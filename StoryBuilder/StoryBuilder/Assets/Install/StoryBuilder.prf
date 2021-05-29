@@ -1,0 +1,27 @@
+[StoryBuilder]
+Copyright 2020 - Seven Valleys Software
+ProductName=StoryBuilder
+ProductVersion=2.00
+ 
+[User Info]
+LicenseOwner=Terry Cox                     
+LicenseNumber=000001
+ 
+[Backup Options]
+BackupOnOpen=Y
+TimedBackup=Y
+TimedBackupInterval=5
+
+[Other Options]
+QuoteOnStartup=N 
+ScreenFont=Arial
+PrinterFont=Times New Roman
+ 
+[File Preferences]
+ProjectDirectory=C:\Users\Terry Cox\Documents\Writing\Projects
+BackupDirectory=C:\Users\Terry Cox\Documents\Writing\Backup
+LogDirectory=C:\temp
+LastFile1=
+LastFile2=
+LastFile3=
+ 

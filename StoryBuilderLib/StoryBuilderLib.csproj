@@ -1,0 +1,41 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net5.0-windows10.0.19041.0</TargetFramework>
+    <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+    <RootNamespace>StoryBuilder</RootNamespace>
+    <RuntimeIdentifiers>win10-x86;win10-x64;win10-arm64</RuntimeIdentifiers>
+    <Platforms>x86;x64;arm64</Platforms>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommonServiceLocator" Version="2.0.6" />
+    <PackageReference Include="Microsoft.ProjectReunion" Version="0.8.0-preview" />
+    <PackageReference Include="Microsoft.ProjectReunion.Foundation" Version="0.8.0-preview" />
+    <PackageReference Include="Microsoft.ProjectReunion.WinUI" Version="0.8.0-preview" />
+    <PackageReference Include="Microsoft.Toolkit.Mvvm" Version="7.0.2" />
+    <PackageReference Include="NLog" Version="4.7.10" />
+    <PackageReference Include="NLog.Extensions.Logging" Version="1.7.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Assets\Install\" />
+    <Folder Include="Controllers\" />
+    <Folder Include="Controls\" />
+    <Folder Include="DAL\" />
+    <Folder Include="Models\Scrivener\" />
+    <Folder Include="Services\Icons\" />
+    <Folder Include="Services\Installation\" />
+    <Folder Include="Services\Logging\" />
+    <Folder Include="Services\Navigation\" />
+    <Folder Include="Services\Theming\" />
+    <Folder Include="Services\Search\" />
+    <Folder Include="Services\Scrivener\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NRtfTree\NRtfTree.csproj" />
+  </ItemGroup>
+
+
+</Project>

@@ -1,0 +1,26 @@
+﻿<ContentDialog
+    x:Class="StoryBuilder.Services.Dialogs.Tools.PreferencesDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Title="Preferences"
+    PrimaryButtonText="Save Changes"
+    SecondaryButtonText="Cancel" >
+  
+    <StackPanel Padding="14,0,14,14"
+                ScrollViewer.VerticalScrollBarVisibility="Visible">
+        <TextBox Header="License Owner" HorizontalAlignment="Left" Width="300" Text="{x:Bind PreferencesVm.LicenseOwner, Mode=TwoWay}" />
+        <TextBox Header="License Number" HorizontalAlignment="Left" Width="200" Text="{x:Bind PreferencesVm.LicenseNumber, Mode=TwoWay}" />
+        <TextBlock HorizontalAlignment="Left" Width="300" Text="Display Quote on Startup" Padding="0,0,0,0" />
+        <TextBox HorizontalAlignment="Left" Width="5" Text="{x:Bind PreferencesVm.QuoteOnStartup, Mode=TwoWay}" />
+        <TextBlock HorizontalAlignment="Left" Width="300" Text="Timed Backup" Padding="0,0,0,0" />
+        <TextBox HorizontalAlignment="Left" Width="5" Text="{x:Bind PreferencesVm.TimedBackup, Mode=TwoWay}" />
+        <TextBlock HorizontalAlignment="Left" Width="300" Text="Timed Backup Interval" Padding="0,0,0,0" />
+        <TextBox HorizontalAlignment="Left" Width="5" Text="{x:Bind PreferencesVm.TimedBackupInterval, Mode=TwoWay}" />
+        <TextBox Header="Backup Directory" HorizontalAlignment="Left" Width="400" Text="{x:Bind PreferencesVm.BackupDirectory, Mode=TwoWay}" />
+        <TextBox Header="Default Project Directory" HorizontalAlignment="Left" Width="400" Text="{x:Bind PreferencesVm.ProjectDirectory, Mode=TwoWay}" />
+    </StackPanel>
+
+</ContentDialog>
