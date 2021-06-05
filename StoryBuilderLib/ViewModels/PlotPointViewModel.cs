@@ -506,7 +506,7 @@ namespace StoryBuilder.ViewModels
             ViewpointList = lists["Viewpoint"];
             ValueExchangeList = lists["ValueExchange"];
 
-            var charViewSource = new CollectionViewSource();
+            CollectionViewSource charViewSource = new CollectionViewSource();
             charViewSource.Source = CharacterNames;
             CharacterList = charViewSource.View;
   

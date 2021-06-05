@@ -15,6 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\StoryBuilder\StoryBuilder\StoryBuilder.csproj" />
     <ProjectReference Include="..\StoryBuilderLib\StoryBuilderLib.csproj" />
   </ItemGroup>
 

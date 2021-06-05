@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using StoryBuilder.Services.Logging;
+using Windows.Services.Maps;
 using Windows.Storage;
 
 namespace StoryBuilder.Services.Installation
@@ -50,40 +53,53 @@ namespace StoryBuilder.Services.Installation
         /// </summary>
         /// <returns></returns>
         public async Task InstallFiles()
-        { 
-            //TODO: Log Installation
-            _installFolder = await Windows.ApplicationModel.Package.Current.InstalledLocation.GetFolderAsync(@"Assets\Install");
-            _localFolder = ApplicationData.Current.LocalFolder;
-            await ReadInstallManifest();
-            await ReadLocalManifest();
-            bool changed = false;
-            foreach (string manifestEntry in _installManifest)
+        {
+            try
             {
-                string[] tokens = manifestEntry.Split(',');
-                if (!_localManifest.ContainsKey(tokens[0]))
+                //TODO: Log Installation
+                string localPath = $"{Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)}";
+                StorageFolder appFolder = await StorageFolder.GetFolderFromPathAsync(localPath);
+                _localFolder = await appFolder.CreateFolderAsync(@"StoryBuilder", CreationCollisionOption.OpenIfExists);
+                var installPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                installPath = Path.Combine(installPath, @"Assets\Install");
+                _installFolder = await StorageFolder.GetFolderFromPathAsync(installPath);
+                //_installFolder = await Windows.ApplicationModel.Package.Current.InstalledLocation.GetFolderAsync(@"Assets\Install");
+                //_localFolder = ApplicationData.Current.LocalFolder;
+                await ReadInstallManifest();
+                await ReadLocalManifest();
+                bool changed = false;
+                foreach (string manifestEntry in _installManifest)
                 {
-                    string msg = $"Adding installation file {tokens[0]}";
-                    Logger.Log(LogLevel.Info, msg);
-                    await InstallFileAsync(tokens[0]);
-                    changed = true;
-                    continue;
+                    string[] tokens = manifestEntry.Split(',');
+                    if (!_localManifest.ContainsKey(tokens[0]))
+                    {
+                        string msg = $"Adding installation file {tokens[0]}";
+                        Logger.Log(LogLevel.Info, msg);
+                        await InstallFileAsync(tokens[0]);
+                        changed = true;
+                        continue;
+                    }
+                    string localHash = _localManifest[tokens[0]];
+                    string installHash = tokens[1];
+                    if (!installHash.Equals(localHash))
+                    {
+                        string msg = $"Replacing installation file {tokens[0]} - hash changed";
+                        Logger.Log(LogLevel.Info, msg);
+                        await InstallFileAsync(tokens[0]);
+                        changed = true;
+                    }
                 }
-                string localHash = _localManifest[tokens[0]];
-                string installHash = tokens[1];
-                if (!installHash.Equals(localHash))
+                if (changed)
                 {
-                    string msg = $"Replacing installation file {tokens[0]} - hash changed";
+                    string msg = $"Installing local copy of install.manifest";
                     Logger.Log(LogLevel.Info, msg);
-                    await InstallFileAsync(tokens[0]);
-                    changed = true;
+                    // copy install manifest as local manifest
+                    await _installFile.CopyAsync(_localFolder, "install.manifest", NameCollisionOption.ReplaceExisting);
                 }
             }
-            if (changed)
+            catch (Exception ex) 
             {
-                string msg = $"Installing local copy of install.manifest";
-                Logger.Log(LogLevel.Info, msg);
-                // copy install manifest as local manifest
-                await _installFile.CopyAsync(_localFolder, "install.manifest", NameCollisionOption.ReplaceExisting);
+                Logger.LogException(LogLevel.Error, ex, "Error in InstallFiles");
             }
         }
 

@@ -26,6 +26,7 @@ using StoryBuilder.DAL;
 using StoryBuilder.Models.Tools;
 using StoryBuilder.Services.Installation;
 using StoryBuilder.Services.Logging;
+using StoryBuilder.Services.Preferences;
 using StoryBuilder.Services.Help;
 using StoryBuilder.Services.Search;
 using StoryBuilder.ViewModels;
@@ -96,7 +97,8 @@ namespace StoryBuilder
         {
             Ioc.Default.ConfigureServices(
                 new ServiceCollection()
-                    // Register services    
+                    // Register services
+                    .AddSingleton<PreferencesService>()
                     .AddSingleton<NavigationService>()
                     .AddSingleton<LogService>()
                     .AddSingleton<HelpService>()
@@ -146,11 +148,15 @@ namespace StoryBuilder
 
             await ProcessInstallationFiles();
 
+
             StoryController story = Ioc.Default.GetService<StoryController>();
-            StorageFolder localFolder = ApplicationData.Current.LocalFolder;
+            string localPath = $"{Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)}";
+            localPath = System.IO.Path.Combine(localPath, "StoryBuilder");
+            StorageFolder localFolder = await StorageFolder.GetFolderFromPathAsync(localPath);
             _log.Log(LogLevel.Info, "Configuration data location = " + localFolder.Path);
 
-            await LoadPreferences(localFolder.Path, story);
+            PreferencesService pref = Ioc.Default.GetService<PreferencesService>();
+            await pref.LoadPreferences(localFolder.Path, story);
 
             await LoadControls(localFolder.Path, story);
 
@@ -176,30 +182,6 @@ namespace StoryBuilder
             SetWindowSize(m_windowHandle, width, height);   // was 800, 600
             _log.Log(LogLevel.Debug, string.Format("Layout: Window size width={0} height={1}", width, height));
             _log.Log(LogLevel.Info, "StoryBuilder App loaded and launched");
-        }
-
-        private async Task LoadPreferences(string path, StoryController story)
-        {
-            try
-            {
-                _log.Log(LogLevel.Info, "Loading Preferences");
-                PreferencesModel model = new PreferencesModel();
-                PreferencesIO loader = new PreferencesIO(model, path);
-                await loader.UpdateModel();
-                // When ran from the app, the app's local folder is the 
-                // installation directory
-                if (model.InstallationDirectory.CompareTo(path) != 0)
-                {
-                    model.InstallationDirectory = path;
-                }
-                await loader.UpdateFile();
-                story.Preferences = model;
-            }
-            catch (Exception ex)
-            {
-                _log.LogException(LogLevel.Error, ex, "Error loading Preferences");
-                AbortApp();
-            }
         }
 
         private async Task ProcessInstallationFiles()

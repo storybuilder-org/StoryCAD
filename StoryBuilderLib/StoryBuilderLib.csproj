@@ -19,11 +19,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Assets\Install\" />
+    <Folder Include="Assets\" />
     <Folder Include="Controllers\" />
     <Folder Include="Controls\" />
     <Folder Include="DAL\" />
     <Folder Include="Models\Scrivener\" />
+    <Folder Include="Install\" />
     <Folder Include="Services\Icons\" />
     <Folder Include="Services\Installation\" />
     <Folder Include="Services\Logging\" />
