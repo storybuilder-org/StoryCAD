@@ -448,7 +448,11 @@ namespace StoryBuilder.ViewModels
         // StoryElement collections
 
         private static ObservableCollection<string> CharacterNames = CharacterModel.CharacterNames;
-        public ICollectionView CharacterList;
+        public ICollectionView CharacterList1;
+        public ICollectionView CharacterList2;
+        public ICollectionView CharacterList3;
+        public ICollectionView ProtagonistList;
+        public ICollectionView AntagonistList;
         private static ObservableCollection<string> SettingNames = SettingModel.SettingNames;
         public ICollectionView SettingList;
 
@@ -506,10 +510,22 @@ namespace StoryBuilder.ViewModels
             ViewpointList = lists["Viewpoint"];
             ValueExchangeList = lists["ValueExchange"];
 
-            CollectionViewSource charViewSource = new CollectionViewSource();
-            charViewSource.Source = CharacterNames;
-            CharacterList = charViewSource.View;
-  
+            CollectionViewSource charViewSource1 = new CollectionViewSource();
+            charViewSource1.Source = CharacterNames;
+            CharacterList1 = charViewSource1.View;
+            CollectionViewSource charViewSource2 = new CollectionViewSource();
+            charViewSource2.Source = CharacterNames;
+            CharacterList2 = charViewSource2.View;
+            CollectionViewSource charViewSource3 = new CollectionViewSource();
+            charViewSource3.Source = CharacterNames;
+            CharacterList3 = charViewSource3.View;
+            CollectionViewSource charViewSource4 = new CollectionViewSource();
+            charViewSource4.Source = CharacterNames;
+            ProtagonistList = charViewSource4.View;
+            CollectionViewSource charViewSource5 = new CollectionViewSource();
+            charViewSource5.Source = CharacterNames;
+            AntagonistList = charViewSource5.View;
+
             var settingViewSource = new CollectionViewSource();
             settingViewSource.Source = SettingNames;
             SettingList = settingViewSource.View;

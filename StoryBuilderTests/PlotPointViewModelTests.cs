@@ -57,8 +57,8 @@ namespace StoryBuilderTests
             Assert.IsNotNull(vm.ValueExchangeList);
             // Validation of list contents are in ListLoaderTests
 
-            Assert.IsNotNull(vm.CharacterList);
-            Assert.AreEqual(0, vm.CharacterList.Count);
+            Assert.IsNotNull(vm.CharacterList1);
+            Assert.AreEqual(0, vm.CharacterList1.Count);
             Assert.IsNotNull(vm.SettingList);
             Assert.AreEqual(0, vm.SettingList.Count);
             // Character and Setting lists are empty at this point

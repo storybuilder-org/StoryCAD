@@ -64,7 +64,7 @@
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
                         <ComboBox Header="Characters" Grid.Column="0" IsEditable="False" MinWidth="300" 
-                                  ItemsSource="{x:Bind PlotpointVm.CharacterList}" 
+                                  ItemsSource="{x:Bind PlotpointVm.CharacterList1}" 
                               SelectedValue="{x:Bind PlotpointVm.Char1, Mode=TwoWay}" Margin="0,0,0,10"/>
                         <TextBlock Grid.Column="1" MinWidth="50"/>
                         <ComboBox Header="Roles" Grid.Column="2" IsEditable="False" MinWidth="200" 
@@ -78,7 +78,7 @@
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
                         <ComboBox Grid.Column="0" IsEditable="False" MinWidth="300" 
-                                  ItemsSource="{x:Bind PlotpointVm.CharacterList}" 
+                                  ItemsSource="{x:Bind PlotpointVm.CharacterList2}" 
                                   SelectedValue="{x:Bind PlotpointVm.Char2, Mode=TwoWay}" Margin="0,0,0,10"/>
                         <TextBlock Grid.Column="1" MinWidth="50"/>
                         <ComboBox Grid.Column="2" IsEditable="False" Width="200" 
@@ -92,7 +92,7 @@
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
                         <ComboBox IsEditable="False" Grid.Column="0" MinWidth="300" 
-                                  ItemsSource="{x:Bind PlotpointVm.CharacterList}" 
+                                  ItemsSource="{x:Bind PlotpointVm.CharacterList3}" 
                                   SelectedValue="{x:Bind PlotpointVm.Char3, Mode=TwoWay}" Margin="0,0,0,10"/>
                         <TextBlock Grid.Column="1" MinWidth="50"/>
                         <ComboBox Grid.Column="2" IsEditable="False" MinWidth="200" 
@@ -169,7 +169,7 @@
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
                         <ComboBox Header="Protagonist" Grid.Column="0" IsEditable="False" MinWidth="300" 
-                                  ItemsSource="{x:Bind PlotpointVm.CharacterList}" 
+                                  ItemsSource="{x:Bind PlotpointVm.ProtagonistList}" 
                           SelectedValue="{x:Bind PlotpointVm.Protagonist, Mode=TwoWay}" />
                         <TextBlock Grid.Column="1" MinWidth="50"/>
                         <ComboBox Header="Feelings" Grid.Column="2" IsEditable="True" MinWidth="200" 
@@ -189,7 +189,7 @@
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
                         <ComboBox Header="Antagonist" Grid.Column="0" IsEditable="False" MinWidth="300" 
-                                  ItemsSource="{x:Bind PlotpointVm.CharacterList}" 
+                                  ItemsSource="{x:Bind PlotpointVm.AntagonistList}" 
                           SelectedValue="{x:Bind PlotpointVm.Antagonist, Mode=TwoWay}" />
                         <TextBlock Grid.Column="1" MinWidth="50"/>
                         <ComboBox Header="Feelings" Grid.Column="2" IsEditable="True" MinWidth="200" 
