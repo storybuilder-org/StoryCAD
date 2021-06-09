@@ -13,15 +13,11 @@ namespace StoryBuilder.Views
     {
 
         public OverviewViewModel OverviewVm => Ioc.Default.GetService<OverviewViewModel>();
+
         public OverviewPage()
         {
             InitializeComponent();
             this.DataContext = OverviewVm;
-        }
-
-        private void ComboBox_TextSubmitted(ComboBox sender, ComboBoxTextSubmittedEventArgs e)
-        {
-            sender.Items.Add(e.Text);
         }
     }
 }

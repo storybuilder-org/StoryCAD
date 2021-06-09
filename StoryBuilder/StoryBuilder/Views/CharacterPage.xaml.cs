@@ -14,12 +14,6 @@ namespace StoryBuilder.Views
     {
         public CharacterViewModel CharVm => Ioc.Default.GetService<CharacterViewModel>();
 
-        private void ComboBox_TextSubmitted(ComboBox sender, ComboBoxTextSubmittedEventArgs args)
-        {
-            sender.SelectedItem = sender.Text;
-            args.Handled = true;
-        }
-
         public CharacterPage()
         {
             InitializeComponent();

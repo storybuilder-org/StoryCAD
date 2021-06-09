@@ -31,13 +31,13 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
-                        <ComboBox Header="Locale" Grid.Column="0" IsEditable="True" 
-                                  MinWidth="200" ItemsSource="{x:Bind SettingVm.LocaleList}" 
-                                  Text="{x:Bind SettingVm.Locale, Mode=TwoWay}" />
+                        <ComboBox Header="Locale" Grid.Column="0" IsEditable="True" MinWidth="200"
+                                  ItemsSource="{x:Bind SettingVm.LocaleList}"
+                                  SelectedItem="{x:Bind SettingVm.Locale, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                         <TextBlock Grid.Column="1" MinWidth="100"/>
-                        <ComboBox Header="Season" Grid.Column="2" IsEditable="True" 
-                                  MinWidth="200" ItemsSource="{x:Bind SettingVm.SeasonList}" 
-                                  Text="{x:Bind SettingVm.Season, Mode=TwoWay}" />
+                        <ComboBox Header="Season" Grid.Column="2" IsEditable="True" MinWidth="200"
+                                  ItemsSource="{x:Bind SettingVm.SeasonList}"
+                                  SelectedItem="{x:Bind SettingVm.Locale, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     </Grid>
                     <Grid Grid.Row="1" HorizontalAlignment="Left">
                         <Grid.ColumnDefinitions>
@@ -45,10 +45,10 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
-                        <TextBox Header="Period" Grid.Column="0" MinWidth="200" 
+                        <TextBox Header="Period" Grid.Column="0" MinWidth="200"
                                  Text="{x:Bind SettingVm.Period, Mode=TwoWay}" />
                         <TextBlock Grid.Column="1" MinWidth="100"/>
-                        <TextBox Header="Lighting" Grid.Column="2" MinWidth="200" 
+                        <TextBox Header="Lighting" Grid.Column="2" MinWidth="200"
                                  Text="{x:Bind SettingVm.Lighting, Mode=TwoWay}" />
                     </Grid>
                     <Grid Grid.Row="2" HorizontalAlignment="Left">
@@ -57,10 +57,10 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
-                        <TextBox Header="Weather" Grid.Column="0" MinWidth="200" 
+                        <TextBox Header="Weather" Grid.Column="0" MinWidth="200"
                                  Text="{x:Bind SettingVm.Weather, Mode=TwoWay}" />
                         <TextBlock Grid.Column="1" Width="100"/>
-                        <TextBox Header="Temperature" Grid.Column="2" MinWidth="200" 
+                        <TextBox Header="Temperature" Grid.Column="2" MinWidth="200"
                                  Text="{x:Bind SettingVm.Temperature, Mode=TwoWay}" />
                     </Grid>
                     <Grid Grid.Row="3" HorizontalAlignment="Left">
@@ -83,9 +83,9 @@
                         <TextBlock Grid.Column="1" Width="100"/>
                         <TextBox Header=" " Grid.Column="2" MinWidth="200" Text="{x:Bind SettingVm.Prop4, Mode=TwoWay}" />
                     </Grid>
-                    <usercontrols:RichEditBoxExtended Header="Scene Summary" Grid.Row="5" 
+                    <usercontrols:RichEditBoxExtended Header="Scene Summary" Grid.Row="5"
                                                       RtfText="{x:Bind SettingVm.Summary, Mode=TwoWay}" AcceptsReturn="True"
-                                                      IsSpellCheckEnabled="True" TextWrapping="Wrap"  
+                                                      IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                                       ScrollViewer.VerticalScrollBarVisibility="Visible" />
                 </Grid>
             </PivotItem>
@@ -97,27 +97,27 @@
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    <usercontrols:RichEditBoxExtended Header="Sights" Grid.Row="0" 
+                    <usercontrols:RichEditBoxExtended Header="Sights" Grid.Row="0"
                                                       RtfText="{x:Bind SettingVm.Sights, Mode=TwoWay}" AcceptsReturn="True"
-                                                      IsSpellCheckEnabled="True" TextWrapping="Wrap"  
+                                                      IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                                       ScrollViewer.VerticalScrollBarVisibility="Visible" />
                     <usercontrols:RichEditBoxExtended Header="Sounds" Grid.Row="1"
                                                       RtfText="{x:Bind SettingVm.Sounds, Mode=TwoWay}" AcceptsReturn="True"
-                                                      IsSpellCheckEnabled="True" TextWrapping="Wrap"  
+                                                      IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                                       ScrollViewer.VerticalScrollBarVisibility="Visible" />
-                    <usercontrols:RichEditBoxExtended Header="Touch" Grid.Row="2" 
+                    <usercontrols:RichEditBoxExtended Header="Touch" Grid.Row="2"
                                                       RtfText="{x:Bind SettingVm.Touch, Mode=TwoWay}" AcceptsReturn="True"
-                                                      IsSpellCheckEnabled="True" TextWrapping="Wrap" 
+                                                      IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                                       ScrollViewer.VerticalScrollBarVisibility="Visible" />
                     <usercontrols:RichEditBoxExtended Header="Smell/Taste"  Grid.Row="3"
                                                       RtfText="{x:Bind SettingVm.SmellTaste, Mode=TwoWay}" AcceptsReturn="True"
-                                                      IsSpellCheckEnabled="True" TextWrapping="Wrap"  
+                                                      IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                                       ScrollViewer.VerticalScrollBarVisibility="Visible" />
                 </Grid>
             </PivotItem>
             <PivotItem Header="Notes">
                 <usercontrols:RichEditBoxExtended Header="Notes" RtfText="{x:Bind SettingVm.Notes, Mode=TwoWay}" AcceptsReturn="True"
-                                                  IsSpellCheckEnabled="True" TextWrapping="Wrap"  
+                                                  IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                                   ScrollViewer.VerticalScrollBarVisibility="Visible" />
             </PivotItem>
         </Pivot>

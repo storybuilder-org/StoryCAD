@@ -7,6 +7,9 @@
     <Platforms>x86;x64;arm64</Platforms>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
+    <NoWarn>1701;1702;CA1416</NoWarn>
+  </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="CommonServiceLocator" Version="2.0.6" />

@@ -23,6 +23,7 @@ namespace StoryBuilder.ViewModels
         private readonly StoryWriter _wtr;
         private readonly LogService _logger;
         private readonly StoryController _story;
+        private bool _changeable;
 
         #endregion
 
@@ -31,7 +32,6 @@ namespace StoryBuilder.ViewModels
         // StoryElement data
 
         private Guid _uuid;
-
         public Guid Uuid
         {
             get => _uuid;
@@ -39,13 +39,12 @@ namespace StoryBuilder.ViewModels
         }
 
         private string _name;
-
         public string Name
         {
             get => _name;
             set
             {
-                if ((!(_name is null)) && (_name != value)) // Name changed?
+                if (_changeable && (_name != value)) // Name changed?
                 {
                     _logger.Log(LogLevel.Info, string.Format("Requesting Name change from {0} to {1}", _name, value));
                     var msg = new NameChangeMessage(_name, value);
@@ -516,64 +515,66 @@ namespace StoryBuilder.ViewModels
 
         private void OnPropertyChanged(object sender, PropertyChangedEventArgs args)
         {
-            Changed = true;
+            if (_changeable)
+                Changed = true;
         }
 
         private async Task LoadModel()
         {
-            _uuid = Model.Uuid;
-            _name = Model.Name;
-            _role = Model.Role;
-            _storyRole = Model.StoryRole;
-            _archetype = Model.Archetype;
-            _characterSketch = Model.CharacterSketch;
-            _age = Model.Age;
-            _sex = Model.Sex;
-            _eyes = Model.Eyes;
-            _hair = Model.Hair;
-            _weight = Model.Weight;
-            _charHeight = Model.CharHeight;
-            _build = Model.Build;
-            _complexion = Model.Complexion;
-            _race = Model.Race;
-            _nationality = Model.Nationality;
-            _health = Model.Health;
-            _physNotes = Model.PhysNotes;
-            _appearance = Model.Appearance;
-            _economic = Model.Economic;
-            _education = Model.Education;
-            _ethnic = Model.Ethnic;
-            _religion = Model.Religion;
-            _enneagram = Model.Enneagram;
-            _intelligence = Model.Intelligence;
-            _values = Model.Values;
-            _abnormality = Model.Abnormality;
-            _focus = Model.Focus;
-            _psychNotes = Model.PsychNotes;
-            _adventurousness = Model.Adventureousness;
-            _agression = Model.Aggression;
-            _confidence = Model.Confidence;
-            _conscientiousness = Model.Conscientiousness;
-            _creativity = Model.Creativity;
-            _dominance = Model.Dominance;
-            _enthusiasm = Model.Enthusiasm;
-            _assurance = Model.Assurance;
-            _sensitivity = Model.Sensitivity;
-            _shrewdness = Model.Shrewdness;
-            _sociability = Model.Sociability;
-            _stability = Model.Stability;
-            _work = Model.Work;
-            _likes = Model.Likes;
-            _habits = Model.Habits;
-            _abilities = Model.Abilities;
-            _woundCategory = Model.WoundCategory;
-            _woundSummary = Model.WoundSummary;
-            _wound = Model.Wound;
-            _fears = Model.Fears;
-            _lies = Model.Lies;
-            _secrets = Model.Secrets;
-            _backStory = Model.BackStory;
-            _id = Model.Id;
+            PropertyChanged += OnPropertyChanged;
+            Uuid = Model.Uuid;
+            Name = Model.Name;
+            Role = Model.Role;
+            StoryRole = Model.StoryRole;
+            Archetype = Model.Archetype;
+            CharacterSketch = Model.CharacterSketch;
+            Age = Model.Age;
+            Sex = Model.Sex;
+            Eyes = Model.Eyes;
+            Hair = Model.Hair;
+            Weight = Model.Weight;
+            CharHeight = Model.CharHeight;
+            Build = Model.Build;
+            Complexion = Model.Complexion;
+            Race = Model.Race;
+            Nationality = Model.Nationality;
+            Health = Model.Health;
+            PhysNotes = Model.PhysNotes;
+            Appearance = Model.Appearance;
+            Economic = Model.Economic;
+            Education = Model.Education;
+            Ethnic = Model.Ethnic;
+            Religion = Model.Religion;
+            Enneagram = Model.Enneagram;
+            Intelligence = Model.Intelligence;
+            Values = Model.Values;
+            Abnormality = Model.Abnormality;
+            Focus = Model.Focus;
+            PsychNotes = Model.PsychNotes;
+            Adventureousness = Model.Adventureousness;
+            Aggression = Model.Aggression;
+            Confidence = Model.Confidence;
+            Conscientiousness = Model.Conscientiousness;
+            Creativity = Model.Creativity;
+            Dominance = Model.Dominance;
+            Enthusiasm = Model.Enthusiasm;
+            Assurance = Model.Assurance;
+            Sensitivity = Model.Sensitivity;
+            Shrewdness = Model.Shrewdness;
+            Sociability = Model.Sociability;
+            Stability = Model.Stability;
+            Work = Model.Work;
+            Likes = Model.Likes;
+            Habits = Model.Habits;
+            Abilities = Model.Abilities;
+            WoundCategory = Model.WoundCategory;
+            WoundSummary = Model.WoundSummary;
+            Wound = Model.Wound;
+            Fears = Model.Fears;
+            Lies = Model.Lies;
+            Secrets = Model.Secrets;
+            BackStory = Model.BackStory;
+            Id = Model.Id;
 
             //Read RTF files
             CharacterSketch = await _rdr.GetRtfText(Model.CharacterSketch, Uuid);
@@ -595,11 +596,15 @@ namespace StoryBuilder.ViewModels
             BackStory = await _rdr.GetRtfText(Model.BackStory, Uuid);
 
             Changed = false;
+            //PropertyChanged += OnPropertyChanged;
+            _changeable = true;
         }
 
         internal async Task SaveModel()
         {
-            //PropertyChanged -= OnPropertyChanged;
+            PropertyChanged -= OnPropertyChanged;
+            _changeable = false;
+
             if (Changed)
             {
                 // Story.Uuid is read-only and cannot be set

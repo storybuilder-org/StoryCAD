@@ -340,7 +340,7 @@
             </SplitView.Content>
         </SplitView>
         <!-- Status Bar -->
-        <StackPanel Grid.Row="2" Orientation="Horizontal" Background="LightGray">
+        <StackPanel Grid.Row="2" Orientation="Horizontal" Background="LightGray" Margin="0,10,0,0">
             <ComboBox IsEditable="False" Width="200"  Margin="10" ItemsSource="{x:Bind ShellVm.ViewList}" 
                       SelectionChanged="{x:Bind ShellVm.ViewChanged, Mode=OneWay}"
                       SelectedItem="{x:Bind ShellVm.SelectedView, Mode=TwoWay}" />

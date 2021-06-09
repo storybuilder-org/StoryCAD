@@ -19,7 +19,7 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    <TextBox Header="Author" Grid.Row="0" 
+                    <TextBox Header="Author" Grid.Row="0"
                              Text="{x:Bind OverviewVm.Author, Mode=TwoWay}" />
                     <Grid Grid.Row="1" HorizontalAlignment="Left">
                         <Grid.ColumnDefinitions>
@@ -27,29 +27,29 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
-                        <TextBox Header="Date Created" Grid.Column="0"  
+                        <TextBox Header="Date Created" Grid.Column="0"
                                  Text="{x:Bind OverviewVm.DateCreated, Mode=TwoWay}" />
                         <TextBlock Grid.Column="1" MinWidth="100"/>
-                        <TextBox Header="Last Changed" Grid.Column="2" 
+                        <TextBox Header="Last Changed" Grid.Column="2"
                                  Text="{x:Bind OverviewVm.DateModified, Mode=TwoWay}" />
                     </Grid>
-                    <usercontrols:RichEditBoxExtended Header="Story Idea" Grid.Row="2" 
+                    <usercontrols:RichEditBoxExtended Header="Story Idea" Grid.Row="2"
                          RtfText="{x:Bind OverviewVm.StoryIdea, Mode=TwoWay}" AcceptsReturn="True"
-                         IsSpellCheckEnabled="True" TextWrapping="Wrap" 
-                         ScrollViewer.VerticalScrollBarVisibility="Visible" 
+                         IsSpellCheckEnabled="True" TextWrapping="Wrap"
+                         ScrollViewer.VerticalScrollBarVisibility="Visible"
                          PlaceholderText="Just record whatever idea or incident made you think 'story'." />
                 </Grid>
             </PivotItem>
             <PivotItem Header="Concept">
                 <usercontrols:RichEditBoxExtended Header="Concept" RtfText="{x:Bind OverviewVm.Concept, Mode=TwoWay}" AcceptsReturn="True"
                                     IsSpellCheckEnabled="True" TextWrapping="Wrap"
-                                    ScrollViewer.VerticalScrollBarVisibility="Visible" 
+                                    ScrollViewer.VerticalScrollBarVisibility="Visible"
                                     PlaceholderText="Use 'What if?' and 'What happens is..' to flesh out your idea." />
             </PivotItem>
             <PivotItem Header="Premise">
                 <usercontrols:RichEditBoxExtended Header="Premise" RtfText="{x:Bind OverviewVm.Premise, Mode=TwoWay}" AcceptsReturn="True"
-                                    IsSpellCheckEnabled="True" TextWrapping="Wrap" 
-                                    ScrollViewer.VerticalScrollBarVisibility="Visible" 
+                                    IsSpellCheckEnabled="True" TextWrapping="Wrap"
+                                    ScrollViewer.VerticalScrollBarVisibility="Visible"
                                     PlaceholderText="A [character] in a situationName [genre, setting] wants something [goal], which brings him into [conflict] with a second character [opposition]. After [a series of conflicts], the [final battle] erupts, and [the protagonist] finally [resolves] the conflict. "/>
             </PivotItem>
             <PivotItem Header="Structure">
@@ -70,12 +70,12 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
-                        <ComboBox Header="Type" Grid.Column="0" MinWidth="200" IsEditable="True" 
-                                  ItemsSource="{x:Bind OverviewVm.StoryTypeList}" 
+                        <ComboBox Header="Type" Grid.Column="0" MinWidth="200" IsEditable="True"
+                                  ItemsSource="{x:Bind OverviewVm.StoryTypeList}"
                                   SelectedItem="{x:Bind OverviewVm.StoryType, Mode=TwoWay}" />
                         <TextBlock Grid.Column="1" MinWidth="100"/>
-                        <ComboBox Header="Genre" Grid.Column="2" MinWidth="200" IsEditable="True" 
-                                  ItemsSource="{x:Bind OverviewVm.GenreList}" 
+                        <ComboBox Header="Genre" Grid.Column="2" MinWidth="200" IsEditable="True"
+                                  ItemsSource="{x:Bind OverviewVm.GenreList}"
                                   SelectedItem="{x:Bind OverviewVm.StoryGenre, Mode=TwoWay}" />
                     </Grid>
                     <Grid Grid.Row="1" HorizontalAlignment="Left">
@@ -84,16 +84,16 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
-                        <ComboBox Header="Viewpoint" Grid.Column="0" MinWidth="200" IsEditable="True" 
-                              ItemsSource="{x:Bind OverviewVm.ViewpointList}" 
-                                    SelectedItem="{x:Bind OverviewVm.Viewpoint, Mode=TwoWay}" />
+                        <ComboBox Header="Viewpoint" Grid.Column="0" MinWidth="200" IsEditable="True"
+                                  ItemsSource="{x:Bind OverviewVm.ViewpointList}"
+                                  SelectedItem="{x:Bind OverviewVm.Viewpoint, Mode=TwoWay}" />
                         <TextBlock Grid.Column="1" MinWidth="100"/>
-                        <ComboBox Header="Literary Device" Grid.Column="2" MinWidth="200" IsEditable="True" 
-                                  ItemsSource="{x:Bind OverviewVm.LiteraryDeviceList}" 
-                                SelectedItem="{x:Bind OverviewVm.LiteraryDevice, Mode=TwoWay}" />
+                        <ComboBox Header="Literary Device" Grid.Column="2" MinWidth="200" IsEditable="True"
+                                  ItemsSource="{x:Bind OverviewVm.LiteraryDeviceList}"
+                                  SelectedItem="{x:Bind OverviewVm.LiteraryDevice, Mode=TwoWay}" />
                     </Grid>
-                    <ComboBox Header="Viewpoint Character" Grid.Row="2" MinWidth="300" IsEditable="True" 
-                               ItemsSource="{x:Bind OverviewVm.CharacterList}" 
+                    <ComboBox Header="Viewpoint Character" Grid.Row="2" MinWidth="300" IsEditable="False"
+                               ItemsSource="{x:Bind OverviewVm.CharacterList}"
                               SelectedItem="{x:Bind OverviewVm.ViewpointCharacter, Mode=TwoWay}" />
                     <Grid Grid.Row="3" HorizontalAlignment="Left" >
                         <Grid.ColumnDefinitions>
@@ -101,27 +101,27 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
-                        <ComboBox Header="Voice" Grid.Column="0" MinWidth="200" IsEditable="True" 
-                                  ItemsSource="{x:Bind OverviewVm.VoiceList}" 
+                        <ComboBox Header="Voice" Grid.Column="0" MinWidth="200" IsEditable="True"
+                                  ItemsSource="{x:Bind OverviewVm.VoiceList}"
                                   SelectedItem="{x:Bind OverviewVm.Voice, Mode=TwoWay}" />
                         <TextBlock Grid.Column="1" MinWidth="100"/>
-                        <ComboBox Header="Tense" Grid.Column="2" MinWidth="200" IsEditable="True"  
-                                  ItemsSource="{x:Bind OverviewVm.TenseList}" 
+                        <ComboBox Header="Tense" Grid.Column="2" MinWidth="200" IsEditable="True"
+                                  ItemsSource="{x:Bind OverviewVm.TenseList}"
                                   SelectedItem="{x:Bind OverviewVm.Tense, Mode=TwoWay}" />
                     </Grid>
-                    <ComboBox Header="Style" Grid.Row="4" MinWidth="200" IsEditable="True" 
-                              ItemsSource="{x:Bind OverviewVm.StyleList}" 
+                    <ComboBox Header="Style" Grid.Row="4" MinWidth="200" IsEditable="True"
+                                  ItemsSource="{x:Bind OverviewVm.StyleList}"
                                   SelectedItem="{x:Bind OverviewVm.Style, Mode=TwoWay}" />
-                    <usercontrols:RichEditBoxExtended Header="Style Notes" Grid.Row="5" 
+                    <usercontrols:RichEditBoxExtended Header="Style Notes" Grid.Row="5"
                         RtfText="{x:Bind OverviewVm.StyleNotes, Mode=TwoWay}" AcceptsReturn="True"
-                        IsSpellCheckEnabled="True" TextWrapping="Wrap" 
+                        IsSpellCheckEnabled="True" TextWrapping="Wrap"
                         ScrollViewer.VerticalScrollBarVisibility="Visible" />
-                    <ComboBox Header="Tone" Grid.Row="6" MinWidth="200" IsEditable="True" 
-                              ItemsSource="{x:Bind OverviewVm.ToneList}" 
-                              SelectedItem="{x:Bind OverviewVm.Tone, Mode=TwoWay}" />
-                    <usercontrols:RichEditBoxExtended Header="Tone Notes" Grid.Row="7" 
+                    <ComboBox Header="Tone" Grid.Row="6" MinWidth="200" IsEditable="True"
+                                  ItemsSource="{x:Bind OverviewVm.ToneList}"
+                                  SelectedItem="{x:Bind OverviewVm.Tone, Mode=TwoWay}" />
+                    <usercontrols:RichEditBoxExtended Header="Tone Notes" Grid.Row="7"
                               RtfText="{x:Bind OverviewVm.ToneNotes, Mode=TwoWay}" AcceptsReturn="True"
-                        IsSpellCheckEnabled="True" TextWrapping="Wrap" 
+                        IsSpellCheckEnabled="True" TextWrapping="Wrap"
                         ScrollViewer.VerticalScrollBarVisibility="Visible" />
                 </Grid>
             </PivotItem>
@@ -136,17 +136,17 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
-                        <TextBox Header="Target Markets" Grid.Column="0" MinWidth="200" 
+                        <TextBox Header="Target Markets" Grid.Column="0" MinWidth="200"
                                  Text="{x:Bind OverviewVm.TargetMarket1, Mode=TwoWay}" />
                         <TextBlock Grid.Column="1" MinWidth="50"/>
-                        <TextBox Header="  " Grid.Column="2" MinWidth="200" 
+                        <TextBox Header="  " Grid.Column="2" MinWidth="200"
                                  Text="{x:Bind OverviewVm.TargetMarket2, Mode=TwoWay}" />
                     </Grid>
                 </Grid>
             </PivotItem>
             <PivotItem Header="Notes">
                 <usercontrols:RichEditBoxExtended Header="Notes" RtfText="{x:Bind OverviewVm.Notes, Mode=TwoWay}" AcceptsReturn="True"
-                                    IsSpellCheckEnabled="True" TextWrapping="Wrap"  
+                                    IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                     ScrollViewer.VerticalScrollBarVisibility="Visible" />
             </PivotItem>
         </Pivot>

@@ -21,18 +21,22 @@
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
-                    <ComboBox Header="Problem Type" Grid.Row="0" IsEditable="True" MinWidth="200" ItemsSource="{x:Bind ProblemVm.ProblemTypeList}"
+                    <ComboBox Header="Problem Type" Grid.Row="0" IsEditable="True" MinWidth="200"
+                              ItemsSource="{x:Bind ProblemVm.ProblemTypeList}"
                               SelectedItem="{x:Bind ProblemVm.ProblemType, Mode=TwoWay}" />
-                    <ComboBox Header="Conflict Type" Grid.Row="1" IsEditable="True" MinWidth="200" ItemsSource="{x:Bind ProblemVm.ConflictTypeList}"
+                    <ComboBox Header="Conflict Type" Grid.Row="1" IsEditable="True" MinWidth="200"
+                              ItemsSource="{x:Bind ProblemVm.ConflictTypeList}"
                               SelectedItem="{x:Bind ProblemVm.ConflictType, Mode=TwoWay}" />
-                    <ComboBox Header="Subject" Grid.Row="2" IsEditable="True" MinWidth="300" ItemsSource="{x:Bind ProblemVm.SubjectList}"
+                    <ComboBox Header="Subject" Grid.Row="2" IsEditable="True" MinWidth="300"
+                              ItemsSource="{x:Bind ProblemVm.SubjectList}"
                               SelectedItem="{x:Bind ProblemVm.Subject, Mode=TwoWay}" />
-                    <usercontrols:RichEditBoxExtended Header="Story Question" Grid.Row="3" 
+                    <usercontrols:RichEditBoxExtended Header="Story Question" Grid.Row="3"
                               RtfText="{x:Bind ProblemVm.StoryQuestion, Mode=TwoWay}" AcceptsReturn="True"
-                              IsSpellCheckEnabled="True" TextWrapping="Wrap" 
+                              IsSpellCheckEnabled="True" TextWrapping="Wrap"
                               ScrollViewer.VerticalScrollBarVisibility="Visible" />
-                    <ComboBox Header="Problem Source" Grid.Row="4" IsEditable="True" ItemsSource="{x:Bind ProblemVm.ProblemSourceList}"
-                              MinWidth="300" SelectedItem="{x:Bind ProblemVm.ProblemSource, Mode=TwoWay}" />
+                    <ComboBox Header="Problem Source" Grid.Row="4" IsEditable="True" MinWidth="300"
+                              ItemsSource="{x:Bind ProblemVm.ProblemSourceList}"
+                              SelectedItem="{x:Bind ProblemVm.ProblemSource, Mode=TwoWay}" />
                 </Grid>
             </PivotItem>
             <PivotItem Header="Protagonist">
@@ -43,17 +47,17 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
-                    <ComboBox Header="Protagonist" Grid.Row="0" IsEditable="False" 
+                    <ComboBox Header="Protagonist" Grid.Row="0" IsEditable="False"
                               MinWidth="300" ItemsSource="{x:Bind ProblemVm.CharacterList}"
                               SelectedItem="{x:Bind ProblemVm.Protagonist, Mode=TwoWay}" />
-                    <ComboBox Header="Goal" Grid.Row="1" IsEditable="True" 
+                    <ComboBox Header="Goal" Grid.Row="1" IsEditable="True"
                               MinWidth="400" ItemsSource="{x:Bind ProblemVm.GoalList}"
                               SelectedItem="{x:Bind ProblemVm.ProtGoal, Mode=TwoWay}" />
-                    <ComboBox Header="Motivation" Grid.Row="2" IsEditable="True" 
+                    <ComboBox Header="Motivation" Grid.Row="2" IsEditable="True"
                               MinWidth="300" ItemsSource="{x:Bind ProblemVm.MotiveList}"
                               SelectedItem="{x:Bind ProblemVm.ProtMotive, Mode=TwoWay}" />
-                    <ComboBox Header="Conflict" Grid.Row="3" IsEditable="True" 
-                              MinWidth="400" ItemsSource="{x:Bind ProblemVm.ConflictList}"
+                    <ComboBox Header="Conflict" Grid.Row="3" IsEditable="True" MinWidth="400" 
+                              ItemsSource="{x:Bind ProblemVm.ConflictList}"
                               SelectedItem="{x:Bind ProblemVm.ProtConflict, Mode=TwoWay}" />
                 </Grid>
             </PivotItem>
@@ -65,16 +69,16 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
-                    <ComboBox Header="Antagonist" Grid.Row="0" IsEditable="False" 
+                    <ComboBox Header="Antagonist" Grid.Row="0" IsEditable="False"
                               MinWidth="300" ItemsSource="{x:Bind Path=ProblemVm.CharacterList}"
                               SelectedItem="{x:Bind ProblemVm.Antagonist, Mode=TwoWay}" />
-                    <ComboBox Header="Goal" Grid.Row="1" IsEditable="True" 
+                    <ComboBox Header="Goal" Grid.Row="1" IsEditable="True"
                               MinWidth="400" ItemsSource="{x:Bind ProblemVm.GoalList}"
                               SelectedItem="{x:Bind ProblemVm.AntagGoal, Mode=TwoWay}" />
-                    <ComboBox Header="Motivation" Grid.Row="2" IsEditable="True" 
-                              MinWidth="300" ItemsSource="{x:Bind ProblemVm.MotiveList}"  
+                    <ComboBox Header="Motivation" Grid.Row="2" IsEditable="True"
+                              MinWidth="300" ItemsSource="{x:Bind ProblemVm.MotiveList}"
                               SelectedItem="{x:Bind ProblemVm.AntagMotive, Mode=TwoWay}" />
-                    <ComboBox Header="Conflict" Grid.Row="3" IsEditable="True" 
+                    <ComboBox Header="Conflict" Grid.Row="3" IsEditable="True"
                               MinWidth="400" ItemsSource="{x:Bind ProblemVm.ConflictList}"
                               SelectedItem="{x:Bind ProblemVm.AntagConflict, Mode=TwoWay}" />
                 </Grid>
@@ -87,16 +91,16 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    <ComboBox Header="Outcome" Grid.Row="0" IsEditable="True" 
+                    <ComboBox Header="Outcome" Grid.Row="0" IsEditable="True"
                               MinWidth="400" ItemsSource="{x:Bind ProblemVm.OutcomeList}"
                               SelectedItem="{x:Bind ProblemVm.Outcome, Mode=TwoWay}" />
-                    <ComboBox Header="Method" Grid.Row="1" IsEditable="True" 
+                    <ComboBox Header="Method" Grid.Row="1" IsEditable="True"
                               MinWidth="400" ItemsSource="{x:Bind ProblemVm.MethodList}"
                               SelectedItem="{x:Bind ProblemVm.Method, Mode=TwoWay}" />
-                    <ComboBox Header="Theme" Grid.Row="2" IsEditable="True" 
+                    <ComboBox Header="Theme" Grid.Row="2" IsEditable="True"
                               MinWidth="400" ItemsSource="{x:Bind ProblemVm.ThemeList}"
                               SelectedItem="{x:Bind ProblemVm.Theme, Mode=TwoWay}" />
-                    <usercontrols:RichEditBoxExtended Header="Premise" Grid.Row="3" 
+                    <usercontrols:RichEditBoxExtended Header="Premise" Grid.Row="3"
                               RtfText="{x:Bind ProblemVm.Premise, Mode=TwoWay}" AcceptsReturn="True"
                               IsSpellCheckEnabled="True" TextWrapping="Wrap"
                               ScrollViewer.VerticalScrollBarVisibility="Visible"
@@ -104,8 +108,8 @@
                 </Grid>
             </PivotItem>
             <PivotItem Header="Notes">
-                <usercontrols:RichEditBoxExtended Header="Notes" RtfText="{x:Bind ProblemVm.Notes, Mode=TwoWay}" 
-                              AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap" 
+                <usercontrols:RichEditBoxExtended Header="Notes" RtfText="{x:Bind ProblemVm.Notes, Mode=TwoWay}"
+                              AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                               ScrollViewer.VerticalScrollBarVisibility="Visible" />
             </PivotItem>
         </Pivot>
