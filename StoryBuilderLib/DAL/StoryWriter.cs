@@ -86,7 +86,7 @@ namespace StoryBuilder.DAL
 
         private async Task ParseStoryElementsAsync()
         {
-            foreach (StoryElement element in StoryElement.StoryElements.Values)
+            foreach (StoryElement element in _model.StoryElements)
             {
                 switch (element.Type)
                 {

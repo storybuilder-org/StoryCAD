@@ -55,13 +55,13 @@ namespace StoryBuilder.DAL
                 // those, add the node to both the Explorer and Narrator views.
                 if (_model.ExplorerView.Count == 1)
                 {
-                    TrashCanModel trash = new TrashCanModel();
+                    TrashCanModel trash = new TrashCanModel(_model);
                     StoryNodeItem trashNode = new StoryNodeItem(trash, null);
                     _model.ExplorerView.Add(trashNode);     // The trashcan is the second root
                 }
                 if (_model.NarratorView.Count == 1)
                 {
-                    TrashCanModel trash = new TrashCanModel();
+                    TrashCanModel trash = new TrashCanModel(_model);
                     StoryNodeItem trashNode = new StoryNodeItem(trash, null);
                     _model.NarratorView.Add(trashNode);     // The trashcan is the second root
                 }
@@ -162,7 +162,7 @@ namespace StoryBuilder.DAL
         {
             // There's one OverviewModel per story. Its corresponding
             //StoryNode is the root of the Explorer TreeView.
-            _overview = new OverviewModel(xn);
+            _overview = new OverviewModel(xn, _model);
             foreach (var attr in xn.Attributes)
             {
                 switch (attr.NodeName)
@@ -241,7 +241,7 @@ namespace StoryBuilder.DAL
 
         private void ParseProblem(IXmlNode xn)
         {
-            var prb = new ProblemModel(xn); 
+            var prb = new ProblemModel(xn, _model); 
             foreach (var attr in xn.Attributes)
             {
                 switch (attr.NodeName)
@@ -311,7 +311,7 @@ namespace StoryBuilder.DAL
 
         private void ParseCharacter(IXmlNode xn)
         {
-            var chr = new CharacterModel(xn);
+            var chr = new CharacterModel(xn, _model);
             foreach (var attr in xn.Attributes)
             {
                 switch (attr.NodeName)
@@ -480,7 +480,7 @@ namespace StoryBuilder.DAL
 
         private void ParseSetting(IXmlNode xn)
         {
-            var loc = new SettingModel(xn);
+            var loc = new SettingModel(xn, _model);
             foreach (var attr in xn.Attributes)
             {
                 switch (attr.NodeName)
@@ -548,7 +548,7 @@ namespace StoryBuilder.DAL
 
         private void ParsePlotPoint(IXmlNode xn)
         {
-            var scene = new PlotPointModel(xn);
+            var scene = new PlotPointModel(xn, _model);
             foreach (var attr in xn.Attributes)
             {
                 switch (attr.NodeName)
@@ -658,7 +658,7 @@ namespace StoryBuilder.DAL
 
         private void ParseFolder(IXmlNode xn)
         {
-            var folder = new FolderModel(xn);
+            var folder = new FolderModel(xn, _model);
             foreach (var attr in xn.Attributes)
             {
                 switch (attr.NodeName)
@@ -677,7 +677,7 @@ namespace StoryBuilder.DAL
 
         private void ParseSection(IXmlNode xn)
         {
-            var section = new SectionModel(xn);
+            var section = new SectionModel(xn, _model);
             foreach (var attr in xn.Attributes)
             {
                 switch (attr.NodeName)
@@ -696,7 +696,7 @@ namespace StoryBuilder.DAL
 
         private void ParseTrashCan(IXmlNode xn)
         {
-            var trash = new TrashCanModel(xn);
+            var trash = new TrashCanModel(xn, _model);
             foreach (var attr in xn.Attributes)
             {
                 switch (attr.NodeName)

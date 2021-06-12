@@ -15,15 +15,15 @@ namespace StoryBuilder.Models
         #endregion
 
         #region Constructor
-        public FolderModel() : base("New Folder", StoryItemType.Folder)
+        public FolderModel(StoryModel model) : base("New Folder", StoryItemType.Folder, model)
         {
             Notes = string.Empty;
         }
-        public FolderModel(string name) : base(name, StoryItemType.Folder)
+        public FolderModel(string name, StoryModel model) : base(name, StoryItemType.Folder, model)
         {
             Notes = string.Empty;
         }
-        public FolderModel(IXmlNode xn) : base(xn)
+        public FolderModel(IXmlNode xn, StoryModel model) : base(xn, model)
         {
             Notes = string.Empty;
         }

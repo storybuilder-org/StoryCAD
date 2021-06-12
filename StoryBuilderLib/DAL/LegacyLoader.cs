@@ -1021,7 +1021,7 @@ namespace StoryBuilder.DAL
         private CharRelationData FileRelationRec;
 
         private StoryController _story;
-        public StoryModel StoryModel;
+        public StoryModel _model;
 
         public LegacyLoader(StoryController controller)
         {
@@ -1036,7 +1036,7 @@ namespace StoryBuilder.DAL
         /// </summary>
         public async Task<StoryModel> LoadFile(StorageFile file)
         {
-            StoryModel = new StoryModel();
+            _model = new StoryModel();
             OverviewModel overview;
             CharacterModel character = null;
             ProblemModel problem = null;
@@ -1053,18 +1053,18 @@ namespace StoryBuilder.DAL
             //Controller.StopCLock();
             // There's one OverviewModel per story; it's also the Treeview root
             ///BUG: Title is wrong
-            overview = new OverviewModel("Working Title");
+            overview = new OverviewModel("Working Title", _model);
             StoryNodeItem overviewNode = new StoryNodeItem(overview, null);
             overviewNode.IsRoot = true;
 
             // Create new nodes to hold the StoryElement type collections
-            StoryElement problems = new FolderModel("Problems");
+            StoryElement problems = new FolderModel("Problems", _model);
             StoryNodeItem problemsNode = new StoryNodeItem(problems, overviewNode);
-            StoryElement characters = new FolderModel("Characters");
+            StoryElement characters = new FolderModel("Characters", _model);
             StoryNodeItem charactersNode = new StoryNodeItem(characters, overviewNode);
-            StoryElement settings = new FolderModel("Settings");
+            StoryElement settings = new FolderModel("Settings", _model);
             StoryNodeItem settingsNode = new StoryNodeItem(settings, overviewNode);
-            StoryElement plotpoints = new FolderModel("Plot Points");
+            StoryElement plotpoints = new FolderModel("Plot Points", _model);
             StoryNodeItem plotpointsNode = new StoryNodeItem(plotpoints, overviewNode);
 
             // Read the legacy StoryBuilder file.  Each record is
@@ -1128,7 +1128,7 @@ namespace StoryBuilder.DAL
                             overview.StoryIdea = new string(rdr.ReadChars(FileRecHeader.RecordLength));
                             break;
                         case ProblemRecType:
-                            problem = new ProblemModel();
+                            problem = new ProblemModel(_model);
                             //switch (VersionRec.Version)
                             switch (VersionRec.Version)
                             {
@@ -1226,7 +1226,7 @@ namespace StoryBuilder.DAL
                             problem.Notes = new string(rdr.ReadChars(FileRecHeader.RecordLength));
                             break;
                         case CharRecType:
-                            character = new CharacterModel();
+                            character = new CharacterModel(_model);
                             switch (VersionRec.Version)
                             {
                                 case "00.06":
@@ -1422,7 +1422,7 @@ namespace StoryBuilder.DAL
                             character.BackStory = new string(rdr.ReadChars(FileRecHeader.RecordLength));
                             break;
                         case LocRecType:
-                            setting = new SettingModel();
+                            setting = new SettingModel(_model);
                             FileLocRec = ReadStruct<LocData>(rdr);
                             setting.Name = FileLocRec.LocSummary.TrimEnd();
                             StoryNodeItem settingNode = new StoryNodeItem(setting, settingsNode);
@@ -1479,7 +1479,7 @@ namespace StoryBuilder.DAL
                             setting.Notes = new string(rdr.ReadChars(FileRecHeader.RecordLength));
                             break;
                         case PlotRecType:
-                            plotpoint = new PlotPointModel();
+                            plotpoint = new PlotPointModel(_model);
                             switch (VersionRec.Version)
                             {
                                 case "00.03":
@@ -1585,7 +1585,7 @@ namespace StoryBuilder.DAL
                             break;
                         case RelationRecType:
                             relationship = new CharacterRelationshipsModel();
-                            StoryModel.RelationList.Add(relationship);
+                            _model.RelationList.Add(relationship);
                             switch (VersionRec.Version)
                             {
                                 case "00.06":
@@ -1645,27 +1645,27 @@ namespace StoryBuilder.DAL
 
             // Activate StoryExplorer viewmodel we've been creating
             overviewNode.IsRoot = true;
-            StoryModel.ExplorerView.Add(overviewNode);  // The OverviewModel node is the only overview
-            TrashCanModel trash = new TrashCanModel();
+            _model.ExplorerView.Add(overviewNode);  // The OverviewModel node is the only overview
+            TrashCanModel trash = new TrashCanModel(_model);
             StoryNodeItem trashNode = new StoryNodeItem(trash, null);
             trashNode.IsRoot = true;
-            StoryModel.ExplorerView.Add(trashNode);     // The trashcan is the second root
+            _model.ExplorerView.Add(trashNode);     // The trashcan is the second root
             // Create Narrator viewmodel
-            SectionModel narrative = new SectionModel("Narrative View");
+            SectionModel narrative = new SectionModel("Narrative View", _model);
             StoryNodeItem narrativeNode = new StoryNodeItem(narrative, null);
             narrativeNode.IsRoot = true;
             foreach (StoryNodeItem child in plotpointsNode.Children)
             {
-                new StoryNodeItem(child, narrativeNode);
+                new StoryNodeItem(_model, child, narrativeNode);
             }
-            StoryModel.NarratorView.Add(narrativeNode);
-            trash = new TrashCanModel();
+            _model.NarratorView.Add(narrativeNode);
+            trash = new TrashCanModel(_model);
             trashNode = new StoryNodeItem(trash, null);
             trashNode.IsRoot = true;
-            StoryModel.NarratorView.Add(trashNode);     // The trashcan is the second root
+            _model.NarratorView.Add(trashNode);     // The trashcan is the second root
 
-            StoryModel.Changed = false;
-            return StoryModel;
+            _model.Changed = false;
+            return _model;
         }
         /// <summary>
         /// This generic method reads a struct of type T from a

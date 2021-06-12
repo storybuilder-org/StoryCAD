@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using Windows.Data.Xml.Dom;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
+using System.Collections.ObjectModel;
 
 namespace StoryBuilder.Models
 {
@@ -30,12 +32,10 @@ namespace StoryBuilder.Models
             get => _type;
             set => _type = value;
         }
-        
+
         #endregion
 
         #region Public Methods
-
-        public static Dictionary<Guid, StoryElement> StoryElements = new Dictionary<Guid, StoryElement>();
 
         public override string ToString()
         {
@@ -46,15 +46,15 @@ namespace StoryBuilder.Models
 
         #region Constructor
 
-        public StoryElement(string name, StoryItemType type)
+        public StoryElement(string name, StoryItemType type, StoryModel model)
         {
             _uuid = Guid.NewGuid();
-            StoryElements.Add(_uuid, this);
             _name = name;
             _type = type;
+            model.StoryElements.Add(this);
         }
 
-        public StoryElement(IXmlNode xn)
+        public StoryElement(IXmlNode xn, StoryModel model)
         {
             Guid uuid = default;
             StoryItemType type = StoryItemType.Unknown;
@@ -92,7 +92,6 @@ namespace StoryBuilder.Models
                     type = StoryItemType.TrashCan;
                     break;
             }
-
             foreach (var attr in xn.Attributes)
             {
                 switch (attr.NodeName)
@@ -112,7 +111,7 @@ namespace StoryBuilder.Models
             _uuid = uuid;
             _name = name;
             _type = type;
-            StoryElements.Add(_uuid, this);
+            model.StoryElements.Add(this);
         }
 
         #endregion

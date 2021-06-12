@@ -18,7 +18,7 @@ namespace StoryBuilder.Services.Scrivener
     public class ScrivenerReports
     {
         private readonly Dictionary<string, string> _templates = new Dictionary<string, string>();
-        private StoryModel _storyModel;
+        private StoryModel _model;
         private ScrivenerIo _scrivener;
         private StoryReader _rdr;
 
@@ -44,7 +44,7 @@ namespace StoryBuilder.Services.Scrivener
             Ioc.Default.GetService<StoryController>();
             _scrivener = Ioc.Default.GetService<ScrivenerIo>();
             _scrivener.ScrivenerFile = file;
-            _storyModel = model;
+            _model = model;
             _rdr = Ioc.Default.GetService<StoryReader>();
             //_root = root;
             //_misc = miscFolder;
@@ -167,12 +167,12 @@ namespace StoryBuilder.Services.Scrivener
 
         private void AddStoryExplorerNodes()
         {
-            RecurseStoryModelNode(_storyModel.ExplorerView[0], _explorerNode);
+            RecurseStoryModelNode(_model.ExplorerView[0], _explorerNode);
         }
 
         private void AddStoryNarratorNodes()
         {
-            RecurseStoryModelNode(_storyModel.NarratorView[0], _narratorNode);
+            RecurseStoryModelNode(_model.NarratorView[0], _narratorNode);
         }
 
         public BinderItem LocateFolder(BinderItem parent, string title)
@@ -382,8 +382,8 @@ namespace StoryBuilder.Services.Scrivener
         {
             StoryElement element = null;
             Guid uuid = new Guid(node.Uuid);
-            if (StoryElement.StoryElements.ContainsKey(uuid))
-                element = StoryElement.StoryElements[uuid];
+            if (_model.StoryElements.StoryElementGuids.ContainsKey(uuid))
+                element = _model.StoryElements.StoryElementGuids[uuid];
             if (element != null)
             {
                 switch (element.Type)
@@ -511,7 +511,7 @@ namespace StoryBuilder.Services.Scrivener
             {
                 if (line.Contains("@Description"))
                 {
-                    foreach (StoryElement element in StoryElement.StoryElements.Values)
+                    foreach (StoryElement element in _model.StoryElements)
                         if (element.Type == StoryItemType.Problem)
                         {
                             ProblemModel chr = (ProblemModel)element;
@@ -628,7 +628,7 @@ namespace StoryBuilder.Services.Scrivener
             {
                 if (line.Contains("@Description"))
                 {
-                    foreach (StoryElement element in StoryElement.StoryElements.Values)
+                    foreach (StoryElement element in _model.StoryElements)
                         if (element.Type == StoryItemType.Character)
                         {
                             CharacterModel chr = (CharacterModel)element;
@@ -802,7 +802,7 @@ namespace StoryBuilder.Services.Scrivener
             {
                 if (line.Contains("@Description"))
                 {
-                    foreach (StoryElement element in StoryElement.StoryElements.Values)
+                    foreach (StoryElement element in _model.StoryElements)
                         if (element.Type == StoryItemType.Setting)
                         {
                             SettingModel loc = (SettingModel)element;
@@ -924,7 +924,7 @@ namespace StoryBuilder.Services.Scrivener
             {
                 if (line.Contains("@Description"))
                 {
-                    foreach (StoryElement element in StoryElement.StoryElements.Values)
+                    foreach (StoryElement element in _model.StoryElements)
                         if (element.Type == StoryItemType.PlotPoint)
                         {
                             PlotPointModel chr = (PlotPointModel)element;
@@ -1132,9 +1132,9 @@ namespace StoryBuilder.Services.Scrivener
                 if (line.Contains("@Synopsis"))
                 {
                     // Find StoryNarrator' Plot Points
-                    foreach (StoryNodeItem child in _storyModel.NarratorView[0].Children)
+                    foreach (StoryNodeItem child in _model.NarratorView[0].Children)
                     {
-                        StoryElement scn = StoryElement.StoryElements[child.Uuid];
+                        StoryElement scn = _model.StoryElements.StoryElementGuids[child.Uuid];
                         PlotPointModel scene = (PlotPointModel)scn;
                         var sb = new StringBuilder(line);
                         sb.Replace("@Synopsis", $"[{scene.Name}] {scene.Description}");

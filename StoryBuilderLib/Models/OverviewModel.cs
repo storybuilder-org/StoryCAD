@@ -177,7 +177,7 @@ namespace StoryBuilder.Models
         #endregion
 
         #region Constructor
-        public OverviewModel() : base("Story Overview", StoryItemType.StoryOverview)
+        public OverviewModel(StoryModel model) : base("Story Overview", StoryItemType.StoryOverview, model)
         {
             DateCreated = string.Empty;
             Author = string.Empty;
@@ -204,7 +204,7 @@ namespace StoryBuilder.Models
             //wrkDate = DateTime.Parse(Convert.ToDateTime(StoryRec.DateCreated.Value).ToString("MM/dd/yy"));
             //frmStory.DefInstance.mskDateCreated.Text = StringsHelper.Format(wrkDate, "Medium Date");
         }
-        public OverviewModel(string name) : base(name, StoryItemType.StoryOverview)
+        public OverviewModel(string name, StoryModel model) : base(name, StoryItemType.StoryOverview, model)
         {
             DateCreated = string.Empty;
             Author = string.Empty;
@@ -231,7 +231,7 @@ namespace StoryBuilder.Models
             //wrkDate = DateTime.Parse(Convert.ToDateTime(StoryRec.DateCreated.Value).ToString("MM/dd/yy"));
             //frmStory.DefInstance.mskDateCreated.Text = StringsHelper.Format(wrkDate, "Medium Date");
         }
-        public OverviewModel(IXmlNode xn) : base(xn)
+        public OverviewModel(IXmlNode xn, StoryModel model) : base(xn, model)
         {
             DateCreated = string.Empty;
             Author = string.Empty;

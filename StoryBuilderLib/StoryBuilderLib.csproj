@@ -24,7 +24,6 @@
   <ItemGroup>
     <Folder Include="Assets\" />
     <Folder Include="Controllers\" />
-    <Folder Include="Controls\" />
     <Folder Include="DAL\" />
     <Folder Include="Models\Scrivener\" />
     <Folder Include="Install\" />

@@ -249,7 +249,7 @@ namespace StoryBuilder.Models
         #endregion
 
         #region Constructors
-        public PlotPointModel() : base("New Plot Point", StoryItemType.PlotPoint)
+        public PlotPointModel(StoryModel model) : base("New Plot Point", StoryItemType.PlotPoint, model)
         {
             Id = ++_nextPlotPointId;
             Viewpoint = string.Empty;
@@ -283,7 +283,7 @@ namespace StoryBuilder.Models
             Review = string.Empty;
             Notes = string.Empty;
         }
-        public PlotPointModel(string name) : base(name, StoryItemType.PlotPoint)
+        public PlotPointModel(string name, StoryModel model) : base(name, StoryItemType.PlotPoint, model)
         {
             Id = ++_nextPlotPointId;
             Viewpoint = string.Empty;
@@ -313,7 +313,7 @@ namespace StoryBuilder.Models
             Review = string.Empty;
             Notes = string.Empty;
         }
-        public PlotPointModel(IXmlNode xn) : base(xn)
+        public PlotPointModel(IXmlNode xn, StoryModel model) : base(xn, model)
         {
             Id = ++_nextPlotPointId;
             Viewpoint = string.Empty;

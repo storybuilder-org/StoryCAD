@@ -152,7 +152,7 @@ namespace StoryBuilder.Models
         #endregion
 
         #region Constructors
-        public ProblemModel() : base("New Problem", StoryItemType.Problem)
+        public ProblemModel(StoryModel model) : base("New Problem", StoryItemType.Problem, model)
         {
             Id = ++_nextProblemId;
             ProblemType = string.Empty;
@@ -174,7 +174,7 @@ namespace StoryBuilder.Models
             Premise = string.Empty;
             Notes = string.Empty;
         }
-        public ProblemModel(string name) : base(name, StoryItemType.Problem)
+        public ProblemModel(string name, StoryModel model) : base(name, StoryItemType.Problem, model)
         {
             Id = ++_nextProblemId;
             ProblemType = string.Empty;
@@ -196,7 +196,7 @@ namespace StoryBuilder.Models
             Premise = string.Empty;
             Notes = string.Empty;
         }
-        public ProblemModel(IXmlNode xn) : base(xn)
+        public ProblemModel(IXmlNode xn, StoryModel model) : base(xn, model)
         {
             Id = ++_nextProblemId;
             ProblemType = string.Empty;

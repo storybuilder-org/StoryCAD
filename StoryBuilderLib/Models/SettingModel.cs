@@ -144,7 +144,7 @@ namespace StoryBuilder.Models
         #endregion
 
         #region Constructors
-        public SettingModel() : base("New Setting", StoryItemType.Setting)
+        public SettingModel(StoryModel model) : base("New Setting", StoryItemType.Setting, model)
         {
             Id = ++_nextSettingId;
             Locale = string.Empty;
@@ -165,7 +165,7 @@ namespace StoryBuilder.Models
             Notes = string.Empty;
             SettingNames.Add(this.Name);
         }
-        public SettingModel(string name) : base(name, StoryItemType.Setting)
+        public SettingModel(string name, StoryModel model) : base(name, StoryItemType.Setting, model)
         {
             Id = ++_nextSettingId;
             Locale = string.Empty;
@@ -186,7 +186,7 @@ namespace StoryBuilder.Models
             Notes = string.Empty;
             SettingNames.Add(this.Name);
         }
-        public SettingModel(IXmlNode xn) : base(xn)
+        public SettingModel(IXmlNode xn, StoryModel model) : base(xn, model)
         {
             Id = ++_nextSettingId;
             Locale = string.Empty;

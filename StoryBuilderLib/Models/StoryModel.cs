@@ -1,4 +1,8 @@
+using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.Drawing.Text;
 using StoryBuilder.Models.Tools;
 using StoryBuilder.ViewModels;
 
@@ -11,6 +15,7 @@ namespace StoryBuilder.Models
         // TODO: Note sorting filtering and grouping depend on ICollectionView (for TreeView?)
         // TODO: See http://msdn.microsoft.com/en-us/library/ms752347.aspx#binding_to_collections
         // TODO: Maybe http://stackoverflow.com/questions/15593166/binding-treeview-with-a-observablecollection
+
         /// <summary>
         /// If any of the story entities have been modified by other than retrieval from the Story
         /// (that is, by a user modification from a View) 'Changed' is set to true. That is, a change
@@ -33,29 +38,42 @@ namespace StoryBuilder.Models
 
         #region StoryExplorer and NarratorView (TreeView) properties
 
-        /// The StoryModel contains two persisted TreeView representations, a Story Explorer tree which
+        /// A StoryModel is a collection of StoryElements (an overview, problems, characters, settings,
+        /// and scenes, plus containers).
+        /// 
+        public StoryElementCollection StoryElements;
+        /// 
+        /// It also contains two persisted TreeView representations, a Story Explorer tree which
         /// contains all Story Elements (the StoryOverview and all Problem, Character, Setting, PlotPoint
         /// and Folder elements) and a Narrator View which contains just Section (chapter, etc) and
         /// selected PlotPoint elements. 
         /// 
-        /// The active TreeView in the Shell page view is bound to a StoryNodeItem tree based on
-        /// whichever of these two TreeView representations is presently  selected.
+        /// One of these persisted TreeViews is actively bound in the Shell page view to a StoryNodeItem tree 
+        /// based on  whichever of these two TreeView representations is presently selected.
 
         public ObservableCollection<StoryNodeItem> ExplorerView = new ObservableCollection<StoryNodeItem>();
-
         public ObservableCollection<StoryNodeItem> NarratorView = new ObservableCollection<StoryNodeItem>();
 
         public ObservableCollection<CharacterRelationshipsModel> RelationList;
 
         #endregion
 
+        #region StoryElement collection properties
+
+        #endregion
+
         #region Constructor
         public StoryModel()
         {
+            StoryElements = new StoryElementCollection();
+
+            ExplorerView = new ObservableCollection<StoryNodeItem>();
+            NarratorView = new ObservableCollection<StoryNodeItem>();
+
             RelationList = new ObservableCollection<CharacterRelationshipsModel>();
+            
             Changed = false;
         }
-
         #endregion
     }
 }

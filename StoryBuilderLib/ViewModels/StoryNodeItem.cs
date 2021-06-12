@@ -6,6 +6,7 @@ using System.ComponentModel;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using StoryBuilder.Models;
+using Microsoft.Toolkit.Mvvm.DependencyInjection;
 
 namespace StoryBuilder.ViewModels
 {
@@ -236,10 +237,10 @@ namespace StoryBuilder.ViewModels
 
         #region Constructors
 
-        public StoryNodeItem(StoryNodeItem node, StoryNodeItem parent)
+        public StoryNodeItem(StoryModel model, StoryNodeItem node, StoryNodeItem parent)
         {
             _uuid = node.Uuid;
-            StoryElement element = StoryElement.StoryElements[Uuid];
+            StoryElement element = model.StoryElements.StoryElementGuids[Uuid];
             Name = element.Name;
             _type = node.Type;
             switch (_type)

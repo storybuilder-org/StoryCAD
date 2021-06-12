@@ -9,11 +9,11 @@ namespace StoryBuilder.Models
     public class TrashCanModel : StoryElement
     {
         #region Constructors
-        public TrashCanModel() : base("Deleted Story Elements", StoryItemType.TrashCan)
+        public TrashCanModel(StoryModel model) : base("Deleted Story Elements", StoryItemType.TrashCan, model)
         {
         }
 
-        public TrashCanModel(IXmlNode xn) : base(xn)
+        public TrashCanModel(IXmlNode xn, StoryModel model) : base(xn, model)
         {
         }
 

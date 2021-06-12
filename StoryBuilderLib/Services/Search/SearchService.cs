@@ -15,14 +15,14 @@ namespace StoryBuilder.Services.Search
         /// <param name="node">StoryNodeItem whose StoryElement to search</param>
         /// <param name="searchArg">string to search for</param>
         /// <returns>true if StoryyElement contains search argument</returns>
-        public bool SearchStoryElement(StoryNodeItem node, string searchArg)
+        public bool SearchStoryElement(StoryNodeItem node, string searchArg, StoryModel model)
         {
             bool result = false;
             arg = searchArg.ToLower();
             StoryElement element = null;
 
-            if (StoryElement.StoryElements.ContainsKey(node.Uuid))
-                element = StoryElement.StoryElements[node.Uuid];
+            if (model.StoryElements.StoryElementGuids.ContainsKey(node.Uuid))
+                element = model.StoryElements.StoryElementGuids[node.Uuid];
             if (element == null)
                 return false;
             switch (element.Type)

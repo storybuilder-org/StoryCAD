@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using Windows.Data.Xml.Dom;
+using StoryBuilder.Models;
 
 namespace StoryBuilder.Models
 {
@@ -403,7 +404,7 @@ namespace StoryBuilder.Models
         #endregion
 
         #region Constructors
-        public CharacterModel() : base("New Character", StoryItemType.Character)
+        public CharacterModel(StoryModel model) : base("New Character", StoryItemType.Character, model)
         {
             Id = ++_nextCharacterId;
             Role = string.Empty;
@@ -459,7 +460,7 @@ namespace StoryBuilder.Models
             CharacterNames.Add(this.Name);
         }
 
-        public CharacterModel(string name) : base(name, StoryItemType.Character)
+        public CharacterModel(string name, StoryModel model) : base(name, StoryItemType.Character, model)
         {
             Id = ++_nextCharacterId;
             Role = string.Empty;
@@ -515,7 +516,7 @@ namespace StoryBuilder.Models
             CharacterNames.Add(this.Name);
         }
 
-        public CharacterModel(IXmlNode xn) : base(xn)
+        public CharacterModel(IXmlNode xn, StoryModel model) : base(xn, model)
         {
             Id = ++_nextCharacterId;
             Role = string.Empty;

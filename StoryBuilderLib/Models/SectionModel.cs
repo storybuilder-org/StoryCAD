@@ -19,15 +19,15 @@ namespace StoryBuilder.Models
         #endregion
 
         #region Constructors
-        public SectionModel() : base("New Section", StoryItemType.Section)
+        public SectionModel(StoryModel model) : base("New Section", StoryItemType.Section, model)
         {
             Notes = string.Empty;
         }
-        public SectionModel(string name) : base(name, StoryItemType.Section)
+        public SectionModel(string name, StoryModel model) : base(name, StoryItemType.Section, model)
         {
             Notes = string.Empty;
         }
-        public SectionModel(IXmlNode xn) : base(xn)
+        public SectionModel(IXmlNode xn, StoryModel model) : base(xn, model)
         {
             Notes = string.Empty;
         }
