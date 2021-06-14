@@ -160,11 +160,11 @@ namespace StoryBuilder.Models
             Subject = string.Empty;
             ProblemSource = string.Empty;
             StoryQuestion = string.Empty;
-            Protagonist = string.Empty;
+            Protagonist = string.Empty;     // Protagonist Guid 
             ProtGoal = string.Empty;
             ProtMotive = string.Empty;
             ProtConflict = string.Empty;
-            Antagonist = string.Empty;
+            Antagonist = string.Empty;      // Antagonist Guid 
             AntagGoal = string.Empty;
             AntagMotive = string.Empty;
             AntagConflict = string.Empty;

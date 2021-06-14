@@ -47,9 +47,9 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
-                    <ComboBox Header="Protagonist" Grid.Row="0" IsEditable="False"
-                              MinWidth="300" ItemsSource="{x:Bind ProblemVm.CharacterList}"
-                              SelectedItem="{x:Bind ProblemVm.Protagonist, Mode=TwoWay}" />
+                    <usercontrols:CharacterName Header="Protagonist" Grid.Row="0" IsEditable="False" MinWidth="300"
+                              DisplayMemberPath="Name"
+                              SelectedItem="{x:Bind ProblemVm.Protagonist, Mode=TwoWay, Converter={StaticResource StoryElement}}" />
                     <ComboBox Header="Goal" Grid.Row="1" IsEditable="True"
                               MinWidth="400" ItemsSource="{x:Bind ProblemVm.GoalList}"
                               SelectedItem="{x:Bind ProblemVm.ProtGoal, Mode=TwoWay}" />
@@ -69,9 +69,9 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
-                    <ComboBox Header="Antagonist" Grid.Row="0" IsEditable="False"
-                              MinWidth="300" ItemsSource="{x:Bind Path=ProblemVm.CharacterList}"
-                              SelectedItem="{x:Bind ProblemVm.Antagonist, Mode=TwoWay}" />
+                    <usercontrols:CharacterName Header="Antagonist" Grid.Row="0" IsEditable="False" MinWidth="300"
+                              DisplayMemberPath="Name"
+                              SelectedItem="{x:Bind ProblemVm.Antagonist, Mode=TwoWay, Converter={StaticResource StoryElement}}" />
                     <ComboBox Header="Goal" Grid.Row="1" IsEditable="True"
                               MinWidth="400" ItemsSource="{x:Bind ProblemVm.GoalList}"
                               SelectedItem="{x:Bind ProblemVm.AntagGoal, Mode=TwoWay}" />

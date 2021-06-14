@@ -69,7 +69,7 @@ namespace StoryBuilder.ViewModels
         public readonly SearchService Search;
 
         // The current story outline being processed. 
-        private StoryModel _model;
+        public StoryModel StoryModel;
         public readonly ScrivenerIo Scrivener;
         private bool _saveAsProjectFolderExists;
         private StorageFolder _saveAsParentFolder;
@@ -335,7 +335,7 @@ namespace StoryBuilder.ViewModels
             if (selectedItem is StoryNodeItem node)
             {
                 CurrentNode = node;
-                StoryElement element = _model.StoryElements.StoryElementGuids[node.Uuid];
+                StoryElement element = StoryModel.StoryElements.StoryElementGuids[node.Uuid];
                 switch (node.Type)
                 {
                     case StoryItemType.Character:
@@ -463,73 +463,73 @@ namespace StoryBuilder.ViewModels
                     _story.ProjectFolder = await parent.CreateFolderAsync(vm.ProjectName);
                     _story.ProjectPath = _story.ProjectFolder.Path;
                     StatusMessage = "New project command executing";
-                    if (_model.Changed)
+                    if (StoryModel.Changed)
                     {
                         await SaveModel();
                         await WriteModel();
                     }
 
                     ResetModel();
-                     var overview = new OverviewModel("Working Title", _model);
+                     var overview = new OverviewModel("Working Title", StoryModel);
                     var overviewNode = new StoryNodeItem(overview, null);
                     overviewNode.IsExpanded = true;
                     overviewNode.IsRoot = true;
-                    _model.ExplorerView.Add(overviewNode);
-                    TrashCanModel trash = new TrashCanModel(_model);
+                    StoryModel.ExplorerView.Add(overviewNode);
+                    TrashCanModel trash = new TrashCanModel(StoryModel);
                     StoryNodeItem trashNode = new StoryNodeItem(trash, null);
-                    _model.ExplorerView.Add(trashNode);     // The trashcan is the second root
-                    var narrative = new SectionModel("Narrative View", _model);
+                    StoryModel.ExplorerView.Add(trashNode);     // The trashcan is the second root
+                    var narrative = new SectionModel("Narrative View", StoryModel);
                     var narrativeNode = new StoryNodeItem(narrative, null);
                     narrativeNode.IsRoot = true;
-                    _model.NarratorView.Add(narrativeNode);
-                    trash = new TrashCanModel(_model);
+                    StoryModel.NarratorView.Add(narrativeNode);
+                    trash = new TrashCanModel(StoryModel);
                     trashNode = new StoryNodeItem(trash, null);
-                    _model.NarratorView.Add(trashNode);     // The trashcan is the second root
+                    StoryModel.NarratorView.Add(trashNode);     // The trashcan is the second root
                     // Use the NewProjectDialog template to complete the model
                     switch (vm.SelectedTemplate)
                     {
                         case "Blank Project":
                             break;
                         case "Empty Folders":
-                            StoryElement problems = new FolderModel("Problems", _model);
+                            StoryElement problems = new FolderModel("Problems", StoryModel);
                             StoryNodeItem problemsNode = new StoryNodeItem(problems, overviewNode);
-                            StoryElement characters = new FolderModel("Characters", _model);
+                            StoryElement characters = new FolderModel("Characters", StoryModel);
                             StoryNodeItem charactersNode = new StoryNodeItem(characters, overviewNode);
-                            StoryElement settings = new FolderModel("Settings", _model);
+                            StoryElement settings = new FolderModel("Settings", StoryModel);
                             StoryNodeItem settingsNode = new StoryNodeItem(settings, overviewNode);
-                            StoryElement plotpoints = new FolderModel("Plot Points", _model);
+                            StoryElement plotpoints = new FolderModel("Plot Points", StoryModel);
                             StoryNodeItem plotpointsNode = new StoryNodeItem(plotpoints, overviewNode); 
                             break;
                         case "External/Internal Problems":
-                            StoryElement externalProblem = new ProblemModel("External Problem", _model);
+                            StoryElement externalProblem = new ProblemModel("External Problem", StoryModel);
                             StoryNodeItem externalProblemNode = new StoryNodeItem(externalProblem, overviewNode);
-                            StoryElement internalProblem = new ProblemModel("Internal Problem", _model);
+                            StoryElement internalProblem = new ProblemModel("Internal Problem", StoryModel);
                             StoryNodeItem internalProblemNode = new StoryNodeItem(internalProblem, overviewNode);
                             break;
                         case "Protagonist/Antagonist":
-                            StoryElement protagonist = new CharacterModel("Protagonist", _model);
+                            StoryElement protagonist = new CharacterModel("Protagonist", StoryModel);
                             StoryNodeItem protagonistNode = new StoryNodeItem(protagonist, overviewNode);
-                            StoryElement antagonist = new CharacterModel("Antagonist", _model);
+                            StoryElement antagonist = new CharacterModel("Antagonist", StoryModel);
                             StoryNodeItem antagonistNode = new StoryNodeItem(antagonist, overviewNode);
                             break;
                         case "Problems and Characters":
-                            StoryElement problemsFolder = new FolderModel("Problems", _model);
+                            StoryElement problemsFolder = new FolderModel("Problems", StoryModel);
                             StoryNodeItem problemsFolderNode = new StoryNodeItem(problemsFolder, overviewNode);
                             problemsFolderNode.IsExpanded = true;
-                            StoryElement charactersFolder = new FolderModel("Characters", _model);
+                            StoryElement charactersFolder = new FolderModel("Characters", StoryModel);
                             StoryNodeItem charactersFolderNode = new StoryNodeItem(charactersFolder, overviewNode);
                             charactersFolderNode.IsExpanded = true;
-                            StoryElement settingsFolder = new FolderModel("Settings", _model);
+                            StoryElement settingsFolder = new FolderModel("Settings", StoryModel);
                             StoryNodeItem settingsFolderNode = new StoryNodeItem(settingsFolder, overviewNode);
-                            StoryElement plotpointsFolder = new FolderModel("Plot Points", _model);
+                            StoryElement plotpointsFolder = new FolderModel("Plot Points", StoryModel);
                             StoryNodeItem plotpointsFolderNode = new StoryNodeItem(plotpointsFolder, overviewNode);
-                            StoryElement externalProb = new ProblemModel("External Problem", _model);
+                            StoryElement externalProb = new ProblemModel("External Problem", StoryModel);
                             StoryNodeItem externalProbNode = new StoryNodeItem(externalProb, problemsFolderNode);
-                            StoryElement internalProb = new ProblemModel("Internal Problem", _model);
+                            StoryElement internalProb = new ProblemModel("Internal Problem", StoryModel);
                             StoryNodeItem internalProbNode = new StoryNodeItem(internalProb, problemsFolderNode);
-                            StoryElement protag = new CharacterModel("Protagonist", _model);
+                            StoryElement protag = new CharacterModel("Protagonist", StoryModel);
                             StoryNodeItem protagNode = new StoryNodeItem(protag, charactersFolderNode);
-                            StoryElement antag = new CharacterModel("Antagonist", _model);
+                            StoryElement antag = new CharacterModel("Antagonist", StoryModel);
                             StoryNodeItem antagNode = new StoryNodeItem(antag, charactersFolderNode);
                             break;
                     }
@@ -558,7 +558,7 @@ namespace StoryBuilder.ViewModels
 
         private async void OpenFile()
         {
-            if (_model.Changed) 
+            if (StoryModel.Changed) 
             {
                 await SaveModel();
                 await WriteModel();
@@ -607,7 +607,7 @@ namespace StoryBuilder.ViewModels
                     _story.ProjectFile = null;    // not created yet
                     DataSource = null;
                     var loader = new LegacyLoader(_story);
-                    _model = await loader.LoadFile(file);
+                    StoryModel = await loader.LoadFile(file);
                     SetCurrentView(StoryViewType.ExplorerView);
                     _story.LoadStatus = LoadStatus.LoadFromText;
                     await CreateProjectFolder();
@@ -622,8 +622,8 @@ namespace StoryBuilder.ViewModels
                     //TODO: Back up at the right place (after open?)
                     await BackupProject();
                     StoryReader rdr = Ioc.Default.GetService<StoryReader>();
-                    _model = await rdr.ReadFile(file);
-                    if (_model.ExplorerView.Count > 0)
+                    StoryModel = await rdr.ReadFile(file);
+                    if (StoryModel.ExplorerView.Count > 0)
                     {
                         SetCurrentView(StoryViewType.ExplorerView);
                         _story.LoadStatus = LoadStatus.LoadFromRtfFiles;
@@ -707,7 +707,7 @@ namespace StoryBuilder.ViewModels
                 {
                     StoryWriter wtr = Ioc.Default.GetService<StoryWriter>();
                     //TODO: WriteFile isn't working; file is empty
-                    await wtr.WriteFile(_story.ProjectFile, _model);
+                    await wtr.WriteFile(_story.ProjectFile, StoryModel);
                     // Prevent updates to the remote version of the file until
                     // we finish making changes and call CompleteUpdatesAsync.
                     CachedFileManager.DeferUpdates(file);
@@ -783,14 +783,14 @@ namespace StoryBuilder.ViewModels
             Logger.Log(LogLevel.Info, "Executing Close project command");
             StatusMessage = "Closing project";
             // Save the existing file if changed
-            if (_model.Changed)
+            if (StoryModel.Changed)
             {
                 await SaveModel();
                 await WriteModel();
             }
             ResetModel();
             SetCurrentView(StoryViewType.ExplorerView);
-            DataSource = _model.ExplorerView;
+            DataSource = StoryModel.ExplorerView;
             ShowHomePage();
             //TODO: Navigate to background Page (is there one?)
             StatusMessage = "Close story command completed";
@@ -800,10 +800,8 @@ namespace StoryBuilder.ViewModels
 
         private void ResetModel()
         {
-            _model = new StoryModel();
-            _model.StoryElements.Clear();
-            CharacterModel.CharacterNames.Clear();
-            SettingModel.SettingNames.Clear();
+            StoryModel = new StoryModel();
+            //TODO: Raise event for StoryModel change?
         }
 
         private async void ExitApp()
@@ -811,7 +809,7 @@ namespace StoryBuilder.ViewModels
             _canExecuteCommands = false;
             Logger.Log(LogLevel.Info, "Executing Exit project command");
             //TODO: Only close if changed
-            if (_model.Changed)
+            if (StoryModel.Changed)
             {
                 await SaveModel();
                 await WriteModel();
@@ -892,7 +890,7 @@ namespace StoryBuilder.ViewModels
                 StoryNodeItem root = DataSource[0];
                 foreach (StoryNodeItem node in root)
                 {
-                    bool result = Search.SearchStoryElement(node, FilterText, _model);
+                    bool result = Search.SearchStoryElement(node, FilterText, StoryModel);
                     if (result == true)
                     {
                         ;
@@ -1009,7 +1007,7 @@ namespace StoryBuilder.ViewModels
                 IList<MasterPlotScene> scenes = model.MasterPlotScenes;
                 foreach (MasterPlotScene scene in scenes)
                 {
-                    PlotPointModel plotPoint = new PlotPointModel(_model);
+                    PlotPointModel plotPoint = new PlotPointModel(StoryModel);
                     plotPoint.Name = scene.SceneTitle;
                     plotPoint.Notes = scene.Notes;
                     StoryNodeItem newNode = new StoryNodeItem(plotPoint, RightTappedNode);
@@ -1035,13 +1033,13 @@ namespace StoryBuilder.ViewModels
             switch (result)
             {
                 case ContentDialogResult.Primary:       // problem
-                    ProblemModel problem = new ProblemModel(_model);
+                    ProblemModel problem = new ProblemModel(StoryModel);
                     problem.Name = situationModel.SituationName;
                     problem.Notes = situationModel.Notes;
                     newNode = new StoryNodeItem(problem, RightTappedNode);
                     break;
                 case ContentDialogResult.Secondary:     // scene
-                    PlotPointModel plotPoint = new PlotPointModel(_model);
+                    PlotPointModel plotPoint = new PlotPointModel(StoryModel);
                     plotPoint.Name = situationModel.SituationName;
                     plotPoint.Notes = situationModel.Notes;
                     newNode = new StoryNodeItem(plotPoint, RightTappedNode);
@@ -1068,7 +1066,7 @@ namespace StoryBuilder.ViewModels
                 var result = await dialog.ShowAsync();
                 if (result == ContentDialogResult.Primary)   // Copy command
                 {
-                    PlotPointModel plotPoint = new PlotPointModel(_model);
+                    PlotPointModel plotPoint = new PlotPointModel(StoryModel);
                     plotPoint.Name = dialog.StockScenesVm.SceneName;
                     StoryNodeItem newNode = new StoryNodeItem(plotPoint, RightTappedNode);
                     _sourceChildren = RightTappedNode.Children;
@@ -1109,7 +1107,7 @@ namespace StoryBuilder.ViewModels
                 if (!await Scrivener.IsScrivenerRelease3())
                     throw new ApplicationException("Project is not Scrivener Release 3");
                 // Load the Scrivener project file's model
-                ScrivenerReports rpt = new ScrivenerReports(file, _model);
+                ScrivenerReports rpt = new ScrivenerReports(file, StoryModel);
                 await rpt.GenerateReports();
             }
 
@@ -1417,27 +1415,27 @@ namespace StoryBuilder.ViewModels
             switch (typeToAdd)
             {
                 case StoryItemType.Folder:
-                    FolderModel folder = new FolderModel(_model);
+                    FolderModel folder = new FolderModel(StoryModel);
                     newNode = new StoryNodeItem(folder, RightTappedNode);
                     break;
                 case StoryItemType.Section:
-                    SectionModel section = new SectionModel(_model);
+                    SectionModel section = new SectionModel(StoryModel);
                     newNode = new StoryNodeItem(section, RightTappedNode);
                     break;
                 case StoryItemType.Problem:
-                    ProblemModel problem = new ProblemModel(_model);
+                    ProblemModel problem = new ProblemModel(StoryModel);
                     newNode = new StoryNodeItem(problem, RightTappedNode);
                     break;
                 case StoryItemType.Character:
-                    CharacterModel character = new CharacterModel(_model);
+                    CharacterModel character = new CharacterModel(StoryModel);
                     newNode = new StoryNodeItem(character, RightTappedNode);
                     break;
                 case StoryItemType.Setting:
-                    SettingModel setting = new SettingModel(_model);
+                    SettingModel setting = new SettingModel(StoryModel);
                     newNode = new StoryNodeItem(setting, RightTappedNode);
                     break;
                 case StoryItemType.PlotPoint:
-                    PlotPointModel plotPoint = new PlotPointModel(_model);
+                    PlotPointModel plotPoint = new PlotPointModel(StoryModel);
                     newNode = new StoryNodeItem(plotPoint, RightTappedNode);
                     break;
             }
@@ -1522,9 +1520,9 @@ namespace StoryBuilder.ViewModels
             }
 
             PlotPointModel plotPoint = (PlotPointModel)
-                _model.StoryElements.StoryElementGuids[RightTappedNode.Uuid];
+                StoryModel.StoryElements.StoryElementGuids[RightTappedNode.Uuid];
             // ReSharper disable once ObjectCreationAsStatement
-            new StoryNodeItem(plotPoint, _model.NarratorView[0]);
+            new StoryNodeItem(plotPoint, StoryModel.NarratorView[0]);
 
             StatusMessage = "PlotPoint copied to Narrator view";
         }
@@ -1549,11 +1547,11 @@ namespace StoryBuilder.ViewModels
                 return;
             }
 
-            foreach (var item in _model.NarratorView[0].Children.ToList())
+            foreach (var item in StoryModel.NarratorView[0].Children.ToList())
             {
                 if (item.Uuid == RightTappedNode.Uuid)
                 {
-                    _model.NarratorView[0].Children.Remove(item);
+                    StoryModel.NarratorView[0].Children.Remove(item);
                     break;
                 }
             }
@@ -1668,17 +1666,17 @@ namespace StoryBuilder.ViewModels
             switch (view) 
             {
                 case StoryViewType.ExplorerView:
-                    DataSource = _model.ExplorerView;
+                    DataSource = StoryModel.ExplorerView;
                     break;
                 case StoryViewType.NarratorView:
-                    DataSource = _model.NarratorView;
+                    DataSource = StoryModel.NarratorView;
                     break;
                 case StoryViewType.SearchView:
                     break;
             }
             if (DataSource.Count > 0)
                 CurrentNode = DataSource[0];
-            _model.Changed = false;
+            StoryModel.Changed = false;
         }
 
         private void LoadViewFromModel()
@@ -1805,8 +1803,8 @@ namespace StoryBuilder.ViewModels
             switch (CurrentNode.Type) 
             {
                 case StoryItemType.Character:
-                    int charIndex = CharacterModel.CharacterNames.IndexOf(msg.OldName);
-                    CharacterModel.CharacterNames[charIndex] = msg.NewName;
+                    //int charIndex = CharacterModel.CharacterNames.IndexOf(msg.OldName);
+                    //CharacterModel.CharacterNames[charIndex] = msg.NewName;
                     break;
                 case StoryItemType.Setting:
                     int settingIndex = SettingModel.SettingNames.IndexOf(msg.OldName);
@@ -1840,7 +1838,7 @@ namespace StoryBuilder.ViewModels
             Search = Ioc.Default.GetService<SearchService>();
 
             Title = "Hello Terry";
-            _model = new StoryModel();
+            StoryModel = new StoryModel();
             StatusMessage = "Ready";
 
             _canExecuteCommands = true;

@@ -92,9 +92,9 @@
                                   ItemsSource="{x:Bind OverviewVm.LiteraryDeviceList}"
                                   SelectedItem="{x:Bind OverviewVm.LiteraryDevice, Mode=TwoWay}" />
                     </Grid>
-                    <ComboBox Header="Viewpoint Character" Grid.Row="2" MinWidth="300" IsEditable="False"
-                               ItemsSource="{x:Bind OverviewVm.CharacterList}"
-                              SelectedItem="{x:Bind OverviewVm.ViewpointCharacter, Mode=TwoWay}" />
+                    <usercontrols:CharacterName Header="Viewpoint Character" Grid.Row="2" IsEditable="False" MinWidth="300"
+                              DisplayMemberPath="Name"
+                              SelectedItem="{x:Bind OverviewVm.ViewpointCharacter, Mode=TwoWay, Converter={StaticResource StoryElement}}" />
                     <Grid Grid.Row="3" HorizontalAlignment="Left" >
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="2*"/>
