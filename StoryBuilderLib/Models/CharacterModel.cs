@@ -397,12 +397,6 @@ namespace StoryBuilder.Models
 
         #endregion
 
-        #region Static Properties
-
-        public static ObservableCollection<string> CharacterNames = new ObservableCollection<string>();
-
-        #endregion
-
         #region Constructors
         public CharacterModel(StoryModel model) : base("New Character", StoryItemType.Character, model)
         {
@@ -457,7 +451,6 @@ namespace StoryBuilder.Models
             Lies = string.Empty;
             Secrets = string.Empty;
             BackStory = string.Empty;
-            CharacterNames.Add(this.Name);
         }
 
         public CharacterModel(string name, StoryModel model) : base(name, StoryItemType.Character, model)
@@ -513,7 +506,6 @@ namespace StoryBuilder.Models
             Lies = string.Empty;
             Secrets = string.Empty;
             BackStory = string.Empty;
-            CharacterNames.Add(this.Name);
         }
 
         public CharacterModel(IXmlNode xn, StoryModel model) : base(xn, model)
@@ -569,7 +561,6 @@ namespace StoryBuilder.Models
             Lies = string.Empty;
             Secrets = string.Empty;
             BackStory = string.Empty;
-            CharacterNames.Add(this.Name);
         }
 
         #endregion

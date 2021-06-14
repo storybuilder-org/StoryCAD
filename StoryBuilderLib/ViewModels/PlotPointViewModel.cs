@@ -445,17 +445,6 @@ namespace StoryBuilder.ViewModels
         public ObservableCollection<string> OutcomeList;
         public ObservableCollection<string> ValueExchangeList;
 
-        // StoryElement collections
-
-        private static ObservableCollection<string> CharacterNames = CharacterModel.CharacterNames;
-        public ICollectionView CharacterList1;
-        public ICollectionView CharacterList2;
-        public ICollectionView CharacterList3;
-        public ICollectionView ProtagonistList;
-        public ICollectionView AntagonistList;
-        private static ObservableCollection<string> SettingNames = SettingModel.SettingNames;
-        public ICollectionView SettingList;
-
         #endregion  
 
         #region Constructors
@@ -466,7 +455,7 @@ namespace StoryBuilder.ViewModels
             _logger = Ioc.Default.GetService<LogService>();
             _wtr = Ioc.Default.GetService<StoryWriter>();
             _rdr = Ioc.Default.GetService<StoryReader>();
- 
+
             Viewpoint = string.Empty;
             Date = string.Empty;
             Time = string.Empty;
@@ -509,27 +498,8 @@ namespace StoryBuilder.ViewModels
             OutcomeList = lists["Outcome"];
             ViewpointList = lists["Viewpoint"];
             ValueExchangeList = lists["ValueExchange"];
-
-            CollectionViewSource charViewSource1 = new CollectionViewSource();
-            charViewSource1.Source = CharacterNames;
-            CharacterList1 = charViewSource1.View;
-            CollectionViewSource charViewSource2 = new CollectionViewSource();
-            charViewSource2.Source = CharacterNames;
-            CharacterList2 = charViewSource2.View;
-            CollectionViewSource charViewSource3 = new CollectionViewSource();
-            charViewSource3.Source = CharacterNames;
-            CharacterList3 = charViewSource3.View;
-            CollectionViewSource charViewSource4 = new CollectionViewSource();
-            charViewSource4.Source = CharacterNames;
-            ProtagonistList = charViewSource4.View;
-            CollectionViewSource charViewSource5 = new CollectionViewSource();
-            charViewSource5.Source = CharacterNames;
-            AntagonistList = charViewSource5.View;
-
-            var settingViewSource = new CollectionViewSource();
-            settingViewSource.Source = SettingNames;
-            SettingList = settingViewSource.View;
         }
-            #endregion
+
+        #endregion
      }
 }

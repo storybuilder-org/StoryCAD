@@ -13,6 +13,7 @@ using StoryBuilder.Services.Logging;
 using StoryBuilder.Services.Messages;
 using StoryBuilder.Services.Navigation;
 using Microsoft.UI.Xaml.Data;
+using Windows.Devices.SmartCards;
 
 namespace StoryBuilder.ViewModels
 {
@@ -20,6 +21,7 @@ namespace StoryBuilder.ViewModels
     {
         #region Fields
 
+        private StoryModel _storyModel;
         private readonly StoryController _story;
         private readonly LogService _logger;
         private readonly StoryReader _rdr;
@@ -71,11 +73,6 @@ namespace StoryBuilder.ViewModels
         }
 
         private string _conflictType;
-        public string ConflictType
-        {
-            get => _conflictType;
-            set => SetProperty(ref _conflictType, value);
-        }
 
         private string _subject;
         public string Subject
@@ -91,6 +88,11 @@ namespace StoryBuilder.ViewModels
             set => SetProperty(ref _problemSource, value);
         }
 
+        public string ConflictType
+        {
+            get => _conflictType;
+            set => SetProperty(ref _conflictType, value);
+        }
         private string _storyQuestion;
         public string StoryQuestion
         {
@@ -100,7 +102,7 @@ namespace StoryBuilder.ViewModels
 
         // Problem protagonist data
 
-        private string _protagonist;
+        private string _protagonist; // Ghe Guid of a Character StoryElement
         public string Protagonist
         {
             get => _protagonist;
@@ -130,7 +132,7 @@ namespace StoryBuilder.ViewModels
 
         // Problem antagonist data
 
-        private string _antagonist;
+        private string _antagonist;  // The Guid of a Character StoryElement
         public string Antagonist
         {
             get => _antagonist;
@@ -243,6 +245,10 @@ namespace StoryBuilder.ViewModels
             Subject = Model.Subject;
             ProblemSource = Model.ProblemSource;
             //StoryQuestion = Model.StoryQuestion;
+            // Character instances like Protagonist and Antagonist are 
+            // read and written as the CharacterModel's StoryElement Guid 
+            // string. A binding converter, StringToStoryElementConverter,
+            // provides the UI the corresponding StoryElement itself.f
             Protagonist = Model.Protagonist ?? string.Empty;
             ProtGoal = Model.ProtGoal;
             ProtMotive = Model.ProtMotive;
@@ -265,11 +271,6 @@ namespace StoryBuilder.ViewModels
             _changeable = true;
         }
 
-        #region Combobox ItemsSource collections
-
-
-        #endregion
-
         internal async Task SaveModel()
         {
             _changeable = false;
@@ -282,7 +283,6 @@ namespace StoryBuilder.ViewModels
                 Model.ConflictType = ConflictType;
                 Model.Subject = Subject;
                 Model.ProblemSource = ProblemSource;
-
                 Model.Protagonist = Protagonist ?? string.Empty;
                 Model.ProtGoal = ProtGoal;
                 Model.ProtMotive = ProtMotive;
@@ -321,7 +321,6 @@ namespace StoryBuilder.ViewModels
         public ObservableCollection<string> MethodList;
         public ObservableCollection<string> ThemeList;
 
-        private static ObservableCollection<string> CharacterNames = CharacterModel.CharacterNames;
         public ICollectionView CharacterList;
 
         #endregion;
@@ -330,6 +329,8 @@ namespace StoryBuilder.ViewModels
 
         public ProblemViewModel() 
         {
+            ShellViewModel shell = Ioc.Default.GetService<ShellViewModel>();
+            _storyModel = shell.StoryModel;
             _story = Ioc.Default.GetService<StoryController>();
             _logger = Ioc.Default.GetService<LogService>();
             _wtr = Ioc.Default.GetService<StoryWriter>();
@@ -340,7 +341,7 @@ namespace StoryBuilder.ViewModels
             Subject = string.Empty;
             ProblemSource = string.Empty;
             StoryQuestion = string.Empty;
-            Protagonist = string.Empty;
+            Protagonist = null;
             ProtGoal = string.Empty;
             ProtMotive = string.Empty;
             ProtConflict = string.Empty;
@@ -365,10 +366,6 @@ namespace StoryBuilder.ViewModels
             OutcomeList = lists["Outcome"];
             MethodList = lists["Method"];
             ThemeList = lists["Theme"];
-
-            var charViewSource = new CollectionViewSource();
-            charViewSource.Source = CharacterNames;
-            CharacterList = charViewSource.View;
         }
         #endregion
     }

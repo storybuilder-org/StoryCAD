@@ -26,9 +26,12 @@ namespace StoryBuilder.Controllers
     {
         #region public Fields and Properties
 
+        // The currently open and active StoryModel instance. 
+        public StoryModel StoryModel;
+
         public PreferencesModel Preferences;
         
-        // A defect in WinUI 3 Win32 code is that ContentDialog controls don't have an
+        // A defect in preview WinUI 3 Win32 code is that ContentDialog controls don't have an
         // established XamlRoot. A workaround is to assign the dialog's XamlRoot to 
         // the root of a containing page. 
         // The Shell page's XamlRoot is stored here and accessed wherever needed. 

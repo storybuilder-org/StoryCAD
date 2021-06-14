@@ -49,9 +49,10 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
-                        <ComboBox Header="Setting" Grid.Column="0" IsEditable="True" MinWidth="300"
-                                  ItemsSource="{x:Bind PlotpointVm.SettingList}"
-                              SelectedItem="{x:Bind PlotpointVm.Setting, Mode=TwoWay}" />
+                        <usercontrols:SettingName Header="Setting" Grid.Column="0" IsEditable="True"
+                             MinWidth="300" Margin="0,0,0,10"
+                             DisplayMemberPath="Name"
+                             SelectedValue="{x:Bind PlotpointVm.Setting, Mode=TwoWay, Converter={StaticResource StoryElement}}"/>
                         <TextBlock Grid.Column="1" MinWidth="50"/>
                         <ComboBox Header="SceneType" Grid.Column="2" IsEditable="True" MinWidth="200"
                                   ItemsSource="{x:Bind PlotpointVm.SceneTypeList}"
@@ -63,9 +64,10 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
-                        <ComboBox Header="Characters" Grid.Column="0" IsEditable="False" MinWidth="300"
-                                  ItemsSource="{x:Bind PlotpointVm.CharacterList1}"
-                              SelectedValue="{x:Bind PlotpointVm.Char1, Mode=TwoWay}" Margin="0,0,0,10"/>
+                        <usercontrols:CharacterName Header="Characters" Grid.Column="0" IsEditable="False" 
+                             MinWidth="300" Margin="0,0,0,10"
+                             DisplayMemberPath="Name"
+                             SelectedValue="{x:Bind PlotpointVm.Char1, Mode=TwoWay, Converter={StaticResource StoryElement}}"/>
                         <TextBlock Grid.Column="1" MinWidth="50"/>
                         <ComboBox Header="Roles" Grid.Column="2" IsEditable="False" MinWidth="200"
                                   ItemsSource="{x:Bind PlotpointVm.StoryRoleList}"
@@ -77,9 +79,10 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
-                        <ComboBox Grid.Column="0" IsEditable="False" MinWidth="300"
-                                  ItemsSource="{x:Bind PlotpointVm.CharacterList2}"
-                                  SelectedValue="{x:Bind PlotpointVm.Char2, Mode=TwoWay}" Margin="0,0,0,10"/>
+                        <usercontrols:CharacterName Grid.Column="0" IsEditable="False"
+                             MinWidth="300" Margin="0,0,0,10"
+                             DisplayMemberPath="Name"
+                             SelectedValue="{x:Bind PlotpointVm.Char2, Mode=TwoWay, Converter={StaticResource StoryElement}}" />
                         <TextBlock Grid.Column="1" MinWidth="50"/>
                         <ComboBox Grid.Column="2" IsEditable="False" Width="200"
                                   ItemsSource="{x:Bind PlotpointVm.StoryRoleList}"
@@ -91,9 +94,10 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
-                        <ComboBox IsEditable="False" Grid.Column="0" MinWidth="300"
-                                  ItemsSource="{x:Bind PlotpointVm.CharacterList3}"
-                                  SelectedValue="{x:Bind PlotpointVm.Char3, Mode=TwoWay}" Margin="0,0,0,10"/>
+                        <usercontrols:CharacterName IsEditable="False" Grid.Column="0" 
+                             MinWidth="300" Margin="0,0,0,10"
+                             DisplayMemberPath="Name"
+                             SelectedValue="{x:Bind PlotpointVm.Char3, Mode=TwoWay, Converter={StaticResource StoryElement}}" />
                         <TextBlock Grid.Column="1" MinWidth="50"/>
                         <ComboBox Grid.Column="2" IsEditable="False" MinWidth="200"
                                   ItemsSource="{x:Bind PlotpointVm.StoryRoleList}"
@@ -168,12 +172,12 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
-                        <ComboBox Header="Protagonist" Grid.Column="0" IsEditable="False" MinWidth="300"
-                                  ItemsSource="{x:Bind PlotpointVm.ProtagonistList}"
-                          SelectedValue="{x:Bind PlotpointVm.Protagonist, Mode=TwoWay}" />
+                        <usercontrols:CharacterName Header="Protagonist" Grid.Column="0" IsEditable="False" MinWidth="300"
+                            DisplayMemberPath="Name"
+                            SelectedValue="{x:Bind PlotpointVm.Protagonist, Mode=TwoWay, Converter={StaticResource StoryElement}}" />
                         <TextBlock Grid.Column="1" MinWidth="50"/>
                         <ComboBox Header="Feelings" Grid.Column="2" IsEditable="True" MinWidth="200"
-                                  ItemsSource="{x:Bind PlotpointVm.EmotionList}"
+                              ItemsSource="{x:Bind PlotpointVm.EmotionList}"
                               SelectedItem="{x:Bind PlotpointVm.ProtagEmotion, Mode=TwoWay}" />
                     </Grid>
                     <ComboBox Header="Protagonist's Goal" Grid.Row="1" IsEditable="True" MinWidth="300"
@@ -188,9 +192,9 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
-                        <ComboBox Header="Antagonist" Grid.Column="0" IsEditable="False" MinWidth="300"
-                                  ItemsSource="{x:Bind PlotpointVm.AntagonistList}"
-                          SelectedValue="{x:Bind PlotpointVm.Antagonist, Mode=TwoWay}" />
+                        <usercontrols:CharacterName Header="Antagonist" Grid.Column="0" IsEditable="False" MinWidth="300"
+                          DisplayMemberPath="Name"
+                          SelectedValue="{x:Bind PlotpointVm.Antagonist, Mode=TwoWay, Converter={StaticResource StoryElement}}" />
                         <TextBlock Grid.Column="1" MinWidth="50"/>
                         <ComboBox Header="Feelings" Grid.Column="2" IsEditable="True" MinWidth="200"
                                   ItemsSource="{x:Bind PlotpointVm.EmotionList}"

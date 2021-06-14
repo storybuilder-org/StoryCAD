@@ -39,7 +39,7 @@ namespace StoryBuilder.Models
 
         public override string ToString()
         {
-            return Name;
+            return _uuid.ToString();
         }
 
         #endregion
