@@ -549,6 +549,12 @@ namespace StoryBuilder.DAL
         private void ParsePlotPoint(IXmlNode xn)
         {
             var scene = new PlotPointModel(xn, _model);
+            var castMembers = xn.SelectSingleNode("./CastMembers");
+            if (castMembers != null)
+                foreach (IXmlNode child in castMembers.ChildNodes)
+                    if (child.NodeName.Equals("Member"))
+                        scene.CastMembers.Add(child.InnerText);
+            string member = string.Empty;
             foreach (var attr in xn.Attributes)
             {
                 switch (attr.NodeName)
@@ -576,23 +582,32 @@ namespace StoryBuilder.DAL
                     case ("SceneType"):
                         scene.SceneType = attr.InnerText;
                         break;
-                    case ("Char1"):
-                        scene.Char1 = attr.InnerText;
+                    case ("Char1"):  // legacy
+                        member = attr.InnerText;
+                        if (!member.Equals(string.Empty))
+                            scene.CastMembers.Add(member);
+                        //scene.Char1 = attr.InnerText;
                         break;
-                    case ("Char2"):
-                        scene.Char2 = attr.InnerText;
+                    case ("Char2"): // legacy
+                        member = attr.InnerText;
+                        if (!member.Equals(string.Empty))
+                            scene.CastMembers.Add(member);
+                        //scene.Char2 = attr.InnerText;
                         break;
-                    case ("Char3"):
-                        scene.Char3 = attr.InnerText;
+                    case ("Char3"): // legacy
+                        member = attr.InnerText;
+                        if (!member.Equals(string.Empty))
+                            scene.CastMembers.Add(member);
+                        //scene.Char3 = attr.InnerText;
                         break;
-                    case ("Role1"):
-                        scene.Role1 = attr.InnerText;
+                    case ("Role1"):  // legacy
+                        //scene.Role1 = attr.InnerText;
                         break;
-                    case ("Role2"):
-                        scene.Role2 = attr.InnerText;
+                    case ("Role2"):  // legacy
+                        //scene.Role2 = attr.InnerText;
                         break;
-                    case ("Role3"):
-                        scene.Role3 = attr.InnerText;
+                    case ("Role3"):  // legacy
+                        //scene.Role3 = attr.InnerText;
                         break;
                     case ("Protagonist"):
                         scene.Protagonist = attr.InnerText;

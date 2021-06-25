@@ -39,6 +39,8 @@ namespace StoryBuilder.Converters
         /// <returns></returns>
         public object Convert(object value, Type targetType, object parameter, string language)
         {
+            if (value == null)
+                return null;
             if (value.GetType() != typeof(string))
                 return null;
             if (value.Equals(string.Empty))

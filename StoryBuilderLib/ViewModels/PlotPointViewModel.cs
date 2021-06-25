@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using Microsoft.Toolkit.Mvvm.Messaging;
+using Microsoft.Toolkit.Mvvm.Input;
 using StoryBuilder.Controllers;
 using StoryBuilder.DAL;
 using StoryBuilder.Models;
@@ -13,6 +14,7 @@ using StoryBuilder.Services.Logging;
 using StoryBuilder.Services.Messages;
 using StoryBuilder.Services.Navigation;
 using Microsoft.UI.Xaml.Data;
+using Microsoft.UI.Xaml;
 
 namespace StoryBuilder.ViewModels
 {
@@ -109,6 +111,13 @@ namespace StoryBuilder.ViewModels
             set => SetProperty(ref _sceneType, value);
         }
 
+        private int _selectedCastMember;
+        public int SelectedCastMember
+        {
+            get => _selectedCastMember;
+            set => SetProperty(ref _selectedCastMember, value);
+        }
+
         private string _char1;
         public string Char1
         {
@@ -128,6 +137,20 @@ namespace StoryBuilder.ViewModels
         {
             get => _char3;
             set => SetProperty(ref _char3, value);
+        }
+
+        private ObservableCollection<StoryElement> _castMembers;
+        public ObservableCollection<StoryElement> CastMembers 
+        {
+            get => _castMembers;
+            set => SetProperty(ref _castMembers, value);
+        }
+
+        private string _castCharacter;
+        public string CastCharacter
+        {
+            get => _castCharacter;
+            set => SetProperty(ref _castCharacter, value);
         }
 
         private string _role1;
@@ -286,7 +309,6 @@ namespace StoryBuilder.ViewModels
         }
 
         //  Scene notes data
-
         private string _notes;
         public string Notes
         {
@@ -297,7 +319,6 @@ namespace StoryBuilder.ViewModels
         // Besides its GUID, each Plot Point has a unique (to this story) 
         // integer id number (useful in lists of scenes.)
 
-        // The StoryModel is passed when CharacterPage is navigated to
         private PlotPointModel _model;
         public PlotPointModel Model
         {
@@ -313,6 +334,13 @@ namespace StoryBuilder.ViewModels
             set => SetProperty(ref _changed, value);
         }
 
+        #endregion
+
+        #region Relay Commands
+       
+        public RelayCommand AddCastCommand { get; }
+        public RelayCommand RemoveCastCommand { get; }
+        
         #endregion
 
         #region Methods
@@ -345,6 +373,9 @@ namespace StoryBuilder.ViewModels
             Time = Model.Time;
             Setting = Model.Setting;
             SceneType = Model.SceneType;
+            CastMembers.Clear();
+            foreach (string member in Model.CastMembers)
+                CastMembers.Add(StringToStoryElement(member));
             Char1 = Model.Char1;
             Char2 = Model.Char2;
             Char3 = Model.Char3;
@@ -376,7 +407,6 @@ namespace StoryBuilder.ViewModels
             
             Notes = await _rdr.GetRtfText(Model.Notes, Uuid);
 
-
             Changed = false;
             PropertyChanged += OnPropertyChanged;
             _changeable = true;
@@ -397,6 +427,9 @@ namespace StoryBuilder.ViewModels
                 Model.Time = Time;
                 Model.Setting = Setting;
                 Model.SceneType = SceneType;
+                Model.CastMembers.Clear();
+                foreach (StoryElement element in CastMembers)
+                    Model.CastMembers.Add(element.ToString());
                 Model.Char1 = Char1;
                 Model.Char2 = Char2;
                 Model.Char3 = Char3;
@@ -430,6 +463,48 @@ namespace StoryBuilder.ViewModels
             }
         }
 
+        private void AddCastMember()
+        {
+           // throw new NotImplementedException();
+        }
+
+        private void RemoveCastMember()
+        {
+           // throw new NotImplementedException();
+        }
+
+        private StoryElement StringToStoryElement(string value)
+        {
+            if (value == null)
+                return null;
+            if (value.Equals(string.Empty))
+                return null;
+            // Get the current StoryModel's StoryElementsCollection
+            ShellViewModel shell = Ioc.Default.GetService<ShellViewModel>();
+            StoryElementCollection elements = shell.StoryModel.StoryElements;
+            // legacy: locate the StoryElement from its Name
+            foreach (StoryElement element in elements)  // Character or Setting??? Search both?
+            {
+                if (element.Type == StoryItemType.Character | element.Type == StoryItemType.Setting)
+                {
+                    if (value.Equals(element.Name))
+                        return element;
+                }
+            }
+            // Look for the StoryElement corresponding to the passed guid
+            // (This is the normal approach)
+            Guid guid = new Guid(value.ToString());
+            if (elements.StoryElementGuids.ContainsKey(guid))
+                return elements.StoryElementGuids[guid];
+            return null;   // Not found
+        }
+
+
+        public void AddCastSelectionChanged(StoryElement member) 
+        {
+            CastMembers.Add(member);
+        }
+
         #endregion
 
         #region ComboBox ItemsSource collections
@@ -461,6 +536,7 @@ namespace StoryBuilder.ViewModels
             Time = string.Empty;
             Setting = string.Empty;
             SceneType = string.Empty;
+            CastMembers = new ObservableCollection<StoryElement>();
             Char1 = string.Empty;
             Char2 = string.Empty;
             Char3 = string.Empty;
@@ -498,8 +574,11 @@ namespace StoryBuilder.ViewModels
             OutcomeList = lists["Outcome"];
             ViewpointList = lists["Viewpoint"];
             ValueExchangeList = lists["ValueExchange"];
+
+            AddCastCommand = new RelayCommand(AddCastMember, () => true);
+            RemoveCastCommand = new RelayCommand(RemoveCastMember, () => true);
         }
 
         #endregion
-     }
+    }
 }

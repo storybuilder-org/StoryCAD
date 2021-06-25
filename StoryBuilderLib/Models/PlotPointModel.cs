@@ -1,4 +1,5 @@
-﻿using Windows.Data.Xml.Dom;
+﻿using System.Collections.Generic;
+using Windows.Data.Xml.Dom;
 
 namespace StoryBuilder.Models
 {
@@ -101,6 +102,13 @@ namespace StoryBuilder.Models
         {
             get => _role3;
             set => _role3 = value;
+        }
+
+        private List<string> _castMembers;
+        public List<string> CastMembers
+        {
+            get => _castMembers;
+            set => _castMembers = value;
         }
 
         private string _remarks;
@@ -257,6 +265,7 @@ namespace StoryBuilder.Models
             Time = string.Empty;
             Setting = string.Empty;
             SceneType = string.Empty;
+            CastMembers = new List<string>();
             Char1 = string.Empty;
             Char2 = string.Empty;
             Char3 = string.Empty;
@@ -291,6 +300,7 @@ namespace StoryBuilder.Models
             Time = string.Empty;
             Setting = string.Empty;
             SceneType = string.Empty;
+            CastMembers = new List<string>();
             Char1 = string.Empty;
             Char2 = string.Empty;
             Char3 = string.Empty;
@@ -321,6 +331,7 @@ namespace StoryBuilder.Models
             Time = string.Empty;
             Setting = string.Empty;
             SceneType = string.Empty;
+            CastMembers = new List<string>();
             Char1 = string.Empty;
             Char2 = string.Empty;
             Char3 = string.Empty;

@@ -5,6 +5,7 @@
     xmlns:local="using:StoryBuilder.Views"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:models="using:StoryBuilder.Models"
     xmlns:usercontrols="using:StoryBuilder.Controls"
     mc:Ignorable="d" >
 
@@ -18,8 +19,6 @@
             <PivotItem Header="Scene">
                 <Grid>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
@@ -55,55 +54,47 @@
                              SelectedValue="{x:Bind PlotpointVm.Setting, Mode=TwoWay, Converter={StaticResource StoryElement}}"/>
                         <TextBlock Grid.Column="1" MinWidth="50"/>
                         <ComboBox Header="SceneType" Grid.Column="2" IsEditable="True" MinWidth="200"
-                                  ItemsSource="{x:Bind PlotpointVm.SceneTypeList}"
+                              ItemsSource="{x:Bind PlotpointVm.SceneTypeList}"
                               SelectedItem="{x:Bind PlotpointVm.SceneType, Mode=TwoWay}" />
                     </Grid>
-                    <Grid Grid.Row="2" HorizontalAlignment="Left">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="3*"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="2*"/>
-                        </Grid.ColumnDefinitions>
-                        <usercontrols:CharacterName Header="Characters" Grid.Column="0" IsEditable="False" 
-                             MinWidth="300" Margin="0,0,0,10"
-                             DisplayMemberPath="Name"
-                             SelectedValue="{x:Bind PlotpointVm.Char1, Mode=TwoWay, Converter={StaticResource StoryElement}}"/>
-                        <TextBlock Grid.Column="1" MinWidth="50"/>
-                        <ComboBox Header="Roles" Grid.Column="2" IsEditable="False" MinWidth="200"
-                                  ItemsSource="{x:Bind PlotpointVm.StoryRoleList}"
-                                  SelectedItem="{x:Bind PlotpointVm.Role1, Mode=TwoWay}" />
+                    <Grid Grid.Row="2" HorizontalAlignment="Left" >
+                        <StackPanel Orientation="Vertical">
+                            <TextBlock Text="Scene Cast" />
+                            <ScrollViewer Height="75" >
+                                <ListView MinWidth="300"
+                                ItemsSource="{x:Bind PlotpointVm.CastMembers, Mode=OneWay}"
+                                    SelectedIndex="{x:Bind PlotpointVm.SelectedCastMember, Mode=OneWay}" >
+                                    <ListView.ItemTemplate>
+                                        <DataTemplate x:DataType="models:StoryElement">
+                                            <TextBlock Text="{x:Bind Name, Mode=OneWay}" MinWidth="250" />
+                                        </DataTemplate>
+                                    </ListView.ItemTemplate>
+                                </ListView>
+                            </ScrollViewer>
+                            <StackPanel Orientation="Horizontal">
+                                <usercontrols:CharacterName Header="New Cast Member"
+                                    IsEditable="False" MinWidth="300"
+                                    DisplayMemberPath="Name"
+                                    SelectedItem="{x:Bind PlotpointVm.CastCharacter, Mode=TwoWay, 
+                                    Converter={StaticResource StoryElement}}" 
+                                    SelectionChanged="NewCastMember_SelectionChanged" />
+                                <TextBlock Width="10" />
+                                <Button FontFamily="Segoe MDL2 Assets" Content="&#xE710;" 
+                                        Command="{x:Bind PlotpointVm.AddCastCommand, Mode=OneWay}" >
+                                    <ToolTipService.ToolTip>
+                                        <ToolTip Content="Add Cast Member"></ToolTip>
+                                    </ToolTipService.ToolTip>
+                                </Button>
+                                <Button FontFamily="Segoe MDL2 Assets" Content="&#xE738;" 
+                                        Command="{x:Bind PlotpointVm.RemoveCastCommand, Mode=OneWay}" >
+                                    <ToolTipService.ToolTip>
+                                        <ToolTip Content="Add Cast Member"></ToolTip>
+                                    </ToolTipService.ToolTip>
+                                </Button>
+                            </StackPanel>
+                        </StackPanel>
                     </Grid>
-                    <Grid Grid.Row="3" HorizontalAlignment="Left">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="3*"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="2*"/>
-                        </Grid.ColumnDefinitions>
-                        <usercontrols:CharacterName Grid.Column="0" IsEditable="False"
-                             MinWidth="300" Margin="0,0,0,10"
-                             DisplayMemberPath="Name"
-                             SelectedValue="{x:Bind PlotpointVm.Char2, Mode=TwoWay, Converter={StaticResource StoryElement}}" />
-                        <TextBlock Grid.Column="1" MinWidth="50"/>
-                        <ComboBox Grid.Column="2" IsEditable="False" Width="200"
-                                  ItemsSource="{x:Bind PlotpointVm.StoryRoleList}"
-                                  SelectedValue="{x:Bind PlotpointVm.Role2, Mode=TwoWay}" />
-                    </Grid>
-                    <Grid Grid.Row="4" HorizontalAlignment="Left">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="3*"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="2*"/>
-                        </Grid.ColumnDefinitions>
-                        <usercontrols:CharacterName IsEditable="False" Grid.Column="0" 
-                             MinWidth="300" Margin="0,0,0,10"
-                             DisplayMemberPath="Name"
-                             SelectedValue="{x:Bind PlotpointVm.Char3, Mode=TwoWay, Converter={StaticResource StoryElement}}" />
-                        <TextBlock Grid.Column="1" MinWidth="50"/>
-                        <ComboBox Grid.Column="2" IsEditable="False" MinWidth="200"
-                                  ItemsSource="{x:Bind PlotpointVm.StoryRoleList}"
-                                  SelectedValue="{x:Bind PlotpointVm.Role3, Mode=TwoWay}" />
-                    </Grid>
-                    <usercontrols:RichEditBoxExtended Header="Scene Sketch" Grid.Row="5"
+                    <usercontrols:RichEditBoxExtended Header="Scene Sketch" Grid.Row="3"
                                                       RtfText="{x:Bind PlotpointVm.Remarks, Mode=TwoWay}"
                                                       AcceptsReturn="True"
                                                       IsSpellCheckEnabled="True" TextWrapping="Wrap"
@@ -132,7 +123,7 @@
                         <ComboBox Header="Value Exchange" Grid.Column="2" IsEditable="False" MinWidth="250"
                                   ItemsSource="{x:Bind PlotpointVm.ValueExchangeList}"
                                   SelectedValue="{x:Bind PlotpointVm.ValueExchange, Mode=TwoWay}"
-                                  PlaceholderText="What changes for your Protagonist?."/>
+                                  PlaceholderText="What changes for your scene's protagonist?."/>
                     </Grid>
                     <usercontrols:RichEditBoxExtended Header="What Happens" Grid.Row="1"
                                                       RtfText="{x:Bind PlotpointVm.Events, Mode=TwoWay}" AcceptsReturn="True"

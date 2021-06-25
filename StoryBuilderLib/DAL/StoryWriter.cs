@@ -585,6 +585,14 @@ namespace StoryBuilder.DAL
             attr = _xml.CreateAttribute("Role3");
             attr.Value = rec.Role3;
             plotPoint.Attributes.Append(attr);
+            XmlNode castList = _xml.CreateElement("CastMembers");
+            foreach (string member in rec.CastMembers) 
+            {
+                XmlElement castMember = _xml.CreateElement("Member");
+                castMember.AppendChild(_xml.CreateTextNode(member));
+                castList.AppendChild(castMember);
+            }
+            plotPoint.AppendChild(castList);
             attr = _xml.CreateAttribute("Remarks");
             attr.Value = rec.Remarks;
             plotPoint.Attributes.Append(attr);
