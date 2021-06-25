@@ -63,7 +63,7 @@
                             <ScrollViewer Height="75" >
                                 <ListView MinWidth="300"
                                 ItemsSource="{x:Bind PlotpointVm.CastMembers, Mode=OneWay}"
-                                    SelectedIndex="{x:Bind PlotpointVm.SelectedCastMember, Mode=OneWay}" >
+                                    SelectedIndex="{x:Bind PlotpointVm.ExistingCastIndex, Mode=OneWay}" >
                                     <ListView.ItemTemplate>
                                         <DataTemplate x:DataType="models:StoryElement">
                                             <TextBlock Text="{x:Bind Name, Mode=OneWay}" MinWidth="250" />
@@ -75,9 +75,8 @@
                                 <usercontrols:CharacterName Header="New Cast Member"
                                     IsEditable="False" MinWidth="300"
                                     DisplayMemberPath="Name"
-                                    SelectedItem="{x:Bind PlotpointVm.CastCharacter, Mode=TwoWay, 
-                                    Converter={StaticResource StoryElement}}" 
-                                    SelectionChanged="NewCastMember_SelectionChanged" />
+                                    SelectedItem="{x:Bind PlotpointVm.NewCastMember, Mode=TwoWay, 
+                                    Converter={StaticResource StoryElement}}" />
                                 <TextBlock Width="10" />
                                 <Button FontFamily="Segoe MDL2 Assets" Content="&#xE710;" 
                                         Command="{x:Bind PlotpointVm.AddCastCommand, Mode=OneWay}" >

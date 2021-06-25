@@ -15,6 +15,7 @@ using StoryBuilder.Services.Messages;
 using StoryBuilder.Services.Navigation;
 using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
 
 namespace StoryBuilder.ViewModels
 {
@@ -27,6 +28,7 @@ namespace StoryBuilder.ViewModels
         private readonly StoryController _story;
         private readonly LogService _logger;
         private bool _changeable;
+        StatusMessage _smsg;
 
         #endregion
 
@@ -111,11 +113,17 @@ namespace StoryBuilder.ViewModels
             set => SetProperty(ref _sceneType, value);
         }
 
-        private int _selectedCastMember;
-        public int SelectedCastMember
+        private int _existingCastIndex;
+        public int ExistingCastIndex
         {
-            get => _selectedCastMember;
-            set => SetProperty(ref _selectedCastMember, value);
+            get => _existingCastIndex;
+            set
+            {
+                SetProperty(ref _existingCastIndex, value);
+                string emsg = String.Format("Existing cast member {0} selected", CastMembers[value].Name);
+                var smsg = new StatusMessage(emsg, 200);
+                Messenger.Send(new StatusChangedMessage(smsg));
+            }
         }
 
         private string _char1;
@@ -146,11 +154,23 @@ namespace StoryBuilder.ViewModels
             set => SetProperty(ref _castMembers, value);
         }
 
-        private string _castCharacter;
-        public string CastCharacter
+        private string _newCastMember;
+        public string NewCastMember
         {
-            get => _castCharacter;
-            set => SetProperty(ref _castCharacter, value);
+            get => _newCastMember;
+            set 
+            {
+                if (CastMemberExists(value))
+                {
+                    _smsg = new StatusMessage("Character is already in scene cast", 200);
+                    Messenger.Send(new StatusChangedMessage(_smsg));
+                }
+                SetProperty(ref _newCastMember, value);
+                StoryElement element = StringToStoryElement(value);
+                string msg = String.Format("New cast member selected",element.Name);
+                var smsg = new StatusMessage(msg, 200);
+                Messenger.Send(new StatusChangedMessage(smsg));
+            }
         }
 
         private string _role1;
@@ -463,14 +483,45 @@ namespace StoryBuilder.ViewModels
             }
         }
 
+        private bool CastMemberExists(string uuid)
+        {
+            foreach (StoryElement element in CastMembers)
+                if (uuid.Equals(element.Uuid))
+                    return true;
+
+            return false;
+        }
+
         private void AddCastMember()
         {
-           // throw new NotImplementedException();
+            if (CastMemberExists(NewCastMember))
+            {
+                _smsg = new StatusMessage("Character is already in scene cast", 200);
+                Messenger.Send(new StatusChangedMessage(_smsg));
+                return;
+            }
+            StoryElement element = StringToStoryElement(NewCastMember);
+            string msg = String.Format("New cast member {0} added", element.Name);
+            _smsg = new StatusMessage(msg, 200);
+            Messenger.Send(new StatusChangedMessage(_smsg));
+            CastMembers.Add(StringToStoryElement(NewCastMember));
+            _logger.Log(LogLevel.Info, msg);
         }
 
         private void RemoveCastMember()
         {
-           // throw new NotImplementedException();
+            if (ExistingCastIndex == -1)
+            {
+                _smsg = new StatusMessage("Select a scene cast member to remove", 200);
+                Messenger.Send(new StatusChangedMessage(_smsg));
+                return;
+            }
+            StoryElement element = CastMembers[ExistingCastIndex];
+            CastMembers.RemoveAt(ExistingCastIndex);
+            string msg = String.Format("Cast member {0} removed", element.Name);
+            _smsg = new StatusMessage(msg, 200);
+            Messenger.Send(new StatusChangedMessage(_smsg));
+            _logger.Log(LogLevel.Info, msg);
         }
 
         private StoryElement StringToStoryElement(string value)
@@ -497,12 +548,6 @@ namespace StoryBuilder.ViewModels
             if (elements.StoryElementGuids.ContainsKey(guid))
                 return elements.StoryElementGuids[guid];
             return null;   // Not found
-        }
-
-
-        public void AddCastSelectionChanged(StoryElement member) 
-        {
-            CastMembers.Add(member);
         }
 
         #endregion

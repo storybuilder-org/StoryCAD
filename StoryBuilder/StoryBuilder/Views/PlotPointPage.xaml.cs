@@ -19,10 +19,5 @@ namespace StoryBuilder.Views
             this.InitializeComponent();
             this.DataContext = PlotpointVm;
         }
-
-        private void NewCastMember_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            PlotpointVm.AddCastSelectionChanged((StoryElement) e.AddedItems[0]);
-        }
     }
 }
