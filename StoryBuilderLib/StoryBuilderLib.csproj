@@ -8,7 +8,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
-    <NoWarn>1701;1702;CA1416</NoWarn>
+    <NoWarn>1701;1702;CA1416;CS0618</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

@@ -21,6 +21,25 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StoryBuilderTests", "StoryB
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Install", "Install", "{955E3675-65A2-4B8A-BA04-16381A4191DC}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{23B3AFDE-90BE-4179-9541-2E1F30EF6C56}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{BD1DCCA7-FDF9-4D37-B9EB-F13307D9689F}"
+	ProjectSection(SolutionItems) = preProject
+		docs\Acknowledgements.md = docs\Acknowledgements.md
+		docs\Add a visual element.md = docs\Add a visual element.md
+		docs\bug_report.md = docs\bug_report.md
+		docs\Coding-Guidelines.md = docs\Coding-Guidelines.md
+		docs\CONTRIBUTING.md = docs\CONTRIBUTING.md
+		docs\contributor-guide.md = docs\contributor-guide.md
+		docs\Creating a StoryBuilder Tool.md = docs\Creating a StoryBuilder Tool.md
+		docs\documentation.md = docs\documentation.md
+		docs\faq.md = docs\faq.md
+		docs\feature_request.md = docs\feature_request.md
+		docs\project_organization_and_layout.md = docs\project_organization_and_layout.md
+		docs\README.md = docs\README.md
+		docs\roadmap.md = docs\roadmap.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

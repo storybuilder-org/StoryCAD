@@ -1,0 +1,1 @@
+#Acknowledgements##Software##Books##Writing websitesScrivenerGMCXaml BrewerPeregrinWriter's whatumcallit'writing scenes' stuffWindows Community ToolkitNrfTree
