@@ -20,19 +20,9 @@ namespace StoryBuilder.Models
         /// If any of the story entities have been modified by other than retrieval from the Story
         /// (that is, by a user modification from a View) 'Changed' is set to true. That is, a change
         /// to OverViewModel, or any ProblemModel, CharacterModel, SettingModel, PlotPointModel, or
-        /// FolderModel will result in Changed being set to true. This amounts to a 'dirty' bit that
-        /// indicates the StoryModel needs to be written to its backing store. 
-        ///
-        /// It's necessary for View controls using source binding to the entity collections to be aware
-        /// of changes (additions and deletions) to them. For example, the Problem view Protagonist
-        /// and Antagonist tabs contain drop down lists of CharacterNames from CharacterList.
-        /// This code uses a (source provided) ObservableSortedDictionary which implements the full
-        /// SortedDictionary functionality but also implemeents INotifyPropertyChanged and 
-        /// INotifyCollectionChanged (that is, is an ObservableCollection.) See the included source
-        /// files for Copyright.  
-        /// See http://drwpf.com/blog/2007/09/16/can-i-bind-my-itemscontrol-to-a-dictionary/ for details.
-        /// One comment on above is http://weblogs.asp.net/pwelter34/archive/2006/05/03/444961.aspx for XML
-        /// serialization.
+        /// FolderModel, or adding a new node, will result in Changed being set to true. 
+        /// 
+        /// This amounts to a 'dirty' bit that indicates the StoryModel needs to be written to its backing store. 
         /// </summary>
         public bool Changed;
 

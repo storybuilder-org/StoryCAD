@@ -350,10 +350,15 @@
                        Margin="10"
                        FontFamily="Segoe UI"></TextBlock>
             <TextBlock Text="{x:Bind ShellVm.FilterStatus, Mode=OneWay}" 
-                     HorizontalAlignment="Right"
+                     HorizontalAlignment="Center"
                      FontSize="14"
                      Margin="10"
                      FontFamily="Segoe UI"></TextBlock>
+            <AppBarButton Icon="Edit" IsCompact="True" Height="36" HorizontalAlignment="Right" >
+                <AppBarButton.Foreground>
+                    <SolidColorBrush Color="{x:Bind ShellVm.ChangeStatusColor, Mode=TwoWay}"/>
+                </AppBarButton.Foreground>
+            </AppBarButton>
         </StackPanel>
     </Grid>
 </Page>

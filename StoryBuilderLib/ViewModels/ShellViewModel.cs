@@ -13,6 +13,7 @@ using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using Microsoft.Toolkit.Mvvm.Messaging;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
 using StoryBuilder.Controllers;
 using StoryBuilder.DAL;
 using StoryBuilder.Models;
@@ -27,6 +28,8 @@ using StoryBuilder.Services.Search;
 using WinRT;
 using GuidAttribute = System.Runtime.InteropServices.GuidAttribute;
 using StoryBuilder.Services.Help;
+using System.Drawing;
+using Microsoft.UI;
 
 namespace StoryBuilder.ViewModels
 {
@@ -183,18 +186,6 @@ namespace StoryBuilder.ViewModels
         }
 
         /// <summary>
-        /// IsDirty indicates that something in the story StoryModel has been changed
-        /// (nominally from the UI), and that the StoryModel needs re-written to its
-        /// backing store.
-        /// </summary>
-        private bool _isDirty;
-        public bool IsDirty
-        {
-            get => _isDirty;
-            set => SetProperty(ref _isDirty, value);
-        }
-
-        /// <summary>
         /// FilterIsChecked binds to the Filter AppBarToggleButton IsChecked property
         /// </summary>
         private bool _filterIsChecked;
@@ -312,6 +303,13 @@ namespace StoryBuilder.ViewModels
         {
             get => _filterStatus;
             set => SetProperty(ref _filterStatus, value);
+        }
+
+        private Windows.UI.Color _changeStatusColor;
+        public Windows.UI.Color ChangeStatusColor 
+        {
+            get => _changeStatusColor;
+            set => SetProperty(ref _changeStatusColor, value);
         }
 
         private string _newNodeName;
@@ -681,6 +679,8 @@ namespace StoryBuilder.ViewModels
                 await SaveModel();
                 await WriteModel();
                 StatusMessage = "Save File command completed";
+                StoryModel.Changed = false;
+                ChangeStatusColor = Colors.Green;
             }
             catch (Exception ex)
             {
@@ -730,7 +730,6 @@ namespace StoryBuilder.ViewModels
             try
             {
                 StatusMessage = "Save File As command executing";
-                await SaveModel();  // Save the model at its present location so it can be copied
                 SaveAsDialog dialog = new SaveAsDialog();
                 dialog.XamlRoot = _story.XamlRoot;
                 var vm = Ioc.Default.GetService<SaveAsViewModel>();
@@ -745,6 +744,8 @@ namespace StoryBuilder.ViewModels
                 {
                     if (await VerifyReplaceOrCreate())
                     {
+                        await SaveModel();  // Save the model at its present location so it can be copied
+                        await WriteModel();
                         string projectName = _story.ProjectFolder.DisplayName;
                         if (!_saveAsProjectFolderExists)
                             _saveAsProjectFolder = await _saveAsParentFolder.CreateFolderAsync(saveAsProjectName);
@@ -753,6 +754,10 @@ namespace StoryBuilder.ViewModels
                         await _story.ProjectFolder.CopyContentsRecursive(_saveAsProjectFolder);
                         _story.ProjectFilename = saveAsProjectName;
                         _story.ProjectPath = _saveAsProjectFolderPath;
+                        // The folder and file are copied, but the 
+                        Messenger.Send(new IsChangedMessage(true));
+                        StoryModel.Changed = false;
+                        ChangeStatusColor = Colors.Green;
                     }
                 }
                 else
@@ -1440,8 +1445,7 @@ namespace StoryBuilder.ViewModels
                     break;
             }
 
-            //_sourceChildren = RightTappedNode.Children;
-            //_sourceChildren.Add(newNode);
+            Messenger.Send(new IsChangedMessage(true));
             msg = string.Format("Added new {0}", typeToAdd.ToString());
             Logger.Log(LogLevel.Info, msg);
             var smsg = new StatusMessage(msg, 100);
@@ -1777,9 +1781,13 @@ namespace StoryBuilder.ViewModels
         #endregion
 
         #region MVVM Message processing
-        private void IsDirtyMessageReceived(IsDirtyChangedMessage isDirty)
+        private void IsChangedMessageReceived(IsChangedMessage isDirty)
         {
-            IsDirty = isDirty.Value;
+            StoryModel.Changed = StoryModel.Changed || isDirty.Value;
+            if (StoryModel.Changed)
+                ChangeStatusColor = Colors.Red;
+            else
+                ChangeStatusColor = Colors.Green;
         }
 
         private void StatusMessageReceived(StatusChangedMessage statusMessage)
@@ -1824,8 +1832,8 @@ namespace StoryBuilder.ViewModels
 
             _itemSelector = Ioc.Default.GetService<TreeViewSelection>();
 
-            Messenger.Register<IsDirtyRequestMessage>(this, (r, m) => { m.Reply(_isDirty); });
-            Messenger.Register<ShellViewModel, IsDirtyChangedMessage>(this, static (r, m) => r.IsDirtyMessageReceived(m));
+            Messenger.Register<IsChangedRequestMessage>(this, (r, m) => { m.Reply(StoryModel.Changed); });
+            Messenger.Register<ShellViewModel, IsChangedMessage>(this, static (r, m) => r.IsChangedMessageReceived(m));
             Messenger.Register<ShellViewModel, StatusChangedMessage>(this, static (r, m) => r.StatusMessageReceived(m));
             Messenger.Register<ShellViewModel, NameChangedMessage>(this, static (r, m) => r.NameMessageReceived(m));
 
@@ -1889,6 +1897,8 @@ namespace StoryBuilder.ViewModels
             SelectedView = "Story Explorer View";
 
             FilterStatus = "Filter:Off";
+
+            ChangeStatusColor = Colors.Green;
         }
         #endregion
 

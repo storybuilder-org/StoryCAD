@@ -325,7 +325,7 @@ namespace StoryBuilder.ViewModels
                     Model.Notes = await _wtr.PutRtfText(Notes, Model.Uuid, "notes.rtf");
 
                     _logger.Log(LogLevel.Info, string.Format("Requesting IsDirty change to true"));
-                    Messenger.Send(new IsDirtyChangedMessage(Changed));
+                    Messenger.Send(new IsChangedMessage(Changed));
                 }
             }
         }

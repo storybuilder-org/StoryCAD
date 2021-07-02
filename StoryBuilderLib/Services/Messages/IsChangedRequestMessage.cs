@@ -2,7 +2,7 @@
 
 namespace StoryBuilder.Services.Messages
 {
-    public class IsDirtyRequestMessage : RequestMessage<bool>
+    public class IsChangedRequestMessage : RequestMessage<bool>
     {
     }
 }

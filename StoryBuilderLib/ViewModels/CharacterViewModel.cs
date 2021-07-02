@@ -671,7 +671,7 @@ namespace StoryBuilder.ViewModels
                 Model.BackStory = await _wtr.PutRtfText(BackStory, Uuid, "backstory.rtf");
 
                 _logger.Log(LogLevel.Info, string.Format("Requesting IsDirty change to true"));
-                Messenger.Send(new IsDirtyChangedMessage(Changed));
+                Messenger.Send(new IsChangedMessage(Changed));
             }
         }
 
