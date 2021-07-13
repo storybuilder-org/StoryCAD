@@ -119,6 +119,7 @@ namespace StoryBuilderTests
                     .AddSingleton<SearchService>()
                     .AddSingleton<InstallationService>()
                     .AddSingleton<ListLoader>()
+                    .AddSingleton<ControlLoader>()
                     .AddSingleton<ToolLoader>()
                     .AddSingleton<ScrivenerIo>()
                     .AddSingleton<StoryController>()

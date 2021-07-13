@@ -9,11 +9,13 @@ using Microsoft.Toolkit.Mvvm.Messaging;
 using StoryBuilder.Controllers;
 using StoryBuilder.DAL;
 using StoryBuilder.Models;
+using StoryBuilder.Models.Tools;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.Services.Messages;
 using StoryBuilder.Services.Navigation;
 using Microsoft.UI.Xaml.Data;
 using Windows.Devices.SmartCards;
+using Windows.ApplicationModel.Appointments;
 
 namespace StoryBuilder.ViewModels
 {
@@ -24,7 +26,7 @@ namespace StoryBuilder.ViewModels
         private StoryModel _storyModel;
         private readonly StoryController _story;
         private readonly LogService _logger;
-        private readonly StoryReader _rdr;
+        internal readonly StoryReader _rdr;
         private readonly StoryWriter _wtr;
         private bool _changeable;
 
@@ -62,7 +64,7 @@ namespace StoryBuilder.ViewModels
         {
             get => _id;
             set => SetProperty(ref _id, value);
-        }                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
+        }
 
         // Problem problem data
         private string _problemType;
@@ -307,9 +309,12 @@ namespace StoryBuilder.ViewModels
 
         #endregion
 
-        #region ListControlSource Sources
-        // ListControlSource sources
+        #region Control initialization sources
 
+        // Conflict UserCOntrol data
+        public SortedDictionary<string, ConflictCategoryModel> ConflictTypes;
+
+        // ListControls sources
         public ObservableCollection<string> ProblemTypeList;
         public ObservableCollection<string> ConflictTypeList;
         public ObservableCollection<string> SubjectList;
@@ -355,6 +360,7 @@ namespace StoryBuilder.ViewModels
             Premise = string.Empty;
             Notes = string.Empty;
 
+            ConflictTypes = _story.ConflictTypes;
             Dictionary<string, ObservableCollection<string>> lists = _story.ListControlSource;
             ProblemTypeList = lists["ProblemType"];
             ConflictTypeList = lists["ConflictType"];

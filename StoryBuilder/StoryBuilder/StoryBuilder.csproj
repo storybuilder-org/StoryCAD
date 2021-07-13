@@ -39,6 +39,12 @@
 	</Content> 
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Update="Assets\Install\Controls.ini">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
     <Exec Command="$(SolutionDir)CreateInstallManifest.exe $(ProjectDir)Assets\Install" />
   </Target>

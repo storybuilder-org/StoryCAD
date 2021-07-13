@@ -46,6 +46,7 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
                     <usercontrols:CharacterName Header="Protagonist" Grid.Row="0" IsEditable="False" MinWidth="300"
                               DisplayMemberPath="Name"
@@ -59,6 +60,7 @@
                     <ComboBox Header="Conflict" Grid.Row="3" IsEditable="True" MinWidth="400" 
                               ItemsSource="{x:Bind ProblemVm.ConflictList}"
                               SelectedItem="{x:Bind ProblemVm.ProtConflict, Mode=TwoWay}" />
+                    <usercontrols:Conflict Grid.Row="4" MinWidth="400" />
                 </Grid>
             </PivotItem>
             <PivotItem Header="Antagonist">

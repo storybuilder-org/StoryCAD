@@ -10,6 +10,9 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
     <NoWarn>1701;1702;CA1416;CS0618</NoWarn>
   </PropertyGroup>
+  <ItemGroup>
+    <None Remove="Controls\Conflict.xaml" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="CommonServiceLocator" Version="2.0.6" />
@@ -24,7 +27,6 @@
   <ItemGroup>
     <Folder Include="Assets\" />
     <Folder Include="Controllers\" />
-    <Folder Include="DAL\" />
     <Folder Include="Models\Scrivener\" />
     <Folder Include="Install\" />
     <Folder Include="Services\Icons\" />
@@ -38,6 +40,18 @@
 
   <ItemGroup>
     <ProjectReference Include="..\NRtfTree\NRtfTree.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="Controls\Conflict.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="Themes\Generic.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
 
 

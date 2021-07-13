@@ -104,6 +104,7 @@ namespace StoryBuilder
                     .AddSingleton<HelpService>()
                     .AddSingleton<SearchService>()
                     .AddSingleton<InstallationService>()
+                    .AddSingleton<ControlLoader>()
                     .AddSingleton<ListLoader>()
                     .AddSingleton<ToolLoader>()
                     .AddSingleton<ScrivenerIo>()
@@ -160,6 +161,8 @@ namespace StoryBuilder
 
             await LoadControls(localFolder.Path, story);
 
+            await LoadLists(localFolder.Path, story);   
+
             await LoadTools(localFolder.Path, story);
 
             ConfigureNavigation();
@@ -200,6 +203,37 @@ namespace StoryBuilder
         }
 
         private async Task LoadControls(string path, StoryController story)
+        {
+            int subTypeCount = 0;
+            int exampleCount = 0;
+            try
+            {
+                _log.Log(LogLevel.Info, "Loading Controls.ini data");
+                ControlLoader loader = Ioc.Default.GetService<ControlLoader>();
+                await loader.Init(path, story);
+                _log.Log(LogLevel.Info, "ConflictType Counts");
+                _log.Log(LogLevel.Info,
+                    $"{story.ConflictTypes.Keys.Count} ConflictType keys created");
+                foreach (ConflictCategoryModel type in story.ConflictTypes.Values) 
+                {
+                    subTypeCount += type.SubCategories.Count;
+                    foreach (string subType in type.SubCategories)
+                    {
+                        exampleCount += type.Examples[subType].Count;
+                    }
+                }
+                _log.Log(LogLevel.Info,
+                    $"{subTypeCount} Total ConflictSubType keys created");
+                _log.Log(LogLevel.Info,
+                     $"{exampleCount} Total ConflictSubType keys created");
+            }
+            catch (Exception ex)
+            {
+                _log.LogException(LogLevel.Error, ex, "Error loading Controls.ini");
+                AbortApp();
+            }
+        }
+        private async Task LoadLists(string path, StoryController story)
         {
             try
             {

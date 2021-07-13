@@ -41,12 +41,13 @@ namespace StoryBuilder.Controllers
         /// The ComboBox and ListBox source bindings in viewmodels point to lists in this Dictionary. 
         /// Each list has a unique key related to the ComboBox or ListBox use.
         /// </summary>
-        public Dictionary<string, ObservableCollection<string>> ListControlSource; 
+        public Dictionary<string, ObservableCollection<string>> ListControlSource;
 
         /// <summary>
-        /// Each Tool generally has its own specific data model. The following 
-        /// data types hold data for tool forms.
+        /// Some controls and all tools have tjeor own specific data model. The following 
+        /// data types hold data for user controls and tool forms.
         /// </summary>
+        public SortedDictionary<string, ConflictCategoryModel> ConflictTypes;
         public Dictionary<string, List<KeyQuestionModel>> KeyQuestionsSource;
         public SortedDictionary<string, ObservableCollection<string>> StockScenesSource;
         public SortedDictionary<string, TopicModel> TopicsSource;

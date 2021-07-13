@@ -16,7 +16,7 @@ namespace StoryBuilder.DAL
             Dictionary<string, ObservableCollection<string>> lists = new Dictionary<string, ObservableCollection<string>>();
             
             StorageFolder controlFolder = await StorageFolder.GetFolderFromPathAsync(path);
-            StorageFile iniFile = await controlFolder.GetFileAsync("Controls.ini");
+            StorageFile iniFile = await controlFolder.GetFileAsync("Lists.ini");
             //See if the .INI file exists
             //string iniFile = Path.Combine(Controller.Controller.SystemDirectory, @"\STORYB.INI");
             // string iniFile = @"C:\STORYB\STORYB.INI";

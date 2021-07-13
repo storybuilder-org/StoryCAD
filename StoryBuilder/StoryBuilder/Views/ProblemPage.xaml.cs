@@ -11,10 +11,11 @@ namespace StoryBuilder.Views
     /// </summary>
     public sealed partial class ProblemPage : BindablePage
     {
-        public ProblemViewModel ProblemVm => Ioc.Default.GetService<ProblemViewModel>();
+        public ProblemViewModel ProblemVm;  
 
         public ProblemPage()
         {
+            ProblemVm = Ioc.Default.GetService<ProblemViewModel>();
             this.InitializeComponent();
             this.DataContext = ProblemVm;
         }
