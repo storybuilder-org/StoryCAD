@@ -311,9 +311,6 @@ namespace StoryBuilder.ViewModels
 
         #region Control initialization sources
 
-        // Conflict UserCOntrol data
-        public SortedDictionary<string, ConflictCategoryModel> ConflictTypes;
-
         // ListControls sources
         public ObservableCollection<string> ProblemTypeList;
         public ObservableCollection<string> ConflictTypeList;
@@ -360,8 +357,7 @@ namespace StoryBuilder.ViewModels
             Premise = string.Empty;
             Notes = string.Empty;
 
-            ConflictTypes = _story.ConflictTypes;
-            Dictionary<string, ObservableCollection<string>> lists = _story.ListControlSource;
+            Dictionary<string, ObservableCollection<string>> lists = StaticData.ListControlSource;
             ProblemTypeList = lists["ProblemType"];
             ConflictTypeList = lists["ConflictType"];
             SubjectList = lists["ProblemSubject"];

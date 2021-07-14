@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using StoryBuilder.Controllers;
+using StoryBuilder.DAL; 
 using StoryBuilder.Models.Tools;
 
 namespace StoryBuilder.ViewModels.Tools
@@ -27,7 +28,7 @@ namespace StoryBuilder.ViewModels.Tools
             set 
             {
                 SetProperty(ref _storyElementName, value);
-                _questions = _story.KeyQuestionsSource[_storyElementName];
+                _questions = StaticData.KeyQuestionsSource[_storyElementName];
                 _index = _questions.Count - 1;
             }
         }
@@ -78,10 +79,9 @@ namespace StoryBuilder.ViewModels.Tools
         #region Constructor
         public KeyQuestionsViewModel ()
         {
-            _story = Ioc.Default.GetService<StoryController>();
             KeyQuestionElements = new ObservableCollection<string>();
             
-            foreach (string element in _story.KeyQuestionsSource.Keys) 
+            foreach (string element in StaticData.KeyQuestionsSource.Keys) 
                 KeyQuestionElements.Add(element);
             StoryElementName = KeyQuestionElements[0];
         }

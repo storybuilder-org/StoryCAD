@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using StoryBuilder.Controllers;
+using StoryBuilder.DAL;
 using StoryBuilder.Models.Tools;
 
 namespace StoryBuilder.ViewModels.Tools
@@ -51,16 +52,14 @@ namespace StoryBuilder.ViewModels.Tools
 
         public MasterPlotsViewModel()
         {
-            var story = Ioc.Default.GetService<StoryController>();
-            
             MasterPlotNames = new ObservableCollection<string>();
             MasterPlots = new Dictionary<string,MasterPlotModel>();
-            foreach (MasterPlotModel plot in story.MasterPlotsSource)
+            foreach (MasterPlotModel plot in StaticData.MasterPlotsSource)
             { 
                 MasterPlotNames.Add(plot.MasterPlotName);
                 MasterPlots.Add(plot.MasterPlotName, plot);
             }
-            MasterPlotName = story.MasterPlotsSource[0].MasterPlotName;
+            MasterPlotName = StaticData.MasterPlotsSource[0].MasterPlotName;
         }
 
         #endregion

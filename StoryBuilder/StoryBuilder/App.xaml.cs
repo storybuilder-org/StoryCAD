@@ -213,8 +213,8 @@ namespace StoryBuilder
                 await loader.Init(path, story);
                 _log.Log(LogLevel.Info, "ConflictType Counts");
                 _log.Log(LogLevel.Info,
-                    $"{story.ConflictTypes.Keys.Count} ConflictType keys created");
-                foreach (ConflictCategoryModel type in story.ConflictTypes.Values) 
+                    $"{StaticData.ConflictTypes.Keys.Count} ConflictType keys created");
+                foreach (ConflictCategoryModel type in StaticData.ConflictTypes.Values) 
                 {
                     subTypeCount += type.SubCategories.Count;
                     foreach (string subType in type.SubCategories)
@@ -239,9 +239,9 @@ namespace StoryBuilder
             {
                 _log.Log(LogLevel.Info, "Loading Controls.ini data");
                 ListLoader loader = Ioc.Default.GetService<ListLoader>();
-                story.ListControlSource = await loader.Init(path);
+                StaticData.ListControlSource = await loader.Init(path);
                 _log.Log(LogLevel.Info,
-                    $"{story.ListControlSource.Keys.Count} ListLoader.Init keys created");
+                    $"{StaticData.ListControlSource.Keys.Count} ListLoader.Init keys created");
             }
             catch (Exception ex)
             {
@@ -258,17 +258,17 @@ namespace StoryBuilder
                 ToolLoader loader = Ioc.Default.GetService<ToolLoader>();
                 await loader.Init(path, story);
                 _log.Log(LogLevel.Info,
-                    $"{story.KeyQuestionsSource.Keys.Count} Key Questions created");
+                    $"{StaticData.KeyQuestionsSource.Keys.Count} Key Questions created");
                 _log.Log(LogLevel.Info,
-                    $"{story.StockScenesSource.Keys.Count} Stock Scenes created");
+                    $"{StaticData.StockScenesSource.Keys.Count} Stock Scenes created");
                 _log.Log(LogLevel.Info,
-                    $"{story.TopicsSource.Count} Topics created");
+                    $"{StaticData.TopicsSource.Count} Topics created");
                 _log.Log(LogLevel.Info,
-                    $"{story.MasterPlotsSource.Count} Master Plots created");
+                    $"{StaticData.MasterPlotsSource.Count} Master Plots created");
                 _log.Log(LogLevel.Info,
-                    $"{story.DramaticSituationsSource.Count} Dramatic Situations created");
+                    $"{StaticData.DramaticSituationsSource.Count} Dramatic Situations created");
                 _log.Log(LogLevel.Info,
-                    $"{story.QuotesSource.Count} Quotes created");
+                    $"{StaticData.QuotesSource.Count} Quotes created");
 
             }
             catch (Exception ex)

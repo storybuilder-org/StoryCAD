@@ -608,7 +608,7 @@ namespace StoryBuilder.ViewModels
             Review = string.Empty;
             Notes = string.Empty;
 
-            Dictionary<string, ObservableCollection<string>> lists = _story.ListControlSource;
+            Dictionary<string, ObservableCollection<string>> lists = StaticData.ListControlSource;
             ViewpointList = lists["Viewpoint"];
             SceneTypeList = lists["SceneType"];
             ScenePurposeList = lists["ScenePurpose"];

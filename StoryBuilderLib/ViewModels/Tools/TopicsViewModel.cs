@@ -4,6 +4,7 @@ using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 using StoryBuilder.Controllers;
 using StoryBuilder.Models.Tools;
+using StoryBuilder.DAL;
 
 namespace StoryBuilder.ViewModels.Tools
 {
@@ -57,7 +58,7 @@ namespace StoryBuilder.ViewModels.Tools
         {
             if (topicName.Equals(string.Empty))
                 return;
-            _topic = _story.TopicsSource[TopicName];
+            _topic = StaticData.TopicsSource[TopicName];
             SubTopicNames.Clear();
             SubTopicNotes.Clear();
             foreach (SubTopicModel model in _topic.SubTopics) 
@@ -93,13 +94,12 @@ namespace StoryBuilder.ViewModels.Tools
         #region Constructor
         public TopicsViewModel()
         {
-            _story = Ioc.Default.GetService<StoryController>();
-            TopicNames = new ObservableCollection<string>(_story.TopicsSource.Keys);
+            TopicNames = new ObservableCollection<string>(StaticData.TopicsSource.Keys);
             SubTopicNames = new ObservableCollection<string>();
             SubTopicNotes = new ObservableCollection<string>();
 
             TopicName = TopicNames[0];
-            _topic = _story.TopicsSource[TopicName];
+            _topic = StaticData.TopicsSource[TopicName];
             TopicName = _topic.TopicName;
         }
         #endregion

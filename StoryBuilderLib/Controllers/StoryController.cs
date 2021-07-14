@@ -37,24 +37,6 @@ namespace StoryBuilder.Controllers
         // The Shell page's XamlRoot is stored here and accessed wherever needed. 
         public XamlRoot XamlRoot;
 
-        /// <summary>
-        /// The ComboBox and ListBox source bindings in viewmodels point to lists in this Dictionary. 
-        /// Each list has a unique key related to the ComboBox or ListBox use.
-        /// </summary>
-        public Dictionary<string, ObservableCollection<string>> ListControlSource;
-
-        /// <summary>
-        /// Some controls and all tools have tjeor own specific data model. The following 
-        /// data types hold data for user controls and tool forms.
-        /// </summary>
-        public SortedDictionary<string, ConflictCategoryModel> ConflictTypes;
-        public Dictionary<string, List<KeyQuestionModel>> KeyQuestionsSource;
-        public SortedDictionary<string, ObservableCollection<string>> StockScenesSource;
-        public SortedDictionary<string, TopicModel> TopicsSource;
-        public List<MasterPlotModel> MasterPlotsSource;
-        public SortedDictionary<string, DramaticSituationModel> DramaticSituationsSource;
-        public ObservableCollection<Quotation> QuotesSource;
-
         // File references. These are used to coordinate LoadModel()
         // and SaveModel() behavior in Story Element ViewModels and 
         // Open, Save, and SaveAs behavior in the ShellViewModel.
@@ -103,7 +85,7 @@ namespace StoryBuilder.Controllers
         public StoryController()
         {
             Preferences = new PreferencesModel();
-            ListControlSource = new Dictionary<string, ObservableCollection<string>>();
+            //ListControlSource = new Dictionary<string, ObservableCollection<string>>();
         }
 
         #endregion

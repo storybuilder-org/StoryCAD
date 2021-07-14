@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using StoryBuilder.Controllers;
+using StoryBuilder.DAL;
 using StoryBuilder.Models.Tools;
 
 namespace StoryBuilder.ViewModels.Tools
@@ -121,9 +122,7 @@ namespace StoryBuilder.ViewModels.Tools
 
         public DramaticSituationsViewModel()
         {
-            story = Ioc.Default.GetService<StoryController>();
-
-            this.situations = story.DramaticSituationsSource;
+            this.situations = StaticData.DramaticSituationsSource;
 
             SituationsSource = new ObservableCollection<string>();
             foreach (string situation in situations.Keys)

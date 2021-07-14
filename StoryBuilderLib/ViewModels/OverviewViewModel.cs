@@ -376,7 +376,7 @@ namespace StoryBuilder.ViewModels
             ToneNotes = string.Empty;
             Notes = string.Empty;
 
-            Dictionary<string, ObservableCollection<string>> lists = _story.ListControlSource;
+            Dictionary<string, ObservableCollection<string>> lists = StaticData.ListControlSource;
             StoryTypeList = lists["StoryType"];
             GenreList = lists["Genre"];
             ViewpointList = lists["Viewpoint"];

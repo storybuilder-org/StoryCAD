@@ -32,7 +32,7 @@ namespace StoryBuilder.DAL
             lines = await FileIO.ReadLinesAsync(iniFile);
 
             // Populate UserControl data source collections
-            story.ConflictTypes = LoadConflictTypes();
+            StaticData.ConflictTypes = LoadConflictTypes();
             //story.KeyQuestionsSource = LoadKeyQuestions();
             //story.StockScenesSource = LoadStockScenes();
             //story.TopicsSource = LoadTopics();

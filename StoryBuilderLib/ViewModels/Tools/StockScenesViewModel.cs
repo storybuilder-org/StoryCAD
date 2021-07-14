@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using StoryBuilder.Controllers;
+using StoryBuilder.DAL;
 
 namespace StoryBuilder.ViewModels.Tools
 {
@@ -51,10 +52,8 @@ namespace StoryBuilder.ViewModels.Tools
 
         public StockScenesViewModel()
         {
-            story = Ioc.Default.GetService<StoryController>();
-            
             StockSceneCategories = new ObservableCollection<string>();
-            _stockScenes = story.StockScenesSource;
+            _stockScenes = StaticData.StockScenesSource;
             foreach (string category in _stockScenes.Keys)
                 StockSceneCategories.Add(category);
         }
