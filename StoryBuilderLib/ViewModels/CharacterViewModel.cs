@@ -725,7 +725,7 @@ namespace StoryBuilder.ViewModels
             PropertyChanged += OnPropertyChanged;
 
              
-            Dictionary<string, ObservableCollection<string>> lists = StaticData.ListControlSource;
+            Dictionary<string, ObservableCollection<string>> lists = GlobalData.ListControlSource;
             RoleList = lists["Role"];
             StoryRoleList = lists["StoryRole"];
             ArchetypeList = lists["Archetype"];

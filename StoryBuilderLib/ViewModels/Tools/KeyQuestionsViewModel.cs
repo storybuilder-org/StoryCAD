@@ -28,7 +28,7 @@ namespace StoryBuilder.ViewModels.Tools
             set 
             {
                 SetProperty(ref _storyElementName, value);
-                _questions = StaticData.KeyQuestionsSource[_storyElementName];
+                _questions = GlobalData.KeyQuestionsSource[_storyElementName];
                 _index = _questions.Count - 1;
             }
         }
@@ -81,7 +81,7 @@ namespace StoryBuilder.ViewModels.Tools
         {
             KeyQuestionElements = new ObservableCollection<string>();
             
-            foreach (string element in StaticData.KeyQuestionsSource.Keys) 
+            foreach (string element in GlobalData.KeyQuestionsSource.Keys) 
                 KeyQuestionElements.Add(element);
             StoryElementName = KeyQuestionElements[0];
         }

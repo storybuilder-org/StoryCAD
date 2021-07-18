@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using StoryBuilder.Controllers;
+using StoryBuilder.DAL;
 using StoryBuilder.Models.Tools;
 
 namespace StoryBuilder.ViewModels
@@ -44,9 +45,8 @@ namespace StoryBuilder.ViewModels
 
         public NewProjectViewModel()
         {
-            story = Ioc.Default.GetService<StoryController>();
             ProjectName = string.Empty;
-            PreferencesModel prefs = story.Preferences;
+            PreferencesModel prefs = GlobalData.Preferences;
             ParentPathName = prefs.ProjectDirectory;
         }
     }

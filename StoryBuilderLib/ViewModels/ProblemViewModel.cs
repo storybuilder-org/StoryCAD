@@ -357,7 +357,7 @@ namespace StoryBuilder.ViewModels
             Premise = string.Empty;
             Notes = string.Empty;
 
-            Dictionary<string, ObservableCollection<string>> lists = StaticData.ListControlSource;
+            Dictionary<string, ObservableCollection<string>> lists = GlobalData.ListControlSource;
             ProblemTypeList = lists["ProblemType"];
             ConflictTypeList = lists["ConflictType"];
             SubjectList = lists["ProblemSubject"];

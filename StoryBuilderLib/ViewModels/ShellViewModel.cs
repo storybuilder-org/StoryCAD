@@ -115,6 +115,7 @@ namespace StoryBuilder.ViewModels
         // Tools MenuFlyOut Commands
         public RelayCommand KeyQuestionsCommand { get; }
         public RelayCommand TopicsCommand { get; }
+        public RelayCommand ConflictCommand { get; }
         public RelayCommand MasterPlotsCommand { get; }
         public RelayCommand DramaticSituationsCommand { get; }
         public RelayCommand StockScenesCommand { get; }
@@ -446,7 +447,7 @@ namespace StoryBuilder.ViewModels
             _canExecuteCommands = false;
             Logger.Log(LogLevel.Info, "Executing NewFile command");
             NewProjectDialog dialog = new NewProjectDialog();
-            dialog.XamlRoot = _story.XamlRoot;
+            dialog.XamlRoot = GlobalData.XamlRoot;
             var result = await dialog.ShowAsync();
             if (result == ContentDialogResult.Primary)
             {
@@ -577,7 +578,7 @@ namespace StoryBuilder.ViewModels
                     initializeWithWindow.Initialize(hwnd);
                 }
                 folderPicker.CommitButtonText = "Project Folder";
-                PreferencesModel prefs = _story.Preferences;
+                PreferencesModel prefs = GlobalData.Preferences;
                 //TODO: Use preferences project folder instead of DocumentsLibrary
                 //except you can't. Thanks, UWP.
                 folderPicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
@@ -731,7 +732,7 @@ namespace StoryBuilder.ViewModels
             {
                 StatusMessage = "Save File As command executing";
                 SaveAsDialog dialog = new SaveAsDialog();
-                dialog.XamlRoot = _story.XamlRoot;
+                dialog.XamlRoot = GlobalData.XamlRoot;
                 var vm = Ioc.Default.GetService<SaveAsViewModel>();
                 vm.ProjectName = _story.ProjectFilename;
                 vm.ProjectPathName = _story.ProjectPath;
@@ -841,7 +842,7 @@ namespace StoryBuilder.ViewModels
                 replaceDialog.Title = "Create SaveAs Folder";
                 replaceDialog.Content = $"Create folder {_saveAsProjectFolderPath}?";
             }
-            replaceDialog.XamlRoot = _story.XamlRoot;
+            replaceDialog.XamlRoot = GlobalData.XamlRoot;
             ContentDialogResult result = await replaceDialog.ShowAsync();
             return (result == ContentDialogResult.Primary);
             //if (result == ContentDialogResult.Primary)
@@ -963,14 +964,14 @@ namespace StoryBuilder.ViewModels
         {
             PreferencesDialog dialog = new PreferencesDialog();
             //TODO: Replace ShellPageXamlRoot with StoryController.XamlRoot everywhere
-            dialog.XamlRoot = _story.XamlRoot;
+            dialog.XamlRoot = GlobalData.XamlRoot;
             dialog.PreferencesVm.LoadModel();
             var result = await dialog.ShowAsync();
             dialog.PreferencesVm.SaveModel();
             if (result == ContentDialogResult.Primary) // Save changes
             {
-                string path = _story.Preferences.InstallationDirectory;
-                PreferencesIO loader = new PreferencesIO(_story.Preferences, path);
+                string path = GlobalData.Preferences.InstallationDirectory;
+                PreferencesIO loader = new PreferencesIO(GlobalData.Preferences, path);
                 await loader.UpdateFile();
             }
             // else Cancel- exit
@@ -982,7 +983,7 @@ namespace StoryBuilder.ViewModels
             if (RightTappedNode == null)
                 RightTappedNode = CurrentNode;
             KeyQuestionsDialog dialog = new KeyQuestionsDialog();
-            dialog.XamlRoot = _story.XamlRoot;
+            dialog.XamlRoot = GlobalData.XamlRoot;
             dialog.KeyQuestionsVm.NextQuestion();
             await dialog.ShowAsync();
         }
@@ -993,17 +994,25 @@ namespace StoryBuilder.ViewModels
             if (RightTappedNode == null)
                 RightTappedNode = CurrentNode;
             TopicsDialog dialog = new TopicsDialog();
-            dialog.XamlRoot = _story.XamlRoot;
+            dialog.XamlRoot = GlobalData.XamlRoot;
             await dialog.ShowAsync();
         }
-
+        public async void ConflictTool()
+        {
+            //TODO: Logging
+            if (RightTappedNode == null)
+                RightTappedNode = CurrentNode;
+            ConflictDialog dialog = new ConflictDialog();
+            dialog.XamlRoot = GlobalData.XamlRoot;
+            await dialog.ShowAsync();
+        }
         private async void MasterPlotTool()
         {
             //TODO: Logging
             if (RightTappedNode == null)
                 RightTappedNode = CurrentNode;
             MasterPlotsDialog dialog = new MasterPlotsDialog();
-            dialog.XamlRoot = _story.XamlRoot;
+            dialog.XamlRoot = GlobalData.XamlRoot;
             var result = await dialog.ShowAsync();
             if (result == ContentDialogResult.Primary)   // Copy command
             {
@@ -1031,7 +1040,7 @@ namespace StoryBuilder.ViewModels
             if (RightTappedNode == null)
                 RightTappedNode = CurrentNode;
             DramaticSituationsDialog dialog = new DramaticSituationsDialog();
-            dialog.XamlRoot = _story.XamlRoot;
+            dialog.XamlRoot = GlobalData.XamlRoot;
             var result = await dialog.ShowAsync();
             DramaticSituationModel situationModel = dialog.DramaticSituationsVm.Situation;
             StoryNodeItem newNode = null;
@@ -1067,7 +1076,7 @@ namespace StoryBuilder.ViewModels
             try
             {
                 StockScenesDialog dialog = new StockScenesDialog();
-                dialog.XamlRoot = _story.XamlRoot;
+                dialog.XamlRoot = GlobalData.XamlRoot;
                 var result = await dialog.ShowAsync();
                 if (result == ContentDialogResult.Primary)   // Copy command
                 {
@@ -1862,6 +1871,7 @@ namespace StoryBuilder.ViewModels
 
             KeyQuestionsCommand = new RelayCommand(KeyQuestionsTool, () => _canExecuteCommands);
             TopicsCommand = new RelayCommand(TopicsTool, () => _canExecuteCommands);
+            ConflictCommand = new RelayCommand(ConflictTool, () => _canExecuteCommands);
             MasterPlotsCommand = new RelayCommand(MasterPlotTool, () => _canExecuteCommands);
             DramaticSituationsCommand = new RelayCommand(DramaticSituationsTool, () => _canExecuteCommands);
             StockScenesCommand = new RelayCommand(StockScenesTool, () => _canExecuteCommands);

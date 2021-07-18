@@ -53,7 +53,7 @@ namespace StoryBuilder.ViewModels.Tools
         public StockScenesViewModel()
         {
             StockSceneCategories = new ObservableCollection<string>();
-            _stockScenes = StaticData.StockScenesSource;
+            _stockScenes = GlobalData.StockScenesSource;
             foreach (string category in _stockScenes.Keys)
                 StockSceneCategories.Add(category);
         }

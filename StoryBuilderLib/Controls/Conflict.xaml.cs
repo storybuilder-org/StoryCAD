@@ -48,7 +48,7 @@ namespace StoryBuilder.Controls
 
         private void Example_Loaded(object sender, RoutedEventArgs e)
         {
-            ConflictTypes = StaticData.ConflictTypes;
+            ConflictTypes = GlobalData.ConflictTypes;
             Category.ItemsSource = ConflictTypes.Keys;
         }
     }

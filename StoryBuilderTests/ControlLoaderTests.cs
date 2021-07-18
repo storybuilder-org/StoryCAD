@@ -21,7 +21,7 @@ namespace StoryBuilderTests
             //Assert.IsNotNull(localFolder);
             ControlLoader loader = new ControlLoader();
             await loader.Init(localPath, story);
-            Assert.IsNotNull(StaticData.ConflictTypes);
+            Assert.IsNotNull(GlobalData.ConflictTypes);
             return;
         }
     }

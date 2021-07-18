@@ -1,7 +1,5 @@
 ﻿using Microsoft.UI.Xaml.Controls;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
-using StoryBuilder.Models;
-using StoryBuilder.Controllers;
 using StoryBuilder.ViewModels;
 
 namespace StoryBuilder.Controls

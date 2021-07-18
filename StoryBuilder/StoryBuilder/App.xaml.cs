@@ -213,8 +213,8 @@ namespace StoryBuilder
                 await loader.Init(path, story);
                 _log.Log(LogLevel.Info, "ConflictType Counts");
                 _log.Log(LogLevel.Info,
-                    $"{StaticData.ConflictTypes.Keys.Count} ConflictType keys created");
-                foreach (ConflictCategoryModel type in StaticData.ConflictTypes.Values) 
+                    $"{GlobalData.ConflictTypes.Keys.Count} ConflictType keys created");
+                foreach (ConflictCategoryModel type in GlobalData.ConflictTypes.Values) 
                 {
                     subTypeCount += type.SubCategories.Count;
                     foreach (string subType in type.SubCategories)
@@ -239,9 +239,9 @@ namespace StoryBuilder
             {
                 _log.Log(LogLevel.Info, "Loading Controls.ini data");
                 ListLoader loader = Ioc.Default.GetService<ListLoader>();
-                StaticData.ListControlSource = await loader.Init(path);
+                GlobalData.ListControlSource = await loader.Init(path);
                 _log.Log(LogLevel.Info,
-                    $"{StaticData.ListControlSource.Keys.Count} ListLoader.Init keys created");
+                    $"{GlobalData.ListControlSource.Keys.Count} ListLoader.Init keys created");
             }
             catch (Exception ex)
             {
@@ -258,17 +258,17 @@ namespace StoryBuilder
                 ToolLoader loader = Ioc.Default.GetService<ToolLoader>();
                 await loader.Init(path, story);
                 _log.Log(LogLevel.Info,
-                    $"{StaticData.KeyQuestionsSource.Keys.Count} Key Questions created");
+                    $"{GlobalData.KeyQuestionsSource.Keys.Count} Key Questions created");
                 _log.Log(LogLevel.Info,
-                    $"{StaticData.StockScenesSource.Keys.Count} Stock Scenes created");
+                    $"{GlobalData.StockScenesSource.Keys.Count} Stock Scenes created");
                 _log.Log(LogLevel.Info,
-                    $"{StaticData.TopicsSource.Count} Topics created");
+                    $"{GlobalData.TopicsSource.Count} Topics created");
                 _log.Log(LogLevel.Info,
-                    $"{StaticData.MasterPlotsSource.Count} Master Plots created");
+                    $"{GlobalData.MasterPlotsSource.Count} Master Plots created");
                 _log.Log(LogLevel.Info,
-                    $"{StaticData.DramaticSituationsSource.Count} Dramatic Situations created");
+                    $"{GlobalData.DramaticSituationsSource.Count} Dramatic Situations created");
                 _log.Log(LogLevel.Info,
-                    $"{StaticData.QuotesSource.Count} Quotes created");
+                    $"{GlobalData.QuotesSource.Count} Quotes created");
 
             }
             catch (Exception ex)

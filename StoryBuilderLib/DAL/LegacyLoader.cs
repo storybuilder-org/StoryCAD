@@ -1636,7 +1636,7 @@ namespace StoryBuilder.DAL
                                 CloseButtonText = "Ok"
                             };
 
-                            loadErrorDialog.XamlRoot = _story.XamlRoot;
+                            loadErrorDialog.XamlRoot = GlobalData.XamlRoot;
                             await loadErrorDialog.ShowAsync();
                             break;
                     }

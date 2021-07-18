@@ -122,7 +122,7 @@ namespace StoryBuilder.ViewModels.Tools
 
         public DramaticSituationsViewModel()
         {
-            this.situations = StaticData.DramaticSituationsSource;
+            this.situations = GlobalData.DramaticSituationsSource;
 
             SituationsSource = new ObservableCollection<string>();
             foreach (string situation in situations.Keys)

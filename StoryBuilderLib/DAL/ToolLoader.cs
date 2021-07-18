@@ -31,12 +31,12 @@ namespace StoryBuilder.DAL
             lines = await FileIO.ReadLinesAsync(iniFile);
             
             // Populate tool data source collections
-            StaticData.KeyQuestionsSource = LoadKeyQuestions();
-            StaticData.StockScenesSource = LoadStockScenes();
-            StaticData.TopicsSource = LoadTopics();
-            StaticData.MasterPlotsSource = LoadMasterPlots();
-            StaticData.DramaticSituationsSource = LoadDramaticSituations();
-            StaticData.QuotesSource = LoadQuotes();
+            GlobalData.KeyQuestionsSource = LoadKeyQuestions();
+            GlobalData.StockScenesSource = LoadStockScenes();
+            GlobalData.TopicsSource = LoadTopics();
+            GlobalData.MasterPlotsSource = LoadMasterPlots();
+            GlobalData.DramaticSituationsSource = LoadDramaticSituations();
+            GlobalData.QuotesSource = LoadQuotes();
             Clear();
         }
 

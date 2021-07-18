@@ -304,7 +304,7 @@ namespace StoryBuilder.ViewModels
             SmellTaste = string.Empty;
             Notes = string.Empty;
 
-            Dictionary<string, ObservableCollection<string>> lists = StaticData.ListControlSource;
+            Dictionary<string, ObservableCollection<string>> lists = GlobalData.ListControlSource;
             LocaleList = lists["Locale"];
             SeasonList = lists["Season"];
         }

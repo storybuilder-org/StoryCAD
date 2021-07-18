@@ -12,6 +12,7 @@
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Controls\Conflict.xaml" />
+    <None Remove="Services\Dialogs\Tools\ConflictDialog.xaml" />
   </ItemGroup>
 
   <ItemGroup>
@@ -45,6 +46,9 @@
   <ItemGroup>
     <Page Update="Controls\Conflict.xaml">
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="Services\Dialogs\Tools\ConflictDialog.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
     </Page>
   </ItemGroup>
 

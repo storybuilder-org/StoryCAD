@@ -5,6 +5,17 @@
     xmlns:local="using:StoryBuilder.Views"
     xmlns:usercontrols="using:StoryBuilder.Controls" >
 
+    <Page.Resources>
+        <CommandBarFlyout x:Key="ConflictFlyout" Placement="Right" x:Name="ConflictFlyout" >
+            <CommandBarFlyout.PrimaryCommands>
+                <AppBarButton Icon="Help" Command="{x:Bind ShellVm.ConflictCommand, Mode=OneWay}" >
+                    <ToolTipService.ToolTip>
+                        <ToolTip Content="Conflict Finder"></ToolTip>
+                    </ToolTipService.ToolTip>
+                </AppBarButton>
+            </CommandBarFlyout.PrimaryCommands>
+        </CommandBarFlyout>
+    </Page.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -39,7 +50,9 @@
                               SelectedItem="{x:Bind ProblemVm.ProblemSource, Mode=TwoWay}" />
                 </Grid>
             </PivotItem>
-            <PivotItem Header="Protagonist">
+            <PivotItem Header="Protagonist"     
+                       ContextFlyout="{StaticResource ConflictFlyout}" >
+                <!--="Conflict_ContextRequested" -->
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -57,10 +70,7 @@
                     <ComboBox Header="Motivation" Grid.Row="2" IsEditable="True"
                               MinWidth="300" ItemsSource="{x:Bind ProblemVm.MotiveList}"
                               SelectedItem="{x:Bind ProblemVm.ProtMotive, Mode=TwoWay}" />
-                    <ComboBox Header="Conflict" Grid.Row="3" IsEditable="True" MinWidth="400" 
-                              ItemsSource="{x:Bind ProblemVm.ConflictList}"
-                              SelectedItem="{x:Bind ProblemVm.ProtConflict, Mode=TwoWay}" />
-                    <usercontrols:Conflict Grid.Row="4" MinWidth="400" />
+                    <TextBox Header="Conflict" MinWidth="400" Text="{x:Bind ProblemVm.ProtConflict, Mode=TwoWay}" />
                 </Grid>
             </PivotItem>
             <PivotItem Header="Antagonist">

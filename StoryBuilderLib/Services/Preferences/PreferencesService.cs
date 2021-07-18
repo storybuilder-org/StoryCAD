@@ -31,7 +31,7 @@ namespace StoryBuilder.Services.Preferences
                     model.InstallationDirectory = path;
                 }
                 await loader.UpdateFile();
-                story.Preferences = model;
+                GlobalData.Preferences = model;
             }
             catch (Exception ex)
             {

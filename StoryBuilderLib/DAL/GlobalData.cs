@@ -1,16 +1,17 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using StoryBuilder.Models.Tools;
+using Microsoft.UI.Xaml;
 
 namespace StoryBuilder.DAL
 {
     /// <summary>
-    /// StaticData provides access to the application data provided by the
-    /// DAL loader classes ListLoader, ControlLoader, and ToolLoader.
+    /// GlobalData provides access to the application data provided by the
+    /// DAL loader classes ListLoader, ControlLoader, and ToolLoader, 
     /// 
-    /// It also provides acces the Preferences instance and a few other items.
+    /// It also provides acces the Preferences instance and other global items.
     /// </summary>
-    public static class StaticData
+    public static class GlobalData
     {
         /// The ComboBox and ListBox source bindings in viewmodels point to lists in this Dictionary. 
         /// Each list has a unique key related to the ComboBox or ListBox use.
@@ -29,5 +30,14 @@ namespace StoryBuilder.DAL
         public static SortedDictionary<string, DramaticSituationModel> DramaticSituationsSource;
         //TODO: Use QuotesSource
         public static ObservableCollection<Quotation> QuotesSource;
+
+        // Preferences data
+        public static PreferencesModel Preferences;
+
+        // A defect in preview WinUI 3 Win32 code is that ContentDialog controls don't have an
+        // established XamlRoot. A workaround is to assign the dialog's XamlRoot to 
+        // the root of a containing page. 
+        // The Shell page's XamlRoot is stored here and accessed wherever needed. 
+        public static XamlRoot XamlRoot;
     }
 }

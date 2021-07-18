@@ -75,7 +75,6 @@
                 </AppBarButton>
             </CommandBarFlyout.PrimaryCommands>
         </CommandBarFlyout>
-
         <!-- DataTemplate for a TreeViewItem Story Node -->
         <DataTemplate x:Key="TreeViewItemDataTemplate" x:DataType="viewmodels:StoryNodeItem" >
             <muxc:TreeViewItem ItemsSource="{x:Bind Children}" 
@@ -267,6 +266,7 @@
                         <MenuFlyout>
                             <MenuFlyoutItem Text="Key Questions" Command="{x:Bind ShellVm.KeyQuestionsCommand, Mode=OneWay}" />
                             <MenuFlyoutItem Text="Topic Information" Command="{x:Bind ShellVm.TopicsCommand, Mode=OneWay}" />
+                            <MenuFlyoutItem Text="Conflict Builder" Command="{x:Bind ShellVm.ConflictCommand, Mode=OneWay}" />
                             <MenuFlyoutSubItem Text="Characterization Aids">
                                 <MenuFlyoutItem Text="Character Relationships" />
                                 <MenuFlyoutItem Text="Virtues and Vices" />

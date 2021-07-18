@@ -54,12 +54,12 @@ namespace StoryBuilder.ViewModels.Tools
         {
             MasterPlotNames = new ObservableCollection<string>();
             MasterPlots = new Dictionary<string,MasterPlotModel>();
-            foreach (MasterPlotModel plot in StaticData.MasterPlotsSource)
+            foreach (MasterPlotModel plot in GlobalData.MasterPlotsSource)
             { 
                 MasterPlotNames.Add(plot.MasterPlotName);
                 MasterPlots.Add(plot.MasterPlotName, plot);
             }
-            MasterPlotName = StaticData.MasterPlotsSource[0].MasterPlotName;
+            MasterPlotName = GlobalData.MasterPlotsSource[0].MasterPlotName;
         }
 
         #endregion

@@ -1,6 +1,7 @@
 ﻿using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using StoryBuilder.Controllers;
+using StoryBuilder.DAL;
 using StoryBuilder.Models.Tools;
 
 namespace StoryBuilder.ViewModels.Tools
@@ -109,8 +110,7 @@ namespace StoryBuilder.ViewModels.Tools
 
         public PreferencesViewModel()
         {
-            var story = Ioc.Default.GetService<StoryController>();
-            _model = story.Preferences;
+            _model = GlobalData.Preferences;
         }
 
         #endregion

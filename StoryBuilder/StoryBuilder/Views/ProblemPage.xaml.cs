@@ -1,4 +1,6 @@
-﻿using Microsoft.UI.Xaml.Controls;
+﻿using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Input;
+using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using StoryBuilder.ViewModels;
 
@@ -11,7 +13,9 @@ namespace StoryBuilder.Views
     /// </summary>
     public sealed partial class ProblemPage : BindablePage
     {
-        public ProblemViewModel ProblemVm;  
+        public ProblemViewModel ProblemVm; 
+        public ShellViewModel ShellVm => Ioc.Default.GetService<ShellViewModel>();
+
 
         public ProblemPage()
         {
@@ -19,5 +23,12 @@ namespace StoryBuilder.Views
             this.InitializeComponent();
             this.DataContext = ProblemVm;
         }
+
+        //private void Conflict_ContextRequested(UIElement sender, ContextRequestedEventArgs args)
+        //{
+        //    FlyoutShowOptions myOption = new FlyoutShowOptions();
+        //    myOption.ShowMode = FlyoutShowMode.Transient;
+        //    ConflictCommandBarFlyout.ShowAt(NavigationTree, myOption);
+        //}
     }
 }

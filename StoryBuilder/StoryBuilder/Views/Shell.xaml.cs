@@ -8,6 +8,7 @@ using StoryBuilder.Services.Logging;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls.Primitives;
+using StoryBuilder.DAL;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -46,8 +47,7 @@ namespace StoryBuilder.Views
             // The Shell_Loaded event is processed in order to obtain and save the XamlRool  
             // and pass it on to ContentDialogs as a WinUI work-around. See
             // https://docs.microsoft.com/en-us/windows/winui/api/microsoft.ui.xaml.controls.contentdialog?view=winui-3.0-preview
-            StoryController controller = Ioc.Default.GetService<StoryController>();
-            controller.XamlRoot = Content.XamlRoot;
+            GlobalData.XamlRoot = Content.XamlRoot;
             ShellVm.ShowHomePage();
         }
 

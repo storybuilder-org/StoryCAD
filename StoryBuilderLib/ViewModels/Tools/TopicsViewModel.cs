@@ -58,7 +58,7 @@ namespace StoryBuilder.ViewModels.Tools
         {
             if (topicName.Equals(string.Empty))
                 return;
-            _topic = StaticData.TopicsSource[TopicName];
+            _topic = GlobalData.TopicsSource[TopicName];
             SubTopicNames.Clear();
             SubTopicNotes.Clear();
             foreach (SubTopicModel model in _topic.SubTopics) 
@@ -94,12 +94,12 @@ namespace StoryBuilder.ViewModels.Tools
         #region Constructor
         public TopicsViewModel()
         {
-            TopicNames = new ObservableCollection<string>(StaticData.TopicsSource.Keys);
+            TopicNames = new ObservableCollection<string>(GlobalData.TopicsSource.Keys);
             SubTopicNames = new ObservableCollection<string>();
             SubTopicNotes = new ObservableCollection<string>();
 
             TopicName = TopicNames[0];
-            _topic = StaticData.TopicsSource[TopicName];
+            _topic = GlobalData.TopicsSource[TopicName];
             TopicName = _topic.TopicName;
         }
         #endregion

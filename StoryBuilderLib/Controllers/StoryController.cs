@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using Windows.Storage;
+﻿using Windows.Storage;
 using Microsoft.UI.Xaml;
 using StoryBuilder.Models;
 using StoryBuilder.Models.Tools;
@@ -8,6 +6,7 @@ using StoryBuilder.ViewModels.Tools;
 
 namespace StoryBuilder.Controllers
 {
+    //TODO: Chang description to describe its role as Application Automation
     /// <summary>
     /// Copyright 2019 Seven Valleys Software
     /// All Rights Reserved
@@ -15,8 +14,7 @@ namespace StoryBuilder.Controllers
     /// The StoryController class mediates between StoryModel and the various
     /// ViewModels.
     /// </summary>
-    //TODO: Rename and relocate as StoryService, a microservice (possibly) 
-    /* Much of this method (Add, Update, Show methods, etc) has been moved
+       /* Much of this method (Add, Update, Show methods, etc) has been moved
        to the ViewModels. Others of this have been moved to the ShellViewModel.
        The mediation between the StoryModel and viewmodels mentioned above should be
        eliminated. What's left is some miscellaneous stuff. If there's a need,
@@ -26,22 +24,14 @@ namespace StoryBuilder.Controllers
     {
         #region public Fields and Properties
 
-        // The currently open and active StoryModel instance. 
+        // The currently open and active StoryModel instance. Null if no 
+        // StoryModel is open.
         public StoryModel StoryModel;
-
-        public PreferencesModel Preferences;
-        
-        // A defect in preview WinUI 3 Win32 code is that ContentDialog controls don't have an
-        // established XamlRoot. A workaround is to assign the dialog's XamlRoot to 
-        // the root of a containing page. 
-        // The Shell page's XamlRoot is stored here and accessed wherever needed. 
-        public XamlRoot XamlRoot;
 
         // File references. These are used to coordinate LoadModel()
         // and SaveModel() behavior in Story Element ViewModels and 
         // Open, Save, and SaveAs behavior in the ShellViewModel.
         // File and folder data
-        public string PreferencesFile;
         public StorageFolder ProjectFolder;
         public StorageFolder FilesFolder;
         public StorageFile ProjectFile;
@@ -84,8 +74,6 @@ namespace StoryBuilder.Controllers
 
         public StoryController()
         {
-            Preferences = new PreferencesModel();
-            //ListControlSource = new Dictionary<string, ObservableCollection<string>>();
         }
 
         #endregion
