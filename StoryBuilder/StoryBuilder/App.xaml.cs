@@ -23,6 +23,7 @@ using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using NavigationService = StoryBuilder.Services.Navigation.NavigationService;
 using StoryBuilder.Controllers;
 using StoryBuilder.DAL;
+using StoryBuilder.Models;
 using StoryBuilder.Models.Tools;
 using StoryBuilder.Services.Installation;
 using StoryBuilder.Services.Logging;
@@ -237,7 +238,7 @@ namespace StoryBuilder
         {
             try
             {
-                _log.Log(LogLevel.Info, "Loading Controls.ini data");
+                _log.Log(LogLevel.Info, "Loading Lists.ini data");
                 ListLoader loader = Ioc.Default.GetService<ListLoader>();
                 GlobalData.ListControlSource = await loader.Init(path);
                 _log.Log(LogLevel.Info,
@@ -245,7 +246,7 @@ namespace StoryBuilder
             }
             catch (Exception ex)
             {
-                _log.LogException(LogLevel.Error, ex, "Error loading Controls.ini");
+                _log.LogException(LogLevel.Error, ex, "Error loading Lists.ini");
                 AbortApp();
             }
         }

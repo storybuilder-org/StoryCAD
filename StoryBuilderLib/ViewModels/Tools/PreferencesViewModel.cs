@@ -1,7 +1,7 @@
 ﻿using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using StoryBuilder.Controllers;
-using StoryBuilder.DAL;
+using StoryBuilder.Models;
 using StoryBuilder.Models.Tools;
 
 namespace StoryBuilder.ViewModels.Tools

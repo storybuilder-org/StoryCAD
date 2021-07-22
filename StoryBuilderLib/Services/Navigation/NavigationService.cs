@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using StoryBuilder.Models;
 
 namespace StoryBuilder.Services.Navigation
 {
@@ -224,6 +225,7 @@ namespace StoryBuilder.Services.Navigation
                 }
 
                 frame.Navigate(_pagesByKey[pageKey], parameter);
+                GlobalData.PageKey = pageKey;
             }
         }
 

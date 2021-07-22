@@ -6,8 +6,9 @@ using System.Threading.Tasks;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml;
 using StoryBuilder.Controllers;
-using StoryBuilder.DAL;
 using StoryBuilder.Services.Logging;
+using StoryBuilder.DAL;
+using StoryBuilder.Models;
 using StoryBuilder.Models.Tools;
 
 namespace StoryBuilder.Services.Preferences

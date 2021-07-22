@@ -3,7 +3,7 @@ using System.Collections.ObjectModel;
 using StoryBuilder.Models.Tools;
 using Microsoft.UI.Xaml;
 
-namespace StoryBuilder.DAL
+namespace StoryBuilder.Models
 {
     /// <summary>
     /// GlobalData provides access to the application data provided by the
@@ -16,6 +16,11 @@ namespace StoryBuilder.DAL
         /// The ComboBox and ListBox source bindings in viewmodels point to lists in this Dictionary. 
         /// Each list has a unique key related to the ComboBox or ListBox use.
         public static Dictionary<string, ObservableCollection<string>> ListControlSource;
+
+        /// Tools that copy data into StoryElements must access and update the viewmodel currently 
+        /// active viewmodel at the time the tool is invoked. The viewmodel type is identified
+        /// by the navigation service page key.
+        public static string PageKey;
         /// <summary>
         /// Some controls and all tools have their own specific data model. The following 
         /// data types hold data for user controls and tool forms.

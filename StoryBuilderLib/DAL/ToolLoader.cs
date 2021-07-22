@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using StoryBuilder.Controllers;
+using StoryBuilder.Models;
 using StoryBuilder.Models.Tools;
 using StoryBuilder.Services.Logging;
 using System.Collections.ObjectModel;

@@ -3,8 +3,8 @@ using System.Collections.ObjectModel;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 using StoryBuilder.Controllers;
+using StoryBuilder.Models;
 using StoryBuilder.Models.Tools;
-using StoryBuilder.DAL;
 
 namespace StoryBuilder.ViewModels.Tools
 {

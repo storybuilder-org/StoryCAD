@@ -2,15 +2,11 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using System;
-using System.IO;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using NavigationService = StoryBuilder.Services.Navigation.NavigationService;
 using StoryBuilder.Controllers;
 using StoryBuilder.DAL;
-using StoryBuilder.Models.Tools;
+using StoryBuilder.Models;
 using StoryBuilder.Services.Installation;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.Services.Preferences;
@@ -19,7 +15,6 @@ using StoryBuilder.Services.Search;
 using StoryBuilder.ViewModels;
 using StoryBuilder.ViewModels.Tools;
 using Windows.Storage;
-using Windows.UI.Text.Core;
 
 namespace StoryBuilderTests
 {

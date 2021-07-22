@@ -1,7 +1,7 @@
 ﻿using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System.Collections.Generic;
-using StoryBuilder.DAL;
+using StoryBuilder.Models;
 using StoryBuilder.Models.Tools;
 using StoryBuilder.ViewModels;
 

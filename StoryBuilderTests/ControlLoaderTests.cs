@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using StoryBuilder.Controllers;
 using StoryBuilder.DAL;
-using Windows.Storage;
+using StoryBuilder.Models;
 
 namespace StoryBuilderTests
 {
