@@ -1,7 +1,4 @@
-﻿using System;
-using System.Reflection.Emit;
-
-namespace StoryBuilder.Models.Tools
+﻿namespace StoryBuilder.Models.Tools
 {
     public class DramaticSituationModel
     {

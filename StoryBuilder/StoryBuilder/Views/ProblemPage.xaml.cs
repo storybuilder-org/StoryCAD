@@ -1,7 +1,4 @@
-﻿using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.Toolkit.Mvvm.DependencyInjection;
+﻿using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using StoryBuilder.ViewModels;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
@@ -13,7 +10,7 @@ namespace StoryBuilder.Views
     /// </summary>
     public sealed partial class ProblemPage : BindablePage
     {
-        public ProblemViewModel ProblemVm; 
+        public ProblemViewModel ProblemVm;
         public ShellViewModel ShellVm => Ioc.Default.GetService<ShellViewModel>();
 
 

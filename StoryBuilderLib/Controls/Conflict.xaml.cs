@@ -1,9 +1,8 @@
 ﻿using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using System.Collections.Generic;
 using StoryBuilder.Models;
 using StoryBuilder.Models.Tools;
-using StoryBuilder.ViewModels;
+using System.Collections.Generic;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -16,7 +15,7 @@ namespace StoryBuilder.Controls
         private string category;
         private string subCategory;
         private ConflictCategoryModel model;
-        private string example;
+        public string ExampleText { get; set; }
 
         public Conflict()
         {
@@ -25,7 +24,7 @@ namespace StoryBuilder.Controls
 
         private void Category_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            category = (string) Category.Items[Category.SelectedIndex];
+            category = (string)Category.Items[Category.SelectedIndex];
             model = ConflictTypes[category];
             SubCategory.ItemsSource = model.SubCategories;
             SubCategory.SelectedIndex = -1;
@@ -43,7 +42,7 @@ namespace StoryBuilder.Controls
 
         private void Example_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            example = (string) Example.SelectedItem;
+            ExampleText = (string)Example.SelectedItem;
         }
 
         private void Example_Loaded(object sender, RoutedEventArgs e)

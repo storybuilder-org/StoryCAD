@@ -1,17 +1,17 @@
-﻿using System;
+﻿using Microsoft.Toolkit.Mvvm.ComponentModel;
+using Microsoft.Toolkit.Mvvm.DependencyInjection;
+using Microsoft.Toolkit.Mvvm.Messaging;
+using StoryBuilder.Controllers;
+using StoryBuilder.DAL;
+using StoryBuilder.Models;
+using StoryBuilder.Services.Logging;
+using StoryBuilder.Services.Messages;
+using StoryBuilder.Services.Navigation;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Threading.Tasks;
-using Microsoft.Toolkit.Mvvm.ComponentModel;
-using Microsoft.Toolkit.Mvvm.Messaging;
-using StoryBuilder.Models;
-using StoryBuilder.DAL;
-using StoryBuilder.Services.Logging;
-using StoryBuilder.Services.Messages;
-using StoryBuilder.Services.Navigation;
-using Microsoft.Toolkit.Mvvm.DependencyInjection;
-using StoryBuilder.Controllers;
 
 namespace StoryBuilder.ViewModels
 {
@@ -717,14 +717,14 @@ namespace StoryBuilder.ViewModels
 
         public CharacterViewModel()
         {
-            _story=Ioc.Default.GetService<StoryController>();
+            _story = Ioc.Default.GetService<StoryController>();
             _logger = Ioc.Default.GetService<LogService>();
             _wtr = Ioc.Default.GetService<StoryWriter>();
             _rdr = Ioc.Default.GetService<StoryReader>();
 
             PropertyChanged += OnPropertyChanged;
 
-             
+
             Dictionary<string, ObservableCollection<string>> lists = GlobalData.ListControlSource;
             RoleList = lists["Role"];
             StoryRoleList = lists["StoryRole"];

@@ -10,6 +10,10 @@
 		<Platforms>AnyCPU;x64;x86</Platforms>
 	</PropertyGroup>
 
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
+	  <NoWarn>1701;1702;IDE0090</NoWarn>
+	</PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="System.Drawing.Common" Version="5.0.0" />
   </ItemGroup>

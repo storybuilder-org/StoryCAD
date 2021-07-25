@@ -1,21 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Threading.Tasks;
-using Microsoft.Toolkit.Mvvm.ComponentModel;
+﻿using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
-using Microsoft.Toolkit.Mvvm.Messaging;
 using Microsoft.Toolkit.Mvvm.Input;
+using Microsoft.Toolkit.Mvvm.Messaging;
 using StoryBuilder.Controllers;
 using StoryBuilder.DAL;
 using StoryBuilder.Models;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.Services.Messages;
 using StoryBuilder.Services.Navigation;
-using Microsoft.UI.Xaml.Data;
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Threading.Tasks;
 
 namespace StoryBuilder.ViewModels
 {
@@ -107,7 +104,7 @@ namespace StoryBuilder.ViewModels
         }
 
         private string _sceneType;
-        public string SceneType 
+        public string SceneType
         {
             get => _sceneType;
             set => SetProperty(ref _sceneType, value);
@@ -148,7 +145,7 @@ namespace StoryBuilder.ViewModels
         }
 
         private ObservableCollection<StoryElement> _castMembers;
-        public ObservableCollection<StoryElement> CastMembers 
+        public ObservableCollection<StoryElement> CastMembers
         {
             get => _castMembers;
             set => SetProperty(ref _castMembers, value);
@@ -158,7 +155,7 @@ namespace StoryBuilder.ViewModels
         public string NewCastMember
         {
             get => _newCastMember;
-            set 
+            set
             {
                 if (CastMemberExists(value))
                 {
@@ -167,7 +164,7 @@ namespace StoryBuilder.ViewModels
                 }
                 SetProperty(ref _newCastMember, value);
                 StoryElement element = StringToStoryElement(value);
-                string msg = String.Format("New cast member selected",element.Name);
+                string msg = String.Format("New cast member selected", element.Name);
                 var smsg = new StatusMessage(msg, 200);
                 Messenger.Send(new StatusChangedMessage(smsg));
             }
@@ -234,14 +231,14 @@ namespace StoryBuilder.ViewModels
         }
 
         private string _significance;
-        public string Significance  
+        public string Significance
         {
             get => _significance;
             set => SetProperty(ref _significance, value);
         }
 
         private string _realization;
-        public string Realization   
+        public string Realization
         {
             get => _realization;
             set => SetProperty(ref _realization, value);
@@ -357,17 +354,17 @@ namespace StoryBuilder.ViewModels
         #endregion
 
         #region Relay Commands
-       
+
         public RelayCommand AddCastCommand { get; }
         public RelayCommand RemoveCastCommand { get; }
-        
+
         #endregion
 
         #region Methods
 
         public async Task Activate(object parameter)
         {
-            Model = (PlotPointModel) parameter;
+            Model = (PlotPointModel)parameter;
             await LoadModel();   // Load the ViewModel from the Story
         }
 
@@ -414,7 +411,7 @@ namespace StoryBuilder.ViewModels
             Outcome = Model.Outcome;
             Emotion = Model.Emotion;
             NewGoal = Model.NewGoal;
-            
+
             // Read RTF files
             Remarks = await _rdr.GetRtfText(Model.Remarks, Uuid);
 
@@ -424,7 +421,7 @@ namespace StoryBuilder.ViewModels
             Realization = await _rdr.GetRtfText(Model.Realization, Uuid);
 
             Review = await _rdr.GetRtfText(Model.Review, Uuid);
-            
+
             Notes = await _rdr.GetRtfText(Model.Notes, Uuid);
 
             Changed = false;

@@ -20,7 +20,7 @@ namespace StoryBuilder.Controls
     /// (esp. note Rob Caplan's comment at the end, which is not handled in the provided code.)
     /// https://social.msdn.microsoft.com/Forums/en-US/f9a83d4e-26e9-476b-8818-7ccdf91a2341/richeditbox-mvvm-pattern?forum=winappswithcsharp
     /// </summary>
-    public class RichEditBoxExtended : RichEditBox 
+    public class RichEditBoxExtended : RichEditBox
     {
         public static readonly DependencyProperty RtfTextProperty =
             DependencyProperty.Register(
@@ -36,7 +36,7 @@ namespace StoryBuilder.Controls
 
         public string RtfText
         {
-            get { return (string) GetValue(RtfTextProperty); }
+            get { return (string)GetValue(RtfTextProperty); }
             set { SetValue(RtfTextProperty, value); }
         }
 

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace StoryBuilder.Services.Dialogs
+﻿namespace StoryBuilder.Services.Dialogs
 {
-    public enum DupProjectResult {Replace, Cancel}
+    public enum DupProjectResult { Replace, Cancel }
 }

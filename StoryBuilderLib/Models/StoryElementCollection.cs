@@ -2,9 +2,6 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace StoryBuilder.Models
 {
@@ -48,7 +45,7 @@ namespace StoryBuilder.Models
                     //TODO: Assert that NeewItems count is always 1, or make this a loop
                     element = (StoryElement)e.NewItems[0];
                     StoryElementGuids.Add(element.Uuid, element);
-                    switch (element.Type) 
+                    switch (element.Type)
                     {
                         case StoryItemType.Character:
                             Characters.Add(element);
@@ -70,7 +67,7 @@ namespace StoryBuilder.Models
                 case NotifyCollectionChangedAction.Remove:
                     //TODO: Assert that OldItems count is always 1, or make this a loop
                     element = (StoryElement)e.OldItems[0];
-                    StoryElementGuids.Remove(element.Uuid); 
+                    StoryElementGuids.Remove(element.Uuid);
                     switch (element.Type)
                     {
                         case StoryItemType.Character:

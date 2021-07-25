@@ -1,10 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Collections.Specialized;
-using System.Drawing.Text;
 using StoryBuilder.Models.Tools;
 using StoryBuilder.ViewModels;
+using System.Collections.ObjectModel;
 
 //using StoryBuilder.Models.Tools;
 
@@ -61,7 +57,7 @@ namespace StoryBuilder.Models
             NarratorView = new ObservableCollection<StoryNodeItem>();
 
             RelationList = new ObservableCollection<CharacterRelationshipsModel>();
-            
+
             Changed = false;
         }
         #endregion

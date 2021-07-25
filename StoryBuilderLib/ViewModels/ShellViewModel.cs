@@ -1,35 +1,33 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Runtime.InteropServices;
-using Windows.Storage;
-using Windows.Storage.Pickers;
-using Microsoft.Toolkit.Mvvm.ComponentModel;
-using Microsoft.Toolkit.Mvvm.Input;
+﻿using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
+using Microsoft.Toolkit.Mvvm.Input;
 using Microsoft.Toolkit.Mvvm.Messaging;
+using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Media;
 using StoryBuilder.Controllers;
 using StoryBuilder.DAL;
 using StoryBuilder.Models;
 using StoryBuilder.Models.Tools;
 using StoryBuilder.Services.Dialogs;
 using StoryBuilder.Services.Dialogs.Tools;
+using StoryBuilder.Services.Help;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.Services.Messages;
 using StoryBuilder.Services.Navigation;
 using StoryBuilder.Services.Scrivener;
 using StoryBuilder.Services.Search;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Threading.Tasks;
+using Windows.Storage;
+using Windows.Storage.Pickers;
 using WinRT;
 using GuidAttribute = System.Runtime.InteropServices.GuidAttribute;
-using StoryBuilder.Services.Help;
-using System.Drawing;
-using Microsoft.UI;
 
 namespace StoryBuilder.ViewModels
 {
@@ -168,8 +166,8 @@ namespace StoryBuilder.ViewModels
         private string _title;
         public string Title
         {
-            get =>_title; 
-            set => SetProperty(ref _title, value); 
+            get => _title;
+            set => SetProperty(ref _title, value);
         }
 
         /// <summary>
@@ -181,8 +179,8 @@ namespace StoryBuilder.ViewModels
         private bool _isPaneOpen = true;
         public bool IsPaneOpen
         {
-            get => _isPaneOpen; 
-            set => SetProperty(ref _isPaneOpen, value);  
+            get => _isPaneOpen;
+            set => SetProperty(ref _isPaneOpen, value);
         }
 
         /// <summary>
@@ -268,7 +266,7 @@ namespace StoryBuilder.ViewModels
 
         // Status Bar properties
 
-        public readonly ObservableCollection<string> ViewList = new ObservableCollection<string>();
+        public readonly ObservableCollection<string> ViewList = new();
 
         private string _selectedView;
         public string SelectedView
@@ -306,7 +304,7 @@ namespace StoryBuilder.ViewModels
         }
 
         private Windows.UI.Color _changeStatusColor;
-        public Windows.UI.Color ChangeStatusColor 
+        public Windows.UI.Color ChangeStatusColor
         {
             get => _changeStatusColor;
             set => SetProperty(ref _changeStatusColor, value);
@@ -366,7 +364,7 @@ namespace StoryBuilder.ViewModels
             }
         }
 
-        public void ShowHomePage() 
+        public void ShowHomePage()
         {
             var nav = Ioc.Default.GetService<NavigationService>();
             nav.NavigateTo(SplitViewFrame, HomePage);
@@ -386,7 +384,7 @@ namespace StoryBuilder.ViewModels
         }
         private void TogglePane()
         {
-            Logger.Log(LogLevel.Trace, string.Format("TogglePane from {0} to {1}",IsPaneOpen,!IsPaneOpen));
+            Logger.Log(LogLevel.Trace, string.Format("TogglePane from {0} to {1}", IsPaneOpen, !IsPaneOpen));
             IsPaneOpen = !IsPaneOpen;
         }
 
@@ -445,7 +443,7 @@ namespace StoryBuilder.ViewModels
         {
             _canExecuteCommands = false;
             Logger.Log(LogLevel.Info, "Executing NewFile command");
-            NewProjectDialog dialog = new NewProjectDialog();
+            NewProjectDialog dialog = new();
             dialog.XamlRoot = GlobalData.XamlRoot;
             var result = await dialog.ShowAsync();
             if (result == ContentDialogResult.Primary)
@@ -468,10 +466,12 @@ namespace StoryBuilder.ViewModels
                     }
 
                     ResetModel();
-                     var overview = new OverviewModel("Working Title", StoryModel);
-                    var overviewNode = new StoryNodeItem(overview, null);
-                    overviewNode.IsExpanded = true;
-                    overviewNode.IsRoot = true;
+                    var overview = new OverviewModel("Working Title", StoryModel);
+                    var overviewNode = new StoryNodeItem(overview, null)
+                    {
+                        IsExpanded = true,
+                        IsRoot = true
+                    };
                     StoryModel.ExplorerView.Add(overviewNode);
                     TrashCanModel trash = new TrashCanModel(StoryModel);
                     StoryNodeItem trashNode = new StoryNodeItem(trash, null);
@@ -490,30 +490,32 @@ namespace StoryBuilder.ViewModels
                             break;
                         case "Empty Folders":
                             StoryElement problems = new FolderModel("Problems", StoryModel);
-                            StoryNodeItem problemsNode = new StoryNodeItem(problems, overviewNode);
+                            StoryNodeItem problemsNode = new(problems, overviewNode);
                             StoryElement characters = new FolderModel("Characters", StoryModel);
-                            StoryNodeItem charactersNode = new StoryNodeItem(characters, overviewNode);
+                            StoryNodeItem charactersNode = new(characters, overviewNode);
                             StoryElement settings = new FolderModel("Settings", StoryModel);
-                            StoryNodeItem settingsNode = new StoryNodeItem(settings, overviewNode);
+                            StoryNodeItem settingsNode = new(settings, overviewNode);
                             StoryElement plotpoints = new FolderModel("Plot Points", StoryModel);
-                            StoryNodeItem plotpointsNode = new StoryNodeItem(plotpoints, overviewNode); 
+                            StoryNodeItem plotpointsNode = new(plotpoints, overviewNode);
                             break;
                         case "External/Internal Problems":
                             StoryElement externalProblem = new ProblemModel("External Problem", StoryModel);
-                            StoryNodeItem externalProblemNode = new StoryNodeItem(externalProblem, overviewNode);
+                            StoryNodeItem externalProblemNode = new(externalProblem, overviewNode);
                             StoryElement internalProblem = new ProblemModel("Internal Problem", StoryModel);
-                            StoryNodeItem internalProblemNode = new StoryNodeItem(internalProblem, overviewNode);
+                            StoryNodeItem internalProblemNode = new(internalProblem, overviewNode);
                             break;
                         case "Protagonist/Antagonist":
                             StoryElement protagonist = new CharacterModel("Protagonist", StoryModel);
-                            StoryNodeItem protagonistNode = new StoryNodeItem(protagonist, overviewNode);
+                            StoryNodeItem protagonistNode = new(protagonist, overviewNode);
                             StoryElement antagonist = new CharacterModel("Antagonist", StoryModel);
-                            StoryNodeItem antagonistNode = new StoryNodeItem(antagonist, overviewNode);
+                            StoryNodeItem antagonistNode = new(antagonist, overviewNode);
                             break;
                         case "Problems and Characters":
                             StoryElement problemsFolder = new FolderModel("Problems", StoryModel);
-                            StoryNodeItem problemsFolderNode = new StoryNodeItem(problemsFolder, overviewNode);
-                            problemsFolderNode.IsExpanded = true;
+                            StoryNodeItem problemsFolderNode = new StoryNodeItem(problemsFolder, overviewNode)
+                            {
+                                IsExpanded = true
+                            };
                             StoryElement charactersFolder = new FolderModel("Characters", StoryModel);
                             StoryNodeItem charactersFolderNode = new StoryNodeItem(charactersFolder, overviewNode);
                             charactersFolderNode.IsExpanded = true;
@@ -556,7 +558,7 @@ namespace StoryBuilder.ViewModels
 
         private async void OpenFile()
         {
-            if (StoryModel.Changed) 
+            if (StoryModel.Changed)
             {
                 await SaveModel();
                 await WriteModel();
@@ -730,7 +732,7 @@ namespace StoryBuilder.ViewModels
             try
             {
                 StatusMessage = "Save File As command executing";
-                SaveAsDialog dialog = new SaveAsDialog();
+                SaveAsDialog dialog = new();
                 dialog.XamlRoot = GlobalData.XamlRoot;
                 var vm = Ioc.Default.GetService<SaveAsViewModel>();
                 vm.ProjectName = _story.ProjectFilename;
@@ -902,7 +904,7 @@ namespace StoryBuilder.ViewModels
                     }
                 }
                 root = DataSource[1];  // trashcan 
-                foreach (StoryNodeItem node in root)
+                foreach (var node in root)
                 {
                 }
                 // foreach view
@@ -961,8 +963,9 @@ namespace StoryBuilder.ViewModels
 
         private async void Preferences()
         {
+            Logger.Log(LogLevel.Info, "Launching Preferences");
+            StatusMessage = "Updating Preferences";
             PreferencesDialog dialog = new PreferencesDialog();
-            //TODO: Replace ShellPageXamlRoot with StoryController.XamlRoot everywhere
             dialog.XamlRoot = GlobalData.XamlRoot;
             dialog.PreferencesVm.LoadModel();
             var result = await dialog.ShowAsync();
@@ -973,44 +976,65 @@ namespace StoryBuilder.ViewModels
                 PreferencesIO loader = new PreferencesIO(GlobalData.Preferences, path);
                 await loader.UpdateFile();
             }
+            Logger.Log(LogLevel.Info, "Preferences update completed");
+            StatusMessage = "Preferences updated";
             // else Cancel- exit
         }
 
         private async void KeyQuestionsTool()
         {
-            //TODO: Logging
+            Logger.Log(LogLevel.Info, "Displaying KeyQuestions tool dialog");
             if (RightTappedNode == null)
                 RightTappedNode = CurrentNode;
             KeyQuestionsDialog dialog = new KeyQuestionsDialog();
             dialog.XamlRoot = GlobalData.XamlRoot;
             dialog.KeyQuestionsVm.NextQuestion();
             await dialog.ShowAsync();
+            Logger.Log(LogLevel.Info, "KeyQuestions finished");
         }
 
         private async void TopicsTool()
         {
-            //TODO: Logging
+            Logger.Log(LogLevel.Info, "Displaying Topics tool dialog");
             if (RightTappedNode == null)
                 RightTappedNode = CurrentNode;
             TopicsDialog dialog = new TopicsDialog();
             dialog.XamlRoot = GlobalData.XamlRoot;
             await dialog.ShowAsync();
+            Logger.Log(LogLevel.Info, "Topics finished");
         }
         public async void ConflictTool()
         {
-            //TODO: Logging
+            Logger.Log(LogLevel.Info, "Displaying Conflict Finder tool dialog");
+            if (!GlobalData.PageKey.Equals(ProblemPage)) 
+            {
+                Logger.Log(LogLevel.Warn, "Conflict Finder is only valid for ProblemPage");
+                StatusMessage = "Conflict Finder is only valid for ProblemPage";
+                return;
+            }
+            ProblemViewModel pvm = Ioc.Default.GetService<ProblemViewModel>();
             if (RightTappedNode == null)
                 RightTappedNode = CurrentNode;
             ConflictDialog dialog = new ConflictDialog();
             dialog.XamlRoot = GlobalData.XamlRoot;
-            await dialog.ShowAsync();
+            var result = await dialog.ShowAsync();
+            if (result == ContentDialogResult.Primary)   // Copy to Protagonist conflict
+            {
+                pvm.ProtConflict = dialog.Conflict.ExampleText;
+            }
+            else if (result == ContentDialogResult.Secondary) // Copy to Antagonist conflict
+            {
+                pvm.AntagConflict = dialog.Conflict.ExampleText;
+            }
+            // else Cancel
+            Logger.Log(LogLevel.Info, "Conflict Finder finished");
         }
         private async void MasterPlotTool()
         {
-            //TODO: Logging
+            Logger.Log(LogLevel.Info, "Displaying MasterPlot tool dialog");
             if (RightTappedNode == null)
                 RightTappedNode = CurrentNode;
-            MasterPlotsDialog dialog = new MasterPlotsDialog();
+            MasterPlotsDialog dialog = new();
             dialog.XamlRoot = GlobalData.XamlRoot;
             var result = await dialog.ShowAsync();
             if (result == ContentDialogResult.Primary)   // Copy command
@@ -1031,11 +1055,12 @@ namespace StoryBuilder.ViewModels
                 }
             }
             // Else canceled
+            Logger.Log(LogLevel.Info, "MasterPlot finished");
         }
 
         private async void DramaticSituationsTool()
         {
-            //TODO: Logging
+            Logger.Log(LogLevel.Info, "Dislaying Dramatic Situations tool dialog");
             if (RightTappedNode == null)
                 RightTappedNode = CurrentNode;
             DramaticSituationsDialog dialog = new DramaticSituationsDialog();
@@ -1065,11 +1090,12 @@ namespace StoryBuilder.ViewModels
             RightTappedNode.IsExpanded = true;
             newNode.IsSelected = true;
             // Else canceled
+            Logger.Log(LogLevel.Info, "Dramatic Situations finished");
         }
 
         private async void StockScenesTool()
         {
-            //TODO: Logging
+            Logger.Log(LogLevel.Info, "Displaying Stock Scenes tool dialog");
             if (RightTappedNode == null)
                 RightTappedNode = CurrentNode;
             try
@@ -1093,6 +1119,7 @@ namespace StoryBuilder.ViewModels
             {
                 string msg = e.Message;
             }
+            Logger.Log(LogLevel.Info, "Stock Scenes finished");
         }
         private async void GenerateScrivenerReports()
         {
@@ -1406,7 +1433,7 @@ namespace StoryBuilder.ViewModels
         {
             //Logger.Log(LogLevel.Trace, "AddStoryElement");
             _canExecuteCommands = false;
-            string msg = string.Format("Adding StoryElement {0}",typeToAdd.ToString());
+            string msg = string.Format("Adding StoryElement {0}", typeToAdd.ToString());
             Logger.Log(LogLevel.Info, msg);
             if (RightTappedNode == null)
             {
@@ -1418,38 +1445,37 @@ namespace StoryBuilder.ViewModels
 
             if (RootNodeType(RightTappedNode) == StoryItemType.TrashCan)
             {
-                Logger.Log(LogLevel.Info,"Add StoryElement failed- can't add to TrashCan");
+                Logger.Log(LogLevel.Info, "Add StoryElement failed- can't add to TrashCan");
                 StatusMessage = "You can't add to Deleted Items";
                 _canExecuteCommands = true;
                 return;
             }
 
-            StoryNodeItem newNode = null;
             switch (typeToAdd)
             {
                 case StoryItemType.Folder:
                     FolderModel folder = new FolderModel(StoryModel);
-                    newNode = new StoryNodeItem(folder, RightTappedNode);
+                    _ = new StoryNodeItem(folder, RightTappedNode);
                     break;
                 case StoryItemType.Section:
                     SectionModel section = new SectionModel(StoryModel);
-                    newNode = new StoryNodeItem(section, RightTappedNode);
+                    _ = new StoryNodeItem(section, RightTappedNode);
                     break;
                 case StoryItemType.Problem:
                     ProblemModel problem = new ProblemModel(StoryModel);
-                    newNode = new StoryNodeItem(problem, RightTappedNode);
+                    _ = new StoryNodeItem(problem, RightTappedNode);
                     break;
                 case StoryItemType.Character:
                     CharacterModel character = new CharacterModel(StoryModel);
-                    newNode = new StoryNodeItem(character, RightTappedNode);
+                    _ = new StoryNodeItem(character, RightTappedNode);
                     break;
                 case StoryItemType.Setting:
                     SettingModel setting = new SettingModel(StoryModel);
-                    newNode = new StoryNodeItem(setting, RightTappedNode);
+                    _ = new StoryNodeItem(setting, RightTappedNode);
                     break;
                 case StoryItemType.PlotPoint:
                     PlotPointModel plotPoint = new PlotPointModel(StoryModel);
-                    newNode = new StoryNodeItem(plotPoint, RightTappedNode);
+                    _ = new StoryNodeItem(plotPoint, RightTappedNode);
                     break;
             }
 
@@ -1590,8 +1616,8 @@ namespace StoryBuilder.ViewModels
         private string _moveErrorMessage;
         public string MoveErrorMesage
         {
-            get => _moveErrorMessage; 
-            set => SetProperty(ref _moveErrorMessage, value);  
+            get => _moveErrorMessage;
+            set => SetProperty(ref _moveErrorMessage, value);
         }
 
         private bool MoveIsValid()
@@ -1673,9 +1699,9 @@ namespace StoryBuilder.ViewModels
             }
         }
 
-        private void SetCurrentView(StoryViewType view) 
+        private void SetCurrentView(StoryViewType view)
         {
-            switch (view) 
+            switch (view)
             {
                 case StoryViewType.ExplorerView:
                     DataSource = StoryModel.ExplorerView;
@@ -1816,7 +1842,7 @@ namespace StoryBuilder.ViewModels
         {
             NameChangeMessage msg = name.Value;
             CurrentNode.Name = msg.NewName;
-            switch (CurrentNode.Type) 
+            switch (CurrentNode.Type)
             {
                 case StoryItemType.Character:
                     //int charIndex = CharacterModel.CharacterNames.IndexOf(msg.OldName);
@@ -1865,7 +1891,7 @@ namespace StoryBuilder.ViewModels
             SaveAsCommand = new RelayCommand(SaveFileAs, () => _canExecuteCommands);
             CloseCommand = new RelayCommand(CloseFile, () => _canExecuteCommands);
             ExitCommand = new RelayCommand(ExitApp, () => _canExecuteCommands);
-            
+
             FilterCommand = new RelayCommand(SearchNodes, () => _canExecuteCommands);
 
             KeyQuestionsCommand = new RelayCommand(KeyQuestionsTool, () => _canExecuteCommands);
@@ -1877,7 +1903,7 @@ namespace StoryBuilder.ViewModels
             PreferencesCommand = new RelayCommand(Preferences, () => _canExecuteCommands);
 
             ReportsCommand = new RelayCommand(GenerateScrivenerReports, () => _canExecuteCommands);
-            
+
             HelpCommand = new RelayCommand(LaunchHelp, () => _canExecuteCommands);
 
             // Move StoryElement commands

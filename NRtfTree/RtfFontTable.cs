@@ -28,9 +28,7 @@
  * Description:	Tabla de Fuentes de un documento RTF.
  * ******************************************************************************/
 
-using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Net.Sgoliver.NRtfTree
 {
@@ -81,7 +79,7 @@ namespace Net.Sgoliver.NRtfTree
             /// </summary>
             public int Count
             {
-                get 
+                get
                 {
                     return fonts.Count;
                 }

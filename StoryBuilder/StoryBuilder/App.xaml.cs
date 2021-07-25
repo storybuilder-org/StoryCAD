@@ -1,38 +1,24 @@
-﻿using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Data;
-using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Navigation;
-using Microsoft.UI.Xaml.Shapes;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using System.Runtime.InteropServices;
-using System.Threading.Tasks;
-using Windows.ApplicationModel;
-using Windows.ApplicationModel.Activation;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
-using Windows.Storage;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
-using NavigationService = StoryBuilder.Services.Navigation.NavigationService;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
 using StoryBuilder.Controllers;
 using StoryBuilder.DAL;
 using StoryBuilder.Models;
 using StoryBuilder.Models.Tools;
+using StoryBuilder.Services.Help;
 using StoryBuilder.Services.Installation;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.Services.Preferences;
-using StoryBuilder.Services.Help;
 using StoryBuilder.Services.Search;
 using StoryBuilder.ViewModels;
 using StoryBuilder.ViewModels.Tools;
 using StoryBuilder.Views;
+using System;
+using System.Runtime.InteropServices;
+using System.Threading.Tasks;
+using Windows.Storage;
+using NavigationService = StoryBuilder.Services.Navigation.NavigationService;
 
 
 // To learn more about WinUI, the WinUI project structure,
@@ -162,7 +148,7 @@ namespace StoryBuilder
 
             await LoadControls(localFolder.Path, story);
 
-            await LoadLists(localFolder.Path, story);   
+            await LoadLists(localFolder.Path, story);
 
             await LoadTools(localFolder.Path, story);
 
@@ -215,7 +201,7 @@ namespace StoryBuilder
                 _log.Log(LogLevel.Info, "ConflictType Counts");
                 _log.Log(LogLevel.Info,
                     $"{GlobalData.ConflictTypes.Keys.Count} ConflictType keys created");
-                foreach (ConflictCategoryModel type in GlobalData.ConflictTypes.Values) 
+                foreach (ConflictCategoryModel type in GlobalData.ConflictTypes.Values)
                 {
                     subTypeCount += type.SubCategories.Count;
                     foreach (string subType in type.SubCategories)

@@ -18,8 +18,8 @@
                   ItemsSource="{x:Bind ConflictTypes.Keys}" />
         <ComboBox Grid.Row="1" Name="SubCategory" Header="Subcategories" MinWidth="200"
                   SelectionChanged="SubCategory_SelectionChanged" />
-        <ComboBox Grid.Row="2" Name="Example" Header="Examples" MinWidth="200" 
-                  Loaded="Example_Loaded"/>
-        <!-- SelectionChanged="Example_SelectionChanged" /-->
+        <ComboBox Grid.Row="2" Name="Example" Header="Examples" MinWidth="200"
+                  Loaded="Example_Loaded"
+                  SelectionChanged="Example_SelectionChanged" />
     </Grid>
 </UserControl>

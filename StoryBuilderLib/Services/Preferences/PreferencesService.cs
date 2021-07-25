@@ -1,15 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Toolkit.Mvvm.DependencyInjection;
+﻿using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml;
 using StoryBuilder.Controllers;
-using StoryBuilder.Services.Logging;
 using StoryBuilder.DAL;
 using StoryBuilder.Models;
 using StoryBuilder.Models.Tools;
+using StoryBuilder.Services.Logging;
+using System;
+using System.Threading.Tasks;
 
 namespace StoryBuilder.Services.Preferences
 {

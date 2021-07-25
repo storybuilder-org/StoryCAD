@@ -1,4 +1,4 @@
-﻿namespace StoryBuilder.Services.Logging 
+﻿namespace StoryBuilder.Services.Logging
 {
     public interface ILogService
     {

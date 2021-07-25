@@ -1,9 +1,9 @@
-﻿using System;
-using System.Diagnostics;
-using System.IO;
-using NLog;
+﻿using NLog;
 using NLog.Config;
 using NLog.Targets;
+using System;
+using System.Diagnostics;
+using System.IO;
 
 namespace StoryBuilder.Services.Logging
 {
@@ -57,7 +57,7 @@ namespace StoryBuilder.Services.Logging
 
                 Logger = LogManager.GetCurrentClassLogger();
             }
-            catch (Exception e) 
+            catch (Exception e)
             {
                 Debug.WriteLine(e.Message);
                 Debug.WriteLine(e.StackTrace);
@@ -66,7 +66,7 @@ namespace StoryBuilder.Services.Logging
         public LogService()
         {
             Log(LogLevel.Info, "Starting Log service");
-            Log(LogLevel.Info,"Detailed log at " + logFilePath);
+            Log(LogLevel.Info, "Detailed log at " + logFilePath);
         }
 
         public void Log(LogLevel level, string message)

@@ -28,9 +28,6 @@
  * Description:	Representa un formato de texto.
  * ******************************************************************************/
 
-using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Drawing;
 
 namespace Net.Sgoliver.NRtfTree

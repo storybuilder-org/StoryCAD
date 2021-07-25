@@ -11,7 +11,7 @@
             get; private set;
         }
 
-        public StatusMessage(string status,int timeoutMilliseconds)
+        public StatusMessage(string status, int timeoutMilliseconds)
         {
             Status = status;
             TimeoutMilliseconds = timeoutMilliseconds;

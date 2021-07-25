@@ -28,11 +28,11 @@
  * Description:	Nodo RTF especializado que contiene la información de una imagen.
  * ******************************************************************************/
 
-using System.Text;
 using Net.Sgoliver.NRtfTree.Core;
-using System.IO;
-using System.Globalization;
 using System.Drawing;
+using System.Globalization;
+using System.IO;
+using System.Text;
 
 namespace Net.Sgoliver.NRtfTree
 {
@@ -60,45 +60,45 @@ namespace Net.Sgoliver.NRtfTree
             /// <param name="node">Nodo RTF del que se obtendrán los datos de la imagen.</param>
             public ImageNode(RtfTreeNode node)
             {
-				if(node != null)
-				{
-					//Asignamos todos los campos del nodo
-					this.NodeKey = node.NodeKey;
-					this.HasParameter = node.HasParameter;
-					this.Parameter = node.Parameter;
-					this.ParentNode = node.ParentNode;
-					this.RootNode = node.RootNode;
-					this.NodeType = node.NodeType;
+                if (node != null)
+                {
+                    //Asignamos todos los campos del nodo
+                    this.NodeKey = node.NodeKey;
+                    this.HasParameter = node.HasParameter;
+                    this.Parameter = node.Parameter;
+                    this.ParentNode = node.ParentNode;
+                    this.RootNode = node.RootNode;
+                    this.NodeType = node.NodeType;
 
-					this.ChildNodes.Clear();
-					this.ChildNodes.AddRange(node.ChildNodes);
+                    this.ChildNodes.Clear();
+                    this.ChildNodes.AddRange(node.ChildNodes);
 
-					//Obtenemos los datos de la imagen como un array de bytes
-					getImageData();
-				}
+                    //Obtenemos los datos de la imagen como un array de bytes
+                    getImageData();
+                }
             }
 
             #endregion
 
             #region Propiedades
 
-			/// <summary>
-			/// Devuelve una cadena de caracteres con el contenido de la imagen en formato hexadecimal.
-			/// </summary>
-			public string HexData
-			{
-				get
-				{
-					return this.SelectSingleChildNode(RtfNodeType.Text).NodeKey;
-				}
-			}
+            /// <summary>
+            /// Devuelve una cadena de caracteres con el contenido de la imagen en formato hexadecimal.
+            /// </summary>
+            public string HexData
+            {
+                get
+                {
+                    return this.SelectSingleChildNode(RtfNodeType.Text).NodeKey;
+                }
+            }
 
             /// <summary>
             /// Devuelve el formato original de la imagen.
             /// </summary>
             public System.Drawing.Imaging.ImageFormat ImageFormat
-            { 
-                get 
+            {
+                get
                 {
                     if (this.SelectSingleChildNode("jpegblip") != null)
                         return System.Drawing.Imaging.ImageFormat.Jpeg;
@@ -215,14 +215,14 @@ namespace Net.Sgoliver.NRtfTree
 
             #region Metodos Publicos
 
-			/// <summary>
-			/// Devuelve un array de bytes con el contenido de la imagen.
-			/// </summary>
-			/// <return>Array de bytes con el contenido de la imagen.</return>
-			public byte[] GetByteData()
-			{
-				return data;
-			}
+            /// <summary>
+            /// Devuelve un array de bytes con el contenido de la imagen.
+            /// </summary>
+            /// <return>Array de bytes con el contenido de la imagen.</return>
+            public byte[] GetByteData()
+            {
+                return data;
+            }
 
             /// <summary>
             /// Guarda una imagen a fichero con el formato original.

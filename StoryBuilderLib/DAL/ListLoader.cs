@@ -11,10 +11,10 @@ namespace StoryBuilder.DAL
     {
         #region Public Methods
 
-        public async Task<Dictionary<string, ObservableCollection<string>>>  Init(string path)
+        public async Task<Dictionary<string, ObservableCollection<string>>> Init(string path)
         {
-            Dictionary<string, ObservableCollection<string>> lists = new Dictionary<string, ObservableCollection<string>>();
-            
+            Dictionary<string, ObservableCollection<string>> lists = new();
+
             StorageFolder controlFolder = await StorageFolder.GetFolderFromPathAsync(path);
             StorageFile iniFile = await controlFolder.GetFileAsync("Lists.ini");
             //See if the .INI file exists
@@ -48,6 +48,6 @@ namespace StoryBuilder.DAL
             }
             return lists;
         }
-    #endregion
+        #endregion
     }
 }

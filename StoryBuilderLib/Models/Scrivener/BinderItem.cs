@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Windows.Data.Xml.Dom;
 
 namespace StoryBuilder.Models.Scrivener
@@ -29,7 +28,7 @@ namespace StoryBuilder.Models.Scrivener
 
         public BinderItemType Type { get; set; }
 
-        public string StbUuid { get; set;}
+        public string StbUuid { get; set; }
 
         public IXmlNode Node { get; set; }
 
@@ -62,7 +61,7 @@ namespace StoryBuilder.Models.Scrivener
             Children = new List<BinderItem>();
         }
 
-        public BinderItem(int id, string uuid, BinderItemType type, string header, BinderItem parent, string created, string modified, string stbUuid) 
+        public BinderItem(int id, string uuid, BinderItemType type, string header, BinderItem parent, string created, string modified, string stbUuid)
         {
             Id = id;
             Uuid = uuid;

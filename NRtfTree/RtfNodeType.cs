@@ -28,8 +28,6 @@
  * Description:	Tipos de nodo de un árbol RTF.
  * ******************************************************************************/
 
-using System;
-
 namespace Net.Sgoliver.NRtfTree
 {
     namespace Core

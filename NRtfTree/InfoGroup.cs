@@ -78,7 +78,7 @@ namespace Net.Sgoliver.NRtfTree
                 get { return _title; }
                 set { _title = value; }
             }
-            
+
             /// <summary>
             /// Tema del documento.
             /// </summary>
@@ -96,7 +96,7 @@ namespace Net.Sgoliver.NRtfTree
                 get { return _author; }
                 set { _author = value; }
             }
-            
+
             /// <summary>
             /// Manager del autor del documento.
             /// </summary>
@@ -105,7 +105,7 @@ namespace Net.Sgoliver.NRtfTree
                 get { return _manager; }
                 set { _manager = value; }
             }
-            
+
             /// <summary>
             /// Compañía del autor del documento.
             /// </summary>
@@ -114,7 +114,7 @@ namespace Net.Sgoliver.NRtfTree
                 get { return _company; }
                 set { _company = value; }
             }
-           
+
             /// <summary>
             /// Última persona que ha realizao cambios sobre el documento.
             /// </summary>
@@ -123,7 +123,7 @@ namespace Net.Sgoliver.NRtfTree
                 get { return _operator; }
                 set { _operator = value; }
             }
-            
+
             /// <summary>
             /// Categoría del documento.
             /// </summary>
@@ -132,7 +132,7 @@ namespace Net.Sgoliver.NRtfTree
                 get { return _category; }
                 set { _category = value; }
             }
-            
+
             /// <summary>
             /// Palabras clave del documento.
             /// </summary>
@@ -141,7 +141,7 @@ namespace Net.Sgoliver.NRtfTree
                 get { return _keywords; }
                 set { _keywords = value; }
             }
-            
+
             /// <summary>
             /// Comentarios.
             /// </summary>
@@ -150,7 +150,7 @@ namespace Net.Sgoliver.NRtfTree
                 get { return _comment; }
                 set { _comment = value; }
             }
-            
+
             /// <summary>
             /// Comentarios mostrados en el cuadro de Texto "Summary Info" o "Properties" de Microsoft Word.
             /// </summary>
@@ -159,7 +159,7 @@ namespace Net.Sgoliver.NRtfTree
                 get { return _doccomm; }
                 set { _doccomm = value; }
             }
-            
+
             /// <summary>
             /// La dirección base usada en las rutas relativas de los enlaces del documento. Puede ser una ruta local o una URL.
             /// </summary>
@@ -168,7 +168,7 @@ namespace Net.Sgoliver.NRtfTree
                 get { return _hlinkbase; }
                 set { _hlinkbase = value; }
             }
-            
+
             /// <summary>
             /// Fecha/Hora de creación del documento.
             /// </summary>
@@ -177,16 +177,16 @@ namespace Net.Sgoliver.NRtfTree
                 get { return _creatim; }
                 set { _creatim = value; }
             }
-            
+
             /// <summary>
             /// Fecha/Hora de revisión del documento.
             /// </summary>
-            public DateTime RevisionTime  
+            public DateTime RevisionTime
             {
                 get { return _revtim; }
                 set { _revtim = value; }
             }
-            
+
             /// <summary>
             /// Fecha/Hora de última impresión del documento.
             /// </summary>
@@ -195,7 +195,7 @@ namespace Net.Sgoliver.NRtfTree
                 get { return _printim; }
                 set { _printim = value; }
             }
-            
+
             /// <summary>
             /// Fecha/Hora de última copia del documento.
             /// </summary>
@@ -204,7 +204,7 @@ namespace Net.Sgoliver.NRtfTree
                 get { return _buptim; }
                 set { _buptim = value; }
             }
-            
+
             /// <summary>
             /// Versión del documento.
             /// </summary>
@@ -213,7 +213,7 @@ namespace Net.Sgoliver.NRtfTree
                 get { return _version; }
                 set { _version = value; }
             }
-            
+
             /// <summary>
             /// Versión interna del documento.
             /// </summary>
@@ -222,7 +222,7 @@ namespace Net.Sgoliver.NRtfTree
                 get { return _vern; }
                 set { _vern = value; }
             }
-            
+
             /// <summary>
             /// Tiempo total de edición del documento (en minutos).
             /// </summary>
@@ -231,7 +231,7 @@ namespace Net.Sgoliver.NRtfTree
                 get { return _edmins; }
                 set { _edmins = value; }
             }
-            
+
             /// <summary>
             /// Número de páginas del documento.
             /// </summary>
@@ -240,7 +240,7 @@ namespace Net.Sgoliver.NRtfTree
                 get { return _nofpages; }
                 set { _nofpages = value; }
             }
-            
+
             /// <summary>
             /// Número de palabras del documento.
             /// </summary>
@@ -249,7 +249,7 @@ namespace Net.Sgoliver.NRtfTree
                 get { return _nofwords; }
                 set { _nofwords = value; }
             }
-            
+
             /// <summary>
             /// Número de caracteres del documento.
             /// </summary>
@@ -258,7 +258,7 @@ namespace Net.Sgoliver.NRtfTree
                 get { return _nofchars; }
                 set { _nofchars = value; }
             }
-            
+
             /// <summary>
             /// Identificación interna del documento.
             /// </summary>
@@ -276,7 +276,7 @@ namespace Net.Sgoliver.NRtfTree
             /// Devuelve la representación del nodo en forma de cadena de caracteres.
             /// </summary>
             /// <returns>Representación del nodo en forma de cadena de caracteres.</returns>
-            public override string  ToString()
+            public override string ToString()
             {
                 StringBuilder str = new StringBuilder();
 

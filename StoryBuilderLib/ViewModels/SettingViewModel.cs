@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Threading.Tasks;
-using Microsoft.Toolkit.Mvvm.ComponentModel;
+﻿using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using Microsoft.Toolkit.Mvvm.Messaging;
 using StoryBuilder.Controllers;
@@ -12,6 +7,11 @@ using StoryBuilder.Models;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.Services.Messages;
 using StoryBuilder.Services.Navigation;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Threading.Tasks;
 
 namespace StoryBuilder.ViewModels
 {
@@ -242,7 +242,7 @@ namespace StoryBuilder.ViewModels
         {
             PropertyChanged -= OnPropertyChanged;
             _changeable = false;
-            if (Changed) 
+            if (Changed)
             {
                 // Story.Uuid is read-only and cannot be assigned
                 Model.Name = Name;

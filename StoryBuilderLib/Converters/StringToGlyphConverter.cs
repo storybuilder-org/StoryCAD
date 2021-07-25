@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Microsoft.UI.Xaml.Data;
+using System;
 using System.Globalization;
-using Microsoft.UI.Xaml.Data;
 
-namespace StoryBuilder.Converters 
+namespace StoryBuilder.Converters
 {
     public class StringToGlyphConverter : IValueConverter
     {
@@ -14,7 +14,7 @@ namespace StoryBuilder.Converters
             }
 
             string glyph = (value as string)?.Substring(3, 4); // for example: &#xe11b; will become e11b 
-            char font = (char) int.Parse(glyph, NumberStyles.HexNumber);
+            char font = (char)int.Parse(glyph, NumberStyles.HexNumber);
             return font;
         }
 

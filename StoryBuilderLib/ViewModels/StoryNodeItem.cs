@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using Windows.Data.Xml.Dom;
-using System.ComponentModel;
-using Microsoft.UI.Xaml;
+﻿using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using StoryBuilder.Models;
-using Microsoft.Toolkit.Mvvm.DependencyInjection;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using Windows.Data.Xml.Dom;
 
 namespace StoryBuilder.ViewModels
 {
@@ -153,9 +152,9 @@ namespace StoryBuilder.ViewModels
             }
         }
 
-        public bool IsExpanded   
-        { 
-            get => (bool) GetValue(IsExpandedProperty);
+        public bool IsExpanded
+        {
+            get => (bool)GetValue(IsExpandedProperty);
             set
             {
                 SetValue(IsExpandedProperty, value);
@@ -167,9 +166,9 @@ namespace StoryBuilder.ViewModels
         public static readonly DependencyProperty IsExpandedProperty =
             DependencyProperty.Register("IsExpanded", typeof(bool), typeof(StoryNodeItem), new PropertyMetadata(false));
 
-        public bool IsSelected  
-        { 
-            get => (bool) GetValue(IsSelectedProperty);
+        public bool IsSelected
+        {
+            get => (bool)GetValue(IsSelectedProperty);
             set
             {
                 SetValue(IsSelectedProperty, value);
@@ -313,7 +312,7 @@ namespace StoryBuilder.ViewModels
                 return;
             Parent.Children.Add(this);
         }
-         
+
         public StoryNodeItem(StoryElement node, StoryNodeItem parent)
         {
             _uuid = node.Uuid;

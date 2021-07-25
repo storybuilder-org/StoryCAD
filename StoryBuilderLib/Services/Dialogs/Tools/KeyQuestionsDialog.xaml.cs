@@ -8,8 +8,8 @@ namespace StoryBuilder.Services.Dialogs.Tools
 {
     public sealed partial class KeyQuestionsDialog
     {
-        public KeyQuestionsViewModel KeyQuestionsVm => Ioc.Default.GetService<KeyQuestionsViewModel>(); 
-  
+        public KeyQuestionsViewModel KeyQuestionsVm => Ioc.Default.GetService<KeyQuestionsViewModel>();
+
         public KeyQuestionsDialog()
         {
             InitializeComponent();

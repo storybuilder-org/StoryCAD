@@ -28,13 +28,12 @@
  * Description:	Clase para la generación de documentos RTF.
  * ******************************************************************************/
 
+using Net.Sgoliver.NRtfTree.Core;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Drawing;
 using System.Globalization;
 using System.IO;
-using Net.Sgoliver.NRtfTree.Core;
+using System.Text;
 
 namespace Net.Sgoliver.NRtfTree
 {
@@ -224,8 +223,8 @@ namespace Net.Sgoliver.NRtfTree
                         format = "jpegblip";
 
                     imgGroup.AppendChild(new RtfTreeNode(RtfNodeType.Keyword, format, false, 0));
-                    
-                    
+
+
                     imgGroup.AppendChild(new RtfTreeNode(RtfNodeType.Keyword, "picw", true, img.Width * 20));
                     imgGroup.AppendChild(new RtfTreeNode(RtfNodeType.Keyword, "pich", true, img.Height * 20));
                     imgGroup.AppendChild(new RtfTreeNode(RtfNodeType.Keyword, "picwgoal", true, width * 20));
@@ -268,10 +267,10 @@ namespace Net.Sgoliver.NRtfTree
             private void InsertFontTable()
             {
                 RtfTreeNode ftGroup = new RtfTreeNode(RtfNodeType.Group);
-                
+
                 ftGroup.AppendChild(new RtfTreeNode(RtfNodeType.Keyword, "fonttbl", false, 0));
 
-                for(int i=0; i<fontTable.Count; i++)
+                for (int i = 0; i < fontTable.Count; i++)
                 {
                     RtfTreeNode ftFont = new RtfTreeNode(RtfNodeType.Group);
                     ftFont.AppendChild(new RtfTreeNode(RtfNodeType.Keyword, "f", true, i));
@@ -327,11 +326,11 @@ namespace Net.Sgoliver.NRtfTree
                 int i = 0;
                 int code = 0;
 
-                while(i < text.Length)
+                while (i < text.Length)
                 {
                     code = Char.ConvertToUtf32(text, i);
 
-                    if(code >= 32 && code < 128)
+                    if (code >= 32 && code < 128)
                     {
                         StringBuilder s = new StringBuilder("");
 
@@ -341,7 +340,7 @@ namespace Net.Sgoliver.NRtfTree
 
                             i++;
 
-                            if(i < text.Length)
+                            if (i < text.Length)
                                 code = Char.ConvertToUtf32(text, i);
                         }
 
@@ -381,7 +380,7 @@ namespace Net.Sgoliver.NRtfTree
                     colorTable.AddColor(format.color);
                 }
             }
-            
+
             /// <summary>
             /// Inserta las claves RTF necesarias para representar el formato de texto pasado como parámetro.
             /// </summary>
@@ -444,7 +443,7 @@ namespace Net.Sgoliver.NRtfTree
                     mainGroup.AppendChild(new RtfTreeNode(RtfNodeType.Keyword, "fs", true, format.size * 2));
                     mainGroup.AppendChild(new RtfTreeNode(RtfNodeType.Keyword, "f", true, fontTable.IndexOf(format.font)));
 
-                    if(format.bold)
+                    if (format.bold)
                         mainGroup.AppendChild(new RtfTreeNode(RtfNodeType.Keyword, "b", false, 0));
 
                     if (format.italic)

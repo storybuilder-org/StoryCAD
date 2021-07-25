@@ -1,17 +1,17 @@
-﻿using System;
-using System.ComponentModel;
-using System.Collections.ObjectModel;
-using Microsoft.Toolkit.Mvvm.ComponentModel;
+﻿using Microsoft.Toolkit.Mvvm.ComponentModel;
+using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using Microsoft.Toolkit.Mvvm.Messaging;
-using StoryBuilder.Models;
+using StoryBuilder.Controllers;
 using StoryBuilder.DAL;
+using StoryBuilder.Models;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.Services.Messages;
 using StoryBuilder.Services.Navigation;
-using Microsoft.Toolkit.Mvvm.DependencyInjection;
+using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Threading.Tasks;
-using StoryBuilder.Controllers;
 
 namespace StoryBuilder.ViewModels
 {
@@ -73,7 +73,7 @@ namespace StoryBuilder.ViewModels
         public string DateCreated
         {
             get => _dateCreated;
-            set => SetProperty(ref _dateCreated, value); 
+            set => SetProperty(ref _dateCreated, value);
         }
 
         private string _author;
@@ -91,7 +91,7 @@ namespace StoryBuilder.ViewModels
             set => SetProperty(ref _dateModified, value);
         }
 
-    
+
         private string _storyIdea;
         public string StoryIdea
         {
@@ -148,7 +148,7 @@ namespace StoryBuilder.ViewModels
         }
 
         private string _voice;
-        public string Voice 
+        public string Voice
         {
             get => _voice;
             set => SetProperty(ref _voice, value);
@@ -160,7 +160,7 @@ namespace StoryBuilder.ViewModels
             get => _literaryDevice;
             set => SetProperty(ref _literaryDevice, value);
         }
-        
+
         private string _tense;
         public string Tense
         {
@@ -238,13 +238,13 @@ namespace StoryBuilder.ViewModels
 
         #endregion
 
- 
+
 
         #region Methods
 
         public async Task Activate(object parameter)
         {
-            Model = (OverviewModel) parameter;
+            Model = (OverviewModel)parameter;
             await LoadModel();
         }
 
@@ -296,7 +296,8 @@ namespace StoryBuilder.ViewModels
         {
             _changeable = false;
             PropertyChanged -= OnPropertyChanged;
-            if (Changed) {
+            if (Changed)
+            {
                 {
                     // Story.Uuid is read-only and cannot be assigned
                     Model.Name = Name;
@@ -392,7 +393,7 @@ namespace StoryBuilder.ViewModels
             //System.DateTime wrkDate = DateTime.FromOADate(0);
             //wrkDate = DateTime.Parse(Convert.ToDateTime(StoryRec.DateCreated.Value).ToString("MM/dd/yy"));
             //frmStory.DefInstance.mskDateCreated.Text = StringsHelper.Format(wrkDate, "Medium Date");
-     
+
         }
 
         #endregion

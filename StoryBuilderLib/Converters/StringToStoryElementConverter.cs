@@ -1,9 +1,8 @@
-﻿using System;
+﻿using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml.Data;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using StoryBuilder.Models;
 using StoryBuilder.ViewModels;
+using System;
 
 namespace StoryBuilder.Converters
 {
@@ -62,7 +61,7 @@ namespace StoryBuilder.Converters
             Guid guid = new Guid(value.ToString());
             if (elements.StoryElementGuids.ContainsKey(guid))
                 return elements.StoryElementGuids[guid];
-               return null;   // Not found
+            return null;   // Not found
         }
 
         /// <summary>
@@ -77,7 +76,7 @@ namespace StoryBuilder.Converters
         {
             if (value == null)
                 return string.Empty;
-            StoryElement element = (StoryElement) value;
+            StoryElement element = (StoryElement)value;
             return element.Uuid.ToString();
         }
 

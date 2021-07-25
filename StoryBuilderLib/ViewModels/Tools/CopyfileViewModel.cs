@@ -1,6 +1,6 @@
-﻿using System.Collections.ObjectModel;
-using Microsoft.Toolkit.Mvvm.ComponentModel;
+﻿using Microsoft.Toolkit.Mvvm.ComponentModel;
 using StoryBuilder.Models;
+using System.Collections.ObjectModel;
 
 namespace StoryBuilder.ViewModels.Tools
 {
@@ -22,14 +22,14 @@ namespace StoryBuilder.ViewModels.Tools
         public bool Changed
         {
             get { return _changed; }
-// ReSharper disable once ValueParameterNotUsed
+            // ReSharper disable once ValueParameterNotUsed
             set { _changed = false; }
         }
 
         public string Title
         {
-            get => _title; 
-            set => SetProperty(ref _title, value); 
+            get => _title;
+            set => SetProperty(ref _title, value);
         }
 
         #endregion
@@ -37,13 +37,13 @@ namespace StoryBuilder.ViewModels.Tools
         // Model entity collection sources
         public ObservableCollection<SettingModel> Settings
         {
-            get => _settings; 
-            set => SetProperty(ref _settings, value); 
-          }
+            get => _settings;
+            set => SetProperty(ref _settings, value);
+        }
         public ObservableCollection<CharacterModel> Characters
         {
-            get => _characters; 
-            set => SetProperty(ref _characters, value); 
+            get => _characters;
+            set => SetProperty(ref _characters, value);
         }
     }
 }

@@ -1,6 +1,4 @@
-﻿using System.Collections.ObjectModel;
-using Windows.Data.Xml.Dom;
-using StoryBuilder.Models;
+﻿using Windows.Data.Xml.Dom;
 
 namespace StoryBuilder.Models
 {
@@ -305,7 +303,7 @@ namespace StoryBuilder.Models
         }
 
 
-    // Character work data
+        // Character work data
 
         private string _work;
         public string Work

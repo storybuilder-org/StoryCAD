@@ -1,11 +1,11 @@
-﻿using System;
+﻿using Net.Sgoliver.NRtfTree.Core;
+using StoryBuilder.Models.Scrivener;
+using System;
 using System.Collections.Generic;
 using System.IO;
-using Windows.Storage;
 using System.Threading.Tasks;
 using Windows.Data.Xml.Dom;
-using Net.Sgoliver.NRtfTree.Core;
-using StoryBuilder.Models.Scrivener;
+using Windows.Storage;
 using XmlDocument = Windows.Data.Xml.Dom.XmlDocument;
 using XmlElement = Windows.Data.Xml.Dom.XmlElement;
 using XmlText = Windows.Data.Xml.Dom.XmlText;
@@ -158,7 +158,7 @@ namespace StoryBuilder.DAL
                     XmlElement value;
                     if (stbUuidNode != null)
                     {
-                        value = (XmlElement) stbUuidNode.SelectSingleNode("./Value");
+                        value = (XmlElement)stbUuidNode.SelectSingleNode("./Value");
                         if (value != null) stbUuid = value.InnerText;
                     }
                     var newNode = new BinderItem(id, uuid, type, title, parent, created, modified, stbUuid);
@@ -194,7 +194,7 @@ namespace StoryBuilder.DAL
         public XmlElement CreateFromBinder(BinderItem rootItem)
         {
             XmlElement xmlRootElement = CreateNode(rootItem);
-            RecurseBinderNode(rootItem,xmlRootElement);
+            RecurseBinderNode(rootItem, xmlRootElement);
 
             return xmlRootElement;
         }

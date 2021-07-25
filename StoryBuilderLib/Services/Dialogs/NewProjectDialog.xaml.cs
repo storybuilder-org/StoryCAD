@@ -1,13 +1,11 @@
-﻿using Microsoft.UI.Xaml;
+﻿using Microsoft.Toolkit.Mvvm.DependencyInjection;
+using Microsoft.UI.Xaml;
+using StoryBuilder.ViewModels;
 using System;
-using System.IO;
 using System.Runtime.InteropServices;
 using Windows.Storage;
 using Windows.Storage.Pickers;
-using Microsoft.Toolkit.Mvvm.DependencyInjection;
-using StoryBuilder.ViewModels;
 using WinRT;
-using Windows.Gaming.Input.ForceFeedback;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -35,7 +33,7 @@ namespace StoryBuilder.Services.Dialogs
         public string ParentFolderPath { get; set; }
         public string ProjectFolderPath { get; set; }
 
-        private async void Browse_Click(object sender, RoutedEventArgs e) 
+        private async void Browse_Click(object sender, RoutedEventArgs e)
         {
             // Find a home for the new project
             var folderPicker = new FolderPicker();

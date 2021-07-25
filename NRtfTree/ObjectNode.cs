@@ -28,10 +28,9 @@
  * Description:	Nodo RTF especializado que contiene la información de un objeto.
  * ******************************************************************************/
 
-using System;
-using System.Text;
 using Net.Sgoliver.NRtfTree.Core;
 using System.Globalization;
+using System.Text;
 
 namespace Net.Sgoliver.NRtfTree
 {
@@ -59,22 +58,22 @@ namespace Net.Sgoliver.NRtfTree
             /// <param name="node">Nodo RTF del que se obtendrán los datos de la imagen.</param>
             public ObjectNode(RtfTreeNode node)
             {
-				if(node != null)
-				{
-					//Asignamos todos los campos del nodo
-					this.NodeKey = node.NodeKey;
-					this.HasParameter = node.HasParameter;
-					this.Parameter= node.Parameter;
-					this.ParentNode = node.ParentNode;
-					this.RootNode = node.RootNode;
-					this.NodeType = node.NodeType;
+                if (node != null)
+                {
+                    //Asignamos todos los campos del nodo
+                    this.NodeKey = node.NodeKey;
+                    this.HasParameter = node.HasParameter;
+                    this.Parameter = node.Parameter;
+                    this.ParentNode = node.ParentNode;
+                    this.RootNode = node.RootNode;
+                    this.NodeType = node.NodeType;
 
-					this.ChildNodes.Clear();
-					this.ChildNodes.AddRange(node.ChildNodes);
+                    this.ChildNodes.Clear();
+                    this.ChildNodes.AddRange(node.ChildNodes);
 
-					//Obtenemos los datos del objeto como un array de bytes
-					getObjectData();
-				}
+                    //Obtenemos los datos del objeto como un array de bytes
+                    getObjectData();
+                }
             }
 
             #endregion
@@ -86,7 +85,7 @@ namespace Net.Sgoliver.NRtfTree
             /// </summary>
             public string ObjectType
             {
-                get 
+                get
                 {
                     if (this.SelectSingleChildNode("objemb") != null)
                         return "objemb";
@@ -144,43 +143,43 @@ namespace Net.Sgoliver.NRtfTree
                 }
             }
 
-			/// <summary>
-			/// Devuelve una cadena de caracteres con el contenido del objeto en formato hexadecimal.
-			/// </summary>
-			public string HexData
-			{
-				get
-				{
-					string Text = "";
+            /// <summary>
+            /// Devuelve una cadena de caracteres con el contenido del objeto en formato hexadecimal.
+            /// </summary>
+            public string HexData
+            {
+                get
+                {
+                    string Text = "";
 
-					//Buscamos el nodo "\objdata"
-					RtfTreeNode objdataNode = this.SelectSingleNode("objdata");
+                    //Buscamos el nodo "\objdata"
+                    RtfTreeNode objdataNode = this.SelectSingleNode("objdata");
 
-					//Si existe el nodo
-					if (objdataNode != null)
-					{
-						//Buscamos los datos en formato hexadecimal (último hijo del grupo de \objdata)
-						Text = objdataNode.ParentNode.LastChild.NodeKey;
-					}
+                    //Si existe el nodo
+                    if (objdataNode != null)
+                    {
+                        //Buscamos los datos en formato hexadecimal (último hijo del grupo de \objdata)
+                        Text = objdataNode.ParentNode.LastChild.NodeKey;
+                    }
 
-					return Text;				
-				}
-			}
+                    return Text;
+                }
+            }
 
             #endregion
 
-			#region Métodos Publicos
+            #region Métodos Publicos
 
-			/// <summary>
-			/// Devuelve un array de bytes con el contenido del objeto.
-			/// </summary>
-			/// <returns>Array de bytes con el contenido del objeto.</returns>
-			public byte[] GetByteData()
-			{
-				return objdata;
-			}
+            /// <summary>
+            /// Devuelve un array de bytes con el contenido del objeto.
+            /// </summary>
+            /// <returns>Array de bytes con el contenido del objeto.</returns>
+            public byte[] GetByteData()
+            {
+                return objdata;
+            }
 
-			#endregion
+            #endregion
 
             #region Métodos Privados
 

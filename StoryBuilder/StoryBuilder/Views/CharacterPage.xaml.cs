@@ -1,6 +1,4 @@
-﻿using Microsoft.UI.Xaml.Controls;
-using Microsoft.Toolkit.Mvvm.DependencyInjection;
-using StoryBuilder.Models;
+﻿using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using StoryBuilder.ViewModels;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238

@@ -28,7 +28,6 @@
  * Description:	Analizador secuencial de documentos RTF.
  * ******************************************************************************/
 
-using System;
 using System.IO;
 
 namespace Net.Sgoliver.NRtfTree
@@ -61,7 +60,7 @@ namespace Net.Sgoliver.NRtfTree
             public RtfReader(SarParser reader)
             {
                 /* Inicializados por defecto */
-				//lex = null;
+                //lex = null;
                 //tok = null;
                 //rtf = null;
 

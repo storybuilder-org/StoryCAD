@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace StoryBuilder.Models.Tools
 {
@@ -8,7 +7,7 @@ namespace StoryBuilder.Models.Tools
         public string MasterPlotName;
         public string MasterPlotNotes;
         public List<MasterPlotScene> MasterPlotScenes;
-        
+
 
         public MasterPlotModel(string name)
         {

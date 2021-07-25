@@ -28,12 +28,12 @@
  * Description:	Representa un documento RTF en forma de árbol.
  * ******************************************************************************/
 
+using Net.Sgoliver.NRtfTree.Util;
 using System;
 using System.Collections;
+using System.Drawing;
 using System.IO;
 using System.Text;
-using System.Drawing;
-using Net.Sgoliver.NRtfTree.Util;
 
 namespace Net.Sgoliver.NRtfTree
 {
@@ -44,7 +44,7 @@ namespace Net.Sgoliver.NRtfTree
         /// </summary>
         public class RtfTree
         {
-			#region Atributos privados
+            #region Atributos privados
 
             /// <summary>
             /// Nodo raíz del documento RTF.
@@ -81,11 +81,11 @@ namespace Net.Sgoliver.NRtfTree
             public RtfTree()
             {
                 //Se crea el nodo raíz del documento
-                rootNode = new RtfTreeNode(RtfNodeType.Root,"ROOT",false,0);
+                rootNode = new RtfTreeNode(RtfNodeType.Root, "ROOT", false, 0);
 
                 rootNode.Tree = this;
 
-				/* Inicializados por defecto */
+                /* Inicializados por defecto */
 
                 //Se inicializa la propiedad mergeSpecialCharacters
                 mergeSpecialCharacters = false;
@@ -157,7 +157,7 @@ namespace Net.Sgoliver.NRtfTree
             /// </summary>
             /// <param name="filePath">Ruta del fichero a generar con el documento RTF.</param>
             public void SaveRtf(string filePath)
-            { 
+            {
                 //Stream de salida
                 StreamWriter sw = new StreamWriter(filePath);
 
@@ -209,11 +209,11 @@ namespace Net.Sgoliver.NRtfTree
                 ArrayList tabla = new ArrayList();
                 String[] tablaFuentes;
 
-				//Nodo raiz del documento
-				RtfTreeNode root = this.rootNode;
+                //Nodo raiz del documento
+                RtfTreeNode root = this.rootNode;
 
-				//Grupo principal del documento
-				RtfTreeNode nprin = root.FirstChild;
+                //Grupo principal del documento
+                RtfTreeNode nprin = root.FirstChild;
 
                 //Buscamos la tabla de fuentes en el árbol
                 bool enc = false;
@@ -435,7 +435,7 @@ namespace Net.Sgoliver.NRtfTree
                     //Revision DateTime
                     if ((auxnode = this.rootNode.SelectSingleNode("revtim")) != null)
                         info.RevisionTime = parseDateTime(auxnode.ParentNode);
-                    
+
                     //Last Print Time
                     if ((auxnode = this.rootNode.SelectSingleNode("printim")) != null)
                         info.LastPrintTime = parseDateTime(auxnode.ParentNode);
@@ -499,7 +499,7 @@ namespace Net.Sgoliver.NRtfTree
                     switch (tok.Type)
                     {
                         case RtfTokenType.GroupStart:
-                            newNode = new RtfTreeNode(RtfNodeType.Group,"GROUP",false,0);
+                            newNode = new RtfTreeNode(RtfNodeType.Group, "GROUP", false, 0);
                             curNode.AppendChild(newNode);
                             curNode = newNode;
                             level++;
@@ -581,7 +581,7 @@ namespace Net.Sgoliver.NRtfTree
             private static string DecodeControlChar(int code, Encoding enc)
             {
                 //Contributed by Jan Stuchlík
-                return enc.GetString(new byte[] {(byte)code});                
+                return enc.GetString(new byte[] { (byte)code });
             }
 
             /// <summary>
@@ -631,11 +631,11 @@ namespace Net.Sgoliver.NRtfTree
                 return res.ToString();
             }
 
-			/// <summary>
-			/// Parsea una fecha con formato "\yr2005\mo12\dy2\hr22\min56\sec15"
-			/// </summary>
-			/// <param name="group">Grupo RTF con la fecha.</param>
-			/// <returns>Objeto DateTime con la fecha leida.</returns>
+            /// <summary>
+            /// Parsea una fecha con formato "\yr2005\mo12\dy2\hr22\min56\sec15"
+            /// </summary>
+            /// <param name="group">Grupo RTF con la fecha.</param>
+            /// <returns>Objeto DateTime con la fecha leida.</returns>
             private static DateTime parseDateTime(RtfTreeNode group)
             {
                 DateTime dt;

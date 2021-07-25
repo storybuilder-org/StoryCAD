@@ -149,13 +149,13 @@ namespace Net.Sgoliver.NRtfTree
                 {
                     rtf.Read();
 
-					if(c == '\\' || c == '{' || c == '}')  //Caracter especial
-					{
-						token.Type = RtfTokenType.Text;
-						token.Key = ((char)c).ToString();
-					}
-					else   //Simbolo de control
-					{
+                    if (c == '\\' || c == '{' || c == '}')  //Caracter especial
+                    {
+                        token.Type = RtfTokenType.Text;
+                        token.Key = ((char)c).ToString();
+                    }
+                    else   //Simbolo de control
+                    {
                         token.Type = RtfTokenType.Control;
                         token.Key = ((char)c).ToString();
 
@@ -173,7 +173,7 @@ namespace Net.Sgoliver.NRtfTree
                         }
 
                         //TODO: ¿Hay más símbolos de Control con parámetros?
-				    }
+                    }
 
                     return;
                 }
@@ -239,7 +239,7 @@ namespace Net.Sgoliver.NRtfTree
             {
                 int c = car;
 
-                StringBuilder Texto = new StringBuilder(((char)c).ToString(),3000000);
+                StringBuilder Texto = new StringBuilder(((char)c).ToString(), 3000000);
 
                 c = rtf.Peek();
 

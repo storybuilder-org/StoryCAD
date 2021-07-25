@@ -1,11 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using StoryBuilder.Controllers;
+﻿using StoryBuilder.Controllers;
 using StoryBuilder.Models;
 using StoryBuilder.Models.Tools;
 using StoryBuilder.Services.Logging;
+using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Threading.Tasks;
 using Windows.Storage;
 
@@ -30,7 +30,7 @@ namespace StoryBuilder.DAL
             installFolder = toolFolder.Path;
             StorageFile iniFile = await toolFolder.GetFileAsync("Tools.ini");
             lines = await FileIO.ReadLinesAsync(iniFile);
-            
+
             // Populate tool data source collections
             GlobalData.KeyQuestionsSource = LoadKeyQuestions();
             GlobalData.StockScenesSource = LoadStockScenes();
@@ -51,12 +51,15 @@ namespace StoryBuilder.DAL
             string element = string.Empty;
             string topic = string.Empty;
             Dictionary<string, List<KeyQuestionModel>> questions = new Dictionary<string, List<KeyQuestionModel>>();
-            foreach (string line in lines) {
+            foreach (string line in lines)
+            {
                 ParseLine(line, ref section, ref keyword, ref keyvalue);
                 //   Process the parsed values
-                switch (section) {
+                switch (section)
+                {
                     case "Key Questions":
-                        switch (keyword) {
+                        switch (keyword)
+                        {
                             case "$SECTION$":
                                 break;
                             case "Element":  // new list of questions for each StoryElement (Overview, Problem, etc.)
@@ -72,7 +75,10 @@ namespace StoryBuilder.DAL
                                 {
                                     current = new KeyQuestionModel
                                     {
-                                        Key = questionKey, Element = element, Topic = topic, Question = keyvalue
+                                        Key = questionKey,
+                                        Element = element,
+                                        Topic = topic,
+                                        Question = keyvalue
                                     };
                                     questions[element].Add(current);
                                     previousKey = questionKey;
@@ -95,14 +101,17 @@ namespace StoryBuilder.DAL
             string section = string.Empty;
             string keyword = string.Empty;
             string keyvalue = string.Empty;
-            SortedDictionary<string, ObservableCollection<string>> stockScenes = 
+            SortedDictionary<string, ObservableCollection<string>> stockScenes =
                 new SortedDictionary<string, ObservableCollection<string>>();
-            foreach (string line in lines) {
+            foreach (string line in lines)
+            {
                 ParseLine(line, ref section, ref keyword, ref keyvalue);
                 //   Process the parsed values
-                switch (section) {
+                switch (section)
+                {
                     case "Stock Scenes":
-                        switch (keyword) {
+                        switch (keyword)
+                        {
                             case "":
                                 break;
                             case "Title":
@@ -119,21 +128,24 @@ namespace StoryBuilder.DAL
             return stockScenes;
         }
 
-        public SortedDictionary<string,TopicModel> LoadTopics()
+        public SortedDictionary<string, TopicModel> LoadTopics()
         {
             string topicName = string.Empty;
             TopicModel currentTopic = null;
             SubTopicModel currentSubTopic = null;
-            SortedDictionary<string,TopicModel> topics =new SortedDictionary<string, TopicModel>();
+            SortedDictionary<string, TopicModel> topics = new SortedDictionary<string, TopicModel>();
             string section = string.Empty;
             string keyword = string.Empty;
             string keyvalue = string.Empty;
-            foreach (string line in lines) {
+            foreach (string line in lines)
+            {
                 ParseLine(line, ref section, ref keyword, ref keyvalue);
                 //   Process the parsed values
-                switch (section) {
+                switch (section)
+                {
                     case "Topic Information":
-                        switch (keyword) {
+                        switch (keyword)
+                        {
                             case "":
                                 break;
                             case "Topic":
@@ -170,19 +182,23 @@ namespace StoryBuilder.DAL
             return topics;
         }
 
-        public List<MasterPlotModel> LoadMasterPlots() {
+        public List<MasterPlotModel> LoadMasterPlots()
+        {
             MasterPlotModel currentMasterPlot = null;
             MasterPlotScene currentMasterPlotScene = null;
             List<MasterPlotModel> masterPlots = new List<MasterPlotModel>();
             string section = string.Empty;
             string keyword = string.Empty;
             string keyvalue = string.Empty;
-            foreach (string line in lines) {
+            foreach (string line in lines)
+            {
                 ParseLine(line, ref section, ref keyword, ref keyvalue);
                 //   Process the parsed values
-                switch (section) {
+                switch (section)
+                {
                     case "MasterPlots":
-                        switch (keyword) {
+                        switch (keyword)
+                        {
                             case "":
                                 break;
                             case "MasterPlot":
@@ -190,7 +206,7 @@ namespace StoryBuilder.DAL
                                 masterPlots.Add(currentMasterPlot);
                                 break;
                             case "Remarks":
-// ReSharper disable PossibleNullReferenceException
+                                // ReSharper disable PossibleNullReferenceException
                                 if (currentMasterPlot.MasterPlotNotes.Equals(string.Empty))
                                     currentMasterPlot.MasterPlotNotes = keyvalue;
                                 else
@@ -211,7 +227,7 @@ namespace StoryBuilder.DAL
                                     currentMasterPlotScene.Notes += Environment.NewLine;
                                     currentMasterPlotScene.Notes += keyvalue;
                                 }
-// ReSharper restore PossibleNullReferenceException
+                                // ReSharper restore PossibleNullReferenceException
                                 break;
                         }
                         break;
@@ -225,14 +241,17 @@ namespace StoryBuilder.DAL
             DramaticSituationModel currentDramaticSituationModel = null;
             SortedDictionary<string, DramaticSituationModel> dramaticSituations = new SortedDictionary<string, DramaticSituationModel>();
             string section = string.Empty;
-            foreach (string line in lines) {
+            foreach (string line in lines)
+            {
                 string keyword = string.Empty;
                 string keyvalue = string.Empty;
                 ParseLine(line, ref section, ref keyword, ref keyvalue);
                 //   Process the parsed values
-                switch (section) {
+                switch (section)
+                {
                     case "Dramatic Situations":
-                        switch (keyword) {
+                        switch (keyword)
+                        {
                             case "":
                                 break;
                             case "Situation":
@@ -240,7 +259,7 @@ namespace StoryBuilder.DAL
                                 dramaticSituations.Add(keyvalue, currentDramaticSituationModel);
                                 break;
                             case "Role1":
-// ReSharper disable PossibleNullReferenceException
+                                // ReSharper disable PossibleNullReferenceException
                                 currentDramaticSituationModel.Role1 = keyvalue;
                                 break;
                             case "Role2":
@@ -269,7 +288,7 @@ namespace StoryBuilder.DAL
                                 break;
                             case "Notes":
                                 currentDramaticSituationModel.Notes = currentDramaticSituationModel.Notes + keyvalue;
-// ReSharper restore PossibleNullReferenceException
+                                // ReSharper restore PossibleNullReferenceException
                                 break;
                         }
                         break;
@@ -285,12 +304,15 @@ namespace StoryBuilder.DAL
             string section = string.Empty;
             string keyword = string.Empty;
             string keyvalue = string.Empty;
-            foreach (string line in lines) {
+            foreach (string line in lines)
+            {
                 ParseLine(line, ref section, ref keyword, ref keyvalue);
                 //   Process the parsed values
-                switch (section) {
+                switch (section)
+                {
                     case "Quotes":
-                        switch (keyword) {
+                        switch (keyword)
+                        {
                             case "":
                                 break;
                             case "Author":
@@ -298,7 +320,7 @@ namespace StoryBuilder.DAL
                                 quotes.Add(currentQuote);
                                 break;
                             case "Quote":
-// ReSharper disable PossibleNullReferenceException
+                                // ReSharper disable PossibleNullReferenceException
                                 if (currentQuote.Quote.Equals(string.Empty))
                                     currentQuote.Quote = keyvalue.TrimEnd();
                                 else
@@ -306,7 +328,7 @@ namespace StoryBuilder.DAL
                                     currentQuote.Quote += Environment.NewLine;
                                     currentQuote.Quote += keyvalue.TrimEnd();
                                 }
-// ReSharper restore PossibleNullReferenceException
+                                // ReSharper restore PossibleNullReferenceException
                                 break;
                         }
                         break;
@@ -316,40 +338,40 @@ namespace StoryBuilder.DAL
         }
 
         // TODO: Font loading is commented out in TOOLS.INI and here.
-/*
-        private List<string> LoadFonts()
-        {
-            List<string> fonts = new List<string>();
-            foreach (string line in _iniFile) {
-                string section = null;
-                string keyword = null;
-                string keyvalue = null;
-                ParseLine(line, ref keyword, ref keyvalue, ref section);
-                //   Process the parsed values
-                switch (section) {
-                    case "Application Tools":
-                    case "Comment":
-                        break;
-                    //case "Fonts":
-                    //    switch (keyword) {
-                    //        case "":
-                    //            break;
-                    //        case "Font":
-                    //            Fonts.Add((keyvalue));
-                    //            break;
-                    //        default:
-                    //            NotFoundCount = NotFoundCount + 1;
-                    //            if (NotFoundCount < NotFoundLimit) {
-                    //                MessageBox.Show(line, @"Unrecognized STORYB.INI Line", MessageBoxButton.OK);
-                    //            }
-                    //            break;
-                    //    }
-                    //    break;
+        /*
+                private List<string> LoadFonts()
+                {
+                    List<string> fonts = new List<string>();
+                    foreach (string line in _iniFile) {
+                        string section = null;
+                        string keyword = null;
+                        string keyvalue = null;
+                        ParseLine(line, ref keyword, ref keyvalue, ref section);
+                        //   Process the parsed values
+                        switch (section) {
+                            case "Application Tools":
+                            case "Comment":
+                                break;
+                            //case "Fonts":
+                            //    switch (keyword) {
+                            //        case "":
+                            //            break;
+                            //        case "Font":
+                            //            Fonts.Add((keyvalue));
+                            //            break;
+                            //        default:
+                            //            NotFoundCount = NotFoundCount + 1;
+                            //            if (NotFoundCount < NotFoundLimit) {
+                            //                MessageBox.Show(line, @"Unrecognized STORYB.INI Line", MessageBoxButton.OK);
+                            //            }
+                            //            break;
+                            //    }
+                            //    break;
+                        }
+                    }
+                    return fonts;
                 }
-            }
-            return fonts;
-        }
-*/
+        */
 
         /// <summary>
         /// Parse a line from the TOOLS.INI file into section, keyword, and keyvalue.
@@ -373,14 +395,16 @@ namespace StoryBuilder.DAL
             }
             if (line.StartsWith(";")) // Comment
                 return;
-            if (line.StartsWith("[")) {
+            if (line.StartsWith("["))
+            {
                 string[] tokens = line.Split(new[] { '[', ']' });
                 section = tokens[1];
                 keyword = "$SECTION$";
                 keyvalue = string.Empty;
                 return;
             }
-            if (line.Contains("=")) {
+            if (line.Contains("="))
+            {
                 string[] tokens = line.Split(new[] { '=' });
                 keyword = tokens[0];
                 keyvalue = tokens[1].TrimEnd();

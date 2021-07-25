@@ -1,7 +1,4 @@
-﻿using System;
-using System.ComponentModel;
-using System.Threading.Tasks;
-using Microsoft.Toolkit.Mvvm.ComponentModel;
+﻿using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using Microsoft.Toolkit.Mvvm.Messaging;
 using StoryBuilder.Controllers;
@@ -10,6 +7,9 @@ using StoryBuilder.Models;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.Services.Messages;
 using StoryBuilder.Services.Navigation;
+using System;
+using System.ComponentModel;
+using System.Threading.Tasks;
 
 namespace StoryBuilder.ViewModels
 {
@@ -21,7 +21,7 @@ namespace StoryBuilder.ViewModels
     /// another Section as its parent. Sections are Chapters, Acts,
     /// etc.
     /// </summary>
-    public class FolderViewModel : ObservableRecipient, INavigable    
+    public class FolderViewModel : ObservableRecipient, INavigable
     {
         #region Fields
 
@@ -90,7 +90,7 @@ namespace StoryBuilder.ViewModels
 
         public async Task Activate(object parameter)
         {
-            Model = (FolderModel) parameter;
+            Model = (FolderModel)parameter;
             await LoadModel();  // Load the ViewModel from the Story
         }
 
@@ -100,7 +100,7 @@ namespace StoryBuilder.ViewModels
         }
 
         private void OnPropertyChanged(object sender, PropertyChangedEventArgs args)
-        
+
         {
             if (_changeable)
                 Changed = true;
@@ -140,7 +140,7 @@ namespace StoryBuilder.ViewModels
 
         #region Constructor
 
-        public FolderViewModel() 
+        public FolderViewModel()
         {
             _story = Ioc.Default.GetService<StoryController>();
             _logger = Ioc.Default.GetService<LogService>();

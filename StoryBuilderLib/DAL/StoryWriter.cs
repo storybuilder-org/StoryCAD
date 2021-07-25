@@ -1,13 +1,13 @@
-﻿using System;
+﻿using Microsoft.Toolkit.Mvvm.DependencyInjection;
+using StoryBuilder.Controllers;
+using StoryBuilder.Models;
+using StoryBuilder.ViewModels;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using System.Xml;
 using Windows.Storage;
-using Microsoft.Toolkit.Mvvm.DependencyInjection;
-using StoryBuilder.Controllers;
-using StoryBuilder.Models;
-using StoryBuilder.ViewModels;
 
 namespace StoryBuilder.DAL
 {
@@ -388,7 +388,7 @@ namespace StoryBuilder.DAL
             chr.Attributes.Append(attr);
             attr = _xml.CreateAttribute("WoundCategory");
             attr.Value = rec.WoundCategory;
-            chr.Attributes.Append(attr);    
+            chr.Attributes.Append(attr);
             attr = _xml.CreateAttribute("WoundSummary");
             attr.Value = rec.WoundSummary;
             chr.Attributes.Append(attr);
@@ -586,7 +586,7 @@ namespace StoryBuilder.DAL
             attr.Value = rec.Role3;
             plotPoint.Attributes.Append(attr);
             XmlNode castList = _xml.CreateElement("CastMembers");
-            foreach (string member in rec.CastMembers) 
+            foreach (string member in rec.CastMembers)
             {
                 XmlElement castMember = _xml.CreateElement("Member");
                 castMember.AppendChild(_xml.CreateTextNode(member));
@@ -776,13 +776,13 @@ namespace StoryBuilder.DAL
 
         public async Task<string> PutRtfText(string note, Guid uuid, string filename)
         {
-            char[] endchars = {' ', (char) 0};      // remove trialing zero from RichEditText
-            string work = note.TrimEnd(endchars);  
+            char[] endchars = { ' ', (char)0 };      // remove trialing zero from RichEditText
+            string work = note.TrimEnd(endchars);
             // If the note already contains an imbedded file reference, we're done
             if (note.StartsWith("[FILE:"))
                 return work;
             //TODO: Make external RTF file size a Preference
-            if (note.Length > 1024) 
+            if (note.Length > 1024)
             {
                 //See also: https://stackoverflow.com/questions/32948609/how-to-close-the-opened-storagefile
                 //TODO: Does these need to be CData instead of attributes?

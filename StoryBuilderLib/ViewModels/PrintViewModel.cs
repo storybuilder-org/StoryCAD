@@ -1,9 +1,9 @@
-﻿using System.Collections.ObjectModel;
-using System.Collections.Specialized;
-using Microsoft.Toolkit.Mvvm.ComponentModel;
+﻿using Microsoft.Toolkit.Mvvm.ComponentModel;
 using StoryBuilder.Models;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 
-namespace StoryBuilder.ViewModels 
+namespace StoryBuilder.ViewModels
 {
     public class PrintViewModel : ObservableRecipient
     {
@@ -44,67 +44,67 @@ namespace StoryBuilder.ViewModels
 
         public bool AllReportsSwitch
         {
-            get => _allReportsSwitch;  
+            get => _allReportsSwitch;
             set => SetProperty(ref _allReportsSwitch, value);
         }
 
         public bool DestinationPreviewSwitch
         {
-            get => _destinationpreviewswitch; 
+            get => _destinationpreviewswitch;
             set => SetProperty(ref _destinationpreviewswitch, value);
         }
 
         public bool DestinationPrinterSwitch
         {
-            get => _destinationprinterswitch; 
+            get => _destinationprinterswitch;
             set => SetProperty(ref _destinationprinterswitch, value);
         }
 
         public bool DestinationDiskSwitch
         {
-            get => _destinationDiskSwitch;  
+            get => _destinationDiskSwitch;
             set => SetProperty(ref _destinationDiskSwitch, value);
         }
 
-        public bool StoryNotesSwitch         
+        public bool StoryNotesSwitch
         {
-            get => _storyNotesSwitch;  
+            get => _storyNotesSwitch;
             set => SetProperty(ref _storyNotesSwitch, value);
         }
 
-        public bool ListOfProblemsSwitch          
+        public bool ListOfProblemsSwitch
         {
-            get => _listOfProblemsSwitch; 
+            get => _listOfProblemsSwitch;
             set => SetProperty(ref _listOfProblemsSwitch, value);
         }
 
         public bool AllProblemsSwitch
         {
-            get => _allproblemsswitch; 
+            get => _allproblemsswitch;
             set => SetProperty(ref _allproblemsswitch, value);
         }
 
         public ObservableCollection<ProblemModel> SelectedProblemsList
         {
-            get => _selectedProblemsList; 
+            get => _selectedProblemsList;
             set => SetProperty(ref _selectedProblemsList, value);
         }
 
         public bool ListOfCharactersSwitch
         {
-            get => _listOfCharactersSwitch; 
+            get => _listOfCharactersSwitch;
             set => SetProperty(ref _listOfCharactersSwitch, value);
         }
 
         public bool AllCharactersSwitch
         {
-            get => _allCharactersSwitch; 
+            get => _allCharactersSwitch;
             set => SetProperty(ref _allCharactersSwitch, value);
         }
 
-        public ObservableCollection<CharacterModel> SelectedCharactersList  
+        public ObservableCollection<CharacterModel> SelectedCharactersList
         {
-            get => _selectedCharactersList;  
+            get => _selectedCharactersList;
             set => SetProperty(ref _selectedCharactersList, value);
         }
 
@@ -122,19 +122,19 @@ namespace StoryBuilder.ViewModels
 
         public bool AllSettingsSwitch
         {
-            get => _allSettingsSwitch;  
+            get => _allSettingsSwitch;
             set => SetProperty(ref _allSettingsSwitch, value);
         }
 
         public ObservableCollection<SettingModel> SelectedSettingsList
         {
-            get => _selectedSettingsList;  
+            get => _selectedSettingsList;
             set => SetProperty(ref _selectedSettingsList, value);
         }
 
         public bool ListOfPlotPointsSwitch
         {
-            get => _listOfPlotPointsSwitch;  
+            get => _listOfPlotPointsSwitch;
             set => SetProperty(ref _listOfPlotPointsSwitch, value);
         }
 
@@ -144,15 +144,15 @@ namespace StoryBuilder.ViewModels
             set => SetProperty(ref _allPlotPointsSwitch, value);
         }
 
-        public ObservableCollection<PlotPointModel> SelectedPlotPointsList  
+        public ObservableCollection<PlotPointModel> SelectedPlotPointsList
         {
-            get => _selectedPlotPointsList; 
+            get => _selectedPlotPointsList;
             set => SetProperty(ref _selectedPlotPointsList, value);
         }
 
         public bool QuestionResponsesSwitch
         {
-            get => _questionResponsesSwitch; 
+            get => _questionResponsesSwitch;
             set => SetProperty(ref _questionResponsesSwitch, value);
         }
 
@@ -173,7 +173,7 @@ namespace StoryBuilder.ViewModels
 
         public PrintViewModel(ObservableCollection<ProblemModel> problems,
                               ObservableCollection<CharacterModel> characters,
-                              ObservableCollection<SettingModel> settings, 
+                              ObservableCollection<SettingModel> settings,
                               ObservableCollection<PlotPointModel> scenes)
         {
             SelectedProblemsListSource = problems;
@@ -181,7 +181,7 @@ namespace StoryBuilder.ViewModels
             SelectedSettingsListSource = settings;
             SelectedPlotPointsListSource = scenes;
 
-            _selectedProblemsList= new ObservableCollection<ProblemModel>();
+            _selectedProblemsList = new ObservableCollection<ProblemModel>();
             _selectedProblemsList.CollectionChanged += OnCollectionChanged;
             _selectedCharactersList = new ObservableCollection<CharacterModel>();
             _selectedCharactersList.CollectionChanged += OnCollectionChanged;

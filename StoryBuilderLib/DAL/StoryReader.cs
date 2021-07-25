@@ -1,16 +1,16 @@
-﻿using System;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using Microsoft.Toolkit.Mvvm.ComponentModel;
+﻿using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using Microsoft.Toolkit.Mvvm.Messaging;
-using Windows.Data.Xml.Dom;
-using Windows.Storage;
 using StoryBuilder.Controllers;
 using StoryBuilder.Models;
-using StoryBuilder.ViewModels;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.Services.Messages;
+using StoryBuilder.ViewModels;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Windows.Data.Xml.Dom;
+using Windows.Storage;
 using static Windows.Data.Xml.Dom.XmlDocument;
 using XmlDocument = Windows.Data.Xml.Dom.XmlDocument;
 using XmlElement = Windows.Data.Xml.Dom.XmlElement;
@@ -22,7 +22,7 @@ namespace StoryBuilder.DAL
     /// StoryWriter parses StoryBuilder's model and writes it to its backing store
     /// (the .stbx file), which is an Xml Document. 
     /// </summary>
-    public class StoryReader: ObservableRecipient
+    public class StoryReader : ObservableRecipient
     {
         /// StoryBuilder's model is found in the StoryBuilder.Models namespace and consists
         /// of various POCO (Plain Old CLR) objects.
@@ -197,8 +197,8 @@ namespace StoryBuilder.DAL
                         _overview.LiteraryDevice = attr.InnerText;
                         break;
                     case "ViewpointCharacter":
-                       _overview.ViewpointCharacter = attr.InnerText;
-                       break;
+                        _overview.ViewpointCharacter = attr.InnerText;
+                        break;
                     case "Voice":
                         _overview.Voice = attr.InnerText;
                         break;
@@ -241,7 +241,7 @@ namespace StoryBuilder.DAL
 
         private void ParseProblem(IXmlNode xn)
         {
-            var prb = new ProblemModel(xn, _model); 
+            var prb = new ProblemModel(xn, _model);
             foreach (var attr in xn.Attributes)
             {
                 switch (attr.NodeName)

@@ -28,8 +28,6 @@
  * Description:	Token leido por el analizador léxico para documentos RTF.
  * ******************************************************************************/
 
-using System;
-
 namespace Net.Sgoliver.NRtfTree
 {
     namespace Core
@@ -60,69 +58,69 @@ namespace Net.Sgoliver.NRtfTree
 
             #endregion
 
-			#region Propiedades
+            #region Propiedades
 
-			/// <summary>
-			/// Tipo del token.
-			/// </summary>
-			public RtfTokenType Type
-			{
-				get
-				{
-					return type;
-				}
-				set
-				{
-					type = value;
-				}
-			}
+            /// <summary>
+            /// Tipo del token.
+            /// </summary>
+            public RtfTokenType Type
+            {
+                get
+                {
+                    return type;
+                }
+                set
+                {
+                    type = value;
+                }
+            }
 
-			/// <summary>
-			/// Palabra clave / Símbolo de Control / Caracter.
-			/// </summary>
-			public string Key
-			{
-				get
-				{
-					return key;
-				}
-				set 
-				{
-					key = value;
-				}
-			}
+            /// <summary>
+            /// Palabra clave / Símbolo de Control / Caracter.
+            /// </summary>
+            public string Key
+            {
+                get
+                {
+                    return key;
+                }
+                set
+                {
+                    key = value;
+                }
+            }
 
-			/// <summary>
-			/// Indica si el token tiene parámetro asociado.
-			/// </summary>
-			public bool HasParameter
-			{
-				get
-				{
-					return hasParam;
-				}
-				set
-				{
-					hasParam = value;
-				}
-			}
+            /// <summary>
+            /// Indica si el token tiene parámetro asociado.
+            /// </summary>
+            public bool HasParameter
+            {
+                get
+                {
+                    return hasParam;
+                }
+                set
+                {
+                    hasParam = value;
+                }
+            }
 
-			/// <summary>
-			/// Parámetro de la palabra clave o símbolo de Control.
-			/// </summary>
-			public int Parameter
-			{
-				get
-				{
-					return param;
-				}
-				set
-				{
-					param = value;
-				}
-			}
+            /// <summary>
+            /// Parámetro de la palabra clave o símbolo de Control.
+            /// </summary>
+            public int Parameter
+            {
+                get
+                {
+                    return param;
+                }
+                set
+                {
+                    param = value;
+                }
+            }
 
-			#endregion
+            #endregion
 
             #region Constructor Público
 
@@ -133,10 +131,10 @@ namespace Net.Sgoliver.NRtfTree
             {
                 type = RtfTokenType.None;
                 key = "";
-                
-				/* Inicializados por defecto */
-				//hasParam = false;
-				//param = 0;
+
+                /* Inicializados por defecto */
+                //hasParam = false;
+                //param = 0;
             }
 
             #endregion

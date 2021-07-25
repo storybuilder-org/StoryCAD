@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace StoryBuilder.Models.Tools
+﻿namespace StoryBuilder.Models.Tools
 {
     public class MasterPlotScene
     {

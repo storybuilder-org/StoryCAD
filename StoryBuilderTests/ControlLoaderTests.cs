@@ -1,9 +1,9 @@
-﻿using System;
-using System.Threading.Tasks;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using StoryBuilder.Controllers;
 using StoryBuilder.DAL;
 using StoryBuilder.Models;
+using System;
+using System.Threading.Tasks;
 
 namespace StoryBuilderTests
 {
@@ -11,7 +11,7 @@ namespace StoryBuilderTests
     public class ControlLoaderTests
     {
         [TestMethod]
-        public async Task TestControlLoader() 
+        public async Task TestControlLoader()
         {
             StoryController story = new StoryController();
             Assert.IsNotNull(story);

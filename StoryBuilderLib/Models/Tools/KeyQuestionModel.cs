@@ -15,8 +15,8 @@ namespace StoryBuilder.Models.Tools
 
         #region Constructor
 
-        public KeyQuestionModel() 
-       {
+        public KeyQuestionModel()
+        {
             Question = string.Empty;
         }
 

@@ -11,7 +11,7 @@ namespace StoryBuilder.Models.Tools
         public ConflictCategoryModel(string topic, string filename)
         {
             TopicName = topic;
-            SubCategories= new List<string>();
+            SubCategories = new List<string>();
             Examples = new SortedDictionary<string, List<string>>();
         }
 

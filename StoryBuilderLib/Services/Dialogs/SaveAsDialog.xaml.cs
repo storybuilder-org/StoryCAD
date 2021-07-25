@@ -1,11 +1,11 @@
-﻿using Microsoft.UI.Xaml;
+﻿using Microsoft.Toolkit.Mvvm.DependencyInjection;
+using Microsoft.UI.Xaml;
+using StoryBuilder.ViewModels;
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
 using Windows.Storage;
 using Windows.Storage.Pickers;
-using Microsoft.Toolkit.Mvvm.DependencyInjection;
-using StoryBuilder.ViewModels;
 using WinRT;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
@@ -37,7 +37,7 @@ namespace StoryBuilder.Services.Dialogs
         private async void OnClick(object sender, RoutedEventArgs e)
         {
             // may throw error if invalid folder location
-           var folderPicker = new FolderPicker();
+            var folderPicker = new FolderPicker();
 
             //Make FolderPicker work in Win32
             if (Window.Current == null)

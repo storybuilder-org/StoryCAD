@@ -1,3 +1,8 @@
+using Microsoft.UI.Xaml.Controls;
+using StoryBuilder.Controllers;
+using StoryBuilder.Models;
+using StoryBuilder.Models.Tools;
+using StoryBuilder.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -5,11 +10,6 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Windows.Storage;
-using StoryBuilder.Controllers;
-using StoryBuilder.Models;
-using StoryBuilder.ViewModels;
-using StoryBuilder.Models.Tools;
-using Microsoft.UI.Xaml.Controls;
 
 namespace StoryBuilder.DAL
 {

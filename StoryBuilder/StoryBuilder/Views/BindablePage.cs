@@ -1,9 +1,8 @@
-﻿using System.Xml.XPath;
-using Microsoft.UI.Xaml.Controls;
+﻿using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
 using StoryBuilder.Services.Navigation;
 
-namespace StoryBuilder.Views   
+namespace StoryBuilder.Views
 {
     public class BindablePage : Page
     {

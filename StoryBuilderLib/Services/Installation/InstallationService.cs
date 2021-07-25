@@ -1,12 +1,10 @@
-﻿using System;
+﻿using Microsoft.Toolkit.Mvvm.DependencyInjection;
+using StoryBuilder.Services.Logging;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Toolkit.Mvvm.DependencyInjection;
-using StoryBuilder.Services.Logging;
-using Windows.Services.Maps;
 using Windows.Storage;
 
 namespace StoryBuilder.Services.Installation
@@ -97,7 +95,7 @@ namespace StoryBuilder.Services.Installation
                     await _installFile.CopyAsync(_localFolder, "install.manifest", NameCollisionOption.ReplaceExisting);
                 }
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
                 Logger.LogException(LogLevel.Error, ex, "Error in InstallFiles");
             }
@@ -139,7 +137,7 @@ namespace StoryBuilder.Services.Installation
             if (subPath.Equals(string.Empty))
                 return dest;
             string[] nodes = subPath.Split(Path.DirectorySeparatorChar);
-            foreach (string node in nodes) 
+            foreach (string node in nodes)
             {
                 if (await dest.TryGetItemAsync(node) == null)
                     dest = await dest.CreateFolderAsync(node);
@@ -161,7 +159,7 @@ namespace StoryBuilder.Services.Installation
             IList<string> localEntries;
             IStorageFile file = await _localFolder.TryGetItemAsync("install.manifest") as IStorageFile;
             if (file == null)  // If there is no manifest return with empty Dictionary
-               return;
+                return;
             localEntries = await FileIO.ReadLinesAsync(file);
             foreach (string line in localEntries)
             {

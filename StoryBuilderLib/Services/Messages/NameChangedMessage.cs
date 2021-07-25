@@ -1,5 +1,4 @@
 ﻿using Microsoft.Toolkit.Mvvm.Messaging.Messages;
-using System;
 
 namespace StoryBuilder.Services.Messages
 {

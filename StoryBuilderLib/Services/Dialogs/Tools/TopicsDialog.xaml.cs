@@ -16,11 +16,11 @@ namespace StoryBuilder.Services.Dialogs.Tools
             TopicsVm.NextSubTopic();
         }
 
-    public void Previous_Click(object o, RoutedEventArgs routedEventArgs)
-    {
-        TopicsVm.PreviousSubTopic();
-    }
-    public TopicsDialog()
+        public void Previous_Click(object o, RoutedEventArgs routedEventArgs)
+        {
+            TopicsVm.PreviousSubTopic();
+        }
+        public TopicsDialog()
         {
             InitializeComponent();
             DataContext = TopicsVm;

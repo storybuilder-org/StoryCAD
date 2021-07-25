@@ -1,9 +1,7 @@
-﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using Microsoft.Toolkit.Mvvm.ComponentModel;
+﻿using Microsoft.Toolkit.Mvvm.ComponentModel;
 using StoryBuilder.Models;
-using StoryBuilder.Services.Navigation;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace StoryBuilder.ViewModels.Tools
 {
@@ -62,7 +60,8 @@ namespace StoryBuilder.ViewModels.Tools
             set => SetProperty(ref _secondTrait, value);
         }
 
-        public string Relationship {
+        public string Relationship
+        {
             get => _relationship;
             set => SetProperty(ref _relationship, value);
         }
@@ -78,7 +77,7 @@ namespace StoryBuilder.ViewModels.Tools
         #region Combobox and ListBox sources
 
         public ObservableCollection<string> RelationshipSource;
-        
+
         #endregion
 
         #region Constructor

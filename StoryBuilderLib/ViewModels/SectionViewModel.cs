@@ -1,7 +1,4 @@
-﻿using System;
-using System.ComponentModel;
-using System.Threading.Tasks;
-using Microsoft.Toolkit.Mvvm.ComponentModel;
+﻿using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using Microsoft.Toolkit.Mvvm.Messaging;
 using StoryBuilder.Controllers;
@@ -10,10 +7,13 @@ using StoryBuilder.Models;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.Services.Messages;
 using StoryBuilder.Services.Navigation;
+using System;
+using System.ComponentModel;
+using System.Threading.Tasks;
 
 namespace StoryBuilder.ViewModels
 {
-    public class SectionViewModel : ObservableRecipient, INavigable    
+    public class SectionViewModel : ObservableRecipient, INavigable
     {
         #region Fields
 
@@ -82,7 +82,7 @@ namespace StoryBuilder.ViewModels
 
         public async Task Activate(object parameter)
         {
-            Model = (SectionModel) parameter;
+            Model = (SectionModel)parameter;
             await LoadModel();  // Load the ViewModel from the Story
         }
 
@@ -131,7 +131,7 @@ namespace StoryBuilder.ViewModels
 
         #region Constructor
 
-        public SectionViewModel() 
+        public SectionViewModel()
         {
             _story = Ioc.Default.GetService<StoryController>();
             _logger = Ioc.Default.GetService<LogService>();

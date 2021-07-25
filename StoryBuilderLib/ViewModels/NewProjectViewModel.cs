@@ -1,25 +1,18 @@
-﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using Microsoft.Toolkit.Mvvm.ComponentModel;
-using Microsoft.Toolkit.Mvvm.DependencyInjection;
-using StoryBuilder.Controllers;
+﻿using Microsoft.Toolkit.Mvvm.ComponentModel;
 using StoryBuilder.Models;
 using StoryBuilder.Models.Tools;
 
 namespace StoryBuilder.ViewModels
 {
-    public class NewProjectViewModel: ObservableRecipient
+    public class NewProjectViewModel : ObservableRecipient
     {
-        private readonly StoryController story;
-
-
         private string _selectedTemplate;
 
-        public string SelectedTemplate 
+        public string SelectedTemplate
         {
             get => _selectedTemplate;
-            set 
-            {   
+            set
+            {
                 SetProperty(ref _selectedTemplate, value);
             }
         }

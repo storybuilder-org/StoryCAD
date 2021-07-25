@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
+﻿using Microsoft.Toolkit.Mvvm.ComponentModel;
+using System;
 using Windows.Data.Xml.Dom;
-using Microsoft.Toolkit.Mvvm.ComponentModel;
-using System.Collections.ObjectModel;
 
 namespace StoryBuilder.Models
 {
@@ -76,16 +73,16 @@ namespace StoryBuilder.Models
                 case "Setting":
                     type = StoryItemType.Setting;
                     break;
-                case "PlotPoint":  
+                case "PlotPoint":
                     type = StoryItemType.PlotPoint;
                     break;
                 case "Separator":       // Legacy: Separator was renamed to Folder
                     type = StoryItemType.Folder;
                     break;
-                case "Folder":   
+                case "Folder":
                     type = StoryItemType.Folder;
                     break;
-                case "Section":  
+                case "Section":
                     type = StoryItemType.Section;
                     break;
                 case "TrashCan":

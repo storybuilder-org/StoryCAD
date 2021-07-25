@@ -1,20 +1,16 @@
-﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using Microsoft.Toolkit.Mvvm.ComponentModel;
-using Microsoft.Toolkit.Mvvm.DependencyInjection;
-using StoryBuilder.Controllers;
+﻿using Microsoft.Toolkit.Mvvm.ComponentModel;
 using StoryBuilder.Models;
 using StoryBuilder.Models.Tools;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace StoryBuilder.ViewModels.Tools
 {
     public class DramaticSituationsViewModel : ObservableRecipient
     {
-        private readonly StoryController story;
-
         #region Fields
-        private bool _changed;
 
+        private bool _changed;
         private string _description1;
         private string _description2;
         private string _description3;
@@ -26,7 +22,7 @@ namespace StoryBuilder.ViewModels.Tools
         public bool Changed
         {
             get { return _changed; }
-// ReSharper disable once ValueParameterNotUsed
+            // ReSharper disable once ValueParameterNotUsed
             set { _changed = false; }
         }
 
@@ -41,8 +37,8 @@ namespace StoryBuilder.ViewModels.Tools
         private string _situationName;
         public string SituationName
         {
-            get => _situationName; 
-            set 
+            get => _situationName;
+            set
             {
                 SetProperty(ref _situationName, value);
                 Situation = situations[value];
@@ -59,14 +55,14 @@ namespace StoryBuilder.ViewModels.Tools
         private string _role2;
         public string Role2
         {
-            get => _role2; 
+            get => _role2;
             set => SetProperty(ref _role2, value);
         }
 
         private string _role3;
         public string Role3
         {
-            get => _role3; 
+            get => _role3;
             set => SetProperty(ref _role3, value);
         }
 
@@ -79,34 +75,34 @@ namespace StoryBuilder.ViewModels.Tools
 
         public string Description1
         {
-            get => _description1; 
+            get => _description1;
             set => SetProperty(ref _description1, value);
-         }
+        }
 
         public string Description2
         {
             get => _description2;
             set => SetProperty(ref _description2, value);
-         }
+        }
 
         public string Description3
         {
-            get => _description3; 
+            get => _description3;
             set => SetProperty(ref _description3, value);
         }
 
         public string Description4
         {
-            get => _description4; 
+            get => _description4;
             set => SetProperty(ref _description4, value);
         }
 
         private string _notes;
         public string Notes
         {
-            get => _notes; 
+            get => _notes;
             set => SetProperty(ref _notes, value);
-         }
+        }
 
         #endregion
 

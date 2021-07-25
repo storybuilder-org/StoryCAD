@@ -22,7 +22,7 @@ namespace StoryBuilder.Models
         // Because Overview is always the root of the StoryExplorer, there is only one instance of it.
         // Consequently it has no Id property (although it does have a UUID.)
 
-            // Overview data
+        // Overview data
 
         private string _dateCreated;
         public string DateCreated

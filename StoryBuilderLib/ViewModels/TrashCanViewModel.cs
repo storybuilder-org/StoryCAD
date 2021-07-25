@@ -1,12 +1,12 @@
-﻿using System;
-using System.Threading.Tasks;
-using Microsoft.Toolkit.Mvvm.ComponentModel;
+﻿using Microsoft.Toolkit.Mvvm.ComponentModel;
 using StoryBuilder.Models;
 using StoryBuilder.Services.Navigation;
+using System;
+using System.Threading.Tasks;
 
 namespace StoryBuilder.ViewModels
 {
-    public class TrashCanViewModel : ObservableRecipient, INavigable    
+    public class TrashCanViewModel : ObservableRecipient, INavigable
     {
         #region Fields
 
@@ -46,14 +46,14 @@ namespace StoryBuilder.ViewModels
 
         public Task Activate(object parameter)
         {
-            Model = (TrashCanModel) parameter;
+            Model = (TrashCanModel)parameter;
             LoadModel();
             return Task.CompletedTask;
         }
 
         public Task Deactivate(object parameter)
         {
-            SaveModel();    
+            SaveModel();
             return Task.CompletedTask;
         }
 

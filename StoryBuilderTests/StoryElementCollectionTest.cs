@@ -1,5 +1,4 @@
-﻿using Microsoft.UI.Xaml;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using StoryBuilder.Models;
 
 namespace StoryBuilderTests
@@ -24,7 +23,7 @@ namespace StoryBuilderTests
             Assert.AreEqual(0, elements.Characters.Count);
             Assert.AreEqual(0, elements.Problems.Count);
             // Test adding elements
-            element = new StoryElement("Protagonist", StoryItemType.Character, model );
+            element = new StoryElement("Protagonist", StoryItemType.Character, model);
             elements.Add(element);
             Assert.AreEqual(1, elements.Count);
             Assert.AreEqual(1, elements.StoryElementGuids.Values.Count);

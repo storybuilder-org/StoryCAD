@@ -1,16 +1,12 @@
-﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using Microsoft.Toolkit.Mvvm.ComponentModel;
-using Microsoft.Toolkit.Mvvm.DependencyInjection;
-using StoryBuilder.Controllers;
+﻿using Microsoft.Toolkit.Mvvm.ComponentModel;
 using StoryBuilder.Models;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace StoryBuilder.ViewModels.Tools
 {
     public class StockScenesViewModel : ObservableRecipient
     {
-        private readonly StoryController story;
-
         #region Properties
 
         public ObservableCollection<string> StockSceneCategories;
@@ -19,7 +15,7 @@ namespace StoryBuilder.ViewModels.Tools
         public string CategoryName
         {
             get => _categoryName;
-            set 
+            set
             {
                 SetProperty(ref _categoryName, value);
                 StockSceneList = _stockScenes[value];

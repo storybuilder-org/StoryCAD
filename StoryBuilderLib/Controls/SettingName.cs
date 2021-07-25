@@ -1,7 +1,5 @@
-﻿using Microsoft.UI.Xaml.Controls;
-using Microsoft.Toolkit.Mvvm.DependencyInjection;
-using StoryBuilder.Models;
-using StoryBuilder.Controllers;
+﻿using Microsoft.Toolkit.Mvvm.DependencyInjection;
+using Microsoft.UI.Xaml.Controls;
 using StoryBuilder.ViewModels;
 
 namespace StoryBuilder.Controls

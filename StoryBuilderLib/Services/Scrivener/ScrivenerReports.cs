@@ -1,17 +1,17 @@
-﻿using System;
+﻿using Microsoft.Toolkit.Mvvm.DependencyInjection;
+using Net.Sgoliver.NRtfTree.Util;
+using StoryBuilder.Controllers;
+using StoryBuilder.DAL;
+using StoryBuilder.Models;
+using StoryBuilder.Models.Scrivener;
+using StoryBuilder.ViewModels;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.Data.Xml.Dom;
 using Windows.Storage;
-using Microsoft.Toolkit.Mvvm.DependencyInjection;
-using Net.Sgoliver.NRtfTree.Util;
-using StoryBuilder.Controllers;
-using StoryBuilder.DAL;
-using StoryBuilder.Models.Scrivener;
-using StoryBuilder.Models;
-using StoryBuilder.ViewModels;
 
 namespace StoryBuilder.Services.Scrivener
 {
@@ -104,10 +104,10 @@ namespace StoryBuilder.Services.Scrivener
             // Find the root DraftFolder BinderItem
             foreach (BinderItem child in _binderNode.Children)
                 if (child.Type == BinderItemType.DraftFolder)
-                    {
-                        draftFolder = child;
-                        break; 
-                    }
+                {
+                    draftFolder = child;
+                    break;
+                }
             List<BinderItem> draftFolderItems = new List<BinderItem>();
             foreach (BinderItem node in draftFolder)
             {
@@ -1192,13 +1192,13 @@ namespace StoryBuilder.Services.Scrivener
 
         private void AddCustomMetaDataSettings()
         {
-            XmlElement customMetaData = (XmlElement) _scrivener.CustomMetaDataSettings;
-            IXmlNode stbUuid = (XmlElement) _scrivener.StbUuidSetting;
+            XmlElement customMetaData = (XmlElement)_scrivener.CustomMetaDataSettings;
+            IXmlNode stbUuid = (XmlElement)_scrivener.StbUuidSetting;
             XmlAttribute attr;
 
             if (stbUuid != null)        // the setting already exits
                 return;
-            
+
             if (customMetaData == null)
             {
                 customMetaData = _scrivener.XmlDocument.CreateElement("CustomMetaDataSettings");
@@ -1232,7 +1232,7 @@ namespace StoryBuilder.Services.Scrivener
 
         private void SetLabelSettings()
         {
-           
+
             XmlAttribute attr;
 
             // Create a replacement LabelSettings node with my label values

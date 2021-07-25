@@ -1,10 +1,8 @@
-﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using Microsoft.Toolkit.Mvvm.ComponentModel;
-using Microsoft.Toolkit.Mvvm.DependencyInjection;
-using StoryBuilder.Controllers;
+﻿using Microsoft.Toolkit.Mvvm.ComponentModel;
 using StoryBuilder.Models;
 using StoryBuilder.Models.Tools;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace StoryBuilder.ViewModels.Tools
 {
@@ -16,7 +14,7 @@ namespace StoryBuilder.ViewModels.Tools
         public string MasterPlotName
         {
             get => _masterPlotName;
-            set 
+            set
             {
                 SetProperty(ref _masterPlotName, value);
                 if (MasterPlots.ContainsKey(value))
@@ -44,7 +42,7 @@ namespace StoryBuilder.ViewModels.Tools
 
         public readonly ObservableCollection<string> MasterPlotNames;
 
-        public readonly Dictionary<string,MasterPlotModel> MasterPlots;
+        public readonly Dictionary<string, MasterPlotModel> MasterPlots;
 
         #endregion
 
@@ -53,9 +51,9 @@ namespace StoryBuilder.ViewModels.Tools
         public MasterPlotsViewModel()
         {
             MasterPlotNames = new ObservableCollection<string>();
-            MasterPlots = new Dictionary<string,MasterPlotModel>();
+            MasterPlots = new Dictionary<string, MasterPlotModel>();
             foreach (MasterPlotModel plot in GlobalData.MasterPlotsSource)
-            { 
+            {
                 MasterPlotNames.Add(plot.MasterPlotName);
                 MasterPlots.Add(plot.MasterPlotName, plot);
             }

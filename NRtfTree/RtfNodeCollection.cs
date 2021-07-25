@@ -28,7 +28,6 @@
  * Description:	Colección de nodos de un árbol RTF.
  * ******************************************************************************/
 
-using System;
 using System.Collections;
 
 namespace Net.Sgoliver.NRtfTree

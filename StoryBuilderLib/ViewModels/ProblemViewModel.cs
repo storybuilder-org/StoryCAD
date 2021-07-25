@@ -1,21 +1,18 @@
-﻿using System;
+﻿using Microsoft.Toolkit.Mvvm.ComponentModel;
+using Microsoft.Toolkit.Mvvm.DependencyInjection;
+using Microsoft.Toolkit.Mvvm.Messaging;
+using Microsoft.UI.Xaml.Data;
+using StoryBuilder.Controllers;
+using StoryBuilder.DAL;
+using StoryBuilder.Models;
+using StoryBuilder.Services.Logging;
+using StoryBuilder.Services.Messages;
+using StoryBuilder.Services.Navigation;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Threading.Tasks;
-using Microsoft.Toolkit.Mvvm.ComponentModel;
-using Microsoft.Toolkit.Mvvm.DependencyInjection;
-using Microsoft.Toolkit.Mvvm.Messaging;
-using StoryBuilder.Controllers;
-using StoryBuilder.DAL;
-using StoryBuilder.Models;
-using StoryBuilder.Models.Tools;
-using StoryBuilder.Services.Logging;
-using StoryBuilder.Services.Messages;
-using StoryBuilder.Services.Navigation;
-using Microsoft.UI.Xaml.Data;
-using Windows.Devices.SmartCards;
-using Windows.ApplicationModel.Appointments;
 
 namespace StoryBuilder.ViewModels
 {
@@ -223,7 +220,7 @@ namespace StoryBuilder.ViewModels
 
         public async Task Activate(object parameter)
         {
-            Model = (ProblemModel) parameter;
+            Model = (ProblemModel)parameter;
             await LoadModel();
         }
 
@@ -329,7 +326,7 @@ namespace StoryBuilder.ViewModels
 
         #region Constructors
 
-        public ProblemViewModel() 
+        public ProblemViewModel()
         {
             ShellViewModel shell = Ioc.Default.GetService<ShellViewModel>();
             _storyModel = shell.StoryModel;

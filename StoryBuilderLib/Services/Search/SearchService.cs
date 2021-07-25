@@ -1,7 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
-using Windows.ApplicationModel.Contacts.DataProvider;
-using StoryBuilder.Models;
+﻿using StoryBuilder.Models;
 using StoryBuilder.ViewModels;
 
 namespace StoryBuilder.Services.Search
@@ -70,7 +67,7 @@ namespace StoryBuilder.Services.Search
 
         private bool SearchPlotPoint(StoryNodeItem node, StoryElement element)
         {
-            return Comparator(element.Name);;
+            return Comparator(element.Name); ;
         }
 
         private bool SearchSetting(StoryNodeItem node, StoryElement element)

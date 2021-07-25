@@ -1,6 +1,4 @@
 ﻿using Microsoft.Toolkit.Mvvm.ComponentModel;
-using Microsoft.Toolkit.Mvvm.DependencyInjection;
-using StoryBuilder.Controllers;
 using StoryBuilder.Models;
 using StoryBuilder.Models.Tools;
 
@@ -13,12 +11,12 @@ namespace StoryBuilder.ViewModels.Tools
 
         private string _licenseowner;
         private string _licensenumber;
-        private bool   _quoteonstartup;
+        private bool _quoteonstartup;
         private string _screenfont;
         private string _printerfont;
         private string _backupOnOpen;
-        private bool   _timedbackup;
-        private int    _timedbackupinterval;
+        private bool _timedbackup;
+        private int _timedbackupinterval;
         private string _defaultdirectory;
         private string _defaultprojectdirectory;
 
@@ -47,7 +45,7 @@ namespace StoryBuilder.ViewModels.Tools
 
         public bool QuoteOnStartup
         {
-            get =>_quoteonstartup; 
+            get => _quoteonstartup;
             set => SetProperty(ref _quoteonstartup, value);
         }
 
@@ -71,13 +69,13 @@ namespace StoryBuilder.ViewModels.Tools
 
         public bool TimedBackup
         {
-            get => _timedbackup; 
+            get => _timedbackup;
             set => SetProperty(ref _timedbackup, value);
         }
 
         public int TimedBackupInterval
         {
-            get => _timedbackupinterval; 
+            get => _timedbackupinterval;
             set => SetProperty(ref _timedbackupinterval, value);
         }
         public string BackupDirectory
@@ -103,7 +101,7 @@ namespace StoryBuilder.ViewModels.Tools
             get => _defaultprojectdirectory;
             set => SetProperty(ref _defaultprojectdirectory, value);
         }
-   
+
         #endregion
 
         #region Constructor

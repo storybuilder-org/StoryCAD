@@ -29,8 +29,6 @@
  * ******************************************************************************/
 
 using System;
-using System.Collections;
-using System.IO;
 using System.Text;
 
 namespace Net.Sgoliver.NRtfTree
@@ -90,10 +88,10 @@ namespace Net.Sgoliver.NRtfTree
 
                 this.type = RtfNodeType.None;
                 this.key = "";
-                
-				/* Inicializados por defecto */
-				//this.param = 0;
-				//this.hasParam = false;
+
+                /* Inicializados por defecto */
+                //this.param = 0;
+                //this.hasParam = false;
                 //this.parent = null;
                 //this.root = null;
             }
@@ -108,10 +106,10 @@ namespace Net.Sgoliver.NRtfTree
 
                 this.type = nodeType;
                 this.key = "";
-                
-				/* Inicializados por defecto */
-				//this.param = 0;
-				//this.hasParam = false;
+
+                /* Inicializados por defecto */
+                //this.param = 0;
+                //this.hasParam = false;
                 //this.parent = null;
                 //this.root = null;
             }
@@ -132,7 +130,7 @@ namespace Net.Sgoliver.NRtfTree
                 this.hasParam = hasParameter;
                 this.param = parameter;
 
-				/* Inicializados por defecto */
+                /* Inicializados por defecto */
                 //this.parent = null;
                 //this.root = null;
             }
@@ -154,7 +152,7 @@ namespace Net.Sgoliver.NRtfTree
                 this.hasParam = token.HasParameter;
                 this.param = token.Parameter;
 
-				/* Inicializados por defecto */
+                /* Inicializados por defecto */
                 //this.parent = null;
                 //this.root = null;
             }
@@ -169,17 +167,17 @@ namespace Net.Sgoliver.NRtfTree
             /// <param name="newNode">Nuevo nodo a añadir.</param>
             public void AppendChild(RtfTreeNode newNode)
             {
-				if(newNode != null)
-				{
-					//Se asigna como nodo padre el nodo actual
-					newNode.parent = this;
+                if (newNode != null)
+                {
+                    //Se asigna como nodo padre el nodo actual
+                    newNode.parent = this;
 
                     //Se actualizan las propiedades Root y Tree del nuevo nodo y sus posibles hijos
                     updateNodeRoot(newNode);
 
-					//Se añade el nuevo nodo al final de la lista de nodos hijo
-					children.Add(newNode);
-				}
+                    //Se añade el nuevo nodo al final de la lista de nodos hijo
+                    children.Add(newNode);
+                }
             }
 
             /// <summary>
@@ -660,14 +658,14 @@ namespace Net.Sgoliver.NRtfTree
                 return node;
             }
 
-			/// <summary>
-			/// Devuelve una representación del nodo donde se indica su tipo, clave, indicador de parámetro y valor de parámetro
-			/// </summary>
-			/// <returns>Cadena de caracteres del tipo [TIPO, CLAVE, IND_PARAMETRO, VAL_PARAMETRO]</returns>
-			public override string ToString()
-			{
-				return "[" + this.type + ", " + this.key + ", " + this.hasParam + ", " + this.param + "]";
-			}
+            /// <summary>
+            /// Devuelve una representación del nodo donde se indica su tipo, clave, indicador de parámetro y valor de parámetro
+            /// </summary>
+            /// <returns>Cadena de caracteres del tipo [TIPO, CLAVE, IND_PARAMETRO, VAL_PARAMETRO]</returns>
+            public override string ToString()
+            {
+                return "[" + this.type + ", " + this.key + ", " + this.hasParam + ", " + this.param + "]";
+            }
 
             #endregion
 
@@ -733,8 +731,8 @@ namespace Net.Sgoliver.NRtfTree
                         {
                             //Si es un caracter especial como las vocales acentuadas
                             if (curNode.NodeKey == "\'")
-                            {						
-								res.Append(GetHexa(curNode.Parameter));
+                            {
+                                res.Append(GetHexa(curNode.Parameter));
                             }
                         }
                     }
@@ -843,10 +841,10 @@ namespace Net.Sgoliver.NRtfTree
                 {
                     return root;
                 }
-				set
-				{
-					root = value;
-				}
+                set
+                {
+                    root = value;
+                }
             }
 
             /// <summary>
@@ -858,10 +856,10 @@ namespace Net.Sgoliver.NRtfTree
                 {
                     return parent;
                 }
-				set
-				{
-					parent = value;
-				}
+                set
+                {
+                    parent = value;
+                }
             }
 
             /// <summary>
@@ -888,10 +886,10 @@ namespace Net.Sgoliver.NRtfTree
                 {
                     return type;
                 }
-				set
-				{
-					type = value;
-				}
+                set
+                {
+                    type = value;
+                }
             }
 
             /// <summary>

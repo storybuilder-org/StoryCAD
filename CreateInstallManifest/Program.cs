@@ -1,9 +1,9 @@
-﻿using System;
+﻿using DirectoryComparer.Services;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Security.Cryptography;
-using DirectoryComparer.Services;
 
 
 namespace CreateInstallManifest
@@ -47,7 +47,7 @@ namespace CreateInstallManifest
             foreach (string file in files)
             {
                 string hash = GetHash(file, hasher);
-                manifest.WriteLine("{0},{1}",file,hash);
+                manifest.WriteLine("{0},{1}", file, hash);
             }
             manifest.Close();
         }

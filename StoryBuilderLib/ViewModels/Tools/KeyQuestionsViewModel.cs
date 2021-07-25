@@ -1,18 +1,15 @@
-﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using Microsoft.Toolkit.Mvvm.ComponentModel;
-using Microsoft.Toolkit.Mvvm.DependencyInjection;
-using StoryBuilder.Controllers;
-using StoryBuilder.Models; 
+﻿using Microsoft.Toolkit.Mvvm.ComponentModel;
+using StoryBuilder.Models;
 using StoryBuilder.Models.Tools;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace StoryBuilder.ViewModels.Tools
 {
-    public class KeyQuestionsViewModel: ObservableRecipient
+    public class KeyQuestionsViewModel : ObservableRecipient
     {
         #region Fields
-        
-        private readonly StoryController _story;
+
         private List<KeyQuestionModel> _questions;
         private KeyQuestionModel _questionModel;
         private int _index;
@@ -25,7 +22,7 @@ namespace StoryBuilder.ViewModels.Tools
         public string StoryElementName
         {
             get => _storyElementName;
-            set 
+            set
             {
                 SetProperty(ref _storyElementName, value);
                 _questions = GlobalData.KeyQuestionsSource[_storyElementName];
@@ -48,7 +45,7 @@ namespace StoryBuilder.ViewModels.Tools
         }
 
         #endregion
-        
+
         #region ComboBox and ListBox sources
         public readonly ObservableCollection<string> KeyQuestionElements;
         #endregion
@@ -68,7 +65,7 @@ namespace StoryBuilder.ViewModels.Tools
         {
             _index--;
             if (_index < 0)
-                _index = _questions.Count -1;
+                _index = _questions.Count - 1;
             _questionModel = _questions[_index];
             Topic = _questionModel.Topic;
             Question = _questionModel.Question;
@@ -77,11 +74,11 @@ namespace StoryBuilder.ViewModels.Tools
         #endregion
 
         #region Constructor
-        public KeyQuestionsViewModel ()
+        public KeyQuestionsViewModel()
         {
             KeyQuestionElements = new ObservableCollection<string>();
-            
-            foreach (string element in GlobalData.KeyQuestionsSource.Keys) 
+
+            foreach (string element in GlobalData.KeyQuestionsSource.Keys)
                 KeyQuestionElements.Add(element);
             StoryElementName = KeyQuestionElements[0];
         }

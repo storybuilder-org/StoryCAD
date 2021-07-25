@@ -1,10 +1,7 @@
-﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using Microsoft.Toolkit.Mvvm.DependencyInjection;
-using Microsoft.Toolkit.Mvvm.ComponentModel;
-using StoryBuilder.Controllers;
+﻿using Microsoft.Toolkit.Mvvm.ComponentModel;
 using StoryBuilder.Models;
 using StoryBuilder.Models.Tools;
+using System.Collections.ObjectModel;
 
 namespace StoryBuilder.ViewModels.Tools
 {
@@ -12,7 +9,6 @@ namespace StoryBuilder.ViewModels.Tools
     {
         #region Fields
 
-        private readonly StoryController _story;
         private TopicModel _topic;
         private int _index;
 
@@ -61,7 +57,7 @@ namespace StoryBuilder.ViewModels.Tools
             _topic = GlobalData.TopicsSource[TopicName];
             SubTopicNames.Clear();
             SubTopicNotes.Clear();
-            foreach (SubTopicModel model in _topic.SubTopics) 
+            foreach (SubTopicModel model in _topic.SubTopics)
             {
                 SubTopicNames.Add(model.SubTopicName);
                 SubTopicNotes.Add(model.SubTopicNotes);

@@ -2,7 +2,7 @@
 
 namespace StoryBuilder.Models.Tools
 {
-    public enum TopicTypeEnum {Notepad, Inline}
+    public enum TopicTypeEnum { Notepad, Inline }
     public class TopicModel
     {
         public TopicTypeEnum TopicType;

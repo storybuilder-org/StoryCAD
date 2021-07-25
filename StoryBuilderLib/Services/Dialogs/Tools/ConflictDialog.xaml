@@ -6,14 +6,15 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     Title="Conflict Builder"
-    PrimaryButtonText="Copy"
-    SecondaryButtonText="Cancel" 
+    PrimaryButtonText="Copy to Protagonist"
+    SecondaryButtonText="Copy to Antagonist"
+    CloseButtonText="Cancel"
     xmlns:usercontrols="using:StoryBuilder.Controls">
   
     <Grid Padding="14,0,14,0">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <usercontrols:Conflict Grid.Row="4" MinWidth="400" />
+        <usercontrols:Conflict x:Name="Conflict" x:FieldModifier="public" Grid.Row="4" MinWidth="400" />
     </Grid>
 </ContentDialog>

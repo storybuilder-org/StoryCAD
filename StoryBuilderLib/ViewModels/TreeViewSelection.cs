@@ -1,13 +1,13 @@
-﻿using Microsoft.UI.Xaml; 
+﻿using Microsoft.UI.Xaml;
 using System.ComponentModel;
 
 namespace StoryBuilder.ViewModels
 {
-    public class TreeViewSelection: DependencyObject, INotifyPropertyChanged
+    public class TreeViewSelection : DependencyObject, INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
-        public object SelectedItem  
-        { 
+        public object SelectedItem
+        {
             get => GetValue(SelectedItemProperty);
             set
             {
@@ -18,10 +18,10 @@ namespace StoryBuilder.ViewModels
 
         // Use a DependencyProperty as the backing store for SelectedItem
         public static readonly DependencyProperty SelectedItemProperty =
-            DependencyProperty.Register("SelectedItem", typeof(object), 
-                typeof(TreeViewSelection), 
+            DependencyProperty.Register("SelectedItem", typeof(object),
+                typeof(TreeViewSelection),
                 new PropertyMetadata(null));
-        
+
         void NotifyPropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));

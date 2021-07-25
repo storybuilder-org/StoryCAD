@@ -1,12 +1,12 @@
-﻿using Microsoft.UI.Xaml.Controls;
-using Microsoft.Toolkit.Mvvm.DependencyInjection;
+﻿using Microsoft.Toolkit.Mvvm.DependencyInjection;
+using Microsoft.UI.Xaml.Controls;
 using StoryBuilder.ViewModels;
 
 namespace StoryBuilder.Controls
 {
     public sealed class CharacterName : ComboBox
     {
-        
+
         public CharacterName() : base()
         {
             DefaultStyleKey = typeof(ComboBox);

@@ -7,7 +7,7 @@ namespace StoryBuilderTests
     public class StoryModelTests
     {
         private StoryModel model = new StoryModel();
-        
+
         [TestMethod]
         public void TestConstructor()
         {

@@ -1,20 +1,20 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
-using System;
-using System.Threading.Tasks;
-using NavigationService = StoryBuilder.Services.Navigation.NavigationService;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using StoryBuilder.Controllers;
 using StoryBuilder.DAL;
 using StoryBuilder.Models;
+using StoryBuilder.Services.Help;
 using StoryBuilder.Services.Installation;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.Services.Preferences;
-using StoryBuilder.Services.Help;
 using StoryBuilder.Services.Search;
 using StoryBuilder.ViewModels;
 using StoryBuilder.ViewModels.Tools;
+using System;
+using System.Threading.Tasks;
 using Windows.Storage;
+using NavigationService = StoryBuilder.Services.Navigation.NavigationService;
 
 namespace StoryBuilderTests
 {
@@ -38,7 +38,7 @@ namespace StoryBuilderTests
             await pref.LoadPreferences(localFolder.Path, story);
             // Validate preferences
             Assert.IsNotNull(GlobalData.Preferences);
-            Assert.AreEqual(localPath,GlobalData.Preferences.InstallationDirectory);
+            Assert.AreEqual(localPath, GlobalData.Preferences.InstallationDirectory);
 
             ListLoader loader = Ioc.Default.GetService<ListLoader>();
             GlobalData.ListControlSource = await loader.Init(localPath);

@@ -1,8 +1,7 @@
-﻿using Windows.Storage;
-using Microsoft.UI.Xaml;
-using StoryBuilder.Models;
+﻿using StoryBuilder.Models;
 using StoryBuilder.Models.Tools;
 using StoryBuilder.ViewModels.Tools;
+using Windows.Storage;
 
 namespace StoryBuilder.Controllers
 {
