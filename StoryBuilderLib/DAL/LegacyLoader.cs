@@ -1042,7 +1042,7 @@ namespace StoryBuilder.DAL
             ProblemModel problem = null;
             SettingModel setting = null;
             PlotPointModel plotpoint = null;
-            CharacterRelationshipsModel relationship = null;
+            CharacterRelationship relationship = null;
 
             // TODO: Note to test StoryModel for null after call
             // Locally defined variables
@@ -1584,35 +1584,37 @@ namespace StoryBuilder.DAL
                             //question.Answer = new string(rdr.ReadChars(FileRecHeader.RecordLength));
                             break;
                         case RelationRecType:
-                            relationship = new CharacterRelationshipsModel();
+                            //TODO: Fix this
+                            relationship = new CharacterRelationship();
                             _model.RelationList.Add(relationship);
                             switch (VersionRec.Version)
                             {
                                 case "00.06":
                                     V0006FileRelationRec = ReadStruct<V0006CharRelationData>(rdr);
-                                    relationship.FirstChar = V0006FileRelationRec.FirstChar.TrimEnd();
-                                    relationship.SecondChar = V0006FileRelationRec.SecondChar.TrimEnd();
-                                    relationship.FirstTrait = "";
-                                    relationship.SecondTrait = "";
-                                    relationship.Relationship = "";
+                                    //relationship.FirstCharacter = V0006FileRelationRec.FirstChar.TrimEnd();
+                                    //relationship.SecondCharacter = V0006FileRelationRec.SecondChar.TrimEnd();
+                                    //relationship.FirstTrait = "";
+                                    //relationship.SecondTrait = "";
+                                    //relationship.Relationship = "";
                                     relationship.Remarks = "";
                                     break;
                                 case "00.08":
                                     V0008FileRelationRec = ReadStruct<V0008CharRelationData>(rdr);
-                                    relationship.FirstChar = V0008FileRelationRec.FirstChar.TrimEnd();
-                                    relationship.SecondChar = V0008FileRelationRec.SecondChar.TrimEnd();
-                                    relationship.FirstTrait = V0008FileRelationRec.Trait1.TrimEnd();
-                                    relationship.SecondTrait = V0008FileRelationRec.Trait2.TrimEnd();
-                                    relationship.Relationship = V0008FileRelationRec.Relationship.TrimEnd();
+                                    //relationship.FirstCharacter = V0008FileRelationRec.FirstChar.TrimEnd();
+                                    //relationship.SecondCharacter = V0008FileRelationRec.SecondChar.TrimEnd();
+                                    //relationship.FirstTrait = V0008FileRelationRec.Trait1.TrimEnd();
+                                    //relationship.SecondTrait = V0008FileRelationRec.Trait2.TrimEnd();
+                                    //relationship.Relationship = V0008FileRelationRec.Relationship.TrimEnd();
                                     relationship.Remarks = V0008FileRelationRec.Remarks.TrimEnd();
                                     break;
                                 default:
                                     FileRelationRec = ReadStruct<CharRelationData>(rdr);
-                                    relationship.FirstChar = V0008FileRelationRec.FirstChar.TrimEnd();
-                                    relationship.SecondChar = V0008FileRelationRec.SecondChar.TrimEnd();
-                                    relationship.FirstTrait = V0008FileRelationRec.Trait1.TrimEnd();
-                                    relationship.SecondTrait = V0008FileRelationRec.Trait2.TrimEnd();
-                                    relationship.Relationship = V0008FileRelationRec.Relationship.TrimEnd();
+                                    relationship = new CharacterRelationship();
+                                    //relationship.FirstCharacter.Name = V0008FileRelationRec.FirstChar.TrimEnd();
+                                    //relationship.SecondCharacter.Name = V0008FileRelationRec.SecondChar.TrimEnd();
+                                    //relationship.FirstTrait = V0008FileRelationRec.Trait1.TrimEnd();
+                                    //relationship.SecondTrait = V0008FileRelationRec.Trait2.TrimEnd();
+                                    //relationship.Relationship = V0008FileRelationRec.Relationship.TrimEnd();
                                     relationship.Remarks = V0008FileRelationRec.Remarks.TrimEnd();
                                     FileRelationRec.Remarks = "";
                                     break;

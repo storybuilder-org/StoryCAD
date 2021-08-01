@@ -1,5 +1,6 @@
 ﻿using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using StoryBuilder.ViewModels;
+using StoryBuilder.ViewModels.Tools;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -11,7 +12,7 @@ namespace StoryBuilder.Views
     public sealed partial class CharacterPage : BindablePage
     {
         public CharacterViewModel CharVm => Ioc.Default.GetService<CharacterViewModel>();
-
+ 
         public CharacterPage()
         {
             InitializeComponent();

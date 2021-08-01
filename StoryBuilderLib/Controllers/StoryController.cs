@@ -46,22 +46,22 @@ namespace StoryBuilder.Controllers
         //TODO: Move updates to the respective viewmodels   
         #region Update other entities   
 
-        public void UpdateCharacterRelationsip(CharacterRelationshipsViewModel viewModel, CharacterRelationshipsModel model)
-        {
-            // TODO: Both UpdateCharacterRelationship and ShowCharacterRelationship are lists and need keyed.
-            // TODO: Use Dictionary<FirstChar|SecondChar, CharacterRelationshipModel>?
-            if (!viewModel.Changed)
-                return;
-            model.Id = viewModel.Id;
-            model.FirstChar = viewModel.FirstChar;
-            model.FirstTrait = viewModel.FirstTrait;
-            model.SecondChar = viewModel.SecondChar;
-            model.SecondTrait = viewModel.SecondTrait;
-            model.Relationship = viewModel.Relationship;
-            model.Remarks = viewModel.Remarks;
-            // TODO: Set StoryModel.Changed  to true;
+        //public void UpdateCharacterRelationsip(CharacterRelationshipViewModel viewModel, CharacterRelationshipsModel model)
+        //{
+        //    // TODO: Both UpdateCharacterRelationship and ShowCharacterRelationship are lists and need keyed.
+        //    // TODO: Use Dictionary<FirstChar|SecondChar, CharacterRelationshipModel>?
+        //    if (!viewModel.Changed)
+        //        return;
+        //    model.Id = viewModel.Id;
+        //    model.FirstChar = viewModel.FirstChar;
+        //    model.FirstTrait = viewModel.FirstTrait;
+        //    model.SecondChar = viewModel.SecondChar;
+        //    model.SecondTrait = viewModel.SecondTrait;
+        //    model.Relationship = viewModel.Relationship;
+        //    model.Remarks = viewModel.Remarks;
+        //    // TODO: Set StoryModel.Changed  to true;
 
-        }
+        //}
 
         #endregion
 

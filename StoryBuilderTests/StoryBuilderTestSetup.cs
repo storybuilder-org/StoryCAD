@@ -95,7 +95,7 @@ namespace StoryBuilderTests
             Assert.AreEqual(33, GlobalData.ListControlSource["Theme"].Count);
             Assert.AreEqual(220, GlobalData.ListControlSource["Tone"].Count);
             Assert.AreEqual(9, GlobalData.ListControlSource["Topic"].Count);
-            Assert.AreEqual(20, GlobalData.ListControlSource["Value"].Count);
+            Assert.AreEqual(38, GlobalData.ListControlSource["Value"].Count);
             Assert.AreEqual(163, GlobalData.ListControlSource["ValueExchange"].Count);
             Assert.AreEqual(5, GlobalData.ListControlSource["Viewpoint"].Count);
             Assert.AreEqual(7, GlobalData.ListControlSource["Voice"].Count);

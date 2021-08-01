@@ -28,7 +28,7 @@ namespace StoryBuilder.Models
         /// and scenes, plus containers).
         /// 
         public StoryElementCollection StoryElements;
-        /// 
+        ///
         /// It also contains two persisted TreeView representations, a Story Explorer tree which
         /// contains all Story Elements (the StoryOverview and all Problem, Character, Setting, PlotPoint
         /// and Folder elements) and a Narrator View which contains just Section (chapter, etc) and
@@ -40,7 +40,7 @@ namespace StoryBuilder.Models
         public ObservableCollection<StoryNodeItem> ExplorerView = new ObservableCollection<StoryNodeItem>();
         public ObservableCollection<StoryNodeItem> NarratorView = new ObservableCollection<StoryNodeItem>();
 
-        public ObservableCollection<CharacterRelationshipsModel> RelationList;
+        public ObservableCollection<CharacterRelationship> RelationList;
 
         #endregion
 
@@ -56,7 +56,7 @@ namespace StoryBuilder.Models
             ExplorerView = new ObservableCollection<StoryNodeItem>();
             NarratorView = new ObservableCollection<StoryNodeItem>();
 
-            RelationList = new ObservableCollection<CharacterRelationshipsModel>();
+            RelationList = new ObservableCollection<CharacterRelationship>();
 
             Changed = false;
         }

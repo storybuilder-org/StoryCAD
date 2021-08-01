@@ -1,6 +1,7 @@
 ﻿using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using Microsoft.Toolkit.Mvvm.Messaging;
+using Microsoft.Toolkit.Mvvm.Input;
 using StoryBuilder.Controllers;
 using StoryBuilder.DAL;
 using StoryBuilder.Models;
@@ -28,6 +29,12 @@ namespace StoryBuilder.ViewModels
         #endregion
 
         #region Properties
+
+        #region Relay Commands
+        public RelayCommand AddRelationshipCommand { get; }
+        public RelayCommand RemoveRelationshipCommand { get; }
+
+        #endregion
 
         // StoryElement data
 
@@ -498,6 +505,42 @@ namespace StoryBuilder.ViewModels
             set => _changed = value;
         }
 
+        // Relationship info
+
+        private ObservableCollection<CharacterRelationship> _relationships;
+        public ObservableCollection<CharacterRelationship> Relationships
+        {
+            get => _relationships;
+            set => SetProperty(ref _relationships, value);
+        }
+
+        private CharacterRelationship _selectedRelationship;
+
+        public CharacterRelationship SelectedRelationship 
+        {
+            get => _selectedRelationship;
+            set => SetProperty(ref _selectedRelationship, value);
+        }
+
+
+        private string _newRelationshipMember;
+        public string NewRelationshipMember
+        {
+            get => _newRelationshipMember;
+            set
+            {
+                if (RelationshipExits(value))
+                {
+                    var _smsg = new StatusMessage("Character is already in Relationships", 200);
+                    Messenger.Send(new StatusChangedMessage(_smsg));
+                }
+                SetProperty(ref _newRelationshipMember, value);
+                StoryElement element = StringToStoryElement(value);
+                string msg = String.Format("New cast member selected", element.Name);
+                var smsg = new StatusMessage(msg, 200);
+                Messenger.Send(new StatusChangedMessage(smsg));
+            }
+        }
         #endregion
 
         #region Public Methods
@@ -674,6 +717,43 @@ namespace StoryBuilder.ViewModels
                 Messenger.Send(new IsChangedMessage(Changed));
             }
         }
+
+        private bool RelationshipExits(string uuid)
+        {
+            //TODO: Fix this
+            //foreach (StoryElement element in CastMembers)
+            //    if (uuid.Equals(element.Uuid))
+            //        return true;
+
+            return false;
+        }
+
+        private StoryElement StringToStoryElement(string value)
+        {
+            if (value == null)
+                return null;
+            if (value.Equals(string.Empty))
+                return null;
+            // Get the current StoryModel's StoryElementsCollection
+            ShellViewModel shell = Ioc.Default.GetService<ShellViewModel>();
+            StoryElementCollection elements = shell.StoryModel.StoryElements;
+            // legacy: locate the StoryElement from its Name
+            foreach (StoryElement element in elements)  // Character or Setting??? Search both?
+            {
+                if (element.Type == StoryItemType.Character | element.Type == StoryItemType.Setting)
+                {
+                    if (value.Equals(element.Name))
+                        return element;
+                }
+            }
+            // Look for the StoryElement corresponding to the passed guid
+            // (This is the normal approach)
+            Guid guid = new Guid(value.ToString());
+            if (elements.StoryElementGuids.ContainsKey(guid))
+                return elements.StoryElementGuids[guid];
+            return null;   // Not found
+        }
+
 
         #endregion
 

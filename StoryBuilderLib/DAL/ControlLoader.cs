@@ -4,6 +4,7 @@ using StoryBuilder.Models.Tools;
 using StoryBuilder.Services.Logging;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Windows.Storage;
 
@@ -31,6 +32,7 @@ namespace StoryBuilder.DAL
 
             // Populate UserControl data source collections
             GlobalData.ConflictTypes = LoadConflictTypes();
+            GlobalData.Relationships = LoadRelationships();
             //story.KeyQuestionsSource = LoadKeyQuestions();
             //story.StockScenesSource = LoadStockScenes();
             //story.TopicsSource = LoadTopics();
@@ -77,6 +79,38 @@ namespace StoryBuilder.DAL
                 }
             }
             return conflictTypes;
+        }
+
+
+        public List<Relationship> LoadRelationships()
+        {
+           List<Relationship> relationships = new List<Relationship>();
+
+            string section = string.Empty;
+            string keyword = string.Empty;
+            string keyvalue = string.Empty;
+            foreach (string line in lines)
+            {
+                ParseLine(line, ref section, ref keyword, ref keyvalue);
+                //   Process the parsed values
+                switch (section)
+                {
+                    case "Relationships":
+                        switch (keyword)
+                        {
+                            case "":
+                                break;
+                            case "Relationship":
+                                string[] tokens = keyvalue.Split(',');
+                                if (tokens.Length != 3)
+                                    continue;
+                                relationships.Add(new Relationship(tokens[0], tokens[1], tokens[2]));
+                                break;
+                        }
+                        break;
+                }
+            }
+            return relationships;
         }
 
         /// <summary>

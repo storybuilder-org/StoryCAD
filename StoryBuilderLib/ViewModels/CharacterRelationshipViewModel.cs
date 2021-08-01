@@ -3,15 +3,14 @@ using StoryBuilder.Models;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
-namespace StoryBuilder.ViewModels.Tools
+namespace StoryBuilder.ViewModels
 {
-    //TODO: Implmement INavigable (for close button?) Note different frame.
-    public class CharacterRelationshipsViewModel : ObservableRecipient // , INavigable
+    //TODO: Figure out what to do with this
+    public class CharacterRelationshipViewModel : ObservableRecipient
     {
         #region Fields
         private bool _changed;
 
-        private int _id;
         private string _firstChar;
         private string _firstTrait;
         private string _secondChar;
@@ -28,12 +27,6 @@ namespace StoryBuilder.ViewModels.Tools
         {
             get { return _changed; }
             set { _changed = false; }
-        }
-
-        public int Id   // Note that this property doesn't use Change Notification
-        {
-            get { return _id; }
-            set { _id = value; }
         }
 
         public string FirstChar
@@ -82,7 +75,7 @@ namespace StoryBuilder.ViewModels.Tools
 
         #region Constructor
 
-        public CharacterRelationshipsViewModel(Dictionary<string, ObservableCollection<string>> lists, ObservableCollection<CharacterModel> characters)
+        public CharacterRelationshipViewModel(Dictionary<string, ObservableCollection<string>> lists, ObservableCollection<CharacterModel> characters)
         {
             _characters = characters;
             RelationshipSource = lists["Relation"];

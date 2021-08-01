@@ -125,6 +125,60 @@
                 <usercontrols:RichEditBoxExtended Header="Appearance" RtfText="{x:Bind CharVm.Appearance, Mode=TwoWay}" AcceptsReturn="True"
                                                   IsSpellCheckEnabled="True" TextWrapping="Wrap"  ScrollViewer.VerticalScrollBarVisibility="Visible" />
             </PivotItem>
+            <PivotItem Header="Relationships">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <ComboBox x:Name="Members" Header="Members" Grid.Row="0" IsEditable="False" MinWidth="200"
+                              ItemsSource="{x:Bind CharVm.Relationships}"
+                              SelectedItem="{x:Bind CharVm.SelectedRelationship, Mode=TwoWay}" />
+                    <!--<ComboBox x:Name="Relationship" Header="Relationship" Grid.Row="1" IsEditable="True" MinWidth="200"
+                              ItemsSource="{x:Bind CharVm.SelectedRelationship.RelationshipList}"
+                              SelectedItem="{x:Bind CharVm.SelectedRelationship.Relationship, Mode=TwoWay}" />-->
+                    <Grid Grid.Row="2" HorizontalAlignment="Left" >
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition MinWidth="150" />
+                            <ColumnDefinition MinWidth="50" />
+                            <ColumnDefinition MinWidth="150" />
+                        </Grid.ColumnDefinitions>
+                        <!--<TextBox Header= "My Trait" Grid.Column="0" MinWidth="100"
+                                 Text="{x:Bind CharVm.MyTrait, Mode=TwoWay}" />
+                        <TextBlock Grid.Column="1" />
+                        <TextBox Header="Opposing Trait" Grid.Column="2" MinWidth="100"
+                                 Text="{x:Bind CharRel.OpposingTrait, Mode=TwoWay}" />-->
+                    </Grid>
+                    <!--<usercontrols:RichEditBoxExtended Header="Relationship Notes" Grid.Row="3"
+                                                      RtfText="{x:Bind CharRel.RelationshipNotes, Mode=TwoWay}" AcceptsReturn="True"
+                                                      IsSpellCheckEnabled="True" TextWrapping="Wrap"
+                                                      ScrollViewer.VerticalScrollBarVisibility="Visible" />-->
+                    <Grid Grid.Row="4" HorizontalAlignment="Left">
+                        <usercontrols:CharacterName Header="New Relationship"
+                                    IsEditable="False" MinWidth="300"
+                                    DisplayMemberPath="Name"
+                                    SelectedItem="{x:Bind CharVm.NewRelationshipMember, Mode=TwoWay, 
+                                    Converter={StaticResource StoryElement}}" />
+                        <TextBlock Width="10" />
+                        <Button FontFamily="Segoe MDL2 Assets" Content="&#xE710;" 
+                                        Command="{x:Bind CharVm.AddRelationshipCommand, Mode=OneWay}" >
+                            <ToolTipService.ToolTip>
+                                <ToolTip Content="Add Relationship"></ToolTip>
+                            </ToolTipService.ToolTip>
+                        </Button>
+                        <Button FontFamily="Segoe MDL2 Assets" Content="&#xE738;" 
+                                        Command="{x:Bind CharVm.RemoveRelationshipCommand, Mode=OneWay}" >
+                            <ToolTipService.ToolTip>
+                                <ToolTip Content="Remove Relationship"></ToolTip>
+                            </ToolTipService.ToolTip>
+                        </Button>
+                    </Grid>
+                </Grid>
+            </PivotItem>
             <PivotItem Header="Flaw">
                 <!-- Character flaw data (heights of RichEditBoxes were "110") -->
                 <Grid>

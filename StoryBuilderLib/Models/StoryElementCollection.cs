@@ -42,7 +42,7 @@ namespace StoryBuilder.Models
             switch (e.Action)
             {
                 case NotifyCollectionChangedAction.Add:
-                    //TODO: Assert that NeewItems count is always 1, or make this a loop
+                    //TODO: Assert that NewItems count is always 1, or make this a loop
                     element = (StoryElement)e.NewItems[0];
                     StoryElementGuids.Add(element.Uuid, element);
                     switch (element.Type)
