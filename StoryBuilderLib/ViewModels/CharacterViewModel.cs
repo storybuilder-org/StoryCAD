@@ -31,6 +31,8 @@ namespace StoryBuilder.ViewModels
         #region Properties
 
         #region Relay Commands
+        public RelayCommand AddTraitCommand { get; }
+        public RelayCommand RemoveTraitCommand { get; }
         public RelayCommand AddRelationshipCommand { get; }
         public RelayCommand RemoveRelationshipCommand { get; }
 
@@ -505,23 +507,67 @@ namespace StoryBuilder.ViewModels
             set => _changed = value;
         }
 
+        // Traits info
+
+        private ObservableCollection<string> _characterTraits;
+        public ObservableCollection<string> CharacterTraits
+        {
+            get => _characterTraits;
+            set => SetProperty(ref _characterTraits, value);
+        }
+
+        private int _existingTraitIndex;
+        public int ExistingTraitIndex
+        {
+            get => _existingTraitIndex;
+            set => SetProperty(ref _existingTraitIndex, value);
+        }
+
+        private string _newTrait;
+        public string NewTrait 
+        {
+            get => _newTrait;
+            set => SetProperty(ref _newTrait, value);
+        }
+
         // Relationship info
 
-        private ObservableCollection<CharacterRelationship> _relationships;
-        public ObservableCollection<CharacterRelationship> Relationships
+        private ObservableCollection<CharacterRelationship> _characterRelationships;
+        public ObservableCollection<CharacterRelationship> CharacterRelationships
+        {
+            get => _characterRelationships;
+            set => SetProperty(ref _characterRelationships, value);
+        }
+
+        private CharacterRelationship _selectedCharacterRelationship;
+
+        public CharacterRelationship SelectedCharacterRelationship 
+        {
+            get => _selectedCharacterRelationship;
+            set => SetProperty(ref _selectedCharacterRelationship, value);
+        }
+
+        private ObservableCollection<string> _relationships;
+        public ObservableCollection<string> Relationships 
         {
             get => _relationships;
             set => SetProperty(ref _relationships, value);
         }
 
-        private CharacterRelationship _selectedRelationship;
-
-        public CharacterRelationship SelectedRelationship 
+        private string _relationship;
+        public string Relationship
         {
-            get => _selectedRelationship;
-            set => SetProperty(ref _selectedRelationship, value);
+            get => _relationship;
+            set => SetProperty(ref _relationship, value);
         }
 
+        private string _relationshipNotes;
+
+        public string RelationshipNotes
+        {
+            get => _relationshipNotes;
+            set => SetProperty(ref _relationshipNotes, value);
+        }
 
         private string _newRelationshipMember;
         public string NewRelationshipMember
@@ -541,6 +587,7 @@ namespace StoryBuilder.ViewModels
                 Messenger.Send(new StatusChangedMessage(smsg));
             }
         }
+
         #endregion
 
         #region Public Methods
@@ -556,6 +603,8 @@ namespace StoryBuilder.ViewModels
             await SaveModel(); // Save the ViewModel back to the Story
         }
 
+        #endregion
+        #region Private Methods
         private void OnPropertyChanged(object sender, PropertyChangedEventArgs args)
         {
             if (_changeable)
@@ -608,6 +657,9 @@ namespace StoryBuilder.ViewModels
             Stability = Model.Stability;
             Work = Model.Work;
             Likes = Model.Likes;
+            CharacterTraits.Clear();
+            foreach (string member in Model.TraitList)
+                CharacterTraits.Add(member);
             Habits = Model.Habits;
             Abilities = Model.Abilities;
             WoundCategory = Model.WoundCategory;
@@ -683,6 +735,9 @@ namespace StoryBuilder.ViewModels
                 Model.Shrewdness = Shrewdness;
                 Model.Sociability = Sociability;
                 Model.Stability = Stability;
+                Model.TraitList.Clear();
+                foreach (string element in CharacterTraits)
+                    Model.TraitList.Add(element);
                 Model.Abilities = Abilities;
                 Model.WoundCategory = WoundCategory;
                 Model.WoundSummary = WoundSummary;
@@ -754,6 +809,13 @@ namespace StoryBuilder.ViewModels
             return null;   // Not found
         }
 
+        private void AddTrait()
+        {
+            CharacterTraits.Add(NewTrait);
+        }
+        private void RemoveTrait() 
+        {
+        }
 
         #endregion
 
@@ -787,6 +849,7 @@ namespace StoryBuilder.ViewModels
         public ObservableCollection<string> SensitivityList;
         public ObservableCollection<string> ShrewdnessList;
         public ObservableCollection<string> SociabilityList;
+        public ObservableCollection<string> TraitList;
         public ObservableCollection<string> StabilityList;
         public ObservableCollection<string> WoundCategoryList;
         public ObservableCollection<string> WoundSummaryList;
@@ -833,8 +896,13 @@ namespace StoryBuilder.ViewModels
             ShrewdnessList = lists["Shrewdness"];
             SociabilityList = lists["Sociability"];
             StabilityList = lists["Stability"];
+            TraitList = lists["Trait"];
             WoundCategoryList = lists["WoundCategory"];
             WoundSummaryList = lists["Wound"];
+
+            CharacterTraits = new ObservableCollection<string>();
+            AddTraitCommand = new RelayCommand(AddTrait, () => true);
+            RemoveTraitCommand = new RelayCommand(RemoveTrait, () => true);
 
             Role = string.Empty;
             StoryRole = string.Empty;

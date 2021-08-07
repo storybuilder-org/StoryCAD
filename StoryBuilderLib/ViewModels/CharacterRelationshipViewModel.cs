@@ -78,7 +78,6 @@ namespace StoryBuilder.ViewModels
         public CharacterRelationshipViewModel(Dictionary<string, ObservableCollection<string>> lists, ObservableCollection<CharacterModel> characters)
         {
             _characters = characters;
-            RelationshipSource = lists["Relation"];
         }
 
         #endregion

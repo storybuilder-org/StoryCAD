@@ -386,6 +386,14 @@ namespace StoryBuilder.DAL
             attr = _xml.CreateAttribute("Stability");
             attr.Value = rec.Stability;
             chr.Attributes.Append(attr);
+            XmlNode traitList = _xml.CreateElement("CharacterTraits");
+            foreach (string member in rec.TraitList)
+            {
+                XmlElement trait = _xml.CreateElement("Trait");
+                trait.AppendChild(_xml.CreateTextNode(member));
+                traitList.AppendChild(trait);
+            }
+            chr.AppendChild(traitList);
             attr = _xml.CreateAttribute("WoundCategory");
             attr.Value = rec.WoundCategory;
             chr.Attributes.Append(attr);

@@ -1,4 +1,5 @@
-﻿using Windows.Data.Xml.Dom;
+﻿using System.Collections.Generic;
+using Windows.Data.Xml.Dom;
 
 namespace StoryBuilder.Models
 {
@@ -321,6 +322,15 @@ namespace StoryBuilder.Models
             set => _likes = value;
         }
 
+        // Character traits data
+
+        private List<string> _traitList;
+        public List<string> TraitList
+        {
+            get => _traitList;
+            set => _traitList = value;
+        }
+
         // Character habits data
 
         private string _habits;
@@ -440,6 +450,7 @@ namespace StoryBuilder.Models
             Stability = string.Empty;
             Work = string.Empty;
             Likes = string.Empty;
+            TraitList = new List<string>();
             Habits = string.Empty;
             Abilities = string.Empty;
             WoundCategory = string.Empty;
@@ -495,6 +506,7 @@ namespace StoryBuilder.Models
             Stability = string.Empty;
             Work = string.Empty;
             Likes = string.Empty;
+            TraitList = new List<string>();
             Habits = string.Empty;
             Abilities = string.Empty;
             WoundCategory = string.Empty;
@@ -550,6 +562,7 @@ namespace StoryBuilder.Models
             Stability = string.Empty;
             Work = string.Empty;
             Likes = string.Empty;
+            TraitList = new List<string>();
             Habits = string.Empty;
             Abilities = string.Empty;
             WoundCategory = string.Empty;

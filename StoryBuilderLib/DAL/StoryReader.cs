@@ -312,6 +312,13 @@ namespace StoryBuilder.DAL
         private void ParseCharacter(IXmlNode xn)
         {
             var chr = new CharacterModel(xn, _model);
+            var traitList = xn.SelectSingleNode("./CharacterTraits");
+            if (traitList != null)
+            {
+                foreach (IXmlNode child in traitList.ChildNodes)
+                    if (child.NodeName.Equals("Trait"))
+                        chr.TraitList.Add(child.InnerText);
+            }
             foreach (var attr in xn.Attributes)
             {
                 switch (attr.NodeName)

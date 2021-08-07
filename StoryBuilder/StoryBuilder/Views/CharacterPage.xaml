@@ -133,14 +133,13 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
-                    <ComboBox x:Name="Members" Header="Members" Grid.Row="0" IsEditable="False" MinWidth="200"
+                    <ComboBox x:Name="Members" Header="Members" Grid.Row="0" IsEditable="False" MinWidth="250"
+                              ItemsSource="{x:Bind CharVm.CharacterRelationships}"
+                              SelectedItem="{x:Bind CharVm.SelectedCharacterRelationship, Mode=TwoWay}" />
+                    <ComboBox x:Name="Relationship" Header="Relationship" Grid.Row="1" MinWidth="250"
                               ItemsSource="{x:Bind CharVm.Relationships}"
-                              SelectedItem="{x:Bind CharVm.SelectedRelationship, Mode=TwoWay}" />
-                    <!--<ComboBox x:Name="Relationship" Header="Relationship" Grid.Row="1" IsEditable="True" MinWidth="200"
-                              ItemsSource="{x:Bind CharVm.SelectedRelationship.RelationshipList}"
-                              SelectedItem="{x:Bind CharVm.SelectedRelationship.Relationship, Mode=TwoWay}" />-->
+                              SelectedItem="{x:Bind CharVm.Relationship}" />
                     <Grid Grid.Row="2" HorizontalAlignment="Left" >
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition MinWidth="150" />
@@ -153,10 +152,10 @@
                         <TextBox Header="Opposing Trait" Grid.Column="2" MinWidth="100"
                                  Text="{x:Bind CharRel.OpposingTrait, Mode=TwoWay}" />-->
                     </Grid>
-                    <!--<usercontrols:RichEditBoxExtended Header="Relationship Notes" Grid.Row="3"
-                                                      RtfText="{x:Bind CharRel.RelationshipNotes, Mode=TwoWay}" AcceptsReturn="True"
+                    <usercontrols:RichEditBoxExtended Header="Relationship Notes" Grid.Row="3"
+                                                      RtfText="{x:Bind CharVm.RelationshipNotes, Mode=TwoWay}" AcceptsReturn="True"
                                                       IsSpellCheckEnabled="True" TextWrapping="Wrap"
-                                                      ScrollViewer.VerticalScrollBarVisibility="Visible" />-->
+                                                      ScrollViewer.VerticalScrollBarVisibility="Visible" />
                     <Grid Grid.Row="4" HorizontalAlignment="Left">
                         <usercontrols:CharacterName Header="New Relationship"
                                     IsEditable="False" MinWidth="300"
@@ -377,17 +376,45 @@
                                                   IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                                   ScrollViewer.VerticalScrollBarVisibility="Visible" />
             </PivotItem>
-            <PivotItem Header="Habits">
-                <!-- Character habits data -->
-                <usercontrols:RichEditBoxExtended Header="Habits" RtfText="{x:Bind CharVm.Habits, Mode=TwoWay}"
-                     AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
+            <PivotItem Header="Traits and Habits">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <!-- Character traits -->
+                    <TextBlock Text="Traits" Grid.Row="0" />
+                    <ScrollViewer Height="100" Grid.Row="1" >
+                        <ListView MinWidth="300"
+                                ItemsSource="{x:Bind CharVm.CharacterTraits, Mode=OneWay}"
+                                    SelectedIndex="{x:Bind CharVm.ExistingTraitIndex, Mode=OneWay}" >
+                        </ListView>
+                    </ScrollViewer>
+                    <StackPanel Orientation="Horizontal" Grid.Row="2">
+                        <ComboBox Header="New Trait"
+                              IsEditable="False" MinWidth="300"
+                              ItemsSource="{x:Bind CharVm.TraitList, Mode=OneWay}"
+                              SelectedItem="{x:Bind CharVm.NewTrait, Mode=TwoWay}" />
+                        <TextBlock Width="10" />
+                        <Button FontFamily="Segoe MDL2 Assets" Content="&#xE710;" 
+                                        Command="{x:Bind CharVm.AddTraitCommand, Mode=OneWay}" >
+                            <ToolTipService.ToolTip>
+                                <ToolTip Content="Add Trait"></ToolTip>
+                            </ToolTipService.ToolTip>
+                        </Button>
+                        <Button FontFamily="Segoe MDL2 Assets" Content="&#xE738;" 
+                                        Command="{x:Bind CharVm.RemoveTraitCommand, Mode=OneWay}" >
+                            <ToolTipService.ToolTip>
+                                <ToolTip Content="Add Character Trait"></ToolTip>
+                            </ToolTipService.ToolTip>
+                        </Button>
+                    </StackPanel>
+                    <usercontrols:RichEditBoxExtended Header="Habits" RtfText="{x:Bind CharVm.Habits, Mode=TwoWay}"
+                      Grid.Row="3" AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                      ScrollViewer.VerticalScrollBarVisibility="Visible" />
-            </PivotItem>
-            <PivotItem Header="Abilities and Skills">
-                <!-- Character abilities data -->
-                <usercontrols:RichEditBoxExtended Header="Abilities" RtfText="{x:Bind CharVm.Abilities, Mode=TwoWay}" AcceptsReturn="True"
-                                                  IsSpellCheckEnabled="True" TextWrapping="Wrap"
-                                                  ScrollViewer.VerticalScrollBarVisibility="Visible" />
+                </Grid>
             </PivotItem>
             <PivotItem Header="Likes and Dislikes">
                 <!-- Character likes data -->
