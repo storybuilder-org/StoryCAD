@@ -2,9 +2,11 @@
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using Microsoft.Toolkit.Mvvm.Messaging;
 using Microsoft.Toolkit.Mvvm.Input;
+using Microsoft.UI.Xaml.Controls;
 using StoryBuilder.Controllers;
 using StoryBuilder.DAL;
 using StoryBuilder.Models;
+using StoryBuilder.Services.Dialogs;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.Services.Messages;
 using StoryBuilder.Services.Navigation;
@@ -24,6 +26,7 @@ namespace StoryBuilder.ViewModels
         private readonly StoryWriter _wtr;
         private readonly LogService _logger;
         private readonly StoryController _story;
+        private StoryModel _storyModel;
         private bool _changeable;
 
         #endregion
@@ -532,16 +535,16 @@ namespace StoryBuilder.ViewModels
 
         // Relationship info
 
-        private ObservableCollection<CharacterRelationship> _characterRelationships;
-        public ObservableCollection<CharacterRelationship> CharacterRelationships
+        private ObservableCollection<Relationship> _characterRelationships;
+        public ObservableCollection<Relationship> CharacterRelationships
         {
             get => _characterRelationships;
             set => SetProperty(ref _characterRelationships, value);
         }
 
-        private CharacterRelationship _selectedCharacterRelationship;
+        private Relationship _selectedCharacterRelationship;
 
-        public CharacterRelationship SelectedCharacterRelationship 
+        public Relationship SelectedCharacterRelationship 
         {
             get => _selectedCharacterRelationship;
             set => SetProperty(ref _selectedCharacterRelationship, value);
@@ -815,6 +818,70 @@ namespace StoryBuilder.ViewModels
         }
         private void RemoveTrait() 
         {
+            if (ExistingTraitIndex == -1) 
+            {
+                var _smsg = new StatusMessage("No trait selected to delete", 200);
+                Messenger.Send(new StatusChangedMessage(_smsg));
+                return;
+            }
+            CharacterTraits.RemoveAt(ExistingTraitIndex);
+        }
+
+        public async void AddRelationship() 
+        {
+            _logger.Log(LogLevel.Info, "Executing AddRelationship command");
+            NewRelationshipDialog dialog = new();
+            dialog.XamlRoot = GlobalData.XamlRoot;
+            NewRelationshipViewModel vm = dialog.NewRelVM;
+            vm.RelationTypes.Clear();
+            foreach (RelationType relationType in GlobalData.RelationTypes)
+                vm.RelationTypes.Add(relationType);
+            vm.Member = _storyModel.StoryElements.StoryElementGuids[Model.Uuid];
+            vm.ProspectivePartners.Clear();
+            foreach (StoryElement character in _storyModel.StoryElements.Characters)
+            {
+                if (character == vm.Member) continue;
+                foreach (Relationship rel in CharacterRelationships)
+                {
+                    if (character == rel.Partner) goto NextCharacter;
+                }
+                vm.ProspectivePartners.Add(character);
+            NextCharacter: continue;
+            }
+            var result = await dialog.ShowAsync();
+            if (result == ContentDialogResult.Primary)
+            {
+                try
+                {
+                    // Create partner's reverse relationship
+                    RelationType reverse = new RelationType(vm.RelationType.PartnerRole, vm.RelationType.MemberRole);
+                    Relationship partnerRel = new Relationship(vm.SelectedPartner, vm.Member, reverse);
+                    // Create member's relationship
+                    Relationship memberRel = new Relationship(vm.Member, vm.SelectedPartner, vm.RelationType);
+                    // Complete pairing 
+                    partnerRel.PartnerRelationship = memberRel;
+                    memberRel.PartnerRelationship = partnerRel;
+                    // Add to StoryModel
+                    _storyModel.Relationships.Add(partnerRel);
+                    _storyModel.Relationships.Add(memberRel);
+                    // Add member relationship to view model
+                    CharacterRelationships.Add(memberRel);
+                    // Make this the selected relationship
+                    SelectedCharacterRelationship = memberRel;
+                    //StatusMessage = "New project ready.";
+                    //Logger.Log(LogLevel.Info, "NewFile command completed");
+                }
+                catch (Exception ex)
+                {
+                    //Logger.LogException(LogLevel.Error, ex, "Error creating new project");
+                    //StatusMessage = "New Story command failed";
+                }
+            }
+            else
+            {
+                //StatusMessage = "New project command cancelled.";
+                //Logger.Log(LogLevel.Info, "NewFile command cancelled");
+            }
         }
 
         #endregion
@@ -860,6 +927,8 @@ namespace StoryBuilder.ViewModels
 
         public CharacterViewModel()
         {
+            ShellViewModel shell = Ioc.Default.GetService<ShellViewModel>();
+            _storyModel = shell.StoryModel;
             _story = Ioc.Default.GetService<StoryController>();
             _logger = Ioc.Default.GetService<LogService>();
             _wtr = Ioc.Default.GetService<StoryWriter>();
@@ -904,6 +973,8 @@ namespace StoryBuilder.ViewModels
             AddTraitCommand = new RelayCommand(AddTrait, () => true);
             RemoveTraitCommand = new RelayCommand(RemoveTrait, () => true);
 
+            AddRelationshipCommand = new RelayCommand(AddRelationship, () => true);
+            CharacterRelationships = new ObservableCollection<Relationship>();
             Role = string.Empty;
             StoryRole = string.Empty;
             Archetype = string.Empty;

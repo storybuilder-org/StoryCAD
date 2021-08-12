@@ -32,7 +32,7 @@ namespace StoryBuilder.DAL
 
             // Populate UserControl data source collections
             GlobalData.ConflictTypes = LoadConflictTypes();
-            GlobalData.Relationships = LoadRelationships();
+            GlobalData.RelationTypes = LoadRelationTypes();
             //story.KeyQuestionsSource = LoadKeyQuestions();
             //story.StockScenesSource = LoadStockScenes();
             //story.TopicsSource = LoadTopics();
@@ -82,9 +82,9 @@ namespace StoryBuilder.DAL
         }
 
 
-        public List<Relationship> LoadRelationships()
+        public List<RelationType> LoadRelationTypes()
         {
-           List<Relationship> relationships = new List<Relationship>();
+           List<RelationType> relationships = new List<RelationType>();
 
             string section = string.Empty;
             string keyword = string.Empty;
@@ -95,16 +95,16 @@ namespace StoryBuilder.DAL
                 //   Process the parsed values
                 switch (section)
                 {
-                    case "Relationships":
+                    case "RelationTypes":
                         switch (keyword)
                         {
                             case "":
                                 break;
-                            case "Relationship":
+                            case "RelationType":
                                 string[] tokens = keyvalue.Split(',');
                                 if (tokens.Length != 3)
                                     continue;
-                                relationships.Add(new Relationship(tokens[0], tokens[1], tokens[2]));
+                                relationships.Add(new RelationType(tokens[0], tokens[1]));
                                 break;
                         }
                         break;

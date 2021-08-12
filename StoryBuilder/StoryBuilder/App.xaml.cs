@@ -109,8 +109,9 @@ namespace StoryBuilder
                     .AddSingleton<SectionViewModel>()
                     .AddSingleton<TrashCanViewModel>()
                     .AddSingleton<TreeViewSelection>()
-                    // Register Open/Save ViewModels
+                    // Register ContentDialog ViewModels
                     .AddSingleton<NewProjectViewModel>()
+                    .AddSingleton<NewRelationshipViewModel>()
                     // Register Tools ViewModels  
                     .AddSingleton<KeyQuestionsViewModel>()
                     .AddSingleton<TopicsViewModel>()

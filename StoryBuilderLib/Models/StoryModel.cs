@@ -1,5 +1,6 @@
 using StoryBuilder.Models.Tools;
 using StoryBuilder.ViewModels;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
 //using StoryBuilder.Models.Tools;
@@ -40,12 +41,7 @@ namespace StoryBuilder.Models
         public ObservableCollection<StoryNodeItem> ExplorerView = new ObservableCollection<StoryNodeItem>();
         public ObservableCollection<StoryNodeItem> NarratorView = new ObservableCollection<StoryNodeItem>();
 
-        public ObservableCollection<CharacterRelationship> RelationList;
-
-        #endregion
-
-        #region StoryElement collection properties
-
+        public ObservableCollection<Relationship> Relationships;
         #endregion
 
         #region Constructor
@@ -56,7 +52,7 @@ namespace StoryBuilder.Models
             ExplorerView = new ObservableCollection<StoryNodeItem>();
             NarratorView = new ObservableCollection<StoryNodeItem>();
 
-            RelationList = new ObservableCollection<CharacterRelationship>();
+            Relationships = new ObservableCollection<Relationship>();
 
             Changed = false;
         }

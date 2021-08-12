@@ -15,7 +15,7 @@ namespace StoryBuilderTests
             Assert.IsNotNull(model.ExplorerView);
             Assert.IsNotNull(model.NarratorView);
             Assert.IsNotNull(model.StoryElements);
-            Assert.IsNotNull(model.RelationList);
+            Assert.IsNotNull(model.Relationships);
             Assert.IsFalse(model.Changed);
         }
     }

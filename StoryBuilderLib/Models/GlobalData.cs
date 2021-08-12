@@ -27,7 +27,7 @@ namespace StoryBuilder.Models
         /// </summary>
         /// User Controls
         public static SortedDictionary<string, ConflictCategoryModel> ConflictTypes;
-        public static List<Relationship> Relationships;
+        public static List<RelationType> RelationTypes;
 
         // Tools
         public static Dictionary<string, List<KeyQuestionModel>> KeyQuestionsSource;

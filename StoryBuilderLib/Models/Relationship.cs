@@ -1,23 +1,44 @@
 ﻿using Microsoft.Toolkit.Mvvm.ComponentModel;
+using System;
 
-namespace StoryBuilder.Models
+namespace StoryBuilder.Models 
 {
     public class Relationship : ObservableObject
     {
-        public string FirstPersonRelationship;
-        public string SecondPersonRelationship;
-        public bool FamilyRelation;
+        #region Properties
 
-        public Relationship(string first, string second, string family)
+        public StoryElement Member { get; set; }   // This character in the relatinship
+        public StoryElement Partner { get; set; }  // The other person in the relationship
+        public Relationship PartnerRelationship { get; set; } // The partner's side of things
+        public RelationType RelationType { get; set; }
+        public string Trait { get; set; }
+        public string Dynamic { get; set; } 
+        public string Remarks { get; set; }
+        #endregion
+
+        #region Constructor
+
+        public Relationship() 
         {
-            FirstPersonRelationship = first;
-            SecondPersonRelationship = second;
-            FamilyRelation = family.Equals("Y");
+            Member = null;
+            Partner = null;
+            RelationType = null;
+            Trait = string.Empty;
+            Dynamic = string.Empty;
+            Remarks = string.Empty;
         }
 
-        public override string ToString()
+        public Relationship(StoryElement member, StoryElement partner, RelationType type)
         {
-            return FirstPersonRelationship + " => " + SecondPersonRelationship;
+            Member = member;
+            Partner = partner;
+            RelationType = type;
+            PartnerRelationship = null;
+            Trait = string.Empty;
+            Dynamic = string.Empty;
+            Remarks = string.Empty;
         }
+
+        #endregion
     }
 }

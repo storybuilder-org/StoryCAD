@@ -133,6 +133,7 @@ namespace StoryBuilderTests
                     .AddSingleton<TreeViewSelection>()
                     // Register Open/Save ViewModels
                     .AddSingleton<NewProjectViewModel>()
+                    .AddSingleton<NewRelationshipViewModel>()
                     // Register Tools ViewModels  
                     .AddSingleton<KeyQuestionsViewModel>()
                     .AddSingleton<TopicsViewModel>()
