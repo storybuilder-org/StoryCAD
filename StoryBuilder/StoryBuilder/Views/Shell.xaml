@@ -75,21 +75,6 @@
                 </AppBarButton>
             </CommandBarFlyout.PrimaryCommands>
         </CommandBarFlyout>
-        <!-- DataTemplate for a TreeViewItem Story Node -->
-        <!--<DataTemplate x:Key="TreeViewItemDataTemplate" x:DataType="viewmodels:StoryNodeItem" >
-            <muxc:TreeViewItem ItemsSource="{x:Bind Children}" 
-                               IsExpanded="{x:Bind IsExpanded, Mode=TwoWay}"
-                               RightTapped="TreeViewItem_RightTapped">
-                <StackPanel Orientation="Horizontal">
-                    <SymbolIcon Symbol="{x:Bind Symbol, Mode=OneWay}" Width="16" Height="16"/>
-                    <TextBlock Margin="0,0,10,0"/>
-                    <TextBlock Text="{x:Bind Name, Mode=TwoWay}" />
-                </StackPanel>
-            </muxc:TreeViewItem>
-            -->
-        <!--IsSelected="{x:Bind IsSelected, Mode=OneWay}"-->
-        <!--
-        </DataTemplate>-->
     </Page.Resources>
 
     <Grid>
@@ -305,7 +290,7 @@
                 </AppBarButton>
             </CommandBar.PrimaryCommands>
         </CommandBar>
-        <!-- SplitView: Navigation and Story Element Pages -->
+        <!-- SplitView: Navigation Tree and Story Element Pages -->
         <SplitView Grid.Row="1" IsPaneOpen="{x:Bind ShellVm.IsPaneOpen, Mode=TwoWay}"
                    VerticalAlignment="Stretch"
                    OpenPaneLength="320"
@@ -354,7 +339,6 @@
             <ComboBox IsEditable="False" Width="200"  Margin="10" ItemsSource="{x:Bind ShellVm.ViewList}" 
                       SelectionChanged="{x:Bind ShellVm.ViewChanged, Mode=OneWay}"
                       SelectedItem="{x:Bind ShellVm.SelectedView, Mode=TwoWay}" />
-            <InfoBar IsOpen="True" Message=" " />
             <TextBlock Text="{x:Bind ShellVm.StatusMessage, Mode=OneWay}" 
                        Width = "300"
                        FontSize="14"
