@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Toolkit.Mvvm.DependencyInjection;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using StoryBuilder.Controllers;
@@ -291,7 +291,7 @@ namespace StoryBuilder
 
         private void OnUnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
         {
-            _log.LogException(LogLevel.Fatal, e.Exception, e.Message);
+            _log.LogException(LogLevel.Error, e.Exception, e.Message);
             _log.Flush();
             AbortApp();
         }

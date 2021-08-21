@@ -18,12 +18,12 @@
 
   <ItemGroup>
     <PackageReference Include="CommonServiceLocator" Version="2.0.6" />
-    <PackageReference Include="Microsoft.ProjectReunion" Version="0.8.0-preview" />
-    <PackageReference Include="Microsoft.ProjectReunion.Foundation" Version="0.8.0-preview" />
-    <PackageReference Include="Microsoft.ProjectReunion.WinUI" Version="0.8.0-preview" />
-    <PackageReference Include="Microsoft.Toolkit.Mvvm" Version="7.0.2" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="7.0.3" />
+    <PackageReference Include="Microsoft.ProjectReunion" Version="0.8.2" />
+    <PackageReference Include="Microsoft.ProjectReunion.Foundation" Version="0.8.2" />
+    <PackageReference Include="Microsoft.ProjectReunion.WinUI" Version="0.8.2" />
     <PackageReference Include="NLog" Version="4.7.10" />
-    <PackageReference Include="NLog.Extensions.Logging" Version="1.7.2" />
+    <PackageReference Include="NLog.Extensions.Logging" Version="1.7.3" />
   </ItemGroup>
 
   <ItemGroup>

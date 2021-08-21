@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Toolkit.Mvvm.DependencyInjection;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using StoryBuilder.Controllers;
 using StoryBuilder.DAL;

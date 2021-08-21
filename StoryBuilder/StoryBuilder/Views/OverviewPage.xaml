@@ -94,7 +94,7 @@
                     </Grid>
                     <usercontrols:CharacterName Header="Viewpoint Character" Grid.Row="2" IsEditable="False" MinWidth="300"
                               DisplayMemberPath="Name"
-                              SelectedItem="{x:Bind OverviewVm.ViewpointCharacter, Mode=TwoWay, Converter={StaticResource StoryElement}}" />
+                              SelectedItem="{x:Bind OverviewVm.ViewpointCharacter, Mode=TwoWay, Converter={StaticResource ToStoryElement}}" />
                     <Grid Grid.Row="3" HorizontalAlignment="Left" >
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="2*"/>

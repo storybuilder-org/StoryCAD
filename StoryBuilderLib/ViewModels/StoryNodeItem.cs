@@ -152,33 +152,59 @@ namespace StoryBuilder.ViewModels
             }
         }
 
+        private bool _isExpanded;
         public bool IsExpanded
         {
-            get => (bool)GetValue(IsExpandedProperty);
+            get => _isExpanded;
             set
             {
-                SetValue(IsExpandedProperty, value);
-                NotifyPropertyChanged("IsExpanded");
+                if (_isExpanded != value)
+                {
+                    _isExpanded = value;
+                    NotifyPropertyChanged("IsExpanded");
+                }
             }
+            //get => (bool)GetValue(IsExpandedProperty);
+            //set
+            //{
+            //    SetValue(IsExpandedProperty, value);
+            //    NotifyPropertyChanged("IsExpanded");
+            //}
         }
 
-        // Use a DependencyProperty as the backing store for IsExpanded. 
-        public static readonly DependencyProperty IsExpandedProperty =
-            DependencyProperty.Register("IsExpanded", typeof(bool), typeof(StoryNodeItem), new PropertyMetadata(false));
+        //// Use a DependencyProperty as the backing store for IsExpanded. 
+        //public static readonly DependencyProperty IsExpandedProperty =
+        //    DependencyProperty.Register("IsExpanded", typeof(bool), typeof(StoryNodeItem), new PropertyMetadata(false));
 
-        public bool IsSelected
+        private bool _isSelected;
+        public bool IsSelected 
         {
-            get => (bool)GetValue(IsSelectedProperty);
+            get => _isSelected;
             set
             {
-                SetValue(IsSelectedProperty, value);
-                NotifyPropertyChanged("IsSelected");
+                if (_isSelected != value)
+                {
+                    _isSelected = value;
+                    NotifyPropertyChanged("IsSelected");
+                }
             }
         }
 
-        // Use a DependencyProperty as the backing store for IsExpanded. 
-        public static readonly DependencyProperty IsSelectedProperty =
-            DependencyProperty.Register("IsSelected", typeof(bool), typeof(StoryNodeItem), new PropertyMetadata(false));
+//public bool IsSelected
+//{
+//    get => (bool)GetValue(IsSelectedProperty);
+//    set
+//    {
+//        SetValue(IsSelectedProperty, value);
+//        NotifyPropertyChanged("IsSelected");
+//    }
+//}
+
+
+
+        //// Use a DependencyProperty as the backing store for IsSelected
+        //public static readonly DependencyProperty IsSelectedProperty =
+        //    DependencyProperty.Register("IsSelected", typeof(bool), typeof(StoryNodeItem), new PropertyMetadata(false));
 
 
         private bool _isRoot;
@@ -269,7 +295,7 @@ namespace StoryBuilder.ViewModels
 
             IsExpanded = node.IsExpanded;
             IsRoot = node.IsRoot;
-            IsSelected = node.IsSelected;
+            //IsSelected = node.IsSelected;
         }
 
         public StoryNodeItem(StoryNodeItem parent, StoryElement model)
@@ -307,7 +333,7 @@ namespace StoryBuilder.ViewModels
             Parent = parent;
             Children = new ObservableCollection<StoryNodeItem>();
             IsExpanded = false;
-            IsSelected = false;
+            //IsSelected = false;
             if (Parent == null)
                 return;
             Parent.Children.Add(this);
@@ -348,7 +374,7 @@ namespace StoryBuilder.ViewModels
 
             IsExpanded = false;
             IsRoot = false;
-            IsSelected = false;
+            //IsSelected = false;
             if (Parent == null)
                 return;
             Parent.Children.Add(this);

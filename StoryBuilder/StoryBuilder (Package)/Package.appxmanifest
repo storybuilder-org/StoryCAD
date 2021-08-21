@@ -7,13 +7,13 @@
   IgnorableNamespaces="uap rescap">
 
   <Identity
-    Name="23682014-ecc0-485f-b48a-f90683812c1a"
-    Publisher="CN=Terry Cox"
-    Version="2.0.0.0" />
+    Name="3b76a060-3624-415f-b178-f0740b114439"
+    Publisher="CN=tcox"
+    Version="1.0.0.0" />
 
   <Properties>
-    <DisplayName>StoryBuilder</DisplayName>
-    <PublisherDisplayName>Terry Cox</PublisherDisplayName>
+    <DisplayName>StoryBuilder (Package)</DisplayName>
+    <PublisherDisplayName>tcox</PublisherDisplayName>
     <Logo>Images\StoreLogo.png</Logo>
   </Properties>
 
@@ -31,15 +31,13 @@
       Executable="$targetnametoken$.exe"
       EntryPoint="$targetentrypoint$">
       <uap:VisualElements
-        DisplayName="StoryBuilder"
-        Description="StoryBuilder - Computer-Aided Design for Your Story"
+        DisplayName="StoryBuilder (Package)"
+        Description="StoryBuilder (Package)"
         BackgroundColor="transparent"
         Square150x150Logo="Images\Square150x150Logo.png"
         Square44x44Logo="Images\Square44x44Logo.png">
         <uap:DefaultTile Wide310x150Logo="Images\Wide310x150Logo.png" />
         <uap:SplashScreen Image="Images\SplashScreen.png" />
-        <uap:InitialRotationPreference>
-          <uap:Rotation Preference="landscape"/></uap:InitialRotationPreference>
       </uap:VisualElements>
     </Application>
   </Applications>

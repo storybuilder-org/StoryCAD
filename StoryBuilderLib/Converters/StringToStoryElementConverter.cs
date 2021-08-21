@@ -1,4 +1,4 @@
-﻿using Microsoft.Toolkit.Mvvm.DependencyInjection;
+﻿using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml.Data;
 using StoryBuilder.Models;
 using StoryBuilder.ViewModels;
@@ -7,13 +7,14 @@ using System;
 namespace StoryBuilder.Converters
 {
     /// <summary>
-    /// Various controls such as CharacterName and SettingName
+    /// Several controls (CharacterName and SettingName)
     /// really refer to a StoryElement by its Name property.
     /// It's important to bind to the StoryElement rather than
     /// the name, which can be changed at any time. To allow
-    /// this, StoryElements are stored and retrieved as as the 
-    /// string values of their Guids, and this converter is used
-    /// when binding to the target control from the string source.
+    /// this, StoryElement references are stored and retrieved 
+    /// as the string values of their Guids, and this converter 
+    /// is used when binding to the target control from the 
+    /// string source.
     /// </summary>
     public class StringToStoryElementConverter : IValueConverter
     {
@@ -24,7 +25,7 @@ namespace StoryBuilder.Converters
         /// and is looked up from the StoryModel's StoryElements
         /// collection. 
         /// 
-        /// Older legacy story outlines may also contain a
+        /// Legacy (V1) story outlines may also contain a
         /// StoryElement's Name value as a string. In that case
         /// the first StoryElement with a matching name is returned.
         /// 

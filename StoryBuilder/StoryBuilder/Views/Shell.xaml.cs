@@ -1,4 +1,4 @@
-﻿using Microsoft.Toolkit.Mvvm.DependencyInjection;
+﻿using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
@@ -74,9 +74,10 @@ namespace StoryBuilder.Views
             ShellVm.ShowFlyoutButtons();
         }
 
-        private void OnSelectionChanged(TreeView sender, TreeViewItemInvokedEventArgs args)
+        private void TreeViewItem_Invoked(TreeView sender, TreeViewItemInvokedEventArgs args)
         {
-            ShellVm.SelectionChanged(args.InvokedItem);
+            ShellVm.TreeViewNodeClicked(args.InvokedItem);
+            args.Handled = true;
         }
 
         private void AddButton_ContextRequested(UIElement sender, ContextRequestedEventArgs args)

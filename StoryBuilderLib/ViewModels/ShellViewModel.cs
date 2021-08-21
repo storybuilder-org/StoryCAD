@@ -1,7 +1,7 @@
-﻿using Microsoft.Toolkit.Mvvm.ComponentModel;
-using Microsoft.Toolkit.Mvvm.DependencyInjection;
-using Microsoft.Toolkit.Mvvm.Input;
-using Microsoft.Toolkit.Mvvm.Messaging;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.DependencyInjection;
+using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -52,12 +52,12 @@ namespace StoryBuilder.ViewModels
 
         public StoryViewType ViewType;
 
-        private TreeViewSelection _itemSelector;
-        public object SelectedItem
-        {
-            get => _itemSelector.SelectedItem;
-            set => _itemSelector.SelectedItem = value;
-        }
+        //private TreeViewSelection _itemSelector;
+        //public object SelectedItem
+        //{
+        //    get => _itemSelector.SelectedItem;
+        //    set => _itemSelector.SelectedItem = value;
+        //}
 
         private int _sourceIndex;
         private ObservableCollection<StoryNodeItem> _sourceChildren;
@@ -321,7 +321,7 @@ namespace StoryBuilder.ViewModels
 
         #region Public Methods
 
-        public void SelectionChanged(object selectedItem)
+        public void TreeViewNodeClicked(object selectedItem)
         {
             //Logger.Log(LogLevel.Trace, "SelectionChanged");
 
@@ -359,8 +359,8 @@ namespace StoryBuilder.ViewModels
                         nav.NavigateTo(SplitViewFrame, TrashCanPage, element);
                         break;
                 }
-                CurrentNode.IsSelected = true;
-                CurrentNode.IsExpanded = true;
+                //CurrentNode.IsSelected = true;
+                //CurrentNode.IsExpanded = true;
             }
         }
 
@@ -1864,7 +1864,7 @@ namespace StoryBuilder.ViewModels
         public ShellViewModel()
         {
 
-            _itemSelector = Ioc.Default.GetService<TreeViewSelection>();
+            //_itemSelector = Ioc.Default.GetService<TreeViewSelection>();
 
             Messenger.Register<IsChangedRequestMessage>(this, (r, m) => { m.Reply(StoryModel.Changed); });
             Messenger.Register<ShellViewModel, IsChangedMessage>(this, static (r, m) => r.IsChangedMessageReceived(m));
