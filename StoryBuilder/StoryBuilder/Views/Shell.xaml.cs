@@ -28,7 +28,7 @@ namespace StoryBuilder.Views
                 InitializeComponent();
                 this.DataContext = ShellVm;
                 Loaded += Shell_Loaded;
-            }
+            }                         
             catch (Exception ex)
             {
                 //TODO: Call exception version of logger

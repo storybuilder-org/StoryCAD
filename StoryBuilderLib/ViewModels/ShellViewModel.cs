@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using CommunityToolkit.WinUI.UI.Controls;
 using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -100,11 +101,8 @@ namespace StoryBuilder.ViewModels
 
         // Move current TreeViewItem flyout
         public RelayCommand MoveLeftCommand { get; }
-
         public RelayCommand MoveRightCommand { get; }
-
         public RelayCommand MoveUpCommand { get; }
-
         public RelayCommand MoveDownCommand { get; }
 
         public RelayCommand HelpCommand { get; }
@@ -289,6 +287,13 @@ namespace StoryBuilder.ViewModels
             set => SetProperty(ref _statusMessage, value);
         }
 
+        private TimeSpan _messageDuration;
+        public TimeSpan MessageDuration 
+        {
+            get => _messageDuration;
+            set => SetProperty(ref _messageDuration, value);
+        }
+
         private string _filterText;
         public string FilterText
         {
@@ -323,49 +328,59 @@ namespace StoryBuilder.ViewModels
 
         public void TreeViewNodeClicked(object selectedItem)
         {
-            //Logger.Log(LogLevel.Trace, "SelectionChanged");
-
             if (selectedItem is null)
-                return;
-            var nav = Ioc.Default.GetService<NavigationService>();
-            if (selectedItem is StoryNodeItem node)
             {
-                CurrentNode = node;
-                StoryElement element = StoryModel.StoryElements.StoryElementGuids[node.Uuid];
-                switch (node.Type)
+                Logger.Log(LogLevel.Info, "TreeViewNodeClicked for null node, event ignored");
+                return;
+            }
+            Logger.Log(LogLevel.Info, string.Format("TreeViewNodeClicked for {0}",selectedItem.ToString()));
+
+            try {
+                var nav = Ioc.Default.GetService<NavigationService>();
+                if (selectedItem is StoryNodeItem node)
                 {
-                    case StoryItemType.Character:
-                        nav.NavigateTo(SplitViewFrame, CharacterPage, element);
-                        break;
-                    case StoryItemType.PlotPoint:
-                        nav.NavigateTo(SplitViewFrame, PlotPointPage, element);
-                        break;
-                    case StoryItemType.Problem:
-                        nav.NavigateTo(SplitViewFrame, ProblemPage, element);
-                        break;
-                    case StoryItemType.Section:
-                        nav.NavigateTo(SplitViewFrame, SectionPage, element);
-                        break;
-                    case StoryItemType.Folder:
-                        nav.NavigateTo(SplitViewFrame, FolderPage, element);
-                        break;
-                    case StoryItemType.Setting:
-                        nav.NavigateTo(SplitViewFrame, SettingPage, element);
-                        break;
-                    case StoryItemType.StoryOverview:
-                        nav.NavigateTo(SplitViewFrame, OverviewPage, element);
-                        break;
-                    case StoryItemType.TrashCan:
-                        nav.NavigateTo(SplitViewFrame, TrashCanPage, element);
-                        break;
-                }
-                //CurrentNode.IsSelected = true;
-                //CurrentNode.IsExpanded = true;
+                    CurrentNode = node;
+                    StoryElement element = StoryModel.StoryElements.StoryElementGuids[node.Uuid];
+                    switch (node.Type)
+                    {
+                        case StoryItemType.Character:
+                            nav.NavigateTo(SplitViewFrame, CharacterPage, element);
+                            break;
+                        case StoryItemType.PlotPoint:
+                            nav.NavigateTo(SplitViewFrame, PlotPointPage, element);
+                            break;
+                        case StoryItemType.Problem:
+                            nav.NavigateTo(SplitViewFrame, ProblemPage, element);
+                            break;
+                        case StoryItemType.Section:
+                            nav.NavigateTo(SplitViewFrame, SectionPage, element);
+                            break;
+                        case StoryItemType.Folder:
+                            nav.NavigateTo(SplitViewFrame, FolderPage, element);
+                            break;
+                        case StoryItemType.Setting:
+                            nav.NavigateTo(SplitViewFrame, SettingPage, element);
+                            break;
+                        case StoryItemType.StoryOverview:
+                            nav.NavigateTo(SplitViewFrame, OverviewPage, element);
+                            break;
+                        case StoryItemType.TrashCan:
+                            nav.NavigateTo(SplitViewFrame, TrashCanPage, element);
+                            break;
+                    }
+                    CurrentNode.IsExpanded = true;
+                } 
+            }
+            catch (Exception e)
+            {
+                Logger.LogException(LogLevel.Error, e, "Error navigating in TreeViewNodeClicked");
             }
         }
 
         public void ShowHomePage()
         {
+            Logger.Log(LogLevel.Info, "ShowHomePage");
+    
             var nav = Ioc.Default.GetService<NavigationService>();
             nav.NavigateTo(SplitViewFrame, HomePage);
         }

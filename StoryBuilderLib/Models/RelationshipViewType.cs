@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace StoryBuilder.Models
 {
-    public class RelationshipCollection: ObservableCollection<RelationType>
+    public enum RelationshipViewType
     {
-        
+        Member,
+        Partner
     }
 }

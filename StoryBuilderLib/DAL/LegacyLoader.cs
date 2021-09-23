@@ -1585,8 +1585,7 @@ namespace StoryBuilder.DAL
                             break;
                         case RelationRecType:
                             //TODO: Fix this
-                            relationship = new Relationship();
-                            _model.Relationships.Add(relationship);
+                            relationship = new Relationship(_model);
                             switch (VersionRec.Version)
                             {
                                 case "00.06":
@@ -1596,7 +1595,7 @@ namespace StoryBuilder.DAL
                                     //relationship.FirstTrait = "";
                                     //relationship.SecondTrait = "";
                                     //relationship.Relationship = "";
-                                    relationship.Remarks = "";
+                                    relationship.Notes = "";
                                     break;
                                 case "00.08":
                                     V0008FileRelationRec = ReadStruct<V0008CharRelationData>(rdr);
@@ -1605,24 +1604,24 @@ namespace StoryBuilder.DAL
                                     //relationship.FirstTrait = V0008FileRelationRec.Trait1.TrimEnd();
                                     //relationship.SecondTrait = V0008FileRelationRec.Trait2.TrimEnd();
                                     //relationship.Relationship = V0008FileRelationRec.Relationship.TrimEnd();
-                                    relationship.Remarks = V0008FileRelationRec.Remarks.TrimEnd();
+                                    relationship.Notes = V0008FileRelationRec.Remarks.TrimEnd();
                                     break;
                                 default:
                                     FileRelationRec = ReadStruct<CharRelationData>(rdr);
-                                    relationship = new Relationship();
+                                    relationship = new Relationship(_model);
                                     //relationship.FirstCharacter.Name = V0008FileRelationRec.FirstChar.TrimEnd();
                                     //relationship.SecondCharacter.Name = V0008FileRelationRec.SecondChar.TrimEnd();
                                     //relationship.FirstTrait = V0008FileRelationRec.Trait1.TrimEnd();
                                     //relationship.SecondTrait = V0008FileRelationRec.Trait2.TrimEnd();
                                     //relationship.Relationship = V0008FileRelationRec.Relationship.TrimEnd();
-                                    relationship.Remarks = V0008FileRelationRec.Remarks.TrimEnd();
+                                    relationship.Notes = V0008FileRelationRec.Remarks.TrimEnd();
                                     FileRelationRec.Remarks = "";
                                     break;
                             }
 
                             break;
                         case RelationNoteType:
-                            relationship.Remarks = new string(rdr.ReadChars(FileRecHeader.RecordLength));
+                            relationship.Notes = new string(rdr.ReadChars(FileRecHeader.RecordLength));
                             break;
                         default:
                             string workstring1 = "Error: Unexpected data on file load ";

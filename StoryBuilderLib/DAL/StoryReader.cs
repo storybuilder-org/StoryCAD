@@ -16,6 +16,7 @@ using XmlDocument = Windows.Data.Xml.Dom.XmlDocument;
 using XmlElement = Windows.Data.Xml.Dom.XmlElement;
 using XmlNodeList = Windows.Data.Xml.Dom.XmlNodeList;
 
+
 namespace StoryBuilder.DAL
 {
     /// <summary>
@@ -47,7 +48,6 @@ namespace StoryBuilder.DAL
             {
                 string msg = $"Reading file {file.Path}.";
                 Logger.Log(LogLevel.Info, msg);
-                //TODO: Add try/catch logic & error logging, set message 
                 _xml = await LoadFromFileAsync(file);
                 LoadStoryModel();
                 // Early story outlines may have been built or converted
@@ -105,6 +105,9 @@ namespace StoryBuilder.DAL
                             break;
                         case "Narrator":
                             ParseStoryNarrator(xn);
+                            break;
+                        case "Relationships":
+                            ParseRelationships(xn);
                             break;
                         case "Settings":  // story settings
                             break;
@@ -763,6 +766,13 @@ namespace StoryBuilder.DAL
             foreach (IXmlNode child in children)
                 RecurseNarratorNode(node, child, false);
         }
+
+        private void ParseRelationships(IXmlNode relationshipNode)
+        {
+            foreach (IXmlNode child in relationshipNode.SelectNodes("Relationship"))
+                new Relationship(child, _model);
+        }
+
 
         /// <summary>
         /// An RTF text field, if it's longer than 2K, will have been written to a

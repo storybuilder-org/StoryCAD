@@ -25,11 +25,17 @@ namespace StoryBuilder.DAL
         private string installFolder;
         public async Task Init(string path, StoryController story)
         {
-            StorageFolder toolFolder = await StorageFolder.GetFolderFromPathAsync(path);
-            installFolder = toolFolder.Path;
-            StorageFile iniFile = await toolFolder.GetFileAsync("Controls.ini");
-            lines = await FileIO.ReadLinesAsync(iniFile);
-
+            try
+            {
+                StorageFolder toolFolder = await StorageFolder.GetFolderFromPathAsync(path);
+                installFolder = toolFolder.Path;
+                StorageFile iniFile = await toolFolder.GetFileAsync("Controls.ini");
+                lines = await FileIO.ReadLinesAsync(iniFile, Windows.Storage.Streams.UnicodeEncoding.Utf8);
+            }
+            catch (Exception ex) 
+            {
+                Console.WriteLine(ex.Message);
+            }
             // Populate UserControl data source collections
             GlobalData.ConflictTypes = LoadConflictTypes();
             GlobalData.RelationTypes = LoadRelationTypes();

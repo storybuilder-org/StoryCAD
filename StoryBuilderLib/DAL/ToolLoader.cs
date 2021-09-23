@@ -26,19 +26,25 @@ namespace StoryBuilder.DAL
         private string installFolder;
         public async Task Init(string path, StoryController story)
         {
-            StorageFolder toolFolder = await StorageFolder.GetFolderFromPathAsync(path);
-            installFolder = toolFolder.Path;
-            StorageFile iniFile = await toolFolder.GetFileAsync("Tools.ini");
-            lines = await FileIO.ReadLinesAsync(iniFile);
+            try
+            {
+                StorageFolder toolFolder = await StorageFolder.GetFolderFromPathAsync(path);
+                installFolder = toolFolder.Path;
+                StorageFile iniFile = await toolFolder.GetFileAsync("Tools.ini");
+                lines = await FileIO.ReadLinesAsync(iniFile);
 
-            // Populate tool data source collections
-            GlobalData.KeyQuestionsSource = LoadKeyQuestions();
-            GlobalData.StockScenesSource = LoadStockScenes();
-            GlobalData.TopicsSource = LoadTopics();
-            GlobalData.MasterPlotsSource = LoadMasterPlots();
-            GlobalData.DramaticSituationsSource = LoadDramaticSituations();
-            GlobalData.QuotesSource = LoadQuotes();
-            Clear();
+                // Populate tool data source collections
+                GlobalData.KeyQuestionsSource = LoadKeyQuestions();
+                GlobalData.StockScenesSource = LoadStockScenes();
+                GlobalData.TopicsSource = LoadTopics();
+                GlobalData.MasterPlotsSource = LoadMasterPlots();
+                GlobalData.DramaticSituationsSource = LoadDramaticSituations();
+                GlobalData.QuotesSource = LoadQuotes();
+                Clear();
+            }
+            catch (Exception e) 
+            { 
+            }
         }
 
         public Dictionary<string, List<KeyQuestionModel>> LoadKeyQuestions()

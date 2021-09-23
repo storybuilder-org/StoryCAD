@@ -12,6 +12,7 @@
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Controls\Conflict.xaml" />
+    <None Remove="Controls\Relationship.xaml" />
     <None Remove="Services\Dialogs\NewRelationshipDialog.xaml" />
     <None Remove="Services\Dialogs\Tools\ConflictDialog.xaml" />
   </ItemGroup>
@@ -19,6 +20,7 @@
   <ItemGroup>
     <PackageReference Include="CommonServiceLocator" Version="2.0.6" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="7.0.3" />
+    <PackageReference Include="CommunityToolkit.WinUI.UI.Controls.Core" Version="7.0.3" />
     <PackageReference Include="Microsoft.ProjectReunion" Version="0.8.2" />
     <PackageReference Include="Microsoft.ProjectReunion.Foundation" Version="0.8.2" />
     <PackageReference Include="Microsoft.ProjectReunion.WinUI" Version="0.8.2" />
@@ -42,6 +44,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\NRtfTree\NRtfTree.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="Controls\Relationship.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
 
   <ItemGroup>

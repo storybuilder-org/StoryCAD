@@ -37,6 +37,7 @@ namespace StoryBuilder.DAL
         private XmlNode _elements;    // The collection of StoryElements
         private XmlNode _explorer;    // StoryExplorer
         private XmlNode _narrator;    // StoryNarrator
+        private XmlNode _relationships; // Character Relationships
         private XmlNode _stbSettings; // Settings
 
         public StoryWriter()
@@ -55,6 +56,7 @@ namespace StoryBuilder.DAL
             await ParseStoryElementsAsync();
             ParseExplorerView();
             ParseNarratorView();
+            ParseRelationships();
             using (Stream fileStream = await _outFile.OpenStreamForWriteAsync())
             {
                 _xml.Save(fileStream);
@@ -80,6 +82,9 @@ namespace StoryBuilder.DAL
             stb.AppendChild(_explorer);
             _narrator = _xml.CreateElement("Narrator");
             stb.AppendChild(_narrator);
+            _relationships = _xml.CreateElement("Relationships");
+            stb.AppendChild(_relationships);
+
             _stbSettings = _xml.CreateElement("Settings");
             stb.AppendChild(_stbSettings);
         }
@@ -748,6 +753,23 @@ namespace StoryBuilder.DAL
                 XmlElement rootElement = RecurseCreateXmlElement(null, root);
                 _narrator.AppendChild(rootElement);
             }
+        }
+
+        private void ParseRelationships()
+        {
+            foreach (Relationship relation in _model.Relationships) 
+            {
+                XmlElement element = _xml.CreateElement("Relationship");
+                // Set attributes
+                element.SetAttribute("Member", UuidString(relation.Member.Uuid));
+                element.SetAttribute("Partner", UuidString(relation.Partner.Uuid));
+                element.SetAttribute("RelationType", relation.RelationType);
+                element.SetAttribute("Trait", relation.Trait);
+                element.SetAttribute("Attribute", relation.Attitude);
+                element.SetAttribute("Notes", relation.Notes);
+                _relationships.AppendChild(element);
+            }
+            
         }
 
         /// <summary>
