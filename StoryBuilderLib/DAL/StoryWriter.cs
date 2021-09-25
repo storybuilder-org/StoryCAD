@@ -5,6 +5,7 @@ using StoryBuilder.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 using Windows.Storage;
@@ -45,22 +46,48 @@ namespace StoryBuilder.DAL
             _story = Ioc.Default.GetService<StoryController>();
         }
 
+        //internal async Task WriteFile(StorageFile output, StoryModel model)
+        //{
+        //    _outFile = output;
+        //    _model = model;
+
+        //    _xml = new XmlDocument();
+        //    CreateStoryDocument();
+        //    //      write RTF if converting. 
+        //    await ParseStoryElementsAsync();
+        //    ParseExplorerView();
+        //    ParseNarratorView();
+        //    ParseRelationships();
+        //    using (Stream fileStream = await _outFile.OpenStreamForWriteAsync())
+        //    {
+        //        _xml.Save(fileStream);
+        //    }
+        //    _model.Changed = false;
+        //    _story.ProjectFolder = await output.GetParentAsync();
+        //}
+
         internal async Task WriteFile(StorageFile output, StoryModel model)
         {
             _outFile = output;
             _model = model;
-
-            _xml = new XmlDocument();
+                        _xml = new XmlDocument();
             CreateStoryDocument();
             //      write RTF if converting. 
             await ParseStoryElementsAsync();
             ParseExplorerView();
             ParseNarratorView();
             ParseRelationships();
+
             using (Stream fileStream = await _outFile.OpenStreamForWriteAsync())
             {
-                _xml.Save(fileStream);
+                XmlWriterSettings settings = new XmlWriterSettings();
+                settings.Async = true;
+                settings.Encoding = Encoding.UTF8;
+                XmlWriter writer = XmlWriter.Create(fileStream, settings);
+
+                _xml.Save(writer);
             }
+
             _model.Changed = false;
             _story.ProjectFolder = await output.GetParentAsync();
         }
@@ -766,6 +793,8 @@ namespace StoryBuilder.DAL
                 element.SetAttribute("RelationType", relation.RelationType);
                 element.SetAttribute("Trait", relation.Trait);
                 element.SetAttribute("Attribute", relation.Attitude);
+                char[] endchars = { ' ', (char) 0 };      // remove trialing zero from RichEditText
+                relation.Notes = relation.Notes.TrimEnd(endchars);
                 element.SetAttribute("Notes", relation.Notes);
                 _relationships.AppendChild(element);
             }

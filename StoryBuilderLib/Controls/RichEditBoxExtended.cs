@@ -42,6 +42,7 @@ namespace StoryBuilder.Controls
 
         private void RichEditBoxExtended_TextChanged(object sender, RoutedEventArgs e)
         {
+            char[] endchars = { ' ', (char)0 };      
             if (!_lockChangeExecution)
             {
                 _lockChangeExecution = true;
@@ -54,7 +55,7 @@ namespace StoryBuilder.Controls
                 else
                 {
                     Document.GetText(TextGetOptions.FormatRtf, out text);
-                    RtfText = text;  //text.Replace("\r\n", string.Empty);
+                    RtfText = text.TrimEnd(endchars);  // remove trialing zero from RichEditText
                 }
 
                 _lockChangeExecution = false;
