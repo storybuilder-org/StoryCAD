@@ -21,10 +21,10 @@ namespace StoryBuilder.ViewModels
     /// (in this case, StoryModel) and the View (in this case, Shell). The model is composed of
     /// instances of StoryElements such as ProblemModel, CharacterModel, etc. These model 
     /// components are not visual, and have no Children, IsSelected or IsExpanded, and so on. 
-    /// A StoryElement type is displayed and modified on a Page such as ProblemPage or
+    /// A StoryElement instance is displayed and modified on a Page such as ProblemPage or
     /// CharacterPage which is contained in Shell's SplitView.Content frame.
     /// 
-    /// StoryBuilder's data model is called StoryModel. StoryModel actually contains two ObservableCollection
+    /// StoryBuilder's data model is called StoryModel. StoryModel  contains two ObservableCollection
     /// lists of StoryNodeItems (and their counterpart StoryElements), a StoryExplorer collection which
     /// contains all Story Elements (the StoryOverview and all Problem, Character, Setting, PlotPoint
     /// and Folder elements) and a Narrator View which contains just Section (chapter, etc) and

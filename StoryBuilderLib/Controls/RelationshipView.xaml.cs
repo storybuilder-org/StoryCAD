@@ -7,12 +7,12 @@ using StoryBuilder.ViewModels;
 
 namespace StoryBuilder.Controls
 {
-    public sealed partial class Relationship : UserControl
+    public sealed partial class RelationshipView : UserControl
     {
         public CharacterViewModel CharVm => Ioc.Default.GetService<CharacterViewModel>();
-        public Relationship()
+        public RelationshipView()
         {
-            this.InitializeComponent();
+            InitializeComponent();
         }
     }
 }

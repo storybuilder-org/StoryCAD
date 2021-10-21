@@ -143,6 +143,15 @@ namespace StoryBuilder.Models
             set => _appearance = value;
         }
 
+        // Character relationship data
+
+        private List<RelationshipModel> _relationshipList;
+        public List<RelationshipModel> RelationshipList
+        {
+            get => _relationshipList;
+            set => _relationshipList = value;
+        }
+
         // Character social data
 
         private string _economic;
@@ -426,6 +435,7 @@ namespace StoryBuilder.Models
             Health = string.Empty;
             PhysNotes = string.Empty;
             Appearance = string.Empty;
+            RelationshipList = new List<RelationshipModel>();
             Economic = string.Empty;
             Education = string.Empty;
             Ethnic = string.Empty;
@@ -482,6 +492,7 @@ namespace StoryBuilder.Models
             Health = string.Empty;
             PhysNotes = string.Empty;
             Appearance = string.Empty;
+            RelationshipList = new List<RelationshipModel>();
             Economic = string.Empty;
             Education = string.Empty;
             Ethnic = string.Empty;
@@ -538,6 +549,7 @@ namespace StoryBuilder.Models
             Health = string.Empty;
             PhysNotes = string.Empty;
             Appearance = string.Empty;
+            RelationshipList = new List<RelationshipModel>();
             Economic = string.Empty;
             Education = string.Empty;
             Ethnic = string.Empty;

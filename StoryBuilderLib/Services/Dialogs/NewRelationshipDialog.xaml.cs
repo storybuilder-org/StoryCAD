@@ -16,7 +16,8 @@ namespace StoryBuilder.Services.Dialogs
     /// </summary>
     public sealed partial class NewRelationshipDialog : ContentDialog
     {
-        public NewRelationshipViewModel NewRelVM =  Ioc.Default.GetService<NewRelationshipViewModel>();
+        public NewRelationshipViewModel NewRelVM;
+
         #region public Properties
 
         public StoryElementCollection StoryElements;
@@ -24,7 +25,7 @@ namespace StoryBuilder.Services.Dialogs
 
         public ObservableCollection<StoryElement> ProspectivePartners;
 
-        public ObservableCollection<Relationship> Relationships;
+        public ObservableCollection<RelationshipModel> Relationships;
 
         public StoryElement SelectedPartner { get; set; }
 

@@ -125,9 +125,9 @@
                 <usercontrols:RichEditBoxExtended Header="Appearance" RtfText="{x:Bind CharVm.Appearance, Mode=TwoWay}" AcceptsReturn="True"
                                                   IsSpellCheckEnabled="True" TextWrapping="Wrap"  ScrollViewer.VerticalScrollBarVisibility="Visible" />
             </PivotItem>
-            <PivotItem Header="Relations">
+            <PivotItem Header="Relationships">
                 <Grid>
-                    <usercontrols:Relationship />
+                    <usercontrols:RelationshipView />
                 </Grid>
             </PivotItem>
             <PivotItem Header="Flaw">

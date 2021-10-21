@@ -28,7 +28,7 @@ namespace StoryBuilder.ViewModels
         private readonly StoryController _story;
         private StoryModel _storyModel;
         private bool _changeable;
-        private RelationshipViewType _relationshipView;
+        private RelationshipModel _currentRelationship;
 
         #endregion
 
@@ -39,7 +39,6 @@ namespace StoryBuilder.ViewModels
         public RelayCommand RemoveTraitCommand { get; }
         public RelayCommand AddRelationshipCommand { get; }
         public RelayCommand RemoveRelationshipCommand { get; }
-        public RelayCommand SwapRelationshipsCommand { get; }
 
         #endregion
 
@@ -210,27 +209,16 @@ namespace StoryBuilder.ViewModels
             set => SetProperty(ref _appearance, value);
         }
 
-        // Character relationship data
+        // Relationship data 
+        public ObservableCollection<RelationshipModel> CharacterRelationships { get; set; }
 
-        // The character whose Relationships are being processed
-        private StoryElement _character;
-        public StoryElement Character { get; set; }
-
-        // The character's collection of Relationships
-        private ObservableCollection<Relationship> _characterRelationships;
-        public ObservableCollection<Relationship> CharacterRelationships { get; set; }
-
-        private Relationship _selectedRelationship;
-
-        public Relationship SelectedRelationship
+        private RelationshipModel _selectedRelationship;
+        public RelationshipModel SelectedRelationship
         {
             get => _selectedRelationship;
-            set
-            {
-                SetProperty(ref _selectedRelationship, value);
-                if (value != null)
-                    DisplayRelationship(_selectedRelationship, RelationshipViewType.Member);
-            }
+            //set => SetProperty(ref _selectedRelationship, value);
+            set => _selectedRelationship = value;
+
         }
 
         private ObservableCollection<string> _relationships;
@@ -238,13 +226,6 @@ namespace StoryBuilder.ViewModels
         {
             get => _relationships;
             set => SetProperty(ref _relationships, value);
-        }
-
-        private string _sideName;
-        public string SideName
-        {
-            get => _sideName;
-            set => SetProperty(ref _sideName, value);
         }
 
         private string _relationType;
@@ -620,8 +601,7 @@ namespace StoryBuilder.ViewModels
             set => SetProperty(ref _newTrait, value);
         }
 
- 
-        #endregion
+         #endregion
 
         #region Public Methods
 
@@ -634,6 +614,30 @@ namespace StoryBuilder.ViewModels
         public async Task Deactivate(object parameter)
         {
             await SaveModel(); // Save the ViewModel back to the Story
+        }
+
+        /// Instead of loading a Character's RelationshipModels directly into
+        /// the ViewModel and binding them, the models themselves are loaded 
+        /// into the VM's CharacterRelationships ObservableCollection, but
+        /// its properties are bound only when one of of the ComboBox items
+        /// CharacterRelationships is bound to is selected.
+        /// However, one property need modified during LoadModel: the Partner  
+        /// StoryElement in the RelationshipModel needs loaded from its Uuid.
+        public async Task RelationshipChanged(object sender, SelectionChangedEventArgs args)
+        {
+            await SaveRelationship(_currentRelationship);
+            await LoadRelationship(SelectedRelationship);
+            _currentRelationship = SelectedRelationship;
+        }
+
+        public async Task SaveRelationships()
+        {
+            await SaveRelationship(_currentRelationship);  // Save any current changes
+            _currentRelationship = null;
+            // Move relationships back to the character model
+            Model.RelationshipList.Clear();
+            foreach (RelationshipModel relation in CharacterRelationships)
+                Model.RelationshipList.Add(relation);
         }
 
         #endregion
@@ -691,9 +695,6 @@ namespace StoryBuilder.ViewModels
             Stability = Model.Stability;
             Work = Model.Work;
             Likes = Model.Likes;
-            CharacterTraits.Clear();
-            foreach (string member in Model.TraitList)
-                CharacterTraits.Add(member);
             Habits = Model.Habits;
             Abilities = Model.Abilities;
             WoundCategory = Model.WoundCategory;
@@ -705,7 +706,7 @@ namespace StoryBuilder.ViewModels
             BackStory = Model.BackStory;
             Id = Model.Id;
 
-            //Read RTF files
+             //Read RTF files
             CharacterSketch = await _rdr.GetRtfText(Model.CharacterSketch, Uuid);
             PhysNotes = await _rdr.GetRtfText(Model.PhysNotes, Uuid);
             Appearance = await _rdr.GetRtfText(Model.Appearance, Uuid);
@@ -724,13 +725,24 @@ namespace StoryBuilder.ViewModels
             Secrets = await _rdr.GetRtfText(Model.Secrets, Uuid);
             BackStory = await _rdr.GetRtfText(Model.BackStory, Uuid);
 
-            //TODO: Simplify this: no parameter, it's always 
-            // this model. No string; use the StoryElement itself.
-            LoadRelationships(Model.Uuid.ToString());
-            _relationshipView = RelationshipViewType.Member;    
+            CharacterTraits.Clear();
+            foreach (string member in Model.TraitList)
+                CharacterTraits.Add(member);
+
+            RelationType = string.Empty;
+            RelationshipTrait = string.Empty;
+            RelationshipAttitude = string.Empty;
+            RelationshipNotes = string.Empty;
+            SelectedRelationship = null;
+            _currentRelationship = null;
+            CharacterRelationships.Clear();
+            foreach (RelationshipModel relation in Model.RelationshipList)
+            {
+                relation.Partner = StringToStoryElement(relation.PartnerUuid); // Populate partner Character StoryElement for Name
+                CharacterRelationships.Add(relation);
+            }
 
             Changed = false;
-            //PropertyChanged += OnPropertyChanged;
             _changeable = true;
         }
 
@@ -775,8 +787,16 @@ namespace StoryBuilder.ViewModels
                 Model.Sociability = Sociability;
                 Model.Stability = Stability;
                 Model.TraitList.Clear();
+                
                 foreach (string element in CharacterTraits)
                     Model.TraitList.Add(element);
+                
+                 await SaveRelationship(_currentRelationship);  // Save any current changes
+                _currentRelationship = null;
+                // Move relationships back to the character model
+                Model.RelationshipList.Clear();
+                foreach (RelationshipModel relation in CharacterRelationships)
+                    Model.RelationshipList.Add(relation);
                 Model.Abilities = Abilities;
                 Model.WoundCategory = WoundCategory;
                 Model.WoundSummary = WoundSummary;
@@ -802,17 +822,9 @@ namespace StoryBuilder.ViewModels
                 Model.Abilities = await _wtr.PutRtfText(Abilities, Uuid, "abilities.rtf");
                 Model.Wound = await _wtr.PutRtfText(Wound, Uuid, "wound.rtf");
                 Model.Fears = await _wtr.PutRtfText(Fears, Uuid, "fears.rtf");
-                Model.Lies = await _wtr.PutRtfText(Lies, Uuid, "secrets.rtf");
+                Model.Lies = await _wtr.PutRtfText(Lies, Uuid, "lies.rtf");
                 Model.Secrets = await _wtr.PutRtfText(Secrets, Uuid, "secrets.rtf");
-                // Notes is actually BackStory
                 Model.BackStory = await _wtr.PutRtfText(BackStory, Uuid, "backstory.rtf");
-
-                if (SelectedRelationship != null)
-                {
-                    SaveRelationship(SelectedRelationship);
-                    SaveRelationship(SelectedRelationship.PartnerRelationship);
-                }
-                ClearRelationship();
 
                 _logger.Log(LogLevel.Info, string.Format("Requesting IsDirty change to true"));
                 Messenger.Send(new IsChangedMessage(Changed));
@@ -823,6 +835,7 @@ namespace StoryBuilder.ViewModels
         {
             CharacterTraits.Add(NewTrait);
         }
+        
         private void RemoveTrait() 
         {
             if (ExistingTraitIndex == -1) 
@@ -834,276 +847,6 @@ namespace StoryBuilder.ViewModels
             CharacterTraits.RemoveAt(ExistingTraitIndex);
         }
 
-        /// <summary>
-        /// Filter the StoryModel Relationships collection
-        /// for just the specified Character's existing 
-        /// Relationship set. These are loaded to 
-        /// CharacterRelationships.
-        /// 
-        /// Called from CharacterViewModel.LoadModel().
-        /// </summary>
-        /// <param name="character">The specified charcter's Story Element</param>
-        private void LoadRelationships(string character)
-        {
-            Character = StringToStoryElement(character);
-
-            CharacterRelationships.Clear();
-            foreach (Relationship relationship in _storyModel.Relationships)
-            {
-                if (relationship.Member == Character)
-                    CharacterRelationships.Add(relationship);
-            }
-        }
-
-        /// <summary>
-        /// When a Relationships member is selected (SelectedRelationship is
-        /// changed), that Relationship displayed.
-        /// </summary>
-        /// <param name="selectedRelation"></param>
-        /// <param name="side"></param>
-        private void DisplayRelationship(Relationship selectedRelation, RelationshipViewType side)
-        {
-            switch (side)
-            {
-                case RelationshipViewType.Member:
-                    SideName = selectedRelation.Member.Name;
-                    RelationType = selectedRelation.RelationType;
-                    RelationshipTrait = selectedRelation.Trait;
-                    RelationshipAttitude = selectedRelation.Attitude;
-                    RelationshipNotes = selectedRelation.Notes;
-                    break;
-                case RelationshipViewType.Partner:
-                    SideName = selectedRelation.Partner.Name;
-                    RelationType = selectedRelation.PartnerRelationship.RelationType;
-                    RelationshipTrait = selectedRelation.PartnerRelationship.Trait;
-                    RelationshipAttitude = selectedRelation.PartnerRelationship.Attitude;
-                    RelationshipNotes = selectedRelation.PartnerRelationship.Notes;
-                    break;
-            }
-
-        }
-        private void SaveRelationship(Relationship selectedRelation)
-        {
-            switch (_relationshipView)
-            {
-                case RelationshipViewType.Member:
-                    SelectedRelationship.Trait = RelationshipTrait;
-                    SelectedRelationship.Attitude = RelationshipAttitude;
-                    SelectedRelationship.Notes = RelationshipNotes;
-                    break;
-                case RelationshipViewType.Partner:
-                    SelectedRelationship.PartnerRelationship.Trait = RelationshipTrait;
-                    SelectedRelationship.PartnerRelationship.Attitude = RelationshipAttitude;
-                    SelectedRelationship.PartnerRelationship.Notes = RelationshipNotes;
-                    break;
-            }
-        }
-        
-        /// <summary>
-        ///  Toggle from one side of a relationship to the other (from member to partner
-        ///  or back.)
-        ///  
-        /// Invoked via command button.
-        /// </summary>
-        private void SwapSides()
-        {
-            if (SelectedRelationship != null)
-            {
-                switch (_relationshipView)
-                {
-                    case RelationshipViewType.Member:
-                        SaveRelationship(SelectedRelationship);
-                        DisplayRelationship(SelectedRelationship, RelationshipViewType.Partner);
-                        _relationshipView = RelationshipViewType.Partner;
-                        break;
-                    case RelationshipViewType.Partner:
-                        SaveRelationship(SelectedRelationship.PartnerRelationship);
-                        DisplayRelationship(SelectedRelationship, RelationshipViewType.Member);
-                        _relationshipView = RelationshipViewType.Member;
-                        break;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Add a new Relationship instance for this character.
-        /// 
-        /// A Relationship implies an reverse Relationship for
-        /// the member's other character (identified as Partner in 
-        /// the Relationship object.) These are not idientical,
-        /// because the other character has different Trait
-        /// and Attitude (towards the relationship)
-        /// values.
-        /// 
-        /// When a Relationship is added, both Relationship 
-        /// objects are created. Because more than one
-        /// StoryElement is modified when a Relationship is
-        /// added(or deleted), the CharacterRelationsips
-        /// collection isn't loaded or saved into the
-        /// CharacterModel from the ViewModel, but instead
-        /// is updated directly in StoryModel's Relationships
-        /// collection.LoadModel simply filters this character's
-        /// Relationships from the StoryModel, and SaveModel
-        /// isn't needed because AddRelationship() adds the
-        /// pair of Relationships directly.
-        /// </summary>
-        private async void AddRelationship()
-        {
-            _logger.Log(LogLevel.Info, "Executing AddRelationship command");
-            NewRelationshipDialog dialog = new();
-            dialog.XamlRoot = GlobalData.XamlRoot;
-            NewRelationshipViewModel vm = dialog.NewRelVM;
-            vm.RelationTypes.Clear();
-            foreach (RelationType relationType in GlobalData.RelationTypes)
-                vm.RelationTypes.Add(relationType);
-            vm.Member = Character;
-            vm.ProspectivePartners.Clear();
-            foreach (StoryElement character in _storyModel.StoryElements.Characters)
-            {
-                if (character == vm.Member) continue;  // Skip me
-                foreach (Relationship rel in CharacterRelationships)
-                {
-                    if (character == rel.Partner) goto NextCharacter;
-                }
-                vm.ProspectivePartners.Add(character);
-            NextCharacter: continue;
-            }
-            var result = await dialog.ShowAsync();
-            if (result == ContentDialogResult.Primary)
-            {
-                try
-                {
-                    //TODO: Make sure both partner and relation type are selected
-                    // Create partner's reverse relationship
-                    RelationType reverse = new RelationType(vm.RelationType.PartnerRole, vm.RelationType.MemberRole);
-                    Relationship partnerRel = new Relationship(vm.SelectedPartner, vm.Member, reverse, _storyModel);
-                    // Create member's relationship
-                    Relationship memberRel = new Relationship(vm.Member, vm.SelectedPartner, vm.RelationType, _storyModel);
-                    // Complete pairing 
-                    partnerRel.PartnerRelationship = memberRel;
-                    memberRel.PartnerRelationship = partnerRel;
-                    // Add to StoryModel
-                    _storyModel.Relationships.Add(partnerRel);
-                    _storyModel.Relationships.Add(memberRel);
-                    // Add partner relationship to member's list of relationships
-                    CharacterRelationships.Add(memberRel);
-                    SelectedRelationship = memberRel;
-                    SideName = memberRel.Member.Name;
-                    _relationshipView = RelationshipViewType.Member;
-                    Changed = true;
-                    Messenger.Send(new IsChangedMessage(Changed));
-
-                    string msg = String.Format("Relationship to {0} added", vm.SelectedPartner.Name);
-                    var smsg = new StatusMessage(msg, 200);
-                    Messenger.Send(new StatusChangedMessage(smsg));
-                    _logger.Log(LogLevel.Info, msg);
-                }
-                catch (Exception ex)
-                {
-                    string msg = "Error creating new Relationship";
-                    _logger.LogException(LogLevel.Error, ex, msg);
-                    var smsg = new StatusMessage(msg, 200);
-                    Messenger.Send(new StatusChangedMessage(smsg));
-                }
-            }
-            else
-            {
-                string msg = "AddRelationship cancelled";
-                _logger.Log(LogLevel.Info, msg);
-                var smsg = new StatusMessage(msg, 200);
-                Messenger.Send(new StatusChangedMessage(smsg));
-            }
-        }
-
-        private async void RemoveRelationship()
-        {
-             _logger.Log(LogLevel.Info, "Executing RemoveRelationship command");
-            string msg;
-            // verify that I have an active relationship
-            if (SelectedRelationship == null)
-            {
-                _logger.Log(LogLevel.Warn, "A relationship must be active to be removed");
-                msg = "A relationship must be active to be removed";
-                var smsg = new StatusMessage(msg, 200);
-                Messenger.Send(new StatusChangedMessage(smsg));
-                _logger.Log(LogLevel.Warn, "A relationship must be active to be removed");
-                return;
-            }
-            Relationship rel = SelectedRelationship;
-            // display verification message
-           
-            msg = string.Format("Delete relationship {0} - {1}",rel.Member.Name, rel.Partner.Name);
-            msg = msg + Environment.NewLine;
-            msg = msg + "(and inverse relationship)";
-            ContentDialog dialog = new ContentDialog()
-            {
-
-                Title = "Remove Relationship",
-                Content = msg,
-                PrimaryButtonText = "Yes",
-                SecondaryButtonText = "No"
-            };
-            dialog.XamlRoot = GlobalData.XamlRoot;
-    
-            var result = await dialog.ShowAsync();
-            if (result == ContentDialogResult.Primary)
-            {
-                // remove inverse
-                foreach (Relationship relationship in _storyModel.Relationships)
-                {
-                    if (relationship.Member == SelectedRelationship.Partner
-                    &&  relationship.Partner == SelectedRelationship.Member)
-                        CharacterRelationships.Remove(relationship);
-                }
-                // remove this one
-                foreach (Relationship relationship in _storyModel.Relationships)
-                {
-                    if (relationship.Member == SelectedRelationship.Member
-                    && relationship.Partner == SelectedRelationship.Partner)
-                        CharacterRelationships.Remove(relationship);
-                }
-                // log and display status
-                msg = string.Format("Relationship {0} - {1} deleted", rel.Member.Name, rel.Partner.Name);
-                _logger.Log(LogLevel.Info, msg);
-                var smsg = new StatusMessage(msg, 200);
-                Messenger.Send(new StatusChangedMessage(smsg));
-            }
-            else
-            {
-                _logger.Log(LogLevel.Info, "Remove relationship cancelled");
-                msg = "RemoveRelationship cancelled";
-                _logger.Log(LogLevel.Info, msg);
-                var smsg = new StatusMessage(msg, 200);
-                Messenger.Send(new StatusChangedMessage(smsg));
-            }
-        }
-
-        private void ClearRelationship() 
-        {
-            SideName = string.Empty;
-            RelationType = string.Empty;
-            RelationshipTrait = string.Empty;
-            RelationshipAttitude = string.Empty;
-            RelationshipNotes = string.Empty;
-            SelectedRelationship = null;
-        }
-
-        /// <summary>
-        /// Test if the relationship to be added already exists.
-        /// </summary>
-        /// <param name="uuid">uuid of Partner to add</param>
-        /// <returns>true if found, false othewise</returns>
-        private bool RelationshipExists(string uuid)
-        {
-             StoryElement character = StringToStoryElement(uuid);
-            foreach (Relationship relationship in _storyModel.Relationships)
-            {
-                if (relationship.Member == SelectedRelationship.Member
-                && character == SelectedRelationship.Partner)
-                    return true;
-            }
-            return false;
-        }
         private StoryElement StringToStoryElement(string value)
         {
             if (value == null)
@@ -1130,6 +873,184 @@ namespace StoryBuilder.ViewModels
             return null;   // Not found
         }
 
+        /// <summary>
+        /// Load and bind a RelationshipModel instance
+        /// </summary>
+        /// <param name="selectedRelation">The RelationShipModel just selected or added</param>
+        private async Task LoadRelationship(RelationshipModel selectedRelation)
+        {
+            if (selectedRelation == null)
+                return;
+            _changeable = false;
+            RelationType = selectedRelation.RelationType;
+            RelationshipTrait = selectedRelation.Trait;
+            RelationshipAttitude = selectedRelation.Attitude;
+            RelationshipNotes = await _rdr.GetRtfText(selectedRelation.Notes, Uuid);
+
+            _changeable = true;
+        }
+
+        private async Task SaveRelationship(RelationshipModel selectedRelation)
+        {
+            if (!Changed || selectedRelation == null)
+                return;
+            selectedRelation.Trait = RelationshipTrait;
+            selectedRelation.Attitude = RelationshipAttitude;
+            selectedRelation.Notes = await _wtr.PutRtfText(RelationshipNotes, Uuid, selectedRelation.PartnerUuid + "_notes.rtf");
+            _logger.Log(LogLevel.Info, string.Format("Requesting IsDirty change to true"));
+            Messenger.Send(new IsChangedMessage(Changed));
+        }
+
+        /// <summary>
+        /// Add a new RelationshipModel instance for this character.
+        /// 
+        /// The added relationship is made the currently loaded and displayed one.
+        /// </summary>
+        private async void AddRelationship()
+        {
+            _logger.Log(LogLevel.Info, "Executing AddRelationship command");
+            await SaveRelationship(_currentRelationship);
+
+            NewRelationshipDialog dialog = new();
+            dialog.XamlRoot = GlobalData.XamlRoot;
+            NewRelationshipViewModel vm = new NewRelationshipViewModel(Model);
+            dialog.NewRelVM = vm;
+            vm.RelationTypes.Clear();
+            foreach (RelationType relationType in GlobalData.RelationTypes)
+                vm.RelationTypes.Add(relationType);
+            vm.ProspectivePartners.Clear();
+            foreach (StoryElement character in _storyModel.StoryElements.Characters)
+            {
+                if (character == vm.Member) continue;  // Skip me
+                foreach (RelationshipModel rel in CharacterRelationships)
+                {
+                    if (character == rel.Partner) goto NextCharacter; // Skip partner
+                }
+                vm.ProspectivePartners.Add(character);
+            NextCharacter: continue;
+            }
+            var result = await dialog.ShowAsync();
+            if (result == ContentDialogResult.Primary)
+            {
+                try
+                {
+                    // Create the new RelationshipModel
+                    string partnerUuid = StoryWriter.UuidString(vm.SelectedPartner.Uuid);
+                    RelationshipModel memberRelationship = new RelationshipModel(partnerUuid, vm.RelationType);
+                    // Complete pairing 
+                    // Add partner relationship to member's list of relationships 
+                    CharacterRelationships.Add(memberRelationship);
+                    SelectedRelationship = memberRelationship;
+                    await LoadRelationship(SelectedRelationship);
+                    _currentRelationship = SelectedRelationship;
+
+                    Changed = true;
+                    string msg = String.Format("Relationship to {0} added", vm.SelectedPartner.Name);
+                    var smsg = new StatusMessage(msg, 200);
+                    Messenger.Send(new StatusChangedMessage(smsg));
+                    _logger.Log(LogLevel.Info, msg);
+
+                    _logger.Log(LogLevel.Info, string.Format("Requesting IsDirty change to true"));
+                    Messenger.Send(new IsChangedMessage(Changed));
+                }
+                catch (Exception ex)
+                {
+                    string msg = "Error creating new Relationship";
+                    _logger.LogException(LogLevel.Error, ex, msg);
+                    var smsg = new StatusMessage(msg, 200);
+                    Messenger.Send(new StatusChangedMessage(smsg));
+                }
+            }
+            else
+            {
+                string msg = "AddRelationship cancelled";
+                _logger.Log(LogLevel.Info, msg);
+                var smsg = new StatusMessage(msg, 200);
+                Messenger.Send(new StatusChangedMessage(smsg));
+            }
+        }
+
+        private async void RemoveRelationship()
+        {
+            _logger.Log(LogLevel.Info, "Executing RemoveRelationship command");
+            string msg;
+            // verify that I have an active relationship
+            if (SelectedRelationship == null)
+            {
+                _logger.Log(LogLevel.Warn, "A relationship must be active to be removed");
+                msg = "A relationship must be active to be removed";
+                var smsg = new StatusMessage(msg, 200);
+                Messenger.Send(new StatusChangedMessage(smsg));
+                _logger.Log(LogLevel.Warn, "A relationship must be active to be removed");
+                return;
+            }
+            RelationshipModel rel = SelectedRelationship;
+            // display verification message
+            StoryElement partner = rel.Partner;
+            msg = string.Format("Delete relationship {0} ", partner.Name);
+            msg += Environment.NewLine;
+            msg += "(and inverse relationship)";
+            ContentDialog dialog = new ContentDialog()
+            {
+
+                Title = "Remove Relationship",
+                Content = msg,
+                PrimaryButtonText = "Yes",
+                SecondaryButtonText = "No"
+            };
+            dialog.XamlRoot = GlobalData.XamlRoot;
+
+            var result = await dialog.ShowAsync();
+            if (result == ContentDialogResult.Primary)
+            {
+                msg = string.Format("Relationship to {0} deleted", partner.Name);
+                msg = string.Format("Relationship to {0} deleted", partner.Name);
+                SelectedRelationship = null;
+                // log and display status
+                _logger.Log(LogLevel.Info, msg);
+                var smsg = new StatusMessage(msg, 200);
+                Messenger.Send(new StatusChangedMessage(smsg));
+                _logger.Log(LogLevel.Info, string.Format("Requesting IsDirty change to true"));
+                Messenger.Send(new IsChangedMessage(Changed));
+            }
+            else
+            {
+                _logger.Log(LogLevel.Info, "Remove relationship cancelled");
+                msg = "RemoveRelationship cancelled";
+                _logger.Log(LogLevel.Info, msg);
+                var smsg = new StatusMessage(msg, 200);
+                Messenger.Send(new StatusChangedMessage(smsg));
+            }
+        }
+
+        private void ClearActiveRelationship()
+        {
+            _changeable = false;
+            RelationType = string.Empty;
+            RelationshipTrait = string.Empty;
+            RelationshipAttitude = string.Empty;
+            RelationshipNotes = string.Empty;
+            SelectedRelationship = null;
+            _currentRelationship = null;
+            _changeable = true;
+        }
+
+        /// <summary>
+        /// Test if the relationship to be added already exists.
+        /// </summary>
+        /// <param name="uuid">uuid of Partner to add</param>
+        /// <returns>true if found, false othewise</returns>
+        private bool RelationshipExists(string uuid)
+        {
+            StoryElement character = StringToStoryElement(uuid);
+            foreach (RelationshipModel relationship in CharacterRelationships)
+            {
+                if (character == relationship.Partner)
+                    return true;
+            }
+            return false;
+        }
+
         #endregion
 
         #region ComboBox ItemsSource collections
@@ -1138,8 +1059,9 @@ namespace StoryBuilder.ViewModels
         public ObservableCollection<string> StoryRoleList;
         public ObservableCollection<string> ArchetypeList;
         public ObservableCollection<string> BuildList;
-
         public ObservableCollection<string> NationalityList;
+        public ObservableCollection<string> RelationshipTraitList;
+        public ObservableCollection<string> RelationshipAttitudeList;
 
         // TODO: How do I bind to Sex option buttons?
         public ObservableCollection<string> EyesList;
@@ -1166,8 +1088,6 @@ namespace StoryBuilder.ViewModels
         public ObservableCollection<string> StabilityList;
         public ObservableCollection<string> WoundCategoryList;
         public ObservableCollection<string> WoundSummaryList;
-        public ObservableCollection<string> RelationshipTraitList;
-        public ObservableCollection<string> RelationshipAttitudeList;
 
         #endregion
 
@@ -1181,6 +1101,7 @@ namespace StoryBuilder.ViewModels
             _logger = Ioc.Default.GetService<LogService>();
             _wtr = Ioc.Default.GetService<StoryWriter>();
             _rdr = Ioc.Default.GetService<StoryReader>();
+            Ioc.Default.GetService<NewProjectViewModel>();
 
             PropertyChanged += OnPropertyChanged;
 
@@ -1218,13 +1139,14 @@ namespace StoryBuilder.ViewModels
             WoundSummaryList = lists["Wound"];
             RelationshipTraitList = lists["Trait"];
             RelationshipAttitudeList = lists["Attitude"];
-        
+
             CharacterTraits = new ObservableCollection<string>();
+            CharacterRelationships = new ObservableCollection<RelationshipModel>();
+
             AddTraitCommand = new RelayCommand(AddTrait, () => true);
             RemoveTraitCommand = new RelayCommand(RemoveTrait, () => true);
             AddRelationshipCommand = new RelayCommand(AddRelationship, () => true);
             RemoveRelationshipCommand = new RelayCommand(RemoveRelationship, () => true);
-            SwapRelationshipsCommand = new RelayCommand(SwapSides, () => true);
 
             Role = string.Empty;
             StoryRole = string.Empty;
@@ -1273,8 +1195,6 @@ namespace StoryBuilder.ViewModels
             WoundSummary = string.Empty;
             Wound = string.Empty;
             BackStory = string.Empty;
-
-            CharacterRelationships = new ObservableCollection<Relationship>();
         }
     }
 

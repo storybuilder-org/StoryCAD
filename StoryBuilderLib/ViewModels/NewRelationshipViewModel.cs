@@ -15,7 +15,7 @@ namespace StoryBuilder.ViewModels
 
         public ObservableCollection<StoryElement> ProspectivePartners;
 
-        public ObservableCollection<Relationship> Relationships;
+        public ObservableCollection<RelationshipModel> Relationships;
 
         private StoryElement _selectedPartner;
         public StoryElement SelectedPartner 
@@ -37,8 +37,9 @@ namespace StoryBuilder.ViewModels
 
         #region Constructor
 
-        public NewRelationshipViewModel()
+        public NewRelationshipViewModel(StoryElement member)
         {
+            Member = member;
             ProspectivePartners = new ObservableCollection<StoryElement>();
             RelationTypes = new ObservableCollection<RelationType>();
         }

@@ -76,13 +76,13 @@ namespace StoryBuilder.DAL
             await ParseStoryElementsAsync();
             ParseExplorerView();
             ParseNarratorView();
-            ParseRelationships();
 
             using (Stream fileStream = await _outFile.OpenStreamForWriteAsync())
             {
                 XmlWriterSettings settings = new XmlWriterSettings();
                 settings.Async = true;
                 settings.Encoding = Encoding.UTF8;
+                settings.Indent = true;
                 XmlWriter writer = XmlWriter.Create(fileStream, settings);
 
                 _xml.Save(writer);
@@ -367,6 +367,31 @@ namespace StoryBuilder.DAL
             attr = _xml.CreateAttribute("Health");
             attr.Value = rec.Health;
             chr.Attributes.Append(attr);
+
+            XmlNode relationshipList = _xml.CreateElement("Relationships");
+            foreach (RelationshipModel relation in rec.RelationshipList)
+            {
+                XmlElement relNode = _xml.CreateElement("Relation");
+                attr = _xml.CreateAttribute("Partner");
+                attr.Value = relation.PartnerUuid;
+                relNode.Attributes.Append(attr);
+                attr = _xml.CreateAttribute("RelationType");
+                attr.Value = relation.RelationType;
+                relNode.Attributes.Append(attr);
+                attr = _xml.CreateAttribute("Trait");
+                attr.Value = relation.Trait;
+                relNode.Attributes.Append(attr);
+                attr = _xml.CreateAttribute("Attitude");
+                attr.Value = relation.Attitude;
+                relNode.Attributes.Append(attr);
+                attr = _xml.CreateAttribute("Notes");
+                relation.Notes = await PutRtfText(relation.Notes, rec.Uuid, relation.PartnerUuid + "_notes.rtf");
+                attr.Value = relation.Notes;
+                relNode.Attributes.Append(attr);
+                relationshipList.AppendChild(relNode);
+            }
+            chr.AppendChild(relationshipList);
+
             attr = _xml.CreateAttribute("Enneagram");
             attr.Value = rec.Enneagram;
             chr.Attributes.Append(attr);
@@ -432,7 +457,6 @@ namespace StoryBuilder.DAL
             attr = _xml.CreateAttribute("WoundSummary");
             attr.Value = rec.WoundSummary;
             chr.Attributes.Append(attr);
-
             attr = _xml.CreateAttribute("CharacterSketch");
             rec.CharacterSketch = await PutRtfText(rec.CharacterSketch, rec.Uuid, "charactersketch.rtf");
             attr.Value = rec.CharacterSketch;
@@ -782,25 +806,6 @@ namespace StoryBuilder.DAL
             }
         }
 
-        private void ParseRelationships()
-        {
-            foreach (Relationship relation in _model.Relationships) 
-            {
-                XmlElement element = _xml.CreateElement("Relationship");
-                // Set attributes
-                element.SetAttribute("Member", UuidString(relation.Member.Uuid));
-                element.SetAttribute("Partner", UuidString(relation.Partner.Uuid));
-                element.SetAttribute("RelationType", relation.RelationType);
-                element.SetAttribute("Trait", relation.Trait);
-                element.SetAttribute("Attribute", relation.Attitude);
-                char[] endchars = { ' ', (char) 0 };      // remove trialing zero from RichEditText
-                relation.Notes = relation.Notes.TrimEnd(endchars);
-                element.SetAttribute("Notes", relation.Notes);
-                _relationships.AppendChild(element);
-            }
-            
-        }
-
         /// <summary>
         /// Create the TreeView's Xml equivalent of the StoryNodeModel
         /// via recursive descent. This is ran once for the Explorer
@@ -843,8 +848,6 @@ namespace StoryBuilder.DAL
             //TODO: Make external RTF file size a Preference
             if (note.Length > 1024)
             {
-                //See also: https://stackoverflow.com/questions/32948609/how-to-close-the-opened-storagefile
-                //TODO: Does these need to be CData instead of attributes?
                 StorageFolder folder = await FindSubFolder(uuid);
                 StorageFile rtfFile = await folder.CreateFileAsync(filename, CreationCollisionOption.ReplaceExisting);
                 using (var stream = await rtfFile.OpenStreamForWriteAsync())

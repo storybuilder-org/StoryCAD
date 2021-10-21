@@ -106,9 +106,6 @@ namespace StoryBuilder.DAL
                         case "Narrator":
                             ParseStoryNarrator(xn);
                             break;
-                        case "Relationships":
-                            ParseRelationships(xn);
-                            break;
                         case "Settings":  // story settings
                             break;
                     }
@@ -321,6 +318,13 @@ namespace StoryBuilder.DAL
                 foreach (IXmlNode child in traitList.ChildNodes)
                     if (child.NodeName.Equals("Trait"))
                         chr.TraitList.Add(child.InnerText);
+            }
+            var relationList = xn.SelectSingleNode("./Relationships");
+            if (relationList != null)
+            {
+                foreach (IXmlNode child in relationList.ChildNodes)
+                    if (child.NodeName.Equals("Relation"))
+                        chr.RelationshipList.Add(new RelationshipModel(child));
             }
             foreach (var attr in xn.Attributes)
             {
@@ -766,13 +770,6 @@ namespace StoryBuilder.DAL
             foreach (IXmlNode child in children)
                 RecurseNarratorNode(node, child, false);
         }
-
-        private void ParseRelationships(IXmlNode relationshipNode)
-        {
-            foreach (IXmlNode child in relationshipNode.SelectNodes("Relationship"))
-                new Relationship(child, _model);
-        }
-
 
         /// <summary>
         /// An RTF text field, if it's longer than 2K, will have been written to a

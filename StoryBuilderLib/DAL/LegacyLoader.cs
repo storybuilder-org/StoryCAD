@@ -1042,7 +1042,7 @@ namespace StoryBuilder.DAL
             ProblemModel problem = null;
             SettingModel setting = null;
             PlotPointModel plotpoint = null;
-            Relationship relationship = null;
+            RelationshipModel relationship = null;
 
             // TODO: Note to test StoryModel for null after call
             // Locally defined variables
@@ -1585,7 +1585,7 @@ namespace StoryBuilder.DAL
                             break;
                         case RelationRecType:
                             //TODO: Fix this
-                            relationship = new Relationship(_model);
+                            relationship = new RelationshipModel();
                             switch (VersionRec.Version)
                             {
                                 case "00.06":
@@ -1608,7 +1608,7 @@ namespace StoryBuilder.DAL
                                     break;
                                 default:
                                     FileRelationRec = ReadStruct<CharRelationData>(rdr);
-                                    relationship = new Relationship(_model);
+                                    relationship = new RelationshipModel();
                                     //relationship.FirstCharacter.Name = V0008FileRelationRec.FirstChar.TrimEnd();
                                     //relationship.SecondCharacter.Name = V0008FileRelationRec.SecondChar.TrimEnd();
                                     //relationship.FirstTrait = V0008FileRelationRec.Trait1.TrimEnd();
