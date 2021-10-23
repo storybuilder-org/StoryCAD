@@ -53,13 +53,6 @@ namespace StoryBuilder.ViewModels
 
         public StoryViewType ViewType;
 
-        //private TreeViewSelection _itemSelector;
-        //public object SelectedItem
-        //{
-        //    get => _itemSelector.SelectedItem;
-        //    set => _itemSelector.SelectedItem = value;
-        //}
-
         private int _sourceIndex;
         private ObservableCollection<StoryNodeItem> _sourceChildren;
         private int _targetIndex;
@@ -71,6 +64,7 @@ namespace StoryBuilder.ViewModels
 
         // The current story outline being processed. 
         public StoryModel StoryModel;
+
         public readonly ScrivenerIo Scrivener;
         private bool _saveAsProjectFolderExists;
         private StorageFolder _saveAsParentFolder;
@@ -320,6 +314,30 @@ namespace StoryBuilder.ViewModels
         {
             get => _newNodeName;
             set => SetProperty(ref _newNodeName, value);
+        }
+
+        #endregion
+
+        #region Static members  
+
+        // Static access to the ShellViewModel singleton for
+        // change tracking at the application level
+        public static ShellViewModel ShellInstance;
+
+        /// <summary>
+        /// If a story element is changed, identify that
+        /// the StoryModel is changed and needs written 
+        /// to the backing store. Also, provide a visual
+        /// traffic light on the Shell status bar that 
+        /// a save is needed.
+        /// </summary>
+        public static void ShowChange()
+        {
+
+            if (ShellInstance.StoryModel.Changed)
+                return;
+            ShellInstance.StoryModel.Changed = true;
+            ShellInstance.ChangeStatusColor = Colors.Red;
         }
 
         #endregion
@@ -1949,6 +1967,8 @@ namespace StoryBuilder.ViewModels
             FilterStatus = "Filter:Off";
 
             ChangeStatusColor = Colors.Green;
+
+            ShellInstance = this;
         }
         #endregion
 

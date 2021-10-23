@@ -36,7 +36,8 @@ namespace StoryBuilder.ViewModels
         private readonly LogService _logger;
         private readonly StoryReader _rdr;
         private readonly StoryWriter _wtr;
-        private bool _changeable;
+        private bool _changeable; // process property changes for this story element
+        private bool _changed;    // this story element has changed
 
         #endregion
 
@@ -229,13 +230,6 @@ namespace StoryBuilder.ViewModels
             set => SetProperty(ref _model, value);
         }
 
-        private bool _changed;
-        public bool Changed
-        {
-            get => _changed;
-            set => SetProperty(ref _changed, value);
-        }
-
         #endregion
 
 
@@ -256,12 +250,18 @@ namespace StoryBuilder.ViewModels
         private void OnPropertyChanged(object sender, PropertyChangedEventArgs args)
         {
             if (_changeable)
-                Changed = true;
+            {
+                _changed = true; 
+                ShellViewModel.ShowChange();
+            }
+                
         }
 
 
         private async Task LoadModel()
         {
+            _changeable = false;
+
             Uuid = Model.Uuid;
             Name = Model.Name;
             DateCreated = Model.DateCreated;
@@ -287,16 +287,13 @@ namespace StoryBuilder.ViewModels
             ToneNotes = await _rdr.GetRtfText(Model.ToneNotes, Uuid);
             Notes = await _rdr.GetRtfText(Model.Notes, Uuid);
 
-            Changed = false;
-            PropertyChanged += OnPropertyChanged;
+            _changed = false;
             _changeable = true;
         }
 
         internal async Task SaveModel()
         {
-            _changeable = false;
-            PropertyChanged -= OnPropertyChanged;
-            if (Changed)
+            if (_changed)
             {
                 {
                     // Story.Uuid is read-only and cannot be assigned
@@ -325,8 +322,8 @@ namespace StoryBuilder.ViewModels
                     Model.ToneNotes = await _wtr.PutRtfText(ToneNotes, Model.Uuid, "tonenotes.rtf");
                     Model.Notes = await _wtr.PutRtfText(Notes, Model.Uuid, "notes.rtf");
 
-                    _logger.Log(LogLevel.Info, string.Format("Requesting IsDirty change to true"));
-                    Messenger.Send(new IsChangedMessage(Changed));
+                    //_logger.Log(LogLevel.Info, string.Format("Requesting IsDirty change to true"));
+                    //Messenger.Send(new IsChangedMessage(Changed));
                 }
             }
         }
@@ -386,6 +383,8 @@ namespace StoryBuilder.ViewModels
             TenseList = lists["Tense"];
             StyleList = lists["LiteraryStyle"];
             ToneList = lists["Tone"];
+
+            PropertyChanged += OnPropertyChanged;
 
             //CharacterList = CharacterModel.CharacterNames;
 

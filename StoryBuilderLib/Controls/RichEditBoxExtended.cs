@@ -36,13 +36,12 @@ namespace StoryBuilder.Controls
 
         public string RtfText
         {
-            get { return (string)GetValue(RtfTextProperty); }
+            get { return (string) GetValue(RtfTextProperty); }
             set { SetValue(RtfTextProperty, value); }
         }
 
         private void RichEditBoxExtended_TextChanged(object sender, RoutedEventArgs e)
         {
-            char[] endchars = { ' ', (char)0 };      
             if (!_lockChangeExecution)
             {
                 _lockChangeExecution = true;
@@ -50,27 +49,29 @@ namespace StoryBuilder.Controls
                 Document.GetText(TextGetOptions.None, out text);
                 if (string.IsNullOrWhiteSpace(text))
                 {
-                    RtfText = string.Empty;
+                    RtfText = "";
                 }
                 else
                 {
                     Document.GetText(TextGetOptions.FormatRtf, out text);
-                    RtfText = text.TrimEnd(endchars);  // remove trialing zero from RichEditText
+                    RtfText = text;
                 }
-
                 _lockChangeExecution = false;
             }
         }
 
         private static void RtfTextPropertyChanged(DependencyObject dependencyObject,
-            DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
+        DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
         {
+            var options = TextSetOptions.FormatRtf | TextSetOptions.ApplyRtfDocumentDefaults;
             var rtb = dependencyObject as RichEditBoxExtended;
             if (rtb == null) return;
             if (!rtb._lockChangeExecution)
             {
                 rtb._lockChangeExecution = true;
-                rtb.Document.SetText(TextSetOptions.FormatRtf, rtb.RtfText);
+                //rtb.Document.SetText(TextSetOptions.FormatRtf, rtb.RtfText);
+                rtb.Document.SetText(options, rtb.RtfText);
+                // get rid of new EOP (cr/lf) somehow
                 rtb._lockChangeExecution = false;
             }
         }
