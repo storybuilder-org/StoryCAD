@@ -20,7 +20,7 @@
         </Grid.RowDefinitions>
         <ComboBox Grid.Row="0" Header="Relationship" PlaceholderText="Pick Relation" IsEditable="False" 
                               ItemsSource="{x:Bind CharVm.CharacterRelationships}"
-                              SelectionChanged="{x:Bind CharVm.RelationshipChanged, Mode=OneWay}"
+                              SelectionChanged="{x:Bind RelationshipChanged, Mode=OneWay}"
                               DisplayMemberPath ="Partner.Name"
                               SelectedItem="{x:Bind CharVm.SelectedRelationship, Mode=TwoWay}" />
         <TextBox Name="RelationType" Grid.Row="2" Header="Relation Type" MinWidth="200" 

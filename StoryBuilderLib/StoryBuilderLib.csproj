@@ -32,7 +32,6 @@
     <Folder Include="Assets\" />
     <Folder Include="Controllers\" />
     <Folder Include="Models\Scrivener\" />
-    <Folder Include="Install\" />
     <Folder Include="Services\Icons\" />
     <Folder Include="Services\Installation\" />
     <Folder Include="Services\Logging\" />

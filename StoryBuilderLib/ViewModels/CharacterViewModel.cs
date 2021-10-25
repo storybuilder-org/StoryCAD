@@ -27,7 +27,7 @@ namespace StoryBuilder.ViewModels
         private readonly LogService _logger;
         private readonly StoryController _story;
         private StoryModel _storyModel;
-        private RelationshipModel _currentRelationship;
+        public RelationshipModel CurrentRelationship;
         private bool _changeable; // process property changes for this story element
         private bool _changed;    // this story element has changed
 
@@ -222,12 +222,12 @@ namespace StoryBuilder.ViewModels
 
         }
 
-        private ObservableCollection<string> _relationships;
-        public ObservableCollection<string> Relationships
-        {
-            get => _relationships;
-            set => SetProperty(ref _relationships, value);
-        }
+        //private ObservableCollection<string> _relationships;
+        //public ObservableCollection<string> Relationships
+        //{
+        //    get => _relationships;
+        //    set => SetProperty(ref _relationships, value);
+        //}
 
         private string _relationType;
         public string RelationType
@@ -609,24 +609,10 @@ namespace StoryBuilder.ViewModels
             await SaveModel(); // Save the ViewModel back to the Story
         }
 
-        /// Instead of loading a Character's RelationshipModels directly into
-        /// the ViewModel and binding them, the models themselves are loaded 
-        /// into the VM's CharacterRelationships ObservableCollection, but
-        /// its properties are bound only when one of of the ComboBox items
-        /// CharacterRelationships is bound to is selected.
-        /// However, one property need modified during LoadModel: the Partner  
-        /// StoryElement in the RelationshipModel needs loaded from its Uuid.
-        public async Task RelationshipChanged(object sender, SelectionChangedEventArgs args)
-        {
-            await SaveRelationship(_currentRelationship);
-            await LoadRelationship(SelectedRelationship);
-            _currentRelationship = SelectedRelationship;
-        }
-
         public async Task SaveRelationships()
         {
-            await SaveRelationship(_currentRelationship);  // Save any current changes
-            _currentRelationship = null;
+            await SaveRelationship(CurrentRelationship);  // Save any current changes
+            CurrentRelationship = null;
             // Move relationships back to the character model
             Model.RelationshipList.Clear();
             foreach (RelationshipModel relation in CharacterRelationships)
@@ -732,7 +718,7 @@ namespace StoryBuilder.ViewModels
             RelationshipAttitude = string.Empty;
             RelationshipNotes = string.Empty;
             SelectedRelationship = null;
-            _currentRelationship = null;
+            CurrentRelationship = null;
             CharacterRelationships.Clear();
             foreach (RelationshipModel relation in Model.RelationshipList)
             {
@@ -785,8 +771,8 @@ namespace StoryBuilder.ViewModels
                 foreach (string element in CharacterTraits)
                     Model.TraitList.Add(element);
                 
-                 await SaveRelationship(_currentRelationship);  // Save any current changes
-                _currentRelationship = null;
+                 await SaveRelationship(CurrentRelationship);  // Save any current changes
+                CurrentRelationship = null;
                 // Move relationships back to the character model
                 Model.RelationshipList.Clear();
                 foreach (RelationshipModel relation in CharacterRelationships)
@@ -871,11 +857,13 @@ namespace StoryBuilder.ViewModels
         /// Load and bind a RelationshipModel instance
         /// </summary>
         /// <param name="selectedRelation">The RelationShipModel just selected or added</param>
-        private async Task LoadRelationship(RelationshipModel selectedRelation)
+        public async Task LoadRelationship(RelationshipModel selectedRelation)
         {
             if (selectedRelation == null)
                 return;
+
             _changeable = false;
+
             RelationType = selectedRelation.RelationType;
             RelationshipTrait = selectedRelation.Trait;
             RelationshipAttitude = selectedRelation.Attitude;
@@ -884,7 +872,7 @@ namespace StoryBuilder.ViewModels
             _changeable = true;
         }
 
-        private async Task SaveRelationship(RelationshipModel selectedRelation)
+        public async Task SaveRelationship(RelationshipModel selectedRelation)
         {
             if (!_changed || selectedRelation == null)
                 return;
@@ -903,7 +891,7 @@ namespace StoryBuilder.ViewModels
         private async void AddRelationship()
         {
             _logger.Log(LogLevel.Info, "Executing AddRelationship command");
-            await SaveRelationship(_currentRelationship);
+            await SaveRelationship(CurrentRelationship);
 
             NewRelationshipDialog dialog = new();
             dialog.XamlRoot = GlobalData.XamlRoot;
@@ -912,6 +900,8 @@ namespace StoryBuilder.ViewModels
             vm.RelationTypes.Clear();
             foreach (RelationType relationType in GlobalData.RelationTypes)
                 vm.RelationTypes.Add(relationType);
+            // Prospective relationship partners are all characters not currently
+            // already in a relationship with this character.
             vm.ProspectivePartners.Clear();
             foreach (StoryElement character in _storyModel.StoryElements.Characters)
             {
@@ -932,11 +922,12 @@ namespace StoryBuilder.ViewModels
                     string partnerUuid = StoryWriter.UuidString(vm.SelectedPartner.Uuid);
                     RelationshipModel memberRelationship = new RelationshipModel(partnerUuid, vm.RelationType);
                     // Complete pairing 
+                    memberRelationship.Partner = StringToStoryElement(partnerUuid);
                     // Add partner relationship to member's list of relationships 
                     CharacterRelationships.Add(memberRelationship);
                     SelectedRelationship = memberRelationship;
                     await LoadRelationship(SelectedRelationship);
-                    _currentRelationship = SelectedRelationship;
+                    CurrentRelationship = SelectedRelationship;
 
                     _changed = true;
                     string msg = String.Format("Relationship to {0} added", vm.SelectedPartner.Name);
@@ -963,6 +954,20 @@ namespace StoryBuilder.ViewModels
                 Messenger.Send(new StatusChangedMessage(smsg));
             }
         }
+
+        /// Instead of loading a Character's RelationshipModels directly into
+        /// the ViewModel and binding them, the models themselves are loaded 
+        /// into the VM's CharacterRelationships ObservableCollection, but
+        /// its properties are bound only when one of of the ComboBox items
+        /// CharacterRelationships is bound to is selected.
+        /// However, one property need modified during LoadModel: the Partner  
+        /// StoryElement in the RelationshipModel needs loaded from its Uuid.
+        //public async Task RelationshipChanged(object sender, SelectionChangedEventArgs args)
+        //{
+        //    await SaveRelationship(CurrentRelationship);
+        //    await LoadRelationship(SelectedRelationship);
+        //   CurrentRelationship = SelectedRelationship;
+        //}
 
         private async void RemoveRelationship()
         {
@@ -1020,12 +1025,14 @@ namespace StoryBuilder.ViewModels
         private void ClearActiveRelationship()
         {
             _changeable = false;
+
             RelationType = string.Empty;
             RelationshipTrait = string.Empty;
             RelationshipAttitude = string.Empty;
             RelationshipNotes = string.Empty;
             SelectedRelationship = null;
-            _currentRelationship = null;
+            CurrentRelationship = null;
+
             _changeable = true;
         }
 
