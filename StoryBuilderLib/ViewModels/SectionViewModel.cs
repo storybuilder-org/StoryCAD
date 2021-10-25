@@ -21,7 +21,8 @@ namespace StoryBuilder.ViewModels
         private readonly StoryWriter _wtr;
         private readonly StoryController _story;
         private readonly LogService _logger;
-        private bool _changeable;
+        private bool _changeable; // process property changes for this story element
+        private bool _changed;    // this story element has changed
 
         #endregion
 
@@ -69,13 +70,6 @@ namespace StoryBuilder.ViewModels
             set => SetProperty(ref _model, value);
         }
 
-        // The Changed bit tracks any change to this ViewModel.
-        private bool _changed;
-        public bool Changed
-        {
-            get => _changed;
-            set => SetProperty(ref _changed, value);
-        }
         #endregion
 
         #region Methods
@@ -94,27 +88,29 @@ namespace StoryBuilder.ViewModels
         private void OnPropertyChanged(object sender, PropertyChangedEventArgs args)
         {
             if (_changeable)
-                Changed = true;
+            {
+                _changed = true;
+                ShellViewModel.ShowChange();
+            }
         }
 
         private async Task LoadModel()
         {
+            _changeable = false;
+            _changed = false;
+
             Uuid = Model.Uuid;
             Name = Model.Name;
 
             // Read RTF file
             Notes = await _rdr.GetRtfText(Model.Notes, Uuid);
 
-            Changed = false;
-            PropertyChanged += OnPropertyChanged;
             _changeable = true;
         }
 
         internal async Task SaveModel()
         {
-            _changeable = false;
-            PropertyChanged -= OnPropertyChanged;
-            if (Changed)
+            if (_changed)
             {
                 // Story.Uuid is read-only; no need to save
                 Model.Name = Name;
@@ -122,8 +118,8 @@ namespace StoryBuilder.ViewModels
                 // Write RYG file
                 Model.Notes = await _wtr.PutRtfText(Notes, Model.Uuid, "notes.rtf");
 
-                _logger.Log(LogLevel.Info, string.Format("Requesting IsDirty change to true"));
-                Messenger.Send(new IsChangedMessage(Changed));
+                //_logger.Log(LogLevel.Info, string.Format("Requesting IsDirty change to true"));
+                //Messenger.Send(new IsChangedMessage(Changed));
             }
         }
 
@@ -139,6 +135,8 @@ namespace StoryBuilder.ViewModels
             _rdr = Ioc.Default.GetService<StoryReader>();
 
             Notes = string.Empty;
+
+            PropertyChanged += OnPropertyChanged;
         }
 
         #endregion

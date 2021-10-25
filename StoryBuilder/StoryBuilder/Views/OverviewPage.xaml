@@ -37,7 +37,7 @@
                          RtfText="{x:Bind OverviewVm.StoryIdea, Mode=TwoWay}" AcceptsReturn="True"
                          IsSpellCheckEnabled="True" TextWrapping="Wrap"
                          ScrollViewer.VerticalScrollBarVisibility="Visible"
-                         PlaceholderText="Just record whatever idea or incident made you think 'story'." />
+                         PlaceholderText="Record whatever idea or incident made you think 'story'." />
                 </Grid>
             </PivotItem>
             <PivotItem Header="Concept">

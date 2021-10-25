@@ -27,8 +27,9 @@ namespace StoryBuilder.ViewModels
         private readonly LogService _logger;
         private readonly StoryController _story;
         private StoryModel _storyModel;
-        private bool _changeable;
         private RelationshipModel _currentRelationship;
+        private bool _changeable; // process property changes for this story element
+        private bool _changed;    // this story element has changed
 
         #endregion
 
@@ -570,15 +571,7 @@ namespace StoryBuilder.ViewModels
             set => _model = value;
         }
 
-        // The Changed bit tracks any change to this ViewModel.
-        private bool _changed;
-        public bool Changed
-        {
-            get => _changed;
-            set => _changed = value;
-        }
-
-        // Traits info
+          // Traits info
 
         private ObservableCollection<string> _characterTraits;
         public ObservableCollection<string> CharacterTraits
@@ -645,13 +638,18 @@ namespace StoryBuilder.ViewModels
         #region Private Methods
         private void OnPropertyChanged(object sender, PropertyChangedEventArgs args)
         {
-             if (_changeable)
-                Changed = true;
+            if (_changeable)
+            {
+                _changed = true;
+                ShellViewModel.ShowChange();
+            }
         }
 
         private async Task LoadModel()
         {
-            PropertyChanged += OnPropertyChanged;
+            _changeable = false;
+            _changed = false;
+
             Uuid = Model.Uuid;
             Name = Model.Name;
             Role = Model.Role;
@@ -742,16 +740,12 @@ namespace StoryBuilder.ViewModels
                 CharacterRelationships.Add(relation);
             }
 
-            Changed = false;
             _changeable = true;
         }
 
         internal async Task SaveModel()
         {
-            PropertyChanged -= OnPropertyChanged;
-            _changeable = false;
-
-            if (Changed)
+            if (_changed)
             {
                 // Story.Uuid is read-only and cannot be set
                 Model.Name = Name;
@@ -826,8 +820,8 @@ namespace StoryBuilder.ViewModels
                 Model.Secrets = await _wtr.PutRtfText(Secrets, Uuid, "secrets.rtf");
                 Model.BackStory = await _wtr.PutRtfText(BackStory, Uuid, "backstory.rtf");
 
-                _logger.Log(LogLevel.Info, string.Format("Requesting IsDirty change to true"));
-                Messenger.Send(new IsChangedMessage(Changed));
+                //_logger.Log(LogLevel.Info, string.Format("Requesting IsDirty change to true"));
+                //Messenger.Send(new IsChangedMessage(Changed));
             }
         }
 
@@ -892,13 +886,13 @@ namespace StoryBuilder.ViewModels
 
         private async Task SaveRelationship(RelationshipModel selectedRelation)
         {
-            if (!Changed || selectedRelation == null)
+            if (!_changed || selectedRelation == null)
                 return;
             selectedRelation.Trait = RelationshipTrait;
             selectedRelation.Attitude = RelationshipAttitude;
             selectedRelation.Notes = await _wtr.PutRtfText(RelationshipNotes, Uuid, selectedRelation.PartnerUuid + "_notes.rtf");
-            _logger.Log(LogLevel.Info, string.Format("Requesting IsDirty change to true"));
-            Messenger.Send(new IsChangedMessage(Changed));
+            //_logger.Log(LogLevel.Info, string.Format("Requesting IsDirty change to true"));
+            //Messenger.Send(new IsChangedMessage(Changed));
         }
 
         /// <summary>
@@ -944,14 +938,14 @@ namespace StoryBuilder.ViewModels
                     await LoadRelationship(SelectedRelationship);
                     _currentRelationship = SelectedRelationship;
 
-                    Changed = true;
+                    _changed = true;
                     string msg = String.Format("Relationship to {0} added", vm.SelectedPartner.Name);
                     var smsg = new StatusMessage(msg, 200);
                     Messenger.Send(new StatusChangedMessage(smsg));
                     _logger.Log(LogLevel.Info, msg);
 
-                    _logger.Log(LogLevel.Info, string.Format("Requesting IsDirty change to true"));
-                    Messenger.Send(new IsChangedMessage(Changed));
+                    //_logger.Log(LogLevel.Info, string.Format("Requesting IsDirty change to true"));
+                    //Messenger.Send(new IsChangedMessage(Changed));
                 }
                 catch (Exception ex)
                 {
@@ -1010,8 +1004,8 @@ namespace StoryBuilder.ViewModels
                 _logger.Log(LogLevel.Info, msg);
                 var smsg = new StatusMessage(msg, 200);
                 Messenger.Send(new StatusChangedMessage(smsg));
-                _logger.Log(LogLevel.Info, string.Format("Requesting IsDirty change to true"));
-                Messenger.Send(new IsChangedMessage(Changed));
+                //_logger.Log(LogLevel.Info, string.Format("Requesting IsDirty change to true"));
+                //Messenger.Send(new IsChangedMessage(Changed));
             }
             else
             {
@@ -1103,9 +1097,6 @@ namespace StoryBuilder.ViewModels
             _rdr = Ioc.Default.GetService<StoryReader>();
             Ioc.Default.GetService<NewProjectViewModel>();
 
-            PropertyChanged += OnPropertyChanged;
-
-
             Dictionary<string, ObservableCollection<string>> lists = GlobalData.ListControlSource;
             RoleList = lists["Role"];
             StoryRoleList = lists["StoryRole"];
@@ -1195,6 +1186,8 @@ namespace StoryBuilder.ViewModels
             WoundSummary = string.Empty;
             Wound = string.Empty;
             BackStory = string.Empty;
+
+            PropertyChanged += OnPropertyChanged;
         }
     }
 

@@ -24,9 +24,10 @@ namespace StoryBuilder.ViewModels
         private readonly StoryWriter _wtr;
         private readonly StoryController _story;
         private readonly LogService _logger;
-        private bool _changeable;
         StatusMessage _smsg;
-
+        private bool _changeable; // process property changes for this story element
+        private bool _changed;    // this story element has changed
+   
         #endregion
 
         #region Properties
@@ -343,14 +344,6 @@ namespace StoryBuilder.ViewModels
             set => SetProperty(ref _model, value);
         }
 
-        // The Changed bit tracks any change to this ViewModel.
-        private bool _changed;
-        public bool Changed
-        {
-            get => _changed;
-            set => SetProperty(ref _changed, value);
-        }
-
         #endregion
 
         #region Relay Commands
@@ -372,15 +365,20 @@ namespace StoryBuilder.ViewModels
         {
             await SaveModel();    // Save the ViewModel back to the Story
         }
-
         private void OnPropertyChanged(object sender, PropertyChangedEventArgs args)
         {
             if (_changeable)
-                Changed = true;
+            {
+                _changed = true;
+                ShellViewModel.ShowChange();
+            }
         }
 
         private async Task LoadModel()
         {
+            _changeable = false;
+            _changed = false;
+
             Uuid = Model.Uuid;
             Name = Model.Name;
             Id = Model.Id;
@@ -414,27 +412,19 @@ namespace StoryBuilder.ViewModels
 
             // Read RTF files
             Remarks = await _rdr.GetRtfText(Model.Remarks, Uuid);
-
             Events = await _rdr.GetRtfText(Model.Events, Uuid);
             Consequences = await _rdr.GetRtfText(Model.Consequences, Uuid);
             Significance = await _rdr.GetRtfText(Model.Significance, Uuid);
             Realization = await _rdr.GetRtfText(Model.Realization, Uuid);
-
             Review = await _rdr.GetRtfText(Model.Review, Uuid);
-
             Notes = await _rdr.GetRtfText(Model.Notes, Uuid);
-
-            Changed = false;
-            PropertyChanged += OnPropertyChanged;
+            
             _changeable = true;
         }
 
         internal async Task SaveModel()
         {
-            PropertyChanged -= OnPropertyChanged;
-            _changeable = false;
-
-            if (Changed)
+            if (_changed)
             {
                 // Story.Uuid is read-only and cannot be assigned
                 Model.Name = Name;
@@ -475,8 +465,8 @@ namespace StoryBuilder.ViewModels
                 Model.Review = await _wtr.PutRtfText(Review, Model.Uuid, "review.rtf");
                 Model.Notes = await _wtr.PutRtfText(Notes, Model.Uuid, "notes.rtf");
 
-                _logger.Log(LogLevel.Info, string.Format("Requesting IsDirty change to true"));
-                Messenger.Send(new IsChangedMessage(Changed));
+                //_logger.Log(LogLevel.Info, string.Format("Requesting IsDirty change to true"));
+                //Messenger.Send(new IsChangedMessage(Changed));
             }
         }
 
@@ -619,6 +609,8 @@ namespace StoryBuilder.ViewModels
 
             AddCastCommand = new RelayCommand(AddCastMember, () => true);
             RemoveCastCommand = new RelayCommand(RemoveCastMember, () => true);
+
+            PropertyChanged += OnPropertyChanged;
         }
 
         #endregion

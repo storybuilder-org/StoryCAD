@@ -6,11 +6,6 @@ namespace StoryBuilder.Models
 {
     public class RelationshipModel
     {
-        #region fields
-
-        StoryModel _model;
-        #endregion
-
         #region Properties
 
         public StoryElement Partner { get; set; } // The other character in the relationship
@@ -22,7 +17,7 @@ namespace StoryBuilder.Models
 
         #endregion
 
-        #region Constructor
+        #region Constructors
 
         public RelationshipModel() 
         {

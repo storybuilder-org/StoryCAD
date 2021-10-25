@@ -232,11 +232,17 @@ namespace StoryBuilder.ViewModels
         private void OnPropertyChanged(object sender, PropertyChangedEventArgs args)
         {
             if (_changeable)
-                Changed = true;
+            {
+                _changed = true;
+                ShellViewModel.ShowChange();
+            }
         }
 
         private async Task LoadModel()
         {
+            _changeable = false;
+            _changed = false;
+
             Uuid = Model.Uuid;
             Name = Model.Name;
             ProblemType = Model.ProblemType;
@@ -265,16 +271,12 @@ namespace StoryBuilder.ViewModels
             Premise = await _rdr.GetRtfText(Model.Premise, Uuid);
             Notes = await _rdr.GetRtfText(Model.Notes, Uuid);
 
-            Changed = false;
-            PropertyChanged += OnPropertyChanged;
             _changeable = true;
-        }
+            }
 
         internal async Task SaveModel()
         {
-            _changeable = false;
-            PropertyChanged -= OnPropertyChanged;
-            if (Changed)
+            if (_changed)
             {
                 // Story.Uuid is read-only and cannot be assigned
                 Model.Name = Name;
@@ -299,8 +301,8 @@ namespace StoryBuilder.ViewModels
                 Model.Premise = await _wtr.PutRtfText(Premise, Model.Uuid, "premise.rtf");
                 Model.Notes = await _wtr.PutRtfText(Notes, Model.Uuid, "notes.rtf");
 
-                _logger.Log(LogLevel.Info, string.Format("Requesting IsDirty change to true"));
-                Messenger.Send(new IsChangedMessage(Changed));
+                //_logger.Log(LogLevel.Info, string.Format("Requesting IsDirty change to true"));
+                //Messenger.Send(new IsChangedMessage(Changed));
             }
         }
 
@@ -365,6 +367,8 @@ namespace StoryBuilder.ViewModels
             OutcomeList = lists["Outcome"];
             MethodList = lists["Method"];
             ThemeList = lists["Theme"];
+
+            PropertyChanged += OnPropertyChanged;
         }
         #endregion
     }

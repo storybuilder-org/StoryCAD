@@ -47,14 +47,14 @@ namespace StoryBuilder.Controls
                 _lockChangeExecution = true;
                 string text;
                 Document.GetText(TextGetOptions.None, out text);
-                if (string.IsNullOrWhiteSpace(text))
+                if (string.IsNullOrWhiteSpace(text))  
                 {
                     RtfText = "";
                 }
                 else
                 {
                     Document.GetText(TextGetOptions.FormatRtf, out text);
-                    RtfText = text;
+                    RtfText = text.TrimEnd('\0'); // remove end of string marker
                 }
                 _lockChangeExecution = false;
             }

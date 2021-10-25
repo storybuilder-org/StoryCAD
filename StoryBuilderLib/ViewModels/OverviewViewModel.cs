@@ -227,7 +227,7 @@ namespace StoryBuilder.ViewModels
         public OverviewModel Model
         {
             get => _model;
-            set => SetProperty(ref _model, value);
+            set => _model = value;
         }
 
         #endregion
@@ -251,16 +251,15 @@ namespace StoryBuilder.ViewModels
         {
             if (_changeable)
             {
-                _changed = true; 
+                _changed = true;
                 ShellViewModel.ShowChange();
             }
-                
         }
-
 
         private async Task LoadModel()
         {
             _changeable = false;
+            _changed = false;
 
             Uuid = Model.Uuid;
             Name = Model.Name;
@@ -287,7 +286,7 @@ namespace StoryBuilder.ViewModels
             ToneNotes = await _rdr.GetRtfText(Model.ToneNotes, Uuid);
             Notes = await _rdr.GetRtfText(Model.Notes, Uuid);
 
-            _changed = false;
+
             _changeable = true;
         }
 
@@ -295,36 +294,34 @@ namespace StoryBuilder.ViewModels
         {
             if (_changed)
             {
-                {
-                    // Story.Uuid is read-only and cannot be assigned
-                    Model.Name = Name;
-                    Model.DateCreated = DateCreated;
-                    Model.Author = Author;
-                    Model.DateModified = DateModified;
-                    Model.StoryType = StoryType;
-                    Model.StoryGenre = StoryGenre;
-                    Model.Viewpoint = Viewpoint;
-                    Model.ViewpointCharacter = ViewpointCharacter;
-                    Model.Voice = Voice;
-                    Model.LiteraryDevice = LiteraryDevice;
-                    Model.Style = Style;
-                    Model.Tense = Tense;
-                    Model.Style = Style;
-                    Model.Tone = Tone;
-                    Model.TargetMarket1 = TargetMarket1;
-                    Model.TargetMarket2 = TargetMarket2;
+                // Story.Uuid is read-only and cannot be assigned
+                Model.Name = Name;
+                Model.DateCreated = DateCreated;
+                Model.Author = Author;
+                Model.DateModified = DateModified;
+                Model.StoryType = StoryType;
+                Model.StoryGenre = StoryGenre;
+                Model.Viewpoint = Viewpoint;
+                Model.ViewpointCharacter = ViewpointCharacter;
+                Model.Voice = Voice;
+                Model.LiteraryDevice = LiteraryDevice;
+                Model.Style = Style;
+                Model.Tense = Tense;
+                Model.Style = Style;
+                Model.Tone = Tone;
+                Model.TargetMarket1 = TargetMarket1;
+                Model.TargetMarket2 = TargetMarket2;
 
-                    // Write RTF files
-                    Model.StoryIdea = await _wtr.PutRtfText(StoryIdea, Model.Uuid, "storyidea.rtf");
-                    Model.Concept = await _wtr.PutRtfText(Concept, Model.Uuid, "concept.rtf");
-                    Model.Premise = await _wtr.PutRtfText(Premise, Model.Uuid, "premise.rtf");
-                    Model.StyleNotes = await _wtr.PutRtfText(StyleNotes, Model.Uuid, "stylenotes.rtf");
-                    Model.ToneNotes = await _wtr.PutRtfText(ToneNotes, Model.Uuid, "tonenotes.rtf");
-                    Model.Notes = await _wtr.PutRtfText(Notes, Model.Uuid, "notes.rtf");
+                // Write RTF files
+                Model.StoryIdea = await _wtr.PutRtfText(StoryIdea, Model.Uuid, "storyidea.rtf");
+                Model.Concept = await _wtr.PutRtfText(Concept, Model.Uuid, "concept.rtf");
+                Model.Premise = await _wtr.PutRtfText(Premise, Model.Uuid, "premise.rtf");
+                Model.StyleNotes = await _wtr.PutRtfText(StyleNotes, Model.Uuid, "stylenotes.rtf");
+                Model.ToneNotes = await _wtr.PutRtfText(ToneNotes, Model.Uuid, "tonenotes.rtf");
+                Model.Notes = await _wtr.PutRtfText(Notes, Model.Uuid, "notes.rtf");
 
-                    //_logger.Log(LogLevel.Info, string.Format("Requesting IsDirty change to true"));
-                    //Messenger.Send(new IsChangedMessage(Changed));
-                }
+                //_logger.Log(LogLevel.Info, string.Format("Requesting IsDirty change to true"));
+                //Messenger.Send(new IsChangedMessage(Changed));
             }
         }
 
