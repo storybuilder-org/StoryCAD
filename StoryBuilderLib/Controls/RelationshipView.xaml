@@ -48,7 +48,7 @@
             <Button Grid.Column="2" Content="Add Relation" 
                              Command="{x:Bind CharVm.AddRelationshipCommand, Mode=OneWay}" />
             <TextBlock Grid.Column="3" MinWidth="25" />
-            <Button Grid.Column="4" Content="Delete Relation" 
+            <Button Grid.Column="4" Content="Remove Relation" 
                              Command="{x:Bind CharVm.RemoveRelationshipCommand, Mode=OneWay}" />
         </Grid>
     </Grid>

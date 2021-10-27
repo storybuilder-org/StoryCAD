@@ -222,14 +222,7 @@ namespace StoryBuilder.ViewModels
 
         }
 
-        //private ObservableCollection<string> _relationships;
-        //public ObservableCollection<string> Relationships
-        //{
-        //    get => _relationships;
-        //    set => SetProperty(ref _relationships, value);
-        //}
-
-        private string _relationType;
+         private string _relationType;
         public string RelationType
         {
             get => _relationType;
@@ -955,20 +948,6 @@ namespace StoryBuilder.ViewModels
             }
         }
 
-        /// Instead of loading a Character's RelationshipModels directly into
-        /// the ViewModel and binding them, the models themselves are loaded 
-        /// into the VM's CharacterRelationships ObservableCollection, but
-        /// its properties are bound only when one of of the ComboBox items
-        /// CharacterRelationships is bound to is selected.
-        /// However, one property need modified during LoadModel: the Partner  
-        /// StoryElement in the RelationshipModel needs loaded from its Uuid.
-        //public async Task RelationshipChanged(object sender, SelectionChangedEventArgs args)
-        //{
-        //    await SaveRelationship(CurrentRelationship);
-        //    await LoadRelationship(SelectedRelationship);
-        //   CurrentRelationship = SelectedRelationship;
-        //}
-
         private async void RemoveRelationship()
         {
             _logger.Log(LogLevel.Info, "Executing RemoveRelationship command");
@@ -976,41 +955,40 @@ namespace StoryBuilder.ViewModels
             // verify that I have an active relationship
             if (SelectedRelationship == null)
             {
-                _logger.Log(LogLevel.Warn, "A relationship must be active to be removed");
-                msg = "A relationship must be active to be removed";
+                _logger.Log(LogLevel.Warn, "A relationship to be removed");
+                msg = "Select the relationship to be removed";
                 var smsg = new StatusMessage(msg, 200);
                 Messenger.Send(new StatusChangedMessage(smsg));
                 _logger.Log(LogLevel.Warn, "A relationship must be active to be removed");
                 return;
             }
-            RelationshipModel rel = SelectedRelationship;
-            // display verification message
-            StoryElement partner = rel.Partner;
-            msg = string.Format("Delete relationship {0} ", partner.Name);
+
+            // Display a confirmation message
+            StoryElement partner = SelectedRelationship.Partner;
+            msg = string.Format("Remove relationship to {0}? ", partner.Name);
             msg += Environment.NewLine;
-            msg += "(and inverse relationship)";
             ContentDialog dialog = new ContentDialog()
             {
-
                 Title = "Remove Relationship",
                 Content = msg,
                 PrimaryButtonText = "Yes",
                 SecondaryButtonText = "No"
             };
             dialog.XamlRoot = GlobalData.XamlRoot;
-
             var result = await dialog.ShowAsync();
             if (result == ContentDialogResult.Primary)
             {
+                // Remove the current (selected) relationship
+                RelationshipModel rel = SelectedRelationship;
+                ClearActiveRelationship();
+                rel.Partner = null;
+                CharacterRelationships.Remove(rel);
                 msg = string.Format("Relationship to {0} deleted", partner.Name);
-                msg = string.Format("Relationship to {0} deleted", partner.Name);
-                SelectedRelationship = null;
+                _changed = true;
                 // log and display status
                 _logger.Log(LogLevel.Info, msg);
                 var smsg = new StatusMessage(msg, 200);
                 Messenger.Send(new StatusChangedMessage(smsg));
-                //_logger.Log(LogLevel.Info, string.Format("Requesting IsDirty change to true"));
-                //Messenger.Send(new IsChangedMessage(Changed));
             }
             else
             {
