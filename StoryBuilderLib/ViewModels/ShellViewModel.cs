@@ -104,7 +104,6 @@ namespace StoryBuilder.ViewModels
         // Tools MenuFlyOut Commands
         public RelayCommand KeyQuestionsCommand { get; }
         public RelayCommand TopicsCommand { get; }
-        public RelayCommand ConflictCommand { get; }
         public RelayCommand MasterPlotsCommand { get; }
         public RelayCommand DramaticSituationsCommand { get; }
         public RelayCommand StockScenesCommand { get; }
@@ -1036,32 +1035,6 @@ namespace StoryBuilder.ViewModels
             await dialog.ShowAsync();
             Logger.Log(LogLevel.Info, "Topics finished");
         }
-        public async void ConflictTool()
-        {
-            Logger.Log(LogLevel.Info, "Displaying Conflict Finder tool dialog");
-            if (!GlobalData.PageKey.Equals(ProblemPage)) 
-            {
-                Logger.Log(LogLevel.Warn, "Conflict Finder is only valid for ProblemPage");
-                StatusMessage = "Conflict Finder is only valid for ProblemPage";
-                return;
-            }
-            ProblemViewModel pvm = Ioc.Default.GetService<ProblemViewModel>();
-            if (RightTappedNode == null)
-                RightTappedNode = CurrentNode;
-            ConflictDialog dialog = new ConflictDialog();
-            dialog.XamlRoot = GlobalData.XamlRoot;
-            var result = await dialog.ShowAsync();
-            if (result == ContentDialogResult.Primary)   // Copy to Protagonist conflict
-            {
-                pvm.ProtConflict = dialog.Conflict.ExampleText;
-            }
-            else if (result == ContentDialogResult.Secondary) // Copy to Antagonist conflict
-            {
-                pvm.AntagConflict = dialog.Conflict.ExampleText;
-            }
-            // else Cancel
-            Logger.Log(LogLevel.Info, "Conflict Finder finished");
-        }
         private async void MasterPlotTool()
         {
             Logger.Log(LogLevel.Info, "Displaying MasterPlot tool dialog");
@@ -1929,7 +1902,6 @@ namespace StoryBuilder.ViewModels
 
             KeyQuestionsCommand = new RelayCommand(KeyQuestionsTool, () => _canExecuteCommands);
             TopicsCommand = new RelayCommand(TopicsTool, () => _canExecuteCommands);
-            ConflictCommand = new RelayCommand(ConflictTool, () => _canExecuteCommands);
             MasterPlotsCommand = new RelayCommand(MasterPlotTool, () => _canExecuteCommands);
             DramaticSituationsCommand = new RelayCommand(DramaticSituationsTool, () => _canExecuteCommands);
             StockScenesCommand = new RelayCommand(StockScenesTool, () => _canExecuteCommands);

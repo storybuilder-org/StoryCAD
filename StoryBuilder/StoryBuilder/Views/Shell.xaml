@@ -254,7 +254,6 @@
                         <MenuFlyout>
                             <MenuFlyoutItem Text="Key Questions" Command="{x:Bind ShellVm.KeyQuestionsCommand, Mode=OneWay}" />
                             <MenuFlyoutItem Text="Topic Information" Command="{x:Bind ShellVm.TopicsCommand, Mode=OneWay}" />
-                            <MenuFlyoutItem Text="Conflict Builder" Command="{x:Bind ShellVm.ConflictCommand, Mode=OneWay}" />
                             <MenuFlyoutSubItem Text="Characterization Aids">
                                 <MenuFlyoutItem Text="Character Relationships" />
                                 <MenuFlyoutItem Text="Virtues and Vices" />

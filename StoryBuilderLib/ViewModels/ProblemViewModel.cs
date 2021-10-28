@@ -1,6 +1,13 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
+using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Data;
 using StoryBuilder.Controllers;
 using StoryBuilder.DAL;
@@ -8,11 +15,7 @@ using StoryBuilder.Models;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.Services.Messages;
 using StoryBuilder.Services.Navigation;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Threading.Tasks;
+using StoryBuilder.Services.Dialogs.Tools;
 
 namespace StoryBuilder.ViewModels
 {
@@ -26,6 +29,7 @@ namespace StoryBuilder.ViewModels
         internal readonly StoryReader _rdr;
         private readonly StoryWriter _wtr;
         private bool _changeable;
+        private bool _changed;
 
         #endregion
 
@@ -206,13 +210,7 @@ namespace StoryBuilder.ViewModels
             set => SetProperty(ref _model, value);
         }
 
-        private bool _changed;
-
-        public bool Changed
-        {
-            get => _changed;
-            set => SetProperty(ref _changed, value);
-        }
+        public RelayCommand ConflictCommand { get; }
 
         #endregion
 
@@ -306,6 +304,24 @@ namespace StoryBuilder.ViewModels
             }
         }
 
+        public async void ConflictTool()
+        {
+            _logger.Log(LogLevel.Info, "Displaying Conflict Finder tool dialog");
+            ConflictDialog dialog = new ConflictDialog();
+            dialog.XamlRoot = GlobalData.XamlRoot;
+            var result = await dialog.ShowAsync();
+            if (result == ContentDialogResult.Primary)   // Copy to Protagonist conflict
+            {
+                ProtConflict = dialog.Conflict.ExampleText;
+            }
+            else if (result == ContentDialogResult.Secondary) // Copy to Antagonist conflict
+            {
+                AntagConflict = dialog.Conflict.ExampleText;
+            }
+            // else Cancel
+            _logger.Log(LogLevel.Info, "Conflict Finder finished");
+        }
+
         #endregion
 
         #region Control initialization sources
@@ -367,6 +383,8 @@ namespace StoryBuilder.ViewModels
             OutcomeList = lists["Outcome"];
             MethodList = lists["Method"];
             ThemeList = lists["Theme"];
+
+            ConflictCommand = new RelayCommand(ConflictTool, () => true);
 
             PropertyChanged += OnPropertyChanged;
         }
