@@ -499,6 +499,7 @@ namespace StoryBuilder.ViewModels
 
                     ResetModel();
                     var overview = new OverviewModel("Working Title", StoryModel);
+                    overview.Author = GlobalData.Preferences.LicenseOwner;
                     var overviewNode = new StoryNodeItem(overview, null)
                     {
                         IsExpanded = true,
@@ -619,6 +620,13 @@ namespace StoryBuilder.ViewModels
                 folderPicker.FileTypeFilter.Add(".stb");
                 _story.ProjectFolder = await folderPicker.PickSingleFolderAsync();
                 //TODO: Test for cancelled FolderPicker
+                if (_story.ProjectFolder == null) 
+                {
+                    Logger.Log(LogLevel.Info,"Open File command cancelled");
+                    StatusMessage = "Open Story command cancelled";
+                    _canExecuteCommands = true;  // unblock other commands
+                    return;
+                }
                 if (!_story.ProjectFolder.DisplayName.EndsWith(".stbx"))
                 {
                     StatusMessage = "Project Folder must end in .stbx";
@@ -667,7 +675,7 @@ namespace StoryBuilder.ViewModels
             }
             catch (Exception ex)
             {
-                Logger.LogException(LogLevel.Error, ex, "Error in OpenFIle command");
+                Logger.LogException(LogLevel.Error, ex, "Error in OpenFile command");
                 StatusMessage = "Open Story command failed";
             }
 

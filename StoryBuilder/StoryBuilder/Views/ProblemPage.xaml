@@ -39,9 +39,7 @@
                               SelectedItem="{x:Bind ProblemVm.ProblemSource, Mode=TwoWay}" />
                 </Grid>
             </PivotItem>
-            <PivotItem Header="Protagonist"     
-                       ContextFlyout="{StaticResource ConflictFlyout}" >
-                <!--="Conflict_ContextRequested" -->
+            <PivotItem Header="Protagonist" >
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>

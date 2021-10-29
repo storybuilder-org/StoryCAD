@@ -286,7 +286,6 @@ namespace StoryBuilder.ViewModels
             ToneNotes = await _rdr.GetRtfText(Model.ToneNotes, Uuid);
             Notes = await _rdr.GetRtfText(Model.Notes, Uuid);
 
-
             _changeable = true;
         }
 
