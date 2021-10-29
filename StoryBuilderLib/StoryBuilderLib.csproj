@@ -19,11 +19,9 @@
 
   <ItemGroup>
     <PackageReference Include="CommonServiceLocator" Version="2.0.6" />
-    <PackageReference Include="CommunityToolkit.Mvvm" Version="7.0.3" />
-    <PackageReference Include="CommunityToolkit.WinUI.UI.Controls.Core" Version="7.0.3" />
-    <PackageReference Include="Microsoft.ProjectReunion" Version="0.8.2" />
-    <PackageReference Include="Microsoft.ProjectReunion.Foundation" Version="0.8.2" />
-    <PackageReference Include="Microsoft.ProjectReunion.WinUI" Version="0.8.2" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="7.1.1-preview3" />
+    <PackageReference Include="CommunityToolkit.WinUI.UI.Controls.Core" Version="7.1.1-preview3" />
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.0.0-preview3" />
     <PackageReference Include="NLog" Version="4.7.10" />
     <PackageReference Include="NLog.Extensions.Logging" Version="1.7.3" />
   </ItemGroup>

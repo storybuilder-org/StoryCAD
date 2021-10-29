@@ -64,12 +64,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.ProjectReunion" Version="0.8.2">
+      <PackageReference Include="Microsoft.WindowsAppSDK" Version="[1.0.0-preview3]">
       <IncludeAssets>build</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Microsoft.ProjectReunion.WinUI" Version="0.8.2">
-      <IncludeAssets>build</IncludeAssets>
-    </PackageReference>
+      </PackageReference>
   </ItemGroup>
   <Import Project="$(WapProjPath)\Microsoft.DesktopBridge.targets" />
 </Project>
