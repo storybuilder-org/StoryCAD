@@ -92,9 +92,9 @@
                     Text="{x:Bind ShellVm.FilterText, Mode=TwoWay}" />
             </CommandBar.Content>
             <CommandBar.PrimaryCommands>
-                <AppBarButton Icon="GlobalNavigationButton" ToolTipService.ToolTip="Show/Hide Navigation Pane"
+                <AppBarButton Icon="GlobalNavigationButton" Label="Show" ToolTipService.ToolTip="Show/Hide Navigation Pane"
                               Command="{x:Bind ShellVm.TogglePaneCommand, Mode=OneWay}" />
-                <AppBarButton Icon="Document" ToolTipService.ToolTip="File Menu">
+                <AppBarButton Icon="Document" Label="File" ToolTipService.ToolTip="File Menu">
                     <AppBarButton.Flyout>
                         <MenuFlyout>
                             <MenuFlyoutItem Text="New Story" Command="{x:Bind ShellVm.NewFileCommand, Mode=OneWay}" >
@@ -130,7 +130,7 @@
                         </MenuFlyout>
                     </AppBarButton.Flyout>
                 </AppBarButton>
-                <AppBarButton ToolTipService.ToolTip="Add/Remove Story Elements">
+                <AppBarButton Label="Add" ToolTipService.ToolTip="Add/Remove Story Elements">
                     <AppBarButton.Icon>
                         <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE710;"/>
                     </AppBarButton.Icon>
@@ -212,7 +212,7 @@
                         </Flyout>
                     </AppBarButton.Flyout>
                 </AppBarButton>
-                <AppBarButton ToolTipService.ToolTip="Move Story Elements" >
+                <AppBarButton Label="Move" ToolTipService.ToolTip="Move Story Elements" >
                     <AppBarButton.Icon>
                         <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE8DE;"/>
                     </AppBarButton.Icon>
@@ -239,14 +239,14 @@
                         </Flyout>
                     </AppBarButton.Flyout>
                 </AppBarButton>
-                <AppBarToggleButton ToolTipService.ToolTip="Search Navigation Tree" 
+                <AppBarToggleButton Label="Search" ToolTipService.ToolTip="Search Navigation Tree" 
                               Command="{x:Bind ShellVm.FilterCommand, Mode=TwoWay}"
                               IsChecked="{x:Bind ShellVm.FilterIsChecked, Mode=TwoWay}">
                     <AppBarToggleButton.Icon>
                         <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE71C;"/>
                     </AppBarToggleButton.Icon>
                 </AppBarToggleButton>
-                <AppBarButton ToolTipService.ToolTip="Tools Menu" >
+                <AppBarButton Label="Tools" ToolTipService.ToolTip="Tools Menu" >
                     <AppBarButton.Icon>
                         <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE90F;"/>
                     </AppBarButton.Icon>
@@ -271,18 +271,18 @@
                         </MenuFlyout>
                     </AppBarButton.Flyout>
                 </AppBarButton>
-                <AppBarButton ToolTipService.ToolTip="Reports" Command="{x:Bind ShellVm.ReportsCommand, Mode=OneWay}" >
+                <AppBarButton Label="Reports" ToolTipService.ToolTip="Reports" Command="{x:Bind ShellVm.ReportsCommand, Mode=OneWay}" >
                     <AppBarButton.Icon>
                         <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xF571;"/>
                     </AppBarButton.Icon>
                 </AppBarButton>
-                <AppBarButton ToolTipService.ToolTip="Preferences" 
+                <AppBarButton Label="Pref" ToolTipService.ToolTip="Preferences" 
                               Command="{x:Bind ShellVm.PreferencesCommand, Mode=OneWay}" >
                     <AppBarButton.Icon>
                         <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE713;"/>
                     </AppBarButton.Icon>
                 </AppBarButton>
-                <AppBarButton ToolTipService.ToolTip="Help"
+                <AppBarButton Label="Help" ToolTipService.ToolTip="Help"
                               Command="{x:Bind ShellVm.HelpCommand, Mode=OneWay}" >
                     <AppBarButton.Icon>
                         <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE897;"/>
