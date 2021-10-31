@@ -14,7 +14,7 @@ namespace StoryBuilder.Services.Help
         /// </summary>
         public async void LaunchHelp()
         {
-            var localFolder = ApplicationData.Current.LocalFolder;
+            /*var localFolder = ApplicationData.Current.LocalFolder;
             var help = await localFolder.GetFolderAsync("help");
             string helpPath = help.Path;
             Process process = new Process
@@ -23,7 +23,12 @@ namespace StoryBuilder.Services.Help
                 {FileName = @"hh.exe", Arguments = @"StoryBuilder.chm"}
             };
             process.StartInfo.WorkingDirectory = helpPath;
-            process.Start();
+            process.Start();*/
+            Process ShowHelp = new();
+            ShowHelp.StartInfo.UseShellExecute = true; //System will decide best app to use
+            ShowHelp.StartInfo.FileName = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\StoryBuilder\\Help\\StoryBuilder.chm";
+            ShowHelp.Start();
+
         }
     }
 }
