@@ -5,7 +5,6 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
-    xmlns:community="using:CommunityToolkit.WinUI.UI.Controls"
     xmlns:viewmodels="using:StoryBuilder.ViewModels"   
     mc:Ignorable="d"
     RequestedTheme="Light">

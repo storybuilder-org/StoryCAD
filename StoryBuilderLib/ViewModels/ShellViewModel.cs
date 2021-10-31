@@ -912,18 +912,17 @@ namespace StoryBuilder.ViewModels
         #region Tool and Report Commands
 
         /// <summary>
-        /// 
+        /// Search the 
         /// </summary>
         private void SearchNodes()
         {
+            bool searchResult = false;  // true if any node returns true
+
+            _canExecuteCommands = false;
             Logger.Log(LogLevel.Info, "In ToggleFilter");
+            ///TODO: 
             if (FilterIsChecked)
             {
-                // Note: for display, think about     
-                //    <Setter Target="SelectionGrid.Background" Value="{ThemeResource TreeViewItemBackgroundSelected}" />
-                //    (or bind the background property?)
-                //    This is more complicated: do I want to set and use multiselect?
-                // Note: I have a recursive search function; see StoryNodeItem::GetEnumerator
                 Logger.Log(LogLevel.Info, "FilterIsChecked= true");
                 if (FilterText.Equals(string.Empty))
                 {
@@ -937,40 +936,25 @@ namespace StoryBuilder.ViewModels
                 StoryNodeItem root = DataSource[0];
                 foreach (StoryNodeItem node in root)
                 {
-                    bool result = Search.SearchStoryElement(node, FilterText, StoryModel);
+                    bool result =  Search.SearchStoryElement(node, FilterText, StoryModel);
                     if (result == true)
                     {
-                        ;
+                        // Note: for display, think about a setter.  
+                        //    <Setter Target="SelectionGrid.Background" Value="{ThemeResource TreeViewItemBackgroundSelected}" />
+                        //    (or better yet, bind the background property like what's done with the Edit statusbar button foreground
+                        // Note: May want to set a breadcrumb property in StoryElement and save previous backGround brush. 
+                        // Note: I have a recursive search function; see StoryNodeItem::GetEnumerator
+                        // Note: set parent nodes IsExpanded up to the root
                     }
                 }
                 root = DataSource[1];  // trashcan 
                 foreach (var node in root)
                 {
+                    // Do what we did above
                 }
-                // foreach view
-                //    foreach root node (i.e, trash too)
-                //       foreach (TreeNode node in root)
-                //           Perform action on node in DFS order here
-                //           What action?
-                //              Search node for FilterText
-                //                 Note: Case sensitive? Wildcards?
-                //                 Get StoryElement from node
-                //                 Use StoryElement case structure to search each type
-                //                 For now, just Name field, maybe summary field;
-                //                 could be more complicated
-                //              Set breadcrumb or maintain list?
-                //                  (breadcrumb can be new StoryNodeItem field)
-                //              Preserve previous TreeViewItem background color?
-                //              Preserve treeviewnode's immediate parent IsExpanded property
-                //              Set TreeViewItem background color
-                //              Expand treeviewnode's immediate parent
-                //       end for
-                //    end for
-                // end for
             }
             else
             {
-                // Note: if list, use that instead
                 // foreach view
                 //    foreach root node
                 //       foreach (TreeNode node in root)
@@ -983,6 +967,7 @@ namespace StoryBuilder.ViewModels
                 // end for 
             }
             Logger.Log(LogLevel.Info, "ToggleFilter");
+            _canExecuteCommands = true;
         }
 
 
