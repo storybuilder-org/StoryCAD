@@ -9,12 +9,10 @@
     PrimaryButtonText="Save Changes"
     SecondaryButtonText="Cancel" >
 
-    <StackPanel Padding="14,0,14,14" ScrollViewer.VerticalScrollBarVisibility="Visible">
-        <TextBox Header="License Owner" HorizontalAlignment="Left" Width="300" Text="{x:Bind PreferencesVm.LicenseOwner, Mode=TwoWay}" Margin="0,8"/>
-        <TextBox Header="License Number" HorizontalAlignment="Left" Width="200" Text="{x:Bind PreferencesVm.LicenseNumber, Mode=TwoWay}" Margin="0,8"/>
+    <StackPanel Padding="14,0,14,14" ScrollViewer.VerticalScrollBarVisibility="Visible"> 
         <ToggleSwitch HorizontalAlignment="Left" Header="Display quote on startup" IsOn="{x:Bind PreferencesVm.QuoteOnStartup, Mode=TwoWay}"  Margin="0,8"/>
         <ToggleSwitch HorizontalAlignment="Left" Header="Schedule backup" IsOn="{x:Bind PreferencesVm.TimedBackup, Mode=TwoWay}" Margin="0,4"/>
-        <NumberBox HorizontalAlignment="Left" Header="Backup Interval" Value="{x:Bind PreferencesVm.TimedBackupInterval, Mode=TwoWay}" Margin="0,4"/>
+        <NumberBox HorizontalAlignment="Left" Header="Backup Interval (Minutes)" Value="{x:Bind PreferencesVm.TimedBackupInterval, Mode=TwoWay}" Margin="0,4"/>
         <TextBox Header="Backup Directory" HorizontalAlignment="Left" Width="400" Text="{x:Bind PreferencesVm.BackupDirectory, Mode=TwoWay}" Margin="0,8"/>
         <TextBox Header="Default Project Directory" HorizontalAlignment="Left" Width="400" Text="{x:Bind PreferencesVm.ProjectDirectory, Mode=TwoWay}" Margin="0,8"/>
     </StackPanel>
