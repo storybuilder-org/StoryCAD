@@ -12,7 +12,7 @@ namespace StoryBuilder.Services.Help
         /// process. The help files are contained in the 
         /// 'help' installation subfolder.
         /// </summary>
-        public static void LaunchHelp()
+        public async void LaunchHelp()
         {
             Process ShowHelp = new(); //Creates new process
             ShowHelp.StartInfo.UseShellExecute = true; //System will decide best app to use, should open the CHM viewer
