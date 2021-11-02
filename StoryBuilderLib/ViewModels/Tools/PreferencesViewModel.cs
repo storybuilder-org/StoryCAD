@@ -9,8 +9,6 @@ namespace StoryBuilder.ViewModels.Tools
         #region Fields
         private bool _changed;
 
-        private string _licenseowner;
-        private string _licensenumber;
         private bool _quoteonstartup;
         private string _screenfont;
         private string _printerfont;
@@ -29,18 +27,6 @@ namespace StoryBuilder.ViewModels.Tools
         {
             get { return _changed; }
             set { _changed = value; }
-        }
-
-        public string LicenseOwner
-        {
-            get => _licenseowner;
-            set => SetProperty(ref _licenseowner, value);
-        }
-
-        public string LicenseNumber
-        {
-            get => _licensenumber;
-            set => SetProperty(ref _licensenumber, value);
         }
 
         public bool QuoteOnStartup
@@ -115,8 +101,6 @@ namespace StoryBuilder.ViewModels.Tools
 
         public void LoadModel()
         {
-            LicenseOwner = _model.LicenseOwner;
-            LicenseNumber = _model.LicenseNumber;
             QuoteOnStartup = _model.QuoteOnStartup;
             ScreenFont = _model.ScreenFont;
             //model.ScreenFontBold = ScreenFontBold;
@@ -134,8 +118,6 @@ namespace StoryBuilder.ViewModels.Tools
 
         public void SaveModel()
         {
-            _model.LicenseOwner = LicenseOwner;
-            _model.LicenseNumber = LicenseNumber;
             _model.QuoteOnStartup = QuoteOnStartup;
             _model.ScreenFont = ScreenFont;
             //_model.ScreenFontBold = ScreenFontBold;

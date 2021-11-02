@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using StoryBuilder.Models;
 using Windows.Storage;
 
 namespace StoryBuilder.DAL
@@ -117,93 +118,43 @@ namespace StoryBuilder.DAL
         /// <returns></returns>
         public async Task UpdateFile()
         {
+            _model = GlobalData.Preferences;
+
             IList<string> newPreferences = new List<string>();
-            // match the file's contents and update
-            foreach (string line in _preferences)
-            {
-                string newline = string.Empty;
-                if (line.Contains("="))
-                {
-                    string[] tokens = line.Split(new char[] { '=' });
-                    string key = tokens[0];
-                    string value = string.Empty;
-                    switch (key)
-                    {
-                        case "ProductName":
-                            value = _model.ProductName;
-                            break;
-                        case "ProductVersion":
-                            value = _model.ProductVersion;
-                            break;
-                        case "LicenseOwner":
-                            value = _model.LicenseOwner;
-                            break;
-                        case "LicenseNumber":
-                            value = _model.LicenseNumber;
-                            break;
-                        case "QuoteOnStartup":
-                            if (_model.QuoteOnStartup == true)
-                                value = "Y";
-                            else
-                                value = "N";
-                            break;
-                        case "ScreenFont":
-                            value = _model.ScreenFont;
-                            break;
-                        case "PrinterFont":
-                            value = _model.PrinterFont;
-                            break;
-                        case "BackupOnOpen":
-                            value = _model.BackupOnOpen;
-                            break;
-                        case "TimedBackup":
-                            if (_model.TimedBackup == true)
-                                value = "Y";
-                            else
-                                value = "N";
-                            break;
-                        case "TimedBackupInterval":
-                            value = Convert.ToString(_model.TimedBackupInterval);
-                            break;
-                        case "Installationirectory":
-                            value = _model.InstallationDirectory;
-                            break;
-                        case "ProjectDirectory":
-                            value = _model.ProjectDirectory;
-                            break;
-                        case "BackupDirectory":
-                            value = _model.BackupDirectory;
-                            break;
-                        case "LogDirectory":
-                            value = _model.LogDirectory;
-                            break;
-                        case "LastFile1":
-                            value = _model.LastFile1;
-                            break;
-                        case "LastFile2":
-                            value = _model.LastFile2;
-                            break;
-                        case "LastFile3":
-                            value = _model.LastFile3;
-                            break;
-                        case "LastFile4":
-                            value = _model.LastFile4;
-                            break;
-                        case "LastFile5":
-                            value = _model.LastFile5;
-                            break;
-                    }
-                    newline = key + "=" + value;
-                }
-                else
-                    newline = line;
-                newPreferences.Add(newline);
-            }
+            // create the file's contents from the model
+            newPreferences.Add("[StoryBuilder]");
+            newPreferences.Add("Copyright 2020 - Seven Valleys Software");
+            newPreferences.Add("ProductName=StoryBuilder");
+            newPreferences.Add("ProductVersion=2.00");
+            newPreferences.Add(string.Empty);
+            newPreferences.Add("[User Info]");
+            newPreferences.Add("LicenseOwner=" + _model.LicenseOwner);
+            newPreferences.Add(string.Empty);
+            newPreferences.Add("[Backup Options]");
+            newPreferences.Add("BackupOnOpen=" + _model.BackupOnOpen);
+            newPreferences.Add("TimedBackup=" + (_model.TimedBackup ? "Y" : "N"));
+            newPreferences.Add("TimedBackupInterval=" + _model.TimedBackupInterval.ToString());
+            newPreferences.Add(string.Empty);
+            newPreferences.Add("[Other Options]");
+            newPreferences.Add("QuoteOnStartup=" + (_model.QuoteOnStartup ? "Y" : "N"));
+            newPreferences.Add("ScreenFont=" + _model.ScreenFont);
+            newPreferences.Add("PrinterFont=" + _model.PrinterFont);
+            newPreferences.Add(string.Empty);
+            newPreferences.Add("[File Preferences]");
+            newPreferences.Add("ProjectDirectory=" + _model.ProjectDirectory);
+            newPreferences.Add("BackupDirectory=" + _model.BackupDirectory);
+            newPreferences.Add("LogDirectory=" + _model.LogDirectory);
+            newPreferences.Add("LastFile1=" + _model.LastFile1);
+            newPreferences.Add("LastFile2=" + _model.LastFile2);
+            newPreferences.Add("LastFile3=" + _model.LastFile3);
+            newPreferences.Add("LastFile4=" + _model.LastFile4);
+            newPreferences.Add("LastFIle5=" + _model.LastFile5);
+
             StorageFolder preferencesFolder = await StorageFolder.GetFolderFromPathAsync(_path);
             StorageFile preferencesFile = await preferencesFolder.CreateFileAsync("StoryBuilder.prf",
                 CreationCollisionOption.ReplaceExisting);
             await FileIO.AppendLinesAsync(preferencesFile, newPreferences);
+
         }
     }
-
 }
