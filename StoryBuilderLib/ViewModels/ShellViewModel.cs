@@ -1004,6 +1004,7 @@ namespace StoryBuilder.ViewModels
             Logger.Log(LogLevel.Info, "Preferences update completed");
             StatusMessage = "Preferences updated";
             // else Cancel- exit
+            //TODO: Log cancellation, move 'updated' log and status into Save changes block
         }
 
         private async void KeyQuestionsTool()
