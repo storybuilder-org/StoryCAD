@@ -55,4 +55,4 @@ There are so many, we needed a separate file:
 [1]:https://choosealicense.com/licenses/gpl-3.0/
 [2]:https://github.com/terrycox/StoryBuilder-2/blob/master/docs/USERNOTES.md
 [3]:https://github.com/terrycox/StoryBuilder-2/blob/master/docs/DEVNOTES.md
-[4]:https://https://github.com/terrycox/StoryBuilder-2/blob/master/docs/ACKNOWLEDGEMENTS.md
+[4]:https://github.com/terrycox/StoryBuilder-2/blob/master/docs/Acknowledgements.md
