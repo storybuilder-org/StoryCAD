@@ -5,7 +5,7 @@ and the community of developers. And, perhaps, in the Venn diagram of these two 
 there are a few writer-develpers....
 
 If you're strictly in the writer camp, welcome! You may want to mosey over to 
-[User Documentation](StoryBuilder-2/blob/master/docs/USERNOTES.md).
+[User Documentation][2]
 
 If you're developer, welcome! The rest of this document is for you. Read on. Once you're
 set up, take a look at [Programmer Notes][3] (If you're a writer, you're
@@ -53,6 +53,6 @@ There are so many, we needed a separate file:
 
 
 [1]:https://choosealicense.com/licenses/gpl-3.0/
-[2]:(StoryBuilder-2/tree/master/docs/USERNOTES.md)
-[3]:http://https://github.com/terrycox/StoryBuilder-2/tree/master/docs/DEVNOTES.md
-[4]:http://https://github.com/terrycox/StoryBuilder-2/tree/master/docs/ACKNOWLEDGEMENTS.md
+[2]:https://github.com/terrycox/StoryBuilder-2/blob/master/docs/USERNOTES.md
+[3]:http://https://github.com/terrycox/StoryBuilder-2/blob/tree/master/docs/DEVNOTES.md
+[4]:http://https://github.com/terrycox/StoryBuilder-2/blob/tree/master/docs/ACKNOWLEDGEMENTS.md
