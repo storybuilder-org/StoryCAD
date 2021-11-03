@@ -52,6 +52,6 @@ There are so many, we needed a separate file:
 
 
 [1]:https://choosealicense.com/licenses/gpl-3.0/
-[2]:http://https://github.com/terrycox/StoryBuilder-2/tree/master/docs/USERNOTES.md
+[2]:(StoryBuilder-2/tree/master/docs/USERNOTES.md)
 [3]:http://https://github.com/terrycox/StoryBuilder-2/tree/master/docs/DEVNOTES.md
 [4]:http://https://github.com/terrycox/StoryBuilder-2/tree/master/docs/ACKNOWLEDGEMENTS.md
