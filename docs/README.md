@@ -4,7 +4,8 @@ StoryBuilder is an odd duck, with its feet in two ponds: the user community of w
 and the community of developers. And, perhaps, in the Venn diagram of these two communities,
 there are a few writer-develpers....
 
-If you're strictly in the writer camp, welcome! You may want to mosey over to [User Documentation][2].
+If you're strictly in the writer camp, welcome! You may want to mosey over to 
+[User Documentation](StoryBuilder-2/tree/master/docs/USERNOTES.md).
 
 If you're developer, welcome! The rest of this document is for you. Read on. Once you're
 set up, take a look at [Programmer Notes][3] (If you're a writer, you're
