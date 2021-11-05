@@ -17,8 +17,7 @@ namespace StoryBuilderTests
             Assert.IsNotNull(story);
             string localPath = $"{Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)}";
             localPath = System.IO.Path.Combine(localPath, "StoryBuilder");
-            //StorageFolder localFolder = await StorageFolder.GetFolderFromPathAsync(localPath);
-            //Assert.IsNotNull(localFolder);
+           
             ControlLoader loader = new ControlLoader();
             await loader.Init(localPath, story);
             Assert.IsNotNull(GlobalData.ConflictTypes);

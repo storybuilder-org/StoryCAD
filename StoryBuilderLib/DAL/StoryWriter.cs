@@ -46,25 +46,7 @@ namespace StoryBuilder.DAL
             _story = Ioc.Default.GetService<StoryController>();
         }
 
-        //internal async Task WriteFile(StorageFile output, StoryModel model)
-        //{
-        //    _outFile = output;
-        //    _model = model;
-
-        //    _xml = new XmlDocument();
-        //    CreateStoryDocument();
-        //    //      write RTF if converting. 
-        //    await ParseStoryElementsAsync();
-        //    ParseExplorerView();
-        //    ParseNarratorView();
-        //    ParseRelationships();
-        //    using (Stream fileStream = await _outFile.OpenStreamForWriteAsync())
-        //    {
-        //        _xml.Save(fileStream);
-        //    }
-        //    _model.Changed = false;
-        //    _story.ProjectFolder = await output.GetParentAsync();
-        //}
+        
 
         internal async Task WriteFile(StorageFile output, StoryModel model)
         {

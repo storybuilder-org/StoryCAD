@@ -61,8 +61,7 @@ namespace StoryBuilder.Services.Installation
                 var installPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
                 installPath = Path.Combine(installPath, @"Assets\Install");
                 _installFolder = await StorageFolder.GetFolderFromPathAsync(installPath);
-                //_installFolder = await Windows.ApplicationModel.Package.Current.InstalledLocation.GetFolderAsync(@"Assets\Install");
-                //_localFolder = ApplicationData.Current.LocalFolder;
+                
                 await ReadInstallManifest();
                 await ReadLocalManifest();
                 bool changed = false;

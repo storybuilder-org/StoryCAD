@@ -69,7 +69,7 @@ namespace StoryBuilder.Controls
             if (!rtb._lockChangeExecution)
             {
                 rtb._lockChangeExecution = true;
-                //rtb.Document.SetText(TextSetOptions.FormatRtf, rtb.RtfText);
+                
                 rtb.Document.SetText(options, rtb.RtfText);
                 // get rid of new EOP (cr/lf) somehow
                 rtb._lockChangeExecution = false;

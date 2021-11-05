@@ -28,7 +28,7 @@ namespace StoryBuilder.Services.Preferences
                 {
                     model.InstallationDirectory = path;
                 }
-                //await loader.UpdateFile();
+                
                 GlobalData.Preferences = model;
             }
             catch (Exception ex)

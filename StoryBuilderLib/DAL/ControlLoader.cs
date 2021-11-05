@@ -21,7 +21,7 @@ namespace StoryBuilder.DAL
         }
 
 
-        private IList<string> lines;
+        public IList<string> lines;
         private string installFolder;
         public async Task Init(string path, StoryController story)
         {
