@@ -19,7 +19,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{E2DA341C-F
 	ProjectSection(SolutionItems) = preProject
 		docs\ACKNOWLEDGE.md = docs\ACKNOWLEDGE.md
 		docs\CONTRIBUTE.md = docs\CONTRIBUTE.md
-		docs\CONTRIBUTING.md = docs\CONTRIBUTING.md
 		docs\DEVNOTES.md = docs\DEVNOTES.md
 		LICENSE.TXT = LICENSE.TXT
 		docs\SOLUTION_PIC.bmp = docs\SOLUTION_PIC.bmp
