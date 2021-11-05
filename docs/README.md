@@ -1,43 +1,72 @@
+See the LICENSE file located in this directory.
 # What is StoryBuilder?
+
+StoryBuilder is a free computer-aided design tool which helps writers rapidly create outlines that
+help create saleable stories. It's CAD for fiction writers. The elements StoryBuilder works with 
+are the elements of good fiction: realistic three dimensional characters who are engaged in 
+meaningful and gripping problems, dramatic and suspenseful plots, and settings that appeal to the senses.
+
+StoryBuilder is currently in beta test. If you're interested in becoming a beta tester, 
+please email tcox@svsoft.com and ask for a copy of the software. Our goal is to distribute
+the software through [Microsoft Store][6].
+
+## Contribution
 
 StoryBuilder is an odd duck, with its feet in two ponds: the user community of writers
 and the community of developers. And, perhaps, in the Venn diagram of these two communities,
 there are a few writer-develpers....
 
+If you would like to join the StoryBuilder community and help make the software better,
+here are some [ways to make StoryBuilder better][5].
+
+### For writers
+
 If you're strictly in the writer camp, welcome! You may want to mosey over to 
-[User Documentation][2].
+[User Documentation][2]. Better yet, try the software for yourself.
 
-If you're developer, welcome! To learn more about StoryBuilder, you should read the
-[User Documentation][2] as well. The rest of this document is for you, and describes
-how to contribute.
+### For developers
 
-StoryBuilder is written in C# and is a Windows desktop application and uses WinUI 3, MVVM, 
-Project Reunion APIs, and .NET5.) But the only skill you need to get started is some C#. 
-You'll need to configure your development environment as described in **Tools and Setup**.
+If you're developer, welcome! A good starting place is to learn more about StoryBuilder,
+so you should read the [User Documentation][2] and use the program a bit before you 
+try to use it. 
 
-Once you've read through this document and are set up, take a look at [Programmer Notes][3].
+Once you've read through this document are familiar with the program, take a look at 
+[Programmer Notes][3].
 
-## Tools and Setup
+## Copyright & License
 
-1. StoryBuilder is installed and updated with Visual Studio. Either VS2019 or VS2022 
-will work. The Community editions of these products are free. You can download
-from here:
-https://docs.microsoft.com/en-us/visualstudio/install/install-visual-studio?view=vs-2019
+StoryBuilder was initially developed by Terry Cox for Seven Valleys Software and
+is @Copyright Sevens Valley Software.
 
-2. StoryBuilder is developed with the Windows App SDK. Set up your development as per this guide:
-https://docs.microsoft.com/en-us/windows/apps/windows-app-sdk/set-up-your-development-environment?tabs=experimental
+Except where otherwise noted, StoryBuilder is released under the [GNU GPLv3][1] license.
+See the LICENSE file located in this directory.
 
-You can test your installation by building and running a new app using the Blank App, Packaged (WinUI 3 in Deskto
-template as described in the document.
+GPLv3 was selected for the same reason car dealerships don't leave the keys in 
+the cars while they're on the lot and before they're sold. 
+The intent is to move to an MIT License in the near future, once this site is 
+up and running.
 
-2. In Visual Studio, clone the Storybuilder repository from the GitHub repository at 
-https://github.com/terrycox/StoryBuilder-2.git
+## Acknowledgements
 
-3. Build and run the solution.
+StoryBuilder is a free and open source too for fiction writers, and the goal is to have both 
+writers and developers collaborate to ensure that it' worth using. We hope to see new 
+contibutors join the effort to make StoryBuilder even better.
 
-4. Click  the File (document icon) button on the menu and open the HELLO sample to verify.
+StoryBuilder was initially developed by Terry Cox for Seven Valleys Software and
+is @Copyright Sevens Valley Software.
+
+Except where otherwise noted, StiryBuilder is released under the [GNU GPLv3][1] license.
+See the LICENSE file located in this directory.
+
+GPLv3 was selected for the same reason car dealerships don't leave the keys in 
+the cars while they're on the lot and before they're sold. 
+The intent is to move to an MIT License in the near future, once this site is 
+up and running.
 
 [1]:https://choosealicense.com/licenses/gpl-3.0/
 [2]:https://github.com/terrycox/StoryBuilder-2/blob/master/docs/USERNOTES.md
 [3]:https://github.com/terrycox/StoryBuilder-2/blob/master/docs/DEVNOTES.md
 [4]:https://github.com/terrycox/StoryBuilder-2/blob/master/docs/ACKNOWLEDGE.md
+[5]:https://github.com/terrycox/StoryBuilder-2/blob/master/docs/CONTRIBUTE.md
+[6]:https://www.microsoft.com/en-us/store/apps/windows
+
