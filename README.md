@@ -15,7 +15,7 @@ StoryBuilder is an odd duck, with its feet in two ponds: the user community of w
 and the community of developers. And, perhaps, in the Venn diagram of these two communities,
 there are a few writer-develpers....
 
-If you would like to join the StoryBuilder community and help make the software better,
+If you would like to join the StoryBuilder community and help improve the software,
 here are some [ways to make StoryBuilder better][5].
 
 ### For writers
