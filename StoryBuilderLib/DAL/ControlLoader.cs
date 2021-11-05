@@ -4,7 +4,6 @@ using StoryBuilder.Models.Tools;
 using StoryBuilder.Services.Logging;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Windows.Storage;
 
@@ -19,7 +18,6 @@ namespace StoryBuilder.DAL
         public ControlLoader()
         {
         }
-
 
         private IList<string> lines;
         private string installFolder;
@@ -86,7 +84,6 @@ namespace StoryBuilder.DAL
             }
             return conflictTypes;
         }
-
 
         public List<RelationType> LoadRelationTypes()
         {
