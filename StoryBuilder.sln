@@ -21,7 +21,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{E2DA341C-F
 		docs\CONTRIBUTE.md = docs\CONTRIBUTE.md
 		docs\DEVNOTES.md = docs\DEVNOTES.md
 		LICENSE.TXT = LICENSE.TXT
-		docs\README.md = docs\README.md
 		docs\SOLUTION_PIC.bmp = docs\SOLUTION_PIC.bmp
 		docs\USERNOTES.md = docs\USERNOTES.md
 	EndProjectSection
