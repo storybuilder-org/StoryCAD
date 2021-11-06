@@ -9,7 +9,7 @@
   <Identity
     Name="3b76a060-3624-415f-b178-f0740b114439"
     Publisher="CN=tcox"
-    Version="2.0.4.0" />
+    Version="2.0.5.0" />
 
   <Properties>
     <DisplayName>StoryBuilder</DisplayName>
