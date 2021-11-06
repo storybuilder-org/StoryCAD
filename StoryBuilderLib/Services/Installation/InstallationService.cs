@@ -55,7 +55,8 @@ namespace StoryBuilder.Services.Installation
                 //TODO: Log Installation
 
                 // Get the target (%appdata%\StoryBuilder) folder
-                string targetPath = $"{Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)}";
+                //string targetPath = $"{Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)}";
+                string targetPath = ApplicationData.Current.RoamingFolder.Path.ToString();  
                 targetFolder = await StorageFolder.GetFolderFromPathAsync(targetPath);
                 // If there is no %appdata/StoryBuilder folder, create one
                 targetFolder = await targetFolder.CreateFolderAsync(@"StoryBuilder", CreationCollisionOption.OpenIfExists);
