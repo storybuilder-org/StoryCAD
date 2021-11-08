@@ -6,7 +6,7 @@ namespace StoryBuilder.Models
 {
     public class StoryElement : ObservableObject
     {
-        //private const SymbolIcon OverviewIcon = new SymbolIcon {Symbol = "Cloud"};
+        
 
         #region  Properties
 
