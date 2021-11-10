@@ -61,6 +61,10 @@ namespace StoryBuilder.Services.Installation
                 var installPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
                 installPath = Path.Combine(installPath, @"Assets\Install");
                 _installFolder = await StorageFolder.GetFolderFromPathAsync(installPath);
+
+                
+
+                
                 
                 await ReadInstallManifest();
                 await ReadLocalManifest();

@@ -646,8 +646,8 @@ namespace StoryBuilder.ViewModels
                     _story.ProjectFilename = file.Name + "x";
                     _story.ProjectFile = null;    // not created yet
                     DataSource = null;
-                    var loader = new LegacyLoader(_story);
-                    StoryModel = await loader.LoadFile(file);
+                   
+                    
                     SetCurrentView(StoryViewType.ExplorerView);
                     _story.LoadStatus = LoadStatus.LoadFromText;
                     await CreateProjectFolder();
