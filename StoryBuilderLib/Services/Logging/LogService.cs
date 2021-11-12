@@ -4,7 +4,7 @@ using NLog.Targets;
 using System;
 using System.Diagnostics;
 using System.IO;
-
+using Windows.Storage;
 namespace StoryBuilder.Services.Logging
 {
     /// <summary>
@@ -23,7 +23,8 @@ namespace StoryBuilder.Services.Logging
 
                 // Create file target
                 var fileTarget = new FileTarget();
-                logFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "StoryBuilder", "logs");
+                //logFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "StoryBuilder", "logs");
+                logFilePath = Path.Combine(ApplicationData.Current.RoamingFolder.Path.ToString(), "StoryBuilder", "logs");
                 var logfilename = Path.Combine(logFilePath, "updater.${date:format=yyyy-MM-dd}.log");
                 fileTarget.FileName = logfilename;
                 fileTarget.CreateDirs = true;

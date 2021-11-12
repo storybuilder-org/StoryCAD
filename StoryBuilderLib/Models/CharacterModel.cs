@@ -11,6 +11,7 @@ namespace StoryBuilder.Models
         // Besides its GUID, each Character has a unique (to this story)
         // integer id number (useful in lists of characters.)
         private static int _nextCharacterId;
+
         private int _id;
         public int Id
         {
