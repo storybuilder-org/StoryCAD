@@ -135,9 +135,6 @@ namespace StoryBuilder
             _log = Ioc.Default.GetService<LogService>();
             _log.Log(LogLevel.Info, "StoryBuilder.App launched");
 
-            await ProcessInstallationFiles();
-
-
             StoryController story = Ioc.Default.GetService<StoryController>();
             //string localPath = $"{Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)}";
             string localPath = ApplicationData.Current.RoamingFolder.Path.ToString();
@@ -145,8 +142,13 @@ namespace StoryBuilder
             StorageFolder localFolder = await StorageFolder.GetFolderFromPathAsync(localPath);
             _log.Log(LogLevel.Info, "Configuration data location = " + localFolder.Path);
 
+            // Load Preferences before processing the installation files
             PreferencesService pref = Ioc.Default.GetService<PreferencesService>();
-            await pref.LoadPreferences(localFolder.Path, story);
+            await pref.LoadPreferences(localPath, story);
+
+            await ProcessInstallationFiles();
+
+
 
             await LoadControls(localFolder.Path, story);
 
