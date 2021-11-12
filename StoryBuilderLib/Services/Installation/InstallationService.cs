@@ -172,13 +172,13 @@ namespace StoryBuilder.Services.Installation
             return destination;
         }
 
-        private async Task ReadTargetManifest()
+        private async Task ReadSourceManifest()
         {
             installFile = await sourcelFolder.GetFileAsync("install.manifest");
             sourceManifest = await FileIO.ReadLinesAsync(installFile);
         }
 
-        private async Task ReadSourceManifest()
+        private async Task ReadTargetManifest()
         {
             targetManifest = new Dictionary<string, string>();
             IList<string> localEntries;

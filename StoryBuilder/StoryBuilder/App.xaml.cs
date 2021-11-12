@@ -154,6 +154,7 @@ namespace StoryBuilder
             await pref.LoadPreferences(localPath, story);
 
             await ProcessInstallationFiles();
+
             string path = GlobalData.Preferences.InstallationDirectory;
             PreferencesIO loader = new PreferencesIO(GlobalData.Preferences, path);
             await loader.UpdateFile();
