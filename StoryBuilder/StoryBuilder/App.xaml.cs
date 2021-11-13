@@ -135,17 +135,29 @@ namespace StoryBuilder
             _log = Ioc.Default.GetService<LogService>();
             _log.Log(LogLevel.Info, "StoryBuilder.App launched");
 
-            await ProcessInstallationFiles();
-
-
             StoryController story = Ioc.Default.GetService<StoryController>();
-            string localPath = $"{Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)}";
+            //string localPath = $"{Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)}";
+            string localPath = ApplicationData.Current.RoamingFolder.Path.ToString();
             localPath = System.IO.Path.Combine(localPath, "StoryBuilder");
             StorageFolder localFolder = await StorageFolder.GetFolderFromPathAsync(localPath);
             _log.Log(LogLevel.Info, "Configuration data location = " + localFolder.Path);
 
+            // We need to preserve user Preferences settings across ProcessInstallationFiles.
+            // The installation file location may be empty or udpated, and one of those
+            // updates might be a new Preferences file if options are added. 
+            // To preserve user-set values, we read the existing Preferences file into GlobalData,
+            // run any updates (including to Preferences), and then save the preferences
+            // back to disk. Both the load and save are field-by-field updates.
+
+            // Load Preferences before processing the installation files
             PreferencesService pref = Ioc.Default.GetService<PreferencesService>();
-            await pref.LoadPreferences(localFolder.Path, story);
+            await pref.LoadPreferences(localPath, story);
+
+            await ProcessInstallationFiles();
+
+            string path = GlobalData.Preferences.InstallationDirectory;
+            PreferencesIO loader = new PreferencesIO(GlobalData.Preferences, path);
+            await loader.UpdateFile();
 
             await LoadControls(localFolder.Path, story);
 

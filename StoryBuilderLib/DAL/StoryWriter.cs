@@ -70,7 +70,7 @@ namespace StoryBuilder.DAL
         {
             _outFile = output;
             _model = model;
-                        _xml = new XmlDocument();
+              _xml = new XmlDocument();
             CreateStoryDocument();
             //      write RTF if converting. 
             await ParseStoryElementsAsync();

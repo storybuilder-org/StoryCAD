@@ -53,7 +53,8 @@ namespace StoryBuilder.Converters
             {
                 if (element.Type == StoryItemType.Character | element.Type == StoryItemType.Setting)
                 {
-                    if (value.Equals(element.Name))
+                    string source = (string)value;
+                    if (source.Trim().Equals(element.Name.Trim()))
                         return element;
                 }
             }
