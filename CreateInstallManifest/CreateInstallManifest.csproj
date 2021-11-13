@@ -5,10 +5,7 @@
     <TargetFramework>net5.0-windows</TargetFramework>
     <ApplicationIcon />
     <StartupObject />
+    <Copyright>Copyright @2021 Seven Valleys Software</Copyright>
   </PropertyGroup>
-
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="xcopy &quot;&quot;$(TargetDir)$(ProjectName).* &quot;$(SolutionDir)&quot; /y" />
-  </Target>
 
 </Project>
