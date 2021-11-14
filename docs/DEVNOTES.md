@@ -104,7 +104,8 @@ instructions for side-loading on hir or her remote machine.
 
 ### Solution and Project Stucture
 
-The StoryBuilder solution [looks like this][1].
+![](https://github.com/terrycox/StoryBuilder-2/blob/master/docs/SOLUTION_PIC.bmp)
+
 
 ### Adding a New Control
 
@@ -189,7 +190,7 @@ project's \Services folder, but it should still be called from LoadTools().
 
 ###The views are generally dialogs and their XAML and code-behind are in StoryBuilderLib's \Services\Dialogs folder. The dialog should 
 
-[1]:https://github.com/terrycox/StoryBuilder-2/blob/master/docs/SOLUTION_PIC.bmp    
+[1]:https://github.com/terrycox/StoryBuilder-2/blob/master/docs/SOLUTION_PIC.bmp   
 [2]:https://docs.microsoft.com/en-us/windows/apps/windows-app-sdk/
 [3]:https://docs.microsoft.com/en-us/windows/apps/windows-app-sdk/
 [4]:https://docs.microsoft.com/en-us/windows/uwp/threading-async/asynchronous-programming-universal-windows-platform-apps
