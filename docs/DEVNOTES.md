@@ -104,8 +104,18 @@ instructions for side-loading on hir or her remote machine.
 
 ### Solution and Project Stucture
 
-![](https://github.com/terrycox/StoryBuilder-2/blob/master/docs/SOLUTION_PIC.bmp)
+The StoryBuilder solution contains the following projects:
 
+#### CreateInstallManifest
+
+This .NET5 console application reads the contents of the StoryBuilder 
+application's \Assets\Install folder and it's child folders and 
+produces a text document containing each file's relative path names 
+and a SHA256 hash of its contents. The list is written into the 
+same \Assets\Install folder as 'install.manifest'. 
+
+When StoryBuilder is launched, install.manifest is read and compared
+to the contents of 
 
 ### Adding a New Control
 
