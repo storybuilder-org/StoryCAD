@@ -238,7 +238,7 @@ namespace StoryBuilder.ViewModels
 
         private async Task LoadModel()
         {
-            _changeable = false;
+             _changeable = false;
             _changed = false;
 
             Uuid = Model.Uuid;

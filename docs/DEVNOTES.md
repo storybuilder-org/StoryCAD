@@ -93,34 +93,45 @@ At present there's no CI/CD pipeline for StoryBuilder. After a branch is coded, 
 is generated and reviewed and merged to master, the master bdranch is built with the changes and
 it's 'implemented' by performing the following steps:
 
-[1] Running the StoryBuilderTest unit tests as a final smoke test (see the next topic.)
+1. Running the StoryBuilderTest unit tests as a final smoke test (see the next topic.)
 
-[2] Publishing the app bundle from the StoryBuilder (Package) project.
+2. Publishing the app bundle from the StoryBuilder (Package) project.
 
-[3] Zipping the app bundle along with the user's README.TXT file, which contains
+3. Zipping the app bundle along with the user's README.TXT file, which contains
 instructions for side-loading on hir or her remote machine.
 
 ## Developer Tips
 
 ### Solution and Project Stucture
 
-The StoryBuilder solution [looks like this][1].
+The StoryBuilder solution contains the following projects:
+
+#### CreateInstallManifest
+
+This .NET5 console application reads the contents of the StoryBuilder 
+application's \Assets\Install folder and it's child folders and 
+produces a text document containing each file's relative path names 
+and a SHA256 hash of its contents. The list is written into the 
+same \Assets\Install folder as 'install.manifest'. 
+
+When StoryBuilder is launched, install.manifest is read and compared
+to the contents of 
 
 ### Adding a New Control
 
 #### Update Page layout to add the new control. 
-   Add a corresponding property to the Page's ViewModel. 
-   Add a 2-way binding from the Page control's Text or SelectedItem to the ViewModel    property.
-   Initialize the property in the ViewModel's constructor.
-   If the control is a ComboBox or other control that uses an ItemsSource,  you
-   also need to add a 1-way binding from the page to that list in the ViewModel,
-   and to provide a source for the list in the ViewModel. The source will usually
-   be a list in Controls.ini, which is in the \Assets\Install folder. Use an existing
-   control as an example. Note that the list must be in the form of key/value pairs.
-   Test this much and very the layout looks okay. Insure that it's responsive 
-   by resizing the page up and down and checking the layout.
-## Add the corresponding property to the Model. 
+Add a corresponding property to the Page's ViewModel. 
+Add a 2-way binding from the Page control's Text or SelectedItem to the ViewModel    property.
+Initialize the property in the ViewModel's constructor.
+If the control is a ComboBox or other control that uses an ItemsSource,  you
+also need to add a 1-way binding from the page to that list in the ViewModel,
+and to provide a source for the list in the ViewModel. The source will usually
+be a list in Controls.ini, which is in the \Assets\Install folder. Use an existing
+control as an example. Note that the list must be in the form of key/value pairs.
+Test this much and very the layout looks okay. Insure that it's responsive 
+by resizing the page up and down and checking the layout.
 
+#### Add the corresponding property to the Model. 
 Name it identically to the ViewModel's property.
 Initialize the property in each of the Model'sconstructors. 
 Update the ViewModel's LoadModel method to assign the ViewModel's property
@@ -133,11 +144,12 @@ property is a RichEditBox, call StoryWriter.PutRtfText instead of a simple assig
 Test that changes to the field persist when you navigate from one StoryElement to
 another in the TreeView.
 
-## Add code to StoryReader to read the Model property from the .stbx file:
+#### Add code to StoryReader to read the Model property from the .stbx file:
    Update the appropriate StoryElement's parse method (called from RecurseStoryElement).
    These methods are case statements to find the property's named attribute in the xml
    node and move its inner text to the Model's property.
-## Add code to StoryWriter to write the Model property to the .stbx file.
+
+#### Add code to StoryWriter to write the Model property to the .stbx file.
    The appropriate method will named 'ParseXElement', ex., ParseSettingElement. 
    Use an existing property as a template.
    Create a new XmlAttribute.
@@ -150,21 +162,35 @@ another in the TreeView.
 
 ### Creating or Modifying a Tool
 
-tba
+#### Define the tool's dialog layout
+Tools are usually pop-ups and are defined as a ContentDialog. The XAML is found in 
+StoryBuilderLib in the \Services\Dialogs\Tools folder.
 
-#### Populate the tool's data
+#### Define the tool's ViewModel
+All but the simplest tools should use a ViewModel to hold code interactions with the tool
+and between the tool and the Page it's invoked from. The ContentDialog code-behind can link
+the view and the viewmodel.
 
-###StoryBuilder's tools generally provide data to aid in story or character definition or the plotting process. Typically this is reference (read only). Although the data can come from any source, such as a web service, much of it will reside in the StoryBuilder project's \Assets\Install\Tools.ini file. 
+#### Define and populate the tool's data
+StoryBuilder's tools generally provide data to aid in story or character definition or the 
+plotting process. Typically this is reference (read only). Although the data can come from 
+any source, such as a web service, much of it will reside in the StoryBuilder 
+project's \Assets\Install\Tools.ini file. 
 
-##Create the model
+#### Create the model
+If the tool creates or modifies data on Story Elements, as is typical,
+create an in-memory model of the data in the StoryBuilderLib project's \Models\Tools folder. 
+These are Plain Old CLR Object (POCO) classes. T
 
-###Create an in-memory model of the data in the StoryBuilderLib project's \Models\Tools folder. These are Plain Old CLR Object (POCO) classes. 
+#### Read the data
+Provide a mechanism to read the data  and populate the model. Data in Tools.ini is loaded in 
+StoryBuilderLib \DAL\ToolLoader.cs, which is called from LoadTools() in the StoryBuilder 
+project's App.Xaml.cs. 
 
-##Read the data
-
-###Provide a mechanism to read the data  and populate the model. Data in Tools.ini is loaded in StoryBuilderLib \DAL\ToolLoader.cs, which is called from LoadTools() in the StoryBuilder project's App.Xaml.cs. 
-
-###Each tool will generally have its own data layout, and ToolLoader.cs consists of a series of methods which load an individual tool's data. If you're accessing data from a different source, such as a web service, you'll probably add the service code under the StoryBuilderLib project's \Services folder, but it should still be called from LoadTools(). 
+Each tool will generally have its own data layout, and ToolLoader.cs consists of a series of 
+methods which load an individual tool's data. If you're accessing data from a different source, 
+such as a web service, you'll probably add the service code under the StoryBuilderLib 
+project's \Services folder, but it should still be called from LoadTools(). 
 
 ##Create the ViewModel
 
@@ -174,7 +200,7 @@ tba
 
 ###The views are generally dialogs and their XAML and code-behind are in StoryBuilderLib's \Services\Dialogs folder. The dialog should 
 
-[1]:https://github.com/terrycox/StoryBuilder-2/blob/master/docs/SOLUTION_PIC_.md
+[1]:https://github.com/terrycox/StoryBuilder-2/blob/master/docs/SOLUTION_PIC.bmp   
 [2]:https://docs.microsoft.com/en-us/windows/apps/windows-app-sdk/
 [3]:https://docs.microsoft.com/en-us/windows/apps/windows-app-sdk/
 [4]:https://docs.microsoft.com/en-us/windows/uwp/threading-async/asynchronous-programming-universal-windows-platform-apps
