@@ -639,21 +639,7 @@ namespace StoryBuilder.ViewModels
                 StorageFile file = files[0];
                 //NOTE: BasicProperties.DateModified can be the date last changed
 
-                if (file.FileType.ToLower().Equals(".stb"))
-                {
-                    // Create V2 stbx suffix as upper if V1 is upper,
-                    // lower if V1 is lower or mixed
-                    _story.ProjectFilename = file.Name + "x";
-                    _story.ProjectFile = null;    // not created yet
-                    DataSource = null;
-                   
-                    
-                    SetCurrentView(StoryViewType.ExplorerView);
-                    _story.LoadStatus = LoadStatus.LoadFromText;
-                    await CreateProjectFolder();
-                    await SaveFile();
-                }
-                else
+                if (file.FileType.ToLower().Equals(".stbx"))
                 {
                     _story.ProjectFilename = file.Name;
                     _story.ProjectFile = file;
