@@ -470,7 +470,7 @@ namespace StoryBuilder.ViewModels
             }
         }
 
-        #region File-related Commands
+        
         private async void NewFile()
         {
             _canExecuteCommands = false;
@@ -655,6 +655,8 @@ namespace StoryBuilder.ViewModels
                         _story.LoadStatus = LoadStatus.LoadFromRtfFiles;
                         StatusMessage = "Open Story completed";
                     }
+                }
+                else { 
                 }
                 string msg = $"Open project {_story.ProjectFilename} command completed";
                 Logger.Log(LogLevel.Info, msg);
@@ -1798,7 +1800,7 @@ namespace StoryBuilder.ViewModels
         //    }
         //}
 
-        #endregion
+        
 
         #region MVVM Message processing
         private void IsChangedMessageReceived(IsChangedMessage isDirty)
