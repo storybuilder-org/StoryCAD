@@ -49,7 +49,7 @@ The main steps are:
 
 Building and debugging can be done in your branch with impunity. 
 
-At present there's no CI/CD pipeline for StoryBuilder. 
+At present there's no CI/CD pipeline for StoryBuilder. Manual processes
 
 
 ### Test

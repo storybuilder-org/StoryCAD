@@ -33,7 +33,8 @@
         public string BackupOnOpen { get; set; }
         public bool TimedBackup { get; set; }
         public int TimedBackupInterval { get; set; }
-        // Installation folder (autoset from ApplicationData.Current.LocalFolder)
+
+        // Installation folder is set to roaming ApplicationData's StoryBuilder subfolder
         // This is also the default Preferences file location
         public string InstallationDirectory { get; set; }
         // Default location to read / save user story outlines

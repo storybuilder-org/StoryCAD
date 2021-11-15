@@ -12,6 +12,9 @@
   <ItemGroup>
     <Content Remove="Assets\Install\manual\StoryBuilder User Manual.pdf" />
   </ItemGroup>
+  <ItemGroup>
+    <None Remove="Assets\StoreLogo.png" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="7.1.1-preview3" />

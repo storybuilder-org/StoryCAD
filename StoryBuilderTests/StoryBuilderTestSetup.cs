@@ -27,6 +27,7 @@ namespace StoryBuilderTests
             ConfigureIoc();
             // Validate service locator
             StoryController story = Ioc.Default.GetService<StoryController>();
+            //string localPath =ApplicationData.Current.RoamingFolder.Path.ToString();
             string localPath = $"{Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)}";
             localPath = System.IO.Path.Combine(localPath, "StoryBuilder");
             StorageFolder localFolder = await StorageFolder.GetFolderFromPathAsync(localPath);

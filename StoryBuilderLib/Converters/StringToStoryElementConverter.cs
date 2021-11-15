@@ -53,16 +53,17 @@ namespace StoryBuilder.Converters
             {
                 if (element.Type == StoryItemType.Character | element.Type == StoryItemType.Setting)
                 {
-                    if (value.Equals(element.Name))
+                    string source = (string)value;
+                    if (source.Trim().Equals(element.Name.Trim()))
                         return element;
                 }
             }
             // Look for the StoryElement corresponding to the passed guid
             // (This is the normal approach)
-            Guid guid = new Guid(value.ToString());
-            if (elements.StoryElementGuids.ContainsKey(guid))
-                return elements.StoryElementGuids[guid];
-            return null;   // Not found
+            if (Guid.TryParse(value.ToString(), out var guid))
+                if (elements.StoryElementGuids.ContainsKey(guid))
+                    return elements.StoryElementGuids[guid];
+            return null;  // Not found
         }
 
         /// <summary>
