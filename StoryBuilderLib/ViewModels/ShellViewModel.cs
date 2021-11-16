@@ -656,10 +656,15 @@ namespace StoryBuilder.ViewModels
                         StatusMessage = "Open Story completed";
                     }
                 }
-                else { 
+                else 
+                {
+                    
+                    string message = $"Open project {_story.ProjectFilename} command failed. Unsupported file extension";
+                    Logger.Log(LogLevel.Info, message);
                 }
                 string msg = $"Open project {_story.ProjectFilename} command completed";
                 Logger.Log(LogLevel.Info, msg);
+                
             }
             catch (Exception ex)
             {
