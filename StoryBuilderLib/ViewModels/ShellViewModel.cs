@@ -470,7 +470,7 @@ namespace StoryBuilder.ViewModels
             }
         }
 
-        #region File-related Commands
+        
         private async void NewFile()
         {
             _canExecuteCommands = false;
@@ -656,8 +656,15 @@ namespace StoryBuilder.ViewModels
                         StatusMessage = "Open Story completed";
                     }
                 }
+                else 
+                {
+                    
+                    string message = $"Open project {_story.ProjectFilename} command failed. Unsupported file extension";
+                    Logger.Log(LogLevel.Info, message);
+                }
                 string msg = $"Open project {_story.ProjectFilename} command completed";
                 Logger.Log(LogLevel.Info, msg);
+                
             }
             catch (Exception ex)
             {
@@ -1798,7 +1805,7 @@ namespace StoryBuilder.ViewModels
         //    }
         //}
 
-        #endregion
+        
 
         #region MVVM Message processing
         private void IsChangedMessageReceived(IsChangedMessage isDirty)
