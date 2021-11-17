@@ -55,7 +55,7 @@ namespace StoryBuilder.DAL
               _xml = new XmlDocument();
             CreateStoryDocument();
             //      write RTF if converting. 
-            await ParseStoryElementsAsync();
+            ParseStoryElementsAsync();
             ParseExplorerView();
             ParseNarratorView();
 
@@ -98,32 +98,32 @@ namespace StoryBuilder.DAL
             stb.AppendChild(_stbSettings);
         }
 
-        private async Task ParseStoryElementsAsync()
+        private void ParseStoryElementsAsync()
         {
             foreach (StoryElement element in _model.StoryElements)
             {
                 switch (element.Type)
                 {
                     case StoryItemType.StoryOverview:
-                        await ParseOverViewElement(element);
+                        ParseOverViewElement(element);
                         break;
                     case StoryItemType.Problem:
-                        await ParseProblemElement(element);
+                        ParseProblemElement(element);
                         break;
                     case StoryItemType.Character:
-                        await ParseCharacterElement(element);
+                        ParseCharacterElement(element);
                         break;
                     case StoryItemType.Setting:
-                        await ParseSettingElement(element);
+                        ParseSettingElement(element);
                         break;
                     case StoryItemType.PlotPoint:
-                        await ParsePlotPointElement(element);
+                        ParsePlotPointElement(element);
                         break;
                     case StoryItemType.Folder:
-                        await ParseFolderElement(element);
+                        ParseFolderElement(element);
                         break;
                     case StoryItemType.Section:
-                        await ParseSectionElement(element);
+                        ParseSectionElement(element);
                         break;
                     case StoryItemType.TrashCan:
                         ParseTrashCanElement(element);
@@ -132,7 +132,7 @@ namespace StoryBuilder.DAL
             }
         }
 
-        private async Task ParseOverViewElement(StoryElement element)
+        private void ParseOverViewElement(StoryElement element)
         {
             OverviewModel rec = (OverviewModel)element;
             XmlNode overview = _xml.CreateElement("Overview");
@@ -193,9 +193,6 @@ namespace StoryBuilder.DAL
             attr = _xml.CreateAttribute("Concept");
             attr.Value = rec.Concept;
             overview.Attributes.Append(attr);
-            attr = _xml.CreateAttribute("Premise");
-            attr.Value = rec.Premise;
-            overview.Attributes.Append(attr);
             attr = _xml.CreateAttribute("StyleNotes");
             attr.Value = rec.StyleNotes;
             overview.Attributes.Append(attr);
@@ -209,7 +206,7 @@ namespace StoryBuilder.DAL
             _elements.AppendChild(overview);
         }
 
-        private async Task ParseProblemElement(StoryElement element)
+        private void ParseProblemElement(StoryElement element)
         {
             ProblemModel rec = (ProblemModel)element;
             XmlNode prob = _xml.CreateElement("Problem");
@@ -283,7 +280,7 @@ namespace StoryBuilder.DAL
             _elements.AppendChild(prob);
         }
 
-        private async Task ParseCharacterElement(StoryElement element)
+        private void ParseCharacterElement(StoryElement element)
         {
             CharacterModel rec = (CharacterModel)element;
             XmlNode chr = _xml.CreateElement("Character");
@@ -483,7 +480,7 @@ namespace StoryBuilder.DAL
             _elements.AppendChild(chr);
         }
 
-        private async Task ParseSettingElement(StoryElement element)
+        private void ParseSettingElement(StoryElement element)
         {
             SettingModel rec = (SettingModel)element;
             XmlNode loc = _xml.CreateElement("Setting");
@@ -550,7 +547,7 @@ namespace StoryBuilder.DAL
             _elements.AppendChild(loc);
         }
 
-        private async Task ParsePlotPointElement(StoryElement element)
+        private void ParsePlotPointElement(StoryElement element)
         {
             PlotPointModel rec = (PlotPointModel)element;
             XmlNode plotPoint = _xml.CreateElement("PlotPoint");
@@ -670,7 +667,7 @@ namespace StoryBuilder.DAL
             _elements.AppendChild(plotPoint);
         }
 
-        private async Task ParseFolderElement(StoryElement element)
+        private void ParseFolderElement(StoryElement element)
         {
             FolderModel rec = (FolderModel)element;
             XmlNode node = _xml.CreateElement("Folder");
@@ -682,16 +679,14 @@ namespace StoryBuilder.DAL
             attr = _xml.CreateAttribute("Name");
             attr.Value = rec.Name;
             node.Attributes.Append(attr);
-
             attr = _xml.CreateAttribute("Notes");
-            rec.Notes = await PutRtfText(rec.Notes, rec.Uuid, "notes.rtf");
             attr.Value = rec.Notes;
             node.Attributes.Append(attr);
 
             _elements.AppendChild(node);
         }
 
-        private async Task ParseSectionElement(StoryElement element)
+        private void ParseSectionElement(StoryElement element)
         {
             SectionModel rec = (SectionModel)element;
             XmlNode node = _xml.CreateElement("Section");
@@ -703,9 +698,7 @@ namespace StoryBuilder.DAL
             attr = _xml.CreateAttribute("Name");
             attr.Value = rec.Name;
             node.Attributes.Append(attr);
-
             attr = _xml.CreateAttribute("Notes");
-            rec.Notes = await PutRtfText(rec.Notes, rec.Uuid, "notes.rtf");
             attr.Value = rec.Notes;
             node.Attributes.Append(attr);
 

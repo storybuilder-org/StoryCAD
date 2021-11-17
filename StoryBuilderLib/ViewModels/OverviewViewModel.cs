@@ -111,11 +111,29 @@ namespace StoryBuilder.ViewModels
 
         // Premise data
 
+        private string _storyProblem;  // The Guid of a Problem StoryElement
+        public string StoryProblem
+        {
+            get => _storyProblem;
+            set 
+            {   LoadStoryPremise(value);  // Copy the problem's Premise to this Premise
+                SetProperty(ref _storyProblem, value);
+            }
+        }
+
         private string _premise;
         public string Premise
         {
             get => _premise;
             set => SetProperty(ref _premise, value);
+        }
+
+        private bool _premiseLock;
+
+        public bool PremiseLock
+        {
+            get => _premiseLock;
+            set => SetProperty(ref _premiseLock, value);
         }
 
         // Structure data
@@ -281,7 +299,6 @@ namespace StoryBuilder.ViewModels
             // Load RTF files
             StoryIdea = await _rdr.GetRtfText(Model.StoryIdea, Uuid);
             Concept = await _rdr.GetRtfText(Model.Concept, Uuid);
-            Premise = await _rdr.GetRtfText(Model.Premise, Uuid);
             StyleNotes = await _rdr.GetRtfText(Model.StyleNotes, Uuid);
             ToneNotes = await _rdr.GetRtfText(Model.ToneNotes, Uuid);
             Notes = await _rdr.GetRtfText(Model.Notes, Uuid);
@@ -314,7 +331,6 @@ namespace StoryBuilder.ViewModels
                 // Write RTF files
                 Model.StoryIdea = await _wtr.PutRtfText(StoryIdea, Model.Uuid, "storyidea.rtf");
                 Model.Concept = await _wtr.PutRtfText(Concept, Model.Uuid, "concept.rtf");
-                Model.Premise = await _wtr.PutRtfText(Premise, Model.Uuid, "premise.rtf");
                 Model.StyleNotes = await _wtr.PutRtfText(StyleNotes, Model.Uuid, "stylenotes.rtf");
                 Model.ToneNotes = await _wtr.PutRtfText(ToneNotes, Model.Uuid, "tonenotes.rtf");
                 Model.Notes = await _wtr.PutRtfText(Notes, Model.Uuid, "notes.rtf");
@@ -323,6 +339,41 @@ namespace StoryBuilder.ViewModels
                 //Messenger.Send(new IsChangedMessage(Changed));
             }
         }
+
+        private async void LoadStoryPremise(string value)
+        {
+            ProblemModel problem = (ProblemModel) StringToStoryElement(value);
+            PremiseLock = false;    // Set Premise to read-only
+            Premise = await _rdr.GetRtfText(problem.Premise, problem.Uuid);
+            PremiseLock = true;     // Set Premise to read/write
+        }
+
+        private StoryElement StringToStoryElement(string value)
+        {
+            if (value == null)
+                return null;
+            if (value.Equals(string.Empty))
+                return null;
+            // Get the current StoryModel's StoryElementsCollection
+            ShellViewModel shell = Ioc.Default.GetService<ShellViewModel>();
+            StoryElementCollection elements = shell.StoryModel.StoryElements;
+            // legacy: locate the StoryElement from its Name
+            foreach (StoryElement element in elements)  // Character or Setting??? Search both?
+            {
+                if (element.Type == StoryItemType.Character | element.Type == StoryItemType.Setting)
+                {
+                    if (value.Equals(element.Name))
+                        return element;
+                }
+            }
+            // Look for the StoryElement corresponding to the passed guid
+            // (This is the normal approach)
+            Guid guid = new Guid(value.ToString());
+            if (elements.StoryElementGuids.ContainsKey(guid))
+                return elements.StoryElementGuids[guid];
+            return null;   // Not found
+        }
+
 
         #endregion
 
@@ -366,6 +417,7 @@ namespace StoryBuilder.ViewModels
             StoryIdea = string.Empty;
             Concept = string.Empty;
             Premise = string.Empty;
+            PremiseLock = true;     // Premise is read-only and is only set when a story problem is selected
             StyleNotes = string.Empty;
             ToneNotes = string.Empty;
             Notes = string.Empty;

@@ -443,11 +443,11 @@ namespace StoryBuilder.Services.Scrivener
             // and then load long fields from their corresponding file in its subfolder
             string saveStoryIdea = overview.StoryIdea;
             string saveConcept = overview.Concept;
-            string savePremise = overview.Premise;
+            //string savePremise = overview.Premise;
             string saveNotes = overview.Notes;
             overview.StoryIdea = await _rdr.GetRtfText(overview.StoryIdea, overview.Uuid);
             overview.Concept = await _rdr.GetRtfText(overview.Concept, overview.Uuid);
-            overview.Premise = await _rdr.GetRtfText(overview.Premise, overview.Uuid);
+            //overview.Premise = await _rdr.GetRtfText(overview.Premise, overview.Uuid);
             overview.Notes = await _rdr.GetRtfText(overview.Notes, overview.Uuid);
             // Parse and write the report
             foreach (string line in lines)
@@ -465,7 +465,7 @@ namespace StoryBuilder.Services.Scrivener
                 sb.Replace("@Market2", overview.TargetMarket2);
                 sb.Replace("@StoryIdea", overview.StoryIdea);
                 sb.Replace("@Concept", overview.Concept);
-                sb.Replace("@Premise", overview.Premise);
+                //sb.Replace("@Premise", overview.Premise);
                 sb.Replace("@Notes", overview.Notes);
                 doc.AddText(sb.ToString(), format);
                 doc.AddNewLine();
@@ -476,7 +476,7 @@ namespace StoryBuilder.Services.Scrivener
             // Post-process RTF properties
             overview.StoryIdea = saveStoryIdea;
             overview.Concept = saveConcept;
-            overview.Premise = savePremise;
+            //overview.Premise = savePremise;
             overview.Notes = saveNotes;
         }
 
