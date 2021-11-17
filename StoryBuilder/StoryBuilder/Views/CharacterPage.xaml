@@ -142,7 +142,9 @@
                               SelectedValue="{x:Bind CharVm.WoundCategory, Mode=TwoWay}" />
                     <ComboBox Grid.Row="1" Header="Wound Summary" IsEditable="False" MinWidth="500" ItemsSource="{x:Bind CharVm.WoundSummaryList}"
                               SelectedValue="{x:Bind CharVm.WoundSummary, Mode=TwoWay}" />
-                    <usercontrols:RichEditBoxExtended Grid.Row="2" Header="Flaw"
+                    <Button  Content="Flaw Builder" Grid.Row="0" HorizontalAlignment="Left" Margin="0,10,10,10" 
+                             Command="{x:Bind CharVm.FlawCommand, Mode=OneWay}" />
+                    <usercontrols:RichEditBoxExtended Grid.Row="1" Header="Flaw"
                                                       RtfText="{x:Bind CharVm.Flaw, Mode=TwoWay}" AcceptsReturn="True"
                                                       IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                                       ScrollViewer.VerticalScrollBarVisibility="Visible"
