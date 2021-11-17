@@ -376,35 +376,14 @@ namespace StoryBuilder.Models
             set => _woundSummary = value;
         }
 
-        private string _wound;
-        public string Wound
+        private string _flaw;
+        public string Flaw
         {
-            get => _wound;
-            set => _wound = value;
+            get => _flaw;
+            set => _flaw = value;
         }
 
-        private string _fears;
-        public string Fears
-        {
-            get => _fears;
-            set => _fears = value;
-        }
-
-        private string _lies;
-        public string Lies
-        {
-            get => _lies;
-            set => _lies = value;
-        }
-
-        private string _secrets;
-        public string Secrets
-        {
-            get => _secrets;
-            set => _secrets = value;
-        }
-
-        // Character note data
+        // Character backstory  
 
         private string _backStory;
         public string BackStory
@@ -466,10 +445,7 @@ namespace StoryBuilder.Models
             Abilities = string.Empty;
             WoundCategory = string.Empty;
             WoundSummary = string.Empty;
-            Wound = string.Empty;
-            Fears = string.Empty;
-            Lies = string.Empty;
-            Secrets = string.Empty;
+            Flaw = string.Empty;
             BackStory = string.Empty;
         }
 
@@ -523,10 +499,7 @@ namespace StoryBuilder.Models
             Abilities = string.Empty;
             WoundCategory = string.Empty;
             WoundSummary = string.Empty;
-            Wound = string.Empty;
-            Fears = string.Empty;
-            Lies = string.Empty;
-            Secrets = string.Empty;
+            Flaw = string.Empty;
             BackStory = string.Empty;
         }
 
@@ -580,10 +553,7 @@ namespace StoryBuilder.Models
             Abilities = string.Empty;
             WoundCategory = string.Empty;
             WoundSummary = string.Empty;
-            Wound = string.Empty;
-            Fears = string.Empty;
-            Lies = string.Empty;
-            Secrets = string.Empty;
+            Flaw = string.Empty;
             BackStory = string.Empty;
         }
 

@@ -470,17 +470,8 @@ namespace StoryBuilder.DAL
                     case "WoundSummary":
                         chr.WoundSummary = attr.InnerText;
                         break;
-                    case "Wound":
-                        chr.Wound = attr.InnerText;
-                        break;
-                    case "Fears":
-                        chr.Fears = attr.InnerText;
-                        break;
-                    case "Lies":
-                        chr.Lies = attr.InnerText;
-                        break;
-                    case "Secrets":
-                        chr.Secrets = attr.InnerText;
+                    case "Flaw":
+                        chr.Flaw = attr.InnerText;
                         break;
                     case "BackStory":
                         chr.BackStory = attr.InnerText;

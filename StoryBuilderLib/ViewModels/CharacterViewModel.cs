@@ -509,34 +509,14 @@ namespace StoryBuilder.ViewModels
             set => SetProperty(ref _woundSummary, value);
         }
 
-        private string _wound;
-        public string Wound
+        private string _flaw   ;
+        public string Flaw
         {
-            get => _wound;
-            set => SetProperty(ref _wound, value);
+            get => _flaw;
+            set => SetProperty(ref _flaw, value);
         }
 
-        private string _fears;
-        public string Fears
-        {
-            get => _fears;
-            set => SetProperty(ref _fears, value);
-        }
-
-        private string _lies;
-        public string Lies
-        {
-            get => _lies;
-            set => SetProperty(ref _lies, value);
-        }
-
-        private string _secrets;
-        public string Secrets
-        {
-            get => _secrets;
-            set => SetProperty(ref _secrets, value);
-        }
-
+ 
         // Character notes data
 
         private string _backStory;
@@ -676,10 +656,7 @@ namespace StoryBuilder.ViewModels
             Abilities = Model.Abilities;
             WoundCategory = Model.WoundCategory;
             WoundSummary = Model.WoundSummary;
-            Wound = Model.Wound;
-            Fears = Model.Fears;
-            Lies = Model.Lies;
-            Secrets = Model.Secrets;
+            Flaw = Model.Flaw;
             BackStory = Model.BackStory;
             Id = Model.Id;
 
@@ -696,10 +673,7 @@ namespace StoryBuilder.ViewModels
             Likes = await _rdr.GetRtfText(Model.Likes, Uuid);
             Habits = await _rdr.GetRtfText(Model.Habits, Uuid);
             Abilities = await _rdr.GetRtfText(Model.Abilities, Uuid);
-            Wound = await _rdr.GetRtfText(Model.Wound, Uuid);
-            Fears = await _rdr.GetRtfText(Model.Fears, Uuid);
-            Lies = await _rdr.GetRtfText(Model.Lies, Uuid);
-            Secrets = await _rdr.GetRtfText(Model.Secrets, Uuid);
+            Flaw = await _rdr.GetRtfText(Model.Flaw, Uuid);
             BackStory = await _rdr.GetRtfText(Model.BackStory, Uuid);
 
             CharacterTraits.Clear();
@@ -773,10 +747,7 @@ namespace StoryBuilder.ViewModels
                 Model.Abilities = Abilities;
                 Model.WoundCategory = WoundCategory;
                 Model.WoundSummary = WoundSummary;
-                Model.Wound = Wound;
-                Model.Fears = Fears;
-                Model.Lies = Lies;
-                Model.Secrets = Secrets;
+                Model.Flaw = Flaw;
                 Model.BackStory = BackStory;
                 Model.Id = Id;
 
@@ -793,10 +764,7 @@ namespace StoryBuilder.ViewModels
                 Model.Likes = await _wtr.PutRtfText(Likes, Uuid, "likes.rtf");
                 Model.Habits = await _wtr.PutRtfText(Habits, Uuid, "habits.rtf");
                 Model.Abilities = await _wtr.PutRtfText(Abilities, Uuid, "abilities.rtf");
-                Model.Wound = await _wtr.PutRtfText(Wound, Uuid, "wound.rtf");
-                Model.Fears = await _wtr.PutRtfText(Fears, Uuid, "fears.rtf");
-                Model.Lies = await _wtr.PutRtfText(Lies, Uuid, "lies.rtf");
-                Model.Secrets = await _wtr.PutRtfText(Secrets, Uuid, "secrets.rtf");
+                Model.Flaw = await _wtr.PutRtfText(Flaw, Uuid, "flaw.rtf");
                 Model.BackStory = await _wtr.PutRtfText(BackStory, Uuid, "backstory.rtf");
 
                 //_logger.Log(LogLevel.Info, string.Format("Requesting IsDirty change to true"));
@@ -1169,7 +1137,7 @@ namespace StoryBuilder.ViewModels
             Abilities = string.Empty;
             WoundCategory = string.Empty;
             WoundSummary = string.Empty;
-            Wound = string.Empty;
+            Flaw = string.Empty;
             BackStory = string.Empty;
 
             PropertyChanged += OnPropertyChanged;
