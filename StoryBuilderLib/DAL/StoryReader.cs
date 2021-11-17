@@ -223,9 +223,6 @@ namespace StoryBuilder.DAL
                     case "Concept":
                         _overview.Concept = attr.InnerText;
                         break;
-                    case "Premise":
-                        _overview.Premise = attr.InnerText;
-                        break;
                     case "StyleNotes":
                         _overview.StyleNotes = attr.InnerText;
                         break;

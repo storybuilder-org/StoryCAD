@@ -62,13 +62,8 @@ namespace StoryBuilder.Models
         }
 
         // Premise data
-
-        private string _premise;
-        public string Premise
-        {
-            get => _premise;
-            set => _premise = value;
-        }
+        // Note: the Premise is a read-only view of the story Problem Premise
+        //       and is not persisted in the model or on disk
 
         // Structure data
 
@@ -195,7 +190,6 @@ namespace StoryBuilder.Models
             TargetMarket2 = string.Empty;
             StoryIdea = string.Empty;
             Concept = string.Empty;
-            Premise = string.Empty;
             StyleNotes = string.Empty;
             ToneNotes = string.Empty;
             Notes = string.Empty;
@@ -222,7 +216,6 @@ namespace StoryBuilder.Models
             TargetMarket2 = string.Empty;
             StoryIdea = string.Empty;
             Concept = string.Empty;
-            Premise = string.Empty;
             StyleNotes = string.Empty;
             ToneNotes = string.Empty;
             Notes = string.Empty;
@@ -250,7 +243,6 @@ namespace StoryBuilder.Models
             TargetMarket2 = string.Empty;
             StoryIdea = string.Empty;
             Concept = string.Empty;
-            Premise = string.Empty;
             StyleNotes = string.Empty;
             ToneNotes = string.Empty;
             Notes = string.Empty;

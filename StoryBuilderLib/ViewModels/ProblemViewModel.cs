@@ -105,7 +105,7 @@ namespace StoryBuilder.ViewModels
 
         // Problem protagonist data
 
-        private string _protagonist; // Ghe Guid of a Character StoryElement
+        private string _protagonist;  // The Guid of a Character StoryElement
         public string Protagonist
         {
             get => _protagonist;
