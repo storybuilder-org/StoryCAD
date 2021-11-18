@@ -1,0 +1,19 @@
+﻿<ContentDialog
+    x:Class="StoryBuilder.Services.Dialogs.Tools.FlawDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Title="Flaw Builder"
+    PrimaryButtonText="Copy Flaw Example"
+    CloseButtonText="Cancel"
+    xmlns:usercontrols="using:StoryBuilder.Controls">
+
+    <Grid Padding="14,0,14,0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <usercontrols:Flaw x:Name="Flaw" x:FieldModifier="public" Grid.Row="0" MinWidth="400" />
+    </Grid>
+</ContentDialog>

@@ -1,8 +1,5 @@
 ﻿// The Content Dialog item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
 
-using StoryBuilder.Controls;
-using Microsoft.UI.Xaml;
-
 namespace StoryBuilder.Services.Dialogs.Tools
 {
     public sealed partial class ConflictDialog

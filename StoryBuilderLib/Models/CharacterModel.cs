@@ -361,21 +361,6 @@ namespace StoryBuilder.Models
 
         // Character flaw data
 
-        private string _woundCategory;
-        public string WoundCategory
-        {
-            get => _woundCategory;
-            set => _woundCategory = value;
-        }
-
-        private string _woundSummary;
-
-        public string WoundSummary
-        {
-            get => _woundSummary;
-            set => _woundSummary = value;
-        }
-
         private string _flaw;
         public string Flaw
         {
@@ -443,8 +428,6 @@ namespace StoryBuilder.Models
             TraitList = new List<string>();
             Habits = string.Empty;
             Abilities = string.Empty;
-            WoundCategory = string.Empty;
-            WoundSummary = string.Empty;
             Flaw = string.Empty;
             BackStory = string.Empty;
         }
@@ -497,8 +480,6 @@ namespace StoryBuilder.Models
             TraitList = new List<string>();
             Habits = string.Empty;
             Abilities = string.Empty;
-            WoundCategory = string.Empty;
-            WoundSummary = string.Empty;
             Flaw = string.Empty;
             BackStory = string.Empty;
         }
@@ -551,8 +532,6 @@ namespace StoryBuilder.Models
             TraitList = new List<string>();
             Habits = string.Empty;
             Abilities = string.Empty;
-            WoundCategory = string.Empty;
-            WoundSummary = string.Empty;
             Flaw = string.Empty;
             BackStory = string.Empty;
         }

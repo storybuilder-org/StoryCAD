@@ -7,9 +7,11 @@ using StoryBuilder.Controllers;
 using StoryBuilder.DAL;
 using StoryBuilder.Models;
 using StoryBuilder.Services.Dialogs;
+using StoryBuilder.Services.Dialogs.Tools;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.Services.Messages;
 using StoryBuilder.Services.Navigation;
+using StoryBuilder.ViewModels.Tools;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -40,6 +42,7 @@ namespace StoryBuilder.ViewModels
         public RelayCommand RemoveTraitCommand { get; }
         public RelayCommand AddRelationshipCommand { get; }
         public RelayCommand RemoveRelationshipCommand { get; }
+        public RelayCommand FlawCommand { get; }
 
         #endregion
 
@@ -495,20 +498,6 @@ namespace StoryBuilder.ViewModels
 
         // Character flaw data
 
-        private string _woundCategory;
-        public string WoundCategory
-        {
-            get => _woundCategory;
-            set => SetProperty(ref _woundCategory, value);
-        }
-
-        private string _woundSummary;
-        public string WoundSummary
-        {
-            get => _woundSummary;
-            set => SetProperty(ref _woundSummary, value);
-        }
-
         private string _flaw   ;
         public string Flaw
         {
@@ -654,8 +643,6 @@ namespace StoryBuilder.ViewModels
             Likes = Model.Likes;
             Habits = Model.Habits;
             Abilities = Model.Abilities;
-            WoundCategory = Model.WoundCategory;
-            WoundSummary = Model.WoundSummary;
             Flaw = Model.Flaw;
             BackStory = Model.BackStory;
             Id = Model.Id;
@@ -745,8 +732,6 @@ namespace StoryBuilder.ViewModels
                 foreach (RelationshipModel relation in CharacterRelationships)
                     Model.RelationshipList.Add(relation);
                 Model.Abilities = Abilities;
-                Model.WoundCategory = WoundCategory;
-                Model.WoundSummary = WoundSummary;
                 Model.Flaw = Flaw;
                 Model.BackStory = BackStory;
                 Model.Id = Id;
@@ -998,6 +983,24 @@ namespace StoryBuilder.ViewModels
             return false;
         }
 
+        private async void FlawTool()
+        {
+            _logger.Log(LogLevel.Info, "Displaying Flaw Finder tool dialog");
+            FlawViewModel FlawVm = Ioc.Default.GetService<FlawViewModel>();
+            FlawDialog dialog = new FlawDialog();
+            dialog.XamlRoot = GlobalData.XamlRoot;
+            var result = await dialog.ShowAsync();
+            if (result == ContentDialogResult.Primary)   // Copy to Character Flaw  
+            {
+                Flaw = FlawVm.WoundSummary; 
+            }
+            else  // Cancel button pressed
+            {
+
+            }
+            _logger.Log(LogLevel.Info, "Flaw Finder finished");
+        }
+
         #endregion
 
         #region ComboBox ItemsSource collections
@@ -1033,8 +1036,6 @@ namespace StoryBuilder.ViewModels
         public ObservableCollection<string> SociabilityList;
         public ObservableCollection<string> TraitList;
         public ObservableCollection<string> StabilityList;
-        public ObservableCollection<string> WoundCategoryList;
-        public ObservableCollection<string> WoundSummaryList;
 
         #endregion
 
@@ -1079,8 +1080,6 @@ namespace StoryBuilder.ViewModels
             SociabilityList = lists["Sociability"];
             StabilityList = lists["Stability"];
             TraitList = lists["Trait"];
-            WoundCategoryList = lists["WoundCategory"];
-            WoundSummaryList = lists["Wound"];
             RelationshipTraitList = lists["Trait"];
             RelationshipAttitudeList = lists["Attitude"];
 
@@ -1091,6 +1090,7 @@ namespace StoryBuilder.ViewModels
             RemoveTraitCommand = new RelayCommand(RemoveTrait, () => true);
             AddRelationshipCommand = new RelayCommand(AddRelationship, () => true);
             RemoveRelationshipCommand = new RelayCommand(RemoveRelationship, () => true);
+            FlawCommand = new RelayCommand(FlawTool, () => true);
 
             Role = string.Empty;
             StoryRole = string.Empty;
@@ -1135,8 +1135,6 @@ namespace StoryBuilder.ViewModels
             Likes = string.Empty;
             Habits = string.Empty;
             Abilities = string.Empty;
-            WoundCategory = string.Empty;
-            WoundSummary = string.Empty;
             Flaw = string.Empty;
             BackStory = string.Empty;
 

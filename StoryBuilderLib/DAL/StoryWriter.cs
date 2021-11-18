@@ -420,12 +420,6 @@ namespace StoryBuilder.DAL
                 traitList.AppendChild(trait);
             }
             chr.AppendChild(traitList);
-            attr = _xml.CreateAttribute("WoundCategory");
-            attr.Value = rec.WoundCategory;
-            chr.Attributes.Append(attr);
-            attr = _xml.CreateAttribute("WoundSummary");
-            attr.Value = rec.WoundSummary;
-            chr.Attributes.Append(attr);
             attr = _xml.CreateAttribute("CharacterSketch");
             attr.Value = rec.CharacterSketch;
             chr.Attributes.Append(attr);

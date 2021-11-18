@@ -120,6 +120,7 @@ namespace StoryBuilder
                     .AddSingleton<DramaticSituationsViewModel>()
                     .AddSingleton<SaveAsViewModel>()
                     .AddSingleton<PreferencesViewModel>()
+                    .AddSingleton<FlawViewModel>()
                     // Complete 
                     .BuildServiceProvider());
         }
