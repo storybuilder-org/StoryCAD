@@ -108,6 +108,7 @@ namespace StoryBuilder
                     .AddSingleton<FolderViewModel>()
                     .AddSingleton<SectionViewModel>()
                     .AddSingleton<TrashCanViewModel>()
+                    .AddSingleton<UnifiedVM>()
                     .AddSingleton<TreeViewSelection>()
                     // Register ContentDialog ViewModels
                     .AddSingleton<NewProjectViewModel>()
