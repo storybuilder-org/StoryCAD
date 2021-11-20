@@ -67,6 +67,7 @@ namespace StoryBuilder.Services.Installation
                 string installPath = assemblyPath.Substring(0, i) + @"\StoryBuilder\StoryBuilder\StoryBuilder";
                 installPath = Path.Combine(installPath, "Assets", "Install");
                 sourcelFolder = await StorageFolder.GetFolderFromPathAsync(installPath);
+                
 
                 // Read the new and old install.manifest files into memory
                 await ReadTargetManifest();

@@ -7,9 +7,11 @@ using StoryBuilder.Controllers;
 using StoryBuilder.DAL;
 using StoryBuilder.Models;
 using StoryBuilder.Services.Dialogs;
+using StoryBuilder.Services.Dialogs.Tools;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.Services.Messages;
 using StoryBuilder.Services.Navigation;
+using StoryBuilder.ViewModels.Tools;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -40,6 +42,7 @@ namespace StoryBuilder.ViewModels
         public RelayCommand RemoveTraitCommand { get; }
         public RelayCommand AddRelationshipCommand { get; }
         public RelayCommand RemoveRelationshipCommand { get; }
+        public RelayCommand FlawCommand { get; }
 
         #endregion
 
@@ -495,48 +498,14 @@ namespace StoryBuilder.ViewModels
 
         // Character flaw data
 
-        private string _woundCategory;
-        public string WoundCategory
+        private string _flaw   ;
+        public string Flaw
         {
-            get => _woundCategory;
-            set => SetProperty(ref _woundCategory, value);
+            get => _flaw;
+            set => SetProperty(ref _flaw, value);
         }
 
-        private string _woundSummary;
-        public string WoundSummary
-        {
-            get => _woundSummary;
-            set => SetProperty(ref _woundSummary, value);
-        }
-
-        private string _wound;
-        public string Wound
-        {
-            get => _wound;
-            set => SetProperty(ref _wound, value);
-        }
-
-        private string _fears;
-        public string Fears
-        {
-            get => _fears;
-            set => SetProperty(ref _fears, value);
-        }
-
-        private string _lies;
-        public string Lies
-        {
-            get => _lies;
-            set => SetProperty(ref _lies, value);
-        }
-
-        private string _secrets;
-        public string Secrets
-        {
-            get => _secrets;
-            set => SetProperty(ref _secrets, value);
-        }
-
+ 
         // Character notes data
 
         private string _backStory;
@@ -674,12 +643,7 @@ namespace StoryBuilder.ViewModels
             Likes = Model.Likes;
             Habits = Model.Habits;
             Abilities = Model.Abilities;
-            WoundCategory = Model.WoundCategory;
-            WoundSummary = Model.WoundSummary;
-            Wound = Model.Wound;
-            Fears = Model.Fears;
-            Lies = Model.Lies;
-            Secrets = Model.Secrets;
+            Flaw = Model.Flaw;
             BackStory = Model.BackStory;
             Id = Model.Id;
 
@@ -696,10 +660,7 @@ namespace StoryBuilder.ViewModels
             Likes = await _rdr.GetRtfText(Model.Likes, Uuid);
             Habits = await _rdr.GetRtfText(Model.Habits, Uuid);
             Abilities = await _rdr.GetRtfText(Model.Abilities, Uuid);
-            Wound = await _rdr.GetRtfText(Model.Wound, Uuid);
-            Fears = await _rdr.GetRtfText(Model.Fears, Uuid);
-            Lies = await _rdr.GetRtfText(Model.Lies, Uuid);
-            Secrets = await _rdr.GetRtfText(Model.Secrets, Uuid);
+            Flaw = await _rdr.GetRtfText(Model.Flaw, Uuid);
             BackStory = await _rdr.GetRtfText(Model.BackStory, Uuid);
 
             CharacterTraits.Clear();
@@ -771,12 +732,7 @@ namespace StoryBuilder.ViewModels
                 foreach (RelationshipModel relation in CharacterRelationships)
                     Model.RelationshipList.Add(relation);
                 Model.Abilities = Abilities;
-                Model.WoundCategory = WoundCategory;
-                Model.WoundSummary = WoundSummary;
-                Model.Wound = Wound;
-                Model.Fears = Fears;
-                Model.Lies = Lies;
-                Model.Secrets = Secrets;
+                Model.Flaw = Flaw;
                 Model.BackStory = BackStory;
                 Model.Id = Id;
 
@@ -793,10 +749,7 @@ namespace StoryBuilder.ViewModels
                 Model.Likes = await _wtr.PutRtfText(Likes, Uuid, "likes.rtf");
                 Model.Habits = await _wtr.PutRtfText(Habits, Uuid, "habits.rtf");
                 Model.Abilities = await _wtr.PutRtfText(Abilities, Uuid, "abilities.rtf");
-                Model.Wound = await _wtr.PutRtfText(Wound, Uuid, "wound.rtf");
-                Model.Fears = await _wtr.PutRtfText(Fears, Uuid, "fears.rtf");
-                Model.Lies = await _wtr.PutRtfText(Lies, Uuid, "lies.rtf");
-                Model.Secrets = await _wtr.PutRtfText(Secrets, Uuid, "secrets.rtf");
+                Model.Flaw = await _wtr.PutRtfText(Flaw, Uuid, "flaw.rtf");
                 Model.BackStory = await _wtr.PutRtfText(BackStory, Uuid, "backstory.rtf");
 
                 //_logger.Log(LogLevel.Info, string.Format("Requesting IsDirty change to true"));
@@ -1030,6 +983,24 @@ namespace StoryBuilder.ViewModels
             return false;
         }
 
+        private async void FlawTool()
+        {
+            _logger.Log(LogLevel.Info, "Displaying Flaw Finder tool dialog");
+            FlawViewModel FlawVm = Ioc.Default.GetService<FlawViewModel>();
+            FlawDialog dialog = new FlawDialog();
+            dialog.XamlRoot = GlobalData.XamlRoot;
+            var result = await dialog.ShowAsync();
+            if (result == ContentDialogResult.Primary)   // Copy to Character Flaw  
+            {
+                Flaw = FlawVm.WoundSummary; 
+            }
+            else  // Cancel button pressed
+            {
+
+            }
+            _logger.Log(LogLevel.Info, "Flaw Finder finished");
+        }
+
         #endregion
 
         #region ComboBox ItemsSource collections
@@ -1065,8 +1036,6 @@ namespace StoryBuilder.ViewModels
         public ObservableCollection<string> SociabilityList;
         public ObservableCollection<string> TraitList;
         public ObservableCollection<string> StabilityList;
-        public ObservableCollection<string> WoundCategoryList;
-        public ObservableCollection<string> WoundSummaryList;
 
         #endregion
 
@@ -1111,8 +1080,6 @@ namespace StoryBuilder.ViewModels
             SociabilityList = lists["Sociability"];
             StabilityList = lists["Stability"];
             TraitList = lists["Trait"];
-            WoundCategoryList = lists["WoundCategory"];
-            WoundSummaryList = lists["Wound"];
             RelationshipTraitList = lists["Trait"];
             RelationshipAttitudeList = lists["Attitude"];
 
@@ -1123,6 +1090,7 @@ namespace StoryBuilder.ViewModels
             RemoveTraitCommand = new RelayCommand(RemoveTrait, () => true);
             AddRelationshipCommand = new RelayCommand(AddRelationship, () => true);
             RemoveRelationshipCommand = new RelayCommand(RemoveRelationship, () => true);
+            FlawCommand = new RelayCommand(FlawTool, () => true);
 
             Role = string.Empty;
             StoryRole = string.Empty;
@@ -1167,9 +1135,7 @@ namespace StoryBuilder.ViewModels
             Likes = string.Empty;
             Habits = string.Empty;
             Abilities = string.Empty;
-            WoundCategory = string.Empty;
-            WoundSummary = string.Empty;
-            Wound = string.Empty;
+            Flaw = string.Empty;
             BackStory = string.Empty;
 
             PropertyChanged += OnPropertyChanged;

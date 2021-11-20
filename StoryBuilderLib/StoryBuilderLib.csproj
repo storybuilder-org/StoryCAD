@@ -12,9 +12,11 @@
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Controls\Conflict.xaml" />
+    <None Remove="Controls\Flaw.xaml" />
     <None Remove="Controls\RelationshipView.xaml" />
     <None Remove="Services\Dialogs\NewRelationshipDialog.xaml" />
     <None Remove="Services\Dialogs\Tools\ConflictDialog.xaml" />
+    <None Remove="Services\Dialogs\Tools\FlawDialog.xaml" />
   </ItemGroup>
 
   <ItemGroup>
@@ -41,6 +43,18 @@
 
   <ItemGroup>
     <ProjectReference Include="..\NRtfTree\NRtfTree.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="Services\Dialogs\Tools\FlawDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="Controls\Flaw.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
 
   <ItemGroup>
