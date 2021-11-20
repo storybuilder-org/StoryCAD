@@ -142,21 +142,6 @@ namespace StoryBuilder.Models
             get => _toneNotes;
             set => _toneNotes = value;
         }
-        // Market data
-
-        private string _targetMarket1;
-        public string TargetMarket1
-        {
-            get => _targetMarket1;
-            set => _targetMarket1 = value;
-        }
-
-        private string _targetMarket2;
-        public string TargetMarket2
-        {
-            get => _targetMarket2;
-            set => _targetMarket2 = value;
-        }
 
         // Notes data
 
@@ -186,8 +171,6 @@ namespace StoryBuilder.Models
             Tense = string.Empty;
             Style = string.Empty;
             Tone = string.Empty;
-            TargetMarket1 = string.Empty;
-            TargetMarket2 = string.Empty;
             StoryIdea = string.Empty;
             Concept = string.Empty;
             StyleNotes = string.Empty;
@@ -212,8 +195,6 @@ namespace StoryBuilder.Models
             Tense = string.Empty;
             Style = string.Empty;
             Tone = string.Empty;
-            TargetMarket1 = string.Empty;
-            TargetMarket2 = string.Empty;
             StoryIdea = string.Empty;
             Concept = string.Empty;
             StyleNotes = string.Empty;
@@ -239,8 +220,6 @@ namespace StoryBuilder.Models
             Tense = string.Empty;
             Style = string.Empty;
             Tone = string.Empty;
-            TargetMarket1 = string.Empty;
-            TargetMarket2 = string.Empty;
             StoryIdea = string.Empty;
             Concept = string.Empty;
             StyleNotes = string.Empty;

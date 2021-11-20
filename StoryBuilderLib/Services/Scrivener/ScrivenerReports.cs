@@ -461,8 +461,6 @@ namespace StoryBuilder.Services.Scrivener
                 sb.Replace("@StoryType", overview.StoryType);
                 sb.Replace("@Genre", overview.StoryGenre);
                 sb.Replace("@Viewpoint", overview.Viewpoint);
-                sb.Replace("@Market1", overview.TargetMarket1);
-                sb.Replace("@Market2", overview.TargetMarket2);
                 sb.Replace("@StoryIdea", overview.StoryIdea);
                 sb.Replace("@Concept", overview.Concept);
                 //sb.Replace("@Premise", overview.Premise);
