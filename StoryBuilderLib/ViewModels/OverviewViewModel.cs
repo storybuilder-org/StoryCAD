@@ -215,22 +215,6 @@ namespace StoryBuilder.ViewModels
             set => SetProperty(ref _toneNotes, value);
         }
 
-        // Market data
-
-        private string _targetMarket1;
-        public string TargetMarket1
-        {
-            get => _targetMarket1;
-            set => SetProperty(ref _targetMarket1, value);
-        }
-
-        private string _targetMarket2;
-        public string TargetMarket2
-        {
-            get => _targetMarket2;
-            set => SetProperty(ref _targetMarket2, value);
-        }
-
         // Notes data
 
         private string _notes;
@@ -294,8 +278,6 @@ namespace StoryBuilder.ViewModels
             Style = Model.Style;
             Tone = Model.Tone;
             Style = Model.Style;
-            TargetMarket1 = Model.TargetMarket1;
-            TargetMarket2 = Model.TargetMarket2;
             // Load RTF files
             StoryIdea = await _rdr.GetRtfText(Model.StoryIdea, Uuid);
             Concept = await _rdr.GetRtfText(Model.Concept, Uuid);
@@ -325,8 +307,6 @@ namespace StoryBuilder.ViewModels
                 Model.Tense = Tense;
                 Model.Style = Style;
                 Model.Tone = Tone;
-                Model.TargetMarket1 = TargetMarket1;
-                Model.TargetMarket2 = TargetMarket2;
 
                 // Write RTF files
                 Model.StoryIdea = await _wtr.PutRtfText(StoryIdea, Model.Uuid, "storyidea.rtf");
@@ -412,8 +392,6 @@ namespace StoryBuilder.ViewModels
             Viewpoint = string.Empty;
             Style = string.Empty;
             Tone = string.Empty;
-            TargetMarket1 = string.Empty;
-            TargetMarket2 = string.Empty;
             StoryIdea = string.Empty;
             Concept = string.Empty;
             Premise = string.Empty;

@@ -180,13 +180,6 @@ namespace StoryBuilder.DAL
             attr = _xml.CreateAttribute("Tone");
             attr.Value = rec.Tone;
             overview.Attributes.Append(attr);
-            attr = _xml.CreateAttribute("TargetMarket1");
-            attr.Value = rec.TargetMarket1;
-            overview.Attributes.Append(attr);
-            attr = _xml.CreateAttribute("TargetMarket2");
-            attr.Value = rec.TargetMarket2;
-            overview.Attributes.Append(attr);
-
             attr = _xml.CreateAttribute("StoryIdea");
             attr.Value = rec.StoryIdea;
             overview.Attributes.Append(attr);

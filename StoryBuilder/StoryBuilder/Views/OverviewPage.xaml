@@ -136,25 +136,6 @@
                         ScrollViewer.VerticalScrollBarVisibility="Visible" />
                 </Grid>
             </PivotItem>
-            <PivotItem Header="Market">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-                    <Grid Grid.Row="0" HorizontalAlignment="Center">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="2*"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="2*"/>
-                        </Grid.ColumnDefinitions>
-                        <TextBox Header="Target Markets" Grid.Column="0" MinWidth="200"
-                                 Text="{x:Bind OverviewVm.TargetMarket1, Mode=TwoWay}" />
-                        <TextBlock Grid.Column="1" MinWidth="50"/>
-                        <TextBox Header="  " Grid.Column="2" MinWidth="200"
-                                 Text="{x:Bind OverviewVm.TargetMarket2, Mode=TwoWay}" />
-                    </Grid>
-                </Grid>
-            </PivotItem>
             <PivotItem Header="Notes">
                 <usercontrols:RichEditBoxExtended Header="Notes" RtfText="{x:Bind OverviewVm.Notes, Mode=TwoWay}" AcceptsReturn="True"
                                     IsSpellCheckEnabled="True" TextWrapping="Wrap"

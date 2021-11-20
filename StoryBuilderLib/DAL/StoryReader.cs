@@ -211,12 +211,6 @@ namespace StoryBuilder.DAL
                     case "Tone":
                         _overview.Tone = attr.InnerText;
                         break;
-                    case "TargetMarket1":
-                        _overview.TargetMarket1 = attr.InnerText;
-                        break;
-                    case "TargetMarket2":
-                        _overview.TargetMarket2 = attr.InnerText;
-                        break;
                     case "StoryIdea":
                         _overview.StoryIdea = attr.InnerText;
                         break;
