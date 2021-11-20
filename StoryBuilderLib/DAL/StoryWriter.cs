@@ -420,12 +420,6 @@ namespace StoryBuilder.DAL
                 traitList.AppendChild(trait);
             }
             chr.AppendChild(traitList);
-            attr = _xml.CreateAttribute("WoundCategory");
-            attr.Value = rec.WoundCategory;
-            chr.Attributes.Append(attr);
-            attr = _xml.CreateAttribute("WoundSummary");
-            attr.Value = rec.WoundSummary;
-            chr.Attributes.Append(attr);
             attr = _xml.CreateAttribute("CharacterSketch");
             attr.Value = rec.CharacterSketch;
             chr.Attributes.Append(attr);
@@ -461,20 +455,11 @@ namespace StoryBuilder.DAL
             attr = _xml.CreateAttribute("Abilities");
             attr.Value = rec.Abilities;
             chr.Attributes.Append(attr);
-            attr = _xml.CreateAttribute("Wound");
-            attr.Value = rec.Wound;
-            chr.Attributes.Append(attr);
-            attr = _xml.CreateAttribute("Fears");
-            attr.Value = rec.Fears;
-            chr.Attributes.Append(attr);
-            attr = _xml.CreateAttribute("Lies");
-            attr.Value = rec.Lies;
-            chr.Attributes.Append(attr);
-            attr = _xml.CreateAttribute("Secrets");
-            attr.Value = rec.Secrets;
+            attr = _xml.CreateAttribute("Flaw");
+            attr.Value = rec.Flaw;
             chr.Attributes.Append(attr);
             attr = _xml.CreateAttribute("BackStory");
-            attr.Value = rec.Secrets;
+            attr.Value = rec.BackStory;
             chr.Attributes.Append(attr);
 
             _elements.AppendChild(chr);

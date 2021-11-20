@@ -137,34 +137,14 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    <ComboBox Header="Wound Category" IsEditable="False" MinWidth="300" ItemsSource="{x:Bind CharVm.WoundCategoryList}"
-                              SelectedValue="{x:Bind CharVm.WoundCategory, Mode=TwoWay}" />
-                    <ComboBox Grid.Row="1" Header="Wound Summary" IsEditable="False" MinWidth="500" ItemsSource="{x:Bind CharVm.WoundSummaryList}"
-                              SelectedValue="{x:Bind CharVm.WoundSummary, Mode=TwoWay}" />
-                    <usercontrols:RichEditBoxExtended Grid.Row="2" Header="Wound"
-                                                      RtfText="{x:Bind CharVm.Wound, Mode=TwoWay}" AcceptsReturn="True"
+                    <Button  Content="Flaw Builder" Grid.Row="0" HorizontalAlignment="Left" Margin="0,10,10,10" 
+                             Command="{x:Bind CharVm.FlawCommand, Mode=OneWay}" />
+                    <usercontrols:RichEditBoxExtended Grid.Row="1" Header="Flaw"
+                                                      RtfText="{x:Bind CharVm.Flaw, Mode=TwoWay}" AcceptsReturn="True"
                                                       IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                                       ScrollViewer.VerticalScrollBarVisibility="Visible"
-                                                      PlaceholderText="See https://onestopforwriters.com/wounds" />
-                    <usercontrols:RichEditBoxExtended Grid.Row="3" Header="Fears"
-                                                      RtfText="{x:Bind CharVm.Fears, Mode=TwoWay}" AcceptsReturn="True"
-                                                      IsSpellCheckEnabled="True" TextWrapping="Wrap"
-                                                      ScrollViewer.VerticalScrollBarVisibility="Visible"
-                                                      PlaceholderText="https://onestopforwriters.com/lessons/28" />
-                    <usercontrols:RichEditBoxExtended Grid.Row="4" Header="Lies"
-                                                      RtfText="{x:Bind CharVm.Lies, Mode=TwoWay}" AcceptsReturn="True"
-                                                      IsSpellCheckEnabled="True" TextWrapping="Wrap"
-                                                      ScrollViewer.VerticalScrollBarVisibility="Visible"
-                                                      PlaceholderText="https://onestopforwriters.com/lessons/23" />
-                    <usercontrols:RichEditBoxExtended Grid.Row="5" Header="Secrets"
-                                                      RtfText="{x:Bind CharVm.Secrets, Mode=TwoWay}" AcceptsReturn="True"
-                                                      IsSpellCheckEnabled="True" TextWrapping="Wrap"
-                                                      ScrollViewer.VerticalScrollBarVisibility="Visible"
-                                                      PlaceholderText="https://onestopforwriters.com/lessons/23" />
+                                                      PlaceholderText="The trauma, fear, lie or secret that sabotages your character." />
                 </Grid>
             </PivotItem>
             <PivotItem Header="Backstory">

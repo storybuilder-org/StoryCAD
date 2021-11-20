@@ -361,50 +361,14 @@ namespace StoryBuilder.Models
 
         // Character flaw data
 
-        private string _woundCategory;
-        public string WoundCategory
+        private string _flaw;
+        public string Flaw
         {
-            get => _woundCategory;
-            set => _woundCategory = value;
+            get => _flaw;
+            set => _flaw = value;
         }
 
-        private string _woundSummary;
-
-        public string WoundSummary
-        {
-            get => _woundSummary;
-            set => _woundSummary = value;
-        }
-
-        private string _wound;
-        public string Wound
-        {
-            get => _wound;
-            set => _wound = value;
-        }
-
-        private string _fears;
-        public string Fears
-        {
-            get => _fears;
-            set => _fears = value;
-        }
-
-        private string _lies;
-        public string Lies
-        {
-            get => _lies;
-            set => _lies = value;
-        }
-
-        private string _secrets;
-        public string Secrets
-        {
-            get => _secrets;
-            set => _secrets = value;
-        }
-
-        // Character note data
+        // Character backstory  
 
         private string _backStory;
         public string BackStory
@@ -464,12 +428,7 @@ namespace StoryBuilder.Models
             TraitList = new List<string>();
             Habits = string.Empty;
             Abilities = string.Empty;
-            WoundCategory = string.Empty;
-            WoundSummary = string.Empty;
-            Wound = string.Empty;
-            Fears = string.Empty;
-            Lies = string.Empty;
-            Secrets = string.Empty;
+            Flaw = string.Empty;
             BackStory = string.Empty;
         }
 
@@ -521,12 +480,7 @@ namespace StoryBuilder.Models
             TraitList = new List<string>();
             Habits = string.Empty;
             Abilities = string.Empty;
-            WoundCategory = string.Empty;
-            WoundSummary = string.Empty;
-            Wound = string.Empty;
-            Fears = string.Empty;
-            Lies = string.Empty;
-            Secrets = string.Empty;
+            Flaw = string.Empty;
             BackStory = string.Empty;
         }
 
@@ -578,12 +532,7 @@ namespace StoryBuilder.Models
             TraitList = new List<string>();
             Habits = string.Empty;
             Abilities = string.Empty;
-            WoundCategory = string.Empty;
-            WoundSummary = string.Empty;
-            Wound = string.Empty;
-            Fears = string.Empty;
-            Lies = string.Empty;
-            Secrets = string.Empty;
+            Flaw = string.Empty;
             BackStory = string.Empty;
         }
 
