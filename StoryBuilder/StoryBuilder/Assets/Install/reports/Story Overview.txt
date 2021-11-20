@@ -1,0 +1,39 @@
+                             StoryBuilder - Story Overview
+
+                   ============== Story Idea =============
+
+    Title:                @Title
+
+    Date Created:         @CreateDate
+
+    Last Changed:         @ModifiedDate
+
+    Author:               @Author
+
+    Story Type:           @StoryType
+
+    Genre:                @Genre
+
+    Viewpoint:            @Viewpoint
+
+    Target Markets:       @Market1
+                          @Market2
+
+    Story Notes:
+    @StoryIdea
+
+                   ============== Concept =============
+
+    Concept:
+    @Concept
+
+                   ============== Premise =============
+
+    Premise:
+    @Premise
+
+
+                   ============== Notes =============
+
+    Notes:
+    @Notes

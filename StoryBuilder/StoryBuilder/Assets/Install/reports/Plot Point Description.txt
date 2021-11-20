@@ -1,0 +1,59 @@
+                   StoryBuilder - Plot Point Description
+
+                   ============== Scene Overview===========
+
+    Id:                 @Id
+
+    Title:              @Title
+
+    Date:               @Date
+
+    Time:               @Time
+
+    Viewpoint:          @Viewpoint
+
+    Setting:            @Setting
+
+    Characters:
+
+    @Char1                             @Role1
+
+    @Char2                             @Role2
+
+    @Char3                             @Role3
+
+    Scene Sketch:
+    @Remarks
+
+                    ============ Scene Conflict ================
+
+    Protagonist:        @ProtagName
+
+    Feelings:           @ProtagEmotion
+
+    Goal:               @ProtagGoal
+
+    Antagonist:         @AntagName
+
+    Feelings:           @AntagEmotion
+
+    Goal:               @AntagGoal
+
+    Opposition:         @Opposition
+
+    Outcome:            @Outcome
+
+                 ============= Sequel =======================
+
+    Emotional Response: @Emotion
+
+    Review and Thought:
+    @Review
+
+    New Goal:           @NewGoal
+
+                 =========== Scene Notes ====================
+
+    Notes:
+    @Notes
+
