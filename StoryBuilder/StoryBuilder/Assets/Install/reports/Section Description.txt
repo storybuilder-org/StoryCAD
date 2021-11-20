@@ -1,7 +1,0 @@
-                        StoryBuilder - Section Description
-
-    Name:               @Name
-
-    Description:
-    @Description
-
