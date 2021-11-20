@@ -2028,6 +2028,7 @@ namespace StoryBuilder.ViewModels
 
             _canExecuteCommands = true;
             TogglePaneCommand = new RelayCommand(TogglePane, () => _canExecuteCommands);
+            OpenUnifiedCommand = new RelayCommand(OpenUnifiedMenu, () => _canExecuteCommands);
             NewFileCommand = new RelayCommand(NewFile, () => _canExecuteCommands);
             OpenFileCommand = new RelayCommand(OpenFile, () => _canExecuteCommands);
             SaveFileCommand = new RelayCommand(async () => await SaveFile(), () => _canExecuteCommands);

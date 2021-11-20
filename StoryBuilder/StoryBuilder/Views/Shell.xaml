@@ -94,6 +94,11 @@
                 <AppBarButton Icon="Document" Label="File" ToolTipService.ToolTip="File Menu">
                     <AppBarButton.Flyout>
                         <MenuFlyout>
+                            <MenuFlyoutItem Text="DEBUG - Open Unified Menu" Command="{x:Bind ShellVm.OpenUnifiedCommand, Mode=OneWay}" >
+                                <MenuFlyoutItem.Icon>
+                                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE8F4;"/>
+                                </MenuFlyoutItem.Icon>
+                            </MenuFlyoutItem>
                             <MenuFlyoutItem Text="New Story" Command="{x:Bind ShellVm.NewFileCommand, Mode=OneWay}" >
                                 <MenuFlyoutItem.Icon>
                                     <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE8F4;"/>
