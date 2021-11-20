@@ -1,0 +1,55 @@
+﻿<UserControl
+    x:Class="StoryBuilder.Controls.RelationshipView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:usercontrols="using:StoryBuilder.Controls"    
+    mc:Ignorable="d">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <ComboBox Grid.Row="0" Header="Relationship" PlaceholderText="Pick Relation" IsEditable="False" 
+                              ItemsSource="{x:Bind CharVm.CharacterRelationships}"
+                              SelectionChanged="{x:Bind RelationshipChanged, Mode=OneWay}"
+                              DisplayMemberPath ="Partner.Name"
+                              SelectedItem="{x:Bind CharVm.SelectedRelationship, Mode=TwoWay}" />
+        <TextBox Name="RelationType" Grid.Row="2" Header="Relation Type" MinWidth="200" 
+                              IsReadOnly="True" Text="{x:Bind CharVm.RelationType, Mode=OneWay}" />
+        <ComboBox Grid.Row="3" Header= "Trait" MinWidth="150" IsEditable="True"
+                              ItemsSource="{x:Bind CharVm.RelationshipTraitList}"
+                              SelectedItem="{x:Bind CharVm.RelationshipTrait, Mode=TwoWay}" />
+        <ComboBox Grid.Row="4" Header="Attitude"  MinWidth="150" IsEditable="True"
+                              ItemsSource="{x:Bind CharVm.RelationshipAttitudeList}"
+                              SelectedItem="{x:Bind CharVm.RelationshipAttitude, Mode=TwoWay}" />
+        <usercontrols:RichEditBoxExtended Grid.Row="5" Header="Relationship Notes" 
+                             RtfText="{x:Bind CharVm.RelationshipNotes, Mode=TwoWay}" AcceptsReturn="True"
+                             IsSpellCheckEnabled="True" TextWrapping="Wrap"
+                             ScrollViewer.VerticalScrollBarVisibility="Visible" />
+        <TextBlock Grid.Row="6"  />        
+        <Grid Grid.Row="8" HorizontalAlignment="Left">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="1" MinWidth="25" />
+            <Button Grid.Column="2" Content="Add Relation" 
+                             Command="{x:Bind CharVm.AddRelationshipCommand, Mode=OneWay}" />
+            <TextBlock Grid.Column="3" MinWidth="25" />
+            <Button Grid.Column="4" Content="Remove Relation" 
+                             Command="{x:Bind CharVm.RemoveRelationshipCommand, Mode=OneWay}" />
+        </Grid>
+    </Grid>
+</UserControl>

@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "StoryBuilderLib": {
+      "commandName": "Project",
+      "nativeDebugging": true
+    }
+  }
+}

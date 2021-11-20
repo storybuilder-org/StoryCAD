@@ -1,0 +1,31 @@
+﻿<ContentDialog
+    x:Class="StoryBuilder.Services.Dialogs.NewProjectDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+    Title="New StoryBuilder Project"
+    PrimaryButtonText="Create"
+    CloseButtonText="Cancel" >
+
+    <StackPanel Orientation="Vertical">
+        <TextBlock Text="Template:" />
+        <ListBox MinWidth="200" SelectedItem="{x:Bind NewProjectVm.SelectedTemplate, Mode=TwoWay}" >
+            <x:String>Blank Project</x:String>
+            <x:String>Empty Folders</x:String>
+            <x:String>External/Internal Problems</x:String>
+            <x:String>Protagonist/Antagonist</x:String>
+            <x:String>Problems and Characters</x:String>
+        </ListBox>
+        <StackPanel Orientation="Horizontal" Padding="0,0,0,14" >
+            <TextBox x:Name="ProjectPathName" Header="Parent Folder Path" MinWidth="300" 
+                     Text="{x:Bind NewProjectVm.ParentPathName, Mode=TwoWay}" />
+            <TextBlock Width="25" />
+            <Button Content="Browse" Click="Browse_Click" VerticalAlignment="Bottom" />
+        </StackPanel>
+        <TextBox x:Name="ProjectName" x:FieldModifier="public" MinWidth="250" HorizontalAlignment="Left" 
+                 Header="Project Name (*.stbx)" Text="{x:Bind NewProjectVm.ProjectName, Mode=TwoWay}" />
+    </StackPanel>
+</ContentDialog>

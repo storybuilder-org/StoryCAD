@@ -1,0 +1,19 @@
+﻿<ContentDialog
+    x:Class="StoryBuilder.Services.Dialogs.Tools.PreferencesDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Title="Preferences"
+    PrimaryButtonText="Save Changes"
+    SecondaryButtonText="Cancel" >
+
+    <StackPanel Padding="14,0,14,14" ScrollViewer.VerticalScrollBarVisibility="Visible"> 
+        <ToggleSwitch HorizontalAlignment="Left" Header="Display quote on startup" IsOn="{x:Bind PreferencesVm.QuoteOnStartup, Mode=TwoWay}"  Margin="0,8"/>
+        <ToggleSwitch HorizontalAlignment="Left" Header="Schedule backup" IsOn="{x:Bind PreferencesVm.TimedBackup, Mode=TwoWay}" Margin="0,4"/>
+        <NumberBox HorizontalAlignment="Left" Header="Backup Interval (Minutes)" Value="{x:Bind PreferencesVm.TimedBackupInterval, Mode=TwoWay}" Margin="0,4"/>
+        <TextBox Header="Backup Directory" HorizontalAlignment="Left" Width="400" Text="{x:Bind PreferencesVm.BackupDirectory, Mode=TwoWay}" Margin="0,8"/>
+        <TextBox Header="Default Project Directory" HorizontalAlignment="Left" Width="400" Text="{x:Bind PreferencesVm.ProjectDirectory, Mode=TwoWay}" Margin="0,8"/>
+    </StackPanel>
+</ContentDialog>
