@@ -112,10 +112,64 @@ This .NET5 console application reads the contents of the StoryBuilder
 application's \Assets\Install folder and it's child folders and 
 produces a text document containing each file's relative path names 
 and a SHA256 hash of its contents. The list is written into the 
-same \Assets\Install folder as 'install.manifest'. 
+same \Assets\Install folder as 'install.manifest'. When StoryBuilder is launched, install.manifest is read and compared
+to the contents of install.manifest saved in the installation folder. Any 
+files whose hashes are different are updated. Whenever you change or add 
+content to \Assets\Install, set CreateInstallManifest as the startup 
+project and run it.
 
-When StoryBuilder is launched, install.manifest is read and compared
-to the contents of 
+#### NRtfTree
+
+NRtfTree Library is a set of classes written in C# that may be used to 
+manage RTF documents. StoryBuilder uses the library in its Scrivener 
+reports interface. It's a .NET 5 DLL project.
+ 
+NRtfTree is licensed under The GNU Lesser General Public License (LGPLv3).
+
+#### StoryBuilder
+
+StoryBUilder is a WinUI 3 Win32 application which was orignally a UWP
+app using WinUI 3 XAML controls exclusively. It was originally
+written as a UWP app and uses async and StorageFile IO 
+exclusively. It contains the App startup logic and all views
+for the running application except dialogs.
+
+The primary Page and home screen is Shell.xaml
+
+#### StoryBuilder (Package)
+
+This project is the MSIX packaging project for StoryBuilder. 
+It's the normal startup project for the solution.
+
+#### StoryBuilderLib
+
+This .NET5 DLL contains the non-IO code for the solution. 
+ The DLL contains the following folders:
+
+**Controls**    UserControls
+
+**Converters**    XAML Value Converters
+
+**DAL**         Data Access Layer
+
+**Models**      StoryBuilder uses the Windows Community Toolkit
+MVVM Library. Each Story Element (node in the Shell Treeview)
+is a Model instance, a class derived from StoryElement. StoryElement
+in turn is an ObservableObject.
+
+**Services**      A collection of microservices, each of which
+is callable (usually from a ViewModel.)
+
+**ViewModels**    WCT MVVM's ViewModels. Each View (Page)
+and most dialogs use a ViewModel as both a target for
+XAML bindings and a collection point for View-oriented logic.
+
+#### StoryBuilderTest 
+This .NET5 Console application is a collection of MSTest 
+unit test classes. 
+
+The tests can be executed by setting StoryBuilderTests
+as the startup project and running Test Explorer. 
 
 ### Adding a New Control
 
@@ -126,6 +180,7 @@ Initialize the property in the ViewModel's constructor.
 If the control is a ComboBox or other control that uses an ItemsSource,  you
 also need to add a 1-way binding from the page to that list in the ViewModel,
 and to provide a source for the list in the ViewModel. The source will usually
+
 be a list in Controls.ini, which is in the \Assets\Install folder. Use an existing
 control as an example. Note that the list must be in the form of key/value pairs.
 Test this much and very the layout looks okay. Insure that it's responsive 
@@ -192,13 +247,16 @@ methods which load an individual tool's data. If you're accessing data from a di
 such as a web service, you'll probably add the service code under the StoryBuilderLib 
 project's \Services folder, but it should still be called from LoadTools(). 
 
-##Create the ViewModel
+#### Create the ViewModel
 
-###StoryBuilder uses MVVM for tools as well as regular Page views. We use the Windows Community Toolkit's MVVM library, which is installed as a NuGet package. The ViewModel class must contain a using statement for Microsoft.Toolkit.Mvvm.ComponentModel and derive from ObservableRecipient.
+StoryBuilder uses MVVM for tools as well as regular Page views. We use the Windows Community Toolkit's MVVM library, which is installed as a NuGet package. The ViewModel class must contain a using statement for Microsoft.Toolkit.Mvvm.ComponentModel and derive from ObservableRecipient.
 
-##Create the View (Dialog)
+#### Create the View (Dialog)
 
-###The views are generally dialogs and their XAML and code-behind are in StoryBuilderLib's \Services\Dialogs folder. The dialog should 
+###The views are generally dialogs and their XAML and 
+code-behind are in StoryBuilderLib's \Services\Dialogs 
+folder. The dialogs should, like Page views, use 
+responsive (self-resizing) layouts.
 
 [1]:https://github.com/terrycox/StoryBuilder-2/blob/master/docs/SOLUTION_PIC.bmp   
 [2]:https://docs.microsoft.com/en-us/windows/apps/windows-app-sdk/
