@@ -6,6 +6,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using StoryBuilder.Models;
 using StoryBuilder.Models.Tools;
+using StoryBuilder.Services.Dialogs;
 
 namespace StoryBuilder.ViewModels
 {
@@ -21,15 +22,15 @@ namespace StoryBuilder.ViewModels
             set { SetProperty(ref _selectedRecentIndex, value); }
         }
 
-        private bool _Closing;
-        public bool Closing
-        {
-            get => _Closing;
-            set
-            {
-                SetProperty(ref _Closing, value);
-            }
-        }
+        //private bool _Closing;
+        //public bool Closing
+        //{
+        //    get => _Closing;
+        //    set
+        //    {
+        //        SetProperty(ref _Closing, value);
+        //    }
+        //}
 
         private string _selectedTemplate;
         public string SelectedTemplate
@@ -67,6 +68,7 @@ namespace StoryBuilder.ViewModels
             ProjectPath = prefs.ProjectDirectory;
         }
 
+        public UnifiedMenu.HideDelegate HideOpen;
         /// <summary>
         /// This controls the frame and sets it content.
         /// </summary>
@@ -114,14 +116,18 @@ namespace StoryBuilder.ViewModels
             PDF.StartInfo.UseShellExecute = true; //uses default app
             PDF.StartInfo.FileName = ManualPath;
             PDF.Start();
+            HideOpen();
         }
 
         public async void LoadStory()
         {
-            shell.OpenFile(); //Calls the open file in shell so it can load the file
-            Closing = true;
+            await shell.OpenFile(); //Calls the open file in shell so it can load the file
+
+            HideOpen();
         }
 
+
+     
         /// <summary>
         /// Loads a story from the recents page
         /// </summary>
@@ -137,7 +143,8 @@ namespace StoryBuilder.ViewModels
             }
             if (SelectedRecentIndex != -1)
             {
-                Closing = true;
+                //Closing = true;
+                HideOpen();
             }
         }
 
@@ -148,7 +155,8 @@ namespace StoryBuilder.ViewModels
         {
             await shell.UnifiedNewFile();
             UpdateRecents(System.IO.Path.Combine(ProjectPath, ProjectName));
-            Closing = true;
+            //Closing = true;
+            HideOpen();
         }
 
         /// <summary>

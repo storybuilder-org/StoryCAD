@@ -25,6 +25,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using Windows.Foundation;
 using Windows.Storage;
 using Windows.Storage.Pickers;
 using WinRT;
@@ -349,10 +350,14 @@ namespace StoryBuilder.ViewModels
         private async void OpenUnifiedMenu()
         {
             _canExecuteCommands = false;
+            // Needs logging
             Logger.Log(LogLevel.Info, "Executing unified menu command");
+            UnifiedVM UnifiedVM = Ioc.Default.GetService<UnifiedVM>();
             UnifiedMenu dialog = new();
             dialog.XamlRoot = GlobalData.XamlRoot;
             var result = await dialog.ShowAsync();
+            // Needs logging, status display
+             _canExecuteCommands = true;
         }
 
         /// <summary>
@@ -739,7 +744,7 @@ namespace StoryBuilder.ViewModels
             _canExecuteCommands = true;
         }
 
-        public async void OpenFile()
+        public async Task OpenFile()
         {
             if (StoryModel.Changed)
             {
@@ -2030,7 +2035,7 @@ namespace StoryBuilder.ViewModels
             TogglePaneCommand = new RelayCommand(TogglePane, () => _canExecuteCommands);
             OpenUnifiedCommand = new RelayCommand(OpenUnifiedMenu, () => _canExecuteCommands);
             NewFileCommand = new RelayCommand(NewFile, () => _canExecuteCommands);
-            OpenFileCommand = new RelayCommand(OpenFile, () => _canExecuteCommands);
+            OpenFileCommand = new RelayCommand(async () => await OpenFile(), () => _canExecuteCommands);
             SaveFileCommand = new RelayCommand(async () => await SaveFile(), () => _canExecuteCommands);
             SaveAsCommand = new RelayCommand(SaveFileAs, () => _canExecuteCommands);
             CloseCommand = new RelayCommand(CloseFile, () => _canExecuteCommands);
