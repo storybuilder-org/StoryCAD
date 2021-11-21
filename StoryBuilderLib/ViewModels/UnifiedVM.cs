@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using StoryBuilder.DAL;
 using StoryBuilder.Models;
 using StoryBuilder.Models.Tools;
 using StoryBuilder.Services.Dialogs;
@@ -20,6 +21,13 @@ namespace StoryBuilder.ViewModels
         {
             get => _selectedRecentIndex;
             set { SetProperty(ref _selectedRecentIndex, value); }
+        }
+
+        private int _selectedSampleIndex;
+        public int SelectedSampleIndex
+        {
+            get => _selectedSampleIndex;
+            set { SetProperty(ref _selectedSampleIndex, value); }
         }
 
         private string _selectedTemplate;
@@ -75,28 +83,18 @@ namespace StoryBuilder.ViewModels
         /// </summary>
         public void SidebarChange(object sender, SelectionChangedEventArgs e)
         {
-            StackPanel Display = new() { HorizontalAlignment = HorizontalAlignment.Stretch };
-            Display.Children.Add(new TextBlock() { Text = CurrentTab.Content + ":", FontSize = 30, HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = Microsoft.UI.Xaml.VerticalAlignment.Top, Margin = new Microsoft.UI.Xaml.Thickness(0, 20, 0, 20) });
             switch (CurrentTab.Name)
             {
                 case "Recent":
-                    ContentView.Content = new Frame() { Content = new Services.Dialogs.RecentFiles() };
+                    ContentView.Content = new Frame() { Content = new RecentFiles() };
                     break;
                 case "New":
-                    ContentView.Content = new Frame() { Content = new Services.Dialogs.NewProjectPage() };
+                    ContentView.Content = new Frame() { Content = new NewProjectPage() };
                     break;
                 case "Example":
-                    ListBox Samples = new() { HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center };
-                    foreach (string SampleStory in System.IO.Directory.GetDirectories(System.IO.Path.Combine(Windows.Storage.ApplicationData.Current.RoamingFolder.Path, @"Storybuilder\samples")))
-                    {
-                        Samples.Items.Add(System.IO.Path.GetFileName(SampleStory).Replace(".stbx", ""));
-                    }
-                    Display.Children.Add(Samples);
-                    Display.Children.Add(new Button() { VerticalAlignment = VerticalAlignment.Bottom, HorizontalAlignment = HorizontalAlignment.Center, Content = "Open sample", Margin = new Microsoft.UI.Xaml.Thickness(0, 20, 0, 20) });
+                    ContentView.Content = new Frame() { Content = new SamplePage() };
                     break;
             }
-            if (CurrentTab.Name != "New" && CurrentTab.Name != "Recent") { ContentView = new Frame() { Content = Display }; } //Only sets the view if its not new as it would be overwritten 
-
         }
 
         public void OpenPDFManual()
@@ -152,7 +150,7 @@ namespace StoryBuilder.ViewModels
         /// <summary>
         /// This updates prefs.RecentFiles1 through 5
         /// </summary>
-        public void UpdateRecents(string Path)
+        public async void UpdateRecents(string Path)
         {
             if (Path != GlobalData.Preferences.LastFile1 && Path != GlobalData.Preferences.LastFile2 && Path != GlobalData.Preferences.LastFile3 && Path != GlobalData.Preferences.LastFile4 && Path != GlobalData.Preferences.LastFile5)
             {
@@ -171,6 +169,9 @@ namespace StoryBuilder.ViewModels
                 else if (Path == GlobalData.Preferences.LastFile4) { NewRecents = new List<string>() { GlobalData.Preferences.LastFile4, GlobalData.Preferences.LastFile1, GlobalData.Preferences.LastFile2, GlobalData.Preferences.LastFile3, GlobalData.Preferences.LastFile5 }; }
                 else if (Path == GlobalData.Preferences.LastFile5) { NewRecents = new List<string>() { GlobalData.Preferences.LastFile5, GlobalData.Preferences.LastFile1, GlobalData.Preferences.LastFile2, GlobalData.Preferences.LastFile3, GlobalData.Preferences.LastFile4 }; }
             }
+            string path = GlobalData.Preferences.InstallationDirectory;
+            PreferencesIO loader = new PreferencesIO(GlobalData.Preferences, path);
+            await loader.UpdateFile();
         }
 
     }
