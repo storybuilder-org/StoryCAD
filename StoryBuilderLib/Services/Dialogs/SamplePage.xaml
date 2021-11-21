@@ -1,0 +1,16 @@
+﻿<Page
+    x:Class="StoryBuilder.Services.Dialogs.SamplePage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:StoryBuilder.Services.Dialogs"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <StackPanel VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+        <TextBlock Text="Sample stories:" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="4" FontSize="30"/>
+        <ListBox HorizontalAlignment="Center" VerticalAlignment="Center" Name="Samples"/>
+        <Button HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="5" Click="LoadSample" Content="Open sample"/>
+    </StackPanel>
+</Page>
