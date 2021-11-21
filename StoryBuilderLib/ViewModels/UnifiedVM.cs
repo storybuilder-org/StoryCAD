@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using StoryBuilder.DAL;
 using StoryBuilder.Models;
 using StoryBuilder.Models.Tools;
 using StoryBuilder.Services.Dialogs;
@@ -75,28 +76,18 @@ namespace StoryBuilder.ViewModels
         /// </summary>
         public void SidebarChange(object sender, SelectionChangedEventArgs e)
         {
-            StackPanel Display = new() { HorizontalAlignment = HorizontalAlignment.Stretch };
-            Display.Children.Add(new TextBlock() { Text = CurrentTab.Content + ":", FontSize = 30, HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = Microsoft.UI.Xaml.VerticalAlignment.Top, Margin = new Microsoft.UI.Xaml.Thickness(0, 20, 0, 20) });
             switch (CurrentTab.Name)
             {
                 case "Recent":
-                    ContentView.Content = new Frame() { Content = new Services.Dialogs.RecentFiles(this) };
+                    ContentView.Content = new Frame() { Content = new RecentFiles(this) };
                     break;
                 case "New":
-                    ContentView.Content = new Frame() { Content = new Services.Dialogs.NewProjectPage(this) };
+                    ContentView.Content = new Frame() { Content = new NewProjectPage(this) };
                     break;
                 case "Example":
-                    ListBox Samples = new() { HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center };
-                    foreach (string SampleStory in System.IO.Directory.GetDirectories(System.IO.Path.Combine(Windows.Storage.ApplicationData.Current.RoamingFolder.Path, @"Storybuilder\samples")))
-                    {
-                        Samples.Items.Add(System.IO.Path.GetFileName(SampleStory).Replace(".stbx", ""));
-                    }
-                    Display.Children.Add(Samples);
-                    Display.Children.Add(new Button() { VerticalAlignment = VerticalAlignment.Bottom, HorizontalAlignment = HorizontalAlignment.Center, Content = "Open sample", Margin = new Microsoft.UI.Xaml.Thickness(0, 20, 0, 20) });
+                    ContentView.Content = new Frame() { Content = new SamplePage(this) };
                     break;
             }
-            if (CurrentTab.Name != "New" && CurrentTab.Name != "Recent") { ContentView = new Frame() { Content = Display }; } //Only sets the view if its not new as it would be overwritten 
-
         }
 
         public void OpenPDFManual()
@@ -136,6 +127,9 @@ namespace StoryBuilder.ViewModels
                 //Closing = true;
                 HideOpen();
             }
+            string path = GlobalData.Preferences.InstallationDirectory;
+            PreferencesIO loader = new(GlobalData.Preferences, path);
+            await loader.UpdateFile();
         }
 
         /// <summary>

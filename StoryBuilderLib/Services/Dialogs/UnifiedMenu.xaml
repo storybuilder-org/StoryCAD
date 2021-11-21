@@ -20,7 +20,6 @@
         <ListBox Grid.Row="0" Grid.Column="0" VerticalAlignment="Stretch" SelectionChanged="{x:Bind UnifiedMenuVM.SidebarChange, Mode=OneWay}" SelectedItem="{x:Bind UnifiedMenuVM.CurrentTab, Mode=TwoWay}" x:Name="SideBar">
             <ListBoxItem Content="Recent files" Name="Recent"/>
             <ListBoxItem Content="Create new story" Name="New"/>
-            <ListBoxItem Content="Open a story" Name="Open"/>
             <ListBoxItem Content="Sample stories" Name="Example"/>
         </ListBox>
         <Frame Grid.Row="0" Grid.Column="1" Name="MenuContent" Content="{x:Bind UnifiedMenuVM.ContentView, Mode=TwoWay}" MinWidth="300" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VerticalContentAlignment="Center"/>
