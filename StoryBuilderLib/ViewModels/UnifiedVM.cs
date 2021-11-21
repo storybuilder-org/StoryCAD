@@ -22,16 +22,6 @@ namespace StoryBuilder.ViewModels
             set { SetProperty(ref _selectedRecentIndex, value); }
         }
 
-        //private bool _Closing;
-        //public bool Closing
-        //{
-        //    get => _Closing;
-        //    set
-        //    {
-        //        SetProperty(ref _Closing, value);
-        //    }
-        //}
-
         private string _selectedTemplate;
         public string SelectedTemplate
         {

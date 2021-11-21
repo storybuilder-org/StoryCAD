@@ -352,7 +352,6 @@ namespace StoryBuilder.ViewModels
             _canExecuteCommands = false;
             // Needs logging
             Logger.Log(LogLevel.Info, "Executing unified menu command");
-            UnifiedVM UnifiedVM = Ioc.Default.GetService<UnifiedVM>();
             UnifiedMenu dialog = new();
             dialog.XamlRoot = GlobalData.XamlRoot;
             var result = await dialog.ShowAsync();
