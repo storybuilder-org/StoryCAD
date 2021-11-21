@@ -80,10 +80,10 @@ namespace StoryBuilder.ViewModels
             switch (CurrentTab.Name)
             {
                 case "Recent":
-                    ContentView.Content = new Frame() { Content = new Services.Dialogs.RecentFiles() };
+                    ContentView.Content = new Frame() { Content = new Services.Dialogs.RecentFiles(this) };
                     break;
                 case "New":
-                    ContentView.Content = new Frame() { Content = new Services.Dialogs.NewProjectPage() };
+                    ContentView.Content = new Frame() { Content = new Services.Dialogs.NewProjectPage(this) };
                     break;
                 case "Example":
                     ListBox Samples = new() { HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center };
@@ -143,7 +143,7 @@ namespace StoryBuilder.ViewModels
         /// </summary>
         public async void MakeProject()
         {
-            await shell.UnifiedNewFile();
+            await shell.UnifiedNewFile(this);
             UpdateRecents(System.IO.Path.Combine(ProjectPath, ProjectName));
             //Closing = true;
             HideOpen();

@@ -11,6 +11,7 @@ namespace StoryBuilder.Services.Dialogs
         public UnifiedMenu()
         {
             InitializeComponent();
+            UnifiedMenuVM = new UnifiedVM();
             UnifiedMenuVM.HideOpen = HideDialog;  // Connect the VM's delegate to HideDialog
         }
 
@@ -21,11 +22,7 @@ namespace StoryBuilder.Services.Dialogs
             Hide();
         }
 
-        public UnifiedVM UnifiedMenuVM
-        {
-            get { return Ioc.Default.GetService<UnifiedVM>(); }
-        }
-
+        public UnifiedVM UnifiedMenuVM;
 
     }
 }

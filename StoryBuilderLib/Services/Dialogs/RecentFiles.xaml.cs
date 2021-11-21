@@ -1,20 +1,9 @@
-﻿using CommunityToolkit.Mvvm.DependencyInjection;
-using Microsoft.UI.Xaml;
+﻿using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Data;
-using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Navigation;
 using StoryBuilder.Models;
 using StoryBuilder.ViewModels;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -26,9 +15,10 @@ namespace StoryBuilder.Services.Dialogs
     /// </summary>
     public sealed partial class RecentFiles : Page
     {
-        public RecentFiles()
+        public RecentFiles(UnifiedVM vm)
         {
             this.InitializeComponent();
+            UnifiedMenuVM = vm;
             //Loads lastfile1 through to lastfile5 and loads it as long as its not null, empty or blank
             if (!String.IsNullOrWhiteSpace(GlobalData.Preferences.LastFile1)) { Recents.Items.Add(new ListBoxItem { Name = GlobalData.Preferences.LastFile1, Content = Path.GetFileName(GlobalData.Preferences.LastFile1).Replace(".stbx", "") }); }
             if (!String.IsNullOrWhiteSpace(GlobalData.Preferences.LastFile2)) { Recents.Items.Add(new ListBoxItem { Name = GlobalData.Preferences.LastFile2, Content = Path.GetFileName(GlobalData.Preferences.LastFile2).Replace(".stbx", "") }); }
@@ -42,9 +32,6 @@ namespace StoryBuilder.Services.Dialogs
                 Pannel.Children.Add(new TextBlock() { Text = "No stories have been opened recently", HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(10) });
             };
         }
-        public UnifiedVM UnifiedMenuVM
-        {
-            get { return Ioc.Default.GetService<UnifiedVM>(); }
-        }
+        public UnifiedVM UnifiedMenuVM;
     }
 }

@@ -19,18 +19,13 @@ namespace StoryBuilder.Services.Dialogs
     /// </summary>
     public sealed partial class NewProjectPage : Page
     {
-        public NewProjectPage()
+        public NewProjectPage(UnifiedVM vm)
         {
             this.InitializeComponent();
+            UnifiedVM = vm;
         }
 
-        public UnifiedVM UnifiedVM
-        {
-            get
-            {
-                return Ioc.Default.GetService<UnifiedVM>();
-            }
-        }
+        public UnifiedVM UnifiedVM;
 
         public bool BrowseButtonClicked { get; set; }
         public bool ProjectFolderExists { get; set; }

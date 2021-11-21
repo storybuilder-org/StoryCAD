@@ -390,14 +390,14 @@ namespace StoryBuilder.ViewModels
             _canExecuteCommands = true;
         }
 
-        public async Task UnifiedNewFile()
+        public async Task UnifiedNewFile(UnifiedVM dialogVM)
         {
             _canExecuteCommands = false;
             Logger.Log(LogLevel.Info, "UnifyVM - New File starting");
             try
             {
                 //TODO: Make sure both path and filename are present
-                UnifiedVM vm = Ioc.Default.GetService<UnifiedVM>();
+                UnifiedVM vm = dialogVM;
                 if (!Path.GetExtension(vm.ProjectName).Equals(".stbx"))
                     vm.ProjectName = vm.ProjectName + ".stbx";
                 _story.ProjectFilename = vm.ProjectName;
