@@ -925,7 +925,7 @@ namespace StoryBuilder.Services.Scrivener
                     foreach (StoryElement element in _model.StoryElements)
                         if (element.Type == StoryItemType.PlotPoint)
                         {
-                            PlotPointModel chr = (PlotPointModel)element;
+                            SceneModel chr = (SceneModel)element;
                             StringBuilder sb = new StringBuilder(line);
                             sb.Replace("@Description", chr.Name);
                             doc.AddText(sb.ToString(), format);
@@ -945,7 +945,7 @@ namespace StoryBuilder.Services.Scrivener
 
         private async Task GeneratePlotPointReport(BinderItem node, StoryElement element)
         {
-            PlotPointModel scene = (PlotPointModel)element;
+            SceneModel scene = (SceneModel)element;
             // Read report template
             if (!_templates.ContainsKey("Plot Point Description"))
                 return;
@@ -1133,7 +1133,7 @@ namespace StoryBuilder.Services.Scrivener
                     foreach (StoryNodeItem child in _model.NarratorView[0].Children)
                     {
                         StoryElement scn = _model.StoryElements.StoryElementGuids[child.Uuid];
-                        PlotPointModel scene = (PlotPointModel)scn;
+                        SceneModel scene = (SceneModel)scn;
                         var sb = new StringBuilder(line);
                         sb.Replace("@Synopsis", $"[{scene.Name}] {scene.Description}");
                         doc.AddText(sb.ToString(), format);

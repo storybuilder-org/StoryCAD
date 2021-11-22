@@ -538,7 +538,7 @@ namespace StoryBuilder.DAL
 
         private void ParsePlotPoint(IXmlNode xn)
         {
-            var scene = new PlotPointModel(xn, _model);
+            var scene = new SceneModel(xn, _model);
             var castMembers = xn.SelectSingleNode("./CastMembers");
             if (castMembers != null)
                 foreach (IXmlNode child in castMembers.ChildNodes)

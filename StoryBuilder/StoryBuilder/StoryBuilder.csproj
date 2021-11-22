@@ -34,7 +34,6 @@
     <Folder Include="Assets\Install\samples\Snow White.stbx\files\" />
     <Folder Include="Assets\Install\samples\The Maltese Falcon.stbx\files\" />
     <Folder Include="Assets\Install\samples\The Old Man and the Sea.stbx\files\" />
-    <Folder Include="Views\" />
   </ItemGroup>
 
   <ItemGroup>

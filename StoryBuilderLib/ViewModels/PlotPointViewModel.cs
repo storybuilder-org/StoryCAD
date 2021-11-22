@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 
 namespace StoryBuilder.ViewModels
 {
-    public class PlotPointViewModel : ObservableRecipient, INavigable
+    public class SceneViewModel : ObservableRecipient, INavigable
     {
         #region Fields
 
@@ -337,8 +337,8 @@ namespace StoryBuilder.ViewModels
         // Besides its GUID, each Plot Point has a unique (to this story) 
         // integer id number (useful in lists of scenes.)
 
-        private PlotPointModel _model;
-        public PlotPointModel Model
+        private SceneModel _model;
+        public SceneModel Model
         {
             get => _model;
             set => SetProperty(ref _model, value);
@@ -357,7 +357,7 @@ namespace StoryBuilder.ViewModels
 
         public async Task Activate(object parameter)
         {
-            Model = (PlotPointModel)parameter;
+            Model = (SceneModel)parameter;
             await LoadModel();   // Load the ViewModel from the Story
         }
 
@@ -556,7 +556,7 @@ namespace StoryBuilder.ViewModels
 
         #region Constructors
 
-        public PlotPointViewModel()
+        public SceneViewModel()
         {
             _story = Ioc.Default.GetService<StoryController>();
             _logger = Ioc.Default.GetService<LogService>();

@@ -527,7 +527,7 @@ namespace StoryBuilder.DAL
 
         private void ParsePlotPointElement(StoryElement element)
         {
-            PlotPointModel rec = (PlotPointModel)element;
+            SceneModel rec = (SceneModel)element;
             XmlNode plotPoint = _xml.CreateElement("PlotPoint");
             XmlAttribute attr;
 

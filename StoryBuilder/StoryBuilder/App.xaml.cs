@@ -104,7 +104,7 @@ namespace StoryBuilder
                     .AddSingleton<CharacterViewModel>()
                     .AddSingleton<ProblemViewModel>()
                     .AddSingleton<SettingViewModel>()
-                    .AddSingleton<PlotPointViewModel>()
+                    .AddSingleton<SceneViewModel>()
                     .AddSingleton<FolderViewModel>()
                     .AddSingleton<SectionViewModel>()
                     .AddSingleton<TrashCanViewModel>()

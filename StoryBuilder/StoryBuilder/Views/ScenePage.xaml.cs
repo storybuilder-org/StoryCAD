@@ -10,7 +10,7 @@ namespace StoryBuilder.Views
     /// </summary>
     public sealed partial class ScenePage : BindablePage
     {
-        public PlotPointViewModel PlotpointVm => Ioc.Default.GetService<PlotPointViewModel>();
+        public SceneViewModel PlotpointVm => Ioc.Default.GetService<SceneViewModel>();
 
         public ScenePage()
         {

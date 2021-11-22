@@ -452,7 +452,7 @@ namespace StoryBuilder.ViewModels
                     await cvm.SaveModel();
                     break;
                 case "StoryBuilder.Views.PlotPointPage":
-                    PlotPointViewModel ppvm = Ioc.Default.GetService<PlotPointViewModel>();
+                    SceneViewModel ppvm = Ioc.Default.GetService<SceneViewModel>();
                     await ppvm.SaveModel();
                     break;
                 case "StoryBuilder.Views.FolderPage":
@@ -1037,7 +1037,7 @@ namespace StoryBuilder.ViewModels
                 IList<MasterPlotScene> scenes = model.MasterPlotScenes;
                 foreach (MasterPlotScene scene in scenes)
                 {
-                    PlotPointModel plotPoint = new PlotPointModel(StoryModel);
+                    SceneModel plotPoint = new SceneModel(StoryModel);
                     plotPoint.Name = scene.SceneTitle;
                     plotPoint.Notes = scene.Notes;
                     StoryNodeItem newNode = new StoryNodeItem(plotPoint, RightTappedNode);
@@ -1070,7 +1070,7 @@ namespace StoryBuilder.ViewModels
                     newNode = new StoryNodeItem(problem, RightTappedNode);
                     break;
                 case ContentDialogResult.Secondary:     // scene
-                    PlotPointModel plotPoint = new PlotPointModel(StoryModel);
+                    SceneModel plotPoint = new SceneModel(StoryModel);
                     plotPoint.Name = situationModel.SituationName;
                     plotPoint.Notes = situationModel.Notes;
                     newNode = new StoryNodeItem(plotPoint, RightTappedNode);
@@ -1098,7 +1098,7 @@ namespace StoryBuilder.ViewModels
                 var result = await dialog.ShowAsync();
                 if (result == ContentDialogResult.Primary)   // Copy command
                 {
-                    PlotPointModel plotPoint = new PlotPointModel(StoryModel);
+                    SceneModel plotPoint = new SceneModel(StoryModel);
                     plotPoint.Name = dialog.StockScenesVm.SceneName;
                     StoryNodeItem newNode = new StoryNodeItem(plotPoint, RightTappedNode);
                     _sourceChildren = RightTappedNode.Children;
@@ -1467,7 +1467,7 @@ namespace StoryBuilder.ViewModels
                     _ = new StoryNodeItem(setting, RightTappedNode);
                     break;
                 case StoryItemType.PlotPoint:
-                    PlotPointModel plotPoint = new PlotPointModel(StoryModel);
+                    SceneModel plotPoint = new SceneModel(StoryModel);
                     _ = new StoryNodeItem(plotPoint, RightTappedNode);
                     break;
             }
@@ -1550,7 +1550,7 @@ namespace StoryBuilder.ViewModels
                 return;
             }
 
-            PlotPointModel plotPoint = (PlotPointModel)
+            SceneModel plotPoint = (SceneModel)
                 StoryModel.StoryElements.StoryElementGuids[RightTappedNode.Uuid];
             // ReSharper disable once ObjectCreationAsStatement
             new StoryNodeItem(plotPoint, StoryModel.NarratorView[0]);
