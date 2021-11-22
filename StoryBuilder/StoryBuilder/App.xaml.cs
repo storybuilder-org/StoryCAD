@@ -37,7 +37,7 @@ namespace StoryBuilder
         public static string OverviewPage = "OverviewPage";
         public static string ProblemPage = "ProblemPage";
         public static string CharacterPage = "CharacterPage";
-        public static string PlotPointPage = "PlotPointPage";
+        public static string ScenePage = "ScenePage";
         public static string FolderPage = "FolderPage";
         public static string SectionPage = "SectionPage";
         public static string SettingPage = "SettingPage";
@@ -292,7 +292,7 @@ namespace StoryBuilder
                 nav.Configure(App.FolderPage, typeof(FolderPage));
                 nav.Configure(App.SectionPage, typeof(SectionPage));
                 nav.Configure(App.SettingPage, typeof(SettingPage));
-                nav.Configure(App.PlotPointPage, typeof(PlotPointPage));
+                nav.Configure(App.ScenePage, typeof(ScenePage));
                 nav.Configure(App.TrashCanPage, typeof(TrashCanPage));
             }
             catch (Exception ex)
