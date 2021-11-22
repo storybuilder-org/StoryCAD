@@ -27,15 +27,11 @@
     <Manifest Include="$(ApplicationManifest)" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Assets\Install\samples\A Doll%27s House.stbx\files\" />
-    <Folder Include="Assets\Install\samples\Danger Calls.stbx\files\" />
-    <Folder Include="Assets\Install\samples\Hamlet.stbx\files\" />
-    <Folder Include="Assets\Install\samples\Snow White.stbx\files\" />
-    <Folder Include="Assets\Install\samples\The Maltese Falcon.stbx\files\" />
-    <Folder Include="Assets\Install\samples\The Old Man and the Sea.stbx\files\" />
-    <Folder Include="Views\" />
-  </ItemGroup>
+<ItemGroup>
+    <Content Include="Assets\Install\**">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+</ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\StoryBuilderLib\StoryBuilderLib.csproj" />
