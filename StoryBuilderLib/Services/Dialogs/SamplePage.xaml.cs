@@ -41,6 +41,7 @@ namespace StoryBuilder.Services.Dialogs
         private async void LoadSample(object sender, RoutedEventArgs e)
         {
             await Ioc.Default.GetService<ShellViewModel>().OpenFileFromPath(paths[Samples.SelectedIndex]);
+            UnifiedVM.UpdateRecents(paths[Samples.SelectedIndex]);
             UnifiedVM.HideOpen();
         }
     }

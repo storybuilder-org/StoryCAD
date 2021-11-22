@@ -9,8 +9,8 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <StackPanel VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
-        <TextBlock Text="Sample stories:" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="4" FontSize="30"/>
+        <TextBlock Text="Sample stories:" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="14" FontSize="30" />
         <ListBox HorizontalAlignment="Center" VerticalAlignment="Center" Name="Samples"/>
-        <Button HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="5" Click="LoadSample" Content="Open sample"/>
+        <Button HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="15" Click="LoadSample" Content="Open sample"/>
     </StackPanel>
 </Page>

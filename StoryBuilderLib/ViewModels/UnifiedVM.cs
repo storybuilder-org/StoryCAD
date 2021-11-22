@@ -103,7 +103,6 @@ namespace StoryBuilder.ViewModels
         public async void LoadStory()
         {
             await shell.OpenFile(); //Calls the open file in shell so it can load the file
-
             HideOpen();
         }
 
@@ -124,12 +123,8 @@ namespace StoryBuilder.ViewModels
             }
             if (SelectedRecentIndex != -1)
             {
-                //Closing = true;
                 HideOpen();
             }
-            string path = GlobalData.Preferences.InstallationDirectory;
-            PreferencesIO loader = new(GlobalData.Preferences, path);
-            await loader.UpdateFile();
         }
 
         /// <summary>
@@ -137,16 +132,20 @@ namespace StoryBuilder.ViewModels
         /// </summary>
         public async void MakeProject()
         {
-            await shell.UnifiedNewFile(this);
-            UpdateRecents(System.IO.Path.Combine(ProjectPath, ProjectName));
-            //Closing = true;
-            HideOpen();
+            //Checks for validity
+            //TODO: check if path is valid (Not illegal) 
+            if (!String.IsNullOrWhiteSpace(SelectedTemplate) && !String.IsNullOrWhiteSpace(ProjectPath) && !String.IsNullOrWhiteSpace(ProjectName))
+            {
+                await shell.UnifiedNewFile(this);
+                UpdateRecents(System.IO.Path.Combine(ProjectPath, ProjectName));
+                HideOpen();
+            }
         }
 
         /// <summary>
         /// This updates prefs.RecentFiles1 through 5
         /// </summary>
-        public void UpdateRecents(string Path)
+        public async void UpdateRecents(string Path)
         {
             if (Path != GlobalData.Preferences.LastFile1 && Path != GlobalData.Preferences.LastFile2 && Path != GlobalData.Preferences.LastFile3 && Path != GlobalData.Preferences.LastFile4 && Path != GlobalData.Preferences.LastFile5)
             {
@@ -165,6 +164,10 @@ namespace StoryBuilder.ViewModels
                 else if (Path == GlobalData.Preferences.LastFile4) { NewRecents = new List<string>() { GlobalData.Preferences.LastFile4, GlobalData.Preferences.LastFile1, GlobalData.Preferences.LastFile2, GlobalData.Preferences.LastFile3, GlobalData.Preferences.LastFile5 }; }
                 else if (Path == GlobalData.Preferences.LastFile5) { NewRecents = new List<string>() { GlobalData.Preferences.LastFile5, GlobalData.Preferences.LastFile1, GlobalData.Preferences.LastFile2, GlobalData.Preferences.LastFile3, GlobalData.Preferences.LastFile4 }; }
             }
+
+            string path = GlobalData.Preferences.InstallationDirectory;
+            PreferencesIO loader = new(GlobalData.Preferences, path);
+            await loader.UpdateFile();
         }
 
     }

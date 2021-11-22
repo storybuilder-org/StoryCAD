@@ -14,7 +14,7 @@ namespace StoryBuilder.Services.Dialogs
             InitializeComponent();
             UnifiedMenuVM = new UnifiedVM();
             UnifiedMenuVM.HideOpen = HideDialog;  // Connect the VM's delegate to HideDialog
-            UnifiedMenuVM.CurrentTab = new ListBoxItem() { Name="Recents"}; //Makes unified VM load recents by default
+            UnifiedMenuVM.CurrentTab = new ListBoxItem() { Name="Recent"}; //Makes unified VM load recents by default
             UnifiedMenuVM.SidebarChange(null,null);
         }
 

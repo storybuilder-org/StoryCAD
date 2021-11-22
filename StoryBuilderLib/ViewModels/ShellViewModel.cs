@@ -368,7 +368,7 @@ namespace StoryBuilder.ViewModels
             _story.ProjectPath = _story.ProjectFolder.Path;
             _story.ProjectFilename = _story.ProjectFolder.DisplayName;
 
-            IReadOnlyList<StorageFile> files = await _story.ProjectFolder.GetFilesAsync();
+             IReadOnlyList<StorageFile> files = await _story.ProjectFolder.GetFilesAsync();
             StorageFile file = files[0];
             //NOTE: BasicProperties.DateModified can be the date last changed
 
@@ -386,7 +386,7 @@ namespace StoryBuilder.ViewModels
                 _story.LoadStatus = LoadStatus.LoadFromRtfFiles;
                 StatusMessage = "Open Story completed";
             }
-            Ioc.Default.GetService<UnifiedVM>().UpdateRecents(_story.ProjectPath); //Updates path
+
             _canExecuteCommands = true;
         }
 
