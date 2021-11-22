@@ -3,7 +3,7 @@ using Windows.Data.Xml.Dom;
 
 namespace StoryBuilder.Models
 {
-    public class PlotPointModel : StoryElement
+    public class SceneModel : StoryElement
     {
         #region Properties
 
@@ -257,7 +257,7 @@ namespace StoryBuilder.Models
         #endregion
 
         #region Constructors
-        public PlotPointModel(StoryModel model) : base("New Plot Point", StoryItemType.PlotPoint, model)
+        public SceneModel(StoryModel model) : base("New Scene", StoryItemType.PlotPoint, model)
         {
             Id = ++_nextPlotPointId;
             Viewpoint = string.Empty;
@@ -292,7 +292,7 @@ namespace StoryBuilder.Models
             Review = string.Empty;
             Notes = string.Empty;
         }
-        public PlotPointModel(string name, StoryModel model) : base(name, StoryItemType.PlotPoint, model)
+        public SceneModel(string name, StoryModel model) : base(name, StoryItemType.PlotPoint, model)
         {
             Id = ++_nextPlotPointId;
             Viewpoint = string.Empty;
@@ -323,7 +323,7 @@ namespace StoryBuilder.Models
             Review = string.Empty;
             Notes = string.Empty;
         }
-        public PlotPointModel(IXmlNode xn, StoryModel model) : base(xn, model)
+        public SceneModel(IXmlNode xn, StoryModel model) : base(xn, model)
         {
             Id = ++_nextPlotPointId;
             Viewpoint = string.Empty;
