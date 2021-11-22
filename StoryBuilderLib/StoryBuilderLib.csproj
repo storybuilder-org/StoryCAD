@@ -14,9 +14,13 @@
     <None Remove="Controls\Conflict.xaml" />
     <None Remove="Controls\Flaw.xaml" />
     <None Remove="Controls\RelationshipView.xaml" />
+    <None Remove="Services\Dialogs\NewProjectPage.xaml" />
     <None Remove="Services\Dialogs\NewRelationshipDialog.xaml" />
+    <None Remove="Services\Dialogs\RecentFiles.xaml" />
+    <None Remove="Services\Dialogs\SamplePage.xaml" />
     <None Remove="Services\Dialogs\Tools\ConflictDialog.xaml" />
     <None Remove="Services\Dialogs\Tools\FlawDialog.xaml" />
+    <None Remove="Services\Dialogs\UnifiedMenu.xaml" />
   </ItemGroup>
 
   <ItemGroup>
@@ -43,6 +47,30 @@
 
   <ItemGroup>
     <ProjectReference Include="..\NRtfTree\NRtfTree.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="Services\Dialogs\SamplePage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="Services\Dialogs\UnifiedMenu.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="Services\Dialogs\RecentFiles.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="Services\Dialogs\NewProjectPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
 
   <ItemGroup>

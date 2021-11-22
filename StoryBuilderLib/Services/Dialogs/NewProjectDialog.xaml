@@ -12,12 +12,12 @@
 
     <StackPanel Orientation="Vertical">
         <TextBlock Text="Template:" />
-        <ListBox MinWidth="200" SelectedItem="{x:Bind NewProjectVm.SelectedTemplate, Mode=TwoWay}" >
-            <x:String>Blank Project</x:String>
-            <x:String>Empty Folders</x:String>
-            <x:String>External/Internal Problems</x:String>
-            <x:String>Protagonist/Antagonist</x:String>
-            <x:String>Problems and Characters</x:String>
+        <ListBox MinWidth="200" SelectedItem="{x:Bind NewProjectVm.SelectedTemplate, Mode=TwoWay}" Name="TemplateLíst">
+            <ListBoxItem Content="Blank Project"/>
+            <ListBoxItem Content="Empty Folders"/>
+            <ListBoxItem Content="External/Internal Problems"/>
+            <ListBoxItem Content="Protagonist/AntagonistProtagonist/AntagonistProtagonist/Antagonist"/>
+            <ListBoxItem Content="Problems and Characters"/>
         </ListBox>
         <StackPanel Orientation="Horizontal" Padding="0,0,0,14" >
             <TextBox x:Name="ProjectPathName" Header="Parent Folder Path" MinWidth="300" 
