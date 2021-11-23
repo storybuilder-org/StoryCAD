@@ -116,7 +116,7 @@ namespace StoryBuilder.DAL
                     case StoryItemType.Setting:
                         ParseSettingElement(element);
                         break;
-                    case StoryItemType.PlotPoint:
+                    case StoryItemType.Scene:
                         ParsePlotPointElement(element);
                         break;
                     case StoryItemType.Folder:

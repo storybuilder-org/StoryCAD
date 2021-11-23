@@ -257,7 +257,7 @@ namespace StoryBuilder.Models
         #endregion
 
         #region Constructors
-        public SceneModel(StoryModel model) : base("New Scene", StoryItemType.PlotPoint, model)
+        public SceneModel(StoryModel model) : base("New Scene", StoryItemType.Scene, model)
         {
             Id = ++_nextSceneId;
             Viewpoint = string.Empty;
@@ -292,7 +292,7 @@ namespace StoryBuilder.Models
             Review = string.Empty;
             Notes = string.Empty;
         }
-        public SceneModel(string name, StoryModel model) : base(name, StoryItemType.PlotPoint, model)
+        public SceneModel(string name, StoryModel model) : base(name, StoryItemType.Scene, model)
         {
             Id = ++_nextSceneId;
             Viewpoint = string.Empty;

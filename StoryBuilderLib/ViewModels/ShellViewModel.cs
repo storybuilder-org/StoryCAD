@@ -363,7 +363,7 @@ namespace StoryBuilder.ViewModels
                         case StoryItemType.Character:
                             nav.NavigateTo(SplitViewFrame, CharacterPage, element);
                             break;
-                        case StoryItemType.PlotPoint:
+                        case StoryItemType.Scene:
                             nav.NavigateTo(SplitViewFrame, ScenePage, element);
                             break;
                         case StoryItemType.Problem:
@@ -1419,7 +1419,7 @@ namespace StoryBuilder.ViewModels
 
         private void AddPlotPoint()
         {
-            AddStoryElement(StoryItemType.PlotPoint);
+            AddStoryElement(StoryItemType.Scene);
         }
 
         private void AddStoryElement(StoryItemType typeToAdd)
@@ -1466,7 +1466,7 @@ namespace StoryBuilder.ViewModels
                     SettingModel setting = new SettingModel(StoryModel);
                     _ = new StoryNodeItem(setting, RightTappedNode);
                     break;
-                case StoryItemType.PlotPoint:
+                case StoryItemType.Scene:
                     SceneModel plotPoint = new SceneModel(StoryModel);
                     _ = new StoryNodeItem(plotPoint, RightTappedNode);
                     break;
@@ -1544,7 +1544,7 @@ namespace StoryBuilder.ViewModels
                 StatusMessage = "Select a node to copy";
                 return;
             }
-            if (RightTappedNode.Type != StoryItemType.PlotPoint)
+            if (RightTappedNode.Type != StoryItemType.Scene)
             {
                 StatusMessage = "You can only copy a PlotPoint";
                 return;
@@ -1572,7 +1572,7 @@ namespace StoryBuilder.ViewModels
                 StatusMessage = "Select a node to remove";
                 return;
             }
-            if (RightTappedNode.Type != StoryItemType.PlotPoint)
+            if (RightTappedNode.Type != StoryItemType.Scene)
             {
                 StatusMessage = "You can only remove a PlotPoint copy";
                 return;

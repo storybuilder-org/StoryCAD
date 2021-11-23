@@ -36,7 +36,7 @@ namespace StoryBuilder.Services.Search
                 case StoryItemType.Setting:
                     result = SearchSetting(node, element);
                     break;
-                case StoryItemType.PlotPoint:
+                case StoryItemType.Scene:
                     result = SearchPlotPoint(node, element);
                     break;
                 case StoryItemType.Folder:

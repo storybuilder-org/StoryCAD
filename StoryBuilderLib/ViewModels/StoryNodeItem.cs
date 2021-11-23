@@ -276,7 +276,7 @@ namespace StoryBuilder.ViewModels
                 case StoryItemType.Character:
                     Symbol = Symbol.Contact;
                     break;
-                case StoryItemType.PlotPoint:
+                case StoryItemType.Scene:
                     Symbol = Symbol.AllApps;
                     break;
                 case StoryItemType.Problem:
@@ -311,7 +311,7 @@ namespace StoryBuilder.ViewModels
                 case StoryItemType.Character:
                     Symbol = Symbol.Contact;
                     break;
-                case StoryItemType.PlotPoint:
+                case StoryItemType.Scene:
                     Symbol = Symbol.AllApps;
                     break;
                 case StoryItemType.Problem:
@@ -352,7 +352,7 @@ namespace StoryBuilder.ViewModels
                 case StoryItemType.Character:
                     Symbol = Symbol.Contact;
                     break;
-                case StoryItemType.PlotPoint:
+                case StoryItemType.Scene:
                     Symbol = Symbol.AllApps;
                     break;
                 case StoryItemType.Problem:
@@ -398,7 +398,7 @@ namespace StoryBuilder.ViewModels
                         Symbol = Symbol.Contact;
                         break;
                     case "PlotPoint":
-                        Type = StoryItemType.PlotPoint;
+                        Type = StoryItemType.Scene;
                         Symbol = Symbol.AllApps;
                         break;
                     case "Problem":

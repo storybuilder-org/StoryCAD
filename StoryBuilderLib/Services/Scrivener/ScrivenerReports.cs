@@ -400,7 +400,7 @@ namespace StoryBuilder.Services.Scrivener
                     case StoryItemType.Setting:
                         await GenerateSettingReport(node, element);
                         break;
-                    case StoryItemType.PlotPoint:
+                    case StoryItemType.Scene:
                         await GeneratePlotPointReport(node, element);
                         break;
                     case StoryItemType.Folder:
@@ -923,7 +923,7 @@ namespace StoryBuilder.Services.Scrivener
                 if (line.Contains("@Description"))
                 {
                     foreach (StoryElement element in _model.StoryElements)
-                        if (element.Type == StoryItemType.PlotPoint)
+                        if (element.Type == StoryItemType.Scene)
                         {
                             SceneModel chr = (SceneModel)element;
                             StringBuilder sb = new StringBuilder(line);
