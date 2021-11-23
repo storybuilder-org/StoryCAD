@@ -137,8 +137,8 @@ namespace StoryBuilder.DAL
                     case "Setting":
                         ParseSetting(node);
                         break;
-                    case "PlotPoint":
-                        ParsePlotPoint(node);
+                    case "Scene":
+                        ParseScene(node);
                         break;
                     case "Separator":       // legacy; Separator was renamed to Folder
                         ParseFolder(node);
@@ -536,7 +536,7 @@ namespace StoryBuilder.DAL
 
         }
 
-        private void ParsePlotPoint(IXmlNode xn)
+        private void ParseScene(IXmlNode xn)
         {
             var scene = new SceneModel(xn, _model);
             var castMembers = xn.SelectSingleNode("./CastMembers");
