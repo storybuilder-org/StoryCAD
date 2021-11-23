@@ -117,7 +117,7 @@ namespace StoryBuilder.DAL
                         ParseSettingElement(element);
                         break;
                     case StoryItemType.Scene:
-                        ParsePlotPointElement(element);
+                        ParseSceneElement(element);
                         break;
                     case StoryItemType.Folder:
                         ParseFolderElement(element);
@@ -525,54 +525,54 @@ namespace StoryBuilder.DAL
             _elements.AppendChild(loc);
         }
 
-        private void ParsePlotPointElement(StoryElement element)
+        private void ParseSceneElement(StoryElement element)
         {
             SceneModel rec = (SceneModel)element;
-            XmlNode plotPoint = _xml.CreateElement("PlotPoint");
+            XmlNode scene = _xml.CreateElement("Scene");
             XmlAttribute attr;
 
             attr = _xml.CreateAttribute("UUID");
             attr.Value = UuidString(rec.Uuid);
-            plotPoint.Attributes.Append(attr);
+            scene.Attributes.Append(attr);
             attr = _xml.CreateAttribute("Name");
             attr.Value = rec.Name;
-            plotPoint.Attributes.Append(attr);
+            scene.Attributes.Append(attr);
             attr = _xml.CreateAttribute("Id");
             attr.Value = rec.Id.ToString();
-            plotPoint.Attributes.Append(attr);
+            scene.Attributes.Append(attr);
             attr = _xml.CreateAttribute("Viewpoint");
             attr.Value = rec.Viewpoint;
-            plotPoint.Attributes.Append(attr);
+            scene.Attributes.Append(attr);
             attr = _xml.CreateAttribute("Date");
             attr.Value = rec.Date;
-            plotPoint.Attributes.Append(attr);
+            scene.Attributes.Append(attr);
             attr = _xml.CreateAttribute("Time");
             attr.Value = rec.Time;
-            plotPoint.Attributes.Append(attr);
+            scene.Attributes.Append(attr);
             attr = _xml.CreateAttribute("Setting");
             attr.Value = rec.Setting;
-            plotPoint.Attributes.Append(attr);
+            scene.Attributes.Append(attr);
             attr = _xml.CreateAttribute("SceneType");
             attr.Value = rec.SceneType;
-            plotPoint.Attributes.Append(attr);
+            scene.Attributes.Append(attr);
             attr = _xml.CreateAttribute("Char1");
             attr.Value = rec.Char1;
-            plotPoint.Attributes.Append(attr);
+            scene.Attributes.Append(attr);
             attr = _xml.CreateAttribute("Char2");
             attr.Value = rec.Char2;
-            plotPoint.Attributes.Append(attr);
+            scene.Attributes.Append(attr);
             attr = _xml.CreateAttribute("Char3");
             attr.Value = rec.Char3;
-            plotPoint.Attributes.Append(attr);
+            scene.Attributes.Append(attr);
             attr = _xml.CreateAttribute("Role1");
             attr.Value = rec.Role1;
-            plotPoint.Attributes.Append(attr);
+            scene.Attributes.Append(attr);
             attr = _xml.CreateAttribute("Role2");
             attr.Value = rec.Role2;
-            plotPoint.Attributes.Append(attr);
+            scene.Attributes.Append(attr);
             attr = _xml.CreateAttribute("Role3");
             attr.Value = rec.Role3;
-            plotPoint.Attributes.Append(attr);
+            scene.Attributes.Append(attr);
             XmlNode castList = _xml.CreateElement("CastMembers");
             foreach (string member in rec.CastMembers)
             {
@@ -580,69 +580,69 @@ namespace StoryBuilder.DAL
                 castMember.AppendChild(_xml.CreateTextNode(member));
                 castList.AppendChild(castMember);
             }
-            plotPoint.AppendChild(castList);
+            scene.AppendChild(castList);
             attr = _xml.CreateAttribute("Remarks");
             attr.Value = rec.Remarks;
-            plotPoint.Attributes.Append(attr);
+            scene.Attributes.Append(attr);
             attr = _xml.CreateAttribute("ScenePurpose");
             attr.Value = rec.ScenePurpose;
-            plotPoint.Attributes.Append(attr);
+            scene.Attributes.Append(attr);
             attr = _xml.CreateAttribute("ValueExchange");
             attr.Value = rec.ValueExchange;
-            plotPoint.Attributes.Append(attr);
+            scene.Attributes.Append(attr);
             attr = _xml.CreateAttribute("Protagonist");
             attr.Value = rec.Protagonist;
-            plotPoint.Attributes.Append(attr);
+            scene.Attributes.Append(attr);
             attr = _xml.CreateAttribute("ProtagEmotion");
             attr.Value = rec.ProtagEmotion;
-            plotPoint.Attributes.Append(attr);
+            scene.Attributes.Append(attr);
             attr = _xml.CreateAttribute("ProtagGoal");
             attr.Value = rec.ProtagGoal;
-            plotPoint.Attributes.Append(attr);
+            scene.Attributes.Append(attr);
             attr = _xml.CreateAttribute("Antagonist");
             attr.Value = rec.Antagonist;
-            plotPoint.Attributes.Append(attr);
+            scene.Attributes.Append(attr);
             attr = _xml.CreateAttribute("AntagEmotion");
             attr.Value = rec.AntagEmotion;
-            plotPoint.Attributes.Append(attr);
+            scene.Attributes.Append(attr);
             attr = _xml.CreateAttribute("AntagGoal");
             attr.Value = rec.AntagGoal;
-            plotPoint.Attributes.Append(attr);
+            scene.Attributes.Append(attr);
             attr = _xml.CreateAttribute("Opposition");
             attr.Value = rec.Opposition;
-            plotPoint.Attributes.Append(attr);
+            scene.Attributes.Append(attr);
             attr = _xml.CreateAttribute("Outcome");
             attr.Value = rec.Outcome;
-            plotPoint.Attributes.Append(attr);
+            scene.Attributes.Append(attr);
             attr = _xml.CreateAttribute("Emotion");
             attr.Value = rec.Emotion;
-            plotPoint.Attributes.Append(attr);
+            scene.Attributes.Append(attr);
             attr = _xml.CreateAttribute("NewGoal");
             attr.Value = rec.NewGoal;
-            plotPoint.Attributes.Append(attr);
+            scene.Attributes.Append(attr);
             attr = _xml.CreateAttribute("Remarks");
             attr.Value = rec.Remarks;
-            plotPoint.Attributes.Append(attr);
+            scene.Attributes.Append(attr);
             attr = _xml.CreateAttribute("Events");
             attr.Value = rec.Events;
-            plotPoint.Attributes.Append(attr);
+            scene.Attributes.Append(attr);
             attr = _xml.CreateAttribute("Consequences");
             attr.Value = rec.Consequences;
-            plotPoint.Attributes.Append(attr);
+            scene.Attributes.Append(attr);
             attr = _xml.CreateAttribute("Significance");
             attr.Value = rec.Significance;
-            plotPoint.Attributes.Append(attr);
+            scene.Attributes.Append(attr);
             attr = _xml.CreateAttribute("Realization");
             attr.Value = rec.Realization;
-            plotPoint.Attributes.Append(attr);
+            scene.Attributes.Append(attr);
             attr = _xml.CreateAttribute("Review");
             attr.Value = rec.Review;
-            plotPoint.Attributes.Append(attr);
+            scene.Attributes.Append(attr);
             attr = _xml.CreateAttribute("Notes");
             attr.Value = rec.Notes;
-            plotPoint.Attributes.Append(attr);
+            scene.Attributes.Append(attr);
 
-            _elements.AppendChild(plotPoint);
+            _elements.AppendChild(scene);
         }
 
         private void ParseFolderElement(StoryElement element)
