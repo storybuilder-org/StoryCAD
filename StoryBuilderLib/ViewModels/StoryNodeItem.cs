@@ -397,7 +397,7 @@ namespace StoryBuilder.ViewModels
                         Type = StoryItemType.Character;
                         Symbol = Symbol.Contact;
                         break;
-                    case "PlotPoint":
+                    case "Scene":
                         Type = StoryItemType.Scene;
                         Symbol = Symbol.AllApps;
                         break;
