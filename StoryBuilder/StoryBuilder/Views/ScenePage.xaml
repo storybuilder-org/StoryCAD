@@ -75,7 +75,7 @@
                                 <usercontrols:CharacterName Header="New Cast Member"
                                     IsEditable="False" MinWidth="300"
                                     DisplayMemberPath="Name"
-                                    SelectedItem="{x:Bind PlotpointVm.NewCastMember, Mode=TwoWay, 
+                                    SelectedItem="{x:Bind SceneVm.NewCastMember, Mode=TwoWay, 
                                     Converter={StaticResource ToStoryElement}}" />
                                 <TextBlock Width="10" />
                                 <Button FontFamily="Segoe MDL2 Assets" Content="&#xE710;" 
