@@ -130,7 +130,7 @@ namespace StoryBuilder
         /// will be used such as when the application is launched to open a specific file.
         /// </summary>
         /// <param name="args">Details about the launch request and process.</param>
-        protected override async void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
+        protected override async void OnLaunched(LaunchActivatedEventArgs args)
         {
             //Current.Resources.Add("Locator", new ViewModelLocator());
             _log = Ioc.Default.GetService<LogService>();
