@@ -14,7 +14,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <TextBox Header="Name" Text="{x:Bind PlotpointVm.Name, Mode=TwoWay}" />
+        <TextBox Header="Name" Text="{x:Bind SceneVm.Name, Mode=TwoWay}" />
         <Pivot Grid.Row="1">
             <PivotItem Header="Scene">
                 <Grid>
@@ -33,14 +33,14 @@
                             <ColumnDefinition Width="4*"/>
                         </Grid.ColumnDefinitions>
                         <TextBox Header="Date" Grid.Column="0" MinWidth="150"
-                                 Text="{x:Bind PlotpointVm.Date, Mode=TwoWay}" />
+                                 Text="{x:Bind SceneVm.Date, Mode=TwoWay}" />
                         <TextBlock Grid.Column="1" MinWidth="50"/>
                         <TextBox Header="Time" Grid.Column="2" MinWidth="150"
-                                 Text="{x:Bind PlotpointVm.Time, Mode=TwoWay}" />
+                                 Text="{x:Bind SceneVm.Time, Mode=TwoWay}" />
                         <TextBlock Grid.Column="3" MinWidth="50"/>
                         <ComboBox Header="Viewpoint" Grid.Column="4"  IsEditable="True" MinWidth="200"
-                                  ItemsSource="{x:Bind PlotpointVm.ViewpointList}"
-                              SelectedItem="{x:Bind PlotpointVm.Viewpoint, Mode=TwoWay}" />
+                                  ItemsSource="{x:Bind SceneVm.ViewpointList}"
+                              SelectedItem="{x:Bind SceneVm.Viewpoint, Mode=TwoWay}" />
                     </Grid>
                     <Grid Grid.Row="1" HorizontalAlignment="Left">
                         <Grid.ColumnDefinitions>
@@ -51,19 +51,19 @@
                         <usercontrols:SettingName Header="Setting" Grid.Column="0" IsEditable="True"
                              MinWidth="300" Margin="0,0,0,10"
                              DisplayMemberPath="Name"
-                             SelectedValue="{x:Bind PlotpointVm.Setting, Mode=TwoWay, Converter={StaticResource ToStoryElement}}"/>
+                             SelectedValue="{x:Bind SceneVm.Setting, Mode=TwoWay, Converter={StaticResource ToStoryElement}}"/>
                         <TextBlock Grid.Column="1" MinWidth="50"/>
                         <ComboBox Header="SceneType" Grid.Column="2" IsEditable="True" MinWidth="200"
-                              ItemsSource="{x:Bind PlotpointVm.SceneTypeList}"
-                              SelectedItem="{x:Bind PlotpointVm.SceneType, Mode=TwoWay}" />
+                              ItemsSource="{x:Bind SceneVm.SceneTypeList}"
+                              SelectedItem="{x:Bind SceneVm.SceneType, Mode=TwoWay}" />
                     </Grid>
                     <Grid Grid.Row="2" HorizontalAlignment="Left" >
                         <StackPanel Orientation="Vertical">
                             <TextBlock Text="Scene Cast" />
                             <ScrollViewer Height="75" >
                                 <ListView MinWidth="300"
-                                ItemsSource="{x:Bind PlotpointVm.CastMembers, Mode=OneWay}"
-                                    SelectedIndex="{x:Bind PlotpointVm.ExistingCastIndex, Mode=OneWay}" >
+                                ItemsSource="{x:Bind SceneVm.CastMembers, Mode=OneWay}"
+                                    SelectedIndex="{x:Bind SceneVm.ExistingCastIndex, Mode=OneWay}" >
                                     <ListView.ItemTemplate>
                                         <DataTemplate x:DataType="models:StoryElement">
                                             <TextBlock Text="{x:Bind Name, Mode=OneWay}" MinWidth="250" />
@@ -79,13 +79,13 @@
                                     Converter={StaticResource ToStoryElement}}" />
                                 <TextBlock Width="10" />
                                 <Button FontFamily="Segoe MDL2 Assets" Content="&#xE710;" 
-                                        Command="{x:Bind PlotpointVm.AddCastCommand, Mode=OneWay}" >
+                                        Command="{x:Bind SceneVm.AddCastCommand, Mode=OneWay}" >
                                     <ToolTipService.ToolTip>
                                         <ToolTip Content="Add Cast Member"></ToolTip>
                                     </ToolTipService.ToolTip>
                                 </Button>
                                 <Button FontFamily="Segoe MDL2 Assets" Content="&#xE738;" 
-                                        Command="{x:Bind PlotpointVm.RemoveCastCommand, Mode=OneWay}" >
+                                        Command="{x:Bind SceneVm.RemoveCastCommand, Mode=OneWay}" >
                                     <ToolTipService.ToolTip>
                                         <ToolTip Content="Add Cast Member"></ToolTip>
                                     </ToolTipService.ToolTip>
@@ -94,7 +94,7 @@
                         </StackPanel>
                     </Grid>
                     <usercontrols:RichEditBoxExtended Header="Scene Sketch" Grid.Row="3"
-                                                      RtfText="{x:Bind PlotpointVm.Remarks, Mode=TwoWay}"
+                                                      RtfText="{x:Bind SceneVm.Remarks, Mode=TwoWay}"
                                                       AcceptsReturn="True"
                                                       IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                                       ScrollViewer.VerticalScrollBarVisibility="Visible" />
@@ -116,31 +116,31 @@
                             <ColumnDefinition Width="5*"/>
                         </Grid.ColumnDefinitions>
                         <ComboBox Header="Purpose of Scene" Grid.Column="0" IsEditable="False" MinWidth="250"
-                                  ItemsSource="{x:Bind PlotpointVm.ScenePurposeList}"
-                                  SelectedValue="{x:Bind PlotpointVm.ScenePurpose, Mode=TwoWay}" />
+                                  ItemsSource="{x:Bind SceneVm.ScenePurposeList}"
+                                  SelectedValue="{x:Bind SceneVm.ScenePurpose, Mode=TwoWay}" />
                         <TextBlock Grid.Column="1" MinWidth="50"/>
                         <ComboBox Header="Value Exchange" Grid.Column="2" IsEditable="False" MinWidth="250"
-                                  ItemsSource="{x:Bind PlotpointVm.ValueExchangeList}"
-                                  SelectedValue="{x:Bind PlotpointVm.ValueExchange, Mode=TwoWay}"
+                                  ItemsSource="{x:Bind SceneVm.ValueExchangeList}"
+                                  SelectedValue="{x:Bind SceneVm.ValueExchange, Mode=TwoWay}"
                                   PlaceholderText="What changes for your scene's protagonist?."/>
                     </Grid>
                     <usercontrols:RichEditBoxExtended Header="What Happens" Grid.Row="1"
-                                                      RtfText="{x:Bind PlotpointVm.Events, Mode=TwoWay}" AcceptsReturn="True"
+                                                      RtfText="{x:Bind SceneVm.Events, Mode=TwoWay}" AcceptsReturn="True"
                                                       IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                                       ScrollViewer.VerticalScrollBarVisibility="Visible"
                                                       PlaceholderText="(Plot/Cause) The way the scene starts to unfold."/>
                     <usercontrols:RichEditBoxExtended Header="The Consequence" Grid.Row="2"
-                                                      RtfText="{x:Bind PlotpointVm.Consequences, Mode=TwoWay}" AcceptsReturn="True"
+                                                      RtfText="{x:Bind SceneVm.Consequences, Mode=TwoWay}" AcceptsReturn="True"
                                                       IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                                       ScrollViewer.VerticalScrollBarVisibility="Visible"
                                                       PlaceholderText="(Plot/Effect) The way the scene ends (usually a disaster)."/>
                     <usercontrols:RichEditBoxExtended Header="Why It Matters" Grid.Row="3"
-                                                      RtfText="{x:Bind PlotpointVm.Significance, Mode=TwoWay}" AcceptsReturn="True"
+                                                      RtfText="{x:Bind SceneVm.Significance, Mode=TwoWay}" AcceptsReturn="True"
                                                       IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                                       ScrollViewer.VerticalScrollBarVisibility="Visible"
                                                       PlaceholderText="(Inner Conflict/Cause) Why what happens affects or resonates with your protagonist."/>
                     <usercontrols:RichEditBoxExtended Header="The Realization" Grid.Row="4"
-                                                      RtfText="{x:Bind PlotpointVm.Realization, Mode=TwoWay}" AcceptsReturn="True"
+                                                      RtfText="{x:Bind SceneVm.Realization, Mode=TwoWay}" AcceptsReturn="True"
                                                       IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                                       ScrollViewer.VerticalScrollBarVisibility="Visible"
                                                       PlaceholderText="(Inner Conflict/Effect) How your protagonist changes or what she learns. (Consider Sequel.)"/>
@@ -164,18 +164,18 @@
                         </Grid.ColumnDefinitions>
                         <usercontrols:CharacterName Header="Protagonist" Grid.Column="0" IsEditable="False" MinWidth="300"
                             DisplayMemberPath="Name"
-                            SelectedValue="{x:Bind PlotpointVm.Protagonist, Mode=TwoWay, Converter={StaticResource ToStoryElement}}" />
+                            SelectedValue="{x:Bind SceneVm.Protagonist, Mode=TwoWay, Converter={StaticResource ToStoryElement}}" />
                         <TextBlock Grid.Column="1" MinWidth="50"/>
                         <ComboBox Header="Feelings" Grid.Column="2" IsEditable="True" MinWidth="200"
-                              ItemsSource="{x:Bind PlotpointVm.EmotionList}"
-                              SelectedItem="{x:Bind PlotpointVm.ProtagEmotion, Mode=TwoWay}" />
+                              ItemsSource="{x:Bind SceneVm.EmotionList}"
+                              SelectedItem="{x:Bind SceneVm.ProtagEmotion, Mode=TwoWay}" />
                     </Grid>
                     <ComboBox Header="Protagonist's Goal" Grid.Row="1" IsEditable="True" MinWidth="300"
-                              ItemsSource="{x:Bind PlotpointVm.GoalList}"
-                              SelectedItem="{x:Bind PlotpointVm.ProtagGoal, Mode=TwoWay}" />
+                              ItemsSource="{x:Bind SceneVm.GoalList}"
+                              SelectedItem="{x:Bind SceneVm.ProtagGoal, Mode=TwoWay}" />
                     <ComboBox Header="Opposition" Grid.Row="2" IsEditable="True" Width="400"
-                              ItemsSource="{x:Bind PlotpointVm.OppositionList}"
-                              SelectedItem="{x:Bind PlotpointVm.Opposition, Mode=TwoWay}" />
+                              ItemsSource="{x:Bind SceneVm.OppositionList}"
+                              SelectedItem="{x:Bind SceneVm.Opposition, Mode=TwoWay}" />
                     <Grid Grid.Row="3" HorizontalAlignment="Left">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="3*"/>
@@ -184,19 +184,19 @@
                         </Grid.ColumnDefinitions>
                         <usercontrols:CharacterName Header="Antagonist" Grid.Column="0" IsEditable="False" MinWidth="300"
                           DisplayMemberPath="Name"
-                          SelectedValue="{x:Bind PlotpointVm.Antagonist, Mode=TwoWay, Converter={StaticResource ToStoryElement}}" />
+                          SelectedValue="{x:Bind SceneVm.Antagonist, Mode=TwoWay, Converter={StaticResource ToStoryElement}}" />
                         <TextBlock Grid.Column="1" MinWidth="50"/>
                         <ComboBox Header="Feelings" Grid.Column="2" IsEditable="True" MinWidth="200"
-                                  ItemsSource="{x:Bind PlotpointVm.EmotionList}"
-                              SelectedItem="{x:Bind PlotpointVm.AntagEmotion, Mode=TwoWay}" />
+                                  ItemsSource="{x:Bind SceneVm.EmotionList}"
+                              SelectedItem="{x:Bind SceneVm.AntagEmotion, Mode=TwoWay}" />
                     </Grid>
                     <ComboBox Header="Antagonist's Goal" Grid.Row="4" IsEditable="True" MinWidth="300"
-                              ItemsSource="{x:Bind PlotpointVm.GoalList}"
-                              SelectedItem="{x:Bind PlotpointVm.AntagGoal, Mode=TwoWay}" />
+                              ItemsSource="{x:Bind SceneVm.GoalList}"
+                              SelectedItem="{x:Bind SceneVm.AntagGoal, Mode=TwoWay}" />
                     <TextBlock Grid.Row="5" Text=" "/>
                     <ComboBox Header="Outcome" Grid.Row="5" IsEditable="True" Width="400"
-                              ItemsSource="{x:Bind PlotpointVm.OutcomeList}"
-                              SelectedItem="{x:Bind PlotpointVm.Outcome, Mode=TwoWay}" />
+                              ItemsSource="{x:Bind SceneVm.OutcomeList}"
+                              SelectedItem="{x:Bind SceneVm.Outcome, Mode=TwoWay}" />
                 </Grid>
             </PivotItem>
             <PivotItem Header="Sequel">
@@ -207,19 +207,19 @@
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
                     <ComboBox Header="Emotional Response" Grid.Row="0" IsEditable="True" MinWidth="200"
-                              ItemsSource="{x:Bind PlotpointVm.EmotionList}"
-                              SelectedItem="{x:Bind PlotpointVm.Emotion, Mode=TwoWay}" />
+                              ItemsSource="{x:Bind SceneVm.EmotionList}"
+                              SelectedItem="{x:Bind SceneVm.Emotion, Mode=TwoWay}" />
                     <usercontrols:RichEditBoxExtended Header="Review and Thought" Grid.Row="1"
-                                                      RtfText="{x:Bind PlotpointVm.Review, Mode=TwoWay}" AcceptsReturn="True"
+                                                      RtfText="{x:Bind SceneVm.Review, Mode=TwoWay}" AcceptsReturn="True"
                                                       IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                                       ScrollViewer.VerticalScrollBarVisibility="Visible" />
                     <ComboBox Header="New Goal" Grid.Row="2" IsEditable="True" MinWidth="400"
-                              ItemsSource="{x:Bind PlotpointVm.GoalList}"
-                              SelectedItem="{x:Bind PlotpointVm.NewGoal, Mode=TwoWay}" />
+                              ItemsSource="{x:Bind SceneVm.GoalList}"
+                              SelectedItem="{x:Bind SceneVm.NewGoal, Mode=TwoWay}" />
                 </Grid>
             </PivotItem>
             <PivotItem Header="Notes">
-                <usercontrols:RichEditBoxExtended Header="Notes" RtfText="{x:Bind PlotpointVm.Notes, Mode=TwoWay}" AcceptsReturn="True"
+                <usercontrols:RichEditBoxExtended Header="Notes" RtfText="{x:Bind SceneVm.Notes, Mode=TwoWay}" AcceptsReturn="True"
                                                   IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                                   ScrollViewer.VerticalScrollBarVisibility="Visible" />
             </PivotItem>
