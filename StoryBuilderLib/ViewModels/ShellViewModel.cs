@@ -529,7 +529,7 @@ namespace StoryBuilder.ViewModels
                             StoryElement settings = new FolderModel("Settings", StoryModel);
                             StoryNodeItem settingsNode = new(settings, overviewNode);
                             StoryElement scenes = new FolderModel("Scenes", StoryModel);
-                            StoryNodeItem plotpointsNode = new(scenes, overviewNode);
+                            StoryNodeItem scenesNode = new(scenes, overviewNode);
                             break;
                         case "External/Internal Problems":
                             StoryElement externalProblem = new ProblemModel("External Problem", StoryModel);
@@ -1037,10 +1037,10 @@ namespace StoryBuilder.ViewModels
                 IList<MasterPlotScene> scenes = model.MasterPlotScenes;
                 foreach (MasterPlotScene scene in scenes)
                 {
-                    SceneModel plotPoint = new SceneModel(StoryModel);
-                    plotPoint.Name = scene.SceneTitle;
-                    plotPoint.Notes = scene.Notes;
-                    StoryNodeItem newNode = new StoryNodeItem(plotPoint, RightTappedNode);
+                    SceneModel SceneVar = new SceneModel(StoryModel);
+                    SceneVar.Name = scene.SceneTitle;
+                    SceneVar.Notes = scene.Notes;
+                    StoryNodeItem newNode = new StoryNodeItem(SceneVar, RightTappedNode);
                     _sourceChildren = RightTappedNode.Children;
                     _sourceChildren.Add(newNode);
                     RightTappedNode.IsExpanded = true;
@@ -1070,10 +1070,10 @@ namespace StoryBuilder.ViewModels
                     newNode = new StoryNodeItem(problem, RightTappedNode);
                     break;
                 case ContentDialogResult.Secondary:     // scene
-                    SceneModel plotPoint = new SceneModel(StoryModel);
-                    plotPoint.Name = situationModel.SituationName;
-                    plotPoint.Notes = situationModel.Notes;
-                    newNode = new StoryNodeItem(plotPoint, RightTappedNode);
+                    SceneModel sceneVar = new SceneModel(StoryModel);
+                    sceneVar.Name = situationModel.SituationName;
+                    sceneVar.Notes = situationModel.Notes;
+                    newNode = new StoryNodeItem(sceneVar, RightTappedNode);
                     break;
                 case ContentDialogResult.None:
                     return;
@@ -1098,9 +1098,9 @@ namespace StoryBuilder.ViewModels
                 var result = await dialog.ShowAsync();
                 if (result == ContentDialogResult.Primary)   // Copy command
                 {
-                    SceneModel plotPoint = new SceneModel(StoryModel);
-                    plotPoint.Name = dialog.StockScenesVm.SceneName;
-                    StoryNodeItem newNode = new StoryNodeItem(plotPoint, RightTappedNode);
+                    SceneModel sceneVar = new SceneModel(StoryModel);
+                    sceneVar.Name = dialog.StockScenesVm.SceneName;
+                    StoryNodeItem newNode = new StoryNodeItem(sceneVar, RightTappedNode);
                     _sourceChildren = RightTappedNode.Children;
                     _sourceChildren.Add(newNode);
                     RightTappedNode.IsExpanded = true;
@@ -1417,7 +1417,7 @@ namespace StoryBuilder.ViewModels
             AddStoryElement(StoryItemType.Setting);
         }
 
-        private void AddPlotPoint()
+        private void AddScene()
         {
             AddStoryElement(StoryItemType.Scene);
         }
@@ -1467,8 +1467,8 @@ namespace StoryBuilder.ViewModels
                     _ = new StoryNodeItem(setting, RightTappedNode);
                     break;
                 case StoryItemType.Scene:
-                    SceneModel plotPoint = new SceneModel(StoryModel);
-                    _ = new StoryNodeItem(plotPoint, RightTappedNode);
+                    SceneModel sceneVar = new SceneModel(StoryModel);
+                    _ = new StoryNodeItem(sceneVar, RightTappedNode);
                     break;
             }
 
@@ -1546,16 +1546,16 @@ namespace StoryBuilder.ViewModels
             }
             if (RightTappedNode.Type != StoryItemType.Scene)
             {
-                StatusMessage = "You can only copy a PlotPoint";
+                StatusMessage = "You can only copy a scene";
                 return;
             }
 
-            SceneModel plotPoint = (SceneModel)
+            SceneModel sceneVar = (SceneModel)
                 StoryModel.StoryElements.StoryElementGuids[RightTappedNode.Uuid];
             // ReSharper disable once ObjectCreationAsStatement
-            new StoryNodeItem(plotPoint, StoryModel.NarratorView[0]);
+            new StoryNodeItem(sceneVar, StoryModel.NarratorView[0]);
 
-            StatusMessage = "PlotPoint copied to Narrator view";
+            StatusMessage = "Scene copied to Narrator view";
         }
 
         /// <summary>
@@ -1574,7 +1574,7 @@ namespace StoryBuilder.ViewModels
             }
             if (RightTappedNode.Type != StoryItemType.Scene)
             {
-                StatusMessage = "You can only remove a PlotPoint copy";
+                StatusMessage = "You can only remove a Scene copy";
                 return;
             }
 
@@ -1909,7 +1909,7 @@ namespace StoryBuilder.ViewModels
             AddProblemCommand = new RelayCommand(AddProblem, () => _canExecuteCommands);
             AddCharacterCommand = new RelayCommand(AddCharacter, () => _canExecuteCommands);
             AddSettingCommand = new RelayCommand(AddSetting, () => _canExecuteCommands);
-            AddSceneCommand = new RelayCommand(AddPlotPoint, () => _canExecuteCommands);
+            AddSceneCommand = new RelayCommand(AddScene, () => _canExecuteCommands);
             // Remove Story Element command (move to trash)
             RemoveStoryElementCommand = new RelayCommand(RemoveStoryElement, () => _canExecuteCommands);
             RestoreStoryElementCommand = new RelayCommand(RestoreStoryElement, () => _canExecuteCommands);
