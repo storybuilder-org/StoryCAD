@@ -42,8 +42,8 @@
                         <ToolTip Content="Add New Setting"></ToolTip>
                     </ToolTipService.ToolTip>
                 </AppBarButton>
-                <AppBarButton Icon="AllApps" Command="{x:Bind ShellVm.AddPlotPointCommand, Mode=OneWay}"
-                          Visibility="{x:Bind ShellVm.AddPlotPointVisibility, Mode=TwoWay}" >
+                <AppBarButton Icon="AllApps" Command="{x:Bind ShellVm.AddSceneCommand, Mode=OneWay}"
+                          Visibility="{x:Bind ShellVm.AddSceneVisibility, Mode=TwoWay}" >
                     <ToolTipService.ToolTip>
                         <ToolTip Content="Add New Plot Point"></ToolTip>
                     </ToolTipService.ToolTip>
@@ -64,13 +64,13 @@
                 <AppBarButton Icon="Switch" Command="{x:Bind ShellVm.AddToNarrativeCommand, Mode=OneWay}" 
                           Visibility="{x:Bind ShellVm.AddToNarrativeVisibility, Mode=TwoWay}" >
                     <ToolTipService.ToolTip>
-                        <ToolTip Content="Add PlotPoint to Narrative"></ToolTip>
+                        <ToolTip Content="Add Scene to Narrative"></ToolTip>
                     </ToolTipService.ToolTip>
                 </AppBarButton>
                 <AppBarButton Icon="Switch" Command="{x:Bind ShellVm.RemoveFromNarrativeCommand, Mode=OneWay}" 
                           Visibility="{x:Bind ShellVm.RemoveFromNarrativeVisibility, Mode=TwoWay}" >
                     <ToolTipService.ToolTip>
-                        <ToolTip Content="Remove PlotPoint from Narrative"></ToolTip>
+                        <ToolTip Content="Remove Scene from Narrative"></ToolTip>
                     </ToolTipService.ToolTip>
                 </AppBarButton>
             </CommandBarFlyout.PrimaryCommands>
@@ -169,11 +169,11 @@
                                         <TextBlock Text="  Add Setting" />
                                     </StackPanel>
                                 </Button>
-                                <Button Visibility="{x:Bind ShellVm.AddPlotPointVisibility, Mode=TwoWay}"
-                                  Command="{x:Bind ShellVm.AddPlotPointCommand, Mode=OneWay}" >
+                                <Button Visibility="{x:Bind ShellVm.AddSceneVisibility, Mode=TwoWay}"
+                                  Command="{x:Bind ShellVm.AddSceneCommand, Mode=OneWay}" >
                                     <StackPanel Orientation="Horizontal" >
                                         <SymbolIcon Symbol="AllApps" />
-                                        <TextBlock Text="  Add Plotpoint" />
+                                        <TextBlock Text="  Add Scene" />
                                     </StackPanel>
                                 </Button>
                                 <MenuFlyoutSeparator />
