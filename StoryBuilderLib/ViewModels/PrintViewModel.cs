@@ -27,8 +27,8 @@ namespace StoryBuilder.ViewModels
         private bool _listOfSettingsSwitch;
         private bool _allSettingsSwitch;
         private ObservableCollection<SettingModel> _selectedSettingsList;
-        private bool _listOfPlotPointsSwitch;
-        private bool _allPlotPointsSwitch;
+        private bool _listOfSceneSwitch;
+        private bool _allSceneSwitch;
         private ObservableCollection<SceneModel> _selectedSceneList;
         private bool _questionResponsesSwitch;
 
@@ -132,19 +132,19 @@ namespace StoryBuilder.ViewModels
             set => SetProperty(ref _selectedSettingsList, value);
         }
 
-        public bool ListOfPlotPointsSwitch
+        public bool ListOfSceneSwitch
         {
-            get => _listOfPlotPointsSwitch;
-            set => SetProperty(ref _listOfPlotPointsSwitch, value);
+            get => _listOfSceneSwitch;
+            set => SetProperty(ref _listOfSceneSwitch, value);
         }
 
-        public bool AllPlotPointsSwitch
+        public bool AllSceneSwitch
         {
-            get { return _allPlotPointsSwitch; }
-            set => SetProperty(ref _allPlotPointsSwitch, value);
+            get { return _allSceneSwitch; }
+            set => SetProperty(ref _allSceneSwitch, value);
         }
 
-        public ObservableCollection<SceneModel> SelectedPlotPointsList
+        public ObservableCollection<SceneModel> SelectedSceneList
         {
             get => _selectedSceneList;
             set => SetProperty(ref _selectedSceneList, value);

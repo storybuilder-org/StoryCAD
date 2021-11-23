@@ -40,7 +40,7 @@ namespace StoryBuilder.ViewModels
         public static string OverviewPage = "OverviewPage";
         public static string ProblemPage = "ProblemPage";
         public static string CharacterPage = "CharacterPage";
-        public static string PlotPointPage = "PlotPointPage";
+        public static string ScenePage = "ScenePage";
         public static string FolderPage = "FolderPage";
         public static string SectionPage = "SectionPage";
         public static string SettingPage = "SettingPage";
@@ -123,7 +123,7 @@ namespace StoryBuilder.ViewModels
         public RelayCommand AddProblemCommand { get; }
         public RelayCommand AddCharacterCommand { get; }
         public RelayCommand AddSettingCommand { get; }
-        public RelayCommand AddPlotPointCommand { get; }
+        public RelayCommand AddSceneCommand { get; }
 
         // Remove command (move to trash)
         public RelayCommand RemoveStoryElementCommand { get; }
@@ -220,11 +220,11 @@ namespace StoryBuilder.ViewModels
             set => SetProperty(ref _addSettingVisibility, value);
         }
 
-        private Visibility _addPlotPointVisibility;
-        public Visibility AddPlotPointVisibility
+        private Visibility _addSceneVisibility;
+        public Visibility AddSceneVisibility
         {
-            get => _addPlotPointVisibility;
-            set => SetProperty(ref _addPlotPointVisibility, value);
+            get => _addSceneVisibility;
+            set => SetProperty(ref _addSceneVisibility, value);
         }
 
         private Visibility _removeStoryElementVisibility;
@@ -364,7 +364,7 @@ namespace StoryBuilder.ViewModels
                             nav.NavigateTo(SplitViewFrame, CharacterPage, element);
                             break;
                         case StoryItemType.PlotPoint:
-                            nav.NavigateTo(SplitViewFrame, PlotPointPage, element);
+                            nav.NavigateTo(SplitViewFrame, ScenePage, element);
                             break;
                         case StoryItemType.Problem:
                             nav.NavigateTo(SplitViewFrame, ProblemPage, element);
@@ -451,7 +451,7 @@ namespace StoryBuilder.ViewModels
                     CharacterViewModel cvm = Ioc.Default.GetService<CharacterViewModel>();
                     await cvm.SaveModel();
                     break;
-                case "StoryBuilder.Views.PlotPointPage":
+                case "StoryBuilder.Views.ScenePage":
                     SceneViewModel ppvm = Ioc.Default.GetService<SceneViewModel>();
                     await ppvm.SaveModel();
                     break;
@@ -528,8 +528,8 @@ namespace StoryBuilder.ViewModels
                             StoryNodeItem charactersNode = new(characters, overviewNode);
                             StoryElement settings = new FolderModel("Settings", StoryModel);
                             StoryNodeItem settingsNode = new(settings, overviewNode);
-                            StoryElement plotpoints = new FolderModel("Plot Points", StoryModel);
-                            StoryNodeItem plotpointsNode = new(plotpoints, overviewNode);
+                            StoryElement scenes = new FolderModel("Scenes", StoryModel);
+                            StoryNodeItem plotpointsNode = new(scenes, overviewNode);
                             break;
                         case "External/Internal Problems":
                             StoryElement externalProblem = new ProblemModel("External Problem", StoryModel);
@@ -554,8 +554,8 @@ namespace StoryBuilder.ViewModels
                             charactersFolderNode.IsExpanded = true;
                             StoryElement settingsFolder = new FolderModel("Settings", StoryModel);
                             StoryNodeItem settingsFolderNode = new StoryNodeItem(settingsFolder, overviewNode);
-                            StoryElement plotpointsFolder = new FolderModel("Plot Points", StoryModel);
-                            StoryNodeItem plotpointsFolderNode = new StoryNodeItem(plotpointsFolder, overviewNode);
+                            StoryElement scenesFolder = new FolderModel("Scenes", StoryModel);
+                            StoryNodeItem scenesFolderNode = new StoryNodeItem(scenesFolder, overviewNode);
                             StoryElement externalProb = new ProblemModel("External Problem", StoryModel);
                             StoryNodeItem externalProbNode = new StoryNodeItem(externalProb, problemsFolderNode);
                             StoryElement internalProb = new ProblemModel("Internal Problem", StoryModel);
@@ -1656,7 +1656,7 @@ namespace StoryBuilder.ViewModels
                     AddProblemVisibility = Visibility.Visible;
                     AddCharacterVisibility = Visibility.Visible;
                     AddSettingVisibility = Visibility.Visible;
-                    AddPlotPointVisibility = Visibility.Visible;
+                    AddSceneVisibility = Visibility.Visible;
                     RemoveStoryElementVisibility = Visibility.Visible;
                     //TODO: Use correct values (bug with this)
                     //RestoreStoryElementVisibility = Visibility.Collapsed;
@@ -1671,7 +1671,7 @@ namespace StoryBuilder.ViewModels
                     AddProblemVisibility = Visibility.Collapsed;
                     AddCharacterVisibility = Visibility.Collapsed;
                     AddSettingVisibility = Visibility.Collapsed;
-                    AddPlotPointVisibility = Visibility.Collapsed;
+                    AddSceneVisibility = Visibility.Collapsed;
                     RemoveStoryElementVisibility = Visibility.Visible;
                     RestoreStoryElementVisibility = Visibility.Collapsed;
                     AddToNarrativeVisibility = Visibility.Collapsed;
@@ -1683,7 +1683,7 @@ namespace StoryBuilder.ViewModels
                     AddProblemVisibility = Visibility.Collapsed;
                     AddCharacterVisibility = Visibility.Collapsed;
                     AddSettingVisibility = Visibility.Collapsed;
-                    AddPlotPointVisibility = Visibility.Collapsed;
+                    AddSceneVisibility = Visibility.Collapsed;
                     RemoveStoryElementVisibility = Visibility.Collapsed;
                     RestoreStoryElementVisibility = Visibility.Visible;
                     AddToNarrativeVisibility = Visibility.Collapsed;
@@ -1909,7 +1909,7 @@ namespace StoryBuilder.ViewModels
             AddProblemCommand = new RelayCommand(AddProblem, () => _canExecuteCommands);
             AddCharacterCommand = new RelayCommand(AddCharacter, () => _canExecuteCommands);
             AddSettingCommand = new RelayCommand(AddSetting, () => _canExecuteCommands);
-            AddPlotPointCommand = new RelayCommand(AddPlotPoint, () => _canExecuteCommands);
+            AddSceneCommand = new RelayCommand(AddPlotPoint, () => _canExecuteCommands);
             // Remove Story Element command (move to trash)
             RemoveStoryElementCommand = new RelayCommand(RemoveStoryElement, () => _canExecuteCommands);
             RestoreStoryElementCommand = new RelayCommand(RestoreStoryElement, () => _canExecuteCommands);
