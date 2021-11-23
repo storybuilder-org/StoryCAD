@@ -10,7 +10,7 @@ namespace StoryBuilder.Models
         // Besides its GUID, each Plot Point has a unique (to this story)
         // integer id number (useful in lists of scenes.)
 
-        private static int _nextPlotPointId;
+        private static int _nextSceneId;
         private int _id;
         public int Id
         {
@@ -259,7 +259,7 @@ namespace StoryBuilder.Models
         #region Constructors
         public SceneModel(StoryModel model) : base("New Scene", StoryItemType.PlotPoint, model)
         {
-            Id = ++_nextPlotPointId;
+            Id = ++_nextSceneId;
             Viewpoint = string.Empty;
             Date = string.Empty;
             Time = string.Empty;
@@ -294,7 +294,7 @@ namespace StoryBuilder.Models
         }
         public SceneModel(string name, StoryModel model) : base(name, StoryItemType.PlotPoint, model)
         {
-            Id = ++_nextPlotPointId;
+            Id = ++_nextSceneId;
             Viewpoint = string.Empty;
             Date = string.Empty;
             Time = string.Empty;
@@ -325,7 +325,7 @@ namespace StoryBuilder.Models
         }
         public SceneModel(IXmlNode xn, StoryModel model) : base(xn, model)
         {
-            Id = ++_nextPlotPointId;
+            Id = ++_nextSceneId;
             Viewpoint = string.Empty;
             Date = string.Empty;
             Time = string.Empty;
