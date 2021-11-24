@@ -19,4 +19,10 @@
     <ProjectReference Include="..\StoryBuilderLib\StoryBuilderLib.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Package.appxmanifest">
+      <SubType>Designer</SubType>
+    </None>
+  </ItemGroup>
+
 </Project>
