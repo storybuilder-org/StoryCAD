@@ -692,8 +692,8 @@ namespace StoryBuilder.Services.Scrivener
             character.PsychNotes = await _rdr.GetRtfText(character.PsychNotes, character.Uuid);
             string saveWork = character.Work;
             character.Work = await _rdr.GetRtfText(character.Work, character.Uuid);
-            string saveLikes = character.Likes;
-            character.Likes = await _rdr.GetRtfText(character.Likes, character.Uuid);
+            string saveLikes = character.Notes;
+            character.Notes = await _rdr.GetRtfText(character.Notes, character.Uuid);
             string saveHabits = character.Habits;
             character.Habits = await _rdr.GetRtfText(character.Habits, character.Uuid);
             string saveAbilities = character.Abilities;
@@ -744,7 +744,7 @@ namespace StoryBuilder.Services.Scrivener
                 sb.Replace("@Sociability", character.Sociability);
                 sb.Replace("@Stability", character.Stability);
                 sb.Replace("@Work", character.Work);
-                sb.Replace("@Likes", character.Likes);
+                sb.Replace("@Likes", character.Notes);
                 sb.Replace("@Habits", character.Habits);
                 sb.Replace("@Abilities", character.Abilities);
                 sb.Replace("@Notes", character.BackStory);
@@ -765,7 +765,7 @@ namespace StoryBuilder.Services.Scrivener
             character.Religion = saveReligion;
             character.PsychNotes = savePsychNotes;
             character.Work = saveWork;
-            character.Likes = saveLikes;
+            character.Notes = saveLikes;
             character.Habits = saveHabits;
             character.Abilities = saveAbilities;
         }

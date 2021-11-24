@@ -468,12 +468,12 @@ namespace StoryBuilder.ViewModels
 
         // Character likes data
 
-        private string _likes;
+        private string _notes;
 
-        public string Likes
+        public string Notes
         {
-            get => _likes;
-            set => SetProperty(ref _likes, value);
+            get => _notes;
+            set => SetProperty(ref _notes, value);
         }
 
         // Character habits data
@@ -640,7 +640,7 @@ namespace StoryBuilder.ViewModels
             Sociability = Model.Sociability;
             Stability = Model.Stability;
             Work = Model.Work;
-            Likes = Model.Likes;
+            Notes = Model.Notes;
             Habits = Model.Habits;
             Abilities = Model.Abilities;
             Flaw = Model.Flaw;
@@ -657,7 +657,7 @@ namespace StoryBuilder.ViewModels
             Religion = await _rdr.GetRtfText(Model.Religion, Uuid);
             PsychNotes = await _rdr.GetRtfText(Model.PsychNotes, Uuid);
             Work = await _rdr.GetRtfText(Model.Work, Uuid);
-            Likes = await _rdr.GetRtfText(Model.Likes, Uuid);
+            Notes = await _rdr.GetRtfText(Model.Notes, Uuid);
             Habits = await _rdr.GetRtfText(Model.Habits, Uuid);
             Abilities = await _rdr.GetRtfText(Model.Abilities, Uuid);
             Flaw = await _rdr.GetRtfText(Model.Flaw, Uuid);
@@ -746,7 +746,7 @@ namespace StoryBuilder.ViewModels
                 Model.Religion = await _wtr.PutRtfText(Religion, Uuid, "religion.rtf");
                 Model.PsychNotes = await _wtr.PutRtfText(PsychNotes, Uuid, "psychnotes.rtf");
                 Model.Work = await _wtr.PutRtfText(Work, Uuid, "work.rtf");
-                Model.Likes = await _wtr.PutRtfText(Likes, Uuid, "likes.rtf");
+                Model.Notes = await _wtr.PutRtfText(Notes, Uuid, "Notes.rtf");
                 Model.Habits = await _wtr.PutRtfText(Habits, Uuid, "habits.rtf");
                 Model.Abilities = await _wtr.PutRtfText(Abilities, Uuid, "abilities.rtf");
                 Model.Flaw = await _wtr.PutRtfText(Flaw, Uuid, "flaw.rtf");
@@ -1132,7 +1132,7 @@ namespace StoryBuilder.ViewModels
             Sociability = string.Empty;
             Stability = string.Empty;
             Work = string.Empty;
-            Likes = string.Empty;
+            Notes = string.Empty;
             Habits = string.Empty;
             Abilities = string.Empty;
             Flaw = string.Empty;

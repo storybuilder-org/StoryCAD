@@ -325,11 +325,11 @@ namespace StoryBuilder.Models
 
         // Character likes data
 
-        private string _likes;
-        public string Likes
+        private string _notes;
+        public string Notes
         {
-            get => _likes;
-            set => _likes = value;
+            get => _notes;
+            set => _notes = value;
         }
 
         // Character traits data
@@ -424,7 +424,7 @@ namespace StoryBuilder.Models
             Sociability = string.Empty;
             Stability = string.Empty;
             Work = string.Empty;
-            Likes = string.Empty;
+            Notes = string.Empty;
             TraitList = new List<string>();
             Habits = string.Empty;
             Abilities = string.Empty;
@@ -476,7 +476,7 @@ namespace StoryBuilder.Models
             Sociability = string.Empty;
             Stability = string.Empty;
             Work = string.Empty;
-            Likes = string.Empty;
+            Notes = string.Empty;
             TraitList = new List<string>();
             Habits = string.Empty;
             Abilities = string.Empty;
@@ -528,7 +528,7 @@ namespace StoryBuilder.Models
             Sociability = string.Empty;
             Stability = string.Empty;
             Work = string.Empty;
-            Likes = string.Empty;
+            Notes = string.Empty;
             TraitList = new List<string>();
             Habits = string.Empty;
             Abilities = string.Empty;

@@ -348,9 +348,9 @@
                      ScrollViewer.VerticalScrollBarVisibility="Visible" />
                 </Grid>
             </PivotItem>
-            <PivotItem Header="Likes and Dislikes">
+            <PivotItem Header="Notes">
                 <!-- Character likes data -->
-                <usercontrols:RichEditBoxExtended Header="Likes/Dislikes" RtfText="{x:Bind CharVm.Likes, Mode=TwoWay}" AcceptsReturn="True"
+                <usercontrols:RichEditBoxExtended Header="Notes" RtfText="{x:Bind CharVm.Notes, Mode=TwoWay}" AcceptsReturn="True"
 
                                                   IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                                   ScrollViewer.VerticalScrollBarVisibility="Visible" />
