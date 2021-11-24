@@ -302,29 +302,18 @@
                     </Grid>
                 </Grid>
             </PivotItem>
-            <PivotItem Header="Work">
-                <!-- Character work data -->
-                <usercontrols:RichEditBoxExtended Header="Work" RtfText="{x:Bind CharVm.Work, Mode=TwoWay}" AcceptsReturn="True"
-                                                  IsSpellCheckEnabled="True" TextWrapping="Wrap"
-                                                  ScrollViewer.VerticalScrollBarVisibility="Visible" />
-            </PivotItem>
-            <PivotItem Header="Traits and Habits">
+            <PivotItem Header="Outer Traits">
                 <Grid>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
                     <!-- Character traits -->
-                    <TextBlock Text="Traits" Grid.Row="0" />
-                    <ScrollViewer Height="100" Grid.Row="1" >
-                        <ListView MinWidth="300"
-                                ItemsSource="{x:Bind CharVm.CharacterTraits, Mode=OneWay}"
-                                SelectedIndex="{x:Bind CharVm.ExistingTraitIndex, Mode=OneWay}" >
-                        </ListView>
-                    </ScrollViewer>
-                    <StackPanel Orientation="Horizontal" Grid.Row="2">
+                    <ListView MinWidth="300" Grid.Row="0" Header="Traits"
+                            ItemsSource="{x:Bind CharVm.CharacterTraits, Mode=TwoWay}"
+                            SelectedIndex="{x:Bind CharVm.ExistingTraitIndex, Mode=OneWay}" >
+                    </ListView>
+                    <StackPanel Orientation="Horizontal" Grid.Row="1">
                         <ComboBox Header="New Trait"
                               IsEditable="False" MinWidth="300"
                               ItemsSource="{x:Bind CharVm.TraitList, Mode=OneWay}"
@@ -343,10 +332,13 @@
                             </ToolTipService.ToolTip>
                         </Button>
                     </StackPanel>
-                    <usercontrols:RichEditBoxExtended Header="Habits" RtfText="{x:Bind CharVm.Habits, Mode=TwoWay}"
-                      Grid.Row="3" AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
-                     ScrollViewer.VerticalScrollBarVisibility="Visible" />
                 </Grid>
+            </PivotItem>
+            <PivotItem Header="Work">
+                <!-- Character work data -->
+                <usercontrols:RichEditBoxExtended Header="Work" RtfText="{x:Bind CharVm.Work, Mode=TwoWay}" AcceptsReturn="True"
+                                                  IsSpellCheckEnabled="True" TextWrapping="Wrap"
+                                                  ScrollViewer.VerticalScrollBarVisibility="Visible" />
             </PivotItem>
             <PivotItem Header="Notes">
                 <!-- Character likes data -->
