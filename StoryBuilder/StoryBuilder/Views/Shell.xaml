@@ -293,17 +293,13 @@
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    <muxc:TreeView x:Name="NavigationTree"
-                              ContextFlyout="{StaticResource AddStoryElementFlyout}" 
-                              ContextRequested="AddButton_ContextRequested" 
-                              ItemsSource="{x:Bind ShellVm.DataSource, Mode=TwoWay}"
-                              ItemInvoked="TreeViewItem_Invoked" >
+                    <muxc:TreeView x:Name="NavigationTree"  ContextFlyout="{StaticResource AddStoryElementFlyout}" ContextRequested="AddButton_ContextRequested"  ItemsSource="{x:Bind ShellVm.DataSource, Mode=TwoWay}" ItemInvoked="TreeViewItem_Invoked" >
                         <muxc:TreeView.ItemTemplate>
                             <DataTemplate  x:DataType="viewmodels:StoryNodeItem">
                                 <muxc:TreeViewItem ItemsSource="{x:Bind Children}" 
                                 IsExpanded="{x:Bind IsExpanded, Mode=TwoWay}"
                                RightTapped="TreeViewItem_RightTapped">
-                                <StackPanel Orientation="Horizontal">
+                                <StackPanel Orientation="Horizontal" Background="{x:Bind Background, Mode=OneWay}" >
                                     <SymbolIcon Symbol="{x:Bind Symbol, Mode=OneWay}" Width="16" Height="16"/>
                                     <TextBlock Margin="0,0,10,0"/>
                                     <TextBlock Text="{x:Bind Name, Mode=TwoWay}" />

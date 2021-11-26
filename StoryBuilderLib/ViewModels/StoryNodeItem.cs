@@ -1,5 +1,7 @@
-﻿using Microsoft.UI.Xaml;
+﻿using Microsoft.UI;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
 using StoryBuilder.Models;
 using System;
 using System.Collections.Generic;
@@ -170,6 +172,23 @@ namespace StoryBuilder.ViewModels
             //    SetValue(IsExpandedProperty, value);
             //    NotifyPropertyChanged("IsExpanded");
             //}
+        }
+
+        /// <summary>
+        /// I dont know how this works exactly.
+        /// </summary>
+        private SolidColorBrush _background;
+        public SolidColorBrush Background
+        {
+            get => _background;
+            set
+            {
+                if (_background != value)
+                {
+                    _background = value;
+                    NotifyPropertyChanged("Background");
+                }
+            }
         }
 
         //// Use a DependencyProperty as the backing store for IsExpanded. 
@@ -432,6 +451,8 @@ namespace StoryBuilder.ViewModels
                     IsExpanded = true;
                 if ((string)attrs.GetNamedItem("IsSelected")?.NodeValue == "True")
                     IsSelected = true;
+                if ((string)attrs.GetNamedItem("Background")?.NodeValue != "True")
+                    Background = new SolidColorBrush(Colors.Green);
                 if ((string)attrs.GetNamedItem("IsRoot")?.NodeValue == "True")
                     IsRoot = true;
             }

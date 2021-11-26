@@ -6,6 +6,7 @@ using CommunityToolkit.WinUI.UI.Controls;
 using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
 using StoryBuilder.Controllers;
 using StoryBuilder.DAL;
 using StoryBuilder.Models;
@@ -347,7 +348,7 @@ namespace StoryBuilder.ViewModels
         #region Public Methods
 
 
-        private async void OpenUnifiedMenu()
+        private async void OpenUnifiedMenu()                      
         {
             _canExecuteCommands = false;
             // Needs logging
@@ -1070,7 +1071,7 @@ namespace StoryBuilder.ViewModels
             ///TODO: 
             if (FilterIsChecked)
             {
-                Logger.Log(LogLevel.Info, "FilterIsChecked= true");
+                Logger.Log(LogLevel.Info, "FilterIsChecked is true");
                 if (FilterText.Equals(string.Empty))
                 {
                     Logger.Log(LogLevel.Info, "No search text provided");
@@ -1086,6 +1087,7 @@ namespace StoryBuilder.ViewModels
                     bool result =  Search.SearchStoryElement(node, FilterText, StoryModel);
                     if (result == true)
                     {
+                        node.Background = new SolidColorBrush(Colors.AliceBlue);
                         // Note: for display, think about a setter.  
                         //    <Setter Target="SelectionGrid.Background" Value="{ThemeResource TreeViewItemBackgroundSelected}" />
                         //    (or better yet, bind the background property like what's done with the Edit statusbar button foreground
