@@ -44,6 +44,8 @@ namespace StoryBuilder.ViewModels
         public RelayCommand RemoveRelationshipCommand { get; }
         public RelayCommand FlawCommand { get; }
 
+        public RelayCommand TraitCommand { get; }
+
         #endregion
 
         // StoryElement data
@@ -1001,6 +1003,25 @@ namespace StoryBuilder.ViewModels
             _logger.Log(LogLevel.Info, "Flaw Finder finished");
         }
 
+        private async void TraitTool()
+        {
+            _logger.Log(LogLevel.Info, "Displaying Trait Builder tool dialog");
+            TraitViewModel TraitVm = Ioc.Default.GetService<TraitViewModel>();
+           TraitsDialog dialog = new TraitsDialog();
+            dialog.XamlRoot = GlobalData.XamlRoot;
+            var result = await dialog.ShowAsync();
+            if (result == ContentDialogResult.Primary)   // Copy to Character Flaw  
+            {
+                int i = 0;
+                //Flaw = TraitVm.WoundSummary;
+            }
+            else  // Cancel button pressed
+            {
+
+            }
+            _logger.Log(LogLevel.Info, "Trait Builder finished");
+        }
+
         #endregion
 
         #region ComboBox ItemsSource collections
@@ -1091,6 +1112,7 @@ namespace StoryBuilder.ViewModels
             AddRelationshipCommand = new RelayCommand(AddRelationship, () => true);
             RemoveRelationshipCommand = new RelayCommand(RemoveRelationship, () => true);
             FlawCommand = new RelayCommand(FlawTool, () => true);
+            TraitCommand = new RelayCommand(TraitTool, () => true);
 
             Role = string.Empty;
             StoryRole = string.Empty;

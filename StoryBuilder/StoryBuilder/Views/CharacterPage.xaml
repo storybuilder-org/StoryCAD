@@ -307,13 +307,16 @@
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
+                    <Button  Content="Trait Builder" Grid.Row="0" HorizontalAlignment="Left" Margin="0,10,10,10" 
+                             Command="{x:Bind CharVm.TraitCommand, Mode=OneWay}" />
                     <!-- Character traits -->
-                    <ListView MinWidth="300" Grid.Row="0" Header="Traits"
+                    <ListView MinWidth="300" Grid.Row="1" Header="Traits"
                             ItemsSource="{x:Bind CharVm.CharacterTraits, Mode=TwoWay}"
                             SelectedIndex="{x:Bind CharVm.ExistingTraitIndex, Mode=OneWay}" >
                     </ListView>
-                    <StackPanel Orientation="Horizontal" Grid.Row="1">
+                    <StackPanel Orientation="Horizontal" Grid.Row="2">
                         <ComboBox Header="New Trait"
                               IsEditable="False" MinWidth="300"
                               ItemsSource="{x:Bind CharVm.TraitList, Mode=OneWay}"

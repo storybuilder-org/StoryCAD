@@ -28,7 +28,6 @@ namespace StoryBuilder.ViewModels.Tools
             set => SetProperty(ref _woundSummary, value);
         }
         #endregion
-
         #region ComboBox sources
 
         public ObservableCollection<string> WoundCategoryList;
@@ -37,7 +36,6 @@ namespace StoryBuilder.ViewModels.Tools
         #endregion
 
         #region Constructor
-
         public FlawViewModel()
         {
             Dictionary<string, ObservableCollection<string>> lists = GlobalData.ListControlSource;
@@ -45,6 +43,7 @@ namespace StoryBuilder.ViewModels.Tools
             WoundCategoryList = lists["WoundCategory"];
             WoundSummaryList = lists["Wound"];
         }
+
         #endregion
     }
 }

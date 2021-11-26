@@ -9,7 +9,7 @@ namespace StoryBuilder.Services.Dialogs.Tools
     {
         public FlawDialog()
         {
-            this.InitializeComponent();
+            InitializeComponent();
         }
     }
 }
