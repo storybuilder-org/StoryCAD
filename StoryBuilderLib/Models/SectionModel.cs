@@ -4,7 +4,7 @@ namespace StoryBuilder.Models
 {
     /// <summary>
     /// A SectionModel is a cousin of FolderModel, but, rather than acting as a general container for
-    /// StoryElements, is a container for PlotPoints only in the Narrative View.
+    /// StoryElements, is a container for Scenes only in the Narrative View.
     /// </summary>
     public class SectionModel : StoryElement
     {
