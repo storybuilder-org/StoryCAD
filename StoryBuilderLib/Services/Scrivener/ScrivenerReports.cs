@@ -30,8 +30,8 @@ namespace StoryBuilder.Services.Scrivener
         private BinderItem _problemListNode;    //       List of Problems report
         private BinderItem _characterListNode;  //       List of Characters report
         private BinderItem _settingListNode;    //       List of Settings report
-        private BinderItem _sceneListNode;  //       List of PlotPoints report
-        private BinderItem _synopsisNode;       //       Concatenated PlotPoint synopses
+        private BinderItem _sceneListNode;  //       List of Scenes report
+        private BinderItem _synopsisNode;       //       Concatenated Scene synopses
         private StringBuilder _stbNotes;
         private XmlElement _newStbRoot;
         private List<BinderItem> _draftFolderItems;
