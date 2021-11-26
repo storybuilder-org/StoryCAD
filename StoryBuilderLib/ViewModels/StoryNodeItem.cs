@@ -175,7 +175,7 @@ namespace StoryBuilder.ViewModels
         }
 
         /// <summary>
-        /// I dont know how this works exactly.
+        /// Binds to background color
         /// </summary>
         private SolidColorBrush _background;
         public SolidColorBrush Background
@@ -451,8 +451,6 @@ namespace StoryBuilder.ViewModels
                     IsExpanded = true;
                 if ((string)attrs.GetNamedItem("IsSelected")?.NodeValue == "True")
                     IsSelected = true;
-                if ((string)attrs.GetNamedItem("Background")?.NodeValue != "True")
-                    Background = new SolidColorBrush(Colors.Green);
                 if ((string)attrs.GetNamedItem("IsRoot")?.NodeValue == "True")
                     IsRoot = true;
             }

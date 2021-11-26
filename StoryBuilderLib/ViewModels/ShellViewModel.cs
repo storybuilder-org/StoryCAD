@@ -178,16 +178,6 @@ namespace StoryBuilder.ViewModels
             set => SetProperty(ref _isPaneOpen, value);
         }
 
-        /// <summary>
-        /// FilterIsChecked binds to the Filter AppBarToggleButton IsChecked property
-        /// </summary>
-        private bool _filterIsChecked;
-        public bool FilterIsChecked
-        {
-            get => _filterIsChecked;
-            set => SetProperty(ref _filterIsChecked, value);
-        }
-
         // CommandBar Flyout AppBarButton properties
         private Visibility _addFolderVisibility;
         public Visibility AddFolderVisibility
@@ -296,13 +286,6 @@ namespace StoryBuilder.ViewModels
         {
             get => _filterText;
             set => SetProperty(ref _filterText, value);
-        }
-
-        private string _filterStatus;
-        public string FilterStatus
-        {
-            get => _filterStatus;
-            set => SetProperty(ref _filterStatus, value);
         }
 
         private Windows.UI.Color _changeStatusColor;
@@ -1059,17 +1042,66 @@ namespace StoryBuilder.ViewModels
 
         #region Tool and Report Commands
 
+        public void BetterSearch(string text)
+        {
+            _canExecuteCommands = false;    //This prevents other commands from being used till this one is complete.
+            Logger.Log(LogLevel.Info, "Better search started.");
+
+             StoryNodeItem root = DataSource[0]; //Gets all nodes in the tree
+            int SearchTotal = 0;
+
+            if (text == "") //Nulls the backgrounds to make them transparent (default)
+            {
+                Logger.Log(LogLevel.Info, "Search text is blank, nulling all backgrounds.");
+                foreach (StoryNodeItem node in root) { node.Background = null; }
+            }
+            else
+            {
+                foreach (StoryNodeItem node in root)
+                {
+                    SearchTotal++;
+                    if (Search.SearchStoryElement(node, text, StoryModel)) 
+                    {
+                        node.Background = new SolidColorBrush(Colors.LightSeaGreen);
+                        if (!node.IsExpanded)
+                        {
+                            var parent = node.Parent;
+                            while (true)
+                            {
+                                if (parent.IsExpanded)
+                                {
+                                    parent.Background = new SolidColorBrush(Colors.LightSeaGreen);
+                                    break;
+                                }
+                                else 
+                                {
+                                    parent.Background = new SolidColorBrush(Colors.LightSeaGreen);
+                                    parent = parent.Parent;
+                                }
+                            }
+                        }
+                    }
+                    else { node.Background = null; }
+                }
+            }
+
+            _canExecuteCommands = true;    //Enables other commands from being used till this one is complete.
+            Logger.Log(LogLevel.Info, "Better search completed, found " + SearchTotal + " matches");
+            //StatusMessage = $"Found {SearchTotal} matches";
+        }
+
+
         /// <summary>
         /// Search the 
         /// </summary>
-        private void SearchNodes()
+        public void SearchNodes()
         {
             bool searchResult = false;  // true if any node returns true
 
             _canExecuteCommands = false;
             Logger.Log(LogLevel.Info, "In ToggleFilter");
             ///TODO: 
-            if (FilterIsChecked)
+            if (true)
             {
                 Logger.Log(LogLevel.Info, "FilterIsChecked is true");
                 if (FilterText.Equals(string.Empty))
@@ -1095,6 +1127,7 @@ namespace StoryBuilder.ViewModels
                         // Note: I have a recursive search function; see StoryNodeItem::GetEnumerator
                         // Note: set parent nodes IsExpanded up to the root
                     }
+                    else { node.Background = null; }
                 }
                 root = DataSource[1];  // trashcan 
                 foreach (var node in root)
@@ -2079,8 +2112,6 @@ namespace StoryBuilder.ViewModels
 
             CurrentView = "Story Explorer View";
             SelectedView = "Story Explorer View";
-
-            FilterStatus = "Filter:Off";
 
             ChangeStatusColor = Colors.Green;
 

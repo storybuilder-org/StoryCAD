@@ -82,9 +82,14 @@ namespace StoryBuilder.Views
 
         private void AddButton_ContextRequested(UIElement sender, ContextRequestedEventArgs args)
         {
-            FlyoutShowOptions myOption = new FlyoutShowOptions();
+            FlyoutShowOptions myOption = new();
             myOption.ShowMode = FlyoutShowMode.Transient;
             AddStoryElementCommandBarFlyout.ShowAt(NavigationTree, myOption);
+        }
+
+        private void TextBox_TextChanged(object sender, TextBoxTextChangingEventArgs e)
+        {
+            ShellVm.BetterSearch(Test.Text);
         }
     }
 }
