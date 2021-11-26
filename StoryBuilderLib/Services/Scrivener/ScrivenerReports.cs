@@ -65,7 +65,7 @@ namespace StoryBuilder.Services.Scrivener
             await GenerateProblemListReport(_problemListNode);
             await GenerateCharacterListReport(_characterListNode);
             await GenerateSettingListReport(_settingListNode);
-            await GeneratePlotPointListReport(_sceneListNode);
+            await GenerateSceneListReport(_sceneListNode);
             await GenerateSynopsisReport(_synopsisNode);
             //await ProcessPreviousNotes();
             // Narrative view processing (into manuscript)
@@ -401,7 +401,7 @@ namespace StoryBuilder.Services.Scrivener
                         await GenerateSettingReport(node, element);
                         break;
                     case StoryItemType.Scene:
-                        await GeneratePlotPointReport(node, element);
+                        await GenerateSceneReport(node, element);
                         break;
                     case StoryItemType.Folder:
                         await GenerateFolderReport(node, element);
@@ -892,7 +892,7 @@ namespace StoryBuilder.Services.Scrivener
             setting.Notes = saveNotes;
         }
 
-        private async Task GeneratePlotPointListReport(BinderItem node)
+        private async Task GenerateSceneListReport(BinderItem node)
         {
             // Read report template
             if (!_templates.ContainsKey("List of Plot Points"))
@@ -943,7 +943,7 @@ namespace StoryBuilder.Services.Scrivener
             await FileIO.WriteTextAsync(contents, rtf);
         }
 
-        private async Task GeneratePlotPointReport(BinderItem node, StoryElement element)
+        private async Task GenerateSceneReport(BinderItem node, StoryElement element)
         {
             SceneModel scene = (SceneModel)element;
             // Read report template
