@@ -26,9 +26,9 @@ namespace StoryBuilder.ViewModels
     /// 
     /// StoryBuilder's data model is called StoryModel. StoryModel  contains two ObservableCollection
     /// lists of StoryNodeItems (and their counterpart StoryElements), a StoryExplorer collection which
-    /// contains all Story Elements (the StoryOverview and all Problem, Character, Setting, PlotPoint
+    /// contains all Story Elements (the StoryOverview and all Problem, Character, Setting, Scene
     /// and Folder elements) and a Narrator View which contains just Section (chapter, etc) and
-    /// selected PlotPoint elements and which represents the story as it's being narrated.
+    /// selected Scene elements and which represents the story as it's being narrated.
     /// 
     /// In the Shell, the user can switch between the two views by loading one or the other model.
     /// NavigationTree will this point to one or the other of the collections. These two 'submodels' 
