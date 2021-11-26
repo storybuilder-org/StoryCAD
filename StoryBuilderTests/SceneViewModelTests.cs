@@ -3,10 +3,10 @@
 namespace StoryBuilderTests
 {
     [TestClass]
-    public class PlotPointViewModelTests
+    public class SceneViewModelTests
     {
         [TestMethod]
-        public void TestPlotPointView()
+        public void TestSceneView()
         {
             
         }
