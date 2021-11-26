@@ -30,7 +30,7 @@ namespace StoryBuilder.Services.Scrivener
         private BinderItem _problemListNode;    //       List of Problems report
         private BinderItem _characterListNode;  //       List of Characters report
         private BinderItem _settingListNode;    //       List of Settings report
-        private BinderItem _plotPointListNode;  //       List of PlotPoints report
+        private BinderItem _sceneListNode;  //       List of PlotPoints report
         private BinderItem _synopsisNode;       //       Concatenated PlotPoint synopses
         private StringBuilder _stbNotes;
         private XmlElement _newStbRoot;
@@ -65,7 +65,7 @@ namespace StoryBuilder.Services.Scrivener
             await GenerateProblemListReport(_problemListNode);
             await GenerateCharacterListReport(_characterListNode);
             await GenerateSettingListReport(_settingListNode);
-            await GeneratePlotPointListReport(_plotPointListNode);
+            await GeneratePlotPointListReport(_sceneListNode);
             await GenerateSynopsisReport(_synopsisNode);
             //await ProcessPreviousNotes();
             // Narrative view processing (into manuscript)
@@ -155,9 +155,9 @@ namespace StoryBuilder.Services.Scrivener
             _settingListNode = LocateText(_miscNode, "List of Settings");
             if (_settingListNode == null)
                 _settingListNode = AddText(_miscNode, "List of Settings");
-            _plotPointListNode = LocateText(_miscNode, "List of Plot Points");
-            if (_plotPointListNode == null)
-                _plotPointListNode = AddText(_miscNode, "List of Plot Points");
+            _sceneListNode = LocateText(_miscNode, "List of Scenes");
+            if (_sceneListNode == null)
+                _sceneListNode = AddText(_miscNode, "List of Scenes");
             _synopsisNode = LocateText(_miscNode, "Story Synopsis");
             if (_synopsisNode == null)
                 _synopsisNode = AddText(_miscNode, "Story Synopsis");
