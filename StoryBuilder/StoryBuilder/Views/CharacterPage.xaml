@@ -305,19 +305,18 @@
             <PivotItem Header="Outer Traits">
                 <Grid>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="1*"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="1*"/>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
-                    <Button  Content="Trait Builder" Grid.Row="0" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="0,10,10,10" 
+                    <Button  Content="Trait Builder" Grid.Row="0"  HorizontalAlignment="Left" Margin="0,10,10,10" 
                              Command="{x:Bind CharVm.TraitCommand, Mode=OneWay}" />
                     <!-- Character traits -->
                     <ListView MinWidth="300" MinHeight="150" Grid.Row="1" Header="Traits"
-                            VerticalAlignment="Stretch"
                             ItemsSource="{x:Bind CharVm.CharacterTraits, Mode=TwoWay}"
                             SelectedIndex="{x:Bind CharVm.ExistingTraitIndex, Mode=OneWay}" >
                     </ListView>
-                    <StackPanel Orientation="Horizontal" Grid.Row="2" VerticalAlignment="Bottom">
+                    <StackPanel Orientation="Horizontal" Grid.Row="2" >
                         <TextBox Header="New Trait" 
                               MinWidth="300" Text="{x:Bind CharVm.NewTrait, Mode=TwoWay}" />
                         <TextBlock Width="10" />
