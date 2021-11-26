@@ -16,6 +16,6 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <usercontrols:Trait x:Name="Trait" x:FieldModifier="public" Grid.Row="4" MinWidth="400" />
+        <usercontrols:Traits x:Name="Trait" x:FieldModifier="public" Grid.Row="4" MinWidth="400" />
     </Grid>
 </ContentDialog>

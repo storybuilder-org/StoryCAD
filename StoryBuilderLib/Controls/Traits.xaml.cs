@@ -7,10 +7,10 @@ using StoryBuilder.ViewModels.Tools;
 
 namespace StoryBuilder.Controls
 {
-    public sealed partial class Trait : UserControl
+    public sealed partial class Traits : UserControl
     {
-        public TraitViewModel TraitVm => Ioc.Default.GetService<TraitViewModel>();
-        public Trait()
+        public TraitsViewModel TraitVm => Ioc.Default.GetService<TraitsViewModel>();
+        public Traits()
         {
             InitializeComponent();
         }

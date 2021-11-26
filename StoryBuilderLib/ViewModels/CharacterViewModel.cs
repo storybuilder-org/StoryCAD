@@ -762,6 +762,7 @@ namespace StoryBuilder.ViewModels
         private void AddTrait()
         {
             CharacterTraits.Add(NewTrait);
+            NewTrait = string.Empty;
         }
         
         private void RemoveTrait() 
@@ -1006,14 +1007,13 @@ namespace StoryBuilder.ViewModels
         private async void TraitTool()
         {
             _logger.Log(LogLevel.Info, "Displaying Trait Builder tool dialog");
-            TraitViewModel TraitVm = Ioc.Default.GetService<TraitViewModel>();
+            TraitsViewModel TraitVm = Ioc.Default.GetService<TraitsViewModel>();
            TraitsDialog dialog = new TraitsDialog();
             dialog.XamlRoot = GlobalData.XamlRoot;
             var result = await dialog.ShowAsync();
-            if (result == ContentDialogResult.Primary)   // Copy to Character Flaw  
+            if (result == ContentDialogResult.Primary)   // Copy to Character Trait 
             {
-                int i = 0;
-                //Flaw = TraitVm.WoundSummary;
+                CharacterTraits.Add(TraitVm.Example);
             }
             else  // Cancel button pressed
             {

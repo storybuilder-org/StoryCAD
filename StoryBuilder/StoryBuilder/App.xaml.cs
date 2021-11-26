@@ -122,7 +122,7 @@ namespace StoryBuilder
                     .AddSingleton<SaveAsViewModel>()
                     .AddSingleton<PreferencesViewModel>()
                     .AddSingleton<FlawViewModel>()
-                    .AddSingleton<TraitViewModel>()
+                    .AddSingleton<TraitsViewModel>()
                     // Complete 
                     .BuildServiceProvider());
         }
