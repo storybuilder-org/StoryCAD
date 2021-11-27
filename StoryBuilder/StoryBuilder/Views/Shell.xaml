@@ -86,7 +86,12 @@
         <!-- Command Bar -->
         <CommandBar  Background="LightGray" IsOpen="False">
             <CommandBar.Content>
-                <TextBox PlaceholderText="Enter search text:" Width="305" Margin="0,8" Text="{x:Bind ShellVm.FilterText, Mode=TwoWay}" Name="Test" TextChanging="TextBox_TextChanged"/>
+                <StackPanel Orientation="Horizontal">
+                    <TextBox PlaceholderText="Enter text to search for here" Width="285" Margin="0,8" Text="{x:Bind ShellVm.FilterText, Mode=TwoWay}"/>
+                    <ToggleButton Command="{x:Bind ShellVm.FilterCommand}" IsChecked="{x:Bind ShellVm.IsSearching,Mode=TwoWay}">
+                        <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE71E;"/>
+                    </ToggleButton>
+                </StackPanel>
             </CommandBar.Content>
             <CommandBar.PrimaryCommands>
                 <AppBarButton Icon="GlobalNavigationButton" Label="Show" ToolTipService.ToolTip="Show/Hide Navigation Pane"

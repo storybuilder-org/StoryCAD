@@ -86,10 +86,5 @@ namespace StoryBuilder.Views
             myOption.ShowMode = FlyoutShowMode.Transient;
             AddStoryElementCommandBarFlyout.ShowAt(NavigationTree, myOption);
         }
-
-        private void TextBox_TextChanged(object sender, TextBoxTextChangingEventArgs e)
-        {
-            ShellVm.BetterSearch(Test.Text);
-        }
     }
 }
