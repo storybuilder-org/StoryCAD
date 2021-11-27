@@ -694,10 +694,6 @@ namespace StoryBuilder.Services.Scrivener
             character.Work = await _rdr.GetRtfText(character.Work, character.Uuid);
             string saveLikes = character.Notes;
             character.Notes = await _rdr.GetRtfText(character.Notes, character.Uuid);
-            string saveHabits = character.Habits;
-            character.Habits = await _rdr.GetRtfText(character.Habits, character.Uuid);
-            string saveAbilities = character.Abilities;
-            character.Abilities = await _rdr.GetRtfText(character.Abilities, character.Uuid);
             // Parse and write the report
             foreach (string line in lines)
             {
@@ -745,8 +741,6 @@ namespace StoryBuilder.Services.Scrivener
                 sb.Replace("@Stability", character.Stability);
                 sb.Replace("@Work", character.Work);
                 sb.Replace("@Likes", character.Notes);
-                sb.Replace("@Habits", character.Habits);
-                sb.Replace("@Abilities", character.Abilities);
                 sb.Replace("@Notes", character.BackStory);
                 doc.AddText(sb.ToString(), format);
                 doc.AddNewLine();
@@ -766,8 +760,6 @@ namespace StoryBuilder.Services.Scrivener
             character.PsychNotes = savePsychNotes;
             character.Work = saveWork;
             character.Notes = saveLikes;
-            character.Habits = saveHabits;
-            character.Abilities = saveAbilities;
         }
 
         private async Task GenerateSettingListReport(BinderItem node)

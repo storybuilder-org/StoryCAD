@@ -442,12 +442,6 @@ namespace StoryBuilder.DAL
             attr = _xml.CreateAttribute("Notes");
             attr.Value = rec.Notes;
             chr.Attributes.Append(attr);
-            attr = _xml.CreateAttribute("Habits");
-            attr.Value = rec.Habits;
-            chr.Attributes.Append(attr);
-            attr = _xml.CreateAttribute("Abilities");
-            attr.Value = rec.Abilities;
-            chr.Attributes.Append(attr);
             attr = _xml.CreateAttribute("Flaw");
             attr.Value = rec.Flaw;
             chr.Attributes.Append(attr);

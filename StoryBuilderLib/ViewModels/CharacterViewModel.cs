@@ -477,27 +477,7 @@ namespace StoryBuilder.ViewModels
             get => _notes;
             set => SetProperty(ref _notes, value);
         }
-
-        // Character habits data
-
-        private string _habits;
-
-        public string Habits
-        {
-            get => _habits;
-            set => SetProperty(ref _habits, value);
-        }
-
-        // Character abilities data
-
-        private string _abilities;
-
-        public string Abilities
-        {
-            get => _abilities;
-            set => SetProperty(ref _abilities, value);
-        }
-
+         
         // Character flaw data
 
         private string _flaw   ;
@@ -508,7 +488,7 @@ namespace StoryBuilder.ViewModels
         }
 
  
-        // Character notes data
+        // Character Backstory data 
 
         private string _backStory;
         public string BackStory
@@ -643,8 +623,6 @@ namespace StoryBuilder.ViewModels
             Stability = Model.Stability;
             Work = Model.Work;
             Notes = Model.Notes;
-            Habits = Model.Habits;
-            Abilities = Model.Abilities;
             Flaw = Model.Flaw;
             BackStory = Model.BackStory;
             Id = Model.Id;
@@ -660,8 +638,6 @@ namespace StoryBuilder.ViewModels
             PsychNotes = await _rdr.GetRtfText(Model.PsychNotes, Uuid);
             Work = await _rdr.GetRtfText(Model.Work, Uuid);
             Notes = await _rdr.GetRtfText(Model.Notes, Uuid);
-            Habits = await _rdr.GetRtfText(Model.Habits, Uuid);
-            Abilities = await _rdr.GetRtfText(Model.Abilities, Uuid);
             Flaw = await _rdr.GetRtfText(Model.Flaw, Uuid);
             BackStory = await _rdr.GetRtfText(Model.BackStory, Uuid);
 
@@ -733,7 +709,6 @@ namespace StoryBuilder.ViewModels
                 Model.RelationshipList.Clear();
                 foreach (RelationshipModel relation in CharacterRelationships)
                     Model.RelationshipList.Add(relation);
-                Model.Abilities = Abilities;
                 Model.Flaw = Flaw;
                 Model.BackStory = BackStory;
                 Model.Id = Id;
@@ -749,8 +724,6 @@ namespace StoryBuilder.ViewModels
                 Model.PsychNotes = await _wtr.PutRtfText(PsychNotes, Uuid, "psychnotes.rtf");
                 Model.Work = await _wtr.PutRtfText(Work, Uuid, "work.rtf");
                 Model.Notes = await _wtr.PutRtfText(Notes, Uuid, "Notes.rtf");
-                Model.Habits = await _wtr.PutRtfText(Habits, Uuid, "habits.rtf");
-                Model.Abilities = await _wtr.PutRtfText(Abilities, Uuid, "abilities.rtf");
                 Model.Flaw = await _wtr.PutRtfText(Flaw, Uuid, "flaw.rtf");
                 Model.BackStory = await _wtr.PutRtfText(BackStory, Uuid, "backstory.rtf");
 
@@ -1155,8 +1128,6 @@ namespace StoryBuilder.ViewModels
             Stability = string.Empty;
             Work = string.Empty;
             Notes = string.Empty;
-            Habits = string.Empty;
-            Abilities = string.Empty;
             Flaw = string.Empty;
             BackStory = string.Empty;
 
