@@ -325,11 +325,11 @@ namespace StoryBuilder.Models
 
         // Character likes data
 
-        private string _likes;
-        public string Likes
+        private string _notes;
+        public string Notes
         {
-            get => _likes;
-            set => _likes = value;
+            get => _notes;
+            set => _notes = value;
         }
 
         // Character traits data
@@ -339,24 +339,6 @@ namespace StoryBuilder.Models
         {
             get => _traitList;
             set => _traitList = value;
-        }
-
-        // Character habits data
-
-        private string _habits;
-        public string Habits
-        {
-            get => _habits;
-            set => _habits = value;
-        }
-
-        // Character abilities data
-
-        private string _abilities;
-        public string Abilities
-        {
-            get => _abilities;
-            set => _abilities = value;
         }
 
         // Character flaw data
@@ -424,10 +406,8 @@ namespace StoryBuilder.Models
             Sociability = string.Empty;
             Stability = string.Empty;
             Work = string.Empty;
-            Likes = string.Empty;
+            Notes = string.Empty;
             TraitList = new List<string>();
-            Habits = string.Empty;
-            Abilities = string.Empty;
             Flaw = string.Empty;
             BackStory = string.Empty;
         }
@@ -476,10 +456,8 @@ namespace StoryBuilder.Models
             Sociability = string.Empty;
             Stability = string.Empty;
             Work = string.Empty;
-            Likes = string.Empty;
+            Notes = string.Empty;
             TraitList = new List<string>();
-            Habits = string.Empty;
-            Abilities = string.Empty;
             Flaw = string.Empty;
             BackStory = string.Empty;
         }
@@ -528,10 +506,8 @@ namespace StoryBuilder.Models
             Sociability = string.Empty;
             Stability = string.Empty;
             Work = string.Empty;
-            Likes = string.Empty;
+            Notes = string.Empty;
             TraitList = new List<string>();
-            Habits = string.Empty;
-            Abilities = string.Empty;
             Flaw = string.Empty;
             BackStory = string.Empty;
         }
