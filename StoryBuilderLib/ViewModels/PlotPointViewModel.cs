@@ -57,7 +57,7 @@ namespace StoryBuilder.ViewModels
             }
         }
 
-        // Besides its GUID, each Plot Point has a unique (to this story) 
+        // Besides its GUID, each Scene has a unique (to this story) 
         // integer id number (useful in lists of scenes.)
 
         private int _id;
@@ -334,7 +334,7 @@ namespace StoryBuilder.ViewModels
             set => SetProperty(ref _notes, value);
         }
 
-        // Besides its GUID, each Plot Point has a unique (to this story) 
+        // Besides its GUID, each Scene has a unique (to this story) 
         // integer id number (useful in lists of scenes.)
 
         private SceneModel _model;

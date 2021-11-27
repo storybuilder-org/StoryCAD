@@ -45,7 +45,7 @@
                 <AppBarButton Icon="AllApps" Command="{x:Bind ShellVm.AddSceneCommand, Mode=OneWay}"
                           Visibility="{x:Bind ShellVm.AddSceneVisibility, Mode=TwoWay}" >
                     <ToolTipService.ToolTip>
-                        <ToolTip Content="Add New Plot Point"></ToolTip>
+                        <ToolTip Content="Add New Scene"></ToolTip>
                     </ToolTipService.ToolTip>
                 </AppBarButton>
                 <AppBarSeparator />

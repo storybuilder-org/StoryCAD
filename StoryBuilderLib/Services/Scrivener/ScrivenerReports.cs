@@ -30,8 +30,8 @@ namespace StoryBuilder.Services.Scrivener
         private BinderItem _problemListNode;    //       List of Problems report
         private BinderItem _characterListNode;  //       List of Characters report
         private BinderItem _settingListNode;    //       List of Settings report
-        private BinderItem _sceneListNode;  //       List of PlotPoints report
-        private BinderItem _synopsisNode;       //       Concatenated PlotPoint synopses
+        private BinderItem _sceneListNode;      //       List of Scenes report
+        private BinderItem _synopsisNode;       //       Concatenated Scene synopses (a poor man's story synopsis)
         private StringBuilder _stbNotes;
         private XmlElement _newStbRoot;
         private List<BinderItem> _draftFolderItems;
@@ -895,9 +895,9 @@ namespace StoryBuilder.Services.Scrivener
         private async Task GenerateSceneListReport(BinderItem node)
         {
             // Read report template
-            if (!_templates.ContainsKey("List of Plot Points"))
+            if (!_templates.ContainsKey("List of Scenes"))
                 return;
-            string template = _templates["List of Plot Points"];
+            string template = _templates["List of Scenes"];
             string[] lines = template.Split(
                 new[] { Environment.NewLine },
                 StringSplitOptions.None
@@ -947,9 +947,9 @@ namespace StoryBuilder.Services.Scrivener
         {
             SceneModel scene = (SceneModel)element;
             // Read report template
-            if (!_templates.ContainsKey("Plot Point Description"))
+            if (!_templates.ContainsKey("Scene Description"))
                 return;
-            string template = _templates["Plot Point Description"];
+            string template = _templates["Scene Description"];
             string[] lines = template.Split(
                 new[] { Environment.NewLine },
                 StringSplitOptions.None
@@ -1129,7 +1129,7 @@ namespace StoryBuilder.Services.Scrivener
             {
                 if (line.Contains("@Synopsis"))
                 {
-                    // Find StoryNarrator' Plot Points
+                    // Find StoryNarrator' Scenes
                     foreach (StoryNodeItem child in _model.NarratorView[0].Children)
                     {
                         StoryElement scn = _model.StoryElements.StoryElementGuids[child.Uuid];

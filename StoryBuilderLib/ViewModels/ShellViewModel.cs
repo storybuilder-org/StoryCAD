@@ -1533,8 +1533,8 @@ namespace StoryBuilder.ViewModels
         }
 
         /// <summary>
-        /// Add a PlotPoint StoryNodeItem to the end of the Narrative view
-        /// by copying from the PlotPoint's StoryNodeItem in the Explorer
+        /// Add a Scebe StoryNodeItem to the end of the Narrative view
+        /// by copying from the Scene's StoryNodeItem in the Explorer
         /// view.
         /// </summary>
         private void CopyToNarrative()
@@ -1559,10 +1559,10 @@ namespace StoryBuilder.ViewModels
         }
 
         /// <summary>
-        /// Remove a TreeViewItem for a copied PlotPoint.
+        /// Remove a TreeViewItem for a copied Scene.
         ///
         /// Because you can't remove an ObservableCollection member
-        /// directly, this method removes the PlotPoint from
+        /// directly, this method removes the Scene from
         /// the Narrative view StoryNodeItem and then reloads it.
         /// </summary>
         private void RemoveFromNarrative()
