@@ -449,14 +449,8 @@ namespace StoryBuilder.DAL
                     case "Work":
                         chr.Work = attr.InnerText;
                         break;
-                    case "Likes":
-                        chr.Likes = attr.InnerText;
-                        break;
-                    case "Habits":
-                        chr.Habits = attr.InnerText;
-                        break;
-                    case "Abilities":
-                        chr.Abilities = attr.InnerText;
+                    case "Notes":
+                        chr.Notes = attr.InnerText;
                         break;
                     case "Flaw":
                         chr.Flaw = attr.InnerText;

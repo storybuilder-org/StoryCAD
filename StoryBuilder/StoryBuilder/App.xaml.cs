@@ -108,6 +108,7 @@ namespace StoryBuilder
                     .AddSingleton<FolderViewModel>()
                     .AddSingleton<SectionViewModel>()
                     .AddSingleton<TrashCanViewModel>()
+                    // .AddSingleton<UnifiedVM>()
                     .AddSingleton<TreeViewSelection>()
                     // Register ContentDialog ViewModels
                     .AddSingleton<NewProjectViewModel>()
@@ -121,6 +122,7 @@ namespace StoryBuilder
                     .AddSingleton<SaveAsViewModel>()
                     .AddSingleton<PreferencesViewModel>()
                     .AddSingleton<FlawViewModel>()
+                    .AddSingleton<TraitsViewModel>()
                     // Complete 
                     .BuildServiceProvider());
         }
