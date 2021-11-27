@@ -136,7 +136,7 @@
                             <MenuFlyoutItem Visibility="{x:Bind ShellVm.AddFolderVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.AddFolderCommand, Mode=OneWay}" Icon="Folder" Text="Add folder"/>
                             <MenuFlyoutItem Visibility="{x:Bind ShellVm.AddSectionVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.AddSectionCommand,Mode=OneWay}" Icon="Folder" Text="Add section"/>
                             <MenuFlyoutItem Visibility="{x:Bind ShellVm.AddProblemVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.AddProblemCommand ,Mode=OneWay}" Icon="Help" Text="Add problem"/>
-                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.AddCharacterVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.AddCharacterCommand,Mode=OneWay}" Icon="Folder" Text="Add character"/>
+                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.AddCharacterVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.AddCharacterCommand,Mode=OneWay}" Icon="Contact" Text="Add character"/>
                             <MenuFlyoutItem Visibility="{x:Bind ShellVm.AddSettingVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.AddSettingCommand,Mode=OneWay}" Icon="Globe" Text="Add setting"/>
                             <MenuFlyoutItem Visibility="{x:Bind ShellVm.AddPlotPointVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.AddPlotPointCommand,Mode=OneWay}" Icon="AllApps" Text="Add scene"/>
                             <MenuFlyoutSeparator/>
@@ -292,3 +292,4 @@
         </StackPanel>
     </Grid>
 </Page>
+ 
