@@ -987,10 +987,12 @@ namespace StoryBuilder.ViewModels
             if (result == ContentDialogResult.Primary)   // Copy to Character Trait 
             {
                 CharacterTraits.Add(TraitVm.Example);
+                _changed = true;
+                ShellViewModel.ShowChange();
             }
             else  // Cancel button pressed
             {
-
+                _logger.Log(LogLevel.Info, "Trait Builder cancelled");
             }
             _logger.Log(LogLevel.Info, "Trait Builder finished");
         }
