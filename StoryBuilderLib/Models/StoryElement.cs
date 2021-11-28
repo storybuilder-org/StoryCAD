@@ -73,6 +73,9 @@ namespace StoryBuilder.Models
                 case "Setting":
                     type = StoryItemType.Setting;
                     break;
+                case "PlotPoint":       // Legacy: PlotPoint was renamed to Scene   
+                    type = StoryItemType.Scene;
+                    break;
                 case "Scene":
                     type = StoryItemType.Scene;
                     break;
