@@ -30,8 +30,13 @@ namespace StoryBuilder.Services.Scrivener
         private BinderItem _problemListNode;    //       List of Problems report
         private BinderItem _characterListNode;  //       List of Characters report
         private BinderItem _settingListNode;    //       List of Settings report
+<<<<<<< HEAD
         private BinderItem _sceneListNode;      //       List of Scenes report
         private BinderItem _synopsisNode;       //       Concatenated Scene synopses (a poor man's story synopsis)
+=======
+        private BinderItem _sceneListNode;  //       List of Scenes report
+        private BinderItem _synopsisNode;       //       Concatenated Scene synopses
+>>>>>>> 5add92b8a324cdef79fafa13deba6aab1854b4d0
         private StringBuilder _stbNotes;
         private XmlElement _newStbRoot;
         private List<BinderItem> _draftFolderItems;

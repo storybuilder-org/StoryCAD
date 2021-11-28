@@ -1533,7 +1533,11 @@ namespace StoryBuilder.ViewModels
         }
 
         /// <summary>
+<<<<<<< HEAD
         /// Add a Scebe StoryNodeItem to the end of the Narrative view
+=======
+        /// Add a Scene StoryNodeItem to the end of the Narrative view
+>>>>>>> 5add92b8a324cdef79fafa13deba6aab1854b4d0
         /// by copying from the Scene's StoryNodeItem in the Explorer
         /// view.
         /// </summary>
