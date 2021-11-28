@@ -7,7 +7,7 @@
     mc:Ignorable="d"
     Title="Dramatic Situations"
     PrimaryButtonText="Copy as Problem"
-    SecondaryButtonText="Copy as Plot Point"
+    SecondaryButtonText="Copy as Scene"
     CloseButtonText="Cancel" >
 
     <StackPanel Padding="14,0,14,0">

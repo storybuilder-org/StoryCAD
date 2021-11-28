@@ -30,8 +30,13 @@ namespace StoryBuilder.Services.Scrivener
         private BinderItem _problemListNode;    //       List of Problems report
         private BinderItem _characterListNode;  //       List of Characters report
         private BinderItem _settingListNode;    //       List of Settings report
-        private BinderItem _plotPointListNode;  //       List of PlotPoints report
-        private BinderItem _synopsisNode;       //       Concatenated PlotPoint synopses
+<<<<<<< HEAD
+        private BinderItem _sceneListNode;      //       List of Scenes report
+        private BinderItem _synopsisNode;       //       Concatenated Scene synopses (a poor man's story synopsis)
+=======
+        private BinderItem _sceneListNode;  //       List of Scenes report
+        private BinderItem _synopsisNode;       //       Concatenated Scene synopses
+>>>>>>> 5add92b8a324cdef79fafa13deba6aab1854b4d0
         private StringBuilder _stbNotes;
         private XmlElement _newStbRoot;
         private List<BinderItem> _draftFolderItems;
@@ -65,7 +70,7 @@ namespace StoryBuilder.Services.Scrivener
             await GenerateProblemListReport(_problemListNode);
             await GenerateCharacterListReport(_characterListNode);
             await GenerateSettingListReport(_settingListNode);
-            await GeneratePlotPointListReport(_plotPointListNode);
+            await GenerateSceneListReport(_sceneListNode);
             await GenerateSynopsisReport(_synopsisNode);
             //await ProcessPreviousNotes();
             // Narrative view processing (into manuscript)
@@ -155,9 +160,9 @@ namespace StoryBuilder.Services.Scrivener
             _settingListNode = LocateText(_miscNode, "List of Settings");
             if (_settingListNode == null)
                 _settingListNode = AddText(_miscNode, "List of Settings");
-            _plotPointListNode = LocateText(_miscNode, "List of Plot Points");
-            if (_plotPointListNode == null)
-                _plotPointListNode = AddText(_miscNode, "List of Plot Points");
+            _sceneListNode = LocateText(_miscNode, "List of Scenes");
+            if (_sceneListNode == null)
+                _sceneListNode = AddText(_miscNode, "List of Scenes");
             _synopsisNode = LocateText(_miscNode, "Story Synopsis");
             if (_synopsisNode == null)
                 _synopsisNode = AddText(_miscNode, "Story Synopsis");
@@ -400,8 +405,8 @@ namespace StoryBuilder.Services.Scrivener
                     case StoryItemType.Setting:
                         await GenerateSettingReport(node, element);
                         break;
-                    case StoryItemType.PlotPoint:
-                        await GeneratePlotPointReport(node, element);
+                    case StoryItemType.Scene:
+                        await GenerateSceneReport(node, element);
                         break;
                     case StoryItemType.Folder:
                         await GenerateFolderReport(node, element);
@@ -884,12 +889,12 @@ namespace StoryBuilder.Services.Scrivener
             setting.Notes = saveNotes;
         }
 
-        private async Task GeneratePlotPointListReport(BinderItem node)
+        private async Task GenerateSceneListReport(BinderItem node)
         {
             // Read report template
-            if (!_templates.ContainsKey("List of Plot Points"))
+            if (!_templates.ContainsKey("List of Scenes"))
                 return;
-            string template = _templates["List of Plot Points"];
+            string template = _templates["List of Scenes"];
             string[] lines = template.Split(
                 new[] { Environment.NewLine },
                 StringSplitOptions.None
@@ -915,9 +920,9 @@ namespace StoryBuilder.Services.Scrivener
                 if (line.Contains("@Description"))
                 {
                     foreach (StoryElement element in _model.StoryElements)
-                        if (element.Type == StoryItemType.PlotPoint)
+                        if (element.Type == StoryItemType.Scene)
                         {
-                            PlotPointModel chr = (PlotPointModel)element;
+                            SceneModel chr = (SceneModel)element;
                             StringBuilder sb = new StringBuilder(line);
                             sb.Replace("@Description", chr.Name);
                             doc.AddText(sb.ToString(), format);
@@ -935,13 +940,13 @@ namespace StoryBuilder.Services.Scrivener
             await FileIO.WriteTextAsync(contents, rtf);
         }
 
-        private async Task GeneratePlotPointReport(BinderItem node, StoryElement element)
+        private async Task GenerateSceneReport(BinderItem node, StoryElement element)
         {
-            PlotPointModel scene = (PlotPointModel)element;
+            SceneModel scene = (SceneModel)element;
             // Read report template
-            if (!_templates.ContainsKey("Plot Point Description"))
+            if (!_templates.ContainsKey("Scene Description"))
                 return;
-            string template = _templates["Plot Point Description"];
+            string template = _templates["Scene Description"];
             string[] lines = template.Split(
                 new[] { Environment.NewLine },
                 StringSplitOptions.None
@@ -1121,11 +1126,11 @@ namespace StoryBuilder.Services.Scrivener
             {
                 if (line.Contains("@Synopsis"))
                 {
-                    // Find StoryNarrator' Plot Points
+                    // Find StoryNarrator' Scenes
                     foreach (StoryNodeItem child in _model.NarratorView[0].Children)
                     {
                         StoryElement scn = _model.StoryElements.StoryElementGuids[child.Uuid];
-                        PlotPointModel scene = (PlotPointModel)scn;
+                        SceneModel scene = (SceneModel)scn;
                         var sb = new StringBuilder(line);
                         sb.Replace("@Synopsis", $"[{scene.Name}] {scene.Description}");
                         doc.AddText(sb.ToString(), format);

@@ -14,7 +14,7 @@ namespace StoryBuilder.Models
         /// <summary>
         /// If any of the story entities have been modified by other than retrieval from the Story
         /// (that is, by a user modification from a View) 'Changed' is set to true. That is, a change
-        /// to OverViewModel, or any ProblemModel, CharacterModel, SettingModel, PlotPointModel, or
+        /// to OverViewModel, or any ProblemModel, CharacterModel, SettingModel, SceneModel, or
         /// FolderModel, or adding a new node, will result in Changed being set to true. 
         /// 
         /// This amounts to a 'dirty' bit that indicates the StoryModel needs to be written to its backing store. 
@@ -29,9 +29,9 @@ namespace StoryBuilder.Models
         public StoryElementCollection StoryElements;
 
         /// StoryModel also contains two persisted TreeView representations, a Story Explorer tree which
-        /// contains all Story Elements (the StoryOverview and all Problem, Character, Setting, PlotPoint
+        /// contains all Story Elements (the StoryOverview and all Problem, Character, Setting, Scene
         /// and Folder elements) and a Narrator View which contains just Section (chapter, etc) and
-        /// selected PlotPoint elements. 
+        /// selected Scene elements. 
         /// 
         /// One of these persisted TreeViews is actively bound in the Shell page view to a StoryNodeItem tree 
         /// based on  whichever of these two TreeView representations is presently selected.

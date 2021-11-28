@@ -8,14 +8,14 @@ namespace StoryBuilder.Views
     /// <summary>
     /// An empty page that can be used on its own or navigated to within a Frame.
     /// </summary>
-    public sealed partial class PlotPointPage : BindablePage
+    public sealed partial class ScenePage : BindablePage
     {
-        public PlotPointViewModel PlotpointVm => Ioc.Default.GetService<PlotPointViewModel>();
+        public SceneViewModel SceneVm => Ioc.Default.GetService<SceneViewModel>();
 
-        public PlotPointPage()
+        public ScenePage()
         {
             this.InitializeComponent();
-            this.DataContext = PlotpointVm;
+            this.DataContext = SceneVm;
         }
     }
 }

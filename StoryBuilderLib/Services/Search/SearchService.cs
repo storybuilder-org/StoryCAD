@@ -36,8 +36,8 @@ namespace StoryBuilder.Services.Search
                 case StoryItemType.Setting:
                     result = SearchSetting(node, element);
                     break;
-                case StoryItemType.PlotPoint:
-                    result = SearchPlotPoint(node, element);
+                case StoryItemType.Scene:
+                    result = SearchScene(node, element);
                     break;
                 case StoryItemType.Folder:
                     result = SearchFolder(node, element);
@@ -65,7 +65,7 @@ namespace StoryBuilder.Services.Search
             return Comparator(element.Name);
         }
 
-        private bool SearchPlotPoint(StoryNodeItem node, StoryElement element)
+        private bool SearchScene(StoryNodeItem node, StoryElement element)
         {
             return Comparator(element.Name); ;
         }

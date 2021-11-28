@@ -42,7 +42,7 @@ namespace StoryBuilder.ViewModels
         public static string OverviewPage = "OverviewPage";
         public static string ProblemPage = "ProblemPage";
         public static string CharacterPage = "CharacterPage";
-        public static string PlotPointPage = "PlotPointPage";
+        public static string ScenePage = "ScenePage";
         public static string FolderPage = "FolderPage";
         public static string SectionPage = "SectionPage";
         public static string SettingPage = "SettingPage";
@@ -127,7 +127,7 @@ namespace StoryBuilder.ViewModels
         public RelayCommand AddProblemCommand { get; }
         public RelayCommand AddCharacterCommand { get; }
         public RelayCommand AddSettingCommand { get; }
-        public RelayCommand AddPlotPointCommand { get; }
+        public RelayCommand AddSceneCommand { get; }
 
         // Remove command (move to trash)
         public RelayCommand RemoveStoryElementCommand { get; }
@@ -214,11 +214,11 @@ namespace StoryBuilder.ViewModels
             set => SetProperty(ref _addSettingVisibility, value);
         }
 
-        private Visibility _addPlotPointVisibility;
-        public Visibility AddPlotPointVisibility
+        private Visibility _addSceneVisibility;
+        public Visibility AddSceneVisibility
         {
-            get => _addPlotPointVisibility;
-            set => SetProperty(ref _addPlotPointVisibility, value);
+            get => _addSceneVisibility;
+            set => SetProperty(ref _addSceneVisibility, value);
         }
 
         private Visibility _removeStoryElementVisibility;
@@ -508,8 +508,8 @@ namespace StoryBuilder.ViewModels
                         case StoryItemType.Character:
                             nav.NavigateTo(SplitViewFrame, CharacterPage, element);
                             break;
-                        case StoryItemType.PlotPoint:
-                            nav.NavigateTo(SplitViewFrame, PlotPointPage, element);
+                        case StoryItemType.Scene:
+                            nav.NavigateTo(SplitViewFrame, ScenePage, element);
                             break;
                         case StoryItemType.Problem:
                             nav.NavigateTo(SplitViewFrame, ProblemPage, element);
@@ -596,8 +596,8 @@ namespace StoryBuilder.ViewModels
                     CharacterViewModel cvm = Ioc.Default.GetService<CharacterViewModel>();
                     await cvm.SaveModel();
                     break;
-                case "StoryBuilder.Views.PlotPointPage":
-                    PlotPointViewModel ppvm = Ioc.Default.GetService<PlotPointViewModel>();
+                case "StoryBuilder.Views.ScenePage":
+                    SceneViewModel ppvm = Ioc.Default.GetService<SceneViewModel>();
                     await ppvm.SaveModel();
                     break;
                 case "StoryBuilder.Views.FolderPage":
@@ -673,8 +673,8 @@ namespace StoryBuilder.ViewModels
                             StoryNodeItem charactersNode = new(characters, overviewNode);
                             StoryElement settings = new FolderModel("Settings", StoryModel);
                             StoryNodeItem settingsNode = new(settings, overviewNode);
-                            StoryElement plotpoints = new FolderModel("Plot Points", StoryModel);
-                            StoryNodeItem plotpointsNode = new(plotpoints, overviewNode);
+                            StoryElement scenes = new FolderModel("Scenes", StoryModel);
+                            StoryNodeItem scenesNode = new(scenes, overviewNode);
                             break;
                         case "External/Internal Problems":
                             StoryElement externalProblem = new ProblemModel("External Problem", StoryModel);
@@ -699,8 +699,8 @@ namespace StoryBuilder.ViewModels
                             charactersFolderNode.IsExpanded = true;
                             StoryElement settingsFolder = new FolderModel("Settings", StoryModel);
                             StoryNodeItem settingsFolderNode = new StoryNodeItem(settingsFolder, overviewNode);
-                            StoryElement plotpointsFolder = new FolderModel("Plot Points", StoryModel);
-                            StoryNodeItem plotpointsFolderNode = new StoryNodeItem(plotpointsFolder, overviewNode);
+                            StoryElement scenesFolder = new FolderModel("Scenes", StoryModel);
+                            StoryNodeItem scenesFolderNode = new StoryNodeItem(scenesFolder, overviewNode);
                             StoryElement externalProb = new ProblemModel("External Problem", StoryModel);
                             StoryNodeItem externalProbNode = new StoryNodeItem(externalProb, problemsFolderNode);
                             StoryElement internalProb = new ProblemModel("Internal Problem", StoryModel);
@@ -1123,10 +1123,10 @@ namespace StoryBuilder.ViewModels
                 IList<MasterPlotScene> scenes = model.MasterPlotScenes;
                 foreach (MasterPlotScene scene in scenes)
                 {
-                    PlotPointModel plotPoint = new PlotPointModel(StoryModel);
-                    plotPoint.Name = scene.SceneTitle;
-                    plotPoint.Notes = scene.Notes;
-                    StoryNodeItem newNode = new StoryNodeItem(plotPoint, RightTappedNode);
+                    SceneModel SceneVar = new SceneModel(StoryModel);
+                    SceneVar.Name = scene.SceneTitle;
+                    SceneVar.Notes = scene.Notes;
+                    StoryNodeItem newNode = new StoryNodeItem(SceneVar, RightTappedNode);
                     _sourceChildren = RightTappedNode.Children;
                     _sourceChildren.Add(newNode);
                     RightTappedNode.IsExpanded = true;
@@ -1156,10 +1156,10 @@ namespace StoryBuilder.ViewModels
                     newNode = new StoryNodeItem(problem, RightTappedNode);
                     break;
                 case ContentDialogResult.Secondary:     // scene
-                    PlotPointModel plotPoint = new PlotPointModel(StoryModel);
-                    plotPoint.Name = situationModel.SituationName;
-                    plotPoint.Notes = situationModel.Notes;
-                    newNode = new StoryNodeItem(plotPoint, RightTappedNode);
+                    SceneModel sceneVar = new SceneModel(StoryModel);
+                    sceneVar.Name = situationModel.SituationName;
+                    sceneVar.Notes = situationModel.Notes;
+                    newNode = new StoryNodeItem(sceneVar, RightTappedNode);
                     break;
                 case ContentDialogResult.None:
                     return;
@@ -1184,9 +1184,9 @@ namespace StoryBuilder.ViewModels
                 var result = await dialog.ShowAsync();
                 if (result == ContentDialogResult.Primary)   // Copy command
                 {
-                    PlotPointModel plotPoint = new PlotPointModel(StoryModel);
-                    plotPoint.Name = dialog.StockScenesVm.SceneName;
-                    StoryNodeItem newNode = new StoryNodeItem(plotPoint, RightTappedNode);
+                    SceneModel sceneVar = new SceneModel(StoryModel);
+                    sceneVar.Name = dialog.StockScenesVm.SceneName;
+                    StoryNodeItem newNode = new StoryNodeItem(sceneVar, RightTappedNode);
                     _sourceChildren = RightTappedNode.Children;
                     _sourceChildren.Add(newNode);
                     RightTappedNode.IsExpanded = true;
@@ -1503,9 +1503,9 @@ namespace StoryBuilder.ViewModels
             AddStoryElement(StoryItemType.Setting);
         }
 
-        private void AddPlotPoint()
+        private void AddScene()
         {
-            AddStoryElement(StoryItemType.PlotPoint);
+            AddStoryElement(StoryItemType.Scene);
         }
 
         private void AddStoryElement(StoryItemType typeToAdd)
@@ -1552,9 +1552,9 @@ namespace StoryBuilder.ViewModels
                     SettingModel setting = new SettingModel(StoryModel);
                     _ = new StoryNodeItem(setting, RightTappedNode);
                     break;
-                case StoryItemType.PlotPoint:
-                    PlotPointModel plotPoint = new PlotPointModel(StoryModel);
-                    _ = new StoryNodeItem(plotPoint, RightTappedNode);
+                case StoryItemType.Scene:
+                    SceneModel sceneVar = new SceneModel(StoryModel);
+                    _ = new StoryNodeItem(sceneVar, RightTappedNode);
                     break;
             }
 
@@ -1619,8 +1619,12 @@ namespace StoryBuilder.ViewModels
         }
 
         /// <summary>
-        /// Add a PlotPoint StoryNodeItem to the end of the Narrative view
-        /// by copying from the PlotPoint's StoryNodeItem in the Explorer
+<<<<<<< HEAD
+        /// Add a Scebe StoryNodeItem to the end of the Narrative view
+=======
+        /// Add a Scene StoryNodeItem to the end of the Narrative view
+>>>>>>> 5add92b8a324cdef79fafa13deba6aab1854b4d0
+        /// by copying from the Scene's StoryNodeItem in the Explorer
         /// view.
         /// </summary>
         private void CopyToNarrative()
@@ -1630,25 +1634,25 @@ namespace StoryBuilder.ViewModels
                 StatusMessage = "Select a node to copy";
                 return;
             }
-            if (RightTappedNode.Type != StoryItemType.PlotPoint)
+            if (RightTappedNode.Type != StoryItemType.Scene)
             {
-                StatusMessage = "You can only copy a PlotPoint";
+                StatusMessage = "You can only copy a scene";
                 return;
             }
 
-            PlotPointModel plotPoint = (PlotPointModel)
+            SceneModel sceneVar = (SceneModel)
                 StoryModel.StoryElements.StoryElementGuids[RightTappedNode.Uuid];
             // ReSharper disable once ObjectCreationAsStatement
-            new StoryNodeItem(plotPoint, StoryModel.NarratorView[0]);
+            new StoryNodeItem(sceneVar, StoryModel.NarratorView[0]);
 
-            StatusMessage = "PlotPoint copied to Narrator view";
+            StatusMessage = "Scene copied to Narrator view";
         }
 
         /// <summary>
-        /// Remove a TreeViewItem for a copied PlotPoint.
+        /// Remove a TreeViewItem for a copied Scene.
         ///
         /// Because you can't remove an ObservableCollection member
-        /// directly, this method removes the PlotPoint from
+        /// directly, this method removes the Scene from
         /// the Narrative view StoryNodeItem and then reloads it.
         /// </summary>
         private void RemoveFromNarrative()
@@ -1658,9 +1662,9 @@ namespace StoryBuilder.ViewModels
                 StatusMessage = "Select a node to remove";
                 return;
             }
-            if (RightTappedNode.Type != StoryItemType.PlotPoint)
+            if (RightTappedNode.Type != StoryItemType.Scene)
             {
-                StatusMessage = "You can only remove a PlotPoint copy";
+                StatusMessage = "You can only remove a Scene copy";
                 return;
             }
 
@@ -1742,7 +1746,7 @@ namespace StoryBuilder.ViewModels
                     AddProblemVisibility = Visibility.Visible;
                     AddCharacterVisibility = Visibility.Visible;
                     AddSettingVisibility = Visibility.Visible;
-                    AddPlotPointVisibility = Visibility.Visible;
+                    AddSceneVisibility = Visibility.Visible;
                     RemoveStoryElementVisibility = Visibility.Visible;
                     //TODO: Use correct values (bug with this)
                     //RestoreStoryElementVisibility = Visibility.Collapsed;
@@ -1757,7 +1761,7 @@ namespace StoryBuilder.ViewModels
                     AddProblemVisibility = Visibility.Collapsed;
                     AddCharacterVisibility = Visibility.Collapsed;
                     AddSettingVisibility = Visibility.Collapsed;
-                    AddPlotPointVisibility = Visibility.Collapsed;
+                    AddSceneVisibility = Visibility.Collapsed;
                     RemoveStoryElementVisibility = Visibility.Visible;
                     RestoreStoryElementVisibility = Visibility.Collapsed;
                     AddToNarrativeVisibility = Visibility.Collapsed;
@@ -1769,7 +1773,7 @@ namespace StoryBuilder.ViewModels
                     AddProblemVisibility = Visibility.Collapsed;
                     AddCharacterVisibility = Visibility.Collapsed;
                     AddSettingVisibility = Visibility.Collapsed;
-                    AddPlotPointVisibility = Visibility.Collapsed;
+                    AddSceneVisibility = Visibility.Collapsed;
                     RemoveStoryElementVisibility = Visibility.Collapsed;
                     RestoreStoryElementVisibility = Visibility.Visible;
                     AddToNarrativeVisibility = Visibility.Collapsed;
@@ -1996,7 +2000,7 @@ namespace StoryBuilder.ViewModels
             AddProblemCommand = new RelayCommand(AddProblem, () => _canExecuteCommands);
             AddCharacterCommand = new RelayCommand(AddCharacter, () => _canExecuteCommands);
             AddSettingCommand = new RelayCommand(AddSetting, () => _canExecuteCommands);
-            AddPlotPointCommand = new RelayCommand(AddPlotPoint, () => _canExecuteCommands);
+            AddSceneCommand = new RelayCommand(AddScene, () => _canExecuteCommands);
             // Remove Story Element command (move to trash)
             RemoveStoryElementCommand = new RelayCommand(RemoveStoryElement, () => _canExecuteCommands);
             RestoreStoryElementCommand = new RelayCommand(RestoreStoryElement, () => _canExecuteCommands);

@@ -73,8 +73,8 @@ namespace StoryBuilder.Models
                 case "Setting":
                     type = StoryItemType.Setting;
                     break;
-                case "PlotPoint":
-                    type = StoryItemType.PlotPoint;
+                case "Scene":
+                    type = StoryItemType.Scene;
                     break;
                 case "Separator":       // Legacy: Separator was renamed to Folder
                     type = StoryItemType.Folder;

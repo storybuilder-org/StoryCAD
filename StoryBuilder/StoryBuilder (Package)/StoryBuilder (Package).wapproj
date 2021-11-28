@@ -43,7 +43,7 @@
     <AppxPackageSigningEnabled>True</AppxPackageSigningEnabled>
     <EntryPointProjectUniqueName>..\StoryBuilder\StoryBuilder.csproj</EntryPointProjectUniqueName>
     <GenerateAppInstallerFile>True</GenerateAppInstallerFile>
-    <PackageCertificateThumbprint>C98DB4D565329A047DA3C174546CDBCEA7F33BA6</PackageCertificateThumbprint>
+    <PackageCertificateThumbprint>AC71A7A01DD00FB40CF3B8F249C0AB1CDD3F6318</PackageCertificateThumbprint>
     <AppxPackageSigningTimestampDigestAlgorithm>SHA256</AppxPackageSigningTimestampDigestAlgorithm>
     <AppxAutoIncrementPackageRevision>True</AppxAutoIncrementPackageRevision>
     <GenerateTestArtifacts>True</GenerateTestArtifacts>

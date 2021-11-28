@@ -6,7 +6,7 @@
         Problem,
         Character,
         Setting,
-        PlotPoint,
+        Scene,
         Folder,
         Section,
         TrashCan,

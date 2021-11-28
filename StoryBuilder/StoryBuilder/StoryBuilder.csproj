@@ -27,11 +27,11 @@
     <Manifest Include="$(ApplicationManifest)" />
   </ItemGroup>
 
-<ItemGroup>
-    <Content Include="Assets\Install\**">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-</ItemGroup>
+  <ItemGroup>
+      <Content Include="Assets\Install\**">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\StoryBuilderLib\StoryBuilderLib.csproj" />

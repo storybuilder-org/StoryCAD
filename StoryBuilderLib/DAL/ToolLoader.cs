@@ -221,7 +221,7 @@ namespace StoryBuilder.DAL
                                     currentMasterPlot.MasterPlotNotes += keyvalue;
                                 }
                                 break;
-                            case "PlotPoint":
+                            case "Scene":
                                 currentMasterPlotScene = new MasterPlotScene(keyvalue);
                                 currentMasterPlot.MasterPlotScenes.Add(currentMasterPlotScene);
                                 break;

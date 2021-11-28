@@ -27,9 +27,9 @@ namespace StoryBuilder.ViewModels
         private bool _listOfSettingsSwitch;
         private bool _allSettingsSwitch;
         private ObservableCollection<SettingModel> _selectedSettingsList;
-        private bool _listOfPlotPointsSwitch;
-        private bool _allPlotPointsSwitch;
-        private ObservableCollection<PlotPointModel> _selectedPlotPointsList;
+        private bool _listOfSceneSwitch;
+        private bool _allSceneSwitch;
+        private ObservableCollection<SceneModel> _selectedSceneList;
         private bool _questionResponsesSwitch;
 
         #endregion
@@ -132,22 +132,22 @@ namespace StoryBuilder.ViewModels
             set => SetProperty(ref _selectedSettingsList, value);
         }
 
-        public bool ListOfPlotPointsSwitch
+        public bool ListOfSceneSwitch
         {
-            get => _listOfPlotPointsSwitch;
-            set => SetProperty(ref _listOfPlotPointsSwitch, value);
+            get => _listOfSceneSwitch;
+            set => SetProperty(ref _listOfSceneSwitch, value);
         }
 
-        public bool AllPlotPointsSwitch
+        public bool AllSceneSwitch
         {
-            get { return _allPlotPointsSwitch; }
-            set => SetProperty(ref _allPlotPointsSwitch, value);
+            get { return _allSceneSwitch; }
+            set => SetProperty(ref _allSceneSwitch, value);
         }
 
-        public ObservableCollection<PlotPointModel> SelectedPlotPointsList
+        public ObservableCollection<SceneModel> SelectedSceneList
         {
-            get => _selectedPlotPointsList;
-            set => SetProperty(ref _selectedPlotPointsList, value);
+            get => _selectedSceneList;
+            set => SetProperty(ref _selectedSceneList, value);
         }
 
         public bool QuestionResponsesSwitch
@@ -164,7 +164,7 @@ namespace StoryBuilder.ViewModels
         public ObservableCollection<ProblemModel> SelectedProblemsListSource;
         public ObservableCollection<CharacterModel> SelectedCharactersListSource;
         public ObservableCollection<SettingModel> SelectedSettingsListSource;
-        public ObservableCollection<PlotPointModel> SelectedPlotPointsListSource;
+        public ObservableCollection<SceneModel> SelectedSceneListSource;
 
 
         #endregion
@@ -174,12 +174,12 @@ namespace StoryBuilder.ViewModels
         public PrintViewModel(ObservableCollection<ProblemModel> problems,
                               ObservableCollection<CharacterModel> characters,
                               ObservableCollection<SettingModel> settings,
-                              ObservableCollection<PlotPointModel> scenes)
+                              ObservableCollection<SceneModel> scenes)
         {
             SelectedProblemsListSource = problems;
             SelectedCharactersListSource = characters;
             SelectedSettingsListSource = settings;
-            SelectedPlotPointsListSource = scenes;
+            SelectedSceneListSource = scenes;
 
             _selectedProblemsList = new ObservableCollection<ProblemModel>();
             _selectedProblemsList.CollectionChanged += OnCollectionChanged;
@@ -187,8 +187,8 @@ namespace StoryBuilder.ViewModels
             _selectedCharactersList.CollectionChanged += OnCollectionChanged;
             _selectedSettingsList = new ObservableCollection<SettingModel>();
             _selectedSettingsList.CollectionChanged += OnCollectionChanged;
-            _selectedPlotPointsList = new ObservableCollection<PlotPointModel>();
-            _selectedPlotPointsList.CollectionChanged += OnCollectionChanged;
+            _selectedSceneList = new ObservableCollection<SceneModel>();
+            _selectedSceneList.CollectionChanged += OnCollectionChanged;
         }
 
         #endregion

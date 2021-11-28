@@ -3,14 +3,14 @@ using Windows.Data.Xml.Dom;
 
 namespace StoryBuilder.Models
 {
-    public class PlotPointModel : StoryElement
+    public class SceneModel : StoryElement
     {
         #region Properties
 
-        // Besides its GUID, each Plot Point has a unique (to this story)
+        // Besides its GUID, each Scene has a unique (to this story)
         // integer id number (useful in lists of scenes.)
 
-        private static int _nextPlotPointId;
+        private static int _nextSceneId;
         private int _id;
         public int Id
         {
@@ -251,15 +251,15 @@ namespace StoryBuilder.Models
             set => _notes = value;
         }
 
-        // Besides its GUID, each Plot Point has a unique (to this story)
+        // Besides its GUID, each Scene has a unique (to this story)
         // integer id number (useful in lists of scenes.)
 
         #endregion
 
         #region Constructors
-        public PlotPointModel(StoryModel model) : base("New Plot Point", StoryItemType.PlotPoint, model)
+        public SceneModel(StoryModel model) : base("New Scene", StoryItemType.Scene, model)
         {
-            Id = ++_nextPlotPointId;
+            Id = ++_nextSceneId;
             Viewpoint = string.Empty;
             Date = string.Empty;
             Time = string.Empty;
@@ -292,9 +292,9 @@ namespace StoryBuilder.Models
             Review = string.Empty;
             Notes = string.Empty;
         }
-        public PlotPointModel(string name, StoryModel model) : base(name, StoryItemType.PlotPoint, model)
+        public SceneModel(string name, StoryModel model) : base(name, StoryItemType.Scene, model)
         {
-            Id = ++_nextPlotPointId;
+            Id = ++_nextSceneId;
             Viewpoint = string.Empty;
             Date = string.Empty;
             Time = string.Empty;
@@ -323,9 +323,9 @@ namespace StoryBuilder.Models
             Review = string.Empty;
             Notes = string.Empty;
         }
-        public PlotPointModel(IXmlNode xn, StoryModel model) : base(xn, model)
+        public SceneModel(IXmlNode xn, StoryModel model) : base(xn, model)
         {
-            Id = ++_nextPlotPointId;
+            Id = ++_nextSceneId;
             Viewpoint = string.Empty;
             Date = string.Empty;
             Time = string.Empty;
