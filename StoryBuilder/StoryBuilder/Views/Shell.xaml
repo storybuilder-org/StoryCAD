@@ -132,81 +132,19 @@
                         <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE710;"/>
                     </AppBarButton.Icon>
                     <AppBarButton.Flyout>
-                        <Flyout>
-                            <StackPanel>
-                                <Button Visibility="{x:Bind ShellVm.AddFolderVisibility, Mode=TwoWay}"
-                                Command="{x:Bind ShellVm.AddFolderCommand, Mode=OneWay}" >
-                                    <StackPanel Orientation="Horizontal" >
-                                        <SymbolIcon Symbol="Folder" />
-                                        <TextBlock Text="  Add Folder" />
-                                    </StackPanel>
-                                </Button>
-                                <Button Visibility="{x:Bind ShellVm.AddSectionVisibility, Mode=TwoWay}"
-                                 Command="{x:Bind ShellVm.AddSectionCommand, Mode=OneWay}" >
-                                    <StackPanel Orientation="Horizontal" >
-                                        <SymbolIcon Symbol="Folder" />
-                                        <TextBlock Text= "  Add Section" />
-                                    </StackPanel>
-                                </Button>
-                                <Button Visibility="{x:Bind ShellVm.AddProblemVisibility, Mode=TwoWay}"
-                                  Command="{x:Bind ShellVm.AddProblemCommand, Mode=OneWay}" >
-                                    <StackPanel Orientation="Horizontal" >
-                                        <SymbolIcon Symbol="Help" />
-                                        <TextBlock Text="  Add Problem" />
-                                    </StackPanel>
-                                </Button>
-                                <Button Visibility="{x:Bind ShellVm.AddCharacterVisibility, Mode=TwoWay}"
-                                  Command="{x:Bind ShellVm.AddCharacterCommand, Mode=OneWay}" >
-                                    <StackPanel Orientation="Horizontal" >
-                                        <SymbolIcon Symbol="Contact" />
-                                        <TextBlock Text="  Add Character" />
-                                    </StackPanel>
-                                </Button>
-                                <Button Visibility="{x:Bind ShellVm.AddSettingVisibility, Mode=TwoWay}"
-                                  Command="{x:Bind ShellVm.AddSettingCommand, Mode=OneWay}" >
-                                    <StackPanel Orientation="Horizontal" >
-                                        <SymbolIcon Symbol="Globe" />
-                                        <TextBlock Text="  Add Setting" />
-                                    </StackPanel>
-                                </Button>
-                                <Button Visibility="{x:Bind ShellVm.AddPlotPointVisibility, Mode=TwoWay}"
-                                  Command="{x:Bind ShellVm.AddPlotPointCommand, Mode=OneWay}" >
-                                    <StackPanel Orientation="Horizontal" >
-                                        <SymbolIcon Symbol="AllApps" />
-                                        <TextBlock Text="  Add Plotpoint" />
-                                    </StackPanel>
-                                </Button>
-                                <MenuFlyoutSeparator />
-                                <Button Visibility="{x:Bind ShellVm.RemoveStoryElementVisibility, Mode=TwoWay}"
-                                  Command="{x:Bind ShellVm.RemoveStoryElementCommand, Mode=OneWay}" >
-                                    <StackPanel Orientation="Horizontal" >
-                                        <SymbolIcon Symbol="Delete" />
-                                        <TextBlock Text="  Remove Story Element" />
-                                    </StackPanel>
-                                </Button>
-                                <Button Visibility="{x:Bind ShellVm.RestoreStoryElementVisibility, Mode=TwoWay}"
-                                  Command="{x:Bind ShellVm.RestoreStoryElementCommand, Mode=OneWay}" >
-                                    <StackPanel Orientation="Horizontal" >
-                                        <SymbolIcon Symbol="Refresh" />
-                                        <TextBlock Text="  Restore Story Element" />
-                                    </StackPanel>
-                                </Button>
-                                <Button Visibility="{x:Bind ShellVm.AddToNarrativeVisibility, Mode=TwoWay}"
-                                   Command="{x:Bind ShellVm.AddToNarrativeCommand, Mode=OneWay}" >
-                                    <StackPanel Orientation="Horizontal" >
-                                        <SymbolIcon Symbol="Switch" />
-                                        <TextBlock Text="  Add To Narrative" />
-                                    </StackPanel>
-                                </Button>
-                                <Button Visibility="{x:Bind ShellVm.RemoveFromNarrativeVisibility, Mode=TwoWay}"
-                                   Command="{x:Bind ShellVm.RemoveFromNarrativeCommand, Mode=OneWay}" >
-                                    <StackPanel Orientation="Horizontal" >
-                                        <SymbolIcon Symbol="Switch" />
-                                        <TextBlock Text="  Remove From Narrative" />
-                                    </StackPanel>
-                                </Button>
-                            </StackPanel>
-                        </Flyout>
+                        <MenuFlyout>
+                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.AddFolderVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.AddFolderCommand, Mode=OneWay}" Icon="Folder" Text="Add folder"/>
+                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.AddSectionVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.AddSectionCommand,Mode=OneWay}" Icon="Folder" Text="Add section"/>
+                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.AddProblemVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.AddProblemCommand ,Mode=OneWay}" Icon="Help" Text="Add problem"/>
+                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.AddCharacterVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.AddCharacterCommand,Mode=OneWay}" Icon="Contact" Text="Add character"/>
+                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.AddSettingVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.AddSettingCommand,Mode=OneWay}" Icon="Globe" Text="Add setting"/>
+                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.AddPlotPointVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.AddPlotPointCommand,Mode=OneWay}" Icon="AllApps" Text="Add scene"/>
+                            <MenuFlyoutSeparator/>
+                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.RemoveStoryElementVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.RemoveStoryElementCommand,Mode=OneWay}" Icon="Delete" Text="Delete story element"/>
+                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.RestoreStoryElementVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.RestoreStoryElementCommand,Mode=OneWay}" Icon="Refresh" Text="Restore Story element"/>
+                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.AddToNarrativeVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.AddToNarrativeCommand,Mode=OneWay}" Icon="Switch" Text="Add To Narrative"/>
+                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.RemoveFromNarrativeVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.RemoveFromNarrativeCommand,Mode=OneWay}" Icon="Switch" Text="Remove from Narative"/>
+                        </MenuFlyout>
                     </AppBarButton.Flyout>
                 </AppBarButton>
                 <AppBarButton Label="Move" ToolTipService.ToolTip="Move Story Elements" >
@@ -338,3 +276,4 @@
         </StackPanel>
     </Grid>
 </Page>
+ 
