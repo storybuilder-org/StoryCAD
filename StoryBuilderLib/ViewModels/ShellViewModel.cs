@@ -141,6 +141,19 @@ namespace StoryBuilder.ViewModels
         #region Shell binding properties
 
         /// <summary>
+        /// This is secondary color it controls the background color of some elements
+        /// this is changed depending on the theme, this is used because the default background#
+        /// for light mode makes the UI look bad, for dark theme its alright
+        /// </summary>
+        private SolidColorBrush _SecondaryColor;
+        public SolidColorBrush SecondaryColor
+        {
+            get => _SecondaryColor;
+            set => SetProperty(ref _SecondaryColor, value);
+        }
+
+
+        /// <summary>
         /// DataSource is bound to Shell's NavigationTree TreeView control and
         /// contains either the StoryExplorer (ExplorerView) or StoryNarrator (NarratorView)
         /// ObservableCollection of StoryNodeItem instances.
@@ -2033,10 +2046,11 @@ namespace StoryBuilder.ViewModels
             {
                 foreach (StoryNodeItem node in root)
                 {
-                    if (Search.SearchStoryElement(node, FilterText, StoryModel))
+                    if (Search.SearchStoryElement(node, FilterText, StoryModel)) //checks if node name contains the thing we are looking for
                     {
                         SearchTotal++;
-                        node.Background = new SolidColorBrush(Colors.LightGoldenrodYellow);
+                        if (Application.Current.RequestedTheme == ApplicationTheme.Light) { node.Background = new SolidColorBrush(Colors.LightGoldenrodYellow); }
+                        else { node.Background = new SolidColorBrush(Colors.DarkGoldenrod); }
                         node.IsExpanded = true;
                         
                         var parent = node.Parent;

@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.DependencyInjection;
+using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
@@ -39,6 +40,9 @@ namespace StoryBuilder.Views
                 // Handle exception
             }
             ShellVm.SplitViewFrame = SplitViewFrame;
+
+            if (Application.Current.RequestedTheme == ApplicationTheme.Light) { ShellVm.SecondaryColor = new Microsoft.UI.Xaml.Media.SolidColorBrush(Colors.LightGray); }
+            else { ShellVm.SecondaryColor = new Microsoft.UI.Xaml.Media.SolidColorBrush(Windows.UI.Color.FromArgb((byte)0.8, (byte)50, (byte)43, (byte)46)); }
         }
 
         private void Shell_Loaded(object sender, RoutedEventArgs e)

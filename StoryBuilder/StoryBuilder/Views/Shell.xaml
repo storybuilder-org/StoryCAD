@@ -6,8 +6,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
     xmlns:viewmodels="using:StoryBuilder.ViewModels"   
-    mc:Ignorable="d"
-    RequestedTheme="Light">
+    mc:Ignorable="d">
 
     <Page.Resources>
         <CommandBarFlyout x:Key="AddStoryElementFlyout" Placement="Right" x:Name="AddStoryElementCommandBarFlyout" >
@@ -84,7 +83,7 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <!-- Command Bar -->
-        <CommandBar  Background="LightGray" IsOpen="False">
+        <CommandBar  Background="{x:Bind ShellVm.SecondaryColor}" IsOpen="False">
             <CommandBar.Content>
                 <StackPanel Orientation="Horizontal">
                     <TextBox PlaceholderText="Enter text to search for here" Width="285" Margin="0,8" Text="{x:Bind ShellVm.FilterText, Mode=TwoWay}"/>
@@ -259,7 +258,7 @@
             </SplitView.Content>
         </SplitView>
         <!-- Status Bar -->
-        <StackPanel Grid.Row="2" Orientation="Horizontal" Background="LightGray" Margin="0,10,0,0">
+        <StackPanel Grid.Row="2" Orientation="Horizontal" Background="{x:Bind ShellVm.SecondaryColor}" Margin="0,10,0,0">
             <ComboBox IsEditable="False" Width="200"  Margin="10" ItemsSource="{x:Bind ShellVm.ViewList}" 
                       SelectionChanged="{x:Bind ShellVm.ViewChanged, Mode=OneWay}"
                       SelectedItem="{x:Bind ShellVm.SelectedView, Mode=TwoWay}" />
