@@ -6,6 +6,7 @@ using CommunityToolkit.WinUI.UI.Controls;
 using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
 using StoryBuilder.Controllers;
 using StoryBuilder.DAL;
 using StoryBuilder.Models;
@@ -25,6 +26,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using Windows.Foundation;
 using Windows.Storage;
 using Windows.Storage.Pickers;
 using WinRT;
@@ -92,6 +94,8 @@ namespace StoryBuilder.ViewModels
         public RelayCommand CloseCommand { get; }
         // ExitCommand
         public RelayCommand ExitCommand { get; }
+        //Open unified menu
+        public RelayCommand OpenUnifiedCommand { get; }
 
         // Move current TreeViewItem flyout
         public RelayCommand MoveLeftCommand { get; }
@@ -172,16 +176,6 @@ namespace StoryBuilder.ViewModels
         {
             get => _isPaneOpen;
             set => SetProperty(ref _isPaneOpen, value);
-        }
-
-        /// <summary>
-        /// FilterIsChecked binds to the Filter AppBarToggleButton IsChecked property
-        /// </summary>
-        private bool _filterIsChecked;
-        public bool FilterIsChecked
-        {
-            get => _filterIsChecked;
-            set => SetProperty(ref _filterIsChecked, value);
         }
 
         // CommandBar Flyout AppBarButton properties
@@ -294,13 +288,6 @@ namespace StoryBuilder.ViewModels
             set => SetProperty(ref _filterText, value);
         }
 
-        private string _filterStatus;
-        public string FilterStatus
-        {
-            get => _filterStatus;
-            set => SetProperty(ref _filterStatus, value);
-        }
-
         private Windows.UI.Color _changeStatusColor;
         public Windows.UI.Color ChangeStatusColor
         {
@@ -313,6 +300,13 @@ namespace StoryBuilder.ViewModels
         {
             get => _newNodeName;
             set => SetProperty(ref _newNodeName, value);
+        }
+
+        private bool _isSearching;
+        public bool IsSearching
+        {
+            get => _isSearching;
+            set => SetProperty(ref _isSearching, value);
         }
 
         #endregion
@@ -342,6 +336,157 @@ namespace StoryBuilder.ViewModels
         #endregion
 
         #region Public Methods
+
+
+        private async void OpenUnifiedMenu()                      
+        {
+            _canExecuteCommands = false;
+            // Needs logging
+            Logger.Log(LogLevel.Info, "Executing unified menu command");
+            UnifiedMenu dialog = new();
+            dialog.XamlRoot = GlobalData.XamlRoot;
+            var result = await dialog.ShowAsync();
+            // Needs logging, status display
+             _canExecuteCommands = true;
+        }
+
+        /// <summary>
+        /// Used to open a file such an sample story or recent file
+        /// </summary>
+        public async Task OpenFileFromPath(string Path)
+        {
+            _story.ProjectFolder = await StorageFolder.GetFolderFromPathAsync(Path);
+            _story.ProjectPath = _story.ProjectFolder.Path;
+            _story.ProjectFilename = _story.ProjectFolder.DisplayName;
+
+             IReadOnlyList<StorageFile> files = await _story.ProjectFolder.GetFilesAsync();
+            StorageFile file = files[0];
+            //NOTE: BasicProperties.DateModified can be the date last changed
+
+            _story.ProjectFilename = file.Name;
+            _story.ProjectFile = file;
+            // Make sure files folder exists...
+            _story.FilesFolder = await _story.ProjectFolder.GetFolderAsync("files");
+            //TODO: Back up at the right place (after open?)
+            await BackupProject();
+            StoryReader rdr = Ioc.Default.GetService<StoryReader>();
+            StoryModel = await rdr.ReadFile(file);
+            if (StoryModel.ExplorerView.Count > 0)
+            {
+                SetCurrentView(StoryViewType.ExplorerView);
+                _story.LoadStatus = LoadStatus.LoadFromRtfFiles;
+                StatusMessage = "Open Story completed";
+            }
+
+            _canExecuteCommands = true;
+        }
+
+        public async Task UnifiedNewFile(UnifiedVM dialogVM)
+        {
+            _canExecuteCommands = false;
+            Logger.Log(LogLevel.Info, "UnifyVM - New File starting");
+            try
+            {
+                //TODO: Make sure both path and filename are present
+                UnifiedVM vm = dialogVM;
+                if (!Path.GetExtension(vm.ProjectName).Equals(".stbx"))
+                    vm.ProjectName = vm.ProjectName + ".stbx";
+                _story.ProjectFilename = vm.ProjectName;
+                StorageFolder parent = await StorageFolder.GetFolderFromPathAsync(vm.ProjectPath);
+                _story.ProjectFolder = await parent.CreateFolderAsync(vm.ProjectName);
+                _story.ProjectPath = _story.ProjectFolder.Path;
+                StatusMessage = "New project command executing";
+                if (StoryModel.Changed)
+                {
+                    await SaveModel();
+                    await WriteModel();
+                }
+
+                ResetModel();
+                var overview = new OverviewModel("Working Title", StoryModel);
+                overview.Author = GlobalData.Preferences.LicenseOwner;
+                var overviewNode = new StoryNodeItem(overview, null)
+                {
+                    IsExpanded = true,
+                    IsRoot = true
+                };
+                StoryModel.ExplorerView.Add(overviewNode);
+                TrashCanModel trash = new TrashCanModel(StoryModel);
+                StoryNodeItem trashNode = new StoryNodeItem(trash, null);
+                StoryModel.ExplorerView.Add(trashNode);     // The trashcan is the second root
+                var narrative = new SectionModel("Narrative View", StoryModel);
+                var narrativeNode = new StoryNodeItem(narrative, null);
+                narrativeNode.IsRoot = true;
+                StoryModel.NarratorView.Add(narrativeNode);
+                trash = new TrashCanModel(StoryModel);
+                trashNode = new StoryNodeItem(trash, null);
+                StoryModel.NarratorView.Add(trashNode);     // The trashcan is the second root
+                                                            // Use the NewProjectDialog template to complete the model
+                switch (vm.SelectedTemplate)
+                {
+                    case "Blank Project":
+                        break;
+                    case "Empty Folders":
+                        StoryElement problems = new FolderModel("Problems", StoryModel);
+                        StoryNodeItem problemsNode = new(problems, overviewNode);
+                        StoryElement characters = new FolderModel("Characters", StoryModel);
+                        StoryNodeItem charactersNode = new(characters, overviewNode);
+                        StoryElement settings = new FolderModel("Settings", StoryModel);
+                        StoryNodeItem settingsNode = new(settings, overviewNode);
+                        StoryElement plotpoints = new FolderModel("Plot Points", StoryModel);
+                        StoryNodeItem plotpointsNode = new(plotpoints, overviewNode);
+                        break;
+                    case "External/Internal Problems":
+                        StoryElement externalProblem = new ProblemModel("External Problem", StoryModel);
+                        StoryNodeItem externalProblemNode = new(externalProblem, overviewNode);
+                        StoryElement internalProblem = new ProblemModel("Internal Problem", StoryModel);
+                        StoryNodeItem internalProblemNode = new(internalProblem, overviewNode);
+                        break;
+                    case "Protagonist/Antagonist":
+                        StoryElement protagonist = new CharacterModel("Protagonist", StoryModel);
+                        StoryNodeItem protagonistNode = new(protagonist, overviewNode);
+                        StoryElement antagonist = new CharacterModel("Antagonist", StoryModel);
+                        StoryNodeItem antagonistNode = new(antagonist, overviewNode);
+                        break;
+                    case "Problems and Characters":
+                        StoryElement problemsFolder = new FolderModel("Problems", StoryModel);
+                        StoryNodeItem problemsFolderNode = new StoryNodeItem(problemsFolder, overviewNode)
+                        {
+                            IsExpanded = true
+                        };
+                        StoryElement charactersFolder = new FolderModel("Characters", StoryModel);
+                        StoryNodeItem charactersFolderNode = new StoryNodeItem(charactersFolder, overviewNode);
+                        charactersFolderNode.IsExpanded = true;
+                        StoryElement settingsFolder = new FolderModel("Settings", StoryModel);
+                        StoryNodeItem settingsFolderNode = new StoryNodeItem(settingsFolder, overviewNode);
+                        StoryElement plotpointsFolder = new FolderModel("Plot Points", StoryModel);
+                        StoryNodeItem plotpointsFolderNode = new StoryNodeItem(plotpointsFolder, overviewNode);
+                        StoryElement externalProb = new ProblemModel("External Problem", StoryModel);
+                        StoryNodeItem externalProbNode = new StoryNodeItem(externalProb, problemsFolderNode);
+                        StoryElement internalProb = new ProblemModel("Internal Problem", StoryModel);
+                        StoryNodeItem internalProbNode = new StoryNodeItem(internalProb, problemsFolderNode);
+                        StoryElement protag = new CharacterModel("Protagonist", StoryModel);
+                        StoryNodeItem protagNode = new StoryNodeItem(protag, charactersFolderNode);
+                        StoryElement antag = new CharacterModel("Antagonist", StoryModel);
+                        StoryNodeItem antagNode = new StoryNodeItem(antag, charactersFolderNode);
+                        break;
+                }
+                SetCurrentView(StoryViewType.ExplorerView);
+                //TODO: Set expand and isselected?
+
+                // Save the new project
+                await SaveFile();
+
+                StatusMessage = "New project ready.";
+                Logger.Log(LogLevel.Info, "Unity - NewFile command completed");
+            }
+            catch (Exception ex)
+            {
+                Logger.LogException(LogLevel.Error, ex, "Error creating new project");
+                StatusMessage = "File make failure.";
+            }
+            _canExecuteCommands = true;
+        }
 
         public void TreeViewNodeClicked(object selectedItem)
         {
@@ -589,7 +734,7 @@ namespace StoryBuilder.ViewModels
             _canExecuteCommands = true;
         }
 
-        private async void OpenFile()
+        public async Task OpenFile()
         {
             if (StoryModel.Changed)
             {
@@ -903,65 +1048,6 @@ namespace StoryBuilder.ViewModels
         #endregion
 
         #region Tool and Report Commands
-
-        /// <summary>
-        /// Search the 
-        /// </summary>
-        private void SearchNodes()
-        {
-            bool searchResult = false;  // true if any node returns true
-
-            _canExecuteCommands = false;
-            Logger.Log(LogLevel.Info, "In ToggleFilter");
-            ///TODO: 
-            if (FilterIsChecked)
-            {
-                Logger.Log(LogLevel.Info, "FilterIsChecked= true");
-                if (FilterText.Equals(string.Empty))
-                {
-                    Logger.Log(LogLevel.Info, "No search text provided");
-                    StatusMessage = "No search text provided";
-                    return;
-                }
-
-                // Search both roots (active and trash) in the currently displayed view.
-                //TODO: When the view changes, reset the search nodes
-                StoryNodeItem root = DataSource[0];
-                foreach (StoryNodeItem node in root)
-                {
-                    bool result =  Search.SearchStoryElement(node, FilterText, StoryModel);
-                    if (result == true)
-                    {
-                        // Note: for display, think about a setter.  
-                        //    <Setter Target="SelectionGrid.Background" Value="{ThemeResource TreeViewItemBackgroundSelected}" />
-                        //    (or better yet, bind the background property like what's done with the Edit statusbar button foreground
-                        // Note: May want to set a breadcrumb property in StoryElement and save previous backGround brush. 
-                        // Note: I have a recursive search function; see StoryNodeItem::GetEnumerator
-                        // Note: set parent nodes IsExpanded up to the root
-                    }
-                }
-                root = DataSource[1];  // trashcan 
-                foreach (var node in root)
-                {
-                    // Do what we did above
-                }
-            }
-            else
-            {
-                // foreach view
-                //    foreach root node
-                //       foreach (TreeNode node in root)
-                //         if breadcrumb set
-                //            reset background color
-                //            reset treeviewnode parent's IsExpanded
-                //         end if
-                //       end for
-                //    end for
-                // end for 
-            }
-            Logger.Log(LogLevel.Info, "ToggleFilter");
-            _canExecuteCommands = true;
-        }
 
 
         /// <summary>
@@ -1882,8 +1968,9 @@ namespace StoryBuilder.ViewModels
 
             _canExecuteCommands = true;
             TogglePaneCommand = new RelayCommand(TogglePane, () => _canExecuteCommands);
+            OpenUnifiedCommand = new RelayCommand(OpenUnifiedMenu, () => _canExecuteCommands);
             NewFileCommand = new RelayCommand(NewFile, () => _canExecuteCommands);
-            OpenFileCommand = new RelayCommand(OpenFile, () => _canExecuteCommands);
+            OpenFileCommand = new RelayCommand(async () => await OpenFile(), () => _canExecuteCommands);
             SaveFileCommand = new RelayCommand(async () => await SaveFile(), () => _canExecuteCommands);
             SaveAsCommand = new RelayCommand(SaveFileAs, () => _canExecuteCommands);
             CloseCommand = new RelayCommand(CloseFile, () => _canExecuteCommands);
@@ -1927,11 +2014,51 @@ namespace StoryBuilder.ViewModels
             CurrentView = "Story Explorer View";
             SelectedView = "Story Explorer View";
 
-            FilterStatus = "Filter:Off";
-
             ChangeStatusColor = Colors.Green;
 
             ShellInstance = this;
+        }
+
+        private void SearchNodes()
+        {
+            _canExecuteCommands = false;    //This prevents other commands from being used till this one is complete.
+            Logger.Log(LogLevel.Info, "Better search started.");
+
+            StoryNodeItem root = DataSource[0]; //Gets all nodes in the tree
+            int SearchTotal = 0;
+
+            if (FilterText == "" || !IsSearching) //Nulls the backgrounds to make them transparent (default) //Check if toggled and null backgrounds if not.
+            {
+                Logger.Log(LogLevel.Info, "Search text is blank, nulling all backgrounds.");
+                foreach (StoryNodeItem node in root) { node.Background = null; }
+                FilterText = "";
+            }
+            else
+            {
+                foreach (StoryNodeItem node in root)
+                {
+                    if (Search.SearchStoryElement(node, FilterText, StoryModel))
+                    {
+                        SearchTotal++;
+                        node.Background = new SolidColorBrush(Colors.LightGoldenrodYellow);
+                        node.IsExpanded = true;
+                        
+                        var parent = node.Parent;
+                        while (!parent.IsRoot)
+                        {
+                            parent.IsExpanded = true;
+                            parent = parent.Parent;
+                        }
+
+                        if (parent.IsRoot) { parent.IsExpanded = true; }
+                    }
+                    else { node.Background = null; }
+                }
+            }
+
+            _canExecuteCommands = true;    //Enables other commands from being used till this one is complete.
+            Logger.Log(LogLevel.Info, "Better search completed, found " + SearchTotal + " matches");
+            StatusMessage = $"Found {SearchTotal} matches";
         }
         #endregion
 

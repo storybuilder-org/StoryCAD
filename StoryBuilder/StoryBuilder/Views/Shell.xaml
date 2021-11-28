@@ -86,7 +86,12 @@
         <!-- Command Bar -->
         <CommandBar  Background="LightGray" IsOpen="False">
             <CommandBar.Content>
-                <TextBox PlaceholderText="Enter search text:" Width="305" Margin="0,8" Text="{x:Bind ShellVm.FilterText, Mode=TwoWay}" />
+                <StackPanel Orientation="Horizontal">
+                    <TextBox PlaceholderText="Enter text to search for here" Width="285" Margin="0,8" Text="{x:Bind ShellVm.FilterText, Mode=TwoWay}"/>
+                    <ToggleButton Command="{x:Bind ShellVm.FilterCommand}" IsChecked="{x:Bind ShellVm.IsSearching,Mode=TwoWay}">
+                        <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE71E;"/>
+                    </ToggleButton>
+                </StackPanel>
             </CommandBar.Content>
             <CommandBar.PrimaryCommands>
                 <AppBarButton Icon="GlobalNavigationButton" Label="Show" ToolTipService.ToolTip="Show/Hide Navigation Pane"
@@ -94,14 +99,9 @@
                 <AppBarButton Icon="Document" Label="File" ToolTipService.ToolTip="File Menu">
                     <AppBarButton.Flyout>
                         <MenuFlyout>
-                            <MenuFlyoutItem Text="New Story" Command="{x:Bind ShellVm.NewFileCommand, Mode=OneWay}" >
+                            <MenuFlyoutItem Text="Open/Create file" Command="{x:Bind ShellVm.OpenUnifiedCommand, Mode=OneWay}" >
                                 <MenuFlyoutItem.Icon>
                                     <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE8F4;"/>
-                                </MenuFlyoutItem.Icon>
-                            </MenuFlyoutItem>
-                            <MenuFlyoutItem Text="Open Story" Command="{x:Bind ShellVm.OpenFileCommand, Mode=OneWay}" >
-                                <MenuFlyoutItem.Icon>
-                                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE8E5;"/>
                                 </MenuFlyoutItem.Icon>
                             </MenuFlyoutItem>
                             <MenuFlyoutItem Text="Save Story" Command="{x:Bind ShellVm.SaveFileCommand, Mode=OneWay}" >
@@ -132,81 +132,6 @@
                         <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE710;"/>
                     </AppBarButton.Icon>
                     <AppBarButton.Flyout>
-                        <Flyout>
-                            <StackPanel>
-                                <Button Visibility="{x:Bind ShellVm.AddFolderVisibility, Mode=TwoWay}"
-                                Command="{x:Bind ShellVm.AddFolderCommand, Mode=OneWay}" >
-                                    <StackPanel Orientation="Horizontal" >
-                                        <SymbolIcon Symbol="Folder" />
-                                        <TextBlock Text="  Add Folder" />
-                                    </StackPanel>
-                                </Button>
-                                <Button Visibility="{x:Bind ShellVm.AddSectionVisibility, Mode=TwoWay}"
-                                 Command="{x:Bind ShellVm.AddSectionCommand, Mode=OneWay}" >
-                                    <StackPanel Orientation="Horizontal" >
-                                        <SymbolIcon Symbol="Folder" />
-                                        <TextBlock Text= "  Add Section" />
-                                    </StackPanel>
-                                </Button>
-                                <Button Visibility="{x:Bind ShellVm.AddProblemVisibility, Mode=TwoWay}"
-                                  Command="{x:Bind ShellVm.AddProblemCommand, Mode=OneWay}" >
-                                    <StackPanel Orientation="Horizontal" >
-                                        <SymbolIcon Symbol="Help" />
-                                        <TextBlock Text="  Add Problem" />
-                                    </StackPanel>
-                                </Button>
-                                <Button Visibility="{x:Bind ShellVm.AddCharacterVisibility, Mode=TwoWay}"
-                                  Command="{x:Bind ShellVm.AddCharacterCommand, Mode=OneWay}" >
-                                    <StackPanel Orientation="Horizontal" >
-                                        <SymbolIcon Symbol="Contact" />
-                                        <TextBlock Text="  Add Character" />
-                                    </StackPanel>
-                                </Button>
-                                <Button Visibility="{x:Bind ShellVm.AddSettingVisibility, Mode=TwoWay}"
-                                  Command="{x:Bind ShellVm.AddSettingCommand, Mode=OneWay}" >
-                                    <StackPanel Orientation="Horizontal" >
-                                        <SymbolIcon Symbol="Globe" />
-                                        <TextBlock Text="  Add Setting" />
-                                    </StackPanel>
-                                </Button>
-                                <Button Visibility="{x:Bind ShellVm.AddSceneVisibility, Mode=TwoWay}"
-                                  Command="{x:Bind ShellVm.AddSceneCommand, Mode=OneWay}" >
-                                    <StackPanel Orientation="Horizontal" >
-                                        <SymbolIcon Symbol="AllApps" />
-                                        <TextBlock Text="  Add Scene" />
-                                    </StackPanel>
-                                </Button>
-                                <MenuFlyoutSeparator />
-                                <Button Visibility="{x:Bind ShellVm.RemoveStoryElementVisibility, Mode=TwoWay}"
-                                  Command="{x:Bind ShellVm.RemoveStoryElementCommand, Mode=OneWay}" >
-                                    <StackPanel Orientation="Horizontal" >
-                                        <SymbolIcon Symbol="Delete" />
-                                        <TextBlock Text="  Remove Story Element" />
-                                    </StackPanel>
-                                </Button>
-                                <Button Visibility="{x:Bind ShellVm.RestoreStoryElementVisibility, Mode=TwoWay}"
-                                  Command="{x:Bind ShellVm.RestoreStoryElementCommand, Mode=OneWay}" >
-                                    <StackPanel Orientation="Horizontal" >
-                                        <SymbolIcon Symbol="Refresh" />
-                                        <TextBlock Text="  Restore Story Element" />
-                                    </StackPanel>
-                                </Button>
-                                <Button Visibility="{x:Bind ShellVm.AddToNarrativeVisibility, Mode=TwoWay}"
-                                   Command="{x:Bind ShellVm.AddToNarrativeCommand, Mode=OneWay}" >
-                                    <StackPanel Orientation="Horizontal" >
-                                        <SymbolIcon Symbol="Switch" />
-                                        <TextBlock Text="  Add To Narrative" />
-                                    </StackPanel>
-                                </Button>
-                                <Button Visibility="{x:Bind ShellVm.RemoveFromNarrativeVisibility, Mode=TwoWay}"
-                                   Command="{x:Bind ShellVm.RemoveFromNarrativeCommand, Mode=OneWay}" >
-                                    <StackPanel Orientation="Horizontal" >
-                                        <SymbolIcon Symbol="Switch" />
-                                        <TextBlock Text="  Remove From Narrative" />
-                                    </StackPanel>
-                                </Button>
-                            </StackPanel>
-                        </Flyout>
                     </AppBarButton.Flyout>
                 </AppBarButton>
                 <AppBarButton Label="Move" ToolTipService.ToolTip="Move Story Elements" >
@@ -236,13 +161,6 @@
                         </Flyout>
                     </AppBarButton.Flyout>
                 </AppBarButton>
-                <AppBarToggleButton Label="Search" ToolTipService.ToolTip="Search Navigation Tree" 
-                              Command="{x:Bind ShellVm.FilterCommand, Mode=TwoWay}"
-                              IsChecked="{x:Bind ShellVm.FilterIsChecked, Mode=TwoWay}">
-                    <AppBarToggleButton.Icon>
-                        <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE71C;"/>
-                    </AppBarToggleButton.Icon>
-                </AppBarToggleButton>
                 <AppBarButton Label="Tools" ToolTipService.ToolTip="Tools Menu" >
                     <AppBarButton.Icon>
                         <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE90F;"/>
@@ -298,17 +216,13 @@
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    <muxc:TreeView x:Name="NavigationTree"
-                              ContextFlyout="{StaticResource AddStoryElementFlyout}" 
-                              ContextRequested="AddButton_ContextRequested" 
-                              ItemsSource="{x:Bind ShellVm.DataSource, Mode=TwoWay}"
-                              ItemInvoked="TreeViewItem_Invoked" >
+                    <muxc:TreeView x:Name="NavigationTree"  ContextFlyout="{StaticResource AddStoryElementFlyout}" ContextRequested="AddButton_ContextRequested"  ItemsSource="{x:Bind ShellVm.DataSource, Mode=TwoWay}" ItemInvoked="TreeViewItem_Invoked" >
                         <muxc:TreeView.ItemTemplate>
                             <DataTemplate  x:DataType="viewmodels:StoryNodeItem">
-                                <muxc:TreeViewItem ItemsSource="{x:Bind Children}" 
+                                <muxc:TreeViewItem ItemsSource="{x:Bind Children}" Background="{x:Bind Background, Mode=OneWay}"
                                 IsExpanded="{x:Bind IsExpanded, Mode=TwoWay}"
                                RightTapped="TreeViewItem_RightTapped">
-                                <StackPanel Orientation="Horizontal">
+                                <StackPanel Orientation="Horizontal"  >
                                     <SymbolIcon Symbol="{x:Bind Symbol, Mode=OneWay}" Width="16" Height="16"/>
                                     <TextBlock Margin="0,0,10,0"/>
                                     <TextBlock Text="{x:Bind Name, Mode=TwoWay}" />
@@ -341,11 +255,6 @@
                        FontSize="14"
                        Margin="10"
                        FontFamily="Segoe UI" Padding="0,5"/>
-            <TextBlock Text="{x:Bind ShellVm.FilterStatus, Mode=OneWay}" 
-                     HorizontalAlignment="Center"
-                     FontSize="14"
-                     Margin="10"
-                     FontFamily="Segoe UI" Padding="0,5"/>
             <AppBarButton Icon="Edit" IsCompact="True" Height="36" HorizontalAlignment="Right" >
                 <AppBarButton.Foreground>
                     <SolidColorBrush Color="{x:Bind ShellVm.ChangeStatusColor, Mode=TwoWay}"/>
@@ -354,3 +263,4 @@
         </StackPanel>
     </Grid>
 </Page>
+ 
