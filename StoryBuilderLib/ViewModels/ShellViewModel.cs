@@ -2050,8 +2050,8 @@ namespace StoryBuilder.ViewModels
                     {
                         SearchTotal++;
                         if (Application.Current.RequestedTheme == ApplicationTheme.Light) { node.Background = new SolidColorBrush(Colors.LightGoldenrodYellow); }
-                        else { node.Background = new SolidColorBrush(Colors.DarkGoldenrod); }
-                        node.IsExpanded = true;
+                        else { node.Background = new SolidColorBrush(Colors.DarkGoldenrod); } //Light Goldenrod is hard to read in dark theme
+                        node.IsExpanded = true; 
                         
                         var parent = node.Parent;
                         while (!parent.IsRoot)

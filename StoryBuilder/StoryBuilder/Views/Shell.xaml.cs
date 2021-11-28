@@ -42,7 +42,7 @@ namespace StoryBuilder.Views
             ShellVm.SplitViewFrame = SplitViewFrame;
 
             if (Application.Current.RequestedTheme == ApplicationTheme.Light) { ShellVm.SecondaryColor = new Microsoft.UI.Xaml.Media.SolidColorBrush(Colors.LightGray); }
-            else { ShellVm.SecondaryColor = new Microsoft.UI.Xaml.Media.SolidColorBrush(Windows.UI.Color.FromArgb((byte)0.8, (byte)50, (byte)43, (byte)46)); }
+            else { ShellVm.SecondaryColor = new Microsoft.UI.Xaml.Media.SolidColorBrush(Colors.DarkSlateGray); }
         }
 
         private void Shell_Loaded(object sender, RoutedEventArgs e)
