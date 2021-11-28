@@ -86,8 +86,8 @@
         <CommandBar  Background="{x:Bind ShellVm.SecondaryColor}" IsOpen="False">
             <CommandBar.Content>
                 <StackPanel Orientation="Horizontal">
-                    <TextBox PlaceholderText="Enter text to search for here" Width="285" Margin="0,8" Text="{x:Bind ShellVm.FilterText, Mode=TwoWay}"/>
-                    <ToggleButton Command="{x:Bind ShellVm.FilterCommand}" IsChecked="{x:Bind ShellVm.IsSearching,Mode=TwoWay}">
+                    <TextBox PlaceholderText="Enter text to search for here" Width="285" Margin="0,8" Text="{x:Bind ShellVm.FilterText, Mode=TwoWay}" VerticalAlignment="Center"/>
+                    <ToggleButton Command="{x:Bind ShellVm.FilterCommand}" IsChecked="{x:Bind ShellVm.IsSearching,Mode=TwoWay}" VerticalAlignment="Center" Margin="5">
                         <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE71E;"/>
                     </ToggleButton>
                 </StackPanel>
@@ -234,8 +234,8 @@
                                 <muxc:TreeViewItem ItemsSource="{x:Bind Children}" Background="{x:Bind Background, Mode=OneWay}"
                                 IsExpanded="{x:Bind IsExpanded, Mode=TwoWay}"
                                RightTapped="TreeViewItem_RightTapped">
-                                <StackPanel Orientation="Horizontal"  >
-                                    <SymbolIcon Symbol="{x:Bind Symbol, Mode=OneWay}" Width="16" Height="16"/>
+                                <StackPanel Orientation="Horizontal">
+                                    <SymbolIcon Symbol="{x:Bind Symbol, Mode=OneWay}" Width="20" Height="20"/>
                                     <TextBlock Margin="0,0,10,0"/>
                                     <TextBlock Text="{x:Bind Name, Mode=TwoWay}" />
                                 </StackPanel>
