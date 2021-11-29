@@ -377,7 +377,11 @@ namespace StoryBuilder.ViewModels
             SceneType = Model.SceneType;
             CastMembers.Clear();
             foreach (string member in Model.CastMembers)
-                CastMembers.Add(StringToStoryElement(member));
+            {
+                StoryElement element = StringToStoryElement(member);
+                if (element != null)        // found
+                     CastMembers.Add(StringToStoryElement(member));
+            }
             Char1 = Model.Char1;
             Char2 = Model.Char2;
             Char3 = Model.Char3;
@@ -527,11 +531,14 @@ namespace StoryBuilder.ViewModels
             {
                 if (element.Type == StoryItemType.Character | element.Type == StoryItemType.Setting)
                 {
-                    if (value.Equals(element.Name))
+                    if (value.Trim().Equals(element.Name.Trim()))
                         return element;
                 }
             }
-            return null;  // Not found
+            // not found
+            string msg = String.Format("Story Element not found name {0}", value);
+            _logger.Log(LogLevel.Warn, msg);
+            return null;   
         }
         #endregion
 
