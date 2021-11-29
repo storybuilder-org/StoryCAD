@@ -5,78 +5,78 @@
     <Folder UUID="7215F081-F5B7-45E9-AA4B-005DA3AA3889" Name="Problems" Notes="" />
     <Folder UUID="0DB836E9-D1F0-4961-9183-3984E79FB6D9" Name="Characters" Notes="" />
     <Folder UUID="D6E3A5F0-3186-4811-B9B0-3A43ACCC2E1A" Name="Settings" Notes="" />
-    <Folder UUID="29B2E3CB-850E-4EAB-BDE3-5332F52F0812" Name="Plot Points" Notes="" />
-    <Problem UUID="0C56A6D5-2F40-4ED8-99D1-96DDE0F1A080" Name="Amanda, Laura, and Tom live in fantasy worlds to escape desperate circumstances " Id="1" ProblemType="Conflict" ConflictType="Person vs. Situation" Subject="Retreat from reality" ProblemSource="The Wingfields are placed in strange surroundings" Protagonist="" ProtGoal="" ProtMotive="" ProtConflict="" Antagonist="" AntagGoal="" AntagMotive="" AntagConflict="" Outcome="" Method="" Theme="" StoryQuestion="{\rtf1\fbidis\ansi\ansicpg1252\deff0\nouicompat\deflang1033{\fonttbl{\f0\fnil\fcharset0 Segoe UI;}{\f1\fnil Segoe UI;}}&#xD;&#xA;{\colortbl ;\red0\green0\blue0;}&#xD;&#xA;{\*\generator Riched20 10.0.10011}\viewkind4\uc1 &#xD;&#xA;\pard\tx720\cf1\f0\fs25 Will Amanda, Laura, and Tom ever be able to escape their constricted lives by living in rather than evading their surroundings?\f1\par&#xD;&#xA;}&#xD;&#xA;" Premise="" Notes="Each of the main characters has developed their own dream world where they escape reality.  Amanda lives in the past as a gracious southern belle, Laura lives in her glass menagerie, and Tom lives vicariously through the movies he watches.&#xD;&#xA;&#xD;&#xA;Each is desparate to escape their current situation." />
-    <Character UUID="D880C022-730F-4AC2-8AEC-96F8E059E24D" Name="Amanda Wingfield" Id="1" Role="Mother" StoryRole="" Archetype="" Age="" Sex="" Eyes="" Hair="" Weight="" CharHeight="" Build="" Complexion="" Race="" Nationality="" Health="" Enneagram="" Intelligence="" Values="" Abnormality="" Focus="" Adventureousness="" Aggression="" Confidence="" Conscientiousness="" Creativity="" Dominance="" Enthusiasm="" Assurance="" Sensitivity="" Shrewdness="" Sociability="" Stability="" CharacterSketch="{\rtf1\fbidis\ansi\ansicpg1252\deff0\nouicompat\deflang1033{\fonttbl{\f0\fnil Segoe UI;}}&#xD;&#xA;{\colortbl ;\red0\green0\blue0;}&#xD;&#xA;{\*\generator Riched20 10.0.10011}\viewkind4\uc1 &#xD;&#xA;\pard\tx720\cf1\f0\fs23 Little woman of great but confused vitality clinging frantically to another time and place. Her characterization must be carefully created, not copied from type. She is not paranoiac, but her life is paranoia. There is much to admire in Amanda, and as much to love and pity as there is to laugh at. She has endurance and a kind of heroism, and though her foolishness makes her unwittingly cruel at times, there is tenderness in her slight person.\par&#xD;&#xA;}&#xD;&#xA;" PhysNotes="" Appearance="" Economic="" Ethnic="" Religion="" PsychNotes="" Work="" Likes="" Habits="" Abilities="" Flaw="" BackStory="">
+    <Folder UUID="29B2E3CB-850E-4EAB-BDE3-5332F52F0812" Name="Scenes" Notes="" />
+    <Problem UUID="0C56A6D5-2F40-4ED8-99D1-96DDE0F1A080" Name="Amanda, Laura, and Tom live in fantasy worlds to escape desperate circumstances " Id="6" ProblemType="Conflict" ConflictType="Person vs. Situation" Subject="Retreat from reality" ProblemSource="The Wingfields are placed in strange surroundings" Protagonist="" ProtGoal="" ProtMotive="" ProtConflict="" Antagonist="" AntagGoal="" AntagMotive="" AntagConflict="" Outcome="" Method="" Theme="" StoryQuestion="{\rtf1\fbidis\ansi\ansicpg1252\deff0\nouicompat\deflang1033{\fonttbl{\f0\fnil\fcharset0 Segoe UI;}{\f1\fnil Segoe UI;}}&#xD;&#xA;{\colortbl ;\red0\green0\blue0;}&#xD;&#xA;{\*\generator Riched20 10.0.10011}\viewkind4\uc1 &#xD;&#xA;\pard\tx720\cf1\f0\fs25 Will Amanda, Laura, and Tom ever be able to escape their constricted lives by living in rather than evading their surroundings?\f1\par&#xD;&#xA;}&#xD;&#xA;" Premise="" Notes="Each of the main characters has developed their own dream world where they escape reality.  Amanda lives in the past as a gracious southern belle, Laura lives in her glass menagerie, and Tom lives vicariously through the movies he watches.&#xD;&#xA;&#xD;&#xA;Each is desparate to escape their current situation." />
+    <Character UUID="D880C022-730F-4AC2-8AEC-96F8E059E24D" Name="Amanda Wingfield" Id="1" Role="Mother" StoryRole="" Archetype="" Age="" Sex="" Eyes="" Hair="" Weight="" CharHeight="" Build="" Complexion="" Race="" Nationality="" Health="" Enneagram="" Intelligence="" Values="" Abnormality="" Focus="" Adventureousness="" Aggression="" Confidence="" Conscientiousness="" Creativity="" Dominance="" Enthusiasm="" Assurance="" Sensitivity="" Shrewdness="" Sociability="" Stability="" CharacterSketch="{\rtf1\fbidis\ansi\ansicpg1252\deff0\nouicompat\deflang1033{\fonttbl{\f0\fnil Segoe UI;}}&#xD;&#xA;{\colortbl ;\red0\green0\blue0;}&#xD;&#xA;{\*\generator Riched20 10.0.10011}\viewkind4\uc1 &#xD;&#xA;\pard\tx720\cf1\f0\fs23 Little woman of great but confused vitality clinging frantically to another time and place. Her characterization must be carefully created, not copied from type. She is not paranoiac, but her life is paranoia. There is much to admire in Amanda, and as much to love and pity as there is to laugh at. She has endurance and a kind of heroism, and though her foolishness makes her unwittingly cruel at times, there is tenderness in her slight person.\par&#xD;&#xA;}&#xD;&#xA;" PhysNotes="" Appearance="" Economic="" Ethnic="" Religion="" PsychNotes="" Work="" Notes="" Flaw="" BackStory="">
       <Relationships />
       <CharacterTraits />
     </Character>
-    <Character UUID="B771DC71-8BF5-4B28-ACE8-7907974BF7F0" Name="Laura Wingfield" Id="2" Role="Daughter" StoryRole="" Archetype="" Age="" Sex="" Eyes="" Hair="" Weight="" CharHeight="" Build="" Complexion="" Race="" Nationality="" Health="" Enneagram="" Intelligence="" Values="" Abnormality="" Focus="" Adventureousness="" Aggression="" Confidence="" Conscientiousness="" Creativity="" Dominance="" Enthusiasm="" Assurance="" Sensitivity="" Shrewdness="" Sociability="" Stability="" CharacterSketch="A childhood illness has left her crippled, one leg slightly shorter than the other, and held in a brace. This defect need not be more than suggested on the stage. Stemming from this, Laura's separation increases till she is like a piece of her own glass collection, too exquisitely fragile to move from the shelf." PhysNotes="" Appearance="" Economic="" Ethnic="" Religion="" PsychNotes="" Work="" Likes="" Habits="" Abilities="" Flaw="" BackStory="">
+    <Character UUID="B771DC71-8BF5-4B28-ACE8-7907974BF7F0" Name="Laura Wingfield" Id="2" Role="Daughter" StoryRole="" Archetype="" Age="" Sex="" Eyes="" Hair="" Weight="" CharHeight="" Build="" Complexion="" Race="" Nationality="" Health="" Enneagram="" Intelligence="" Values="" Abnormality="" Focus="" Adventureousness="" Aggression="" Confidence="" Conscientiousness="" Creativity="" Dominance="" Enthusiasm="" Assurance="" Sensitivity="" Shrewdness="" Sociability="" Stability="" CharacterSketch="A childhood illness has left her crippled, one leg slightly shorter than the other, and held in a brace. This defect need not be more than suggested on the stage. Stemming from this, Laura's separation increases till she is like a piece of her own glass collection, too exquisitely fragile to move from the shelf." PhysNotes="" Appearance="" Economic="" Ethnic="" Religion="" PsychNotes="" Work="" Notes="" Flaw="" BackStory="">
       <Relationships />
       <CharacterTraits />
     </Character>
-    <Character UUID="44862F2A-A517-4611-B174-4FE76CBF8456" Name="Tom Wingfield" Id="3" Role="Son" StoryRole="" Archetype="" Age="" Sex="" Eyes="" Hair="" Weight="" CharHeight="" Build="" Complexion="" Race="" Nationality="" Health="" Enneagram="" Intelligence="" Values="" Abnormality="" Focus="" Adventureousness="" Aggression="" Confidence="" Conscientiousness="" Creativity="" Dominance="" Enthusiasm="" Assurance="" Sensitivity="" Shrewdness="" Sociability="" Stability="" CharacterSketch="Narrator of the play.&#xD;&#xA;&#xD;&#xA;A poet with a job in a warehouse. His nature is not remorseless, but to escape from a trap he has to act without pity." PhysNotes="" Appearance="" Economic="" Ethnic="" Religion="" PsychNotes="" Work="" Likes="" Habits="" Abilities="" Flaw="" BackStory="">
+    <Character UUID="44862F2A-A517-4611-B174-4FE76CBF8456" Name="Tom Wingfield" Id="3" Role="Son" StoryRole="" Archetype="" Age="" Sex="" Eyes="" Hair="" Weight="" CharHeight="" Build="" Complexion="" Race="" Nationality="" Health="" Enneagram="" Intelligence="" Values="" Abnormality="" Focus="" Adventureousness="" Aggression="" Confidence="" Conscientiousness="" Creativity="" Dominance="" Enthusiasm="" Assurance="" Sensitivity="" Shrewdness="" Sociability="" Stability="" CharacterSketch="Narrator of the play.&#xD;&#xA;&#xD;&#xA;A poet with a job in a warehouse. His nature is not remorseless, but to escape from a trap he has to act without pity." PhysNotes="" Appearance="" Economic="" Ethnic="" Religion="" PsychNotes="" Work="" Notes="" Flaw="" BackStory="">
       <Relationships />
       <CharacterTraits />
     </Character>
-    <Character UUID="DEDF1DAF-4572-4540-B40E-A602BD6105A3" Name="Jim O'Connor" Id="4" Role="Gentleman Caller" StoryRole="" Archetype="" Age="" Sex="" Eyes="" Hair="" Weight="" CharHeight="" Build="" Complexion="" Race="" Nationality="" Health="" Enneagram="" Intelligence="" Values="" Abnormality="" Focus="" Adventureousness="" Aggression="" Confidence="" Conscientiousness="" Creativity="" Dominance="" Enthusiasm="" Assurance="" Sensitivity="" Shrewdness="" Sociability="" Stability="" CharacterSketch="A nice, ordinary, young man." PhysNotes="" Appearance="" Economic="" Ethnic="" Religion="" PsychNotes="" Work="" Likes="" Habits="" Abilities="" Flaw="" BackStory="">
+    <Character UUID="DEDF1DAF-4572-4540-B40E-A602BD6105A3" Name="Jim O'Connor" Id="4" Role="Gentleman Caller" StoryRole="" Archetype="" Age="" Sex="" Eyes="" Hair="" Weight="" CharHeight="" Build="" Complexion="" Race="" Nationality="" Health="" Enneagram="" Intelligence="" Values="" Abnormality="" Focus="" Adventureousness="" Aggression="" Confidence="" Conscientiousness="" Creativity="" Dominance="" Enthusiasm="" Assurance="" Sensitivity="" Shrewdness="" Sociability="" Stability="" CharacterSketch="A nice, ordinary, young man." PhysNotes="" Appearance="" Economic="" Ethnic="" Religion="" PsychNotes="" Work="" Notes="" Flaw="" BackStory="">
       <Relationships />
       <CharacterTraits />
     </Character>
     <Setting UUID="4035FC67-D0D0-46C8-B636-8D153339CC38" Name="Alley in St. Louis" Id="1" Locale="" Season="" Period="" Lighting="" Weather="" Temperature="" Prop1="cigarettes, matches" Prop2="" Prop3="" Prop4="" Summary="" Sights="Dark, grim rear wall of the Wingfield tenement, flanked on both sides by shadowy narrow alleys which run into murky canyons of tangled clotheslines, garbage cans, &amp; neighboring fire escapes." Sounds="" Touch="" SmellTaste="" Notes="The fire escape is a symbol of entrapment and escape." />
     <Setting UUID="A76B8607-F82E-4C4A-A32A-DBA65AFD1D40" Name="Wingfield apartment" Id="2" Locale="" Season="" Period="" Lighting="dim" Weather="" Temperature="" Prop1="(see notes)" Prop2="" Prop3="" Prop4="" Summary="" Sights="" Sounds="" Touch="" SmellTaste="" Notes="Located in the rear of the building, facing an alley, entered by a fire escape.&#xD;&#xA;&#xD;&#xA;Nearest the audience is the living room (also a sleeping room for Laura). Just beyonda wide arch is the dining room.&#xD;&#xA;&#xD;&#xA;Props for living room:  Sofa-bed, whatnot shelf holding scores of transparent glass animals, a large photo of father in military uniform hangs to left of archway, near photo is typewriter keyboard chart and Gregg shorthand diagram, an upright typewriter on a small table beneath charts.&#xD;&#xA;&#xD;&#xA;Props for dining room:  Drop-leaf table, chairs&#xD;&#xA;" />
-    <PlotPoint UUID="85558512-FE73-4B25-801F-497240A6B887" Name="Introduction to the Play" Id="1" Viewpoint="" Date="now" Time="" Setting="Alley in St. Louis" SceneType="" Char1="" Char2="" Char3="" Role1="" Role2="" Role3="" ScenePurpose="" ValueExchange="" Protagonist="" ProtagEmotion="" ProtagGoal="" Antagonist="" AntagEmotion="" AntagGoal="" Opposition="" Outcome="" Emotion="" NewGoal="" Remarks="[FILE:remarks.rtf]" Events="" Consequences="" Significance="" Realization="" Review="" Notes="">
+    <Scene UUID="85558512-FE73-4B25-801F-497240A6B887" Name="Introduction to the Play" Id="1" Viewpoint="" Date="now" Time="" Setting="Alley in St. Louis" SceneType="" Char1="" Char2="" Char3="" Role1="" Role2="" Role3="" ScenePurpose="" ValueExchange="" Protagonist="" ProtagEmotion="" ProtagGoal="" Antagonist="" AntagEmotion="" AntagGoal="" Opposition="" Outcome="" Emotion="" NewGoal="" Remarks="[FILE:remarks.rtf]" Events="" Consequences="" Significance="" Realization="" Review="" Notes="">
       <CastMembers>
         <Member>44862f2a-a517-4611-b174-4fe76cbf8456</Member>
       </CastMembers>
-    </PlotPoint>
-    <PlotPoint UUID="C0102E9F-54EE-4800-98DD-D14B62A27FA1" Name="Scene I - Introduction of Characters" Id="2" Viewpoint="" Date="" Time="luncheon" Setting="Wingfield apartment" SceneType="" Char1="" Char2="" Char3="" Role1="" Role2="" Role3="" ScenePurpose="" ValueExchange="" Protagonist="" ProtagEmotion="" ProtagGoal="" Antagonist="" AntagEmotion="" AntagGoal="" Opposition="" Outcome="" Emotion="" NewGoal="" Remarks="Amanda calls Tom to come for the meal. After he appears, she hounds him about his eating habits. He objects and leaves the table to smoke. She scolds him about smoking.&#xD;&#xA;Laura rises to bring in dessert. Amanda tells her &quot;No sister, no, sister - you be the lady this time and I'll be the darky. Resume your seat, little sister - I want you to stay fresh and pretty - for gentlemen callers.&quot; Laura states that she is not expecting any gentlemen callers which leads Amanda into a reminiscence of one Sunday afternoon in Blue Mountain and her 17 callers. Laura offers to clear the table, but again Amanda declines due to the immenent arrival of Laura's gentlemen callers. When Laura again states that none are expected, Amanda is shocked. Laura turns to Tom with a faint, apologetic smile. Her voice catches a little. &quot;Mother's afraid I'm going to be an old maid.&quot;" Events="" Consequences="" Significance="" Realization="" Review="" Notes="">
+    </Scene>
+    <Scene UUID="C0102E9F-54EE-4800-98DD-D14B62A27FA1" Name="Scene I - Introduction of Characters" Id="2" Viewpoint="" Date="" Time="luncheon" Setting="" SceneType="" Char1="" Char2="" Char3="" Role1="" Role2="" Role3="" ScenePurpose="" ValueExchange="" Protagonist="" ProtagEmotion="" ProtagGoal="" Antagonist="" AntagEmotion="" AntagGoal="" Opposition="" Outcome="" Emotion="" NewGoal="" Remarks="[FILE:remarks.rtf]" Events="" Consequences="" Significance="" Realization="" Review="" Notes="">
+      <CastMembers>
+        <Member>d880c022-730f-4ac2-8aec-96f8e059e24d</Member>
+        <Member>b771dc71-8bf5-4b28-ace8-7907974bf7f0</Member>
+        <Member>44862f2a-a517-4611-b174-4fe76cbf8456</Member>
+      </CastMembers>
+    </Scene>
+    <Scene UUID="A569528A-03A4-4FE0-96D0-3C3A86828887" Name="Scene II - Blue Roses" Id="3" Viewpoint="" Date="" Time="afternoon" Setting="Wingfield apartment" SceneType="" Char1="" Char2="" Char3="" Role1="" Role2="" Role3="" ScenePurpose="" ValueExchange="" Protagonist="" ProtagEmotion="" ProtagGoal="" Antagonist="" AntagEmotion="" AntagGoal="" Opposition="" Outcome="" Emotion="" NewGoal="" Remarks="[FILE:remarks.rtf]" Events="" Consequences="" Significance="" Realization="" Review="" Notes="">
+      <CastMembers>
+        <Member>Laura Wingfield</Member>
+        <Member>Amanda Wingfield</Member>
+      </CastMembers>
+    </Scene>
+    <Scene UUID="4BA95525-BDE3-4A85-84FA-869A0BD74F71" Name="Scene III - After the fiasco" Id="4" Viewpoint="" Date="" Time="" Setting="" SceneType="" Char1="" Char2="" Char3="" Role1="" Role2="" Role3="" ScenePurpose="" ValueExchange="" Protagonist="" ProtagEmotion="" ProtagGoal="" Antagonist="" AntagEmotion="" AntagGoal="" Opposition="" Outcome="" Emotion="" NewGoal="" Remarks="[FILE:remarks.rtf]" Events="" Consequences="" Significance="" Realization="" Review="" Notes="">
+      <CastMembers>
+        <Member>44862f2a-a517-4611-b174-4fe76cbf8456</Member>
+        <Member>d880c022-730f-4ac2-8aec-96f8e059e24d</Member>
+        <Member>b771dc71-8bf5-4b28-ace8-7907974bf7f0</Member>
+      </CastMembers>
+    </Scene>
+    <Scene UUID="613D145D-4F5E-4680-9A1D-515F06A9F39E" Name="Scene IV - Plans &amp; Provisions" Id="5" Viewpoint="" Date="" Time="" Setting="" SceneType="" Char1="" Char2="" Char3="" Role1="" Role2="" Role3="" ScenePurpose="" ValueExchange="" Protagonist="" ProtagEmotion="" ProtagGoal="" Antagonist="" AntagEmotion="" AntagGoal="" Opposition="" Outcome="" Emotion="" NewGoal="" Remarks="[FILE:remarks.rtf]" Events="" Consequences="" Significance="" Realization="" Review="" Notes="">
+      <CastMembers>
+        <Member>44862f2a-a517-4611-b174-4fe76cbf8456</Member>
+        <Member>b771dc71-8bf5-4b28-ace8-7907974bf7f0</Member>
+        <Member>d880c022-730f-4ac2-8aec-96f8e059e24d</Member>
+      </CastMembers>
+    </Scene>
+    <Scene UUID="9ACC08B8-8EA6-4E3D-98EA-C5B8FA3648BD" Name="Scene V - Annunciation" Id="6" Viewpoint="" Date="" Time="early dusk" Setting="Wingfield apartment" SceneType="" Char1="" Char2="" Char3="" Role1="" Role2="" Role3="" ScenePurpose="" ValueExchange="" Protagonist="" ProtagEmotion="" ProtagGoal="" Antagonist="" AntagEmotion="" AntagGoal="" Opposition="" Outcome="" Emotion="" NewGoal="" Remarks="[FILE:remarks.rtf]" Events="" Consequences="" Significance="" Realization="" Review="" Notes="">
       <CastMembers>
         <Member>Amanda Wingfield</Member>
-        <Member>Laura Wingfield</Member>
         <Member>Tom Wingfield</Member>
-      </CastMembers>
-    </PlotPoint>
-    <PlotPoint UUID="A569528A-03A4-4FE0-96D0-3C3A86828887" Name="Scene II - Blue Roses" Id="3" Viewpoint="" Date="" Time="afternoon" Setting="Wingfield apartment" SceneType="" Char1="" Char2="" Char3="" Role1="" Role2="" Role3="" ScenePurpose="" ValueExchange="" Protagonist="" ProtagEmotion="" ProtagGoal="" Antagonist="" AntagEmotion="" AntagGoal="" Opposition="" Outcome="" Emotion="" NewGoal="" Remarks="[FILE:remarks.rtf]" Events="" Consequences="" Significance="" Realization="" Review="" Notes="">
-      <CastMembers>
-        <Member>Laura Wingfield</Member>
-        <Member>Amanda Wingfield</Member>
-      </CastMembers>
-    </PlotPoint>
-    <PlotPoint UUID="4BA95525-BDE3-4A85-84FA-869A0BD74F71" Name="Scene III - After the fiasco" Id="4" Viewpoint="" Date="" Time="" Setting="" SceneType="" Char1="" Char2="" Char3="" Role1="" Role2="" Role3="" ScenePurpose="" ValueExchange="" Protagonist="" ProtagEmotion="" ProtagGoal="" Antagonist="" AntagEmotion="" AntagGoal="" Opposition="" Outcome="" Emotion="" NewGoal="" Remarks="[FILE:remarks.rtf]" Events="" Consequences="" Significance="" Realization="" Review="" Notes="">
-      <CastMembers>
-        <Member>Tom Wingfield</Member>
-        <Member>Amanda Wingfield</Member>
         <Member>Laura Wingfield</Member>
       </CastMembers>
-    </PlotPoint>
-    <PlotPoint UUID="613D145D-4F5E-4680-9A1D-515F06A9F39E" Name="Scene IV - Plans &amp; Provisions" Id="5" Viewpoint="" Date="" Time="" Setting="" SceneType="" Char1="" Char2="" Char3="" Role1="" Role2="" Role3="" ScenePurpose="" ValueExchange="" Protagonist="" ProtagEmotion="" ProtagGoal="" Antagonist="" AntagEmotion="" AntagGoal="" Opposition="" Outcome="" Emotion="" NewGoal="" Remarks="[FILE:remarks.rtf]" Events="" Consequences="" Significance="" Realization="" Review="" Notes="">
-      <CastMembers>
-        <Member>Tom Wingfield</Member>
-        <Member>Laura Wingfield</Member>
-        <Member>Amanda Wingfield</Member>
-      </CastMembers>
-    </PlotPoint>
-    <PlotPoint UUID="9ACC08B8-8EA6-4E3D-98EA-C5B8FA3648BD" Name="Scene V - Annunciation" Id="6" Viewpoint="" Date="" Time="early dusk" Setting="Wingfield apartment" SceneType="" Char1="" Char2="" Char3="" Role1="" Role2="" Role3="" ScenePurpose="" ValueExchange="" Protagonist="" ProtagEmotion="" ProtagGoal="" Antagonist="" AntagEmotion="" AntagGoal="" Opposition="" Outcome="" Emotion="" NewGoal="" Remarks="[FILE:remarks.rtf]" Events="" Consequences="" Significance="" Realization="" Review="" Notes="">
-      <CastMembers>
-        <Member>Amanda Wingfield</Member>
-        <Member>Tom Wingfield</Member>
-        <Member>Laura Wingfield</Member>
-      </CastMembers>
-    </PlotPoint>
-    <PlotPoint UUID="5E2014F7-284F-4128-92D9-7A95D7118A1E" Name="Scene VI - Terror" Id="7" Viewpoint="" Date="next eveni" Time="" Setting="Wingfield apartment" SceneType="" Char1="" Char2="" Char3="" Role1="" Role2="" Role3="" ScenePurpose="" ValueExchange="" Protagonist="" ProtagEmotion="" ProtagGoal="" Antagonist="" AntagEmotion="" AntagGoal="" Opposition="" Outcome="" Emotion="" NewGoal="" Remarks="[FILE:remarks.rtf]" Events="" Consequences="" Significance="" Realization="" Review="" Notes="">
+    </Scene>
+    <Scene UUID="5E2014F7-284F-4128-92D9-7A95D7118A1E" Name="Scene VI - Terror" Id="7" Viewpoint="" Date="next eveni" Time="" Setting="Wingfield apartment" SceneType="" Char1="" Char2="" Char3="" Role1="" Role2="" Role3="" ScenePurpose="" ValueExchange="" Protagonist="" ProtagEmotion="" ProtagGoal="" Antagonist="" AntagEmotion="" AntagGoal="" Opposition="" Outcome="" Emotion="" NewGoal="" Remarks="[FILE:remarks.rtf]" Events="" Consequences="" Significance="" Realization="" Review="" Notes="">
       <CastMembers>
         <Member>Amanda Wingfield</Member>
         <Member>Tom Wingfield</Member>
         <Member>Jim O'Connor</Member>
       </CastMembers>
-    </PlotPoint>
-    <PlotPoint UUID="83D4E969-1A69-4E00-9C32-0B7A7899476E" Name="Scene VII - Wonder &amp; Despair" Id="8" Viewpoint="" Date="" Time="1/2 hr. la" Setting="Wingfield apartment" SceneType="" Char1="" Char2="" Char3="" Role1="" Role2="" Role3="" ScenePurpose="" ValueExchange="" Protagonist="" ProtagEmotion="" ProtagGoal="" Antagonist="" AntagEmotion="" AntagGoal="" Opposition="" Outcome="" Emotion="" NewGoal="" Remarks="[FILE:remarks.rtf]" Events="" Consequences="" Significance="" Realization="" Review="" Notes="">
+    </Scene>
+    <Scene UUID="83D4E969-1A69-4E00-9C32-0B7A7899476E" Name="Scene VII - Wonder &amp; Despair" Id="8" Viewpoint="" Date="" Time="1/2 hr. la" Setting="Wingfield apartment" SceneType="" Char1="" Char2="" Char3="" Role1="" Role2="" Role3="" ScenePurpose="" ValueExchange="" Protagonist="" ProtagEmotion="" ProtagGoal="" Antagonist="" AntagEmotion="" AntagGoal="" Opposition="" Outcome="" Emotion="" NewGoal="" Remarks="[FILE:remarks.rtf]" Events="" Consequences="" Significance="" Realization="" Review="" Notes="">
       <CastMembers>
         <Member>Laura Wingfield</Member>
         <Member>Jim O'Connor</Member>
       </CastMembers>
-    </PlotPoint>
+    </Scene>
     <TrashCan UUID="0F5E29EC-F800-481D-BCF4-83330EBC2A22" Name="Deleted Story Elements" />
     <Section UUID="55F4D874-4E35-495C-A923-5E32D54310ED" Name="Narrative View" Notes="" />
     <TrashCan UUID="1E1DCA46-5B7D-441C-93FD-065D81B7D2EB" Name="Deleted Story Elements" />
@@ -96,29 +96,29 @@
         <StoryNode UUID="4035FC67-D0D0-46C8-B636-8D153339CC38" Type="Setting" Name="Alley in St. Louis" IsExpanded="True" IsSelected="False" IsRoot="False" />
         <StoryNode UUID="A76B8607-F82E-4C4A-A32A-DBA65AFD1D40" Type="Setting" Name="Wingfield apartment" IsExpanded="True" IsSelected="False" IsRoot="False" />
       </StoryNode>
-      <StoryNode UUID="29B2E3CB-850E-4EAB-BDE3-5332F52F0812" Type="Folder" Name="Plot Points" IsExpanded="True" IsSelected="False" IsRoot="False">
-        <StoryNode UUID="85558512-FE73-4B25-801F-497240A6B887" Type="PlotPoint" Name="Introduction to the Play" IsExpanded="True" IsSelected="False" IsRoot="False" />
-        <StoryNode UUID="C0102E9F-54EE-4800-98DD-D14B62A27FA1" Type="PlotPoint" Name="Scene I - Introduction of Characters" IsExpanded="False" IsSelected="False" IsRoot="False" />
-        <StoryNode UUID="A569528A-03A4-4FE0-96D0-3C3A86828887" Type="PlotPoint" Name="Scene II - Blue Roses" IsExpanded="False" IsSelected="False" IsRoot="False" />
-        <StoryNode UUID="4BA95525-BDE3-4A85-84FA-869A0BD74F71" Type="PlotPoint" Name="Scene III - After the fiasco" IsExpanded="False" IsSelected="False" IsRoot="False" />
-        <StoryNode UUID="613D145D-4F5E-4680-9A1D-515F06A9F39E" Type="PlotPoint" Name="Scene IV - Plans &amp; Provisions" IsExpanded="False" IsSelected="False" IsRoot="False" />
-        <StoryNode UUID="9ACC08B8-8EA6-4E3D-98EA-C5B8FA3648BD" Type="PlotPoint" Name="Scene V - Annunciation" IsExpanded="False" IsSelected="False" IsRoot="False" />
-        <StoryNode UUID="5E2014F7-284F-4128-92D9-7A95D7118A1E" Type="PlotPoint" Name="Scene VI - Terror" IsExpanded="False" IsSelected="False" IsRoot="False" />
-        <StoryNode UUID="83D4E969-1A69-4E00-9C32-0B7A7899476E" Type="PlotPoint" Name="Scene VII - Wonder &amp; Despair" IsExpanded="False" IsSelected="False" IsRoot="False" />
+      <StoryNode UUID="29B2E3CB-850E-4EAB-BDE3-5332F52F0812" Type="Folder" Name="Scenes" IsExpanded="True" IsSelected="False" IsRoot="False">
+        <StoryNode UUID="85558512-FE73-4B25-801F-497240A6B887" Type="Scene" Name="Introduction to the Play" IsExpanded="True" IsSelected="False" IsRoot="False" />
+        <StoryNode UUID="C0102E9F-54EE-4800-98DD-D14B62A27FA1" Type="Scene" Name="Scene I - Introduction of Characters" IsExpanded="True" IsSelected="False" IsRoot="False" />
+        <StoryNode UUID="A569528A-03A4-4FE0-96D0-3C3A86828887" Type="Scene" Name="Scene II - Blue Roses" IsExpanded="False" IsSelected="False" IsRoot="False" />
+        <StoryNode UUID="4BA95525-BDE3-4A85-84FA-869A0BD74F71" Type="Scene" Name="Scene III - After the fiasco" IsExpanded="True" IsSelected="False" IsRoot="False" />
+        <StoryNode UUID="613D145D-4F5E-4680-9A1D-515F06A9F39E" Type="Scene" Name="Scene IV - Plans &amp; Provisions" IsExpanded="True" IsSelected="False" IsRoot="False" />
+        <StoryNode UUID="9ACC08B8-8EA6-4E3D-98EA-C5B8FA3648BD" Type="Scene" Name="Scene V - Annunciation" IsExpanded="False" IsSelected="False" IsRoot="False" />
+        <StoryNode UUID="5E2014F7-284F-4128-92D9-7A95D7118A1E" Type="Scene" Name="Scene VI - Terror" IsExpanded="False" IsSelected="False" IsRoot="False" />
+        <StoryNode UUID="83D4E969-1A69-4E00-9C32-0B7A7899476E" Type="Scene" Name="Scene VII - Wonder &amp; Despair" IsExpanded="False" IsSelected="False" IsRoot="False" />
       </StoryNode>
     </StoryNode>
     <StoryNode UUID="0F5E29EC-F800-481D-BCF4-83330EBC2A22" Type="TrashCan" Name="Deleted Story Elements" IsExpanded="False" IsSelected="False" IsRoot="True" />
   </Explorer>
   <Narrator>
     <StoryNode UUID="55F4D874-4E35-495C-A923-5E32D54310ED" Type="Section" Name="Narrative View" IsExpanded="False" IsSelected="False" IsRoot="True">
-      <StoryNode UUID="85558512-FE73-4B25-801F-497240A6B887" Type="PlotPoint" Name="Introduction to the Play" IsExpanded="False" IsSelected="False" IsRoot="False" />
-      <StoryNode UUID="C0102E9F-54EE-4800-98DD-D14B62A27FA1" Type="PlotPoint" Name="Scene I - Introduction of Characters" IsExpanded="False" IsSelected="False" IsRoot="False" />
-      <StoryNode UUID="A569528A-03A4-4FE0-96D0-3C3A86828887" Type="PlotPoint" Name="Scene II - Blue Roses" IsExpanded="False" IsSelected="False" IsRoot="False" />
-      <StoryNode UUID="4BA95525-BDE3-4A85-84FA-869A0BD74F71" Type="PlotPoint" Name="Scene III - After the fiasco" IsExpanded="False" IsSelected="False" IsRoot="False" />
-      <StoryNode UUID="613D145D-4F5E-4680-9A1D-515F06A9F39E" Type="PlotPoint" Name="Scene IV - Plans &amp; Provisions" IsExpanded="False" IsSelected="False" IsRoot="False" />
-      <StoryNode UUID="9ACC08B8-8EA6-4E3D-98EA-C5B8FA3648BD" Type="PlotPoint" Name="Scene V - Annunciation" IsExpanded="False" IsSelected="False" IsRoot="False" />
-      <StoryNode UUID="5E2014F7-284F-4128-92D9-7A95D7118A1E" Type="PlotPoint" Name="Scene VI - Terror" IsExpanded="False" IsSelected="False" IsRoot="False" />
-      <StoryNode UUID="83D4E969-1A69-4E00-9C32-0B7A7899476E" Type="PlotPoint" Name="Scene VII - Wonder &amp; Despair" IsExpanded="False" IsSelected="False" IsRoot="False" />
+      <StoryNode UUID="85558512-FE73-4B25-801F-497240A6B887" Type="Scene" Name="Introduction to the Play" IsExpanded="False" IsSelected="False" IsRoot="False" />
+      <StoryNode UUID="C0102E9F-54EE-4800-98DD-D14B62A27FA1" Type="Scene" Name="Scene I - Introduction of Characters" IsExpanded="False" IsSelected="False" IsRoot="False" />
+      <StoryNode UUID="A569528A-03A4-4FE0-96D0-3C3A86828887" Type="Scene" Name="Scene II - Blue Roses" IsExpanded="False" IsSelected="False" IsRoot="False" />
+      <StoryNode UUID="4BA95525-BDE3-4A85-84FA-869A0BD74F71" Type="Scene" Name="Scene III - After the fiasco" IsExpanded="False" IsSelected="False" IsRoot="False" />
+      <StoryNode UUID="613D145D-4F5E-4680-9A1D-515F06A9F39E" Type="Scene" Name="Scene IV - Plans &amp; Provisions" IsExpanded="False" IsSelected="False" IsRoot="False" />
+      <StoryNode UUID="9ACC08B8-8EA6-4E3D-98EA-C5B8FA3648BD" Type="Scene" Name="Scene V - Annunciation" IsExpanded="False" IsSelected="False" IsRoot="False" />
+      <StoryNode UUID="5E2014F7-284F-4128-92D9-7A95D7118A1E" Type="Scene" Name="Scene VI - Terror" IsExpanded="False" IsSelected="False" IsRoot="False" />
+      <StoryNode UUID="83D4E969-1A69-4E00-9C32-0B7A7899476E" Type="Scene" Name="Scene VII - Wonder &amp; Despair" IsExpanded="False" IsSelected="False" IsRoot="False" />
     </StoryNode>
     <StoryNode UUID="1E1DCA46-5B7D-441C-93FD-065D81B7D2EB" Type="TrashCan" Name="Deleted Story Elements" IsExpanded="False" IsSelected="False" IsRoot="True" />
   </Narrator>
