@@ -433,8 +433,8 @@ namespace StoryBuilder.ViewModels
                         StoryNodeItem charactersNode = new(characters, overviewNode);
                         StoryElement settings = new FolderModel("Settings", StoryModel);
                         StoryNodeItem settingsNode = new(settings, overviewNode);
-                        StoryElement plotpoints = new FolderModel("Plot Points", StoryModel);
-                        StoryNodeItem plotpointsNode = new(plotpoints, overviewNode);
+                        StoryElement scene = new FolderModel("Scene", StoryModel);
+                        StoryNodeItem plotpointsNode = new(scene, overviewNode);
                         break;
                     case "External/Internal Problems":
                         StoryElement externalProblem = new ProblemModel("External Problem", StoryModel);
