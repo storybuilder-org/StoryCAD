@@ -156,19 +156,7 @@ namespace StoryBuilder.ViewModels
         public string NewCastMember
         {
             get => _newCastMember;
-            set
-            {
-                if (CastMemberExists(value))
-                {
-                    _smsg = new StatusMessage("Character is already in scene cast", 200);
-                    Messenger.Send(new StatusChangedMessage(_smsg));
-                }
-                SetProperty(ref _newCastMember, value);
-                StoryElement element = StringToStoryElement(value);
-                string msg = String.Format("New cast member selected", element.Name);
-                var smsg = new StatusMessage(msg, 200);
-                Messenger.Send(new StatusChangedMessage(smsg));
-            }
+            set => SetProperty(ref _newCastMember, value);
         }
 
         private string _role1;
@@ -215,7 +203,6 @@ namespace StoryBuilder.ViewModels
             get => _valueExchange;
             set => SetProperty(ref _valueExchange, value);
         }
-
 
         private string _events;
         public string Events
@@ -481,17 +468,25 @@ namespace StoryBuilder.ViewModels
 
         private void AddCastMember()
         {
+            // Edit the character to add
+            StoryElement element = StringToStoryElement(NewCastMember);
+            if (NewCastMember == null)
+            {
+                var _smsg = new StatusMessage("Select a character to add to scene cast, 200", 200);
+                Messenger.Send(new StatusChangedMessage(_smsg));
+                return;
+            }
             if (CastMemberExists(NewCastMember))
             {
                 _smsg = new StatusMessage("Character is already in scene cast", 200);
                 Messenger.Send(new StatusChangedMessage(_smsg));
                 return;
             }
-            StoryElement element = StringToStoryElement(NewCastMember);
-            string msg = String.Format("New cast member {0} added", element.Name);
+
+            CastMembers.Add(element);
+            string msg = string.Format("New cast member {0} added", element.Name);
             _smsg = new StatusMessage(msg, 200);
             Messenger.Send(new StatusChangedMessage(_smsg));
-            CastMembers.Add(StringToStoryElement(NewCastMember));
             _logger.Log(LogLevel.Info, msg);
         }
 
@@ -517,9 +512,16 @@ namespace StoryBuilder.ViewModels
                 return null;
             if (value.Equals(string.Empty))
                 return null;
+
+            // Look for the StoryElement corresponding to the passed guid
+            // (This is the normal approach)
             // Get the current StoryModel's StoryElementsCollection
             ShellViewModel shell = Ioc.Default.GetService<ShellViewModel>();
             StoryElementCollection elements = shell.StoryModel.StoryElements;
+            if (Guid.TryParse(value.ToString(), out var guid))
+                if (elements.StoryElementGuids.ContainsKey(guid))
+                    return elements.StoryElementGuids[guid];
+
             // legacy: locate the StoryElement from its Name
             foreach (StoryElement element in elements)  // Character or Setting??? Search both?
             {
@@ -529,14 +531,8 @@ namespace StoryBuilder.ViewModels
                         return element;
                 }
             }
-            // Look for the StoryElement corresponding to the passed guid
-            // (This is the normal approach)
-            if (Guid.TryParse(value.ToString(), out var guid))
-                if (elements.StoryElementGuids.ContainsKey(guid))
-                    return elements.StoryElementGuids[guid];
             return null;  // Not found
         }
-
         #endregion
 
         #region ComboBox ItemsSource collections
