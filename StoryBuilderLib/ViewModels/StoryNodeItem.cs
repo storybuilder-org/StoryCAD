@@ -30,11 +30,7 @@ namespace StoryBuilder.ViewModels
     /// lists of StoryNodeItems (and their counterpart StoryElements), a StoryExplorer collection which
     /// contains all Story Elements (the StoryOverview and all Problem, Character, Setting, Scene
     /// and Folder elements) and a Narrator View which contains just Section (chapter, etc) and
-<<<<<<< HEAD
-    /// selected Scebe elements and which represents the story as it's being narrated.
-=======
     /// selected Scene elements and which represents the story as it's being narrated.
->>>>>>> 5add92b8a324cdef79fafa13deba6aab1854b4d0
     /// 
     /// In the Shell, the user can switch between the two views by loading one or the other model.
     /// NavigationTree will this point to one or the other of the collections. These two 'submodels' 
@@ -419,6 +415,10 @@ namespace StoryBuilder.ViewModels
                     case "Character":
                         Type = StoryItemType.Character;
                         Symbol = Symbol.Contact;
+                        break;
+                    case "PlotPoint":   // Legacy: PlotPoint was renamed to Scene   
+                        Type = StoryItemType.Scene;
+                        Symbol = Symbol.AllApps;
                         break;
                     case "Scene":
                         Type = StoryItemType.Scene;

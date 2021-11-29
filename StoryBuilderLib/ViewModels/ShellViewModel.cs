@@ -446,8 +446,8 @@ namespace StoryBuilder.ViewModels
                         StoryNodeItem charactersNode = new(characters, overviewNode);
                         StoryElement settings = new FolderModel("Settings", StoryModel);
                         StoryNodeItem settingsNode = new(settings, overviewNode);
-                        StoryElement plotpoints = new FolderModel("Plot Points", StoryModel);
-                        StoryNodeItem plotpointsNode = new(plotpoints, overviewNode);
+                        StoryElement scene = new FolderModel("Scene", StoryModel);
+                        StoryNodeItem plotpointsNode = new(scene, overviewNode);
                         break;
                     case "External/Internal Problems":
                         StoryElement externalProblem = new ProblemModel("External Problem", StoryModel);
@@ -802,7 +802,8 @@ namespace StoryBuilder.ViewModels
                     _story.ProjectFilename = file.Name;
                     _story.ProjectFile = file;
                     // Make sure files folder exists...
-                    _story.FilesFolder = await _story.ProjectFolder.GetFolderAsync("files");
+                    //_story.FilesFolder = await _story.ProjectFolder.GetFolderAsync("files");
+                    _story.FilesFolder = await _story.ProjectFolder.CreateFolderAsync("files", CreationCollisionOption.OpenIfExists);
                     //TODO: Back up at the right place (after open?)
                     await BackupProject();
                     StoryReader rdr = Ioc.Default.GetService<StoryReader>();
@@ -1632,11 +1633,7 @@ namespace StoryBuilder.ViewModels
         }
 
         /// <summary>
-<<<<<<< HEAD
-        /// Add a Scebe StoryNodeItem to the end of the Narrative view
-=======
         /// Add a Scene StoryNodeItem to the end of the Narrative view
->>>>>>> 5add92b8a324cdef79fafa13deba6aab1854b4d0
         /// by copying from the Scene's StoryNodeItem in the Explorer
         /// view.
         /// </summary>

@@ -137,6 +137,9 @@ namespace StoryBuilder.DAL
                     case "Setting":
                         ParseSetting(node);
                         break;
+                    case "PlotPoint":
+                        ParseScene(node);   // legacy; PlotPoint was renamed to Scene
+                        break;
                     case "Scene":
                         ParseScene(node);
                         break;
