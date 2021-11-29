@@ -415,6 +415,7 @@ namespace StoryBuilder.ViewModels
 
         internal async Task SaveModel()
         {
+            _changeable = false;
             if (_changed)
             {
                 // Story.Uuid is read-only and cannot be assigned

@@ -54,7 +54,7 @@ namespace StoryBuilder.Controls
                 else
                 {
                     Document.GetText(TextGetOptions.FormatRtf, out text);
-                    RtfText = text.TrimEnd('\0'); // remove end of string marker
+                    //RtfText = text.TrimEnd('\0'); // remove end of string marker
                 }
                 _lockChangeExecution = false;
             }
