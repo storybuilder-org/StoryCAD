@@ -6,8 +6,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
     xmlns:viewmodels="using:StoryBuilder.ViewModels"   
-    mc:Ignorable="d"
-    RequestedTheme="Light">
+    mc:Ignorable="d">
 
     <Page.Resources>
         <CommandBarFlyout x:Key="AddStoryElementFlyout" Placement="Right" x:Name="AddStoryElementCommandBarFlyout" >
@@ -84,11 +83,11 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <!-- Command Bar -->
-        <CommandBar  Background="LightGray" IsOpen="False">
+        <CommandBar  Background="{x:Bind ShellVm.SecondaryColor}" IsOpen="False">
             <CommandBar.Content>
                 <StackPanel Orientation="Horizontal">
-                    <TextBox PlaceholderText="Enter text to search for here" Width="285" Margin="0,8" Text="{x:Bind ShellVm.FilterText, Mode=TwoWay}"/>
-                    <ToggleButton Command="{x:Bind ShellVm.FilterCommand}" IsChecked="{x:Bind ShellVm.IsSearching,Mode=TwoWay}">
+                    <TextBox PlaceholderText="Enter text to search for here" Width="285" Margin="0,8" Text="{x:Bind ShellVm.FilterText, Mode=TwoWay}" VerticalAlignment="Center"/>
+                    <ToggleButton Command="{x:Bind ShellVm.FilterCommand}" IsChecked="{x:Bind ShellVm.IsSearching,Mode=TwoWay}" VerticalAlignment="Center" Margin="5">
                         <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE71E;"/>
                     </ToggleButton>
                 </StackPanel>
@@ -222,8 +221,8 @@
                                 <muxc:TreeViewItem ItemsSource="{x:Bind Children}" Background="{x:Bind Background, Mode=OneWay}"
                                 IsExpanded="{x:Bind IsExpanded, Mode=TwoWay}"
                                RightTapped="TreeViewItem_RightTapped">
-                                <StackPanel Orientation="Horizontal"  >
-                                    <SymbolIcon Symbol="{x:Bind Symbol, Mode=OneWay}" Width="16" Height="16"/>
+                                <StackPanel Orientation="Horizontal">
+                                    <SymbolIcon Symbol="{x:Bind Symbol, Mode=OneWay}" Width="20" Height="20"/>
                                     <TextBlock Margin="0,0,10,0"/>
                                     <TextBlock Text="{x:Bind Name, Mode=TwoWay}" />
                                 </StackPanel>
@@ -246,7 +245,7 @@
             </SplitView.Content>
         </SplitView>
         <!-- Status Bar -->
-        <StackPanel Grid.Row="2" Orientation="Horizontal" Background="LightGray" Margin="0,10,0,0">
+        <StackPanel Grid.Row="2" Orientation="Horizontal" Background="{x:Bind ShellVm.SecondaryColor}" Margin="0,10,0,0">
             <ComboBox IsEditable="False" Width="200"  Margin="10" ItemsSource="{x:Bind ShellVm.ViewList}" 
                       SelectionChanged="{x:Bind ShellVm.ViewChanged, Mode=OneWay}"
                       SelectedItem="{x:Bind ShellVm.SelectedView, Mode=TwoWay}" />
