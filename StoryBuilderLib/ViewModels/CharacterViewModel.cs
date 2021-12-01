@@ -457,17 +457,6 @@ namespace StoryBuilder.ViewModels
             set => SetProperty(ref _stability, value);
         }
 
-
-        // Character work data
-
-        private string _work;
-
-        public string Work
-        {
-            get => _work;
-            set => SetProperty(ref _work, value);
-        }
-
         // Character likes data
 
         private string _notes;
@@ -621,7 +610,6 @@ namespace StoryBuilder.ViewModels
             Shrewdness = Model.Shrewdness;
             Sociability = Model.Sociability;
             Stability = Model.Stability;
-            Work = Model.Work;
             Notes = Model.Notes;
             Flaw = Model.Flaw;
             BackStory = Model.BackStory;
@@ -636,7 +624,6 @@ namespace StoryBuilder.ViewModels
             Ethnic = await _rdr.GetRtfText(Model.Ethnic, Uuid);
             Religion = await _rdr.GetRtfText(Model.Religion, Uuid);
             PsychNotes = await _rdr.GetRtfText(Model.PsychNotes, Uuid);
-            Work = await _rdr.GetRtfText(Model.Work, Uuid);
             Notes = await _rdr.GetRtfText(Model.Notes, Uuid);
             Flaw = await _rdr.GetRtfText(Model.Flaw, Uuid);
             BackStory = await _rdr.GetRtfText(Model.BackStory, Uuid);
@@ -722,7 +709,6 @@ namespace StoryBuilder.ViewModels
                 Model.Ethnic = await _wtr.PutRtfText(Ethnic, Uuid, "ethnic.rtf");
                 Model.Religion = await _wtr.PutRtfText(Religion, Uuid, "religion.rtf");
                 Model.PsychNotes = await _wtr.PutRtfText(PsychNotes, Uuid, "psychnotes.rtf");
-                Model.Work = await _wtr.PutRtfText(Work, Uuid, "work.rtf");
                 Model.Notes = await _wtr.PutRtfText(Notes, Uuid, "Notes.rtf");
                 Model.Flaw = await _wtr.PutRtfText(Flaw, Uuid, "flaw.rtf");
                 Model.BackStory = await _wtr.PutRtfText(BackStory, Uuid, "backstory.rtf");
@@ -1128,7 +1114,6 @@ namespace StoryBuilder.ViewModels
             Shrewdness = string.Empty;
             Sociability = string.Empty;
             Stability = string.Empty;
-            Work = string.Empty;
             Notes = string.Empty;
             Flaw = string.Empty;
             BackStory = string.Empty;

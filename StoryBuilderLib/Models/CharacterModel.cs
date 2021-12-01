@@ -313,16 +313,6 @@ namespace StoryBuilder.Models
             set => _stability = value;
         }
 
-
-        // Character work data
-
-        private string _work;
-        public string Work
-        {
-            get => _work;
-            set => _work = value;
-        }
-
         // Character likes data
 
         private string _notes;
@@ -405,7 +395,6 @@ namespace StoryBuilder.Models
             Shrewdness = string.Empty;
             Sociability = string.Empty;
             Stability = string.Empty;
-            Work = string.Empty;
             Notes = string.Empty;
             TraitList = new List<string>();
             Flaw = string.Empty;
@@ -455,7 +444,6 @@ namespace StoryBuilder.Models
             Shrewdness = string.Empty;
             Sociability = string.Empty;
             Stability = string.Empty;
-            Work = string.Empty;
             Notes = string.Empty;
             TraitList = new List<string>();
             Flaw = string.Empty;
@@ -505,7 +493,6 @@ namespace StoryBuilder.Models
             Shrewdness = string.Empty;
             Sociability = string.Empty;
             Stability = string.Empty;
-            Work = string.Empty;
             Notes = string.Empty;
             TraitList = new List<string>();
             Flaw = string.Empty;

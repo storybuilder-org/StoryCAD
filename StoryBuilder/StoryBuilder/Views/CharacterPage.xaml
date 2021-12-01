@@ -335,12 +335,6 @@
                     </StackPanel>
                 </Grid>
             </PivotItem>
-            <PivotItem Header="Work">
-                <!-- Character work data -->
-                <usercontrols:RichEditBoxExtended Header="Work" RtfText="{x:Bind CharVm.Work, Mode=TwoWay}" AcceptsReturn="True"
-                                                  IsSpellCheckEnabled="True" TextWrapping="Wrap"
-                                                  ScrollViewer.VerticalScrollBarVisibility="Visible" />
-            </PivotItem>
             <PivotItem Header="Notes">
                 <!-- Character likes data -->
                 <usercontrols:RichEditBoxExtended Header="Notes" RtfText="{x:Bind CharVm.Notes, Mode=TwoWay}" AcceptsReturn="True"
