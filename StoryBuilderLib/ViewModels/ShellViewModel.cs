@@ -1137,17 +1137,26 @@ namespace StoryBuilder.ViewModels
                 IList<MasterPlotScene> scenes = model.MasterPlotScenes;
                 foreach (MasterPlotScene scene in scenes)
                 {
-                    SceneModel SceneVar = new SceneModel(StoryModel);
-                    SceneVar.Name = scene.SceneTitle;
-                    SceneVar.Notes = scene.Notes;
-                    StoryNodeItem newNode = new StoryNodeItem(SceneVar, RightTappedNode);
-                    _sourceChildren = RightTappedNode.Children;
-                    _sourceChildren.Add(newNode);
+                    SceneModel child = new SceneModel(StoryModel);
+                    child.Name = scene.SceneTitle;
+                    child.Remarks = "See Notes.";
+                    child.Notes = scene.Notes;
+                    // add the new SceneModel & node to the end of the target's children 
+                    StoryNodeItem newNode = new StoryNodeItem(child, RightTappedNode);
                     RightTappedNode.IsExpanded = true;
                     newNode.IsSelected = true;
                 }
+                var msg = string.Format("MasterPlot {0} inserted", masterPlotName);
+                StatusMessage = msg;
+                Logger.Log(LogLevel.Info, msg);
+                ShowChange();
             }
-            // Else canceled
+            else  // cancelledd
+            {
+                var msg = "MasterPlot cancelled";
+                StatusMessage = msg;
+                Logger.Log(LogLevel.Info, msg);
+            } 
             Logger.Log(LogLevel.Info, "MasterPlot finished");
         }
 
@@ -1161,28 +1170,41 @@ namespace StoryBuilder.ViewModels
             var result = await dialog.ShowAsync();
             DramaticSituationModel situationModel = dialog.DramaticSituationsVm.Situation;
             StoryNodeItem newNode = null;
+            string msg;
             switch (result)
             {
                 case ContentDialogResult.Primary:       // problem
                     ProblemModel problem = new ProblemModel(StoryModel);
                     problem.Name = situationModel.SituationName;
+                    problem.StoryQuestion = "See Notes.";
                     problem.Notes = situationModel.Notes;
+                    // Insert the new Problem as the target's child
                     newNode = new StoryNodeItem(problem, RightTappedNode);
+                    msg = string.Format("Problem {0} inserted", situationModel.SituationName);
+                    StatusMessage = msg;
+                    Logger.Log(LogLevel.Info, msg);
+                    ShowChange();
                     break;
                 case ContentDialogResult.Secondary:     // scene
                     SceneModel sceneVar = new SceneModel(StoryModel);
                     sceneVar.Name = situationModel.SituationName;
+                    sceneVar.Remarks = "See Notes.";
                     sceneVar.Notes = situationModel.Notes;
+                    // Insert the new Scene as the target's child
                     newNode = new StoryNodeItem(sceneVar, RightTappedNode);
+                    msg = string.Format("Scene {0} inserted", situationModel.SituationName);
+                    StatusMessage = msg;
+                    Logger.Log(LogLevel.Info, msg);
+                    ShowChange();
                     break;
                 case ContentDialogResult.None:
+                    msg = "MasterPlot cancelled";
+                    StatusMessage = msg;
+                    Logger.Log(LogLevel.Info, msg);
                     return;
             }
-            _sourceChildren = RightTappedNode.Children;
-            _sourceChildren.Add(newNode);
             RightTappedNode.IsExpanded = true;
             newNode.IsSelected = true;
-            // Else canceled
             Logger.Log(LogLevel.Info, "Dramatic Situations finished");
         }
 
