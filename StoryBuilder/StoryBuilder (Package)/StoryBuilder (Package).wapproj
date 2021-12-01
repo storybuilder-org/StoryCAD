@@ -43,7 +43,7 @@
     <AppxPackageSigningEnabled>True</AppxPackageSigningEnabled>
     <EntryPointProjectUniqueName>..\StoryBuilder\StoryBuilder.csproj</EntryPointProjectUniqueName>
     <GenerateAppInstallerFile>True</GenerateAppInstallerFile>
-    <PackageCertificateThumbprint>D8BBA30097EB7F07F5585CCB14AA6458B9F8EB7B</PackageCertificateThumbprint>
+    <PackageCertificateThumbprint>D859B0BE541EE9397D211A2D6094DB48AA7961D0</PackageCertificateThumbprint>
     <AppxPackageSigningTimestampDigestAlgorithm>SHA256</AppxPackageSigningTimestampDigestAlgorithm>
     <AppxAutoIncrementPackageRevision>True</AppxAutoIncrementPackageRevision>
     <GenerateTestArtifacts>True</GenerateTestArtifacts>
@@ -126,7 +126,6 @@
     <Content Include="Images\Wide310x150Logo.scale-150.png" />
     <Content Include="Images\Wide310x150Logo.scale-200.png" />
     <Content Include="Images\Wide310x150Logo.scale-400.png" />
-    <None Include="StoryBuilder %28Package%29_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\StoryBuilder\StoryBuilder.csproj">
@@ -135,7 +134,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.WindowsAppSDK" Version="[1.0.0-preview3]">
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.0.0">
       <IncludeAssets>build</IncludeAssets>
     </PackageReference>
   </ItemGroup>
