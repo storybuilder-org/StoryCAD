@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net5.0-windows10.0.19041.0</TargetFramework>
@@ -7,33 +7,48 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <Platforms>x86;x64;arm64</Platforms>
     <RuntimeIdentifiers>win10-x86;win10-x64;win10-arm64</RuntimeIdentifiers>
+    <PublishProfile>win10-$(Platform).pubxml</PublishProfile>
     <UseWinUI>true</UseWinUI>
+    <EnablePreviewMsixTooling>true</EnablePreviewMsixTooling>
   </PropertyGroup>
+	<ItemGroup>
+		<Content Remove="Assets\1StoreLogo.png" />
+		<Content Remove="Assets\Install\StoryBuilder.prf" />
+	</ItemGroup>
+	
   <ItemGroup>
-    <Content Remove="Assets\Install\StoryBuilder.prf" />
+    <AppxManifest Include="Package.appxmanifest">
+      <SubType>Designer</SubType>
+    </AppxManifest>
   </ItemGroup>
   <ItemGroup>
-    <None Remove="Assets\StoreLogo.png" />
+    <Content Include="Assets\SplashScreen.scale-200.png" />
+    <Content Include="Assets\LockScreenLogo.scale-200.png" />
+    <Content Include="Assets\Square150x150Logo.scale-200.png" />
+    <Content Include="Assets\Square44x44Logo.scale-200.png" />
+    <Content Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png" />
+    <Content Include="Assets\Wide310x150Logo.scale-200.png" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="CommunityToolkit.Mvvm" Version="7.1.1-preview3" />
-    <PackageReference Include="CommunityToolkit.WinUI.UI.Controls.Core" Version="7.1.1-preview3" />
-    <PackageReference Include="Microsoft.Windows.CsWinRT" Version="1.4.1" />
-    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.0.0-preview3" />
-    <PackageReference Include="NLog" Version="4.7.11" />
-    <PackageReference Include="NLog.Extensions.Logging" Version="1.7.3" />
-    <PackageReference Include="PInvoke.User32" Version="0.7.104" />
+	  <PackageReference Include="CommunityToolkit.Mvvm" Version="7.1.1-preview3" />
+	  <PackageReference Include="CommunityToolkit.WinUI.UI.Controls.Core" Version="7.1.1-preview3" />
+	  <PackageReference Include="Microsoft.Windows.CsWinRT" Version="1.4.1" />
+	  <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.0.0-preview3" />
+	  <PackageReference Include="NLog" Version="4.7.11" />
+	  <PackageReference Include="NLog.Extensions.Logging" Version="1.7.3" />
+	  <PackageReference Include="PInvoke.User32" Version="0.7.104" />
     <Manifest Include="$(ApplicationManifest)" />
   </ItemGroup>
 
-  <ItemGroup>
-      <Content Include="Assets\Install\**">
-          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </Content>
-  </ItemGroup>
+	<ItemGroup>
+		<Content Include="Assets\Install\**">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\StoryBuilderLib\StoryBuilderLib.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\..\StoryBuilderLib\StoryBuilderLib.csproj" />
+	</ItemGroup>
+	
 </Project>

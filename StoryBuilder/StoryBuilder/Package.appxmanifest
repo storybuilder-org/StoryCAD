@@ -8,13 +8,13 @@
 
   <Identity
     Name="3b76a060-3624-415f-b178-f0740b114439"
-    Publisher="CN=tcox"
-    Version="2.0.7.0" />
+    Publisher="CN=Rarisma"
+    Version="2.0.0.0" />
 
   <Properties>
     <DisplayName>StoryBuilder</DisplayName>
-    <PublisherDisplayName>tcox</PublisherDisplayName>
-    <Logo>Images\StoreLogo.png</Logo>
+    <PublisherDisplayName>The StoryBuilder team</PublisherDisplayName>
+    <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
 
   <Dependencies>
@@ -32,20 +32,12 @@
       EntryPoint="$targetentrypoint$">
       <uap:VisualElements
         DisplayName="StoryBuilder"
-        Description="StoryBuilder"
+        Description="CAD for software developers"
         BackgroundColor="transparent"
-        Square150x150Logo="Images\Square150x150Logo.png"
-        Square44x44Logo="Images\Square44x44Logo.png">
-        <uap:DefaultTile Wide310x150Logo="Images\Wide310x150Logo.png"  ShortName="StoryBuilder" Square71x71Logo="Images\SmallTile.png" Square310x310Logo="Images\LargeTile.png">
-          <uap:ShowNameOnTiles>
-            <uap:ShowOn Tile="square310x310Logo"/>
-            <uap:ShowOn Tile="wide310x150Logo"/>
-          </uap:ShowNameOnTiles>
-        </uap:DefaultTile >
-        <uap:SplashScreen Image="Images\SplashScreen.png" />
-        <uap:InitialRotationPreference>
-          <uap:Rotation Preference="portrait"/>
-          <uap:Rotation Preference="landscape"/></uap:InitialRotationPreference>
+        Square150x150Logo="Assets\Square150x150Logo.png"
+        Square44x44Logo="Assets\Square44x44Logo.png">
+        <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png"  Square71x71Logo="Assets\SmallTile.png" Square310x310Logo="Assets\LargeTile.png"/>
+        <uap:SplashScreen Image="Assets\SplashScreen.png" />
       </uap:VisualElements>
     </Application>
   </Applications>
