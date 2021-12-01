@@ -1124,12 +1124,12 @@ namespace StoryBuilder.ViewModels
                 IList<MasterPlotScene> scenes = model.MasterPlotScenes;
                 foreach (MasterPlotScene scene in scenes)
                 {
-                    SceneModel SceneVar = new SceneModel(StoryModel);
-                    SceneVar.Name = scene.SceneTitle;
-                    SceneVar.Notes = scene.Notes;
-                    StoryNodeItem newNode = new StoryNodeItem(SceneVar, RightTappedNode);
-                    _sourceChildren = RightTappedNode.Children;
-                    _sourceChildren.Add(newNode);
+                    SceneModel child = new SceneModel(StoryModel);
+                    child.Name = scene.SceneTitle;
+                    child.Remarks = "See Notes.";
+                    child.Notes = scene.Notes;
+                    // add the new SceneModel & node to the end of the target's children 
+                    StoryNodeItem newNode = new StoryNodeItem(child, RightTappedNode);
                     RightTappedNode.IsExpanded = true;
                     newNode.IsSelected = true;
                 }
