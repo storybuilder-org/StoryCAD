@@ -449,9 +449,6 @@ namespace StoryBuilder.DAL
                     case "PsychNotes":
                         chr.PsychNotes = attr.InnerText;
                         break;
-                    case "Work":
-                        chr.Work = attr.InnerText;
-                        break;
                     case "Notes":
                         chr.Notes = attr.InnerText;
                         break;

@@ -690,8 +690,6 @@ namespace StoryBuilder.Services.Scrivener
             character.Religion = await _rdr.GetRtfText(character.Religion, character.Uuid);
             string savePsychNotes = character.PsychNotes;
             character.PsychNotes = await _rdr.GetRtfText(character.PsychNotes, character.Uuid);
-            string saveWork = character.Work;
-            character.Work = await _rdr.GetRtfText(character.Work, character.Uuid);
             string saveLikes = character.Notes;
             character.Notes = await _rdr.GetRtfText(character.Notes, character.Uuid);
             // Parse and write the report
@@ -739,7 +737,6 @@ namespace StoryBuilder.Services.Scrivener
                 sb.Replace("@Shrewdness", character.Shrewdness);
                 sb.Replace("@Sociability", character.Sociability);
                 sb.Replace("@Stability", character.Stability);
-                sb.Replace("@Work", character.Work);
                 sb.Replace("@Likes", character.Notes);
                 sb.Replace("@Notes", character.BackStory);
                 doc.AddText(sb.ToString(), format);
@@ -758,7 +755,6 @@ namespace StoryBuilder.Services.Scrivener
             character.Ethnic = saveEthnic;
             character.Religion = saveReligion;
             character.PsychNotes = savePsychNotes;
-            character.Work = saveWork;
             character.Notes = saveLikes;
         }
 
