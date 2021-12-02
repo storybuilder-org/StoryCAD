@@ -12,7 +12,6 @@
     <EnablePreviewMsixTooling>true</EnablePreviewMsixTooling>
   </PropertyGroup>
 	<ItemGroup>
-		<Content Remove="Assets\1StoreLogo.png" />
 		<Content Remove="Assets\Install\StoryBuilder.prf" />
 	</ItemGroup>
 	
@@ -45,6 +44,10 @@
 		<Content Include="Assets\Install\**">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Remove="Assets\HomeLogo.png" />
 	</ItemGroup>
 
 	<ItemGroup>
