@@ -8,7 +8,7 @@
                     mc:Ignorable="d" >
 
     <Grid>
-        <Image Source="/Assets/StoreLogo.png"/>
+        <Image Source="/Assets/HomeLogo.png"/>
     </Grid>   
 
 </local:BindablePage>
