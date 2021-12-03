@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "StoryBuilder (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "StoryBuilder (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}

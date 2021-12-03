@@ -64,7 +64,7 @@ namespace StoryBuilder.Services.Installation
                 // Get the source (\Assets\Install) path from the executing program's location
                 string assemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
                 int i = assemblyPath.IndexOf(@"\StoryBuilder\StoryBuilder");
-                string installPath = assemblyPath.Substring(0, i) + @"\StoryBuilder\StoryBuilder\StoryBuilder";
+                string installPath = assemblyPath.Substring(0, i) + @"\StoryBuilder\StoryBuilder";
                 installPath = Path.Combine(installPath, "Assets", "Install");
                 sourcelFolder = await StorageFolder.GetFolderFromPathAsync(installPath);
                 
