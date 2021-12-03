@@ -35,7 +35,7 @@ namespace CreateInstallManifest
             string assemblyLocation = System.Reflection.Assembly.GetExecutingAssembly().Location;
             int i = assemblyLocation.IndexOf("StoryBuilder");
             string path = assemblyLocation.Substring(0, i);
-            string installFolder = Path.Combine(path, "StoryBuilder", "StoryBuilder", "StoryBuilder","Assets", "Install");
+            string installFolder = Path.Combine(path, "StoryBuilder", "StoryBuilder","Assets", "Install");
 
             Debug.WriteLine(installFolder);
             int baseLength = installFolder.Length;
