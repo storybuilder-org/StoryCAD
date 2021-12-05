@@ -65,7 +65,7 @@ namespace StoryBuilder.Services.Installation
                     Logger.Log(LogLevel.Trace, $"Got file path for manifest resource {InstallerFile} as {File}");
 
                     StorageFolder ParentFolder = ApplicationData.Current.RoamingFolder;
-
+                    ParentFolder = await ParentFolder.CreateFolderAsync("StoryBuilder", CreationCollisionOption.OpenIfExists);
                     if (File.Contains(@"\"))
                     {
                         Logger.Log(LogLevel.Trace, $"{InstallerFile} contains subdirectories");
@@ -99,72 +99,6 @@ namespace StoryBuilder.Services.Installation
                 {
                     Logger.LogException(LogLevel.Error, ex, "error in new installer");
                 }
-            }
-        }
-
-        private async Task InstallFileAsync(string fileName)
-        {
-            string installPath = Path.Combine(sourcelFolder.Path, fileName);
-            StorageFile file = await StorageFile.GetFileFromPathAsync(installPath);
-
-            StorageFolder dest = await GetTargetlFolder(fileName);
-            string target = Path.GetFileName(fileName);
-            string msg = $"Copying file {target} to {dest.Path}";
-            Logger.Log(LogLevel.Info, msg);
-            await file.CopyAsync(dest, target, NameCollisionOption.ReplaceExisting);
-            if (target.EndsWith("stbx"))  // if it's a sample file, add a "files" subfolder
-            {
-                if (await dest.TryGetItemAsync("files") == null)
-                {
-                    msg = $"Adding files subfolder to {dest.Path}";
-                    Logger.Log(LogLevel.Info, msg);
-                    await dest.CreateFolderAsync("files");
-                }
-            }
-        }
-
-        /// <summary>
-        /// Find or create the destination folder.
-        /// 
-        /// The argument can contain zero or more subfolders. This routine
-        /// loops through them in turn until the complete destination folder
-        /// is found, creating any missing folders along the way.
-        /// </summary>
-        /// <param name="fileName">Relative path excluding filename and extension</param>
-        /// <returns>StorageFile</returns>
-        private async Task<StorageFolder> GetTargetlFolder(string fileName)
-        {
-            StorageFolder destination = targetFolder;
-            string folders = Path.GetDirectoryName(fileName);
-            if (folders.Equals(string.Empty))
-                return destination;
-            string[] nodes = folders.Split(Path.DirectorySeparatorChar);
-            // There are subfolders 
-            foreach (string node in nodes)
-            {
-                 destination = await destination.CreateFolderAsync(node,CreationCollisionOption.OpenIfExists);
-            }
-            return destination;
-        }
-
-        private async Task ReadSourceManifest()
-        {
-            installFile = await sourcelFolder.GetFileAsync("install.manifest");
-            sourceManifest = await FileIO.ReadLinesAsync(installFile);
-        }
-
-        private async Task ReadTargetManifest()
-        {
-            targetManifest = new Dictionary<string, string>();
-            IList<string> localEntries;
-            IStorageFile file = await targetFolder.TryGetItemAsync("install.manifest") as IStorageFile;
-            if (file == null)  // If there is no manifest return with empty Dictionary
-                return;
-            localEntries = await FileIO.ReadLinesAsync(file);
-            foreach (string line in localEntries)
-            {
-                string[] tokens = line.Split(',');
-                targetManifest.Add(tokens[0], tokens[1]);
             }
         }
 
