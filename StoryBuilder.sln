@@ -20,7 +20,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{E2DA341C-F
 		docs\USERNOTES.md = docs\USERNOTES.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StoryBuilder", "StoryBuilder\StoryBuilder.csproj", "{BC359F5C-E784-4FD5-80E5-63A6A0FB853C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StoryBuilder", "StoryBuilder\StoryBuilder.csproj", "{BC359F5C-E784-4FD5-80E5-63A6A0FB853C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -50,81 +50,55 @@ namespace StoryBuilder.Services.Installation
         /// <returns></returns>
         public async Task InstallFiles()
         {
-            try
+            //if (true) { return; } //Uncomment this to skip the installer entirely
+            string[] aa = Assembly.GetExecutingAssembly().GetManifestResourceNames();
+            foreach (string InstallerFile in Assembly.GetExecutingAssembly().GetManifestResourceNames())
             {
-                //TODO: Log Installation
-
-                // Get the target (%appdata%\StoryBuilder) folder
-                //string targetPath = $"{Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)}";
-                string targetPath = ApplicationData.Current.RoamingFolder.Path.ToString();  
-                targetFolder = await StorageFolder.GetFolderFromPathAsync(targetPath);
-                // If there is no %appdata/StoryBuilder folder, create one
-                targetFolder = await targetFolder.CreateFolderAsync(@"StoryBuilder", CreationCollisionOption.OpenIfExists);
-                
-                // Get the source (\Assets\Install) path from the executing program's location
-                string assemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-                int i = assemblyPath.IndexOf(@"\StoryBuilder\StoryBuilder");
-                string installPath = assemblyPath.Substring(0, i) + @"\StoryBuilder\StoryBuilder";
-                installPath = Path.Combine(installPath, "Assets", "Install");
-                sourcelFolder = await StorageFolder.GetFolderFromPathAsync(installPath);
-                
-
-                // Read the new and old install.manifest files into memory
-                await ReadTargetManifest();
-                await ReadSourceManifest();
-
-                bool changed = false;
-
-                // Process each line in the source (\Assets\Install) install.manifest 
-                // The install.manifest is is created by the CreateInstallManifest
-                // (in this solution) and is in the format:
-                //     filename,hash
-                // where filename may also have a folder prefix. For example:
-                // Bibliog.txt,29483b0fdf7550d3e2c2c54a11e4fbf5d53ed0f4b11983c6d0e36b2cd209a1bb
-                // or
-                // samples\Hamlet.stbx\Hamlet.stbx,7d5c11d7d8a5d42a9e1d005545182babb9616213769393fa8de274166f3edcf9
-                foreach (string manifestEntry in sourceManifest)
+                try
                 {
-                    string[] tokens = manifestEntry.Split(',');
-                    string fileName = tokens[0];
-                    string sourceHash = tokens[1];
+                    string File = InstallerFile;
+                    Logger.Log(LogLevel.Trace, $"Starting to install file {File}");
+                    File = File.Replace("StoryBuilder.Assets.Install", "");
+                    int lastIndex = File.LastIndexOf('.');
+                    if (lastIndex > 0) { File = File[..lastIndex].Replace(".", @"\") + File[lastIndex..]; }
+                    File = File.Replace("stbx", ".stbx").Remove(0, 1);
+                    Logger.Log(LogLevel.Trace, $"Got file path for manifest resource {InstallerFile} as {File}");
 
-                    // Skip the manifest itself until after the other copies
-                    if (fileName.Equals("install.manifest"))
-                        continue;
+                    StorageFolder ParentFolder = ApplicationData.Current.RoamingFolder;
 
-                    // The target manifest was loaded into a dictionary
-                    // [filename],[hash] for lookup. If the file isn't
-                    // in the target manifest, it needs added.
-                    if (!targetManifest.ContainsKey(fileName))
+                    if (File.Contains(@"\"))
                     {
-                        string msg = $"Adding installation file {fileName}";
-                        Logger.Log(LogLevel.Info, msg);
-                        await InstallFileAsync(fileName);
-                        changed = true;
-                        continue;
+                        Logger.Log(LogLevel.Trace, $"{InstallerFile} contains subdirectories");
+                        string[] path = File.Split(@"\");
+                        foreach (string dir in path)
+                        {
+                            Logger.Log(LogLevel.Trace, $"{InstallerFile} mounting subdirectory {dir}");
+                            ParentFolder = await ParentFolder.CreateFolderAsync(dir, CreationCollisionOption.OpenIfExists);
+                        }
                     }
-                    // If it's in the target manifest, see if it's changed
-                    if (!sourceHash.Equals(targetManifest[fileName]))
+
+                    List<Byte> ContentToWrite = new();
+                    using (Stream InternalResourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(InstallerFile))
                     {
-                        string msg = $"Replacing installation file {fileName} - hash changed";
-                        Logger.Log(LogLevel.Info, msg);
-                        await InstallFileAsync(fileName);
-                        changed = true;
+                        StorageFile DiskFile = await ParentFolder.CreateFileAsync(Path.GetFileName(File), CreationCollisionOption.ReplaceExisting);
+                        using (Stream FileDiskStream = await DiskFile.OpenStreamForWriteAsync())
+                        {
+                            Logger.Log(LogLevel.Trace, $"Opened manifiest stream and stream for file on disk ({DiskFile.Path})");
+
+                            while (InternalResourceStream.Position < InternalResourceStream.Length)
+                            {
+                                FileDiskStream.WriteByte((byte)InternalResourceStream.ReadByte());
+                            }
+                            await FileDiskStream.FlushAsync();
+                        }
+                        await InternalResourceStream.FlushAsync();
                     }
+                    Logger.Log(LogLevel.Trace, $"Flushed stream for {File}");
                 }
-
-                if (changed)
+                catch (Exception ex)
                 {
-                    string msg = $"Installing local copy of install.manifest";
-                    Logger.Log(LogLevel.Info, msg);
-                    // copy install manifest as local manifest
-                    await installFile.CopyAsync(targetFolder, "install.manifest", NameCollisionOption.ReplaceExisting);
+                    Logger.LogException(LogLevel.Error, ex, "error in new installer");
                 }
-            }
-            catch (Exception ex)
-            {
-                Logger.LogException(LogLevel.Error, ex, "Error in InstallFiles");
             }
         }
 
