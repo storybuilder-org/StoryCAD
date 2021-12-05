@@ -56,12 +56,15 @@ namespace StoryBuilder.Services.Installation
             {
                 try
                 {
-                    string File = InstallerFile;
+                    //Turns manifiest path into a sensible one ready for storage
+                    string File = InstallerFile.Replace("StoryBuilder.Assets.Install", "");
+
+                    if (File.Contains("samp")) {
+                        int a = 0; }
                     Logger.Log(LogLevel.Trace, $"Starting to install file {File}");
-                    File = File.Replace("StoryBuilder.Assets.Install", "");
                     int lastIndex = File.LastIndexOf('.');
                     if (lastIndex > 0) { File = File[..lastIndex].Replace(".", @"\") + File[lastIndex..]; }
-                    File = File.Replace("stbx", ".stbx").Remove(0, 1);
+                    File = File.Replace(@"\stbx", "stbx").Remove(0, 1).Replace("stbx", ".stbx").Replace("..", ".").Replace('_', ' ');
                     Logger.Log(LogLevel.Trace, $"Got file path for manifest resource {InstallerFile} as {File}");
 
                     StorageFolder ParentFolder = ApplicationData.Current.RoamingFolder;
@@ -69,11 +72,14 @@ namespace StoryBuilder.Services.Installation
                     if (File.Contains(@"\"))
                     {
                         Logger.Log(LogLevel.Trace, $"{InstallerFile} contains subdirectories");
-                        string[] path = File.Split(@"\");
-                        foreach (string dir in path)
+                        List<string> dirs = new(File.Split(@"\"));
+                        int iteration = 1;
+                        foreach (string dir in dirs)
                         {
+                            if (iteration >= dirs.Count) { continue; }
                             Logger.Log(LogLevel.Trace, $"{InstallerFile} mounting subdirectory {dir}");
                             ParentFolder = await ParentFolder.CreateFolderAsync(dir, CreationCollisionOption.OpenIfExists);
+                            iteration++;
                         }
                     }
 
