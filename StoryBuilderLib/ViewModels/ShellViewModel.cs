@@ -51,7 +51,6 @@ namespace StoryBuilder.ViewModels
         // Navigation navigation landmark nodes
         public StoryNodeItem CurrentNode { get; set; }
         public StoryNodeItem RightTappedNode;
-        public StoryNodeItem TrashCanNode;
 
         public StoryViewType ViewType;
 
@@ -431,10 +430,8 @@ namespace StoryBuilder.ViewModels
                 var narrativeNode = new StoryNodeItem(narrative, null);
                 narrativeNode.IsRoot = true;
                 StoryModel.NarratorView.Add(narrativeNode);
-                trash = new TrashCanModel(StoryModel);
-                trashNode = new StoryNodeItem(trash, null);
-                StoryModel.NarratorView.Add(trashNode);     // The trashcan is the second root
-                                                            // Use the NewProjectDialog template to complete the model
+                StoryModel.NarratorView.Add(trashNode);     // Both views share the trashcan
+                // Use the NewProjectDialog template to complete the model
                 switch (vm.SelectedTemplate)
                 {
                     case "Blank Project":
@@ -1624,8 +1621,8 @@ namespace StoryBuilder.ViewModels
             ObservableCollection<StoryNodeItem> source =
                 RightTappedNode.Parent.Children;
             source.Remove(RightTappedNode);
-            TrashCanNode.Children.Add(RightTappedNode);
-            RightTappedNode.Parent = TrashCanNode;
+            DataSource[1].Children.Add(RightTappedNode);
+            RightTappedNode.Parent = DataSource[1];
             RightTappedNode = null;
             string msg = string.Format("Deleted node {0}", RightTappedNode.Name);
             Logger.Log(LogLevel.Info, msg);
@@ -1648,7 +1645,7 @@ namespace StoryBuilder.ViewModels
             }
             //TODO: Add dialog to confirm restore
             ObservableCollection<StoryNodeItem> target = DataSource[0].Children;
-            TrashCanNode.Children.Remove(RightTappedNode);
+            DataSource[1].Children.Remove(RightTappedNode);
             target.Add(RightTappedNode);
             RightTappedNode.Parent = DataSource[0];
             RightTappedNode = null;
@@ -1835,27 +1832,6 @@ namespace StoryBuilder.ViewModels
         private void LoadViewFromModel()
         {
             //DataSource = CurrentView.Equals("Story Explorer View") ? LoadExplorerView() : LoadNarratorView();
-        }
-
-        /// <summary>
-        /// Load the Story Explorer ViewModel collection and return it for binding to the
-        /// Shell's Navigator TreeView.
-        /// </summary>
-        /// <returns></returns>
-        private ObservableCollection<StoryNodeItem> LoadExplorerView()
-        {
-            ObservableCollection<StoryNodeItem> vm = new ObservableCollection<StoryNodeItem>();
-            //foreach (StoryNodeItem root in Model.ExplorerView)
-            //{
-            //    StoryNodeItem vmRoot = new StoryNodeItem(root, null);
-            //    RecurseStoryNodeItem(root, vmRoot);
-            //    vm.Add(vmRoot);
-            //}
-
-            //CurrentRootNode = vm[0];
-            //TrashCanNode = vm[1];
-            //ViewType = StoryViewType.ExplorerView;
-            return vm;
         }
 
         /// <summary>
