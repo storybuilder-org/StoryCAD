@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "CreateInstallManifest": {
-      "commandName": "Project",
-      "commandLineArgs": "C:\\dev\\src\\StoryBuilder\\StoryBuilder\\StoryBuilder\\Assets\\Install"
-    }
-  }
-}
