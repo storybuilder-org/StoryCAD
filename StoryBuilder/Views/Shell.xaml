@@ -210,7 +210,7 @@
                     </AppBarButton.Icon>
                 </AppBarButton>
                 <AppBarButton Label="Help" ToolTipService.ToolTip="Help"
-                              Command="{x:Bind ShellVm.HelpCommand, Mode=OneWay}" >
+                              Command="{x:Bind ShellVm.HelpCommand, Mode=OneWay}" IsEnabled="False" >
                     <AppBarButton.Icon>
                         <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE897;"/>
                     </AppBarButton.Icon>
