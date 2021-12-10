@@ -165,7 +165,7 @@ namespace StoryBuilder
             await LoadControls(localFolder.Path, story);
 
             await LoadLists(localFolder.Path, story);
-
+            
             await LoadTools(localFolder.Path, story);
 
             ConfigureNavigation();

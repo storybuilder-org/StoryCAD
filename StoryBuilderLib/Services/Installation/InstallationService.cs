@@ -21,176 +21,130 @@ namespace StoryBuilder.Services.Installation
     {
         public readonly LogService Logger;
 
-        private StorageFolder sourcelFolder;
-        private StorageFile   installFile;
-        private StorageFolder targetFolder;
-
-        private IList<string> sourceManifest;
-        private Dictionary<string, string> targetManifest;
 
         /// <summary>
-        /// InstallFiles copies application assets, including control
-        /// and tool initialization data, help files, report templates, 
-        /// and sample story projects, to StoryBuilder's local application
-        /// data folder. The entire contents of the application's \Assets\Install
-        /// folder are copied from StoryBuilder app project.
-        /// 
-        /// In order to speed up the asset copying, InstallFiles file copies
-        /// are driven from an install.manifest file, which lists the path
-        /// of each file in the Assets\Install folder and its subfolders.
-        /// Each file's SHA256 hash hash is compared to the same file's 
-        /// hash from a copy of install.manifest copied to the local application
-        /// data folder after all files are copied. The hashes match if the file
-        /// hasn't changed, and it's skipped. If there's no install.manifest
-        /// in %appdata%\install, all files are copied, along with install.manifest.
-        /// 
-        /// Note that the hash isn't used to verify file integrity, only to
-        /// determine if the file has changed or not.
+        /// This copies all the files from \assets\install to \RoamingState\StoryBuilder\
+        /// via reading the manifest resource stream and writing them to the disk.
         /// </summary>
         /// <returns></returns>
         public async Task InstallFiles()
         {
-            try
+            await DeleteFiles();
+            foreach (string InstallerFile in Assembly.GetExecutingAssembly().GetManifestResourceNames())
             {
-                //TODO: Log Installation
-
-                // Get the target (%appdata%\StoryBuilder) folder
-                //string targetPath = $"{Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)}";
-                string targetPath = ApplicationData.Current.RoamingFolder.Path.ToString();  
-                targetFolder = await StorageFolder.GetFolderFromPathAsync(targetPath);
-                // If there is no %appdata/StoryBuilder folder, create one
-                targetFolder = await targetFolder.CreateFolderAsync(@"StoryBuilder", CreationCollisionOption.OpenIfExists);
-                
-                // Get the source (\Assets\Install) path from the executing program's location
-                string assemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-                int i = assemblyPath.IndexOf(@"\StoryBuilder\StoryBuilder");
-                string installPath = assemblyPath.Substring(0, i) + @"\StoryBuilder\StoryBuilder";
-                installPath = Path.Combine(installPath, "Assets", "Install");
-                sourcelFolder = await StorageFolder.GetFolderFromPathAsync(installPath);
-                
-
-                // Read the new and old install.manifest files into memory
-                await ReadTargetManifest();
-                await ReadSourceManifest();
-
-                bool changed = false;
-
-                // Process each line in the source (\Assets\Install) install.manifest 
-                // The install.manifest is is created by the CreateInstallManifest
-                // (in this solution) and is in the format:
-                //     filename,hash
-                // where filename may also have a folder prefix. For example:
-                // Bibliog.txt,29483b0fdf7550d3e2c2c54a11e4fbf5d53ed0f4b11983c6d0e36b2cd209a1bb
-                // or
-                // samples\Hamlet.stbx\Hamlet.stbx,7d5c11d7d8a5d42a9e1d005545182babb9616213769393fa8de274166f3edcf9
-                foreach (string manifestEntry in sourceManifest)
+                try
                 {
-                    string[] tokens = manifestEntry.Split(',');
-                    string fileName = tokens[0];
-                    string sourceHash = tokens[1];
-
-                    // Skip the manifest itself until after the other copies
-                    if (fileName.Equals("install.manifest"))
-                        continue;
-
-                    // The target manifest was loaded into a dictionary
-                    // [filename],[hash] for lookup. If the file isn't
-                    // in the target manifest, it needs added.
-                    if (!targetManifest.ContainsKey(fileName))
-                    {
-                        string msg = $"Adding installation file {fileName}";
-                        Logger.Log(LogLevel.Info, msg);
-                        await InstallFileAsync(fileName);
-                        changed = true;
-                        continue;
-                    }
-                    // If it's in the target manifest, see if it's changed
-                    if (!sourceHash.Equals(targetManifest[fileName]))
-                    {
-                        string msg = $"Replacing installation file {fileName} - hash changed";
-                        Logger.Log(LogLevel.Info, msg);
-                        await InstallFileAsync(fileName);
-                        changed = true;
-                    }
+                    //This processes the internal path into one that is able to be written to the disk
+                    string File = ProcessFileName(InstallerFile);
+                    StorageFile DiskFile = await CreateDummyFileAsync(File);
+                    WriteManifestData(DiskFile,InstallerFile);
                 }
-
-                if (changed)
+                catch (Exception ex)
                 {
-                    string msg = $"Installing local copy of install.manifest";
-                    Logger.Log(LogLevel.Info, msg);
-                    // copy install manifest as local manifest
-                    await installFile.CopyAsync(targetFolder, "install.manifest", NameCollisionOption.ReplaceExisting);
-                }
-            }
-            catch (Exception ex)
-            {
-                Logger.LogException(LogLevel.Error, ex, "Error in InstallFiles");
-            }
-        }
-
-        private async Task InstallFileAsync(string fileName)
-        {
-            string installPath = Path.Combine(sourcelFolder.Path, fileName);
-            StorageFile file = await StorageFile.GetFileFromPathAsync(installPath);
-
-            StorageFolder dest = await GetTargetlFolder(fileName);
-            string target = Path.GetFileName(fileName);
-            string msg = $"Copying file {target} to {dest.Path}";
-            Logger.Log(LogLevel.Info, msg);
-            await file.CopyAsync(dest, target, NameCollisionOption.ReplaceExisting);
-            if (target.EndsWith("stbx"))  // if it's a sample file, add a "files" subfolder
-            {
-                if (await dest.TryGetItemAsync("files") == null)
-                {
-                    msg = $"Adding files subfolder to {dest.Path}";
-                    Logger.Log(LogLevel.Info, msg);
-                    await dest.CreateFolderAsync("files");
+                    Logger.LogException(LogLevel.Error, ex, "error in new installer");
                 }
             }
         }
 
         /// <summary>
-        /// Find or create the destination folder.
-        /// 
-        /// The argument can contain zero or more subfolders. This routine
-        /// loops through them in turn until the complete destination folder
-        /// is found, creating any missing folders along the way.
+        /// This deletes all files in the parent directory
         /// </summary>
-        /// <param name="fileName">Relative path excluding filename and extension</param>
-        /// <returns>StorageFile</returns>
-        private async Task<StorageFolder> GetTargetlFolder(string fileName)
+        /// <returns></returns>
+        private async Task DeleteFiles()
         {
-            StorageFolder destination = targetFolder;
-            string folders = Path.GetDirectoryName(fileName);
-            if (folders.Equals(string.Empty))
-                return destination;
-            string[] nodes = folders.Split(Path.DirectorySeparatorChar);
-            // There are subfolders 
-            foreach (string node in nodes)
+            StorageFolder ParentFolder = ApplicationData.Current.RoamingFolder;
+            foreach (StorageFile Item in await ParentFolder.GetFilesAsync())
             {
-                 destination = await destination.CreateFolderAsync(node,CreationCollisionOption.OpenIfExists);
+                try { await Item.DeleteAsync(); }
+                catch (Exception ex)
+                {
+                    Logger.LogException(LogLevel.Error, ex, "Error when deleting files");
+                }
+
             }
-            return destination;
-        }
-
-        private async Task ReadSourceManifest()
-        {
-            installFile = await sourcelFolder.GetFileAsync("install.manifest");
-            sourceManifest = await FileIO.ReadLinesAsync(installFile);
-        }
-
-        private async Task ReadTargetManifest()
-        {
-            targetManifest = new Dictionary<string, string>();
-            IList<string> localEntries;
-            IStorageFile file = await targetFolder.TryGetItemAsync("install.manifest") as IStorageFile;
-            if (file == null)  // If there is no manifest return with empty Dictionary
-                return;
-            localEntries = await FileIO.ReadLinesAsync(file);
-            foreach (string line in localEntries)
+            foreach (StorageFolder Item in await ParentFolder.GetFoldersAsync())
             {
-                string[] tokens = line.Split(',');
-                targetManifest.Add(tokens[0], tokens[1]);
+                try { await Item.DeleteAsync(); }
+                catch (Exception ex)
+                {
+                    Logger.LogException(LogLevel.Error, ex, "Error when deleting files");
+                }
+            }
+        }
+
+        /// <summary>
+        /// This processes the internal manifiest resources into propper file paths
+        /// </summary>
+        /// <returns></returns>
+        private string ProcessFileName(string InputFileName)
+        {
+            Logger.Log(LogLevel.Trace, $"Processing file path of {InputFileName}");
+
+            //Removes the parent container as the files are relative.
+            string File = InputFileName.Replace("StoryBuilder.Assets.Install", "");
+
+            //This replaces all the . with \ (except the last . as thats the file type)
+            int lastIndex = File.LastIndexOf('.');
+            if (lastIndex > 0) { File = File[..lastIndex].Replace(".", @"\") + File[lastIndex..]; }
+            File = File.Replace(@"\stbx", "stbx").Remove(0, 1).Replace("stbx", ".stbx").Replace("..", ".").Replace('_', ' ');
+
+            //Fixes a dolls house name as all non ASCII (I think) characters are replaced with spaces except for the file name
+            if (File.Contains("A Doll s House.stbx")) { File = File.Replace(" s ", "'s "); }
+
+            //This fixes the UUID for samples.
+            if (File.Contains("files"))
+            {
+                string[] path = File.Split("files");
+                string UUID = path[1].Replace(" ", "-");
+                File = path[0] + "files\\" + UUID.Substring(2); //Removes extra space in UUID
+            }
+
+            Logger.Log(LogLevel.Trace, $"Got ideal path as {File}");
+            return File;
+        }
+
+        //This traverses through 
+        private async Task<StorageFile> CreateDummyFileAsync(string File)
+        {
+            StorageFolder ParentFolder = ApplicationData.Current.RoamingFolder;
+            ParentFolder = await ParentFolder.CreateFolderAsync("StoryBuilder", CreationCollisionOption.OpenIfExists);
+            if (File.Contains(@"\"))
+            {
+                Logger.Log(LogLevel.Trace, $"{File} contains subdirectories");
+                List<string> dirs = new(File.Split(@"\"));
+                int iteration = 1;
+                foreach (string dir in dirs)
+                {
+                    if (iteration >= dirs.Count) { continue; }
+                    Logger.Log(LogLevel.Trace, $"{File} mounting subdirectory {dir}");
+                    ParentFolder = await ParentFolder.CreateFolderAsync(dir, CreationCollisionOption.OpenIfExists);
+                    iteration++;
+                }
+            }
+
+            return await ParentFolder.CreateFileAsync(Path.GetFileName(File), CreationCollisionOption.ReplaceExisting);
+        }
+
+        /// <summary>
+        /// This opens the internal manifiest data for a file and writes to the blank file made in CreateDummyFileAsync
+        /// </summary>
+        /// <param name="DiskFile"></param>
+        private async void WriteManifestData(StorageFile DiskFile, string InstallerFile)
+        {
+            List<Byte> ContentToWrite = new();
+            using (Stream InternalResourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(InstallerFile))
+            {
+                using (Stream FileDiskStream = await DiskFile.OpenStreamForWriteAsync())
+                {
+                    Logger.Log(LogLevel.Trace, $"Opened manifiest stream and stream for file on disk ({DiskFile.Path})");
+
+                    while (InternalResourceStream.Position < InternalResourceStream.Length)
+                    {
+                        FileDiskStream.WriteByte((byte)InternalResourceStream.ReadByte());
+                    }
+                    await FileDiskStream.FlushAsync();
+                }
+                await InternalResourceStream.FlushAsync();
             }
         }
 
