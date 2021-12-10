@@ -50,7 +50,6 @@
     <None Remove="Assets\Install\help\bm9.BMP" />
     <None Remove="Assets\Install\help\StoryBuilder.chm" />
     <None Remove="Assets\Install\help\StoryBuilder.chw" />
-    <None Remove="Assets\Install\install.manifest" />
     <None Remove="Assets\Install\Lists.ini" />
     <None Remove="Assets\Install\manual\StoryBuilder User Manual.pdf" />
     <None Remove="Assets\Install\reports\Character Description.txt" />
