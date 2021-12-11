@@ -2,7 +2,6 @@
 using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
-using CommunityToolkit.WinUI.UI.Controls;
 using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -26,7 +25,6 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-using Windows.Foundation;
 using Windows.Storage;
 using Windows.Storage.Pickers;
 using WinRT;
@@ -1543,7 +1541,7 @@ namespace StoryBuilder.ViewModels
 
         private void AddStoryElement(StoryItemType typeToAdd)
         {
-            //Logger.Log(LogLevel.Trace, "AddStoryElement");
+            Logger.Log(LogLevel.Trace, "AddStoryElement");
             _canExecuteCommands = false;
             string msg = string.Format("Adding StoryElement {0}", typeToAdd.ToString());
             Logger.Log(LogLevel.Info, msg);
@@ -1601,7 +1599,7 @@ namespace StoryBuilder.ViewModels
 
         private void RemoveStoryElement()
         {
-            //TODO: Logging
+            Logger.Log(LogLevel.Trace, "RemoveStoryElement");
             if (RightTappedNode == null)
             {
                 StatusMessage = "Right tap a node to delete";
@@ -1623,7 +1621,6 @@ namespace StoryBuilder.ViewModels
             source.Remove(RightTappedNode);
             DataSource[1].Children.Add(RightTappedNode);
             RightTappedNode.Parent = DataSource[1];
-            RightTappedNode = null;
             string msg = string.Format("Deleted node {0}", RightTappedNode.Name);
             Logger.Log(LogLevel.Info, msg);
             var smsg = new StatusMessage(msg, 100);
@@ -1632,7 +1629,7 @@ namespace StoryBuilder.ViewModels
 
         private void RestoreStoryElement()
         {
-            //TODO: Logging
+             Logger.Log(LogLevel.Trace, "RestoreStoryElement");
             if (RightTappedNode == null)
             {
                 StatusMessage = "Right tap a node to restore";
@@ -1648,7 +1645,10 @@ namespace StoryBuilder.ViewModels
             DataSource[1].Children.Remove(RightTappedNode);
             target.Add(RightTappedNode);
             RightTappedNode.Parent = DataSource[0];
-            RightTappedNode = null;
+            string msg = string.Format("Restored node {0}", RightTappedNode.Name);
+            Logger.Log(LogLevel.Info, msg);
+            var smsg = new StatusMessage(msg, 100);
+            Messenger.Send(new StatusChangedMessage(smsg));
         }
 
         /// <summary>
@@ -1658,6 +1658,7 @@ namespace StoryBuilder.ViewModels
         /// </summary>
         private void CopyToNarrative()
         {
+            Logger.Log(LogLevel.Trace, "CopyToNarrative");
             if (RightTappedNode == null)
             {
                 StatusMessage = "Select a node to copy";
@@ -1673,19 +1674,22 @@ namespace StoryBuilder.ViewModels
                 StoryModel.StoryElements.StoryElementGuids[RightTappedNode.Uuid];
             // ReSharper disable once ObjectCreationAsStatement
             new StoryNodeItem(sceneVar, StoryModel.NarratorView[0]);
-
-            StatusMessage = "Scene copied to Narrator view";
+            string msg = string.Format("Copied node {0} to Narrative View", RightTappedNode.Name);
+            Logger.Log(LogLevel.Info, msg);
+            var smsg = new StatusMessage(msg, 100);
+            Messenger.Send(new StatusChangedMessage(smsg));
         }
 
         /// <summary>
-        /// Remove a TreeViewItem for a copied Scene.
-        ///
-        /// Because you can't remove an ObservableCollection member
-        /// directly, this method removes the Scene from
-        /// the Narrative view StoryNodeItem and then reloads it.
+        /// Remove a TreeViewItem from the Narrative view for a copied Scene.
         /// </summary>
         private void RemoveFromNarrative()
         {
+            Logger.Log(LogLevel.Trace, "RemoveFromNarrative");
+
+            string msg;
+            StatusMessage smsg;
+
             if (RightTappedNode == null)
             {
                 StatusMessage = "Select a node to remove";
@@ -1702,16 +1706,24 @@ namespace StoryBuilder.ViewModels
                 if (item.Uuid == RightTappedNode.Uuid)
                 {
                     StoryModel.NarratorView[0].Children.Remove(item);
-                    break;
+                    msg = string.Format("Removed node {0} from Narrative View", RightTappedNode.Name);
+                    Logger.Log(LogLevel.Info, msg);
+                    smsg = new StatusMessage(msg, 100);
+                    Messenger.Send(new StatusChangedMessage(smsg));
+                    return;
                 }
             }
-
-            DataSource = LoadNarratorView();
+            msg = string.Format("Node {0} not in Narrative View", RightTappedNode.Name);
+            Logger.Log(LogLevel.Info, msg);
+            smsg = new StatusMessage(msg, 100);
+            Messenger.Send(new StatusChangedMessage(smsg));
         }
 
         /// <summary>
         /// Search up the StoryNodeItem tree to its
         /// root from a specified node and return its StoryItemType. 
+        /// 
+        /// This allows code to determine which TreeView it's in.
         /// </summary>
         /// <param name="startNode">The node to begin searching from</param>
         /// <returns>The StoryItemType of the root node</returns>
@@ -1827,77 +1839,6 @@ namespace StoryBuilder.ViewModels
                 CurrentNode = DataSource[0];
             StoryModel.Changed = false;
         }
-
-        /// <summary>
-        /// Load the Story Narrator StoryViewModel Story and return it for binding to the
-        /// Shell's Navigator TreeView.
-        /// </summary>
-        /// <returns></returns>
-        private ObservableCollection<StoryNodeItem> LoadNarratorView()
-        {
-            ObservableCollection<StoryNodeItem> vm = new ObservableCollection<StoryNodeItem>();
-            //foreach (StoryNodeItem root in Model.NarratorView)           {
-            //    StoryNodeItem vmRoot = new StoryNodeItem(root, null);
-            //    RecurseStoryNodeItem(root, vmRoot);
-            //    vm.Add(vmRoot);
-            //}
-
-            //CurrentRootNode = vm[0];
-            //TrashCanNode = vm[1];
-            //ViewType = StoryViewType.NarratorView;
-            return vm;
-        }
-
-        /// <summary>
-        /// Populate the TreeView's StoryNodeItem via traversing one of 
-        /// StoryModel's two StoryNodeItem via recursive descent.
-        /// </summary>
-        /// <param name="node"></param>
-        /// <param name="parent"></param>
-        //private static void RecurseStoryNodeItem(StoryNodeItem node, StoryNodeItem parent)
-        //{
-        //    // Find the node's Children node
-        //    foreach (StoryNodeItem child in node.Children)
-        //    {
-        //        var vmNode = new StoryNodeItem(child, parent);
-        //        parent.Children.Add(vmNode);
-        //        RecurseStoryNodeItem(child, vmNode);
-        //    }
-        //}
-
-        //private void SaveModelFromView()
-        //{
-        //    ObservableCollection<StoryNodeItem> model = new ObservableCollection<StoryNodeItem>();
-        //    foreach (StoryNodeItem vmRoot in DataSource)
-        //    {
-        //        StoryNodeItem modelRoot = new StoryNodeItem(vmRoot, null);
-        //        RecurseStoryNodeViewModel(vmRoot, modelRoot);
-        //        model.Add(modelRoot);
-        //    }
-        //    if (CurrentView.Equals("Story Explorer View"))
-        //        Model.ExplorerView = model;
-        //    else
-        //        Model.NarratorView = model;
-        //}
-
-        /// <summary>
-        /// Populate the appropriate StoryModel's  StoryNodeItem via traversing
-        /// the active TreeView's DataSource StoryNodeItem via recursive descent.
-        /// </summary>
-        /// <param name="node"></param> 
-        /// <param name="parent"></param>
-        //private static void RecurseStoryNodeViewModel(StoryNodeItem node, StoryNodeItem parent)
-        //{
-        //    // Find the node's Children 
-        //    foreach (StoryNodeItem child in node.Children)
-        //    {
-        //        var vmNode = new StoryNodeItem(child, parent);
-        //        parent.Children.Add(vmNode);
-        //        RecurseStoryNodeViewModel(child, vmNode);
-        //    }
-        //}
-
-        
 
         #region MVVM Message processing
         private void IsChangedMessageReceived(IsChangedMessage isDirty)
