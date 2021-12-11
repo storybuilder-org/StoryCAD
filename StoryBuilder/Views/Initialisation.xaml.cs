@@ -1,54 +1,55 @@
-﻿using CommunityToolkit.Mvvm.DependencyInjection;
-using Microsoft.UI.Xaml;
-using StoryBuilder.ViewModels;
+﻿using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Controls.Primitives;
+using Microsoft.UI.Xaml.Data;
+using Microsoft.UI.Xaml.Input;
+using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Navigation;
 using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices.WindowsRuntime;
+using Windows.Foundation;
+using Windows.Foundation.Collections;
+using StoryBuilder.ViewModels;
+using Windows.Storage.Pickers;
 using System.Runtime.InteropServices;
 using Windows.Storage;
-using Windows.Storage.Pickers;
-using WinRT;
 
-// The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
+// To learn more about WinUI, the WinUI project structure,
+// and more about our project templates, see: http://aka.ms/winui-project-info.
 
-namespace StoryBuilder.Services.Dialogs
+namespace StoryBuilder.Views
 {
     /// <summary>
     /// An empty page that can be used on its own or navigated to within a Frame.
     /// </summary>
-    public sealed partial class NewProjectDialog
+    public sealed partial class Initialisation : Page
     {
-        public NewProjectViewModel NewProjectVm
+        InitialisationVM InitVM = new();
+        public Initialisation()
         {
-            get
-            {
-                return Ioc.Default.GetService<NewProjectViewModel>();
-            }
+            this.InitializeComponent();
         }
-        public NewProjectDialog()
-        {
-            InitializeComponent();
-        }
-        public bool BrowseButtonClicked { get; set; }
-        public bool ProjectFolderExists { get; set; }
-        public StorageFolder ParentFolder { get; set; }
-        public string ParentFolderPath { get; set; }
-        public string ProjectFolderPath { get; set; }
 
-        private async void Browse_Click(object sender, RoutedEventArgs e)
+        private async void Button_Click(object sender, RoutedEventArgs e)
         {
-            // Find a home for the new project
             var folderPicker = new FolderPicker();
             if (Window.Current == null)
             {
                 IntPtr hwnd = GetActiveWindow();
+                //IntPtr hwnd = GlobalData.WindowHandle;
                 var initializeWithWindow = folderPicker.As<IInitializeWithWindow>();
                 initializeWithWindow.Initialize(hwnd);
             }
-            //BUG: 
             folderPicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
             folderPicker.FileTypeFilter.Add("*");
             StorageFolder folder = await folderPicker.PickSingleFolderAsync();
-            ParentFolderPath = folder.Path;
-            NewProjectVm.ParentPathName = folder.Path;
+            if (folder != null)
+            {
+                ProjPath.Text = folder.Path;
+            }
         }
 
         [ComImport]

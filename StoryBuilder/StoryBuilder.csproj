@@ -59,7 +59,17 @@
 		</Content>
 	</ItemGroup>
 
+	<ItemGroup>
+	  <None Remove="Views\Initialisation.xaml" />
+	</ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\StoryBuilderLib\StoryBuilderLib.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="Views\Initialisation.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
 </Project>

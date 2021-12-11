@@ -159,7 +159,7 @@ namespace StoryBuilder
             await ProcessInstallationFiles();
 
             string path = GlobalData.Preferences.InstallationDirectory;
-            PreferencesIO loader = new PreferencesIO(GlobalData.Preferences, path);
+            PreferencesIO loader = new(GlobalData.Preferences, path);
             await loader.UpdateFile();
 
             await LoadControls(localFolder.Path, story);
@@ -174,7 +174,10 @@ namespace StoryBuilder
             // Create a Frame to act as the navigation context and navigate to the first page (Shell)
             Frame rootFrame = new Frame();
             if (rootFrame.Content == null)
-                rootFrame.Navigate(typeof(Shell));
+            {
+                if (await ApplicationData.Current.RoamingFolder.TryGetItemAsync("Storybuilder.prf") != null) { rootFrame.Navigate(typeof(Shell)); }
+                else { rootFrame.Navigate(typeof(Initialisation));  }
+            }
             // Place the frame in the current Window
             m_window.Content = rootFrame;
             m_window.Activate();

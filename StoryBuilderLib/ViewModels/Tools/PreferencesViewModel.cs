@@ -101,35 +101,12 @@ namespace StoryBuilder.ViewModels.Tools
 
         public void LoadModel()
         {
-            QuoteOnStartup = _model.QuoteOnStartup;
-            ScreenFont = _model.ScreenFont;
-            //model.ScreenFontBold = ScreenFontBold;
-            PrinterFont = _model.PrinterFont;
-            _backupOnOpen = _model.BackupOnOpen;
-            //model.PrinterFontBold = PrinterFontBold;
-            TimedBackup = _model.TimedBackup;
-            TimedBackupInterval = _model.TimedBackupInterval;
-            BackupDirectory = _model.BackupDirectory;
-            //model.PreviousBackup = PreviousBackup;
-            ProjectDirectory = _model.ProjectDirectory;
-            LogDirectory = _model.LogDirectory;
-            Changed = false;
+
         }
 
         public void SaveModel()
         {
-            _model.QuoteOnStartup = QuoteOnStartup;
-            _model.ScreenFont = ScreenFont;
-            //_model.ScreenFontBold = ScreenFontBold;
-            _model.PrinterFont = PrinterFont;
-            //_model.PrinterFontBold = PrinterFontBold;
-            _model.TimedBackup = TimedBackup;
-            _model.TimedBackupInterval = TimedBackupInterval;
-            //_model.PreviousBackup = PreviousBackup;
-            _model.ProjectDirectory = DefaultDirectory;
-            _model.BackupDirectory = BackupDirectory;
-            _model.LogDirectory = LogDirectory;
-            _model.Changed = true;
+        
             Changed = false;
         }
 

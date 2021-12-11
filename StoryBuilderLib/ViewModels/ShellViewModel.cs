@@ -417,7 +417,7 @@ namespace StoryBuilder.ViewModels
 
                 ResetModel();
                 var overview = new OverviewModel("Working Title", StoryModel);
-                overview.Author = GlobalData.Preferences.LicenseOwner;
+                overview.Author = GlobalData.Preferences.Name;
                 var overviewNode = new StoryNodeItem(overview, null)
                 {
                     IsExpanded = true,
@@ -657,7 +657,7 @@ namespace StoryBuilder.ViewModels
 
                     ResetModel();
                     var overview = new OverviewModel("Working Title", StoryModel);
-                    overview.Author = GlobalData.Preferences.LicenseOwner;
+                    overview.Author = GlobalData.Preferences.Name;
                     var overviewNode = new StoryNodeItem(overview, null)
                     {
                         IsExpanded = true,
