@@ -1744,7 +1744,6 @@ namespace StoryBuilder.ViewModels
             if (!SelectedView.Equals(CurrentView))
             {
                 CurrentView = SelectedView;
-                LoadViewFromModel();
                 switch (CurrentView)
                 {
                     case "Story Explorer View":
@@ -1827,11 +1826,6 @@ namespace StoryBuilder.ViewModels
             if (DataSource.Count > 0)
                 CurrentNode = DataSource[0];
             StoryModel.Changed = false;
-        }
-
-        private void LoadViewFromModel()
-        {
-            //DataSource = CurrentView.Equals("Story Explorer View") ? LoadExplorerView() : LoadNarratorView();
         }
 
         /// <summary>
