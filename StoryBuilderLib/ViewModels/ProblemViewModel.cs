@@ -16,6 +16,7 @@ using StoryBuilder.Services.Logging;
 using StoryBuilder.Services.Messages;
 using StoryBuilder.Services.Navigation;
 using StoryBuilder.Services.Dialogs.Tools;
+using WinRT;
 
 namespace StoryBuilder.ViewModels
 {

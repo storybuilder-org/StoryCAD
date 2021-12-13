@@ -756,14 +756,18 @@ namespace StoryBuilder.ViewModels
             try
             {
                 ResetModel();
+
+                //var window = new Window();
+                //var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(window);
                 var folderPicker = new FolderPicker();
+                WinRT.Interop.InitializeWithWindow.Initialize(folderPicker, GlobalData.WindowHandle);
                 //Make folder Picker works in Win32
-                if (Window.Current == null)
-                {
-                    IntPtr hwnd = GetActiveWindow();
-                    var initializeWithWindow = folderPicker.As<IInitializeWithWindow>();
-                    initializeWithWindow.Initialize(hwnd);
-                }
+                //if (Window.Current == null)
+                //{
+                //    IntPtr hwnd = GetActiveWindow();
+                //    var initializeWithWindow = folderPicker.As<IInitializeWithWindow>();
+                //    initializeWithWindow.Initialize(hwnd);
+                //}
                 folderPicker.CommitButtonText = "Project Folder";
                 PreferencesModel prefs = GlobalData.Preferences;
                 //TODO: Use preferences project folder instead of DocumentsLibrary
@@ -780,11 +784,6 @@ namespace StoryBuilder.ViewModels
                     _canExecuteCommands = true;  // unblock other commands
                     return;
                 }
-                //if (!_story.ProjectFolder.DisplayName.EndsWith(".stbx"))
-                //{
-                //    StatusMessage = "Project Folder must end in .stbx";
-                //    return;
-                //}
                 _story.ProjectPath = _story.ProjectFolder.Path;
                 _story.ProjectFilename = _story.ProjectFolder.DisplayName;
 
