@@ -784,11 +784,6 @@ namespace StoryBuilder.ViewModels
                     _canExecuteCommands = true;  // unblock other commands
                     return;
                 }
-                //if (!_story.ProjectFolder.DisplayName.EndsWith(".stbx"))
-                //{
-                //    StatusMessage = "Project Folder must end in .stbx";
-                //    return;
-                //}
                 _story.ProjectPath = _story.ProjectFolder.Path;
                 _story.ProjectFilename = _story.ProjectFolder.DisplayName;
 
