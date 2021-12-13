@@ -89,12 +89,14 @@ namespace StoryBuilder.DAL
                         case "BackupOnOpen":
                             _model.BackupOnOpen = tokens[1];
                             break;
+
                         case "TimedBackup":
                             if (tokens[1] == "Y")
                                 _model.TimedBackup = true;
                             else
                                 _model.TimedBackup = false;
                             break;
+
                         case "TimedBackupInterval":
                             _model.TimedBackupInterval = Convert.ToInt32(tokens[1]);
                             break;

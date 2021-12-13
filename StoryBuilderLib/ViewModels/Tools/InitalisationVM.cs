@@ -51,15 +51,15 @@ namespace StoryBuilder.ViewModels
 
         public async void Save()
         {
-            PreferencesModel prf = Ioc.Default.GetService<PreferencesModel>();
+            PreferencesModel prf = new();
             prf.Email = Email;
             prf.ErrorCollectionConsent = ErrorLogging;
             prf.Newsletter = News;
             prf.ProjectDirectory = Path;
             prf.Name = Name;
-            PreferencesIO prfIO = new(prf, ApplicationData.Current.RoamingFolder.Path);
+            PreferencesIO prfIO = new(prf, System.IO.Path.Combine(ApplicationData.Current.RoamingFolder.Path,"Storybuilder"));
             await prfIO.UpdateFile();
-            PreferencesIO loader = new(GlobalData.Preferences, ApplicationData.Current.RoamingFolder.Path);
+            PreferencesIO loader = new(GlobalData.Preferences, System.IO.Path.Combine(ApplicationData.Current.RoamingFolder.Path, "Storybuilder"));
             await loader.UpdateModel();
         }
 

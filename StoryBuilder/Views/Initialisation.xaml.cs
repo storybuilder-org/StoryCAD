@@ -64,7 +64,7 @@ namespace StoryBuilder.Views
 
 
         public void Check(object sender, RoutedEventArgs e)
-        {
+        {   
             if (InitVM.Path.ToString() != "" && InitVM.Name != "")
             {
                 InitVM.Save();

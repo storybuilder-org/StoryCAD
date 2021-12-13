@@ -966,16 +966,12 @@ namespace StoryBuilder.ViewModels
         {
             Logger.Log(LogLevel.Info, "Launching Preferences");
             StatusMessage = "Updating Preferences";
-            PreferencesDialog dialog = new PreferencesDialog();
+            PreferencesDialog dialog = new();
             dialog.XamlRoot = GlobalData.XamlRoot;
-            dialog.PreferencesVm.LoadModel();
             var result = await dialog.ShowAsync();
-            dialog.PreferencesVm.SaveModel();
             if (result == ContentDialogResult.Primary) // Save changes
             {
-                string path = GlobalData.Preferences.InstallationDirectory;
-                PreferencesIO loader = new PreferencesIO(GlobalData.Preferences, path);
-                await loader.UpdateFile();
+                await dialog.PreferencesVm.SaveAsync();
             }
             Logger.Log(LogLevel.Info, "Preferences update completed");
             StatusMessage = "Preferences updated";

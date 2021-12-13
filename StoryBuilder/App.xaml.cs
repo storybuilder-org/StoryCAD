@@ -175,7 +175,7 @@ namespace StoryBuilder
             Frame rootFrame = new Frame();
             if (rootFrame.Content == null)
             {
-                if (await ApplicationData.Current.RoamingFolder.TryGetItemAsync("Storybuilder.prf") != null) { rootFrame.Navigate(typeof(Shell)); }
+                if (System.IO.File.Exists(System.IO.Path.Combine(localPath,"StoryBuilder.prf"))) { rootFrame.Navigate(typeof(Shell)); }
                 else { rootFrame.Navigate(typeof(Initialisation));  }
             }
             // Place the frame in the current Window

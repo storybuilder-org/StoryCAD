@@ -24,8 +24,8 @@
 
             <StackPanel Grid.Row="1" VerticalAlignment="Stretch">
                 <Border Height="100"/>
-                <TextBox PlaceholderText="What is your name?" Margin="15" VerticalAlignment="Center" Text="{x:Bind InitVM.Name, Mode=TwoWay}"/>
-                <TextBox PlaceholderText="What is your email (optional)?" Margin="15" VerticalAlignment="Center" Text="{x:Bind InitVM.Email, Mode=TwoWay}"/>
+                <TextBox PlaceholderText="What is your name?" Margin="15" VerticalAlignment="Center" Name="Name" Text="{x:Bind InitVM.Name, Mode=TwoWay}"/>
+                <TextBox PlaceholderText="What is your email (optional)?" Margin="15" VerticalAlignment="Center" Name="Email" Text="{x:Bind InitVM.Email, Mode=TwoWay}"/>
                 <StackPanel Orientation="Horizontal">
                     <TextBox PlaceholderText="Where do you want to save your stories?" Name="ProjPath" Margin="15" VerticalAlignment="Center" Width="435" HorizontalAlignment="Left" Text="{x:Bind InitVM.Path, Mode=TwoWay}"/>
                     <Button Content="Browse" HorizontalAlignment="Center" Click="Button_Click"/>
