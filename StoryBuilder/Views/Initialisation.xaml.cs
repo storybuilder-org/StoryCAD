@@ -7,7 +7,6 @@ using Windows.Storage;
 using Windows.Storage.Pickers;
 using WinRT;
 
-
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
 
@@ -62,6 +61,16 @@ namespace StoryBuilder.Views
 
         [DllImport("user32.dll", ExactSpelling = true, CharSet = CharSet.Auto, PreserveSig = true, SetLastError = false)]
         public static extern IntPtr GetActiveWindow();
+
+
+        public void Check(object sender, RoutedEventArgs e)
+        {
+            if (InitVM.Path.ToString() != "" && InitVM.Name != "")
+            {
+                InitVM.Save();
+                RootFrame.Navigate(typeof(Shell));
+            }
+        }
 
     }
 }

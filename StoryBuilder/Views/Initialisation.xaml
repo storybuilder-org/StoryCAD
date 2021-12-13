@@ -8,32 +8,35 @@
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
-    <Grid HorizontalAlignment="Center" VerticalAlignment="Stretch">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="100"/>
-            <RowDefinition Height="300"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
-        
-        <StackPanel Grid.Row="0" VerticalAlignment="Center">
-            <TextBlock Text="Welcome to StoryBuilder!" FontSize="30" Padding="15" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-            <TextBlock Text="To get started we just need some info and you'll be on your way to make a brilliant story!" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-        </StackPanel>
+    <Frame Name="RootFrame">
+        <Grid HorizontalAlignment="Center" VerticalAlignment="Stretch" >
+            <Grid.RowDefinitions>
+                <RowDefinition Height="100"/>
+                <RowDefinition Height="300"/>
+                <RowDefinition Height="100"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="1" VerticalAlignment="Stretch">
-            <Border Height="100"/>
-            <TextBox PlaceholderText="What is your name?" Margin="5" VerticalAlignment="Center" Text="{x:Bind InitVM.Name, Mode=TwoWay}"/>
-            <TextBox PlaceholderText="What is your email (optional)?" Margin="5" VerticalAlignment="Center" Text="{x:Bind InitVM.Email, Mode=TwoWay}"/>
-            <StackPanel Orientation="Horizontal">
-                <TextBox PlaceholderText="Where do you want to save your stories?" Name="ProjPath" Margin="5" VerticalAlignment="Center" Width="465" HorizontalAlignment="Left" Text="{x:Bind InitVM.Path, Mode=TwoWay}"/>
-                <Button Content="Browse" HorizontalAlignment="Center" Click="Button_Click"/>
+            <StackPanel Grid.Row="0" VerticalAlignment="Center">
+                <TextBlock Text="Welcome to StoryBuilder!" FontSize="30" Padding="15" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                <TextBlock Text="To get started we just need some info and you'll be on your way to make a brilliant story!" HorizontalAlignment="Center" VerticalAlignment="Center"/>
             </StackPanel>
-        </StackPanel>
 
-        <StackPanel Grid.Row="2">
-            <CheckBox IsChecked="{x:Bind InitVM.ErrorLogging, Mode=TwoWay}" Content="Send error logs to Team StoryBuilder (Does not contain any personal infomation.)" VerticalAlignment="Bottom" Margin="5"/>
-            <CheckBox IsChecked="{x:Bind InitVM.News, Mode=TwoWay}" Content="Send me newsletters about StoryBuilder" VerticalAlignment="Bottom" Margin="5"/>
-            <Button Content="Continue" Margin="25" HorizontalAlignment="Center"/>
-        </StackPanel>
-    </Grid>
+            <StackPanel Grid.Row="1" VerticalAlignment="Stretch">
+                <Border Height="100"/>
+                <TextBox PlaceholderText="What is your name?" Margin="15" VerticalAlignment="Center" Text="{x:Bind InitVM.Name, Mode=TwoWay}"/>
+                <TextBox PlaceholderText="What is your email (optional)?" Margin="15" VerticalAlignment="Center" Text="{x:Bind InitVM.Email, Mode=TwoWay}"/>
+                <StackPanel Orientation="Horizontal">
+                    <TextBox PlaceholderText="Where do you want to save your stories?" Name="ProjPath" Margin="15" VerticalAlignment="Center" Width="435" HorizontalAlignment="Left" Text="{x:Bind InitVM.Path, Mode=TwoWay}"/>
+                    <Button Content="Browse" HorizontalAlignment="Center" Click="Button_Click"/>
+                </StackPanel>
+            </StackPanel>
+
+            <StackPanel Grid.Row="3">
+                <CheckBox IsChecked="{x:Bind InitVM.ErrorLogging, Mode=TwoWay}" Content="Send error logs to Team StoryBuilder (Does not contain any personal infomation.)" VerticalAlignment="Bottom" Margin="5"/>
+                <CheckBox IsChecked="{x:Bind InitVM.News, Mode=TwoWay}" Content="Send me newsletters about StoryBuilder" VerticalAlignment="Bottom" Margin="5"/>
+                <Button Content="Continue" Margin="25" HorizontalAlignment="Center" Click="Check"/>
+            </StackPanel>
+        </Grid>
+    </Frame>
 </Page>

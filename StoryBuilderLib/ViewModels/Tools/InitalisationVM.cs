@@ -8,6 +8,7 @@ using StoryBuilder.DAL;
 using StoryBuilder.Models;
 using StoryBuilder.Models.Tools;
 using StoryBuilder.Services.Dialogs;
+using Windows.Storage;
 
 namespace StoryBuilder.ViewModels
 {
@@ -34,23 +35,32 @@ namespace StoryBuilder.ViewModels
             set { SetProperty(ref _path, value); }
         }
 
-        private string _errorlogging;
-        public string ErrorLogging
+        private bool _errorlogging;
+        public bool ErrorLogging
         {
             get => _errorlogging;
             set { SetProperty(ref _errorlogging, value); }
         }
 
-        private string _news;
-        public string News
+        private bool _news;
+        public bool News
         {
             get => _news;
             set { SetProperty(ref _news, value); }
         }
 
-        public void Check()
+        public async void Save()
         {
-            //if (Path != String.IsNullOrWhiteSpace )
+            PreferencesModel prf = Ioc.Default.GetService<PreferencesModel>();
+            prf.Email = Email;
+            prf.ErrorCollectionConsent = ErrorLogging;
+            prf.Newsletter = News;
+            prf.ProjectDirectory = Path;
+            prf.Name = Name;
+            PreferencesIO prfIO = new(prf, ApplicationData.Current.RoamingFolder.Path);
+            await prfIO.UpdateFile();
+            PreferencesIO loader = new(GlobalData.Preferences, ApplicationData.Current.RoamingFolder.Path);
+            await loader.UpdateModel();
         }
 
         public InitialisationVM()
