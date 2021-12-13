@@ -62,8 +62,18 @@ namespace StoryBuilder.Models
         }
 
         // Premise data
+
+        private string _storyProblem;  // The Guid of a Problem StoryElement
+        public string StoryProblem
+        {
+            get => _storyProblem;
+            set => _storyProblem = value;
+        }
+
         // Note: the Premise is a read-only view of the story Problem Premise
-        //       and is not persisted in the model or on disk
+        //       and is not persisted in the model or on disk. Instead, when
+        //       this model is to the ViewModel, StoryProblem's Premise is
+        //       copied as read-only text to the OverViewViewModel.
 
         // Structure data
 
@@ -176,6 +186,8 @@ namespace StoryBuilder.Models
             StyleNotes = string.Empty;
             ToneNotes = string.Empty;
             Notes = string.Empty;
+            StoryProblem = string.Empty;
+
             // TODO: Set good defaults for these
             //System.DateTime wrkDate = DateTime.FromOADate(0);
             //wrkDate = DateTime.Parse(Convert.ToDateTime(StoryRec.DateCreated.Value).ToString("MM/dd/yy"));
@@ -200,6 +212,8 @@ namespace StoryBuilder.Models
             StyleNotes = string.Empty;
             ToneNotes = string.Empty;
             Notes = string.Empty;
+            StoryProblem = string.Empty;
+
             // TODO: Set good defaults for these
             //System.DateTime wrkDate = DateTime.FromOADate(0);
             //wrkDate = DateTime.Parse(Convert.ToDateTime(StoryRec.DateCreated.Value).ToString("MM/dd/yy"));
@@ -225,6 +239,8 @@ namespace StoryBuilder.Models
             StyleNotes = string.Empty;
             ToneNotes = string.Empty;
             Notes = string.Empty;
+            StoryProblem = string.Empty;
+
             // TODO: Set good defaults for these
             //System.DateTime wrkDate = DateTime.FromOADate(0);
             //wrkDate = DateTime.Parse(Convert.ToDateTime(StoryRec.DateCreated.Value).ToString("MM/dd/yy"));

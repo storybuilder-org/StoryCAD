@@ -278,6 +278,8 @@ namespace StoryBuilder.ViewModels
             Style = Model.Style;
             Tone = Model.Tone;
             Style = Model.Style;
+            StoryProblem = Model.StoryProblem;
+
             // Load RTF files
             StoryIdea = await _rdr.GetRtfText(Model.StoryIdea, Uuid);
             Concept = await _rdr.GetRtfText(Model.Concept, Uuid);
@@ -307,6 +309,7 @@ namespace StoryBuilder.ViewModels
                 Model.Tense = Tense;
                 Model.Style = Style;
                 Model.Tone = Tone;
+                Model.StoryProblem = StoryProblem;
 
                 // Write RTF files
                 Model.StoryIdea = await _wtr.PutRtfText(StoryIdea, Model.Uuid, "storyidea.rtf");
@@ -322,10 +325,12 @@ namespace StoryBuilder.ViewModels
 
         private async void LoadStoryPremise(string value)
         {
+            if (value.Equals(string.Empty))
+                return;
             ProblemModel problem = (ProblemModel) StringToStoryElement(value);
-            PremiseLock = false;    // Set Premise to read-only
+            PremiseLock = false;    // Set Premise to read/write
             Premise = await _rdr.GetRtfText(problem.Premise, problem.Uuid);
-            PremiseLock = true;     // Set Premise to read/write
+            PremiseLock = true;     // Set Premise to read-only
         }
 
         private StoryElement StringToStoryElement(string value)
@@ -399,6 +404,7 @@ namespace StoryBuilder.ViewModels
             StyleNotes = string.Empty;
             ToneNotes = string.Empty;
             Notes = string.Empty;
+            StoryProblem = string.Empty;
 
             Dictionary<string, ObservableCollection<string>> lists = GlobalData.ListControlSource;
             StoryTypeList = lists["StoryType"];
