@@ -48,7 +48,6 @@ namespace StoryBuilder
 
         private Window m_window;
         private IntPtr m_windowHandle;
-        public IntPtr WindowHandle { get { return m_windowHandle; } }
 
         private void SetWindowSize(IntPtr hwnd, int width, int height)
         {
@@ -188,6 +187,7 @@ namespace StoryBuilder
             //Get the Window's HWND
             m_windowHandle = PInvoke.User32.GetActiveWindow();
             m_window.Title = "StoryBuilder";
+            GlobalData.WindowHandle = m_windowHandle;
             // The Window object doesn't (yet) have Width and Height properties in WInUI 3 Desktop yet.
             // To set the Width and Height, you can use the Win32 API SetWindowPos.
             // Note, you should apply the DPI scale factor if you are thinking of dpi instead of pixels.
