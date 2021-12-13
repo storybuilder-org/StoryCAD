@@ -15,6 +15,7 @@ using StoryBuilder.ViewModels;
 using StoryBuilder.ViewModels.Tools;
 using StoryBuilder.Views;
 using System;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Windows.Storage;
@@ -143,7 +144,12 @@ namespace StoryBuilder
             string localPath = ApplicationData.Current.RoamingFolder.Path.ToString();
             localPath = System.IO.Path.Combine(localPath, "StoryBuilder");
             StorageFolder localFolder = await StorageFolder.GetFolderFromPathAsync(localPath);
-            _log.Log(LogLevel.Info, "Configuration data location = " + localFolder.Path);
+            var pathMsg = string.Format("Configuration data location = " + localFolder.Path);
+            _log.Log(LogLevel.Info, pathMsg);
+            Trace.Listeners.Add(new TextWriterTraceListener(Console.Out));
+            Trace.AutoFlush = true;
+            Trace.Indent();
+            Trace.WriteLine(pathMsg);
 
             // We need to preserve user Preferences settings across ProcessInstallationFiles.
             // The installation file location may be empty or udpated, and one of those
