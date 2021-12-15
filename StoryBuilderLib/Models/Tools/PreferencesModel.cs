@@ -23,6 +23,7 @@
         public string Email { get; set; }
         public bool ErrorCollectionConsent { get; set; }
         public bool Newsletter { get; set; }
+        public bool Initalised { get; set; } //this decides if the user should be shown the initalisation window
 
         // Visual changes
         public bool ForceDarkmode { get; set; }

@@ -57,6 +57,7 @@ namespace StoryBuilder.ViewModels
             prf.Newsletter = News;
             prf.ProjectDirectory = Path;
             prf.Name = Name;
+            prf.Initalised = true; //Makes sure this window isn't shown to the user
             PreferencesIO prfIO = new(prf, System.IO.Path.Combine(ApplicationData.Current.RoamingFolder.Path,"Storybuilder"));
             await prfIO.UpdateFile();
             PreferencesIO loader = new(GlobalData.Preferences, System.IO.Path.Combine(ApplicationData.Current.RoamingFolder.Path, "Storybuilder"));

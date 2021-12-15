@@ -58,29 +58,36 @@ namespace StoryBuilder.DAL
                             _model.Email = tokens[1];
                             break;
 
-                        case "QuoteOnStartup":
-                            if (tokens[1] == "Y")
+                        case "QuoteOnStartup": 
+                            if (tokens[1] == "Y" || tokens[1] == "True")
                                 _model.QuoteOnStartup = true;
                             else
                                 _model.QuoteOnStartup = false;
                             break;
 
+                        case "Initalised":
+                            if (tokens[1] == "Y" || tokens[1] == "True")
+                                _model.Initalised = true;
+                            else
+                                _model.Initalised = false;
+                            break;
+
                         case "ErrorCollectionConsent":
-                            if (tokens[1] == "Y")
+                            if (tokens[1] == "Y" || tokens[1] == "True")
                                 _model.ErrorCollectionConsent = true;
                             else
                                 _model.ErrorCollectionConsent = false;
                             break;
 
                         case "Newsletter":
-                            if (tokens[1] == "Y")
+                            if (tokens[1] == "Y" || tokens[1] == "True")
                                 _model.Newsletter = true;
                             else
                                 _model.Newsletter = false;
                             break;
 
                         case "ForceDarkmode":
-                            if (tokens[1] == "Y")
+                            if (tokens[1] == "Y" || tokens[1] == "True")
                                 _model.ForceDarkmode = true;
                             else
                                 _model.ForceDarkmode = false;
@@ -91,7 +98,7 @@ namespace StoryBuilder.DAL
                             break;
 
                         case "TimedBackup":
-                            if (tokens[1] == "Y")
+                            if (tokens[1] == "Y" || tokens[1] == "True")
                                 _model.TimedBackup = true;
                             else
                                 _model.TimedBackup = false;
@@ -149,6 +156,9 @@ namespace StoryBuilder.DAL
 
             if (_model.QuoteOnStartup == true) { NewPreferences.Add("QuoteOnStartup=Y"); }
             else { NewPreferences.Add("QuoteOnStartup=N"); }
+
+            if (_model.Initalised == true) { NewPreferences.Add("Initalised=Y"); }
+            else { NewPreferences.Add("Initalised=N"); }
 
             if (_model.TimedBackup == true) { NewPreferences.Add("TimedBackup=Y"); }
             else { NewPreferences.Add("TimedBackup=N"); }

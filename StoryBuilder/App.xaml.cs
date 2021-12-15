@@ -146,7 +146,7 @@ namespace StoryBuilder
             _log.Log(LogLevel.Info, "Configuration data location = " + localFolder.Path);
 
             // We need to preserve user Preferences settings across ProcessInstallationFiles.
-            // The installation file location may be empty or udpated, and one of those
+            // The installation file location may be empty or update, and one of those
             // updates might be a new Preferences file if options are added. 
             // To preserve user-set values, we read the existing Preferences file into GlobalData,
             // run any updates (including to Preferences), and then save the preferences
@@ -175,7 +175,7 @@ namespace StoryBuilder
             Frame rootFrame = new Frame();
             if (rootFrame.Content == null)
             {
-                if (System.IO.File.Exists(System.IO.Path.Combine(localPath,"StoryBuilder.prf"))) { rootFrame.Navigate(typeof(Shell)); }
+                if (GlobalData.Preferences.Initalised) { rootFrame.Navigate(typeof(Shell)); }
                 else { rootFrame.Navigate(typeof(Initialisation));  }
             }
             // Place the frame in the current Window
