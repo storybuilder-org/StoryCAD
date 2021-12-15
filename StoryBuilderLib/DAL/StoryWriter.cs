@@ -186,6 +186,9 @@ namespace StoryBuilder.DAL
             attr = _xml.CreateAttribute("Concept");
             attr.Value = rec.Concept;
             overview.Attributes.Append(attr);
+            attr = _xml.CreateAttribute("StoryProblem");
+            attr.Value = rec.StoryProblem;
+            overview.Attributes.Append(attr);
             attr = _xml.CreateAttribute("StyleNotes");
             attr.Value = rec.StyleNotes;
             overview.Attributes.Append(attr);
