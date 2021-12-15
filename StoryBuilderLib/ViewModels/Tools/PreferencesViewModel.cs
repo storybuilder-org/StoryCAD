@@ -9,6 +9,12 @@ namespace StoryBuilder.ViewModels.Tools
 {
     public class PreferencesViewModel : ObservableRecipient
     {
+        private string _backupdir;
+        public string BackupDir
+        {
+            get => _backupdir;
+            set { SetProperty(ref _backupdir, value); }
+        }
 
         private string _Name;
         public string Name
@@ -59,15 +65,18 @@ namespace StoryBuilder.ViewModels.Tools
         public async Task SaveAsync()
         {
             PreferencesModel prf = new();
+            PreferencesIO prfIO = new(prf, System.IO.Path.Combine(ApplicationData.Current.RoamingFolder.Path, "Storybuilder"));
+            await prfIO.UpdateModel();
+    
             prf.Name = Name;
             prf.Email = Email;
             prf.ErrorCollectionConsent = ErrorConsent;
             prf.ProjectDirectory = ProjectDir;
+            prf.BackupDirectory = BackupDir;
             prf.TimedBackupInterval = BackupInterval;
             prf.TimedBackup = Backup;
             prf.Newsletter = NewsConsent;
 
-            PreferencesIO prfIO = new(prf, System.IO.Path.Combine(ApplicationData.Current.RoamingFolder.Path, "Storybuilder"));
             await prfIO.UpdateFile();
             PreferencesIO loader = new(GlobalData.Preferences, System.IO.Path.Combine(ApplicationData.Current.RoamingFolder.Path, "Storybuilder"));
             await loader.UpdateModel();

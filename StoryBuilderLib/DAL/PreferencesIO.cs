@@ -154,9 +154,6 @@ namespace StoryBuilder.DAL
             StorageFile preferencesFile = await preferencesFolder.CreateFileAsync("StoryBuilder.prf", CreationCollisionOption.ReplaceExisting);
             IList<string> NewPreferences = new List<string>();
 
-            if (_model.QuoteOnStartup == true) { NewPreferences.Add("QuoteOnStartup=Y"); }
-            else { NewPreferences.Add("QuoteOnStartup=N"); }
-
             if (_model.Initalised == true) { NewPreferences.Add("Initalised=Y"); }
             else { NewPreferences.Add("Initalised=N"); }
 
@@ -174,18 +171,20 @@ namespace StoryBuilder.DAL
 
             NewPreferences.Add("Name=" + _model.Name);
             NewPreferences.Add("Email=" + _model.Email);
-            NewPreferences.Add("BackupOnOpen=" + _model.BackupOnOpen);
-            NewPreferences.Add("TimedBackup=" + _model.TimedBackup);
             NewPreferences.Add("TimedBackupInterval=" + _model.TimedBackupInterval);
             NewPreferences.Add("InstallationDirectory=" + _model.InstallationDirectory);
             NewPreferences.Add("ProjectDirectory=" + _model.ProjectDirectory);
             NewPreferences.Add("BackupDirectory=" + _model.BackupDirectory);
-            NewPreferences.Add("LogDirectory=" + _model.LogDirectory);
             NewPreferences.Add("LastFile1=" + _model.LastFile1);
             NewPreferences.Add("LastFile2=" + _model.LastFile2);
             NewPreferences.Add("LastFile3=" + _model.LastFile3);
             NewPreferences.Add("LastFile4=" + _model.LastFile4);
             NewPreferences.Add("LastFile5=" + _model.LastFile5);
+
+            if (_model.QuoteOnStartup == true) { NewPreferences.Add("QuoteOnStartup=Y"); }
+            else { NewPreferences.Add("QuoteOnStartup=N"); }
+            NewPreferences.Add("BackupOnOpen=" + _model.BackupOnOpen);
+            NewPreferences.Add("LogDirectory=" + _model.LogDirectory);
 
             await FileIO.WriteLinesAsync(preferencesFile, NewPreferences);
         }

@@ -9,13 +9,15 @@
     SecondaryButtonText="Go back">
 
     <StackPanel Width="400">
-        <TextBlock Text="Preferences" FontSize="30" HorizontalAlignment="Center" Margin="8" />
+        <TextBlock Text="Preferences" FontSize="30" HorizontalAlignment="Center" Margin="0,4,0,0" />
         <TextBox Header="Your name:" PlaceholderText="Put the name want to publish under here" HorizontalAlignment="Center" Margin="8" Width="300" Text="{x:Bind PreferencesVm.Name, Mode=TwoWay}"/>
         <TextBox Header="Your email:" PlaceholderText="Put your email here" Margin="8" Width="300" Text="{x:Bind PreferencesVm.Email, Mode=TwoWay}"/>
         <TextBox Header="Project directory:" PlaceholderText="Where do you want to store your stories?" Margin="8" Width="300" HorizontalAlignment="Center" Text="{x:Bind PreferencesVm.ProjectDir, Mode=TwoWay}"/>
         <CheckBox Content="Send error logs to Team StoryBuilder" Margin="8" HorizontalAlignment="Center" IsChecked="{x:Bind PreferencesVm.ErrorConsent, Mode=TwoWay}"/>
         <CheckBox Content="Send me newsletters about StoryBuilder" Margin="8" HorizontalAlignment="Center" IsChecked="{x:Bind PreferencesVm.NewsConsent, Mode=TwoWay}"/>
-        <CheckBox Content="Make timed backups" Margin="0,20,0,0" HorizontalAlignment="Center" IsChecked="{x:Bind PreferencesVm.Backup, Mode=TwoWay}"/>
+        <CheckBox Content="Make timed backups" Margin="8" HorizontalAlignment="Center" IsChecked="{x:Bind PreferencesVm.Backup, Mode=TwoWay}"/>
         <NumberBox Header="How often should backups be made? (Seconds)" Margin="8" Width="300" HorizontalAlignment="Center" Value="{x:Bind PreferencesVm.BackupInterval, Mode=TwoWay}"/>
+        <TextBox Header="Backup directory:" PlaceholderText="Where do you want to store your backups?" Margin="8" Width="300" HorizontalAlignment="Center" Text="{x:Bind PreferencesVm.BackupDir, Mode=TwoWay}"/>
+
     </StackPanel>
 </ContentDialog>
