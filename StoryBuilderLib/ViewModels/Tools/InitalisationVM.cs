@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
@@ -35,6 +35,13 @@ namespace StoryBuilder.ViewModels
             set { SetProperty(ref _path, value); }
         }
 
+        private string _Backuppath;
+        public string BackupPath
+        {
+            get => _Backuppath;
+            set { SetProperty(ref _Backuppath, value); }
+        }
+
         private bool _errorlogging;
         public bool ErrorLogging
         {
@@ -51,13 +58,17 @@ namespace StoryBuilder.ViewModels
 
         public async void Save()
         {
+            //Creates new preferences model and sets the values
             PreferencesModel prf = new();
             prf.Email = Email;
             prf.ErrorCollectionConsent = ErrorLogging;
             prf.Newsletter = News;
             prf.ProjectDirectory = Path;
+            prf.BackupDirectory = BackupPath;
             prf.Name = Name;
             prf.Initalised = true; //Makes sure this window isn't shown to the user
+
+            //Updates the file, then rereads into memory.
             PreferencesIO prfIO = new(prf, System.IO.Path.Combine(ApplicationData.Current.RoamingFolder.Path,"Storybuilder"));
             await prfIO.UpdateFile();
             PreferencesIO loader = new(GlobalData.Preferences, System.IO.Path.Combine(ApplicationData.Current.RoamingFolder.Path, "Storybuilder"));

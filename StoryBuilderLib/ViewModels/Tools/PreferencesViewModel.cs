@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using StoryBuilder.DAL;
 using StoryBuilder.Models;
 using StoryBuilder.Models.Tools;
@@ -82,6 +82,10 @@ namespace StoryBuilder.ViewModels.Tools
             await loader.UpdateModel();
         }
 
+        /// <summary>
+        /// Loads the model from the global one
+        /// it then updates the UI with the value
+        /// </summary>
         public PreferencesViewModel()
         {
             PreferencesModel _model = GlobalData.Preferences;
@@ -92,6 +96,7 @@ namespace StoryBuilder.ViewModels.Tools
             BackupInterval = _model.TimedBackupInterval;
             Backup = _model.TimedBackup;
             NewsConsent = _model.Newsletter;
+            BackupDir = _model.BackupDirectory;
         }
     }
 }

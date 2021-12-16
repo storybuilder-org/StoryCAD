@@ -1,4 +1,4 @@
-﻿using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using StoryBuilder.ViewModels;
 using System;
@@ -23,7 +23,17 @@ namespace StoryBuilder.Views
             this.InitializeComponent();
         }
 
-        private async void Button_Click(object sender, RoutedEventArgs e)
+        /// <summary>
+        /// This is called when the browse button next to Project Path
+        /// once clicked it opens a folder picker. If cancled the folder
+        /// will be null and nothing will happen.
+        /// 
+        /// If a folder is selected it will set the VM and UI versions of
+        /// the variables to make sure they are in sync.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private async void SetProjectPath(object sender, RoutedEventArgs e)
         {
             var folderPicker = new FolderPicker();
             if (Window.Current == null)
@@ -41,6 +51,37 @@ namespace StoryBuilder.Views
             {
                 ProjPath.Text = folder.Path;
                 InitVM.Path = folder.Path;
+            }
+        }
+
+        /// <summary>
+        /// This is called when the browse button next to Project Path
+        /// once clicked it opens a folder picker. If cancled the folder
+        /// will be null and nothing will happen.
+        /// 
+        /// If a folder is selected it will set the VM and UI versions of
+        /// the variables to make sure they are in sync.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private async void SetBackupPath(object sender, RoutedEventArgs e)
+        {
+            var folderPicker = new FolderPicker();
+            if (Window.Current == null)
+            {
+                IntPtr hwnd = GetActiveWindow();
+                //IntPtr hwnd = GlobalData.WindowHandle;
+                var initializeWithWindow = folderPicker.As<IInitializeWithWindow>();
+                initializeWithWindow.Initialize(hwnd);
+            }
+
+            folderPicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
+            folderPicker.FileTypeFilter.Add("*");
+            StorageFolder folder = await folderPicker.PickSingleFolderAsync();
+            if (folder != null)
+            {
+                BackPath.Text = folder.Path;
+                InitVM.BackupPath = folder.Path;
             }
         }
 
@@ -66,7 +107,7 @@ namespace StoryBuilder.Views
 
         public void Check(object sender, RoutedEventArgs e)
         {
-            if (!String.IsNullOrWhiteSpace(InitVM.Path.ToString()) && InitVM.Name != "")
+            if (!String.IsNullOrWhiteSpace(InitVM.Path.ToString()) && !String.IsNullOrWhiteSpace(InitVM.BackupPath.ToString()) && InitVM.Name != "")
             {
                 InitVM.Save();
                 RootFrame.Navigate(typeof(Shell));
