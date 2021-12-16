@@ -50,6 +50,33 @@ namespace StoryBuilder.Services.Scrivener
             //_misc = miscFolder;
         }
 
+
+        public StoryElement StringToStoryElement(string value)
+        {
+            if (value == null)
+                return null;
+            if (value.Equals(string.Empty))
+                return null;
+            // Get the current StoryModel's StoryElementsCollection
+            ShellViewModel shell = Ioc.Default.GetService<ShellViewModel>();
+            StoryElementCollection elements = shell.StoryModel.StoryElements;
+            // legacy: locate the StoryElement from its Name
+            foreach (StoryElement element in elements)  // Character or Setting??? Search both?
+            {
+                if (element.Type == StoryItemType.Character | element.Type == StoryItemType.Setting)
+                {
+                    if (value.Equals(element.Name))
+                        return element;
+                }
+            }
+            // Look for the StoryElement corresponding to the passed guid
+            // (This is the normal approach)
+            if (Guid.TryParse(value.ToString(), out var guid))
+                if (elements.StoryElementGuids.ContainsKey(guid))
+                    return elements.StoryElementGuids[guid];
+            return null;  // Not found
+        }
+
         #endregion
 
         #region public methods
@@ -449,6 +476,9 @@ namespace StoryBuilder.Services.Scrivener
             overview.Concept = await _rdr.GetRtfText(overview.Concept, overview.Uuid);
             //overview.Premise = await _rdr.GetRtfText(overview.Premise, overview.Uuid);
             overview.Notes = await _rdr.GetRtfText(overview.Notes, overview.Uuid);
+            StoryElement vpChar = StringToStoryElement(overview.ViewpointCharacter);
+
+            //CharacterModel vpChar = overview.String
             // Parse and write the report
             foreach (string line in lines)
             {
@@ -463,10 +493,22 @@ namespace StoryBuilder.Services.Scrivener
                 sb.Replace("@Viewpoint", overview.Viewpoint);
                 sb.Replace("@StoryIdea", overview.StoryIdea);
                 sb.Replace("@Concept", overview.Concept);
-                //sb.Replace("@Premise", overview.Premise);
+                sb.Replace("@StoryProblem", overview.StoryProblem);
+                sb.Replace("@Premise", overview.Premise);
+                sb.Replace("@StoryType", overview.StoryType);
+                sb.Replace("@StoryGenre", overview.StoryGenre);
+                sb.Replace("@LiteraryDevice", overview.LiteraryDevice);
+                sb.Replace("@viewpointCharacter", vpChar.Name);
+                sb.Replace("@Voice", overview.Voice);
+                sb.Replace("@Tense", overview.Tense);
+                sb.Replace("@Style", overview.Style);
+                sb.Replace("@styleNotes", overview.StyleNotes);
+                sb.Replace("@Tone", overview.Tone);
+                sb.Replace("@toneNotes", overview.ToneNotes);
                 sb.Replace("@Notes", overview.Notes);
                 doc.AddText(sb.ToString(), format);
                 doc.AddNewLine();
+
             }
             // Write the report
             string rtf = doc.GetRtf();
