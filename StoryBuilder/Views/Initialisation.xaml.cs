@@ -1,5 +1,5 @@
-﻿using CommunityToolkit.Mvvm.DependencyInjection;
-using Microsoft.UI.Xaml;
+﻿using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
 using StoryBuilder.ViewModels;
 using System;
 using System.Runtime.InteropServices;
@@ -7,48 +7,41 @@ using Windows.Storage;
 using Windows.Storage.Pickers;
 using WinRT;
 
-// The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
+// To learn more about WinUI, the WinUI project structure,
+// and more about our project templates, see: http://aka.ms/winui-project-info.
 
-namespace StoryBuilder.Services.Dialogs
+namespace StoryBuilder.Views
 {
     /// <summary>
     /// An empty page that can be used on its own or navigated to within a Frame.
     /// </summary>
-    public sealed partial class NewProjectDialog
+    public sealed partial class Initialisation : Page
     {
-        public NewProjectViewModel NewProjectVm
+        InitialisationVM InitVM = new();
+        public Initialisation()
         {
-            get
-            {
-                return Ioc.Default.GetService<NewProjectViewModel>();
-            }
+            this.InitializeComponent();
         }
-        public NewProjectDialog()
-        {
-            InitializeComponent();
-        }
-        public bool BrowseButtonClicked { get; set; }
-        public bool ProjectFolderExists { get; set; }
-        public StorageFolder ParentFolder { get; set; }
-        public string ParentFolderPath { get; set; }
-        public string ProjectFolderPath { get; set; }
 
-        private async void Browse_Click(object sender, RoutedEventArgs e)
+        private async void Button_Click(object sender, RoutedEventArgs e)
         {
-            // Find a home for the new project
             var folderPicker = new FolderPicker();
             if (Window.Current == null)
             {
                 IntPtr hwnd = GetActiveWindow();
+                //IntPtr hwnd = GlobalData.WindowHandle;
                 var initializeWithWindow = folderPicker.As<IInitializeWithWindow>();
                 initializeWithWindow.Initialize(hwnd);
             }
-            //BUG: 
+
             folderPicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
             folderPicker.FileTypeFilter.Add("*");
             StorageFolder folder = await folderPicker.PickSingleFolderAsync();
-            ParentFolderPath = folder.Path;
-            NewProjectVm.ParentPathName = folder.Path;
+            if (folder != null)
+            {
+                ProjPath.Text = folder.Path;
+                InitVM.Path = folder.Path;
+            }
         }
 
         [ComImport]
@@ -69,6 +62,16 @@ namespace StoryBuilder.Services.Dialogs
 
         [DllImport("user32.dll", ExactSpelling = true, CharSet = CharSet.Auto, PreserveSig = true, SetLastError = false)]
         public static extern IntPtr GetActiveWindow();
+
+
+        public void Check(object sender, RoutedEventArgs e)
+        {
+            if (!String.IsNullOrWhiteSpace(InitVM.Path.ToString()) && InitVM.Name != "")
+            {
+                InitVM.Save();
+                RootFrame.Navigate(typeof(Shell));
+            }
+        }
 
     }
 }

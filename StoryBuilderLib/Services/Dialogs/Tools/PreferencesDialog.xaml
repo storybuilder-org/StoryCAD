@@ -5,15 +5,19 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    Title="Preferences"
-    PrimaryButtonText="Save Changes"
-    SecondaryButtonText="Cancel" >
+    PrimaryButtonText="Save"
+    SecondaryButtonText="Go back">
 
-    <StackPanel Padding="14,0,14,14" ScrollViewer.VerticalScrollBarVisibility="Visible"> 
-        <ToggleSwitch HorizontalAlignment="Left" Header="Display quote on startup" IsOn="{x:Bind PreferencesVm.QuoteOnStartup, Mode=TwoWay}"  Margin="0,8"/>
-        <ToggleSwitch HorizontalAlignment="Left" Header="Schedule backup" IsOn="{x:Bind PreferencesVm.TimedBackup, Mode=TwoWay}" Margin="0,4"/>
-        <NumberBox HorizontalAlignment="Left" Header="Backup Interval (Minutes)" Value="{x:Bind PreferencesVm.TimedBackupInterval, Mode=TwoWay}" Margin="0,4"/>
-        <TextBox Header="Backup Directory" HorizontalAlignment="Left" Width="400" Text="{x:Bind PreferencesVm.BackupDirectory, Mode=TwoWay}" Margin="0,8"/>
-        <TextBox Header="Default Project Directory" HorizontalAlignment="Left" Width="400" Text="{x:Bind PreferencesVm.ProjectDirectory, Mode=TwoWay}" Margin="0,8"/>
+    <StackPanel Width="400">
+        <TextBlock Text="Preferences" FontSize="30" HorizontalAlignment="Center" Margin="0,4,0,0" />
+        <TextBox Header="Your name:" PlaceholderText="Put the name want to publish under here" HorizontalAlignment="Center" Margin="8" Width="300" Text="{x:Bind PreferencesVm.Name, Mode=TwoWay}"/>
+        <TextBox Header="Your email:" PlaceholderText="Put your email here" Margin="8" Width="300" Text="{x:Bind PreferencesVm.Email, Mode=TwoWay}"/>
+        <TextBox Header="Project directory:" PlaceholderText="Where do you want to store your stories?" Margin="8" Width="300" HorizontalAlignment="Center" Text="{x:Bind PreferencesVm.ProjectDir, Mode=TwoWay}"/>
+        <CheckBox Content="Send error logs to Team StoryBuilder" Margin="8" HorizontalAlignment="Center" IsChecked="{x:Bind PreferencesVm.ErrorConsent, Mode=TwoWay}"/>
+        <CheckBox Content="Send me newsletters about StoryBuilder" Margin="8" HorizontalAlignment="Center" IsChecked="{x:Bind PreferencesVm.NewsConsent, Mode=TwoWay}"/>
+        <CheckBox Content="Make timed backups" Margin="8" HorizontalAlignment="Center" IsChecked="{x:Bind PreferencesVm.Backup, Mode=TwoWay}"/>
+        <NumberBox Header="How often should backups be made? (Seconds)" Margin="8" Width="300" HorizontalAlignment="Center" Value="{x:Bind PreferencesVm.BackupInterval, Mode=TwoWay}"/>
+        <TextBox Header="Backup directory:" PlaceholderText="Where do you want to store your backups?" Margin="8" Width="300" HorizontalAlignment="Center" Text="{x:Bind PreferencesVm.BackupDir, Mode=TwoWay}"/>
+
     </StackPanel>
 </ContentDialog>

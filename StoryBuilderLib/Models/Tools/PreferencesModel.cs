@@ -17,27 +17,25 @@
     {
         #region Properties
         public bool Changed { get; set; }
-        // Product Information (set on installation)
-        public string ProductName { get; set; }
-        public string ProductVersion { get; set; }
 
-        // Liscense Information (set on installation)
-        public string LicenseOwner { get; set; }
-        public string LicenseNumber { get; set; }
-        // Miscellaneous
+        //User infomation
+        public string Name { get; set; }
+        public string Email { get; set; }
+        public bool ErrorCollectionConsent { get; set; }
+        public bool Newsletter { get; set; }
+        public bool Initalised { get; set; } //this decides if the user should be shown the initalisation window
+
+        // Visual changes
+        public bool ForceDarkmode { get; set; }
         public bool QuoteOnStartup { get; set; }
-        // Current Screen Font
-        public string ScreenFont { get; set; }
-        public string PrinterFont { get; set; }
+
         // Backup Information
         public string BackupOnOpen { get; set; }
         public bool TimedBackup { get; set; }
         public int TimedBackupInterval { get; set; }
 
-        // Installation folder is set to roaming ApplicationData's StoryBuilder subfolder
-        // This is also the default Preferences file location
+        //Directorys
         public string InstallationDirectory { get; set; }
-        // Default location to read / save user story outlines
         public string ProjectDirectory { get; set; }
         public string BackupDirectory { get; set; }
         public string LogDirectory { get; set; }

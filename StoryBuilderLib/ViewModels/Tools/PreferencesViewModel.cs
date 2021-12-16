@@ -1,165 +1,97 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using StoryBuilder.DAL;
 using StoryBuilder.Models;
 using StoryBuilder.Models.Tools;
+using System.Threading.Tasks;
+using Windows.Storage;
 
 namespace StoryBuilder.ViewModels.Tools
 {
     public class PreferencesViewModel : ObservableRecipient
     {
-        #region Fields
-        private bool _changed;
-
-        private bool _quoteonstartup;
-        private string _screenfont;
-        private string _printerfont;
-        private string _backupOnOpen;
-        private bool _timedbackup;
-        private int _timedbackupinterval;
-        private string _defaultdirectory;
-        private string _defaultprojectdirectory;
-
-        private PreferencesModel _model;
-
-        #endregion
-
-        #region Properties
-        public bool Changed
+        private string _backupdir;
+        public string BackupDir
         {
-            get { return _changed; }
-            set { _changed = value; }
+            get => _backupdir;
+            set { SetProperty(ref _backupdir, value); }
         }
 
-        public bool QuoteOnStartup
+        private string _Name;
+        public string Name
         {
-            get => _quoteonstartup;
-            set => SetProperty(ref _quoteonstartup, value);
+            get { return _Name; }
+            set { _Name = value; }
+        }
+        private string _Email;
+        public string Email
+        {
+            get { return _Email; }
+            set { _Email = value; }
+        }
+        private bool _ErrorConsent;
+        public bool ErrorConsent
+        {
+            get { return _ErrorConsent; }
+            set { _ErrorConsent = value; }
+        }
+        private bool _NewsConsent;
+        public bool NewsConsent
+        {
+            get { return _NewsConsent; }
+            set { _NewsConsent = value; }
+        }
+        private bool _Backup;
+        public bool Backup
+        {
+            get { return _Backup; }
+            set { _Backup = value; }
+        }
+        private int _BackupInterval;
+        public int BackupInterval
+        {
+            get { return _BackupInterval; }
+            set { _BackupInterval = value; }
+        }
+        private string _ProjectDir;
+        public string ProjectDir
+        {
+            get { return _ProjectDir; }
+            set { _ProjectDir = value; }
         }
 
-        public string ScreenFont
+        /// <summary>
+        /// Saves the users preferences to disk.
+        /// </summary>
+        public async Task SaveAsync()
         {
-            get => _screenfont;
-            set => SetProperty(ref _screenfont, value);
-        }
+            PreferencesModel prf = new();
+            PreferencesIO prfIO = new(prf, System.IO.Path.Combine(ApplicationData.Current.RoamingFolder.Path, "Storybuilder"));
+            await prfIO.UpdateModel();
+    
+            prf.Name = Name;
+            prf.Email = Email;
+            prf.ErrorCollectionConsent = ErrorConsent;
+            prf.ProjectDirectory = ProjectDir;
+            prf.BackupDirectory = BackupDir;
+            prf.TimedBackupInterval = BackupInterval;
+            prf.TimedBackup = Backup;
+            prf.Newsletter = NewsConsent;
 
-        public string PrinterFont
-        {
-            get => _printerfont;
-            set => SetProperty(ref _printerfont, value);
+            await prfIO.UpdateFile();
+            PreferencesIO loader = new(GlobalData.Preferences, System.IO.Path.Combine(ApplicationData.Current.RoamingFolder.Path, "Storybuilder"));
+            await loader.UpdateModel();
         }
-
-        public string BackupOnOpen
-        {
-            get => _backupOnOpen;
-            set => SetProperty(ref _backupOnOpen, value);
-        }
-
-        public bool TimedBackup
-        {
-            get => _timedbackup;
-            set => SetProperty(ref _timedbackup, value);
-        }
-
-        public int TimedBackupInterval
-        {
-            get => _timedbackupinterval;
-            set => SetProperty(ref _timedbackupinterval, value);
-        }
-        public string BackupDirectory
-        {
-            get => _defaultprojectdirectory;
-            set => SetProperty(ref _defaultprojectdirectory, value);
-        }
-
-        public string DefaultDirectory
-        {
-            get => _defaultdirectory;
-            set => SetProperty(ref _defaultdirectory, value);
-        }
-
-        public string ProjectDirectory
-        {
-            get => _defaultprojectdirectory;
-            set => SetProperty(ref _defaultprojectdirectory, value);
-        }
-
-        public string LogDirectory
-        {
-            get => _defaultprojectdirectory;
-            set => SetProperty(ref _defaultprojectdirectory, value);
-        }
-
-        #endregion
-
-        #region Constructor
 
         public PreferencesViewModel()
         {
-            _model = GlobalData.Preferences;
-        }
-
-        #endregion
-
-        public void LoadModel()
-        {
-            QuoteOnStartup = _model.QuoteOnStartup;
-            ScreenFont = _model.ScreenFont;
-            //model.ScreenFontBold = ScreenFontBold;
-            PrinterFont = _model.PrinterFont;
-            _backupOnOpen = _model.BackupOnOpen;
-            //model.PrinterFontBold = PrinterFontBold;
-            TimedBackup = _model.TimedBackup;
-            TimedBackupInterval = _model.TimedBackupInterval;
-            BackupDirectory = _model.BackupDirectory;
-            //model.PreviousBackup = PreviousBackup;
-            ProjectDirectory = _model.ProjectDirectory;
-            LogDirectory = _model.LogDirectory;
-            Changed = false;
-        }
-
-        public void SaveModel()
-        {
-            _model.QuoteOnStartup = QuoteOnStartup;
-            _model.ScreenFont = ScreenFont;
-            //_model.ScreenFontBold = ScreenFontBold;
-            _model.PrinterFont = PrinterFont;
-            //_model.PrinterFontBold = PrinterFontBold;
-            _model.TimedBackup = TimedBackup;
-            _model.TimedBackupInterval = TimedBackupInterval;
-            //_model.PreviousBackup = PreviousBackup;
-            _model.ProjectDirectory = DefaultDirectory;
-            _model.BackupDirectory = BackupDirectory;
-            _model.LogDirectory = LogDirectory;
-            _model.Changed = true;
-            Changed = false;
-        }
-
-        public void ChangeScreenFontCommand()
-        {
-            //FontDialog dialog = new FontDialog();
-            //dialog.ShowColor = false;
-            //FontFamily family = new FontFamily(ScreenFont);
-            //FontStyle style = ScreenFontBold ? FontStyle.Bold : FontStyle.Regular;
-            //dialog.Font = new Font(family, 9.75f, style);
-            //if(dialog.ShowDialog() != DialogResult.Cancel )
-            //{
-            //    ScreenFont = dialog.Font.Name;
-            //    ScreenFontBold = dialog.Font.Bold;
-            //}
-        }
-
-        public void ChangePrinterFontCommand()
-        {
-            //FontWeight weight = 
-            //FontDialog dialog = new FontDialog();
-            //dialog.FixedPitchOnly = true;
-            //dialog.ShowColor = false;
-            //FontFamily family = new FontFamily(PrinterFont);
-            //FontStyle style = PrinterFontBold ? FontStyles.Oblique : FontStyles.Normal;
-            //dialog.Font = new Font(family, 9.75f, style);
-            //if (dialog.ShowDialog() != DialogResult.Cancel) {
-            //    PrinterFont = dialog.Font.Name;
-            //    PrinterFontBold = dialog.Font.Bold;
-            //}
+            PreferencesModel _model = GlobalData.Preferences;
+            ErrorConsent = _model.ErrorCollectionConsent;
+            Email = _model.Email;
+            Name = _model.Name;
+            ProjectDir = _model.ProjectDirectory;
+            BackupInterval = _model.TimedBackupInterval;
+            Backup = _model.TimedBackup;
+            NewsConsent = _model.Newsletter;
         }
     }
 }

@@ -151,7 +151,7 @@ namespace StoryBuilder
             Trace.WriteLine(pathMsg);
 
             // We need to preserve user Preferences settings across ProcessInstallationFiles.
-            // The installation file location may be empty or udpated, and one of those
+            // The installation file location may be empty or update, and one of those
             // updates might be a new Preferences file if options are added. 
             // To preserve user-set values, we read the existing Preferences file into GlobalData,
             // run any updates (including to Preferences), and then save the preferences
@@ -164,7 +164,7 @@ namespace StoryBuilder
             await ProcessInstallationFiles();
 
             string path = GlobalData.Preferences.InstallationDirectory;
-            PreferencesIO loader = new PreferencesIO(GlobalData.Preferences, path);
+            PreferencesIO loader = new(GlobalData.Preferences, path);
             await loader.UpdateFile();
 
             await LoadControls(localFolder.Path, story);
@@ -179,7 +179,10 @@ namespace StoryBuilder
             // Create a Frame to act as the navigation context and navigate to the first page (Shell)
             Frame rootFrame = new Frame();
             if (rootFrame.Content == null)
-                rootFrame.Navigate(typeof(Shell));
+            {
+                if (GlobalData.Preferences.Initalised) { rootFrame.Navigate(typeof(Shell)); }
+                else { rootFrame.Navigate(typeof(Initialisation));  }
+            }
             // Place the frame in the current Window
             m_window.Content = rootFrame;
             m_window.Activate();
