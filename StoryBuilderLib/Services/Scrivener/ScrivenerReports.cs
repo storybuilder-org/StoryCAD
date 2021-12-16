@@ -499,6 +499,10 @@ namespace StoryBuilder.Services.Scrivener
                 sb.Replace("@StoryGenre", overview.StoryGenre);
                 sb.Replace("@LiteraryDevice", overview.LiteraryDevice);
                 sb.Replace("@viewpointCharacter", vpChar.Name);
+                if (vpChar != null)
+                    sb.Replace("@viewpointCharacter", vpChar.Name);
+                else
+                    sb.Replace("@viewpointCharacter", string.Empty);
                 sb.Replace("@Voice", overview.Voice);
                 sb.Replace("@Tense", overview.Tense);
                 sb.Replace("@Style", overview.Style);
