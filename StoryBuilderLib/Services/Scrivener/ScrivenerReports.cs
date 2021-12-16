@@ -1147,16 +1147,24 @@ namespace StoryBuilder.Services.Scrivener
 
         private async Task LoadReportTemplates()
         {
-            _templates.Clear();
-            StorageFolder localFolder = ApplicationData.Current.LocalFolder;
-            StorageFolder templatesFolder = await localFolder.GetFolderAsync("reports");
-            var templates = await templatesFolder.GetFilesAsync();
-            foreach (var fi in templates)
+            try
             {
-                string name = fi.DisplayName.Substring(0, fi.Name.Length - 4);
-                string text = await FileIO.ReadTextAsync(fi);
+                _templates.Clear();
+                StorageFolder localFolder = ApplicationData.Current.RoamingFolder;
+                StorageFolder stbFolder = await localFolder.GetFolderAsync("StoryBuilder");
+                StorageFolder templatesFolder = await stbFolder.GetFolderAsync("reports");
+                var templates = await templatesFolder.GetFilesAsync();
+                foreach (var fi in templates)
+                {
+                    string name = fi.DisplayName.Substring(0, fi.Name.Length - 4);
+                    string text = await FileIO.ReadTextAsync(fi);
 
-                _templates.Add(name, text);
+                    _templates.Add(name, text);
+                }
+            }
+            catch (Exception ex)
+            {
+                //TODO: Log exception
             }
         }
 
