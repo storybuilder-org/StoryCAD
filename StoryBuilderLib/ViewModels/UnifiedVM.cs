@@ -165,8 +165,7 @@ namespace StoryBuilder.ViewModels
                 else if (Path == GlobalData.Preferences.LastFile5) { NewRecents = new List<string>() { GlobalData.Preferences.LastFile5, GlobalData.Preferences.LastFile1, GlobalData.Preferences.LastFile2, GlobalData.Preferences.LastFile3, GlobalData.Preferences.LastFile4 }; }
             }
 
-            string path = GlobalData.Preferences.InstallationDirectory;
-            PreferencesIO loader = new(GlobalData.Preferences, path);
+            PreferencesIO loader = new(GlobalData.Preferences, GlobalData.RootDirectory);
             await loader.UpdateFile();
         }
 

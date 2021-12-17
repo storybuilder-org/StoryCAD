@@ -3,6 +3,7 @@ using StoryBuilder.Models.Tools;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using Windows.Storage;
 
 namespace StoryBuilder.Models
 {
@@ -44,6 +45,9 @@ namespace StoryBuilder.Models
 
         // Preferences data
         public static PreferencesModel Preferences;
+
+        //Path to root directory where data is stored
+        public static string RootDirectory = System.IO.Path.Combine(ApplicationData.Current.RoamingFolder.Path, "Storybuilder");
 
         // A defect in preview WinUI 3 Win32 code is that ContentDialog controls don't have an
         // established XamlRoot. A workaround is to assign the dialog's XamlRoot to 

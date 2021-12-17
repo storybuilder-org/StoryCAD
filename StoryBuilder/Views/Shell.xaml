@@ -83,7 +83,7 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <!-- Command Bar -->
-        <CommandBar  Background="{x:Bind ShellVm.SecondaryColor}" IsOpen="False">
+        <CommandBar  Background="{x:Bind ShellVm.UserPreferences.PrimaryColor}" IsOpen="False">
             <CommandBar.Content>
                 <StackPanel Orientation="Horizontal">
                     <TextBox PlaceholderText="Enter text to search for here" Width="285" Margin="0,8" Text="{x:Bind ShellVm.FilterText, Mode=TwoWay}" VerticalAlignment="Center"/>
@@ -258,7 +258,7 @@
             </SplitView.Content>
         </SplitView>
         <!-- Status Bar -->
-        <StackPanel Grid.Row="2" Orientation="Horizontal" Background="{x:Bind ShellVm.SecondaryColor}" Margin="0,10,0,0">
+        <StackPanel Grid.Row="2" Orientation="Horizontal" Background="{x:Bind ShellVm.UserPreferences.PrimaryColor}" Margin="0,10,0,0">
             <ComboBox IsEditable="False" Width="200"  Margin="10" ItemsSource="{x:Bind ShellVm.ViewList}" 
                       SelectionChanged="{x:Bind ShellVm.ViewChanged, Mode=OneWay}"
                       SelectedItem="{x:Bind ShellVm.SelectedView, Mode=TwoWay}" />

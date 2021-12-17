@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.DependencyInjection;
+using StoryBuilder.Models;
 using StoryBuilder.Services.Logging;
 using System;
 using System.Collections.Generic;
@@ -52,9 +53,11 @@ namespace StoryBuilder.Services.Installation
         /// <returns></returns>
         private async Task DeleteFiles()
         {
-            StorageFolder ParentFolder = ApplicationData.Current.RoamingFolder;
+            StorageFolder ParentFolder = await StorageFolder.GetFolderFromPathAsync(GlobalData.RootDirectory);
             foreach (StorageFile Item in await ParentFolder.GetFilesAsync())
             {
+                if (Item.Name == "StoryBuilder.prf") { continue; } //Doesnt delete prf
+
                 try { await Item.DeleteAsync(); }
                 catch (Exception ex)
                 {
@@ -64,6 +67,8 @@ namespace StoryBuilder.Services.Installation
             }
             foreach (StorageFolder Item in await ParentFolder.GetFoldersAsync())
             {
+                if (Item.Name == "logs") { continue; }
+
                 try { await Item.DeleteAsync(); }
                 catch (Exception ex)
                 {
