@@ -27,17 +27,19 @@
 
     Eyes:               @Eyes
 
-    Build:              @Build
-
     Hair:               @Hair
 
-    Nationality:        @Nationality
+    Build:              @Build
 
     Skin:               @Skin
 
+    Race:               @Race
+        
+    Nationality:        @Nationality
+
     Health:             @Health
 
-    Race:               @Race
+    
 
     Details:
     @PhysNotes
@@ -47,22 +49,28 @@
     Appearance:
     @Appearance
 
-                 =========== Psychological Traits ==========
+                ============= Relationships ==================
 
-    Personality:        @Personality
+    Relationship:
 
-    Intelligence:       @Intelligence
+    Relation Type:
 
-      Values:           @Values
+    Trait:
 
-      Abnormality:      @Abnormality
+    Attitude:
 
-      Focus:            @Focus
+    Relationship Notes:
 
-      Notes:
-      @PsychNotes
+                ============= Flaw ==================
 
-                   =========== Social Traits ======================
+    Flaw:
+
+          ================= Backstory =====================
+
+    Backstory:
+    @Notes
+
+             =========== Social Traits ======================
 
     Economic Status:
     @Economic
@@ -76,6 +84,23 @@
     Religion:
     @Religion
 
+
+                 =========== Psychological Traits ==========
+
+    Personality:        @Personality
+
+    Intelligence:       @Intelligence
+
+      Values:           @Values
+
+      Focus:            @Focus
+
+      Abnormality:      @Abnormality
+
+      Notes:
+      @PsychNotes
+
+ 
                    =========== Inner Traits ======================
 
     Adventurousness:          @Adventure
@@ -102,23 +127,13 @@
 
     Stability:          @Stability
 
-                   =================== Work =====================
+                    =========== Outer Traits ======================
 
-    Work:
-    @Work
+   Traits:        
 
-                   ============== Likes and Dislikes ===============
+                    =========== Notes ======================
+    Notes:
+   
 
-    Likes/Dislikes:
-    @Likes
 
-                   ============== Habits and Vices =================
-
-    Habits/Vices:
-    @Habits
-
-                   ================= Backstory =====================
-
-    Backstory:
-    @Notes
 
