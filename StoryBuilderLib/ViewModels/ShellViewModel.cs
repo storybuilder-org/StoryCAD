@@ -373,7 +373,7 @@ namespace StoryBuilder.ViewModels
             _story.ProjectFilename = file.Name;
             _story.ProjectFile = file;
             // Make sure files folder exists...
-            _story.FilesFolder = await _story.ProjectFolder.GetFolderAsync("files");
+            _story.FilesFolder = await _story.ProjectFolder.CreateFolderAsync("files", CreationCollisionOption.OpenIfExists);
             //TODO: Back up at the right place (after open?)
             await BackupProject();
             StoryReader rdr = Ioc.Default.GetService<StoryReader>();
