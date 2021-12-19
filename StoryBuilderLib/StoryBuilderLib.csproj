@@ -106,6 +106,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Page Update="Services\Dialogs\UnifiedMenu.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+
+  <ItemGroup>
     <Page Update="Controls\Traits.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -119,12 +125,6 @@
 
   <ItemGroup>
     <Page Update="Services\Dialogs\SamplePage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Page Update="Services\Dialogs\UnifiedMenu.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>

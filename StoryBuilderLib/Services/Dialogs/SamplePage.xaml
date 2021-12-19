@@ -6,11 +6,11 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    Background="{x:Bind UnifiedVM.AdjustmentColor, Mode=OneWay}">
 
-    <StackPanel VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+    <StackPanel VerticalAlignment="Stretch" HorizontalAlignment="Center" Margin="0,0,70,0">
         <TextBlock Text="Sample stories:" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="14" FontSize="30" />
-        <ListBox HorizontalAlignment="Center" VerticalAlignment="Center" Name="Samples"/>
+        <ListBox HorizontalAlignment="Center" VerticalAlignment="Center" Name="Samples" Width="200" Background="{x:Bind UnifiedVM.AdjustmentColor, Mode=OneWay}"/>
         <Button HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="15" Click="LoadSample" Content="Open sample"/>
     </StackPanel>
 </Page>

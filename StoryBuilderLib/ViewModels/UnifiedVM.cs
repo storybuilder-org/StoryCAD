@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
-using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using StoryBuilder.DAL;
 using StoryBuilder.Models;
@@ -15,6 +14,7 @@ namespace StoryBuilder.ViewModels
     {
         //Since the original menu was designed with the shell in mind we need to call some commands on the ShellVM so it can be done correctly
         ShellViewModel shell = Ioc.Default.GetService<ShellViewModel>();
+        public PreferencesModel UserPrefs = GlobalData.Preferences;
 
         private int _selectedRecentIndex;
         public int SelectedRecentIndex
@@ -43,6 +43,16 @@ namespace StoryBuilder.ViewModels
             set { SetProperty(ref _ProjectPath, value); }
         }
 
+        /// <summary>
+        /// This makes the UI one consistant color
+        /// </summary>
+        private Microsoft.UI.Xaml.Media.SolidColorBrush _adjustmentColor;
+        public Microsoft.UI.Xaml.Media.SolidColorBrush AdjustmentColor
+        {
+            get => _adjustmentColor;
+            set { SetProperty(ref _adjustmentColor, value); }
+        }
+
         private ListBoxItem _currentTab;
         public ListBoxItem CurrentTab
         {
@@ -59,13 +69,19 @@ namespace StoryBuilder.ViewModels
             ProjectPath = prefs.ProjectDirectory;
         }
 
-        public UnifiedMenu.HideDelegate HideOpen;
+        public UnifiedMenuPage.UpdateContentDelegate UpdateContent;
+
+        public void Hide()
+        {
+            shell.CloseUnifiedCommand.Execute(null);
+        }
+
         /// <summary>
         /// This controls the frame and sets it content.
         /// </summary>
         /// <returns></returns>
-        private Frame _contentView = new();
-        public Frame ContentView
+        private StackPanel _contentView = new();
+        public StackPanel ContentView
         {
             get => _contentView;
             set { SetProperty(ref _contentView, value); }
@@ -76,34 +92,14 @@ namespace StoryBuilder.ViewModels
         /// </summary>
         public void SidebarChange(object sender, SelectionChangedEventArgs e)
         {
-            switch (CurrentTab.Name)
-            {
-                case "Recent":
-                    ContentView.Content = new Frame() { Content = new RecentFiles(this) };
-                    break;
-                case "New":
-                    ContentView.Content = new Frame() { Content = new NewProjectPage(this) };
-                    break;
-                case "Example":
-                    ContentView.Content = new Frame() { Content = new SamplePage(this) };
-                    break;
-            }
-        }
-
-        public void OpenPDFManual()
-        {
-            string ManualPath = System.IO.Path.Combine(Windows.Storage.ApplicationData.Current.RoamingFolder.Path, "Storybuilder", "Manual", "StoryBuilder User Manual.pdf");
-            System.Diagnostics.Process PDF = new();
-            PDF.StartInfo.UseShellExecute = true; //uses default app
-            PDF.StartInfo.FileName = ManualPath;
-            PDF.Start();
-            HideOpen();
+            ContentView.Children.Clear();
+            UpdateContent();
         }
 
         public async void LoadStory()
         {
             await shell.OpenFile(); //Calls the open file in shell so it can load the file
-            HideOpen();
+            Hide();
         }
 
 
@@ -123,7 +119,7 @@ namespace StoryBuilder.ViewModels
             }
             if (SelectedRecentIndex != -1)
             {
-                HideOpen();
+                Hide();
             }
         }
 
@@ -138,7 +134,7 @@ namespace StoryBuilder.ViewModels
             {
                 await shell.UnifiedNewFile(this);
                 UpdateRecents(System.IO.Path.Combine(ProjectPath, ProjectName));
-                HideOpen();
+                Hide();
             }
         }
 

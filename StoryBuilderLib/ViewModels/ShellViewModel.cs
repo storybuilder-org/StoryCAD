@@ -52,6 +52,8 @@ namespace StoryBuilder.ViewModels
 
         public StoryViewType ViewType;
 
+        private ContentDialog _contentDialog;
+
         private int _sourceIndex;
         private ObservableCollection<StoryNodeItem> _sourceChildren;
         private int _targetIndex;
@@ -91,8 +93,9 @@ namespace StoryBuilder.ViewModels
         public RelayCommand CloseCommand { get; }
         // ExitCommand
         public RelayCommand ExitCommand { get; }
-        //Open unified menu
+        //Open/Closes unified menu
         public RelayCommand OpenUnifiedCommand { get; }
+        public RelayCommand CloseUnifiedCommand { get; }
 
         // Move current TreeViewItem flyout
         public RelayCommand MoveLeftCommand { get; }
@@ -338,18 +341,20 @@ namespace StoryBuilder.ViewModels
         #endregion
 
         #region Public Methods
-
+        private async void CloseUnifiedMenu()
+        {
+            _contentDialog.Hide();
+        }
 
         private async void OpenUnifiedMenu()                      
         {
             _canExecuteCommands = false;
             // Needs logging
-            Logger.Log(LogLevel.Info, "Executing unified menu command");
-            UnifiedMenu dialog = new();
-            dialog.XamlRoot = GlobalData.XamlRoot;
-            var result = await dialog.ShowAsync();
-            // Needs logging, status display
-             _canExecuteCommands = true;
+            _contentDialog = new();
+            _contentDialog.XamlRoot = GlobalData.XamlRoot;
+            _contentDialog.Content = new UnifiedMenuPage();
+            await _contentDialog.ShowAsync();
+            _canExecuteCommands = true;
         }
 
         /// <summary>
@@ -1782,6 +1787,7 @@ namespace StoryBuilder.ViewModels
             _canExecuteCommands = true;
             TogglePaneCommand = new RelayCommand(TogglePane, () => _canExecuteCommands);
             OpenUnifiedCommand = new RelayCommand(OpenUnifiedMenu, () => _canExecuteCommands);
+            CloseUnifiedCommand = new RelayCommand(CloseUnifiedMenu, () => _canExecuteCommands);
             OpenFileCommand = new RelayCommand(async () => await OpenFile(), () => _canExecuteCommands);
             SaveFileCommand = new RelayCommand(async () => await SaveFile(), () => _canExecuteCommands);
             SaveAsCommand = new RelayCommand(SaveFileAs, () => _canExecuteCommands);
