@@ -742,35 +742,54 @@ namespace StoryBuilder.Services.Scrivener
             foreach (string line in lines)
             {
                 StringBuilder sb = new StringBuilder(line);
+                //Story Role section
                 sb.Replace("@Id", node.Id.ToString());
                 sb.Replace("@Title", character.Name);
                 sb.Replace("@Role", character.Role);
                 sb.Replace("@StoryRole", character.StoryRole);
                 sb.Replace("@Archetype", character.Archetype);
                 sb.Replace("@CharacterSketch", character.CharacterSketch);
+                //Physical section
                 sb.Replace("@Age", character.Age);
                 sb.Replace("@Sex", character.Sex);
                 sb.Replace("@Height", character.CharHeight);
                 sb.Replace("@Weight", character.Weight);
                 sb.Replace("@Eyes", character.Eyes);
-                sb.Replace("@Build", character.Build);
                 sb.Replace("@Hair", character.Hair);
-                sb.Replace("@Nationality", character.Nationality);
+                sb.Replace("@Build", character.Build);
                 sb.Replace("@Skin", character.Complexion);
-                sb.Replace("@Health", character.Health);
                 sb.Replace("@Race", character.Race);
+                sb.Replace("@Nationality", character.Nationality);
+                sb.Replace("@Health", character.Health);
                 sb.Replace("@PhysNotes", character.PhysNotes);
+                //Appearance section
                 sb.Replace("@Appearance", character.Appearance);
-                sb.Replace("@Personality", character.Enneagram);
-                sb.Replace("@Intelligence", character.Intelligence);
-                sb.Replace("@Values", character.Values);
-                sb.Replace("@Abnormality", character.Abnormality);
-                sb.Replace("@Focus", character.Focus);
-                sb.Replace("@PsychNotes", character.PsychNotes);
+                //Relationships section
+                //Relationship
+                //Relation Type
+                //Trait
+                //Attitude
+                //Relationship Notes
+
+                //Flaw section
+                //Flaw
+
+                //Backstory section
+                sb.Replace("@Notes", character.BackStory);
+
+                //Social Traits section
                 sb.Replace("@Economic", character.Economic);
                 sb.Replace("@Education", character.Education);
                 sb.Replace("@Ethnic", character.Ethnic);
                 sb.Replace("@Religion", character.Religion);
+                //Psychological Traits section
+                sb.Replace("@Personality", character.Enneagram);
+                sb.Replace("@Intelligence", character.Intelligence);
+                sb.Replace("@Values", character.Values);
+                sb.Replace("@Focus", character.Focus);
+                sb.Replace("@Abnormality", character.Abnormality);
+                sb.Replace("@PsychNotes", character.PsychNotes);
+                //Inner Traits section
                 sb.Replace("@Adventure", character.Adventureousness);
                 sb.Replace("@Aggression", character.Aggression);
                 sb.Replace("@Confidence", character.Confidence);
@@ -783,8 +802,8 @@ namespace StoryBuilder.Services.Scrivener
                 sb.Replace("@Shrewdness", character.Shrewdness);
                 sb.Replace("@Sociability", character.Sociability);
                 sb.Replace("@Stability", character.Stability);
-                sb.Replace("@Likes", character.Notes);
-                sb.Replace("@Notes", character.BackStory);
+                //Outer Traits section
+                //traits
                 doc.AddText(sb.ToString(), format);
                 doc.AddNewLine();
             }
