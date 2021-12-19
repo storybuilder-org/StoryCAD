@@ -130,7 +130,7 @@
 
                     =========== Outer Traits ======================
 
-   Traits:        
+   Traits:        @Traits
 
                     =========== Notes ======================
     Notes:

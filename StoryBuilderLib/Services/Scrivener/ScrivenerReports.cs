@@ -767,7 +767,7 @@ namespace StoryBuilder.Services.Scrivener
                 //Relationships section
                 sb.Replace("@Relationship", character.Relationship);
                 sb.Replace("@relationType", character.RelationType);
-                sb.Replace("@realtionTrait", character.RelationTrait);
+                sb.Replace("@relationTrait", character.RelationTrait);
                 sb.Replace("@Attitude", character.Attitude);
                 sb.Replace("@RelationshipNotes", character.RelationshipNotes);
                 //Flaw section
