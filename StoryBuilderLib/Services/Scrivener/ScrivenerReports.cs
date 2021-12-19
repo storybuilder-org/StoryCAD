@@ -765,14 +765,14 @@ namespace StoryBuilder.Services.Scrivener
                 //Appearance section
                 sb.Replace("@Appearance", character.Appearance);
                 //Relationships section
-                //Relationship
-                //Relation Type
-                //Trait
-                //Attitude
-                //Relationship Notes
-
+                sb.Replace("@Relationship", character.Relationship);
+                sb.Replace("@relationType", character.RelationType);
+                sb.Replace("@realtionTrait", character.RelationTrait);
+                sb.Replace("@Attitude", character.Attitude);
+                sb.Replace("@RelationshipNotes", character.RelationshipNotes);
                 //Flaw section
-                //Flaw
+                sb.Replace("@Flaw", character.Flaw);
+                
 
                 //Backstory section
                 sb.Replace("@Notes", character.BackStory);
@@ -803,7 +803,7 @@ namespace StoryBuilder.Services.Scrivener
                 sb.Replace("@Sociability", character.Sociability);
                 sb.Replace("@Stability", character.Stability);
                 //Outer Traits section
-                //traits
+                sb.Replace("@Traits", character.outerTrait);
                 doc.AddText(sb.ToString(), format);
                 doc.AddNewLine();
             }

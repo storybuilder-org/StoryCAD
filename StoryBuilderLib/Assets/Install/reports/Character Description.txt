@@ -51,19 +51,20 @@
 
                 ============= Relationships ==================
 
-    Relationship:
+    Relationship:       @Relationship
 
-    Relation Type:
+    Relation Type:      @relationType
 
-    Trait:
+    Trait:              @relationTrait
 
-    Attitude:
+    Attitude:           @Attitude
 
-    Relationship Notes:
+    Relationship Notes: 
+    @RelationshipNotes
 
                 ============= Flaw ==================
 
-    Flaw:
+    Flaw: @Flaw
 
           ================= Backstory =====================
 
@@ -103,13 +104,13 @@
  
                    =========== Inner Traits ======================
 
-    Adventurousness:          @Adventure
+    Adventurousness:    @Adventure
 
-    Aggression:                     @Aggression
+    Aggression:         @Aggression
 
-    Confidence:                    @Confidence
+    Confidence:         @Confidence
 
-    Conscientiousness:        @Conscientious
+    Conscientiousness:  @Conscientious
 
     Creativity:         @Creative
 

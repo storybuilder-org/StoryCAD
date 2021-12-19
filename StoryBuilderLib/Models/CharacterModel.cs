@@ -194,7 +194,7 @@ namespace StoryBuilder.Models
             set => _relationshipNotes = value;
         }
 
-       
+        
 
         // Character social data
 
@@ -366,6 +366,14 @@ namespace StoryBuilder.Models
         }
 
         // Character traits data
+
+        private string _outerTrait;
+
+        public string outerTrait
+        {
+            get => _outerTrait;
+            set => _outerTrait = value;
+        }
 
         private List<string> _traitList;
         public List<string> TraitList
