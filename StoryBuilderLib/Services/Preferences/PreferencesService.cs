@@ -22,12 +22,6 @@ namespace StoryBuilder.Services.Preferences
                 PreferencesModel model = new PreferencesModel();
                 PreferencesIO loader = new PreferencesIO(model, path);
                 await loader.UpdateModel();
-                // When ran from the app, the app's local folder is the 
-                // installation directory
-                if (model.InstallationDirectory.CompareTo(path) != 0)
-                {
-                    model.InstallationDirectory = path;
-                }
                 
                 GlobalData.Preferences = model;
             }

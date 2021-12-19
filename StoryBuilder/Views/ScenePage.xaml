@@ -97,7 +97,7 @@
                                                       RtfText="{x:Bind SceneVm.Remarks, Mode=TwoWay}"
                                                       AcceptsReturn="True"
                                                       IsSpellCheckEnabled="True" TextWrapping="Wrap"
-                                                      ScrollViewer.VerticalScrollBarVisibility="Visible" />
+                                                      ScrollViewer.VerticalScrollBarVisibility="Visible"/>
                 </Grid>
             </PivotItem>
             <PivotItem Header="Development">

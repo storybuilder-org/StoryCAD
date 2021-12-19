@@ -27,7 +27,7 @@ namespace StoryBuilder.ViewModels
         StatusMessage _smsg;
         private bool _changeable; // process property changes for this story element
         private bool _changed;    // this story element has changed
-   
+
         #endregion
 
         #region Properties

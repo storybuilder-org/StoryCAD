@@ -26,7 +26,8 @@
         public bool Initalised { get; set; } //this decides if the user should be shown the initalisation window
 
         // Visual changes
-        public bool ForceDarkmode { get; set; }
+        public Microsoft.UI.Xaml.Media.SolidColorBrush PrimaryColor { get; set; } //Sets UI Color
+        public Microsoft.UI.Xaml.Media.SolidColorBrush SecondaryColor { get; set; } //Sets Text Color
         public bool QuoteOnStartup { get; set; }
 
         // Backup Information
@@ -35,10 +36,8 @@
         public int TimedBackupInterval { get; set; }
 
         //Directorys
-        public string InstallationDirectory { get; set; }
         public string ProjectDirectory { get; set; }
         public string BackupDirectory { get; set; }
-        public string LogDirectory { get; set; }
 
         // Recent files (set automatically)
         public string LastFile1 { get; set; }
@@ -52,7 +51,6 @@
         #region Constructor
         public PreferencesModel()
         {
-            InstallationDirectory = string.Empty;
             LastFile1 = string.Empty;
             LastFile2 = string.Empty;
             LastFile3 = string.Empty;
