@@ -686,6 +686,7 @@ namespace StoryBuilder.ViewModels
                     {
                         SetCurrentView(StoryViewType.ExplorerView);
                         _story.LoadStatus = LoadStatus.LoadFromRtfFiles;
+                        new UnifiedVM().UpdateRecents(_story.ProjectPath);
                         StatusMessage = "Open Story completed";
                     }
                 }

@@ -154,11 +154,19 @@ namespace StoryBuilder.ViewModels
             else //This shuffle the file used to the top
             {
                 List<String> NewRecents = new();
-                if (Path == GlobalData.Preferences.LastFile1) { } //Do nothing since its the latest file loaded
-                else if (Path == GlobalData.Preferences.LastFile2) { NewRecents = new List<string>() { GlobalData.Preferences.LastFile2, GlobalData.Preferences.LastFile1, GlobalData.Preferences.LastFile3, GlobalData.Preferences.LastFile4, GlobalData.Preferences.LastFile5 }; }
+                if (Path == GlobalData.Preferences.LastFile2) { NewRecents = new List<string>() { GlobalData.Preferences.LastFile2, GlobalData.Preferences.LastFile1, GlobalData.Preferences.LastFile3, GlobalData.Preferences.LastFile4, GlobalData.Preferences.LastFile5 }; }
                 else if (Path == GlobalData.Preferences.LastFile3) { NewRecents = new List<string>() { GlobalData.Preferences.LastFile3, GlobalData.Preferences.LastFile1, GlobalData.Preferences.LastFile2, GlobalData.Preferences.LastFile4, GlobalData.Preferences.LastFile5 }; }
                 else if (Path == GlobalData.Preferences.LastFile4) { NewRecents = new List<string>() { GlobalData.Preferences.LastFile4, GlobalData.Preferences.LastFile1, GlobalData.Preferences.LastFile2, GlobalData.Preferences.LastFile3, GlobalData.Preferences.LastFile5 }; }
                 else if (Path == GlobalData.Preferences.LastFile5) { NewRecents = new List<string>() { GlobalData.Preferences.LastFile5, GlobalData.Preferences.LastFile1, GlobalData.Preferences.LastFile2, GlobalData.Preferences.LastFile3, GlobalData.Preferences.LastFile4 }; }
+                
+                if (NewRecents.Count > 0)
+                {
+                    GlobalData.Preferences.LastFile1 = NewRecents[0];
+                    GlobalData.Preferences.LastFile2 = NewRecents[1];
+                    GlobalData.Preferences.LastFile3 = NewRecents[2];
+                    GlobalData.Preferences.LastFile4 = NewRecents[3];
+                    GlobalData.Preferences.LastFile5 = NewRecents[4];
+                }
             }
 
             PreferencesIO loader = new(GlobalData.Preferences, GlobalData.RootDirectory);
