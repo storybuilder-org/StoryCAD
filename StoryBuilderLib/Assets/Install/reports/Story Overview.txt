@@ -37,7 +37,7 @@
 
     Literary Device: @LiteraryDevice
 
-    Viewpoint Character: @ViewpointCharacter
+    Viewpoint Character: @viewpointCharacter
 
     Voice: @Voice
 
@@ -45,11 +45,11 @@
 
     Style: @Style
 
-    Style Notes: @StyleNotes
+    Style Notes: @styleNotes
 
     Tone: @Tone
 
-    Tone Notes: @ToneNotes
+    Tone Notes: @toneNotes
 
 
 
