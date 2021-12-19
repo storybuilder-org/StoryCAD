@@ -21,6 +21,7 @@ namespace StoryBuilder.Views
     public sealed partial class Shell
     {
         public ShellViewModel ShellVm => Ioc.Default.GetService<ShellViewModel>();
+        public UnifiedVM UnifiedVM => Ioc.Default.GetService<UnifiedVM>();
 
         public Shell()
         {

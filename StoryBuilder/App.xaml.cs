@@ -177,7 +177,7 @@ namespace StoryBuilder
 
             //Get the Window's HWND
             m_windowHandle = PInvoke.User32.GetActiveWindow();
-            m_window.Title = "StoryBuilder.";
+            m_window.Title = "StoryBuilder";
             GlobalData.WindowHandle = m_windowHandle;
             // The Window object doesn't (yet) have Width and Height properties in WInUI 3 Desktop yet.
             // To set the Width and Height, you can use the Win32 API SetWindowPos.

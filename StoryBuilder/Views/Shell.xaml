@@ -98,7 +98,7 @@
                 <AppBarButton Icon="Document" Label="File" ToolTipService.ToolTip="File Menu">
                     <AppBarButton.Flyout>
                         <MenuFlyout>
-                            <MenuFlyoutItem Text="Open/Create file" Command="{x:Bind ShellVm.OpenUnifiedCommand, Mode=OneWay}" >
+                            <MenuFlyoutItem Text="Open/Create file" Command="{x:Bind ShellVm.OpenUnifiedCommand}">
                                 <MenuFlyoutItem.Icon>
                                     <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE8F4;"/>
                                 </MenuFlyoutItem.Icon>
@@ -234,11 +234,11 @@
                                 <muxc:TreeViewItem ItemsSource="{x:Bind Children}" Background="{x:Bind Background, Mode=OneWay}"
                                 IsExpanded="{x:Bind IsExpanded, Mode=TwoWay}"
                                RightTapped="TreeViewItem_RightTapped">
-                                <StackPanel Orientation="Horizontal">
-                                    <SymbolIcon Symbol="{x:Bind Symbol, Mode=OneWay}" Width="20" Height="20"/>
-                                    <TextBlock Margin="0,0,10,0"/>
-                                    <TextBlock Text="{x:Bind Name, Mode=TwoWay}" />
-                                </StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <SymbolIcon Symbol="{x:Bind Symbol, Mode=OneWay}" Width="20" Height="20"/>
+                                        <TextBlock Margin="0,0,10,0"/>
+                                        <TextBlock Text="{x:Bind Name, Mode=TwoWay}" />
+                                    </StackPanel>
                                 </muxc:TreeViewItem>
                             </DataTemplate>
                         </muxc:TreeView.ItemTemplate>
@@ -275,4 +275,3 @@
         </StackPanel>
     </Grid>
 </Page>
- 
