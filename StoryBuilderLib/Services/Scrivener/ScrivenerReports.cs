@@ -477,6 +477,7 @@ namespace StoryBuilder.Services.Scrivener
             //overview.Premise = await _rdr.GetRtfText(overview.Premise, overview.Uuid);
             overview.Notes = await _rdr.GetRtfText(overview.Notes, overview.Uuid);
             StoryElement vpChar = StringToStoryElement(overview.ViewpointCharacter);
+            StoryElement vpStoryProblem = StringToStoryElement(overview.StoryProblem);
 
             //CharacterModel vpChar = overview.String
             // Parse and write the report
@@ -493,7 +494,12 @@ namespace StoryBuilder.Services.Scrivener
                 sb.Replace("@Viewpoint", overview.Viewpoint);
                 sb.Replace("@StoryIdea", overview.StoryIdea);
                 sb.Replace("@Concept", overview.Concept);
-                sb.Replace("@StoryProblem", overview.StoryProblem);
+                sb.Replace("@StoryProblem", vpStoryProblem.Name);
+                if (vpStoryProblem != null)
+                    sb.Replace("@StoryProblem", vpStoryProblem.Name);
+                else
+                    sb.Replace("@StoryProblem", string.Empty);
+
                 sb.Replace("@Premise", overview.Premise);
                 sb.Replace("@StoryType", overview.StoryType);
                 sb.Replace("@StoryGenre", overview.StoryGenre);
