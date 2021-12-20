@@ -864,7 +864,28 @@ namespace StoryBuilder.Services.Scrivener
                         {
                             SettingModel loc = (SettingModel)element;
                             StringBuilder sb = new StringBuilder(line);
-                            sb.Replace("@Description", loc.Name);
+                            sb.Replace("@Id", loc.Id.ToString());
+                            sb.Replace("@Name", loc.Name);
+                            //SETTING SECTION
+                            sb.Replace("@Locale", loc.Locale);
+                            sb.Replace("@Season", loc.Season);
+                            sb.Replace("@Period", loc.Period);
+                            sb.Replace("@Lighting", loc.Lighting);
+                            sb.Replace("@Weather", loc.Weather);
+                            sb.Replace("@Temperature", loc.Temperature);
+                            sb.Replace("@Prop1@", loc.Prop1);
+                            sb.Replace("@Prop2@", loc.Prop2);
+                            sb.Replace("@Prop3@",loc.Prop3);
+                            sb.Replace("@Prop4@", loc.Prop4);
+                            sb.Replace("@SceneSummary", loc.Summary);
+                            //SENSATION SECTION
+                            sb.Replace("@Sights", loc.Sights);
+                            sb.Replace("@Sounds", loc.Sounds);
+                            sb.Replace("@Touch", loc.Touch);
+                            sb.Replace("@SmellTaste", loc.SmellTaste);
+                            //NOTES SECTION
+                            sb.Replace("@Notes", loc.Notes);
+                            
                             doc.AddText(sb.ToString(), format);
                             doc.AddNewLine();
                         }
