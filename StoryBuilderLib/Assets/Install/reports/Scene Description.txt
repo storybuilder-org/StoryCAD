@@ -14,9 +14,7 @@
 
     SceneType:          @SceneType
 
-    Scene Cast:
-
-    New Cast Member:    @NewCastMember
+    Scene Cast:         @CastMember
 
     Scene Sketch:
     @Remarks

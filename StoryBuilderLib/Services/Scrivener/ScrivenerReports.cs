@@ -483,6 +483,7 @@ namespace StoryBuilder.Services.Scrivener
             string problemName = seProblem?.Name ?? string.Empty;
             ProblemModel problem = (ProblemModel)seProblem;
             string premise = problem?.Premise ?? string.Empty;
+            string x = GetRtfText(premise);
             // Parse and write the report
             foreach (string line in lines)
             {
@@ -498,7 +499,6 @@ namespace StoryBuilder.Services.Scrivener
                 sb.Replace("@StoryIdea", overview.StoryIdea);
                 sb.Replace("@Concept", overview.Concept);
                 sb.Replace("@StoryProblem", problemName);
-                string x = GetRtfText(premise);
                 sb.Replace("@Premise", premise);
                 sb.Replace("@StoryType", overview.StoryType);
                 sb.Replace("@StoryGenre", overview.StoryGenre);
@@ -1050,7 +1050,6 @@ namespace StoryBuilder.Services.Scrivener
             scene.Review = await _rdr.GetRtfText(scene.Review, scene.Uuid);
             string saveNotes = scene.Notes;
             scene.Notes = await _rdr.GetRtfText(scene.Notes, scene.Uuid);
-            string combinedString = string.Join(",", scene.CastMembers);
 
             StoryElement antagonist = StringToStoryElement(scene.Antagonist);
             string antagonistName = antagonist?.Name ?? string.Empty;
@@ -1070,8 +1069,20 @@ namespace StoryBuilder.Services.Scrivener
                 sb.Replace("@Viewpoint", scene.Viewpoint);
                 sb.Replace("@Setting", settingName);
                 sb.Replace("@SceneType", scene.SceneType);
-                //TODO sb.Replace("@SceneCast", scene);
-                sb.Replace("@NewCastMember", combinedString);
+
+                if (line.Contains("@CastMember"))
+                {
+                    foreach (string seCastMember in scene.CastMembers)
+                    {
+                        StoryElement castMember = StringToStoryElement(seCastMember);
+                        string castMemberName = castMember?.Name ?? string.Empty;
+                        StringBuilder sbCast = new StringBuilder(line);
+                        sbCast.Replace("@CastMember", castMemberName);
+                        doc.AddText(sbCast.ToString());
+                        doc.AddNewLine();
+                    }
+                }
+
                 sb.Replace("@Remarks", scene.Remarks);
                 //DEVELOPMENT SECTION
                 sb.Replace("@PurposeOfScene", scene.ScenePurpose);
