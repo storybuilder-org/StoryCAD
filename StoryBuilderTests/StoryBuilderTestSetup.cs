@@ -39,7 +39,7 @@ namespace StoryBuilderTests
             await pref.LoadPreferences(localFolder.Path, story);
             // Validate preferences
             Assert.IsNotNull(GlobalData.Preferences);
-            Assert.AreEqual(localPath, GlobalData.Preferences.InstallationDirectory);
+            Assert.AreEqual(localPath, GlobalData.RootDirectory);
 
             ListLoader loader = Ioc.Default.GetService<ListLoader>();
             GlobalData.ListControlSource = await loader.Init(localPath);

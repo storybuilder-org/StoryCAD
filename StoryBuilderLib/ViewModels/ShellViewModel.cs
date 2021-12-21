@@ -18,6 +18,7 @@ using StoryBuilder.Services.Messages;
 using StoryBuilder.Services.Navigation;
 using StoryBuilder.Services.Scrivener;
 using StoryBuilder.Services.Search;
+using StoryBuilder.ViewModels.Tools;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -962,19 +963,42 @@ namespace StoryBuilder.ViewModels
 
         private async void Preferences()
         {
+            //Logging stuff
             Logger.Log(LogLevel.Info, "Launching Preferences");
             StatusMessage = "Updating Preferences";
-            PreferencesDialog dialog = new();
-            dialog.XamlRoot = GlobalData.XamlRoot;
-            var result = await dialog.ShowAsync();
+
+            //Creates and shows dialog
+            ContentDialog PreferencesDialog = new();
+            PreferencesDialog.XamlRoot = GlobalData.XamlRoot;
+            PreferencesDialog.Content = new PreferencesDialog();
+            PreferencesDialog.Title = "Preferences";
+            PreferencesDialog.PrimaryButtonText = "Save";
+            PreferencesDialog.SecondaryButtonText = "About StoryBuilder";
+            PreferencesDialog.CloseButtonText = "Cancel";
+
+            var result = await PreferencesDialog.ShowAsync();
             if (result == ContentDialogResult.Primary) // Save changes
             {
-                await dialog.PreferencesVm.SaveAsync();
+                await Ioc.Default.GetService<PreferencesViewModel>().SaveAsync();
+                Logger.Log(LogLevel.Info, "Preferences update completed");
+                StatusMessage = "Preferences updated";
             }
-            Logger.Log(LogLevel.Info, "Preferences update completed");
-            StatusMessage = "Preferences updated";
-            // else Cancel- exit
-            //TODO: Log cancellation, move 'updated' log and status into Save changes block
+            else if (result == ContentDialogResult.Secondary)
+            {
+                ContentDialog AboutDialog = new();
+                AboutDialog.XamlRoot = GlobalData.XamlRoot;
+                AboutDialog.Content = new About();
+                AboutDialog.Width = 900;
+                AboutDialog.Title = "About StoryBuilder";
+                AboutDialog.CloseButtonText = "Close";
+                await AboutDialog.ShowAsync();
+            }
+            else //don't save changes
+            {
+                Logger.Log(LogLevel.Info, "Preferences update canceled");
+                StatusMessage = "Preferences closed";
+            }
+
         }
 
         private async void KeyQuestionsTool()
