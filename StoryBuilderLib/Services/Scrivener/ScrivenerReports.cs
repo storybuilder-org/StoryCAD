@@ -483,7 +483,7 @@ namespace StoryBuilder.Services.Scrivener
             string problemName = seProblem?.Name ?? string.Empty;
             ProblemModel problem = (ProblemModel)seProblem;
             string premise = problem?.Premise ?? string.Empty;
-            string x = GetRtfText(premise);
+            premise = GetRtfText(premise);
             // Parse and write the report
             foreach (string line in lines)
             {
@@ -495,8 +495,8 @@ namespace StoryBuilder.Services.Scrivener
                 sb.Replace("@Author", overview.Author);
                 sb.Replace("@StoryType", overview.StoryType);
                 sb.Replace("@Genre", overview.StoryGenre);
-                sb.Replace("@Viewpoint", overview.Viewpoint);
-                sb.Replace("@StoryIdea", overview.StoryIdea);
+                sb.Replace("@Viewpoint",overview.Viewpoint);
+                sb.Replace("@StoryIdea", GetRtfText(overview.StoryIdea));
                 sb.Replace("@Concept", overview.Concept);
                 sb.Replace("@StoryProblem", problemName);
                 sb.Replace("@Premise", premise);
@@ -1270,40 +1270,14 @@ namespace StoryBuilder.Services.Scrivener
 
             RtfTreeNode node = new RtfTreeNode();
 
-            for (int i = 0; i < root.ChildNodes.Count; i++)
-            {
-                node = root.ChildNodes[i];
+            //Search first Text Node
+            RtfTreeNode textNode =    tree.RootNode.FirstChild.SelectSingleChildNode(RtfNodeType.Text);
 
-                if (node.NodeType == RtfNodeType.Group)
-                {
-                    //...
-                }
-                else if (node.NodeType == RtfNodeType.Control)
-                {
-                    //...
-                }
-                else if (node.NodeType == RtfNodeType.Keyword)
-                {
-                    switch (node.NodeKey)
-                    {
-                        case "f":  //Font type
-                                   //...
-                            break;
-                        case "cf":  //Font color
-                                    //...
-                            break;
-                        case "fs":  //Font size
-                                    //...
-                            break;
-                    }
-                }
-                else if (node.NodeType == RtfNodeType.Text)
-                {
-                    //...
-                }
-            }
-
-            return string.Empty;
+            RtfNodeCollection nodes = tree.RootNode.FirstChild.SelectChildNodes(RtfNodeType.Text);
+            StringBuilder sb = new StringBuilder();
+            foreach (RtfTreeNode n in nodes)
+                sb.Append(n.NodeKey);
+            return sb.ToString();
         }
 
         private async Task LoadReportTemplates()
