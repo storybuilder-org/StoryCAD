@@ -873,10 +873,10 @@ namespace StoryBuilder.Services.Scrivener
                             sb.Replace("@Lighting", loc.Lighting);
                             sb.Replace("@Weather", loc.Weather);
                             sb.Replace("@Temperature", loc.Temperature);
-                            sb.Replace("@Prop1@", loc.Prop1);
-                            sb.Replace("@Prop2@", loc.Prop2);
-                            sb.Replace("@Prop3@",loc.Prop3);
-                            sb.Replace("@Prop4@", loc.Prop4);
+                            sb.Replace("@Prop1", loc.Prop1);
+                            sb.Replace("@Prop2", loc.Prop2);
+                            sb.Replace("@Prop3",loc.Prop3);
+                            sb.Replace("@Prop4", loc.Prop4);
                             sb.Replace("@Summary", loc.Summary);
                             //SENSATION SECTION
                             sb.Replace("@Sights", loc.Sights);
