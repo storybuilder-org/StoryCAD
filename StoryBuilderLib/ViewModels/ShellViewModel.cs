@@ -792,61 +792,67 @@ namespace StoryBuilder.ViewModels
             Logger.Log(LogLevel.Info, "WriteModel successful");
         }
 
+
         private async void SaveFileAs()
         {
             _canExecuteCommands = false;
-            Logger.Log(LogLevel.Info, "Executing 'SaveAs' command");
+            Logger.Log(LogLevel.Info, "Running save as");
+            StatusMessage = "Save File As command executing";
             try
             {
-                StatusMessage = "Save File As command executing";
-                SaveAsDialog dialog = new();
-                dialog.XamlRoot = GlobalData.XamlRoot;
-                var vm = Ioc.Default.GetService<SaveAsViewModel>();
-                vm.ProjectName = _story.ProjectFilename;
-                vm.ProjectPathName = _story.ProjectPath;
-                var result = await dialog.ShowAsync();
-                _saveAsParentFolder = dialog.ParentFolder;
-                string saveAsProjectName = vm.ProjectName;
-                _saveAsProjectFolderExists = dialog.ProjectFolderExists;
-                _saveAsProjectFolderPath = dialog.ProjectFolderPath;
-                if (result == ContentDialogResult.Primary)
+                //Creates the content diolouge
+                ContentDialog SaveAsDialog = new();
+                SaveAsDialog.Title = "Save as";
+                SaveAsDialog.XamlRoot = GlobalData.XamlRoot;
+                SaveAsDialog.PrimaryButtonText = "Save";
+                SaveAsDialog.SecondaryButtonText = "Cancel";
+                SaveAsDialog.Content = new SaveAsDialog();
+  
+                //Sets needed data in VM and then shows the dialog
+                SaveAsViewModel SaveAsVM = Ioc.Default.GetService<SaveAsViewModel>();
+                SaveAsVM.ProjectName = _story.ProjectFilename;
+                SaveAsVM.ProjectPathName = _story.ProjectPath;
+                var result = await SaveAsDialog.ShowAsync();
+
+                if (result == ContentDialogResult.Primary) //If save is clicked
                 {
                     if (await VerifyReplaceOrCreate())
                     {
-                        await SaveModel();  // Save the model at its present location so it can be copied
+                        //Saves model to disk
+                        await SaveModel(); 
                         await WriteModel();
+
+                        //Gets data from VM
+                        string saveAsProjectName = SaveAsVM.ProjectName;
                         string projectName = _story.ProjectFolder.DisplayName;
-                        if (!_saveAsProjectFolderExists)
-                            _saveAsProjectFolder = await _saveAsParentFolder.CreateFolderAsync(saveAsProjectName);
-                        else
-                            _saveAsProjectFolder = await _saveAsParentFolder.GetFolderAsync(saveAsProjectName);
+
+                        //Saves file to disk
+                        _saveAsProjectFolder = await _saveAsParentFolder.CreateFolderAsync(saveAsProjectName, CreationCollisionOption.OpenIfExists);
                         await _story.ProjectFolder.CopyContentsRecursive(_saveAsProjectFolder);
+                        
+                        //Updates shell to use the newly saved copy
                         _story.ProjectFilename = saveAsProjectName;
                         _story.ProjectPath = _saveAsProjectFolderPath;
-                        // The folder and file are copied, but the 
                         Messenger.Send(new IsChangedMessage(true));
                         StoryModel.Changed = false;
                         ChangeStatusColor = Colors.Green;
+                        StatusMessage = "Save File As command completed";
+                        Logger.Log(LogLevel.Info, "Save as command completed");
                     }
                 }
-                else
+                else //If cancled.
                 {
-                    // display cancelled message on Shell
                     StatusMessage = "SaveAs dialog cancelled";
                     Logger.Log(LogLevel.Info, "'SaveAs' project command cancelled");
                     _canExecuteCommands = true;
-                    return;
                 }
-                _story.LoadStatus = LoadStatus.LoadFromRtfFiles;
             }
-            catch (Exception ex)
+            catch (Exception ex) //If error occurs in file.
             {
                 Logger.LogException(LogLevel.Error, ex, "Exception in SaveFileAs");
                 StatusMessage = "Save File As failed";
                 return;
             }
-            StatusMessage = "Save File As command completed";
-            Logger.Log(LogLevel.Info, "Save as command completed");
             _canExecuteCommands = true;
         }
 
