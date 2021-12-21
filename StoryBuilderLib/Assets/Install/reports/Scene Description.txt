@@ -14,28 +14,28 @@
 
     Setting:            @Setting
 
-    SceneType:
+    SceneType:          @SceneType
 
     Scene Cast:
 
-    New Cast Member:
+    New Cast Member:    @NewCastMember
 
     Scene Sketch:
     @Remarks
 
                     ============ Development ================
 
-    Purpose of Scene: 
+    Purpose of Scene:   @PurposeOfScene
 
-    Value Exchange:
+    Value Exchange:     @ValueExchange
 
-    What Happens:
+    What Happens:       
 
-    The Consequence:
+    The Consequence:    @Consequence
 
     Why It Matters:
 
-    The Realization:
+    The Realization:    @Realization
 
                     ============ Scene Conflict ================
 

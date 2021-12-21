@@ -1055,35 +1055,60 @@ namespace StoryBuilder.Services.Scrivener
             scene.Review = await _rdr.GetRtfText(scene.Review, scene.Uuid);
             string saveNotes = scene.Notes;
             scene.Notes = await _rdr.GetRtfText(scene.Notes, scene.Uuid);
+            string combinedString = string.Join(",", scene.CastMembers);
+
+            StoryElement vpAntagonist = StringToStoryElement(scene.Antagonist);
+            StoryElement vpProtagonist = StringToStoryElement(scene.Protagonist);
+            StoryElement vpSetting = StringToStoryElement(scene.Setting);
             // Parse and write the report
             foreach (string line in lines)
             {
                 StringBuilder sb = new StringBuilder(line);
+                //SCENE OVERVIEW SECTION
                 sb.Replace("@Id", node.Id.ToString());
                 sb.Replace("@Title", scene.Name);
                 sb.Replace("@Date", scene.Date);
                 sb.Replace("@Time", scene.Time);
                 sb.Replace("@Viewpoint", scene.Viewpoint);
-                sb.Replace("@Setting", scene.Setting);
-                sb.Replace("@Char1", scene.Char1);
-                sb.Replace("@Char2", scene.Char2);
-                sb.Replace("@Char3", scene.Char3);
-                sb.Replace("@Role1", scene.Role1);
-                sb.Replace("@Role2", scene.Role2);
-                sb.Replace("@Role3", scene.Role3);
+                sb.Replace("@Setting", vpSetting.Name);
+                if (vpSetting.Name != null)
+                    sb.Replace("@Setting", vpSetting.Name);
+                else
+                    sb.Replace("@Setting", String.Empty);
+                sb.Replace("@SceneType", scene.SceneType);
+                //TODO sb.Replace("@SceneCast", scene);
+                sb.Replace("@NewCastMember", combinedString);
                 sb.Replace("@Remarks", scene.Remarks);
-                sb.Replace("@ProtagName", scene.Protagonist);
+                //DEVELOPMENT SECTION
+                sb.Replace("@PurposeOfScene", scene.ScenePurpose);
+                sb.Replace("@ValueExchange", scene.ValueExchange);
+                //TODO sb.Replace("@WhatHappens",scene.)
+                sb.Replace("@Consequence", scene.Consequences);
+                //sb.Replace("@WhyItMatters",scene.why)
+                sb.Replace("@Realization", scene.Realization);
+                //SCENE CONFLICT SECTION
+                sb.Replace("@ProtagName", vpProtagonist.Name);
+                if (vpProtagonist != null)
+                    sb.Replace("@ProtagName", vpProtagonist.Name);
+                else
+                    sb.Replace("@ProtagName", String.Empty);
                 sb.Replace("@ProtagEmotion", scene.ProtagEmotion);
                 sb.Replace("@ProtagGoal", scene.ProtagGoal);
-                sb.Replace("@AntagName", scene.Antagonist);
+                sb.Replace("@AntagName", vpAntagonist.Name);
+                if (vpAntagonist != null)
+                    sb.Replace("@AntagName", vpAntagonist.Name);
+                else
+                    sb.Replace("@AntagName", String.Empty);
                 sb.Replace("@AntagEmotion", scene.AntagEmotion);
                 sb.Replace("@AntagGoal", scene.AntagGoal);
-                sb.Replace("@Opposition", scene.Opposition);
                 sb.Replace("@Outcome", scene.Outcome);
+                //SEQUEL SECTION
                 sb.Replace("@Emotion", scene.Emotion);
                 sb.Replace("@Review", scene.Review);
                 sb.Replace("@NewGoal", scene.NewGoal);
+                //SCENE NOTES SECTION
                 sb.Replace("@Notes", scene.Notes);
+
                 doc.AddText(sb.ToString(), format);
                 doc.AddNewLine();
             }
