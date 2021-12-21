@@ -877,7 +877,7 @@ namespace StoryBuilder.Services.Scrivener
                             sb.Replace("@Prop2@", loc.Prop2);
                             sb.Replace("@Prop3@",loc.Prop3);
                             sb.Replace("@Prop4@", loc.Prop4);
-                            sb.Replace("@SceneSummary", loc.Summary);
+                            sb.Replace("@Summary", loc.Summary);
                             //SENSATION SECTION
                             sb.Replace("@Sights", loc.Sights);
                             sb.Replace("@Sounds", loc.Sounds);
