@@ -12,7 +12,7 @@
     <EnablePreviewMsixTooling>true</EnablePreviewMsixTooling>
     <GenerateAppInstallerFile>False</GenerateAppInstallerFile>
     <AppxPackageSigningEnabled>True</AppxPackageSigningEnabled>
-    <PackageCertificateThumbprint>D859B0BE541EE9397D211A2D6094DB48AA7961D0</PackageCertificateThumbprint>
+    <PackageCertificateThumbprint>D9CAFED91E915FA8F3DCDC67468833F749A0E6C8</PackageCertificateThumbprint>
     <AppxPackageSigningTimestampDigestAlgorithm>SHA256</AppxPackageSigningTimestampDigestAlgorithm>
     <AppxAutoIncrementPackageRevision>False</AppxAutoIncrementPackageRevision>
     <AppxSymbolPackageEnabled>True</AppxSymbolPackageEnabled>
@@ -20,7 +20,7 @@
     <AppxBundle>Auto</AppxBundle>
     <AppInstallerUri>C:\msixs</AppInstallerUri>
     <HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
-    <AppxPackageDir>C:\Users\Rarisma\Desktop\stb2\</AppxPackageDir>
+    <AppxPackageDir>C:\Users\Rarisma\Desktop\stbr\</AppxPackageDir>
     <AppxBundlePlatforms>x64</AppxBundlePlatforms>
   </PropertyGroup>
 
