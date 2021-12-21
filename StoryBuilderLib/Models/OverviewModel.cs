@@ -61,13 +61,13 @@ namespace StoryBuilder.Models
             set => _concept = value;
         }
 
-        private string _premise;
+        //private string _premise;
 
-        public string Premise
-        {
-            get => _premise;
-            set => _premise = value;
-        }
+        //public string Premise
+        //{
+        //    get => _premise;
+        //    set => _premise = value;
+        //}
 
         private string _storyProblem;  // The Guid of a Problem StoryElement
         public string StoryProblem

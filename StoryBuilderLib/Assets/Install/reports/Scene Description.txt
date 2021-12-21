@@ -1,8 +1,6 @@
-                   StoryBuilder - Plot Point Description
+                   StoryBuilder - Scene Description
 
                    ============== Scene Overview ===========
-
-    Id:                 @Id
 
     Title:              @Title
 
@@ -29,11 +27,11 @@
 
     Value Exchange:     @ValueExchange
 
-    What Happens:       
+    What Happens:       @Events
 
     The Consequence:    @Consequence
 
-    Why It Matters:
+    Why It Matters:     @Significance
 
     The Realization:    @Realization
 

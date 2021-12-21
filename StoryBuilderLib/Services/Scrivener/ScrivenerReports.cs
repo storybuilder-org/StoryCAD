@@ -1,9 +1,10 @@
 ﻿using CommunityToolkit.Mvvm.DependencyInjection;
 using Net.Sgoliver.NRtfTree.Util;
+using Net.Sgoliver.NRtfTree.Core;
 using StoryBuilder.Controllers;
 using StoryBuilder.DAL;
 using StoryBuilder.Models;
-using StoryBuilder.Models.Scrivener;
+using StoryBuilder.Models.Scrivener;    
 using StoryBuilder.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -477,9 +478,11 @@ namespace StoryBuilder.Services.Scrivener
             //overview.Premise = await _rdr.GetRtfText(overview.Premise, overview.Uuid);
             overview.Notes = await _rdr.GetRtfText(overview.Notes, overview.Uuid);
             StoryElement vpChar = StringToStoryElement(overview.ViewpointCharacter);
-            StoryElement vpStoryProblem = StringToStoryElement(overview.StoryProblem);
-
-            //CharacterModel vpChar = overview.String
+            string vpName = vpChar?.Name ?? string.Empty;
+            StoryElement seProblem = StringToStoryElement(overview.StoryProblem);
+            string problemName = seProblem?.Name ?? string.Empty;
+            ProblemModel problem = (ProblemModel)seProblem;
+            string premise = problem?.Premise ?? string.Empty;
             // Parse and write the report
             foreach (string line in lines)
             {
@@ -494,21 +497,13 @@ namespace StoryBuilder.Services.Scrivener
                 sb.Replace("@Viewpoint", overview.Viewpoint);
                 sb.Replace("@StoryIdea", overview.StoryIdea);
                 sb.Replace("@Concept", overview.Concept);
-                sb.Replace("@StoryProblem", vpStoryProblem.Name);
-                if (vpStoryProblem != null)
-                    sb.Replace("@StoryProblem", vpStoryProblem.Name);
-                else
-                    sb.Replace("@StoryProblem", string.Empty);
-
-                sb.Replace("@Premise", overview.Premise);
+                sb.Replace("@StoryProblem", problemName);
+                string x = GetRtfText(premise);
+                sb.Replace("@Premise", premise);
                 sb.Replace("@StoryType", overview.StoryType);
                 sb.Replace("@StoryGenre", overview.StoryGenre);
                 sb.Replace("@LiteraryDevice", overview.LiteraryDevice);
-                sb.Replace("@viewpointCharacter", vpChar.Name);
-                if (vpChar != null)
-                    sb.Replace("@viewpointCharacter", vpChar.Name);
-                else
-                    sb.Replace("@viewpointCharacter", string.Empty);
+                sb.Replace("@viewpointCharacter", vpName);
                 sb.Replace("@Voice", overview.Voice);
                 sb.Replace("@Tense", overview.Tense);
                 sb.Replace("@Style", overview.Style);
@@ -516,7 +511,7 @@ namespace StoryBuilder.Services.Scrivener
                 sb.Replace("@Tone", overview.Tone);
                 sb.Replace("@toneNotes", overview.ToneNotes);
                 sb.Replace("@Notes", overview.Notes);
-                doc.AddText(sb.ToString(), format);
+                doc.AddText(sb.ToString());
                 doc.AddNewLine();
 
             }
@@ -958,7 +953,7 @@ namespace StoryBuilder.Services.Scrivener
                 sb.Replace("@Touch", setting.Touch);
                 sb.Replace("@SmellTaste", setting.SmellTaste);
                 sb.Replace("@Notes", setting.Notes);
-                doc.AddText(sb.ToString(), format);
+                doc.AddText(sb.ToString());
                 doc.AddNewLine();
             }
             // Write the report
@@ -1057,24 +1052,23 @@ namespace StoryBuilder.Services.Scrivener
             scene.Notes = await _rdr.GetRtfText(scene.Notes, scene.Uuid);
             string combinedString = string.Join(",", scene.CastMembers);
 
-            StoryElement vpAntagonist = StringToStoryElement(scene.Antagonist);
-            StoryElement vpProtagonist = StringToStoryElement(scene.Protagonist);
-            StoryElement vpSetting = StringToStoryElement(scene.Setting);
+            StoryElement antagonist = StringToStoryElement(scene.Antagonist);
+            string antagonistName = antagonist?.Name ?? string.Empty;
+            StoryElement protagonist = StringToStoryElement(scene.Protagonist);
+            string protagonistName = protagonist?.Name ?? string.Empty;
+            StoryElement setting = StringToStoryElement(scene.Setting);
+            string settingName = setting?.Name ?? string.Empty;
+
             // Parse and write the report
             foreach (string line in lines)
             {
                 StringBuilder sb = new StringBuilder(line);
                 //SCENE OVERVIEW SECTION
-                sb.Replace("@Id", node.Id.ToString());
                 sb.Replace("@Title", scene.Name);
                 sb.Replace("@Date", scene.Date);
                 sb.Replace("@Time", scene.Time);
                 sb.Replace("@Viewpoint", scene.Viewpoint);
-                sb.Replace("@Setting", vpSetting.Name);
-                if (vpSetting.Name != null)
-                    sb.Replace("@Setting", vpSetting.Name);
-                else
-                    sb.Replace("@Setting", String.Empty);
+                sb.Replace("@Setting", settingName);
                 sb.Replace("@SceneType", scene.SceneType);
                 //TODO sb.Replace("@SceneCast", scene);
                 sb.Replace("@NewCastMember", combinedString);
@@ -1082,23 +1076,15 @@ namespace StoryBuilder.Services.Scrivener
                 //DEVELOPMENT SECTION
                 sb.Replace("@PurposeOfScene", scene.ScenePurpose);
                 sb.Replace("@ValueExchange", scene.ValueExchange);
-                //TODO sb.Replace("@WhatHappens",scene.)
+                sb.Replace("@Events", scene.Events);
                 sb.Replace("@Consequence", scene.Consequences);
-                //sb.Replace("@WhyItMatters",scene.why)
+                sb.Replace("@Significance", scene.Significance);
                 sb.Replace("@Realization", scene.Realization);
                 //SCENE CONFLICT SECTION
-                sb.Replace("@ProtagName", vpProtagonist.Name);
-                if (vpProtagonist != null)
-                    sb.Replace("@ProtagName", vpProtagonist.Name);
-                else
-                    sb.Replace("@ProtagName", String.Empty);
-                sb.Replace("@ProtagEmotion", scene.ProtagEmotion);
+                sb.Replace("@ProtagName", protagonistName);
+                 sb.Replace("@ProtagEmotion", scene.ProtagEmotion);
                 sb.Replace("@ProtagGoal", scene.ProtagGoal);
-                sb.Replace("@AntagName", vpAntagonist.Name);
-                if (vpAntagonist != null)
-                    sb.Replace("@AntagName", vpAntagonist.Name);
-                else
-                    sb.Replace("@AntagName", String.Empty);
+                sb.Replace("@AntagName", antagonistName);
                 sb.Replace("@AntagEmotion", scene.AntagEmotion);
                 sb.Replace("@AntagGoal", scene.AntagGoal);
                 sb.Replace("@Outcome", scene.Outcome);
@@ -1108,8 +1094,7 @@ namespace StoryBuilder.Services.Scrivener
                 sb.Replace("@NewGoal", scene.NewGoal);
                 //SCENE NOTES SECTION
                 sb.Replace("@Notes", scene.Notes);
-
-                doc.AddText(sb.ToString(), format);
+                doc.AddText(sb.ToString());
                 doc.AddNewLine();
             }
             // Write the report
@@ -1241,16 +1226,15 @@ namespace StoryBuilder.Services.Scrivener
                         SceneModel scene = (SceneModel)scn;
                         var sb = new StringBuilder(line);
                         sb.Replace("@Synopsis", $"[{scene.Name}] {scene.Description}");
-                        doc.AddText(sb.ToString(), format);
+                        doc.AddText(sb.ToString());
                         doc.AddNewLine();
-                        doc.AddText(scene.Remarks, format);
-                        doc.AddNewLine();
+                        doc.AddText(scene.Remarks);
                         doc.AddNewLine();
                     }
                 }
                 else
                 {
-                    doc.AddText(line, format);
+                    doc.AddText(line);
                     doc.AddNewLine();
                 }
             }
@@ -1260,6 +1244,55 @@ namespace StoryBuilder.Services.Scrivener
             StorageFile contents = await di.CreateFileAsync("content.rtf", CreationCollisionOption.ReplaceExisting);
             // Write the report
             await FileIO.WriteTextAsync(contents, rtf);
+        }
+
+        private string GetRtfText(string rtfInput)
+        {
+            //Create the RTF tree object
+            RtfTree tree = new RtfTree();
+
+            //Load and parse RTF document
+            tree.LoadRtfText(rtfInput);
+
+            //Get root node
+            RtfTreeNode root = tree.RootNode;
+
+            RtfTreeNode node = new RtfTreeNode();
+
+            for (int i = 0; i < root.ChildNodes.Count; i++)
+            {
+                node = root.ChildNodes[i];
+
+                if (node.NodeType == RtfNodeType.Group)
+                {
+                    //...
+                }
+                else if (node.NodeType == RtfNodeType.Control)
+                {
+                    //...
+                }
+                else if (node.NodeType == RtfNodeType.Keyword)
+                {
+                    switch (node.NodeKey)
+                    {
+                        case "f":  //Font type
+                                   //...
+                            break;
+                        case "cf":  //Font color
+                                    //...
+                            break;
+                        case "fs":  //Font size
+                                    //...
+                            break;
+                    }
+                }
+                else if (node.NodeType == RtfNodeType.Text)
+                {
+                    //...
+                }
+            }
+
+            return string.Empty;
         }
 
         private async Task LoadReportTemplates()
