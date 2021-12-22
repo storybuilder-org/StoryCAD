@@ -1004,37 +1004,56 @@ namespace StoryBuilder.ViewModels
         private async void KeyQuestionsTool()
         {
             Logger.Log(LogLevel.Info, "Displaying KeyQuestions tool dialog");
-            if (RightTappedNode == null)
-                RightTappedNode = CurrentNode;
-            KeyQuestionsDialog dialog = new KeyQuestionsDialog();
-            dialog.XamlRoot = GlobalData.XamlRoot;
-            dialog.KeyQuestionsVm.NextQuestion();
-            await dialog.ShowAsync();
+            if (RightTappedNode == null) { RightTappedNode = CurrentNode;}
+            
+            //Creates and shows dialog
+            ContentDialog KeyQuestionsDialog = new();
+            KeyQuestionsDialog.Title = "Key questions";
+            KeyQuestionsDialog.CloseButtonText = "Close";
+            KeyQuestionsDialog.XamlRoot = GlobalData.XamlRoot;
+            KeyQuestionsDialog.Content = new KeyQuestionsDialog();
+            await KeyQuestionsDialog.ShowAsync();
+
+            Ioc.Default.GetService<KeyQuestionsViewModel>().NextQuestion();
+
             Logger.Log(LogLevel.Info, "KeyQuestions finished");
         }
 
         private async void TopicsTool()
         {
             Logger.Log(LogLevel.Info, "Displaying Topics tool dialog");
-            if (RightTappedNode == null)
-                RightTappedNode = CurrentNode;
-            TopicsDialog dialog = new TopicsDialog();
+            if (RightTappedNode == null) { RightTappedNode = CurrentNode;}
+            
+            ContentDialog dialog = new();
             dialog.XamlRoot = GlobalData.XamlRoot;
+            dialog.Title = "Topic Information";
+            dialog.CloseButtonText = "Done";
+            dialog.Content = new TopicsDialog();
             await dialog.ShowAsync();
             Logger.Log(LogLevel.Info, "Topics finished");
         }
+
+        /// <summary>
+        /// This shows the master plot dialog
+        /// </summary>
         private async void MasterPlotTool()
         {
             Logger.Log(LogLevel.Info, "Displaying MasterPlot tool dialog");
-            if (RightTappedNode == null)
-                RightTappedNode = CurrentNode;
-            MasterPlotsDialog dialog = new();
+            if (RightTappedNode == null)  { RightTappedNode = CurrentNode; }
+            
+            //Creates and shows content dialog
+            ContentDialog dialog = new();
             dialog.XamlRoot = GlobalData.XamlRoot;
+            dialog.Title = "Master plots";
+            dialog.PrimaryButtonText = "Copy";
+            dialog.SecondaryButtonText = "Cancel";
+            dialog.Content = new MasterPlotsDialog();
             var result = await dialog.ShowAsync();
+
             if (result == ContentDialogResult.Primary)   // Copy command
             {
-                string masterPlotName = dialog.MasterPlotsVm.MasterPlotName;
-                MasterPlotModel model = dialog.MasterPlotsVm.MasterPlots[masterPlotName];
+                string masterPlotName = Ioc.Default.GetService<MasterPlotsViewModel>().MasterPlotName;
+                MasterPlotModel model = Ioc.Default.GetService<MasterPlotsViewModel >().MasterPlots[masterPlotName];
                 IList<MasterPlotScene> scenes = model.MasterPlotScenes;
                 foreach (MasterPlotScene scene in scenes)
                 {
@@ -1043,87 +1062,97 @@ namespace StoryBuilder.ViewModels
                     child.Remarks = "See Notes.";
                     child.Notes = scene.Notes;
                     // add the new SceneModel & node to the end of the target's children 
-                    StoryNodeItem newNode = new StoryNodeItem(child, RightTappedNode);
+                    StoryNodeItem newNode = new(child, RightTappedNode);
                     RightTappedNode.IsExpanded = true;
                     newNode.IsSelected = true;
                 }
-                var msg = string.Format("MasterPlot {0} inserted", masterPlotName);
+                var msg = $"MasterPlot {masterPlotName} inserted";
                 StatusMessage = msg;
                 Logger.Log(LogLevel.Info, msg);
                 ShowChange();
+                Logger.Log(LogLevel.Info, "MasterPlot complete");
             }
-            else  // cancelledd
+            else  // canceled
             {
-                var msg = "MasterPlot cancelled";
-                StatusMessage = msg;
-                Logger.Log(LogLevel.Info, msg);
+                StatusMessage = "MasterPlot cancelled";
+                Logger.Log(LogLevel.Info, "MasterPlot canceled");
             } 
-            Logger.Log(LogLevel.Info, "MasterPlot finished");
         }
 
         private async void DramaticSituationsTool()
         {
             Logger.Log(LogLevel.Info, "Dislaying Dramatic Situations tool dialog");
-            if (RightTappedNode == null)
-                RightTappedNode = CurrentNode;
-            DramaticSituationsDialog dialog = new DramaticSituationsDialog();
+            if (RightTappedNode == null)  { RightTappedNode = CurrentNode; }
+
+            //Creates and shows dialog
+            ContentDialog dialog = new();
             dialog.XamlRoot = GlobalData.XamlRoot;
+            dialog.Title = "Dramatic situations";
+            dialog.PrimaryButtonText = "Copy as problem";
+            dialog.SecondaryButtonText = "Copy as scene";
+            dialog.CloseButtonText = "Cancel";
+            dialog.Content = new DramaticSituationsDialog();
             var result = await dialog.ShowAsync();
-            DramaticSituationModel situationModel = dialog.DramaticSituationsVm.Situation;
+
+            DramaticSituationModel situationModel = Ioc.Default.GetService<DramaticSituationsViewModel>().Situation;
             StoryNodeItem newNode = null;
-            string msg;
+            string msg = "";
             switch (result)
             {
                 case ContentDialogResult.Primary:       // problem
-                    ProblemModel problem = new ProblemModel(StoryModel);
+                    ProblemModel problem = new(StoryModel);
                     problem.Name = situationModel.SituationName;
                     problem.StoryQuestion = "See Notes.";
                     problem.Notes = situationModel.Notes;
                     // Insert the new Problem as the target's child
                     newNode = new StoryNodeItem(problem, RightTappedNode);
-                    msg = string.Format("Problem {0} inserted", situationModel.SituationName);
-                    StatusMessage = msg;
-                    Logger.Log(LogLevel.Info, msg);
+                    msg = $"Problem {situationModel.SituationName} inserted";
                     ShowChange();
                     break;
-                case ContentDialogResult.Secondary:     // scene
-                    SceneModel sceneVar = new SceneModel(StoryModel);
+                case ContentDialogResult.Secondary:     //Scene
+                    SceneModel sceneVar = new(StoryModel);
                     sceneVar.Name = situationModel.SituationName;
                     sceneVar.Remarks = "See Notes.";
                     sceneVar.Notes = situationModel.Notes;
                     // Insert the new Scene as the target's child
                     newNode = new StoryNodeItem(sceneVar, RightTappedNode);
-                    msg = string.Format("Scene {0} inserted", situationModel.SituationName);
-                    StatusMessage = msg;
-                    Logger.Log(LogLevel.Info, msg);
+                    msg = $"Scene {situationModel.SituationName} inserted";
                     ShowChange();
                     break;
-                case ContentDialogResult.None:
+                default:
                     msg = "MasterPlot cancelled";
-                    StatusMessage = msg;
-                    Logger.Log(LogLevel.Info, msg);
                     return;
             }
+            StatusMessage = msg;
+            Logger.Log(LogLevel.Info, msg);
             RightTappedNode.IsExpanded = true;
             newNode.IsSelected = true;
             Logger.Log(LogLevel.Info, "Dramatic Situations finished");
         }
 
+        /// <summary>
+        /// This loads the stock scenes dialog in the Plotting Aids submenu
+        /// </summary>
         private async void StockScenesTool()
         {
             Logger.Log(LogLevel.Info, "Displaying Stock Scenes tool dialog");
-            if (RightTappedNode == null)
-                RightTappedNode = CurrentNode;
+            if (RightTappedNode == null) {RightTappedNode = CurrentNode;}
             try
             {
-                StockScenesDialog dialog = new StockScenesDialog();
+                //Creates and shows dialog
+                ContentDialog dialog = new();
+                dialog.Title = "Stock scenes";
+                dialog.Content = new StockScenesDialog();
+                dialog.PrimaryButtonText = "Stock Scenes";
+                dialog.CloseButtonText = "Cancel";
                 dialog.XamlRoot = GlobalData.XamlRoot;
                 var result = await dialog.ShowAsync();
+
                 if (result == ContentDialogResult.Primary)   // Copy command
                 {
-                    SceneModel sceneVar = new SceneModel(StoryModel);
-                    sceneVar.Name = dialog.StockScenesVm.SceneName;
-                    StoryNodeItem newNode = new StoryNodeItem(sceneVar, RightTappedNode);
+                    SceneModel sceneVar = new(StoryModel);
+                    sceneVar.Name = Ioc.Default.GetService<StockScenesViewModel>().SceneName;
+                    StoryNodeItem newNode = new(sceneVar, RightTappedNode);
                     _sourceChildren = RightTappedNode.Children;
                     _sourceChildren.Add(newNode);
                     RightTappedNode.IsExpanded = true;
