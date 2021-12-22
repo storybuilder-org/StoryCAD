@@ -72,8 +72,6 @@
     <None Remove="Services\Dialogs\SamplePage.xaml" />
     <None Remove="Services\Dialogs\SaveAsDialog.xaml" />
     <None Remove="Services\Dialogs\Tools\About.xaml" />
-    <None Remove="Services\Dialogs\Tools\FlawDialog.xaml" />
-    <None Remove="Services\Dialogs\Tools\TraitsDialog.xaml" />
     <None Remove="Services\Dialogs\UnifiedMenu.xaml" />
   </ItemGroup>
   <ItemGroup>
@@ -136,12 +134,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Page Update="Services\Dialogs\Tools\TraitsDialog.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-  </ItemGroup>
-
-  <ItemGroup>
     <Page Update="Services\Dialogs\SamplePage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -155,12 +147,6 @@
 
   <ItemGroup>
     <Page Update="Services\Dialogs\NewProjectPage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Page Update="Services\Dialogs\Tools\FlawDialog.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>

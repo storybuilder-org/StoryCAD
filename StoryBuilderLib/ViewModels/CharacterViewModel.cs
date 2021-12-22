@@ -17,6 +17,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Threading.Tasks;
+using StoryBuilder.Controls;
 
 namespace StoryBuilder.ViewModels
 {
@@ -941,42 +942,57 @@ namespace StoryBuilder.ViewModels
             return false;
         }
 
+        /// <summary>
+        /// This opens and deals with the flaw tool
+        /// </summary>
         private async void FlawTool()
         {
             _logger.Log(LogLevel.Info, "Displaying Flaw Finder tool dialog");
-            FlawViewModel FlawVm = Ioc.Default.GetService<FlawViewModel>();
-            FlawDialog dialog = new FlawDialog();
-            dialog.XamlRoot = GlobalData.XamlRoot;
-            var result = await dialog.ShowAsync();
+
+            //Creates and shows dialog
+            ContentDialog FlawDialog = new();
+            FlawDialog.XamlRoot = GlobalData.XamlRoot;
+            FlawDialog.Content = new Flaw();
+            FlawDialog.Title = "Flaw Builder";
+            FlawDialog.PrimaryButtonText = "Copy flaw example";
+            FlawDialog.CloseButtonText = "Cancel";
+            var result = await FlawDialog.ShowAsync();
+
             if (result == ContentDialogResult.Primary)   // Copy to Character Flaw  
             {
-                Flaw = FlawVm.WoundSummary; 
+                Flaw = Ioc.Default.GetService<FlawViewModel>().WoundSummary; //Sets the flaw.
+                _logger.Log(LogLevel.Info, "Flaw Finder complete");
             }
             else  // Cancel button pressed
             {
-
+                _logger.Log(LogLevel.Info, "Flaw Finder canceled");
             }
-            _logger.Log(LogLevel.Info, "Flaw Finder finished");
         }
 
         private async void TraitTool()
         {
             _logger.Log(LogLevel.Info, "Displaying Trait Builder tool dialog");
-            TraitsViewModel TraitVm = Ioc.Default.GetService<TraitsViewModel>();
-           TraitsDialog dialog = new TraitsDialog();
-            dialog.XamlRoot = GlobalData.XamlRoot;
-            var result = await dialog.ShowAsync();
+
+            //Creates and shows dialog
+            ContentDialog TraitDialog = new(); 
+            TraitDialog.Title = "Trait builder";
+            TraitDialog.PrimaryButtonText = "Copy trait";
+            TraitDialog.CloseButtonText = "Cancel";
+            TraitDialog.XamlRoot = GlobalData.XamlRoot;
+            TraitDialog.Content = new Traits();
+            var result = await TraitDialog.ShowAsync();
+
             if (result == ContentDialogResult.Primary)   // Copy to Character Trait 
             {
-                CharacterTraits.Add(TraitVm.Example);
+                CharacterTraits.Add(Ioc.Default.GetService<TraitsViewModel>().Example);
                 _changed = true;
                 ShellViewModel.ShowChange();
+                _logger.Log(LogLevel.Info, "Trait Builder complete");
             }
             else  // Cancel button pressed
             {
                 _logger.Log(LogLevel.Info, "Trait Builder cancelled");
             }
-            _logger.Log(LogLevel.Info, "Trait Builder finished");
         }
 
         #endregion
