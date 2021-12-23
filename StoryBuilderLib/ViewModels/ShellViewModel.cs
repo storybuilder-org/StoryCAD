@@ -824,16 +824,16 @@ namespace StoryBuilder.ViewModels
                         await WriteModel();
 
                         //Gets data from VM
-                        string saveAsProjectName = SaveAsVM.ProjectName;
                         string projectName = _story.ProjectFolder.DisplayName;
 
-                        //Saves file to disk
-                        _saveAsProjectFolder = await _saveAsParentFolder.CreateFolderAsync(saveAsProjectName, CreationCollisionOption.OpenIfExists);
-                        await _story.ProjectFolder.CopyContentsRecursive(_saveAsProjectFolder);
+                        //Saves the current project folders and files to disk
+                        SaveAsVM.SaveAsProjectFolder = await SaveAsVM.SaveAsParentFolder.CreateFolderAsync(SaveAsVM.ProjectName, CreationCollisionOption.OpenIfExists);
+                        await _story.ProjectFolder.CopyContentsRecursive(SaveAsVM.SaveAsProjectFolder);
                         
-                        //Updates shell to use the newly saved copy
-                        _story.ProjectFilename = saveAsProjectName;
-                        _story.ProjectPath = _saveAsProjectFolderPath;
+                        //Update the StoryModel properties to use the newly saved copy
+                        _story.ProjectFilename = SaveAsVM.ProjectName;
+                        _story.ProjectFolder = SaveAsVM.SaveAsProjectFolder;
+                        _story.ProjectPath = SaveAsVM.SaveAsProjectFolderPath;
                         Messenger.Send(new IsChangedMessage(true));
                         StoryModel.Changed = false;
                         ChangeStatusColor = Colors.Green;
@@ -841,18 +841,16 @@ namespace StoryBuilder.ViewModels
                         Logger.Log(LogLevel.Info, "Save as command completed");
                     }
                 }
-                else //If cancled.
+                else // if cancelled
                 {
                     StatusMessage = "SaveAs dialog cancelled";
                     Logger.Log(LogLevel.Info, "'SaveAs' project command cancelled");
-                    _canExecuteCommands = true;
                 }
             }
             catch (Exception ex) //If error occurs in file.
             {
                 Logger.LogException(LogLevel.Error, ex, "Exception in SaveFileAs");
                 StatusMessage = "Save File As failed";
-                return;
             }
             _canExecuteCommands = true;
         }

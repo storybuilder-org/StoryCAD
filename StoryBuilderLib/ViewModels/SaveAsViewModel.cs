@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Windows.Storage;
 
 namespace StoryBuilder.ViewModels
 {
@@ -21,6 +22,34 @@ namespace StoryBuilder.ViewModels
         {
             get => _projectPathName;
             set => SetProperty(ref _projectPathName, value);
+        }
+
+        private bool _saveAsProjectFolderExists;
+        public bool SaveAsProjectFolderExists 
+        {
+            get => _saveAsProjectFolderExists;
+            set => _saveAsProjectFolderExists = value;
+        }
+        
+        private StorageFolder _saveAsParentFolder;
+        public StorageFolder SaveAsParentFolder 
+        {
+            get => _saveAsParentFolder;
+            set => _saveAsParentFolder = value; 
+        }
+
+        private StorageFolder _saveAsProjectFolder;
+        public StorageFolder SaveAsProjectFolder 
+        {
+            get => _saveAsProjectFolder;
+            set => _saveAsProjectFolder = value;
+        }
+
+        private string _saveAsProjectFolderPath;
+        public string SaveAsProjectFolderPath 
+        {
+            get => _saveAsProjectFolderPath;
+            set => _saveAsProjectFolderPath = value;
         }
 
         #endregion

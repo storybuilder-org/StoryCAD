@@ -67,8 +67,10 @@ namespace StoryBuilder.Services.Dialogs
             ParentFolder = await folderPicker.PickSingleFolderAsync();
             //TODO: Test for cancelled FolderPicker via 'if Parentfolder =! null {} else {}
             ProjectFolderExists = await ParentFolder.TryGetItemAsync(ProjectName.Text) != null;
+            
             ProjectFolderPath = Path.Combine(ParentFolder.Path, ProjectName.Text);
             ProjectPathName.Text = ProjectFolderPath;
+            SaveAsVm.ProjectPathName = ProjectFolderPath;
             BrowseButtonClicked = true;
         }
 
