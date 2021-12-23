@@ -153,6 +153,49 @@ namespace StoryBuilder.Models
             set => _relationshipList = value;
         }
 
+        //Relationship section
+
+        private string _relationship;
+
+        public string Relationship
+        {
+            get => _relationship;
+            set => _relationship = value;
+        }
+
+        private string _relationType;
+
+        public string RelationType
+        {
+            get => _relationType;
+            set => _relationType = value;
+        }
+
+        private string _relationTrait;
+        
+        public string RelationTrait
+        {
+            get => _relationTrait;
+            set => _relationTrait = value;
+        }
+
+        private string _attitude;
+        public string Attitude
+        {
+            get => _attitude;
+            set => _attitude = value;
+        }
+
+        private string _relationshipNotes;
+
+        public string RelationshipNotes
+        {
+            get => _relationshipNotes;
+            set => _relationshipNotes = value;
+        }
+
+        
+
         // Character social data
 
         private string _economic;
@@ -323,6 +366,14 @@ namespace StoryBuilder.Models
         }
 
         // Character traits data
+
+        private string _outerTrait;
+
+        public string outerTrait
+        {
+            get => _outerTrait;
+            set => _outerTrait = value;
+        }
 
         private List<string> _traitList;
         public List<string> TraitList

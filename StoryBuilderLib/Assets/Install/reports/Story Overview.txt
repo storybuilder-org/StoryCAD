@@ -2,38 +2,58 @@
 
                    ============== Story Idea =============
 
-    Title:                @Title
+    Title:                  @Title
 
-    Date Created:         @CreateDate
+    Username:               @Author
 
-    Last Changed:         @ModifiedDate
+    Creation Date:          @CreateDate
 
-    Author:               @Author
+    Last Changed:           @ModifiedDate
+        
+    Story Idea:             @StoryIdea
 
-    Story Type:           @StoryType
-
-    Genre:                @Genre
-
-    Viewpoint:            @Viewpoint
-
-    Target Markets:       @Market1
-                          @Market2
-
-    Story Notes:
-    @StoryIdea
+    
 
                    ============== Concept =============
 
-    Concept:
+    Concept: 
     @Concept
 
                    ============== Premise =============
 
+    Story Problem:
+    @StoryProblem
+
     Premise:
     @Premise
 
+                  ============== Structure =============
 
-                   ============== Notes =============
+    Type: @StoryType
+    
+    Genre: @StoryGenre
+
+    Viewpoint: @Viewpoint
+
+    Literary Device: @LiteraryDevice
+
+    Viewpoint Character: @viewpointCharacter
+
+    Voice: @Voice
+
+    Tense: @Tense
+
+    Style: @Style
+
+    Style Notes: @styleNotes
+
+    Tone: @Tone
+
+    Tone Notes: @toneNotes
+
+
+
+                  =============== Notes ================
 
     Notes:
     @Notes

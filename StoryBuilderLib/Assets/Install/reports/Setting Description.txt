@@ -26,6 +26,9 @@
 
     Prop4:              @Prop4
 
+    Scene Summary:
+    @Summary
+
                        ============= Sensations ==================
 
     Sights:

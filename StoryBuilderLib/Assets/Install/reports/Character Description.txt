@@ -27,17 +27,19 @@
 
     Eyes:               @Eyes
 
-    Build:              @Build
-
     Hair:               @Hair
 
-    Nationality:        @Nationality
+    Build:              @Build
 
     Skin:               @Skin
 
+    Race:               @Race
+        
+    Nationality:        @Nationality
+
     Health:             @Health
 
-    Race:               @Race
+    
 
     Details:
     @PhysNotes
@@ -47,22 +49,29 @@
     Appearance:
     @Appearance
 
-                 =========== Psychological Traits ==========
+                ============= Relationships ==================
 
-    Personality:        @Personality
+    Relationship:       @Relationship
 
-    Intelligence:       @Intelligence
+    Relation Type:      @relationType
 
-      Values:           @Values
+    Trait:              @relationTrait
 
-      Abnormality:      @Abnormality
+    Attitude:           @Attitude
 
-      Focus:            @Focus
+    Relationship Notes: 
+    @RelationshipNotes
 
-      Notes:
-      @PsychNotes
+                ============= Flaw ==================
 
-                   =========== Social Traits ======================
+    Flaw: @Flaw
+
+          ================= Backstory =====================
+
+    Backstory:
+    @Notes
+
+             =========== Social Traits ======================
 
     Economic Status:
     @Economic
@@ -76,15 +85,32 @@
     Religion:
     @Religion
 
+
+                 =========== Psychological Traits ==========
+
+    Personality:        @Personality
+
+    Intelligence:       @Intelligence
+
+      Values:           @Values
+
+      Focus:            @Focus
+
+      Abnormality:      @Abnormality
+
+      Notes:
+      @PsychNotes
+
+ 
                    =========== Inner Traits ======================
 
-    Adventurousness:          @Adventure
+    Adventurousness:    @Adventure
 
-    Aggression:                     @Aggression
+    Aggression:         @Aggression
 
-    Confidence:                    @Confidence
+    Confidence:         @Confidence
 
-    Conscientiousness:        @Conscientious
+    Conscientiousness:  @Conscientious
 
     Creativity:         @Creative
 
@@ -102,23 +128,13 @@
 
     Stability:          @Stability
 
-                   =================== Work =====================
+                    =========== Outer Traits ======================
 
-    Work:
-    @Work
+   Traits:        @Traits
 
-                   ============== Likes and Dislikes ===============
+                    =========== Notes ======================
+    Notes:
+   
 
-    Likes/Dislikes:
-    @Likes
 
-                   ============== Habits and Vices =================
-
-    Habits/Vices:
-    @Habits
-
-                   ================= Backstory =====================
-
-    Backstory:
-    @Notes
 

@@ -1,8 +1,6 @@
-                   StoryBuilder - Plot Point Description
+                   StoryBuilder - Scene Description
 
-                   ============== Scene Overview===========
-
-    Id:                 @Id
+                   ============== Scene Overview ===========
 
     Title:              @Title
 
@@ -14,16 +12,26 @@
 
     Setting:            @Setting
 
-    Characters:
+    SceneType:          @SceneType
 
-    @Char1                             @Role1
-
-    @Char2                             @Role2
-
-    @Char3                             @Role3
+    Scene Cast:         @CastMember
 
     Scene Sketch:
     @Remarks
+
+                    ============ Development ================
+
+    Purpose of Scene:   @PurposeOfScene
+
+    Value Exchange:     @ValueExchange
+
+    What Happens:       @Events
+
+    The Consequence:    @Consequence
+
+    Why It Matters:     @Significance
+
+    The Realization:    @Realization
 
                     ============ Scene Conflict ================
 
@@ -31,15 +39,13 @@
 
     Feelings:           @ProtagEmotion
 
-    Goal:               @ProtagGoal
+    Protagonist's Goal: @ProtagGoal
 
     Antagonist:         @AntagName
 
     Feelings:           @AntagEmotion
 
-    Goal:               @AntagGoal
-
-    Opposition:         @Opposition
+    Antagonist's Goal:  @AntagGoal
 
     Outcome:            @Outcome
 
