@@ -17,6 +17,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Threading.Tasks;
+using StoryBuilder.Controls;
 
 namespace StoryBuilder.ViewModels
 {
@@ -791,9 +792,9 @@ namespace StoryBuilder.ViewModels
             //Messenger.Send(new IsChangedMessage(Changed));
         }
 
+
         /// <summary>
         /// Add a new RelationshipModel instance for this character.
-        /// 
         /// The added relationship is made the currently loaded and displayed one.
         /// </summary>
         private async void AddRelationship()
@@ -801,36 +802,40 @@ namespace StoryBuilder.ViewModels
             _logger.Log(LogLevel.Info, "Executing AddRelationship command");
             await SaveRelationship(CurrentRelationship);
 
-            NewRelationshipDialog dialog = new();
-            dialog.XamlRoot = GlobalData.XamlRoot;
-            NewRelationshipViewModel vm = new NewRelationshipViewModel(Model);
-            dialog.NewRelVM = vm;
-            vm.RelationTypes.Clear();
-            foreach (RelationType relationType in GlobalData.RelationTypes)
-                vm.RelationTypes.Add(relationType);
-            // Prospective relationship partners are all characters not currently
-            // already in a relationship with this character.
-            vm.ProspectivePartners.Clear();
+            //Sets up view model
+            NewRelationshipViewModel VM = new(Model);
+            VM.RelationTypes.Clear();
+            foreach (RelationType relationType in GlobalData.RelationTypes) { VM.RelationTypes.Add(relationType); }
+            VM.ProspectivePartners.Clear(); //Prospective partners are chars who are not in a relationship with this char
             foreach (StoryElement character in _storyModel.StoryElements.Characters)
             {
-                if (character == vm.Member) continue;  // Skip me
+                if (character == VM.Member) { continue; } //Character cannot be in a relationship with themselves.
                 foreach (RelationshipModel rel in CharacterRelationships)
                 {
                     if (character == rel.Partner) goto NextCharacter; // Skip partner
                 }
-                vm.ProspectivePartners.Add(character);
-            NextCharacter: continue;
+                VM.ProspectivePartners.Add(character);
+                NextCharacter: continue;
             }
-            var result = await dialog.ShowAsync();
-            if (result == ContentDialogResult.Primary)
+
+            //Creates dialog and shows dialog
+            ContentDialog NewRelationship = new();
+            NewRelationship.Title = "New relationship";
+            NewRelationship.PrimaryButtonText = "Add relationship";
+            NewRelationship.SecondaryButtonText = "Cancel";
+            NewRelationship.XamlRoot = GlobalData.XamlRoot;
+            NewRelationship.Content = new NewRelationshipPage(VM);
+            var result = await NewRelationship.ShowAsync();
+
+            if (result == ContentDialogResult.Primary) //User clicks add relationship
             {
                 try
                 {
                     // Create the new RelationshipModel
-                    string partnerUuid = StoryWriter.UuidString(vm.SelectedPartner.Uuid);
-                    RelationshipModel memberRelationship = new RelationshipModel(partnerUuid, vm.RelationType);
-                    // Complete pairing 
-                    memberRelationship.Partner = StringToStoryElement(partnerUuid);
+                    string partnerUuid = StoryWriter.UuidString(VM.SelectedPartner.Uuid);
+                    RelationshipModel memberRelationship = new(partnerUuid, VM.RelationType);
+
+                    memberRelationship.Partner = StringToStoryElement(partnerUuid); // Complete pairing
                     // Add partner relationship to member's list of relationships 
                     CharacterRelationships.Add(memberRelationship);
                     SelectedRelationship = memberRelationship;
@@ -838,28 +843,20 @@ namespace StoryBuilder.ViewModels
                     CurrentRelationship = SelectedRelationship;
 
                     _changed = true;
-                    string msg = String.Format("Relationship to {0} added", vm.SelectedPartner.Name);
-                    var smsg = new StatusMessage(msg, 200);
-                    Messenger.Send(new StatusChangedMessage(smsg));
+                    string msg = String.Format("Relationship to {0} added", VM.SelectedPartner.Name);
+                    Messenger.Send(new StatusChangedMessage(new StatusMessage(msg, 200)));
                     _logger.Log(LogLevel.Info, msg);
-
-                    //_logger.Log(LogLevel.Info, string.Format("Requesting IsDirty change to true"));
-                    //Messenger.Send(new IsChangedMessage(Changed));
                 }
                 catch (Exception ex)
                 {
-                    string msg = "Error creating new Relationship";
-                    _logger.LogException(LogLevel.Error, ex, msg);
-                    var smsg = new StatusMessage(msg, 200);
-                    Messenger.Send(new StatusChangedMessage(smsg));
+                    _logger.LogException(LogLevel.Error, ex, "Error creating new Relationship");
+                    Messenger.Send(new StatusChangedMessage(new StatusMessage("Error creating new Relationship", 200)));
                 }
             }
-            else
+            else //User clicks cancel
             {
-                string msg = "AddRelationship cancelled";
-                _logger.Log(LogLevel.Info, msg);
-                var smsg = new StatusMessage(msg, 200);
-                Messenger.Send(new StatusChangedMessage(smsg));
+                _logger.Log(LogLevel.Info, "AddRelationship cancelled");
+                Messenger.Send(new StatusChangedMessage(new StatusMessage("AddRelationship cancelled", 200)));
             }
         }
 
@@ -945,42 +942,57 @@ namespace StoryBuilder.ViewModels
             return false;
         }
 
+        /// <summary>
+        /// This opens and deals with the flaw tool
+        /// </summary>
         private async void FlawTool()
         {
             _logger.Log(LogLevel.Info, "Displaying Flaw Finder tool dialog");
-            FlawViewModel FlawVm = Ioc.Default.GetService<FlawViewModel>();
-            FlawDialog dialog = new FlawDialog();
-            dialog.XamlRoot = GlobalData.XamlRoot;
-            var result = await dialog.ShowAsync();
+
+            //Creates and shows dialog
+            ContentDialog FlawDialog = new();
+            FlawDialog.XamlRoot = GlobalData.XamlRoot;
+            FlawDialog.Content = new Flaw();
+            FlawDialog.Title = "Flaw Builder";
+            FlawDialog.PrimaryButtonText = "Copy flaw example";
+            FlawDialog.CloseButtonText = "Cancel";
+            var result = await FlawDialog.ShowAsync();
+
             if (result == ContentDialogResult.Primary)   // Copy to Character Flaw  
             {
-                Flaw = FlawVm.WoundSummary; 
+                Flaw = Ioc.Default.GetService<FlawViewModel>().WoundSummary; //Sets the flaw.
+                _logger.Log(LogLevel.Info, "Flaw Finder complete");
             }
             else  // Cancel button pressed
             {
-
+                _logger.Log(LogLevel.Info, "Flaw Finder canceled");
             }
-            _logger.Log(LogLevel.Info, "Flaw Finder finished");
         }
 
         private async void TraitTool()
         {
             _logger.Log(LogLevel.Info, "Displaying Trait Builder tool dialog");
-            TraitsViewModel TraitVm = Ioc.Default.GetService<TraitsViewModel>();
-           TraitsDialog dialog = new TraitsDialog();
-            dialog.XamlRoot = GlobalData.XamlRoot;
-            var result = await dialog.ShowAsync();
+
+            //Creates and shows dialog
+            ContentDialog TraitDialog = new(); 
+            TraitDialog.Title = "Trait builder";
+            TraitDialog.PrimaryButtonText = "Copy trait";
+            TraitDialog.CloseButtonText = "Cancel";
+            TraitDialog.XamlRoot = GlobalData.XamlRoot;
+            TraitDialog.Content = new Traits();
+            var result = await TraitDialog.ShowAsync();
+
             if (result == ContentDialogResult.Primary)   // Copy to Character Trait 
             {
-                CharacterTraits.Add(TraitVm.Example);
+                CharacterTraits.Add(Ioc.Default.GetService<TraitsViewModel>().Example);
                 _changed = true;
                 ShellViewModel.ShowChange();
+                _logger.Log(LogLevel.Info, "Trait Builder complete");
             }
             else  // Cancel button pressed
             {
                 _logger.Log(LogLevel.Info, "Trait Builder cancelled");
             }
-            _logger.Log(LogLevel.Info, "Trait Builder finished");
         }
 
         #endregion

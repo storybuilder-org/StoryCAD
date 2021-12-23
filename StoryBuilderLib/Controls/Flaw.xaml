@@ -11,9 +11,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
          </Grid.RowDefinitions>
-        <ComboBox Grid.Row="0" Header="Wound Category" IsEditable="False" MinWidth="300" ItemsSource="{x:Bind FlawVm.WoundCategoryList}"
-                              SelectedValue="{x:Bind FlawVm.WoundCategory, Mode=TwoWay}" />
-        <ComboBox Grid.Row="1" Header="Wound Summary" IsEditable="False" MinWidth="500" ItemsSource="{x:Bind FlawVm.WoundSummaryList}"
-                              SelectedValue="{x:Bind FlawVm.WoundSummary, Mode=TwoWay}" />
-    </Grid>
+        <ComboBox Grid.Row="0" Header="Wound Category" IsEditable="False" MinWidth="300" ItemsSource="{x:Bind FlawVm.WoundCategoryList}" SelectedValue="{x:Bind FlawVm.WoundCategory, Mode=TwoWay}" Margin="0,8"/>
+        <ComboBox Grid.Row="1" Header="Wound Summary" IsEditable="False" MinWidth="500" ItemsSource="{x:Bind FlawVm.WoundSummaryList}" SelectedValue="{x:Bind FlawVm.WoundSummary, Mode=TwoWay}" Margin="0,8"/>
+    </Grid> 
 </UserControl>

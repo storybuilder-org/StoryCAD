@@ -11,10 +11,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <ComboBox Grid.Row="0" Header="Trait Categories" IsEditable="False" MinWidth="200" ItemsSource="{x:Bind TraitVm.CategoryList}"
-                               SelectedValue="{x:Bind TraitVm.Category, Mode=TwoWay}" 
-                               SelectionChanged="{x:Bind TraitVm.ViewChanged, Mode=OneWay}"/>
-        <ComboBox Grid.Row="1" Header="Examples" IsEditable="False" MinWidth="300" ItemsSource="{x:Bind TraitVm.ExampleList, Mode=TwoWay}"
-                              SelectedValue="{x:Bind TraitVm.Example, Mode=TwoWay}" />
+        <ComboBox Grid.Row="0" Header="Trait Categories" IsEditable="False" MinWidth="200" ItemsSource="{x:Bind TraitVm.CategoryList}" SelectedValue="{x:Bind TraitVm.Category, Mode=TwoWay}" SelectionChanged="{x:Bind TraitVm.ViewChanged, Mode=OneWay}" Margin="8"/>
+        <ComboBox Grid.Row="1" Header="Examples" IsEditable="False" MinWidth="300" ItemsSource="{x:Bind TraitVm.ExampleList, Mode=TwoWay}" SelectedValue="{x:Bind TraitVm.Example, Mode=TwoWay}" Margin="5"/>
     </Grid>
 </UserControl>

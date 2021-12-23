@@ -1,20 +1,14 @@
-﻿<ContentDialog
+﻿<Page
     x:Class="StoryBuilder.Services.Dialogs.Tools.MasterPlotsDialog"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:StoryBuilder.Services.Dialogs.Tools"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d"
-    Title="MasterPlots"
-    PrimaryButtonText="Copy"
-    SecondaryButtonText="Cancel" >
+    mc:Ignorable="d">
   
-    <StackPanel Padding="14,0,14,0">
-        <ComboBox Header="Master Plot" Width="300" ItemsSource="{x:Bind MasterPlotsVm.MasterPlotNames}" 
-            SelectedItem="{x:Bind MasterPlotsVm.MasterPlotName, Mode=TwoWay}" />
-        <TextBlock Width="200"/>
-        <TextBlock Width="500" Height="400" TextWrapping="Wrap"
-                   Text="{x:Bind MasterPlotsVm.MasterPlotNotes, Mode=TwoWay}" />
+    <StackPanel Width="500" Height="400">
+        <ComboBox Margin="20" HorizontalAlignment="Center" Header="Master Plot" Width="300" ItemsSource="{x:Bind MasterPlotsVm.MasterPlotNames}" SelectedItem="{x:Bind MasterPlotsVm.MasterPlotName, Mode=TwoWay}" />
+        <TextBlock Margin="20" VerticalAlignment="Center" HorizontalAlignment="Stretch" TextWrapping="Wrap" Text="{x:Bind MasterPlotsVm.MasterPlotNotes, Mode=TwoWay}" />
     </StackPanel>
-</ContentDialog>
+</Page>

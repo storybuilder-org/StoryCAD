@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Threading.Tasks;
+using ABI.Windows.ApplicationModel.Contacts.DataProvider;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
@@ -10,6 +11,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Data;
 using StoryBuilder.Controllers;
+using StoryBuilder.Controls;
 using StoryBuilder.DAL;
 using StoryBuilder.Models;
 using StoryBuilder.Services.Logging;
@@ -305,21 +307,32 @@ namespace StoryBuilder.ViewModels
             }
         }
 
+        /// <summary>
+        /// Opens conflict builder
+        /// </summary>
         public async void ConflictTool()
         {
             _logger.Log(LogLevel.Info, "Displaying Conflict Finder tool dialog");
-            ConflictDialog dialog = new ConflictDialog();
-            dialog.XamlRoot = GlobalData.XamlRoot;
-            var result = await dialog.ShowAsync();
+
+            //Creates and shows content
+            ContentDialog ConflictDialog = new();
+            ConflictDialog.Title = "Conflict builder";
+            ConflictDialog.XamlRoot = GlobalData.XamlRoot;
+            ConflictDialog.PrimaryButtonText = "Copy to Protagonist";
+            ConflictDialog.SecondaryButtonText = "Copy to Antagonist";
+            ConflictDialog.CloseButtonText = "Close";
+            Conflict SelectedConflict = new();
+            ConflictDialog.Content = SelectedConflict;
+            var result = await ConflictDialog.ShowAsync();
+
             if (result == ContentDialogResult.Primary)   // Copy to Protagonist conflict
             {
-                ProtConflict = dialog.Conflict.ExampleText;
+                ProtConflict = SelectedConflict.ExampleText;
             }
             else if (result == ContentDialogResult.Secondary) // Copy to Antagonist conflict
             {
-                AntagConflict = dialog.Conflict.ExampleText;
+                AntagConflict = SelectedConflict.ExampleText;
             }
-            // else Cancel
             _logger.Log(LogLevel.Info, "Conflict Finder finished");
         }
 

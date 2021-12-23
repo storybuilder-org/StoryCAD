@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
 using StoryBuilder.ViewModels.Tools;
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -7,7 +8,7 @@ using StoryBuilder.ViewModels.Tools;
 namespace StoryBuilder.Services.Dialogs.Tools
 {
     // The Content Dialog item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
-    public sealed partial class TopicsDialog
+    public sealed partial class TopicsDialog : Page
     {
         public TopicsViewModel TopicsVm => Ioc.Default.GetService<TopicsViewModel>();
 
