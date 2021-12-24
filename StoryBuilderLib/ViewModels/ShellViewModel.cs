@@ -68,11 +68,6 @@ namespace StoryBuilder.ViewModels
         public StoryModel StoryModel;
 
         public readonly ScrivenerIo Scrivener;
-        private bool _saveAsProjectFolderExists;
-        private StorageFolder _saveAsParentFolder;
-
-        private string _saveAsProjectFolderPath;
-        private StorageFolder _saveAsProjectFolder;
 
         // The right-hand (detail) side of ShellView
         public Frame SplitViewFrame;
@@ -719,8 +714,8 @@ namespace StoryBuilder.ViewModels
             {
                 StorageFolder backup;
                 //TODO: Get backup folder from Preferences
-                string path = @"C:\Users\Terry Cox\Documents\Writing\Backup";
-                StorageFolder backupRoot = await StorageFolder.GetFolderFromPathAsync(path);
+                PreferencesModel preferences = GlobalData.Preferences;
+                StorageFolder backupRoot = await StorageFolder.GetFolderFromPathAsync(preferences.BackupDirectory);
                 string projectName = _story.ProjectFolder.DisplayName;
                 if (await backupRoot.TryGetItemAsync(projectName) == null)
                     backup = await backupRoot.CreateFolderAsync(projectName);
@@ -801,6 +796,7 @@ namespace StoryBuilder.ViewModels
             StatusMessage = "Save File As command executing";
             try
             {
+
                 //Creates the content diolouge
                 ContentDialog SaveAsDialog = new();
                 SaveAsDialog.Title = "Save as";
@@ -811,8 +807,10 @@ namespace StoryBuilder.ViewModels
   
                 //Sets needed data in VM and then shows the dialog
                 SaveAsViewModel SaveAsVM = Ioc.Default.GetService<SaveAsViewModel>();
+                // The default project name and project folder path are from the active StoryModel
                 SaveAsVM.ProjectName = _story.ProjectFilename;
                 SaveAsVM.ProjectPathName = _story.ProjectPath;
+
                 var result = await SaveAsDialog.ShowAsync();
 
                 if (result == ContentDialogResult.Primary) //If save is clicked
@@ -823,17 +821,17 @@ namespace StoryBuilder.ViewModels
                         await SaveModel(); 
                         await WriteModel();
 
-                        //Gets data from VM
-                        string projectName = _story.ProjectFolder.DisplayName;
-
                         //Saves the current project folders and files to disk
-                        SaveAsVM.SaveAsProjectFolder = await SaveAsVM.SaveAsParentFolder.CreateFolderAsync(SaveAsVM.ProjectName, CreationCollisionOption.OpenIfExists);
+                        SaveAsVM.SaveAsProjectFolder = await SaveAsVM.ParentFolder.CreateFolderAsync(SaveAsVM.ProjectName, CreationCollisionOption.OpenIfExists);
                         await _story.ProjectFolder.CopyContentsRecursive(SaveAsVM.SaveAsProjectFolder);
-                        
+
                         //Update the StoryModel properties to use the newly saved copy
                         _story.ProjectFilename = SaveAsVM.ProjectName;
                         _story.ProjectFolder = SaveAsVM.SaveAsProjectFolder;
                         _story.ProjectPath = SaveAsVM.SaveAsProjectFolderPath;
+                        // Add to the recent files stack
+                        new UnifiedVM().UpdateRecents(_story.ProjectPath);
+                        // Indicate everything's done
                         Messenger.Send(new IsChangedMessage(true));
                         StoryModel.Changed = false;
                         ChangeStatusColor = Colors.Green;
@@ -853,6 +851,33 @@ namespace StoryBuilder.ViewModels
                 StatusMessage = "Save File As failed";
             }
             _canExecuteCommands = true;
+        }
+
+        private async Task<bool> VerifyReplaceOrCreate()
+        {
+            Logger.Log(LogLevel.Trace, "VerifyReplaceOrCreated");
+            ContentDialog replaceDialog = new ContentDialog()
+            {
+                PrimaryButtonText = "Yes",
+                SecondaryButtonText = "No"
+            };
+            SaveAsViewModel SaveAsVM = Ioc.Default.GetService<SaveAsViewModel>();
+            SaveAsVM.SaveAsProjectFolderPath = Path.Combine(SaveAsVM.ParentFolder.Path, SaveAsVM.ProjectName);
+            SaveAsVM.ProjectFolderExists = await SaveAsVM.ParentFolder.TryGetItemAsync(SaveAsVM.ProjectName) != null;
+            if (SaveAsVM.ProjectFolderExists)
+            {
+                replaceDialog.Title = "Replace SaveAs Folder";
+                replaceDialog.Content = $"Folder {SaveAsVM.SaveAsProjectFolderPath} already exists. Replace?";
+            }
+            else
+            {
+                replaceDialog.Title = "Create SaveAs Folder";
+                replaceDialog.Content = $"Create folder {SaveAsVM.SaveAsProjectFolderPath}?";
+            }
+            replaceDialog.XamlRoot = GlobalData.XamlRoot;
+            ContentDialogResult result = await replaceDialog.ShowAsync();
+            return (result == ContentDialogResult.Primary);
+
         }
 
         private async void CloseFile()
@@ -895,33 +920,6 @@ namespace StoryBuilder.ViewModels
             }
             StatusMessage = "Goodbye";
             Application.Current.Exit();  // Win32
-        }
-
-        private async Task<bool> VerifyReplaceOrCreate()
-        {
-            Logger.Log(LogLevel.Trace, "VerifyReplaceOrCreated");
-            ContentDialog replaceDialog = new ContentDialog()
-            {
-                PrimaryButtonText = "Yes",
-                SecondaryButtonText = "No"
-            };
-            if (_saveAsProjectFolderExists)
-            {
-                replaceDialog.Title = "Replace SaveAs Folder";
-                replaceDialog.Content = $"Folder {_saveAsProjectFolderPath} already exists. Replace?";
-            }
-            else
-            {
-                replaceDialog.Title = "Create SaveAs Folder";
-                replaceDialog.Content = $"Create folder {_saveAsProjectFolderPath}?";
-            }
-            replaceDialog.XamlRoot = GlobalData.XamlRoot;
-            ContentDialogResult result = await replaceDialog.ShowAsync();
-            return (result == ContentDialogResult.Primary);
-            //if (result == ContentDialogResult.Primary)
-            //    _saveAsVerified = true;
-            //else
-            //    _saveAsVerified = false;
         }
 
         private async Task CreateProjectFolder()

@@ -24,18 +24,18 @@ namespace StoryBuilder.ViewModels
             set => SetProperty(ref _projectPathName, value);
         }
 
-        private bool _saveAsProjectFolderExists;
-        public bool SaveAsProjectFolderExists 
+        private bool _projectFolderExists;
+        public bool ProjectFolderExists 
         {
-            get => _saveAsProjectFolderExists;
-            set => _saveAsProjectFolderExists = value;
+            get => _projectFolderExists;
+            set => _projectFolderExists = value;
         }
         
-        private StorageFolder _saveAsParentFolder;
-        public StorageFolder SaveAsParentFolder 
+        private StorageFolder _parentFolder;
+        public StorageFolder ParentFolder 
         {
-            get => _saveAsParentFolder;
-            set => _saveAsParentFolder = value; 
+            get => _parentFolder;
+            set => _parentFolder = value; 
         }
 
         private StorageFolder _saveAsProjectFolder;
