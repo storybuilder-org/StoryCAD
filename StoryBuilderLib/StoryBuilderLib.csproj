@@ -96,7 +96,6 @@
     <Folder Include="Services\Navigation\" />
     <Folder Include="Services\Theming\" />
     <Folder Include="Services\Search\" />
-    <Folder Include="Services\Scrivener\" />
   </ItemGroup>
 
   <ItemGroup>

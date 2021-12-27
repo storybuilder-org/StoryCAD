@@ -16,7 +16,7 @@ using StoryBuilder.Services.Help;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.Services.Messages;
 using StoryBuilder.Services.Navigation;
-using StoryBuilder.Services.Scrivener;
+using StoryBuilder.Services.Reports;
 using StoryBuilder.Services.Search;
 using StoryBuilder.ViewModels.Tools;
 using System;

@@ -13,7 +13,7 @@ namespace StoryBuilder.Controllers
     /// The StoryController class mediates between StoryModel and the various
     /// ViewModels.
     /// </summary>
-       /* Much of this method (Add, Update, Show methods, etc) has been moved
+       /* Many of this class's methods (Add, Update, Show methods, etc) has been moved
        to the ViewModels. Others of this have been moved to the ShellViewModel.
        The mediation between the StoryModel and viewmodels mentioned above should be
        eliminated. What's left is some miscellaneous stuff. If there's a need,
@@ -31,6 +31,7 @@ namespace StoryBuilder.Controllers
         // and SaveModel() behavior in Story Element ViewModels and 
         // Open, Save, and SaveAs behavior in the ShellViewModel.
         // File and folder data
+        //TODO: Move into StoryModel?
         public StorageFolder ProjectFolder;
         public StorageFolder FilesFolder;
         public StorageFile ProjectFile;
