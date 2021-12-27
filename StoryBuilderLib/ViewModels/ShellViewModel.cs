@@ -747,6 +747,7 @@ namespace StoryBuilder.ViewModels
                 StatusMessage = "Save File command executing";
                 await SaveModel();
                 await WriteModel();
+                Ioc.Default.GetService<MainWindowVM>().Title = $"StoryBuilder - Editing {_story.ProjectFilename.Replace(".stbx", "")}  (Last saved at {DateTime.Now})";
                 StatusMessage = "Save File command completed";
                 StoryModel.Changed = false;
                 ChangeStatusColor = Colors.Green;
@@ -899,6 +900,8 @@ namespace StoryBuilder.ViewModels
             }
             ResetModel();
             SetCurrentView(StoryViewType.ExplorerView);
+            Ioc.Default.GetService<MainWindowVM>().Title = "StoryBuilder";
+
             DataSource = StoryModel.ExplorerView;
             ShowHomePage();
             //TODO: Navigate to background Page (is there one?)
