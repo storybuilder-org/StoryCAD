@@ -11,7 +11,7 @@ namespace StoryBuilder.Models
     /// GlobalData provides access to the application data provided by the
     /// DAL loader classes ListLoader, ControlLoader, and ToolLoader, 
     /// 
-    /// It also provides acces the Preferences instance and other global items.
+    /// It also provides access the Preferences instance and other global items.
     /// </summary>
     public static class GlobalData
     {

@@ -367,6 +367,7 @@ namespace StoryBuilder.ViewModels
             //NOTE: BasicProperties.DateModified can be the date last changed
 
             _story.ProjectFilename = file.Name;
+            Ioc.Default.GetService<MainWindowVM>().Title = $"StoryBuilder - Editing {_story.ProjectFilename.Replace(".stbx", "")}";
             _story.ProjectFile = file;
             // Make sure files folder exists...
             _story.FilesFolder = await _story.ProjectFolder.CreateFolderAsync("files", CreationCollisionOption.OpenIfExists);
@@ -472,8 +473,10 @@ namespace StoryBuilder.ViewModels
                         StoryNodeItem antagNode = new StoryNodeItem(antag, charactersFolderNode);
                         break;
                 }
+
+                Ioc.Default.GetService<MainWindowVM>().Title = $"StoryBuilder - Editing {vm.ProjectName.Replace(".stbx","")}";
                 SetCurrentView(StoryViewType.ExplorerView);
-                //TODO: Set expand and isselected?
+                //TODO: Set expand and is selected?
 
                 // Save the new project
                 await SaveFile();
@@ -682,6 +685,7 @@ namespace StoryBuilder.ViewModels
                     {
                         SetCurrentView(StoryViewType.ExplorerView);
                         _story.LoadStatus = LoadStatus.LoadFromRtfFiles;
+                        Ioc.Default.GetService<MainWindowVM>().Title = $"StoryBuilder - Editing {_story.ProjectFilename.Replace(".stbx", "")}";
                         new UnifiedVM().UpdateRecents(_story.ProjectPath);
                         StatusMessage = "Open Story completed";
                     }
@@ -830,6 +834,7 @@ namespace StoryBuilder.ViewModels
                         _story.ProjectFolder = SaveAsVM.SaveAsProjectFolder;
                         _story.ProjectPath = SaveAsVM.SaveAsProjectFolderPath;
                         // Add to the recent files stack
+                        Ioc.Default.GetService<MainWindowVM>().Title = $"StoryBuilder - Editing {_story.ProjectFilename.Replace(".stbx", "")}";
                         new UnifiedVM().UpdateRecents(_story.ProjectPath);
                         // Indicate everything's done
                         Messenger.Send(new IsChangedMessage(true));
