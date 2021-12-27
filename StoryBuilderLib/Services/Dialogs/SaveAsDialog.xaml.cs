@@ -1,20 +1,11 @@
 ﻿using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Data;
-using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Navigation;
+using StoryBuilder.Models;
 using StoryBuilder.ViewModels;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
 using Windows.Storage;
 using Windows.Storage.Pickers;
 using WinRT;
@@ -32,6 +23,7 @@ namespace StoryBuilder.Services.Dialogs
         public SaveAsDialog()
         {
             InitializeComponent();
+            ProjectPathName.IsReadOnly = true;
         }
 
         public SaveAsViewModel SaveAsVm
@@ -42,34 +34,37 @@ namespace StoryBuilder.Services.Dialogs
             }
         }
 
-        public bool BrowseButtonClicked { get; set; }
-        public bool ProjectFolderExists { get; set; }
         public StorageFolder ParentFolder { get; set; }
         public string ParentFolderPath { get; set; }
         public string ProjectFolderPath { get; set; }
 
-        private async void OnClick(object sender, RoutedEventArgs e)
+        private async void OnBrowse(object sender, RoutedEventArgs e)
         {
+            ProjectPathName.IsReadOnly = false;
             // may throw error if invalid folder location
             var folderPicker = new FolderPicker();
+            WinRT.Interop.InitializeWithWindow.Initialize(folderPicker, GlobalData.WindowHandle);
 
             //Make FolderPicker work in Win32
-            if (Window.Current == null)
-            {
-                IntPtr hwnd = GetActiveWindow();
-                var initializeWithWindow = folderPicker.As<IInitializeWithWindow>();
-                initializeWithWindow.Initialize(hwnd);
-            }
+            //if (Window.Current == null)
+            //{
+            //    IntPtr hwnd = GetActiveWindow();
+            //    var initializeWithWindow = folderPicker.As<IInitializeWithWindow>();
+            //    initializeWithWindow.Initialize(hwnd);
+            //}
             folderPicker.CommitButtonText = "Project Parent Folder:";
             folderPicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
             folderPicker.FileTypeFilter.Add(("*"));
 
             ParentFolder = await folderPicker.PickSingleFolderAsync();
+            SaveAsVm.ParentFolder = ParentFolder;
+
             //TODO: Test for cancelled FolderPicker via 'if Parentfolder =! null {} else {}
-            ProjectFolderExists = await ParentFolder.TryGetItemAsync(ProjectName.Text) != null;
+            
             ProjectFolderPath = Path.Combine(ParentFolder.Path, ProjectName.Text);
             ProjectPathName.Text = ProjectFolderPath;
-            BrowseButtonClicked = true;
+            SaveAsVm.ProjectPathName = ProjectFolderPath;
+            ProjectPathName.IsReadOnly = true;
         }
 
         [ComImport]
