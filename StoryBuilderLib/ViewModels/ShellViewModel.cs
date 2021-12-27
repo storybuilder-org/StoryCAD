@@ -747,7 +747,7 @@ namespace StoryBuilder.ViewModels
                 StatusMessage = "Save File command executing";
                 await SaveModel();
                 await WriteModel();
-                Ioc.Default.GetService<MainWindowVM>().Title = $"StoryBuilder - Editing {_story.ProjectFilename.Replace(".stbx", "")}  (Last saved at {DateTime.Now})";
+                Ioc.Default.GetService<MainWindowVM>().Title = $"StoryBuilder - Editing {_story.ProjectFilename.Replace(".stbx", "")}  (Last saved at {DateTime.Now.ToString("HH:mm:ss")})";
                 StatusMessage = "Save File command completed";
                 StoryModel.Changed = false;
                 ChangeStatusColor = Colors.Green;
