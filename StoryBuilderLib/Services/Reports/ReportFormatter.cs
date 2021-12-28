@@ -40,7 +40,6 @@ namespace StoryBuilder.Services.Reports
             // and then load long fields from their corresponding file in its subfolder
             string saveStoryIdea = overview.StoryIdea;
             string saveConcept = overview.Concept;
-            //string savePremise = overview.Premise;
             string saveNotes = overview.Notes;
             overview.StoryIdea = await _rdr.GetRtfText(overview.StoryIdea, overview.Uuid);
             overview.Concept = await _rdr.GetRtfText(overview.Concept, overview.Uuid);
@@ -52,7 +51,7 @@ namespace StoryBuilder.Services.Reports
             string problemName = seProblem?.Name ?? string.Empty;
             ProblemModel problem = (ProblemModel)seProblem;
             string premise = problem?.Premise ?? string.Empty;
-            premise = GetRtfText(premise);
+
             // Parse and write the report
             foreach (string line in lines)
             {
@@ -65,10 +64,10 @@ namespace StoryBuilder.Services.Reports
                 sb.Replace("@StoryType", overview.StoryType);
                 sb.Replace("@Genre", overview.StoryGenre);
                 sb.Replace("@Viewpoint", overview.Viewpoint);
-                sb.Replace("@StoryIdea", GetRtfText(overview.StoryIdea));
-                sb.Replace("@Concept", overview.Concept);
+                sb.Replace("@StoryIdea", GetText(overview.StoryIdea));
+                sb.Replace("@Concept", GetText(overview.Concept));
                 sb.Replace("@StoryProblem", problemName);
-                sb.Replace("@Premise", premise);
+                sb.Replace("@Premise", GetText(premise));
                 sb.Replace("@StoryType", overview.StoryType);
                 sb.Replace("@StoryGenre", overview.StoryGenre);
                 sb.Replace("@LiteraryDevice", overview.LiteraryDevice);
@@ -87,7 +86,6 @@ namespace StoryBuilder.Services.Reports
             // Post-process RTF properties
             overview.StoryIdea = saveStoryIdea;
             overview.Concept = saveConcept;
-            //overview.Premise = savePremise;
             overview.Notes = saveNotes;
             return doc.GetRtf();
         }
@@ -127,14 +125,6 @@ namespace StoryBuilder.Services.Reports
             string[] lines = _templates["Problem Description"];
             RtfDocument doc = new RtfDocument(string.Empty);
 
-            // Add formatting for it
-            //RtfTextFormat format = new RtfTextFormat();
-            //format.font = "Calibri";
-            //format.size = 12;
-            //format.bold = false;
-            //format.underline = false;
-            //format.italic = false;
-
             // Pre-process RTF properties to preserve [FILE:x.rtf] tag for long fields
             // and then load long fields from their corresponding file in its subfolder
             string saveStoryQuestion = problem.StoryQuestion;
@@ -151,7 +141,7 @@ namespace StoryBuilder.Services.Reports
                 sb.Replace("@ProblemType", problem.ProblemType);
                 sb.Replace("@ConflictType", problem.ConflictType);
                 sb.Replace("@Subject", problem.Subject);
-                sb.Replace("@StoryQuestion", problem.StoryQuestion);
+                sb.Replace("@StoryQuestion", GetText(problem.StoryQuestion));
                 sb.Replace("@ProblemSource", problem.ProblemSource);
                 sb.Replace("@ProtagName", problem.Protagonist);
                 sb.Replace("@ProtagMotive", problem.ProtMotive);
@@ -162,7 +152,8 @@ namespace StoryBuilder.Services.Reports
                 sb.Replace("@Outcome", problem.Outcome);
                 sb.Replace("@Method", problem.Method);
                 sb.Replace("@Theme", problem.Theme);
-                sb.Replace("@Notes", problem.Notes);
+                sb.Replace("@Premise", GetText(problem.Premise));
+                sb.Replace("@Notes", GetText(problem.Notes));
                 doc.AddText(sb.ToString());
                 doc.AddNewLine();
             }
@@ -238,7 +229,7 @@ namespace StoryBuilder.Services.Reports
                 sb.Replace("@Role", character.Role);
                 sb.Replace("@StoryRole", character.StoryRole);
                 sb.Replace("@Archetype", character.Archetype);
-                sb.Replace("@CharacterSketch", character.CharacterSketch);
+                sb.Replace("@CharacterSketch", GetText(character.CharacterSketch));
                 //Physical section
                 sb.Replace("@Age", character.Age);
                 sb.Replace("@Sex", character.Sex);
@@ -251,9 +242,9 @@ namespace StoryBuilder.Services.Reports
                 sb.Replace("@Race", character.Race);
                 sb.Replace("@Nationality", character.Nationality);
                 sb.Replace("@Health", character.Health);
-                sb.Replace("@PhysNotes", character.PhysNotes);
+                sb.Replace("@PhysNotes", GetText(character.PhysNotes));
                 //Appearance section
-                sb.Replace("@Appearance", character.Appearance);
+                sb.Replace("@Appearance", GetText(character.Appearance));
                 //Relationships section
                 sb.Replace("@Relationship", character.Relationship);
                 sb.Replace("@relationType", character.RelationType);
@@ -261,21 +252,21 @@ namespace StoryBuilder.Services.Reports
                 sb.Replace("@Attitude", character.Attitude);
                 sb.Replace("@RelationshipNotes", character.RelationshipNotes);
                 //Flaw section
-                sb.Replace("@Flaw", character.Flaw);
+                sb.Replace("@Flaw", GetText(character.Flaw));
                 //Backstory section
                 sb.Replace("@Notes", character.BackStory);
                 //Social Traits section
-                sb.Replace("@Economic", character.Economic);
-                sb.Replace("@Education", character.Education);
-                sb.Replace("@Ethnic", character.Ethnic);
-                sb.Replace("@Religion", character.Religion);
+                sb.Replace("@Economic", GetText(character.Economic));
+                sb.Replace("@Education", GetText(character.Education));
+                sb.Replace("@Ethnic", GetText(character.Ethnic));
+                sb.Replace("@Religion", GetText(character.Religion));
                 //Psychological Traits section
                 sb.Replace("@Personality", character.Enneagram);
                 sb.Replace("@Intelligence", character.Intelligence);
                 sb.Replace("@Values", character.Values);
                 sb.Replace("@Focus", character.Focus);
                 sb.Replace("@Abnormality", character.Abnormality);
-                sb.Replace("@PsychNotes", character.PsychNotes);
+                sb.Replace("@PsychNotes", GetText(character.PsychNotes));
                 //Inner Traits section
                 sb.Replace("@Adventure", character.Adventureousness);
                 sb.Replace("@Aggression", character.Aggression);
@@ -291,6 +282,9 @@ namespace StoryBuilder.Services.Reports
                 sb.Replace("@Stability", character.Stability);
                 //Outer Traits section
                 sb.Replace("@Traits", character.outerTrait);
+                // Notes section
+                sb.Replace("@Notes", GetText(character.Notes));
+
                 doc.AddText(sb.ToString());
                 doc.AddNewLine();
             }
@@ -370,11 +364,11 @@ namespace StoryBuilder.Services.Reports
                 sb.Replace("@Prop2", setting.Prop2);
                 sb.Replace("@Prop3", setting.Prop3);
                 sb.Replace("@Prop4", setting.Prop4);
-                sb.Replace("@Sights", setting.Sights);
-                sb.Replace("@Sounds", setting.Sounds);
-                sb.Replace("@Touch", setting.Touch);
-                sb.Replace("@SmellTaste", setting.SmellTaste);
-                sb.Replace("@Notes", setting.Notes);
+                sb.Replace("@Sights", GetText(setting.Sights));
+                sb.Replace("@Sounds", GetText(setting.Sounds));
+                sb.Replace("@Touch", GetText(setting.Touch));
+                sb.Replace("@SmellTaste", GetText(setting.SmellTaste));
+                sb.Replace("@Notes", GetText(setting.Notes));
                 doc.AddText(sb.ToString());
                 doc.AddNewLine();
             }
@@ -423,14 +417,6 @@ namespace StoryBuilder.Services.Reports
             SceneModel scene = (SceneModel)element;
             string[] lines = _templates["Scene Description"];
             RtfDocument doc = new RtfDocument(string.Empty);
-            
-            // Add formatting for it
-            //RtfTextFormat format = new RtfTextFormat();
-            //format.font = "Calibri";
-            //format.size = 12;
-            //format.bold = false;
-            //format.underline = false;
-            //format.italic = false;
 
             // Pre-process RTF properties to preserve [FILE:x.rtf] tag for long fields
             // and then load long fields from their corresponding file in its subfolder
@@ -473,7 +459,7 @@ namespace StoryBuilder.Services.Reports
                     }
                 }
 
-                sb.Replace("@Remarks", scene.Remarks);
+                sb.Replace("@Remarks", GetText(scene.Remarks));
                 //DEVELOPMENT SECTION
                 sb.Replace("@PurposeOfScene", scene.ScenePurpose);
                 sb.Replace("@ValueExchange", scene.ValueExchange);
@@ -491,10 +477,11 @@ namespace StoryBuilder.Services.Reports
                 sb.Replace("@Outcome", scene.Outcome);
                 //SEQUEL SECTION
                 sb.Replace("@Emotion", scene.Emotion);
-                sb.Replace("@Review", scene.Review);
+                sb.Replace("@Review", GetText(scene.Review));
                 sb.Replace("@NewGoal", scene.NewGoal);
                 //SCENE NOTES SECTION
-                sb.Replace("@Notes", scene.Notes);
+                sb.Replace("@Notes", GetText(scene.Notes));
+
                 doc.AddText(sb.ToString());
                 doc.AddNewLine();
             }
@@ -674,30 +661,25 @@ namespace StoryBuilder.Services.Reports
             return null;  // Not found
         }
 
-        private string GetRtfText(string rtfInput)
+        /// <summary>
+        /// A RichEditBox property is an a wrapper for an RTF 
+        /// document, with its header, font table, color table, etc.,
+        /// and which can be read or written. This causes format problems
+        /// when it's a cell on a StoryBuilder report.  This function
+        /// returns only the text, but does preserve newlines as 
+        /// paragraph breaks.
+        /// </summary>
+        /// <param name="rtfInput"></param>
+        /// <returns></returns>
+        private string GetText(string rtfInput)
         {
+            string text = rtfInput ?? string.Empty;
             if (rtfInput.Equals(string.Empty))
                 return string.Empty;
-
-            //Create the RTF tree object
-            RtfTree tree = new RtfTree();
-
-            //Load and parse RTF document
-            tree.LoadRtfText(rtfInput);
-
-            //Get root node
-            RtfTreeNode root = tree.RootNode;
-
-            RtfTreeNode node = new RtfTreeNode();
-
-            //Search first Text Node
-            RtfTreeNode textNode = tree.RootNode.FirstChild.SelectSingleChildNode(RtfNodeType.Text);
-
-            RtfNodeCollection nodes = tree.RootNode.FirstChild.SelectChildNodes(RtfNodeType.Text);
-            StringBuilder sb = new StringBuilder();
-            foreach (RtfTreeNode n in nodes)
-                sb.Append(n.NodeKey);
-            return sb.ToString();
+            RichTextStripper rts = new RichTextStripper();
+            text =  rts.StripRichTextFormat(text);
+            text = text.Replace("\n","\\par");
+            return text;
         }
 
         /// <summary>
