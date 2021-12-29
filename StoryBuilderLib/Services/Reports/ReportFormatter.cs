@@ -225,6 +225,7 @@ namespace StoryBuilder.Services.Reports
             {
                 StringBuilder sb = new StringBuilder(line);
                 //Story Role section
+                sb.Replace("@Id", character.Id.ToString());
                 sb.Replace("@Title", character.Name);
                 sb.Replace("@Role", character.Role);
                 sb.Replace("@StoryRole", character.StoryRole);
