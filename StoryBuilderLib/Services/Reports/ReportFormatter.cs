@@ -530,8 +530,9 @@ namespace StoryBuilder.Services.Reports
             {
                 StringBuilder sb = new StringBuilder(line);
                 sb.Replace("@Name", folder.Name);
-                sb.Replace("@Notes", folder.Notes);
+                sb.Replace("@Notes", GetText(folder.Notes));
                 doc.AddText(sb.ToString());  //,format);
+                doc.AddNewLine();
             }
             // Post-process RTF properties
             folder.Notes = saveNotes;
