@@ -46,7 +46,7 @@ namespace StoryBuilder
 
         private LogService _log;
 
-        private Window m_window;
+        public Window m_window;
         private IntPtr m_windowHandle;
 
         private void SetWindowSize(IntPtr hwnd, int width, int height)
@@ -108,6 +108,7 @@ namespace StoryBuilder
                     .AddSingleton<FolderViewModel>()
                     .AddSingleton<SectionViewModel>()
                     .AddSingleton<TrashCanViewModel>()
+                    .AddSingleton<MainWindowVM>()
                     // .AddSingleton<UnifiedVM>()
                     .AddSingleton<TreeViewSelection>()
                     // Register ContentDialog ViewModels
@@ -177,7 +178,7 @@ namespace StoryBuilder
 
             //Get the Window's HWND
             m_windowHandle = PInvoke.User32.GetActiveWindow();
-            m_window.Title = "StoryBuilder";
+            Ioc.Default.GetService<MainWindowVM>().Title = $"StoryBuilder";
             GlobalData.WindowHandle = m_windowHandle;
             // The Window object doesn't (yet) have Width and Height properties in WInUI 3 Desktop yet.
             // To set the Width and Height, you can use the Win32 API SetWindowPos.
