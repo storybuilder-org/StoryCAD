@@ -477,10 +477,10 @@ namespace StoryBuilder.Services.Reports
                 //DEVELOPMENT SECTION
                 sb.Replace("@PurposeOfScene", scene.ScenePurpose);
                 sb.Replace("@ValueExchange", scene.ValueExchange);
-                sb.Replace("@Events", scene.Events);
-                sb.Replace("@Consequence", scene.Consequences);
-                sb.Replace("@Significance", scene.Significance);
-                sb.Replace("@Realization", scene.Realization);
+                sb.Replace("@Events", GetText(scene.Events));
+                sb.Replace("@Consequence", GetText(scene.Consequences));
+                sb.Replace("@Significance", GetText(scene.Significance));
+                sb.Replace("@Realization", GetText(scene.Realization));
                 //SCENE CONFLICT SECTION
                 sb.Replace("@ProtagName", protagonistName);
                 sb.Replace("@ProtagEmotion", scene.ProtagEmotion);
