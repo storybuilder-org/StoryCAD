@@ -75,10 +75,10 @@ namespace StoryBuilder.Services.Reports
                 sb.Replace("@Voice", overview.Voice);
                 sb.Replace("@Tense", overview.Tense);
                 sb.Replace("@Style", overview.Style);
-                sb.Replace("@styleNotes", overview.StyleNotes);
+                sb.Replace("@styleNotes", GetText(overview.StyleNotes));
                 sb.Replace("@Tone", overview.Tone);
-                sb.Replace("@toneNotes", overview.ToneNotes);
-                sb.Replace("@Notes", overview.Notes);
+                sb.Replace("@toneNotes", GetText(overview.ToneNotes));
+                sb.Replace("@Notes", GetText(overview.Notes));
                 doc.AddText(sb.ToString());
                 doc.AddNewLine();
 
@@ -358,6 +358,7 @@ namespace StoryBuilder.Services.Reports
             foreach (string line in lines)
             {
                 StringBuilder sb = new StringBuilder(line);
+                sb.Replace("@Id", setting.Id.ToString());
                 sb.Replace("@Title", setting.Name);
                 sb.Replace("@Locale", setting.Locale);
                 sb.Replace("@Season", setting.Season);
@@ -369,6 +370,7 @@ namespace StoryBuilder.Services.Reports
                 sb.Replace("@Prop2", setting.Prop2);
                 sb.Replace("@Prop3", setting.Prop3);
                 sb.Replace("@Prop4", setting.Prop4);
+                sb.Replace("@Summary", GetText(setting.Summary));
                 sb.Replace("@Sights", GetText(setting.Sights));
                 sb.Replace("@Sounds", GetText(setting.Sounds));
                 sb.Replace("@Touch", GetText(setting.Touch));
