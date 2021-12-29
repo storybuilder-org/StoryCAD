@@ -448,15 +448,24 @@ namespace StoryBuilder.Services.Reports
 
                 if (line.Contains("@CastMember"))
                 {
-                    foreach (string seCastMember in scene.CastMembers)
+                    if(scene.CastMembers.Count == 0)
                     {
-                        StoryElement castMember = StringToStoryElement(seCastMember);
-                        string castMemberName = castMember?.Name ?? string.Empty;
-                        StringBuilder sbCast = new StringBuilder(line);
-                        sbCast.Replace("@CastMember", castMemberName);
-                        doc.AddText(sbCast.ToString());
-                        doc.AddNewLine();
+                        sb.Replace("@CastMember", String.Empty);
                     }
+                    else
+                    {
+                        foreach (string seCastMember in scene.CastMembers)
+                        {
+                            StoryElement castMember = StringToStoryElement(seCastMember);
+                            string castMemberName = castMember?.Name ?? string.Empty;
+                            StringBuilder sbCast = new StringBuilder(line);
+                            
+                            sbCast.Replace("@CastMember", castMemberName);
+                            doc.AddText(sbCast.ToString());
+                            doc.AddNewLine();
+                        }
+                    }
+                    
                 }
 
                 sb.Replace("@Remarks", GetText(scene.Remarks));
