@@ -565,7 +565,7 @@ namespace StoryBuilder.Services.Reports
             {
                 StringBuilder sb = new StringBuilder(line);
                 sb.Replace("@Name", section.Name);
-                sb.Replace("@Notes", section.Notes);
+                sb.Replace("@Notes", GetText(section.Notes));
                 doc.AddText(sb.ToString()); // , format);
                 doc.AddNewLine();
             }
