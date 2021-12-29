@@ -1,12 +1,9 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using CommunityToolkit.Mvvm.DependencyInjection;
+﻿using CommunityToolkit.Mvvm.DependencyInjection;
 using System;
 using Net.Sgoliver.NRtfTree.Util;
-using Net.Sgoliver.NRtfTree.Core;
-using StoryBuilder.Controllers;
 using StoryBuilder.DAL;
 using StoryBuilder.Models;
-using StoryBuilder.ViewModels;  
+using StoryBuilder.ViewModels;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
@@ -27,14 +24,6 @@ namespace StoryBuilder.Services.Reports
             OverviewModel overview = (OverviewModel)element;
             string[] lines = _templates["Story Overview"];  
             RtfDocument doc = new RtfDocument(string.Empty);
-
-            // Add formatting for it
-            //RtfTextFormat format = new RtfTextFormat();
-            //format.font = "Calibri";
-            //format.size = 12;
-            //format.bold = false;
-            //format.underline = false;
-            //format.italic = false;
 
             // Pre-process RTF properties to preserve [FILE:x.rtf] tag for long fields
             // and then load long fields from their corresponding file in its subfolder
@@ -499,14 +488,6 @@ namespace StoryBuilder.Services.Reports
             string[] lines = _templates["Folder Description"];
             RtfDocument doc = new RtfDocument(string.Empty);
 
-            // Add formatting for it
-            //RtfTextFormat format = new RtfTextFormat();
-            //format.font = "Calibri";
-            //format.size = 12;
-            //format.bold = false;
-            //format.underline = false;
-            //format.italic = false;
-
             // Pre-process RTF properties to preserve [FILE:x.rtf] tag for long fields
             // and then load long fields from their corresponding file in its subfolder
             string saveNotes = folder.Notes;
@@ -530,14 +511,6 @@ namespace StoryBuilder.Services.Reports
             SectionModel section = (SectionModel)element;
             string[] lines = _templates["Section Description"];
             RtfDocument doc = new RtfDocument(string.Empty);
-
-            // Add formatting for it
-            //RtfTextFormat format = new RtfTextFormat();
-            //format.font = "Calibri";
-            //format.size = 12;
-            //format.bold = false;
-            //format.underline = false;
-            //format.italic = false;
 
             // Pre-process RTF properties to preserve [FILE:x.rtf] tag for long fields
             // and then load long fields from their corresponding file in its subfolder
@@ -563,14 +536,6 @@ namespace StoryBuilder.Services.Reports
 
             string[] lines = _templates["Story Synopsis"];
             RtfDocument doc = new RtfDocument(string.Empty);
-
-            // Add formatting for it
-            //RtfTextFormat format = new RtfTextFormat();
-            //format.font = "Calibri";
-            //format.size = 12;
-            //format.bold = false;
-            //format.underline = false;
-            //format.italic = false;
 
             // Pre-process RTF properties to preserve [FILE:x.rtf] tag for long fields
             // and then load long fields from their corresponding file in its subfolder
