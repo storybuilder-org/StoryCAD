@@ -567,6 +567,7 @@ namespace StoryBuilder.Services.Reports
                 sb.Replace("@Name", section.Name);
                 sb.Replace("@Notes", section.Notes);
                 doc.AddText(sb.ToString()); // , format);
+                doc.AddNewLine();
             }
 
             // Post-process RTF properties
