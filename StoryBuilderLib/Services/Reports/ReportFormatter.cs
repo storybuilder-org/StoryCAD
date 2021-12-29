@@ -125,6 +125,10 @@ namespace StoryBuilder.Services.Reports
             string[] lines = _templates["Problem Description"];
             RtfDocument doc = new RtfDocument(string.Empty);
 
+            StoryElement vpProtagnoist = StringToStoryElement(problem.Protagonist);
+
+            StoryElement vpAntagonist = StringToStoryElement(problem.Antagonist);
+
             // Pre-process RTF properties to preserve [FILE:x.rtf] tag for long fields
             // and then load long fields from their corresponding file in its subfolder
             string saveStoryQuestion = problem.StoryQuestion;
@@ -143,10 +147,10 @@ namespace StoryBuilder.Services.Reports
                 sb.Replace("@Subject", problem.Subject);
                 sb.Replace("@StoryQuestion", GetText(problem.StoryQuestion));
                 sb.Replace("@ProblemSource", problem.ProblemSource);
-                sb.Replace("@ProtagName", problem.Protagonist);
+                sb.Replace("@ProtagName", vpProtagnoist.Name);
                 sb.Replace("@ProtagMotive", problem.ProtMotive);
                 sb.Replace("@ProtagGoal", problem.ProtGoal);
-                sb.Replace("@AntagName", problem.Antagonist);
+                sb.Replace("@AntagName", vpAntagonist.Name);
                 sb.Replace("@AntagMotive", problem.AntagMotive);
                 sb.Replace("@AntagGoal", problem.AntagGoal);
                 sb.Replace("@Outcome", problem.Outcome);
@@ -255,7 +259,7 @@ namespace StoryBuilder.Services.Reports
                 //Flaw section
                 sb.Replace("@Flaw", GetText(character.Flaw));
                 //Backstory section
-                sb.Replace("@Notes", character.BackStory);
+                sb.Replace("@Notes", GetText(character.BackStory));
                 //Social Traits section
                 sb.Replace("@Economic", GetText(character.Economic));
                 sb.Replace("@Education", GetText(character.Education));
