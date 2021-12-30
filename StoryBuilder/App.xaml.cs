@@ -112,6 +112,7 @@ namespace StoryBuilder
                     .AddSingleton<TreeViewSelection>()
                     // Register ContentDialog ViewModels
                     .AddSingleton<NewProjectViewModel>()
+                    .AddSingleton<PrintReportDialogVM>()
                     .AddSingleton<NewRelationshipViewModel>()
                     // Register Tools ViewModels  
                     .AddSingleton<KeyQuestionsViewModel>()

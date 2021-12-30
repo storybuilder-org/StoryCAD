@@ -28,6 +28,7 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Windows.Storage;
 using Windows.Storage.Pickers;
+using Microsoft.Web.WebView2.Core;
 using WinRT;
 using GuidAttribute = System.Runtime.InteropServices.GuidAttribute;
 
@@ -1166,6 +1167,44 @@ namespace StoryBuilder.ViewModels
             }
             Logger.Log(LogLevel.Info, "Stock Scenes finished");
         }
+
+        private async void OpenReportsDialog()
+        {
+            ContentDialog ReportDialog = new();
+            ReportDialog.Title = "Generate Reports";
+            ReportDialog.PrimaryButtonText = "Generate";
+            ReportDialog.CloseButtonText = "Cancel";
+            ReportDialog.XamlRoot = GlobalData.XamlRoot;
+            ReportDialog.Content = new PrintReportsDialog();
+            var result = await ReportDialog.ShowAsync();
+
+            if (result == ContentDialogResult.Primary)
+            {
+                PrintReportDialogVM ReportVM = Ioc.Default.GetRequiredService<PrintReportDialogVM>();
+
+                switch (ReportVM.ReportType)
+                {
+                    case "Scrivener":
+                        //Put code to make scrivener report here
+                        break;
+                    case "Preview":
+                        //Put code to show preview here (or remove it)
+                        break;
+                    case "Printer":
+                        //Put code to print here (or remove it)
+                    break;
+                }
+
+                StatusMessage = "Report generator complete";
+                Logger.Log(LogLevel.Info, "Report Generator complete");
+            }
+            else
+            {
+                StatusMessage = "Report generator canceled";
+                Logger.Log(LogLevel.Info, "Report Generator canceled");
+            }
+        }
+
         private async void GenerateScrivenerReports()
         {
             _canExecuteCommands = false;
@@ -1863,7 +1902,7 @@ namespace StoryBuilder.ViewModels
             StockScenesCommand = new RelayCommand(StockScenesTool, () => _canExecuteCommands);
             PreferencesCommand = new RelayCommand(Preferences, () => _canExecuteCommands);
 
-            ReportsCommand = new RelayCommand(GenerateScrivenerReports, () => _canExecuteCommands);
+            ReportsCommand = new RelayCommand(OpenReportsDialog, () => _canExecuteCommands);
 
             HelpCommand = new RelayCommand(LaunchHelp, () => _canExecuteCommands);
 
