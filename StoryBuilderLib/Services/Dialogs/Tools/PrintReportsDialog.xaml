@@ -1,0 +1,41 @@
+﻿<Page
+    x:Class="StoryBuilder.Services.Dialogs.Tools.PrintReportsDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:StoryBuilder.Services.Dialogs.Tools"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:viewModels="using:StoryBuilder.ViewModels"
+    mc:Ignorable="d">
+
+    <StackPanel Width="800" MinWidth="300">
+        <StackPanel HorizontalAlignment="Center" Margin="0,15,520,15">
+            <ComboBox Header="Destination" Width="200" HorizontalAlignment="Center" Margin="0,10" SelectedItem="{x:Bind PrintVM.ReportType, Mode=TwoWay}">
+                <ComboBoxItem Content="Preview"/>
+                <ComboBoxItem Content="Printer"/>
+                <ComboBoxItem Content="Scrivener"/>
+            </ComboBox>
+
+            <TextBlock Text="Create reports for the following:" />
+            <CheckBox Content="Story summary" IsChecked="{x:Bind PrintVM.CreateSummary, Mode=TwoWay}"/>
+            <CheckBox Content="Story overview" IsChecked="{x:Bind PrintVM.CreateSummary, Mode=TwoWay}" />
+        </StackPanel>
+
+        <Pivot Height="300">
+            <PivotItem Header="Problems" TabIndex="0">
+                <ListView SelectionMode="Multiple" Height="290" Name="ProblemsList" ItemsSource="{x:Bind Problems, Mode=TwoWay}" SelectionChanged="UpdateSelection" />
+            </PivotItem>
+            <PivotItem Header="Characters">
+                <ListView SelectionMode="Multiple" Height="290" Name="CharactersList" ItemsSource="{x:Bind Characters, Mode=TwoWay}"  SelectionChanged="UpdateSelection"/>
+            </PivotItem>
+            <PivotItem Header="Scenes">
+                <ListView SelectionMode="Multiple" Height="290" Name="ScenesList" ItemsSource="{x:Bind Scenes, Mode=TwoWay}"  SelectionChanged="UpdateSelection"/>
+            </PivotItem>
+            <PivotItem Header="Settings">
+                <ListView SelectionMode="Multiple" Height="290" Name="SettingsList" ItemsSource="{x:Bind Settings, Mode=TwoWay}"  SelectionChanged="UpdateSelection"/>
+            </PivotItem>
+
+        </Pivot>
+ 
+    </StackPanel>
+</Page>
