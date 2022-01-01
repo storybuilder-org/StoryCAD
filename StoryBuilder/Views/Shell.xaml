@@ -198,10 +198,16 @@
                         </MenuFlyout>
                     </AppBarButton.Flyout>
                 </AppBarButton>
-                <AppBarButton Label="Reports" ToolTipService.ToolTip="Reports" Command="{x:Bind ShellVm.ReportsCommand, Mode=OneWay}" >
+                <AppBarButton Label="Reports" ToolTipService.ToolTip="Reports Menu" >
                     <AppBarButton.Icon>
                         <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xF571;"/>
                     </AppBarButton.Icon>
+                    <AppBarButton.Flyout>
+                        <MenuFlyout>
+                            <MenuFlyoutItem Text="Print Reports" Command="{x:Bind ShellVm.PrintReportsCommand, Mode=OneWay}" />
+                            <MenuFlyoutItem Text="Scrivener Reports" Command="{x:Bind ShellVm.ScrivenerReportsCommand, Mode=OneWay}" />
+                            </MenuFlyout>
+                    </AppBarButton.Flyout>
                 </AppBarButton>
                 <AppBarButton Label="Preferences" ToolTipService.ToolTip="Preferences" 
                               Command="{x:Bind ShellVm.PreferencesCommand, Mode=OneWay}" >
