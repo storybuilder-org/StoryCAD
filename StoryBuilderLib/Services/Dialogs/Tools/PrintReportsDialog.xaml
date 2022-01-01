@@ -23,16 +23,16 @@
 
         <Pivot Height="300">
             <PivotItem Header="Problems" TabIndex="0">
-                <ListView SelectionMode="Multiple" Height="290" Name="ProblemsList" ItemsSource="{x:Bind Problems, Mode=TwoWay}" SelectionChanged="UpdateSelection" />
+                <ListView SelectionMode="Multiple" Height="290" Name="ProblemsList" ItemsSource="{x:Bind PrintVM.ProblemNodes, Mode=TwoWay}" SelectionChanged="UpdateSelection" />
             </PivotItem>
             <PivotItem Header="Characters">
-                <ListView SelectionMode="Multiple" Height="290" Name="CharactersList" ItemsSource="{x:Bind Characters, Mode=TwoWay}"  SelectionChanged="UpdateSelection"/>
+                <ListView SelectionMode="Multiple" Height="290" Name="CharactersList" ItemsSource="{x:Bind PrintVM.CharacterNodes, Mode=TwoWay}"  SelectionChanged="UpdateSelection"/>
             </PivotItem>
             <PivotItem Header="Scenes">
-                <ListView SelectionMode="Multiple" Height="290" Name="ScenesList" ItemsSource="{x:Bind Scenes, Mode=TwoWay}"  SelectionChanged="UpdateSelection"/>
+                <ListView SelectionMode="Multiple" Height="290" Name="ScenesList" ItemsSource="{x:Bind PrintVM.SceneNodes, Mode=TwoWay}"  SelectionChanged="UpdateSelection"/>
             </PivotItem>
             <PivotItem Header="Settings">
-                <ListView SelectionMode="Multiple" Height="290" Name="SettingsList" ItemsSource="{x:Bind Settings, Mode=TwoWay}"  SelectionChanged="UpdateSelection"/>
+                <ListView SelectionMode="Multiple" Height="290" Name="SettingsList" ItemsSource="{x:Bind PrintVM.SettingNodes, Mode=TwoWay}"  SelectionChanged="UpdateSelection"/>
             </PivotItem>
 
         </Pivot>

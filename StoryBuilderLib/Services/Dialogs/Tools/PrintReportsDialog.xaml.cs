@@ -17,7 +17,6 @@ namespace StoryBuilder.Services.Dialogs.Tools
     /// </summary>
     public sealed partial class PrintReportsDialog : Page
     {
-
         public PrintReportDialogVM PrintVM = Ioc.Default.GetRequiredService<PrintReportDialogVM>();
 
         public PrintReportsDialog()

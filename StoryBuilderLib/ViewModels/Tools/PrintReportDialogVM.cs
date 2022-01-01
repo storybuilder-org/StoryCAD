@@ -1,12 +1,6 @@
-﻿using System;
-using Microsoft.UI.Xaml.Controls;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System.Collections.Generic;
-using Windows.ApplicationModel.Background;
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.DependencyInjection;
 using StoryBuilder.Models;
-using StoryBuilder.ViewModels;
-
 
 namespace StoryBuilder.ViewModels.Tools
 {
@@ -47,42 +41,42 @@ namespace StoryBuilder.ViewModels.Tools
             set => SetProperty(ref _selectedNodes, value);
         }
 
-        private List<StoryNodeItem> _allProblemNodes = new();
-        public List<StoryNodeItem> AllProblemNodes
+        private List<StoryNodeItem> _problemNodes = new();
+        public List<StoryNodeItem> ProblemNodes 
         {
-            get => _allProblemNodes;
-            set => SetProperty(ref _allProblemNodes, value);
+            get => _problemNodes;
+            set => SetProperty(ref _problemNodes, value);
         }
 
-        private List<StoryNodeItem> _allCharacterNodes = new();
-        public List<StoryNodeItem> AllCharacterNodes
+        private List<StoryNodeItem> _characterNodes = new();
+        public List<StoryNodeItem> CharacterNodes
         {
-            get => _allCharacterNodes;
-            set => SetProperty(ref _allCharacterNodes, value);
+            get => _characterNodes;
+            set => SetProperty(ref _characterNodes, value);
         }
 
-        private List<StoryNodeItem> _allSettingNodes = new();
-        public List<StoryNodeItem> AllSettingNodes
+        private List<StoryNodeItem> _settingNodes = new();
+        public List<StoryNodeItem> SettingNodes
         {
-            get => _allSettingNodes;
-            set => SetProperty(ref _allSettingNodes, value);
+            get => _settingNodes;
+            set => SetProperty(ref _settingNodes, value);
         }
 
-        private List<StoryNodeItem> _allSceneNodes = new();
-        public List<StoryNodeItem> AllSceneNodes
+        private List<StoryNodeItem> _sceneNodes = new();
+        public List<StoryNodeItem> SceneNodes
         {
-            get => _allSceneNodes;
-            set => SetProperty(ref _allSceneNodes, value);
+            get => _sceneNodes;
+            set => SetProperty(ref _sceneNodes, value);
         }
 
         public void TraverseNode(StoryNodeItem node)
         {
             switch (node.Type)
             {
-                case StoryItemType.Problem: AllProblemNodes.Add(node); break;
-                case StoryItemType.Character: AllCharacterNodes.Add(node); break;
-                case StoryItemType.Setting: AllSettingNodes.Add(node); break;
-                case StoryItemType.Scene: AllSceneNodes.Add(node); break;
+                case StoryItemType.Problem: ProblemNodes.Add(node); break;
+                case StoryItemType.Character: CharacterNodes.Add(node); break;
+                case StoryItemType.Setting: SettingNodes.Add(node); break;
+                case StoryItemType.Scene: SceneNodes.Add(node); break;
             }
 
             //Recurs until children are empty 
