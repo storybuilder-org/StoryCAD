@@ -58,9 +58,7 @@ namespace StoryBuilder.ViewModels
         #endregion
 
         #region Constructor
-        public SaveAsViewModel()
-        {
-        }
+
         #endregion
     }
 }

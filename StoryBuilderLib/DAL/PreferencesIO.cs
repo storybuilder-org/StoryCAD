@@ -48,7 +48,7 @@ namespace StoryBuilder.DAL
                 //Update the model from the file
                 foreach (string line in _preferences)
                 {
-                    string[] tokens = line.Split(new char[] { '=' });
+                    string[] tokens = line.Split(new[] { '=' });
                     switch (tokens[0])
                     {
                         case "Name":

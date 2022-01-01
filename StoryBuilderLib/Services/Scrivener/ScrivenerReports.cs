@@ -1,6 +1,4 @@
 ﻿using CommunityToolkit.Mvvm.DependencyInjection;
-using Net.Sgoliver.NRtfTree.Util;
-using Net.Sgoliver.NRtfTree.Core;
 using StoryBuilder.Controllers;
 using StoryBuilder.DAL;
 using StoryBuilder.Models;
@@ -13,12 +11,14 @@ using System.Text;
 using System.Threading.Tasks;
 using Windows.Data.Xml.Dom;
 using Windows.Storage;
+using NRtfTree.Core;
+using NRtfTree.Util;
 
 namespace StoryBuilder.Services.Scrivener
 {
     public class ScrivenerReports
     {
-        private readonly Dictionary<string, string> _templates = new Dictionary<string, string>();
+        private readonly Dictionary<string, string> _templates = new();
         private StoryModel _model;
         private ScrivenerIo _scrivener;
         private StoryReader _rdr;
@@ -72,7 +72,7 @@ namespace StoryBuilder.Services.Scrivener
             }
             // Look for the StoryElement corresponding to the passed guid
             // (This is the normal approach)
-            if (Guid.TryParse(value.ToString(), out var guid))
+            if (Guid.TryParse(value, out Guid guid))
                 if (elements.StoryElementGuids.ContainsKey(guid))
                     return elements.StoryElementGuids[guid];
             return null;  // Not found
@@ -342,11 +342,8 @@ namespace StoryBuilder.Services.Scrivener
                         foreach (StorageFile fi in files)
                             if (fi.Name.Equals("notes.rtf")) // If this content has any notes, collect them
                             {
-                                string header = string.Format("SCRIVENER NOTES FOR '{0} {1}' as of {2}",
-                                    node.Parent.Title, node.Title, node.Modified);
-                                _stbNotes.AppendLine(header);
-                                var text = await _scrivener.ReadRtfText(fi.Path);
-                                _stbNotes.AppendLine(text);
+                                _stbNotes.AppendLine($"SCRIVENER NOTES FOR '{node.Parent.Title} {node.Title}' as of {node.Modified}");
+                                _stbNotes.AppendLine(await _scrivener.ReadRtfText(fi.Path));
                             }
                     }
                 }
@@ -449,7 +446,7 @@ namespace StoryBuilder.Services.Scrivener
             // Read report template
             if (!_templates.ContainsKey("Story Overview"))
                 return;
-            string template = _templates["Story Overview"]; ;
+            string template = _templates["Story Overview"];
             string[] lines = template.Split(
                 new[] { Environment.NewLine },
                 StringSplitOptions.None
@@ -1297,7 +1294,7 @@ namespace StoryBuilder.Services.Scrivener
                     _templates.Add(name, text);
                 }
             }
-            catch (Exception ex)
+            catch
             {
                 //TODO: Log exception
             }

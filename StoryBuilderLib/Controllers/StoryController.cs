@@ -1,6 +1,4 @@
 ﻿using StoryBuilder.Models;
-using StoryBuilder.Models.Tools;
-using StoryBuilder.ViewModels.Tools;
 using Windows.Storage;
 
 namespace StoryBuilder.Controllers
@@ -15,7 +13,7 @@ namespace StoryBuilder.Controllers
     /// </summary>
        /* Much of this method (Add, Update, Show methods, etc) has been moved
        to the ViewModels. Others of this have been moved to the ShellViewModel.
-       The mediation between the StoryModel and viewmodels mentioned above should be
+       The mediation between the StoryModel and ViewModels mentioned above should be
        eliminated. What's left is some miscellaneous stuff. If there's a need,
        keep what's left as a service. Otherwise, eliminate.
      */
@@ -44,10 +42,6 @@ namespace StoryBuilder.Controllers
         #endregion
  
         #region Constructor
-
-        public StoryController()
-        {
-        }
 
         #endregion
 

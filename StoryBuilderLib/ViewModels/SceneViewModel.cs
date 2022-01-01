@@ -49,7 +49,7 @@ namespace StoryBuilder.ViewModels
             {
                 if (_changeable && (_name != value)) // Name changed?
                 {
-                    _logger.Log(LogLevel.Info, string.Format("Requesting Name change from {0} to {1}", _name, value));
+                    _logger.Log(LogLevel.Info, $"Requesting Name change from {_name} to {value}");
                     var msg = new NameChangeMessage(_name, value);
                     Messenger.Send(new NameChangedMessage(msg));
                 }
@@ -118,7 +118,7 @@ namespace StoryBuilder.ViewModels
             set
             {
                 SetProperty(ref _existingCastIndex, value);
-                string emsg = String.Format("Existing cast member {0} selected", CastMembers[value].Name);
+                string emsg = $"Existing cast member {CastMembers[value].Name} selected";
                 var smsg = new StatusMessage(emsg, 200);
                 Messenger.Send(new StatusChangedMessage(smsg));
             }
@@ -477,8 +477,7 @@ namespace StoryBuilder.ViewModels
             StoryElement element = StringToStoryElement(NewCastMember);
             if (NewCastMember == null)
             {
-                var _smsg = new StatusMessage("Select a character to add to scene cast, 200", 200);
-                Messenger.Send(new StatusChangedMessage(_smsg));
+                Messenger.Send(new StatusChangedMessage(new StatusMessage("Select a character to add to scene cast, 200", 200)));
                 return;
             }
             if (CastMemberExists(NewCastMember))
@@ -489,7 +488,7 @@ namespace StoryBuilder.ViewModels
             }
 
             CastMembers.Add(element);
-            string msg = string.Format("New cast member {0} added", element.Name);
+            string msg = $"New cast member {element.Name} added";
             _smsg = new StatusMessage(msg, 200);
             Messenger.Send(new StatusChangedMessage(_smsg));
             _logger.Log(LogLevel.Info, msg);
@@ -505,7 +504,7 @@ namespace StoryBuilder.ViewModels
             }
             StoryElement element = CastMembers[ExistingCastIndex];
             CastMembers.RemoveAt(ExistingCastIndex);
-            string msg = String.Format("Cast member {0} removed", element.Name);
+            string msg = $"Cast member {element.Name} removed";
             _smsg = new StatusMessage(msg, 200);
             Messenger.Send(new StatusChangedMessage(_smsg));
             _logger.Log(LogLevel.Info, msg);
@@ -523,9 +522,11 @@ namespace StoryBuilder.ViewModels
             // Get the current StoryModel's StoryElementsCollection
             ShellViewModel shell = Ioc.Default.GetService<ShellViewModel>();
             StoryElementCollection elements = shell.StoryModel.StoryElements;
-            if (Guid.TryParse(value.ToString(), out var guid))
-                if (elements.StoryElementGuids.ContainsKey(guid))
-                    return elements.StoryElementGuids[guid];
+            if (Guid.TryParse(value, out Guid guid))
+            {
+                if (elements.StoryElementGuids.ContainsKey(guid)) { return elements.StoryElementGuids[guid]; }
+
+            }
 
             // legacy: locate the StoryElement from its Name
             foreach (StoryElement element in elements)  // Character or Setting??? Search both?
@@ -537,7 +538,7 @@ namespace StoryBuilder.ViewModels
                 }
             }
             // not found
-            string msg = String.Format("Story Element not found name {0}", value);
+            string msg = $"Story Element not found name {value}";
             _logger.Log(LogLevel.Warn, msg);
             return null;   
         }

@@ -30,7 +30,7 @@
 
 using System.Collections.Generic;
 
-namespace Net.Sgoliver.NRtfTree
+namespace NRtfTree
 {
     namespace Util
     {
@@ -55,7 +55,7 @@ namespace Net.Sgoliver.NRtfTree
             /// <summary>
             /// Inserta un nueva fuente en la tabla de fuentes.
             /// </summary>
-            /// <param name="color">Nueva fuente a insertar.</param>
+            /// <param name="name">Nueva fuente a insertar.</param>
             public void AddFont(string name)
             {
                 fonts.Add(name);

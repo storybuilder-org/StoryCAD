@@ -15,10 +15,6 @@ namespace StoryBuilder.DAL
         public readonly PreferencesModel Preferences;
         public readonly LogService Logger;
 
-        public ControlLoader()
-        {
-        }
-
         private IList<string> lines;
         private string installFolder;
         public async Task Init(string path, StoryController story)

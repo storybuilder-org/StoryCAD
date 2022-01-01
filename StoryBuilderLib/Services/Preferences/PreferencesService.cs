@@ -19,8 +19,8 @@ namespace StoryBuilder.Services.Preferences
             try
             {
                 Logger.Log(LogLevel.Info, "Loading Preferences");
-                PreferencesModel model = new PreferencesModel();
-                PreferencesIO loader = new PreferencesIO(model, path);
+                PreferencesModel model = new();
+                PreferencesIO loader = new(model, path);
                 await loader.UpdateModel();
                 
                 GlobalData.Preferences = model;

@@ -28,7 +28,7 @@
  * Description:	Tipos de token de un árbol de documento RTF.
  * ******************************************************************************/
 
-namespace Net.Sgoliver.NRtfTree
+namespace NRtfTree
 {
     namespace Core
     {

@@ -67,7 +67,7 @@ namespace StoryBuilder.Services.Search
 
         private bool SearchScene(StoryNodeItem node, StoryElement element)
         {
-            return Comparator(element.Name); ;
+            return Comparator(element.Name);
         }
 
         private bool SearchSetting(StoryNodeItem node, StoryElement element)

@@ -4,7 +4,6 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using StoryBuilder.Controllers;
 using StoryBuilder.DAL;
 using StoryBuilder.Models;
-using StoryBuilder.Services.Help;
 using StoryBuilder.Services.Installation;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.Services.Preferences;
@@ -22,7 +21,7 @@ namespace StoryBuilderTests
     public sealed class StoryBuilderTestSetup
     {
         [AssemblyInitialize()]
-        public async static Task AssemblyInit(TestContext context)
+        public static async Task AssemblyInit(TestContext context)
         {
             ConfigureIoc();
             // Validate service locator
@@ -111,7 +110,6 @@ namespace StoryBuilderTests
                     .AddSingleton<PreferencesService>()
                     .AddSingleton<NavigationService>()
                     .AddSingleton<LogService>()
-                    .AddSingleton<HelpService>()
                     .AddSingleton<SearchService>()
                     .AddSingleton<InstallationService>()
                     .AddSingleton<ListLoader>()

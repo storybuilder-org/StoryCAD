@@ -36,8 +36,8 @@ namespace StoryBuilder.Models
         /// One of these persisted TreeViews is actively bound in the Shell page view to a StoryNodeItem tree 
         /// based on  whichever of these two TreeView representations is presently selected.
         ///
-        public ObservableCollection<StoryNodeItem> ExplorerView = new ObservableCollection<StoryNodeItem>();
-        public ObservableCollection<StoryNodeItem> NarratorView = new ObservableCollection<StoryNodeItem>();
+        public ObservableCollection<StoryNodeItem> ExplorerView;
+        public ObservableCollection<StoryNodeItem> NarratorView;
    
         #endregion
 

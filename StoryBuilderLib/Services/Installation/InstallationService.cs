@@ -137,20 +137,18 @@ namespace StoryBuilder.Services.Installation
         private async void WriteManifestData(StorageFile DiskFile, string InstallerFile)
         {
             List<Byte> ContentToWrite = new();
-            using (Stream InternalResourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(InstallerFile))
+            await using Stream InternalResourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(InstallerFile);
+            await using (Stream FileDiskStream = await DiskFile.OpenStreamForWriteAsync())
             {
-                using (Stream FileDiskStream = await DiskFile.OpenStreamForWriteAsync())
-                {
-                    Logger.Log(LogLevel.Trace, $"Opened manifiest stream and stream for file on disk ({DiskFile.Path})");
+                Logger.Log(LogLevel.Trace, $"Opened manifest stream and stream for file on disk ({DiskFile.Path})");
 
-                    while (InternalResourceStream.Position < InternalResourceStream.Length)
-                    {
-                        FileDiskStream.WriteByte((byte)InternalResourceStream.ReadByte());
-                    }
-                    await FileDiskStream.FlushAsync();
+                while (InternalResourceStream.Position < InternalResourceStream.Length)
+                {
+                    FileDiskStream.WriteByte((byte)InternalResourceStream.ReadByte());
                 }
-                await InternalResourceStream.FlushAsync();
+                await FileDiskStream.FlushAsync();
             }
+            await InternalResourceStream.FlushAsync();
         }
 
         public InstallationService()

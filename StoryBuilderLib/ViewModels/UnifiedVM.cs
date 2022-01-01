@@ -1,13 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
-using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using StoryBuilder.DAL;
 using StoryBuilder.Models;
 using StoryBuilder.Models.Tools;
 using StoryBuilder.Services.Dialogs;
+using System;
+using System.Collections.Generic;
 
 namespace StoryBuilder.ViewModels
 {
@@ -15,7 +14,6 @@ namespace StoryBuilder.ViewModels
     {
         //Since the original menu was designed with the shell in mind we need to call some commands on the ShellVM so it can be done correctly
         ShellViewModel shell = Ioc.Default.GetService<ShellViewModel>();
-        public PreferencesModel UserPrefs = GlobalData.Preferences;
 
         private int _selectedRecentIndex;
         public int SelectedRecentIndex

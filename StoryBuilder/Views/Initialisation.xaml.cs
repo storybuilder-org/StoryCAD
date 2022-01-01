@@ -17,7 +17,7 @@ namespace StoryBuilder.Views
     /// </summary>
     public sealed partial class Initialisation : Page
     {
-        InitialisationVM InitVM = new();
+        InitVM InitVM = new();
         public Initialisation()
         {
             this.InitializeComponent();
@@ -107,7 +107,7 @@ namespace StoryBuilder.Views
 
         public void Check(object sender, RoutedEventArgs e)
         {
-            if (!String.IsNullOrWhiteSpace(InitVM.Path.ToString()) && !String.IsNullOrWhiteSpace(InitVM.BackupPath.ToString()) && InitVM.Name != "")
+            if (!String.IsNullOrWhiteSpace(InitVM.Path) && !string.IsNullOrWhiteSpace(InitVM.BackupPath) && InitVM.Name != "")
             {
                 InitVM.Save();
                 RootFrame.Navigate(typeof(Shell));

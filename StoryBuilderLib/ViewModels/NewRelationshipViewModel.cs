@@ -1,6 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using StoryBuilder.Models;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
 namespace StoryBuilder.ViewModels
@@ -10,7 +9,7 @@ namespace StoryBuilder.ViewModels
     {
         #region public Properties
 
-        public StoryElementCollection StoryElements;
+
         public StoryElement Member { get; set; }
 
         public ObservableCollection<StoryElement> ProspectivePartners;

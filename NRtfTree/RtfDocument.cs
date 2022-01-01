@@ -28,14 +28,14 @@
  * Description:	Clase para la generación de documentos RTF.
  * ******************************************************************************/
 
-using Net.Sgoliver.NRtfTree.Core;
 using System;
 using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Text;
+using NRtfTree.Core;
 
-namespace Net.Sgoliver.NRtfTree
+namespace NRtfTree
 {
     namespace Util
     {
@@ -194,9 +194,9 @@ namespace Net.Sgoliver.NRtfTree
 
                 try
                 {
-                    byte[] data = null;
+                    byte[] data;
 
-                    FileInfo fInfo = new FileInfo(path);
+                    FileInfo fInfo = new(path);
                     long numBytes = fInfo.Length;
 
                     fStream = new FileStream(path, FileMode.Open, FileAccess.Read);
@@ -204,23 +204,18 @@ namespace Net.Sgoliver.NRtfTree
 
                     data = br.ReadBytes((int)numBytes);
 
-                    StringBuilder hexdata = new StringBuilder();
+                    StringBuilder hexdata = new ();
 
-                    for (int i = 0; i < data.Length; i++)
-                    {
-                        hexdata.Append(GetHexa(data[i]));
-                    }
+                    foreach (var t in data) { hexdata.Append(GetHexa(t)); }
 
                     Image img = Image.FromFile(path);
 
-                    RtfTreeNode imgGroup = new RtfTreeNode(RtfNodeType.Group);
+                    RtfTreeNode imgGroup = new(RtfNodeType.Group);
                     imgGroup.AppendChild(new RtfTreeNode(RtfNodeType.Keyword, "pict", false, 0));
 
-                    string format = "";
-                    if (path.ToLower().EndsWith("wmf"))
-                        format = "emfblip";
-                    else
-                        format = "jpegblip";
+                    string format;
+                    if (path.ToLower().EndsWith("wmf")) {format = "emfblip";}
+                    else { format = "jpegblip"; }
 
                     imgGroup.AppendChild(new RtfTreeNode(RtfNodeType.Keyword, format, false, 0));
 
@@ -324,15 +319,14 @@ namespace Net.Sgoliver.NRtfTree
             private void InsertText(string text)
             {
                 int i = 0;
-                int code = 0;
 
                 while (i < text.Length)
                 {
-                    code = Char.ConvertToUtf32(text, i);
+                    var code = Char.ConvertToUtf32(text, i);
 
                     if (code >= 32 && code < 128)
                     {
-                        StringBuilder s = new StringBuilder("");
+                        StringBuilder s = new("");
 
                         while (i < text.Length && code >= 32 && code < 128)
                         {
@@ -341,14 +335,14 @@ namespace Net.Sgoliver.NRtfTree
                             i++;
 
                             if (i < text.Length)
-                                code = Char.ConvertToUtf32(text, i);
+                                code = char.ConvertToUtf32(text, i);
                         }
 
                         mainGroup.AppendChild(new RtfTreeNode(RtfNodeType.Text, s.ToString(), false, 0));
                     }
                     else
                     {
-                        byte[] bytes = encoding.GetBytes(new char[] { text[i] });
+                        byte[] bytes = encoding.GetBytes(new[] { text[i] });
 
                         mainGroup.AppendChild(new RtfTreeNode(RtfNodeType.Control, "'", true, bytes[0]));
 
@@ -418,7 +412,7 @@ namespace Net.Sgoliver.NRtfTree
                     {
                         currentFormat.bold = format.bold;
 
-                        mainGroup.AppendChild(new RtfTreeNode(RtfNodeType.Keyword, "b", format.bold ? false : true, 0));
+                        mainGroup.AppendChild(new RtfTreeNode(RtfNodeType.Keyword, "b", !format.bold, 0));
                     }
 
                     //Italic
@@ -426,7 +420,7 @@ namespace Net.Sgoliver.NRtfTree
                     {
                         currentFormat.italic = format.italic;
 
-                        mainGroup.AppendChild(new RtfTreeNode(RtfNodeType.Keyword, "i", format.italic ? false : true, 0));
+                        mainGroup.AppendChild(new RtfTreeNode(RtfNodeType.Keyword, "i", !format.italic, 0));
                     }
 
                     //Underline
@@ -434,7 +428,7 @@ namespace Net.Sgoliver.NRtfTree
                     {
                         currentFormat.underline = format.underline;
 
-                        mainGroup.AppendChild(new RtfTreeNode(RtfNodeType.Keyword, "ul", format.underline ? false : true, 0));
+                        mainGroup.AppendChild(new RtfTreeNode(RtfNodeType.Keyword, "ul", !format.underline, 0));
                     }
                 }
                 else //currentFormat == null

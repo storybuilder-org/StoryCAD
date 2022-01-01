@@ -53,7 +53,7 @@ namespace StoryBuilder.Services.Navigation
         /// </summary>
         public const string UnknownPageKey = "-- UNKNOWN --";
 
-        private readonly Dictionary<string, Type> _pagesByKey = new Dictionary<string, Type>();
+        private readonly Dictionary<string, Type> _pagesByKey = new();
         private Frame _currentFrame;
 
         /// <summary>
@@ -62,15 +62,9 @@ namespace StoryBuilder.Services.Navigation
         /// </summary>
         public Frame CurrentFrame
         {
-            get
-            {
-                return _currentFrame ?? (_currentFrame = ((Frame)Window.Current.Content));
-            }
+            get => _currentFrame ??= ((Frame)Window.Current.Content);
 
-            set
-            {
-                _currentFrame = value;
-            }
+            set => _currentFrame = value;
         }
 
         /// <summary>
@@ -173,11 +167,7 @@ namespace StoryBuilder.Services.Navigation
             {
                 if (!_pagesByKey.ContainsKey(pageKey))
                 {
-                    throw new ArgumentException(
-                        string.Format(
-                            "No such page: {0}. Did you forget to call NavigationService.Configure?",
-                            pageKey),
-                        "pageKey");
+                    throw new ArgumentException($"No such page: {pageKey}. Did you forget to call NavigationService.Configure?", pageKey);
                 }
 
                 CurrentFrame.Navigate(_pagesByKey[pageKey], parameter);
@@ -217,11 +207,7 @@ namespace StoryBuilder.Services.Navigation
             {
                 if (!_pagesByKey.ContainsKey(pageKey))
                 {
-                    throw new ArgumentException(
-                        string.Format(
-                            "No such page: {0}. Did you forget to call NavigationService.Configure?",
-                            pageKey),
-                        "pageKey");
+                    throw new ArgumentException($"No such page: {pageKey}. Did you forget to call NavigationService.Configure?", pageKey);
                 }
 
                 frame.Navigate(_pagesByKey[pageKey], parameter);

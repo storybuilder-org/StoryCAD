@@ -7,7 +7,7 @@ namespace StoryBuilder.Models
     {
         #region Static Properties
 
-        public static ObservableCollection<string> SettingNames = new ObservableCollection<string>();
+        public static ObservableCollection<string> SettingNames = new();
 
         #endregion
         #region Properties

@@ -59,9 +59,9 @@ namespace StoryBuilder.DAL
             ParseExplorerView();
             ParseNarratorView();
 
-            using (Stream fileStream = await _outFile.OpenStreamForWriteAsync())
+            await using (Stream fileStream = await _outFile.OpenStreamForWriteAsync())
             {
-                XmlWriterSettings settings = new XmlWriterSettings();
+                XmlWriterSettings settings = new();
                 settings.Async = true;
                 settings.Encoding = Encoding.UTF8;
                 settings.Indent = true;
@@ -757,10 +757,9 @@ namespace StoryBuilder.DAL
             {
                 StorageFolder folder = await FindSubFolder(uuid);
                 StorageFile rtfFile = await folder.CreateFileAsync(filename, CreationCollisionOption.ReplaceExisting);
-                using (var stream = await rtfFile.OpenStreamForWriteAsync())
+                await using (Stream stream = await rtfFile.OpenStreamForWriteAsync())
                 {
-                    using (var writer = new StreamWriter(stream))
-                        writer.Write(work);
+                    await using (StreamWriter writer = new(stream)) {await writer.WriteAsync(work);}
                 }
                 return $"[FILE:{filename}]";
             }
@@ -778,13 +777,9 @@ namespace StoryBuilder.DAL
             // //https://stackoverflow.com/questions/32948609/how-to-close-the-opened-storagefile
             StorageFolder folder = await FindSubFolder(uuid);
             StorageFile rtfFile = await folder.CreateFileAsync(rftFilename, CreationCollisionOption.ReplaceExisting);
-            using (var stream = await rtfFile.OpenStreamForWriteAsync())
-            {
-                using (var writer = new StreamWriter(stream))
-                {
-                    writer.Write(notes);
-                }
-            }
+            await using var stream = await rtfFile.OpenStreamForWriteAsync();
+            await using var writer = new StreamWriter(stream);
+            await writer.WriteAsync(notes);
         }
 
         /// <summary>

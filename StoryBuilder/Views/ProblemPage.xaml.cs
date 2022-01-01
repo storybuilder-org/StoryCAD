@@ -23,7 +23,7 @@ namespace StoryBuilder.Views
 
         //private void Conflict_ContextRequested(UIElement sender, ContextRequestedEventArgs args)
         //{
-        //    FlyoutShowOptions myOption = new FlyoutShowOptions();
+        //    FlyoutShowOptions myOption = new();
         //    myOption.ShowMode = FlyoutShowMode.Transient;
         //    ConflictCommandBarFlyout.ShowAt(NavigationTree, myOption);
         //}

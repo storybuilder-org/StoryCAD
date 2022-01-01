@@ -37,7 +37,6 @@ namespace StoryBuilder.Models
         private void OnStoryElementsChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             StoryElement element;
-            int i;
 
             switch (e.Action)
             {
@@ -56,8 +55,6 @@ namespace StoryBuilder.Models
                         case StoryItemType.Problem:
                             Problems.Add(element);
                             break;
-                        default:
-                            break;
                     }
                     break;
 
@@ -68,6 +65,7 @@ namespace StoryBuilder.Models
                     //TODO: Assert that OldItems count is always 1, or make this a loop
                     element = (StoryElement)e.OldItems[0];
                     StoryElementGuids.Remove(element.Uuid);
+                    int i;
                     switch (element.Type)
                     {
                         case StoryItemType.Character:
@@ -81,8 +79,6 @@ namespace StoryBuilder.Models
                         case StoryItemType.Problem:
                             i = Problems.IndexOf(element);
                             Problems.RemoveAt(i);
-                            break;
-                        default:
                             break;
                     }
                     break;

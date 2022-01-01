@@ -31,7 +31,7 @@
 using System;
 using System.Text;
 
-namespace Net.Sgoliver.NRtfTree
+namespace NRtfTree
 {
     namespace Core
     {
@@ -677,7 +677,7 @@ namespace Net.Sgoliver.NRtfTree
             /// <returns>Texto RTF del nodo.</returns>
             private string getRtf()
             {
-                string res = "";
+                string res;
 
                 Encoding enc = this.tree.GetEncoding();
 
@@ -776,7 +776,7 @@ namespace Net.Sgoliver.NRtfTree
                     if (code >= 128 || code < 32)
                     {
                         res.Append(@"\'");
-                        byte[] bytes = enc.GetBytes(new char[] { s[i] });
+                        byte[] bytes = enc.GetBytes(new[] { s[i] });
                         res.Append(GetHexa(bytes[0]));
                     }
                     else
@@ -983,7 +983,7 @@ namespace Net.Sgoliver.NRtfTree
                 get
                 {
                     if (children.Count > 0)
-                        return children[children.Count - 1];
+                        return children[^1];
                     else
                         return null;
                 }

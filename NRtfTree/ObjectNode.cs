@@ -28,18 +28,18 @@
  * Description:	Nodo RTF especializado que contiene la información de un objeto.
  * ******************************************************************************/
 
-using Net.Sgoliver.NRtfTree.Core;
 using System.Globalization;
 using System.Text;
+using NRtfTree.Core;
 
-namespace Net.Sgoliver.NRtfTree
+namespace NRtfTree
 {
     namespace Util
     {
         /// <summary>
         /// Encapsula un nodo RTF de tipo Objeto (Palabra clave "\object")
         /// </summary>
-        public class ObjectNode : Net.Sgoliver.NRtfTree.Core.RtfTreeNode
+        public class ObjectNode : RtfTreeNode
         {
             #region Atributos Privados
 
@@ -190,7 +190,7 @@ namespace Net.Sgoliver.NRtfTree
             {
                 //Formato: ( '{' \object (<objtype> & <objmod>? & <objclass>? & <objname>? & <objtime>? & <objsize>? & <rsltmod>?) ('{\*' \objdata (<objalias>? & <objsect>?) <data> '}') <result> '}' )
 
-                string Text = "";
+                string Text;
 
                 if (this.FirstChild.NodeKey == "object")
                 {

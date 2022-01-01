@@ -13,50 +13,50 @@ namespace StoryBuilder.ViewModels.Tools
         public string BackupDir
         {
             get => _backupdir;
-            set { SetProperty(ref _backupdir, value); }
+            set => SetProperty(ref _backupdir, value);
         }
 
         private string _Name;
         public string Name
         {
-            get { return _Name; }
-            set { _Name = value; }
+            get => _Name;
+            set => _Name = value;
         }
         private string _Email;
         public string Email
         {
-            get { return _Email; }
-            set { _Email = value; }
+            get => _Email;
+            set => _Email = value;
         }
         private bool _ErrorConsent;
         public bool ErrorConsent
         {
-            get { return _ErrorConsent; }
-            set { _ErrorConsent = value; }
+            get => _ErrorConsent;
+            set => _ErrorConsent = value;
         }
         private bool _NewsConsent;
         public bool NewsConsent
         {
-            get { return _NewsConsent; }
-            set { _NewsConsent = value; }
+            get => _NewsConsent;
+            set => _NewsConsent = value;
         }
         private bool _Backup;
         public bool Backup
         {
-            get { return _Backup; }
-            set { _Backup = value; }
+            get => _Backup;
+            set => _Backup = value;
         }
         private int _BackupInterval;
         public int BackupInterval
         {
-            get { return _BackupInterval; }
-            set { _BackupInterval = value; }
+            get => _BackupInterval;
+            set => _BackupInterval = value;
         }
         private string _ProjectDir;
         public string ProjectDir
         {
-            get { return _ProjectDir; }
-            set { _ProjectDir = value; }
+            get => _ProjectDir;
+            set => _ProjectDir = value;
         }
 
         /// <summary>

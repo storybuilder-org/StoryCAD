@@ -25,8 +25,6 @@ namespace StoryBuilder.Services.Dialogs
 
         public ObservableCollection<RelationType> RelationTypes;
 
-        public RelationType RelationType;
-
         #endregion  
         public NewRelationshipPage(NewRelationshipViewModel vm)
         {

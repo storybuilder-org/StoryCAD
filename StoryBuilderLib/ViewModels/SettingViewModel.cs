@@ -47,7 +47,7 @@ namespace StoryBuilder.ViewModels
             {
                 if (_changeable && (_name != value)) // Name changed?
                 {
-                    _logger.Log(LogLevel.Info, string.Format("Requesting Name change from {0} to {1}", _name, value));
+                    _logger.Log(LogLevel.Info, $"Requesting Name change from {_name} to {value}");
                     var msg = new NameChangeMessage(_name, value);
                     Messenger.Send(new NameChangedMessage(msg));
                 }

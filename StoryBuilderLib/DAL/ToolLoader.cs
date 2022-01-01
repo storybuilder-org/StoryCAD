@@ -17,11 +17,6 @@ namespace StoryBuilder.DAL
         public readonly PreferencesModel Preferences;
         public readonly LogService Logger;
 
-        public ToolLoader()
-        {
-        }
-
-
         private IList<string> lines;
         private string installFolder;
         public async Task Init(string path, StoryController story)
@@ -42,8 +37,10 @@ namespace StoryBuilder.DAL
                 GlobalData.QuotesSource = LoadQuotes();
                 Clear();
             }
-            catch (Exception e) 
+            catch
             {
+                
+                Logger.Log(LogLevel.Error, "Error in ToolLoader.Init");
             }
         }
 

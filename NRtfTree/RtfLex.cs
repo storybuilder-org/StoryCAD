@@ -32,7 +32,7 @@ using System;
 using System.IO;
 using System.Text;
 
-namespace Net.Sgoliver.NRtfTree
+namespace NRtfTree
 {
     namespace Core
     {
@@ -134,10 +134,10 @@ namespace Net.Sgoliver.NRtfTree
             /// <param name="token">Token RTF al que se asignará la palabra clave.</param>
             private void parseKeyword(RtfToken token)
             {
-                StringBuilder palabraClave = new StringBuilder();
+                StringBuilder palabraClave = new();
 
-                StringBuilder parametroStr = new StringBuilder();
-                int parametroInt = 0;
+                StringBuilder parametroStr = new();
+                int parametroInt;
 
                 int c;
                 bool negativo = false;

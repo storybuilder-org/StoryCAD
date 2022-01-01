@@ -30,7 +30,7 @@ namespace StoryBuilder.Services.Dialogs
             if (Recents.Items.Count < 1)
             {
                 Pannel.Children.Add(new TextBlock() { Text = "No stories have been opened recently", HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(10) });
-            };
+            }
         }
         public UnifiedVM UnifiedMenuVM;
     }

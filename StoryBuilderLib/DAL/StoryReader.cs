@@ -55,17 +55,17 @@ namespace StoryBuilder.DAL
                 // those, add the node to both the Explorer and Narrator views.
                 if (_model.ExplorerView.Count == 1)
                 {
-                    TrashCanModel trash = new TrashCanModel(_model);
-                    StoryNodeItem trashNode = new StoryNodeItem(trash, null);
+                    TrashCanModel trash = new(_model);
+                    StoryNodeItem trashNode = new(trash, null);
                     _model.ExplorerView.Add(trashNode);     // The trashcan is the second root
                 }
                 if (_model.NarratorView.Count == 1)
                 {
-                    TrashCanModel trash = new TrashCanModel(_model);
-                    StoryNodeItem trashNode = new StoryNodeItem(trash, null);
+                    TrashCanModel trash = new(_model);
+                    StoryNodeItem trashNode = new(trash, null);
                     _model.NarratorView.Add(trashNode);     // The trashcan is the second root
                 }
-                msg = $"File load successful.";
+                msg = "File load successful.";
                 Logger.Log(LogLevel.Info, msg);
                 var smsg = new StatusMessage(msg, 200);
                 Messenger.Send(new StatusChangedMessage(smsg));
@@ -541,7 +541,7 @@ namespace StoryBuilder.DAL
                 foreach (IXmlNode child in castMembers.ChildNodes)
                     if (child.NodeName.Equals("Member"))
                         scene.CastMembers.Add(child.InnerText);
-            string member = string.Empty;
+            string member;
             foreach (var attr in xn.Attributes)
             {
                 switch (attr.NodeName)

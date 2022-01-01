@@ -1,13 +1,13 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
-using CommunityToolkit.Mvvm.Messaging;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.UI.Xaml.Controls;
 using StoryBuilder.Controllers;
+using StoryBuilder.Controls;
 using StoryBuilder.DAL;
 using StoryBuilder.Models;
 using StoryBuilder.Services.Dialogs;
-using StoryBuilder.Services.Dialogs.Tools;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.Services.Messages;
 using StoryBuilder.Services.Navigation;
@@ -17,7 +17,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Threading.Tasks;
-using StoryBuilder.Controls;
 
 namespace StoryBuilder.ViewModels
 {
@@ -66,7 +65,7 @@ namespace StoryBuilder.ViewModels
             {
                 if (_changeable && (_name != value)) // Name changed?
                 {
-                    _logger.Log(LogLevel.Info, string.Format("Requesting Name change from {0} to {1}", _name, value));
+                    _logger.Log(LogLevel.Info, $"Requesting Name change from {_name} to {value}");
                     var msg = new NameChangeMessage(_name, value);
                     Messenger.Send(new NameChangedMessage(msg));
                 }
@@ -270,7 +269,7 @@ namespace StoryBuilder.ViewModels
                 }
                 SetProperty(ref _newRelationshipMember, value);
                 StoryElement element = StringToStoryElement(value);
-                string msg = String.Format("New cast member selected", element.Name);
+                string msg = $"New cast member selected {element.Name}";
                 var smsg = new StatusMessage(msg, 200);
                 Messenger.Send(new StatusChangedMessage(smsg));
             }
@@ -364,18 +363,18 @@ namespace StoryBuilder.ViewModels
 
         private string _adventurousness;
 
-        public string Adventureousness
+        public string Adventurousness
         {
             get => _adventurousness;
             set => SetProperty(ref _adventurousness, value);
         }
 
-        private string _agression;
+        private string _aggression;
 
         public string Aggression
         {
-            get => _agression;
-            set => SetProperty(ref _agression, value);
+            get => _aggression;
+            set => SetProperty(ref _aggression, value);
         }
 
         private string _confidence;
@@ -599,7 +598,7 @@ namespace StoryBuilder.ViewModels
             Abnormality = Model.Abnormality;
             Focus = Model.Focus;
             PsychNotes = Model.PsychNotes;
-            Adventureousness = Model.Adventureousness;
+            Adventurousness = Model.Adventureousness;
             Aggression = Model.Aggression;
             Confidence = Model.Confidence;
             Conscientiousness = Model.Conscientiousness;
@@ -674,7 +673,7 @@ namespace StoryBuilder.ViewModels
                 Model.Values = Values;
                 Model.Abnormality = Abnormality;
                 Model.Focus = Focus;
-                Model.Adventureousness = Adventureousness;
+                Model.Adventureousness = Adventurousness;
                 Model.Aggression = Aggression;
                 Model.Confidence = Confidence;
                 Model.Conscientiousness = Conscientiousness;
@@ -691,7 +690,7 @@ namespace StoryBuilder.ViewModels
                 foreach (string element in CharacterTraits)
                     Model.TraitList.Add(element);
                 
-                 await SaveRelationship(CurrentRelationship);  // Save any current changes
+                await SaveRelationship(CurrentRelationship);  // Save any current changes
                 CurrentRelationship = null;
                 // Move relationships back to the character model
                 Model.RelationshipList.Clear();
@@ -736,7 +735,7 @@ namespace StoryBuilder.ViewModels
             CharacterTraits.RemoveAt(ExistingTraitIndex);
         }
 
-        private StoryElement StringToStoryElement(string value)
+        private static StoryElement StringToStoryElement(string value)
         {
             if (value == null)
                 return null;
@@ -756,9 +755,10 @@ namespace StoryBuilder.ViewModels
             }
             // Look for the StoryElement corresponding to the passed guid
             // (This is the normal approach)
-            if (Guid.TryParse(value.ToString(), out var guid))
-                if (elements.StoryElementGuids.ContainsKey(guid))
-                    return elements.StoryElementGuids[guid];
+            if (Guid.TryParse(value, out var guid))
+            {
+                if (elements.StoryElementGuids.ContainsKey(guid)) { return elements.StoryElementGuids[guid]; }
+            }
             return null;  // Not found
         }
 
@@ -843,7 +843,7 @@ namespace StoryBuilder.ViewModels
                     CurrentRelationship = SelectedRelationship;
 
                     _changed = true;
-                    string msg = String.Format("Relationship to {0} added", VM.SelectedPartner.Name);
+                    string msg = $"Relationship to {VM.SelectedPartner.Name} added";
                     Messenger.Send(new StatusChangedMessage(new StatusMessage(msg, 200)));
                     _logger.Log(LogLevel.Info, msg);
                 }
@@ -877,9 +877,9 @@ namespace StoryBuilder.ViewModels
 
             // Display a confirmation message
             StoryElement partner = SelectedRelationship.Partner;
-            msg = string.Format("Remove relationship to {0}? ", partner.Name);
+            msg = $"Remove relationship to {partner.Name}? ";
             msg += Environment.NewLine;
-            ContentDialog dialog = new ContentDialog()
+            ContentDialog dialog = new()
             {
                 Title = "Remove Relationship",
                 Content = msg,
@@ -895,7 +895,7 @@ namespace StoryBuilder.ViewModels
                 ClearActiveRelationship();
                 rel.Partner = null;
                 CharacterRelationships.Remove(rel);
-                msg = string.Format("Relationship to {0} deleted", partner.Name);
+                msg = $"Relationship to {partner.Name} deleted";
                 _changed = true;
                 // log and display status
                 _logger.Log(LogLevel.Info, msg);
@@ -1114,7 +1114,7 @@ namespace StoryBuilder.ViewModels
             Abnormality = string.Empty;
             Focus = string.Empty;
             PsychNotes = string.Empty;
-            Adventureousness = string.Empty;
+            Adventurousness = string.Empty;
             Aggression = string.Empty;
             Confidence = string.Empty;
             Conscientiousness = string.Empty;

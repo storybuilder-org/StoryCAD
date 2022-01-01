@@ -2,7 +2,6 @@
 using StoryBuilder.Controllers;
 using StoryBuilder.DAL;
 using StoryBuilder.Models;
-using System;
 using System.Threading.Tasks;
 
 namespace StoryBuilderTests
@@ -13,12 +12,11 @@ namespace StoryBuilderTests
         [TestMethod]
         public async Task TestControlLoader()
         {
-            StoryController story = new StoryController();
+            StoryController story = new();
             Assert.IsNotNull(story);
-            string localPath = $"{Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)}";
-            localPath = System.IO.Path.Combine(localPath, "StoryBuilder");
-           
-            ControlLoader loader = new ControlLoader();
+            string localPath = GlobalData.RootDirectory;
+
+            ControlLoader loader = new();
             await loader.Init(localPath, story);
             Assert.IsNotNull(GlobalData.ConflictTypes);
             return;

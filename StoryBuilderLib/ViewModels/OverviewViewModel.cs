@@ -60,7 +60,7 @@ namespace StoryBuilder.ViewModels
             {
                 if (_changeable && (_name != value)) // Name changed?
                 {
-                    _logger.Log(LogLevel.Info, string.Format("Requesting Name change from {0} to {1}", _name, value));
+                    _logger.Log(LogLevel.Info, $"Requesting Name change from {_name} to {value}");
                     var msg = new NameChangeMessage(_name, value);
                     Messenger.Send(new NameChangedMessage(msg));
                 }
@@ -353,9 +353,10 @@ namespace StoryBuilder.ViewModels
             }
             // Look for the StoryElement corresponding to the passed guid
             // (This is the normal approach)
-            if (Guid.TryParse(value.ToString(), out var guid))
-                if (elements.StoryElementGuids.ContainsKey(guid))
-                    return elements.StoryElementGuids[guid];
+            if (Guid.TryParse(value, out Guid guid))
+            {
+                if (elements.StoryElementGuids.ContainsKey(guid)) { return elements.StoryElementGuids[guid]; }
+            }
             return null;  // Not found
         }
 

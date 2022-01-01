@@ -13,12 +13,7 @@ namespace StoryBuilder.ViewModels
         public string Title
         {
             get => _title;
-            set { SetProperty(ref _title, value); }
-        }
-
-        public MainWindowVM()
-        {
-
+            set => SetProperty(ref _title, value);
         }
     }
 }

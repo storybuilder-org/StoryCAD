@@ -20,19 +20,10 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    <ComboBox x:Name="Role" Header="Role" Grid.Row="0" IsEditable="True" MinWidth="200"
-                              ItemsSource="{x:Bind CharVm.RoleList}"
-                              SelectedItem="{x:Bind CharVm.Role, Mode=TwoWay}" />
-                    <ComboBox x:Name="StoryRole" Header="Story Role" Grid.Row="1" IsEditable="False" MinWidth="200"
-                              ItemsSource="{x:Bind CharVm.StoryRoleList}"
-                              SelectedItem="{x:Bind CharVm.StoryRole, Mode=TwoWay}" />
-                    <ComboBox x:Name="Archetype" Header="Archetype" Grid.Row="2" IsEditable="False" MinWidth="200"
-                              ItemsSource="{x:Bind CharVm.ArchetypeList}"
-                              SelectedItem="{x:Bind CharVm.Archetype, Mode=TwoWay}" />
-                    <usercontrols:RichEditBoxExtended Header="Character Sketch" Grid.Row="3"
-                                                      RtfText="{x:Bind CharVm.CharacterSketch, Mode=TwoWay}" AcceptsReturn="True"
-                                                      IsSpellCheckEnabled="True" TextWrapping="Wrap"
-                                                      ScrollViewer.VerticalScrollBarVisibility="Visible" />
+                    <ComboBox Header="Role" Grid.Row="0" IsEditable="True" MinWidth="200" ItemsSource="{x:Bind CharVm.RoleList}" SelectedItem="{x:Bind CharVm.Role, Mode=TwoWay}" />
+                    <ComboBox Header="Story Role" Grid.Row="1" IsEditable="False" MinWidth="200" ItemsSource="{x:Bind CharVm.StoryRoleList}" SelectedItem="{x:Bind CharVm.StoryRole, Mode=TwoWay}" />
+                    <ComboBox Header="Archetype" Grid.Row="2" IsEditable="False" MinWidth="200" ItemsSource="{x:Bind CharVm.ArchetypeList}" SelectedItem="{x:Bind CharVm.Archetype, Mode=TwoWay}" />
+                    <usercontrols:RichEditBoxExtended Header="Character Sketch" Grid.Row="3" RtfText="{x:Bind CharVm.CharacterSketch, Mode=TwoWay}" AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap" ScrollViewer.VerticalScrollBarVisibility="Visible" />
                 </Grid>
             </PivotItem>
             <PivotItem Header="Physical">
@@ -149,9 +140,7 @@
             </PivotItem>
             <PivotItem Header="Backstory">
                 <!-- Character notes data -->
-                <usercontrols:RichEditBoxExtended Header="Backstory" RtfText="{x:Bind CharVm.BackStory, Mode=TwoWay}" AcceptsReturn="True"
-                                                  IsSpellCheckEnabled="True" TextWrapping="Wrap"
-                                                  ScrollViewer.VerticalScrollBarVisibility="Visible" />
+                <usercontrols:RichEditBoxExtended Header="Backstory" RtfText="{x:Bind CharVm.BackStory, Mode=TwoWay}" AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap" ScrollViewer.VerticalScrollBarVisibility="Visible" />
             </PivotItem>
             <PivotItem Header="Social">
                 <!-- Character social data -->
@@ -224,9 +213,9 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
-                        <ComboBox Header="Adventureousness" Grid.Column="0" IsEditable="True" Width="200"
+                        <ComboBox Header="Adventurousness" Grid.Column="0" IsEditable="True" Width="200"
                                   ItemsSource="{x:Bind CharVm.AdventureousnessList}"
-                                  SelectedItem="{x:Bind CharVm.Adventureousness, Mode=TwoWay}" />
+                                  SelectedItem="{x:Bind CharVm.Adventurousness, Mode=TwoWay}" />
                         <TextBlock Grid.Column="1" Width="100"/>
                         <ComboBox Header="Aggression" Grid.Column="2" IsEditable="True" Width="200"
                                   ItemsSource="{x:Bind CharVm.AggressionList}"
@@ -317,17 +306,14 @@
                             SelectedIndex="{x:Bind CharVm.ExistingTraitIndex, Mode=OneWay}" >
                     </ListView>
                     <StackPanel Orientation="Horizontal" Grid.Row="2" >
-                        <TextBox Header="New Trait" 
-                              MinWidth="300" Text="{x:Bind CharVm.NewTrait, Mode=TwoWay}" />
+                        <TextBox Header="New Trait"  MinWidth="300" Text="{x:Bind CharVm.NewTrait, Mode=TwoWay}" />
                         <TextBlock Width="10" />
-                        <Button Name="AddTrait" FontFamily="Segoe MDL2 Assets" Content="&#xE710;" 
-                                        Command="{x:Bind CharVm.AddTraitCommand, Mode=OneWay}" >
+                        <Button FontFamily="Segoe MDL2 Assets" Content="&#xE710;"  Command="{x:Bind CharVm.AddTraitCommand, Mode=OneWay}" >
                             <ToolTipService.ToolTip>
                                 <ToolTip Content="Add Trait"></ToolTip>
                             </ToolTipService.ToolTip>
                         </Button>
-                        <Button FontFamily="Segoe MDL2 Assets" Content="&#xE738;" 
-                                        Command="{x:Bind CharVm.RemoveTraitCommand, Mode=OneWay}" >
+                        <Button FontFamily="Segoe MDL2 Assets" Content="&#xE738;" Command="{x:Bind CharVm.RemoveTraitCommand, Mode=OneWay}">
                             <ToolTipService.ToolTip>
                                 <ToolTip Content="Remove Trait"></ToolTip>
                             </ToolTipService.ToolTip>
@@ -337,10 +323,7 @@
             </PivotItem>
             <PivotItem Header="Notes">
                 <!-- Character likes data -->
-                <usercontrols:RichEditBoxExtended Header="Notes" RtfText="{x:Bind CharVm.Notes, Mode=TwoWay}" AcceptsReturn="True"
-
-                                                  IsSpellCheckEnabled="True" TextWrapping="Wrap"
-                                                  ScrollViewer.VerticalScrollBarVisibility="Visible" />
+                <usercontrols:RichEditBoxExtended Header="Notes" RtfText="{x:Bind CharVm.Notes, Mode=TwoWay}" AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap" ScrollViewer.VerticalScrollBarVisibility="Visible" />
             </PivotItem>
         </Pivot>
     </Grid>

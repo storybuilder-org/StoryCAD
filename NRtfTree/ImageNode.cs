@@ -28,20 +28,20 @@
  * Description:	Nodo RTF especializado que contiene la información de una imagen.
  * ******************************************************************************/
 
-using Net.Sgoliver.NRtfTree.Core;
 using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Text;
+using NRtfTree.Core;
 
-namespace Net.Sgoliver.NRtfTree
+namespace NRtfTree
 {
     namespace Util
     {
         /// <summary>
         /// Encapsula un nodo RTF de tipo Imagen (Palabra clave "\pict")
         /// </summary>
-        public class ImageNode : Net.Sgoliver.NRtfTree.Core.RtfTreeNode
+        public class ImageNode : RtfTreeNode
         {
             #region Atributos privados
 
@@ -74,7 +74,7 @@ namespace Net.Sgoliver.NRtfTree
                     this.ChildNodes.AddRange(node.ChildNodes);
 
                     //Obtenemos los datos de la imagen como un array de bytes
-                    getImageData();
+                    GetImageData();
                 }
             }
 
@@ -232,10 +232,10 @@ namespace Net.Sgoliver.NRtfTree
             {
                 if (data != null)
                 {
-                    MemoryStream stream = new MemoryStream(data, 0, data.Length);
+                    MemoryStream stream = new(data, 0, data.Length);
 
                     //Escribir a un fichero cualquier tipo de imagen
-                    Bitmap bitmap = new Bitmap(stream);
+                    Bitmap bitmap = new(stream);
                     bitmap.Save(filePath, this.ImageFormat);
                 }
             }
@@ -249,7 +249,7 @@ namespace Net.Sgoliver.NRtfTree
             {
                 if (data != null)
                 {
-                    MemoryStream stream = new MemoryStream(data, 0, data.Length);
+                    MemoryStream stream = new(data, 0, data.Length);
 
                     //System.Drawing.Imaging.Metafile metafile = new System.Drawing.Imaging.Metafile(stream);
 
@@ -261,7 +261,7 @@ namespace Net.Sgoliver.NRtfTree
                     //fs.Close();
 
                     //Escribir a un fichero cualquier tipo de imagen
-                    Bitmap bitmap = new Bitmap(stream);
+                    Bitmap bitmap = new(stream);
                     bitmap.Save(filePath, format);
                 }
             }
@@ -273,12 +273,12 @@ namespace Net.Sgoliver.NRtfTree
             /// <summary>
             /// Obtiene los datos de la imagen a partir de la información contenida en el nodo RTF.
             /// </summary>
-            private void getImageData()
+            private void GetImageData()
             {
                 //Formato 1 (Word 97-2000): {\*\shppict {\pict\jpegblip <datos>}}{\nonshppict {\pict\wmetafile8 <datos>}}
                 //Formato 2 (Wordpad)     : {\pict\wmetafile8 <datos>}
 
-                string Text = "";
+                string Text;
 
                 if (this.FirstChild.NodeKey == "pict")
                 {
@@ -287,7 +287,7 @@ namespace Net.Sgoliver.NRtfTree
                     int dataSize = Text.Length / 2;
                     data = new byte[dataSize];
 
-                    StringBuilder sbaux = new StringBuilder(2);
+                    StringBuilder sbaux = new(2);
 
                     for (int i = 0; i < Text.Length; i++)
                     {

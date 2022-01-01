@@ -48,8 +48,6 @@ namespace StoryBuilder.ViewModels.Tools
                     foreach (string item in SkillList)
                         ExampleList.Add("(Skill): " + item);
                     break;
-                default:
-                    break;
             }
         }
 

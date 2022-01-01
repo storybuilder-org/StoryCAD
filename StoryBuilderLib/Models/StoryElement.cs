@@ -11,10 +11,7 @@ namespace StoryBuilder.Models
         #region  Properties
 
         private readonly Guid _uuid;
-        public Guid Uuid
-        {
-            get => _uuid;
-        }
+        public Guid Uuid => _uuid;
 
         private string _name;
         public string Name

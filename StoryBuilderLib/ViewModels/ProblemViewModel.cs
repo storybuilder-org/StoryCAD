@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Threading.Tasks;
-using ABI.Windows.ApplicationModel.Contacts.DataProvider;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
@@ -17,8 +11,11 @@ using StoryBuilder.Models;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.Services.Messages;
 using StoryBuilder.Services.Navigation;
-using StoryBuilder.Services.Dialogs.Tools;
-using WinRT;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Threading.Tasks;
 
 namespace StoryBuilder.ViewModels
 {
@@ -55,7 +52,7 @@ namespace StoryBuilder.ViewModels
             {
                 if (_changeable && (_name != value)) // Name changed?
                 {
-                    _logger.Log(LogLevel.Info, string.Format("Requesting Name change from {0} to {1}", _name, value));
+                    _logger.Log(LogLevel.Info, $"Requesting Name change from {_name} to {value}");
                     var msg = new NameChangeMessage(_name, value);
                     Messenger.Send(new NameChangedMessage(msg));
                 }

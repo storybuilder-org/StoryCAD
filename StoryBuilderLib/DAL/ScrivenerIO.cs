@@ -1,11 +1,11 @@
-﻿using Net.Sgoliver.NRtfTree.Core;
-using StoryBuilder.Models.Scrivener;
+﻿using StoryBuilder.Models.Scrivener;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Windows.Data.Xml.Dom;
 using Windows.Storage;
+using NRtfTree.Core;
 using XmlDocument = Windows.Data.Xml.Dom.XmlDocument;
 using XmlElement = Windows.Data.Xml.Dom.XmlElement;
 using XmlText = Windows.Data.Xml.Dom.XmlText;
@@ -88,11 +88,11 @@ namespace StoryBuilder.DAL
             string created = string.Empty;
             string modified = string.Empty;
             BinderItemType type = BinderItemType.Unknown;
-            string title;
 
             if (node.NodeName.Equals("Binder"))
-                for (int i = 0; i < node.ChildNodes.Count; i++)
-                    RecurseXmlNode(node.ChildNodes[i], parent);
+            {
+                foreach (IXmlNode Node in node.ChildNodes) { RecurseXmlNode(Node, parent); }
+            }
             else if (node.NodeName.Equals("BinderItem"))
             {
                 // Search for the attributes we want on a BindItem.
@@ -144,7 +144,7 @@ namespace StoryBuilder.DAL
                     }
                 }
                 var titleNode = node.SelectSingleNode("./Title");
-                title = titleNode != null ? titleNode.InnerText : string.Empty;
+                var title = titleNode != null ? titleNode.InnerText : string.Empty;
                 var children = node.SelectSingleNode("./Children");
                 // Process stbuuid
                 var metaData = node.SelectSingleNode("./MetaData");

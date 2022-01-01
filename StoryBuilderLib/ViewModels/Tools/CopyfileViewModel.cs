@@ -26,20 +26,8 @@ namespace StoryBuilder.ViewModels.Tools
             set { _changed = false; }
         }
 
-        public string Title
-        {
-            get => _title;
-            set => SetProperty(ref _title, value);
-        }
-
         #endregion
 
-        // Model entity collection sources
-        public ObservableCollection<SettingModel> Settings
-        {
-            get => _settings;
-            set => SetProperty(ref _settings, value);
-        }
         public ObservableCollection<CharacterModel> Characters
         {
             get => _characters;

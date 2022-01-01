@@ -23,7 +23,7 @@ namespace StoryBuilder.ViewModels.Tools
 
         #region Combobox and ListBox sources
 
-        public ObservableCollection<string> DataList = new ObservableCollection<string>();
+        public ObservableCollection<string> DataList = new();
 
         #endregion
 

@@ -28,14 +28,14 @@
  * Description:	Representa un documento RTF en forma de árbol.
  * ******************************************************************************/
 
-using Net.Sgoliver.NRtfTree.Util;
 using System;
 using System.Collections;
 using System.Drawing;
 using System.IO;
 using System.Text;
+using NRtfTree.Util;
 
-namespace Net.Sgoliver.NRtfTree
+namespace NRtfTree
 {
     namespace Core
     {
@@ -107,7 +107,7 @@ namespace Net.Sgoliver.NRtfTree
             public int LoadRtfFile(string path)
             {
                 //Resultado de la carga
-                int res = 0;
+                int res;
 
                 //Se abre el fichero de entrada
                 rtf = new StreamReader(path);
@@ -134,7 +134,7 @@ namespace Net.Sgoliver.NRtfTree
             public int LoadRtfText(string text)
             {
                 //Resultado de la carga
-                int res = 0;
+                int res ;
 
                 //Se abre el fichero de entrada
                 rtf = new StringReader(text);
@@ -159,10 +159,10 @@ namespace Net.Sgoliver.NRtfTree
             public void SaveRtf(string filePath)
             {
                 //Stream de salida
-                StreamWriter sw = new StreamWriter(filePath);
+                StreamWriter sw = new(filePath);
 
                 //Se trasforma el árbol RTF a Texto y se escribe al fichero
-                sw.WriteAsync(this.RootNode.Rtf);
+                sw.WriteAsync(RootNode.Rtf);
 
                 //Se cierra el fichero
                 sw.Flush();
@@ -171,7 +171,7 @@ namespace Net.Sgoliver.NRtfTree
 
             public string RtfText()
             {
-                return this.RootNode.Rtf;
+                return RootNode.Rtf;
             }
 
             /// <summary>
@@ -180,7 +180,7 @@ namespace Net.Sgoliver.NRtfTree
             /// <returns>Cadena de caracteres con la representación del documento.</returns>
             public override string ToString()
             {
-                string res = "";
+                string res;
 
                 res = toStringInm(rootNode, 0, false);
 
@@ -193,7 +193,7 @@ namespace Net.Sgoliver.NRtfTree
             /// <returns>Cadena de caracteres con la representación del documento.</returns>
             public string ToStringEx()
             {
-                string res = "";
+                string res;
 
                 res = toStringInm(rootNode, 0, true);
 
@@ -206,8 +206,8 @@ namespace Net.Sgoliver.NRtfTree
             /// <returns>Tabla de fuentes del documento RTF</returns>
             public String[] GetFontTable()
             {
-                ArrayList tabla = new ArrayList();
-                String[] tablaFuentes;
+                ArrayList tabla = new();
+                string[] tablaFuentes;
 
                 //Nodo raiz del documento
                 RtfTreeNode root = this.rootNode;
@@ -352,7 +352,7 @@ namespace Net.Sgoliver.NRtfTree
                 //Si existe el nodo "\info" exraemos toda la información.
                 if (infoNode != null)
                 {
-                    RtfTreeNode auxnode = null;
+                    RtfTreeNode auxnode;
 
                     info = new InfoGroup();
 
@@ -489,7 +489,7 @@ namespace Net.Sgoliver.NRtfTree
                 RtfTreeNode curNode = rootNode;
 
                 //Nuevos nodos para construir el árbol RTF
-                RtfTreeNode newNode = null;
+                RtfTreeNode newNode;
 
                 //Se obtiene el primer token
                 tok = lex.NextToken();
@@ -581,7 +581,7 @@ namespace Net.Sgoliver.NRtfTree
             private static string DecodeControlChar(int code, Encoding enc)
             {
                 //Contributed by Jan Stuchlík
-                return enc.GetString(new byte[] { (byte)code });
+                return enc.GetString(new[] { (byte)code });
             }
 
             /// <summary>
@@ -701,7 +701,7 @@ namespace Net.Sgoliver.NRtfTree
 
                 RtfTreeNode nprin = curNode;
 
-                RtfTreeNode nodo = new RtfTreeNode();
+                RtfTreeNode nodo;
 
                 for (int i = prim; i < nprin.ChildNodes.Count; i++)
                 {

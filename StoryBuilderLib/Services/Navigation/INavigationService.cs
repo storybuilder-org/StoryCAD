@@ -17,11 +17,7 @@ namespace StoryBuilder.Services.Navigation
 // </license>
 // ****************************************************************************
 {
-    /// <summary>
-    /// An interface defining how navigation between pages should
-    /// be performed in various frameworks such as Windows, 
-    /// Windows Phone, Android, iOS etc.
-    /// </summary>
+
     ////[ClassInfo(typeof(INavigationService),
     ////    VersionString = "5.3.5",
     ////    DateString = "201604212130",
@@ -34,7 +30,12 @@ namespace StoryBuilder.Services.Navigation
     /// prefixed to them, which specifies the Frame on which to display the Page,
     /// rather than than using Window.Current.Content. This was required in order
     /// to dplay to pages in the right-hand-side Frame (subframe) of SplitView.
-    /// 
+    ///
+    /// <summary>
+    /// An interface defining how navigation between pages should
+    /// be performed in various frameworks such as Windows, 
+    /// Windows Phone, Android, iOS etc.
+    /// </summary>
     public interface INavigationService
     {
         /// <summary>
@@ -82,9 +83,9 @@ namespace StoryBuilder.Services.Navigation
         /// Depending on the platforms, the navigation service might
         /// have to be configured with a key/page list.
         /// </summary>
-        /// <param name="frame"> The frame or subframe on which to display the page
-        /// <param name="pageKey">The key corresponding to the page
-        /// that should be displayed.</param>
+        /// <param name="frame"> The frame or subframe on which to display the page </param>
+        /// <param name="pageKey">The key corresponding to the page that should be displayed.</param>
+        /// </summary>
         void NavigateTo(Frame frame, string pageKey);
 
         /// <summary>
@@ -94,7 +95,7 @@ namespace StoryBuilder.Services.Navigation
         /// Depending on the platforms, the navigation service might 
         /// have to be Configure with a key/page list.
         /// </summary>
-        /// <param name="frame"> The frame or subframe on which to display the page
+        /// <param name="frame"> The frame or subframe on which to display the page </Param>
         /// <param name="pageKey">The key corresponding to the page
         /// that should be displayed.</param>
         /// <param name="parameter">The parameter that should be passed
