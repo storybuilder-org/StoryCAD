@@ -73,13 +73,9 @@
     <None Remove="Services\Dialogs\SaveAsDialog.xaml" />
     <None Remove="Services\Dialogs\Tools\About.xaml" />
     <None Remove="Services\Dialogs\UnifiedMenu.xaml" />
-    <None Remove="ViewModels\Tools\InitVM" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Assets\Install\**" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="ViewModels\Tools\InitVM" />
   </ItemGroup>
 
   <ItemGroup>

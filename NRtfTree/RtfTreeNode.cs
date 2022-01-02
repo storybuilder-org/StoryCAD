@@ -86,8 +86,8 @@ namespace NRtfTree
             {
                 children = new RtfNodeCollection();
 
-                this.type = RtfNodeType.None;
-                this.key = "";
+                type = RtfNodeType.None;
+                key = "";
 
                 /* Inicializados por defecto */
                 //this.param = 0;
@@ -104,8 +104,8 @@ namespace NRtfTree
             {
                 children = new RtfNodeCollection();
 
-                this.type = nodeType;
-                this.key = "";
+                type = nodeType;
+                key = "";
 
                 /* Inicializados por defecto */
                 //this.param = 0;
@@ -127,8 +127,8 @@ namespace NRtfTree
 
                 this.type = type;
                 this.key = key;
-                this.hasParam = hasParameter;
-                this.param = parameter;
+                hasParam = hasParameter;
+                param = parameter;
 
                 /* Inicializados por defecto */
                 //this.parent = null;
@@ -147,10 +147,10 @@ namespace NRtfTree
             {
                 children = new RtfNodeCollection();
 
-                this.type = (RtfNodeType)token.Type;
-                this.key = token.Key;
-                this.hasParam = token.HasParameter;
-                this.param = token.Parameter;
+                type = (RtfNodeType)token.Type;
+                key = token.Key;
+                hasParam = token.HasParameter;
+                param = token.Parameter;
 
                 /* Inicializados por defecto */
                 //this.parent = null;
@@ -232,23 +232,23 @@ namespace NRtfTree
             {
                 RtfTreeNode clon = new RtfTreeNode();
 
-                clon.key = this.key;
-                clon.hasParam = this.hasParam;
-                clon.param = this.param;
-                clon.parent = this.parent;
-                clon.root = this.root;
-                clon.type = this.type;
+                clon.key = key;
+                clon.hasParam = hasParam;
+                clon.param = param;
+                clon.parent = parent;
+                clon.root = root;
+                clon.type = type;
 
                 //Si cloneChildren=false se copia directamente la lista de hijos
                 if (!cloneChildren)
                 {
-                    clon.children = this.children;
+                    clon.children = children;
                 }
                 else  //En caso contrario se clonan también cada uno de los hijos, propagando el parámetro cloneChildren=true
                 {
                     clon.children = new RtfNodeCollection();
 
-                    foreach (RtfTreeNode child in this.children)
+                    foreach (RtfTreeNode child in children)
                     {
                         clon.children.Add(child.CloneNode(true));
                     }
@@ -580,7 +580,7 @@ namespace NRtfTree
             /// <returns>Primer nodo hermano del actual cuya palabra clave es la indicada como parámetro.</returns>
             public RtfTreeNode SelectSibling(string keyword)
             {
-                RtfTreeNode par = this.parent;
+                RtfTreeNode par = parent;
                 int curInd = par.ChildNodes.IndexOf(this);
 
                 int i = curInd + 1;
@@ -608,7 +608,7 @@ namespace NRtfTree
             /// <returns>Primer nodo hermano del actual cuyo tipo es el indicado como parámetro.</returns>
             public RtfTreeNode SelectSibling(RtfNodeType nodeType)
             {
-                RtfTreeNode par = this.parent;
+                RtfTreeNode par = parent;
                 int curInd = par.ChildNodes.IndexOf(this);
 
                 int i = curInd + 1;
@@ -637,7 +637,7 @@ namespace NRtfTree
             /// <returns>Primer nodo hermano del actual cuya palabra clave y parámetro son los indicados como parámetro.</returns>
             public RtfTreeNode SelectSibling(string keyword, int param)
             {
-                RtfTreeNode par = this.parent;
+                RtfTreeNode par = parent;
                 int curInd = par.ChildNodes.IndexOf(this);
 
                 int i = curInd + 1;
@@ -664,7 +664,7 @@ namespace NRtfTree
             /// <returns>Cadena de caracteres del tipo [TIPO, CLAVE, IND_PARAMETRO, VAL_PARAMETRO]</returns>
             public override string ToString()
             {
-                return "[" + this.type + ", " + this.key + ", " + this.hasParam + ", " + this.param + "]";
+                return "[" + type + ", " + key + ", " + hasParam + ", " + param + "]";
             }
 
             #endregion
@@ -679,7 +679,7 @@ namespace NRtfTree
             {
                 string res;
 
-                Encoding enc = this.tree.GetEncoding();
+                Encoding enc = tree.GetEncoding();
 
                 res = getRtfInm(this, null, enc);
 
@@ -812,10 +812,10 @@ namespace NRtfTree
             private void updateNodeRoot(RtfTreeNode node)
             {
                 //Se asigna el nodo raíz del documento
-                node.root = this.root;
+                node.root = root;
 
                 //Se asigna el árbol propietario del nodo
-                node.tree = this.tree;
+                node.tree = tree;
 
                 //Se actualizan recursivamente los hijos del nodo actual
                 foreach (RtfTreeNode nod in node.children)
@@ -957,7 +957,7 @@ namespace NRtfTree
             {
                 get
                 {
-                    return this.SelectSingleChildNode(keyword);
+                    return SelectSingleChildNode(keyword);
                 }
             }
 

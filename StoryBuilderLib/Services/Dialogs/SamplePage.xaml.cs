@@ -18,7 +18,7 @@ namespace StoryBuilder.Services.Dialogs
         private List<string> paths = new();
         public SamplePage(UnifiedVM vm)
         {
-            this.InitializeComponent();
+            InitializeComponent();
             foreach (string SampleStory in Directory.GetDirectories(Path.Combine(Windows.Storage.ApplicationData.Current.RoamingFolder.Path, @"Storybuilder\samples")))
             {
                 Samples.Items.Add(Path.GetFileName(SampleStory).Replace(".stbx", ""));

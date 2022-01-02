@@ -136,9 +136,8 @@ namespace StoryBuilder.DAL
         {
             OverviewModel rec = (OverviewModel)element;
             XmlNode overview = _xml.CreateElement("Overview");
-            XmlAttribute attr;
 
-            attr = _xml.CreateAttribute("UUID");
+            XmlAttribute attr = _xml.CreateAttribute("UUID");
             attr.Value = UuidString(rec.Uuid);
             overview.Attributes.Append(attr);
             attr = _xml.CreateAttribute("Name");
@@ -206,9 +205,8 @@ namespace StoryBuilder.DAL
         {
             ProblemModel rec = (ProblemModel)element;
             XmlNode prob = _xml.CreateElement("Problem");
-            XmlAttribute attr;
 
-            attr = _xml.CreateAttribute("UUID");
+            XmlAttribute attr = _xml.CreateAttribute("UUID");
             attr.Value = UuidString(rec.Uuid);
             prob.Attributes.Append(attr);
             attr = _xml.CreateAttribute("Name");
@@ -280,9 +278,8 @@ namespace StoryBuilder.DAL
         {
             CharacterModel rec = (CharacterModel)element;
             XmlNode chr = _xml.CreateElement("Character");
-            XmlAttribute attr;
 
-            attr = _xml.CreateAttribute("UUID");
+            XmlAttribute attr = _xml.CreateAttribute("UUID");
             attr.Value = UuidString(rec.Uuid);
             chr.Attributes.Append(attr);
             attr = _xml.CreateAttribute("Name");
@@ -643,9 +640,8 @@ namespace StoryBuilder.DAL
         {
             FolderModel rec = (FolderModel)element;
             XmlNode node = _xml.CreateElement("Folder");
-            XmlAttribute attr;
 
-            attr = _xml.CreateAttribute("UUID");
+            XmlAttribute attr = _xml.CreateAttribute("UUID");
             attr.Value = UuidString(rec.Uuid);
             node.Attributes.Append(attr);
             attr = _xml.CreateAttribute("Name");
@@ -662,9 +658,8 @@ namespace StoryBuilder.DAL
         {
             SectionModel rec = (SectionModel)element;
             XmlNode node = _xml.CreateElement("Section");
-            XmlAttribute attr;
 
-            attr = _xml.CreateAttribute("UUID");
+            XmlAttribute attr = _xml.CreateAttribute("UUID");
             attr.Value = UuidString(rec.Uuid);
             node.Attributes.Append(attr);
             attr = _xml.CreateAttribute("Name");
@@ -681,9 +676,8 @@ namespace StoryBuilder.DAL
         {
             TrashCanModel rec = (TrashCanModel)element;
             XmlNode node = _xml.CreateElement("TrashCan");
-            XmlAttribute attr;
 
-            attr = _xml.CreateAttribute("UUID");
+            XmlAttribute attr = _xml.CreateAttribute("UUID");
             attr.Value = UuidString(rec.Uuid);
             node.Attributes.Append(attr);
             attr = _xml.CreateAttribute("Name");
@@ -777,8 +771,8 @@ namespace StoryBuilder.DAL
             // //https://stackoverflow.com/questions/32948609/how-to-close-the-opened-storagefile
             StorageFolder folder = await FindSubFolder(uuid);
             StorageFile rtfFile = await folder.CreateFileAsync(rftFilename, CreationCollisionOption.ReplaceExisting);
-            await using var stream = await rtfFile.OpenStreamForWriteAsync();
-            await using var writer = new StreamWriter(stream);
+            await using Stream stream = await rtfFile.OpenStreamForWriteAsync();
+            await using StreamWriter writer = new(stream);
             await writer.WriteAsync(notes);
         }
 

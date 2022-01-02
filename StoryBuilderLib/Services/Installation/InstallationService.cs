@@ -101,7 +101,7 @@ namespace StoryBuilder.Services.Installation
             {
                 string[] path = File.Split("files");
                 string UUID = path[1].Replace(" ", "-");
-                File = path[0] + "files\\" + UUID.Substring(2); //Removes extra space in UUID
+                File = path[0] + "files\\" + UUID[2..]; //Removes extra space in UUID
             }
 
             Logger.Log(LogLevel.Trace, $"Got ideal path as {File}");
@@ -132,8 +132,9 @@ namespace StoryBuilder.Services.Installation
 
         /// <summary>
         /// This opens the internal manifiest data for a file and writes to the blank file made in CreateDummyFileAsync
+        /// <param name="DiskFile"> File to be written to</param>
+        /// <param name="InstallerFile"> manifest path eg StoryBUilder.Assets.Install</param>
         /// </summary>
-        /// <param name="DiskFile"></param>
         private async void WriteManifestData(StorageFile DiskFile, string InstallerFile)
         {
             List<Byte> ContentToWrite = new();

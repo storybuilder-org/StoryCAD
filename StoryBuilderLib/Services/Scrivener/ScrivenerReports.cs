@@ -136,7 +136,7 @@ namespace StoryBuilder.Services.Scrivener
                     draftFolder = child;
                     break;
                 }
-            List<BinderItem> draftFolderItems = new List<BinderItem>();
+            List<BinderItem> draftFolderItems = new();
             foreach (BinderItem node in draftFolder)
             {
                 draftFolderItems.Add(node);
@@ -215,14 +215,14 @@ namespace StoryBuilder.Services.Scrivener
 
         public BinderItem AddFolder(BinderItem parent, string title)
         {
-            BinderItem item = new BinderItem(0, NewUuid(), BinderItemType.Folder, title);
+            BinderItem item = new(0, NewUuid(), BinderItemType.Folder, title);
             parent.Children.Add(item);
             return item;
         }
 
         public BinderItem InsertFolderBefore(BinderItem parent, string after, string title)
         {
-            BinderItem item = new BinderItem(0, NewUuid(), BinderItemType.Folder, title);
+            BinderItem item = new(0, NewUuid(), BinderItemType.Folder, title);
             parent.Children.Insert(FolderIndex(_binderNode, after), item);
             return item;
         }
@@ -247,7 +247,7 @@ namespace StoryBuilder.Services.Scrivener
 
         public BinderItem AddText(BinderItem parent, string title)
         {
-            BinderItem item = new BinderItem(0, NewUuid(), BinderItemType.Text, title);
+            BinderItem item = new(0, NewUuid(), BinderItemType.Text, title);
             parent.Children.Add(item);
             return item;
         }
@@ -267,7 +267,7 @@ namespace StoryBuilder.Services.Scrivener
                     type = BinderItemType.Text;
                     break;
             }
-            BinderItem binderItem = new BinderItem(0, StoryWriter.UuidString(node.Uuid), type, node.Name, parent);
+            BinderItem binderItem = new(0, StoryWriter.UuidString(node.Uuid), type, node.Name, parent);
             foreach (StoryNodeItem child in node.Children)
                 RecurseStoryModelNode(child, binderItem);
         }
@@ -275,7 +275,7 @@ namespace StoryBuilder.Services.Scrivener
         public async Task ProcessPreviousNotes()
         {
             _stbNotes = new StringBuilder(string.Empty);
-            ///TODO: Activate notes collecting
+            //TODO: Activate notes collecting
             await LoadPreviousNotes();
             await ReadScrivenerNotes();
             await SaveScrivenerNotes();
@@ -299,7 +299,7 @@ namespace StoryBuilder.Services.Scrivener
                 return;
 
             // Look for 'Previous Scrivener Notes' in the old StoryBuilder's Miscellaneous subfolder and read it. (see ScrivenerReports)
-            foreach (BinderItem node in (_miscNode))
+            foreach (BinderItem node in _miscNode)
             {
                 if (node.Type == BinderItemType.Text)
                 {
@@ -307,7 +307,7 @@ namespace StoryBuilder.Services.Scrivener
                     {
                         StorageFolder di = await _scrivener.GetSubFolder(node.Uuid);
                         // There should be only one text file in the folder
-                        var files = await di.GetFilesAsync();
+                        IReadOnlyList<StorageFile> files = await di.GetFilesAsync();
                         if (files.Count != 1)
                             return;
                         // It should be a content.rtf file
@@ -357,11 +357,11 @@ namespace StoryBuilder.Services.Scrivener
         /// </summary>
         public async Task SaveScrivenerNotes()
         {
-            ///TODO: Complete SaveScrivenerNotes code
+            //TODO: Complete SaveScrivenerNotes code
             await Task.Run(() =>
             {
                 // Add a BinderItem for the report under the Miscellaneous folder
-                BinderItem story = new BinderItem(0, NewUuid(), BinderItemType.Text, "Previous Scrivener Notes", _miscNode);
+                BinderItem story = new(0, NewUuid(), BinderItemType.Text, "Previous Scrivener Notes", _miscNode);
                 // Create a folder for the document
                 string path = Path.Combine(_scrivener.ProjectPath, "Files", "Data", story.Uuid, "content.rtf");
                 // Locate and open the output content.rtf report
@@ -370,11 +370,11 @@ namespace StoryBuilder.Services.Scrivener
                 //StorageFile contents = await di.CreateFileAsync("content.rtf", CreationCollisionOption.ReplaceExisting);
 
                 // Create the document itself
-                RtfDocument doc = new RtfDocument(path);
+                RtfDocument doc = new(path);
 
                 //StorageFile rtfFile = await di.CreateFileAsync("content.rtf", CreationCollisionOption.ReplaceExisting);
                 // Add formatting for it
-                RtfTextFormat format = new RtfTextFormat();
+                RtfTextFormat format = new();
                 format.font = "Calibri";
                 format.size = 12;
                 format.bold = false;
@@ -406,7 +406,7 @@ namespace StoryBuilder.Services.Scrivener
         private async Task RecurseStoryElementReports(BinderItem node)
         {
             StoryElement element = null;
-            Guid uuid = new Guid(node.Uuid);
+            Guid uuid = new(node.Uuid);
             if (_model.StoryElements.StoryElementGuids.ContainsKey(uuid))
                 element = _model.StoryElements.StoryElementGuids[uuid];
             if (element != null)
@@ -456,9 +456,9 @@ namespace StoryBuilder.Services.Scrivener
             StorageFile contents = await di.CreateFileAsync("content.rtf", CreationCollisionOption.ReplaceExisting);
             // Create the document itself
             //RtfDocument doc = new RtfDocument(Path.Combine(di.Path, "content.rtf"));
-            RtfDocument doc = new RtfDocument(string.Empty);
+            RtfDocument doc = new(string.Empty);
             // Add formatting for it
-            RtfTextFormat format = new RtfTextFormat();
+            RtfTextFormat format = new();
             format.font = "Calibri";
             format.size = 12;
             format.bold = false;
@@ -485,7 +485,7 @@ namespace StoryBuilder.Services.Scrivener
             foreach (string line in lines)
             {
                 // Parse the report
-                StringBuilder sb = new StringBuilder(line);
+                StringBuilder sb = new(line);
                 sb.Replace("@Title", overview.Name);
                 sb.Replace("@CreateDate", overview.DateCreated);
                 sb.Replace("@ModifiedDate", overview.DateModified);
@@ -539,9 +539,9 @@ namespace StoryBuilder.Services.Scrivener
             StorageFile contents = await di.CreateFileAsync("content.rtf", CreationCollisionOption.ReplaceExisting);
             // Create the document itself
             //RtfDocument doc = new RtfDocument(Path.Combine(di.Path, "content.rtf"));
-            RtfDocument doc = new RtfDocument(string.Empty);
+            RtfDocument doc = new(string.Empty);
             // Add formatting for it
-            RtfTextFormat format = new RtfTextFormat();
+            RtfTextFormat format = new();
             format.font = "Calibri";
             format.size = 12;
             format.bold = false;
@@ -557,7 +557,7 @@ namespace StoryBuilder.Services.Scrivener
                         if (element.Type == StoryItemType.Problem)
                         {
                             ProblemModel chr = (ProblemModel)element;
-                            StringBuilder sb = new StringBuilder(line);
+                            StringBuilder sb = new(line);
                             sb.Replace("@Description", chr.Name);
                             doc.AddText(sb.ToString(), format);
                             doc.AddNewLine();
@@ -591,9 +591,9 @@ namespace StoryBuilder.Services.Scrivener
             StorageFile contents = await di.CreateFileAsync("content.rtf", CreationCollisionOption.ReplaceExisting);
             // Create the document itself
             //RtfDocument doc = new RtfDocument(Path.Combine(di.Path, "content.rtf"));
-            RtfDocument doc = new RtfDocument(string.Empty);
+            RtfDocument doc = new(string.Empty);
             // Add formatting for it
-            RtfTextFormat format = new RtfTextFormat();
+            RtfTextFormat format = new();
             format.font = "Calibri";
             format.size = 12;
             format.bold = false;
@@ -610,7 +610,7 @@ namespace StoryBuilder.Services.Scrivener
             // Parse and write the report
             foreach (string line in lines)
             {
-                StringBuilder sb = new StringBuilder(line);
+                StringBuilder sb = new(line);
                 sb.Replace("@Id", node.Id.ToString());
                 sb.Replace("@Title", problem.Name);
                 sb.Replace("@ProblemType", problem.ProblemType);
@@ -656,9 +656,9 @@ namespace StoryBuilder.Services.Scrivener
             StorageFile contents = await di.CreateFileAsync("content.rtf", CreationCollisionOption.ReplaceExisting);
             // Create the document itself
             //RtfDocument doc = new RtfDocument(Path.Combine(di.Path, "content.rtf"));
-            RtfDocument doc = new RtfDocument(string.Empty);
+            RtfDocument doc = new(string.Empty);
             // Add formatting for it
-            RtfTextFormat format = new RtfTextFormat();
+            RtfTextFormat format = new();
             format.font = "Calibri";
             format.size = 12;
             format.bold = false;
@@ -674,7 +674,7 @@ namespace StoryBuilder.Services.Scrivener
                         if (element.Type == StoryItemType.Character)
                         {
                             CharacterModel chr = (CharacterModel)element;
-                            StringBuilder sb = new StringBuilder(line);
+                            StringBuilder sb = new(line);
                             sb.Replace("@Description", chr.Name);
                             doc.AddText(sb.ToString(), format);
                             doc.AddNewLine();
@@ -707,9 +707,9 @@ namespace StoryBuilder.Services.Scrivener
             StorageFile contents = await di.CreateFileAsync("content.rtf", CreationCollisionOption.ReplaceExisting);
             // Create the document itself
             //RtfDocument doc = new RtfDocument(Path.Combine(di.Path, "content.rtf"));
-            RtfDocument doc = new RtfDocument(string.Empty);
+            RtfDocument doc = new(string.Empty);
             // Add formatting for it
-            RtfTextFormat format = new RtfTextFormat();
+            RtfTextFormat format = new();
             format.font = "Calibri";
             format.size = 12;
             format.bold = false;
@@ -739,7 +739,7 @@ namespace StoryBuilder.Services.Scrivener
             // Parse and write the report
             foreach (string line in lines)
             {
-                StringBuilder sb = new StringBuilder(line);
+                StringBuilder sb = new(line);
                 //Story Role section
                 sb.Replace("@Id", node.Id.ToString());
                 sb.Replace("@Title", character.Name);
@@ -837,9 +837,9 @@ namespace StoryBuilder.Services.Scrivener
             StorageFile contents = await di.CreateFileAsync("content.rtf", CreationCollisionOption.ReplaceExisting);
             // Create the document itself
             //RtfDocument doc = new RtfDocument(Path.Combine(di.Path, "content.rtf"));
-            RtfDocument doc = new RtfDocument(string.Empty);
+            RtfDocument doc = new(string.Empty);
             // Add formatting for it
-            RtfTextFormat format = new RtfTextFormat();
+            RtfTextFormat format = new();
             format.font = "Calibri";
             format.size = 12;
             format.bold = false;
@@ -855,7 +855,7 @@ namespace StoryBuilder.Services.Scrivener
                         if (element.Type == StoryItemType.Setting)
                         {
                             SettingModel loc = (SettingModel)element;
-                            StringBuilder sb = new StringBuilder(line);
+                            StringBuilder sb = new(line);
                             sb.Replace("@Id", loc.Id.ToString());
                             sb.Replace("@Name", loc.Name);
                             //SETTING SECTION
@@ -909,9 +909,9 @@ namespace StoryBuilder.Services.Scrivener
             StorageFile contents = await di.CreateFileAsync("content.rtf", CreationCollisionOption.ReplaceExisting);
             // Create the document itself
             //RtfDocument doc = new RtfDocument(Path.Combine(di.Path, "content.rtf"));
-            RtfDocument doc = new RtfDocument(string.Empty);
+            RtfDocument doc = new(string.Empty);
             // Add formatting for it
-            RtfTextFormat format = new RtfTextFormat();
+            RtfTextFormat format = new();
             format.font = "Calibri";
             format.size = 12;
             format.bold = false;
@@ -932,7 +932,7 @@ namespace StoryBuilder.Services.Scrivener
             // Parse and write the report
             foreach (string line in lines)
             {
-                StringBuilder sb = new StringBuilder(line);
+                StringBuilder sb = new(line);
                 sb.Replace("@Id", node.Id.ToString());
                 sb.Replace("@Title", setting.Name);
                 sb.Replace("@Locale", setting.Locale);
@@ -980,9 +980,9 @@ namespace StoryBuilder.Services.Scrivener
             StorageFile contents = await di.CreateFileAsync("content.rtf", CreationCollisionOption.ReplaceExisting);
             // Create the document itself
             //RtfDocument doc = new RtfDocument(Path.Combine(di.Path, "content.rtf"));
-            RtfDocument doc = new RtfDocument(string.Empty);
+            RtfDocument doc = new(string.Empty);
             // Add formatting for it
-            RtfTextFormat format = new RtfTextFormat();
+            RtfTextFormat format = new();
             format.font = "Calibri";
             format.size = 12;
             format.bold = false;
@@ -998,7 +998,7 @@ namespace StoryBuilder.Services.Scrivener
                         if (element.Type == StoryItemType.Scene)
                         {
                             SceneModel chr = (SceneModel)element;
-                            StringBuilder sb = new StringBuilder(line);
+                            StringBuilder sb = new(line);
                             sb.Replace("@Description", chr.Name);
                             doc.AddText(sb.ToString(), format);
                             doc.AddNewLine();
@@ -1031,9 +1031,9 @@ namespace StoryBuilder.Services.Scrivener
             StorageFile contents = await di.CreateFileAsync("content.rtf", CreationCollisionOption.ReplaceExisting);
             // Create the document itself
             //RtfDocument doc = new RtfDocument(Path.Combine(di.Path, "content.rtf"));
-            RtfDocument doc = new RtfDocument(string.Empty);
+            RtfDocument doc = new(string.Empty);
             // Add formatting for it
-            RtfTextFormat format = new RtfTextFormat();
+            RtfTextFormat format = new();
             format.font = "Calibri";
             format.size = 12;
             format.bold = false;
@@ -1058,7 +1058,7 @@ namespace StoryBuilder.Services.Scrivener
             // Parse and write the report
             foreach (string line in lines)
             {
-                StringBuilder sb = new StringBuilder(line);
+                StringBuilder sb = new(line);
                 //SCENE OVERVIEW SECTION
                 sb.Replace("@Title", scene.Name);
                 sb.Replace("@Date", scene.Date);
@@ -1073,7 +1073,7 @@ namespace StoryBuilder.Services.Scrivener
                     {
                         StoryElement castMember = StringToStoryElement(seCastMember);
                         string castMemberName = castMember?.Name ?? string.Empty;
-                        StringBuilder sbCast = new StringBuilder(line);
+                        StringBuilder sbCast = new(line);
                         sbCast.Replace("@CastMember", castMemberName);
                         doc.AddText(sbCast.ToString());
                         doc.AddNewLine();
@@ -1130,9 +1130,9 @@ namespace StoryBuilder.Services.Scrivener
             StorageFile contents = await di.CreateFileAsync("content.rtf", CreationCollisionOption.ReplaceExisting);
             // Create the document itself
             //RtfDocument doc = new RtfDocument(Path.Combine(di.Path, "content.rtf"));
-            RtfDocument doc = new RtfDocument(string.Empty);
+            RtfDocument doc = new(string.Empty);
             // Add formatting for it
-            RtfTextFormat format = new RtfTextFormat();
+            RtfTextFormat format = new();
             format.font = "Calibri";
             format.size = 12;
             format.bold = false;
@@ -1145,7 +1145,7 @@ namespace StoryBuilder.Services.Scrivener
             // Parse and write the report
             foreach (string line in lines)
             {
-                StringBuilder sb = new StringBuilder(line);
+                StringBuilder sb = new(line);
                 sb.Replace("@Name", folder.Name);
                 sb.Replace("@Notes", folder.Notes);
                 doc.AddText(sb.ToString(), format);
@@ -1173,9 +1173,9 @@ namespace StoryBuilder.Services.Scrivener
             StorageFile contents = await di.CreateFileAsync("content.rtf", CreationCollisionOption.ReplaceExisting);
             // Create the document itself
             //RtfDocument doc = new RtfDocument(Path.Combine(di.Path, "content.rtf"));
-            RtfDocument doc = new RtfDocument(string.Empty);
+            RtfDocument doc = new(string.Empty);
             // Add formatting for it
-            RtfTextFormat format = new RtfTextFormat();
+            RtfTextFormat format = new();
             format.font = "Calibri";
             format.size = 12;
             format.bold = false;
@@ -1188,7 +1188,7 @@ namespace StoryBuilder.Services.Scrivener
             // Parse and write the report
             foreach (string line in lines)
             {
-                StringBuilder sb = new StringBuilder(line);
+                StringBuilder sb = new(line);
                 sb.Replace("@Id", node.Id.ToString());
                 sb.Replace("@Name", section.Name);
                 sb.Replace("@Notes", section.Notes);
@@ -1214,9 +1214,9 @@ namespace StoryBuilder.Services.Scrivener
             // Create a folder for the document
             StorageFolder di = await _scrivener.GetSubFolder(node.Uuid);
             // Create the document itself
-            RtfDocument doc = new RtfDocument(Path.Combine(di.Path, "content.rtf"));
+            RtfDocument doc = new(Path.Combine(di.Path, "content.rtf"));
             // Add formatting for it
-            RtfTextFormat format = new RtfTextFormat();
+            RtfTextFormat format = new();
             format.font = "Calibri";
             format.size = 12;
             format.bold = false;
@@ -1232,7 +1232,7 @@ namespace StoryBuilder.Services.Scrivener
                     {
                         StoryElement scn = _model.StoryElements.StoryElementGuids[child.Uuid];
                         SceneModel scene = (SceneModel)scn;
-                        var sb = new StringBuilder(line);
+                        StringBuilder sb = new(line);
                         sb.Replace("@Synopsis", $"[{scene.Name}] {scene.Description}");
                         doc.AddText(sb.ToString());
                         doc.AddNewLine();
@@ -1257,7 +1257,7 @@ namespace StoryBuilder.Services.Scrivener
         private string GetRtfText(string rtfInput)
         {
             //Create the RTF tree object
-            RtfTree tree = new RtfTree();
+            RtfTree tree = new();
 
             //Load and parse RTF document
             tree.LoadRtfText(rtfInput);
@@ -1265,13 +1265,13 @@ namespace StoryBuilder.Services.Scrivener
             //Get root node
             RtfTreeNode root = tree.RootNode;
 
-            RtfTreeNode node = new RtfTreeNode();
+            RtfTreeNode node = new();
 
             //Search first Text Node
             RtfTreeNode textNode =    tree.RootNode.FirstChild.SelectSingleChildNode(RtfNodeType.Text);
 
             RtfNodeCollection nodes = tree.RootNode.FirstChild.SelectChildNodes(RtfNodeType.Text);
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new();
             foreach (RtfTreeNode n in nodes)
                 sb.Append(n.NodeKey);
             return sb.ToString();
@@ -1285,10 +1285,10 @@ namespace StoryBuilder.Services.Scrivener
                 StorageFolder localFolder = ApplicationData.Current.RoamingFolder;
                 StorageFolder stbFolder = await localFolder.GetFolderAsync("StoryBuilder");
                 StorageFolder templatesFolder = await stbFolder.GetFolderAsync("reports");
-                var templates = await templatesFolder.GetFilesAsync();
-                foreach (var fi in templates)
+                IReadOnlyList<StorageFile> templates = await templatesFolder.GetFilesAsync();
+                foreach (StorageFile fi in templates)
                 {
-                    string name = fi.DisplayName.Substring(0, fi.Name.Length - 4);
+                    string name = fi.DisplayName[..(fi.Name.Length - 4)];
                     string text = await FileIO.ReadTextAsync(fi);
 
                     _templates.Add(name, text);
@@ -1320,7 +1320,6 @@ namespace StoryBuilder.Services.Scrivener
         {
             XmlElement customMetaData = (XmlElement)_scrivener.CustomMetaDataSettings;
             IXmlNode stbUuid = (XmlElement)_scrivener.StbUuidSetting;
-            XmlAttribute attr;
 
             if (stbUuid != null)        // the setting already exits
                 return;
@@ -1333,7 +1332,7 @@ namespace StoryBuilder.Services.Scrivener
 
             stbUuid = _scrivener.XmlDocument.CreateElement("MetaDataField");
 
-            attr = _scrivener.XmlDocument.CreateAttribute("Type");
+            XmlAttribute attr = _scrivener.XmlDocument.CreateAttribute("Type");
             attr.Value = "Text";
             stbUuid.Attributes.SetNamedItem(attr);
             attr = _scrivener.XmlDocument.CreateAttribute("ID");
@@ -1358,9 +1357,6 @@ namespace StoryBuilder.Services.Scrivener
 
         private void SetLabelSettings()
         {
-
-            XmlAttribute attr;
-
             // Create a replacement LabelSettings node with my label values
             XmlElement labelSettings = _scrivener.XmlDocument.CreateElement("LabelSettings");
 
@@ -1374,7 +1370,7 @@ namespace StoryBuilder.Services.Scrivener
             labelSettings.AppendChild(labels);
             // Generate each label 
             IXmlNode label = _scrivener.XmlDocument.CreateElement("Label");
-            attr = _scrivener.XmlDocument.CreateAttribute("ID");
+            XmlAttribute attr = _scrivener.XmlDocument.CreateAttribute("ID");
             attr.Value = "-1";
             label.Attributes.SetNamedItem(attr);
             label.InnerText = "No Label";

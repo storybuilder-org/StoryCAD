@@ -63,15 +63,15 @@ namespace NRtfTree
                 if (node != null)
                 {
                     //Asignamos todos los campos del nodo
-                    this.NodeKey = node.NodeKey;
-                    this.HasParameter = node.HasParameter;
-                    this.Parameter = node.Parameter;
-                    this.ParentNode = node.ParentNode;
-                    this.RootNode = node.RootNode;
-                    this.NodeType = node.NodeType;
+                    NodeKey = node.NodeKey;
+                    HasParameter = node.HasParameter;
+                    Parameter = node.Parameter;
+                    ParentNode = node.ParentNode;
+                    RootNode = node.RootNode;
+                    NodeType = node.NodeType;
 
-                    this.ChildNodes.Clear();
-                    this.ChildNodes.AddRange(node.ChildNodes);
+                    ChildNodes.Clear();
+                    ChildNodes.AddRange(node.ChildNodes);
 
                     //Obtenemos los datos de la imagen como un array de bytes
                     GetImageData();
@@ -89,7 +89,7 @@ namespace NRtfTree
             {
                 get
                 {
-                    return this.SelectSingleChildNode(RtfNodeType.Text).NodeKey;
+                    return SelectSingleChildNode(RtfNodeType.Text).NodeKey;
                 }
             }
 
@@ -100,15 +100,15 @@ namespace NRtfTree
             {
                 get
                 {
-                    if (this.SelectSingleChildNode("jpegblip") != null)
+                    if (SelectSingleChildNode("jpegblip") != null)
                         return System.Drawing.Imaging.ImageFormat.Jpeg;
-                    else if (this.SelectSingleChildNode("pngblip") != null)
+                    else if (SelectSingleChildNode("pngblip") != null)
                         return System.Drawing.Imaging.ImageFormat.Png;
-                    else if (this.SelectSingleChildNode("emfblip") != null)
+                    else if (SelectSingleChildNode("emfblip") != null)
                         return System.Drawing.Imaging.ImageFormat.Emf;
-                    else if (this.SelectSingleChildNode("wmetafile") != null)
+                    else if (SelectSingleChildNode("wmetafile") != null)
                         return System.Drawing.Imaging.ImageFormat.Wmf;
-                    else if (this.SelectSingleChildNode("dibitmap") != null || this.SelectSingleChildNode("wbitmap") != null)
+                    else if (SelectSingleChildNode("dibitmap") != null || SelectSingleChildNode("wbitmap") != null)
                         return System.Drawing.Imaging.ImageFormat.Bmp;
                     else
                         return null;
@@ -122,7 +122,7 @@ namespace NRtfTree
             {
                 get
                 {
-                    RtfTreeNode node = this.SelectSingleChildNode("picw");
+                    RtfTreeNode node = SelectSingleChildNode("picw");
 
                     if (node != null)
                         return node.Parameter;
@@ -138,7 +138,7 @@ namespace NRtfTree
             {
                 get
                 {
-                    RtfTreeNode node = this.SelectSingleChildNode("pich");
+                    RtfTreeNode node = SelectSingleChildNode("pich");
 
                     if (node != null)
                         return node.Parameter;
@@ -154,7 +154,7 @@ namespace NRtfTree
             {
                 get
                 {
-                    RtfTreeNode node = this.SelectSingleChildNode("picwgoal");
+                    RtfTreeNode node = SelectSingleChildNode("picwgoal");
 
                     if (node != null)
                         return node.Parameter;
@@ -170,7 +170,7 @@ namespace NRtfTree
             {
                 get
                 {
-                    RtfTreeNode node = this.SelectSingleChildNode("pichgoal");
+                    RtfTreeNode node = SelectSingleChildNode("pichgoal");
 
                     if (node != null)
                         return node.Parameter;
@@ -186,7 +186,7 @@ namespace NRtfTree
             {
                 get
                 {
-                    RtfTreeNode node = this.SelectSingleChildNode("picescalex");
+                    RtfTreeNode node = SelectSingleChildNode("picescalex");
 
                     if (node != null)
                         return node.Parameter;
@@ -202,7 +202,7 @@ namespace NRtfTree
             {
                 get
                 {
-                    RtfTreeNode node = this.SelectSingleChildNode("picescaley");
+                    RtfTreeNode node = SelectSingleChildNode("picescaley");
 
                     if (node != null)
                         return node.Parameter;
@@ -236,7 +236,7 @@ namespace NRtfTree
 
                     //Escribir a un fichero cualquier tipo de imagen
                     Bitmap bitmap = new(stream);
-                    bitmap.Save(filePath, this.ImageFormat);
+                    bitmap.Save(filePath, ImageFormat);
                 }
             }
 
@@ -280,9 +280,9 @@ namespace NRtfTree
 
                 string Text;
 
-                if (this.FirstChild.NodeKey == "pict")
+                if (FirstChild.NodeKey == "pict")
                 {
-                    Text = this.SelectSingleChildNode(RtfNodeType.Text).NodeKey;
+                    Text = SelectSingleChildNode(RtfNodeType.Text).NodeKey;
 
                     int dataSize = Text.Length / 2;
                     data = new byte[dataSize];

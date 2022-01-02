@@ -14,8 +14,8 @@ namespace StoryBuilder.Views
 
         public ScenePage()
         {
-            this.InitializeComponent();
-            this.DataContext = SceneVm;
+            InitializeComponent();
+            DataContext = SceneVm;
         }
     }
 }

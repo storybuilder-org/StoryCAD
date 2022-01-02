@@ -214,7 +214,7 @@
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
                         <ComboBox Header="Adventurousness" Grid.Column="0" IsEditable="True" Width="200"
-                                  ItemsSource="{x:Bind CharVm.AdventureousnessList}"
+                                  ItemsSource="{x:Bind CharVm.AdventurousnessList}"
                                   SelectedItem="{x:Bind CharVm.Adventurousness, Mode=TwoWay}" />
                         <TextBlock Grid.Column="1" Width="100"/>
                         <ComboBox Header="Aggression" Grid.Column="2" IsEditable="True" Width="200"

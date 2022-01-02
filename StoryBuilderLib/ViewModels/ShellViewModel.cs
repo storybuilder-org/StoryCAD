@@ -341,7 +341,7 @@ namespace StoryBuilder.ViewModels
         {
             _canExecuteCommands = false;
             // Needs logging
-            _contentDialog = new();
+            _contentDialog = new ContentDialog();
             _contentDialog.XamlRoot = GlobalData.XamlRoot;
             _contentDialog.Content = new UnifiedMenuPage();
             await _contentDialog.ShowAsync();
@@ -492,7 +492,7 @@ namespace StoryBuilder.ViewModels
             Logger.Log(LogLevel.Info, $"TreeViewNodeClicked for {selectedItem}");
 
             try {
-                var nav = Ioc.Default.GetService<NavigationService>();
+                NavigationService nav = Ioc.Default.GetService<NavigationService>();
                 if (selectedItem is StoryNodeItem node)
                 {
                     CurrentNode = node;
@@ -537,7 +537,7 @@ namespace StoryBuilder.ViewModels
         {
             Logger.Log(LogLevel.Info, "ShowHomePage");
     
-            var nav = Ioc.Default.GetService<NavigationService>();
+            NavigationService nav = Ioc.Default.GetService<NavigationService>();
             nav.NavigateTo(SplitViewFrame, HomePage);
         }
 
@@ -627,7 +627,7 @@ namespace StoryBuilder.ViewModels
 
                 //var window = new Window();
                 //var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(window);
-                var folderPicker = new FolderPicker();
+                FolderPicker folderPicker = new();
                 WinRT.Interop.InitializeWithWindow.Initialize(folderPicker, GlobalData.WindowHandle);
                 //Make folder Picker works in Win32
                 //if (Window.Current == null)
@@ -761,7 +761,7 @@ namespace StoryBuilder.ViewModels
             try
             {
                 await CreateProjectFile();
-                var file = _story.ProjectFile;
+                StorageFile file = _story.ProjectFile;
                 if (file != null)
                 {
                     StoryWriter wtr = Ioc.Default.GetService<StoryWriter>();
@@ -805,7 +805,7 @@ namespace StoryBuilder.ViewModels
                 SaveAsVM.ProjectName = _story.ProjectFilename;
                 SaveAsVM.ProjectPathName = _story.ProjectPath;
 
-                var result = await SaveAsDialog.ShowAsync();
+                ContentDialogResult result = await SaveAsDialog.ShowAsync();
 
                 if (result == ContentDialogResult.Primary) //If save is clicked
                 {
@@ -871,7 +871,7 @@ namespace StoryBuilder.ViewModels
             }
             replaceDialog.XamlRoot = GlobalData.XamlRoot;
             ContentDialogResult result = await replaceDialog.ShowAsync();
-            return (result == ContentDialogResult.Primary);
+            return result == ContentDialogResult.Primary;
 
         }
 
@@ -953,27 +953,31 @@ namespace StoryBuilder.ViewModels
             PreferencesDialog.SecondaryButtonText = "About StoryBuilder";
             PreferencesDialog.CloseButtonText = "Cancel";
 
-            var result = await PreferencesDialog.ShowAsync();
-            if (result == ContentDialogResult.Primary) // Save changes
+            ContentDialogResult result = await PreferencesDialog.ShowAsync();
+            switch (result)
             {
-                await Ioc.Default.GetService<PreferencesViewModel>().SaveAsync();
-                Logger.Log(LogLevel.Info, "Preferences update completed");
-                StatusMessage = "Preferences updated";
-            }
-            else if (result == ContentDialogResult.Secondary)
-            {
-                ContentDialog AboutDialog = new();
-                AboutDialog.XamlRoot = GlobalData.XamlRoot;
-                AboutDialog.Content = new About();
-                AboutDialog.Width = 900;
-                AboutDialog.Title = "About StoryBuilder";
-                AboutDialog.CloseButtonText = "Close";
-                await AboutDialog.ShowAsync();
-            }
-            else //don't save changes
-            {
-                Logger.Log(LogLevel.Info, "Preferences update canceled");
-                StatusMessage = "Preferences closed";
+                // Save changes
+                case ContentDialogResult.Primary:
+                    await Ioc.Default.GetService<PreferencesViewModel>().SaveAsync();
+                    Logger.Log(LogLevel.Info, "Preferences update completed");
+                    StatusMessage = "Preferences updated";
+                    break;
+                case ContentDialogResult.Secondary:
+                {
+                    ContentDialog AboutDialog = new();
+                    AboutDialog.XamlRoot = GlobalData.XamlRoot;
+                    AboutDialog.Content = new About();
+                    AboutDialog.Width = 900;
+                    AboutDialog.Title = "About StoryBuilder";
+                    AboutDialog.CloseButtonText = "Close";
+                    await AboutDialog.ShowAsync();
+                    break;
+                }
+                //don't save changes
+                default:
+                    Logger.Log(LogLevel.Info, "Preferences update canceled");
+                    StatusMessage = "Preferences closed";
+                    break;
             }
 
         }
@@ -1025,7 +1029,7 @@ namespace StoryBuilder.ViewModels
             dialog.PrimaryButtonText = "Copy";
             dialog.SecondaryButtonText = "Cancel";
             dialog.Content = new MasterPlotsDialog();
-            var result = await dialog.ShowAsync();
+            ContentDialogResult result = await dialog.ShowAsync();
 
             if (result == ContentDialogResult.Primary)   // Copy command
             {
@@ -1043,7 +1047,7 @@ namespace StoryBuilder.ViewModels
                     RightTappedNode.IsExpanded = true;
                     newNode.IsSelected = true;
                 }
-                var msg = $"MasterPlot {masterPlotName} inserted";
+                string msg = $"MasterPlot {masterPlotName} inserted";
                 StatusMessage = msg;
                 Logger.Log(LogLevel.Info, msg);
                 ShowChange();
@@ -1069,35 +1073,42 @@ namespace StoryBuilder.ViewModels
             dialog.SecondaryButtonText = "Copy as scene";
             dialog.CloseButtonText = "Cancel";
             dialog.Content = new DramaticSituationsDialog();
-            var result = await dialog.ShowAsync();
+            ContentDialogResult result = await dialog.ShowAsync();
 
             DramaticSituationModel situationModel = Ioc.Default.GetService<DramaticSituationsViewModel>().Situation;
             StoryNodeItem newNode = null;
             string msg;
-            if (result == ContentDialogResult.Primary)
+            switch (result)
             {
-                ProblemModel problem = new(StoryModel);
-                problem.Name = situationModel.SituationName;
-                problem.StoryQuestion = "See Notes.";
-                problem.Notes = situationModel.Notes;
+                case ContentDialogResult.Primary:
+                {
+                    ProblemModel problem = new(StoryModel);
+                    problem.Name = situationModel.SituationName;
+                    problem.StoryQuestion = "See Notes.";
+                    problem.Notes = situationModel.Notes;
 
-                // Insert the new Problem as the target's child
-                newNode = new StoryNodeItem(problem, RightTappedNode);
-                msg = $"Problem {situationModel.SituationName} inserted";
-                ShowChange();
+                    // Insert the new Problem as the target's child
+                    newNode = new StoryNodeItem(problem, RightTappedNode);
+                    msg = $"Problem {situationModel.SituationName} inserted";
+                    ShowChange();
+                    break;
+                }
+                case ContentDialogResult.Secondary:
+                {
+                    SceneModel sceneVar = new(StoryModel);
+                    sceneVar.Name = situationModel.SituationName;
+                    sceneVar.Remarks = "See Notes.";
+                    sceneVar.Notes = situationModel.Notes;
+                    // Insert the new Scene as the target's child
+                    newNode = new StoryNodeItem(sceneVar, RightTappedNode);
+                    msg = $"Scene {situationModel.SituationName} inserted";
+                    ShowChange();
+                    break;
+                }
+                default:
+                    msg = "MasterPlot cancelled";
+                    break;
             }
-            else if (result == ContentDialogResult.Secondary)
-            {
-                SceneModel sceneVar = new(StoryModel);
-                sceneVar.Name = situationModel.SituationName;
-                sceneVar.Remarks = "See Notes.";
-                sceneVar.Notes = situationModel.Notes;
-                // Insert the new Scene as the target's child
-                newNode = new StoryNodeItem(sceneVar, RightTappedNode);
-                msg = $"Scene {situationModel.SituationName} inserted";
-                ShowChange();
-            }
-            else {  msg = "MasterPlot cancelled";  }
 
             StatusMessage = msg;
             Logger.Log(LogLevel.Info, msg);
@@ -1122,7 +1133,7 @@ namespace StoryBuilder.ViewModels
                 dialog.PrimaryButtonText = "Stock Scenes";
                 dialog.CloseButtonText = "Cancel";
                 dialog.XamlRoot = GlobalData.XamlRoot;
-                var result = await dialog.ShowAsync();
+                ContentDialogResult result = await dialog.ShowAsync();
 
                 if (result == ContentDialogResult.Primary)   // Copy command
                 {
@@ -1151,7 +1162,7 @@ namespace StoryBuilder.ViewModels
             if (Window.Current == null)
             {
                 IntPtr hwnd = GetActiveWindow();
-                var initializeWithWindow = openPicker.As<IInitializeWithWindow>();
+                IInitializeWithWindow initializeWithWindow = openPicker.As<IInitializeWithWindow>();
                 initializeWithWindow.Initialize(hwnd);
             }
             openPicker.ViewMode = PickerViewMode.List;
@@ -1196,7 +1207,7 @@ namespace StoryBuilder.ViewModels
             _sourceIndex = _sourceChildren.IndexOf(CurrentNode);
             _targetCollection = null;
             _targetIndex = -1;
-            var targetParent = CurrentNode.Parent.Parent;
+            StoryNodeItem targetParent = CurrentNode.Parent.Parent;
 
             // The source must become the parent's successor
             _targetCollection = CurrentNode.Parent.Parent.Children;
@@ -1254,7 +1265,7 @@ namespace StoryBuilder.ViewModels
                     return;
                 }
 
-                var grandparentCollection = CurrentNode.Parent.Parent.Children;
+                ObservableCollection<StoryNodeItem> grandparentCollection = CurrentNode.Parent.Parent.Children;
                 int siblingIndex = grandparentCollection.IndexOf(CurrentNode.Parent) - 1;
                 if (siblingIndex >= 0)
                 {
@@ -1293,7 +1304,6 @@ namespace StoryBuilder.ViewModels
         private void MoveTreeViewItemUp()
         {
             //TODO: Logging
-            StoryNodeItem _targetParent;
 
             if (CurrentNode == null)
             {
@@ -1310,7 +1320,7 @@ namespace StoryBuilder.ViewModels
             _sourceIndex = _sourceChildren.IndexOf(CurrentNode);
             _targetCollection = null;
             _targetIndex = -1;
-            _targetParent = CurrentNode.Parent;
+            StoryNodeItem _targetParent = CurrentNode.Parent;
 
             // If first child, must move to end parent's predecessor
             if (_sourceIndex == 0)
@@ -1321,8 +1331,8 @@ namespace StoryBuilder.ViewModels
                     return;
                 }
                 // find parent's predecessor
-                var grandparentCollection = CurrentNode.Parent.Parent.Children;
-                var siblingIndex = grandparentCollection.IndexOf(CurrentNode.Parent) - 1;
+                ObservableCollection<StoryNodeItem> grandparentCollection = CurrentNode.Parent.Parent.Children;
+                int siblingIndex = grandparentCollection.IndexOf(CurrentNode.Parent) - 1;
                 if (siblingIndex >= 0)
                 {
                     _targetCollection = grandparentCollection[siblingIndex].Children;
@@ -1355,7 +1365,6 @@ namespace StoryBuilder.ViewModels
         private void MoveTreeViewItemDown()
         {
             //TODO: Logging
-            StoryNodeItem _targetParent;
 
             if (CurrentNode == null)
             {
@@ -1372,7 +1381,7 @@ namespace StoryBuilder.ViewModels
             _sourceIndex = _sourceChildren.IndexOf(CurrentNode);
             _targetCollection = null;
             _targetIndex = 0;
-            _targetParent = CurrentNode.Parent;
+            StoryNodeItem _targetParent = CurrentNode.Parent;
 
             // If last child, must move to end parent's successor
             if (_sourceIndex == _sourceChildren.Count - 1)
@@ -1383,8 +1392,8 @@ namespace StoryBuilder.ViewModels
                     return;
                 }
                 // find parent's successor
-                var grandparentCollection = CurrentNode.Parent.Parent.Children;
-                var siblingIndex = grandparentCollection.IndexOf(CurrentNode.Parent) + 1;
+                ObservableCollection<StoryNodeItem> grandparentCollection = CurrentNode.Parent.Parent.Children;
+                int siblingIndex = grandparentCollection.IndexOf(CurrentNode.Parent) + 1;
                 if (siblingIndex == grandparentCollection.Count)
                 {
                     StatusMessage = "Cannot move down further";
@@ -1500,7 +1509,7 @@ namespace StoryBuilder.ViewModels
             Messenger.Send(new IsChangedMessage(true));
             msg = $"Added new {typeToAdd.ToString()}";
             Logger.Log(LogLevel.Info, msg);
-            var smsg = new StatusMessage(msg, 100);
+            StatusMessage smsg = new(msg, 100);
             Messenger.Send(new StatusChangedMessage(smsg));
             _canExecuteCommands = true;
         }
@@ -1531,7 +1540,7 @@ namespace StoryBuilder.ViewModels
             RightTappedNode.Parent = DataSource[1];
             string msg = $"Deleted node {RightTappedNode.Name}";
             Logger.Log(LogLevel.Info, msg);
-            var smsg = new StatusMessage(msg, 100);
+            StatusMessage smsg = new(msg, 100);
             Messenger.Send(new StatusChangedMessage(smsg));
         }
 
@@ -1555,7 +1564,7 @@ namespace StoryBuilder.ViewModels
             RightTappedNode.Parent = DataSource[0];
             string msg = $"Restored node {RightTappedNode.Name}";
             Logger.Log(LogLevel.Info, msg);
-            var smsg = new StatusMessage(msg, 100);
+            StatusMessage smsg = new(msg, 100);
             Messenger.Send(new StatusChangedMessage(smsg));
         }
 
@@ -1583,7 +1592,7 @@ namespace StoryBuilder.ViewModels
             _ = new StoryNodeItem(sceneVar, StoryModel.NarratorView[0]);
             string msg = $"Copied node {RightTappedNode.Name} to Narrative View";
             Logger.Log(LogLevel.Info, msg);
-            var smsg = new StatusMessage(msg, 100);
+            StatusMessage smsg = new(msg, 100);
             Messenger.Send(new StatusChangedMessage(smsg));
         }
 
@@ -1608,7 +1617,7 @@ namespace StoryBuilder.ViewModels
                 return;
             }
 
-            foreach (var item in StoryModel.NarratorView[0].Children.ToList())
+            foreach (StoryNodeItem item in StoryModel.NarratorView[0].Children.ToList())
             {
                 if (item.Uuid == RightTappedNode.Uuid)
                 {
@@ -1874,7 +1883,7 @@ namespace StoryBuilder.ViewModels
 
             if (FilterText == "" || !IsSearching) //Nulls the backgrounds to make them transparent (default) //Check if toggled and null backgrounds if not.
             {
-                Logger.Log(LogLevel.Info, "Search text is blank, nulling all backgrounds.");
+                Logger.Log(LogLevel.Info, "Search text is blank, making all backgrounds null.");
                 foreach (StoryNodeItem node in root) { node.Background = null; }
                 FilterText = "";
             }
@@ -1889,7 +1898,7 @@ namespace StoryBuilder.ViewModels
                         else { node.Background = new SolidColorBrush(Colors.DarkGoldenrod); } //Light Goldenrod is hard to read in dark theme
                         node.IsExpanded = true; 
                         
-                        var parent = node.Parent;
+                        StoryNodeItem parent = node.Parent;
                         while (!parent.IsRoot)
                         {
                             parent.IsExpanded = true;

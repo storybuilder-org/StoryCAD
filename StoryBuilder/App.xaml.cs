@@ -1,23 +1,26 @@
-﻿using CommunityToolkit.Mvvm.DependencyInjection;
+﻿using System;
+using System.Diagnostics;
+using System.Linq;
+using System.Threading.Tasks;
+using Windows.Storage;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using PInvoke;
 using StoryBuilder.Controllers;
 using StoryBuilder.DAL;
 using StoryBuilder.Models;
 using StoryBuilder.Models.Tools;
 using StoryBuilder.Services.Installation;
 using StoryBuilder.Services.Logging;
+using StoryBuilder.Services.Navigation;
 using StoryBuilder.Services.Preferences;
 using StoryBuilder.Services.Search;
 using StoryBuilder.ViewModels;
 using StoryBuilder.ViewModels.Tools;
 using StoryBuilder.Views;
-using System;
-using System.Diagnostics;
-using System.Threading.Tasks;
-using Windows.Storage;
-using NavigationService = StoryBuilder.Services.Navigation.NavigationService;
+using UnhandledExceptionEventArgs = Microsoft.UI.Xaml.UnhandledExceptionEventArgs;
 
 
 // To learn more about WinUI, the WinUI project structure,
@@ -30,8 +33,8 @@ namespace StoryBuilder
     /// </summary>
     public partial class App : Application
     {
-        private const int width = 1050;
-        private const int height = 700;
+        private const int Width = 1050;
+        private const int Height = 700;
         private const string HomePage = "HomePage";
         private const string OverviewPage = "OverviewPage";
         private const string ProblemPage = "ProblemPage";
@@ -47,14 +50,14 @@ namespace StoryBuilder
         public Window m_window;
         private IntPtr m_windowHandle;
 
-        private static void SetWindowSize(IntPtr hwnd, int Width, int Height)
+        private static void SetWindowSize(IntPtr hwnd, int windowWidth, int windowHeight)
         {
-            var dpi = PInvoke.User32.GetDpiForWindow(hwnd);
+            int dpi = User32.GetDpiForWindow(hwnd);
             float scalingFactor = (float)dpi / 96;
-            Width = (int)(Width * scalingFactor);
-            Height = (int)(Height * scalingFactor);
+            windowWidth = (int)(windowWidth * scalingFactor);
+            windowHeight = (int)(windowHeight * scalingFactor);
 
-            PInvoke.User32.SetWindowPos(hwnd, PInvoke.User32.SpecialWindowHandles.HWND_TOP, 0, 0, Width, Height, PInvoke.User32.SetWindowPosFlags.SWP_SHOWWINDOW);
+            User32.SetWindowPos(hwnd, User32.SpecialWindowHandles.HWND_TOP, 0, 0, windowWidth, windowHeight, User32.SetWindowPosFlags.SWP_SHOWWINDOW);
         }
 
         /// <summary>
@@ -96,7 +99,8 @@ namespace StoryBuilder
                     .AddSingleton<SectionViewModel>()
                     .AddSingleton<TrashCanViewModel>()
                     .AddSingleton<MainWindowVM>()
-                    // .AddSingleton<UnifiedVM>()
+                    .AddSingleton<UnifiedVM>()
+                    .AddSingleton<InitVM>()
                     .AddSingleton<TreeViewSelection>()
                     // Register ContentDialog ViewModels
                     .AddSingleton<NewProjectViewModel>()
@@ -129,7 +133,7 @@ namespace StoryBuilder
             StoryController story = Ioc.Default.GetService<StoryController>();
             string localPath = GlobalData.RootDirectory;
             StorageFolder localFolder = await StorageFolder.GetFolderFromPathAsync(localPath);
-            var pathMsg = string.Format("Configuration data location = " + localFolder.Path);
+            string pathMsg = string.Format("Configuration data location = " + localFolder.Path);
             _log.Log(LogLevel.Info, pathMsg);
             Trace.Listeners.Add(new TextWriterTraceListener(Console.Out));
             Trace.AutoFlush = true;
@@ -155,22 +159,21 @@ namespace StoryBuilder
             Frame rootFrame = new();
             if (rootFrame.Content == null)
             {
-                if (GlobalData.Preferences.Initalised) { rootFrame.Navigate(typeof(Shell)); }
-                else { rootFrame.Navigate(typeof(Initialisation));  }
+                rootFrame.Navigate(GlobalData.Preferences.Initalised ? typeof(Shell) : typeof(Initialization));
             }
             // Place the frame in the current Window
             m_window.Content = rootFrame;
             m_window.Activate();
 
             //Get the Window's HWND
-            m_windowHandle = PInvoke.User32.GetActiveWindow();
+            m_windowHandle = User32.GetActiveWindow();
             Ioc.Default.GetService<MainWindowVM>().Title = "StoryBuilder";
             GlobalData.WindowHandle = m_windowHandle;
             // The Window object doesn't (yet) have Width and Height properties in WInUI 3 Desktop yet.
             // To set the Width and Height, you can use the Win32 API SetWindowPos.
             // Note, you should apply the DPI scale factor if you are thinking of dpi instead of pixels.
-            SetWindowSize(m_windowHandle, width, height);   // was 800, 600
-            _log.Log(LogLevel.Debug, $"Layout: Window size width={width} height={height}");
+            SetWindowSize(m_windowHandle, Width, Height);   // was 800, 600
+            _log.Log(LogLevel.Debug, $"Layout: Window size width={Width} height={Height}");
             _log.Log(LogLevel.Info, "StoryBuilder App loaded and launched");
         }
 
@@ -203,10 +206,7 @@ namespace StoryBuilder
                 foreach (ConflictCategoryModel type in GlobalData.ConflictTypes.Values)
                 {
                     subTypeCount += type.SubCategories.Count;
-                    foreach (string subType in type.SubCategories)
-                    {
-                        exampleCount += type.Examples[subType].Count;
-                    }
+                    exampleCount += type.SubCategories.Sum(subType => type.Examples[subType].Count);
                 }
                 _log.Log(LogLevel.Info,
                     $"{subTypeCount} Total ConflictSubType keys created");
@@ -270,15 +270,15 @@ namespace StoryBuilder
             {
                 _log.Log(LogLevel.Info, "Configuring page navigation");
                 NavigationService nav = Ioc.Default.GetService<NavigationService>();
-                nav.Configure(App.HomePage, typeof(HomePage));
-                nav.Configure(App.OverviewPage, typeof(OverviewPage));
-                nav.Configure(App.ProblemPage, typeof(ProblemPage));
-                nav.Configure(App.CharacterPage, typeof(CharacterPage));
-                nav.Configure(App.FolderPage, typeof(FolderPage));
-                nav.Configure(App.SectionPage, typeof(SectionPage));
-                nav.Configure(App.SettingPage, typeof(SettingPage));
-                nav.Configure(App.ScenePage, typeof(ScenePage));
-                nav.Configure(App.TrashCanPage, typeof(TrashCanPage));
+                nav.Configure(HomePage, typeof(HomePage));
+                nav.Configure(OverviewPage, typeof(OverviewPage));
+                nav.Configure(ProblemPage, typeof(ProblemPage));
+                nav.Configure(CharacterPage, typeof(CharacterPage));
+                nav.Configure(FolderPage, typeof(FolderPage));
+                nav.Configure(SectionPage, typeof(SectionPage));
+                nav.Configure(SettingPage, typeof(SettingPage));
+                nav.Configure(ScenePage, typeof(ScenePage));
+                nav.Configure(TrashCanPage, typeof(TrashCanPage));
             }
             catch (Exception ex)
             {
@@ -287,7 +287,7 @@ namespace StoryBuilder
             }
         }
 
-        private void OnUnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
+        private void OnUnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
             _log.LogException(LogLevel.Error, e.Exception, e.Message);
             _log.Flush();

@@ -11,7 +11,7 @@ namespace StoryBuilder.Controls
         {
             DefaultStyleKey = typeof(ComboBox);
             ShellViewModel shell = Ioc.Default.GetService<ShellViewModel>();
-            this.ItemsSource = shell.StoryModel.StoryElements.Problems;
+            ItemsSource = shell.StoryModel.StoryElements.Problems;
             //TODO: Subscribe to change for StoryModel?
         }
     }

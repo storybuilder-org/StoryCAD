@@ -89,15 +89,15 @@ namespace StoryBuilder.Models
                     type = StoryItemType.TrashCan;
                     break;
             }
-            foreach (var attr in xn.Attributes)
+            foreach (IXmlNode attr in xn.Attributes)
             {
                 switch (attr.NodeName)
                 {
-                    case ("UUID"):
+                    case "UUID":
                         uuid = new Guid(attr.InnerText);
                         uuidFound = true;
                         break;
-                    case ("Name"):
+                    case "Name":
                         name = attr.InnerText;
                         nameFound = true;
                         break;

@@ -19,7 +19,7 @@ namespace StoryBuilder.Controls
 
         public Conflict()
         {
-            this.InitializeComponent();
+            InitializeComponent();
         }
 
         private void Category_SelectionChanged(object sender, SelectionChangedEventArgs e)

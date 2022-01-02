@@ -39,7 +39,7 @@ namespace StoryBuilder.DAL
         {
             //Tries to read file
             StorageFolder preferencesFolder = await StorageFolder.GetFolderFromPathAsync(_path);
-            var preferencesFile = await preferencesFolder.TryGetItemAsync("StoryBuilder.prf") as IStorageFile;
+            IStorageFile preferencesFile = (IStorageFile) await preferencesFolder.TryGetItemAsync("StoryBuilder.prf");
 
             if (preferencesFile != null) //Checks if file exists
             {

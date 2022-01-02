@@ -15,7 +15,7 @@ namespace StoryBuilder.Views
         public FolderPage()
         {
             InitializeComponent();
-            this.DataContext = FolderVm;
+            DataContext = FolderVm;
         }
     }
 }

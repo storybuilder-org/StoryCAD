@@ -53,7 +53,7 @@ namespace StoryBuilder.DAL
             string keyvalue = string.Empty;
             string element = string.Empty;
             string topic = string.Empty;
-            Dictionary<string, List<KeyQuestionModel>> questions = new Dictionary<string, List<KeyQuestionModel>>();
+            Dictionary<string, List<KeyQuestionModel>> questions = new();
             foreach (string line in lines)
             {
                 ParseLine(line, ref section, ref keyword, ref keyvalue);
@@ -104,8 +104,7 @@ namespace StoryBuilder.DAL
             string section = string.Empty;
             string keyword = string.Empty;
             string keyvalue = string.Empty;
-            SortedDictionary<string, ObservableCollection<string>> stockScenes =
-                new SortedDictionary<string, ObservableCollection<string>>();
+            SortedDictionary<string, ObservableCollection<string>> stockScenes = new();
             foreach (string line in lines)
             {
                 ParseLine(line, ref section, ref keyword, ref keyvalue);
@@ -136,7 +135,7 @@ namespace StoryBuilder.DAL
             string topicName = string.Empty;
             TopicModel currentTopic = null;
             SubTopicModel currentSubTopic = null;
-            SortedDictionary<string, TopicModel> topics = new SortedDictionary<string, TopicModel>();
+            SortedDictionary<string, TopicModel> topics = new();
             string section = string.Empty;
             string keyword = string.Empty;
             string keyvalue = string.Empty;
@@ -189,7 +188,7 @@ namespace StoryBuilder.DAL
         {
             MasterPlotModel currentMasterPlot = null;
             MasterPlotScene currentMasterPlotScene = null;
-            List<MasterPlotModel> masterPlots = new List<MasterPlotModel>();
+            List<MasterPlotModel> masterPlots = new();
             string section = string.Empty;
             string keyword = string.Empty;
             string keyvalue = string.Empty;
@@ -243,7 +242,7 @@ namespace StoryBuilder.DAL
         public SortedDictionary<string, DramaticSituationModel> LoadDramaticSituations()
         {
             DramaticSituationModel currentDramaticSituationModel = null;
-            SortedDictionary<string, DramaticSituationModel> dramaticSituations = new SortedDictionary<string, DramaticSituationModel>();
+            SortedDictionary<string, DramaticSituationModel> dramaticSituations = new();
             string section = string.Empty;
             foreach (string line in lines)
             {
@@ -291,7 +290,7 @@ namespace StoryBuilder.DAL
                                 //TODO: Process Example lines
                                 break;
                             case "Notes":
-                                currentDramaticSituationModel.Notes = currentDramaticSituationModel.Notes + keyvalue;
+                                currentDramaticSituationModel.Notes += keyvalue;
                                 // ReSharper restore PossibleNullReferenceException
                                 break;
                         }
@@ -303,7 +302,7 @@ namespace StoryBuilder.DAL
 
         public ObservableCollection<Quotation> LoadQuotes()
         {
-            ObservableCollection<Quotation> quotes = new ObservableCollection<Quotation>();
+            ObservableCollection<Quotation> quotes = new();
             Quotation currentQuote = null;
             string section = string.Empty;
             string keyword = string.Empty;
@@ -417,7 +416,7 @@ namespace StoryBuilder.DAL
             if (line.StartsWith("="))
             {
                 keyword = string.Empty;
-                keyvalue = line.Substring(1).TrimEnd();
+                keyvalue = line[1..].TrimEnd();
             }
 
         }

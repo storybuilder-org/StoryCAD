@@ -15,7 +15,7 @@ namespace StoryBuilder.ViewModels.Tools
 
         public string Title
         {
-            get { return _title; }
+            get => _title;
             set => SetProperty(ref _title, value);
         }
 

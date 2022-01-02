@@ -93,7 +93,7 @@ namespace NRtfTree
             public RtfDocument(string path, Encoding enc)
             {
                 this.path = path;
-                this.encoding = enc;
+                encoding = enc;
 
                 fontTable = new RtfFontTable();
                 fontTable.AddFont("Arial");  //Default font

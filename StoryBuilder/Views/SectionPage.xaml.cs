@@ -14,7 +14,7 @@ namespace StoryBuilder.Views
         public SectionPage()
         {
             InitializeComponent();
-            this.DataContext = SectionVm;
+            DataContext = SectionVm;
         }
     }
 }

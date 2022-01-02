@@ -16,7 +16,7 @@ namespace StoryBuilder.Views
         public OverviewPage()
         {
             InitializeComponent();
-            this.DataContext = OverviewVm;
+            DataContext = OverviewVm;
         }
     }
 }

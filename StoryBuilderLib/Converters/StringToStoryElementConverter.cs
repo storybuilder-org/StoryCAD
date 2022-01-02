@@ -60,7 +60,7 @@ namespace StoryBuilder.Converters
             }
             // Look for the StoryElement corresponding to the passed guid
             // (This is the normal approach)
-            if (Guid.TryParse(value.ToString(), out var guid))
+            if (Guid.TryParse(value.ToString(), out Guid guid))
                 if (elements.StoryElementGuids.ContainsKey(guid))
                     return elements.StoryElementGuids[guid];
             return null;  // Not found

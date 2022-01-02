@@ -67,14 +67,14 @@ namespace StoryBuilder.DAL
                 }
                 msg = "File load successful.";
                 Logger.Log(LogLevel.Info, msg);
-                var smsg = new StatusMessage(msg, 200);
+                StatusMessage smsg = new(msg, 200);
                 Messenger.Send(new StatusChangedMessage(smsg));
                 return _model;
             }
             catch (Exception ex)
             {
                 Logger.LogException(LogLevel.Error, ex, "Error reading story");
-                var smsg = new StatusMessage("Error reading story", 200);
+                StatusMessage smsg = new("Error reading story", 200);
                 Messenger.Send(new StatusChangedMessage(smsg));
                 return new StoryModel();  // return an empty story model
             }
@@ -91,7 +91,7 @@ namespace StoryBuilder.DAL
 
             if (nodes != null)
             {
-                foreach (var xn in nodes)
+                foreach (IXmlNode xn in nodes)
                 {
                     switch (xn.NodeName)
                     {
@@ -115,7 +115,7 @@ namespace StoryBuilder.DAL
 
         private void ParseStoryElements(IXmlNode node)
         {
-            foreach (var child in node.ChildNodes)
+            foreach (IXmlNode child in node.ChildNodes)
                 RecurseStoryElement(child);
         }
 
@@ -156,7 +156,7 @@ namespace StoryBuilder.DAL
                         ParseTrashCan(node);
                         break;
                 }
-                foreach (var child in node.ChildNodes)
+                foreach (IXmlNode child in node.ChildNodes)
                     RecurseStoryElement(child);
             }
         }
@@ -166,7 +166,7 @@ namespace StoryBuilder.DAL
             // There's one OverviewModel per story. Its corresponding
             //StoryNode is the root of the Explorer TreeView.
             _overview = new OverviewModel(xn, _model);
-            foreach (var attr in xn.Attributes)
+            foreach (IXmlNode attr in xn.Attributes)
             {
                 switch (attr.NodeName)
                 {
@@ -238,59 +238,59 @@ namespace StoryBuilder.DAL
 
         private void ParseProblem(IXmlNode xn)
         {
-            var prb = new ProblemModel(xn, _model);
-            foreach (var attr in xn.Attributes)
+            ProblemModel prb = new(xn, _model);
+            foreach (IXmlNode attr in xn.Attributes)
             {
                 switch (attr.NodeName)
                 {
-                    case ("UUID"):
+                    case "UUID":
                         break;
-                    case ("Name"):
+                    case "Name":
                         prb.Name = attr.InnerText;
                         break;
-                    case ("ProblemType"):
+                    case "ProblemType":
                         prb.ProblemType = attr.InnerText;
                         break;
-                    case ("ConflictType"):
+                    case "ConflictType":
                         prb.ConflictType = attr.InnerText;
                         break;
-                    case ("Subject"):
+                    case "Subject":
                         prb.Subject = attr.InnerText;
                         break;
-                    case ("ProblemSource"):
+                    case "ProblemSource":
                         prb.ProblemSource = attr.InnerText;
                         break;
-                    case ("Protagonist"):
+                    case "Protagonist":
                         prb.Protagonist = attr.InnerText;
                         break;
-                    case ("ProtGoal"):
+                    case "ProtGoal":
                         prb.ProtGoal = attr.InnerText;
                         break;
-                    case ("ProtMotive"):
+                    case "ProtMotive":
                         prb.ProtMotive = attr.InnerText;
                         break;
-                    case ("ProtConflict"):
+                    case "ProtConflict":
                         prb.ProtConflict = attr.InnerText;
                         break;
-                    case ("Antagonist"):
+                    case "Antagonist":
                         prb.Antagonist = attr.InnerText;
                         break;
-                    case ("AntagGoal"):
+                    case "AntagGoal":
                         prb.AntagGoal = attr.InnerText;
                         break;
-                    case ("AntagMotive"):
+                    case "AntagMotive":
                         prb.AntagMotive = attr.InnerText;
                         break;
-                    case ("AntagConflict"):
+                    case "AntagConflict":
                         prb.AntagConflict = attr.InnerText;
                         break;
-                    case ("Outcome"):
+                    case "Outcome":
                         prb.Outcome = attr.InnerText;
                         break;
-                    case ("Method"):
+                    case "Method":
                         prb.Method = attr.InnerText;
                         break;
-                    case ("Theme"):
+                    case "Theme":
                         prb.Theme = attr.InnerText;
                         break;
                     case "StoryQuestion":
@@ -308,22 +308,22 @@ namespace StoryBuilder.DAL
 
         private void ParseCharacter(IXmlNode xn)
         {
-            var chr = new CharacterModel(xn, _model);
-            var traitList = xn.SelectSingleNode("./CharacterTraits");
+            CharacterModel chr = new(xn, _model);
+            IXmlNode traitList = xn.SelectSingleNode("./CharacterTraits");
             if (traitList != null)
             {
                 foreach (IXmlNode child in traitList.ChildNodes)
                     if (child.NodeName.Equals("Trait"))
                         chr.TraitList.Add(child.InnerText);
             }
-            var relationList = xn.SelectSingleNode("./Relationships");
+            IXmlNode relationList = xn.SelectSingleNode("./Relationships");
             if (relationList != null)
             {
                 foreach (IXmlNode child in relationList.ChildNodes)
                     if (child.NodeName.Equals("Relation"))
                         chr.RelationshipList.Add(new RelationshipModel(child));
             }
-            foreach (var attr in xn.Attributes)
+            foreach (IXmlNode attr in xn.Attributes)
             {
                 switch (attr.NodeName)
                 {
@@ -467,47 +467,47 @@ namespace StoryBuilder.DAL
 
         private void ParseSetting(IXmlNode xn)
         {
-            var loc = new SettingModel(xn, _model);
-            foreach (var attr in xn.Attributes)
+            SettingModel loc = new(xn, _model);
+            foreach (IXmlNode attr in xn.Attributes)
             {
                 switch (attr.NodeName)
                 {
-                    case ("UUID"):
+                    case "UUID":
                         break;
-                    case ("Name"):
+                    case "Name":
                         loc.Name = attr.InnerText;
                         break;
-                    case ("Id"):
+                    case "Id":
                         loc.Id = Convert.ToInt32(attr.InnerText);
                         break;
-                    case ("Locale"):
+                    case "Locale":
                         loc.Locale = attr.InnerText;
                         break;
-                    case ("Season"):
+                    case "Season":
                         loc.Season = attr.InnerText;
                         break;
-                    case ("Period"):
+                    case "Period":
                         loc.Period = attr.InnerText;
                         break;
-                    case ("Lighting"):
+                    case "Lighting":
                         loc.Lighting = attr.InnerText;
                         break;
-                    case ("Weather"):
+                    case "Weather":
                         loc.Weather = attr.InnerText;
                         break;
-                    case ("Temperature"):
+                    case "Temperature":
                         loc.Temperature = attr.InnerText;
                         break;
-                    case ("Prop1"):
+                    case "Prop1":
                         loc.Prop1 = attr.InnerText;
                         break;
-                    case ("Prop2"):
+                    case "Prop2":
                         loc.Prop2 = attr.InnerText;
                         break;
-                    case ("Prop3"):
+                    case "Prop3":
                         loc.Prop3 = attr.InnerText;
                         break;
-                    case ("Prop4"):
+                    case "Prop4":
                         loc.Prop4 = attr.InnerText;
                         break;
                     case "Summary":
@@ -535,101 +535,101 @@ namespace StoryBuilder.DAL
 
         private void ParseScene(IXmlNode xn)
         {
-            var scene = new SceneModel(xn, _model);
-            var castMembers = xn.SelectSingleNode("./CastMembers");
+            SceneModel scene = new(xn, _model);
+            IXmlNode castMembers = xn.SelectSingleNode("./CastMembers");
             if (castMembers != null)
                 foreach (IXmlNode child in castMembers.ChildNodes)
                     if (child.NodeName.Equals("Member"))
                         scene.CastMembers.Add(child.InnerText);
             string member;
-            foreach (var attr in xn.Attributes)
+            foreach (IXmlNode attr in xn.Attributes)
             {
                 switch (attr.NodeName)
                 {
-                    case ("UUID"):
+                    case "UUID":
                         break;
-                    case ("Name"):
+                    case "Name":
                         scene.Name = attr.InnerText;
                         break;
-                    case ("Id"):
+                    case "Id":
                         scene.Id = Convert.ToInt32(attr.InnerText);
                         break;
-                    case ("Viewpoint"):
+                    case "Viewpoint":
                         scene.Viewpoint = attr.InnerText;
                         break;
-                    case ("Date"):
+                    case "Date":
                         scene.Date = attr.InnerText;
                         break;
-                    case ("Time"):
+                    case "Time":
                         scene.Time = attr.InnerText;
                         break;
-                    case ("Setting"):
+                    case "Setting":
                         scene.Setting = attr.InnerText;
                         break;
-                    case ("SceneType"):
+                    case "SceneType":
                         scene.SceneType = attr.InnerText;
                         break;
-                    case ("Char1"):  // legacy
+                    case "Char1":  // legacy
                         member = attr.InnerText;
                         if (!member.Equals(string.Empty))
                             scene.CastMembers.Add(member);
                         //scene.Char1 = attr.InnerText;
                         break;
-                    case ("Char2"): // legacy
+                    case "Char2": // legacy
                         member = attr.InnerText;
                         if (!member.Equals(string.Empty))
                             scene.CastMembers.Add(member);
                         //scene.Char2 = attr.InnerText;
                         break;
-                    case ("Char3"): // legacy
+                    case "Char3": // legacy
                         member = attr.InnerText;
                         if (!member.Equals(string.Empty))
                             scene.CastMembers.Add(member);
                         //scene.Char3 = attr.InnerText;
                         break;
-                    case ("Role1"):  // legacy
+                    case "Role1":  // legacy
                         //scene.Role1 = attr.InnerText;
                         break;
-                    case ("Role2"):  // legacy
+                    case "Role2":  // legacy
                         //scene.Role2 = attr.InnerText;
                         break;
-                    case ("Role3"):  // legacy
+                    case "Role3":  // legacy
                         //scene.Role3 = attr.InnerText;
                         break;
-                    case ("Protagonist"):
+                    case "Protagonist":
                         scene.Protagonist = attr.InnerText;
                         break;
-                    case ("ProtagEmotion"):
+                    case "ProtagEmotion":
                         scene.ProtagEmotion = attr.InnerText;
                         break;
-                    case ("ProtagGoal"):
+                    case "ProtagGoal":
                         scene.ProtagGoal = attr.InnerText;
                         break;
-                    case ("Antagonist"):
+                    case "Antagonist":
                         scene.Antagonist = attr.InnerText;
                         break;
-                    case ("AntagEmotion"):
+                    case "AntagEmotion":
                         scene.AntagEmotion = attr.InnerText;
                         break;
-                    case ("AntagGoal"):
+                    case "AntagGoal":
                         scene.AntagGoal = attr.InnerText;
                         break;
-                    case ("Opposition"):
+                    case "Opposition":
                         scene.Opposition = attr.InnerText;
                         break;
-                    case ("Outcome"):
+                    case "Outcome":
                         scene.Outcome = attr.InnerText;
                         break;
-                    case ("Emotion"):
+                    case "Emotion":
                         scene.Emotion = attr.InnerText;
                         break;
-                    case ("NewGoal"):
+                    case "NewGoal":
                         scene.NewGoal = attr.InnerText;
                         break;
-                    case ("ScenePurpose"):
+                    case "ScenePurpose":
                         scene.ScenePurpose = attr.InnerText;
                         break;
-                    case ("ValueExchange"):
+                    case "ValueExchange":
                         scene.ValueExchange = attr.InnerText;
                         break;
                     case "Remarks":
@@ -660,14 +660,14 @@ namespace StoryBuilder.DAL
 
         private void ParseFolder(IXmlNode xn)
         {
-            var folder = new FolderModel(xn, _model);
-            foreach (var attr in xn.Attributes)
+            FolderModel folder = new(xn, _model);
+            foreach (IXmlNode attr in xn.Attributes)
             {
                 switch (attr.NodeName)
                 {
-                    case ("UUID"):
+                    case "UUID":
                         break;
-                    case ("Name"):
+                    case "Name":
                         folder.Name = attr.InnerText;
                         break;
                     case "Notes":
@@ -679,14 +679,14 @@ namespace StoryBuilder.DAL
 
         private void ParseSection(IXmlNode xn)
         {
-            var section = new SectionModel(xn, _model);
-            foreach (var attr in xn.Attributes)
+            SectionModel section = new(xn, _model);
+            foreach (IXmlNode attr in xn.Attributes)
             {
                 switch (attr.NodeName)
                 {
-                    case ("UUID"):
+                    case "UUID":
                         break;
-                    case ("Name"):
+                    case "Name":
                         section.Name = attr.InnerText;
                         break;
                     case "Notes":
@@ -698,14 +698,14 @@ namespace StoryBuilder.DAL
 
         private void ParseTrashCan(IXmlNode xn)
         {
-            var trash = new TrashCanModel(xn, _model);
-            foreach (var attr in xn.Attributes)
+            TrashCanModel trash = new(xn, _model);
+            foreach (IXmlNode attr in xn.Attributes)
             {
                 switch (attr.NodeName)
                 {
-                    case ("UUID"):
+                    case "UUID":
                         break;
-                    case ("Name"):
+                    case "Name":
                         trash.Name = attr.InnerText;
                         break;
                 }
@@ -720,7 +720,7 @@ namespace StoryBuilder.DAL
 
         private void RecurseExplorerNode(StoryNodeItem parent, IXmlNode xn, bool root)
         {
-            StoryNodeItem node = new StoryNodeItem(parent, xn);
+            StoryNodeItem node = new(parent, xn);
             if (root) _model.ExplorerView.Add(node);
 
             XmlNodeList children = xn.SelectNodes("StoryNode");
@@ -736,7 +736,7 @@ namespace StoryBuilder.DAL
 
         private void RecurseNarratorNode(StoryNodeItem parent, IXmlNode xn, bool root)
         {
-            StoryNodeItem node = new StoryNodeItem(parent, xn);
+            StoryNodeItem node = new(parent, xn);
             if (root) _model.NarratorView.Add(node);
 
             XmlNodeList children = xn.SelectNodes("StoryNode");
@@ -800,7 +800,7 @@ namespace StoryBuilder.DAL
             _story = Ioc.Default.GetService<StoryController>();
             Logger = Ioc.Default.GetService<LogService>();
 
-            XmlDocument doc = new XmlDocument();
+            XmlDocument doc = new();
             _xml = doc;
             //Model.Changed = false;
         }
@@ -820,3 +820,4 @@ namespace StoryBuilder.DAL
         }
     }
 }
+

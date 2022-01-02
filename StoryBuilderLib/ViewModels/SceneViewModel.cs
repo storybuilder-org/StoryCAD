@@ -47,10 +47,10 @@ namespace StoryBuilder.ViewModels
             get => _name;
             set
             {
-                if (_changeable && (_name != value)) // Name changed?
+                if (_changeable && _name != value) // Name changed?
                 {
                     _logger.Log(LogLevel.Info, $"Requesting Name change from {_name} to {value}");
-                    var msg = new NameChangeMessage(_name, value);
+                    NameChangeMessage msg = new(_name, value);
                     Messenger.Send(new NameChangedMessage(msg));
                 }
                 SetProperty(ref _name, value);
@@ -119,7 +119,7 @@ namespace StoryBuilder.ViewModels
             {
                 SetProperty(ref _existingCastIndex, value);
                 string emsg = $"Existing cast member {CastMembers[value].Name} selected";
-                var smsg = new StatusMessage(emsg, 200);
+                StatusMessage smsg = new(emsg, 200);
                 Messenger.Send(new StatusChangedMessage(smsg));
             }
         }
@@ -464,10 +464,7 @@ namespace StoryBuilder.ViewModels
 
         private bool CastMemberExists(string uuid)
         {
-            foreach (StoryElement element in CastMembers)
-                if (uuid.Equals(element.Uuid))
-                    return true;
-
+            foreach (StoryElement element in CastMembers) {if (uuid == element.Uuid.ToString()) {return true;}}
             return false;
         }
 

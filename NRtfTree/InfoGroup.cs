@@ -280,28 +280,28 @@ namespace NRtfTree
             {
                 StringBuilder str = new StringBuilder();
 
-                str.AppendLine("Title     : " + this.Title);
-                str.AppendLine("Subject   : " + this.Subject);
-                str.AppendLine("Author    : " + this.Author);
-                str.AppendLine("Manager   : " + this.Manager);
-                str.AppendLine("Company   : " + this.Company);
-                str.AppendLine("Operator  : " + this.Operator);
-                str.AppendLine("Category  : " + this.Category);
-                str.AppendLine("Keywords  : " + this.Keywords);
-                str.AppendLine("Comment   : " + this.Comment);
-                str.AppendLine("DComment  : " + this.DocComment);
-                str.AppendLine("HLinkBase : " + this.HlinkBase);
-                str.AppendLine("Created   : " + this.CreationTime);
-                str.AppendLine("Revised   : " + this.RevisionTime);
-                str.AppendLine("Printed   : " + this.LastPrintTime);
-                str.AppendLine("Backup    : " + this.BackupTime);
-                str.AppendLine("Version   : " + this.Version);
-                str.AppendLine("IVersion  : " + this.InternalVersion);
-                str.AppendLine("Editing   : " + this.EditingTime);
-                str.AppendLine("Num Pages : " + this.NumberOfPages);
-                str.AppendLine("Num Words : " + this.NumberOfWords);
-                str.AppendLine("Num Chars : " + this.NumberOfChars);
-                str.AppendLine("Id        : " + this.Id);
+                str.AppendLine("Title     : " + Title);
+                str.AppendLine("Subject   : " + Subject);
+                str.AppendLine("Author    : " + Author);
+                str.AppendLine("Manager   : " + Manager);
+                str.AppendLine("Company   : " + Company);
+                str.AppendLine("Operator  : " + Operator);
+                str.AppendLine("Category  : " + Category);
+                str.AppendLine("Keywords  : " + Keywords);
+                str.AppendLine("Comment   : " + Comment);
+                str.AppendLine("DComment  : " + DocComment);
+                str.AppendLine("HLinkBase : " + HlinkBase);
+                str.AppendLine("Created   : " + CreationTime);
+                str.AppendLine("Revised   : " + RevisionTime);
+                str.AppendLine("Printed   : " + LastPrintTime);
+                str.AppendLine("Backup    : " + BackupTime);
+                str.AppendLine("Version   : " + Version);
+                str.AppendLine("IVersion  : " + InternalVersion);
+                str.AppendLine("Editing   : " + EditingTime);
+                str.AppendLine("Num Pages : " + NumberOfPages);
+                str.AppendLine("Num Words : " + NumberOfWords);
+                str.AppendLine("Num Chars : " + NumberOfChars);
+                str.AppendLine("Id        : " + Id);
 
                 return str.ToString();
             }

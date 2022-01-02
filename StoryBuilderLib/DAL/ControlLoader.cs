@@ -45,7 +45,7 @@ namespace StoryBuilder.DAL
         public SortedDictionary<string, ConflictCategoryModel> LoadConflictTypes()
         {
             ConflictCategoryModel currentConflictType = null;
-            SortedDictionary<string, ConflictCategoryModel> conflictTypes = new SortedDictionary<string, ConflictCategoryModel>();
+            SortedDictionary<string, ConflictCategoryModel> conflictTypes = new();
             string currentSubtype = string.Empty;
 
             string section = string.Empty;
@@ -83,7 +83,7 @@ namespace StoryBuilder.DAL
 
         public List<RelationType> LoadRelationTypes()
         {
-           List<RelationType> relationships = new List<RelationType>();
+           List<RelationType> relationships = new();
 
             string section = string.Empty;
             string keyword = string.Empty;
@@ -152,7 +152,7 @@ namespace StoryBuilder.DAL
             if (line.StartsWith("="))
             {
                 keyword = string.Empty;
-                keyvalue = line.Substring(1).TrimEnd();
+                keyvalue = line[1..].TrimEnd();
             }
 
         }

@@ -25,13 +25,7 @@ namespace StoryBuilder.Services.Dialogs
             ProjectPathName.IsReadOnly = true;
         }
 
-        public SaveAsViewModel SaveAsVm
-        {
-            get
-            {
-                return Ioc.Default.GetService<SaveAsViewModel>();
-            }
-        }
+        public SaveAsViewModel SaveAsVm => Ioc.Default.GetService<SaveAsViewModel>();
 
         public StorageFolder ParentFolder { get; set; }
         public string ParentFolderPath { get; set; }
@@ -41,7 +35,7 @@ namespace StoryBuilder.Services.Dialogs
         {
             ProjectPathName.IsReadOnly = false;
             // may throw error if invalid folder location
-            var folderPicker = new FolderPicker();
+            FolderPicker folderPicker = new();
             WinRT.Interop.InitializeWithWindow.Initialize(folderPicker, GlobalData.WindowHandle);
 
             //Make FolderPicker work in Win32
@@ -53,7 +47,7 @@ namespace StoryBuilder.Services.Dialogs
             //}
             folderPicker.CommitButtonText = "Project Parent Folder:";
             folderPicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
-            folderPicker.FileTypeFilter.Add(("*"));
+            folderPicker.FileTypeFilter.Add("*");
 
             ParentFolder = await folderPicker.PickSingleFolderAsync();
             SaveAsVm.ParentFolder = ParentFolder;

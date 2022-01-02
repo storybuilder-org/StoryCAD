@@ -63,10 +63,10 @@ namespace StoryBuilder.ViewModels
             get => _name;
             set
             {
-                if (_changeable && (_name != value)) // Name changed?
+                if (_changeable && _name != value) // Name changed?
                 {
                     _logger.Log(LogLevel.Info, $"Requesting Name change from {_name} to {value}");
-                    var msg = new NameChangeMessage(_name, value);
+                    NameChangeMessage msg = new(_name, value);
                     Messenger.Send(new NameChangedMessage(msg));
                 }
                 SetProperty(ref _name, value);
@@ -264,14 +264,12 @@ namespace StoryBuilder.ViewModels
             {
                 if (RelationshipExists(value))
                 {
-                    var _smsg = new StatusMessage("Character is already in Relationships", 200);
+                    StatusMessage _smsg = new("Character is already in Relationships", 200);
                     Messenger.Send(new StatusChangedMessage(_smsg));
                 }
                 SetProperty(ref _newRelationshipMember, value);
                 StoryElement element = StringToStoryElement(value);
-                string msg = $"New cast member selected {element.Name}";
-                var smsg = new StatusMessage(msg, 200);
-                Messenger.Send(new StatusChangedMessage(smsg));
+                Messenger.Send(new StatusChangedMessage(new StatusMessage($"New cast member selected {element.Name}", 200)));
             }
         }
 
@@ -728,7 +726,7 @@ namespace StoryBuilder.ViewModels
         {
             if (ExistingTraitIndex == -1) 
             {
-                var _smsg = new StatusMessage("No trait selected to delete", 200);
+                StatusMessage _smsg = new("No trait selected to delete", 200);
                 Messenger.Send(new StatusChangedMessage(_smsg));
                 return;
             }
@@ -755,7 +753,7 @@ namespace StoryBuilder.ViewModels
             }
             // Look for the StoryElement corresponding to the passed guid
             // (This is the normal approach)
-            if (Guid.TryParse(value, out var guid))
+            if (Guid.TryParse(value, out Guid guid))
             {
                 if (elements.StoryElementGuids.ContainsKey(guid)) { return elements.StoryElementGuids[guid]; }
             }
@@ -812,10 +810,9 @@ namespace StoryBuilder.ViewModels
                 if (character == VM.Member) { continue; } //Character cannot be in a relationship with themselves.
                 foreach (RelationshipModel rel in CharacterRelationships)
                 {
-                    if (character == rel.Partner) goto NextCharacter; // Skip partner
+                    if (character == rel.Partner) { continue;}
                 }
                 VM.ProspectivePartners.Add(character);
-                NextCharacter: continue;
             }
 
             //Creates dialog and shows dialog
@@ -825,7 +822,7 @@ namespace StoryBuilder.ViewModels
             NewRelationship.SecondaryButtonText = "Cancel";
             NewRelationship.XamlRoot = GlobalData.XamlRoot;
             NewRelationship.Content = new NewRelationshipPage(VM);
-            var result = await NewRelationship.ShowAsync();
+            ContentDialogResult result = await NewRelationship.ShowAsync();
 
             if (result == ContentDialogResult.Primary) //User clicks add relationship
             {
@@ -869,7 +866,7 @@ namespace StoryBuilder.ViewModels
             {
                 _logger.Log(LogLevel.Warn, "A relationship to be removed");
                 msg = "Select the relationship to be removed";
-                var smsg = new StatusMessage(msg, 200);
+                StatusMessage smsg = new(msg, 200);
                 Messenger.Send(new StatusChangedMessage(smsg));
                 _logger.Log(LogLevel.Warn, "A relationship must be active to be removed");
                 return;
@@ -887,7 +884,7 @@ namespace StoryBuilder.ViewModels
                 SecondaryButtonText = "No"
             };
             dialog.XamlRoot = GlobalData.XamlRoot;
-            var result = await dialog.ShowAsync();
+            ContentDialogResult result = await dialog.ShowAsync();
             if (result == ContentDialogResult.Primary)
             {
                 // Remove the current (selected) relationship
@@ -899,7 +896,7 @@ namespace StoryBuilder.ViewModels
                 _changed = true;
                 // log and display status
                 _logger.Log(LogLevel.Info, msg);
-                var smsg = new StatusMessage(msg, 200);
+                StatusMessage smsg = new(msg, 200);
                 Messenger.Send(new StatusChangedMessage(smsg));
             }
             else
@@ -907,7 +904,7 @@ namespace StoryBuilder.ViewModels
                 _logger.Log(LogLevel.Info, "Remove relationship cancelled");
                 msg = "RemoveRelationship cancelled";
                 _logger.Log(LogLevel.Info, msg);
-                var smsg = new StatusMessage(msg, 200);
+                StatusMessage smsg = new(msg, 200);
                 Messenger.Send(new StatusChangedMessage(smsg));
             }
         }
@@ -956,7 +953,7 @@ namespace StoryBuilder.ViewModels
             FlawDialog.Title = "Flaw Builder";
             FlawDialog.PrimaryButtonText = "Copy flaw example";
             FlawDialog.CloseButtonText = "Cancel";
-            var result = await FlawDialog.ShowAsync();
+            ContentDialogResult result = await FlawDialog.ShowAsync();
 
             if (result == ContentDialogResult.Primary)   // Copy to Character Flaw  
             {
@@ -980,7 +977,7 @@ namespace StoryBuilder.ViewModels
             TraitDialog.CloseButtonText = "Cancel";
             TraitDialog.XamlRoot = GlobalData.XamlRoot;
             TraitDialog.Content = new Traits();
-            var result = await TraitDialog.ShowAsync();
+            ContentDialogResult result = await TraitDialog.ShowAsync();
 
             if (result == ContentDialogResult.Primary)   // Copy to Character Trait 
             {
@@ -1017,7 +1014,7 @@ namespace StoryBuilder.ViewModels
         public ObservableCollection<string> ValuesList;
         public ObservableCollection<string> AbnormalityList;
         public ObservableCollection<string> FocusList;
-        public ObservableCollection<string> AdventureousnessList;
+        public ObservableCollection<string> AdventurousnessList;
         public ObservableCollection<string> AggressionList;
         public ObservableCollection<string> ConfidenceList;
         public ObservableCollection<string> ConscientiousnessList;
@@ -1061,7 +1058,7 @@ namespace StoryBuilder.ViewModels
             ValuesList = lists["Value"];
             AbnormalityList = lists["MentalIllness"];
             FocusList = lists["Focus"];
-            AdventureousnessList = lists["Adventurous"];
+            AdventurousnessList = lists["Adventurous"];
             AggressionList = lists["Aggressiveness"];
             ConfidenceList = lists["Confidence"];
             ConscientiousnessList = lists["Conscientiousness"];

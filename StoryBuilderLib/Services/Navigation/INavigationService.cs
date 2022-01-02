@@ -82,7 +82,6 @@ namespace StoryBuilder.Services.Navigation
         /// a specified frame.
         /// Depending on the platforms, the navigation service might
         /// have to be configured with a key/page list.
-        /// </summary>
         /// <param name="frame"> The frame or subframe on which to display the page </param>
         /// <param name="pageKey">The key corresponding to the page that should be displayed.</param>
         /// </summary>

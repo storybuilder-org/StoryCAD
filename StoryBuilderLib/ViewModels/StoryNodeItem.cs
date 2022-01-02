@@ -228,7 +228,7 @@ namespace StoryBuilder.ViewModels
         private bool _isRoot;
         public bool IsRoot
         {
-            get { return _isRoot; }
+            get => _isRoot;
             set
             {
                 if (_isRoot != value)

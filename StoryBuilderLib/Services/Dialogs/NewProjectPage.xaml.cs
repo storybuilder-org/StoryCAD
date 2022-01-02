@@ -19,7 +19,7 @@ namespace StoryBuilder.Services.Dialogs
     {
         public NewProjectPage(UnifiedVM vm)
         {
-            this.InitializeComponent();
+            InitializeComponent();
             UnifiedVM = vm;
         }
 
@@ -34,12 +34,12 @@ namespace StoryBuilder.Services.Dialogs
         private async void Browse_Click(object sender, RoutedEventArgs e)
         {
             // Find a home for the new project
-            var folderPicker = new FolderPicker();
+            FolderPicker folderPicker = new();
             if (Window.Current == null)
             {
                 IntPtr hwnd = GetActiveWindow();
                 //IntPtr hwnd = GlobalData.WindowHandle;
-                var initializeWithWindow = folderPicker.As<IInitializeWithWindow>();
+                IInitializeWithWindow initializeWithWindow = folderPicker.As<IInitializeWithWindow>();
                 initializeWithWindow.Initialize(hwnd);
             }
             folderPicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;

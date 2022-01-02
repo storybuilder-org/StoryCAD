@@ -19,27 +19,27 @@ namespace StoryBuilder.ViewModels
         public int SelectedRecentIndex
         {
             get => _selectedRecentIndex;
-            set { SetProperty(ref _selectedRecentIndex, value); }
+            set => SetProperty(ref _selectedRecentIndex, value);
         }
 
         private string _selectedTemplate;
         public string SelectedTemplate
         {
             get => _selectedTemplate;
-            set { SetProperty(ref _selectedTemplate, value); }
+            set => SetProperty(ref _selectedTemplate, value);
         }
         private string _projectName;
         public string ProjectName
         {
             get => _projectName;
-            set { SetProperty(ref _projectName, value); }
+            set => SetProperty(ref _projectName, value);
         }
 
         private string _ProjectPath;
         public string ProjectPath
         {
             get => _ProjectPath;
-            set { SetProperty(ref _ProjectPath, value); }
+            set => SetProperty(ref _ProjectPath, value);
         }
 
         /// <summary>
@@ -49,15 +49,14 @@ namespace StoryBuilder.ViewModels
         public Microsoft.UI.Xaml.Media.SolidColorBrush AdjustmentColor
         {
             get => _adjustmentColor;
-            set { SetProperty(ref _adjustmentColor, value); }
+            set => SetProperty(ref _adjustmentColor, value);
         }
 
         private ListBoxItem _currentTab;
         public ListBoxItem CurrentTab
         {
             get => _currentTab;
-            set { SetProperty(ref _currentTab, value); }
-
+            set => SetProperty(ref _currentTab, value);
         }
 
         public UnifiedVM()
@@ -83,7 +82,7 @@ namespace StoryBuilder.ViewModels
         public StackPanel ContentView
         {
             get => _contentView;
-            set { SetProperty(ref _contentView, value); }
+            set => SetProperty(ref _contentView, value);
         }
 
         /// <summary>
@@ -152,19 +151,19 @@ namespace StoryBuilder.ViewModels
             }
             else //This shuffle the file used to the top
             {
-                List<String> NewRecents = new();
-                if (Path == GlobalData.Preferences.LastFile2) { NewRecents = new List<string>() { GlobalData.Preferences.LastFile2, GlobalData.Preferences.LastFile1, GlobalData.Preferences.LastFile3, GlobalData.Preferences.LastFile4, GlobalData.Preferences.LastFile5 }; }
-                else if (Path == GlobalData.Preferences.LastFile3) { NewRecents = new List<string>() { GlobalData.Preferences.LastFile3, GlobalData.Preferences.LastFile1, GlobalData.Preferences.LastFile2, GlobalData.Preferences.LastFile4, GlobalData.Preferences.LastFile5 }; }
-                else if (Path == GlobalData.Preferences.LastFile4) { NewRecents = new List<string>() { GlobalData.Preferences.LastFile4, GlobalData.Preferences.LastFile1, GlobalData.Preferences.LastFile2, GlobalData.Preferences.LastFile3, GlobalData.Preferences.LastFile5 }; }
-                else if (Path == GlobalData.Preferences.LastFile5) { NewRecents = new List<string>() { GlobalData.Preferences.LastFile5, GlobalData.Preferences.LastFile1, GlobalData.Preferences.LastFile2, GlobalData.Preferences.LastFile3, GlobalData.Preferences.LastFile4 }; }
+                string[] newRecents = Array.Empty<string>();
+                if (Path == GlobalData.Preferences.LastFile2) { newRecents = new[] { GlobalData.Preferences.LastFile2, GlobalData.Preferences.LastFile1, GlobalData.Preferences.LastFile3, GlobalData.Preferences.LastFile4, GlobalData.Preferences.LastFile5 }; }
+                else if (Path == GlobalData.Preferences.LastFile3) { newRecents = new[] { GlobalData.Preferences.LastFile3, GlobalData.Preferences.LastFile1, GlobalData.Preferences.LastFile2, GlobalData.Preferences.LastFile4, GlobalData.Preferences.LastFile5 }; }
+                else if (Path == GlobalData.Preferences.LastFile4) { newRecents = new[] { GlobalData.Preferences.LastFile4, GlobalData.Preferences.LastFile1, GlobalData.Preferences.LastFile2, GlobalData.Preferences.LastFile3, GlobalData.Preferences.LastFile5 }; }
+                else if (Path == GlobalData.Preferences.LastFile5) { newRecents = new[] { GlobalData.Preferences.LastFile5, GlobalData.Preferences.LastFile1, GlobalData.Preferences.LastFile2, GlobalData.Preferences.LastFile3, GlobalData.Preferences.LastFile4 }; }
                 
-                if (NewRecents.Count > 0)
+                if (newRecents.Length > 0)
                 {
-                    GlobalData.Preferences.LastFile1 = NewRecents[0];
-                    GlobalData.Preferences.LastFile2 = NewRecents[1];
-                    GlobalData.Preferences.LastFile3 = NewRecents[2];
-                    GlobalData.Preferences.LastFile4 = NewRecents[3];
-                    GlobalData.Preferences.LastFile5 = NewRecents[4];
+                    GlobalData.Preferences.LastFile1 = newRecents[0];
+                    GlobalData.Preferences.LastFile2 = newRecents[1];
+                    GlobalData.Preferences.LastFile3 = newRecents[2];
+                    GlobalData.Preferences.LastFile4 = newRecents[3];
+                    GlobalData.Preferences.LastFile5 = newRecents[4];
                 }
             }
 

@@ -11,6 +11,7 @@ namespace StoryBuilder.Services.Search
         /// </summary>
         /// <param name="node">StoryNodeItem whose StoryElement to search</param>
         /// <param name="searchArg">string to search for</param>
+        /// <param name="model">model to search in</param>
         /// <returns>true if StoryyElement contains search argument</returns>
         public bool SearchStoryElement(StoryNodeItem node, string searchArg, StoryModel model)
         {
@@ -50,9 +51,7 @@ namespace StoryBuilder.Services.Search
         }
         private bool Comparator(string text)
         {
-            if (text.ToLower().Contains(arg))
-                return true;
-            return false;
+            return text.ToLower().Contains(arg);
         }
 
         private bool SearchSection(StoryNodeItem node, StoryElement element)

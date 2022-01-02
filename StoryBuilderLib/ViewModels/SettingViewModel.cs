@@ -45,10 +45,10 @@ namespace StoryBuilder.ViewModels
             get => _name;
             set
             {
-                if (_changeable && (_name != value)) // Name changed?
+                if (_changeable && _name != value) // Name changed?
                 {
                     _logger.Log(LogLevel.Info, $"Requesting Name change from {_name} to {value}");
-                    var msg = new NameChangeMessage(_name, value);
+                    NameChangeMessage msg = new(_name, value);
                     Messenger.Send(new NameChangedMessage(msg));
                 }
                 SetProperty(ref _name, value);

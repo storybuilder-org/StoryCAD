@@ -38,8 +38,8 @@ namespace StoryBuilder.ViewModels
 
         public bool Changed
         {
-            get { return _changed; }
-            set { _changed = value; }
+            get => _changed;
+            set => _changed = value;
         }
 
         public bool AllReportsSwitch
@@ -140,7 +140,7 @@ namespace StoryBuilder.ViewModels
 
         public bool AllSceneSwitch
         {
-            get { return _allSceneSwitch; }
+            get => _allSceneSwitch;
             set => SetProperty(ref _allSceneSwitch, value);
         }
 

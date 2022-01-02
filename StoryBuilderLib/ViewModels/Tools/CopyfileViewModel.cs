@@ -21,9 +21,9 @@ namespace StoryBuilder.ViewModels.Tools
 
         public bool Changed
         {
-            get { return _changed; }
+            get => _changed;
             // ReSharper disable once ValueParameterNotUsed
-            set { _changed = false; }
+            set => _changed = false;
         }
 
         #endregion
