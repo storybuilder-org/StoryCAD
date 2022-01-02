@@ -654,14 +654,15 @@ namespace StoryBuilder.Services.Reports
         /// </summary>
         /// <param name="rtfInput"></param>
         /// <returns></returns>
-        private string GetText(string rtfInput)
+        public string GetText(string rtfInput, bool formatNewLines = true)
         {
             string text = rtfInput ?? string.Empty;
             if (rtfInput.Equals(string.Empty))
                 return string.Empty;
             RichTextStripper rts = new RichTextStripper();
             text =  rts.StripRichTextFormat(text);
-            text = text.Replace("\n","\\par");
+            if (formatNewLines)
+                text = text.Replace("\n","\\par");
             return text;
         }
 
