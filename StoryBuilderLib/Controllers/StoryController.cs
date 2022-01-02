@@ -25,16 +25,6 @@ namespace StoryBuilder.Controllers
         // StoryModel is open.
         public StoryModel StoryModel;
 
-        // File references. These are used to coordinate LoadModel()
-        // and SaveModel() behavior in Story Element ViewModels and 
-        // Open, Save, and SaveAs behavior in the ShellViewModel.
-        // File and folder data
-        public StorageFolder ProjectFolder;
-        public StorageFolder FilesFolder;
-        public StorageFile ProjectFile;
-        public string ProjectFilename;
-        public string ProjectPath;
-
         // LoadStatus decides where LoadModel() and SaveModel() get
         // and put RTF text data.
         public LoadStatus LoadStatus;

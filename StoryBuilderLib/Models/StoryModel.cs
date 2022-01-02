@@ -1,5 +1,6 @@
 using StoryBuilder.ViewModels;
 using System.Collections.ObjectModel;
+using Windows.Storage;
 
 //using StoryBuilder.Models.Tools;
 
@@ -38,7 +39,11 @@ namespace StoryBuilder.Models
         ///
         public ObservableCollection<StoryNodeItem> ExplorerView;
         public ObservableCollection<StoryNodeItem> NarratorView;
-   
+        public StorageFolder ProjectFolder;
+        public StorageFolder FilesFolder;
+        public StorageFile ProjectFile;
+        public string ProjectFilename;
+        public string ProjectPath;
         #endregion
 
         #region Constructor

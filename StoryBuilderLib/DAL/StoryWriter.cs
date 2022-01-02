@@ -71,7 +71,7 @@ namespace StoryBuilder.DAL
             }
 
             _model.Changed = false;
-            _story.ProjectFolder = await output.GetParentAsync();
+            GlobalData.StoryModel.ProjectFolder = await output.GetParentAsync();
         }
 
         private void CreateStoryDocument()
@@ -784,12 +784,12 @@ namespace StoryBuilder.DAL
         private async Task<StorageFolder> FindSubFolder(Guid uuid)
         {
             // Search the ProjectFolder's subfolders for the desired one (folder name == uuid as string)
-            IReadOnlyList<StorageFolder> folders = await _story.FilesFolder.GetFoldersAsync();
+            IReadOnlyList<StorageFolder> folders = await GlobalData.StoryModel.FilesFolder.GetFoldersAsync();
             foreach (StorageFolder folder in folders)
                 if (folder.Name.Equals(UuidString(uuid)))
                     return folder;
             // If the SubFolder doesn't exist, create it.
-            StorageFolder newFolder = await _story.FilesFolder.CreateFolderAsync(UuidString(uuid));
+            StorageFolder newFolder = await GlobalData.StoryModel.FilesFolder.CreateFolderAsync(UuidString(uuid));
             return newFolder;
         }
 

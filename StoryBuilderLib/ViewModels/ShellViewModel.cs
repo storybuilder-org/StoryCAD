@@ -63,7 +63,7 @@ namespace StoryBuilder.ViewModels
         public readonly SearchService Search;
 
         // The current story outline being processed. 
-        public StoryModel StoryModel;
+        public StoryModel StoryModel = GlobalData.StoryModel;
 
         public readonly ScrivenerIo Scrivener;
 
@@ -353,19 +353,19 @@ namespace StoryBuilder.ViewModels
         /// </summary>
         public async Task OpenFileFromPath(string Path)
         {
-            _story.ProjectFolder = await StorageFolder.GetFolderFromPathAsync(Path);
-            _story.ProjectPath = _story.ProjectFolder.Path;
-            _story.ProjectFilename = _story.ProjectFolder.DisplayName;
+            StoryModel.ProjectFolder = await StorageFolder.GetFolderFromPathAsync(Path);
+            StoryModel.ProjectPath = StoryModel.ProjectFolder.Path;
+            StoryModel.ProjectFilename = StoryModel.ProjectFolder.DisplayName;
 
-             IReadOnlyList<StorageFile> files = await _story.ProjectFolder.GetFilesAsync();
+             IReadOnlyList<StorageFile> files = await StoryModel.ProjectFolder.GetFilesAsync();
             StorageFile file = files[0];
             //NOTE: BasicProperties.DateModified can be the date last changed
 
-            _story.ProjectFilename = file.Name;
-            Ioc.Default.GetService<MainWindowVM>().Title = $"StoryBuilder - Editing {_story.ProjectFilename.Replace(".stbx", "")}";
-            _story.ProjectFile = file;
+            StoryModel.ProjectFilename = file.Name;
+            Ioc.Default.GetService<MainWindowVM>().Title = $"StoryBuilder - Editing {StoryModel.ProjectFilename.Replace(".stbx", "")}";
+            StoryModel.ProjectFile = file;
             // Make sure files folder exists...
-            _story.FilesFolder = await _story.ProjectFolder.CreateFolderAsync("files", CreationCollisionOption.OpenIfExists);
+            StoryModel.FilesFolder = await StoryModel.ProjectFolder.CreateFolderAsync("files", CreationCollisionOption.OpenIfExists);
             //TODO: Back up at the right place (after open?)
             await BackupProject();
             StoryReader rdr = Ioc.Default.GetService<StoryReader>();
@@ -389,10 +389,10 @@ namespace StoryBuilder.ViewModels
                 //TODO: Make sure both path and filename are present
                 UnifiedVM vm = dialogVM;
                 if (!Path.GetExtension(vm.ProjectName).Equals(".stbx")) {vm.ProjectName += ".stbx";}
-                _story.ProjectFilename = vm.ProjectName;
+                StoryModel.ProjectFilename = vm.ProjectName;
                 StorageFolder parent = await StorageFolder.GetFolderFromPathAsync(vm.ProjectPath);
-                _story.ProjectFolder = await parent.CreateFolderAsync(vm.ProjectName);
-                _story.ProjectPath = _story.ProjectFolder.Path;
+                StoryModel.ProjectFolder = await parent.CreateFolderAsync(vm.ProjectName);
+                StoryModel.ProjectPath = StoryModel.ProjectFolder.Path;
                 StatusMessage = "New project command executing";
                 if (StoryModel.Changed)
                 {
@@ -643,29 +643,28 @@ namespace StoryBuilder.ViewModels
                 folderPicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
                 folderPicker.FileTypeFilter.Add(".stbx");
                 folderPicker.FileTypeFilter.Add(".stb");
-                _story.ProjectFolder = await folderPicker.PickSingleFolderAsync();
-                //TODO: Test for cancelled FolderPicker
-                if (_story.ProjectFolder == null) 
+                StoryModel.ProjectFolder = await folderPicker.PickSingleFolderAsync();
+                if (StoryModel.ProjectFolder == null) 
                 {
                     Logger.Log(LogLevel.Info,"Open File command cancelled");
                     StatusMessage = "Open Story command cancelled";
                     _canExecuteCommands = true;  // unblock other commands
                     return;
                 }
-                _story.ProjectPath = _story.ProjectFolder.Path;
-                _story.ProjectFilename = _story.ProjectFolder.DisplayName;
+                StoryModel.ProjectPath = StoryModel.ProjectFolder.Path;
+                StoryModel.ProjectFilename = StoryModel.ProjectFolder.DisplayName;
 
-                IReadOnlyList<StorageFile> files = await _story.ProjectFolder.GetFilesAsync();
+                IReadOnlyList<StorageFile> files = await StoryModel.ProjectFolder.GetFilesAsync();
                 StorageFile file = files[0];
                 //NOTE: BasicProperties.DateModified can be the date last changed
 
                 if (file.FileType.ToLower().Equals(".stbx"))
                 {
-                    _story.ProjectFilename = file.Name;
-                    _story.ProjectFile = file;
+                    StoryModel.ProjectFilename = file.Name;
+                    StoryModel.ProjectFile = file;
                     // Make sure files folder exists...
                     //_story.FilesFolder = await _story.ProjectFolder.GetFolderAsync("files");
-                    _story.FilesFolder = await _story.ProjectFolder.CreateFolderAsync("files", CreationCollisionOption.OpenIfExists);
+                    StoryModel.FilesFolder = await StoryModel.ProjectFolder.CreateFolderAsync("files", CreationCollisionOption.OpenIfExists);
                     //TODO: Back up at the right place (after open?)
                     await BackupProject();
                     StoryReader rdr = Ioc.Default.GetService<StoryReader>();
@@ -674,18 +673,18 @@ namespace StoryBuilder.ViewModels
                     {
                         SetCurrentView(StoryViewType.ExplorerView);
                         _story.LoadStatus = LoadStatus.LoadFromRtfFiles;
-                        Ioc.Default.GetService<MainWindowVM>().Title = $"StoryBuilder - Editing {_story.ProjectFilename.Replace(".stbx", "")}";
-                        new UnifiedVM().UpdateRecents(_story.ProjectPath);
+                        Ioc.Default.GetService<MainWindowVM>().Title = $"StoryBuilder - Editing {StoryModel.ProjectFilename.Replace(".stbx", "")}";
+                        new UnifiedVM().UpdateRecents(StoryModel.ProjectPath);
                         StatusMessage = "Open Story completed";
                     }
                 }
                 else 
                 {
                     
-                    string message = $"Open project {_story.ProjectFilename} command failed. Unsupported file extension";
+                    string message = $"Open project {StoryModel.ProjectFilename} command failed. Unsupported file extension";
                     Logger.Log(LogLevel.Info, message);
                 }
-                string msg = $"Open project {_story.ProjectFilename} command completed";
+                string msg = $"Open project {StoryModel.ProjectFilename} command completed";
                 Logger.Log(LogLevel.Info, msg);
                 
             }
@@ -709,12 +708,12 @@ namespace StoryBuilder.ViewModels
                 //TODO: Get backup folder from Preferences
                 PreferencesModel preferences = GlobalData.Preferences;
                 StorageFolder backupRoot = await StorageFolder.GetFolderFromPathAsync(preferences.BackupDirectory);
-                string projectName = _story.ProjectFolder.DisplayName;
+                string projectName = StoryModel.ProjectFolder.DisplayName;
                 if (await backupRoot.TryGetItemAsync(projectName) == null)
                     backup = await backupRoot.CreateFolderAsync(projectName);
                 else
                     backup = await backupRoot.GetFolderAsync(projectName);
-                await _story.ProjectFolder.CopyContentsRecursive(backup);
+                await StoryModel.ProjectFolder.CopyContentsRecursive(backup);
             }
             catch (Exception ex)
             {
@@ -736,7 +735,7 @@ namespace StoryBuilder.ViewModels
                 StatusMessage = "Save File command executing";
                 await SaveModel();
                 await WriteModel();
-                Ioc.Default.GetService<MainWindowVM>().Title = $"StoryBuilder - Editing {_story.ProjectFilename.Replace(".stbx", "")}  (Last saved at {DateTime.Now:HH:mm:ss})";
+                Ioc.Default.GetService<MainWindowVM>().Title = $"StoryBuilder - Editing {GlobalData.StoryModel.ProjectFilename.Replace(".stbx", "")}  (Last saved at {DateTime.Now:HH:mm:ss})";
                 StatusMessage = "Save File command completed";
                 StoryModel.Changed = false;
                 ChangeStatusColor = Colors.Green;
@@ -757,16 +756,16 @@ namespace StoryBuilder.ViewModels
         /// <returns>Task (async function)</returns>
         private async Task WriteModel()
         {
-            Logger.Log(LogLevel.Info, $"In WriteModel, file={_story.ProjectFilename}");
+            Logger.Log(LogLevel.Info, $"In WriteModel, file={StoryModel.ProjectFilename}");
             try
             {
                 await CreateProjectFile();
-                StorageFile file = _story.ProjectFile;
+                StorageFile file = StoryModel.ProjectFile;
                 if (file != null)
                 {
                     StoryWriter wtr = Ioc.Default.GetService<StoryWriter>();
                     //TODO: WriteFile isn't working; file is empty
-                    await wtr.WriteFile(_story.ProjectFile, StoryModel);
+                    await wtr.WriteFile(StoryModel.ProjectFile, StoryModel);
                     // Prevent updates to the remote version of the file until
                     // we finish making changes and call CompleteUpdatesAsync.
                     CachedFileManager.DeferUpdates(file);
@@ -802,8 +801,8 @@ namespace StoryBuilder.ViewModels
                 //Sets needed data in VM and then shows the dialog
                 SaveAsViewModel SaveAsVM = Ioc.Default.GetService<SaveAsViewModel>();
                 // The default project name and project folder path are from the active StoryModel
-                SaveAsVM.ProjectName = _story.ProjectFilename;
-                SaveAsVM.ProjectPathName = _story.ProjectPath;
+                SaveAsVM.ProjectName = StoryModel.ProjectFilename;
+                SaveAsVM.ProjectPathName = StoryModel.ProjectPath;
 
                 ContentDialogResult result = await SaveAsDialog.ShowAsync();
 
@@ -817,15 +816,15 @@ namespace StoryBuilder.ViewModels
 
                         //Saves the current project folders and files to disk
                         SaveAsVM.SaveAsProjectFolder = await SaveAsVM.ParentFolder.CreateFolderAsync(SaveAsVM.ProjectName, CreationCollisionOption.OpenIfExists);
-                        await _story.ProjectFolder.CopyContentsRecursive(SaveAsVM.SaveAsProjectFolder);
+                        await StoryModel.ProjectFolder.CopyContentsRecursive(SaveAsVM.SaveAsProjectFolder);
 
                         //Update the StoryModel properties to use the newly saved copy
-                        _story.ProjectFilename = SaveAsVM.ProjectName;
-                        _story.ProjectFolder = SaveAsVM.SaveAsProjectFolder;
-                        _story.ProjectPath = SaveAsVM.SaveAsProjectFolderPath;
+                        StoryModel.ProjectFilename = SaveAsVM.ProjectName;
+                        StoryModel.ProjectFolder = SaveAsVM.SaveAsProjectFolder;
+                        StoryModel.ProjectPath = SaveAsVM.SaveAsProjectFolderPath;
                         // Add to the recent files stack
-                        Ioc.Default.GetService<MainWindowVM>().Title = $"StoryBuilder - Editing {_story.ProjectFilename.Replace(".stbx", "")}";
-                        new UnifiedVM().UpdateRecents(_story.ProjectPath);
+                        Ioc.Default.GetService<MainWindowVM>().Title = $"StoryBuilder - Editing {StoryModel.ProjectFilename.Replace(".stbx", "")}";
+                        new UnifiedVM().UpdateRecents(StoryModel.ProjectPath);
                         // Indicate everything's done
                         Messenger.Send(new IsChangedMessage(true));
                         StoryModel.Changed = false;
@@ -921,17 +920,17 @@ namespace StoryBuilder.ViewModels
 
         private async Task CreateProjectFolder()
         {
-            StorageFolder folder = await _story.ProjectFolder.CreateFolderAsync(_story.ProjectFilename);
-            _story.ProjectFolder = folder;
-            _story.ProjectPath = folder.Path;
+            StorageFolder folder = await StoryModel.ProjectFolder.CreateFolderAsync(StoryModel.ProjectFilename);
+            StoryModel.ProjectFolder = folder;
+            StoryModel.ProjectPath = folder.Path;
         }
 
         private async Task CreateProjectFile()
         {
-            _story.ProjectFile = await _story.ProjectFolder.CreateFileAsync(_story.ProjectFilename, CreationCollisionOption.ReplaceExisting);
+            StoryModel.ProjectFile = await StoryModel.ProjectFolder.CreateFileAsync(StoryModel.ProjectFilename, CreationCollisionOption.ReplaceExisting);
             //Story.ProjectFolder = await Story.ProjectFile.GetParentAsync();
             // Also, create the data subfolder
-            _story.FilesFolder = await _story.ProjectFolder.CreateFolderAsync("files", CreationCollisionOption.OpenIfExists);
+            StoryModel.FilesFolder = await StoryModel.ProjectFolder.CreateFolderAsync("files", CreationCollisionOption.OpenIfExists);
         }
 
         #endregion
