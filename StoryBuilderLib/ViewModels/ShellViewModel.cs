@@ -428,13 +428,13 @@ namespace StoryBuilder.ViewModels
                         StoryElement scene = new FolderModel("Scene", StoryModel);
                         StoryNodeItem plotpointsNode = new(scene, overviewNode);
                         break;
-                    case "External/Internal Problems":
+                    case "External and Internal Problems":
                         StoryElement externalProblem = new ProblemModel("External Problem", StoryModel);
                         StoryNodeItem externalProblemNode = new(externalProblem, overviewNode);
                         StoryElement internalProblem = new ProblemModel("Internal Problem", StoryModel);
                         StoryNodeItem internalProblemNode = new(internalProblem, overviewNode);
                         break;
-                    case "Protagonist/Antagonist":
+                    case "ProtagonistAntagonist":
                         StoryElement protagonist = new CharacterModel("Protagonist", StoryModel);
                         StoryNodeItem protagonistNode = new(protagonist, overviewNode);
                         StoryElement antagonist = new CharacterModel("Antagonist", StoryModel);
@@ -735,7 +735,6 @@ namespace StoryBuilder.ViewModels
                 StatusMessage = "Save File command executing";
                 await SaveModel();
                 await WriteModel();
-                Ioc.Default.GetService<MainWindowVM>().Title = $"StoryBuilder - Editing {GlobalData.StoryModel.ProjectFilename.Replace(".stbx", "")}  (Last saved at {DateTime.Now:HH:mm:ss})";
                 StatusMessage = "Save File command completed";
                 StoryModel.Changed = false;
                 ChangeStatusColor = Colors.Green;
