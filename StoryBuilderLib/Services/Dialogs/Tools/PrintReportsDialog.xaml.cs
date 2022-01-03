@@ -3,6 +3,7 @@ using Microsoft.UI.Xaml.Controls;
 using System.Collections.Generic;
 using Windows.Graphics.Printing.OptionDetails;
 using CommunityToolkit.Mvvm.DependencyInjection;
+using Microsoft.UI.Xaml;
 using StoryBuilder.Models;
 using StoryBuilder.ViewModels;
 using StoryBuilder.ViewModels.Tools;
@@ -34,15 +35,44 @@ namespace StoryBuilder.Services.Dialogs.Tools
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        /// <exception cref="NotImplementedException"></exception>
         private void UpdateSelection(object sender, SelectionChangedEventArgs e)
         {
             PrintVM.SelectedNodes.Clear();
-            
-            foreach (var item in ProblemsList.SelectedItems) { PrintVM.SelectedNodes.Add((StoryNodeItem) item); }
-            foreach (var item in CharactersList.SelectedItems) { PrintVM.SelectedNodes.Add((StoryNodeItem) item); }
-            foreach (var item in ScenesList.SelectedItems) { PrintVM.SelectedNodes.Add((StoryNodeItem) item); }
-            foreach (var item in SettingsList.SelectedItems) { PrintVM.SelectedNodes.Add((StoryNodeItem) item); }
+
+            if (!PrintVM.SelectAllProblems)
+            {
+                foreach (StoryNodeItem item in ProblemsList.SelectedItems) { PrintVM.SelectedNodes.Add(item); }
+            }
+            else { PrintVM.SelectedNodes.AddRange(PrintVM.ProblemNodes); }
+
+            if (!PrintVM.SelectAllCharacters)
+            {
+                foreach (StoryNodeItem item in CharactersList.SelectedItems) { PrintVM.SelectedNodes.Add(item); }
+            }
+            else { PrintVM.SelectedNodes.AddRange(PrintVM.CharacterNodes); }
+
+            if (!PrintVM.SelectAllScenes)
+            {
+                foreach (StoryNodeItem item in ScenesList.SelectedItems) { PrintVM.SelectedNodes.Add(item); }
+            }
+            else { PrintVM.SelectedNodes.AddRange(PrintVM.SceneNodes); }
+
+            if (!PrintVM.SelectAllSettings)
+            {
+                foreach (StoryNodeItem item in SettingsList.SelectedItems) { PrintVM.SelectedNodes.Add(item); }
+            }
+            else { PrintVM.SelectedNodes.AddRange(PrintVM.SceneNodes); }
+
+            ProblemsList.IsEnabled = !PrintVM.SelectAllProblems;
+            CharactersList.IsEnabled = !PrintVM.SelectAllCharacters;
+            SettingsList.IsEnabled = !PrintVM.SelectAllSettings;
+            ScenesList.IsEnabled = !PrintVM.SelectAllScenes;
+        }
+
+
+        private void CheckboxClicked(object sender, RoutedEventArgs e)
+        {
+            UpdateSelection(null,null);
         }
     }
 }

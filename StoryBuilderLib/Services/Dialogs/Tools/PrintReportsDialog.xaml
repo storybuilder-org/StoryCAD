@@ -22,18 +22,29 @@
 
         <Pivot Height="300">
             <PivotItem Header="Problems" TabIndex="0">
-                <ListView SelectionMode="Multiple" Height="290" Name="ProblemsList" ItemsSource="{x:Bind PrintVM.ProblemNodes, Mode=TwoWay}" SelectionChanged="UpdateSelection" />
+                <StackPanel>
+                    <CheckBox Content="Print all problems" IsChecked="{x:Bind PrintVM.SelectAllProblems,Mode=TwoWay}" Click="CheckboxClicked"/>
+                    <ListView SelectionMode="Multiple" Height="260" Name="ProblemsList" ItemsSource="{x:Bind PrintVM.ProblemNodes, Mode=TwoWay}" SelectionChanged="UpdateSelection" />
+                </StackPanel>
             </PivotItem>
             <PivotItem Header="Characters">
-                <ListView SelectionMode="Multiple" Height="290" Name="CharactersList" ItemsSource="{x:Bind PrintVM.CharacterNodes, Mode=TwoWay}"  SelectionChanged="UpdateSelection"/>
+                <StackPanel>
+                    <CheckBox Content="Print all characters" IsChecked="{x:Bind PrintVM.SelectAllCharacters,Mode=TwoWay}" Click="CheckboxClicked"/>
+                    <ListView SelectionMode="Multiple" Height="260" Name="CharactersList" ItemsSource="{x:Bind PrintVM.CharacterNodes, Mode=TwoWay}"  SelectionChanged="UpdateSelection"/>
+                </StackPanel>
             </PivotItem>
             <PivotItem Header="Scenes">
-                <ListView SelectionMode="Multiple" Height="290" Name="ScenesList" ItemsSource="{x:Bind PrintVM.SceneNodes, Mode=TwoWay}"  SelectionChanged="UpdateSelection"/>
+                <StackPanel>
+                    <CheckBox Content="Print all scenes" IsChecked="{x:Bind PrintVM.SelectAllScenes, Mode=TwoWay}" Click="CheckboxClicked"/>
+                    <ListView SelectionMode="Multiple" Height="260" Name="ScenesList" ItemsSource="{x:Bind PrintVM.SceneNodes, Mode=TwoWay}"  SelectionChanged="UpdateSelection"/>
+                </StackPanel>
             </PivotItem>
             <PivotItem Header="Settings">
-                <ListView SelectionMode="Multiple" Height="290" Name="SettingsList" ItemsSource="{x:Bind PrintVM.SettingNodes, Mode=TwoWay}"  SelectionChanged="UpdateSelection"/>
+                <StackPanel>
+                    <CheckBox Content="Print all settings" IsChecked="{x:Bind PrintVM.SelectAllSettings,Mode=TwoWay}" Click="CheckboxClicked"/>
+                    <ListView SelectionMode="Multiple" Height="260" Name="SettingsList" ItemsSource="{x:Bind PrintVM.SettingNodes, Mode=TwoWay}"  SelectionChanged="UpdateSelection"/>
+                </StackPanel>
             </PivotItem>
-
         </Pivot>
  
     </StackPanel>
