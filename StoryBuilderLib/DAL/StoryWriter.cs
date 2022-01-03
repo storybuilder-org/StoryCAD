@@ -1,6 +1,4 @@
-﻿using CommunityToolkit.Mvvm.DependencyInjection;
-using StoryBuilder.Controllers;
-using StoryBuilder.Models;
+﻿using StoryBuilder.Models;
 using StoryBuilder.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -23,7 +21,6 @@ namespace StoryBuilder.DAL
         /// StoryBuilder's model is found in the StoryBuilder.Models namespace and consists
         /// of various POCO (Plain Old CLR) objects.
         ///
-        private readonly StoryController _story;
         private StoryModel _model;
 
         /// The in-memory representation of the .stbx file is an XmlDocument
@@ -43,7 +40,6 @@ namespace StoryBuilder.DAL
 
         public StoryWriter()
         {
-            _story = Ioc.Default.GetService<StoryController>();
         }
 
         

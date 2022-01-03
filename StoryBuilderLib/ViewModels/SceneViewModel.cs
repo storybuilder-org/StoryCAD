@@ -2,7 +2,6 @@
 using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
-using StoryBuilder.Controllers;
 using StoryBuilder.DAL;
 using StoryBuilder.Models;
 using StoryBuilder.Services.Logging;
@@ -22,7 +21,6 @@ namespace StoryBuilder.ViewModels
 
         private readonly StoryReader _rdr;
         private readonly StoryWriter _wtr;
-        private readonly StoryController _story;
         private readonly LogService _logger;
         StatusMessage _smsg;
         private bool _changeable; // process property changes for this story element
@@ -517,8 +515,7 @@ namespace StoryBuilder.ViewModels
             // Look for the StoryElement corresponding to the passed guid
             // (This is the normal approach)
             // Get the current StoryModel's StoryElementsCollection
-            ShellViewModel shell = Ioc.Default.GetService<ShellViewModel>();
-            StoryElementCollection elements = shell.StoryModel.StoryElements;
+            StoryElementCollection elements = GlobalData.StoryModel.StoryElements;
             if (Guid.TryParse(value, out Guid guid))
             {
                 if (elements.StoryElementGuids.ContainsKey(guid)) { return elements.StoryElementGuids[guid]; }
@@ -560,7 +557,6 @@ namespace StoryBuilder.ViewModels
 
         public SceneViewModel()
         {
-            _story = Ioc.Default.GetService<StoryController>();
             _logger = Ioc.Default.GetService<LogService>();
             _wtr = Ioc.Default.GetService<StoryWriter>();
             _rdr = Ioc.Default.GetService<StoryReader>();

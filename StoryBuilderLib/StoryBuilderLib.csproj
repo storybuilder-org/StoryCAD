@@ -88,7 +88,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\" />
     <Folder Include="Models\Scrivener\" />
     <Folder Include="Services\Icons\" />
     <Folder Include="Services\Installation\" />

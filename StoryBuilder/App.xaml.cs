@@ -8,7 +8,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using PInvoke;
-using StoryBuilder.Controllers;
 using StoryBuilder.DAL;
 using StoryBuilder.Models;
 using StoryBuilder.Models.Tools;
@@ -85,7 +84,6 @@ namespace StoryBuilder
                     .AddSingleton<ListLoader>()
                     .AddSingleton<ToolLoader>()
                     .AddSingleton<ScrivenerIo>()
-                    .AddSingleton<StoryController>()
                     .AddSingleton<StoryReader>()
                     .AddSingleton<StoryWriter>()
                     // Register ViewModels 
@@ -130,7 +128,6 @@ namespace StoryBuilder
             _log = Ioc.Default.GetService<LogService>();
             _log.Log(LogLevel.Info, "StoryBuilder.App launched");
 
-            StoryController story = Ioc.Default.GetService<StoryController>();
             string localPath = GlobalData.RootDirectory;
             StorageFolder localFolder = await StorageFolder.GetFolderFromPathAsync(localPath);
             string pathMsg = string.Format("Configuration data location = " + localFolder.Path);
@@ -142,15 +139,15 @@ namespace StoryBuilder
 
             // Load Preferences
             PreferencesService pref = Ioc.Default.GetService<PreferencesService>();
-            await pref.LoadPreferences(localPath, story);
+            await pref.LoadPreferences(localPath);
 
             await ProcessInstallationFiles();
 
-            await LoadControls(localFolder.Path, story);
+            await LoadControls(localFolder.Path);
 
             await LoadLists(localFolder.Path);
             
-            await LoadTools(localFolder.Path, story);
+            await LoadTools(localFolder.Path);
 
             ConfigureNavigation();
 
@@ -191,7 +188,7 @@ namespace StoryBuilder
             }
         }
 
-        private async Task LoadControls(string path, StoryController story)
+        private async Task LoadControls(string path)
         {
             int subTypeCount = 0;
             int exampleCount = 0;
@@ -199,7 +196,7 @@ namespace StoryBuilder
             {
                 _log.Log(LogLevel.Info, "Loading Controls.ini data");
                 ControlLoader loader = Ioc.Default.GetService<ControlLoader>();
-                await loader.Init(path, story);
+                await loader.Init(path);
                 _log.Log(LogLevel.Info, "ConflictType Counts");
                 _log.Log(LogLevel.Info,
                     $"{GlobalData.ConflictTypes.Keys.Count} ConflictType keys created");
@@ -236,13 +233,13 @@ namespace StoryBuilder
             }
         }
 
-        private async Task LoadTools(string path, StoryController story)
+        private async Task LoadTools(string path)
         {
             try
             {
                 _log.Log(LogLevel.Info, "Loading Tools.ini data");
                 ToolLoader loader = Ioc.Default.GetService<ToolLoader>();
-                await loader.Init(path, story);
+                await loader.Init(path);
                 _log.Log(LogLevel.Info,
                     $"{GlobalData.KeyQuestionsSource.Keys.Count} Key Questions created");
                 _log.Log(LogLevel.Info,

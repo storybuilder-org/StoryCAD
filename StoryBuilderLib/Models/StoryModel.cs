@@ -42,8 +42,13 @@ namespace StoryBuilder.Models
         public StorageFolder ProjectFolder;
         public StorageFolder FilesFolder;
         public StorageFile ProjectFile;
-        public string ProjectFilename;
         public string ProjectPath;
+        private string projectFilename;
+        public string ProjectFilename 
+        { 
+            get => projectFilename;
+            set => projectFilename = value; 
+        }
         #endregion
 
         #region Constructor
@@ -55,6 +60,8 @@ namespace StoryBuilder.Models
             NarratorView = new ObservableCollection<StoryNodeItem>();
 
             Changed = false;
+
+            projectFilename = null;
         }
         #endregion
     }

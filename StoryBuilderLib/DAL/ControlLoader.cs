@@ -1,5 +1,4 @@
-﻿using StoryBuilder.Controllers;
-using StoryBuilder.Models;
+﻿using StoryBuilder.Models;
 using StoryBuilder.Models.Tools;
 using StoryBuilder.Services.Logging;
 using System;
@@ -11,13 +10,12 @@ namespace StoryBuilder.DAL
 {
     public class ControlLoader
     {
-        public readonly StoryController Story;
         public readonly PreferencesModel Preferences;
         public readonly LogService Logger;
 
         private IList<string> lines;
         private string installFolder;
-        public async Task Init(string path, StoryController story)
+        public async Task Init(string path)
         {
             try
             {

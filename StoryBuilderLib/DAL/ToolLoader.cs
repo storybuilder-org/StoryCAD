@@ -1,5 +1,4 @@
-﻿using StoryBuilder.Controllers;
-using StoryBuilder.Models;
+﻿using StoryBuilder.Models;
 using StoryBuilder.Models.Tools;
 using StoryBuilder.Services.Logging;
 using System;
@@ -13,13 +12,12 @@ namespace StoryBuilder.DAL
 {
     public class ToolLoader
     {
-        public readonly StoryController Story;
         public readonly PreferencesModel Preferences;
         public readonly LogService Logger;
 
         private IList<string> lines;
         private string installFolder;
-        public async Task Init(string path, StoryController story)
+        public async Task Init(string path)
         {
             try
             {
@@ -339,43 +337,7 @@ namespace StoryBuilder.DAL
             }
             return quotes;
         }
-
-        // TODO: Font loading is commented out in TOOLS.INI and here.
-        /*
-                private List<string> LoadFonts()
-                {
-                    List<string> fonts = new List<string>();
-                    foreach (string line in _iniFile) {
-                        string section = null;
-                        string keyword = null;
-                        string keyvalue = null;
-                        ParseLine(line, ref keyword, ref keyvalue, ref section);
-                        //   Process the parsed values
-                        switch (section) {
-                            case "Application Tools":
-                            case "Comment":
-                                break;
-                            //case "Fonts":
-                            //    switch (keyword) {
-                            //        case "":
-                            //            break;
-                            //        case "Font":
-                            //            Fonts.Add((keyvalue));
-                            //            break;
-                            //        default:
-                            //            NotFoundCount = NotFoundCount + 1;
-                            //            if (NotFoundCount < NotFoundLimit) {
-                            //                MessageBox.Show(line, @"Unrecognized STORYB.INI Line", MessageBoxButton.OK);
-                            //            }
-                            //            break;
-                            //    }
-                            //    break;
-                        }
-                    }
-                    return fonts;
-                }
-        */
-
+         
         /// <summary>
         /// Parse a line from the TOOLS.INI file into section, keyword, and keyvalue.
         /// 

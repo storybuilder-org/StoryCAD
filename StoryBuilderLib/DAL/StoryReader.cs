@@ -1,7 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Messaging;
-using StoryBuilder.Controllers;
 using StoryBuilder.Models;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.Services.Messages;
@@ -28,7 +27,6 @@ namespace StoryBuilder.DAL
         /// StoryBuilder's model is found in the StoryBuilder.Models namespace and consists
         /// of various POCO (Plain Old CLR) objects.
         ///
-        private readonly StoryController _story;
         public readonly LogService Logger;
 
         /// The in-memory representation of the .stbx file is an XmlDocument
@@ -797,7 +795,6 @@ namespace StoryBuilder.DAL
         #region Constructor
         public StoryReader()
         {
-            _story = Ioc.Default.GetService<StoryController>();
             Logger = Ioc.Default.GetService<LogService>();
 
             XmlDocument doc = new();

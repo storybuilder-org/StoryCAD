@@ -3,7 +3,6 @@ using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.UI.Xaml.Controls;
-using StoryBuilder.Controllers;
 using StoryBuilder.Controls;
 using StoryBuilder.DAL;
 using StoryBuilder.Models;
@@ -27,7 +26,6 @@ namespace StoryBuilder.ViewModels
         private readonly StoryReader _rdr;
         private readonly StoryWriter _wtr;
         private readonly LogService _logger;
-        private readonly StoryController _story;
         private StoryModel _storyModel;
         public RelationshipModel CurrentRelationship;
         private bool _changeable; // process property changes for this story element
@@ -740,8 +738,7 @@ namespace StoryBuilder.ViewModels
             if (value.Equals(string.Empty))
                 return null;
             // Get the current StoryModel's StoryElementsCollection
-            ShellViewModel shell = Ioc.Default.GetService<ShellViewModel>();
-            StoryElementCollection elements = shell.StoryModel.StoryElements;
+            StoryElementCollection elements = GlobalData.StoryModel.StoryElements;
             // legacy: locate the StoryElement from its Name
             foreach (StoryElement element in elements)  // Character or Setting??? Search both?
             {
@@ -1034,9 +1031,7 @@ namespace StoryBuilder.ViewModels
 
         public CharacterViewModel()
         {
-            ShellViewModel shell = Ioc.Default.GetService<ShellViewModel>();
-            _storyModel = shell.StoryModel;
-            _story = Ioc.Default.GetService<StoryController>();
+            _storyModel = GlobalData.StoryModel;
             _logger = Ioc.Default.GetService<LogService>();
             _wtr = Ioc.Default.GetService<StoryWriter>();
             _rdr = Ioc.Default.GetService<StoryReader>();

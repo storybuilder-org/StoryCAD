@@ -1,7 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Messaging;
-using StoryBuilder.Controllers;
 using StoryBuilder.DAL;
 using StoryBuilder.Models;
 using StoryBuilder.Services.Logging;
@@ -32,7 +31,6 @@ namespace StoryBuilder.ViewModels
 
         #region Fields
 
-        private readonly StoryController _story;
         private readonly LogService _logger;
         private readonly StoryReader _rdr;
         private readonly StoryWriter _wtr;
@@ -340,8 +338,7 @@ namespace StoryBuilder.ViewModels
             if (value.Equals(string.Empty))
                 return null;
             // Get the current StoryModel's StoryElementsCollection
-            ShellViewModel shell = Ioc.Default.GetService<ShellViewModel>();
-            StoryElementCollection elements = shell.StoryModel.StoryElements;
+            StoryElementCollection elements = GlobalData.StoryModel.StoryElements;
             // legacy: locate the StoryElement from its Name
             foreach (StoryElement element in elements)  // Character or Setting??? Search both?
             {
@@ -384,7 +381,6 @@ namespace StoryBuilder.ViewModels
 
         public OverviewViewModel()
         {
-            _story = Ioc.Default.GetService<StoryController>();
             _logger = Ioc.Default.GetService<LogService>();
             _wtr = Ioc.Default.GetService<StoryWriter>();
             _rdr = Ioc.Default.GetService<StoryReader>();

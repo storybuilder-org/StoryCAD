@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using StoryBuilder.Controllers;
 using StoryBuilder.DAL;
 using StoryBuilder.Models;
 using StoryBuilder.Services.Installation;
@@ -25,7 +24,6 @@ namespace StoryBuilderTests
         {
             ConfigureIoc();
             // Validate service locator
-            StoryController story = Ioc.Default.GetService<StoryController>();
             //string localPath =ApplicationData.Current.RoamingFolder.Path.ToString();
             string localPath = $"{Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)}";
             localPath = System.IO.Path.Combine(localPath, "StoryBuilder");
@@ -35,7 +33,7 @@ namespace StoryBuilderTests
             // Validate InstallFiles
 
             PreferencesService pref = Ioc.Default.GetService<PreferencesService>();
-            await pref.LoadPreferences(localFolder.Path, story);
+            await pref.LoadPreferences(localFolder.Path);
             // Validate preferences
             Assert.IsNotNull(GlobalData.Preferences);
             Assert.AreEqual(localPath, GlobalData.RootDirectory);
@@ -116,7 +114,6 @@ namespace StoryBuilderTests
                     .AddSingleton<ControlLoader>()
                     .AddSingleton<ToolLoader>()
                     .AddSingleton<ScrivenerIo>()
-                    .AddSingleton<StoryController>()
                     .AddSingleton<StoryReader>()
                     .AddSingleton<StoryWriter>()
                     // Register ViewModels 

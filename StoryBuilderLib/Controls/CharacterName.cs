@@ -1,7 +1,7 @@
 ﻿
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml.Controls;
-using StoryBuilder.ViewModels;
+using StoryBuilder.Models;
 
 namespace StoryBuilder.Controls
 {
@@ -11,8 +11,7 @@ namespace StoryBuilder.Controls
         public CharacterName() : base()
         {
             DefaultStyleKey = typeof(ComboBox);
-            ShellViewModel shell = Ioc.Default.GetService<ShellViewModel>();
-            ItemsSource = shell.StoryModel.StoryElements.Characters;
+            ItemsSource = GlobalData.StoryModel.StoryElements.Characters;
             
             //TODO: Subscribe to change for StoryModel?
         }

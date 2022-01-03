@@ -1,5 +1,4 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using StoryBuilder.Controllers;
 using StoryBuilder.DAL;
 using StoryBuilder.Models;
 using System.Threading.Tasks;
@@ -12,12 +11,10 @@ namespace StoryBuilderTests
         [TestMethod]
         public async Task TestControlLoader()
         {
-            StoryController story = new();
-            Assert.IsNotNull(story);
             string localPath = GlobalData.RootDirectory;
 
             ControlLoader loader = new();
-            await loader.Init(localPath, story);
+            await loader.Init(localPath);
             Assert.IsNotNull(GlobalData.ConflictTypes);
             return;
         }

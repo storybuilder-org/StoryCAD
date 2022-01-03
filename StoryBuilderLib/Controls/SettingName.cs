@@ -1,6 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml.Controls;
-using StoryBuilder.ViewModels;
+using StoryBuilder.Models;
 
 namespace StoryBuilder.Controls
 {
@@ -10,8 +10,7 @@ namespace StoryBuilder.Controls
         public SettingName() : base()
         {
             DefaultStyleKey = typeof(ComboBox);
-            ShellViewModel shell = Ioc.Default.GetService<ShellViewModel>();
-            ItemsSource = shell.StoryModel.StoryElements.Settings;
+            ItemsSource = GlobalData.StoryModel.StoryElements.Settings;
             //TODO: Subscribe to change for StoryModel?
         }
     }

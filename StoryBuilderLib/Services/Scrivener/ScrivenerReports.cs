@@ -1,5 +1,4 @@
 ﻿using CommunityToolkit.Mvvm.DependencyInjection;
-using StoryBuilder.Controllers;
 using StoryBuilder.DAL;
 using StoryBuilder.Models;
 using StoryBuilder.Models.Scrivener;    
@@ -42,7 +41,6 @@ namespace StoryBuilder.Services.Scrivener
 
         public ScrivenerReports(StorageFile file, StoryModel model)
         {
-            Ioc.Default.GetService<StoryController>();
             _scrivener = Ioc.Default.GetService<ScrivenerIo>();
             _scrivener.ScrivenerFile = file;
             _model = model;
@@ -59,8 +57,7 @@ namespace StoryBuilder.Services.Scrivener
             if (value.Equals(string.Empty))
                 return null;
             // Get the current StoryModel's StoryElementsCollection
-            ShellViewModel shell = Ioc.Default.GetService<ShellViewModel>();
-            StoryElementCollection elements = shell.StoryModel.StoryElements;
+            StoryElementCollection elements = GlobalData.StoryModel.StoryElements;
             // legacy: locate the StoryElement from its Name
             foreach (StoryElement element in elements)  // Character or Setting??? Search both?
             {

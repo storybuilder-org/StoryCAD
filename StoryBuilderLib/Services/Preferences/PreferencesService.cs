@@ -1,6 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml;
-using StoryBuilder.Controllers;
 using StoryBuilder.DAL;
 using StoryBuilder.Models;
 using StoryBuilder.Models.Tools;
@@ -14,7 +13,7 @@ namespace StoryBuilder.Services.Preferences
     {
         public readonly LogService Logger = Ioc.Default.GetService<LogService>();
 
-        public async Task LoadPreferences(string path, StoryController story)
+        public async Task LoadPreferences(string path)
         {
             try
             {

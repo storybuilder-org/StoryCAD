@@ -1,7 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Messaging;
-using StoryBuilder.Controllers;
 using StoryBuilder.DAL;
 using StoryBuilder.Models;
 using StoryBuilder.Services.Logging;
@@ -19,7 +18,6 @@ namespace StoryBuilder.ViewModels
     {
         #region Fields
 
-        private readonly StoryController _story;
         private readonly LogService _logger;
         private readonly StoryReader _rdr;
         private readonly StoryWriter _wtr;
@@ -277,7 +275,6 @@ namespace StoryBuilder.ViewModels
         #region Constructor
         public SettingViewModel()
         {
-            _story = Ioc.Default.GetService<StoryController>();
             _logger = Ioc.Default.GetService<LogService>();
             _wtr = Ioc.Default.GetService<StoryWriter>();
             _rdr = Ioc.Default.GetService<StoryReader>();

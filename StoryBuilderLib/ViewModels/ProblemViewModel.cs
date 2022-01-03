@@ -4,7 +4,6 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Data;
-using StoryBuilder.Controllers;
 using StoryBuilder.Controls;
 using StoryBuilder.DAL;
 using StoryBuilder.Models;
@@ -23,8 +22,6 @@ namespace StoryBuilder.ViewModels
     {
         #region Fields
 
-        private StoryModel _storyModel;
-        private readonly StoryController _story;
         private readonly LogService _logger;
         internal readonly StoryReader _rdr;
         private readonly StoryWriter _wtr;
@@ -364,9 +361,6 @@ namespace StoryBuilder.ViewModels
 
         public ProblemViewModel()
         {
-            ShellViewModel shell = Ioc.Default.GetService<ShellViewModel>();
-            _storyModel = shell.StoryModel;
-            _story = Ioc.Default.GetService<StoryController>();
             _logger = Ioc.Default.GetService<LogService>();
             _wtr = Ioc.Default.GetService<StoryWriter>();
             _rdr = Ioc.Default.GetService<StoryReader>();

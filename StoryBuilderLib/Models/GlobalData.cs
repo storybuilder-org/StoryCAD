@@ -56,6 +56,6 @@ namespace StoryBuilder.Models
         public static XamlRoot XamlRoot;
 
         //The outline that is currently open
-        public static StoryModel StoryModel = new();
+        public static StoryModel StoryModel;
     }
 }
