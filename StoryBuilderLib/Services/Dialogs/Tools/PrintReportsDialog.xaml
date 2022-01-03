@@ -10,15 +10,14 @@
 
     <StackPanel Width="800" MinWidth="300">
         <StackPanel HorizontalAlignment="Center" Margin="0,15,520,15">
-            <ComboBox Header="Destination" Width="200" HorizontalAlignment="Center" Margin="0,10" SelectedItem="{x:Bind PrintVM.ReportType, Mode=TwoWay}">
-                <ComboBoxItem Content="Preview"/>
-                <ComboBoxItem Content="Printer"/>
-                <ComboBoxItem Content="Scrivener"/>
-            </ComboBox>
-
             <TextBlock Text="Create reports for the following:" />
-            <CheckBox Content="Story summary" IsChecked="{x:Bind PrintVM.CreateSummary, Mode=TwoWay}"/>
-            <CheckBox Content="Story overview" IsChecked="{x:Bind PrintVM.CreateSummary, Mode=TwoWay}" />
+            <CheckBox Content="Story Overview" IsChecked="{x:Bind PrintVM.CreateOverview, Mode=TwoWay}" />
+            <CheckBox Content="Story Synopsis" IsChecked="{x:Bind PrintVM.CreateSummary, Mode=TwoWay}"/>
+            <TextBlock MinWidth="50" />
+            <CheckBox Content="List of Problems" IsChecked="{x:Bind PrintVM.ProblemList, Mode=TwoWay}"/>
+            <CheckBox Content="List of Characters" IsChecked="{x:Bind PrintVM.CharacterList, Mode=TwoWay}"/>
+            <CheckBox Content="List of Settings" IsChecked="{x:Bind PrintVM.SettingList, Mode=TwoWay}"/>
+            <CheckBox Content="List of Scenes" IsChecked="{x:Bind PrintVM.SceneList, Mode=TwoWay}"/>
         </StackPanel>
 
         <Pivot Height="300">

@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Drawing;
 using System.Drawing.Printing;
-using System.IO;        
+using System.IO;
 using System.Threading.Tasks;
 using StoryBuilder.Models;
 using StoryBuilder.ViewModels;
@@ -27,9 +25,44 @@ namespace StoryBuilder.Services.Reports
         {
             string rtf = string.Empty;
             await _formatter.LoadReportTemplates(); // Load text report templates
+
+            //Process single selection (non-Pivot) reports
             if (_vm.CreateOverview)
             {
-                //rtf = await _formatter.FormatStoryOverviewReport();
+                rtf = await _formatter.FormatStoryOverviewReport(Overview());
+                documentText = FormatText(rtf);
+                Print(documentText);
+            }
+            if (_vm.CreateSummary)
+            {
+                rtf = await _formatter.FormatSynopsisReport();
+                documentText = FormatText(rtf);
+                Print(documentText); ;
+            }
+
+            if (_vm.ProblemList)
+            {
+                rtf = _formatter.FormatProblemListReport();
+                documentText = FormatText(rtf);
+                Print(documentText); ;
+            }
+            if (_vm.CharacterList)
+            {
+                rtf = _formatter.FormatCharacterListReport();
+                documentText = FormatText(rtf);
+                Print(documentText); ;
+            }
+            if (_vm.SettingList)
+            {
+                rtf = _formatter.FormatSettingListReport();
+                documentText = FormatText(rtf);
+                Print(documentText); ;
+            }
+            if (_vm.SceneList)
+            {
+                rtf = _formatter.FormatSceneListReport();
+                documentText = FormatText(rtf);
+                Print(documentText); ;
             }
 
             foreach (StoryNodeItem node in _vm.SelectedNodes)
@@ -47,12 +80,25 @@ namespace StoryBuilder.Services.Reports
                         case StoryItemType.Character:
                             rtf = await _formatter.FormatCharacterReport(element);
                             break;
+                        case StoryItemType.Setting:
+                            rtf = await _formatter.FormatSettingReport(element);
+                            break;
+                        case StoryItemType.Scene:
+                            rtf = await _formatter.FormatSceneReport(element);
+                            break;
                     }
                     documentText = FormatText(rtf);
-                    
                     Print(documentText);
                 }
             }
+        }
+
+        private StoryElement Overview() 
+        {
+            foreach (StoryElement element in _model.StoryElements)
+                if (element.Type == StoryItemType.StoryOverview)
+                    return element;
+            return null;
         }
 
         // The PrintPage event is raised for each page to be printed.
@@ -141,11 +187,15 @@ namespace StoryBuilder.Services.Reports
             return sb.ToString();
         }
 
+        #region Constructor
+
         public PrintReports(PrintReportDialogVM vm, StoryModel model)
         {
             _vm = vm;
             _model = model;
             _formatter = new ReportFormatter();
         }
+
+        #endregion
     }
 }

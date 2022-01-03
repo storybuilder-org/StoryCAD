@@ -6,20 +6,6 @@ namespace StoryBuilder.ViewModels.Tools
 {
     public class PrintReportDialogVM : ObservableRecipient
     {
-
-        private string _reportType;
-        /// <summary>
-        /// What type of report should be made
-        ///
-        /// Possible values
-        /// Scrivener, Preview, printer
-        /// </summary>
-        public string ReportType
-        {
-            get => _reportType;
-            set => SetProperty(ref _reportType, value);
-        }
-
         private bool _createSummary;
         public bool CreateSummary
         {
@@ -32,6 +18,34 @@ namespace StoryBuilder.ViewModels.Tools
         {
             get => _createOverview;
             set => SetProperty(ref _createOverview, value);
+        }
+
+        private bool _problemList;
+        public bool ProblemList
+        {
+            get => _problemList;
+            set => SetProperty(ref _problemList, value);
+        }
+
+        private bool _characterList;
+        public bool CharacterList
+        {
+            get => _characterList;
+            set => SetProperty(ref _characterList, value);
+        }
+
+        private bool _settingList;
+        public bool SettingList
+        {
+            get => _settingList;
+            set => SetProperty(ref _settingList, value);
+        }
+
+        private bool _sceneList;
+        public bool SceneList
+        {
+            get => _sceneList;
+            set => SetProperty(ref _sceneList, value);
         }
 
         private List<StoryNodeItem> _selectedNodes = new();
