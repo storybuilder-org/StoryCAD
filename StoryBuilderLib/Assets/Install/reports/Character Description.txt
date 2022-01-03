@@ -98,7 +98,7 @@
 
       Abnormality:      @Abnormality
 
-      Notes:
+      Psychological Notes:
       @PsychNotes
 
  
@@ -133,7 +133,8 @@
    Traits:        @Traits
 
                     =========== Notes ======================
-    Notes:
+    Notes:    
+    @Notes
    
 
 
