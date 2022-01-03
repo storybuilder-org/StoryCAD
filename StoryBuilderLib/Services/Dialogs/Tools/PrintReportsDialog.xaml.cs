@@ -22,12 +22,22 @@ namespace StoryBuilder.Services.Dialogs.Tools
 
         public PrintReportsDialog()
         {
-            this.InitializeComponent();
+            InitializeComponent();
+
+            PrintVM.ProblemNodes.Clear();
+            PrintVM.CharacterNodes.Clear();
+            PrintVM.SceneNodes.Clear();
+            PrintVM.SettingNodes.Clear();
+
             //Gets all nodes that aren't deleted
-            foreach (var rootChild in Ioc.Default.GetRequiredService<ShellViewModel>().DataSource[0].Children)
+            try
             {
-                PrintVM.TraverseNode(rootChild);
+                foreach (var rootChild in Ioc.Default.GetRequiredService<ShellViewModel>().DataSource[0].Children)
+                {
+                    PrintVM.TraverseNode(rootChild);
+                }
             }
+            catch {}
         }
 
         /// <summary>
