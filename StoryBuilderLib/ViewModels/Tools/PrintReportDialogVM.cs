@@ -1,6 +1,9 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System.Collections.Generic;
+using ABI.Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml;
 using StoryBuilder.Models;
+using WinRT;
 
 namespace StoryBuilder.ViewModels.Tools
 {
@@ -25,6 +28,33 @@ namespace StoryBuilder.ViewModels.Tools
         {
             get => _createSummary;
             set => SetProperty(ref _createSummary, value);
+        }
+        private bool _selectAllProblems;
+        public bool SelectAllProblems
+        {
+            get => _selectAllProblems;
+            set => SetProperty(ref _selectAllProblems, value);
+        }
+
+        private bool _selectAllCharacters;
+        public bool SelectAllCharacters
+        {
+            get => _selectAllCharacters;
+            set => SetProperty(ref _selectAllCharacters, value);
+        }
+
+        private bool _selectAllScenes;
+        public bool SelectAllScenes
+        {
+            get => _selectAllScenes;
+            set => SetProperty(ref _selectAllScenes, value);
+        }
+
+        private bool _selectAllSetting;
+        public bool SelectAllSettings
+        {
+            get => _selectAllScenes;
+            set => SetProperty(ref _selectAllSetting, value);
         }
 
         private bool _createOverview;
@@ -82,5 +112,6 @@ namespace StoryBuilder.ViewModels.Tools
             //Recurs until children are empty 
             foreach (StoryNodeItem storyNodeItem in node.Children) { TraverseNode(storyNodeItem); }
         }
+
     }
 }
