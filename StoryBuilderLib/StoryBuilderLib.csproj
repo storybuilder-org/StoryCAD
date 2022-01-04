@@ -78,6 +78,14 @@
   <ItemGroup>
     <EmbeddedResource Include="Assets\Install\**" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="Services\Theming\**" />
+    <Content Remove="Services\Theming\**" />
+    <EmbeddedResource Remove="Services\Theming\**" />
+    <None Remove="Services\Theming\**" />
+    <Page Remove="Services\Theming\**" />
+    <PRIResource Remove="Services\Theming\**" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="CommonServiceLocator" Version="2.0.6" />
@@ -94,7 +102,6 @@
     <Folder Include="Services\Installation\" />
     <Folder Include="Services\Logging\" />
     <Folder Include="Services\Navigation\" />
-    <Folder Include="Services\Theming\" />
     <Folder Include="Services\Search\" />
   </ItemGroup>
 
