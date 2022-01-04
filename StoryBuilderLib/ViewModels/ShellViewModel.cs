@@ -14,7 +14,7 @@ using StoryBuilder.Services.Dialogs.Tools;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.Services.Messages;
 using StoryBuilder.Services.Navigation;
-using StoryBuilder.Services.Scrivener;
+using StoryBuilder.Services.Reports;
 using StoryBuilder.Services.Search;
 using StoryBuilder.ViewModels.Tools;
 using System;
@@ -26,6 +26,7 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Windows.Storage;
 using Windows.Storage.Pickers;
+using Microsoft.Web.WebView2.Core;
 using WinRT;
 using GuidAttribute = System.Runtime.InteropServices.GuidAttribute;
 
@@ -100,7 +101,8 @@ namespace StoryBuilder.ViewModels
         public RelayCommand MasterPlotsCommand { get; }
         public RelayCommand DramaticSituationsCommand { get; }
         public RelayCommand StockScenesCommand { get; }
-        public RelayCommand ReportsCommand { get; }
+        public RelayCommand PrintReportsCommand { get; }
+        public RelayCommand ScrivenerReportsCommand { get; }
         public RelayCommand PreferencesCommand { get; }
 
         // Filter command
@@ -1148,10 +1150,82 @@ namespace StoryBuilder.ViewModels
             }
             catch (Exception e) {  Logger.LogException(LogLevel.Error, e, e.Message); }
         }
+
+        private async void OpenReportsDialog()
+        {
+            ContentDialog ReportDialog = new();
+            ReportDialog.Title = "Generate Reports";
+            ReportDialog.PrimaryButtonText = "Generate";
+            ReportDialog.CloseButtonText = "Cancel";
+            ReportDialog.XamlRoot = GlobalData.XamlRoot;
+            ReportDialog.Content = new PrintReportsDialog();
+            var result = await ReportDialog.ShowAsync();
+
+            if (result == ContentDialogResult.Primary)
+            {
+                PrintReportDialogVM ReportVM = Ioc.Default.GetRequiredService<PrintReportDialogVM>();
+
+                //switch (ReportVM.ReportType)
+                //{
+                //    case "Scrivener":
+                //        //Put code to make scrivener report here
+                //        break;
+                //    case "Preview":
+                //        //Put code to show preview here (or remove it)
+                //        break;
+                //    case "Printer":
+                //        //Put code to print here (or remove it)
+                //    break;
+                //}
+
+                StatusMessage = "Report generator complete";
+                Logger.Log(LogLevel.Info, "Report Generator complete");
+            }
+            else
+            {
+                StatusMessage = "Report generator canceled";
+                Logger.Log(LogLevel.Info, "Report Generator canceled");
+            }
+        }
+
+        private async void GeneratePrintReports()
+        {
+            _canExecuteCommands = false;
+            Logger.Log(LogLevel.Info, "Executing Generate Print Reports command");
+            StatusMessage = "Generate Print Reports executing";
+            await SaveModel();
+
+            // Run reports dialog
+            ContentDialog ReportDialog = new();
+            ReportDialog.Title = "Generate Reports";
+            ReportDialog.PrimaryButtonText = "Generate";
+            ReportDialog.CloseButtonText = "Cancel";
+            ReportDialog.XamlRoot = GlobalData.XamlRoot;
+            ReportDialog.Content = new PrintReportsDialog();
+            var result = await ReportDialog.ShowAsync();
+
+            if (result == ContentDialogResult.Primary)
+            {
+                PrintReportDialogVM ReportVM = Ioc.Default.GetRequiredService<PrintReportDialogVM>();
+
+                PrintReports rpt = new PrintReports(ReportVM, StoryModel);
+                await rpt.Generate();
+
+                StatusMessage = "Generate Print Reports complete";
+                Logger.Log(LogLevel.Info, "Generate Print Reports complete");
+            }
+            else
+            {
+                StatusMessage = "Generate Print Reports canceled";
+                Logger.Log(LogLevel.Info, "Generate Print Reports canceled");
+            }
+            _canExecuteCommands = true;
+        }
+
         private async void GenerateScrivenerReports()
         {
             _canExecuteCommands = false;
-            Logger.Log(LogLevel.Info, "Executing generate Scrivener reports command");
+            Logger.Log(LogLevel.Info, "Executing Generate Scrivener Reports command");
             StatusMessage = "Generate Scrivener Reports executing";
             await SaveModel();
 
@@ -1836,7 +1910,8 @@ namespace StoryBuilder.ViewModels
             StockScenesCommand = new RelayCommand(StockScenesTool, () => _canExecuteCommands);
             PreferencesCommand = new RelayCommand(Preferences, () => _canExecuteCommands);
 
-            ReportsCommand = new RelayCommand(GenerateScrivenerReports, () => _canExecuteCommands);
+            PrintReportsCommand = new RelayCommand(GeneratePrintReports, () => _canExecuteCommands);
+            ScrivenerReportsCommand = new RelayCommand(GenerateScrivenerReports, () => _canExecuteCommands);
 
             // Move StoryElement commands
             MoveLeftCommand = new RelayCommand(MoveTreeViewItemLeft, () => _canExecuteCommands);

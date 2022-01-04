@@ -784,6 +784,16 @@ namespace NRtfTree
                 }
             }
 
+            public string TextEx
+            {
+                get
+                {
+                   RtfTreeNode pardNode = this.RootNode.FirstChild.SelectSingleChildNode("pard");
+                    int pPard = this.RootNode.FirstChild.ChildNodes.IndexOf(pardNode);
+                    return ConvertToTextAux(this.RootNode.FirstChild, pPard, Encoding.Default);
+                }
+            }
+
             #endregion
         }
     }
