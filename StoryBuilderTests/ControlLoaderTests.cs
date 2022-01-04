@@ -3,20 +3,18 @@ using StoryBuilder.DAL;
 using StoryBuilder.Models;
 using System.Threading.Tasks;
 
-namespace StoryBuilderTests
-{
-    [TestClass]
-    public class ControlLoaderTests
-    {
-        [TestMethod]
-        public async Task TestControlLoader()
-        {
-            string localPath = GlobalData.RootDirectory;
+namespace StoryBuilderTests;
 
-            ControlLoader loader = new();
-            await loader.Init(localPath);
-            Assert.IsNotNull(GlobalData.ConflictTypes);
-            return;
-        }
+[TestClass]
+public class ControlLoaderTests
+{
+    [TestMethod]
+    public async Task TestControlLoader()
+    {
+        string localPath = GlobalData.RootDirectory;
+
+        ControlLoader loader = new();
+        await loader.Init(localPath);
+        Assert.IsNotNull(GlobalData.ConflictTypes);
     }
 }

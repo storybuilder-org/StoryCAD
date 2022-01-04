@@ -1,11 +1,10 @@
 ﻿using CommunityToolkit.Mvvm.Messaging.Messages;
 
-namespace StoryBuilder.Services.Messages
+namespace StoryBuilder.Services.Messages;
+
+public class StatusChangedMessage : ValueChangedMessage<StatusMessage>
 {
-    public class StatusChangedMessage : ValueChangedMessage<StatusMessage>
+    public StatusChangedMessage(StatusMessage value) : base(value)
     {
-        public StatusChangedMessage(StatusMessage value) : base(value)
-        {
-        }
     }
 }

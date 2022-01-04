@@ -1,4 +1,3 @@
-﻿namespace StoryBuilder.ViewModels
-{
-    public enum FlyoutInvocationType { ContextRequestType, ClickRequestType }
-}
+﻿namespace StoryBuilder.ViewModels;
+
+public enum FlyoutInvocationType { ContextRequestType, ClickRequestType }

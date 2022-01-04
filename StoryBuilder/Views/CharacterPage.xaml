@@ -303,19 +303,18 @@
                     <!-- Character traits -->
                     <ListView MinWidth="300" MinHeight="150" Grid.Row="1" Header="Traits"
                             ItemsSource="{x:Bind CharVm.CharacterTraits, Mode=TwoWay}"
-                            SelectedIndex="{x:Bind CharVm.ExistingTraitIndex, Mode=OneWay}" >
-                    </ListView>
+                            SelectedIndex="{x:Bind CharVm.ExistingTraitIndex, Mode=OneWay}" />
                     <StackPanel Orientation="Horizontal" Grid.Row="2" >
                         <TextBox Header="New Trait"  MinWidth="300" Text="{x:Bind CharVm.NewTrait, Mode=TwoWay}" />
                         <TextBlock Width="10" />
                         <Button FontFamily="Segoe MDL2 Assets" Content="&#xE710;"  Command="{x:Bind CharVm.AddTraitCommand, Mode=OneWay}" >
                             <ToolTipService.ToolTip>
-                                <ToolTip Content="Add Trait"></ToolTip>
+                                <ToolTip Content="Add Trait" />
                             </ToolTipService.ToolTip>
                         </Button>
                         <Button FontFamily="Segoe MDL2 Assets" Content="&#xE738;" Command="{x:Bind CharVm.RemoveTraitCommand, Mode=OneWay}">
                             <ToolTipService.ToolTip>
-                                <ToolTip Content="Remove Trait"></ToolTip>
+                                <ToolTip Content="Remove Trait" />
                             </ToolTipService.ToolTip>
                         </Button>
                     </StackPanel>

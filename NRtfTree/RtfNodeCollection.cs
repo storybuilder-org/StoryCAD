@@ -50,7 +50,7 @@ namespace NRtfTree
             {
                 InnerList.Add(node);
 
-                return (InnerList.Count - 1);
+                return InnerList.Count - 1;
             }
 
             /// <summary>
@@ -69,14 +69,8 @@ namespace NRtfTree
             /// </summary>
             public RtfTreeNode this[int index]
             {
-                get
-                {
-                    return (RtfTreeNode)InnerList[index];
-                }
-                set
-                {
-                    InnerList[index] = value;
-                }
+                get => (RtfTreeNode)InnerList[index];
+                set => InnerList[index] = value;
             }
 
             /// <summary>

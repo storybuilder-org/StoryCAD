@@ -67,24 +67,12 @@ namespace NRtfTree
             /// </summary>
             /// <param name="index">Indice del color a recuperar.</param>
             /// <returns>Color n-ésimo de la tabla de colores.</returns>
-            public Color this[int index]
-            {
-                get
-                {
-                    return Color.FromArgb(colors[index]);
-                }
-            }
+            public Color this[int index] => Color.FromArgb(colors[index]);
 
             /// <summary>
             /// Número de colores en la tabla.
             /// </summary>
-            public int Count
-            {
-                get
-                {
-                    return colors.Count;
-                }
-            }
+            public int Count => colors.Count;
 
             /// <summary>
             /// Obtiene el índice de un color determinado en la tabla.

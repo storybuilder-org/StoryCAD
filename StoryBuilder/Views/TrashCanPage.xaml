@@ -7,8 +7,6 @@
                     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                     mc:Ignorable="d" >
 
-    <StackPanel Padding="14,0,14,0">
-
-    </StackPanel>   
+    <StackPanel Padding="14,0,14,0" />
 
 </local:BindablePage>

@@ -85,13 +85,7 @@ namespace NRtfTree
             /// <summary>
             /// Devuelve una cadena de caracteres con el contenido de la imagen en formato hexadecimal.
             /// </summary>
-            public string HexData
-            {
-                get
-                {
-                    return SelectSingleChildNode(RtfNodeType.Text).NodeKey;
-                }
-            }
+            public string HexData => SelectSingleChildNode(RtfNodeType.Text).NodeKey;
 
             /// <summary>
             /// Devuelve el formato original de la imagen.
@@ -102,16 +96,15 @@ namespace NRtfTree
                 {
                     if (SelectSingleChildNode("jpegblip") != null)
                         return System.Drawing.Imaging.ImageFormat.Jpeg;
-                    else if (SelectSingleChildNode("pngblip") != null)
+                    if (SelectSingleChildNode("pngblip") != null)
                         return System.Drawing.Imaging.ImageFormat.Png;
-                    else if (SelectSingleChildNode("emfblip") != null)
+                    if (SelectSingleChildNode("emfblip") != null)
                         return System.Drawing.Imaging.ImageFormat.Emf;
-                    else if (SelectSingleChildNode("wmetafile") != null)
+                    if (SelectSingleChildNode("wmetafile") != null)
                         return System.Drawing.Imaging.ImageFormat.Wmf;
-                    else if (SelectSingleChildNode("dibitmap") != null || SelectSingleChildNode("wbitmap") != null)
+                    if (SelectSingleChildNode("dibitmap") != null || SelectSingleChildNode("wbitmap") != null)
                         return System.Drawing.Imaging.ImageFormat.Bmp;
-                    else
-                        return null;
+                    return null;
                 }
             }
 

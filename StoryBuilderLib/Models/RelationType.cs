@@ -1,21 +1,20 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 
-namespace StoryBuilder.Models
+namespace StoryBuilder.Models;
+
+public class RelationType : ObservableObject
 {
-    public class RelationType : ObservableObject
+    public string MemberRole;
+    public string PartnerRole;
+
+    public RelationType(string memberRole, string partnerRole)
     {
-        public string MemberRole;
-        public string PartnerRole;
+        MemberRole = memberRole;
+        PartnerRole = partnerRole;
+    }
 
-        public RelationType(string memberRole, string partnerRole)
-        {
-            MemberRole = memberRole;
-            PartnerRole = partnerRole;
-        }
-
-        public override string ToString()
-        {
-            return MemberRole+ " => " + PartnerRole;
-        }
+    public override string ToString()
+    {
+        return MemberRole+ " => " + PartnerRole;
     }
 }

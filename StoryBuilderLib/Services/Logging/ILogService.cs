@@ -1,7 +1,6 @@
-﻿namespace StoryBuilder.Services.Logging
+﻿namespace StoryBuilder.Services.Logging;
+
+public interface ILogService
 {
-    public interface ILogService
-    {
-        void Log(LogLevel level, string message);
-    }
+    void Log(LogLevel level, string message);
 }

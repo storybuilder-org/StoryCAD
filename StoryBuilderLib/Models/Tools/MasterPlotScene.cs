@@ -1,14 +1,13 @@
-﻿namespace StoryBuilder.Models.Tools
-{
-    public class MasterPlotScene
-    {
-        public string SceneTitle;
-        public string Notes;
+﻿namespace StoryBuilder.Models.Tools;
 
-        public MasterPlotScene(string title)
-        {
-            SceneTitle = title;
-            Notes = string.Empty;
-        }
+public class MasterPlotScene
+{
+    public string SceneTitle;
+    public string Notes;
+
+    public MasterPlotScene(string title)
+    {
+        SceneTitle = title;
+        Notes = string.Empty;
     }
 }

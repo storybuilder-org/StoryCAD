@@ -1,7 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.DependencyInjection;
-using Net.Sgoliver.NRtfTree.Util;
-using Net.Sgoliver.NRtfTree.Core;
-using StoryBuilder.Controllers;
+using NRtfTree.Util;
+using NRtfTree.Core;
 using StoryBuilder.DAL;
 using StoryBuilder.Models;
 using StoryBuilder.Models.Scrivener;    
@@ -43,7 +42,6 @@ namespace StoryBuilder.Services.Reports
 
         public ScrivenerReports(StorageFile file, StoryModel model)
         {
-            Ioc.Default.GetService<StoryController>();
             _scrivener = Ioc.Default.GetService<ScrivenerIo>();
             _scrivener.ScrivenerFile = file;
             _model = model;

@@ -1,14 +1,13 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace StoryBuilderTests
+namespace StoryBuilderTests;
+
+[TestClass]
+public class ControllerTests
 {
-    [TestClass]
-    public class ControllerTests
+    [TestMethod]
+    public void TestConstructor()
     {
-        [TestMethod]
-        public void TestConstructor()
-        {
             
-        }
     }
 }

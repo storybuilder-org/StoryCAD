@@ -7,6 +7,7 @@ using StoryBuilder.Services.Messages;
 using StoryBuilder.ViewModels;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using Windows.Data.Xml.Dom;
 using Windows.Storage;
@@ -48,6 +49,12 @@ namespace StoryBuilder.DAL
                 Logger.Log(LogLevel.Info, msg);
                 _xml = await LoadFromFileAsync(file);
                 LoadStoryModel();
+                _model.ProjectFile = file;
+                _model.ProjectFilename = file.Name;
+                _model.ProjectFolder = await file.GetParentAsync();
+                _model.ProjectPath = _model.ProjectFolder.Path;
+                _model.ProjectFilename = Path.GetFileName(file.Path);
+                _model.FilesFolder = await _model.ProjectFolder.CreateFolderAsync("files", CreationCollisionOption.OpenIfExists);
                 // Early story outlines may have been built or converted
                 // without a TrashCan node added. If this model is one of 
                 // those, add the node to both the Explorer and Narrator views.

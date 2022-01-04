@@ -65,14 +65,8 @@ namespace NRtfTree
             /// </summary>
             public RtfTokenType Type
             {
-                get
-                {
-                    return type;
-                }
-                set
-                {
-                    type = value;
-                }
+                get => type;
+                set => type = value;
             }
 
             /// <summary>
@@ -80,14 +74,8 @@ namespace NRtfTree
             /// </summary>
             public string Key
             {
-                get
-                {
-                    return key;
-                }
-                set
-                {
-                    key = value;
-                }
+                get => key;
+                set => key = value;
             }
 
             /// <summary>
@@ -95,14 +83,8 @@ namespace NRtfTree
             /// </summary>
             public bool HasParameter
             {
-                get
-                {
-                    return hasParam;
-                }
-                set
-                {
-                    hasParam = value;
-                }
+                get => hasParam;
+                set => hasParam = value;
             }
 
             /// <summary>
@@ -110,14 +92,8 @@ namespace NRtfTree
             /// </summary>
             public int Parameter
             {
-                get
-                {
-                    return param;
-                }
-                set
-                {
-                    param = value;
-                }
+                get => param;
+                set => param = value;
             }
 
             #endregion

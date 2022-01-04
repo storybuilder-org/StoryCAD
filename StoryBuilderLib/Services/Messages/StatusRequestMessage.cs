@@ -1,8 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.Messaging.Messages;
 
-namespace StoryBuilder.Services.Messages
+namespace StoryBuilder.Services.Messages;
+
+class StatusRequestMessage : RequestMessage<StatusMessage>
 {
-    class StatusRequestMessage : RequestMessage<StatusMessage>
-    {
-    }
 }

@@ -1,8 +1,7 @@
-﻿namespace StoryBuilder.Models.Tools
+﻿namespace StoryBuilder.Models.Tools;
+
+public class Quotation
 {
-    public class Quotation
-    {
-        public string Quote;
-        public string Author;
-    }
+    public string Quote;
+    public string Author;
 }

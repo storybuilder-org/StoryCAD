@@ -206,7 +206,7 @@ namespace NRtfTree
 
                     StringBuilder hexdata = new ();
 
-                    foreach (var t in data) { hexdata.Append(GetHexa(t)); }
+                    foreach (byte t in data) { hexdata.Append(GetHexa(t)); }
 
                     Image img = Image.FromFile(path);
 
@@ -261,13 +261,13 @@ namespace NRtfTree
             /// </summary>
             private void InsertFontTable()
             {
-                RtfTreeNode ftGroup = new RtfTreeNode(RtfNodeType.Group);
+                RtfTreeNode ftGroup = new(RtfNodeType.Group);
 
                 ftGroup.AppendChild(new RtfTreeNode(RtfNodeType.Keyword, "fonttbl", false, 0));
 
                 for (int i = 0; i < fontTable.Count; i++)
                 {
-                    RtfTreeNode ftFont = new RtfTreeNode(RtfNodeType.Group);
+                    RtfTreeNode ftFont = new(RtfNodeType.Group);
                     ftFont.AppendChild(new RtfTreeNode(RtfNodeType.Keyword, "f", true, i));
                     ftFont.AppendChild(new RtfTreeNode(RtfNodeType.Keyword, "fnil", false, 0));
                     ftFont.AppendChild(new RtfTreeNode(RtfNodeType.Text, fontTable[i] + ";", false, 0));
@@ -283,7 +283,7 @@ namespace NRtfTree
             /// </summary>
             private void InsertColorTable()
             {
-                RtfTreeNode ctGroup = new RtfTreeNode(RtfNodeType.Group);
+                RtfTreeNode ctGroup = new(RtfNodeType.Group);
 
                 ctGroup.AppendChild(new RtfTreeNode(RtfNodeType.Keyword, "colortbl", false, 0));
 
@@ -303,7 +303,7 @@ namespace NRtfTree
             /// </summary>
             private void InsertGenerator()
             {
-                RtfTreeNode genGroup = new RtfTreeNode(RtfNodeType.Group);
+                RtfTreeNode genGroup = new(RtfNodeType.Group);
 
                 genGroup.AppendChild(new RtfTreeNode(RtfNodeType.Control, "*", false, 0));
                 genGroup.AppendChild(new RtfTreeNode(RtfNodeType.Keyword, "generator", false, 0));
@@ -322,13 +322,13 @@ namespace NRtfTree
 
                 while (i < text.Length)
                 {
-                    var code = Char.ConvertToUtf32(text, i);
+                    int code = char.ConvertToUtf32(text, i);
 
-                    if (code >= 32 && code < 128)
+                    if (code is >= 32 and < 128)
                     {
                         StringBuilder s = new("");
 
-                        while (i < text.Length && code >= 32 && code < 128)
+                        while (i < text.Length && code is >= 32 and < 128)
                         {
                             s.Append(text[i]);
 

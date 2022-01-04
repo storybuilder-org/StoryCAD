@@ -2,16 +2,15 @@
 using StoryBuilder.Models;
 using StoryBuilder.ViewModels;
 
-namespace StoryBuilder.Controls
-{
-    public sealed class CharacterName : ComboBox
-    {
+namespace StoryBuilder.Controls;
 
-        public CharacterName() : base()
-        {
-            DefaultStyleKey = typeof(ComboBox);
-            StoryModel model = ShellViewModel.GetModel();
-            ItemsSource = model.StoryElements.Characters;
-        }
+public sealed class CharacterName : ComboBox
+{
+
+    public CharacterName() : base()
+    {
+        DefaultStyleKey = typeof(ComboBox);
+        StoryModel model = ShellViewModel.GetModel();
+        ItemsSource = model.StoryElements.Characters;
     }
 }
