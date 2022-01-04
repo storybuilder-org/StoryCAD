@@ -1,8 +1,7 @@
-﻿namespace StoryBuilder.Models
+﻿namespace StoryBuilder.Models;
+
+public enum LoadStatus
 {
-    public enum LoadStatus
-    {
-        LoadFromText,      // Loaded in Model and not saved
-        LoadFromRtfFiles    // Saved 
-    }
+    LoadFromText,      // Loaded in Model and not saved
+    LoadFromRtfFiles    // Saved 
 }

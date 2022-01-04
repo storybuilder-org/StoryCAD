@@ -206,7 +206,7 @@ namespace NRtfTree
                         int dataSize = Text.Length / 2;
                         objdata = new byte[dataSize];
 
-                        StringBuilder sbaux = new StringBuilder(2);
+                        StringBuilder sbaux = new(2);
 
                         for (int i = 0; i < Text.Length; i++)
                         {

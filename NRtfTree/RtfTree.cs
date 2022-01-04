@@ -204,7 +204,7 @@ namespace NRtfTree
             /// Devuelve la tabla de fuentes del documento RTF.
             /// </summary>
             /// <returns>Tabla de fuentes del documento RTF</returns>
-            public String[] GetFontTable()
+            public string[] GetFontTable()
             {
                 ArrayList tabla = new();
                 string[] tablaFuentes;
@@ -218,7 +218,7 @@ namespace NRtfTree
                 //Buscamos la tabla de fuentes en el árbol
                 bool enc = false;
                 int i = 0;
-                RtfTreeNode ntf = new RtfTreeNode();  //Nodo con la tabla de fuentes
+                RtfTreeNode ntf = new();  //Nodo con la tabla de fuentes
 
                 while (!enc && i < nprin.ChildNodes.Count)
                 {
@@ -242,18 +242,18 @@ namespace NRtfTree
                     foreach (RtfTreeNode nodo in fuente.ChildNodes)
                     {
                         if (nodo.NodeType == RtfNodeType.Text)
-                            nombreFuente = nodo.NodeKey.Substring(0, nodo.NodeKey.Length - 1);
+                            nombreFuente = nodo.NodeKey[..^1];
                     }
 
                     tabla.Add(nombreFuente);
                 }
 
                 //Convertimos el ArrayList en un array tradicional
-                tablaFuentes = new String[tabla.Count];
+                tablaFuentes = new string[tabla.Count];
 
                 for (int c = 0; c < tabla.Count; c++)
                 {
-                    tablaFuentes[c] = (String)tabla[c];
+                    tablaFuentes[c] = (string)tabla[c];
                 }
 
                 return tablaFuentes;
@@ -265,7 +265,7 @@ namespace NRtfTree
             /// <returns>Tabla de colores del documento RTF</returns>
             public Color[] GetColorTable()
             {
-                ArrayList tabla = new ArrayList();
+                ArrayList tabla = new();
                 Color[] tablaColores;
 
                 //Nodo raiz del documento
@@ -277,7 +277,7 @@ namespace NRtfTree
                 //Buscamos la tabla de colores en el árbol
                 bool enc = false;
                 int i = 0;
-                RtfTreeNode ntc = new RtfTreeNode();  //Nodo con la tabla de fuentes
+                RtfTreeNode ntc = new();  //Nodo con la tabla de fuentes
 
                 while (!enc && i < nprin.ChildNodes.Count)
                 {
@@ -303,28 +303,30 @@ namespace NRtfTree
                 {
                     RtfTreeNode nodo = ntc.ChildNodes[j];
 
-                    if (nodo.NodeType == RtfNodeType.Text && nodo.NodeKey.Trim() == ";")
+                    switch (nodo.NodeType)
                     {
-                        tabla.Add(Color.FromArgb(rojo, verde, azul));
+                        case RtfNodeType.Text when nodo.NodeKey.Trim() == ";":
+                            tabla.Add(Color.FromArgb(rojo, verde, azul));
 
-                        rojo = 0;
-                        verde = 0;
-                        azul = 0;
-                    }
-                    else if (nodo.NodeType == RtfNodeType.Keyword)
-                    {
-                        switch (nodo.NodeKey)
-                        {
-                            case "red":
-                                rojo = nodo.Parameter;
-                                break;
-                            case "green":
-                                verde = nodo.Parameter;
-                                break;
-                            case "blue":
-                                azul = nodo.Parameter;
-                                break;
-                        }
+                            rojo = 0;
+                            verde = 0;
+                            azul = 0;
+                            break;
+                        case RtfNodeType.Keyword:
+                            switch (nodo.NodeKey)
+                            {
+                                case "red":
+                                    rojo = nodo.Parameter;
+                                    break;
+                                case "green":
+                                    verde = nodo.Parameter;
+                                    break;
+                                case "blue":
+                                    azul = nodo.Parameter;
+                                    break;
+                            }
+
+                            break;
                     }
                 }
 
@@ -514,8 +516,8 @@ namespace NRtfTree
                             if (mergeSpecialCharacters)
                             {
                                 //Contributed by Jan Stuchlík
-                                bool isText = tok.Type == RtfTokenType.Text || (tok.Type == RtfTokenType.Control && tok.Key == "'");
-                                if (curNode.LastChild != null && (curNode.LastChild.NodeType == RtfNodeType.Text && isText))
+                                bool isText = tok.Type == RtfTokenType.Text || tok.Type == RtfTokenType.Control && tok.Key == "'";
+                                if (curNode.LastChild is {NodeType: RtfNodeType.Text} && isText)
                                 {
                                     if (tok.Type == RtfTokenType.Text)
                                     {
@@ -593,7 +595,7 @@ namespace NRtfTree
             /// <returns>Representación Textual del nodo 'curNode' con nivel 'level'</returns>
             private string toStringInm(RtfTreeNode curNode, int level, bool showNodeTypes)
             {
-                StringBuilder res = new StringBuilder();
+                StringBuilder res = new();
 
                 RtfNodeCollection children = curNode.ChildNodes;
 
@@ -697,33 +699,32 @@ namespace NRtfTree
             /// <returns>Texto plano del documento.</returns>
             private string ConvertToTextAux(RtfTreeNode curNode, int prim, Encoding enc)
             {
-                StringBuilder res = new StringBuilder("");
+                StringBuilder res = new("");
 
-                RtfTreeNode nprin = curNode;
-
-                RtfTreeNode nodo;
-
-                for (int i = prim; i < nprin.ChildNodes.Count; i++)
+                for (int i = prim; i < curNode.ChildNodes.Count; i++)
                 {
-                    nodo = nprin.ChildNodes[i];
+                    RtfTreeNode nodo = curNode.ChildNodes[i];
 
-                    if (nodo.NodeType == RtfNodeType.Group)
+                    switch (nodo.NodeType)
                     {
-                        res.Append(ConvertToTextAux(nodo, 0, enc));
-                    }
-                    else if (nodo.NodeType == RtfNodeType.Control)
-                    {
-                        if (nodo.NodeKey == "'")
-                            res.Append(DecodeControlChar(nodo.Parameter, enc));
-                    }
-                    else if (nodo.NodeType == RtfNodeType.Text)
-                    {
-                        res.Append(nodo.NodeKey);
-                    }
-                    else if (nodo.NodeType == RtfNodeType.Keyword)
-                    {
-                        if (nodo.NodeKey.Equals("par"))
-                            res.AppendLine("");
+                        case RtfNodeType.Group:
+                            res.Append(ConvertToTextAux(nodo, 0, enc));
+                            break;
+                        case RtfNodeType.Control:
+                        {
+                            if (nodo.NodeKey == "'")
+                                res.Append(DecodeControlChar(nodo.Parameter, enc));
+                            break;
+                        }
+                        case RtfNodeType.Text:
+                            res.Append(nodo.NodeKey);
+                            break;
+                        case RtfNodeType.Keyword:
+                        {
+                            if (nodo.NodeKey.Equals("par"))
+                                res.AppendLine("");
+                            break;
+                        }
                     }
                 }
 
@@ -737,60 +738,38 @@ namespace NRtfTree
             /// <summary>
             /// Devuelve el nodo raíz del árbol del documento.
             /// </summary>
-            public RtfTreeNode RootNode
-            {
-                get
-                {
-                    //Se devuelve el nodo raíz del documento
-                    return rootNode;
-                }
-            }
+            public RtfTreeNode RootNode =>
+                //Se devuelve el nodo raíz del documento
+                rootNode;
 
             /// <summary>
             /// Devuelve el Texto RTF del documento.
             /// </summary>
-            public string Rtf
-            {
-                get
-                {
-                    //Se devuelve el Texto RTF del documento completo
-                    return rootNode.Rtf;
-                }
-            }
+            public string Rtf =>
+                //Se devuelve el Texto RTF del documento completo
+                rootNode.Rtf;
 
             /// <summary>
             /// Indica si se decodifican los caracteres especiales (\') uniéndolos a nodos de texto contiguos.
             /// </summary>
             public bool MergeSpecialCharacters
             {
-                get
-                {
-                    return mergeSpecialCharacters;
-                }
-                set
-                {
-                    mergeSpecialCharacters = value;
-                }
+                get => mergeSpecialCharacters;
+                set => mergeSpecialCharacters = value;
             }
 
             /// <summary>
             /// Devuelve el texto plano del documento.
             /// </summary>
-            public string Text
-            {
-                get
-                {
-                    return ConvertToText();
-                }
-            }
+            public string Text => ConvertToText();
 
             public string TextEx
             {
                 get
                 {
-                   RtfTreeNode pardNode = this.RootNode.FirstChild.SelectSingleChildNode("pard");
-                    int pPard = this.RootNode.FirstChild.ChildNodes.IndexOf(pardNode);
-                    return ConvertToTextAux(this.RootNode.FirstChild, pPard, Encoding.Default);
+                   RtfTreeNode pardNode = RootNode.FirstChild.SelectSingleChildNode("pard");
+                    int pPard = RootNode.FirstChild.ChildNodes.IndexOf(pardNode);
+                    return ConvertToTextAux(RootNode.FirstChild, pPard, Encoding.Default);
                 }
             }
 

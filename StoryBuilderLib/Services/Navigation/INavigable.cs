@@ -1,10 +1,9 @@
 ﻿using System.Threading.Tasks;
 
-namespace StoryBuilder.Services.Navigation
+namespace StoryBuilder.Services.Navigation;
+
+public interface INavigable
 {
-    public interface INavigable
-    {
-        Task Activate(object parameter);
-        Task Deactivate(object parameter);
-    }
+    Task Activate(object parameter);
+    Task Deactivate(object parameter);
 }

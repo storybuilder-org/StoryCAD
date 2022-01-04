@@ -75,8 +75,8 @@ namespace NRtfTree
             /// </summary>
             public string Title
             {
-                get { return _title; }
-                set { _title = value; }
+                get => _title;
+                set => _title = value;
             }
 
             /// <summary>
@@ -84,8 +84,8 @@ namespace NRtfTree
             /// </summary>
             public string Subject
             {
-                get { return _subject; }
-                set { _subject = value; }
+                get => _subject;
+                set => _subject = value;
             }
 
             /// <summary>
@@ -93,8 +93,8 @@ namespace NRtfTree
             /// </summary>
             public string Author
             {
-                get { return _author; }
-                set { _author = value; }
+                get => _author;
+                set => _author = value;
             }
 
             /// <summary>
@@ -102,8 +102,8 @@ namespace NRtfTree
             /// </summary>
             public string Manager
             {
-                get { return _manager; }
-                set { _manager = value; }
+                get => _manager;
+                set => _manager = value;
             }
 
             /// <summary>
@@ -111,8 +111,8 @@ namespace NRtfTree
             /// </summary>
             public string Company
             {
-                get { return _company; }
-                set { _company = value; }
+                get => _company;
+                set => _company = value;
             }
 
             /// <summary>
@@ -120,8 +120,8 @@ namespace NRtfTree
             /// </summary>
             public string Operator
             {
-                get { return _operator; }
-                set { _operator = value; }
+                get => _operator;
+                set => _operator = value;
             }
 
             /// <summary>
@@ -129,8 +129,8 @@ namespace NRtfTree
             /// </summary>
             public string Category
             {
-                get { return _category; }
-                set { _category = value; }
+                get => _category;
+                set => _category = value;
             }
 
             /// <summary>
@@ -138,8 +138,8 @@ namespace NRtfTree
             /// </summary>
             public string Keywords
             {
-                get { return _keywords; }
-                set { _keywords = value; }
+                get => _keywords;
+                set => _keywords = value;
             }
 
             /// <summary>
@@ -147,8 +147,8 @@ namespace NRtfTree
             /// </summary>
             public string Comment
             {
-                get { return _comment; }
-                set { _comment = value; }
+                get => _comment;
+                set => _comment = value;
             }
 
             /// <summary>
@@ -156,8 +156,8 @@ namespace NRtfTree
             /// </summary>
             public string DocComment
             {
-                get { return _doccomm; }
-                set { _doccomm = value; }
+                get => _doccomm;
+                set => _doccomm = value;
             }
 
             /// <summary>
@@ -165,8 +165,8 @@ namespace NRtfTree
             /// </summary>
             public string HlinkBase
             {
-                get { return _hlinkbase; }
-                set { _hlinkbase = value; }
+                get => _hlinkbase;
+                set => _hlinkbase = value;
             }
 
             /// <summary>
@@ -174,8 +174,8 @@ namespace NRtfTree
             /// </summary>
             public DateTime CreationTime
             {
-                get { return _creatim; }
-                set { _creatim = value; }
+                get => _creatim;
+                set => _creatim = value;
             }
 
             /// <summary>
@@ -183,8 +183,8 @@ namespace NRtfTree
             /// </summary>
             public DateTime RevisionTime
             {
-                get { return _revtim; }
-                set { _revtim = value; }
+                get => _revtim;
+                set => _revtim = value;
             }
 
             /// <summary>
@@ -192,8 +192,8 @@ namespace NRtfTree
             /// </summary>
             public DateTime LastPrintTime
             {
-                get { return _printim; }
-                set { _printim = value; }
+                get => _printim;
+                set => _printim = value;
             }
 
             /// <summary>
@@ -201,8 +201,8 @@ namespace NRtfTree
             /// </summary>
             public DateTime BackupTime
             {
-                get { return _buptim; }
-                set { _buptim = value; }
+                get => _buptim;
+                set => _buptim = value;
             }
 
             /// <summary>
@@ -210,8 +210,8 @@ namespace NRtfTree
             /// </summary>
             public int Version
             {
-                get { return _version; }
-                set { _version = value; }
+                get => _version;
+                set => _version = value;
             }
 
             /// <summary>
@@ -219,8 +219,8 @@ namespace NRtfTree
             /// </summary>
             public int InternalVersion
             {
-                get { return _vern; }
-                set { _vern = value; }
+                get => _vern;
+                set => _vern = value;
             }
 
             /// <summary>
@@ -228,8 +228,8 @@ namespace NRtfTree
             /// </summary>
             public int EditingTime
             {
-                get { return _edmins; }
-                set { _edmins = value; }
+                get => _edmins;
+                set => _edmins = value;
             }
 
             /// <summary>
@@ -237,8 +237,8 @@ namespace NRtfTree
             /// </summary>
             public int NumberOfPages
             {
-                get { return _nofpages; }
-                set { _nofpages = value; }
+                get => _nofpages;
+                set => _nofpages = value;
             }
 
             /// <summary>
@@ -246,8 +246,8 @@ namespace NRtfTree
             /// </summary>
             public int NumberOfWords
             {
-                get { return _nofwords; }
-                set { _nofwords = value; }
+                get => _nofwords;
+                set => _nofwords = value;
             }
 
             /// <summary>
@@ -255,8 +255,8 @@ namespace NRtfTree
             /// </summary>
             public int NumberOfChars
             {
-                get { return _nofchars; }
-                set { _nofchars = value; }
+                get => _nofchars;
+                set => _nofchars = value;
             }
 
             /// <summary>
@@ -264,8 +264,8 @@ namespace NRtfTree
             /// </summary>
             public int Id
             {
-                get { return _id; }
-                set { _id = value; }
+                get => _id;
+                set => _id = value;
             }
 
             #endregion
@@ -278,7 +278,7 @@ namespace NRtfTree
             /// <returns>Representación del nodo en forma de cadena de caracteres.</returns>
             public override string ToString()
             {
-                StringBuilder str = new StringBuilder();
+                StringBuilder str = new();
 
                 str.AppendLine("Title     : " + Title);
                 str.AppendLine("Subject   : " + Subject);

@@ -6,112 +6,111 @@ using System;
 using System.Diagnostics;
 using System.IO;
 
-namespace StoryBuilder.Services.Logging
+namespace StoryBuilder.Services.Logging;
+
+/// <summary>
+/// Manage the Task Log file.
+/// </summary>
+public class LogService : ILogService
 {
-    /// <summary>
-    /// Manage the Task Log file.
-    /// </summary>
-    public class LogService : ILogService
+    private static readonly Logger Logger;
+    private static readonly string logFilePath;
+
+    static LogService()
     {
-        private static readonly Logger Logger;
-        private static readonly string logFilePath;
-
-        static LogService()
+        try
         {
-            try
+            LoggingConfiguration config = new();
+
+            // Create file target
+            FileTarget fileTarget = new();
+            //logFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "StoryBuilder", "logs");
+            logFilePath = Path.Combine(GlobalData.RootDirectory, "logs");
+            string logfilename = Path.Combine(logFilePath, "updater.${date:format=yyyy-MM-dd}.log");
+            fileTarget.FileName = logfilename;
+            fileTarget.CreateDirs = true;
+            fileTarget.MaxArchiveFiles = 7;
+            fileTarget.ArchiveEvery = FileArchivePeriod.Day;
+            fileTarget.ConcurrentWrites = true;
+            fileTarget.Layout =
+                "${longdate} | ${level} | ${message} | ${exception:format=Message,StackTrace,Data:MaxInnerExceptionLevel=5}";
+            LoggingRule fileRule = new("*", NLog.LogLevel.Trace, fileTarget);
+            config.AddTarget("logfile", fileTarget);
+            config.LoggingRules.Add(fileRule);
+
+            // create console target
+            if (!Debugger.IsAttached)
             {
-                LoggingConfiguration config = new();
-
-                // Create file target
-                FileTarget fileTarget = new();
-                //logFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "StoryBuilder", "logs");
-                logFilePath = Path.Combine(GlobalData.RootDirectory, "logs");
-                string logfilename = Path.Combine(logFilePath, "updater.${date:format=yyyy-MM-dd}.log");
-                fileTarget.FileName = logfilename;
-                fileTarget.CreateDirs = true;
-                fileTarget.MaxArchiveFiles = 7;
-                fileTarget.ArchiveEvery = FileArchivePeriod.Day;
-                fileTarget.ConcurrentWrites = true;
-                fileTarget.Layout =
-                        "${longdate} | ${level} | ${message} | ${exception:format=Message,StackTrace,Data:MaxInnerExceptionLevel=5}";
-                LoggingRule fileRule = new("*", NLog.LogLevel.Trace, fileTarget);
-                config.AddTarget("logfile", fileTarget);
-                config.LoggingRules.Add(fileRule);
-
-                // create console target
-                if (!Debugger.IsAttached)
-                {
-                    ColoredConsoleTarget consoleTarget = new();
-                    consoleTarget.Layout = @"${date:format=HH\\:MM\\:ss} ${logger} ${message}";
-                    config.AddTarget("console", consoleTarget);
-                    LoggingRule consoleRule = new("*", NLog.LogLevel.Info, consoleTarget);
-                    config.LoggingRules.Add(consoleRule);
-                }
-                else
-                {
-                    DebuggerTarget consoleTarget = new();
-                    consoleTarget.Layout = @"${date:format=HH\\:MM\\:ss} ${logger} ${message}";
-                    config.AddTarget("console", consoleTarget);
-                    LoggingRule consoleRule = new("*", NLog.LogLevel.Info, consoleTarget);
-                    config.LoggingRules.Add(consoleRule);
-                }
-                LogManager.Configuration = config;
-
-                Logger = LogManager.GetCurrentClassLogger();
+                ColoredConsoleTarget consoleTarget = new();
+                consoleTarget.Layout = @"${date:format=HH\\:MM\\:ss} ${logger} ${message}";
+                config.AddTarget("console", consoleTarget);
+                LoggingRule consoleRule = new("*", NLog.LogLevel.Info, consoleTarget);
+                config.LoggingRules.Add(consoleRule);
             }
-            catch (Exception e)
+            else
             {
-                Debug.WriteLine(e.Message);
-                Debug.WriteLine(e.StackTrace);
+                DebuggerTarget consoleTarget = new();
+                consoleTarget.Layout = @"${date:format=HH\\:MM\\:ss} ${logger} ${message}";
+                config.AddTarget("console", consoleTarget);
+                LoggingRule consoleRule = new("*", NLog.LogLevel.Info, consoleTarget);
+                config.LoggingRules.Add(consoleRule);
             }
-        }
-        public LogService()
-        {
-            Log(LogLevel.Info, "Starting Log service");
-            Log(LogLevel.Info, "Detailed log at " + logFilePath);
-        }
+            LogManager.Configuration = config;
 
-        public void Log(LogLevel level, string message)
-        {
-            switch (level)
-            {
-                case LogLevel.Trace:
-                    Logger.Trace(message);
-                    break;
-                case LogLevel.Debug:
-                    Logger.Debug(message);
-                    break;
-                case LogLevel.Info:
-                    Logger.Info(message);
-                    break;
-                case LogLevel.Warn:
-                    Logger.Warn(message);
-                    break;
-                case LogLevel.Error:
-                    Logger.Error(message);
-                    break;
-                case LogLevel.Fatal:
-                    Logger.Fatal(message);
-                    break;
-            }
+            Logger = LogManager.GetCurrentClassLogger();
         }
+        catch (Exception e)
+        {
+            Debug.WriteLine(e.Message);
+            Debug.WriteLine(e.StackTrace);
+        }
+    }
+    public LogService()
+    {
+        Log(LogLevel.Info, "Starting Log service");
+        Log(LogLevel.Info, "Detailed log at " + logFilePath);
+    }
 
-        public void LogException(LogLevel level, Exception exception, string message)
+    public void Log(LogLevel level, string message)
+    {
+        switch (level)
         {
-            switch (level)
-            {
-                case LogLevel.Error:
-                    Logger.Error(exception, message);
-                    break;
-                case LogLevel.Fatal:
-                    Logger.Fatal(exception, message);
-                    break;
-            }
+            case LogLevel.Trace:
+                Logger.Trace(message);
+                break;
+            case LogLevel.Debug:
+                Logger.Debug(message);
+                break;
+            case LogLevel.Info:
+                Logger.Info(message);
+                break;
+            case LogLevel.Warn:
+                Logger.Warn(message);
+                break;
+            case LogLevel.Error:
+                Logger.Error(message);
+                break;
+            case LogLevel.Fatal:
+                Logger.Fatal(message);
+                break;
         }
+    }
 
-        public void Flush()
+    public void LogException(LogLevel level, Exception exception, string message)
+    {
+        switch (level)
         {
-            LogManager.Flush();
+            case LogLevel.Error:
+                Logger.Error(exception, message);
+                break;
+            case LogLevel.Fatal:
+                Logger.Fatal(exception, message);
+                break;
         }
+    }
+
+    public void Flush()
+    {
+        LogManager.Flush();
     }
 }

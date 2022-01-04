@@ -1,14 +1,13 @@
-﻿namespace StoryBuilder.Models.Tools
-{
-    public class SubTopicModel
-    {
-        public string SubTopicName;
-        public string SubTopicNotes;
+﻿namespace StoryBuilder.Models.Tools;
 
-        public SubTopicModel(string name)
-        {
-            SubTopicName = name;
-            SubTopicNotes = string.Empty;
-        }
+public class SubTopicModel
+{
+    public string SubTopicName;
+    public string SubTopicNotes;
+
+    public SubTopicModel(string name)
+    {
+        SubTopicName = name;
+        SubTopicNotes = string.Empty;
     }
 }

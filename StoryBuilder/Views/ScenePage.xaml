@@ -81,13 +81,13 @@
                                 <Button FontFamily="Segoe MDL2 Assets" Content="&#xE710;" 
                                         Command="{x:Bind SceneVm.AddCastCommand, Mode=OneWay}" >
                                     <ToolTipService.ToolTip>
-                                        <ToolTip Content="Add Cast Member"></ToolTip>
+                                        <ToolTip Content="Add Cast Member" />
                                     </ToolTipService.ToolTip>
                                 </Button>
                                 <Button FontFamily="Segoe MDL2 Assets" Content="&#xE738;" 
                                         Command="{x:Bind SceneVm.RemoveCastCommand, Mode=OneWay}" >
                                     <ToolTipService.ToolTip>
-                                        <ToolTip Content="Add Cast Member"></ToolTip>
+                                        <ToolTip Content="Add Cast Member" />
                                     </ToolTipService.ToolTip>
                                 </Button>
                             </StackPanel>

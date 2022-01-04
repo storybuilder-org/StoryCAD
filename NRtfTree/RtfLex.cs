@@ -85,13 +85,13 @@ namespace NRtfTree
                 int c;
 
                 //Se crea el nuevo token a devolver
-                RtfToken token = new RtfToken();
+                RtfToken token = new();
 
                 //Se lee el siguiente caracter del documento
                 c = rtf.Read();
 
                 //Se ignoran los retornos de carro, tabuladores y caracteres nulos
-                while (c == '\r' || c == '\n' || c == '\t' || c == '\0')
+                while (c is '\r' or '\n' or '\t' or '\0')
                     c = rtf.Read();
 
                 //Se trata el caracter leido
@@ -145,11 +145,11 @@ namespace NRtfTree
                 c = rtf.Peek();
 
                 //Si el caracter leido no es una letra --> Se trata de un símbolo de Control o un caracter especial: '\\', '\{' o '\}'
-                if (!Char.IsLetter((char)c))
+                if (!char.IsLetter((char)c))
                 {
                     rtf.Read();
 
-                    if (c == '\\' || c == '{' || c == '}')  //Caracter especial
+                    if (c is '\\' or '{' or '}')  //Caracter especial
                     {
                         token.Type = RtfTokenType.Text;
                         token.Key = ((char)c).ToString();
@@ -180,7 +180,7 @@ namespace NRtfTree
 
                 //Se lee la palabra clave completa (hasta encontrar un caracter no alfanumérico, por ejemplo '\' ó ' '
                 c = rtf.Peek();
-                while (Char.IsLetter((char)c))
+                while (char.IsLetter((char)c))
                 {
                     rtf.Read();
                     palabraClave.Append((char)c);
@@ -193,7 +193,7 @@ namespace NRtfTree
                 token.Key = palabraClave.ToString();
 
                 //Se comprueba si la palabra clave tiene parámetro
-                if (Char.IsDigit((char)c) || c == '-')
+                if (char.IsDigit((char)c) || c == '-')
                 {
                     token.HasParameter = true;
 
@@ -207,7 +207,7 @@ namespace NRtfTree
 
                     //Se lee el parámetro completo
                     c = rtf.Peek();
-                    while (Char.IsDigit((char)c))
+                    while (char.IsDigit((char)c))
                     {
                         rtf.Read();
                         parametroStr.Append((char)c);
@@ -239,7 +239,7 @@ namespace NRtfTree
             {
                 int c = car;
 
-                StringBuilder Texto = new StringBuilder(((char)c).ToString(), 3000000);
+                StringBuilder Texto = new(((char)c).ToString(), 3000000);
 
                 c = rtf.Peek();
 

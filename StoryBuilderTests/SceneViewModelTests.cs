@@ -1,14 +1,13 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace StoryBuilderTests
+namespace StoryBuilderTests;
+
+[TestClass]
+public class SceneViewModelTests
 {
-    [TestClass]
-    public class SceneViewModelTests
+    [TestMethod]
+    public void TestSceneView()
     {
-        [TestMethod]
-        public void TestSceneView()
-        {
             
-        }
     }
 }

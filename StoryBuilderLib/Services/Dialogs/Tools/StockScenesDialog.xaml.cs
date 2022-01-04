@@ -4,16 +4,15 @@ using StoryBuilder.ViewModels.Tools;
 
 // The Content Dialog item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
 
-namespace StoryBuilder.Services.Dialogs.Tools
-{
-    public sealed partial class StockScenesDialog : Page
-    {
-        public StockScenesViewModel StockScenesVm => Ioc.Default.GetService<StockScenesViewModel>();
+namespace StoryBuilder.Services.Dialogs.Tools;
 
-        public StockScenesDialog()
-        {
-            InitializeComponent();
-            DataContext = StockScenesVm;
-        }
+public sealed partial class StockScenesDialog : Page
+{
+    public StockScenesViewModel StockScenesVm => Ioc.Default.GetService<StockScenesViewModel>();
+
+    public StockScenesDialog()
+    {
+        InitializeComponent();
+        DataContext = StockScenesVm;
     }
 }

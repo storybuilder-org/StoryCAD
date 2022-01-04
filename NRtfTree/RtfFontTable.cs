@@ -66,29 +66,16 @@ namespace NRtfTree
             /// </summary>
             /// <param name="index">Indice de la fuente a recuperar.</param>
             /// <returns>Fuente n-ésima de la tabla de fuentes.</returns>
-            public string this[int index]
-            {
-                get
-                {
-                    return fonts[index];
-                }
-            }
+            public string this[int index] => fonts[index];
 
             /// <summary>
             /// Número de fuentes en la tabla.
             /// </summary>
-            public int Count
-            {
-                get
-                {
-                    return fonts.Count;
-                }
-            }
+            public int Count => fonts.Count;
 
             /// <summary>
             /// Obtiene el índice de una fuente determinado en la tabla.
             /// </summary>
-            /// <param name="color">Fuente a consultar.</param>
             /// <returns>Indice de la fuente consultada.</returns>
             public int IndexOf(string name)
             {

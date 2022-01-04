@@ -230,7 +230,7 @@ namespace NRtfTree
             /// <returns>Devuelve una copia exacta del nodo actual.</returns>
             public RtfTreeNode CloneNode(bool cloneChildren)
             {
-                RtfTreeNode clon = new RtfTreeNode();
+                RtfTreeNode clon = new();
 
                 clon.key = key;
                 clon.hasParam = hasParam;
@@ -263,7 +263,7 @@ namespace NRtfTree
             /// <returns>Devuelve true si el nodo actual tiene algún nodo hijo.</returns>
             public bool HasChildNodes()
             {
-                return (children.Count != 0);
+                return children.Count != 0;
             }
 
             /// <summary>
@@ -452,7 +452,7 @@ namespace NRtfTree
             /// <returns>Colección de nodos, a partir del nodo actual, cuya palabra clave es la indicada como parámetro.</returns>
             public RtfNodeCollection SelectNodes(string keyword)
             {
-                RtfNodeCollection nodes = new RtfNodeCollection();
+                RtfNodeCollection nodes = new();
 
                 foreach (RtfTreeNode node in children)
                 {
@@ -474,7 +474,7 @@ namespace NRtfTree
             /// <returns>Colección de nodos, a partir del nodo actual, cuyo tipo es la indicado como parámetro.</returns>
             public RtfNodeCollection SelectNodes(RtfNodeType nodeType)
             {
-                RtfNodeCollection nodes = new RtfNodeCollection();
+                RtfNodeCollection nodes = new();
 
                 foreach (RtfTreeNode node in children)
                 {
@@ -497,7 +497,7 @@ namespace NRtfTree
             /// <returns>Colección de nodos, a partir del nodo actual, cuya palabra clave y parámetro son los indicados como parámetro.</returns>
             public RtfNodeCollection SelectNodes(string keyword, int param)
             {
-                RtfNodeCollection nodes = new RtfNodeCollection();
+                RtfNodeCollection nodes = new();
 
                 foreach (RtfTreeNode node in children)
                 {
@@ -519,7 +519,7 @@ namespace NRtfTree
             /// <returns>Colección de nodos de la lista de nodos hijos del nodo actual cuya palabra clave es la indicada como parámetro.</returns>
             public RtfNodeCollection SelectChildNodes(string keyword)
             {
-                RtfNodeCollection nodes = new RtfNodeCollection();
+                RtfNodeCollection nodes = new();
 
                 foreach (RtfTreeNode node in children)
                 {
@@ -539,7 +539,7 @@ namespace NRtfTree
             /// <returns>Colección de nodos de la lista de nodos hijos del nodo actual cuyo tipo es el indicado como parámetro.</returns>
             public RtfNodeCollection SelectChildNodes(RtfNodeType nodeType)
             {
-                RtfNodeCollection nodes = new RtfNodeCollection();
+                RtfNodeCollection nodes = new();
 
                 foreach (RtfTreeNode node in children)
                 {
@@ -560,7 +560,7 @@ namespace NRtfTree
             /// <returns>Colección de nodos de la lista de nodos hijos del nodo actual cuya palabra clave y parámetro son los indicados como parámetro.</returns>
             public RtfNodeCollection SelectChildNodes(string keyword, int param)
             {
-                RtfNodeCollection nodes = new RtfNodeCollection();
+                RtfNodeCollection nodes = new();
 
                 foreach (RtfTreeNode node in children)
                 {
@@ -695,7 +695,7 @@ namespace NRtfTree
             /// <returns>Texto en formato RTF del nodo.</returns>
             private string getRtfInm(RtfTreeNode curNode, RtfTreeNode prevNode, Encoding enc)
             {
-                StringBuilder res = new StringBuilder("");
+                StringBuilder res = new("");
 
                 if (curNode.NodeType == RtfNodeType.Root)
                     res.Append("");
@@ -723,30 +723,34 @@ namespace NRtfTree
 
                     if (curNode.HasParameter)
                     {
-                        if (curNode.NodeType == RtfNodeType.Keyword)
+                        switch (curNode.NodeType)
                         {
-                            res.Append(Convert.ToString(curNode.Parameter));
-                        }
-                        else if (curNode.NodeType == RtfNodeType.Control)
-                        {
-                            //Si es un caracter especial como las vocales acentuadas
-                            if (curNode.NodeKey == "\'")
+                            case RtfNodeType.Keyword:
+                                res.Append(Convert.ToString(curNode.Parameter));
+                                break;
+                            case RtfNodeType.Control:
                             {
-                                res.Append(GetHexa(curNode.Parameter));
+                                //Si es un caracter especial como las vocales acentuadas
+                                if (curNode.NodeKey == "\'")
+                                {
+                                    res.Append(GetHexa(curNode.Parameter));
+                                }
+
+                                break;
                             }
                         }
                     }
                 }
 
                 //Se obtienen los nodos hijos
-                RtfNodeCollection children = curNode.ChildNodes;
+                RtfNodeCollection childNodes = curNode.ChildNodes;
 
-                for (int i = 0; i < children.Count; i++)
+                for (int i = 0; i < childNodes.Count; i++)
                 {
-                    RtfTreeNode node = children[i];
+                    RtfTreeNode node = childNodes[i];
 
                     if (i > 0)
-                        res.Append(getRtfInm(node, children[i - 1], enc));
+                        res.Append(getRtfInm(node, childNodes[i - 1], enc));
                     else
                         res.Append(getRtfInm(node, null, enc));
                 }
@@ -771,7 +775,7 @@ namespace NRtfTree
 
                 for (int i = 0; i < s.Length; i++)
                 {
-                    int code = Char.ConvertToUtf32(s, i);
+                    int code = char.ConvertToUtf32(s, i);
 
                     if (code >= 128 || code < 32)
                     {
@@ -837,14 +841,8 @@ namespace NRtfTree
 			/// </remarks>
             public RtfTreeNode RootNode
             {
-                get
-                {
-                    return root;
-                }
-                set
-                {
-                    root = value;
-                }
+                get => root;
+                set => root = value;
             }
 
             /// <summary>
@@ -852,14 +850,8 @@ namespace NRtfTree
             /// </summary>
             public RtfTreeNode ParentNode
             {
-                get
-                {
-                    return parent;
-                }
-                set
-                {
-                    parent = value;
-                }
+                get => parent;
+                set => parent = value;
             }
 
             /// <summary>
@@ -867,14 +859,8 @@ namespace NRtfTree
             /// </summary>
             public RtfTree Tree
             {
-                get
-                {
-                    return tree;
-                }
-                set
-                {
-                    tree = value;
-                }
+                get => tree;
+                set => tree = value;
             }
 
             /// <summary>
@@ -882,14 +868,8 @@ namespace NRtfTree
             /// </summary>
             public RtfNodeType NodeType
             {
-                get
-                {
-                    return type;
-                }
-                set
-                {
-                    type = value;
-                }
+                get => type;
+                set => type = value;
             }
 
             /// <summary>
@@ -897,14 +877,8 @@ namespace NRtfTree
             /// </summary>
             public string NodeKey
             {
-                get
-                {
-                    return key;
-                }
-                set
-                {
-                    key = value;
-                }
+                get => key;
+                set => key = value;
             }
 
             /// <summary>
@@ -912,14 +886,8 @@ namespace NRtfTree
             /// </summary>
             public bool HasParameter
             {
-                get
-                {
-                    return hasParam;
-                }
-                set
-                {
-                    hasParam = value;
-                }
+                get => hasParam;
+                set => hasParam = value;
             }
 
             /// <summary>
@@ -927,39 +895,21 @@ namespace NRtfTree
             /// </summary>
             public int Parameter
             {
-                get
-                {
-                    return param;
-                }
-                set
-                {
-                    param = value;
-                }
+                get => param;
+                set => param = value;
             }
 
             /// <summary>
             /// Devuelve la colección de nodos hijo del nodo actual.
             /// </summary>
-            public RtfNodeCollection ChildNodes
-            {
-                get
-                {
-                    return children;
-                }
-            }
+            public RtfNodeCollection ChildNodes => children;
 
             /// <summary>
             /// Devuelve el primer nodo hijo cuya palabra clave sea la indicada como parámetro.
             /// </summary>
             /// <param name="keyword">Palabra clave buscada.</param>
             /// <returns>Primer nodo hijo cuya palabra clave sea la indicada como parámetro. En caso de no existir se devuelve null.</returns>
-            public RtfTreeNode this[string keyword]
-            {
-                get
-                {
-                    return SelectSingleChildNode(keyword);
-                }
-            }
+            public RtfTreeNode this[string keyword] => SelectSingleChildNode(keyword);
 
             /// <summary>
             /// Devuelve el primer nodo hijo del nodo actual.
@@ -1024,13 +974,7 @@ namespace NRtfTree
             /// <summary>
             /// Devuelve el código RTF del nodo actual y todos sus nodos hijos.
             /// </summary>
-            public string Rtf
-            {
-                get
-                {
-                    return getRtf();
-                }
-            }
+            public string Rtf => getRtf();
 
             #endregion
         }
