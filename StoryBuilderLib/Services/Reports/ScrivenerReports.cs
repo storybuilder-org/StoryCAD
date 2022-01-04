@@ -1,7 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.DependencyInjection;
-using Net.Sgoliver.NRtfTree.Util;
-using Net.Sgoliver.NRtfTree.Core;
-using StoryBuilder.Controllers;
+using NRtfTree.Util;
+using NRtfTree.Core;
 using StoryBuilder.DAL;
 using StoryBuilder.Models;
 using StoryBuilder.Models.Scrivener;    
@@ -13,6 +12,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Windows.Data.Xml.Dom;
 using Windows.Storage;
+using StoryBuilder.Controllers;
 
 namespace StoryBuilder.Services.Reports
 {

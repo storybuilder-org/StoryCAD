@@ -1,6 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.DependencyInjection;
 using System;
-using Net.Sgoliver.NRtfTree.Util;
+using NRtfTree.Util;
 using StoryBuilder.DAL;
 using StoryBuilder.Models;
 using StoryBuilder.ViewModels;
