@@ -390,21 +390,27 @@ namespace StoryBuilder.ViewModels
             Logger.Log(LogLevel.Info, "UnifyVM - New File starting");
             try
             {
-                //TODO: Make sure both path and filename are present
-                UnifiedVM vm = dialogVM;
-                if (!Path.GetExtension(vm.ProjectName).Equals(".stbx")) {vm.ProjectName += ".stbx";}
-                StoryModel.ProjectFilename = vm.ProjectName;
-                StorageFolder parent = await StorageFolder.GetFolderFromPathAsync(vm.ProjectPath);
-                StoryModel.ProjectFolder = await parent.CreateFolderAsync(vm.ProjectName);
-                StoryModel.ProjectPath = StoryModel.ProjectFolder.Path;
                 StatusMessage = "New project command executing";
+                // If the current project needs saved, do so
                 if (StoryModel.Changed)
                 {
                     await SaveModel();
                     await WriteModel();
                 }
+                
+                UnifiedVM vm = dialogVM;  // Access the dialog settings
+
+                // Start with a blank StoryModel and populate it
+                // using the new project dialog's settings
 
                 ResetModel();
+
+                if (!Path.GetExtension(vm.ProjectName).Equals(".stbx")) { vm.ProjectName += ".stbx"; }
+                StoryModel.ProjectFilename = vm.ProjectName;
+                StorageFolder parent = await StorageFolder.GetFolderFromPathAsync(vm.ProjectPath);
+                StoryModel.ProjectFolder = await parent.CreateFolderAsync(vm.ProjectName);
+                StoryModel.ProjectPath = StoryModel.ProjectFolder.Path;
+          
                 OverviewModel overview = new("Working Title", StoryModel);
                 overview.Author = GlobalData.Preferences.Name;
                 StoryNodeItem overviewNode = new(overview, null) { IsExpanded = true, IsRoot = true };
