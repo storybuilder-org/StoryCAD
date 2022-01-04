@@ -515,7 +515,8 @@ namespace StoryBuilder.ViewModels
             // Look for the StoryElement corresponding to the passed guid
             // (This is the normal approach)
             // Get the current StoryModel's StoryElementsCollection
-            StoryElementCollection elements = GlobalData.StoryModel.StoryElements;
+            StoryModel model = ShellViewModel.GetModel();
+            StoryElementCollection elements = model.StoryElements;
             if (Guid.TryParse(value, out Guid guid))
             {
                 if (elements.StoryElementGuids.ContainsKey(guid)) { return elements.StoryElementGuids[guid]; }

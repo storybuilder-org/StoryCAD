@@ -46,8 +46,8 @@ namespace StoryBuilder.DAL
 
         internal async Task WriteFile(StorageFile output, StoryModel model)
         {
-            _outFile = output;
             _model = model;
+            _outFile = output;
               _xml = new XmlDocument();
             CreateStoryDocument();
             //      write RTF if converting. 
@@ -66,8 +66,8 @@ namespace StoryBuilder.DAL
                 _xml.Save(writer);
             }
 
-            _model.Changed = false;
-            GlobalData.StoryModel.ProjectFolder = await output.GetParentAsync();
+            model.Changed = false;
+            model.ProjectFolder = await output.GetParentAsync();  // is this needed?
         }
 
         private void CreateStoryDocument()
@@ -780,13 +780,13 @@ namespace StoryBuilder.DAL
         private async Task<StorageFolder> FindSubFolder(Guid uuid)
         {
             // Search the ProjectFolder's subfolders for the desired one (folder name == uuid as string)
-            IReadOnlyList<StorageFolder> folders = await GlobalData.StoryModel.FilesFolder.GetFoldersAsync();
+            StoryModel model = ShellViewModel.GetModel();
+            IReadOnlyList<StorageFolder> folders = await model.FilesFolder.GetFoldersAsync();
             foreach (StorageFolder folder in folders)
                 if (folder.Name.Equals(UuidString(uuid)))
                     return folder;
             // If the SubFolder doesn't exist, create it.
-            StorageFolder newFolder = await GlobalData.StoryModel.FilesFolder.CreateFolderAsync(UuidString(uuid));
-            return newFolder;
+            return await model.FilesFolder.CreateFolderAsync(UuidString(uuid));
         }
 
         /// <summary>

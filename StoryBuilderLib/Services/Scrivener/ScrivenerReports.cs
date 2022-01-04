@@ -57,7 +57,7 @@ namespace StoryBuilder.Services.Scrivener
             if (value.Equals(string.Empty))
                 return null;
             // Get the current StoryModel's StoryElementsCollection
-            StoryElementCollection elements = GlobalData.StoryModel.StoryElements;
+            StoryElementCollection elements = _model.StoryElements;
             // legacy: locate the StoryElement from its Name
             foreach (StoryElement element in elements)  // Character or Setting??? Search both?
             {

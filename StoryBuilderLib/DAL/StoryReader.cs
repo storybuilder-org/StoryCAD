@@ -781,15 +781,14 @@ namespace StoryBuilder.DAL
         private async Task<StorageFolder> FindSubFolder(Guid uuid)
         {
             // Search the ProjectFolder's subfolders for the SubFolder
-            IReadOnlyList<StorageFolder> folders = await GlobalData.StoryModel.FilesFolder.GetFoldersAsync();
+            StoryModel model = ShellViewModel.GetModel();
+            IReadOnlyList<StorageFolder> folders = await model.FilesFolder.GetFoldersAsync();
             foreach (StorageFolder folder in folders)
                 if (folder.Name.Equals(UuidString(uuid)))
                     //Story.SubFolder = folder;
                     return folder;
-
             // If the SubFolder doesn't exist, create it.
-            StorageFolder newFolder = await GlobalData.StoryModel.FilesFolder.CreateFolderAsync(UuidString(uuid));
-            return newFolder;
+            return await model.FilesFolder.CreateFolderAsync(UuidString(uuid));
         }
 
         #region Constructor

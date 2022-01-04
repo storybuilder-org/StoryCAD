@@ -26,7 +26,6 @@ namespace StoryBuilder.ViewModels
         private readonly StoryReader _rdr;
         private readonly StoryWriter _wtr;
         private readonly LogService _logger;
-        private StoryModel _storyModel;
         public RelationshipModel CurrentRelationship;
         private bool _changeable; // process property changes for this story element
         private bool _changed;    // this story element has changed
@@ -738,7 +737,8 @@ namespace StoryBuilder.ViewModels
             if (value.Equals(string.Empty))
                 return null;
             // Get the current StoryModel's StoryElementsCollection
-            StoryElementCollection elements = GlobalData.StoryModel.StoryElements;
+            StoryModel model = ShellViewModel.GetModel();
+            StoryElementCollection elements = model.StoryElements;
             // legacy: locate the StoryElement from its Name
             foreach (StoryElement element in elements)  // Character or Setting??? Search both?
             {
@@ -802,7 +802,8 @@ namespace StoryBuilder.ViewModels
             VM.RelationTypes.Clear();
             foreach (RelationType relationType in GlobalData.RelationTypes) { VM.RelationTypes.Add(relationType); }
             VM.ProspectivePartners.Clear(); //Prospective partners are chars who are not in a relationship with this char
-            foreach (StoryElement character in _storyModel.StoryElements.Characters)
+            StoryModel model = ShellViewModel.GetModel();
+            foreach (StoryElement character in model.StoryElements.Characters)
             {
                 if (character == VM.Member) { continue; } //Character cannot be in a relationship with themselves.
                 foreach (RelationshipModel rel in CharacterRelationships)
@@ -1031,7 +1032,6 @@ namespace StoryBuilder.ViewModels
 
         public CharacterViewModel()
         {
-            _storyModel = GlobalData.StoryModel;
             _logger = Ioc.Default.GetService<LogService>();
             _wtr = Ioc.Default.GetService<StoryWriter>();
             _rdr = Ioc.Default.GetService<StoryReader>();

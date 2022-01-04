@@ -1,6 +1,6 @@
-﻿using CommunityToolkit.Mvvm.DependencyInjection;
-using Microsoft.UI.Xaml.Controls;
+﻿using Microsoft.UI.Xaml.Controls;
 using StoryBuilder.Models;
+using StoryBuilder.ViewModels;
 
 namespace StoryBuilder.Controls
 {
@@ -10,8 +10,8 @@ namespace StoryBuilder.Controls
         public ProblemName() : base()
         {
             DefaultStyleKey = typeof(ComboBox);
-            ItemsSource = GlobalData.StoryModel.StoryElements.Problems;
-            //TODO: Subscribe to change for StoryModel?
+            StoryModel model = ShellViewModel.GetModel();   
+            ItemsSource = model.StoryElements.Problems;
         }
     }
 }

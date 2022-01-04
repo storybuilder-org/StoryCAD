@@ -54,8 +54,5 @@ namespace StoryBuilder.Models
         // the root of a containing page. 
         // The Shell page's XamlRoot is stored here and accessed wherever needed. 
         public static XamlRoot XamlRoot;
-
-        //The outline that is currently open
-        public static StoryModel StoryModel;
     }
 }

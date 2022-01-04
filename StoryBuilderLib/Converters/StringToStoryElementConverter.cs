@@ -1,5 +1,4 @@
-﻿using CommunityToolkit.Mvvm.DependencyInjection;
-using Microsoft.UI.Xaml.Data;
+﻿using Microsoft.UI.Xaml.Data;
 using StoryBuilder.Models;
 using StoryBuilder.ViewModels;
 using System;
@@ -46,7 +45,8 @@ namespace StoryBuilder.Converters
             if (value.Equals(string.Empty))
                 return null;
             // Get the current StoryModel's StoryElementsCollection
-            StoryElementCollection elements = GlobalData.StoryModel.StoryElements;
+            StoryModel model = ShellViewModel.GetModel();
+            StoryElementCollection elements = model.StoryElements;
             // legacy: locate the StoryElement from its Name
             foreach (StoryElement element in elements)  // Character or Setting??? Search both?
             {
