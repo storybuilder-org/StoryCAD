@@ -417,6 +417,7 @@ public class StoryWriter
         chr.Attributes.Append(attr);
         attr = _xml.CreateAttribute("Education");
         attr.Value = rec.Education;
+        chr.Attributes.Append(attr);
         attr = _xml.CreateAttribute("Ethnic");
         attr.Value = rec.Ethnic;
         chr.Attributes.Append(attr);
