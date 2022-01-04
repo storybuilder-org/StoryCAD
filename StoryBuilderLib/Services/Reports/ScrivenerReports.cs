@@ -12,7 +12,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Windows.Data.Xml.Dom;
 using Windows.Storage;
-using StoryBuilder.Controllers;
 
 namespace StoryBuilder.Services.Reports
 {
@@ -43,7 +42,7 @@ namespace StoryBuilder.Services.Reports
 
         public ScrivenerReports(StorageFile file, StoryModel model)
         {
-            Ioc.Default.GetService<StoryController>();
+            //Ioc.Default.GetService<StoryController>();
             _scrivener = Ioc.Default.GetService<ScrivenerIo>();
             _scrivener.ScrivenerFile = file;
             _model = model;
