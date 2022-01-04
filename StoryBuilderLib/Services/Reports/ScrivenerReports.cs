@@ -42,7 +42,6 @@ namespace StoryBuilder.Services.Reports
 
         public ScrivenerReports(StorageFile file, StoryModel model)
         {
-            //Ioc.Default.GetService<StoryController>();
             _scrivener = Ioc.Default.GetService<ScrivenerIo>();
             _scrivener.ScrivenerFile = file;
             _model = model;
