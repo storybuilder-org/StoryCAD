@@ -233,8 +233,8 @@
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
                     <ComboBox Header="Adventureousness" Grid.Column="0" Grid.Row="0" IsEditable="True" MinWidth="200"
-                                  ItemsSource="{x:Bind CharVm.AdventureousnessList}"
-                                  SelectedItem="{x:Bind CharVm.Adventureousness, Mode=TwoWay}" />
+                                  ItemsSource="{x:Bind CharVm.AdventurousnessList}"
+                                  SelectedItem="{x:Bind CharVm.Adventurousness, Mode=TwoWay}" />
                     <ComboBox Header="Confidence" Grid.Column="0" Grid.Row="1" IsEditable="True" MinWidth="200"
                                   ItemsSource="{x:Bind CharVm.ConfidenceList}"
                                   SelectedItem="{x:Bind CharVm.Confidence, Mode=TwoWay}" />
