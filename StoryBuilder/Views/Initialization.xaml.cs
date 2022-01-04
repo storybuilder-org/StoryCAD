@@ -1,26 +1,21 @@
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using StoryBuilder.ViewModels;
 using System;
 using System.Runtime.InteropServices;
 using Windows.Storage;
 using Windows.Storage.Pickers;
+using CommunityToolkit.Mvvm.DependencyInjection;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using StoryBuilder.ViewModels;
 using WinRT;
-
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
 
 namespace StoryBuilder.Views
 {
-    /// <summary>
-    /// An empty page that can be used on its own or navigated to within a Frame.
-    /// </summary>
-    public sealed partial class Initialisation : Page
+    public sealed partial class Initialization : Page
     {
-        InitialisationVM InitVM = new();
-        public Initialisation()
+        InitVM _initVM = Ioc.Default.GetService<InitVM>();
+        public Initialization()
         {
-            this.InitializeComponent();
+            InitializeComponent();
         }
 
         /// <summary>
@@ -35,12 +30,12 @@ namespace StoryBuilder.Views
         /// <param name="e"></param>
         private async void SetProjectPath(object sender, RoutedEventArgs e)
         {
-            var folderPicker = new FolderPicker();
+            FolderPicker folderPicker = new FolderPicker();
             if (Window.Current == null)
             {
                 IntPtr hwnd = GetActiveWindow();
                 //IntPtr hwnd = GlobalData.WindowHandle;
-                var initializeWithWindow = folderPicker.As<IInitializeWithWindow>();
+                IInitializeWithWindow initializeWithWindow = folderPicker.As<IInitializeWithWindow>();
                 initializeWithWindow.Initialize(hwnd);
             }
 
@@ -50,7 +45,7 @@ namespace StoryBuilder.Views
             if (folder != null)
             {
                 ProjPath.Text = folder.Path;
-                InitVM.Path = folder.Path;
+                _initVM.Path = folder.Path;
             }
         }
 
@@ -66,12 +61,12 @@ namespace StoryBuilder.Views
         /// <param name="e"></param>
         private async void SetBackupPath(object sender, RoutedEventArgs e)
         {
-            var folderPicker = new FolderPicker();
+            FolderPicker folderPicker = new FolderPicker();
             if (Window.Current == null)
             {
                 IntPtr hwnd = GetActiveWindow();
                 //IntPtr hwnd = GlobalData.WindowHandle;
-                var initializeWithWindow = folderPicker.As<IInitializeWithWindow>();
+                IInitializeWithWindow initializeWithWindow = folderPicker.As<IInitializeWithWindow>();
                 initializeWithWindow.Initialize(hwnd);
             }
 
@@ -81,7 +76,7 @@ namespace StoryBuilder.Views
             if (folder != null)
             {
                 BackPath.Text = folder.Path;
-                InitVM.BackupPath = folder.Path;
+                _initVM.BackupPath = folder.Path;
             }
         }
 
@@ -107,9 +102,9 @@ namespace StoryBuilder.Views
 
         public void Check(object sender, RoutedEventArgs e)
         {
-            if (!String.IsNullOrWhiteSpace(InitVM.Path.ToString()) && !String.IsNullOrWhiteSpace(InitVM.BackupPath.ToString()) && InitVM.Name != "")
+            if (!string.IsNullOrWhiteSpace(_initVM.Path) && !string.IsNullOrWhiteSpace(_initVM.BackupPath) && _initVM.Name != "")
             {
-                InitVM.Save();
+                _initVM.Save();
                 RootFrame.Navigate(typeof(Shell));
             }
         }

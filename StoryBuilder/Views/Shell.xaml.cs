@@ -1,5 +1,5 @@
-﻿using CommunityToolkit.Mvvm.DependencyInjection;
-using Microsoft.UI;
+﻿using System;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
@@ -8,7 +8,6 @@ using Microsoft.UI.Xaml.Navigation;
 using StoryBuilder.Models;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.ViewModels;
-using System;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -21,14 +20,14 @@ namespace StoryBuilder.Views
     public sealed partial class Shell
     {
         public ShellViewModel ShellVm => Ioc.Default.GetService<ShellViewModel>();
-        public UnifiedVM UnifiedVM => Ioc.Default.GetService<UnifiedVM>();
+        public UnifiedVM UnifiedVm => Ioc.Default.GetService<UnifiedVM>();
 
         public Shell()
         {
             try
             {
                 InitializeComponent();
-                this.DataContext = ShellVm;
+                DataContext = ShellVm;
                 Loaded += Shell_Loaded;
             }                         
             catch (Exception ex)
@@ -71,7 +70,7 @@ namespace StoryBuilder.Views
         }
         private void TreeViewItem_RightTapped(object sender, RightTappedRoutedEventArgs e)
         {
-            var item = (TreeViewItem)sender;
+            TreeViewItem item = (TreeViewItem)sender;
             ShellVm.RightTappedNode = (StoryNodeItem)item.DataContext;
             ShellVm.ShowFlyoutButtons();
         }

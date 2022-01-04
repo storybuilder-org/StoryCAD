@@ -17,7 +17,7 @@ namespace StoryBuilder.Services.Dialogs
     {
         public RecentFiles(UnifiedVM vm)
         {
-            this.InitializeComponent();
+            InitializeComponent();
             UnifiedMenuVM = vm;
             //Loads lastfile1 through to lastfile5 and loads it as long as its not null, empty or blank
             if (!String.IsNullOrWhiteSpace(GlobalData.Preferences.LastFile1)) { Recents.Items.Add(new ListBoxItem { Name = GlobalData.Preferences.LastFile1, Content = Path.GetFileName(GlobalData.Preferences.LastFile1).Replace(".stbx", "") }); }
@@ -30,7 +30,7 @@ namespace StoryBuilder.Services.Dialogs
             if (Recents.Items.Count < 1)
             {
                 Pannel.Children.Add(new TextBlock() { Text = "No stories have been opened recently", HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(10) });
-            };
+            }
         }
         public UnifiedVM UnifiedMenuVM;
     }

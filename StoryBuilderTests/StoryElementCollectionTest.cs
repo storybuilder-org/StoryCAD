@@ -12,7 +12,7 @@ namespace StoryBuilderTests
         [TestMethod]
         public void TestStoryElements()
         {
-            StoryModel model = new StoryModel();
+            StoryModel model = new();
             elements = new StoryElementCollection();
             Assert.IsNotNull(elements.StoryElementGuids);
             Assert.IsNotNull(elements.Characters);

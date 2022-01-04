@@ -22,9 +22,7 @@ namespace StoryBuilder.Services.Navigation
     // </license>
     // ****************************************************************************
 
-    /// <summary>
-    /// Windows 10 UWP implementation of <see cref="INavigationService"/>.
-    /// </summary>
+
     ////[ClassInfo(typeof(INavigationService))]
     ///
     /// NOTE: This class is derived from the MVVMLight navigation service by
@@ -35,7 +33,9 @@ namespace StoryBuilder.Services.Navigation
     /// to display StoryElement pages in the right-hand-side Frame (subframe) of SplitView.
     /// Note that if if a Frame is passed, GoBack isn't available; using it will
     /// get you in trouble. 
-
+    /// <summary>
+    /// Windows 10 UWP implementation of <see cref="INavigationService"/>.
+    /// </summary>
     public class NavigationService : INavigationService
     {
         /// <summary>
@@ -53,7 +53,7 @@ namespace StoryBuilder.Services.Navigation
         /// </summary>
         public const string UnknownPageKey = "-- UNKNOWN --";
 
-        private readonly Dictionary<string, Type> _pagesByKey = new Dictionary<string, Type>();
+        private readonly Dictionary<string, Type> _pagesByKey = new();
         private Frame _currentFrame;
 
         /// <summary>
@@ -62,15 +62,9 @@ namespace StoryBuilder.Services.Navigation
         /// </summary>
         public Frame CurrentFrame
         {
-            get
-            {
-                return _currentFrame ?? (_currentFrame = ((Frame)Window.Current.Content));
-            }
+            get => _currentFrame ??= (Frame)Window.Current.Content;
 
-            set
-            {
-                _currentFrame = value;
-            }
+            set => _currentFrame = value;
         }
 
         /// <summary>
@@ -114,14 +108,14 @@ namespace StoryBuilder.Services.Navigation
                         return UnknownPageKey;
                     }
 
-                    var currentType = CurrentFrame.Content.GetType();
+                    Type currentType = CurrentFrame.Content.GetType();
 
                     if (_pagesByKey.All(p => p.Value != currentType))
                     {
                         return UnknownPageKey;
                     }
 
-                    var item = _pagesByKey.FirstOrDefault(
+                    KeyValuePair<string, Type> item = _pagesByKey.FirstOrDefault(
                         i => i.Value == currentType);
 
                     return item.Key;
@@ -173,11 +167,7 @@ namespace StoryBuilder.Services.Navigation
             {
                 if (!_pagesByKey.ContainsKey(pageKey))
                 {
-                    throw new ArgumentException(
-                        string.Format(
-                            "No such page: {0}. Did you forget to call NavigationService.Configure?",
-                            pageKey),
-                        "pageKey");
+                    throw new ArgumentException($"No such page: {pageKey}. Did you forget to call NavigationService.Configure?", pageKey);
                 }
 
                 CurrentFrame.Navigate(_pagesByKey[pageKey], parameter);
@@ -190,6 +180,7 @@ namespace StoryBuilder.Services.Navigation
         /// Make sure to call the <see cref="Configure"/>
         /// method first.
         /// </summary>
+        /// <param name="frame"></param>
         /// <param name="pageKey">The key corresponding to the page
         /// that should be displayed.</param>
         /// <exception cref="ArgumentException">When this method is called for 
@@ -205,6 +196,8 @@ namespace StoryBuilder.Services.Navigation
         /// Make sure to call the <see cref="Configure"/>
         /// method first.
         /// </summary>
+        /// <param name="frame"></param>
+        /// 
         /// <param name="pageKey">The key corresponding to the page
         /// that should be displayed.</param>
         /// <param name="parameter">The parameter that should be passed
@@ -217,11 +210,7 @@ namespace StoryBuilder.Services.Navigation
             {
                 if (!_pagesByKey.ContainsKey(pageKey))
                 {
-                    throw new ArgumentException(
-                        string.Format(
-                            "No such page: {0}. Did you forget to call NavigationService.Configure?",
-                            pageKey),
-                        "pageKey");
+                    throw new ArgumentException($"No such page: {pageKey}. Did you forget to call NavigationService.Configure?", pageKey);
                 }
 
                 frame.Navigate(_pagesByKey[pageKey], parameter);
@@ -269,10 +258,7 @@ namespace StoryBuilder.Services.Navigation
                 {
                     return _pagesByKey.FirstOrDefault(p => p.Value == page).Key;
                 }
-                else
-                {
-                    throw new ArgumentException($"The page '{page.Name}' is unknown by the NavigationService");
-                }
+                throw new ArgumentException($"The page '{page.Name}' is unknown by the NavigationService");
             }
         }
     }

@@ -1,5 +1,6 @@
 using StoryBuilder.ViewModels;
 using System.Collections.ObjectModel;
+using Windows.Storage;
 
 //using StoryBuilder.Models.Tools;
 
@@ -36,9 +37,18 @@ namespace StoryBuilder.Models
         /// One of these persisted TreeViews is actively bound in the Shell page view to a StoryNodeItem tree 
         /// based on  whichever of these two TreeView representations is presently selected.
         ///
-        public ObservableCollection<StoryNodeItem> ExplorerView = new ObservableCollection<StoryNodeItem>();
-        public ObservableCollection<StoryNodeItem> NarratorView = new ObservableCollection<StoryNodeItem>();
-   
+        public ObservableCollection<StoryNodeItem> ExplorerView;
+        public ObservableCollection<StoryNodeItem> NarratorView;
+        public StorageFolder ProjectFolder;
+        public StorageFolder FilesFolder;
+        public StorageFile ProjectFile;
+        public string ProjectPath;
+        private string projectFilename;
+        public string ProjectFilename 
+        { 
+            get => projectFilename;
+            set => projectFilename = value; 
+        }
         #endregion
 
         #region Constructor
@@ -50,6 +60,8 @@ namespace StoryBuilder.Models
             NarratorView = new ObservableCollection<StoryNodeItem>();
 
             Changed = false;
+
+            projectFilename = null;
         }
         #endregion
     }

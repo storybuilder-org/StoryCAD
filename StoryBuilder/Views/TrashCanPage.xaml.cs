@@ -14,7 +14,7 @@ namespace StoryBuilder.Views
         public TrashCanPage()
         {
             InitializeComponent();
-            this.DataContext = TrashCanVm;
+            DataContext = TrashCanVm;
         }
     }
 }

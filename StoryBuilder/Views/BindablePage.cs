@@ -10,8 +10,7 @@ namespace StoryBuilder.Views
         {
             base.OnNavigatedTo(e);
 
-            var navigableViewModel = this.DataContext as INavigable;
-            if (navigableViewModel != null)
+            if (DataContext is INavigable navigableViewModel)
                 navigableViewModel.Activate(e.Parameter);
         }
 
@@ -19,8 +18,7 @@ namespace StoryBuilder.Views
         {
             base.OnNavigatedFrom(e);
 
-            var navigableViewModel = this.DataContext as INavigable;
-            if (navigableViewModel != null)
+            if (DataContext is INavigable navigableViewModel)
                 navigableViewModel.Deactivate(e.Parameter);
         }
     }

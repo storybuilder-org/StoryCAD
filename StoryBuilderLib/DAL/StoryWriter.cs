@@ -1,6 +1,4 @@
-﻿using CommunityToolkit.Mvvm.DependencyInjection;
-using StoryBuilder.Controllers;
-using StoryBuilder.Models;
+﻿using StoryBuilder.Models;
 using StoryBuilder.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -23,7 +21,6 @@ namespace StoryBuilder.DAL
         /// StoryBuilder's model is found in the StoryBuilder.Models namespace and consists
         /// of various POCO (Plain Old CLR) objects.
         ///
-        private readonly StoryController _story;
         private StoryModel _model;
 
         /// The in-memory representation of the .stbx file is an XmlDocument
@@ -43,15 +40,14 @@ namespace StoryBuilder.DAL
 
         public StoryWriter()
         {
-            _story = Ioc.Default.GetService<StoryController>();
         }
 
         
 
         internal async Task WriteFile(StorageFile output, StoryModel model)
         {
-            _outFile = output;
             _model = model;
+            _outFile = output;
               _xml = new XmlDocument();
             CreateStoryDocument();
             //      write RTF if converting. 
@@ -59,9 +55,9 @@ namespace StoryBuilder.DAL
             ParseExplorerView();
             ParseNarratorView();
 
-            using (Stream fileStream = await _outFile.OpenStreamForWriteAsync())
+            await using (Stream fileStream = await _outFile.OpenStreamForWriteAsync())
             {
-                XmlWriterSettings settings = new XmlWriterSettings();
+                XmlWriterSettings settings = new();
                 settings.Async = true;
                 settings.Encoding = Encoding.UTF8;
                 settings.Indent = true;
@@ -70,8 +66,8 @@ namespace StoryBuilder.DAL
                 _xml.Save(writer);
             }
 
-            _model.Changed = false;
-            _story.ProjectFolder = await output.GetParentAsync();
+            model.Changed = false;
+            model.ProjectFolder = await output.GetParentAsync();  // is this needed?
         }
 
         private void CreateStoryDocument()
@@ -136,9 +132,8 @@ namespace StoryBuilder.DAL
         {
             OverviewModel rec = (OverviewModel)element;
             XmlNode overview = _xml.CreateElement("Overview");
-            XmlAttribute attr;
 
-            attr = _xml.CreateAttribute("UUID");
+            XmlAttribute attr = _xml.CreateAttribute("UUID");
             attr.Value = UuidString(rec.Uuid);
             overview.Attributes.Append(attr);
             attr = _xml.CreateAttribute("Name");
@@ -206,9 +201,8 @@ namespace StoryBuilder.DAL
         {
             ProblemModel rec = (ProblemModel)element;
             XmlNode prob = _xml.CreateElement("Problem");
-            XmlAttribute attr;
 
-            attr = _xml.CreateAttribute("UUID");
+            XmlAttribute attr = _xml.CreateAttribute("UUID");
             attr.Value = UuidString(rec.Uuid);
             prob.Attributes.Append(attr);
             attr = _xml.CreateAttribute("Name");
@@ -280,9 +274,8 @@ namespace StoryBuilder.DAL
         {
             CharacterModel rec = (CharacterModel)element;
             XmlNode chr = _xml.CreateElement("Character");
-            XmlAttribute attr;
 
-            attr = _xml.CreateAttribute("UUID");
+            XmlAttribute attr = _xml.CreateAttribute("UUID");
             attr.Value = UuidString(rec.Uuid);
             chr.Attributes.Append(attr);
             attr = _xml.CreateAttribute("Name");
@@ -643,9 +636,8 @@ namespace StoryBuilder.DAL
         {
             FolderModel rec = (FolderModel)element;
             XmlNode node = _xml.CreateElement("Folder");
-            XmlAttribute attr;
 
-            attr = _xml.CreateAttribute("UUID");
+            XmlAttribute attr = _xml.CreateAttribute("UUID");
             attr.Value = UuidString(rec.Uuid);
             node.Attributes.Append(attr);
             attr = _xml.CreateAttribute("Name");
@@ -662,9 +654,8 @@ namespace StoryBuilder.DAL
         {
             SectionModel rec = (SectionModel)element;
             XmlNode node = _xml.CreateElement("Section");
-            XmlAttribute attr;
 
-            attr = _xml.CreateAttribute("UUID");
+            XmlAttribute attr = _xml.CreateAttribute("UUID");
             attr.Value = UuidString(rec.Uuid);
             node.Attributes.Append(attr);
             attr = _xml.CreateAttribute("Name");
@@ -681,9 +672,8 @@ namespace StoryBuilder.DAL
         {
             TrashCanModel rec = (TrashCanModel)element;
             XmlNode node = _xml.CreateElement("TrashCan");
-            XmlAttribute attr;
 
-            attr = _xml.CreateAttribute("UUID");
+            XmlAttribute attr = _xml.CreateAttribute("UUID");
             attr.Value = UuidString(rec.Uuid);
             node.Attributes.Append(attr);
             attr = _xml.CreateAttribute("Name");
@@ -757,10 +747,9 @@ namespace StoryBuilder.DAL
             {
                 StorageFolder folder = await FindSubFolder(uuid);
                 StorageFile rtfFile = await folder.CreateFileAsync(filename, CreationCollisionOption.ReplaceExisting);
-                using (var stream = await rtfFile.OpenStreamForWriteAsync())
+                await using (Stream stream = await rtfFile.OpenStreamForWriteAsync())
                 {
-                    using (var writer = new StreamWriter(stream))
-                        writer.Write(work);
+                    await using (StreamWriter writer = new(stream)) {await writer.WriteAsync(work);}
                 }
                 return $"[FILE:{filename}]";
             }
@@ -778,13 +767,9 @@ namespace StoryBuilder.DAL
             // //https://stackoverflow.com/questions/32948609/how-to-close-the-opened-storagefile
             StorageFolder folder = await FindSubFolder(uuid);
             StorageFile rtfFile = await folder.CreateFileAsync(rftFilename, CreationCollisionOption.ReplaceExisting);
-            using (var stream = await rtfFile.OpenStreamForWriteAsync())
-            {
-                using (var writer = new StreamWriter(stream))
-                {
-                    writer.Write(notes);
-                }
-            }
+            await using Stream stream = await rtfFile.OpenStreamForWriteAsync();
+            await using StreamWriter writer = new(stream);
+            await writer.WriteAsync(notes);
         }
 
         /// <summary>
@@ -795,13 +780,13 @@ namespace StoryBuilder.DAL
         private async Task<StorageFolder> FindSubFolder(Guid uuid)
         {
             // Search the ProjectFolder's subfolders for the desired one (folder name == uuid as string)
-            IReadOnlyList<StorageFolder> folders = await _story.FilesFolder.GetFoldersAsync();
+            StoryModel model = ShellViewModel.GetModel();
+            IReadOnlyList<StorageFolder> folders = await model.FilesFolder.GetFoldersAsync();
             foreach (StorageFolder folder in folders)
                 if (folder.Name.Equals(UuidString(uuid)))
                     return folder;
             // If the SubFolder doesn't exist, create it.
-            StorageFolder newFolder = await _story.FilesFolder.CreateFolderAsync(UuidString(uuid));
-            return newFolder;
+            return await model.FilesFolder.CreateFolderAsync(UuidString(uuid));
         }
 
         /// <summary>

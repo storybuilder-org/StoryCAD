@@ -8,5 +8,5 @@
         // Virtual views (lists from ExplorerView
         SearchView
 
-    };
+    }
 }

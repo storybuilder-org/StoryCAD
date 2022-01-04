@@ -1,10 +1,11 @@
 ﻿using NLog;
 using NLog.Config;
 using NLog.Targets;
+using StoryBuilder.Models;
 using System;
 using System.Diagnostics;
 using System.IO;
-using Windows.Storage;
+
 namespace StoryBuilder.Services.Logging
 {
     /// <summary>
@@ -19,13 +20,13 @@ namespace StoryBuilder.Services.Logging
         {
             try
             {
-                var config = new LoggingConfiguration();
+                LoggingConfiguration config = new();
 
                 // Create file target
-                var fileTarget = new FileTarget();
+                FileTarget fileTarget = new();
                 //logFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "StoryBuilder", "logs");
-                logFilePath = Path.Combine(ApplicationData.Current.RoamingFolder.Path.ToString(), "StoryBuilder", "logs");
-                var logfilename = Path.Combine(logFilePath, "updater.${date:format=yyyy-MM-dd}.log");
+                logFilePath = Path.Combine(GlobalData.RootDirectory, "logs");
+                string logfilename = Path.Combine(logFilePath, "updater.${date:format=yyyy-MM-dd}.log");
                 fileTarget.FileName = logfilename;
                 fileTarget.CreateDirs = true;
                 fileTarget.MaxArchiveFiles = 7;
@@ -33,25 +34,25 @@ namespace StoryBuilder.Services.Logging
                 fileTarget.ConcurrentWrites = true;
                 fileTarget.Layout =
                         "${longdate} | ${level} | ${message} | ${exception:format=Message,StackTrace,Data:MaxInnerExceptionLevel=5}";
-                var fileRule = new LoggingRule("*", NLog.LogLevel.Trace, fileTarget);
+                LoggingRule fileRule = new("*", NLog.LogLevel.Trace, fileTarget);
                 config.AddTarget("logfile", fileTarget);
                 config.LoggingRules.Add(fileRule);
 
                 // create console target
                 if (!Debugger.IsAttached)
                 {
-                    var consoleTarget = new ColoredConsoleTarget();
+                    ColoredConsoleTarget consoleTarget = new();
                     consoleTarget.Layout = @"${date:format=HH\\:MM\\:ss} ${logger} ${message}";
                     config.AddTarget("console", consoleTarget);
-                    var consoleRule = new LoggingRule("*", NLog.LogLevel.Info, consoleTarget);
+                    LoggingRule consoleRule = new("*", NLog.LogLevel.Info, consoleTarget);
                     config.LoggingRules.Add(consoleRule);
                 }
                 else
                 {
-                    var consoleTarget = new DebuggerTarget();
+                    DebuggerTarget consoleTarget = new();
                     consoleTarget.Layout = @"${date:format=HH\\:MM\\:ss} ${logger} ${message}";
                     config.AddTarget("console", consoleTarget);
-                    var consoleRule = new LoggingRule("*", NLog.LogLevel.Info, consoleTarget);
+                    LoggingRule consoleRule = new("*", NLog.LogLevel.Info, consoleTarget);
                     config.LoggingRules.Add(consoleRule);
                 }
                 LogManager.Configuration = config;

@@ -1,6 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using System;
-using Windows.Data.Xml.Dom;
+﻿using Windows.Data.Xml.Dom;
 
 namespace StoryBuilder.Models
 {
@@ -48,7 +46,7 @@ namespace StoryBuilder.Models
             Attitude = string.Empty;
             Notes = string.Empty;
 
-            foreach (var attr in xn.Attributes)
+            foreach (IXmlNode attr in xn.Attributes)
             {
                 switch (attr.NodeName)
                 {

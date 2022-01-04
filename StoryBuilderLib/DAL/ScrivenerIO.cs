@@ -1,11 +1,11 @@
-﻿using Net.Sgoliver.NRtfTree.Core;
-using StoryBuilder.Models.Scrivener;
+﻿using StoryBuilder.Models.Scrivener;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Windows.Data.Xml.Dom;
 using Windows.Storage;
+using NRtfTree.Core;
 using XmlDocument = Windows.Data.Xml.Dom.XmlDocument;
 using XmlElement = Windows.Data.Xml.Dom.XmlElement;
 using XmlText = Windows.Data.Xml.Dom.XmlText;
@@ -65,7 +65,7 @@ namespace StoryBuilder.DAL
 
         public BinderItem BuildBinderItemTree()
         {
-            BinderItem root = new BinderItem(0, "", BinderItemType.Root, "Root");
+            BinderItem root = new(0, "", BinderItemType.Root, "Root");
             RecurseXmlNode(Binder, root);
             return root;
         }
@@ -88,15 +88,15 @@ namespace StoryBuilder.DAL
             string created = string.Empty;
             string modified = string.Empty;
             BinderItemType type = BinderItemType.Unknown;
-            string title;
 
             if (node.NodeName.Equals("Binder"))
-                for (int i = 0; i < node.ChildNodes.Count; i++)
-                    RecurseXmlNode(node.ChildNodes[i], parent);
+            {
+                foreach (IXmlNode Node in node.ChildNodes) { RecurseXmlNode(Node, parent); }
+            }
             else if (node.NodeName.Equals("BinderItem"))
             {
                 // Search for the attributes we want on a BindItem.
-                foreach (var attr in node.Attributes)
+                foreach (IXmlNode attr in node.Attributes)
                 {
                     switch (attr.NodeName)
                     {
@@ -143,14 +143,14 @@ namespace StoryBuilder.DAL
                             break;
                     }
                 }
-                var titleNode = node.SelectSingleNode("./Title");
-                title = titleNode != null ? titleNode.InnerText : string.Empty;
-                var children = node.SelectSingleNode("./Children");
+                IXmlNode titleNode = node.SelectSingleNode("./Title");
+                string title = titleNode != null ? titleNode.InnerText : string.Empty;
+                IXmlNode children = node.SelectSingleNode("./Children");
                 // Process stbuuid
-                var metaData = node.SelectSingleNode("./MetaData");
+                IXmlNode metaData = node.SelectSingleNode("./MetaData");
                 if (metaData != null)
                 {
-                    var customMetaData = metaData.SelectSingleNode("./CustomMetaData");
+                    IXmlNode customMetaData = metaData.SelectSingleNode("./CustomMetaData");
                     XmlElement stbUuidNode = null;
                     if (customMetaData != null)
                         stbUuidNode = (XmlElement)customMetaData.SelectSingleNode("./MetaDataItem[FieldID='stbuuid']");
@@ -161,7 +161,7 @@ namespace StoryBuilder.DAL
                         value = (XmlElement)stbUuidNode.SelectSingleNode("./Value");
                         if (value != null) stbUuid = value.InnerText;
                     }
-                    var newNode = new BinderItem(id, uuid, type, title, parent, created, modified, stbUuid);
+                    BinderItem newNode = new(id, uuid, type, title, parent, created, modified, stbUuid);
                     newNode.Node = node;
                     if (children != null)
                         foreach (IXmlNode child in children.ChildNodes)
@@ -344,7 +344,7 @@ namespace StoryBuilder.DAL
             await Task.Run(() =>
             {
                 //Create an RTF object
-                RtfTree tree = new RtfTree();
+                RtfTree tree = new();
 
                 //Load an RTF document from a file
                 tree.LoadRtfFile(path);
@@ -366,7 +366,7 @@ namespace StoryBuilder.DAL
             StorageFile file = await projectFolder.CreateFileAsync(fileName, CreationCollisionOption.ReplaceExisting);
             if (root != null)
             {
-                XmlDocument doc = new XmlDocument();
+                XmlDocument doc = new();
                 doc.AppendChild(doc.CreateProcessingInstruction("xml", "version=\"1.0\" encoding=\"UTF-8\""));
                 XmlElement newRoot = doc.CreateElement("Binder");
                 doc.AppendChild(newRoot);

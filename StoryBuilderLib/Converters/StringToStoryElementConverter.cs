@@ -1,5 +1,4 @@
-﻿using CommunityToolkit.Mvvm.DependencyInjection;
-using Microsoft.UI.Xaml.Data;
+﻿using Microsoft.UI.Xaml.Data;
 using StoryBuilder.Models;
 using StoryBuilder.ViewModels;
 using System;
@@ -46,8 +45,8 @@ namespace StoryBuilder.Converters
             if (value.Equals(string.Empty))
                 return null;
             // Get the current StoryModel's StoryElementsCollection
-            ShellViewModel shell = Ioc.Default.GetService<ShellViewModel>();
-            StoryElementCollection elements = shell.StoryModel.StoryElements;
+            StoryModel model = ShellViewModel.GetModel();
+            StoryElementCollection elements = model.StoryElements;
             // legacy: locate the StoryElement from its Name
             foreach (StoryElement element in elements)  // Character or Setting??? Search both?
             {
@@ -60,7 +59,7 @@ namespace StoryBuilder.Converters
             }
             // Look for the StoryElement corresponding to the passed guid
             // (This is the normal approach)
-            if (Guid.TryParse(value.ToString(), out var guid))
+            if (Guid.TryParse(value.ToString(), out Guid guid))
                 if (elements.StoryElementGuids.ContainsKey(guid))
                     return elements.StoryElementGuids[guid];
             return null;  // Not found

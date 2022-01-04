@@ -79,9 +79,9 @@ namespace StoryBuilder.Models.Scrivener
 
         #region Methods
 
-        public bool IsLeaf { get { return Children.Count == 0; } }
+        public bool IsLeaf => Children.Count == 0;
 
-        public bool IsRoot { get { return Parent == null; } }
+        public bool IsRoot => Parent == null;
 
         /// <summary>
         /// This method allows a dept-first search (DFS) or 'pre-order traversal' of

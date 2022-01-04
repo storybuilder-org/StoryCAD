@@ -1,24 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Threading.Tasks;
-using ABI.Windows.ApplicationModel.Contacts.DataProvider;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Data;
-using StoryBuilder.Controllers;
 using StoryBuilder.Controls;
 using StoryBuilder.DAL;
 using StoryBuilder.Models;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.Services.Messages;
 using StoryBuilder.Services.Navigation;
-using StoryBuilder.Services.Dialogs.Tools;
-using WinRT;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Threading.Tasks;
 
 namespace StoryBuilder.ViewModels
 {
@@ -26,8 +22,6 @@ namespace StoryBuilder.ViewModels
     {
         #region Fields
 
-        private StoryModel _storyModel;
-        private readonly StoryController _story;
         private readonly LogService _logger;
         internal readonly StoryReader _rdr;
         private readonly StoryWriter _wtr;
@@ -53,10 +47,10 @@ namespace StoryBuilder.ViewModels
             get => _name;
             set
             {
-                if (_changeable && (_name != value)) // Name changed?
+                if (_changeable && _name != value) // Name changed?
                 {
-                    _logger.Log(LogLevel.Info, string.Format("Requesting Name change from {0} to {1}", _name, value));
-                    var msg = new NameChangeMessage(_name, value);
+                    _logger.Log(LogLevel.Info, $"Requesting Name change from {_name} to {value}");
+                    NameChangeMessage msg = new(_name, value);
                     Messenger.Send(new NameChangedMessage(msg));
                 }
                 SetProperty(ref _name, value);
@@ -321,19 +315,26 @@ namespace StoryBuilder.ViewModels
             ConflictDialog.PrimaryButtonText = "Copy to Protagonist";
             ConflictDialog.SecondaryButtonText = "Copy to Antagonist";
             ConflictDialog.CloseButtonText = "Close";
-            Conflict SelectedConflict = new();
-            ConflictDialog.Content = SelectedConflict;
-            var result = await ConflictDialog.ShowAsync();
+            Conflict selectedConflict = new();
+            ConflictDialog.Content = selectedConflict;
+            ContentDialogResult result = await ConflictDialog.ShowAsync();
 
-            if (result == ContentDialogResult.Primary)   // Copy to Protagonist conflict
+            switch (result)
             {
-                ProtConflict = SelectedConflict.ExampleText;
+                // Copy to Protagonist conflict
+                case ContentDialogResult.Primary:
+                    ProtConflict = selectedConflict.ExampleText;
+                    _logger.Log(LogLevel.Info, "Conflict Finder finished (copied to protaganist)");
+                    break;
+                // Copy to Antagonist conflict
+                case ContentDialogResult.Secondary:
+                    AntagConflict = selectedConflict.ExampleText;
+                    _logger.Log(LogLevel.Info, "Conflict Finder finished (copied to antagonist)");
+                    break;
+                default:
+                    _logger.Log(LogLevel.Info, "Conflict Finder canceled");
+                    break;
             }
-            else if (result == ContentDialogResult.Secondary) // Copy to Antagonist conflict
-            {
-                AntagConflict = SelectedConflict.ExampleText;
-            }
-            _logger.Log(LogLevel.Info, "Conflict Finder finished");
         }
 
         #endregion
@@ -360,9 +361,6 @@ namespace StoryBuilder.ViewModels
 
         public ProblemViewModel()
         {
-            ShellViewModel shell = Ioc.Default.GetService<ShellViewModel>();
-            _storyModel = shell.StoryModel;
-            _story = Ioc.Default.GetService<StoryController>();
             _logger = Ioc.Default.GetService<LogService>();
             _wtr = Ioc.Default.GetService<StoryWriter>();
             _rdr = Ioc.Default.GetService<StoryReader>();

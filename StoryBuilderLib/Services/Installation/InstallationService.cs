@@ -101,7 +101,7 @@ namespace StoryBuilder.Services.Installation
             {
                 string[] path = File.Split("files");
                 string UUID = path[1].Replace(" ", "-");
-                File = path[0] + "files\\" + UUID.Substring(2); //Removes extra space in UUID
+                File = path[0] + "files\\" + UUID[2..]; //Removes extra space in UUID
             }
 
             Logger.Log(LogLevel.Trace, $"Got ideal path as {File}");
@@ -132,25 +132,24 @@ namespace StoryBuilder.Services.Installation
 
         /// <summary>
         /// This opens the internal manifiest data for a file and writes to the blank file made in CreateDummyFileAsync
+        /// <param name="DiskFile"> File to be written to</param>
+        /// <param name="InstallerFile"> manifest path eg StoryBUilder.Assets.Install</param>
         /// </summary>
-        /// <param name="DiskFile"></param>
         private async void WriteManifestData(StorageFile DiskFile, string InstallerFile)
         {
             List<Byte> ContentToWrite = new();
-            using (Stream InternalResourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(InstallerFile))
+            await using Stream InternalResourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(InstallerFile);
+            await using (Stream FileDiskStream = await DiskFile.OpenStreamForWriteAsync())
             {
-                using (Stream FileDiskStream = await DiskFile.OpenStreamForWriteAsync())
-                {
-                    Logger.Log(LogLevel.Trace, $"Opened manifiest stream and stream for file on disk ({DiskFile.Path})");
+                Logger.Log(LogLevel.Trace, $"Opened manifest stream and stream for file on disk ({DiskFile.Path})");
 
-                    while (InternalResourceStream.Position < InternalResourceStream.Length)
-                    {
-                        FileDiskStream.WriteByte((byte)InternalResourceStream.ReadByte());
-                    }
-                    await FileDiskStream.FlushAsync();
+                while (InternalResourceStream.Position < InternalResourceStream.Length)
+                {
+                    FileDiskStream.WriteByte((byte)InternalResourceStream.ReadByte());
                 }
-                await InternalResourceStream.FlushAsync();
+                await FileDiskStream.FlushAsync();
             }
+            await InternalResourceStream.FlushAsync();
         }
 
         public InstallationService()

@@ -7,7 +7,7 @@ namespace StoryBuilder.Models
     {
         #region Static Properties
 
-        public static ObservableCollection<string> SettingNames = new ObservableCollection<string>();
+        public static ObservableCollection<string> SettingNames = new();
 
         #endregion
         #region Properties
@@ -162,7 +162,7 @@ namespace StoryBuilder.Models
             Touch = string.Empty;
             SmellTaste = string.Empty;
             Notes = string.Empty;
-            SettingNames.Add(this.Name);
+            SettingNames.Add(Name);
         }
         public SettingModel(string name, StoryModel model) : base(name, StoryItemType.Setting, model)
         {
@@ -183,7 +183,7 @@ namespace StoryBuilder.Models
             Touch = string.Empty;
             SmellTaste = string.Empty;
             Notes = string.Empty;
-            SettingNames.Add(this.Name);
+            SettingNames.Add(Name);
         }
         public SettingModel(IXmlNode xn, StoryModel model) : base(xn, model)
         {
@@ -204,7 +204,7 @@ namespace StoryBuilder.Models
             Touch = string.Empty;
             SmellTaste = string.Empty;
             Notes = string.Empty;
-            SettingNames.Add(this.Name);
+            SettingNames.Add(Name);
         }
 
         #endregion

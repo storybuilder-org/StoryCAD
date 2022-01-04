@@ -23,7 +23,7 @@ namespace StoryBuilder.Controls
         /// CharacterRelationships is bound to is selected.
         /// However, one property need modified during LoadModel: the Partner  
         /// StoryElement in the RelationshipModel needs loaded from its Uuid.
-        public async Task RelationshipChanged(object sender, SelectionChangedEventArgs args)
+        public async void RelationshipChanged(object sender, SelectionChangedEventArgs args)
         {
             await CharVm.SaveRelationship(CharVm.CurrentRelationship);
             await CharVm.LoadRelationship(CharVm.SelectedRelationship);

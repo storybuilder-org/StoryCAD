@@ -30,7 +30,7 @@
 
 using System.IO;
 
-namespace Net.Sgoliver.NRtfTree
+namespace NRtfTree
 {
     namespace Core
     {

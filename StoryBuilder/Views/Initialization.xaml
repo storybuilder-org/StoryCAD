@@ -1,8 +1,7 @@
 <Page
-    x:Class="StoryBuilder.Views.Initialisation"
+    x:Class="StoryBuilder.Views.Initialization"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:StoryBuilder.Views"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
@@ -24,21 +23,21 @@
 
                 <StackPanel Grid.Row="1" VerticalAlignment="Stretch">
                     <Border Height="50"/>
-                    <TextBox PlaceholderText="What is your name?" Margin="15" VerticalAlignment="Center" Name="Name" Text="{x:Bind InitVM.Name, Mode=TwoWay}"/>
-                    <TextBox PlaceholderText="What is your email (optional)?" Margin="15" VerticalAlignment="Center" Name="Email" Text="{x:Bind InitVM.Email, Mode=TwoWay}"/>
+                    <TextBox PlaceholderText="What is your name?" Margin="15" VerticalAlignment="Center" Text="{x:Bind _initVM.Name, Mode=TwoWay}"/>
+                    <TextBox PlaceholderText="What is your email (optional)?" Margin="15" VerticalAlignment="Center"  Text="{x:Bind _initVM.Email, Mode=TwoWay}"/>
                     <StackPanel Orientation="Horizontal">
-                        <TextBox PlaceholderText="Where do you want to save your stories?" Name="ProjPath" Margin="15" VerticalAlignment="Center" Width="435" HorizontalAlignment="Left" Text="{x:Bind InitVM.Path, Mode=TwoWay}"/>
+                        <TextBox PlaceholderText="Where do you want to save your stories?" Name="ProjPath" Margin="15" VerticalAlignment="Center" Width="435" HorizontalAlignment="Left" Text="{x:Bind _initVM.Path, Mode=TwoWay}"/>
                         <Button Content="Browse" HorizontalAlignment="Center" Click="SetProjectPath"/>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal">
-                        <TextBox PlaceholderText="Where do you want to backup your stories to?" Name="BackPath" Margin="15" VerticalAlignment="Center" Width="435" HorizontalAlignment="Left" Text="{x:Bind InitVM.BackupPath, Mode=TwoWay}"/>
+                        <TextBox PlaceholderText="Where do you want to backup your stories to?" Name="BackPath" Margin="15" VerticalAlignment="Center" Width="435" HorizontalAlignment="Left" Text="{x:Bind _initVM.BackupPath, Mode=TwoWay}"/>
                         <Button Content="Browse" HorizontalAlignment="Center" Click="SetBackupPath"/>
                     </StackPanel>
                 </StackPanel>
 
                 <StackPanel Grid.Row="2">
-                    <CheckBox IsChecked="{x:Bind InitVM.ErrorLogging, Mode=TwoWay}" Content="Send error logs to Team StoryBuilder (Does not contain any personal infomation.)" VerticalAlignment="Bottom" Margin="5"/>
-                    <CheckBox IsChecked="{x:Bind InitVM.News, Mode=TwoWay}" Content="Send me newsletters about StoryBuilder" VerticalAlignment="Bottom" Margin="5"/>
+                    <CheckBox IsChecked="{x:Bind _initVM.ErrorLogging, Mode=TwoWay}" Content="Send error logs to Team StoryBuilder (Does not contain any personal information.)" VerticalAlignment="Bottom" Margin="5"/>
+                    <CheckBox IsChecked="{x:Bind _initVM.News, Mode=TwoWay}" Content="Send me newsletters about StoryBuilder" VerticalAlignment="Bottom" Margin="5"/>
                     <Button Content="Continue" Margin="25" HorizontalAlignment="Center" Click="Check"/>
                 </StackPanel>
             </Grid>

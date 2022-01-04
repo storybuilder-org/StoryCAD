@@ -142,7 +142,7 @@
                             <MenuFlyoutItem Visibility="{x:Bind ShellVm.RemoveStoryElementVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.RemoveStoryElementCommand,Mode=OneWay}" Icon="Delete" Text="Delete story element"/>
                             <MenuFlyoutItem Visibility="{x:Bind ShellVm.RestoreStoryElementVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.RestoreStoryElementCommand,Mode=OneWay}" Icon="Refresh" Text="Restore Story element"/>
                             <MenuFlyoutItem Visibility="{x:Bind ShellVm.AddToNarrativeVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.AddToNarrativeCommand,Mode=OneWay}" Icon="Switch" Text="Add To Narrative"/>
-                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.RemoveFromNarrativeVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.RemoveFromNarrativeCommand,Mode=OneWay}" Icon="Switch" Text="Remove from Narative"/>
+                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.RemoveFromNarrativeVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.RemoveFromNarrativeCommand,Mode=OneWay}" Icon="Switch" Text="Remove from Narrative"/>
                         </MenuFlyout>
                     </AppBarButton.Flyout>
                 </AppBarButton>

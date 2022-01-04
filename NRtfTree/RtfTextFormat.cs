@@ -30,7 +30,7 @@
 
 using System.Drawing;
 
-namespace Net.Sgoliver.NRtfTree
+namespace NRtfTree
 {
     namespace Util
     {

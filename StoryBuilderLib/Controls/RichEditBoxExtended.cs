@@ -36,8 +36,8 @@ namespace StoryBuilder.Controls
 
         public string RtfText
         {
-            get { return (string) GetValue(RtfTextProperty); }
-            set { SetValue(RtfTextProperty, value); }
+            get => (string) GetValue(RtfTextProperty);
+            set => SetValue(RtfTextProperty, value);
         }
 
         private void RichEditBoxExtended_TextChanged(object sender, RoutedEventArgs e)
@@ -45,8 +45,7 @@ namespace StoryBuilder.Controls
             if (!_lockChangeExecution)
             {
                 _lockChangeExecution = true;
-                string text;
-                Document.GetText(TextGetOptions.None, out text);
+                Document.GetText(TextGetOptions.None, out string text);
                 if (string.IsNullOrWhiteSpace(text))  
                 {
                     RtfText = "";
@@ -63,8 +62,8 @@ namespace StoryBuilder.Controls
         private static void RtfTextPropertyChanged(DependencyObject dependencyObject,
         DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
         {
-            var options = TextSetOptions.FormatRtf | TextSetOptions.ApplyRtfDocumentDefaults;
-            var rtb = dependencyObject as RichEditBoxExtended;
+            TextSetOptions options = TextSetOptions.FormatRtf | TextSetOptions.ApplyRtfDocumentDefaults;
+            RichEditBoxExtended rtb = dependencyObject as RichEditBoxExtended;
             if (rtb == null) return;
             if (!rtb._lockChangeExecution)
             {

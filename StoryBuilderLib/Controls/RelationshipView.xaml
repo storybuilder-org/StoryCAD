@@ -36,7 +36,7 @@
                              IsSpellCheckEnabled="True" TextWrapping="Wrap"
                              ScrollViewer.VerticalScrollBarVisibility="Visible" />
         <TextBlock Grid.Row="6"  />        
-        <Grid Grid.Row="8" HorizontalAlignment="Left">
+        <Grid Grid.Row="7" HorizontalAlignment="Left">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>

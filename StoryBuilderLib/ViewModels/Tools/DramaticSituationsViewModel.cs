@@ -21,9 +21,9 @@ namespace StoryBuilder.ViewModels.Tools
         #region Properties
         public bool Changed
         {
-            get { return _changed; }
+            get => _changed;
             // ReSharper disable once ValueParameterNotUsed
-            set { _changed = false; }
+            set => _changed = false;
         }
 
         private DramaticSituationModel _situation;
@@ -118,7 +118,7 @@ namespace StoryBuilder.ViewModels.Tools
 
         public DramaticSituationsViewModel()
         {
-            this.situations = GlobalData.DramaticSituationsSource;
+            situations = GlobalData.DramaticSituationsSource;
 
             SituationsSource = new ObservableCollection<string>();
             foreach (string situation in situations.Keys)

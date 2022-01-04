@@ -1,7 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Messaging;
-using StoryBuilder.Controllers;
 using StoryBuilder.DAL;
 using StoryBuilder.Models;
 using StoryBuilder.Services.Logging;
@@ -19,7 +18,6 @@ namespace StoryBuilder.ViewModels
 
         private readonly StoryReader _rdr;
         private readonly StoryWriter _wtr;
-        private readonly StoryController _story;
         private readonly LogService _logger;
         private bool _changeable; // process property changes for this story element
         private bool _changed;    // this story element has changed
@@ -43,10 +41,10 @@ namespace StoryBuilder.ViewModels
             get => _name;
             set
             {
-                if (_changeable && (_name != value)) // Name changed?
+                if (_changeable && _name != value) // Name changed?
                 {
-                    _logger.Log(LogLevel.Info, string.Format("Requesting Name change from {0} to {1}", _name, value));
-                    var msg = new NameChangeMessage(_name, value);
+                    _logger.Log(LogLevel.Info, $"Requesting Name change from {_name} to {value}");
+                    NameChangeMessage msg = new(_name, value);
                     Messenger.Send(new NameChangedMessage(msg));
                 }
                 SetProperty(ref _name, value);
@@ -129,7 +127,6 @@ namespace StoryBuilder.ViewModels
 
         public SectionViewModel()
         {
-            _story = Ioc.Default.GetService<StoryController>();
             _logger = Ioc.Default.GetService<LogService>();
             _wtr = Ioc.Default.GetService<StoryWriter>();
             _rdr = Ioc.Default.GetService<StoryReader>();

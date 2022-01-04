@@ -6,13 +6,11 @@ using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
-using StoryBuilder.Controllers;
 using StoryBuilder.DAL;
 using StoryBuilder.Models;
 using StoryBuilder.Models.Tools;
 using StoryBuilder.Services.Dialogs;
 using StoryBuilder.Services.Dialogs.Tools;
-using StoryBuilder.Services.Help;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.Services.Messages;
 using StoryBuilder.Services.Navigation;
@@ -38,15 +36,15 @@ namespace StoryBuilder.ViewModels
     {
         private bool _canExecuteCommands;
 
-        public static string HomePage = "HomePage";
-        public static string OverviewPage = "OverviewPage";
-        public static string ProblemPage = "ProblemPage";
-        public static string CharacterPage = "CharacterPage";
-        public static string ScenePage = "ScenePage";
-        public static string FolderPage = "FolderPage";
-        public static string SectionPage = "SectionPage";
-        public static string SettingPage = "SettingPage";
-        public static string TrashCanPage = "TrashCanPage";
+        private const string HomePage = "HomePage";
+        private const string OverviewPage = "OverviewPage";
+        private const string ProblemPage = "ProblemPage";
+        private const string CharacterPage = "CharacterPage";
+        private const string ScenePage = "ScenePage";
+        private const string FolderPage = "FolderPage";
+        private const string SectionPage = "SectionPage";
+        private const string SettingPage = "SettingPage";
+        private const string TrashCanPage = "TrashCanPage";
 
         // Navigation navigation landmark nodes
         public StoryNodeItem CurrentNode { get; set; }
@@ -60,9 +58,7 @@ namespace StoryBuilder.ViewModels
         private ObservableCollection<StoryNodeItem> _sourceChildren;
         private int _targetIndex;
         private ObservableCollection<StoryNodeItem> _targetCollection;
-        public readonly StoryController _story;
         public readonly LogService Logger;
-        public readonly HelpService Help;
         public readonly SearchService Search;
 
         // The current story outline being processed. 
@@ -77,9 +73,6 @@ namespace StoryBuilder.ViewModels
 
         // Open/Close Navigation pane (Hamburger menu)
         public RelayCommand TogglePaneCommand { get; }
-
-        // File operation MenuFlyout commands
-        public RelayCommand NewFileCommand { get; }
         // Open file
         public RelayCommand OpenFileCommand { get; }
         // Save command
@@ -320,6 +313,11 @@ namespace StoryBuilder.ViewModels
         // change tracking at the application level
         public static ShellViewModel ShellInstance;
 
+        public static StoryModel GetModel() 
+        {
+            return ShellInstance.StoryModel;
+        }
+
         /// <summary>
         /// If a story element is changed, identify that
         /// the StoryModel is changed and needs written 
@@ -339,7 +337,7 @@ namespace StoryBuilder.ViewModels
         #endregion
 
         #region Public Methods
-        private async void CloseUnifiedMenu()
+        private void CloseUnifiedMenu()
         {
             _contentDialog.Hide();
         }
@@ -348,7 +346,7 @@ namespace StoryBuilder.ViewModels
         {
             _canExecuteCommands = false;
             // Needs logging
-            _contentDialog = new();
+            _contentDialog = new ContentDialog();
             _contentDialog.XamlRoot = GlobalData.XamlRoot;
             _contentDialog.Content = new UnifiedMenuPage();
             await _contentDialog.ShowAsync();
@@ -360,19 +358,19 @@ namespace StoryBuilder.ViewModels
         /// </summary>
         public async Task OpenFileFromPath(string Path)
         {
-            _story.ProjectFolder = await StorageFolder.GetFolderFromPathAsync(Path);
-            _story.ProjectPath = _story.ProjectFolder.Path;
-            _story.ProjectFilename = _story.ProjectFolder.DisplayName;
+            StoryModel.ProjectFolder = await StorageFolder.GetFolderFromPathAsync(Path);
+            StoryModel.ProjectPath = StoryModel.ProjectFolder.Path;
+            StoryModel.ProjectFilename = StoryModel.ProjectFolder.DisplayName;
 
-             IReadOnlyList<StorageFile> files = await _story.ProjectFolder.GetFilesAsync();
+             IReadOnlyList<StorageFile> files = await StoryModel.ProjectFolder.GetFilesAsync();
             StorageFile file = files[0];
             //NOTE: BasicProperties.DateModified can be the date last changed
 
-            _story.ProjectFilename = file.Name;
-            Ioc.Default.GetService<MainWindowVM>().Title = $"StoryBuilder - Editing {_story.ProjectFilename.Replace(".stbx", "")}";
-            _story.ProjectFile = file;
+            StoryModel.ProjectFilename = file.Name;
+            Ioc.Default.GetService<MainWindowVM>().Title = $"StoryBuilder - Editing {StoryModel.ProjectFilename.Replace(".stbx", "")}";
+            StoryModel.ProjectFile = file;
             // Make sure files folder exists...
-            _story.FilesFolder = await _story.ProjectFolder.CreateFolderAsync("files", CreationCollisionOption.OpenIfExists);
+            StoryModel.FilesFolder = await StoryModel.ProjectFolder.CreateFolderAsync("files", CreationCollisionOption.OpenIfExists);
             //TODO: Back up at the right place (after open?)
             await BackupProject();
             StoryReader rdr = Ioc.Default.GetService<StoryReader>();
@@ -380,7 +378,6 @@ namespace StoryBuilder.ViewModels
             if (StoryModel.ExplorerView.Count > 0)
             {
                 SetCurrentView(StoryViewType.ExplorerView);
-                _story.LoadStatus = LoadStatus.LoadFromRtfFiles;
                 StatusMessage = "Open Story completed";
             }
 
@@ -395,12 +392,11 @@ namespace StoryBuilder.ViewModels
             {
                 //TODO: Make sure both path and filename are present
                 UnifiedVM vm = dialogVM;
-                if (!Path.GetExtension(vm.ProjectName).Equals(".stbx"))
-                    vm.ProjectName = vm.ProjectName + ".stbx";
-                _story.ProjectFilename = vm.ProjectName;
+                if (!Path.GetExtension(vm.ProjectName).Equals(".stbx")) {vm.ProjectName += ".stbx";}
+                StoryModel.ProjectFilename = vm.ProjectName;
                 StorageFolder parent = await StorageFolder.GetFolderFromPathAsync(vm.ProjectPath);
-                _story.ProjectFolder = await parent.CreateFolderAsync(vm.ProjectName);
-                _story.ProjectPath = _story.ProjectFolder.Path;
+                StoryModel.ProjectFolder = await parent.CreateFolderAsync(vm.ProjectName);
+                StoryModel.ProjectPath = StoryModel.ProjectFolder.Path;
                 StatusMessage = "New project command executing";
                 if (StoryModel.Changed)
                 {
@@ -409,19 +405,15 @@ namespace StoryBuilder.ViewModels
                 }
 
                 ResetModel();
-                var overview = new OverviewModel("Working Title", StoryModel);
+                OverviewModel overview = new("Working Title", StoryModel);
                 overview.Author = GlobalData.Preferences.Name;
-                var overviewNode = new StoryNodeItem(overview, null)
-                {
-                    IsExpanded = true,
-                    IsRoot = true
-                };
+                StoryNodeItem overviewNode = new(overview, null) { IsExpanded = true, IsRoot = true };
                 StoryModel.ExplorerView.Add(overviewNode);
-                TrashCanModel trash = new TrashCanModel(StoryModel);
-                StoryNodeItem trashNode = new StoryNodeItem(trash, null);
+                TrashCanModel trash = new(StoryModel);
+                StoryNodeItem trashNode = new(trash, null);
                 StoryModel.ExplorerView.Add(trashNode);     // The trashcan is the second root
-                var narrative = new SectionModel("Narrative View", StoryModel);
-                var narrativeNode = new StoryNodeItem(narrative, null);
+                SectionModel narrative = new("Narrative View", StoryModel);
+                StoryNodeItem narrativeNode = new(narrative, null);
                 narrativeNode.IsRoot = true;
                 StoryModel.NarratorView.Add(narrativeNode);
                 StoryModel.NarratorView.Add(trashNode);     // Both views share the trashcan
@@ -440,13 +432,13 @@ namespace StoryBuilder.ViewModels
                         StoryElement scene = new FolderModel("Scene", StoryModel);
                         StoryNodeItem plotpointsNode = new(scene, overviewNode);
                         break;
-                    case "External/Internal Problems":
+                    case "External and Internal Problems":
                         StoryElement externalProblem = new ProblemModel("External Problem", StoryModel);
                         StoryNodeItem externalProblemNode = new(externalProblem, overviewNode);
                         StoryElement internalProblem = new ProblemModel("Internal Problem", StoryModel);
                         StoryNodeItem internalProblemNode = new(internalProblem, overviewNode);
                         break;
-                    case "Protagonist/Antagonist":
+                    case "ProtagonistAntagonist":
                         StoryElement protagonist = new CharacterModel("Protagonist", StoryModel);
                         StoryNodeItem protagonistNode = new(protagonist, overviewNode);
                         StoryElement antagonist = new CharacterModel("Antagonist", StoryModel);
@@ -454,25 +446,25 @@ namespace StoryBuilder.ViewModels
                         break;
                     case "Problems and Characters":
                         StoryElement problemsFolder = new FolderModel("Problems", StoryModel);
-                        StoryNodeItem problemsFolderNode = new StoryNodeItem(problemsFolder, overviewNode)
+                        StoryNodeItem problemsFolderNode = new(problemsFolder, overviewNode)
                         {
                             IsExpanded = true
                         };
                         StoryElement charactersFolder = new FolderModel("Characters", StoryModel);
-                        StoryNodeItem charactersFolderNode = new StoryNodeItem(charactersFolder, overviewNode);
+                        StoryNodeItem charactersFolderNode = new(charactersFolder, overviewNode);
                         charactersFolderNode.IsExpanded = true;
                         StoryElement settingsFolder = new FolderModel("Settings", StoryModel);
-                        StoryNodeItem settingsFolderNode = new StoryNodeItem(settingsFolder, overviewNode);
+                        StoryNodeItem settingsFolderNode = new(settingsFolder, overviewNode);
                         StoryElement plotpointsFolder = new FolderModel("Plot Points", StoryModel);
-                        StoryNodeItem plotpointsFolderNode = new StoryNodeItem(plotpointsFolder, overviewNode);
+                        StoryNodeItem plotpointsFolderNode = new(plotpointsFolder, overviewNode);
                         StoryElement externalProb = new ProblemModel("External Problem", StoryModel);
-                        StoryNodeItem externalProbNode = new StoryNodeItem(externalProb, problemsFolderNode);
+                        StoryNodeItem externalProbNode = new(externalProb, problemsFolderNode);
                         StoryElement internalProb = new ProblemModel("Internal Problem", StoryModel);
-                        StoryNodeItem internalProbNode = new StoryNodeItem(internalProb, problemsFolderNode);
+                        StoryNodeItem internalProbNode = new(internalProb, problemsFolderNode);
                         StoryElement protag = new CharacterModel("Protagonist", StoryModel);
-                        StoryNodeItem protagNode = new StoryNodeItem(protag, charactersFolderNode);
+                        StoryNodeItem protagNode = new(protag, charactersFolderNode);
                         StoryElement antag = new CharacterModel("Antagonist", StoryModel);
-                        StoryNodeItem antagNode = new StoryNodeItem(antag, charactersFolderNode);
+                        StoryNodeItem antagNode = new(antag, charactersFolderNode);
                         break;
                 }
 
@@ -501,10 +493,10 @@ namespace StoryBuilder.ViewModels
                 Logger.Log(LogLevel.Info, "TreeViewNodeClicked for null node, event ignored");
                 return;
             }
-            Logger.Log(LogLevel.Info, string.Format("TreeViewNodeClicked for {0}",selectedItem.ToString()));
+            Logger.Log(LogLevel.Info, $"TreeViewNodeClicked for {selectedItem}");
 
             try {
-                var nav = Ioc.Default.GetService<NavigationService>();
+                NavigationService nav = Ioc.Default.GetService<NavigationService>();
                 if (selectedItem is StoryNodeItem node)
                 {
                     CurrentNode = node;
@@ -549,7 +541,7 @@ namespace StoryBuilder.ViewModels
         {
             Logger.Log(LogLevel.Info, "ShowHomePage");
     
-            var nav = Ioc.Default.GetService<NavigationService>();
+            NavigationService nav = Ioc.Default.GetService<NavigationService>();
             nav.NavigateTo(SplitViewFrame, HomePage);
         }
 
@@ -560,14 +552,14 @@ namespace StoryBuilder.ViewModels
         /// Insure the file is saved before allowding the
         /// app to terminate.
         /// </summary>
-        public void ProcessCloseButton()
+        public static void ProcessCloseButton()
         {
             //BUG: Process the close button
             //throw new NotImplementedException();
         }
         private void TogglePane()
         {
-            Logger.Log(LogLevel.Trace, string.Format("TogglePane from {0} to {1}", IsPaneOpen, !IsPaneOpen));
+            Logger.Log(LogLevel.Trace, $"TogglePane from {IsPaneOpen} to {!IsPaneOpen}");
             IsPaneOpen = !IsPaneOpen;
         }
 
@@ -584,8 +576,7 @@ namespace StoryBuilder.ViewModels
         {
             if (SplitViewFrame.CurrentSourcePageType is null)
                 return;
-            Logger.Log(LogLevel.Trace, string.Format("SaveModel- Page type={0}",
-                SplitViewFrame.CurrentSourcePageType.ToString()));
+            Logger.Log(LogLevel.Trace, $"SaveModel- Page type={SplitViewFrame.CurrentSourcePageType}");
             if (SplitViewFrame.CurrentSourcePageType == null)
                 return;
             switch (SplitViewFrame.CurrentSourcePageType.ToString())
@@ -640,7 +631,7 @@ namespace StoryBuilder.ViewModels
 
                 //var window = new Window();
                 //var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(window);
-                var folderPicker = new FolderPicker();
+                FolderPicker folderPicker = new();
                 WinRT.Interop.InitializeWithWindow.Initialize(folderPicker, GlobalData.WindowHandle);
                 //Make folder Picker works in Win32
                 //if (Window.Current == null)
@@ -655,30 +646,28 @@ namespace StoryBuilder.ViewModels
                 //except you can't. Thanks, UWP.
                 folderPicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
                 folderPicker.FileTypeFilter.Add(".stbx");
-                folderPicker.FileTypeFilter.Add(".stb");
-                _story.ProjectFolder = await folderPicker.PickSingleFolderAsync();
-                //TODO: Test for cancelled FolderPicker
-                if (_story.ProjectFolder == null) 
+                StoryModel.ProjectFolder = await folderPicker.PickSingleFolderAsync();
+                if (StoryModel.ProjectFolder == null) 
                 {
                     Logger.Log(LogLevel.Info,"Open File command cancelled");
                     StatusMessage = "Open Story command cancelled";
                     _canExecuteCommands = true;  // unblock other commands
                     return;
                 }
-                _story.ProjectPath = _story.ProjectFolder.Path;
-                _story.ProjectFilename = _story.ProjectFolder.DisplayName;
+                StoryModel.ProjectPath = StoryModel.ProjectFolder.Path;
+                StoryModel.ProjectFilename = StoryModel.ProjectFolder.DisplayName;
 
-                IReadOnlyList<StorageFile> files = await _story.ProjectFolder.GetFilesAsync();
+                IReadOnlyList<StorageFile> files = await StoryModel.ProjectFolder.GetFilesAsync();
                 StorageFile file = files[0];
                 //NOTE: BasicProperties.DateModified can be the date last changed
 
                 if (file.FileType.ToLower().Equals(".stbx"))
                 {
-                    _story.ProjectFilename = file.Name;
-                    _story.ProjectFile = file;
+                    StoryModel.ProjectFilename = file.Name;
+                    StoryModel.ProjectFile = file;
                     // Make sure files folder exists...
                     //_story.FilesFolder = await _story.ProjectFolder.GetFolderAsync("files");
-                    _story.FilesFolder = await _story.ProjectFolder.CreateFolderAsync("files", CreationCollisionOption.OpenIfExists);
+                    StoryModel.FilesFolder = await StoryModel.ProjectFolder.CreateFolderAsync("files", CreationCollisionOption.OpenIfExists);
                     //TODO: Back up at the right place (after open?)
                     await BackupProject();
                     StoryReader rdr = Ioc.Default.GetService<StoryReader>();
@@ -686,19 +675,18 @@ namespace StoryBuilder.ViewModels
                     if (StoryModel.ExplorerView.Count > 0)
                     {
                         SetCurrentView(StoryViewType.ExplorerView);
-                        _story.LoadStatus = LoadStatus.LoadFromRtfFiles;
-                        Ioc.Default.GetService<MainWindowVM>().Title = $"StoryBuilder - Editing {_story.ProjectFilename.Replace(".stbx", "")}";
-                        new UnifiedVM().UpdateRecents(_story.ProjectPath);
+                        Ioc.Default.GetService<MainWindowVM>().Title = $"StoryBuilder - Editing {StoryModel.ProjectFilename.Replace(".stbx", "")}";
+                        new UnifiedVM().UpdateRecents(StoryModel.ProjectPath);
                         StatusMessage = "Open Story completed";
                     }
                 }
                 else 
                 {
                     
-                    string message = $"Open project {_story.ProjectFilename} command failed. Unsupported file extension";
+                    string message = $"Open project {StoryModel.ProjectFilename} command failed. Unsupported file extension";
                     Logger.Log(LogLevel.Info, message);
                 }
-                string msg = $"Open project {_story.ProjectFilename} command completed";
+                string msg = $"Open project {StoryModel.ProjectFilename} command completed";
                 Logger.Log(LogLevel.Info, msg);
                 
             }
@@ -722,12 +710,12 @@ namespace StoryBuilder.ViewModels
                 //TODO: Get backup folder from Preferences
                 PreferencesModel preferences = GlobalData.Preferences;
                 StorageFolder backupRoot = await StorageFolder.GetFolderFromPathAsync(preferences.BackupDirectory);
-                string projectName = _story.ProjectFolder.DisplayName;
+                string projectName = StoryModel.ProjectFolder.DisplayName;
                 if (await backupRoot.TryGetItemAsync(projectName) == null)
                     backup = await backupRoot.CreateFolderAsync(projectName);
                 else
                     backup = await backupRoot.GetFolderAsync(projectName);
-                await _story.ProjectFolder.CopyContentsRecursive(backup);
+                await StoryModel.ProjectFolder.CopyContentsRecursive(backup);
             }
             catch (Exception ex)
             {
@@ -749,7 +737,6 @@ namespace StoryBuilder.ViewModels
                 StatusMessage = "Save File command executing";
                 await SaveModel();
                 await WriteModel();
-                Ioc.Default.GetService<MainWindowVM>().Title = $"StoryBuilder - Editing {_story.ProjectFilename.Replace(".stbx", "")}  (Last saved at {DateTime.Now.ToString("HH:mm:ss")})";
                 StatusMessage = "Save File command completed";
                 StoryModel.Changed = false;
                 ChangeStatusColor = Colors.Green;
@@ -770,16 +757,16 @@ namespace StoryBuilder.ViewModels
         /// <returns>Task (async function)</returns>
         private async Task WriteModel()
         {
-            Logger.Log(LogLevel.Info, string.Format("In WriteModel, file={0}", _story.ProjectFilename));
+            Logger.Log(LogLevel.Info, $"In WriteModel, file={StoryModel.ProjectFilename}");
             try
             {
                 await CreateProjectFile();
-                var file = _story.ProjectFile;
+                StorageFile file = StoryModel.ProjectFile;
                 if (file != null)
                 {
                     StoryWriter wtr = Ioc.Default.GetService<StoryWriter>();
                     //TODO: WriteFile isn't working; file is empty
-                    await wtr.WriteFile(_story.ProjectFile, StoryModel);
+                    await wtr.WriteFile(StoryModel.ProjectFile, StoryModel);
                     // Prevent updates to the remote version of the file until
                     // we finish making changes and call CompleteUpdatesAsync.
                     CachedFileManager.DeferUpdates(file);
@@ -815,10 +802,10 @@ namespace StoryBuilder.ViewModels
                 //Sets needed data in VM and then shows the dialog
                 SaveAsViewModel SaveAsVM = Ioc.Default.GetService<SaveAsViewModel>();
                 // The default project name and project folder path are from the active StoryModel
-                SaveAsVM.ProjectName = _story.ProjectFilename;
-                SaveAsVM.ProjectPathName = _story.ProjectPath;
+                SaveAsVM.ProjectName = StoryModel.ProjectFilename;
+                SaveAsVM.ProjectPathName = StoryModel.ProjectPath;
 
-                var result = await SaveAsDialog.ShowAsync();
+                ContentDialogResult result = await SaveAsDialog.ShowAsync();
 
                 if (result == ContentDialogResult.Primary) //If save is clicked
                 {
@@ -830,15 +817,15 @@ namespace StoryBuilder.ViewModels
 
                         //Saves the current project folders and files to disk
                         SaveAsVM.SaveAsProjectFolder = await SaveAsVM.ParentFolder.CreateFolderAsync(SaveAsVM.ProjectName, CreationCollisionOption.OpenIfExists);
-                        await _story.ProjectFolder.CopyContentsRecursive(SaveAsVM.SaveAsProjectFolder);
+                        await StoryModel.ProjectFolder.CopyContentsRecursive(SaveAsVM.SaveAsProjectFolder);
 
                         //Update the StoryModel properties to use the newly saved copy
-                        _story.ProjectFilename = SaveAsVM.ProjectName;
-                        _story.ProjectFolder = SaveAsVM.SaveAsProjectFolder;
-                        _story.ProjectPath = SaveAsVM.SaveAsProjectFolderPath;
+                        StoryModel.ProjectFilename = SaveAsVM.ProjectName;
+                        StoryModel.ProjectFolder = SaveAsVM.SaveAsProjectFolder;
+                        StoryModel.ProjectPath = SaveAsVM.SaveAsProjectFolderPath;
                         // Add to the recent files stack
-                        Ioc.Default.GetService<MainWindowVM>().Title = $"StoryBuilder - Editing {_story.ProjectFilename.Replace(".stbx", "")}";
-                        new UnifiedVM().UpdateRecents(_story.ProjectPath);
+                        Ioc.Default.GetService<MainWindowVM>().Title = $"StoryBuilder - Editing {StoryModel.ProjectFilename.Replace(".stbx", "")}";
+                        new UnifiedVM().UpdateRecents(StoryModel.ProjectPath);
                         // Indicate everything's done
                         Messenger.Send(new IsChangedMessage(true));
                         StoryModel.Changed = false;
@@ -864,7 +851,7 @@ namespace StoryBuilder.ViewModels
         private async Task<bool> VerifyReplaceOrCreate()
         {
             Logger.Log(LogLevel.Trace, "VerifyReplaceOrCreated");
-            ContentDialog replaceDialog = new ContentDialog()
+            ContentDialog replaceDialog = new()
             {
                 PrimaryButtonText = "Yes",
                 SecondaryButtonText = "No"
@@ -884,7 +871,7 @@ namespace StoryBuilder.ViewModels
             }
             replaceDialog.XamlRoot = GlobalData.XamlRoot;
             ContentDialogResult result = await replaceDialog.ShowAsync();
-            return (result == ContentDialogResult.Primary);
+            return result == ContentDialogResult.Primary;
 
         }
 
@@ -934,38 +921,22 @@ namespace StoryBuilder.ViewModels
 
         private async Task CreateProjectFolder()
         {
-            StorageFolder folder = await _story.ProjectFolder.CreateFolderAsync(_story.ProjectFilename);
-            _story.ProjectFolder = folder;
-            _story.ProjectPath = folder.Path;
+            StorageFolder folder = await StoryModel.ProjectFolder.CreateFolderAsync(StoryModel.ProjectFilename);
+            StoryModel.ProjectFolder = folder;
+            StoryModel.ProjectPath = folder.Path;
         }
 
         private async Task CreateProjectFile()
         {
-            _story.ProjectFile = await _story.ProjectFolder.CreateFileAsync(_story.ProjectFilename, CreationCollisionOption.ReplaceExisting);
+            StoryModel.ProjectFile = await StoryModel.ProjectFolder.CreateFileAsync(StoryModel.ProjectFilename, CreationCollisionOption.ReplaceExisting);
             //Story.ProjectFolder = await Story.ProjectFile.GetParentAsync();
             // Also, create the data subfolder
-            _story.FilesFolder = await _story.ProjectFolder.CreateFolderAsync("files", CreationCollisionOption.OpenIfExists);
+            StoryModel.FilesFolder = await StoryModel.ProjectFolder.CreateFolderAsync("files", CreationCollisionOption.OpenIfExists);
         }
 
         #endregion
 
         #region Tool and Report Commands
-
-
-        /// <summary>
-        /// The Help (?) icon on the shell will display an HTML (CHM) help file in a 
-        /// separate window by invoking the HelpService.
-        /// </summary>
-        private void LaunchHelp()
-        {
-            _canExecuteCommands = false;
-            Logger.Log(LogLevel.Info, "Launching StoryBuilder help");
-            StatusMessage = "Showing StoryBuilder Help";
-
-            Help.LaunchHelp();
-            Logger.Log(LogLevel.Info, "Show help completed");
-            _canExecuteCommands = true;
-        }
 
         private async void Preferences()
         {
@@ -982,27 +953,31 @@ namespace StoryBuilder.ViewModels
             PreferencesDialog.SecondaryButtonText = "About StoryBuilder";
             PreferencesDialog.CloseButtonText = "Cancel";
 
-            var result = await PreferencesDialog.ShowAsync();
-            if (result == ContentDialogResult.Primary) // Save changes
+            ContentDialogResult result = await PreferencesDialog.ShowAsync();
+            switch (result)
             {
-                await Ioc.Default.GetService<PreferencesViewModel>().SaveAsync();
-                Logger.Log(LogLevel.Info, "Preferences update completed");
-                StatusMessage = "Preferences updated";
-            }
-            else if (result == ContentDialogResult.Secondary)
-            {
-                ContentDialog AboutDialog = new();
-                AboutDialog.XamlRoot = GlobalData.XamlRoot;
-                AboutDialog.Content = new About();
-                AboutDialog.Width = 900;
-                AboutDialog.Title = "About StoryBuilder";
-                AboutDialog.CloseButtonText = "Close";
-                await AboutDialog.ShowAsync();
-            }
-            else //don't save changes
-            {
-                Logger.Log(LogLevel.Info, "Preferences update canceled");
-                StatusMessage = "Preferences closed";
+                // Save changes
+                case ContentDialogResult.Primary:
+                    await Ioc.Default.GetService<PreferencesViewModel>().SaveAsync();
+                    Logger.Log(LogLevel.Info, "Preferences update completed");
+                    StatusMessage = "Preferences updated";
+                    break;
+                case ContentDialogResult.Secondary:
+                {
+                    ContentDialog AboutDialog = new();
+                    AboutDialog.XamlRoot = GlobalData.XamlRoot;
+                    AboutDialog.Content = new About();
+                    AboutDialog.Width = 900;
+                    AboutDialog.Title = "About StoryBuilder";
+                    AboutDialog.CloseButtonText = "Close";
+                    await AboutDialog.ShowAsync();
+                    break;
+                }
+                //don't save changes
+                default:
+                    Logger.Log(LogLevel.Info, "Preferences update canceled");
+                    StatusMessage = "Preferences closed";
+                    break;
             }
 
         }
@@ -1054,7 +1029,7 @@ namespace StoryBuilder.ViewModels
             dialog.PrimaryButtonText = "Copy";
             dialog.SecondaryButtonText = "Cancel";
             dialog.Content = new MasterPlotsDialog();
-            var result = await dialog.ShowAsync();
+            ContentDialogResult result = await dialog.ShowAsync();
 
             if (result == ContentDialogResult.Primary)   // Copy command
             {
@@ -1072,7 +1047,7 @@ namespace StoryBuilder.ViewModels
                     RightTappedNode.IsExpanded = true;
                     newNode.IsSelected = true;
                 }
-                var msg = $"MasterPlot {masterPlotName} inserted";
+                string msg = $"MasterPlot {masterPlotName} inserted";
                 StatusMessage = msg;
                 Logger.Log(LogLevel.Info, msg);
                 ShowChange();
@@ -1098,25 +1073,29 @@ namespace StoryBuilder.ViewModels
             dialog.SecondaryButtonText = "Copy as scene";
             dialog.CloseButtonText = "Cancel";
             dialog.Content = new DramaticSituationsDialog();
-            var result = await dialog.ShowAsync();
+            ContentDialogResult result = await dialog.ShowAsync();
 
             DramaticSituationModel situationModel = Ioc.Default.GetService<DramaticSituationsViewModel>().Situation;
             StoryNodeItem newNode = null;
-            string msg = "";
+            string msg;
             switch (result)
             {
-                case ContentDialogResult.Primary:       // problem
-                    ProblemModel problem = new(StoryModel);
+                case ContentDialogResult.Primary:
+                {
+                    ProblemModel problem = new ProblemModel(StoryModel);
                     problem.Name = situationModel.SituationName;
                     problem.StoryQuestion = "See Notes.";
                     problem.Notes = situationModel.Notes;
+
                     // Insert the new Problem as the target's child
                     newNode = new StoryNodeItem(problem, RightTappedNode);
                     msg = $"Problem {situationModel.SituationName} inserted";
                     ShowChange();
                     break;
-                case ContentDialogResult.Secondary:     //Scene
-                    SceneModel sceneVar = new(StoryModel);
+                }
+                case ContentDialogResult.Secondary:
+                {
+                    SceneModel sceneVar = new SceneModel(StoryModel);
                     sceneVar.Name = situationModel.SituationName;
                     sceneVar.Remarks = "See Notes.";
                     sceneVar.Notes = situationModel.Notes;
@@ -1125,10 +1104,12 @@ namespace StoryBuilder.ViewModels
                     msg = $"Scene {situationModel.SituationName} inserted";
                     ShowChange();
                     break;
+                }
                 default:
                     msg = "MasterPlot cancelled";
-                    return;
+                    break;
             }
+
             StatusMessage = msg;
             Logger.Log(LogLevel.Info, msg);
             RightTappedNode.IsExpanded = true;
@@ -1152,25 +1133,22 @@ namespace StoryBuilder.ViewModels
                 dialog.PrimaryButtonText = "Stock Scenes";
                 dialog.CloseButtonText = "Cancel";
                 dialog.XamlRoot = GlobalData.XamlRoot;
-                var result = await dialog.ShowAsync();
+                ContentDialogResult result = await dialog.ShowAsync();
 
                 if (result == ContentDialogResult.Primary)   // Copy command
                 {
-                    SceneModel sceneVar = new(StoryModel);
+                    SceneModel sceneVar = new SceneModel(StoryModel);
                     sceneVar.Name = Ioc.Default.GetService<StockScenesViewModel>().SceneName;
                     StoryNodeItem newNode = new(sceneVar, RightTappedNode);
                     _sourceChildren = RightTappedNode.Children;
                     _sourceChildren.Add(newNode);
                     RightTappedNode.IsExpanded = true;
                     newNode.IsSelected = true;
+                    Logger.Log(LogLevel.Info, "Stock Scenes finished");
                 }
-                // Else canceled
+                else {Logger.Log(LogLevel.Info, "Stock Scenes canceled");}
             }
-            catch (Exception e)
-            {
-                string msg = e.Message;
-            }
-            Logger.Log(LogLevel.Info, "Stock Scenes finished");
+            catch (Exception e) {  Logger.LogException(LogLevel.Error, e, e.Message); }
         }
 
         private async void OpenReportsDialog()
@@ -1252,11 +1230,11 @@ namespace StoryBuilder.ViewModels
             await SaveModel();
 
             // Select the Scrivener .scrivx file to add the report to
-            FileOpenPicker openPicker = new FileOpenPicker();
+            FileOpenPicker openPicker = new();
             if (Window.Current == null)
             {
                 IntPtr hwnd = GetActiveWindow();
-                var initializeWithWindow = openPicker.As<IInitializeWithWindow>();
+                IInitializeWithWindow initializeWithWindow = openPicker.As<IInitializeWithWindow>();
                 initializeWithWindow.Initialize(hwnd);
             }
             openPicker.ViewMode = PickerViewMode.List;
@@ -1301,7 +1279,7 @@ namespace StoryBuilder.ViewModels
             _sourceIndex = _sourceChildren.IndexOf(CurrentNode);
             _targetCollection = null;
             _targetIndex = -1;
-            var targetParent = CurrentNode.Parent.Parent;
+            StoryNodeItem targetParent = CurrentNode.Parent.Parent;
 
             // The source must become the parent's successor
             _targetCollection = CurrentNode.Parent.Parent.Children;
@@ -1359,7 +1337,7 @@ namespace StoryBuilder.ViewModels
                     return;
                 }
 
-                var grandparentCollection = CurrentNode.Parent.Parent.Children;
+                ObservableCollection<StoryNodeItem> grandparentCollection = CurrentNode.Parent.Parent.Children;
                 int siblingIndex = grandparentCollection.IndexOf(CurrentNode.Parent) - 1;
                 if (siblingIndex >= 0)
                 {
@@ -1367,7 +1345,7 @@ namespace StoryBuilder.ViewModels
                     _targetCollection = targetParent.Children;
                     if (_targetCollection.Count > 0)
                     {
-                        targetParent = _targetCollection[_targetCollection.Count - 1];
+                        targetParent = _targetCollection[^1];
                         _targetCollection = targetParent.Children;
                         _targetIndex = _targetCollection.Count;
                     }
@@ -1398,7 +1376,6 @@ namespace StoryBuilder.ViewModels
         private void MoveTreeViewItemUp()
         {
             //TODO: Logging
-            StoryNodeItem _targetParent;
 
             if (CurrentNode == null)
             {
@@ -1415,7 +1392,7 @@ namespace StoryBuilder.ViewModels
             _sourceIndex = _sourceChildren.IndexOf(CurrentNode);
             _targetCollection = null;
             _targetIndex = -1;
-            _targetParent = CurrentNode.Parent;
+            StoryNodeItem _targetParent = CurrentNode.Parent;
 
             // If first child, must move to end parent's predecessor
             if (_sourceIndex == 0)
@@ -1426,8 +1403,8 @@ namespace StoryBuilder.ViewModels
                     return;
                 }
                 // find parent's predecessor
-                var grandparentCollection = CurrentNode.Parent.Parent.Children;
-                var siblingIndex = grandparentCollection.IndexOf(CurrentNode.Parent) - 1;
+                ObservableCollection<StoryNodeItem> grandparentCollection = CurrentNode.Parent.Parent.Children;
+                int siblingIndex = grandparentCollection.IndexOf(CurrentNode.Parent) - 1;
                 if (siblingIndex >= 0)
                 {
                     _targetCollection = grandparentCollection[siblingIndex].Children;
@@ -1460,7 +1437,6 @@ namespace StoryBuilder.ViewModels
         private void MoveTreeViewItemDown()
         {
             //TODO: Logging
-            StoryNodeItem _targetParent;
 
             if (CurrentNode == null)
             {
@@ -1477,7 +1453,7 @@ namespace StoryBuilder.ViewModels
             _sourceIndex = _sourceChildren.IndexOf(CurrentNode);
             _targetCollection = null;
             _targetIndex = 0;
-            _targetParent = CurrentNode.Parent;
+            StoryNodeItem _targetParent = CurrentNode.Parent;
 
             // If last child, must move to end parent's successor
             if (_sourceIndex == _sourceChildren.Count - 1)
@@ -1488,8 +1464,8 @@ namespace StoryBuilder.ViewModels
                     return;
                 }
                 // find parent's successor
-                var grandparentCollection = CurrentNode.Parent.Parent.Children;
-                var siblingIndex = grandparentCollection.IndexOf(CurrentNode.Parent) + 1;
+                ObservableCollection<StoryNodeItem> grandparentCollection = CurrentNode.Parent.Parent.Children;
+                int siblingIndex = grandparentCollection.IndexOf(CurrentNode.Parent) + 1;
                 if (siblingIndex == grandparentCollection.Count)
                 {
                     StatusMessage = "Cannot move down further";
@@ -1556,7 +1532,7 @@ namespace StoryBuilder.ViewModels
         {
             Logger.Log(LogLevel.Trace, "AddStoryElement");
             _canExecuteCommands = false;
-            string msg = string.Format("Adding StoryElement {0}", typeToAdd.ToString());
+            string msg = $"Adding StoryElement {typeToAdd.ToString()}";
             Logger.Log(LogLevel.Info, msg);
             if (RightTappedNode == null)
             {
@@ -1577,35 +1553,35 @@ namespace StoryBuilder.ViewModels
             switch (typeToAdd)
             {
                 case StoryItemType.Folder:
-                    FolderModel folder = new FolderModel(StoryModel);
+                    FolderModel folder = new(StoryModel);
                     _ = new StoryNodeItem(folder, RightTappedNode);
                     break;
                 case StoryItemType.Section:
-                    SectionModel section = new SectionModel(StoryModel);
+                    SectionModel section = new(StoryModel);
                     _ = new StoryNodeItem(section, RightTappedNode);
                     break;
                 case StoryItemType.Problem:
-                    ProblemModel problem = new ProblemModel(StoryModel);
+                    ProblemModel problem = new(StoryModel);
                     _ = new StoryNodeItem(problem, RightTappedNode);
                     break;
                 case StoryItemType.Character:
-                    CharacterModel character = new CharacterModel(StoryModel);
+                    CharacterModel character = new(StoryModel);
                     _ = new StoryNodeItem(character, RightTappedNode);
                     break;
                 case StoryItemType.Setting:
-                    SettingModel setting = new SettingModel(StoryModel);
+                    SettingModel setting = new(StoryModel);
                     _ = new StoryNodeItem(setting, RightTappedNode);
                     break;
                 case StoryItemType.Scene:
-                    SceneModel sceneVar = new SceneModel(StoryModel);
+                    SceneModel sceneVar = new(StoryModel);
                     _ = new StoryNodeItem(sceneVar, RightTappedNode);
                     break;
             }
 
             Messenger.Send(new IsChangedMessage(true));
-            msg = string.Format("Added new {0}", typeToAdd.ToString());
+            msg = $"Added new {typeToAdd.ToString()}";
             Logger.Log(LogLevel.Info, msg);
-            var smsg = new StatusMessage(msg, 100);
+            StatusMessage smsg = new(msg, 100);
             Messenger.Send(new StatusChangedMessage(smsg));
             _canExecuteCommands = true;
         }
@@ -1634,9 +1610,9 @@ namespace StoryBuilder.ViewModels
             source.Remove(RightTappedNode);
             DataSource[1].Children.Add(RightTappedNode);
             RightTappedNode.Parent = DataSource[1];
-            string msg = string.Format("Deleted node {0}", RightTappedNode.Name);
+            string msg = $"Deleted node {RightTappedNode.Name}";
             Logger.Log(LogLevel.Info, msg);
-            var smsg = new StatusMessage(msg, 100);
+            StatusMessage smsg = new(msg, 100);
             Messenger.Send(new StatusChangedMessage(smsg));
         }
 
@@ -1658,9 +1634,9 @@ namespace StoryBuilder.ViewModels
             DataSource[1].Children.Remove(RightTappedNode);
             target.Add(RightTappedNode);
             RightTappedNode.Parent = DataSource[0];
-            string msg = string.Format("Restored node {0}", RightTappedNode.Name);
+            string msg = $"Restored node {RightTappedNode.Name}";
             Logger.Log(LogLevel.Info, msg);
-            var smsg = new StatusMessage(msg, 100);
+            StatusMessage smsg = new(msg, 100);
             Messenger.Send(new StatusChangedMessage(smsg));
         }
 
@@ -1683,13 +1659,12 @@ namespace StoryBuilder.ViewModels
                 return;
             }
 
-            SceneModel sceneVar = (SceneModel)
-                StoryModel.StoryElements.StoryElementGuids[RightTappedNode.Uuid];
+            SceneModel sceneVar = (SceneModel) StoryModel.StoryElements.StoryElementGuids[RightTappedNode.Uuid];
             // ReSharper disable once ObjectCreationAsStatement
-            new StoryNodeItem(sceneVar, StoryModel.NarratorView[0]);
-            string msg = string.Format("Copied node {0} to Narrative View", RightTappedNode.Name);
+            _ = new StoryNodeItem(sceneVar, StoryModel.NarratorView[0]);
+            string msg = $"Copied node {RightTappedNode.Name} to Narrative View";
             Logger.Log(LogLevel.Info, msg);
-            var smsg = new StatusMessage(msg, 100);
+            StatusMessage smsg = new(msg, 100);
             Messenger.Send(new StatusChangedMessage(smsg));
         }
 
@@ -1714,19 +1689,19 @@ namespace StoryBuilder.ViewModels
                 return;
             }
 
-            foreach (var item in StoryModel.NarratorView[0].Children.ToList())
+            foreach (StoryNodeItem item in StoryModel.NarratorView[0].Children.ToList())
             {
                 if (item.Uuid == RightTappedNode.Uuid)
                 {
                     StoryModel.NarratorView[0].Children.Remove(item);
-                    msg = string.Format("Removed node {0} from Narrative View", RightTappedNode.Name);
+                    msg = $"Removed node {RightTappedNode.Name} from Narrative View";
                     Logger.Log(LogLevel.Info, msg);
                     smsg = new StatusMessage(msg, 100);
                     Messenger.Send(new StatusChangedMessage(smsg));
                     return;
                 }
             }
-            msg = string.Format("Node {0} not in Narrative View", RightTappedNode.Name);
+            msg = $"Node {RightTappedNode.Name} not in Narrative View";
             Logger.Log(LogLevel.Info, msg);
             smsg = new StatusMessage(msg, 100);
             Messenger.Send(new StatusChangedMessage(smsg));
@@ -1740,7 +1715,7 @@ namespace StoryBuilder.ViewModels
         /// </summary>
         /// <param name="startNode">The node to begin searching from</param>
         /// <returns>The StoryItemType of the root node</returns>
-        private StoryItemType RootNodeType(StoryNodeItem startNode)
+        private static StoryItemType RootNodeType(StoryNodeItem startNode)
         {
             StoryNodeItem node = startNode;
             while (!node.IsRoot)
@@ -1764,7 +1739,7 @@ namespace StoryBuilder.ViewModels
             return true;
         }
 
-        public void ViewChanged(object sender, SelectionChangedEventArgs args)
+        public void ViewChanged()
         {
             if (!SelectedView.Equals(CurrentView))
             {
@@ -1850,7 +1825,6 @@ namespace StoryBuilder.ViewModels
             }
             if (DataSource.Count > 0)
                 CurrentNode = DataSource[0];
-            StoryModel.Changed = false;
         }
 
         #region MVVM Message processing
@@ -1875,8 +1849,8 @@ namespace StoryBuilder.ViewModels
         /// setter send a message here. ShellViewModel knows which
         /// StoryNodeItem instance is selected (via OnSelectionChanged) and
         /// alters its Name as well.
+        /// <param name="name"></param>
         /// </summary>
-        /// <param name="msg"></param>
         private void NameMessageReceived(NameChangedMessage name)
         {
             NameChangeMessage msg = name.Value;
@@ -1890,8 +1864,6 @@ namespace StoryBuilder.ViewModels
                 case StoryItemType.Setting:
                     int settingIndex = SettingModel.SettingNames.IndexOf(msg.OldName);
                     SettingModel.SettingNames[settingIndex] = msg.NewName;
-                    break;
-                default:
                     break;
             }
         }
@@ -1910,12 +1882,9 @@ namespace StoryBuilder.ViewModels
             Messenger.Register<ShellViewModel, StatusChangedMessage>(this, static (r, m) => r.StatusMessageReceived(m));
             Messenger.Register<ShellViewModel, NameChangedMessage>(this, static (r, m) => r.NameMessageReceived(m));
 
-
-            _story = Ioc.Default.GetService<StoryController>();
             //Preferences = Ioc.Default.GetService<Preferences>();
             Scrivener = Ioc.Default.GetService<ScrivenerIo>();
             Logger = Ioc.Default.GetService<LogService>();
-            Help = Ioc.Default.GetService<HelpService>();
             Search = Ioc.Default.GetService<SearchService>();
 
             Title = "Hello Terry";
@@ -1943,8 +1912,6 @@ namespace StoryBuilder.ViewModels
 
             PrintReportsCommand = new RelayCommand(GeneratePrintReports, () => _canExecuteCommands);
             ScrivenerReportsCommand = new RelayCommand(GenerateScrivenerReports, () => _canExecuteCommands);
-
-            HelpCommand = new RelayCommand(LaunchHelp, () => _canExecuteCommands);
 
             // Move StoryElement commands
             MoveLeftCommand = new RelayCommand(MoveTreeViewItemLeft, () => _canExecuteCommands);
@@ -1986,7 +1953,7 @@ namespace StoryBuilder.ViewModels
 
             if (FilterText == "" || !IsSearching) //Nulls the backgrounds to make them transparent (default) //Check if toggled and null backgrounds if not.
             {
-                Logger.Log(LogLevel.Info, "Search text is blank, nulling all backgrounds.");
+                Logger.Log(LogLevel.Info, "Search text is blank, making all backgrounds null.");
                 foreach (StoryNodeItem node in root) { node.Background = null; }
                 FilterText = "";
             }
@@ -2001,7 +1968,7 @@ namespace StoryBuilder.ViewModels
                         else { node.Background = new SolidColorBrush(Colors.DarkGoldenrod); } //Light Goldenrod is hard to read in dark theme
                         node.IsExpanded = true; 
                         
-                        var parent = node.Parent;
+                        StoryNodeItem parent = node.Parent;
                         while (!parent.IsRoot)
                         {
                             parent.IsExpanded = true;
@@ -2037,6 +2004,6 @@ namespace StoryBuilder.ViewModels
         }
 
         [DllImport("user32.dll", ExactSpelling = true, CharSet = CharSet.Auto, PreserveSig = true, SetLastError = false)]
-        public static extern IntPtr GetActiveWindow();
+        private static extern IntPtr GetActiveWindow();
     }
 }

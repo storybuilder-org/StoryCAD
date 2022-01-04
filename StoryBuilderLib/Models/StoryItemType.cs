@@ -11,6 +11,6 @@
         Section,
         TrashCan,
         Unknown
-    };
+    }
 
 }

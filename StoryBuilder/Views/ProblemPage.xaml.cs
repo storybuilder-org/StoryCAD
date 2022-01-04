@@ -17,13 +17,13 @@ namespace StoryBuilder.Views
         public ProblemPage()
         {
             ProblemVm = Ioc.Default.GetService<ProblemViewModel>();
-            this.InitializeComponent();
-            this.DataContext = ProblemVm;
+            InitializeComponent();
+            DataContext = ProblemVm;
         }
 
         //private void Conflict_ContextRequested(UIElement sender, ContextRequestedEventArgs args)
         //{
-        //    FlyoutShowOptions myOption = new FlyoutShowOptions();
+        //    FlyoutShowOptions myOption = new();
         //    myOption.ShowMode = FlyoutShowMode.Transient;
         //    ConflictCommandBarFlyout.ShowAt(NavigationTree, myOption);
         //}

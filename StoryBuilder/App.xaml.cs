@@ -1,25 +1,25 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using System;
+using System.Diagnostics;
+using System.Linq;
+using System.Threading.Tasks;
+using Windows.Storage;
 using CommunityToolkit.Mvvm.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using StoryBuilder.Controllers;
+using PInvoke;
 using StoryBuilder.DAL;
 using StoryBuilder.Models;
 using StoryBuilder.Models.Tools;
-using StoryBuilder.Services.Help;
 using StoryBuilder.Services.Installation;
 using StoryBuilder.Services.Logging;
+using StoryBuilder.Services.Navigation;
 using StoryBuilder.Services.Preferences;
 using StoryBuilder.Services.Search;
 using StoryBuilder.ViewModels;
 using StoryBuilder.ViewModels.Tools;
 using StoryBuilder.Views;
-using System;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
-using System.Threading.Tasks;
-using Windows.Storage;
-using NavigationService = StoryBuilder.Services.Navigation.NavigationService;
+using UnhandledExceptionEventArgs = Microsoft.UI.Xaml.UnhandledExceptionEventArgs;
 
 
 // To learn more about WinUI, the WinUI project structure,
@@ -32,41 +32,31 @@ namespace StoryBuilder
     /// </summary>
     public partial class App : Application
     {
-        private const int width = 1050;
-        private const int height = 700;
-        public static string HomePage = "HomePage";
-        public static string OverviewPage = "OverviewPage";
-        public static string ProblemPage = "ProblemPage";
-        public static string CharacterPage = "CharacterPage";
-        public static string ScenePage = "ScenePage";
-        public static string FolderPage = "FolderPage";
-        public static string SectionPage = "SectionPage";
-        public static string SettingPage = "SettingPage";
-        public static string TrashCanPage = "TrashCanPage";
+        private const int Width = 1050;
+        private const int Height = 700;
+        private const string HomePage = "HomePage";
+        private const string OverviewPage = "OverviewPage";
+        private const string ProblemPage = "ProblemPage";
+        private const string CharacterPage = "CharacterPage";
+        private const string ScenePage = "ScenePage";
+        private const string FolderPage = "FolderPage";
+        private const string SectionPage = "SectionPage";
+        private const string SettingPage = "SettingPage";
+        private const string TrashCanPage = "TrashCanPage";
 
         private LogService _log;
 
         public Window m_window;
         private IntPtr m_windowHandle;
 
-        private void SetWindowSize(IntPtr hwnd, int width, int height)
+        private static void SetWindowSize(IntPtr hwnd, int windowWidth, int windowHeight)
         {
-            var dpi = PInvoke.User32.GetDpiForWindow(hwnd);
+            int dpi = User32.GetDpiForWindow(hwnd);
             float scalingFactor = (float)dpi / 96;
-            width = (int)(width * scalingFactor);
-            height = (int)(height * scalingFactor);
+            windowWidth = (int)(windowWidth * scalingFactor);
+            windowHeight = (int)(windowHeight * scalingFactor);
 
-            PInvoke.User32.SetWindowPos(hwnd, PInvoke.User32.SpecialWindowHandles.HWND_TOP,
-                                        0, 0, width, height,
-                                        PInvoke.User32.SetWindowPosFlags.SWP_SHOWWINDOW);
-        }
-
-        [ComImport]
-        [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-        [Guid("EECDBF0E-BAE9-4CB6-A68E-9598E1CB57BB")]
-        internal interface IWindowNative
-        {
-            IntPtr WindowHandle { get; }
+            User32.SetWindowPos(hwnd, User32.SpecialWindowHandles.HWND_TOP, 0, 0, windowWidth, windowHeight, User32.SetWindowPosFlags.SWP_SHOWWINDOW);
         }
 
         /// <summary>
@@ -80,7 +70,7 @@ namespace StoryBuilder
             Current.UnhandledException += OnUnhandledException;
         }
 
-        private void ConfigureIoc()
+        private static void ConfigureIoc()
         {
             Ioc.Default.ConfigureServices(
                 new ServiceCollection()
@@ -88,14 +78,12 @@ namespace StoryBuilder
                     .AddSingleton<PreferencesService>()
                     .AddSingleton<NavigationService>()
                     .AddSingleton<LogService>()
-                    .AddSingleton<HelpService>()
                     .AddSingleton<SearchService>()
                     .AddSingleton<InstallationService>()
                     .AddSingleton<ControlLoader>()
                     .AddSingleton<ListLoader>()
                     .AddSingleton<ToolLoader>()
                     .AddSingleton<ScrivenerIo>()
-                    .AddSingleton<StoryController>()
                     .AddSingleton<StoryReader>()
                     .AddSingleton<StoryWriter>()
                     // Register ViewModels 
@@ -109,7 +97,8 @@ namespace StoryBuilder
                     .AddSingleton<SectionViewModel>()
                     .AddSingleton<TrashCanViewModel>()
                     .AddSingleton<MainWindowVM>()
-                    // .AddSingleton<UnifiedVM>()
+                    .AddSingleton<UnifiedVM>()
+                    .AddSingleton<InitVM>()
                     .AddSingleton<TreeViewSelection>()
                     // Register ContentDialog ViewModels
                     .AddSingleton<NewProjectViewModel>()
@@ -140,11 +129,9 @@ namespace StoryBuilder
             _log = Ioc.Default.GetService<LogService>();
             _log.Log(LogLevel.Info, "StoryBuilder.App launched");
 
-            StoryController story = Ioc.Default.GetService<StoryController>();
-            string localPath = ApplicationData.Current.RoamingFolder.Path.ToString();
-            localPath = System.IO.Path.Combine(localPath, "StoryBuilder");
+            string localPath = GlobalData.RootDirectory;
             StorageFolder localFolder = await StorageFolder.GetFolderFromPathAsync(localPath);
-            var pathMsg = string.Format("Configuration data location = " + localFolder.Path);
+            string pathMsg = string.Format("Configuration data location = " + localFolder.Path);
             _log.Log(LogLevel.Info, pathMsg);
             Trace.Listeners.Add(new TextWriterTraceListener(Console.Out));
             Trace.AutoFlush = true;
@@ -153,15 +140,15 @@ namespace StoryBuilder
 
             // Load Preferences
             PreferencesService pref = Ioc.Default.GetService<PreferencesService>();
-            await pref.LoadPreferences(localPath, story);
+            await pref.LoadPreferences(localPath);
 
             await ProcessInstallationFiles();
 
-            await LoadControls(localFolder.Path, story);
+            await LoadControls(localFolder.Path);
 
-            await LoadLists(localFolder.Path, story);
+            await LoadLists(localFolder.Path);
             
-            await LoadTools(localFolder.Path, story);
+            await LoadTools(localFolder.Path);
 
             ConfigureNavigation();
 
@@ -170,22 +157,21 @@ namespace StoryBuilder
             Frame rootFrame = new();
             if (rootFrame.Content == null)
             {
-                if (GlobalData.Preferences.Initalised) { rootFrame.Navigate(typeof(Shell)); }
-                else { rootFrame.Navigate(typeof(Initialisation));  }
+                rootFrame.Navigate(GlobalData.Preferences.Initalised ? typeof(Shell) : typeof(Initialization));
             }
             // Place the frame in the current Window
             m_window.Content = rootFrame;
             m_window.Activate();
 
             //Get the Window's HWND
-            m_windowHandle = PInvoke.User32.GetActiveWindow();
-            Ioc.Default.GetService<MainWindowVM>().Title = $"StoryBuilder";
+            m_windowHandle = User32.GetActiveWindow();
+            Ioc.Default.GetService<MainWindowVM>().Title = "StoryBuilder";
             GlobalData.WindowHandle = m_windowHandle;
             // The Window object doesn't (yet) have Width and Height properties in WInUI 3 Desktop yet.
             // To set the Width and Height, you can use the Win32 API SetWindowPos.
             // Note, you should apply the DPI scale factor if you are thinking of dpi instead of pixels.
-            SetWindowSize(m_windowHandle, width, height);   // was 800, 600
-            _log.Log(LogLevel.Debug, string.Format("Layout: Window size width={0} height={1}", width, height));
+            SetWindowSize(m_windowHandle, Width, Height);   // was 800, 600
+            _log.Log(LogLevel.Debug, $"Layout: Window size width={Width} height={Height}");
             _log.Log(LogLevel.Info, "StoryBuilder App loaded and launched");
         }
 
@@ -194,8 +180,7 @@ namespace StoryBuilder
             try
             {
                 _log.Log(LogLevel.Info, "Processing Installation files");
-                var install = Ioc.Default.GetService<InstallationService>();
-                await install.InstallFiles();
+                await Ioc.Default.GetService<InstallationService>().InstallFiles(); //Runs InstallationService.InstallFiles()
             }
             catch (Exception ex)
             {
@@ -204,7 +189,7 @@ namespace StoryBuilder
             }
         }
 
-        private async Task LoadControls(string path, StoryController story)
+        private async Task LoadControls(string path)
         {
             int subTypeCount = 0;
             int exampleCount = 0;
@@ -212,17 +197,14 @@ namespace StoryBuilder
             {
                 _log.Log(LogLevel.Info, "Loading Controls.ini data");
                 ControlLoader loader = Ioc.Default.GetService<ControlLoader>();
-                await loader.Init(path, story);
+                await loader.Init(path);
                 _log.Log(LogLevel.Info, "ConflictType Counts");
                 _log.Log(LogLevel.Info,
                     $"{GlobalData.ConflictTypes.Keys.Count} ConflictType keys created");
                 foreach (ConflictCategoryModel type in GlobalData.ConflictTypes.Values)
                 {
                     subTypeCount += type.SubCategories.Count;
-                    foreach (string subType in type.SubCategories)
-                    {
-                        exampleCount += type.Examples[subType].Count;
-                    }
+                    exampleCount += type.SubCategories.Sum(subType => type.Examples[subType].Count);
                 }
                 _log.Log(LogLevel.Info,
                     $"{subTypeCount} Total ConflictSubType keys created");
@@ -235,7 +217,7 @@ namespace StoryBuilder
                 AbortApp();
             }
         }
-        private async Task LoadLists(string path, StoryController story)
+        private async Task LoadLists(string path)
         {
             try
             {
@@ -252,13 +234,13 @@ namespace StoryBuilder
             }
         }
 
-        private async Task LoadTools(string path, StoryController story)
+        private async Task LoadTools(string path)
         {
             try
             {
                 _log.Log(LogLevel.Info, "Loading Tools.ini data");
                 ToolLoader loader = Ioc.Default.GetService<ToolLoader>();
-                await loader.Init(path, story);
+                await loader.Init(path);
                 _log.Log(LogLevel.Info,
                     $"{GlobalData.KeyQuestionsSource.Keys.Count} Key Questions created");
                 _log.Log(LogLevel.Info,
@@ -286,15 +268,15 @@ namespace StoryBuilder
             {
                 _log.Log(LogLevel.Info, "Configuring page navigation");
                 NavigationService nav = Ioc.Default.GetService<NavigationService>();
-                nav.Configure(App.HomePage, typeof(HomePage));
-                nav.Configure(App.OverviewPage, typeof(OverviewPage));
-                nav.Configure(App.ProblemPage, typeof(ProblemPage));
-                nav.Configure(App.CharacterPage, typeof(CharacterPage));
-                nav.Configure(App.FolderPage, typeof(FolderPage));
-                nav.Configure(App.SectionPage, typeof(SectionPage));
-                nav.Configure(App.SettingPage, typeof(SettingPage));
-                nav.Configure(App.ScenePage, typeof(ScenePage));
-                nav.Configure(App.TrashCanPage, typeof(TrashCanPage));
+                nav.Configure(HomePage, typeof(HomePage));
+                nav.Configure(OverviewPage, typeof(OverviewPage));
+                nav.Configure(ProblemPage, typeof(ProblemPage));
+                nav.Configure(CharacterPage, typeof(CharacterPage));
+                nav.Configure(FolderPage, typeof(FolderPage));
+                nav.Configure(SectionPage, typeof(SectionPage));
+                nav.Configure(SettingPage, typeof(SettingPage));
+                nav.Configure(ScenePage, typeof(ScenePage));
+                nav.Configure(TrashCanPage, typeof(TrashCanPage));
             }
             catch (Exception ex)
             {
@@ -303,16 +285,16 @@ namespace StoryBuilder
             }
         }
 
-        private void OnUnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
+        private void OnUnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
             _log.LogException(LogLevel.Error, e.Exception, e.Message);
             _log.Flush();
             AbortApp();
         }
 
-        private void AbortApp()
-        {
-            Application.Current.Exit();  // Win32
-        }
+        /// <summary>
+        /// Closes the app
+        /// </summary>
+        private static void AbortApp() { Current.Exit();  }
     }
 }

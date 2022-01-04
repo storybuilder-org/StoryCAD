@@ -28,7 +28,7 @@
  * Description:	Tipos de nodo de un árbol RTF.
  * ******************************************************************************/
 
-namespace Net.Sgoliver.NRtfTree
+namespace NRtfTree
 {
     namespace Core
     {

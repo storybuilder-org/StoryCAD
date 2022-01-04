@@ -9,8 +9,8 @@ namespace StoryBuilder.Views
 
         public SettingPage()
         {
-            this.InitializeComponent();
-            this.DataContext = SettingVm;
+            InitializeComponent();
+            DataContext = SettingVm;
         }
     }
 }

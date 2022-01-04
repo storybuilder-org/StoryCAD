@@ -27,9 +27,9 @@ namespace StoryBuilder.DAL
             // As each record is read, it's moved to the corresponding initialization
             // structure field or loaded as an initialization value for a contol
             string text = await FileIO.ReadTextAsync(iniFile);
-            StringReader sr = new StringReader(text);
+            StringReader sr = new(text);
             string line;
-            while ((line = sr.ReadLine()) != null)
+            while ((line = await sr.ReadLineAsync()) != null)
             {
                 line = line.TrimEnd();
                 if (line.Equals(string.Empty))

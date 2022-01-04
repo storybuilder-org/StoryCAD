@@ -22,7 +22,7 @@ namespace StoryBuilder.ViewModels
                 typeof(TreeViewSelection),
                 new PropertyMetadata(null));
 
-        void NotifyPropertyChanged(string propertyName)
+        private void NotifyPropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Windows.Storage;
 
@@ -13,8 +14,8 @@ namespace StoryBuilder.DAL
         {
             await CopyContentsShallow(source, dest);
 
-            var subfolders = await source.GetFoldersAsync();
-            foreach (var storageFolder in subfolders)
+            IReadOnlyList<StorageFolder> subfolders = await source.GetFoldersAsync();
+            foreach (StorageFolder storageFolder in subfolders)
             {
                 await storageFolder.CopyContentsRecursive(await dest.GetFolderAsync(storageFolder.Name));
             }
@@ -27,9 +28,9 @@ namespace StoryBuilder.DAL
         {
             await source.CopyFiles(destination);
 
-            var items = await source.GetFoldersAsync();
+            IReadOnlyList<StorageFolder> items = await source.GetFoldersAsync();
 
-            foreach (var storageFolder in items)
+            foreach (StorageFolder storageFolder in items)
             {
                 await destination.CreateFolderAsync(storageFolder.Name, CreationCollisionOption.OpenIfExists);
             }
@@ -40,9 +41,9 @@ namespace StoryBuilder.DAL
         /// </summary>
         private static async Task CopyFiles(this IStorageFolder source, IStorageFolder destination)
         {
-            var items = await source.GetFilesAsync();
+            IReadOnlyList<StorageFile> items = await source.GetFilesAsync();
 
-            foreach (var storageFile in items)
+            foreach (StorageFile storageFile in items)
             {
                 await storageFile.CopyAsync(destination, storageFile.Name, NameCollisionOption.ReplaceExisting);
             }

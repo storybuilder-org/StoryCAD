@@ -28,18 +28,18 @@
  * Description:	Nodo RTF especializado que contiene la información de un objeto.
  * ******************************************************************************/
 
-using Net.Sgoliver.NRtfTree.Core;
 using System.Globalization;
 using System.Text;
+using NRtfTree.Core;
 
-namespace Net.Sgoliver.NRtfTree
+namespace NRtfTree
 {
     namespace Util
     {
         /// <summary>
         /// Encapsula un nodo RTF de tipo Objeto (Palabra clave "\object")
         /// </summary>
-        public class ObjectNode : Net.Sgoliver.NRtfTree.Core.RtfTreeNode
+        public class ObjectNode : RtfTreeNode
         {
             #region Atributos Privados
 
@@ -61,15 +61,15 @@ namespace Net.Sgoliver.NRtfTree
                 if (node != null)
                 {
                     //Asignamos todos los campos del nodo
-                    this.NodeKey = node.NodeKey;
-                    this.HasParameter = node.HasParameter;
-                    this.Parameter = node.Parameter;
-                    this.ParentNode = node.ParentNode;
-                    this.RootNode = node.RootNode;
-                    this.NodeType = node.NodeType;
+                    NodeKey = node.NodeKey;
+                    HasParameter = node.HasParameter;
+                    Parameter = node.Parameter;
+                    ParentNode = node.ParentNode;
+                    RootNode = node.RootNode;
+                    NodeType = node.NodeType;
 
-                    this.ChildNodes.Clear();
-                    this.ChildNodes.AddRange(node.ChildNodes);
+                    ChildNodes.Clear();
+                    ChildNodes.AddRange(node.ChildNodes);
 
                     //Obtenemos los datos del objeto como un array de bytes
                     getObjectData();
@@ -87,21 +87,21 @@ namespace Net.Sgoliver.NRtfTree
             {
                 get
                 {
-                    if (this.SelectSingleChildNode("objemb") != null)
+                    if (SelectSingleChildNode("objemb") != null)
                         return "objemb";
-                    if (this.SelectSingleChildNode("objlink") != null)
+                    if (SelectSingleChildNode("objlink") != null)
                         return "objlink";
-                    if (this.SelectSingleChildNode("objautlink") != null)
+                    if (SelectSingleChildNode("objautlink") != null)
                         return "objautlink";
-                    if (this.SelectSingleChildNode("objsub") != null)
+                    if (SelectSingleChildNode("objsub") != null)
                         return "objsub";
-                    if (this.SelectSingleChildNode("objpub") != null)
+                    if (SelectSingleChildNode("objpub") != null)
                         return "objpub";
-                    if (this.SelectSingleChildNode("objicemb") != null)
+                    if (SelectSingleChildNode("objicemb") != null)
                         return "objicemb";
-                    if (this.SelectSingleChildNode("objhtml") != null)
+                    if (SelectSingleChildNode("objhtml") != null)
                         return "objhtml";
-                    if (this.SelectSingleChildNode("objocx") != null)
+                    if (SelectSingleChildNode("objocx") != null)
                         return "objocx";
                     else
                         return "";
@@ -117,7 +117,7 @@ namespace Net.Sgoliver.NRtfTree
                 {
                     //Formato: {\*\objclass Paint.Picture}
 
-                    RtfTreeNode node = this.SelectSingleNode("objclass");
+                    RtfTreeNode node = SelectSingleNode("objclass");
 
                     if (node != null)
                         return node.NextSibling.NodeKey;
@@ -133,7 +133,7 @@ namespace Net.Sgoliver.NRtfTree
             {
                 get
                 {
-                    RtfTreeNode node = this.SelectSingleNode("result");
+                    RtfTreeNode node = SelectSingleNode("result");
 
                     //Si existe el nodo "\result" recuperamos el grupo RTF superior.
                     if (node != null)
@@ -153,7 +153,7 @@ namespace Net.Sgoliver.NRtfTree
                     string Text = "";
 
                     //Buscamos el nodo "\objdata"
-                    RtfTreeNode objdataNode = this.SelectSingleNode("objdata");
+                    RtfTreeNode objdataNode = SelectSingleNode("objdata");
 
                     //Si existe el nodo
                     if (objdataNode != null)
@@ -190,12 +190,12 @@ namespace Net.Sgoliver.NRtfTree
             {
                 //Formato: ( '{' \object (<objtype> & <objmod>? & <objclass>? & <objname>? & <objtime>? & <objsize>? & <rsltmod>?) ('{\*' \objdata (<objalias>? & <objsect>?) <data> '}') <result> '}' )
 
-                string Text = "";
+                string Text;
 
-                if (this.FirstChild.NodeKey == "object")
+                if (FirstChild.NodeKey == "object")
                 {
                     //Buscamos el nodo "\objdata"
-                    RtfTreeNode objdataNode = this.SelectSingleNode("objdata");
+                    RtfTreeNode objdataNode = SelectSingleNode("objdata");
 
                     //Si existe el nodo
                     if (objdataNode != null)

@@ -1,5 +1,4 @@
-﻿using Microsoft.UI;
-using Microsoft.UI.Xaml;
+﻿using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using StoryBuilder.Models;
@@ -229,7 +228,7 @@ namespace StoryBuilder.ViewModels
         private bool _isRoot;
         public bool IsRoot
         {
-            get { return _isRoot; }
+            get => _isRoot;
             set
             {
                 if (_isRoot != value)

@@ -15,7 +15,7 @@ namespace StoryBuilder.ViewModels.Tools
 
         public string Title
         {
-            get { return _title; }
+            get => _title;
             set => SetProperty(ref _title, value);
         }
 
@@ -23,7 +23,7 @@ namespace StoryBuilder.ViewModels.Tools
 
         #region Combobox and ListBox sources
 
-        public ObservableCollection<string> DataList = new ObservableCollection<string>();
+        public ObservableCollection<string> DataList = new();
 
         #endregion
 
