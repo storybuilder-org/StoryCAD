@@ -283,7 +283,7 @@
                         </Grid.ColumnDefinitions>
                         <ComboBox Header="Sociability" Grid.Column="0" IsEditable="True"
                                   Width="200" ItemsSource="{x:Bind CharVm.SociabilityList}"
-                              Text="{x:Bind CharVm.Sociability, Mode=TwoWay}" />
+                                  SelectedItem="{x:Bind CharVm.Sociability, Mode=TwoWay}" />
                         <TextBlock Grid.Column="1" Width="100"/>
                         <ComboBox Header="Stability" Grid.Column="2" IsEditable="True" Width="200"
                                   ItemsSource="{x:Bind CharVm.StabilityList}"
