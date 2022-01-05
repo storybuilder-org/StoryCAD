@@ -568,6 +568,8 @@ public class ReportFormatter
                 foreach (StoryNodeItem child in _model.NarratorView[0].Children)
                 {
                     StoryElement scn = _model.StoryElements.StoryElementGuids[child.Uuid];
+                    if (scn.Type != StoryItemType.Scene)
+                        continue;
                     SceneModel scene = (SceneModel)scn;
                     StringBuilder sb = new(line);
                     string saveRemarks = scene.Remarks;
