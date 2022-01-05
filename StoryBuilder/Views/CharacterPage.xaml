@@ -281,23 +281,31 @@
                     <Button  Content="Trait Builder" Grid.Row="0"  HorizontalAlignment="Left" Margin="0,10,10,10" 
                              Command="{x:Bind CharVm.TraitCommand, Mode=OneWay}" />
                     <!-- Character traits -->
-                    <ListView MinWidth="300" MinHeight="150" Grid.Row="1" Header="Traits"
+                    <ListView Header="Traits" Grid.Row="1" MinWidth="300" MinHeight="150" 
                             ItemsSource="{x:Bind CharVm.CharacterTraits, Mode=TwoWay}"
                             SelectedIndex="{x:Bind CharVm.ExistingTraitIndex, Mode=OneWay}" />
-                    <StackPanel Orientation="Horizontal" Grid.Row="2" >
-                        <TextBox Header="New Trait"  MinWidth="300" Text="{x:Bind CharVm.NewTrait, Mode=TwoWay}" />
-                        <TextBlock Width="10" />
-                        <Button FontFamily="Segoe MDL2 Assets" Content="&#xE710;"  Command="{x:Bind CharVm.AddTraitCommand, Mode=OneWay}" >
+                    <Grid Grid.Row="2" HorizontalAlignment="Left">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="2*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="2*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="2*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBox Header="Other Trait:" Grid.Column="0" MinWidth="300" Text="{x:Bind CharVm.NewTrait, Mode=TwoWay}" />
+                        <TextBlock Grid.Column="1" Width="10" />
+                        <Button Grid.Column="2" FontFamily="Segoe MDL2 Assets" Content="&#xE710;"  Command="{x:Bind CharVm.AddTraitCommand, Mode=OneWay}" >
                             <ToolTipService.ToolTip>
                                 <ToolTip Content="Add Trait" />
                             </ToolTipService.ToolTip>
                         </Button>
-                        <Button FontFamily="Segoe MDL2 Assets" Content="&#xE738;" Command="{x:Bind CharVm.RemoveTraitCommand, Mode=OneWay}">
+                        <TextBlock Grid.Column="3" Width="10" />
+                        <Button Grid.Column="4" FontFamily="Segoe MDL2 Assets" Content="&#xE738;" Command="{x:Bind CharVm.RemoveTraitCommand, Mode=OneWay}">
                             <ToolTipService.ToolTip>
                                 <ToolTip Content="Remove Trait" />
                             </ToolTipService.ToolTip>
                         </Button>
-                    </StackPanel>
+                    </Grid>
                 </Grid>
             </PivotItem>
             <PivotItem Header="Notes">
