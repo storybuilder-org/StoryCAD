@@ -133,7 +133,7 @@
                                   SelectedItem="{x:Bind OverviewVm.Tone, Mode=TwoWay}" />
                     </Grid>
                     <usercontrols:RichEditBoxExtended Header="Structure Notes" Grid.Row="5"
-                        RtfText="{x:Bind OverviewVm.StyleNotes, Mode=TwoWay}" AcceptsReturn="True"
+                        RtfText="{x:Bind OverviewVm.StructureNotes, Mode=TwoWay}" AcceptsReturn="True"
                         IsSpellCheckEnabled="True" TextWrapping="Wrap"
                         ScrollViewer.VerticalScrollBarVisibility="Visible" />
                 </Grid>
