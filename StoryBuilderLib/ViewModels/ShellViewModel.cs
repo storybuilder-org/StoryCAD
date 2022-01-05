@@ -26,7 +26,6 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Windows.Storage;
 using Windows.Storage.Pickers;
-using Microsoft.Web.WebView2.Core;
 using WinRT;
 using GuidAttribute = System.Runtime.InteropServices.GuidAttribute;
 
@@ -444,7 +443,7 @@ namespace StoryBuilder.ViewModels
                         StoryElement internalProblem = new ProblemModel("Internal Problem", StoryModel);
                         StoryNodeItem internalProblemNode = new(internalProblem, overviewNode);
                         break;
-                    case "ProtagonistAntagonist":
+                    case "Protagonist and Antagonist":
                         StoryElement protagonist = new CharacterModel("Protagonist", StoryModel);
                         StoryNodeItem protagonistNode = new(protagonist, overviewNode);
                         StoryElement antagonist = new CharacterModel("Antagonist", StoryModel);
