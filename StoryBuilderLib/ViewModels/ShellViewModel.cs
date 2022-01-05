@@ -26,7 +26,6 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Windows.Storage;
 using Windows.Storage.Pickers;
-using Microsoft.Web.WebView2.Core;
 using WinRT;
 using GuidAttribute = System.Runtime.InteropServices.GuidAttribute;
 
@@ -371,10 +370,10 @@ namespace StoryBuilder.ViewModels
             StoryModel.ProjectFile = file;
             // Make sure files folder exists...
             StoryModel.FilesFolder = await StoryModel.ProjectFolder.CreateFolderAsync("files", CreationCollisionOption.OpenIfExists);
-            //TODO: Back up at the right place (after open?)
             await BackupProject();
             StoryReader rdr = Ioc.Default.GetService<StoryReader>();
             StoryModel = await rdr.ReadFile(file);
+            await BackupProject();
             if (StoryModel.ExplorerView.Count > 0)
             {
                 SetCurrentView(StoryViewType.ExplorerView);
@@ -444,7 +443,7 @@ namespace StoryBuilder.ViewModels
                         StoryElement internalProblem = new ProblemModel("Internal Problem", StoryModel);
                         StoryNodeItem internalProblemNode = new(internalProblem, overviewNode);
                         break;
-                    case "ProtagonistAntagonist":
+                    case "Protagonist and Antagonist":
                         StoryElement protagonist = new CharacterModel("Protagonist", StoryModel);
                         StoryNodeItem protagonistNode = new(protagonist, overviewNode);
                         StoryElement antagonist = new CharacterModel("Antagonist", StoryModel);
@@ -480,6 +479,8 @@ namespace StoryBuilder.ViewModels
 
                 // Save the new project
                 await SaveFile();
+                await BackupProject();
+
 
                 StatusMessage = "New project ready.";
                 Logger.Log(LogLevel.Info, "Unity - NewFile command completed");
@@ -638,14 +639,8 @@ namespace StoryBuilder.ViewModels
                 //var window = new Window();
                 //var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(window);
                 FolderPicker folderPicker = new();
+                //Make folder Picker work in Win32
                 WinRT.Interop.InitializeWithWindow.Initialize(folderPicker, GlobalData.WindowHandle);
-                //Make folder Picker works in Win32
-                //if (Window.Current == null)
-                //{
-                //    IntPtr hwnd = GetActiveWindow();
-                //    var initializeWithWindow = folderPicker.As<IInitializeWithWindow>();
-                //    initializeWithWindow.Initialize(hwnd);
-                //}
                 folderPicker.CommitButtonText = "Project Folder";
                 PreferencesModel prefs = GlobalData.Preferences;
                 //TODO: Use preferences project folder instead of DocumentsLibrary
@@ -660,8 +655,6 @@ namespace StoryBuilder.ViewModels
                     _canExecuteCommands = true;  // unblock other commands
                     return;
                 }
-                //StoryModel.ProjectPath = StoryModel.ProjectFolder.Path;
-                //StoryModel.ProjectFilename = StoryModel.ProjectFolder.DisplayName;
 
                 IReadOnlyList<StorageFile> files = await StoryModel.ProjectFolder.GetFilesAsync();
                 StorageFile file = files[0];
@@ -669,10 +662,10 @@ namespace StoryBuilder.ViewModels
 
                 if (file.FileType.ToLower().Equals(".stbx"))
                 {
-                    //TODO: Back up at the right place (after open?)
                     await BackupProject();
                     StoryReader rdr = Ioc.Default.GetService<StoryReader>();
                     StoryModel = await rdr.ReadFile(file);
+                    await BackupProject();
                     if (StoryModel.ExplorerView.Count > 0)
                     {
                         SetCurrentView(StoryViewType.ExplorerView);
