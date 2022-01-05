@@ -445,7 +445,7 @@ namespace StoryBuilder.DAL
                     case "Economic":
                         chr.Economic = attr.InnerText;
                         break;
-                    case "Education,":
+                    case "Education":
                         chr.Education = attr.InnerText;
                         break;
                     case "Ethnic":
