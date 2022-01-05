@@ -192,11 +192,11 @@ public class OverviewViewModel : ObservableRecipient, INavigable
         set => SetProperty(ref _style, value);
     }
 
-    private string _styleNotes;
-    public string StyleNotes
+    private string _structureNotes;
+    public string StructureNotes
     {
-        get => _styleNotes;
-        set => SetProperty(ref _styleNotes, value);
+        get => _structureNotes;
+        set => SetProperty(ref _structureNotes, value);
     }
 
     private string _tone;
@@ -281,7 +281,7 @@ public class OverviewViewModel : ObservableRecipient, INavigable
         // Load RTF files
         StoryIdea = await _rdr.GetRtfText(Model.StoryIdea, Uuid);
         Concept = await _rdr.GetRtfText(Model.Concept, Uuid);
-        StyleNotes = await _rdr.GetRtfText(Model.StyleNotes, Uuid);
+        StructureNotes = await _rdr.GetRtfText(Model.StructureNotes, Uuid);
         ToneNotes = await _rdr.GetRtfText(Model.ToneNotes, Uuid);
         Notes = await _rdr.GetRtfText(Model.Notes, Uuid);
 
@@ -312,7 +312,7 @@ public class OverviewViewModel : ObservableRecipient, INavigable
             // Write RTF files
             Model.StoryIdea = await _wtr.PutRtfText(StoryIdea, Model.Uuid, "storyidea.rtf");
             Model.Concept = await _wtr.PutRtfText(Concept, Model.Uuid, "concept.rtf");
-            Model.StyleNotes = await _wtr.PutRtfText(StyleNotes, Model.Uuid, "stylenotes.rtf");
+            Model.StructureNotes = await _wtr.PutRtfText(StructureNotes, Model.Uuid, "stylenotes.rtf");
             Model.ToneNotes = await _wtr.PutRtfText(ToneNotes, Model.Uuid, "tonenotes.rtf");
             Model.Notes = await _wtr.PutRtfText(Notes, Model.Uuid, "notes.rtf");
 
@@ -399,7 +399,7 @@ public class OverviewViewModel : ObservableRecipient, INavigable
         Concept = string.Empty;
         Premise = string.Empty;
         PremiseLock = true;     // Premise is read-only and is only set when a story problem is selected
-        StyleNotes = string.Empty;
+        StructureNotes = string.Empty;
         ToneNotes = string.Empty;
         Notes = string.Empty;
         StoryProblem = string.Empty;

@@ -45,7 +45,7 @@
 
     Style: @Style
 
-    Style Notes: @styleNotes
+    Style Notes: @StructureNotes
 
     Tone: @Tone
 

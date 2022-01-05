@@ -178,8 +178,8 @@ public class StoryWriter
         attr = _xml.CreateAttribute("StoryProblem");
         attr.Value = rec.StoryProblem;
         overview.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("StyleNotes");
-        attr.Value = rec.StyleNotes;
+        attr = _xml.CreateAttribute("StructureNotes");
+        attr.Value = rec.StructureNotes;
         overview.Attributes.Append(attr);
         attr = _xml.CreateAttribute("ToneNotes");
         attr.Value = rec.ToneNotes;
