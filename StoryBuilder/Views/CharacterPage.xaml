@@ -140,7 +140,8 @@
             </PivotItem>
             <PivotItem Header="Backstory">
                 <!-- Character notes data -->
-                <usercontrols:RichEditBoxExtended Header="Backstory" RtfText="{x:Bind CharVm.BackStory, Mode=TwoWay}" AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap" ScrollViewer.VerticalScrollBarVisibility="Visible" />
+                <usercontrols:RichEditBoxExtended Header="Backstory" RtfText="{x:Bind CharVm.BackStory, Mode=TwoWay}" AcceptsReturn="True" 
+                                                  IsSpellCheckEnabled="True" TextWrapping="Wrap" ScrollViewer.VerticalScrollBarVisibility="Visible" />
             </PivotItem>
             <PivotItem Header="Social">
                 <!-- Character social data -->
@@ -210,11 +211,10 @@
                                   ItemsSource="{x:Bind CharVm.AbnormalityList}"
                                   SelectedItem="{x:Bind CharVm.Abnormality, Mode=TwoWay}" />
                     </Grid>
-                    <Grid Grid.Row="3" HorizontalAlignment="Left">
-                        <usercontrols:RichEditBoxExtended Header="Psych Notes" RtfText="{x:Bind CharVm.PsychNotes, Mode=TwoWay}" AcceptsReturn="True"
-                                                      IsSpellCheckEnabled="True" TextWrapping="Wrap" Height="350"
-                                                      ScrollViewer.VerticalScrollBarVisibility="Visible" />
-                    </Grid>
+                    <usercontrols:RichEditBoxExtended Header="Psych Notes" Grid.Row="3" 
+                                                RtfText="{x:Bind CharVm.PsychNotes, Mode=TwoWay}" AcceptsReturn="True"
+                                                IsSpellCheckEnabled="True" TextWrapping="Wrap" 
+                                                ScrollViewer.VerticalScrollBarVisibility="Visible" />
                 </Grid>
             </PivotItem>
             <PivotItem Header="Inner Traits">
