@@ -228,8 +228,8 @@ namespace StoryBuilder.DAL
                     case "StoryProblem":
                         _overview.StoryProblem = attr.InnerText;
                         break;
-                    case "StyleNotes":
-                        _overview.StyleNotes = attr.InnerText;
+                    case "StructureNotes":
+                        _overview.StructureNotes = attr.InnerText;
                         break;
                     case "ToneNotes":
                         _overview.ToneNotes = attr.InnerText;
@@ -445,7 +445,7 @@ namespace StoryBuilder.DAL
                     case "Economic":
                         chr.Economic = attr.InnerText;
                         break;
-                    case "Education,":
+                    case "Education":
                         chr.Education = attr.InnerText;
                         break;
                     case "Ethnic":

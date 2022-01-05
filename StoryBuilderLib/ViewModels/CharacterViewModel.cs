@@ -715,7 +715,8 @@ public class CharacterViewModel : ObservableRecipient, INavigable
 
     private void AddTrait()
     {
-        CharacterTraits.Add(NewTrait);
+        string trait = "(Other) " + NewTrait;
+        CharacterTraits.Add(trait);
         NewTrait = string.Empty;
     }
         

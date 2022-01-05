@@ -65,7 +65,7 @@ public class ReportFormatter
             sb.Replace("@Voice", overview.Voice);
             sb.Replace("@Tense", overview.Tense);
             sb.Replace("@Style", overview.Style);
-            sb.Replace("@styleNotes", GetText(overview.StyleNotes));
+            sb.Replace("@StructureNotes", GetText(overview.StructureNotes));
             sb.Replace("@Tone", overview.Tone);
             sb.Replace("@toneNotes", GetText(overview.ToneNotes));
             sb.Replace("@Notes", GetText(overview.Notes));

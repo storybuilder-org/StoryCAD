@@ -140,7 +140,8 @@
             </PivotItem>
             <PivotItem Header="Backstory">
                 <!-- Character notes data -->
-                <usercontrols:RichEditBoxExtended Header="Backstory" RtfText="{x:Bind CharVm.BackStory, Mode=TwoWay}" AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap" ScrollViewer.VerticalScrollBarVisibility="Visible" />
+                <usercontrols:RichEditBoxExtended Header="Backstory" RtfText="{x:Bind CharVm.BackStory, Mode=TwoWay}" AcceptsReturn="True" 
+                                                  IsSpellCheckEnabled="True" TextWrapping="Wrap" ScrollViewer.VerticalScrollBarVisibility="Visible" />
             </PivotItem>
             <PivotItem Header="Social">
                 <!-- Character social data -->
@@ -171,34 +172,58 @@
             </PivotItem>
             <PivotItem Header="Psychological">
                 <!-- Character psychological data -->
-                <StackPanel>
-                    <ComboBox Header="Personality Type" IsEditable="False" Width="200" ItemsSource="{x:Bind CharVm.EnneagramList}"
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Grid Grid.Row="0" HorizontalAlignment="Left">
+                        <ComboBox Header="Personality Type" IsEditable="False" Width="200" ItemsSource="{x:Bind CharVm.EnneagramList}"
                               SelectedValue="{x:Bind CharVm.Enneagram, Mode=TwoWay}" />
-                    <StackPanel Orientation="Horizontal">
-                        <ComboBox Header="Intelligence" IsEditable="True" Width="200"
+                    </Grid>
+                    <Grid Grid.Row="1" HorizontalAlignment="Left">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="2*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="2*"/>
+                        </Grid.ColumnDefinitions>
+                        <ComboBox Header="Intelligence"  Grid.Column="0" IsEditable="True" Width="200"
                                   ItemsSource="{x:Bind CharVm.IntelligenceList}"
                                   SelectedItem="{x:Bind CharVm.Intelligence, Mode=TwoWay}" />
-                        <TextBlock Width="100"/>
-                        <ComboBox Header="Values" IsEditable="True" Width="200"
+                        <TextBlock Width="100"  Grid.Column="1" />
+                        <ComboBox Header="Values"  Grid.Column="2" IsEditable="True" Width="200"
                                   ItemsSource="{x:Bind CharVm.ValuesList}"
                                   SelectedItem="{x:Bind CharVm.Values, Mode=TwoWay}" />
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal">
-                        <ComboBox Header="Focus" IsEditable="True" Width="200"
+                    </Grid>
+                    <Grid Grid.Row="2" HorizontalAlignment="Left">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="2*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="2*"/>
+                        </Grid.ColumnDefinitions>
+                        <ComboBox Header="Focus"  Grid.Column="0" IsEditable="True" Width="200"
                                   ItemsSource="{x:Bind CharVm.FocusList}"
                                   SelectedItem="{x:Bind CharVm.Focus, Mode=TwoWay}" />
-                        <TextBlock Width="100"/>
-                        <ComboBox Header="Abnormality" IsEditable="True" Width="200"
+                        <TextBlock Width="100"  Grid.Column="1" />
+                        <ComboBox Header="Abnormality"  Grid.Column="2" IsEditable="True" Width="200"
                                   ItemsSource="{x:Bind CharVm.AbnormalityList}"
                                   SelectedItem="{x:Bind CharVm.Abnormality, Mode=TwoWay}" />
-                    </StackPanel>
-                    <usercontrols:RichEditBoxExtended Header="Psych Notes" RtfText="{x:Bind CharVm.PsychNotes, Mode=TwoWay}" AcceptsReturn="True"
-                                                      IsSpellCheckEnabled="True" TextWrapping="Wrap" Height="350"
-                                                      ScrollViewer.VerticalScrollBarVisibility="Visible" />
-                </StackPanel>
+                    </Grid>
+                    <usercontrols:RichEditBoxExtended Header="Psych Notes" Grid.Row="3" 
+                                                RtfText="{x:Bind CharVm.PsychNotes, Mode=TwoWay}" AcceptsReturn="True"
+                                                IsSpellCheckEnabled="True" TextWrapping="Wrap" 
+                                                ScrollViewer.VerticalScrollBarVisibility="Visible" />
+                </Grid>
             </PivotItem>
             <PivotItem Header="Inner Traits">
-                <Grid>
+                <Grid HorizontalAlignment="Left">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="2*"/>
+                    </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
@@ -207,88 +232,43 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
-                    <Grid Grid.Row="0" HorizontalAlignment="Left">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="2*"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="2*"/>
-                        </Grid.ColumnDefinitions>
-                        <ComboBox Header="Adventurousness" Grid.Column="0" IsEditable="True" Width="200"
+                    <ComboBox Header="Adventureousness" Grid.Column="0" Grid.Row="0" IsEditable="True" MinWidth="200"
                                   ItemsSource="{x:Bind CharVm.AdventurousnessList}"
                                   SelectedItem="{x:Bind CharVm.Adventurousness, Mode=TwoWay}" />
-                        <TextBlock Grid.Column="1" Width="100"/>
-                        <ComboBox Header="Aggression" Grid.Column="2" IsEditable="True" Width="200"
-                                  ItemsSource="{x:Bind CharVm.AggressionList}"
-                                  SelectedItem="{x:Bind CharVm.Aggression, Mode=TwoWay}" />
-                    </Grid>
-                    <Grid Grid.Row="1" HorizontalAlignment="Left">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="2*"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="2*"/>
-                        </Grid.ColumnDefinitions>
-                        <ComboBox Header="Confidence" Grid.Column="0" IsEditable="True" Width="200"
+                    <ComboBox Header="Confidence" Grid.Column="0" Grid.Row="1" IsEditable="True" MinWidth="200"
                                   ItemsSource="{x:Bind CharVm.ConfidenceList}"
                                   SelectedItem="{x:Bind CharVm.Confidence, Mode=TwoWay}" />
-                        <TextBlock Grid.Column="1" Width="100"/>
-                        <ComboBox Header="Conscientiousness" Grid.Column="2" IsEditable="True" Width="200"
-                                  ItemsSource="{x:Bind CharVm.ConscientiousnessList}"
-                                  SelectedItem="{x:Bind CharVm.Conscientiousness, Mode=TwoWay}" />
-                    </Grid>
-                    <Grid Grid.Row="2" HorizontalAlignment="Left">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="2*"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="2*"/>
-                        </Grid.ColumnDefinitions>
-                        <ComboBox Header="Creativity" Grid.Column="0" IsEditable="True" Width="200" ItemsSource="{x:Bind CharVm.CreativityList}"
+                    <ComboBox Header="Creativity" Grid.Column="0" Grid.Row="2" IsEditable="True" MinWidth="200" 
+                                  ItemsSource="{x:Bind CharVm.CreativityList}"
                                   SelectedItem="{x:Bind CharVm.Creativity, Mode=TwoWay}" />
-                        <TextBlock Grid.Column="1" Width="100"/>
-                        <ComboBox Header="Dominance" Grid.Column="2" IsEditable="True" Width="200" ItemsSource="{x:Bind CharVm.DominanceList}"
-                                  SelectedItem="{x:Bind CharVm.Dominance, Mode=TwoWay}" />
-                    </Grid>
-                    <Grid Grid.Row="3" HorizontalAlignment="Left">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="2*"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="2*"/>
-                        </Grid.ColumnDefinitions>
-                        <ComboBox Header="Enthusiasm" Grid.Column="0" IsEditable="True" Width="200"
+                    <ComboBox Header="Enthusiasm" Grid.Column="0" Grid.Row="3" IsEditable="True" MinWidth="200"
                                   ItemsSource="{x:Bind CharVm.EnthusiasmList}"
                                   SelectedItem="{x:Bind CharVm.Enthusiasm, Mode=TwoWay}" />
-                        <TextBlock Grid.Column="1" Width="100"/>
-                        <ComboBox Header="Self Assurance" Grid.Column="2" IsEditable="True" Width="200"
-                                  ItemsSource="{x:Bind CharVm.AssuranceList}"
-                                  SelectedItem="{x:Bind CharVm.Assurance, Mode=TwoWay}" />
-                    </Grid>
-                    <Grid Grid.Row="4" HorizontalAlignment="Left">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="2*"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="2*"/>
-                        </Grid.ColumnDefinitions>
-                        <ComboBox Header="Sensitivity" Grid.Column="0" IsEditable="True" Width="200"
+                    <ComboBox Header="Sensitivity" Grid.Column="0" Grid.Row="4" IsEditable="True" MinWidth="200"
                                   ItemsSource="{x:Bind CharVm.SensitivityList}"
                                   SelectedItem="{x:Bind CharVm.Sensitivity, Mode=TwoWay}" />
-                        <TextBlock Grid.Column="1" Width="100"/>
-                        <ComboBox Header="Shrewdness" Grid.Column="2" IsEditable="True" Width="200"
+                    <ComboBox Header="Sociability" Grid.Column="0" Grid.Row="5" IsEditable="True" MinWidth="200"
+                                  ItemsSource="{x:Bind CharVm.SociabilityList}"
+                                  SelectedItem="{x:Bind CharVm.Sociability, Mode=TwoWay}" />
+                    <TextBlock Grid.Column="1" Grid.Row="0" MinWidth="100"/>
+                    <ComboBox Header="Aggression" Grid.Column="2" Grid.Row="0" IsEditable="True" MinWidth="200"
+                                  ItemsSource="{x:Bind CharVm.AggressionList}"
+                                  SelectedItem="{x:Bind CharVm.Aggression, Mode=TwoWay}" />
+                    <ComboBox Header="Conscientiousness" Grid.Column="2" Grid.Row="1" IsEditable="True" MinWidth="200"
+                                  ItemsSource="{x:Bind CharVm.ConscientiousnessList}"
+                                  SelectedItem="{x:Bind CharVm.Conscientiousness, Mode=TwoWay}" />
+                    <ComboBox Header="Dominance" Grid.Column="2" Grid.Row="2" IsEditable="True" MinWidth="200" 
+                                  ItemsSource="{x:Bind CharVm.DominanceList}"
+                                  SelectedItem="{x:Bind CharVm.Dominance, Mode=TwoWay}" />
+                    <ComboBox Header="Self Assurance" Grid.Column="2" Grid.Row="3" IsEditable="True" MinWidth="200"
+                                  ItemsSource="{x:Bind CharVm.AssuranceList}"
+                                  SelectedItem="{x:Bind CharVm.Assurance, Mode=TwoWay}" />
+                    <ComboBox Header="Shrewdness" Grid.Column="2" Grid.Row="4" IsEditable="True" MinWidth="200"
                                   ItemsSource="{x:Bind CharVm.ShrewdnessList}"
                                   SelectedItem="{x:Bind CharVm.Shrewdness, Mode=TwoWay}" />
-                    </Grid>
-                    <Grid Grid.Row="5" HorizontalAlignment="Left">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="2*"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="2*"/>
-                        </Grid.ColumnDefinitions>
-                        <ComboBox Header="Sociability" Grid.Column="0" IsEditable="True"
-                                  Width="200" ItemsSource="{x:Bind CharVm.SociabilityList}"
-                              Text="{x:Bind CharVm.Sociability, Mode=TwoWay}" />
-                        <TextBlock Grid.Column="1" Width="100"/>
-                        <ComboBox Header="Stability" Grid.Column="2" IsEditable="True" Width="200"
+                    <ComboBox Header="Stability" Grid.Column="2" Grid.Row="5" IsEditable="True" MinWidth="200"
                                   ItemsSource="{x:Bind CharVm.StabilityList}"
                                   SelectedItem="{x:Bind CharVm.Stability, Mode=TwoWay}" />
-                    </Grid>
                 </Grid>
             </PivotItem>
             <PivotItem Header="Outer Traits">
@@ -301,23 +281,31 @@
                     <Button  Content="Trait Builder" Grid.Row="0"  HorizontalAlignment="Left" Margin="0,10,10,10" 
                              Command="{x:Bind CharVm.TraitCommand, Mode=OneWay}" />
                     <!-- Character traits -->
-                    <ListView MinWidth="300" MinHeight="150" Grid.Row="1" Header="Traits"
+                    <ListView Header="Traits" Grid.Row="1" MinWidth="300" MinHeight="150" 
                             ItemsSource="{x:Bind CharVm.CharacterTraits, Mode=TwoWay}"
                             SelectedIndex="{x:Bind CharVm.ExistingTraitIndex, Mode=OneWay}" />
-                    <StackPanel Orientation="Horizontal" Grid.Row="2" >
-                        <TextBox Header="New Trait"  MinWidth="300" Text="{x:Bind CharVm.NewTrait, Mode=TwoWay}" />
-                        <TextBlock Width="10" />
-                        <Button FontFamily="Segoe MDL2 Assets" Content="&#xE710;"  Command="{x:Bind CharVm.AddTraitCommand, Mode=OneWay}" >
+                    <Grid Grid.Row="2" HorizontalAlignment="Left">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="2*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="2*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="2*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBox Header="Other Trait:" Grid.Column="0" MinWidth="300" Text="{x:Bind CharVm.NewTrait, Mode=TwoWay}" />
+                        <TextBlock Grid.Column="1" Width="10" />
+                        <Button Grid.Column="2" FontFamily="Segoe MDL2 Assets" Content="&#xE710;"  Command="{x:Bind CharVm.AddTraitCommand, Mode=OneWay}" >
                             <ToolTipService.ToolTip>
                                 <ToolTip Content="Add Trait" />
                             </ToolTipService.ToolTip>
                         </Button>
-                        <Button FontFamily="Segoe MDL2 Assets" Content="&#xE738;" Command="{x:Bind CharVm.RemoveTraitCommand, Mode=OneWay}">
+                        <TextBlock Grid.Column="3" Width="10" />
+                        <Button Grid.Column="4" FontFamily="Segoe MDL2 Assets" Content="&#xE738;" Command="{x:Bind CharVm.RemoveTraitCommand, Mode=OneWay}">
                             <ToolTipService.ToolTip>
                                 <ToolTip Content="Remove Trait" />
                             </ToolTipService.ToolTip>
                         </Button>
-                    </StackPanel>
+                    </Grid>
                 </Grid>
             </PivotItem>
             <PivotItem Header="Notes">

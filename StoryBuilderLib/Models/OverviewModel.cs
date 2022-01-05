@@ -139,11 +139,11 @@ public class OverviewModel : StoryElement
         set => _style = value;
     }
 
-    private string _styleNotes;
-    public string StyleNotes
+    private string _structureNotes;
+    public string StructureNotes
     {
-        get => _styleNotes;
-        set => _styleNotes = value;
+        get => _structureNotes;
+        set => _structureNotes = value;
     }
     private string _tone;
     public string Tone
@@ -189,7 +189,7 @@ public class OverviewModel : StoryElement
         Tone = string.Empty;
         StoryIdea = string.Empty;
         Concept = string.Empty;
-        StyleNotes = string.Empty;
+        StructureNotes = string.Empty;
         ToneNotes = string.Empty;
         Notes = string.Empty;
         StoryProblem = string.Empty;
@@ -215,7 +215,7 @@ public class OverviewModel : StoryElement
         Tone = string.Empty;
         StoryIdea = string.Empty;
         Concept = string.Empty;
-        StyleNotes = string.Empty;
+        StructureNotes = string.Empty;
         ToneNotes = string.Empty;
         Notes = string.Empty;
         StoryProblem = string.Empty;
@@ -242,7 +242,7 @@ public class OverviewModel : StoryElement
         Tone = string.Empty;
         StoryIdea = string.Empty;
         Concept = string.Empty;
-        StyleNotes = string.Empty;
+        StructureNotes = string.Empty;
         ToneNotes = string.Empty;
         Notes = string.Empty;
         StoryProblem = string.Empty;
