@@ -8,6 +8,7 @@ using StoryBuilder.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Security;
 using System.Threading.Tasks;
 using Windows.Data.Xml.Dom;
 using Windows.Storage;
@@ -47,7 +48,13 @@ namespace StoryBuilder.DAL
             {
                 string msg = $"Reading file {file.Path}.";
                 Logger.Log(LogLevel.Info, msg);
-                _xml = await LoadFromFileAsync(file);
+                // my changes
+                string text = await FileIO.ReadTextAsync(file);
+                string xmlText = text.Replace("\0", string.Empty);
+                _xml = new XmlDocument();
+                _xml.LoadXml(xmlText);
+                // end my changes
+                //_xml = await LoadFromFileAsync(file);
                 LoadStoryModel();
                 _model.ProjectFile = file;
                 _model.ProjectFilename = file.Name;
@@ -837,9 +844,10 @@ namespace StoryBuilder.DAL
             string[] result = note.Split(separator, StringSplitOptions.RemoveEmptyEntries);
             string filename = result[1];
             StorageFolder folder = await FindSubFolder(uuid);
-            StorageFile rtfFile =
-                await folder.GetFileAsync(filename);
-            return await FileIO.ReadTextAsync(rtfFile);
+            StorageFile rtfFile = await folder.GetFileAsync(filename);
+            string text = await FileIO.ReadTextAsync(rtfFile);
+            return text.Replace("\0",string.Empty);
+            //return await FileIO.ReadTextAsync(rtfFile);
         }
         public async Task<string> ReadRtfText(Guid uuid, string rftFilename)
         {
