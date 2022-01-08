@@ -51,13 +51,23 @@ public class StoryWriter
 
         await using (Stream fileStream = await _outFile.OpenStreamForWriteAsync())
         {
+
             XmlWriterSettings settings = new();
             settings.Async = true;
             settings.Encoding = Encoding.UTF8;
             settings.Indent = true;
-            XmlWriter writer = XmlWriter.Create(fileStream, settings);
-
-            _xml.Save(writer);
+            StringWriter sb = new StringWriter();
+            XmlWriter writer = XmlWriter.Create(sb, settings);
+            try 
+            {
+                _xml.Save(writer);
+            }
+            catch(Exception ex) 
+            {
+                string x = ex.Message;
+            }
+            //XmlWriter writer = XmlWriter.Create(fileStream, settings);
+            //_xml.Save(writer);
         }
 
         model.Changed = false;
