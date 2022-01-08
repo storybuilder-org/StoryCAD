@@ -426,7 +426,7 @@ namespace StoryBuilder.Services.Reports
             StorageFolder di = await _scrivener.GetSubFolder(node.Uuid); // Get subfolder path
             StorageFile contents = await di.CreateFileAsync("content.rtf", CreationCollisionOption.ReplaceExisting);
  
-            string rtf = await _formatter.FormatStoryOverviewReport(overview);
+            string rtf = _formatter.FormatStoryOverviewReport(overview);
             
             // Write the report
             await FileIO.WriteTextAsync(contents, rtf);
@@ -448,7 +448,7 @@ namespace StoryBuilder.Services.Reports
             StorageFolder di = await _scrivener.GetSubFolder(node.Uuid); // Get subfolder path
             StorageFile contents = await di.CreateFileAsync("content.rtf", CreationCollisionOption.ReplaceExisting);
 
-            string rtf = await _formatter.FormatProblemReport(element);
+            string rtf = _formatter.FormatProblemReport(element);
             
             // Write the report
             await FileIO.WriteTextAsync(contents, rtf);
@@ -470,7 +470,7 @@ namespace StoryBuilder.Services.Reports
             StorageFolder di = await _scrivener.GetSubFolder(node.Uuid); // Get subfolder path
             StorageFile contents = await di.CreateFileAsync("content.rtf", CreationCollisionOption.ReplaceExisting);
 
-            string rtf = await _formatter.FormatCharacterReport(element);
+            string rtf = _formatter.FormatCharacterReport(element);
             
             // Write the report
             await FileIO.WriteTextAsync(contents, rtf);
@@ -494,7 +494,7 @@ namespace StoryBuilder.Services.Reports
             StorageFolder di = await _scrivener.GetSubFolder(node.Uuid); // Get subfolder path
             StorageFile contents = await di.CreateFileAsync("content.rtf", CreationCollisionOption.ReplaceExisting);
  
-            string rtf = await _formatter.FormatSettingReport(element);
+            string rtf = _formatter.FormatSettingReport(element);
             
             // Write the report
             await FileIO.WriteTextAsync(contents, rtf);
@@ -518,7 +518,7 @@ namespace StoryBuilder.Services.Reports
             StorageFolder di = await _scrivener.GetSubFolder(node.Uuid); // Get subfolder path
             StorageFile contents = await di.CreateFileAsync("content.rtf", CreationCollisionOption.ReplaceExisting);
 
-            string rtf = await _formatter.FormatSceneReport(element);
+            string rtf = _formatter.FormatSceneReport(element);
 
             // Write the report
             await FileIO.WriteTextAsync(contents, rtf);
@@ -530,7 +530,7 @@ namespace StoryBuilder.Services.Reports
             StorageFolder di = await _scrivener.GetSubFolder(node.Uuid); // Get subfolder path
             StorageFile contents = await di.CreateFileAsync("content.rtf", CreationCollisionOption.ReplaceExisting);
 
-            string rtf = await _formatter.FormatFolderReport(element);
+            string rtf = _formatter.FormatFolderReport(element);
 
             // Write the report
             await FileIO.WriteTextAsync(contents, rtf);
@@ -542,7 +542,7 @@ namespace StoryBuilder.Services.Reports
             StorageFolder di = await _scrivener.GetSubFolder(node.Uuid); // Get subfolder path
             StorageFile contents = await di.CreateFileAsync("content.rtf", CreationCollisionOption.ReplaceExisting);
 
-            string rtf = await _formatter.FormatSectionReport(element);
+            string rtf = _formatter.FormatSectionReport(element);
 
             // Write the report
             await FileIO.WriteTextAsync(contents, rtf);
@@ -554,7 +554,7 @@ namespace StoryBuilder.Services.Reports
             StorageFolder di = await _scrivener.GetSubFolder(node.Uuid);
             StorageFile contents = await di.CreateFileAsync("content.rtf", CreationCollisionOption.ReplaceExisting);
 
-            string rtf = await _formatter.FormatSynopsisReport();
+            string rtf = _formatter.FormatSynopsisReport();
 
             // Write the report
             await FileIO.WriteTextAsync(contents, rtf);

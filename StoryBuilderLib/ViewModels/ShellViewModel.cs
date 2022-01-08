@@ -393,7 +393,7 @@ namespace StoryBuilder.ViewModels
                 // If the current project needs saved, do so
                 if (StoryModel.Changed)
                 {
-                    await SaveModel();
+                    SaveModel();
                     await WriteModel();
                 }
                 
@@ -579,7 +579,7 @@ namespace StoryBuilder.ViewModels
         /// and calls its SaveModel() method.
         /// </summary>
         /// <returns></returns>
-        private async Task SaveModel()
+        private void SaveModel()
         {
             if (SplitViewFrame.CurrentSourcePageType is null)
                 return;
@@ -590,31 +590,31 @@ namespace StoryBuilder.ViewModels
             {
                 case "StoryBuilder.Views.OverviewPage":
                     OverviewViewModel ovm = Ioc.Default.GetService<OverviewViewModel>();
-                    await ovm.SaveModel();
+                    ovm.SaveModel();
                     break;
                 case "StoryBuilder.Views.ProblemPage":
                     ProblemViewModel pvm = Ioc.Default.GetService<ProblemViewModel>();
-                    await pvm.SaveModel();
+                    pvm.SaveModel();
                     break;
                 case "StoryBuilder.Views.CharacterPage":
                     CharacterViewModel cvm = Ioc.Default.GetService<CharacterViewModel>();
-                    await cvm.SaveModel();
+                    cvm.SaveModel();
                     break;
                 case "StoryBuilder.Views.ScenePage":
-                    SceneViewModel ppvm = Ioc.Default.GetService<SceneViewModel>();
-                    await ppvm.SaveModel();
+                    SceneViewModel scvm = Ioc.Default.GetService<SceneViewModel>();
+                    scvm.SaveModel();
                     break;
                 case "StoryBuilder.Views.FolderPage":
-                    FolderViewModel sepvm = Ioc.Default.GetService<FolderViewModel>();
-                    await sepvm.SaveModel();
+                    FolderViewModel fpvm = Ioc.Default.GetService<FolderViewModel>();
+                    fpvm.SaveModel();
                     break;
                 case "StoryBuilder.Views.SectionPage":
-                    SectionViewModel scvm = Ioc.Default.GetService<SectionViewModel>();
-                    await scvm.SaveModel();
+                    SectionViewModel secpvm = Ioc.Default.GetService<SectionViewModel>();
+                    secpvm.SaveModel();
                     break;
                 case "StoryBuilder.Views.SettingPage":
-                    SettingViewModel svm = Ioc.Default.GetService<SettingViewModel>();
-                    await svm.SaveModel();
+                    SettingViewModel setvm = Ioc.Default.GetService<SettingViewModel>();
+                    setvm.SaveModel();
                     break;
             }
         }
@@ -625,7 +625,7 @@ namespace StoryBuilder.ViewModels
         {
             if (StoryModel.Changed)
             {
-                await SaveModel();
+                SaveModel();
                 await WriteModel();
             }
             //Logger.Log(LogLevel.Trace, "OpenFile");
@@ -729,7 +729,7 @@ namespace StoryBuilder.ViewModels
             {
                 //TODO: SaveFile is both an AppButton command and called from NewFile and OpenFile. Split these.
                 StatusMessage = "Save File command executing";
-                await SaveModel();
+                SaveModel();
                 await WriteModel();
                 StatusMessage = "Save File command completed";
                 StoryModel.Changed = false;
@@ -806,7 +806,7 @@ namespace StoryBuilder.ViewModels
                     if (await VerifyReplaceOrCreate())
                     {
                         //Saves model to disk
-                        await SaveModel(); 
+                        SaveModel(); 
                         await WriteModel();
 
                         //Saves the current project folders and files to disk
@@ -878,7 +878,7 @@ namespace StoryBuilder.ViewModels
             // Save the existing file if changed
             if (StoryModel.Changed)
             {
-                await SaveModel();
+                SaveModel();
                 await WriteModel();
             }
             ResetModel();
@@ -906,7 +906,7 @@ namespace StoryBuilder.ViewModels
             //TODO: Only close if changed
             if (StoryModel.Changed)
             {
-                await SaveModel();
+                SaveModel();
                 await WriteModel();
             }
             StatusMessage = "Goodbye";
@@ -1187,7 +1187,7 @@ namespace StoryBuilder.ViewModels
             _canExecuteCommands = false;
             Logger.Log(LogLevel.Info, "Executing Generate Print Reports command");
             StatusMessage = "Generate Print Reports executing";
-            await SaveModel();
+            SaveModel();
 
             // Run reports dialog
             ContentDialog ReportDialog = new();
@@ -1221,7 +1221,7 @@ namespace StoryBuilder.ViewModels
             _canExecuteCommands = false;
             Logger.Log(LogLevel.Info, "Executing Generate Scrivener Reports command");
             StatusMessage = "Generate Scrivener Reports executing";
-            await SaveModel();
+            SaveModel();
 
             // Select the Scrivener .scrivx file to add the report to
             FileOpenPicker openPicker = new();

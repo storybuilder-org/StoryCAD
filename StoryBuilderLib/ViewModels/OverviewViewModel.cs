@@ -236,15 +236,15 @@ public class OverviewViewModel : ObservableRecipient, INavigable
 
     #region Methods
 
-    public async Task Activate(object parameter)
+    public void Activate(object parameter)
     {
         Model = (OverviewModel)parameter;
-        await LoadModel();
+        LoadModel();
     }
 
-    public async Task Deactivate(object parameter)
+    public void Deactivate(object parameter)
     {
-        await SaveModel();
+        SaveModel();
     }
 
     private void OnPropertyChanged(object sender, PropertyChangedEventArgs args)
@@ -256,7 +256,7 @@ public class OverviewViewModel : ObservableRecipient, INavigable
         }
     }
 
-    private async Task LoadModel()
+    private void LoadModel()
     {
         _changeable = false;
         _changed = false;
@@ -277,18 +277,16 @@ public class OverviewViewModel : ObservableRecipient, INavigable
         Tone = Model.Tone;
         Style = Model.Style;
         StoryProblem = Model.StoryProblem;
-
-        // Load RTF files
-        StoryIdea = await _rdr.GetRtfText(Model.StoryIdea, Uuid);
-        Concept = await _rdr.GetRtfText(Model.Concept, Uuid);
-        StructureNotes = await _rdr.GetRtfText(Model.StructureNotes, Uuid);
-        ToneNotes = await _rdr.GetRtfText(Model.ToneNotes, Uuid);
-        Notes = await _rdr.GetRtfText(Model.Notes, Uuid);
+        StoryIdea = Model.StoryIdea;
+        Concept = Model.Concept;
+        StructureNotes = Model.StructureNotes;
+        ToneNotes = Model.ToneNotes;
+        Notes = Model.Notes;
 
         _changeable = true;
     }
 
-    internal async Task SaveModel()
+    internal void SaveModel()
     {
         if (_changed)
         {
@@ -308,26 +306,21 @@ public class OverviewViewModel : ObservableRecipient, INavigable
             Model.Style = Style;
             Model.Tone = Tone;
             Model.StoryProblem = StoryProblem;
-
-            // Write RTF files
-            Model.StoryIdea = await _wtr.PutRtfText(StoryIdea, Model.Uuid, "storyidea.rtf");
-            Model.Concept = await _wtr.PutRtfText(Concept, Model.Uuid, "concept.rtf");
-            Model.StructureNotes = await _wtr.PutRtfText(StructureNotes, Model.Uuid, "stylenotes.rtf");
-            Model.ToneNotes = await _wtr.PutRtfText(ToneNotes, Model.Uuid, "tonenotes.rtf");
-            Model.Notes = await _wtr.PutRtfText(Notes, Model.Uuid, "notes.rtf");
-
-            //_logger.Log(LogLevel.Info, string.Format("Requesting IsDirty change to true"));
-            //Messenger.Send(new IsChangedMessage(Changed));
+            Model.StoryIdea = StoryIdea;
+            Model.Concept = Concept;
+            Model.StructureNotes = StructureNotes;
+            Model.ToneNotes = ToneNotes;
+            Model.Notes = Notes;
         }
     }
 
-    private async void LoadStoryPremise(string value)
+    private void LoadStoryPremise(string value)
     {
         if (value.Equals(string.Empty))
             return;
         ProblemModel problem = (ProblemModel) StringToStoryElement(value);
-        PremiseLock = false;    // Set Premise to read/write
-        Premise = await _rdr.GetRtfText(problem.Premise, problem.Uuid);
+        PremiseLock = false;    // Set Premise to read/write to allow update
+        Premise = problem.Premise;
         PremiseLock = true;     // Set Premise to read-only
     }
 

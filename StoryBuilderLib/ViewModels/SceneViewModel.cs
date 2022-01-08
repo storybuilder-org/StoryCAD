@@ -340,15 +340,15 @@ public class SceneViewModel : ObservableRecipient, INavigable
 
     #region Methods
 
-    public async Task Activate(object parameter)
+    public void Activate(object parameter)
     {
         Model = (SceneModel)parameter;
-        await LoadModel();   // Load the ViewModel from the Story
+        LoadModel();   // Load the ViewModel from the Story
     }
 
-    public async Task Deactivate(object parameter)
+    public void Deactivate(object parameter)
     {
-        await SaveModel();    // Save the ViewModel back to the Story
+        SaveModel();    // Save the ViewModel back to the Story
     }
     private void OnPropertyChanged(object sender, PropertyChangedEventArgs args)
     {
@@ -359,7 +359,7 @@ public class SceneViewModel : ObservableRecipient, INavigable
         }
     }
 
-    private async Task LoadModel()
+    private void LoadModel()
     {
         _changeable = false;
         _changed = false;
@@ -398,20 +398,18 @@ public class SceneViewModel : ObservableRecipient, INavigable
         Outcome = Model.Outcome;
         Emotion = Model.Emotion;
         NewGoal = Model.NewGoal;
-
-        // Read RTF files
-        Remarks = await _rdr.GetRtfText(Model.Remarks, Uuid);
-        Events = await _rdr.GetRtfText(Model.Events, Uuid);
-        Consequences = await _rdr.GetRtfText(Model.Consequences, Uuid);
-        Significance = await _rdr.GetRtfText(Model.Significance, Uuid);
-        Realization = await _rdr.GetRtfText(Model.Realization, Uuid);
-        Review = await _rdr.GetRtfText(Model.Review, Uuid);
-        Notes = await _rdr.GetRtfText(Model.Notes, Uuid);
+        Remarks = Model.Remarks;
+        Events = Model.Events;
+        Consequences = Model.Consequences;
+        Significance = Model.Significance;
+        Realization = Model.Realization;
+        Review = Model.Review;
+        Notes = Model.Notes;
             
         _changeable = true;
     }
 
-    internal async Task SaveModel()
+    internal void SaveModel()
     {
         _changeable = false;
         if (_changed)
@@ -447,13 +445,13 @@ public class SceneViewModel : ObservableRecipient, INavigable
             Model.NewGoal = NewGoal;
 
             // Write RTF files
-            Model.Remarks = await _wtr.PutRtfText(Remarks, Model.Uuid, "remarks.rtf");
-            Model.Events = await _wtr.PutRtfText(Events, Model.Uuid, "events.rtf");
-            Model.Consequences = await _wtr.PutRtfText(Consequences, Model.Uuid, "consequences.rtf");
-            Model.Significance = await _wtr.PutRtfText(Significance, Model.Uuid, "significance.rtf");
-            Model.Realization = await _wtr.PutRtfText(Realization, Model.Uuid, "realization.rtf");
-            Model.Review = await _wtr.PutRtfText(Review, Model.Uuid, "review.rtf");
-            Model.Notes = await _wtr.PutRtfText(Notes, Model.Uuid, "notes.rtf");
+            Model.Remarks = Remarks;
+            Model.Events = Events;
+            Model.Consequences = Consequences;
+            Model.Significance = Significance;
+            Model.Realization = Realization;
+            Model.Review = Review;
+            Model.Notes = Notes;
 
             //_logger.Log(LogLevel.Info, string.Format("Requesting IsDirty change to true"));
             //Messenger.Send(new IsChangedMessage(Changed));

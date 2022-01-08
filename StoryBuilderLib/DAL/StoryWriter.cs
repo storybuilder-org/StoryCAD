@@ -730,41 +730,12 @@ public class StoryWriter
         return element;
     }
 
-    public async Task<string> PutRtfText(string note, Guid uuid, string filename)
-    {
-        char[] endchars = { ' ', (char)0 };      // remove trialing zero from RichEditText
-        string work = note.TrimEnd(endchars);
-        // If the note already contains an imbedded file reference, we're done
-        if (note.StartsWith("[FILE:"))
-            return work;
-        //TODO: Make external RTF file size a Preference
-        if (note.Length > 1024)
-        {
-            StorageFolder folder = await FindSubFolder(uuid);
-            StorageFile rtfFile = await folder.CreateFileAsync(filename, CreationCollisionOption.ReplaceExisting);
-            await using (Stream stream = await rtfFile.OpenStreamForWriteAsync())
-            {
-                await using (StreamWriter writer = new(stream)) {await writer.WriteAsync(work);}
-            }
-            return $"[FILE:{filename}]";
-        }
-        return work;
-    }
     public async Task<string> ReadRtfText(Guid uuid, string rftFilename)
     {
         StorageFolder folder = await FindSubFolder(uuid);
         StorageFile rtfFile =
             await folder.GetFileAsync(rftFilename);
         return await FileIO.ReadTextAsync(rtfFile);
-    }
-    public async Task WriteRtfText(Guid uuid, string rftFilename, string notes)
-    {
-        // //https://stackoverflow.com/questions/32948609/how-to-close-the-opened-storagefile
-        StorageFolder folder = await FindSubFolder(uuid);
-        StorageFile rtfFile = await folder.CreateFileAsync(rftFilename, CreationCollisionOption.ReplaceExisting);
-        await using Stream stream = await rtfFile.OpenStreamForWriteAsync();
-        await using StreamWriter writer = new(stream);
-        await writer.WriteAsync(notes);
     }
 
     /// <summary>

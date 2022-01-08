@@ -183,15 +183,15 @@ public class SettingViewModel : ObservableRecipient, INavigable
 
     #region Methods
 
-    public async Task Activate(object parameter)
+    public void Activate(object parameter)
     {
         Model = (SettingModel)parameter;
-        await LoadModel();
+        LoadModel();
     }
 
-    public async Task Deactivate(object parameter)
+    public void Deactivate(object parameter)
     {
-        await SaveModel();    // Save the ViewModel back to the Story
+        SaveModel();    // Save the ViewModel back to the Story
     }
 
     private void OnPropertyChanged(object sender, PropertyChangedEventArgs args)
@@ -203,7 +203,7 @@ public class SettingViewModel : ObservableRecipient, INavigable
         }
     }
 
-    private async Task LoadModel()
+    private void LoadModel()
     {
         _changeable = false;
         _changed = false;
@@ -220,20 +220,17 @@ public class SettingViewModel : ObservableRecipient, INavigable
         Prop2 = Model.Prop2;
         Prop3 = Model.Prop3;
         Prop4 = Model.Prop4;
-        Summary = string.Empty;
-
-        // Read RTF files
-        Summary = await _rdr.GetRtfText(Model.Summary, Uuid);
-        Sights = await _rdr.GetRtfText(Model.Sights, Uuid);
-        Sounds = await _rdr.GetRtfText(Model.Sounds, Uuid);
-        Touch = await _rdr.GetRtfText(Model.Touch, Uuid);
-        SmellTaste = await _rdr.GetRtfText(Model.SmellTaste, Uuid);
-        Notes = await _rdr.GetRtfText(Model.Notes, Uuid);
+        Summary = Model.Summary;
+        Sights = Model.Sights;
+        Sounds = Model.Sounds;
+        Touch = Model.Touch;
+        SmellTaste = Model.SmellTaste;
+        Notes = Model.Notes;
 
         _changeable = true;
     }
 
-    internal async Task SaveModel()
+    internal void SaveModel()
     {
         if (_changed)
         {
@@ -251,12 +248,12 @@ public class SettingViewModel : ObservableRecipient, INavigable
             Model.Prop4 = Prop4;
 
             //Write RTF files
-            Model.Summary = await _wtr.PutRtfText(Summary, Model.Uuid, "notes.rtf");
-            Model.Sights = await _wtr.PutRtfText(Sights, Model.Uuid, "sights.rtf");
-            Model.Sounds = await _wtr.PutRtfText(Sounds, Model.Uuid, "sounds.rtf");
-            Model.Touch = await _wtr.PutRtfText(Touch, Model.Uuid, "touch.rtf");
-            Model.SmellTaste = await _wtr.PutRtfText(SmellTaste, Model.Uuid, "smelltaste.rtf");
-            Model.Notes = await _wtr.PutRtfText(Notes, Model.Uuid, "notes.rtf");
+            Model.Summary = Summary;
+            Model.Sights = Sights;
+            Model.Sounds = Sounds;
+            Model.Touch = Touch;
+            Model.SmellTaste = SmellTaste;
+            Model.Notes = Notes;
 
             //_logger.Log(LogLevel.Info, string.Format("Requesting IsDirty change to true"));
             //Messenger.Send(new IsChangedMessage(Changed));

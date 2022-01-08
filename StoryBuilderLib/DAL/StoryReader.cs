@@ -74,6 +74,7 @@ namespace StoryBuilder.DAL
                 Logger.Log(LogLevel.Info, msg);
                 StatusMessage smsg = new(msg, 200);
                 Messenger.Send(new StatusChangedMessage(smsg));
+                await FixupRtfFiles(_model);
                 return _model;
             }
             catch (Exception ex)
@@ -82,6 +83,73 @@ namespace StoryBuilder.DAL
                 StatusMessage smsg = new("Error reading story", 200);
                 Messenger.Send(new StatusChangedMessage(smsg));
                 return new StoryModel();  // return an empty story model
+            }
+        }
+
+        private async Task FixupRtfFiles(StoryModel model)
+        {
+            foreach (StoryElement element in model.StoryElements) 
+            {
+                switch (element.Type)
+                {
+                    case StoryItemType.StoryOverview:
+                        OverviewModel overview = (OverviewModel)element;
+                        // Load RTF files
+                        overview.StoryIdea = await GetRtfText(overview.StoryIdea, overview.Uuid);
+                        overview.Concept = await GetRtfText(overview.Concept, overview.Uuid);
+                        overview.StructureNotes = await GetRtfText(overview.StructureNotes, overview.Uuid);
+                        overview.ToneNotes = await GetRtfText(overview.ToneNotes, overview.Uuid);
+                        overview.Notes = await GetRtfText(overview.Notes, overview.Uuid);
+                        break;
+                    case StoryItemType.Problem:
+                        ProblemModel problem = (ProblemModel)element;
+                        problem.StoryQuestion = await GetRtfText(problem.StoryQuestion, problem.Uuid);
+                        problem.Premise = await GetRtfText(problem.Premise, problem.Uuid);
+                        problem.Notes = await GetRtfText(problem.Notes, problem.Uuid);
+                        //await GenerateProblemReport(node, element);
+                        break;
+                    case StoryItemType.Character:
+                        CharacterModel character = (CharacterModel)element;
+                        character.CharacterSketch = await GetRtfText(character.CharacterSketch, character.Uuid);
+                        character.PhysNotes = await GetRtfText(character.PhysNotes, character.Uuid);
+                        character.Appearance = await GetRtfText(character.Appearance, character.Uuid);
+                        character.Economic = await GetRtfText(character.Economic, character.Uuid);
+                        character.Education = await GetRtfText(character.Education, character.Uuid);
+                        character.Ethnic = await GetRtfText(character.Ethnic, character.Uuid);
+                        character.Religion = await GetRtfText(character.Religion, character.Uuid);
+                        character.PsychNotes = await GetRtfText(character.PsychNotes, character.Uuid);
+                        character.Notes = await GetRtfText(character.Notes, character.Uuid);
+                        character.Flaw = await GetRtfText(character.Flaw, character.Uuid);
+                        character.BackStory = await GetRtfText(character.BackStory, character.Uuid);
+                        break;
+                    case StoryItemType.Setting:
+                        SettingModel setting = (SettingModel)element;
+                        setting.Summary = await GetRtfText(setting.Summary, setting.Uuid);
+                        setting.Sights = await GetRtfText(setting.Sights, setting.Uuid);
+                        setting.Sounds = await GetRtfText(setting.Sounds, setting.Uuid);
+                        setting.Touch = await GetRtfText(setting.Touch, setting.Uuid);
+                        setting.SmellTaste = await GetRtfText(setting.SmellTaste, setting.Uuid);
+                        setting.Notes = await GetRtfText(setting.Notes, setting.Uuid);
+                        break;
+                    case StoryItemType.Scene:
+                        SceneModel scene = (SceneModel)element;
+                        scene.Remarks = await GetRtfText(scene.Remarks, scene.Uuid);
+                        scene.Events = await GetRtfText(scene.Events, scene.Uuid);
+                        scene.Consequences = await GetRtfText(scene.Consequences, scene.Uuid);
+                        scene.Significance = await GetRtfText(scene.Significance, scene.Uuid);
+                        scene.Realization = await GetRtfText(scene.Realization, scene.Uuid);
+                        scene.Review = await GetRtfText(scene.Review, scene.Uuid);
+                        scene.Notes = await GetRtfText(scene.Notes, scene.Uuid);
+                        break;
+                    case StoryItemType.Folder:
+                        FolderModel folder = (FolderModel)element;
+                        folder.Notes = await GetRtfText(folder.Notes, folder.Uuid);
+                        break;
+                    case StoryItemType.Section:
+                        SectionModel section = (SectionModel)element;
+                        section.Notes = await GetRtfText(section.Notes, section.Uuid);
+                        break;
+                }
             }
         }
 

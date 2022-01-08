@@ -20,21 +20,12 @@ public class ReportFormatter
 
     #region Public methods
 
-    public async Task<string> FormatStoryOverviewReport(StoryElement element)
+    public string FormatStoryOverviewReport(StoryElement element)
     {
         OverviewModel overview = (OverviewModel)element;
         string[] lines = _templates["Story Overview"];  
         RtfDocument doc = new(string.Empty);
 
-        // Pre-process RTF properties to preserve [FILE:x.rtf] tag for long fields
-        // and then load long fields from their corresponding file in its subfolder
-        string saveStoryIdea = overview.StoryIdea;
-        string saveConcept = overview.Concept;
-        string saveNotes = overview.Notes;
-        overview.StoryIdea = await _rdr.GetRtfText(overview.StoryIdea, overview.Uuid);
-        overview.Concept = await _rdr.GetRtfText(overview.Concept, overview.Uuid);
-        //overview.Premise = await _rdr.GetRtfText(overview.Premise, overview.Uuid);
-        overview.Notes = await _rdr.GetRtfText(overview.Notes, overview.Uuid);
         StoryElement vpChar = StringToStoryElement(overview.ViewpointCharacter);
         string vpName = vpChar?.Name ?? string.Empty;
         StoryElement seProblem = StringToStoryElement(overview.StoryProblem);
@@ -71,12 +62,7 @@ public class ReportFormatter
             sb.Replace("@Notes", GetText(overview.Notes));
             doc.AddText(sb.ToString());
             doc.AddNewLine();
-
         }
-        // Post-process RTF properties
-        overview.StoryIdea = saveStoryIdea;
-        overview.Concept = saveConcept;
-        overview.Notes = saveNotes;
         return doc.GetRtf();
     }
 
@@ -109,7 +95,7 @@ public class ReportFormatter
         return doc.GetRtf();
     }
 
-    public async Task<string> FormatProblemReport(StoryElement element)
+    public string FormatProblemReport(StoryElement element)
     {
         ProblemModel problem = (ProblemModel)element;
         string[] lines = _templates["Problem Description"];
@@ -119,14 +105,6 @@ public class ReportFormatter
 
         StoryElement vpAntagonist = StringToStoryElement(problem.Antagonist);
 
-        // Pre-process RTF properties to preserve [FILE:x.rtf] tag for long fields
-        // and then load long fields from their corresponding file in its subfolder
-        string saveStoryQuestion = problem.StoryQuestion;
-        problem.StoryQuestion = await _rdr.GetRtfText(problem.StoryQuestion, problem.Uuid);
-        string savePremise = problem.Premise;
-        problem.Premise = await _rdr.GetRtfText(problem.Premise, problem.Uuid);
-        string saveNotes = problem.Notes;
-        problem.Notes = await _rdr.GetRtfText(problem.Notes, problem.Uuid);
         // Parse and write the report
         foreach (string line in lines)
         {
@@ -151,10 +129,6 @@ public class ReportFormatter
             doc.AddText(sb.ToString());
             doc.AddNewLine();
         }
-        // Post-process RTF properties
-        problem.StoryQuestion = saveStoryQuestion;
-        problem.Premise = savePremise;
-        problem.Notes = saveNotes;
 
         return doc.GetRtf();
     }
@@ -188,32 +162,13 @@ public class ReportFormatter
         return doc.GetRtf();
     }
 
-    public async Task<string> FormatCharacterReport(StoryElement element)
+    public string FormatCharacterReport(StoryElement element)
     {
         CharacterModel character = (CharacterModel)element;
         string[] lines = _templates["Character Description"];
         RtfDocument doc = new(string.Empty);
 
-        // Pre-process RTF properties to preserve [FILE:x.rtf] tag for long fields
-        // and then load long fields from their corresponding file in its subfolder
-        string saveCharacterSketch = character.CharacterSketch;
-        character.CharacterSketch = await _rdr.GetRtfText(character.CharacterSketch, character.Uuid);
-        string savePhysNotes = character.PhysNotes;
-        character.PhysNotes = await _rdr.GetRtfText(character.PhysNotes, character.Uuid);
-        string saveAppearance = character.Appearance;
-        character.Appearance = await _rdr.GetRtfText(character.Appearance, character.Uuid);
-        string saveEconomic = character.Economic;
-        character.Economic = await _rdr.GetRtfText(character.Economic, character.Uuid);
-        string saveEducation = character.Education;
-        character.Education = await _rdr.GetRtfText(character.Education, character.Uuid);
-        string saveEthnic = character.Ethnic;
-        character.Ethnic = await _rdr.GetRtfText(character.Ethnic, character.Uuid);
-        string saveReligion = character.Religion;
-        character.Religion = await _rdr.GetRtfText(character.Religion, character.Uuid);
-        string savePsychNotes = character.PsychNotes;
-        character.PsychNotes = await _rdr.GetRtfText(character.PsychNotes, character.Uuid);
-        string saveNotes = character.Notes;
-        character.Notes = await _rdr.GetRtfText(character.Notes, character.Uuid);
+
         // Parse and write the report
         foreach (string line in lines)
         {
@@ -283,16 +238,6 @@ public class ReportFormatter
             doc.AddText(sb.ToString());
             doc.AddNewLine();
         }
-        // Post-produce RTF files
-        character.CharacterSketch = saveCharacterSketch;
-        character.PhysNotes = savePhysNotes;
-        character.Appearance = saveAppearance;
-        character.Economic = saveEconomic;
-        character.Education = saveEducation;
-        character.Ethnic = saveEthnic;
-        character.Religion = saveReligion;
-        character.PsychNotes = savePsychNotes;
-        character.Notes = saveNotes;
          
         return doc.GetRtf();
     }
@@ -326,24 +271,12 @@ public class ReportFormatter
         return doc.GetRtf();
     }
 
-    public async Task<string> FormatSettingReport(StoryElement element)
+    public string FormatSettingReport(StoryElement element)
     {
         SettingModel setting = (SettingModel)element;
         string[] lines = _templates["Setting Description"];
         RtfDocument doc = new(string.Empty);
 
-        // Pre-process RTF properties to preserve [FILE:x.rtf] tag for long fields
-        // and then load long fields from their corresponding file in its subfolder
-        string saveSights = setting.Sights;
-        setting.Sights = await _rdr.GetRtfText(setting.Sights, setting.Uuid);
-        string saveSounds = setting.Sounds;
-        setting.Sounds = await _rdr.GetRtfText(setting.Sounds, setting.Uuid);
-        string saveTouch = setting.Touch;
-        setting.Touch = await _rdr.GetRtfText(setting.Touch, setting.Uuid);
-        string saveSmellTaste = setting.SmellTaste;
-        setting.SmellTaste = await _rdr.GetRtfText(setting.SmellTaste, setting.Uuid);
-        string saveNotes = setting.Notes;
-        setting.Notes = await _rdr.GetRtfText(setting.Notes, setting.Uuid);
         // Parse and write the report
         foreach (string line in lines)
         {
@@ -369,14 +302,6 @@ public class ReportFormatter
             doc.AddText(sb.ToString());
             doc.AddNewLine();
         }
-
-        // Post-process RTF properties
-        setting.Sights = saveSights;
-        setting.Sounds = saveSounds;
-        setting.Touch = saveTouch;
-        setting.SmellTaste = saveSmellTaste;
-        setting.Notes = saveNotes;
-
         return doc.GetRtf();
     }
 
@@ -409,20 +334,11 @@ public class ReportFormatter
         return doc.GetRtf(); 
     }
 
-    public async Task<string> FormatSceneReport(StoryElement element)
+    public string FormatSceneReport(StoryElement element)
     {
         SceneModel scene = (SceneModel)element;
         string[] lines = _templates["Scene Description"];
         RtfDocument doc = new(string.Empty);
-
-        // Pre-process RTF properties to preserve [FILE:x.rtf] tag for long fields
-        // and then load long fields from their corresponding file in its subfolder
-        string saveRemarks = scene.Remarks;
-        scene.Remarks = await _rdr.GetRtfText(scene.Remarks, scene.Uuid);
-        string saveReview = scene.Review;
-        scene.Review = await _rdr.GetRtfText(scene.Review, scene.Uuid);
-        string saveNotes = scene.Notes;
-        scene.Notes = await _rdr.GetRtfText(scene.Notes, scene.Uuid);
 
         StoryElement antagonist = StringToStoryElement(scene.Antagonist);
         string antagonistName = antagonist?.Name ?? string.Empty;
@@ -491,24 +407,15 @@ public class ReportFormatter
             doc.AddText(sb.ToString());
             doc.AddNewLine();
         }
-        // Post-process RTF properties
-        scene.Remarks = saveRemarks;
-        scene.Review = saveReview;
-        scene.Notes = saveNotes;
 
         return doc.GetRtf();
     }
 
-    public async Task<string> FormatFolderReport(StoryElement element)
+    public string FormatFolderReport(StoryElement element)
     {
         FolderModel folder = (FolderModel)element;
         string[] lines = _templates["Folder Description"];
         RtfDocument doc = new(string.Empty);
-
-        // Pre-process RTF properties to preserve [FILE:x.rtf] tag for long fields
-        // and then load long fields from their corresponding file in its subfolder
-        string saveNotes = folder.Notes;
-        folder.Notes = await _rdr.GetRtfText(folder.Notes, folder.Uuid);
         // Parse and write the report
         foreach (string line in lines)
         {
@@ -518,22 +425,15 @@ public class ReportFormatter
             doc.AddText(sb.ToString());  //,format);
             doc.AddNewLine();
         }
-        // Post-process RTF properties
-        folder.Notes = saveNotes;
-
         return doc.GetRtf();
     }
 
-    public async Task<string> FormatSectionReport(StoryElement element)
+    public string FormatSectionReport(StoryElement element)
     {
         SectionModel section = (SectionModel)element;
         string[] lines = _templates["Section Description"];
         RtfDocument doc = new(string.Empty);
 
-        // Pre-process RTF properties to preserve [FILE:x.rtf] tag for long fields
-        // and then load long fields from their corresponding file in its subfolder
-        string saveNotes = section.Notes;
-        section.Notes = await _rdr.GetRtfText(section.Notes, section.Uuid);
         // Parse and write the report
         foreach (string line in lines)
         {
@@ -543,14 +443,10 @@ public class ReportFormatter
             doc.AddText(sb.ToString()); // , format);
             doc.AddNewLine();
         }
-
-        // Post-process RTF properties
-        section.Notes = saveNotes;
-
         return doc.GetRtf();
     }
 
-    public async Task<string> FormatSynopsisReport()
+    public string FormatSynopsisReport()
     {
 
         string[] lines = _templates["Story Synopsis"];
@@ -572,10 +468,7 @@ public class ReportFormatter
                         continue;
                     SceneModel scene = (SceneModel)scn;
                     StringBuilder sb = new(line);
-                    string saveRemarks = scene.Remarks;
-                    scene.Remarks = await _rdr.GetRtfText(scene.Remarks, scene.Uuid);
                     sb.Replace("@Synopsis", $"[{scene.Name}] {scene.Description}");
-                    scene.Remarks = saveRemarks;
                     doc.AddText(sb.ToString());
                     doc.AddNewLine();
                     doc.AddText(scene.Remarks);
@@ -588,7 +481,6 @@ public class ReportFormatter
                 doc.AddNewLine();
             }
         }
-
         return doc.GetRtf();
     }
 

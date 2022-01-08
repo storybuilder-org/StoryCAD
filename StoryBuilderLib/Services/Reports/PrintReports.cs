@@ -31,13 +31,13 @@ public class PrintReports
         //Process single selection (non-Pivot) reports
         if (_vm.CreateOverview)
         {
-            rtf = await _formatter.FormatStoryOverviewReport(Overview());
+            rtf = _formatter.FormatStoryOverviewReport(Overview());
             documentText = FormatText(rtf);
             Print(documentText);
         }
         if (_vm.CreateSummary)
         {
-            rtf = await _formatter.FormatSynopsisReport();
+            rtf =_formatter.FormatSynopsisReport();
             documentText = FormatText(rtf);
             Print(documentText);
         }
@@ -77,16 +77,16 @@ public class PrintReports
                 switch (node.Type)
                 {
                     case StoryItemType.Problem:
-                        rtf = await _formatter.FormatProblemReport(element);
+                        rtf = _formatter.FormatProblemReport(element);
                         break;
                     case StoryItemType.Character:
-                        rtf = await _formatter.FormatCharacterReport(element);
+                        rtf = _formatter.FormatCharacterReport(element);
                         break;
                     case StoryItemType.Setting:
-                        rtf = await _formatter.FormatSettingReport(element);
+                        rtf = _formatter.FormatSettingReport(element);
                         break;
                     case StoryItemType.Scene:
-                        rtf = await _formatter.FormatSceneReport(element);
+                        rtf = _formatter.FormatSceneReport(element);
                         break;
                 }
                 documentText = FormatText(rtf);
