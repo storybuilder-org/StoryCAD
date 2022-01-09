@@ -38,7 +38,7 @@ public class StoryWriter
     private XmlNode _relationships; // Character Relationships
     private XmlNode _stbSettings; // Settings
 
-    internal async Task WriteFile(StorageFile output, StoryModel model)
+    public async Task WriteFile(StorageFile output, StoryModel model)
     {
         _model = model;
         _outFile = output;
