@@ -49,10 +49,6 @@ public class StoryWriter
         ParseExplorerView();
         ParseNarratorView();
 
-        //StringBuilder sb = new StringBuilder(_xml.ToString());
-        //sb.Replace("\0", string.Empty);
-        //XmlDocument xml2 = new XmlDocument();
-        //xml2.Load(sb.ToString());
         await using (Stream fileStream = await _outFile.OpenStreamForWriteAsync())
         {
             XmlWriterSettings settings = new();
@@ -60,8 +56,6 @@ public class StoryWriter
             settings.Encoding = Encoding.UTF8;
             settings.Indent = true;
             settings.CheckCharacters = true;
-            //StringWriter sb = new StringWriter();
-            //XmlWriter writer = XmlWriter.Create(sb, settings); ;
             XmlWriter writer = XmlWriter.Create(fileStream, settings);
             try
             {
@@ -69,6 +63,7 @@ public class StoryWriter
             }
             catch (Exception ex) 
             {
+                //TODO: Log exception
                 string x = ex.Message;
             }
         }

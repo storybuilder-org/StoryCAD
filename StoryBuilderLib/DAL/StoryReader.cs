@@ -8,7 +8,6 @@ using StoryBuilder.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Security;
 using System.Threading.Tasks;
 using Windows.Data.Xml.Dom;
 using Windows.Storage;
@@ -48,13 +47,7 @@ namespace StoryBuilder.DAL
             {
                 string msg = $"Reading file {file.Path}.";
                 Logger.Log(LogLevel.Info, msg);
-                // my changes
-                string text = await FileIO.ReadTextAsync(file);
-                string xmlText = text.Replace("\0", string.Empty);
-                _xml = new XmlDocument();
-                _xml.LoadXml(xmlText);
-                // end my changes
-                //_xml = await LoadFromFileAsync(file);
+                _xml = await LoadFromFileAsync(file);
                 LoadStoryModel();
                 _model.ProjectFile = file;
                 _model.ProjectFilename = file.Name;
@@ -81,7 +74,6 @@ namespace StoryBuilder.DAL
                 Logger.Log(LogLevel.Info, msg);
                 StatusMessage smsg = new(msg, 200);
                 Messenger.Send(new StatusChangedMessage(smsg));
-                await FixupRtfFiles(_model);
                 return _model;
             }
             catch (Exception ex)
@@ -90,73 +82,6 @@ namespace StoryBuilder.DAL
                 StatusMessage smsg = new("Error reading story", 200);
                 Messenger.Send(new StatusChangedMessage(smsg));
                 return new StoryModel();  // return an empty story model
-            }
-        }
-
-        private async Task FixupRtfFiles(StoryModel model)
-        {
-            foreach (StoryElement element in model.StoryElements) 
-            {
-                switch (element.Type)
-                {
-                    case StoryItemType.StoryOverview:
-                        OverviewModel overview = (OverviewModel)element;
-                        // Load RTF files
-                        overview.StoryIdea = await GetRtfText(overview.StoryIdea, overview.Uuid);
-                        overview.Concept = await GetRtfText(overview.Concept, overview.Uuid);
-                        overview.StructureNotes = await GetRtfText(overview.StructureNotes, overview.Uuid);
-                        overview.ToneNotes = await GetRtfText(overview.ToneNotes, overview.Uuid);
-                        overview.Notes = await GetRtfText(overview.Notes, overview.Uuid);
-                        break;
-                    case StoryItemType.Problem:
-                        ProblemModel problem = (ProblemModel)element;
-                        problem.StoryQuestion = await GetRtfText(problem.StoryQuestion, problem.Uuid);
-                        problem.Premise = await GetRtfText(problem.Premise, problem.Uuid);
-                        problem.Notes = await GetRtfText(problem.Notes, problem.Uuid);
-                        //await GenerateProblemReport(node, element);
-                        break;
-                    case StoryItemType.Character:
-                        CharacterModel character = (CharacterModel)element;
-                        character.CharacterSketch = await GetRtfText(character.CharacterSketch, character.Uuid);
-                        character.PhysNotes = await GetRtfText(character.PhysNotes, character.Uuid);
-                        character.Appearance = await GetRtfText(character.Appearance, character.Uuid);
-                        character.Economic = await GetRtfText(character.Economic, character.Uuid);
-                        character.Education = await GetRtfText(character.Education, character.Uuid);
-                        character.Ethnic = await GetRtfText(character.Ethnic, character.Uuid);
-                        character.Religion = await GetRtfText(character.Religion, character.Uuid);
-                        character.PsychNotes = await GetRtfText(character.PsychNotes, character.Uuid);
-                        character.Notes = await GetRtfText(character.Notes, character.Uuid);
-                        character.Flaw = await GetRtfText(character.Flaw, character.Uuid);
-                        character.BackStory = await GetRtfText(character.BackStory, character.Uuid);
-                        break;
-                    case StoryItemType.Setting:
-                        SettingModel setting = (SettingModel)element;
-                        setting.Summary = await GetRtfText(setting.Summary, setting.Uuid);
-                        setting.Sights = await GetRtfText(setting.Sights, setting.Uuid);
-                        setting.Sounds = await GetRtfText(setting.Sounds, setting.Uuid);
-                        setting.Touch = await GetRtfText(setting.Touch, setting.Uuid);
-                        setting.SmellTaste = await GetRtfText(setting.SmellTaste, setting.Uuid);
-                        setting.Notes = await GetRtfText(setting.Notes, setting.Uuid);
-                        break;
-                    case StoryItemType.Scene:
-                        SceneModel scene = (SceneModel)element;
-                        scene.Remarks = await GetRtfText(scene.Remarks, scene.Uuid);
-                        scene.Events = await GetRtfText(scene.Events, scene.Uuid);
-                        scene.Consequences = await GetRtfText(scene.Consequences, scene.Uuid);
-                        scene.Significance = await GetRtfText(scene.Significance, scene.Uuid);
-                        scene.Realization = await GetRtfText(scene.Realization, scene.Uuid);
-                        scene.Review = await GetRtfText(scene.Review, scene.Uuid);
-                        scene.Notes = await GetRtfText(scene.Notes, scene.Uuid);
-                        break;
-                    case StoryItemType.Folder:
-                        FolderModel folder = (FolderModel)element;
-                        folder.Notes = await GetRtfText(folder.Notes, folder.Uuid);
-                        break;
-                    case StoryItemType.Section:
-                        SectionModel section = (SectionModel)element;
-                        section.Notes = await GetRtfText(section.Notes, section.Uuid);
-                        break;
-                }
             }
         }
 
@@ -822,56 +747,6 @@ namespace StoryBuilder.DAL
             XmlNodeList children = xn.SelectNodes("StoryNode");
             foreach (IXmlNode child in children)
                 RecurseNarratorNode(node, child, false);
-        }
-
-        /// <summary>
-        /// An RTF text field, if it's longer than 2K, will have been written to a
-        /// separate text file in a subfolder for the Story Element it's a part of.
-        /// If that's the case, the text field will contain the text file's filename
-        /// as an imbedded string in the form [FILE:filename.rtf]
-        /// </summary>
-        /// <param name="note">the .stbx file's rtf text field or file reference</param>
-        /// <param name="uuid">StoryElement uuid (also the subfolder name) </param>
-        /// <returns>the rtf text field</returns>
-        public async Task<string> GetRtfText(string note, Guid uuid)
-        {
-            // If it's just text, and not an imbedded file reference,
-            // return the text
-            if (!note.StartsWith("[FILE:"))
-                return note;
-            // Otherwise read and return the imbedded file from its subfolder
-            char[] separator = { '[', ']', ':' };
-            string[] result = note.Split(separator, StringSplitOptions.RemoveEmptyEntries);
-            string filename = result[1];
-            StorageFolder folder = await FindSubFolder(uuid);
-            StorageFile rtfFile = await folder.GetFileAsync(filename);
-            string text = await FileIO.ReadTextAsync(rtfFile);
-            return text.Replace("\0",string.Empty);
-            //return await FileIO.ReadTextAsync(rtfFile);
-        }
-        public async Task<string> ReadRtfText(Guid uuid, string rftFilename)
-        {
-            StorageFolder folder = await FindSubFolder(uuid);
-            StorageFile rtfFile = await folder.GetFileAsync(rftFilename);
-            return await FileIO.ReadTextAsync(rtfFile);
-        }
-
-        /// <summary>
-        /// Locate or create a Directory for a StoryElement based on its GUID
-        /// </summary>
-        /// <param name="uuid">The GUID of a text node</param>
-        /// <returns>StorageFolder instance for the StoryElement's folder</returns>
-        private async Task<StorageFolder> FindSubFolder(Guid uuid)
-        {
-            // Search the ProjectFolder's subfolders for the SubFolder
-            //StoryModel model = ShellViewModel.GetModel();
-            IReadOnlyList<StorageFolder> folders = await _model.FilesFolder.GetFoldersAsync();
-            foreach (StorageFolder folder in folders)
-                if (folder.Name.Equals(UuidString(uuid)))
-                    //Story.SubFolder = folder;
-                    return folder;
-            // If the SubFolder doesn't exist, create it.
-            return await _model.FilesFolder.CreateFolderAsync(UuidString(uuid));
         }
 
         #region Constructor
