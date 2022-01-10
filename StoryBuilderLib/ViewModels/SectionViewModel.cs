@@ -72,15 +72,15 @@ public class SectionViewModel : ObservableRecipient, INavigable
 
     #region Methods
 
-    public async Task Activate(object parameter)
+    public void Activate(object parameter)
     {
         Model = (SectionModel)parameter;
-        await LoadModel();  // Load the ViewModel from the Story
+        LoadModel();  // Load the ViewModel from the Story
     }
 
-    public async Task Deactivate(object parameter)
+    public void Deactivate(object parameter)
     {
-        await SaveModel();    // Save the ViewModel back to the Story
+        SaveModel();    // Save the ViewModel back to the Story
     }
 
     private void OnPropertyChanged(object sender, PropertyChangedEventArgs args)
@@ -92,21 +92,19 @@ public class SectionViewModel : ObservableRecipient, INavigable
         }
     }
 
-    private async Task LoadModel()
+    private void LoadModel()
     {
         _changeable = false;
         _changed = false;
 
         Uuid = Model.Uuid;
         Name = Model.Name;
-
-        // Read RTF file
-        Notes = await _rdr.GetRtfText(Model.Notes, Uuid);
+        Notes = Model.Notes;
 
         _changeable = true;
     }
 
-    internal async Task SaveModel()
+    internal void SaveModel()
     {
         if (_changed)
         {
@@ -114,7 +112,7 @@ public class SectionViewModel : ObservableRecipient, INavigable
             Model.Name = Name;
 
             // Write RYG file
-            Model.Notes = await _wtr.PutRtfText(Notes, Model.Uuid, "notes.rtf");
+            Model.Notes = Notes;
 
             //_logger.Log(LogLevel.Info, string.Format("Requesting IsDirty change to true"));
             //Messenger.Send(new IsChangedMessage(Changed));

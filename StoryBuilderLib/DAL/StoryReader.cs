@@ -749,55 +749,6 @@ namespace StoryBuilder.DAL
                 RecurseNarratorNode(node, child, false);
         }
 
-        /// <summary>
-        /// An RTF text field, if it's longer than 2K, will have been written to a
-        /// separate text file in a subfolder for the Story Element it's a part of.
-        /// If that's the case, the text field will contain the text file's filename
-        /// as an imbedded string in the form [FILE:filename.rtf]
-        /// </summary>
-        /// <param name="note">the .stbx file's rtf text field or file reference</param>
-        /// <param name="uuid">StoryElement uuid (also the subfolder name) </param>
-        /// <returns>the rtf text field</returns>
-        public async Task<string> GetRtfText(string note, Guid uuid)
-        {
-            // If it's just text, and not an imbedded file reference,
-            // return the text
-            if (!note.StartsWith("[FILE:"))
-                return note;
-            // Otherwise read and return the imbedded file from its subfolder
-            char[] separator = { '[', ']', ':' };
-            string[] result = note.Split(separator, StringSplitOptions.RemoveEmptyEntries);
-            string filename = result[1];
-            StorageFolder folder = await FindSubFolder(uuid);
-            StorageFile rtfFile =
-                await folder.GetFileAsync(filename);
-            return await FileIO.ReadTextAsync(rtfFile);
-        }
-        public async Task<string> ReadRtfText(Guid uuid, string rftFilename)
-        {
-            StorageFolder folder = await FindSubFolder(uuid);
-            StorageFile rtfFile = await folder.GetFileAsync(rftFilename);
-            return await FileIO.ReadTextAsync(rtfFile);
-        }
-
-        /// <summary>
-        /// Locate or create a Directory for a StoryElement based on its GUID
-        /// </summary>
-        /// <param name="uuid">The GUID of a text node</param>
-        /// <returns>StorageFolder instance for the StoryElement's folder</returns>
-        private async Task<StorageFolder> FindSubFolder(Guid uuid)
-        {
-            // Search the ProjectFolder's subfolders for the SubFolder
-            StoryModel model = ShellViewModel.GetModel();
-            IReadOnlyList<StorageFolder> folders = await model.FilesFolder.GetFoldersAsync();
-            foreach (StorageFolder folder in folders)
-                if (folder.Name.Equals(UuidString(uuid)))
-                    //Story.SubFolder = folder;
-                    return folder;
-            // If the SubFolder doesn't exist, create it.
-            return await model.FilesFolder.CreateFolderAsync(UuidString(uuid));
-        }
-
         #region Constructor
         public StoryReader()
         {

@@ -44,17 +44,15 @@ public class TrashCanViewModel : ObservableRecipient, INavigable
 
     #region Methods
 
-    public Task Activate(object parameter)
+    public void Activate(object parameter)
     {
         Model = (TrashCanModel)parameter;
         LoadModel();
-        return Task.CompletedTask;
     }
 
-    public Task Deactivate(object parameter)
+    public void Deactivate(object parameter)
     {
         SaveModel();
-        return Task.CompletedTask;
     }
 
     private void LoadModel()

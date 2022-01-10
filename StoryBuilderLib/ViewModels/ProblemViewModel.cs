@@ -213,15 +213,15 @@ public class ProblemViewModel : ObservableRecipient, INavigable
 
     #region Methods
 
-    public async Task Activate(object parameter)
+    public void Activate(object parameter)
     {
         Model = (ProblemModel)parameter;
-        await LoadModel();
+        LoadModel();
     }
 
-    public async Task Deactivate(object parameter)
+    public void Deactivate(object parameter)
     {
-        await SaveModel();    // Save the ViewModel back to the Story
+        SaveModel();    // Save the ViewModel back to the Story
     }
 
     private void OnPropertyChanged(object sender, PropertyChangedEventArgs args)
@@ -233,7 +233,7 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         }
     }
 
-    private async Task LoadModel()
+    private void LoadModel()
     {
         _changeable = false;
         _changed = false;
@@ -243,8 +243,8 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         ProblemType = Model.ProblemType;
         ConflictType = Model.ConflictType;
         Subject = Model.Subject;
+        StoryQuestion = Model.StoryQuestion;
         ProblemSource = Model.ProblemSource;
-        //StoryQuestion = Model.StoryQuestion;
         // Character instances like Protagonist and Antagonist are 
         // read and written as the CharacterModel's StoryElement Guid 
         // string. A binding converter, StringToStoryElementConverter,
@@ -260,16 +260,13 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         Outcome = Model.Outcome;
         Method = Model.Method;
         Theme = Model.Theme;
-        //Premise = Model.Premise;
-        // Read RTF files
-        StoryQuestion = await _rdr.GetRtfText(Model.StoryQuestion, Uuid);
-        Premise = await _rdr.GetRtfText(Model.Premise, Uuid);
-        Notes = await _rdr.GetRtfText(Model.Notes, Uuid);
+        Premise = Model.Premise;
+        Notes = Model.Notes;
 
         _changeable = true;
     }
 
-    internal async Task SaveModel()
+    internal void SaveModel()
     {
         if (_changed)
         {
@@ -292,9 +289,9 @@ public class ProblemViewModel : ObservableRecipient, INavigable
             Model.Theme = Theme;
 
             // Write RTF files
-            Model.StoryQuestion = await _wtr.PutRtfText(StoryQuestion, Model.Uuid, "storyquestion.rtf");
-            Model.Premise = await _wtr.PutRtfText(Premise, Model.Uuid, "premise.rtf");
-            Model.Notes = await _wtr.PutRtfText(Notes, Model.Uuid, "notes.rtf");
+            Model.StoryQuestion = StoryQuestion;
+            Model.Premise = Premise;
+            Model.Notes = Notes;
 
             //_logger.Log(LogLevel.Info, string.Format("Requesting IsDirty change to true"));
             //Messenger.Send(new IsChangedMessage(Changed));

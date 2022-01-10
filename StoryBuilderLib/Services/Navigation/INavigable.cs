@@ -4,6 +4,6 @@ namespace StoryBuilder.Services.Navigation;
 
 public interface INavigable
 {
-    Task Activate(object parameter);
-    Task Deactivate(object parameter);
+    void Activate(object parameter);
+    void Deactivate(object parameter);
 }

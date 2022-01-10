@@ -121,7 +121,7 @@ public class InstallationService
             foreach (string dir in dirs)
             {
                 if (iteration >= dirs.Count) { continue; }
-                Logger.Log(LogLevel.Trace, $"{File} mounting subdirectory {dir}");
+                //Logger.Log(LogLevel.Trace, $"{File} mounting subdirectory {dir}");
                 ParentFolder = await ParentFolder.CreateFolderAsync(dir, CreationCollisionOption.OpenIfExists);
                 iteration++;
             }

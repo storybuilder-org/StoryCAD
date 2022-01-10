@@ -526,20 +526,20 @@ public class CharacterViewModel : ObservableRecipient, INavigable
 
     #region Public Methods
 
-    public async Task Activate(object parameter)
+    public void Activate(object parameter)
     {
         Model = (CharacterModel)parameter;
-        await LoadModel(); // Load the ViewModel from the Story
+        LoadModel(); // Load the ViewModel from the Story
     }
 
-    public async Task Deactivate(object parameter)
+    public void Deactivate(object parameter)
     {
-        await SaveModel(); // Save the ViewModel back to the Story
+        SaveModel(); // Save the ViewModel back to the Story
     }
 
-    public async Task SaveRelationships()
+    public void SaveRelationships()
     {
-        await SaveRelationship(CurrentRelationship);  // Save any current changes
+        SaveRelationship(CurrentRelationship);  // Save any current changes
         CurrentRelationship = null;
         // Move relationships back to the character model
         Model.RelationshipList.Clear();
@@ -559,7 +559,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable
         }
     }
 
-    private async Task LoadModel()
+    private void LoadModel()
     {
         _changeable = false;
         _changed = false;
@@ -610,19 +610,6 @@ public class CharacterViewModel : ObservableRecipient, INavigable
         BackStory = Model.BackStory;
         Id = Model.Id;
 
-        //Read RTF files
-        CharacterSketch = await _rdr.GetRtfText(Model.CharacterSketch, Uuid);
-        PhysNotes = await _rdr.GetRtfText(Model.PhysNotes, Uuid);
-        Appearance = await _rdr.GetRtfText(Model.Appearance, Uuid);
-        Economic = await _rdr.GetRtfText(Model.Economic, Uuid);
-        Education = await _rdr.GetRtfText(Model.Education, Uuid);
-        Ethnic = await _rdr.GetRtfText(Model.Ethnic, Uuid);
-        Religion = await _rdr.GetRtfText(Model.Religion, Uuid);
-        PsychNotes = await _rdr.GetRtfText(Model.PsychNotes, Uuid);
-        Notes = await _rdr.GetRtfText(Model.Notes, Uuid);
-        Flaw = await _rdr.GetRtfText(Model.Flaw, Uuid);
-        BackStory = await _rdr.GetRtfText(Model.BackStory, Uuid);
-
         CharacterTraits.Clear();
         foreach (string member in Model.TraitList)
             CharacterTraits.Add(member);
@@ -643,7 +630,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable
         _changeable = true;
     }
 
-    internal async Task SaveModel()
+    internal void SaveModel()
     {
         if (_changed)
         {
@@ -685,7 +672,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable
             foreach (string element in CharacterTraits)
                 Model.TraitList.Add(element);
                 
-            await SaveRelationship(CurrentRelationship);  // Save any current changes
+            SaveRelationship(CurrentRelationship);  // Save any current changes
             CurrentRelationship = null;
             // Move relationships back to the character model
             Model.RelationshipList.Clear();
@@ -696,20 +683,17 @@ public class CharacterViewModel : ObservableRecipient, INavigable
             Model.Id = Id;
 
             // Write and clear RTF files
-            Model.CharacterSketch = await _wtr.PutRtfText(CharacterSketch, Uuid, "charactersketch.rtf");
-            Model.PhysNotes = await _wtr.PutRtfText(PhysNotes, Uuid, "physnotes.rtf");
-            Model.Appearance = await _wtr.PutRtfText(Appearance, Uuid, "appearance.rtf");
-            Model.Economic = await _wtr.PutRtfText(Economic, Uuid, "economic.rtf");
-            Model.Education = await _wtr.PutRtfText(Education, Uuid, "education.rtf");
-            Model.Ethnic = await _wtr.PutRtfText(Ethnic, Uuid, "ethnic.rtf");
-            Model.Religion = await _wtr.PutRtfText(Religion, Uuid, "religion.rtf");
-            Model.PsychNotes = await _wtr.PutRtfText(PsychNotes, Uuid, "psychnotes.rtf");
-            Model.Notes = await _wtr.PutRtfText(Notes, Uuid, "Notes.rtf");
-            Model.Flaw = await _wtr.PutRtfText(Flaw, Uuid, "flaw.rtf");
-            Model.BackStory = await _wtr.PutRtfText(BackStory, Uuid, "backstory.rtf");
-
-            //_logger.Log(LogLevel.Info, string.Format("Requesting IsDirty change to true"));
-            //Messenger.Send(new IsChangedMessage(Changed));
+            Model.CharacterSketch = CharacterSketch;
+            Model.PhysNotes = PhysNotes;
+            Model.Appearance = Appearance;
+            Model.Economic = Economic;
+            Model.Education = Education;
+            Model.Ethnic = Ethnic;
+            Model.Religion = Religion;
+            Model.PsychNotes = PsychNotes;
+            Model.Notes = Notes;
+            Model.Flaw = Flaw;
+            Model.BackStory = BackStory;
         }
     }
 
@@ -762,7 +746,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable
     /// Load and bind a RelationshipModel instance
     /// </summary>
     /// <param name="selectedRelation">The RelationShipModel just selected or added</param>
-    public async Task LoadRelationship(RelationshipModel selectedRelation)
+    public void LoadRelationship(RelationshipModel selectedRelation)
     {
         if (selectedRelation == null)
             return;
@@ -772,20 +756,18 @@ public class CharacterViewModel : ObservableRecipient, INavigable
         RelationType = selectedRelation.RelationType;
         RelationshipTrait = selectedRelation.Trait;
         RelationshipAttitude = selectedRelation.Attitude;
-        RelationshipNotes = await _rdr.GetRtfText(selectedRelation.Notes, Uuid);
+        RelationshipNotes = selectedRelation.Notes;
 
         _changeable = true;
     }
 
-    public async Task SaveRelationship(RelationshipModel selectedRelation)
+    public void SaveRelationship(RelationshipModel selectedRelation)
     {
         if (!_changed || selectedRelation == null)
             return;
         selectedRelation.Trait = RelationshipTrait;
         selectedRelation.Attitude = RelationshipAttitude;
-        selectedRelation.Notes = await _wtr.PutRtfText(RelationshipNotes, Uuid, selectedRelation.PartnerUuid + "_notes.rtf");
-        //_logger.Log(LogLevel.Info, string.Format("Requesting IsDirty change to true"));
-        //Messenger.Send(new IsChangedMessage(Changed));
+        selectedRelation.Notes = RelationshipNotes;
     }
 
 
@@ -796,7 +778,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable
     private async void AddRelationship()
     {
         _logger.Log(LogLevel.Info, "Executing AddRelationship command");
-        await SaveRelationship(CurrentRelationship);
+        SaveRelationship(CurrentRelationship);
 
         //Sets up view model
         NewRelationshipViewModel VM = new(Model);
@@ -836,7 +818,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable
                 // Add partner relationship to member's list of relationships 
                 CharacterRelationships.Add(memberRelationship);
                 SelectedRelationship = memberRelationship;
-                await LoadRelationship(SelectedRelationship);
+                LoadRelationship(SelectedRelationship);
                 CurrentRelationship = SelectedRelationship;
 
                 _changed = true;
