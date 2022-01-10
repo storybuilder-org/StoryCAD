@@ -1,11 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <StoryBuilder Version="2.0">
-  <StoryElements />
-  <Explorer />
-  <Narrator />
-  <Relationships />
-  <Settings />
-</StoryBuilder>                    " DateCreated="01-01-29" DateModified="06/24/98" Author="Dashiell Hammett" StoryType="Novel" StoryGenre="Mystery Thriller" ViewPoint="" ViewpointCharacter="" Voice="" LiteraryDevice="" Tense="" Style="" Tone="" StoryIdea="[FILE:storyidea.rtf]" Concept="" StyleNotes="" ToneNotes="" Notes="" />
+  <StoryElements>
+    <Overview UUID="5D8CA368-CE67-44F7-A555-8B434A0EEE76" Name="The Maltese Falcon                        " DateCreated="01-01-29" DateModified="06/24/98" Author="Dashiell Hammett" StoryType="Novel" StoryGenre="Mystery Thriller" ViewPoint="" ViewpointCharacter="" Voice="" LiteraryDevice="" Tense="" Style="" Tone="" StoryIdea="[FILE:storyidea.rtf]" Concept="" StyleNotes="" ToneNotes="" Notes="" />
     <Folder UUID="0177AABA-298C-4052-BBD3-58FBCE6F3475" Name="Problems" Notes="" />
     <Folder UUID="5FD4A41A-AB45-41C1-8094-887E19164850" Name="Characters" Notes="" />
     <Folder UUID="EB35359E-A75D-47F2-B55D-AE11EE8470E3" Name="Settings" Notes="" />
