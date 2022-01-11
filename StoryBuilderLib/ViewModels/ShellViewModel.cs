@@ -352,37 +352,6 @@ namespace StoryBuilder.ViewModels
             _canExecuteCommands = true;
         }
 
-        /// <summary>
-        /// Used to open a file such an sample story or recent file
-        /// </summary>
-        public async Task OpenFileFromPath(string Path)
-        {
-            StoryModel.ProjectFolder = await StorageFolder.GetFolderFromPathAsync(Path);
-            StoryModel.ProjectPath = StoryModel.ProjectFolder.Path;
-            StoryModel.ProjectFilename = StoryModel.ProjectFolder.DisplayName;
-
-             IReadOnlyList<StorageFile> files = await StoryModel.ProjectFolder.GetFilesAsync();
-            StorageFile file = files[0];
-            //NOTE: BasicProperties.DateModified can be the date last changed
-
-            StoryModel.ProjectFilename = file.Name;
-            Ioc.Default.GetService<MainWindowVM>().Title = $"StoryBuilder - Editing {StoryModel.ProjectFilename.Replace(".stbx", "")}";
-            StoryModel.ProjectFile = file;
-            // Make sure files folder exists...
-            StoryModel.FilesFolder = await StoryModel.ProjectFolder.CreateFolderAsync("files", CreationCollisionOption.OpenIfExists);
-            await BackupProject();
-            StoryReader rdr = Ioc.Default.GetService<StoryReader>();
-            StoryModel = await rdr.ReadFile(file);
-            await BackupProject();
-            if (StoryModel.ExplorerView.Count > 0)
-            {
-                SetCurrentView(StoryViewType.ExplorerView);
-                StatusMessage = "Open Story completed";
-            }
-
-            _canExecuteCommands = true;
-        }
-
         public async Task UnifiedNewFile(UnifiedVM dialogVM)
         {
             _canExecuteCommands = false;
@@ -406,8 +375,7 @@ namespace StoryBuilder.ViewModels
 
                 if (!Path.GetExtension(vm.ProjectName).Equals(".stbx")) { vm.ProjectName += ".stbx"; }
                 StoryModel.ProjectFilename = vm.ProjectName;
-                StorageFolder parent = await StorageFolder.GetFolderFromPathAsync(vm.ProjectPath);
-                StoryModel.ProjectFolder = await parent.CreateFolderAsync(vm.ProjectName);
+                StoryModel.ProjectFolder = await StorageFolder.GetFolderFromPathAsync(vm.ProjectPath);
                 StoryModel.ProjectPath = StoryModel.ProjectFolder.Path;
           
                 OverviewModel overview = new("Working Title", StoryModel);
@@ -620,8 +588,13 @@ namespace StoryBuilder.ViewModels
         }
 
         
-
-        public async Task OpenFile()
+        /// <summary>
+        /// Opens a file picker to let the user chose a stbx file and loads said file
+        /// If fromPath is specified then the picker is skipped.
+        /// </summary>
+        /// <param name="fromPath"></param>
+        /// <returns></returns>
+        public async Task OpenFile(string fromPath = "")
         {
             if (StoryModel.Changed)
             {
@@ -636,51 +609,50 @@ namespace StoryBuilder.ViewModels
             {
                 ResetModel();
 
-                //var window = new Window();
-                //var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(window);
-                FolderPicker folderPicker = new();
-                //Make folder Picker work in Win32
-                WinRT.Interop.InitializeWithWindow.Initialize(folderPicker, GlobalData.WindowHandle);
-                folderPicker.CommitButtonText = "Project Folder";
-                PreferencesModel prefs = GlobalData.Preferences;
-                //TODO: Use preferences project folder instead of DocumentsLibrary
-                //except you can't. Thanks, UWP.
-                folderPicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
-                folderPicker.FileTypeFilter.Add(".stbx");
-                StoryModel.ProjectFolder = await folderPicker.PickSingleFolderAsync();
-                if (StoryModel.ProjectFolder == null) 
+                if (fromPath == "" || !File.Exists(fromPath))
                 {
-                    Logger.Log(LogLevel.Info,"Open File command cancelled");
+                    //var window = new Window();
+                    //var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(window);
+                    FileOpenPicker filePicker = new();
+                    //Make folder Picker work in Win32
+                    WinRT.Interop.InitializeWithWindow.Initialize(filePicker, GlobalData.WindowHandle);
+                    filePicker.CommitButtonText = "Project Folder";
+                    PreferencesModel prefs = GlobalData.Preferences;
+                    //TODO: Use preferences project folder instead of DocumentsLibrary
+                    //except you can't. Thanks, UWP.
+                    filePicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
+                    filePicker.FileTypeFilter.Add(".stbx");
+                    StoryModel.ProjectFile = await filePicker.PickSingleFileAsync();
+                }
+                else
+                {
+                    StoryModel.ProjectFile = await StorageFile.GetFileFromPathAsync(fromPath);
+                }
+
+                StoryModel.ProjectFolder = await StoryModel.ProjectFile.GetParentAsync();
+                if (StoryModel.ProjectFile == null) 
+                {
+                    Logger.Log(LogLevel.Info,"Open File command cancelled (StoryModel.ProjectFile was null)");
                     StatusMessage = "Open Story command cancelled";
                     _canExecuteCommands = true;  // unblock other commands
                     return;
                 }
 
-                IReadOnlyList<StorageFile> files = await StoryModel.ProjectFolder.GetFilesAsync();
-                StorageFile file = files[0];
                 //NOTE: BasicProperties.DateModified can be the date last changed
 
-                if (file.FileType.ToLower().Equals(".stbx"))
+                await BackupProject();
+                StoryReader rdr = Ioc.Default.GetService<StoryReader>();
+                StoryModel = await rdr.ReadFile(StoryModel.ProjectFile);
+                await BackupProject();
+                if (StoryModel.ExplorerView.Count > 0)
                 {
-                    await BackupProject();
-                    StoryReader rdr = Ioc.Default.GetService<StoryReader>();
-                    StoryModel = await rdr.ReadFile(file);
-                    await BackupProject();
-                    if (StoryModel.ExplorerView.Count > 0)
-                    {
-                        SetCurrentView(StoryViewType.ExplorerView);
-                        Ioc.Default.GetService<MainWindowVM>().Title = $"StoryBuilder - Editing {StoryModel.ProjectFilename.Replace(".stbx", "")}";
-                        new UnifiedVM().UpdateRecents(StoryModel.ProjectPath);
-                        StatusMessage = "Open Story completed";
-                    }
+                    SetCurrentView(StoryViewType.ExplorerView);
+                    Ioc.Default.GetService<MainWindowVM>().Title = $"StoryBuilder - Editing {StoryModel.ProjectFilename.Replace(".stbx", "")}";
+                    new UnifiedVM().UpdateRecents(StoryModel.ProjectPath);
+                    StatusMessage = "Open Story completed";
                 }
-                else 
-                {
-                    
-                    string message = $"Open project {StoryModel.ProjectFilename} command failed. Unsupported file extension";
-                    Logger.Log(LogLevel.Info, message);
-                }
-                string msg = $"Open project {StoryModel.ProjectFilename} command completed";
+
+                string msg = $"Opened project {StoryModel.ProjectFilename}";
                 Logger.Log(LogLevel.Info, msg);
                 
             }
@@ -696,33 +668,28 @@ namespace StoryBuilder.ViewModels
 
         private async Task BackupProject()
         {
-            //Logger.Log(LogLevel.Trace, "BackupProject");
-            Logger.Log(LogLevel.Info, "BackupProject executing");
+            Logger.Log(LogLevel.Info, "Starting Project Backup");
+            //Creates backup directory if it doesnt exist
+            if (!Directory.Exists(GlobalData.Preferences.BackupDirectory)) {Directory.CreateDirectory(GlobalData.Preferences.BackupDirectory);}
+
             try
             {
-                StorageFolder backup;
-                //TODO: Get backup folder from Preferences
-                PreferencesModel preferences = GlobalData.Preferences;
-                StorageFolder backupRoot = await StorageFolder.GetFolderFromPathAsync(preferences.BackupDirectory);
-                string projectName = StoryModel.ProjectFolder.DisplayName;
-                if (await backupRoot.TryGetItemAsync(projectName) == null)
-                    backup = await backupRoot.CreateFolderAsync(projectName);
-                else
-                    backup = await backupRoot.GetFolderAsync(projectName);
-                await StoryModel.ProjectFolder.CopyContentsRecursive(backup);
+                string fileName = $"{StoryModel.ProjectFilename} as of {DateTime.Now}".Replace('/',' ').Replace(':',' ').Replace(".stbx","") + ".stbx";
+                StorageFolder backupRoot = await StorageFolder.GetFolderFromPathAsync(GlobalData.Preferences.BackupDirectory);
+                StorageFolder backupLocation = await backupRoot.CreateFolderAsync(StoryModel.ProjectFilename, CreationCollisionOption.OpenIfExists);
+                await StoryModel.ProjectFile.CopyAsync(backupLocation, fileName);
             }
             catch (Exception ex)
             {
                 Logger.LogException(LogLevel.Error, ex, "Error backing up project");
                 //TODO: Percolate exception
             }
-
             Logger.Log(LogLevel.Info, "BackupProject complete");
         }
 
         private async Task SaveFile()
         {
-            //Logger.Log(LogLevel.Trace, "SaveFile");
+            Logger.Log(LogLevel.Trace, "Saving file");
             _canExecuteCommands = false;
             Logger.Log(LogLevel.Info, "Executing SaveFile command");
             try
@@ -746,7 +713,7 @@ namespace StoryBuilder.ViewModels
         }
 
         /// <summary>
-        /// Write the current StoryModel to the backing project folder/files
+        /// Write the current StoryModel to the backing project file
         /// </summary>
         /// <returns>Task (async function)</returns>
         private async Task WriteModel()
@@ -924,8 +891,6 @@ namespace StoryBuilder.ViewModels
         {
             StoryModel.ProjectFile = await StoryModel.ProjectFolder.CreateFileAsync(StoryModel.ProjectFilename, CreationCollisionOption.ReplaceExisting);
             //Story.ProjectFolder = await Story.ProjectFile.GetParentAsync();
-            // Also, create the data subfolder
-            StoryModel.FilesFolder = await StoryModel.ProjectFolder.CreateFolderAsync("files", CreationCollisionOption.OpenIfExists);
         }
 
         #endregion
