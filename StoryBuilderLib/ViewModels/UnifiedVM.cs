@@ -108,11 +108,11 @@ public class UnifiedVM : ObservableRecipient
     {
         switch (SelectedRecentIndex)
         {
-            case 0: await shell.OpenFileFromPath(GlobalData.Preferences.LastFile1); UpdateRecents(GlobalData.Preferences.LastFile1); break;
-            case 1: await shell.OpenFileFromPath(GlobalData.Preferences.LastFile2); UpdateRecents(GlobalData.Preferences.LastFile2); break;
-            case 2: await shell.OpenFileFromPath(GlobalData.Preferences.LastFile3); UpdateRecents(GlobalData.Preferences.LastFile3); break;
-            case 3: await shell.OpenFileFromPath(GlobalData.Preferences.LastFile4); UpdateRecents(GlobalData.Preferences.LastFile4); break;
-            case 4: await shell.OpenFileFromPath(GlobalData.Preferences.LastFile5); UpdateRecents(GlobalData.Preferences.LastFile5); break;
+            case 0: await shell.OpenFile(GlobalData.Preferences.LastFile1); UpdateRecents(GlobalData.Preferences.LastFile1); break;
+            case 1: await shell.OpenFile(GlobalData.Preferences.LastFile2); UpdateRecents(GlobalData.Preferences.LastFile2); break;
+            case 2: await shell.OpenFile(GlobalData.Preferences.LastFile3); UpdateRecents(GlobalData.Preferences.LastFile3); break;
+            case 3: await shell.OpenFile(GlobalData.Preferences.LastFile4); UpdateRecents(GlobalData.Preferences.LastFile4); break;
+            case 4: await shell.OpenFile(GlobalData.Preferences.LastFile5); UpdateRecents(GlobalData.Preferences.LastFile5); break;
         }
         if (SelectedRecentIndex != -1)
         {
