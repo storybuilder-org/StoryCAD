@@ -43,6 +43,7 @@
     <PackageReference Include="NLog" Version="5.0.0-preview.3" />
     <PackageReference Include="NLog.Extensions.Logging" Version="5.0.0-preview.3" />
     <PackageReference Include="PInvoke.User32" Version="0.7.104" />
+    <PackageReference Include="Syncfusion.Editors.WinUI" Version="19.4.0.42" />
     <Manifest Include="$(ApplicationManifest)" />
   </ItemGroup>
 

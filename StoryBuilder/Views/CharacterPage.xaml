@@ -2,6 +2,7 @@
     x:Class="StoryBuilder.Views.CharacterPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:editors="using:Syncfusion.UI.Xaml.Editors"
     xmlns:local="using:StoryBuilder.Views"
     xmlns:usercontrols="using:StoryBuilder.Controls" >
 
@@ -20,9 +21,9 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    <ComboBox Header="Role" Grid.Row="0" IsEditable="True" MinWidth="200" ItemsSource="{x:Bind CharVm.RoleList}" SelectedItem="{x:Bind CharVm.Role, Mode=TwoWay}" />
-                    <ComboBox Header="Story Role" Grid.Row="1" IsEditable="False" MinWidth="200" ItemsSource="{x:Bind CharVm.StoryRoleList}" SelectedItem="{x:Bind CharVm.StoryRole, Mode=TwoWay}" />
-                    <ComboBox Header="Archetype" Grid.Row="2" IsEditable="False" MinWidth="200" ItemsSource="{x:Bind CharVm.ArchetypeList}" SelectedItem="{x:Bind CharVm.Archetype, Mode=TwoWay}" />
+                    <editors:SfComboBox Header="Role" Grid.Row="0" IsEditable="True" MinWidth="200" ItemsSource="{x:Bind CharVm.RoleList}" SelectedItem="{x:Bind CharVm.Role, Mode=TwoWay}" />
+                    <editors:SfComboBox Header="Story Role" Grid.Row="1" IsEditable="False" MinWidth="200" ItemsSource="{x:Bind CharVm.StoryRoleList}" SelectedItem="{x:Bind CharVm.StoryRole, Mode=TwoWay}" />
+                    <editors:SfComboBox Header="Archetype" Grid.Row="2" IsEditable="False" MinWidth="200" ItemsSource="{x:Bind CharVm.ArchetypeList}" SelectedItem="{x:Bind CharVm.Archetype, Mode=TwoWay}" />
                     <usercontrols:RichEditBoxExtended Header="Character Sketch" Grid.Row="3" RtfText="{x:Bind CharVm.CharacterSketch, Mode=TwoWay}" AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap" ScrollViewer.VerticalScrollBarVisibility="Visible" />
                 </Grid>
             </PivotItem>
@@ -67,11 +68,11 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
-                        <ComboBox Header="Eye Color" Grid.Column="0" IsEditable="True" MinWidth="200"
+                        <editors:SfComboBox Header="Eye Color" Grid.Column="0" IsEditable="True" MinWidth="200"
                                   ItemsSource="{x:Bind CharVm.EyesList}"
                                   SelectedItem="{x:Bind CharVm.Eyes, Mode=TwoWay}" />
                         <TextBlock Grid.Column="1" MinWidth="100"/>
-                        <ComboBox Header="Hair Color" Grid.Column="2" IsEditable="True" MinWidth="200"
+                        <editors:SfComboBox Header="Hair Color" Grid.Column="2" IsEditable="True" MinWidth="200"
                                   ItemsSource="{x:Bind CharVm.HairList}"
                                   SelectedItem="{x:Bind CharVm.Hair, Mode=TwoWay}" />
                     </Grid>
@@ -81,11 +82,11 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
-                        <ComboBox Header="Build" Grid.Column="0" IsEditable="True" MinWidth="200"
+                        <editors:SfComboBox Header="Build" Grid.Column="0" IsEditable="True" MinWidth="200"
                                   ItemsSource="{x:Bind CharVm.BuildList}"
                                   SelectedItem="{x:Bind CharVm.Build, Mode=TwoWay}" />
                         <TextBlock Grid.Column="1" MinWidth="100"/>
-                        <ComboBox Header="Complexion" Grid.Column="2" IsEditable="True" MinWidth="200"
+                        <editors:SfComboBox Header="Complexion" Grid.Column="2" IsEditable="True" MinWidth="200"
                                   ItemsSource="{x:Bind CharVm.SkinList}"
                                   SelectedItem="{x:Bind CharVm.Complexion, Mode=TwoWay}" />
                     </Grid>
@@ -95,11 +96,11 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
-                        <ComboBox Header="Race" Grid.Column="0" IsEditable="True" MinWidth="200"
+                        <editors:SfComboBox Header="Race" Grid.Column="0" IsEditable="True" MinWidth="200"
                                   ItemsSource="{x:Bind CharVm.RaceList}"
                                   SelectedItem="{x:Bind CharVm.Race, Mode=TwoWay}" />
                         <TextBlock Grid.Column="1" MinWidth="100"/>
-                        <ComboBox Header="Nationality" Grid.Column="2" IsEditable="True" MinWidth="200"
+                        <editors:SfComboBox Header="Nationality" Grid.Column="2" IsEditable="True" MinWidth="200"
                                   ItemsSource="{x:Bind CharVm.NationalityList}"
                                   SelectedItem="{x:Bind CharVm.Nationality, Mode=TwoWay}" />
                     </Grid>
@@ -131,7 +132,8 @@
                     </Grid.RowDefinitions>
                     <Button  Content="Flaw Builder" Grid.Row="0" HorizontalAlignment="Left" Margin="0,10,10,10" 
                              Command="{x:Bind CharVm.FlawCommand, Mode=OneWay}" />
-                    <usercontrols:RichEditBoxExtended Grid.Row="1" Header="Flaw"
+                    <TextBlock Width="100"  Grid.Column="1" />
+                    <usercontrols:RichEditBoxExtended Grid.Row="2" Header="Flaw"
                                                       RtfText="{x:Bind CharVm.Flaw, Mode=TwoWay}" AcceptsReturn="True"
                                                       IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                                       ScrollViewer.VerticalScrollBarVisibility="Visible"
@@ -180,7 +182,7 @@
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
                     <Grid Grid.Row="0" HorizontalAlignment="Left">
-                        <ComboBox Header="Personality Type" IsEditable="False" Width="200" ItemsSource="{x:Bind CharVm.EnneagramList}"
+                        <editors:SfComboBox Header="Personality Type" IsEditable="False" Width="200" ItemsSource="{x:Bind CharVm.EnneagramList}"
                               SelectedValue="{x:Bind CharVm.Enneagram, Mode=TwoWay}" />
                     </Grid>
                     <Grid Grid.Row="1" HorizontalAlignment="Left">
@@ -189,11 +191,11 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
-                        <ComboBox Header="Intelligence"  Grid.Column="0" IsEditable="True" Width="200"
+                        <editors:SfComboBox Header="Intelligence"  Grid.Column="0" IsEditable="True" Width="200"
                                   ItemsSource="{x:Bind CharVm.IntelligenceList}"
                                   SelectedItem="{x:Bind CharVm.Intelligence, Mode=TwoWay}" />
                         <TextBlock Width="100"  Grid.Column="1" />
-                        <ComboBox Header="Values"  Grid.Column="2" IsEditable="True" Width="200"
+                        <editors:SfComboBox Header="Values"  Grid.Column="2" IsEditable="True" Width="200"
                                   ItemsSource="{x:Bind CharVm.ValuesList}"
                                   SelectedItem="{x:Bind CharVm.Values, Mode=TwoWay}" />
                     </Grid>
@@ -203,11 +205,11 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
-                        <ComboBox Header="Focus"  Grid.Column="0" IsEditable="True" Width="200"
+                        <editors:SfComboBox Header="Focus"  Grid.Column="0" IsEditable="True" Width="200"
                                   ItemsSource="{x:Bind CharVm.FocusList}"
                                   SelectedItem="{x:Bind CharVm.Focus, Mode=TwoWay}" />
                         <TextBlock Width="100"  Grid.Column="1" />
-                        <ComboBox Header="Abnormality"  Grid.Column="2" IsEditable="True" Width="200"
+                        <editors:SfComboBox Header="Abnormality"  Grid.Column="2" IsEditable="True" Width="200"
                                   ItemsSource="{x:Bind CharVm.AbnormalityList}"
                                   SelectedItem="{x:Bind CharVm.Abnormality, Mode=TwoWay}" />
                     </Grid>
@@ -232,41 +234,41 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
-                    <ComboBox Header="Adventureousness" Grid.Column="0" Grid.Row="0" IsEditable="True" MinWidth="200"
+                    <editors:SfComboBox Header="Adventureousness" Grid.Column="0" Grid.Row="0" IsEditable="True" MinWidth="200"
                                   ItemsSource="{x:Bind CharVm.AdventurousnessList}"
                                   SelectedItem="{x:Bind CharVm.Adventurousness, Mode=TwoWay}" />
-                    <ComboBox Header="Confidence" Grid.Column="0" Grid.Row="1" IsEditable="True" MinWidth="200"
+                    <editors:SfComboBox Header="Confidence" Grid.Column="0" Grid.Row="1" IsEditable="True" MinWidth="200"
                                   ItemsSource="{x:Bind CharVm.ConfidenceList}"
                                   SelectedItem="{x:Bind CharVm.Confidence, Mode=TwoWay}" />
-                    <ComboBox Header="Creativity" Grid.Column="0" Grid.Row="2" IsEditable="True" MinWidth="200" 
+                    <editors:SfComboBox Header="Creativity" Grid.Column="0" Grid.Row="2" IsEditable="True" MinWidth="200" 
                                   ItemsSource="{x:Bind CharVm.CreativityList}"
                                   SelectedItem="{x:Bind CharVm.Creativity, Mode=TwoWay}" />
-                    <ComboBox Header="Enthusiasm" Grid.Column="0" Grid.Row="3" IsEditable="True" MinWidth="200"
+                    <editors:SfComboBox Header="Enthusiasm" Grid.Column="0" Grid.Row="3" IsEditable="True" MinWidth="200"
                                   ItemsSource="{x:Bind CharVm.EnthusiasmList}"
                                   SelectedItem="{x:Bind CharVm.Enthusiasm, Mode=TwoWay}" />
-                    <ComboBox Header="Sensitivity" Grid.Column="0" Grid.Row="4" IsEditable="True" MinWidth="200"
+                    <editors:SfComboBox Header="Sensitivity" Grid.Column="0" Grid.Row="4" IsEditable="True" MinWidth="200"
                                   ItemsSource="{x:Bind CharVm.SensitivityList}"
                                   SelectedItem="{x:Bind CharVm.Sensitivity, Mode=TwoWay}" />
-                    <ComboBox Header="Sociability" Grid.Column="0" Grid.Row="5" IsEditable="True" MinWidth="200"
+                    <editors:SfComboBox Header="Sociability" Grid.Column="0" Grid.Row="5" IsEditable="True" MinWidth="200"
                                   ItemsSource="{x:Bind CharVm.SociabilityList}"
                                   SelectedItem="{x:Bind CharVm.Sociability, Mode=TwoWay}" />
                     <TextBlock Grid.Column="1" Grid.Row="0" MinWidth="100"/>
-                    <ComboBox Header="Aggression" Grid.Column="2" Grid.Row="0" IsEditable="True" MinWidth="200"
+                    <editors:SfComboBox Header="Aggression" Grid.Column="2" Grid.Row="0" IsEditable="True" MinWidth="200"
                                   ItemsSource="{x:Bind CharVm.AggressionList}"
                                   SelectedItem="{x:Bind CharVm.Aggression, Mode=TwoWay}" />
-                    <ComboBox Header="Conscientiousness" Grid.Column="2" Grid.Row="1" IsEditable="True" MinWidth="200"
+                    <editors:SfComboBox Header="Conscientiousness" Grid.Column="2" Grid.Row="1" IsEditable="True" MinWidth="200"
                                   ItemsSource="{x:Bind CharVm.ConscientiousnessList}"
                                   SelectedItem="{x:Bind CharVm.Conscientiousness, Mode=TwoWay}" />
-                    <ComboBox Header="Dominance" Grid.Column="2" Grid.Row="2" IsEditable="True" MinWidth="200" 
+                    <editors:SfComboBox Header="Dominance" Grid.Column="2" Grid.Row="2" IsEditable="True" MinWidth="200" 
                                   ItemsSource="{x:Bind CharVm.DominanceList}"
                                   SelectedItem="{x:Bind CharVm.Dominance, Mode=TwoWay}" />
-                    <ComboBox Header="Self Assurance" Grid.Column="2" Grid.Row="3" IsEditable="True" MinWidth="200"
+                    <editors:SfComboBox Header="Self Assurance" Grid.Column="2" Grid.Row="3" IsEditable="True" MinWidth="200"
                                   ItemsSource="{x:Bind CharVm.AssuranceList}"
                                   SelectedItem="{x:Bind CharVm.Assurance, Mode=TwoWay}" />
-                    <ComboBox Header="Shrewdness" Grid.Column="2" Grid.Row="4" IsEditable="True" MinWidth="200"
+                    <editors:SfComboBox Header="Shrewdness" Grid.Column="2" Grid.Row="4" IsEditable="True" MinWidth="200"
                                   ItemsSource="{x:Bind CharVm.ShrewdnessList}"
                                   SelectedItem="{x:Bind CharVm.Shrewdness, Mode=TwoWay}" />
-                    <ComboBox Header="Stability" Grid.Column="2" Grid.Row="5" IsEditable="True" MinWidth="200"
+                    <editors:SfComboBox Header="Stability" Grid.Column="2" Grid.Row="5" IsEditable="True" MinWidth="200"
                                   ItemsSource="{x:Bind CharVm.StabilityList}"
                                   SelectedItem="{x:Bind CharVm.Stability, Mode=TwoWay}" />
                 </Grid>
