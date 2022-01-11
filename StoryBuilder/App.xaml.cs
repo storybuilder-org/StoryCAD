@@ -66,6 +66,8 @@ public partial class App : Application
     public App()
     {
         ConfigureIoc();
+        //Register Syncfusion license
+        Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("NTYzMTY1QDMxMzkyZTM0MmUzME9nM25VTkZZdjM1bDgxbHU3Y0pMTm9sTXJ5VDB4cTFvcmRKMEk0Ry8wUWM9");
         InitializeComponent();
         Current.UnhandledException += OnUnhandledException;
     }
