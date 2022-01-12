@@ -12,8 +12,9 @@
             <Grid HorizontalAlignment="Center">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="100"/>
-                    <RowDefinition Height="400"/>
-                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="300"/>
+                    <RowDefinition Height="90"/>
+                    <RowDefinition Height="100"/>
                 </Grid.RowDefinitions>
 
                 <StackPanel Grid.Row="0" VerticalAlignment="Center">
@@ -38,7 +39,10 @@
                 <StackPanel Grid.Row="2">
                     <CheckBox IsChecked="{x:Bind _initVM.ErrorLogging, Mode=TwoWay}" Content="Send error logs to Team StoryBuilder (Does not contain any personal information.)" VerticalAlignment="Bottom" Margin="5"/>
                     <CheckBox IsChecked="{x:Bind _initVM.News, Mode=TwoWay}" Content="Send me newsletters about StoryBuilder" VerticalAlignment="Bottom" Margin="5"/>
+                </StackPanel>
+                <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center">
                     <Button Content="Continue" Margin="25" HorizontalAlignment="Center" Click="Check"/>
+                    <Button Content="Join our community discord!" Background="#5865F2" Foreground="White"  Margin="25" HorizontalAlignment="Center" Click="Discord"/>
                 </StackPanel>
             </Grid>
         </ScrollViewer>

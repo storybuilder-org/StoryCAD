@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Windows.Storage;
 using Windows.Storage.Pickers;
@@ -98,6 +99,14 @@ public sealed partial class Initialization : Page
 
     [DllImport("user32.dll", ExactSpelling = true, CharSet = CharSet.Auto, PreserveSig = true, SetLastError = false)]
     public static extern IntPtr GetActiveWindow();
+
+    public void Discord(object sender, RoutedEventArgs e)
+    {
+        Process Browser = new();
+        Browser.StartInfo.FileName = @"https://discord.gg/wfZxU4bx6n";
+        Browser.StartInfo.UseShellExecute = true;
+        Browser.Start();
+    }
 
 
     public void Check(object sender, RoutedEventArgs e)
