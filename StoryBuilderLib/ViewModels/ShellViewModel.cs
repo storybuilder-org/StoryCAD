@@ -20,6 +20,7 @@ using StoryBuilder.ViewModels.Tools;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -335,7 +336,7 @@ namespace StoryBuilder.ViewModels
 
         #endregion
 
-        #region Public Methods
+            #region Public Methods
         private void CloseUnifiedMenu()
         {
             _contentDialog.Hide();
@@ -928,8 +929,17 @@ namespace StoryBuilder.ViewModels
                     AboutDialog.Content = new About();
                     AboutDialog.Width = 900;
                     AboutDialog.Title = "About StoryBuilder";
+                    AboutDialog.SecondaryButtonText = "Join Discord";
                     AboutDialog.CloseButtonText = "Close";
-                    await AboutDialog.ShowAsync();
+                    var a = await AboutDialog.ShowAsync();
+
+                    if (a == ContentDialogResult.Secondary)
+                    {
+                        Process Browser = new();
+                        Browser.StartInfo.FileName = @"https://discord.gg/wfZxU4bx6n";
+                        Browser.StartInfo.UseShellExecute = true;
+                        Browser.Start();
+                        }
                     break;
                 }
                 //don't save changes
