@@ -1,10 +1,15 @@
 Table of Contents
  
 ![Front Matter](Front_Matter.md)
+
     ![Front Page (Image)](Front_Page_(Image).md)
+    
     ![Preface](Preface.md)
+    
     ![Legal Matters](Legal_Matters.md)
+    
     ![Getting Help](Getting_Help.md)
+    
 ![Quick Start](Quick_Start.md)
     ![Using Various Input Devices](Using_Various_Input_Devices.md)
     ![Navigating in StoryBuilder](Navigating_in_StoryBuilder.md)
