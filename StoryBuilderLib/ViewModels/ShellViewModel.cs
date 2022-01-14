@@ -676,22 +676,26 @@ namespace StoryBuilder.ViewModels
 
             try
             {
+                //Gets correct name for file
                 string fileName = $"{StoryModel.ProjectFilename} as of {DateTime.Now}".Replace('/',' ').Replace(':',' ').Replace(".stbx","");
-                StorageFolder backupRoot = await StorageFolder.GetFolderFromPathAsync(GlobalData.Preferences.BackupDirectory);
-                //StorageFile zipFileOnDisk = await backupRoot.CreateFileAsync(StoryModel.ProjectFilename + ".zip", CreationCollisionOption.OpenIfExists);
-                //ZipArchive compressedArchive = new(await zipFileOnDisk.OpenStreamForWriteAsync(), ZipArchiveMode.Create);
-                //compressedArchive.CreateEntryFromFile(Path.Combine(StoryModel.ProjectPath,StoryModel.ProjectFilename), fileName);
+                StorageFolder backupRoot = await StorageFolder.GetFolderFromPathAsync(GlobalData.Preferences.BackupDirectory.Replace(".stbx",""));
+                StorageFolder backupLocation = await backupRoot.CreateFolderAsync(StoryModel.ProjectFilename , CreationCollisionOption.OpenIfExists);
+                Logger.Log(LogLevel.Info, $"Backing up to {backupLocation.Path} as {fileName}.zip");
 
-                using (FileStream fs = new(Path.Combine(backupRoot.Path,StoryModel.ProjectFile.Name.Replace(".stbx","") + ".zip"), FileMode.OpenOrCreate))
-                using (ZipArchive arch = new (fs, ZipArchiveMode.Update))
-                {
-                    arch.CreateEntryFromFile( Path.Combine(StoryModel.ProjectFolder.Path,StoryModel.ProjectFile.Name), fileName + ".stbx");
-                }
+                //Creates ziparchive
+                FileStream file = new(Path.Combine(backupLocation.Path, fileName) + ".zip", FileMode.OpenOrCreate);
+                ZipArchive archive = new(file, ZipArchiveMode.Create);
+                Logger.Log(LogLevel.Info, $"Created zip file dummy and opened stream at {file.Name}");
+
+                //Creates entry and flushes to disk.
+                Logger.Log(LogLevel.Info, $"Reading file at {Path.Combine(StoryModel.ProjectFolder.Path, StoryModel.ProjectFile.Name)} and compressing it as {StoryModel.ProjectFile.Name}.stbx");
+                archive.CreateEntryFromFile(Path.Combine(StoryModel.ProjectFolder.Path, StoryModel.ProjectFile.Name), StoryModel.ProjectFile.Name + ".stbx");
+                await file.FlushAsync();
+                Logger.Log(LogLevel.Info, $"Finished backup, flushed data to disk.");
             }
             catch (Exception ex)
             {
                 Logger.LogException(LogLevel.Error, ex, "Error backing up project");
-                //TODO: Percolate exception
             }
             Logger.Log(LogLevel.Info, "BackupProject complete");
         }
