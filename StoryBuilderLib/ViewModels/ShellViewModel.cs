@@ -22,6 +22,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
@@ -675,10 +676,17 @@ namespace StoryBuilder.ViewModels
 
             try
             {
-                string fileName = $"{StoryModel.ProjectFilename} as of {DateTime.Now}".Replace('/',' ').Replace(':',' ').Replace(".stbx","") + ".stbx";
+                string fileName = $"{StoryModel.ProjectFilename} as of {DateTime.Now}".Replace('/',' ').Replace(':',' ').Replace(".stbx","");
                 StorageFolder backupRoot = await StorageFolder.GetFolderFromPathAsync(GlobalData.Preferences.BackupDirectory);
-                StorageFolder backupLocation = await backupRoot.CreateFolderAsync(StoryModel.ProjectFilename, CreationCollisionOption.OpenIfExists);
-                await StoryModel.ProjectFile.CopyAsync(backupLocation, fileName);
+                //StorageFile zipFileOnDisk = await backupRoot.CreateFileAsync(StoryModel.ProjectFilename + ".zip", CreationCollisionOption.OpenIfExists);
+                //ZipArchive compressedArchive = new(await zipFileOnDisk.OpenStreamForWriteAsync(), ZipArchiveMode.Create);
+                //compressedArchive.CreateEntryFromFile(Path.Combine(StoryModel.ProjectPath,StoryModel.ProjectFilename), fileName);
+
+                using (FileStream fs = new(Path.Combine(backupRoot.Path,StoryModel.ProjectFile.Name.Replace(".stbx","") + ".zip"), FileMode.OpenOrCreate))
+                using (ZipArchive arch = new (fs, ZipArchiveMode.Update))
+                {
+                    arch.CreateEntryFromFile( Path.Combine(StoryModel.ProjectFolder.Path,StoryModel.ProjectFile.Name), fileName + ".stbx");
+                }
             }
             catch (Exception ex)
             {
