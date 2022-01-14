@@ -9,17 +9,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StoryBuilderLib", "StoryBui
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StoryBuilderTests", "StoryBuilderTests\StoryBuilderTests.csproj", "{F5CB258A-B8E6-4D60-80B8-B6F398157A55}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{E2DA341C-F20D-4A6B-9DC5-4F04953267DF}"
-	ProjectSection(SolutionItems) = preProject
-		docs\ACKNOWLEDGE.md = docs\ACKNOWLEDGE.md
-		CODE_OF_CONDUCT.md = CODE_OF_CONDUCT.md
-		docs\CONTRIBUTE.md = docs\CONTRIBUTE.md
-		docs\DEVNOTES.md = docs\DEVNOTES.md
-		LICENSE.TXT = LICENSE.TXT
-		SUPPORT.md = SUPPORT.md
-		docs\USERNOTES.md = docs\USERNOTES.md
-	EndProjectSection
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StoryBuilder", "StoryBuilder\StoryBuilder.csproj", "{BC359F5C-E784-4FD5-80E5-63A6A0FB853C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{10629CB1-BAB9-4F98-9359-0E89CD116847}"
