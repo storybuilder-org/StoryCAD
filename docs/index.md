@@ -2,7 +2,7 @@ Table of Contents
  
 [Front Matter](Front_Matter.md)
  
-    [Front Page (Image)](Front_Page_(Image).md)
+    [Front Page (Image)](Front_Page_Image.md)
  
     [Preface](Preface.md)
  
