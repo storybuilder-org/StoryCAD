@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using Windows.ApplicationModel.Store.Preview.InstallControl;
 using Windows.Storage;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,6 +12,7 @@ using PInvoke;
 using StoryBuilder.DAL;
 using StoryBuilder.Models;
 using StoryBuilder.Models.Tools;
+using StoryBuilder.Services;
 using StoryBuilder.Services.Installation;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.Services.Navigation;
@@ -88,6 +90,7 @@ public partial class App : Application
                 .AddSingleton<ScrivenerIo>()
                 .AddSingleton<StoryReader>()
                 .AddSingleton<StoryWriter>()
+                .AddSingleton<BackupService>()
                 // Register ViewModels 
                 .AddSingleton<ShellViewModel>()
                 .AddSingleton<OverviewViewModel>()

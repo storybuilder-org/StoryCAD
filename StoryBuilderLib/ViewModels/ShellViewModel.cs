@@ -28,6 +28,7 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Windows.Storage;
 using Windows.Storage.Pickers;
+using StoryBuilder.Services;
 using WinRT;
 using GuidAttribute = System.Runtime.InteropServices.GuidAttribute;
 
@@ -449,9 +450,8 @@ namespace StoryBuilder.ViewModels
 
                 // Save the new project
                 await SaveFile();
-                await BackupProject();
-
-
+                await Ioc.Default.GetService<BackupService>().BackupProject();
+                Ioc.Default.GetService<BackupService>().StartTimedBackup();
                 StatusMessage = "New project ready.";
                 Logger.Log(LogLevel.Info, "Unity - NewFile command completed");
             }
@@ -639,24 +639,23 @@ namespace StoryBuilder.ViewModels
                     _canExecuteCommands = true;  // unblock other commands
                     return;
                 }
-
+                Ioc.Default.GetService<BackupService>().StopTimedBackup();
                 //NOTE: BasicProperties.DateModified can be the date last changed
 
-                await BackupProject();
+                await Ioc.Default.GetService<BackupService>().BackupProject();
                 StoryReader rdr = Ioc.Default.GetService<StoryReader>();
                 StoryModel = await rdr.ReadFile(StoryModel.ProjectFile);
-                await BackupProject();
+                await Ioc.Default.GetService<BackupService>().BackupProject();
                 if (StoryModel.ExplorerView.Count > 0)
                 {
                     SetCurrentView(StoryViewType.ExplorerView);
-                    Ioc.Default.GetService<MainWindowVM>().Title = $"StoryBuilder - Editing {StoryModel.ProjectFilename.Replace(".stbx", "")}";
-                    new UnifiedVM().UpdateRecents(StoryModel.ProjectPath);
                     StatusMessage = "Open Story completed";
                 }
-
+                Ioc.Default.GetService<MainWindowVM>().Title = $"StoryBuilder - Editing {StoryModel.ProjectFilename.Replace(".stbx", "")}";
+                new UnifiedVM().UpdateRecents(Path.Combine(StoryModel.ProjectFolder.Path,StoryModel.ProjectFile.Name));
+                Ioc.Default.GetService<BackupService>().StartTimedBackup();
                 string msg = $"Opened project {StoryModel.ProjectFilename}";
                 Logger.Log(LogLevel.Info, msg);
-                
             }
             catch (Exception ex)
             {
@@ -666,38 +665,6 @@ namespace StoryBuilder.ViewModels
 
             Logger.Log(LogLevel.Info, "Open Story completed.");
             _canExecuteCommands = true;
-        }
-
-        private async Task BackupProject()
-        {
-            Logger.Log(LogLevel.Info, "Starting Project Backup");
-            //Creates backup directory if it doesnt exist
-            if (!Directory.Exists(GlobalData.Preferences.BackupDirectory)) {Directory.CreateDirectory(GlobalData.Preferences.BackupDirectory);}
-
-            try
-            {
-                //Gets correct name for file
-                string fileName = $"{StoryModel.ProjectFilename} as of {DateTime.Now}".Replace('/',' ').Replace(':',' ').Replace(".stbx","");
-                StorageFolder backupRoot = await StorageFolder.GetFolderFromPathAsync(GlobalData.Preferences.BackupDirectory.Replace(".stbx",""));
-                StorageFolder backupLocation = await backupRoot.CreateFolderAsync(StoryModel.ProjectFilename , CreationCollisionOption.OpenIfExists);
-                Logger.Log(LogLevel.Info, $"Backing up to {backupLocation.Path} as {fileName}.zip");
-
-                //Creates ziparchive
-                FileStream file = new(Path.Combine(backupLocation.Path, fileName) + ".zip", FileMode.OpenOrCreate);
-                ZipArchive archive = new(file, ZipArchiveMode.Create);
-                Logger.Log(LogLevel.Info, $"Created zip file dummy and opened stream at {file.Name}");
-
-                //Creates entry and flushes to disk.
-                Logger.Log(LogLevel.Info, $"Reading file at {Path.Combine(StoryModel.ProjectFolder.Path, StoryModel.ProjectFile.Name)} and compressing it as {StoryModel.ProjectFile.Name}.stbx");
-                archive.CreateEntryFromFile(Path.Combine(StoryModel.ProjectFolder.Path, StoryModel.ProjectFile.Name), StoryModel.ProjectFile.Name + ".stbx");
-                await file.FlushAsync();
-                Logger.Log(LogLevel.Info, $"Finished backup, flushed data to disk.");
-            }
-            catch (Exception ex)
-            {
-                Logger.LogException(LogLevel.Error, ex, "Error backing up project");
-            }
-            Logger.Log(LogLevel.Info, "BackupProject complete");
         }
 
         private async Task SaveFile()
@@ -799,7 +766,7 @@ namespace StoryBuilder.ViewModels
                         StoryModel.ProjectPath = SaveAsVM.SaveAsProjectFolderPath;
                         // Add to the recent files stack
                         Ioc.Default.GetService<MainWindowVM>().Title = $"StoryBuilder - Editing {StoryModel.ProjectFilename.Replace(".stbx", "")}";
-                        new UnifiedVM().UpdateRecents(StoryModel.ProjectPath);
+                        new UnifiedVM().UpdateRecents(Path.Combine(StoryModel.ProjectFolder.Path, StoryModel.ProjectFile.Name));
                         // Indicate everything's done
                         Messenger.Send(new IsChangedMessage(true));
                         StoryModel.Changed = false;
