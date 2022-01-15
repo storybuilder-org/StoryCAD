@@ -1,14 +1,14 @@
 Table of Contents
  
-[Front Matter](/Front_Matter.md)
+[Front Matter](Front_Matter.md)
  
-    [Front Page (Image)](/Front_Page_Image.md)
+    [Front Page (Image)](Front_Page_Image.md)
  
-    [Preface](/Preface.md)
+    [Preface](Preface.md)
  
-    [Legal Matters](/Legal_Matters.md)
+    [Legal Matters](Legal_Matters.md)
  
-    [Getting Help](/Getting_Help.md)
+    [Getting Help](Getting_Help.md)
  
 [Quick Start](Quick_Start.md)
  
@@ -26,11 +26,11 @@ Table of Contents
  
         [Menu Bar](Menu_Bar.md)
  
-            [Show/Hide Navigation Pane](Show_Hide_Navigation_Pane.md)
+            [ShowHide Navigation Pane](Show_Hide_Navigation_Pane.md)
  
             [File Menu](File_Menu.md)
  
-            [Add/Remove Story Elements](Add_Remove_Story_Elements.md)
+            [AddRemove Story Elements](Add_Remove_Story_Elements.md)
  
             [Move Story Elements](Move_Story_Elements.md)
  
