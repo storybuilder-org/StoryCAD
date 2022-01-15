@@ -1,7 +1,7 @@
 ### The StoryBuilder User Interface ###
 The StoryBuilder User Interface
 
-![][User-Interface]
+![](User-Interface.png)
 
 The form’s sections are as follows. They’ll be explained in more detail as we go.
 

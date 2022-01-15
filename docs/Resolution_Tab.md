@@ -1,7 +1,7 @@
 ### Resolution Tab ###
 Resolution Tab
 
-![][Problem-Resolution-Tab]
+![](Problem-Resolution-Tab.png)
 
 The resolution is the outcome of the problem.  Not every problem in a story must be resolved, but the important ones which affect the protagonist's desire and show his growth must be.  If they are not, the reader, who has been turning pages to find out what happens, will feel cheated.
 

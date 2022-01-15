@@ -1,3 +1,3 @@
 ## Front Page (Image) ##
 
-![][StoryBuilder]
+![](StoryBuilder.png)

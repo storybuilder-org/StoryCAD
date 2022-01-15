@@ -1,7 +1,7 @@
 ### Relationships Tab ###
  Relationships Tab
 
-![][Character-Relationships-Tab]
+![](Character-Relationships-Tab.png)
 
 
 The Relationship tab on the Character form describes significant character-to-character relationships.

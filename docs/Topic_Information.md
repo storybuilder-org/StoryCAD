@@ -3,7 +3,7 @@
 1
 Topic Information
 
-![][Clipboard-Image-6]
+![](Clipboard-Image-6.png)
 
 The Topic Information sub-menu on the Tools menu contains a list containing information specific to certain topics.  These items will be displayed either on a card file-like list or a Windows notepad, depending on the contents. 
 

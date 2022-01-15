@@ -4,7 +4,7 @@ Setting Tab
 
 The Setting tab contains elements which make the setting specific and unique.
 
-![][Clipboard-Image-4]
+![](Clipboard-Image-4.png)
 
 
 Locale	The location of the setting in space.

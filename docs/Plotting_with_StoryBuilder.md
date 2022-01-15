@@ -28,28 +28,28 @@ How do you go about finding those 50-60  (or however many you need) scenes?
 
 Don’t think in terms of scene count. Think of plotting as finding the scenes you need to resolve your story’s problems.  If you’ve been following this dialog, you know that you  have a top-level problem, the Story Problem, defined on the Story Overview form, and you’ve summarized the problem in its Premise:
 
-![][Plotting-with-StoryBuilder-Premise]
+![](Plotting-with-StoryBuilder-Premise.png)
  When that problem is resolved, the story is finished. This is the top level design of your story.
 
 If you were to use Master Plots to create of Scene story elements for the plot points in this problem with the Three Act Structure template, it might look like this:
 
-![][Plotting-with-StoryBuilder-Story-Problem-MasterPlots-Scene-list]
+![](Plotting-with-StoryBuilder-Story-Problem-MasterPlots-Scene-list.png)
 
 This is what plotting the main Story Problem might look like if it were, say, a short story. But it’s longer story (a Novella, in this case), and there aren’t enough scenes to carry the longer work. So instead of thinking of each part as  a scene, consider it just as a story beat or plot point. Ignoring the other plot points, consider First Obstacle and Subsequent Obstacles not as Scenes but as Problems= subproblems, Complications, in this case):
 
-![][Plotting-with-StoryBuilder-Complication-SubProblems]
+![](Plotting-with-StoryBuilder-Complication-SubProblems.png)
 
 In real life one strategy to solve a problem is to decompose it into smaller problems. That same approach works when plotting, the twist being that you’ll be creating rather than solving subproblems. Don’t plot in Scenes;  plot in Problems. These problems can be further decomposed into scenes:
 
-![][Plotting-with-StoryBuilder-SubProblems-Epanded-into-Scenes]
+![](Plotting-with-StoryBuilder-SubProblems-Epanded-into-Scenes.png)
 
 This process works not only with complications (subplots with bad outcomes which are designed to increase the conflict), but with other subplots. In The Old Man and the Sea, Manolin, the boy Santiago mentored and who loves him, has a character arc based on his relationship with the old man:
 
-![][StoryBuilder-Manolin-Problem]
+![](StoryBuilder-Manolin-Problem.png)
 
 This is an inner problem for Manolin, a coming of age arc, and it’s plotted in just six scenes:
 
-![][Plotting-with-StoryBuilder-Manolin-Subplot]
+![](Plotting-with-StoryBuilder-Manolin-Subplot.png)
 
 Hemingway uses this problem as a frame around Santiago’s battle, splitting the scenes and using the first three to introduce Santiago before his battle, and the last three to show Manolin vowing to fish with the old man again. Plot your scenes for your Problems, but you don’t have to arrange them in that order in your narrative. That’s what Story Narrator View is for.
 

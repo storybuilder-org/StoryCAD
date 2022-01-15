@@ -1,7 +1,7 @@
 ### Scene Tab ###
 Scene Tab
 
-![][Scene-Scene-Tab]
+![](Scene-Scene-Tab.png)
 
 Date and Time		Identify when the scene occurs.
 

@@ -5,13 +5,13 @@ The Menu bar is located just below the title bar on the StoryBuilder form and pr
 
 Clicking the See more (...) button will display labels below each menu button:
 
-![][Menu-Bar]
+![](Menu-Bar.png)
 
 Clicking the same button will toggle the button labels off again.
 
 Hovering your mouse or stylus over a button will display a tool tip describing the button’s function:
 
-![][Menu-Bar-Tooltip]
+![](Menu-Bar-Tooltip.png)
 
 
 The menu bar buttons either display drop-down menus (such as File), or launch particular actions (such as Preferences.)

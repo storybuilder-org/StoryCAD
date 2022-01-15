@@ -1,7 +1,7 @@
 #### Status Bar ####
 Status Bar
 
-![][Status-Bar]
+![](Status-Bar.png)
 
 
 The Status Bar reports information you may find useful during program execution. It contains the following controls:
@@ -24,6 +24,6 @@ Indicates if a Search is active.
 
 Changed Indicator
 
- ![][Changed-Indicator]
+![](Changed-Indicator.png)
 
 The Changed Indicator displays red if any editing has been done to the outline and green if not. It’s a reminder to save your work.
