@@ -1,7 +1,7 @@
 ### Premise Tab ###
 Premise Tab
 
-![][Overview-Premise]
+![](Overview-Premise.png)
 
 
 Story Problem

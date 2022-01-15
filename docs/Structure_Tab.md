@@ -3,7 +3,7 @@ Structure Tab
 
 Structure is the order and manner in which you tell your story. Structure has two meanings. This tab is concerned with the constraints you put on the story (hopefully early in your story development.) The second meaning is concerned with the order and arrangement of story elements; you’ll add as you develop your outline. 
 
-![][Overview-Structure-Tab]
+![](Overview-Structure-Tab.png)
 
 
 Fields:

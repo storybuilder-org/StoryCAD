@@ -1,7 +1,7 @@
 ### Social Tab ###
 Social Tab
 
-![][Character-Social-Tab]
+![](Character-Social-Tab.png)
 
 These elements are the major factors which affect this character's behavior and which come from the influence of others or the community.
 

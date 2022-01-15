@@ -1,7 +1,7 @@
 ### Physical Tab ###
 Physical and Appearance Tabs
 
-![][Clipboard-Image-2]
+![](Clipboard-Image-2.png)
 
 
 These character traits describe the external physical characteristics and appearance of the character.  They are generally self-explanatory.

@@ -6,7 +6,7 @@
 
 Key Questions
 
-![][Clipboard-Image-5]
+![](Clipboard-Image-5.png)
 
 [tk: Format]
 
