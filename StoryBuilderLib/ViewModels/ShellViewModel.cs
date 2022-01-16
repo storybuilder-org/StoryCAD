@@ -642,7 +642,6 @@ namespace StoryBuilder.ViewModels
                 Ioc.Default.GetService<BackupService>().StopTimedBackup();
                 //NOTE: BasicProperties.DateModified can be the date last changed
 
-                await Ioc.Default.GetService<BackupService>().BackupProject();
                 StoryReader rdr = Ioc.Default.GetService<StoryReader>();
                 StoryModel = await rdr.ReadFile(StoryModel.ProjectFile);
                 await Ioc.Default.GetService<BackupService>().BackupProject();
