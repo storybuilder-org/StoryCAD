@@ -80,16 +80,17 @@ namespace StoryBuilder.Services
                 StorageFolder backupLocation = await backupRoot.CreateFolderAsync(Shell.StoryModel.ProjectFile.Name, CreationCollisionOption.OpenIfExists);
                 Log.Log(LogLevel.Info, $"Backing up to {backupLocation.Path} as {fileName}.zip");
 
-                //Creates ziparchive
-                FileStream file = new(Path.Combine(backupLocation.Path, fileName) + ".zip", FileMode.OpenOrCreate);
-                ZipArchive archive = new(file, ZipArchiveMode.Create);
-                Log.Log(LogLevel.Info, $"Created zip file dummy and opened stream at {file.Name}");
+                StorageFolder Temp = await StorageFolder.GetFolderFromPathAsync(GlobalData.RootDirectory);
+                Temp = await Temp.CreateFolderAsync("Temp", CreationCollisionOption.ReplaceExisting);
+                await Shell.StoryModel.ProjectFile.CopyAsync(Temp, Shell.StoryModel.ProjectFile.Name,NameCollisionOption.ReplaceExisting);
+                ZipFile.CreateFromDirectory(Temp.Path,Path.Combine(backupLocation.Path,fileName ) + ".zip");
+                
+                //Creates ziparchive then cleans up
+                Log.Log(LogLevel.Info, $"Created Zip file at {Path.Combine(backupLocation.Path, fileName)}.zip");
+                await Temp.DeleteAsync();
 
                 //Creates entry and flushes to disk.
-                Log.Log(LogLevel.Info, $"Reading file at {Path.Combine(Shell.StoryModel.ProjectFolder.Path, Shell.StoryModel.ProjectFile.Name)} and compressing it as {Shell.StoryModel.ProjectFile.Name}.stbx");
-                archive.CreateEntryFromFile(Path.Combine(Shell.StoryModel.ProjectFolder.Path, Shell.StoryModel.ProjectFile.Name), Shell.StoryModel.ProjectFile.Name + ".stbx");
-                await file.FlushAsync();
-                Log.Log(LogLevel.Info, $"Finished backup, flushed data to disk.");
+                Log.Log(LogLevel.Info, $"Finished backup.");
             }
             catch (Exception ex)
             {
