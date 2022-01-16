@@ -450,7 +450,7 @@ namespace StoryBuilder.ViewModels
 
                 // Save the new project
                 await SaveFile();
-                await Ioc.Default.GetService<BackupService>().BackupProject();
+                await MakeBackup();
                 Ioc.Default.GetService<BackupService>().StartTimedBackup();
                 StatusMessage = "New project ready.";
                 Logger.Log(LogLevel.Info, "Unity - NewFile command completed");
@@ -461,6 +461,11 @@ namespace StoryBuilder.ViewModels
                 StatusMessage = "File make failure.";
             }
             _canExecuteCommands = true;
+        }
+
+        public async Task MakeBackup()
+        {
+            await Ioc.Default.GetService<BackupService>().BackupProject();
         }
 
         public void TreeViewNodeClicked(object selectedItem)

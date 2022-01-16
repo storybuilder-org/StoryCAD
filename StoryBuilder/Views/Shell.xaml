@@ -102,16 +102,25 @@
                                 <MenuFlyoutItem.Icon>
                                     <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE8F4;"/>
                                 </MenuFlyoutItem.Icon>
+                                <MenuFlyoutItem.KeyboardAccelerators>
+                                    <KeyboardAccelerator Modifiers="Control" Key="O"/>
+                                </MenuFlyoutItem.KeyboardAccelerators>
                             </MenuFlyoutItem>
                             <MenuFlyoutItem Text="Save Story" Command="{x:Bind ShellVm.SaveFileCommand, Mode=OneWay}" >
                                 <MenuFlyoutItem.Icon>
                                     <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE74E;"/>
                                 </MenuFlyoutItem.Icon>
+                                <MenuFlyoutItem.KeyboardAccelerators>
+                                    <KeyboardAccelerator Key="S" Modifiers="Control"/>
+                                </MenuFlyoutItem.KeyboardAccelerators>
                             </MenuFlyoutItem>
                             <MenuFlyoutItem Text="Save Story As" Command="{x:Bind ShellVm.SaveAsCommand, Mode=OneWay}" >
                                 <MenuFlyoutItem.Icon>
                                     <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE792;"/>
                                 </MenuFlyoutItem.Icon>
+                                <MenuFlyoutItem.KeyboardAccelerators>
+                                    <KeyboardAccelerator Modifiers="Control,Shift" Key="S"/>
+                                </MenuFlyoutItem.KeyboardAccelerators>
                             </MenuFlyoutItem>
                             <MenuFlyoutItem Text="Close Story" Command="{x:Bind ShellVm.CloseCommand, Mode=OneWay}" >
                                 <MenuFlyoutItem.Icon>
@@ -132,12 +141,36 @@
                     </AppBarButton.Icon>
                     <AppBarButton.Flyout>
                         <MenuFlyout>
-                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.AddFolderVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.AddFolderCommand, Mode=OneWay}" Icon="Folder" Text="Add folder"/>
-                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.AddSectionVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.AddSectionCommand,Mode=OneWay}" Icon="Folder" Text="Add section"/>
-                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.AddProblemVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.AddProblemCommand ,Mode=OneWay}" Icon="Help" Text="Add problem"/>
-                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.AddCharacterVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.AddCharacterCommand,Mode=OneWay}" Icon="Contact" Text="Add character"/>
-                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.AddSettingVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.AddSettingCommand,Mode=OneWay}" Icon="Globe" Text="Add setting"/>
-                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.AddSceneVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.AddSceneCommand,Mode=OneWay}" Icon="AllApps" Text="Add scene"/>
+                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.AddFolderVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.AddFolderCommand, Mode=OneWay}" Icon="Folder" Text="Add folder">
+                                <MenuFlyoutItem.KeyboardAccelerators>
+                                    <KeyboardAccelerator Key="F1"/>
+                                </MenuFlyoutItem.KeyboardAccelerators>
+                            </MenuFlyoutItem>
+                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.AddSectionVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.AddSectionCommand,Mode=OneWay}" Icon="Folder" Text="Add section">
+                                <MenuFlyoutItem.KeyboardAccelerators>
+                                    <KeyboardAccelerator Key="F2"/>
+                                </MenuFlyoutItem.KeyboardAccelerators>
+                            </MenuFlyoutItem>
+                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.AddProblemVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.AddProblemCommand ,Mode=OneWay}" Icon="Help" Text="Add problem">
+                                <MenuFlyoutItem.KeyboardAccelerators>
+                                    <KeyboardAccelerator Key="F3"/>
+                                </MenuFlyoutItem.KeyboardAccelerators>
+                            </MenuFlyoutItem>
+                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.AddCharacterVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.AddCharacterCommand,Mode=OneWay}" Icon="Contact" Text="Add character">
+                                <MenuFlyoutItem.KeyboardAccelerators>
+                                    <KeyboardAccelerator Key="F4"/>
+                                </MenuFlyoutItem.KeyboardAccelerators>
+                            </MenuFlyoutItem>
+                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.AddSettingVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.AddSettingCommand,Mode=OneWay}" Icon="Globe" Text="Add setting">
+                                <MenuFlyoutItem.KeyboardAccelerators>
+                                    <KeyboardAccelerator Key="F5"/>
+                                </MenuFlyoutItem.KeyboardAccelerators>
+                            </MenuFlyoutItem>
+                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.AddSceneVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.AddSceneCommand,Mode=OneWay}" Icon="AllApps" Text="Add scene">
+                                <MenuFlyoutItem.KeyboardAccelerators>
+                                    <KeyboardAccelerator Key="F6"/>
+                                </MenuFlyoutItem.KeyboardAccelerators>
+                            </MenuFlyoutItem>
                             <MenuFlyoutSeparator/>
                             <MenuFlyoutItem Visibility="{x:Bind ShellVm.RemoveStoryElementVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.RemoveStoryElementCommand,Mode=OneWay}" Icon="Delete" Text="Delete story element"/>
                             <MenuFlyoutItem Visibility="{x:Bind ShellVm.RestoreStoryElementVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.RestoreStoryElementCommand,Mode=OneWay}" Icon="Refresh" Text="Restore Story element"/>
@@ -210,6 +243,9 @@
                     <AppBarButton.Icon>
                         <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE713;"/>
                     </AppBarButton.Icon>
+                    <AppBarButton.KeyboardAccelerators>
+                        <KeyboardAccelerator Modifiers="Control" Key="P"/>
+                    </AppBarButton.KeyboardAccelerators>
                 </AppBarButton>
                 <AppBarButton Label="Help" ToolTipService.ToolTip="Help"
                               Command="{x:Bind ShellVm.HelpCommand, Mode=OneWay}" IsEnabled="False" >

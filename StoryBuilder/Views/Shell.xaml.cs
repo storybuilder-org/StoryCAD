@@ -6,6 +6,7 @@ using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Navigation;
 using StoryBuilder.Models;
+using StoryBuilder.Services;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.ViewModels;
 
@@ -21,7 +22,6 @@ public sealed partial class Shell
 {
     public ShellViewModel ShellVm => Ioc.Default.GetService<ShellViewModel>();
     public UnifiedVM UnifiedVm => Ioc.Default.GetService<UnifiedVM>();
-
     public Shell()
     {
         try
