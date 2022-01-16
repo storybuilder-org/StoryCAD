@@ -32,9 +32,9 @@ namespace StoryBuilder.Services
                 Log.Log(LogLevel.Info, "Timed backup task started.");
                 while (!timeBackupWorker.CancellationPending)
                 {
+                    System.Threading.Thread.Sleep((GlobalData.Preferences.TimedBackupInterval * 60) * 1000);
                     Log.Log(LogLevel.Trace, "Starting auto backup");
                     BackupProject();
-                    System.Threading.Thread.Sleep((GlobalData.Preferences.TimedBackupInterval * 60) * 1000);
                 }
 
                 Log.Log(LogLevel.Info, "Timed backup task finished.");

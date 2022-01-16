@@ -830,7 +830,7 @@ namespace StoryBuilder.ViewModels
             ResetModel();
             SetCurrentView(StoryViewType.ExplorerView);
             Ioc.Default.GetService<MainWindowVM>().Title = "StoryBuilder";
-
+            Ioc.Default.GetService<BackupService>().StopTimedBackup();
             DataSource = StoryModel.ExplorerView;
             ShowHomePage();
             //TODO: Navigate to background Page (is there one?)
