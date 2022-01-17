@@ -2,8 +2,6 @@ Table of Contents
  
 [Front Matter](Front_Matter.md)
  
-[Front Page (Image)](Front_Page_(Image).md)
- 
 [Preface](Preface.md)
  
 [Legal Matters](Legal_Matters.md)
