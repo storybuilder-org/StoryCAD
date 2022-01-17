@@ -2,33 +2,33 @@ Table of Contents
  
 [Front Matter](Front_Matter.md)
  
-    [Front Page Image](Front_Page_Image.md)
+[    Front Page Image](Front_Page_Image.md)
  
-    [Preface](Preface.md)
+[    Preface](Preface.md)
  
-    [Legal Matters](Legal_Matters.md)
+[    Legal Matters](Legal_Matters.md)
  
-    [Getting Help](Getting_Help.md)
+     Getting Help](Getting_Help.md)
  
 [Quick Start](Quick_Start.md)
  
-    [Using Various Input Devices](Using_Various_Input_Devices.md)
+[    Using Various Input Devices](Using_Various_Input_Devices.md)
  
-    [Navigating in StoryBuilder](Navigating_in_StoryBuilder.md)
+[    Navigating in StoryBuilder](Navigating_in_StoryBuilder.md)
  
-        [Starting and Stopping StoryBuilder](Starting_and_Stopping_StoryBuilder.md)
+[        Starting and Stopping StoryBuilder](Starting_and_Stopping_StoryBuilder.md)
  
-        [Reading and Writing Outlines](Reading_and_Writing_Outlines.md)
+[        Reading and Writing Outlines](Reading_and_Writing_Outlines.md)
  
-        [The StoryBuilder User Interface](The_StoryBuilder_User_Interface.md)
+[        The StoryBuilder User Interface](The_StoryBuilder_User_Interface.md)
  
-            [Status Bar](Status_Bar.md)
+[            Status Bar](Status_Bar.md)
  
-        [Menu Bar](Menu_Bar.md)
+[            Menu Bar](Menu_Bar.md)
  
-            [ShowHide Navigation Pane](Show_Hide_Navigation_Pane.md)
+[                ShowHide Navigation Pane](Show_Hide_Navigation_Pane.md)
  
-            [File Menu](File_Menu.md)
+[                File Menu](File_Menu.md)
  
             [AddRemove Story Elements](Add_Remove_Story_Elements.md)
  
