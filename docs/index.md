@@ -28,7 +28,7 @@ Table of Contents
  
 [File Menu](File_Menu.md)
  
-[Add/Remove Story Elements](Add_Remove_Story_Elements.md)
+[Add or Remove Story Elements](Add_Remove_Story_Elements.md)
  
 [Move Story Elements](Move_Story_Elements.md)
  
