@@ -1226,6 +1226,28 @@ namespace StoryBuilder.ViewModels
             _canExecuteCommands = true;
         }
 
+        private void LaunchGitHubPages()
+        {
+            _canExecuteCommands = false;
+            string msg = "Launching GitHub Pages User Manual";
+            Logger.Log(LogLevel.Info,msg);
+            StatusMessage = msg;
+
+            string url = @"https://storybuilder-org.github.io/StoryBuilder-2/";
+
+            ProcessStartInfo psi = new ProcessStartInfo
+            {
+                FileName = url,
+                UseShellExecute = true
+            };
+            Process.Start(psi);
+
+            msg = "Launch default browser completed";
+            StatusMessage = msg;
+            Logger.Log(LogLevel.Info, msg);
+            _canExecuteCommands = true;
+        }
+
         #endregion  
 
         #region Move TreeViewItem Commands
@@ -1872,15 +1894,19 @@ namespace StoryBuilder.ViewModels
 
             FilterCommand = new RelayCommand(SearchNodes, () => _canExecuteCommands);
 
+            // Tools commands
             KeyQuestionsCommand = new RelayCommand(KeyQuestionsTool, () => _canExecuteCommands);
             TopicsCommand = new RelayCommand(TopicsTool, () => _canExecuteCommands);
             MasterPlotsCommand = new RelayCommand(MasterPlotTool, () => _canExecuteCommands);
             DramaticSituationsCommand = new RelayCommand(DramaticSituationsTool, () => _canExecuteCommands);
             StockScenesCommand = new RelayCommand(StockScenesTool, () => _canExecuteCommands);
+
             PreferencesCommand = new RelayCommand(Preferences, () => _canExecuteCommands);
 
             PrintReportsCommand = new RelayCommand(GeneratePrintReports, () => _canExecuteCommands);
             ScrivenerReportsCommand = new RelayCommand(GenerateScrivenerReports, () => _canExecuteCommands);
+
+            HelpCommand = new RelayCommand(LaunchGitHubPages, () => _canExecuteCommands);
 
             // Move StoryElement commands
             MoveLeftCommand = new RelayCommand(MoveTreeViewItemLeft, () => _canExecuteCommands);
