@@ -34,7 +34,7 @@ public class LogService : ILogService
             fileTarget.ConcurrentWrites = true;
             fileTarget.Layout =
                 "${longdate} | ${level} | ${message} | ${exception:format=Message,StackTrace,Data:MaxInnerExceptionLevel=5}";
-            LoggingRule fileRule = new("*", NLog.LogLevel.Trace, fileTarget);
+            LoggingRule fileRule = new("*", NLog.LogLevel.Info, fileTarget);
             config.AddTarget("logfile", fileTarget);
             config.LoggingRules.Add(fileRule);
 
