@@ -1,4 +1,5 @@
-﻿using StoryBuilder.Models;
+﻿using CommunityToolkit.Mvvm.DependencyInjection;
+using StoryBuilder.Models;
 using StoryBuilder.ViewModels;
 
 namespace StoryBuilder.Services.Search;
@@ -81,7 +82,11 @@ public class SearchService
 
     private bool SearchProblem(StoryNodeItem node, StoryElement element)
     {
-        return Comparator(element.Name);
+        StoryElement b;
+        Ioc.Default.GetService<ShellViewModel>().StoryModel.StoryElements.StoryElementGuids.TryGetValue(node.Uuid, out b);
+        if (Comparator(element.Name)) { return true; }
+        else if (Comparator(b.Antagonist)) { return true; }
+        else { return false; }
     }
 
     private bool SearchStoryOverview(StoryNodeItem node, StoryElement element)

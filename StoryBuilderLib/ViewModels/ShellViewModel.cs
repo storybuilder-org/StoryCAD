@@ -1947,13 +1947,16 @@ namespace StoryBuilder.ViewModels
                         node.IsExpanded = true; 
                         
                         StoryNodeItem parent = node.Parent;
-                        while (!parent.IsRoot)
+                        if (parent != null)
                         {
-                            parent.IsExpanded = true;
-                            parent = parent.Parent;
-                        }
+                            while (!parent.IsRoot)
+                            {
+                                parent.IsExpanded = true;
+                                parent = parent.Parent;
+                            }
 
-                        if (parent.IsRoot) { parent.IsExpanded = true; }
+                            if (parent.IsRoot) { parent.IsExpanded = true; }
+                        }
                     }
                     else { node.Background = null; }
                 }
