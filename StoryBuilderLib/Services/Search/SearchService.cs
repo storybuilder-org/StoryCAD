@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.DependencyInjection;
 using StoryBuilder.Models;
 using StoryBuilder.ViewModels;
+using System;
 
 namespace StoryBuilder.Services.Search;
 
@@ -67,6 +68,14 @@ public class SearchService
 
     private bool SearchScene(StoryNodeItem node, StoryElement element)
     {
+        SceneModel scene = (SceneModel)element;
+        foreach (string member in scene.CastMembers)
+        { 
+            StoryElement Model;
+            Ioc.Default.GetService<ShellViewModel>().StoryModel.StoryElements.StoryElementGuids.TryGetValue(Guid.Parse(member), out Model);
+            Model = Model as CharacterModel;
+            if (Comparator(Model.Name)) { return true; }
+        }
         return Comparator(element.Name);
     }
 
@@ -82,15 +91,27 @@ public class SearchService
 
     private bool SearchProblem(StoryNodeItem node, StoryElement element)
     {
-        StoryElement b;
-        Ioc.Default.GetService<ShellViewModel>().StoryModel.StoryElements.StoryElementGuids.TryGetValue(node.Uuid, out b);
+        ProblemModel problem = (ProblemModel)element;
+        StoryElement protag = null;
+        StoryElement antag = null;
+        Ioc.Default.GetService<ShellViewModel>().StoryModel.StoryElements.StoryElementGuids.TryGetValue(Guid.Parse(problem.Protagonist), out antag);
+        Ioc.Default.GetService<ShellViewModel>().StoryModel.StoryElements.StoryElementGuids.TryGetValue(Guid.Parse(problem.Antagonist), out protag);
+        protag = (CharacterModel)protag;
+        antag = (CharacterModel)antag;
+
         if (Comparator(element.Name)) { return true; }
-        else if (Comparator(b.Antagonist)) { return true; }
+        else if (Comparator(protag.Name)) { return true; } //Checks protags name (if UUID)
+        else if (Comparator(antag.Name)) { return true; } //Checks antags name (if UUID)
         else { return false; }
     }
 
     private bool SearchStoryOverview(StoryNodeItem node, StoryElement element)
     {
-        return Comparator(element.Name);
+            OverviewModel overview = (OverviewModel)element;
+        StoryElement problem;
+        Ioc.Default.GetService<ShellViewModel>().StoryModel.StoryElements.StoryElementGuids.TryGetValue(Guid.Parse(overview.StoryProblem), out problem);
+        if (Comparator(element.Name)) { return true; }
+        else if (Comparator(problem.Name)) { return true; }
+        else { return false; }
     }
 }
