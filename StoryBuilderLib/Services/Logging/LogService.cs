@@ -1,6 +1,7 @@
 ﻿using NLog;
 using NLog.Config;
 using NLog.Targets;
+using Elmah.Io.NLog;
 using StoryBuilder.Models;
 using System;
 using System.Diagnostics;
@@ -24,7 +25,6 @@ public class LogService : ILogService
 
             // Create file target
             FileTarget fileTarget = new();
-            //logFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "StoryBuilder", "logs");
             logFilePath = Path.Combine(GlobalData.RootDirectory, "logs");
             string logfilename = Path.Combine(logFilePath, "updater.${date:format=yyyy-MM-dd}.log");
             fileTarget.FileName = logfilename;
@@ -37,6 +37,15 @@ public class LogService : ILogService
             LoggingRule fileRule = new("*", NLog.LogLevel.Trace, fileTarget);
             config.AddTarget("logfile", fileTarget);
             config.LoggingRules.Add(fileRule);
+
+            // create elmah.io target
+            var elmahIoTarget = new ElmahIoTarget();
+            elmahIoTarget.Name = "elmahio";
+            elmahIoTarget.ApiKey = "39076395ea004e5cb898c7aec59d73d7";
+            elmahIoTarget.LogId = "6e87ad13-67cd-460b-b72f-0866cc738d89";
+            config.AddTarget(elmahIoTarget);
+            config.AddRuleForAllLevels(elmahIoTarget);
+            LogManager.Configuration = config;
 
             // create console target
             if (!Debugger.IsAttached)
