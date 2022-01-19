@@ -41,8 +41,8 @@ public class LogService : ILogService
             // create elmah.io target
             var elmahIoTarget = new ElmahIoTarget();
             elmahIoTarget.Name = "elmahio";
-            elmahIoTarget.ApiKey = "39076395ea004e5cb898c7aec59d73d7";
-            elmahIoTarget.LogId = "6e87ad13-67cd-460b-b72f-0866cc738d89";
+            elmahIoTarget.ApiKey = "API-KEY";
+            elmahIoTarget.LogId = "LOG-ID";
             config.AddTarget(elmahIoTarget);
             config.AddRuleForAllLevels(elmahIoTarget);
             LogManager.Configuration = config;
