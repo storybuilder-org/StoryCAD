@@ -70,13 +70,18 @@ public class SearchService
     {
         SceneModel scene = (SceneModel)element;
         foreach (string member in scene.CastMembers)
-        { 
-            StoryElement Model;
-            Ioc.Default.GetService<ShellViewModel>().StoryModel.StoryElements.StoryElementGuids.TryGetValue(Guid.Parse(member), out Model);
+        {
+            Ioc.Default.GetService<ShellViewModel>().StoryModel.StoryElements.StoryElementGuids.TryGetValue(Guid.Parse(member), out StoryElement Model);
             Model = Model as CharacterModel;
             if (Comparator(Model.Name)) { return true; }
         }
-        return Comparator(element.Name);
+
+        Ioc.Default.GetService<ShellViewModel>().StoryModel.StoryElements.StoryElementGuids.TryGetValue(Guid.Parse(scene.Protagonist), out StoryElement protag);
+        Ioc.Default.GetService<ShellViewModel>().StoryModel.StoryElements.StoryElementGuids.TryGetValue(Guid.Parse(scene.Antagonist), out StoryElement antag);
+        if (Comparator(element.Name)) { return true; }
+        else if  (Comparator(protag.Name)) { return true; }
+        else if (Comparator(antag.Name)) { return true; }
+        return false;
     }
 
     private bool SearchSetting(StoryNodeItem node, StoryElement element)
@@ -86,6 +91,14 @@ public class SearchService
 
     private bool SearchCharacter(StoryNodeItem node, StoryElement element)
     {
+        CharacterModel characterModel = (CharacterModel)element;
+
+        foreach (RelationshipModel partner in characterModel.RelationshipList)
+        {
+            Ioc.Default.GetService<ShellViewModel>().StoryModel.StoryElements.StoryElementGuids.TryGetValue(Guid.Parse(partner.PartnerUuid), out StoryElement Model);
+            if (Comparator(Model.Name)) { return true; }
+        }
+
         return Comparator(element.Name);
     }
 
