@@ -21,6 +21,8 @@ public class LogService : ILogService
     {
         try
         {
+            string apiKey = Environment.GetEnvironmentVariable("API-KEY");
+            string logID = Environment.GetEnvironmentVariable("Log-ID");
             LoggingConfiguration config = new();
 
             // Create file target
@@ -38,17 +40,17 @@ public class LogService : ILogService
             config.AddTarget("logfile", fileTarget);
             config.LoggingRules.Add(fileRule);
 
-            // create elmah.io target
-            var elmahIoTarget = new ElmahIoTarget();
-            elmahIoTarget.Name = "elmahio";
-            elmahIoTarget.Layout =
-           "${longdate} | ${level} | ${message} | ${exception:format=Message,StackTrace,Data:MaxInnerExceptionLevel=5}";
-            elmahIoTarget.ApiKey = Environment.GetEnvironmentVariable("API-KEY");
-            elmahIoTarget.LogId = Environment.GetEnvironmentVariable("Log-ID");
-            config.AddTarget(elmahIoTarget);
-            LoggingRule elmahIoRule = new("*", NLog.LogLevel.Error, elmahIoTarget);
-            config.LoggingRules.Add(elmahIoRule);
-            LogManager.Configuration = config;
+            // create elmah.io target if keys are defined
+            if (apiKey != null && logID != null)
+            {
+                // create elmah.io target
+                var elmahIoTarget = new ElmahIoTarget();
+                elmahIoTarget.Name = "elmahio";
+                elmahIoTarget.ApiKey = apiKey;
+                elmahIoTarget.LogId = logID;
+                config.AddTarget(elmahIoTarget);
+                config.AddRule(NLog.LogLevel.Error, NLog.LogLevel.Fatal, elmahIoTarget, "*");
+            }
 
             // create console target
             if (!Debugger.IsAttached)
@@ -59,14 +61,7 @@ public class LogService : ILogService
                 LoggingRule consoleRule = new("*", NLog.LogLevel.Info, consoleTarget);
                 config.LoggingRules.Add(consoleRule);
             }
-            else
-            {
-                DebuggerTarget consoleTarget = new();
-                consoleTarget.Layout = @"${date:format=HH\\:MM\\:ss} ${logger} ${message}";
-                config.AddTarget("console", consoleTarget);
-                LoggingRule consoleRule = new("*", NLog.LogLevel.Info, consoleTarget);
-                config.LoggingRules.Add(consoleRule);
-            }
+
             LogManager.Configuration = config;
 
             Logger = LogManager.GetCurrentClassLogger();
