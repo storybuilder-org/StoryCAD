@@ -25,7 +25,7 @@ namespace StoryBuilder.Services
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void BackupTask(object sender, DoWorkEventArgs e)
+        private async void BackupTask(object sender, DoWorkEventArgs e)
         {
             try
             {
@@ -34,7 +34,7 @@ namespace StoryBuilder.Services
                 {
                     System.Threading.Thread.Sleep((GlobalData.Preferences.TimedBackupInterval * 60) * 1000);
                     Log.Log(LogLevel.Trace, "Starting auto backup");
-                    BackupProject();
+                    await BackupProject();
                 }
 
                 Log.Log(LogLevel.Info, "Timed backup task finished.");

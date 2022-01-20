@@ -860,6 +860,7 @@ namespace StoryBuilder.ViewModels
                 SaveModel();
                 await WriteModel();
             }
+            Logger.Flush();
             StatusMessage = "Goodbye";
             Application.Current.Exit();  // Win32
         }
