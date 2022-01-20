@@ -842,6 +842,7 @@ namespace StoryBuilder.ViewModels
             StatusMessage = "Close story command completed";
             Logger.Log(LogLevel.Info, "Close story command completed");
             _canExecuteCommands = true;
+            throw new Exception("Forced error");
         }
 
         private void ResetModel()

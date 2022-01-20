@@ -41,10 +41,13 @@ public class LogService : ILogService
             // create elmah.io target
             var elmahIoTarget = new ElmahIoTarget();
             elmahIoTarget.Name = "elmahio";
-            elmahIoTarget.ApiKey = "API-KEY";
-            elmahIoTarget.LogId = "LOG-ID";
+            elmahIoTarget.Layout =
+           "${longdate} | ${level} | ${message} | ${exception:format=Message,StackTrace,Data:MaxInnerExceptionLevel=5}";
+            elmahIoTarget.ApiKey = Environment.GetEnvironmentVariable("API-KEY");
+            elmahIoTarget.LogId = Environment.GetEnvironmentVariable("Log-ID");
             config.AddTarget(elmahIoTarget);
-            config.AddRuleForAllLevels(elmahIoTarget);
+            LoggingRule elmahIoRule = new("*", NLog.LogLevel.Error, elmahIoTarget);
+            config.LoggingRules.Add(elmahIoRule);
             LogManager.Configuration = config;
 
             // create console target
