@@ -8,6 +8,7 @@ namespace StoryBuilder.Services.Search;
 public class SearchService
 {
     private string arg;
+    StoryElementCollection ElementCollection = Ioc.Default.GetService<ShellViewModel>().StoryModel.StoryElements;
     /// <summary>
     /// Search a StoryElement for a given string search argument
     /// </summary>
@@ -66,18 +67,24 @@ public class SearchService
         return Comparator(element.Name);
     }
 
+    /// <summary>
+    /// Searches Cast members, protagonist name, antagonist name and the name of scene in a scene
+    /// </summary>
+    /// <param name="node"></param>
+    /// <param name="element"></param>
+    /// <returns></returns>
     private bool SearchScene(StoryNodeItem node, StoryElement element)
     {
         SceneModel scene = (SceneModel)element;
         foreach (string member in scene.CastMembers)
         {
-            Ioc.Default.GetService<ShellViewModel>().StoryModel.StoryElements.StoryElementGuids.TryGetValue(Guid.Parse(member), out StoryElement Model);
+            ElementCollection.StoryElementGuids.TryGetValue(Guid.Parse(member), out StoryElement Model);
             Model = Model as CharacterModel;
             if (Comparator(Model.Name)) { return true; }
         }
 
-        Ioc.Default.GetService<ShellViewModel>().StoryModel.StoryElements.StoryElementGuids.TryGetValue(Guid.Parse(scene.Protagonist), out StoryElement protag);
-        Ioc.Default.GetService<ShellViewModel>().StoryModel.StoryElements.StoryElementGuids.TryGetValue(Guid.Parse(scene.Antagonist), out StoryElement antag);
+        ElementCollection.StoryElementGuids.TryGetValue(Guid.Parse(scene.Protagonist), out StoryElement protag);
+        ElementCollection.StoryElementGuids.TryGetValue(Guid.Parse(scene.Antagonist), out StoryElement antag);
         if (Comparator(element.Name)) { return true; }
         else if  (Comparator(protag.Name)) { return true; }
         else if (Comparator(antag.Name)) { return true; }
@@ -89,42 +96,61 @@ public class SearchService
         return Comparator(element.Name);
     }
 
+    /// <summary>
+    /// Searches the name of each character in a relationship and the name of the character
+    /// </summary>
+    /// <param name="node"></param>
+    /// <param name="element"></param>
+    /// <returns></returns>
     private bool SearchCharacter(StoryNodeItem node, StoryElement element)
     {
         CharacterModel characterModel = (CharacterModel)element;
 
-        foreach (RelationshipModel partner in characterModel.RelationshipList)
+        foreach (RelationshipModel partner in characterModel.RelationshipList) //Checks each character in relationship
         {
-            Ioc.Default.GetService<ShellViewModel>().StoryModel.StoryElements.StoryElementGuids.TryGetValue(Guid.Parse(partner.PartnerUuid), out StoryElement Model);
+            ElementCollection.StoryElementGuids.TryGetValue(Guid.Parse(partner.PartnerUuid), out StoryElement Model);
             if (Comparator(Model.Name)) { return true; }
         }
 
-        return Comparator(element.Name);
+        return Comparator(element.Name); //Checks element name
     }
 
+    /// <summary>
+    /// Searches a problem for the element name, Antag name, protag name,
+    /// </summary>
+    /// <param name="node"></param>
+    /// <param name="element"></param>
+    /// <returns></returns>
     private bool SearchProblem(StoryNodeItem node, StoryElement element)
     {
         ProblemModel problem = (ProblemModel)element;
-        StoryElement protag = null;
-        StoryElement antag = null;
-        Ioc.Default.GetService<ShellViewModel>().StoryModel.StoryElements.StoryElementGuids.TryGetValue(Guid.Parse(problem.Protagonist), out antag);
-        Ioc.Default.GetService<ShellViewModel>().StoryModel.StoryElements.StoryElementGuids.TryGetValue(Guid.Parse(problem.Antagonist), out protag);
+
+        //Gets the Protagonist/Antagonist from the UUID provided in the problem node, thencast
+        ElementCollection.StoryElementGuids.TryGetValue(Guid.Parse(problem.Protagonist), out StoryElement antag);
+        ElementCollection.StoryElementGuids.TryGetValue(Guid.Parse(problem.Antagonist), out StoryElement protag);
+
+        //Casts to the character model
         protag = (CharacterModel)protag;
         antag = (CharacterModel)antag;
 
-        if (Comparator(element.Name)) { return true; }
-        else if (Comparator(protag.Name)) { return true; } //Checks protags name (if UUID)
-        else if (Comparator(antag.Name)) { return true; } //Checks antags name (if UUID)
+        if (Comparator(element.Name)) { return true; } //Checks name of node
+        else if (Comparator(protag.Name)) { return true; } //Checks protags name
+        else if (Comparator(antag.Name)) { return true; } //Checks antags name
         else { return false; }
     }
 
+    /// <summary>
+    /// Searches the overview node for the name and main story problem
+    /// </summary>
+    /// <param name="node"></param>
+    /// <param name="element"></param>
+    /// <returns></returns>
     private bool SearchStoryOverview(StoryNodeItem node, StoryElement element)
     {
-            OverviewModel overview = (OverviewModel)element;
-        StoryElement problem;
-        Ioc.Default.GetService<ShellViewModel>().StoryModel.StoryElements.StoryElementGuids.TryGetValue(Guid.Parse(overview.StoryProblem), out problem);
-        if (Comparator(element.Name)) { return true; }
-        else if (Comparator(problem.Name)) { return true; }
+        OverviewModel overview = (OverviewModel)element;
+        ElementCollection.StoryElementGuids.TryGetValue(Guid.Parse(overview.StoryProblem), out StoryElement problem);
+        if (Comparator(element.Name)) { return true; } //checks node name
+        else if (Comparator(problem.Name)) { return true; } //Checks problem name
         else { return false; }
     }
 }
