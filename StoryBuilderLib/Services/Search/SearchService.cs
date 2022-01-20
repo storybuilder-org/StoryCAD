@@ -8,7 +8,7 @@ namespace StoryBuilder.Services.Search;
 public class SearchService
 {
     private string arg;
-    StoryElementCollection ElementCollection = Ioc.Default.GetService<ShellViewModel>().StoryModel.StoryElements;
+    StoryElementCollection ElementCollection;
     /// <summary>
     /// Search a StoryElement for a given string search argument
     /// </summary>
@@ -21,6 +21,7 @@ public class SearchService
         bool result = false;
         arg = searchArg.ToLower();
         StoryElement element = null;
+        ElementCollection = Ioc.Default.GetService<ShellViewModel>().StoryModel.StoryElements;
 
         if (model.StoryElements.StoryElementGuids.ContainsKey(node.Uuid))
             element = model.StoryElements.StoryElementGuids[node.Uuid];
@@ -68,7 +69,7 @@ public class SearchService
     }
 
     /// <summary>
-    /// Searches Cast members, protagonist name, antagonist name and the name of scene in a scene
+    /// Searches Cast members, protagonist name, antagonist name and the name of the scene and the selected setting in a scene node
     /// </summary>
     /// <param name="node"></param>
     /// <param name="element"></param>
@@ -85,9 +86,11 @@ public class SearchService
 
         ElementCollection.StoryElementGuids.TryGetValue(Guid.Parse(scene.Protagonist), out StoryElement protag);
         ElementCollection.StoryElementGuids.TryGetValue(Guid.Parse(scene.Antagonist), out StoryElement antag);
+        ElementCollection.StoryElementGuids.TryGetValue(Guid.Parse(scene.Setting), out StoryElement setting);
         if (Comparator(element.Name)) { return true; }
         else if  (Comparator(protag.Name)) { return true; }
         else if (Comparator(antag.Name)) { return true; }
+        else if (Comparator(setting.Name)) { return true; }
         return false;
     }
 
