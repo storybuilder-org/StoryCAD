@@ -18,7 +18,8 @@ it uses [C#/WinRT][3] and [UWP asynchronous IO][4].
 ## Code Contributions
 
 If you want to clone the repository and hack at it, go right ahead. Feel
-free to make any use of the code, consistent with the license, you like.
+free to make any use of the code, consistent with our license and the 
+licenses of the packages StoryBuilder is built with, you like.
 
 But to get your changes accepted back into production and distribution, 
 we use a more collaboratory approach, based on GitHub branch/merge. 
