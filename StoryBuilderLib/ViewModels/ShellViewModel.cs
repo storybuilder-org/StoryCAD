@@ -1926,7 +1926,7 @@ namespace StoryBuilder.ViewModels
         {
             _canExecuteCommands = false;    //This prevents other commands from being used till this one is complete.
             Logger.Log(LogLevel.Info, "Better search started.");
-
+            SaveModel();
             StoryNodeItem root = DataSource[0]; //Gets all nodes in the tree
             int SearchTotal = 0;
 
