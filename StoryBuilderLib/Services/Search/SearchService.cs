@@ -23,10 +23,8 @@ public class SearchService
         StoryElement element = null;
         ElementCollection = Ioc.Default.GetService<ShellViewModel>().StoryModel.StoryElements;
 
-        if (model.StoryElements.StoryElementGuids.ContainsKey(node.Uuid))
-            element = model.StoryElements.StoryElementGuids[node.Uuid];
-        if (element == null)
-            return false;
+        if (model.StoryElements.StoryElementGuids.ContainsKey(node.Uuid)) { element = model.StoryElements.StoryElementGuids[node.Uuid]; }
+        if (element == null) { return false; } 
         switch (element.Type)
         {
             case StoryItemType.StoryOverview:
@@ -77,21 +75,31 @@ public class SearchService
     private bool SearchScene(StoryNodeItem node, StoryElement element)
     {
         SceneModel scene = (SceneModel)element;
-        foreach (string member in scene.CastMembers)
+
+        foreach (string member in scene.CastMembers) //Searches character in scene
         {
             ElementCollection.StoryElementGuids.TryGetValue(Guid.Parse(member), out StoryElement Model);
             Model = Model as CharacterModel;
             if (Comparator(Model.Name)) { return true; }
         }
 
-        ElementCollection.StoryElementGuids.TryGetValue(Guid.Parse(scene.Protagonist), out StoryElement protag);
-        ElementCollection.StoryElementGuids.TryGetValue(Guid.Parse(scene.Antagonist), out StoryElement antag);
-        ElementCollection.StoryElementGuids.TryGetValue(Guid.Parse(scene.Setting), out StoryElement setting);
-        if (Comparator(element.Name)) { return true; }
-        else if  (Comparator(protag.Name)) { return true; }
-        else if (Comparator(antag.Name)) { return true; }
-        else if (Comparator(setting.Name)) { return true; }
-        return false;
+        if (Comparator(element.Name)) { return true; }  //Searches node name
+        else if (!string.IsNullOrEmpty(scene.Protagonist)) //Searches protagonist
+        {
+            ElementCollection.StoryElementGuids.TryGetValue(Guid.Parse(scene.Protagonist), out StoryElement protag);
+            if (Comparator(protag.Name)) { return true; }
+        }
+        else if (!string.IsNullOrEmpty(scene.Antagonist)) //Searches Antagonist
+        {
+            ElementCollection.StoryElementGuids.TryGetValue(Guid.Parse(scene.Antagonist), out StoryElement antag);
+            if (Comparator(antag.Name)) { return true; }
+        }
+        else if (!string.IsNullOrEmpty(scene.Setting))
+        {
+            ElementCollection.StoryElementGuids.TryGetValue(Guid.Parse(scene.Setting), out StoryElement setting);
+            if (Comparator(setting.Name)) { return true; }
+        }
+        return false; //No match, return false
     }
 
     private bool SearchSetting(StoryNodeItem node, StoryElement element)
@@ -128,18 +136,20 @@ public class SearchService
     {
         ProblemModel problem = (ProblemModel)element;
 
-        //Gets the Protagonist/Antagonist from the UUID provided in the problem node, thencast
-        ElementCollection.StoryElementGuids.TryGetValue(Guid.Parse(problem.Protagonist), out StoryElement antag);
-        ElementCollection.StoryElementGuids.TryGetValue(Guid.Parse(problem.Antagonist), out StoryElement protag);
+        if (!string.IsNullOrEmpty(problem.Protagonist))//Checks protags name
+        {
+            ElementCollection.StoryElementGuids.TryGetValue(Guid.Parse(problem.Protagonist), out StoryElement protag);
+            if (Comparator(protag.Name)) { return true; } 
 
-        //Casts to the character model
-        protag = (CharacterModel)protag;
-        antag = (CharacterModel)antag;
+        }
+        else if (!string.IsNullOrEmpty(problem.Antagonist))//Checks antags name
+        {
+            ElementCollection.StoryElementGuids.TryGetValue(Guid.Parse(problem.Antagonist), out StoryElement antag);
+            if (Comparator(antag.Name)) { return true; } 
+        }
 
         if (Comparator(element.Name)) { return true; } //Checks name of node
-        else if (Comparator(protag.Name)) { return true; } //Checks protags name
-        else if (Comparator(antag.Name)) { return true; } //Checks antags name
-        else { return false; }
+        return false; 
     }
 
     /// <summary>
@@ -151,9 +161,13 @@ public class SearchService
     private bool SearchStoryOverview(StoryNodeItem node, StoryElement element)
     {
         OverviewModel overview = (OverviewModel)element;
-        ElementCollection.StoryElementGuids.TryGetValue(Guid.Parse(overview.StoryProblem), out StoryElement problem);
+        if (!string.IsNullOrEmpty(overview.StoryProblem))
+        {
+            ElementCollection.StoryElementGuids.TryGetValue(Guid.Parse(overview.StoryProblem), out StoryElement problem);
+            if (Comparator(problem.Name)) { return true; } //Checks problem name
+        }
+
         if (Comparator(element.Name)) { return true; } //checks node name
-        else if (Comparator(problem.Name)) { return true; } //Checks problem name
         else { return false; }
     }
 }
