@@ -3,12 +3,11 @@
 ## General notes
 
 StoryBuilder is written in C# and XAML and is a Windows desktop app. 
-It's written using WinUI 3, MVVM, [Project Reunion APIs][2], and .NET5. 
+It's written using [WinUI 3][2], [MVVM][6], [Project Reunion APIs][3], and [.NET6][8]. 
 Although the only programming skill you need to get started is some C#,
 familiarity with [Windows.Storage IO][5] and [MVVM][6] will be useful. 
 The program is maintained as a Visual Studio solution using either
-VS2022 or VS2019. You'll need to configure your development environment
-as described in [Tools and Setup](#tools-and-setup).
+VS2022 or VS2019.
 
 StoryBuilder began as a UWP program and now uses Windows UI
 (WinUI 3) [controls][7] and styles. It runs
@@ -21,6 +20,9 @@ If you want to clone the repository and hack at it, go right ahead. Feel
 free to make any use of the code, consistent with our license and the 
 licenses of the packages StoryBuilder is built with, you like.
 
+Be aware that two of the  
+careful: two of the 
+
 But to get your changes accepted back into production and distribution, 
 we use a more collaboratory approach, based on GitHub branch/merge. 
 It lets you play with your changes safely, commit frequently for backup
@@ -29,20 +31,20 @@ always an easy way to back changes out, and that multiple
 eyes are on any production changes.
 
 Contributions always start from issues (bugs or feature requests)
-to maintain some history of why the change was made.
+in order to maintain a history of why the change was made.
 
-The main steps are:
+### Coding Worflow
 
-1. Create a branch off of main
-2. Make commits
-3. Open a pull request
-4. Collaborate through PR comments
-5. Make more commits
-6. Discuss and review code with a reviewer
-7. Deploy for final testing
+1. Create a branch off of master.
+2. Code and make commits.
+3. Open a pull request. We recommend doing this early.
+4. Collaborate through PR comments.
+5. Make more commits.
+6. Discuss and review code with a reviewer.
+7. Deploy for final testing.
 8. Merge your branch into the main branch
 
-Although it's a complex program, it's orderly: throughout
+Although StoryBuilder is a complex program, it's orderly: throughout
 the code it does similar things in a similar fashion, and it's 
 organizing principle is 'Keep it simple, stupid.'  If you're adding 
 something to StoryBuilder, there's a chance what you're
@@ -53,27 +55,15 @@ a Control, or new or changed installation data.
 
 ### Tools and Setup
 
-1. StoryBuilder is installed and updated with Visual Studio. Either VS2019 or VS2022 
-will work. The Community editions of these products are free. You can download
-from here:
-https://docs.microsoft.com/en-us/visualstudio/install/install-visual-studio?view=vs-2019
+You'll need to configure your development environment
+as described in the **Installation** section of [README.md][9].
 
-2. StoryBuilder is developed with the Windows App SDK. Set up your development as per this guide:
-https://docs.microsoft.com/en-us/windows/apps/windows-app-sdk/set-up-your-development-environment?tabs=experimental
-
-You can test your installation by building and running a new app using the Blank App, Packaged (WinUI 3 in Deskto
-template as described in the document.
-
-2. In Visual Studio, clone the Storybuilder repository from the GitHub repository at 
-https://github.com/terrycox/StoryBuilder-2.git
-
-3. Build and run the solution.
-
-4. Click  the File (document icon) button on the menu and open the HELLO sample to verify.
+We strongly recommend building and running the [HELLO sample][10]
+to verify your installation before proceeding.
 
 ### Build
 
-Building and debugging can be done in your branch with impunity.
+Always work in a branch. Building and debugging can be done in your branch with impunity.
 
 ### Test
 
@@ -101,76 +91,69 @@ it's 'implemented' by performing the following steps:
 3. Zipping the app bundle along with the user's README.TXT file, which contains
 instructions for side-loading on hir or her remote machine.
 
-## Developer Tips
+These steps are a part of release management and will be done by an administrator.
 
-### Solution and Project Stucture
+
+## Solution and Project Stucture
 
 The StoryBuilder solution contains the following projects:
 
-#### CreateInstallManifest
-
-This .NET5 console application reads the contents of the StoryBuilder 
-application's \Assets\Install folder and it's child folders and 
-produces a text document containing each file's relative path names 
-and a SHA256 hash of its contents. The list is written into the 
-same \Assets\Install folder as 'install.manifest'. When StoryBuilder is launched, install.manifest is read and compared
-to the contents of install.manifest saved in the installation folder. Any 
-files whose hashes are different are updated. Whenever you change or add 
-content to \Assets\Install, set CreateInstallManifest as the startup 
-project and run it.
-
-#### NRtfTree
+### NRtfTree
 
 NRtfTree Library is a set of classes written in C# that may be used to 
 manage RTF documents. StoryBuilder uses the library in its Scrivener 
-reports interface. It's a .NET 5 DLL project.
+reports interface. It's a .NET 6 DLL project.
  
 NRtfTree is licensed under The GNU Lesser General Public License (LGPLv3).
 
-#### StoryBuilder
+### StoryBuilder
 
 StoryBUilder is a WinUI 3 Win32 application which was orignally a UWP
-app using WinUI 3 XAML controls exclusively. It was originally
-written as a UWP app and uses async and StorageFile IO 
-exclusively. It contains the App startup logic and all views
-for the running application except dialogs.
+app. It uses WinUI 3 XAML controls exclusively. It uses StorageFile
+(async) IO exclusively This projct contains the App startup logic and all 
+control layout (views). All views are declarative (XAML), ecept dialogs.
 
-The primary Page and home screen is Shell.xaml
+The primary Page and home screen is **Shell.xaml**.
 
-#### StoryBuilder (Package)
+This project also contains the inline MSIX packaging for StoryBuilder. 
 
-This project is the MSIX packaging project for StoryBuilder. 
-It's the normal startup project for the solution.
+StoryBuilder the normal startup project for the solution. Program 
+initializaton is in **App.Xaml.cs**.
 
-#### StoryBuilderLib
+### StoryBuilderLib
 
-This .NET5 DLL contains the non-IO code for the solution. 
- The DLL contains the following folders:
+This .NET 6 DLL contains the non-IO code for the solution. 
+The DLL contains the following folders:
+
+**Assets**      The Install subfolder holds runtime data.
 
 **Controls**    UserControls
 
-**Converters**    XAML Value Converters
+**Converters**  XAML Value Converters
 
 **DAL**         Data Access Layer
 
 **Models**      StoryBuilder uses the Windows Community Toolkit
-MVVM Library. Each Story Element (node in the Shell Treeview)
-is a Model instance, a class derived from StoryElement. StoryElement
-in turn is an ObservableObject.
+MVVM Library. Each Story Element ( which is also anode in the **Shell** Treeview)
+is a Model class derived from StoryElement (for example, CharacterModel or
+SceneModel). 
 
 **Services**      A collection of microservices, each of which
 is callable (usually from a ViewModel.)
 
-**ViewModels**    WCT MVVM's ViewModels. Each View (Page)
+**ViewModels**    [Windows Community Toolkit MVVM ViewModels][6]. Each View (Page)
 and most dialogs use a ViewModel as both a target for
-XAML bindings and a collection point for View-oriented logic.
+XAML bindings and a collection point for View-oriented logic. 
 
-#### StoryBuilderTest 
-This .NET5 Console application is a collection of MSTest 
+### StoryBuilderTest 
+
+This .NET 6 Console application is a collection of MSTest 
 unit test classes. 
 
 The tests can be executed by setting StoryBuilderTests
 as the startup project and running Test Explorer. 
+
+## Developer Tips
 
 ### Adding a New Control
 
@@ -216,7 +199,20 @@ another in the TreeView.
    Test by using the new property, saving the story outline, re-opening the story project,
    and verifying that the data entry from the new control is present and correct.
 
+### Dialogs
+
+Interactions with the user are generally done through popup ContentDialogs, which may be 
+inline code if small (such as verification requests) or defined in XAML if more complicated.
+The XAML is found in StoryBuilderLib in the \Services\Dialogs\ folder. An example is
+NewProjectPage, displayed when the user wants to create a new story outline.
+
+Dialogs, like the Shell's main pages, use data binding to a ViewModel (found in StoryBuilderLib
+in the ViewModels folder). An example is NewProjectViewModel.
+
 ### Creating or Modifying a Tool
+
+A tool is a device to facilitate work, and writing a story is work. StoryBuilder
+contains a rich set of tools to assist in outlining. Tools in StoryBuilder
 
 #### Define the tool's dialog layout
 Tools are usually pop-ups and are defined as a ContentDialog. The XAML is found in 
@@ -260,9 +256,12 @@ folder. The dialogs should, like Page views, use
 responsive (self-resizing) layouts.
 
 [1]:https://github.com/terrycox/StoryBuilder-2/blob/master/docs/SOLUTION_PIC.bmp   
-[2]:https://docs.microsoft.com/en-us/windows/apps/windows-app-sdk/
+[2]:https://docs.microsoft.com/en-us/windows/apps/winui/winui3/
 [3]:https://docs.microsoft.com/en-us/windows/apps/windows-app-sdk/
 [4]:https://docs.microsoft.com/en-us/windows/uwp/threading-async/asynchronous-programming-universal-windows-platform-apps
 [5]:https://docs.microsoft.com/en-us/uwp/api/windows.storage?view=winrt-22000
 [6]:https://docs.microsoft.com/en-us/windows/communitytoolkit/mvvm/introduction
 [7]:https://www.microsoft.com/en-us/p/winui-3-controls-gallery/9p3jfpwwdzrc?activetab=pivot:overviewtab
+[8]:https://docs.microsoft.com/en-us/dotnet/api/?view=net-6.0
+[9]:https://github.com/storybuilder-org/StoryBuilder-2/blob/master/README.md
+[10]:https://docs.microsoft.com/en-us/windows/apps/winui/winui3/create-your-first-winui3-app?pivots=winui3-packaged-csharp

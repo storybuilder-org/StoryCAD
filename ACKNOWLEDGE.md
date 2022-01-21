@@ -13,17 +13,24 @@ and we'll rectify that.
 Thanks go to these wonderful people:
 
 * Rarisma     
-* Mylo        
+* Mylo
+* Tina
+* Tim        
 
 ## Software
 
 StoryBuilder uses or links to the following software:
 
 * [WinUI 3][1]
-* [Windows App SDK][5]
-* [Windows Community Toolkit][2]
-* [NRtfTree][3]
-* [Scrivener][4]
+* [Windows App SDK][2]
+* [Windows Community Toolkit][3]
+* [Elmah.io][4]
+* [NRtfTree][5]
+* [Scrivener][6]
+* [SyncFusion][7]
+
+We are especially grateful to elmah.io and Syncfusion, commercial products who make their
+livelihood freely available to public open source projects like ours.
 
 ## Origins
 
@@ -37,11 +44,13 @@ copies, but inevitably software rot set in as my day job consumed more of time a
 energy, and first fell into disuse and then became unusable. The original StoryBuilder
 is the ancestor of this one version.
 
-After I retired, I had the dubious idea of rewriting StoryBuilder and selling it again,
+After I retired, I had the idea of rewriting StoryBuilder and selling it again,
 and started down that road. However, looking at my tired old face in the mirror one 
 morning, I came to realize that I wasn't interested in going into business again. I
-wasn't interested in scrappng my project either, which realization led to the decision
+wasn't interested in scrapping my project either, which realization led to the decision
 to distribute StoryBuilder as free and open source software (FOSS.)
+
+I'm pleased with how it's developing and I hope you find it useful.
 
 ## Software Influences
 
@@ -53,14 +62,26 @@ Five individuals and their work deserve mention for this reason.
 Laurent Bugnion, Galasoft, MVVM Light Toolkit
 https://github.com/lbugnion/mvvmlight
 
+MVVM Light was one of the most influential early MVVM projects. Although it's fallen
+into disuse, it was a direct influence on [Windows Community Toolkit MVVM][3], 
+
 Perigrin66, Pergrine's View, StaffManager
 http://peregrinesview.uk/mvvm-bringing-it-all-together/
+
+The navigation tree and details panel design is very old; it was one of the early driving
+forces in the creation of C++. StoryBuilder V1 used it (poorly.) When StoryBuilder V2
+was just a vague idea, this small project suggested a way forward.
 
 Diederik Krols, XAML Brewer, Using a TreeView Control for Navigation in UWP
 https://xamlbrewer.wordpress.com/2018/06/08/using-a-treeview-control-for-navigation-in-uwp/comment-page-1/#comment-296
 
+This project lead me toward UWP, and the birth of the WinUI 3 project cemented the 
+way forward. XamlBrewer is a great stylist and his posts are always worth reading.
+
 Ryan Demopoulos
 https://docs.microsoft.com/en-us/windows/apps/winui/
+
+The WinUI3 project has a
 
 Michael Hawker (XAML Llama)
 https://dotnetfoundation.org/projects/windowscommunitytoolkit
@@ -83,10 +104,10 @@ in turn composed of smaller components. A Problem contains three
 Writer's whatumcallit
 'writing scenes' stuff
 
-
-
-[1]:https://docs.microsoft.com/en-us/windows/apps/winui/
-[2]:https://dotnetfoundation.org/projects/windowscommunitytoolkit
-[3]:https://www.codeproject.com/articles/11306/nrtftree-a-class-library-for-rtf-processing-in-c
-[4]:https://www.literatureandlatte.com/scrivener/overview
-[5]:https://docs.microsoft.com/en-us/windows/apps/windows-app-sdk/
+[1]:https://microsoft.github.io/microsoft-ui-xaml/
+[2]:https://github.com/microsoft/WindowsAppSDK
+[3]:https://github.com/CommunityToolkit/WindowsCommunityToolkit
+[4]:https://elmah.io/
+[5]:https://github.com/sgolivernet/nrtftree
+[6]:https://www.literatureandlatte.com/scrivener
+[7]:https://www.syncfusion.com/winui-controls
