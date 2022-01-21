@@ -89,7 +89,7 @@ public class LogService : ILogService
                 Logger.Debug(message);
                 break;
             case LogLevel.Info:
-                Logger.Info(message);
+                        Logger.Info(message);
                 break;
             case LogLevel.Warn:
                 Logger.Warn(message);

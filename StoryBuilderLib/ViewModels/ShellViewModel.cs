@@ -1926,7 +1926,7 @@ namespace StoryBuilder.ViewModels
         {
             _canExecuteCommands = false;    //This prevents other commands from being used till this one is complete.
             Logger.Log(LogLevel.Info, "Better search started.");
-
+            SaveModel();
             StoryNodeItem root = DataSource[0]; //Gets all nodes in the tree
             int SearchTotal = 0;
 
@@ -1948,13 +1948,16 @@ namespace StoryBuilder.ViewModels
                         node.IsExpanded = true; 
                         
                         StoryNodeItem parent = node.Parent;
-                        while (!parent.IsRoot)
+                        if (parent != null)
                         {
-                            parent.IsExpanded = true;
-                            parent = parent.Parent;
-                        }
+                            while (!parent.IsRoot)
+                            {
+                                parent.IsExpanded = true;
+                                parent = parent.Parent;
+                            }
 
-                        if (parent.IsRoot) { parent.IsExpanded = true; }
+                            if (parent.IsRoot) { parent.IsExpanded = true; }
+                        }
                     }
                     else { node.Background = null; }
                 }
