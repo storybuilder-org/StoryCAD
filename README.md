@@ -8,7 +8,7 @@ meaningful and gripping problems, dramatic and suspenseful plots, and settings t
 StoryBuilder is currently in beta test. If you're interested in becoming a beta tester, 
 please email tcox@svsoft.com and ask for a copy of the software. Our goal is to distribute
 the software through [Microsoft Store][6].
-
+test
 ## Contribution
 
 StoryBuilder is an odd duck, with its feet in two ponds: the user community of writers
