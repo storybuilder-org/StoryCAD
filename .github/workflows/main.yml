@@ -38,4 +38,4 @@ jobs:
 
       # Runs a single command using the runners shell
       - name: Build app for release
-        run: msbuild storybuilder.sln -t:rebuild -verbosity:normal -property:Configuration=Release
+        run: msbuild storybuilder.sln -t:build -verbosity:normal -property:Configuration=Release
