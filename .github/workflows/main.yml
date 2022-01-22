@@ -25,17 +25,27 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
       
+      #Installs .NET6
       - name: Install .NET Core
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: 6.0.x
       
+      #Sets up MSBUILD
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v1.1
 
-      - name: Restore the application
+      - name: Restore the nuget projecrts
         run: msbuild storybuilder.sln /t:Restore /p:Configuration=Release
 
-      # Runs a single command using the runners shell
-      - name: Build app for release
-        run: msbuild storybuilder.sln -t:build -verbosity:normal -property:Configuration=Release
+      # build NRTF
+      - name: Build NRTF
+        run: msbuild NRtfTree\NRtfTree.csproj -t:build -verbosity:normal -property:Configuration=Release
+
+      # builds StoryBuilder lib
+      - name: Build StoryBuilderLib
+        run: msbuild StoryBuilderLib\StoryBuilderLib.csproj -t:build -verbosity:normal -property:Configuration=Release
+        
+      # builds StoryBuilder
+      - name: Build StoryBuilder
+        run: msbuild StoryBuilder\StoryBuilder.csproj -t:build -verbosity:normal -property:Configuration=Release
