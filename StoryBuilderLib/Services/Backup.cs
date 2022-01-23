@@ -36,7 +36,7 @@ namespace StoryBuilder.Services
                     Log.Log(LogLevel.Trace, "Starting auto backup");
                     await BackupProject();
                 }
-
+                e.Cancel = true;
                 Log.Log(LogLevel.Info, "Timed backup task finished.");
             }
             catch (Exception ex)
@@ -52,7 +52,8 @@ namespace StoryBuilder.Services
         {
             if (!GlobalData.Preferences.TimedBackup) { return; }
             timeBackupWorker.DoWork += BackupTask;
-            timeBackupWorker.RunWorkerAsync();
+            if (!timeBackupWorker.IsBusy)
+                timeBackupWorker.RunWorkerAsync();
         }
 
         /// <summary>
@@ -64,6 +65,7 @@ namespace StoryBuilder.Services
             {
                 timeBackupWorker.CancelAsync();
             }
+            timeBackupWorker.DoWork -= BackupTask;
         }
 
         public async Task BackupProject()
