@@ -69,6 +69,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Assets\Install\samples\" />
     <Folder Include="Models\Scrivener\" />
     <Folder Include="Services\Icons\" />
     <Folder Include="Services\Installation\" />
