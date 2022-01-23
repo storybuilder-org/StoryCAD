@@ -10,7 +10,7 @@ to those whose generous ideas and time helped make StoryBuilder possible.
 If we've missed anyone's contribution, our sincere apologies. Let us know
 and we'll rectify that.
 
-Thanks go to these wonderful people:
+**Thanks go to these wonderful people:**
 
 * Rarisma     
 * Mylo
@@ -85,24 +85,6 @@ The WinUI3 project has a
 
 Michael Hawker (XAML Llama)
 https://dotnetfoundation.org/projects/windowscommunitytoolkit
-
-## Writing Influences
-
-
-GMC: Goal, Motivation & Conflict, Debora Dixon, 
-
-StoryBuilder handles story structure in terms of its building blocks,
-story elements: Problem, Character, Setting, and Scene. Story elements are
-in turn composed of smaller components. A Problem contains three 
-
-
--GMC
-
-##Writing websites
-
-
-Writer's whatumcallit
-'writing scenes' stuff
 
 [1]:https://microsoft.github.io/microsoft-ui-xaml/
 [2]:https://github.com/microsoft/WindowsAppSDK
