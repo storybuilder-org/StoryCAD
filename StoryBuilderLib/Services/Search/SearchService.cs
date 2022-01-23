@@ -84,17 +84,17 @@ public class SearchService
         }
 
         if (Comparator(element.Name)) { return true; }  //Searches node name
-        else if (!string.IsNullOrEmpty(scene.Protagonist)) //Searches protagonist
+        if (!string.IsNullOrEmpty(scene.Protagonist)) //Searches protagonist
         {
             ElementCollection.StoryElementGuids.TryGetValue(Guid.Parse(scene.Protagonist), out StoryElement protag);
             if (Comparator(protag.Name)) { return true; }
         }
-        else if (!string.IsNullOrEmpty(scene.Antagonist)) //Searches Antagonist
+        if (!string.IsNullOrEmpty(scene.Antagonist)) //Searches Antagonist
         {
             ElementCollection.StoryElementGuids.TryGetValue(Guid.Parse(scene.Antagonist), out StoryElement antag);
             if (Comparator(antag.Name)) { return true; }
         }
-        else if (!string.IsNullOrEmpty(scene.Setting))
+        if (!string.IsNullOrEmpty(scene.Setting))
         {
             ElementCollection.StoryElementGuids.TryGetValue(Guid.Parse(scene.Setting), out StoryElement setting);
             if (Comparator(setting.Name)) { return true; }
@@ -142,7 +142,7 @@ public class SearchService
             if (Comparator(protag.Name)) { return true; } 
 
         }
-        else if (!string.IsNullOrEmpty(problem.Antagonist))//Checks antags name
+        if (!string.IsNullOrEmpty(problem.Antagonist))//Checks antags name
         {
             ElementCollection.StoryElementGuids.TryGetValue(Guid.Parse(problem.Antagonist), out StoryElement antag);
             if (Comparator(antag.Name)) { return true; } 
