@@ -22,7 +22,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
@@ -121,6 +120,7 @@ namespace StoryBuilder.ViewModels
         public RelayCommand AddCharacterCommand { get; }
         public RelayCommand AddSettingCommand { get; }
         public RelayCommand AddSceneCommand { get; }
+        public RelayCommand PrintNodeCommand { get; }
 
         // Remove command (move to trash)
         public RelayCommand RemoveStoryElementCommand { get; }
@@ -339,6 +339,15 @@ namespace StoryBuilder.ViewModels
         #endregion
 
             #region Public Methods
+
+        public async Task PrintCurrentNodeAsync()
+        {
+            PrintReportDialogVM PrintVM = Ioc.Default.GetRequiredService<PrintReportDialogVM>();
+            PrintVM.SelectedNodes.Clear();
+            PrintVM.SelectedNodes.Add(RightTappedNode);
+            await new PrintReports(PrintVM, StoryModel).Generate();
+        }
+
         private void CloseUnifiedMenu()
         {
             _contentDialog.Hide();
@@ -1870,6 +1879,7 @@ namespace StoryBuilder.ViewModels
             TogglePaneCommand = new RelayCommand(TogglePane, () => _canExecuteCommands);
             OpenUnifiedCommand = new RelayCommand(OpenUnifiedMenu, () => _canExecuteCommands);
             CloseUnifiedCommand = new RelayCommand(CloseUnifiedMenu, () => _canExecuteCommands);
+            PrintNodeCommand = new RelayCommand(async () => await PrintCurrentNodeAsync(), () => _canExecuteCommands);
             OpenFileCommand = new RelayCommand(async () => await OpenFile(), () => _canExecuteCommands);
             SaveFileCommand = new RelayCommand(async () => await SaveFile(), () => _canExecuteCommands);
             SaveAsCommand = new RelayCommand(SaveFileAs, () => _canExecuteCommands);
