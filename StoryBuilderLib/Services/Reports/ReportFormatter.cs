@@ -464,15 +464,18 @@ public class ReportFormatter
                 foreach (StoryNodeItem child in _model.NarratorView[0].Children)
                 {
                     StoryElement scn = _model.StoryElements.StoryElementGuids[child.Uuid];
-                    if (scn.Type != StoryItemType.Scene)
-                        continue;
+                    if (scn.Type != StoryItemType.Scene) { continue; }
                     SceneModel scene = (SceneModel)scn;
                     StringBuilder sb = new(line);
                     sb.Replace("@Synopsis", $"[{scene.Name}] {scene.Description}");
                     doc.AddText(sb.ToString());
-                    doc.AddNewLine();
-                    doc.AddText(scene.Remarks);
-                    doc.AddNewLine();
+                    //doc.AddNewLine();
+
+                    if (!String.IsNullOrEmpty(scene.Remarks)) //Only adds remarks if it has content
+                    {
+                        doc.AddText(scene.Remarks.Replace(@"\pard","").Replace(@"\par",""));
+                        //doc.AddNewLine();
+                    }
                 }
             }
             else
