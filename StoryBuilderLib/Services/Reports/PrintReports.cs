@@ -172,8 +172,11 @@ public class PrintReports
                 line = line.TrimStart();
             }
             sb.Append(line.Trim());
-            sb.Append('\n');
         }
+        sb.Replace("[", "\n\n[");
+        sb.Replace("]", "]\n");
+
+        string a = sb.ToString();
         return sb.ToString();
     }
 

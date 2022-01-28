@@ -36,7 +36,7 @@ public class PrintReportDialogVM : ObservableRecipient
     private bool _selectAllSetting;
     public bool SelectAllSettings
     {
-        get => _selectAllScenes;
+        get => _selectAllSetting;
         set => SetProperty(ref _selectAllSetting, value);
     }
 
