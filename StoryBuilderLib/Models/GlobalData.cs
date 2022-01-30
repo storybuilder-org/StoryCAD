@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Windows.Storage;
+using WinUIEx;
 
 namespace StoryBuilder.Models;
 
@@ -48,6 +49,8 @@ public static class GlobalData
 
     //Path to root directory where data is stored
     public static string RootDirectory = System.IO.Path.Combine(ApplicationData.Current.RoamingFolder.Path, "Storybuilder");
+
+    public static WindowEx MainWindow;
 
     // A defect in preview WinUI 3 Win32 code is that ContentDialog controls don't have an
     // established XamlRoot. A workaround is to assign the dialog's XamlRoot to 

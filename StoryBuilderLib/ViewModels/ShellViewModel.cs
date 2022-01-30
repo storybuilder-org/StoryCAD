@@ -453,7 +453,7 @@ namespace StoryBuilder.ViewModels
                         break;
                 }
 
-                Ioc.Default.GetService<MainWindowVM>().Title = $"StoryBuilder - Editing {vm.ProjectName.Replace(".stbx","")}";
+                GlobalData.MainWindow.Title = $"StoryBuilder - Editing {vm.ProjectName.Replace(".stbx","")}";
                 SetCurrentView(StoryViewType.ExplorerView);
                 //TODO: Set expand and is selected?
 
@@ -664,7 +664,7 @@ namespace StoryBuilder.ViewModels
                     SetCurrentView(StoryViewType.ExplorerView);
                     StatusMessage = "Open Story completed";
                 }
-                Ioc.Default.GetService<MainWindowVM>().Title = $"StoryBuilder - Editing {StoryModel.ProjectFilename.Replace(".stbx", "")}";
+                GlobalData.MainWindow.Title = $"StoryBuilder - Editing {StoryModel.ProjectFilename.Replace(".stbx", "")}";
                 new UnifiedVM().UpdateRecents(Path.Combine(StoryModel.ProjectFolder.Path,StoryModel.ProjectFile.Name));
                 Ioc.Default.GetService<BackupService>().StartTimedBackup();
                 string msg = $"Opened project {StoryModel.ProjectFilename}";
@@ -778,7 +778,7 @@ namespace StoryBuilder.ViewModels
                         StoryModel.ProjectFolder = SaveAsVM.SaveAsProjectFolder;
                         StoryModel.ProjectPath = SaveAsVM.SaveAsProjectFolderPath;
                         // Add to the recent files stack
-                        Ioc.Default.GetService<MainWindowVM>().Title = $"StoryBuilder - Editing {StoryModel.ProjectFilename.Replace(".stbx", "")}";
+                        GlobalData.MainWindow.Title = $"StoryBuilder - Editing {StoryModel.ProjectFilename.Replace(".stbx", "")}";
                         new UnifiedVM().UpdateRecents(Path.Combine(StoryModel.ProjectFolder.Path, StoryModel.ProjectFile.Name));
                         // Indicate everything's done
                         Messenger.Send(new IsChangedMessage(true));
@@ -843,7 +843,7 @@ namespace StoryBuilder.ViewModels
             }
             ResetModel();
             SetCurrentView(StoryViewType.ExplorerView);
-            Ioc.Default.GetService<MainWindowVM>().Title = "StoryBuilder";
+            GlobalData.MainWindow.Title = "StoryBuilder";
             Ioc.Default.GetService<BackupService>().StopTimedBackup();
             DataSource = StoryModel.ExplorerView;
             ShowHomePage();
