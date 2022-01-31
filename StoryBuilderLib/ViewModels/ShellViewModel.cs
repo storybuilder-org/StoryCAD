@@ -22,7 +22,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
@@ -121,6 +120,7 @@ namespace StoryBuilder.ViewModels
         public RelayCommand AddCharacterCommand { get; }
         public RelayCommand AddSettingCommand { get; }
         public RelayCommand AddSceneCommand { get; }
+        public RelayCommand PrintNodeCommand { get; }
 
         // Remove command (move to trash)
         public RelayCommand RemoveStoryElementCommand { get; }
@@ -339,6 +339,15 @@ namespace StoryBuilder.ViewModels
         #endregion
 
             #region Public Methods
+
+        public async Task PrintCurrentNodeAsync()
+        {
+            PrintReportDialogVM PrintVM = Ioc.Default.GetRequiredService<PrintReportDialogVM>();
+            PrintVM.SelectedNodes.Clear();
+            PrintVM.SelectedNodes.Add(RightTappedNode);
+            await new PrintReports(PrintVM, StoryModel).Generate();
+        }
+
         private void CloseUnifiedMenu()
         {
             _contentDialog.Hide();
@@ -444,7 +453,7 @@ namespace StoryBuilder.ViewModels
                         break;
                 }
 
-                Ioc.Default.GetService<MainWindowVM>().Title = $"StoryBuilder - Editing {vm.ProjectName.Replace(".stbx","")}";
+                GlobalData.MainWindow.Title = $"StoryBuilder - Editing {vm.ProjectName.Replace(".stbx","")}";
                 SetCurrentView(StoryViewType.ExplorerView);
                 //TODO: Set expand and is selected?
 
@@ -655,7 +664,7 @@ namespace StoryBuilder.ViewModels
                     SetCurrentView(StoryViewType.ExplorerView);
                     StatusMessage = "Open Story completed";
                 }
-                Ioc.Default.GetService<MainWindowVM>().Title = $"StoryBuilder - Editing {StoryModel.ProjectFilename.Replace(".stbx", "")}";
+                GlobalData.MainWindow.Title = $"StoryBuilder - Editing {StoryModel.ProjectFilename.Replace(".stbx", "")}";
                 new UnifiedVM().UpdateRecents(Path.Combine(StoryModel.ProjectFolder.Path,StoryModel.ProjectFile.Name));
                 Ioc.Default.GetService<BackupService>().StartTimedBackup();
                 string msg = $"Opened project {StoryModel.ProjectFilename}";
@@ -769,7 +778,7 @@ namespace StoryBuilder.ViewModels
                         StoryModel.ProjectFolder = SaveAsVM.SaveAsProjectFolder;
                         StoryModel.ProjectPath = SaveAsVM.SaveAsProjectFolderPath;
                         // Add to the recent files stack
-                        Ioc.Default.GetService<MainWindowVM>().Title = $"StoryBuilder - Editing {StoryModel.ProjectFilename.Replace(".stbx", "")}";
+                        GlobalData.MainWindow.Title = $"StoryBuilder - Editing {StoryModel.ProjectFilename.Replace(".stbx", "")}";
                         new UnifiedVM().UpdateRecents(Path.Combine(StoryModel.ProjectFolder.Path, StoryModel.ProjectFile.Name));
                         // Indicate everything's done
                         Messenger.Send(new IsChangedMessage(true));
@@ -834,7 +843,7 @@ namespace StoryBuilder.ViewModels
             }
             ResetModel();
             SetCurrentView(StoryViewType.ExplorerView);
-            Ioc.Default.GetService<MainWindowVM>().Title = "StoryBuilder";
+            GlobalData.MainWindow.Title = "StoryBuilder";
             Ioc.Default.GetService<BackupService>().StopTimedBackup();
             DataSource = StoryModel.ExplorerView;
             ShowHomePage();
@@ -1475,46 +1484,46 @@ namespace StoryBuilder.ViewModels
 
         private void AddFolder()
         {
-            AddStoryElement(StoryItemType.Folder);
+            TreeViewNodeClicked(AddStoryElement(StoryItemType.Folder));
         }
 
         private void AddSection()
         {
-            AddStoryElement(StoryItemType.Section);
+            TreeViewNodeClicked(AddStoryElement(StoryItemType.Section));
         }
 
         private void AddProblem()
         {
-            AddStoryElement(StoryItemType.Problem);
+            TreeViewNodeClicked(AddStoryElement(StoryItemType.Problem));
         }
 
         private void AddCharacter()
         {
-            AddStoryElement(StoryItemType.Character);
+            TreeViewNodeClicked(AddStoryElement(StoryItemType.Character));
         }
 
         private void AddSetting()
         {
-            AddStoryElement(StoryItemType.Setting);
+            TreeViewNodeClicked(AddStoryElement(StoryItemType.Setting));
         }
 
         private void AddScene()
         {
-            AddStoryElement(StoryItemType.Scene);
+            TreeViewNodeClicked(AddStoryElement(StoryItemType.Scene));
         }
 
-        private void AddStoryElement(StoryItemType typeToAdd)
+        private StoryNodeItem AddStoryElement(StoryItemType typeToAdd)
         {
             Logger.Log(LogLevel.Trace, "AddStoryElement");
             _canExecuteCommands = false;
-            string msg = $"Adding StoryElement {typeToAdd.ToString()}";
+            string msg = $"Adding StoryElement {typeToAdd}";
             Logger.Log(LogLevel.Info, msg);
             if (RightTappedNode == null)
             {
                 Logger.Log(LogLevel.Info, "Add StoryElement failed- node not selected");
                 StatusMessage = "Right tap a node to add to";
                 _canExecuteCommands = true;
-                return;
+                return null;
             }
 
             if (RootNodeType(RightTappedNode) == StoryItemType.TrashCan)
@@ -1522,43 +1531,45 @@ namespace StoryBuilder.ViewModels
                 Logger.Log(LogLevel.Info, "Add StoryElement failed- can't add to TrashCan");
                 StatusMessage = "You can't add to Deleted Items";
                 _canExecuteCommands = true;
-                return;
+                return null;
             }
 
+            StoryNodeItem NewNode = null;
             switch (typeToAdd)
             {
                 case StoryItemType.Folder:
-                    FolderModel folder = new(StoryModel);
-                    _ = new StoryNodeItem(folder, RightTappedNode);
+                    NewNode = new StoryNodeItem(new FolderModel(StoryModel), RightTappedNode);
                     break;
                 case StoryItemType.Section:
-                    SectionModel section = new(StoryModel);
-                    _ = new StoryNodeItem(section, RightTappedNode);
+                    NewNode = new StoryNodeItem(new SectionModel(StoryModel), RightTappedNode);
                     break;
                 case StoryItemType.Problem:
-                    ProblemModel problem = new(StoryModel);
-                    _ = new StoryNodeItem(problem, RightTappedNode);
+                    NewNode = new StoryNodeItem(new ProblemModel(StoryModel), RightTappedNode);
                     break;
                 case StoryItemType.Character:
-                    CharacterModel character = new(StoryModel);
-                    _ = new StoryNodeItem(character, RightTappedNode);
+                    NewNode = new StoryNodeItem(new CharacterModel(StoryModel), RightTappedNode);
                     break;
                 case StoryItemType.Setting:
-                    SettingModel setting = new(StoryModel);
-                    _ = new StoryNodeItem(setting, RightTappedNode);
+                    NewNode = new StoryNodeItem(new SettingModel(StoryModel), RightTappedNode);
                     break;
                 case StoryItemType.Scene:
-                    SceneModel sceneVar = new(StoryModel);
-                    _ = new StoryNodeItem(sceneVar, RightTappedNode);
+                    NewNode = new StoryNodeItem(new SceneModel(StoryModel), RightTappedNode);
                     break;
+            }
+            
+            if (NewNode != null)
+            {
+                NewNode.Parent.IsExpanded = true;
             }
 
             Messenger.Send(new IsChangedMessage(true));
-            msg = $"Added new {typeToAdd.ToString()}";
+            msg = $"Added new {typeToAdd}";
             Logger.Log(LogLevel.Info, msg);
             StatusMessage smsg = new(msg, 100);
             Messenger.Send(new StatusChangedMessage(smsg));
             _canExecuteCommands = true;
+
+            return null;
         }
 
         private void RemoveStoryElement()
@@ -1870,6 +1881,7 @@ namespace StoryBuilder.ViewModels
             TogglePaneCommand = new RelayCommand(TogglePane, () => _canExecuteCommands);
             OpenUnifiedCommand = new RelayCommand(OpenUnifiedMenu, () => _canExecuteCommands);
             CloseUnifiedCommand = new RelayCommand(CloseUnifiedMenu, () => _canExecuteCommands);
+            PrintNodeCommand = new RelayCommand(async () => await PrintCurrentNodeAsync(), () => _canExecuteCommands);
             OpenFileCommand = new RelayCommand(async () => await OpenFile(), () => _canExecuteCommands);
             SaveFileCommand = new RelayCommand(async () => await SaveFile(), () => _canExecuteCommands);
             SaveAsCommand = new RelayCommand(SaveFileAs, () => _canExecuteCommands);

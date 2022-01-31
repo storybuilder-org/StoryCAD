@@ -37,7 +37,7 @@ public sealed partial class PrintReportsDialog : Page
         }
         catch (Exception ex)
         {
-            Ioc.Default.GetService<LogService>().LogException(LogLevel.Error, ex, "Reading nodes in shellVM DataSource[0], this is expected if no story is loaded.");
+            Ioc.Default.GetService<LogService>().LogException(LogLevel.Error, ex, "Error reading nodes");
         }
     }
 
@@ -72,7 +72,7 @@ public sealed partial class PrintReportsDialog : Page
         {
             foreach (StoryNodeItem item in SettingsList.SelectedItems) { PrintVM.SelectedNodes.Add(item); }
         }
-        else { PrintVM.SelectedNodes.AddRange(PrintVM.SceneNodes); }
+        else { PrintVM.SelectedNodes.AddRange(PrintVM.SettingNodes); }
 
         ProblemsList.IsEnabled = !PrintVM.SelectAllProblems;
         CharactersList.IsEnabled = !PrintVM.SelectAllCharacters;
