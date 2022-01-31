@@ -101,31 +101,69 @@ public class ReportFormatter
         string[] lines = _templates["Problem Description"];
         RtfDocument doc = new(string.Empty);
 
-        StoryElement vpProtagnoist = StringToStoryElement(problem.Protagonist);
-
+        StoryElement vpProtagonist = StringToStoryElement(problem.Protagonist);
         StoryElement vpAntagonist = StringToStoryElement(problem.Antagonist);
 
         // Parse and write the report
         foreach (string line in lines)
         {
             StringBuilder sb = new(line);
-            sb.Replace("@Title", problem.Name);
+            if (String.IsNullOrEmpty(problem.Name)) { sb.Replace("@Title", ""); }
+            else { sb.Replace("@Title", problem.Name); }
+
             sb.Replace("@ProblemType", problem.ProblemType);
-            sb.Replace("@ConflictType", problem.ConflictType);
-            sb.Replace("@Subject", problem.Subject);
-            sb.Replace("@StoryQuestion", GetText(problem.StoryQuestion));
-            sb.Replace("@ProblemSource", problem.ProblemSource);
-            sb.Replace("@ProtagName", vpProtagnoist.Name);
-            sb.Replace("@ProtagMotive", problem.ProtMotive);
-            sb.Replace("@ProtagGoal", problem.ProtGoal);
-            sb.Replace("@AntagName", vpAntagonist.Name);
-            sb.Replace("@AntagMotive", problem.AntagMotive);
-            sb.Replace("@AntagGoal", problem.AntagGoal);
-            sb.Replace("@Outcome", problem.Outcome);
-            sb.Replace("@Method", problem.Method);
-            sb.Replace("@Theme", problem.Theme);
-            sb.Replace("@Premise", GetText(problem.Premise));
-            sb.Replace("@Notes", GetText(problem.Notes));
+
+            if (String.IsNullOrEmpty(problem.ConflictType)) { sb.Replace("@ConflictType", ""); }
+            else { sb.Replace("@ConflictType", problem.ConflictType); }
+            
+            if (String.IsNullOrEmpty(problem.Subject)) { sb.Replace("@Subject", ""); }
+            else { sb.Replace("@Subject", problem.Subject); }
+
+            if (String.IsNullOrEmpty(problem.StoryQuestion)) { sb.Replace("@StoryQuestion", ""); } 
+            else { sb.Replace("@StoryQuestion", GetText(problem.StoryQuestion)); }
+            
+            if (String.IsNullOrEmpty(problem.ProblemSource)) { sb.Replace("@ProblemSource", ""); }
+            else { sb.Replace("@ProblemSource", problem.ProblemSource); }
+
+            if (String.IsNullOrEmpty(problem.ProtMotive)) { sb.Replace("@ProtagMotive", ""); }
+            else { sb.Replace("@ProtagMotive", problem.ProtMotive); }
+
+            if (String.IsNullOrEmpty(problem.ProtGoal)) { sb.Replace("@ProtagGoal", ""); }
+            else { sb.Replace("@ProtagGoal", problem.ProtGoal); }
+            
+            if (vpProtagonist != null)
+            {
+                if (String.IsNullOrEmpty(vpProtagonist.Name)) { sb.Replace("@ProtagName", ""); }
+                else { sb.Replace("@ProtagName", vpProtagonist.Name); }
+            }
+
+            if (vpAntagonist != null)
+            {
+                if (String.IsNullOrEmpty(vpAntagonist.Name)) { sb.Replace("@AntagName", ""); }
+                else { sb.Replace("@AntagName", vpAntagonist.Name); }
+            }
+            
+            if (String.IsNullOrEmpty(problem.AntagMotive)) { sb.Replace("@AntagMotive", ""); }
+            else { sb.Replace("@AntagMotive", problem.AntagMotive); }
+
+            if (String.IsNullOrEmpty(problem.AntagGoal)) { sb.Replace("@AntagGoal", ""); }
+            else { sb.Replace("@AntagGoal", problem.AntagGoal); }
+            
+            if (String.IsNullOrEmpty(problem.Outcome)) { sb.Replace("@Outcome", ""); }
+            else { sb.Replace("@Outcome", problem.Outcome); }
+
+            if (String.IsNullOrEmpty(problem.Method)) { sb.Replace("@Method", ""); }
+            else { sb.Replace("@Method", problem.Method); }
+            
+            if (String.IsNullOrEmpty(problem.Theme)) { sb.Replace("@Theme", ""); }
+            else { sb.Replace("@Theme", problem.Theme); }
+
+            if (String.IsNullOrEmpty(problem.Premise)) { sb.Replace("@Premise", ""); }
+            else { sb.Replace("@Premise", GetText(problem.Premise)); }
+            
+            if (String.IsNullOrEmpty(problem.Notes)) { sb.Replace("@Notes", ""); }
+            else { sb.Replace("@Notes", GetText(problem.Notes)); }
+
             doc.AddText(sb.ToString());
             doc.AddNewLine();
         }
