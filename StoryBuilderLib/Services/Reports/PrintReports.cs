@@ -38,7 +38,8 @@ public class PrintReports
         if (_vm.CreateSummary)
         {
             rtf =_formatter.FormatSynopsisReport();
-            documentText = FormatText(rtf,true);
+            documentText = FormatText(rtf);
+            //documentText = FormatText(rtf,true);
             Print(documentText);
         }
 
@@ -167,26 +168,26 @@ public class PrintReports
 
         foreach (string t in lines)
         {
-            string line = t;
+            string line = t.TrimEnd();
+            if (line.Equals("\r"))
+                continue;
             while (line.Length > 72) 
             {
                 string temp = line[..72];
                 int j = temp.LastIndexOf(' ');
                 temp = temp[..j];
                 sb.Append(temp);
-                sb.Append('\n');
+                sb.Append(Environment.NewLine);
                 line = line[j..];
                 line = line.TrimStart();
             }
-            sb.Append(line.Trim());
-            if (!SummaryMode) { sb.Append('\n'); }
+            sb.Append(line + Environment.NewLine);
         }
-
-        if (SummaryMode)
-        {
-            sb.Replace("[", "\n\n[");
-            sb.Replace("]", "]\n");
-        }
+        //if (SummaryMode)
+        //{
+        //    sb.Replace("[", "\r\n[");
+        //    sb.Replace("]", "]\r\n");
+        //}
         return sb.ToString();
     }
 

@@ -590,10 +590,11 @@ public class ReportFormatter
         string text = rtfInput ?? string.Empty;
         if (rtfInput.Equals(string.Empty))
             return string.Empty;
+        text = text.Replace("\'0d", "");
+        text = text.Replace("\'0a", "");
         RichTextStripper rts = new();
         text =  rts.StripRichTextFormat(text);
-        if (formatNewLines)
-            text = text.Replace("\n","\\par");
+        text = text.Replace("\\","");
         return text;
     }
 
