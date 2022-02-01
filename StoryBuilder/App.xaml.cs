@@ -21,6 +21,7 @@ using StoryBuilder.Services.Search;
 using StoryBuilder.ViewModels;
 using StoryBuilder.ViewModels.Tools;
 using StoryBuilder.Views;
+using WinUIEx;
 using UnhandledExceptionEventArgs = Microsoft.UI.Xaml.UnhandledExceptionEventArgs;
 
 
@@ -48,7 +49,6 @@ public partial class App : Application
 
     private LogService _log;
 
-    public Window m_window;
     private IntPtr m_windowHandle;
 
     private static void SetWindowSize(IntPtr hwnd, int windowWidth, int windowHeight)
@@ -101,7 +101,6 @@ public partial class App : Application
                 .AddSingleton<FolderViewModel>()
                 .AddSingleton<SectionViewModel>()
                 .AddSingleton<TrashCanViewModel>()
-                .AddSingleton<MainWindowVM>()
                 .AddSingleton<UnifiedVM>()
                 .AddSingleton<InitVM>()
                 .AddSingleton<TreeViewSelection>()
@@ -142,7 +141,6 @@ public partial class App : Application
         Trace.AutoFlush = true;
         Trace.Indent();
         Trace.WriteLine(pathMsg);
-
         // Load Preferences
         PreferencesService pref = Ioc.Default.GetService<PreferencesService>();
         await pref.LoadPreferences(localPath);
@@ -157,7 +155,11 @@ public partial class App : Application
 
         ConfigureNavigation();
 
-        m_window = new MainWindow();
+        //Creates new window and sets Min Height & Min Width
+        GlobalData.MainWindow = new();
+        GlobalData.MainWindow.MinHeight = 700;
+        GlobalData.MainWindow.MinWidth = 1050;
+
         // Create a Frame to act as the navigation context and navigate to the first page (Shell)
         Frame rootFrame = new();
         if (rootFrame.Content == null)
@@ -165,12 +167,12 @@ public partial class App : Application
             rootFrame.Navigate(GlobalData.Preferences.Initalised ? typeof(Shell) : typeof(Initialization));
         }
         // Place the frame in the current Window
-        m_window.Content = rootFrame;
-        m_window.Activate();
-
+        GlobalData.MainWindow.Content = rootFrame;
+        GlobalData.MainWindow.Activate();
+ 
         //Get the Window's HWND
         m_windowHandle = User32.GetActiveWindow();
-        Ioc.Default.GetService<MainWindowVM>().Title = "StoryBuilder";
+        GlobalData.MainWindow.Title = "StoryBuilder";
         GlobalData.WindowHandle = m_windowHandle;
         // The Window object doesn't (yet) have Width and Height properties in WInUI 3 Desktop yet.
         // To set the Width and Height, you can use the Win32 API SetWindowPos.
@@ -178,6 +180,7 @@ public partial class App : Application
         SetWindowSize(m_windowHandle, Width, Height);   // was 800, 600
         _log.Log(LogLevel.Debug, $"Layout: Window size width={Width} height={Height}");
         _log.Log(LogLevel.Info, "StoryBuilder App loaded and launched");
+        GlobalData.MainWindow.CenterOnScreen(); //Centers the window on the monitor
     }
 
     private async Task ProcessInstallationFiles()

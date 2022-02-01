@@ -72,6 +72,12 @@
                         <ToolTip Content="Remove Scene from Narrative" />
                     </ToolTipService.ToolTip>
                 </AppBarButton>
+                <AppBarButton Icon="Print" Command="{x:Bind ShellVm.PrintNodeCommand, Mode=OneWay}" 
+                          Visibility="{x:Bind ShellVm.AddFolderVisibility, Mode=TwoWay}" >
+                    <ToolTipService.ToolTip>
+                        <ToolTip Content="Print selected node"/>
+                    </ToolTipService.ToolTip>
+                </AppBarButton>
             </CommandBarFlyout.PrimaryCommands>
         </CommandBarFlyout>
     </Page.Resources>

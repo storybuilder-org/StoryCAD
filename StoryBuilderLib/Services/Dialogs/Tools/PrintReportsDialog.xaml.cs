@@ -72,7 +72,7 @@ public sealed partial class PrintReportsDialog : Page
         {
             foreach (StoryNodeItem item in SettingsList.SelectedItems) { PrintVM.SelectedNodes.Add(item); }
         }
-        else { PrintVM.SelectedNodes.AddRange(PrintVM.SceneNodes); }
+        else { PrintVM.SelectedNodes.AddRange(PrintVM.SettingNodes); }
 
         ProblemsList.IsEnabled = !PrintVM.SelectAllProblems;
         CharactersList.IsEnabled = !PrintVM.SelectAllCharacters;

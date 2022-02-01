@@ -39,6 +39,7 @@ public class PrintReports
         {
             rtf =_formatter.FormatSynopsisReport();
             documentText = FormatText(rtf);
+            //documentText = FormatText(rtf,true);
             Print(documentText);
         }
 
@@ -152,30 +153,45 @@ public class PrintReports
             Ioc.Default.GetService<LogService>().LogException(LogLevel.Error, ex, "Error in Print reports.");
         }
     }
-
-    private string FormatText(string rtfInput) 
+    /// <summary>
+    /// Formats text for a report, if SummaryMode is set to true
+    /// then some formatting is changed to make summary reports more pleasant
+    /// </summary>
+    /// <param name="rtfInput"></param>
+    /// <param name="SummaryMode"></param>
+    /// <returns></returns>
+    private string FormatText(string rtfInput, bool SummaryMode = false) 
     {
         string text = _formatter.GetText(rtfInput, false);
         string[] lines = text.Split('\n');
         StringBuilder sb = new();
+
         foreach (string t in lines)
         {
-            string line = t;
+            string line = t.TrimEnd();
+            if (line.Equals("\r"))
+                continue;
             while (line.Length > 72) 
             {
                 string temp = line[..72];
                 int j = temp.LastIndexOf(' ');
                 temp = temp[..j];
                 sb.Append(temp);
-                sb.Append('\n');
+                sb.Append(Environment.NewLine);
                 line = line[j..];
                 line = line.TrimStart();
             }
-            sb.Append(line.Trim());
-            sb.Append('\n');
+            sb.Append(line + Environment.NewLine);
         }
+        //if (SummaryMode)
+        //{
+        //    sb.Replace("[", "\r\n[");
+        //    sb.Replace("]", "]\r\n");
+        //}
         return sb.ToString();
     }
+
+
 
     #region Constructor
 
