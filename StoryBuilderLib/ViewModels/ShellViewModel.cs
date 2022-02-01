@@ -1004,6 +1004,13 @@ namespace StoryBuilder.ViewModels
                     child.Name = scene.SceneTitle;
                     child.Remarks = "See Notes.";
                     child.Notes = scene.Notes;
+
+                    if (RightTappedNode == null)
+                    {
+                        StatusMessage = "You need to right click a node to";
+                        return;
+                    }
+
                     // add the new SceneModel & node to the end of the target's children 
                     StoryNodeItem newNode = new(child, RightTappedNode);
                     RightTappedNode.IsExpanded = true;
@@ -1040,17 +1047,22 @@ namespace StoryBuilder.ViewModels
             DramaticSituationModel situationModel = Ioc.Default.GetService<DramaticSituationsViewModel>().Situation;
             StoryNodeItem newNode = null;
             string msg;
+            if (RightTappedNode == null) 
+            {
+                StatusMessage = "Right tap a node to add this node to.";
+                return;
+            }
             switch (result)
             {
                 case ContentDialogResult.Primary:
                 {
-                    ProblemModel problem = new ProblemModel(StoryModel);
+                    ProblemModel problem = new(StoryModel);
                     problem.Name = situationModel.SituationName;
                     problem.StoryQuestion = "See Notes.";
                     problem.Notes = situationModel.Notes;
 
                     // Insert the new Problem as the target's child
-                    newNode = new StoryNodeItem(problem, RightTappedNode);
+                    newNode = new(problem, RightTappedNode);
                     msg = $"Problem {situationModel.SituationName} inserted";
                     ShowChange();
                     break;
@@ -1062,7 +1074,7 @@ namespace StoryBuilder.ViewModels
                     sceneVar.Remarks = "See Notes.";
                     sceneVar.Notes = situationModel.Notes;
                     // Insert the new Scene as the target's child
-                    newNode = new StoryNodeItem(sceneVar, RightTappedNode);
+                    newNode = new(sceneVar, RightTappedNode);
                     msg = $"Scene {situationModel.SituationName} inserted";
                     ShowChange();
                     break;
@@ -1074,7 +1086,14 @@ namespace StoryBuilder.ViewModels
 
             StatusMessage = msg;
             Logger.Log(LogLevel.Info, msg);
-            RightTappedNode.IsExpanded = true;
+            try
+            {
+                RightTappedNode.IsExpanded = true;
+            }
+            catch (Exception ex)
+            {
+                Logger.Log(LogLevel.Info, "Error expanding right tapped node");  //This is expected if no story is loade
+            }
             newNode.IsSelected = true;
             Logger.Log(LogLevel.Info, "Dramatic Situations finished");
         }
@@ -1113,45 +1132,13 @@ namespace StoryBuilder.ViewModels
             catch (Exception e) {  Logger.LogException(LogLevel.Error, e, e.Message); }
         }
 
-        private async void OpenReportsDialog()
-        {
-            ContentDialog ReportDialog = new();
-            ReportDialog.Title = "Generate Reports";
-            ReportDialog.PrimaryButtonText = "Generate";
-            ReportDialog.CloseButtonText = "Cancel";
-            ReportDialog.XamlRoot = GlobalData.XamlRoot;
-            ReportDialog.Content = new PrintReportsDialog();
-            var result = await ReportDialog.ShowAsync();
-
-            if (result == ContentDialogResult.Primary)
-            {
-                PrintReportDialogVM ReportVM = Ioc.Default.GetRequiredService<PrintReportDialogVM>();
-
-                //switch (ReportVM.ReportType)
-                //{
-                //    case "Scrivener":
-                //        //Put code to make scrivener report here
-                //        break;
-                //    case "Preview":
-                //        //Put code to show preview here (or remove it)
-                //        break;
-                //    case "Printer":
-                //        //Put code to print here (or remove it)
-                //    break;
-                //}
-
-                StatusMessage = "Report generator complete";
-                Logger.Log(LogLevel.Info, "Report Generator complete");
-            }
-            else
-            {
-                StatusMessage = "Report generator canceled";
-                Logger.Log(LogLevel.Info, "Report Generator canceled");
-            }
-        }
-
         private async void GeneratePrintReports()
         {
+            if (Ioc.Default.GetRequiredService<ShellViewModel>().DataSource == null) 
+            {
+                StatusMessage = "You need to load a Story first!";
+                return; 
+            }
             _canExecuteCommands = false;
             Logger.Log(LogLevel.Info, "Executing Generate Print Reports command");
             StatusMessage = "Generate Print Reports executing";
@@ -1170,7 +1157,7 @@ namespace StoryBuilder.ViewModels
             {
                 PrintReportDialogVM ReportVM = Ioc.Default.GetRequiredService<PrintReportDialogVM>();
 
-                PrintReports rpt = new PrintReports(ReportVM, StoryModel);
+                PrintReports rpt = new(ReportVM, StoryModel);
                 await rpt.Generate();
 
                 StatusMessage = "Generate Print Reports complete";
@@ -1939,6 +1926,13 @@ namespace StoryBuilder.ViewModels
             _canExecuteCommands = false;    //This prevents other commands from being used till this one is complete.
             Logger.Log(LogLevel.Info, "Better search started.");
             SaveModel();
+            if (DataSource == null)
+            {
+                Logger.Log(LogLevel.Info, "Datasource is null");
+                StatusMessage = "You need to load a story first!";
+                _canExecuteCommands = true;
+                return;
+            }
             StoryNodeItem root = DataSource[0]; //Gets all nodes in the tree
             int SearchTotal = 0;
 

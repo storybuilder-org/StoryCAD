@@ -13,7 +13,7 @@
 
   <Properties>
     <DisplayName>StoryBuilder</DisplayName>
-    <PublisherDisplayName>tcox</PublisherDisplayName>
+    <PublisherDisplayName>Team StoryBuilder</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
 
@@ -33,7 +33,7 @@
       EntryPoint="$targetentrypoint$">
       <uap:VisualElements
         DisplayName="StoryBuilder"
-        Description="StoryBuilder"
+        Description="StoryBuilder is CAD tool for fiction writers."
         BackgroundColor="transparent"
         Square150x150Logo="Assets\Square150x150Logo.png"
         Square44x44Logo="Assets\Square44x44Logo.png">

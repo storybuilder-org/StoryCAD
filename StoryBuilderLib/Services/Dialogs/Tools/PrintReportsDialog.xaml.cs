@@ -37,7 +37,7 @@ public sealed partial class PrintReportsDialog : Page
         }
         catch (Exception ex)
         {
-            Ioc.Default.GetService<LogService>().LogException(LogLevel.Error, ex, "Error reading nodes");
+            Ioc.Default.GetService<LogService>().LogException(LogLevel.Error, ex, "Error parsing nodes.");
         }
     }
 
