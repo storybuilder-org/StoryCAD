@@ -1038,17 +1038,22 @@ namespace StoryBuilder.ViewModels
             DramaticSituationModel situationModel = Ioc.Default.GetService<DramaticSituationsViewModel>().Situation;
             StoryNodeItem newNode = null;
             string msg;
+            if (RightTappedNode == null) 
+            {
+                StatusMessage = "Right tap a node to add this node to.";
+                return;
+            }
             switch (result)
             {
                 case ContentDialogResult.Primary:
                 {
-                    ProblemModel problem = new ProblemModel(StoryModel);
+                    ProblemModel problem = new(StoryModel);
                     problem.Name = situationModel.SituationName;
                     problem.StoryQuestion = "See Notes.";
                     problem.Notes = situationModel.Notes;
 
                     // Insert the new Problem as the target's child
-                    newNode = new StoryNodeItem(problem, RightTappedNode);
+                    newNode = new(problem, RightTappedNode);
                     msg = $"Problem {situationModel.SituationName} inserted";
                     ShowChange();
                     break;
@@ -1060,7 +1065,7 @@ namespace StoryBuilder.ViewModels
                     sceneVar.Remarks = "See Notes.";
                     sceneVar.Notes = situationModel.Notes;
                     // Insert the new Scene as the target's child
-                    newNode = new StoryNodeItem(sceneVar, RightTappedNode);
+                    newNode = new(sceneVar, RightTappedNode);
                     msg = $"Scene {situationModel.SituationName} inserted";
                     ShowChange();
                     break;
