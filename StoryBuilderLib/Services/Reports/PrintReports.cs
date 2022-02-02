@@ -38,8 +38,8 @@ public class PrintReports
         if (_vm.CreateSummary)
         {
             rtf =_formatter.FormatSynopsisReport();
-            documentText = FormatText(rtf);
-            //documentText = FormatText(rtf,true);
+            //documentText = FormatText(rtf);
+            documentText = FormatText(rtf,true);
             Print(documentText);
         }
 
@@ -183,11 +183,11 @@ public class PrintReports
             }
             sb.Append(line + Environment.NewLine);
         }
-        //if (SummaryMode)
-        //{
-        //    sb.Replace("[", "\r\n[");
-        //    sb.Replace("]", "]\r\n");
-        //}
+        if (SummaryMode)
+        {
+            sb.Replace("[", "\r\n[");
+            sb.Replace("]", "]\r\n");
+        }
         return sb.ToString();
     }
 
