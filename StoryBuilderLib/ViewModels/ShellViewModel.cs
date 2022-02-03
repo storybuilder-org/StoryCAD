@@ -357,7 +357,7 @@ namespace StoryBuilder.ViewModels
         {
             _canExecuteCommands = false;
             // Needs logging
-            _contentDialog = new ContentDialog();
+            _contentDialog = new();
             _contentDialog.XamlRoot = GlobalData.XamlRoot;
             _contentDialog.Content = new UnifiedMenuPage();
             await _contentDialog.ShowAsync();
