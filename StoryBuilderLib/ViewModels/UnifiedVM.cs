@@ -21,6 +21,13 @@ public class UnifiedVM : ObservableRecipient
         set => SetProperty(ref _selectedRecentIndex, value);
     }
 
+    private int _selectedTemplateIndex;
+    public int SelectedTemplateIndex
+    {
+        get => _selectedRecentIndex;
+        set => SetProperty(ref _selectedRecentIndex, value);
+    }
+
     private string _selectedTemplate;
     public string SelectedTemplate
     {
@@ -125,10 +132,13 @@ public class UnifiedVM : ObservableRecipient
     /// </summary>
     public async void MakeProject()
     {
-        //Checks for validity
+        GlobalData.Preferences.LastSelectedTemplate = SelectedTemplateIndex;
+
         //TODO: check if path is valid (Not illegal) 
-        if (!string.IsNullOrWhiteSpace(SelectedTemplate) && !string.IsNullOrWhiteSpace(ProjectPath) && !string.IsNullOrWhiteSpace(ProjectName))
+        if (!string.IsNullOrWhiteSpace(ProjectPath) && !string.IsNullOrWhiteSpace(ProjectName))
         {
+            PreferencesIO loader = new(GlobalData.Preferences, GlobalData.RootDirectory);
+            await loader.UpdateFile();
             await shell.UnifiedNewFile(this);
             Hide();
         }

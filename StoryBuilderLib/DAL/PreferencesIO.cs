@@ -124,6 +124,9 @@ public class PreferencesIO
                     case "LastFile5":
                         _model.LastFile5 = tokens[1];
                         break;
+                    case "LastTemplate":
+                        _model.LastSelectedTemplate = Convert.ToInt32(tokens[1]);
+                        break;
                 }
             }
             _log.Log(LogLevel.Info, "PreferencesModel updated from StoryBuilder.prf.");
@@ -171,6 +174,7 @@ public class PreferencesIO
         NewPreferences.Add("BackupOnOpen=" + _model.BackupOnOpen);
         NewPreferences.Add("ErrorCollectionConsent=" + _model.ErrorCollectionConsent);
         NewPreferences.Add("TimedBackup=" + _model.TimedBackup);
+        NewPreferences.Add("LastTemplate=" + _model.LastSelectedTemplate);
 
         await FileIO.WriteLinesAsync(preferencesFile, NewPreferences); //Writes file to disk.
     }
