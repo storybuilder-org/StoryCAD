@@ -183,7 +183,7 @@ public partial class App : Application
         GlobalData.MainWindow.CenterOnScreen(); //Centers the window on the monitor
     }
 
-    private async Task ProcessInstallationFiles()
+    private async Task ProcessInstallationFiles()   
     {
         try
         {

@@ -2,6 +2,7 @@
 using NLog.Config;
 using NLog.Targets;
 using Elmah.Io.NLog;
+using StoryBuilder.DAL;
 using StoryBuilder.Models;
 using System;
 using System.Diagnostics;
@@ -120,4 +121,5 @@ public class LogService : ILogService
     {
         LogManager.Flush();
     }
+
 }
