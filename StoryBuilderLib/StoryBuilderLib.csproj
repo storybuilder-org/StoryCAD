@@ -76,7 +76,6 @@
     <Folder Include="Services\Installation\" />
     <Folder Include="Services\Logging\" />
     <Folder Include="Services\Navigation\" />
-    <Folder Include="Services\Search\" />
   </ItemGroup>
 
   <ItemGroup>
