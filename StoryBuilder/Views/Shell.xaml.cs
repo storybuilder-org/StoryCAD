@@ -51,10 +51,7 @@ public sealed partial class Shell
         GlobalData.XamlRoot = Content.XamlRoot;
         ShellVm.ShowHomePage();
 
-        ContentDialog UnifiedMenu = new();
-        UnifiedMenu.Content = new Services.Dialogs.UnifiedMenuPage();
-        UnifiedMenu.XamlRoot = GlobalData.XamlRoot;
-        await UnifiedMenu.ShowAsync();
+        ShellVm.OpenUnifiedCommand.Execute(null);
     }
 
     /// <summary>

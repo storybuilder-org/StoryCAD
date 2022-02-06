@@ -24,8 +24,8 @@ public class UnifiedVM : ObservableRecipient
     private int _selectedTemplateIndex;
     public int SelectedTemplateIndex
     {
-        get => _selectedRecentIndex;
-        set => SetProperty(ref _selectedRecentIndex, value);
+        get => _selectedTemplateIndex;
+        set => SetProperty(ref _selectedTemplateIndex, value);
     }
 
     private string _selectedTemplate;
