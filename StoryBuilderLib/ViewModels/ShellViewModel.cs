@@ -1092,7 +1092,7 @@ namespace StoryBuilder.ViewModels
             }
             catch (Exception ex)
             {
-                Logger.Log(LogLevel.Info, "Error expanding right tapped node");  //This is expected if no story is loade
+                Logger.LogException(LogLevel.Info, ex, "Error expanding right tapped node");  //This is expected if no story is loaded
             }
             newNode.IsSelected = true;
             Logger.Log(LogLevel.Info, "Dramatic Situations finished");

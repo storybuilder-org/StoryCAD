@@ -1,6 +1,8 @@
 ﻿using NLog;
 using NLog.Config;
 using NLog.Targets;
+using Azure.Identity;
+using Azure.Security.KeyVault.Secrets;
 using Elmah.Io.NLog;
 using StoryBuilder.Models;
 using System;
@@ -21,8 +23,17 @@ public class LogService : ILogService
     {
         try
         {
-            string apiKey = Environment.GetEnvironmentVariable("API-KEY");
-            string logID = Environment.GetEnvironmentVariable("Log-ID");
+            //string apiKey = Environment.GetEnvironmentVariable("API-KEY");
+            //string logID = Environment.GetEnvironmentVariable("Log-ID");
+
+            string keyVaultUri = "https://storybuilder-secrets.vault.azure.net/";
+            //SecretClient secretClient = new SecretClient(new Uri(keyVaultUri), new ClientCertificateCredential());
+            //SecretClient secretClient = new SecretClient(new Uri(keyVaultUri), new DefaultAzureCredential());
+           // KeyVaultSecret apiSecret = secretClient.GetSecret("Elmah-API-key");
+            //string apiKey = apiSecret.Value.ToString();
+           // KeyVaultSecret logSecret = secretClient.GetSecret("Elmah-Log-ID");
+            //string logID = logSecret.Value.ToString();
+
             LoggingConfiguration config = new();
 
             // Create file target
