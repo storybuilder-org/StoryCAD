@@ -264,12 +264,17 @@ namespace StoryBuilder.ViewModels
             get => _currentView;
             set => _currentView = value;
         }
-
-        private string _statusMessage;
-        public string StatusMessage
+        public _StatusMessage StatusMessage = new();
+        public struct _StatusMessage
         {
-            get => _statusMessage;
-            set => SetProperty(ref _statusMessage, value);
+            private int level; //Higher is worse, 0 is info, 1 - Warning, 2 - Error
+            public string status;
+            public void SetStatus(String Message, int Level)
+            {
+                this.status = Message;
+                this.level = Level;
+            }
+
         }
 
         private TimeSpan _messageDuration;
@@ -310,6 +315,8 @@ namespace StoryBuilder.ViewModels
         #endregion
 
         #region Static members  
+
+        
 
         // Static access to the ShellViewModel singleton for
         // change tracking at the application level
@@ -370,7 +377,7 @@ namespace StoryBuilder.ViewModels
             Logger.Log(LogLevel.Info, "UnifyVM - New File starting");
             try
             {
-                StatusMessage = "New project command executing";
+                StatusMessage.SetStatus("New project command executing",0);
                 // If the current project needs saved, do so
                 if (StoryModel.Changed)
                 {
@@ -461,13 +468,13 @@ namespace StoryBuilder.ViewModels
                 await SaveFile();
                 await MakeBackup();
                 Ioc.Default.GetService<BackupService>().StartTimedBackup();
-                StatusMessage = "New project ready.";
+                StatusMessage.SetStatus("New project ready.",0);
                 Logger.Log(LogLevel.Info, "Unity - NewFile command completed");
             }
             catch (Exception ex)
             {
                 Logger.LogException(LogLevel.Error, ex, "Error creating new project");
-                StatusMessage = "File make failure.";
+                StatusMessage.SetStatus("File make failure.",2);
             }
             _canExecuteCommands = true;
         }
@@ -649,7 +656,7 @@ namespace StoryBuilder.ViewModels
                 if (StoryModel.ProjectFile == null) 
                 {
                     Logger.Log(LogLevel.Info,"Open File command cancelled (StoryModel.ProjectFile was null)");
-                    StatusMessage = "Open Story command cancelled";
+                    StatusMessage.SetStatus("Open Story command cancelled",0);
                     _canExecuteCommands = true;  // unblock other commands
                     return;
                 }
@@ -662,7 +669,7 @@ namespace StoryBuilder.ViewModels
                 if (StoryModel.ExplorerView.Count > 0)
                 {
                     SetCurrentView(StoryViewType.ExplorerView);
-                    StatusMessage = "Open Story completed";
+                    StatusMessage.SetStatus("Open Story completed",0);
                 }
                 GlobalData.MainWindow.Title = $"StoryBuilder - Editing {StoryModel.ProjectFilename.Replace(".stbx", "")}";
                 new UnifiedVM().UpdateRecents(Path.Combine(StoryModel.ProjectFolder.Path,StoryModel.ProjectFile.Name));
@@ -673,7 +680,7 @@ namespace StoryBuilder.ViewModels
             catch (Exception ex)
             {
                 Logger.LogException(LogLevel.Error, ex, "Error in OpenFile command");
-                StatusMessage = "Open Story command failed";
+                StatusMessage.SetStatus("Open Story command failed",2);
             }
 
             Logger.Log(LogLevel.Info, "Open Story completed.");
@@ -688,17 +695,17 @@ namespace StoryBuilder.ViewModels
             try
             {
                 //TODO: SaveFile is both an AppButton command and called from NewFile and OpenFile. Split these.
-                StatusMessage = "Save File command executing";
+                StatusMessage.SetStatus("Save File command executing",0);
                 SaveModel();
                 await WriteModel();
-                StatusMessage = "Save File command completed";
+                StatusMessage.SetStatus("Save File command completed",0);
                 StoryModel.Changed = false;
                 ChangeStatusColor = Colors.Green;
             }
             catch (Exception ex)
             {
                 Logger.LogException(LogLevel.Error, ex, "Exception in SaveFile");
-                StatusMessage = "Save File failed";
+                StatusMessage.SetStatus("Save File failed",2);
             }
 
             Logger.Log(LogLevel.Info, "SaveFile completed");
@@ -730,7 +737,7 @@ namespace StoryBuilder.ViewModels
             catch (Exception ex)
             {
                 Logger.LogException(LogLevel.Error, ex, "Error writing file");
-                StatusMessage = "Error writing file - see log";
+                StatusMessage.SetStatus("Error writing file - see log",2);
                 return;
             }
             Logger.Log(LogLevel.Info, "WriteModel successful");
@@ -741,7 +748,7 @@ namespace StoryBuilder.ViewModels
         {
             _canExecuteCommands = false;
             Logger.Log(LogLevel.Info, "Running save as");
-            StatusMessage = "Save File As command executing";
+            StatusMessage.SetStatus("Save File As command executing",0);
             try
             {
 
@@ -784,20 +791,20 @@ namespace StoryBuilder.ViewModels
                         Messenger.Send(new IsChangedMessage(true));
                         StoryModel.Changed = false;
                         ChangeStatusColor = Colors.Green;
-                        StatusMessage = "Save File As command completed";
+                        StatusMessage.SetStatus("Save File As command completed",0);
                         Logger.Log(LogLevel.Info, "Save as command completed");
                     }
                 }
                 else // if cancelled
                 {
-                    StatusMessage = "SaveAs dialog cancelled";
+                    StatusMessage.SetStatus("SaveAs dialog cancelled",1);
                     Logger.Log(LogLevel.Info, "'SaveAs' project command cancelled");
                 }
             }
             catch (Exception ex) //If error occurs in file.
             {
                 Logger.LogException(LogLevel.Error, ex, "Exception in SaveFileAs");
-                StatusMessage = "Save File As failed";
+                StatusMessage.SetStatus("Save File As failed",2);
             }
             _canExecuteCommands = true;
         }
@@ -834,7 +841,7 @@ namespace StoryBuilder.ViewModels
             //BUG: Close file logic doesn't work (see comments)
             _canExecuteCommands = false;
             Logger.Log(LogLevel.Info, "Executing Close project command");
-            StatusMessage = "Closing project";
+            StatusMessage.SetStatus("Closing project",1);
             // Save the existing file if changed
             if (StoryModel.Changed)
             {
@@ -848,7 +855,7 @@ namespace StoryBuilder.ViewModels
             DataSource = StoryModel.ExplorerView;
             ShowHomePage();
             //TODO: Navigate to background Page (is there one?)
-            StatusMessage = "Close story command completed";
+            StatusMessage.SetStatus("Close story command completed",1);
             Logger.Log(LogLevel.Info, "Close story command completed");
             _canExecuteCommands = true;
         }
@@ -870,7 +877,7 @@ namespace StoryBuilder.ViewModels
                 await WriteModel();
             }
             Logger.Flush();
-            StatusMessage = "Goodbye";
+            StatusMessage.SetStatus("Goodbye",1);
             Application.Current.Exit();  // Win32
         }
 
@@ -895,7 +902,7 @@ namespace StoryBuilder.ViewModels
         {
             //Logging stuff
             Logger.Log(LogLevel.Info, "Launching Preferences");
-            StatusMessage = "Updating Preferences";
+            StatusMessage.SetStatus("Updating Preferences",0);
 
             //Creates and shows dialog
             ContentDialog PreferencesDialog = new();
@@ -913,7 +920,7 @@ namespace StoryBuilder.ViewModels
                 case ContentDialogResult.Primary:
                     await Ioc.Default.GetService<PreferencesViewModel>().SaveAsync();
                     Logger.Log(LogLevel.Info, "Preferences update completed");
-                    StatusMessage = "Preferences updated";
+                    StatusMessage.SetStatus("Preferences updated",0);
                     break;
                 case ContentDialogResult.Secondary:
                 {
@@ -938,7 +945,7 @@ namespace StoryBuilder.ViewModels
                 //don't save changes
                 default:
                     Logger.Log(LogLevel.Info, "Preferences update canceled");
-                    StatusMessage = "Preferences closed";
+                    StatusMessage.SetStatus("Preferences closed",0);
                     break;
             }
 
@@ -1007,7 +1014,7 @@ namespace StoryBuilder.ViewModels
 
                     if (RightTappedNode == null)
                     {
-                        StatusMessage = "You need to right click a node to";
+                        StatusMessage.SetStatus("You need to right click a node to",2);
                         return;
                     }
 
@@ -1017,14 +1024,14 @@ namespace StoryBuilder.ViewModels
                     newNode.IsSelected = true;
                 }
                 string msg = $"MasterPlot {masterPlotName} inserted";
-                StatusMessage = msg;
+                StatusMessage.SetStatus(msg,0);
                 Logger.Log(LogLevel.Info, msg);
                 ShowChange();
                 Logger.Log(LogLevel.Info, "MasterPlot complete");
             }
             else  // canceled
             {
-                StatusMessage = "MasterPlot cancelled";
+                StatusMessage.SetStatus("MasterPlot cancelled",0);
                 Logger.Log(LogLevel.Info, "MasterPlot canceled");
             } 
         }
@@ -1049,7 +1056,7 @@ namespace StoryBuilder.ViewModels
             string msg;
             if (RightTappedNode == null) 
             {
-                StatusMessage = "Right tap a node to add this node to.";
+                StatusMessage.SetStatus("Right tap a node to add this node to.",1);
                 return;
             }
             switch (result)
@@ -1084,7 +1091,7 @@ namespace StoryBuilder.ViewModels
                     break;
             }
 
-            StatusMessage = msg;
+            StatusMessage.SetStatus(msg,2);
             Logger.Log(LogLevel.Info, msg);
             try
             {
@@ -1136,12 +1143,12 @@ namespace StoryBuilder.ViewModels
         {
             if (Ioc.Default.GetRequiredService<ShellViewModel>().DataSource == null) 
             {
-                StatusMessage = "You need to load a Story first!";
+                StatusMessage.SetStatus("You need to load a Story first!",1);
                 return; 
             }
             _canExecuteCommands = false;
             Logger.Log(LogLevel.Info, "Executing Generate Print Reports command");
-            StatusMessage = "Generate Print Reports executing";
+            StatusMessage.SetStatus("Generate Print Reports executing",0);
             SaveModel();
 
             // Run reports dialog
@@ -1160,12 +1167,12 @@ namespace StoryBuilder.ViewModels
                 PrintReports rpt = new(ReportVM, StoryModel);
                 await rpt.Generate();
 
-                StatusMessage = "Generate Print Reports complete";
+                StatusMessage.SetStatus("Generate Print Reports complete",0);
                 Logger.Log(LogLevel.Info, "Generate Print Reports complete");
             }
             else
             {
-                StatusMessage = "Generate Print Reports canceled";
+                StatusMessage.SetStatus("Generate Print Reports canceled",1);
                 Logger.Log(LogLevel.Info, "Generate Print Reports canceled");
             }
             _canExecuteCommands = true;
@@ -1175,7 +1182,7 @@ namespace StoryBuilder.ViewModels
         {
             _canExecuteCommands = false;
             Logger.Log(LogLevel.Info, "Executing Generate Scrivener Reports command");
-            StatusMessage = "Generate Scrivener Reports executing";
+            StatusMessage.SetStatus("Generate Scrivener Reports executing",0);
             SaveModel();
 
             // Select the Scrivener .scrivx file to add the report to
@@ -1201,7 +1208,7 @@ namespace StoryBuilder.ViewModels
                 await rpt.GenerateReports();
             }
 
-            StatusMessage = "Generate Scrivener Reports completed";
+            StatusMessage.SetStatus("Generate Scrivener Reports completed",0);
             Logger.Log(LogLevel.Info, "Generate Scrivener reports completed");
             _canExecuteCommands = true;
         }
@@ -1211,7 +1218,7 @@ namespace StoryBuilder.ViewModels
             _canExecuteCommands = false;
             string msg = "Launching GitHub Pages User Manual";
             Logger.Log(LogLevel.Info,msg);
-            StatusMessage = msg;
+            StatusMessage.SetStatus(msg,0);
 
             string url = @"https://storybuilder-org.github.io/StoryBuilder-2/";
 
@@ -1223,7 +1230,7 @@ namespace StoryBuilder.ViewModels
             Process.Start(psi);
 
             msg = "Launch default browser completed";
-            StatusMessage = msg;
+            StatusMessage.SetStatus(msg,0);
             Logger.Log(LogLevel.Info, msg);
             _canExecuteCommands = true;
         }
@@ -1237,13 +1244,13 @@ namespace StoryBuilder.ViewModels
             //TODO: Logging
             if (CurrentNode == null)
             {
-                StatusMessage = "Click or touch a node to move";
+                StatusMessage.SetStatus("Click or touch a node to move",1);
                 return;
             }
 
             if (CurrentNode.Parent.IsRoot)
             {
-                StatusMessage = "Cannot move further left";
+                StatusMessage.SetStatus("Cannot move further left",1);
                 return;
             }
             _sourceChildren = CurrentNode.Parent.Children;
@@ -1258,7 +1265,7 @@ namespace StoryBuilder.ViewModels
 
             if (!MoveIsValid()) // Verify message
             {
-                StatusMessage = MoveErrorMesage;
+                StatusMessage.SetStatus(MoveErrorMesage,2);
                 return;
             }
 
@@ -1277,7 +1284,7 @@ namespace StoryBuilder.ViewModels
 
             if (CurrentNode == null)
             {
-                StatusMessage = "Click or touch a node to move";
+                StatusMessage.SetStatus("Click or touch a node to move",1);
                 return;
             }
 
@@ -1304,7 +1311,7 @@ namespace StoryBuilder.ViewModels
                 // find parent's predecessor
                 if (CurrentNode.Parent.Parent == null)
                 {
-                    StatusMessage = "Cannot move further right";
+                    StatusMessage.SetStatus("Cannot move further right",1);
                     return;
                 }
 
@@ -1322,13 +1329,13 @@ namespace StoryBuilder.ViewModels
                     }
                     else
                     {
-                        StatusMessage = "Cannot move further right";
+                        StatusMessage.SetStatus("Cannot move further right",1);
                         return;
                     }
                 }
                 else
                 {
-                    StatusMessage = "Cannot move further right";
+                    StatusMessage.SetStatus("Cannot move further right",1);
                     return;
                 }
             }
@@ -1350,13 +1357,13 @@ namespace StoryBuilder.ViewModels
 
             if (CurrentNode == null)
             {
-                StatusMessage = "Click or touch a node to move";
+                StatusMessage.SetStatus("Click or touch a node to move",1);
                 return;
             }
 
             if (CurrentNode.IsRoot)
             {
-                StatusMessage = "Cannot move up further";
+                StatusMessage.SetStatus("Cannot move up further",1);
                 return;
             }
             _sourceChildren = CurrentNode.Parent.Children;
@@ -1370,7 +1377,7 @@ namespace StoryBuilder.ViewModels
             {
                 if (CurrentNode.Parent.Parent == null)
                 {
-                    StatusMessage = "Cannot move up further";
+                    StatusMessage.SetStatus("Cannot move up further",1);
                     return;
                 }
                 // find parent's predecessor
@@ -1383,7 +1390,7 @@ namespace StoryBuilder.ViewModels
                 }
                 else
                 {
-                    StatusMessage = "Cannot move up further";
+                    StatusMessage.SetStatus("Cannot move up further",1);
                     return;
                 }
             }
@@ -1411,12 +1418,12 @@ namespace StoryBuilder.ViewModels
 
             if (CurrentNode == null)
             {
-                StatusMessage = "Click or touch a node to move";
+                StatusMessage.SetStatus("Click or touch a node to move",1);
                 return;
             }
             if (CurrentNode.IsRoot)
             {
-                StatusMessage = "Cannot move a root node";
+                StatusMessage.SetStatus("Cannot move a root node",1);
                 return;
             }
 
@@ -1431,7 +1438,7 @@ namespace StoryBuilder.ViewModels
             {
                 if (CurrentNode.Parent.Parent == null)
                 {
-                    StatusMessage = "Cannot move down further";
+                    StatusMessage.SetStatus("Cannot move down further",1);
                     return;
                 }
                 // find parent's successor
@@ -1439,12 +1446,12 @@ namespace StoryBuilder.ViewModels
                 int siblingIndex = grandparentCollection.IndexOf(CurrentNode.Parent) + 1;
                 if (siblingIndex == grandparentCollection.Count)
                 {
-                    StatusMessage = "Cannot move down further";
+                    StatusMessage.SetStatus("Cannot move down further",1);
                     return;
                 }
                 if (grandparentCollection[siblingIndex].IsRoot)
                 {
-                    StatusMessage = "Cannot move down further";
+                    StatusMessage.SetStatus("Cannot move down further",1);
                     return;
                 }
                 _targetCollection = grandparentCollection[siblingIndex].Children;
@@ -1508,7 +1515,7 @@ namespace StoryBuilder.ViewModels
             if (RightTappedNode == null)
             {
                 Logger.Log(LogLevel.Info, "Add StoryElement failed- node not selected");
-                StatusMessage = "Right tap a node to add to";
+                StatusMessage.SetStatus("Right tap a node to add to",1);
                 _canExecuteCommands = true;
                 return null;
             }
@@ -1516,7 +1523,7 @@ namespace StoryBuilder.ViewModels
             if (RootNodeType(RightTappedNode) == StoryItemType.TrashCan)
             {
                 Logger.Log(LogLevel.Info, "Add StoryElement failed- can't add to TrashCan");
-                StatusMessage = "You can't add to Deleted Items";
+                StatusMessage.SetStatus("You can't add to Deleted Items",1);
                 _canExecuteCommands = true;
                 return null;
             }
@@ -1564,17 +1571,17 @@ namespace StoryBuilder.ViewModels
             Logger.Log(LogLevel.Trace, "RemoveStoryElement");
             if (RightTappedNode == null)
             {
-                StatusMessage = "Right tap a node to delete";
+                StatusMessage.SetStatus("Right tap a node to delete",1);
                 return;
             }
             if (RootNodeType(RightTappedNode) == StoryItemType.TrashCan)
             {
-                StatusMessage = "You can't deleted from Deleted StoryElements";
+                StatusMessage.SetStatus("You can't deleted from Deleted StoryElements",1);
                 return;
             }
             if (RightTappedNode.Parent == null)
             {
-                StatusMessage = "You can't delete a root node";
+                StatusMessage.SetStatus("You can't delete a root node",1);
                 return;
             }
 
@@ -1594,12 +1601,12 @@ namespace StoryBuilder.ViewModels
              Logger.Log(LogLevel.Trace, "RestoreStoryElement");
             if (RightTappedNode == null)
             {
-                StatusMessage = "Right tap a node to restore";
+                StatusMessage.SetStatus("Right tap a node to restore",1);
                 return;
             }
             if (RootNodeType(RightTappedNode) != StoryItemType.TrashCan)
             {
-                StatusMessage = "You can only restore from Deleted StoryElements";
+                StatusMessage.SetStatus("You can only restore from Deleted StoryElements",1);
                 return;
             }
             //TODO: Add dialog to confirm restore
@@ -1623,12 +1630,12 @@ namespace StoryBuilder.ViewModels
             Logger.Log(LogLevel.Trace, "CopyToNarrative");
             if (RightTappedNode == null)
             {
-                StatusMessage = "Select a node to copy";
+                StatusMessage.SetStatus("Select a node to copy",1);
                 return;
             }
             if (RightTappedNode.Type != StoryItemType.Scene)
             {
-                StatusMessage = "You can only copy a scene";
+                StatusMessage.SetStatus("You can only copy a scene",1);
                 return;
             }
 
@@ -1653,12 +1660,12 @@ namespace StoryBuilder.ViewModels
 
             if (RightTappedNode == null)
             {
-                StatusMessage = "Select a node to remove";
+                StatusMessage.SetStatus("Select a node to remove",1);
                 return;
             }
             if (RightTappedNode.Type != StoryItemType.Scene)
             {
-                StatusMessage = "You can only remove a Scene copy";
+                StatusMessage.SetStatus("You can only remove a Scene copy",1);
                 return;
             }
 
@@ -1812,7 +1819,7 @@ namespace StoryBuilder.ViewModels
 
         private void StatusMessageReceived(StatusChangedMessage statusMessage)
         {
-            StatusMessage = statusMessage.Value.Status;
+            //StatusMessage = statusMessage.Value.Status;
         }
 
         /// <summary>
@@ -1862,7 +1869,7 @@ namespace StoryBuilder.ViewModels
 
             Title = "Hello Terry";
             StoryModel = new StoryModel();
-            StatusMessage = "Ready";
+            StatusMessage.SetStatus("Ready",0);
 
             _canExecuteCommands = true;
             TogglePaneCommand = new RelayCommand(TogglePane, () => _canExecuteCommands);
@@ -1929,7 +1936,7 @@ namespace StoryBuilder.ViewModels
             if (DataSource == null)
             {
                 Logger.Log(LogLevel.Info, "Datasource is null");
-                StatusMessage = "You need to load a story first!";
+                StatusMessage.SetStatus("You need to load a story first!",1);
                 _canExecuteCommands = true;
                 return;
             }
@@ -1971,7 +1978,7 @@ namespace StoryBuilder.ViewModels
 
             _canExecuteCommands = true;    //Enables other commands from being used till this one is complete.
             Logger.Log(LogLevel.Info, "Better search completed, found " + SearchTotal + " matches");
-            StatusMessage = $"Found {SearchTotal} matches";
+            StatusMessage.SetStatus($"Found {SearchTotal} matches",1);
         }
         #endregion
 
