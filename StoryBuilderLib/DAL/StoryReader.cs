@@ -70,17 +70,15 @@ namespace StoryBuilder.DAL
                     StoryNodeItem trashNode = new(trash, null);
                     _model.NarratorView.Add(trashNode);     // The trashcan is the second root
                 }
-                msg = "File load successful.";
-                Logger.Log(LogLevel.Info, msg);
-                StatusMessage smsg = new(msg, 200);
-                Messenger.Send(new StatusChangedMessage(smsg));
+
+                Messenger.Send(new StatusChangedMessage(new($"File load successful.", LogLevel.Info, true)));
+
                 return _model;
             }
             catch (Exception ex)
             {
                 Logger.LogException(LogLevel.Error, ex, "Error reading story");
-                StatusMessage smsg = new("Error reading story", 200);
-                Messenger.Send(new StatusChangedMessage(smsg));
+                Messenger.Send(new StatusChangedMessage(new("Error reading story", LogLevel.Error)));
                 return new StoryModel();  // return an empty story model
             }
         }

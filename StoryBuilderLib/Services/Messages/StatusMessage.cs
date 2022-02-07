@@ -1,4 +1,7 @@
-﻿namespace StoryBuilder.Services.Messages;
+﻿using CommunityToolkit.Mvvm.DependencyInjection;
+using StoryBuilder.Services.Logging;
+
+namespace StoryBuilder.Services.Messages;
 
 public class StatusMessage
 {
@@ -6,14 +9,19 @@ public class StatusMessage
     {
         get; private set;
     }
-    public int TimeoutMilliseconds
+    public LogLevel Level
     {
         get; private set;
     }
 
-    public StatusMessage(string status, int timeoutMilliseconds)
+    public StatusMessage(string status, LogLevel level, bool SendToLog = false)
     {
         Status = status;
-        TimeoutMilliseconds = timeoutMilliseconds;
+        Level = level;
+        
+        if (SendToLog)
+        {
+            Ioc.Default.GetService<LogService>().Log(Level,status);
+        }
     }
 }

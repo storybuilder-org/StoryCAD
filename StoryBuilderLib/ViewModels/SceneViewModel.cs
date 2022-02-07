@@ -116,9 +116,7 @@ public class SceneViewModel : ObservableRecipient, INavigable
         set
         {
             SetProperty(ref _existingCastIndex, value);
-            string emsg = $"Existing cast member {CastMembers[value].Name} selected";
-            StatusMessage smsg = new(emsg, 200);
-            Messenger.Send(new StatusChangedMessage(smsg));
+            Messenger.Send(new StatusChangedMessage(new($"Existing cast member {CastMembers[value].Name} selected", LogLevel.Info)));
         }
     }
 
@@ -470,37 +468,31 @@ public class SceneViewModel : ObservableRecipient, INavigable
         StoryElement element = StringToStoryElement(NewCastMember);
         if (NewCastMember == null)
         {
-            Messenger.Send(new StatusChangedMessage(new StatusMessage("Select a character to add to scene cast, 200", 200)));
+            Messenger.Send(new StatusChangedMessage(new StatusMessage("Select a character to add to scene cast, 200", LogLevel.Warn)));
             return;
         }
         if (CastMemberExists(NewCastMember))
         {
-            _smsg = new StatusMessage("Character is already in scene cast", 200);
+            _smsg = new StatusMessage("Character is already in scene cast", LogLevel.Warn);
             Messenger.Send(new StatusChangedMessage(_smsg));
             return;
         }
 
         CastMembers.Add(element);
-        string msg = $"New cast member {element.Name} added";
-        _smsg = new StatusMessage(msg, 200);
-        Messenger.Send(new StatusChangedMessage(_smsg));
-        _logger.Log(LogLevel.Info, msg);
+        Messenger.Send(new StatusChangedMessage(new($"New cast member {element.Name} added", LogLevel.Info, true)));
     }
 
     private void RemoveCastMember()
     {
         if (ExistingCastIndex == -1)
         {
-            _smsg = new StatusMessage("Select a scene cast member to remove", 200);
+            _smsg = new StatusMessage("Select a scene cast member to remove", LogLevel.Info);
             Messenger.Send(new StatusChangedMessage(_smsg));
             return;
         }
         StoryElement element = CastMembers[ExistingCastIndex];
         CastMembers.RemoveAt(ExistingCastIndex);
-        string msg = $"Cast member {element.Name} removed";
-        _smsg = new StatusMessage(msg, 200);
-        Messenger.Send(new StatusChangedMessage(_smsg));
-        _logger.Log(LogLevel.Info, msg);
+        Messenger.Send(new StatusChangedMessage(new($"Cast member {element.Name} removed", LogLevel.Info, true)));
     }
 
     private StoryElement StringToStoryElement(string value)
