@@ -73,10 +73,23 @@
                     </ToolTipService.ToolTip>
                 </AppBarButton>
                 <AppBarButton Icon="Print" Command="{x:Bind ShellVm.PrintNodeCommand, Mode=OneWay}" 
-                          Visibility="{x:Bind ShellVm.AddFolderVisibility, Mode=TwoWay}" >
+                          Visibility="{x:Bind ShellVm.PrintNodeVisibility, Mode=TwoWay}" >
                     <ToolTipService.ToolTip>
                         <ToolTip Content="Print selected node"/>
                     </ToolTipService.ToolTip>
+                </AppBarButton>
+                <AppBarButton Icon="Cancel" Visibility="{x:Bind ShellVm.EmptyTrashVisibility, Mode=TwoWay}" >
+                    <ToolTipService.ToolTip>
+                        <ToolTip Content="Empty trash"/>
+                    </ToolTipService.ToolTip>
+                    <AppBarButton.Flyout>
+                        <Flyout>
+                            <StackPanel>
+                                <TextBlock Text="Are you sure you want to empty the trash?" HorizontalAlignment="Center"/>
+                                <Button Command="{x:Bind ShellVm.EmptyTrashCommand, Mode=OneWay}" Content="Empty" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Flyout>
+                    </AppBarButton.Flyout>
                 </AppBarButton>
             </CommandBarFlyout.PrimaryCommands>
         </CommandBarFlyout>
