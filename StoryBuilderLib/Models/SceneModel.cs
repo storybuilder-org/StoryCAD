@@ -26,11 +26,11 @@ public class SceneModel : StoryElement
         set => _description = value;
     }
 
-    private string _viewpoint;
-    public string Viewpoint
+    private string _viewpointCharacter;
+    public string ViewpointCharacter
     {
-        get => _viewpoint;
-        set => _viewpoint = value;
+        get => _viewpointCharacter;
+        set => _viewpointCharacter = value;
     }
 
     private string _date;
@@ -260,7 +260,7 @@ public class SceneModel : StoryElement
     public SceneModel(StoryModel model) : base("New Scene", StoryItemType.Scene, model)
     {
         Id = ++_nextSceneId;
-        Viewpoint = string.Empty;
+        ViewpointCharacter = string.Empty;
         Date = string.Empty;
         Time = string.Empty;
         Setting = string.Empty;
@@ -295,18 +295,12 @@ public class SceneModel : StoryElement
     public SceneModel(string name, StoryModel model) : base(name, StoryItemType.Scene, model)
     {
         Id = ++_nextSceneId;
-        Viewpoint = string.Empty;
+        ViewpointCharacter = string.Empty;
         Date = string.Empty;
         Time = string.Empty;
         Setting = string.Empty;
         SceneType = string.Empty;
         CastMembers = new List<string>();
-        Char1 = string.Empty;
-        Char2 = string.Empty;
-        Char3 = string.Empty;
-        Role1 = string.Empty;
-        Role2 = string.Empty;
-        Role3 = string.Empty;
         Remarks = string.Empty;
         ScenePurpose = string.Empty;
         ValueExchange = string.Empty;
@@ -326,18 +320,12 @@ public class SceneModel : StoryElement
     public SceneModel(IXmlNode xn, StoryModel model) : base(xn, model)
     {
         Id = ++_nextSceneId;
-        Viewpoint = string.Empty;
+        ViewpointCharacter = string.Empty;
         Date = string.Empty;
         Time = string.Empty;
         Setting = string.Empty;
         SceneType = string.Empty;
         CastMembers = new List<string>();
-        Char1 = string.Empty;
-        Char2 = string.Empty;
-        Char3 = string.Empty;
-        Role1 = string.Empty;
-        Role2 = string.Empty;
-        Role3 = string.Empty;
         Remarks = string.Empty;
         ScenePurpose = string.Empty;
         ValueExchange = string.Empty;

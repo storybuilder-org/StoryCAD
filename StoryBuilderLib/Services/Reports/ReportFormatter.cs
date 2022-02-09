@@ -378,6 +378,8 @@ public class ReportFormatter
         string[] lines = _templates["Scene Description"];
         RtfDocument doc = new(string.Empty);
 
+        StoryElement vpCharacter = StringToStoryElement(scene.ViewpointCharacter);
+        string vpCharacterName = vpCharacter?.Name ?? string.Empty;
         StoryElement antagonist = StringToStoryElement(scene.Antagonist);
         string antagonistName = antagonist?.Name ?? string.Empty;
         StoryElement protagonist = StringToStoryElement(scene.Protagonist);
@@ -393,30 +395,24 @@ public class ReportFormatter
             sb.Replace("@Title", scene.Name);
             sb.Replace("@Date", scene.Date);
             sb.Replace("@Time", scene.Time);
-            sb.Replace("@Viewpoint", scene.Viewpoint);
+            if (line.Contains("@ViewpointCharacter")) 
+            sb.Replace("@ViewpointCharacter", vpCharacterName);
             sb.Replace("@Setting", settingName);
             sb.Replace("@SceneType", scene.SceneType);
 
             if (line.Contains("@CastMember"))
             {
-                if(scene.CastMembers.Count == 0)
+                foreach (string seCastMember in scene.CastMembers)
                 {
-                    sb.Replace("@CastMember", string.Empty);
-                }
-                else
-                {
-                    foreach (string seCastMember in scene.CastMembers)
-                    {
-                        StoryElement castMember = StringToStoryElement(seCastMember);
-                        string castMemberName = castMember?.Name ?? string.Empty;
-                        StringBuilder sbCast = new(line);
+                    StoryElement castMember = StringToStoryElement(seCastMember);
+                    string castMemberName = castMember?.Name ?? string.Empty;
+                    StringBuilder sbCast = new(line);
                             
-                        sbCast.Replace("@CastMember", castMemberName);
-                        doc.AddText(sbCast.ToString());
-                        doc.AddNewLine();
-                    }
+                    sbCast.Replace("@CastMember", castMemberName);
+                    doc.AddText(sbCast.ToString());
+                    doc.AddNewLine();
                 }
-                    
+                sb.Clear();
             }
 
             sb.Replace("@Remarks", GetText(scene.Remarks));
@@ -590,10 +586,10 @@ public class ReportFormatter
         string text = rtfInput ?? string.Empty;
         if (rtfInput.Equals(string.Empty))
             return string.Empty;
-        text = text.Replace("\'0d", "");
-        text = text.Replace("\'0a", "");
         RichTextStripper rts = new();
         text =  rts.StripRichTextFormat(text);
+        text = text.Replace("\'0d", "");
+        text = text.Replace("\'0a", "");
         text = text.Replace("\\","");
         return text;
     }

@@ -29,19 +29,19 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="3*"/>
                             <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="3*"/>
+                            <ColumnDefinition Width="2*"/>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="4*"/>
                         </Grid.ColumnDefinitions>
                         <TextBox Header="Date" Grid.Column="0" MinWidth="150"
                                  Text="{x:Bind SceneVm.Date, Mode=TwoWay}" />
                         <TextBlock Grid.Column="1" MinWidth="50"/>
-                        <TextBox Header="Time" Grid.Column="2" MinWidth="150"
+                        <TextBox Header="Time" Grid.Column="2" MinWidth="100"
                                  Text="{x:Bind SceneVm.Time, Mode=TwoWay}" />
                         <TextBlock Grid.Column="3" MinWidth="50"/>
-                        <editors:SfComboBox Header="Viewpoint" Grid.Column="4"  IsEditable="True" MinWidth="200"
-                                  ItemsSource="{x:Bind SceneVm.ViewpointList}"
-                              SelectedItem="{x:Bind SceneVm.Viewpoint, Mode=TwoWay}" />
+                        <usercontrols:CharacterName Header="Viewpoint Character" Grid.Column="4" IsEditable="False" MinWidth="250"
+                              DisplayMemberPath="Name"
+                              SelectedItem="{x:Bind SceneVm.ViewpointCharacter, Mode=TwoWay, Converter={StaticResource ToStoryElement}}" />
                     </Grid>
                     <Grid Grid.Row="1" HorizontalAlignment="Left">
                         <Grid.ColumnDefinitions>

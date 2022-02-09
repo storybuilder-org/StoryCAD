@@ -74,11 +74,11 @@ public class SceneViewModel : ObservableRecipient, INavigable
         set => SetProperty(ref _description, value);
     }
 
-    private string _viewpoint;
-    public string Viewpoint
+    private string _viewpointCharacter;
+    public string ViewpointCharacter
     {
-        get => _viewpoint;
-        set => SetProperty(ref _viewpoint, value);
+        get => _viewpointCharacter;
+        set => SetProperty(ref _viewpointCharacter, value);
     }
 
     private string _date;
@@ -368,7 +368,7 @@ public class SceneViewModel : ObservableRecipient, INavigable
         Name = Model.Name;
         Id = Model.Id;
         Description = Model.Description;
-        Viewpoint = Model.Viewpoint;
+        ViewpointCharacter = Model.ViewpointCharacter;
         Date = Model.Date;
         Time = Model.Time;
         Setting = Model.Setting;
@@ -380,12 +380,6 @@ public class SceneViewModel : ObservableRecipient, INavigable
             if (element != null)        // found
                 CastMembers.Add(StringToStoryElement(member));
         }
-        Char1 = Model.Char1;
-        Char2 = Model.Char2;
-        Char3 = Model.Char3;
-        Role1 = Model.Role1;
-        Role2 = Model.Role2;
-        Role3 = Model.Role3;
         ScenePurpose = Model.ScenePurpose;
         ValueExchange = Model.ValueExchange;
         Protagonist = Model.Protagonist;
@@ -417,7 +411,7 @@ public class SceneViewModel : ObservableRecipient, INavigable
             // Story.Uuid is read-only and cannot be assigned
             Model.Name = Name;
             Model.Description = Description;
-            Model.Viewpoint = Viewpoint;
+            Model.ViewpointCharacter = ViewpointCharacter;
             Model.Date = Date;
             Model.Time = Time;
             Model.Setting = Setting;
@@ -425,12 +419,6 @@ public class SceneViewModel : ObservableRecipient, INavigable
             Model.CastMembers.Clear();
             foreach (StoryElement element in CastMembers)
                 Model.CastMembers.Add(element.ToString());
-            Model.Char1 = Char1;
-            Model.Char2 = Char2;
-            Model.Char3 = Char3;
-            Model.Role1 = Role1;
-            Model.Role2 = Role2;
-            Model.Role3 = Role3;
             Model.ScenePurpose = ScenePurpose;
             Model.ValueExchange = ValueExchange;
             Model.Protagonist = Protagonist;
@@ -560,18 +548,12 @@ public class SceneViewModel : ObservableRecipient, INavigable
         _wtr = Ioc.Default.GetService<StoryWriter>();
         _rdr = Ioc.Default.GetService<StoryReader>();
 
-        Viewpoint = string.Empty;
+        ViewpointCharacter = string.Empty;
         Date = string.Empty;
         Time = string.Empty;
         Setting = string.Empty;
         SceneType = string.Empty;
         CastMembers = new ObservableCollection<StoryElement>();
-        Char1 = string.Empty;
-        Char2 = string.Empty;
-        Char3 = string.Empty;
-        Role1 = string.Empty;
-        Role2 = string.Empty;
-        Role3 = string.Empty;
         ScenePurpose = string.Empty;
         ValueExchange = string.Empty;
         Remarks = string.Empty;

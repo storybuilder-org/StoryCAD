@@ -546,7 +546,6 @@ namespace StoryBuilder.DAL
                 foreach (IXmlNode child in castMembers.ChildNodes)
                     if (child.NodeName.Equals("Member"))
                         scene.CastMembers.Add(child.InnerText);
-            string member;
             foreach (IXmlNode attr in xn.Attributes)
             {
                 switch (attr.NodeName)
@@ -559,8 +558,8 @@ namespace StoryBuilder.DAL
                     case "Id":
                         scene.Id = Convert.ToInt32(attr.InnerText);
                         break;
-                    case "Viewpoint":
-                        scene.Viewpoint = attr.InnerText;
+                    case "ViewpointCharacter":
+                        scene.ViewpointCharacter = attr.InnerText;
                         break;
                     case "Date":
                         scene.Date = attr.InnerText;
@@ -573,33 +572,6 @@ namespace StoryBuilder.DAL
                         break;
                     case "SceneType":
                         scene.SceneType = attr.InnerText;
-                        break;
-                    case "Char1":  // legacy
-                        member = attr.InnerText;
-                        if (!member.Equals(string.Empty))
-                            scene.CastMembers.Add(member);
-                        //scene.Char1 = attr.InnerText;
-                        break;
-                    case "Char2": // legacy
-                        member = attr.InnerText;
-                        if (!member.Equals(string.Empty))
-                            scene.CastMembers.Add(member);
-                        //scene.Char2 = attr.InnerText;
-                        break;
-                    case "Char3": // legacy
-                        member = attr.InnerText;
-                        if (!member.Equals(string.Empty))
-                            scene.CastMembers.Add(member);
-                        //scene.Char3 = attr.InnerText;
-                        break;
-                    case "Role1":  // legacy
-                        //scene.Role1 = attr.InnerText;
-                        break;
-                    case "Role2":  // legacy
-                        //scene.Role2 = attr.InnerText;
-                        break;
-                    case "Role3":  // legacy
-                        //scene.Role3 = attr.InnerText;
                         break;
                     case "Protagonist":
                         scene.Protagonist = attr.InnerText;
