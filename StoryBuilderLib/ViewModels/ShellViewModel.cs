@@ -30,6 +30,9 @@ using Windows.Storage.Pickers;
 using StoryBuilder.Services;
 using WinRT;
 using GuidAttribute = System.Runtime.InteropServices.GuidAttribute;
+using System.ComponentModel;
+using Microsoft.UI.Dispatching;
+using Windows.UI.Core;
 
 namespace StoryBuilder.ViewModels
 {
@@ -264,6 +267,7 @@ namespace StoryBuilder.ViewModels
             get => _currentView;
             set => _currentView = value;
         }
+        private BackgroundWorker StatusTimerWorker = new() { WorkerSupportsCancellation = true, WorkerReportsProgress = false };
         private string _statusMessage;
         public string StatusMessage
         {
@@ -275,6 +279,12 @@ namespace StoryBuilder.ViewModels
         {
             get => _statusColor;
             set => SetProperty(ref _statusColor, value);
+        }
+        private StatusMessage _RawStatus;
+        private StatusMessage RawStatus
+        {
+            get => _RawStatus;
+            set => SetProperty(ref _RawStatus, value);
         }
 
         private TimeSpan _messageDuration;
@@ -1775,10 +1785,11 @@ namespace StoryBuilder.ViewModels
                 ChangeStatusColor = Colors.Green;
         }
 
-        private void StatusMessageReceived(StatusChangedMessage statusMessage)
+        private async void StatusMessageReceived(StatusChangedMessage statusMessage)
         {
-            StatusMessage = statusMessage.Value.Status;
-            switch (statusMessage.Value.Level)
+            RawStatus = statusMessage.Value;
+
+            switch (RawStatus.Level)
             {
                 case LogLevel.Info:
                     StatusColor = new SolidColorBrush(Colors.White);
@@ -1793,6 +1804,60 @@ namespace StoryBuilder.ViewModels
                     StatusColor = new SolidColorBrush(Colors.DarkRed);
                     break;
             }
+            if (StatusTimerWorker.IsBusy) 
+            {
+                StatusTimerWorker.CancelAsync();
+                StatusTimerWorker.DoWork += StatusClearCountDown;
+                while (StatusTimerWorker.IsBusy)
+                {
+                    System.Threading.Thread.Sleep(10);
+                }
+            }
+            StatusTimerWorker.DoWork += StatusClearCountDown;
+            StatusTimerWorker.RunWorkerAsync();
+        }
+        public void clearStatus()
+        {
+            StatusMessage = "";
+        }
+        private async void StatusClearCountDown(object sender, DoWorkEventArgs e)
+        {
+            switch (RawStatus.Level)
+            {
+                case LogLevel.Info:
+                    for (int PendingIntervals = 300; PendingIntervals >= 0; PendingIntervals--)
+                    {
+                        if (!StatusTimerWorker.CancellationPending) { System.Threading.Thread.Sleep(10); }
+                        else { break; }
+                    }
+                    break;
+                case LogLevel.Warn:
+                    for (int PendingIntervals = 500; PendingIntervals >= 0; PendingIntervals--)
+                    {
+                        if (!StatusTimerWorker.CancellationPending) { System.Threading.Thread.Sleep(10); }
+                        else { break; }
+                    }
+                    break;
+                case LogLevel.Error:
+                    for (int PendingIntervals = 1000; PendingIntervals >= 0; PendingIntervals--)
+                    {
+                        if (!StatusTimerWorker.CancellationPending) { System.Threading.Thread.Sleep(10); }
+                        else { break; }
+                    }
+                    break;
+                case LogLevel.Fatal:
+                    for (int PendingIntervals = 6000; PendingIntervals >= 0; PendingIntervals--)
+                    {
+                        if (!StatusTimerWorker.CancellationPending) { System.Threading.Thread.Sleep(10); }
+                        else { break; }
+                    }
+                    break;
+            }
+            await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+            {
+                this.txtstatus.Text = textrecord.Text;
+            });
+            e.Cancel = true;
         }
 
         /// <summary>
