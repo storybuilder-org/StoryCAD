@@ -131,6 +131,7 @@ namespace StoryBuilder.ViewModels
         // Remove command (move to trash)
         public RelayCommand RemoveStoryElementCommand { get; }
         public RelayCommand RestoreStoryElementCommand { get; }
+        public RelayCommand EmptyTrashCommand { get; }
         // Copy to Narrative command
         public RelayCommand AddToNarrativeCommand { get; }
         public RelayCommand RemoveFromNarrativeCommand { get; }
@@ -251,6 +252,20 @@ namespace StoryBuilder.ViewModels
         {
             get => _removeFromNarrativeVisibility;
             set => SetProperty(ref _removeFromNarrativeVisibility, value);
+        }
+
+        private Visibility _printNodeVisibility;
+        public Visibility PrintNodeVisibility
+        {
+            get => _printNodeVisibility;
+            set => SetProperty(ref _printNodeVisibility, value);
+        }
+
+        private Visibility _emptyTrashVisibilty;
+        public Visibility EmptyTrashVisibility
+        {
+            get => _emptyTrashVisibilty;
+            set => SetProperty(ref _emptyTrashVisibilty, value);
         }
 
         // Status Bar properties
@@ -1542,7 +1557,7 @@ namespace StoryBuilder.ViewModels
             return null;
         }
 
-        private void RemoveStoryElement()
+        private async void RemoveStoryElement()
         {
             Logger.Log(LogLevel.Trace, "RemoveStoryElement");
             if (RightTappedNode == null)
@@ -1566,6 +1581,56 @@ namespace StoryBuilder.ViewModels
             DataSource[1].Children.Add(RightTappedNode);
             RightTappedNode.Parent = DataSource[1];
             Messenger.Send(new StatusChangedMessage(new($"Deleted node {RightTappedNode.Name}", LogLevel.Info, true)));
+            return;
+            }
+
+            List<StoryNodeItem> FoundNodes = new();
+            foreach (StoryNodeItem node in  DataSource[0]) //Gets all nodes in the tree
+            {
+                if (Ioc.Default.GetRequiredService<DeletionService>().SearchStoryElement(node, RightTappedNode.Uuid, StoryModel,false))
+                {
+                    FoundNodes.Add(node);
+                }
+            }
+
+            bool delete = true;
+            //Only warns if it finds a node its referenced in
+            if (FoundNodes.Count >= 1)
+            {
+                //Creates UI
+                StackPanel Content = new();
+                Content.Children.Add(new TextBlock() { Text = "The following nodes will be updated to remove references to this node:" });
+                Content.Children.Add(new ListView() { ItemsSource = FoundNodes, HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center, Height = 300, Width = 480 });
+
+                //Creates dialog and then shows it
+                ContentDialog _contentDialog = new();
+                _contentDialog.XamlRoot = GlobalData.XamlRoot;
+                _contentDialog.Content = Content;
+                _contentDialog.Title = "Are you sure you want to delete this node?";
+                _contentDialog.Width = 500;
+                _contentDialog.PrimaryButtonText = "Confirm";
+                _contentDialog.SecondaryButtonText = "Cancel";
+                var result = await _contentDialog.ShowAsync();
+
+                if (result == ContentDialogResult.Secondary) { delete = false; }
+            }
+
+
+            if (delete)
+            {
+                foreach (StoryNodeItem node in FoundNodes)
+                {
+                    Ioc.Default.GetRequiredService<DeletionService>().SearchStoryElement(node, RightTappedNode.Uuid, StoryModel, true);
+                }
+                ObservableCollection<StoryNodeItem> source = RightTappedNode.Parent.Children;
+                source.Remove(RightTappedNode);
+                DataSource[1].Children.Add(RightTappedNode);
+                RightTappedNode.Parent = DataSource[1];
+                string msg = $"Deleted node {RightTappedNode.Name}";
+                Logger.Log(LogLevel.Info, msg);
+                StatusMessage smsg = new(msg, 100);
+                Messenger.Send(new StatusChangedMessage(smsg));
+            }
         }
 
         private void RestoreStoryElement()
@@ -1612,6 +1677,15 @@ namespace StoryBuilder.ViewModels
             // ReSharper disable once ObjectCreationAsStatement
             _ = new StoryNodeItem(sceneVar, StoryModel.NarratorView[0]);
             Messenger.Send(new StatusChangedMessage(new($"Copied node {RightTappedNode.Name} to Narrative View", LogLevel.Info, true)));
+        }
+
+        /// <summary>
+        /// Clears trash
+        /// </summary>
+        private void EmptyTrash()
+        {
+            StatusMessage = "Trash Emptied.";
+            DataSource[1].Children.Clear();
         }
 
         /// <summary>
@@ -1721,6 +1795,8 @@ namespace StoryBuilder.ViewModels
                     AddToNarrativeVisibility = Visibility.Visible;
                     //RemoveFromNarrativeVisibility = Visibility.Collapsed;
                     RestoreStoryElementVisibility = Visibility.Visible;
+                    PrintNodeVisibility = Visibility.Visible;
+                    EmptyTrashVisibility = Visibility.Collapsed;
                     break;
                 case StoryItemType.Section:         // Narrator tree
                     AddFolderVisibility = Visibility.Collapsed;
@@ -1733,6 +1809,8 @@ namespace StoryBuilder.ViewModels
                     RestoreStoryElementVisibility = Visibility.Collapsed;
                     AddToNarrativeVisibility = Visibility.Collapsed;
                     RemoveFromNarrativeVisibility = Visibility.Visible;
+                    PrintNodeVisibility = Visibility.Visible;
+                    EmptyTrashVisibility = Visibility.Collapsed;
                     break;
                 case StoryItemType.TrashCan:        // Trashcan tree (either view)
                     AddFolderVisibility = Visibility.Collapsed;
@@ -1745,6 +1823,8 @@ namespace StoryBuilder.ViewModels
                     RestoreStoryElementVisibility = Visibility.Visible;
                     AddToNarrativeVisibility = Visibility.Collapsed;
                     RemoveFromNarrativeVisibility = Visibility.Collapsed;
+                    PrintNodeVisibility = Visibility.Collapsed;
+                    EmptyTrashVisibility = Visibility.Visible;
                     break;
             }
         }
@@ -1911,6 +1991,7 @@ namespace StoryBuilder.ViewModels
             // Remove Story Element command (move to trash)
             RemoveStoryElementCommand = new RelayCommand(RemoveStoryElement, () => _canExecuteCommands);
             RestoreStoryElementCommand = new RelayCommand(RestoreStoryElement, () => _canExecuteCommands);
+            EmptyTrashCommand = new RelayCommand(EmptyTrash, () => _canExecuteCommands);
             // Copy to Narrative command
             AddToNarrativeCommand = new RelayCommand(CopyToNarrative, () => _canExecuteCommands);
             RemoveFromNarrativeCommand = new RelayCommand(RemoveFromNarrative, () => _canExecuteCommands);

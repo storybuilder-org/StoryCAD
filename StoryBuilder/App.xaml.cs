@@ -91,6 +91,7 @@ public partial class App : Application
                 .AddSingleton<StoryReader>()
                 .AddSingleton<StoryWriter>()
                 .AddSingleton<BackupService>()
+                .AddSingleton<DeletionService>()
                 // Register ViewModels 
                 .AddSingleton<ShellViewModel>()
                 .AddSingleton<OverviewViewModel>()
