@@ -1770,18 +1770,19 @@ namespace StoryBuilder.ViewModels
         private void IsChangedMessageReceived(IsChangedMessage isDirty)
         {
             StoryModel.Changed = StoryModel.Changed || isDirty.Value;
-            if (StoryModel.Changed)
-                ChangeStatusColor = Colors.Red;
-            else
-                ChangeStatusColor = Colors.Green;
+            if (StoryModel.Changed) { ChangeStatusColor = Colors.Red; }
+            else { ChangeStatusColor = Colors.Green; }
         }
 
+        /// <summary>
+        /// This displays a status message and starts a timer for it to be cleared (If Warning or Info.)
+        /// </summary>
+        /// <param name="statusMessage"></param>
         private void StatusMessageReceived(StatusChangedMessage statusMessage)
         {
-            if (statusTimer.IsEnabled)
-                statusTimer.Stop();
+            if (statusTimer.IsEnabled) { statusTimer.Stop(); } //Stops a timer if one is already running
 
-            StatusMessage = statusMessage.Value.Status;
+            StatusMessage = statusMessage.Value.Status; //This shows the message
 
             switch (statusMessage.Value.Level)
             {
@@ -1795,17 +1796,20 @@ namespace StoryBuilder.ViewModels
                     statusTimer.Interval = new TimeSpan(0, 0, 30); // Timer will tick in 30 seconds
                     statusTimer.Start();
                     break;
-                case LogLevel.Error:
+                case LogLevel.Error: // Timer won't be started
                     StatusColor = new SolidColorBrush(Colors.Red);
-                    // Timer won't be started
                     break;
-                case LogLevel.Fatal:
+                case LogLevel.Fatal: // Timer won't be started
                     StatusColor = new SolidColorBrush(Colors.DarkRed);
-                    // Timer won't be started
                     break;
             }
         }
 
+        /// <summary>
+        /// This clears the status message when the timer has ended.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void statusTimer_Tick(object sender, object e) 
         {
             statusTimer.Stop();
