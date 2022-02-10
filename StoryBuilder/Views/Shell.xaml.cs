@@ -39,16 +39,19 @@ public sealed partial class Shell
             //log.Log(LogLevel.Debug, ex.InnerException.Data.Values);
             // Handle exception
         }
+
         ShellVm.SplitViewFrame = SplitViewFrame;
     }
 
-    private void Shell_Loaded(object sender, RoutedEventArgs e)
+    private async void Shell_Loaded(object sender, RoutedEventArgs e)
     {
         // The Shell_Loaded event is processed in order to obtain and save the XamlRool  
         // and pass it on to ContentDialogs as a WinUI work-around. See
         // https://docs.microsoft.com/en-us/windows/winui/api/microsoft.ui.xaml.controls.contentdialog?view=winui-3.0-preview
         GlobalData.XamlRoot = Content.XamlRoot;
         ShellVm.ShowHomePage();
+
+        ShellVm.OpenUnifiedCommand.Execute(null);
     }
 
     /// <summary>
