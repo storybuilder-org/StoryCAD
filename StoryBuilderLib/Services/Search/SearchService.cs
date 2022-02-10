@@ -84,6 +84,12 @@ public class SearchService
         }
 
         if (Comparator(element.Name)) { return true; }  //Searches node name
+
+        if (!string.IsNullOrEmpty(scene.ViewpointCharacter)) //Searches VP characters
+        {
+            ElementCollection.StoryElementGuids.TryGetValue(Guid.Parse(scene.ViewpointCharacter), out StoryElement vpChar);
+            if (Comparator(vpChar.Name)) { return true; }
+        }
         if (!string.IsNullOrEmpty(scene.Protagonist)) //Searches protagonist
         {
             ElementCollection.StoryElementGuids.TryGetValue(Guid.Parse(scene.Protagonist), out StoryElement protag);
