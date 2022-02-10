@@ -65,6 +65,9 @@ namespace StoryBuilder.ViewModels
         public readonly LogService Logger;
         public readonly SearchService Search;
 
+        private DispatcherTimer statusTimer;
+        private TimeSpan interval;
+
         // The current story outline being processed. 
         public StoryModel StoryModel;
 
@@ -267,7 +270,7 @@ namespace StoryBuilder.ViewModels
             get => _currentView;
             set => _currentView = value;
         }
-        private BackgroundWorker StatusTimerWorker = new() { WorkerSupportsCancellation = true, WorkerReportsProgress = false };
+
         private string _statusMessage;
         public string StatusMessage
         {
@@ -280,19 +283,7 @@ namespace StoryBuilder.ViewModels
             get => _statusColor;
             set => SetProperty(ref _statusColor, value);
         }
-        private StatusMessage _RawStatus;
-        private StatusMessage RawStatus
-        {
-            get => _RawStatus;
-            set => SetProperty(ref _RawStatus, value);
-        }
 
-        private TimeSpan _messageDuration;
-        public TimeSpan MessageDuration 
-        {
-            get => _messageDuration;
-            set => SetProperty(ref _messageDuration, value);
-        }
 
         private string _filterText;
         public string FilterText
@@ -1785,79 +1776,40 @@ namespace StoryBuilder.ViewModels
                 ChangeStatusColor = Colors.Green;
         }
 
-        private async void StatusMessageReceived(StatusChangedMessage statusMessage)
+        private void StatusMessageReceived(StatusChangedMessage statusMessage)
         {
-            RawStatus = statusMessage.Value;
+            if (statusTimer.IsEnabled)
+                statusTimer.Stop();
 
-            switch (RawStatus.Level)
+            StatusMessage = statusMessage.Value.Status;
+
+            switch (statusMessage.Value.Level)
             {
                 case LogLevel.Info:
                     StatusColor = new SolidColorBrush(Colors.White);
+                    statusTimer.Interval = new TimeSpan(0, 0, 15);  // Timer will tick in 15 seconds
+                    statusTimer.Start();
                     break;
                 case LogLevel.Warn:
                     StatusColor = new SolidColorBrush(Colors.Yellow);
+                    statusTimer.Interval = new TimeSpan(0, 0, 30); // Timer will tick in 30 seconds
+                    statusTimer.Start();
                     break;
                 case LogLevel.Error:
                     StatusColor = new SolidColorBrush(Colors.Red);
+                    // Timer won't be started
                     break;
                 case LogLevel.Fatal:
                     StatusColor = new SolidColorBrush(Colors.DarkRed);
+                    // Timer won't be started
                     break;
             }
-            if (StatusTimerWorker.IsBusy) 
-            {
-                StatusTimerWorker.CancelAsync();
-                StatusTimerWorker.DoWork += StatusClearCountDown;
-                while (StatusTimerWorker.IsBusy)
-                {
-                    System.Threading.Thread.Sleep(10);
-                }
-            }
-            StatusTimerWorker.DoWork += StatusClearCountDown;
-            StatusTimerWorker.RunWorkerAsync();
         }
-        public void clearStatus()
+
+        private void statusTimer_Tick(object sender, object e) 
         {
-            StatusMessage = "";
-        }
-        private async void StatusClearCountDown(object sender, DoWorkEventArgs e)
-        {
-            switch (RawStatus.Level)
-            {
-                case LogLevel.Info:
-                    for (int PendingIntervals = 300; PendingIntervals >= 0; PendingIntervals--)
-                    {
-                        if (!StatusTimerWorker.CancellationPending) { System.Threading.Thread.Sleep(10); }
-                        else { break; }
-                    }
-                    break;
-                case LogLevel.Warn:
-                    for (int PendingIntervals = 500; PendingIntervals >= 0; PendingIntervals--)
-                    {
-                        if (!StatusTimerWorker.CancellationPending) { System.Threading.Thread.Sleep(10); }
-                        else { break; }
-                    }
-                    break;
-                case LogLevel.Error:
-                    for (int PendingIntervals = 1000; PendingIntervals >= 0; PendingIntervals--)
-                    {
-                        if (!StatusTimerWorker.CancellationPending) { System.Threading.Thread.Sleep(10); }
-                        else { break; }
-                    }
-                    break;
-                case LogLevel.Fatal:
-                    for (int PendingIntervals = 6000; PendingIntervals >= 0; PendingIntervals--)
-                    {
-                        if (!StatusTimerWorker.CancellationPending) { System.Threading.Thread.Sleep(10); }
-                        else { break; }
-                    }
-                    break;
-            }
-            await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
-            {
-                this.txtstatus.Text = textrecord.Text;
-            });
-            e.Cancel = true;
+            statusTimer.Stop();
+            StatusMessage = string.Empty;
         }
 
         /// <summary>
@@ -1907,6 +1859,10 @@ namespace StoryBuilder.ViewModels
 
             Title = "Hello Terry";
             StoryModel = new StoryModel();
+
+            statusTimer = new DispatcherTimer();
+            statusTimer.Tick += statusTimer_Tick;
+
             Messenger.Send(new StatusChangedMessage(new($"Ready", LogLevel.Info)));
 
             _canExecuteCommands = true;
