@@ -1562,32 +1562,24 @@ namespace StoryBuilder.ViewModels
             Logger.Log(LogLevel.Trace, "RemoveStoryElement");
             if (RightTappedNode == null)
             {
-                Messenger.Send(new StatusChangedMessage(new($"Right tap a node to delete", LogLevel.Warn)));
+                StatusMessage = "Right tap a node to delete";
                 return;
             }
             if (RootNodeType(RightTappedNode) == StoryItemType.TrashCan)
             {
-                Messenger.Send(new StatusChangedMessage(new($"You can't deleted from Deleted StoryElements", LogLevel.Warn)));
+                StatusMessage = "You can't delete from the trash!";
                 return;
             }
             if (RightTappedNode.Parent == null)
             {
-                Messenger.Send(new StatusChangedMessage(new($"You can't delete a root node", LogLevel.Warn)));
+                StatusMessage = "You can't delete a root node!";
                 return;
             }
 
-            ObservableCollection<StoryNodeItem> source = RightTappedNode.Parent.Children;
-            source.Remove(RightTappedNode);
-            DataSource[1].Children.Add(RightTappedNode);
-            RightTappedNode.Parent = DataSource[1];
-            Messenger.Send(new StatusChangedMessage(new($"Deleted node {RightTappedNode.Name}", LogLevel.Info, true)));
-            return;
-            }
-
             List<StoryNodeItem> FoundNodes = new();
-            foreach (StoryNodeItem node in  DataSource[0]) //Gets all nodes in the tree
+            foreach (StoryNodeItem node in DataSource[0]) //Gets all nodes in the tree
             {
-                if (Ioc.Default.GetRequiredService<DeletionService>().SearchStoryElement(node, RightTappedNode.Uuid, StoryModel,false))
+                if (Ioc.Default.GetRequiredService<DeletionService>().SearchStoryElement(node, RightTappedNode.Uuid, StoryModel, false))
                 {
                     FoundNodes.Add(node);
                 }
@@ -1626,10 +1618,7 @@ namespace StoryBuilder.ViewModels
                 source.Remove(RightTappedNode);
                 DataSource[1].Children.Add(RightTappedNode);
                 RightTappedNode.Parent = DataSource[1];
-                string msg = $"Deleted node {RightTappedNode.Name}";
-                Logger.Log(LogLevel.Info, msg);
-                StatusMessage smsg = new(msg, 100);
-                Messenger.Send(new StatusChangedMessage(smsg));
+                Messenger.Send(new StatusChangedMessage(new($"Deleted node {RightTappedNode.Name}", LogLevel.Info, true)));
             }
         }
 
