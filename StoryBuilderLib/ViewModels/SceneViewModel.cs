@@ -122,27 +122,6 @@ public class SceneViewModel : ObservableRecipient, INavigable
         }
     }
 
-    private string _char1;
-    public string Char1
-    {
-        get => _char1;
-        set => SetProperty(ref _char1, value);
-    }
-
-    private string _char2;
-    public string Char2
-    {
-        get => _char2;
-        set => SetProperty(ref _char2, value);
-    }
-
-    private string _char3;
-    public string Char3
-    {
-        get => _char3;
-        set => SetProperty(ref _char3, value);
-    }
-
     private ObservableCollection<StoryElement> _castMembers;
     public ObservableCollection<StoryElement> CastMembers
     {
@@ -155,28 +134,6 @@ public class SceneViewModel : ObservableRecipient, INavigable
     {
         get => _newCastMember;
         set => SetProperty(ref _newCastMember, value);
-    }
-
-    private string _role1;
-    public string Role1
-    {
-        get => _role1;
-        set => SetProperty(ref _role1, value);
-    }
-
-    private string _role2;
-    public string Role2
-    {
-        get => _role2;
-        set => SetProperty(ref _role2, value);
-    }
-
-    private string _role3;
-
-    public string Role3
-    {
-        get => _role3;
-        set => SetProperty(ref _role3, value);
     }
 
     private string _remarks;
@@ -399,6 +356,7 @@ public class SceneViewModel : ObservableRecipient, INavigable
         Realization = Model.Realization;
         Review = Model.Review;
         Notes = Model.Notes;
+        NewCastMember = string.Empty;
             
         _changeable = true;
     }
@@ -469,6 +427,7 @@ public class SceneViewModel : ObservableRecipient, INavigable
         }
 
         CastMembers.Add(element);
+        OnPropertyChanged();
         string msg = $"New cast member {element.Name} added";
         _smsg = new StatusMessage(msg, 200);
         Messenger.Send(new StatusChangedMessage(_smsg));
@@ -485,6 +444,7 @@ public class SceneViewModel : ObservableRecipient, INavigable
         }
         StoryElement element = CastMembers[ExistingCastIndex];
         CastMembers.RemoveAt(ExistingCastIndex);
+        OnPropertyChanged();
         string msg = $"Cast member {element.Name} removed";
         _smsg = new StatusMessage(msg, 200);
         Messenger.Send(new StatusChangedMessage(_smsg));
