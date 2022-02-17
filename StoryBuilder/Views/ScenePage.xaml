@@ -39,7 +39,7 @@
                         <TextBox Header="Time" Grid.Column="2" MinWidth="100"
                                  Text="{x:Bind SceneVm.Time, Mode=TwoWay}" />
                         <TextBlock Grid.Column="3" MinWidth="50"/>
-                        <usercontrols:CharacterName Header="Viewpoint Character" Grid.Column="4" IsEditable="False" MinWidth="250"
+                        <usercontrols:CharacterName x:Name="ViewPointCharacter" Header="Viewpoint Character" Grid.Column="4" IsEditable="False" MinWidth="250"
                               DisplayMemberPath="Name"
                               SelectedItem="{x:Bind SceneVm.ViewpointCharacter, Mode=TwoWay, Converter={StaticResource ToStoryElement}}" />
                     </Grid>
@@ -63,8 +63,8 @@
                             <TextBlock Text="Scene Cast" />
                             <ScrollViewer Height="75" >
                                 <ListView MinWidth="300"
-                                ItemsSource="{x:Bind SceneVm.CastMembers, Mode=OneWay}"
-                                    SelectedIndex="{x:Bind SceneVm.ExistingCastIndex, Mode=OneWay}" >
+                                ItemsSource="{x:Bind SceneVm.CastMembers, Mode=TwoWay}"
+                                    SelectedIndex="{x:Bind SceneVm.ExistingCastIndex, Mode=TwoWay}" >
                                     <ListView.ItemTemplate>
                                         <DataTemplate x:DataType="models:StoryElement">
                                             <TextBlock Text="{x:Bind Name, Mode=OneWay}" MinWidth="250" />

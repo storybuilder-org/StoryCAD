@@ -78,7 +78,16 @@ public class SceneViewModel : ObservableRecipient, INavigable
     public string ViewpointCharacter
     {
         get => _viewpointCharacter;
-        set => SetProperty(ref _viewpointCharacter, value);
+        set
+        {
+            SetProperty(ref _viewpointCharacter, value);
+            if (value.Equals(string.Empty))
+                return;
+            if (!CastMemberExists(value))
+            {
+                CastMembers.Add(StringToStoryElement(value));
+            }
+        }
     }
 
     private string _date;
@@ -325,7 +334,6 @@ public class SceneViewModel : ObservableRecipient, INavigable
         Name = Model.Name;
         Id = Model.Id;
         Description = Model.Description;
-        ViewpointCharacter = Model.ViewpointCharacter;
         Date = Model.Date;
         Time = Model.Time;
         Setting = Model.Setting;
@@ -337,6 +345,8 @@ public class SceneViewModel : ObservableRecipient, INavigable
             if (element != null)        // found
                 CastMembers.Add(StringToStoryElement(member));
         }
+        GetOverviewViewpoint();
+        ViewpointCharacter = Model.ViewpointCharacter;
         ScenePurpose = Model.ScenePurpose;
         ValueExchange = Model.ValueExchange;
         Protagonist = Model.Protagonist;
@@ -359,6 +369,15 @@ public class SceneViewModel : ObservableRecipient, INavigable
         NewCastMember = string.Empty;
             
         _changeable = true;
+    }
+
+    private void GetOverviewViewpoint()
+    {
+        StoryModel model = ShellViewModel.GetModel();
+        StoryNodeItem node = model.ExplorerView[0];
+        OverviewModel overview = (OverviewModel) model.StoryElements.StoryElementGuids[node.Uuid];
+        var viewpoint = overview.Viewpoint;
+        var viewpointChar = overview.ViewpointCharacter;
     }
 
     internal void SaveModel()
@@ -508,12 +527,12 @@ public class SceneViewModel : ObservableRecipient, INavigable
         _wtr = Ioc.Default.GetService<StoryWriter>();
         _rdr = Ioc.Default.GetService<StoryReader>();
 
-        ViewpointCharacter = string.Empty;
         Date = string.Empty;
         Time = string.Empty;
         Setting = string.Empty;
         SceneType = string.Empty;
         CastMembers = new ObservableCollection<StoryElement>();
+        ViewpointCharacter = string.Empty;
         ScenePurpose = string.Empty;
         ValueExchange = string.Empty;
         Remarks = string.Empty;
