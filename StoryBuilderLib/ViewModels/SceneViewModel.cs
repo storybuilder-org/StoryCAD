@@ -125,6 +125,8 @@ public class SceneViewModel : ObservableRecipient, INavigable
         set
         {
             SetProperty(ref _existingCastIndex, value);
+            if (_existingCastIndex == -1)
+                return;
             string emsg = $"Existing cast member {CastMembers[value].Name} selected";
             StatusMessage smsg = new(emsg, 200);
             Messenger.Send(new StatusChangedMessage(smsg));
