@@ -11,7 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Threading.Tasks;
+using System.Text;  
 
 namespace StoryBuilder.ViewModels;
 
@@ -53,16 +53,6 @@ public class SceneViewModel : ObservableRecipient, INavigable
             }
             SetProperty(ref _name, value);
         }
-    }
-
-    // Besides its GUID, each Scene has a unique (to this story) 
-    // integer id number (useful in lists of scenes.)
-
-    private int _id;
-    public int Id
-    {
-        get => _id;
-        set => SetProperty(ref _id, value);
     }
 
     //  Scene general data
@@ -287,15 +277,27 @@ public class SceneViewModel : ObservableRecipient, INavigable
         set => SetProperty(ref _notes, value);
     }
 
-    // Besides its GUID, each Scene has a unique (to this story) 
-    // integer id number (useful in lists of scenes.)
-
     private SceneModel _model;
     public SceneModel Model
     {
         get => _model;
         set => SetProperty(ref _model, value);
     }
+
+    private string _vpCharTip;
+    public string VpCharTip 
+    {
+        get => _vpCharTip;
+        set => SetProperty(ref _vpCharTip, value);  
+    }
+
+    private bool _vpCharTipIsOpen;
+    public bool VpCharTipIsOpen
+    {
+        get => _vpCharTipIsOpen;
+        set => SetProperty(ref _vpCharTipIsOpen, value);
+    }
+
 
     #endregion
 
@@ -334,7 +336,6 @@ public class SceneViewModel : ObservableRecipient, INavigable
 
         Uuid = Model.Uuid;
         Name = Model.Name;
-        Id = Model.Id;
         Description = Model.Description;
         Date = Model.Date;
         Time = Model.Time;
@@ -347,7 +348,6 @@ public class SceneViewModel : ObservableRecipient, INavigable
             if (element != null)        // found
                 CastMembers.Add(StringToStoryElement(member));
         }
-        GetOverviewViewpoint();
         ViewpointCharacter = Model.ViewpointCharacter;
         ScenePurpose = Model.ScenePurpose;
         ValueExchange = Model.ValueExchange;
@@ -369,17 +369,9 @@ public class SceneViewModel : ObservableRecipient, INavigable
         Review = Model.Review;
         Notes = Model.Notes;
         NewCastMember = string.Empty;
-            
-        _changeable = true;
-    }
+        GetOverviewViewpoint();
 
-    private void GetOverviewViewpoint()
-    {
-        StoryModel model = ShellViewModel.GetModel();
-        StoryNodeItem node = model.ExplorerView[0];
-        OverviewModel overview = (OverviewModel) model.StoryElements.StoryElementGuids[node.Uuid];
-        var viewpoint = overview.Viewpoint;
-        var viewpointChar = overview.ViewpointCharacter;
+        _changeable = true;
     }
 
     internal void SaveModel()
@@ -503,6 +495,35 @@ public class SceneViewModel : ObservableRecipient, INavigable
         string msg = $"Story Element not found name {value}";
         _logger.Log(LogLevel.Warn, msg);
         return null;   
+    }
+
+    private void GetOverviewViewpoint()
+    {
+        string viewpointText;
+        string viewpointName;
+
+        StoryModel model = ShellViewModel.GetModel();
+        StoryNodeItem node = model.ExplorerView[0];
+        OverviewModel overview = (OverviewModel)model.StoryElements.StoryElementGuids[node.Uuid];
+        string viewpoint = overview?.Viewpoint;
+        if (viewpoint == string.Empty)
+            viewpointText = "No story viewpoint selected";
+        else
+            viewpointText = "Story viewpoint = " + viewpoint.ToString();
+        var viewpointChar = overview?.ViewpointCharacter;
+        if (viewpointChar == string.Empty)
+            viewpointName = "Story viewpoint character not selected";
+        else
+            viewpointName = viewpointChar;
+        var tip = new StringBuilder();
+        tip.AppendLine(string.Empty);
+        tip.AppendLine(viewpointText);
+        tip.AppendLine(viewpointName);
+        VpCharTip = tip.ToString();
+        if (ViewpointCharacter.Equals(string.Empty))
+            VpCharTipIsOpen = true;
+        else
+            VpCharTipIsOpen = false;
     }
     #endregion
 

@@ -10,6 +10,16 @@
     xmlns:usercontrols="using:StoryBuilder.Controls"
     mc:Ignorable="d" >
 
+    <Page.Resources>
+        <TeachingTip x:Name="ViewpointCharacterTip"
+	        Title="Reminder:"
+	        Subtitle="Pick a scene viewpoint character consistent with your story POV:"
+	        PreferredPlacement="Auto"
+            IsOpen="{x:Bind SceneVm.VpCharTipIsOpen}"
+            Content="{x:Bind SceneVm.VpCharTip}" >
+        </TeachingTip>
+    </Page.Resources>
+    
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -39,10 +49,10 @@
                         <TextBox Header="Time" Grid.Column="2" MinWidth="100"
                                  Text="{x:Bind SceneVm.Time, Mode=TwoWay}" />
                         <TextBlock Grid.Column="3" MinWidth="50"/>
-                        <usercontrols:CharacterName x:Name="ViewPointCharacter" Header="Viewpoint Character" Grid.Column="4" IsEditable="False" MinWidth="250"
+                        <usercontrols:CharacterName x:Name="ViewpointCharacter" Header="Viewpoint Character" Grid.Column="4" IsEditable="False" MinWidth="250"
                               DisplayMemberPath="Name"
                               SelectedItem="{x:Bind SceneVm.ViewpointCharacter, Mode=TwoWay, Converter={StaticResource ToStoryElement}}" />
-                    </Grid>
+                      </Grid>
                     <Grid Grid.Row="1" HorizontalAlignment="Left">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="3*"/>
