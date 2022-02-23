@@ -24,6 +24,7 @@ public class PreferencesModel
     public bool ErrorCollectionConsent { get; set; }
     public bool Newsletter { get; set; }
     public bool Initalised { get; set; } //this decides if the user should be shown the initalisation window
+    public int LastSelectedTemplate { get; set; } //This is the Last Template Selected by the user.3
 
     // Visual changes
     public Microsoft.UI.Xaml.Media.SolidColorBrush PrimaryColor { get; set; } //Sets UI Color

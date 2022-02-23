@@ -319,6 +319,7 @@
                       SelectionChanged="{x:Bind ShellVm.ViewChanged, Mode=OneWay}"
                       SelectedItem="{x:Bind ShellVm.SelectedView, Mode=TwoWay}" />
             <TextBlock Text="{x:Bind ShellVm.StatusMessage, Mode=OneWay}" 
+                       Foreground="{x:Bind ShellVm.StatusColor, Mode=OneWay}"
                        Width = "300"
                        FontSize="14"
                        Margin="10"

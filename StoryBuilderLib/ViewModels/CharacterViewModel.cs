@@ -261,12 +261,12 @@ public class CharacterViewModel : ObservableRecipient, INavigable
         {
             if (RelationshipExists(value))
             {
-                StatusMessage _smsg = new("Character is already in Relationships", 200);
+                StatusMessage _smsg = new("Character is already in Relationships", LogLevel.Warn);
                 Messenger.Send(new StatusChangedMessage(_smsg));
             }
             SetProperty(ref _newRelationshipMember, value);
             StoryElement element = StringToStoryElement(value);
-            Messenger.Send(new StatusChangedMessage(new StatusMessage($"New cast member selected {element.Name}", 200)));
+            Messenger.Send(new StatusChangedMessage(new StatusMessage($"New cast member selected {element.Name}", LogLevel.Info)));
         }
     }
 
@@ -708,8 +708,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable
     {
         if (ExistingTraitIndex == -1) 
         {
-            StatusMessage _smsg = new("No trait selected to delete", 200);
-            Messenger.Send(new StatusChangedMessage(_smsg));
+            Messenger.Send(new StatusChangedMessage(new("No trait selected to delete", LogLevel.Warn)));
             return;
         }
         CharacterTraits.RemoveAt(ExistingTraitIndex);
@@ -794,7 +793,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable
                 if (character == rel.Partner) goto NextCharacter; // Skip partner
             }
             VM.ProspectivePartners.Add(character);
-            NextCharacter: continue;
+        NextCharacter: continue;
         }
 
         //Creates dialog and shows dialog
@@ -822,20 +821,17 @@ public class CharacterViewModel : ObservableRecipient, INavigable
                 CurrentRelationship = SelectedRelationship;
 
                 _changed = true;
-                string msg = $"Relationship to {VM.SelectedPartner.Name} added";
-                Messenger.Send(new StatusChangedMessage(new StatusMessage(msg, 200)));
-                _logger.Log(LogLevel.Info, msg);
+                Messenger.Send(new StatusChangedMessage(new StatusMessage($"Relationship to {VM.SelectedPartner.Name} added", LogLevel.Info, true)));
             }
             catch (Exception ex)
             {
                 _logger.LogException(LogLevel.Error, ex, "Error creating new Relationship");
-                Messenger.Send(new StatusChangedMessage(new StatusMessage("Error creating new Relationship", 200)));
+                Messenger.Send(new StatusChangedMessage(new StatusMessage("Error creating new Relationship", LogLevel.Error)));
             }
         }
         else //User clicks cancel
         {
-            _logger.Log(LogLevel.Info, "AddRelationship cancelled");
-            Messenger.Send(new StatusChangedMessage(new StatusMessage("AddRelationship cancelled", 200)));
+            Messenger.Send(new StatusChangedMessage(new StatusMessage("AddRelationship cancelled", LogLevel.Info, true)));
         }
     }
 
@@ -846,11 +842,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable
         // verify that I have an active relationship
         if (SelectedRelationship == null)
         {
-            _logger.Log(LogLevel.Warn, "A relationship to be removed");
-            msg = "Select the relationship to be removed";
-            StatusMessage smsg = new(msg, 200);
-            Messenger.Send(new StatusChangedMessage(smsg));
-            _logger.Log(LogLevel.Warn, "A relationship must be active to be removed");
+            Messenger.Send(new StatusChangedMessage(new("Select the relationship to be removed", LogLevel.Warn, true)));
             return;
         }
 
@@ -874,20 +866,14 @@ public class CharacterViewModel : ObservableRecipient, INavigable
             ClearActiveRelationship();
             rel.Partner = null;
             CharacterRelationships.Remove(rel);
-            msg = $"Relationship to {partner.Name} deleted";
             _changed = true;
+
             // log and display status
-            _logger.Log(LogLevel.Info, msg);
-            StatusMessage smsg = new(msg, 200);
-            Messenger.Send(new StatusChangedMessage(smsg));
+            Messenger.Send(new StatusChangedMessage(new($"Relationship to {partner.Name} deleted", LogLevel.Info, true)));
         }
         else
         {
-            _logger.Log(LogLevel.Info, "Remove relationship cancelled");
-            msg = "RemoveRelationship cancelled";
-            _logger.Log(LogLevel.Info, msg);
-            StatusMessage smsg = new(msg, 200);
-            Messenger.Send(new StatusChangedMessage(smsg));
+            Messenger.Send(new StatusChangedMessage(new("Remove Relationship cancelled", LogLevel.Info, true)));
         }
     }
 

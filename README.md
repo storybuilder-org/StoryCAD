@@ -105,6 +105,10 @@ here are some ways to [Contribute][13].
 StoryBuilder uses the [GNU GPLv3][20] license.
 See the LICENSE file located in this directory. 
 
+## Privacy Policy
+
+Our privacy policy is [here][22].
+
 ## Acknowledgements
 
 We are grateful beyond words for those who have helped bring StoryBuilder back to
@@ -134,4 +138,5 @@ We are most grateful for all of them- especially those who toil in the arena:
 [19]:https://github.com/orgs/storybuilder-org/projects/1/views/1
 [20]:https://choosealicense.com/licenses/gpl-3.0/
 [21]:https://github.com/storybuilder-org/StoryBuilder-2/blob/master/ACKNOWLEDGE.md
+[22]:https:https://github.com/terrycox/StoryBuilder-2/blob/master/PRIVACY_POLICY.TXT
 

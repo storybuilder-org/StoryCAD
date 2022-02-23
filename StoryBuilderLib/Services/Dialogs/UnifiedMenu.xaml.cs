@@ -23,6 +23,7 @@ public sealed partial class UnifiedMenuPage : Page
                 MenuContent.Children.Add(new RecentFiles(UnifiedMenuVM));
                 break;
             case "New":
+                UnifiedMenuVM.SelectedTemplateIndex = Models.GlobalData.Preferences.LastSelectedTemplate;
                 MenuContent.Children.Add(new NewProjectPage(UnifiedMenuVM));
                 break;
             case "Example":
@@ -37,7 +38,7 @@ public sealed partial class UnifiedMenuPage : Page
     public UnifiedMenuPage()
     {
         InitializeComponent();
-        UnifiedMenuVM = new UnifiedVM();
+        UnifiedMenuVM = new();
         UnifiedMenuVM.UpdateContent = UpdateContent;  // Connect the VM's delegate to HideDialog
         UnifiedMenuVM.CurrentTab = new ListBoxItem() { Name = "Recent" }; //Makes unified VM load recents by default
         UnifiedMenuVM.SidebarChange(null, null);
