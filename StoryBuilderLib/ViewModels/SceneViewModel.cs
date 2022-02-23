@@ -497,11 +497,22 @@ public class SceneViewModel : ObservableRecipient, INavigable
         return null;   
     }
 
+    /// <summary>
+    /// Build VpCharTip, the bound content of the ViewpointCharacterTip TeachingTip,
+    /// by finding and parsing OverViewModel's Viewpoint and ViewPointCharacter.
+    /// 
+    /// For example, if the Viewpoint is 'First person', the scene's viewpoint character
+    /// should be the same as the overview's viewpoint character (the entire story's
+    /// told in first person.) 
+    /// 
+    /// Theis is presented as a suggestion, not a hard-and-fast rule.
+    /// </summary>
     private void GetOverviewViewpoint()
     {
         string viewpointText;
         string viewpointName;
 
+        VpCharTipIsOpen = false;
         StoryModel model = ShellViewModel.GetModel();
         StoryNodeItem node = model.ExplorerView[0];
         OverviewModel overview = (OverviewModel)model.StoryElements.StoryElementGuids[node.Uuid];
@@ -511,19 +522,23 @@ public class SceneViewModel : ObservableRecipient, INavigable
         else
             viewpointText = "Story viewpoint = " + viewpoint.ToString();
         var viewpointChar = overview?.ViewpointCharacter;
-        if (viewpointChar == string.Empty)
-            viewpointName = "Story viewpoint character not selected";
+        if (Guid.TryParse(viewpointChar, out Guid guid))
+            viewpointName = "Story viewpoint charcter = " + model.StoryElements.StoryElementGuids[guid].Name;
         else
-            viewpointName = viewpointChar;
+            viewpointName = "Story viewpoint character not found";
         var tip = new StringBuilder();
         tip.AppendLine(string.Empty);
         tip.AppendLine(viewpointText);
         tip.AppendLine(viewpointName);
         VpCharTip = tip.ToString();
+
+        // The TeachingTip should only display if there's no scene ViewpointCharcter selected
         if (ViewpointCharacter.Equals(string.Empty))
+        {
             VpCharTipIsOpen = true;
-        else
-            VpCharTipIsOpen = false;
+            string msg = "ViewpointCharacterTip displayed";
+            _logger.Log(LogLevel.Warn, msg);
+        }
     }
     #endregion
 
