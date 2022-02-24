@@ -50,7 +50,7 @@ public class DeletionService
     }
 
     /// <summary>
-    /// Searches Cast members, protagonist name, antagonist name and the name of the scene and the selected setting in a scene node
+    /// Searches Cast members, viewpoint character, protagonist name, antagonist name and the name of the scene and the selected setting in a scene node
     /// </summary>
     /// <param name="node"></param>
     /// <param name="element"></param>
@@ -71,6 +71,16 @@ public class DeletionService
             else { NewCast.Add(member); }
         }
         if (Delete) { scene.CastMembers = NewCast; }
+
+        if (!string.IsNullOrEmpty(scene.ViewpointCharacter)) //Searches protagonist
+        {
+            ElementCollection.StoryElementGuids.TryGetValue(Guid.Parse(scene.ViewpointCharacter), out StoryElement vpChar);
+            if (vpChar.Uuid == arg)
+            {
+                if (Delete) { scene.ViewpointCharacter = null; }
+                else { return true; }
+            }
+        }
 
         if (!string.IsNullOrEmpty(scene.Protagonist)) //Searches protagonist
         {

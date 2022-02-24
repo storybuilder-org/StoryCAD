@@ -530,8 +530,8 @@ public class StoryWriter
         attr = _xml.CreateAttribute("Id");
         attr.Value = rec.Id.ToString();
         scene.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Viewpoint");
-        attr.Value = rec.Viewpoint;
+        attr = _xml.CreateAttribute("ViewpointCharacter");
+        attr.Value = rec.ViewpointCharacter;
         scene.Attributes.Append(attr);
         attr = _xml.CreateAttribute("Date");
         attr.Value = rec.Date;

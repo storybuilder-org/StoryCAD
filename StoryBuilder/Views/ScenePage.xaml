@@ -10,6 +10,16 @@
     xmlns:usercontrols="using:StoryBuilder.Controls"
     mc:Ignorable="d" >
 
+    <Page.Resources>
+        <TeachingTip x:Name="ViewpointCharacterTip"
+	        Title="Reminder:"
+	        Subtitle="Pick a scene viewpoint character consistent with your story POV:"
+	        PreferredPlacement="Auto"
+            IsOpen="{x:Bind SceneVm.VpCharTipIsOpen}"
+            Content="{x:Bind SceneVm.VpCharTip}" >
+        </TeachingTip>
+    </Page.Resources>
+    
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -29,20 +39,20 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="3*"/>
                             <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="3*"/>
+                            <ColumnDefinition Width="2*"/>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="4*"/>
                         </Grid.ColumnDefinitions>
                         <TextBox Header="Date" Grid.Column="0" MinWidth="150"
                                  Text="{x:Bind SceneVm.Date, Mode=TwoWay}" />
                         <TextBlock Grid.Column="1" MinWidth="50"/>
-                        <TextBox Header="Time" Grid.Column="2" MinWidth="150"
+                        <TextBox Header="Time" Grid.Column="2" MinWidth="100"
                                  Text="{x:Bind SceneVm.Time, Mode=TwoWay}" />
                         <TextBlock Grid.Column="3" MinWidth="50"/>
-                        <editors:SfComboBox Header="Viewpoint" Grid.Column="4"  IsEditable="True" MinWidth="200"
-                                  ItemsSource="{x:Bind SceneVm.ViewpointList}"
-                              SelectedItem="{x:Bind SceneVm.Viewpoint, Mode=TwoWay}" />
-                    </Grid>
+                        <usercontrols:CharacterName x:Name="ViewpointCharacter" Header="Viewpoint Character" Grid.Column="4" IsEditable="False" MinWidth="250"
+                              DisplayMemberPath="Name"
+                              SelectedItem="{x:Bind SceneVm.ViewpointCharacter, Mode=TwoWay, Converter={StaticResource ToStoryElement}}" />
+                      </Grid>
                     <Grid Grid.Row="1" HorizontalAlignment="Left">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="3*"/>
@@ -63,8 +73,8 @@
                             <TextBlock Text="Scene Cast" />
                             <ScrollViewer Height="75" >
                                 <ListView MinWidth="300"
-                                ItemsSource="{x:Bind SceneVm.CastMembers, Mode=OneWay}"
-                                    SelectedIndex="{x:Bind SceneVm.ExistingCastIndex, Mode=OneWay}" >
+                                ItemsSource="{x:Bind SceneVm.CastMembers, Mode=TwoWay}"
+                                    SelectedIndex="{x:Bind SceneVm.ExistingCastIndex, Mode=TwoWay}" >
                                     <ListView.ItemTemplate>
                                         <DataTemplate x:DataType="models:StoryElement">
                                             <TextBlock Text="{x:Bind Name, Mode=OneWay}" MinWidth="250" />

@@ -12,5 +12,6 @@ public sealed class CharacterName : ComboBox
         DefaultStyleKey = typeof(ComboBox);
         StoryModel model = ShellViewModel.GetModel();
         ItemsSource = model.StoryElements.Characters;
+ 
     }
 }
