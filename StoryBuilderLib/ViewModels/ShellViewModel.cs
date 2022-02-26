@@ -30,9 +30,6 @@ using Windows.Storage.Pickers;
 using StoryBuilder.Services;
 using WinRT;
 using GuidAttribute = System.Runtime.InteropServices.GuidAttribute;
-using System.ComponentModel;
-using Microsoft.UI.Dispatching;
-using Windows.UI.Core;
 
 namespace StoryBuilder.ViewModels
 {
@@ -699,7 +696,6 @@ namespace StoryBuilder.ViewModels
             {
                 Logger.LogException(LogLevel.Error, ex, "Error in OpenFile command");
                 Messenger.Send(new StatusChangedMessage(new($"Open Story command failed", LogLevel.Error)));
-
             }
 
             Logger.Log(LogLevel.Info, "Open Story completed.");
