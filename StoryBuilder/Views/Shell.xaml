@@ -324,7 +324,7 @@
                        FontSize="14"
                        Margin="10"
                        FontFamily="Segoe UI" Padding="0,5"/>
-            <AppBarButton Icon="Edit" IsCompact="True" Height="36" HorizontalAlignment="Right" >
+            <AppBarButton Icon="Edit" IsCompact="True" Height="36" HorizontalAlignment="Right" ToolTipService.ToolTip="This icon becomes red when you've made changes that haven't been saved yet">
                 <AppBarButton.Foreground>
                     <SolidColorBrush Color="{x:Bind ShellVm.ChangeStatusColor, Mode=TwoWay}"/>
                 </AppBarButton.Foreground>
