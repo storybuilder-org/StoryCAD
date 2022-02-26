@@ -2046,9 +2046,19 @@ namespace StoryBuilder.ViewModels
                 }
             }
 
+            switch (SearchTotal)
+            {
+                case 0:
+                    Messenger.Send(new StatusChangedMessage(new("Found no matches", LogLevel.Info, true)));
+                    break;
+                case 1:
+                    Messenger.Send(new StatusChangedMessage(new("Found 1 match", LogLevel.Info, true)));
+                    break;
+                default:
+                    Messenger.Send(new StatusChangedMessage(new($"Found {SearchTotal} matches", LogLevel.Info, true)));
+                    break;
+            }
             _canExecuteCommands = true;    //Enables other commands from being used till this one is complete.
-            Messenger.Send(new StatusChangedMessage(new($"Found {SearchTotal} matches", LogLevel.Info, true)));
-
         }
         #endregion
 

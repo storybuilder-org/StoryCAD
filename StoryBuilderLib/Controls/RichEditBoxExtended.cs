@@ -1,6 +1,8 @@
-﻿using Microsoft.UI.Text;
+﻿using Microsoft.UI;
+using Microsoft.UI.Text;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
 
 namespace StoryBuilder.Controls;
 
@@ -32,6 +34,8 @@ public class RichEditBoxExtended : RichEditBox
     public RichEditBoxExtended()
     {
         TextChanged += RichEditBoxExtended_TextChanged;
+
+        if (Application.Current.RequestedTheme == ApplicationTheme.Dark) { Foreground = new SolidColorBrush(Colors.White); }
     }
 
     public string RtfText
