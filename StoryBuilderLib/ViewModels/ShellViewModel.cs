@@ -686,8 +686,9 @@ namespace StoryBuilder.ViewModels
                 {
                     SetCurrentView(StoryViewType.ExplorerView);
                     Messenger.Send(new StatusChangedMessage(new($"Open Story completed", LogLevel.Info )));
-
                 }
+
+                ShowHomePage();
                 GlobalData.MainWindow.Title = $"StoryBuilder - Editing {StoryModel.ProjectFilename.Replace(".stbx", "")}";
                 new UnifiedVM().UpdateRecents(Path.Combine(StoryModel.ProjectFolder.Path,StoryModel.ProjectFile.Name));
                 Ioc.Default.GetService<BackupService>().StartTimedBackup();
