@@ -144,8 +144,8 @@ public class SceneViewModel : ObservableRecipient, INavigable
 
     // Scene development data (from Lisa Cron's Story Genius)
 
-    private string _scenePurpose;
-    public string ScenePurpose
+    private List<string> _scenePurpose;
+    public List<string> ScenePurpose
     {
         get => _scenePurpose;
         set => SetProperty(ref _scenePurpose, value);
@@ -512,7 +512,7 @@ public class SceneViewModel : ObservableRecipient, INavigable
         if (viewpoint == string.Empty)
             viewpointText = "No story viewpoint selected";
         else
-            viewpointText = "Story viewpoint = " + viewpoint.ToString();
+             viewpointText = "Story viewpoint = " + viewpoint.ToString();
         var viewpointChar = overview?.ViewpointCharacter;
         if (Guid.TryParse(viewpointChar, out Guid guid))
             viewpointName = "Story viewpoint charcter = " + model.StoryElements.StoryElementGuids[guid].Name;
@@ -563,7 +563,7 @@ public class SceneViewModel : ObservableRecipient, INavigable
         SceneType = string.Empty;
         CastMembers = new ObservableCollection<StoryElement>();
         ViewpointCharacter = string.Empty;
-        ScenePurpose = string.Empty;
+        ScenePurpose = new List<string>();
         ValueExchange = string.Empty;
         Remarks = string.Empty;
         Protagonist = string.Empty;

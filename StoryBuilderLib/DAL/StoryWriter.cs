@@ -570,12 +570,17 @@ public class StoryWriter
             castMember.AppendChild(_xml.CreateTextNode(member));
             castList.AppendChild(castMember);
         }
+
+        XmlNode ScenePurposeList = _xml.CreateElement("ScenePurpose");
+        foreach (string item in rec.ScenePurpose)
+        {
+            XmlElement Purpose = _xml.CreateElement("Purpose");
+            Purpose.AppendChild(_xml.CreateTextNode(item));
+            ScenePurposeList.AppendChild(Purpose);
+        }
         scene.AppendChild(castList);
         attr = _xml.CreateAttribute("Remarks");
         attr.Value = rec.Remarks;
-        scene.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("ScenePurpose");
-        attr.Value = rec.ScenePurpose;
         scene.Attributes.Append(attr);
         attr = _xml.CreateAttribute("ValueExchange");
         attr.Value = rec.ValueExchange;
