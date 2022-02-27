@@ -379,6 +379,16 @@ public class OverviewViewModel : ObservableRecipient, INavigable
         _wtr = Ioc.Default.GetService<StoryWriter>();
         _rdr = Ioc.Default.GetService<StoryReader>();
 
+        Dictionary<string, ObservableCollection<string>> lists = GlobalData.ListControlSource;
+        StoryTypeList = lists["StoryType"];
+        GenreList = lists["Genre"];
+        ViewpointList = lists["Viewpoint"];
+        LiteraryDeviceList = lists["LiteraryDevice"];
+        VoiceList = lists["Voice"];
+        TenseList = lists["Tense"];
+        StyleList = lists["LiteraryStyle"];
+        ToneList = lists["Tone"];
+
         DateCreated = string.Empty;
         Author = string.Empty;
         DateModified = string.Empty;
@@ -396,16 +406,6 @@ public class OverviewViewModel : ObservableRecipient, INavigable
         ToneNotes = string.Empty;
         Notes = string.Empty;
         StoryProblem = string.Empty;
-
-        Dictionary<string, ObservableCollection<string>> lists = GlobalData.ListControlSource;
-        StoryTypeList = lists["StoryType"];
-        GenreList = lists["Genre"];
-        ViewpointList = lists["Viewpoint"];
-        LiteraryDeviceList = lists["LiteraryDevice"];
-        VoiceList = lists["Voice"];
-        TenseList = lists["Tense"];
-        StyleList = lists["LiteraryStyle"];
-        ToneList = lists["Tone"];
 
         PropertyChanged += OnPropertyChanged;
 
