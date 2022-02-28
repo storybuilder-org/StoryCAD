@@ -545,25 +545,7 @@ public class StoryWriter
         attr = _xml.CreateAttribute("SceneType");
         attr.Value = rec.SceneType;
         scene.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Char1");
-        attr.Value = rec.Char1;
-        scene.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Char2");
-        attr.Value = rec.Char2;
-        scene.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Char3");
-        attr.Value = rec.Char3;
-        scene.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Role1");
-        attr.Value = rec.Role1;
-        scene.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Role2");
-        attr.Value = rec.Role2;
-        scene.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Role3");
-        attr.Value = rec.Role3;
-        scene.Attributes.Append(attr);
-        XmlNode castList = _xml.CreateElement("CastMembers");
+         XmlNode castList = _xml.CreateElement("CastMembers");
         foreach (string member in rec.CastMembers)
         {
             XmlElement castMember = _xml.CreateElement("Member");
