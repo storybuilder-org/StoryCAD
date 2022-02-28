@@ -10,7 +10,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Threading.Tasks;
 
 namespace StoryBuilder.ViewModels;
 
@@ -231,8 +230,6 @@ public class OverviewViewModel : ObservableRecipient, INavigable
     }
 
     #endregion
-
-
 
     #region Methods
 
