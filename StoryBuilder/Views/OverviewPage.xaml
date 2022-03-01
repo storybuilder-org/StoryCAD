@@ -100,9 +100,9 @@
                         <TextBlock Grid.Column="1" MinWidth="100"/>
                         <editors:SfComboBox Header="Literary Device" Grid.Column="2" MinWidth="200" IsEditable="True"
                                   ItemsSource="{x:Bind OverviewVm.LiteraryDeviceList}"
-                                  SelectedItem="{x:Bind OverviewVm.LiteraryDevice, Mode=TwoWay}" />
+                                  SelectedItem="{Binding OverviewVm.LiteraryDevice, Mode=TwoWay}" />
                     </Grid>
-                    <usercontrols:CharacterName Header="Viewpoint Character" Grid.Row="2" IsEditable="False" MinWidth="300"
+                    <usercontrols:CharacterName  Header="Viewpoint Character" Grid.Row="2" IsEditable="False" MinWidth="300"
                               DisplayMemberPath="Name"
                               SelectedItem="{x:Bind OverviewVm.ViewpointCharacter, Mode=TwoWay, Converter={StaticResource ToStoryElement}}" />
                     <Grid Grid.Row="3" HorizontalAlignment="Left" >

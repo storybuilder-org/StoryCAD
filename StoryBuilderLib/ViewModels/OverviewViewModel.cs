@@ -380,7 +380,10 @@ public class OverviewViewModel : ObservableRecipient, INavigable
         StoryTypeList = lists["StoryType"];
         GenreList = lists["Genre"];
         ViewpointList = lists["Viewpoint"];
-        LiteraryDeviceList = lists["LiteraryDevice"];
+        //LiteraryDeviceList = lists["LiteraryDevice"];
+        LiteraryDeviceList = new ObservableCollection<string>();
+        foreach (string device in lists["LiteraryDevice"])
+            LiteraryDeviceList.Add(device);
         VoiceList = lists["Voice"];
         TenseList = lists["Tense"];
         StyleList = lists["LiteraryStyle"];
