@@ -7,6 +7,7 @@ using StoryBuilder.Models;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.Services.Messages;
 using StoryBuilder.Services.Navigation;
+using Syncfusion.UI.Xaml.Editors;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -144,8 +145,8 @@ public class SceneViewModel : ObservableRecipient, INavigable
 
     // Scene development data (from Lisa Cron's Story Genius)
 
-    private List<string> _scenePurpose;
-    public List<string> ScenePurpose
+    private ObservableCollection<string> _scenePurpose;
+    public ObservableCollection<string> ScenePurpose
     {
         get => _scenePurpose;
         set => SetProperty(ref _scenePurpose, value);
@@ -347,7 +348,19 @@ public class SceneViewModel : ObservableRecipient, INavigable
                 CastMembers.Add(StringToStoryElement(member));
         }
         ViewpointCharacter = Model.ViewpointCharacter;
-        ScenePurpose = Model.ScenePurpose;
+
+        // The ScenePurpose multi-select SfComboBox
+        // SelectedItems IList is read-only, so we
+        // use callback delegates to clear and add
+        // the scene's list of purposes from delegate
+        // methods declared in ScenePage.xaml.cs
+        ClearScenePurpose();
+        foreach (string purpose in Model.ScenePurpose)
+        {
+            AddScenePurpose(purpose);
+            ScenePurpose.Add(purpose);
+        }
+
         ValueExchange = Model.ValueExchange;
         Protagonist = Model.Protagonist;
         ProtagEmotion = Model.ProtagEmotion;
@@ -388,7 +401,9 @@ public class SceneViewModel : ObservableRecipient, INavigable
             Model.CastMembers.Clear();
             foreach (StoryElement element in CastMembers)
                 Model.CastMembers.Add(element.ToString());
-            Model.ScenePurpose = ScenePurpose;
+            Model.ScenePurpose.Clear();
+            foreach(string purpose in ScenePurpose)
+                Model.ScenePurpose.Add(purpose);    
             Model.ValueExchange = ValueExchange;
             Model.Protagonist = Protagonist;
             Model.ProtagEmotion = ProtagEmotion;
@@ -413,6 +428,22 @@ public class SceneViewModel : ObservableRecipient, INavigable
             //_logger.Log(LogLevel.Info, string.Format("Requesting IsDirty change to true"));
             //Messenger.Send(new IsChangedMessage(Changed));
         }
+    }
+
+    /// Delegate types and instances for updating the
+    /// ScenePurpose SfComboBox
+    public delegate void ClearScenePurposeDelegate();
+    public delegate void AddScenePurposeDelegate(string purpose);
+
+    public ClearScenePurposeDelegate ClearScenePurpose;
+    public AddScenePurposeDelegate AddScenePurpose;
+
+    public void ScenePurpose_SelectionChanged(object sender, ComboBoxSelectionChangedEventArgs e)
+    {
+        foreach (string purpose in e.AddedItems)
+            ScenePurpose.Add(purpose);
+        foreach (string purpose in e.RemovedItems)
+            ScenePurpose.Remove(purpose);
     }
 
     private bool CastMemberExists(string uuid)
@@ -563,7 +594,7 @@ public class SceneViewModel : ObservableRecipient, INavigable
         SceneType = string.Empty;
         CastMembers = new ObservableCollection<StoryElement>();
         ViewpointCharacter = string.Empty;
-        ScenePurpose = new List<string>();
+        ScenePurpose = new ObservableCollection<string>();
         ValueExchange = string.Empty;
         Remarks = string.Empty;
         Protagonist = string.Empty;
