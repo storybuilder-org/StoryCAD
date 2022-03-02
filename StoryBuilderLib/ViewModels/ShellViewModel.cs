@@ -684,11 +684,11 @@ namespace StoryBuilder.ViewModels
                     SetCurrentView(StoryViewType.ExplorerView);
                     Messenger.Send(new StatusChangedMessage(new($"Open Story completed", LogLevel.Info )));
                 }
-
-                TreeViewNodeClicked(DataSource[0]);
                 GlobalData.MainWindow.Title = $"StoryBuilder - Editing {StoryModel.ProjectFilename.Replace(".stbx", "")}";
                 new UnifiedVM().UpdateRecents(Path.Combine(StoryModel.ProjectFolder.Path,StoryModel.ProjectFile.Name));
                 Ioc.Default.GetService<BackupService>().StartTimedBackup();
+
+                TreeViewNodeClicked(DataSource[0]); // Navigate to the tree root
                 string msg = $"Opened project {StoryModel.ProjectFilename}";
                 Logger.Log(LogLevel.Info, msg);
             }
