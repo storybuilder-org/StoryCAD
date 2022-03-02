@@ -38,6 +38,7 @@ public class RichEditBoxExtended : RichEditBox
         //For some reason WinUI seems to be actively inverting the color of foregound in darkmode
         //So for now we set the color to black and its just black on white in Light mode or White on Black in darkmode
         Foreground = new SolidColorBrush(Colors.Black);
+        CornerRadius = new(5);
     }
 
     public string RtfText
