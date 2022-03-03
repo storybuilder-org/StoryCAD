@@ -738,31 +738,6 @@ public class StoryWriter
         return element;
     }
 
-    public async Task<string> ReadRtfText(Guid uuid, string rftFilename)
-    {
-        StorageFolder folder = await FindSubFolder(uuid);
-        StorageFile rtfFile =
-            await folder.GetFileAsync(rftFilename);
-        return await FileIO.ReadTextAsync(rtfFile);
-    }
-
-    /// <summary>
-    /// Locate or create a Directory for a StoryElement based on its GUID
-    /// </summary>
-    /// <param name="uuid">The GUID of a text node</param>
-    /// <returns>StorageFolder instance for the StoryElement's folder</returns>
-    private async Task<StorageFolder> FindSubFolder(Guid uuid)
-    {
-        // Search the ProjectFolder's subfolders for the desired one (folder name == uuid as string)
-        StoryModel model = ShellViewModel.GetModel();
-        IReadOnlyList<StorageFolder> folders = await model.FilesFolder.GetFoldersAsync();
-        foreach (StorageFolder folder in folders)
-            if (folder.Name.Equals(UuidString(uuid)))
-                return folder;
-        // If the SubFolder doesn't exist, create it.
-        return await model.FilesFolder.CreateFolderAsync(UuidString(uuid));
-    }
-
     /// <summary>
     /// Generate a GUID string in the Scrivener format (i.e., without curly braces)
     /// </summary>
