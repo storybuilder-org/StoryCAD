@@ -126,9 +126,11 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="5*"/>
                         </Grid.ColumnDefinitions>
-                        <editors:SfComboBox Header="Purpose of Scene" Grid.Column="0" IsEditable="False" MinWidth="250"
+                        <editors:SfComboBox x:Name="ScenePurpose"  x:FieldModifier="public" Header="Purpose of Scene"
+                                  Grid.Column="0" IsEditable="False" MinWidth="250"   
                                   ItemsSource="{x:Bind SceneVm.ScenePurposeList}"
-                                  SelectedValue="{x:Bind SceneVm.ScenePurpose, Mode=TwoWay}" />
+                                  SelectionChanged="{x:Bind SceneVm.ScenePurpose_SelectionChanged}"
+                                  SelectionMode="Multiple" />
                         <TextBlock Grid.Column="1" MinWidth="50"/>
                         <editors:SfComboBox Header="Value Exchange" Grid.Column="2" IsEditable="False" MinWidth="250"
                                   ItemsSource="{x:Bind SceneVm.ValueExchangeList}"
