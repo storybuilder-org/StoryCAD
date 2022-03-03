@@ -30,9 +30,6 @@ using Windows.Storage.Pickers;
 using StoryBuilder.Services;
 using WinRT;
 using GuidAttribute = System.Runtime.InteropServices.GuidAttribute;
-using System.ComponentModel;
-using Microsoft.UI.Dispatching;
-using Windows.UI.Core;
 
 namespace StoryBuilder.ViewModels
 {
