@@ -20,6 +20,7 @@ public class PrintReports
     private StringReader fileStream;
     private Font printFont;
     private string documentText;
+    PrintDocument PrintDoc = new();
 
     //PrintHelper helper = new();
 
@@ -111,9 +112,13 @@ public class PrintReports
         float linesPerPage = ev.MarginBounds.Height / printFont.GetHeight(ev.Graphics);
 
         // Iterate over the file, printing each line.
-        while (count < linesPerPage &&
-               (line = fileStream.ReadLine()) != null)
+        while (count < linesPerPage && (line = fileStream.ReadLine()) != null)
         {
+            if (line == @"\PageBreak")
+            {
+                ev.HasMorePages = true;
+                break;
+            }
             float yPos = topMargin + count * printFont.GetHeight(ev.Graphics);
             ev.Graphics.DrawString(line, printFont, Brushes.Black, leftMargin, yPos, new StringFormat());
             count++;
@@ -131,15 +136,14 @@ public class PrintReports
         {
             fileStream = new StringReader(file);
             printFont = new Font("Arial", 12, FontStyle.Regular, GraphicsUnit.Pixel);
-            PrintDocument pd = new();
-            pd.PrintPage += new(pd_PrintPage);
+            PrintDoc.PrintPage += new(pd_PrintPage);
             Margins margins = new(100, 100, 100, 100);
-            pd.DefaultPageSettings.Margins = margins;
+            PrintDoc.DefaultPageSettings.Margins = margins;
             float pixelsPerChar = printFont.Size;
-            float lineWidth = pd.DefaultPageSettings.PrintableArea.Width;
+            float lineWidth = PrintDoc.DefaultPageSettings.PrintableArea.Width;
             int charsPerLine = Convert.ToInt32(lineWidth / pixelsPerChar);
             // Print the document.
-            pd.Print();
+            PrintDoc.Print();
         }
         catch (Exception ex)
         {
@@ -155,7 +159,7 @@ public class PrintReports
     /// <returns></returns>
     private string FormatText(string rtfInput, bool SummaryMode = false) 
     {
-        string text = _formatter.GetText(rtfInput + @"\pageb", false);
+        string text = _formatter.GetText(rtfInput, false);
         string[] lines = text.Split('\n');
         StringBuilder sb = new();
 
@@ -181,6 +185,7 @@ public class PrintReports
             sb.Replace("[", "\r\n[");
             sb.Replace("]", "]\r\n");
         }
+        sb.Append("\n\\PageBreak\n");
         return sb.ToString();
     }
 
