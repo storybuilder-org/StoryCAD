@@ -32,40 +32,34 @@ public class PrintReports
         if (_vm.CreateOverview)
         {
             rtf = _formatter.FormatStoryOverviewReport(Overview());
-            documentText = FormatText(rtf);
-            Print(documentText);
+            documentText += FormatText(rtf);
         }
         if (_vm.CreateSummary)
         {
             rtf =_formatter.FormatSynopsisReport();
             //documentText = FormatText(rtf);
-            documentText = FormatText(rtf,true);
-            Print(documentText);
+            documentText += FormatText(rtf,true);
         }
 
         if (_vm.ProblemList)
         {
             rtf = _formatter.FormatProblemListReport();
-            documentText = FormatText(rtf);
-            Print(documentText);
+            documentText += FormatText(rtf);
         }
         if (_vm.CharacterList)
         {
             rtf = _formatter.FormatCharacterListReport();
-            documentText = FormatText(rtf);
-            Print(documentText);
+            documentText += FormatText(rtf);
         }
         if (_vm.SettingList)
         {
             rtf = _formatter.FormatSettingListReport();
-            documentText = FormatText(rtf);
-            Print(documentText);
+            documentText += FormatText(rtf);
         }
         if (_vm.SceneList)
         {
             rtf = _formatter.FormatSceneListReport();
-            documentText = FormatText(rtf);
-            Print(documentText);
+            documentText += FormatText(rtf);
         }
 
         foreach (StoryNodeItem node in _vm.SelectedNodes)
@@ -90,10 +84,11 @@ public class PrintReports
                         rtf = _formatter.FormatSceneReport(element);
                         break;
                 }
-                documentText = FormatText(rtf);
-                Print(documentText);
+                documentText += FormatText(rtf);
             }
         }
+
+        Print(documentText);
     }
 
     private StoryElement Overview() 
@@ -125,10 +120,8 @@ public class PrintReports
         }
 
         // If more lines exist, print another page.
-        if (line != null)
-            ev.HasMorePages = true;
-        else
-            ev.HasMorePages = false;
+        if (line != null) { ev.HasMorePages = true; }
+        else { ev.HasMorePages = false; }
     }
 
     // Print the file.
@@ -162,7 +155,7 @@ public class PrintReports
     /// <returns></returns>
     private string FormatText(string rtfInput, bool SummaryMode = false) 
     {
-        string text = _formatter.GetText(rtfInput, false);
+        string text = _formatter.GetText(rtfInput + @"\pageb", false);
         string[] lines = text.Split('\n');
         StringBuilder sb = new();
 
