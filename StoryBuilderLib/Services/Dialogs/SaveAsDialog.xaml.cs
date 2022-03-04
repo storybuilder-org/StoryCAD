@@ -45,7 +45,7 @@ public sealed partial class SaveAsDialog : Page
         //    var initializeWithWindow = folderPicker.As<IInitializeWithWindow>();
         //    initializeWithWindow.Initialize(hwnd);
         //}
-        folderPicker.CommitButtonText = "Project Parent Folder:";
+        folderPicker.CommitButtonText = "Select folder";
         folderPicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
         folderPicker.FileTypeFilter.Add("*");
 
@@ -54,7 +54,7 @@ public sealed partial class SaveAsDialog : Page
 
         //TODO: Test for cancelled FolderPicker via 'if Parentfolder =! null {} else {}
             
-        ProjectFolderPath = Path.Combine(ParentFolder.Path, ProjectName.Text);
+        ProjectFolderPath = ParentFolder.Path;
         ProjectPathName.Text = ProjectFolderPath;
         SaveAsVm.ProjectPathName = ProjectFolderPath;
         ProjectPathName.IsReadOnly = true;

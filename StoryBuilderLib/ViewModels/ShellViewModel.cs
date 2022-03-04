@@ -790,12 +790,11 @@ namespace StoryBuilder.ViewModels
                         await WriteModel();
 
                         //Saves the current project folders and files to disk
-                        SaveAsVM.SaveAsProjectFolder = await SaveAsVM.ParentFolder.CreateFolderAsync(SaveAsVM.ProjectName, CreationCollisionOption.OpenIfExists);
-                        await StoryModel.ProjectFolder.CopyContentsRecursive(SaveAsVM.SaveAsProjectFolder);
+                        await StoryModel.ProjectFile.CopyAsync(SaveAsVM.ParentFolder, SaveAsVM.ProjectName);
 
                         //Update the StoryModel properties to use the newly saved copy
                         StoryModel.ProjectFilename = SaveAsVM.ProjectName;
-                        StoryModel.ProjectFolder = SaveAsVM.SaveAsProjectFolder;
+                        StoryModel.ProjectFolder = SaveAsVM.ParentFolder;
                         StoryModel.ProjectPath = SaveAsVM.SaveAsProjectFolderPath;
                         // Add to the recent files stack
                         GlobalData.MainWindow.Title = $"StoryBuilder - Editing {StoryModel.ProjectFilename.Replace(".stbx", "")}";
@@ -823,28 +822,22 @@ namespace StoryBuilder.ViewModels
         private async Task<bool> VerifyReplaceOrCreate()
         {
             Logger.Log(LogLevel.Trace, "VerifyReplaceOrCreated");
-            ContentDialog replaceDialog = new()
-            {
-                PrimaryButtonText = "Yes",
-                SecondaryButtonText = "No"
-            };
-            SaveAsViewModel SaveAsVM = Ioc.Default.GetService<SaveAsViewModel>();
-            SaveAsVM.SaveAsProjectFolderPath = Path.Combine(SaveAsVM.ParentFolder.Path, SaveAsVM.ProjectName);
-            SaveAsVM.ProjectFolderExists = await SaveAsVM.ParentFolder.TryGetItemAsync(SaveAsVM.ProjectName) != null;
-            if (SaveAsVM.ProjectFolderExists)
-            {
-                replaceDialog.Title = "Replace SaveAs Folder";
-                replaceDialog.Content = $"Folder {SaveAsVM.SaveAsProjectFolderPath} already exists. Replace?";
-            }
-            else
-            {
-                replaceDialog.Title = "Create SaveAs Folder";
-                replaceDialog.Content = $"Create folder {SaveAsVM.SaveAsProjectFolderPath}?";
-            }
-            replaceDialog.XamlRoot = GlobalData.XamlRoot;
-            ContentDialogResult result = await replaceDialog.ShowAsync();
-            return result == ContentDialogResult.Primary;
 
+            SaveAsViewModel SaveAsVM = Ioc.Default.GetService<SaveAsViewModel>();
+            SaveAsVM.SaveAsProjectFolderPath = SaveAsVM.ParentFolder.Path;
+            if (File.Exists(Path.Combine(SaveAsVM.ProjectPathName,SaveAsVM.ProjectName)))
+            {
+                ContentDialog replaceDialog = new()
+                {
+                    PrimaryButtonText = "Yes",
+                    SecondaryButtonText = "No",
+                    Title = "Replace file",
+                    Content = $"File {SaveAsVM.SaveAsProjectFolderPath} already exists. \n\nDo you want to replace it?",
+                    XamlRoot = GlobalData.XamlRoot,
+                };
+                return await replaceDialog.ShowAsync() == ContentDialogResult.Primary;
+            }
+            else { return true; }
         }
 
         private async void CloseFile()
