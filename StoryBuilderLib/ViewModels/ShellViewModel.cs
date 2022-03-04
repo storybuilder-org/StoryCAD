@@ -822,7 +822,7 @@ namespace StoryBuilder.ViewModels
 
         private async Task<bool> VerifyReplaceOrCreate()
         {
-            Logger.Log(LogLevel.Trace, "VerifyReplaceOrCreated");
+            Logger.Log(LogLevel.Trace, " VerifyReplaceOrCreated");
             ContentDialog replaceDialog = new()
             {
                 PrimaryButtonText = "Yes",
