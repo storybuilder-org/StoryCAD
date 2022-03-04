@@ -5,7 +5,7 @@
 StoryBuilder is written in C# and XAML and is a Windows desktop app. 
 It's written using [WinUI 3][2], [MVVM][6], [Project Reunion APIs][3], and [.NET6][8]. 
 Although the only programming skill you need to get started is some C#, familiarity with [asynchronous IO][5] and [MVVM][6] will be useful. 
-We maintain StoryBuilder as a Visual Studio solution using VS2022.
+We maintain StoryBuilder as a Visual Studio solution using either VS2022 (recommended) or VS2019.
 StoryBuilder began as a UWP program and now uses Windows UI (WinUI 3) [controls][7] and styles. It runs
 as a native Windows (Win32) program, but its UWP roots remain; it uses [UWP asynchronous IO][4].
 This allows StoryBuilder outlines, which are XML files, to be stored locally or on cloud storage services like OneDrive, Dropbox, Google Drive or Box.
@@ -13,7 +13,8 @@ This allows StoryBuilder outlines, which are XML files, to be stored locally or 
 
 ## Installation and Setup
 
-We maintain the StoryBuilder repository with Visual Studio 2022. The Community edition is free. You can find it [here][11].
+We maintain the StoryBuilder repository with Visual Studio. Either VS2019 or VS2022 will work. The Community editions of 
+these products are free. You can find them [here][11].
 
 StoryBuilder uses the [Windows App SDK][2]. Set up your development as per [this guide][12]. We are currently running 
 version 1.0.

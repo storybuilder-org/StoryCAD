@@ -417,7 +417,21 @@ public class ReportFormatter
 
             sb.Replace("@Remarks", GetText(scene.Remarks));
             //DEVELOPMENT SECTION
-            sb.Replace("@PurposeOfScene", scene.ScenePurpose);
+            if (line.Contains("@PurposeOfScene"))
+            {
+                foreach (string sePurpose in scene.ScenePurpose)
+                {
+                    StoryElement Purpose = StringToStoryElement(sePurpose);
+                    string PurposeName = Purpose?.Name ?? string.Empty;
+                    StringBuilder sbCast = new(line);
+
+                    sbCast.Replace("@CastMember", PurposeName);
+                    doc.AddText(sbCast.ToString());
+                    doc.AddNewLine();
+                }
+                sb.Clear();
+            }
+
             sb.Replace("@ValueExchange", scene.ValueExchange);
             sb.Replace("@Events", GetText(scene.Events));
             sb.Replace("@Consequence", GetText(scene.Consequences));

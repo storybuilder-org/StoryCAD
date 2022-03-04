@@ -682,11 +682,12 @@ namespace StoryBuilder.ViewModels
                 {
                     SetCurrentView(StoryViewType.ExplorerView);
                     Messenger.Send(new StatusChangedMessage(new($"Open Story completed", LogLevel.Info )));
-
                 }
                 GlobalData.MainWindow.Title = $"StoryBuilder - Editing {StoryModel.ProjectFilename.Replace(".stbx", "")}";
                 new UnifiedVM().UpdateRecents(Path.Combine(StoryModel.ProjectFolder.Path,StoryModel.ProjectFile.Name));
                 Ioc.Default.GetService<BackupService>().StartTimedBackup();
+
+                TreeViewNodeClicked(DataSource[0]); // Navigate to the tree root
                 string msg = $"Opened project {StoryModel.ProjectFilename}";
                 Logger.Log(LogLevel.Info, msg);
             }
@@ -694,7 +695,6 @@ namespace StoryBuilder.ViewModels
             {
                 Logger.LogException(LogLevel.Error, ex, "Error in OpenFile command");
                 Messenger.Send(new StatusChangedMessage(new($"Open Story command failed", LogLevel.Error)));
-
             }
 
             Logger.Log(LogLevel.Info, "Open Story completed.");
@@ -2041,9 +2041,19 @@ namespace StoryBuilder.ViewModels
                 }
             }
 
+            switch (SearchTotal)
+            {
+                case 0:
+                    Messenger.Send(new StatusChangedMessage(new("Found no matches", LogLevel.Info, true)));
+                    break;
+                case 1:
+                    Messenger.Send(new StatusChangedMessage(new("Found 1 match", LogLevel.Info, true)));
+                    break;
+                default:
+                    Messenger.Send(new StatusChangedMessage(new($"Found {SearchTotal} matches", LogLevel.Info, true)));
+                    break;
+            }
             _canExecuteCommands = true;    //Enables other commands from being used till this one is complete.
-            Messenger.Send(new StatusChangedMessage(new($"Found {SearchTotal} matches", LogLevel.Info, true)));
-
         }
         #endregion
 

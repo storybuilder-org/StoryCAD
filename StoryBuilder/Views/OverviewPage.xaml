@@ -96,7 +96,7 @@
                         </Grid.ColumnDefinitions>
                         <editors:SfComboBox Header="Viewpoint" Grid.Column="0" IsEditable="False" MinWidth="200" 
                                   ItemsSource="{x:Bind OverviewVm.ViewpointList}"
-                                  SelectedItem="{x:Bind OverviewVm.Viewpoint, Mode=TwoWay}" />
+                                  SelectedItem="{x:Bind OverviewVm.Viewpoint, Mode=TwoWay}" BorderThickness="1" />
                         <TextBlock Grid.Column="1" MinWidth="100"/>
                         <editors:SfComboBox Header="Literary Technique" IsEditable="False" Grid.Column="2" MinWidth="200" 
                                   ItemsSource="{x:Bind OverviewVm.LiteraryTechniqueList}"

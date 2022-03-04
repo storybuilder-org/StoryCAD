@@ -541,6 +541,13 @@ namespace StoryBuilder.DAL
                 foreach (IXmlNode child in castMembers.ChildNodes)
                     if (child.NodeName.Equals("Member"))
                         scene.CastMembers.Add(child.InnerText);
+
+            IXmlNode ScenePurpose = xn.SelectSingleNode("./ScenePurpose");
+            if (ScenePurpose != null)
+                foreach (IXmlNode child in ScenePurpose.ChildNodes)
+                    if (child.NodeName.Equals("Purpose"))
+                        scene.ScenePurpose.Add(child.InnerText);
+
             foreach (IXmlNode attr in xn.Attributes)
             {
                 switch (attr.NodeName)
@@ -597,9 +604,6 @@ namespace StoryBuilder.DAL
                         break;
                     case "NewGoal":
                         scene.NewGoal = attr.InnerText;
-                        break;
-                    case "ScenePurpose":
-                        scene.ScenePurpose = attr.InnerText;
                         break;
                     case "ValueExchange":
                         scene.ValueExchange = attr.InnerText;

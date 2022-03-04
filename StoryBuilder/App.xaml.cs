@@ -295,7 +295,7 @@ public partial class App : Application
 
     private void OnUnhandledException(object sender, UnhandledExceptionEventArgs e)
     {
-        _log.LogException(LogLevel.Error, e.Exception, e.Message);
+        _log.LogException(LogLevel.Fatal, e.Exception, e.Message);
         _log.Flush();
         AbortApp();
     }

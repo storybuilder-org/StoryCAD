@@ -545,37 +545,24 @@ public class StoryWriter
         attr = _xml.CreateAttribute("SceneType");
         attr.Value = rec.SceneType;
         scene.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Char1");
-        attr.Value = rec.Char1;
-        scene.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Char2");
-        attr.Value = rec.Char2;
-        scene.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Char3");
-        attr.Value = rec.Char3;
-        scene.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Role1");
-        attr.Value = rec.Role1;
-        scene.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Role2");
-        attr.Value = rec.Role2;
-        scene.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Role3");
-        attr.Value = rec.Role3;
-        scene.Attributes.Append(attr);
-        XmlNode castList = _xml.CreateElement("CastMembers");
+         XmlNode castList = _xml.CreateElement("CastMembers");
         foreach (string member in rec.CastMembers)
         {
             XmlElement castMember = _xml.CreateElement("Member");
             castMember.AppendChild(_xml.CreateTextNode(member));
             castList.AppendChild(castMember);
         }
-        scene.AppendChild(castList);
+
+        XmlNode scenePurposeList = _xml.CreateElement("ScenePurpose");
+        foreach (string item in rec.ScenePurpose)
+        {
+            XmlElement Purpose = _xml.CreateElement("Purpose");
+            Purpose.AppendChild(_xml.CreateTextNode(item));
+            scenePurposeList.AppendChild(Purpose);
+        }
+        scene.AppendChild(scenePurposeList);
         attr = _xml.CreateAttribute("Remarks");
         attr.Value = rec.Remarks;
-        scene.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("ScenePurpose");
-        attr.Value = rec.ScenePurpose;
         scene.Attributes.Append(attr);
         attr = _xml.CreateAttribute("ValueExchange");
         attr.Value = rec.ValueExchange;

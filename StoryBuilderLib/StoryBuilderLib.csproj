@@ -66,6 +66,7 @@
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.0.0" />
     <PackageReference Include="NLog" Version="5.0.0-preview.3" />
     <PackageReference Include="NLog.Extensions.Logging" Version="5.0.0-preview.3" />
+    <PackageReference Include="Syncfusion.Editors.WinUI" Version="19.4.0.54" />
     <PackageReference Include="WinUIEx" Version="1.1.0" />
   </ItemGroup>
 
