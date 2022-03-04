@@ -45,7 +45,7 @@
                 <usercontrols:RichEditBoxExtended Header="Concept" RtfText="{x:Bind OverviewVm.Concept, Mode=TwoWay}" AcceptsReturn="True"
                                     IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                     ScrollViewer.VerticalScrollBarVisibility="Visible"
-                                    PlaceholderText="Use 'What if?' and 'What happens is..' to flesh out your idea." />
+                                    PlaceholderText="Use 'What if?' and 'What happens is' to flesh out your idea." />
             </PivotItem>
             <PivotItem Header="Premise">
                 <Grid>
