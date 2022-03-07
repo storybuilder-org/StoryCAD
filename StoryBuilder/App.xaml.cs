@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Windows.Storage;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
+using WinUIEx;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using PInvoke;
@@ -20,7 +21,7 @@ using StoryBuilder.Services.Search;
 using StoryBuilder.ViewModels;
 using StoryBuilder.ViewModels.Tools;
 using StoryBuilder.Views;
-using WinUIEx;
+
 using UnhandledExceptionEventArgs = Microsoft.UI.Xaml.UnhandledExceptionEventArgs;
 
 
@@ -133,9 +134,7 @@ public partial class App : Application
         _log = Ioc.Default.GetService<LogService>();
         _log.Log(LogLevel.Info, "StoryBuilder.App launched");
 
-        string localPath = GlobalData.RootDirectory;
-        StorageFolder localFolder = await StorageFolder.GetFolderFromPathAsync(localPath);
-        string pathMsg = string.Format("Configuration data location = " + localFolder.Path);
+        string pathMsg = string.Format("Configuration data location = " + GlobalData.RootDirectory);
         _log.Log(LogLevel.Info, pathMsg);
         Trace.Listeners.Add(new TextWriterTraceListener(Console.Out));
         Trace.AutoFlush = true;
@@ -143,44 +142,49 @@ public partial class App : Application
         Trace.WriteLine(pathMsg);
         // Load Preferences
         PreferencesService pref = Ioc.Default.GetService<PreferencesService>();
-        await pref.LoadPreferences(localPath);
+        await pref.LoadPreferences(GlobalData.RootDirectory);
 
         await ProcessInstallationFiles();
 
-        await LoadControls(localFolder.Path);
+        await LoadControls(GlobalData.RootDirectory);
 
-        await LoadLists(localFolder.Path);
+        await LoadLists(GlobalData.RootDirectory);
             
-        await LoadTools(localFolder.Path);
+        await LoadTools(GlobalData.RootDirectory);
 
         ConfigureNavigation();
 
-        //Creates new window and sets Min Height & Min Width
-        GlobalData.MainWindow = new();
-        GlobalData.MainWindow.MinHeight = 700;
-        GlobalData.MainWindow.MinWidth = 1050;
+        WindowEx mainWindow = new MainWindow();
+        (mainWindow as WindowEx).MinHeight = Height;
+        (mainWindow as WindowEx).MinWidth = Width;
+        mainWindow.SetWindowSize(Width, Height);
+        mainWindow.Title = "StoryBuilder";
 
         // Create a Frame to act as the navigation context and navigate to the first page (Shell)
         Frame rootFrame = new();
+        // Place the frame in the current Window
+        mainWindow.Content = rootFrame;
+        mainWindow.Activate();
+        mainWindow.CenterOnScreen(); //Centers the window on the monitor
+    
         if (rootFrame.Content == null)
         {
-            rootFrame.Navigate(GlobalData.Preferences.Initalised ? typeof(Shell) : typeof(Initialization));
+            rootFrame.Navigate(GlobalData.Preferences.PreferencesInitialised ? typeof(Shell) : typeof(PreferencesInitialization));
         }
-        // Place the frame in the current Window
-        GlobalData.MainWindow.Content = rootFrame;
-        GlobalData.MainWindow.Activate();
- 
+        GlobalData.MainWindow = (MainWindow) mainWindow;
         //Get the Window's HWND
         m_windowHandle = User32.GetActiveWindow();
-        GlobalData.MainWindow.Title = "StoryBuilder";
         GlobalData.WindowHandle = m_windowHandle;
+
+
+
         // The Window object doesn't (yet) have Width and Height properties in WInUI 3 Desktop yet.
         // To set the Width and Height, you can use the Win32 API SetWindowPos.
         // Note, you should apply the DPI scale factor if you are thinking of dpi instead of pixels.
-        SetWindowSize(m_windowHandle, Width, Height);   // was 800, 600
+        //SetWindowSize(m_windowHandle, Width, Height);   // was 800, 600
         _log.Log(LogLevel.Debug, $"Layout: Window size width={Width} height={Height}");
         _log.Log(LogLevel.Info, "StoryBuilder App loaded and launched");
-        GlobalData.MainWindow.CenterOnScreen(); //Centers the window on the monitor
+
     }
 
     private async Task ProcessInstallationFiles()

@@ -2,7 +2,7 @@
 
 namespace StoryBuilder;
 
-public sealed partial class MainWindow : WindowEx   
+public sealed partial class MainWindow : WindowEx 
 {
     public MainWindow()
     {

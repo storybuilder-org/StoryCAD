@@ -68,9 +68,9 @@ public class PreferencesIO
 
                     case "Initalised":
                         if (tokens[1] == "True")
-                            _model.Initalised = true;
+                            _model.PreferencesInitialised = true;
                         else
-                            _model.Initalised = false;
+                            _model.PreferencesInitialised = false;
                         break;
 
                     case "ErrorCollectionConsent":
@@ -159,7 +159,7 @@ public class PreferencesIO
         //Updates file
         List<string> NewPreferences = new();
         NewPreferences.Add("Newsletter=" + _model.Newsletter);
-        NewPreferences.Add("Initalised=" + _model.Initalised);
+        NewPreferences.Add("Initalised=" + _model.PreferencesInitialised);
         NewPreferences.Add("Name=" + _model.Name);
         NewPreferences.Add("Email=" + _model.Email);
         NewPreferences.Add("TimedBackupInterval=" + _model.TimedBackupInterval);

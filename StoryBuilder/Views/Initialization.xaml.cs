@@ -3,25 +3,29 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Windows.Storage;
 using Windows.Storage.Pickers;
-using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using StoryBuilder.ViewModels.Tools;
 using WinRT;
 
 namespace StoryBuilder.Views;
 
-public sealed partial class Initialization : Page
+/// <summary>
+/// This Page is displayed if Preferences.PreferencesInitialised
+/// is false.
+/// </summary>
+public sealed partial class PreferencesInitialization : Page
 {
     InitVM _initVM = Ioc.Default.GetService<InitVM>();
-    public Initialization()
+    public PreferencesInitialization()
     {
         InitializeComponent();
     }
 
     /// <summary>
     /// This is called when the browse button next to Project Path
-    /// once clicked it opens a folder picker. If cancled the folder
+    /// once clicked it opens a folder picker. If canceled, the folder
     /// will be null and nothing will happen.
     /// 
     /// If a folder is selected it will set the VM and UI versions of
