@@ -36,6 +36,10 @@ jobs:
     - name: Setup MSBuild.exe
       uses: microsoft/setup-msbuild@v1.0.2
 
+    #Bump version number
+    - name: Increase Version Number
+      run: ${{ github.run_number }} | Out-File -FilePath "D:\a\StoryBuilder-2\StoryBuilder-2\StoryBuilderLib\Assets\Install\RevisionID"
+
     # Restore the application to populate the obj folder with RuntimeIdentifiers
     - name: Restore the application
       run: msbuild $env:Solution_Name /t:Restore /p:Configuration=$env:Configuration
