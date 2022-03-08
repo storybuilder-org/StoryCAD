@@ -11,7 +11,8 @@ public sealed partial class About : Page
     public About()
     {
         InitializeComponent();
-        Version.Text = "Version: " + Windows.ApplicationModel.Package.Current.Id.Version.Major + "." + Windows.ApplicationModel.Package.Current.Id.Version.Minor + "." + Windows.ApplicationModel.Package.Current.Id.Version.Build;
+        string Revision = System.IO.File.ReadAllText(GlobalData.RootDirectory + "\\RevisionID");
+        Version.Text = "Version: " + Windows.ApplicationModel.Package.Current.Id.Version.Major + "." + Windows.ApplicationModel.Package.Current.Id.Version.Minor + "." + Windows.ApplicationModel.Package.Current.Id.Version.Build + "." + Revision;
         Path.Text = "Installation Directory: " + GlobalData.RootDirectory;
     }
 }
