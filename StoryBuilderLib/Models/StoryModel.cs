@@ -40,7 +40,6 @@ public class StoryModel
     public ObservableCollection<StoryNodeItem> ExplorerView;
     public ObservableCollection<StoryNodeItem> NarratorView;
     public StorageFolder ProjectFolder;
-    public StorageFolder FilesFolder;
     public StorageFile ProjectFile;
     public string ProjectPath;
     private string projectFilename;

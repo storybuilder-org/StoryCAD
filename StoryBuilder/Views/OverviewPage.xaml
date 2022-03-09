@@ -1,4 +1,4 @@
-﻿<local:BindablePage NavigationCacheMode="Required"
+<local:BindablePage NavigationCacheMode="Required"
     x:Class="StoryBuilder.Views.OverviewPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -61,7 +61,7 @@
                     <usercontrols:RichEditBoxExtended Header="Premise" Grid.Row="2" RtfText="{x:Bind OverviewVm.Premise, Mode=TwoWay}"
                                     IsReadOnly ="{x:Bind OverviewVm.PremiseLock, Mode=TwoWay}" TextWrapping="Wrap"
                                     ScrollViewer.VerticalScrollBarVisibility="Visible"
-                                    PlaceholderText="Select a problem as your main story problem. That problem's premise is your story premise. "/>
+                                    PlaceholderText="Select a Problem as your main story problem. That problem's premise is your story premise. "/>
                 </Grid>
             </PivotItem>
             <PivotItem Header="Structure">
