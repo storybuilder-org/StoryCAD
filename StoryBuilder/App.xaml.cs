@@ -35,8 +35,9 @@ namespace StoryBuilder;
 /// </summary>
 public partial class App : Application
 {
-    private const int Width = 1050;
-    private const int Height = 700;
+    private const double  Width = 2000;
+    private const double  Height = 1500;
+
     private const string HomePage = "HomePage";
     private const string OverviewPage = "OverviewPage";
     private const string ProblemPage = "ProblemPage";
@@ -155,8 +156,8 @@ public partial class App : Application
         ConfigureNavigation();
 
         WindowEx mainWindow = new MainWindow();
-        (mainWindow as WindowEx).MinHeight = Height;
-        (mainWindow as WindowEx).MinWidth = Width;
+        //(mainWindow as WindowEx).MinHeight = Height;
+        //(mainWindow as WindowEx).MinWidth = Width;
         mainWindow.SetWindowSize(Width, Height);
         mainWindow.Title = "StoryBuilder";
 
@@ -175,8 +176,6 @@ public partial class App : Application
         //Get the Window's HWND
         m_windowHandle = User32.GetActiveWindow();
         GlobalData.WindowHandle = m_windowHandle;
-
-
 
         // The Window object doesn't (yet) have Width and Height properties in WInUI 3 Desktop yet.
         // To set the Width and Height, you can use the Win32 API SetWindowPos.
