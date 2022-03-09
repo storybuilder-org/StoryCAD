@@ -1,4 +1,4 @@
-﻿<local:BindablePage NavigationCacheMode="Required"
+<local:BindablePage NavigationCacheMode="Required"
     x:Class="StoryBuilder.Views.OverviewPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -96,7 +96,7 @@
                         </Grid.ColumnDefinitions>
                         <editors:SfComboBox Header="Viewpoint" Grid.Column="0" MinWidth="200" IsEditable="True"
                                   ItemsSource="{x:Bind OverviewVm.ViewpointList}"
-                                  SelectedItem="{x:Bind OverviewVm.Viewpoint, Mode=TwoWay}" />
+                                  SelectedItem="{x:Bind OverviewVm.Viewpoint, Mode=TwoWay}" BorderThickness="1" />
                         <TextBlock Grid.Column="1" MinWidth="100"/>
                         <editors:SfComboBox Header="Literary Device" Grid.Column="2" MinWidth="200" IsEditable="True"
                                   ItemsSource="{x:Bind OverviewVm.LiteraryDeviceList}"

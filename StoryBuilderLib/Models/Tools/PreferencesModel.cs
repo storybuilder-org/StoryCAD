@@ -1,4 +1,6 @@
-﻿namespace StoryBuilder.Models.Tools;
+﻿using Microsoft.UI;
+
+namespace StoryBuilder.Models.Tools;
 
 /// <summary>
 /// PreferencesModel contains product and licensing information,
@@ -28,7 +30,7 @@ public class PreferencesModel
 
     // Visual changes
     public Microsoft.UI.Xaml.Media.SolidColorBrush PrimaryColor { get; set; } //Sets UI Color
-    public Microsoft.UI.Xaml.Media.SolidColorBrush SecondaryColor { get; set; } //Sets Text Color
+    public Microsoft.UI.Xaml.Media.SolidColorBrush SecondaryColor = new(Colors.Black); //Sets Text Color
     public bool QuoteOnStartup { get; set; }
 
     // Backup Information
