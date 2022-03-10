@@ -156,8 +156,8 @@ public partial class App : Application
         ConfigureNavigation();
 
         WindowEx mainWindow = new MainWindow();
-        //(mainWindow as WindowEx).MinHeight = Height;
-        //(mainWindow as WindowEx).MinWidth = Width;
+        (mainWindow as WindowEx).MinHeight = 1500;
+        (mainWindow as WindowEx).MinWidth = 1500;
         mainWindow.SetWindowSize(Width, Height);
         mainWindow.Title = "StoryBuilder";
 
