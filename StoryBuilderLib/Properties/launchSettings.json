@@ -2,7 +2,8 @@
   "profiles": {
     "StoryBuilderLib": {
       "commandName": "Project",
-      "nativeDebugging": true
+      "hotReloadEnabled": false,
+      "nativeDebugging": false
     }
   }
 }

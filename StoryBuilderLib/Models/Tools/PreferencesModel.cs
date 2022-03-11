@@ -25,7 +25,12 @@ public class PreferencesModel
     public string Email { get; set; }
     public bool ErrorCollectionConsent { get; set; }
     public bool Newsletter { get; set; }
-    public bool Initalised { get; set; } //this decides if the user should be shown the initalisation window
+
+    /// <summary>
+    /// This switch tracks whether this is a new 
+    /// installation. 
+    /// </summary>
+    public bool PreferencesInitialised { get; set; } 
     public int LastSelectedTemplate { get; set; } //This is the Last Template Selected by the user.3
 
     // Visual changes

@@ -195,9 +195,6 @@ namespace StoryBuilder.DAL
                     case "ViewPoint":
                         _overview.Viewpoint = attr.InnerText;
                         break;
-                    case "Form":
-                        _overview.LiteraryDevice = attr.InnerText;
-                        break;
                     case "LiteraryDevice":
                         _overview.LiteraryDevice = attr.InnerText;
                         break;

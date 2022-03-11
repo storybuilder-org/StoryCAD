@@ -10,7 +10,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Threading.Tasks;
 
 namespace StoryBuilder.ViewModels;
 
@@ -171,11 +170,11 @@ public class OverviewViewModel : ObservableRecipient, INavigable
         set => SetProperty(ref _voice, value);
     }
 
-    private string _literaryDevice;
-    public string LiteraryDevice
+    private string _literaryTechnique;
+    public string LiteraryTechnique
     {
-        get => _literaryDevice;
-        set => SetProperty(ref _literaryDevice, value);
+        get => _literaryTechnique;
+        set => SetProperty(ref _literaryTechnique, value);
     }
 
     private string _tense;
@@ -232,8 +231,6 @@ public class OverviewViewModel : ObservableRecipient, INavigable
 
     #endregion
 
-
-
     #region Methods
 
     public void Activate(object parameter)
@@ -271,7 +268,7 @@ public class OverviewViewModel : ObservableRecipient, INavigable
         Viewpoint = Model.Viewpoint;
         ViewpointCharacter = Model.ViewpointCharacter;
         Voice = Model.Voice;
-        LiteraryDevice = Model.LiteraryDevice;
+        LiteraryTechnique = Model.LiteraryDevice;
         Tense = Model.Tense;
         Style = Model.Style;
         Tone = Model.Tone;
@@ -300,7 +297,7 @@ public class OverviewViewModel : ObservableRecipient, INavigable
             Model.Viewpoint = Viewpoint;
             Model.ViewpointCharacter = ViewpointCharacter;
             Model.Voice = Voice;
-            Model.LiteraryDevice = LiteraryDevice;
+            Model.LiteraryDevice = LiteraryTechnique;
             Model.Style = Style;
             Model.Tense = Tense;
             Model.Style = Style;
@@ -359,7 +356,7 @@ public class OverviewViewModel : ObservableRecipient, INavigable
     public ObservableCollection<string> StoryTypeList;
     public ObservableCollection<string> GenreList;
     public ObservableCollection<string> ViewpointList;
-    public ObservableCollection<string> LiteraryDeviceList;
+    public ObservableCollection<string> LiteraryTechniqueList;
     public ObservableCollection<string> LiteraryStyleList;
     public ObservableCollection<string> VoiceList;
     public ObservableCollection<string> TenseList;
@@ -379,12 +376,22 @@ public class OverviewViewModel : ObservableRecipient, INavigable
         _wtr = Ioc.Default.GetService<StoryWriter>();
         _rdr = Ioc.Default.GetService<StoryReader>();
 
+        Dictionary<string, ObservableCollection<string>> lists = GlobalData.ListControlSource;
+        StoryTypeList = lists["StoryType"];
+        GenreList = lists["Genre"];
+        ViewpointList = lists["Viewpoint"];
+        LiteraryTechniqueList = lists["LiteraryTechnique"];
+        VoiceList = lists["Voice"];
+        TenseList = lists["Tense"];
+        StyleList = lists["LiteraryStyle"];
+        ToneList = lists["Tone"];
+
         DateCreated = string.Empty;
         Author = string.Empty;
         DateModified = string.Empty;
         StoryType = string.Empty;
         StoryGenre = string.Empty;
-        LiteraryDevice = string.Empty;
+        LiteraryTechnique = string.Empty;
         Viewpoint = string.Empty;
         Style = string.Empty;
         Tone = string.Empty;
@@ -396,16 +403,6 @@ public class OverviewViewModel : ObservableRecipient, INavigable
         ToneNotes = string.Empty;
         Notes = string.Empty;
         StoryProblem = string.Empty;
-
-        Dictionary<string, ObservableCollection<string>> lists = GlobalData.ListControlSource;
-        StoryTypeList = lists["StoryType"];
-        GenreList = lists["Genre"];
-        ViewpointList = lists["Viewpoint"];
-        LiteraryDeviceList = lists["LiteraryDevice"];
-        VoiceList = lists["Voice"];
-        TenseList = lists["Tense"];
-        StyleList = lists["LiteraryStyle"];
-        ToneList = lists["Tone"];
 
         PropertyChanged += OnPropertyChanged;
 

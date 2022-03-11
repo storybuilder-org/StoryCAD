@@ -1,10 +1,8 @@
-﻿using CommunityToolkit.Mvvm.DependencyInjection;
-using StoryBuilder.ViewModels;
-using WinUIEx;
+﻿using WinUIEx;
 
 namespace StoryBuilder;
 
-public sealed partial class MainWindow
+public sealed partial class MainWindow : WindowEx 
 {
     public MainWindow()
     {

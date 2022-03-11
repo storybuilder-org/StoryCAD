@@ -45,7 +45,7 @@
                 <usercontrols:RichEditBoxExtended Header="Concept" RtfText="{x:Bind OverviewVm.Concept, Mode=TwoWay}" AcceptsReturn="True"
                                     IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                     ScrollViewer.VerticalScrollBarVisibility="Visible"
-                                    PlaceholderText="Use 'What if?' and 'What happens is..' to flesh out your idea." />
+                                    PlaceholderText="Use 'What if?' and 'What happens is' to flesh out your idea." />
             </PivotItem>
             <PivotItem Header="Premise">
                 <Grid>
@@ -80,11 +80,11 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
-                        <editors:SfComboBox Header="Type" Grid.Column="0" MinWidth="200" IsEditable="True"
+                        <editors:SfComboBox Header="Type" Grid.Column="0" IsEditable="False" MinWidth="200"
                                   ItemsSource="{x:Bind OverviewVm.StoryTypeList}"
                                   SelectedItem="{x:Bind OverviewVm.StoryType, Mode=TwoWay}" />
                         <TextBlock Grid.Column="1" MinWidth="100"/>
-                        <editors:SfComboBox Header="Genre" Grid.Column="2" MinWidth="200" IsEditable="True"
+                        <editors:SfComboBox Header="Genre" Grid.Column="2" IsEditable="False" MinWidth="200"
                                   ItemsSource="{x:Bind OverviewVm.GenreList}"
                                   SelectedItem="{x:Bind OverviewVm.StoryGenre, Mode=TwoWay}" />
                     </Grid>
@@ -94,15 +94,15 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
-                        <editors:SfComboBox Header="Viewpoint" Grid.Column="0" MinWidth="200" IsEditable="True"
+                        <editors:SfComboBox Header="Viewpoint" Grid.Column="0" IsEditable="False" MinWidth="200" 
                                   ItemsSource="{x:Bind OverviewVm.ViewpointList}"
                                   SelectedItem="{x:Bind OverviewVm.Viewpoint, Mode=TwoWay}" BorderThickness="1" />
                         <TextBlock Grid.Column="1" MinWidth="100"/>
-                        <editors:SfComboBox Header="Literary Device" Grid.Column="2" MinWidth="200" IsEditable="True"
-                                  ItemsSource="{x:Bind OverviewVm.LiteraryDeviceList}"
-                                  SelectedItem="{x:Bind OverviewVm.LiteraryDevice, Mode=TwoWay}" />
+                        <editors:SfComboBox Header="Literary Technique" IsEditable="False" Grid.Column="2" MinWidth="200" 
+                                  ItemsSource="{x:Bind OverviewVm.LiteraryTechniqueList}"
+                                  SelectedItem="{x:Bind OverviewVm.LiteraryTechnique, Mode=TwoWay}" />
                     </Grid>
-                    <usercontrols:CharacterName Header="Viewpoint Character" Grid.Row="2" IsEditable="False" MinWidth="300"
+                    <usercontrols:CharacterName  Header="Viewpoint Character" Grid.Row="2" IsEditable="False" MinWidth="300"
                               DisplayMemberPath="Name"
                               SelectedItem="{x:Bind OverviewVm.ViewpointCharacter, Mode=TwoWay, Converter={StaticResource ToStoryElement}}" />
                     <Grid Grid.Row="3" HorizontalAlignment="Left" >
@@ -111,11 +111,11 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
-                        <editors:SfComboBox Header="Voice" Grid.Column="0" MinWidth="200" IsEditable="True"
+                        <editors:SfComboBox Header="Voice" Grid.Column="0" IsEditable="False" MinWidth="200" 
                                   ItemsSource="{x:Bind OverviewVm.VoiceList}"
                                   SelectedItem="{x:Bind OverviewVm.Voice, Mode=TwoWay}" />
                         <TextBlock Grid.Column="1" MinWidth="100"/>
-                        <editors:SfComboBox Header="Tense" Grid.Column="2" MinWidth="200" IsEditable="True"
+                        <editors:SfComboBox Header="Tense" Grid.Column="2" IsEditable="False" MinWidth="200" 
                                   ItemsSource="{x:Bind OverviewVm.TenseList}"
                                   SelectedItem="{x:Bind OverviewVm.Tense, Mode=TwoWay}" />
                     </Grid>
@@ -125,11 +125,11 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="2*"/>
                     </Grid.ColumnDefinitions>
-                        <editors:SfComboBox Header="Style" Grid.Column="0" MinWidth="200" IsEditable="True"
+                        <editors:SfComboBox Header="Style" Grid.Column="0" IsEditable="False" MinWidth="200" 
                                   ItemsSource="{x:Bind OverviewVm.StyleList}"
                                   SelectedItem="{x:Bind OverviewVm.Style, Mode=TwoWay}" />
                         <TextBlock Grid.Column="1" MinWidth="100"/>
-                        <editors:SfComboBox Header="Tone" Grid.Column="2" MinWidth="200" IsEditable="True"
+                        <editors:SfComboBox Header="Tone" Grid.Column="2" IsEditable="False" MinWidth="200"  
                                   ItemsSource="{x:Bind OverviewVm.ToneList}"
                                   SelectedItem="{x:Bind OverviewVm.Tone, Mode=TwoWay}" />
                     </Grid>

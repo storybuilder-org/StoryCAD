@@ -63,7 +63,6 @@ namespace StoryBuilder.ViewModels
         public readonly SearchService Search;
 
         private DispatcherTimer statusTimer;
-        private TimeSpan interval;
 
         // The current story outline being processed. 
         public StoryModel StoryModel;
@@ -371,7 +370,7 @@ namespace StoryBuilder.ViewModels
             _contentDialog.Hide();
         }
 
-        private async void OpenUnifiedMenu()                      
+        public async Task OpenUnifiedMenu()                      
         {
             _canExecuteCommands = false;
             // Needs logging
@@ -1937,7 +1936,7 @@ namespace StoryBuilder.ViewModels
 
             _canExecuteCommands = true;
             TogglePaneCommand = new RelayCommand(TogglePane, () => _canExecuteCommands);
-            OpenUnifiedCommand = new RelayCommand(OpenUnifiedMenu, () => _canExecuteCommands);
+            OpenUnifiedCommand = new RelayCommand(async () => await OpenUnifiedMenu(), () => _canExecuteCommands);
             CloseUnifiedCommand = new RelayCommand(CloseUnifiedMenu, () => _canExecuteCommands);
             PrintNodeCommand = new RelayCommand(async () => await PrintCurrentNodeAsync(), () => _canExecuteCommands);
             OpenFileCommand = new RelayCommand(async () => await OpenFile(), () => _canExecuteCommands);
