@@ -152,13 +152,6 @@ public class OverviewModel : StoryElement
         set => _tone = value;
     }
 
-    private string _toneNotes;
-    public string ToneNotes
-    {
-        get => _toneNotes;
-        set => _toneNotes = value;
-    }
-
     // Notes data
 
     private string _notes;
@@ -190,7 +183,6 @@ public class OverviewModel : StoryElement
         StoryIdea = string.Empty;
         Concept = string.Empty;
         StructureNotes = string.Empty;
-        ToneNotes = string.Empty;
         Notes = string.Empty;
         StoryProblem = string.Empty;
 
@@ -216,7 +208,6 @@ public class OverviewModel : StoryElement
         StoryIdea = string.Empty;
         Concept = string.Empty;
         StructureNotes = string.Empty;
-        ToneNotes = string.Empty;
         Notes = string.Empty;
         StoryProblem = string.Empty;
 
@@ -243,7 +234,6 @@ public class OverviewModel : StoryElement
         StoryIdea = string.Empty;
         Concept = string.Empty;
         StructureNotes = string.Empty;
-        ToneNotes = string.Empty;
         Notes = string.Empty;
         StoryProblem = string.Empty;
 

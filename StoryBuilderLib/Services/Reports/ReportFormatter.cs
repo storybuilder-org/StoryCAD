@@ -58,7 +58,6 @@ public class ReportFormatter
             sb.Replace("@Style", overview.Style);
             sb.Replace("@StructureNotes", GetText(overview.StructureNotes));
             sb.Replace("@Tone", overview.Tone);
-            sb.Replace("@toneNotes", GetText(overview.ToneNotes));
             sb.Replace("@Notes", GetText(overview.Notes));
             doc.AddText(sb.ToString());
             doc.AddNewLine();

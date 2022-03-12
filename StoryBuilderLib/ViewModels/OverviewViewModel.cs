@@ -205,13 +205,6 @@ public class OverviewViewModel : ObservableRecipient, INavigable
         set => SetProperty(ref _tone, value);
     }
 
-    private string _toneNotes;
-    public string ToneNotes
-    {
-        get => _toneNotes;
-        set => SetProperty(ref _toneNotes, value);
-    }
-
     // Notes data
 
     private string _notes;
@@ -277,7 +270,6 @@ public class OverviewViewModel : ObservableRecipient, INavigable
         StoryIdea = Model.StoryIdea;
         Concept = Model.Concept;
         StructureNotes = Model.StructureNotes;
-        ToneNotes = Model.ToneNotes;
         Notes = Model.Notes;
 
         _changeable = true;
@@ -306,7 +298,6 @@ public class OverviewViewModel : ObservableRecipient, INavigable
             Model.StoryIdea = StoryIdea;
             Model.Concept = Concept;
             Model.StructureNotes = StructureNotes;
-            Model.ToneNotes = ToneNotes;
             Model.Notes = Notes;
         }
     }
@@ -400,7 +391,6 @@ public class OverviewViewModel : ObservableRecipient, INavigable
         Premise = string.Empty;
         PremiseLock = true;     // Premise is read-only and is only set when a story problem is selected
         StructureNotes = string.Empty;
-        ToneNotes = string.Empty;
         Notes = string.Empty;
         StoryProblem = string.Empty;
 
