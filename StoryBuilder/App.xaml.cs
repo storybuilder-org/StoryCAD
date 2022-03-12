@@ -146,8 +146,10 @@ public partial class App : Application
         int dpi = User32.GetDpiForWindow(mainWindow.GetWindowHandle());
         float scalingFactor = (float)dpi / 96;
 
-        mainWindow.MinHeight = 700 * scalingFactor;
-        mainWindow.MinWidth = 1050 * scalingFactor;
+        mainWindow.MinHeight = 675 * scalingFactor;
+        mainWindow.MinWidth = 900 * scalingFactor;
+        mainWindow.Width = 1050 * scalingFactor;
+        mainWindow.Height = 750 * scalingFactor;
         mainWindow.Title = "StoryBuilder";
 
         // Create a Frame to act as the navigation context and navigate to the first page (Shell)
