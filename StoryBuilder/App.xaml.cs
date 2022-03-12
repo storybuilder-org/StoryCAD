@@ -35,9 +35,6 @@ namespace StoryBuilder;
 /// </summary>
 public partial class App : Application
 {
-    private const double  Width = 2000;
-    private const double  Height = 1500;
-
     private const string HomePage = "HomePage";
     private const string OverviewPage = "OverviewPage";
     private const string ProblemPage = "ProblemPage";
@@ -51,16 +48,6 @@ public partial class App : Application
     private LogService _log;
 
     private IntPtr m_windowHandle;
-
-    private static void SetWindowSize(IntPtr hwnd, int windowWidth, int windowHeight)
-    {
-        int dpi = User32.GetDpiForWindow(hwnd);
-        float scalingFactor = (float)dpi / 96;
-        windowWidth = (int)(windowWidth * scalingFactor);
-        windowHeight = (int)(windowHeight * scalingFactor);
-
-        User32.SetWindowPos(hwnd, User32.SpecialWindowHandles.HWND_TOP, 0, 0, windowWidth, windowHeight, User32.SetWindowPosFlags.SWP_SHOWWINDOW);
-    }
 
     /// <summary>
     /// Initializes the singleton application object.  This is the first line of authored code
@@ -156,9 +143,11 @@ public partial class App : Application
         ConfigureNavigation();
 
         WindowEx mainWindow = new MainWindow();
-        (mainWindow as WindowEx).MinHeight = 1500;
-        (mainWindow as WindowEx).MinWidth = 1500;
-        mainWindow.SetWindowSize(Width, Height);
+        int dpi = User32.GetDpiForWindow(mainWindow.GetWindowHandle());
+        float scalingFactor = (float)dpi / 96;
+
+        mainWindow.MinHeight = 700 * scalingFactor;
+        mainWindow.MinWidth = 1050 * scalingFactor;
         mainWindow.Title = "StoryBuilder";
 
         // Create a Frame to act as the navigation context and navigate to the first page (Shell)
@@ -181,8 +170,8 @@ public partial class App : Application
         // To set the Width and Height, you can use the Win32 API SetWindowPos.
         // Note, you should apply the DPI scale factor if you are thinking of dpi instead of pixels.
         //SetWindowSize(m_windowHandle, Width, Height);   // was 800, 600
-        _log.Log(LogLevel.Debug, $"Layout: Window size width={Width} height={Height}");
-        _log.Log(LogLevel.Info, "StoryBuilder App loaded and launched");
+        //_log.Log(LogLevel.Debug, $"Layout: Window size width={Width} height={Height}");
+        //_log.Log(LogLevel.Info, "StoryBuilder App loaded and launched");
 
     }
 
