@@ -171,9 +171,8 @@ public partial class App : Application
         // The Window object doesn't (yet) have Width and Height properties in WInUI 3 Desktop yet.
         // To set the Width and Height, you can use the Win32 API SetWindowPos.
         // Note, you should apply the DPI scale factor if you are thinking of dpi instead of pixels.
-        //SetWindowSize(m_windowHandle, Width, Height);   // was 800, 600
-        //_log.Log(LogLevel.Debug, $"Layout: Window size width={Width} height={Height}");
-        //_log.Log(LogLevel.Info, "StoryBuilder App loaded and launched");
+        _log.Log(LogLevel.Debug, $"Layout: Window size width={mainWindow.Width} height={mainWindow.Height}");
+        _log.Log(LogLevel.Info, "StoryBuilder App loaded and launched");
 
     }
 
