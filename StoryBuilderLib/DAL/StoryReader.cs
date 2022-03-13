@@ -225,9 +225,6 @@ namespace StoryBuilder.DAL
                     case "StructureNotes":
                         _overview.StructureNotes = attr.InnerText;
                         break;
-                    case "ToneNotes":
-                        _overview.ToneNotes = attr.InnerText;
-                        break;
                     case "Notes":
                         _overview.Notes = attr.InnerText;
                         break;

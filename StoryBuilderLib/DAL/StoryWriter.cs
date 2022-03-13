@@ -189,9 +189,6 @@ public class StoryWriter
         attr = _xml.CreateAttribute("StructureNotes");
         attr.Value = rec.StructureNotes;
         overview.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("ToneNotes");
-        attr.Value = rec.ToneNotes;
-        overview.Attributes.Append(attr);
         attr = _xml.CreateAttribute("Notes");
         attr.Value = rec.Notes;
         overview.Attributes.Append(attr);
