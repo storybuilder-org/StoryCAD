@@ -22,6 +22,7 @@ public class LogService : ILogService
         try
         {
             string apiKey = Environment.GetEnvironmentVariable("API-KEY");
+
             string logID = Environment.GetEnvironmentVariable("Log-ID");
             LoggingConfiguration config = new();
 
@@ -45,6 +46,16 @@ public class LogService : ILogService
             {
                 // create elmah.io target
                 var elmahIoTarget = new ElmahIoTarget();
+
+                elmahIoTarget.OnMessage = msg =>
+                {
+                    msg.Version = Windows.ApplicationModel.Package.Current.Id.Version.Major + "."
+                    + Windows.ApplicationModel.Package.Current.Id.Version.Minor + "."
+                    + Windows.ApplicationModel.Package.Current.Id.Version.Build + " Build " + File.ReadAllText(GlobalData.RootDirectory + "\\RevisionID");
+
+                    msg.User = GlobalData.Preferences.Name + " " + GlobalData.Preferences.Email;
+                };
+
                 elmahIoTarget.Name = "elmahio";
                 elmahIoTarget.ApiKey = apiKey;
                 elmahIoTarget.LogId = logID;
@@ -89,7 +100,7 @@ public class LogService : ILogService
                 Logger.Debug(message);
                 break;
             case LogLevel.Info:
-                        Logger.Info(message);
+                Logger.Info(message);
                 break;
             case LogLevel.Warn:
                 Logger.Warn(message);
