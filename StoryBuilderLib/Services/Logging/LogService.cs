@@ -26,12 +26,21 @@ public class LogService : ILogService
             //string apiKey = Environment.GetEnvironmentVariable("API-KEY");
             //string logID = Environment.GetEnvironmentVariable("Log-ID");
 
-            string keyVaultUri = "https://storybuilder-secrets.vault.azure.net/";
-            SecretClient secretClient = new SecretClient(new Uri(keyVaultUri), new EnvironmentCredential());
-
-            KeyVaultSecret apiSecret = secretClient.GetSecret("Elmah-API-key");
+            SecretClient secretClient = null;
+            KeyVaultSecret apiSecret = null;
+            KeyVaultSecret logSecret = null;
+            try
+            {
+                string keyVaultUri = "https://storybuilder-secrets.vault.azure.net/";
+                secretClient = new SecretClient(new Uri(keyVaultUri), new EnvironmentCredential());
+                apiSecret = secretClient.GetSecret("Elmah-API-key");
+                logSecret = secretClient.GetSecret("Elmah-Log-ID");
+            }
+            catch (Exception ex) 
+            {
+                Console.WriteLine(ex.Message);
+            }
             string apiKey = apiSecret.Value.ToString();
-            KeyVaultSecret logSecret = secretClient.GetSecret("Elmah-Log-ID");
             string logID = logSecret.Value.ToString();
 
             LoggingConfiguration config = new();
