@@ -1233,20 +1233,12 @@ namespace StoryBuilder.ViewModels
                 return;
             }
 
-            if (CurrentNode.Parent.IsRoot)
+            if (CurrentNode.Parent != null && CurrentNode.Parent.IsRoot)
             {
                 Messenger.Send(new StatusChangedMessage(new($"Cannot move further left", LogLevel.Info)));
                 return;
             }
-            _sourceChildren = CurrentNode.Parent.Children;
-            _sourceIndex = _sourceChildren.IndexOf(CurrentNode);
-            _targetCollection = null;
-            _targetIndex = -1;
-            StoryNodeItem targetParent = CurrentNode.Parent.Parent;
 
-            // The source must become the parent's successor
-            _targetCollection = CurrentNode.Parent.Parent.Children;
-            _targetIndex = _targetCollection.IndexOf(CurrentNode.Parent) + 1;
 
             if (!MoveIsValid()) // Verify message
             {
@@ -1254,12 +1246,28 @@ namespace StoryBuilder.ViewModels
                 return;
             }
 
-            _sourceChildren.RemoveAt(_sourceIndex);
-            if (_targetIndex == -1)
-                _targetCollection.Add(CurrentNode);
+            if (CurrentNode.Parent != null)
+            {
+                _sourceChildren = CurrentNode.Parent.Children;
+                _sourceIndex = _sourceChildren.IndexOf(CurrentNode);
+                _targetCollection = null;
+                _targetIndex = -1;
+                StoryNodeItem targetParent = CurrentNode.Parent.Parent;
+                // The source must become the parent's successor
+                _targetCollection = CurrentNode.Parent.Parent.Children;
+                _targetIndex = _targetCollection.IndexOf(CurrentNode.Parent) + 1;
+
+
+                _sourceChildren.RemoveAt(_sourceIndex);
+                if (_targetIndex == -1) { _targetCollection.Add(CurrentNode); }
+                else { _targetCollection.Insert(_targetIndex, CurrentNode); }
+                CurrentNode.Parent = targetParent;
+            }
             else
-                _targetCollection.Insert(_targetIndex, CurrentNode);
-            CurrentNode.Parent = targetParent;
+            {
+                Messenger.Send(new StatusChangedMessage(new($"Cannot move root node.", LogLevel.Info)));
+                return;
+            }
         }
 
         private void MoveTreeViewItemRight()
@@ -1279,11 +1287,19 @@ namespace StoryBuilder.ViewModels
             //    StatusMessage = "Cannot move further right";
             //    return;
             //}
+            if (CurrentNode.Parent != null)
+            {
+                _sourceChildren = CurrentNode.Parent.Children;
+                _sourceIndex = _sourceChildren.IndexOf(CurrentNode);
+                _targetCollection = null;
+                _targetIndex = -1;
+            }
+            else
+            {
+                Messenger.Send(new StatusChangedMessage(new($"Cannot move root node.", LogLevel.Info)));
+                return;
+            }
 
-            _sourceChildren = CurrentNode.Parent.Children;
-            _sourceIndex = _sourceChildren.IndexOf(CurrentNode);
-            _targetCollection = null;
-            _targetIndex = -1;
 
             if (_sourceIndex > 0) // not first child, new parent will be previous sibling
             {
