@@ -38,7 +38,7 @@
                         <TextBlock Grid.Column="1" MinWidth="100"/>
                         <editors:SfComboBox Header="Season" Grid.Column="2" IsEditable="True" MinWidth="200"
                                   ItemsSource="{x:Bind SettingVm.SeasonList}"
-                                  SelectedItem="{x:Bind SettingVm.Locale, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                  SelectedItem="{x:Bind SettingVm.Season, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     </Grid>
                     <Grid Grid.Row="1" HorizontalAlignment="Left">
                         <Grid.ColumnDefinitions>
