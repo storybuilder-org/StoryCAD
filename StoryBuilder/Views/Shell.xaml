@@ -229,20 +229,11 @@
                         <MenuFlyout>
                             <MenuFlyoutItem Text="Key Questions" Command="{x:Bind ShellVm.KeyQuestionsCommand, Mode=OneWay}" />
                             <MenuFlyoutItem Text="Topic Information" Command="{x:Bind ShellVm.TopicsCommand, Mode=OneWay}" />
-                            <MenuFlyoutSubItem Text="Characterization Aids">
-                                <MenuFlyoutItem Text="Character Relationships" />
-                                <MenuFlyoutItem Text="Virtues and Vices" />
-                                <MenuFlyoutItem Text="Skills and Abilities" />
-                                <MenuFlyoutItem Text="Male First Names" />
-                                <MenuFlyoutItem Text="Female First Names" />
-                                <MenuFlyoutItem Text="Last Names" />
-                            </MenuFlyoutSubItem>
-                            <MenuFlyoutSubItem Text="Plotting Aids">
+                                <MenuFlyoutSubItem Text="Plotting Aids">
                                 <MenuFlyoutItem Text="Master Plots" Command="{x:Bind ShellVm.MasterPlotsCommand, Mode=OneWay}" />
                                 <MenuFlyoutItem Text="Dramatic Situations" Command="{x:Bind ShellVm.DramaticSituationsCommand, Mode=OneWay}"/>
                                 <MenuFlyoutItem Text="Stock Scenes" Command="{x:Bind ShellVm.StockScenesCommand, Mode=OneWay}"/>
                             </MenuFlyoutSubItem>
-                            <MenuFlyoutItem Text="Quotes" />
                         </MenuFlyout>
                     </AppBarButton.Flyout>
                 </AppBarButton>
