@@ -1118,11 +1118,16 @@ namespace StoryBuilder.ViewModels
 
                 if (result == ContentDialogResult.Primary)   // Copy command
                 {
-                    SceneModel sceneVar = new SceneModel(StoryModel);
+                    if (Ioc.Default.GetService<StockScenesViewModel>().SceneName == "")
+                    {
+                        Messenger.Send(new StatusChangedMessage(new($"You need to load a Story first!", LogLevel.Warn)));
+                    }
+
+                    SceneModel sceneVar = new SceneModel(StoryModel); 
                     sceneVar.Name = Ioc.Default.GetService<StockScenesViewModel>().SceneName;
                     StoryNodeItem newNode = new(sceneVar, RightTappedNode);
                     _sourceChildren = RightTappedNode.Children;
-                    _sourceChildren.Add(newNode);
+                    TreeViewNodeClicked(newNode);
                     RightTappedNode.IsExpanded = true;
                     newNode.IsSelected = true;
                     Logger.Log(LogLevel.Info, "Stock Scenes finished");
