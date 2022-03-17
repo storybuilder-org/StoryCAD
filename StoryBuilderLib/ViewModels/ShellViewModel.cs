@@ -1050,7 +1050,8 @@ namespace StoryBuilder.ViewModels
             string msg;
             if (RightTappedNode == null) 
             {
-                Messenger.Send(new StatusChangedMessage(new($"Right tap a node to add this node to.", LogLevel.Info, false)));
+                msg = $"Right tap a node to add this node to.";
+                Messenger.Send(new StatusChangedMessage(new StatusMessage(msg, LogLevel.Warn, false)));
                 return;
             }
             switch (result)
@@ -1063,7 +1064,7 @@ namespace StoryBuilder.ViewModels
                     problem.Notes = situationModel.Notes;
 
                     // Insert the new Problem as the target's child
-                    newNode = new(problem, RightTappedNode);
+                    newNode = new StoryNodeItem(problem, RightTappedNode);
                     msg = $"Problem {situationModel.SituationName} inserted";
                     ShowChange();
                     break;
@@ -1075,26 +1076,18 @@ namespace StoryBuilder.ViewModels
                     sceneVar.Remarks = "See Notes.";
                     sceneVar.Notes = situationModel.Notes;
                     // Insert the new Scene as the target's child
-                    newNode = new(sceneVar, RightTappedNode);
+                    newNode = new StoryNodeItem(sceneVar, RightTappedNode);
                     msg = $"Scene {situationModel.SituationName} inserted";
                     ShowChange();
                     break;
                 }
                 default:
-                    msg = "MasterPlot cancelled";
+                    msg = "Dratatic Situation tool cancelled";
                     break;
             }
+            Logger.Log(LogLevel.Info, msg);
             Messenger.Send(new StatusChangedMessage(new(msg, LogLevel.Info, true)));
 
-            try
-            {
-                RightTappedNode.IsExpanded = true;
-            }
-            catch (Exception ex) //This is expected if no story is loaded
-            {
-                Messenger.Send(new StatusChangedMessage(new("Error expanding right tapped node", LogLevel.Info, true)));
-            }
-            newNode.IsSelected = true;
             Logger.Log(LogLevel.Info, "Dramatic Situations finished");
         }
 
