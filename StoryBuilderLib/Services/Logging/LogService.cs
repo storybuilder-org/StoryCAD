@@ -16,7 +16,6 @@ public class LogService : ILogService
 {
     private static readonly Logger Logger;
     private static readonly string logFilePath;
-
     static LogService()
     {
         try
@@ -35,8 +34,7 @@ public class LogService : ILogService
             fileTarget.MaxArchiveFiles = 7;
             fileTarget.ArchiveEvery = FileArchivePeriod.Day;
             fileTarget.ConcurrentWrites = true;
-            fileTarget.Layout =
-                "${longdate} | ${level} | ${message} | ${exception:format=Message,StackTrace,Data:MaxInnerExceptionLevel=5}";
+            fileTarget.Layout = "${longdate} | ${level} | ${message} | ${exception:format=Message,StackTrace,Data:MaxInnerExceptionLevel=5}";
             LoggingRule fileRule = new("*", NLog.LogLevel.Info, fileTarget);
             config.AddTarget("logfile", fileTarget);
             config.LoggingRules.Add(fileRule);
@@ -47,13 +45,13 @@ public class LogService : ILogService
                 // create elmah.io target
                 var elmahIoTarget = new ElmahIoTarget();
 
-                elmahIoTarget.OnMessage = msg =>
+                elmahIoTarget.OnMessage += msg =>
                 {
                     msg.Version = Windows.ApplicationModel.Package.Current.Id.Version.Major + "."
                     + Windows.ApplicationModel.Package.Current.Id.Version.Minor + "."
                     + Windows.ApplicationModel.Package.Current.Id.Version.Build + " Build " + File.ReadAllText(GlobalData.RootDirectory + "\\RevisionID");
 
-                    msg.User = GlobalData.Preferences.Name + " " + GlobalData.Preferences.Email;
+                    msg.User = GlobalData.Preferences.Name + $"({GlobalData.Preferences.Email})";
                 };
 
                 elmahIoTarget.Name = "elmahio";
