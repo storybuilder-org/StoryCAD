@@ -456,9 +456,9 @@ public class SceneViewModel : ObservableRecipient, INavigable
     {
         // Edit the character to add
         StoryElement element = StringToStoryElement(NewCastMember);
-        if (NewCastMember == null)
+        if (element == null)
         {
-            Messenger.Send(new StatusChangedMessage(new StatusMessage("Select a character to add to scene cast, 200", LogLevel.Warn)));
+            Messenger.Send(new StatusChangedMessage(new StatusMessage("Select a character to add to scene cast", LogLevel.Warn, true)));
             return;
         }
         if (CastMemberExists(NewCastMember))

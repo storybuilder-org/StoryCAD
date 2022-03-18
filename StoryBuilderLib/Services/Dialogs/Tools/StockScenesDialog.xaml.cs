@@ -14,5 +14,6 @@ public sealed partial class StockScenesDialog : Page
     {
         InitializeComponent();
         DataContext = StockScenesVm;
+        StockScenesVm.CategoryName = StockScenesVm.StockSceneCategories[0];
     }
 }
