@@ -23,8 +23,8 @@ public class LogService : ILogService
     {
         try
         {
-            //string apiKey = Environment.GetEnvironmentVariable("API-KEY");
-            //string logID = Environment.GetEnvironmentVariable("Log-ID");
+            string apiKey = Environment.GetEnvironmentVariable("API-KEY");
+            string logID = Environment.GetEnvironmentVariable("Log-ID");
 
             SecretClient secretClient = null;
             KeyVaultSecret apiSecret = null;
@@ -32,16 +32,27 @@ public class LogService : ILogService
             try
             {
                 string keyVaultUri = "https://storybuilder-secrets.vault.azure.net/";
-                secretClient = new SecretClient(new Uri(keyVaultUri), new EnvironmentCredential());
+                EnvironmentCredential credential = new EnvironmentCredential();
+                secretClient = new SecretClient(new Uri(keyVaultUri), credential);
                 apiSecret = secretClient.GetSecret("Elmah-API-key");
                 logSecret = secretClient.GetSecret("Elmah-Log-ID");
             }
-            catch (Exception ex) 
+            catch (AuthenticationFailedException ex)
             {
                 Console.WriteLine(ex.Message);
             }
-            string apiKey = apiSecret.Value.ToString();
-            string logID = logSecret.Value.ToString();
+            //catch (CredentialUnavailableException ex)
+            //{
+            //    Console.WriteLine(ex.Message);
+            //}
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            if (apiSecret != null)
+                apiKey = apiSecret.Value.ToString();
+            if (logSecret != null)
+                logID = logSecret.Value.ToString();
 
             LoggingConfiguration config = new();
 
