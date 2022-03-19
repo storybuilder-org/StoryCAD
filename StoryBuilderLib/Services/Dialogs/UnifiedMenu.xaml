@@ -13,9 +13,9 @@
         </Grid.ColumnDefinitions>
 
         <ListBox Grid.Column="0" VerticalAlignment="Stretch" CornerRadius="10" SelectionChanged="{x:Bind UnifiedMenuVM.SidebarChange, Mode=OneWay}" SelectedItem="{x:Bind UnifiedMenuVM.CurrentTab, Mode=TwoWay}">
-            <ListBoxItem Content="Recent files"/>
-            <ListBoxItem Content="Create new story"/>
-            <ListBoxItem Content="Sample stories"/>
+            <ListBoxItem Content="Recent files" Name="Recent"/>
+            <ListBoxItem Content="Create new story" Name="New"/>
+            <ListBoxItem Content="Sample stories" Name="Example"/>
         </ListBox>
         <StackPanel Padding="20" Grid.Column="1" Name="MenuContent" MinWidth="500" HorizontalAlignment="Center" VerticalAlignment="Stretch"/>
     </Grid>
