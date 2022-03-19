@@ -1111,9 +1111,10 @@ namespace StoryBuilder.ViewModels
 
                 if (result == ContentDialogResult.Primary)   // Copy command
                 {
-                    if (Ioc.Default.GetService<StockScenesViewModel>().SceneName == "")
+                    if (string.IsNullOrWhiteSpace(Ioc.Default.GetService<StockScenesViewModel>().SceneName))
                     {
-                        Messenger.Send(new StatusChangedMessage(new($"You need to load a Story first!", LogLevel.Warn)));
+                        Messenger.Send(new StatusChangedMessage(new($"You need to select a stock scene", LogLevel.Warn)));
+                        return;
                     }
 
                     SceneModel sceneVar = new SceneModel(StoryModel); 
