@@ -25,31 +25,23 @@ public sealed partial class RecentFiles : Page
         string[] RecentFiles = new []{ GlobalData.Preferences.LastFile1 , GlobalData.Preferences.LastFile2, GlobalData.Preferences.LastFile3, GlobalData.Preferences.LastFile4, GlobalData.Preferences.LastFile5};
         foreach (var File in RecentFiles)
         {
-            if (!string.IsNullOrWhiteSpace(File))
-            {/*
-                Grid Item = new();
-                Item.RowDefinitions.Add(new(){Height = new(50)});
-                Item.RowDefinitions.Add(new() { Height = new(50) });
-                Item.ColumnDefinitions.Add(new() { Width = new(50) });
-                Item.ColumnDefinitions.Add(new() { Width = new() });
-
-                Item.Children.Add(new TextBlock{ Text = Path.GetFileName(File).Replace(".stbx", ""), FontSize = 20});
-                StackPanel SubItem = new();
-                SubItem.Orientation=Orientation.Horizontal;
-                SubItem.SetValue(Grid.RowProperty, 1);
-                Item.Children.Add(new TextBlock(){ Text = "DATE PLACEHOLDER", FontSize = 10});
-                Item.Children[1].SetValue(Grid.RowProperty, 1);
-                SubItem.Children.Add(new TextBlock{ Text = File, FontSize = 10});
-                Item.Children.Add(SubItem);
-                Pannel.Children.Add(Item);*/
-
-                StackPanel Item = new();
-                Item.Width = 300;
-                Item.Children.Add(new TextBlock { Text = Path.GetFileName(File).Replace(".stbx", ""), FontSize = 20});
-                Item.Children.Add(new TextBlock { Text = "Last edited: " + System.IO.File.GetLastWriteTime(File), FontSize = 10, VerticalAlignment = VerticalAlignment.Center});
-                Recents.Items.Add(Item);
-
+            if (!string.IsNullOrWhiteSpace(File) )
+            {
+                if (System.IO.File.Exists(File))
+                {
+                    StackPanel Item = new();
+                    Item.Width = 300;
+                    Item.Children.Add(new TextBlock { Text = Path.GetFileName(File).Replace(".stbx", ""), FontSize = 20 });
+                    Item.Children.Add(new TextBlock { Text = "Last edited: " + System.IO.File.GetLastWriteTime(File), FontSize = 10, VerticalAlignment = VerticalAlignment.Center });
+                    Recents.Items.Add(Item);
+                }
             }
+        }
+
+        if (Recents.Items.Count == 0)
+        {
+            Recents.Items.Add(new TextBlock{Text = "No files have been opened recently."});
+            Recents.IsEnabled = false;
         }
     }
     public UnifiedVM UnifiedMenuVM;
