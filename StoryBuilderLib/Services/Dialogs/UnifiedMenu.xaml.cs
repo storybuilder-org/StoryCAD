@@ -1,5 +1,11 @@
-﻿using Microsoft.UI.Xaml.Controls;
+﻿using Windows.UI;
+using ABI.Microsoft.UI.Xaml;
+using CommunityToolkit.WinUI.Helpers;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
 using StoryBuilder.ViewModels;
+using Application = Microsoft.UI.Xaml.Application;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.

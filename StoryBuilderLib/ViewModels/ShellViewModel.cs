@@ -27,6 +27,8 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Windows.Storage;
 using Windows.Storage.Pickers;
+using Windows.UI;
+using CommunityToolkit.WinUI.Helpers;
 using StoryBuilder.Services;
 using WinRT;
 using GuidAttribute = System.Runtime.InteropServices.GuidAttribute;
@@ -365,10 +367,7 @@ namespace StoryBuilder.ViewModels
             await new PrintReports(PrintVM, StoryModel).Generate();
         }
 
-        private void CloseUnifiedMenu()
-        {
-            _contentDialog.Hide();
-        }
+        private void CloseUnifiedMenu() {  _contentDialog.Hide();  }
 
         public async Task OpenUnifiedMenu()                      
         {
@@ -474,6 +473,8 @@ namespace StoryBuilder.ViewModels
                 GlobalData.MainWindow.Title = $"StoryBuilder - Editing {vm.ProjectName.Replace(".stbx","")}";
                 SetCurrentView(StoryViewType.ExplorerView);
                 //TODO: Set expand and is selected?
+                
+                Ioc.Default.GetService<UnifiedVM>().UpdateRecents(Path.Combine(vm.ProjectPath,vm.ProjectName)); //adds item to recent
 
                 // Save the new project
                 await SaveFile();

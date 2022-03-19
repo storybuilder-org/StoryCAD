@@ -49,7 +49,7 @@ public class UnifiedVM : ObservableRecipient
     }
 
     /// <summary>
-    /// This makes the UI one consistant color
+    /// This makes the UI one consistent color
     /// </summary>
     private Microsoft.UI.Xaml.Media.SolidColorBrush _adjustmentColor;
     public Microsoft.UI.Xaml.Media.SolidColorBrush AdjustmentColor
@@ -145,7 +145,7 @@ public class UnifiedVM : ObservableRecipient
     }
 
     /// <summary>
-    /// This updates prefs.RecentFiles1 through 5
+    /// This updates preferences.RecentFiles1 through 5
     /// </summary>
     public async void UpdateRecents(string Path)
     {
