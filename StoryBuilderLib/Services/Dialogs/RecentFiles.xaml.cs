@@ -31,7 +31,6 @@ public sealed partial class RecentFiles : Page
                 if (System.IO.File.Exists(File))
                 {
                     StackPanel Item = new();
-                    var a = new ToolTip() {Content = File};
                     ToolTipService.SetToolTip(Item,File);
                     Item.Width = 300;
                     Item.Children.Add(new TextBlock { Text = Path.GetFileName(File).Replace(".stbx", ""), FontSize = 20 });
