@@ -3,6 +3,9 @@ using Microsoft.UI.Xaml.Controls;
 using StoryBuilder.Models;
 using StoryBuilder.ViewModels;
 using System.IO;
+using System.Linq;
+using System.Net.Mime;
+using Elmah.Io.Client;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -18,17 +21,27 @@ public sealed partial class RecentFiles : Page
     {
         InitializeComponent();
         UnifiedMenuVM = vm;
-        //Loads lastfile1 through to lastfile5 and loads it as long as its not null, empty or blank
-        if (!string.IsNullOrWhiteSpace(GlobalData.Preferences.LastFile1)) { Recents.Items.Add(new ListBoxItem { Name = GlobalData.Preferences.LastFile1, Content = Path.GetFileName(GlobalData.Preferences.LastFile1).Replace(".stbx", "") }); }
-        if (!string.IsNullOrWhiteSpace(GlobalData.Preferences.LastFile2)) { Recents.Items.Add(new ListBoxItem { Name = GlobalData.Preferences.LastFile2, Content = Path.GetFileName(GlobalData.Preferences.LastFile2).Replace(".stbx", "") }); }
-        if (!string.IsNullOrWhiteSpace(GlobalData.Preferences.LastFile3)) { Recents.Items.Add(new ListBoxItem { Name = GlobalData.Preferences.LastFile3, Content = Path.GetFileName(GlobalData.Preferences.LastFile3).Replace(".stbx", "") }); }
-        if (!string.IsNullOrWhiteSpace(GlobalData.Preferences.LastFile4)) { Recents.Items.Add(new ListBoxItem { Name = GlobalData.Preferences.LastFile4, Content = Path.GetFileName(GlobalData.Preferences.LastFile4).Replace(".stbx", "") }); }
-        if (!string.IsNullOrWhiteSpace(GlobalData.Preferences.LastFile5)) { Recents.Items.Add(new ListBoxItem { Name = GlobalData.Preferences.LastFile5, Content = Path.GetFileName(GlobalData.Preferences.LastFile5).Replace(".stbx", "") }); }
 
-
-        if (Recents.Items.Count < 1)
+        string[] RecentFiles = new []{ GlobalData.Preferences.LastFile1 , GlobalData.Preferences.LastFile2, GlobalData.Preferences.LastFile3, GlobalData.Preferences.LastFile4, GlobalData.Preferences.LastFile5};
+        foreach (var File in RecentFiles)
         {
-            Pannel.Children.Add(new TextBlock { Text = "No stories have been opened recently", HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(10) });
+            if (!string.IsNullOrWhiteSpace(File) )
+            {
+                if (System.IO.File.Exists(File))
+                {
+                    StackPanel Item = new();
+                    Item.Width = 300;
+                    Item.Children.Add(new TextBlock { Text = Path.GetFileName(File).Replace(".stbx", ""), FontSize = 20 });
+                    Item.Children.Add(new TextBlock { Text = "Last edited: " + System.IO.File.GetLastWriteTime(File), FontSize = 10, VerticalAlignment = VerticalAlignment.Center });
+                    Recents.Items.Add(Item);
+                }
+            }
+        }
+
+        if (Recents.Items.Count == 0)
+        {
+            Recents.Items.Add(new TextBlock{Text = "No files have been opened recently."});
+            Recents.IsEnabled = false;
         }
     }
     public UnifiedVM UnifiedMenuVM;

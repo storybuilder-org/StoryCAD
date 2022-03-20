@@ -4,8 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d"
-    Background="{x:Bind UnifiedMenuVM.AdjustmentColor, Mode=OneWay}">
+    mc:Ignorable="d">
 
     <Grid Width="auto" MinHeight="500" MinWidth="600" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
         <Grid.ColumnDefinitions>
@@ -13,11 +12,11 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <ListBox Grid.Column="0" VerticalAlignment="Stretch" SelectionChanged="{x:Bind UnifiedMenuVM.SidebarChange, Mode=OneWay}" SelectedItem="{x:Bind UnifiedMenuVM.CurrentTab, Mode=TwoWay}">
+        <ListBox Grid.Column="0" VerticalAlignment="Stretch" CornerRadius="10" SelectionChanged="{x:Bind UnifiedMenuVM.SidebarChange, Mode=OneWay}" SelectedItem="{x:Bind UnifiedMenuVM.CurrentTab, Mode=TwoWay}">
             <ListBoxItem Content="Recent files" Name="Recent"/>
             <ListBoxItem Content="Create new story" Name="New"/>
             <ListBoxItem Content="Sample stories" Name="Example"/>
         </ListBox>
-        <StackPanel Padding="20" Grid.Column="1" Name="MenuContent" MinWidth="500" HorizontalAlignment="Center" VerticalAlignment="Stretch" CornerRadius="20"/>
+        <StackPanel Padding="20" Grid.Column="1" Name="MenuContent" MinWidth="500" HorizontalAlignment="Center" VerticalAlignment="Stretch"/>
     </Grid>
 </Page>
