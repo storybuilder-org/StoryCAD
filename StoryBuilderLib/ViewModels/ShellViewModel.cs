@@ -1104,7 +1104,7 @@ namespace StoryBuilder.ViewModels
                 ContentDialog dialog = new();
                 dialog.Title = "Stock scenes";
                 dialog.Content = new StockScenesDialog();
-                dialog.PrimaryButtonText = "Stock Scenes";
+                dialog.PrimaryButtonText = "Add Scene";
                 dialog.CloseButtonText = "Cancel";
                 dialog.XamlRoot = GlobalData.XamlRoot;
                 ContentDialogResult result = await dialog.ShowAsync();
@@ -1124,9 +1124,12 @@ namespace StoryBuilder.ViewModels
                     TreeViewNodeClicked(newNode);
                     RightTappedNode.IsExpanded = true;
                     newNode.IsSelected = true;
-                    Logger.Log(LogLevel.Info, "Stock Scenes finished");
+                    Messenger.Send(new StatusChangedMessage(new("Stock Scenes inserted", LogLevel.Info)));
                 }
-                else {Logger.Log(LogLevel.Info, "Stock Scenes canceled");}
+                else 
+                {
+                    Messenger.Send(new StatusChangedMessage(new("Stock Scenes canceled", LogLevel.Warn)));
+                }
             }
             catch (Exception e) {  Logger.LogException(LogLevel.Error, e, e.Message); }
         }
@@ -1876,6 +1879,7 @@ namespace StoryBuilder.ViewModels
                     StatusColor = new SolidColorBrush(Colors.DarkRed);
                     break;
             }
+            Logger.Log(statusMessage.Value.Level, statusMessage.Value.Status);
         }
 
         /// <summary>
