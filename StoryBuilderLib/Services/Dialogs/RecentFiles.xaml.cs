@@ -5,6 +5,7 @@ using StoryBuilder.ViewModels;
 using System.IO;
 using System.Linq;
 using System.Net.Mime;
+using CommunityToolkit.WinUI.UI;
 using Elmah.Io.Client;
 
 // To learn more about WinUI, the WinUI project structure,
@@ -30,6 +31,7 @@ public sealed partial class RecentFiles : Page
                 if (System.IO.File.Exists(File))
                 {
                     StackPanel Item = new();
+                    ToolTipService.SetToolTip(Item,File);
                     Item.Width = 300;
                     Item.Children.Add(new TextBlock { Text = Path.GetFileName(File).Replace(".stbx", ""), FontSize = 20 });
                     Item.Children.Add(new TextBlock { Text = "Last edited: " + System.IO.File.GetLastWriteTime(File), FontSize = 10, VerticalAlignment = VerticalAlignment.Center });
