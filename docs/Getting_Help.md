@@ -1,7 +1,7 @@
 ## Getting Help ##
 Getting Help
 
-Currently StoryBuilder’s only support mechanism is to email support@svsoft.com. 
+Currently StoryBuilder’s only support mechanism is to email support@storybuilder.org. 
 
 We plan to provide a FAQ and an online help request form as soon as possible.
 
