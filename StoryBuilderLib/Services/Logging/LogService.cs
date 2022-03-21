@@ -16,6 +16,7 @@ public class LogService : ILogService
 {
     private static readonly Logger Logger;
     private static readonly string logFilePath;
+    private static string stackTraceHelper; //Elmah for some reason doesn't show the stack trace of an exception so this one does.
     static LogService()
     {
         try
@@ -52,6 +53,7 @@ public class LogService : ILogService
                     + Windows.ApplicationModel.Package.Current.Id.Version.Build + " Build " + File.ReadAllText(GlobalData.RootDirectory + "\\RevisionID");
 
                     msg.User = GlobalData.Preferences.Name + $"({GlobalData.Preferences.Email})";
+                    msg.Source = stackTraceHelper;
                 };
 
                 elmahIoTarget.Name = "elmahio";
@@ -117,9 +119,11 @@ public class LogService : ILogService
         switch (level)
         {
             case LogLevel.Error:
+                stackTraceHelper = exception.StackTrace;
                 Logger.Error(exception, message);
                 break;
             case LogLevel.Fatal:
+                stackTraceHelper = exception.StackTrace;
                 Logger.Fatal(exception, message);
                 break;
         }
