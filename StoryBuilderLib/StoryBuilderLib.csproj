@@ -76,7 +76,6 @@
     <Folder Include="Models\Scrivener\" />
     <Folder Include="Services\Icons\" />
     <Folder Include="Services\Installation\" />
-    <Folder Include="Services\Logging\" />
     <Folder Include="Services\Navigation\" />
     <Folder Include="Services\Search\" />
   </ItemGroup>
