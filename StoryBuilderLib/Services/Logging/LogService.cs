@@ -16,12 +16,13 @@ public class LogService : ILogService
 {
     private static readonly Logger Logger;
     private static readonly string logFilePath;
-
+    private static string stackTraceHelper; //Elmah for some reason doesn't show the stack trace of an exception so this one does.
     static LogService()
     {
         try
         {
             string apiKey = Environment.GetEnvironmentVariable("API-KEY");
+
             string logID = Environment.GetEnvironmentVariable("Log-ID");
             LoggingConfiguration config = new();
 
@@ -34,8 +35,7 @@ public class LogService : ILogService
             fileTarget.MaxArchiveFiles = 7;
             fileTarget.ArchiveEvery = FileArchivePeriod.Day;
             fileTarget.ConcurrentWrites = true;
-            fileTarget.Layout =
-                "${longdate} | ${level} | ${message} | ${exception:format=Message,StackTrace,Data:MaxInnerExceptionLevel=5}";
+            fileTarget.Layout = "${longdate} | ${level} | ${message} | ${exception:format=Message,StackTrace,Data:MaxInnerExceptionLevel=5}";
             LoggingRule fileRule = new("*", NLog.LogLevel.Info, fileTarget);
             config.AddTarget("logfile", fileTarget);
             config.LoggingRules.Add(fileRule);
@@ -45,6 +45,17 @@ public class LogService : ILogService
             {
                 // create elmah.io target
                 var elmahIoTarget = new ElmahIoTarget();
+
+                elmahIoTarget.OnMessage += msg =>
+                {
+                    msg.Version = Windows.ApplicationModel.Package.Current.Id.Version.Major + "."
+                    + Windows.ApplicationModel.Package.Current.Id.Version.Minor + "."
+                    + Windows.ApplicationModel.Package.Current.Id.Version.Build + " Build " + File.ReadAllText(GlobalData.RootDirectory + "\\RevisionID");
+
+                    msg.User = GlobalData.Preferences.Name + $"({GlobalData.Preferences.Email})";
+                    msg.Source = stackTraceHelper;
+                };
+
                 elmahIoTarget.Name = "elmahio";
                 elmahIoTarget.ApiKey = apiKey;
                 elmahIoTarget.LogId = logID;
@@ -89,7 +100,7 @@ public class LogService : ILogService
                 Logger.Debug(message);
                 break;
             case LogLevel.Info:
-                        Logger.Info(message);
+                Logger.Info(message);
                 break;
             case LogLevel.Warn:
                 Logger.Warn(message);
@@ -108,9 +119,11 @@ public class LogService : ILogService
         switch (level)
         {
             case LogLevel.Error:
+                stackTraceHelper = exception.StackTrace;
                 Logger.Error(exception, message);
                 break;
             case LogLevel.Fatal:
+                stackTraceHelper = exception.StackTrace;
                 Logger.Fatal(exception, message);
                 break;
         }
