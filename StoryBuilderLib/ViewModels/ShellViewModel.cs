@@ -1032,7 +1032,7 @@ namespace StoryBuilder.ViewModels
         private async void DramaticSituationsTool()
         {
             Logger.Log(LogLevel.Info, "Dislaying Dramatic Situations tool dialog");
-            if (RightTappedNode == null)  { RightTappedNode = CurrentNode; }
+            if (RightTappedNode == null) { RightTappedNode = CurrentNode; }
 
             //Creates and shows dialog
             ContentDialog dialog = new();
@@ -1047,54 +1047,46 @@ namespace StoryBuilder.ViewModels
             DramaticSituationModel situationModel = Ioc.Default.GetService<DramaticSituationsViewModel>().Situation;
             StoryNodeItem newNode = null;
             string msg;
-            if (RightTappedNode == null) 
+            if (RightTappedNode == null)
             {
-                StatusMessage = "Right tap a node to add this node to.";
+                msg = $"Right tap a node to add this node to.";
+                Messenger.Send(new StatusChangedMessage(new StatusMessage(msg, LogLevel.Warn, false)));
                 return;
             }
             switch (result)
             {
                 case ContentDialogResult.Primary:
-                {
-                    ProblemModel problem = new(StoryModel);
-                    problem.Name = situationModel.SituationName;
-                    problem.StoryQuestion = "See Notes.";
-                    problem.Notes = situationModel.Notes;
+                    {
+                        ProblemModel problem = new(StoryModel);
+                        problem.Name = situationModel.SituationName;
+                        problem.StoryQuestion = "See Notes.";
+                        problem.Notes = situationModel.Notes;
 
-                    // Insert the new Problem as the target's child
-                    newNode = new(problem, RightTappedNode);
-                    msg = $"Problem {situationModel.SituationName} inserted";
-                    ShowChange();
-                    break;
-                }
+                        // Insert the new Problem as the target's child
+                        newNode = new StoryNodeItem(problem, RightTappedNode);
+                        msg = $"Problem {situationModel.SituationName} inserted";
+                        ShowChange();
+                        break;
+                    }
                 case ContentDialogResult.Secondary:
-                {
-                    SceneModel sceneVar = new SceneModel(StoryModel);
-                    sceneVar.Name = situationModel.SituationName;
-                    sceneVar.Remarks = "See Notes.";
-                    sceneVar.Notes = situationModel.Notes;
-                    // Insert the new Scene as the target's child
-                    newNode = new(sceneVar, RightTappedNode);
-                    msg = $"Scene {situationModel.SituationName} inserted";
-                    ShowChange();
-                    break;
-                }
+                    {
+                        SceneModel sceneVar = new SceneModel(StoryModel);
+                        sceneVar.Name = situationModel.SituationName;
+                        sceneVar.Remarks = "See Notes.";
+                        sceneVar.Notes = situationModel.Notes;
+                        // Insert the new Scene as the target's child
+                        newNode = new StoryNodeItem(sceneVar, RightTappedNode);
+                        msg = $"Scene {situationModel.SituationName} inserted";
+                        ShowChange();
+                        break;
+                    }
                 default:
-                    msg = "MasterPlot cancelled";
+                    msg = "Dratatic Situation tool cancelled";
                     break;
             }
-
-            StatusMessage = msg;
             Logger.Log(LogLevel.Info, msg);
-            try
-            {
-                RightTappedNode.IsExpanded = true;
-            }
-            catch (Exception ex)
-            {
-                Logger.LogException(LogLevel.Info, ex, "Error expanding right tapped node");  //This is expected if no story is loaded
-            }
-            newNode.IsSelected = true;
+            Messenger.Send(new StatusChangedMessage(new(msg, LogLevel.Info, true)));
+
             Logger.Log(LogLevel.Info, "Dramatic Situations finished");
         }
 
