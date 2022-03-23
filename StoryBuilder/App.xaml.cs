@@ -22,7 +22,6 @@ using StoryBuilder.Services.Keys;
 using StoryBuilder.ViewModels;
 using StoryBuilder.ViewModels.Tools;
 using StoryBuilder.Views;
-using WinUIEx;
 using Syncfusion.Licensing;
 using UnhandledExceptionEventArgs = Microsoft.UI.Xaml.UnhandledExceptionEventArgs;
 

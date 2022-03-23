@@ -86,12 +86,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Update="Assets\Install\license.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </EmbeddedResource>
-  </ItemGroup>
-
-  <ItemGroup>
     <None Update="NLog.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

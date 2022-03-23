@@ -53,9 +53,7 @@ namespace StoryBuilder.Services.Keys
 
         public string SyncfusionToken() 
         {
-            string token = string.Empty;
-            string path = Path.Combine(GlobalData.RootDirectory, "license.txt");
-            return File.ReadAllText(path);
+            return "NTYzMTY1QDMxMzkyZTM0MmUzME9nM25VTkZZdjM1bDgxbHU3Y0pMTm9sTXJ5VDB4cTFvcmRKMEk0Ry8wUWM9";
         }
 
         public KeyService() 
