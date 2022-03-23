@@ -21,6 +21,13 @@ public class UnifiedVM : ObservableRecipient
         set => SetProperty(ref _selectedRecentIndex, value);
     }
 
+    private int _selectedTemplateIndex;
+    public int SelectedTemplateIndex
+    {
+        get => _selectedTemplateIndex;
+        set => SetProperty(ref _selectedTemplateIndex, value);
+    }
+
     private string _selectedTemplate;
     public string SelectedTemplate
     {
@@ -42,7 +49,7 @@ public class UnifiedVM : ObservableRecipient
     }
 
     /// <summary>
-    /// This makes the UI one consistant color
+    /// This makes the UI one consistent color
     /// </summary>
     private Microsoft.UI.Xaml.Media.SolidColorBrush _adjustmentColor;
     public Microsoft.UI.Xaml.Media.SolidColorBrush AdjustmentColor
@@ -125,17 +132,20 @@ public class UnifiedVM : ObservableRecipient
     /// </summary>
     public async void MakeProject()
     {
-        //Checks for validity
+        GlobalData.Preferences.LastSelectedTemplate = SelectedTemplateIndex;
+
         //TODO: check if path is valid (Not illegal) 
-        if (!string.IsNullOrWhiteSpace(SelectedTemplate) && !string.IsNullOrWhiteSpace(ProjectPath) && !string.IsNullOrWhiteSpace(ProjectName))
+        if (!string.IsNullOrWhiteSpace(ProjectPath) && !string.IsNullOrWhiteSpace(ProjectName))
         {
+            PreferencesIO loader = new(GlobalData.Preferences, GlobalData.RootDirectory);
+            await loader.UpdateFile();
             await shell.UnifiedNewFile(this);
             Hide();
         }
     }
 
     /// <summary>
-    /// This updates prefs.RecentFiles1 through 5
+    /// This updates preferences.RecentFiles1 through 5
     /// </summary>
     public async void UpdateRecents(string Path)
     {

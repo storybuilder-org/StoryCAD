@@ -73,10 +73,23 @@
                     </ToolTipService.ToolTip>
                 </AppBarButton>
                 <AppBarButton Icon="Print" Command="{x:Bind ShellVm.PrintNodeCommand, Mode=OneWay}" 
-                          Visibility="{x:Bind ShellVm.AddFolderVisibility, Mode=TwoWay}" >
+                          Visibility="{x:Bind ShellVm.PrintNodeVisibility, Mode=TwoWay}" >
                     <ToolTipService.ToolTip>
                         <ToolTip Content="Print selected node"/>
                     </ToolTipService.ToolTip>
+                </AppBarButton>
+                <AppBarButton Icon="Cancel" Visibility="{x:Bind ShellVm.EmptyTrashVisibility, Mode=TwoWay}" >
+                    <ToolTipService.ToolTip>
+                        <ToolTip Content="Empty trash"/>
+                    </ToolTipService.ToolTip>
+                    <AppBarButton.Flyout>
+                        <Flyout>
+                            <StackPanel>
+                                <TextBlock Text="Are you sure you want to empty the trash?" HorizontalAlignment="Center"/>
+                                <Button Command="{x:Bind ShellVm.EmptyTrashCommand, Mode=OneWay}" Content="Empty" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Flyout>
+                    </AppBarButton.Flyout>
                 </AppBarButton>
             </CommandBarFlyout.PrimaryCommands>
         </CommandBarFlyout>
@@ -216,20 +229,11 @@
                         <MenuFlyout>
                             <MenuFlyoutItem Text="Key Questions" Command="{x:Bind ShellVm.KeyQuestionsCommand, Mode=OneWay}" />
                             <MenuFlyoutItem Text="Topic Information" Command="{x:Bind ShellVm.TopicsCommand, Mode=OneWay}" />
-                            <MenuFlyoutSubItem Text="Characterization Aids">
-                                <MenuFlyoutItem Text="Character Relationships" />
-                                <MenuFlyoutItem Text="Virtues and Vices" />
-                                <MenuFlyoutItem Text="Skills and Abilities" />
-                                <MenuFlyoutItem Text="Male First Names" />
-                                <MenuFlyoutItem Text="Female First Names" />
-                                <MenuFlyoutItem Text="Last Names" />
-                            </MenuFlyoutSubItem>
-                            <MenuFlyoutSubItem Text="Plotting Aids">
+                                <MenuFlyoutSubItem Text="Plotting Aids">
                                 <MenuFlyoutItem Text="Master Plots" Command="{x:Bind ShellVm.MasterPlotsCommand, Mode=OneWay}" />
                                 <MenuFlyoutItem Text="Dramatic Situations" Command="{x:Bind ShellVm.DramaticSituationsCommand, Mode=OneWay}"/>
                                 <MenuFlyoutItem Text="Stock Scenes" Command="{x:Bind ShellVm.StockScenesCommand, Mode=OneWay}"/>
                             </MenuFlyoutSubItem>
-                            <MenuFlyoutItem Text="Quotes" />
                         </MenuFlyout>
                     </AppBarButton.Flyout>
                 </AppBarButton>
@@ -306,15 +310,16 @@
                       SelectionChanged="{x:Bind ShellVm.ViewChanged, Mode=OneWay}"
                       SelectedItem="{x:Bind ShellVm.SelectedView, Mode=TwoWay}" />
             <TextBlock Text="{x:Bind ShellVm.StatusMessage, Mode=OneWay}" 
+                       Foreground="{x:Bind ShellVm.StatusColor, Mode=OneWay}"
                        Width = "300"
                        FontSize="14"
                        Margin="10"
                        FontFamily="Segoe UI" Padding="0,5"/>
-            <AppBarButton Icon="Edit" IsCompact="True" Height="36" HorizontalAlignment="Right" >
-                <AppBarButton.Foreground>
+            <SymbolIcon Symbol="Edit" Height="36" HorizontalAlignment="Right" ToolTipService.ToolTip="This icon becomes red when you've made changes that haven't been saved yet.">
+                <SymbolIcon.Foreground>
                     <SolidColorBrush Color="{x:Bind ShellVm.ChangeStatusColor, Mode=TwoWay}"/>
-                </AppBarButton.Foreground>
-            </AppBarButton>
+                </SymbolIcon.Foreground>
+            </SymbolIcon>
         </StackPanel>
     </Grid>
 </Page>

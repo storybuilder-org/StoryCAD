@@ -20,6 +20,7 @@ public class PrintReports
     private StringReader fileStream;
     private Font printFont;
     private string documentText;
+    PrintDocument PrintDoc = new();
 
     //PrintHelper helper = new();
 
@@ -32,40 +33,34 @@ public class PrintReports
         if (_vm.CreateOverview)
         {
             rtf = _formatter.FormatStoryOverviewReport(Overview());
-            documentText = FormatText(rtf);
-            Print(documentText);
+            documentText += FormatText(rtf);
         }
         if (_vm.CreateSummary)
         {
             rtf =_formatter.FormatSynopsisReport();
             //documentText = FormatText(rtf);
-            documentText = FormatText(rtf,true);
-            Print(documentText);
+            documentText += FormatText(rtf,true);
         }
 
         if (_vm.ProblemList)
         {
             rtf = _formatter.FormatProblemListReport();
-            documentText = FormatText(rtf);
-            Print(documentText);
+            documentText += FormatText(rtf);
         }
         if (_vm.CharacterList)
         {
             rtf = _formatter.FormatCharacterListReport();
-            documentText = FormatText(rtf);
-            Print(documentText);
+            documentText += FormatText(rtf);
         }
         if (_vm.SettingList)
         {
             rtf = _formatter.FormatSettingListReport();
-            documentText = FormatText(rtf);
-            Print(documentText);
+            documentText += FormatText(rtf);
         }
         if (_vm.SceneList)
         {
             rtf = _formatter.FormatSceneListReport();
-            documentText = FormatText(rtf);
-            Print(documentText);
+            documentText += FormatText(rtf);
         }
 
         foreach (StoryNodeItem node in _vm.SelectedNodes)
@@ -90,10 +85,11 @@ public class PrintReports
                         rtf = _formatter.FormatSceneReport(element);
                         break;
                 }
-                documentText = FormatText(rtf);
-                Print(documentText);
+                documentText += FormatText(rtf);
             }
         }
+
+        Print(documentText);
     }
 
     private StoryElement Overview() 
@@ -116,19 +112,21 @@ public class PrintReports
         float linesPerPage = ev.MarginBounds.Height / printFont.GetHeight(ev.Graphics);
 
         // Iterate over the file, printing each line.
-        while (count < linesPerPage &&
-               (line = fileStream.ReadLine()) != null)
+        while (count < linesPerPage && (line = fileStream.ReadLine()) != null)
         {
+            if (line == @"\PageBreak")
+            {
+                ev.HasMorePages = true;
+                break;
+            }
             float yPos = topMargin + count * printFont.GetHeight(ev.Graphics);
             ev.Graphics.DrawString(line, printFont, Brushes.Black, leftMargin, yPos, new StringFormat());
             count++;
         }
 
         // If more lines exist, print another page.
-        if (line != null)
-            ev.HasMorePages = true;
-        else
-            ev.HasMorePages = false;
+        if (line != null) { ev.HasMorePages = true; }
+        else { ev.HasMorePages = false; }
     }
 
     // Print the file.
@@ -138,15 +136,14 @@ public class PrintReports
         {
             fileStream = new StringReader(file);
             printFont = new Font("Arial", 12, FontStyle.Regular, GraphicsUnit.Pixel);
-            PrintDocument pd = new();
-            pd.PrintPage += new(pd_PrintPage);
+            PrintDoc.PrintPage += new(pd_PrintPage);
             Margins margins = new(100, 100, 100, 100);
-            pd.DefaultPageSettings.Margins = margins;
+            PrintDoc.DefaultPageSettings.Margins = margins;
             float pixelsPerChar = printFont.Size;
-            float lineWidth = pd.DefaultPageSettings.PrintableArea.Width;
+            float lineWidth = PrintDoc.DefaultPageSettings.PrintableArea.Width;
             int charsPerLine = Convert.ToInt32(lineWidth / pixelsPerChar);
             // Print the document.
-            pd.Print();
+            PrintDoc.Print();
         }
         catch (Exception ex)
         {
@@ -188,6 +185,7 @@ public class PrintReports
             sb.Replace("[", "\r\n[");
             sb.Replace("]", "]\r\n");
         }
+        sb.Append("\n\\PageBreak\n");
         return sb.ToString();
     }
 

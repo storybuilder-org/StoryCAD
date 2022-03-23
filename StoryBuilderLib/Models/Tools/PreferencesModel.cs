@@ -1,4 +1,6 @@
-﻿namespace StoryBuilder.Models.Tools;
+﻿using Microsoft.UI;
+
+namespace StoryBuilder.Models.Tools;
 
 /// <summary>
 /// PreferencesModel contains product and licensing information,
@@ -23,11 +25,17 @@ public class PreferencesModel
     public string Email { get; set; }
     public bool ErrorCollectionConsent { get; set; }
     public bool Newsletter { get; set; }
-    public bool Initalised { get; set; } //this decides if the user should be shown the initalisation window
+
+    /// <summary>
+    /// This switch tracks whether this is a new 
+    /// installation. 
+    /// </summary>
+    public bool PreferencesInitialised { get; set; } 
+    public int LastSelectedTemplate { get; set; } //This is the Last Template Selected by the user.3
 
     // Visual changes
     public Microsoft.UI.Xaml.Media.SolidColorBrush PrimaryColor { get; set; } //Sets UI Color
-    public Microsoft.UI.Xaml.Media.SolidColorBrush SecondaryColor { get; set; } //Sets Text Color
+    public Microsoft.UI.Xaml.Media.SolidColorBrush SecondaryColor = new(Colors.Black); //Sets Text Color
     public bool QuoteOnStartup { get; set; }
 
     // Backup Information

@@ -189,9 +189,6 @@ public class StoryWriter
         attr = _xml.CreateAttribute("StructureNotes");
         attr.Value = rec.StructureNotes;
         overview.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("ToneNotes");
-        attr.Value = rec.ToneNotes;
-        overview.Attributes.Append(attr);
         attr = _xml.CreateAttribute("Notes");
         attr.Value = rec.Notes;
         overview.Attributes.Append(attr);
@@ -530,8 +527,8 @@ public class StoryWriter
         attr = _xml.CreateAttribute("Id");
         attr.Value = rec.Id.ToString();
         scene.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Viewpoint");
-        attr.Value = rec.Viewpoint;
+        attr = _xml.CreateAttribute("ViewpointCharacter");
+        attr.Value = rec.ViewpointCharacter;
         scene.Attributes.Append(attr);
         attr = _xml.CreateAttribute("Date");
         attr.Value = rec.Date;
@@ -545,37 +542,24 @@ public class StoryWriter
         attr = _xml.CreateAttribute("SceneType");
         attr.Value = rec.SceneType;
         scene.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Char1");
-        attr.Value = rec.Char1;
-        scene.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Char2");
-        attr.Value = rec.Char2;
-        scene.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Char3");
-        attr.Value = rec.Char3;
-        scene.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Role1");
-        attr.Value = rec.Role1;
-        scene.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Role2");
-        attr.Value = rec.Role2;
-        scene.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Role3");
-        attr.Value = rec.Role3;
-        scene.Attributes.Append(attr);
-        XmlNode castList = _xml.CreateElement("CastMembers");
+         XmlNode castList = _xml.CreateElement("CastMembers");
         foreach (string member in rec.CastMembers)
         {
             XmlElement castMember = _xml.CreateElement("Member");
             castMember.AppendChild(_xml.CreateTextNode(member));
             castList.AppendChild(castMember);
         }
-        scene.AppendChild(castList);
+
+        XmlNode scenePurposeList = _xml.CreateElement("ScenePurpose");
+        foreach (string item in rec.ScenePurpose)
+        {
+            XmlElement Purpose = _xml.CreateElement("Purpose");
+            Purpose.AppendChild(_xml.CreateTextNode(item));
+            scenePurposeList.AppendChild(Purpose);
+        }
+        scene.AppendChild(scenePurposeList);
         attr = _xml.CreateAttribute("Remarks");
         attr.Value = rec.Remarks;
-        scene.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("ScenePurpose");
-        attr.Value = rec.ScenePurpose;
         scene.Attributes.Append(attr);
         attr = _xml.CreateAttribute("ValueExchange");
         attr.Value = rec.ValueExchange;
@@ -736,31 +720,6 @@ public class StoryWriter
             RecurseCreateXmlElement(element, child);
         }
         return element;
-    }
-
-    public async Task<string> ReadRtfText(Guid uuid, string rftFilename)
-    {
-        StorageFolder folder = await FindSubFolder(uuid);
-        StorageFile rtfFile =
-            await folder.GetFileAsync(rftFilename);
-        return await FileIO.ReadTextAsync(rtfFile);
-    }
-
-    /// <summary>
-    /// Locate or create a Directory for a StoryElement based on its GUID
-    /// </summary>
-    /// <param name="uuid">The GUID of a text node</param>
-    /// <returns>StorageFolder instance for the StoryElement's folder</returns>
-    private async Task<StorageFolder> FindSubFolder(Guid uuid)
-    {
-        // Search the ProjectFolder's subfolders for the desired one (folder name == uuid as string)
-        StoryModel model = ShellViewModel.GetModel();
-        IReadOnlyList<StorageFolder> folders = await model.FilesFolder.GetFoldersAsync();
-        foreach (StorageFolder folder in folders)
-            if (folder.Name.Equals(UuidString(uuid)))
-                return folder;
-        // If the SubFolder doesn't exist, create it.
-        return await model.FilesFolder.CreateFolderAsync(UuidString(uuid));
     }
 
     /// <summary>

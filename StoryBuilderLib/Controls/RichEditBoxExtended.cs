@@ -1,6 +1,8 @@
-﻿using Microsoft.UI.Text;
+﻿using Microsoft.UI;
+using Microsoft.UI.Text;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
 
 namespace StoryBuilder.Controls;
 
@@ -32,6 +34,12 @@ public class RichEditBoxExtended : RichEditBox
     public RichEditBoxExtended()
     {
         TextChanged += RichEditBoxExtended_TextChanged;
+        TextAlignment = TextAlignment.Left;
+
+        //For some reason WinUI seems to be actively inverting the color of foreground in dark mode
+        //So for now we set the color to black and its just black on white in Light mode or White on Black in dark mode
+        Foreground = new SolidColorBrush(Colors.Black);
+        CornerRadius = new(5);
     }
 
     public string RtfText

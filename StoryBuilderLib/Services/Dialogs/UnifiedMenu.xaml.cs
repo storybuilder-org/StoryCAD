@@ -1,5 +1,11 @@
-﻿using Microsoft.UI.Xaml.Controls;
+﻿using Windows.UI;
+using ABI.Microsoft.UI.Xaml;
+using CommunityToolkit.WinUI.Helpers;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
 using StoryBuilder.ViewModels;
+using Application = Microsoft.UI.Xaml.Application;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -23,6 +29,7 @@ public sealed partial class UnifiedMenuPage : Page
                 MenuContent.Children.Add(new RecentFiles(UnifiedMenuVM));
                 break;
             case "New":
+                UnifiedMenuVM.SelectedTemplateIndex = Models.GlobalData.Preferences.LastSelectedTemplate;
                 MenuContent.Children.Add(new NewProjectPage(UnifiedMenuVM));
                 break;
             case "Example":
@@ -37,7 +44,7 @@ public sealed partial class UnifiedMenuPage : Page
     public UnifiedMenuPage()
     {
         InitializeComponent();
-        UnifiedMenuVM = new UnifiedVM();
+        UnifiedMenuVM = new();
         UnifiedMenuVM.UpdateContent = UpdateContent;  // Connect the VM's delegate to HideDialog
         UnifiedMenuVM.CurrentTab = new ListBoxItem() { Name = "Recent" }; //Makes unified VM load recents by default
         UnifiedMenuVM.SidebarChange(null, null);

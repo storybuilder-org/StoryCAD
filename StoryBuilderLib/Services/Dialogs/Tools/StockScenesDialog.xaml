@@ -6,8 +6,8 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
   
-    <StackPanel>
-        <ComboBox Margin="0,10,50,0" Header="Scene Categories" Width="400" ItemsSource="{x:Bind StockScenesVm.StockSceneCategories, Mode=TwoWay}" SelectedItem="{x:Bind StockScenesVm.CategoryName, Mode=TwoWay}" />
-        <ListView Margin="0,20" Header="Scenes" Width="400" Height="400" ItemsSource="{x:Bind StockScenesVm.StockSceneList, Mode=TwoWay}"  SelectedItem="{x:Bind StockScenesVm.SceneName, Mode=TwoWay}"/>
+    <StackPanel Margin="10,0">
+        <ComboBox Header="Scene Categories" Margin="0,0,0,10" Width="400" HorizontalAlignment="Center" ItemsSource="{x:Bind StockScenesVm.StockSceneCategories, Mode=TwoWay}" SelectedItem="{x:Bind StockScenesVm.CategoryName, Mode=TwoWay}"/>
+        <ListView VerticalAlignment="Stretch" Header="Scenes" Width="400" Height="420" SelectedIndex="1" ItemsSource="{x:Bind StockScenesVm.StockSceneList, Mode=TwoWay}"  SelectedItem="{x:Bind StockScenesVm.SceneName, Mode=TwoWay}"/>
     </StackPanel>
 </Page>

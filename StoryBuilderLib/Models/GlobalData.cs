@@ -1,10 +1,11 @@
-﻿using Microsoft.UI.Xaml;
+﻿using WinUIEx;
+using Microsoft.UI.Xaml;
 using StoryBuilder.Models.Tools;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Windows.Storage;
-using WinUIEx;
+
 
 namespace StoryBuilder.Models;
 
@@ -50,11 +51,14 @@ public static class GlobalData
     //Path to root directory where data is stored
     public static string RootDirectory = System.IO.Path.Combine(ApplicationData.Current.RoamingFolder.Path, "Storybuilder");
 
+    // MainWindow is the main window displayed by the app. It's an instance of
+    // WinUIEx's WindowEx, which is an extension of Microsoft.Xaml.UI.Window 
+    // and which hosts a Frame holding 
     public static WindowEx MainWindow;
 
-    // A defect in preview WinUI 3 Win32 code is that ContentDialog controls don't have an
+    // A defect in early WinUI 3 Win32 code is that ContentDialog controls don't have an
     // established XamlRoot. A workaround is to assign the dialog's XamlRoot to 
-    // the root of a containing page. 
+    // the root of a visible Page.
     // The Shell page's XamlRoot is stored here and accessed wherever needed. 
     public static XamlRoot XamlRoot;
 }

@@ -1,7 +1,9 @@
 {
   "profiles": {
     "StoryBuilder (Package)": {
-      "commandName": "MsixPackage"
+      "commandName": "MsixPackage",
+      "hotReloadEnabled": false,
+      "nativeDebugging": false
     },
     "StoryBuilder (Unpackaged)": {
       "commandName": "Project"

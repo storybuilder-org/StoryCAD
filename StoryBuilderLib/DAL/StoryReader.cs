@@ -54,7 +54,6 @@ namespace StoryBuilder.DAL
                 _model.ProjectFolder = await file.GetParentAsync();
                 _model.ProjectPath = _model.ProjectFolder.Path;
                 _model.ProjectFilename = Path.GetFileName(file.Path);
-                _model.FilesFolder = await _model.ProjectFolder.CreateFolderAsync("files", CreationCollisionOption.OpenIfExists);
                 // Early story outlines may have been built or converted
                 // without a TrashCan node added. If this model is one of 
                 // those, add the node to both the Explorer and Narrator views.
@@ -70,17 +69,15 @@ namespace StoryBuilder.DAL
                     StoryNodeItem trashNode = new(trash, null);
                     _model.NarratorView.Add(trashNode);     // The trashcan is the second root
                 }
-                msg = "File load successful.";
-                Logger.Log(LogLevel.Info, msg);
-                StatusMessage smsg = new(msg, 200);
-                Messenger.Send(new StatusChangedMessage(smsg));
+
+                Messenger.Send(new StatusChangedMessage(new($"File load successful.", LogLevel.Info, true)));
+
                 return _model;
             }
             catch (Exception ex)
             {
                 Logger.LogException(LogLevel.Error, ex, "Error reading story");
-                StatusMessage smsg = new("Error reading story", 200);
-                Messenger.Send(new StatusChangedMessage(smsg));
+                Messenger.Send(new StatusChangedMessage(new("Error reading story", LogLevel.Error)));
                 return new StoryModel();  // return an empty story model
             }
         }
@@ -198,9 +195,6 @@ namespace StoryBuilder.DAL
                     case "ViewPoint":
                         _overview.Viewpoint = attr.InnerText;
                         break;
-                    case "Form":
-                        _overview.LiteraryDevice = attr.InnerText;
-                        break;
                     case "LiteraryDevice":
                         _overview.LiteraryDevice = attr.InnerText;
                         break;
@@ -230,9 +224,6 @@ namespace StoryBuilder.DAL
                         break;
                     case "StructureNotes":
                         _overview.StructureNotes = attr.InnerText;
-                        break;
-                    case "ToneNotes":
-                        _overview.ToneNotes = attr.InnerText;
                         break;
                     case "Notes":
                         _overview.Notes = attr.InnerText;
@@ -546,7 +537,13 @@ namespace StoryBuilder.DAL
                 foreach (IXmlNode child in castMembers.ChildNodes)
                     if (child.NodeName.Equals("Member"))
                         scene.CastMembers.Add(child.InnerText);
-            string member;
+
+            IXmlNode ScenePurpose = xn.SelectSingleNode("./ScenePurpose");
+            if (ScenePurpose != null)
+                foreach (IXmlNode child in ScenePurpose.ChildNodes)
+                    if (child.NodeName.Equals("Purpose"))
+                        scene.ScenePurpose.Add(child.InnerText);
+
             foreach (IXmlNode attr in xn.Attributes)
             {
                 switch (attr.NodeName)
@@ -559,8 +556,8 @@ namespace StoryBuilder.DAL
                     case "Id":
                         scene.Id = Convert.ToInt32(attr.InnerText);
                         break;
-                    case "Viewpoint":
-                        scene.Viewpoint = attr.InnerText;
+                    case "ViewpointCharacter":
+                        scene.ViewpointCharacter = attr.InnerText;
                         break;
                     case "Date":
                         scene.Date = attr.InnerText;
@@ -573,33 +570,6 @@ namespace StoryBuilder.DAL
                         break;
                     case "SceneType":
                         scene.SceneType = attr.InnerText;
-                        break;
-                    case "Char1":  // legacy
-                        member = attr.InnerText;
-                        if (!member.Equals(string.Empty))
-                            scene.CastMembers.Add(member);
-                        //scene.Char1 = attr.InnerText;
-                        break;
-                    case "Char2": // legacy
-                        member = attr.InnerText;
-                        if (!member.Equals(string.Empty))
-                            scene.CastMembers.Add(member);
-                        //scene.Char2 = attr.InnerText;
-                        break;
-                    case "Char3": // legacy
-                        member = attr.InnerText;
-                        if (!member.Equals(string.Empty))
-                            scene.CastMembers.Add(member);
-                        //scene.Char3 = attr.InnerText;
-                        break;
-                    case "Role1":  // legacy
-                        //scene.Role1 = attr.InnerText;
-                        break;
-                    case "Role2":  // legacy
-                        //scene.Role2 = attr.InnerText;
-                        break;
-                    case "Role3":  // legacy
-                        //scene.Role3 = attr.InnerText;
                         break;
                     case "Protagonist":
                         scene.Protagonist = attr.InnerText;
@@ -630,9 +600,6 @@ namespace StoryBuilder.DAL
                         break;
                     case "NewGoal":
                         scene.NewGoal = attr.InnerText;
-                        break;
-                    case "ScenePurpose":
-                        scene.ScenePurpose = attr.InnerText;
                         break;
                     case "ValueExchange":
                         scene.ValueExchange = attr.InnerText;

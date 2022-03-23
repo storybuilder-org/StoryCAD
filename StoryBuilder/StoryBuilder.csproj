@@ -22,6 +22,8 @@
     <HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
     <AppxPackageDir>C:\Users\Rarisma\Desktop\stbr\</AppxPackageDir>
     <AppxBundlePlatforms>x64</AppxBundlePlatforms>
+    <RunAnalyzersDuringLiveAnalysis>False</RunAnalyzersDuringLiveAnalysis>
+    <RunAnalyzersDuringBuild>False</RunAnalyzersDuringBuild>
   </PropertyGroup>
 
   <ItemGroup>
@@ -39,11 +41,11 @@
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22523-preview" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="7.1.2" />
     <PackageReference Include="CommunityToolkit.WinUI.UI.Controls.Core" Version="7.1.2" />
-    <PackageReference Include="Microsoft.Windows.CsWinRT" Version="1.6.1" />
     <PackageReference Include="NLog" Version="5.0.0-preview.3" />
     <PackageReference Include="NLog.Extensions.Logging" Version="5.0.0-preview.3" />
     <PackageReference Include="PInvoke.User32" Version="0.7.104" />
     <PackageReference Include="Syncfusion.Editors.WinUI" Version="19.4.0.56" />
+    <PackageReference Include="WinUIEx" Version="1.1.0" />
     <Manifest Include="$(ApplicationManifest)" />
   </ItemGroup>
 

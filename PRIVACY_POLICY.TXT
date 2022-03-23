@@ -1,0 +1,53 @@
+                              STORYBUILDER PRIVACY POLICY
+
+This privacy policy will help you understand how StoryBuilder uses and protects the data you provide to us when you use StoryBuilder.
+
+We reserve the right to change this policy at any given time. If you want to make sure that you are up to date with the latest changes, we advise you to visit this page.
+
+WHAT USER DATA WE COLLECT
+
+We may collect the following data:
+
+* Your IP address.
+* Your email address (if you give us permission to obtain it.)
+* Error logs (if you give us[TC1] permission to obtain them.)
+
+WHY WE COLLECT YOUR DATA
+
+We may collect your data for several reasons:
+
+* To send you articles, tips, and updates information in the form of a newsletter.
+* To collect reports of error anomalies in StoryBuilder. 
+
+SAFEGUARDING AND SECURING THE DATA
+
+StoryBuilder is committed to securing your data and keeping it confidential. We 
+do not share the data we collect or use it for any purposes other than stated. 
+The outlines you create are not referenced in any way.
+
+OUR CERTIFICATE POLICY
+
+When you install StoryBuilder, an x509 Certificate is installed. This certificate is 
+used to verify that the code you install has not been altered by a third party, and 
+provides access to the error log monitoring service.
+
+LINKS TO OTHER WEBSITES
+
+Our application contains links that lead to several writing-related websites. StoryBuilder
+is not held responsible for your data and privacy protection on them. Visiting those 
+websites is not governed by this privacy policy agreement. Make sure to read the privacy 
+policy documentation of the website(s) you go to.
+
+RESTRICTING THE COLLECTION OF YOUR PERSONAL DATA
+
+StoryBuilder’s Preferences page gives you control over the use and collection of your 
+personal data. If you wish to restrict the use and collection of your data, you can 
+leaving either or both of the following two boxes unchecked:
+
+* Send error logs to Team StoryBuilder
+* Send me newsletters about StoryBuilder
+
+If you do authorize either of these two options, please enter your email address as well.
+
+
+

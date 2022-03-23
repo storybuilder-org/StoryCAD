@@ -31,7 +31,11 @@ public sealed partial class SamplePage : Page
 
     private async void LoadSample(object sender, RoutedEventArgs e)
     {
-        await Ioc.Default.GetService<ShellViewModel>().OpenFile(paths[Samples.SelectedIndex]);
-        UnifiedVM.Hide();
+        if (Samples.SelectedIndex != -1)
+        {
+            await Ioc.Default.GetService<ShellViewModel>().OpenFile(paths[Samples.SelectedIndex]);
+            UnifiedVM.Hide();
+        }
     }
+
 }

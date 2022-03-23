@@ -26,11 +26,11 @@ public class SceneModel : StoryElement
         set => _description = value;
     }
 
-    private string _viewpoint;
-    public string Viewpoint
+    private string _viewpointCharacter;
+    public string ViewpointCharacter
     {
-        get => _viewpoint;
-        set => _viewpoint = value;
+        get => _viewpointCharacter;
+        set => _viewpointCharacter = value;
     }
 
     private string _date;
@@ -59,49 +59,6 @@ public class SceneModel : StoryElement
     {
         get => _sceneType;
         set => _sceneType = value;
-    }
-
-    private string _char1;
-    public string Char1
-    {
-        get => _char1;
-        set => _char1 = value;
-    }
-
-    private string _char2;
-    public string Char2
-    {
-        get => _char2;
-        set => _char2 = value;
-    }
-
-    private string _char3;
-    public string Char3
-    {
-        get => _char3;
-        set => _char3 = value;
-    }
-
-    private string _role1;
-    public string Role1
-    {
-        get => _role1;
-        set => _role1 = value;
-    }
-
-    private string _role2;
-    public string Role2
-    {
-        get => _role2;
-        set => _role2 = value;
-    }
-
-    private string _role3;
-
-    public string Role3
-    {
-        get => _role3;
-        set => _role3 = value;
     }
 
     private List<string> _castMembers;
@@ -177,8 +134,8 @@ public class SceneModel : StoryElement
     }
     // Scene Development (Story Genius) data
 
-    private string _scenePurpose;
-    public string ScenePurpose
+    private List<string> _scenePurpose;
+    public List<string> ScenePurpose
     {
         get => _scenePurpose;
         set => _scenePurpose = value;
@@ -260,20 +217,14 @@ public class SceneModel : StoryElement
     public SceneModel(StoryModel model) : base("New Scene", StoryItemType.Scene, model)
     {
         Id = ++_nextSceneId;
-        Viewpoint = string.Empty;
+        ViewpointCharacter = string.Empty;
         Date = string.Empty;
         Time = string.Empty;
         Setting = string.Empty;
         SceneType = string.Empty;
         CastMembers = new List<string>();
-        Char1 = string.Empty;
-        Char2 = string.Empty;
-        Char3 = string.Empty;
-        Role1 = string.Empty;
-        Role2 = string.Empty;
-        Role3 = string.Empty;
         Remarks = string.Empty;
-        ScenePurpose = string.Empty;
+        ScenePurpose = new List<string>();
         ValueExchange = string.Empty;
         Protagonist = string.Empty;
         ProtagEmotion = string.Empty;
@@ -295,20 +246,14 @@ public class SceneModel : StoryElement
     public SceneModel(string name, StoryModel model) : base(name, StoryItemType.Scene, model)
     {
         Id = ++_nextSceneId;
-        Viewpoint = string.Empty;
+        ViewpointCharacter = string.Empty;
         Date = string.Empty;
         Time = string.Empty;
         Setting = string.Empty;
         SceneType = string.Empty;
         CastMembers = new List<string>();
-        Char1 = string.Empty;
-        Char2 = string.Empty;
-        Char3 = string.Empty;
-        Role1 = string.Empty;
-        Role2 = string.Empty;
-        Role3 = string.Empty;
         Remarks = string.Empty;
-        ScenePurpose = string.Empty;
+        ScenePurpose = new List<string>();
         ValueExchange = string.Empty;
         Protagonist = string.Empty;
         ProtagEmotion = string.Empty;
@@ -326,20 +271,14 @@ public class SceneModel : StoryElement
     public SceneModel(IXmlNode xn, StoryModel model) : base(xn, model)
     {
         Id = ++_nextSceneId;
-        Viewpoint = string.Empty;
+        ViewpointCharacter = string.Empty;
         Date = string.Empty;
         Time = string.Empty;
         Setting = string.Empty;
         SceneType = string.Empty;
         CastMembers = new List<string>();
-        Char1 = string.Empty;
-        Char2 = string.Empty;
-        Char3 = string.Empty;
-        Role1 = string.Empty;
-        Role2 = string.Empty;
-        Role3 = string.Empty;
         Remarks = string.Empty;
-        ScenePurpose = string.Empty;
+        ScenePurpose = new List<string>();
         ValueExchange = string.Empty;
         Protagonist = string.Empty;
         ProtagEmotion = string.Empty;
