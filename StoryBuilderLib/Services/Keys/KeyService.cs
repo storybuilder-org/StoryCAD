@@ -1,29 +1,27 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Diagnostics;
+using System.IO;
 using System.Threading.Tasks;
 using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
+using StoryBuilder.Models;
 
 namespace StoryBuilder.Services.Keys
 {
     public class KeyService
     {
         /// <summary>
-        /// Process
+        /// Obtain tokens for elmah.io logging, if they exist.
         /// </summary>
-        /// <returns>Elmah</returns>
+        /// <returns>elmah.io tokens, or empty strings</returns>
         public Tuple<string, string> ElmahTokens()
         {
-            string apiKey = null;
-            string logID = null;
 
-            // Try to obtain elmah.io tokens from developer-set
+            // Try to obtain elmah.io tokens from developer
             // environment variables, if present. 
             // If so, there's no need to query Key Vault.
-            apiKey = Environment.GetEnvironmentVariable("API-KEY");
-            logID = Environment.GetEnvironmentVariable("Log-ID");
+            string apiKey = Environment.GetEnvironmentVariable("API-KEY");
+            string logID = Environment.GetEnvironmentVariable("Log-ID");
             if ((apiKey != null)
             && (logID != null))
                 return Tuple.Create(apiKey, logID);
@@ -47,10 +45,21 @@ namespace StoryBuilder.Services.Keys
             catch (Exception ex)
             {
                 // Log exception
-                Console.WriteLine(ex.Message);
+                Debug.WriteLine(ex.Message);
                 return Tuple.Create(string.Empty, string.Empty);
             }
             return Tuple.Create(apiSecret.Value.ToString(), logSecret.Value.ToString());
+        }
+
+        public string SyncfusionToken() 
+        {
+            string token = string.Empty;
+            string path = Path.Combine(GlobalData.RootDirectory, "license.txt");
+            return File.ReadAllText(path);
+        }
+
+        public KeyService() 
+        { 
         }
     }
 }

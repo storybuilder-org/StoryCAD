@@ -18,6 +18,7 @@ using StoryBuilder.Services.Logging;
 using StoryBuilder.Services.Navigation;
 using StoryBuilder.Services.Preferences;
 using StoryBuilder.Services.Search;
+using StoryBuilder.Services.Keys;
 using StoryBuilder.ViewModels;
 using StoryBuilder.ViewModels.Tools;
 using StoryBuilder.Views;
@@ -69,7 +70,8 @@ public partial class App : Application
     {
         ConfigureIoc();
         //Register Syncfusion license
-        Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("NTYzMTY1QDMxMzkyZTM0MmUzME9nM25VTkZZdjM1bDgxbHU3Y0pMTm9sTXJ5VDB4cTFvcmRKMEk0Ry8wUWM9");
+        var keys = Ioc.Default.GetService<KeyService>();
+        SyncFusion.Licensing.SyncfusionLicenseProvider.RegisterLicense(keys.SyncfusionToken());
         InitializeComponent();
         Current.UnhandledException += OnUnhandledException;
     }
@@ -91,6 +93,7 @@ public partial class App : Application
                 .AddSingleton<StoryReader>()
                 .AddSingleton<StoryWriter>()
                 .AddSingleton<BackupService>()
+                .AddSingleton<KeyService>()
                 // Register ViewModels 
                 .AddSingleton<ShellViewModel>()
                 .AddSingleton<OverviewViewModel>()
