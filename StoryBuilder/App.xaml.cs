@@ -23,6 +23,7 @@ using StoryBuilder.ViewModels;
 using StoryBuilder.ViewModels.Tools;
 using StoryBuilder.Views;
 using WinUIEx;
+using Syncfusion.Licensing;
 using UnhandledExceptionEventArgs = Microsoft.UI.Xaml.UnhandledExceptionEventArgs;
 
 
@@ -71,7 +72,7 @@ public partial class App : Application
         ConfigureIoc();
         //Register Syncfusion license
         var keys = Ioc.Default.GetService<KeyService>();
-        SyncFusion.Licensing.SyncfusionLicenseProvider.RegisterLicense(keys.SyncfusionToken());
+        SyncfusionLicenseProvider.RegisterLicense(keys.SyncfusionToken());
         InitializeComponent();
         Current.UnhandledException += OnUnhandledException;
     }
