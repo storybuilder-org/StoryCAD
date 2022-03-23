@@ -26,16 +26,11 @@ public class LogService : ILogService
 
             string apiKey = string.Empty;
             string logID = string.Empty;
-
- 
-            //catch (CredentialUnavailableException ex)
-            //{
-            //    Console.WriteLine(ex.Message);
-            //}
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
 
             LoggingConfiguration config = new();
 
