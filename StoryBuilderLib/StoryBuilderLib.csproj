@@ -20,7 +20,7 @@
     <None Remove="Assets\Install\Lists.ini" />
     <None Remove="Assets\Install\reports\Character Description.txt" />
     <None Remove="Assets\Install\reports\Folder Description.txt" />
-    <None Remove="Assets\Install\reports\List of Characters.txt" />
+    <None Remove="Assets\Install\reports\List of Characters.txt" /> 
     <None Remove="Assets\Install\reports\List of Problems.txt" />
     <None Remove="Assets\Install\reports\List of Scene.txt" />
     <None Remove="Assets\Install\reports\List of Settings.txt" />
