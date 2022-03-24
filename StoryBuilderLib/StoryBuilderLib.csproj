@@ -4,7 +4,7 @@
     <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
     <RootNamespace>StoryBuilder</RootNamespace>
     <RuntimeIdentifiers>win10-x86;win10-x64</RuntimeIdentifiers>
-    <Platforms>x86;x64;arm64</Platforms>
+    <Platforms>x86;x64</Platforms>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
