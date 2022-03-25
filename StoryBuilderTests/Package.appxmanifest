@@ -7,12 +7,12 @@
   IgnorableNamespaces="uap rescap">
 
   <Identity
-    Name="3b76a060-3624-415f-b178-f0740b114439"
+    Name="9dd7a502-6f68-466b-b18f-654c404db079"
     Publisher="CN=tcox"
-    Version="2.0.12.0" />
+    Version="1.0.0.0" />
 
   <Properties>
-    <DisplayName>StoryBuilder</DisplayName>
+    <DisplayName>StoryBuilderTest (Package)</DisplayName>
     <PublisherDisplayName>tcox</PublisherDisplayName>
     <Logo>Images\StoreLogo.png</Logo>
   </Properties>
@@ -31,21 +31,13 @@
       Executable="$targetnametoken$.exe"
       EntryPoint="$targetentrypoint$">
       <uap:VisualElements
-        DisplayName="StoryBuilder"
-        Description="StoryBuilder"
+        DisplayName="StoryBuilderTest (Package)"
+        Description="StoryBuilderTest (Package)"
         BackgroundColor="transparent"
         Square150x150Logo="Images\Square150x150Logo.png"
         Square44x44Logo="Images\Square44x44Logo.png">
-        <uap:DefaultTile Wide310x150Logo="Images\Wide310x150Logo.png"  ShortName="StoryBuilder" Square71x71Logo="Images\SmallTile.png" Square310x310Logo="Images\LargeTile.png">
-          <uap:ShowNameOnTiles>
-            <uap:ShowOn Tile="square310x310Logo"/>
-            <uap:ShowOn Tile="wide310x150Logo"/>
-          </uap:ShowNameOnTiles>
-        </uap:DefaultTile >
+        <uap:DefaultTile Wide310x150Logo="Images\Wide310x150Logo.png" />
         <uap:SplashScreen Image="Images\SplashScreen.png" />
-        <uap:InitialRotationPreference>
-          <uap:Rotation Preference="portrait"/>
-          <uap:Rotation Preference="landscape"/></uap:InitialRotationPreference>
       </uap:VisualElements>
     </Application>
   </Applications>
