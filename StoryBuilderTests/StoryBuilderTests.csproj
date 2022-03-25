@@ -1,35 +1,56 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
-	  <TargetFramework>net6.0-windows10.0.19041.0</TargetFramework>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net6.0-windows10.0.19041.0</TargetFramework>
+    <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+    <RootNamespace>StoryBuilderTest</RootNamespace>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
     <Platforms>x86;x64;arm64</Platforms>
-
-    <IsPackable>false</IsPackable>
+    <RuntimeIdentifiers>win10-x86;win10-x64</RuntimeIdentifiers>
+    <UseWinUI>true</UseWinUI>
+    <EnablePreviewMsixTooling>true</EnablePreviewMsixTooling>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.1.0" />
-    <PackageReference Include="Microsoft.TestPlatform.TestHost" Version="17.1.0" />
-    <PackageReference Include="MSTest.TestAdapter" Version="2.2.8" />
-    <PackageReference Include="MSTest.TestFramework" Version="2.2.8" />
-    <PackageReference Include="coverlet.collector" Version="3.1.2">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.0.1" />
+    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22000.197" />
+    <Manifest Include="$(ApplicationManifest)" />
+  </ItemGroup>
+
+<ItemGroup>
+    <AppxManifest Include="Package.appxmanifest">
+        <SubType>Designer</SubType>
+    </AppxManifest>
+</ItemGroup>
+<ItemGroup>
+    <Content Include="Images\LockScreenLogo.scale-200.png" />
+    <Content Include="Images\SplashScreen.scale-200.png" />
+    <Content Include="Images\Square150x150Logo.scale-200.png" />
+    <Content Include="Images\Square44x44Logo.scale-200.png" />
+    <Content Include="Images\Square44x44Logo.targetsize-24_altform-unplated.png" />
+    <Content Include="Images\StoreLogo.png" />
+    <Content Include="Images\Wide310x150Logo.scale-200.png" />
+</ItemGroup>
+
+<ItemGroup>
+    <ProjectCapability Include="TestContainer" />
+</ItemGroup>
+
+<ItemGroup>
+    <PackageReference Include="MSTest.TestAdapter">
+        <Version>2.2.8</Version>
     </PackageReference>
-  </ItemGroup>
+    <PackageReference Include="MSTest.TestFramework">
+        <Version>2.2.8</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.TestPlatform.TestHost">
+        <Version>17.1.0</Version>
+        <ExcludeAssets>build</ExcludeAssets>
+    </PackageReference>
+</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\StoryBuilderLib\StoryBuilderLib.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="Package.appxmanifest">
-      <SubType>Designer</SubType>
-    </None>
-  </ItemGroup>
-
-  <ItemGroup>
-      <ProjectCapability Include="TestContainer" />
-  </ItemGroup>
+<ItemGroup>
+  <ProjectReference Include="..\StoryBuilderLib\StoryBuilderLib.csproj" />
+</ItemGroup>
 
 </Project>

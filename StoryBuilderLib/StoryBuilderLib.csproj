@@ -3,8 +3,8 @@
 	  <TargetFramework>net6.0-windows10.0.19041.0</TargetFramework>
     <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
     <RootNamespace>StoryBuilder</RootNamespace>
-    <RuntimeIdentifiers>win10-x86;win10-x64;win10-arm64</RuntimeIdentifiers>
-    <Platforms>x86;x64;arm64</Platforms>
+    <RuntimeIdentifiers>win10-x86;win10-x64</RuntimeIdentifiers>
+    <Platforms>x86;x64</Platforms>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
@@ -20,7 +20,7 @@
     <None Remove="Assets\Install\Lists.ini" />
     <None Remove="Assets\Install\reports\Character Description.txt" />
     <None Remove="Assets\Install\reports\Folder Description.txt" />
-    <None Remove="Assets\Install\reports\List of Characters.txt" />
+    <None Remove="Assets\Install\reports\List of Characters.txt" /> 
     <None Remove="Assets\Install\reports\List of Problems.txt" />
     <None Remove="Assets\Install\reports\List of Scene.txt" />
     <None Remove="Assets\Install\reports\List of Settings.txt" />
@@ -60,13 +60,15 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Azure.Identity" Version="1.6.0-beta.1" />
+    <PackageReference Include="Azure.Security.KeyVault.Secrets" Version="4.3.0-beta.4" />
     <PackageReference Include="CommonServiceLocator" Version="2.0.6" />
-    <PackageReference Include="CommunityToolkit.Mvvm" Version="7.1.2" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.0.0-preview2" />
     <PackageReference Include="CommunityToolkit.WinUI.UI.Controls.Core" Version="7.1.2" />
     <PackageReference Include="Elmah.Io.NLog" Version="4.1.25" />
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.0.1" />
-    <PackageReference Include="NLog" Version="5.0.0-preview.3" />
-    <PackageReference Include="NLog.Extensions.Logging" Version="5.0.0-preview.3" />
+    <PackageReference Include="NLog" Version="5.0.0-rc2" />
+    <PackageReference Include="NLog.Extensions.Logging" Version="5.0.0-rc2" />
     <PackageReference Include="Syncfusion.Editors.WinUI" Version="19.4.0.56" />
     <PackageReference Include="WinUIEx" Version="1.1.0" />
   </ItemGroup>

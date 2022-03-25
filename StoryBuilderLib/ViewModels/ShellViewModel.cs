@@ -27,8 +27,6 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Windows.Storage;
 using Windows.Storage.Pickers;
-using Windows.UI;
-using CommunityToolkit.WinUI.Helpers;
 using StoryBuilder.Services;
 using WinRT;
 using GuidAttribute = System.Runtime.InteropServices.GuidAttribute;
@@ -1034,7 +1032,7 @@ namespace StoryBuilder.ViewModels
         private async void DramaticSituationsTool()
         {
             Logger.Log(LogLevel.Info, "Dislaying Dramatic Situations tool dialog");
-            if (RightTappedNode == null)  { RightTappedNode = CurrentNode; }
+            if (RightTappedNode == null) { RightTappedNode = CurrentNode; }
 
             //Creates and shows dialog
             ContentDialog dialog = new();
@@ -1049,7 +1047,7 @@ namespace StoryBuilder.ViewModels
             DramaticSituationModel situationModel = Ioc.Default.GetService<DramaticSituationsViewModel>().Situation;
             StoryNodeItem newNode = null;
             string msg;
-            if (RightTappedNode == null) 
+            if (RightTappedNode == null)
             {
                 msg = $"Right tap a node to add this node to.";
                 Messenger.Send(new StatusChangedMessage(new StatusMessage(msg, LogLevel.Warn, false)));

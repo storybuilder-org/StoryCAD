@@ -6,6 +6,8 @@ using StoryBuilder.Models;
 using System;
 using System.Diagnostics;
 using System.IO;
+using CommunityToolkit.Mvvm.DependencyInjection;
+using StoryBuilder.Services.Keys;
 
 namespace StoryBuilder.Services.Logging;
 
@@ -21,12 +23,9 @@ public class LogService : ILogService
     {
         try
         {
-            string apiKey = Environment.GetEnvironmentVariable("API-KEY");
-
-            string logID = Environment.GetEnvironmentVariable("Log-ID");
             LoggingConfiguration config = new();
 
-            // Create file target
+            // Create the file logging target
             FileTarget fileTarget = new();
             logFilePath = Path.Combine(GlobalData.RootDirectory, "logs");
             string logfilename = Path.Combine(logFilePath, "updater.${date:format=yyyy-MM-dd}.log");
@@ -41,7 +40,11 @@ public class LogService : ILogService
             config.LoggingRules.Add(fileRule);
 
             // create elmah.io target if keys are defined
-            if (apiKey != null && logID != null)
+            var keys = Ioc.Default.GetService<KeyService>();
+            var tokens = keys.ElmahTokens();
+            string apiKey = tokens.Item1;
+            string logID = tokens.Item2;
+            if (apiKey != string.Empty && logID != string.Empty)
             {
                 // create elmah.io target
                 var elmahIoTarget = new ElmahIoTarget();

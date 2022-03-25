@@ -18,12 +18,12 @@ using StoryBuilder.Services.Logging;
 using StoryBuilder.Services.Navigation;
 using StoryBuilder.Services.Preferences;
 using StoryBuilder.Services.Search;
+using StoryBuilder.Services.Keys;
 using StoryBuilder.ViewModels;
 using StoryBuilder.ViewModels.Tools;
 using StoryBuilder.Views;
-
+using Syncfusion.Licensing;
 using UnhandledExceptionEventArgs = Microsoft.UI.Xaml.UnhandledExceptionEventArgs;
-
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -57,7 +57,8 @@ public partial class App : Application
     {
         ConfigureIoc();
         //Register Syncfusion license
-        Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("NTYzMTY1QDMxMzkyZTM0MmUzME9nM25VTkZZdjM1bDgxbHU3Y0pMTm9sTXJ5VDB4cTFvcmRKMEk0Ry8wUWM9");
+        var keys = Ioc.Default.GetService<KeyService>();
+        SyncfusionLicenseProvider.RegisterLicense(keys.SyncfusionToken());
         InitializeComponent();
         Current.UnhandledException += OnUnhandledException;
     }
@@ -79,6 +80,7 @@ public partial class App : Application
                 .AddSingleton<StoryReader>()
                 .AddSingleton<StoryWriter>()
                 .AddSingleton<BackupService>()
+                .AddSingleton<KeyService>()
                 .AddSingleton<DeletionService>()
                 // Register ViewModels 
                 .AddSingleton<ShellViewModel>()
