@@ -700,7 +700,7 @@ namespace StoryBuilder.ViewModels
             _canExecuteCommands = true;
         }
 
-        private async Task SaveFile()
+        public async Task SaveFile()
         {
             Logger.Log(LogLevel.Trace, "Saving file");
             _canExecuteCommands = false;
