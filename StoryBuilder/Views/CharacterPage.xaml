@@ -11,7 +11,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <TextBox Header="Name" Text="{x:Bind CharVm.Name, Mode=TwoWay}" />
+        <TextBox Header="Name" Text="{x:Bind CharVm.Name, Mode=TwoWay}" Margin="10,0" />
         <Pivot Grid.Row="1">
             <PivotItem Header="Role">
                 <Grid>
@@ -102,7 +102,7 @@
                         <TextBlock Grid.Column="1" MinWidth="100"/>
                         <editors:SfComboBox Header="Nationality" Grid.Column="2" IsEditable="True" MinWidth="200"
                                   ItemsSource="{x:Bind CharVm.NationalityList}"
-                                  SelectedItem="{x:Bind CharVm.Nationality, Mode=TwoWay}" />
+                                  SelectedItem="{x:Bind CharVm.Nationality, Mode=TwoWay}" MaxDropDownHeight="270"/>
                     </Grid>
                     <TextBox Header="General Health" Grid.Row="5"
                              Text="{x:Bind CharVm.Health, Mode=TwoWay}" />
