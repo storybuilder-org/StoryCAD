@@ -65,11 +65,18 @@ public class LogService : ILogService
         string logID = string.Empty;
 
         // create elmah.io target if keys are defined
-        var doppler = new Doppler();
-        var keys = await doppler.FetchSecretsAsync();
-        apiKey = keys.APIKEY;
-        logID = keys.LOGID;
-
+        try
+        {
+            var doppler = new Doppler();
+            var keys = await doppler.FetchSecretsAsync();
+            apiKey = keys.APIKEY;
+            logID = keys.LOGID;
+        }
+        catch (Exception ex) 
+        {
+            LogException(LogLevel.Error, ex, ex.Message);
+            return false;
+        }
         if (apiKey == string.Empty | logID == string.Empty)
             return false;
 

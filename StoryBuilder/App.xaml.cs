@@ -126,7 +126,7 @@ public partial class App : Application
         if (result)
             _log.Log(LogLevel.Info, "elmah.io log target added");
         else
-            _log.Log(LogLevel.Info,"elmah.io log target bypassed"); 
+            _log.Log(LogLevel.Info, "elmah.io log target bypassed");
 
         string pathMsg = string.Format("Configuration data location = " + GlobalData.RootDirectory);
         _log.Log(LogLevel.Info, pathMsg);
@@ -162,17 +162,18 @@ public partial class App : Application
         Frame rootFrame = new();
         // Place the frame in the current Window
         mainWindow.Content = rootFrame;
-        mainWindow.Activate();
         mainWindow.CenterOnScreen(); //Centers the window on the monitor
     
         if (rootFrame.Content == null)
         {
             rootFrame.Navigate(GlobalData.Preferences.PreferencesInitialised ? typeof(Shell) : typeof(PreferencesInitialization));
         }
+        mainWindow.Activate();
         GlobalData.MainWindow = (MainWindow) mainWindow;
         //Get the Window's HWND
         m_windowHandle = User32.GetActiveWindow();
         GlobalData.WindowHandle = m_windowHandle;
+
 
         // The Window object doesn't (yet) have Width and Height properties in WInUI 3 Desktop yet.
         // To set the Width and Height, you can use the Win32 API SetWindowPos.
