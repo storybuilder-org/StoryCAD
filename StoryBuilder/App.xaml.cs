@@ -57,8 +57,7 @@ public partial class App : Application
     {
         ConfigureIoc();
         //Register Syncfusion license
-        var keys = Ioc.Default.GetService<KeyService>();
-        SyncfusionLicenseProvider.RegisterLicense(keys.SyncfusionToken());
+        SyncfusionLicenseProvider.RegisterLicense(GlobalData.SyncfusionToken);
         InitializeComponent();
         Current.UnhandledException += OnUnhandledException;
     }
@@ -80,7 +79,6 @@ public partial class App : Application
                 .AddSingleton<StoryReader>()
                 .AddSingleton<StoryWriter>()
                 .AddSingleton<BackupService>()
-                .AddSingleton<KeyService>()
                 .AddSingleton<DeletionService>()
                 // Register ViewModels 
                 .AddSingleton<ShellViewModel>()
@@ -121,8 +119,14 @@ public partial class App : Application
     protected override async void OnLaunched(LaunchActivatedEventArgs args)
     {
         //Current.Resources.Add("Locator", new ViewModelLocator());
+
         _log = Ioc.Default.GetService<LogService>();
         _log.Log(LogLevel.Info, "StoryBuilder.App launched");
+        bool result = await _log.AddElmahTarget();
+        if (result)
+            _log.Log(LogLevel.Info, "elmah.io log target added");
+        else
+            _log.Log(LogLevel.Info,"elmah.io log target bypassed"); 
 
         string pathMsg = string.Format("Configuration data location = " + GlobalData.RootDirectory);
         _log.Log(LogLevel.Info, pathMsg);

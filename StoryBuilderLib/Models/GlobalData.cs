@@ -61,4 +61,9 @@ public static class GlobalData
     // the root of a visible Page.
     // The Shell page's XamlRoot is stored here and accessed wherever needed. 
     public static XamlRoot XamlRoot;
+
+    // Tokens
+    public static string SyncfusionToken = "NTYzMTY1QDMxMzkyZTM0MmUzME9nM25VTkZZdjM1bDgxbHU3Y0pMTm9sTXJ5VDB4cTFvcmRKMEk0Ry8wUWM9";
+    public static string DopplerToken = "dp.st.prd.8ioOdjDRz4LLMRfU63LnaFJMuNhuMQ1m1Ocka1ZV6XZ";
+
 }
