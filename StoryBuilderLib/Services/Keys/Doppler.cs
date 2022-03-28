@@ -7,7 +7,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using StoryBuilder.Models;
-
+using dotenv.net.Utilities;
 
 
 namespace StoryBuilder.Services.Keys
@@ -30,7 +30,8 @@ namespace StoryBuilder.Services.Keys
         /// <returns>elmah.io tokens, or empty strings</returns>
         public async Task<Doppler> FetchSecretsAsync()
         {
-            var basicAuthHeaderValue = Convert.ToBase64String(Encoding.Default.GetBytes(GlobalData.DopplerToken + ":"));
+            var token = EnvReader.GetStringValue("DOPPLER_TOKEN");
+            var basicAuthHeaderValue = Convert.ToBase64String(Encoding.Default.GetBytes(token + ":"));
 
             client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", basicAuthHeaderValue);
             var streamTask = client.GetStreamAsync("https://api.doppler.com/v3/configs/config/secrets/download?format=json");

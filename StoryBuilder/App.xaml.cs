@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Windows.Storage;
@@ -22,6 +23,8 @@ using StoryBuilder.Services.Keys;
 using StoryBuilder.ViewModels;
 using StoryBuilder.ViewModels.Tools;
 using StoryBuilder.Views;
+using dotenv.net;
+using dotenv.net.Utilities;
 using Syncfusion.Licensing;
 using UnhandledExceptionEventArgs = Microsoft.UI.Xaml.UnhandledExceptionEventArgs;
 
@@ -56,8 +59,13 @@ public partial class App : Application
     public App()
     {
         ConfigureIoc();
+
+        var path = Path.Combine(Windows.ApplicationModel.Package.Current.InstalledLocation.Path, ".env");
+        var options = new DotEnvOptions(false, new[] { path });
+        DotEnv.Load(options);
         //Register Syncfusion license
-        SyncfusionLicenseProvider.RegisterLicense(GlobalData.SyncfusionToken);
+        var token = EnvReader.GetStringValue("SYNCFUSION_TOKEN");
+        SyncfusionLicenseProvider.RegisterLicense(token);
         InitializeComponent();
         Current.UnhandledException += OnUnhandledException;
     }
@@ -118,8 +126,6 @@ public partial class App : Application
     /// <param name="args">Details about the launch request and process.</param>
     protected override async void OnLaunched(LaunchActivatedEventArgs args)
     {
-        //Current.Resources.Add("Locator", new ViewModelLocator());
-
         _log = Ioc.Default.GetService<LogService>();
         _log.Log(LogLevel.Info, "StoryBuilder.App launched");
         bool result = await _log.AddElmahTarget();
