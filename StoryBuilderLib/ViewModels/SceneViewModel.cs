@@ -546,7 +546,7 @@ public class SceneViewModel : ObservableRecipient, INavigable
              viewpointText = "Story viewpoint = " + viewpoint.ToString();
         var viewpointChar = overview?.ViewpointCharacter;
         if (Guid.TryParse(viewpointChar, out Guid guid))
-            viewpointName = "Story viewpoint charcter = " + model.StoryElements.StoryElementGuids[guid].Name;
+            viewpointName = "Story viewpoint character = " + model.StoryElements.StoryElementGuids[guid].Name;
         else
             viewpointName = "Story viewpoint character not found";
         var tip = new StringBuilder();
