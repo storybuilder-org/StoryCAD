@@ -89,4 +89,11 @@ public sealed partial class Shell
         myOption.ShowMode = FlyoutShowMode.Transient;
         AddStoryElementCommandBarFlyout.ShowAt(NavigationTree, myOption);
     }
+
+    /// <summary>
+    /// This is called when the user clicks the save pen
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
+    private async void SaveIconPressed(object sender, PointerRoutedEventArgs e) { await ShellVm.SaveFile(); }
 }
