@@ -7,7 +7,6 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
-using CommunityToolkit.Mvvm.DependencyInjection;
 using StoryBuilder.Services.Keys;
 
 namespace StoryBuilder.Services.Logging;
@@ -80,26 +79,35 @@ public class LogService : ILogService
         if (apiKey == string.Empty | logID == string.Empty)
             return false;
 
-        // create elmah.io target
-        var elmahIoTarget = new ElmahIoTarget();
-
-        elmahIoTarget.OnMessage += msg =>
+        try
         {
-            msg.Version = Windows.ApplicationModel.Package.Current.Id.Version.Major + "."
-            + Windows.ApplicationModel.Package.Current.Id.Version.Minor + "."
-            + Windows.ApplicationModel.Package.Current.Id.Version.Build + " Build " + File.ReadAllText(GlobalData.RootDirectory + "\\RevisionID");
+            // create elmah.io target
+            var elmahIoTarget = new ElmahIoTarget();
 
-            msg.User = GlobalData.Preferences.Name + $"({GlobalData.Preferences.Email})";
-            msg.Source = stackTraceHelper;
-        };
+            elmahIoTarget.OnMessage += msg =>
+            {
+                msg.Version = Windows.ApplicationModel.Package.Current.Id.Version.Major + "."
+                + Windows.ApplicationModel.Package.Current.Id.Version.Minor + "."
+                + Windows.ApplicationModel.Package.Current.Id.Version.Build + " Build " + File.ReadAllText(GlobalData.RootDirectory + "\\RevisionID");
 
-        elmahIoTarget.Name = "elmahio";
-        elmahIoTarget.ApiKey = apiKey;
-        elmahIoTarget.LogId = logID;
-        LogManager.Configuration.AddTarget(elmahIoTarget);
-        LogManager.Configuration.AddRule(NLog.LogLevel.Error, NLog.LogLevel.Fatal, elmahIoTarget, "*");
-        LogManager.ReconfigExistingLoggers();
-        return true;
+                msg.User = GlobalData.Preferences.Name + $"({GlobalData.Preferences.Email})";
+                msg.Source = stackTraceHelper;
+            };
+
+            elmahIoTarget.Name = "elmahio";
+            elmahIoTarget.ApiKey = apiKey;
+            elmahIoTarget.LogId = logID;
+            LogManager.Configuration.AddTarget(elmahIoTarget);
+            LogManager.Configuration.AddRule(NLog.LogLevel.Error, NLog.LogLevel.Fatal, elmahIoTarget, "*");
+            LogManager.ReconfigExistingLoggers();
+            GlobalData.ElmahLogging = true;
+            return true;
+        }
+        catch (Exception ex)
+        {
+            LogException(LogLevel.Error, ex, ex.Message);
+            return false;
+        }
     }
     public LogService()
     {

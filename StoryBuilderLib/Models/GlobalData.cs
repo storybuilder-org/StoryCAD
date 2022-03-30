@@ -45,6 +45,10 @@ public static class GlobalData
     //TODO: Use QuotesSource
     public static ObservableCollection<Quotation> QuotesSource;
 
+    // Connection status
+    public static bool DopplerConnection;
+    public static bool ElmahLogging;
+
     // Preferences data
     public static PreferencesModel Preferences;
 
