@@ -1,12 +1,12 @@
 ﻿using System;
-using System.Diagnostics;
-using System.IO;
 using System.Threading.Tasks;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using StoryBuilder.Models;
+using StoryBuilder.Services.Logging;
 using dotenv.net.Utilities;
 
 
@@ -30,14 +30,23 @@ namespace StoryBuilder.Services.Keys
         /// <returns>elmah.io tokens, or empty strings</returns>
         public async Task<Doppler> FetchSecretsAsync()
         {
-            var token = EnvReader.GetStringValue("DOPPLER_TOKEN");
-            var basicAuthHeaderValue = Convert.ToBase64String(Encoding.Default.GetBytes(token + ":"));
+            try
+            {
+                var token = EnvReader.GetStringValue("DOPPLER_TOKEN");
+                var basicAuthHeaderValue = Convert.ToBase64String(Encoding.Default.GetBytes(token + ":"));
 
-            client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", basicAuthHeaderValue);
-            var streamTask = client.GetStreamAsync("https://api.doppler.com/v3/configs/config/secrets/download?format=json");
-            var secrets = await JsonSerializer.DeserializeAsync<Doppler>(await streamTask);
-            
-            return secrets;
+                client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", basicAuthHeaderValue);
+                var streamTask = client.GetStreamAsync("https://api.doppler.com/v3/configs/config/secrets/download?format=json");
+                var secrets = await JsonSerializer.DeserializeAsync<Doppler>(await streamTask);
+                GlobalData.DopplerConnection = true;
+                return secrets;
+            }
+            catch (Exception ex)
+            {
+                var log = Ioc.Default.GetService<LogService>();
+                log.LogException(LogLevel.Warn, ex, ex.Message);
+                return this;
+            }
         }
 
     }
