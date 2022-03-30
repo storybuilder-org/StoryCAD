@@ -540,7 +540,7 @@ public class SceneViewModel : ObservableRecipient, INavigable
         StoryNodeItem node = model.ExplorerView[0];
         OverviewModel overview = (OverviewModel)model.StoryElements.StoryElementGuids[node.Uuid];
         string viewpoint = overview?.Viewpoint;
-        if (viewpoint == string.Empty)
+        if (viewpoint == string.Empty | viewpoint == null)
             viewpointText = "No story viewpoint selected";
         else
              viewpointText = "Story viewpoint = " + viewpoint.ToString();
