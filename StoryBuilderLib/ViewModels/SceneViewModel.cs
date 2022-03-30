@@ -540,13 +540,13 @@ public class SceneViewModel : ObservableRecipient, INavigable
         StoryNodeItem node = model.ExplorerView[0];
         OverviewModel overview = (OverviewModel)model.StoryElements.StoryElementGuids[node.Uuid];
         string viewpoint = overview?.Viewpoint;
-        if (viewpoint == string.Empty)
+        if (viewpoint == string.Empty | viewpoint == null)
             viewpointText = "No story viewpoint selected";
         else
              viewpointText = "Story viewpoint = " + viewpoint.ToString();
         var viewpointChar = overview?.ViewpointCharacter;
         if (Guid.TryParse(viewpointChar, out Guid guid))
-            viewpointName = "Story viewpoint charcter = " + model.StoryElements.StoryElementGuids[guid].Name;
+            viewpointName = "Story viewpoint character = " + model.StoryElements.StoryElementGuids[guid].Name;
         else
             viewpointName = "Story viewpoint character not found";
         var tip = new StringBuilder();

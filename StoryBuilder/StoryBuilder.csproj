@@ -12,7 +12,7 @@
     <EnablePreviewMsixTooling>true</EnablePreviewMsixTooling>
     <GenerateAppInstallerFile>False</GenerateAppInstallerFile>
     <AppxPackageSigningEnabled>True</AppxPackageSigningEnabled>
-    <PackageCertificateThumbprint>D9CAFED91E915FA8F3DCDC67468833F749A0E6C8</PackageCertificateThumbprint>
+    <PackageCertificateThumbprint>5F61964EDBC12091CFAA723724F7A804F1F5C2B2</PackageCertificateThumbprint>
     <AppxPackageSigningTimestampDigestAlgorithm>SHA256</AppxPackageSigningTimestampDigestAlgorithm>
     <AppxAutoIncrementPackageRevision>False</AppxAutoIncrementPackageRevision>
     <AppxSymbolPackageEnabled>True</AppxSymbolPackageEnabled>
@@ -37,6 +37,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="dotenv.net" Version="3.1.1" />
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.0.1" />
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22581-preview" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.0.0-preview2" />
@@ -68,6 +69,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\StoryBuilderLib\StoryBuilderLib.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update=".env">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
   <ItemGroup>

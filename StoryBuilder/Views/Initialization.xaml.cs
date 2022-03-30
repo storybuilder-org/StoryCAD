@@ -6,6 +6,7 @@ using Windows.Storage.Pickers;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using CommunityToolkit.Mvvm.DependencyInjection;
+using StoryBuilder.Models;
 using StoryBuilder.ViewModels.Tools;
 using WinRT;
 
@@ -38,8 +39,8 @@ public sealed partial class PreferencesInitialization : Page
         FolderPicker folderPicker = new();
         if (Window.Current == null)
         {
-            IntPtr hwnd = GetActiveWindow();
-            //IntPtr hwnd = GlobalData.WindowHandle;
+            //IntPtr hwnd = GetActiveWindow();
+            IntPtr hwnd = GlobalData.WindowHandle;
             IInitializeWithWindow initializeWithWindow = folderPicker.As<IInitializeWithWindow>();
             initializeWithWindow.Initialize(hwnd);
         }
@@ -69,8 +70,8 @@ public sealed partial class PreferencesInitialization : Page
         FolderPicker folderPicker = new();
         if (Window.Current == null)
         {
-            IntPtr hwnd = GetActiveWindow();
-            //IntPtr hwnd = GlobalData.WindowHandle;
+            //IntPtr hwnd = GetActiveWindow();
+            IntPtr hwnd = GlobalData.WindowHandle;
             IInitializeWithWindow initializeWithWindow = folderPicker.As<IInitializeWithWindow>();
             initializeWithWindow.Initialize(hwnd);
         }

@@ -32,12 +32,11 @@ public sealed partial class Shell
         }                         
         catch (Exception ex)
         {
-            //TODO: Call exception version of logger
+            // A shell initialization error is fatal
             LogService log = Ioc.Default.GetService<LogService>();
-            log.Log(LogLevel.Debug, ex.Message);
-            log.Log(LogLevel.Debug, ex.StackTrace);
-            //log.Log(LogLevel.Debug, ex.InnerException.Data.Values);
-            // Handle exception
+            log.LogException(LogLevel.Error, ex, ex.Message);
+            log.Flush();
+            Application.Current.Exit();  // Win32
         }
 
         ShellVm.SplitViewFrame = SplitViewFrame;
@@ -50,6 +49,7 @@ public sealed partial class Shell
         // https://docs.microsoft.com/en-us/windows/winui/api/microsoft.ui.xaml.controls.contentdialog?view=winui-3.0-preview
         GlobalData.XamlRoot = Content.XamlRoot;
         ShellVm.ShowHomePage();
+        ShellVm.ShowConnectionStatus();
         await ShellVm.OpenUnifiedMenu();
     }
 
@@ -89,4 +89,11 @@ public sealed partial class Shell
         myOption.ShowMode = FlyoutShowMode.Transient;
         AddStoryElementCommandBarFlyout.ShowAt(NavigationTree, myOption);
     }
+
+    /// <summary>
+    /// This is called when the user clicks the save pen
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
+    private async void SaveIconPressed(object sender, PointerRoutedEventArgs e) { await ShellVm.SaveFile(); }
 }

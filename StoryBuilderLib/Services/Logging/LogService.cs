@@ -6,7 +6,7 @@ using StoryBuilder.Models;
 using System;
 using System.Diagnostics;
 using System.IO;
-using CommunityToolkit.Mvvm.DependencyInjection;
+using System.Threading.Tasks;
 using StoryBuilder.Services.Keys;
 
 namespace StoryBuilder.Services.Logging;
@@ -39,33 +39,6 @@ public class LogService : ILogService
             config.AddTarget("logfile", fileTarget);
             config.LoggingRules.Add(fileRule);
 
-            // create elmah.io target if keys are defined
-            var keys = Ioc.Default.GetService<KeyService>();
-            var tokens = keys.ElmahTokens();
-            string apiKey = tokens.Item1;
-            string logID = tokens.Item2;
-            if (apiKey != string.Empty && logID != string.Empty)
-            {
-                // create elmah.io target
-                var elmahIoTarget = new ElmahIoTarget();
-
-                elmahIoTarget.OnMessage += msg =>
-                {
-                    msg.Version = Windows.ApplicationModel.Package.Current.Id.Version.Major + "."
-                    + Windows.ApplicationModel.Package.Current.Id.Version.Minor + "."
-                    + Windows.ApplicationModel.Package.Current.Id.Version.Build + " Build " + File.ReadAllText(GlobalData.RootDirectory + "\\RevisionID");
-
-                    msg.User = GlobalData.Preferences.Name + $"({GlobalData.Preferences.Email})";
-                    msg.Source = stackTraceHelper;
-                };
-
-                elmahIoTarget.Name = "elmahio";
-                elmahIoTarget.ApiKey = apiKey;
-                elmahIoTarget.LogId = logID;
-                config.AddTarget(elmahIoTarget);
-                config.AddRule(NLog.LogLevel.Error, NLog.LogLevel.Fatal, elmahIoTarget, "*");
-            }
-
             // create console target
             if (!Debugger.IsAttached)
             {
@@ -75,9 +48,7 @@ public class LogService : ILogService
                 LoggingRule consoleRule = new("*", NLog.LogLevel.Info, consoleTarget);
                 config.LoggingRules.Add(consoleRule);
             }
-
             LogManager.Configuration = config;
-
             Logger = LogManager.GetCurrentClassLogger();
         }
         catch (Exception e)
@@ -86,11 +57,64 @@ public class LogService : ILogService
             Debug.WriteLine(e.StackTrace);
         }
     }
+
+    public async Task<bool> AddElmahTarget()
+    {
+        string apiKey = string.Empty;
+        string logID = string.Empty;
+
+        // create elmah.io target if keys are defined
+        try
+        {
+            var doppler = new Doppler();
+            var keys = await doppler.FetchSecretsAsync();
+            apiKey = keys.APIKEY;
+            logID = keys.LOGID;
+        }
+        catch (Exception ex) 
+        {
+            LogException(LogLevel.Error, ex, ex.Message);
+            return false;
+        }
+        if (apiKey == string.Empty | logID == string.Empty)
+            return false;
+
+        try
+        {
+            // create elmah.io target
+            var elmahIoTarget = new ElmahIoTarget();
+
+            elmahIoTarget.OnMessage += msg =>
+            {
+                msg.Version = Windows.ApplicationModel.Package.Current.Id.Version.Major + "."
+                + Windows.ApplicationModel.Package.Current.Id.Version.Minor + "."
+                + Windows.ApplicationModel.Package.Current.Id.Version.Build + " Build " + File.ReadAllText(GlobalData.RootDirectory + "\\RevisionID");
+
+                msg.User = GlobalData.Preferences.Name + $"({GlobalData.Preferences.Email})";
+                msg.Source = stackTraceHelper;
+            };
+
+            elmahIoTarget.Name = "elmahio";
+            elmahIoTarget.ApiKey = apiKey;
+            elmahIoTarget.LogId = logID;
+            LogManager.Configuration.AddTarget(elmahIoTarget);
+            LogManager.Configuration.AddRule(NLog.LogLevel.Error, NLog.LogLevel.Fatal, elmahIoTarget, "*");
+            LogManager.ReconfigExistingLoggers();
+            GlobalData.ElmahLogging = true;
+            return true;
+        }
+        catch (Exception ex)
+        {
+            LogException(LogLevel.Error, ex, ex.Message);
+            return false;
+        }
+    }
     public LogService()
     {
         Log(LogLevel.Info, "Starting Log service");
         Log(LogLevel.Info, "Detailed log at " + logFilePath);
     }
+
 
     public void Log(LogLevel level, string message)
     {

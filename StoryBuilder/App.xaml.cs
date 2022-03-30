@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Windows.Storage;
@@ -22,6 +23,8 @@ using StoryBuilder.Services.Keys;
 using StoryBuilder.ViewModels;
 using StoryBuilder.ViewModels.Tools;
 using StoryBuilder.Views;
+using dotenv.net;
+using dotenv.net.Utilities;
 using Syncfusion.Licensing;
 using UnhandledExceptionEventArgs = Microsoft.UI.Xaml.UnhandledExceptionEventArgs;
 
@@ -56,10 +59,18 @@ public partial class App : Application
     public App()
     {
         ConfigureIoc();
+      
+        var path = Path.Combine(Windows.ApplicationModel.Package.Current.InstalledLocation.Path, ".env");
+        var options = new DotEnvOptions(false, new[] { path });
+        DotEnv.Load(options);
+        
         //Register Syncfusion license
-        var keys = Ioc.Default.GetService<KeyService>();
-        SyncfusionLicenseProvider.RegisterLicense(keys.SyncfusionToken());
+        var token = EnvReader.GetStringValue("SYNCFUSION_TOKEN");
+        SyncfusionLicenseProvider.RegisterLicense(token);
+
         InitializeComponent();
+
+        _log = Ioc.Default.GetService<LogService>();
         Current.UnhandledException += OnUnhandledException;
     }
 
@@ -80,7 +91,6 @@ public partial class App : Application
                 .AddSingleton<StoryReader>()
                 .AddSingleton<StoryWriter>()
                 .AddSingleton<BackupService>()
-                .AddSingleton<KeyService>()
                 .AddSingleton<DeletionService>()
                 // Register ViewModels 
                 .AddSingleton<ShellViewModel>()
@@ -120,9 +130,21 @@ public partial class App : Application
     /// <param name="args">Details about the launch request and process.</param>
     protected override async void OnLaunched(LaunchActivatedEventArgs args)
     {
-        //Current.Resources.Add("Locator", new ViewModelLocator());
-        _log = Ioc.Default.GetService<LogService>();
         _log.Log(LogLevel.Info, "StoryBuilder.App launched");
+
+        // Note: Shell_Loaded in Shell.xaml.cs will display a
+        // connection status message as soon as it's displayable.
+
+        if (Debugger.IsAttached)
+            _log.Log(LogLevel.Info, "Bypassing elmah.io");
+        else
+        {
+            await _log.AddElmahTarget();
+            if (GlobalData.ElmahLogging)
+                _log.Log(LogLevel.Info, "elmah.io log target added");
+            else  // can have several reasons (no doppler, or an error adding the target)
+                _log.Log(LogLevel.Info, "elmah.io log target bypassed");
+        }
 
         string pathMsg = string.Format("Configuration data location = " + GlobalData.RootDirectory);
         _log.Log(LogLevel.Info, pathMsg);
@@ -158,17 +180,18 @@ public partial class App : Application
         Frame rootFrame = new();
         // Place the frame in the current Window
         mainWindow.Content = rootFrame;
-        mainWindow.Activate();
         mainWindow.CenterOnScreen(); //Centers the window on the monitor
     
         if (rootFrame.Content == null)
         {
             rootFrame.Navigate(GlobalData.Preferences.PreferencesInitialised ? typeof(Shell) : typeof(PreferencesInitialization));
         }
+        mainWindow.Activate();
         GlobalData.MainWindow = (MainWindow) mainWindow;
         //Get the Window's HWND
         m_windowHandle = User32.GetActiveWindow();
         GlobalData.WindowHandle = m_windowHandle;
+
 
         // The Window object doesn't (yet) have Width and Height properties in WInUI 3 Desktop yet.
         // To set the Width and Height, you can use the Win32 API SetWindowPos.

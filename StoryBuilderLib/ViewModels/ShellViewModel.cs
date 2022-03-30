@@ -700,7 +700,7 @@ namespace StoryBuilder.ViewModels
             _canExecuteCommands = true;
         }
 
-        private async Task SaveFile()
+        public async Task SaveFile()
         {
             Logger.Log(LogLevel.Trace, "Saving file");
             _canExecuteCommands = false;
@@ -1822,6 +1822,16 @@ namespace StoryBuilder.ViewModels
                     EmptyTrashVisibility = Visibility.Visible;
                     break;
             }
+        }
+
+        public void ShowConnectionStatus()
+        {
+            StatusMessage msg;
+            if (!GlobalData.DopplerConnection | !GlobalData.ElmahLogging)
+                msg = new StatusMessage("Connection not established", LogLevel.Warn, true);
+            else
+                msg = new StatusMessage("Connection established", LogLevel.Info, true);
+            Messenger.Send(new StatusChangedMessage(msg));
         }
 
         private void SetCurrentView(StoryViewType view)
