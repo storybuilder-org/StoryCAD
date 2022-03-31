@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml.Controls;
 using StoryBuilder.ViewModels;
+using Syncfusion.UI.Xaml.Editors;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -22,10 +23,11 @@ public sealed partial class RelationshipView : UserControl
     /// CharacterRelationships is bound to is selected.
     /// However, one property need modified during LoadModel: the Partner  
     /// StoryElement in the RelationshipModel needs loaded from its Uuid.
-    public void RelationshipChanged(object sender, SelectionChangedEventArgs args)
+    public void RelationshipChanged(object? sender, ComboBoxSelectionChangedEventArgs e)
     {
         CharVm.SaveRelationship(CharVm.CurrentRelationship);
         CharVm.LoadRelationship(CharVm.SelectedRelationship);
         CharVm.CurrentRelationship = CharVm.SelectedRelationship;
     }
+
 }
