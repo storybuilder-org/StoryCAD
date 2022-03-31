@@ -1761,6 +1761,7 @@ namespace StoryBuilder.ViewModels
                         SetCurrentView(StoryViewType.NarratorView);
                         break;
                 }
+                TreeViewNodeClicked(Ioc.Default.GetRequiredService<ShellViewModel>().DataSource[0]);
             }
         }
 
@@ -1847,8 +1848,7 @@ namespace StoryBuilder.ViewModels
                 case StoryViewType.SearchView:
                     break;
             }
-            if (DataSource.Count > 0)
-                CurrentNode = DataSource[0];
+            if (DataSource.Count > 0) {CurrentNode = DataSource[0];}
         }
 
         #region MVVM Message processing
