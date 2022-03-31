@@ -427,6 +427,7 @@ public class SceneViewModel : ObservableRecipient, INavigable
 
             //_logger.Log(LogLevel.Info, string.Format("Requesting IsDirty change to true"));
             //Messenger.Send(new IsChangedMessage(Changed));
+            _changeable = true;
         }
     }
 
