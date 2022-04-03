@@ -532,23 +532,25 @@ public class SceneViewModel : ObservableRecipient, INavigable
     /// </summary>
     private void GetOverviewViewpoint()
     {
-        string viewpointText;
-        string viewpointName;
+        string viewpointText = "No story viewpoint selected";
+        string viewpointName = "No story viewpoint character selected";
 
         VpCharTipIsOpen = false;
         StoryModel model = ShellViewModel.GetModel();
         StoryNodeItem node = model.ExplorerView[0];
         OverviewModel overview = (OverviewModel)model.StoryElements.StoryElementGuids[node.Uuid];
-        string viewpoint = overview?.Viewpoint;
-        if (viewpoint == string.Empty)
-            viewpointText = "No story viewpoint selected";
-        else
-             viewpointText = "Story viewpoint = " + viewpoint.ToString();
-        var viewpointChar = overview?.ViewpointCharacter;
-        if (Guid.TryParse(viewpointChar, out Guid guid))
-            viewpointName = "Story viewpoint character = " + model.StoryElements.StoryElementGuids[guid].Name;
-        else
-            viewpointName = "Story viewpoint character not found";
+        //string viewpoint = overview?.Viewpoint;
+        string viewpoint = overview?.Viewpoint != null ? overview.Viewpoint : string.Empty;
+        if (!viewpoint.Equals(string.Empty))
+            viewpointText = "Story viewpoint = " + viewpoint;
+        var viewpointChar = overview?.ViewpointCharacter != null ? overview.ViewpointCharacter : string.Empty;
+        if (!viewpointChar.Equals(string.Empty))
+        {
+            if (Guid.TryParse(viewpointChar, out Guid guid))
+                viewpointName = "Story viewpoint character = " + model.StoryElements.StoryElementGuids[guid].Name;
+            else
+                viewpointName = "Story viewpoint character not found";
+        }
         var tip = new StringBuilder();
         tip.AppendLine(string.Empty);
         tip.AppendLine(viewpointText);
