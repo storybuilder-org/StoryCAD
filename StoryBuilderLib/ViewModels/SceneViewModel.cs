@@ -529,58 +529,42 @@ public class SceneViewModel : ObservableRecipient, INavigable
     /// should be the same as the overview's viewpoint character (the entire story's
     /// told in first person.) 
     /// 
-    /// Theis is presented as a suggestion, not a hard-and-fast rule.
+    /// This is presented as a suggestion, not a hard-and-fast rule.
     /// </summary>
     private void GetOverviewViewpoint()
     {
-        try
+        string viewpointText = "No story viewpoint selected";
+        string viewpointName = "No story viewpoint character selected";
+
+        VpCharTipIsOpen = false;
+        StoryModel model = ShellViewModel.GetModel();
+        StoryNodeItem node = model.ExplorerView[0];
+        OverviewModel overview = (OverviewModel)model.StoryElements.StoryElementGuids[node.Uuid];
+        //string viewpoint = overview?.Viewpoint;
+        string viewpoint = overview?.Viewpoint != null ? overview.Viewpoint : string.Empty;
+        if (!viewpoint.Equals(string.Empty))
+            viewpointText = "Story viewpoint = " + viewpoint;
+        var viewpointChar = overview?.ViewpointCharacter != null ? overview.ViewpointCharacter : string.Empty;
+        if (!viewpointChar.Equals(string.Empty))
         {
-            string viewpointText;
-            string viewpointName;
-
-            VpCharTipIsOpen = false;
-            StoryModel model = ShellViewModel.GetModel();
-            StoryNodeItem node = model.ExplorerView[0];
-            OverviewModel overview = (OverviewModel) model.StoryElements.StoryElementGuids[node.Uuid];
-            string viewpoint = overview?.Viewpoint;
-            if (viewpoint == string.Empty | viewpoint == null)
-            {
-                viewpointText = "No story viewpoint selected";
-            }
-            else
-            {
-                viewpointText = "Story viewpoint = " + viewpoint.ToString();
-            }
-
-            var viewpointChar = overview?.ViewpointCharacter;
             if (Guid.TryParse(viewpointChar, out Guid guid))
-            {
                 viewpointName = "Story viewpoint character = " + model.StoryElements.StoryElementGuids[guid].Name;
-            }
             else
-            {
                 viewpointName = "Story viewpoint character not found";
-            }
-
-            var tip = new StringBuilder();
-            tip.AppendLine(string.Empty);
-            tip.AppendLine(viewpointText);
-            tip.AppendLine(viewpointName);
-            VpCharTip = tip.ToString();
-
-            // The TeachingTip should only display if there's no scene ViewpointCharcter selected
-            if (ViewpointCharacter.Equals(string.Empty))
-            {
-                VpCharTipIsOpen = true;
-                string msg = "ViewpointCharacterTip displayed";
-                _logger.Log(LogLevel.Warn, msg);
-            }
         }
-        catch (Exception ex)
+        var tip = new StringBuilder();
+        tip.AppendLine(string.Empty);
+        tip.AppendLine(viewpointText);
+        tip.AppendLine(viewpointName);
+        VpCharTip = tip.ToString();
+
+        // The TeachingTip should only display if there's no scene ViewpointCharcter selected
+        if (ViewpointCharacter.Equals(string.Empty))
         {
-            _logger.LogException(LogLevel.Error,ex,"Error displaying tooltip");
+            VpCharTipIsOpen = true;
+            string msg = "ViewpointCharacterTip displayed";
+            _logger.Log(LogLevel.Warn, msg);
         }
-
     }
     #endregion
 
