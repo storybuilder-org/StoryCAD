@@ -59,14 +59,18 @@ public partial class App : Application
     public App()
     {
         ConfigureIoc();
-
+      
         var path = Path.Combine(Windows.ApplicationModel.Package.Current.InstalledLocation.Path, ".env");
         var options = new DotEnvOptions(false, new[] { path });
         DotEnv.Load(options);
+        
         //Register Syncfusion license
         var token = EnvReader.GetStringValue("SYNCFUSION_TOKEN");
         SyncfusionLicenseProvider.RegisterLicense(token);
+
         InitializeComponent();
+
+        _log = Ioc.Default.GetService<LogService>();
         Current.UnhandledException += OnUnhandledException;
     }
 
@@ -126,13 +130,21 @@ public partial class App : Application
     /// <param name="args">Details about the launch request and process.</param>
     protected override async void OnLaunched(LaunchActivatedEventArgs args)
     {
-        _log = Ioc.Default.GetService<LogService>();
         _log.Log(LogLevel.Info, "StoryBuilder.App launched");
-        bool result = await _log.AddElmahTarget();
-        if (result)
-            _log.Log(LogLevel.Info, "elmah.io log target added");
+
+        // Note: Shell_Loaded in Shell.xaml.cs will display a
+        // connection status message as soon as it's displayable.
+
+        if (Debugger.IsAttached)
+            _log.Log(LogLevel.Info, "Bypassing elmah.io");
         else
-            _log.Log(LogLevel.Info, "elmah.io log target bypassed");
+        {
+            await _log.AddElmahTarget();
+            if (GlobalData.ElmahLogging)
+                _log.Log(LogLevel.Info, "elmah.io log target added");
+            else  // can have several reasons (no doppler, or an error adding the target)
+                _log.Log(LogLevel.Info, "elmah.io log target bypassed");
+        }
 
         string pathMsg = string.Format("Configuration data location = " + GlobalData.RootDirectory);
         _log.Log(LogLevel.Info, pathMsg);
