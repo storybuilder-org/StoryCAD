@@ -6,14 +6,7 @@ using StoryBuilder.Services.Logging;
 using StoryBuilder.ViewModels;
 using StoryBuilder.ViewModels.Tools;
 
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
-
 namespace StoryBuilder.Services.Dialogs.Tools;
-
-/// <summary>
-/// An empty page that can be used on its own or navigated to within a Frame.
-/// </summary>
 public sealed partial class PrintReportsDialog : Page
 {
     public PrintReportDialogVM PrintVM = Ioc.Default.GetRequiredService<PrintReportDialogVM>();

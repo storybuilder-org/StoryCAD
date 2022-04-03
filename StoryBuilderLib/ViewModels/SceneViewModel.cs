@@ -427,6 +427,7 @@ public class SceneViewModel : ObservableRecipient, INavigable
 
             //_logger.Log(LogLevel.Info, string.Format("Requesting IsDirty change to true"));
             //Messenger.Send(new IsChangedMessage(Changed));
+            _changeable = true;
         }
     }
 
@@ -532,36 +533,54 @@ public class SceneViewModel : ObservableRecipient, INavigable
     /// </summary>
     private void GetOverviewViewpoint()
     {
-        string viewpointText;
-        string viewpointName;
-
-        VpCharTipIsOpen = false;
-        StoryModel model = ShellViewModel.GetModel();
-        StoryNodeItem node = model.ExplorerView[0];
-        OverviewModel overview = (OverviewModel)model.StoryElements.StoryElementGuids[node.Uuid];
-        string viewpoint = overview?.Viewpoint;
-        if (viewpoint == string.Empty | viewpoint == null)
-            viewpointText = "No story viewpoint selected";
-        else
-             viewpointText = "Story viewpoint = " + viewpoint.ToString();
-        var viewpointChar = overview?.ViewpointCharacter;
-        if (Guid.TryParse(viewpointChar, out Guid guid))
-            viewpointName = "Story viewpoint character = " + model.StoryElements.StoryElementGuids[guid].Name;
-        else
-            viewpointName = "Story viewpoint character not found";
-        var tip = new StringBuilder();
-        tip.AppendLine(string.Empty);
-        tip.AppendLine(viewpointText);
-        tip.AppendLine(viewpointName);
-        VpCharTip = tip.ToString();
-
-        // The TeachingTip should only display if there's no scene ViewpointCharcter selected
-        if (ViewpointCharacter.Equals(string.Empty))
+        try
         {
-            VpCharTipIsOpen = true;
-            string msg = "ViewpointCharacterTip displayed";
-            _logger.Log(LogLevel.Warn, msg);
+            string viewpointText;
+            string viewpointName;
+
+            VpCharTipIsOpen = false;
+            StoryModel model = ShellViewModel.GetModel();
+            StoryNodeItem node = model.ExplorerView[0];
+            OverviewModel overview = (OverviewModel) model.StoryElements.StoryElementGuids[node.Uuid];
+            string viewpoint = overview?.Viewpoint;
+            if (viewpoint == string.Empty | viewpoint == null)
+            {
+                viewpointText = "No story viewpoint selected";
+            }
+            else
+            {
+                viewpointText = "Story viewpoint = " + viewpoint.ToString();
+            }
+
+            var viewpointChar = overview?.ViewpointCharacter;
+            if (Guid.TryParse(viewpointChar, out Guid guid))
+            {
+                viewpointName = "Story viewpoint character = " + model.StoryElements.StoryElementGuids[guid].Name;
+            }
+            else
+            {
+                viewpointName = "Story viewpoint character not found";
+            }
+
+            var tip = new StringBuilder();
+            tip.AppendLine(string.Empty);
+            tip.AppendLine(viewpointText);
+            tip.AppendLine(viewpointName);
+            VpCharTip = tip.ToString();
+
+            // The TeachingTip should only display if there's no scene ViewpointCharcter selected
+            if (ViewpointCharacter.Equals(string.Empty))
+            {
+                VpCharTipIsOpen = true;
+                string msg = "ViewpointCharacterTip displayed";
+                _logger.Log(LogLevel.Warn, msg);
+            }
         }
+        catch (Exception ex)
+        {
+            _logger.LogException(LogLevel.Error,ex,"Error displaying tooltip");
+        }
+
     }
     #endregion
 

@@ -27,6 +27,7 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Windows.Storage;
 using Windows.Storage.Pickers;
+using ABI.Windows.Storage.Provider;
 using StoryBuilder.Services;
 using WinRT;
 using GuidAttribute = System.Runtime.InteropServices.GuidAttribute;
@@ -404,8 +405,8 @@ namespace StoryBuilder.ViewModels
                 StoryModel.ProjectFilename = vm.ProjectName;
                 StoryModel.ProjectFolder = await StorageFolder.GetFolderFromPathAsync(vm.ProjectPath);
                 StoryModel.ProjectPath = StoryModel.ProjectFolder.Path;
-          
-                OverviewModel overview = new("Working Title", StoryModel);
+
+                OverviewModel overview = new("Working Title", StoryModel){DateCreated = DateTime.Today.ToString("d")};
                 overview.Author = GlobalData.Preferences.Name;
                 StoryNodeItem overviewNode = new(overview, null) { IsExpanded = true, IsRoot = true };
                 StoryModel.ExplorerView.Add(overviewNode);
@@ -467,6 +468,7 @@ namespace StoryBuilder.ViewModels
                         StoryNodeItem antagNode = new(antag, charactersFolderNode);
                         break;
                 }
+
 
                 GlobalData.MainWindow.Title = $"StoryBuilder - Editing {vm.ProjectName.Replace(".stbx","")}";
                 SetCurrentView(StoryViewType.ExplorerView);
@@ -703,6 +705,7 @@ namespace StoryBuilder.ViewModels
         public async Task SaveFile()
         {
             Logger.Log(LogLevel.Trace, "Saving file");
+            (StoryModel.StoryElements.StoryElementGuids[DataSource[0].Uuid] as OverviewModel).DateModified = DateTime.Now.ToString("d");
             _canExecuteCommands = false;
             Logger.Log(LogLevel.Info, "Executing SaveFile command");
             try
@@ -1761,6 +1764,7 @@ namespace StoryBuilder.ViewModels
                         SetCurrentView(StoryViewType.NarratorView);
                         break;
                 }
+                TreeViewNodeClicked(Ioc.Default.GetRequiredService<ShellViewModel>().DataSource[0]);
             }
         }
 
@@ -1847,8 +1851,7 @@ namespace StoryBuilder.ViewModels
                 case StoryViewType.SearchView:
                     break;
             }
-            if (DataSource.Count > 0)
-                CurrentNode = DataSource[0];
+            if (DataSource.Count > 0) {CurrentNode = DataSource[0];}
         }
 
         #region MVVM Message processing
