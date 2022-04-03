@@ -3,6 +3,7 @@ using StoryBuilder.Models;
 using StoryBuilder.Models.Tools;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace StoryBuilder.ViewModels.Tools;
 
@@ -50,13 +51,17 @@ public class MasterPlotsViewModel : ObservableRecipient
 
     public MasterPlotsViewModel()
     {
-        MasterPlotNames = new ObservableCollection<string>();
+        List<string> MasterNames = new();
         MasterPlots = new Dictionary<string, MasterPlotModel>();
         foreach (MasterPlotModel plot in GlobalData.MasterPlotsSource)
         {
-            MasterPlotNames.Add(plot.MasterPlotName);
+            MasterNames.Add(plot.MasterPlotName);
             MasterPlots.Add(plot.MasterPlotName, plot);
         }
+
+        MasterNames.Sort();
+        MasterPlotNames = new ObservableCollection<string>();
+        foreach (var name in MasterNames) { MasterPlotNames.Add(name); }
         MasterPlotName = GlobalData.MasterPlotsSource[0].MasterPlotName;
     }
 

@@ -427,6 +427,7 @@ public class SceneViewModel : ObservableRecipient, INavigable
 
             //_logger.Log(LogLevel.Info, string.Format("Requesting IsDirty change to true"));
             //Messenger.Send(new IsChangedMessage(Changed));
+            _changeable = true;
         }
     }
 
@@ -528,7 +529,7 @@ public class SceneViewModel : ObservableRecipient, INavigable
     /// should be the same as the overview's viewpoint character (the entire story's
     /// told in first person.) 
     /// 
-    /// Theis is presented as a suggestion, not a hard-and-fast rule.
+    /// This is presented as a suggestion, not a hard-and-fast rule.
     /// </summary>
     private void GetOverviewViewpoint()
     {
