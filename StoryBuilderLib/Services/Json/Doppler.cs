@@ -10,7 +10,7 @@ using StoryBuilder.Services.Logging;
 using dotenv.net.Utilities;
 
 
-namespace StoryBuilder.Services.Keys
+namespace StoryBuilder.Services.Json    
 {
 
     public class Doppler

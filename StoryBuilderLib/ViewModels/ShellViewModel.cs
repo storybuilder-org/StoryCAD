@@ -921,6 +921,7 @@ namespace StoryBuilder.ViewModels
                 case ContentDialogResult.Primary:
                     await Ioc.Default.GetService<PreferencesViewModel>().SaveAsync();
                     Messenger.Send(new StatusChangedMessage(new($"Preferences updated", LogLevel.Info, true)));
+                    
                     break;
                 case ContentDialogResult.Secondary:
                 {
