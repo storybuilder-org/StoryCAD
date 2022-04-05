@@ -1,5 +1,6 @@
-﻿using System.Text.Json.Serialization;
-
+﻿using System;
+using System.Text.Json.Serialization;
+using StoryBuilder.Models;
 namespace StoryBuilder.Services.Json
 {
     public class PreferencesData
@@ -9,19 +10,28 @@ namespace StoryBuilder.Services.Json
 
         [JsonPropertyName("name")]
         public string Name { get; set; }
-        
+
         [JsonPropertyName("elmahconsent")]
         public bool ErrorCollectionConsent { get; set; }
-        
+
         [JsonPropertyName("newsletterconsent")]
         public bool Newsletter { get; set; }
-        
-        [JsonPropertyName("version")]
-        public string Version { get; set; }
+
+        //[JsonPropertyName("version")]
+        //public string Version { get; set; }
 
         [JsonPropertyName("date")]
         public string Date { get; set; }
+
+        public PreferencesData()
+        {
+            var preferences = GlobalData.Preferences;
+            Email = preferences.Email;
+            Name = preferences.Name;
+            ErrorCollectionConsent = preferences.ErrorCollectionConsent;
+            Newsletter = preferences.Newsletter;
+            //Version = preferences.Version;
+            Date = DateTime.Now.ToShortDateString();
+        }
     }
-    
-    
 }
