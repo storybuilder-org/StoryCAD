@@ -21,9 +21,6 @@ namespace StoryBuilder.Services.Json
 
         [JsonPropertyName("date")]
         public string Date { get; set; }
-
-        //string jsonString = JsonSerializer.Serialize(PreferencesData instance);
-
     }
     
     

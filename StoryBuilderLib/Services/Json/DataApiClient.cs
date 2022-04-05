@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Text;  
 using System.Text.Json;
 
 namespace StoryBuilder.Services.Json
@@ -33,21 +34,25 @@ namespace StoryBuilder.Services.Json
         //    return true;
         //}
 
-        public DataApiClient() 
-        { 
+        public DataApiClient()
+        {
         }
-        //private static async Task<List<Repository>> ProcessRepositories()
-        //{
-        //    client.DefaultRequestHeaders.Accept.Clear();
-        //    client.DefaultRequestHeaders.Accept.Add(
-        //        new MediaTypeWithQualityHeaderValue("application/vnd.github.v3+json"));
-            
-        //    // Identify who we are (use a token?)
-        //    client.DefaultRequestHeaders.Add("User-Agent", "StoryBuilder");
 
-        //    var streamTask = client.GetStreamAsync("https://api.github.com/orgs/dotnet/repos");
-        //    var repositories = await JsonSerializer.DeserializeAsync<List<Repository>>(await streamTask);
-        //    return repositories;
-        //}
+        private static async Task<bool> PostPreferences(PreferencesData preferences)
+        {
+            client.DefaultRequestHeaders.Accept.Clear();
+
+            // Identify who we are (maybe use a secrets token?)
+            //    client.DefaultRequestHeaders.Add("User-Agent", "StoryBuilder");
+
+            //TODO: Add try/catch logic
+
+            Uri server = new Uri("localhost:3000");
+            string jsonString = JsonSerializer.Serialize(preferences);
+            var content = new StringContent(jsonString, Encoding.UTF8, "application/json");
+            var response = await client.PostAsync(server, content);
+            response.EnsureSuccessStatusCode();
+            return true;
+        }
     }
 }
