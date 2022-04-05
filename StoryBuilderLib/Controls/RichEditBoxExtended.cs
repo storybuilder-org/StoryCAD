@@ -37,7 +37,7 @@ public class RichEditBoxExtended : RichEditBox
         TextChanged += RichEditBoxExtended_TextChanged;
         TextAlignment = TextAlignment.Left;
         CornerRadius = new(5);
-        if (Application.Current.RequestedTheme == ApplicationTheme.Dark) { Foreground = new SolidColorBrush(Colors.LightGray); }
+        if (Application.Current.RequestedTheme == ApplicationTheme.Dark) { Foreground = new SolidColorBrush(Colors.LightGray); } //Color fix for dark mode
     }
 
 
