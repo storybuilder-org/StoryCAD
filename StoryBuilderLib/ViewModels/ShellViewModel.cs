@@ -705,7 +705,13 @@ namespace StoryBuilder.ViewModels
         public async Task SaveFile()
         {
             Logger.Log(LogLevel.Trace, "Saving file");
-            (StoryModel.StoryElements.StoryElementGuids[DataSource[0].Uuid] as OverviewModel).DateModified = DateTime.Now.ToString("d");
+
+            try //Updating the lost modified timer
+            {
+                (StoryModel.StoryElements.StoryElementGuids[DataSource[0].Uuid] as OverviewModel).DateModified = DateTime.Now.ToString("d");
+            }
+            catch (NullReferenceException) { Messenger.Send(new StatusChangedMessage(new($"Failed to update Last Modified date", LogLevel.Warn))); } //This appears to happen when in narrative view but im not sure how to fix it.
+
             _canExecuteCommands = false;
             Logger.Log(LogLevel.Info, "Executing SaveFile command");
             try
@@ -1557,6 +1563,7 @@ namespace StoryBuilder.ViewModels
             if (NewNode != null)
             {
                 NewNode.Parent.IsExpanded = true;
+                NewNode.IsRoot = false; //Only an overview node can be a root, which cant be created normally
             }
 
             Messenger.Send(new IsChangedMessage(true));
@@ -1579,7 +1586,7 @@ namespace StoryBuilder.ViewModels
                 StatusMessage = "You can't delete from the trash!";
                 return;
             }
-            if (RightTappedNode.Parent == null)
+            if (RightTappedNode.IsRoot)
             {
                 StatusMessage = "You can't delete a root node!";
                 return;
