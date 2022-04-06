@@ -1,4 +1,5 @@
-﻿using Microsoft.UI;
+﻿using System;
+using Microsoft.UI;
 
 namespace StoryBuilder.Models.Tools;
 
@@ -20,7 +21,7 @@ public class PreferencesModel
     #region Properties
     public bool Changed { get; set; }
 
-    //User infomation
+    //User information
     public string Name { get; set; }
     public string Email { get; set; }
     public bool ErrorCollectionConsent { get; set; }
@@ -30,7 +31,7 @@ public class PreferencesModel
     /// This switch tracks whether this is a new 
     /// installation. 
     /// </summary>
-    public bool PreferencesInitialised { get; set; } 
+    public bool PreferencesInitialised { get; set; }
     public int LastSelectedTemplate { get; set; } //This is the Last Template Selected by the user.3
 
     // Visual changes
@@ -43,7 +44,7 @@ public class PreferencesModel
     public bool TimedBackup { get; set; }
     public int TimedBackupInterval { get; set; }
 
-    //Directorys
+    //Directories
     public string ProjectDirectory { get; set; }
     public string BackupDirectory { get; set; }
 
@@ -54,6 +55,14 @@ public class PreferencesModel
     public string LastFile4 { get; set; }
     public string LastFile5 { get; set; }
 
+    //Version Tracking
+    public string Version
+    {
+        get => Windows.ApplicationModel.Package.Current.Id.Version.Major + "." +
+               Windows.ApplicationModel.Package.Current.Id.Version.Minor + "." +
+               Windows.ApplicationModel.Package.Current.Id.Version.Build +
+               $" (Build {System.IO.File.ReadAllText(GlobalData.RootDirectory + "\\RevisionID")})".Replace("\r", "").Replace("\n", "");
+    }
     #endregion
 
     #region Constructor

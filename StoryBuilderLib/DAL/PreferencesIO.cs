@@ -39,7 +39,7 @@ public class PreferencesIO
     {
         //Tries to read file
         StorageFolder preferencesFolder = await StorageFolder.GetFolderFromPathAsync(_path);
-        IStorageFile preferencesFile = (IStorageFile) await preferencesFolder.TryGetItemAsync("StoryBuilder.prf");
+        IStorageFile preferencesFile = (IStorageFile)await preferencesFolder.TryGetItemAsync("StoryBuilder.prf");
 
         if (preferencesFile != null) //Checks if file exists
         {
@@ -59,25 +59,19 @@ public class PreferencesIO
                         _model.Email = tokens[1];
                         break;
 
-                    case "QuoteOnStartup": 
-                        if (tokens[1] == "True")
-                            _model.QuoteOnStartup = true;
-                        else
-                            _model.QuoteOnStartup = false;
+                    case "QuoteOnStartup":
+                        if (tokens[1] == "True") { _model.QuoteOnStartup = true; }
+                        else { _model.QuoteOnStartup = false; }
                         break;
 
                     case "Initalised":
-                        if (tokens[1] == "True")
-                            _model.PreferencesInitialised = true;
-                        else
-                            _model.PreferencesInitialised = false;
+                        if (tokens[1] == "True") { _model.PreferencesInitialised = true; }
+                        else { _model.PreferencesInitialised = false; }
                         break;
 
                     case "ErrorCollectionConsent":
-                        if (tokens[1] == "True")
-                            _model.ErrorCollectionConsent = true;
-                        else
-                            _model.ErrorCollectionConsent = false;
+                        if (tokens[1] == "True") { _model.ErrorCollectionConsent = true; }
+                        else { _model.ErrorCollectionConsent = false; }
                         break;
 
                     case "Newsletter":
@@ -92,10 +86,8 @@ public class PreferencesIO
                         break;
 
                     case "TimedBackup":
-                        if (tokens[1] == "True")
-                            _model.TimedBackup = true;
-                        else
-                            _model.TimedBackup = false;
+                        if (tokens[1] == "True") { _model.TimedBackup = true; }
+                        else { _model.TimedBackup = false; }
                         break;
 
                     case "TimedBackupInterval":
@@ -108,7 +100,6 @@ public class PreferencesIO
                     case "BackupDirectory":
                         _model.BackupDirectory = tokens[1];
                         break;
-
                     case "LastFile1":
                         _model.LastFile1 = tokens[1];
                         break;
@@ -127,6 +118,10 @@ public class PreferencesIO
                     case "LastTemplate":
                         _model.LastSelectedTemplate = Convert.ToInt32(tokens[1]);
                         break;
+                    case "Version":
+                        if (tokens[1] != _model.Version) {/*Report change here*/}
+                        break;
+
                 }
             }
             _log.Log(LogLevel.Info, "PreferencesModel updated from StoryBuilder.prf.");
@@ -155,7 +150,7 @@ public class PreferencesIO
         _log.Log(LogLevel.Info, "Updating prf from model.");
         StorageFolder preferencesFolder = await StorageFolder.GetFolderFromPathAsync(_path);
         StorageFile preferencesFile = await preferencesFolder.CreateFileAsync("StoryBuilder.prf", CreationCollisionOption.ReplaceExisting);
-            
+
         //Updates file
         List<string> NewPreferences = new();
         NewPreferences.Add("Newsletter=" + _model.Newsletter);
@@ -175,6 +170,7 @@ public class PreferencesIO
         NewPreferences.Add("ErrorCollectionConsent=" + _model.ErrorCollectionConsent);
         NewPreferences.Add("TimedBackup=" + _model.TimedBackup);
         NewPreferences.Add("LastTemplate=" + _model.LastSelectedTemplate);
+        NewPreferences.Add("Version=" + _model.Version);
 
         await FileIO.WriteLinesAsync(preferencesFile, NewPreferences); //Writes file to disk.
     }
