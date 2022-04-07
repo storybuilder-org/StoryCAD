@@ -494,17 +494,8 @@ namespace StoryBuilder.DAL
                     case "Temperature":
                         loc.Temperature = attr.InnerText;
                         break;
-                    case "Prop1":
-                        loc.Prop1 = attr.InnerText;
-                        break;
-                    case "Prop2":
-                        loc.Prop2 = attr.InnerText;
-                        break;
-                    case "Prop3":
-                        loc.Prop3 = attr.InnerText;
-                        break;
-                    case "Prop4":
-                        loc.Prop4 = attr.InnerText;
+                    case "Props":
+                        loc.Props = attr.InnerText;
                         break;
                     case "Summary":
                         loc.Summary = attr.InnerText;

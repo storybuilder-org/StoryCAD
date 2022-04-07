@@ -64,26 +64,9 @@
                         <TextBox Header="Temperature" Grid.Column="2" MinWidth="200"
                                  Text="{x:Bind SettingVm.Temperature, Mode=TwoWay}" />
                     </Grid>
-                    <Grid Grid.Row="3" HorizontalAlignment="Left">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="2*"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="2*"/>
-                        </Grid.ColumnDefinitions>
-                        <TextBox Header="Prop" Grid.Column="0" MinWidth="200" Text="{x:Bind SettingVm.Prop1, Mode=TwoWay}" />
-                        <TextBlock Grid.Column="1" Width="100"/>
-                        <TextBox Header="2nd prop" Grid.Column="2" MinWidth="200" Text="{x:Bind SettingVm.Prop2, Mode=TwoWay}" />
-                    </Grid>
-                    <Grid Grid.Row="4" HorizontalAlignment="Left">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="2*"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="2*"/>
-                        </Grid.ColumnDefinitions>
-                        <TextBox Header="3rd prop" Grid.Column="0" MinWidth="200" Text="{x:Bind SettingVm.Prop3, Mode=TwoWay}" />
-                        <TextBlock Grid.Column="1" Width="100"/>
-                        <TextBox Header="4th prop" Grid.Column="2" MinWidth="200" Text="{x:Bind SettingVm.Prop4, Mode=TwoWay}" />
-                    </Grid>
+
+                    <TextBox Header="Props" Grid.Column="0" Grid.Row="3" Text="{x:Bind SettingVm.Props, Mode=TwoWay}" />
+
                     <usercontrols:RichEditBoxExtended Header="Scene Summary" Grid.Row="5"
                                                       RtfText="{x:Bind SettingVm.Summary, Mode=TwoWay}" AcceptsReturn="True"
                                                       IsSpellCheckEnabled="True" TextWrapping="Wrap"

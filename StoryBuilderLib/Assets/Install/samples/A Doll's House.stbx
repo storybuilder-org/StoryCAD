@@ -47,7 +47,7 @@
       <Relationships />
       <CharacterTraits />
     </Character>
-    <Setting UUID="E510E85D-9332-4C9B-B7A2-99716A966AA4" Name="Living room in Helmer house" Id="1" Locale="Aristocratic home" Season="Winter (Snowy)" Period="" Lighting="" Weather="" Temperature="" Prop1="" Prop2="" Prop3="" Prop4="" Summary="" Sights="" Sounds="" Touch="" SmellTaste="" Notes="A comfortable room, tastefully but not expensively furnished.  A door to the right of the back wall leads to the entryway; another to left leads to Helmer's study. Between the doors, a piano. &#xD;&#xA;&#xD;&#xA;This is the only scene used in the intire play." />
+    <Setting UUID="E510E85D-9332-4C9B-B7A2-99716A966AA4" Name="Living room in Helmer house" Id="1" Locale="Aristocratic home" Season="Winter (Snowy)" Period="" Lighting="" Weather="" Temperature="" Props="" Summary="" Sights="" Sounds="" Touch="" SmellTaste="" Notes="A comfortable room, tastefully but not expensively furnished.  A door to the right of the back wall leads to the entryway; another to left leads to Helmer's study. Between the doors, a piano. &#xD;&#xA;&#xD;&#xA;This is the only scene used in the intire play." />
     <Scene UUID="A87262AA-E960-4DD5-A9E3-EA9CF84E6122" Name="ACT I" Id="1" Viewpoint="" Date="" Time="" Setting="" SceneType="" Char1="" Char2="" Char3="" Role1="" Role2="" Role3="" ScenePurpose="" ValueExchange="" Protagonist="" ProtagEmotion="" ProtagGoal="" Antagonist="" AntagEmotion="" AntagGoal="" Opposition="" Outcome="" Emotion="" NewGoal="" Remarks="" Events="" Consequences="" Significance="" Realization="" Review="" Notes="">
       <CastMembers />
     </Scene>

@@ -18,13 +18,7 @@
 
     Temperature:        @Temperature
 
-    Prop1:              @Prop1
-
-    Prop2:              @Prop2
-
-    Prop3:              @Prop3
-
-    Prop4:              @Prop4
+    Props:              @Props
 
     Scene Summary:
     @Summary
