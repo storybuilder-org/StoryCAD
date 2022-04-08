@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Windows.Storage;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.Models.Tools;
+using StoryBuilder.Services.Json;   
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
@@ -172,6 +173,7 @@ public class PreferencesIO
         NewPreferences.Add("LastTemplate=" + _model.LastSelectedTemplate);
         NewPreferences.Add("Version=" + _model.Version);
 
-        await FileIO.WriteLinesAsync(preferencesFile, NewPreferences); //Writes file to disk.
+        await FileIO.WriteLinesAsync(preferencesFile, NewPreferences); //Write the Prererences file to disk.
+        await DataLogger.PostPreferences(new PreferencesData(_model));
     }
 }

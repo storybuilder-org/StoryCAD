@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Text.Json.Serialization;
 using StoryBuilder.Models;
+using StoryBuilder.Models.Tools;
 namespace StoryBuilder.Services.Json
 {
     public class PreferencesData
@@ -17,8 +18,8 @@ namespace StoryBuilder.Services.Json
         [JsonPropertyName("newsletterconsent")]
         public bool Newsletter { get; set; }
 
-        //[JsonPropertyName("version")]
-        //public string Version { get; set; }
+        [JsonPropertyName("version")]
+        public string Version { get; set; }
 
         [JsonPropertyName("date")]
         public string Date { get; set; }
@@ -30,7 +31,17 @@ namespace StoryBuilder.Services.Json
             Name = preferences.Name;
             ErrorCollectionConsent = preferences.ErrorCollectionConsent;
             Newsletter = preferences.Newsletter;
-            //Version = preferences.Version;
+            Version = preferences.Version;
+            Date = DateTime.Now.ToShortDateString();
+        }
+
+        public PreferencesData(PreferencesModel model) 
+        {
+            Email = model.Email;
+            Name = model.Name;
+            ErrorCollectionConsent = model.ErrorCollectionConsent;
+            Newsletter = model.Newsletter;
+            Version = model.Version;
             Date = DateTime.Now.ToShortDateString();
         }
     }

@@ -56,13 +56,7 @@ public class PreferencesModel
     public string LastFile5 { get; set; }
 
     //Version Tracking
-    public string Version
-    {
-        get => Windows.ApplicationModel.Package.Current.Id.Version.Major + "." +
-               Windows.ApplicationModel.Package.Current.Id.Version.Minor + "." +
-               Windows.ApplicationModel.Package.Current.Id.Version.Build +
-               $" (Build {System.IO.File.ReadAllText(GlobalData.RootDirectory + "\\RevisionID")})".Replace("\r", "").Replace("\n", "");
-    }
+    public string Version { get; set; }
     #endregion
 
     #region Constructor

@@ -14,7 +14,7 @@ namespace StoryBuilder.Services.Json
     {
 
         private static readonly HttpClient client = new HttpClient();
-        private static async Task PostPreferences(PreferencesData preferences)
+        public static async Task PostPreferences(PreferencesData preferences)
         {
             var log = Ioc.Default.GetService<LogService>();
             
@@ -37,6 +37,32 @@ namespace StoryBuilder.Services.Json
             {
                 log.LogException(LogLevel.Warn, ex, ex.Message);
             }           
+            return;
+        }
+
+        public static async Task PostVersion(VersionData version)
+        {
+            var log = Ioc.Default.GetService<LogService>();
+
+            try
+            {
+                client.DefaultRequestHeaders.Accept.Clear();
+                // Identify who we are (maybe use a secrets token?)
+                //    client.DefaultRequestHeaders.Add("User-Agent", "StoryBuilder");
+
+                //TODO: Add try/catch logic
+
+                Uri server = new Uri("localhost:3000");
+                string jsonString = JsonSerializer.Serialize(version);
+                var content = new StringContent(jsonString, Encoding.UTF8, "application/json");
+                var response = await client.PostAsync(server, content);
+                response.EnsureSuccessStatusCode();
+                //TODO: Log success
+            }
+            catch (Exception ex)
+            {
+                log.LogException(LogLevel.Warn, ex, ex.Message);
+            }
             return;
         }
     }

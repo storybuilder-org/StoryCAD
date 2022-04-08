@@ -15,6 +15,7 @@ using StoryBuilder.Models;
 using StoryBuilder.Models.Tools;
 using StoryBuilder.Services;
 using StoryBuilder.Services.Installation;
+using StoryBuilder.Services.Json;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.Services.Navigation;
 using StoryBuilder.Services.Preferences;
@@ -59,7 +60,12 @@ public partial class App : Application
     public App()
     {
         ConfigureIoc();
-      
+
+        string Revision = System.IO.File.ReadAllText(GlobalData.RootDirectory + "\\RevisionID");
+        GlobalData.Version = "Version: " + Windows.ApplicationModel.Package.Current.Id.Version.Major + "." + 
+            Windows.ApplicationModel.Package.Current.Id.Version.Minor + "." + Windows.ApplicationModel.Package.Current.Id.Version.Build + 
+            "." + Revision;
+        
         var path = Path.Combine(Windows.ApplicationModel.Package.Current.InstalledLocation.Path, ".env");
         var options = new DotEnvOptions(false, new[] { path });
         DotEnv.Load(options);
@@ -155,6 +161,17 @@ public partial class App : Application
         // Load Preferences
         PreferencesService pref = Ioc.Default.GetService<PreferencesService>();
         await pref.LoadPreferences(GlobalData.RootDirectory);
+
+        if (!GlobalData.Version.Equals(GlobalData.Preferences.Version))
+        {
+            _log.Log(LogLevel.Info, "Version mismatch: " + GlobalData.Version + " != " + GlobalData.Preferences.Version);
+            var preferences = GlobalData.Preferences;
+            var versionLogData = new VersionData(); 
+            preferences.Version = GlobalData.Version;
+            PreferencesIO prefIO = Ioc.Default.GetService<PreferencesIO>();
+            await prefIO.UpdateFile();
+            await DataLogger.PostVersion(versionLogData);
+        }
 
         await ProcessInstallationFiles();
 
