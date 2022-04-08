@@ -96,32 +96,11 @@ public class SettingViewModel : ObservableRecipient, INavigable
         set => SetProperty(ref _temperature, value);
     }
 
-    private string _prop1;
-    public string Prop1
+    private string _props;
+    public string Props
     {
-        get => _prop1;
-        set => SetProperty(ref _prop1, value);
-    }
-
-    private string _prop2;
-    public string Prop2
-    {
-        get => _prop2;
-        set => SetProperty(ref _prop2, value);
-    }
-
-    private string _prop3;
-    public string Prop3
-    {
-        get => _prop3;
-        set => SetProperty(ref _prop3, value);
-    }
-
-    private string _prop4;
-    public string Prop4
-    {
-        get => _prop4;
-        set => SetProperty(ref _prop4, value);
+        get => _props;
+        set => SetProperty(ref _props, value);
     }
 
     private string _summary;
@@ -215,10 +194,7 @@ public class SettingViewModel : ObservableRecipient, INavigable
         Lighting = Model.Lighting;
         Weather = Model.Weather;
         Temperature = Model.Temperature;
-        Prop1 = Model.Prop1;
-        Prop2 = Model.Prop2;
-        Prop3 = Model.Prop3;
-        Prop4 = Model.Prop4;
+        Props = Model.Props;
         Summary = Model.Summary;
         Sights = Model.Sights;
         Sounds = Model.Sounds;
@@ -241,10 +217,7 @@ public class SettingViewModel : ObservableRecipient, INavigable
             Model.Lighting = Lighting;
             Model.Weather = Weather;
             Model.Temperature = Temperature;
-            Model.Prop1 = Prop1;
-            Model.Prop2 = Prop2;
-            Model.Prop3 = Prop3;
-            Model.Prop4 = Prop4;
+            Model.Props = Props;
 
             //Write RTF files
             Model.Summary = Summary;
@@ -281,10 +254,7 @@ public class SettingViewModel : ObservableRecipient, INavigable
         Lighting = string.Empty;
         Weather = string.Empty;
         Temperature = string.Empty;
-        Prop1 = string.Empty;
-        Prop2 = string.Empty;
-        Prop3 = string.Empty;
-        Prop4 = string.Empty;
+        Props = string.Empty;
         Summary = string.Empty;
         Sights = string.Empty;
         Sounds = string.Empty;

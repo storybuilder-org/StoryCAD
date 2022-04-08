@@ -809,6 +809,16 @@ public class CharacterViewModel : ObservableRecipient, INavigable
         {
             try
             {
+                if (VM.SelectedPartner == null) //This would occur if member box is empty and okay is clicked
+                {
+                    Messenger.Send(new StatusChangedMessage(new StatusMessage($"The member box is empty!", LogLevel.Warn)));
+                    return;
+                }
+                if (VM.RelationType == null) //This would occur if member box is empty and okay is clicked
+                {
+                    Messenger.Send(new StatusChangedMessage(new StatusMessage($"The relationship box is empty!", LogLevel.Warn)));
+                    return;
+                }
                 // Create the new RelationshipModel
                 string partnerUuid = StoryWriter.UuidString(VM.SelectedPartner.Uuid);
                 RelationshipModel memberRelationship = new(partnerUuid, VM.RelationType);
