@@ -11,7 +11,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <TextBox Header="Name" Text="{x:Bind ProblemVm.Name, Mode=TwoWay}" />
+        <TextBox Header="Name" Text="{x:Bind ProblemVm.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
         <Pivot Grid.Row="1">
             <PivotItem Header="Problem">
                 <Grid>
@@ -61,7 +61,7 @@
                     <Button  Content="Conflict Builder" Grid.Row="3" HorizontalAlignment="Left" Margin="0,10,10,10" 
                              Command="{x:Bind ProblemVm.ConflictCommand, Mode=OneWay}" />
                     <TextBox Header="Conflict" Grid.Row="4" MinWidth="300" TextWrapping="Wrap" AcceptsReturn="True"
-                             Text="{x:Bind ProblemVm.ProtConflict, Mode=TwoWay}" />
+                             Text="{x:Bind ProblemVm.ProtConflict, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                 </Grid>
             </PivotItem>
             <PivotItem Header="Antagonist">
@@ -85,7 +85,7 @@
                     <Button  Content="Conflict Builder" Grid.Row="3" HorizontalAlignment="Left" Margin="0,10,10,10" 
                              Command="{x:Bind ProblemVm.ConflictCommand, Mode=OneWay}" />
                     <TextBox Header="Conflict" Grid.Row="4" MinWidth="300" TextWrapping="Wrap" AcceptsReturn="True"
-                             Text="{x:Bind ProblemVm.AntagConflict, Mode=TwoWay}" />
+                             Text="{x:Bind ProblemVm.AntagConflict, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                 </Grid>
             </PivotItem>
             <PivotItem Header="Resolution">
