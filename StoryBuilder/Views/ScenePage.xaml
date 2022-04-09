@@ -77,7 +77,7 @@
                                     SelectedIndex="{x:Bind SceneVm.ExistingCastIndex, Mode=TwoWay}" >
                                     <ListView.ItemTemplate>
                                         <DataTemplate x:DataType="models:StoryElement">
-                                            <TextBlock Text="{x:Bind Name, Mode=OneWay1}" MinWidth="250" />
+                                            <TextBlock Text="{x:Bind Name, Mode=OneWay}" MinWidth="250" />
                                         </DataTemplate>
                                     </ListView.ItemTemplate>
                                 </ListView>
