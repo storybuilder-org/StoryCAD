@@ -706,9 +706,6 @@ namespace StoryBuilder.ViewModels
         public async Task SaveFile()
         { 
             Logger.Log(LogLevel.Trace, "Saving file");
-            DispatcherTimer timer = new DispatcherTimer();
-            Test.Focus(FocusState.Programmatic); 
-            System.Threading.Thread.Sleep(1000);
             try //Updating the lost modified timer
             {
                 (StoryModel.StoryElements.StoryElementGuids[DataSource[0].Uuid] as OverviewModel).DateModified = DateTime.Now.ToString("d");
