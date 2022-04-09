@@ -11,7 +11,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <TextBox Header="Title" Text="{x:Bind OverviewVm.Name, Mode=TwoWay}" />
+        <TextBox Header="Title" Text="{x:Bind OverviewVm.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
         <Pivot Grid.Row="1">
             <PivotItem Header="Story Idea">
                 <Grid>
@@ -21,7 +21,7 @@
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
                     <TextBox Header="Author" Grid.Row="0"
-                             Text="{x:Bind OverviewVm.Author, Mode=TwoWay}" />
+                             Text="{x:Bind OverviewVm.Author, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     <Grid Grid.Row="1" HorizontalAlignment="Left">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="2*"/>
@@ -29,10 +29,10 @@
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
                         <TextBox Header="Date Created" Grid.Column="0"
-                                 Text="{x:Bind OverviewVm.DateCreated, Mode=TwoWay}" />
+                                 Text="{x:Bind OverviewVm.DateCreated, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                         <TextBlock Grid.Column="1" MinWidth="100"/>
                         <TextBox Header="Last Changed" Grid.Column="2"
-                                 Text="{x:Bind OverviewVm.DateModified, Mode=TwoWay}" />
+                                 Text="{x:Bind OverviewVm.DateModified, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     </Grid>
                     <usercontrols:RichEditBoxExtended Header="Story Idea" Grid.Row="2"
                          RtfText="{x:Bind OverviewVm.StoryIdea, Mode=TwoWay}" AcceptsReturn="True"

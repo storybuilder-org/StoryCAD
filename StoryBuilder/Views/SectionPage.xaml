@@ -13,7 +13,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <TextBox Header="Name" Text="{x:Bind SectionVm.Name, Mode=TwoWay}" />
+        <TextBox Header="Name" Text="{x:Bind SectionVm.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
         <usercontrols:RichEditBoxExtended Header="Notes" Grid.Row="1" 
                                           RtfText="{x:Bind SectionVm.Notes, Mode=TwoWay}" AcceptsReturn="True"
                                           IsSpellCheckEnabled="True" TextWrapping="Wrap" 

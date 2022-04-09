@@ -14,7 +14,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <TextBox Header="Name" Text="{x:Bind SettingVm.Name, Mode=TwoWay}" />
+        <TextBox Header="Name" Text="{x:Bind SettingVm.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
         <Pivot Grid.Row="1">
             <PivotItem Header="Setting">
                 <Grid>
@@ -47,10 +47,10 @@
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
                         <TextBox Header="Period" Grid.Column="0" MinWidth="200"
-                                 Text="{x:Bind SettingVm.Period, Mode=TwoWay}" />
+                                 Text="{x:Bind SettingVm.Period, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                         <TextBlock Grid.Column="1" MinWidth="100"/>
                         <TextBox Header="Lighting" Grid.Column="2" MinWidth="200"
-                                 Text="{x:Bind SettingVm.Lighting, Mode=TwoWay}" />
+                                 Text="{x:Bind SettingVm.Lighting, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     </Grid>
                     <Grid Grid.Row="2" HorizontalAlignment="Left">
                         <Grid.ColumnDefinitions>
@@ -59,13 +59,13 @@
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
                         <TextBox Header="Weather" Grid.Column="0" MinWidth="200"
-                                 Text="{x:Bind SettingVm.Weather, Mode=TwoWay}" />
+                                 Text="{x:Bind SettingVm.Weather, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                         <TextBlock Grid.Column="1" Width="100"/>
                         <TextBox Header="Temperature" Grid.Column="2" MinWidth="200"
-                                 Text="{x:Bind SettingVm.Temperature, Mode=TwoWay}" />
+                                 Text="{x:Bind SettingVm.Temperature, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     </Grid>
 
-                    <TextBox Header="Props" Grid.Column="0" Grid.Row="3" Text="{x:Bind SettingVm.Props, Mode=TwoWay}" />
+                    <TextBox Header="Props" Grid.Column="0" Grid.Row="3" Text="{x:Bind SettingVm.Props, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
                     <usercontrols:RichEditBoxExtended Header="Scene Summary" Grid.Row="5"
                                                       RtfText="{x:Bind SettingVm.Summary, Mode=TwoWay}" AcceptsReturn="True"

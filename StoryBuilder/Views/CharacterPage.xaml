@@ -11,7 +11,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <TextBox Header="Name" Text="{x:Bind CharVm.Name, Mode=TwoWay}" Margin="10,0" />
+        <TextBox Header="Name" Text="{x:Bind CharVm.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="10,0" />
         <Pivot Grid.Row="1">
             <PivotItem Header="Role">
                 <Grid>
@@ -45,10 +45,10 @@
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
                         <TextBox Header="Age" Grid.Column="0" MinWidth="100"
-                                 Text="{x:Bind CharVm.Age, Mode=TwoWay}" />
+                                 Text="{x:Bind CharVm.Age, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                         <TextBlock Grid.Column="1" MinWidth="300"/>
                         <TextBox Header="Sex" Grid.Column="2" MinWidth="100"
-                                 Text="{x:Bind CharVm.Sex, Mode=TwoWay}" />
+                                 Text="{x:Bind CharVm.Sex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     </Grid>
                     <Grid Grid.Row="1" HorizontalAlignment="Left">
                         <Grid.ColumnDefinitions>
@@ -57,10 +57,10 @@
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
                         <TextBox Header="Height" Grid.Column="0" MinWidth="100"
-                                 Text="{x:Bind CharVm.CharHeight, Mode=TwoWay}" />
+                                 Text="{x:Bind CharVm.CharHeight, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                         <TextBlock Grid.Column="1" MinWidth="300"/>
                         <TextBox Header="Weight" Grid.Column="2" MinWidth="100"
-                                 Text="{x:Bind CharVm.Weight, Mode=TwoWay}" />
+                                 Text="{x:Bind CharVm.Weight, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     </Grid>
                     <Grid Grid.Row="2" HorizontalAlignment="Left">
                         <Grid.ColumnDefinitions>
@@ -105,7 +105,7 @@
                                   SelectedItem="{x:Bind CharVm.Nationality, Mode=TwoWay}" MaxDropDownHeight="270"/>
                     </Grid>
                     <TextBox Header="General Health" Grid.Row="5"
-                             Text="{x:Bind CharVm.Health, Mode=TwoWay}" />
+                             Text="{x:Bind CharVm.Health, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     <usercontrols:RichEditBoxExtended Header="Physical Notes" Grid.Row="6"
                                                       RtfText="{x:Bind CharVm.PhysNotes, Mode=TwoWay}" AcceptsReturn="True"
                                                       IsSpellCheckEnabled="True" TextWrapping="Wrap"
@@ -294,7 +294,7 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
-                        <TextBox Header="Other Trait:" Grid.Column="0" MinWidth="300" Text="{x:Bind CharVm.NewTrait, Mode=TwoWay}" />
+                        <TextBox Header="Other Trait:" Grid.Column="0" MinWidth="300" Text="{x:Bind CharVm.NewTrait, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                         <TextBlock Grid.Column="1" Width="10" />
                         <Button Grid.Column="2" FontFamily="Segoe MDL2 Assets" Content="&#xE710;"  Command="{x:Bind CharVm.AddTraitCommand, Mode=OneWay}" >
                             <ToolTipService.ToolTip>

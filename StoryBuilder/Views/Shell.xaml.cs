@@ -10,9 +10,6 @@ using StoryBuilder.Services;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.ViewModels;
 
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
-
 namespace StoryBuilder.Views;
 
 /// <summary>
@@ -38,7 +35,7 @@ public sealed partial class Shell
             log.Flush();
             Application.Current.Exit();  // Win32
         }
-
+        ShellVm.Test = FocusThing;
         ShellVm.SplitViewFrame = SplitViewFrame;
     }
 
@@ -96,4 +93,5 @@ public sealed partial class Shell
     /// <param name="sender"></param>
     /// <param name="e"></param>
     private async void SaveIconPressed(object sender, PointerRoutedEventArgs e) { await ShellVm.SaveFile(); }
+    
 }

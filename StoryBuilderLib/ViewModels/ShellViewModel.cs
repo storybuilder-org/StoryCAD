@@ -31,6 +31,7 @@ using ABI.Windows.Storage.Provider;
 using StoryBuilder.Services;
 using WinRT;
 using GuidAttribute = System.Runtime.InteropServices.GuidAttribute;
+using Microsoft.UI.Xaml.Input;
 
 namespace StoryBuilder.ViewModels
 {
@@ -74,6 +75,7 @@ namespace StoryBuilder.ViewModels
         public Frame SplitViewFrame;
 
         #region CommandBar Relay Commands
+        public TextBox Test;
 
         // Open/Close Navigation pane (Hamburger menu)
         public RelayCommand TogglePaneCommand { get; }
@@ -701,11 +703,9 @@ namespace StoryBuilder.ViewModels
             Logger.Log(LogLevel.Info, "Open Story completed.");
             _canExecuteCommands = true;
         }
-
         public async Task SaveFile()
-        {
+        { 
             Logger.Log(LogLevel.Trace, "Saving file");
-
             try //Updating the lost modified timer
             {
                 (StoryModel.StoryElements.StoryElementGuids[DataSource[0].Uuid] as OverviewModel).DateModified = DateTime.Now.ToString("d");
