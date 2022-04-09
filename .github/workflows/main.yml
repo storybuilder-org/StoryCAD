@@ -1,4 +1,4 @@
-name: StoryBuilder Tester
+name: StoryBuilder Tester 
 
 on:
   push:
@@ -37,8 +37,29 @@ jobs:
       uses: microsoft/setup-msbuild@v1.0.2
 
     #Bump version number
-    - name: Increase Version Number
-      run: ${{ github.run_number }} | Out-File -FilePath "D:\a\StoryBuilder-2\StoryBuilder-2\StoryBuilderLib\Assets\Install\RevisionID"
+    - name: Increase Version Number 
+      run: |
+        $VersionRegex = "\d+\.\d+\.\d+\.\d+"
+        $BUILD_BUILDNUMBER = "2.0.12.${{ github.run_number }}"
+        $ManifestVersionRegex = " Version=""\d+\.\d+\.\d+\.\d+"""
+
+        $ScriptPath = $null
+        try
+        {
+            $ScriptPath = (Get-Variable MyInvocation).Value.MyCommand.Path
+            $ScriptDir = Split-Path -Parent $ScriptPath
+        }
+        catch {}
+
+        # Get and validate the version data
+        $VersionData = [regex]::matches($BUILD_BUILDNUMBER,$VersionRegex)
+        $NewVersion = $VersionData[0]
+        Write-Verbose "Version: $NewVersion"
+        $AssemblyVersion = $NewVersion
+        $ManifestVersion = " Version=""$NewVersion"""
+        $filecontent = Get-Content("D:\a\StoryBuilder-2\StoryBuilder-2\StoryBuilder\Package.appxmanifest")
+        attrib $file -r
+        $filecontent -replace $ManifestVersionRegex, $ManifestVersion | Out-File "D:\a\StoryBuilder-2\StoryBuilder-2\StoryBuilder\Package.appxmanifest" utf8
 
     # Restore the application to populate the obj folder with RuntimeIdentifiers
     - name: Restore the application
