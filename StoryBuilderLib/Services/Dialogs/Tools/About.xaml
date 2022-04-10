@@ -9,6 +9,7 @@
     <StackPanel HorizontalAlignment="Stretch">
         <TextBlock Name="Version" Margin="5"/>
         <TextBlock Name="Path" TextWrapping="Wrap" Margin="5"/>
+        <Button Content="Open Logs folder" HorizontalAlignment="Center" Click="OpenPath" Margin="5"/>
         <TextBlock Text="Created by Terry Cox (TCox), Jake Shaw (Rarisma) and Kyle Lemons (KyleRLemons)" Margin="5" FontSize="13"/>
     </StackPanel>
 </Page>
