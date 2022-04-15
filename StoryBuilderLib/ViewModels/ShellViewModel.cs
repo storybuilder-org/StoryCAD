@@ -396,7 +396,7 @@ namespace StoryBuilder.ViewModels
                     await WriteModel();
                 }
                 
-                UnifiedVM vm = dialogVM;  // Access the dialog settings
+                UnifiedVM vm = dialogVM; //Access the dialog settings
 
                 // Start with a blank StoryModel and populate it
                 // using the new project dialog's settings
@@ -421,11 +421,11 @@ namespace StoryBuilder.ViewModels
                 StoryModel.NarratorView.Add(narrativeNode);
                 StoryModel.NarratorView.Add(trashNode);     // Both views share the trashcan
                 // Use the NewProjectDialog template to complete the model
-                switch (vm.SelectedTemplate)
+                switch (vm.SelectedTemplateIndex)
                 {
-                    case "Blank Project":
+                    case 0:
                         break;
-                    case "Empty Folders":
+                    case 1:
                         StoryElement problems = new FolderModel("Problems", StoryModel);
                         StoryNodeItem problemsNode = new(problems, overviewNode);
                         StoryElement characters = new FolderModel("Characters", StoryModel);
@@ -435,19 +435,19 @@ namespace StoryBuilder.ViewModels
                         StoryElement scene = new FolderModel("Scene", StoryModel);
                         StoryNodeItem plotpointsNode = new(scene, overviewNode);
                         break;
-                    case "External and Internal Problems":
+                    case 2:
                         StoryElement externalProblem = new ProblemModel("External Problem", StoryModel);
                         StoryNodeItem externalProblemNode = new(externalProblem, overviewNode);
                         StoryElement internalProblem = new ProblemModel("Internal Problem", StoryModel);
                         StoryNodeItem internalProblemNode = new(internalProblem, overviewNode);
                         break;
-                    case "Protagonist and Antagonist":
+                    case 3:
                         StoryElement protagonist = new CharacterModel("Protagonist", StoryModel);
                         StoryNodeItem protagonistNode = new(protagonist, overviewNode);
                         StoryElement antagonist = new CharacterModel("Antagonist", StoryModel);
                         StoryNodeItem antagonistNode = new(antagonist, overviewNode);
                         break;
-                    case "Problems and Characters":
+                    case 4:
                         StoryElement problemsFolder = new FolderModel("Problems", StoryModel);
                         StoryNodeItem problemsFolderNode = new(problemsFolder, overviewNode)
                         {

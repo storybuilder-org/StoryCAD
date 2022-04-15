@@ -133,7 +133,6 @@ public class UnifiedVM : ObservableRecipient
     public async void MakeProject()
     {
         GlobalData.Preferences.LastSelectedTemplate = SelectedTemplateIndex;
-
         //TODO: check if path is valid (Not illegal) 
         if (!string.IsNullOrWhiteSpace(ProjectPath) && !string.IsNullOrWhiteSpace(ProjectName))
         {
