@@ -61,6 +61,7 @@
                     <usercontrols:RichEditBoxExtended Header="Premise" Grid.Row="2" RtfText="{x:Bind OverviewVm.Premise, Mode=TwoWay}"
                                     IsReadOnly ="{x:Bind OverviewVm.PremiseLock, Mode=TwoWay}" TextWrapping="Wrap"
                                     ScrollViewer.VerticalScrollBarVisibility="Visible"
+                                    ToolTipService.ToolTip="This box displays the content of the Story Problems' premise."
                                     PlaceholderText="Select a Problem as your main story problem. That problem's premise is your story premise. "/>
                 </Grid>
             </PivotItem>
