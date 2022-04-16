@@ -72,4 +72,28 @@ public sealed partial class NewProjectPage : Page
     [DllImport("user32.dll", ExactSpelling = true, CharSet = CharSet.Auto, PreserveSig = true, SetLastError = false)]
     public static extern IntPtr GetActiveWindow();
 
+    private void CheckValidity(object sender, RoutedEventArgs e)
+    {
+        //Checks file name validity
+        try { File.Create(Path.Combine(Path.GetTempPath(), ProjectName.Text)); }
+        catch
+        {
+            ProjectName.Text = "";
+            ProjectName.PlaceholderText = "You can't call your file that!";
+            return;
+        }
+
+        //Checks file path validity
+        try { Directory.CreateDirectory(ProjectPathName.Text); }
+        catch
+        {
+            ProjectPathName.Text = "";
+            ProjectPathName.PlaceholderText = "You can't put files here!";
+            return;
+        }
+        
+        if (string.IsNullOrWhiteSpace(ProjectName.Text) || string.IsNullOrWhiteSpace(ProjectPathName.Text)) { return; }
+
+        UnifiedVM.MakeProject();
+    }
 }

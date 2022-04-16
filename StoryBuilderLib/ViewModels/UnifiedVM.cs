@@ -134,14 +134,10 @@ public class UnifiedVM : ObservableRecipient
     {
         GlobalData.Preferences.LastSelectedTemplate = SelectedTemplateIndex;
 
-        //TODO: check if path is valid (Not illegal) 
-        if (!string.IsNullOrWhiteSpace(ProjectPath) && !string.IsNullOrWhiteSpace(ProjectName))
-        {
-            PreferencesIO loader = new(GlobalData.Preferences, GlobalData.RootDirectory);
-            await loader.UpdateFile();
-            await shell.UnifiedNewFile(this);
-            Hide();
-        }
+        PreferencesIO loader = new(GlobalData.Preferences, GlobalData.RootDirectory);
+        await loader.UpdateFile();
+        await shell.UnifiedNewFile(this);
+        Hide();
     }
 
     /// <summary>
