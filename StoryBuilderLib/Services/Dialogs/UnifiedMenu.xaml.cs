@@ -7,14 +7,8 @@ using Microsoft.UI.Xaml.Media;
 using StoryBuilder.ViewModels;
 using Application = Microsoft.UI.Xaml.Application;
 
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
-
 namespace StoryBuilder.Services.Dialogs;
 
-/// <summary>
-/// An empty page that can be used on its own or navigated to within a Frame.
-/// </summary>
 public sealed partial class UnifiedMenuPage : Page
 {
     public delegate void UpdateContentDelegate();

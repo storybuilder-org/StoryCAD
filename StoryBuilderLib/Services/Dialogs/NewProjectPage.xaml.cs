@@ -2,19 +2,13 @@
 using Microsoft.UI.Xaml.Controls;
 using StoryBuilder.ViewModels;
 using System;
+using System.IO;
 using System.Runtime.InteropServices;
 using Windows.Storage;
 using Windows.Storage.Pickers;
 using WinRT;
 
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
-
 namespace StoryBuilder.Services.Dialogs;
-
-/// <summary>
-/// An empty page that can be used on its own or navigated to within a Frame.
-/// </summary>
 public sealed partial class NewProjectPage : Page
 {
     public NewProjectPage(UnifiedVM vm)
@@ -72,4 +66,25 @@ public sealed partial class NewProjectPage : Page
     [DllImport("user32.dll", ExactSpelling = true, CharSet = CharSet.Auto, PreserveSig = true, SetLastError = false)]
     public static extern IntPtr GetActiveWindow();
 
+    private void CheckValidity(object sender, RoutedEventArgs e)
+    {
+        //Checks file name validity
+        try { File.Create(Path.Combine(Path.GetTempPath(), ProjectName.Text)); }
+        catch
+        {
+            ProjectName.Text = "";
+            ProjectName.PlaceholderText = "You can't call your file that!";
+            return;
+        }
+
+        //Checks file path validity
+        try { Directory.CreateDirectory(ProjectPathName.Text); }
+        catch
+        {
+            ProjectPathName.Text = "";
+            ProjectPathName.PlaceholderText = "You can't put files here!";
+            return;
+        }
+        
+    }
 }
