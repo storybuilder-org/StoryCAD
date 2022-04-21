@@ -69,12 +69,19 @@ public sealed partial class NewProjectPage : Page
     private void CheckValidity(object sender, RoutedEventArgs e)
     {
         //Checks file name validity
-        try { File.Create(Path.Combine(Path.GetTempPath(), ProjectName.Text)); }
-        catch
+        try
         {
-            ProjectName.Text = "";
-            ProjectName.PlaceholderText = "You can't call your file that!";
-            return;
+            File.Create(Path.Combine(Path.GetTempPath(), ProjectName.Text));
+        }
+        catch (Exception ex)
+        {
+            if (ex.Message.Contains("The filename, directory name, or volume label syntax is incorrect. "))
+            {
+                ProjectName.Text = "";
+                ProjectName.PlaceholderText = "You can't call your file that!";
+                return;
+            }
+
         }
 
         //Checks file path validity
@@ -85,6 +92,6 @@ public sealed partial class NewProjectPage : Page
             ProjectPathName.PlaceholderText = "You can't put files here!";
             return;
         }
-        
+        UnifiedVM.MakeProject();
     }
 }

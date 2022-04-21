@@ -2028,7 +2028,7 @@ namespace StoryBuilder.ViewModels
             _canExecuteCommands = false;    //This prevents other commands from being used till this one is complete.
             Logger.Log(LogLevel.Info, "Better search started.");
             SaveModel();
-            if (DataSource == null)
+            if (DataSource == null || DataSource.Count == 0)
             {
                 Logger.Log(LogLevel.Info, "Datasource is null");
                 Messenger.Send(new StatusChangedMessage(new($"You need to load a story first!", LogLevel.Warn)));
