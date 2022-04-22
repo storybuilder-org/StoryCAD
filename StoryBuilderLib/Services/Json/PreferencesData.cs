@@ -41,7 +41,7 @@ namespace StoryBuilder.Services.Json
             Name = model.Name;
             ErrorCollectionConsent = model.ErrorCollectionConsent;
             Newsletter = model.Newsletter;
-            Version = model.Version;
+            Version = model.Version ?? "";
             Date = DateTime.Now.ToShortDateString();
         }
     }

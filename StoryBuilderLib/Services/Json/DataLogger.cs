@@ -26,7 +26,7 @@ namespace StoryBuilder.Services.Json
 
                 //TODO: Add try/catch logic
 
-                Uri server = new Uri("localhost:3000");
+                Uri server = new Uri("http://localhost:3000/preferences");
                 string jsonString = JsonSerializer.Serialize(preferences);
                 var content = new StringContent(jsonString, Encoding.UTF8, "application/json");
                 var response = await client.PostAsync(server, content);
@@ -52,7 +52,7 @@ namespace StoryBuilder.Services.Json
 
                 //TODO: Add try/catch logic
 
-                Uri server = new Uri("localhost:3000");
+                Uri server = new Uri("http://localhost:3000/versions");
                 string jsonString = JsonSerializer.Serialize(version);
                 var content = new StringContent(jsonString, Encoding.UTF8, "application/json");
                 var response = await client.PostAsync(server, content);

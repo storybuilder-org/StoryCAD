@@ -70,6 +70,7 @@
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.0.1" />
     <PackageReference Include="NLog" Version="5.0.0-rc2" />
     <PackageReference Include="NLog.Extensions.Logging" Version="5.0.0-rc2" />
+    <PackageReference Include="Parse.NETStandard2" Version="2.0.0" />
     <PackageReference Include="Syncfusion.Editors.WinUI" Version="19.4.0.56" />
     <PackageReference Include="WinUIEx" Version="1.1.0" />
   </ItemGroup>

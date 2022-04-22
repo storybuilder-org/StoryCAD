@@ -62,9 +62,10 @@ public partial class App : Application
         ConfigureIoc();
 
         string Revision = System.IO.File.ReadAllText(GlobalData.RootDirectory + "\\RevisionID");
-        GlobalData.Version = "Version: " + Windows.ApplicationModel.Package.Current.Id.Version.Major + "." + 
-            Windows.ApplicationModel.Package.Current.Id.Version.Minor + "." + Windows.ApplicationModel.Package.Current.Id.Version.Build + 
-            "." + Revision;
+        GlobalData.Version = "Version: " + Windows.ApplicationModel.Package.Current.Id.Version.Major + "." +
+            Windows.ApplicationModel.Package.Current.Id.Version.Minor + "." + Windows.ApplicationModel.Package.Current.Id.Version.Build +
+            "." + Revision.TrimEnd();
+          
         
         var path = Path.Combine(Windows.ApplicationModel.Package.Current.InstalledLocation.Path, ".env");
         var options = new DotEnvOptions(false, new[] { path });
@@ -168,7 +169,7 @@ public partial class App : Application
             var preferences = GlobalData.Preferences;
             var versionLogData = new VersionData(); 
             preferences.Version = GlobalData.Version;
-            PreferencesIO prefIO = Ioc.Default.GetService<PreferencesIO>();
+            PreferencesIO prefIO = new(preferences, System.IO.Path.Combine(ApplicationData.Current.RoamingFolder.Path, "Storybuilder"));
             await prefIO.UpdateFile();
             await DataLogger.PostVersion(versionLogData);
         }

@@ -18,7 +18,7 @@ namespace StoryBuilder.Services.Json
         [JsonPropertyName("previousversion")]
         public string PreviousVersion { get; set; }
 
-        [JsonPropertyName("date")]
+        [JsonPropertyName("VersionDate")]
         public string Date { get; set; }
 
         public VersionData()
@@ -26,7 +26,7 @@ namespace StoryBuilder.Services.Json
             var preferences = GlobalData.Preferences;
             Email = preferences.Email;
             Name = preferences.Name;
-            PreviousVersion = preferences.Version;
+            PreviousVersion = preferences.Version ?? "";
             CurrentVersion = GlobalData.Version; ;
             Date = DateTime.Now.ToShortDateString();
         }
