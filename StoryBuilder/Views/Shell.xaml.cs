@@ -98,5 +98,9 @@ public sealed partial class Shell
         ShellVm.SearchNodes();
     }
 
-    private void ClearNodes(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args) { foreach (StoryNodeItem node in ShellVm.DataSource[0]) { node.Background = null; } }
+    private void ClearNodes(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
+    {
+        if (ShellVm.DataSource == null || ShellVm.DataSource.Count ==0) { return; }
+        foreach (StoryNodeItem node in ShellVm.DataSource[0]) { node.Background = null; }
+    }
 }
