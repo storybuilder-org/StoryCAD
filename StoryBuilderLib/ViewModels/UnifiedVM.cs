@@ -6,12 +6,12 @@ using StoryBuilder.Models;
 using StoryBuilder.Models.Tools;
 using StoryBuilder.Services.Dialogs;
 using System;
+using System.IO;
 
 namespace StoryBuilder.ViewModels;
 
 public class UnifiedVM : ObservableRecipient
 {
-    //Since the original menu was designed with the shell in mind we need to call some commands on the ShellVM so it can be done correctly
     ShellViewModel shell = Ioc.Default.GetService<ShellViewModel>();
 
     private int _selectedRecentIndex;
@@ -106,10 +106,8 @@ public class UnifiedVM : ObservableRecipient
         Hide();
     }
 
-
-     
     /// <summary>
-    /// Loads a story from the recents page
+    /// Loads a story from the recent page
     /// </summary>
     public async void LoadRecentStory()
     {
@@ -138,10 +136,11 @@ public class UnifiedVM : ObservableRecipient
         await loader.UpdateFile();
         await shell.UnifiedNewFile(this);
         Hide();
+
     }
 
     /// <summary>
-    /// This updates preferences.RecentFiles1 through 5
+    /// This updates preferences.RecentFiles 1 through 5
     /// </summary>
     public async void UpdateRecents(string Path)
     {
