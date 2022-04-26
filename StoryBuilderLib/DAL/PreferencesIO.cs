@@ -4,7 +4,8 @@ using System.Threading.Tasks;
 using Windows.Storage;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.Models.Tools;
-using StoryBuilder.Services.Json;   
+using StoryBuilder.Services.Json;
+using StoryBuilder.Services.Parse;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
@@ -174,6 +175,8 @@ public class PreferencesIO
         NewPreferences.Add("Version=" + _model.Version);
 
         await FileIO.WriteLinesAsync(preferencesFile, NewPreferences); //Write the Prererences file to disk.
-        await DataLogger.PostPreferences(new PreferencesData(_model));
+
+        var parse = Ioc.Default.GetService<ParseService>();
+        await parse.PostPreferences(_model);
     }
 }

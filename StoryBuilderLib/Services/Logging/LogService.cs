@@ -88,7 +88,7 @@ public class LogService : ILogService
             {
                 msg.Version = Windows.ApplicationModel.Package.Current.Id.Version.Major + "."
                 + Windows.ApplicationModel.Package.Current.Id.Version.Minor + "."
-                + Windows.ApplicationModel.Package.Current.Id.Version.Build + " Build " + File.ReadAllText(GlobalData.RootDirectory + "\\RevisionID");
+                + Windows.ApplicationModel.Package.Current.Id.Version.Revision;
 
                 msg.User = GlobalData.Preferences.Name + $"({GlobalData.Preferences.Email})";
                 msg.Source = stackTraceHelper;

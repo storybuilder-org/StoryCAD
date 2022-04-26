@@ -20,7 +20,7 @@ using StoryBuilder.Services.Logging;
 using StoryBuilder.Services.Navigation;
 using StoryBuilder.Services.Preferences;
 using StoryBuilder.Services.Search;
-//using StoryBuilder.Services.Keys;
+using StoryBuilder.Services.Parse;
 using StoryBuilder.ViewModels;
 using StoryBuilder.ViewModels.Tools;
 using StoryBuilder.Views;
@@ -61,12 +61,12 @@ public partial class App : Application
     {
         ConfigureIoc();
 
-        string Revision = System.IO.File.ReadAllText(GlobalData.RootDirectory + "\\RevisionID");
         GlobalData.Version = "Version: " + Windows.ApplicationModel.Package.Current.Id.Version.Major + "." +
             Windows.ApplicationModel.Package.Current.Id.Version.Minor + "." + Windows.ApplicationModel.Package.Current.Id.Version.Build +
-            "." + Revision.TrimEnd();
-          
-        
+            "." + Windows.ApplicationModel.Package.Current.Id.Version.Revision;
+
+
+
         var path = Path.Combine(Windows.ApplicationModel.Package.Current.InstalledLocation.Path, ".env");
         var options = new DotEnvOptions(false, new[] { path });
         DotEnv.Load(options);
@@ -99,6 +99,7 @@ public partial class App : Application
                 .AddSingleton<StoryWriter>()
                 .AddSingleton<BackupService>()
                 .AddSingleton<DeletionService>()
+                .AddSingleton<ParseService>()
                 // Register ViewModels 
                 .AddSingleton<ShellViewModel>()
                 .AddSingleton<OverviewViewModel>()
@@ -165,13 +166,16 @@ public partial class App : Application
 
         if (!GlobalData.Version.Equals(GlobalData.Preferences.Version))
         {
+            // Process a version change (usually a new release)
             _log.Log(LogLevel.Info, "Version mismatch: " + GlobalData.Version + " != " + GlobalData.Preferences.Version);
             var preferences = GlobalData.Preferences;
-            var versionLogData = new VersionData(); 
+            // Update Preferences
             preferences.Version = GlobalData.Version;
             PreferencesIO prefIO = new(preferences, System.IO.Path.Combine(ApplicationData.Current.RoamingFolder.Path, "Storybuilder"));
             await prefIO.UpdateFile();
-            await DataLogger.PostVersion(versionLogData);
+            // Post deployment to backend server
+            var parse = Ioc.Default.GetService<ParseService>();
+            await parse.PostVersion();
         }
 
         await ProcessInstallationFiles();
