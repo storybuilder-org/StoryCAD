@@ -75,7 +75,6 @@ namespace StoryBuilder.ViewModels
         public Frame SplitViewFrame;
 
         #region CommandBar Relay Commands
-        public TextBox Test;
 
         // Open/Close Navigation pane (Hamburger menu)
         public RelayCommand TogglePaneCommand { get; }
@@ -110,9 +109,7 @@ namespace StoryBuilder.ViewModels
         public RelayCommand PrintReportsCommand { get; }
         public RelayCommand ScrivenerReportsCommand { get; }
         public RelayCommand PreferencesCommand { get; }
-
-        // Filter command
-        public RelayCommand FilterCommand { get; set; }
+        
 
         #endregion
 
@@ -318,13 +315,6 @@ namespace StoryBuilder.ViewModels
         {
             get => _newNodeName;
             set => SetProperty(ref _newNodeName, value);
-        }
-
-        private bool _isSearching;
-        public bool IsSearching
-        {
-            get => _isSearching;
-            set => SetProperty(ref _isSearching, value);
         }
 
         #endregion
@@ -1976,8 +1966,6 @@ namespace StoryBuilder.ViewModels
             CloseCommand = new RelayCommand(CloseFile, () => _canExecuteCommands);
             ExitCommand = new RelayCommand(ExitApp, () => _canExecuteCommands);
 
-            FilterCommand = new RelayCommand(SearchNodes, () => _canExecuteCommands);
-
             // Tools commands
             KeyQuestionsCommand = new RelayCommand(KeyQuestionsTool, () => _canExecuteCommands);
             TopicsCommand = new RelayCommand(TopicsTool, () => _canExecuteCommands);
@@ -2023,7 +2011,7 @@ namespace StoryBuilder.ViewModels
             ShellInstance = this;
         }
 
-        private void SearchNodes()
+        public void SearchNodes()
         {
             _canExecuteCommands = false;    //This prevents other commands from being used till this one is complete.
             Logger.Log(LogLevel.Info, "Better search started.");
@@ -2036,40 +2024,31 @@ namespace StoryBuilder.ViewModels
                 _canExecuteCommands = true;
                 return;
             }
-            StoryNodeItem root = DataSource[0]; //Gets all nodes in the tree
+
             int SearchTotal = 0;
 
-            if (FilterText == "" || !IsSearching) //Nulls the backgrounds to make them transparent (default) //Check if toggled and null backgrounds if not.
+            foreach (StoryNodeItem node in DataSource[0])
             {
-                Logger.Log(LogLevel.Info, "Search text is blank, making all backgrounds null.");
-                foreach (StoryNodeItem node in root) { node.Background = null; }
-                FilterText = "";
-            }
-            else
-            {
-                foreach (StoryNodeItem node in root)
+                if (Search.SearchStoryElement(node, FilterText, StoryModel)) //checks if node name contains the thing we are looking for
                 {
-                    if (Search.SearchStoryElement(node, FilterText, StoryModel)) //checks if node name contains the thing we are looking for
-                    {
-                        SearchTotal++;
-                        if (Application.Current.RequestedTheme == ApplicationTheme.Light) { node.Background = new SolidColorBrush(Colors.LightGoldenrodYellow); }
-                        else { node.Background = new SolidColorBrush(Colors.DarkGoldenrod); } //Light Goldenrod is hard to read in dark theme
-                        node.IsExpanded = true; 
-                        
-                        StoryNodeItem parent = node.Parent;
-                        if (parent != null)
-                        {
-                            while (!parent.IsRoot)
-                            {
-                                parent.IsExpanded = true;
-                                parent = parent.Parent;
-                            }
+                    SearchTotal++;
+                    if (Application.Current.RequestedTheme == ApplicationTheme.Light) { node.Background = new SolidColorBrush(Colors.LightGoldenrodYellow); }
+                    else { node.Background = new SolidColorBrush(Colors.DarkGoldenrod); } //Light Goldenrod is hard to read in dark theme
+                    node.IsExpanded = true;
 
-                            if (parent.IsRoot) { parent.IsExpanded = true; }
+                    StoryNodeItem parent = node.Parent;
+                    if (parent != null)
+                    {
+                        while (!parent.IsRoot)
+                        {
+                            parent.IsExpanded = true;
+                            parent = parent.Parent;
                         }
+
+                        if (parent.IsRoot) { parent.IsExpanded = true; }
                     }
-                    else { node.Background = null; }
                 }
+                else { node.Background = null; }
             }
 
             switch (SearchTotal)

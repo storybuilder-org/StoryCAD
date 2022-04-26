@@ -132,14 +132,11 @@ public class UnifiedVM : ObservableRecipient
     {
         GlobalData.Preferences.LastSelectedTemplate = SelectedTemplateIndex;
 
+        PreferencesIO loader = new(GlobalData.Preferences, GlobalData.RootDirectory);
+        await loader.UpdateFile();
+        await shell.UnifiedNewFile(this);
+        Hide();
 
-        if (!string.IsNullOrWhiteSpace(ProjectPath) && !string.IsNullOrWhiteSpace(ProjectName))
-        {
-            PreferencesIO loader = new(GlobalData.Preferences, GlobalData.RootDirectory);
-            await loader.UpdateFile();
-            await shell.UnifiedNewFile(this);
-            Hide();
-        }
     }
 
     /// <summary>

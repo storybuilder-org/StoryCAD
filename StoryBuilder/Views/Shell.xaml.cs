@@ -32,7 +32,6 @@ public sealed partial class Shell
             log.Flush();
             Application.Current.Exit();  // Win32
         }
-        ShellVm.Test = FocusThing;
         ShellVm.SplitViewFrame = SplitViewFrame;
     }
 
@@ -90,5 +89,15 @@ public sealed partial class Shell
     /// <param name="sender"></param>
     /// <param name="e"></param>
     private async void SaveIconPressed(object sender, PointerRoutedEventArgs e) { await ShellVm.SaveFile(); }
-    
+
+    private void Search(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
+    {
+        ShellVm.SearchNodes();
+    }
+
+    private void ClearNodes(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
+    {
+        if (ShellVm.DataSource == null || ShellVm.DataSource.Count ==0) { return; }
+        foreach (StoryNodeItem node in ShellVm.DataSource[0]) { node.Background = null; }
+    }
 }

@@ -9,6 +9,7 @@ using Windows.Storage.Pickers;
 using WinRT;
 
 namespace StoryBuilder.Services.Dialogs;
+
 public sealed partial class NewProjectPage : Page
 {
     public NewProjectPage(UnifiedVM vm)
@@ -81,7 +82,6 @@ public sealed partial class NewProjectPage : Page
                 ProjectName.PlaceholderText = "You can't call your file that!";
                 return;
             }
-
         }
 
         //Checks file path validity
