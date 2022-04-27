@@ -4,7 +4,6 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:editors="using:Syncfusion.UI.Xaml.Editors"                    
     xmlns:local="using:StoryBuilder.Views"
     xmlns:usercontrols="using:StoryBuilder.Controls"
     mc:Ignorable="d" >
@@ -32,13 +31,13 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
-                        <editors:SfComboBox Header="Locale" Grid.Column="0" IsEditable="True" MinWidth="200"
+                        <AutoSuggestBox Header="Locale" Grid.Column="0"  MinWidth="200"
                                   ItemsSource="{x:Bind SettingVm.LocaleList}"
-                                  SelectedItem="{x:Bind SettingVm.Locale, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                  Text="{x:Bind SettingVm.Locale, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                         <TextBlock Grid.Column="1" MinWidth="100"/>
-                        <editors:SfComboBox Header="Season" Grid.Column="2" IsEditable="True" MinWidth="200"
-                                  ItemsSource="{x:Bind SettingVm.SeasonList}"
-                                  SelectedItem="{x:Bind SettingVm.Season, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <AutoSuggestBox Header="Season" Grid.Column="2" MinWidth="200"
+                                        ItemsSource="{x:Bind SettingVm.SeasonList}"
+                                        Text="{x:Bind SettingVm.Season, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     </Grid>
                     <Grid Grid.Row="1" HorizontalAlignment="Left">
                         <Grid.ColumnDefinitions>

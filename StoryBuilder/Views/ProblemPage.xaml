@@ -22,22 +22,22 @@
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
-                    <editors:SfComboBox Header="Problem Type" Grid.Row="0" IsEditable="True" MinWidth="200"
+                    <AutoSuggestBox Header="Problem Type" Grid.Row="0"  MinWidth="200"
                               ItemsSource="{x:Bind ProblemVm.ProblemTypeList}"
-                              SelectedItem="{x:Bind ProblemVm.ProblemType, Mode=TwoWay}" />
-                    <editors:SfComboBox Header="Conflict Type" Grid.Row="1" IsEditable="True" MinWidth="200"
-                              ItemsSource="{x:Bind ProblemVm.ConflictTypeList}"
-                              SelectedItem="{x:Bind ProblemVm.ConflictType, Mode=TwoWay}" />
-                    <editors:SfComboBox Header="Subject" Grid.Row="2" IsEditable="True" MinWidth="300"
-                              ItemsSource="{x:Bind ProblemVm.SubjectList}"
-                              SelectedItem="{x:Bind ProblemVm.Subject, Mode=TwoWay}" />
+                              Text="{x:Bind ProblemVm.ProblemType, Mode=TwoWay}" />
+                    <AutoSuggestBox Header="Conflict Type" Grid.Row="1"  MinWidth="200"
+                                    ItemsSource="{x:Bind ProblemVm.ConflictTypeList}"
+                                    Text="{x:Bind ProblemVm.ConflictType, Mode=TwoWay}" />
+                    <AutoSuggestBox Header="Subject" Grid.Row="2" MinWidth="300"
+                                    ItemsSource="{x:Bind ProblemVm.SubjectList}"
+                                    Text="{x:Bind ProblemVm.Subject, Mode=TwoWay}" />
                     <usercontrols:RichEditBoxExtended Header="Story Question" Grid.Row="3"
                               RtfText="{x:Bind ProblemVm.StoryQuestion, Mode=TwoWay}" AcceptsReturn="True"
                               IsSpellCheckEnabled="True" TextWrapping="Wrap"
                               ScrollViewer.VerticalScrollBarVisibility="Visible" />
-                    <editors:SfComboBox Header="Problem Source" Grid.Row="4" IsEditable="True" MinWidth="300"
-                              ItemsSource="{x:Bind ProblemVm.ProblemSourceList}"
-                              SelectedItem="{x:Bind ProblemVm.ProblemSource, Mode=TwoWay}" />
+                    <AutoSuggestBox Header="Problem Source" Grid.Row="4" MinWidth="300"
+                                    ItemsSource="{x:Bind ProblemVm.ProblemSourceList}"
+                                    Text="{x:Bind ProblemVm.ProblemSource, Mode=TwoWay}" />
                 </Grid>
             </PivotItem>
             <PivotItem Header="Protagonist" >
@@ -52,12 +52,12 @@
                     <usercontrols:CharacterName Header="Protagonist" Grid.Row="0" IsEditable="False" MinWidth="300"
                               DisplayMemberPath="Name"
                               SelectedItem="{x:Bind ProblemVm.Protagonist, Mode=TwoWay, Converter={StaticResource ToStoryElement}}" />
-                    <editors:SfComboBox Header="Goal" Grid.Row="1" IsEditable="True"
+                    <AutoSuggestBox Header="Goal" Grid.Row="1" 
                               MinWidth="400" ItemsSource="{x:Bind ProblemVm.GoalList}"
-                              SelectedItem="{x:Bind ProblemVm.ProtGoal, Mode=TwoWay}" />
-                    <editors:SfComboBox Header="Motivation" Grid.Row="2" IsEditable="True"
-                              MinWidth="300" ItemsSource="{x:Bind ProblemVm.MotiveList}"
-                              SelectedItem="{x:Bind ProblemVm.ProtMotive, Mode=TwoWay}" />
+                              Text="{x:Bind ProblemVm.ProtGoal, Mode=TwoWay}" />
+                    <AutoSuggestBox Header="Motivation" Grid.Row="2" 
+                                    MinWidth="300" ItemsSource="{x:Bind ProblemVm.MotiveList}"
+                                    Text="{x:Bind ProblemVm.ProtMotive, Mode=TwoWay}" />
                     <Button  Content="Conflict Builder" Grid.Row="3" HorizontalAlignment="Left" Margin="0,10,10,10" 
                              Command="{x:Bind ProblemVm.ConflictCommand, Mode=OneWay}" />
                     <TextBox Header="Conflict" Grid.Row="4" MinWidth="300" TextWrapping="Wrap" AcceptsReturn="True"
@@ -76,12 +76,12 @@
                     <usercontrols:CharacterName Header="Antagonist" Grid.Row="0" IsEditable="False" MinWidth="300"
                               DisplayMemberPath="Name"
                               SelectedItem="{x:Bind ProblemVm.Antagonist, Mode=TwoWay, Converter={StaticResource ToStoryElement}}" />
-                    <editors:SfComboBox Header="Goal" Grid.Row="1" IsEditable="True"
+                    <AutoSuggestBox Header="Goal" Grid.Row="1" 
                               MinWidth="400" ItemsSource="{x:Bind ProblemVm.GoalList}"
-                              SelectedItem="{x:Bind ProblemVm.AntagGoal, Mode=TwoWay}" />
-                    <editors:SfComboBox Header="Motivation" Grid.Row="2" IsEditable="True"
+                              Text="{x:Bind ProblemVm.AntagGoal, Mode=TwoWay}" />
+                    <AutoSuggestBox Header="Motivation" Grid.Row="2" 
                               MinWidth="300" ItemsSource="{x:Bind ProblemVm.MotiveList}"
-                              SelectedItem="{x:Bind ProblemVm.AntagMotive, Mode=TwoWay}" />
+                              Text="{x:Bind ProblemVm.AntagMotive, Mode=TwoWay}" />
                     <Button  Content="Conflict Builder" Grid.Row="3" HorizontalAlignment="Left" Margin="0,10,10,10" 
                              Command="{x:Bind ProblemVm.ConflictCommand, Mode=OneWay}" />
                     <TextBox Header="Conflict" Grid.Row="4" MinWidth="300" TextWrapping="Wrap" AcceptsReturn="True"
@@ -96,15 +96,15 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    <editors:SfComboBox Header="Outcome" Grid.Row="0" IsEditable="True"
+                    <AutoSuggestBox Header="Outcome" Grid.Row="0" 
                               MinWidth="400" ItemsSource="{x:Bind ProblemVm.OutcomeList}"
-                              SelectedItem="{x:Bind ProblemVm.Outcome, Mode=TwoWay}" />
-                    <editors:SfComboBox Header="Method" Grid.Row="1" IsEditable="True"
+                              Text="{x:Bind ProblemVm.Outcome, Mode=TwoWay}" />
+                    <AutoSuggestBox Header="Method" Grid.Row="1" 
                               MinWidth="400" ItemsSource="{x:Bind ProblemVm.MethodList}"
-                              SelectedItem="{x:Bind ProblemVm.Method, Mode=TwoWay}" />
-                    <editors:SfComboBox Header="Theme" Grid.Row="2" IsEditable="True"
+                              Text="{x:Bind ProblemVm.Method, Mode=TwoWay}" />
+                    <AutoSuggestBox Header="Theme" Grid.Row="2" 
                               MinWidth="400" ItemsSource="{x:Bind ProblemVm.ThemeList}"
-                              SelectedItem="{x:Bind ProblemVm.Theme, Mode=TwoWay}" />
+                              Text="{x:Bind ProblemVm.Theme, Mode=TwoWay}" />
                     <usercontrols:RichEditBoxExtended Header="Premise" Grid.Row="3"
                               RtfText="{x:Bind ProblemVm.Premise, Mode=TwoWay}" AcceptsReturn="True"
                               IsSpellCheckEnabled="True" TextWrapping="Wrap"

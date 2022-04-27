@@ -58,7 +58,7 @@ public class SettingViewModel : ObservableRecipient, INavigable
     public string Locale
     {
         get => _locale;
-        set => SetProperty(ref _locale, value);
+        set => SetProperty(ref _locale, value ?? "");
     }
 
     private string _season;
