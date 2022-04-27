@@ -19,7 +19,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <editors:SfComboBox Grid.Row="0" Header="Relationship" PlaceholderText="Pick Relation" IsEditable="False" 
+        <ComboBox Grid.Row="0" Header="Relationship" PlaceholderText="Pick Relation" IsEditable="False" 
                             ItemsSource="{x:Bind CharVm.CharacterRelationships}"
                             SelectionChanged="RelationshipChanged"
                             DisplayMemberPath ="Partner.Name"
