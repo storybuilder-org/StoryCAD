@@ -59,7 +59,7 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
-                        <usercontrols:SettingName Header="Setting" Grid.Column="0" IsEditable="True"
+                        <usercontrols:SettingName Header="Setting" Grid.Column="0" IsEditable="False"
                              MinWidth="300" Margin="0,0,0,10"
                              DisplayMemberPath="Name"
                              SelectedValue="{x:Bind SceneVm.Setting, Mode=TwoWay, Converter={StaticResource ToStoryElement}}"/>
