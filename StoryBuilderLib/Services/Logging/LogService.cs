@@ -20,6 +20,7 @@ public class LogService : ILogService
     private static readonly string logFilePath;
     private static string stackTraceHelper; //Elmah for some reason doesn't show the stack trace of an exception so this one does.
     static LogService()
+
     {
         try
         {
@@ -40,7 +41,7 @@ public class LogService : ILogService
             config.LoggingRules.Add(fileRule);
 
             // create console target
-            if (!Debugger.IsAttached)
+            if (Debugger.IsAttached)
             {
                 ColoredConsoleTarget consoleTarget = new();
                 consoleTarget.Layout = @"${date:format=HH\\:MM\\:ss} ${logger} ${message}";
@@ -88,7 +89,7 @@ public class LogService : ILogService
             {
                 msg.Version = Windows.ApplicationModel.Package.Current.Id.Version.Major + "."
                 + Windows.ApplicationModel.Package.Current.Id.Version.Minor + "."
-                + Windows.ApplicationModel.Package.Current.Id.Version.Build + " Build " + File.ReadAllText(GlobalData.RootDirectory + "\\RevisionID");
+                + Windows.ApplicationModel.Package.Current.Id.Version.Build + " Build " + Windows.ApplicationModel.Package.Current.Id.Version.Revision;
 
                 msg.User = GlobalData.Preferences.Name + $"({GlobalData.Preferences.Email})";
                 msg.Source = stackTraceHelper;
