@@ -1,4 +1,4 @@
-name: StoryBuilder Tester 
+name: AutoBuilder
 
 on:
   push:
