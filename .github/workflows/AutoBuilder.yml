@@ -1,4 +1,4 @@
-name: AutoBuilder
+name: AutoBuild
 
 on:
   push:
@@ -7,9 +7,7 @@ on:
     branches: [ master ]
 
 jobs:
-
   build:
-
     strategy:
       matrix:
         configuration: [Release, Debug]
@@ -21,18 +19,18 @@ jobs:
       Solution_Name: StoryBuilder.sln
 
     steps:
-    - name: Checkout
+    - name: Download Repository
       uses: actions/checkout@v2
       with:
         fetch-depth: 0
 
-    # Install the .NET Core workload
-    - name: Install .NET Core
+    # Install .NET
+    - name: Install .NET
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 6.0.x
 
-    # Add  MSBuild to the PATH: https://github.com/microsoft/setup-msbuild
+    #Install MSBUILD
     - name: Setup MSBuild.exe
       uses: microsoft/setup-msbuild@v1.0.2
 
@@ -42,7 +40,6 @@ jobs:
         $VersionRegex = "\d+\.\d+\.\d+\.\d+"
         $BUILD_BUILDNUMBER = "2.0.12.${{ github.run_number }}"
         $ManifestVersionRegex = " Version=""\d+\.\d+\.\d+\.\d+"""
-
         $ScriptPath = $null
         try
         {
@@ -50,7 +47,6 @@ jobs:
             $ScriptDir = Split-Path -Parent $ScriptPath
         }
         catch {}
-
         # Get and validate the version data
         $VersionData = [regex]::matches($BUILD_BUILDNUMBER,$VersionRegex)
         $NewVersion = $VersionData[0]
@@ -60,13 +56,13 @@ jobs:
         $filecontent = Get-Content("D:\a\StoryBuilder-2\StoryBuilder-2\StoryBuilder\Package.appxmanifest")
         attrib $file -r
         $filecontent -replace $ManifestVersionRegex, $ManifestVersion | Out-File "D:\a\StoryBuilder-2\StoryBuilder-2\StoryBuilder\Package.appxmanifest" utf8
-
+        
     # Restore the application to populate the obj folder with RuntimeIdentifiers
     - name: Restore the application
       run: msbuild $env:Solution_Name /t:Restore /p:Configuration=$env:Configuration
       env:
         Configuration: ${{ matrix.configuration }}
-        
+    
     - name: Restore StoryBuilder Tests
       run: msbuild StoryBuilderTests\StoryBuilderTests.csproj /t:Restore /p:Configuration=Release
 
@@ -77,9 +73,9 @@ jobs:
         $certificatePath = "GitHubActionsWorkflow.pfx"
         [IO.File]::WriteAllBytes("$certificatePath", $pfx_cert_byte)
         [IO.File]::WriteAllText("D:\a\StoryBuilder-2\StoryBuilder-2\StoryBuilder\.env", "${{ secrets.ENV }}")
-
+        
     # Create the app package by building and packaging the project
-    - name: Create the app package
+    - name: Create the MSIX
       run: msbuild $env:Solution_Name /p:Configuration=$env:Configuration /p:Platform=$env:Platform /p:UapAppxPackageBuildMode=$env:Appx_Package_Build_Mode /p:AppxBundle=$env:Appx_Bundle /p:PackageCertificateKeyFile="D:\a\StoryBuilder-2\StoryBuilder-2\GitHubActionsWorkflow.pfx" /p:AppxPackageDir="$env:Appx_Package_Dir" /p:GenerateAppxPackageOnBuild=true
       env:
         Appx_Bundle: Never
@@ -90,11 +86,27 @@ jobs:
 
     # Remove the pfx
     - name: Remove the pfx
-      run: Remove-Item -path GitHubActionsWorkflow.pfx
+      run: |
+        Remove-Item -path GitHubActionsWorkflow.pfx
+      
+    - name: Clean MSIXs
+      run: 'D:\a\StoryBuilder-2\StoryBuilder-2\.github\workflows\MSIXCleaner.exe "D:\a\StoryBuilder-2\StoryBuilder-2\StoryBuilder\Packages\"'
 
+    - name: Write help file
+      run: |
+       "Hello, Thank you for testing StoryBuilder 2.0.12.${{ github.run_number }} Alpha 
+        1) Open StoryBuilder.cer, this should bring up the certificate import wizard
+        2) Press install certificate, and change store location to Local Machine, then press next
+        3) Change the option to Place All Certificates in the following store and click browse
+        4) Select Trusted People and press OK and then press finish
+        Now you will want to open the msix folder and select the configuration you want, 
+        if you don't know what configuration to pick then we recommend StoryBuilder Release x64.msix.
+        
+        Changelogs aren't available for Alpha Builds." | Out-File -FilePath "D:\a\StoryBuilder-2\StoryBuilder-2\StoryBuilder\Packages\Install Instructions.txt"
+    
     # Upload the MSIX package: https://github.com/marketplace/actions/upload-a-build-artifact
     - name: Upload MSIX package
       uses: actions/upload-artifact@v2
       with:
-        name: MSIX Package
-        path: D:\a\StoryBuilder-2\StoryBuilder-2\StoryBuilder\Packages\
+        name: StoryBuilder
+        path: D:\a\StoryBuilder-2\StoryBuilder-2\StoryBuilder\Packages\*
