@@ -108,7 +108,7 @@ jobs:
         if you don't know what configuration to pick then we recommend StoryBuilder Release x64.msix.
         
         See what's changed here:
-        https://github.com/Rarisma/StoryBuilder-2/releases/tag/${{ github.event.inputs.VersionNumber }}" | Out-File -FilePath "D:\a\StoryBuilder-2\StoryBuilder-2\StoryBuilder\Packages\Install Instructions.txt"
+        https://github.com/storybuilder-org/StoryBuilder-2/releases/tag/${{ github.event.inputs.VersionNumber }}" | Out-File -FilePath "D:\a\StoryBuilder-2\StoryBuilder-2\StoryBuilder\Packages\Install Instructions.txt"
     
     - name: Archive Release
       uses: thedoctor0/zip-release@master
