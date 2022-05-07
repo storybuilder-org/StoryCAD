@@ -1,6 +1,7 @@
 ﻿using Windows.UI;
 using ABI.Microsoft.UI.Xaml;
 using CommunityToolkit.WinUI.Helpers;
+using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
@@ -42,5 +43,6 @@ public sealed partial class UnifiedMenuPage : Page
         UnifiedMenuVM.UpdateContent = UpdateContent;  // Connect the VM's delegate to HideDialog
         UnifiedMenuVM.CurrentTab = new ListBoxItem() { Name = "Recent" }; //Makes unified VM load recents by default
         UnifiedMenuVM.SidebarChange(null, null);
+        if (ActualTheme == ElementTheme.Light) {UnifiedMenuVM.AdjustmentColor = new SolidColorBrush(Colors.White);}
     }
 }

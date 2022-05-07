@@ -35,7 +35,8 @@ public class PreferencesModel
 
     // Visual changes
     public Microsoft.UI.Xaml.Media.SolidColorBrush PrimaryColor { get; set; } //Sets UI Color
-    public Microsoft.UI.Xaml.Media.SolidColorBrush SecondaryColor = new(Colors.Black); //Sets Text Color
+    public Microsoft.UI.Xaml.Media.SolidColorBrush SecondaryColor = new(Colors.Black); //Sets Text Color (Gets treated as white, even if set to black on dark mode)
+    public Microsoft.UI.Xaml.TextWrapping WrapNodeNames { get; set; }
     public bool QuoteOnStartup { get; set; }
 
     // Backup Information
@@ -43,7 +44,7 @@ public class PreferencesModel
     public bool TimedBackup { get; set; }
     public int TimedBackupInterval { get; set; }
 
-    //Directorys
+    //Directories
     public string ProjectDirectory { get; set; }
     public string BackupDirectory { get; set; }
 
