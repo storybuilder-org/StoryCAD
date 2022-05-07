@@ -1,11 +1,14 @@
 ﻿using System;
 using CommunityToolkit.Mvvm.DependencyInjection;
+using CommunityToolkit.WinUI.UI.Helpers;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Input;
+using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
 using StoryBuilder.Models;
+using StoryBuilder.Models.Tools;
 using StoryBuilder.Services;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.ViewModels;
@@ -16,6 +19,7 @@ public sealed partial class Shell
 {
     public ShellViewModel ShellVm => Ioc.Default.GetService<ShellViewModel>();
     public UnifiedVM UnifiedVm => Ioc.Default.GetService<UnifiedVM>();
+    public PreferencesModel Preferences = GlobalData.Preferences;
     public Shell()
     {
         try
@@ -100,4 +104,5 @@ public sealed partial class Shell
         if (ShellVm.DataSource == null || ShellVm.DataSource.Count ==0) { return; }
         foreach (StoryNodeItem node in ShellVm.DataSource[0]) { node.Background = null; }
     }
+
 }

@@ -367,6 +367,7 @@ namespace StoryBuilder.ViewModels
             _contentDialog = new();
             _contentDialog.XamlRoot = GlobalData.XamlRoot;
             _contentDialog.Content = new UnifiedMenuPage();
+            if (Application.Current.RequestedTheme == ApplicationTheme.Light) { _contentDialog.Background = new SolidColorBrush(Colors.LightGray); }
             await _contentDialog.ShowAsync();
             _canExecuteCommands = true;
         }
@@ -907,7 +908,6 @@ namespace StoryBuilder.ViewModels
             PreferencesDialog.Content = new PreferencesDialog();
             PreferencesDialog.Title = "Preferences";
             PreferencesDialog.PrimaryButtonText = "Save";
-            PreferencesDialog.SecondaryButtonText = "About StoryBuilder";
             PreferencesDialog.CloseButtonText = "Cancel";
 
             ContentDialogResult result = await PreferencesDialog.ShowAsync();
@@ -918,26 +918,6 @@ namespace StoryBuilder.ViewModels
                     await Ioc.Default.GetService<PreferencesViewModel>().SaveAsync();
                     Messenger.Send(new StatusChangedMessage(new($"Preferences updated", LogLevel.Info, true)));
                     break;
-                case ContentDialogResult.Secondary:
-                {
-                    ContentDialog AboutDialog = new();
-                    AboutDialog.XamlRoot = GlobalData.XamlRoot;
-                    AboutDialog.Content = new About();
-                    AboutDialog.Width = 900;
-                    AboutDialog.Title = "About StoryBuilder";
-                    AboutDialog.SecondaryButtonText = "Join Discord";
-                    AboutDialog.CloseButtonText = "Close";
-                    var a = await AboutDialog.ShowAsync();
-
-                    if (a == ContentDialogResult.Secondary)
-                    {
-                        Process Browser = new();
-                        Browser.StartInfo.FileName = @"https://discord.gg/wfZxU4bx6n";
-                        Browser.StartInfo.UseShellExecute = true;
-                        Browser.Start();
-                        }
-                    break;
-                }
                 //don't save changes
                 default:
                     Messenger.Send(new StatusChangedMessage(new($"Preferences closed", LogLevel.Info, true)));
@@ -1872,7 +1852,7 @@ namespace StoryBuilder.ViewModels
             switch (statusMessage.Value.Level)
             {
                 case LogLevel.Info:
-                    StatusColor = new SolidColorBrush(Colors.White);
+                    StatusColor = GlobalData.Preferences.SecondaryColor;
                     statusTimer.Interval = new TimeSpan(0, 0, 15);  // Timer will tick in 15 seconds
                     statusTimer.Start();
                     break;

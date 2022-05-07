@@ -127,6 +127,10 @@ public class PreferencesIO
                     case "LastTemplate":
                         _model.LastSelectedTemplate = Convert.ToInt32(tokens[1]);
                         break;
+                    case "WrapNodeNames":
+                        if (tokens[1] == "True") { _model.WrapNodeNames = TextWrapping.WrapWholeWords; }
+                        else {_model.WrapNodeNames = TextWrapping.NoWrap;}
+                        break;
                 }
             }
             _log.Log(LogLevel.Info, "PreferencesModel updated from StoryBuilder.prf.");
@@ -175,6 +179,9 @@ public class PreferencesIO
         NewPreferences.Add("ErrorCollectionConsent=" + _model.ErrorCollectionConsent);
         NewPreferences.Add("TimedBackup=" + _model.TimedBackup);
         NewPreferences.Add("LastTemplate=" + _model.LastSelectedTemplate);
+
+        if (_model.WrapNodeNames == TextWrapping.WrapWholeWords) { NewPreferences.Add("WrapNodeNames=True"); }
+        else if (_model.WrapNodeNames == TextWrapping.NoWrap) { NewPreferences.Add("WrapNodeNames=False"); }
 
         await FileIO.WriteLinesAsync(preferencesFile, NewPreferences); //Writes file to disk.
     }

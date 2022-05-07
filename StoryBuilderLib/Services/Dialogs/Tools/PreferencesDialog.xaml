@@ -5,14 +5,38 @@
 
     <ScrollViewer>
         <StackPanel Width="400">
-            <TextBox Header="Your name:" PlaceholderText="Put the name want to publish under here" HorizontalAlignment="Center" Margin="8" Width="300" Text="{x:Bind PreferencesVm.Name, Mode=TwoWay}"/>
-            <TextBox Header="Your email:" PlaceholderText="Put your email here" Margin="8" Width="300" Text="{x:Bind PreferencesVm.Email, Mode=TwoWay}"/>
-            <TextBox Header="Project directory:" PlaceholderText="Where do you want to store your stories?" Margin="8" Width="300" HorizontalAlignment="Center" Text="{x:Bind PreferencesVm.ProjectDir, Mode=TwoWay}"/>
-            <CheckBox Content="Make timed backups" Margin="8" HorizontalAlignment="Center" IsChecked="{x:Bind PreferencesVm.Backup, Mode=TwoWay}"/>
-            <NumberBox Header="How often should backups be made? (Minutes)" Margin="4" Width="300" HorizontalAlignment="Center" Value="{x:Bind PreferencesVm.BackupInterval, Mode=TwoWay}"/>
-            <TextBox Header="Backup directory:" PlaceholderText="Where do you want to store your backups?" Margin="8" Width="300" HorizontalAlignment="Center" Text="{x:Bind PreferencesVm.BackupDir, Mode=TwoWay}"/>
-            <CheckBox Content="Send error logs to Team StoryBuilder" Margin="8" HorizontalAlignment="Center" IsChecked="{x:Bind PreferencesVm.ErrorConsent, Mode=TwoWay}"/>
-            <CheckBox Content="Send me newsletters about StoryBuilder" Margin="8" HorizontalAlignment="Center" IsChecked="{x:Bind PreferencesVm.NewsConsent, Mode=TwoWay}"/>
+            <Pivot>
+                <PivotItem Header="General">
+                    <StackPanel>
+                        <TextBox Header="Your name:" PlaceholderText="Put the name want to publish under here" HorizontalAlignment="Center" Margin="8" Width="300" Text="{x:Bind PreferencesVm.Name, Mode=TwoWay}"/>
+                        <TextBox Header="Your email:" PlaceholderText="Put your email here" Margin="8" Width="300" Text="{x:Bind PreferencesVm.Email, Mode=TwoWay}"/>
+                        <TextBox Header="Project directory:" PlaceholderText="Where do you want to store your stories?" Margin="8" Width="300" HorizontalAlignment="Center" Text="{x:Bind PreferencesVm.ProjectDir, Mode=TwoWay}"/>
+                    </StackPanel>
+                </PivotItem>
+                <PivotItem Header="Backup">
+                    <StackPanel>
+                        <CheckBox Content="Make timed backups" Margin="8" HorizontalAlignment="Center" Name="TimedBackups" IsChecked="{x:Bind PreferencesVm.Backup, Mode=TwoWay}"/>
+                        <NumberBox Header="How often should backups be made? (Minutes)" Margin="4" Width="300" HorizontalAlignment="Center" Value="{x:Bind PreferencesVm.BackupInterval, Mode=TwoWay}"/>
+                        <TextBox Header="Backup directory:" PlaceholderText="Where do you want to store your backups?" Margin="8" Width="300" HorizontalAlignment="Center" Text="{x:Bind PreferencesVm.BackupDir, Mode=TwoWay}"/>
+                    </StackPanel>
+               </PivotItem>
+                <PivotItem Header="Other">
+                    <StackPanel>
+                        <CheckBox Content="Send error logs to Team StoryBuilder" Margin="8" HorizontalAlignment="Center" IsChecked="{x:Bind PreferencesVm.ErrorConsent, Mode=TwoWay}"/>
+                        <CheckBox Content="Send me newsletters about StoryBuilder" Margin="8" HorizontalAlignment="Center" IsChecked="{x:Bind PreferencesVm.NewsConsent, Mode=TwoWay}"/>
+                        <CheckBox Content="Wrap node names" Margin="8" HorizontalAlignment="Center" IsChecked="{x:Bind PreferencesVm.WrapNodeNames, Mode=TwoWay}"/>
+                        <TextBlock Text="Changing these settings may require a restart to take effect." HorizontalAlignment="Center" VerticalAlignment="Bottom"/>
+                    </StackPanel>
+                </PivotItem>
+                <PivotItem Header="About">
+                    <StackPanel>
+                        <TextBlock Name="Version" HorizontalAlignment="Center" Margin="5"/>
+                        <Button Content="Open Logs folder" HorizontalAlignment="Center" Click="OpenPath" Margin="5"/>
+                        <Button Content="Join the StoryBuilder Discord!" HorizontalAlignment="Center" Click="OpenDiscordURL" Margin="5"/>
+                        <TextBlock Text="StoryBuilder was created by Terry Cox, Jake Shaw (Rarisma) and Kyle Lemons" TextWrapping="WrapWholeWords" Margin="5" FontSize="13"/>
+                    </StackPanel>
+                </PivotItem>
+            </Pivot>
         </StackPanel>
     </ScrollViewer>
 </Page>
