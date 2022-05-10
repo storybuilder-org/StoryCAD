@@ -1,15 +1,12 @@
 ﻿using System;
 using CommunityToolkit.Mvvm.DependencyInjection;
-using CommunityToolkit.WinUI.UI.Helpers;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
 using StoryBuilder.Models;
 using StoryBuilder.Models.Tools;
-using StoryBuilder.Services;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.ViewModels;
 
