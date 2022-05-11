@@ -40,7 +40,7 @@ public class PreferencesModel
     public bool QuoteOnStartup { get; set; }
 
     // Backup Information
-    public string BackupOnOpen { get; set; }
+    public bool BackupOnOpen { get; set; }
     public bool TimedBackup { get; set; }
     public int TimedBackupInterval { get; set; }
 

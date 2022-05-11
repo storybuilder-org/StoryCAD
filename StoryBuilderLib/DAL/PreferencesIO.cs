@@ -88,7 +88,10 @@ public class PreferencesIO
                         break;
 
                     case "BackupOnOpen":
-                        _model.BackupOnOpen = tokens[1];
+                        if (tokens[1] == "True")
+                            _model.BackupOnOpen = true;
+                        else
+                            _model.BackupOnOpen = false;
                         break;
 
                     case "TimedBackup":
@@ -181,7 +184,7 @@ public class PreferencesIO
         NewPreferences.Add("LastTemplate=" + _model.LastSelectedTemplate);
 
         if (_model.WrapNodeNames == TextWrapping.WrapWholeWords) { NewPreferences.Add("WrapNodeNames=True"); }
-        else if (_model.WrapNodeNames == TextWrapping.NoWrap) { NewPreferences.Add("WrapNodeNames=False"); }
+        else { NewPreferences.Add("WrapNodeNames=False"); }
 
         await FileIO.WriteLinesAsync(preferencesFile, NewPreferences); //Writes file to disk.
     }

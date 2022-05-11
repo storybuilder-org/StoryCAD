@@ -471,7 +471,7 @@ namespace StoryBuilder.ViewModels
 
                 // Save the new project
                 await SaveFile();
-                await MakeBackup();
+                if (GlobalData.Preferences.BackupOnOpen) { await MakeBackup(); }
                 Ioc.Default.GetService<BackupService>().StartTimedBackup();
                 Messenger.Send(new StatusChangedMessage(new($"New project command executing", LogLevel.Info, true)));
 
@@ -671,15 +671,18 @@ namespace StoryBuilder.ViewModels
 
                 StoryReader rdr = Ioc.Default.GetService<StoryReader>();
                 StoryModel = await rdr.ReadFile(StoryModel.ProjectFile);
-                await Ioc.Default.GetService<BackupService>().BackupProject();
+
+                if (GlobalData.Preferences.BackupOnOpen) { await Ioc.Default.GetService<BackupService>().BackupProject(); }
+               
                 if (StoryModel.ExplorerView.Count > 0)
                 {
                     SetCurrentView(StoryViewType.ExplorerView);
-                    Messenger.Send(new StatusChangedMessage(new($"Open Story completed", LogLevel.Info )));
+                    Messenger.Send(new StatusChangedMessage(new($"Open Story completed", LogLevel.Info)));
                 }
                 GlobalData.MainWindow.Title = $"StoryBuilder - Editing {StoryModel.ProjectFilename.Replace(".stbx", "")}";
-                new UnifiedVM().UpdateRecents(Path.Combine(StoryModel.ProjectFolder.Path,StoryModel.ProjectFile.Name));
-                Ioc.Default.GetService<BackupService>().StartTimedBackup();
+                new UnifiedVM().UpdateRecents(Path.Combine(StoryModel.ProjectFolder.Path,StoryModel.ProjectFile.Name)); 
+                if (GlobalData.Preferences.TimedBackup) { Ioc.Default.GetService<BackupService>().StartTimedBackup(); }
+                
 
                 TreeViewNodeClicked(DataSource[0]); // Navigate to the tree root
                 string msg = $"Opened project {StoryModel.ProjectFilename}";
