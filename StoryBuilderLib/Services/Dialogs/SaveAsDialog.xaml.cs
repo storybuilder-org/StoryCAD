@@ -45,7 +45,6 @@ public sealed partial class SaveAsDialog : Page
         ParentFolder = await folderPicker.PickSingleFolderAsync();
         SaveAsVm.ParentFolder = ParentFolder;
 
-        //TODO: Test for cancelled FolderPicker via 'if Parentfolder =! null {} else {}
         if (ParentFolder != null)
         {
             ProjectFolderPath = ParentFolder.Path;
