@@ -85,7 +85,7 @@
                     <AppBarButton.Flyout>
                         <Flyout>
                             <StackPanel>
-                                <TextBlock Text="Are you sure you want to empty the trash?" HorizontalAlignment="Center"/>
+                                <TextBlock Text="Are you sure you want to empty the trash?" HorizontalAlignment="Center" Margin="0,0,0,10"/>
                                 <Button Command="{x:Bind ShellVm.EmptyTrashCommand, Mode=OneWay}" Content="Empty" HorizontalAlignment="Center"/>
                             </StackPanel>
                         </Flyout>
@@ -105,7 +105,7 @@
         <CommandBar  Background="{x:Bind ShellVm.UserPreferences.PrimaryColor}" IsOpen="False">
             <CommandBar.Content>
                 <StackPanel Orientation="Horizontal">
-                    <AutoSuggestBox PlaceholderText="Enter text to search for here" QueryIcon="Find" Width="285" Margin="0,8" QuerySubmitted="Search" TextChanged="ClearNodes" Text="{x:Bind ShellVm.FilterText, Mode=TwoWay}" VerticalAlignment="Center"/>
+                    <AutoSuggestBox PlaceholderText="Enter text to search for here" QueryIcon="Find" Width="335" Margin="0,8" QuerySubmitted="Search" TextChanged="ClearNodes" Text="{x:Bind ShellVm.FilterText, Mode=TwoWay}" VerticalAlignment="Center"/>
                 </StackPanel>
             </CommandBar.Content>
             <CommandBar.PrimaryCommands>
@@ -188,7 +188,11 @@
                                 </MenuFlyoutItem.KeyboardAccelerators>
                             </MenuFlyoutItem>
                             <MenuFlyoutSeparator/>
-                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.RemoveStoryElementVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.RemoveStoryElementCommand,Mode=OneWay}" Icon="Delete" Text="Delete story element"/>
+                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.RemoveStoryElementVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.RemoveStoryElementCommand,Mode=OneWay}" Icon="Delete" Text="Delete story element">
+                                <MenuFlyoutItem.KeyboardAccelerators>
+                                    <KeyboardAccelerator Key="Delete"/>
+                                </MenuFlyoutItem.KeyboardAccelerators>
+                            </MenuFlyoutItem>
                             <MenuFlyoutItem Visibility="{x:Bind ShellVm.RestoreStoryElementVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.RestoreStoryElementCommand,Mode=OneWay}" Icon="Refresh" Text="Restore Story element"/>
                             <MenuFlyoutItem Visibility="{x:Bind ShellVm.AddToNarrativeVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.AddToNarrativeCommand,Mode=OneWay}" Icon="Switch" Text="Add To Narrative"/>
                             <MenuFlyoutItem Visibility="{x:Bind ShellVm.RemoveFromNarrativeVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.RemoveFromNarrativeCommand,Mode=OneWay}" Icon="Switch" Text="Remove from Narrative"/>
@@ -204,16 +208,16 @@
                             <StackPanel  Orientation="Horizontal" >
                                 <Button ToolTipService.ToolTip="Move Left"
                                     FontFamily="Segoe MDL2 Assets" Content="&#xE09A;"
-                                    Command="{x:Bind ShellVm.MoveLeftCommand, Mode=OneWay}" />
+                                    Command="{x:Bind ShellVm.MoveLeftCommand, Mode=OneWay}"  Margin="5"/>
                                 <Button ToolTipService.ToolTip="Move Right"
                                         FontFamily="Segoe MDL2 Assets" Content="&#xE013;"
-                                        Command="{x:Bind ShellVm.MoveRightCommand, Mode=OneWay}" />
+                                        Command="{x:Bind ShellVm.MoveRightCommand, Mode=OneWay}"  Margin="5"/>
                                 <Button ToolTipService.ToolTip="Move Up"
                                         FontFamily="Segoe MDL2 Assets" Content="&#xE09C;"
-                                        Command="{x:Bind ShellVm.MoveUpCommand, Mode=OneWay}" />
+                                        Command="{x:Bind ShellVm.MoveUpCommand, Mode=OneWay}" Margin="5"/>
                                 <Button ToolTipService.ToolTip="Move Down"
                                         FontFamily="Segoe MDL2 Assets" Content="&#xE09D;"
-                                        Command="{x:Bind ShellVm.MoveDownCommand, Mode=OneWay}" />
+                                        Command="{x:Bind ShellVm.MoveDownCommand, Mode=OneWay}" Margin="5"/>
                             </StackPanel>
                         </Flyout>
                     </AppBarButton.Flyout>
@@ -273,7 +277,7 @@
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    <muxc:TreeView x:Name="NavigationTree" ContextFlyout="{StaticResource AddStoryElementFlyout}" ContextRequested="AddButton_ContextRequested"  ItemsSource="{x:Bind ShellVm.DataSource, Mode=TwoWay}" ItemInvoked="TreeViewItem_Invoked" >
+                    <muxc:TreeView x:Name="NavigationTree" AllowDrop="False" ContextFlyout="{StaticResource AddStoryElementFlyout}" ContextRequested="AddButton_ContextRequested"  ItemsSource="{x:Bind ShellVm.DataSource, Mode=TwoWay}" ItemInvoked="TreeViewItem_Invoked" >
                         <muxc:TreeView.ItemTemplate>
                             <DataTemplate  x:DataType="viewmodels:StoryNodeItem">
                                 <muxc:TreeViewItem ItemsSource="{x:Bind Children}" Background="{x:Bind Background, Mode=OneWay}" IsExpanded="{x:Bind IsExpanded, Mode=TwoWay}" RightTapped="TreeViewItem_RightTapped">

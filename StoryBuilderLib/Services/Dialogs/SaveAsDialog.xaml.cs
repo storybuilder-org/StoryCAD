@@ -4,19 +4,12 @@ using Microsoft.UI.Xaml.Controls;
 using StoryBuilder.Models;
 using StoryBuilder.ViewModels;
 using System;
-using System.IO;
 using System.Runtime.InteropServices;
 using Windows.Storage;
 using Windows.Storage.Pickers;
 
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
-
 namespace StoryBuilder.Services.Dialogs;
 
-/// <summary>
-/// An empty page that can be used on its own or navigated to within a Frame.
-/// </summary>
 public sealed partial class SaveAsDialog : Page
 {
     public SaveAsDialog()
@@ -52,12 +45,13 @@ public sealed partial class SaveAsDialog : Page
         ParentFolder = await folderPicker.PickSingleFolderAsync();
         SaveAsVm.ParentFolder = ParentFolder;
 
-        //TODO: Test for cancelled FolderPicker via 'if Parentfolder =! null {} else {}
-            
-        ProjectFolderPath = ParentFolder.Path;
-        ProjectPathName.Text = ProjectFolderPath;
-        SaveAsVm.ProjectPathName = ProjectFolderPath;
-        ProjectPathName.IsReadOnly = true;
+        if (ParentFolder != null)
+        {
+            ProjectFolderPath = ParentFolder.Path;
+            ProjectPathName.Text = ProjectFolderPath;
+            SaveAsVm.ProjectPathName = ProjectFolderPath;
+            ProjectPathName.IsReadOnly = true;
+        }
     }
 
     [ComImport]

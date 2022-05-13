@@ -11,6 +11,7 @@ namespace StoryBuilder.ViewModels.Tools;
 
 public class PreferencesViewModel : ObservableRecipient
 {
+    public bool init = true;
     private string _backupdir;
     public string BackupDir
     {
@@ -68,6 +69,13 @@ public class PreferencesViewModel : ObservableRecipient
         set => _wrapNodeNames = value;
     }
 
+    private bool _backupOnOpen;
+    public bool BackupUpOnOpen
+    {
+        get => _backupOnOpen;
+        set => _backupOnOpen = value;
+    }
+
     /// <summary>
     /// Saves the users preferences to disk.
     /// </summary>
@@ -85,6 +93,8 @@ public class PreferencesViewModel : ObservableRecipient
         prf.TimedBackupInterval = BackupInterval;
         prf.TimedBackup = Backup;
         prf.Newsletter = NewsConsent;
+        prf.PreferencesInitialised = init;
+        prf.BackupOnOpen = BackupUpOnOpen;
 
         if (WrapNodeNames) {prf.WrapNodeNames = TextWrapping.WrapWholeWords;}
         else {prf.WrapNodeNames = TextWrapping.NoWrap;}
@@ -109,6 +119,8 @@ public class PreferencesViewModel : ObservableRecipient
         Backup = _model.TimedBackup;
         NewsConsent = _model.Newsletter;
         BackupDir = _model.BackupDirectory;
+        BackupUpOnOpen = _model.BackupOnOpen;
+
 
         if (_model.WrapNodeNames == TextWrapping.WrapWholeWords) {WrapNodeNames = true;}
         else {WrapNodeNames = false; }

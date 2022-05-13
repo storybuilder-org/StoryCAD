@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
@@ -348,10 +349,18 @@ namespace StoryBuilder.ViewModels
 
         #endregion
 
-            #region Public Methods
+        #region Public Methods
 
         public async Task PrintCurrentNodeAsync()
         {
+            if (RightTappedNode == null)
+            {
+                Messenger.Send(new StatusChangedMessage(new($"Right tap a node to print", LogLevel.Warn)));
+                Logger.Log(LogLevel.Info, "Print node failed as no node is selected");
+                _canExecuteCommands = true;
+                return;
+            }
+
             PrintReportDialogVM PrintVM = Ioc.Default.GetRequiredService<PrintReportDialogVM>();
             PrintVM.SelectedNodes.Clear();
             PrintVM.SelectedNodes.Add(RightTappedNode);
@@ -471,7 +480,7 @@ namespace StoryBuilder.ViewModels
 
                 // Save the new project
                 await SaveFile();
-                await MakeBackup();
+                if (GlobalData.Preferences.BackupOnOpen) { await MakeBackup(); }
                 Ioc.Default.GetService<BackupService>().StartTimedBackup();
                 Messenger.Send(new StatusChangedMessage(new($"New project command executing", LogLevel.Info, true)));
 
@@ -671,15 +680,18 @@ namespace StoryBuilder.ViewModels
 
                 StoryReader rdr = Ioc.Default.GetService<StoryReader>();
                 StoryModel = await rdr.ReadFile(StoryModel.ProjectFile);
-                await Ioc.Default.GetService<BackupService>().BackupProject();
+
+                if (GlobalData.Preferences.BackupOnOpen) { await Ioc.Default.GetService<BackupService>().BackupProject(); }
+               
                 if (StoryModel.ExplorerView.Count > 0)
                 {
                     SetCurrentView(StoryViewType.ExplorerView);
-                    Messenger.Send(new StatusChangedMessage(new($"Open Story completed", LogLevel.Info )));
+                    Messenger.Send(new StatusChangedMessage(new($"Open Story completed", LogLevel.Info)));
                 }
                 GlobalData.MainWindow.Title = $"StoryBuilder - Editing {StoryModel.ProjectFilename.Replace(".stbx", "")}";
-                new UnifiedVM().UpdateRecents(Path.Combine(StoryModel.ProjectFolder.Path,StoryModel.ProjectFile.Name));
-                Ioc.Default.GetService<BackupService>().StartTimedBackup();
+                new UnifiedVM().UpdateRecents(Path.Combine(StoryModel.ProjectFolder.Path,StoryModel.ProjectFile.Name)); 
+                if (GlobalData.Preferences.TimedBackup) { Ioc.Default.GetService<BackupService>().StartTimedBackup(); }
+                
 
                 TreeViewNodeClicked(DataSource[0]); // Navigate to the tree root
                 string msg = $"Opened project {StoryModel.ProjectFilename}";
@@ -695,7 +707,14 @@ namespace StoryBuilder.ViewModels
             _canExecuteCommands = true;
         }
         public async Task SaveFile()
-        { 
+        {
+            if (DataSource.Count == 0 || DataSource == null)
+            {
+                Messenger.Send(new StatusChangedMessage(new($"You need to open a story first!", LogLevel.Info,false)));
+                Logger.Log(LogLevel.Info, "SaveFile command cancelled (DataSource was null or empty)");
+                return;
+            }
+            
             Logger.Log(LogLevel.Trace, "Saving file");
             try //Updating the lost modified timer
             {
@@ -840,22 +859,32 @@ namespace StoryBuilder.ViewModels
 
         private async void CloseFile()
         {
-            //BUG: Close file logic doesn't work (see comments)
             _canExecuteCommands = false;
             Messenger.Send(new StatusChangedMessage(new($"Closing project", LogLevel.Info, true)));
-            // Save the existing file if changed
+
             if (StoryModel.Changed)
             {
-                SaveModel();
-                await WriteModel();
+                ContentDialog Warning = new()
+                {
+                    Title = "Save changes?",
+                    PrimaryButtonText = "Yes",
+                    SecondaryButtonText = "No",
+                    XamlRoot = GlobalData.XamlRoot
+                };
+                if (await Warning.ShowAsync() == ContentDialogResult.Primary)
+                {
+                    SaveModel();
+                    await WriteModel();
+                }
             }
+
             ResetModel();
+            RightTappedNode = null; //Null right tapped node to prevent possible issues.
             SetCurrentView(StoryViewType.ExplorerView);
             GlobalData.MainWindow.Title = "StoryBuilder";
             Ioc.Default.GetService<BackupService>().StopTimedBackup();
             DataSource = StoryModel.ExplorerView;
             ShowHomePage();
-            //TODO: Navigate to background Page (is there one?)
             Messenger.Send(new StatusChangedMessage(new($"Close story command completed", LogLevel.Info, true)));
             _canExecuteCommands = true;
         }
@@ -871,11 +900,20 @@ namespace StoryBuilder.ViewModels
             _canExecuteCommands = false;
             Messenger.Send(new StatusChangedMessage(new($"Executing Exit project command", LogLevel.Info, true)));
 
-            //TODO: Only close if changed
             if (StoryModel.Changed)
             {
-                SaveModel();
-                await WriteModel();
+                ContentDialog Warning = new()
+                {
+                    Title = "Save changes?",
+                    PrimaryButtonText = "Yes",
+                    SecondaryButtonText = "No",
+                    XamlRoot = GlobalData.XamlRoot
+                };
+                if (await Warning.ShowAsync() == ContentDialogResult.Primary)
+                {
+                    SaveModel();
+                    await WriteModel();
+                }
             }
             Logger.Flush();
             Application.Current.Exit();  // Win32
@@ -1621,6 +1659,13 @@ namespace StoryBuilder.ViewModels
                 Messenger.Send(new StatusChangedMessage(new("You can only restore from Deleted StoryElements", LogLevel.Warn)));
                 return;
             }
+
+            if (RightTappedNode.IsRoot)
+            {
+                Messenger.Send(new StatusChangedMessage(new("You can't restore a root node!", LogLevel.Warn)));
+                return;
+            }
+            
             //TODO: Add dialog to confirm restore
             ObservableCollection<StoryNodeItem> target = DataSource[0].Children;
             DataSource[1].Children.Remove(RightTappedNode);
@@ -1659,7 +1704,15 @@ namespace StoryBuilder.ViewModels
         /// </summary>
         private void EmptyTrash()
         {
+            if (DataSource == null)
+            {
+                Messenger.Send(new StatusChangedMessage(new($"You need to load a story first!", LogLevel.Warn, false)));
+                Logger.Log(LogLevel.Info, "Failed to empty trash as DataSource is null. (Is a story loaded?)");
+                return;
+            }
+            
             StatusMessage = "Trash Emptied.";
+            Logger.Log(LogLevel.Info,"Emptied Trash.");
             DataSource[1].Children.Clear();
         }
 
@@ -1729,6 +1782,12 @@ namespace StoryBuilder.ViewModels
 
         public void ViewChanged()
         {
+            if (DataSource == null || DataSource.Count == 0)
+            {
+                Messenger.Send(new StatusChangedMessage(new($"You need to load a story first!", LogLevel.Warn, false)));
+                Logger.Log(LogLevel.Info, "Failed to switch views as DataSource is null or empty. (Is a story loaded?)");
+                return;
+            }
             if (!SelectedView.Equals(CurrentView))
             {
                 CurrentView = SelectedView;
