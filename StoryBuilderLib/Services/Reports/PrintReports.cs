@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using StoryBuilder.Models;
 using StoryBuilder.Services.Logging;
+using StoryBuilder.Services.Messages;
 using StoryBuilder.ViewModels;
 using StoryBuilder.ViewModels.Tools;
 
@@ -89,7 +90,14 @@ public class PrintReports
             }
         }
 
+        if (string.IsNullOrEmpty(documentText))
+        {
+            Ioc.Default.GetService<ShellViewModel>().ShowMessage(LogLevel.Warn, "No nodes selected for report generation",true);
+            return;
+        }
         Print(documentText);
+        Ioc.Default.GetService<ShellViewModel>().ShowMessage( LogLevel.Info, "Generate Print Reports complete",true);
+
     }
 
     private StoryElement Overview() 
