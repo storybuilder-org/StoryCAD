@@ -4,7 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <StackPanel Width="500">
-        <Pivot>
+        <Pivot Name="PivotView">
             <PivotItem Header="General">
                 <StackPanel>
                     <TextBox Header="Your name:" PlaceholderText="Put the name want to publish under here" HorizontalAlignment="Center" Margin="8" Width="300" Text="{x:Bind PreferencesVm.Name, Mode=TwoWay}"/>
@@ -43,9 +43,14 @@
             </PivotItem>
             <PivotItem Opacity="0" IsEnabled="False" Header="" Name="Dev">
                 <StackPanel>
-                    <Button Content="Show init page on reload"/>
-                    <Button Content="Crash"/>
+                    <Button Content="Set Init to false" Click="SetInitToFalse"/>
+                    <Button Content="Throw exception" Click="ThrowException"/>
+                    <Button Content="Attach Elmah" Click="AttachElmah"/>
                     <TextBlock Name="cpuarch"/>
+                    <TextBlock Name="osarch"/>
+                    <TextBlock Name="osinfo"/>
+                    <TextBlock Name="apparch"/>
+                    <TextBlock Name="RampiUsage"/>
                 </StackPanel>
             </PivotItem>
         </Pivot>

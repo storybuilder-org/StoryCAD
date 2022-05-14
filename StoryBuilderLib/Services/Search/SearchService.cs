@@ -2,6 +2,8 @@
 using StoryBuilder.Models;
 using StoryBuilder.ViewModels;
 using System;
+using Microsoft.Identity.Client;
+using LogLevel = StoryBuilder.Services.Logging.LogLevel;
 
 namespace StoryBuilder.Services.Search;
 
@@ -18,6 +20,12 @@ public class SearchService
     /// <returns>true if StoryyElement contains search argument</returns>
     public bool SearchStoryElement(StoryNodeItem node, string searchArg, StoryModel model)
     {
+        if (searchArg == null)
+        {
+            Ioc.Default.GetRequiredService<ShellViewModel>().Logger.Log(LogLevel.Warn, "Search argument is null, returning false.");
+            return false;
+        } // Fixes blank search
+        
         bool result = false;
         arg = searchArg.ToLower();
         StoryElement element = null;
