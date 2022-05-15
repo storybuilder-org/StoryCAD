@@ -8,6 +8,7 @@ using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using StoryBuilder.Models;
+using StoryBuilder.Services.Logging;
 using StoryBuilder.ViewModels.Tools;
 using WinRT;
 
@@ -21,7 +22,22 @@ public sealed partial class PreferencesDialog : Page
         InitializeComponent();
         DataContext = PreferencesVm;
         Version.Text = "StoryBuilder Version: " + Windows.ApplicationModel.Package.Current.Id.Version.Major + "." + Windows.ApplicationModel.Package.Current.Id.Version.Minor + "." + Windows.ApplicationModel.Package.Current.Id.Version.Build + "." + Windows.ApplicationModel.Package.Current.Id.Version.Revision;
+
+        if (Debugger.IsAttached || GlobalData.Preferences.Name == "ShowMeTheDevTab")
+        {
+            Dev.IsEnabled = true;
+            Dev.Opacity = 1;
+            Dev.Header = "Dev";
+            cpuarch.Text = "CPU ARCH: " + RuntimeInformation.ProcessArchitecture;
+            osarch.Text = "OS ARCH: " + RuntimeInformation.OSArchitecture;
+            osinfo.Text = "OS INFO: Windows Build " + Environment.OSVersion.VersionString.Replace("Microsoft Windows NT 10.0.","").Replace(".0","");
+            if (IntPtr.Size == 4) { apparch.Text = "Looks like we are running as a 32 bit process."; }
+            else if (IntPtr.Size == 8) { apparch.Text = "Looks like we are running as a 64 bit process."; }
+            else { apparch.Text = $"We don't know what architecture we are running on,\nMight want to call for help.\nIntPtr was {IntPtr.Size}, expected 4 or 8."; }
+        }
+        else { PivotView.Items.Remove(Dev); }
     }
+
     private void OpenPath(object sender, RoutedEventArgs e)
     {
         Process.Start(new ProcessStartInfo()
@@ -99,4 +115,18 @@ public sealed partial class PreferencesDialog : Page
     [DllImport("user32.dll", ExactSpelling = true, CharSet = CharSet.Auto, PreserveSig = true, SetLastError = false)]
     public static extern IntPtr GetActiveWindow();
 
+    private void ThrowException(object sender, RoutedEventArgs e)
+    {
+        throw new NotImplementedException();
+    }
+
+    private void SetInitToFalse(object sender, RoutedEventArgs e)
+    {
+        PreferencesVm.init = false;
+    }
+
+    private void AttachElmah(object sender, RoutedEventArgs e)
+    {
+        Ioc.Default.GetRequiredService<LogService>().AddElmahTarget();
+    }
 }
