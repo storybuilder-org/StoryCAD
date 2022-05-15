@@ -1177,7 +1177,6 @@ namespace StoryBuilder.ViewModels
 
                 PrintReports rpt = new(ReportVM, StoryModel);
                 await rpt.Generate();
-                Messenger.Send(new StatusChangedMessage(new($"Generate Print Reports complete", LogLevel.Info, true)));
             }
             else
             {
@@ -1890,12 +1889,22 @@ namespace StoryBuilder.ViewModels
             if (DataSource.Count > 0) {CurrentNode = DataSource[0];}
         }
 
-        #region MVVM Message processing
+        #region MVVM ` processing
         private void IsChangedMessageReceived(IsChangedMessage isDirty)
         {
             StoryModel.Changed = StoryModel.Changed || isDirty.Value;
             if (StoryModel.Changed) { ChangeStatusColor = Colors.Red; }
             else { ChangeStatusColor = Colors.Green; }
+        }
+
+        /// <summary>
+        /// Sends message
+        /// </summary>
+        /// <param name="Level"></param>
+        /// <param name="Message"></param>
+        public void ShowMessage(LogLevel Level, string Message,bool SendToLog)
+        {
+            Messenger.Send(new StatusChangedMessage(new(Message, Level, SendToLog)));
         }
 
         /// <summary>
