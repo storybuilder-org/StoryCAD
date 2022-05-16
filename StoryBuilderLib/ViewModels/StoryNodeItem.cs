@@ -44,6 +44,7 @@ public class StoryNodeItem : DependencyObject, INotifyPropertyChanged
     public event PropertyChangedEventHandler PropertyChanged;
 
     // StoryElement data
+    
 
     private Guid _uuid;
     public Guid Uuid
@@ -243,6 +244,8 @@ public class StoryNodeItem : DependencyObject, INotifyPropertyChanged
             }
         }
     }
+
+    public bool Dragable { get => !IsRoot; }
 
     #endregion
 
@@ -473,5 +476,11 @@ public class StoryNodeItem : DependencyObject, INotifyPropertyChanged
     private void NotifyPropertyChanged(string propertyName)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+
+    //
+    private void UIElement_OnDragStarting(UIElement sender, DragStartingEventArgs args)
+    {
+
     }
 }

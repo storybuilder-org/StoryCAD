@@ -277,14 +277,16 @@
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    <muxc:TreeView x:Name="NavigationTree" AllowDrop="False" ContextFlyout="{StaticResource AddStoryElementFlyout}" ContextRequested="AddButton_ContextRequested"  ItemsSource="{x:Bind ShellVm.DataSource, Mode=TwoWay}" ItemInvoked="TreeViewItem_Invoked" >
+                    <muxc:TreeView x:Name="NavigationTree"  ContextFlyout="{StaticResource AddStoryElementFlyout}" ContextRequested="AddButton_ContextRequested"  ItemsSource="{x:Bind ShellVm.DataSource, Mode=TwoWay}" ItemInvoked="TreeViewItem_Invoked" >
                         <muxc:TreeView.ItemTemplate>
                             <DataTemplate  x:DataType="viewmodels:StoryNodeItem">
-                                <muxc:TreeViewItem ItemsSource="{x:Bind Children}" Background="{x:Bind Background, Mode=OneWay}" IsExpanded="{x:Bind IsExpanded, Mode=TwoWay}" RightTapped="TreeViewItem_RightTapped">
+                                <muxc:TreeViewItem  ItemsSource="{x:Bind Children}" CanDrag="{x:Bind Dragable}" DragStarting="UIElement_OnDragStarting"  Drop="UIElement_OnDrop"
+                                Background="{x:Bind Background, Mode=OneWay}"
+                                                   IsExpanded="{x:Bind IsExpanded, Mode=TwoWay}"
+                                                   RightTapped="TreeViewItem_RightTapped">
                                     <StackPanel Orientation="Horizontal">
-                                        <SymbolIcon Symbol="{x:Bind Symbol, Mode=OneWay}" Width="20" Height="20"/>
-                                        <TextBlock Margin="0,0,10,0"/>
-                                        <TextBlock Text="{x:Bind Name, Mode=TwoWay}" TextWrapping="{Binding  TextWrapping}" MaxWidth="225"/>
+                                        <SymbolIcon Symbol="{x:Bind Symbol, Mode=OneWay}" Width="40" Height="20"/>
+                                        <TextBlock  Text="{x:Bind Name, Mode=TwoWay}" TextWrapping="{Binding  TextWrapping}" MaxWidth="210"/>
                                     </StackPanel>
                                 </muxc:TreeViewItem>
                             </DataTemplate>
