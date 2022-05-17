@@ -1237,10 +1237,28 @@ namespace StoryBuilder.ViewModels
             _canExecuteCommands = true;
         }
 
-        #endregion  
+        #endregion
 
         #region Move TreeViewItem Commands
-
+        public void DragCheck(TreeView sender, TreeViewDragItemsStartingEventArgs args)
+        {
+            try
+            {
+                foreach (var item in args.Items)
+                {
+                    if ((item as StoryNodeItem).IsRoot)
+                    {
+                        Ioc.Default.GetService<ShellViewModel>().ShowMessage(LogLevel.Warn, "You can't move a root node!", false);
+                        args.Cancel = true;
+                        return;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Ioc.Default.GetService<LogService>().LogException(LogLevel.Error, e, e.Message);
+            }
+        }
         private void MoveTreeViewItemLeft()
         {
             //TODO: Logging
