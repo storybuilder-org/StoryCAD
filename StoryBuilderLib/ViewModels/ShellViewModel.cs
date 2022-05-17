@@ -1261,7 +1261,6 @@ namespace StoryBuilder.ViewModels
         }
         private void MoveTreeViewItemLeft()
         {
-            //TODO: Logging
             if (CurrentNode == null)
             {
                 Messenger.Send(new StatusChangedMessage(new($"Click or touch a node to move", LogLevel.Info)));
@@ -1297,6 +1296,7 @@ namespace StoryBuilder.ViewModels
                 if (_targetIndex == -1) { _targetCollection.Add(CurrentNode); }
                 else { _targetCollection.Insert(_targetIndex, CurrentNode); }
                 CurrentNode.Parent = targetParent;
+                Logger.Log(LogLevel.Info, $"Moving {CurrentNode.Name} left from parent {CurrentNode.Parent.Name} to parent {CurrentNode.Parent.Parent.Name}");
             }
             else
             {
@@ -1379,12 +1379,13 @@ namespace StoryBuilder.ViewModels
             if (MoveIsValid()) // Verify move
             {
                 _sourceChildren.RemoveAt(_sourceIndex);
-                if (_targetIndex == -1)
-                    _targetCollection.Add(CurrentNode);
+                if (_targetIndex == -1)  {_targetCollection.Add(CurrentNode);}
                 else
                     _targetCollection.Insert(_targetIndex, CurrentNode);
                 CurrentNode.Parent = targetParent;
             }
+            Logger.Log(LogLevel.Info, $"Moving {CurrentNode.Name} right from parent {CurrentNode.Parent.Name} to parent {CurrentNode.Children[0].Name}");
+
         }
 
         private void MoveTreeViewItemUp()
@@ -1444,6 +1445,8 @@ namespace StoryBuilder.ViewModels
                     _targetCollection.Insert(_targetIndex, CurrentNode);
                 CurrentNode.Parent = _targetParent;
             }
+            Logger.Log(LogLevel.Info, $"Moving {CurrentNode.Name} up from parent {CurrentNode.Parent.Name} to parent {_targetParent.Name}");
+
         }
 
         private void MoveTreeViewItemDown()
@@ -1504,6 +1507,8 @@ namespace StoryBuilder.ViewModels
                 _targetCollection.Insert(_targetIndex, CurrentNode);
                 CurrentNode.Parent = _targetParent;
             }
+            Logger.Log(LogLevel.Info, $"Moving {CurrentNode.Name} down from parent {CurrentNode.Parent.Name} to parent {_targetParent}");
+
         }
 
         #endregion
