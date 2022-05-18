@@ -58,6 +58,7 @@ namespace StoryBuilder.Models.Tools
 
         //Version Tracking
         public string Version { get; set; }
+        public DateTime LastContact { get; set; }
         #endregion
 
         #region Constructor

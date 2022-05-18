@@ -5,6 +5,7 @@ using StoryBuilder.Models;
 using StoryBuilder.Models.Tools;
 using StoryBuilder.Services.Logging;
 using CommunityToolkit.Mvvm.DependencyInjection;
+using StoryBuilder.DAL;
 
 namespace StoryBuilder.Services.Parse
 {
@@ -53,6 +54,8 @@ namespace StoryBuilder.Services.Parse
 
                 log.Log(LogLevel.Info, "Save ParsePreferences data");
                 await pref.SaveAsync();
+                preferences.LastContact = DateTime.Now;
+                await Ioc.Default.GetService<PreferencesIO>().UpdateFile();
                 log.Log(LogLevel.Info, "PostPreferences successful");
 
             }
