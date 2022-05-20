@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using StoryBuilder.Models;
 using StoryBuilder.Services.Logging;
-using StoryBuilder.Services.Messages;
 using StoryBuilder.ViewModels;
 using StoryBuilder.ViewModels.Tools;
 
