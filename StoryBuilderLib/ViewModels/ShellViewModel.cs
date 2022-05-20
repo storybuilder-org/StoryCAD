@@ -1259,6 +1259,11 @@ namespace StoryBuilder.ViewModels
                 Ioc.Default.GetService<LogService>().LogException(LogLevel.Error, e, e.Message);
             }
         }
+        public void DragFinished(TreeView sender, TreeViewDragItemsCompletedEventArgs args)
+        {
+            var awd = args.Items[0];
+            
+        }
         private void MoveTreeViewItemLeft()
         {
             if (CurrentNode == null)
@@ -1451,8 +1456,6 @@ namespace StoryBuilder.ViewModels
 
         private void MoveTreeViewItemDown()
         {
-            //TODO: Logging
-
             if (CurrentNode == null)
             {
                 Messenger.Send(new StatusChangedMessage(new($"Click or touch a node to move", LogLevel.Info)));
@@ -1483,7 +1486,11 @@ namespace StoryBuilder.ViewModels
                 int siblingIndex = grandparentCollection.IndexOf(CurrentNode.Parent) + 1;
                 if (siblingIndex == grandparentCollection.Count)
                 {
-                    Messenger.Send(new StatusChangedMessage(new($"Cannot move down further", LogLevel.Warn)));
+                    CurrentNode.Parent = DataSource[1];
+                    _sourceChildren.RemoveAt(_sourceIndex);
+                    DataSource[1].Children.Insert(_targetIndex, CurrentNode);
+                    Messenger.Send(new StatusChangedMessage(new($"Moved to trash", LogLevel.Info)));
+                    
                     return;
                 }
                 if (grandparentCollection[siblingIndex].IsRoot)
@@ -2156,5 +2163,6 @@ namespace StoryBuilder.ViewModels
 
         [DllImport("user32.dll", ExactSpelling = true, CharSet = CharSet.Auto, PreserveSig = true, SetLastError = false)]
         private static extern IntPtr GetActiveWindow();
+
     }
 }

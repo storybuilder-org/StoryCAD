@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Diagnostics;
-using System.Linq;
-using Windows.ApplicationModel.DataTransfer;
 using CommunityToolkit.Mvvm.DependencyInjection;
-using Elmah.Io.Client;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
@@ -105,5 +101,4 @@ public sealed partial class Shell
         if (ShellVm.DataSource == null || ShellVm.DataSource.Count ==0) { return; }
         foreach (StoryNodeItem node in ShellVm.DataSource[0]) { node.Background = null; }
     }
-
 }

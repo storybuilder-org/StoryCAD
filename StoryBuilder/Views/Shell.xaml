@@ -1,12 +1,12 @@
 ﻿<Page NavigationCacheMode="Required"  
-    x:Class="StoryBuilder.Views.Shell"
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
-    xmlns:viewmodels="using:StoryBuilder.ViewModels"   
-    mc:Ignorable="d">
+       x:Class="StoryBuilder.Views.Shell"
+       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+       xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
+       xmlns:viewmodels="using:StoryBuilder.ViewModels"   
+       mc:Ignorable="d">
 
     <Page.Resources>
         <CommandBarFlyout x:Key="AddStoryElementFlyout" Placement="Right" x:Name="AddStoryElementCommandBarFlyout" >
@@ -287,7 +287,8 @@
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    <muxc:TreeView x:Name="NavigationTree" DragItemsStarting="{x:Bind ShellVm.DragCheck}"  ContextFlyout="{StaticResource AddStoryElementFlyout}" ContextRequested="AddButton_ContextRequested"  ItemsSource="{x:Bind ShellVm.DataSource, Mode=TwoWay}" ItemInvoked="TreeViewItem_Invoked" >
+                    <!-- This XAML gives an error saying that dragcheck and dragfinished can't be found/accessible, the compiler is wrong. -->
+                    <muxc:TreeView x:Name="NavigationTree" DragItemsStarting="{x:Bind ShellVm.DragCheck}" DragItemsCompleted="{x:Bind ShellVm.DragFinished}" AllowDrop="False"  ContextFlyout="{StaticResource AddStoryElementFlyout}" ContextRequested="AddButton_ContextRequested"  ItemsSource="{x:Bind ShellVm.DataSource, Mode=TwoWay}" ItemInvoked="TreeViewItem_Invoked" >
                         <muxc:TreeView.ItemTemplate>
                             <DataTemplate  x:DataType="viewmodels:StoryNodeItem">
                                 <muxc:TreeViewItem  ItemsSource="{x:Bind Children}"
