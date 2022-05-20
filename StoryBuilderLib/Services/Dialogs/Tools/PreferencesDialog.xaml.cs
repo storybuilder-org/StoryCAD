@@ -125,8 +125,8 @@ public sealed partial class PreferencesDialog : Page
         PreferencesVm.init = false;
     }
 
-    private void AttachElmah(object sender, RoutedEventArgs e)
+    private async void AttachElmah(object sender, RoutedEventArgs e)
     {
-        Ioc.Default.GetRequiredService<LogService>().AddElmahTarget();
+        await Ioc.Default.GetRequiredService<LogService>().AddElmahTarget();
     }
 }

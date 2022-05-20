@@ -103,14 +103,14 @@ namespace StoryBuilder.Services
             }
             catch (Exception ex)
             {
-                Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread().TryEnqueue(() =>
+                Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread().TryEnqueue(async () =>
                 {
                     ContentDialog warning = new();
                     warning.Title = "Backup Warning";
                     warning.Content = "The last backup failed due to the following reason:\n" + ex.Message;
                     warning.XamlRoot = GlobalData.XamlRoot;
                     warning.CloseButtonText = "Understood.";
-                    warning.ShowAsync();
+                    await warning.ShowAsync();
                 });
 
                 Log.LogException(LogLevel.Error, ex, $"Error backing up project {ex.Message}");

@@ -121,7 +121,6 @@ public class LogService : ILogService
                     int ln = 0;
                     if (LogString.Split("\n").Length > 50)
                     {
-                        string NewLogString = "";
                         foreach (var line in LogString.Split("\n").TakeLast(50))
                         {
                             msg.Data.Add(new(key: "Line " + ln, value: line));
