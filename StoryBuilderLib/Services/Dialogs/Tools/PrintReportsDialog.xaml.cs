@@ -14,11 +14,21 @@ public sealed partial class PrintReportsDialog : Page
     public PrintReportsDialog()
     {
         InitializeComponent();
-
+        PrintVM.SelectAllCharacters = false;
+        PrintVM.SelectAllProblems = false;
+        PrintVM.SelectAllScenes = false;
+        PrintVM.SelectAllSettings = false;
+        PrintVM.CreateOverview = false;
+        PrintVM.CreateSummary = false;
+        PrintVM.SelectedNodes.Clear();
         PrintVM.ProblemNodes.Clear();
         PrintVM.CharacterNodes.Clear();
         PrintVM.SceneNodes.Clear();
         PrintVM.SettingNodes.Clear();
+        PrintVM.CharacterList = false;
+        PrintVM.ProblemList = false;
+        PrintVM.SettingList = false;
+        PrintVM.SceneList = false;
 
         //Gets all nodes that aren't deleted
         try

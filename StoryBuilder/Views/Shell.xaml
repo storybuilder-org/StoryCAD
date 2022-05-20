@@ -283,8 +283,7 @@
                                 <muxc:TreeViewItem ItemsSource="{x:Bind Children}" Background="{x:Bind Background, Mode=OneWay}" IsExpanded="{x:Bind IsExpanded, Mode=TwoWay}" RightTapped="TreeViewItem_RightTapped">
                                     <StackPanel Orientation="Horizontal">
                                         <SymbolIcon Symbol="{x:Bind Symbol, Mode=OneWay}" Width="20" Height="20"/>
-                                        <TextBlock Margin="0,0,10,0"/>
-                                        <TextBlock Text="{x:Bind Name, Mode=TwoWay}" TextWrapping="{Binding  TextWrapping}" MaxWidth="225"/>
+                                        <TextBlock Text="{x:Bind Name, Mode=TwoWay}" TextWrapping="{Binding  TextWrapping}" MaxWidth="220" Margin="10,0,10,0"/>
                                     </StackPanel>
                                 </muxc:TreeViewItem>
                             </DataTemplate>

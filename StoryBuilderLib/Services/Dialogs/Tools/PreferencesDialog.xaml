@@ -16,10 +16,10 @@
                 </StackPanel>
             </PivotItem>
             <PivotItem Header="Backup">
-                <StackPanel>
-                    <CheckBox Content="Make a backup of the story when opened" Margin="4" HorizontalAlignment="Center" Name="BackupOnOpen" IsChecked="{x:Bind PreferencesVm.BackupUpOnOpen, Mode=TwoWay}"/>
-                    <CheckBox Content="Make timed backups" Margin="8" HorizontalAlignment="Center" Name="TimedBackups" IsChecked="{x:Bind PreferencesVm.Backup, Mode=TwoWay}"/>
-                    <NumberBox Header="How often should backups be made? (Minutes)" Maximum="300" Minimum="1" Margin="4" Width="300" HorizontalAlignment="Center" Value="{x:Bind PreferencesVm.BackupInterval, Mode=TwoWay}"/>
+                <StackPanel HorizontalAlignment="Right">
+                    <CheckBox Content="Make a backup of the story when opened" Margin="4" HorizontalAlignment="Left" Name="BackupOnOpen" IsChecked="{x:Bind PreferencesVm.BackupUpOnOpen, Mode=TwoWay}"/>
+                    <CheckBox Content="Make timed backups" Margin="4" HorizontalAlignment="Left" Name="TimedBackups" IsChecked="{x:Bind PreferencesVm.Backup, Mode=TwoWay}"/>
+                    <NumberBox Header="How often should backups be made? (Minutes)" Maximum="300" Minimum="1" Margin="4" Width="300" HorizontalAlignment="Left" Value="{x:Bind PreferencesVm.BackupInterval, Mode=TwoWay}"/>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                         <TextBox Header="Backup directory:" PlaceholderText="Where do you want to store your backups?" IsReadOnly="True" Margin="8" Width="300" HorizontalAlignment="Center" Text="{x:Bind PreferencesVm.BackupDir, Mode=TwoWay}"/>
                         <Button Content="Browse" Click="SetBackupPath" VerticalAlignment="Center" Margin="0,25,10,0"/>
@@ -27,30 +27,34 @@
                 </StackPanel>
             </PivotItem>
             <PivotItem Header="Other">
-                <StackPanel>
-                    <CheckBox Content="Send error logs to Team StoryBuilder" Margin="8" HorizontalAlignment="Center" IsChecked="{x:Bind PreferencesVm.ErrorConsent, Mode=TwoWay}"/>
-                    <CheckBox Content="Send me newsletters about StoryBuilder" Margin="8" HorizontalAlignment="Center" IsChecked="{x:Bind PreferencesVm.NewsConsent, Mode=TwoWay}"/>
-                    <CheckBox Content="Wrap node names" Margin="8" HorizontalAlignment="Center" IsChecked="{x:Bind PreferencesVm.WrapNodeNames, Mode=TwoWay}"/>
+                <StackPanel HorizontalAlignment="Center">
+                    <CheckBox Content="Send error logs to Team StoryBuilder" Margin="8" HorizontalAlignment="Left" IsChecked="{x:Bind PreferencesVm.ErrorConsent, Mode=TwoWay}"/>
+                    <CheckBox Content="Send me newsletters about StoryBuilder" Margin="8" HorizontalAlignment="Left" IsChecked="{x:Bind PreferencesVm.NewsConsent, Mode=TwoWay}"/>
+                    <CheckBox Content="Wrap node names" Margin="8" HorizontalAlignment="Left" IsChecked="{x:Bind PreferencesVm.WrapNodeNames, Mode=TwoWay}"/>
                 </StackPanel>
             </PivotItem>
             <PivotItem Header="About">
                 <StackPanel>
                     <TextBlock Name="Version" HorizontalAlignment="Center" Margin="5"/>
-                    <Button Content="Open Logs folder" HorizontalAlignment="Center" Click="OpenPath" Margin="5"/>
+                    <Button Content="Open Logs folder" HorizontalAlignment="Center" Click="OpenPath" Margin="5" Width="200"/>
                     <Button Content="Join the StoryBuilder Discord!" HorizontalAlignment="Center" Click="OpenDiscordURL" Margin="5"/>
                     <TextBlock Text="StoryBuilder was created by Terry Cox, Jake Shaw (Rarisma) and Kyle Lemons" TextWrapping="WrapWholeWords" Margin="5" FontSize="13"/>
                 </StackPanel>
             </PivotItem>
             <PivotItem Opacity="0" IsEnabled="False" Header="" Name="Dev">
-                <StackPanel>
-                    <Button Content="Set Init to false" Click="SetInitToFalse"/>
-                    <Button Content="Throw exception" Click="ThrowException"/>
-                    <Button Content="Attach Elmah" Click="AttachElmah"/>
-                    <TextBlock Name="cpuarch"/>
-                    <TextBlock Name="osarch"/>
-                    <TextBlock Name="osinfo"/>
+                <StackPanel HorizontalAlignment="Center">
+                    <StackPanel Orientation="Horizontal">
+                        <Button Content="Set Init to false" Click="SetInitToFalse"/>
+                        <Button Content="Throw exception" Click="ThrowException" Margin="10,0"/>
+                        <Button Content="Attach Elmah" Click="AttachElmah"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom">
+                        <TextBlock Name="cpuarch"/>
+                        <TextBlock Name="osarch"/>
+                        <TextBlock Name="osinfo"/>
+                    </StackPanel>
+
                     <TextBlock Name="apparch"/>
-                    <TextBlock Name="RampiUsage"/>
                 </StackPanel>
             </PivotItem>
         </Pivot>
