@@ -149,7 +149,6 @@ public class PreferencesIO
         }
     }
 
-
     public async Task UpdateFile()
     {
         _log.Log(LogLevel.Info, "Updating prf from model.");

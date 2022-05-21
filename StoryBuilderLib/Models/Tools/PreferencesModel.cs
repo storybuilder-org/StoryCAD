@@ -58,7 +58,8 @@ namespace StoryBuilder.Models.Tools
 
         //Version Tracking
         public string Version { get; set; }
-        public DateTime LastContact { get; set; }
+        public bool ParsePreferencesFailed { get; set; }
+        public bool ParseVersionFailed { get; set; }
         #endregion
 
         #region Constructor
@@ -69,6 +70,7 @@ namespace StoryBuilder.Models.Tools
             LastFile3 = string.Empty;
             LastFile4 = string.Empty;
             LastFile5 = string.Empty;
+
         }
         #endregion
     }

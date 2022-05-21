@@ -54,9 +54,9 @@ namespace StoryBuilder.Services.Parse
 
                 log.Log(LogLevel.Info, "Save ParsePreferences data");
                 await pref.SaveAsync();
-                preferences.LastContact = DateTime.Now;
                 await Ioc.Default.GetService<PreferencesIO>().UpdateFile();
                 log.Log(LogLevel.Info, "PostPreferences successful");
+                preferences.ParsePreferencesFailed = false;
 
             }
             catch (ParseException ex)
@@ -69,11 +69,13 @@ namespace StoryBuilder.Services.Parse
                 //"Invalid session token"
                 //"Invalid username/password"
                 log.LogException(LogLevel.Warn, ex, ex.Message);
+                preferences.ParsePreferencesFailed = true;
             }
             catch (Exception ex)
             {
                 // (InnerException) "Invalid session token
                 log.LogException(LogLevel.Warn, ex, ex.Message);
+                preferences.ParsePreferencesFailed = true;
             }
         }
 
