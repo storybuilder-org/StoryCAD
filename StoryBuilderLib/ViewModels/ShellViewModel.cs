@@ -1,5 +1,4 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
@@ -1261,8 +1260,7 @@ namespace StoryBuilder.ViewModels
         }
         public void DragFinished(TreeView sender, TreeViewDragItemsCompletedEventArgs args)
         {
-            var awd = args.Items[0];
-            
+
         }
         private void MoveTreeViewItemLeft()
         {
@@ -1301,7 +1299,7 @@ namespace StoryBuilder.ViewModels
                 if (_targetIndex == -1) { _targetCollection.Add(CurrentNode); }
                 else { _targetCollection.Insert(_targetIndex, CurrentNode); }
                 CurrentNode.Parent = targetParent;
-                Logger.Log(LogLevel.Info, $"Moving {CurrentNode.Name} left from parent {CurrentNode.Parent.Name} to parent {CurrentNode.Parent.Parent.Name}");
+                Logger.Log(LogLevel.Info, $"Moving {CurrentNode.Name} left from parent {CurrentNode.Parent.Name} to parent {CurrentNode.Parent.Parent.Name}");                
             }
             else
             {
@@ -1388,9 +1386,8 @@ namespace StoryBuilder.ViewModels
                 else
                     _targetCollection.Insert(_targetIndex, CurrentNode);
                 CurrentNode.Parent = targetParent;
+                Logger.Log(LogLevel.Info, $"Moving {CurrentNode.Name} right to parent {CurrentNode.Parent.Name}");
             }
-            Logger.Log(LogLevel.Info, $"Moving {CurrentNode.Name} right from parent {CurrentNode.Parent.Name} to parent {CurrentNode.Children[0].Name}");
-
         }
 
         private void MoveTreeViewItemUp()
@@ -1449,9 +1446,8 @@ namespace StoryBuilder.ViewModels
                 else
                     _targetCollection.Insert(_targetIndex, CurrentNode);
                 CurrentNode.Parent = _targetParent;
+                Logger.Log(LogLevel.Info, $"Moving {CurrentNode.Name} up to parent {CurrentNode.Parent.Name}");
             }
-            Logger.Log(LogLevel.Info, $"Moving {CurrentNode.Name} up from parent {CurrentNode.Parent.Name} to parent {_targetParent.Name}");
-
         }
 
         private void MoveTreeViewItemDown()
@@ -1513,9 +1509,8 @@ namespace StoryBuilder.ViewModels
                 _sourceChildren.RemoveAt(_sourceIndex);
                 _targetCollection.Insert(_targetIndex, CurrentNode);
                 CurrentNode.Parent = _targetParent;
+                Logger.Log(LogLevel.Info, $"Moving {CurrentNode.Name} down up to parent {CurrentNode.Parent.Name}");
             }
-            Logger.Log(LogLevel.Info, $"Moving {CurrentNode.Name} down from parent {CurrentNode.Parent.Name} to parent {_targetParent}");
-
         }
 
         #endregion
