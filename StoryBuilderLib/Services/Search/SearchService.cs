@@ -2,7 +2,6 @@
 using StoryBuilder.Models;
 using StoryBuilder.ViewModels;
 using System;
-using Microsoft.Identity.Client;
 using LogLevel = StoryBuilder.Services.Logging.LogLevel;
 
 namespace StoryBuilder.Services.Search;

@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using ABI.Microsoft.UI.Windowing;
+using ABI.Windows.Storage;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 using WinUIEx;
@@ -19,6 +19,7 @@ using StoryBuilder.Services.Logging;
 using StoryBuilder.Services.Navigation;
 using StoryBuilder.Services.Preferences;
 using StoryBuilder.Services.Search;
+using StoryBuilder.Services.Parse;
 using StoryBuilder.ViewModels;
 using StoryBuilder.ViewModels.Tools;
 using StoryBuilder.Views;
@@ -53,7 +54,13 @@ public partial class App : Application
     public App()
     {
         ConfigureIoc();
-      
+
+        GlobalData.Version = "Version: " + Windows.ApplicationModel.Package.Current.Id.Version.Major + "." +
+            Windows.ApplicationModel.Package.Current.Id.Version.Minor + "." + Windows.ApplicationModel.Package.Current.Id.Version.Build +
+            "." + Windows.ApplicationModel.Package.Current.Id.Version.Revision;
+
+
+
         var path = Path.Combine(Windows.ApplicationModel.Package.Current.InstalledLocation.Path, ".env");
         var options = new DotEnvOptions(false, new[] { path });
         DotEnv.Load(options);
@@ -86,6 +93,7 @@ public partial class App : Application
                 .AddSingleton<StoryWriter>()
                 .AddSingleton<BackupService>()
                 .AddSingleton<DeletionService>()
+                .AddSingleton<ParseService>()
                 // Register ViewModels 
                 .AddSingleton<ShellViewModel>()
                 .AddSingleton<OverviewViewModel>()
@@ -148,7 +156,26 @@ public partial class App : Application
         Trace.WriteLine(pathMsg);
         // Load Preferences
         PreferencesService pref = Ioc.Default.GetService<PreferencesService>();
+        ParseService parse = Ioc.Default.GetService<ParseService>();    
         await pref.LoadPreferences(GlobalData.RootDirectory);
+        // If the previous attempt to communicate to the back-end server failed, retry
+        if (!GlobalData.Preferences.ParsePreferencesStatus)
+            await parse.PostPreferences(GlobalData.Preferences);
+        if (!GlobalData.Preferences.ParseVersionStatus)
+            await parse.PostVersion();
+        
+        if (!GlobalData.Version.Equals(GlobalData.Preferences.Version))
+        {
+            // Process a version change (usually a new release)
+            _log.Log(LogLevel.Info, "Version mismatch: " + GlobalData.Version + " != " + GlobalData.Preferences.Version);
+            var preferences = GlobalData.Preferences;
+            // Update Preferences
+            preferences.Version = GlobalData.Version;
+            PreferencesIO prefIO = new(preferences, GlobalData.RootDirectory);
+            await prefIO.UpdateFile();
+            // Post deployment to backend server
+            await parse.PostVersion();
+        }
 
         await ProcessInstallationFiles();
 

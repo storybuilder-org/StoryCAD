@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 using Windows.Storage;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.Models.Tools;
+using StoryBuilder.Services.Json;
+using StoryBuilder.Services.Parse;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
@@ -59,25 +61,14 @@ public class PreferencesIO
                         _model.Email = tokens[1];
                         break;
 
-                    case "QuoteOnStartup": 
-                        if (tokens[1] == "True")
-                            _model.QuoteOnStartup = true;
-                        else
-                            _model.QuoteOnStartup = false;
-                        break;
-
                     case "Initalised":
-                        if (tokens[1] == "True")
-                            _model.PreferencesInitialised = true;
-                        else
-                            _model.PreferencesInitialised = false;
+                        if (tokens[1] == "True") { _model.PreferencesInitialised = true; }
+                        else { _model.PreferencesInitialised = false; }
                         break;
 
                     case "ErrorCollectionConsent":
-                        if (tokens[1] == "True")
-                            _model.ErrorCollectionConsent = true;
-                        else
-                            _model.ErrorCollectionConsent = false;
+                        if (tokens[1] == "True") { _model.ErrorCollectionConsent = true; }
+                        else { _model.ErrorCollectionConsent = false; }
                         break;
 
                     case "Newsletter":
@@ -95,10 +86,8 @@ public class PreferencesIO
                         break;
 
                     case "TimedBackup":
-                        if (tokens[1] == "True")
-                            _model.TimedBackup = true;
-                        else
-                            _model.TimedBackup = false;
+                        if (tokens[1] == "True") { _model.TimedBackup = true; }
+                        else { _model.TimedBackup = false; }
                         break;
 
                     case "TimedBackupInterval":
@@ -111,7 +100,6 @@ public class PreferencesIO
                     case "BackupDirectory":
                         _model.BackupDirectory = tokens[1];
                         break;
-
                     case "LastFile1":
                         _model.LastFile1 = tokens[1];
                         break;
@@ -129,6 +117,21 @@ public class PreferencesIO
                         break;
                     case "LastTemplate":
                         _model.LastSelectedTemplate = Convert.ToInt32(tokens[1]);
+                        break;
+                    case "Version":
+                        if (tokens[1] != _model.Version) {/*Report change here*/}
+                        break;
+                    case "ParsePreferencesStatus":
+                         if (tokens[1] == "True") 
+                            _model.ParsePreferencesStatus = true; 
+                        else 
+                            _model.ParsePreferencesStatus = false; 
+                        break;
+                    case "ParseVersionStatus":
+                        if (tokens[1] == "True")
+                            _model.ParseVersionStatus = true;
+                        else
+                            _model.ParseVersionStatus= false;
                         break;
                     case "WrapNodeNames":
                         if (tokens[1] == "True") { _model.WrapNodeNames = TextWrapping.WrapWholeWords; }
@@ -156,13 +159,12 @@ public class PreferencesIO
         }
     }
 
-
     public async Task UpdateFile()
     {
         _log.Log(LogLevel.Info, "Updating prf from model.");
         StorageFolder preferencesFolder = await StorageFolder.GetFolderFromPathAsync(_path);
         StorageFile preferencesFile = await preferencesFolder.CreateFileAsync("StoryBuilder.prf", CreationCollisionOption.ReplaceExisting);
-            
+
         //Updates file
         List<string> NewPreferences = new();
         NewPreferences.Add("Newsletter=" + _model.Newsletter);
@@ -177,11 +179,13 @@ public class PreferencesIO
         NewPreferences.Add("LastFile3=" + _model.LastFile3);
         NewPreferences.Add("LastFile4=" + _model.LastFile4);
         NewPreferences.Add("LastFile5=" + _model.LastFile5);
-        NewPreferences.Add("QuoteOnStartup=" + _model.QuoteOnStartup);
         NewPreferences.Add("BackupOnOpen=" + _model.BackupOnOpen);
         NewPreferences.Add("ErrorCollectionConsent=" + _model.ErrorCollectionConsent);
         NewPreferences.Add("TimedBackup=" + _model.TimedBackup);
         NewPreferences.Add("LastTemplate=" + _model.LastSelectedTemplate);
+        NewPreferences.Add("Version=" + _model.Version);
+        NewPreferences.Add("ParsePreferencesStaus=" + _model.ParsePreferencesStatus);
+        NewPreferences.Add("ParseVersionStaus=" + _model.ParseVersionStatus);
 
         if (_model.WrapNodeNames == TextWrapping.WrapWholeWords) { NewPreferences.Add("WrapNodeNames=True"); }
         else { NewPreferences.Add("WrapNodeNames=False"); }

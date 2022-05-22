@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Windows.Storage;
 
-
 namespace StoryBuilder.Models;
 
 /// <summary>
@@ -19,6 +18,9 @@ public static class GlobalData
 {
     /// A pointer to the App Window (MainWindow) handle
     public static IntPtr WindowHandle;
+
+    /// The current (running) version of StoryBuilder
+    public static string Version;
 
     /// The ComboBox and ListBox source bindings in viewmodels point to lists in this Dictionary. 
     /// Each list has a unique key related to the ComboBox or ListBox use.

@@ -9,9 +9,9 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using StoryBuilder.Services.Json;
 using CommunityToolkit.WinUI.UI.Controls.TextToolbarSymbols;
 using Elmah.Io.Client;
-using StoryBuilder.Services.Keys;
 
 namespace StoryBuilder.Services.Logging;
 
@@ -92,6 +92,10 @@ public class LogService : ILogService
 
             elmahIoTarget.OnMessage += msg =>
             {
+                msg.Version = Windows.ApplicationModel.Package.Current.Id.Version.Major + "."
+                + Windows.ApplicationModel.Package.Current.Id.Version.Minor + "."
+                + Windows.ApplicationModel.Package.Current.Id.Version.Revision;
+                
                 try { msg.User = GlobalData.Preferences.Name + $"({GlobalData.Preferences.Email})"; }
                 catch (Exception e) { msg.User = $"There was an error attempting to obtain user information Error: {e.Message}"; }
 
@@ -136,7 +140,6 @@ public class LogService : ILogService
                         }
                     }
                     msg.Data.Add(new(key: "Log ","end"));
-
                 }
                 catch (Exception e) { msg.Data.Add(new("Error", $"There was an error attempting to obtain the log Error: {e.Message}"));}
             };
