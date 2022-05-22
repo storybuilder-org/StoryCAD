@@ -48,7 +48,8 @@ public class InstallationService
     }
 
     /// <summary>
-    /// This deletes all files in the parent directory
+    /// This deletes all files in the parent directory EXCEPT StoryBuilder.prf
+    /// (user preferences are preserved)
     /// </summary>
     /// <returns></returns>
     private async Task DeleteFiles()

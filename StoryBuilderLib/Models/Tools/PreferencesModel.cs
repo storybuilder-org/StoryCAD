@@ -58,8 +58,10 @@ namespace StoryBuilder.Models.Tools
 
         //Version Tracking
         public string Version { get; set; }
-        public bool ParsePreferencesFailed { get; set; }
-        public bool ParseVersionFailed { get; set; }
+
+        // Backend server log status
+        public bool ParsePreferencesStatus { get; set; }  // Last preferences change was logged successfuly or not
+        public bool ParseVersionStatus { get; set; }      // Last version change was logged successfuly or not
         #endregion
 
         #region Constructor

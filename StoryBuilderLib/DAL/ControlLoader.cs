@@ -10,7 +10,6 @@ namespace StoryBuilder.DAL;
 
 public class ControlLoader
 {
-    public readonly PreferencesModel Preferences;
     public readonly LogService Logger;
 
     private IList<string> lines;

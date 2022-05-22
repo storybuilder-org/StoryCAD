@@ -1,7 +1,9 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using StoryBuilder.DAL;
 using StoryBuilder.Models;
 using StoryBuilder.Models.Tools;
+using StoryBuilder.Services.Parse;
 using System.Threading.Tasks;
 using Windows.Storage;
 
@@ -63,7 +65,7 @@ public class PreferencesViewModel : ObservableRecipient
     /// Saves the users preferences to disk.
     /// </summary>
     public async Task SaveAsync()
-    {
+    {   
         PreferencesModel prf = new();
         PreferencesIO prfIO = new(prf, System.IO.Path.Combine(ApplicationData.Current.RoamingFolder.Path, "Storybuilder"));
         await prfIO.UpdateModel();
@@ -80,6 +82,9 @@ public class PreferencesViewModel : ObservableRecipient
         await prfIO.UpdateFile();
         PreferencesIO loader = new(GlobalData.Preferences, System.IO.Path.Combine(ApplicationData.Current.RoamingFolder.Path, "Storybuilder"));
         await loader.UpdateModel();
+        ParseService parse = Ioc.Default.GetService<ParseService>();
+        if (!GlobalData.Preferences.ParsePreferencesStatus)
+            await parse.PostPreferences(GlobalData.Preferences);
     }
 
     /// <summary>

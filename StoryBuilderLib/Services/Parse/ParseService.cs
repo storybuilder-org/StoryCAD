@@ -6,6 +6,7 @@ using StoryBuilder.Models.Tools;
 using StoryBuilder.Services.Logging;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using StoryBuilder.DAL;
+using Windows.Storage;
 
 namespace StoryBuilder.Services.Parse
 {
@@ -56,7 +57,7 @@ namespace StoryBuilder.Services.Parse
                 await pref.SaveAsync();
                 await Ioc.Default.GetService<PreferencesIO>().UpdateFile();
                 log.Log(LogLevel.Info, "PostPreferences successful");
-                preferences.ParsePreferencesFailed = false;
+                await SavePreferencesStatus(true); 
 
             }
             catch (ParseException ex)
@@ -67,21 +68,22 @@ namespace StoryBuilder.Services.Parse
                 //      exceptions for corrective action: ex, 
                 //"Account already exists for this username"
                 //"Invalid session token"
+                await SavePreferencesStatus(false);
                 //"Invalid username/password"
                 log.LogException(LogLevel.Warn, ex, ex.Message);
-                preferences.ParsePreferencesFailed = true;
             }
             catch (Exception ex)
             {
                 // (InnerException) "Invalid session token
+                await SavePreferencesStatus(false);
                 log.LogException(LogLevel.Warn, ex, ex.Message);
-                preferences.ParsePreferencesFailed = true;
             }
         }
 
         public async Task PostVersion()
         {
             log.Log(LogLevel.Info, "Posting version data to parse");
+            var preferences = GlobalData.Preferences;
             try
             {
                 log.Log(LogLevel.Info, "Register ParseVersion subclass");
@@ -100,7 +102,6 @@ namespace StoryBuilder.Services.Parse
                 }
 
                 log.Log(LogLevel.Info, "Create ParseVersion ParseObject");
-                var preferences = GlobalData.Preferences;
                 var vers = new ParseVersion
                 {
 
@@ -112,19 +113,35 @@ namespace StoryBuilder.Services.Parse
                 };
                 log.Log(LogLevel.Info, "Save Version data to parse-server");
                 await vers.SaveAsync();
+                await SaveVersionStatus(true);
                 log.Log(LogLevel.Info, "PostVersion successful");
             }
-
             catch (ParseException ex)
             {
                 //See PostPreferences for notes
+                await SaveVersionStatus(false);
                 log.LogException(LogLevel.Warn, ex, ex.Message);
             }
             catch (Exception ex)
             {
                 // (InnerException) "Invalid session token
+                await SaveVersionStatus(false);
                 log.LogException(LogLevel.Warn, ex, ex.Message);
             }
+        }
+        
+        private async Task SavePreferencesStatus(bool preferencesStatus) 
+        {
+            PreferencesIO prfIO = new(GlobalData.Preferences, System.IO.Path.Combine(ApplicationData.Current.RoamingFolder.Path, "Storybuilder"));
+            GlobalData.Preferences.ParsePreferencesStatus = preferencesStatus;
+            await prfIO.UpdateFile();
+        }
+
+        private async Task SaveVersionStatus(bool versionStatus)
+        {
+            PreferencesIO prfIO = new(GlobalData.Preferences, System.IO.Path.Combine(ApplicationData.Current.RoamingFolder.Path, "Storybuilder"));
+            GlobalData.Preferences.ParseVersionStatus = versionStatus;
+            await prfIO.UpdateFile();
 
         }
     }

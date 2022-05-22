@@ -41,7 +41,7 @@ public class PreferencesIO
     {
         //Tries to read file
         StorageFolder preferencesFolder = await StorageFolder.GetFolderFromPathAsync(_path);
-        IStorageFile preferencesFile = (IStorageFile)await preferencesFolder.TryGetItemAsync("StoryBuilder.prf");
+        IStorageFile preferencesFile = (IStorageFile) await preferencesFolder.TryGetItemAsync("StoryBuilder.prf");
 
         if (preferencesFile != null) //Checks if file exists
         {
@@ -123,8 +123,17 @@ public class PreferencesIO
                     case "Version":
                         if (tokens[1] != _model.Version) {/*Report change here*/}
                         break;
-                    case "LastContact":
-                        _model.LastContact = Convert.ToDateTime(tokens[1]);
+                    case "ParsePreferencesStatus":
+                         if (tokens[1] == "True") 
+                            _model.ParsePreferencesStatus = true; 
+                        else 
+                            _model.ParsePreferencesStatus = false; 
+                        break;
+                    case "ParseVersionStatus":
+                        if (tokens[1] == "True")
+                            _model.ParseVersionStatus = true;
+                        else
+                            _model.ParseVersionStatus= false;
                         break;
 
                 }
@@ -175,11 +184,9 @@ public class PreferencesIO
         NewPreferences.Add("TimedBackup=" + _model.TimedBackup);
         NewPreferences.Add("LastTemplate=" + _model.LastSelectedTemplate);
         NewPreferences.Add("Version=" + _model.Version);
-        NewPreferences.Add("LastContact=" + _model.LastContact);
+        NewPreferences.Add("ParsePreferencesStaus=" + _model.ParsePreferencesStatus);
+        NewPreferences.Add("ParseVersionStaus=" + _model.ParseVersionStatus);
 
         await FileIO.WriteLinesAsync(preferencesFile, NewPreferences); //Write the Preferences file to disk.
-
-        var parse = Ioc.Default.GetService<ParseService>();
-        await parse.PostPreferences(_model);
     }
 }

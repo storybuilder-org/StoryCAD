@@ -162,8 +162,14 @@ public partial class App : Application
         Trace.WriteLine(pathMsg);
         // Load Preferences
         PreferencesService pref = Ioc.Default.GetService<PreferencesService>();
+        ParseService parse = Ioc.Default.GetService<ParseService>();    
         await pref.LoadPreferences(GlobalData.RootDirectory);
-
+        // If the previous attempt to communicate to the back-end server failed, retry
+        if (!GlobalData.Preferences.ParsePreferencesStatus)
+            await parse.PostPreferences(GlobalData.Preferences);
+        if (!GlobalData.Preferences.ParseVersionStatus)
+            await parse.PostVersion();
+        
         if (!GlobalData.Version.Equals(GlobalData.Preferences.Version))
         {
             // Process a version change (usually a new release)
@@ -174,7 +180,6 @@ public partial class App : Application
             PreferencesIO prefIO = new(preferences, System.IO.Path.Combine(ApplicationData.Current.RoamingFolder.Path, "Storybuilder"));
             await prefIO.UpdateFile();
             // Post deployment to backend server
-            var parse = Ioc.Default.GetService<ParseService>();
             await parse.PostVersion();
         }
 
