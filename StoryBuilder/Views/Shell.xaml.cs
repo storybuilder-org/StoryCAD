@@ -6,22 +6,17 @@ using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Navigation;
 using StoryBuilder.Models;
-using StoryBuilder.Services;
+using StoryBuilder.Models.Tools;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.ViewModels;
 
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
-
 namespace StoryBuilder.Views;
 
-/// <summary>
-/// An empty page that can be used on its own or navigated to within a Frame.
-/// </summary>
 public sealed partial class Shell
 {
     public ShellViewModel ShellVm => Ioc.Default.GetService<ShellViewModel>();
     public UnifiedVM UnifiedVm => Ioc.Default.GetService<UnifiedVM>();
+    public PreferencesModel Preferences = GlobalData.Preferences;
     public Shell()
     {
         try
@@ -38,7 +33,6 @@ public sealed partial class Shell
             log.Flush();
             Application.Current.Exit();  // Win32
         }
-
         ShellVm.SplitViewFrame = SplitViewFrame;
     }
 
@@ -96,4 +90,16 @@ public sealed partial class Shell
     /// <param name="sender"></param>
     /// <param name="e"></param>
     private async void SaveIconPressed(object sender, PointerRoutedEventArgs e) { await ShellVm.SaveFile(); }
+
+    private void Search(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
+    {
+        ShellVm.SearchNodes();
+    }
+
+    private void ClearNodes(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
+    {
+        if (ShellVm.DataSource == null || ShellVm.DataSource.Count ==0) { return; }
+        foreach (StoryNodeItem node in ShellVm.DataSource[0]) { node.Background = null; }
+    }
+
 }

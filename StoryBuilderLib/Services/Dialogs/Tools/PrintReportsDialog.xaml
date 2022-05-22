@@ -13,7 +13,7 @@
             <CheckBox Content="Story Synopsis" IsChecked="{x:Bind PrintVM.CreateSummary, Mode=TwoWay}"/>
         </StackPanel>
 
-        <Pivot Height="500">
+        <Pivot>
             <PivotItem Header="Problems" TabIndex="0">
                 <StackPanel>
                     <CheckBox Content="Print a list of all Problems" IsChecked="{x:Bind PrintVM.ProblemList, Mode=TwoWay}"/>

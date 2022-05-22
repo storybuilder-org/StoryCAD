@@ -4,10 +4,15 @@ using NLog.Targets;
 using Elmah.Io.NLog;
 using StoryBuilder.Models;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using StoryBuilder.Services.Json;
+using CommunityToolkit.WinUI.UI.Controls.TextToolbarSymbols;
+using Elmah.Io.Client;
+using StoryBuilder.Services.Keys;
 
 namespace StoryBuilder.Services.Logging;
 
@@ -19,7 +24,9 @@ public class LogService : ILogService
     private static readonly Logger Logger;
     private static readonly string logFilePath;
     private static string stackTraceHelper; //Elmah for some reason doesn't show the stack trace of an exception so this one does.
+    private static string logfilename;
     static LogService()
+
     {
         try
         {
@@ -28,7 +35,7 @@ public class LogService : ILogService
             // Create the file logging target
             FileTarget fileTarget = new();
             logFilePath = Path.Combine(GlobalData.RootDirectory, "logs");
-            string logfilename = Path.Combine(logFilePath, "updater.${date:format=yyyy-MM-dd}.log");
+            logfilename = Path.Combine(logFilePath, "updater.${date:format=yyyy-MM-dd}.log");
             fileTarget.FileName = logfilename;
             fileTarget.CreateDirs = true;
             fileTarget.MaxArchiveFiles = 7;
@@ -40,7 +47,7 @@ public class LogService : ILogService
             config.LoggingRules.Add(fileRule);
 
             // create console target
-            if (!Debugger.IsAttached)
+            if (Debugger.IsAttached)
             {
                 ColoredConsoleTarget consoleTarget = new();
                 consoleTarget.Layout = @"${date:format=HH\\:MM\\:ss} ${logger} ${message}";
@@ -89,9 +96,53 @@ public class LogService : ILogService
                 msg.Version = Windows.ApplicationModel.Package.Current.Id.Version.Major + "."
                 + Windows.ApplicationModel.Package.Current.Id.Version.Minor + "."
                 + Windows.ApplicationModel.Package.Current.Id.Version.Revision;
+                
+                try { msg.User = GlobalData.Preferences.Name + $"({GlobalData.Preferences.Email})"; }
+                catch (Exception e) { msg.User = $"There was an error attempting to obtain user information Error: {e.Message}"; }
 
-                msg.User = GlobalData.Preferences.Name + $"({GlobalData.Preferences.Email})";
-                msg.Source = stackTraceHelper;
+                try { msg.Source = stackTraceHelper; } 
+                catch (Exception e) {msg.Source = $"There was an error attempting to obtain StackTrace helper Error: {e.Message}";}
+                
+                try
+                {
+                    msg.Version = Windows.ApplicationModel.Package.Current.Id.Version.Major + "."
+                        + Windows.ApplicationModel.Package.Current.Id.Version.Minor + "."
+                        + Windows.ApplicationModel.Package.Current.Id.Version.Build + " Build " + Windows.ApplicationModel.Package.Current.Id.Version.Revision;
+                }
+                catch (Exception e) { msg.Version = $"There was an error trying to obtain version information Error: {e.Message}"; }
+
+                try
+                {
+                    msg.Data = new List<Item>();
+                    string LogString = "";
+                    using (FileStream stream = File.Open(Path.Combine(GlobalData.RootDirectory, "logs", $"updater.{DateTime.Now.ToString("yyyy-MM-dd")}.log"), FileMode.Open, FileAccess.Read,FileShare.ReadWrite))
+                    {
+                        using (StreamReader reader = new(stream))
+                        {
+                            LogString = reader.ReadToEnd();
+                        }
+                    }
+
+                    int ln = 0;
+                    if (LogString.Split("\n").Length > 50)
+                    {
+                        foreach (var line in LogString.Split("\n").TakeLast(50))
+                        {
+                            msg.Data.Add(new(key: "Line " + ln, value: line));
+                            ln++;
+                        }
+                    }
+                    else
+                    {
+                        foreach (var line in LogString.Split("\n").TakeLast(50))
+                        {
+                            msg.Data.Add(new(key: "Line ", value: line));
+                            ln++;
+                        }
+                    }
+                    msg.Data.Add(new(key: "Log ","end"));
+                }
+                catch (Exception e) { msg.Data.Add(new("Error", $"There was an error attempting to obtain the log Error: {e.Message}"));}
             };
 
             elmahIoTarget.Name = "elmahio";

@@ -27,7 +27,6 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Windows.Storage;
 using Windows.Storage.Pickers;
-using ABI.Windows.Storage.Provider;
 using StoryBuilder.Services;
 using WinRT;
 using GuidAttribute = System.Runtime.InteropServices.GuidAttribute;
@@ -108,9 +107,7 @@ namespace StoryBuilder.ViewModels
         public RelayCommand PrintReportsCommand { get; }
         public RelayCommand ScrivenerReportsCommand { get; }
         public RelayCommand PreferencesCommand { get; }
-
-        // Filter command
-        public RelayCommand FilterCommand { get; set; }
+        
 
         #endregion
 
@@ -318,13 +315,6 @@ namespace StoryBuilder.ViewModels
             set => SetProperty(ref _newNodeName, value);
         }
 
-        private bool _isSearching;
-        public bool IsSearching
-        {
-            get => _isSearching;
-            set => SetProperty(ref _isSearching, value);
-        }
-
         #endregion
 
         #region Static members  
@@ -356,10 +346,18 @@ namespace StoryBuilder.ViewModels
 
         #endregion
 
-            #region Public Methods
+        #region Public Methods
 
         public async Task PrintCurrentNodeAsync()
         {
+            if (RightTappedNode == null)
+            {
+                Messenger.Send(new StatusChangedMessage(new($"Right tap a node to print", LogLevel.Warn)));
+                Logger.Log(LogLevel.Info, "Print node failed as no node is selected");
+                _canExecuteCommands = true;
+                return;
+            }
+
             PrintReportDialogVM PrintVM = Ioc.Default.GetRequiredService<PrintReportDialogVM>();
             PrintVM.SelectedNodes.Clear();
             PrintVM.SelectedNodes.Add(RightTappedNode);
@@ -375,6 +373,7 @@ namespace StoryBuilder.ViewModels
             _contentDialog = new();
             _contentDialog.XamlRoot = GlobalData.XamlRoot;
             _contentDialog.Content = new UnifiedMenuPage();
+            if (Application.Current.RequestedTheme == ApplicationTheme.Light) { _contentDialog.Background = new SolidColorBrush(Colors.LightGray); }
             await _contentDialog.ShowAsync();
             _canExecuteCommands = true;
         }
@@ -394,7 +393,7 @@ namespace StoryBuilder.ViewModels
                     await WriteModel();
                 }
                 
-                UnifiedVM vm = dialogVM;  // Access the dialog settings
+                UnifiedVM vm = dialogVM; //Access the dialog settings
 
                 // Start with a blank StoryModel and populate it
                 // using the new project dialog's settings
@@ -419,11 +418,11 @@ namespace StoryBuilder.ViewModels
                 StoryModel.NarratorView.Add(narrativeNode);
                 StoryModel.NarratorView.Add(trashNode);     // Both views share the trashcan
                 // Use the NewProjectDialog template to complete the model
-                switch (vm.SelectedTemplate)
+                switch (vm.SelectedTemplateIndex)
                 {
-                    case "Blank Project":
+                    case 0:
                         break;
-                    case "Empty Folders":
+                    case 1:
                         StoryElement problems = new FolderModel("Problems", StoryModel);
                         StoryNodeItem problemsNode = new(problems, overviewNode);
                         StoryElement characters = new FolderModel("Characters", StoryModel);
@@ -433,19 +432,19 @@ namespace StoryBuilder.ViewModels
                         StoryElement scene = new FolderModel("Scene", StoryModel);
                         StoryNodeItem plotpointsNode = new(scene, overviewNode);
                         break;
-                    case "External and Internal Problems":
+                    case 2:
                         StoryElement externalProblem = new ProblemModel("External Problem", StoryModel);
                         StoryNodeItem externalProblemNode = new(externalProblem, overviewNode);
                         StoryElement internalProblem = new ProblemModel("Internal Problem", StoryModel);
                         StoryNodeItem internalProblemNode = new(internalProblem, overviewNode);
                         break;
-                    case "Protagonist and Antagonist":
+                    case 3:
                         StoryElement protagonist = new CharacterModel("Protagonist", StoryModel);
                         StoryNodeItem protagonistNode = new(protagonist, overviewNode);
                         StoryElement antagonist = new CharacterModel("Antagonist", StoryModel);
                         StoryNodeItem antagonistNode = new(antagonist, overviewNode);
                         break;
-                    case "Problems and Characters":
+                    case 4:
                         StoryElement problemsFolder = new FolderModel("Problems", StoryModel);
                         StoryNodeItem problemsFolderNode = new(problemsFolder, overviewNode)
                         {
@@ -478,7 +477,7 @@ namespace StoryBuilder.ViewModels
 
                 // Save the new project
                 await SaveFile();
-                await MakeBackup();
+                if (GlobalData.Preferences.BackupOnOpen) { await MakeBackup(); }
                 Ioc.Default.GetService<BackupService>().StartTimedBackup();
                 Messenger.Send(new StatusChangedMessage(new($"New project command executing", LogLevel.Info, true)));
 
@@ -678,15 +677,18 @@ namespace StoryBuilder.ViewModels
 
                 StoryReader rdr = Ioc.Default.GetService<StoryReader>();
                 StoryModel = await rdr.ReadFile(StoryModel.ProjectFile);
-                await Ioc.Default.GetService<BackupService>().BackupProject();
+
+                if (GlobalData.Preferences.BackupOnOpen) { await Ioc.Default.GetService<BackupService>().BackupProject(); }
+               
                 if (StoryModel.ExplorerView.Count > 0)
                 {
                     SetCurrentView(StoryViewType.ExplorerView);
-                    Messenger.Send(new StatusChangedMessage(new($"Open Story completed", LogLevel.Info )));
+                    Messenger.Send(new StatusChangedMessage(new($"Open Story completed", LogLevel.Info)));
                 }
                 GlobalData.MainWindow.Title = $"StoryBuilder - Editing {StoryModel.ProjectFilename.Replace(".stbx", "")}";
-                new UnifiedVM().UpdateRecents(Path.Combine(StoryModel.ProjectFolder.Path,StoryModel.ProjectFile.Name));
-                Ioc.Default.GetService<BackupService>().StartTimedBackup();
+                new UnifiedVM().UpdateRecents(Path.Combine(StoryModel.ProjectFolder.Path,StoryModel.ProjectFile.Name)); 
+                if (GlobalData.Preferences.TimedBackup) { Ioc.Default.GetService<BackupService>().StartTimedBackup(); }
+                
 
                 TreeViewNodeClicked(DataSource[0]); // Navigate to the tree root
                 string msg = $"Opened project {StoryModel.ProjectFilename}";
@@ -701,11 +703,22 @@ namespace StoryBuilder.ViewModels
             Logger.Log(LogLevel.Info, "Open Story completed.");
             _canExecuteCommands = true;
         }
-
         public async Task SaveFile()
         {
+            if (DataSource.Count == 0 || DataSource == null)
+            {
+                Messenger.Send(new StatusChangedMessage(new($"You need to open a story first!", LogLevel.Info,false)));
+                Logger.Log(LogLevel.Info, "SaveFile command cancelled (DataSource was null or empty)");
+                return;
+            }
+            
             Logger.Log(LogLevel.Trace, "Saving file");
-            (StoryModel.StoryElements.StoryElementGuids[DataSource[0].Uuid] as OverviewModel).DateModified = DateTime.Now.ToString("d");
+            try //Updating the lost modified timer
+            {
+                (StoryModel.StoryElements.StoryElementGuids[DataSource[0].Uuid] as OverviewModel).DateModified = DateTime.Now.ToString("d");
+            }
+            catch (NullReferenceException) { Messenger.Send(new StatusChangedMessage(new($"Failed to update Last Modified date", LogLevel.Warn))); } //This appears to happen when in narrative view but im not sure how to fix it.
+
             _canExecuteCommands = false;
             Logger.Log(LogLevel.Info, "Executing SaveFile command");
             try
@@ -843,22 +856,32 @@ namespace StoryBuilder.ViewModels
 
         private async void CloseFile()
         {
-            //BUG: Close file logic doesn't work (see comments)
             _canExecuteCommands = false;
             Messenger.Send(new StatusChangedMessage(new($"Closing project", LogLevel.Info, true)));
-            // Save the existing file if changed
+
             if (StoryModel.Changed)
             {
-                SaveModel();
-                await WriteModel();
+                ContentDialog Warning = new()
+                {
+                    Title = "Save changes?",
+                    PrimaryButtonText = "Yes",
+                    SecondaryButtonText = "No",
+                    XamlRoot = GlobalData.XamlRoot
+                };
+                if (await Warning.ShowAsync() == ContentDialogResult.Primary)
+                {
+                    SaveModel();
+                    await WriteModel();
+                }
             }
+
             ResetModel();
+            RightTappedNode = null; //Null right tapped node to prevent possible issues.
             SetCurrentView(StoryViewType.ExplorerView);
             GlobalData.MainWindow.Title = "StoryBuilder";
             Ioc.Default.GetService<BackupService>().StopTimedBackup();
             DataSource = StoryModel.ExplorerView;
             ShowHomePage();
-            //TODO: Navigate to background Page (is there one?)
             Messenger.Send(new StatusChangedMessage(new($"Close story command completed", LogLevel.Info, true)));
             _canExecuteCommands = true;
         }
@@ -874,11 +897,20 @@ namespace StoryBuilder.ViewModels
             _canExecuteCommands = false;
             Messenger.Send(new StatusChangedMessage(new($"Executing Exit project command", LogLevel.Info, true)));
 
-            //TODO: Only close if changed
             if (StoryModel.Changed)
             {
-                SaveModel();
-                await WriteModel();
+                ContentDialog Warning = new()
+                {
+                    Title = "Save changes?",
+                    PrimaryButtonText = "Yes",
+                    SecondaryButtonText = "No",
+                    XamlRoot = GlobalData.XamlRoot
+                };
+                if (await Warning.ShowAsync() == ContentDialogResult.Primary)
+                {
+                    SaveModel();
+                    await WriteModel();
+                }
             }
             Logger.Flush();
             Application.Current.Exit();  // Win32
@@ -911,7 +943,6 @@ namespace StoryBuilder.ViewModels
             PreferencesDialog.Content = new PreferencesDialog();
             PreferencesDialog.Title = "Preferences";
             PreferencesDialog.PrimaryButtonText = "Save";
-            PreferencesDialog.SecondaryButtonText = "About StoryBuilder";
             PreferencesDialog.CloseButtonText = "Cancel";
 
             ContentDialogResult result = await PreferencesDialog.ShowAsync();
@@ -923,26 +954,6 @@ namespace StoryBuilder.ViewModels
                     Messenger.Send(new StatusChangedMessage(new($"Preferences updated", LogLevel.Info, true)));
                     
                     break;
-                case ContentDialogResult.Secondary:
-                {
-                    ContentDialog AboutDialog = new();
-                    AboutDialog.XamlRoot = GlobalData.XamlRoot;
-                    AboutDialog.Content = new About();
-                    AboutDialog.Width = 900;
-                    AboutDialog.Title = "About StoryBuilder";
-                    AboutDialog.SecondaryButtonText = "Join Discord";
-                    AboutDialog.CloseButtonText = "Close";
-                    var a = await AboutDialog.ShowAsync();
-
-                    if (a == ContentDialogResult.Secondary)
-                    {
-                        Process Browser = new();
-                        Browser.StartInfo.FileName = @"https://discord.gg/wfZxU4bx6n";
-                        Browser.StartInfo.UseShellExecute = true;
-                        Browser.Start();
-                        }
-                    break;
-                }
                 //don't save changes
                 default:
                     Messenger.Send(new StatusChangedMessage(new($"Preferences closed", LogLevel.Info, true)));
@@ -1164,7 +1175,6 @@ namespace StoryBuilder.ViewModels
 
                 PrintReports rpt = new(ReportVM, StoryModel);
                 await rpt.Generate();
-                Messenger.Send(new StatusChangedMessage(new($"Generate Print Reports complete", LogLevel.Info, true)));
             }
             else
             {
@@ -1558,6 +1568,7 @@ namespace StoryBuilder.ViewModels
             if (NewNode != null)
             {
                 NewNode.Parent.IsExpanded = true;
+                NewNode.IsRoot = false; //Only an overview node can be a root, which cant be created normally
             }
 
             Messenger.Send(new IsChangedMessage(true));
@@ -1580,7 +1591,7 @@ namespace StoryBuilder.ViewModels
                 StatusMessage = "You can't delete from the trash!";
                 return;
             }
-            if (RightTappedNode.Parent == null)
+            if (RightTappedNode.IsRoot)
             {
                 StatusMessage = "You can't delete a root node!";
                 return;
@@ -1645,6 +1656,13 @@ namespace StoryBuilder.ViewModels
                 Messenger.Send(new StatusChangedMessage(new("You can only restore from Deleted StoryElements", LogLevel.Warn)));
                 return;
             }
+
+            if (RightTappedNode.IsRoot)
+            {
+                Messenger.Send(new StatusChangedMessage(new("You can't restore a root node!", LogLevel.Warn)));
+                return;
+            }
+            
             //TODO: Add dialog to confirm restore
             ObservableCollection<StoryNodeItem> target = DataSource[0].Children;
             DataSource[1].Children.Remove(RightTappedNode);
@@ -1683,7 +1701,15 @@ namespace StoryBuilder.ViewModels
         /// </summary>
         private void EmptyTrash()
         {
+            if (DataSource == null)
+            {
+                Messenger.Send(new StatusChangedMessage(new($"You need to load a story first!", LogLevel.Warn, false)));
+                Logger.Log(LogLevel.Info, "Failed to empty trash as DataSource is null. (Is a story loaded?)");
+                return;
+            }
+            
             StatusMessage = "Trash Emptied.";
+            Logger.Log(LogLevel.Info,"Emptied Trash.");
             DataSource[1].Children.Clear();
         }
 
@@ -1753,6 +1779,12 @@ namespace StoryBuilder.ViewModels
 
         public void ViewChanged()
         {
+            if (DataSource == null || DataSource.Count == 0)
+            {
+                Messenger.Send(new StatusChangedMessage(new($"You need to load a story first!", LogLevel.Warn, false)));
+                Logger.Log(LogLevel.Info, "Failed to switch views as DataSource is null or empty. (Is a story loaded?)");
+                return;
+            }
             if (!SelectedView.Equals(CurrentView))
             {
                 CurrentView = SelectedView;
@@ -1855,12 +1887,22 @@ namespace StoryBuilder.ViewModels
             if (DataSource.Count > 0) {CurrentNode = DataSource[0];}
         }
 
-        #region MVVM Message processing
+        #region MVVM ` processing
         private void IsChangedMessageReceived(IsChangedMessage isDirty)
         {
             StoryModel.Changed = StoryModel.Changed || isDirty.Value;
             if (StoryModel.Changed) { ChangeStatusColor = Colors.Red; }
             else { ChangeStatusColor = Colors.Green; }
+        }
+
+        /// <summary>
+        /// Sends message
+        /// </summary>
+        /// <param name="Level"></param>
+        /// <param name="Message"></param>
+        public void ShowMessage(LogLevel Level, string Message,bool SendToLog)
+        {
+            Messenger.Send(new StatusChangedMessage(new(Message, Level, SendToLog)));
         }
 
         /// <summary>
@@ -1876,7 +1918,7 @@ namespace StoryBuilder.ViewModels
             switch (statusMessage.Value.Level)
             {
                 case LogLevel.Info:
-                    StatusColor = new SolidColorBrush(Colors.White);
+                    StatusColor = GlobalData.Preferences.SecondaryColor;
                     statusTimer.Interval = new TimeSpan(0, 0, 15);  // Timer will tick in 15 seconds
                     statusTimer.Start();
                     break;
@@ -1970,8 +2012,6 @@ namespace StoryBuilder.ViewModels
             CloseCommand = new RelayCommand(CloseFile, () => _canExecuteCommands);
             ExitCommand = new RelayCommand(ExitApp, () => _canExecuteCommands);
 
-            FilterCommand = new RelayCommand(SearchNodes, () => _canExecuteCommands);
-
             // Tools commands
             KeyQuestionsCommand = new RelayCommand(KeyQuestionsTool, () => _canExecuteCommands);
             TopicsCommand = new RelayCommand(TopicsTool, () => _canExecuteCommands);
@@ -2017,53 +2057,44 @@ namespace StoryBuilder.ViewModels
             ShellInstance = this;
         }
 
-        private void SearchNodes()
+        public void SearchNodes()
         {
             _canExecuteCommands = false;    //This prevents other commands from being used till this one is complete.
-            Logger.Log(LogLevel.Info, "Better search started.");
+            Logger.Log(LogLevel.Info, $"Search started, Searching for { FilterText }");
             SaveModel();
-            if (DataSource == null)
+            if (DataSource == null || DataSource.Count == 0)
             {
-                Logger.Log(LogLevel.Info, "Datasource is null");
+                Logger.Log(LogLevel.Info, "Data source is null or Empty.");
                 Messenger.Send(new StatusChangedMessage(new($"You need to load a story first!", LogLevel.Warn)));
 
                 _canExecuteCommands = true;
                 return;
             }
-            StoryNodeItem root = DataSource[0]; //Gets all nodes in the tree
+
             int SearchTotal = 0;
 
-            if (FilterText == "" || !IsSearching) //Nulls the backgrounds to make them transparent (default) //Check if toggled and null backgrounds if not.
+            foreach (StoryNodeItem node in DataSource[0])
             {
-                Logger.Log(LogLevel.Info, "Search text is blank, making all backgrounds null.");
-                foreach (StoryNodeItem node in root) { node.Background = null; }
-                FilterText = "";
-            }
-            else
-            {
-                foreach (StoryNodeItem node in root)
+                if (Search.SearchStoryElement(node, FilterText, StoryModel)) //checks if node name contains the thing we are looking for
                 {
-                    if (Search.SearchStoryElement(node, FilterText, StoryModel)) //checks if node name contains the thing we are looking for
-                    {
-                        SearchTotal++;
-                        if (Application.Current.RequestedTheme == ApplicationTheme.Light) { node.Background = new SolidColorBrush(Colors.LightGoldenrodYellow); }
-                        else { node.Background = new SolidColorBrush(Colors.DarkGoldenrod); } //Light Goldenrod is hard to read in dark theme
-                        node.IsExpanded = true; 
-                        
-                        StoryNodeItem parent = node.Parent;
-                        if (parent != null)
-                        {
-                            while (!parent.IsRoot)
-                            {
-                                parent.IsExpanded = true;
-                                parent = parent.Parent;
-                            }
+                    SearchTotal++;
+                    if (Application.Current.RequestedTheme == ApplicationTheme.Light) { node.Background = new SolidColorBrush(Colors.LightGoldenrodYellow); }
+                    else { node.Background = new SolidColorBrush(Colors.DarkGoldenrod); } //Light Goldenrod is hard to read in dark theme
+                    node.IsExpanded = true;
 
-                            if (parent.IsRoot) { parent.IsExpanded = true; }
+                    StoryNodeItem parent = node.Parent;
+                    if (parent != null)
+                    {
+                        while (!parent.IsRoot)
+                        {
+                            parent.IsExpanded = true;
+                            parent = parent.Parent;
                         }
+
+                        if (parent.IsRoot) { parent.IsExpanded = true; }
                     }
-                    else { node.Background = null; }
                 }
+                else { node.Background = null; }
             }
 
             switch (SearchTotal)

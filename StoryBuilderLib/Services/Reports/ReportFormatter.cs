@@ -326,10 +326,7 @@ public class ReportFormatter
             sb.Replace("@Lighting", setting.Lighting);
             sb.Replace("@Weather", setting.Weather);
             sb.Replace("@Temperature", setting.Temperature);
-            sb.Replace("@Prop1", setting.Prop1);
-            sb.Replace("@Prop2", setting.Prop2);
-            sb.Replace("@Prop3", setting.Prop3);
-            sb.Replace("@Prop4", setting.Prop4);
+            sb.Replace("@Props", setting.Props);
             sb.Replace("@Summary", GetText(setting.Summary));
             sb.Replace("@Sights", GetText(setting.Sights));
             sb.Replace("@Sounds", GetText(setting.Sounds));

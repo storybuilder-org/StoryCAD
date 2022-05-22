@@ -15,9 +15,16 @@ public sealed partial class About : Page
     public About()
     {
         InitializeComponent();
-        //Version.Text = "Version: " + Windows.ApplicationModel.Package.Current.Id.Version.Major + "." + Windows.ApplicationModel.Package.Current.Id.Version.Minor + "." + Windows.ApplicationModel.Package.Current.Id.Version.Build + "." +
-        //Windows.ApplicationModel.Package.Current.Id.Version.Revision;
         Version.Text = GlobalData.Version;
         Path.Text = "Installation Directory: " + GlobalData.RootDirectory;
+    }
+    private void OpenPath(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+    {
+        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo()
+        {
+            FileName = System.IO.Path.Combine(GlobalData.RootDirectory,"Logs"),
+            UseShellExecute = true,
+            Verb = "open"
+        });;
     }
 }

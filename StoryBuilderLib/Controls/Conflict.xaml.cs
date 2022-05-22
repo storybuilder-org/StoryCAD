@@ -6,9 +6,6 @@ using StoryBuilder.Models.Tools;
 using System.Collections.Generic;
 using Syncfusion.UI.Xaml.Editors;
 
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
-
 namespace StoryBuilder.Controls;
 
 public sealed partial class Conflict : UserControl
@@ -23,7 +20,7 @@ public sealed partial class Conflict : UserControl
     {
         InitializeComponent();
     }
-    private void Category_SelectionChanged(object? sender, ComboBoxSelectionChangedEventArgs e)
+    private void Category_SelectionChanged(object sender, ComboBoxSelectionChangedEventArgs e)
     {
         category = (string)Category.Items[Category.SelectedIndex];
         model = ConflictTypes[category];
@@ -32,7 +29,7 @@ public sealed partial class Conflict : UserControl
         Example.SelectedIndex = -1;
     }
 
-    private void SubCategory_SelectionChanged(object? sender, ComboBoxSelectionChangedEventArgs e)
+    private void SubCategory_SelectionChanged(object sender, ComboBoxSelectionChangedEventArgs e)
     {
         if (SubCategory.SelectedIndex > -1)
         {
@@ -41,12 +38,12 @@ public sealed partial class Conflict : UserControl
         }
     }
 
-    private void Example_SelectionChanged(object? sender, ComboBoxSelectionChangedEventArgs e)
+    private void Example_SelectionChanged(object sender, ComboBoxSelectionChangedEventArgs e)
     {
         ExampleText = (string)Example.SelectedItem;
     }
 
-    private void Example_Loaded(object? sender, RoutedEventArgs e)
+    private void Example_Loaded(object sender, RoutedEventArgs e)
     {
         ConflictTypes = GlobalData.ConflictTypes;
         Category.ItemsSource = ConflictTypes.Keys;

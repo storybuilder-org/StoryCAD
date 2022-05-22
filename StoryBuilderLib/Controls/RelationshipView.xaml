@@ -19,19 +19,19 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <editors:SfComboBox Grid.Row="0" Header="Relationship" PlaceholderText="Pick Relation" IsEditable="False" 
+        <ComboBox Grid.Row="0" Header="Relationship" PlaceholderText="Pick Relation" IsEditable="False" 
                             ItemsSource="{x:Bind CharVm.CharacterRelationships}"
                             SelectionChanged="RelationshipChanged"
                             DisplayMemberPath ="Partner.Name"
                             SelectedItem="{x:Bind CharVm.SelectedRelationship, Mode=TwoWay}" />
         <TextBox Name="RelationType" Grid.Row="2" Header="Relation Type" MinWidth="200" 
                               IsReadOnly="True" Text="{x:Bind CharVm.RelationType, Mode=OneWay}" />
-        <editors:SfComboBox Grid.Row="3" Header= "Trait" MinWidth="150" IsEditable="True"
+        <AutoSuggestBox Grid.Row="3" Header= "Trait" MinWidth="150"
                               ItemsSource="{x:Bind CharVm.RelationshipTraitList}"
-                              SelectedItem="{x:Bind CharVm.RelationshipTrait, Mode=TwoWay}" />
-        <editors:SfComboBox Grid.Row="4" Header="Attitude"  MinWidth="150" IsEditable="True"
-                            ItemsSource="{x:Bind CharVm.RelationshipAttitudeList}"
-                            SelectedItem="{x:Bind CharVm.RelationshipAttitude, Mode=TwoWay}" />
+                               Text="{x:Bind CharVm.RelationshipTrait, Mode=TwoWay}" />
+        <AutoSuggestBox Grid.Row="4" Header="Attitude"  MinWidth="150" 
+                        ItemsSource="{x:Bind CharVm.RelationshipAttitudeList}"
+                        Text="{x:Bind CharVm.RelationshipAttitude, Mode=TwoWay}" />
         <usercontrols:RichEditBoxExtended Grid.Row="5" Header="Relationship Notes" 
                              RtfText="{x:Bind CharVm.RelationshipNotes, Mode=TwoWay}" AcceptsReturn="True"
                              IsSpellCheckEnabled="True" TextWrapping="Wrap"

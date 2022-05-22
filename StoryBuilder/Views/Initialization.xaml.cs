@@ -13,8 +13,7 @@ using WinRT;
 namespace StoryBuilder.Views;
 
 /// <summary>
-/// This Page is displayed if Preferences.PreferencesInitialised
-/// is false.
+/// This Page is displayed if Preferences.Initialised is false.
 /// </summary>
 public sealed partial class PreferencesInitialization : Page
 {

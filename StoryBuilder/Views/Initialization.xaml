@@ -27,11 +27,11 @@
                     <TextBox PlaceholderText="What is your name?" Margin="15" VerticalAlignment="Center" Text="{x:Bind _initVM.Name, Mode=TwoWay}"/>
                     <TextBox PlaceholderText="What is your email (optional)?" Margin="15" VerticalAlignment="Center"  Text="{x:Bind _initVM.Email, Mode=TwoWay}"/>
                     <StackPanel Orientation="Horizontal">
-                        <TextBox PlaceholderText="Where do you want to save your stories?" Name="ProjPath" Margin="15" VerticalAlignment="Center" Width="435" HorizontalAlignment="Left" Text="{x:Bind _initVM.Path, Mode=TwoWay}"/>
+                        <TextBox IsReadOnly="true" PlaceholderText="Where do you want to save your stories?" Name="ProjPath" Margin="15" VerticalAlignment="Center" Width="435" HorizontalAlignment="Left" Text="{x:Bind _initVM.Path, Mode=TwoWay}"/>
                         <Button Content="Browse" HorizontalAlignment="Center" Click="SetProjectPath"/>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal">
-                        <TextBox PlaceholderText="Where do you want to backup your stories to?" Name="BackPath" Margin="15" VerticalAlignment="Center" Width="435" HorizontalAlignment="Left" Text="{x:Bind _initVM.BackupPath, Mode=TwoWay}"/>
+                        <TextBox IsReadOnly="True" PlaceholderText="Where do you want to backup your stories to?" Name="BackPath" Margin="15" VerticalAlignment="Center" Width="435" HorizontalAlignment="Left" Text="{x:Bind _initVM.BackupPath, Mode=TwoWay}"/>
                         <Button Content="Browse" HorizontalAlignment="Center" Click="SetBackupPath"/>
                     </StackPanel>
                 </StackPanel>

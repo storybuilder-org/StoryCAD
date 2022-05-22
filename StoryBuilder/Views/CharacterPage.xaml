@@ -11,7 +11,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <TextBox Header="Name" Text="{x:Bind CharVm.Name, Mode=TwoWay}" Margin="10,0" />
+        <TextBox Header="Name" Text="{x:Bind CharVm.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="10,10,10,0" />
         <Pivot Grid.Row="1">
             <PivotItem Header="Role">
                 <Grid>
@@ -21,7 +21,7 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    <editors:SfComboBox Header="Role" Grid.Row="0" IsEditable="True" MinWidth="200" ItemsSource="{x:Bind CharVm.RoleList}" SelectedItem="{x:Bind CharVm.Role, Mode=TwoWay}" />
+                    <AutoSuggestBox Header="Role" Grid.Row="0"  MinWidth="200" ItemsSource="{x:Bind CharVm.RoleList}" Text="{x:Bind CharVm.Role, Mode=TwoWay}" />
                     <editors:SfComboBox Header="Story Role" Grid.Row="1" IsEditable="False" MinWidth="200" ItemsSource="{x:Bind CharVm.StoryRoleList}" SelectedItem="{x:Bind CharVm.StoryRole, Mode=TwoWay}" />
                     <editors:SfComboBox Header="Archetype" Grid.Row="2" IsEditable="False" MinWidth="200" ItemsSource="{x:Bind CharVm.ArchetypeList}" SelectedItem="{x:Bind CharVm.Archetype, Mode=TwoWay}" />
                     <usercontrols:RichEditBoxExtended Header="Character Sketch" Grid.Row="3" RtfText="{x:Bind CharVm.CharacterSketch, Mode=TwoWay}" AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap" ScrollViewer.VerticalScrollBarVisibility="Visible" />
@@ -45,10 +45,10 @@
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
                         <TextBox Header="Age" Grid.Column="0" MinWidth="100"
-                                 Text="{x:Bind CharVm.Age, Mode=TwoWay}" />
+                                 Text="{x:Bind CharVm.Age, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                         <TextBlock Grid.Column="1" MinWidth="300"/>
                         <TextBox Header="Sex" Grid.Column="2" MinWidth="100"
-                                 Text="{x:Bind CharVm.Sex, Mode=TwoWay}" />
+                                 Text="{x:Bind CharVm.Sex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     </Grid>
                     <Grid Grid.Row="1" HorizontalAlignment="Left">
                         <Grid.ColumnDefinitions>
@@ -57,10 +57,10 @@
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
                         <TextBox Header="Height" Grid.Column="0" MinWidth="100"
-                                 Text="{x:Bind CharVm.CharHeight, Mode=TwoWay}" />
+                                 Text="{x:Bind CharVm.CharHeight, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                         <TextBlock Grid.Column="1" MinWidth="300"/>
                         <TextBox Header="Weight" Grid.Column="2" MinWidth="100"
-                                 Text="{x:Bind CharVm.Weight, Mode=TwoWay}" />
+                                 Text="{x:Bind CharVm.Weight, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     </Grid>
                     <Grid Grid.Row="2" HorizontalAlignment="Left">
                         <Grid.ColumnDefinitions>
@@ -68,13 +68,13 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
-                        <editors:SfComboBox Header="Eye Color" Grid.Column="0" IsEditable="True" MinWidth="200"
+                        <AutoSuggestBox Header="Eye Color" Grid.Column="0" MinWidth="200"
                                   ItemsSource="{x:Bind CharVm.EyesList}"
-                                  SelectedItem="{x:Bind CharVm.Eyes, Mode=TwoWay}" />
+                                  Text="{x:Bind CharVm.Eyes, Mode=TwoWay}" />
                         <TextBlock Grid.Column="1" MinWidth="100"/>
-                        <editors:SfComboBox Header="Hair Color" Grid.Column="2" IsEditable="True" MinWidth="200"
+                        <AutoSuggestBox Header="Hair Color" Grid.Column="2"  MinWidth="200"
                                   ItemsSource="{x:Bind CharVm.HairList}"
-                                  SelectedItem="{x:Bind CharVm.Hair, Mode=TwoWay}" />
+                                  Text="{x:Bind CharVm.Hair, Mode=TwoWay}" />
                     </Grid>
                     <Grid Grid.Row="3" HorizontalAlignment="Left">
                         <Grid.ColumnDefinitions>
@@ -82,13 +82,13 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
-                        <editors:SfComboBox Header="Build" Grid.Column="0" IsEditable="True" MinWidth="200"
+                        <AutoSuggestBox Header="Build" Grid.Column="0" MinWidth="200"
                                   ItemsSource="{x:Bind CharVm.BuildList}"
-                                  SelectedItem="{x:Bind CharVm.Build, Mode=TwoWay}" />
+                                  Text="{x:Bind CharVm.Build, Mode=TwoWay}" />
                         <TextBlock Grid.Column="1" MinWidth="100"/>
-                        <editors:SfComboBox Header="Complexion" Grid.Column="2" IsEditable="True" MinWidth="200"
+                        <AutoSuggestBox Header="Complexion" Grid.Column="2" MinWidth="200"
                                   ItemsSource="{x:Bind CharVm.SkinList}"
-                                  SelectedItem="{x:Bind CharVm.Complexion, Mode=TwoWay}" />
+                                  Text="{x:Bind CharVm.Complexion, Mode=TwoWay}" />
                     </Grid>
                     <Grid Grid.Row="4" HorizontalAlignment="Left">
                         <Grid.ColumnDefinitions>
@@ -96,16 +96,16 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
-                        <editors:SfComboBox Header="Race" Grid.Column="0" IsEditable="True" MinWidth="200"
+                        <AutoSuggestBox Header="Race" Grid.Column="0"  MinWidth="200"
                                   ItemsSource="{x:Bind CharVm.RaceList}"
-                                  SelectedItem="{x:Bind CharVm.Race, Mode=TwoWay}" />
+                                  Text="{x:Bind CharVm.Race, Mode=TwoWay}" />
                         <TextBlock Grid.Column="1" MinWidth="100"/>
-                        <editors:SfComboBox Header="Nationality" Grid.Column="2" IsEditable="True" MinWidth="200"
+                        <AutoSuggestBox Header="Nationality" Grid.Column="2" MinWidth="200"
                                   ItemsSource="{x:Bind CharVm.NationalityList}"
-                                  SelectedItem="{x:Bind CharVm.Nationality, Mode=TwoWay}" MaxDropDownHeight="270"/>
+                                  Text="{x:Bind CharVm.Nationality, Mode=TwoWay}"/>
                     </Grid>
                     <TextBox Header="General Health" Grid.Row="5"
-                             Text="{x:Bind CharVm.Health, Mode=TwoWay}" />
+                             Text="{x:Bind CharVm.Health, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     <usercontrols:RichEditBoxExtended Header="Physical Notes" Grid.Row="6"
                                                       RtfText="{x:Bind CharVm.PhysNotes, Mode=TwoWay}" AcceptsReturn="True"
                                                       IsSpellCheckEnabled="True" TextWrapping="Wrap"
@@ -191,13 +191,13 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
-                        <editors:SfComboBox Header="Intelligence"  Grid.Column="0" IsEditable="True" Width="200"
+                        <AutoSuggestBox Header="Intelligence"  Grid.Column="0" Width="200"
                                   ItemsSource="{x:Bind CharVm.IntelligenceList}"
-                                  SelectedItem="{x:Bind CharVm.Intelligence, Mode=TwoWay}" />
+                                  Text="{x:Bind CharVm.Intelligence, Mode=TwoWay}" />
                         <TextBlock Width="100"  Grid.Column="1" />
-                        <editors:SfComboBox Header="Values"  Grid.Column="2" IsEditable="True" Width="200"
+                        <AutoSuggestBox Header="Values"  Grid.Column="2"  Width="200"
                                   ItemsSource="{x:Bind CharVm.ValuesList}"
-                                  SelectedItem="{x:Bind CharVm.Values, Mode=TwoWay}" />
+                                  Text="{x:Bind CharVm.Values, Mode=TwoWay}" />
                     </Grid>
                     <Grid Grid.Row="2" HorizontalAlignment="Left">
                         <Grid.ColumnDefinitions>
@@ -205,13 +205,13 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
-                        <editors:SfComboBox Header="Focus"  Grid.Column="0" IsEditable="True" Width="200"
+                        <AutoSuggestBox Header="Focus"  Grid.Column="0" Width="200"
                                   ItemsSource="{x:Bind CharVm.FocusList}"
-                                  SelectedItem="{x:Bind CharVm.Focus, Mode=TwoWay}" />
+                                  Text="{x:Bind CharVm.Focus, Mode=TwoWay}" />
                         <TextBlock Width="100"  Grid.Column="1" />
-                        <editors:SfComboBox Header="Abnormality"  Grid.Column="2" IsEditable="True" Width="200"
+                        <AutoSuggestBox Header="Abnormality"  Grid.Column="2"  Width="200"
                                   ItemsSource="{x:Bind CharVm.AbnormalityList}"
-                                  SelectedItem="{x:Bind CharVm.Abnormality, Mode=TwoWay}" />
+                                  Text="{x:Bind CharVm.Abnormality, Mode=TwoWay}" />
                     </Grid>
                     <usercontrols:RichEditBoxExtended Header="Psych Notes" Grid.Row="3" 
                                                 RtfText="{x:Bind CharVm.PsychNotes, Mode=TwoWay}" AcceptsReturn="True"
@@ -234,43 +234,43 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
-                    <editors:SfComboBox Header="Adventureousness" Grid.Column="0" Grid.Row="0" IsEditable="True" MinWidth="200"
+                    <AutoSuggestBox Header="Adventureousness" Grid.Column="0" Grid.Row="0"  MinWidth="200"
                                   ItemsSource="{x:Bind CharVm.AdventurousnessList}"
-                                  SelectedItem="{x:Bind CharVm.Adventurousness, Mode=TwoWay}" />
-                    <editors:SfComboBox Header="Confidence" Grid.Column="0" Grid.Row="1" IsEditable="True" MinWidth="200"
+                                  Text="{x:Bind CharVm.Adventurousness, Mode=TwoWay}" />
+                    <AutoSuggestBox Header="Confidence" Grid.Column="0" Grid.Row="1" MinWidth="200"
                                   ItemsSource="{x:Bind CharVm.ConfidenceList}"
-                                  SelectedItem="{x:Bind CharVm.Confidence, Mode=TwoWay}" />
-                    <editors:SfComboBox Header="Creativity" Grid.Column="0" Grid.Row="2" IsEditable="True" MinWidth="200" 
+                                  Text="{x:Bind CharVm.Confidence, Mode=TwoWay}" />
+                    <AutoSuggestBox Header="Creativity" Grid.Column="0" Grid.Row="2" MinWidth="200" 
                                   ItemsSource="{x:Bind CharVm.CreativityList}"
-                                  SelectedItem="{x:Bind CharVm.Creativity, Mode=TwoWay}" />
-                    <editors:SfComboBox Header="Enthusiasm" Grid.Column="0" Grid.Row="3" IsEditable="True" MinWidth="200"
+                                  Text="{x:Bind CharVm.Creativity, Mode=TwoWay}" />
+                    <AutoSuggestBox Header="Enthusiasm" Grid.Column="0" Grid.Row="3"  MinWidth="200"
                                   ItemsSource="{x:Bind CharVm.EnthusiasmList}"
-                                  SelectedItem="{x:Bind CharVm.Enthusiasm, Mode=TwoWay}" />
-                    <editors:SfComboBox Header="Sensitivity" Grid.Column="0" Grid.Row="4" IsEditable="True" MinWidth="200"
+                                  Text="{x:Bind CharVm.Enthusiasm, Mode=TwoWay}" />
+                    <AutoSuggestBox Header="Sensitivity" Grid.Column="0" Grid.Row="4" MinWidth="200"
                                   ItemsSource="{x:Bind CharVm.SensitivityList}"
-                                  SelectedItem="{x:Bind CharVm.Sensitivity, Mode=TwoWay}" />
-                    <editors:SfComboBox Header="Sociability" Grid.Column="0" Grid.Row="5" IsEditable="True" MinWidth="200"
+                                  Text="{x:Bind CharVm.Sensitivity, Mode=TwoWay}" />
+                    <AutoSuggestBox Header="Sociability" Grid.Column="0" Grid.Row="5" MinWidth="200"
                                   ItemsSource="{x:Bind CharVm.SociabilityList}"
-                                  SelectedItem="{x:Bind CharVm.Sociability, Mode=TwoWay}" />
+                                  Text="{x:Bind CharVm.Sociability, Mode=TwoWay}" />
                     <TextBlock Grid.Column="1" Grid.Row="0" MinWidth="100"/>
-                    <editors:SfComboBox Header="Aggression" Grid.Column="2" Grid.Row="0" IsEditable="True" MinWidth="200"
+                    <AutoSuggestBox Header="Aggression" Grid.Column="2" Grid.Row="0" MinWidth="200"
                                   ItemsSource="{x:Bind CharVm.AggressionList}"
-                                  SelectedItem="{x:Bind CharVm.Aggression, Mode=TwoWay}" />
-                    <editors:SfComboBox Header="Conscientiousness" Grid.Column="2" Grid.Row="1" IsEditable="True" MinWidth="200"
+                                  Text="{x:Bind CharVm.Aggression, Mode=TwoWay}" />
+                    <AutoSuggestBox Header="Conscientiousness" Grid.Column="2" Grid.Row="1" MinWidth="200"
                                   ItemsSource="{x:Bind CharVm.ConscientiousnessList}"
-                                  SelectedItem="{x:Bind CharVm.Conscientiousness, Mode=TwoWay}" />
-                    <editors:SfComboBox Header="Dominance" Grid.Column="2" Grid.Row="2" IsEditable="True" MinWidth="200" 
+                                  Text="{x:Bind CharVm.Conscientiousness, Mode=TwoWay}" />
+                    <AutoSuggestBox Header="Dominance" Grid.Column="2" Grid.Row="2" MinWidth="200" 
                                   ItemsSource="{x:Bind CharVm.DominanceList}"
-                                  SelectedItem="{x:Bind CharVm.Dominance, Mode=TwoWay}" />
-                    <editors:SfComboBox Header="Self Assurance" Grid.Column="2" Grid.Row="3" IsEditable="True" MinWidth="200"
+                                  Text="{x:Bind CharVm.Dominance, Mode=TwoWay}" />
+                    <AutoSuggestBox Header="Self Assurance" Grid.Column="2" Grid.Row="3" MinWidth="200"
                                   ItemsSource="{x:Bind CharVm.AssuranceList}"
-                                  SelectedItem="{x:Bind CharVm.Assurance, Mode=TwoWay}" />
-                    <editors:SfComboBox Header="Shrewdness" Grid.Column="2" Grid.Row="4" IsEditable="True" MinWidth="200"
+                                  Text="{x:Bind CharVm.Assurance, Mode=TwoWay}" />
+                    <AutoSuggestBox Header="Shrewdness" Grid.Column="2" Grid.Row="4" MinWidth="200"
                                   ItemsSource="{x:Bind CharVm.ShrewdnessList}"
-                                  SelectedItem="{x:Bind CharVm.Shrewdness, Mode=TwoWay}" />
-                    <editors:SfComboBox Header="Stability" Grid.Column="2" Grid.Row="5" IsEditable="True" MinWidth="200"
+                                  Text="{x:Bind CharVm.Shrewdness, Mode=TwoWay}" />
+                    <AutoSuggestBox Header="Stability" Grid.Column="2" Grid.Row="5" MinWidth="200"
                                   ItemsSource="{x:Bind CharVm.StabilityList}"
-                                  SelectedItem="{x:Bind CharVm.Stability, Mode=TwoWay}" />
+                                  Text="{x:Bind CharVm.Stability, Mode=TwoWay}" />
                 </Grid>
             </PivotItem>
             <PivotItem Header="Outer Traits">
@@ -294,7 +294,7 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
-                        <TextBox Header="Other Trait:" Grid.Column="0" MinWidth="300" Text="{x:Bind CharVm.NewTrait, Mode=TwoWay}" />
+                        <TextBox Header="Other Trait:" Grid.Column="0" MinWidth="300" Text="{x:Bind CharVm.NewTrait, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                         <TextBlock Grid.Column="1" Width="10" />
                         <Button Grid.Column="2" FontFamily="Segoe MDL2 Assets" Content="&#xE710;"  Command="{x:Bind CharVm.AddTraitCommand, Mode=OneWay}" >
                             <ToolTipService.ToolTip>

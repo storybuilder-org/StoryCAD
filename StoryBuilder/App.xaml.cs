@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Windows.Storage;
+using ABI.Microsoft.UI.Windowing;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 using WinUIEx;
@@ -27,16 +27,11 @@ using StoryBuilder.Views;
 using dotenv.net;
 using dotenv.net.Utilities;
 using Syncfusion.Licensing;
+using AppWindow = Microsoft.UI.Windowing.AppWindow;
 using UnhandledExceptionEventArgs = Microsoft.UI.Xaml.UnhandledExceptionEventArgs;
-
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
 
 namespace StoryBuilder;
 
-/// <summary>
-/// Provides application-specific behavior to supplement the default Application class.
-/// </summary>
 public partial class App : Application
 {
     private const string HomePage = "HomePage";
@@ -208,7 +203,7 @@ public partial class App : Application
         // Place the frame in the current Window
         mainWindow.Content = rootFrame;
         mainWindow.CenterOnScreen(); //Centers the window on the monitor
-    
+
         if (rootFrame.Content == null)
         {
             rootFrame.Navigate(GlobalData.Preferences.PreferencesInitialised ? typeof(Shell) : typeof(PreferencesInitialization));

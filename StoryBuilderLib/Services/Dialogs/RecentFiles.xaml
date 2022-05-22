@@ -14,7 +14,7 @@
             <RowDefinition Height="50"/>
         </Grid.RowDefinitions>
         <TextBlock Text="Recent files: " FontSize="30" HorizontalAlignment="Center" VerticalAlignment="Top" Grid.Row="0"/>
-        <ListBox Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center" Name="Recents" Width="300" SelectionChanged="{x:Bind UnifiedMenuVM.LoadRecentStory}"  SelectedIndex="{x:Bind UnifiedMenuVM.SelectedRecentIndex, Mode=TwoWay}"/>
+        <ListBox Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center" Name="Recents" Width="300" Background="{x:Bind UnifiedMenuVM.AdjustmentColor}" SelectionChanged="{x:Bind UnifiedMenuVM.LoadRecentStory}"  SelectedIndex="{x:Bind UnifiedMenuVM.SelectedRecentIndex, Mode=TwoWay}"/>
         <Button Content="Open story from disk" Click="{x:Bind UnifiedMenuVM.LoadStory}" HorizontalAlignment="Center" VerticalAlignment="Bottom" Grid.Row="2"/>
     </Grid>
 </Page>

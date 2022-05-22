@@ -1,4 +1,5 @@
-﻿using Microsoft.UI;
+﻿using ABI.Windows.ApplicationModel.Appointments.DataProvider;
+using Microsoft.UI;
 using Microsoft.UI.Text;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -35,12 +36,10 @@ public class RichEditBoxExtended : RichEditBox
     {
         TextChanged += RichEditBoxExtended_TextChanged;
         TextAlignment = TextAlignment.Left;
-
-        //For some reason WinUI seems to be actively inverting the color of foreground in dark mode
-        //So for now we set the color to black and its just black on white in Light mode or White on Black in dark mode
-        Foreground = new SolidColorBrush(Colors.Black);
         CornerRadius = new(5);
+        if (Application.Current.RequestedTheme == ApplicationTheme.Dark) { Foreground = new SolidColorBrush(Colors.LightGray); } //Color fix for dark mode
     }
+
 
     public string RtfText
     {

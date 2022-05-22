@@ -1,20 +1,15 @@
 ﻿using Windows.UI;
 using ABI.Microsoft.UI.Xaml;
 using CommunityToolkit.WinUI.Helpers;
+using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using StoryBuilder.ViewModels;
 using Application = Microsoft.UI.Xaml.Application;
 
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
-
 namespace StoryBuilder.Services.Dialogs;
 
-/// <summary>
-/// An empty page that can be used on its own or navigated to within a Frame.
-/// </summary>
 public sealed partial class UnifiedMenuPage : Page
 {
     public delegate void UpdateContentDelegate();
@@ -48,5 +43,6 @@ public sealed partial class UnifiedMenuPage : Page
         UnifiedMenuVM.UpdateContent = UpdateContent;  // Connect the VM's delegate to HideDialog
         UnifiedMenuVM.CurrentTab = new ListBoxItem() { Name = "Recent" }; //Makes unified VM load recents by default
         UnifiedMenuVM.SidebarChange(null, null);
+        if (ActualTheme == ElementTheme.Light) {UnifiedMenuVM.AdjustmentColor = new SolidColorBrush(Colors.White);}
     }
 }

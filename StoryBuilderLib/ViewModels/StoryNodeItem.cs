@@ -208,6 +208,11 @@ public class StoryNodeItem : DependencyObject, INotifyPropertyChanged
         }
     }
 
+    public TextWrapping TextWrapping
+    {
+        get => GlobalData.Preferences.WrapNodeNames;
+    }
+
 //public bool IsSelected
 //{
 //    get => (bool)GetValue(IsSelectedProperty);

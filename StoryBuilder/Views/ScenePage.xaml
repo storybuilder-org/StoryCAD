@@ -25,7 +25,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <TextBox Header="Name" Text="{x:Bind SceneVm.Name, Mode=TwoWay}" />
+        <TextBox Header="Name" Text="{x:Bind SceneVm.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="10,10,10,0" />
         <Pivot Grid.Row="1">
             <PivotItem Header="Scene">
                 <Grid>
@@ -44,10 +44,10 @@
                             <ColumnDefinition Width="4*"/>
                         </Grid.ColumnDefinitions>
                         <TextBox Header="Date" Grid.Column="0" MinWidth="150"
-                                 Text="{x:Bind SceneVm.Date, Mode=TwoWay}" />
+                                 Text="{x:Bind SceneVm.Date, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                         <TextBlock Grid.Column="1" MinWidth="50"/>
                         <TextBox Header="Time" Grid.Column="2" MinWidth="100"
-                                 Text="{x:Bind SceneVm.Time, Mode=TwoWay}" />
+                                 Text="{x:Bind SceneVm.Time, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                         <TextBlock Grid.Column="3" MinWidth="50"/>
                         <usercontrols:CharacterName x:Name="ViewpointCharacter" Header="Viewpoint Character" Grid.Column="4" IsEditable="False" MinWidth="250"
                               DisplayMemberPath="Name"
@@ -59,14 +59,14 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
-                        <usercontrols:SettingName Header="Setting" Grid.Column="0" IsEditable="True"
+                        <usercontrols:SettingName Header="Setting" Grid.Column="0" IsEditable="False"
                              MinWidth="300" Margin="0,0,0,10"
                              DisplayMemberPath="Name"
                              SelectedValue="{x:Bind SceneVm.Setting, Mode=TwoWay, Converter={StaticResource ToStoryElement}}"/>
                         <TextBlock Grid.Column="1" MinWidth="50"/>
-                        <editors:SfComboBox Header="SceneType" Grid.Column="2" IsEditable="True" MinWidth="200"
-                              ItemsSource="{x:Bind SceneVm.SceneTypeList}"
-                              SelectedItem="{x:Bind SceneVm.SceneType, Mode=TwoWay}" />
+                        <AutoSuggestBox Header="SceneType" Grid.Column="2" MinWidth="200"
+                                        ItemsSource="{x:Bind SceneVm.SceneTypeList}"
+                                        Text="{x:Bind SceneVm.SceneType, Mode=TwoWay}" />
                     </Grid>
                     <Grid Grid.Row="2" HorizontalAlignment="Left" >
                         <StackPanel Orientation="Vertical">
@@ -184,16 +184,16 @@
                             DisplayMemberPath="Name"
                             SelectedValue="{x:Bind SceneVm.Protagonist, Mode=TwoWay, Converter={StaticResource ToStoryElement}}" />
                         <TextBlock Grid.Column="1" MinWidth="50"/>
-                        <editors:SfComboBox Header="Feelings" Grid.Column="2" IsEditable="True" MinWidth="200"
-                              ItemsSource="{x:Bind SceneVm.EmotionList}"
-                              SelectedItem="{x:Bind SceneVm.ProtagEmotion, Mode=TwoWay}" />
+                        <AutoSuggestBox Header="Feelings" Grid.Column="2" MinWidth="200"
+                                        ItemsSource="{x:Bind SceneVm.EmotionList}"
+                                        Text="{x:Bind SceneVm.ProtagEmotion, Mode=TwoWay}" />
                     </Grid>
-                    <editors:SfComboBox Header="Protagonist's Goal" Grid.Row="1" IsEditable="True" MinWidth="300"
-                              ItemsSource="{x:Bind SceneVm.GoalList}"
-                              SelectedItem="{x:Bind SceneVm.ProtagGoal, Mode=TwoWay}" />
-                    <editors:SfComboBox Header="Opposition" Grid.Row="2" IsEditable="True" Width="400"
-                              ItemsSource="{x:Bind SceneVm.OppositionList}"
-                              SelectedItem="{x:Bind SceneVm.Opposition, Mode=TwoWay}" />
+                    <AutoSuggestBox Header="Protagonist's Goal" Grid.Row="1"  MinWidth="300"
+                                    ItemsSource="{x:Bind SceneVm.GoalList}"
+                                    Text="{x:Bind SceneVm.ProtagGoal, Mode=TwoWay}" />
+                    <AutoSuggestBox Header="Opposition" Grid.Row="2" Width="400"
+                                    ItemsSource="{x:Bind SceneVm.OppositionList}"
+                                    Text="{x:Bind SceneVm.Opposition, Mode=TwoWay}" HorizontalAlignment="Left"/>
                     <Grid Grid.Row="3" HorizontalAlignment="Left">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="3*"/>
@@ -204,17 +204,17 @@
                           DisplayMemberPath="Name"
                           SelectedValue="{x:Bind SceneVm.Antagonist, Mode=TwoWay, Converter={StaticResource ToStoryElement}}" />
                         <TextBlock Grid.Column="1" MinWidth="50"/>
-                        <editors:SfComboBox Header="Feelings" Grid.Column="2" IsEditable="True" MinWidth="200"
-                                  ItemsSource="{x:Bind SceneVm.EmotionList}"
-                              SelectedItem="{x:Bind SceneVm.AntagEmotion, Mode=TwoWay}" />
+                        <AutoSuggestBox Header="Feelings" Grid.Column="2"  MinWidth="200"
+                                        ItemsSource="{x:Bind SceneVm.EmotionList}"
+                                        Text="{x:Bind SceneVm.AntagEmotion, Mode=TwoWay}" />
                     </Grid>
-                    <editors:SfComboBox Header="Antagonist's Goal" Grid.Row="4" IsEditable="True" MinWidth="300" MaxDropDownHeight="270"
-                              ItemsSource="{x:Bind SceneVm.GoalList}"
-                              SelectedItem="{x:Bind SceneVm.AntagGoal, Mode=TwoWay}" />
+                    <AutoSuggestBox Header="Antagonist's Goal" Grid.Row="4" MinWidth="300"
+                                    ItemsSource="{x:Bind SceneVm.GoalList}"
+                                    Text="{x:Bind SceneVm.AntagGoal, Mode=TwoWay}" />
                     <TextBlock Grid.Row="5" Text=" "/>
-                    <editors:SfComboBox Header="Outcome" Grid.Row="5" IsEditable="True" Width="400"
-                              ItemsSource="{x:Bind SceneVm.OutcomeList}"
-                              SelectedItem="{x:Bind SceneVm.Outcome, Mode=TwoWay}" />
+                    <AutoSuggestBox Header="Outcome" Grid.Row="5" Width="400"
+                                    ItemsSource="{x:Bind SceneVm.OutcomeList}"
+                                    Text="{x:Bind SceneVm.Outcome, Mode=TwoWay}" HorizontalAlignment="Left"/>
                 </Grid>
             </PivotItem>
             <PivotItem Header="Sequel">
@@ -224,16 +224,16 @@
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
-                    <editors:SfComboBox Header="Emotional Response" Grid.Row="0" IsEditable="True" MinWidth="200"
-                              ItemsSource="{x:Bind SceneVm.EmotionList}"
-                              SelectedItem="{x:Bind SceneVm.Emotion, Mode=TwoWay}" />
+                    <AutoSuggestBox Header="Emotional Response" Grid.Row="0" MinWidth="200"
+                                    ItemsSource="{x:Bind SceneVm.EmotionList}"
+                                    Text="{x:Bind SceneVm.Emotion, Mode=TwoWay}" />
                     <usercontrols:RichEditBoxExtended Header="Review and Thought" Grid.Row="1"
                                                       RtfText="{x:Bind SceneVm.Review, Mode=TwoWay}" AcceptsReturn="True"
                                                       IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                                       ScrollViewer.VerticalScrollBarVisibility="Visible" />
-                    <editors:SfComboBox Header="New Goal" Grid.Row="2" IsEditable="True" MinWidth="400"
-                              ItemsSource="{x:Bind SceneVm.GoalList}"
-                              SelectedItem="{x:Bind SceneVm.NewGoal, Mode=TwoWay}" />
+                    <AutoSuggestBox Header="New Goal" Grid.Row="2" MinWidth="400"
+                                    ItemsSource="{x:Bind SceneVm.GoalList}"
+                                    Text="{x:Bind SceneVm.NewGoal, Mode=TwoWay}" />
                 </Grid>
             </PivotItem>
             <PivotItem Header="Notes">

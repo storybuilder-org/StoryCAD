@@ -316,12 +316,13 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         ConflictDialog.Content = selectedConflict;
         ContentDialogResult result = await ConflictDialog.ShowAsync();
 
+        if (selectedConflict.ExampleText == null) {selectedConflict.ExampleText = "";}
         switch (result)
         {
             // Copy to Protagonist conflict
             case ContentDialogResult.Primary:
                 ProtConflict = selectedConflict.ExampleText;
-                _logger.Log(LogLevel.Info, "Conflict Finder finished (copied to protaganist)");
+                _logger.Log(LogLevel.Info, "Conflict Finder finished (copied to protagonist)");
                 break;
             // Copy to Antagonist conflict
             case ContentDialogResult.Secondary:

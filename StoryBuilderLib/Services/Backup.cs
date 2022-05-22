@@ -1,16 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.IO.Compression;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Windows.Storage;
+using Windows.System;
 using CommunityToolkit.Mvvm.DependencyInjection;
+using Microsoft.UI.Xaml.Controls;
 using StoryBuilder.Models;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.ViewModels;
+using DispatcherQueue = ABI.Windows.System.DispatcherQueue;
 
 namespace StoryBuilder.Services
 {
@@ -33,7 +33,7 @@ namespace StoryBuilder.Services
                 while (!timeBackupWorker.CancellationPending)
                 {
                     System.Threading.Thread.Sleep((GlobalData.Preferences.TimedBackupInterval * 60) * 1000);
-                    Log.Log(LogLevel.Trace, "Starting auto backup");
+                    Log.Log(LogLevel.Info, "Starting auto backup");
                     await BackupProject();
                 }
                 e.Cancel = true;
@@ -70,24 +70,31 @@ namespace StoryBuilder.Services
 
         public async Task BackupProject()
         {
-            Log.Log(LogLevel.Info, "Starting Project Backup");
-            //Creates backup directory if it doesnt exist
-            if (!Directory.Exists(GlobalData.Preferences.BackupDirectory)) { Directory.CreateDirectory(GlobalData.Preferences.BackupDirectory); }
-
+            Log.Log(LogLevel.Info, $"Starting Project Backup at {GlobalData.Preferences.BackupDirectory}");
             try
             {
+                //Creates backup directory if it doesn't exist
+                if (!Directory.Exists(GlobalData.Preferences.BackupDirectory))
+                {
+                    Log.Log(LogLevel.Info, "Backup dir not found, making it.");
+                    Directory.CreateDirectory(GlobalData.Preferences.BackupDirectory);
+                }
+
                 //Gets correct name for file
+                Log.Log(LogLevel.Info, "Getting backup path and file to made");
                 string fileName = $"{Shell.StoryModel.ProjectFile.Name} as of {DateTime.Now}".Replace('/', ' ').Replace(':', ' ').Replace(".stbx", "");
                 StorageFolder backupRoot = await StorageFolder.GetFolderFromPathAsync(GlobalData.Preferences.BackupDirectory.Replace(".stbx", ""));
                 StorageFolder backupLocation = await backupRoot.CreateFolderAsync(Shell.StoryModel.ProjectFile.Name, CreationCollisionOption.OpenIfExists);
                 Log.Log(LogLevel.Info, $"Backing up to {backupLocation.Path} as {fileName}.zip");
 
+                Log.Log(LogLevel.Info, "Writing file");
                 StorageFolder Temp = await StorageFolder.GetFolderFromPathAsync(GlobalData.RootDirectory);
                 Temp = await Temp.CreateFolderAsync("Temp", CreationCollisionOption.ReplaceExisting);
-                await Shell.StoryModel.ProjectFile.CopyAsync(Temp, Shell.StoryModel.ProjectFile.Name,NameCollisionOption.ReplaceExisting);
-                ZipFile.CreateFromDirectory(Temp.Path,Path.Combine(backupLocation.Path,fileName ) + ".zip");
-                
-                //Creates ziparchive then cleans up
+                await Shell.StoryModel.ProjectFile.CopyAsync(Temp, Shell.StoryModel.ProjectFile.Name,
+                    NameCollisionOption.ReplaceExisting);
+                ZipFile.CreateFromDirectory(Temp.Path, Path.Combine(backupLocation.Path, fileName) + ".zip");
+
+                //Creates zip archive then cleans up
                 Log.Log(LogLevel.Info, $"Created Zip file at {Path.Combine(backupLocation.Path, fileName)}.zip");
                 await Temp.DeleteAsync();
 
@@ -96,7 +103,17 @@ namespace StoryBuilder.Services
             }
             catch (Exception ex)
             {
-                Log.LogException(LogLevel.Error, ex, "Error backing up project");
+                Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread().TryEnqueue(async () =>
+                {
+                    ContentDialog warning = new();
+                    warning.Title = "Backup Warning";
+                    warning.Content = "The last backup failed due to the following reason:\n" + ex.Message;
+                    warning.XamlRoot = GlobalData.XamlRoot;
+                    warning.CloseButtonText = "Understood.";
+                    await warning.ShowAsync();
+                });
+
+                Log.LogException(LogLevel.Error, ex, $"Error backing up project {ex.Message}");
             }
             Log.Log(LogLevel.Info, "BackupProject complete");
         }

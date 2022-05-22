@@ -84,7 +84,10 @@ public class PreferencesIO
                         break;
 
                     case "BackupOnOpen":
-                        _model.BackupOnOpen = tokens[1];
+                        if (tokens[1] == "True")
+                            _model.BackupOnOpen = true;
+                        else
+                            _model.BackupOnOpen = false;
                         break;
 
                     case "TimedBackup":
@@ -135,7 +138,10 @@ public class PreferencesIO
                         else
                             _model.ParseVersionStatus= false;
                         break;
-
+                    case "WrapNodeNames":
+                        if (tokens[1] == "True") { _model.WrapNodeNames = TextWrapping.WrapWholeWords; }
+                        else {_model.WrapNodeNames = TextWrapping.NoWrap;}
+                        break;
                 }
             }
             _log.Log(LogLevel.Info, "PreferencesModel updated from StoryBuilder.prf.");
@@ -187,6 +193,9 @@ public class PreferencesIO
         NewPreferences.Add("ParsePreferencesStaus=" + _model.ParsePreferencesStatus);
         NewPreferences.Add("ParseVersionStaus=" + _model.ParseVersionStatus);
 
-        await FileIO.WriteLinesAsync(preferencesFile, NewPreferences); //Write the Preferences file to disk.
+        if (_model.WrapNodeNames == TextWrapping.WrapWholeWords) { NewPreferences.Add("WrapNodeNames=True"); }
+        else { NewPreferences.Add("WrapNodeNames=False"); }
+
+        await FileIO.WriteLinesAsync(preferencesFile, NewPreferences); //Writes file to disk.
     }
 }
