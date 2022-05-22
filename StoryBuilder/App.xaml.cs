@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using ABI.Microsoft.UI.Windowing;
+using ABI.Windows.Storage;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 using WinUIEx;
@@ -15,7 +15,6 @@ using StoryBuilder.Models;
 using StoryBuilder.Models.Tools;
 using StoryBuilder.Services;
 using StoryBuilder.Services.Installation;
-using StoryBuilder.Services.Json;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.Services.Navigation;
 using StoryBuilder.Services.Preferences;
@@ -172,7 +171,7 @@ public partial class App : Application
             var preferences = GlobalData.Preferences;
             // Update Preferences
             preferences.Version = GlobalData.Version;
-            PreferencesIO prefIO = new(preferences, System.IO.Path.Combine(ApplicationData.Current.RoamingFolder.Path, "Storybuilder"));
+            PreferencesIO prefIO = new(preferences, GlobalData.RootDirectory);
             await prefIO.UpdateFile();
             // Post deployment to backend server
             await parse.PostVersion();

@@ -12,7 +12,6 @@ using System.Threading.Tasks;
 using StoryBuilder.Services.Json;
 using CommunityToolkit.WinUI.UI.Controls.TextToolbarSymbols;
 using Elmah.Io.Client;
-using StoryBuilder.Services.Keys;
 
 namespace StoryBuilder.Services.Logging;
 

@@ -38,13 +38,7 @@ namespace StoryBuilder.Models.Tools
         // Visual changes
         public Microsoft.UI.Xaml.Media.SolidColorBrush PrimaryColor { get; set; } //Sets UI Color
         public Microsoft.UI.Xaml.Media.SolidColorBrush SecondaryColor = new(Colors.Black); //Sets Text Color
-        public bool QuoteOnStartup { get; set; }
-
-        // Visual changes
-        public Microsoft.UI.Xaml.Media.SolidColorBrush PrimaryColor { get; set; } //Sets UI Color
-        public Microsoft.UI.Xaml.Media.SolidColorBrush SecondaryColor = new(Colors.Black); //Sets Text Color (Gets treated as white, even if set to black on dark mode)
         public Microsoft.UI.Xaml.TextWrapping WrapNodeNames { get; set; }
-        public bool QuoteOnStartup { get; set; }
 
         // Backup Information
         public bool BackupOnOpen { get; set; }
@@ -54,16 +48,7 @@ namespace StoryBuilder.Models.Tools
         //Directories
         public string ProjectDirectory { get; set; }
         public string BackupDirectory { get; set; }
-
-        // Backup Information
-        public string BackupOnOpen { get; set; }
-        public bool TimedBackup { get; set; }
-        public int TimedBackupInterval { get; set; }
-
-        //Directories
-        public string ProjectDirectory { get; set; }
-        public string BackupDirectory { get; set; }
-
+        
         // Recent files (set automatically)
         public string LastFile1 { get; set; }
         public string LastFile2 { get; set; }

@@ -61,11 +61,6 @@ public class PreferencesIO
                         _model.Email = tokens[1];
                         break;
 
-                    case "QuoteOnStartup":
-                        if (tokens[1] == "True") { _model.QuoteOnStartup = true; }
-                        else { _model.QuoteOnStartup = false; }
-                        break;
-
                     case "Initalised":
                         if (tokens[1] == "True") { _model.PreferencesInitialised = true; }
                         else { _model.PreferencesInitialised = false; }
@@ -184,7 +179,6 @@ public class PreferencesIO
         NewPreferences.Add("LastFile3=" + _model.LastFile3);
         NewPreferences.Add("LastFile4=" + _model.LastFile4);
         NewPreferences.Add("LastFile5=" + _model.LastFile5);
-        NewPreferences.Add("QuoteOnStartup=" + _model.QuoteOnStartup);
         NewPreferences.Add("BackupOnOpen=" + _model.BackupOnOpen);
         NewPreferences.Add("ErrorCollectionConsent=" + _model.ErrorCollectionConsent);
         NewPreferences.Add("TimedBackup=" + _model.TimedBackup);
