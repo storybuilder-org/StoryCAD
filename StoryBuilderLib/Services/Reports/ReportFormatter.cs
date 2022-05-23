@@ -135,6 +135,7 @@ public class ReportFormatter
                 if (String.IsNullOrEmpty(vpProtagonist.Name)) { sb.Replace("@ProtagName", ""); }
                 else { sb.Replace("@ProtagName", vpProtagonist.Name); }
             }
+            else { sb.Replace("@ProtagName", ""); }
 
             if (String.IsNullOrEmpty(problem.ProtConflict)) { sb.Replace("@ProtagConflict", ""); }
             else { sb.Replace("@ProtagConflict", problem.ProtConflict); }
@@ -144,6 +145,7 @@ public class ReportFormatter
                 if (String.IsNullOrEmpty(vpAntagonist.Name)) { sb.Replace("@AntagName", ""); }
                 else { sb.Replace("@AntagName", vpAntagonist.Name); }
             }
+            else { sb.Replace("@AntagName", ""); }
             
             if (String.IsNullOrEmpty(problem.AntagMotive)) { sb.Replace("@AntagMotive", ""); }
             else { sb.Replace("@AntagMotive", problem.AntagMotive); }
