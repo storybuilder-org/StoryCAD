@@ -50,8 +50,9 @@
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom">
                         <TextBlock Name="cpuarch"/>
-                        <TextBlock Name="osarch"/>
+                        <TextBlock Name="osarch" Margin="10,0"/>
                         <TextBlock Name="osinfo"/>
+                        <TextBlock Name="Last"/>
                     </StackPanel>
 
                     <TextBlock Name="apparch"/>

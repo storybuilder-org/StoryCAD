@@ -43,7 +43,6 @@
     <None Remove="Services\Dialogs\RecentFiles.xaml" />
     <None Remove="Services\Dialogs\SamplePage.xaml" />
     <None Remove="Services\Dialogs\SaveAsDialog.xaml" />
-    <None Remove="Services\Dialogs\Tools\About.xaml" />
     <None Remove="Services\Dialogs\Tools\PrintReportsDialog.xaml" />
     <None Remove="Services\Dialogs\UnifiedMenu.xaml" />
   </ItemGroup>
@@ -65,12 +64,12 @@
     <PackageReference Include="CommunityToolkit.WinUI.UI.Controls.Core" Version="7.1.2" />
     <PackageReference Include="dotenv.net" Version="3.1.1" />
     <PackageReference Include="Elmah.Io.NLog" Version="4.1.25" />
-    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.0.1" />
-    <PackageReference Include="NLog" Version="5.0.0-rc2" />
-    <PackageReference Include="NLog.Extensions.Logging" Version="5.0.0-rc2" />
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.0.3" />
+    <PackageReference Include="NLog" Version="5.0.0" />
+    <PackageReference Include="NLog.Extensions.Logging" Version="5.0.0" />
     <PackageReference Include="Parse.NETStandard2" Version="2.0.0" />
-    <PackageReference Include="Syncfusion.Editors.WinUI" Version="19.4.0.56" />
-    <PackageReference Include="WinUIEx" Version="1.1.0" />
+    <PackageReference Include="Syncfusion.Editors.WinUI" Version="20.1.0.56" />
+    <PackageReference Include="WinUIEx" Version="1.4.2" />
   </ItemGroup>
 
   <ItemGroup>
@@ -94,12 +93,6 @@
 
   <ItemGroup>
     <Page Update="Services\Dialogs\Tools\PrintReportsDialog.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Page Update="Services\Dialogs\Tools\About.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>

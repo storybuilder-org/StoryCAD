@@ -38,15 +38,15 @@
 
   <ItemGroup>
     <PackageReference Include="dotenv.net" Version="3.1.1" />
-    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.0.1" />
-    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22581-preview" />
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.0.3" />
+    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22000.197" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.0.0-preview2" />
     <PackageReference Include="CommunityToolkit.WinUI.UI.Controls.Core" Version="7.1.2" />
-    <PackageReference Include="NLog" Version="5.0.0-rc2" />
-    <PackageReference Include="NLog.Extensions.Logging" Version="5.0.0-rc2" />
+    <PackageReference Include="NLog" Version="5.0.0" />
+    <PackageReference Include="NLog.Extensions.Logging" Version="5.0.0" />
     <PackageReference Include="PInvoke.User32" Version="0.7.104" />
-    <PackageReference Include="Syncfusion.Editors.WinUI" Version="19.4.0.56" />
-    <PackageReference Include="WinUIEx" Version="1.1.0" />
+    <PackageReference Include="Syncfusion.Editors.WinUI" Version="20.1.0.56" />
+    <PackageReference Include="WinUIEx" Version="1.4.2" />
     <Manifest Include="$(ApplicationManifest)" />
   </ItemGroup>
 

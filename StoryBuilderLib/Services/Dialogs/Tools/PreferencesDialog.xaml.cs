@@ -30,6 +30,7 @@ public sealed partial class PreferencesDialog : Page
             Dev.Header = "Dev";
             cpuarch.Text = "CPU ARCH: " + RuntimeInformation.ProcessArchitecture;
             osarch.Text = "OS ARCH: " + RuntimeInformation.OSArchitecture;
+            //LastContact.Text = "Last Contact: " + GlobalData.Preferences.;
             osinfo.Text = "OS INFO: Windows Build " + Environment.OSVersion.VersionString.Replace("Microsoft Windows NT 10.0.","").Replace(".0","");
             if (IntPtr.Size == 4) { apparch.Text = "Looks like we are running as a 32 bit process."; }
             else if (IntPtr.Size == 8) { apparch.Text = "Looks like we are running as a 64 bit process."; }
