@@ -4,6 +4,7 @@
        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+       xmlns:treeView="using:Syncfusion.UI.Xaml.TreeView" 
        xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
        xmlns:viewmodels="using:StoryBuilder.ViewModels"   
        mc:Ignorable="d">
@@ -288,8 +289,8 @@
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
                     <!-- This XAML gives an error saying that dragcheck and dragfinished can't be found/accessible, the compiler is wrong. -->
-                    <muxc:TreeView x:Name="NavigationTree" DragItemsStarting="{x:Bind ShellVm.DragCheck}" DragItemsCompleted="{x:Bind ShellVm.DragFinished}" AllowDrop="False"  ContextFlyout="{StaticResource AddStoryElementFlyout}" ContextRequested="AddButton_ContextRequested"  ItemsSource="{x:Bind ShellVm.DataSource, Mode=TwoWay}" ItemInvoked="TreeViewItem_Invoked" >
-                        <muxc:TreeView.ItemTemplate>
+                    <treeView:SfTreeView x:Name="NavigationTree" DragItemsStarting="{x:Bind ShellVm.DragCheck}" DragItemsCompleted="{x:Bind ShellVm.DragFinished}" AllowDrop="False"  ContextFlyout="{StaticResource AddStoryElementFlyout}" ContextRequested="AddButton_ContextRequested"  ItemsSource="{x:Bind ShellVm.DataSource, Mode=TwoWay}" ItemInvoked="TreeViewItem_Invoked" >
+                        <treeView:SfTreeView.ItemTemplate>
                             <DataTemplate  x:DataType="viewmodels:StoryNodeItem">
                                 <muxc:TreeViewItem  ItemsSource="{x:Bind Children}"
                                 Background="{x:Bind Background, Mode=OneWay}"
@@ -301,8 +302,8 @@
                                     </StackPanel>
                                 </muxc:TreeViewItem>
                             </DataTemplate>
-                        </muxc:TreeView.ItemTemplate>
-                    </muxc:TreeView>
+                        </treeView:SfTreeView.ItemTemplate>
+                    </treeView:SfTreeView>
                 </Grid>
             </SplitView.Pane>
             <SplitView.Content>

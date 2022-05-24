@@ -45,7 +45,8 @@
     <PackageReference Include="NLog" Version="5.0.0-rc2" />
     <PackageReference Include="NLog.Extensions.Logging" Version="5.0.0-rc2" />
     <PackageReference Include="PInvoke.User32" Version="0.7.104" />
-    <PackageReference Include="Syncfusion.Editors.WinUI" Version="19.4.0.56" />
+    <PackageReference Include="Syncfusion.Editors.WinUI" Version="20.1.0.57" />
+    <PackageReference Include="Syncfusion.TreeView.WinUI" Version="20.1.0.57" />
     <PackageReference Include="WinUIEx" Version="1.1.0" />
     <Manifest Include="$(ApplicationManifest)" />
   </ItemGroup>
