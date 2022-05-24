@@ -5,6 +5,7 @@ using StoryBuilder.DAL;
 using StoryBuilder.Models;
 using StoryBuilder.ViewModels;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.Storage;
@@ -178,6 +179,31 @@ public class ReportFormatter
         return doc.GetRtf();
     }
 
+    public string FormatCharacterRelationshipReport(StoryElement element)
+    {
+        CharacterModel character = (CharacterModel)element;
+        RtfDocument doc = new(string.Empty);
+        foreach (var rel in character.RelationshipList)
+        {
+            foreach (string line in _templates["Character Relationship Description"])
+            {
+                StringBuilder sb = new(line);
+                sb.Replace("@Relationship", rel.Partner.Name);
+                sb.Replace("@relationType", rel.RelationType);
+                sb.Replace("@relationTrait", rel.RelationType);
+                sb.Replace("@Attitude", rel.Attitude);
+                sb.Replace("@Notes", GetText(rel.Notes));
+
+                doc.AddText(sb.ToString());
+                doc.AddNewLine();
+            }
+            doc.AddNewLine();
+            doc.AddNewLine();
+        }
+
+        return doc.GetRtf();
+    }
+
     public string FormatCharacterListReport()
     {
         string[] lines = _templates["List of Characters"];
@@ -241,11 +267,11 @@ public class ReportFormatter
             //Appearance section
             sb.Replace("@Appearance", GetText(character.Appearance));
             //Relationships section
-            sb.Replace("@Relationship", character.Relationship);
-            sb.Replace("@relationType", character.RelationType);
-            sb.Replace("@relationTrait", character.RelationTrait);
-            sb.Replace("@Attitude", character.Attitude);
-            sb.Replace("@RelationshipNotes", character.RelationshipNotes);
+            if (sb.ToString() == "@Relationships" && character.RelationshipList.Count > 0)
+            {
+                sb.Replace("@Relationships", FormatCharacterRelationshipReport(element));
+            }
+
             //Flaw section
             sb.Replace("@Flaw", GetText(character.Flaw));
             //Backstory section

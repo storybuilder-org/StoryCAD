@@ -1,4 +1,5 @@
-﻿using Microsoft.UI.Xaml;
+﻿#nullable enable
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using StoryBuilder.Models;
 using StoryBuilder.Models.Tools;
