@@ -17,6 +17,8 @@ public sealed partial class Shell
     public ShellViewModel ShellVm => Ioc.Default.GetService<ShellViewModel>();
     public UnifiedVM UnifiedVm => Ioc.Default.GetService<UnifiedVM>();
     public PreferencesModel Preferences = GlobalData.Preferences;
+
+    private TreeViewItem dragSource = null;
     public Shell()
     {
         try
@@ -102,4 +104,45 @@ public sealed partial class Shell
         foreach (StoryNodeItem node in ShellVm.DataSource[0]) { node.Background = null; }
     }
 
+    // Drag and Drop related
+    private void TreeViewItem_DragEnter(object sender, DragEventArgs args)
+    {
+        dragSource = args.OriginalSource as TreeViewItem;
+    }
+
+    private void TreeViewItem_OnDrop(object sender, DragEventArgs args)
+    {
+        string x = args.ToString();
+    }
+
+    //private void TreeViewItem_DropCompleted(UIElement sender, DropCompletedEventArgs args)
+    //{
+    //    string x = args.ToString();
+    //}
+
+    private void TreeViewItem_OnDragOver(object sender, DragEventArgs args)
+    {
+        // sender is the item you are currently hovering over 
+        TreeViewItem item = (TreeViewItem)sender;
+       
+        base.OnDragOver(args);
+        var node = NavigationTree.NodeFromContainer(item);
+
+        if (node.Depth == -1)
+            item.AllowDrop = false;
+        if (node.Parent == null)  // but they are all null ?
+            item.AllowDrop = false;
+        //args.AcceptedOperation = Windows.Ap(TrplicationModel.DataTransfer.DataPackageOperation.Move;
+    }
+
+    //private StoryNodeItem GetStoryNode(TreeViewItem treeViewItem)
+    //{
+    //    if (treeViewItem != null)
+    //    {
+    //        var StoryNodeItem = ContainerFromItemr(treeViewItem);
+    //        return data as TreeViewData;
+    //    }
+
+    //    return null;
+    //}
 }
