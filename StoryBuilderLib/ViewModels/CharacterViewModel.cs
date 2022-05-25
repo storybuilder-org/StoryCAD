@@ -15,7 +15,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Threading.Tasks;
 
 namespace StoryBuilder.ViewModels;
 
@@ -44,6 +43,16 @@ public class CharacterViewModel : ObservableRecipient, INavigable
     public RelayCommand TraitCommand { get; }
 
     #endregion
+
+    /// <summary>
+    /// This enables the boxes in relationship view to be editable
+    /// </summary>
+    private bool _isLoaded;
+    public bool IsLoaded
+    {
+        get => _isLoaded;
+        set => SetProperty(ref _isLoaded, value);
+    }
 
     // StoryElement data
 

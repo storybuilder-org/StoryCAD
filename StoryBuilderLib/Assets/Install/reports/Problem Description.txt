@@ -12,7 +12,7 @@
 
     Story Question:
     @StoryQuestion
-
+	
     Source of Conflict:
     @ProblemSource
 
@@ -24,6 +24,8 @@
 
     Goal:               @ProtagGoal
 
+	 Conflict:           @ProtagConflict
+	
                    =========== Problem Antagonist ===========
 
     Name:               @AntagName
@@ -32,6 +34,8 @@
 
     Goal:               @AntagGoal
 
+	  Conflict:           @AntagConflict
+	
                    =========== Problem Resolution ===========
 
     Outcome:            @Outcome

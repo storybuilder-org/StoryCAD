@@ -5,6 +5,7 @@ using StoryBuilder.DAL;
 using StoryBuilder.Models;
 using StoryBuilder.ViewModels;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.Storage;
@@ -135,19 +136,27 @@ public class ReportFormatter
                 if (String.IsNullOrEmpty(vpProtagonist.Name)) { sb.Replace("@ProtagName", ""); }
                 else { sb.Replace("@ProtagName", vpProtagonist.Name); }
             }
+            else { sb.Replace("@ProtagName", ""); }
+
+            if (String.IsNullOrEmpty(problem.ProtConflict)) { sb.Replace("@ProtagConflict", ""); }
+            else { sb.Replace("@ProtagConflict", problem.ProtConflict); }
 
             if (vpAntagonist != null)
             {
                 if (String.IsNullOrEmpty(vpAntagonist.Name)) { sb.Replace("@AntagName", ""); }
                 else { sb.Replace("@AntagName", vpAntagonist.Name); }
             }
+            else { sb.Replace("@AntagName", ""); }
             
             if (String.IsNullOrEmpty(problem.AntagMotive)) { sb.Replace("@AntagMotive", ""); }
             else { sb.Replace("@AntagMotive", problem.AntagMotive); }
 
             if (String.IsNullOrEmpty(problem.AntagGoal)) { sb.Replace("@AntagGoal", ""); }
             else { sb.Replace("@AntagGoal", problem.AntagGoal); }
-            
+
+            if (String.IsNullOrEmpty(problem.AntagConflict)) { sb.Replace("@AntagConflict", ""); }
+            else { sb.Replace("@AntagConflict", problem.AntagConflict); }
+
             if (String.IsNullOrEmpty(problem.Outcome)) { sb.Replace("@Outcome", ""); }
             else { sb.Replace("@Outcome", problem.Outcome); }
 
@@ -164,6 +173,31 @@ public class ReportFormatter
             else { sb.Replace("@Notes", GetText(problem.Notes)); }
 
             doc.AddText(sb.ToString());
+            doc.AddNewLine();
+        }
+
+        return doc.GetRtf();
+    }
+
+    public string FormatCharacterRelationshipReport(StoryElement element)
+    {
+        CharacterModel character = (CharacterModel)element;
+        RtfDocument doc = new(string.Empty);
+        foreach (var rel in character.RelationshipList)
+        {
+            foreach (string line in _templates["Character Relationship Description"])
+            {
+                StringBuilder sb = new(line);
+                sb.Replace("@Relationship", rel.Partner.Name);
+                sb.Replace("@relationType", rel.RelationType);
+                sb.Replace("@relationTrait", rel.RelationType);
+                sb.Replace("@Attitude", rel.Attitude);
+                sb.Replace("@Notes", GetText(rel.Notes));
+
+                doc.AddText(sb.ToString());
+                doc.AddNewLine();
+            }
+            doc.AddNewLine();
             doc.AddNewLine();
         }
 
@@ -233,11 +267,11 @@ public class ReportFormatter
             //Appearance section
             sb.Replace("@Appearance", GetText(character.Appearance));
             //Relationships section
-            sb.Replace("@Relationship", character.Relationship);
-            sb.Replace("@relationType", character.RelationType);
-            sb.Replace("@relationTrait", character.RelationTrait);
-            sb.Replace("@Attitude", character.Attitude);
-            sb.Replace("@RelationshipNotes", character.RelationshipNotes);
+            if (sb.ToString() == "@Relationships" && character.RelationshipList.Count > 0)
+            {
+                sb.Replace("@Relationships", FormatCharacterRelationshipReport(element));
+            }
+
             //Flaw section
             sb.Replace("@Flaw", GetText(character.Flaw));
             //Backstory section
@@ -415,17 +449,22 @@ public class ReportFormatter
             //DEVELOPMENT SECTION
             if (line.Contains("@PurposeOfScene"))
             {
-                foreach (string sePurpose in scene.ScenePurpose)
-                {
-                    StoryElement Purpose = StringToStoryElement(sePurpose);
-                    string PurposeName = Purpose?.Name ?? string.Empty;
-                    StringBuilder sbCast = new(line);
-
-                    sbCast.Replace("@CastMember", PurposeName);
-                    doc.AddText(sbCast.ToString());
-                    doc.AddNewLine();
-                }
+                string PurposeString = "";
+                foreach (string Purpose in scene.ScenePurpose) { PurposeString += Purpose + ", "; }
+                sb.Replace("@PurposeOfScene", PurposeString);
+                doc.AddText(sb.ToString());
                 sb.Clear();
+                /*              
+                                foreach (string sePurpose in scene.ScenePurpose)
+                                {
+                                    StoryElement Purpose = StringToStoryElement(sePurpose);
+                                    string PurposeName = Purpose?.Name ?? string.Empty;
+                                    StringBuilder sbCast = new(line);
+
+                                    sbCast.Replace("@CastMember", PurposeName);
+                                    doc.AddText(sbCast.ToString());
+                                    doc.AddNewLine();
+                                }*/
             }
 
             sb.Replace("@ValueExchange", scene.ValueExchange);

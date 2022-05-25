@@ -51,16 +51,7 @@
 
                 ============= Relationships ==================
 
-    Relationship:       @Relationship
-
-    Relation Type:      @relationType
-
-    Trait:              @relationTrait
-
-    Attitude:           @Attitude
-
-    Relationship Notes: 
-    @RelationshipNotes
+@Relationships
 
                 ============= Flaw ==================
 
