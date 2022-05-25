@@ -1240,7 +1240,6 @@ namespace StoryBuilder.ViewModels
 
         private void MoveTreeViewItemLeft()
         {
-            //TODO: Logging
             if (CurrentNode == null)
             {
                 Messenger.Send(new StatusChangedMessage(new($"Click or touch a node to move", LogLevel.Info)));
@@ -1276,6 +1275,7 @@ namespace StoryBuilder.ViewModels
                 if (_targetIndex == -1) { _targetCollection.Add(CurrentNode); }
                 else { _targetCollection.Insert(_targetIndex, CurrentNode); }
                 CurrentNode.Parent = targetParent;
+                Logger.Log(LogLevel.Info, $"Moving {CurrentNode.Name} left from parent {CurrentNode.Parent.Name} to parent {CurrentNode.Parent.Parent.Name}");
             }
             else
             {
@@ -1358,11 +1358,11 @@ namespace StoryBuilder.ViewModels
             if (MoveIsValid()) // Verify move
             {
                 _sourceChildren.RemoveAt(_sourceIndex);
-                if (_targetIndex == -1)
-                    _targetCollection.Add(CurrentNode);
+                if (_targetIndex == -1) { _targetCollection.Add(CurrentNode); }
                 else
                     _targetCollection.Insert(_targetIndex, CurrentNode);
                 CurrentNode.Parent = targetParent;
+                Logger.Log(LogLevel.Info, $"Moving {CurrentNode.Name} right to parent {CurrentNode.Parent.Name}");
             }
         }
 
@@ -1422,13 +1422,12 @@ namespace StoryBuilder.ViewModels
                 else
                     _targetCollection.Insert(_targetIndex, CurrentNode);
                 CurrentNode.Parent = _targetParent;
+                Logger.Log(LogLevel.Info, $"Moving {CurrentNode.Name} up to parent {CurrentNode.Parent.Name}");
             }
         }
 
         private void MoveTreeViewItemDown()
         {
-            //TODO: Logging
-
             if (CurrentNode == null)
             {
                 Messenger.Send(new StatusChangedMessage(new($"Click or touch a node to move", LogLevel.Info)));
@@ -1459,7 +1458,11 @@ namespace StoryBuilder.ViewModels
                 int siblingIndex = grandparentCollection.IndexOf(CurrentNode.Parent) + 1;
                 if (siblingIndex == grandparentCollection.Count)
                 {
-                    Messenger.Send(new StatusChangedMessage(new($"Cannot move down further", LogLevel.Warn)));
+                    CurrentNode.Parent = DataSource[1];
+                    _sourceChildren.RemoveAt(_sourceIndex);
+                    DataSource[1].Children.Insert(_targetIndex, CurrentNode);
+                    Messenger.Send(new StatusChangedMessage(new($"Moved to trash", LogLevel.Info)));
+
                     return;
                 }
                 if (grandparentCollection[siblingIndex].IsRoot)
@@ -1482,8 +1485,10 @@ namespace StoryBuilder.ViewModels
                 _sourceChildren.RemoveAt(_sourceIndex);
                 _targetCollection.Insert(_targetIndex, CurrentNode);
                 CurrentNode.Parent = _targetParent;
+                Logger.Log(LogLevel.Info, $"Moving {CurrentNode.Name} down up to parent {CurrentNode.Parent.Name}");
             }
         }
+
 
         #endregion
 

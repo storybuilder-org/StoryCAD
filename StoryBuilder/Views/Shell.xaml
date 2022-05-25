@@ -201,24 +201,34 @@
                 </AppBarButton>
                 <AppBarButton Label="Move" ToolTipService.ToolTip="Move Story Elements" >
                     <AppBarButton.Icon>
-                        <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE8DE;"/>
+                        <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE759;"/>
                     </AppBarButton.Icon>
                     <AppBarButton.Flyout>
                         <Flyout>
-                            <StackPanel  Orientation="Horizontal" >
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="40"/>
+                                    <RowDefinition Height="40"/>
+                                    <RowDefinition Height="40"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="45"/>
+                                    <ColumnDefinition Width="50"/>
+                                    <ColumnDefinition Width="45"/>
+                                </Grid.ColumnDefinitions>
                                 <Button ToolTipService.ToolTip="Move Left"
-                                    FontFamily="Segoe MDL2 Assets" Content="&#xE09A;"
-                                    Command="{x:Bind ShellVm.MoveLeftCommand, Mode=OneWay}"  Margin="5"/>
+                                        FontFamily="Segoe MDL2 Assets" Content="&#xE09A;"
+                                        Command="{x:Bind ShellVm.MoveLeftCommand, Mode=OneWay}"  Margin="0,5,0,5"  Grid.Row="1"/>
                                 <Button ToolTipService.ToolTip="Move Right"
                                         FontFamily="Segoe MDL2 Assets" Content="&#xE013;"
-                                        Command="{x:Bind ShellVm.MoveRightCommand, Mode=OneWay}"  Margin="5"/>
+                                        Command="{x:Bind ShellVm.MoveRightCommand, Mode=OneWay}"  Margin="0,5,0,5" Grid.Row="1" Grid.Column="2"/>
                                 <Button ToolTipService.ToolTip="Move Up"
                                         FontFamily="Segoe MDL2 Assets" Content="&#xE09C;"
-                                        Command="{x:Bind ShellVm.MoveUpCommand, Mode=OneWay}" Margin="5"/>
+                                        Command="{x:Bind ShellVm.MoveUpCommand, Mode=OneWay}"  Margin="5,0,5,0" Grid.Column="1"/>
                                 <Button ToolTipService.ToolTip="Move Down"
                                         FontFamily="Segoe MDL2 Assets" Content="&#xE09D;"
-                                        Command="{x:Bind ShellVm.MoveDownCommand, Mode=OneWay}" Margin="5"/>
-                            </StackPanel>
+                                        Command="{x:Bind ShellVm.MoveDownCommand, Mode=OneWay}" Margin="5,0,5,0" Grid.Column="1" Grid.Row="2"/>
+                            </Grid>
                         </Flyout>
                     </AppBarButton.Flyout>
                 </AppBarButton>

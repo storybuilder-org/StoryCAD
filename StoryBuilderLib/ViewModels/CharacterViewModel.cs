@@ -44,6 +44,16 @@ public class CharacterViewModel : ObservableRecipient, INavigable
 
     #endregion
 
+    /// <summary>
+    /// This enables the boxes in relationship view to be editable
+    /// </summary>
+    private bool _isLoaded;
+    public bool IsLoaded
+    {
+        get => _isLoaded;
+        set => SetProperty(ref _isLoaded, value);
+    }
+
     // StoryElement data
 
     private Guid _uuid;
