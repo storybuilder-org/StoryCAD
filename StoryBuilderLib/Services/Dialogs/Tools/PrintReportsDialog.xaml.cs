@@ -86,6 +86,14 @@ public sealed partial class PrintReportsDialog : Page
 
     private void CheckboxClicked(object sender, RoutedEventArgs e)
     {
+        //This clears any selected checkboxes
+        switch ((sender as CheckBox).Content.ToString())
+        {
+            case "Print all problems": ProblemsList.SelectedItems.Clear(); break;
+            case "Print all characters": CharactersList.SelectedItems.Clear(); break;
+            case "Print all scenes": ScenesList.SelectedItems.Clear(); break;
+            case "Print all settings": SettingsList.SelectedItems.Clear(); break;
+        }
         UpdateSelection(null,null);
     }
 }
