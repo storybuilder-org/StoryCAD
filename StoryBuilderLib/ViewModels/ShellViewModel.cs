@@ -359,8 +359,11 @@ namespace StoryBuilder.ViewModels
             }
 
             PrintReportDialogVM PrintVM = Ioc.Default.GetRequiredService<PrintReportDialogVM>();
-            PrintVM.SelectedNodes.Clear();
-            PrintVM.SelectedNodes.Add(RightTappedNode);
+            PrintVM.SelectedNodes.Clear(); //Makes sure only one node is selected
+
+            if (RightTappedNode.Type == StoryItemType.StoryOverview) { PrintVM.CreateOverview = true; }
+            else { PrintVM.SelectedNodes.Add(RightTappedNode); }
+
             await new PrintReports(PrintVM, StoryModel).Generate();
         }
 
