@@ -13,7 +13,7 @@
     Story Question:
     @StoryQuestion
 	
-    Source of Conflict:
+    Problem Source:
     @ProblemSource
 
                    =========== Problem Protagonist ===========
