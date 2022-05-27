@@ -20,19 +20,19 @@
 
     Name:               @ProtagName
 
-    Motivation:         @ProtagMotive
-
     Goal:               @ProtagGoal
+
+    Motivation:         @ProtagMotive
 
 	 Conflict:           @ProtagConflict
 	
                    =========== Problem Antagonist ===========
 
     Name:               @AntagName
+	
+    Goal:               @AntagGoal
 
     Motivation:         @AntagMotive
-
-    Goal:               @AntagGoal
 
 	  Conflict:           @AntagConflict
 	
