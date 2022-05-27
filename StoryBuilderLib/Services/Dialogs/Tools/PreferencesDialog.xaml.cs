@@ -8,6 +8,7 @@ using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using StoryBuilder.Models;
+using StoryBuilder.Services.Installation;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.ViewModels.Tools;
 using WinRT;
@@ -129,5 +130,10 @@ public sealed partial class PreferencesDialog : Page
     private async void AttachElmah(object sender, RoutedEventArgs e)
     {
         await Ioc.Default.GetRequiredService<LogService>().AddElmahTarget();
+    }
+
+    private async void Reinstall(object sender, RoutedEventArgs e)
+    {
+        await Ioc.Default.GetRequiredService<InstallationService>().InstallFiles();
     }
 }

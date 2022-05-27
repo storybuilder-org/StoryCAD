@@ -47,6 +47,7 @@
                         <Button Content="Set Init to false" Click="SetInitToFalse"/>
                         <Button Content="Throw exception" Click="ThrowException" Margin="10,0"/>
                         <Button Content="Attach Elmah" Click="AttachElmah"/>
+                        <Button Content="Run InstallService" Click="Reinstall"/>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom">
                         <TextBlock Name="cpuarch"/>
