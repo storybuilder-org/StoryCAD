@@ -5,7 +5,6 @@ using StoryBuilder.DAL;
 using StoryBuilder.Models;
 using StoryBuilder.ViewModels;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.Storage;
@@ -476,6 +475,7 @@ public class ReportFormatter
             sb.Replace("@ProtagName", protagonistName);
             sb.Replace("@ProtagEmotion", scene.ProtagEmotion);
             sb.Replace("@ProtagGoal", scene.ProtagGoal);
+            sb.Replace("@Opposition", scene.Opposition);
             sb.Replace("@AntagName", antagonistName);
             sb.Replace("@AntagEmotion", scene.AntagEmotion);
             sb.Replace("@AntagGoal", scene.AntagGoal);
