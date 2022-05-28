@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Threading.Tasks;
 using Parse;
 using StoryBuilder.Models;
@@ -7,6 +8,7 @@ using StoryBuilder.Services.Logging;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using StoryBuilder.DAL;
 using Windows.Storage;
+using ABI.Windows.Devices.Printers.Extensions;
 
 namespace StoryBuilder.Services.Parse
 {
@@ -21,6 +23,41 @@ namespace StoryBuilder.Services.Parse
     /// </summary>
     public class ParseService
     {
+        private LogService Log = Ioc.Default.GetService<LogService>();
+        public async void Begin()
+        {
+            BackgroundWorker Worker = new();
+            Worker.DoWork += async (sender, e) =>
+            {
+                try
+                {
+                    // If the previous attempt to communicate to the back-end server failed, retry
+                    if (!GlobalData.Preferences.ParsePreferencesStatus)
+                        await PostPreferences(GlobalData.Preferences);
+                    if (!GlobalData.Preferences.ParseVersionStatus)
+                        await PostVersion();
+
+                    if (!GlobalData.Version.Equals(GlobalData.Preferences.Version))
+                    {
+                        // Process a version change (usually a new release)
+                        Log.Log(LogLevel.Info, "Version mismatch: " + GlobalData.Version + " != " + GlobalData.Preferences.Version);
+                        var preferences = GlobalData.Preferences;
+                        // Update Preferences
+                        preferences.Version = GlobalData.Version;
+                        PreferencesIO prefIO = new(preferences, GlobalData.RootDirectory);
+                        await prefIO.UpdateFile();
+                        // Post deployment to backend server
+                        await PostVersion();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.LogException(LogLevel.Warn,ex, "Error in parse service worker");
+                }
+            };
+            Worker.RunWorkerAsync();
+        }
+
         private LogService log = Ioc.Default.GetService<LogService>();
         public async Task PostPreferences(PreferencesModel preferences)
         {

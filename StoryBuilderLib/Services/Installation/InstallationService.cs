@@ -11,23 +11,16 @@ using Windows.Storage;
 namespace StoryBuilder.Services.Installation;
 
 /// <summary>
-/// InstallationService processes installation files for the
-/// application.
-///
-/// This process)
-///
-/// For now, I just install or replace the files.
+/// This class copies the files from inside the executable to GlobalData.RootDirectory is.
 /// </summary>
 public class InstallationService
 {
     public readonly LogService Logger;
 
-
     /// <summary>
-    /// This copies all the files from \assets\install to \RoamingState\StoryBuilder\
-    /// via reading the manifest resource stream and writing them to the disk.
+    /// This copies all the files from \assets\install to GlobalData.RootDirectory.
+    /// This is done by using manifest resource steams and writing them to the disk.
     /// </summary>
-    /// <returns></returns>
     public async Task InstallFiles()
     {
         await DeleteFiles();
@@ -42,22 +35,20 @@ public class InstallationService
             }
             catch (Exception ex)
             {
-                Logger.LogException(LogLevel.Error, ex, "error in new installer");
+                Logger.LogException(LogLevel.Error, ex, "Error in installer");
             }
         }
     }
 
     /// <summary>
-    /// This deletes all files in the parent directory EXCEPT StoryBuilder.prf
-    /// (user preferences are preserved)
+    /// This deletes all files in the parent directory EXCEPT StoryBuilder.prf and all logs.
     /// </summary>
-    /// <returns></returns>
     private async Task DeleteFiles()
     {
         StorageFolder ParentFolder = await StorageFolder.GetFolderFromPathAsync(GlobalData.RootDirectory);
         foreach (StorageFile Item in await ParentFolder.GetFilesAsync())
         {
-            if (Item.Name == "StoryBuilder.prf") { continue; } //Doesnt delete prf
+            if (Item.Name == "StoryBuilder.prf") { continue; } //Don't delete prf
 
             try { await Item.DeleteAsync(); }
             catch (Exception ex)
@@ -79,34 +70,34 @@ public class InstallationService
     }
 
     /// <summary>
-    /// This processes the internal manifiest resources into propper file paths
+    /// This processes the internal manifest resources into real file paths
     /// </summary>
     /// <returns></returns>
-    private string ProcessFileName(string InputFileName)
+    private string ProcessFileName(string inputFileName)
     {
-        Logger.Log(LogLevel.Trace, $"Processing file path of {InputFileName}");
+        Logger.Log(LogLevel.Trace, $"Processing file path of {inputFileName}");
 
         //Removes the parent container as the files are relative.
-        string File = InputFileName.Replace("StoryBuilder.Assets.Install", "");
+        string file = inputFileName.Replace("StoryBuilder.Assets.Install", "");
 
         //This replaces all the . with \ (except the last . as thats the file type)
-        int lastIndex = File.LastIndexOf('.');
-        if (lastIndex > 0) { File = File[..lastIndex].Replace(".", @"\") + File[lastIndex..]; }
-        File = File.Replace(@"\stbx", "stbx").Remove(0, 1).Replace("stbx", ".stbx").Replace("..", ".").Replace('_', ' ');
+        int lastIndex = file.LastIndexOf('.');
+        if (lastIndex > 0) { file = file[..lastIndex].Replace(".", @"\") + file[lastIndex..]; }
+        file = file.Replace(@"\stbx", "stbx").Remove(0, 1).Replace("stbx", ".stbx").Replace("..", ".").Replace('_', ' ');
 
         //Fixes a dolls house name as all non ASCII (I think) characters are replaced with spaces except for the file name
-        if (File.Contains("A Doll s House.stbx")) { File = File.Replace(" s ", "'s "); }
+        if (file.Contains("A Doll s House.stbx")) { file = file.Replace(" s ", "'s "); }
 
         //This fixes the UUID for samples.
-        if (File.Contains("files"))
+        if (file.Contains("files"))
         {
-            string[] path = File.Split("files");
+            string[] path = file.Split("files");
             string UUID = path[1].Replace(" ", "-");
-            File = path[0] + "files\\" + UUID[2..]; //Removes extra space in UUID
+            file = path[0] + "files\\" + UUID[2..]; //Removes extra space in UUID
         }
 
-        Logger.Log(LogLevel.Trace, $"Got ideal path as {File}");
-        return File;
+        Logger.Log(LogLevel.Trace, $"Got ideal path as {file}");
+        return file;
     }
 
     //This traverses through 
@@ -122,7 +113,7 @@ public class InstallationService
             foreach (string dir in dirs)
             {
                 if (iteration >= dirs.Count) { continue; }
-                //Logger.Log(LogLevel.Trace, $"{File} mounting subdirectory {dir}");
+                //Logger.Log(LogLevel.Trace, $"{File} mounting sub directory {dir}");
                 ParentFolder = await ParentFolder.CreateFolderAsync(dir, CreationCollisionOption.OpenIfExists);
                 iteration++;
             }
@@ -132,25 +123,25 @@ public class InstallationService
     }
 
     /// <summary>
-    /// This opens the internal manifiest data for a file and writes to the blank file made in CreateDummyFileAsync
+    /// This opens the internal manifest data for a file and writes to the blank file made in CreateDummyFileAsync
     /// <param name="DiskFile"> File to be written to</param>
-    /// <param name="InstallerFile"> manifest path eg StoryBUilder.Assets.Install</param>
+    /// <param name="InstallerFile"> manifest path eg StoryBuilder.Assets.Install</param>
     /// </summary>
     private async void WriteManifestData(StorageFile DiskFile, string InstallerFile)
     {
         List<byte> ContentToWrite = new();
-        await using Stream InternalResourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(InstallerFile);
-        await using (Stream FileDiskStream = await DiskFile.OpenStreamForWriteAsync())
+        await using Stream internalResourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(InstallerFile);
+        await using (Stream fileDiskStream = await DiskFile.OpenStreamForWriteAsync())
         {
             Logger.Log(LogLevel.Trace, $"Opened manifest stream and stream for file on disk ({DiskFile.Path})");
 
-            while (InternalResourceStream.Position < InternalResourceStream.Length)
+            while (internalResourceStream.Position < internalResourceStream.Length)
             {
-                FileDiskStream.WriteByte((byte)InternalResourceStream.ReadByte());
+                fileDiskStream.WriteByte((byte)internalResourceStream.ReadByte());
             }
-            await FileDiskStream.FlushAsync();
+            await fileDiskStream.FlushAsync();
         }
-        await InternalResourceStream.FlushAsync();
+        await internalResourceStream.FlushAsync();
     }
 
     public InstallationService()

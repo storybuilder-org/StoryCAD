@@ -156,26 +156,8 @@ public partial class App : Application
         Trace.WriteLine(pathMsg);
         // Load Preferences
         PreferencesService pref = Ioc.Default.GetService<PreferencesService>();
-        ParseService parse = Ioc.Default.GetService<ParseService>();    
         await pref.LoadPreferences(GlobalData.RootDirectory);
-        // If the previous attempt to communicate to the back-end server failed, retry
-        if (!GlobalData.Preferences.ParsePreferencesStatus)
-            await parse.PostPreferences(GlobalData.Preferences);
-        if (!GlobalData.Preferences.ParseVersionStatus)
-            await parse.PostVersion();
-        
-        if (!GlobalData.Version.Equals(GlobalData.Preferences.Version))
-        {
-            // Process a version change (usually a new release)
-            _log.Log(LogLevel.Info, "Version mismatch: " + GlobalData.Version + " != " + GlobalData.Preferences.Version);
-            var preferences = GlobalData.Preferences;
-            // Update Preferences
-            preferences.Version = GlobalData.Version;
-            PreferencesIO prefIO = new(preferences, GlobalData.RootDirectory);
-            await prefIO.UpdateFile();
-            // Post deployment to backend server
-            await parse.PostVersion();
-        }
+        Ioc.Default.GetService<ParseService>().Begin();
 
         await ProcessInstallationFiles();
 
