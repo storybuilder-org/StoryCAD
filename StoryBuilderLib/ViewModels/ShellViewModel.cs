@@ -1279,7 +1279,8 @@ namespace StoryBuilder.ViewModels
                 if (_targetIndex == -1) { _targetCollection.Add(CurrentNode); }
                 else { _targetCollection.Insert(_targetIndex, CurrentNode); }
                 CurrentNode.Parent = targetParent;
-                Logger.Log(LogLevel.Info, $"Moving {CurrentNode.Name} left from parent {CurrentNode.Parent.Name} to parent {CurrentNode.Parent.Parent.Name}");
+
+                Logger.Log(LogLevel.Info, $"Moving {CurrentNode.Name} left to parent {CurrentNode.Parent.Name}");
             }
             else
             {
