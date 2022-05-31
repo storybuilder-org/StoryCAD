@@ -107,12 +107,18 @@ public sealed partial class Shell
     // Drag and Drop related
     private void TreeViewItem_DragEnter(object sender, DragEventArgs args)
     {
-        dragSource = args.OriginalSource as TreeViewItem;
+        //// disallow starting a drag from the trashcan
+        //// make all trashcan entries invalid targets
+        //base.OnDragEnter(args);
+        //// sender is the object being dragged
+        //// args.OriginalSource appears to be the target you're hovering over
+        //dragSource = args.OriginalSource as TreeViewItem;  
+       
     }
 
     private void TreeViewItem_OnDrop(object sender, DragEventArgs args)
     {
-        string x = args.ToString();
+        //string x = args.ToString();
     }
 
     //private void TreeViewItem_DropCompleted(UIElement sender, DropCompletedEventArgs args)
@@ -122,27 +128,45 @@ public sealed partial class Shell
 
     private void TreeViewItem_OnDragOver(object sender, DragEventArgs args)
     {
-        // sender is the item you are currently hovering over 
-        TreeViewItem item = (TreeViewItem)sender;
-       
-        base.OnDragOver(args);
-        var node = NavigationTree.NodeFromContainer(item);
-
-        if (node.Depth == -1)
-            item.AllowDrop = false;
-        if (node.Parent == null)  // but they are all null ?
-            item.AllowDrop = false;
-        //args.AcceptedOperation = Windows.Ap(TrplicationModel.DataTransfer.DataPackageOperation.Move;
+        //// sender is the item you are currently hovering over 
+        //Type type = sender.GetType();
+        //if (!type.Name.Equals("TreeViewItem"))
+        //{
+        //    System.Diagnostics.Debug.WriteLine($" Invalid target type {type.Name}");
+        //    args.Handled = true;
+        //    args.AcceptedOperation = Windows.ApplicationModel.DataTransfer.DataPackageOperation.None;
+        //    return;
+        //}
+        //TreeViewItem item = (TreeViewItem)sender;
+        //item.AllowDrop = false;
+        ////Console.WriteLine($"Entered for {item.Content}");
+        //base.OnDragOver(args);
+        //var node = NavigationTree.NodeFromContainer(item);
+        
+        //System.Diagnostics.Debug.WriteLine($"node  = {node.Content}");
+        //while (node.Depth != 0) 
+        //{ 
+        //    node = node.Parent; 
+        //}
+        //StoryNodeItem storyNode = (StoryNodeItem) node.Content;
+        //System.Diagnostics.Debug.WriteLine($"StoryNode Root = {storyNode.Name}");
+        
+        //if (storyNode.Type == StoryItemType.TrashCan)
+        //{
+        //    System.Diagnostics.Debug.WriteLine($"Root = Trash can");
+        //    item.AllowDrop = false;
+        //    args.Handled = true;
+        //    args.AcceptedOperation = Windows.ApplicationModel.DataTransfer.DataPackageOperation.None;      
+        //    return;
+        //}
+        //System.Diagnostics.Debug.WriteLine($"Allowing drop for {storyNode.Name}");
+        //item.AllowDrop = true;
+        ////args.AcceptedOperation = Windows.ApplicationModel.DataTransfer.DataPackageOperation.Move;
     }
 
-    //private StoryNodeItem GetStoryNode(TreeViewItem treeViewItem)
-    //{
-    //    if (treeViewItem != null)
-    //    {
-    //        var StoryNodeItem = ContainerFromItemr(treeViewItem);
-    //        return data as TreeViewData;
-    //    }
-
-    //    return null;
-    //}
+    private void OnDragItemsStarting(TreeView sender, TreeViewDragItemsStartingEventArgs args)
+    {
+        TreeViewNode trashNode = sender.RootNodes[1];
+        var trashItem = NavigationTree.ItemFromContainer(trashNode);
+    }
 }

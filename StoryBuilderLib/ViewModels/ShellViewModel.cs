@@ -1753,14 +1753,14 @@ namespace StoryBuilder.ViewModels
         /// </summary>
         /// <param name="startNode">The node to begin searching from</param>
         /// <returns>The StoryItemType of the root node</returns>
-        private static StoryItemType RootNodeType(StoryNodeItem startNode)
+        public static StoryItemType RootNodeType(StoryNodeItem startNode)
         {
             StoryNodeItem node = startNode;
             while (!node.IsRoot)
                 node = node.Parent;
             return node.Type;
         }
-
+        
         #endregion
 
         private string _moveErrorMessage;

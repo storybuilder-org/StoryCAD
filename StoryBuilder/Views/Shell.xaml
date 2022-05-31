@@ -280,6 +280,8 @@
                     <muxc:TreeView x:Name="NavigationTree" 
                                    ContextFlyout="{StaticResource AddStoryElementFlyout}" 
                                    ContextRequested="AddButton_ContextRequested" 
+                                   CanDragItems="True" AllowDrop="True"
+                                   DragItemsStarting="OnDragItemsStarting"
                                    ItemsSource="{x:Bind ShellVm.DataSource, Mode=TwoWay}" 
                                    ItemInvoked="TreeViewItem_Invoked" >
                         <muxc:TreeView.ItemTemplate>
