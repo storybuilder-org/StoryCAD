@@ -645,7 +645,7 @@ namespace StoryBuilder.ViewModels
             try
             {
                 ResetModel();
-
+                ShowHomePage();
                 if (fromPath == "" || !File.Exists(fromPath))
                 {
                     //var window = new Window();
@@ -693,7 +693,7 @@ namespace StoryBuilder.ViewModels
                 if (GlobalData.Preferences.TimedBackup) { Ioc.Default.GetService<BackupService>().StartTimedBackup(); }
                 
 
-                TreeViewNodeClicked(DataSource[0]); // Navigate to the tree root
+                //TreeViewNodeClicked(DataSource[0]); // Navigate to the tree root
                 string msg = $"Opened project {StoryModel.ProjectFilename}";
                 Logger.Log(LogLevel.Info, msg);
             }
