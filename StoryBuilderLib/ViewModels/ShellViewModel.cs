@@ -24,6 +24,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Threading;
 using System.Threading.Tasks;
 using Windows.Storage;
 using Windows.Storage.Pickers;
@@ -630,7 +631,6 @@ namespace StoryBuilder.ViewModels
         /// If fromPath is specified then the picker is skipped.
         /// </summary>
         /// <param name="fromPath"></param>
-        /// <returns></returns>
         public async Task OpenFile(string fromPath = "")
         {
             if (StoryModel.Changed)
@@ -675,6 +675,7 @@ namespace StoryBuilder.ViewModels
                     _canExecuteCommands = true;  // unblock other commands
                     return;
                 }
+
                 Ioc.Default.GetService<BackupService>().StopTimedBackup();
                 //NOTE: BasicProperties.DateModified can be the date last changed
 
@@ -691,9 +692,9 @@ namespace StoryBuilder.ViewModels
                 GlobalData.MainWindow.Title = $"StoryBuilder - Editing {StoryModel.ProjectFilename.Replace(".stbx", "")}";
                 new UnifiedVM().UpdateRecents(Path.Combine(StoryModel.ProjectFolder.Path,StoryModel.ProjectFile.Name)); 
                 if (GlobalData.Preferences.TimedBackup) { Ioc.Default.GetService<BackupService>().StartTimedBackup(); }
-                
 
                 //TreeViewNodeClicked(DataSource[0]); // Navigate to the tree root
+                ShowHomePage();
                 string msg = $"Opened project {StoryModel.ProjectFilename}";
                 Logger.Log(LogLevel.Info, msg);
             }
