@@ -24,7 +24,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Threading;
 using System.Threading.Tasks;
 using Windows.Storage;
 using Windows.Storage.Pickers;
@@ -638,7 +637,7 @@ namespace StoryBuilder.ViewModels
                 SaveModel();
                 await WriteModel();
             }
-            //Logger.Log(LogLevel.Trace, "OpenFile");
+
             _canExecuteCommands = false;
             Logger.Log(LogLevel.Info, "Executing OpenFile command");
 
@@ -648,8 +647,7 @@ namespace StoryBuilder.ViewModels
                 ShowHomePage();
                 if (fromPath == "" || !File.Exists(fromPath))
                 {
-                    //var window = new Window();
-                    //var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(window);
+                    Logger.Log(LogLevel.Info, "Opening file picker as story wasn't able to be found");
                     FileOpenPicker filePicker = new();
                     //Make folder Picker work in Win32
                     WinRT.Interop.InitializeWithWindow.Initialize(filePicker, GlobalData.WindowHandle);
@@ -660,6 +658,12 @@ namespace StoryBuilder.ViewModels
                     filePicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
                     filePicker.FileTypeFilter.Add(".stbx");
                     StoryModel.ProjectFile = await filePicker.PickSingleFileAsync();
+                    if (StoryModel.ProjectFile == null) //Picker was canceled.
+                    {
+                        Logger.Log(LogLevel.Info, "File picked to locate file was canceled.");
+                        _canExecuteCommands = true;  // unblock other commands
+                        return;
+                    }
                 }
                 else
                 {
@@ -671,7 +675,6 @@ namespace StoryBuilder.ViewModels
                 {
                     Logger.Log(LogLevel.Info,"Open File command cancelled (StoryModel.ProjectFile was null)");
                     Messenger.Send(new StatusChangedMessage(new($"Open Story command cancelled", LogLevel.Info)));
-
                     _canExecuteCommands = true;  // unblock other commands
                     return;
                 }
@@ -693,8 +696,8 @@ namespace StoryBuilder.ViewModels
                 new UnifiedVM().UpdateRecents(Path.Combine(StoryModel.ProjectFolder.Path,StoryModel.ProjectFile.Name)); 
                 if (GlobalData.Preferences.TimedBackup) { Ioc.Default.GetService<BackupService>().StartTimedBackup(); }
 
-                //TreeViewNodeClicked(DataSource[0]); // Navigate to the tree root
                 ShowHomePage();
+
                 string msg = $"Opened project {StoryModel.ProjectFilename}";
                 Logger.Log(LogLevel.Info, msg);
             }
