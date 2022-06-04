@@ -630,7 +630,6 @@ namespace StoryBuilder.ViewModels
         /// If fromPath is specified then the picker is skipped.
         /// </summary>
         /// <param name="fromPath"></param>
-        /// <returns></returns>
         public async Task OpenFile(string fromPath = "")
         {
             if (StoryModel.Changed)
@@ -638,18 +637,17 @@ namespace StoryBuilder.ViewModels
                 SaveModel();
                 await WriteModel();
             }
-            //Logger.Log(LogLevel.Trace, "OpenFile");
+
             _canExecuteCommands = false;
             Logger.Log(LogLevel.Info, "Executing OpenFile command");
 
             try
             {
                 ResetModel();
-
+                ShowHomePage();
                 if (fromPath == "" || !File.Exists(fromPath))
                 {
-                    //var window = new Window();
-                    //var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(window);
+                    Logger.Log(LogLevel.Info, "Opening file picker as story wasn't able to be found");
                     FileOpenPicker filePicker = new();
                     //Make folder Picker work in Win32
                     WinRT.Interop.InitializeWithWindow.Initialize(filePicker, GlobalData.WindowHandle);
@@ -660,6 +658,12 @@ namespace StoryBuilder.ViewModels
                     filePicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
                     filePicker.FileTypeFilter.Add(".stbx");
                     StoryModel.ProjectFile = await filePicker.PickSingleFileAsync();
+                    if (StoryModel.ProjectFile == null) //Picker was canceled.
+                    {
+                        Logger.Log(LogLevel.Info, "File picked to locate file was canceled.");
+                        _canExecuteCommands = true;  // unblock other commands
+                        return;
+                    }
                 }
                 else
                 {
@@ -671,10 +675,10 @@ namespace StoryBuilder.ViewModels
                 {
                     Logger.Log(LogLevel.Info,"Open File command cancelled (StoryModel.ProjectFile was null)");
                     Messenger.Send(new StatusChangedMessage(new($"Open Story command cancelled", LogLevel.Info)));
-
                     _canExecuteCommands = true;  // unblock other commands
                     return;
                 }
+
                 Ioc.Default.GetService<BackupService>().StopTimedBackup();
                 //NOTE: BasicProperties.DateModified can be the date last changed
 
@@ -691,9 +695,9 @@ namespace StoryBuilder.ViewModels
                 GlobalData.MainWindow.Title = $"StoryBuilder - Editing {StoryModel.ProjectFilename.Replace(".stbx", "")}";
                 new UnifiedVM().UpdateRecents(Path.Combine(StoryModel.ProjectFolder.Path,StoryModel.ProjectFile.Name)); 
                 if (GlobalData.Preferences.TimedBackup) { Ioc.Default.GetService<BackupService>().StartTimedBackup(); }
-                
 
-                TreeViewNodeClicked(DataSource[0]); // Navigate to the tree root
+                ShowHomePage();
+
                 string msg = $"Opened project {StoryModel.ProjectFilename}";
                 Logger.Log(LogLevel.Info, msg);
             }
@@ -1279,7 +1283,8 @@ namespace StoryBuilder.ViewModels
                 if (_targetIndex == -1) { _targetCollection.Add(CurrentNode); }
                 else { _targetCollection.Insert(_targetIndex, CurrentNode); }
                 CurrentNode.Parent = targetParent;
-                Logger.Log(LogLevel.Info, $"Moving {CurrentNode.Name} left from parent {CurrentNode.Parent.Name} to parent {CurrentNode.Parent.Parent.Name}");
+
+                Logger.Log(LogLevel.Info, $"Moving {CurrentNode.Name} left to parent {CurrentNode.Parent.Name}");
             }
             else
             {

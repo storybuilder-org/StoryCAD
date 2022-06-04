@@ -805,6 +805,13 @@ public class CharacterViewModel : ObservableRecipient, INavigable
         NextCharacter: continue;
         }
 
+        if (VM.ProspectivePartners.Count == 0)
+        {
+            Ioc.Default.GetRequiredService<LogService>().Log(LogLevel.Warn,"There are no prospective partners, not showing AddRelationship Dialog." );
+            Ioc.Default.GetRequiredService<ShellViewModel>().ShowMessage(LogLevel.Warn, "This character already has a relationship with everyone",false);
+            return;
+        }
+
         //Creates dialog and shows dialog
         ContentDialog NewRelationship = new();
         NewRelationship.Title = "New relationship";
