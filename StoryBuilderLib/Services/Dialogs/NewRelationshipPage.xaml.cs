@@ -2,8 +2,12 @@
 using System;
 using System.Runtime.InteropServices;
 using System.Collections.ObjectModel;
+using CommunityToolkit.Mvvm.DependencyInjection;
+using NLog;
 using StoryBuilder.Models;
+using StoryBuilder.Services.Logging;
 using StoryBuilder.ViewModels;
+using LogLevel = StoryBuilder.Services.Logging.LogLevel;
 
 namespace StoryBuilder.Services.Dialogs;
 
