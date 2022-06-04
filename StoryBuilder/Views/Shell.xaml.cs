@@ -18,7 +18,13 @@ public sealed partial class Shell
     public UnifiedVM UnifiedVm => Ioc.Default.GetService<UnifiedVM>();
     public PreferencesModel Preferences = GlobalData.Preferences;
 
-    private TreeViewItem dragSource = null;
+    private TreeViewItem dragTargetItem;    
+    private TreeViewNode dragTargetNode;
+    private StoryNodeItem dragTargetStoryNode;
+    private TreeViewItem dragSourceItem = null;
+    private TreeViewNode dragSourceNode;
+    private StoryNodeItem dragSourceStoryNode;
+
     public Shell()
     {
         try
@@ -105,20 +111,74 @@ public sealed partial class Shell
     }
 
     // Drag and Drop related
-    private void TreeViewItem_DragEnter(object sender, DragEventArgs args)
+    private void TreeViewItem_OnDragEnter(object sender, DragEventArgs args)
     {
+        System.Diagnostics.Debug.WriteLine($"OnDragEnter event");
+
+        // args.OriginalSource is the TreeViewItem you're dragging
+        Type type = args.OriginalSource.GetType();
+        if (!type.Name.Equals("TreeViewItem"))
+        {
+            System.Diagnostics.Debug.WriteLine($"Invalid dragSource type: {type.Name}");
+            //args.AcceptedOperation = Windows.ApplicationModel.DataTransfer.DataPackageOperation.None;
+            args.Handled = true;
+            base.OnDragEnter(args);
+            return;
+        }
+        dragSourceItem = args.OriginalSource as TreeViewItem;
+        dragSourceNode = NavigationTree.NodeFromContainer(dragSourceItem);
+        dragSourceStoryNode = dragSourceNode.Content as StoryNodeItem;
+        System.Diagnostics.Debug.WriteLine($"dragSource Name: {dragSourceStoryNode.Name}");
+        System.Diagnostics.Debug.WriteLine($"dragSource type: {dragSourceStoryNode.Type.ToString()}");
+
+        // Insure that the source is not in the trashcan
+        var node = dragSourceNode;
+        while (node.Depth != 0)
+        {
+            node = node.Parent;
+        }
+        var root = node.Content as StoryNodeItem;
+        if (root.Type == StoryItemType.TrashCan)
+        {
+            System.Diagnostics.Debug.WriteLine($"dragSource root is TrashCan");
+            //args.AcceptedOperation = Windows.ApplicationModel.DataTransfer.DataPackageOperation.None;
+            args.Handled = true;
+            base.OnDragEnter(args);
+            return;
+        }
+
+        // sender is the object being dragged
+        Type type = sender.GetType();
+        if (!type.Name.Equals("TreeViewItem"))
+        {
+            System.Diagnostics.Debug.WriteLine($"Invalid dragTarget type: {type.Name}");
+            args.AcceptedOperation = Windows.ApplicationModel.DataTransfer.DataPackageOperation.None;
+            args.Handled = true;
+            base.OnDragEnter(args);
+            return;
+        }
+        dragTargetItem = sender as TreeViewItem;
+        dragTargetNode = NavigationTree.NodeFromContainer(dragTargetItem);
+        dragTargetStoryNode = dragTargetNode.Content as StoryNodeItem;
+
+        // Insure that the source is not in the trashcan
+        //while (node.Depth != 0) 
+        //{ 
+        //    node = node.Parent; 
+        //}
+
         //// disallow starting a drag from the trashcan
         //// make all trashcan entries invalid targets
-        //base.OnDragEnter(args);
-        //// sender is the object being dragged
-        //// args.OriginalSource appears to be the target you're hovering over
-        //dragSource = args.OriginalSource as TreeViewItem;  
-       
+
+
+
+        base.OnDragEnter(args);
     }
 
     private void TreeViewItem_OnDrop(object sender, DragEventArgs args)
     {
-        //string x = args.ToString();
+        System.Diagnostics.Debug.WriteLine($"OnDrop event");
+        base.OnDrop(args);
     }
 
     //private void TreeViewItem_DropCompleted(UIElement sender, DropCompletedEventArgs args)
@@ -128,6 +188,7 @@ public sealed partial class Shell
 
     private void TreeViewItem_OnDragOver(object sender, DragEventArgs args)
     {
+        System.Diagnostics.Debug.WriteLine($"OnDragOver event");
         //// sender is the item you are currently hovering over 
         //Type type = sender.GetType();
         //if (!type.Name.Equals("TreeViewItem"))
@@ -140,9 +201,9 @@ public sealed partial class Shell
         //TreeViewItem item = (TreeViewItem)sender;
         //item.AllowDrop = false;
         ////Console.WriteLine($"Entered for {item.Content}");
-        //base.OnDragOver(args);
+
         //var node = NavigationTree.NodeFromContainer(item);
-        
+
         //System.Diagnostics.Debug.WriteLine($"node  = {node.Content}");
         //while (node.Depth != 0) 
         //{ 
@@ -150,7 +211,7 @@ public sealed partial class Shell
         //}
         //StoryNodeItem storyNode = (StoryNodeItem) node.Content;
         //System.Diagnostics.Debug.WriteLine($"StoryNode Root = {storyNode.Name}");
-        
+
         //if (storyNode.Type == StoryItemType.TrashCan)
         //{
         //    System.Diagnostics.Debug.WriteLine($"Root = Trash can");
@@ -162,11 +223,23 @@ public sealed partial class Shell
         //System.Diagnostics.Debug.WriteLine($"Allowing drop for {storyNode.Name}");
         //item.AllowDrop = true;
         ////args.AcceptedOperation = Windows.ApplicationModel.DataTransfer.DataPackageOperation.Move;
+        base.OnDragOver(args);
+    }
+    
+    //private void OnDragItemsStarting(TreeView sender, TreeViewDragItemsStartingEventArgs args)
+    //{
+    //    TreeViewNode trashNode = sender.RootNodes[1];
+    //    var trashItem = NavigationTree.ItemFromContainer(trashNode);
+    //}
+
+    private void TreeViewItem_OnDragStarting(UIElement sender, DragStartingEventArgs args)
+    {
+        System.Diagnostics.Debug.WriteLine($"OnDragStarting event");
     }
 
-    private void OnDragItemsStarting(TreeView sender, TreeViewDragItemsStartingEventArgs args)
-    {
-        TreeViewNode trashNode = sender.RootNodes[1];
-        var trashItem = NavigationTree.ItemFromContainer(trashNode);
-    }
+    //private void OnDragItemsCompleted(TreeView sender, TreeViewDragItemsCompletedEventArgs args)
+    //{
+
+
+    //}
 }

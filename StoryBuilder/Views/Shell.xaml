@@ -280,8 +280,7 @@
                     <muxc:TreeView x:Name="NavigationTree" 
                                    ContextFlyout="{StaticResource AddStoryElementFlyout}" 
                                    ContextRequested="AddButton_ContextRequested" 
-                                   CanDragItems="True" AllowDrop="True"
-                                   DragItemsStarting="OnDragItemsStarting"
+                                   CanDragItems="True" AllowDrop="True" CanReorderItems="True"
                                    ItemsSource="{x:Bind ShellVm.DataSource, Mode=TwoWay}" 
                                    ItemInvoked="TreeViewItem_Invoked" >
                         <muxc:TreeView.ItemTemplate>
@@ -290,9 +289,10 @@
                                                    Background="{x:Bind Background, Mode=OneWay}" 
                                                    IsExpanded="{x:Bind IsExpanded, Mode=TwoWay}" 
                                                    RightTapped="TreeViewItem_RightTapped"
-                                                   DragEnter="TreeViewItem_DragEnter"
+                                                   DragStarting="TreeViewItem_OnDragStarting"
+                                                   DragEnter="TreeViewItem_OnDragEnter"
                                                    DragOver="TreeViewItem_OnDragOver"
-                                                   Drop="TreeViewItem_OnDrop">
+                                                   Drop="TreeViewItem_OnDrop" >
                                     <StackPanel Orientation="Horizontal">
                                         <SymbolIcon Symbol="{x:Bind Symbol, Mode=OneWay}" Width="20" Height="20"/>
                                         <TextBlock Text="{x:Bind Name, Mode=TwoWay}" TextWrapping="{Binding  TextWrapping}" MaxWidth="220" Margin="10,0,10,0"/>
