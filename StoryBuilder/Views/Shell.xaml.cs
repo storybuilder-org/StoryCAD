@@ -21,7 +21,7 @@ public sealed partial class Shell
     private TreeViewItem dragTargetItem;    
     private TreeViewNode dragTargetNode;
     private StoryNodeItem dragTargetStoryNode;
-    private TreeViewItem dragSourceItem = null;
+    private TreeViewItem dragSourceItem;
     private TreeViewNode dragSourceNode;
     private StoryNodeItem dragSourceStoryNode;
 
@@ -127,12 +127,24 @@ public sealed partial class Shell
         }
         dragSourceItem = args.OriginalSource as TreeViewItem;
         dragSourceNode = NavigationTree.NodeFromContainer(dragSourceItem);
+        System.Diagnostics.Debug.WriteLine($"dragSource Depth: {dragSourceNode.Depth}");    
+
+        var node = dragSourceNode;
+        // Insure the source is not a root or above
+       if (node.Depth < 1)
+        {
+            System.Diagnostics.Debug.WriteLine($"dragSource is not below root");
+            args.AcceptedOperation = Windows.ApplicationModel.DataTransfer.DataPackageOperation.None;
+            args.Handled = true;
+            base.OnDragEnter(args);
+            return;
+        }
+
         dragSourceStoryNode = dragSourceNode.Content as StoryNodeItem;
         System.Diagnostics.Debug.WriteLine($"dragSource Name: {dragSourceStoryNode.Name}");
         System.Diagnostics.Debug.WriteLine($"dragSource type: {dragSourceStoryNode.Type.ToString()}");
 
         // Insure that the source is not in the trashcan
-        var node = dragSourceNode;
         while (node.Depth != 0)
         {
             node = node.Parent;
@@ -141,14 +153,14 @@ public sealed partial class Shell
         if (root.Type == StoryItemType.TrashCan)
         {
             System.Diagnostics.Debug.WriteLine($"dragSource root is TrashCan");
-            //args.AcceptedOperation = Windows.ApplicationModel.DataTransfer.DataPackageOperation.None;
+            args.AcceptedOperation = Windows.ApplicationModel.DataTransfer.DataPackageOperation.None;
             args.Handled = true;
             base.OnDragEnter(args);
             return;
         }
 
         // sender is the object being dragged
-        Type type = sender.GetType();
+        type = sender.GetType();
         if (!type.Name.Equals("TreeViewItem"))
         {
             System.Diagnostics.Debug.WriteLine($"Invalid dragTarget type: {type.Name}");
@@ -159,19 +171,38 @@ public sealed partial class Shell
         }
         dragTargetItem = sender as TreeViewItem;
         dragTargetNode = NavigationTree.NodeFromContainer(dragTargetItem);
+        System.Diagnostics.Debug.WriteLine($"dragTarget Depth: {dragTargetNode.Depth}");
+
+        node = dragTargetNode;
+        // Insure the target is not a root or above
+        if (node.Depth < 1)
+        {
+            System.Diagnostics.Debug.WriteLine($"dragTarget is not below root");
+            args.AcceptedOperation = Windows.ApplicationModel.DataTransfer.DataPackageOperation.None;
+            args.Handled = true;
+            base.OnDragEnter(args);
+            return;
+        }
+
         dragTargetStoryNode = dragTargetNode.Content as StoryNodeItem;
+        System.Diagnostics.Debug.WriteLine($"dragTarget Name: {dragTargetStoryNode.Name}");
+        System.Diagnostics.Debug.WriteLine($"dragTarget type: {dragTargetStoryNode.Type.ToString()}");
 
-        // Insure that the source is not in the trashcan
-        //while (node.Depth != 0) 
-        //{ 
-        //    node = node.Parent; 
-        //}
-
-        //// disallow starting a drag from the trashcan
-        //// make all trashcan entries invalid targets
-
-
-
+        // Insure that the target is not in the trashcan
+        while (node.Depth != 0)
+        {
+            node = node.Parent;
+        }
+        root = node.Content as StoryNodeItem;
+        if (root.Type == StoryItemType.TrashCan)
+        {
+            System.Diagnostics.Debug.WriteLine($"dragTarget root is TrashCan");
+            args.AcceptedOperation = Windows.ApplicationModel.DataTransfer.DataPackageOperation.None;
+            args.Handled = true;
+            base.OnDragEnter(args);
+            return;
+        }
+        System.Diagnostics.Debug.WriteLine($"Drag and Drop is valid");
         base.OnDragEnter(args);
     }
 
