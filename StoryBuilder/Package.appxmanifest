@@ -7,13 +7,13 @@
   IgnorableNamespaces="uap rescap">
 
   <Identity
-    Name="3234e32c-9ca1-4ad4-99bc-6583d2362437"
-    Publisher="CN=Team-StoryBuilder"
+    Name="34432StoryBuilder.StoryBuilder"
+    Publisher="CN=34A1944E-942C-4545-B217-ECE68E54ACF8"
     Version="2.0.15.0" />
 
   <Properties>
     <DisplayName>StoryBuilder</DisplayName>
-    <PublisherDisplayName>Team StoryBuilder</PublisherDisplayName>
+    <PublisherDisplayName>StoryBuilder</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
 
