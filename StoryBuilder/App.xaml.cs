@@ -63,11 +63,17 @@ public partial class App : Application
 
         var path = Path.Combine(Windows.ApplicationModel.Package.Current.InstalledLocation.Path, ".env");
         var options = new DotEnvOptions(false, new[] { path });
-        DotEnv.Load(options);
+        try
+        {
+            DotEnv.Load(options);
+
+            //Register Syncfusion license
+            var token = EnvReader.GetStringValue("SYNCFUSION_TOKEN");
+            SyncfusionLicenseProvider.RegisterLicense(token);
+        }
+        catch { GlobalData.ShowDotEnvWarning = true; }
         
-        //Register Syncfusion license
-        var token = EnvReader.GetStringValue("SYNCFUSION_TOKEN");
-        SyncfusionLicenseProvider.RegisterLicense(token);
+
 
         InitializeComponent();
 

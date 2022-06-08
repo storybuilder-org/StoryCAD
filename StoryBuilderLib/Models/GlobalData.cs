@@ -67,4 +67,7 @@ public static class GlobalData
     // the root of a visible Page.
     // The Shell page's XamlRoot is stored here and accessed wherever needed. 
     public static XamlRoot XamlRoot;
+
+    // If DotEnv is fails, this will show a warning to the user.
+    public static bool ShowDotEnvWarning = false;
 }
