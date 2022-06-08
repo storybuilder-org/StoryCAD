@@ -12,7 +12,6 @@
     <EnablePreviewMsixTooling>true</EnablePreviewMsixTooling>
     <GenerateAppInstallerFile>False</GenerateAppInstallerFile>
     <AppxPackageSigningEnabled>True</AppxPackageSigningEnabled>
-    <PackageCertificateThumbprint>5F61964EDBC12091CFAA723724F7A804F1F5C2B2</PackageCertificateThumbprint>
     <AppxPackageSigningTimestampDigestAlgorithm>SHA256</AppxPackageSigningTimestampDigestAlgorithm>
     <AppxAutoIncrementPackageRevision>False</AppxAutoIncrementPackageRevision>
     <AppxSymbolPackageEnabled>True</AppxSymbolPackageEnabled>
@@ -20,10 +19,11 @@
     <AppxBundle>Auto</AppxBundle>
     <AppInstallerUri>C:\msixs</AppInstallerUri>
     <HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
-    <AppxPackageDir>C:\Users\Rarisma\Desktop\stbr\</AppxPackageDir>
-    <AppxBundlePlatforms>x64</AppxBundlePlatforms>
+    <AppxPackageDir>C:\Users\Rarisma\Desktop\NoConfidenceInBozza232Still\</AppxPackageDir>
+    <AppxBundlePlatforms>x86</AppxBundlePlatforms>
     <RunAnalyzersDuringLiveAnalysis>False</RunAnalyzersDuringLiveAnalysis>
     <RunAnalyzersDuringBuild>False</RunAnalyzersDuringBuild>
+    <PackageCertificateKeyFile>StoryBuilder_TemporaryKey.pfx</PackageCertificateKeyFile>
   </PropertyGroup>
 
   <ItemGroup>
