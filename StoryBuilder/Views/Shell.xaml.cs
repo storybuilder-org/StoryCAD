@@ -125,8 +125,8 @@ public sealed partial class Shell
             Logger.Log(LogLevel.Warn, $"Invalid dragSource type: {type.Name}");
             args.AcceptedOperation = Windows.ApplicationModel.DataTransfer.DataPackageOperation.None;
             args.Handled = true;
-            ShellVm.ShowMessage(LogLevel.Warn, "Invalid drag source", false);
             base.OnDragEnter(args);
+            ShellVm.ShowMessage(LogLevel.Warn, "Invalid drag source", false);
             return;
         }
         dragSourceItem = args.OriginalSource as TreeViewItem;
@@ -140,8 +140,8 @@ public sealed partial class Shell
             Logger.Log(LogLevel.Warn, $"dragSource is not below root");
             args.AcceptedOperation = Windows.ApplicationModel.DataTransfer.DataPackageOperation.None;
             args.Handled = true;
-            ShellVm.ShowMessage(LogLevel.Warn, "Invalid drag source", false);
             base.OnDragEnter(args);
+            ShellVm.ShowMessage(LogLevel.Warn, "Invalid drag source", false);
             return;
         }
        
@@ -160,8 +160,8 @@ public sealed partial class Shell
             Logger.Log(LogLevel.Warn, $"dragSource root is TrashCan");
             args.AcceptedOperation = Windows.ApplicationModel.DataTransfer.DataPackageOperation.None;
             args.Handled = true;
-            ShellVm.ShowMessage(LogLevel.Warn, "Invalid drag source", false);
             base.OnDragEnter(args);
+            ShellVm.ShowMessage(LogLevel.Warn, "Invalid drag source", false);
             return;
         }
 
@@ -172,8 +172,8 @@ public sealed partial class Shell
             Logger.Log(LogLevel.Warn, $"Invalid dragTarget type: {type.Name}");
             args.AcceptedOperation = Windows.ApplicationModel.DataTransfer.DataPackageOperation.None;
             args.Handled = true;
-            ShellVm.ShowMessage(LogLevel.Warn, "Invalid drag target", false);
             base.OnDragEnter(args);
+            ShellVm.ShowMessage(LogLevel.Warn, "Invalid drag target", false);
             return;
         }
         dragTargetItem = sender as TreeViewItem;
@@ -188,8 +188,8 @@ public sealed partial class Shell
             Logger.Log(LogLevel.Warn, $"dragTarget is not below root");
             args.AcceptedOperation = Windows.ApplicationModel.DataTransfer.DataPackageOperation.None;
             args.Handled = true;
-            ShellVm.ShowMessage(LogLevel.Warn, "Invalid drag target", false);   
             base.OnDragEnter(args);
+            ShellVm.ShowMessage(LogLevel.Warn, "Invalid drag target", false);
             return;
         }
         
@@ -208,8 +208,8 @@ public sealed partial class Shell
             Logger.Log(LogLevel.Warn, $"dragTarget root is TrashCan");
             args.AcceptedOperation = Windows.ApplicationModel.DataTransfer.DataPackageOperation.None;
             args.Handled = true;
-            ShellVm.ShowMessage(LogLevel.Warn, "Invalid drag target", false);
             base.OnDragEnter(args);
+            ShellVm.ShowMessage(LogLevel.Warn, "Invalid drag target", false);
             return;
         }
         ShellVm.ShowMessage(LogLevel.Info, "Drag and drop successful", true);
