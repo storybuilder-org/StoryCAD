@@ -21,7 +21,7 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    <AutoSuggestBox Header="Role" Grid.Row="0"  MinWidth="200" ItemsSource="{x:Bind CharVm.RoleList}" Text="{x:Bind CharVm.Role, Mode=TwoWay}" />
+                    <editors:SfComboBox IsEditable="True" Header="Role" Grid.Row="0"  MinWidth="200" ItemsSource="{x:Bind CharVm.RoleList}" Text="{x:Bind CharVm.Role, Mode=TwoWay}" />
                     <editors:SfComboBox Header="Story Role" Grid.Row="1" IsEditable="False" MinWidth="200" ItemsSource="{x:Bind CharVm.StoryRoleList}" SelectedItem="{x:Bind CharVm.StoryRole, Mode=TwoWay}" />
                     <editors:SfComboBox Header="Archetype" Grid.Row="2" IsEditable="False" MinWidth="200" ItemsSource="{x:Bind CharVm.ArchetypeList}" SelectedItem="{x:Bind CharVm.Archetype, Mode=TwoWay}" />
                     <usercontrols:RichEditBoxExtended Header="Character Sketch" Grid.Row="3" RtfText="{x:Bind CharVm.CharacterSketch, Mode=TwoWay}" AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap" ScrollViewer.VerticalScrollBarVisibility="Visible" />
@@ -68,11 +68,11 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
-                        <AutoSuggestBox Header="Eye Color" Grid.Column="0" MinWidth="200"
+                        <editors:SfComboBox IsEditable="True" Header="Eye Color" Grid.Column="0" MinWidth="200"
                                   ItemsSource="{x:Bind CharVm.EyesList}"
                                   Text="{x:Bind CharVm.Eyes, Mode=TwoWay}" />
                         <TextBlock Grid.Column="1" MinWidth="100"/>
-                        <AutoSuggestBox Header="Hair Color" Grid.Column="2"  MinWidth="200"
+                        <editors:SfComboBox IsEditable="True" Header="Hair Color" Grid.Column="2"  MinWidth="200"
                                   ItemsSource="{x:Bind CharVm.HairList}"
                                   Text="{x:Bind CharVm.Hair, Mode=TwoWay}" />
                     </Grid>
@@ -82,11 +82,11 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
-                        <AutoSuggestBox Header="Build" Grid.Column="0" MinWidth="200"
+                        <editors:SfComboBox IsEditable="True" Header="Build" Grid.Column="0" MinWidth="200"
                                   ItemsSource="{x:Bind CharVm.BuildList}"
                                   Text="{x:Bind CharVm.Build, Mode=TwoWay}" />
                         <TextBlock Grid.Column="1" MinWidth="100"/>
-                        <AutoSuggestBox Header="Complexion" Grid.Column="2" MinWidth="200"
+                        <editors:SfComboBox IsEditable="True" Header="Complexion" Grid.Column="2" MinWidth="200"
                                   ItemsSource="{x:Bind CharVm.SkinList}"
                                   Text="{x:Bind CharVm.Complexion, Mode=TwoWay}" />
                     </Grid>
@@ -96,11 +96,11 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
-                        <AutoSuggestBox Header="Race" Grid.Column="0"  MinWidth="200"
+                        <editors:SfComboBox IsEditable="True" Header="Race" Grid.Column="0"  MinWidth="200"
                                   ItemsSource="{x:Bind CharVm.RaceList}"
                                   Text="{x:Bind CharVm.Race, Mode=TwoWay}" />
                         <TextBlock Grid.Column="1" MinWidth="100"/>
-                        <AutoSuggestBox Header="Nationality" Grid.Column="2" MinWidth="200"
+                        <editors:SfComboBox IsEditable="True" Header="Nationality" Grid.Column="2" MinWidth="200"
                                   ItemsSource="{x:Bind CharVm.NationalityList}"
                                   Text="{x:Bind CharVm.Nationality, Mode=TwoWay}"/>
                     </Grid>
@@ -191,11 +191,11 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
-                        <AutoSuggestBox Header="Intelligence"  Grid.Column="0" Width="200"
+                        <editors:SfComboBox IsEditable="True" Header="Intelligence"  Grid.Column="0" Width="200"
                                   ItemsSource="{x:Bind CharVm.IntelligenceList}"
                                   Text="{x:Bind CharVm.Intelligence, Mode=TwoWay}" />
                         <TextBlock Width="100"  Grid.Column="1" />
-                        <AutoSuggestBox Header="Values"  Grid.Column="2"  Width="200"
+                        <editors:SfComboBox IsEditable="True" Header="Values"  Grid.Column="2"  Width="200"
                                   ItemsSource="{x:Bind CharVm.ValuesList}"
                                   Text="{x:Bind CharVm.Values, Mode=TwoWay}" />
                     </Grid>
@@ -205,11 +205,11 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
-                        <AutoSuggestBox Header="Focus"  Grid.Column="0" Width="200"
+                        <editors:SfComboBox IsEditable="True" Header="Focus"  Grid.Column="0" Width="200"
                                   ItemsSource="{x:Bind CharVm.FocusList}"
                                   Text="{x:Bind CharVm.Focus, Mode=TwoWay}" />
                         <TextBlock Width="100"  Grid.Column="1" />
-                        <AutoSuggestBox Header="Abnormality"  Grid.Column="2"  Width="200"
+                        <editors:SfComboBox IsEditable="True" Header="Abnormality"  Grid.Column="2"  Width="200"
                                   ItemsSource="{x:Bind CharVm.AbnormalityList}"
                                   Text="{x:Bind CharVm.Abnormality, Mode=TwoWay}" />
                     </Grid>
@@ -234,41 +234,41 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
-                    <AutoSuggestBox Header="Adventureousness" Grid.Column="0" Grid.Row="0"  MinWidth="200"
+                    <editors:SfComboBox IsEditable="True" Header="Adventureousness" Grid.Column="0" Grid.Row="0"  MinWidth="200"
                                   ItemsSource="{x:Bind CharVm.AdventurousnessList}"
                                   Text="{x:Bind CharVm.Adventurousness, Mode=TwoWay}" />
-                    <AutoSuggestBox Header="Confidence" Grid.Column="0" Grid.Row="1" MinWidth="200"
+                    <editors:SfComboBox IsEditable="True" Header="Confidence" Grid.Column="0" Grid.Row="1" MinWidth="200"
                                   ItemsSource="{x:Bind CharVm.ConfidenceList}"
                                   Text="{x:Bind CharVm.Confidence, Mode=TwoWay}" />
-                    <AutoSuggestBox Header="Creativity" Grid.Column="0" Grid.Row="2" MinWidth="200" 
+                    <editors:SfComboBox IsEditable="True" Header="Creativity" Grid.Column="0" Grid.Row="2" MinWidth="200" 
                                   ItemsSource="{x:Bind CharVm.CreativityList}"
                                   Text="{x:Bind CharVm.Creativity, Mode=TwoWay}" />
-                    <AutoSuggestBox Header="Enthusiasm" Grid.Column="0" Grid.Row="3"  MinWidth="200"
+                    <editors:SfComboBox IsEditable="True" Header="Enthusiasm" Grid.Column="0" Grid.Row="3"  MinWidth="200"
                                   ItemsSource="{x:Bind CharVm.EnthusiasmList}"
                                   Text="{x:Bind CharVm.Enthusiasm, Mode=TwoWay}" />
-                    <AutoSuggestBox Header="Sensitivity" Grid.Column="0" Grid.Row="4" MinWidth="200"
+                    <editors:SfComboBox IsEditable="True" Header="Sensitivity" Grid.Column="0" Grid.Row="4" MinWidth="200"
                                   ItemsSource="{x:Bind CharVm.SensitivityList}"
                                   Text="{x:Bind CharVm.Sensitivity, Mode=TwoWay}" />
-                    <AutoSuggestBox Header="Sociability" Grid.Column="0" Grid.Row="5" MinWidth="200"
+                    <editors:SfComboBox IsEditable="True" Header="Sociability" Grid.Column="0" Grid.Row="5" MinWidth="200"
                                   ItemsSource="{x:Bind CharVm.SociabilityList}"
                                   Text="{x:Bind CharVm.Sociability, Mode=TwoWay}" />
                     <TextBlock Grid.Column="1" Grid.Row="0" MinWidth="100"/>
-                    <AutoSuggestBox Header="Aggression" Grid.Column="2" Grid.Row="0" MinWidth="200"
+                    <editors:SfComboBox IsEditable="True" Header="Aggression" Grid.Column="2" Grid.Row="0" MinWidth="200"
                                   ItemsSource="{x:Bind CharVm.AggressionList}"
                                   Text="{x:Bind CharVm.Aggression, Mode=TwoWay}" />
-                    <AutoSuggestBox Header="Conscientiousness" Grid.Column="2" Grid.Row="1" MinWidth="200"
+                    <editors:SfComboBox IsEditable="True" Header="Conscientiousness" Grid.Column="2" Grid.Row="1" MinWidth="200"
                                   ItemsSource="{x:Bind CharVm.ConscientiousnessList}"
                                   Text="{x:Bind CharVm.Conscientiousness, Mode=TwoWay}" />
-                    <AutoSuggestBox Header="Dominance" Grid.Column="2" Grid.Row="2" MinWidth="200" 
+                    <editors:SfComboBox IsEditable="True" Header="Dominance" Grid.Column="2" Grid.Row="2" MinWidth="200" 
                                   ItemsSource="{x:Bind CharVm.DominanceList}"
                                   Text="{x:Bind CharVm.Dominance, Mode=TwoWay}" />
-                    <AutoSuggestBox Header="Self Assurance" Grid.Column="2" Grid.Row="3" MinWidth="200"
+                    <editors:SfComboBox IsEditable="True" Header="Self Assurance" Grid.Column="2" Grid.Row="3" MinWidth="200"
                                   ItemsSource="{x:Bind CharVm.AssuranceList}"
                                   Text="{x:Bind CharVm.Assurance, Mode=TwoWay}" />
-                    <AutoSuggestBox Header="Shrewdness" Grid.Column="2" Grid.Row="4" MinWidth="200"
+                    <editors:SfComboBox IsEditable="True" Header="Shrewdness" Grid.Column="2" Grid.Row="4" MinWidth="200"
                                   ItemsSource="{x:Bind CharVm.ShrewdnessList}"
                                   Text="{x:Bind CharVm.Shrewdness, Mode=TwoWay}" />
-                    <AutoSuggestBox Header="Stability" Grid.Column="2" Grid.Row="5" MinWidth="200"
+                    <editors:SfComboBox IsEditable="True" Header="Stability" Grid.Column="2" Grid.Row="5" MinWidth="200"
                                   ItemsSource="{x:Bind CharVm.StabilityList}"
                                   Text="{x:Bind CharVm.Stability, Mode=TwoWay}" />
                 </Grid>

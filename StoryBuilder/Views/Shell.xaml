@@ -240,7 +240,7 @@
                         <MenuFlyout>
                             <MenuFlyoutItem Text="Key Questions" Command="{x:Bind ShellVm.KeyQuestionsCommand, Mode=OneWay}" />
                             <MenuFlyoutItem Text="Topic Information" Command="{x:Bind ShellVm.TopicsCommand, Mode=OneWay}" />
-                                <MenuFlyoutSubItem Text="Plotting Aids">
+                            <MenuFlyoutSubItem Text="Plotting Aids">
                                 <MenuFlyoutItem Text="Master Plots" Command="{x:Bind ShellVm.MasterPlotsCommand, Mode=OneWay}" />
                                 <MenuFlyoutItem Text="Dramatic Situations" Command="{x:Bind ShellVm.DramaticSituationsCommand, Mode=OneWay}"/>
                                 <MenuFlyoutItem Text="Stock Scenes" Command="{x:Bind ShellVm.StockScenesCommand, Mode=OneWay}"/>
@@ -256,7 +256,7 @@
                         <MenuFlyout>
                             <MenuFlyoutItem Text="Print Reports" Command="{x:Bind ShellVm.PrintReportsCommand, Mode=OneWay}" />
                             <MenuFlyoutItem Text="Scrivener Reports" Command="{x:Bind ShellVm.ScrivenerReportsCommand, Mode=OneWay}" />
-                            </MenuFlyout>
+                        </MenuFlyout>
                     </AppBarButton.Flyout>
                 </AppBarButton>
                 <AppBarButton Label="Preferences" ToolTipService.ToolTip="Preferences" 

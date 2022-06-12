@@ -24,7 +24,7 @@ public sealed partial class Shell
             InitializeComponent();
             DataContext = ShellVm;
             Loaded += Shell_Loaded;
-        }                         
+        }
         catch (Exception ex)
         {
             // A shell initialization error is fatal
@@ -98,7 +98,7 @@ public sealed partial class Shell
 
     private void ClearNodes(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
     {
-        if (ShellVm.DataSource == null || ShellVm.DataSource.Count ==0) { return; }
+        if (ShellVm.DataSource == null || ShellVm.DataSource.Count == 0) { return; }
         foreach (StoryNodeItem node in ShellVm.DataSource[0]) { node.Background = null; }
     }
 
