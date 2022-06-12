@@ -549,6 +549,22 @@ namespace StoryBuilder.ViewModels
             }
         }
 
+        /// <summary>
+        /// Shows dotenv warning.
+        /// </summary>
+        public async void ShowWarning()
+        {
+            ContentDialog dialog = new();
+            dialog.Title = "File missing.";
+            dialog.Content = "This copy is missing a key file, if you are working on a branch or fork this is expected and you do not need to do anything about this." +
+                          "\nHowever if you are not a developer then report this as it should not happen.\nThe following may have issues or possible errors\n" +
+                          "Syncfusion related items and error logging.";
+            dialog.XamlRoot = GlobalData.XamlRoot;
+            dialog.PrimaryButtonText = "Okay";
+            var xyz = await dialog.ShowAsync();
+            Ioc.Default.GetService<LogService>().Log(LogLevel.Error,"Env missing.");
+        }
+
         public void ShowHomePage()
         {
             Logger.Log(LogLevel.Info, "ShowHomePage");

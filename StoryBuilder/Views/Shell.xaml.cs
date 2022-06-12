@@ -44,7 +44,8 @@ public sealed partial class Shell
         GlobalData.XamlRoot = Content.XamlRoot;
         ShellVm.ShowHomePage();
         ShellVm.ShowConnectionStatus();
-        await ShellVm.OpenUnifiedMenu();
+        if (GlobalData.ShowDotEnvWarning) { ShellVm.ShowWarning(); }
+        else { ShellVm.OpenUnifiedMenu(); }
     }
 
     /// <summary>
