@@ -49,9 +49,7 @@
                         <TextBox Header="Time" Grid.Column="2" MinWidth="100"
                                  Text="{x:Bind SceneVm.Time, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                         <TextBlock Grid.Column="3" MinWidth="50"/>
-                        <usercontrols:CharacterName x:Name="ViewpointCharacter" Header="Viewpoint Character" Grid.Column="4" IsEditable="False" MinWidth="250"
-                              DisplayMemberPath="Name"
-                              SelectedItem="{x:Bind SceneVm.ViewpointCharacter, Mode=TwoWay, Converter={StaticResource ToStoryElement}}" />
+                        <usercontrols:CharacterName x:Name="ViewpointCharacter" Header="Viewpoint Character" Grid.Column="4" IsEditable="False" MinWidth="250" DisplayMemberPath="Name" SelectedItem="{x:Bind SceneVm.ViewpointCharacter, Mode=TwoWay, Converter={StaticResource ToStoryElement}}" />
                     </Grid>
                     <Grid Grid.Row="1" HorizontalAlignment="Left">
                         <Grid.ColumnDefinitions>
@@ -62,7 +60,7 @@
                         <usercontrols:SettingName Header="Setting" Grid.Column="0" IsEditable="False"
                              MinWidth="300" Margin="0,0,0,10"
                              DisplayMemberPath="Name"
-                             SelectedValue="{x:Bind SceneVm.Setting, Mode=TwoWay, Converter={StaticResource ToStoryElement}}"/>
+                             SelectedItem="{x:Bind SceneVm.Setting, Mode=TwoWay, Converter={StaticResource ToStoryElement}}"/>
                         <TextBlock Grid.Column="1" MinWidth="50"/>
                         <editors:SfComboBox IsEditable="True" Header="SceneType" Grid.Column="2" MinWidth="200"
                                         ItemsSource="{x:Bind SceneVm.SceneTypeList}"
@@ -182,7 +180,7 @@
                         </Grid.ColumnDefinitions>
                         <usercontrols:CharacterName Header="Protagonist" Grid.Column="0" IsEditable="False" MinWidth="300"
                             DisplayMemberPath="Name"
-                            SelectedValue="{x:Bind SceneVm.Protagonist, Mode=TwoWay, Converter={StaticResource ToStoryElement}}" />
+                            SelectedItem="{x:Bind SceneVm.Protagonist, Mode=TwoWay, Converter={StaticResource ToStoryElement}}" />
                         <TextBlock Grid.Column="1" MinWidth="50"/>
                         <editors:SfComboBox IsEditable="True" Header="Feelings" Grid.Column="2" MinWidth="200"
                                         ItemsSource="{x:Bind SceneVm.EmotionList}"
@@ -202,7 +200,7 @@
                         </Grid.ColumnDefinitions>
                         <usercontrols:CharacterName Header="Antagonist" Grid.Column="0" IsEditable="False" MinWidth="300"
                           DisplayMemberPath="Name"
-                          SelectedValue="{x:Bind SceneVm.Antagonist, Mode=TwoWay, Converter={StaticResource ToStoryElement}}" />
+                          SelectedItem ="{x:Bind SceneVm.Antagonist, Mode=TwoWay, Converter={StaticResource ToStoryElement}}" />
                         <TextBlock Grid.Column="1" MinWidth="50"/>
                         <editors:SfComboBox IsEditable="True" Header="Feelings" Grid.Column="2"  MinWidth="200"
                                         ItemsSource="{x:Bind SceneVm.EmotionList}"

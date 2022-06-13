@@ -241,9 +241,21 @@
                             <MenuFlyoutItem Text="Key Questions" Command="{x:Bind ShellVm.KeyQuestionsCommand, Mode=OneWay}" />
                             <MenuFlyoutItem Text="Topic Information" Command="{x:Bind ShellVm.TopicsCommand, Mode=OneWay}" />
                             <MenuFlyoutSubItem Text="Plotting Aids">
-                                <MenuFlyoutItem Text="Master Plots" Command="{x:Bind ShellVm.MasterPlotsCommand, Mode=OneWay}" />
-                                <MenuFlyoutItem Text="Dramatic Situations" Command="{x:Bind ShellVm.DramaticSituationsCommand, Mode=OneWay}"/>
-                                <MenuFlyoutItem Text="Stock Scenes" Command="{x:Bind ShellVm.StockScenesCommand, Mode=OneWay}"/>
+                                <MenuFlyoutItem Text="Master Plots" Command="{x:Bind ShellVm.MasterPlotsCommand, Mode=OneWay}">
+                                    <MenuFlyoutItem.KeyboardAccelerators>
+                                        <KeyboardAccelerator Key="M" Modifiers="Control"/>
+                                    </MenuFlyoutItem.KeyboardAccelerators>
+                                </MenuFlyoutItem>
+                                <MenuFlyoutItem Text="Dramatic Situations" Command="{x:Bind ShellVm.DramaticSituationsCommand, Mode=OneWay}">
+                                    <MenuFlyoutItem.KeyboardAccelerators>
+                                        <KeyboardAccelerator Key="D" Modifiers="Control"/>
+                                    </MenuFlyoutItem.KeyboardAccelerators>
+                                </MenuFlyoutItem>
+                                <MenuFlyoutItem Text="Stock Scenes" Command="{x:Bind ShellVm.StockScenesCommand, Mode=OneWay}">
+                                    <MenuFlyoutItem.KeyboardAccelerators>
+                                        <KeyboardAccelerator Key="L" Modifiers="Control"/>
+                                    </MenuFlyoutItem.KeyboardAccelerators>
+                                </MenuFlyoutItem>
                             </MenuFlyoutSubItem>
                         </MenuFlyout>
                     </AppBarButton.Flyout>
