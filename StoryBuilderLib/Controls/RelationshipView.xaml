@@ -4,7 +4,8 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:usercontrols="using:StoryBuilder.Controls">
+    xmlns:usercontrols="using:StoryBuilder.Controls"
+    xmlns:editors="using:Syncfusion.UI.Xaml.Editors">
 
     <Grid>
         <Grid.RowDefinitions>
@@ -24,17 +25,17 @@
                             SelectedItem="{x:Bind CharVm.SelectedRelationship, Mode=TwoWay}" />
         <TextBox Grid.Row="2" Header="Relation Type" MinWidth="200" 
                               IsReadOnly="True" Text="{x:Bind CharVm.RelationType, Mode=OneWay}" />
-        <AutoSuggestBox Grid.Row="3" Header= "Trait" MinWidth="150"
+        <editors:SfComboBox IsEditable="True" Grid.Row="3" Header= "Trait" MinWidth="150"
                               ItemsSource="{x:Bind CharVm.RelationshipTraitList}"   
                               Text="{x:Bind CharVm.RelationshipTrait, Mode=TwoWay}" IsEnabled="{x:Bind CharVm.IsLoaded, Mode=TwoWay}" />
-        <AutoSuggestBox Grid.Row="4" Header="Attitude"  MinWidth="150"
+        <editors:SfComboBox IsEditable="True" Grid.Row="4" Header="Attitude"  MinWidth="150"
                         ItemsSource="{x:Bind CharVm.RelationshipAttitudeList}"
                         Text="{x:Bind CharVm.RelationshipAttitude, Mode=TwoWay}" IsEnabled="{x:Bind CharVm.IsLoaded, Mode=TwoWay}"/>
         <usercontrols:RichEditBoxExtended Grid.Row="5" Header="Relationship Notes" IsEnabled="{x:Bind CharVm.IsLoaded, Mode=TwoWay}"
                              RtfText="{x:Bind CharVm.RelationshipNotes, Mode=TwoWay}" AcceptsReturn="True"
                              IsSpellCheckEnabled="True" TextWrapping="Wrap"
                              ScrollViewer.VerticalScrollBarVisibility="Visible"/>
-        <TextBlock Grid.Row="6"  />        
+        <TextBlock Grid.Row="6"  />
         <Grid Grid.Row="7" HorizontalAlignment="Left">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
