@@ -238,7 +238,11 @@
                     </AppBarButton.Icon>
                     <AppBarButton.Flyout>
                         <MenuFlyout>
-                            <MenuFlyoutItem Text="Key Questions" Command="{x:Bind ShellVm.KeyQuestionsCommand, Mode=OneWay}" />
+                            <MenuFlyoutItem Text="Key Questions" Command="{x:Bind ShellVm.KeyQuestionsCommand, Mode=OneWay}">
+                                <MenuFlyoutItem.KeyboardAccelerators>
+                                    <KeyboardAccelerator Key="Q" Modifiers="Control"/>
+                                </MenuFlyoutItem.KeyboardAccelerators>
+                            </MenuFlyoutItem>
                             <MenuFlyoutItem Text="Topic Information" Command="{x:Bind ShellVm.TopicsCommand, Mode=OneWay}" />
                             <MenuFlyoutSubItem Text="Plotting Aids">
                                 <MenuFlyoutItem Text="Master Plots" Command="{x:Bind ShellVm.MasterPlotsCommand, Mode=OneWay}">
@@ -266,8 +270,16 @@
                     </AppBarButton.Icon>
                     <AppBarButton.Flyout>
                         <MenuFlyout>
-                            <MenuFlyoutItem Text="Print Reports" Command="{x:Bind ShellVm.PrintReportsCommand, Mode=OneWay}" />
-                            <MenuFlyoutItem Text="Scrivener Reports" Command="{x:Bind ShellVm.ScrivenerReportsCommand, Mode=OneWay}" />
+                            <MenuFlyoutItem Text="Print Reports" Command="{x:Bind ShellVm.PrintReportsCommand, Mode=OneWay}">
+                                <MenuFlyoutItem.KeyboardAccelerators>
+                                    <KeyboardAccelerator Key="P" Modifiers="Control"/>
+                                </MenuFlyoutItem.KeyboardAccelerators>
+                            </MenuFlyoutItem>
+                            <MenuFlyoutItem Text="Scrivener Reports" Command="{x:Bind ShellVm.ScrivenerReportsCommand, Mode=OneWay}">
+                                <MenuFlyoutItem.KeyboardAccelerators>
+                                    <KeyboardAccelerator Key="R" Modifiers="Control"/>
+                                </MenuFlyoutItem.KeyboardAccelerators>
+                            </MenuFlyoutItem>
                         </MenuFlyout>
                     </AppBarButton.Flyout>
                 </AppBarButton>
