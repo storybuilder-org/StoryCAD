@@ -301,7 +301,12 @@ public class ReportFormatter
             sb.Replace("@Sociability", character.Sociability);
             sb.Replace("@Stability", character.Stability);
             //Outer Traits section
-            sb.Replace("@Traits", character.outerTrait);
+            string traits = "";
+            foreach (var trait in character.TraitList)
+            {
+                traits += trait.ToString() + "\n";
+            }
+            sb.Replace("@Traits", traits);
             // Notes section
             sb.Replace("@Notes", GetText(character.Notes));
 
