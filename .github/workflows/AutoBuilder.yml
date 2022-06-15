@@ -38,7 +38,7 @@ jobs:
     - name: Increase Version Number 
       run: |
         $VersionRegex = "\d+\.\d+\.\d+\.\d+"
-        $BUILD_BUILDNUMBER = "2.0.14.${{ github.run_number }}"
+        $BUILD_BUILDNUMBER = "2.0.${{ github.run_number }}.0"
         $ManifestVersionRegex = " Version=""\d+\.\d+\.\d+\.\d+"""
         $ScriptPath = $null
         try
