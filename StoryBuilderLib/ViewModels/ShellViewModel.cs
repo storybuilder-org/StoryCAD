@@ -63,6 +63,7 @@ namespace StoryBuilder.ViewModels
         public readonly SearchService Search;
 
         private DispatcherTimer statusTimer;
+        private DispatcherTimer autoSaveTimer = new();
 
         // The current story outline being processed. 
         public StoryModel StoryModel;
@@ -648,6 +649,12 @@ namespace StoryBuilder.ViewModels
         /// <param name="fromPath"></param>
         public async Task OpenFile(string fromPath = "")
         {
+            if (GlobalData.Preferences.AutoSaveInterval > 31 || GlobalData.Preferences.AutoSaveInterval < 4) { GlobalData.Preferences.AutoSaveInterval = 20; }
+            else { GlobalData.Preferences.AutoSaveInterval = GlobalData.Preferences.AutoSaveInterval; }
+            autoSaveTimer.Tick += AutoSaveTimer_Tick;
+            autoSaveTimer.Interval = new(0, 0, 0, GlobalData.Preferences.AutoSaveInterval, 0);
+            autoSaveTimer.Stop();
+
             if (StoryModel.Changed)
             {
                 SaveModel();
@@ -713,7 +720,7 @@ namespace StoryBuilder.ViewModels
                 if (GlobalData.Preferences.TimedBackup) { Ioc.Default.GetService<BackupService>().StartTimedBackup(); }
 
                 ShowHomePage();
-
+                if (GlobalData.Preferences.AutoSave) { autoSaveTimer.Start(); }
                 string msg = $"Opened project {StoryModel.ProjectFilename}";
                 Logger.Log(LogLevel.Info, msg);
             }
@@ -734,7 +741,6 @@ namespace StoryBuilder.ViewModels
                 Logger.Log(LogLevel.Info, "SaveFile command cancelled (DataSource was null or empty)");
                 return;
             }
-            
             Logger.Log(LogLevel.Trace, "Saving file");
             try //Updating the lost modified timer
             {
@@ -762,6 +768,11 @@ namespace StoryBuilder.ViewModels
 
             Logger.Log(LogLevel.Info, "SaveFile completed");
             _canExecuteCommands = true;
+        }
+
+        private async void AutoSaveTimer_Tick(object sender, object e)
+        {
+            await SaveFile();
         }
 
         /// <summary>
@@ -881,7 +892,7 @@ namespace StoryBuilder.ViewModels
         {
             _canExecuteCommands = false;
             Messenger.Send(new StatusChangedMessage(new($"Closing project", LogLevel.Info, true)));
-
+            autoSaveTimer.Stop();
             if (StoryModel.Changed)
             {
                 ContentDialog Warning = new()
@@ -1920,7 +1931,10 @@ namespace StoryBuilder.ViewModels
         private void IsChangedMessageReceived(IsChangedMessage isDirty)
         {
             StoryModel.Changed = StoryModel.Changed || isDirty.Value;
-            if (StoryModel.Changed) { ChangeStatusColor = Colors.Red; }
+            if (StoryModel.Changed) 
+            {
+                ChangeStatusColor = Colors.Red;
+            }
             else { ChangeStatusColor = Colors.Green; }
         }
 
