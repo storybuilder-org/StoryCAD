@@ -649,10 +649,13 @@ namespace StoryBuilder.ViewModels
         /// <param name="fromPath"></param>
         public async Task OpenFile(string fromPath = "")
         {
-            if (GlobalData.Preferences.AutoSaveInterval > 31 || GlobalData.Preferences.AutoSaveInterval < 4) { GlobalData.Preferences.AutoSaveInterval = 20; }
-            else { GlobalData.Preferences.AutoSaveInterval = GlobalData.Preferences.AutoSaveInterval; }
-            autoSaveTimer.Tick += AutoSaveTimer_Tick;
-            autoSaveTimer.Interval = new(0, 0, 0, GlobalData.Preferences.AutoSaveInterval, 0);
+            if (GlobalData.Preferences.AutoSave)
+            {
+                if (GlobalData.Preferences.AutoSaveInterval > 31 || GlobalData.Preferences.AutoSaveInterval < 4) { GlobalData.Preferences.AutoSaveInterval = 20; }
+                else { GlobalData.Preferences.AutoSaveInterval = GlobalData.Preferences.AutoSaveInterval; }
+                autoSaveTimer.Tick += AutoSaveTimer_Tick;
+                autoSaveTimer.Interval = new(0, 0, 0, GlobalData.Preferences.AutoSaveInterval, 0);
+            }
             autoSaveTimer.Stop();
 
             if (StoryModel.Changed)
@@ -772,7 +775,8 @@ namespace StoryBuilder.ViewModels
 
         private async void AutoSaveTimer_Tick(object sender, object e)
         {
-            await SaveFile();
+            if (GlobalData.Preferences.AutoSave) { await SaveFile(); }
+           
         }
 
         /// <summary>
