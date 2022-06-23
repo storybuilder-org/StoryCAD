@@ -70,4 +70,7 @@ public static class GlobalData
 
     // If DotEnv is fails, this will show a warning to the user.
     public static bool ShowDotEnvWarning = false;
+
+    // Set to true if the app has loaded with a version change. (Changelog)
+    public static bool LoadedWithVersionChange = false;
 }

@@ -43,9 +43,10 @@ public sealed partial class Shell
         // https://docs.microsoft.com/en-us/windows/winui/api/microsoft.ui.xaml.controls.contentdialog?view=winui-3.0-preview
         GlobalData.XamlRoot = Content.XamlRoot;
         ShellVm.ShowHomePage();
-        ShellVm.ShowConnectionStatus();
-        if (GlobalData.ShowDotEnvWarning) { ShellVm.ShowWarning(); }
-        else { ShellVm.OpenUnifiedMenu(); }
+        ShellVm.ShowConnectionStatus();        
+        if (GlobalData.ShowDotEnvWarning) { await ShellVm.ShowWarningAsync(); }
+        if (GlobalData.LoadedWithVersionChange ) { await ShellVm.ShowChangelog(); }
+        await ShellVm.OpenUnifiedMenu();
     }
 
     /// <summary>
