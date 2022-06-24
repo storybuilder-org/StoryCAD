@@ -119,7 +119,7 @@ public class PreferencesIO
                         _model.LastSelectedTemplate = Convert.ToInt32(tokens[1]);
                         break;
                     case "Version":
-                        if (tokens[1] != _model.Version) {/*Report change here*/}
+                        _model.Version = tokens[1];
                         break;
                     case "ParsePreferencesStatus":
                          if (tokens[1] == "True") 

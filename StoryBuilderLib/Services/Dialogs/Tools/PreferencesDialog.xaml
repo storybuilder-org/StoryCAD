@@ -41,6 +41,11 @@
                     <TextBlock Text="StoryBuilder was created by Terry Cox, Jake Shaw (Rarisma) and Kyle Lemons" TextWrapping="WrapWholeWords" Margin="5" FontSize="13"/>
                 </StackPanel>
             </PivotItem>
+            <PivotItem Header="What's new">
+                <ScrollViewer VerticalScrollBarVisibility="Visible" Height="450">
+                    <TextBlock Name="Changelog" TextWrapping="Wrap"/>
+                </ScrollViewer>
+            </PivotItem>
             <PivotItem Opacity="0" IsEnabled="False" Header="" Name="Dev">
                 <StackPanel HorizontalAlignment="Center">
                     <StackPanel Orientation="Horizontal">

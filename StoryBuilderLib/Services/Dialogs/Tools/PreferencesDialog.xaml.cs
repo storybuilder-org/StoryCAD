@@ -12,10 +12,12 @@ using StoryBuilder.Services.Installation;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.ViewModels.Tools;
 using WinRT;
+using StoryBuilder.ViewModels;
+using Octokit;
 
 namespace StoryBuilder.Services.Dialogs.Tools;
 
-public sealed partial class PreferencesDialog : Page
+public sealed partial class PreferencesDialog : Microsoft.UI.Xaml.Controls.Page
 {
     public PreferencesViewModel PreferencesVm => Ioc.Default.GetService<PreferencesViewModel>();
     public PreferencesDialog()
@@ -23,6 +25,7 @@ public sealed partial class PreferencesDialog : Page
         InitializeComponent();
         DataContext = PreferencesVm;
         Version.Text = "StoryBuilder Version: " + Windows.ApplicationModel.Package.Current.Id.Version.Major + "." + Windows.ApplicationModel.Package.Current.Id.Version.Minor + "." + Windows.ApplicationModel.Package.Current.Id.Version.Build + "." + Windows.ApplicationModel.Package.Current.Id.Version.Revision;
+        SetChangelog();
 
         if (Debugger.IsAttached || GlobalData.Preferences.Name == "ShowMeTheDevTab")
         {
@@ -38,6 +41,20 @@ public sealed partial class PreferencesDialog : Page
             else { apparch.Text = $"We don't know what architecture we are running on,\nMight want to call for help.\nIntPtr was {IntPtr.Size}, expected 4 or 8."; }
         }
         else { PivotView.Items.Remove(Dev); }
+    }
+
+    private async void SetChangelog()
+    {
+        try
+        {
+            GitHubClient client = new(new ProductHeaderValue("Stb2ChangelogGrabber"));
+            Changelog.Text = (await client.Repository.Release.Get("storybuilder-org", "StoryBuilder-2", GlobalData.Version.Replace("Version: ", ""))).Body;
+        }
+        catch
+        {
+            Changelog.Text = "Failed to get changelog for this version, this because either:\n - You are running an autobuild version\n- There is an issue conntecting to Github";
+        }
+
     }
 
     private void OpenPath(object sender, RoutedEventArgs e)

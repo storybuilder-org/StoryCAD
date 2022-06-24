@@ -573,25 +573,33 @@ namespace StoryBuilder.ViewModels
 
         public async Task ShowChangelog()
         {
-            GitHubClient client = new(new ProductHeaderValue("Stb2ChangelogGrabber"));
-
-            ContentDialog ChangelogUI = new()
+            try
             {
-                Width = 800,
-                Content = new ScrollViewer() 
+                GitHubClient client = new(new ProductHeaderValue("Stb2ChangelogGrabber"));
+
+                ContentDialog ChangelogUI = new()
                 {
-                    VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
-                    Content = new TextBlock()
+                    Width = 800,
+                    Content = new ScrollViewer()
                     {
-                        TextWrapping = TextWrapping.Wrap,
-                        Text = (await client.Repository.Release.Get("storybuilder-org", "StoryBuilder-2", GlobalData.Version.Replace("Version: ",""))).Body
-                    } 
-                },
-                Title = "What's new in StoryBuilder " + GlobalData.Version,
-                PrimaryButtonText = "Okay",
-                XamlRoot = GlobalData.XamlRoot
-            };
-            await ChangelogUI.ShowAsync();
+                        VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+                        Content = new TextBlock()
+                        {
+                            TextWrapping = TextWrapping.Wrap,
+                            Text = (await client.Repository.Release.Get("storybuilder-org", "StoryBuilder-2", GlobalData.Version.Replace("Version: ", ""))).Body
+                        }
+                    },
+                    Title = "What's new in StoryBuilder " + GlobalData.Version,
+                    PrimaryButtonText = "Okay",
+                    XamlRoot = GlobalData.XamlRoot
+                };
+                await ChangelogUI.ShowAsync();
+            }
+            catch (Exception e)
+            {
+                if (e.Source.Contains("Net")) { Logger.Log( LogLevel.Info , "Error with network, user probably isn't connected to wifi or is using an autobuild"); }
+                else { Logger.LogException(LogLevel.Error, e, "Error in ShowChangeLog()"); }
+            }
         }
 
         public void ShowHomePage()
