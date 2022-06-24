@@ -62,9 +62,11 @@ We will provide program demos video soon.
 
 ## Roadmap
 
+Here's our [Roadmap][24].
+
 We group StoryBuilder's plans into a series of [GitHub Projects][18].
 
-Currently, we're completing the [Clean Up StoryBuilder][19] project.
+Currently, we're completing the [Distribute StoryBuilder via WIndows Store][19] project.
 
 See the [open issues](https://github.com/storybuilder-org/StoryBuilder-2/issues) for a complete list of proposed 
 features and known bugs.
@@ -108,9 +110,10 @@ We are most grateful for all of them- especially those who toil in the arena:
 [16]:https://github.com/sgolivernet/nrtftree/blob/master/LICENSE
 [17]:https://www.syncfusion.com/sales/speciallicensingprograms
 [18]:https://github.com/storybuilder-org/StoryBuilder-2/projects?type=beta
-[19]:https://github.com/orgs/storybuilder-org/projects/1/views/1
+[19]:https://github.com/orgs/storybuilder-org/projects/1/views/3
 [20]:https://choosealicense.com/licenses/gpl-3.0/
 [21]:https://github.com/storybuilder-org/StoryBuilder-2/blob/master/ACKNOWLEDGE.md
 [22]:https://github.com/terrycox/StoryBuilder-2/blob/master/PRIVACY_POLICY.TXT
 [23]:https://github.com/terrycox/StoryBuilder-2/blob/master/LICENSE.TXT
+[24]:https://github.com/storybuilder-org/StoryBuilder-2/blob/master/ROADMAP.md
 
