@@ -110,7 +110,7 @@ We are most grateful for all of them- especially those who toil in the arena:
 [16]:https://github.com/sgolivernet/nrtftree/blob/master/LICENSE
 [17]:https://www.syncfusion.com/sales/speciallicensingprograms
 [18]:https://github.com/storybuilder-org/StoryBuilder-2/projects?type=beta
-[19]:https://github.com/orgs/storybuilder-org/projects/1/views/3
+[19]:https://github.com/orgs/storybuilder-org/projects/3/
 [20]:https://choosealicense.com/licenses/gpl-3.0/
 [21]:https://github.com/storybuilder-org/StoryBuilder-2/blob/master/ACKNOWLEDGE.md
 [22]:https://github.com/terrycox/StoryBuilder-2/blob/master/PRIVACY_POLICY.TXT
