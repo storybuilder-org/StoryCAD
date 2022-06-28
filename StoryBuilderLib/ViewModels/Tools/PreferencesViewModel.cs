@@ -77,7 +77,19 @@ public class PreferencesViewModel : ObservableRecipient
         get => _backupOnOpen;
         set => _backupOnOpen = value;
     }
-
+    
+    private bool _autoSave;
+    public bool AutoSave
+    {
+        get => _autoSave;
+        set => _autoSave = value;
+    }
+    private int _autoSaveInterval;
+    public int AutoSaveInterval
+    {
+        get => _autoSaveInterval;
+        set => _autoSaveInterval = value;
+    }
     /// <summary>
     /// Saves the users preferences to disk.
     /// </summary>
@@ -97,6 +109,10 @@ public class PreferencesViewModel : ObservableRecipient
         prf.Newsletter = NewsConsent;
         prf.PreferencesInitialised = init;
         prf.BackupOnOpen = BackupUpOnOpen;
+        prf.AutoSave = AutoSave;
+        if ( AutoSaveInterval > 31 || AutoSaveInterval < 4) { AutoSaveInterval = 20; }
+        else { prf.AutoSaveInterval = AutoSaveInterval; }
+        
 
         if (WrapNodeNames) {prf.WrapNodeNames = TextWrapping.WrapWholeWords;}
         else {prf.WrapNodeNames = TextWrapping.NoWrap;}
@@ -125,7 +141,8 @@ public class PreferencesViewModel : ObservableRecipient
         NewsConsent = _model.Newsletter;
         BackupDir = _model.BackupDirectory;
         BackupUpOnOpen = _model.BackupOnOpen;
-
+        AutoSave = _model.AutoSave;
+        AutoSaveInterval = _model.AutoSaveInterval;
 
         if (_model.WrapNodeNames == TextWrapping.WrapWholeWords) {WrapNodeNames = true;}
         else {WrapNodeNames = false; }

@@ -137,6 +137,13 @@ public class PreferencesIO
                         if (tokens[1] == "True") { _model.WrapNodeNames = TextWrapping.WrapWholeWords; }
                         else {_model.WrapNodeNames = TextWrapping.NoWrap;}
                         break;
+                    case "AutoSave":
+                        if (tokens[1] == "True") { _model.AutoSave = true; }
+                        else { _model.AutoSave = false; }
+                        break;
+                    case "AutoSaveInterval":
+                        _model.AutoSaveInterval = Convert.ToInt32(tokens[1]);
+                        break;
                 }
             }
             _log.Log(LogLevel.Info, "PreferencesModel updated from StoryBuilder.prf.");
@@ -184,8 +191,10 @@ public class PreferencesIO
         NewPreferences.Add("TimedBackup=" + _model.TimedBackup);
         NewPreferences.Add("LastTemplate=" + _model.LastSelectedTemplate);
         NewPreferences.Add("Version=" + _model.Version);
-        NewPreferences.Add("ParsePreferencesStaus=" + _model.ParsePreferencesStatus);
+        NewPreferences.Add("ParsePreferencesStaus=" + _model.ParsePreferencesStatus); //These are spelt wrong but correcting them will cause data loss. (Save it for a major update)
         NewPreferences.Add("ParseVersionStaus=" + _model.ParseVersionStatus);
+        NewPreferences.Add("AutoSave=" + _model.AutoSave);
+        NewPreferences.Add("AutoSaveInterval=" + _model.AutoSaveInterval);
 
         if (_model.WrapNodeNames == TextWrapping.WrapWholeWords) { NewPreferences.Add("WrapNodeNames=True"); }
         else { NewPreferences.Add("WrapNodeNames=False"); }

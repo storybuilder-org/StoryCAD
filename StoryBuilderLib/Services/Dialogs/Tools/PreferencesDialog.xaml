@@ -31,6 +31,10 @@
                     <CheckBox Content="Send error logs to Team StoryBuilder" Margin="8" HorizontalAlignment="Left" IsChecked="{x:Bind PreferencesVm.ErrorConsent, Mode=TwoWay}"/>
                     <CheckBox Content="Send me newsletters about StoryBuilder" Margin="8" HorizontalAlignment="Left" IsChecked="{x:Bind PreferencesVm.NewsConsent, Mode=TwoWay}"/>
                     <CheckBox Content="Wrap node names" Margin="8" HorizontalAlignment="Left" IsChecked="{x:Bind PreferencesVm.WrapNodeNames, Mode=TwoWay}"/>
+                    <StackPanel Orientation="Horizontal">
+                        <CheckBox Content="Automatically Save" IsChecked="{x:Bind PreferencesVm.AutoSave, Mode=TwoWay}" HorizontalAlignment="Left" Margin="8"/>
+                        <NumberBox Minimum="5" Maximum="60" IsEnabled="{x:Bind PreferencesVm.AutoSave, Mode=TwoWay}" PlaceholderText="Enter a value (Seconds)" Value="{x:Bind PreferencesVm.AutoSaveInterval, Mode=TwoWay}" HorizontalAlignment="Left" Margin="8"/>
+                    </StackPanel>
                 </StackPanel>
             </PivotItem>
             <PivotItem Header="About">

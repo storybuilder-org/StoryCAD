@@ -41,6 +41,8 @@ namespace StoryBuilder.Models.Tools
         public Microsoft.UI.Xaml.TextWrapping WrapNodeNames { get; set; }
 
         // Backup Information
+        public bool AutoSave { get; set; }
+        public int AutoSaveInterval { get; set; }
         public bool BackupOnOpen { get; set; }
         public bool TimedBackup { get; set; }
         public int TimedBackupInterval { get; set; }
