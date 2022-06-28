@@ -41,6 +41,7 @@ namespace StoryBuilder.Services.Parse
                     {
                         // Process a version change (usually a new release)
                         Log.Log(LogLevel.Info, "Version mismatch: " + GlobalData.Version + " != " + GlobalData.Preferences.Version);
+                        GlobalData.LoadedWithVersionChange = true;
                         var preferences = GlobalData.Preferences;
                         // Update Preferences
                         preferences.Version = GlobalData.Version;

@@ -30,6 +30,12 @@ using Windows.Storage.Pickers;
 using StoryBuilder.Services;
 using WinRT;
 using GuidAttribute = System.Runtime.InteropServices.GuidAttribute;
+using System.Net.Http;
+using System.Text;
+using System.Net.Http.Headers;
+using System.Net;
+using Octokit;
+using ProductHeaderValue = Octokit.ProductHeaderValue;
 
 namespace StoryBuilder.ViewModels
 {
@@ -377,7 +383,7 @@ namespace StoryBuilder.ViewModels
             _contentDialog = new();
             _contentDialog.XamlRoot = GlobalData.XamlRoot;
             _contentDialog.Content = new UnifiedMenuPage();
-            if (Application.Current.RequestedTheme == ApplicationTheme.Light) { _contentDialog.Background = new SolidColorBrush(Colors.LightGray); }
+            if (Microsoft.UI.Xaml.Application.Current.RequestedTheme == ApplicationTheme.Light) { _contentDialog.Background = new SolidColorBrush(Colors.LightGray); }
             await _contentDialog.ShowAsync();
             _canExecuteCommands = true;
         }
@@ -553,7 +559,7 @@ namespace StoryBuilder.ViewModels
         /// <summary>
         /// Shows dotenv warning.
         /// </summary>
-        public async void ShowWarning()
+        public async Task ShowWarningAsync()
         {
             ContentDialog dialog = new();
             dialog.Title = "File missing.";
@@ -562,8 +568,39 @@ namespace StoryBuilder.ViewModels
                           "Syncfusion related items and error logging.";
             dialog.XamlRoot = GlobalData.XamlRoot;
             dialog.PrimaryButtonText = "Okay";
-            var xyz = await dialog.ShowAsync();
+            await dialog.ShowAsync();
             Ioc.Default.GetService<LogService>().Log(LogLevel.Error,"Env missing.");
+        }
+
+        public async Task ShowChangelog()
+        {
+            try
+            {
+                GitHubClient client = new(new ProductHeaderValue("Stb2ChangelogGrabber"));
+
+                ContentDialog ChangelogUI = new()
+                {
+                    Width = 800,
+                    Content = new ScrollViewer()
+                    {
+                        VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+                        Content = new TextBlock()
+                        {
+                            TextWrapping = TextWrapping.Wrap,
+                            Text = (await client.Repository.Release.Get("storybuilder-org", "StoryBuilder-2", GlobalData.Version.Replace("Version: ", ""))).Body
+                        }
+                    },
+                    Title = "What's new in StoryBuilder " + GlobalData.Version,
+                    PrimaryButtonText = "Okay",
+                    XamlRoot = GlobalData.XamlRoot
+                };
+                await ChangelogUI.ShowAsync();
+            }
+            catch (Exception e)
+            {
+                if (e.Source.Contains("Net")) { Logger.Log( LogLevel.Info , "Error with network, user probably isn't connected to wifi or is using an autobuild"); }
+                else { Logger.LogException(LogLevel.Error, e, "Error in ShowChangeLog()"); }
+            }
         }
 
         public void ShowHomePage()
@@ -951,7 +988,7 @@ namespace StoryBuilder.ViewModels
                 }
             }
             Logger.Flush();
-            Application.Current.Exit();  // Win32
+            Microsoft.UI.Xaml.Application.Current.Exit();  // Win32
         }
 
         private async Task CreateProjectFolder()
@@ -2125,7 +2162,7 @@ namespace StoryBuilder.ViewModels
                 if (Search.SearchStoryElement(node, FilterText, StoryModel)) //checks if node name contains the thing we are looking for
                 {
                     SearchTotal++;
-                    if (Application.Current.RequestedTheme == ApplicationTheme.Light) { node.Background = new SolidColorBrush(Colors.LightGoldenrodYellow); }
+                    if (Microsoft.UI.Xaml.Application.Current.RequestedTheme == ApplicationTheme.Light) { node.Background = new SolidColorBrush(Colors.LightGoldenrodYellow); }
                     else { node.Background = new SolidColorBrush(Colors.DarkGoldenrod); } //Light Goldenrod is hard to read in dark theme
                     node.IsExpanded = true;
 
