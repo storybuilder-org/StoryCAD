@@ -2,6 +2,7 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using StoryBuilder.ViewModels;
+using Syncfusion.UI.Xaml.Editors;
 
 namespace StoryBuilder.Controls;
 
@@ -20,12 +21,12 @@ public sealed partial class RelationshipView : UserControl
     /// CharacterRelationships is bound to is selected.
     /// However, one property need modified during LoadModel: the Partner  
     /// StoryElement in the RelationshipModel needs loaded from its Uuid.
-    private void RelationshipChanged(object sender, SelectionChangedEventArgs e)
+    private void RelationshipChanged(object sender, ComboBoxSelectionChangedEventArgs e)
     {
         CharVm.SaveRelationship(CharVm.CurrentRelationship);
         CharVm.LoadRelationship(CharVm.SelectedRelationship);
         CharVm.CurrentRelationship = CharVm.SelectedRelationship;
-        if ((sender as ComboBox).SelectedValue == null) {  CharVm.IsLoaded = false; }
+        if ((sender as SfComboBox).SelectedValue == null) {  CharVm.IsLoaded = false; }
         else { CharVm.IsLoaded = true;}
     }
 }
