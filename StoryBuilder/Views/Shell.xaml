@@ -91,11 +91,6 @@
                         </Flyout>
                     </AppBarButton.Flyout>
                 </AppBarButton>
-                <AppBarButton Icon="MoveToFolder" Command="{x:Bind ShellVm.NarativeEditorCommand, Mode=OneWay}" Visibility="{x:Bind ShellVm.PrintNodeVisibility, Mode=TwoWay}" >
-                    <ToolTipService.ToolTip>
-                        <ToolTip Content="Narative editor"/>
-                    </ToolTipService.ToolTip>
-                </AppBarButton>
             </CommandBarFlyout.PrimaryCommands>
         </CommandBarFlyout>
     </Page.Resources>

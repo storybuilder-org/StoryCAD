@@ -13,7 +13,7 @@
             <ColumnDefinition Width="200"/>
             <ColumnDefinition Width="200"/>
         </Grid.ColumnDefinitions>
-        <TreeView x:Name="NavigationTree" AllowDrop="False"   ItemsSource="{x:Bind ShellVM.DataSource, Mode=TwoWay}"  >
+        <TreeView x:Name="NavigationTree" AllowDrop="False"  >
             <TreeView.ItemTemplate>
                 <DataTemplate  x:DataType="viewmodels:StoryNodeItem">
                     <TreeViewItem ItemsSource="{x:Bind Children}" Background="{x:Bind Background, Mode=OneWay}" IsExpanded="{x:Bind IsExpanded, Mode=TwoWay}" >
