@@ -62,6 +62,7 @@ namespace StoryBuilder.Services.Parse
         private LogService log = Ioc.Default.GetService<LogService>();
         public async Task PostPreferences(PreferencesModel preferences)
         {
+            return;
             log.Log(LogLevel.Info, "Posting preferences data to parse");
             try
             {
@@ -120,6 +121,7 @@ namespace StoryBuilder.Services.Parse
 
         public async Task PostVersion()
         {
+            return;
             log.Log(LogLevel.Info, "Posting version data to parse");
             var preferences = GlobalData.Preferences;
             try
