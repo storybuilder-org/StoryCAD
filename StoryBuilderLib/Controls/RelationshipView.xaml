@@ -19,12 +19,12 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <StackPanel Orientation="Horizontal" Grid.Row="0" >
-            <editors:SfComboBox Header="Relationship" PlaceholderText="Pick Relation" IsEditable="False" 
+            <ComboBox Header="Relationship" PlaceholderText="Pick Relation" IsEditable="False" 
                             ItemsSource="{x:Bind CharVm.CharacterRelationships}"
                             SelectionChanged="RelationshipChanged" 
-                            DisplayMemberPath ="Partner.Name" 
+                            DisplayMemberPath ="Partner.Name" Name="RelationshipPickerBox"
                             SelectedItem="{x:Bind CharVm.SelectedRelationship, Mode=TwoWay}" Margin="5" VerticalAlignment="Center" />
-            <Button Content="Add Relation" Command="{x:Bind CharVm.AddRelationshipCommand, Mode=OneWay}" Margin="5" VerticalAlignment="Bottom"/>
+            <Button Content="Add Relation" Click="ButtonBase_OnClick" Margin="5" VerticalAlignment="Bottom"/>
             <Button Content="Remove Relation" Command="{x:Bind CharVm.RemoveRelationshipCommand, Mode=OneWay}" Margin="5"  VerticalAlignment="Bottom" IsEnabled="{x:Bind CharVm.IsLoaded, Mode=TwoWay}"/>
         </StackPanel>
 

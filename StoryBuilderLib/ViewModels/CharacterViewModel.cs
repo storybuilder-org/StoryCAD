@@ -15,6 +15,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Threading.Tasks;
 
 namespace StoryBuilder.ViewModels;
 
@@ -783,7 +784,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable
     /// Add a new RelationshipModel instance for this character.
     /// The added relationship is made the currently loaded and displayed one.
     /// </summary>
-    private async void AddRelationship()
+    public async Task AddRelationship()
     {
         _logger.Log(LogLevel.Info, "Executing AddRelationship command");
         SaveRelationship(CurrentRelationship);
@@ -1070,7 +1071,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable
 
         AddTraitCommand = new RelayCommand(AddTrait, () => true);
         RemoveTraitCommand = new RelayCommand(RemoveTrait, () => true);
-        AddRelationshipCommand = new RelayCommand(AddRelationship, () => true);
+        AddRelationshipCommand = new RelayCommand(async () => await  AddRelationship(), () => true);
         RemoveRelationshipCommand = new RelayCommand(RemoveRelationship, () => true);
         FlawCommand = new RelayCommand(FlawTool, () => true);
         TraitCommand = new RelayCommand(TraitTool, () => true);
