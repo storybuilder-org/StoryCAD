@@ -1,7 +1,9 @@
-﻿using CommunityToolkit.Mvvm.DependencyInjection;
+﻿using System.Linq;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using StoryBuilder.ViewModels;
+using Syncfusion.UI.Xaml.Editors;
 
 namespace StoryBuilder.Controls;
 
@@ -25,7 +27,13 @@ public sealed partial class RelationshipView : UserControl
         CharVm.SaveRelationship(CharVm.CurrentRelationship);
         CharVm.LoadRelationship(CharVm.SelectedRelationship);
         CharVm.CurrentRelationship = CharVm.SelectedRelationship;
-        if ((sender as ComboBox).SelectedValue == null) {  CharVm.IsLoaded = false; }
+        if (RelationshipPickerBox.SelectedValue == null) {  CharVm.IsLoaded = false; }
         else { CharVm.IsLoaded = true;}
+    }
+
+    private async void ButtonBase_OnClick(object sender, RoutedEventArgs e)
+    {
+       await CharVm.AddRelationship();
+       RelationshipPickerBox.SelectedItem = CharVm.CharacterRelationships.Last();
     }
 }

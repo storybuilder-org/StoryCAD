@@ -18,38 +18,31 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <ComboBox Grid.Row="0" Header="Relationship" PlaceholderText="Pick Relation" IsEditable="False" 
+        <StackPanel Orientation="Horizontal" Grid.Row="0" >
+            <ComboBox Header="Relationship" PlaceholderText="Pick Relation" IsEditable="False" 
                             ItemsSource="{x:Bind CharVm.CharacterRelationships}"
                             SelectionChanged="RelationshipChanged" 
-                            DisplayMemberPath ="Partner.Name" 
-                            SelectedItem="{x:Bind CharVm.SelectedRelationship, Mode=TwoWay}" />
-        <TextBox Grid.Row="2" Header="Relation Type" MinWidth="200" 
-                              IsReadOnly="True" Text="{x:Bind CharVm.RelationType, Mode=OneWay}" />
-        <editors:SfComboBox IsEditable="True" Grid.Row="3" Header= "Trait" MinWidth="150"
+                            DisplayMemberPath ="Partner.Name" Name="RelationshipPickerBox"
+                            SelectedItem="{x:Bind CharVm.SelectedRelationship, Mode=TwoWay}" Margin="5" VerticalAlignment="Center" />
+            <Button Content="Add Relation" Click="ButtonBase_OnClick" Margin="5" VerticalAlignment="Bottom"/>
+            <Button Content="Remove Relation" Command="{x:Bind CharVm.RemoveRelationshipCommand, Mode=OneWay}" Margin="5"  VerticalAlignment="Bottom" IsEnabled="{x:Bind CharVm.IsLoaded, Mode=TwoWay}"/>
+        </StackPanel>
+
+        <TextBox Grid.Row="2" Header="Relation Type" MinWidth="200" IsEnabled="{x:Bind CharVm.IsLoaded, Mode=TwoWay}" Text="{x:Bind CharVm.RelationType, Mode=OneWay}" />
+
+        <StackPanel Orientation="Horizontal" Grid.Row="3" Margin="0,5">
+            <editors:SfComboBox IsEditable="True"  Header= "Trait" MinWidth="150"
                               ItemsSource="{x:Bind CharVm.RelationshipTraitList}"   
-                              Text="{x:Bind CharVm.RelationshipTrait, Mode=TwoWay}" IsEnabled="{x:Bind CharVm.IsLoaded, Mode=TwoWay}" />
-        <editors:SfComboBox IsEditable="True" Grid.Row="4" Header="Attitude"  MinWidth="150"
+                              Text="{x:Bind CharVm.RelationshipTrait, Mode=TwoWay}" IsEnabled="{x:Bind CharVm.IsLoaded, Mode=TwoWay}" Margin="0,0,10,0"/>
+            <editors:SfComboBox IsEditable="True" Grid.Row="4" Header="Attitude"  MinWidth="150"
                         ItemsSource="{x:Bind CharVm.RelationshipAttitudeList}"
                         Text="{x:Bind CharVm.RelationshipAttitude, Mode=TwoWay}" IsEnabled="{x:Bind CharVm.IsLoaded, Mode=TwoWay}"/>
-        <usercontrols:RichEditBoxExtended Grid.Row="5" Header="Relationship Notes" IsEnabled="{x:Bind CharVm.IsLoaded, Mode=TwoWay}"
+        </StackPanel>
+        
+
+        <usercontrols:RichEditBoxExtended Grid.Row="5" Header="Relationship Notes" IsEnabled="{x:Bind CharVm.IsLoaded, Mode=TwoWay}" Margin="0,10"
                              RtfText="{x:Bind CharVm.RelationshipNotes, Mode=TwoWay}" AcceptsReturn="True"
                              IsSpellCheckEnabled="True" TextWrapping="Wrap"
                              ScrollViewer.VerticalScrollBarVisibility="Visible"/>
-        <TextBlock Grid.Row="6"  />
-        <Grid Grid.Row="7" HorizontalAlignment="Left">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
-            <TextBlock Grid.Column="1" MinWidth="25" />
-            <Button Grid.Column="2" Content="Add Relation" 
-                             Command="{x:Bind CharVm.AddRelationshipCommand, Mode=OneWay}" />
-            <TextBlock Grid.Column="3" MinWidth="25" />
-            <Button Grid.Column="4" Content="Remove Relation" 
-                             Command="{x:Bind CharVm.RemoveRelationshipCommand, Mode=OneWay}" />
-        </Grid>
     </Grid>
 </UserControl>
