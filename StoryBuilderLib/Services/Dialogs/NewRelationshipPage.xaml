@@ -6,15 +6,11 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
-        <ComboBox Header="Members" Grid.Row="0" IsEditable="False" MinWidth="250" ItemsSource="{x:Bind NewRelVM.ProspectivePartners}" DisplayMemberPath ="Name" SelectedItem="{x:Bind  NewRelVM.SelectedPartner, Mode=TwoWay}"  Margin="10"/>
-        <ComboBox Header="Relationship" Grid.Row="1" MinWidth="250" ItemsSource="{x:Bind  NewRelVM.RelationTypes}" SelectedItem="{x:Bind  NewRelVM.RelationType, Mode=TwoWay}" Margin="10"/>
-    </Grid>
+    <StackPanel Orientation="Horizontal" Width="500">
+        <TextBlock  Text="{x:Bind CharVM.Name}" VerticalAlignment="Center"/>
+        <TextBlock  Text=" is a " VerticalAlignment="Center"/>
+        <ComboBox  MinWidth="150" ItemsSource="{x:Bind  NewRelVM.SimpleRelationTypes}" SelectedItem="{x:Bind  NewRelVM.RelationType, Mode=TwoWay}" Margin="10"/>
+        <TextBlock  Text=" to " VerticalAlignment="Center" Margin="0,0,10,0"/>
+        <ComboBox IsEditable="False" MinWidth="150" ItemsSource="{x:Bind NewRelVM.ProspectivePartners}" DisplayMemberPath="Name" SelectedItem="{x:Bind  NewRelVM.SelectedPartner, Mode=TwoWay}" VerticalAlignment="Center"/>
+    </StackPanel>
 </Page>

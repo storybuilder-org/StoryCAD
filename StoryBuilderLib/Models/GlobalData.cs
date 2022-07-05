@@ -37,6 +37,7 @@ public static class GlobalData
     /// User Controls
     public static SortedDictionary<string, ConflictCategoryModel> ConflictTypes;
     public static List<RelationType> RelationTypes;
+    public static List<string> SimpleRelationTypes;
 
     // Tools
     public static Dictionary<string, List<KeyQuestionModel>> KeyQuestionsSource;

@@ -1,4 +1,6 @@
 ﻿using Windows.Data.Xml.Dom;
+using CommunityToolkit.Mvvm.DependencyInjection;
+using StoryBuilder.ViewModels;
 
 namespace StoryBuilder.Models;
 
@@ -12,6 +14,8 @@ public class RelationshipModel
     public string Trait { get; set; }
     public string Attitude { get; set; }
     public string Notes { get; set; }
+
+    public CharacterViewModel CharVM = Ioc.Default.GetService<CharacterViewModel>();
 
     #endregion
 

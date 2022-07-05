@@ -15,6 +15,7 @@ public sealed partial class NewRelationshipPage : Page
 {
 
     public NewRelationshipViewModel NewRelVM;
+    public CharacterViewModel CharVM = Ioc.Default.GetService<CharacterViewModel>();
 
     #region public Properties
 
@@ -28,6 +29,7 @@ public sealed partial class NewRelationshipPage : Page
     public StoryElement SelectedPartner { get; set; }
 
     public ObservableCollection<RelationType> RelationTypes;
+    public ObservableCollection<string> SimpleRelationTypes;
 
     #endregion  
     public NewRelationshipPage(NewRelationshipViewModel vm)
@@ -36,23 +38,4 @@ public sealed partial class NewRelationshipPage : Page
         RelationTypes = new ObservableCollection<RelationType>();
         NewRelVM = vm;
     }
-
-    [ComImport]
-    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-    [Guid("EECDBF0E-BAE9-4CB6-A68E-9598E1CB57BB")]
-    internal interface IWindowNative
-    {
-        IntPtr WindowHandle { get; }
-    }
-
-    [ComImport]
-    [Guid("3E68D4BD-7135-4D10-8018-9FB6D9F33FA1")]
-    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-    public interface IInitializeWithWindow
-    {
-        void Initialize(IntPtr hwnd);
-    }
-
-    [DllImport("user32.dll", ExactSpelling = true, CharSet = CharSet.Auto, PreserveSig = true, SetLastError = false)]
-    public static extern IntPtr GetActiveWindow();
 }

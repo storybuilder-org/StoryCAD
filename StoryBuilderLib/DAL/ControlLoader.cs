@@ -30,6 +30,7 @@ public class ControlLoader
         // Populate UserControl data source collections
         GlobalData.ConflictTypes = LoadConflictTypes();
         GlobalData.RelationTypes = LoadRelationTypes();
+        GlobalData.SimpleRelationTypes = LoadSimpleRelationTypes();
         //story.KeyQuestionsSource = LoadKeyQuestions();
         //story.StockScenesSource = LoadStockScenes();
         //story.TopicsSource = LoadTopics();
@@ -76,6 +77,36 @@ public class ControlLoader
             }
         }
         return conflictTypes;
+    }
+    public List<String> LoadSimpleRelationTypes()
+    {
+        List<String> relationships = new();
+
+        string section = string.Empty;
+        string keyword = string.Empty;
+        string keyvalue = string.Empty;
+        foreach (string line in lines)
+        {
+            ParseLine(line, ref section, ref keyword, ref keyvalue);
+            //   Process the parsed values
+            switch (section)
+            {
+                case "RelationTypes":
+                    switch (keyword)
+                    {
+                        case "":
+                            break;
+                        case "RelationType":
+                            string[] tokens = keyvalue.Split(',');
+                            if (tokens.Length != 3)
+                                continue;
+                            relationships.Add(tokens[0]);
+                            break;
+                    }
+                    break;
+            }
+        }
+        return relationships;
     }
 
     public List<RelationType> LoadRelationTypes()

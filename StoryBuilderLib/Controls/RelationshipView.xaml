@@ -5,44 +5,43 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:usercontrols="using:StoryBuilder.Controls"
-    xmlns:editors="using:Syncfusion.UI.Xaml.Editors">
+    xmlns:editors="using:Syncfusion.UI.Xaml.Editors"
+    xmlns:models="using:StoryBuilder.Models">
+<StackPanel>
+    <Button Content="Add Relation" Command="{x:Bind CharVm.AddRelationshipCommand, Mode=OneWay}" Margin="5" VerticalAlignment="Bottom"/>
+        <ListView ItemsSource="{x:Bind CharVm.CharacterRelationships}">
+            <ListView.ItemTemplate>
+                <DataTemplate x:DataType="models:RelationshipModel">
+                    <Expander Width="auto" HorizontalAlignment="Stretch" Name="parent">
+                        <Expander.Header>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="auto"/>
+                                    <ColumnDefinition Width="auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <SymbolIcon Symbol="Cancel" HorizontalAlignment="Left" Grid.Column="0" PointerPressed="UIElement_OnPointerPressed" Tag="{x:Bind Partner.Uuid}"/>
+                                <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="0,10" HorizontalAlignment="Center" Grid.Column="2">
+                                    <TextBlock Text="{x:Bind CharVM.Name}" VerticalAlignment="Center"/>
+                                    <TextBlock Text=" is a " VerticalAlignment="Center"/>
+                                    <TextBox MinWidth="200" Height="20" Text="{x:Bind RelationType, Mode=OneWay}"  Margin="10,0"/>
+                                    <TextBlock Text=" to " VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                    <TextBlock Text="{x:Bind Partner.Name}" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Grid>
 
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
-        <StackPanel Orientation="Horizontal" Grid.Row="0" >
-            <editors:SfComboBox Header="Relationship" PlaceholderText="Pick Relation" IsEditable="False" 
-                            ItemsSource="{x:Bind CharVm.CharacterRelationships}"
-                            SelectionChanged="RelationshipChanged" 
-                            DisplayMemberPath ="Partner.Name" 
-                            SelectedItem="{x:Bind CharVm.SelectedRelationship, Mode=TwoWay}" Margin="5" VerticalAlignment="Center" />
-            <Button Content="Add Relation" Command="{x:Bind CharVm.AddRelationshipCommand, Mode=OneWay}" Margin="5" VerticalAlignment="Bottom"/>
-            <Button Content="Remove Relation" Command="{x:Bind CharVm.RemoveRelationshipCommand, Mode=OneWay}" Margin="5"  VerticalAlignment="Bottom" IsEnabled="{x:Bind CharVm.IsLoaded, Mode=TwoWay}"/>
-        </StackPanel>
+                        </Expander.Header>
+                        <StackPanel HorizontalAlignment="Stretch" Width="auto">
+                            <StackPanel Orientation="Horizontal" Margin="0,5" HorizontalAlignment="Center">
+                                <editors:SfComboBox IsEditable="True"  Header= "Trait" MinWidth="150" ItemsSource="{x:Bind CharVM.RelationshipTraitList}" Text="{x:Bind Trait, Mode=TwoWay}" Margin="0,0,10,0"/>
+                                <editors:SfComboBox IsEditable="True" Header="Attitude"  MinWidth="150" ItemsSource="{x:Bind CharVM.RelationshipAttitudeList}" Text="{x:Bind Attitude, Mode=TwoWay}"/>
+                            </StackPanel>
 
-        <TextBox Grid.Row="2" Header="Relation Type" MinWidth="200" IsEnabled="{x:Bind CharVm.IsLoaded, Mode=TwoWay}" Text="{x:Bind CharVm.RelationType, Mode=OneWay}" />
-
-        <StackPanel Orientation="Horizontal" Grid.Row="3" Margin="0,5">
-            <editors:SfComboBox IsEditable="True"  Header= "Trait" MinWidth="150"
-                              ItemsSource="{x:Bind CharVm.RelationshipTraitList}"   
-                              Text="{x:Bind CharVm.RelationshipTrait, Mode=TwoWay}" IsEnabled="{x:Bind CharVm.IsLoaded, Mode=TwoWay}" Margin="0,0,10,0"/>
-            <editors:SfComboBox IsEditable="True" Grid.Row="4" Header="Attitude"  MinWidth="150"
-                        ItemsSource="{x:Bind CharVm.RelationshipAttitudeList}"
-                        Text="{x:Bind CharVm.RelationshipAttitude, Mode=TwoWay}" IsEnabled="{x:Bind CharVm.IsLoaded, Mode=TwoWay}"/>
-        </StackPanel>
-        
-
-        <usercontrols:RichEditBoxExtended Grid.Row="5" Header="Relationship Notes" IsEnabled="{x:Bind CharVm.IsLoaded, Mode=TwoWay}" Margin="0,10"
-                             RtfText="{x:Bind CharVm.RelationshipNotes, Mode=TwoWay}" AcceptsReturn="True"
-                             IsSpellCheckEnabled="True" TextWrapping="Wrap"
-                             ScrollViewer.VerticalScrollBarVisibility="Visible"/>
-    </Grid>
+                            <usercontrols:RichEditBoxExtended Grid.Row="1" MinHeight="200" Width="{Binding parent.width, RelativeSource={RelativeSource TemplatedParent}}" HorizontalAlignment="Stretch" Header="Relationship Notes"  RtfText="{x:Bind Notes, Mode=TwoWay}" AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap" ScrollViewer.VerticalScrollBarVisibility="Visible"/>
+                        </StackPanel>
+                    </Expander>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+    </StackPanel>
 </UserControl>
