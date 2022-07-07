@@ -14,6 +14,7 @@ public class RelationshipModel
     public string Trait { get; set; }
     public string Attitude { get; set; }
     public string Notes { get; set; }
+    public CharacterViewModel CharVM = Ioc.Default.GetService<CharacterViewModel>();
 
     public CharacterViewModel CharVM = Ioc.Default.GetService<CharacterViewModel>();
 
@@ -31,11 +32,11 @@ public class RelationshipModel
         Notes = string.Empty;
     }
 
-    public RelationshipModel(string partnerUuid, RelationType type)
+    public RelationshipModel(string partnerUuid, string type)
     {
 
         PartnerUuid = partnerUuid;
-        RelationType = type.ToString();
+        RelationType = type;
         Trait = string.Empty;
         Attitude = string.Empty;
         Notes = string.Empty;

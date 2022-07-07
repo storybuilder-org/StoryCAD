@@ -36,8 +36,12 @@ public static class GlobalData
     /// </summary>
     /// User Controls
     public static SortedDictionary<string, ConflictCategoryModel> ConflictTypes;
+<<<<<<< Updated upstream
     public static List<RelationType> RelationTypes;
     public static List<string> SimpleRelationTypes;
+=======
+    public static List<string> RelationTypes;
+>>>>>>> Stashed changes
 
     // Tools
     public static Dictionary<string, List<KeyQuestionModel>> KeyQuestionsSource;

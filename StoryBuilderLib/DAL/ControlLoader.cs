@@ -109,9 +109,9 @@ public class ControlLoader
         return relationships;
     }
 
-    public List<RelationType> LoadRelationTypes()
+    public List<string> LoadRelationTypes()
     {
-        List<RelationType> relationships = new();
+        List<string> relationships = new();
 
         string section = string.Empty;
         string keyword = string.Empty;
@@ -128,10 +128,7 @@ public class ControlLoader
                         case "":
                             break;
                         case "RelationType":
-                            string[] tokens = keyvalue.Split(',');
-                            if (tokens.Length != 3)
-                                continue;
-                            relationships.Add(new RelationType(tokens[0], tokens[1]));
+                            relationships.Add(keyvalue);
                             break;
                     }
                     break;
@@ -185,14 +182,5 @@ public class ControlLoader
 
     }
 
-    public void Clear()
-    {
-        lines = null;
-    }
-
-    private void LogEntry(string line)
-    {
-        // TODO: Code LogEntry details (requires logging framework)
-        throw new NotImplementedException();
-    }
+    public void Clear() {  lines = null; }
 }

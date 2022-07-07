@@ -1,5 +1,10 @@
 ﻿using System;
+<<<<<<< Updated upstream
 using System.Runtime.InteropServices;
+=======
+using System.Linq;
+using System.Threading.Tasks;
+>>>>>>> Stashed changes
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -30,8 +35,25 @@ public sealed partial class RelationshipView : UserControl
         CharVm.SaveRelationship(CharVm.CurrentRelationship);
         CharVm.LoadRelationship(CharVm.SelectedRelationship);
         CharVm.CurrentRelationship = CharVm.SelectedRelationship;
+<<<<<<< Updated upstream
         if ((sender as SfComboBox).SelectedValue == null) {  CharVm.IsLoaded = false; }
         else { CharVm.IsLoaded = true;}
+=======
+       // if (RelationshipPickerBox.SelectedValue == null) {  CharVm.IsLoaded = false; }
+    //    else { CharVm.IsLoaded = true;}
+>>>>>>> Stashed changes
+    }
+
+    private async void UIElement_OnPointerPressed(object sender, PointerRoutedEventArgs e)
+    {
+<<<<<<< Updated upstream
+        ContentDialogResult result = await new ContentDialog()
+        {
+            XamlRoot = GlobalData.XamlRoot,
+            Content = "Are you sure you want to delete the relationship between PLACEHOLDER and PLACEHOLDER",
+=======
+       await CharVm.AddRelationship();
+       //RelationshipPickerBox.SelectedItem = CharVm.CharacterRelationships.Last();
     }
 
     private async void UIElement_OnPointerPressed(object sender, PointerRoutedEventArgs e)
@@ -39,12 +61,17 @@ public sealed partial class RelationshipView : UserControl
         ContentDialogResult result = await new ContentDialog()
         {
             XamlRoot = GlobalData.XamlRoot,
-            Content = "Are you sure you want to delete the relationship between PLACEHOLDER and PLACEHOLDER",
+            Content = $"Are you sure you want to delete the relationship between {CharVm.Name} and {(sender as SymbolIcon).Tag}",
+>>>>>>> Stashed changes
             Title = "Are you sure?",
             PrimaryButtonText = "Yes",
             SecondaryButtonText = "No"
         }.ShowAsync();
+<<<<<<< Updated upstream
 
+=======
+        
+>>>>>>> Stashed changes
         if (result == ContentDialogResult.Primary)
         {
             foreach (var relationship in CharVm.CharacterRelationships)
