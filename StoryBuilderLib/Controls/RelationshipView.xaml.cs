@@ -1,7 +1,8 @@
-﻿using System;
+using System;
 using System.Runtime.InteropServices;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Linq;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -32,9 +33,6 @@ public sealed partial class RelationshipView : UserControl
         CharVm.SaveRelationship(CharVm.CurrentRelationship);
         CharVm.LoadRelationship(CharVm.SelectedRelationship);
         CharVm.CurrentRelationship = CharVm.SelectedRelationship;
-
-       // if (RelationshipPickerBox.SelectedValue == null) {  CharVm.IsLoaded = false; }
-    //    else { CharVm.IsLoaded = true;}
     }
 
     private async void UIElement_OnPointerPressed(object sender, PointerRoutedEventArgs e)
@@ -59,5 +57,11 @@ public sealed partial class RelationshipView : UserControl
                 }
             }
         }
+    }
+
+    private async void ButtonBase_OnClick(object sender, RoutedEventArgs e)
+    {
+       await CharVm.AddRelationship();
+       RelationshipPickerBox.SelectedItem = CharVm.CharacterRelationships.Last();
     }
 }
