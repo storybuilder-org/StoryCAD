@@ -58,10 +58,4 @@ public sealed partial class RelationshipView : UserControl
             }
         }
     }
-
-    private async void ButtonBase_OnClick(object sender, RoutedEventArgs e)
-    {
-       await CharVm.AddRelationship();
-       RelationshipPickerBox.SelectedItem = CharVm.CharacterRelationships.Last();
-    }
 }
