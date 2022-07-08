@@ -599,7 +599,8 @@ namespace StoryBuilder.ViewModels
             catch (Exception e)
             {
                 if (e.Source.Contains("Net")) { Logger.Log( LogLevel.Info , "Error with network, user probably isn't connected to wifi or is using an autobuild"); }
-                else { Logger.LogException(LogLevel.Error, e, "Error in ShowChangeLog()"); }
+                if (e.Source.Contains("Octokit.NotFoundException")) { Logger.Log( LogLevel.Info , "Error finding changelog for this version"); }
+                else { Logger.Log(LogLevel.Info, "Error in ShowChangeLog()"); }
             }
         }
 
