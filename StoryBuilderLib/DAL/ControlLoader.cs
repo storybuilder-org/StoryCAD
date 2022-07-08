@@ -30,7 +30,6 @@ public class ControlLoader
         // Populate UserControl data source collections
         GlobalData.ConflictTypes = LoadConflictTypes();
         GlobalData.RelationTypes = LoadRelationTypes();
-        GlobalData.SimpleRelationTypes = LoadSimpleRelationTypes();
         //story.KeyQuestionsSource = LoadKeyQuestions();
         //story.StockScenesSource = LoadStockScenes();
         //story.TopicsSource = LoadTopics();

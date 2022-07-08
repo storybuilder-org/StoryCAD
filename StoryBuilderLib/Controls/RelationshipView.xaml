@@ -7,18 +7,13 @@
     xmlns:usercontrols="using:StoryBuilder.Controls"
     xmlns:editors="using:Syncfusion.UI.Xaml.Editors"
     xmlns:models="using:StoryBuilder.Models">
-<<<<<<< Updated upstream
-<StackPanel>
-    <Button Content="Add Relation" Command="{x:Bind CharVm.AddRelationshipCommand, Mode=OneWay}" Margin="5" VerticalAlignment="Bottom"/>
-        <ListView ItemsSource="{x:Bind CharVm.CharacterRelationships}">
-=======
-    <StackPanel>
-        <Button Content="Add Relation" Command="{x:Bind CharVm.AddRelationshipCommand, Mode=OneWay}" Margin="5" VerticalAlignment="Bottom"/>
-        <ScrollViewer VerticalScrollBarVisibility="Visible">
-            <ListView ItemsSource="{x:Bind CharVm.CharacterRelationships}">
->>>>>>> Stashed changes
-            <ListView.ItemTemplate>
-                <DataTemplate x:DataType="models:RelationshipModel">
+
+    <ScrollViewer>
+        <StackPanel Orientation="Vertical" Margin="5">
+            <Button Content="Create a new relationship" Command="{x:Bind CharVm.AddRelationshipCommand, Mode=OneWay}" Margin="5" VerticalAlignment="Bottom" HorizontalAlignment="Center"/>
+            <ItemsRepeater ItemsSource="{x:Bind CharVm.CharacterRelationships}">
+                <ItemsRepeater.ItemTemplate>
+                    <DataTemplate x:DataType="models:RelationshipModel">
                     <Expander Width="auto" HorizontalAlignment="Stretch" Name="parent">
                         <Expander.Header>
                             <Grid>
@@ -27,11 +22,7 @@
                                     <ColumnDefinition Width="auto"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-<<<<<<< Updated upstream
-                                <SymbolIcon Symbol="Cancel" HorizontalAlignment="Left" Grid.Column="0" PointerPressed="UIElement_OnPointerPressed" Tag="{x:Bind Partner.Uuid}"/>
-=======
                                 <SymbolIcon Symbol="Cancel" HorizontalAlignment="Left" Grid.Column="0" PointerPressed="UIElement_OnPointerPressed" Tag="{x:Bind Partner.Name}"/>
->>>>>>> Stashed changes
                                 <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="0,10" HorizontalAlignment="Center" Grid.Column="2">
                                     <TextBlock Text="{x:Bind CharVM.Name}" VerticalAlignment="Center"/>
                                     <TextBlock Text=" is a " VerticalAlignment="Center"/>
@@ -40,21 +31,8 @@
                                     <TextBlock Text="{x:Bind Partner.Name}" VerticalAlignment="Center"/>
                                 </StackPanel>
                             </Grid>
-<<<<<<< Updated upstream
-
                         </Expander.Header>
-                        <StackPanel HorizontalAlignment="Stretch" Width="auto">
-                            <StackPanel Orientation="Horizontal" Margin="0,5" HorizontalAlignment="Center">
-                                <editors:SfComboBox IsEditable="True"  Header= "Trait" MinWidth="150" ItemsSource="{x:Bind CharVM.RelationshipTraitList}" Text="{x:Bind Trait, Mode=TwoWay}" Margin="0,0,10,0"/>
-                                <editors:SfComboBox IsEditable="True" Header="Attitude"  MinWidth="150" ItemsSource="{x:Bind CharVM.RelationshipAttitudeList}" Text="{x:Bind Attitude, Mode=TwoWay}"/>
-                            </StackPanel>
-
-                            <usercontrols:RichEditBoxExtended Grid.Row="1" MinHeight="200" Width="{Binding parent.width, RelativeSource={RelativeSource TemplatedParent}}" HorizontalAlignment="Stretch" Header="Relationship Notes"  RtfText="{x:Bind Notes, Mode=TwoWay}" AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap" ScrollViewer.VerticalScrollBarVisibility="Visible"/>
-                        </StackPanel>
-=======
-                        </Expander.Header>
-                        
-                        <Grid HorizontalAlignment="Stretch">
+                        <Grid HorizontalAlignment="Stretch" MinWidth="600">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="auto"/>
@@ -69,14 +47,10 @@
                             <editors:SfComboBox Grid.Row="0" Grid.Column="2" IsEditable="True" Header="Attitude"  MinWidth="150" ItemsSource="{x:Bind CharVM.RelationshipAttitudeList}" Text="{x:Bind Attitude, Mode=TwoWay}"/>
                             <usercontrols:RichEditBoxExtended Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4" MinHeight="200" HorizontalAlignment="Stretch" Header="Relationship Notes"  RtfText="{x:Bind Notes, Mode=TwoWay}" AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap" ScrollViewer.VerticalScrollBarVisibility="Visible"/>
                         </Grid>
->>>>>>> Stashed changes
                     </Expander>
                 </DataTemplate>
-            </ListView.ItemTemplate>
-        </ListView>
-<<<<<<< Updated upstream
-=======
-        </ScrollViewer>
->>>>>>> Stashed changes
-    </StackPanel>
+            </ItemsRepeater.ItemTemplate>
+        </ItemsRepeater>
+        </StackPanel>
+    </ScrollViewer>
 </UserControl>

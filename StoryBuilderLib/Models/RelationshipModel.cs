@@ -15,9 +15,6 @@ public class RelationshipModel
     public string Attitude { get; set; }
     public string Notes { get; set; }
     public CharacterViewModel CharVM = Ioc.Default.GetService<CharacterViewModel>();
-
-    public CharacterViewModel CharVM = Ioc.Default.GetService<CharacterViewModel>();
-
     #endregion
 
     #region Constructors

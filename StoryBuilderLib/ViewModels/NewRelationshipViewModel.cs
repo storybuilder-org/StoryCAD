@@ -37,6 +37,12 @@ public class NewRelationshipViewModel : ObservableRecipient
         get => _inverserelationType;
         set => SetProperty(ref _inverserelationType, value);
     }
+    private bool _inverseRelationship;
+    public bool InverseRelationship
+    {
+        get => _inverseRelationship;
+        set => SetProperty(ref _inverseRelationship, value);
+    }
 
     #endregion
 

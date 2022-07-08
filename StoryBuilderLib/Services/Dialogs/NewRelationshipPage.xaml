@@ -5,16 +5,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
-
-<<<<<<< Updated upstream
-    <StackPanel Orientation="Horizontal" Width="500">
-        <TextBlock  Text="{x:Bind CharVM.Name}" VerticalAlignment="Center"/>
-        <TextBlock  Text=" is a " VerticalAlignment="Center"/>
-        <ComboBox  MinWidth="150" ItemsSource="{x:Bind  NewRelVM.SimpleRelationTypes}" SelectedItem="{x:Bind  NewRelVM.RelationType, Mode=TwoWay}" Margin="10"/>
-        <TextBlock  Text=" to " VerticalAlignment="Center" Margin="0,0,10,0"/>
-        <ComboBox IsEditable="False" MinWidth="150" ItemsSource="{x:Bind NewRelVM.ProspectivePartners}" DisplayMemberPath="Name" SelectedItem="{x:Bind  NewRelVM.SelectedPartner, Mode=TwoWay}" VerticalAlignment="Center"/>
-    </StackPanel>
-=======
+    
     <StackPanel>
         <StackPanel Orientation="Horizontal" Width="500" HorizontalAlignment="Center">
             <TextBlock  Text="{x:Bind CharVM.Name}" VerticalAlignment="Center"/>
@@ -24,15 +15,14 @@
             <ComboBox Name="PartnerBox" IsEditable="False" MinWidth="150" ItemsSource="{x:Bind NewRelVM.ProspectivePartners}" DisplayMemberPath="Name" SelectedItem="{x:Bind  NewRelVM.SelectedPartner, Mode=TwoWay}" VerticalAlignment="Center"/>
         </StackPanel>
 
-        <CheckBox Content="Make a relationship on the other character" Name="Inverse" HorizontalAlignment="Center" Margin="0,20,0,0"/>
+        <CheckBox Content="Make a relationship on the other character" HorizontalAlignment="Center" Margin="0,20,0,0" IsChecked="{x:Bind NewRelVM.InverseRelationship, Mode=TwoWay}"/>
         <StackPanel Orientation="Horizontal" Width="500" HorizontalAlignment="Center">
             <ComboBox IsEditable="False" MinWidth="150" ItemsSource="{x:Bind NewRelVM.ProspectivePartners}" IsEnabled="False" DisplayMemberPath="Name" SelectedItem="{x:Bind  NewRelVM.SelectedPartner, Mode=TwoWay}" VerticalAlignment="Center"/>
             <TextBlock  Text=" is a " VerticalAlignment="Center" Margin="10,0"/>
-            <ComboBox   MinWidth="150" ItemsSource="{x:Bind  NewRelVM.RelationTypes}" SelectedItem="{x:Bind  NewRelVM.InverseRelationType, Mode=TwoWay}" />
+            <ComboBox   MinWidth="150" ItemsSource="{x:Bind  NewRelVM.RelationTypes}" SelectedItem="{x:Bind  NewRelVM.InverseRelationType, Mode=TwoWay}" IsEnabled="{x:Bind NewRelVM.InverseRelationship, Mode=TwoWay}"/>
             <TextBlock  Text=" to" VerticalAlignment="Center" Margin="5,0"/>
             <TextBlock  Text="{x:Bind CharVM.Name}"  VerticalAlignment="Center"/>
         </StackPanel>
     </StackPanel>
 
->>>>>>> Stashed changes
 </Page>

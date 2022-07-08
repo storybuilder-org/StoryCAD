@@ -15,8 +15,6 @@ public sealed partial class NewRelationshipPage : Page
 {
     public CharacterViewModel CharVM = Ioc.Default.GetService<CharacterViewModel>();
     public NewRelationshipViewModel NewRelVM;
-    public CharacterViewModel CharVM = Ioc.Default.GetService<CharacterViewModel>();
-
     #region public Properties
 
     public StoryElementCollection StoryElements;

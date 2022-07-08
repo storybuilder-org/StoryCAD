@@ -838,6 +838,12 @@ public class CharacterViewModel : ObservableRecipient, INavigable
                 // Create the new RelationshipModel
                 string partnerUuid = StoryWriter.UuidString(VM.SelectedPartner.Uuid);
                 RelationshipModel memberRelationship = new(partnerUuid, VM.RelationType);
+                if (VM.InverseRelationship && !string.IsNullOrWhiteSpace(VM.InverseRelationType))
+                {
+                    (VM.SelectedPartner as CharacterModel).RelationshipList.Add(new(Uuid.ToString(), VM.InverseRelationType));
+
+                }
+
 
                 memberRelationship.Partner = StringToStoryElement(partnerUuid); // Complete pairing
                 // Add partner relationship to member's list of relationships 
