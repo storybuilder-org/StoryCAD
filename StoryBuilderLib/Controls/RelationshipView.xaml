@@ -14,7 +14,7 @@
             <ItemsRepeater ItemsSource="{x:Bind CharVm.CharacterRelationships}">
                 <ItemsRepeater.ItemTemplate>
                     <DataTemplate x:DataType="models:RelationshipModel">
-                        <Expander Width="auto" HorizontalAlignment="Stretch" Name="parent">
+                        <Expander Width="auto" HorizontalAlignment="Stretch" IsExpanded="True">
                             <Expander.Header>
                                 <Grid>
                                     <Grid.ColumnDefinitions>
