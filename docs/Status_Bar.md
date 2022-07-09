@@ -1,29 +1,29 @@
 #### Status Bar ####
-Status Bar
+Status Bar <br/>
 
 ![](Status-Bar.png)
 
 
-The Status Bar reports information you may find useful during program execution. It contains the following controls:
+The Status Bar reports information you may find useful during program execution. It contains the following controls: <br/>
 
-View Selector
+View Selector <br/>
 
-Allows you to switch between Story Explorer and Story Narrator views.
+Allows you to switch between Story Explorer and Story Narrator views. <br/>
 
-Story Explorer is the view in which you create and edit your outline. The order and arrangement of story elements in the Navigation Pane is entirely under your control.
+Story Explorer is the view in which you create and edit your outline. The order and arrangement of story elements in the Navigation Pane is entirely under your control. <br/>
 
-Story Narrator is your outline’s scenes arranged into the order you wish to tell your story in.
+Story Narrator is your outline’s scenes arranged into the order you wish to tell your story in. <br/>
 
-Status Message
+Status Message <br/>
 
-The Status Message displays feedback information from the program to you.
+The Status Message displays feedback information from the program to you. <br/>
 
-Filter Status
+Filter Status <br/>
 
-Indicates if a Search is active.
+Indicates if a Search is active. <br/>
 
-Changed Indicator
+Changed Indicator <br/>
 
 ![](Changed-Indicator.png)
 
-The Changed Indicator displays red if any editing has been done to the outline and green if not. It’s a reminder to save your work.
+The Changed Indicator displays red if any editing has been done to the outline and green if not. It’s a reminder to save your work. <br/>
