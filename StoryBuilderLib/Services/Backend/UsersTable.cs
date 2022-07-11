@@ -13,6 +13,4 @@ namespace StoryBuilder.Services.Backend
         public string Email { get; set; }
         public DateTime DateAdded { get; set; }
     }
-    {
-    }
 }

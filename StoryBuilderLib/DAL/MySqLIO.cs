@@ -34,7 +34,7 @@ namespace StoryBuilder.DAL
         ///  Read a specific users row given the id
         /// </summary>
         /// <param name="id"></param>
-        public async Task<UsersTable> ReadUsers(int id) 
+        public async Task<UsersTable> ReadUser(int id) 
         {
             string sql = "SELECT id, user_name, email,date_added FROM users WHERE id = @Id";
             UsersTable users = new UsersTable();
@@ -65,6 +65,66 @@ namespace StoryBuilder.DAL
             {
                 throw ex;
             }
+        }
+
+        public async Task<UsersTable> ReadUser(string email)
+        {
+            string sql = "SELECT id, user_name, email, date_added FROM users WHERE email = @Email";
+            UsersTable users = new UsersTable();
+
+            try
+            {
+                await using (MySqlConnection conn = new MySqlConnection(connectionString))
+                {
+                    await using (var cmd = new MySqlCommand(sql, conn))
+                    {
+                        cmd.Parameters.Add("@Email", MySqlDbType.String);
+                        cmd.Parameters["@UserName"].Value = email;
+                        var reader = await cmd.ExecuteReaderAsync();
+
+                        if (reader.Read())
+                        {
+                            users.Id = reader.GetInt32(0);
+                            users.UserName = reader.GetString(1);
+                            users.Email = reader.GetString(2);
+                            users.DateAdded = reader.GetDateTime(3);
+                        }
+                    }
+                }
+
+                return users;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public async Task<int> AddUser(string name, string email)
+        {
+            try
+            {
+                await using (MySqlConnection conn = new MySqlConnection(connectionString))
+                {
+                    string rtn = "AddUser";
+                    await using (var cmd = new MySqlCommand(rtn, conn))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.Parameters.AddWithValue("@user_name", name);
+                        cmd.Parameters.AddWithValue("@email", email);
+                        cmd.Parameters.Add("@Id", MySqlDbType.Int32);
+                        cmd.Parameters["@Id"].Direction = ParameterDirection.Output;
+                        var reader = await cmd.ExecuteReaderAsync();
+                        int id = (int)cmd.Parameters["@Id"].Value;
+                        return id;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+     
         }
 
         public MySqlIO()
