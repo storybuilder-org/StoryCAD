@@ -13,7 +13,7 @@
             <Button Content="Create a new relationship" Command="{x:Bind CharVm.AddRelationshipCommand, Mode=OneWay}" Margin="5" VerticalAlignment="Bottom" HorizontalAlignment="Center"/>
             <ItemsRepeater ItemsSource="{x:Bind CharVm.CharacterRelationships}">
                 <ItemsRepeater.ItemTemplate>
-                    <DataTemplate x:DataType="models:RelationshipModel">
+                    <DataTemplate x:DataType="models:RelationshipModel" >
                         <Expander Width="auto" HorizontalAlignment="Stretch" IsExpanded="True">
                             <Expander.Header>
                                 <Grid>
@@ -22,7 +22,7 @@
                                         <ColumnDefinition Width="auto"/>
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
-                                    <SymbolIcon Symbol="Cancel" HorizontalAlignment="Left" Grid.Column="0" PointerPressed="UIElement_OnPointerPressed" Tag="{x:Bind Partner.Name}"/>
+                                    <SymbolIcon Symbol="Cancel" HorizontalAlignment="Left" Grid.Column="0" PointerPressed="UIElement_OnPointerPressed" Tag="{x:Bind PartnerUuid}"/>
                                     <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="0,10" HorizontalAlignment="Center" Grid.Column="2">
                                         <TextBlock Text="{x:Bind CharVM.Name}" VerticalAlignment="Center"/>
                                         <TextBlock Text=" is a " VerticalAlignment="Center"/>

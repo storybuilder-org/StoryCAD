@@ -1,15 +1,12 @@
 using System;
-using System.Runtime.InteropServices;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Linq;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using StoryBuilder.Models;
+using StoryBuilder.Services.Logging;
 using StoryBuilder.ViewModels;
-using Syncfusion.UI.Xaml.Editors;
+using Syncfusion.UI.Xaml.Core;
 
 namespace StoryBuilder.Controls;
 
@@ -35,27 +32,15 @@ public sealed partial class RelationshipView : UserControl
         CharVm.CurrentRelationship = CharVm.SelectedRelationship;
     }
 
-    private async void UIElement_OnPointerPressed(object sender, PointerRoutedEventArgs e)
+    private void UIElement_OnPointerPressed(object sender, PointerRoutedEventArgs e)
     {
-        ContentDialogResult result = await new ContentDialog()
+        RelationshipModel characterToDelete = null;
+        foreach (var character in CharVm.CharacterRelationships)
         {
-            XamlRoot = GlobalData.XamlRoot,
-            Content = $"Are you sure you want to delete the relationship between {CharVm.Name.Trim()} and {(sender as SymbolIcon).Tag.ToString().Trim()}",
-            Title = "Are you sure?",
-            PrimaryButtonText = "Yes",
-            SecondaryButtonText = "No"
-        }.ShowAsync();
-        
-        if (result == ContentDialogResult.Primary)
-        {
-            foreach (var relationship in CharVm.CharacterRelationships)
-            {
-                if (relationship.Partner.Uuid.Equals(CharVm.CurrentRelationship.Partner.Uuid))
-                {
-                    CharVm.CharacterRelationships.Remove(relationship);
-                    break;
-                }
-            }
+            if (character.PartnerUuid == (sender as SymbolIcon).Tag) { characterToDelete = character;  }
         }
+        Ioc.Default.GetService<CharacterViewModel>().CharacterRelationships.Remove(characterToDelete);
+        CharVm.SaveRelationships();
+
     }
 }

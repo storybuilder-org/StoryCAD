@@ -54,7 +54,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable
         get => _isLoaded;
         set => SetProperty(ref _isLoaded, value);
     }
-
+    
     // StoryElement data
 
     private Guid _uuid;
@@ -841,7 +841,20 @@ public class CharacterViewModel : ObservableRecipient, INavigable
                 RelationshipModel memberRelationship = new(partnerUuid, VM.RelationType);
                 if (VM.InverseRelationship && !string.IsNullOrWhiteSpace(VM.InverseRelationType))
                 {
-                    (VM.SelectedPartner as CharacterModel).RelationshipList.Add(new(Uuid.ToString(), VM.InverseRelationType));
+                    bool _MakeChar = true;
+                    foreach (var Relation in (VM.SelectedPartner as CharacterModel).RelationshipList)
+                    {
+                        if (Relation.Partner == VM.Member)
+                        {
+                            _MakeChar = false;
+                        }
+                    }
+
+                    if (_MakeChar)
+                    {
+                        (VM.SelectedPartner as CharacterModel).RelationshipList.Add(new(Uuid.ToString(), VM.InverseRelationType));
+                    }
+
 
                 }
 
