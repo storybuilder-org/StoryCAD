@@ -32,15 +32,33 @@ public sealed partial class RelationshipView : UserControl
         CharVm.CurrentRelationship = CharVm.SelectedRelationship;
     }
 
-    private void UIElement_OnPointerPressed(object sender, PointerRoutedEventArgs e)
+    private async void UIElement_OnPointerPressed(object sender, PointerRoutedEventArgs e)
     {
         RelationshipModel characterToDelete = null;
         foreach (var character in CharVm.CharacterRelationships)
         {
             if (character.PartnerUuid == (sender as SymbolIcon).Tag) { characterToDelete = character;  }
         }
-        Ioc.Default.GetService<CharacterViewModel>().CharacterRelationships.Remove(characterToDelete);
-        CharVm.SaveRelationships();
 
+        ContentDialogResult result =  await new ContentDialog()
+        {
+            Title = "Are you sure?",
+            Content =
+                $"Are you sure you want to delete the relationship between {CharVm.Name} and {characterToDelete.Partner.Name}?",
+            XamlRoot = GlobalData.XamlRoot,
+            PrimaryButtonText = "Yes",
+            SecondaryButtonText = "No"
+        }.ShowAsync();
+
+        if (result == ContentDialogResult.Primary)
+        {
+            Ioc.Default.GetService<CharacterViewModel>().CharacterRelationships.Remove(characterToDelete);
+            CharVm.SaveRelationships();
+        }
+    }
+
+    private void UIElement_OnLosingFocus(UIElement sender, LosingFocusEventArgs args)
+    {
+        CharVm.SaveRelationships();
     }
 }
