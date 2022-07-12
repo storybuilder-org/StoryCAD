@@ -881,48 +881,6 @@ public class CharacterViewModel : ObservableRecipient, INavigable
         }
     }
 
-    private async void RemoveRelationship()
-    {
-        _logger.Log(LogLevel.Info, "Executing RemoveRelationship command");
-        string msg;
-        // verify that I have an active relationship
-        if (SelectedRelationship == null)
-        {
-            Messenger.Send(new StatusChangedMessage(new("Select the relationship to be removed", LogLevel.Warn, true)));
-            return;
-        }
-
-        // Display a confirmation message
-        StoryElement partner = SelectedRelationship.Partner;
-        msg = $"Remove relationship to {partner.Name}? ";
-        msg += Environment.NewLine;
-        ContentDialog dialog = new()
-        {
-            Title = "Remove Relationship",
-            Content = msg,
-            PrimaryButtonText = "Yes",
-            SecondaryButtonText = "No"
-        };
-        dialog.XamlRoot = GlobalData.XamlRoot;
-        ContentDialogResult result = await dialog.ShowAsync();
-        if (result == ContentDialogResult.Primary)
-        {
-            // Remove the current (selected) relationship
-            RelationshipModel rel = SelectedRelationship;
-            ClearActiveRelationship();
-            rel.Partner = null;
-            CharacterRelationships.Remove(rel);
-            _changed = true;
-
-            // log and display status
-            Messenger.Send(new StatusChangedMessage(new($"Relationship to {partner.Name} deleted", LogLevel.Info, true)));
-        }
-        else
-        {
-            Messenger.Send(new StatusChangedMessage(new("Remove Relationship cancelled", LogLevel.Info, true)));
-        }
-    }
-
     private void ClearActiveRelationship()
     {
         _changeable = false;
@@ -1091,7 +1049,6 @@ public class CharacterViewModel : ObservableRecipient, INavigable
         AddTraitCommand = new RelayCommand(AddTrait, () => true);
         RemoveTraitCommand = new RelayCommand(RemoveTrait, () => true);
         AddRelationshipCommand = new RelayCommand(async () => await  AddRelationship(), () => true);
-        RemoveRelationshipCommand = new RelayCommand(RemoveRelationship, () => true);
         FlawCommand = new RelayCommand(FlawTool, () => true);
         TraitCommand = new RelayCommand(TraitTool, () => true);
 
