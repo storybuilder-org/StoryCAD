@@ -820,6 +820,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable
         NewRelationship.SecondaryButtonText = "Cancel";
         NewRelationship.XamlRoot = GlobalData.XamlRoot;
         NewRelationship.Content = new NewRelationshipPage(VM);
+        NewRelationship.MinWidth = 200;
         ContentDialogResult result = await NewRelationship.ShowAsync();
 
         if (result == ContentDialogResult.Primary) //User clicks add relationship

@@ -134,7 +134,7 @@ public class PreferencesIO
                             _model.ParseVersionStatus= false;
                         break;
                     case "WrapNodeNames":
-                        if (tokens[1] == "True") { _model.WrapNodeNames = TextWrapping.WrapWholeWords; }
+                        if (tokens[1] == "True") { _model.WrapNodeNames = TextWrapping.Wrap; }
                         else {_model.WrapNodeNames = TextWrapping.NoWrap;}
                         break;
                     case "AutoSave":

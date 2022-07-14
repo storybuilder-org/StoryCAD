@@ -16,20 +16,27 @@
                     <DataTemplate x:DataType="models:RelationshipModel" >
                         <Expander Width="auto" HorizontalAlignment="Stretch" IsExpanded="True" LosingFocus="LostFocus">
                             <Expander.Header>
-                                <Grid>
+                                <Grid Height="auto">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="auto"/>
-                                        <ColumnDefinition Width="auto"/>
+                                        <ColumnDefinition Width="15"/>
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
                                     <SymbolIcon Symbol="Cancel" HorizontalAlignment="Left" Grid.Column="0" PointerPressed="RemoveRelationship" Tag="{x:Bind PartnerUuid}"/>
-                                    <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="0,10" HorizontalAlignment="Center" Grid.Column="2">
-                                        <TextBlock Text="{x:Bind CharVM.Name}" VerticalAlignment="Center"/>
-                                        <TextBlock Text=" is a " VerticalAlignment="Center"/>
-                                        <TextBox MinWidth="200" Height="20" Text="{x:Bind RelationType, Mode=OneWay}"  Margin="10,0"/>
-                                        <TextBlock Text=" to " VerticalAlignment="Center" Margin="0,0,10,0"/>
-                                        <TextBlock Text="{x:Bind Partner.Name}" VerticalAlignment="Center"/>
-                                    </StackPanel>
+                                    <Grid Grid.Row="0" Margin="0,10" HorizontalAlignment="Center" Grid.Column="2">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="{x:Bind CharVM.Name}" VerticalAlignment="Center" TextWrapping="Wrap" Margin="5,0,0,0" IsTextScaleFactorEnabled="True"/>
+                                        <TextBlock Grid.Column="1" Text=" is a " VerticalAlignment="Center"/>
+                                        <TextBox Grid.Column="2" MinWidth="200" Height="20" Text="{x:Bind RelationType, Mode=OneWay}"  Margin="10,0"/>
+                                        <TextBlock Grid.Column="3" Text=" to " VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                        <TextBlock Grid.Column="4" Text="{x:Bind Partner.Name}" VerticalAlignment="Center" TextWrapping="Wrap"  Margin="5,0,0,0"/>
+                                    </Grid>
                                 </Grid>
                             </Expander.Header>
                             <Grid HorizontalAlignment="Stretch" MinWidth="600">
