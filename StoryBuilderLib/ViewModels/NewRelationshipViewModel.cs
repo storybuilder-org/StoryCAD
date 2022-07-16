@@ -23,15 +23,27 @@ public class NewRelationshipViewModel : ObservableRecipient
         set => SetProperty(ref _selectedPartner, value);
     }
 
-    public ObservableCollection<RelationType> RelationTypes { get; set; }
+    public ObservableCollection<string> RelationTypes { get; set; }
 
-    private RelationType _relationType;
-    public RelationType RelationType 
+    private string _relationType;
+    public string RelationType 
     { 
         get => _relationType; 
         set => SetProperty(ref _relationType, value);
     }
-        
+    private string _inverserelationType;
+    public string InverseRelationType
+    {
+        get => _inverserelationType;
+        set => SetProperty(ref _inverserelationType, value);
+    }
+    private bool _inverseRelationship;
+    public bool InverseRelationship
+    {
+        get => _inverseRelationship;
+        set => SetProperty(ref _inverseRelationship, value);
+    }
+
     #endregion
 
     #region Constructor
@@ -40,7 +52,7 @@ public class NewRelationshipViewModel : ObservableRecipient
     {
         Member = member;
         ProspectivePartners = new ObservableCollection<StoryElement>();
-        RelationTypes = new ObservableCollection<RelationType>();
+        RelationTypes = new ObservableCollection<string>();
     }
 
     #endregion

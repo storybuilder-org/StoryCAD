@@ -54,7 +54,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable
         get => _isLoaded;
         set => SetProperty(ref _isLoaded, value);
     }
-
+    
     // StoryElement data
 
     private Guid _uuid;
@@ -792,7 +792,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable
         //Sets up view model
         NewRelationshipViewModel VM = new(Model);
         VM.RelationTypes.Clear();
-        foreach (RelationType relationType in GlobalData.RelationTypes) { VM.RelationTypes.Add(relationType); }
+        foreach (string relationType in GlobalData.RelationTypes) { VM.RelationTypes.Add(relationType); }
         VM.ProspectivePartners.Clear(); //Prospective partners are chars who are not in a relationship with this char
         StoryModel model = ShellViewModel.GetModel();
         foreach (StoryElement character in model.StoryElements.Characters)
@@ -820,6 +820,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable
         NewRelationship.SecondaryButtonText = "Cancel";
         NewRelationship.XamlRoot = GlobalData.XamlRoot;
         NewRelationship.Content = new NewRelationshipPage(VM);
+        NewRelationship.MinWidth = 200;
         ContentDialogResult result = await NewRelationship.ShowAsync();
 
         if (result == ContentDialogResult.Primary) //User clicks add relationship
@@ -839,6 +840,25 @@ public class CharacterViewModel : ObservableRecipient, INavigable
                 // Create the new RelationshipModel
                 string partnerUuid = StoryWriter.UuidString(VM.SelectedPartner.Uuid);
                 RelationshipModel memberRelationship = new(partnerUuid, VM.RelationType);
+                if (VM.InverseRelationship && !string.IsNullOrWhiteSpace(VM.InverseRelationType))
+                {
+                    bool _MakeChar = true;
+                    foreach (var Relation in (VM.SelectedPartner as CharacterModel).RelationshipList)
+                    {
+                        if (Relation.Partner == VM.Member)
+                        {
+                            _MakeChar = false;
+                        }
+                    }
+
+                    if (_MakeChar)
+                    {
+                        (VM.SelectedPartner as CharacterModel).RelationshipList.Add(new(Uuid.ToString(), VM.InverseRelationType));
+                    }
+
+
+                }
+
 
                 memberRelationship.Partner = StringToStoryElement(partnerUuid); // Complete pairing
                 // Add partner relationship to member's list of relationships 
@@ -859,48 +879,6 @@ public class CharacterViewModel : ObservableRecipient, INavigable
         else //User clicks cancel
         {
             Messenger.Send(new StatusChangedMessage(new StatusMessage("AddRelationship cancelled", LogLevel.Info, true)));
-        }
-    }
-
-    private async void RemoveRelationship()
-    {
-        _logger.Log(LogLevel.Info, "Executing RemoveRelationship command");
-        string msg;
-        // verify that I have an active relationship
-        if (SelectedRelationship == null)
-        {
-            Messenger.Send(new StatusChangedMessage(new("Select the relationship to be removed", LogLevel.Warn, true)));
-            return;
-        }
-
-        // Display a confirmation message
-        StoryElement partner = SelectedRelationship.Partner;
-        msg = $"Remove relationship to {partner.Name}? ";
-        msg += Environment.NewLine;
-        ContentDialog dialog = new()
-        {
-            Title = "Remove Relationship",
-            Content = msg,
-            PrimaryButtonText = "Yes",
-            SecondaryButtonText = "No"
-        };
-        dialog.XamlRoot = GlobalData.XamlRoot;
-        ContentDialogResult result = await dialog.ShowAsync();
-        if (result == ContentDialogResult.Primary)
-        {
-            // Remove the current (selected) relationship
-            RelationshipModel rel = SelectedRelationship;
-            ClearActiveRelationship();
-            rel.Partner = null;
-            CharacterRelationships.Remove(rel);
-            _changed = true;
-
-            // log and display status
-            Messenger.Send(new StatusChangedMessage(new($"Relationship to {partner.Name} deleted", LogLevel.Info, true)));
-        }
-        else
-        {
-            Messenger.Send(new StatusChangedMessage(new("Remove Relationship cancelled", LogLevel.Info, true)));
         }
     }
 
@@ -1072,7 +1050,6 @@ public class CharacterViewModel : ObservableRecipient, INavigable
         AddTraitCommand = new RelayCommand(AddTrait, () => true);
         RemoveTraitCommand = new RelayCommand(RemoveTrait, () => true);
         AddRelationshipCommand = new RelayCommand(async () => await  AddRelationship(), () => true);
-        RemoveRelationshipCommand = new RelayCommand(RemoveRelationship, () => true);
         FlawCommand = new RelayCommand(FlawTool, () => true);
         TraitCommand = new RelayCommand(TraitTool, () => true);
 
