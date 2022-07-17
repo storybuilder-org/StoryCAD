@@ -1,13 +1,25 @@
 # StoryBuilder Roadmap
 
-## Distribut StoryBuilder via Windows Store
+## Release Planning
+
+We are now delivering software via a Windows Store 'flight'. 
+
+We anticipate that our next release will include:
+
+
+## Distribute StoryBuilder via Windows Store
 
 This is a major milestone and is descdribed in a Project in 
 StoryBuilder's repository: https://github.com/orgs/storybuilder-org/projects/3
 
 #### Status:
 
-Although not all the tasks in the projet are complete (notably the back-end
+StoryBuilder is available for free download from the Store as a 
+'restricted flight'. It's restricted to a list of Windows userid
+email addresses, while we perform additional testing and complete
+several tasks. 
+
+We will update (notably the back-end
 server), enough work has been done that we've submitted our app to the 
 Store.
 
@@ -15,8 +27,7 @@ Although all requirements appear to be met, the actual submission fails
 with a Microsoft internal error. This is being researched by Microsoft
 as incident 2206130040005500. 
 
-As soon as the incident is resolved, we'll have StoryBuilder available for
-free download from the Store.
+
 
 ## Add an Autosave Feature (#351)
 
@@ -27,14 +38,13 @@ which saves the current outline exactly like Save Story / Ctrl+S /
 Clicking the edit status button. AutoSave's save interval should be 
 saved in specified in seconds rather than minutes.
 
-
 We should recommend or require the backup at the start of edit session 
 if AutoSave is selected, so that the user can revert changes back 
 easily if he or she decides they're unwanted.
 
 #### Status:
 
-Coded, PR created.
+Completed and implemented.
 
 ## Creating a Story' in help is not matching options in Storybuilder (#349)
 
@@ -46,7 +56,7 @@ to account for the many changes in StoryBuilder V2.
 
 #### Status:
 
-In Progress.
+Still in Progress.
 
 ## Drag and Drop is buggy (#312)
 
@@ -73,7 +83,7 @@ When the app is updated show a notice that explains whats changed, this could th
 
 #### Status:
 
-In Progress.
+Completed and implemented.
 
 ## ARM64 is broken (#108)
 
@@ -109,33 +119,25 @@ you'd like to print StoryBuilder reports on. This can include PDFs.
 
 ## Back-end server (#255, 256)
 
-We need a server to hold deployment information for integration with our web server for a StoryBuilder newsletter as well
-as for deployment tracking (consistent with our user data and privacy policy.)
+We need a server to hold deployment information for integration with our 
+web server for a StoryBuilder newsletter as well
+as for deployment tracking (consistent with our user data and 
+privacy policy.)
 
 #### Status:
 
 FOSSHost.com accepted a server request for a free server 
-and has made one available on AARCH64.com. We have installed 
+and has made one available on AARCH64.com. We initially installed 
 Ubuntu Server on it and have contracted a contractor (Caresort) 
 to install and configure LAMP software and code
 (Parse Server) to receive and save the required data from 
-StoryBuilder clients.
+StoryBuilder clients. We badly interpreted how complicated the 
+Linux Parse Server software stack would be to implment, and have
+decided to take a simpler approach, holding the required information
+in a SQL database and writing batch code to process it.
 
-## Picture pickers for characters and settings (#53)
-
-The saying "A picture is worth a thousand words" may have been invented 
-to describe this proposed feature. Provide a
-mechanism to select images from the web and browse them (perhaps 
-similar to XAML Control Gallery's FlipView.) The user
-can browse and find images (for example, of actors) that represent 
-his or her concept of the character's appearance. This could 
-replace (or better, supplement) the RichEditBox.
-
-If this is useful for Character appearance, why not for Setting as well?
-
-#### Status:
-
-Not started.
+We've coded the new StoryBuilder interface and are in the process of
+accessing the server from the client code.
 
 ## Create a 'copy to narrative' tool (#23)
 
@@ -167,11 +169,30 @@ view in bulk.
 
 #### Status:
 
-Not started.
+In process.
 
 ## Program demo videos (#145)
 
 #### Status:
+
+In process. We need a minor modification to our website to link to
+these videos.
+
+## Picture pickers for characters and settings (#53)
+
+The saying "A picture is worth a thousand words" may have been invented 
+to describe this proposed feature. Provide a
+mechanism to select images from the web and browse them (perhaps 
+similar to XAML Control Gallery's FlipView.) The user
+can browse and find images (for example, of actors) that represent 
+his or her concept of the character's appearance. This could 
+replace (or better, supplement) the RichEditBox.
+
+If this is useful for Character appearance, why not for Setting as well?
+
+#### Status:
+
+Not started.
 
 ## Launch StoryBuilder from .stbx file (#94)
 
