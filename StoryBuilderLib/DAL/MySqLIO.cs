@@ -1,135 +1,108 @@
-﻿using System;
-using System.Data;
-using System.Runtime.Serialization.Json;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Linq;
-using System.Text;
+﻿using System.Data;
 using System.Threading.Tasks;
 using MySql.Data.MySqlClient;
 using StoryBuilder.Services.Backend;
 
 namespace StoryBuilder.DAL
 {
-
-    /// <summary>
-    /// don't hold database connection longer than necessary
-    // connection string values from Doppler (with dev and prd variants)
-    // (note: get rid of parse server Doppler data)
-    // logging
-    // async io
-    //    see https://stackoverflow.com/questions/39967208/c-sharp-mysql-driver-async-operations
-    // methods:
-    //   read userid given userid number
-    //   add user (use stored procedure)
-    //   update user (if userid exists and name or email changes)
-    //   add or update preferences (add if add user, update if user exists
-    //   add version
-    /// </summary>
     public class MySqlIO
     {
-        private string connectionString = "server=localhost;database=StoryBuilder;uid=stb;pwd=stb;";
+        public string ConnectionString = "server=localhost;database=StoryBuilder;uid=stb;pwd=stb;";
 
         /// <summary>
         ///  Read a specific users row given the id
         /// </summary>
         /// <param name="id"></param>
-        public async Task<UsersTable> ReadUser(int id) 
+        public async Task<UsersTable> ReadUserByID(MySqlConnection conn, int id)
         {
             string sql = "SELECT id, user_name, email,date_added FROM users WHERE id = @Id";
             UsersTable users = new UsersTable();
 
-            try
+            await using (var cmd = new MySqlCommand(sql, conn))
             {
-                await using (MySqlConnection conn = new MySqlConnection(connectionString))
+                cmd.Parameters.Add("@Id", MySqlDbType.Int32);
+                cmd.Parameters["@Id"].Value = id;
+                var reader = await cmd.ExecuteReaderAsync();
+
+                if (reader.Read())
                 {
-                    await using (var cmd = new MySqlCommand(sql, conn))
-                    {
-                        cmd.Parameters.Add("@Id", MySqlDbType.Int32);
-                        cmd.Parameters["@Id"].Value = id;
-                        var reader = await cmd.ExecuteReaderAsync();
-
-                        if (reader.Read())
-                        {
-                            users.Id = reader.GetInt32(0);
-                            users.UserName = reader.GetString(1);
-                            users.Email = reader.GetString(2);
-                            users.DateAdded = reader.GetDateTime(3);
-                        }
-                    }
+                    users.Id = reader.GetInt32(0);
+                    users.UserName = reader.GetString(1);
+                    users.Email = reader.GetString(2);
+                    users.DateAdded = reader.GetDateTime(3);
                 }
+            }
 
-                return users;
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
+            return users;
         }
-
-        public async Task<UsersTable> ReadUser(string email)
+        public async Task<UsersTable> ReadUserByEmail(MySqlConnection conn, string email)
         {
             string sql = "SELECT id, user_name, email, date_added FROM users WHERE email = @Email";
             UsersTable users = new UsersTable();
 
-            try
+            await using (var cmd = new MySqlCommand(sql, conn))
             {
-                await using (MySqlConnection conn = new MySqlConnection(connectionString))
+                cmd.Parameters.Add("@Email", MySqlDbType.String);
+                cmd.Parameters["@UserName"].Value = email;
+                var reader = await cmd.ExecuteReaderAsync();
+
+                if (reader.Read())
                 {
-                    await using (var cmd = new MySqlCommand(sql, conn))
-                    {
-                        cmd.Parameters.Add("@Email", MySqlDbType.String);
-                        cmd.Parameters["@UserName"].Value = email;
-                        var reader = await cmd.ExecuteReaderAsync();
-
-                        if (reader.Read())
-                        {
-                            users.Id = reader.GetInt32(0);
-                            users.UserName = reader.GetString(1);
-                            users.Email = reader.GetString(2);
-                            users.DateAdded = reader.GetDateTime(3);
-                        }
-                    }
+                    users.Id = reader.GetInt32(0);
+                    users.UserName = reader.GetString(1);
+                    users.Email = reader.GetString(2);
+                    users.DateAdded = reader.GetDateTime(3);
                 }
+            }
 
-                return users;
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
+            return users;
         }
-
-        public async Task<int> AddUser(string name, string email)
+        public async Task<int> AddOrUpdateUser(MySqlConnection conn, string name, string email)
         {
-            try
-            {
-                await using (MySqlConnection conn = new MySqlConnection(connectionString))
-                {
-                    string rtn = "AddUser";
-                    await using (var cmd = new MySqlCommand(rtn, conn))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@user_name", name);
-                        cmd.Parameters.AddWithValue("@email", email);
-                        cmd.Parameters.Add("@Id", MySqlDbType.Int32);
-                        cmd.Parameters["@Id"].Direction = ParameterDirection.Output;
-                        var reader = await cmd.ExecuteReaderAsync();
-                        int id = (int)cmd.Parameters["@Id"].Value;
-                        return id;
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-     
+            string rtn = "spAddUser";
+            await using var cmd = new MySqlCommand(rtn, conn);
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("name", name);
+            cmd.Parameters.AddWithValue("email", email);
+            cmd.Parameters.Add("@user_id", MySqlDbType.Int32);
+            cmd.Parameters["@user_id"].Direction = ParameterDirection.Output;
+            await cmd.ExecuteNonQueryAsync();
+            int id = (int)cmd.Parameters["@user_id"].Value;
+            return id;
+        }
+        public async Task AddOrUpdatePreferences(MySqlConnection conn, int id, bool elmah, bool newsletter, string version)
+        {
+            string sql =
+                "INSERT INTO StoryBuilder.preferences" +
+                " (user_id, elmah_consent, newsletter_consent, version)" +
+                " VALUES (@user_id,@elmah,@newsletter, @version)" +
+                " ON DUPLICATE KEY UPDATE elmah_consent = @elmah, newsletter_consent = @newsletter, version = @version";
+            await using var cmd = new MySqlCommand(sql, conn);
+            cmd.Parameters.AddWithValue("@user_id", id);
+            cmd.Parameters.AddWithValue("@elmah", elmah);
+            cmd.Parameters.AddWithValue("@newsletter", newsletter);
+            cmd.Parameters.AddWithValue("@version", version);
+            await cmd.ExecuteNonQueryAsync();
         }
 
+        public async Task AddVersion(MySqlConnection conn, int id, string currentVersion, string previousVersion)
+        {
+
+            string sql = "INSERT INTO StoryBuilder.versions" +
+                         " (user_id, current_version, previous_version)" +
+                         " VALUES (@user_id,@current,@previous)";
+            await using (var cmd = new MySqlCommand(sql, conn))
+            {
+                cmd.Parameters.AddWithValue("@user_id", id);
+                cmd.Parameters.AddWithValue("@current", currentVersion);
+                cmd.Parameters.AddWithValue("@previous", previousVersion);
+                await cmd.ExecuteNonQueryAsync();
+            }
+        }
         public MySqlIO()
         {
             // obtain connection string data from Doppler?
         }
+
     }
 }

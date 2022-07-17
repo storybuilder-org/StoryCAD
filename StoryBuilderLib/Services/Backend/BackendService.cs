@@ -1,47 +1,70 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Threading.Tasks;
-using Parse;
 using StoryBuilder.Models;
 using StoryBuilder.Models.Tools;
 using StoryBuilder.Services.Logging;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using StoryBuilder.DAL;
-using Windows.Storage;
-using StoryBuilder.Services.Parse;
+using MySql.Data.MySqlClient;
 
 namespace StoryBuilder.Services.Backend
 {
     /// <summary>
     /// BackendService is StoryBuilder's interface to our backend server 
-    /// which is hosted by AARCH64.com  in partnershnd hosts the open source ip with FOSSHost.com
-    /// runs a MsSQL database. We use three tables to store client account information:
+    /// which is hosted by AARCH64.com  in partnership with FOSSHost.com. The
+    /// server runs a MsSQL database. We use three tables to store client
+    /// account information:
     ///     users           userid (generated), name, and email address
     ///     preferences     consent to use elmah.io, consent to receive newsletter
-    ///     versions        version change (current and previous version of StoryBuilder)
+    ///     versions        version change (current and previous version of StoryBuilder).
+    /// 
+    /// This service contains two methods used to log changes in a client that we need
+    /// to track:
+    ///     PostPreferences() is called when a user establishes or changes his preferences
+    ///         (specifically his permissions for elmah.io logging and for receiving
+    ///         our newsletter.)
+    ///     PostVersion() is called when the version of StoryBuilder is running changes,
+    ///         via update or from the user uninstalling / reinstalling the app.
+    /// 
+    /// Both PostPreferences and PostVersion assume a user known to the back-end
+    /// StoryBuilder MySQL database and identified by a record in the 'users' table.
+    /// The 'user' table is keyed by an auto-incremented Int32 field, but contains
+    /// as email address for the user which is identified as UNIQUE. For our purposes,
+    /// the user's email address is his identification.
+    ///
+    /// Access to the database is through the MySqlIO class in the DAL.
+    /// The 'AddUser' stored procedure in the database is called to either add a
+    /// new user or to return the userid (key) if the email address/userid already
+    /// exists. Similar 'add or update' logic is used for the preferences table.
+    /// Versions uses a unique primary key of the userid and an auto-incremented
+    /// version id. Unlike the user and preferences table, there can be multiple
+    /// versions rows for a user, and their timestamp can be used to measure and track
+    /// deployments.
+
     /// </summary>
     public class BackendService
     {
-        private LogService Log = Ioc.Default.GetService<LogService>();
+        private LogService log = Ioc.Default.GetService<LogService>();
 
-        public async void Begin()
+        public void Begin()
         {
             BackgroundWorker Worker = new();
             Worker.DoWork += async (sender, e) =>
             {
                 try
                 {
-                    // If the previous attempt to communicate to the back-end server failed, retry
+                    // If the previous attempt to communicate to the back-end server
+                    // or database failed, retry
                     if (!GlobalData.Preferences.ParsePreferencesStatus)
                         await PostPreferences(GlobalData.Preferences);
                     if (!GlobalData.Preferences.ParseVersionStatus)
                         await PostVersion();
-
+                    // If the StoryBuilder version has changed, post the version change
                     if (!GlobalData.Version.Equals(GlobalData.Preferences.Version))
                     {
                         // Process a version change (usually a new release)
-                        Log.Log(LogLevel.Info,
-                            "Version mismatch: " + GlobalData.Version + " != " + GlobalData.Preferences.Version);
+                        log.Log(LogLevel.Info, "Version mismatch: " + GlobalData.Version + " != " + GlobalData.Preferences.Version);
                         GlobalData.LoadedWithVersionChange = true;
                         var preferences = GlobalData.Preferences;
                         // Update Preferences
@@ -54,139 +77,82 @@ namespace StoryBuilder.Services.Backend
                 }
                 catch (Exception ex)
                 {
-                    Log.LogException(LogLevel.Warn, ex, "Error in parse service worker");
+                    log.LogException(LogLevel.Warn, ex, "Error in parse service worker");
                 }
             };
             Worker.RunWorkerAsync();
         }
-
-        private LogService log = Ioc.Default.GetService<LogService>();
-
         public async Task PostPreferences(PreferencesModel preferences)
         {
-            return;
-            log.Log(LogLevel.Info, "Posting preferences data to parse");
+            log.Log(LogLevel.Info, "Post user preferences to back-end database");
+
+            MySqlIO sql = Ioc.Default.GetService<MySqlIO>();
+
+
+            // Get a connection to the database
+            MySqlConnection conn = new MySqlConnection(sql.ConnectionString);
+
             try
             {
-                log.Log(LogLevel.Info, "Register ParsePreferences subclass");
-                ParseObject.RegisterSubclass<ParsePreferences>();
+                await conn.OpenAsync();
 
-                log.Log(LogLevel.Info, "Initialize ParseClient");
-                ParseClient.Initialize(new ParseClient.Configuration
-                {
-                    ApplicationId = "StoryBuilder",
-                    Server = "http://localhost:1337/parse/"
-                });
+                string name = preferences.Name;
+                string email = preferences.Email;
+                int id = await sql.AddOrUpdateUser(conn, name, email);
+                log.Log(LogLevel.Info, "Name: " + name + " userId: " + id);
 
-                if (ParseUser.CurrentUser != null)
-                {
-                    ParseUser.LogOut();
-                }
-
-                log.Log(LogLevel.Info, "Create ParsePrefences ParseObject");
-                var pref = new ParsePreferences
-                {
-                    Email = preferences.Email,
-                    Name = preferences.Name,
-                    ErrorCollectionConsent = preferences.ErrorCollectionConsent,
-                    Newsletter = preferences.Newsletter,
-                    Version = "1.0.0",
-                    UpdateDate = DateTime.Now.ToShortDateString()
-                };
-
-                log.Log(LogLevel.Info, "Save ParsePreferences data");
-                await pref.SaveAsync();
-                await Ioc.Default.GetService<PreferencesIO>().UpdateFile();
-                log.Log(LogLevel.Info, "PostPreferences successful");
-                await SavePreferencesStatus(true);
-
+                bool elmah = preferences.ErrorCollectionConsent;
+                bool newsletter = preferences.Newsletter;
+                string version = preferences.Version;
+                await sql.AddOrUpdatePreferences(conn, id, elmah, newsletter, version);
+                log.Log(LogLevel.Info, "Preferences:  elmah=" + elmah + " newsletter=" + newsletter);
             }
-            catch (ParseException ex)
-            {
-                //Note: I'm unable to access ErrorCode. The
-                //      parse server messages are unique, though,
-                //      and can be used to identify specific 
-                //      exceptions for corrective action: ex, 
-                //"Account already exists for this username"
-                //"Invalid session token"
-                await SavePreferencesStatus(false);
-                //"Invalid username/password"
-                log.LogException(LogLevel.Warn, ex, ex.Message);
-            }
+            // may want to use multiple catch clauses
             catch (Exception ex)
             {
-                // (InnerException) "Invalid session token
-                await SavePreferencesStatus(false);
                 log.LogException(LogLevel.Warn, ex, ex.Message);
+            }
+            finally
+            {
+                await conn.CloseAsync();
+                log.Log(LogLevel.Info, "Back-end database connection ended");
             }
         }
 
         public async Task PostVersion()
         {
-            return;
             log.Log(LogLevel.Info, "Posting version data to parse");
+
             var preferences = GlobalData.Preferences;
+            MySqlIO sql = Ioc.Default.GetService<MySqlIO>();
+
+            // Get a connection to the database
+            MySqlConnection conn = new MySqlConnection(sql.ConnectionString);
+
             try
             {
-                log.Log(LogLevel.Info, "Register ParseVersion subclass");
-                ParseObject.RegisterSubclass<ParseVersion>();
+                await conn.OpenAsync();
 
-                log.Log(LogLevel.Info, "Initialize ParseClient");
-                ParseClient.Initialize(new ParseClient.Configuration
-                {
-                    ApplicationId = "StoryBuilder",
-                    Server = "http://localhost:1337/parse/"
-                });
-
-                if (ParseUser.CurrentUser != null)
-                {
-                    ParseUser.LogOut();
-                }
-
-                log.Log(LogLevel.Info, "Create ParseVersion ParseObject");
-                var vers = new ParseVersion
-                {
-
-                    Email = preferences.Email,
-                    Name = preferences.Name,
-                    PreviousVersion = preferences.Version ?? "",
-                    CurrentVersion = GlobalData.Version,
-                    RunDate = DateTime.Now.ToShortDateString()
-                };
-                log.Log(LogLevel.Info, "Save Version data to parse-server");
-                await vers.SaveAsync();
-                await SaveVersionStatus(true);
-                log.Log(LogLevel.Info, "PostVersion successful");
+                string name = preferences.Name;
+                string email = preferences.Email;
+                int id = await sql.AddOrUpdateUser(conn, name, email);
+                log.Log(LogLevel.Info, "User Name: " + name + " userId: " + id);
+                
+                string current = GlobalData.Version;
+                string previous = preferences.Version ?? "";
+                await sql.AddVersion(conn, id, current, previous);
+                log.Log(LogLevel.Info, "Version:  Current=" + current + " Previous=" + previous);
             }
-            catch (ParseException ex)
-            {
-                //See PostPreferences for notes
-                await SaveVersionStatus(false);
-                log.LogException(LogLevel.Warn, ex, ex.Message);
-            }
+            // May want to use multiple catch clauses
             catch (Exception ex)
             {
-                // (InnerException) "Invalid session token
-                await SaveVersionStatus(false);
                 log.LogException(LogLevel.Warn, ex, ex.Message);
             }
-        }
-
-        private async Task SavePreferencesStatus(bool preferencesStatus)
-        {
-            PreferencesIO prfIO = new(GlobalData.Preferences,
-                System.IO.Path.Combine(ApplicationData.Current.RoamingFolder.Path, "Storybuilder"));
-            GlobalData.Preferences.ParsePreferencesStatus = preferencesStatus;
-            await prfIO.UpdateFile();
-        }
-
-        private async Task SaveVersionStatus(bool versionStatus)
-        {
-            PreferencesIO prfIO = new(GlobalData.Preferences,
-                System.IO.Path.Combine(ApplicationData.Current.RoamingFolder.Path, "Storybuilder"));
-            GlobalData.Preferences.ParseVersionStatus = versionStatus;
-            await prfIO.UpdateFile();
-
+            finally
+            {
+                await conn.CloseAsync();
+                log.Log(LogLevel.Info, "Back-end database connection ended");
+            }
         }
     }
 }

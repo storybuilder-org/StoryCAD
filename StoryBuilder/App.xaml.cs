@@ -19,14 +19,13 @@ using StoryBuilder.Services.Logging;
 using StoryBuilder.Services.Navigation;
 using StoryBuilder.Services.Preferences;
 using StoryBuilder.Services.Search;
-using StoryBuilder.Services.Parse;
 using StoryBuilder.ViewModels;
 using StoryBuilder.ViewModels.Tools;
 using StoryBuilder.Views;
 using dotenv.net;
 using dotenv.net.Utilities;
+using StoryBuilder.Services.Backend;
 using Syncfusion.Licensing;
-using AppWindow = Microsoft.UI.Windowing.AppWindow;
 using UnhandledExceptionEventArgs = Microsoft.UI.Xaml.UnhandledExceptionEventArgs;
 
 namespace StoryBuilder;
@@ -97,9 +96,10 @@ public partial class App : Application
                 .AddSingleton<ScrivenerIo>()
                 .AddSingleton<StoryReader>()
                 .AddSingleton<StoryWriter>()
+                .AddSingleton<MySqlIO>()
                 .AddSingleton<BackupService>()
                 .AddSingleton<DeletionService>()
-                .AddSingleton<ParseService>()
+                .AddSingleton<BackendService>()
                 // Register ViewModels 
                 .AddSingleton<ShellViewModel>()
                 .AddSingleton<OverviewViewModel>()
@@ -163,7 +163,7 @@ public partial class App : Application
         // Load Preferences
         PreferencesService pref = Ioc.Default.GetService<PreferencesService>();
         await pref.LoadPreferences(GlobalData.RootDirectory);
-        Ioc.Default.GetService<ParseService>().Begin();
+        Ioc.Default.GetService<BackendService>()!.Begin();
 
         await ProcessInstallationFiles();
 
