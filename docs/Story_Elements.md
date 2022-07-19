@@ -6,7 +6,7 @@ Here, clicking on the first or root node in the tree displays the Story  Overvie
 
 On some screen sizes and orientations the Navigation and Content panes may be stacked with the Navigation pane above the Content pane. In those cases the Show/Hide Navigation button (the hamburger menu button) acts differently; it toggles from the Navigation Pane to the Content Pane and back. <br/>
 
-![](Navigation-and-Content-Pane.png)
+MISSING IMAGE: C:/dev/src/User Manual/Screenshots/Navigation and Content Pane.png <br/>
 
 Every Story Element type is a different form. These are the story elements: <br/>
 

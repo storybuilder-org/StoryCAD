@@ -1,7 +1,7 @@
 ### Premise Tab ###
 Premise Tab <br/>
 
-![](Overview-Premise.png)
+MISSING IMAGE: C:/dev/src/User Manual/Screenshots/Overview Premise.png <br/>
 
 
 Story Problem <br/>

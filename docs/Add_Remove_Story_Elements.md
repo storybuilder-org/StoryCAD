@@ -3,11 +3,11 @@ Add/Remove Story Elements <br/>
 
 You can add or remove Story Elements in two ways. There’s a Menu Bar button which opens an ‘Add/Remove Story Elements’ menu: <br/>
 
-![](Add-Story-Element-Menu.png)
+MISSING IMAGE: C:/dev/src/User Manual/Screenshots/Add Story Element Menu.png <br/>
 
 There’s also a pop-up menu which displays when you right-click on any Story Element node in the Navigation Pane: <br/>
 
-![](Story-Element-Flyout.png)
+MISSING IMAGE: C:/dev/src/User Manual/Screenshots/Story Element Flyout.bmp <br/>
 
 (Hint: Holding your mouse or stylus over any of the buttons on a menu or pop-up menu will display a tip describing the button.) <br/>
 

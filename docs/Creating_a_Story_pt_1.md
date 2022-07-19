@@ -17,11 +17,11 @@ To do so in StoryBuilder, launch the program. The first time you launch the prog
 
 Back to our story idea. Use the File menu’s  Open/Create file option: <br/>
 
-![](File-Open-Dialog-2.png)
+![](File-Open-Dialog.png)
 
 Click on Create New Story to start a new outline: <br/>
 
-![](Create-New-Story-Dialog-2.png)
+![](Create-New-Story-Dialog.png)
 
 Select ‘Empty Folders’ for the Template. If it’s not already there, change the Project path to the folder you’d like to save your outline in (usually the Preferences location) using the Browse button. And finally, assign a Project Name. This will be the file name of the story outline file. In our case, use ‘Danger Calls’. Click on Create project, and you’ll have created your first story outline: <br/>
 
@@ -53,7 +53,7 @@ At the moment, the story outline for "Danger Calls" exists only in your computer
 
 The indicator will change from red to green, indicating that all changes have been saved to disk. <br/>
 
-![](Changed-Indicator-2.png)
+![](Changed-Indicator.png)
 
 Alternatively, from the File menu, you can select Save Story, or enter the Ctrl+S shortcut keys.  Remember to save your work periodically. <br/>
 

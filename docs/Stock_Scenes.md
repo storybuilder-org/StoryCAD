@@ -1,7 +1,7 @@
 #### Stock Scenes ####
 Stock Scenes <br/>
 
-![](Tools-Stock-Scenes.png)
+MISSING IMAGE: C:/dev/src/User Manual/Screenshots/Tools Stock Scenes.png <br/>
 
 This tool, invoked from the Plotting Aids sub-menu of the Tools menu, provides a list of several categories of stock scenes. These are scenic situations which recur frequently in fiction.  <br/>
 
