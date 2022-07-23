@@ -78,6 +78,17 @@
                         <ToolTip Content="Print selected node"/>
                     </ToolTipService.ToolTip>
                 </AppBarButton>
+
+                <AppBarButton Command="{x:Bind ShellVm.NarrativeToolCommand, Mode=OneWay}" 
+                              Visibility="{x:Bind ShellVm.PrintNodeVisibility, Mode=TwoWay}" >
+                    <AppBarButton.Icon>
+                        <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE736;"/>
+                    </AppBarButton.Icon>
+                    <ToolTipService.ToolTip>
+                        <ToolTip Content="Open Narrative Tool"/>
+                    </ToolTipService.ToolTip>
+                </AppBarButton>
+                
                 <AppBarButton Icon="Cancel" Visibility="{x:Bind ShellVm.EmptyTrashVisibility, Mode=TwoWay}" >
                     <ToolTipService.ToolTip>
                         <ToolTip Content="Empty trash"/>

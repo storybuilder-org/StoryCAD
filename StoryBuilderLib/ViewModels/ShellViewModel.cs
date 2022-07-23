@@ -128,6 +128,7 @@ namespace StoryBuilder.ViewModels
         public RelayCommand AddSettingCommand { get; }
         public RelayCommand AddSceneCommand { get; }
         public RelayCommand PrintNodeCommand { get; }
+        public RelayCommand NarrativeToolCommand { get; }
 
         // Remove command (move to trash)
         public RelayCommand RemoveStoryElementCommand { get; }
@@ -2090,6 +2091,7 @@ namespace StoryBuilder.ViewModels
             TogglePaneCommand = new RelayCommand(TogglePane, () => _canExecuteCommands);
             OpenUnifiedCommand = new RelayCommand(async () => await OpenUnifiedMenu(), () => _canExecuteCommands);
             CloseUnifiedCommand = new RelayCommand(CloseUnifiedMenu, () => _canExecuteCommands);
+            NarrativeToolCommand = new RelayCommand(async () => await OpenNarrativeTool(), () => _canExecuteCommands);
             PrintNodeCommand = new RelayCommand(async () => await PrintCurrentNodeAsync(), () => _canExecuteCommands);
             OpenFileCommand = new RelayCommand(async () => await OpenFile(), () => _canExecuteCommands);
             SaveFileCommand = new RelayCommand(async () => await SaveFile(), () => _canExecuteCommands);
@@ -2140,6 +2142,16 @@ namespace StoryBuilder.ViewModels
             ChangeStatusColor = Colors.Green;
 
             ShellInstance = this;
+        }
+
+        private async Task OpenNarrativeTool()
+        {
+            ContentDialog dialog = new();
+            dialog.XamlRoot = GlobalData.XamlRoot;
+            dialog.Title = "Narrative Editor - EXPERIMENTAL";
+            dialog.PrimaryButtonText = "Done";
+            dialog.Content = new NarrativeTool();
+            ContentDialogResult result = await dialog.ShowAsync();
         }
 
         public void SearchNodes()

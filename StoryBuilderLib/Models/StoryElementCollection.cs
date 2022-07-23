@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using static System.Formats.Asn1.AsnWriter;
 
 namespace StoryBuilder.Models;
 
@@ -17,6 +18,7 @@ public class StoryElementCollection : ObservableCollection<StoryElement>
     public ObservableCollection<StoryElement> Characters;
     public ObservableCollection<StoryElement> Settings;
     public ObservableCollection<StoryElement> Problems;
+    public ObservableCollection<StoryElement> Scenes;
 
     public StoryElementCollection()
     {
@@ -25,6 +27,7 @@ public class StoryElementCollection : ObservableCollection<StoryElement>
         Characters = new ObservableCollection<StoryElement>();
         Settings = new ObservableCollection<StoryElement>();
         Problems = new ObservableCollection<StoryElement>();
+        Scenes = new ObservableCollection<StoryElement>();
     }
 
     /// <summary>
@@ -54,6 +57,9 @@ public class StoryElementCollection : ObservableCollection<StoryElement>
                         break;
                     case StoryItemType.Problem:
                         Problems.Add(element);
+                        break;
+                    case StoryItemType.Scene:
+                        Scenes.Add(element);
                         break;
                 }
                 break;

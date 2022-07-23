@@ -1,4 +1,4 @@
-﻿using System;
+﻿  using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -117,6 +117,7 @@ public partial class App : Application
                 .AddSingleton<NewProjectViewModel>()
                 .AddSingleton<NewRelationshipViewModel>()
                 .AddSingleton<PrintReportDialogVM>()
+                .AddSingleton<NarrativeToolVM>()
                 // Register Tools ViewModels  
                 .AddSingleton<KeyQuestionsViewModel>()
                 .AddSingleton<TopicsViewModel>()

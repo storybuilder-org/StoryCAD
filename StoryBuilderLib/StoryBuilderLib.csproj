@@ -45,6 +45,7 @@
     <None Remove="Services\Dialogs\RecentFiles.xaml" />
     <None Remove="Services\Dialogs\SamplePage.xaml" />
     <None Remove="Services\Dialogs\SaveAsDialog.xaml" />
+    <None Remove="Services\Dialogs\Tools\NarrativeTool.xaml" />
     <None Remove="Services\Dialogs\Tools\PrintReportsDialog.xaml" />
     <None Remove="Services\Dialogs\UnifiedMenu.xaml" />
   </ItemGroup>
@@ -92,6 +93,9 @@
     <None Update="NLog.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <Page Update="Services\Dialogs\Tools\NarrativeTool.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
 
   <ItemGroup>
