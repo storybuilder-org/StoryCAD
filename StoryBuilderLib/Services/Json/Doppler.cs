@@ -18,16 +18,25 @@ namespace StoryBuilder.Services.Json
         [JsonPropertyName("APIKEY")]
         public string APIKEY { get; set; }
 
+        [JsonPropertyName("CAFILE")]
+        public string CAFILE { get; set; }
+
+        [JsonPropertyName("CONNECTION")]
+        public string CONNECTION { get; set; }
+
         [JsonPropertyName("LOGID")]
-        public string LOGID { get; set; }
+        public string LOGID  { get; set; }
+
+        [JsonPropertyName("SSLCA")]
+        public string SSLCA { get; set; }
 
         private static HttpClient client = new HttpClient();
 
         /// <summary>
-        /// Obtain tokens for elmah.io logging, if they exist.
+        /// Obtain tokens for elmah.io and and MySQL connection to the backend server.
         /// Based on https://docs.doppler.com/docs/asp-net-core-csharp
         /// </summary>
-        /// <returns>elmah.io tokens, or empty strings</returns>
+        /// <returns>Doppler tokens, or empty strings</returns>
         public async Task<Doppler> FetchSecretsAsync()
         {
             try

@@ -4,9 +4,12 @@ using System.Threading.Tasks;
 using StoryBuilder.Models;
 using StoryBuilder.Models.Tools;
 using StoryBuilder.Services.Logging;
+using StoryBuilder.Services.Json;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using StoryBuilder.DAL;
 using MySql.Data.MySqlClient;
+using Windows.Storage;
+using StoryBuilder.Services.Preferences;
 
 namespace StoryBuilder.Services.Backend
 {
@@ -46,6 +49,8 @@ namespace StoryBuilder.Services.Backend
     public class BackendService
     {
         private LogService log = Ioc.Default.GetService<LogService>();
+        private string connection = string.Empty;
+        private string sslCA = string.Empty;
 
         public void Begin()
         {
@@ -56,15 +61,16 @@ namespace StoryBuilder.Services.Backend
                 {
                     // If the previous attempt to communicate to the back-end server
                     // or database failed, retry
-                    if (!GlobalData.Preferences.ParsePreferencesStatus)
+                    if (!GlobalData.Preferences.RecordPreferencesStatus)
                         await PostPreferences(GlobalData.Preferences);
-                    if (!GlobalData.Preferences.ParseVersionStatus)
+                    if (!GlobalData.Preferences.RecordVersionStatus)
                         await PostVersion();
                     // If the StoryBuilder version has changed, post the version change
                     if (!GlobalData.Version.Equals(GlobalData.Preferences.Version))
                     {
                         // Process a version change (usually a new release)
-                        log.Log(LogLevel.Info, "Version mismatch: " + GlobalData.Version + " != " + GlobalData.Preferences.Version);
+                        log.Log(LogLevel.Info,
+                            "Version mismatch: " + GlobalData.Version + " != " + GlobalData.Preferences.Version);
                         GlobalData.LoadedWithVersionChange = true;
                         var preferences = GlobalData.Preferences;
                         // Update Preferences
@@ -82,6 +88,7 @@ namespace StoryBuilder.Services.Backend
             };
             Worker.RunWorkerAsync();
         }
+
         public async Task PostPreferences(PreferencesModel preferences)
         {
             log.Log(LogLevel.Info, "Post user preferences to back-end database");
@@ -90,7 +97,7 @@ namespace StoryBuilder.Services.Backend
 
 
             // Get a connection to the database
-            MySqlConnection conn = new MySqlConnection(sql.ConnectionString);
+            MySqlConnection conn = new MySqlConnection(connection);
 
             try
             {
@@ -104,7 +111,16 @@ namespace StoryBuilder.Services.Backend
                 bool elmah = preferences.ErrorCollectionConsent;
                 bool newsletter = preferences.Newsletter;
                 string version = preferences.Version;
+                // Workaround for an issue with the PreferencesModel Version property.
+                // It has a built-in title. We need to remove the title before we log.
+                if (version.StartsWith("Version: "))
+                    version = version.Substring(9);
+                // Post the preferences to the database
                 await sql.AddOrUpdatePreferences(conn, id, elmah, newsletter, version);
+                // Indicate we've stored them successfully
+                GlobalData.Preferences.RecordPreferencesStatus = true;
+                PreferencesIO loader = new(GlobalData.Preferences, GlobalData.RootDirectory);
+                await loader.UpdateFile();
                 log.Log(LogLevel.Info, "Preferences:  elmah=" + elmah + " newsletter=" + newsletter);
             }
             // may want to use multiple catch clauses
@@ -127,7 +143,7 @@ namespace StoryBuilder.Services.Backend
             MySqlIO sql = Ioc.Default.GetService<MySqlIO>();
 
             // Get a connection to the database
-            MySqlConnection conn = new MySqlConnection(sql.ConnectionString);
+            MySqlConnection conn = new MySqlConnection(connection);
 
             try
             {
@@ -137,10 +153,15 @@ namespace StoryBuilder.Services.Backend
                 string email = preferences.Email;
                 int id = await sql.AddOrUpdateUser(conn, name, email);
                 log.Log(LogLevel.Info, "User Name: " + name + " userId: " + id);
-                
+
                 string current = GlobalData.Version;
                 string previous = preferences.Version ?? "";
+                // Post the version change to the database
                 await sql.AddVersion(conn, id, current, previous);
+                // Indicate we've stored it  successfully
+                GlobalData.Preferences.RecordVersionStatus = true;
+                PreferencesIO loader = new(GlobalData.Preferences, GlobalData.RootDirectory);
+                await loader.UpdateFile();
                 log.Log(LogLevel.Info, "Version:  Current=" + current + " Previous=" + previous);
             }
             // May want to use multiple catch clauses
@@ -152,6 +173,43 @@ namespace StoryBuilder.Services.Backend
             {
                 await conn.CloseAsync();
                 log.Log(LogLevel.Info, "Back-end database connection ended");
+            }
+        }
+
+        public async Task SetConnectionString(Doppler keys)
+        {
+            try
+            {
+                log.Log(LogLevel.Info, "GetConnectionString");
+                StorageFolder tempFolder = ApplicationData.Current.TemporaryFolder;
+                StorageFile tempFile = 
+                    await tempFolder.CreateFileAsync("storybuilder.pem", CreationCollisionOption.ReplaceExisting);
+                string caFile = keys.CAFILE;
+                await FileIO.WriteTextAsync(tempFile, caFile);
+                sslCA = $"SslCa={tempFile.Path};";
+                // create MySQL connection string if keys are defined
+                connection = keys.CONNECTION + sslCA; 
+                // can compare the c:\certs and temp file to see if they are the same
+            }
+            catch (Exception ex)
+            {
+                log.LogException(LogLevel.Warn, ex, ex.Message);
+            }
+        }
+
+        public async Task DeleteWorkFile()
+        {
+            try
+            {
+                log.Log(LogLevel.Info, "DeleteWorkFile");
+                string path = sslCA.Substring(6);   // remove leading 'SslCa='  
+                path = path.Substring(0, path.Length - 1);  // remove trailing ';'
+                StorageFile file = await StorageFile.GetFileFromPathAsync(path);
+                await file.DeleteAsync();
+            }
+            catch (Exception ex)
+            {
+                log.LogException(LogLevel.Warn, ex, ex.Message);
             }
         }
     }

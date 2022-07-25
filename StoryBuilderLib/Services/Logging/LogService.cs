@@ -24,6 +24,8 @@ public class LogService : ILogService
     private static readonly string logFilePath;
     private static string stackTraceHelper; //Elmah for some reason doesn't show the stack trace of an exception so this one does.
     private static string logfilename;
+    private string apiKey = string.Empty;
+    private string logID = string.Empty;
     static LogService()
 
     {
@@ -66,22 +68,6 @@ public class LogService : ILogService
 
     public async Task<bool> AddElmahTarget()
     {
-        string apiKey = string.Empty;
-        string logID = string.Empty;
-
-        // create elmah.io target if keys are defined
-        try
-        {
-            var doppler = new Doppler();
-            var keys = await doppler.FetchSecretsAsync();
-            apiKey = keys.APIKEY;
-            logID = keys.LOGID;
-        }
-        catch (Exception ex) 
-        {
-            LogException(LogLevel.Error, ex, ex.Message);
-            return false;
-        }
         if (apiKey == string.Empty | logID == string.Empty)
             return false;
 
@@ -159,6 +145,13 @@ public class LogService : ILogService
             return false;
         }
     }
+
+    public void SetElmahTokens(Doppler keys)
+    {
+        apiKey = keys.APIKEY;
+        logID = keys.LOGID;
+    }
+
     public LogService()
     {
         Log(LogLevel.Info, "Starting Log service");

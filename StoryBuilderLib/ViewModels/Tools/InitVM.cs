@@ -70,7 +70,7 @@ public class InitVM : ObservableRecipient
         PreferencesIO loader = new(GlobalData.Preferences, System.IO.Path.Combine(ApplicationData.Current.RoamingFolder.Path, "Storybuilder"));
         await loader.UpdateModel();
         BackendService backend = Ioc.Default.GetService<BackendService>();
-        if (!GlobalData.Preferences.ParsePreferencesStatus)
+        if (!GlobalData.Preferences.RecordPreferencesStatus)
             await backend.PostPreferences(GlobalData.Preferences);
     }
 }

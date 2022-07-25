@@ -25,6 +25,7 @@ using StoryBuilder.Views;
 using dotenv.net;
 using dotenv.net.Utilities;
 using StoryBuilder.Services.Backend;
+using StoryBuilder.Services.Json;
 using Syncfusion.Licensing;
 using UnhandledExceptionEventArgs = Microsoft.UI.Xaml.UnhandledExceptionEventArgs;
 
@@ -142,6 +143,21 @@ public partial class App : Application
 
         // Note: Shell_Loaded in Shell.xaml.cs will display a
         // connection status message as soon as it's displayable.
+
+        // Obtain keys if defined
+        try
+        {
+            var doppler = new Doppler();
+            var keys = await doppler.FetchSecretsAsync();
+            BackendService backend = Ioc.Default.GetService<BackendService>();
+            await backend.SetConnectionString(keys);
+            _log.SetElmahTokens(keys);
+
+        }
+        catch (Exception ex)
+        {
+            _log.LogException(LogLevel.Error, ex, ex.Message);
+        }
 
         if (Debugger.IsAttached)
             _log.Log(LogLevel.Info, "Bypassing elmah.io");
