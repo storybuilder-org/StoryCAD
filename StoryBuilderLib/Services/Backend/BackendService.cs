@@ -56,7 +56,7 @@ namespace StoryBuilder.Services.Backend
         /// <summary>
         /// Do any necessary posting to the backend MySql server on app
         /// startup. This will include either preferences or versions
-        /// posting that weren't succesfull during the last run.
+        /// posting that weren't successfull during the last run.
         ///
         /// Also, if the app version has changed because of an update,
         /// post the new version.
