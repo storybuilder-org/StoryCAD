@@ -15,9 +15,9 @@ namespace StoryBuilder.Services.Backend
 {
     /// <summary>
     /// BackendService is StoryBuilder's interface to our backend server 
-    /// which is hosted by AARCH64.com  in partnership with FOSSHost.com. The
-    /// server runs a MsSQL database. We use three tables to store client
-    /// account information:
+    /// which is hosted on ScaleGrid. The  server runs a MsSQL database.
+    ///
+    /// We use three tables to store client account information:
     ///     users           userid (generated), name, and email address
     ///     preferences     consent to use elmah.io, consent to receive newsletter
     ///     versions        version change (current and previous version of StoryBuilder).
@@ -52,7 +52,16 @@ namespace StoryBuilder.Services.Backend
         private string connection = string.Empty;
         private string sslCA = string.Empty;
 
-        public void Begin()
+
+        /// <summary>
+        /// Do any necessary posting to the backend MySql server on app
+        /// startup. This will include either preferences or versions
+        /// posting that weren't succesfull during the last run.
+        ///
+        /// Also, if the app version has changed because of an update,
+        /// post the new version.
+        /// </summary>
+        public void StartupRecording()
         {
             BackgroundWorker Worker = new();
             Worker.DoWork += async (sender, e) =>

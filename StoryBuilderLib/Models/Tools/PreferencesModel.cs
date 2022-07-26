@@ -62,8 +62,8 @@ namespace StoryBuilder.Models.Tools
         public string Version { get; set; }
 
         // Backend server log status
-        public bool RecordPreferencesStatus { get; set; }  // Last preferences change was logged successfuly or not
-        public bool RecordVersionStatus { get; set; }      // Last version change was logged successfuly or not
+        public bool RecordPreferencesStatus { get; set; }  // Last preferences change was logged successfully or not
+        public bool RecordVersionStatus { get; set; }      // Last version change was logged successfully or not
         #endregion
 
         #region Constructor

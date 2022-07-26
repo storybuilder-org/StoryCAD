@@ -179,7 +179,7 @@ public partial class App : Application
         // Load Preferences
         PreferencesService pref = Ioc.Default.GetService<PreferencesService>();
         await pref.LoadPreferences(GlobalData.RootDirectory);
-        Ioc.Default.GetService<BackendService>()!.Begin();
+        Ioc.Default.GetService<BackendService>()!.StartupRecording();
 
         await ProcessInstallationFiles();
 
