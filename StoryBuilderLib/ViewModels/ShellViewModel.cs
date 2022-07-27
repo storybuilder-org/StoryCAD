@@ -36,6 +36,7 @@ using System.Net.Http.Headers;
 using System.Net;
 using Octokit;
 using ProductHeaderValue = Octokit.ProductHeaderValue;
+using StoryBuilder.Services.Backend;
 
 namespace StoryBuilder.ViewModels
 {
@@ -988,6 +989,8 @@ namespace StoryBuilder.ViewModels
                     await WriteModel();
                 }
             }
+            BackendService backend = Ioc.Default.GetService<BackendService>();
+            await backend.DeleteWorkFile();
             Logger.Flush();
             Microsoft.UI.Xaml.Application.Current.Exit();  // Win32
         }

@@ -19,14 +19,14 @@ using StoryBuilder.Services.Logging;
 using StoryBuilder.Services.Navigation;
 using StoryBuilder.Services.Preferences;
 using StoryBuilder.Services.Search;
-using StoryBuilder.Services.Parse;
 using StoryBuilder.ViewModels;
 using StoryBuilder.ViewModels.Tools;
 using StoryBuilder.Views;
 using dotenv.net;
 using dotenv.net.Utilities;
+using StoryBuilder.Services.Backend;
+using StoryBuilder.Services.Json;
 using Syncfusion.Licensing;
-using AppWindow = Microsoft.UI.Windowing.AppWindow;
 using UnhandledExceptionEventArgs = Microsoft.UI.Xaml.UnhandledExceptionEventArgs;
 
 namespace StoryBuilder;
@@ -97,9 +97,10 @@ public partial class App : Application
                 .AddSingleton<ScrivenerIo>()
                 .AddSingleton<StoryReader>()
                 .AddSingleton<StoryWriter>()
+                .AddSingleton<MySqlIO>()
                 .AddSingleton<BackupService>()
                 .AddSingleton<DeletionService>()
-                .AddSingleton<ParseService>()
+                .AddSingleton<BackendService>()
                 // Register ViewModels 
                 .AddSingleton<ShellViewModel>()
                 .AddSingleton<OverviewViewModel>()
@@ -143,6 +144,21 @@ public partial class App : Application
         // Note: Shell_Loaded in Shell.xaml.cs will display a
         // connection status message as soon as it's displayable.
 
+        // Obtain keys if defined
+        try
+        {
+            var doppler = new Doppler();
+            var keys = await doppler.FetchSecretsAsync();
+            BackendService backend = Ioc.Default.GetService<BackendService>();
+            await backend.SetConnectionString(keys);
+            _log.SetElmahTokens(keys);
+
+        }
+        catch (Exception ex)
+        {
+            _log.LogException(LogLevel.Error, ex, ex.Message);
+        }
+
         if (Debugger.IsAttached)
             _log.Log(LogLevel.Info, "Bypassing elmah.io");
         else
@@ -163,7 +179,7 @@ public partial class App : Application
         // Load Preferences
         PreferencesService pref = Ioc.Default.GetService<PreferencesService>();
         await pref.LoadPreferences(GlobalData.RootDirectory);
-        Ioc.Default.GetService<ParseService>().Begin();
+        Ioc.Default.GetService<BackendService>()!.StartupRecording();
 
         await ProcessInstallationFiles();
 
