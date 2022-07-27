@@ -1,7 +1,7 @@
 ### Antagonist Tab ###
 Antagonist Tab <br/>
 
-![](Problem-Antagonist-Tab.png)
+MISSING IMAGE: C:/dev/src/User Manual/Screenshots/Problem Antagonist Tab.png <br/>
 
 The problem's antagonist is the source of the opposition to the problem protagonist's goal. <br/>
 

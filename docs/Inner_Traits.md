@@ -1,7 +1,7 @@
 ### Inner Traits ###
 Inner Traits Tab <br/>
 
-![](Character-Inner-Traits-Tab.png)
+MISSING IMAGE: C:/dev/src/User Manual/Screenshots/Character Inner Traits Tab.png <br/>
 
 A trait is a distinguishing characteristic or quality.  As a fiction writer, you may find it useful to think of inner and outer (external) traits.  Inner traits are aspects of  character stemming from psychological and social causes.  External traits are habits and behaviors which reflect and illustrate the inner traits.  For instance, a girl may be submissive toward her mother (an inner trait) and may reflect it by bringing her small presents each day (an outer trait.)  You will want to find external traits to illuminate the inner traits of your characters, following the 'show, don't tell' maxim. <br/>
 

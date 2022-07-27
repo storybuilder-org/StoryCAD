@@ -250,125 +250,31 @@ vignette: A term derived from the art work which decorated the front plates of n
 
 villain: A character who represents an evil or unwelcome force.  The villain is a stock character frequently cast as the antagonist in stories. <br/>
 
-[StoryBuilder]: StoryBuilder.png width=480px height=480px <br/>
-
-[Keyboard-Right-Mouse-Key]: Keyboard-Right-Mouse-Key.png width=59px height=51px <br/>
-
-[File-Menu]: File-Menu.png width=440px height=415px <br/>
-
-[File-Open-Dialog]: File-Open-Dialog.png width=536px height=589px <br/>
-
-[Create-New-Story-Dialog]: Create-New-Story-Dialog.png width=540px height=548px <br/>
-
-[User-Interface]: User-Interface.png width=680px height=461px <br/>
-
-[Status-Bar]: Status-Bar.png width=680px height=35px <br/>
-
-[Changed-Indicator]: Changed-Indicator.png width=55px height=40px <br/>
-
-[Menu-Bar]: Menu-Bar.png width=657px height=64px <br/>
-
-[Menu-Bar-Tooltip]: Menu-Bar-Tooltip.png width=209px height=81px <br/>
-
-[Show-and-Hide-Navigation]: Show-and-Hide-Navigation.png width=680px height=539px <br/>
-
-[Add-Story-Element-Menu]: Add-Story-Element-Menu.png width=243px height=444px <br/>
-
-[Story-Element-Flyout]: Story-Element-Flyout.png width=472px height=116px <br/>
-
-[Move-Story-Elements]: Move-Story-Elements.png width=680px height=181px <br/>
-
-[Search-Function]: Search-Function.png width=680px height=454px <br/>
-
 [Print-Reports-Button-and-Menu]: Print-Reports-Button-and-Menu.png width=165px height=161px <br/>
-
-[Generate-Reports-Dialog]: Generate-Reports-Dialog.png width=552px height=671px <br/>
-
-[Scrivener-Reports-File-Picker]: Scrivener-Reports-File-Picker.png width=680px height=280px <br/>
-
-[Scrivener-Reports-Generated-Status-Message]: Scrivener-Reports-Generated-Status-Message.png width=296px height=44px <br/>
-
-[Scrivener-Binder-with-StoryBuilder-Outline]: Scrivener-Binder-with-StoryBuilder-Outline.png width=680px height=331px <br/>
-
-[Scrivener-Split-Screen-with-StoryBuilder]: Scrivener-Split-Screen-with-StoryBuilder.png width=680px height=511px <br/>
-
-[Prefences-CommandBar-Button]: Prefences-CommandBar-Button.png width=299px height=43px <br/>
-
-[Preferences-Dialog]: Preferences-Dialog.png width=444px height=683px <br/>
-
-[Navigation-and-Content-Pane]: Navigation-and-Content-Pane.png width=680px height=454px <br/>
-
-[Tabs]: Tabs.png width=680px height=549px <br/>
-
-[Explorer-and-Navigator-Views]: Explorer-and-Navigator-Views.png width=332px height=125px <br/>
-
-[Overview-Story-Idea-Tab]: Overview-Story-Idea-Tab.png width=680px height=454px <br/>
-
-[Overview-Concept-Tab]: Overview-Concept-Tab.png width=680px height=454px <br/>
-
-[Overview-Premise]: Overview-Premise.png width=680px height=454px <br/>
-
-[Overview-Structure-Tab]: Overview-Structure-Tab.png width=680px height=454px <br/>
-
-[Problem-Problem-Tab]: Problem-Problem-Tab.png width=680px height=432px <br/>
-
-[Problem-Protagonist-Tab]: Problem-Protagonist-Tab.png width=680px height=454px <br/>
-
-[Problem-Antagonist-Tab]: Problem-Antagonist-Tab.png width=680px height=454px <br/>
 
 [Clipboard-Image]: Clipboard-Image.png width=440px height=264px <br/>
 
-[Clipboard-Image-17]: Clipboard-Image-17.png width=680px height=449px <br/>
+[Clipboard-Image-33]: Clipboard-Image-33.png width=680px height=449px <br/>
 
-[Clipboard-Image-18]: Clipboard-Image-18.png width=680px height=494px <br/>
+[Clipboard-Image-34]: Clipboard-Image-34.png width=680px height=494px <br/>
 
-[Clipboard-Image-19]: Clipboard-Image-19.png width=680px height=495px <br/>
+[Clipboard-Image-35]: Clipboard-Image-35.png width=680px height=495px <br/>
 
-[Character-Relationships-Tab]: Character-Relationships-Tab.png width=680px height=456px <br/>
+[Character-Relationships-Tab]: Character-Relationships-Tab.png width=680px height=516px <br/>
 
-[Character-Flaw-Tab]: Character-Flaw-Tab.png width=680px height=456px <br/>
+[Add-a-Relationship]: Add-a-Relationship.png width=548px height=320px <br/>
 
-[Flaw-Builder]: Flaw-Builder.png width=547px height=316px <br/>
+[Inverse-Relationship]: Inverse-Relationship.png width=680px height=415px <br/>
 
-[Character-Backstory-Tab]: Character-Backstory-Tab.png width=680px height=454px <br/>
+[Clipboard-Image-36]: Clipboard-Image-36.png width=680px height=491px <br/>
 
-[Character-Social-Tab]: Character-Social-Tab.png width=680px height=454px <br/>
+[Clipboard-Image-37]: Clipboard-Image-37.png width=443px height=496px <br/>
 
-[Character-Psychological-Tab]: Character-Psychological-Tab.png width=680px height=454px <br/>
+[Clipboard-Image-38]: Clipboard-Image-38.png width=384px height=516px <br/>
 
-[Character-Inner-Traits-Tab]: Character-Inner-Traits-Tab.png width=680px height=454px <br/>
+[File-Open-Dialog]: File-Open-Dialog.png width=559px height=595px <br/>
 
-[Character-Outer-Traits]: Character-Outer-Traits.png width=680px height=454px <br/>
-
-[Trait-Builder]: Trait-Builder.png width=352px height=304px <br/>
-
-[Clipboard-Image-20]: Clipboard-Image-20.png width=680px height=491px <br/>
-
-[Setting-Sensations-Tab]: Setting-Sensations-Tab.png width=680px height=454px <br/>
-
-[Scene-Scene-Tab]: Scene-Scene-Tab.png width=680px height=454px <br/>
-
-[Scene-Development-Tab]: Scene-Development-Tab.png width=680px height=454px <br/>
-
-[Scene-Conflict-Tab]: Scene-Conflict-Tab.png width=680px height=454px <br/>
-
-[Scene-Sequel-Tab]: Scene-Sequel-Tab.png width=680px height=454px <br/>
-
-[Problem-Resolution-Tab]: Problem-Resolution-Tab.png width=680px height=456px <br/>
-
-[Clipboard-Image-21]: Clipboard-Image-21.png width=443px height=496px <br/>
-
-[Clipboard-Image-22]: Clipboard-Image-22.png width=384px height=516px <br/>
-
-[Tools-Master-Plots]: Tools-Master-Plots.png width=544px height=631px <br/>
-
-[Tools-Dramatic-Situations]: Tools-Dramatic-Situations.png width=472px height=227px <br/>
-
-[Tools-Stock-Scenes]: Tools-Stock-Scenes.png width=475px height=628px <br/>
-
-[File-Open-Dialog-2]: File-Open-Dialog-2.png width=559px height=595px <br/>
-
-[Create-New-Story-Dialog-2]: Create-New-Story-Dialog-2.png width=555px height=565px <br/>
+[Create-New-Story-Dialog]: Create-New-Story-Dialog.png width=555px height=565px <br/>
 
 [Danger-Calls-New-Story-Outline]: Danger-Calls-New-Story-Outline.png width=680px height=489px <br/>
 
@@ -382,7 +288,7 @@ villain: A character who represents an evil or unwelcome force.  The villain is 
 
 [Tutorial-1-Changed-Indicator-(Red)]: Tutorial-1-Changed-Indicator-(Red).png width=53px height=47px <br/>
 
-[Changed-Indicator-2]: Changed-Indicator-2.png width=55px height=40px <br/>
+[Changed-Indicator]: Changed-Indicator.png width=55px height=40px <br/>
 
 [Tutorial-1-Empty-Struture-Tab]: Tutorial-1-Empty-Struture-Tab.png width=651px height=708px <br/>
 
@@ -416,48 +322,24 @@ villain: A character who represents an evil or unwelcome force.  The villain is 
 
 [Tutorial-4-Renamed-third-problem]: Tutorial-4-Renamed-third-problem.png width=680px height=510px <br/>
 
-[Clipboard-Image-23]: Clipboard-Image-23.png width=491px height=171px <br/>
+[Clipboard-Image-39]: Clipboard-Image-39.png width=491px height=171px <br/>
 
-[Clipboard-Image-24]: Clipboard-Image-24.png width=228px height=208px <br/>
+[Clipboard-Image-40]: Clipboard-Image-40.png width=228px height=208px <br/>
 
-[Clipboard-Image-25]: Clipboard-Image-25.png width=256px height=129px <br/>
+[Clipboard-Image-41]: Clipboard-Image-41.png width=256px height=129px <br/>
 
-[Clipboard-Image-26]: Clipboard-Image-26.png width=265px height=137px <br/>
-
-[Tools-Master-Plots-2]: Tools-Master-Plots-2.png width=548px height=639px <br/>
-
-[Tools-Master-Plots-Result]: Tools-Master-Plots-Result.png width=680px height=353px <br/>
+[Clipboard-Image-42]: Clipboard-Image-42.png width=265px height=137px <br/>
 
 [Scenes-Tied-to-Master-Plots-Plot-Points]: Scenes-Tied-to-Master-Plots-Plot-Points.png width=331px height=637px <br/>
 
-[Dramatic-Situations-List-of-SItuations]: Dramatic-Situations-List-of-SItuations.png width=680px height=462px <br/>
+[Clipboard-Image-43]: Clipboard-Image-43.png width=390px height=534px <br/>
 
-[Dramtic-Situations-tool]: Dramtic-Situations-tool.png width=467px height=229px <br/>
+[Clipboard-Image-44]: Clipboard-Image-44.png width=548px height=670px <br/>
 
-[Stock-Scenes-Categories]: Stock-Scenes-Categories.png width=463px height=623px <br/>
+[Clipboard-Image-45]: Clipboard-Image-45.png width=543px height=281px <br/>
 
-[Stock-Scenes-Examples]: Stock-Scenes-Examples.png width=465px height=628px <br/>
+[Clipboard-Image-46]: Clipboard-Image-46.png width=568px height=355px <br/>
 
-[Plotting-with-StoryBuilder-Premise]: Plotting-with-StoryBuilder-Premise.png width=680px height=307px <br/>
+[Clipboard-Image-47]: Clipboard-Image-47.png width=543px height=281px <br/>
 
-[Plotting-with-StoryBuilder-Story-Problem-MasterPlots-Scene-list]: Plotting-with-StoryBuilder-Story-Problem-MasterPlots-Scene-list.png width=680px height=338px <br/>
-
-[Plotting-with-StoryBuilder-Complication-SubProblems]: Plotting-with-StoryBuilder-Complication-SubProblems.png width=305px height=133px <br/>
-
-[Plotting-with-StoryBuilder-SubProblems-Epanded-into-Scenes]: Plotting-with-StoryBuilder-SubProblems-Epanded-into-Scenes.png width=273px height=356px <br/>
-
-[StoryBuilder-Manolin-Problem]: StoryBuilder-Manolin-Problem.png width=680px height=452px <br/>
-
-[Plotting-with-StoryBuilder-Manolin-Subplot]: Plotting-with-StoryBuilder-Manolin-Subplot.png width=277px height=224px <br/>
-
-[Clipboard-Image-27]: Clipboard-Image-27.png width=390px height=534px <br/>
-
-[Clipboard-Image-28]: Clipboard-Image-28.png width=548px height=670px <br/>
-
-[Clipboard-Image-29]: Clipboard-Image-29.png width=543px height=281px <br/>
-
-[Clipboard-Image-30]: Clipboard-Image-30.png width=568px height=355px <br/>
-
-[Clipboard-Image-31]: Clipboard-Image-31.png width=543px height=281px <br/>
-
-[Clipboard-Image-32]: Clipboard-Image-32.png width=568px height=355px <br/>
+[Clipboard-Image-48]: Clipboard-Image-48.png width=568px height=355px <br/>

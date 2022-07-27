@@ -4,6 +4,6 @@ Show/Hide Navigation Pane <br/>
 
 This button toggles the Navigation Pane to either display or be hidden. Hiding the Navigation Pane makes better use of screen space on a smaller screens or when the main form is sized smaller. It also encourages focus on just the one screen. <br/>
 
-![](Show-and-Hide-Navigation.png)
+MISSING IMAGE: C:/dev/src/User Manual/Screenshots/Show and Hide Navigation.png <br/>
 
 (Hint: StoryBuilder detects and reports spelling errors on text fields.) <br/>

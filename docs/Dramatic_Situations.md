@@ -1,7 +1,7 @@
 #### Dramatic Situations ####
 Dramatic Situations <br/>
 
-![](Tools-Dramatic-Situations.png)
+MISSING IMAGE: C:/dev/src/User Manual/Screenshots/Tools Dramatic Situations.png <br/>
 
 Georges Polti, in his 1895 book The Thirty-Six Dramatic Situations, proposed that there are only a limited number of dramatic situations, based on fundamental human conflicts.   He defined each of his situations in terms of dramatic elements and examples. <br/>
 
