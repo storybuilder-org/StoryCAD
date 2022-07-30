@@ -14,15 +14,16 @@ public class NarrativeToolVM
     public ShellViewModel ShellVM = Ioc.Default.GetRequiredService<ShellViewModel>();
     public LogService Logger = Ioc.Default.GetRequiredService<LogService>();
     public RelayCommand CopyCommand { get; } 
+    public RelayCommand DeleteCommand { get; } 
     public RelayCommand CopyAllUnusedCommand { get; } 
     public RelayCommand MoveUpCommand { get; }
 
+    private string _message;
     public string Message
     {
         get => _message;
-        set => _message = value;
+        set => _message=value; //Can't use set property for some reason??
     }
-    private string _message = "";
 
 
     public NarrativeToolVM()
@@ -30,8 +31,13 @@ public class NarrativeToolVM
         CopyCommand = new RelayCommand(Copy);
         CopyAllUnusedCommand = new RelayCommand(CopyAllUnused);
         MoveUpCommand = new RelayCommand(MoveUp);
+        DeleteCommand = new RelayCommand(MoveUp);
     }
 
+    public void Delete()
+    {
+
+    }
     private void MoveUp()
     {/*
         if (LastSelectedNode == null)
@@ -105,34 +111,30 @@ public class NarrativeToolVM
                 return;
             }
 
-            Logger.Log(LogLevel.Info, $"Node Selected is a {LastSelectedNode.Type} and has {LastSelectedNode.Children.Count} children");
-            if (LastSelectedNode.Type == StoryItemType.Scene || ((LastSelectedNode.Type == StoryItemType.Folder || LastSelectedNode.Type == StoryItemType.Section) && LastSelectedNode.Children.Count > 0))  //check the node is either a scene OR has children
+            Logger.Log(LogLevel.Info, $"Node Selected is a {LastSelectedNode.Type}");
+            if (LastSelectedNode.Type == StoryItemType.Scene)  //check the node is either a scene OR has children
             {
-                if (LastSelectedNode.Children.Count != 0) //has Children
+                if (!RecursiveCheck(ShellVM.StoryModel.NarratorView).Any(StoryNodeItem => StoryNodeItem.Uuid == LastSelectedNode.Uuid))
                 {
-                    Logger.Log(LogLevel.Info, $"Iterating through children");
-                    foreach (var child in LastSelectedNode.Children) //Iterates through children and checks they are a Scene
-                    {
-                        if (child.Type == StoryItemType.Scene || child.Type == StoryItemType.Folder || child.Type == StoryItemType.Section) //Does nothing if not a scene.
-                        {
-                            Logger.Log(LogLevel.Info, $"Found Child {child.Name}");
-                            _ = new StoryNodeItem((SceneModel)ShellVM.StoryModel.StoryElements.StoryElementGuids[child.Uuid], ShellVM.StoryModel.NarratorView[0]);
-                        }
-                    }
+                    _ = new StoryNodeItem((SceneModel)ShellVM.StoryModel.StoryElements.StoryElementGuids[LastSelectedNode.Uuid], ShellVM.StoryModel.NarratorView[0]);
+                    Logger.Log(LogLevel.Info, $"Copied LastSelectedNode {LastSelectedNode.Name} ({LastSelectedNode.Uuid})");
+
                 }
-                Logger.Log(LogLevel.Info, $"Copied LastSelectedNode {LastSelectedNode.Name} ({LastSelectedNode.Uuid})");
-                _ = new StoryNodeItem((SceneModel)ShellVM.StoryModel.StoryElements.StoryElementGuids[LastSelectedNode.Uuid], ShellVM.StoryModel.NarratorView[0]);
-                Logger.Log(LogLevel.Info, $"NarrativeTool.Copy() complete.");
+                else
+                {
+                    Logger.Log(LogLevel.Warn, $"Node {LastSelectedNode.Name} ({LastSelectedNode.Uuid}) already exists in the NarratorView");
+                    Message = "This scene already appears in the narrative view.";
+                }
             }
             else
             {
+                Logger.Log(LogLevel.Warn, $"Node {LastSelectedNode.Name} ({LastSelectedNode.Uuid}) wasn't copied, it was a {LastSelectedNode.Type}");
                 Message = "You can't copy that.";
             }
         }
-        catch (Exception ex)
-        {
-            Logger.LogException(LogLevel.Error, ex, "Error in NarrativeTool.Copy()");
-        }
+        catch (Exception ex) { Logger.LogException(LogLevel.Error, ex, "Error in NarrativeTool.Copy()"); }
+        Logger.Log(LogLevel.Info, "NarrativeTool.Copy() complete.");
+
     }
 
     /// <summary>

@@ -30,10 +30,6 @@ using Windows.Storage.Pickers;
 using StoryBuilder.Services;
 using WinRT;
 using GuidAttribute = System.Runtime.InteropServices.GuidAttribute;
-using System.Net.Http;
-using System.Text;
-using System.Net.Http.Headers;
-using System.Net;
 using Octokit;
 using ProductHeaderValue = Octokit.ProductHeaderValue;
 
