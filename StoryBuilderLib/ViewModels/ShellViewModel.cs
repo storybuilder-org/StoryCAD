@@ -1774,7 +1774,6 @@ namespace StoryBuilder.ViewModels
             }
 
             SceneModel sceneVar = (SceneModel) StoryModel.StoryElements.StoryElementGuids[RightTappedNode.Uuid];
-            // ReSharper disable once ObjectCreationAsStatement
             _ = new StoryNodeItem(sceneVar, StoryModel.NarratorView[0]);
             Messenger.Send(new StatusChangedMessage(new($"Copied node {RightTappedNode.Name} to Narrative View", LogLevel.Info, true)));
         }
