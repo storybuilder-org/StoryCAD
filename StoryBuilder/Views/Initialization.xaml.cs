@@ -115,7 +115,10 @@ public sealed partial class PreferencesInitialization : Page
 
     public void Check(object sender, RoutedEventArgs e)
     {
-        if (!string.IsNullOrWhiteSpace(_initVM.Path) && !string.IsNullOrWhiteSpace(_initVM.BackupPath) && _initVM.Name != "")
+        if (!string.IsNullOrWhiteSpace(_initVM.Path) 
+            && !string.IsNullOrWhiteSpace(_initVM.BackupPath) 
+            && _initVM.Name != string.Empty
+            && _initVM.Email != string.Empty)
         {
             _initVM.Save();
             RootFrame.Navigate(typeof(Shell));
