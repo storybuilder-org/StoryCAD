@@ -176,9 +176,11 @@ public partial class App : Application
         Trace.AutoFlush = true;
         Trace.Indent();
         Trace.WriteLine(pathMsg);
+        
         // Load Preferences
         PreferencesService pref = Ioc.Default.GetService<PreferencesService>();
         await pref.LoadPreferences(GlobalData.RootDirectory);
+        
         Ioc.Default.GetService<BackendService>()!.StartupRecording();
 
         await ProcessInstallationFiles();
@@ -191,36 +193,34 @@ public partial class App : Application
 
         ConfigureNavigation();
 
+        // Construct a Window to hold our Pages
         WindowEx mainWindow = new MainWindow();
-        int dpi = User32.GetDpiForWindow(mainWindow.GetWindowHandle());
-        float scalingFactor = (float)dpi / 96;
-
-        mainWindow.MinHeight = 675 * scalingFactor;
-        mainWindow.MinWidth = 900 * scalingFactor;
-        mainWindow.Width = 1050 * scalingFactor;
-        mainWindow.Height = 750 * scalingFactor;
+        mainWindow.MinHeight = 675;
+        mainWindow.MinWidth = 900;
+        mainWindow.Width = 1050;
+        mainWindow.Height = 750;
         mainWindow.Title = "StoryBuilder";
 
-        // Create a Frame to act as the navigation context and navigate to the first page (Shell)
+        // Create a Frame to act as the navigation context 
         Frame rootFrame = new();
         // Place the frame in the current Window
         mainWindow.Content = rootFrame;
-        mainWindow.CenterOnScreen(); //Centers the window on the monitor
-
-        if (rootFrame.Content == null)
-        {
-            rootFrame.Navigate(GlobalData.Preferences.PreferencesInitialised ? typeof(Shell) : typeof(PreferencesInitialization));
-        }
+        mainWindow.CenterOnScreen(); // Centers the window on the monitor
         mainWindow.Activate();
+
+        // Navigate to the first page:
+        //   If we've not yet initialized Preferences, it's PreferencesInitialization.
+        //   If we have initialized Preferences, it Shell.
+        // PreferencesInitialization will Navigate to Shell after it's done its business.
+        if (!GlobalData.Preferences.PreferencesInitialised) {rootFrame.Navigate(typeof(PreferencesInitialization));}
+        else {rootFrame.Navigate(typeof(Shell));}
+
+        // Preserve both the Window and its Handle for future use
         GlobalData.MainWindow = (MainWindow) mainWindow;
         //Get the Window's HWND
         m_windowHandle = User32.GetActiveWindow();
         GlobalData.WindowHandle = m_windowHandle;
 
-
-        // The Window object doesn't (yet) have Width and Height properties in WInUI 3 Desktop yet.
-        // To set the Width and Height, you can use the Win32 API SetWindowPos.
-        // Note, you should apply the DPI scale factor if you are thinking of dpi instead of pixels.
         _log.Log(LogLevel.Debug, $"Layout: Window size width={mainWindow.Width} height={mainWindow.Height}");
         _log.Log(LogLevel.Info, "StoryBuilder App loaded and launched");
 

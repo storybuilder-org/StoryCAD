@@ -112,10 +112,12 @@ public sealed partial class PreferencesInitialization : Page
         Browser.Start();
     }
 
-
+    /// <summary>
+    /// Checks that the Paths, Name and Email aren't blank or null.
+    /// </summary>
     public void Check(object sender, RoutedEventArgs e)
     {
-        if (!string.IsNullOrWhiteSpace(_initVM.Path) && !string.IsNullOrWhiteSpace(_initVM.BackupPath) && _initVM.Name != "")
+        if (!string.IsNullOrWhiteSpace(_initVM.Path) && !string.IsNullOrWhiteSpace(_initVM.BackupPath) && _initVM.Name != string.Empty && _initVM.Email != string.Empty)
         {
             _initVM.Save();
             RootFrame.Navigate(typeof(Shell));
