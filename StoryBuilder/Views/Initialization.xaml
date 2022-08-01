@@ -11,10 +11,10 @@
         <ScrollViewer VerticalScrollBarVisibility="Hidden">
             <Grid HorizontalAlignment="Center">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="100"/>
-                    <RowDefinition Height="300"/>
-                    <RowDefinition Height="90"/>
-                    <RowDefinition Height="100"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
                 <StackPanel Grid.Row="0" VerticalAlignment="Center">

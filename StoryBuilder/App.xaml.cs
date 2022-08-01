@@ -212,10 +212,8 @@ public partial class App : Application
         //   If we've not yet initialized Preferences, it's PreferencesInitialization.
         //   If we have initialized Preferences, it Shell.
         // PreferencesInitialization will Navigate to Shell after it's done its business.
-        if (!GlobalData.Preferences.PreferencesInitialised)
-            rootFrame.Navigate(typeof(PreferencesInitialization));
-        else
-            rootFrame.Navigate(typeof(Shell));
+        if (!GlobalData.Preferences.PreferencesInitialised) {rootFrame.Navigate(typeof(PreferencesInitialization));}
+        else {rootFrame.Navigate(typeof(Shell));}
 
         // Preserve both the Window and its Handle for future use
         GlobalData.MainWindow = (MainWindow) mainWindow;
