@@ -89,6 +89,7 @@ jobs:
       run: |
         Remove-Item -path GitHubActionsWorkflow.pfx
       
+      #Cleans output and file names
     - name: Clean MSIXs
       run: 'D:\a\StoryBuilder-2\StoryBuilder-2\.github\workflows\MSIXCleaner.exe "D:\a\StoryBuilder-2\StoryBuilder-2\StoryBuilder\Packages\"'
 
