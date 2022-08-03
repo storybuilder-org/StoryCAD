@@ -50,22 +50,23 @@ public sealed partial class RelationshipView : UserControl
             RelationshipModel characterToDelete = null;
             foreach (var character in CharVm.CharacterRelationships)
             {   //UUID is stored in tag as a cheeky hack to identify the relationship.
-                if (character.PartnerUuid == (sender as SymbolIcon).Tag) //Identify via tag.
+                if (character.PartnerUuid.Equals((sender as SymbolIcon).Tag)) //Identify via tag.
                 {
                     characterToDelete = character;
                 }
             }
             _logger.Log(LogLevel.Info, $"Character to delete: {characterToDelete.Partner.Name}({characterToDelete.Partner.Uuid})");
 
-            //Show confirmation dialog
-            ContentDialogResult result = await new ContentDialog()
+            //Show confirmation dialog and gets result.
+            ContentDialog CD = new()
             {
                 Title = "Are you sure?",
-                Content = $"Are you sure you want to delete the relationship between {Name} and {characterToDelete.Partner.Name}?",
+                Content = $"Are you sure you want to delete the relationship between {CharVm.Name} and {characterToDelete.Partner.Name}?",
                 XamlRoot = GlobalData.XamlRoot,
                 PrimaryButtonText = "Yes",
                 SecondaryButtonText = "No"
-            }.ShowAsync();
+            };
+            var result = await CD.ShowAsync();
             _logger.Log(LogLevel.Info, $"Dialog Result: {result}");
 
             if (result == ContentDialogResult.Primary) //If positive, then delete.
@@ -84,5 +85,5 @@ public sealed partial class RelationshipView : UserControl
     }
 
     //When focus is lost, we save the relationship to the disk. (this is different from saving the story)
-    private void LostFocus(UIElement sender, LosingFocusEventArgs args) { CharVm.SaveRelationships(); }
+    private void OnLostFocus(UIElement sender, LosingFocusEventArgs args) { CharVm.SaveRelationships(); }
 }
