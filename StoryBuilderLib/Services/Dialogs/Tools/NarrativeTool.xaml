@@ -52,7 +52,7 @@
                 <Button ToolTipService.ToolTip="Move Up" FontFamily="Segoe MDL2 Assets" Content="&#xE09C;" Margin="0,0,5,0"/>
                 <Button ToolTipService.ToolTip="Move Down" FontFamily="Segoe MDL2 Assets" Content="&#xE09D;"/>
             </StackPanel>
-            <Button Grid.Column="2" Grid.Row="2" Content="Delete from narrative view" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,10,0,0"/>
+            <Button Grid.Column="2" Grid.Row="2" Content="Delete from narrative view" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,10,0,0" Command="{x:Bind ToolVM.DeleteCommand}"/>
         </StackPanel>
         <TextBlock Grid.Row="3" Text="{x:Bind ToolVM.Message, Mode=OneWay}" HorizontalAlignment="Center" Grid.ColumnSpan="22" TextWrapping="Wrap"/>
     </Grid> 

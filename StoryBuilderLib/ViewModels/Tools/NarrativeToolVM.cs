@@ -1,7 +1,12 @@
 ﻿using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml;
 using StoryBuilder.Models;
 using StoryBuilder.Services.Logging;
+using StoryBuilder.Services.Messages;
+using StoryBuilder.Services.Search;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -17,13 +22,7 @@ public class NarrativeToolVM
     public RelayCommand DeleteCommand { get; } 
     public RelayCommand CopyAllUnusedCommand { get; } 
     public RelayCommand MoveUpCommand { get; }
-
-    private string _message;
-    public string Message
-    {
-        get => _message;
-        set => _message=value; //Can't use set property for some reason??
-    }
+    public  string Message { get; set; }
 
 
     public NarrativeToolVM()
@@ -31,13 +30,42 @@ public class NarrativeToolVM
         CopyCommand = new RelayCommand(Copy);
         CopyAllUnusedCommand = new RelayCommand(CopyAllUnused);
         MoveUpCommand = new RelayCommand(MoveUp);
-        DeleteCommand = new RelayCommand(MoveUp);
+        DeleteCommand = new RelayCommand(Delete);
     }
 
     public void Delete()
     {
+        Logger.Log(LogLevel.Trace, "RemoveStoryElement");
+        if (LastSelectedNode == null)
+        {
+            return;
+        }
 
+        if (LastSelectedNode.Type == StoryItemType.TrashCan)
+        {
+            return;
+        }
+
+        if (LastSelectedNode.IsRoot)
+        {
+            return;
+        }
+
+        //Even though there should only be one copy, just delete any just in case.
+        if (ShellVM.StoryModel.NarratorView[0].Children.Contains(LastSelectedNode)) { ShellVM.StoryModel.NarratorView[0].Children.Remove(LastSelectedNode); }
+        foreach (StoryNodeItem child in ShellVM.StoryModel.NarratorView[0].Children) { recurseDelete(LastSelectedNode, child); }
+        ShellVM.StoryModel.NarratorView[1].Children.Add(LastSelectedNode);
     }
+
+    private void recurseDelete(StoryNodeItem item, StoryNodeItem Place)
+    {
+        if (Place.Children.Contains(item)) {Place.Children.Remove(item);}
+        else
+        {
+            foreach (StoryNodeItem child in Place.Children) { recurseDelete(item, child); }
+        }
+    }   
+
     private void MoveUp()
     {/*
         if (LastSelectedNode == null)

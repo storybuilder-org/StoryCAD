@@ -1880,7 +1880,7 @@ namespace StoryBuilder.ViewModels
         }
 
         /// <summary>
-        /// This method is called when one of NavigationTree's 
+        /// This method is called when one of NavigationTree's
         /// TreeViewItem nodes is right-tapped.
         /// 
         /// It alters the visibility of the command bar flyout 
@@ -2145,6 +2145,7 @@ namespace StoryBuilder.ViewModels
             dialog.XamlRoot = GlobalData.XamlRoot;
             dialog.Title = "Narrative Editor - EXPERIMENTAL";
             dialog.PrimaryButtonText = "Done";
+            dialog.Width = 600;
             dialog.Content = new NarrativeTool();
             ContentDialogResult result = await dialog.ShowAsync();
         }
