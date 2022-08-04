@@ -52,77 +52,49 @@ public class NarrativeToolVM
         }
 
         //Even though there should only be one copy, just delete any just in case.
-        if (ShellVM.StoryModel.NarratorView[0].Children.Contains(LastSelectedNode)) { ShellVM.StoryModel.NarratorView[0].Children.Remove(LastSelectedNode); }
+        if (ShellVM.StoryModel.NarratorView[0].Children.Contains(LastSelectedNode)) 
+        {
+            ShellVM.StoryModel.NarratorView[0].Children.Remove(LastSelectedNode);
+            ShellVM.StoryModel.NarratorView[1].Children.Add(LastSelectedNode);
+        }
         foreach (StoryNodeItem child in ShellVM.StoryModel.NarratorView[0].Children) { recurseDelete(LastSelectedNode, child); }
-        ShellVM.StoryModel.NarratorView[1].Children.Add(LastSelectedNode);
     }
 
-    private void recurseDelete(StoryNodeItem item, StoryNodeItem Place)
+    /// <summary>
+    /// Recursively deletes from NarratorView.
+    /// </summary>
+    private void recurseDelete(StoryNodeItem item, StoryNodeItem Parent)
     {
-        if (Place.Children.Contains(item)) {Place.Children.Remove(item);}
-        else
+        if (Parent.Children.Contains(item)) //Checks parent contains child we are looking.
         {
-            foreach (StoryNodeItem child in Place.Children) { recurseDelete(item, child); }
+            Parent.Children.Remove(item); //Deletes child.
+            ShellVM.StoryModel.NarratorView[1].Children.Add(LastSelectedNode);
+        }
+        else //If child isn't in parent, recurse again.
+        {
+            foreach (StoryNodeItem child in Parent.Children) { recurseDelete(item, child); }
         }
     }   
 
     private void MoveUp()
-    {/*
-        if (LastSelectedNode == null)
-        {
-            ShellVM.ShowMessage(LogLevel.Info, "Click or touch a node to move", false);
-            return;
-        }
+    {
+        if (LastSelectedNode == null) { return;} //Null check.
 
-        if (LastSelectedNode.IsRoot)
+        if (LastSelectedNode.Parent.Equals(ShellVM.StoryModel.NarratorView[0])) //Checks parent isn't root.
         {
-            ShellVM.ShowMessage(LogLevel.Warn,"Cannot move up further",false);
-            return;
-        }
-        _sourceChildren = CurrentNode.Parent.Children;
-        _sourceIndex = _sourceChildren.IndexOf(CurrentNode);
-        _targetCollection = null;
-        _targetIndex = -1;
-        StoryNodeItem _targetParent = CurrentNode.Parent;
+            int OldIndex = LastSelectedNode.Parent.Children.IndexOf(LastSelectedNode);
+            int NewIndex = OldIndex--; //Moving up, take one from index.
 
-        // If first child, must move to end parent's predecessor
-        if (_sourceIndex == 0)
-        {
-            if (LastSelectedNode.Parent.Parent == null)
+            if (NewIndex != -1) //If the item isn't at position 0, just move in list.
             {
-                ShellVM.ShowMessage(LogLevel.Info, "Cannot move up further", false);
-                return;
+                LastSelectedNode.Parent.Children.Move(OldIndex, NewIndex);
             }
-            
-            // find parent's predecessor
-            ObservableCollection<StoryNodeItem> grandparentCollection = LastSelectedNode.Parent.Parent.Children;
-            int siblingIndex = grandparentCollection.IndexOf(LastSelectedNode.Parent) - 1;
-            if (siblingIndex >= 0)
+            else //Remove from current parent and place in parent of parent.
             {
-                _targetCollection = grandparentCollection[siblingIndex].Children;
-                _targetParent = grandparentCollection[siblingIndex];
-            }
-            else
-            {
-                Messenger.Send(new StatusChangedMessage(new($"Cannot move up further", LogLevel.Warn)));
-                return;
+                LastSelectedNode.Parent.Children.Remove(LastSelectedNode);
+                LastSelectedNode.Parent.Parent.Children.Add(LastSelectedNode);
             }
         }
-        // Otherwise, move up a notch
-        else
-        {
-            _targetCollection = _sourceChildren;
-            _targetIndex = _sourceIndex - 1;
-        }
-
-        if (MoveIsValid()) // Verify move
-        {
-            _sourceChildren.RemoveAt(_sourceIndex);
-            if (_targetIndex == -1) { _targetCollection.Add(LastSelectedNode); }
-            else { _targetCollection.Insert(_targetIndex, LastSelectedNode); }
-            LastSelectedNode.Parent = _targetParent;
-            Logger.Log(LogLevel.Info, $"Moving {LastSelectedNode.Name} up to parent {LastSelectedNode.Parent.Name}");
-        }*/
     }
 
     /// <summary>
