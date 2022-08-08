@@ -18,15 +18,17 @@ namespace StoryBuilder.Services.Dialogs.Tools
         ShellViewModel ShellVM = Ioc.Default.GetService<ShellViewModel>();
         NarrativeToolVM ToolVM = Ioc.Default.GetService<NarrativeToolVM>();
 
-        public NarrativeTool()
-        {
-            this.InitializeComponent();
-        }
+        public NarrativeTool() { InitializeComponent(); }
 
-        private void UIElement_OnTapped(object sender, TappedRoutedEventArgs e)
+        //This is ran when a item is clicked on either tree.
+        private void ItemInvoked(object sender, TappedRoutedEventArgs e)
         {
             TreeViewItem item = (TreeViewItem)sender;
             ToolVM.LastSelectedNode = (StoryNodeItem)item.DataContext;
+
+            //Only shows one selected item between either tree.
+            //if (item.Tag == "Nar") { explorerview.SelectedNode = null; } //Narrator Tree was clicked, so clear the explorer tree items.
+            //else { explorerview.SelectedNode = null; } //Explorer Tree was clicked, so clear the narrator tree items.
         }
 
     }

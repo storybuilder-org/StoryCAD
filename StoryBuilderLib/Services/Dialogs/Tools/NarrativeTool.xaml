@@ -6,54 +6,54 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:viewModels="using:StoryBuilder.ViewModels"
-    mc:Ignorable="d">
-    
+    mc:Ignorable="d" >
     <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" MinWidth="200"/>
-            <ColumnDefinition Width="auto" MinWidth="5"/>
-            <ColumnDefinition Width="*" MinWidth="200"/>
-        </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
+        <Grid Grid.Row="0" MinHeight="500">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="250"/>
+                <ColumnDefinition Width="250"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
 
-        <TextBlock Text="Story Explorer View" Grid.Row="0" Grid.Column="0" HorizontalAlignment="Center"/>
-        <TreeView ItemsSource="{x:Bind ShellVM.StoryModel.ExplorerView, Mode=TwoWay}" Grid.Row="1" Grid.Column="0"  Background="{x:Bind Background}">
-            <TreeView.ItemTemplate>
-                <DataTemplate x:DataType="viewModels:StoryNodeItem">
-                    <TreeViewItem ItemsSource="{x:Bind Children}" IsExpanded="True" Tapped="UIElement_OnTapped">
-                        <TextBlock Text="{Binding Name}" TextWrapping="Wrap"/>
-                    </TreeViewItem>
-                </DataTemplate>
-            </TreeView.ItemTemplate>
-        </TreeView>
+            <TextBlock Text="Story Explorer View" Grid.Row="0" Grid.Column="0" HorizontalAlignment="Center"/>
+            <TreeView ItemsSource="{x:Bind ShellVM.StoryModel.ExplorerView, Mode=TwoWay}" Margin="0,5" Grid.Row="1" Name="explorerview" Grid.Column="0"  Background="{x:Bind Background}" >
+                <TreeView.ItemTemplate>
+                    <DataTemplate x:DataType="viewModels:StoryNodeItem">
+                        <TreeViewItem ItemsSource="{x:Bind Children}" IsExpanded="True" Tapped="ItemInvoked" Tag="Exp">
+                            <TextBlock Text="{Binding Name}" TextWrapping="Wrap"/>
+                        </TreeViewItem>
+                    </DataTemplate>
+                </TreeView.ItemTemplate>
+            </TreeView>
 
-        <StackPanel Grid.Column="0" Grid.Row="2" Margin="0,10,0,0">
-            <Button Content="Copy to narrator view" HorizontalAlignment="Center" Margin="0,0,0,10" Command="{x:Bind ToolVM.CopyCommand}"/>
-            <Button Content="Add unused scenes to narrator view" HorizontalAlignment="Center" Command="{x:Bind ToolVM.CopyAllUnusedCommand}"/>
+            <TextBlock Text="Narrator View" Grid.Column="1" Grid.Row="0" HorizontalAlignment="Center"/>
+            <TreeView ItemsSource="{x:Bind ShellVM.StoryModel.NarratorView, Mode=TwoWay}" Margin="0,5" Grid.Row="1" Grid.Column="1" Name="narratorview">
+                <TreeView.ItemTemplate>
+                    <DataTemplate x:DataType="viewModels:StoryNodeItem">
+                        <TreeViewItem ItemsSource="{x:Bind Children}" IsExpanded="True" Tapped="ItemInvoked" Tag="Nar" >
+                            <TextBlock Text="{Binding Name}" TextWrapping="Wrap"/>
+                        </TreeViewItem>
+                    </DataTemplate>
+                </TreeView.ItemTemplate>
+            </TreeView>
+
+            <!--<TextBlock Grid.Row="3" Text="{x:Bind ToolVM.Message, Mode=OneWay}" HorizontalAlignment="Center" Grid.ColumnSpan="22" TextWrapping="Wrap"/> -->
+        </Grid>
+
+        <StackPanel Grid.Column="0" Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center">
+            <Button ToolTipService.ToolTip="Add scene to narrative view" Content=">" Margin="5,0"  HorizontalAlignment="Center" Command="{x:Bind ToolVM.CopyCommand}"/>
+            <Button ToolTipService.ToolTip="Add unused scene to narrative view" Content=">>" Margin="5,0" HorizontalAlignment="Center" Command="{x:Bind ToolVM.CopyAllUnusedCommand}"/>
+            <Button ToolTipService.ToolTip="Move node up" FontFamily="Segoe MDL2 Assets" Margin="5,0" Content="&#xE09C;" Command="{x:Bind ToolVM.MoveUpCommand}"/>
+            <Button ToolTipService.ToolTip="Move node down" FontFamily="Segoe MDL2 Assets" Content="&#xE09D;" Margin="5,0" Command="{x:Bind ToolVM.MoveDownCommand}"/>
+            <Button FontFamily="Segoe MDL2 Assets" Content="&#xE74D;" HorizontalAlignment="Center" Margin="5,0" Command="{x:Bind ToolVM.DeleteCommand}"/>
         </StackPanel>
+    </Grid>
 
-        <TextBlock Text="Narrator View" Grid.Column="2" Grid.Row="0" HorizontalAlignment="Center"/>
-        <TreeView ItemsSource="{x:Bind ShellVM.StoryModel.NarratorView, Mode=TwoWay}" Grid.Row="1" Grid.Column="2">
-            <TreeView.ItemTemplate>
-                <DataTemplate x:DataType="viewModels:StoryNodeItem">
-                    <TreeViewItem ItemsSource="{x:Bind Children}" IsExpanded="True" Tapped="UIElement_OnTapped">
-                        <TextBlock Text="{Binding Name}" TextWrapping="Wrap"/>
-                    </TreeViewItem>
-                </DataTemplate>
-            </TreeView.ItemTemplate>
-        </TreeView>
-        <StackPanel Grid.Column="2" Grid.Row="2" Orientation="Vertical">
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">
-                <Button ToolTipService.ToolTip="Move Up" FontFamily="Segoe MDL2 Assets" Content="&#xE09C;" Margin="0,0,5,0" Command="{x:Bind ToolVM.MoveUpCommand}"/>
-                <Button ToolTipService.ToolTip="Move Down" FontFamily="Segoe MDL2 Assets" Content="&#xE09D;"/>
-            </StackPanel>
-            <Button Grid.Column="2" Grid.Row="2" Content="Delete from narrative view" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,10,0,0" Command="{x:Bind ToolVM.DeleteCommand}"/>
-        </StackPanel>
-        <TextBlock Grid.Row="3" Text="{x:Bind ToolVM.Message, Mode=OneWay}" HorizontalAlignment="Center" Grid.ColumnSpan="22" TextWrapping="Wrap"/>
-    </Grid> 
 </Page>

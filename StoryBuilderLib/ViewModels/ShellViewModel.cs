@@ -2143,9 +2143,8 @@ namespace StoryBuilder.ViewModels
         {
             ContentDialog dialog = new();
             dialog.XamlRoot = GlobalData.XamlRoot;
-            dialog.Title = "Narrative Editor - EXPERIMENTAL";
+            dialog.Title = "Narrative Editor";
             dialog.PrimaryButtonText = "Done";
-            dialog.Width = 600;
             dialog.Content = new NarrativeTool();
             ContentDialogResult result = await dialog.ShowAsync();
         }
