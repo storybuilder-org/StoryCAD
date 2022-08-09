@@ -24,7 +24,7 @@ namespace StoryBuilder.Services.Dialogs.Tools
         private void ItemInvoked(object sender, TappedRoutedEventArgs e)
         {
             TreeViewItem item = (TreeViewItem)sender;
-            ToolVM.LastSelectedNode = (StoryNodeItem)item.DataContext;
+            ShellVM.CurrentNode = (StoryNodeItem)item.DataContext;
 
             //Only shows one selected item between either tree.
             //if (item.Tag == "Nar") { explorerview.SelectedNode = null; } //Narrator Tree was clicked, so clear the explorer tree items.

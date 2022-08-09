@@ -1,42 +1,26 @@
-﻿using CommunityToolkit.Mvvm.DependencyInjection;
+﻿using System;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
-using CommunityToolkit.Mvvm.Messaging;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml;
 using StoryBuilder.Models;
 using StoryBuilder.Services.Logging;
-using StoryBuilder.Services.Messages;
-using StoryBuilder.Services.Search;
-using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using Microsoft.Extensions.Logging;
-using LogLevel = StoryBuilder.Services.Logging.LogLevel;
 
 namespace StoryBuilder.ViewModels.Tools;
 public class NarrativeToolVM
 {
-    public StoryNodeItem LastSelectedNode;
     public ShellViewModel ShellVM = Ioc.Default.GetRequiredService<ShellViewModel>();
     public LogService Logger = Ioc.Default.GetRequiredService<LogService>();
     public RelayCommand CopyCommand { get; } 
     public RelayCommand DeleteCommand { get; } 
     public RelayCommand CopyAllUnusedCommand { get; } 
-    public RelayCommand MoveUpCommand { get; }
-    public RelayCommand MoveDownCommand { get; }
     public  string Message { get; set; }
-    private int _sourceIndex;
-    private ObservableCollection<StoryNodeItem> _sourceChildren;
-    private int _targetIndex;
-    private ObservableCollection<StoryNodeItem> _targetCollection;
 
     public NarrativeToolVM()
     {
         CopyCommand = new RelayCommand(Copy);
         CopyAllUnusedCommand = new RelayCommand(CopyAllUnused);
-        MoveUpCommand = new RelayCommand(MoveUp);
-        MoveDownCommand = new RelayCommand(MoveDown);
         DeleteCommand = new RelayCommand(Delete);
     }
 
@@ -45,29 +29,25 @@ public class NarrativeToolVM
         Logger.Log(LogLevel.Trace, "Deleting element");
         try
         {
-            if (LastSelectedNode == null)
+            if (ShellVM.CurrentNode == null)
             {
-                Logger.Log(LogLevel.Error, "L");
+                Logger.Log(LogLevel.Error, "Current node is null, aborting delete");
                 return;
             }
 
-            if (LastSelectedNode.Type == StoryItemType.TrashCan)
+            if (ShellVM.CurrentNode.Type == StoryItemType.TrashCan || ShellVM.CurrentNode.IsRoot)
             {
-                return;
-            }
-
-            if (LastSelectedNode.IsRoot)
-            {
+                Logger.Log(LogLevel.Error, "Cannot delete this node, was either trash can or a Root");
                 return;
             }
 
             //Even though there should only be one copy, just delete any just in case.
-            if (ShellVM.StoryModel.NarratorView[0].Children.Contains(LastSelectedNode))
+            if (ShellVM.StoryModel.NarratorView[0].Children.Contains(ShellVM.CurrentNode))
             {
-                ShellVM.StoryModel.NarratorView[0].Children.Remove(LastSelectedNode);
-                ShellVM.StoryModel.NarratorView[1].Children.Add(LastSelectedNode);
+                ShellVM.StoryModel.NarratorView[0].Children.Remove(ShellVM.CurrentNode);
+                ShellVM.StoryModel.NarratorView[1].Children.Add(ShellVM.CurrentNode);
             }
-            foreach (StoryNodeItem child in ShellVM.StoryModel.NarratorView[0].Children) { recurseDelete(LastSelectedNode, child); }
+            foreach (StoryNodeItem child in ShellVM.StoryModel.NarratorView[0].Children) { recurseDelete(ShellVM.CurrentNode, child); }
         }
         catch
         {
@@ -81,133 +61,24 @@ public class NarrativeToolVM
     /// </summary>
     private void recurseDelete(StoryNodeItem item, StoryNodeItem Parent)
     {
-        if (Parent.Children.Contains(item)) //Checks parent contains child we are looking.
+        try
         {
-            Parent.Children.Remove(item); //Deletes child.
-            ShellVM.StoryModel.NarratorView[1].Children.Add(LastSelectedNode);
-        }
-        else //If child isn't in parent, recurse again.
-        {
-            foreach (StoryNodeItem child in Parent.Children) { recurseDelete(item, child); }
-        }
-    }   
-
-    private void MoveUp()
-    {
-        if (LastSelectedNode == null)
-        {
-            //Messenger.Send(new StatusChangedMessage(new($"Click or touch a node to move", LogLevel.Info)));
-            return;
-        }
-
-        if (LastSelectedNode.IsRoot)
-        {
-            //Messenger.Send(new StatusChangedMessage(new($"Cannot move up further", LogLevel.Warn)));
-            return;
-        }
-        _sourceChildren = LastSelectedNode.Parent.Children;
-        _sourceIndex = _sourceChildren.IndexOf(LastSelectedNode);
-        _targetCollection = null;
-        _targetIndex = -1;
-        StoryNodeItem _targetParent = LastSelectedNode.Parent;
-
-        // If first child, must move to end parent's predecessor
-        if (_sourceIndex == 0)
-        {
-            if (LastSelectedNode.Parent.Parent == null)
+            if (Parent.Children.Contains(item)) //Checks parent contains child we are looking.
             {
-                //Messenger.Send(new StatusChangedMessage(new($"Cannot move up further", LogLevel.Warn)));
-                return;
+                Parent.Children.Remove(item); //Deletes child.
+                ShellVM.StoryModel.NarratorView[1].Children.Add(ShellVM.CurrentNode);
             }
-            // find parent's predecessor
-            ObservableCollection<StoryNodeItem> grandparentCollection = LastSelectedNode.Parent.Parent.Children;
-            int siblingIndex = grandparentCollection.IndexOf(LastSelectedNode.Parent) - 1;
-            if (siblingIndex >= 0)
+            else //If child isn't in parent, recurse again.
             {
-                _targetCollection = grandparentCollection[siblingIndex].Children;
-                _targetParent = grandparentCollection[siblingIndex];
-            }
-            else
-            {
-                //Messenger.Send(new StatusChangedMessage(new($"Cannot move up further", LogLevel.Warn)));
-                return;
+                foreach (StoryNodeItem child in Parent.Children) { recurseDelete(item, child); }
             }
         }
-        // Otherwise, move up a notch
-        else
+        catch (Exception ex)
         {
-            _targetCollection = _sourceChildren;
-            _targetIndex = _sourceIndex - 1;
+            Logger.LogException(LogLevel.Error, ex,"Error deleting node in Recursive delete");
         }
 
-        //TODO: port ShellVM.VerifyMove() when it isn't stubbed
-        _sourceChildren.RemoveAt(_sourceIndex);
-        if (_targetIndex == -1)
-            _targetCollection.Add(LastSelectedNode);
-        else
-            _targetCollection.Insert(_targetIndex, LastSelectedNode);
-        LastSelectedNode.Parent = _targetParent;
-        Logger.Log(LogLevel.Info, $"Moving {LastSelectedNode.Name} up to parent {LastSelectedNode.Parent.Name}");
-    }
-
-    public void MoveDown()
-    {
-        if (LastSelectedNode == null)
-        {
-            //Messenger.Send(new StatusChangedMessage(new($"Click or touch a node to move", LogLevel.Info)));
-            return;
-        }
-        if (LastSelectedNode.IsRoot)
-        {
-            //Messenger.Send(new StatusChangedMessage(new($"Cannot move a root node", LogLevel.Info)));
-            return;
-        }
-
-        _sourceChildren = LastSelectedNode.Parent.Children;
-        _sourceIndex = _sourceChildren.IndexOf(LastSelectedNode);
-        _targetCollection = null;
-        _targetIndex = 0;
-        StoryNodeItem _targetParent = LastSelectedNode.Parent;
-
-        // If last child, must move to end parent's successor
-        if (_sourceIndex == _sourceChildren.Count - 1)
-        {
-            if (LastSelectedNode.Parent.Parent == null)
-            {
-                //Messenger.Send(new StatusChangedMessage(new($"Cannot move down further", LogLevel.Warn)));
-                return;
-            }
-            // find parent's successor
-            ObservableCollection<StoryNodeItem> grandparentCollection = LastSelectedNode.Parent.Parent.Children;
-            int siblingIndex = grandparentCollection.IndexOf(LastSelectedNode.Parent) + 1;
-            if (siblingIndex == grandparentCollection.Count)
-            {
-                LastSelectedNode.Parent = ShellVM.StoryModel.NarratorView[1];
-                _sourceChildren.RemoveAt(_sourceIndex);
-                ShellVM.StoryModel.NarratorView[1].Children.Insert(_targetIndex, LastSelectedNode);
-                //Messenger.Send(new StatusChangedMessage(new($"Moved to trash", LogLevel.Info)));
-
-                return;
-            }
-            if (grandparentCollection[siblingIndex].IsRoot)
-            {
-                //Messenger.Send(new StatusChangedMessage(new($"Cannot move down further", LogLevel.Warn)));
-                return;
-            }
-            _targetCollection = grandparentCollection[siblingIndex].Children;
-            _targetParent = grandparentCollection[siblingIndex];
-        }
-        // Otherwise, move down a notch
-        else
-        {
-            _targetCollection = _sourceChildren;
-            _targetIndex = _sourceIndex + 1;
-        }
-        _sourceChildren.RemoveAt(_sourceIndex);
-        _targetCollection.Insert(_targetIndex, LastSelectedNode);
-        LastSelectedNode.Parent = _targetParent;
-        Logger.Log(LogLevel.Info, $"Moving {LastSelectedNode.Name} down up to parent {LastSelectedNode.Parent.Name}");
-    }
+    } 
 
     /// <summary>
     /// Copies all scenes, if the node has children then it will copy all children that are scenes
@@ -216,31 +87,33 @@ public class NarrativeToolVM
     {
         try
         {
+            Logger.Log(LogLevel.Info, $"Starting to copy node between trees.");
+
             //Check if selection is null
-            if (LastSelectedNode == null)
+            if (ShellVM.CurrentNode == null)
             {
                 Logger.Log(LogLevel.Warn, "No node selected");
                 return;
             }
 
-            Logger.Log(LogLevel.Info, $"Node Selected is a {LastSelectedNode.Type}");
-            if (LastSelectedNode.Type == StoryItemType.Scene)  //check the node is either a scene OR has children
+            Logger.Log(LogLevel.Info, $"Node Selected is a {ShellVM.CurrentNode.Type}");
+            if (ShellVM.CurrentNode.Type == StoryItemType.Scene)  //check the node is either a scene OR has children
             {
-                if (!RecursiveCheck(ShellVM.StoryModel.NarratorView[0].Children).Any(StoryNodeItem => StoryNodeItem.Uuid == LastSelectedNode.Uuid))
+                if (!RecursiveCheck(ShellVM.StoryModel.NarratorView[0].Children).Any(StoryNodeItem => StoryNodeItem.Uuid == ShellVM.CurrentNode.Uuid))
                 {
-                    _ = new StoryNodeItem((SceneModel)ShellVM.StoryModel.StoryElements.StoryElementGuids[LastSelectedNode.Uuid], ShellVM.StoryModel.NarratorView[0]);
-                    Logger.Log(LogLevel.Info, $"Copied LastSelectedNode {LastSelectedNode.Name} ({LastSelectedNode.Uuid})");
+                    _ = new StoryNodeItem((SceneModel)ShellVM.StoryModel.StoryElements.StoryElementGuids[ShellVM.CurrentNode.Uuid], ShellVM.StoryModel.NarratorView[0]);
+                    Logger.Log(LogLevel.Info, $"Copied ShellVM.CurrentNode {ShellVM.CurrentNode.Name} ({ShellVM.CurrentNode.Uuid})");
 
                 }
                 else
                 {
-                    Logger.Log(LogLevel.Warn, $"Node {LastSelectedNode.Name} ({LastSelectedNode.Uuid}) already exists in the NarratorView");
+                    Logger.Log(LogLevel.Warn, $"Node {ShellVM.CurrentNode.Name} ({ShellVM.CurrentNode.Uuid}) already exists in the NarratorView");
                     Message = "This scene already appears in the narrative view.";
                 }
             }
             else
             {
-                Logger.Log(LogLevel.Warn, $"Node {LastSelectedNode.Name} ({LastSelectedNode.Uuid}) wasn't copied, it was a {LastSelectedNode.Type}");
+                Logger.Log(LogLevel.Warn, $"Node {ShellVM.CurrentNode.Name} ({ShellVM.CurrentNode.Uuid}) wasn't copied, it was a {ShellVM.CurrentNode.Type}");
                 Message = "You can't copy that.";
             }
         }
@@ -253,11 +126,16 @@ public class NarrativeToolVM
     private List<StoryNodeItem> RecursiveCheck(ObservableCollection<StoryNodeItem> List)
     {
         List<StoryNodeItem> NewList = new();
-        foreach (var VARIABLE in List)
+        try
         {
-            NewList.Add(VARIABLE);
-            NewList.AddRange(RecursiveCheck(VARIABLE.Children));
+            foreach (var VARIABLE in List)
+            {
+                NewList.Add(VARIABLE);
+                NewList.AddRange(RecursiveCheck(VARIABLE.Children));
+            }
         }
+        catch (Exception exception) { Logger.LogException(LogLevel.Error, exception, "Error in recursive check"); }
+        
         return NewList;
     }
 
@@ -266,7 +144,8 @@ public class NarrativeToolVM
     /// </summary>
     private void CopyAllUnused()
     {
-        foreach (var VARIABLE in ShellVM.StoryModel.ExplorerView[0].Children) { RecurseCopyUnused(VARIABLE); }
+        try { foreach (var item in ShellVM.StoryModel.ExplorerView[0].Children) { RecurseCopyUnused(item); } }
+        catch (Exception e) { Logger.LogException(LogLevel.Error, e, "Error in recursive check"); }
     }
 
     /// <summary>
@@ -287,7 +166,7 @@ public class NarrativeToolVM
                 }
             }
 
-            foreach (var Child in Item.Children) { RecurseCopyUnused(Child); }  
+            foreach (var child in Item.Children) { RecurseCopyUnused(child); }  
         }
         catch (Exception ex)
         {

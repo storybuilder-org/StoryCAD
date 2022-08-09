@@ -48,10 +48,10 @@
         </Grid>
 
         <StackPanel Grid.Column="0" Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center">
-            <Button ToolTipService.ToolTip="Add scene to narrative view" Content=">" Margin="5,0"  HorizontalAlignment="Center" Command="{x:Bind ToolVM.CopyCommand}"/>
-            <Button ToolTipService.ToolTip="Add unused scene to narrative view" Content=">>" Margin="5,0" HorizontalAlignment="Center" Command="{x:Bind ToolVM.CopyAllUnusedCommand}"/>
-            <Button ToolTipService.ToolTip="Move node up" FontFamily="Segoe MDL2 Assets" Margin="5,0" Content="&#xE09C;" Command="{x:Bind ToolVM.MoveUpCommand}"/>
-            <Button ToolTipService.ToolTip="Move node down" FontFamily="Segoe MDL2 Assets" Content="&#xE09D;" Margin="5,0" Command="{x:Bind ToolVM.MoveDownCommand}"/>
+            <Button ToolTipService.ToolTip="Add scene to narrative view" Content="Add Scene" Margin="5,0"  HorizontalAlignment="Center" Command="{x:Bind ToolVM.CopyCommand}"/>
+            <Button ToolTipService.ToolTip="Add unused scene to narrative view" Content="Add all unused Scenes" Margin="5,0" HorizontalAlignment="Center" Command="{x:Bind ToolVM.CopyAllUnusedCommand}"/>
+            <Button ToolTipService.ToolTip="Move node up" FontFamily="Segoe MDL2 Assets" Margin="5,0" Content="&#xE09C;" Command="{x:Bind ShellVM.MoveUpCommand}"/>
+            <Button ToolTipService.ToolTip="Move node down" FontFamily="Segoe MDL2 Assets" Content="&#xE09D;" Margin="5,0" Command="{x:Bind ShellVM.MoveDownCommand}"/>
             <Button FontFamily="Segoe MDL2 Assets" Content="&#xE74D;" HorizontalAlignment="Center" Margin="5,0" Command="{x:Bind ToolVM.DeleteCommand}"/>
         </StackPanel>
     </Grid>
