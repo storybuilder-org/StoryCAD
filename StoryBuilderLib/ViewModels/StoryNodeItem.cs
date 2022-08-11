@@ -1,12 +1,16 @@
-﻿using Microsoft.UI.Xaml;
+﻿using CommunityToolkit.Mvvm.DependencyInjection;
+using Elmah.Io.Client;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using StoryBuilder.Models;
+using StoryBuilder.Services.Logging;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using Windows.Data.Xml.Dom;
+using Windows.Web.AtomPub;
 
 namespace StoryBuilder.ViewModels;
 
@@ -38,6 +42,9 @@ namespace StoryBuilder.ViewModels;
 /// </summary>
 public class StoryNodeItem : DependencyObject, INotifyPropertyChanged
 {
+    private LogService logger = Ioc.Default.GetRequiredService<LogService>();
+    private ShellViewModel shellvm = Ioc.Default.GetRequiredService<ShellViewModel>();
+
     // is it INavigable?
     #region Properties
 
@@ -467,8 +474,57 @@ public class StoryNodeItem : DependencyObject, INotifyPropertyChanged
         Parent = parent;
         Parent?.Children.Add(this);  // (if parent != null)
     }
-
     #endregion
+
+    public void Delete(ViewType View)
+    {
+        logger.Log(LogLevel.Trace, $"Starting to delete element {Name} ({Uuid}) from {View}");
+        if (Type == StoryItemType.TrashCan || IsRoot)
+        {
+            Ioc.Default.GetService<ShellViewModel>().ShowMessage(LogLevel.Warn, "This element can't be deleted.",false);
+            logger.Log(LogLevel.Info, "User tried to delete Root or Trashcan node.");
+        }
+
+        ObservableCollection<StoryNodeItem> SourceCollection;
+        if (View == ViewType.Explorer) { SourceCollection = shellvm.StoryModel.ExplorerView; }
+        else { SourceCollection = shellvm.StoryModel.NarratorView; }
+
+        if (SourceCollection.Contains(this))
+        {
+            logger.Log(LogLevel.Info, "Node found in root, deleting it.");
+            SourceCollection.Remove(this);
+            SourceCollection[1].Children.Add(this);
+        }
+        else
+        {
+            foreach (StoryNodeItem child in SourceCollection)
+            {
+                logger.Log(LogLevel.Info, "Recursing tree to find node.");
+                RecursiveDelete(child, View);
+            }
+        }
+    }
+
+    private void RecursiveDelete(StoryNodeItem ParentItem, ViewType View)
+    {
+        logger.Log(LogLevel.Info, "Starting recursive delete instance");
+        try
+        {
+            if (ParentItem.Children.Contains(this)) //Checks parent contains child we are looking.
+            {
+                logger.Log(LogLevel.Info, "StoryNodeItem found, deleting it.");
+                ParentItem.Children.Remove(this); //Deletes child.
+                if (View == ViewType.Explorer) { shellvm.StoryModel.ExplorerView[1].Children.Add(this); }
+                else { shellvm.StoryModel.NarratorView[1].Children.Add(this); }
+            }
+            else //If child isn't in parent, recurse again.
+            {
+                logger.Log(LogLevel.Info, "StoryNodeItem not found, recursing again");
+                foreach (StoryNodeItem child in Parent.Children) { RecursiveDelete(child, View); }
+            }
+        }
+        catch (Exception ex) { logger.LogException(LogLevel.Error, ex, "Error deleting node in Recursive delete"); }
+    }
 
     private void NotifyPropertyChanged(string propertyName)
     {

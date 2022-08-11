@@ -13,6 +13,7 @@ public class NarrativeToolVM: ObservableRecipient
 {
     public ShellViewModel ShellVM = Ioc.Default.GetRequiredService<ShellViewModel>();
     public LogService Logger = Ioc.Default.GetRequiredService<LogService>();
+    public bool IsNarratorSelected = false;
     public RelayCommand CopyCommand { get; } 
     public RelayCommand DeleteCommand { get; } 
     public RelayCommand CopyAllUnusedCommand { get; }
@@ -36,61 +37,9 @@ public class NarrativeToolVM: ObservableRecipient
     /// </summary>
     public void Delete()
     {
-        Logger.Log(LogLevel.Trace, "Deleting element");
-        try
-        {
-            //Check for null and ensure the node is suposed to be deleted first, then proceed with deleting.
-            if (ShellVM.CurrentNode == null)
-            {
-                Logger.Log(LogLevel.Warn, "Current node is null, aborting delete");
-                return;
-            }
-
-            if (ShellVM.CurrentNode.Type == StoryItemType.TrashCan || ShellVM.CurrentNode.IsRoot)
-            {
-                Logger.Log(LogLevel.Warn, "Cannot delete this node, was either trash can or a Root");
-                return;
-            }
-
-            //Check the root of the narrator view first, then recurse.
-            if (ShellVM.StoryModel.NarratorView[0].Children.Contains(ShellVM.CurrentNode))
-            {
-                Logger.Log(LogLevel.Info, "Node is not a child of a child, removing it from NarratorView[0]");
-                ShellVM.StoryModel.NarratorView[0].Children.Remove(ShellVM.CurrentNode);
-                ShellVM.StoryModel.NarratorView[1].Children.Add(ShellVM.CurrentNode);
-            }
-            
-            foreach (StoryNodeItem child in ShellVM.StoryModel.NarratorView[0].Children)
-            {
-                Logger.Log(LogLevel.Info, "Node is either a child or not in the tree, recursing tree.");
-                RecurseDelete(ShellVM.CurrentNode, child);
-            }
-        }
-        catch (Exception e) { Logger.LogException(LogLevel.Error,e, "Error Deleting node in NarrativeTool.Delete()"); }
+        if (IsNarratorSelected) { ShellVM.CurrentNode.Delete(ViewType.Narrator); }
     }
-
-    /// <summary>
-    /// Recursively deletes from NarratorView.
-    /// </summary>
-    private void RecurseDelete(StoryNodeItem item, StoryNodeItem Parent)
-    {
-        Logger.Log(LogLevel.Info, "Starting recursive delete instance");
-        try
-        {
-            if (Parent.Children.Contains(item)) //Checks parent contains child we are looking.
-            {
-                Logger.Log(LogLevel.Info, "StoryNodeItem found, deleting it.");
-                Parent.Children.Remove(item); //Deletes child.
-                ShellVM.StoryModel.NarratorView[1].Children.Add(ShellVM.CurrentNode);
-            }
-            else //If child isn't in parent, recurse again.
-            {
-                Logger.Log(LogLevel.Info, "StoryNodeItem not found, recursing again");
-                foreach (StoryNodeItem child in Parent.Children) { RecurseDelete(item, child); }
-            }
-        }
-        catch (Exception ex) { Logger.LogException(LogLevel.Error, ex,"Error deleting node in Recursive delete"); }
-    } 
+    
 
     /// <summary>
     /// Copies all scenes, if the node has children then it will copy all children that are scenes

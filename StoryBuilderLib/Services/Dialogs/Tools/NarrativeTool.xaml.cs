@@ -27,8 +27,8 @@ namespace StoryBuilder.Services.Dialogs.Tools
             ShellVM.CurrentNode = (StoryNodeItem)item.DataContext;
 
             //Only shows one selected item between either tree.
-            //if (item.Tag == "Nar") { explorerview.SelectedNode = null; } //Narrator Tree was clicked, so clear the explorer tree items.
-            //else { explorerview.SelectedNode = null; } //Explorer Tree was clicked, so clear the narrator tree items.
+            if (item.Tag.Equals("Nar")) { ToolVM.IsNarratorSelected = true; } //Narrator Tree was clicked, so clear the explorer tree items.
+            else { ToolVM.IsNarratorSelected = false; } //Explorer Tree was clicked, so clear the narrator tree items.
         }
 
     }
