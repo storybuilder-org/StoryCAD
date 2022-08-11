@@ -6,16 +6,23 @@ using StoryBuilder.Services.Logging;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace StoryBuilder.ViewModels.Tools;
-public class NarrativeToolVM
+public class NarrativeToolVM: ObservableRecipient
 {
     public ShellViewModel ShellVM = Ioc.Default.GetRequiredService<ShellViewModel>();
     public LogService Logger = Ioc.Default.GetRequiredService<LogService>();
     public RelayCommand CopyCommand { get; } 
     public RelayCommand DeleteCommand { get; } 
-    public RelayCommand CopyAllUnusedCommand { get; } 
-    public  string Message { get; set; }
+    public RelayCommand CopyAllUnusedCommand { get; }
+
+    private string _message;
+    public string Message
+    {
+        get => _message;
+        set => SetProperty(ref _message, value);
+    }
 
     public NarrativeToolVM()
     {

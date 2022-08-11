@@ -27,7 +27,7 @@
                 <TreeView.ItemTemplate>
                     <DataTemplate x:DataType="viewModels:StoryNodeItem">
                         <TreeViewItem ItemsSource="{x:Bind Children}" IsExpanded="True" Tapped="ItemInvoked" Tag="Exp">
-                            <TextBlock Text="{Binding Name}" TextWrapping="Wrap"/>
+                            <TextBlock Text="{x:Bind Name}" TextWrapping="Wrap"/>
                         </TreeViewItem>
                     </DataTemplate>
                 </TreeView.ItemTemplate>
@@ -38,7 +38,7 @@
                 <TreeView.ItemTemplate>
                     <DataTemplate x:DataType="viewModels:StoryNodeItem">
                         <TreeViewItem ItemsSource="{x:Bind Children}" IsExpanded="True" Tapped="ItemInvoked" Tag="Nar" >
-                            <TextBlock Text="{Binding Name}" TextWrapping="Wrap"/>
+                            <TextBlock Text="{x:Bind Name}" TextWrapping="Wrap"/>
                         </TreeViewItem>
                     </DataTemplate>
                 </TreeView.ItemTemplate>
