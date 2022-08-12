@@ -1,7 +1,7 @@
 ### The StoryBuilder User Interface ###
 The StoryBuilder User Interface <br/>
 
-![](User-Interface.png)
+MISSING IMAGE: C:/dev/src/User Manual/Screenshots/User Interface.png <br/>
 
 The form’s sections are as follows. They’ll be explained in more detail as we go. <br/>
 

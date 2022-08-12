@@ -3,7 +3,7 @@
 Sequel Sequel Tab <br/>
 Sequel Tab <br/>
 
-![](Scene-Sequel-Tab.png)
+MISSING IMAGE: C:/dev/src/User Manual/Screenshots/Scene Sequel Tab.png <br/>
 
 The prose which immediately follows a scene usually ties that scene to the next.  The two literary devices which serve this purpose are the transition and the sequel. <br/>
 

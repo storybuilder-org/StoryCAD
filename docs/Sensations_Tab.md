@@ -3,7 +3,7 @@ Sensations Tab <br/>
 
 Your reader can only experience your settings through the eyes and ears of your characters.  To make the setting as effective as possible, you must explore the impressions the setting makes on the five senses. This tab is a reminder to do so. <br/>
 
-![](Setting-Sensations-Tab.png)
+MISSING IMAGE: C:/dev/src/User Manual/Screenshots/Setting Sensations Tab.png <br/>
 
 
 Fields: <br/>

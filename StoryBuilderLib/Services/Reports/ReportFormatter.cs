@@ -187,9 +187,25 @@ public class ReportFormatter
             foreach (string line in _templates["Character Relationship Description"])
             {
                 StringBuilder sb = new(line);
-                sb.Replace("@Relationship", rel.Partner.Name);
+                if (rel.Partner == null)
+                {
+                    foreach (var VARIABLE in Ioc.Default.GetService<ShellViewModel>().StoryModel.StoryElements.Characters)
+                    {
+                        if (VARIABLE.Uuid.Equals(Guid.Parse(rel.PartnerUuid)))
+                        {
+                            sb.Replace("@Relationship", VARIABLE.Name);
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    sb.Replace("@Relationship", rel.Partner.Name);
+
+                }
+
                 sb.Replace("@relationType", rel.RelationType);
-                sb.Replace("@relationTrait", rel.RelationType);
+                sb.Replace("@relationTrait", rel.Trait);
                 sb.Replace("@Attitude", rel.Attitude);
                 sb.Replace("@Notes", GetText(rel.Notes));
 

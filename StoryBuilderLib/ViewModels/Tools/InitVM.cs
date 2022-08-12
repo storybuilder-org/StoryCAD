@@ -3,8 +3,8 @@ using CommunityToolkit.Mvvm.DependencyInjection;
 using StoryBuilder.DAL;
 using StoryBuilder.Models;
 using StoryBuilder.Models.Tools;
-using StoryBuilder.Services.Parse;
 using Windows.Storage;
+using StoryBuilder.Services.Backend;
 
 namespace StoryBuilder.ViewModels.Tools;
 
@@ -69,8 +69,8 @@ public class InitVM : ObservableRecipient
         await prfIO.UpdateFile();
         PreferencesIO loader = new(GlobalData.Preferences, System.IO.Path.Combine(ApplicationData.Current.RoamingFolder.Path, "Storybuilder"));
         await loader.UpdateModel();
-        ParseService parse = Ioc.Default.GetService<ParseService>();
-        if (!GlobalData.Preferences.ParsePreferencesStatus)
-            await parse.PostPreferences(GlobalData.Preferences);
+        BackendService backend = Ioc.Default.GetService<BackendService>();
+        if (!GlobalData.Preferences.RecordPreferencesStatus)
+            await backend.PostPreferences(GlobalData.Preferences);
     }
 }

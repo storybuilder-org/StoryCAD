@@ -1,7 +1,7 @@
 ### Concept Tab ###
 
 
-![](Overview-Concept-Tab.png)
+MISSING IMAGE: C:/dev/src/User Manual/Screenshots/Overview Concept Tab.png <br/>
 
 A concept is an idea that asks a question that implies conflict.  The answer to that question is your story.   <br/>
 

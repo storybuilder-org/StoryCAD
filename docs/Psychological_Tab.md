@@ -1,7 +1,7 @@
 ### Psychological Tab ###
 Psychological Tab <br/>
 
-![](Character-Psychological-Tab.png)
+MISSING IMAGE: C:/dev/src/User Manual/Screenshots/Character Psychological Tab.png <br/>
 
 This tab contains information about the mental states and processes of the character. <br/>
 

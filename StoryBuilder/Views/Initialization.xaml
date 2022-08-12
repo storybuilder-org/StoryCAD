@@ -11,10 +11,10 @@
         <ScrollViewer VerticalScrollBarVisibility="Hidden">
             <Grid HorizontalAlignment="Center">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="100"/>
-                    <RowDefinition Height="300"/>
-                    <RowDefinition Height="90"/>
-                    <RowDefinition Height="100"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
                 <StackPanel Grid.Row="0" VerticalAlignment="Center">
@@ -24,14 +24,14 @@
 
                 <StackPanel Grid.Row="1" VerticalAlignment="Stretch">
                     <Border Height="50"/>
-                    <TextBox PlaceholderText="What is your name?" Margin="15" VerticalAlignment="Center" Text="{x:Bind _initVM.Name, Mode=TwoWay}"/>
-                    <TextBox PlaceholderText="What is your email (optional)?" Margin="15" VerticalAlignment="Center"  Text="{x:Bind _initVM.Email, Mode=TwoWay}"/>
+                    <TextBox PlaceholderText="What's your name?" Margin="15" VerticalAlignment="Center" Text="{x:Bind _initVM.Name, Mode=TwoWay}"/>
+                    <TextBox PlaceholderText="What's your email address?" IsSpellCheckEnabled="False"  Margin="15" VerticalAlignment="Center"  Text="{x:Bind _initVM.Email, Mode=TwoWay}"/>
                     <StackPanel Orientation="Horizontal">
-                        <TextBox IsReadOnly="true" PlaceholderText="Where do you want to save your stories?" Name="ProjPath" Margin="15" VerticalAlignment="Center" Width="435" HorizontalAlignment="Left" Text="{x:Bind _initVM.Path, Mode=TwoWay}"/>
+                        <TextBox IsReadOnly="true" PlaceholderText="Select a folder to hold your story outlines." Name="ProjPath" Margin="15" VerticalAlignment="Center" Width="435" HorizontalAlignment="Left" Text="{x:Bind _initVM.Path, Mode=TwoWay}"/>
                         <Button Content="Browse" HorizontalAlignment="Center" Click="SetProjectPath"/>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal">
-                        <TextBox IsReadOnly="True" PlaceholderText="Where do you want to backup your stories to?" Name="BackPath" Margin="15" VerticalAlignment="Center" Width="435" HorizontalAlignment="Left" Text="{x:Bind _initVM.BackupPath, Mode=TwoWay}"/>
+                        <TextBox IsReadOnly="True" PlaceholderText="Select a folder to hold your outline backups." Name="BackPath" Margin="15" VerticalAlignment="Center" Width="435" HorizontalAlignment="Left" Text="{x:Bind _initVM.BackupPath, Mode=TwoWay}"/>
                         <Button Content="Browse" HorizontalAlignment="Center" Click="SetBackupPath"/>
                     </StackPanel>
                 </StackPanel>

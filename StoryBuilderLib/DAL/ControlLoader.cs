@@ -77,10 +77,9 @@ public class ControlLoader
         }
         return conflictTypes;
     }
-
-    public List<RelationType> LoadRelationTypes()
+    public List<String> LoadSimpleRelationTypes()
     {
-        List<RelationType> relationships = new();
+        List<String> relationships = new();
 
         string section = string.Empty;
         string keyword = string.Empty;
@@ -100,7 +99,35 @@ public class ControlLoader
                             string[] tokens = keyvalue.Split(',');
                             if (tokens.Length != 3)
                                 continue;
-                            relationships.Add(new RelationType(tokens[0], tokens[1]));
+                            relationships.Add(tokens[0]);
+                            break;
+                    }
+                    break;
+            }
+        }
+        return relationships;
+    }
+
+    public List<string> LoadRelationTypes()
+    {
+        List<string> relationships = new();
+
+        string section = string.Empty;
+        string keyword = string.Empty;
+        string keyvalue = string.Empty;
+        foreach (string line in lines)
+        {
+            ParseLine(line, ref section, ref keyword, ref keyvalue);
+            //   Process the parsed values
+            switch (section)
+            {
+                case "RelationTypes":
+                    switch (keyword)
+                    {
+                        case "":
+                            break;
+                        case "RelationType":
+                            relationships.Add(keyvalue);
                             break;
                     }
                     break;
@@ -154,14 +181,5 @@ public class ControlLoader
 
     }
 
-    public void Clear()
-    {
-        lines = null;
-    }
-
-    private void LogEntry(string line)
-    {
-        // TODO: Code LogEntry details (requires logging framework)
-        throw new NotImplementedException();
-    }
+    public void Clear() {  lines = null; }
 }

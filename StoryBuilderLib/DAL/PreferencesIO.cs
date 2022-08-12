@@ -4,8 +4,6 @@ using System.Threading.Tasks;
 using Windows.Storage;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.Models.Tools;
-using StoryBuilder.Services.Json;
-using StoryBuilder.Services.Parse;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
@@ -121,20 +119,20 @@ public class PreferencesIO
                     case "Version":
                         _model.Version = tokens[1];
                         break;
-                    case "ParsePreferencesStatus":
+                    case "RecordPreferencesStatus":
                          if (tokens[1] == "True") 
-                            _model.ParsePreferencesStatus = true; 
+                            _model.RecordPreferencesStatus = true; 
                         else 
-                            _model.ParsePreferencesStatus = false; 
+                            _model.RecordPreferencesStatus = false; 
                         break;
-                    case "ParseVersionStatus":
+                    case "RecordVersionStatus":
                         if (tokens[1] == "True")
-                            _model.ParseVersionStatus = true;
+                            _model.RecordVersionStatus = true;
                         else
-                            _model.ParseVersionStatus= false;
+                            _model.RecordVersionStatus= false;
                         break;
                     case "WrapNodeNames":
-                        if (tokens[1] == "True") { _model.WrapNodeNames = TextWrapping.WrapWholeWords; }
+                        if (tokens[1] == "True") { _model.WrapNodeNames = TextWrapping.Wrap; }
                         else {_model.WrapNodeNames = TextWrapping.NoWrap;}
                         break;
                     case "AutoSave":
@@ -191,8 +189,8 @@ public class PreferencesIO
         NewPreferences.Add("TimedBackup=" + _model.TimedBackup);
         NewPreferences.Add("LastTemplate=" + _model.LastSelectedTemplate);
         NewPreferences.Add("Version=" + _model.Version);
-        NewPreferences.Add("ParsePreferencesStaus=" + _model.ParsePreferencesStatus); //These are spelt wrong but correcting them will cause data loss. (Save it for a major update)
-        NewPreferences.Add("ParseVersionStaus=" + _model.ParseVersionStatus);
+        NewPreferences.Add("RecordPreferencesStatus=" + _model.RecordPreferencesStatus); //These are spelt wrong but correcting them will cause data loss. (Save it for a major update)
+        NewPreferences.Add("RecordVersionStatus=" + _model.RecordVersionStatus);
         NewPreferences.Add("AutoSave=" + _model.AutoSave);
         NewPreferences.Add("AutoSaveInterval=" + _model.AutoSaveInterval);
 

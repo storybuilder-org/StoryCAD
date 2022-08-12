@@ -1,3 +1,3 @@
 ## Front Page (Image) ##
 
-![](StoryBuilder.png)
+MISSING IMAGE: C:/dev/src/User Manual/Screenshots/StoryBuilder.jpg <br/>
