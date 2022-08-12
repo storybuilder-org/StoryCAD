@@ -479,48 +479,60 @@ public class StoryNodeItem : DependencyObject, INotifyPropertyChanged
     public void Delete(ViewType View)
     {
         logger.Log(LogLevel.Trace, $"Starting to delete element {Name} ({Uuid}) from {View}");
+        //Sanity check
         if (Type == StoryItemType.TrashCan || IsRoot)
         {
             Ioc.Default.GetService<ShellViewModel>().ShowMessage(LogLevel.Warn, "This element can't be deleted.",false);
             logger.Log(LogLevel.Info, "User tried to delete Root or Trashcan node.");
         }
 
-        ObservableCollection<StoryNodeItem> SourceCollection;
-        if (View == ViewType.Explorer) { SourceCollection = shellvm.StoryModel.ExplorerView; }
-        else { SourceCollection = shellvm.StoryModel.NarratorView; }
+        //Set source collection to either narrative view or explorer view, we use the first item [0] so we don't delete from trash.
+        StoryNodeItem SourceCollection;
+        if (View == ViewType.Explorer) { SourceCollection = shellvm.StoryModel.ExplorerView[0]; }
+        else { SourceCollection = shellvm.StoryModel.NarratorView[0]; }
 
-        if (SourceCollection.Contains(this))
+        if (SourceCollection.Children.Contains(this))
         {
+            //Delete node from selected view.
             logger.Log(LogLevel.Info, "Node found in root, deleting it.");
-            SourceCollection.Remove(this);
-            SourceCollection[1].Children.Add(this);
+            SourceCollection.Children.Remove(this);
+
+            //Add to correct trash node
+            if (View == ViewType.Explorer) { shellvm.StoryModel.ExplorerView[1].Children.Add(this); }
+            else { shellvm.StoryModel.NarratorView[1].Children.Add(this); }
         }
         else
         {
-            foreach (StoryNodeItem child in SourceCollection)
+            foreach (StoryNodeItem childItem in SourceCollection.Children)
             {
                 logger.Log(LogLevel.Info, "Recursing tree to find node.");
-                RecursiveDelete(child, View);
+                  RecursiveDelete(childItem, View);
             }
         }
     }
 
     private void RecursiveDelete(StoryNodeItem ParentItem, ViewType View)
     {
-        logger.Log(LogLevel.Info, "Starting recursive delete instance");
+        logger.Log(LogLevel.Info, $"Starting recursive delete instance for parent {ParentItem.Name} ({ParentItem.Uuid}) in {View}");
         try
         {
             if (ParentItem.Children.Contains(this)) //Checks parent contains child we are looking.
             {
                 logger.Log(LogLevel.Info, "StoryNodeItem found, deleting it.");
                 ParentItem.Children.Remove(this); //Deletes child.
+
+                //Add to appropriate trash node.
                 if (View == ViewType.Explorer) { shellvm.StoryModel.ExplorerView[1].Children.Add(this); }
                 else { shellvm.StoryModel.NarratorView[1].Children.Add(this); }
             }
             else //If child isn't in parent, recurse again.
             {
                 logger.Log(LogLevel.Info, "StoryNodeItem not found, recursing again");
-                foreach (StoryNodeItem child in Parent.Children) { RecursiveDelete(child, View); }
+                foreach (StoryNodeItem ChildItem in ParentItem.Children)
+                {
+                    logger.Log(LogLevel.Debug, $"ChildItem is {ChildItem.Name} {ChildItem.Uuid}");
+                    RecursiveDelete(ChildItem, View);
+                }
             }
         }
         catch (Exception ex) { logger.LogException(LogLevel.Error, ex, "Error deleting node in Recursive delete"); }

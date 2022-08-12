@@ -24,12 +24,20 @@ namespace StoryBuilder.Services.Dialogs.Tools
         private void ItemInvoked(object sender, TappedRoutedEventArgs e)
         {
             TreeViewItem item = (TreeViewItem)sender;
-            ShellVM.CurrentNode = (StoryNodeItem)item.DataContext;
+            ToolVM.SelectedNode = (StoryNodeItem)item.DataContext;
 
             //Only shows one selected item between either tree.
             if (item.Tag.Equals("Nar")) { ToolVM.IsNarratorSelected = true; } //Narrator Tree was clicked, so clear the explorer tree items.
             else { ToolVM.IsNarratorSelected = false; } //Explorer Tree was clicked, so clear the narrator tree items.
         }
 
+        private void Move(object sender, RoutedEventArgs e)
+        {
+            var old = ShellVM.CurrentNode;
+            ShellVM.CurrentNode = ToolVM.SelectedNode;
+            if ((sender as Button).Tag.ToString().Contains("UP")) { ShellVM.MoveUpCommand.Execute(null); } //Move up
+            else { ShellVM.MoveDownCommand.Execute(null); } //Move down
+            ShellVM.CurrentNode = old; 
+        }
     }
 }

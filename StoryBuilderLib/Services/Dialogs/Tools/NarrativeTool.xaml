@@ -20,10 +20,11 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="*"/>
+                <RowDefinition Height="auto"/>
             </Grid.RowDefinitions>
 
             <TextBlock Text="Story Explorer View" Grid.Row="0" Grid.Column="0" HorizontalAlignment="Center"/>
-            <TreeView ItemsSource="{x:Bind ShellVM.StoryModel.ExplorerView, Mode=TwoWay}" Margin="0,5" Grid.Row="1" Name="explorerview" Grid.Column="0"  Background="{x:Bind Background}" >
+            <TreeView ItemsSource="{x:Bind ShellVM.StoryModel.ExplorerView, Mode=TwoWay}" Margin="0,5" Grid.Row="1" Grid.Column="0"  Background="{x:Bind Background}" >
                 <TreeView.ItemTemplate>
                     <DataTemplate x:DataType="viewModels:StoryNodeItem">
                         <TreeViewItem ItemsSource="{x:Bind Children}" IsExpanded="True" Tapped="ItemInvoked" Tag="Exp">
@@ -34,25 +35,34 @@
             </TreeView>
 
             <TextBlock Text="Narrator View" Grid.Column="1" Grid.Row="0" HorizontalAlignment="Center"/>
-            <TreeView ItemsSource="{x:Bind ShellVM.StoryModel.NarratorView, Mode=TwoWay}" Margin="0,5" Grid.Row="1" Grid.Column="1" Name="narratorview">
+            <TreeView ItemsSource="{x:Bind ShellVM.StoryModel.NarratorView, Mode=TwoWay}" Margin="0,5" Grid.Row="1" Grid.Column="1">
                 <TreeView.ItemTemplate>
                     <DataTemplate x:DataType="viewModels:StoryNodeItem">
-                        <TreeViewItem ItemsSource="{x:Bind Children}" IsExpanded="True" Tapped="ItemInvoked" Tag="Nar" >
+                        <TreeViewItem ItemsSource="{x:Bind Children}" IsExpanded="True" Tapped="ItemInvoked" Tag="Nar">
                             <TextBlock Text="{x:Bind Name}" TextWrapping="Wrap"/>
                         </TreeViewItem>
                     </DataTemplate>
                 </TreeView.ItemTemplate>
             </TreeView>
 
-            <!--<TextBlock Grid.Row="3" Text="{x:Bind ToolVM.Message, Mode=OneWay}" HorizontalAlignment="Center" Grid.ColumnSpan="22" TextWrapping="Wrap"/> -->
+            <TextBlock Grid.Row="2" Margin="0,0,0,5" Text="{x:Bind ToolVM.Message, Mode=OneWay}" HorizontalAlignment="Center" Grid.ColumnSpan="22" TextWrapping="Wrap"/>
         </Grid>
 
         <StackPanel Grid.Column="0" Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center">
             <Button ToolTipService.ToolTip="Add scene to narrative view" Content="Add Scene" Margin="5,0"  HorizontalAlignment="Center" Command="{x:Bind ToolVM.CopyCommand}"/>
             <Button ToolTipService.ToolTip="Add unused scene to narrative view" Content="Add all unused Scenes" Margin="5,0" HorizontalAlignment="Center" Command="{x:Bind ToolVM.CopyAllUnusedCommand}"/>
-            <Button ToolTipService.ToolTip="Move node up" FontFamily="Segoe MDL2 Assets" Margin="5,0" Content="&#xE09C;" Command="{x:Bind ShellVM.MoveUpCommand}"/>
-            <Button ToolTipService.ToolTip="Move node down" FontFamily="Segoe MDL2 Assets" Content="&#xE09D;" Margin="5,0" Command="{x:Bind ShellVM.MoveDownCommand}"/>
-            <!--<Button ToolTipService.ToolTip="Add Section" FontFamily="Segoe MDL2 Assets" Content="&#xE09D;" Margin="5,0" Command="{x:Bind ShellVM.AddSectionCommand}"/> -->
+            <Button ToolTipService.ToolTip="Move node up" FontFamily="Segoe MDL2 Assets" Margin="5,0" Content="&#xE09C;" Click="Move" Tag="UP"/>
+            <Button ToolTipService.ToolTip="Move node down" FontFamily="Segoe MDL2 Assets" Content="&#xE09D;" Margin="5,0" Click="Move" Tag=""/>
+            <Button ToolTipService.ToolTip="Add Section" FontFamily="Segoe MDL2 Assets" Content="&#xE8B7;" Margin="5,0">
+                <Button.Flyout>
+                    <Flyout>
+                        <StackPanel>
+                            <TextBox Header="Name of Section:" Margin="5" Width="250" Text="{x:Bind ToolVM.FlyoutText,Mode=TwoWay}" />
+                            <Button Content="Create section" HorizontalAlignment="Center" Margin="5" Command="{x:Bind ToolVM.CreateFlyout}"/>
+                        </StackPanel>
+                    </Flyout>
+                </Button.Flyout>
+            </Button>
             <Button FontFamily="Segoe MDL2 Assets" Content="&#xE74D;" HorizontalAlignment="Center" Margin="5,0" Command="{x:Bind ToolVM.DeleteCommand}"/>
         </StackPanel>
     </Grid>
