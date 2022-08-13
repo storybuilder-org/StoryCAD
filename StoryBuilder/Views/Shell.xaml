@@ -288,6 +288,11 @@
                         </MenuFlyout>
                     </AppBarButton.Flyout>
                 </AppBarButton>
+                <AppBarButton Command="{x:Bind ShellVm.NarrativeToolCommand, Mode=OneWay}">
+                    <AppBarButton.Icon>
+                        <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xe736;"/>
+                    </AppBarButton.Icon>
+                </AppBarButton>
                 <AppBarButton Label="Preferences" ToolTipService.ToolTip="Preferences" 
                               Command="{x:Bind ShellVm.PreferencesCommand, Mode=OneWay}" >
                     <AppBarButton.Icon>

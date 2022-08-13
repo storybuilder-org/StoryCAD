@@ -72,7 +72,7 @@ namespace StoryBuilder.ViewModels
         public StoryModel StoryModel;
 
         public readonly ScrivenerIo Scrivener;
-
+        
         // The right-hand (detail) side of ShellView
         public Frame SplitViewFrame;
 

@@ -52,7 +52,7 @@
             <Button ToolTipService.ToolTip="Add scene to narrative view" Content="Add Scene" Margin="5,0"  HorizontalAlignment="Center" Command="{x:Bind ToolVM.CopyCommand}"/>
             <Button ToolTipService.ToolTip="Add unused scene to narrative view" Content="Add all unused Scenes" Margin="5,0" HorizontalAlignment="Center" Command="{x:Bind ToolVM.CopyAllUnusedCommand}"/>
             <Button ToolTipService.ToolTip="Move node up" FontFamily="Segoe MDL2 Assets" Margin="5,0" Content="&#xE09C;" Click="Move" Tag="UP"/>
-            <Button ToolTipService.ToolTip="Move node down" FontFamily="Segoe MDL2 Assets" Content="&#xE09D;" Margin="5,0" Click="Move" Tag=""/>
+            <Button ToolTipService.ToolTip="Move node down" FontFamily="Segoe MDL2 Assets" Content="&#xE09D;" Margin="5,0" Click="Move" Tag="DN"/>
             <Button ToolTipService.ToolTip="Add Section" FontFamily="Segoe MDL2 Assets" Content="&#xE8B7;" Margin="5,0">
                 <Button.Flyout>
                     <Flyout>

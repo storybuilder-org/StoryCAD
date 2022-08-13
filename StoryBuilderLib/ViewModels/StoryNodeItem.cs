@@ -11,6 +11,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using Windows.Data.Xml.Dom;
 using Windows.Web.AtomPub;
+using ABI.Windows.ApplicationModel.VoiceCommands;
 
 namespace StoryBuilder.ViewModels;
 
@@ -496,17 +497,14 @@ public class StoryNodeItem : DependencyObject, INotifyPropertyChanged
             //Delete node from selected view.
             logger.Log(LogLevel.Info, "Node found in root, deleting it.");
             SourceCollection.Children.Remove(this);
-
-            //Add to correct trash node
-            if (View == ViewType.Explorer) { shellvm.StoryModel.ExplorerView[1].Children.Add(this); }
-            else { shellvm.StoryModel.NarratorView[1].Children.Add(this); }
+            TrashItem(View); //Add to appropriate trash node.
         }
         else
         {
             foreach (StoryNodeItem childItem in SourceCollection.Children)
             {
                 logger.Log(LogLevel.Info, "Recursing tree to find node.");
-                  RecursiveDelete(childItem, View);
+                RecursiveDelete(childItem, View);
             }
         }
     }
@@ -520,10 +518,7 @@ public class StoryNodeItem : DependencyObject, INotifyPropertyChanged
             {
                 logger.Log(LogLevel.Info, "StoryNodeItem found, deleting it.");
                 ParentItem.Children.Remove(this); //Deletes child.
-
-                //Add to appropriate trash node.
-                if (View == ViewType.Explorer) { shellvm.StoryModel.ExplorerView[1].Children.Add(this); }
-                else { shellvm.StoryModel.NarratorView[1].Children.Add(this); }
+                TrashItem(View); //Add to appropriate trash node.
             }
             else //If child isn't in parent, recurse again.
             {
@@ -536,6 +531,20 @@ public class StoryNodeItem : DependencyObject, INotifyPropertyChanged
             }
         }
         catch (Exception ex) { logger.LogException(LogLevel.Error, ex, "Error deleting node in Recursive delete"); }
+    }
+
+    private void TrashItem(ViewType View)
+    {
+        if (View == ViewType.Explorer)
+        {
+            shellvm.StoryModel.ExplorerView[1].Children.Add(this);
+            Parent = shellvm.StoryModel.ExplorerView[1];
+        }
+        else
+        {
+            shellvm.StoryModel.NarratorView[1].Children.Add(this);
+            Parent = shellvm.StoryModel.NarratorView[1];
+        }
     }
 
     private void NotifyPropertyChanged(string propertyName)

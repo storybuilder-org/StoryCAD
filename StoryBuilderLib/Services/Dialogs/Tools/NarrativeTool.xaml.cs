@@ -33,6 +33,7 @@ namespace StoryBuilder.Services.Dialogs.Tools
 
         private void Move(object sender, RoutedEventArgs e)
         {
+            if (ToolVM.SelectedNode == null || ShellVM.StoryModel.NarratorView[1].Children.Contains(ToolVM.SelectedNode)) { return; }
             var old = ShellVM.CurrentNode;
             ShellVM.CurrentNode = ToolVM.SelectedNode;
             if ((sender as Button).Tag.ToString().Contains("UP")) { ShellVM.MoveUpCommand.Execute(null); } //Move up
