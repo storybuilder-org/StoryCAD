@@ -66,5 +66,4 @@
             <Button FontFamily="Segoe MDL2 Assets" Content="&#xE74D;" HorizontalAlignment="Center" Margin="5,0" Command="{x:Bind ToolVM.DeleteCommand}"/>
         </StackPanel>
     </Grid>
-
 </Page>
