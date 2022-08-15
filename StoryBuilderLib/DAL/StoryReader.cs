@@ -700,14 +700,12 @@ namespace StoryBuilder.DAL
         private void RecurseNarratorNode(StoryNodeItem parent, IXmlNode xn, bool root)
         {
             StoryNodeItem node = new(parent, xn);
-            if (node.Name != "Deleted Story Elements")
-            {
-                if (root) _model.NarratorView.Add(node);
+            if (node.Name == "Deleted Story Elements" && root) {return;}
+            if (root) _model.NarratorView.Add(node);
 
-                XmlNodeList children = xn.SelectNodes("StoryNode");
-                foreach (IXmlNode child in children)
-                    RecurseNarratorNode(node, child, false);
-            }
+            XmlNodeList children = xn.SelectNodes("StoryNode");
+            foreach (IXmlNode child in children)
+                RecurseNarratorNode(node, child, false);
 
         }
 
