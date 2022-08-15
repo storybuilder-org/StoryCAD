@@ -389,7 +389,7 @@ namespace StoryBuilder.ViewModels
         public async Task UnifiedNewFile(UnifiedVM dialogVM)
         {
             _canExecuteCommands = false;
-            Logger.Log(LogLevel.Info, "UnifyVM - New File starting");
+            Logger.Log(LogLevel.Info, "FileOpenVM - New File starting");
             try
             {
                 Messenger.Send(new StatusChangedMessage(new($"New project command executing", LogLevel.Info)));
@@ -424,7 +424,6 @@ namespace StoryBuilder.ViewModels
                 StoryNodeItem narrativeNode = new(narrative, null);
                 narrativeNode.IsRoot = true;
                 StoryModel.NarratorView.Add(narrativeNode);
-                StoryModel.NarratorView.Add(trashNode);     // Both views share the trashcan
                 // Use the NewProjectDialog template to complete the model
                 switch (vm.SelectedTemplateIndex)
                 {
@@ -1717,11 +1716,9 @@ namespace StoryBuilder.ViewModels
                 {
                     Ioc.Default.GetRequiredService<DeletionService>().SearchStoryElement(node, RightTappedNode.Uuid, StoryModel, true);
                 }
-                ObservableCollection<StoryNodeItem> source = RightTappedNode.Parent.Children;
-                source.Remove(RightTappedNode);
-                DataSource[1].Children.Add(RightTappedNode);
-                RightTappedNode.Parent = DataSource[1];
-                Messenger.Send(new StatusChangedMessage(new($"Deleted node {RightTappedNode.Name}", LogLevel.Info, true)));
+
+                if (CurrentView.ToString().Contains("Explorer")){ RightTappedNode.Delete(Models.ViewType.Explorer); }
+                else { RightTappedNode.Delete(Models.ViewType.Narrator); }
             }
         }
 

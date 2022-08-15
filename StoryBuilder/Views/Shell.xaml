@@ -270,6 +270,11 @@
                     </AppBarButton.Icon>
                     <AppBarButton.Flyout>
                         <MenuFlyout>
+                            <MenuFlyoutItem Text="Open Narrative Editor" Command="{x:Bind ShellVm.NarrativeToolCommand, Mode=OneWay}" muxc:ToolTipService.ToolTip="Opens the narrative editor to build your story as its told">
+                                <MenuFlyoutItem.KeyboardAccelerators>
+                                    <KeyboardAccelerator Key="N" Modifiers="Control"/>
+                                </MenuFlyoutItem.KeyboardAccelerators>
+                            </MenuFlyoutItem>
                             <MenuFlyoutItem Text="Print Reports" Command="{x:Bind ShellVm.PrintReportsCommand, Mode=OneWay}">
                                 <MenuFlyoutItem.KeyboardAccelerators>
                                     <KeyboardAccelerator Key="P" Modifiers="Control"/>
@@ -280,18 +285,9 @@
                                     <KeyboardAccelerator Key="R" Modifiers="Control"/>
                                 </MenuFlyoutItem.KeyboardAccelerators>
                             </MenuFlyoutItem>
-                            <MenuFlyoutItem Text="Open Narrative Editor" Command="{x:Bind ShellVm.NarrativeToolCommand, Mode=OneWay}">
-                                <MenuFlyoutItem.KeyboardAccelerators>
-                                    <KeyboardAccelerator Key="N" Modifiers="Control"/>
-                                </MenuFlyoutItem.KeyboardAccelerators>
-                            </MenuFlyoutItem>
+
                         </MenuFlyout>
                     </AppBarButton.Flyout>
-                </AppBarButton>
-                <AppBarButton Command="{x:Bind ShellVm.NarrativeToolCommand, Mode=OneWay}">
-                    <AppBarButton.Icon>
-                        <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xe736;"/>
-                    </AppBarButton.Icon>
                 </AppBarButton>
                 <AppBarButton Label="Preferences" ToolTipService.ToolTip="Preferences" 
                               Command="{x:Bind ShellVm.PreferencesCommand, Mode=OneWay}" >

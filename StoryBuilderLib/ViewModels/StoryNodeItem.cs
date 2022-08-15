@@ -540,11 +540,7 @@ public class StoryNodeItem : DependencyObject, INotifyPropertyChanged
             shellvm.StoryModel.ExplorerView[1].Children.Add(this);
             Parent = shellvm.StoryModel.ExplorerView[1];
         }
-        else
-        {
-            shellvm.StoryModel.NarratorView[1].Children.Add(this);
-            Parent = shellvm.StoryModel.NarratorView[1];
-        }
+        //Narrative view nodes are not added to trash.
     }
 
     private void NotifyPropertyChanged(string propertyName)
