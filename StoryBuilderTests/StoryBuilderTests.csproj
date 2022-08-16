@@ -47,6 +47,7 @@
         <Version>17.2.0</Version>
         <ExcludeAssets>build</ExcludeAssets>
     </PackageReference>
+    <PackageReference Include="Syncfusion.Editors.WinUI" Version="20.2.0.40" />
 </ItemGroup>
 
 <ItemGroup>
