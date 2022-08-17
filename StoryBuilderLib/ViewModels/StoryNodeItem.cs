@@ -1,12 +1,17 @@
-﻿using Microsoft.UI.Xaml;
+﻿using CommunityToolkit.Mvvm.DependencyInjection;
+using Elmah.Io.Client;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using StoryBuilder.Models;
+using StoryBuilder.Services.Logging;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using Windows.Data.Xml.Dom;
+using Windows.Web.AtomPub;
+using ABI.Windows.ApplicationModel.VoiceCommands;
 
 namespace StoryBuilder.ViewModels;
 
@@ -38,6 +43,9 @@ namespace StoryBuilder.ViewModels;
 /// </summary>
 public class StoryNodeItem : DependencyObject, INotifyPropertyChanged
 {
+    private LogService logger = Ioc.Default.GetRequiredService<LogService>();
+    private ShellViewModel shellvm = Ioc.Default.GetRequiredService<ShellViewModel>();
+
     // is it INavigable?
     #region Properties
 
@@ -467,8 +475,73 @@ public class StoryNodeItem : DependencyObject, INotifyPropertyChanged
         Parent = parent;
         Parent?.Children.Add(this);  // (if parent != null)
     }
-
     #endregion
+
+    public void Delete(ViewType View)
+    {
+        logger.Log(LogLevel.Trace, $"Starting to delete element {Name} ({Uuid}) from {View}");
+        //Sanity check
+        if (Type == StoryItemType.TrashCan || IsRoot)
+        {
+            Ioc.Default.GetService<ShellViewModel>().ShowMessage(LogLevel.Warn, "This element can't be deleted.",false);
+            logger.Log(LogLevel.Info, "User tried to delete Root or Trashcan node.");
+        }
+
+        //Set source collection to either narrative view or explorer view, we use the first item [0] so we don't delete from trash.
+        StoryNodeItem SourceCollection;
+        if (View == ViewType.Explorer) { SourceCollection = shellvm.StoryModel.ExplorerView[0]; }
+        else { SourceCollection = shellvm.StoryModel.NarratorView[0]; }
+
+        if (SourceCollection.Children.Contains(this))
+        {
+            //Delete node from selected view.
+            logger.Log(LogLevel.Info, "Node found in root, deleting it.");
+            SourceCollection.Children.Remove(this);
+            TrashItem(View); //Add to appropriate trash node.
+        }
+        else
+        {
+            foreach (StoryNodeItem childItem in SourceCollection.Children)
+            {
+                logger.Log(LogLevel.Info, "Recursing tree to find node.");
+                RecursiveDelete(childItem, View);
+            }
+        }
+    }
+
+    private void RecursiveDelete(StoryNodeItem ParentItem, ViewType View)
+    {
+        logger.Log(LogLevel.Info, $"Starting recursive delete instance for parent {ParentItem.Name} ({ParentItem.Uuid}) in {View}");
+        try
+        {
+            if (ParentItem.Children.Contains(this)) //Checks parent contains child we are looking.
+            {
+                logger.Log(LogLevel.Info, "StoryNodeItem found, deleting it.");
+                ParentItem.Children.Remove(this); //Deletes child.
+                TrashItem(View); //Add to appropriate trash node.
+            }
+            else //If child isn't in parent, recurse again.
+            {
+                logger.Log(LogLevel.Info, "StoryNodeItem not found, recursing again");
+                foreach (StoryNodeItem ChildItem in ParentItem.Children)
+                {
+                    logger.Log(LogLevel.Debug, $"ChildItem is {ChildItem.Name} {ChildItem.Uuid}");
+                    RecursiveDelete(ChildItem, View);
+                }
+            }
+        }
+        catch (Exception ex) { logger.LogException(LogLevel.Error, ex, "Error deleting node in Recursive delete"); }
+    }
+
+    private void TrashItem(ViewType View)
+    {
+        if (View == ViewType.Explorer)
+        {
+            shellvm.StoryModel.ExplorerView[1].Children.Add(this);
+            Parent = shellvm.StoryModel.ExplorerView[1];
+        }
+        //Narrative view nodes are not added to trash.
+    }
 
     private void NotifyPropertyChanged(string propertyName)
     {

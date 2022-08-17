@@ -30,10 +30,6 @@ using Windows.Storage.Pickers;
 using StoryBuilder.Services;
 using WinRT;
 using GuidAttribute = System.Runtime.InteropServices.GuidAttribute;
-using System.Net.Http;
-using System.Text;
-using System.Net.Http.Headers;
-using System.Net;
 using Octokit;
 using ProductHeaderValue = Octokit.ProductHeaderValue;
 using StoryBuilder.Services.Backend;
@@ -76,7 +72,7 @@ namespace StoryBuilder.ViewModels
         public StoryModel StoryModel;
 
         public readonly ScrivenerIo Scrivener;
-
+        
         // The right-hand (detail) side of ShellView
         public Frame SplitViewFrame;
 
@@ -129,6 +125,7 @@ namespace StoryBuilder.ViewModels
         public RelayCommand AddSettingCommand { get; }
         public RelayCommand AddSceneCommand { get; }
         public RelayCommand PrintNodeCommand { get; }
+        public RelayCommand NarrativeToolCommand { get; }
 
         // Remove command (move to trash)
         public RelayCommand RemoveStoryElementCommand { get; }
@@ -392,7 +389,7 @@ namespace StoryBuilder.ViewModels
         public async Task UnifiedNewFile(UnifiedVM dialogVM)
         {
             _canExecuteCommands = false;
-            Logger.Log(LogLevel.Info, "UnifyVM - New File starting");
+            Logger.Log(LogLevel.Info, "FileOpenVM - New File starting");
             try
             {
                 Messenger.Send(new StatusChangedMessage(new($"New project command executing", LogLevel.Info)));
@@ -427,7 +424,6 @@ namespace StoryBuilder.ViewModels
                 StoryNodeItem narrativeNode = new(narrative, null);
                 narrativeNode.IsRoot = true;
                 StoryModel.NarratorView.Add(narrativeNode);
-                StoryModel.NarratorView.Add(trashNode);     // Both views share the trashcan
                 // Use the NewProjectDialog template to complete the model
                 switch (vm.SelectedTemplateIndex)
                 {
@@ -1720,11 +1716,9 @@ namespace StoryBuilder.ViewModels
                 {
                     Ioc.Default.GetRequiredService<DeletionService>().SearchStoryElement(node, RightTappedNode.Uuid, StoryModel, true);
                 }
-                ObservableCollection<StoryNodeItem> source = RightTappedNode.Parent.Children;
-                source.Remove(RightTappedNode);
-                DataSource[1].Children.Add(RightTappedNode);
-                RightTappedNode.Parent = DataSource[1];
-                Messenger.Send(new StatusChangedMessage(new($"Deleted node {RightTappedNode.Name}", LogLevel.Info, true)));
+
+                if (CurrentView.ToString().Contains("Explorer")){ RightTappedNode.Delete(Models.ViewType.Explorer); }
+                else { RightTappedNode.Delete(Models.ViewType.Narrator); }
             }
         }
 
@@ -1776,7 +1770,6 @@ namespace StoryBuilder.ViewModels
             }
 
             SceneModel sceneVar = (SceneModel) StoryModel.StoryElements.StoryElementGuids[RightTappedNode.Uuid];
-            // ReSharper disable once ObjectCreationAsStatement
             _ = new StoryNodeItem(sceneVar, StoryModel.NarratorView[0]);
             Messenger.Send(new StatusChangedMessage(new($"Copied node {RightTappedNode.Name} to Narrative View", LogLevel.Info, true)));
         }
@@ -1887,7 +1880,7 @@ namespace StoryBuilder.ViewModels
         }
 
         /// <summary>
-        /// This method is called when one of NavigationTree's 
+        /// This method is called when one of NavigationTree's
         /// TreeViewItem nodes is right-tapped.
         /// 
         /// It alters the visibility of the command bar flyout 
@@ -2093,6 +2086,7 @@ namespace StoryBuilder.ViewModels
             TogglePaneCommand = new RelayCommand(TogglePane, () => _canExecuteCommands);
             OpenUnifiedCommand = new RelayCommand(async () => await OpenUnifiedMenu(), () => _canExecuteCommands);
             CloseUnifiedCommand = new RelayCommand(CloseUnifiedMenu, () => _canExecuteCommands);
+            NarrativeToolCommand = new RelayCommand(async () => await OpenNarrativeTool(), () => _canExecuteCommands);
             PrintNodeCommand = new RelayCommand(async () => await PrintCurrentNodeAsync(), () => _canExecuteCommands);
             OpenFileCommand = new RelayCommand(async () => await OpenFile(), () => _canExecuteCommands);
             SaveFileCommand = new RelayCommand(async () => await SaveFile(), () => _canExecuteCommands);
@@ -2143,6 +2137,16 @@ namespace StoryBuilder.ViewModels
             ChangeStatusColor = Colors.Green;
 
             ShellInstance = this;
+        }
+
+        private async Task OpenNarrativeTool()
+        {
+            ContentDialog dialog = new();
+            dialog.XamlRoot = GlobalData.XamlRoot;
+            dialog.Title = "Narrative Editor";
+            dialog.PrimaryButtonText = "Done";
+            dialog.Content = new NarrativeTool();
+            ContentDialogResult result = await dialog.ShowAsync();
         }
 
         public void SearchNodes()

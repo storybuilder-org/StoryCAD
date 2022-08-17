@@ -65,9 +65,9 @@ namespace StoryBuilder.DAL
                 }
                 if (_model.NarratorView.Count == 1)
                 {
-                    TrashCanModel trash = new(_model);
-                    StoryNodeItem trashNode = new(trash, null);
-                    _model.NarratorView.Add(trashNode);     // The trashcan is the second root
+                    //TrashCanModel trash = new(_model);
+                    //StoryNodeItem trashNode = new(trash, null);
+                    //_model.NarratorView.Add(trashNode);     // The trashcan is the second root
                 }
 
                 Messenger.Send(new StatusChangedMessage(new($"File load successful.", LogLevel.Info, true)));
@@ -700,11 +700,13 @@ namespace StoryBuilder.DAL
         private void RecurseNarratorNode(StoryNodeItem parent, IXmlNode xn, bool root)
         {
             StoryNodeItem node = new(parent, xn);
+            if (node.Name == "Deleted Story Elements" && root) {return;}
             if (root) _model.NarratorView.Add(node);
 
             XmlNodeList children = xn.SelectNodes("StoryNode");
             foreach (IXmlNode child in children)
                 RecurseNarratorNode(node, child, false);
+
         }
 
         #region Constructor

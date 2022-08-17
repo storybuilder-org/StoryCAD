@@ -238,6 +238,11 @@
                     </AppBarButton.Icon>
                     <AppBarButton.Flyout>
                         <MenuFlyout>
+                            <MenuFlyoutItem Text="Open Narrative Editor" Command="{x:Bind ShellVm.NarrativeToolCommand, Mode=OneWay}" muxc:ToolTipService.ToolTip="Opens the narrative editor to build your story as its told">
+                                <MenuFlyoutItem.KeyboardAccelerators>
+                                    <KeyboardAccelerator Key="N" Modifiers="Control"/>
+                                </MenuFlyoutItem.KeyboardAccelerators>
+                            </MenuFlyoutItem>
                             <MenuFlyoutItem Text="Key Questions" Command="{x:Bind ShellVm.KeyQuestionsCommand, Mode=OneWay}">
                                 <MenuFlyoutItem.KeyboardAccelerators>
                                     <KeyboardAccelerator Key="Q" Modifiers="Control"/>
@@ -280,6 +285,7 @@
                                     <KeyboardAccelerator Key="R" Modifiers="Control"/>
                                 </MenuFlyoutItem.KeyboardAccelerators>
                             </MenuFlyoutItem>
+
                         </MenuFlyout>
                     </AppBarButton.Flyout>
                 </AppBarButton>

@@ -14,7 +14,7 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <TextBox Header="Name" Text="{x:Bind SectionVm.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="10,10,10,0" />
-        <usercontrols:RichEditBoxExtended Header="Notes" Grid.Row="1" 
+        <usercontrols:RichEditBoxExtended Header="Notes" Grid.Row="1" Margin="10"
                                           RtfText="{x:Bind SectionVm.Notes, Mode=TwoWay}" AcceptsReturn="True"
                                           IsSpellCheckEnabled="True" TextWrapping="Wrap" 
                                           ScrollViewer.VerticalScrollBarVisibility="Visible" />
