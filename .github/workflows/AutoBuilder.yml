@@ -33,12 +33,20 @@ jobs:
     #Install MSBUILD
     - name: Setup MSBuild.exe
       uses: microsoft/setup-msbuild@v1.0.2
-
+    
+    - uses: oprypin/find-latest-tag@v1
+      with:
+        repository: storybuilder-org/StoryBuilder-2
+        releases-only: true
+      id: testtag
+      
     #Bump version number
     - name: Increase Version Number 
       run: |
         $VersionRegex = "\d+\.\d+\.\d+\.\d+"
-        $BUILD_BUILDNUMBER = "2.0.${{ github.run_number }}.0"
+        $LastVer = "${{ steps.testtag.outputs.tag }}"
+        $VersionSplit = $LastVer.Split(".")
+        $BUILD_BUILDNUMBER = $VersionSplit[0] + "." + $VersionSplit[1] + ".${{ github.run_number }}.0"
         $ManifestVersionRegex = " Version=""\d+\.\d+\.\d+\.\d+"""
         $ScriptPath = $null
         try
@@ -95,7 +103,11 @@ jobs:
 
     - name: Write help file
       run: |
-       "Hello, Thank you for testing StoryBuilder 2.0.12.${{ github.run_number }} Alpha 
+        $LastVer = "${{ steps.testtag.outputs.tag }}"
+        $VersionSplit = $LastVer.Split(".")
+        $BUILD_BUILDNUMBER = $VersionSplit[0] + "." + $VersionSplit[1] + ".${{ github.run_number }}.0"
+      
+        "Hello, Thank you for testing StoryBuilder " + $VersionSplit[0] + "." + $VersionSplit[1] + ".${{ github.run_number }}.0" + " Alpha 
         1) Open StoryBuilder.cer, this should bring up the certificate import wizard
         2) Press install certificate, and change store location to Local Machine, then press next
         3) Change the option to Place All Certificates in the following store and click browse
