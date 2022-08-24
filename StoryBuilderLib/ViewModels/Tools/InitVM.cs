@@ -10,6 +10,12 @@ namespace StoryBuilder.ViewModels.Tools;
 
 public class InitVM : ObservableRecipient
 {
+    private string _errorMessage;
+    public string ErrorMessage
+    {
+        get => _errorMessage;
+        set => SetProperty(ref _name, value);
+    }
     private string _name;
     public string Name
     {
