@@ -378,9 +378,11 @@ namespace StoryBuilder.ViewModels
         {
             _canExecuteCommands = false;
             // Needs logging
-            _contentDialog = new();
-            _contentDialog.XamlRoot = GlobalData.XamlRoot;
-            _contentDialog.Content = new UnifiedMenuPage();
+            _contentDialog = new()
+            {
+                XamlRoot = GlobalData.XamlRoot,
+                Content = new UnifiedMenuPage()
+            };
             if (Microsoft.UI.Xaml.Application.Current.RequestedTheme == ApplicationTheme.Light) { _contentDialog.Background = new SolidColorBrush(Colors.LightGray); }
             await _contentDialog.ShowAsync();
             _canExecuteCommands = true;

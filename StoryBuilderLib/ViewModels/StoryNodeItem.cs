@@ -12,6 +12,7 @@ using System.ComponentModel;
 using Windows.Data.Xml.Dom;
 using Windows.Web.AtomPub;
 using ABI.Windows.ApplicationModel.VoiceCommands;
+using CommunityToolkit.WinUI.Helpers;
 
 namespace StoryBuilder.ViewModels;
 
@@ -418,45 +419,45 @@ public class StoryNodeItem : DependencyObject, INotifyPropertyChanged
         {
             Uuid = new Guid((string)attrs.GetNamedItem("UUID")?.NodeValue);
             string type = (string)attrs.GetNamedItem("Type")?.NodeValue;
-            switch (type)
+            switch (type.ToLower()) //Fixes differences in casing between versions.
             {
-                case "StoryOverView":
+                case "storyoverview":
                     Type = StoryItemType.StoryOverview;
                     Symbol = Symbol.View;
                     break;
-                case "Character":
+                case "character":
                     Type = StoryItemType.Character;
                     Symbol = Symbol.Contact;
                     break;
-                case "PlotPoint":   // Legacy: PlotPoint was renamed to Scene   
+                case "plotpoint":   // Legacy: PlotPoint was renamed to Scene   
                     Type = StoryItemType.Scene;
                     Symbol = Symbol.AllApps;
                     break;
-                case "Scene":
+                case "scene":
                     Type = StoryItemType.Scene;
                     Symbol = Symbol.AllApps;
                     break;
-                case "Problem":
+                case "problem":
                     Type = StoryItemType.Problem;
                     Symbol = Symbol.Help;
                     break;
-                case "Setting":
+                case "setting":
                     Type = StoryItemType.Setting;
                     Symbol = Symbol.Globe;
                     break;
-                case "Separator":   // Legacy: Separator was renamed Folder
+                case "separator":   // Legacy: Separator was renamed Folder
                     Type = StoryItemType.Folder;
                     Symbol = Symbol.Folder;
                     break;
-                case "Folder":
+                case "folder":
                     Type = StoryItemType.Folder;
                     Symbol = Symbol.Folder;
                     break;
-                case "Section":
+                case "section":
                     Type = StoryItemType.Section;
                     Symbol = Symbol.Folder;
                     break;
-                case "TrashCan":
+                case "trashcan":
                     Type = StoryItemType.TrashCan;
                     Symbol = Symbol.Delete;
                     break;
