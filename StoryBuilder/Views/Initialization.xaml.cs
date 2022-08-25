@@ -18,7 +18,7 @@ namespace StoryBuilder.Views;
 /// </summary>
 public sealed partial class PreferencesInitialization : Page
 {
-    InitVM _initVM = Ioc.Default.GetService<InitVM>();
+    InitVM InitVM = Ioc.Default.GetService<InitVM>();
     public PreferencesInitialization() { InitializeComponent(); }
 
     /// <summary>
@@ -48,7 +48,7 @@ public sealed partial class PreferencesInitialization : Page
         if (folder != null)
         {
             ProjPath.Text = folder.Path;
-            _initVM.Path = folder.Path;
+            InitVM.Path = folder.Path;
         }
     }
 
@@ -79,7 +79,7 @@ public sealed partial class PreferencesInitialization : Page
         if (folder != null)
         {
             BackPath.Text = folder.Path;
-            _initVM.BackupPath = folder.Path;
+            InitVM.BackupPath = folder.Path;
         }
     }
 
@@ -116,29 +116,34 @@ public sealed partial class PreferencesInitialization : Page
     /// </summary>
     public void Check(object sender, RoutedEventArgs e)
     {
-        if (String.IsNullOrWhiteSpace(_initVM.Name))
+        if (String.IsNullOrWhiteSpace(InitVM.Name))
         {
-            _initVM.ErrorMessage = "Please enter your name";
+            InitVM.ErrorMessage = "Please enter your Name";
             return;
         }
-        if (String.IsNullOrWhiteSpace(_initVM.Email))
+        if (String.IsNullOrWhiteSpace(InitVM.Email))
         {
-            _initVM.ErrorMessage = "Please enter your email";
+            InitVM.ErrorMessage = "Please enter your Email";
             return;
         }
-        if (String.IsNullOrWhiteSpace(_initVM.Path))
+        else if (!InitVM.Email.Contains("@") || !InitVM.Email.Contains("."))
         {
-            _initVM.ErrorMessage = "Please set a project path";
+            InitVM.ErrorMessage = "Please enter a valid email address.";
             return;
         }
-        if (String.IsNullOrWhiteSpace(_initVM.BackupPath))
+        if (String.IsNullOrWhiteSpace(InitVM.Path))
         {
-            _initVM.ErrorMessage = "Please set a backup path";
+            InitVM.ErrorMessage = "Please set a Project path";
+            return;
+        }
+        if (String.IsNullOrWhiteSpace(InitVM.BackupPath))
+        {
+            InitVM.ErrorMessage = "Please set a Backup path";
             return;
         }
 
 
-        _initVM.Save();
+        InitVM.Save();
         RootFrame.Navigate(typeof(Shell));
     }
 

@@ -14,7 +14,7 @@ public class InitVM : ObservableRecipient
     public string ErrorMessage
     {
         get => _errorMessage;
-        set => SetProperty(ref _name, value);
+        set => SetProperty(ref _errorMessage, value);
     }
     private string _name;
     public string Name
