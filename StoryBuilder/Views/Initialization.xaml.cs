@@ -9,6 +9,7 @@ using CommunityToolkit.Mvvm.DependencyInjection;
 using StoryBuilder.Models;
 using StoryBuilder.ViewModels.Tools;
 using WinRT;
+using Elmah.Io.Client;
 
 namespace StoryBuilder.Views;
 
@@ -17,19 +18,16 @@ namespace StoryBuilder.Views;
 /// </summary>
 public sealed partial class PreferencesInitialization : Page
 {
-    InitVM _initVM = Ioc.Default.GetService<InitVM>();
-    public PreferencesInitialization()
-    {
-        InitializeComponent();
-    }
+    InitVM InitVM = Ioc.Default.GetService<InitVM>();
+    public PreferencesInitialization() { InitializeComponent(); }
 
     /// <summary>
     /// This is called when the browse button next to Project Path
     /// once clicked it opens a folder picker. If canceled, the folder
     /// will be null and nothing will happen.
     /// 
-    /// If a folder is selected it will set the VM and UI versions of
-    /// the variables to make sure they are in sync.
+    /// If a folder is selected it will set the VM and UI versions
+    /// of the variables to ensure they are in sync.
     /// </summary>
     /// <param name="sender"></param>
     /// <param name="e"></param>
@@ -50,13 +48,13 @@ public sealed partial class PreferencesInitialization : Page
         if (folder != null)
         {
             ProjPath.Text = folder.Path;
-            _initVM.Path = folder.Path;
+            InitVM.Path = folder.Path;
         }
     }
 
     /// <summary>
     /// This is called when the browse button next to Project Path
-    /// once clicked it opens a folder picker. If cancled the folder
+    /// once clicked it opens a folder picker. If canceled4 the folder
     /// will be null and nothing will happen.
     /// 
     /// If a folder is selected it will set the VM and UI versions of
@@ -81,7 +79,7 @@ public sealed partial class PreferencesInitialization : Page
         if (folder != null)
         {
             BackPath.Text = folder.Path;
-            _initVM.BackupPath = folder.Path;
+            InitVM.BackupPath = folder.Path;
         }
     }
 
@@ -104,11 +102,12 @@ public sealed partial class PreferencesInitialization : Page
     [DllImport("user32.dll", ExactSpelling = true, CharSet = CharSet.Auto, PreserveSig = true, SetLastError = false)]
     public static extern IntPtr GetActiveWindow();
 
+    /// <summary>
+    /// Opens discord URL in default browser (Via ShellExecute)
+    /// </summary>
     public void Discord(object sender, RoutedEventArgs e)
     {
-        Process Browser = new();
-        Browser.StartInfo.FileName = @"https://discord.gg/wfZxU4bx6n";
-        Browser.StartInfo.UseShellExecute = true;
+        Process Browser = new() { StartInfo = new() { FileName = "https://discord.gg/wfZxU4bx6n", UseShellExecute = true } };
         Browser.Start();
     }
 
@@ -117,11 +116,35 @@ public sealed partial class PreferencesInitialization : Page
     /// </summary>
     public void Check(object sender, RoutedEventArgs e)
     {
-        if (!string.IsNullOrWhiteSpace(_initVM.Path) && !string.IsNullOrWhiteSpace(_initVM.BackupPath) && _initVM.Name != string.Empty && _initVM.Email != string.Empty)
+        if (String.IsNullOrWhiteSpace(InitVM.Name))
         {
-            _initVM.Save();
-            RootFrame.Navigate(typeof(Shell));
+            InitVM.ErrorMessage = "Please enter your Name";
+            return;
         }
+        if (String.IsNullOrWhiteSpace(InitVM.Email))
+        {
+            InitVM.ErrorMessage = "Please enter your Email";
+            return;
+        }
+        else if (!InitVM.Email.Contains("@") || !InitVM.Email.Contains("."))
+        {
+            InitVM.ErrorMessage = "Please enter a valid email address.";
+            return;
+        }
+        if (String.IsNullOrWhiteSpace(InitVM.Path))
+        {
+            InitVM.ErrorMessage = "Please set a Project path";
+            return;
+        }
+        if (String.IsNullOrWhiteSpace(InitVM.BackupPath))
+        {
+            InitVM.ErrorMessage = "Please set a Backup path";
+            return;
+        }
+
+
+        InitVM.Save();
+        RootFrame.Navigate(typeof(Shell));
     }
 
 }
