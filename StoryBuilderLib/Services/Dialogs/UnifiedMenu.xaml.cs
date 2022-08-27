@@ -1,12 +1,8 @@
-﻿using Windows.UI;
-using ABI.Microsoft.UI.Xaml;
-using CommunityToolkit.WinUI.Helpers;
-using Microsoft.UI;
+﻿using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using StoryBuilder.ViewModels;
-using Application = Microsoft.UI.Xaml.Application;
 
 namespace StoryBuilder.Services.Dialogs;
 

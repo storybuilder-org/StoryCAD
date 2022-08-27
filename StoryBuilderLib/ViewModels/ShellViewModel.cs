@@ -156,18 +156,11 @@ namespace StoryBuilder.ViewModels
                 _canExecuteCommands = true;
             }
         }
-
+        
         /// <summary>
         /// Used for theming
         /// </summary>
         public PreferencesModel UserPreferences = GlobalData.Preferences;
-
-        private string _title;
-        public string Title
-        {
-            get => _title;
-            set => SetProperty(ref _title, value);
-        }
 
         /// <summary>
         /// IsPaneOpen is bound to ShellSplitView's IsPaneOpen property with
@@ -2076,7 +2069,6 @@ namespace StoryBuilder.ViewModels
             Logger = Ioc.Default.GetService<LogService>();
             Search = Ioc.Default.GetService<SearchService>();
 
-            Title = "Hello Terry";
             StoryModel = new StoryModel();
 
             statusTimer = new DispatcherTimer();

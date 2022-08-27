@@ -6,7 +6,6 @@ using StoryBuilder.Models;
 using StoryBuilder.Models.Tools;
 using StoryBuilder.Services.Dialogs;
 using System;
-using System.IO;
 
 namespace StoryBuilder.ViewModels;
 

@@ -1,5 +1,4 @@
 ﻿using CommunityToolkit.Mvvm.DependencyInjection;
-using Elmah.Io.Client;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
@@ -10,9 +9,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using Windows.Data.Xml.Dom;
-using Windows.Web.AtomPub;
-using ABI.Windows.ApplicationModel.VoiceCommands;
-using CommunityToolkit.WinUI.Helpers;
 
 namespace StoryBuilder.ViewModels;
 

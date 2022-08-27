@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.UI;
+﻿using Microsoft.UI;
 
 namespace StoryBuilder.Models.Tools
 {

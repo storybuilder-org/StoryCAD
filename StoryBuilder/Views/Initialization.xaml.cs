@@ -9,7 +9,6 @@ using CommunityToolkit.Mvvm.DependencyInjection;
 using StoryBuilder.Models;
 using StoryBuilder.ViewModels.Tools;
 using WinRT;
-using Elmah.Io.Client;
 
 namespace StoryBuilder.Views;
 

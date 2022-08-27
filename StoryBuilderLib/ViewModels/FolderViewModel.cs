@@ -8,7 +8,6 @@ using StoryBuilder.Services.Messages;
 using StoryBuilder.Services.Navigation;
 using System;
 using System.ComponentModel;
-using System.Threading.Tasks;
 
 namespace StoryBuilder.ViewModels;
 

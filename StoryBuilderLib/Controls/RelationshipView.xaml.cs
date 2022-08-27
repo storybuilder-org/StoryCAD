@@ -1,15 +1,11 @@
 using System;
 using CommunityToolkit.Mvvm.DependencyInjection;
-using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
-using NLog.Fluent;
 using StoryBuilder.Models;
 using StoryBuilder.Services.Logging;
-using StoryBuilder.Services.Messages;
 using StoryBuilder.ViewModels;
-using Syncfusion.UI.Xaml.Core;
 
 namespace StoryBuilder.Controls;
 

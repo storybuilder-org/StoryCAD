@@ -10,7 +10,6 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using StoryBuilder.Services.Json;
-using CommunityToolkit.WinUI.UI.Controls.TextToolbarSymbols;
 using Elmah.Io.Client;
 
 namespace StoryBuilder.Services.Logging;

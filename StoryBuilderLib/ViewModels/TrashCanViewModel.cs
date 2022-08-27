@@ -2,7 +2,6 @@
 using StoryBuilder.Models;
 using StoryBuilder.Services.Navigation;
 using System;
-using System.Threading.Tasks;
 
 namespace StoryBuilder.ViewModels;
 

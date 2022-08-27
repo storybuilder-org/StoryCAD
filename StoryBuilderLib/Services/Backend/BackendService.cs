@@ -9,7 +9,6 @@ using CommunityToolkit.Mvvm.DependencyInjection;
 using StoryBuilder.DAL;
 using MySql.Data.MySqlClient;
 using Windows.Storage;
-using StoryBuilder.Services.Preferences;
 
 namespace StoryBuilder.Services.Backend
 {
