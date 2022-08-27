@@ -122,9 +122,9 @@ public class PreferencesIO
                     case "RecordPreferencesStatus":
                          if (tokens[1] == "True") 
                             _model.RecordPreferencesStatus = true; 
-                        else 
+                         else 
                             _model.RecordPreferencesStatus = false; 
-                        break;
+                         break;
                     case "RecordVersionStatus":
                         if (tokens[1] == "True")
                             _model.RecordVersionStatus = true;

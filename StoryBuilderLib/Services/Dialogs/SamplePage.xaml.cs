@@ -25,7 +25,7 @@ public sealed partial class SamplePage : Page
             Samples.Items.Add(Path.GetFileName(sampleStory).Replace(".stbx", ""));
             paths.Add(sampleStory);
         }
-         UnifiedVM = vm;
+        UnifiedVM = vm;
     }
     public UnifiedVM UnifiedVM;
 

@@ -65,10 +65,9 @@ public class LogService : ILogService
         }
     }
 
-    public async Task<bool> AddElmahTarget()
+    public Task<bool> AddElmahTarget()
     {
-        if (apiKey == string.Empty | logID == string.Empty)
-            return false;
+        if (apiKey == string.Empty | logID == string.Empty) { return Task.FromResult(false); } //if we don't have an api key or log id, we can't add the elmah target and must return.
 
         try
         {
@@ -136,12 +135,12 @@ public class LogService : ILogService
             LogManager.Configuration.AddRule(NLog.LogLevel.Error, NLog.LogLevel.Fatal, elmahIoTarget, "*");
             LogManager.ReconfigExistingLoggers();
             GlobalData.ElmahLogging = true;
-            return true;
+            return Task.FromResult(true);
         }
         catch (Exception ex)
         {
             LogException(LogLevel.Error, ex, ex.Message);
-            return false;
+            return Task.FromResult(false);
         }
     }
 

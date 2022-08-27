@@ -213,20 +213,17 @@ public class StoryNodeItem : DependencyObject, INotifyPropertyChanged
         }
     }
 
-    public TextWrapping TextWrapping
-    {
-        get => GlobalData.Preferences.WrapNodeNames;
-    }
+    public TextWrapping TextWrapping => GlobalData.Preferences.WrapNodeNames; //Gets user preference for text wrapping
 
-//public bool IsSelected
-//{
-//    get => (bool)GetValue(IsSelectedProperty);
-//    set
-//    {
-//        SetValue(IsSelectedProperty, value);
-//        NotifyPropertyChanged("IsSelected");
-//    }
-//}
+    //public bool IsSelected
+    //{
+    //    get => (bool)GetValue(IsSelectedProperty);
+    //    set
+    //    {
+    //        SetValue(IsSelectedProperty, value);
+    //        NotifyPropertyChanged("IsSelected");
+    //    }
+    //}
 
 
 

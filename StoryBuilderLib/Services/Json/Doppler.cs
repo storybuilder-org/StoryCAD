@@ -30,7 +30,7 @@ namespace StoryBuilder.Services.Json
         [JsonPropertyName("SSLCA")]
         public string SSLCA { get; set; }
 
-        private static HttpClient client = new HttpClient();
+        private static HttpClient client = new();
 
         /// <summary>
         /// Obtain tokens for elmah.io and and MySQL connection to the backend server.
