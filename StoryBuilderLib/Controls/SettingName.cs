@@ -7,7 +7,7 @@ namespace StoryBuilder.Controls;
 public sealed class SettingName : ComboBox
 {
 
-    public SettingName() : base()
+    public SettingName()
     {
         DefaultStyleKey = typeof(ComboBox);
         Loaded += SettingName_Loaded;

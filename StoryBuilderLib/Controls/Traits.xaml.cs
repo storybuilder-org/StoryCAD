@@ -1,5 +1,4 @@
 ﻿using CommunityToolkit.Mvvm.DependencyInjection;
-using Microsoft.UI.Xaml.Controls;
 using StoryBuilder.ViewModels.Tools;
 
 // To learn more about WinUI, the WinUI project structure,

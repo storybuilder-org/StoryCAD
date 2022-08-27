@@ -9,7 +9,7 @@ using StoryBuilder.ViewModels;
 
 namespace StoryBuilder.Controls;
 
-public sealed partial class RelationshipView : UserControl
+public sealed partial class RelationshipView
 {
     public CharacterViewModel CharVm => Ioc.Default.GetService<CharacterViewModel>();
     public LogService _logger => Ioc.Default.GetService<LogService>();

@@ -449,7 +449,7 @@ public class ReportFormatter
             sb.Replace("@ViewpointCharacter", vpCharacterName);
             sb.Replace("@Setting", settingName);
             sb.Replace("@SceneType", scene.SceneType);
-
+            
             if (line.Contains("@CastMember"))
             {
                 foreach (string seCastMember in scene.CastMembers)
