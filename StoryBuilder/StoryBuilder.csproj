@@ -64,7 +64,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<None Remove="Views\Initialization.xaml" />
+		<None Remove="Views\PreferencesInitialization.xaml" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -78,7 +78,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Page Update="Views\Initialization.xaml">
+		<Page Update="Views\PreferencesInitialization.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</Page>
 	</ItemGroup>

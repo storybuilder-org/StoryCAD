@@ -55,11 +55,7 @@ public partial class App : Application
     {
         ConfigureIoc();
 
-        GlobalData.Version = "Version: " + Package.Current.Id.Version.Major + "." +
-            Package.Current.Id.Version.Minor + "." + Package.Current.Id.Version.Build +
-            "." + Package.Current.Id.Version.Revision;
-
-
+        GlobalData.Version = "Version: " + Package.Current.Id.Version.Major + "." + Package.Current.Id.Version.Minor + "." + Package.Current.Id.Version.Build + "." + Package.Current.Id.Version.Revision;
 
         var path = Path.Combine(Package.Current.InstalledLocation.Path, ".env");
         var options = new DotEnvOptions(false, new[] { path });
@@ -73,8 +69,6 @@ public partial class App : Application
         }
         catch { GlobalData.ShowDotEnvWarning = true; }
         
-
-
         InitializeComponent();
 
         _log = Ioc.Default.GetService<LogService>();
@@ -155,18 +149,14 @@ public partial class App : Application
             _log.SetElmahTokens(keys);
 
         }
-        catch (Exception ex)
-        {
-            _log.LogException(LogLevel.Error, ex, ex.Message);
-        }
+        catch (Exception ex) { _log.LogException(LogLevel.Error, ex, ex.Message); }
 
-        if (Debugger.IsAttached)
-            _log.Log(LogLevel.Info, "Bypassing elmah.io");
+        if (Debugger.IsAttached) {_log.Log(LogLevel.Info, "Bypassing elmah.io as debugger is attached.");}
         else
         {
+            //TODO: check elmah is bypassed when logging is disabled by user.
             await _log.AddElmahTarget();
-            if (GlobalData.ElmahLogging)
-                _log.Log(LogLevel.Info, "elmah.io log target added");
+            if (GlobalData.ElmahLogging) {_log.Log(LogLevel.Info, "elmah.io log target added");}
             else  // can have several reasons (no doppler, or an error adding the target)
                 _log.Log(LogLevel.Info, "elmah.io log target bypassed");
         }
@@ -187,9 +177,7 @@ public partial class App : Application
         await ProcessInstallationFiles();
 
         await LoadControls(GlobalData.RootDirectory);
-
         await LoadLists(GlobalData.RootDirectory);
-            
         await LoadTools(GlobalData.RootDirectory);
 
         ConfigureNavigation();
