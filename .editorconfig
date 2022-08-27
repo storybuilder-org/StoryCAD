@@ -2,3 +2,6 @@
 
 # CA1416: Validate platform compatibility
 dotnet_diagnostic.CA1416.severity = none
+
+# CA1822: Mark members as static
+dotnet_diagnostic.CA1822.severity = none

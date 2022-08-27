@@ -167,7 +167,7 @@ public class ControlLoader
             keyvalue = string.Empty;
             return;
         }
-        if (line.Contains("="))
+        if (line.Contains('='))
         {
             string[] tokens = line.Split(new[] { '=' });
             keyword = tokens[0];

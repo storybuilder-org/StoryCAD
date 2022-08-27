@@ -26,7 +26,6 @@ public class LogService : ILogService
     private string apiKey = string.Empty;
     private string logID = string.Empty;
     static LogService()
-
     {
         try
         {
@@ -96,7 +95,7 @@ public class LogService : ILogService
                 try
                 {
                     msg.Data = new List<Item>();
-                    string LogString = "";
+                    string LogString = string.Empty;
                     using (FileStream stream = File.Open(Path.Combine(GlobalData.RootDirectory, "logs", $"updater.{DateTime.Now.ToString("yyyy-MM-dd")}.log"), FileMode.Open, FileAccess.Read,FileShare.ReadWrite))
                     {
                         using (StreamReader reader = new(stream))

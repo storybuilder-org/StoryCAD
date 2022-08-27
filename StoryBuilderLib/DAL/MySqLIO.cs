@@ -16,7 +16,7 @@ namespace StoryBuilder.DAL
         public async Task<UsersTable> ReadUserByID(MySqlConnection conn, int id)
         {
             string sql = "SELECT id, user_name, email,date_added FROM users WHERE id = @Id";
-            UsersTable users = new UsersTable();
+            UsersTable users = new();
 
             await using (var cmd = new MySqlCommand(sql, conn))
             {
