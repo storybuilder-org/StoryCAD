@@ -1150,7 +1150,7 @@ namespace StoryBuilder.ViewModels
                     problem.Notes = situationModel.Notes;
 
                     // Insert the new Problem as the target's child
-                    newNode = new StoryNodeItem(problem, RightTappedNode);
+                    _ = new StoryNodeItem(problem, RightTappedNode);
                     msg = $"Problem {situationModel.SituationName} inserted";
                     ShowChange();
                     break;
@@ -1162,7 +1162,7 @@ namespace StoryBuilder.ViewModels
                     sceneVar.Remarks = "See Notes.";
                     sceneVar.Notes = situationModel.Notes;
                     // Insert the new Scene as the target's child
-                    newNode = new StoryNodeItem(sceneVar, RightTappedNode);
+                    _ = new StoryNodeItem(sceneVar, RightTappedNode);
                     msg = $"Scene {situationModel.SituationName} inserted";
                     ShowChange();
                     break;

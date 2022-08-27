@@ -23,7 +23,6 @@ public class LogService : ILogService
     private static readonly Logger Logger;
     private static readonly string logFilePath;
     private static string stackTraceHelper; //Elmah for some reason doesn't show the stack trace of an exception so this one does.
-    private static string logfilename;
     private string apiKey = string.Empty;
     private string logID = string.Empty;
     static LogService()
@@ -36,8 +35,7 @@ public class LogService : ILogService
             // Create the file logging target
             FileTarget fileTarget = new();
             logFilePath = Path.Combine(GlobalData.RootDirectory, "logs");
-            logfilename = Path.Combine(logFilePath, "updater.${date:format=yyyy-MM-dd}.log");
-            fileTarget.FileName = logfilename;
+            fileTarget.FileName = Path.Combine(logFilePath, "updater.${date:format=yyyy-MM-dd}.log");
             fileTarget.CreateDirs = true;
             fileTarget.MaxArchiveFiles = 7;
             fileTarget.ArchiveEvery = FileArchivePeriod.Day;
