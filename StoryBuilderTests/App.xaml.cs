@@ -1,6 +1,7 @@
-﻿using Microsoft.UI.Xaml;
+﻿using System;
+using Microsoft.UI.Xaml;
+using Microsoft.VisualStudio.TestPlatform.TestExecutor;
 using Microsoft.VisualStudio.TestTools.UnitTesting.AppContainer;
-using System;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -18,12 +19,12 @@ namespace StoryBuilderTest
         /// </summary>
         public App()
         {
-            this.InitializeComponent();
+            InitializeComponent();
         }
 
-     protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
+     protected override void OnLaunched(LaunchActivatedEventArgs args)
 {
-    Microsoft.VisualStudio.TestPlatform.TestExecutor.UnitTestClient.CreateDefaultUI();
+    UnitTestClient.CreateDefaultUI();
 
     m_window = new MainWindow();
 
@@ -33,7 +34,7 @@ namespace StoryBuilderTest
     UITestMethodAttribute.DispatcherQueue = m_window.DispatcherQueue;
 
     // Replace back with e.Arguments when https://github.com/microsoft/microsoft-ui-xaml/issues/3368 is fixed
-    Microsoft.VisualStudio.TestPlatform.TestExecutor.UnitTestClient.Run(Environment.CommandLine);
+    UnitTestClient.Run(Environment.CommandLine);
 }
 
         private Window m_window;

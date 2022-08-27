@@ -1,6 +1,6 @@
-﻿using Microsoft.UI.Xaml.Data;
-using System;
+﻿using System;
 using System.Globalization;
+using Microsoft.UI.Xaml.Data;
 
 namespace StoryBuilder.Converters;
 

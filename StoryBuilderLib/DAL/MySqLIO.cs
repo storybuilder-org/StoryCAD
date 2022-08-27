@@ -99,10 +99,5 @@ namespace StoryBuilder.DAL
                 await cmd.ExecuteNonQueryAsync();
             }
         }
-        public MySqlIO()
-        {
-            // obtain connection string data from Doppler?
-        }
-
     }
 }

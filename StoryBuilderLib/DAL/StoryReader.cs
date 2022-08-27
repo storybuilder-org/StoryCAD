@@ -1,19 +1,16 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System;
+using System.IO;
+using System.Threading.Tasks;
+using Windows.Data.Xml.Dom;
+using Windows.Storage;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Messaging;
 using StoryBuilder.Models;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.Services.Messages;
 using StoryBuilder.ViewModels;
-using System;
-using System.IO;
-using System.Threading.Tasks;
-using Windows.Data.Xml.Dom;
-using Windows.Storage;
 using static Windows.Data.Xml.Dom.XmlDocument;
-using XmlDocument = Windows.Data.Xml.Dom.XmlDocument;
-using XmlElement = Windows.Data.Xml.Dom.XmlElement;
-using XmlNodeList = Windows.Data.Xml.Dom.XmlNodeList;
 
 
 namespace StoryBuilder.DAL
@@ -69,7 +66,7 @@ namespace StoryBuilder.DAL
                     //_model.NarratorView.Add(trashNode);     // The trashcan is the second root
                 }
 
-                Messenger.Send(new StatusChangedMessage(new($"File load successful.", LogLevel.Info, true)));
+                Messenger.Send(new StatusChangedMessage(new("File load successful.", LogLevel.Info, true)));
 
                 return _model;
             }

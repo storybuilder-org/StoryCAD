@@ -69,10 +69,10 @@ public sealed partial class RelationshipView
             {
                 _logger.Log(LogLevel.Info, $"Deleting Relationship to {characterToDelete.Partner.Name}");
                 Ioc.Default.GetService<CharacterViewModel>().CharacterRelationships.Remove(characterToDelete);
-                _logger.Log(LogLevel.Info, $"Deleted");
+                _logger.Log(LogLevel.Info, "Deleted");
                 CharVm.SaveRelationships();
             }
-            _logger.Log(LogLevel.Info, $"Remove relationship complete!");
+            _logger.Log(LogLevel.Info, "Remove relationship complete!");
         }
         catch (Exception ex)
         {

@@ -1,5 +1,5 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using Windows.Storage;
+﻿using Windows.Storage;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace StoryBuilder.ViewModels;
 

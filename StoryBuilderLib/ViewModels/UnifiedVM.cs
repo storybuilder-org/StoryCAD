@@ -1,11 +1,12 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
 using StoryBuilder.DAL;
 using StoryBuilder.Models;
 using StoryBuilder.Models.Tools;
 using StoryBuilder.Services.Dialogs;
-using System;
 
 namespace StoryBuilder.ViewModels;
 
@@ -50,8 +51,8 @@ public class UnifiedVM : ObservableRecipient
     /// <summary>
     /// This makes the UI one consistent color
     /// </summary>
-    private Microsoft.UI.Xaml.Media.SolidColorBrush _adjustmentColor;
-    public Microsoft.UI.Xaml.Media.SolidColorBrush AdjustmentColor
+    private SolidColorBrush _adjustmentColor;
+    public SolidColorBrush AdjustmentColor
     {
         get => _adjustmentColor;
         set => SetProperty(ref _adjustmentColor, value);

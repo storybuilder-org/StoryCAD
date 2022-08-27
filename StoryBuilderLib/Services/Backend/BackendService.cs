@@ -1,14 +1,14 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Threading.Tasks;
+using Windows.Storage;
+using CommunityToolkit.Mvvm.DependencyInjection;
+using MySql.Data.MySqlClient;
+using StoryBuilder.DAL;
 using StoryBuilder.Models;
 using StoryBuilder.Models.Tools;
-using StoryBuilder.Services.Logging;
 using StoryBuilder.Services.Json;
-using CommunityToolkit.Mvvm.DependencyInjection;
-using StoryBuilder.DAL;
-using MySql.Data.MySqlClient;
-using Windows.Storage;
+using StoryBuilder.Services.Logging;
 
 namespace StoryBuilder.Services.Backend
 {

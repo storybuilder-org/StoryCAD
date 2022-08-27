@@ -1,16 +1,17 @@
-﻿using NLog;
-using NLog.Config;
-using NLog.Targets;
-using Elmah.Io.NLog;
-using StoryBuilder.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using StoryBuilder.Services.Json;
+using Windows.ApplicationModel;
 using Elmah.Io.Client;
+using Elmah.Io.NLog;
+using NLog;
+using NLog.Config;
+using NLog.Targets;
+using StoryBuilder.Models;
+using StoryBuilder.Services.Json;
 
 namespace StoryBuilder.Services.Logging;
 
@@ -76,9 +77,9 @@ public class LogService : ILogService
 
             elmahIoTarget.OnMessage += msg =>
             {
-                msg.Version = Windows.ApplicationModel.Package.Current.Id.Version.Major + "."
-                + Windows.ApplicationModel.Package.Current.Id.Version.Minor + "."
-                + Windows.ApplicationModel.Package.Current.Id.Version.Revision;
+                msg.Version = Package.Current.Id.Version.Major + "."
+                                                               + Package.Current.Id.Version.Minor + "."
+                                                               + Package.Current.Id.Version.Revision;
                 
                 try { msg.User = GlobalData.Preferences.Name + $"({GlobalData.Preferences.Email})"; }
                 catch (Exception e) { msg.User = $"There was an error attempting to obtain user information Error: {e.Message}"; }
@@ -88,9 +89,9 @@ public class LogService : ILogService
                 
                 try
                 {
-                    msg.Version = Windows.ApplicationModel.Package.Current.Id.Version.Major + "."
-                        + Windows.ApplicationModel.Package.Current.Id.Version.Minor + "."
-                        + Windows.ApplicationModel.Package.Current.Id.Version.Build + " Build " + Windows.ApplicationModel.Package.Current.Id.Version.Revision;
+                    msg.Version = Package.Current.Id.Version.Major + "."
+                                                                   + Package.Current.Id.Version.Minor + "."
+                                                                   + Package.Current.Id.Version.Build + " Build " + Package.Current.Id.Version.Revision;
                 }
                 catch (Exception e) { msg.Version = $"There was an error trying to obtain version information Error: {e.Message}"; }
 
@@ -132,7 +133,7 @@ public class LogService : ILogService
             elmahIoTarget.ApiKey = apiKey;
             elmahIoTarget.LogId = logID;
             LogManager.Configuration.AddTarget(elmahIoTarget);
-            LogManager.Configuration.AddRule(NLog.LogLevel.Error, NLog.LogLevel.Fatal, elmahIoTarget, "*");
+            LogManager.Configuration.AddRule(NLog.LogLevel.Error, NLog.LogLevel.Fatal, elmahIoTarget);
             LogManager.ReconfigExistingLoggers();
             GlobalData.ElmahLogging = true;
             return Task.FromResult(true);

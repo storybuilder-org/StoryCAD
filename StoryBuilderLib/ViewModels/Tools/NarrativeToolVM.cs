@@ -1,12 +1,12 @@
 ﻿using System;
-using CommunityToolkit.Mvvm.DependencyInjection;
-using CommunityToolkit.Mvvm.Input;
-using StoryBuilder.Models;
-using StoryBuilder.Services.Logging;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.DependencyInjection;
+using CommunityToolkit.Mvvm.Input;
+using StoryBuilder.Models;
+using StoryBuilder.Services.Logging;
 
 namespace StoryBuilder.ViewModels.Tools;
 public class NarrativeToolVM: ObservableRecipient
@@ -65,7 +65,7 @@ public class NarrativeToolVM: ObservableRecipient
     {
         try
         {
-            Logger.Log(LogLevel.Info, $"Starting to copy node between trees.");
+            Logger.Log(LogLevel.Info, "Starting to copy node between trees.");
 
             //Check if selection is null
             if (SelectedNode == null)
@@ -91,7 +91,7 @@ public class NarrativeToolVM: ObservableRecipient
             }
             else if (SelectedNode.Type is StoryItemType.Folder or StoryItemType.Section) //If its a folder then recurse and add all unused scenes to the narrative view.
             {
-                Logger.Log(LogLevel.Info, $"Item is a folder/section, getting flattened list of all children.");
+                Logger.Log(LogLevel.Info, "Item is a folder/section, getting flattened list of all children.");
                 foreach (var item in RecursiveCheck(SelectedNode.Children))
                 {
                     if (item.Type == StoryItemType.Scene && !RecursiveCheck(ShellVM.StoryModel.NarratorView[0].Children).Any(StoryNodeItem => StoryNodeItem.Uuid == item.Uuid))

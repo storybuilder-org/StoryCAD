@@ -1,14 +1,14 @@
-﻿using CommunityToolkit.Mvvm.DependencyInjection;
-using System;
-using NRtfTree.Util;
-using StoryBuilder.DAL;
-using StoryBuilder.Models;
-using StoryBuilder.ViewModels;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.Storage;
+using CommunityToolkit.Mvvm.DependencyInjection;
+using NRtfTree.Util;
+using StoryBuilder.DAL;
+using StoryBuilder.Models;
 using StoryBuilder.Services.Logging;
+using StoryBuilder.ViewModels;
 
 namespace StoryBuilder.Services.Reports;
 
@@ -320,7 +320,7 @@ public class ReportFormatter
             string traits = "";
             foreach (var trait in character.TraitList)
             {
-                traits += trait.ToString() + "\n";
+                traits += trait + "\n";
             }
             sb.Replace("@Traits", traits);
             // Notes section

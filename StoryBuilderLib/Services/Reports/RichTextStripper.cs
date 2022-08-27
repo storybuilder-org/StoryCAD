@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text.RegularExpressions;
 
 namespace StoryBuilder.Services.Reports;
@@ -201,7 +202,7 @@ public class RichTextStripper
                     }
                     else if (!ignorable)
                     {
-                        int c = int.Parse(hex, System.Globalization.NumberStyles.HexNumber);
+                        int c = int.Parse(hex, NumberStyles.HexNumber);
                         outList.Add(char.ConvertFromUtf32(c));
                     }
                 }
@@ -248,13 +249,11 @@ public class RichTextStripper
                 length += str.Length;
                 continue;
             }
-            else
+
+            if (ch == '{' || ch == '}' || ch == '\\')
             {
-                if (ch == '{' || ch == '}' || ch == '\\')
-                {
-                    stringData = stringData.Insert(length, @"\");
-                    length++;
-                }
+                stringData = stringData.Insert(length, @"\");
+                length++;
             }
             length++;
         }

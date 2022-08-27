@@ -1,18 +1,19 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using System;
+using System.IO;
+using System.Threading.Tasks;
+using Windows.Storage;
 using CommunityToolkit.Mvvm.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using StoryBuilder.DAL;
 using StoryBuilder.Models;
 using StoryBuilder.Services.Installation;
 using StoryBuilder.Services.Logging;
+using StoryBuilder.Services.Navigation;
 using StoryBuilder.Services.Preferences;
 using StoryBuilder.Services.Search;
 using StoryBuilder.ViewModels;
 using StoryBuilder.ViewModels.Tools;
-using System;
-using System.Threading.Tasks;
-using Windows.Storage;
-using NavigationService = StoryBuilder.Services.Navigation.NavigationService;
 
 namespace StoryBuilderTests;
 
@@ -26,7 +27,7 @@ public sealed class StoryBuilderTestSetup
         // Validate service locator
         //string localPath =ApplicationData.Current.RoamingFolder.Path.ToString();
         string localPath = $"{Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)}";
-        localPath = System.IO.Path.Combine(localPath, "StoryBuilder");
+        localPath = Path.Combine(localPath, "StoryBuilder");
         StorageFolder localFolder = await StorageFolder.GetFolderFromPathAsync(localPath);
         InstallationService install = Ioc.Default.GetService<InstallationService>();
         await install.InstallFiles();

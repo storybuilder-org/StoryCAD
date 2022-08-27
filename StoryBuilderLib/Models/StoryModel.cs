@@ -1,6 +1,6 @@
-using StoryBuilder.ViewModels;
 using System.Collections.ObjectModel;
 using Windows.Storage;
+using StoryBuilder.ViewModels;
 
 //using StoryBuilder.Models.Tools;
 

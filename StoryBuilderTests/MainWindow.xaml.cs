@@ -12,7 +12,7 @@ namespace StoryBuilderTest
     {
         public MainWindow()
         {
-            this.InitializeComponent();
+            InitializeComponent();
         }
     }
 }

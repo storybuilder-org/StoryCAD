@@ -1,12 +1,13 @@
-﻿using CommunityToolkit.Mvvm.DependencyInjection;
+﻿using System;
+using System.Runtime.InteropServices;
+using Windows.Storage;
+using Windows.Storage.Pickers;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using StoryBuilder.Models;
 using StoryBuilder.ViewModels;
-using System;
-using System.Runtime.InteropServices;
-using Windows.Storage;
-using Windows.Storage.Pickers;
+using WinRT.Interop;
 
 namespace StoryBuilder.Services.Dialogs;
 
@@ -29,7 +30,7 @@ public sealed partial class SaveAsDialog : Page
         ProjectPathName.IsReadOnly = false;
         // may throw error if invalid folder location
         FolderPicker folderPicker = new();
-        WinRT.Interop.InitializeWithWindow.Initialize(folderPicker, GlobalData.WindowHandle);
+        InitializeWithWindow.Initialize(folderPicker, GlobalData.WindowHandle);
 
         //Make FolderPicker work in Win32
         //if (Window.Current == null)

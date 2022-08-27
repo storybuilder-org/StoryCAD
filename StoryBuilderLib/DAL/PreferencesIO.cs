@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Windows.Storage;
-using StoryBuilder.Services.Logging;
-using StoryBuilder.Models.Tools;
 using CommunityToolkit.Mvvm.DependencyInjection;
+using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
+using StoryBuilder.Models.Tools;
+using StoryBuilder.Services.Logging;
 
 namespace StoryBuilder.DAL;
 
@@ -154,13 +155,13 @@ public class PreferencesIO
 
         if (Application.Current.RequestedTheme == ApplicationTheme.Light)
         {
-            _model.PrimaryColor = new SolidColorBrush(Microsoft.UI.Colors.LightGray);
-            _model.SecondaryColor = new SolidColorBrush(Microsoft.UI.Colors.Black);
+            _model.PrimaryColor = new SolidColorBrush(Colors.LightGray);
+            _model.SecondaryColor = new SolidColorBrush(Colors.Black);
         }
         else
         {
-            _model.PrimaryColor = new SolidColorBrush(Microsoft.UI.Colors.DarkSlateGray);
-            _model.SecondaryColor = new SolidColorBrush(Microsoft.UI.Colors.White);
+            _model.PrimaryColor = new SolidColorBrush(Colors.DarkSlateGray);
+            _model.SecondaryColor = new SolidColorBrush(Colors.White);
         }
     }
 

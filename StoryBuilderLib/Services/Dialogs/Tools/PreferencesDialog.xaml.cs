@@ -1,27 +1,30 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
 using System.Runtime.InteropServices;
+using Windows.ApplicationModel;
 using Windows.Storage;
 using Windows.Storage.Pickers;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml;
+using Octokit;
 using StoryBuilder.Models;
 using StoryBuilder.Services.Installation;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.ViewModels.Tools;
 using WinRT;
-using Octokit;
+using Page = Microsoft.UI.Xaml.Controls.Page;
 
 namespace StoryBuilder.Services.Dialogs.Tools;
 
-public sealed partial class PreferencesDialog : Microsoft.UI.Xaml.Controls.Page
+public sealed partial class PreferencesDialog : Page
 {
     public PreferencesViewModel PreferencesVm => Ioc.Default.GetService<PreferencesViewModel>();
     public PreferencesDialog()
     {
         InitializeComponent();
         DataContext = PreferencesVm;
-        Version.Text = "StoryBuilder Version: " + Windows.ApplicationModel.Package.Current.Id.Version.Major + "." + Windows.ApplicationModel.Package.Current.Id.Version.Minor + "." + Windows.ApplicationModel.Package.Current.Id.Version.Build + "." + Windows.ApplicationModel.Package.Current.Id.Version.Revision;
+        Version.Text = "StoryBuilder Version: " + Package.Current.Id.Version.Major + "." + Package.Current.Id.Version.Minor + "." + Package.Current.Id.Version.Build + "." + Package.Current.Id.Version.Revision;
         SetChangelog();
 
         if (Debugger.IsAttached || GlobalData.Preferences.Name == "ShowMeTheDevTab")
@@ -56,9 +59,9 @@ public sealed partial class PreferencesDialog : Microsoft.UI.Xaml.Controls.Page
 
     private void OpenPath(object sender, RoutedEventArgs e)
     {
-        Process.Start(new ProcessStartInfo()
+        Process.Start(new ProcessStartInfo
         {
-            FileName = System.IO.Path.Combine(GlobalData.RootDirectory, "Logs"),
+            FileName = Path.Combine(GlobalData.RootDirectory, "Logs"),
             UseShellExecute = true,
             Verb = "open"
         });

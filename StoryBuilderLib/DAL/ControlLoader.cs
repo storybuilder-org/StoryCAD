@@ -1,10 +1,11 @@
-﻿using StoryBuilder.Models;
-using StoryBuilder.Models.Tools;
-using StoryBuilder.Services.Logging;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Windows.Storage;
+using Windows.Storage.Streams;
+using StoryBuilder.Models;
+using StoryBuilder.Models.Tools;
+using StoryBuilder.Services.Logging;
 
 namespace StoryBuilder.DAL;
 
@@ -21,7 +22,7 @@ public class ControlLoader
             StorageFolder toolFolder = await StorageFolder.GetFolderFromPathAsync(path);
             installFolder = toolFolder.Path;
             StorageFile iniFile = await toolFolder.GetFileAsync("Controls.ini");
-            lines = await FileIO.ReadLinesAsync(iniFile, Windows.Storage.Streams.UnicodeEncoding.Utf8);
+            lines = await FileIO.ReadLinesAsync(iniFile, UnicodeEncoding.Utf8);
         }
         catch (Exception ex) 
         {

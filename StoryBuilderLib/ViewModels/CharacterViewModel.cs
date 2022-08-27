@@ -1,4 +1,9 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
@@ -11,11 +16,6 @@ using StoryBuilder.Services.Logging;
 using StoryBuilder.Services.Messages;
 using StoryBuilder.Services.Navigation;
 using StoryBuilder.ViewModels.Tools;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Threading.Tasks;
 
 namespace StoryBuilder.ViewModels;
 
@@ -803,7 +803,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable
                 if (character == rel.Partner) goto NextCharacter; // Skip partner
             }
             VM.ProspectivePartners.Add(character);
-        NextCharacter: continue;
+        NextCharacter: ;
         }
 
         if (VM.ProspectivePartners.Count == 0)
@@ -829,12 +829,12 @@ public class CharacterViewModel : ObservableRecipient, INavigable
             {
                 if (VM.SelectedPartner == null) //This would occur if member box is empty and okay is clicked
                 {
-                    Messenger.Send(new StatusChangedMessage(new StatusMessage($"The member box is empty!", LogLevel.Warn)));
+                    Messenger.Send(new StatusChangedMessage(new StatusMessage("The member box is empty!", LogLevel.Warn)));
                     return;
                 }
                 if (VM.RelationType == null) //This would occur if member box is empty and okay is clicked
                 {
-                    Messenger.Send(new StatusChangedMessage(new StatusMessage($"The relationship box is empty!", LogLevel.Warn)));
+                    Messenger.Send(new StatusChangedMessage(new StatusMessage("The relationship box is empty!", LogLevel.Warn)));
                     return;
                 }
                 // Create the new RelationshipModel

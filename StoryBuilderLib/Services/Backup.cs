@@ -2,9 +2,11 @@
 using System.ComponentModel;
 using System.IO;
 using System.IO.Compression;
+using System.Threading;
 using System.Threading.Tasks;
 using Windows.Storage;
 using CommunityToolkit.Mvvm.DependencyInjection;
+using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml.Controls;
 using StoryBuilder.Models;
 using StoryBuilder.Services.Logging;
@@ -30,7 +32,7 @@ namespace StoryBuilder.Services
                 Log.Log(LogLevel.Info, "Timed backup task started.");
                 while (!timeBackupWorker.CancellationPending)
                 {
-                    System.Threading.Thread.Sleep((GlobalData.Preferences.TimedBackupInterval * 60) * 1000);
+                    Thread.Sleep((GlobalData.Preferences.TimedBackupInterval * 60) * 1000);
                     Log.Log(LogLevel.Info, "Starting auto backup");
                     await BackupProject();
                 }
@@ -97,11 +99,11 @@ namespace StoryBuilder.Services
                 await Temp.DeleteAsync();
 
                 //Creates entry and flushes to disk.
-                Log.Log(LogLevel.Info, $"Finished backup.");
+                Log.Log(LogLevel.Info, "Finished backup.");
             }
             catch (Exception ex)
             {
-                Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread().TryEnqueue(async () =>
+                DispatcherQueue.GetForCurrentThread().TryEnqueue(async () =>
                 {
                     ContentDialog warning = new();
                     warning.Title = "Backup Warning";

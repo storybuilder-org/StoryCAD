@@ -1,7 +1,7 @@
-﻿using Microsoft.UI.Xaml;
+﻿using System.Collections.Generic;
+using Microsoft.UI.Xaml;
 using StoryBuilder.Models;
 using StoryBuilder.Models.Tools;
-using System.Collections.Generic;
 using Syncfusion.UI.Xaml.Editors;
 
 namespace StoryBuilder.Controls;

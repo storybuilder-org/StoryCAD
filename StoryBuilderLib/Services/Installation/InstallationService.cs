@@ -1,12 +1,12 @@
-﻿using CommunityToolkit.Mvvm.DependencyInjection;
-using StoryBuilder.Models;
-using StoryBuilder.Services.Logging;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 using Windows.Storage;
+using CommunityToolkit.Mvvm.DependencyInjection;
+using StoryBuilder.Models;
+using StoryBuilder.Services.Logging;
 
 namespace StoryBuilder.Services.Installation;
 

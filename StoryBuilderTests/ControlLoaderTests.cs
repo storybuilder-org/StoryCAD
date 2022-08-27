@@ -1,7 +1,7 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using System.Threading.Tasks;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using StoryBuilder.DAL;
 using StoryBuilder.Models;
-using System.Threading.Tasks;
 
 namespace StoryBuilderTests;
 

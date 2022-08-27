@@ -1,14 +1,11 @@
-﻿using StoryBuilder.Models.Scrivener;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Windows.Data.Xml.Dom;
 using Windows.Storage;
 using NRtfTree.Core;
-using XmlDocument = Windows.Data.Xml.Dom.XmlDocument;
-using XmlElement = Windows.Data.Xml.Dom.XmlElement;
-using XmlText = Windows.Data.Xml.Dom.XmlText;
+using StoryBuilder.Models.Scrivener;
 
 namespace StoryBuilder.DAL;
 
