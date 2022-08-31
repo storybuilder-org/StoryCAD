@@ -60,6 +60,9 @@
     <Page Remove="Services\Theming\**" />
     <PRIResource Remove="Services\Theming\**" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="C:\temp\lists_edit.txt" Link="lists_edit.txt" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="CommonServiceLocator" Version="2.0.6" />
