@@ -438,7 +438,7 @@ namespace StoryBuilder.ViewModels
                         StoryNodeItem charactersNode = new(characters, overviewNode);
                         StoryElement settings = new FolderModel("Settings", StoryModel);
                         StoryNodeItem settingsNode = new(settings, overviewNode);
-                        StoryElement scene = new FolderModel("Scene", StoryModel);
+                        StoryElement scene = new FolderModel("Scenes", StoryModel);
                         StoryNodeItem plotpointsNode = new(scene, overviewNode);
                         break;
                     case 2:
