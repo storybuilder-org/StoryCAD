@@ -415,7 +415,7 @@ namespace StoryBuilder.ViewModels
                 StoryModel.ProjectFolder = await StorageFolder.GetFolderFromPathAsync(vm.ProjectPath);
                 StoryModel.ProjectPath = StoryModel.ProjectFolder.Path;
 
-                OverviewModel overview = new("Working Title", StoryModel){DateCreated = DateTime.Today.ToString("d")};
+                OverviewModel overview = new(Path.GetFileNameWithoutExtension(vm.ProjectName), StoryModel){DateCreated = DateTime.Today.ToString("d")};
                 overview.Author = GlobalData.Preferences.Name;
                 StoryNodeItem overviewNode = new(overview, null) { IsExpanded = true, IsRoot = true };
                 StoryModel.ExplorerView.Add(overviewNode);
