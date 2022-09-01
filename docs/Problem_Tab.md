@@ -3,7 +3,7 @@ Problem Tab <br/>
 
 This tabs contains elements which help to define a story problem. <br/>
 
-MISSING IMAGE: C:/dev/src/User Manual/Screenshots/Problem Problem Tab.png <br/>
+![](Problem-Problem-Tab.png)
 
 
 Problem Type <br/>

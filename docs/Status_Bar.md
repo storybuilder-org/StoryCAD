@@ -1,7 +1,7 @@
 #### Status Bar ####
 Status Bar <br/>
 
-MISSING IMAGE: C:/dev/src/User Manual/Screenshots/Status Bar.png <br/>
+![](Status-Bar.png)
 
 
 The Status Bar reports information you may find useful during program execution. It contains the following controls: <br/>
@@ -24,6 +24,6 @@ Indicates if a Search is active. <br/>
 
 Changed Indicator <br/>
 
- MISSING IMAGE: C:/dev/src/User Manual/Screenshots/Changed Indicator.png <br/>
+![](Changed-Indicator.png)
 
 The Changed Indicator displays red if any editing has been done to the outline and green if not. It’s a reminder to save your work. <br/>

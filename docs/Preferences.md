@@ -1,11 +1,11 @@
-#### Preferences ####
+##### Preferences #####
 Preferences <br/>
 
 The Preferences dialog is launched when you click on the Preferences button on the Menu Bar: <br/>
 
-MISSING IMAGE: C:/dev/src/User Manual/Screenshots/Prefences CommandBar Button.png <br/>
+![](Prefences-CommandBar-Button.png)
 
-MISSING IMAGE: C:/dev/src/User Manual/Screenshots/Preferences Dialog.png <br/>
+![](Preferences-Dialog.png)
 
 This dialog will also be displayed the first time you launch StoryBuilder. <br/>
 

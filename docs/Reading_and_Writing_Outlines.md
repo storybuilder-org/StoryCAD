@@ -12,11 +12,12 @@ The Open command identifies which outline you wish to work on. The Save command 
 
 File Open displays the following open dialog: <br/>
 
-MISSING IMAGE: C:/dev/src/User Manual/Screenshots/File Open Dialog.png <br/>
+![](File-Open-Dialog.png)
 
 This dialog will by default display recently opened outlines. Clicking on Open story from disk will open a file browser to allow you to pick a particular outline to pen.  Clicking on the Create new story tab on the left will display a dialog for a new story outline. The Project path defaults to the file folder specified in Preferences. <br/>
 
-MISSING IMAGE: C:/dev/src/User Manual/Screenshots/Create New Story Dialog.png  <br/>
+![](Create-New-Outline-Dialog.png)
+  <br/>
 Clicking on Sample Stories on the left tab displays a list of sample outlines installed with StoryBuilder for you to play with. If you intend to change a sample, we recommend saving it to a different location before doing so. <br/>
 
 Only one story outline can be open at a time.  If you open a new file you'll be prompted to save the current file first if it’s been modified. <br/>

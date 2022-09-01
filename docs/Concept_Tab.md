@@ -1,7 +1,7 @@
 ### Concept Tab ###
 
 
-MISSING IMAGE: C:/dev/src/User Manual/Screenshots/Overview Concept Tab.png <br/>
+![](Overview-Concept-Tab.png)
 
 A concept is an idea that asks a question that implies conflict.  The answer to that question is your story.   <br/>
 
@@ -10,8 +10,6 @@ Concept is what begins to shape your idea into a story. Taking the time to creat
 Initially, phrase your concept as a "what if" question. Then use ‘What if? And ‘What happens is’ to flesh out your idea.  <br/>
 
 A good concept sparks more “what if” questions. <br/>
-
-[tk: Move exapanded discussion and the following examples to Reference] <br/>
 
 Other Examples: <br/>
 

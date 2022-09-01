@@ -3,7 +3,7 @@ Story Idea Tab <br/>
 
 Not every story idea will become a story you want to write, but the habit of being on the lookout for and recording story ideas is useful.  Recording that initial idea here. <br/>
 
-MISSING IMAGE: C:/dev/src/User Manual/Screenshots/Overview Story Idea Tab.png <br/>
+![](Overview-Story-Idea-Tab.png)
 
 Fields: <br/>
 

@@ -3,7 +3,7 @@ Creating a Story <br/>
 
 
 
-The best  way to learn about StoryBuilder is to actually create a story with it.  That's what this tutorial is for.  We'll create a story outline with StoryBuilder and show you exactly what we did at each step along the way. We don’t claim it’s a great outline; actually, it’s pretty trite. But it tries to make the point that any story idea, with work and process, can be developed into a workable story. <br/>
+The best  way to learn about StoryBuilder is to actually create a story with it.  That's what this tutorial is for.  We'll create a story outline with StoryBuilder and show you exactly what we did at each step along the way. We don’t claim it’s a great outline; actually, it’s pretty trite. But the point is that any story idea, with work and process, can be developed into a workable story. <br/>
 
 The tutorial assumes you can navigate in StoryBuilder, so if you haven’t yet done so, please take a look at the Quick Start  section of this manual, and particularly at the Navigating in StoryBuilder subsection. That  said, let’s begin. <br/>
 
@@ -17,7 +17,7 @@ To do so in StoryBuilder, launch the program. The first time you launch the prog
 
 Back to our story idea. Use the File menu’s  Open/Create file option: <br/>
 
-![](File-Open-Dialog.png)
+![](File-Open-Dialog-6.png)
 
 Click on Create New Story to start a new outline: <br/>
 
@@ -53,7 +53,7 @@ At the moment, the story outline for "Danger Calls" exists only in your computer
 
 The indicator will change from red to green, indicating that all changes have been saved to disk. <br/>
 
-![](Changed-Indicator.png)
+![](Changed-Indicator-6.png)
 
 Alternatively, from the File menu, you can select Save Story, or enter the Ctrl+S shortcut keys.  Remember to save your work periodically. <br/>
 
