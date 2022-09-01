@@ -2,102 +2,47 @@
 
 ## Current Release
 
-As of July 29, 2022, we've rolled out Release 2.1.0.0. This is the 
-completion of a major milestone, distributing StoryBuilder 
-via Windows Store direct link. 
+As of August 31st, 2022, we've rolled out Release 2.2.0.0. We have now opened the app up to general distribution via the Microsoft Store. 
 
-This release has a ton of fixes, adds our privacy policy, and contains documentation improvements.
-A point release, 2.1.1.0, on August 1, 2022, fixed a scaling issue we missed in 2.1.0.0. 
-We allow Windows Store client installations for any 
-Windows user who has a link to the download, from a
-link through the website (https://storybuilder.org) and other channels. 
+This release has a few fixes and improvements whilst implementing new features such as the Narrative Editor.
 
 ## Next Release
 
-Our next Release will be 2.2.0.0, planned for around August 31st. 
+Our next Release will be 2.3.0.0, planned for around September 31st. 
 
 We expect that this next release will include the following features:
 
-### Create a 'copy to narrative' tool (#23)
+### Improving StoryBuilder Tests (#17)
+StoryBuilder has long needed a way to comprehensively test all features of the app to prevent regressions from being introduced accidentally when the codebase is changed. Currently StoryBuilder checks that the code will compile and create a working version when a Pull Request is created; however this is not a silver bullet and implementing tests would ensure that regressions do not creep in.
 
-A user can switch between two views when working in StoryBuilder, 
-'Story Explorer View' and 'Story Narrator View', and can switch 
-back and forth between them using a 'current view' dropdown on the 
-Shell status bar. Story Explorer shows every story element the user 
-has created, in whatever order he likes. The Narrator's view, on the 
-other hand, shows just Scene (Plot Point) and Section story elements. 
-Sections are groupings of scenes such as chapters in a book or 
-acts in a play- folders. Story Narrative View 
-displays the story in narrative order.
-Every scene Story Narrator View contains is and will remain 
-in Story Explorer View, which is where it's created; you can't 
-create scenes in the Narrator, becausee a scene in Story 
-Narrator is just a link to that scene in Story Explorer.
+### Code Cleanup 
+StoryBuilders code is reused in places and this can cause issues if that code is flawed as it needs to be fixed in multiple places.
+Cleaning the code should reduce the file size and improve the code quality of the app.
 
-Today, the only way to add a scene to the Narrator is to use the 
-right-click flyout on the Navigation pane (the left-hand side of the Shell.)
+### Single Instancing (#43)
+Only one instance of StoryBuilder should be open at once as the program is not designed to have multiple instances open and this can cause error and other various mischief. As such when one instance is open already and another is launched it should bring the current app to the front.
 
-We want to create a 'Copy to Narrative' tool which opens a dialog that displays two TreeViews, side by side. The left side 
-will contain the Story Explorer View, and the right side, 
-the Story Narrator View. Between the two TreeView controls, 
-buttons will allow a scene to be copied to or removed from the Story 
-Narrator View, and moved up and down in the Story Narrator View.
-This is a tool to create or update the Story Narrator 
-view in bulk.
+### Update Website
+The website is need of updates to ensure that all information is up to date.
 
-#### Status:
+### Update Samples
+Some samples are outdated and don't properly show off all the features of the app.
+Some samples are also missing information either from creation or some updates may have caused issues.
 
-In Progress.
+## Experemental Features
+These features ideally should make it into 2.3.0.0 however these issues pose complex issues and require extensive research into the features to get working.
 
-### Update to WinAppSDK 1.1.3 (#376)
+### New Node Types (#45)
+During a discussion of the roadmap for 2.3.0.0 Issue #45 was discussed and whilst eager to implement, concerns were raised over the WebView2 Control as it had certain stipulations that the end user would need to meet in order to be used and function properly.
 
-Maintenance to update StoryBuilder dependencies.
-
-#### Status:
-
-DONE, in the point release (2.1.1.0.)
-
-Other NuGet package dependencies were also updated in 2.1.1.0.
-
-### 'Creating a Story' tutorial in Help is out of date (#349)
-
-The Tutorial in the StoryBuilder User Manual is from the old (V1) StoryBuilder,
-and needs revised / rewritten.
-
-Not only the screenshots, but the actual story design process, need revised
-to account for the many changes in StoryBuilder V2.
-
-#### Status:
-
-In progress.
-
-### Program demo videos (#145)
-
-A short (two minutes) 'StoryBuilder Concepts'
-This will describe what StoryBuilder is, why outline,  and how to create, develop and edit outlines.
-
-A longer (ten minutes) 'Introduction to StoryBuilder'.
-This will contain everything you need to know to get started.
-
-#### Status:
-In process. We also need a minor modification to our website to link to
-these videos.
-
-### Windows Store
-
-We'll open StoryBuilder up for full discovery and download on the Store.
-
-Status:
-
-We're waiting to see how stable the current release is. If we encounter
-any significant issues, we'll fix them or defer the full Store distribution
-to a later release.
+### ARM64 Support
+ARM64 has posed an issue for a long time due to issues with figuring out what is reallly wrong with ARM64 Builds as very little information is given. With a stronger ARM64 Device we are trying to find the what really causes the issues however this might have to wait until Windows App SDK 1.2 Releases as it is set to improve ARM64 support.
 
 ## Ongoing Issues
 
 ### Drag and Drop is buggy (#312)
 
-Dragging and dropping, the user can do a lot of inappropriate things, such as moving stuff to the trashcan, which s
+Dragging and dropping, the user can do a lot of inappropriate things, such as moving stuff to the trashcan which may cause issues as it's not able to be tracked correctly in the code and as such it can and does cause issues.
 
 #### Status:
 
@@ -125,7 +70,7 @@ We've been working on this since January 2022 and aquired a Samsung
 tablet to test with. We've made some progress, but don't have a 
 functional StoryBuilder deployment that works on ARM64 devices.
 
-We've acquired a second test computer, a Surface X, and are working on this as time permist.
+We've acquired a second test computer, a Surface X, and are working on this as time permits.
 
 ### Implement a Print Manager for printed reports (#157)
 
