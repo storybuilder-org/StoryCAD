@@ -1,7 +1,7 @@
 ### The StoryBuilder User Interface ###
 The StoryBuilder User Interface <br/>
 
-MISSING IMAGE: C:/dev/src/User Manual/Screenshots/User Interface.png <br/>
+![](User-Interface.png)
 
 The form’s sections are as follows. They’ll be explained in more detail as we go. <br/>
 
@@ -11,4 +11,5 @@ The form’s sections are as follows. They’ll be explained in more detail as w
 	•	Content Pane - The contents of the currently selected S*tory Element* <br/>
 
 
+[Menu Bar](Menu_Bar.md) <br/><br/>
 [Status Bar](Status_Bar.md) <br/><br/>

@@ -3,7 +3,7 @@ Conflict Tab <br/>
 
 The Conflict tab helps define the drama in a scene. <br/>
 
-MISSING IMAGE: C:/dev/src/User Manual/Screenshots/Scene Conflict Tab.png <br/>
+![](Scene-Conflict-Tab.png)
 
 A scene is a 'small story', which has the same key elements of the overall story: a goal,  opposition to that goal, and an outcome.  The Conflict tab compresses the elements on the Problem form into a single tab. <br/>
 

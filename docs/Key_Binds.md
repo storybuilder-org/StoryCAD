@@ -1,4 +1,4 @@
-#### Key Binds ####
+##### Key Binds #####
 Key Binds <br/>
 Some options in the menu have key binds to speed up your story planning. Below is a comprehensive list of all the key binds on the menu bar: <br/>
 

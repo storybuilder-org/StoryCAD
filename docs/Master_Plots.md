@@ -1,8 +1,8 @@
-#### Master Plots ####
+###### Master Plots ######
 1 <br/>
 Master Plots <br/>
 
-MISSING IMAGE: C:/dev/src/User Manual/Screenshots/Tools Master Plots.png <br/>
+![](Tools-Master-Plots.png)
 
 Plots tend to include the same story elements.  Aristotle was the first to identify and expand upon some of these elements, which have been elaborated in the centuries since his time.  These elements have to do with the shape of the plot. <br/>
 

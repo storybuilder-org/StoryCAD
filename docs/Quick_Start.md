@@ -7,4 +7,3 @@
 [Character Form](Character_Form.md) <br/><br/>
 [Setting Form](Setting_Form.md) <br/><br/>
 [Scene Form](Scene_Form.md) <br/><br/>
-[Tools Menu](Tools_Menu.md) <br/><br/>

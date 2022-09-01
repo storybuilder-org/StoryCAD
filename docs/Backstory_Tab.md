@@ -1,7 +1,7 @@
 ### Backstory Tab ###
 Backstory Tab <br/>
 
-MISSING IMAGE: C:/dev/src/User Manual/Screenshots/Character Backstory Tab.png <br/>
+![](Character-Backstory-Tab.png)
 
  Backstory is what happened to your character before the story. It’s usually introduced as explanation  for traits or beliefs- as the root of a character’s motivations or reactions to story situations. <br/>
 
