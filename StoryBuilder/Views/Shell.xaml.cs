@@ -6,6 +6,7 @@ using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Navigation;
 using StoryBuilder.Models;
+using StoryBuilder.Models.Tools;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.ViewModels;
 
@@ -15,6 +16,7 @@ public sealed partial class Shell
 {
     public ShellViewModel ShellVm => Ioc.Default.GetService<ShellViewModel>();
     public UnifiedVM UnifiedVm => Ioc.Default.GetService<UnifiedVM>();
+    public PreferencesModel Preferences = GlobalData.Preferences;
     public Shell()
     {
         try
@@ -57,7 +59,13 @@ public sealed partial class Shell
         NavigationTree.SelectionMode = TreeViewSelectionMode.Single;
     }
 
-
+    /// <summary>
+    /// Navigates to the specified source page type.
+    /// </summary>
+    public bool Navigate(Type sourcePageType, object parameter = null)
+    {
+        return SplitViewFrame.Navigate(sourcePageType, parameter);
+    }
     private void TreeViewItem_RightTapped(object sender, RightTappedRoutedEventArgs e)
     {
         TreeViewItem item = (TreeViewItem)sender;
