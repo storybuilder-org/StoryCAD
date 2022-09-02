@@ -19,4 +19,4 @@ Right Touchpad button <br/>
 
 The menu key(sometimes called document key) looks like this:  <br/>
 
-MISSING IMAGE: C:/dev/src/User Manual/Screenshots/Keyboard Right Mouse Key.bmp <br/>
+![](Keyboard-Right-Mouse-Key.png)

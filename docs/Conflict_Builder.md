@@ -1,11 +1,10 @@
 ### Conflict Builder ###
 Conflict Builder <br/>
 
-This  <br/>
 
-![](Clipboard-Image.png)
+![](Clipboard-Image-95.png)
 
-While we often think we’d like to live our lives with a minimum of conflict, we’re fascinated by the stuff, and our fiction absolutely depends on it.   <br/>
+While we often think we’d like to live our lives with a minimum of conflict, we’re fascinated by the stuff, our fiction absolutely depends on it.   <br/>
 
 Conflict is easy to define: it’s what prevents your character from achieving his or her goal. Picking the right conflict is arguably the most important decision you’ll make in designing your story. If there’s no struggle, there’s no story. Robert McKee puts it this way: Nothing moves forward in a story except through conflict. <br/>
 
@@ -30,13 +29,25 @@ Each of these five categories can be further divided into subcategories. <br/>
 Relationship Conflicts differ according the the type of relationship.  <br/>
 Data Conflicts differ according the type of information mismatch between the two parties. <br/>
 Interest Conflicts <br/>
-Where crime fits: <br/>
-
-In General: <br/>
-Antisocial Behavior (SOCIAL PSYCHOLOGY) iResearchNet  <br/>
+Where Crime Fits <br/>
+Conflict Resolution Theory has a shortcoming: it’s based on work to reduce and resolve conflict. The criminal justice system, however, exists because conflict, when it passes a breaking point, becomes the perview of crime and punishment.  <br/>
+We’ve added a Conflict Category, Criminal, with the following subcategories: <br/>
+Crimes of Passion <br/>
+Antisocial Behavior <br/>
 Sociopathy <br/>
+Psychopathy <br/>
+Notes <br/>
+Crimes of Passion are different than the other subcategories. The legal definition of a crime of passion is that it’s committed ‘in a moment of passion’ in response to some provocation. We all known provocation, and have probably all acted in ways we regret in response to provocation. It’s easy to see ourselves  committing  some crimes: stealing, in order to feed our starving child, or beating up a bully who ‘deserves it.’   <br/>
+The other crime subcategories are different because they’re deliberate and premeditated. We somehow feel that they’re organic, a part of the individual’s nature, and it’s interesting to note that these other categories all may relate to narcissistic personality disorder. But it’s also worth noting that every one of us possess some basic traits of narcissism, such as being self-focused, having a lack of empathy, and desiring power and control, in one degree or another.   <br/>
+When thinking about conflict in your fiction, you may want to consider how a resolvable conflict can devolve into a more serious one: the process of finding complications. <br/>
+Other resources: <br/>
+Antisocial Behavior (SOCIAL PSYCHOLOGY) iResearchNet  <br/>
 Antisocial personality disorder - Symptoms and causes - Mayo Clinic  <br/>
 Antisocial Personality Disorder (Sociopathy): Causes and Symptoms (psycom.net)  <br/>
+
+Sociopathy <br/>
+
+[tba] <br/>
 
 Psychopathy <br/>
 
@@ -50,21 +61,19 @@ Structural Sources of Conflict (eolss.net)  <br/>
 The 8 causes of conflict (and what to do about them) | by Duane Rohrbacher | Medium  <br/>
 The Relevance of Clausewitz's Theory of War to Contemporary Conflict Resolution (jstor.org)  <br/>
 
-
 Take a look at this last one (‘8 causes’) against the categories I have. For example, ‘Policy’ may automatically point to structural issues. <br/>
 
 Clausewitz describes war as “...a clash between major interests, which is resolved by bloodshed -- that is the only way in which it differs from other conflicts.”  <br/>
 
 The issue of information warfare <br/>
 
-When it comes to an extremely important point, the morality of war, Clausewitz says: “the moral factor is the most fluid element of all, and therefore spreads most easily to affect everything else.” 9  <br/>
+When it comes to an extremely important point, the morality of war, Clausewitz says: “the moral factor is the most fluid element of all, and therefore spreads most easily to affect everything else.”  9  <br/>
 
-warfare is “Trinitarian.” Simply put, it is about people, armed forces, and government.12  <br/>
+Warfare is “Trinitarian.” Simply put, it is about people, armed forces, and government. 12  <br/>
 
-These dynamics are also part of a new strategic landscape of conflict. Traditionally, violent conflict has been associated with inter-state wars or civil wars, but there is increasing agreement among conflict analysts that most current violent conflicts do not fit these ‘traditional’ categories. For instance, most violent deaths occur in non-traditional conflict settings. The new landscape of conflict frequently I’nvolves a mix of ingredients such as local and cross-border organised crime, socio-economic exclusion, rapid urbanisation, political change after years of stasis, or long-standing disputes over land or identity.  <br/>
-
+These dynamics are also part of a new strategic landscape of conflict. Traditionally, violent conflict has been associated with inter-state wars or civil wars, but there is increasing agreement among conflict analysts that most current violent conflicts do not fit these ‘traditional’ categories. For instance, most violent deaths occur in non-traditional conflict settings. The new landscape of conflict frequently involves a mix of ingredients such as local and cross-border organized crime, socio-economic exclusion, rapid urbanization, political change after years of stasis, or long-standing disputes over land or identity.  <br/>
 Something for Everyone in the Military-Industrial Complex | War Is Boring  <br/>
 This is another rabbit hole. But a very interesting one.  <br/>
-‘It turns out that all the advising and assisting, all the training and coaching, has only made matters worse. As for those overstretched forces, relentless deployments are evidently breaking them down as reports indicate that rates of mental distress and suicide are again on the rise among them.   <br/>
+‘It turns out that all the advising and assisting, all the training and coaching, has only made matters worse. As for those overstretched forces, relentless deployments are evidently breaking them down as reports indicate that rates of mental distress and suicide are again on the rise among them.’   <br/>
 
 

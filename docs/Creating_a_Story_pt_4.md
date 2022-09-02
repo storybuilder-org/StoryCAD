@@ -51,31 +51,34 @@ Leonard Kraskin, trying to capture the drug dealer Charlie Lacas. Lacas has avoi
 
 This isn’t too satisfactorily; it has quite a few flaws. We haven’t spelled out exactly how Lacas uses his communications to his advantage, so we don’t know how our detectives are countering it. The Premise has the detectives in separate cars- are  they trying to triangulate a location?  Do they expect to send a message that Lacas will respond to? Who does he normally communicate with? Besides, he knows what the two detectives look like. Whatever they intercept wasn’t obtained with a warrant, and thus would be inadmissible.  <br/>
 
-Not knowing Lacas uses his communications suggests two weaknesses in our outlining: research and specificity. Here’s hoping it won’t result in an FBI van parked across the street, but some research in how drug deals operate and in the communications technology  they use resulted in a clearer understanding of the story.  StoryBuilder doesn’t yet have much in the way of research tools, but every story element node except folders has a ‘Notes’ tab. I  <br/>
+Not knowing Lacas uses his communications suggests two weaknesses in our outlining: research and specificity. Here’s hoping it won’t result in an FBI van parked across the street, but some research in how drug deals operate and in the communications technology  they use led to a clearer understanding of the story.  StoryBuilder doesn’t have much in the way of research tools (yet), but every story element node except folders has a ‘Notes’ tab. I’ve added my research notes on the Notes tab on the ‘How will Leonard and Tony get past Charlie's tech?’ Story Problem. <br/>
 
-Let’s start with the ‘Who does he normally communicate with’ question. The tool to fix this is the same one that gave us our Concept: ‘What if?’  <br/>
+Let’s start with the ‘Who does he normally communicate with’ question. The tool to fix this is the same one that gave us our Concept: ‘What if?’.  Our Problem becomes: <br/>
 
+Can the detectives thwart Charlie's secretive communications network and find out when and where he'll be dealing drugs? <br/>
 
-Pick story problems <br/>
+What if Charlie Lacas normally only communicates with a handful of selected street dealers using a paging system (see Notes)? <br/>
+
+What if Leonard and Tony acquire a system that can intercept the paging messages?  This needs someone who can set it up. And I doubt it's legal to intercept communications like this. Information Privacy Laws say something like 'Information collected by an individual can't be disclosed to other organizations or individuals unless specifically allowed by law or by consent of the individual.' <br/>
 
 
 The story is beginning to take on substance; we can start to visualize some scenes.  In fact, if a plot point occurs to you,  there's no reason not to add it, now or at any time.  Stories are conceived through a process of accumulation, and one of StoryBuilder's strong points is that you can collect whatever pieces fit as you find them.  But before we start plotting let's continue with the problems.  <br/>
 
 Character traits are also a means of achieving conflict.  Many stories don't have enough built-in conflict, which leads to contrived plots.  But conflict isn't necessarily limited to the interplay of protagonist and antagonist.  We can create conflict by giving Tony a trait which clashes with Leonard's.  The opposite of impulsiveness isn't necessarily caution, though.  Going back to the Inner Traits tab on Tony's record, we select Thoughtful from the Shrewdness trait: <br/>
 
+![](Tony-Irwin-Inner-Traits.png)
 
 
-4 <br/>
 
 It's tempting to fill up the screen, by selecting other inner traits at this time, but it's better for the story to focus on just one or two traits in a character.   <br/>
 
 We can clarify the problems further.  The Resolution tab on the Problem form identifies the outcome of a problem. The outcome of the story's major outer or external problem is the most important; the story's over when this problem is resolved.  In this case, though, we might solve both problems at once, in a confrontational scene. Let's assume that we want a happy ending, and think about the inner problem's outcome: <br/>
 
+Lacas has avoided being caught before because of his cunning use of technology to communicate with his street dealers and customers. But Leonard and Tony have figured out how to trace the calls, and think they know where Lacas is. Using their new tech, and in two cars, Leonard and Tony zero in on Lacas when Bob Luhrs calls to place an order. They follow and find the house Lacas is using to dispense drugs.. Tony thinks it's too easy, but Leonard rushes in. It's a trap, however, and Lacas and Luhrs capture Leonard but hesitate, not knowing what to do with him. <br/>
 
-5 <br/>
+Tony's able to free his partner by communicating to Lacas with the Luhrs pager channel, distracting Lacas and Luhrs while he gets the drop on the dealers. <br/>
 
-Does this work?  The story's over when Lacas is captured, and Leonard's inner problem, his impulsiveness, which might have gotten him killed, ends in his rescue.  The question is whether he learns and grows from the experience.  In an action-oriented story, this is less important, so we'll leave it alone for now.  However, it's worth coming back to; our story's theme will probably have to do with this character flaw (for example, 'Imprudence leads to danger'.) <br/>
-
+Does this work?  The story's over when Lacas is captured, and Leonard's inner problem, his impulsiveness, which might have gotten him killed, ends in his rescue.  The question is whether he learns and grows from the experience. A common pattern for inner problems is the ‘came to realize’ story, in which learning a lesson contributes to the   In an action-oriented story, this is less important, so we'll leave it alone for now.  However our story's theme  probably has to do with this character flaw (for example, 'Imprudence leads to danger'.) <br/>
 
  You can find out more about Problems here.  <br/>
 

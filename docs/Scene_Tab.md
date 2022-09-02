@@ -1,7 +1,7 @@
 ### Scene Tab ###
 Scene Tab <br/>
 
-MISSING IMAGE: C:/dev/src/User Manual/Screenshots/Scene Scene Tab.png <br/>
+![](Scene-Scene-Tab.png)
 
 Date and Time		Identify when the scene occurs. <br/>
 

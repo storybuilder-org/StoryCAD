@@ -5,5 +5,5 @@ For most story element types, that Form contains multiple tabs. Clicking or touc
 
 In some cases (and particularly if you resize the StoryBuilder window down) not all tabs will show. In that case  the tabs will form a carousel you can scroll left or right by using the left or right arrows that appear at the edges of the tab area. <br/>
 
-MISSING IMAGE: C:/dev/src/User Manual/Screenshots/Tabs.png <br/>
+![](Tabs.png)
 
