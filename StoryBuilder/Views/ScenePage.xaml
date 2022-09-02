@@ -16,7 +16,8 @@
 	        Subtitle="Pick a scene viewpoint character consistent with your story POV:"
 	        PreferredPlacement="Auto"
             IsOpen="{x:Bind SceneVm.VpCharTipIsOpen}"
-            Content="{x:Bind SceneVm.VpCharTip}" />
+            Content="{x:Bind SceneVm.VpCharTip}" >
+        </TeachingTip>
     </Page.Resources>
 
     <Grid>
