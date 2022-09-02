@@ -13,36 +13,57 @@ Our next Release will be 2.3.0.0, planned for around September 31st.
 We expect that this next release will include the following features:
 
 ### Improving StoryBuilder Tests (#17)
-StoryBuilder has long needed a way to comprehensively test all features of the app to prevent regressions from being introduced accidentally when the codebase is changed. Currently StoryBuilder checks that the code will compile and create a working version when a Pull Request is created; however this is not a silver bullet and implementing tests would ensure that regressions do not creep in.
+StoryBuilder has long needed a way to comprehensively test all features 
+of the app to prevent regressions from being introduced accidentally 
+when the codebase is changed. Currently StoryBuilder checks that the code 
+will compile and create a working version when a Pull Request is created; 
+however, implementing a suite of MsTest unit tests and running them to 
+verify builds will help prevent or reduce regressions.
 
 ### Code Cleanup 
-StoryBuilders code is reused in places and this can cause issues if that code is flawed as it needs to be fixed in multiple places.
-Cleaning the code should reduce the file size and improve the code quality of the app.
+StoryBuilders code is duplicated in places and this can cause issues: if 
+the code is flawed, it will need to be fixed in multiple places. There's
+also unused (dead) code, overly complicated code, and variance in coding
+standards. Cleaning the code should reduce the file size and improve 
+the code quality of the app.
 
 ### Single Instancing (#43)
-Only one instance of StoryBuilder should be open at once as the program is not designed to have multiple instances open and this can cause error and other various mischief. As such when one instance is open already and another is launched it should bring the current app to the front.
+Only one instance of StoryBuilder should be open at once as the program
+is not designed to have multiple instances open and this can cause error and other various mischief. As such when one instance is open already and another is launched it should bring the current app to the front.
 
 ### Update Website
 The website is need of updates to ensure that all information is up to date.
 
 ### Update Samples
-Some samples are outdated and don't properly show off all the features of the app.
-Some samples are also missing information either from creation or some updates may have caused issues.
+Some samples are outdated and don't properly show off all the features 
+of the app. Some samples are also missing information either from creation 
+or early updates may have caused issues.
 
-## Experemental Features
+## Experimental Features
 These features ideally should make it into 2.3.0.0 however these issues pose complex issues and require extensive research into the features to get working.
 
 ### New Node Types (#45)
-During a discussion of the roadmap for 2.3.0.0 Issue #45 was discussed and whilst eager to implement, concerns were raised over the WebView2 Control as it had certain stipulations that the end user would need to meet in order to be used and function properly.
+During a discussion of the roadmap for 2.3.0.0, Issue #45 was discussed. This
+add two additional story element types, for notes and web pages, to improve
+the ability to collect research relevant to the story.
 
 ### ARM64 Support
-ARM64 has posed an issue for a long time due to issues with figuring out what is reallly wrong with ARM64 Builds as very little information is given. With a stronger ARM64 Device we are trying to find the what really causes the issues however this might have to wait until Windows App SDK 1.2 Releases as it is set to improve ARM64 support.
+Support for ARM64 processors has been a longstanding ue to issues 
+with figuring out what is reallly wrong with ARM64 Builds as very little 
+information is given. With a stronger ARM64 device in our posession, we're
+trying to find 'the what really causes the issues.
+This may have to wait for Windows App SDK 1.2 production, which has  
+has improved ARM64 support.
 
 ## Ongoing Issues
 
 ### Drag and Drop is buggy (#312)
 
-Dragging and dropping, the user can do a lot of inappropriate things, such as moving stuff to the trashcan which may cause issues as it's not able to be tracked correctly in the code and as such it can and does cause issues.
+While powerful, when dragging and dropping story nodes to reorder them
+can cause a lot of inappropriate things to happen. For example,
+moving stuff to the trashcan which may cause issues as it's not able 
+to be track if the node being trashed is used elsewhere in the code.
+Deleting a used story element can and does cause issues. 
 
 #### Status:
 
@@ -76,7 +97,8 @@ We've acquired a second test computer, a Surface X, and are working on this as t
 
 A Print Manager dialog should be part of the Print Report menu. The ability to select a printer and specify its options is essential for 
 StoryBuilder print reports.
-The current mechanism, printing to the default printer, is a work-around, but not a long-term solution.
+The current mechanism, printing to the default printer, is a work-around, 
+but not a long-term solution.
 
 #### Status:
 
@@ -125,6 +147,7 @@ We’d like to support portrait orientation in tables and laptops that support i
 StoryBuilder’s split pane (TreeView on the left and details on the right) works well in landscape mode where the screen is wider than it is tall. For portrait mode, we’d like to use the Hamberger button to toggle back and forth between the TreeView and the detail panel.
 #### Status
 Not started.
+
 ### Unit testing / additional unit tests (#17)
 Run all StoryBuilderTest scripts from Test Explorer as a part of 
 PR review prior to and after merge. Code new scripts or change old 
