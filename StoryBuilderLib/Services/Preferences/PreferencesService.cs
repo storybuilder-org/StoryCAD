@@ -19,7 +19,7 @@ public class PreferencesService
         {
             Logger.Log(LogLevel.Info, "Loading Preferences");
             PreferencesModel model = new();
-            PreferencesIO loader = new(model, path);
+            PreferencesIo loader = new(model, path);
             await loader.UpdateModel();
                 
             GlobalData.Preferences = model;

@@ -96,7 +96,7 @@ public class PreferencesViewModel : ObservableRecipient
     public async Task SaveAsync()
     {   
         PreferencesModel prf = new();
-        PreferencesIO prfIO = new(prf, Path.Combine(ApplicationData.Current.RoamingFolder.Path, "Storybuilder"));
+        PreferencesIo prfIO = new(prf, Path.Combine(ApplicationData.Current.RoamingFolder.Path, "Storybuilder"));
         await prfIO.UpdateModel();
     
         prf.Name = Name;
@@ -118,7 +118,7 @@ public class PreferencesViewModel : ObservableRecipient
         else {prf.WrapNodeNames = TextWrapping.NoWrap;}
 
         await prfIO.UpdateFile();
-        PreferencesIO loader = new(GlobalData.Preferences, Path.Combine(ApplicationData.Current.RoamingFolder.Path, "Storybuilder"));
+        PreferencesIo loader = new(GlobalData.Preferences, Path.Combine(ApplicationData.Current.RoamingFolder.Path, "Storybuilder"));
         await loader.UpdateModel();
         BackendService backend = Ioc.Default.GetService<BackendService>();
         GlobalData.Preferences.RecordPreferencesStatus = false;  // indicate need to update

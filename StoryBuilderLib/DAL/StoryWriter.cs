@@ -4,8 +4,12 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 using Windows.Storage;
+using CommunityToolkit.Mvvm.DependencyInjection;
+using NLog;
 using StoryBuilder.Models;
+using StoryBuilder.Services.Logging;
 using StoryBuilder.ViewModels;
+using LogLevel = NLog.LogLevel;
 
 namespace StoryBuilder.DAL;
 
@@ -15,10 +19,10 @@ namespace StoryBuilder.DAL;
 /// </summary>
 public class StoryWriter
 {
-    //TODO: Move System.IO stuff to a DAL microservice?
+    //TODO: Move System.IO stuff to a DAL micro service?
 
     /// StoryBuilder's model is found in the StoryBuilder.Models namespace and consists
-    /// of various POCO (Plain Old CLR) objects.
+    /// of various Plain Old CLR objects.
     ///
     private StoryModel _model;
 
@@ -37,6 +41,8 @@ public class StoryWriter
     private XmlNode _relationships; // Character Relationships
     private XmlNode _stbSettings; // Settings
 
+    private readonly LogService _logger = Ioc.Default.GetRequiredService<LogService>();
+
     public async Task WriteFile(StorageFile output, StoryModel model)
     {
         _model = model;
@@ -48,23 +54,21 @@ public class StoryWriter
         ParseExplorerView();
         ParseNarratorView();
 
-        await using (Stream fileStream = await _outFile.OpenStreamForWriteAsync())
+        await using (Stream _fileStream = await _outFile.OpenStreamForWriteAsync())
         {
-            XmlWriterSettings settings = new();
-            settings.Async = true;
-            settings.Encoding = Encoding.UTF8;
-            settings.Indent = true;
-            settings.CheckCharacters = true;
-            XmlWriter writer = XmlWriter.Create(fileStream, settings);
+            XmlWriterSettings _settings = new()
+            {
+                Async = true,
+                Encoding = Encoding.UTF8,
+                Indent = true,
+                CheckCharacters = true
+            };
+            XmlWriter _writer = XmlWriter.Create(_fileStream, _settings);
             try
             {
-                _xml.Save(writer);
+                _xml.Save(_writer);
             }
-            catch (Exception ex) 
-            {
-                //TODO: Log exception
-                string x = ex.Message;
-            }
+            catch (Exception _ex) { _logger.LogException(Services.Logging.LogLevel.Error,_ex, "Error in write file"); }
         }
 
         model.Changed = false;
@@ -73,57 +77,60 @@ public class StoryWriter
 
     private void CreateStoryDocument()
     {
-        XmlNode docNode = _xml.CreateXmlDeclaration("1.0", "UTF-8", null);
-        _xml.AppendChild(docNode);
+        XmlNode _docNode = _xml.CreateXmlDeclaration("1.0", "UTF-8", null);
+        _xml.AppendChild(_docNode);
         // Create StoryBuilder node with version
-        XmlNode stb = _xml.CreateElement("StoryBuilder");
+        XmlNode _stb = _xml.CreateElement("StoryBuilder");
         //Create an attribute.
-        XmlAttribute attr = _xml.CreateAttribute("Version");
-        attr.Value = "2.0";
-        stb.Attributes.Append(attr);
-        _xml.AppendChild(stb);
+        XmlAttribute _attr = _xml.CreateAttribute("Version");
+        _attr.Value = "2.0";
+        _stb.Attributes.Append(_attr);
+        _xml.AppendChild(_stb);
         _elements = _xml.CreateElement("StoryElements");
-        stb.AppendChild(_elements);
+        _stb.AppendChild(_elements);
         _explorer = _xml.CreateElement("Explorer");
-        stb.AppendChild(_explorer);
+        _stb.AppendChild(_explorer);
         _narrator = _xml.CreateElement("Narrator");
-        stb.AppendChild(_narrator);
+        _stb.AppendChild(_narrator);
         _relationships = _xml.CreateElement("Relationships");
-        stb.AppendChild(_relationships);
+        _stb.AppendChild(_relationships);
 
         _stbSettings = _xml.CreateElement("Settings");
-        stb.AppendChild(_stbSettings);
+        _stb.AppendChild(_stbSettings);
     }
 
     private void ParseStoryElementsAsync()
     {
-        foreach (StoryElement element in _model.StoryElements)
+        foreach (StoryElement _element in _model.StoryElements)
         {
-            switch (element.Type)
+            switch (_element.Type)
             {
                 case StoryItemType.StoryOverview:
-                    ParseOverViewElement(element);
+                    ParseOverViewElement(_element);
                     break;
                 case StoryItemType.Problem:
-                    ParseProblemElement(element);
+                    ParseProblemElement(_element);
                     break;
                 case StoryItemType.Character:
-                    ParseCharacterElement(element);
+                    ParseCharacterElement(_element);
                     break;
                 case StoryItemType.Setting:
-                    ParseSettingElement(element);
+                    ParseSettingElement(_element);
                     break;
                 case StoryItemType.Scene:
-                    ParseSceneElement(element);
+                    ParseSceneElement(_element);
                     break;
                 case StoryItemType.Folder:
-                    ParseFolderElement(element);
+                    ParseFolderElement(_element);
                     break;
                 case StoryItemType.Section:
-                    ParseSectionElement(element);
+                    ParseSectionElement(_element);
                     break;
                 case StoryItemType.TrashCan:
-                    ParseTrashCanElement(element);
+                    ParseTrashCanElement(_element);
+                    break;
+                default:
+                    Ioc.Default.GetRequiredService<Logger>().Log(LogLevel.Warn, "Unknown Element found in StoryWriter: " + _element.Type);
                     break;
             }
         }
@@ -131,552 +138,550 @@ public class StoryWriter
 
     private void ParseOverViewElement(StoryElement element)
     {
-        OverviewModel rec = (OverviewModel)element;
-        XmlNode overview = _xml.CreateElement("Overview");
+        OverviewModel _rec = (OverviewModel)element;
+        XmlNode _overview = _xml.CreateElement("Overview");
 
-        XmlAttribute attr = _xml.CreateAttribute("UUID");
-        attr.Value = UuidString(rec.Uuid);
-        overview.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Name");
-        attr.Value = rec.Name;
-        overview.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("DateCreated");
-        attr.Value = rec.DateCreated;
-        overview.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("DateModified");
-        attr.Value = rec.DateModified;
-        overview.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Author");
-        attr.Value = rec.Author;
-        overview.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("StoryType");
-        attr.Value = rec.StoryType;
-        overview.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("StoryGenre");
-        attr.Value = rec.StoryGenre;
-        overview.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("ViewPoint");
-        attr.Value = rec.Viewpoint;
-        overview.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("ViewpointCharacter");
-        attr.Value = rec.ViewpointCharacter;
-        overview.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Voice");
-        attr.Value = rec.Voice;
-        overview.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("LiteraryDevice");
-        attr.Value = rec.LiteraryDevice;
-        overview.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Tense");
-        attr.Value = rec.Tense;
-        overview.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Style");
-        attr.Value = rec.Style;
-        overview.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Tone");
-        attr.Value = rec.Tone;
-        overview.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("StoryIdea");
-        attr.Value = rec.StoryIdea;
-        overview.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Concept");
-        attr.Value = rec.Concept;
-        overview.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("StoryProblem");
-        attr.Value = rec.StoryProblem;
-        overview.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("StructureNotes");
-        attr.Value = rec.StructureNotes;
-        overview.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Notes");
-        attr.Value = rec.Notes;
-        overview.Attributes.Append(attr);
+        XmlAttribute _attr = _xml.CreateAttribute("UUID");
+        _attr.Value = UuidString(_rec.Uuid);
+        _overview.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Name");
+        _attr.Value = _rec.Name;
+        _overview.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("DateCreated");
+        _attr.Value = _rec.DateCreated;
+        _overview.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("DateModified");
+        _attr.Value = _rec.DateModified;
+        _overview.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Author");
+        _attr.Value = _rec.Author;
+        _overview.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("StoryType");
+        _attr.Value = _rec.StoryType;
+        _overview.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("StoryGenre");
+        _attr.Value = _rec.StoryGenre;
+        _overview.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("ViewPoint");
+        _attr.Value = _rec.Viewpoint;
+        _overview.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("ViewpointCharacter");
+        _attr.Value = _rec.ViewpointCharacter;
+        _overview.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Voice");
+        _attr.Value = _rec.Voice;
+        _overview.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("LiteraryDevice");
+        _attr.Value = _rec.LiteraryDevice;
+        _overview.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Tense");
+        _attr.Value = _rec.Tense;
+        _overview.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Style");
+        _attr.Value = _rec.Style;
+        _overview.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Tone");
+        _attr.Value = _rec.Tone;
+        _overview.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("StoryIdea");
+        _attr.Value = _rec.StoryIdea;
+        _overview.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Concept");
+        _attr.Value = _rec.Concept;
+        _overview.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("StoryProblem");
+        _attr.Value = _rec.StoryProblem;
+        _overview.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("StructureNotes");
+        _attr.Value = _rec.StructureNotes;
+        _overview.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Notes");
+        _attr.Value = _rec.Notes;
+        _overview.Attributes.Append(_attr);
 
-        _elements.AppendChild(overview);
+        _elements.AppendChild(_overview);
     }
 
     private void ParseProblemElement(StoryElement element)
     {
-        ProblemModel rec = (ProblemModel)element;
-        XmlNode prob = _xml.CreateElement("Problem");
+        ProblemModel _rec = (ProblemModel)element;
+        XmlNode _prob = _xml.CreateElement("Problem");
 
-        XmlAttribute attr = _xml.CreateAttribute("UUID");
-        attr.Value = UuidString(rec.Uuid);
-        prob.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Name");
-        attr.Value = rec.Name;
-        prob.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Id");
-        attr.Value = rec.Id.ToString();
-        prob.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("ProblemType");
-        attr.Value = rec.ProblemType;
-        prob.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("ConflictType");
-        attr.Value = rec.ConflictType;
-        prob.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Subject");
-        attr.Value = rec.Subject;
-        prob.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("ProblemSource");
-        attr.Value = rec.ProblemSource;
-        prob.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Protagonist");
-        attr.Value = rec.Protagonist;
-        prob.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("ProtGoal");
-        attr.Value = rec.ProtGoal;
-        prob.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("ProtMotive");
-        attr.Value = rec.ProtMotive;
-        prob.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("ProtConflict");
-        attr.Value = rec.ProtConflict;
-        prob.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Antagonist");
-        attr.Value = rec.Antagonist;
-        prob.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("AntagGoal");
-        attr.Value = rec.AntagGoal;
-        prob.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("AntagMotive");
-        attr.Value = rec.AntagMotive;
-        prob.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("AntagConflict");
-        attr.Value = rec.AntagConflict;
-        prob.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Outcome");
-        attr.Value = rec.Outcome;
-        prob.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Method");
-        attr.Value = rec.Method;
-        prob.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Theme");
-        attr.Value = rec.Theme;
-        prob.Attributes.Append(attr);
+        XmlAttribute _attr = _xml.CreateAttribute("UUID");
+        _attr.Value = UuidString(_rec.Uuid);
+        _prob.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Name");
+        _attr.Value = _rec.Name;
+        _prob.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Id");
+        _attr.Value = _rec.Id.ToString();
+        _prob.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("ProblemType");
+        _attr.Value = _rec.ProblemType;
+        _prob.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("ConflictType");
+        _attr.Value = _rec.ConflictType;
+        _prob.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Subject");
+        _attr.Value = _rec.Subject;
+        _prob.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("ProblemSource");
+        _attr.Value = _rec.ProblemSource;
+        _prob.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Protagonist");
+        _attr.Value = _rec.Protagonist;
+        _prob.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("ProtGoal");
+        _attr.Value = _rec.ProtGoal;
+        _prob.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("ProtMotive");
+        _attr.Value = _rec.ProtMotive;
+        _prob.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("ProtConflict");
+        _attr.Value = _rec.ProtConflict;
+        _prob.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Antagonist");
+        _attr.Value = _rec.Antagonist;
+        _prob.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("AntagGoal");
+        _attr.Value = _rec.AntagGoal;
+        _prob.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("AntagMotive");
+        _attr.Value = _rec.AntagMotive;
+        _prob.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("AntagConflict");
+        _attr.Value = _rec.AntagConflict;
+        _prob.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Outcome");
+        _attr.Value = _rec.Outcome;
+        _prob.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Method");
+        _attr.Value = _rec.Method;
+        _prob.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Theme");
+        _attr.Value = _rec.Theme;
+        _prob.Attributes.Append(_attr);
 
-        attr = _xml.CreateAttribute("StoryQuestion");
-        attr.Value = rec.StoryQuestion;
-        prob.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Premise");
-        attr.Value = rec.Premise;
-        prob.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Notes");
-        attr.Value = rec.Notes;
-        prob.Attributes.Append(attr);
+        _attr = _xml.CreateAttribute("StoryQuestion");
+        _attr.Value = _rec.StoryQuestion;
+        _prob.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Premise");
+        _attr.Value = _rec.Premise;
+        _prob.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Notes");
+        _attr.Value = _rec.Notes;
+        _prob.Attributes.Append(_attr);
 
-        _elements.AppendChild(prob);
+        _elements.AppendChild(_prob);
     }
 
     private void ParseCharacterElement(StoryElement element)
     {
-        CharacterModel rec = (CharacterModel)element;
-        XmlNode chr = _xml.CreateElement("Character");
+        CharacterModel _rec = (CharacterModel)element;
+        XmlNode _chr = _xml.CreateElement("Character");
 
-        XmlAttribute attr = _xml.CreateAttribute("UUID");
-        attr.Value = UuidString(rec.Uuid);
-        chr.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Name");
-        attr.Value = rec.Name;
-        chr.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Id");
-        attr.Value = rec.Id.ToString();
-        chr.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Role");
-        attr.Value = rec.Role;
-        chr.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("StoryRole");
-        attr.Value = rec.StoryRole;
-        chr.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Archetype");
-        attr.Value = rec.Archetype;
-        chr.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Age");
-        attr.Value = rec.Age;
-        chr.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Sex");
-        attr.Value = rec.Sex;
-        chr.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Eyes");
-        attr.Value = rec.Eyes;
-        chr.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Hair");
-        attr.Value = rec.Hair;
-        chr.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Weight");
-        attr.Value = rec.Weight;
-        chr.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("CharHeight");
-        attr.Value = rec.CharHeight;
-        chr.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Build");
-        attr.Value = rec.Build;
-        chr.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Complexion");
-        attr.Value = rec.Complexion;
-        chr.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Race");
-        attr.Value = rec.Race;
-        chr.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Nationality");
-        attr.Value = rec.Nationality;
-        chr.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Health");
-        attr.Value = rec.Health;
-        chr.Attributes.Append(attr);
+        XmlAttribute _attr = _xml.CreateAttribute("UUID");
+        _attr.Value = UuidString(_rec.Uuid);
+        _chr.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Name");
+        _attr.Value = _rec.Name;
+        _chr.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Id");
+        _attr.Value = _rec.Id.ToString();
+        _chr.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Role");
+        _attr.Value = _rec.Role;
+        _chr.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("StoryRole");
+        _attr.Value = _rec.StoryRole;
+        _chr.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Archetype");
+        _attr.Value = _rec.Archetype;
+        _chr.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Age");
+        _attr.Value = _rec.Age;
+        _chr.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Sex");
+        _attr.Value = _rec.Sex;
+        _chr.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Eyes");
+        _attr.Value = _rec.Eyes;
+        _chr.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Hair");
+        _attr.Value = _rec.Hair;
+        _chr.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Weight");
+        _attr.Value = _rec.Weight;
+        _chr.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("CharHeight");
+        _attr.Value = _rec.CharHeight;
+        _chr.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Build");
+        _attr.Value = _rec.Build;
+        _chr.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Complexion");
+        _attr.Value = _rec.Complexion;
+        _chr.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Race");
+        _attr.Value = _rec.Race;
+        _chr.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Nationality");
+        _attr.Value = _rec.Nationality;
+        _chr.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Health");
+        _attr.Value = _rec.Health;
+        _chr.Attributes.Append(_attr);
 
-        XmlNode relationshipList = _xml.CreateElement("Relationships");
-        foreach (RelationshipModel relation in rec.RelationshipList)
+        XmlNode _relationshipList = _xml.CreateElement("Relationships");
+        foreach (RelationshipModel _relation in _rec.RelationshipList)
         {
-            XmlElement relNode = _xml.CreateElement("Relation");
-            attr = _xml.CreateAttribute("Partner");
-            attr.Value = relation.PartnerUuid;
-            relNode.Attributes.Append(attr);
-            attr = _xml.CreateAttribute("RelationType");
-            attr.Value = relation.RelationType;
-            relNode.Attributes.Append(attr);
-            attr = _xml.CreateAttribute("Trait");
-            attr.Value = relation.Trait;
-            relNode.Attributes.Append(attr);
-            attr = _xml.CreateAttribute("Attitude");
-            attr.Value = relation.Attitude;
-            relNode.Attributes.Append(attr);
-            attr = _xml.CreateAttribute("Notes");
-            attr.Value = relation.Notes;
-            relNode.Attributes.Append(attr);
-            relationshipList.AppendChild(relNode);
+            XmlElement _relNode = _xml.CreateElement("Relation");
+            _attr = _xml.CreateAttribute("Partner");
+            _attr.Value = _relation.PartnerUuid;
+            _relNode.Attributes.Append(_attr);
+            _attr = _xml.CreateAttribute("RelationType");
+            _attr.Value = _relation.RelationType;
+            _relNode.Attributes.Append(_attr);
+            _attr = _xml.CreateAttribute("Trait");
+            _attr.Value = _relation.Trait;
+            _relNode.Attributes.Append(_attr);
+            _attr = _xml.CreateAttribute("Attitude");
+            _attr.Value = _relation.Attitude;
+            _relNode.Attributes.Append(_attr);
+            _attr = _xml.CreateAttribute("Notes");
+            _attr.Value = _relation.Notes;
+            _relNode.Attributes.Append(_attr);
+            _relationshipList.AppendChild(_relNode);
         }
-        chr.AppendChild(relationshipList);
+        _chr.AppendChild(_relationshipList);
 
-        attr = _xml.CreateAttribute("Enneagram");
-        attr.Value = rec.Enneagram;
-        chr.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Intelligence");
-        attr.Value = rec.Intelligence;
-        chr.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Values");
-        attr.Value = rec.Values;
-        chr.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Abnormality");
-        attr.Value = rec.Abnormality;
-        chr.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Focus");
-        attr.Value = rec.Focus;
-        chr.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Adventureousness");
-        attr.Value = rec.Adventureousness;
-        chr.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Aggression");
-        attr.Value = rec.Aggression;
-        chr.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Confidence");
-        attr.Value = rec.Confidence;
-        chr.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Conscientiousness");
-        attr.Value = rec.Conscientiousness;
-        chr.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Creativity");
-        attr.Value = rec.Creativity;
-        chr.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Dominance");
-        attr.Value = rec.Dominance;
-        chr.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Enthusiasm");
-        attr.Value = rec.Enthusiasm;
-        chr.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Assurance");
-        attr.Value = rec.Assurance;
-        chr.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Sensitivity");
-        attr.Value = rec.Sensitivity;
-        chr.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Shrewdness");
-        attr.Value = rec.Shrewdness;
-        chr.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Sociability");
-        attr.Value = rec.Sociability;
-        chr.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Stability");
-        attr.Value = rec.Stability;
-        chr.Attributes.Append(attr);
-        XmlNode traitList = _xml.CreateElement("CharacterTraits");
-        foreach (string member in rec.TraitList)
+        _attr = _xml.CreateAttribute("Enneagram");
+        _attr.Value = _rec.Enneagram;
+        _chr.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Intelligence");
+        _attr.Value = _rec.Intelligence;
+        _chr.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Values");
+        _attr.Value = _rec.Values;
+        _chr.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Abnormality");
+        _attr.Value = _rec.Abnormality;
+        _chr.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Focus");
+        _attr.Value = _rec.Focus;
+        _chr.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Adventureousness");
+        _attr.Value = _rec.Adventureousness;
+        _chr.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Aggression");
+        _attr.Value = _rec.Aggression;
+        _chr.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Confidence");
+        _attr.Value = _rec.Confidence;
+        _chr.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Conscientiousness");
+        _attr.Value = _rec.Conscientiousness;
+        _chr.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Creativity");
+        _attr.Value = _rec.Creativity;
+        _chr.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Dominance");
+        _attr.Value = _rec.Dominance;
+        _chr.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Enthusiasm");
+        _attr.Value = _rec.Enthusiasm;
+        _chr.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Assurance");
+        _attr.Value = _rec.Assurance;
+        _chr.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Sensitivity");
+        _attr.Value = _rec.Sensitivity;
+        _chr.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Shrewdness");
+        _attr.Value = _rec.Shrewdness;
+        _chr.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Sociability");
+        _attr.Value = _rec.Sociability;
+        _chr.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Stability");
+        _attr.Value = _rec.Stability;
+        _chr.Attributes.Append(_attr);
+        XmlNode _traitList = _xml.CreateElement("CharacterTraits");
+        foreach (string _member in _rec.TraitList)
         {
-            XmlElement trait = _xml.CreateElement("Trait");
-            trait.AppendChild(_xml.CreateTextNode(member));
-            traitList.AppendChild(trait);
+            XmlElement _trait = _xml.CreateElement("Trait");
+            _trait.AppendChild(_xml.CreateTextNode(_member));
+            _traitList.AppendChild(_trait);
         }
-        chr.AppendChild(traitList);
-        attr = _xml.CreateAttribute("CharacterSketch");
-        attr.Value = rec.CharacterSketch;
-        chr.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("PhysNotes");
-        attr.Value = rec.PhysNotes;
-        chr.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Appearance");
-        attr.Value = rec.Appearance;
-        chr.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Economic");
-        attr.Value = rec.Economic;
-        chr.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Education");
-        attr.Value = rec.Education;
-        chr.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Ethnic");
-        attr.Value = rec.Ethnic;
-        chr.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Religion");
-        attr.Value = rec.Religion;
-        chr.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("PsychNotes");
-        attr.Value = rec.PsychNotes;
-        chr.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Notes");
-        attr.Value = rec.Notes;
-        chr.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Flaw");
-        attr.Value = rec.Flaw;
-        chr.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("BackStory");
-        attr.Value = rec.BackStory;
-        chr.Attributes.Append(attr);
+        _chr.AppendChild(_traitList);
+        _attr = _xml.CreateAttribute("CharacterSketch");
+        _attr.Value = _rec.CharacterSketch;
+        _chr.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("PhysNotes");
+        _attr.Value = _rec.PhysNotes;
+        _chr.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Appearance");
+        _attr.Value = _rec.Appearance;
+        _chr.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Economic");
+        _attr.Value = _rec.Economic;
+        _chr.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Education");
+        _attr.Value = _rec.Education;
+        _chr.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Ethnic");
+        _attr.Value = _rec.Ethnic;
+        _chr.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Religion");
+        _attr.Value = _rec.Religion;
+        _chr.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("PsychNotes");
+        _attr.Value = _rec.PsychNotes;
+        _chr.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Notes");
+        _attr.Value = _rec.Notes;
+        _chr.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Flaw");
+        _attr.Value = _rec.Flaw;
+        _chr.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("BackStory");
+        _attr.Value = _rec.BackStory;
+        _chr.Attributes.Append(_attr);
 
-        _elements.AppendChild(chr);
+        _elements.AppendChild(_chr);
     }
 
     private void ParseSettingElement(StoryElement element)
     {
-        SettingModel rec = (SettingModel)element;
-        XmlNode loc = _xml.CreateElement("Setting");
-        XmlAttribute attr;
+        SettingModel _rec = (SettingModel)element;
+        XmlNode _loc = _xml.CreateElement("Setting");
 
-        attr = _xml.CreateAttribute("UUID");
-        attr.Value = UuidString(rec.Uuid);
-        loc.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Name");
-        attr.Value = rec.Name;
-        loc.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Id");
-        attr.Value = rec.Id.ToString();
-        loc.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Locale");
-        attr.Value = rec.Locale;
-        loc.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Season");
-        attr.Value = rec.Season;
-        loc.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Period");
-        attr.Value = rec.Period;
-        loc.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Lighting");
-        attr.Value = rec.Lighting;
-        loc.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Weather");
-        attr.Value = rec.Weather;
-        loc.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Temperature");
-        attr.Value = rec.Temperature;
-        loc.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Props");
-        attr.Value = rec.Props;
-        loc.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Summary");
-        attr.Value = rec.Summary;
-        loc.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Sights");
-        attr.Value = rec.Sights;
-        loc.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Sounds");
-        attr.Value = rec.Sounds;
-        loc.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Touch");
-        attr.Value = rec.Touch;
-        loc.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("SmellTaste");
-        attr.Value = rec.SmellTaste;
-        loc.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Notes");
-        attr.Value = rec.Notes;
-        loc.Attributes.Append(attr);
+        XmlAttribute _attr = _xml.CreateAttribute("UUID");
+        _attr.Value = UuidString(_rec.Uuid);
+        _loc.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Name");
+        _attr.Value = _rec.Name;
+        _loc.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Id");
+        _attr.Value = _rec.Id.ToString();
+        _loc.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Locale");
+        _attr.Value = _rec.Locale;
+        _loc.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Season");
+        _attr.Value = _rec.Season;
+        _loc.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Period");
+        _attr.Value = _rec.Period;
+        _loc.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Lighting");
+        _attr.Value = _rec.Lighting;
+        _loc.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Weather");
+        _attr.Value = _rec.Weather;
+        _loc.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Temperature");
+        _attr.Value = _rec.Temperature;
+        _loc.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Props");
+        _attr.Value = _rec.Props;
+        _loc.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Summary");
+        _attr.Value = _rec.Summary;
+        _loc.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Sights");
+        _attr.Value = _rec.Sights;
+        _loc.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Sounds");
+        _attr.Value = _rec.Sounds;
+        _loc.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Touch");
+        _attr.Value = _rec.Touch;
+        _loc.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("SmellTaste");
+        _attr.Value = _rec.SmellTaste;
+        _loc.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Notes");
+        _attr.Value = _rec.Notes;
+        _loc.Attributes.Append(_attr);
 
-        _elements.AppendChild(loc);
+        _elements.AppendChild(_loc);
     }
 
     private void ParseSceneElement(StoryElement element)
     {
-        SceneModel rec = (SceneModel)element;
-        XmlNode scene = _xml.CreateElement("Scene");
-        XmlAttribute attr;
+        SceneModel _rec = (SceneModel)element;
+        XmlNode _scene = _xml.CreateElement("Scene");
 
-        attr = _xml.CreateAttribute("UUID");
-        attr.Value = UuidString(rec.Uuid);
-        scene.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Name");
-        attr.Value = rec.Name;
-        scene.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Id");
-        attr.Value = rec.Id.ToString();
-        scene.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("ViewpointCharacter");
-        attr.Value = rec.ViewpointCharacter;
-        scene.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Date");
-        attr.Value = rec.Date;
-        scene.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Time");
-        attr.Value = rec.Time;
-        scene.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Setting");
-        attr.Value = rec.Setting;
-        scene.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("SceneType");
-        attr.Value = rec.SceneType;
-        scene.Attributes.Append(attr);
-         XmlNode castList = _xml.CreateElement("CastMembers");
-        foreach (string member in rec.CastMembers)
+        XmlAttribute _attr = _xml.CreateAttribute("UUID");
+        _attr.Value = UuidString(_rec.Uuid);
+        _scene.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Name");
+        _attr.Value = _rec.Name;
+        _scene.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Id");
+        _attr.Value = _rec.Id.ToString();
+        _scene.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("ViewpointCharacter");
+        _attr.Value = _rec.ViewpointCharacter;
+        _scene.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Date");
+        _attr.Value = _rec.Date;
+        _scene.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Time");
+        _attr.Value = _rec.Time;
+        _scene.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Setting");
+        _attr.Value = _rec.Setting;
+        _scene.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("SceneType");
+        _attr.Value = _rec.SceneType;
+        _scene.Attributes.Append(_attr);
+         XmlNode _castList = _xml.CreateElement("CastMembers");
+        foreach (string _member in _rec.CastMembers)
         {
-            XmlElement castMember = _xml.CreateElement("Member");
-            castMember.AppendChild(_xml.CreateTextNode(member));
-            castList.AppendChild(castMember);
+            XmlElement _castMember = _xml.CreateElement("Member");
+            _castMember.AppendChild(_xml.CreateTextNode(_member));
+            _castList.AppendChild(_castMember);
         }
 
-        XmlNode scenePurposeList = _xml.CreateElement("ScenePurpose");
-        foreach (string item in rec.ScenePurpose)
+        XmlNode _scenePurposeList = _xml.CreateElement("ScenePurpose");
+        foreach (string _item in _rec.ScenePurpose)
         {
-            XmlElement Purpose = _xml.CreateElement("Purpose");
-            Purpose.AppendChild(_xml.CreateTextNode(item));
-            scenePurposeList.AppendChild(Purpose);
+            XmlElement _purpose = _xml.CreateElement("Purpose");
+            _purpose.AppendChild(_xml.CreateTextNode(_item));
+            _scenePurposeList.AppendChild(_purpose);
         }
-        scene.AppendChild(scenePurposeList);
-        attr = _xml.CreateAttribute("Remarks");
-        attr.Value = rec.Remarks;
-        scene.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("ValueExchange");
-        attr.Value = rec.ValueExchange;
-        scene.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Protagonist");
-        attr.Value = rec.Protagonist;
-        scene.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("ProtagEmotion");
-        attr.Value = rec.ProtagEmotion;
-        scene.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("ProtagGoal");
-        attr.Value = rec.ProtagGoal;
-        scene.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Antagonist");
-        attr.Value = rec.Antagonist;
-        scene.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("AntagEmotion");
-        attr.Value = rec.AntagEmotion;
-        scene.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("AntagGoal");
-        attr.Value = rec.AntagGoal;
-        scene.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Opposition");
-        attr.Value = rec.Opposition;
-        scene.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Outcome");
-        attr.Value = rec.Outcome;
-        scene.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Emotion");
-        attr.Value = rec.Emotion;
-        scene.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("NewGoal");
-        attr.Value = rec.NewGoal;
-        scene.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Remarks");
-        attr.Value = rec.Remarks;
-        scene.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Events");
-        attr.Value = rec.Events;
-        scene.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Consequences");
-        attr.Value = rec.Consequences;
-        scene.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Significance");
-        attr.Value = rec.Significance;
-        scene.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Realization");
-        attr.Value = rec.Realization;
-        scene.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Review");
-        attr.Value = rec.Review;
-        scene.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Notes");
-        attr.Value = rec.Notes;
-        scene.Attributes.Append(attr);
+        _scene.AppendChild(_scenePurposeList);
+        _attr = _xml.CreateAttribute("Remarks");
+        _attr.Value = _rec.Remarks;
+        _scene.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("ValueExchange");
+        _attr.Value = _rec.ValueExchange;
+        _scene.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Protagonist");
+        _attr.Value = _rec.Protagonist;
+        _scene.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("ProtagEmotion");
+        _attr.Value = _rec.ProtagEmotion;
+        _scene.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("ProtagGoal");
+        _attr.Value = _rec.ProtagGoal;
+        _scene.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Antagonist");
+        _attr.Value = _rec.Antagonist;
+        _scene.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("AntagEmotion");
+        _attr.Value = _rec.AntagEmotion;
+        _scene.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("AntagGoal");
+        _attr.Value = _rec.AntagGoal;
+        _scene.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Opposition");
+        _attr.Value = _rec.Opposition;
+        _scene.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Outcome");
+        _attr.Value = _rec.Outcome;
+        _scene.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Emotion");
+        _attr.Value = _rec.Emotion;
+        _scene.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("NewGoal");
+        _attr.Value = _rec.NewGoal;
+        _scene.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Remarks");
+        _attr.Value = _rec.Remarks;
+        _scene.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Events");
+        _attr.Value = _rec.Events;
+        _scene.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Consequences");
+        _attr.Value = _rec.Consequences;
+        _scene.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Significance");
+        _attr.Value = _rec.Significance;
+        _scene.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Realization");
+        _attr.Value = _rec.Realization;
+        _scene.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Review");
+        _attr.Value = _rec.Review;
+        _scene.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Notes");
+        _attr.Value = _rec.Notes;
+        _scene.Attributes.Append(_attr);
 
-        _elements.AppendChild(scene);
+        _elements.AppendChild(_scene);
     }
 
     private void ParseFolderElement(StoryElement element)
     {
-        FolderModel rec = (FolderModel)element;
-        XmlNode node = _xml.CreateElement("Folder");
+        FolderModel _rec = (FolderModel)element;
+        XmlNode _node = _xml.CreateElement("Folder");
 
-        XmlAttribute attr = _xml.CreateAttribute("UUID");
-        attr.Value = UuidString(rec.Uuid);
-        node.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Name");
-        attr.Value = rec.Name;
-        node.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Notes");
-        attr.Value = rec.Notes;
-        node.Attributes.Append(attr);
+        XmlAttribute _attr = _xml.CreateAttribute("UUID");
+        _attr.Value = UuidString(_rec.Uuid);
+        _node.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Name");
+        _attr.Value = _rec.Name;
+        _node.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Notes");
+        _attr.Value = _rec.Notes;
+        _node.Attributes.Append(_attr);
 
-        _elements.AppendChild(node);
+        _elements.AppendChild(_node);
     }
 
     private void ParseSectionElement(StoryElement element)
     {
-        SectionModel rec = (SectionModel)element;
-        XmlNode node = _xml.CreateElement("Section");
+        SectionModel _rec = (SectionModel)element;
+        XmlNode _node = _xml.CreateElement("Section");
 
-        XmlAttribute attr = _xml.CreateAttribute("UUID");
-        attr.Value = UuidString(rec.Uuid);
-        node.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Name");
-        attr.Value = rec.Name;
-        node.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Notes");
-        attr.Value = rec.Notes;
-        node.Attributes.Append(attr);
+        XmlAttribute _attr = _xml.CreateAttribute("UUID");
+        _attr.Value = UuidString(_rec.Uuid);
+        _node.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Name");
+        _attr.Value = _rec.Name;
+        _node.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Notes");
+        _attr.Value = _rec.Notes;
+        _node.Attributes.Append(_attr);
 
-        _elements.AppendChild(node);
+        _elements.AppendChild(_node);
     }
 
     private void ParseTrashCanElement(StoryElement element)
     {
-        TrashCanModel rec = (TrashCanModel)element;
-        XmlNode node = _xml.CreateElement("TrashCan");
+        TrashCanModel _rec = (TrashCanModel)element;
+        XmlNode _node = _xml.CreateElement("TrashCan");
 
-        XmlAttribute attr = _xml.CreateAttribute("UUID");
-        attr.Value = UuidString(rec.Uuid);
-        node.Attributes.Append(attr);
-        attr = _xml.CreateAttribute("Name");
-        attr.Value = rec.Name;
-        node.Attributes.Append(attr);
+        XmlAttribute _attr = _xml.CreateAttribute("UUID");
+        _attr.Value = UuidString(_rec.Uuid);
+        _node.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Name");
+        _attr.Value = _rec.Name;
+        _node.Attributes.Append(_attr);
 
-        _elements.AppendChild(node);
+        _elements.AppendChild(_node);
     }
 
     private void ParseExplorerView()
     {
-        foreach (StoryNodeItem root in _model.ExplorerView)
+        foreach (StoryNodeItem _root in _model.ExplorerView)
         {
-            root.IsRoot = true;
-            XmlElement rootElement = RecurseCreateXmlElement(null, root);
-            _explorer.AppendChild(rootElement);
+            _root.IsRoot = true;
+            XmlElement _rootElement = RecurseCreateXmlElement(null, _root);
+            _explorer.AppendChild(_rootElement);
         }
     }
 
     private void ParseNarratorView()
     {
-        foreach (StoryNodeItem root in _model.NarratorView)
+        foreach (StoryNodeItem _root in _model.NarratorView)
         {
-            root.IsRoot = true;
-            XmlElement rootElement = RecurseCreateXmlElement(null, root);
-            _narrator.AppendChild(rootElement);
+            _root.IsRoot = true;
+            XmlElement _rootElement = RecurseCreateXmlElement(null, _root);
+            _narrator.AppendChild(_rootElement);
         }
     }
 
@@ -694,22 +699,22 @@ public class StoryWriter
     /// <returns>XnlElement version of the Treeview node</returns>
     public XmlElement RecurseCreateXmlElement(XmlElement parent, StoryNodeItem node)
     {
-        XmlElement element = _xml.CreateElement("StoryNode");
+        XmlElement _element = _xml.CreateElement("StoryNode");
         // Set attributes
-        element.SetAttribute("UUID", UuidString(node.Uuid));
-        element.SetAttribute("Type", node.Type.ToString("g"));
-        element.SetAttribute("Name", node.Name);
+        _element.SetAttribute("UUID", UuidString(node.Uuid));
+        _element.SetAttribute("Type", node.Type.ToString("g"));
+        _element.SetAttribute("Name", node.Name);
         // Add MetaData 
-        element.SetAttribute("IsExpanded", node.IsExpanded.ToString());
-        element.SetAttribute("IsSelected", node.IsSelected.ToString());
-        element.SetAttribute("IsRoot", node.IsRoot.ToString());
-        parent?.AppendChild(element);
+        _element.SetAttribute("IsExpanded", node.IsExpanded.ToString());
+        _element.SetAttribute("IsSelected", node.IsSelected.ToString());
+        _element.SetAttribute("IsRoot", node.IsRoot.ToString());
+        parent?.AppendChild(_element);
         // Traverse and create XmlNodes for the binderNode's child node subtree
-        foreach (StoryNodeItem child in node.Children)
+        foreach (StoryNodeItem _child in node.Children)
         {
-            RecurseCreateXmlElement(element, child);
+            RecurseCreateXmlElement(_element, _child);
         }
-        return element;
+        return _element;
     }
 
     /// <summary>
@@ -718,9 +723,9 @@ public class StoryWriter
     /// <returns>string UUID representation</returns>
     public static string UuidString(Guid uuid)
     {
-        string id = uuid.ToString("B").ToUpper();
-        id = id.Replace("{", string.Empty);
-        id = id.Replace("}", string.Empty);
-        return id;
+        string _id = uuid.ToString("B").ToUpper();
+        _id = _id.Replace("{", string.Empty);
+        _id = _id.Replace("}", string.Empty);
+        return _id;
     }
 }

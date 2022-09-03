@@ -132,7 +132,7 @@ public class UnifiedVM : ObservableRecipient
     {
         GlobalData.Preferences.LastSelectedTemplate = SelectedTemplateIndex;
 
-        PreferencesIO loader = new(GlobalData.Preferences, GlobalData.RootDirectory);
+        PreferencesIo loader = new(GlobalData.Preferences, GlobalData.RootDirectory);
         await loader.UpdateFile();
         await shell.UnifiedNewFile(this);
         Hide();
@@ -170,7 +170,7 @@ public class UnifiedVM : ObservableRecipient
             }
         }
 
-        PreferencesIO loader = new(GlobalData.Preferences, GlobalData.RootDirectory);
+        PreferencesIo loader = new(GlobalData.Preferences, GlobalData.RootDirectory);
         await loader.UpdateFile();
     }
 

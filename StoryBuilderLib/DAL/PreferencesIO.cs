@@ -15,7 +15,7 @@ namespace StoryBuilder.DAL;
 /// This data access module handles file I/O and updates
 /// for the StoryBuilder.prf file and PreferencesModel  object. 
 /// </summary>
-public class PreferencesIO
+public class PreferencesIo
 {
     private IList<string> _preferences;
     private PreferencesModel _model;
@@ -27,7 +27,7 @@ public class PreferencesIO
     /// </summary>
     /// <param name="model">The PreferencesModel to read/write</param>
     /// <param name="path">The folder path StoryBuilder.prf resides in</param>
-    public PreferencesIO(PreferencesModel model, string path)
+    public PreferencesIo(PreferencesModel model, string path)
     {
         _model = model;
         _path = path;
@@ -39,109 +39,110 @@ public class PreferencesIO
     public async Task UpdateModel()
     {
         //Tries to read file
-        StorageFolder preferencesFolder = await StorageFolder.GetFolderFromPathAsync(_path);
-        IStorageFile preferencesFile = (IStorageFile) await preferencesFolder.TryGetItemAsync("StoryBuilder.prf");
+        StorageFolder _preferencesFolder = await StorageFolder.GetFolderFromPathAsync(_path);
+        IStorageFile _preferencesFile = (IStorageFile) await _preferencesFolder.TryGetItemAsync("StoryBuilder.prf");
 
-        if (preferencesFile != null) //Checks if file exists
+        if (_preferencesFile != null) //Checks if file exists
         {
-            _preferences = await FileIO.ReadLinesAsync(preferencesFile);
+            _preferences = await FileIO.ReadLinesAsync(_preferencesFile);
 
             //Update the model from the file
-            foreach (string line in _preferences)
+            //TODO: Use bool.parse.
+            foreach (string _line in _preferences)
             {
-                string[] tokens = line.Split(new[] { '=' });
-                switch (tokens[0])
+                string[] _tokens = _line.Split(new[] { '=' });
+                switch (_tokens[0])
                 {
                     case "Name":
-                        _model.Name = tokens[1];
+                        _model.Name = _tokens[1];
                         break;
 
                     case "Email":
-                        _model.Email = tokens[1];
+                        _model.Email = _tokens[1];
                         break;
 
                     case "Initalised":
-                        if (tokens[1] == "True") { _model.PreferencesInitialised = true; }
+                        if (_tokens[1] == "True") { _model.PreferencesInitialised = true; }
                         else { _model.PreferencesInitialised = false; }
                         break;
 
                     case "ErrorCollectionConsent":
-                        if (tokens[1] == "True") { _model.ErrorCollectionConsent = true; }
+                        if (_tokens[1] == "True") { _model.ErrorCollectionConsent = true; }
                         else { _model.ErrorCollectionConsent = false; }
                         break;
 
                     case "Newsletter":
-                        if (tokens[1] == "True")
+                        if (_tokens[1] == "True")
                             _model.Newsletter = true;
                         else
                             _model.Newsletter = false;
                         break;
 
                     case "BackupOnOpen":
-                        if (tokens[1] == "True")
+                        if (_tokens[1] == "True")
                             _model.BackupOnOpen = true;
                         else
                             _model.BackupOnOpen = false;
                         break;
 
                     case "TimedBackup":
-                        if (tokens[1] == "True") { _model.TimedBackup = true; }
+                        if (_tokens[1] == "True") { _model.TimedBackup = true; }
                         else { _model.TimedBackup = false; }
                         break;
 
                     case "TimedBackupInterval":
-                        _model.TimedBackupInterval = Convert.ToInt32(tokens[1]);
+                        _model.TimedBackupInterval = Convert.ToInt32(_tokens[1]);
                         break;
 
                     case "ProjectDirectory":
-                        _model.ProjectDirectory = tokens[1];
+                        _model.ProjectDirectory = _tokens[1];
                         break;
                     case "BackupDirectory":
-                        _model.BackupDirectory = tokens[1];
+                        _model.BackupDirectory = _tokens[1];
                         break;
                     case "LastFile1":
-                        _model.LastFile1 = tokens[1];
+                        _model.LastFile1 = _tokens[1];
                         break;
                     case "LastFile2":
-                        _model.LastFile2 = tokens[1];
+                        _model.LastFile2 = _tokens[1];
                         break;
                     case "LastFile3":
-                        _model.LastFile3 = tokens[1];
+                        _model.LastFile3 = _tokens[1];
                         break;
                     case "LastFile4":
-                        _model.LastFile4 = tokens[1];
+                        _model.LastFile4 = _tokens[1];
                         break;
                     case "LastFile5":
-                        _model.LastFile5 = tokens[1];
+                        _model.LastFile5 = _tokens[1];
                         break;
                     case "LastTemplate":
-                        _model.LastSelectedTemplate = Convert.ToInt32(tokens[1]);
+                        _model.LastSelectedTemplate = Convert.ToInt32(_tokens[1]);
                         break;
                     case "Version":
-                        _model.Version = tokens[1];
+                        _model.Version = _tokens[1];
                         break;
                     case "RecordPreferencesStatus":
-                         if (tokens[1] == "True") 
+                         if (_tokens[1] == "True") 
                             _model.RecordPreferencesStatus = true; 
                          else 
                             _model.RecordPreferencesStatus = false; 
                          break;
                     case "RecordVersionStatus":
-                        if (tokens[1] == "True")
+                        if (_tokens[1] == "True")
                             _model.RecordVersionStatus = true;
                         else
                             _model.RecordVersionStatus= false;
                         break;
                     case "WrapNodeNames":
-                        if (tokens[1] == "True") { _model.WrapNodeNames = TextWrapping.Wrap; }
+                        if (_tokens[1] == "True") { _model.WrapNodeNames = TextWrapping.Wrap; }
                         else {_model.WrapNodeNames = TextWrapping.NoWrap;}
                         break;
                     case "AutoSave":
-                        if (tokens[1] == "True") { _model.AutoSave = true; }
+                        if (_tokens[1] == "True") { _model.AutoSave = true; }
                         else { _model.AutoSave = false; }
                         break;
                     case "AutoSaveInterval":
-                        _model.AutoSaveInterval = Convert.ToInt32(tokens[1]);
+                        _model.AutoSaveInterval = Convert.ToInt32(_tokens[1]);
                         break;
                 }
             }
@@ -168,36 +169,38 @@ public class PreferencesIO
     public async Task UpdateFile()
     {
         _log.Log(LogLevel.Info, "Updating prf from model.");
-        StorageFolder preferencesFolder = await StorageFolder.GetFolderFromPathAsync(_path);
-        StorageFile preferencesFile = await preferencesFolder.CreateFileAsync("StoryBuilder.prf", CreationCollisionOption.ReplaceExisting);
+        StorageFolder _preferencesFolder = await StorageFolder.GetFolderFromPathAsync(_path);
+        StorageFile _preferencesFile = await _preferencesFolder.CreateFileAsync("StoryBuilder.prf", CreationCollisionOption.ReplaceExisting);
 
         //Updates file
-        List<string> NewPreferences = new();
-        NewPreferences.Add("Newsletter=" + _model.Newsletter);
-        NewPreferences.Add("Initalised=" + _model.PreferencesInitialised);
-        NewPreferences.Add("Name=" + _model.Name);
-        NewPreferences.Add("Email=" + _model.Email);
-        NewPreferences.Add("TimedBackupInterval=" + _model.TimedBackupInterval);
-        NewPreferences.Add("ProjectDirectory=" + _model.ProjectDirectory);
-        NewPreferences.Add("BackupDirectory=" + _model.BackupDirectory);
-        NewPreferences.Add("LastFile1=" + _model.LastFile1);
-        NewPreferences.Add("LastFile2=" + _model.LastFile2);
-        NewPreferences.Add("LastFile3=" + _model.LastFile3);
-        NewPreferences.Add("LastFile4=" + _model.LastFile4);
-        NewPreferences.Add("LastFile5=" + _model.LastFile5);
-        NewPreferences.Add("BackupOnOpen=" + _model.BackupOnOpen);
-        NewPreferences.Add("ErrorCollectionConsent=" + _model.ErrorCollectionConsent);
-        NewPreferences.Add("TimedBackup=" + _model.TimedBackup);
-        NewPreferences.Add("LastTemplate=" + _model.LastSelectedTemplate);
-        NewPreferences.Add("Version=" + _model.Version);
-        NewPreferences.Add("RecordPreferencesStatus=" + _model.RecordPreferencesStatus); //These are spelt wrong but correcting them will cause data loss. (Save it for a major update)
-        NewPreferences.Add("RecordVersionStatus=" + _model.RecordVersionStatus);
-        NewPreferences.Add("AutoSave=" + _model.AutoSave);
-        NewPreferences.Add("AutoSaveInterval=" + _model.AutoSaveInterval);
+        List<string> _newPreferences = new()
+        {
+            "Newsletter=" + _model.Newsletter,
+            "Initalised=" + _model.PreferencesInitialised,
+            "Name=" + _model.Name,
+            "Email=" + _model.Email,
+            "TimedBackupInterval=" + _model.TimedBackupInterval,
+            "ProjectDirectory=" + _model.ProjectDirectory,
+            "BackupDirectory=" + _model.BackupDirectory,
+            "LastFile1=" + _model.LastFile1,
+            "LastFile2=" + _model.LastFile2,
+            "LastFile3=" + _model.LastFile3,
+            "LastFile4=" + _model.LastFile4,
+            "LastFile5=" + _model.LastFile5,
+            "BackupOnOpen=" + _model.BackupOnOpen,
+            "ErrorCollectionConsent=" + _model.ErrorCollectionConsent,
+            "TimedBackup=" + _model.TimedBackup,
+            "LastTemplate=" + _model.LastSelectedTemplate,
+            "Version=" + _model.Version,
+            "RecordPreferencesStatus=" + _model.RecordPreferencesStatus, //TODO: Fix spelling error
+            "RecordVersionStatus=" + _model.RecordVersionStatus,
+            "AutoSave=" + _model.AutoSave,
+            "AutoSaveInterval=" + _model.AutoSaveInterval
+        };
 
-        if (_model.WrapNodeNames == TextWrapping.WrapWholeWords) { NewPreferences.Add("WrapNodeNames=True"); }
-        else { NewPreferences.Add("WrapNodeNames=False"); }
+        if (_model.WrapNodeNames == TextWrapping.WrapWholeWords) { _newPreferences.Add("WrapNodeNames=True"); }
+        else { _newPreferences.Add("WrapNodeNames=False"); }
 
-        await FileIO.WriteLinesAsync(preferencesFile, NewPreferences); //Writes file to disk.
+        await FileIO.WriteLinesAsync(_preferencesFile, _newPreferences); //Writes file to disk.
     }
 }

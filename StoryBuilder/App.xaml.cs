@@ -91,7 +91,7 @@ public partial class App : Application
                 .AddSingleton<ScrivenerIo>()
                 .AddSingleton<StoryReader>()
                 .AddSingleton<StoryWriter>()
-                .AddSingleton<MySqlIO>()
+                .AddSingleton<MySqlIo>()
                 .AddSingleton<BackupService>()
                 .AddSingleton<DeletionService>()
                 .AddSingleton<BackendService>()
