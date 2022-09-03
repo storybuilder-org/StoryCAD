@@ -3,13 +3,12 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Windows.Storage;
 using Windows.Storage.Pickers;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using CommunityToolkit.Mvvm.DependencyInjection;
 using StoryBuilder.Models;
 using StoryBuilder.ViewModels.Tools;
 using WinRT;
-using Elmah.Io.Client;
 
 namespace StoryBuilder.Views;
 
@@ -126,7 +125,8 @@ public sealed partial class PreferencesInitialization : Page
             InitVM.ErrorMessage = "Please enter your Email";
             return;
         }
-        else if (!InitVM.Email.Contains("@") || !InitVM.Email.Contains("."))
+
+        if (!InitVM.Email.Contains("@") || !InitVM.Email.Contains("."))
         {
             InitVM.ErrorMessage = "Please enter a valid email address.";
             return;

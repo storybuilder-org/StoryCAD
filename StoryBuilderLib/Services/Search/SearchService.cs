@@ -1,8 +1,8 @@
-﻿using CommunityToolkit.Mvvm.DependencyInjection;
+﻿using System;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using StoryBuilder.Models;
+using StoryBuilder.Services.Logging;
 using StoryBuilder.ViewModels;
-using System;
-using LogLevel = StoryBuilder.Services.Logging.LogLevel;
 
 namespace StoryBuilder.Services.Search;
 
@@ -181,6 +181,7 @@ public class SearchService
         }
 
         if (Comparator(element.Name)) { return true; } //checks node name
-        else { return false; }
+
+        return false;
     }
 }

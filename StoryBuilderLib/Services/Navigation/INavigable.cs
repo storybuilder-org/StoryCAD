@@ -1,6 +1,4 @@
-﻿using System.Threading.Tasks;
-
-namespace StoryBuilder.Services.Navigation;
+﻿namespace StoryBuilder.Services.Navigation;
 
 public interface INavigable
 {

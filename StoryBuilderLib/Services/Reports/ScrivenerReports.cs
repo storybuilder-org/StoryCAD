@@ -1,17 +1,16 @@
-﻿using CommunityToolkit.Mvvm.DependencyInjection;
-using NRtfTree.Util;
-using NRtfTree.Core;
-using StoryBuilder.DAL;
-using StoryBuilder.Models;
-using StoryBuilder.Models.Scrivener;    
-using StoryBuilder.ViewModels;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.Data.Xml.Dom;
 using Windows.Storage;
+using CommunityToolkit.Mvvm.DependencyInjection;
+using NRtfTree.Util;
+using StoryBuilder.DAL;
+using StoryBuilder.Models;
+using StoryBuilder.Models.Scrivener;
+using StoryBuilder.ViewModels;
 
 namespace StoryBuilder.Services.Reports
 {

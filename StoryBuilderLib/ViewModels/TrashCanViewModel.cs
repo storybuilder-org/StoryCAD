@@ -1,8 +1,7 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System;
+using CommunityToolkit.Mvvm.ComponentModel;
 using StoryBuilder.Models;
 using StoryBuilder.Services.Navigation;
-using System;
-using System.Threading.Tasks;
 
 namespace StoryBuilder.ViewModels;
 

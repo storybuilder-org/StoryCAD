@@ -1,5 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Globalization;
 using System.Text.RegularExpressions;
 
 namespace StoryBuilder.Services.Reports;
@@ -201,7 +201,7 @@ public class RichTextStripper
                     }
                     else if (!ignorable)
                     {
-                        int c = int.Parse(hex, System.Globalization.NumberStyles.HexNumber);
+                        int c = int.Parse(hex, NumberStyles.HexNumber);
                         outList.Add(char.ConvertFromUtf32(c));
                     }
                 }
@@ -218,11 +218,6 @@ public class RichTextStripper
                 }
             }
         }
-        else
-        {
-            // Didn't match the regex
-            returnString = inputRtf;
-        }
 
         returnString = string.Join(string.Empty, outList.ToArray());
 
@@ -230,51 +225,4 @@ public class RichTextStripper
 
         return returnString;
     }
-
-    public static void MakeStringUnicodeCompatible(ref string stringData)
-    {
-        int length = 0;
-        while (length < stringData.Length)
-        {
-            char ch = stringData[length];
-            ushort code = Convert.ToUInt16(ch);
-
-            if (code > 127)
-            {
-                // string str = String.Format(@"\u{0}" + "  ", code);
-                string str = string.Format(@"\u{0}" + 3f, code);
-                stringData = stringData.Insert(length + 1, str);
-                stringData = stringData.Remove(length, 1);
-                length += str.Length;
-                continue;
-            }
-            else
-            {
-                if (ch == '{' || ch == '}' || ch == '\\')
-                {
-                    stringData = stringData.Insert(length, @"\");
-                    length++;
-                }
-            }
-            length++;
-        }
-
-        // cemerson 20160504055201: fix extra spaces created sometimes like:
-        // \u132   \u3ad    \u3434
-        stringData = stringData.Replace(@"  \\u", @" \\u");
-        // stringData = stringData.Replace("  ", String.Empty);
-
-        // cemerson 20160427124322: added line to fix superscripted registration marks
-        // Æ (Registration Mark)            
-        stringData = stringData.Replace(@"\\super\\'ae\\nosupersub", @"\\'ae");
-        stringData = stringData.Replace(@"Æ", @"\\'ae");
-        stringData = stringData.Replace(@"\u174", @"\\'ae");
-        stringData = stringData.Replace(@"\\'ae", @"\super\'ae\nosupersub");
-        // © (Copyright Mark)            
-        stringData = stringData.Replace(@"\\super\\'a9\\nosupersub", @"\\'a9");
-        stringData = stringData.Replace(@"©", @"\\'a9");
-        stringData = stringData.Replace(@"\u169", @"\\'a9");
-        stringData = stringData.Replace(@"\\'a9", @"\super\'a9\nosupersub");
-    }
-
 }

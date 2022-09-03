@@ -1,11 +1,12 @@
+using System.IO;
+using System.Threading.Tasks;
+using Windows.Storage;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
+using Microsoft.UI.Xaml;
 using StoryBuilder.DAL;
 using StoryBuilder.Models;
 using StoryBuilder.Models.Tools;
-using System.Threading.Tasks;
-using Windows.Storage;
-using Microsoft.UI.Xaml;
 using StoryBuilder.Services.Backend;
 
 namespace StoryBuilder.ViewModels.Tools;
@@ -95,7 +96,7 @@ public class PreferencesViewModel : ObservableRecipient
     public async Task SaveAsync()
     {   
         PreferencesModel prf = new();
-        PreferencesIO prfIO = new(prf, System.IO.Path.Combine(ApplicationData.Current.RoamingFolder.Path, "Storybuilder"));
+        PreferencesIO prfIO = new(prf, Path.Combine(ApplicationData.Current.RoamingFolder.Path, "Storybuilder"));
         await prfIO.UpdateModel();
     
         prf.Name = Name;
@@ -117,7 +118,7 @@ public class PreferencesViewModel : ObservableRecipient
         else {prf.WrapNodeNames = TextWrapping.NoWrap;}
 
         await prfIO.UpdateFile();
-        PreferencesIO loader = new(GlobalData.Preferences, System.IO.Path.Combine(ApplicationData.Current.RoamingFolder.Path, "Storybuilder"));
+        PreferencesIO loader = new(GlobalData.Preferences, Path.Combine(ApplicationData.Current.RoamingFolder.Path, "Storybuilder"));
         await loader.UpdateModel();
         BackendService backend = Ioc.Default.GetService<BackendService>();
         GlobalData.Preferences.RecordPreferencesStatus = false;  // indicate need to update

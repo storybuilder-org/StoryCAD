@@ -1,22 +1,18 @@
 using System;
 using CommunityToolkit.Mvvm.DependencyInjection;
-using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
-using NLog.Fluent;
 using StoryBuilder.Models;
 using StoryBuilder.Services.Logging;
-using StoryBuilder.Services.Messages;
 using StoryBuilder.ViewModels;
-using Syncfusion.UI.Xaml.Core;
 
 namespace StoryBuilder.Controls;
 
-public sealed partial class RelationshipView : UserControl
+public sealed partial class RelationshipView
 {
     public CharacterViewModel CharVm => Ioc.Default.GetService<CharacterViewModel>();
-    public LogService _logger => Ioc.Default.GetService<LogService>();
+    public LogService Logger => Ioc.Default.GetService<LogService>();
     public RelationshipView()
     {
         InitializeComponent();
@@ -46,7 +42,7 @@ public sealed partial class RelationshipView : UserControl
         try
         {
             //First identify the relationship.
-            _logger.Log(LogLevel.Info, "Starting to remove relationship");
+            Logger.Log(LogLevel.Info, "Starting to remove relationship");
             RelationshipModel characterToDelete = null;
             foreach (var character in CharVm.CharacterRelationships)
             {   //UUID is stored in tag as a cheeky hack to identify the relationship.
@@ -55,7 +51,7 @@ public sealed partial class RelationshipView : UserControl
                     characterToDelete = character;
                 }
             }
-            _logger.Log(LogLevel.Info, $"Character to delete: {characterToDelete.Partner.Name}({characterToDelete.Partner.Uuid})");
+            Logger.Log(LogLevel.Info, $"Character to delete: {characterToDelete.Partner.Name}({characterToDelete.Partner.Uuid})");
 
             //Show confirmation dialog and gets result.
             ContentDialog CD = new()
@@ -67,20 +63,20 @@ public sealed partial class RelationshipView : UserControl
                 SecondaryButtonText = "No"
             };
             var result = await CD.ShowAsync();
-            _logger.Log(LogLevel.Info, $"Dialog Result: {result}");
+            Logger.Log(LogLevel.Info, $"Dialog Result: {result}");
 
             if (result == ContentDialogResult.Primary) //If positive, then delete.
             {
-                _logger.Log(LogLevel.Info, $"Deleting Relationship to {characterToDelete.Partner.Name}");
+                Logger.Log(LogLevel.Info, $"Deleting Relationship to {characterToDelete.Partner.Name}");
                 Ioc.Default.GetService<CharacterViewModel>().CharacterRelationships.Remove(characterToDelete);
-                _logger.Log(LogLevel.Info, $"Deleted");
+                Logger.Log(LogLevel.Info, "Deleted");
                 CharVm.SaveRelationships();
             }
-            _logger.Log(LogLevel.Info, $"Remove relationship complete!");
+            Logger.Log(LogLevel.Info, "Remove relationship complete!");
         }
         catch (Exception ex)
         {
-            _logger.LogException(LogLevel.Error, ex, "Error removing relationship");
+            Logger.LogException(LogLevel.Error, ex, "Error removing relationship");
         }
     }
 

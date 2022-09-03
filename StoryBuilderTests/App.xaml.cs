@@ -1,24 +1,7 @@
-﻿using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Data;
-using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Navigation;
-using Microsoft.UI.Xaml.Shapes;
+﻿using System;
+using Microsoft.UI.Xaml;
+using Microsoft.VisualStudio.TestPlatform.TestExecutor;
 using Microsoft.VisualStudio.TestTools.UnitTesting.AppContainer;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Windows.ApplicationModel;
-using Windows.ApplicationModel.Activation;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
-
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
 
 namespace StoryBuilderTest
 {
@@ -33,12 +16,12 @@ namespace StoryBuilderTest
         /// </summary>
         public App()
         {
-            this.InitializeComponent();
+            InitializeComponent();
         }
 
-     protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
+     protected override void OnLaunched(LaunchActivatedEventArgs args)
 {
-    Microsoft.VisualStudio.TestPlatform.TestExecutor.UnitTestClient.CreateDefaultUI();
+    UnitTestClient.CreateDefaultUI();
 
     m_window = new MainWindow();
 
@@ -48,7 +31,7 @@ namespace StoryBuilderTest
     UITestMethodAttribute.DispatcherQueue = m_window.DispatcherQueue;
 
     // Replace back with e.Arguments when https://github.com/microsoft/microsoft-ui-xaml/issues/3368 is fixed
-    Microsoft.VisualStudio.TestPlatform.TestExecutor.UnitTestClient.Run(Environment.CommandLine);
+    UnitTestClient.Run(Environment.CommandLine);
 }
 
         private Window m_window;

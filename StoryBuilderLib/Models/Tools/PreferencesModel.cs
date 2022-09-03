@@ -1,5 +1,6 @@
-﻿using System;
-using Microsoft.UI;
+﻿using Microsoft.UI;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Media;
 
 namespace StoryBuilder.Models.Tools
 {
@@ -36,9 +37,9 @@ namespace StoryBuilder.Models.Tools
         public int LastSelectedTemplate { get; set; } //This is the Last Template Selected by the user.3
 
         // Visual changes
-        public Microsoft.UI.Xaml.Media.SolidColorBrush PrimaryColor { get; set; } //Sets UI Color
-        public Microsoft.UI.Xaml.Media.SolidColorBrush SecondaryColor = new(Colors.Black); //Sets Text Color
-        public Microsoft.UI.Xaml.TextWrapping WrapNodeNames { get; set; }
+        public SolidColorBrush PrimaryColor { get; set; } //Sets UI Color
+        public SolidColorBrush SecondaryColor = new(Colors.Black); //Sets Text Color
+        public TextWrapping WrapNodeNames { get; set; }
 
         // Backup Information
         public bool AutoSave { get; set; }

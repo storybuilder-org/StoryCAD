@@ -1,5 +1,5 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using CommunityToolkit.Mvvm.ComponentModel;
 using StoryBuilder.Models;
 
 namespace StoryBuilder.ViewModels.Tools;

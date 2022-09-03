@@ -1,12 +1,12 @@
-﻿using CommunityToolkit.Mvvm.DependencyInjection;
-using StoryBuilder.Models;
-using StoryBuilder.Services.Logging;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 using Windows.Storage;
+using CommunityToolkit.Mvvm.DependencyInjection;
+using StoryBuilder.Models;
+using StoryBuilder.Services.Logging;
 
 namespace StoryBuilder.Services.Installation;
 
@@ -24,7 +24,7 @@ public class InstallationService
     public async Task InstallFiles()
     {
         await DeleteFiles();
-        foreach (string InstallerFile in Assembly.GetExecutingAssembly().GetManifestResourceNames())
+        foreach (var InstallerFile in Assembly.GetExecutingAssembly().GetManifestResourceNames())
         {
             try
             {
@@ -33,10 +33,7 @@ public class InstallationService
                 StorageFile DiskFile = await CreateDummyFileAsync(File);
                 WriteManifestData(DiskFile,InstallerFile);
             }
-            catch (Exception ex)
-            {
-                Logger.LogException(LogLevel.Error, ex, "Error in installer");
-            }
+            catch (Exception ex) { Logger.LogException(LogLevel.Error, ex, "Error in installer"); }
         }
     }
 
@@ -62,10 +59,7 @@ public class InstallationService
             if (Item.Name == "logs") { continue; }
 
             try { await Item.DeleteAsync(); }
-            catch (Exception ex)
-            {
-                Logger.LogException(LogLevel.Error, ex, "Error when deleting files");
-            }
+            catch (Exception ex) { Logger.LogException(LogLevel.Error, ex, "Error when deleting files"); }
         }
     }
 
@@ -100,7 +94,11 @@ public class InstallationService
         return file;
     }
 
-    //This traverses through 
+    /// <summary>
+    /// Creates empty placeholder files.
+    /// </summary>
+    /// <param name="File">The file.</param>
+    /// <returns></returns>
     private async Task<StorageFile> CreateDummyFileAsync(string File)
     {
         StorageFolder ParentFolder = ApplicationData.Current.RoamingFolder;
@@ -125,11 +123,10 @@ public class InstallationService
     /// <summary>
     /// This opens the internal manifest data for a file and writes to the blank file made in CreateDummyFileAsync
     /// <param name="DiskFile"> File to be written to</param>
-    /// <param name="InstallerFile"> manifest path eg StoryBuilder.Assets.Install</param>
+    /// <param name="InstallerFile"> manifest path ie StoryBuilder.Assets.Install</param>
     /// </summary>
     private async void WriteManifestData(StorageFile DiskFile, string InstallerFile)
     {
-        List<byte> ContentToWrite = new();
         await using Stream internalResourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(InstallerFile);
         await using (Stream fileDiskStream = await DiskFile.OpenStreamForWriteAsync())
         {
@@ -144,8 +141,5 @@ public class InstallationService
         await internalResourceStream.FlushAsync();
     }
 
-    public InstallationService()
-    {
-        Logger = Ioc.Default.GetService<LogService>();
-    }
+    public InstallationService() { Logger = Ioc.Default.GetService<LogService>(); }
 }

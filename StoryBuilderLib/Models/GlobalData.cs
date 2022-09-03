@@ -1,10 +1,11 @@
-﻿using WinUIEx;
-using Microsoft.UI.Xaml;
-using StoryBuilder.Models.Tools;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using Windows.Storage;
+using Microsoft.UI.Xaml;
+using StoryBuilder.Models.Tools;
+using WinUIEx;
 
 namespace StoryBuilder.Models;
 
@@ -55,7 +56,7 @@ public static class GlobalData
     public static PreferencesModel Preferences;
 
     //Path to root directory where data is stored
-    public static string RootDirectory = System.IO.Path.Combine(ApplicationData.Current.RoamingFolder.Path, "Storybuilder");
+    public static string RootDirectory = Path.Combine(ApplicationData.Current.RoamingFolder.Path, "Storybuilder");
 
     // MainWindow is the main window displayed by the app. It's an instance of
     // WinUIEx's WindowEx, which is an extension of Microsoft.Xaml.UI.Window 

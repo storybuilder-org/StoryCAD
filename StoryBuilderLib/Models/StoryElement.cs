@@ -1,6 +1,6 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using System;
+﻿using System;
 using Windows.Data.Xml.Dom;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace StoryBuilder.Models;
 

@@ -1,6 +1,6 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System.Collections.ObjectModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using StoryBuilder.Models;
-using System.Collections.ObjectModel;
 
 namespace StoryBuilder.ViewModels;
 

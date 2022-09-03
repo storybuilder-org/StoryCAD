@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Text;
 using System.Drawing;
 using System.Drawing.Printing;
 using System.IO;
+using System.Text;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using StoryBuilder.Models;
@@ -143,7 +143,7 @@ public class PrintReports
         {
             fileStream = new StringReader(file);
             printFont = new Font("Arial", 12, FontStyle.Regular, GraphicsUnit.Pixel);
-            PrintDoc.PrintPage += new(pd_PrintPage);
+            PrintDoc.PrintPage += pd_PrintPage;
             Margins margins = new(100, 100, 100, 100);
             PrintDoc.DefaultPageSettings.Margins = margins;
             float pixelsPerChar = printFont.Size;

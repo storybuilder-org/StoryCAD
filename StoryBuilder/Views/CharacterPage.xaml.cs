@@ -1,6 +1,4 @@
 ﻿using CommunityToolkit.Mvvm.DependencyInjection;
-using Microsoft.UI.Xaml;
-using StoryBuilder.Controls;
 using StoryBuilder.ViewModels;
 
 namespace StoryBuilder.Views;

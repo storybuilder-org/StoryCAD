@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
@@ -72,7 +72,7 @@ namespace StoryBuilder.ViewModels
         public StoryModel StoryModel;
 
         public readonly ScrivenerIo Scrivener;
-        
+
         // The right-hand (detail) side of ShellView
         public Frame SplitViewFrame;
 
@@ -111,7 +111,7 @@ namespace StoryBuilder.ViewModels
         public RelayCommand PrintReportsCommand { get; }
         public RelayCommand ScrivenerReportsCommand { get; }
         public RelayCommand PreferencesCommand { get; }
-        
+
 
         #endregion
 
@@ -161,13 +161,6 @@ namespace StoryBuilder.ViewModels
         /// Used for theming
         /// </summary>
         public PreferencesModel UserPreferences = GlobalData.Preferences;
-
-        private string _title;
-        public string Title
-        {
-            get => _title;
-            set => SetProperty(ref _title, value);
-        }
 
         /// <summary>
         /// IsPaneOpen is bound to ShellSplitView's IsPaneOpen property with
@@ -328,7 +321,7 @@ namespace StoryBuilder.ViewModels
         // change tracking at the application level
         public static ShellViewModel ShellInstance;
 
-        public static StoryModel GetModel() 
+        public static StoryModel GetModel()
         {
             return ShellInstance.StoryModel;
         }
@@ -372,9 +365,9 @@ namespace StoryBuilder.ViewModels
             await new PrintReports(PrintVM, StoryModel).Generate();
         }
 
-        private void CloseUnifiedMenu() {  _contentDialog.Hide();  }
+        private void CloseUnifiedMenu() { _contentDialog.Hide(); }
 
-        public async Task OpenUnifiedMenu()                      
+        public async Task OpenUnifiedMenu()
         {
             _canExecuteCommands = false;
             // Needs logging
@@ -402,7 +395,7 @@ namespace StoryBuilder.ViewModels
                     SaveModel();
                     await WriteModel();
                 }
-                
+
                 UnifiedVM vm = dialogVM; //Access the dialog settings
 
                 // Start with a blank StoryModel and populate it
@@ -415,7 +408,7 @@ namespace StoryBuilder.ViewModels
                 StoryModel.ProjectFolder = await StorageFolder.GetFolderFromPathAsync(vm.ProjectPath);
                 StoryModel.ProjectPath = StoryModel.ProjectFolder.Path;
 
-                OverviewModel overview = new(Path.GetFileNameWithoutExtension(vm.ProjectName), StoryModel){DateCreated = DateTime.Today.ToString("d")};
+                OverviewModel overview = new(Path.GetFileNameWithoutExtension(vm.ProjectName), StoryModel) { DateCreated = DateTime.Today.ToString("d") };
                 overview.Author = GlobalData.Preferences.Name;
                 StoryNodeItem overviewNode = new(overview, null) { IsExpanded = true, IsRoot = true };
                 StoryModel.ExplorerView.Add(overviewNode);
@@ -478,11 +471,11 @@ namespace StoryBuilder.ViewModels
                 }
 
 
-                GlobalData.MainWindow.Title = $"StoryBuilder - Editing {vm.ProjectName.Replace(".stbx","")}";
+                GlobalData.MainWindow.Title = $"StoryBuilder - Editing {vm.ProjectName.Replace(".stbx", "")}";
                 SetCurrentView(StoryViewType.ExplorerView);
                 //TODO: Set expand and is selected?
-                
-                Ioc.Default.GetService<UnifiedVM>().UpdateRecents(Path.Combine(vm.ProjectPath,vm.ProjectName)); //adds item to recent
+
+                Ioc.Default.GetService<UnifiedVM>().UpdateRecents(Path.Combine(vm.ProjectPath, vm.ProjectName)); //adds item to recent
 
                 // Save the new project
                 await SaveFile();
@@ -513,7 +506,8 @@ namespace StoryBuilder.ViewModels
             }
             Logger.Log(LogLevel.Info, $"TreeViewNodeClicked for {selectedItem}");
 
-            try {
+            try
+            {
                 NavigationService nav = Ioc.Default.GetService<NavigationService>();
                 if (selectedItem is StoryNodeItem node)
                 {
@@ -547,7 +541,7 @@ namespace StoryBuilder.ViewModels
                             break;
                     }
                     CurrentNode.IsExpanded = true;
-                } 
+                }
             }
             catch (Exception e)
             {
@@ -568,7 +562,7 @@ namespace StoryBuilder.ViewModels
             dialog.XamlRoot = GlobalData.XamlRoot;
             dialog.PrimaryButtonText = "Okay";
             await dialog.ShowAsync();
-            Ioc.Default.GetService<LogService>().Log(LogLevel.Error,"Env missing.");
+            Ioc.Default.GetService<LogService>().Log(LogLevel.Error, "Env missing.");
         }
 
         public async Task ShowChangelog()
@@ -597,8 +591,8 @@ namespace StoryBuilder.ViewModels
             }
             catch (Exception e)
             {
-                if (e.Source.Contains("Net")) { Logger.Log( LogLevel.Info , "Error with network, user probably isn't connected to wifi or is using an autobuild"); }
-                if (e.Source.Contains("Octokit.NotFoundException")) { Logger.Log( LogLevel.Info , "Error finding changelog for this version"); }
+                if (e.Source.Contains("Net")) { Logger.Log(LogLevel.Info, "Error with network, user probably isn't connected to wifi or is using an autobuild"); }
+                if (e.Source.Contains("Octokit.NotFoundException")) { Logger.Log(LogLevel.Info, "Error finding changelog for this version"); }
                 else { Logger.Log(LogLevel.Info, "Error in ShowChangeLog()"); }
             }
         }
@@ -606,7 +600,7 @@ namespace StoryBuilder.ViewModels
         public void ShowHomePage()
         {
             Logger.Log(LogLevel.Info, "ShowHomePage");
-    
+
             NavigationService nav = Ioc.Default.GetService<NavigationService>();
             nav.NavigateTo(SplitViewFrame, HomePage);
         }
@@ -678,7 +672,7 @@ namespace StoryBuilder.ViewModels
             }
         }
 
-        
+
         /// <summary>
         /// Opens a file picker to let the user chose a stbx file and loads said file
         /// If fromPath is specified then the picker is skipped.
@@ -734,9 +728,9 @@ namespace StoryBuilder.ViewModels
                 }
 
                 StoryModel.ProjectFolder = await StoryModel.ProjectFile.GetParentAsync();
-                if (StoryModel.ProjectFile == null) 
+                if (StoryModel.ProjectFile == null)
                 {
-                    Logger.Log(LogLevel.Info,"Open File command cancelled (StoryModel.ProjectFile was null)");
+                    Logger.Log(LogLevel.Info, "Open File command cancelled (StoryModel.ProjectFile was null)");
                     Messenger.Send(new StatusChangedMessage(new($"Open Story command cancelled", LogLevel.Info)));
                     _canExecuteCommands = true;  // unblock other commands
                     return;
@@ -749,14 +743,14 @@ namespace StoryBuilder.ViewModels
                 StoryModel = await rdr.ReadFile(StoryModel.ProjectFile);
 
                 if (GlobalData.Preferences.BackupOnOpen) { await Ioc.Default.GetService<BackupService>().BackupProject(); }
-               
+
                 if (StoryModel.ExplorerView.Count > 0)
                 {
                     SetCurrentView(StoryViewType.ExplorerView);
                     Messenger.Send(new StatusChangedMessage(new($"Open Story completed", LogLevel.Info)));
                 }
                 GlobalData.MainWindow.Title = $"StoryBuilder - Editing {StoryModel.ProjectFilename.Replace(".stbx", "")}";
-                new UnifiedVM().UpdateRecents(Path.Combine(StoryModel.ProjectFolder.Path,StoryModel.ProjectFile.Name)); 
+                new UnifiedVM().UpdateRecents(Path.Combine(StoryModel.ProjectFolder.Path, StoryModel.ProjectFile.Name));
                 if (GlobalData.Preferences.TimedBackup) { Ioc.Default.GetService<BackupService>().StartTimedBackup(); }
 
                 ShowHomePage();
@@ -777,7 +771,7 @@ namespace StoryBuilder.ViewModels
         {
             if (DataSource.Count == 0 || DataSource == null)
             {
-                Messenger.Send(new StatusChangedMessage(new($"You need to open a story first!", LogLevel.Info,false)));
+                Messenger.Send(new StatusChangedMessage(new($"You need to open a story first!", LogLevel.Info, false)));
                 Logger.Log(LogLevel.Info, "SaveFile command cancelled (DataSource was null or empty)");
                 return;
             }
@@ -813,7 +807,7 @@ namespace StoryBuilder.ViewModels
         private async void AutoSaveTimer_Tick(object sender, object e)
         {
             if (GlobalData.Preferences.AutoSave) { await SaveFile(); }
-           
+
         }
 
         /// <summary>
@@ -851,7 +845,7 @@ namespace StoryBuilder.ViewModels
         private async void SaveFileAs()
         {
             _canExecuteCommands = false;
-            Messenger.Send(new StatusChangedMessage(new($"Save File As command executing", LogLevel.Info,true)));
+            Messenger.Send(new StatusChangedMessage(new($"Save File As command executing", LogLevel.Info, true)));
             try
             {
                 //Creates the content diolouge
@@ -861,7 +855,7 @@ namespace StoryBuilder.ViewModels
                 SaveAsDialog.PrimaryButtonText = "Save";
                 SaveAsDialog.SecondaryButtonText = "Cancel";
                 SaveAsDialog.Content = new SaveAsDialog();
-  
+
                 //Sets needed data in VM and then shows the dialog
                 SaveAsViewModel SaveAsVM = Ioc.Default.GetService<SaveAsViewModel>();
                 // The default project name and project folder path are from the active StoryModel
@@ -875,7 +869,7 @@ namespace StoryBuilder.ViewModels
                     if (await VerifyReplaceOrCreate())
                     {
                         //Saves model to disk
-                        SaveModel(); 
+                        SaveModel();
                         await WriteModel();
 
                         //Saves the current project folders and files to disk
@@ -914,7 +908,7 @@ namespace StoryBuilder.ViewModels
 
             SaveAsViewModel SaveAsVM = Ioc.Default.GetService<SaveAsViewModel>();
             SaveAsVM.SaveAsProjectFolderPath = SaveAsVM.ParentFolder.Path;
-            if (File.Exists(Path.Combine(SaveAsVM.ProjectPathName,SaveAsVM.ProjectName)))
+            if (File.Exists(Path.Combine(SaveAsVM.ProjectPathName, SaveAsVM.ProjectName)))
             {
                 ContentDialog replaceDialog = new()
                 {
@@ -1029,7 +1023,7 @@ namespace StoryBuilder.ViewModels
                 case ContentDialogResult.Primary:
                     await Ioc.Default.GetService<PreferencesViewModel>().SaveAsync();
                     Messenger.Send(new StatusChangedMessage(new($"Preferences updated", LogLevel.Info, true)));
-                    
+
                     break;
                 //don't save changes
                 default:
@@ -1042,8 +1036,8 @@ namespace StoryBuilder.ViewModels
         private async void KeyQuestionsTool()
         {
             Logger.Log(LogLevel.Info, "Displaying KeyQuestions tool dialog");
-            if (RightTappedNode == null) { RightTappedNode = CurrentNode;}
-            
+            if (RightTappedNode == null) { RightTappedNode = CurrentNode; }
+
             //Creates and shows dialog
             ContentDialog KeyQuestionsDialog = new();
             KeyQuestionsDialog.Title = "Key questions";
@@ -1060,8 +1054,8 @@ namespace StoryBuilder.ViewModels
         private async void TopicsTool()
         {
             Logger.Log(LogLevel.Info, "Displaying Topics tool dialog");
-            if (RightTappedNode == null) { RightTappedNode = CurrentNode;}
-            
+            if (RightTappedNode == null) { RightTappedNode = CurrentNode; }
+
             ContentDialog dialog = new();
             dialog.XamlRoot = GlobalData.XamlRoot;
             dialog.Title = "Topic Information";
@@ -1077,8 +1071,8 @@ namespace StoryBuilder.ViewModels
         private async void MasterPlotTool()
         {
             Logger.Log(LogLevel.Info, "Displaying MasterPlot tool dialog");
-            if (RightTappedNode == null)  { RightTappedNode = CurrentNode; }
-            
+            if (RightTappedNode == null) { RightTappedNode = CurrentNode; }
+
             //Creates and shows content dialog
             ContentDialog dialog = new();
             dialog.XamlRoot = GlobalData.XamlRoot;
@@ -1091,7 +1085,7 @@ namespace StoryBuilder.ViewModels
             if (result == ContentDialogResult.Primary)   // Copy command
             {
                 string masterPlotName = Ioc.Default.GetService<MasterPlotsViewModel>().MasterPlotName;
-                MasterPlotModel model = Ioc.Default.GetService<MasterPlotsViewModel >().MasterPlots[masterPlotName];
+                MasterPlotModel model = Ioc.Default.GetService<MasterPlotsViewModel>().MasterPlots[masterPlotName];
                 IList<MasterPlotScene> scenes = model.MasterPlotScenes;
                 foreach (MasterPlotScene scene in scenes)
                 {
@@ -1118,7 +1112,7 @@ namespace StoryBuilder.ViewModels
             else  // canceled
             {
                 Messenger.Send(new StatusChangedMessage(new($"MasterPlot cancelled", LogLevel.Info, true)));
-            } 
+            }
         }
 
         private async void DramaticSituationsTool()
@@ -1148,30 +1142,30 @@ namespace StoryBuilder.ViewModels
             switch (result)
             {
                 case ContentDialogResult.Primary:
-                {
-                    ProblemModel problem = new(StoryModel);
-                    problem.Name = situationModel.SituationName;
-                    problem.StoryQuestion = "See Notes.";
-                    problem.Notes = situationModel.Notes;
+                    {
+                        ProblemModel problem = new(StoryModel);
+                        problem.Name = situationModel.SituationName;
+                        problem.StoryQuestion = "See Notes.";
+                        problem.Notes = situationModel.Notes;
 
-                    // Insert the new Problem as the target's child
-                    newNode = new StoryNodeItem(problem, RightTappedNode);
-                    msg = $"Problem {situationModel.SituationName} inserted";
-                    ShowChange();
-                    break;
-                }
+                        // Insert the new Problem as the target's child
+                        newNode = new StoryNodeItem(problem, RightTappedNode);
+                        msg = $"Problem {situationModel.SituationName} inserted";
+                        ShowChange();
+                        break;
+                    }
                 case ContentDialogResult.Secondary:
-                {
-                    SceneModel sceneVar = new SceneModel(StoryModel);
-                    sceneVar.Name = situationModel.SituationName;
-                    sceneVar.Remarks = "See Notes.";
-                    sceneVar.Notes = situationModel.Notes;
-                    // Insert the new Scene as the target's child
-                    newNode = new StoryNodeItem(sceneVar, RightTappedNode);
-                    msg = $"Scene {situationModel.SituationName} inserted";
-                    ShowChange();
-                    break;
-                }
+                    {
+                        SceneModel sceneVar = new SceneModel(StoryModel);
+                        sceneVar.Name = situationModel.SituationName;
+                        sceneVar.Remarks = "See Notes.";
+                        sceneVar.Notes = situationModel.Notes;
+                        // Insert the new Scene as the target's child
+                        newNode = new StoryNodeItem(sceneVar, RightTappedNode);
+                        msg = $"Scene {situationModel.SituationName} inserted";
+                        ShowChange();
+                        break;
+                    }
                 default:
                     msg = "Dratatic Situation tool cancelled";
                     break;
@@ -1188,7 +1182,7 @@ namespace StoryBuilder.ViewModels
         private async void StockScenesTool()
         {
             Logger.Log(LogLevel.Info, "Displaying Stock Scenes tool dialog");
-            if (RightTappedNode == null) {RightTappedNode = CurrentNode;}
+            if (RightTappedNode == null) { RightTappedNode = CurrentNode; }
             try
             {
                 //Creates and shows dialog
@@ -1208,7 +1202,7 @@ namespace StoryBuilder.ViewModels
                         return;
                     }
 
-                    SceneModel sceneVar = new SceneModel(StoryModel); 
+                    SceneModel sceneVar = new SceneModel(StoryModel);
                     sceneVar.Name = Ioc.Default.GetService<StockScenesViewModel>().SceneName;
                     StoryNodeItem newNode = new(sceneVar, RightTappedNode);
                     _sourceChildren = RightTappedNode.Children;
@@ -1217,20 +1211,20 @@ namespace StoryBuilder.ViewModels
                     newNode.IsSelected = true;
                     Messenger.Send(new StatusChangedMessage(new("Stock Scenes inserted", LogLevel.Info)));
                 }
-                else 
+                else
                 {
                     Messenger.Send(new StatusChangedMessage(new("Stock Scenes canceled", LogLevel.Warn)));
                 }
             }
-            catch (Exception e) {  Logger.LogException(LogLevel.Error, e, e.Message); }
+            catch (Exception e) { Logger.LogException(LogLevel.Error, e, e.Message); }
         }
 
         private async void GeneratePrintReports()
         {
-            if (Ioc.Default.GetRequiredService<ShellViewModel>().DataSource == null) 
+            if (Ioc.Default.GetRequiredService<ShellViewModel>().DataSource == null)
             {
                 Messenger.Send(new StatusChangedMessage(new($"You need to load a Story first!", LogLevel.Warn)));
-                return; 
+                return;
             }
             _canExecuteCommands = false;
             Messenger.Send(new StatusChangedMessage(new($"Generate Print Reports executing", LogLevel.Info, true)));
@@ -1333,7 +1327,6 @@ namespace StoryBuilder.ViewModels
 
             if (!MoveIsValid()) // Verify message
             {
-                Messenger.Send(new StatusChangedMessage(new(MoveErrorMesage, LogLevel.Info)));
                 return;
             }
 
@@ -1647,7 +1640,7 @@ namespace StoryBuilder.ViewModels
                     NewNode = new StoryNodeItem(new SceneModel(StoryModel), RightTappedNode);
                     break;
             }
-            
+
             if (NewNode != null)
             {
                 NewNode.Parent.IsExpanded = true;
@@ -1719,14 +1712,14 @@ namespace StoryBuilder.ViewModels
                     Ioc.Default.GetRequiredService<DeletionService>().SearchStoryElement(node, RightTappedNode.Uuid, StoryModel, true);
                 }
 
-                if (CurrentView.ToString().Contains("Explorer")){ RightTappedNode.Delete(Models.ViewType.Explorer); }
+                if (CurrentView.ToString().Contains("Explorer")) { RightTappedNode.Delete(Models.ViewType.Explorer); }
                 else { RightTappedNode.Delete(Models.ViewType.Narrator); }
             }
         }
 
         private void RestoreStoryElement()
         {
-             Logger.Log(LogLevel.Trace, "RestoreStoryElement");
+            Logger.Log(LogLevel.Trace, "RestoreStoryElement");
             if (RightTappedNode == null)
             {
                 Messenger.Send(new StatusChangedMessage(new($"Right tap a node to restore", LogLevel.Warn)));
@@ -1743,7 +1736,7 @@ namespace StoryBuilder.ViewModels
                 Messenger.Send(new StatusChangedMessage(new("You can't restore a root node!", LogLevel.Warn)));
                 return;
             }
-            
+
             //TODO: Add dialog to confirm restore
             ObservableCollection<StoryNodeItem> target = DataSource[0].Children;
             DataSource[1].Children.Remove(RightTappedNode);
@@ -1771,7 +1764,7 @@ namespace StoryBuilder.ViewModels
                 return;
             }
 
-            SceneModel sceneVar = (SceneModel) StoryModel.StoryElements.StoryElementGuids[RightTappedNode.Uuid];
+            SceneModel sceneVar = (SceneModel)StoryModel.StoryElements.StoryElementGuids[RightTappedNode.Uuid];
             _ = new StoryNodeItem(sceneVar, StoryModel.NarratorView[0]);
             Messenger.Send(new StatusChangedMessage(new($"Copied node {RightTappedNode.Name} to Narrative View", LogLevel.Info, true)));
         }
@@ -1787,9 +1780,9 @@ namespace StoryBuilder.ViewModels
                 Logger.Log(LogLevel.Info, "Failed to empty trash as DataSource is null. (Is a story loaded?)");
                 return;
             }
-            
+
             StatusMessage = "Trash Emptied.";
-            Logger.Log(LogLevel.Info,"Emptied Trash.");
+            Logger.Log(LogLevel.Info, "Emptied Trash.");
             DataSource[1].Children.Clear();
         }
 
@@ -1843,16 +1836,8 @@ namespace StoryBuilder.ViewModels
 
         #endregion
 
-        private string _moveErrorMessage;
-        public string MoveErrorMesage
-        {
-            get => _moveErrorMessage;
-            set => SetProperty(ref _moveErrorMessage, value);
-        }
-
         private bool MoveIsValid()
         {
-            MoveErrorMesage = string.Empty;
             //TODO: Complete stubbed MoveIsValid method
             return true;
         }
@@ -1964,14 +1949,14 @@ namespace StoryBuilder.ViewModels
                 case StoryViewType.SearchView:
                     break;
             }
-            if (DataSource.Count > 0) {CurrentNode = DataSource[0];}
+            if (DataSource.Count > 0) { CurrentNode = DataSource[0]; }
         }
 
         #region MVVM ` processing
         private void IsChangedMessageReceived(IsChangedMessage isDirty)
         {
             StoryModel.Changed = StoryModel.Changed || isDirty.Value;
-            if (StoryModel.Changed) 
+            if (StoryModel.Changed)
             {
                 ChangeStatusColor = Colors.Red;
             }
@@ -1983,7 +1968,7 @@ namespace StoryBuilder.ViewModels
         /// </summary>
         /// <param name="Level"></param>
         /// <param name="Message"></param>
-        public void ShowMessage(LogLevel Level, string Message,bool SendToLog)
+        public void ShowMessage(LogLevel Level, string Message, bool SendToLog)
         {
             Messenger.Send(new StatusChangedMessage(new(Message, Level, SendToLog)));
         }
@@ -2025,7 +2010,7 @@ namespace StoryBuilder.ViewModels
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void statusTimer_Tick(object sender, object e) 
+        private void statusTimer_Tick(object sender, object e)
         {
             statusTimer.Stop();
             StatusMessage = string.Empty;
@@ -2076,7 +2061,6 @@ namespace StoryBuilder.ViewModels
             Logger = Ioc.Default.GetService<LogService>();
             Search = Ioc.Default.GetService<SearchService>();
 
-            Title = "Hello Terry";
             StoryModel = new StoryModel();
 
             statusTimer = new DispatcherTimer();
@@ -2154,7 +2138,7 @@ namespace StoryBuilder.ViewModels
         public void SearchNodes()
         {
             _canExecuteCommands = false;    //This prevents other commands from being used till this one is complete.
-            Logger.Log(LogLevel.Info, $"Search started, Searching for { FilterText }");
+            Logger.Log(LogLevel.Info, $"Search started, Searching for {FilterText}");
             SaveModel();
             if (DataSource == null || DataSource.Count == 0)
             {

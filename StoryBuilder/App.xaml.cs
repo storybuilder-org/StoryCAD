@@ -1,35 +1,35 @@
 ﻿  using System;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using ABI.Windows.Storage;
-using CommunityToolkit.Mvvm.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection;
-using WinUIEx;
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using PInvoke;
-using StoryBuilder.DAL;
-using StoryBuilder.Models;
-using StoryBuilder.Models.Tools;
-using StoryBuilder.Services;
-using StoryBuilder.Services.Installation;
-using StoryBuilder.Services.Logging;
-using StoryBuilder.Services.Navigation;
-using StoryBuilder.Services.Preferences;
-using StoryBuilder.Services.Search;
-using StoryBuilder.ViewModels;
-using StoryBuilder.ViewModels.Tools;
-using StoryBuilder.Views;
-using dotenv.net;
-using dotenv.net.Utilities;
-using StoryBuilder.Services.Backend;
-using StoryBuilder.Services.Json;
-using Syncfusion.Licensing;
-using UnhandledExceptionEventArgs = Microsoft.UI.Xaml.UnhandledExceptionEventArgs;
+  using System.Diagnostics;
+  using System.IO;
+  using System.Linq;
+  using System.Threading.Tasks;
+  using Windows.ApplicationModel;
+  using CommunityToolkit.Mvvm.DependencyInjection;
+  using dotenv.net;
+  using dotenv.net.Utilities;
+  using Microsoft.Extensions.DependencyInjection;
+  using Microsoft.UI.Xaml;
+  using Microsoft.UI.Xaml.Controls;
+  using PInvoke;
+  using StoryBuilder.DAL;
+  using StoryBuilder.Models;
+  using StoryBuilder.Models.Tools;
+  using StoryBuilder.Services;
+  using StoryBuilder.Services.Backend;
+  using StoryBuilder.Services.Installation;
+  using StoryBuilder.Services.Json;
+  using StoryBuilder.Services.Logging;
+  using StoryBuilder.Services.Navigation;
+  using StoryBuilder.Services.Preferences;
+  using StoryBuilder.Services.Search;
+  using StoryBuilder.ViewModels;
+  using StoryBuilder.ViewModels.Tools;
+  using StoryBuilder.Views;
+  using Syncfusion.Licensing;
+  using WinUIEx;
+  using UnhandledExceptionEventArgs = Microsoft.UI.Xaml.UnhandledExceptionEventArgs;
 
-namespace StoryBuilder;
+  namespace StoryBuilder;
 
 public partial class App : Application
 {
@@ -55,13 +55,9 @@ public partial class App : Application
     {
         ConfigureIoc();
 
-        GlobalData.Version = "Version: " + Windows.ApplicationModel.Package.Current.Id.Version.Major + "." +
-            Windows.ApplicationModel.Package.Current.Id.Version.Minor + "." + Windows.ApplicationModel.Package.Current.Id.Version.Build +
-            "." + Windows.ApplicationModel.Package.Current.Id.Version.Revision;
+        GlobalData.Version = "Version: " + Package.Current.Id.Version.Major + "." + Package.Current.Id.Version.Minor + "." + Package.Current.Id.Version.Build + "." + Package.Current.Id.Version.Revision;
 
-
-
-        var path = Path.Combine(Windows.ApplicationModel.Package.Current.InstalledLocation.Path, ".env");
+        var path = Path.Combine(Package.Current.InstalledLocation.Path, ".env");
         var options = new DotEnvOptions(false, new[] { path });
         try
         {
@@ -73,8 +69,6 @@ public partial class App : Application
         }
         catch { GlobalData.ShowDotEnvWarning = true; }
         
-
-
         InitializeComponent();
 
         _log = Ioc.Default.GetService<LogService>();
@@ -155,18 +149,14 @@ public partial class App : Application
             _log.SetElmahTokens(keys);
 
         }
-        catch (Exception ex)
-        {
-            _log.LogException(LogLevel.Error, ex, ex.Message);
-        }
+        catch (Exception ex) { _log.LogException(LogLevel.Error, ex, ex.Message); }
 
-        if (Debugger.IsAttached)
-            _log.Log(LogLevel.Info, "Bypassing elmah.io");
+        if (Debugger.IsAttached) {_log.Log(LogLevel.Info, "Bypassing elmah.io as debugger is attached.");}
         else
         {
+            //TODO: check elmah is bypassed when logging is disabled by user.
             await _log.AddElmahTarget();
-            if (GlobalData.ElmahLogging)
-                _log.Log(LogLevel.Info, "elmah.io log target added");
+            if (GlobalData.ElmahLogging) {_log.Log(LogLevel.Info, "elmah.io log target added");}
             else  // can have several reasons (no doppler, or an error adding the target)
                 _log.Log(LogLevel.Info, "elmah.io log target bypassed");
         }
@@ -187,9 +177,7 @@ public partial class App : Application
         await ProcessInstallationFiles();
 
         await LoadControls(GlobalData.RootDirectory);
-
         await LoadLists(GlobalData.RootDirectory);
-            
         await LoadTools(GlobalData.RootDirectory);
 
         ConfigureNavigation();

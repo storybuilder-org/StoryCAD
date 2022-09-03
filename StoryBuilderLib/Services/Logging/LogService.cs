@@ -1,17 +1,17 @@
-﻿using NLog;
-using NLog.Config;
-using NLog.Targets;
-using Elmah.Io.NLog;
-using StoryBuilder.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using StoryBuilder.Services.Json;
-using CommunityToolkit.WinUI.UI.Controls.TextToolbarSymbols;
+using Windows.ApplicationModel;
 using Elmah.Io.Client;
+using Elmah.Io.NLog;
+using NLog;
+using NLog.Config;
+using NLog.Targets;
+using StoryBuilder.Models;
+using StoryBuilder.Services.Json;
 
 namespace StoryBuilder.Services.Logging;
 
@@ -23,11 +23,9 @@ public class LogService : ILogService
     private static readonly Logger Logger;
     private static readonly string logFilePath;
     private static string stackTraceHelper; //Elmah for some reason doesn't show the stack trace of an exception so this one does.
-    private static string logfilename;
     private string apiKey = string.Empty;
     private string logID = string.Empty;
     static LogService()
-
     {
         try
         {
@@ -36,8 +34,7 @@ public class LogService : ILogService
             // Create the file logging target
             FileTarget fileTarget = new();
             logFilePath = Path.Combine(GlobalData.RootDirectory, "logs");
-            logfilename = Path.Combine(logFilePath, "updater.${date:format=yyyy-MM-dd}.log");
-            fileTarget.FileName = logfilename;
+            fileTarget.FileName = Path.Combine(logFilePath, "updater.${date:format=yyyy-MM-dd}.log");
             fileTarget.CreateDirs = true;
             fileTarget.MaxArchiveFiles = 7;
             fileTarget.ArchiveEvery = FileArchivePeriod.Day;
@@ -78,9 +75,9 @@ public class LogService : ILogService
 
             elmahIoTarget.OnMessage += msg =>
             {
-                msg.Version = Windows.ApplicationModel.Package.Current.Id.Version.Major + "."
-                + Windows.ApplicationModel.Package.Current.Id.Version.Minor + "."
-                + Windows.ApplicationModel.Package.Current.Id.Version.Revision;
+                msg.Version = Package.Current.Id.Version.Major + "."
+                                                               + Package.Current.Id.Version.Minor + "."
+                                                               + Package.Current.Id.Version.Revision;
                 
                 try { msg.User = GlobalData.Preferences.Name + $"({GlobalData.Preferences.Email})"; }
                 catch (Exception e) { msg.User = $"There was an error attempting to obtain user information Error: {e.Message}"; }
@@ -90,16 +87,16 @@ public class LogService : ILogService
                 
                 try
                 {
-                    msg.Version = Windows.ApplicationModel.Package.Current.Id.Version.Major + "."
-                        + Windows.ApplicationModel.Package.Current.Id.Version.Minor + "."
-                        + Windows.ApplicationModel.Package.Current.Id.Version.Build + " Build " + Windows.ApplicationModel.Package.Current.Id.Version.Revision;
+                    msg.Version = Package.Current.Id.Version.Major + "."
+                                                                   + Package.Current.Id.Version.Minor + "."
+                                                                   + Package.Current.Id.Version.Build + " Build " + Package.Current.Id.Version.Revision;
                 }
                 catch (Exception e) { msg.Version = $"There was an error trying to obtain version information Error: {e.Message}"; }
 
                 try
                 {
                     msg.Data = new List<Item>();
-                    string LogString = "";
+                    string LogString = string.Empty;
                     using (FileStream stream = File.Open(Path.Combine(GlobalData.RootDirectory, "logs", $"updater.{DateTime.Now.ToString("yyyy-MM-dd")}.log"), FileMode.Open, FileAccess.Read,FileShare.ReadWrite))
                     {
                         using (StreamReader reader = new(stream))
@@ -134,7 +131,7 @@ public class LogService : ILogService
             elmahIoTarget.ApiKey = apiKey;
             elmahIoTarget.LogId = logID;
             LogManager.Configuration.AddTarget(elmahIoTarget);
-            LogManager.Configuration.AddRule(NLog.LogLevel.Error, NLog.LogLevel.Fatal, elmahIoTarget, "*");
+            LogManager.Configuration.AddRule(NLog.LogLevel.Error, NLog.LogLevel.Fatal, elmahIoTarget);
             LogManager.ReconfigExistingLoggers();
             GlobalData.ElmahLogging = true;
             return true;

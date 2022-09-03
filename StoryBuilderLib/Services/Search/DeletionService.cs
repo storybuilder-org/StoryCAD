@@ -1,8 +1,8 @@
-﻿using CommunityToolkit.Mvvm.DependencyInjection;
+﻿using System;
+using System.Collections.Generic;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using StoryBuilder.Models;
 using StoryBuilder.ViewModels;
-using System;
-using System.Collections.Generic;
 
 namespace StoryBuilder.Services.Search;
 
@@ -192,6 +192,6 @@ public class DeletionService
                 else { return true; }  
             } //Checks problem name
         }
-         return false;
+        return false;
     }
 }
