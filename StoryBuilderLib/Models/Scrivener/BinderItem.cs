@@ -12,6 +12,7 @@ public class BinderItem
 
     public BinderItem Parent { get; set; }
 
+    // ReSharper disable once AutoPropertyCanBeMadeGetOnly.Local
     public List<BinderItem> Children { get; private set; }
 
     public int Id { get; set; }
@@ -103,12 +104,12 @@ public class BinderItem
     public IEnumerator<BinderItem> GetEnumerator()
     {
         yield return this;
-        foreach (BinderItem child in Children)
+        foreach (BinderItem _child in Children)
         {
             // ReSharper disable once GenericEnumeratorNotDisposed
-            IEnumerator<BinderItem> childEnumerator = child.GetEnumerator();
-            while (childEnumerator.MoveNext())
-                yield return childEnumerator.Current;
+            IEnumerator<BinderItem> _childEnumerator = _child.GetEnumerator();
+            while (_childEnumerator.MoveNext())
+                yield return _childEnumerator.Current;
         }
     }
 

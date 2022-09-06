@@ -292,46 +292,6 @@ public class ToolLoader
         }
         return _dramaticSituations;
     }
-
-    public ObservableCollection<Quotation> LoadQuotes()
-    {
-        ObservableCollection<Quotation> _quotes = new();
-        Quotation _currentQuote = null;
-        string _section = string.Empty;
-        string _keyword = string.Empty;
-        string _keyvalue = string.Empty;
-        foreach (string _line in _lines)
-        {
-            ParseLine(_line, ref _section, ref _keyword, ref _keyvalue);
-            //   Process the parsed values
-            switch (_section)
-            {
-                case "Quotes":
-                    switch (_keyword)
-                    {
-                        case "":
-                            break;
-                        case "Author":
-                            _currentQuote = new Quotation { Author = _keyvalue, Quote = string.Empty };
-                            _quotes.Add(_currentQuote);
-                            break;
-                        case "Quote":
-                            // ReSharper disable PossibleNullReferenceException
-                            if (_currentQuote.Quote.Equals(string.Empty))
-                                _currentQuote.Quote = _keyvalue.TrimEnd();
-                            else
-                            {
-                                _currentQuote.Quote += Environment.NewLine;
-                                _currentQuote.Quote += _keyvalue.TrimEnd();
-                            }
-                            // ReSharper restore PossibleNullReferenceException
-                            break;
-                    }
-                    break;
-            }
-        }
-        return _quotes;
-    }
          
     /// <summary>
     /// Parse a line from the TOOLS.INI file into section, keyword, and keyvalue.

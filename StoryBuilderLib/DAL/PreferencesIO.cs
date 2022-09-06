@@ -62,8 +62,8 @@ public class PreferencesIo
                         break;
 
                     case "Initalised":
-                        if (_tokens[1] == "True") { _model.PreferencesInitialised = true; }
-                        else { _model.PreferencesInitialised = false; }
+                        if (_tokens[1] == "True") { _model.PreferencesInitialized = true; }
+                        else { _model.PreferencesInitialized = false; }
                         break;
 
                     case "ErrorCollectionConsent":
@@ -176,7 +176,7 @@ public class PreferencesIo
         List<string> _newPreferences = new()
         {
             "Newsletter=" + _model.Newsletter,
-            "Initalised=" + _model.PreferencesInitialised,
+            "Initalised=" + _model.PreferencesInitialized,
             "Name=" + _model.Name,
             "Email=" + _model.Email,
             "TimedBackupInterval=" + _model.TimedBackupInterval,
