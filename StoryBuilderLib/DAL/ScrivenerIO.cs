@@ -190,8 +190,7 @@ public class ScrivenerIo
         foreach (BinderItem _child in binderNode.Children)
         {
             IXmlNode _newNode = CreateNode(_child);
-            if (_parentChildren != null)
-                _parentChildren.AppendChild(_newNode);
+            if (_parentChildren != null) {_parentChildren.AppendChild(_newNode);}
             //xmlParentNode.AppendChild(newNode);
             RecurseBinderNode(_child, _newNode);
         }
@@ -251,7 +250,9 @@ public class ScrivenerIo
     /// <returns>A string representation of the enum value.</returns>
     private static string GetType(BinderItemType type)
     {
+        //TODO: Handle Unknown and default cases in switch (and hence remove the following Resharper ignore commend)
         string _value = string.Empty;
+        // ReSharper disable once SwitchStatementMissingSomeEnumCasesNoDefault
         switch (type)
         {
             case BinderItemType.Text:

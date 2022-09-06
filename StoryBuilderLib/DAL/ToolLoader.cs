@@ -81,7 +81,7 @@ public class ToolLoader
                             }
                             else
                             {
-                                _current.Question = _current.Question + " " + _keyValue;
+                                _current!.Question = _current.Question + " " + _keyValue;
                             }
                             break;
                     }
@@ -158,10 +158,10 @@ public class ToolLoader
                                 _topics.Add(_topicName, _currentTopic);
                             }
                             _currentSubTopic = new SubTopicModel(_keyvalue);
-                            _currentTopic.SubTopics.Add(_currentSubTopic);
+                            _currentTopic!.SubTopics.Add(_currentSubTopic);
                             break;
                         case "Remarks":
-                            if (_currentSubTopic.SubTopicNotes.Equals(string.Empty))
+                            if (_currentSubTopic!.SubTopicNotes.Equals(string.Empty))
                                 _currentSubTopic.SubTopicNotes = _keyvalue;
                             else
                             {

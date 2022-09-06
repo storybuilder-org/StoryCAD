@@ -103,6 +103,7 @@ public class StoryWriter
     {
         foreach (StoryElement _element in _model.StoryElements)
         {
+            // ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault
             switch (_element.Type)
             {
                 case StoryItemType.StoryOverview:

@@ -26,7 +26,8 @@ public class ListLoader
         // structure field or loaded as an initialization value for a control
         string _text = await FileIO.ReadTextAsync(_iniFile);
         StringReader _sr = new(_text);
-        string _line;
+        // ReSharper disable once MoveVariableDeclarationInsideLoopCondition
+        string _line; //Not Inlining to keep code readability
         while ((_line = await _sr.ReadLineAsync()) != null)
         {
             _line = _line.TrimEnd();
