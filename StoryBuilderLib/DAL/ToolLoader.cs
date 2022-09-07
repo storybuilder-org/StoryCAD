@@ -32,7 +32,6 @@ public class ToolLoader
             GlobalData.TopicsSource = LoadTopics();
             GlobalData.MasterPlotsSource = LoadMasterPlots();
             GlobalData.DramaticSituationsSource = LoadDramaticSituations();
-            GlobalData.QuotesSource = LoadQuotes();
             Clear();
         }
         catch (Exception _ex) { Logger.LogException(LogLevel.Error, _ex, "Error Initializing tool loader"); }

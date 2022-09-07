@@ -2,8 +2,6 @@ using System.Collections.ObjectModel;
 using Windows.Storage;
 using StoryBuilder.ViewModels;
 
-//using StoryBuilder.Models.Tools;
-
 namespace StoryBuilder.Models;
 
 public class StoryModel
@@ -42,25 +40,19 @@ public class StoryModel
     public StorageFolder ProjectFolder;
     public StorageFile ProjectFile;
     public string ProjectPath;
-    private string projectFilename;
-    public string ProjectFilename 
-    { 
-        get => projectFilename;
-        set => projectFilename = value; 
-    }
+    public string ProjectFilename { get; set; }
+
     #endregion
 
     #region Constructor
     public StoryModel()
     {
         StoryElements = new StoryElementCollection();
-
         ExplorerView = new ObservableCollection<StoryNodeItem>();
         NarratorView = new ObservableCollection<StoryNodeItem>();
 
         Changed = false;
-
-        projectFilename = null;
+        ProjectFilename = null;
     }
     #endregion
 }

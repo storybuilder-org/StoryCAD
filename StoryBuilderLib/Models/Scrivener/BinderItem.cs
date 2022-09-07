@@ -33,10 +33,7 @@ public class BinderItem
 
     public IXmlNode Node { get; set; }
 
-    public override string ToString()
-    {
-        return Title;
-    }
+    public override string ToString() { return Title; }
 
     #endregion
 
@@ -79,10 +76,6 @@ public class BinderItem
     #endregion // Constructors
 
     #region Methods
-
-    public bool IsLeaf => Children.Count == 0;
-
-    public bool IsRoot => Parent == null;
 
     /// <summary>
     /// This method allows a dept-first search (DFS) or 'pre-order traversal' of

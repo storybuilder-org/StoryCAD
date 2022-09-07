@@ -281,18 +281,11 @@ public partial class App : Application
             _log.Log(LogLevel.Info, "Loading Tools.ini data");
             ToolLoader loader = Ioc.Default.GetService<ToolLoader>();
             await loader.Init(path);
-            _log.Log(LogLevel.Info,
-                $"{GlobalData.KeyQuestionsSource.Keys.Count} Key Questions created");
-            _log.Log(LogLevel.Info,
-                $"{GlobalData.StockScenesSource.Keys.Count} Stock Scenes created");
-            _log.Log(LogLevel.Info,
-                $"{GlobalData.TopicsSource.Count} Topics created");
-            _log.Log(LogLevel.Info,
-                $"{GlobalData.MasterPlotsSource.Count} Master Plots created");
-            _log.Log(LogLevel.Info,
-                $"{GlobalData.DramaticSituationsSource.Count} Dramatic Situations created");
-            _log.Log(LogLevel.Info,
-                $"{GlobalData.QuotesSource.Count} Quotes created");
+            _log.Log(LogLevel.Info, $"{GlobalData.KeyQuestionsSource.Keys.Count} Key Questions created");
+            _log.Log(LogLevel.Info, $"{GlobalData.StockScenesSource.Keys.Count} Stock Scenes created");
+            _log.Log(LogLevel.Info, $"{GlobalData.TopicsSource.Count} Topics created");
+            _log.Log(LogLevel.Info, $"{GlobalData.MasterPlotsSource.Count} Master Plots created");
+            _log.Log(LogLevel.Info, $"{GlobalData.DramaticSituationsSource.Count} Dramatic Situations created");
 
         }
         catch (Exception ex)

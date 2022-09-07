@@ -45,8 +45,6 @@ public static class GlobalData
     public static SortedDictionary<string, TopicModel> TopicsSource;
     public static List<MasterPlotModel> MasterPlotsSource;
     public static SortedDictionary<string, DramaticSituationModel> DramaticSituationsSource;
-    //TODO: Use QuotesSource
-    public static ObservableCollection<Quotation> QuotesSource;
 
     // Connection status
     public static bool DopplerConnection;
