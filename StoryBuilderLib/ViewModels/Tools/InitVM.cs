@@ -71,9 +71,9 @@ public class InitVM : ObservableRecipient
         prf.PreferencesInitialised = true; //Makes sure this window isn't shown to the user
 
         //Updates the file, then rereads into memory.
-        PreferencesIO prfIO = new(prf, System.IO.Path.Combine(ApplicationData.Current.RoamingFolder.Path,"Storybuilder"));
+        PreferencesIo prfIO = new(prf, System.IO.Path.Combine(ApplicationData.Current.RoamingFolder.Path,"Storybuilder"));
         await prfIO.UpdateFile();
-        PreferencesIO loader = new(GlobalData.Preferences, System.IO.Path.Combine(ApplicationData.Current.RoamingFolder.Path, "Storybuilder"));
+        PreferencesIo loader = new(GlobalData.Preferences, System.IO.Path.Combine(ApplicationData.Current.RoamingFolder.Path, "Storybuilder"));
         await loader.UpdateModel();
         BackendService backend = Ioc.Default.GetService<BackendService>();
         if (!GlobalData.Preferences.RecordPreferencesStatus)

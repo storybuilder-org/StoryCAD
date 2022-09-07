@@ -83,7 +83,7 @@ namespace StoryBuilder.Services.Backend
                         var preferences = GlobalData.Preferences;
                         // Update Preferences
                         preferences.Version = GlobalData.Version;
-                        PreferencesIO prefIO = new(preferences, GlobalData.RootDirectory);
+                        PreferencesIo prefIO = new(preferences, GlobalData.RootDirectory);
                         await prefIO.UpdateFile();
                         // Post deployment to backend server
                         await PostVersion();
@@ -101,7 +101,7 @@ namespace StoryBuilder.Services.Backend
         {
             log.Log(LogLevel.Info, "Post user preferences to back-end database");
 
-            MySqlIO sql = Ioc.Default.GetService<MySqlIO>();
+            MySqlIo sql = Ioc.Default.GetService<MySqlIo>();
 
 
             // Get a connection to the database
@@ -127,7 +127,7 @@ namespace StoryBuilder.Services.Backend
                 await sql.AddOrUpdatePreferences(conn, id, elmah, newsletter, version);
                 // Indicate we've stored them successfully
                 GlobalData.Preferences.RecordPreferencesStatus = true;
-                PreferencesIO loader = new(GlobalData.Preferences, GlobalData.RootDirectory);
+                PreferencesIo loader = new(GlobalData.Preferences, GlobalData.RootDirectory);
                 await loader.UpdateFile();
                 log.Log(LogLevel.Info, "Preferences:  elmah=" + elmah + " newsletter=" + newsletter);
             }
@@ -148,7 +148,7 @@ namespace StoryBuilder.Services.Backend
             log.Log(LogLevel.Info, "Posting version data to parse");
 
             var preferences = GlobalData.Preferences;
-            MySqlIO sql = Ioc.Default.GetService<MySqlIO>();
+            MySqlIo sql = Ioc.Default.GetService<MySqlIo>();
 
             // Get a connection to the database
             MySqlConnection conn = new MySqlConnection(connection);
@@ -168,7 +168,7 @@ namespace StoryBuilder.Services.Backend
                 await sql.AddVersion(conn, id, current, previous);
                 // Indicate we've stored it  successfully
                 GlobalData.Preferences.RecordVersionStatus = true;
-                PreferencesIO loader = new(GlobalData.Preferences, GlobalData.RootDirectory);
+                PreferencesIo loader = new(GlobalData.Preferences, GlobalData.RootDirectory);
                 await loader.UpdateFile();
                 log.Log(LogLevel.Info, "Version:  Current=" + current + " Previous=" + previous);
             }

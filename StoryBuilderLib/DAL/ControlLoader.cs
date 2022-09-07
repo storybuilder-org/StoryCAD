@@ -5,28 +5,23 @@ using Windows.Storage;
 using Windows.Storage.Streams;
 using StoryBuilder.Models;
 using StoryBuilder.Models.Tools;
-using StoryBuilder.Services.Logging;
 
 namespace StoryBuilder.DAL;
 
 public class ControlLoader
 {
-    public readonly LogService Logger;
-
-    private IList<string> lines;
-    private string installFolder;
+    private IList<string> _lines;
     public async Task Init(string path)
     {
         try
         {
-            StorageFolder toolFolder = await StorageFolder.GetFolderFromPathAsync(path);
-            installFolder = toolFolder.Path;
-            StorageFile iniFile = await toolFolder.GetFileAsync("Controls.ini");
-            lines = await FileIO.ReadLinesAsync(iniFile, UnicodeEncoding.Utf8);
+            StorageFolder _toolFolder = await StorageFolder.GetFolderFromPathAsync(path);
+            StorageFile _iniFile = await _toolFolder.GetFileAsync("Controls.ini");
+            _lines = await FileIO.ReadLinesAsync(_iniFile, UnicodeEncoding.Utf8);
         }
-        catch (Exception ex) 
+        catch (Exception _ex) 
         {
-            Console.WriteLine(ex.Message);
+            Console.WriteLine(_ex.Message);
         }
         // Populate UserControl data source collections
         GlobalData.ConflictTypes = LoadConflictTypes();
@@ -42,99 +37,69 @@ public class ControlLoader
 
     public SortedDictionary<string, ConflictCategoryModel> LoadConflictTypes()
     {
-        ConflictCategoryModel currentConflictType = null;
-        SortedDictionary<string, ConflictCategoryModel> conflictTypes = new();
-        string currentSubtype = string.Empty;
+        ConflictCategoryModel _currentConflictType = null;
+        SortedDictionary<string, ConflictCategoryModel> _conflictTypes = new();
+        string _currentSubtype = string.Empty;
 
-        string section = string.Empty;
-        string keyword = string.Empty;
-        string keyvalue = string.Empty;
-        foreach (string line in lines)
+        string _section = string.Empty;
+        string _keyword = string.Empty;
+        string _keyvalue = string.Empty;
+        foreach (string _line in _lines)
         {
-            ParseLine(line, ref section, ref keyword, ref keyvalue);
+            ParseLine(_line, ref _section, ref _keyword, ref _keyvalue);
             //   Process the parsed values
-            switch (section)
+            switch (_section)
             {
                 case "Conflict Types":
-                    switch (keyword)
+                    switch (_keyword)
                     {
                         case "":
                             break;
                         case "Type":
-                            currentConflictType = new ConflictCategoryModel(keyvalue);
-                            conflictTypes.Add(keyvalue, currentConflictType);
+                            _currentConflictType = new ConflictCategoryModel(_keyvalue);
+                            _conflictTypes.Add(_keyvalue, _currentConflictType);
                             break;
                         case "Subtype":
-                            currentSubtype = keyvalue;
-                            currentConflictType.SubCategories.Add(keyvalue);
-                            currentConflictType.Examples.Add(currentSubtype, new List<string>());
+                            _currentSubtype = _keyvalue;
+                            _currentConflictType!.SubCategories.Add(_keyvalue);
+                            _currentConflictType.Examples.Add(_currentSubtype, new List<string>());
                             break;
                         case "Example":
-                            currentConflictType.Examples[currentSubtype].Add(keyvalue);
+                            _currentConflictType!.Examples[_currentSubtype].Add(_keyvalue);
                             break;
                     }
                     break;
             }
         }
-        return conflictTypes;
-    }
-    public List<String> LoadSimpleRelationTypes()
-    {
-        List<String> relationships = new();
-
-        string section = string.Empty;
-        string keyword = string.Empty;
-        string keyvalue = string.Empty;
-        foreach (string line in lines)
-        {
-            ParseLine(line, ref section, ref keyword, ref keyvalue);
-            //   Process the parsed values
-            switch (section)
-            {
-                case "RelationTypes":
-                    switch (keyword)
-                    {
-                        case "":
-                            break;
-                        case "RelationType":
-                            string[] tokens = keyvalue.Split(',');
-                            if (tokens.Length != 3)
-                                continue;
-                            relationships.Add(tokens[0]);
-                            break;
-                    }
-                    break;
-            }
-        }
-        return relationships;
+        return _conflictTypes;
     }
 
     public List<string> LoadRelationTypes()
     {
-        List<string> relationships = new();
+        List<string> _relationships = new();
 
-        string section = string.Empty;
-        string keyword = string.Empty;
-        string keyvalue = string.Empty;
-        foreach (string line in lines)
+        string _section = string.Empty;
+        string _keyword = string.Empty;
+        string _keyvalue = string.Empty;
+        foreach (string _line in _lines)
         {
-            ParseLine(line, ref section, ref keyword, ref keyvalue);
+            ParseLine(_line, ref _section, ref _keyword, ref _keyvalue);
             //   Process the parsed values
-            switch (section)
+            switch (_section)
             {
                 case "RelationTypes":
-                    switch (keyword)
+                    switch (_keyword)
                     {
                         case "":
                             break;
                         case "RelationType":
-                            relationships.Add(keyvalue);
+                            _relationships.Add(_keyvalue);
                             break;
                     }
                     break;
             }
         }
-        return relationships;
+        return _relationships;
     }
 
     /// <summary>
@@ -161,17 +126,17 @@ public class ControlLoader
             return;
         if (line.StartsWith("["))
         {
-            string[] tokens = line.Split('[', ']');
-            section = tokens[1];
+            string[] _tokens = line.Split('[', ']');
+            section = _tokens[1];
             keyword = "$SECTION$";
             keyvalue = string.Empty;
             return;
         }
         if (line.Contains('='))
         {
-            string[] tokens = line.Split(new[] { '=' });
-            keyword = tokens[0];
-            keyvalue = tokens[1].TrimEnd();
+            string[] _tokens = line.Split(new[] { '=' });
+            keyword = _tokens[0];
+            keyvalue = _tokens[1].TrimEnd();
             return;
         }
         if (line.StartsWith("="))
@@ -182,5 +147,5 @@ public class ControlLoader
 
     }
 
-    public void Clear() {  lines = null; }
+    public void Clear() {  _lines = null; }
 }
