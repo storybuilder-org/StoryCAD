@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using Windows.Data.Xml.Dom;
 using CommunityToolkit.Mvvm.ComponentModel;
 
@@ -6,8 +7,6 @@ namespace StoryBuilder.Models;
 
 public class StoryElement : ObservableObject
 {
-        
-
     #region  Properties
 
     private readonly Guid _uuid;
@@ -48,13 +47,14 @@ public class StoryElement : ObservableObject
         model.StoryElements.Add(this);
     }
 
+    [SuppressMessage("ReSharper", "InconsistentNaming")] //Some names conflict with class members, and I can't really think of any suitable alternatives.
     public StoryElement(IXmlNode xn, StoryModel model)
     {
         Guid uuid = default;
         StoryItemType type = StoryItemType.Unknown;
         string name = string.Empty;
-        bool uuidFound = false;
-        bool nameFound = false;
+        bool _uuidFound = false;
+        bool _nameFound = false;
         Type = StoryItemType.Unknown;
         switch (xn.NodeName)
         {
@@ -89,20 +89,20 @@ public class StoryElement : ObservableObject
                 type = StoryItemType.TrashCan;
                 break;
         }
-        foreach (IXmlNode attr in xn.Attributes)
+        foreach (IXmlNode _attr in xn.Attributes)
         {
-            switch (attr.NodeName)
+            switch (_attr.NodeName)
             {
                 case "UUID":
-                    uuid = new Guid(attr.InnerText);
-                    uuidFound = true;
+                    uuid = new Guid(_attr.InnerText);
+                    _uuidFound = true;
                     break;
                 case "Name":
-                    name = attr.InnerText;
-                    nameFound = true;
+                    name = _attr.InnerText;
+                    _nameFound = true;
                     break;
             }
-            if (uuidFound && nameFound)
+            if (_uuidFound && _nameFound)
                 break;
         }
         _uuid = uuid;

@@ -243,31 +243,7 @@ public class SceneModel : StoryElement
         Review = string.Empty;
         Notes = string.Empty;
     }
-    public SceneModel(string name, StoryModel model) : base(name, StoryItemType.Scene, model)
-    {
-        Id = ++_nextSceneId;
-        ViewpointCharacter = string.Empty;
-        Date = string.Empty;
-        Time = string.Empty;
-        Setting = string.Empty;
-        SceneType = string.Empty;
-        CastMembers = new List<string>();
-        Remarks = string.Empty;
-        ScenePurpose = new List<string>();
-        ValueExchange = string.Empty;
-        Protagonist = string.Empty;
-        ProtagEmotion = string.Empty;
-        ProtagGoal = string.Empty;
-        Antagonist = string.Empty;
-        AntagEmotion = string.Empty;
-        AntagGoal = string.Empty;
-        Opposition = string.Empty;
-        Outcome = string.Empty;
-        Emotion = string.Empty;
-        NewGoal = string.Empty;
-        Review = string.Empty;
-        Notes = string.Empty;
-    }
+
     public SceneModel(IXmlNode xn, StoryModel model) : base(xn, model)
     {
         Id = ++_nextSceneId;

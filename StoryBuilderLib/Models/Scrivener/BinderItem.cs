@@ -12,6 +12,7 @@ public class BinderItem
 
     public BinderItem Parent { get; set; }
 
+    // ReSharper disable once AutoPropertyCanBeMadeGetOnly.Local
     public List<BinderItem> Children { get; private set; }
 
     public int Id { get; set; }
@@ -32,10 +33,7 @@ public class BinderItem
 
     public IXmlNode Node { get; set; }
 
-    public override string ToString()
-    {
-        return Title;
-    }
+    public override string ToString() { return Title; }
 
     #endregion
 
@@ -79,10 +77,6 @@ public class BinderItem
 
     #region Methods
 
-    public bool IsLeaf => Children.Count == 0;
-
-    public bool IsRoot => Parent == null;
-
     /// <summary>
     /// This method allows a dept-first search (DFS) or 'pre-order traversal' of
     /// a of a BinderItem tree or subtree with a simple C# foreach.
@@ -103,12 +97,12 @@ public class BinderItem
     public IEnumerator<BinderItem> GetEnumerator()
     {
         yield return this;
-        foreach (BinderItem child in Children)
+        foreach (BinderItem _child in Children)
         {
             // ReSharper disable once GenericEnumeratorNotDisposed
-            IEnumerator<BinderItem> childEnumerator = child.GetEnumerator();
-            while (childEnumerator.MoveNext())
-                yield return childEnumerator.Current;
+            IEnumerator<BinderItem> _childEnumerator = _child.GetEnumerator();
+            while (_childEnumerator.MoveNext())
+                yield return _childEnumerator.Current;
         }
     }
 

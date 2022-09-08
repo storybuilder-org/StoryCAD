@@ -68,7 +68,7 @@ public class InitVM : ObservableRecipient
         prf.ProjectDirectory = Path;
         prf.BackupDirectory = BackupPath;
         prf.Name = Name;
-        prf.PreferencesInitialised = true; //Makes sure this window isn't shown to the user
+        prf.PreferencesInitialized = true; //Makes sure this window isn't shown to the user
 
         //Updates the file, then rereads into memory.
         PreferencesIo prfIO = new(prf, System.IO.Path.Combine(ApplicationData.Current.RoamingFolder.Path,"Storybuilder"));

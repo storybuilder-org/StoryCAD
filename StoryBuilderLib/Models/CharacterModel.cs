@@ -153,49 +153,6 @@ public class CharacterModel : StoryElement
         set => _relationshipList = value;
     }
 
-    //Relationship section
-
-    private string _relationship;
-
-    public string Relationship
-    {
-        get => _relationship;
-        set => _relationship = value;
-    }
-
-    private string _relationType;
-
-    public string RelationType
-    {
-        get => _relationType;
-        set => _relationType = value;
-    }
-
-    private string _relationTrait;
-        
-    public string RelationTrait
-    {
-        get => _relationTrait;
-        set => _relationTrait = value;
-    }
-
-    private string _attitude;
-    public string Attitude
-    {
-        get => _attitude;
-        set => _attitude = value;
-    }
-
-    private string _relationshipNotes;
-
-    public string RelationshipNotes
-    {
-        get => _relationshipNotes;
-        set => _relationshipNotes = value;
-    }
-
-        
-
     // Character social data
 
     private string _economic;
@@ -279,11 +236,11 @@ public class CharacterModel : StoryElement
         set => _adventurousness = value;
     }
 
-    private string _agression;
+    private string _aggression;
     public string Aggression
     {
-        get => _agression;
-        set => _agression = value;
+        get => _aggression;
+        set => _aggression = value;
     }
 
     private string _confidence;
@@ -367,13 +324,6 @@ public class CharacterModel : StoryElement
 
     // Character traits data
 
-    private string _outerTrait;
-
-    public string outerTrait
-    {
-        get => _outerTrait;
-        set => _outerTrait = value;
-    }
 
     private List<string> _traitList;
     public List<string> TraitList

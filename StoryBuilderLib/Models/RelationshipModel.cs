@@ -19,16 +19,6 @@ public class RelationshipModel
 
     #region Constructors
 
-    public RelationshipModel() 
-    {
-        Partner = null;
-        PartnerUuid = string.Empty;
-        RelationType = string.Empty;
-        Trait = string.Empty;
-        Attitude = string.Empty;
-        Notes = string.Empty;
-    }
-
     public RelationshipModel(string partnerUuid, string type)
     {
 
@@ -48,24 +38,24 @@ public class RelationshipModel
         Attitude = string.Empty;
         Notes = string.Empty;
 
-        foreach (IXmlNode attr in xn.Attributes)
+        foreach (IXmlNode _attr in xn.Attributes)
         {
-            switch (attr.NodeName)
+            switch (_attr.NodeName)
             {
                 case "Partner":
-                    PartnerUuid =  attr.InnerText;
+                    PartnerUuid =  _attr.InnerText;
                     break;
                 case "RelationType":
-                    RelationType = attr.InnerText;
+                    RelationType = _attr.InnerText;
                     break;
                 case "Trait":
-                    Trait = attr.InnerText;
+                    Trait = _attr.InnerText;
                     break;
                 case "Attitude":
-                    Attitude = attr.InnerText;
+                    Attitude = _attr.InnerText;
                     break;
                 case "Notes":
-                    Notes = attr.InnerText;
+                    Notes = _attr.InnerText;
                     break;
             }
         }

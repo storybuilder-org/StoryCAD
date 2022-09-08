@@ -201,7 +201,7 @@ public partial class App : Application
         //   If we've not yet initialized Preferences, it's PreferencesInitialization.
         //   If we have initialized Preferences, it Shell.
         // PreferencesInitialization will Navigate to Shell after it's done its business.
-        if (!GlobalData.Preferences.PreferencesInitialised) {rootFrame.Navigate(typeof(PreferencesInitialization));}
+        if (!GlobalData.Preferences.PreferencesInitialized) {rootFrame.Navigate(typeof(PreferencesInitialization));}
         else {rootFrame.Navigate(typeof(Shell));}
 
         // Preserve both the Window and its Handle for future use
@@ -281,18 +281,11 @@ public partial class App : Application
             _log.Log(LogLevel.Info, "Loading Tools.ini data");
             ToolLoader loader = Ioc.Default.GetService<ToolLoader>();
             await loader.Init(path);
-            _log.Log(LogLevel.Info,
-                $"{GlobalData.KeyQuestionsSource.Keys.Count} Key Questions created");
-            _log.Log(LogLevel.Info,
-                $"{GlobalData.StockScenesSource.Keys.Count} Stock Scenes created");
-            _log.Log(LogLevel.Info,
-                $"{GlobalData.TopicsSource.Count} Topics created");
-            _log.Log(LogLevel.Info,
-                $"{GlobalData.MasterPlotsSource.Count} Master Plots created");
-            _log.Log(LogLevel.Info,
-                $"{GlobalData.DramaticSituationsSource.Count} Dramatic Situations created");
-            _log.Log(LogLevel.Info,
-                $"{GlobalData.QuotesSource.Count} Quotes created");
+            _log.Log(LogLevel.Info, $"{GlobalData.KeyQuestionsSource.Keys.Count} Key Questions created");
+            _log.Log(LogLevel.Info, $"{GlobalData.StockScenesSource.Keys.Count} Stock Scenes created");
+            _log.Log(LogLevel.Info, $"{GlobalData.TopicsSource.Count} Topics created");
+            _log.Log(LogLevel.Info, $"{GlobalData.MasterPlotsSource.Count} Master Plots created");
+            _log.Log(LogLevel.Info, $"{GlobalData.DramaticSituationsSource.Count} Dramatic Situations created");
 
         }
         catch (Exception ex)

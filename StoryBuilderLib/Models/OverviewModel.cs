@@ -161,36 +161,10 @@ public class OverviewModel : StoryElement
         set => _notes = value;
     }
 
-
-
     #endregion
 
     #region Constructor
-    public OverviewModel(StoryModel model) : base("Story Overview", StoryItemType.StoryOverview, model)
-    {
-        DateCreated = string.Empty;
-        Author = string.Empty;
-        DateModified = string.Empty;
-        StoryType = string.Empty;
-        StoryGenre = string.Empty;
-        Viewpoint = string.Empty;
-        ViewpointCharacter = string.Empty;
-        Voice = string.Empty;
-        LiteraryDevice = string.Empty;
-        Tense = string.Empty;
-        Style = string.Empty;
-        Tone = string.Empty;
-        StoryIdea = string.Empty;
-        Concept = string.Empty;
-        StructureNotes = string.Empty;
-        Notes = string.Empty;
-        StoryProblem = string.Empty;
 
-        // TODO: Set good defaults for these
-        //System.DateTime wrkDate = DateTime.FromOADate(0);
-        //wrkDate = DateTime.Parse(Convert.ToDateTime(StoryRec.DateCreated.Value).ToString("MM/dd/yy"));
-        //frmStory.DefInstance.mskDateCreated.Text = StringsHelper.Format(wrkDate, "Medium Date");
-    }
     public OverviewModel(string name, StoryModel model) : base(name, StoryItemType.StoryOverview, model)
     {
         DateCreated = string.Empty;

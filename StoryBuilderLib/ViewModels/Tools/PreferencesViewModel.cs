@@ -107,7 +107,7 @@ public class PreferencesViewModel : ObservableRecipient
         prf.TimedBackupInterval = BackupInterval;
         prf.TimedBackup = Backup;
         prf.Newsletter = NewsConsent;
-        prf.PreferencesInitialised = init;
+        prf.PreferencesInitialized = init;
         prf.BackupOnOpen = BackupUpOnOpen;
         prf.AutoSave = AutoSave;
         if ( AutoSaveInterval > 31 || AutoSaveInterval < 4) { AutoSaveInterval = 20; }
