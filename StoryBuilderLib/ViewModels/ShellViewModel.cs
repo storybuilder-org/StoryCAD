@@ -49,6 +49,7 @@ namespace StoryBuilder.ViewModels
         private const string SectionPage = "SectionPage";
         private const string SettingPage = "SettingPage";
         private const string TrashCanPage = "TrashCanPage";
+        private const string WebPage = "WebPage";
 
         // Navigation navigation landmark nodes
         public StoryNodeItem CurrentNode { get; set; }
@@ -122,6 +123,7 @@ namespace StoryBuilder.ViewModels
         public RelayCommand AddSectionCommand { get; }
         public RelayCommand AddProblemCommand { get; }
         public RelayCommand AddCharacterCommand { get; }
+        public RelayCommand AddWebCommand { get; }
         public RelayCommand AddSettingCommand { get; }
         public RelayCommand AddSceneCommand { get; }
         public RelayCommand PrintNodeCommand { get; }
@@ -532,6 +534,9 @@ namespace StoryBuilder.ViewModels
                             break;
                         case StoryItemType.Setting:
                             nav.NavigateTo(SplitViewFrame, SettingPage, element);
+                            break;
+                        case StoryItemType.Web:
+                            nav.NavigateTo(SplitViewFrame, WebPage, element);
                             break;
                         case StoryItemType.StoryOverview:
                             nav.NavigateTo(SplitViewFrame, OverviewPage, element);
@@ -1585,6 +1590,10 @@ namespace StoryBuilder.ViewModels
         {
             TreeViewNodeClicked(AddStoryElement(StoryItemType.Character));
         }
+        private void AddWeb()
+        {
+            TreeViewNodeClicked(AddStoryElement(StoryItemType.Web));
+        }
 
         private void AddSetting()
         {
@@ -1638,6 +1647,9 @@ namespace StoryBuilder.ViewModels
                     break;
                 case StoryItemType.Scene:
                     NewNode = new StoryNodeItem(new SceneModel(StoryModel), RightTappedNode);
+                    break;
+                case StoryItemType.Web:
+                    NewNode = new StoryNodeItem(new WebModel(StoryModel), RightTappedNode);
                     break;
             }
 
@@ -2104,6 +2116,7 @@ namespace StoryBuilder.ViewModels
             AddSectionCommand = new RelayCommand(AddSection, () => _canExecuteCommands);
             AddProblemCommand = new RelayCommand(AddProblem, () => _canExecuteCommands);
             AddCharacterCommand = new RelayCommand(AddCharacter, () => _canExecuteCommands);
+            AddWebCommand = new RelayCommand(AddWeb, () => _canExecuteCommands);
             AddSettingCommand = new RelayCommand(AddSetting, () => _canExecuteCommands);
             AddSceneCommand = new RelayCommand(AddScene, () => _canExecuteCommands);
             // Remove Story Element command (move to trash)

@@ -65,6 +65,7 @@
 
 	<ItemGroup>
 		<None Remove="Views\PreferencesInitialization.xaml" />
+		<None Remove="Views\WebPage.xaml" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -75,6 +76,9 @@
 		<None Update=".env">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
+		<Page Update="Views\WebPage.xaml">
+		  <Generator>MSBuild:Compile</Generator>
+		</Page>
 	</ItemGroup>
 
 	<ItemGroup>

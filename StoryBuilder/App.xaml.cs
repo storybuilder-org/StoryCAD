@@ -42,6 +42,8 @@ public partial class App : Application
     private const string SectionPage = "SectionPage";
     private const string SettingPage = "SettingPage";
     private const string TrashCanPage = "TrashCanPage";
+    private const string WebPage = "WebPage";
+
 
     private LogService _log;
 
@@ -104,6 +106,7 @@ public partial class App : Application
                 .AddSingleton<SceneViewModel>()
                 .AddSingleton<FolderViewModel>()
                 .AddSingleton<SectionViewModel>()
+                .AddSingleton<WebViewModel>()
                 .AddSingleton<TrashCanViewModel>()
                 .AddSingleton<UnifiedVM>()
                 .AddSingleton<InitVM>()
@@ -310,6 +313,7 @@ public partial class App : Application
             nav.Configure(SettingPage, typeof(SettingPage));
             nav.Configure(ScenePage, typeof(ScenePage));
             nav.Configure(TrashCanPage, typeof(TrashCanPage));
+            nav.Configure(WebPage, typeof(WebPage));
         }
         catch (Exception ex)
         {

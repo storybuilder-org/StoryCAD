@@ -9,6 +9,7 @@ public enum StoryItemType
     Scene,
     Folder,
     Section,
+    Web,
     TrashCan,
     Unknown
 }

@@ -47,6 +47,12 @@
                         <ToolTip Content="Add New Scene" />
                     </ToolTipService.ToolTip>
                 </AppBarButton>
+                <AppBarButton Command="{x:Bind ShellVm.AddWebCommand, Mode=OneWay}"
+                              Visibility="{x:Bind ShellVm.AddSceneVisibility, Mode=TwoWay}" >
+                    <ToolTipService.ToolTip>
+                        <ToolTip Content="Add new Web Node" />
+                    </ToolTipService.ToolTip>
+                </AppBarButton>
                 <AppBarSeparator />
                 <AppBarButton Icon="Delete"  Command="{x:Bind ShellVm.RemoveStoryElementCommand, Mode=OneWay}" 
                           Visibility="{x:Bind ShellVm.RemoveStoryElementVisibility, Mode=TwoWay}" >
