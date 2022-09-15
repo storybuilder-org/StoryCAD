@@ -13,7 +13,7 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <TextBox Grid.Row="0" Margin="10,5" Text="{x:Bind WebVM.URL, Mode=TwoWay}"/>
-        <WebView2 Grid.Row="1" Margin="10,5" Source="{x:Bind WebVM.URL, Mode=TwoWay}" />
+        <AutoSuggestBox Grid.Row="0" Margin="10,5" Text="{x:Bind WebVM.URL, Mode=TwoWay}" QueryIcon="Find" QuerySubmitted="AutoSuggestBox_OnQuerySubmitted"/>
+        <WebView2 Grid.Row="1" Margin="10,5" Name="web"/>
     </Grid>
 </Page>

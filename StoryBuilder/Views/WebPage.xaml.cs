@@ -25,4 +25,24 @@ public sealed partial class WebPage : Page
     {
         this.InitializeComponent();
     }
+
+    private void TextBox_OnTextChanged(object sender, TextChangedEventArgs e)
+    {
+        if (!string.IsNullOrEmpty(WebVM.URL)) { web.Source = new Uri(WebVM.URL); }
+        
+    }
+
+    private void AutoSuggestBox_OnQuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
+    {
+        //Prevent crash as URI cast cant be empty.
+        try
+        {
+            if (!string.IsNullOrEmpty(WebVM.URL)) { web.Source = new Uri(WebVM.URL); }
+
+        }
+        catch (UriFormatException ex)
+        {
+            web.Source = new Uri("https://storybuilder.org/");
+        }
+    }
 }
