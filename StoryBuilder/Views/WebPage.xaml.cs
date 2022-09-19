@@ -1,48 +1,52 @@
 ﻿using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Data;
-using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Navigation;
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
+using Microsoft.Web.WebView2.Core;
 using StoryBuilder.ViewModels;
+using StoryBuilder.Services.Logging;
+using LogLevel = StoryBuilder.Services.Logging.LogLevel;
 
 namespace StoryBuilder.Views;
 
 public sealed partial class WebPage : Page
 {
     WebViewModel WebVM = Ioc.Default.GetRequiredService<WebViewModel>();
-
-    public WebPage()
-    {
-        this.InitializeComponent();
-    }
-
-    private void TextBox_OnTextChanged(object sender, TextChangedEventArgs e)
-    {
-        if (!string.IsNullOrEmpty(WebVM.URL)) { web.Source = new Uri(WebVM.URL); }
-        
-    }
-
-    private void AutoSuggestBox_OnQuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
+    private LogService Logger = Ioc.Default.GetRequiredService<LogService>();
+    
+    public WebPage() { InitializeComponent(); }
+    
+    private void QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
     {
         //Prevent crash as URI cast cant be empty.
         try
         {
-            if (!string.IsNullOrEmpty(WebVM.URL)) { web.Source = new Uri(WebVM.URL); }
+            if (!string.IsNullOrEmpty(WebVM.Query))
+            {
+                Logger.Log(LogLevel.Info, $"Checking if {WebVM.Query} is a URI.");
+                WebVM.URL = new Uri(WebVM.Query);
+                Logger.Log(LogLevel.Info, $"{WebVM.Query} is a valid URI, navigating to it.");
+            }
 
         }
         catch (UriFormatException ex)
         {
-            web.Source = new Uri("https://storybuilder.org/");
+            Logger.Log(LogLevel.Info, $"Checking if {WebVM.Query} is not URI, searching it.");
+            WebVM.URL = new Uri("https://www.google.com/search?q=" + Uri.EscapeDataString(WebVM.Query));
+            Logger.Log(LogLevel.Info, $"URL is: {WebVM.URL}");
+
         }
     }
+
+    private void Web_OnNavigationCompleted(WebView2 sender, CoreWebView2NavigationCompletedEventArgs args)
+    {
+        WebVM.Query = WebVM.URL.ToString();
+        WebVM.Timestamp = DateTime.Now;
+        Logger.Log(LogLevel.Info, $"Updated Query to {WebVM.Query} ");
+    }
+
+    private void Refresh(object sender, RoutedEventArgs e) { WebView.Reload(); }
+
+    private void GoForward(object sender, RoutedEventArgs e) { WebView.GoForward(); }
+    private void GoBack(object sender, RoutedEventArgs e) { WebView.GoBack(); }
 }

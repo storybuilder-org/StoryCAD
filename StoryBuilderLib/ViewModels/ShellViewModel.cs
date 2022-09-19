@@ -674,6 +674,10 @@ namespace StoryBuilder.ViewModels
                     SettingViewModel setvm = Ioc.Default.GetService<SettingViewModel>();
                     setvm.SaveModel();
                     break;
+                case "StoryBuilder.Views.WebPage":
+                    WebViewModel webvm = Ioc.Default.GetService<WebViewModel>();
+                    webvm.SaveModel();
+                    break;
             }
         }
 

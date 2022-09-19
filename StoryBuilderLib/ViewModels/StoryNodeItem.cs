@@ -6,9 +6,12 @@ using Windows.Data.Xml.Dom;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Documents;
 using Microsoft.UI.Xaml.Media;
 using StoryBuilder.Models;
 using StoryBuilder.Services.Logging;
+using FontIcon = ABI.Microsoft.UI.Xaml.Controls.FontIcon;
+using Microsoft.UI;
 
 namespace StoryBuilder.ViewModels;
 
@@ -353,6 +356,9 @@ public class StoryNodeItem : DependencyObject, INotifyPropertyChanged
                 break;
             case StoryItemType.Section:
                 Symbol = Symbol.Folder;
+                break;
+            case StoryItemType.Web:
+                //Symbol = new Symbol();
                 break;
             case StoryItemType.TrashCan:
                 Symbol = Symbol.Delete;

@@ -10,9 +10,12 @@ namespace StoryBuilder.Models;
 
 public class WebModel : StoryElement
 {
-    
+    public Uri URL;
+    public DateTime Timestamp;
     public WebModel(StoryModel model) : base("New Webpage", StoryItemType.Web, model)
     {
-                
+        
     }
+
+
 }

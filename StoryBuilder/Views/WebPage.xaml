@@ -8,12 +8,31 @@
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
-    <Grid>
+    <Grid Margin="8,10">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <AutoSuggestBox Grid.Row="0" Margin="10,5" Text="{x:Bind WebVM.URL, Mode=TwoWay}" QueryIcon="Find" QuerySubmitted="AutoSuggestBox_OnQuerySubmitted"/>
-        <WebView2 Grid.Row="1" Margin="10,5" Name="web"/>
+        <TextBox Header="Name" Text="{x:Bind WebVM.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.Row="0"/>
+        <StackPanel Orientation="Horizontal" Grid.Row="1" HorizontalAlignment="Stretch">
+            <Button Margin="2,5" Click="Refresh">
+                <Button.Content>
+                    <SymbolIcon Symbol="Refresh"/>
+                </Button.Content>
+            </Button>
+            <Button Margin="2,5" Click="GoBack">
+                <Button.Content>
+                    <SymbolIcon Symbol="Back"/>
+                </Button.Content>
+            </Button>
+            <Button Margin="2,5" Click="GoForward">
+                <Button.Content>
+                    <SymbolIcon Symbol="Forward"/>
+                </Button.Content>
+            </Button>
+            <AutoSuggestBox HorizontalAlignment="Stretch" Width="530" Text="{x:Bind WebVM.Query, Mode=TwoWay}" Margin="2,8" PlaceholderText="Enter a web link here and it will be shown below!" QueryIcon="Find"  QuerySubmitted="QuerySubmitted"/>
+        </StackPanel>
+        <WebView2 Name="WebView" Grid.Row="2" Source="{x:Bind WebVM.URL, Mode=TwoWay}" NavigationCompleted="Web_OnNavigationCompleted" />
     </Grid>
 </Page>
