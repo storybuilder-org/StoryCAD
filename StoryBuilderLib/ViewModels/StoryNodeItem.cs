@@ -10,7 +10,6 @@ using Microsoft.UI.Xaml.Documents;
 using Microsoft.UI.Xaml.Media;
 using StoryBuilder.Models;
 using StoryBuilder.Services.Logging;
-using FontIcon = ABI.Microsoft.UI.Xaml.Controls.FontIcon;
 using Microsoft.UI;
 
 namespace StoryBuilder.ViewModels;
@@ -358,7 +357,11 @@ public class StoryNodeItem : DependencyObject, INotifyPropertyChanged
                 Symbol = Symbol.Folder;
                 break;
             case StoryItemType.Web:
-                //Symbol = new Symbol();
+                //Generic testing stuff, swap out with real font and glyph when working.
+                FontIcon _Icon = new FontIcon();
+                _Icon.FontFamily = new FontFamily("Segoe UI Emoji");
+                _Icon.Glyph = "\x25B6";
+                //Symbol = (IconElement) _Icon;
                 break;
             case StoryItemType.TrashCan:
                 Symbol = Symbol.Delete;

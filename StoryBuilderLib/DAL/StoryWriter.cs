@@ -160,6 +160,8 @@ public class StoryWriter
         _attr = _xml.CreateAttribute("Timestamp");
         _attr.Value = _rec.Timestamp.ToString();
         _web.Attributes.Append(_attr);
+
+        _elements.AppendChild(_web);
     }
 
     private void ParseOverViewElement(StoryElement element)

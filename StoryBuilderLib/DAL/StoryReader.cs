@@ -147,6 +147,9 @@ public class StoryReader : ObservableRecipient
                 case "Folder":
                     ParseFolder(node);
                     break;
+                case "Web":
+                    Web(node);
+                    break;
                 case "Section":
                     ParseSection(node);
                     break;
@@ -156,6 +159,28 @@ public class StoryReader : ObservableRecipient
             }
             foreach (IXmlNode _child in node.ChildNodes)
                 RecurseStoryElement(_child);
+        }
+    }
+
+    private void Web(IXmlNode xn)
+    {
+        WebModel _web = new(xn, _model);
+        foreach (IXmlNode _attr in xn.Attributes)
+        {
+            switch (_attr.NodeName)
+            {
+                case "UUID":
+                    break;
+                case "Name":
+                    _web.Name = _attr.InnerText;
+                    break;
+                case "Timestamp":
+                    _web.Timestamp = Convert.ToDateTime(_attr.InnerText);
+                    break;
+                case "URL":
+                    _web.URL = new Uri(_attr.InnerText);
+                    break;
+            }
         }
     }
 

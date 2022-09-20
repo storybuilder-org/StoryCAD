@@ -37,7 +37,7 @@ public class StoryElement : ObservableObject
 
     #endregion
 
-    #region Constructor
+    #region Constructor 
 
     public StoryElement(string name, StoryItemType type, StoryModel model)
     {
