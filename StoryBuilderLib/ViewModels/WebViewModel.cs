@@ -20,15 +20,22 @@ using System.Security.Policy;
 using CommunityToolkit.Mvvm.Messaging;
 using StoryBuilder.Services.Messages;
 using LogLevel = StoryBuilder.Services.Logging.LogLevel;
+using System.ComponentModel;
 
 namespace StoryBuilder.ViewModels;
 
 public class WebViewModel : ObservableRecipient, INavigable
 {
-    private bool _changed;    // this story element has changed
+    #region Fields
 
-    private LogService Logger = Ioc.Default.GetRequiredService<LogService>();
+    private bool _changed; // this story element has changed
+    private bool _changeable;
+    private LogService _logger = Ioc.Default.GetRequiredService<LogService>();
+
+    #endregion
+
     private string _name;
+
     public string Name
     {
         get => _name;
@@ -36,15 +43,17 @@ public class WebViewModel : ObservableRecipient, INavigable
         {
             if (_name != value) // Name changed?
             {
-                Logger.Log(LogLevel.Info, $"Requesting Name change from {_name} to {value}");
+                _logger.Log(LogLevel.Info, $"Requesting Name change from {_name} to {value}");
                 NameChangeMessage msg = new(_name, value);
                 Messenger.Send(new NameChangedMessage(msg));
             }
+
             SetProperty(ref _name, value);
         }
     }
 
     private Guid _uuid;
+
     public Guid guid
     {
         get => _uuid;
@@ -52,13 +61,15 @@ public class WebViewModel : ObservableRecipient, INavigable
     }
 
     private string _query = "https://google.com/";
+
     public string Query
     {
         get => _query;
         set => SetProperty(ref _query, value);
     }
 
-    private Uri _url = new Uri("https://google.com/") ;
+    private Uri _url = new Uri("https://google.com/");
+
     public Uri URL
     {
         get => _url;
@@ -66,6 +77,7 @@ public class WebViewModel : ObservableRecipient, INavigable
     }
 
     private DateTime _timestamp;
+
     public DateTime Timestamp
     {
         get => _timestamp;
@@ -73,6 +85,7 @@ public class WebViewModel : ObservableRecipient, INavigable
     }
 
     private WebModel _model;
+
     public WebModel Model
     {
         get => _model;
@@ -95,18 +108,30 @@ public class WebViewModel : ObservableRecipient, INavigable
         LoadModel();
     }
 
+    public void Deactivate(object parameter)
+    {
+        SaveModel();
+    }
+
+    private void OnPropertyChanged(object sender, PropertyChangedEventArgs args)
+    { 
+        if (_changeable)
+        {
+            _changed = true;
+            ShellViewModel.ShowChange();
+        }
+    }
     private void LoadModel()
     {
+        _changeable = false;
+        _changed = false;
+        
         guid = Model.Uuid;
         Name = Model.Name;
         URL = Model.URL;
         Timestamp = Model.Timestamp;
 
-    }
-    
-    public void Deactivate(object parameter)
-    {
-        SaveModel();
+        _changeable = true;
     }
 
     public void SaveModel()
@@ -119,5 +144,11 @@ public class WebViewModel : ObservableRecipient, INavigable
             Model.Timestamp = Timestamp;
 
         }
+    }
+
+    public WebViewModel()
+    {
+        _logger = Ioc.Default.GetService<LogService>();
+        PropertyChanged += OnPropertyChanged;
     }
 }

@@ -27,7 +27,8 @@ namespace StoryBuilder.ViewModels;
 /// instances of StoryElements such as ProblemModel, CharacterModel, etc. These model 
 /// components are not visual, and have no Children, IsSelected or IsExpanded, and so on. 
 /// A StoryElement instance is displayed and modified on a Page such as ProblemPage or
-/// CharacterPage which is contained in Shell's SplitView.Content frame.
+/// CharacterPage which is contained in Shell's SplitView.Content frame. In order to do so,
+/// it needs a TreeViewItem on the tree which binds to a StoryNodeItem, which
 /// 
 /// StoryBuilder's data model is called StoryModel. StoryModel  contains two ObservableCollection
 /// lists of StoryNodeItems (and their counterpart StoryElements), a StoryExplorer collection which
@@ -357,11 +358,7 @@ public class StoryNodeItem : DependencyObject, INotifyPropertyChanged
                 Symbol = Symbol.Folder;
                 break;
             case StoryItemType.Web:
-                //Generic testing stuff, swap out with real font and glyph when working.
-                FontIcon _Icon = new FontIcon();
-                _Icon.FontFamily = new FontFamily("Segoe UI Emoji");
-                _Icon.Glyph = "\x25B6";
-                //Symbol = (IconElement) _Icon;
+                Symbol = Symbol.PreviewLink;
                 break;
             case StoryItemType.TrashCan:
                 Symbol = Symbol.Delete;

@@ -147,8 +147,8 @@ public class StoryReader : ObservableRecipient
                 case "Folder":
                     ParseFolder(node);
                     break;
-                case "Web":
-                    Web(node);
+                case "ParseWeb":
+                    ParseWeb(node);
                     break;
                 case "Section":
                     ParseSection(node);
@@ -162,7 +162,7 @@ public class StoryReader : ObservableRecipient
         }
     }
 
-    private void Web(IXmlNode xn)
+    private void ParseWeb(IXmlNode xn)
     {
         WebModel _web = new(xn, _model);
         foreach (IXmlNode _attr in xn.Attributes)
