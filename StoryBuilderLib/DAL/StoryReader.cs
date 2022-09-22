@@ -147,7 +147,7 @@ public class StoryReader : ObservableRecipient
                 case "Folder":
                     ParseFolder(node);
                     break;
-                case "ParseWeb":
+                case "Web":
                     ParseWeb(node);
                     break;
                 case "Section":

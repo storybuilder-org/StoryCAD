@@ -1,31 +1,23 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using StoryBuilder.Services.Navigation;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ABI.Microsoft.Web.WebView2.Core;
 using CommunityToolkit.Mvvm.DependencyInjection;
-using NLog;
 using Microsoft.UI.Xaml.Controls;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.Models;
-using System.Xml.Linq;
-using Microsoft.UI.Xaml;
-using Octokit;
-using Org.BouncyCastle.Utilities;
-using System.Drawing;
-using System.Security.Policy;
 using CommunityToolkit.Mvvm.Messaging;
 using StoryBuilder.Services.Messages;
 using LogLevel = StoryBuilder.Services.Logging.LogLevel;
 using System.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 
 namespace StoryBuilder.ViewModels;
 
 public class WebViewModel : ObservableRecipient, INavigable
 {
+    ///TODO: Make sure queries are async
+    ///TODO: Do we need WebView2Core, WebView2Environment?
+
     #region Fields
 
     private bool _changed; // this story element has changed
@@ -34,8 +26,9 @@ public class WebViewModel : ObservableRecipient, INavigable
 
     #endregion
 
+    #region Properties
+    
     private string _name;
-
     public string Name
     {
         get => _name;
@@ -53,7 +46,6 @@ public class WebViewModel : ObservableRecipient, INavigable
     }
 
     private Guid _uuid;
-
     public Guid guid
     {
         get => _uuid;
@@ -61,7 +53,6 @@ public class WebViewModel : ObservableRecipient, INavigable
     }
 
     private string _query = "https://google.com/";
-
     public string Query
     {
         get => _query;
@@ -69,7 +60,6 @@ public class WebViewModel : ObservableRecipient, INavigable
     }
 
     private Uri _url = new Uri("https://google.com/");
-
     public Uri URL
     {
         get => _url;
@@ -77,7 +67,6 @@ public class WebViewModel : ObservableRecipient, INavigable
     }
 
     private DateTime _timestamp;
-
     public DateTime Timestamp
     {
         get => _timestamp;
@@ -85,23 +74,22 @@ public class WebViewModel : ObservableRecipient, INavigable
     }
 
     private WebModel _model;
-
     public WebModel Model
     {
         get => _model;
         set => SetProperty(ref _model, value);
     }
 
-    /// <summary>
-    /// This is ran when the query box search icon is clicked.
-    /// If its a URL then we navigate to it directly, if not
-    /// search it with google.
-    /// </summary>
-    public void QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
-    {
+    #endregion  
 
-    }
+    #region Relay Commands
 
+    public RelayCommand RefreshCommand { get; }
+    public RelayCommand GoBackCommand { get; }
+    public RelayCommand GoForwardCommand { get; }
+
+    #endregion
+    
     public void Activate(object parameter)
     {
         Model = (WebModel)parameter;
@@ -146,9 +134,64 @@ public class WebViewModel : ObservableRecipient, INavigable
         }
     }
 
+    /// <summary>
+    /// This is ran when the AutoSuggestBox search icon is clicked.
+    /// If it's a URL, navigate to it directly, if not,
+    /// search it with google.
+    /// </summary>
+    public void SubmitQuery()
+    {
+        //Prevent crash as URI cast cant be empty.
+        try
+        {
+            if (!string.IsNullOrEmpty(Query))
+            {
+                _logger.Log(LogLevel.Info, $"Checking if {Query} is a URI.");
+                URL = new Uri(Query);
+                _logger.Log(LogLevel.Info, $"{Query} is a valid URI, navigating to it.");
+            }
+
+        }
+        catch (UriFormatException ex)
+        {
+            _logger.Log(LogLevel.Info, $"Checking if {Query} is not URI, searching it.");
+            URL = new Uri("https://www.google.com/search?q=" + Uri.EscapeDataString(Query));
+            _logger.Log(LogLevel.Info, $"URL is: {URL}");
+
+        }
+    }
+
+    /// Delegate types and instances for WebView2 navigation controls
+    public delegate void RefreshDelegate();
+    public delegate void GoForwardDelegate();
+    public delegate void GoBackDelegate();
+
+    public RefreshDelegate Refresh;
+    public GoForwardDelegate GoForward;
+    public GoBackDelegate GoBack;
+
+    private void ExecuteRefresh()
+    {
+        Refresh();
+    }
+
+    private void ExecuteGoBack()
+    {
+        GoBack();
+    }
+
+    private void ExecuteGoForward()
+    {
+        GoForward();
+    }
+
     public WebViewModel()
     {
         _logger = Ioc.Default.GetService<LogService>();
         PropertyChanged += OnPropertyChanged;
+
+        RefreshCommand = new RelayCommand(ExecuteRefresh, () => true);
+        GoBackCommand = new RelayCommand(ExecuteGoBack, () => true);
+        GoForwardCommand = new RelayCommand(ExecuteGoForward, () => true);
     }
 }

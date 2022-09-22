@@ -9,34 +9,23 @@ using LogLevel = StoryBuilder.Services.Logging.LogLevel;
 
 namespace StoryBuilder.Views;
 
-public sealed partial class WebPage : Page
+public sealed partial class WebPage : BindablePage
 {
     WebViewModel WebVM = Ioc.Default.GetRequiredService<WebViewModel>();
     private LogService Logger = Ioc.Default.GetRequiredService<LogService>();
-    
-    public WebPage() { InitializeComponent(); }
-    
-    private void QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
+
+    public WebPage()
     {
-        //Prevent crash as URI cast cant be empty.
-        try
-        {
-            if (!string.IsNullOrEmpty(WebVM.Query))
-            {
-                Logger.Log(LogLevel.Info, $"Checking if {WebVM.Query} is a URI.");
-                WebVM.URL = new Uri(WebVM.Query);
-                Logger.Log(LogLevel.Info, $"{WebVM.Query} is a valid URI, navigating to it.");
-            }
-
-        }
-        catch (UriFormatException ex)
-        {
-            Logger.Log(LogLevel.Info, $"Checking if {WebVM.Query} is not URI, searching it.");
-            WebVM.URL = new Uri("https://www.google.com/search?q=" + Uri.EscapeDataString(WebVM.Query));
-            Logger.Log(LogLevel.Info, $"URL is: {WebVM.URL}");
-
-        }
+        InitializeComponent();
+        DataContext = WebVM;
+        WebVM.Refresh = Refresh;
+        WebVM.GoForward = GoForward;
+        WebVM.GoBack = GoBack;
     }
+
+    public void Refresh() { WebView.Reload(); }
+    public void GoForward() { WebView.GoForward(); }
+    public void GoBack() { WebView.GoBack(); }
 
     private void Web_OnNavigationCompleted(WebView2 sender, CoreWebView2NavigationCompletedEventArgs args)
     {
@@ -45,8 +34,8 @@ public sealed partial class WebPage : Page
         Logger.Log(LogLevel.Info, $"Updated Query to {WebVM.Query} ");
     }
 
-    private void Refresh(object sender, RoutedEventArgs e) { WebView.Reload(); }
-
-    private void GoForward(object sender, RoutedEventArgs e) { WebView.GoForward(); }
-    private void GoBack(object sender, RoutedEventArgs e) { WebView.GoBack(); }
+    private void QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
+    {
+        WebVM.SubmitQuery();
+    }
 }
