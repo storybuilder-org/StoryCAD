@@ -33,6 +33,8 @@ using GuidAttribute = System.Runtime.InteropServices.GuidAttribute;
 using Octokit;
 using ProductHeaderValue = Octokit.ProductHeaderValue;
 using StoryBuilder.Services.Backend;
+using System.Net.Http;
+using System.Net;
 
 namespace StoryBuilder.ViewModels
 {
@@ -562,7 +564,7 @@ namespace StoryBuilder.ViewModels
         /// <summary>
         /// Shows dotenv warning.
         /// </summary>
-        public async Task ShowWarningAsync()
+        public async Task ShowDotEnvWarningAsync()
         {
             ContentDialog dialog = new();
             dialog.Title = "File missing.";
@@ -573,6 +575,30 @@ namespace StoryBuilder.ViewModels
             dialog.PrimaryButtonText = "Okay";
             await dialog.ShowAsync();
             Ioc.Default.GetService<LogService>().Log(LogLevel.Error, "Env missing.");
+        }
+
+        /// <summary>
+        /// This shows a message, if the webview runtime is missing
+        /// </summary>
+        public async Task ShowWebviewErrorAsync()
+        {
+            Ioc.Default.GetService<LogService>().Log(LogLevel.Error, "Webview is missing.");
+            ContentDialog dialog = new();
+            dialog.Title = "Webview is missing.";
+            dialog.Content = "This computer is missing the WebView2 Runtime, without it some features may not work.\nWould you like to install this now?";
+            dialog.XamlRoot = GlobalData.XamlRoot;
+            dialog.PrimaryButtonText = "Yes";
+            dialog.SecondaryButtonText = "No";
+
+            Ioc.Default.GetService<LogService>().Log(LogLevel.Error, "Showing dialog missing.");
+            if (await dialog.ShowAsync() == ContentDialogResult.Primary)
+            {
+                Ioc.Default.GetService<LogService>().Log(LogLevel.Error, "Installing webview...");
+                new WebClient().DownloadFile("https://go.microsoft.com/fwlink/p/?LinkId=2124703", Path.Combine(GlobalData.RootDirectory, "evergreenbootstrapper.exe"));
+                System.Diagnostics.Process.Start(Path.Combine(GlobalData.RootDirectory, "evergreenbootstrapper.exe"));
+
+            }
+
         }
 
         public async Task ShowChangelog()

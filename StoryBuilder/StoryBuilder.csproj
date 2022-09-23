@@ -19,8 +19,8 @@
 		<AppxBundle>Auto</AppxBundle>
 		<AppInstallerUri>C:\msixs</AppInstallerUri>
 		<HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
-		<AppxPackageDir>C:\Users\Rarisma\Desktop\Ehurmantraut</AppxPackageDir>
-		<AppxBundlePlatforms>x64</AppxBundlePlatforms>
+		<AppxPackageDir>C:\Users\Rarisma\Desktop\TheHandOfHarshReality%27sUngloved\</AppxPackageDir>
+		<AppxBundlePlatforms>x86|x64</AppxBundlePlatforms>
 		<RunAnalyzersDuringLiveAnalysis>False</RunAnalyzersDuringLiveAnalysis>
 		<RunAnalyzersDuringBuild>False</RunAnalyzersDuringBuild>
 		<PackageCertificateKeyFile>StoryBuilder_TemporaryKey.pfx</PackageCertificateKeyFile>

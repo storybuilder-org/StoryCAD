@@ -28,8 +28,9 @@
   using Syncfusion.Licensing;
   using WinUIEx;
   using UnhandledExceptionEventArgs = Microsoft.UI.Xaml.UnhandledExceptionEventArgs;
+using Microsoft.Web.WebView2.Core;
 
-  namespace StoryBuilder;
+namespace StoryBuilder;
 
 public partial class App : Application
 {
@@ -59,7 +60,6 @@ public partial class App : Application
         ConfigureIoc();
 
         GlobalData.Version = "Version: " + Package.Current.Id.Version.Major + "." + Package.Current.Id.Version.Minor + "." + Package.Current.Id.Version.Build + "." + Package.Current.Id.Version.Revision;
-
         var path = Path.Combine(Package.Current.InstalledLocation.Path, ".env");
         var options = new DotEnvOptions(false, new[] { path });
         try
