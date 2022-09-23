@@ -147,6 +147,9 @@ public class StoryReader : ObservableRecipient
                 case "Folder":
                     ParseFolder(node);
                     break;
+                case "Notes":
+                    ParseNotes(node);
+                    break;
                 case "Web":
                     ParseWeb(node);
                     break;
@@ -642,6 +645,24 @@ public class StoryReader : ObservableRecipient
             }
         }
 
+    }
+    private void ParseNotes(IXmlNode xn)
+    {
+        NotesModel _Notes = new(xn, _model);
+        foreach (IXmlNode _attr in xn.Attributes)
+        {
+            switch (_attr.NodeName)
+            {
+                case "UUID":
+                    break;
+                case "Name":
+                    _Notes.Name = _attr.InnerText;
+                    break;
+                case "Notes":
+                    _Notes.Notes = _attr.InnerText;
+                    break;
+            }
+        }
     }
 
     private void ParseFolder(IXmlNode xn)

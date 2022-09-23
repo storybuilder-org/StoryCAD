@@ -313,6 +313,9 @@ public class StoryNodeItem : DependencyObject, INotifyPropertyChanged
             case StoryItemType.TrashCan:
                 Symbol = Symbol.Delete;
                 break;
+            case StoryItemType.Notes:
+                Symbol = Symbol.TwoPage;
+                break;
         }
 
         Parent = parent;
@@ -378,6 +381,10 @@ public class StoryNodeItem : DependencyObject, INotifyPropertyChanged
                 case "trashcan":
                     Type = StoryItemType.TrashCan;
                     Symbol = Symbol.Delete;
+                    break;
+                case "notes":
+                    Type = StoryItemType.Notes;
+                    Symbol = Symbol.TwoPage;
                     break;
             }
 

@@ -43,6 +43,7 @@ public partial class App : Application
     private const string SettingPage = "SettingPage";
     private const string TrashCanPage = "TrashCanPage";
     private const string WebPage = "WebPage";
+    private const string NotesPage = "NotesPage";
 
 
     private LogService _log;
@@ -107,6 +108,7 @@ public partial class App : Application
                 .AddSingleton<FolderViewModel>()
                 .AddSingleton<SectionViewModel>()
                 .AddSingleton<WebViewModel>()
+                .AddSingleton<NotesViewModel>()
                 .AddSingleton<TrashCanViewModel>()
                 .AddSingleton<UnifiedVM>()
                 .AddSingleton<InitVM>()
@@ -304,6 +306,7 @@ public partial class App : Application
         {
             _log.Log(LogLevel.Info, "Configuring page navigation");
             NavigationService nav = Ioc.Default.GetService<NavigationService>();
+            nav.Configure(NotesPage, typeof(NotesPage));
             nav.Configure(HomePage, typeof(HomePage));
             nav.Configure(OverviewPage, typeof(OverviewPage));
             nav.Configure(ProblemPage, typeof(ProblemPage));

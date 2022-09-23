@@ -47,10 +47,13 @@
                         <ToolTip Content="Add New Scene" />
                     </ToolTipService.ToolTip>
                 </AppBarButton>
-                <AppBarButton Command="{x:Bind ShellVm.AddWebCommand, Mode=OneWay}" Visibility="{x:Bind ShellVm.AddSceneVisibility, Mode=TwoWay}" >
-                    <AppBarButton.Icon>
-                        <SymbolIcon Symbol="PreviewLink"/>
-                    </AppBarButton.Icon>
+                <AppBarButton Icon="TwoPage" Command="{x:Bind ShellVm.AddNotesCommand, Mode=OneWay}"
+                          Visibility="{x:Bind ShellVm.AddSceneVisibility, Mode=TwoWay}" >
+                    <ToolTipService.ToolTip>
+                        <ToolTip Content="Add New Notes" />
+                    </ToolTipService.ToolTip>
+                </AppBarButton>
+                <AppBarButton Icon="PreviewLink" Command="{x:Bind ShellVm.AddWebCommand, Mode=OneWay}" Visibility="{x:Bind ShellVm.AddSceneVisibility, Mode=TwoWay}" >
                     <ToolTipService.ToolTip>
                         <ToolTip Content="Add new Web Node" />
                     </ToolTipService.ToolTip>

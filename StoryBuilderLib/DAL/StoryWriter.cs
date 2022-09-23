@@ -127,6 +127,9 @@ public class StoryWriter
                 case StoryItemType.Folder:
                     ParseFolderElement(_element);
                     break;
+                case StoryItemType.Notes:
+                    ParseNotesElement(_element);
+                    break;
                 case StoryItemType.Section:
                     ParseSectionElement(_element);
                     break;
@@ -642,6 +645,23 @@ public class StoryWriter
         _elements.AppendChild(_scene);
     }
 
+    private void ParseNotesElement(StoryElement element)
+    {
+        NotesModel _rec = (NotesModel)element;
+        XmlNode _node = _xml.CreateElement("Notes");
+
+        XmlAttribute _attr = _xml.CreateAttribute("UUID");
+        _attr.Value = UuidString(_rec.Uuid);
+        _node.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Name");
+        _attr.Value = _rec.Name;
+        _node.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Notes");
+        _attr.Value = _rec.Notes;
+        _node.Attributes.Append(_attr);
+
+        _elements.AppendChild(_node);
+    }
     private void ParseFolderElement(StoryElement element)
     {
         FolderModel _rec = (FolderModel)element;

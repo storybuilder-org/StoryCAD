@@ -85,6 +85,9 @@ public class StoryElement : ObservableObject
             case "Section":
                 type = StoryItemType.Section;
                 break;
+            case "Notes":
+                type = StoryItemType.Notes;
+                break;
             case "Web":
                 type= StoryItemType.Web;
                 break;

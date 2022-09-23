@@ -10,6 +10,7 @@ public enum StoryItemType
     Folder,
     Section,
     Web,
+    Notes,
     TrashCan,
     Unknown
 }
