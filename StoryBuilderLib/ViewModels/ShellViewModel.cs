@@ -515,7 +515,7 @@ namespace StoryBuilder.ViewModels
                 {
                     CurrentNode = node;
                     StoryElement element = StoryModel.StoryElements.StoryElementGuids[node.Uuid];
-                    switch (node.Type)
+                    switch (element.Type)
                     {
                         case StoryItemType.Character:
                             nav.NavigateTo(SplitViewFrame, CharacterPage, element);

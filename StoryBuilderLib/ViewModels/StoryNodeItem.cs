@@ -6,11 +6,9 @@ using Windows.Data.Xml.Dom;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Documents;
 using Microsoft.UI.Xaml.Media;
 using StoryBuilder.Models;
 using StoryBuilder.Services.Logging;
-using Microsoft.UI;
 
 namespace StoryBuilder.ViewModels;
 
@@ -221,18 +219,6 @@ public class StoryNodeItem : DependencyObject, INotifyPropertyChanged
         get => GlobalData.Preferences.WrapNodeNames;
     }
 
-//public bool IsSelected
-//{
-//    get => (bool)GetValue(IsSelectedProperty);
-//    set
-//    {
-//        SetValue(IsSelectedProperty, value);
-//        NotifyPropertyChanged("IsSelected");
-//    }
-//}
-
-
-
     //// Use a DependencyProperty as the backing store for IsSelected
     //public static readonly DependencyProperty IsSelectedProperty =
     //    DependencyProperty.Register("IsSelected", typeof(bool), typeof(StoryNodeItem), new PropertyMetadata(false));
@@ -293,48 +279,12 @@ public class StoryNodeItem : DependencyObject, INotifyPropertyChanged
 
     #region Constructors
 
-    public StoryNodeItem(StoryModel model, StoryNodeItem node, StoryNodeItem parent)
+    public StoryNodeItem(StoryElement node, StoryNodeItem parent)
     {
-        _uuid = node.Uuid;
-        StoryElement element = model.StoryElements.StoryElementGuids[Uuid];
-        Name = element.Name;
-        _type = node.Type;
+        Uuid = node.Uuid;
+        Name = node.Name;
+        Type = node.Type;
         switch (_type)
-        {
-            case StoryItemType.StoryOverview:
-                Symbol = Symbol.View;
-                break;
-            case StoryItemType.Character:
-                Symbol = Symbol.Contact;
-                break;
-            case StoryItemType.Scene:
-                Symbol = Symbol.AllApps;
-                break;
-            case StoryItemType.Problem:
-                Symbol = Symbol.Help;
-                break;
-            case StoryItemType.Setting:
-                Symbol = Symbol.Globe;
-                break;
-            case StoryItemType.Folder:
-                Symbol = Symbol.Folder;
-                break;
-        }
-
-        Parent = parent;
-        Children = new ObservableCollection<StoryNodeItem>();
-
-        IsExpanded = node.IsExpanded;
-        IsRoot = node.IsRoot;
-        //IsSelected = node.IsSelected;
-    }
-
-    public StoryNodeItem(StoryNodeItem parent, StoryElement model)
-    {
-        Uuid = model.Uuid;
-        Name = model.Name;
-        Type = model.Type;
-        switch (model.Type)
         {
             case StoryItemType.StoryOverview:
                 Symbol = Symbol.View;
@@ -359,44 +309,6 @@ public class StoryNodeItem : DependencyObject, INotifyPropertyChanged
                 break;
             case StoryItemType.Web:
                 Symbol = Symbol.PreviewLink;
-                break;
-            case StoryItemType.TrashCan:
-                Symbol = Symbol.Delete;
-                break;
-        }
-        Parent = parent;
-        Children = new ObservableCollection<StoryNodeItem>();
-        IsExpanded = false;
-        //IsSelected = false;
-        if (Parent == null)
-            return;
-        Parent.Children.Add(this);
-    }
-
-    public StoryNodeItem(StoryElement node, StoryNodeItem parent)
-    {
-        _uuid = node.Uuid;
-        _name = node.Name;
-        _type = node.Type;
-        switch (_type)
-        {
-            case StoryItemType.StoryOverview:
-                Symbol = Symbol.View;
-                break;
-            case StoryItemType.Character:
-                Symbol = Symbol.Contact;
-                break;
-            case StoryItemType.Scene:
-                Symbol = Symbol.AllApps;
-                break;
-            case StoryItemType.Problem:
-                Symbol = Symbol.Help;
-                break;
-            case StoryItemType.Setting:
-                Symbol = Symbol.Globe;
-                break;
-            case StoryItemType.Folder:
-                Symbol = Symbol.Folder;
                 break;
             case StoryItemType.TrashCan:
                 Symbol = Symbol.Delete;
@@ -458,6 +370,10 @@ public class StoryNodeItem : DependencyObject, INotifyPropertyChanged
                 case "section":
                     Type = StoryItemType.Section;
                     Symbol = Symbol.Folder;
+                    break;
+                case "web":
+                    Type = StoryItemType.Web;
+                    Symbol = Symbol.PreviewLink;
                     break;
                 case "trashcan":
                     Type = StoryItemType.TrashCan;

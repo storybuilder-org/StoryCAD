@@ -165,7 +165,9 @@ public class StoryReader : ObservableRecipient
     private void ParseWeb(IXmlNode xn)
     {
         WebModel _web = new(xn, _model);
-        foreach (IXmlNode _attr in xn.Attributes)
+        foreach (IXmlNode 
+                     
+                     _attr in xn.Attributes)
         {
             switch (_attr.NodeName)
             {
