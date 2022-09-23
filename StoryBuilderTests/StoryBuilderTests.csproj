@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<TargetFramework>net6.0-windows10.0.19041.0</TargetFramework>
@@ -20,10 +20,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Syncfusion.Editors.WinUI" Version="20.2.0.40" />
-	</ItemGroup>
-
-	<ItemGroup>
+		<ProjectReference Include="..\StoryBuilder\StoryBuilder.csproj" />
 		<ProjectReference Include="..\StoryBuilderLib\StoryBuilderLib.csproj" />
 	</ItemGroup>
 

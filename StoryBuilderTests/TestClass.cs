@@ -3,6 +3,7 @@
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.VisualStudio.TestTools.UnitTesting.AppContainer;
+using StoryBuilder.Models;
 
 namespace StoryBuilderTest;
 
@@ -48,5 +49,12 @@ public class TestClass
     public void UITestMethod()
     {
         Assert.AreEqual(0, new Grid().ActualWidth);
+    }
+
+    [TestMethod]
+    public void TestStoryModel()
+    {
+        StoryModel model = new StoryModel();
+        Assert.IsNotNull(model);
     }
 }
