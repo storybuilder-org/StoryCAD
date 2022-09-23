@@ -47,9 +47,9 @@
                         <ToolTip Content="Add New Scene" />
                     </ToolTipService.ToolTip>
                 </AppBarButton>
-                <AppBarButton Command="{x:Bind ShellVm.AddWebCommand, Mode=OneWay}" Visibility="{x:Bind ShellVm.AddSceneVisibility, Mode=TwoWay}">
+                <AppBarButton Command="{x:Bind ShellVm.AddWebCommand, Mode=OneWay}" Visibility="{x:Bind ShellVm.AddSceneVisibility, Mode=TwoWay}" >
                     <AppBarButton.Icon>
-                        <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xEC6C;" />
+                        <SymbolIcon Symbol="PreviewLink"/>
                     </AppBarButton.Icon>
                     <ToolTipService.ToolTip>
                         <ToolTip Content="Add new Web Node" />
@@ -197,7 +197,7 @@
                             </MenuFlyoutItem>
                             <MenuFlyoutItem Text="Add Web node" Visibility="{x:Bind ShellVm.AddSceneVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.AddWebCommand,Mode=OneWay}">
                                 <MenuFlyoutItem.Icon>
-                                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xEC6C;" />
+                                    <SymbolIcon Symbol="PreviewLink"/>
                                 </MenuFlyoutItem.Icon>
                                 <MenuFlyoutItem.KeyboardAccelerators>
                                     <KeyboardAccelerator Key="F7"/>
