@@ -52,6 +52,9 @@ public class WebViewModel : ObservableRecipient, INavigable
         set => SetProperty(ref _uuid, value);
     }
 
+    /// <summary>
+    /// This is the whats shown on the UI.
+    /// </summary>
     private string _query = "https://google.com/";
     public string Query
     {
@@ -59,12 +62,19 @@ public class WebViewModel : ObservableRecipient, INavigable
         set => SetProperty(ref _query, value);
     }
 
+    /// <summary>
+    /// This is the real webview URL, it may differ query but usually should be the same.
+    /// </summary>
     private Uri _url = new Uri("https://google.com/");
     public Uri URL
     {
         get => _url;
         set { SetProperty(ref _url, value); }
     }
+
+    /// <summary>
+    /// Last accessed URL/
+    /// </summary>
 
     private DateTime _timestamp;
     public DateTime Timestamp
@@ -170,20 +180,11 @@ public class WebViewModel : ObservableRecipient, INavigable
     public GoForwardDelegate GoForward;
     public GoBackDelegate GoBack;
 
-    private void ExecuteRefresh()
-    {
-        Refresh();
-    }
+    private void ExecuteRefresh() { Refresh(); }
 
-    private void ExecuteGoBack()
-    {
-        GoBack();
-    }
+    private void ExecuteGoBack() { GoBack(); }
 
-    private void ExecuteGoForward()
-    {
-        GoForward();
-    }
+    private void ExecuteGoForward() { GoForward(); }
 
     public WebViewModel()
     {

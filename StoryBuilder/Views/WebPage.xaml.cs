@@ -27,6 +27,9 @@ public sealed partial class WebPage : BindablePage
     public void GoForward() { WebView.GoForward(); }
     public void GoBack() { WebView.GoBack(); }
 
+    /// <summary>
+    /// This code updates the timestamp and query so that the URL box can be updated. 
+    /// </summary>
     private void Web_OnNavigationCompleted(WebView2 sender, CoreWebView2NavigationCompletedEventArgs args)
     {
         WebVM.Query = WebVM.URL.ToString();
@@ -34,8 +37,10 @@ public sealed partial class WebPage : BindablePage
         Logger.Log(LogLevel.Info, $"Updated Query to {WebVM.Query} ");
     }
 
-    private void QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
-    {
-        WebVM.SubmitQuery();
-    }
+    /// <summary>
+    /// This happens when the search icon is clicked.
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="args"></param>
+    private void QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args) { WebVM.SubmitQuery(); }
 }
