@@ -52,7 +52,6 @@ public class InstallationService
             {
                 Logger.LogException(LogLevel.Error, ex, "Error when deleting files");
             }
-
         }
         foreach (StorageFolder Item in await ParentFolder.GetFoldersAsync())
         {

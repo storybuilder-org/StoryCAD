@@ -25,10 +25,12 @@ public sealed partial class PrintReportsDialog : Page
         PrintVM.CharacterNodes.Clear();
         PrintVM.SceneNodes.Clear();
         PrintVM.SettingNodes.Clear();
+        PrintVM.WebNodes.Clear();
         PrintVM.CharacterList = false;
         PrintVM.ProblemList = false;
         PrintVM.SettingList = false;
         PrintVM.SceneList = false;
+        PrintVM.WebList = false;
 
         //Gets all nodes that aren't deleted
         try
@@ -77,10 +79,17 @@ public sealed partial class PrintReportsDialog : Page
         }
         else { PrintVM.SelectedNodes.AddRange(PrintVM.SettingNodes); }
 
+        if (!PrintVM.SelectAllWeb)
+        {
+            foreach (StoryNodeItem item in WebList.SelectedItems) { PrintVM.SelectedNodes.Add(item); }
+        }
+        else { PrintVM.SelectedNodes.AddRange(PrintVM.WebNodes); }
+
         ProblemsList.IsEnabled = !PrintVM.SelectAllProblems;
         CharactersList.IsEnabled = !PrintVM.SelectAllCharacters;
         SettingsList.IsEnabled = !PrintVM.SelectAllSettings;
         ScenesList.IsEnabled = !PrintVM.SelectAllScenes;
+        WebList.IsEnabled = !PrintVM.SelectAllWeb;
     }
 
 
@@ -93,6 +102,7 @@ public sealed partial class PrintReportsDialog : Page
             case "Print all characters": CharactersList.SelectedItems.Clear(); break;
             case "Print all scenes": ScenesList.SelectedItems.Clear(); break;
             case "Print all settings": SettingsList.SelectedItems.Clear(); break;
+            case "Print all websites": WebList.SelectedItems.Clear(); break;
         }
         UpdateSelection(null,null);
     }

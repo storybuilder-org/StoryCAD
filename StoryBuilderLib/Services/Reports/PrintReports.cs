@@ -62,6 +62,16 @@ public class PrintReports
             rtf = _formatter.FormatSceneListReport();
             documentText += FormatText(rtf);
         }
+        if (_vm.SceneList)
+        {
+            rtf = _formatter.FormatSceneListReport();
+            documentText += FormatText(rtf);
+        }
+        if (_vm.WebList)
+        {
+            rtf = _formatter.FormatWebListReport();
+            documentText += FormatText(rtf);
+        }
 
         foreach (StoryNodeItem node in _vm.SelectedNodes)
         {
@@ -83,6 +93,9 @@ public class PrintReports
                         break;
                     case StoryItemType.Scene:
                         rtf = _formatter.FormatSceneReport(element);
+                        break;
+                    case StoryItemType.Web:
+                        rtf = _formatter.FormatWebReport(element);
                         break;
                 }
                 documentText += FormatText(rtf);
@@ -195,8 +208,6 @@ public class PrintReports
         sb.Append("\n\\PageBreak\n");
         return sb.ToString();
     }
-
-
 
     #region Constructor
 
