@@ -545,7 +545,7 @@ public class StoryWriter
             _castMember.AppendChild(_xml.CreateTextNode(_member));
             _castList.AppendChild(_castMember);
         }
-
+        _scene.AppendChild(_castList);
         XmlNode _scenePurposeList = _xml.CreateElement("ScenePurpose");
         foreach (string _item in _rec.ScenePurpose)
         {
