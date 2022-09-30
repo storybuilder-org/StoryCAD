@@ -37,9 +37,9 @@ public class PrintReports
         }
         if (_vm.CreateSummary)
         {
-            rtf =_formatter.FormatSynopsisReport();
+            rtf = _formatter.FormatSynopsisReport();
             //documentText = FormatText(rtf);
-            documentText += FormatText(rtf,true);
+            documentText += FormatText(rtf, true);
         }
 
         if (_vm.ProblemList)
@@ -104,15 +104,15 @@ public class PrintReports
 
         if (string.IsNullOrEmpty(documentText))
         {
-            Ioc.Default.GetService<ShellViewModel>().ShowMessage(LogLevel.Warn, "No nodes selected for report generation",true);
+            Ioc.Default.GetService<ShellViewModel>().ShowMessage(LogLevel.Warn, "No nodes selected for report generation", true);
             return;
         }
         Print(documentText);
-        Ioc.Default.GetService<ShellViewModel>().ShowMessage( LogLevel.Info, "Generate Print Reports complete",true);
+        Ioc.Default.GetService<ShellViewModel>().ShowMessage(LogLevel.Info, "Generate Print Reports complete", true);
 
     }
 
-    private StoryElement Overview() 
+    private StoryElement Overview()
     {
         foreach (StoryElement element in _model.StoryElements)
             if (element.Type == StoryItemType.StoryOverview)
@@ -177,20 +177,22 @@ public class PrintReports
     /// <param name="rtfInput"></param>
     /// <param name="SummaryMode"></param>
     /// <returns></returns>
-    private string FormatText(string rtfInput, bool SummaryMode = false) 
+    private string FormatText(string rtfInput, bool SummaryMode = false)
     {
         string text = _formatter.GetText(rtfInput, false);
         string[] lines = text.Split('\n');
         StringBuilder sb = new();
 
+        //TODO: rewrite this for readabilty and maintainability
         foreach (string t in lines)
         {
             string line = t.TrimEnd();
             if (line.Equals("\r"))
                 continue;
-            while (line.Length > 72) 
+            while (line.Length > 72)
             {
                 string temp = line[..72];
+                if (!temp.Contains(" ")) { temp += " "; } //wrapping fix
                 int j = temp.LastIndexOf(' ');
                 temp = temp[..j];
                 sb.Append(temp);

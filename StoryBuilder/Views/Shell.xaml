@@ -206,6 +206,14 @@
                                     <KeyboardAccelerator Key="F7"/>
                                 </MenuFlyoutItem.KeyboardAccelerators>
                             </MenuFlyoutItem>
+                            <MenuFlyoutItem Text="Add Notes node" Visibility="{x:Bind ShellVm.AddSceneVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.AddNotesCommand,Mode=OneWay}">
+                                <MenuFlyoutItem.Icon>
+                                    <SymbolIcon Symbol="TwoPage"/>
+                                </MenuFlyoutItem.Icon>
+                                <MenuFlyoutItem.KeyboardAccelerators>
+                                    <KeyboardAccelerator Key="F8"/>
+                                </MenuFlyoutItem.KeyboardAccelerators>
+                            </MenuFlyoutItem>
                             <MenuFlyoutSeparator/>
                             <MenuFlyoutItem Visibility="{x:Bind ShellVm.RemoveStoryElementVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.RemoveStoryElementCommand,Mode=OneWay}" Icon="Delete" Text="Delete story element">
                                 <MenuFlyoutItem.KeyboardAccelerators>
