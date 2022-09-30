@@ -50,23 +50,26 @@
                     <TextBlock Name="Changelog" TextWrapping="Wrap"/>
                 </ScrollViewer>
             </PivotItem>
-            <PivotItem Opacity="0" IsEnabled="False" Header="" Name="Dev">
-                <StackPanel HorizontalAlignment="Center">
-                    <StackPanel Orientation="Horizontal">
-                        <Button Content="Set Init to false" Click="SetInitToFalse"/>
-                        <Button Content="Throw exception" Click="ThrowException" Margin="10,0"/>
-                        <Button Content="Attach Elmah" Click="AttachElmah"/>
-                        <Button Content="Run InstallService" Click="Reinstall"/>
+            <PivotItem Header="Dev" Name="Dev">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <Button Content="Set Init to false" Click="SetInitToFalse" Width="200"/>
+                        <Button Content="Throw exception" Click="ThrowException" Width="200"/>
+                        <Button Content="Attach Elmah" Click="AttachElmah" Width="200"/>
+                        <Button Content="Run InstallService" Click="Reinstall" Width="200"/>
                     </StackPanel>
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom">
-                        <TextBlock Name="cpuarch"/>
-                        <TextBlock Name="osarch" Margin="10,0"/>
-                        <TextBlock Name="osinfo"/>
-                        <TextBlock Name="Last"/>
+                    <StackPanel VerticalAlignment="Bottom" Grid.Column="1" Margin="10,0,0,0">
+                        <TextBlock Name="CPUArchitecture"/>
+                        <TextBlock Name="OSArchitecture"/>
+                        <TextBlock Name="OSInfo"/>
+                        <TextBlock Name="AppArchitecture"/>
                     </StackPanel>
+                </Grid>
 
-                    <TextBlock Name="apparch"/>
-                </StackPanel>
             </PivotItem>
         </Pivot>
         <TextBlock Text="Changing these settings may require a restart to take effect." HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,15,0,0"/>

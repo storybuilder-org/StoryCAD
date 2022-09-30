@@ -27,20 +27,24 @@ public sealed partial class PreferencesDialog : Page
         Version.Text = "StoryBuilder Version: " + Package.Current.Id.Version.Major + "." + Package.Current.Id.Version.Minor + "." + Package.Current.Id.Version.Build + "." + Package.Current.Id.Version.Revision;
         SetChangelog();
 
-        if (Debugger.IsAttached || GlobalData.Preferences.Name == "ShowMeTheDevTab")
+        //TODO: Put this in a VM and make this data get logged at start up with some more system info.
+        if (Debugger.IsAttached)
         {
-            Dev.IsEnabled = true;
-            Dev.Opacity = 1;
-            Dev.Header = "Dev";
-            cpuarch.Text = "CPU ARCH: " + RuntimeInformation.ProcessArchitecture;
-            osarch.Text = "OS ARCH: " + RuntimeInformation.OSArchitecture;
-            //LastContact.Text = "Last Contact: " + GlobalData.Preferences.;
-            osinfo.Text = "OS INFO: Windows Build " + Environment.OSVersion.VersionString.Replace("Microsoft Windows NT 10.0.","").Replace(".0","");
-            if (IntPtr.Size == 4) { apparch.Text = "Looks like we are running as a 32 bit process."; }
-            else if (IntPtr.Size == 8) { apparch.Text = "Looks like we are running as a 64 bit process."; }
-            else { apparch.Text = $"We don't know what architecture we are running on,\nMight want to call for help.\nIntPtr was {IntPtr.Size}, expected 4 or 8."; }
+            CPUArchitecture.Text = "CPU ARCH: " + RuntimeInformation.ProcessArchitecture;
+            OSArchitecture.Text = "OS ARCH: " + RuntimeInformation.OSArchitecture;
+            OSInfo.Text = "OS Info: Windows Build " + Environment.OSVersion.VersionString.Replace("Microsoft Windows NT 10.0.","").Replace(".0","");
+            if (IntPtr.Size == 4) { AppArchitecture.Text = "We are running as a 32 bit process."; }
+            else if (IntPtr.Size == 8) { AppArchitecture.Text = "We are running as a 64 bit process."; }
+            else { AppArchitecture.Text = $"UNKNOWN ARCHITECTURE!\nIntPtr was {IntPtr.Size}, expected 4 or 8."; }
         }
-        else { PivotView.Items.Remove(Dev); }
+        else
+        {
+            Dev.Header = "";
+            Dev.Content = null;
+            Dev.IsEnabled = false;
+            Dev.Opacity = 0;
+            PivotView.Items.Remove(Dev);
+        }
     }
 
     private async void SetChangelog()

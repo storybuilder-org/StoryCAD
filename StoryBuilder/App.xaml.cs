@@ -8,8 +8,10 @@
   using dotenv.net;
   using dotenv.net.Utilities;
   using Microsoft.Extensions.DependencyInjection;
+  using Microsoft.UI.Dispatching;
   using Microsoft.UI.Xaml;
   using Microsoft.UI.Xaml.Controls;
+  using Microsoft.Windows.AppLifecycle;
   using PInvoke;
   using StoryBuilder.DAL;
   using StoryBuilder.Models;
@@ -27,6 +29,7 @@
   using StoryBuilder.Views;
   using Syncfusion.Licensing;
   using WinUIEx;
+  using AppInstance = Microsoft.Windows.AppLifecycle.AppInstance;
   using UnhandledExceptionEventArgs = Microsoft.UI.Xaml.UnhandledExceptionEventArgs;
 using Microsoft.Web.WebView2.Core;
 
@@ -57,11 +60,14 @@ public partial class App : Application
     /// </summary>
     public App()
     {
+        CheckForOtherInstances(); //Check other instances aren't already open.
+        
         ConfigureIoc();
 
         GlobalData.Version = "Version: " + Package.Current.Id.Version.Major + "." + Package.Current.Id.Version.Minor + "." + Package.Current.Id.Version.Build + "." + Package.Current.Id.Version.Revision;
-        var path = Path.Combine(Package.Current.InstalledLocation.Path, ".env");
-        var options = new DotEnvOptions(false, new[] { path });
+        string path = Path.Combine(Package.Current.InstalledLocation.Path, ".env");
+        DotEnvOptions options = new(false, new[] { path });
+        
         try
         {
             DotEnv.Load(options);
@@ -76,6 +82,36 @@ public partial class App : Application
 
         _log = Ioc.Default.GetService<LogService>();
         Current.UnhandledException += OnUnhandledException;
+    }
+
+    /// <summary>
+    /// This checks for other already open storybuilder instances
+    /// If one is open, pull it up and kill this instance.
+    /// </summary>
+    private async void CheckForOtherInstances()
+    {
+        //If this instance is the first, then we will register it, otherwise we will get info about the other instance.
+        AppInstance _MainInstance = AppInstance.FindOrRegisterForKey("main"); //Get main instance
+        _MainInstance.Activated += ActivateMainInstance;
+
+        //Redirect to other instance if one exists, otherwise continue initializing this instance.
+        if (!_MainInstance.IsCurrent)
+        {
+            //Bring up the 'main' instance 
+            AppActivationArguments _ActivatedEventArgs = AppInstance.GetCurrent().GetActivatedEventArgs();
+            await _MainInstance.RedirectActivationToAsync(_ActivatedEventArgs);
+            Process.GetCurrentProcess().Kill();
+        }
+    }
+
+    /// <summary>
+    /// When a second instance is opened, this code will be ran on the main (first) instance
+    /// It will bring up the main window.
+    /// </summary>
+    private void ActivateMainInstance(object sender, AppActivationArguments e)
+    {
+        GlobalData.MainWindow.Restore(); //Resize window and unminimize window
+        GlobalData.MainWindow.BringToFront(); //Bring window to front
     }
 
     private static void ConfigureIoc()
