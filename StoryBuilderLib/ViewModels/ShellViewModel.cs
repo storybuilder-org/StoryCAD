@@ -769,7 +769,7 @@ namespace StoryBuilder.ViewModels
         }
         public async Task SaveFile()
         {
-            if (DataSource.Count == 0 || DataSource == null)
+            if (DataSource == null || DataSource.Count == 0)
             {
                 Messenger.Send(new StatusChangedMessage(new($"You need to open a story first!", LogLevel.Info, false)));
                 Logger.Log(LogLevel.Info, "SaveFile command cancelled (DataSource was null or empty)");
