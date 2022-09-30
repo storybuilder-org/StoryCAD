@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Diagnostics;
 using CommunityToolkit.Mvvm.ComponentModel;
 using StoryBuilder.Models;
 using StoryBuilder.Models.Tools;
@@ -55,16 +56,24 @@ public class TopicsViewModel : ObservableRecipient
         if (topicName.Equals(string.Empty))
             return;
         _topic = GlobalData.TopicsSource[TopicName];
-        SubTopicNames.Clear();
-        SubTopicNotes.Clear();
-        foreach (SubTopicModel model in _topic.SubTopics)
+        switch (_topic.TopicType)
         {
-            SubTopicNames.Add(model.SubTopicName);
-            SubTopicNotes.Add(model.SubTopicNotes);
+            case TopicTypeEnum.Notepad:
+                Process.Start("notepad.exe", _topic.Filename);
+                break;
+            case TopicTypeEnum.Inline:
+                SubTopicNames.Clear();
+                SubTopicNotes.Clear();
+                foreach (SubTopicModel model in _topic.SubTopics)
+                {
+                    SubTopicNames.Add(model.SubTopicName);
+                    SubTopicNotes.Add(model.SubTopicNotes);
+                }
+                _index = 0;
+                SubTopicName = SubTopicNames[0];
+                SubTopicNote = SubTopicNotes[0];
+                break;
         }
-        _index = 0;
-        SubTopicName = SubTopicNames[0];
-        SubTopicNote = SubTopicNotes[0];
     }
 
     public void NextSubTopic()
