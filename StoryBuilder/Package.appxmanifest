@@ -8,8 +8,8 @@
 
   <Identity
     Name="34432StoryBuilder.StoryBuilder"
-    Publisher="CN=34A1944E-942C-4545-B217-ECE68E54ACF8"
-    Version="2.1.1.0" />
+    Publisher="CN=Jake"
+    Version="2.3.0.0" />
 
   <Properties>
     <DisplayName>StoryBuilder</DisplayName>

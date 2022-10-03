@@ -33,6 +33,9 @@ using GuidAttribute = System.Runtime.InteropServices.GuidAttribute;
 using Octokit;
 using ProductHeaderValue = Octokit.ProductHeaderValue;
 using StoryBuilder.Services.Backend;
+using System.Net.Http;
+using System.Net;
+using Microsoft.Web.WebView2.Core;
 
 namespace StoryBuilder.ViewModels
 {
@@ -49,6 +52,8 @@ namespace StoryBuilder.ViewModels
         private const string SectionPage = "SectionPage";
         private const string SettingPage = "SettingPage";
         private const string TrashCanPage = "TrashCanPage";
+        private const string NotesPage = "NotesPage";
+        private const string WebPage = "WebPage";
 
         // Navigation navigation landmark nodes
         public StoryNodeItem CurrentNode { get; set; }
@@ -122,6 +127,8 @@ namespace StoryBuilder.ViewModels
         public RelayCommand AddSectionCommand { get; }
         public RelayCommand AddProblemCommand { get; }
         public RelayCommand AddCharacterCommand { get; }
+        public RelayCommand AddWebCommand { get; }
+        public RelayCommand AddNotesCommand { get; }
         public RelayCommand AddSettingCommand { get; }
         public RelayCommand AddSceneCommand { get; }
         public RelayCommand PrintNodeCommand { get; }
@@ -513,7 +520,7 @@ namespace StoryBuilder.ViewModels
                 {
                     CurrentNode = node;
                     StoryElement element = StoryModel.StoryElements.StoryElementGuids[node.Uuid];
-                    switch (node.Type)
+                    switch (element.Type)
                     {
                         case StoryItemType.Character:
                             nav.NavigateTo(SplitViewFrame, CharacterPage, element);
@@ -532,6 +539,12 @@ namespace StoryBuilder.ViewModels
                             break;
                         case StoryItemType.Setting:
                             nav.NavigateTo(SplitViewFrame, SettingPage, element);
+                            break;
+                        case StoryItemType.Web:
+                            nav.NavigateTo(SplitViewFrame, WebPage, element);
+                            break;
+                        case StoryItemType.Notes:
+                            nav.NavigateTo(SplitViewFrame, NotesPage, element);
                             break;
                         case StoryItemType.StoryOverview:
                             nav.NavigateTo(SplitViewFrame, OverviewPage, element);
@@ -552,7 +565,7 @@ namespace StoryBuilder.ViewModels
         /// <summary>
         /// Shows dotenv warning.
         /// </summary>
-        public async Task ShowWarningAsync()
+        public async Task ShowDotEnvWarningAsync()
         {
             ContentDialog dialog = new();
             dialog.Title = "File missing.";
@@ -563,6 +576,61 @@ namespace StoryBuilder.ViewModels
             dialog.PrimaryButtonText = "Okay";
             await dialog.ShowAsync();
             Ioc.Default.GetService<LogService>().Log(LogLevel.Error, "Env missing.");
+        }
+
+        /// <summary>
+        /// This shows a message, if the webview runtime is missing and then tries to install it.
+        /// </summary>
+        public async Task ShowWebviewErrorAsync()
+        {
+            Ioc.Default.GetService<LogService>().Log(LogLevel.Error, "Webview is missing.");
+
+            //Show dialog
+            ContentDialog dialog = new()
+            {
+                Title = "Webview is missing.",
+                Content = "This computer is missing the WebView2 Runtime, without it some features may not work.\nWould you like to install this now?",
+                XamlRoot = GlobalData.XamlRoot,
+                PrimaryButtonText = "Yes",
+                SecondaryButtonText = "No"
+            };
+
+            Ioc.Default.GetService<LogService>().Log(LogLevel.Error, "Showing dialog missing.");
+            if (await dialog.ShowAsync() == ContentDialogResult.Primary) //Okay clicked.
+            {
+                Ioc.Default.GetService<LogService>().Log(LogLevel.Error, "Installing webview...");
+                
+                //Download file
+                new WebClient().DownloadFile("https://go.microsoft.com/fwlink/p/?LinkId=2124703", Path.Combine(GlobalData.RootDirectory, "evergreenbootstrapper.exe"));
+                
+                //Run installer and wait for it to finish
+                Process p = Process.Start(Path.Combine(GlobalData.RootDirectory, "evergreenbootstrapper.exe"));
+                p.WaitForExit();
+
+                //Check again for webview and show relevant message to user.
+                try
+                {
+                    if (CoreWebView2Environment.GetAvailableBrowserVersionString() != null) 
+                    {
+                        dialog.SecondaryButtonText = null;
+                        dialog.PrimaryButtonText = "Okay";
+                        dialog.Title = "Webview installed!";
+                        dialog.Content = "You are good to go, everything should work now.";
+                        await dialog.ShowAsync();
+                        Logger.Log(LogLevel.Info, "Webview installed");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    dialog.SecondaryButtonText = null;
+                    dialog.PrimaryButtonText = "Okay";
+                    dialog.Title = "Somthing went wrong.";
+                    dialog.Content = "Looks like somthing went wrong, you can still use StoryBuilder however some features may not work.";
+                    await dialog.ShowAsync();
+                    Logger.Log(LogLevel.Warn, "Somthing went wrong with the webview install.");
+                }
+            }
+
         }
 
         public async Task ShowChangelog()
@@ -668,6 +736,10 @@ namespace StoryBuilder.ViewModels
                 case "StoryBuilder.Views.SettingPage":
                     SettingViewModel setvm = Ioc.Default.GetService<SettingViewModel>();
                     setvm.SaveModel();
+                    break;
+                case "StoryBuilder.Views.WebPage":
+                    WebViewModel webvm = Ioc.Default.GetService<WebViewModel>();
+                    webvm.SaveModel();
                     break;
             }
         }
@@ -1585,6 +1657,14 @@ namespace StoryBuilder.ViewModels
         {
             TreeViewNodeClicked(AddStoryElement(StoryItemType.Character));
         }
+        private void AddWeb()
+        {
+            TreeViewNodeClicked(AddStoryElement(StoryItemType.Web));
+        }
+        private void AddNotes()
+        {
+            TreeViewNodeClicked(AddStoryElement(StoryItemType.Notes));
+        }
 
         private void AddSetting()
         {
@@ -1638,6 +1718,12 @@ namespace StoryBuilder.ViewModels
                     break;
                 case StoryItemType.Scene:
                     NewNode = new StoryNodeItem(new SceneModel(StoryModel), RightTappedNode);
+                    break;
+                case StoryItemType.Web:
+                    NewNode = new StoryNodeItem(new WebModel(StoryModel), RightTappedNode);
+                    break;
+                case StoryItemType.Notes:
+                    NewNode = new StoryNodeItem(new NotesModel(StoryModel), RightTappedNode);
                     break;
             }
 
@@ -2104,6 +2190,8 @@ namespace StoryBuilder.ViewModels
             AddSectionCommand = new RelayCommand(AddSection, () => _canExecuteCommands);
             AddProblemCommand = new RelayCommand(AddProblem, () => _canExecuteCommands);
             AddCharacterCommand = new RelayCommand(AddCharacter, () => _canExecuteCommands);
+            AddWebCommand = new RelayCommand(AddWeb, () => _canExecuteCommands);
+            AddNotesCommand = new RelayCommand(AddNotes, () => _canExecuteCommands);
             AddSettingCommand = new RelayCommand(AddSetting, () => _canExecuteCommands);
             AddSceneCommand = new RelayCommand(AddScene, () => _canExecuteCommands);
             // Remove Story Element command (move to trash)

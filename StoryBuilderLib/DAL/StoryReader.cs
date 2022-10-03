@@ -147,6 +147,12 @@ public class StoryReader : ObservableRecipient
                 case "Folder":
                     ParseFolder(node);
                     break;
+                case "Notes":
+                    ParseNotes(node);
+                    break;
+                case "Web":
+                    ParseWeb(node);
+                    break;
                 case "Section":
                     ParseSection(node);
                     break;
@@ -156,6 +162,30 @@ public class StoryReader : ObservableRecipient
             }
             foreach (IXmlNode _child in node.ChildNodes)
                 RecurseStoryElement(_child);
+        }
+    }
+
+    private void ParseWeb(IXmlNode xn)
+    {
+        WebModel _web = new(xn, _model);
+        foreach (IXmlNode 
+                     
+                     _attr in xn.Attributes)
+        {
+            switch (_attr.NodeName)
+            {
+                case "UUID":
+                    break;
+                case "Name":
+                    _web.Name = _attr.InnerText;
+                    break;
+                case "Timestamp":
+                    _web.Timestamp = Convert.ToDateTime(_attr.InnerText);
+                    break;
+                case "URL":
+                    _web.URL = new Uri(_attr.InnerText);
+                    break;
+            }
         }
     }
 
@@ -615,6 +645,24 @@ public class StoryReader : ObservableRecipient
             }
         }
 
+    }
+    private void ParseNotes(IXmlNode xn)
+    {
+        NotesModel _Notes = new(xn, _model);
+        foreach (IXmlNode _attr in xn.Attributes)
+        {
+            switch (_attr.NodeName)
+            {
+                case "UUID":
+                    break;
+                case "Name":
+                    _Notes.Name = _attr.InnerText;
+                    break;
+                case "Notes":
+                    _Notes.Notes = _attr.InnerText;
+                    break;
+            }
+        }
     }
 
     private void ParseFolder(IXmlNode xn)

@@ -31,8 +31,9 @@
   using WinUIEx;
   using AppInstance = Microsoft.Windows.AppLifecycle.AppInstance;
   using UnhandledExceptionEventArgs = Microsoft.UI.Xaml.UnhandledExceptionEventArgs;
+using Microsoft.Web.WebView2.Core;
 
-  namespace StoryBuilder;
+namespace StoryBuilder;
 
 public partial class App : Application
 {
@@ -45,6 +46,9 @@ public partial class App : Application
     private const string SectionPage = "SectionPage";
     private const string SettingPage = "SettingPage";
     private const string TrashCanPage = "TrashCanPage";
+    private const string WebPage = "WebPage";
+    private const string NotesPage = "NotesPage";
+
 
     private LogService _log;
 
@@ -61,9 +65,9 @@ public partial class App : Application
         ConfigureIoc();
 
         GlobalData.Version = "Version: " + Package.Current.Id.Version.Major + "." + Package.Current.Id.Version.Minor + "." + Package.Current.Id.Version.Build + "." + Package.Current.Id.Version.Revision;
-
         string path = Path.Combine(Package.Current.InstalledLocation.Path, ".env");
         DotEnvOptions options = new(false, new[] { path });
+        
         try
         {
             DotEnv.Load(options);
@@ -139,6 +143,8 @@ public partial class App : Application
                 .AddSingleton<SceneViewModel>()
                 .AddSingleton<FolderViewModel>()
                 .AddSingleton<SectionViewModel>()
+                .AddSingleton<WebViewModel>()
+                .AddSingleton<NotesViewModel>()
                 .AddSingleton<TrashCanViewModel>()
                 .AddSingleton<UnifiedVM>()
                 .AddSingleton<InitVM>()
@@ -336,6 +342,7 @@ public partial class App : Application
         {
             _log.Log(LogLevel.Info, "Configuring page navigation");
             NavigationService nav = Ioc.Default.GetService<NavigationService>();
+            nav.Configure(NotesPage, typeof(NotesPage));
             nav.Configure(HomePage, typeof(HomePage));
             nav.Configure(OverviewPage, typeof(OverviewPage));
             nav.Configure(ProblemPage, typeof(ProblemPage));
@@ -345,6 +352,7 @@ public partial class App : Application
             nav.Configure(SettingPage, typeof(SettingPage));
             nav.Configure(ScenePage, typeof(ScenePage));
             nav.Configure(TrashCanPage, typeof(TrashCanPage));
+            nav.Configure(WebPage, typeof(WebPage));
         }
         catch (Exception ex)
         {

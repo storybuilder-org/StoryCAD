@@ -9,6 +9,11 @@ using StoryBuilder.DAL;
 using StoryBuilder.Models;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.ViewModels;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.Web.WebView2.Core;
+using Windows.Storage.Streams;
+using System.IO;
+using Google.Protobuf.WellKnownTypes;
 
 namespace StoryBuilder.Services.Reports;
 
@@ -512,6 +517,79 @@ public class ReportFormatter
             doc.AddNewLine();
         }
 
+        return doc.GetRtf();
+    }
+
+    public string FormatWebReport (StoryElement element)
+    {
+        RtfDocument doc = new(string.Empty);
+        StringBuilder sb = new();
+        WebModel model = element as WebModel;
+        sb.AppendLine(model.Name);
+        sb.AppendLine(model.URL.ToString());
+        doc.AddText(sb.ToString());
+        doc.AddNewLine();
+        return doc.GetRtf();
+
+        // STUB: Reimpliment this code at a later date, because
+        /*
+        //Create new Webview, then initalise corewebview and configure URL. 
+        var _webview = new WebView2();
+        _webview.Source = ((WebModel)element).URL;
+        _webview.Height = 1080;
+        _webview.Width = 1920;
+        await _webview.EnsureCoreWebView2Async();
+
+        //Create file
+        StorageFolder ParentFolder = ApplicationData.Current.RoamingFolder;
+        ParentFolder = await ParentFolder.CreateFolderAsync("Cache",CreationCollisionOption.OpenIfExists);
+        StorageFile imgfile = await ParentFolder.CreateFileAsync(Guid.NewGuid().ToString() + ".png");
+        
+        //Screenshot site
+        MemoryStream _buffer = new();
+        var x = _buffer.AsRandomAccessStream();
+
+        await _webview.CoreWebView2.CapturePreviewAsync(CoreWebView2CapturePreviewImageFormat.Png, (IRandomAccessStream)_buffer);
+        //await _webview.CoreWebView2.PrintToPdfAsync("C:\\test.pdf", null);
+        //Write to disk
+        Stream WriteStream = await imgfile.OpenStreamForWriteAsync();
+        WriteStream.Write(_buffer.ToArray());
+
+        //Add image
+        doc.AddImage(imgfile.Path, 1920, 1080);
+        */
+
+    }
+
+    public string FormatWebListReport()
+    {
+        string[] lines = _templates["List of Websites"];
+        RtfDocument doc = new(string.Empty);
+
+        // Parse and write the report
+        foreach (string line in lines)
+        {
+            if (line.Contains("@Description"))
+            {
+                foreach (StoryElement element in _model.StoryElements)
+                {
+                                        if (element.Type == StoryItemType.Web)
+                    {
+                        WebModel scene = (WebModel)element;
+                        StringBuilder sb = new(line);
+                        sb.Replace("@Description", scene.Name);
+                        doc.AddText(sb.ToString());
+                        doc.AddNewLine();
+                    }
+                }
+
+            }
+            else
+            {
+                doc.AddText(line);
+                doc.AddNewLine();
+            }
+        }
         return doc.GetRtf();
     }
 

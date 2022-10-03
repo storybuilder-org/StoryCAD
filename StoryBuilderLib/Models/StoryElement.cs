@@ -37,7 +37,7 @@ public class StoryElement : ObservableObject
 
     #endregion
 
-    #region Constructor
+    #region Constructor 
 
     public StoryElement(string name, StoryItemType type, StoryModel model)
     {
@@ -84,6 +84,12 @@ public class StoryElement : ObservableObject
                 break;
             case "Section":
                 type = StoryItemType.Section;
+                break;
+            case "Notes":
+                type = StoryItemType.Notes;
+                break;
+            case "Web":
+                type= StoryItemType.Web;
                 break;
             case "TrashCan":
                 type = StoryItemType.TrashCan;

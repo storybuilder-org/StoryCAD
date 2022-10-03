@@ -39,6 +39,7 @@ public class StoryWriter
     private XmlNode _explorer;    // StoryExplorer
     private XmlNode _narrator;    // StoryNarrator
     private XmlNode _relationships; // Character Relationships
+    private XmlNode _web; // Character Relationships
     private XmlNode _stbSettings; // Settings
 
     private readonly LogService _logger = Ioc.Default.GetRequiredService<LogService>();
@@ -94,6 +95,8 @@ public class StoryWriter
         _stb.AppendChild(_narrator);
         _relationships = _xml.CreateElement("Relationships");
         _stb.AppendChild(_relationships);
+        _web = _xml.CreateElement("Web");
+        _stb.AppendChild(_web);
 
         _stbSettings = _xml.CreateElement("Settings");
         _stb.AppendChild(_stbSettings);
@@ -124,17 +127,44 @@ public class StoryWriter
                 case StoryItemType.Folder:
                     ParseFolderElement(_element);
                     break;
+                case StoryItemType.Notes:
+                    ParseNotesElement(_element);
+                    break;
                 case StoryItemType.Section:
                     ParseSectionElement(_element);
                     break;
                 case StoryItemType.TrashCan:
                     ParseTrashCanElement(_element);
                     break;
+                case StoryItemType.Web:
+                    ParseWebElement(_element);
+                    break;
                 default:
                     Ioc.Default.GetRequiredService<Logger>().Log(LogLevel.Warn, "Unknown Element found in StoryWriter: " + _element.Type);
                     break;
             }
         }
+    }
+
+    private void ParseWebElement(StoryElement element)
+    {
+        WebModel _rec = (WebModel)element;
+        XmlNode _web = _xml.CreateElement("Web");
+
+        XmlAttribute _attr = _xml.CreateAttribute("UUID");
+        _attr.Value = UuidString(_rec.Uuid);
+        _web.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Name");
+        _attr.Value = _rec.Name;
+        _web.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("URL");
+        _attr.Value = _rec.URL.ToString();
+        _web.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Timestamp");
+        _attr.Value = _rec.Timestamp.ToString();
+        _web.Attributes.Append(_attr);
+
+        _elements.AppendChild(_web);
     }
 
     private void ParseOverViewElement(StoryElement element)
@@ -615,6 +645,23 @@ public class StoryWriter
         _elements.AppendChild(_scene);
     }
 
+    private void ParseNotesElement(StoryElement element)
+    {
+        NotesModel _rec = (NotesModel)element;
+        XmlNode _node = _xml.CreateElement("Notes");
+
+        XmlAttribute _attr = _xml.CreateAttribute("UUID");
+        _attr.Value = UuidString(_rec.Uuid);
+        _node.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Name");
+        _attr.Value = _rec.Name;
+        _node.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Notes");
+        _attr.Value = _rec.Notes;
+        _node.Attributes.Append(_attr);
+
+        _elements.AppendChild(_node);
+    }
     private void ParseFolderElement(StoryElement element)
     {
         FolderModel _rec = (FolderModel)element;

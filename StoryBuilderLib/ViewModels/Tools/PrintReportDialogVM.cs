@@ -33,6 +33,13 @@ public class PrintReportDialogVM : ObservableRecipient
         set => SetProperty(ref _selectAllScenes, value);
     }
 
+    private bool _selectAllWeb;
+    public bool SelectAllWeb
+    {
+        get => _selectAllWeb;
+        set => SetProperty(ref _selectAllWeb, value);
+    }
+
     private bool _selectAllSetting;
     public bool SelectAllSettings
     {
@@ -75,6 +82,13 @@ public class PrintReportDialogVM : ObservableRecipient
         set => SetProperty(ref _sceneList, value);
     }
 
+    private bool _webList;
+    public bool WebList
+    {
+        get => _webList;
+        set => SetProperty(ref _webList, value);
+    }
+
     private List<StoryNodeItem> _selectedNodes = new();
     public List<StoryNodeItem> SelectedNodes
     {
@@ -110,6 +124,13 @@ public class PrintReportDialogVM : ObservableRecipient
         set => SetProperty(ref _sceneNodes, value);
     }
 
+    private List<StoryNodeItem> _webNodes = new();
+    public List<StoryNodeItem> WebNodes
+    {
+        get => _webNodes;
+        set => SetProperty(ref _webNodes, value);
+    }
+
     public void TraverseNode(StoryNodeItem node)
     {
         switch (node.Type)
@@ -118,6 +139,7 @@ public class PrintReportDialogVM : ObservableRecipient
             case StoryItemType.Character: CharacterNodes.Add(node); break;
             case StoryItemType.Setting: SettingNodes.Add(node); break;
             case StoryItemType.Scene: SceneNodes.Add(node); break;
+            case StoryItemType.Web: WebNodes.Add(node); break;
         }
 
         //Recurs until children are empty 

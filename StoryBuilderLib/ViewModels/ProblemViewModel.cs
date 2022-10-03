@@ -22,8 +22,8 @@ public class ProblemViewModel : ObservableRecipient, INavigable
     #region Fields
 
     private readonly LogService _logger;
-    internal readonly StoryReader _rdr;
-    private readonly StoryWriter _wtr;
+    //internal readonly StoryReader _rdr;
+    //private readonly StoryWriter _wtr;
     private bool _changeable;
     private bool _changed;
 
@@ -359,8 +359,8 @@ public class ProblemViewModel : ObservableRecipient, INavigable
     public ProblemViewModel()
     {
         _logger = Ioc.Default.GetService<LogService>();
-        _wtr = Ioc.Default.GetService<StoryWriter>();
-        _rdr = Ioc.Default.GetService<StoryReader>();
+        //_wtr = Ioc.Default.GetService<StoryWriter>();
+        //_rdr = Ioc.Default.GetService<StoryReader>();
 
         ProblemType = string.Empty;
         ConflictType = string.Empty;

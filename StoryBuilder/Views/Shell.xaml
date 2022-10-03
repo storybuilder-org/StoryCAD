@@ -47,6 +47,17 @@
                         <ToolTip Content="Add New Scene" />
                     </ToolTipService.ToolTip>
                 </AppBarButton>
+                <AppBarButton Icon="TwoPage" Command="{x:Bind ShellVm.AddNotesCommand, Mode=OneWay}"
+                          Visibility="{x:Bind ShellVm.AddSceneVisibility, Mode=TwoWay}" >
+                    <ToolTipService.ToolTip>
+                        <ToolTip Content="Add New Notes" />
+                    </ToolTipService.ToolTip>
+                </AppBarButton>
+                <AppBarButton Icon="PreviewLink" Command="{x:Bind ShellVm.AddWebCommand, Mode=OneWay}" Visibility="{x:Bind ShellVm.AddSceneVisibility, Mode=TwoWay}" >
+                    <ToolTipService.ToolTip>
+                        <ToolTip Content="Add new Web Node" />
+                    </ToolTipService.ToolTip>
+                </AppBarButton>
                 <AppBarSeparator />
                 <AppBarButton Icon="Delete"  Command="{x:Bind ShellVm.RemoveStoryElementCommand, Mode=OneWay}" 
                           Visibility="{x:Bind ShellVm.RemoveStoryElementVisibility, Mode=TwoWay}" >
@@ -185,6 +196,22 @@
                             <MenuFlyoutItem Visibility="{x:Bind ShellVm.AddSceneVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.AddSceneCommand,Mode=OneWay}" Icon="AllApps" Text="Add scene">
                                 <MenuFlyoutItem.KeyboardAccelerators>
                                     <KeyboardAccelerator Key="F6"/>
+                                </MenuFlyoutItem.KeyboardAccelerators>
+                            </MenuFlyoutItem>
+                            <MenuFlyoutItem Text="Add Web node" Visibility="{x:Bind ShellVm.AddSceneVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.AddWebCommand,Mode=OneWay}">
+                                <MenuFlyoutItem.Icon>
+                                    <SymbolIcon Symbol="PreviewLink"/>
+                                </MenuFlyoutItem.Icon>
+                                <MenuFlyoutItem.KeyboardAccelerators>
+                                    <KeyboardAccelerator Key="F7"/>
+                                </MenuFlyoutItem.KeyboardAccelerators>
+                            </MenuFlyoutItem>
+                            <MenuFlyoutItem Text="Add Notes node" Visibility="{x:Bind ShellVm.AddSceneVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.AddNotesCommand,Mode=OneWay}">
+                                <MenuFlyoutItem.Icon>
+                                    <SymbolIcon Symbol="TwoPage"/>
+                                </MenuFlyoutItem.Icon>
+                                <MenuFlyoutItem.KeyboardAccelerators>
+                                    <KeyboardAccelerator Key="F8"/>
                                 </MenuFlyoutItem.KeyboardAccelerators>
                             </MenuFlyoutItem>
                             <MenuFlyoutSeparator/>

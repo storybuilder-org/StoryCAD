@@ -25,7 +25,8 @@ namespace StoryBuilder.ViewModels;
 /// instances of StoryElements such as ProblemModel, CharacterModel, etc. These model 
 /// components are not visual, and have no Children, IsSelected or IsExpanded, and so on. 
 /// A StoryElement instance is displayed and modified on a Page such as ProblemPage or
-/// CharacterPage which is contained in Shell's SplitView.Content frame.
+/// CharacterPage which is contained in Shell's SplitView.Content frame. In order to do so,
+/// it needs a TreeViewItem on the tree which binds to a StoryNodeItem, which
 /// 
 /// StoryBuilder's data model is called StoryModel. StoryModel  contains two ObservableCollection
 /// lists of StoryNodeItems (and their counterpart StoryElements), a StoryExplorer collection which
@@ -218,18 +219,6 @@ public class StoryNodeItem : DependencyObject, INotifyPropertyChanged
         get => GlobalData.Preferences.WrapNodeNames;
     }
 
-//public bool IsSelected
-//{
-//    get => (bool)GetValue(IsSelectedProperty);
-//    set
-//    {
-//        SetValue(IsSelectedProperty, value);
-//        NotifyPropertyChanged("IsSelected");
-//    }
-//}
-
-
-
     //// Use a DependencyProperty as the backing store for IsSelected
     //public static readonly DependencyProperty IsSelectedProperty =
     //    DependencyProperty.Register("IsSelected", typeof(bool), typeof(StoryNodeItem), new PropertyMetadata(false));
@@ -290,48 +279,12 @@ public class StoryNodeItem : DependencyObject, INotifyPropertyChanged
 
     #region Constructors
 
-    public StoryNodeItem(StoryModel model, StoryNodeItem node, StoryNodeItem parent)
+    public StoryNodeItem(StoryElement node, StoryNodeItem parent)
     {
-        _uuid = node.Uuid;
-        StoryElement element = model.StoryElements.StoryElementGuids[Uuid];
-        Name = element.Name;
-        _type = node.Type;
+        Uuid = node.Uuid;
+        Name = node.Name;
+        Type = node.Type;
         switch (_type)
-        {
-            case StoryItemType.StoryOverview:
-                Symbol = Symbol.View;
-                break;
-            case StoryItemType.Character:
-                Symbol = Symbol.Contact;
-                break;
-            case StoryItemType.Scene:
-                Symbol = Symbol.AllApps;
-                break;
-            case StoryItemType.Problem:
-                Symbol = Symbol.Help;
-                break;
-            case StoryItemType.Setting:
-                Symbol = Symbol.Globe;
-                break;
-            case StoryItemType.Folder:
-                Symbol = Symbol.Folder;
-                break;
-        }
-
-        Parent = parent;
-        Children = new ObservableCollection<StoryNodeItem>();
-
-        IsExpanded = node.IsExpanded;
-        IsRoot = node.IsRoot;
-        //IsSelected = node.IsSelected;
-    }
-
-    public StoryNodeItem(StoryNodeItem parent, StoryElement model)
-    {
-        Uuid = model.Uuid;
-        Name = model.Name;
-        Type = model.Type;
-        switch (model.Type)
         {
             case StoryItemType.StoryOverview:
                 Symbol = Symbol.View;
@@ -354,46 +307,14 @@ public class StoryNodeItem : DependencyObject, INotifyPropertyChanged
             case StoryItemType.Section:
                 Symbol = Symbol.Folder;
                 break;
-            case StoryItemType.TrashCan:
-                Symbol = Symbol.Delete;
-                break;
-        }
-        Parent = parent;
-        Children = new ObservableCollection<StoryNodeItem>();
-        IsExpanded = false;
-        //IsSelected = false;
-        if (Parent == null)
-            return;
-        Parent.Children.Add(this);
-    }
-
-    public StoryNodeItem(StoryElement node, StoryNodeItem parent)
-    {
-        _uuid = node.Uuid;
-        _name = node.Name;
-        _type = node.Type;
-        switch (_type)
-        {
-            case StoryItemType.StoryOverview:
-                Symbol = Symbol.View;
-                break;
-            case StoryItemType.Character:
-                Symbol = Symbol.Contact;
-                break;
-            case StoryItemType.Scene:
-                Symbol = Symbol.AllApps;
-                break;
-            case StoryItemType.Problem:
-                Symbol = Symbol.Help;
-                break;
-            case StoryItemType.Setting:
-                Symbol = Symbol.Globe;
-                break;
-            case StoryItemType.Folder:
-                Symbol = Symbol.Folder;
+            case StoryItemType.Web:
+                Symbol = Symbol.PreviewLink;
                 break;
             case StoryItemType.TrashCan:
                 Symbol = Symbol.Delete;
+                break;
+            case StoryItemType.Notes:
+                Symbol = Symbol.TwoPage;
                 break;
         }
 
@@ -453,9 +374,17 @@ public class StoryNodeItem : DependencyObject, INotifyPropertyChanged
                     Type = StoryItemType.Section;
                     Symbol = Symbol.Folder;
                     break;
+                case "web":
+                    Type = StoryItemType.Web;
+                    Symbol = Symbol.PreviewLink;
+                    break;
                 case "trashcan":
                     Type = StoryItemType.TrashCan;
                     Symbol = Symbol.Delete;
+                    break;
+                case "notes":
+                    Type = StoryItemType.Notes;
+                    Symbol = Symbol.TwoPage;
                     break;
             }
 

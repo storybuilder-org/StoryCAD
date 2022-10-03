@@ -5,6 +5,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Navigation;
+using Microsoft.Web.WebView2.Core;
 using StoryBuilder.Models;
 using StoryBuilder.Models.Tools;
 using StoryBuilder.Services.Logging;
@@ -44,7 +45,9 @@ public sealed partial class Shell
         GlobalData.XamlRoot = Content.XamlRoot;
         ShellVm.ShowHomePage();
         ShellVm.ShowConnectionStatus();        
-        if (GlobalData.ShowDotEnvWarning) { await ShellVm.ShowWarningAsync(); }
+        if (GlobalData.ShowDotEnvWarning) { await ShellVm.ShowDotEnvWarningAsync(); }
+        try { CoreWebView2Environment.GetAvailableBrowserVersionString(); }
+        catch { await ShellVm.ShowWebviewErrorAsync(); }
         if (GlobalData.LoadedWithVersionChange ) { await ShellVm.ShowChangelog(); }
         await ShellVm.OpenUnifiedMenu();
     }

@@ -19,8 +19,8 @@
 		<AppxBundle>Auto</AppxBundle>
 		<AppInstallerUri>C:\msixs</AppInstallerUri>
 		<HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
-		<AppxPackageDir>C:\Users\Rarisma\Desktop\Ehurmantraut</AppxPackageDir>
-		<AppxBundlePlatforms>x64</AppxBundlePlatforms>
+		<AppxPackageDir>C:\Users\Rarisma\Desktop\TheHandOfHarshReality%27sUngloved\</AppxPackageDir>
+		<AppxBundlePlatforms>x86|x64</AppxBundlePlatforms>
 		<RunAnalyzersDuringLiveAnalysis>False</RunAnalyzersDuringLiveAnalysis>
 		<RunAnalyzersDuringBuild>False</RunAnalyzersDuringBuild>
 		<PackageCertificateKeyFile>StoryBuilder_TemporaryKey.pfx</PackageCertificateKeyFile>
@@ -64,7 +64,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<None Remove="Views\NotesPage.xaml" />
 		<None Remove="Views\PreferencesInitialization.xaml" />
+		<None Remove="Views\WebPage.xaml" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -75,6 +77,12 @@
 		<None Update=".env">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
+		<Page Update="Views\NotesPage.xaml">
+		  <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+		</Page>
+		<Page Update="Views\WebPage.xaml">
+		  <Generator>MSBuild:Compile</Generator>
+		</Page>
 	</ItemGroup>
 
 	<ItemGroup>
