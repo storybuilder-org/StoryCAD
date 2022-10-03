@@ -147,6 +147,11 @@ public class NarrativeToolVM: ObservableRecipient
     /// </summary>
     private void MakeSection()
     {
+        if (ShellVM.DataSource == null || ShellVM.DataSource.Count > 0)
+        {
+            Logger.Log(LogLevel.Warn, "DataSource is empty or null, not adding section");
+            return;
+        }
         _ = new StoryNodeItem(new SectionModel(FlyoutText, ShellVM.StoryModel), ShellVM.StoryModel.NarratorView[0]);
     }
 

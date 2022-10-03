@@ -27,6 +27,7 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Windows.Storage;
 using Windows.Storage.Pickers;
+using Elmah.Io.Client;
 using StoryBuilder.Services;
 using WinRT;
 using GuidAttribute = System.Runtime.InteropServices.GuidAttribute;
@@ -841,7 +842,7 @@ namespace StoryBuilder.ViewModels
         }
         public async Task SaveFile()
         {
-            if (DataSource.Count == 0 || DataSource == null)
+            if (DataSource == null || DataSource.Count == 0)
             {
                 Messenger.Send(new StatusChangedMessage(new($"You need to open a story first!", LogLevel.Info, false)));
                 Logger.Log(LogLevel.Info, "SaveFile command cancelled (DataSource was null or empty)");
@@ -920,6 +921,14 @@ namespace StoryBuilder.ViewModels
             Messenger.Send(new StatusChangedMessage(new($"Save File As command executing", LogLevel.Info, true)));
             try
             {
+                if (StoryModel.ProjectFile == null || StoryModel.ProjectPath == null)
+                {
+                    Messenger.Send(new StatusChangedMessage(new($"You need to load a story first!", LogLevel.Info, false)));
+                    Logger.Log(LogLevel.Warn, "User tried to use save as without a story loaded.");
+                    _canExecuteCommands = true;
+                    return;
+                }
+
                 //Creates the content diolouge
                 ContentDialog SaveAsDialog = new();
                 SaveAsDialog.Title = "Save as";
