@@ -1346,7 +1346,7 @@ namespace StoryBuilder.ViewModels
                 if (_targetIndex == -1) { _targetCollection.Add(CurrentNode); }
                 else { _targetCollection.Insert(_targetIndex, CurrentNode); }
                 CurrentNode.Parent = targetParent;
-
+                ShowChange();
                 Logger.Log(LogLevel.Info, $"Moving {CurrentNode.Name} left to parent {CurrentNode.Parent.Name}");
             }
             else
@@ -1434,6 +1434,8 @@ namespace StoryBuilder.ViewModels
                 else
                     _targetCollection.Insert(_targetIndex, CurrentNode);
                 CurrentNode.Parent = targetParent;
+                ShowChange();
+
                 Logger.Log(LogLevel.Info, $"Moving {CurrentNode.Name} right to parent {CurrentNode.Parent.Name}");
             }
         }
@@ -1494,6 +1496,8 @@ namespace StoryBuilder.ViewModels
                 else
                     _targetCollection.Insert(_targetIndex, CurrentNode);
                 CurrentNode.Parent = _targetParent;
+                ShowChange();
+
                 Logger.Log(LogLevel.Info, $"Moving {CurrentNode.Name} up to parent {CurrentNode.Parent.Name}");
             }
         }
@@ -1557,6 +1561,8 @@ namespace StoryBuilder.ViewModels
                 _sourceChildren.RemoveAt(_sourceIndex);
                 _targetCollection.Insert(_targetIndex, CurrentNode);
                 CurrentNode.Parent = _targetParent;
+                ShowChange();
+
                 Logger.Log(LogLevel.Info, $"Moving {CurrentNode.Name} down up to parent {CurrentNode.Parent.Name}");
             }
         }
@@ -1952,7 +1958,7 @@ namespace StoryBuilder.ViewModels
             if (DataSource.Count > 0) { CurrentNode = DataSource[0]; }
         }
 
-        #region MVVM ` processing
+        #region MVVM  processing
         private void IsChangedMessageReceived(IsChangedMessage isDirty)
         {
             StoryModel.Changed = StoryModel.Changed || isDirty.Value;
