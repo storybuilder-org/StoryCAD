@@ -321,7 +321,7 @@
       </CastMembers>
       <ScenePurpose />
     </Scene>
-    <Scene UUID="64F411D1-DE9C-42C9-97BA-CA4430DDD471" Name="Scene 7 Claudius plots with Laertes to kill Hamlet" Id="24" ViewpointCharacter="bf774a16-4f57-47ba-9105-6adb73642f37" Date="" Time="" Setting="b2cefac0-7adb-421c-8285-b3780f7f47e7" SceneType="Suspense scene" ValueExchange="" Protagonist="" ProtagEmotion="" ProtagGoal="" Antagonist="" AntagEmotion="" AntagGoal="" Opposition="" Outcome="" Emotion="" NewGoal="" Remarks="{\rtf1\fbidis\ansi\ansicpg1252\deff0\nouicompat\deflang1033{\fonttbl{\f0\fnil\fcharset0 Segoe UI;}}&#xD;&#xA;{\colortbl ;\red0\green0\blue0;}&#xD;&#xA;{\*\generator Riched20 10.0.10011}\viewkind4\uc1 &#xD;&#xA;\pard\cf1\f0\fs25 When Claudius receives a letter from Hamlet reporting his return to Denmark, he plots with Laertes to kill him. They arrange a duel in which Laertes will fight with a poisoned blade. Claudius will also poison a drink, which he will offer Hamlet. Gertrude arrives with the news that Ophelia has drowned.\par&#xD;&#xA;}&#xD;&#xA;" Events="" Consequences="" Significance="" Realization="" Review="" Notes="">
+    <Scene UUID="64F411D1-DE9C-42C9-97BA-CA4430DDD471" Name="Scene 7 Claudius plots with Laertes to kill Hamlet" Id="24" ViewpointCharacter="bf774a16-4f57-47ba-9105-6adb73642f37" Date="" Time="" Setting="b2cefac0-7adb-421c-8285-b3780f7f47e7" SceneType="Suspense scene" ValueExchange="" Protagonist="" ProtagEmotion="" ProtagGoal="" Antagonist="" AntagEmotion="" AntagGoal="" Opposition="" Outcome="" Emotion="" NewGoal="" Remarks="{\rtf1\fbidis\ansi\ansicpg1252\deff0\nouicompat\deflang1033{\fonttbl{\f0\fnil\fcharset0 Segoe UI;}}&#xD;&#xA;{\colortbl ;\red255\green255\blue255;}&#xD;&#xA;{\*\generator Riched20 10.0.10011}\viewkind4\uc1 &#xD;&#xA;\pard\cf1\f0\fs25 When Claudius receives a letter from Hamlet reporting his return to Denmark, he plots with Laertes to kill him. They arrange a duel in which Laertes will fight with a poisoned blade. Claudius will also poison a drink, which he will offer Hamlet. Gertrude arrives with the news that Ophelia has drowned.\par&#xD;&#xA;}&#xD;&#xA;" Events="" Consequences="" Significance="" Realization="" Review="" Notes="">
       <CastMembers>
         <Member>bf774a16-4f57-47ba-9105-6adb73642f37</Member>
         <Member>c6c3db4d-8be2-4014-8bf0-3915193ddebb</Member>
@@ -453,9 +453,7 @@
         </StoryNode>
       </StoryNode>
     </StoryNode>
-    <StoryNode UUID="C6953857-8096-492E-BF38-6312F153C902" Type="TrashCan" Name="Deleted Story Elements" IsExpanded="False" IsSelected="False" IsRoot="True">
-      <StoryNode UUID="44D2419D-5670-4F82-8823-DE112E26274B" Type="Setting" Name="New Setting" IsExpanded="True" IsSelected="False" IsRoot="False" />
-    </StoryNode>
+    <StoryNode UUID="C6953857-8096-492E-BF38-6312F153C902" Type="TrashCan" Name="Deleted Story Elements" IsExpanded="True" IsSelected="False" IsRoot="True" />
   </Explorer>
   <Narrator>
     <StoryNode UUID="1EC971B2-BFF3-4661-9F56-CBA4DEFB57EF" Type="Section" Name="Narrative View" IsExpanded="True" IsSelected="False" IsRoot="True">
