@@ -1,6 +1,6 @@
 # About StoryBuilder
 
-Our mission is to provide a free open-source resource for writers of all levels who struggle with the complexity of plotted fiction. 
+Our mission is to provide a free open-source resource for writers of all levels who struggle with the complexity of plotted fiction.
 
 StoryBuilder is an editor for fiction outlines from which writers can quickly create working drafts. It uses best-practice techniques and offers hundreds of suggestions for better stories. It's CAD for fiction writers.
 
