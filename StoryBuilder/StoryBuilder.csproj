@@ -17,7 +17,7 @@
 		<AppxSymbolPackageEnabled>True</AppxSymbolPackageEnabled>
 		<GenerateTestArtifacts>True</GenerateTestArtifacts>
 		<AppxBundle>Auto</AppxBundle>
-		<AppInstallerUri>C:\msixs</AppInstallerUri>
+		<AppInstallerUri>C:\msixs\</AppInstallerUri>
 		<HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
 		<AppxPackageDir>C:\Users\Rarisma\Desktop\TheHandOfHarshReality%27sUngloved\</AppxPackageDir>
 		<AppxBundlePlatforms>x64</AppxBundlePlatforms>
