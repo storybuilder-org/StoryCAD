@@ -37,6 +37,7 @@ using StoryBuilder.Services.Backend;
 using System.Net.Http;
 using System.Net;
 using Microsoft.Web.WebView2.Core;
+using Org.BouncyCastle.Bcpg.OpenPgp;
 
 namespace StoryBuilder.ViewModels
 {
@@ -60,7 +61,7 @@ namespace StoryBuilder.ViewModels
         public StoryNodeItem CurrentNode { get; set; }
         public StoryNodeItem RightTappedNode;
 
-        public StoryViewType ViewType;
+        public StoryViewType CurrentViewType;
 
         private ContentDialog _contentDialog;
 
@@ -1152,6 +1153,7 @@ namespace StoryBuilder.ViewModels
         private async void MasterPlotTool()
         {
             Logger.Log(LogLevel.Info, "Displaying MasterPlot tool dialog");
+            if 
             if (RightTappedNode == null) { RightTappedNode = CurrentNode; }
 
             //Creates and shows content dialog
@@ -1263,41 +1265,47 @@ namespace StoryBuilder.ViewModels
         private async void StockScenesTool()
         {
             Logger.Log(LogLevel.Info, "Displaying Stock Scenes tool dialog");
-            if (RightTappedNode == null) { RightTappedNode = CurrentNode; }
-            try
-            {
-                //Creates and shows dialog
-                ContentDialog dialog = new();
-                dialog.Title = "Stock scenes";
-                dialog.Content = new StockScenesDialog();
-                dialog.PrimaryButtonText = "Add Scene";
-                dialog.CloseButtonText = "Cancel";
-                dialog.XamlRoot = GlobalData.XamlRoot;
-                ContentDialogResult result = await dialog.ShowAsync();
-
-                if (result == ContentDialogResult.Primary)   // Copy command
+            string msg;
+            if (VerifyToolUse(false, true, out msg))
+                try
                 {
-                    if (string.IsNullOrWhiteSpace(Ioc.Default.GetService<StockScenesViewModel>().SceneName))
+                    //Creates and shows dialog
+                    ContentDialog dialog = new();
+                    dialog.Title = "Stock scenes";
+                    dialog.Content = new StockScenesDialog();
+                    dialog.PrimaryButtonText = "Add Scene";
+                    dialog.CloseButtonText = "Cancel";
+                    dialog.XamlRoot = GlobalData.XamlRoot;
+                    ContentDialogResult result = await dialog.ShowAsync();
+
+                    if (result == ContentDialogResult.Primary)   // Copy command
                     {
-                        Messenger.Send(new StatusChangedMessage(new($"You need to select a stock scene", LogLevel.Warn)));
-                        return;
-                    }
+                        if (string.IsNullOrWhiteSpace(Ioc.Default.GetService<StockScenesViewModel>().SceneName))
+                        {
+                            Messenger.Send(new StatusChangedMessage(new($"You need to select a stock scene", LogLevel.Warn)));
+                            return;
+                        }
 
-                    SceneModel sceneVar = new SceneModel(StoryModel);
-                    sceneVar.Name = Ioc.Default.GetService<StockScenesViewModel>().SceneName;
-                    StoryNodeItem newNode = new(sceneVar, RightTappedNode);
-                    _sourceChildren = RightTappedNode.Children;
-                    TreeViewNodeClicked(newNode);
-                    RightTappedNode.IsExpanded = true;
-                    newNode.IsSelected = true;
-                    Messenger.Send(new StatusChangedMessage(new("Stock Scenes inserted", LogLevel.Info)));
+                        SceneModel sceneVar = new SceneModel(StoryModel);
+                        sceneVar.Name = Ioc.Default.GetService<StockScenesViewModel>().SceneName;
+                        StoryNodeItem newNode = new(sceneVar, RightTappedNode);
+                        _sourceChildren = RightTappedNode.Children;
+                        TreeViewNodeClicked(newNode);
+                        RightTappedNode.IsExpanded = true;
+                        newNode.IsSelected = true;
+                        Messenger.Send(new StatusChangedMessage(new("Stock Scenes inserted", LogLevel.Info)));
+                    }
+                    else
+                    {
+                        Messenger.Send(new StatusChangedMessage(new("Stock Scenes canceled", LogLevel.Warn)));
+                    }
                 }
-                else
-                {
-                    Messenger.Send(new StatusChangedMessage(new("Stock Scenes canceled", LogLevel.Warn)));
-                }
+                catch (Exception e) { Logger.LogException(LogLevel.Error, e, e.Message); }
+            else
+            {
+                Messenger.Send(new StatusChangedMessage(new("You need a ", LogLevel.Warn)));
             }
-            catch (Exception e) { Logger.LogException(LogLevel.Error, e, e.Message); }
+
         }
 
         private async void GeneratePrintReports()
@@ -1386,6 +1394,31 @@ namespace StoryBuilder.ViewModels
 
             _canExecuteCommands = true;
         }
+
+        /// <summary>
+        /// Verify that the tool being called has its prerequisites met.
+        ///
+        /// 
+        /// </summary>
+        /// <param name="explorerViewOnly">This tool can only run in StoryExplorer view</param>
+        /// <param name="nodeRequired">A node (right-clicked or clicked) must be present</param>
+        /// <returns></returns>
+        private bool VerifyToolUse(bool explorerViewOnly, bool nodeRequired, string errorMessage)
+        {
+            if (explorerViewOnly && !IsExplorerView())
+            {
+                Messenger.Send(new StatusChangedMessage(new($"This tool can only be run in Story Explorer view", LogLevel.Warn)));
+                return false;
+            }
+            if (nodeRequired && RightTappedNode == null)
+            {
+                Messenger.Send(new StatusChangedMessage(new($"You need to select a node first", LogLevel.Warn)));
+                return false;
+            }
+
+            return true;
+        }
+
 
         #endregion  
 
@@ -2043,15 +2076,19 @@ namespace StoryBuilder.ViewModels
             {
                 case StoryViewType.ExplorerView:
                     DataSource = StoryModel.ExplorerView;
+                    CurrentViewType = StoryViewType.ExplorerView;
                     break;
                 case StoryViewType.NarratorView:
                     DataSource = StoryModel.NarratorView;
+                    CurrentViewType = StoryViewType.NarratorView;
                     break;
                 case StoryViewType.SearchView:
                     break;
             }
-            if (DataSource.Count > 0) { CurrentNode = DataSource[0]; }
         }
+
+        private bool IsExplorerView() => CurrentViewType == StoryViewType.ExplorerView;
+        private bool IsNarratorView() => CurrentViewType == StoryViewType.NarratorView;
 
         #region MVVM  processing
         private void IsChangedMessageReceived(IsChangedMessage isDirty)
