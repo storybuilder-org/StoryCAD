@@ -37,6 +37,8 @@ using StoryBuilder.Services.Backend;
 using System.Net.Http;
 using System.Net;
 using Microsoft.Web.WebView2.Core;
+using System.Collections;
+using System.Security.Policy;
 
 namespace StoryBuilder.ViewModels
 {
@@ -600,10 +602,10 @@ namespace StoryBuilder.ViewModels
             if (await dialog.ShowAsync() == ContentDialogResult.Primary) //Okay clicked.
             {
                 Ioc.Default.GetService<LogService>().Log(LogLevel.Error, "Installing webview...");
-                
+
                 //Download file
                 new WebClient().DownloadFile("https://go.microsoft.com/fwlink/p/?LinkId=2124703", Path.Combine(GlobalData.RootDirectory, "evergreenbootstrapper.exe"));
-                
+
                 //Run installer and wait for it to finish
                 Process p = Process.Start(Path.Combine(GlobalData.RootDirectory, "evergreenbootstrapper.exe"));
                 p.WaitForExit();
@@ -611,7 +613,7 @@ namespace StoryBuilder.ViewModels
                 //Check again for webview and show relevant message to user.
                 try
                 {
-                    if (CoreWebView2Environment.GetAvailableBrowserVersionString() != null) 
+                    if (CoreWebView2Environment.GetAvailableBrowserVersionString() != null)
                     {
                         dialog.SecondaryButtonText = null;
                         dialog.PrimaryButtonText = "Okay";
@@ -1735,7 +1737,24 @@ namespace StoryBuilder.ViewModels
                     NewNode = new StoryNodeItem(new SceneModel(StoryModel), RightTappedNode);
                     break;
                 case StoryItemType.Web:
-                    NewNode = new StoryNodeItem(new WebModel(StoryModel), RightTappedNode);
+                    switch (GlobalData.Preferences.PreferredSearchEngine)
+                    {
+                        case BrowserType.DuckDuckGo:
+                            NewNode = new StoryNodeItem(new WebModel(StoryModel) { URL = new Uri("https://duckduckgo.com/") }, RightTappedNode);
+                            break;
+                        case BrowserType.Google:
+                            NewNode = new StoryNodeItem(new WebModel(StoryModel) { URL = new Uri("https://google.com/") }, RightTappedNode);
+                            break;
+                        case BrowserType.Bing:
+                            NewNode = new StoryNodeItem(new WebModel(StoryModel) { URL = new Uri("https://bing.com/") }, RightTappedNode);
+                            break;
+                        case BrowserType.Yahoo:
+                            NewNode = new StoryNodeItem(new WebModel(StoryModel) { URL = new Uri("https://yahoo.com/") }, RightTappedNode);
+                            break;
+                        default: //Just default to DDG.
+                            NewNode = new StoryNodeItem(new WebModel(StoryModel) { URL = new Uri("https://duckduckgo.com/") }, RightTappedNode);
+                            break;
+                    }
                     break;
                 case StoryItemType.Notes:
                     NewNode = new StoryNodeItem(new NotesModel(StoryModel), RightTappedNode);

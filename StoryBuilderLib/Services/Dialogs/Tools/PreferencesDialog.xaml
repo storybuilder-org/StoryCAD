@@ -35,6 +35,12 @@
                         <CheckBox Content="Automatically Save" IsChecked="{x:Bind PreferencesVm.AutoSave, Mode=TwoWay}" HorizontalAlignment="Left" Margin="8"/>
                         <NumberBox Minimum="5" Maximum="60" IsEnabled="{x:Bind PreferencesVm.AutoSave, Mode=TwoWay}" PlaceholderText="Enter a value (Seconds)" Value="{x:Bind PreferencesVm.AutoSaveInterval, Mode=TwoWay}" HorizontalAlignment="Left" Margin="8"/>
                     </StackPanel>
+                    <ComboBox Header="Preferred Search Engine" HorizontalAlignment="Stretch" SelectedIndex="{x:Bind PreferencesVm.PreferredSearchEngine, Mode=TwoWay}">
+                        <ComboBoxItem Content="DuckDuckGo"/>
+                        <ComboBoxItem Content="Google"/>
+                        <ComboBoxItem Content="Bing"/>
+                        <ComboBoxItem Content="Yahoo"/>
+                    </ComboBox>
                 </StackPanel>
             </PivotItem>
             <PivotItem Header="About">

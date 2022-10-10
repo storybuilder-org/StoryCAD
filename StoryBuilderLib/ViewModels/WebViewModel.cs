@@ -165,7 +165,25 @@ public class WebViewModel : ObservableRecipient, INavigable
         catch (UriFormatException ex)
         {
             _logger.Log(LogLevel.Info, $"Checking if {Query} is not URI, searching it.");
-            URL = new Uri("https://www.google.com/search?q=" + Uri.EscapeDataString(Query));
+
+            switch (GlobalData.Preferences.PreferredSearchEngine)
+            {
+                case BrowserType.DuckDuckGo:
+                    URL = new Uri("https://duckduckgo.com/?va=j&q=" + Uri.EscapeDataString(Query));
+                    break;
+                case BrowserType.Google:
+                    URL = new Uri("https://www.google.com/search?q=" + Uri.EscapeDataString(Query));
+                    break;
+                case BrowserType.Bing:
+                    URL = new Uri("https://www.bing.com/search?q=" + Uri.EscapeDataString(Query));
+                    break;
+                case BrowserType.Yahoo:
+                    URL = new Uri("https://search.yahoo.com/search?p=" + Uri.EscapeDataString(Query));
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
             _logger.Log(LogLevel.Info, $"URL is: {URL}");
 
         }
