@@ -1438,13 +1438,13 @@ namespace StoryBuilder.ViewModels
         {
             if (CurrentNode == null)
             {
-                Messenger.Send(new StatusChangedMessage(new($"Click or touch a node to move", LogLevel.Info)));
+                Messenger.Send(new StatusChangedMessage(new($"Click or touch a node to move", LogLevel.Warn)));
                 return;
             }
 
             if (CurrentNode.Parent != null && CurrentNode.Parent.IsRoot)
             {
-                Messenger.Send(new StatusChangedMessage(new($"Cannot move further left", LogLevel.Info)));
+                Messenger.Send(new StatusChangedMessage(new($"Cannot move further left", LogLevel.Warn)));
                 return;
             }
 
@@ -1472,7 +1472,7 @@ namespace StoryBuilder.ViewModels
                 Logger.Log(LogLevel.Info, $"Moving {CurrentNode.Name} left to parent {CurrentNode.Parent.Name}");
             }
             else
-                Messenger.Send(new StatusChangedMessage(new($"Cannot move root node.", LogLevel.Info)));
+                Messenger.Send(new StatusChangedMessage(new($"Cannot move root node.", LogLevel.Warn)));
         }
 
         private void MoveTreeViewItemRight()
@@ -1482,7 +1482,7 @@ namespace StoryBuilder.ViewModels
 
             if (CurrentNode == null)
             {
-                Messenger.Send(new StatusChangedMessage(new($"Click or touch a node to move", LogLevel.Info)));
+                Messenger.Send(new StatusChangedMessage(new($"Click or touch a node to move", LogLevel.Warn)));
                 return;
             }
 
@@ -1501,7 +1501,7 @@ namespace StoryBuilder.ViewModels
             }
             else
             {
-                Messenger.Send(new StatusChangedMessage(new($"Cannot move root node.", LogLevel.Info)));
+                Messenger.Send(new StatusChangedMessage(new($"Cannot move root node.", LogLevel.Warn)));
                 return;
             }
 
@@ -1517,7 +1517,7 @@ namespace StoryBuilder.ViewModels
                 // find parent's predecessor
                 if (CurrentNode.Parent.Parent == null)
                 {
-                    Messenger.Send(new StatusChangedMessage(new($"Cannot move further right", LogLevel.Info)));
+                    Messenger.Send(new StatusChangedMessage(new($"Cannot move further right", LogLevel.Warn)));
                     return;
                 }
 
@@ -1563,7 +1563,7 @@ namespace StoryBuilder.ViewModels
         {
             if (CurrentNode == null)
             {
-                Messenger.Send(new StatusChangedMessage(new($"Click or touch a node to move", LogLevel.Info)));
+                Messenger.Send(new StatusChangedMessage(new($"Click or touch a node to move", LogLevel.Warn)));
                 return;
             }
 
@@ -1625,12 +1625,12 @@ namespace StoryBuilder.ViewModels
         {
             if (CurrentNode == null)
             {
-                Messenger.Send(new StatusChangedMessage(new($"Click or touch a node to move", LogLevel.Info)));
+                Messenger.Send(new StatusChangedMessage(new($"Click or touch a node to move", LogLevel.Warn)));
                 return;
             }
             if (CurrentNode.IsRoot)
             {
-                Messenger.Send(new StatusChangedMessage(new($"Cannot move a root node", LogLevel.Info)));
+                Messenger.Send(new StatusChangedMessage(new($"Cannot move a root node", LogLevel.Warn)));
                 return;
             }
 
