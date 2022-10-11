@@ -27,9 +27,9 @@ public class StoryModel
     /// 
     public StoryElementCollection StoryElements;
 
-    /// StoryModel also contains two persisted TreeView representations, a Story Explorer tree which
+    /// StoryModel also contains two persisted TreeView representations, a Story ExplorerView tree which
     /// contains all Story Elements (the StoryOverview and all Problem, Character, Setting, Scene
-    /// and Folder elements) and a Narrator View which contains just Section (chapter, etc) and
+    /// and Folder elements) and a NarratorView View which contains just Section (chapter, etc) and
     /// selected Scene elements. 
     /// 
     /// One of these persisted TreeViews is actively bound in the Shell page view to a StoryNodeItem tree 

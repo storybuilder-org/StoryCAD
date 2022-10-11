@@ -21,7 +21,7 @@ namespace StoryBuilder.ViewModels;
 /// Shell DataContext.
 /// 
 /// Like any other ViewModel, a StoryNodeItem is an intermediary between the data model 
-/// (in this case, StoryModel) and the View (in this case, Shell). The model is composed of
+/// (in this case, StoryModel) and the storyView (in this case, Shell). The model is composed of
 /// instances of StoryElements such as ProblemModel, CharacterModel, etc. These model 
 /// components are not visual, and have no Children, IsSelected or IsExpanded, and so on. 
 /// A StoryElement instance is displayed and modified on a Page such as ProblemPage or
@@ -31,7 +31,7 @@ namespace StoryBuilder.ViewModels;
 /// StoryBuilder's data model is called StoryModel. StoryModel  contains two ObservableCollection
 /// lists of StoryNodeItems (and their counterpart StoryElements), a StoryExplorer collection which
 /// contains all Story Elements (the StoryOverview and all Problem, Character, Setting, Scene
-/// and Folder elements) and a Narrator View which contains just Section (chapter, etc) and
+/// and Folder elements) and a NarratorView storyView which contains just Section (chapter, etc) and
 /// selected Scene elements and which represents the story as it's being narrated.
 /// 
 /// In the Shell, the user can switch between the two views by loading one or the other model.
@@ -403,9 +403,9 @@ public class StoryNodeItem : DependencyObject, INotifyPropertyChanged
     }
     #endregion
 
-    public void Delete(ViewType View)
+    public void Delete(StoryViewType storyView)
     {
-        logger.Log(LogLevel.Trace, $"Starting to delete element {Name} ({Uuid}) from {View}");
+        logger.Log(LogLevel.Trace, $"Starting to delete element {Name} ({Uuid}) from {storyView}");
         //Sanity check
         if (Type == StoryItemType.TrashCan || IsRoot)
         {
@@ -415,7 +415,7 @@ public class StoryNodeItem : DependencyObject, INotifyPropertyChanged
 
         //Set source collection to either narrative view or explorer view, we use the first item [0] so we don't delete from trash.
         StoryNodeItem SourceCollection;
-        if (View == ViewType.Explorer) { SourceCollection = shellvm.StoryModel.ExplorerView[0]; }
+        if (storyView == StoryViewType.ExplorerView) { SourceCollection = shellvm.StoryModel.ExplorerView[0]; }
         else { SourceCollection = shellvm.StoryModel.NarratorView[0]; }
 
         if (SourceCollection.Children.Contains(this))
@@ -423,28 +423,28 @@ public class StoryNodeItem : DependencyObject, INotifyPropertyChanged
             //Delete node from selected view.
             logger.Log(LogLevel.Info, "Node found in root, deleting it.");
             SourceCollection.Children.Remove(this);
-            TrashItem(View); //Add to appropriate trash node.
+            TrashItem(storyView); //Add to appropriate trash node.
         }
         else
         {
             foreach (StoryNodeItem childItem in SourceCollection.Children)
             {
                 logger.Log(LogLevel.Info, "Recursing tree to find node.");
-                RecursiveDelete(childItem, View);
+                RecursiveDelete(childItem, storyView);
             }
         }
     }
 
-    private void RecursiveDelete(StoryNodeItem ParentItem, ViewType View)
+    private void RecursiveDelete(StoryNodeItem ParentItem, StoryViewType storyView)
     {
-        logger.Log(LogLevel.Info, $"Starting recursive delete instance for parent {ParentItem.Name} ({ParentItem.Uuid}) in {View}");
+        logger.Log(LogLevel.Info, $"Starting recursive delete instance for parent {ParentItem.Name} ({ParentItem.Uuid}) in {storyView}");
         try
         {
             if (ParentItem.Children.Contains(this)) //Checks parent contains child we are looking.
             {
                 logger.Log(LogLevel.Info, "StoryNodeItem found, deleting it.");
                 ParentItem.Children.Remove(this); //Deletes child.
-                TrashItem(View); //Add to appropriate trash node.
+                TrashItem(storyView); //Add to appropriate trash node.
             }
             else //If child isn't in parent, recurse again.
             {
@@ -452,16 +452,16 @@ public class StoryNodeItem : DependencyObject, INotifyPropertyChanged
                 foreach (StoryNodeItem ChildItem in ParentItem.Children)
                 {
                     logger.Log(LogLevel.Debug, $"ChildItem is {ChildItem.Name} {ChildItem.Uuid}");
-                    RecursiveDelete(ChildItem, View);
+                    RecursiveDelete(ChildItem, storyView);
                 }
             }
         }
         catch (Exception ex) { logger.LogException(LogLevel.Error, ex, "Error deleting node in Recursive delete"); }
     }
 
-    private void TrashItem(ViewType View)
+    private void TrashItem(StoryViewType storyView)
     {
-        if (View == ViewType.Explorer)
+        if (storyView == StoryViewType.ExplorerView)
         {
             shellvm.StoryModel.ExplorerView[1].Children.Add(this);
             Parent = shellvm.StoryModel.ExplorerView[1];
