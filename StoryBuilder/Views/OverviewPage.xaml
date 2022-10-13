@@ -11,7 +11,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <TextBox Header="Title" Text="{x:Bind OverviewVm.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="10,10,10,0" />
+        <TextBox Header="Title" Text="{x:Bind OverviewVm.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource NameBox}" />
         <Pivot Grid.Row="1">
             <PivotItem Header="Story Idea">
                 <Grid>
@@ -20,8 +20,7 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    <TextBox Header="Author" Grid.Row="0"
-                             Text="{x:Bind OverviewVm.Author, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBox Header="Author" Grid.Row="0" Text="{x:Bind OverviewVm.Author, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     <Grid Grid.Row="1" HorizontalAlignment="Left">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="2*"/>
@@ -42,25 +41,19 @@
                 </Grid>
             </PivotItem>
             <PivotItem Header="Concept">
-                <usercontrols:RichEditBoxExtended Header="Concept" RtfText="{x:Bind OverviewVm.Concept, Mode=TwoWay}" AcceptsReturn="True"
-                                    IsSpellCheckEnabled="True" TextWrapping="Wrap"
-                                    ScrollViewer.VerticalScrollBarVisibility="Visible"
-                                    PlaceholderText="Use 'What if?' and 'What happens is' to flesh out your idea." />
+                <usercontrols:RichEditBoxExtended Header="Concept" RtfText="{x:Bind OverviewVm.Concept, Mode=TwoWay}" PlaceholderText="Use 'What if?' and 'What happens is' to flesh out your idea." />
             </PivotItem>
             <PivotItem Header="Premise">
                 <Grid>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
                     <usercontrols:ProblemName Header="Story Problem" Grid.Row="0" IsEditable="False" MinWidth="300"
                               DisplayMemberPath="Name"
                               SelectedItem="{x:Bind OverviewVm.StoryProblem, Mode=TwoWay, Converter={StaticResource ToStoryElement}}" />
-                    <TextBlock Grid.Row="1" Text=" "/>
-                    <usercontrols:RichEditBoxExtended Header="Premise" Grid.Row="2" RtfText="{x:Bind OverviewVm.Premise, Mode=TwoWay}"
-                                    IsReadOnly ="{x:Bind OverviewVm.PremiseLock, Mode=TwoWay}" TextWrapping="Wrap"
-                                    ScrollViewer.VerticalScrollBarVisibility="Visible"
+                    <usercontrols:RichEditBoxExtended Header="Premise" Grid.Row="1" RtfText="{x:Bind OverviewVm.Premise, Mode=TwoWay}"
+                                    IsReadOnly ="{x:Bind OverviewVm.PremiseLock, Mode=TwoWay}"
                                     ToolTipService.ToolTip="This box displays the content of the Story Problems premise. (To change what appears in this box, go to the problem and edit the premise)"
                                     PlaceholderText="Select a Problem as your main story problem. That problem's premise is your story premise. "/>
                 </Grid>
@@ -112,38 +105,28 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
-                        <editors:SfComboBox Header="Voice" Grid.Column="0" IsEditable="False" MinWidth="200" 
+                        <editors:SfComboBox Header="Voice" Grid.Column="0" IsEditable="False"
                                   ItemsSource="{x:Bind OverviewVm.VoiceList}"
                                   SelectedItem="{x:Bind OverviewVm.Voice, Mode=TwoWay}" />
                         <TextBlock Grid.Column="1" MinWidth="100"/>
-                        <editors:SfComboBox Header="Tense" Grid.Column="2" IsEditable="False" MinWidth="200" 
+                        <editors:SfComboBox Header="Tense" Grid.Column="2" IsEditable="False"
                                   ItemsSource="{x:Bind OverviewVm.TenseList}"
                                   SelectedItem="{x:Bind OverviewVm.Tense, Mode=TwoWay}" />
                     </Grid>
                     <Grid Grid.Row="4" HorizontalAlignment="Left" >
                         <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="2*"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="2*"/>
-                    </Grid.ColumnDefinitions>
-                        <editors:SfComboBox Header="Style" Grid.Column="0" IsEditable="False" MinWidth="200" 
-                                  ItemsSource="{x:Bind OverviewVm.StyleList}"
-                                  SelectedItem="{x:Bind OverviewVm.Style, Mode=TwoWay}" />
-                        <TextBlock Grid.Column="1" MinWidth="100"/>
-                        <editors:SfComboBox Header="Tone" Grid.Column="2" IsEditable="False" MinWidth="200"  
-                                  ItemsSource="{x:Bind OverviewVm.ToneList}"
-                                  SelectedItem="{x:Bind OverviewVm.Tone, Mode=TwoWay}" />
+                            <ColumnDefinition Width="2*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="2*"/>
+                        </Grid.ColumnDefinitions>
+                        <editors:SfComboBox Header="Style" Grid.Column="0" IsEditable="False" MinWidth="200" ItemsSource="{x:Bind OverviewVm.StyleList}" SelectedItem="{x:Bind OverviewVm.Style, Mode=TwoWay}" />
+                        <editors:SfComboBox Header="Tone" Grid.Column="2" IsEditable="False" ItemsSource="{x:Bind OverviewVm.ToneList}" SelectedItem="{x:Bind OverviewVm.Tone, Mode=TwoWay}" />
                     </Grid>
-                    <usercontrols:RichEditBoxExtended Header="Structure Notes" Grid.Row="5"
-                        RtfText="{x:Bind OverviewVm.StructureNotes, Mode=TwoWay}" AcceptsReturn="True"
-                        IsSpellCheckEnabled="True" TextWrapping="Wrap"
-                        ScrollViewer.VerticalScrollBarVisibility="Visible" />
+                    <usercontrols:RichEditBoxExtended Header="Structure Notes" Grid.Row="5" RtfText="{x:Bind OverviewVm.StructureNotes, Mode=TwoWay}"/>
                 </Grid>
             </PivotItem>
             <PivotItem Header="Notes">
-                <usercontrols:RichEditBoxExtended Header="Notes" RtfText="{x:Bind OverviewVm.Notes, Mode=TwoWay}" AcceptsReturn="True"
-                                    IsSpellCheckEnabled="True" TextWrapping="Wrap"
-                                    ScrollViewer.VerticalScrollBarVisibility="Visible" />
+                <usercontrols:RichEditBoxExtended Header="Notes" RtfText="{x:Bind OverviewVm.Notes, Mode=TwoWay}" />
             </PivotItem>
         </Pivot>
     </Grid>

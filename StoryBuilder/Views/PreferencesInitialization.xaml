@@ -43,7 +43,7 @@
                 </StackPanel>
                 <TextBlock Text="{x:Bind InitVM.ErrorMessage, Mode=TwoWay}" Foreground="Red" Grid.Row="3" HorizontalAlignment="Center"/>
                 <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Center">
-                    <Button x:Name="ContinueButton" Content="Continue" Margin="25" HorizontalAlignment="Center" Click="Check"/>
+                    <Button Content="Continue" Margin="25" HorizontalAlignment="Center" Click="Check"/>
                     <Button Content="Join our community discord!" Background="#5865F2" Foreground="White"  Margin="25" HorizontalAlignment="Center" Click="Discord"/>
                 </StackPanel>
 
