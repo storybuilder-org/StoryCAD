@@ -16,9 +16,9 @@ namespace StoryBuilder.Services;
 
 public class BackupService
 {
-    private BackgroundWorker timeBackupWorker = new(){WorkerSupportsCancellation = true,WorkerReportsProgress = false};
-    private LogService Log = Ioc.Default.GetService<LogService>();
-    ShellViewModel Shell = Ioc.Default.GetService<ShellViewModel>();
+    private BackgroundWorker _timeBackupWorker = new(){WorkerSupportsCancellation = true,WorkerReportsProgress = false};
+    private LogService _log = Ioc.Default.GetService<LogService>();
+    private ShellViewModel _shell = Ioc.Default.GetService<ShellViewModel>();
 
     /// <summary>
     /// Makes a backup every x minutes, x being the value of TimedBackupInterval in user preferences.
@@ -29,19 +29,19 @@ public class BackupService
     {
         try
         {
-            Log.Log(LogLevel.Info, "Timed backup task started.");
-            while (!timeBackupWorker.CancellationPending)
+            _log.Log(LogLevel.Info, "Timed backup task started.");
+            while (!_timeBackupWorker.CancellationPending)
             {
-                Thread.Sleep((GlobalData.Preferences.TimedBackupInterval * 60) * 1000);
-                Log.Log(LogLevel.Info, "Starting auto backup");
+                Thread.Sleep(GlobalData.Preferences.TimedBackupInterval * 60 * 1000);
+                _log.Log(LogLevel.Info, "Starting auto backup");
                 await BackupProject();
             }
             e.Cancel = true;
-            Log.Log(LogLevel.Info, "Timed backup task finished.");
+            _log.Log(LogLevel.Info, "Timed backup task finished.");
         }
-        catch (Exception ex)
+        catch (Exception _Ex)
         {
-            Log.LogException(LogLevel.Error, ex,"Error in auto backup task.");
+            _log.LogException(LogLevel.Error, _Ex,"Error in auto backup task.");
         }
     }
 
@@ -51,9 +51,9 @@ public class BackupService
     public void StartTimedBackup()
     {
         if (!GlobalData.Preferences.TimedBackup) { return; }
-        timeBackupWorker.DoWork += BackupTask;
-        if (!timeBackupWorker.IsBusy)
-            timeBackupWorker.RunWorkerAsync();
+        _timeBackupWorker.DoWork += BackupTask;
+        if (!_timeBackupWorker.IsBusy)
+            _timeBackupWorker.RunWorkerAsync();
     }
 
     /// <summary>
@@ -61,60 +61,61 @@ public class BackupService
     /// </summary>
     public void StopTimedBackup()
     {
-        if (timeBackupWorker.IsBusy)
+        if (_timeBackupWorker.IsBusy)
         {
-            timeBackupWorker.CancelAsync();
+            _timeBackupWorker.CancelAsync();
         }
-        timeBackupWorker.DoWork -= BackupTask;
+        _timeBackupWorker.DoWork -= BackupTask;
     }
 
     public async Task BackupProject()
     {
-        Log.Log(LogLevel.Info, $"Starting Project Backup at {GlobalData.Preferences.BackupDirectory}");
+        _log.Log(LogLevel.Info, $"Starting Project Backup at {GlobalData.Preferences.BackupDirectory}");
         try
         {
             //Creates backup directory if it doesn't exist
             if (!Directory.Exists(GlobalData.Preferences.BackupDirectory))
             {
-                Log.Log(LogLevel.Info, "Backup dir not found, making it.");
+                _log.Log(LogLevel.Info, "Backup dir not found, making it.");
                 Directory.CreateDirectory(GlobalData.Preferences.BackupDirectory);
             }
 
             //Gets correct name for file
-            Log.Log(LogLevel.Info, "Getting backup path and file to made");
-            string fileName = $"{Shell.StoryModel.ProjectFile.Name} as of {DateTime.Now}".Replace('/', ' ').Replace(':', ' ').Replace(".stbx", "");
-            StorageFolder backupRoot = await StorageFolder.GetFolderFromPathAsync(GlobalData.Preferences.BackupDirectory.Replace(".stbx", ""));
-            StorageFolder backupLocation = await backupRoot.CreateFolderAsync(Shell.StoryModel.ProjectFile.Name, CreationCollisionOption.OpenIfExists);
-            Log.Log(LogLevel.Info, $"Backing up to {backupLocation.Path} as {fileName}.zip");
+            _log.Log(LogLevel.Info, "Getting backup path and file to made");
+            string _FileName = $"{_shell.StoryModel.ProjectFile.Name} as of {DateTime.Now}".Replace('/', ' ').Replace(':', ' ').Replace(".stbx", "");
+            StorageFolder _BackupRoot = await StorageFolder.GetFolderFromPathAsync(GlobalData.Preferences.BackupDirectory.Replace(".stbx", ""));
+            StorageFolder _BackupLocation = await _BackupRoot.CreateFolderAsync(_shell.StoryModel.ProjectFile.Name, CreationCollisionOption.OpenIfExists);
+            _log.Log(LogLevel.Info, $"Backing up to {_BackupLocation.Path} as {_FileName}.zip");
 
-            Log.Log(LogLevel.Info, "Writing file");
-            StorageFolder Temp = await StorageFolder.GetFolderFromPathAsync(GlobalData.RootDirectory);
-            Temp = await Temp.CreateFolderAsync("Temp", CreationCollisionOption.ReplaceExisting);
-            await Shell.StoryModel.ProjectFile.CopyAsync(Temp, Shell.StoryModel.ProjectFile.Name,
+            _log.Log(LogLevel.Info, "Writing file");
+            StorageFolder _Temp = await StorageFolder.GetFolderFromPathAsync(GlobalData.RootDirectory);
+            _Temp = await _Temp.CreateFolderAsync("Temp", CreationCollisionOption.ReplaceExisting);
+            await _shell.StoryModel.ProjectFile.CopyAsync(_Temp, _shell.StoryModel.ProjectFile.Name,
                 NameCollisionOption.ReplaceExisting);
-            ZipFile.CreateFromDirectory(Temp.Path, Path.Combine(backupLocation.Path, fileName) + ".zip");
+            ZipFile.CreateFromDirectory(_Temp.Path, Path.Combine(_BackupLocation.Path, _FileName) + ".zip");
 
             //Creates zip archive then cleans up
-            Log.Log(LogLevel.Info, $"Created Zip file at {Path.Combine(backupLocation.Path, fileName)}.zip");
-            await Temp.DeleteAsync();
+            _log.Log(LogLevel.Info, $"Created Zip file at {Path.Combine(_BackupLocation.Path, _FileName)}.zip");
+            await _Temp.DeleteAsync();
 
             //Creates entry and flushes to disk.
-            Log.Log(LogLevel.Info, "Finished backup.");
+            _log.Log(LogLevel.Info, "Finished backup.");
         }
-        catch (Exception ex)
+        catch (Exception _Ex)
         {
             DispatcherQueue.GetForCurrentThread().TryEnqueue(async () =>
             {
-                ContentDialog warning = new();
-                warning.Title = "Backup Warning";
-                warning.Content = "The last backup failed due to the following reason:\n" + ex.Message;
-                warning.XamlRoot = GlobalData.XamlRoot;
-                warning.CloseButtonText = "Understood.";
-                await warning.ShowAsync();
+                await new ContentDialog
+                {
+                    Title = "Backup Warning",
+                    Content = "The last backup failed due to the following reason:\n" + _Ex.Message,
+                    XamlRoot = GlobalData.XamlRoot,
+                    CloseButtonText = "Understood."
+                }.ShowAsync();
             });
 
-            Log.LogException(LogLevel.Error, ex, $"Error backing up project {ex.Message}");
+            _log.LogException(LogLevel.Error, _Ex, $"Error backing up project {_Ex.Message}");
         }
-        Log.Log(LogLevel.Info, "BackupProject complete");
+        _log.Log(LogLevel.Info, "BackupProject complete");
     }
 }

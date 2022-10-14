@@ -24,7 +24,7 @@ namespace StoryBuilder.Services.Navigation;
 ////[ClassInfo(typeof(INavigationService))]
 ///
 /// NOTE: This class is derived from the MVVMLight navigation service by
-/// Laurent Bugnion mentioned bove. The only change to the original code is
+/// Laurent Bugnion mentioned above. The only change to the original code is
 /// to add a pair of NavigateTo() methods which have an additional parameter
 /// prefixed to them, which specifies the Frame on which to display the Page,
 /// rather than than using Window.Current.Content. This was required in order
@@ -66,28 +66,6 @@ public class NavigationService : INavigationService
     }
 
     /// <summary>
-    /// Gets a flag indicating if the CurrentFrame can navigate backwards.
-    /// </summary>
-    public bool CanGoBack => CurrentFrame.CanGoBack;
-
-    /// <summary>
-    /// Gets a flag indicating if the CurrentFrame can navigate forward.
-    /// </summary>
-    public bool CanGoForward => CurrentFrame.CanGoForward;
-
-    /// <summary>
-    /// Check if the CurrentFrame can navigate forward, and if yes, performs
-    /// a forward navigation.
-    /// </summary>
-    public void GoForward()
-    {
-        if (CurrentFrame.CanGoForward)
-        {
-            CurrentFrame.GoForward();
-        }
-    }
-
-    /// <summary>
     /// The key corresponding to the currently displayed page.
     /// </summary>
     public string CurrentPageKey
@@ -106,17 +84,17 @@ public class NavigationService : INavigationService
                     return UnknownPageKey;
                 }
 
-                Type currentType = CurrentFrame.Content.GetType();
+                Type _CurrentType = CurrentFrame.Content.GetType();
 
-                if (_pagesByKey.All(p => p.Value != currentType))
+                if (_pagesByKey.All(p => p.Value != _CurrentType))
                 {
                     return UnknownPageKey;
                 }
 
-                KeyValuePair<string, Type> item = _pagesByKey.FirstOrDefault(
-                    i => i.Value == currentType);
+                KeyValuePair<string, Type> _Item = _pagesByKey.FirstOrDefault(
+                    i => i.Value == _CurrentType);
 
-                return item.Key;
+                return _Item.Key;
             }
         }
     }
@@ -240,23 +218,6 @@ public class NavigationService : INavigationService
             _pagesByKey.Add(
                 key,
                 pageType);
-        }
-    }
-
-    /// <summary>
-    /// Gets the key corresponding to a given page type.
-    /// </summary>
-    /// <param name="page">The type of the page for which the key must be returned.</param>
-    /// <returns>The key corresponding to the page type.</returns>
-    public string GetKeyForPage(Type page)
-    {
-        lock (_pagesByKey)
-        {
-            if (_pagesByKey.ContainsValue(page))
-            {
-                return _pagesByKey.FirstOrDefault(p => p.Value == page).Key;
-            }
-            throw new ArgumentException($"The page '{page.Name}' is unknown by the NavigationService");
         }
     }
 }

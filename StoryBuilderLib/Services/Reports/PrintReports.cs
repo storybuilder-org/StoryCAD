@@ -17,135 +17,136 @@ public class PrintReports
     private PrintReportDialogVM _vm;
     private StoryModel _model;
     private ReportFormatter _formatter;
-    private StringReader fileStream;
-    private Font printFont;
-    private string documentText;
-    PrintDocument PrintDoc = new();
+    private StringReader _fileStream;
+    private Font _printFont;
+    private string _documentText;
+    private PrintDocument _printDoc = new();
 
     //PrintHelper helper = new();
 
     public async Task Generate()
     {
-        string rtf = string.Empty;
+        string _Rtf = string.Empty;
         await _formatter.LoadReportTemplates(); // Load text report templates
 
         //Process single selection (non-Pivot) reports
         if (_vm.CreateOverview)
         {
-            rtf = _formatter.FormatStoryOverviewReport(Overview());
-            documentText += FormatText(rtf);
+            _Rtf = _formatter.FormatStoryOverviewReport(Overview());
+            _documentText += FormatText(_Rtf);
         }
         if (_vm.CreateSummary)
         {
-            rtf = _formatter.FormatSynopsisReport();
+            _Rtf = _formatter.FormatSynopsisReport();
             //documentText = FormatText(rtf);
-            documentText += FormatText(rtf, true);
+            _documentText += FormatText(_Rtf, true);
         }
 
         if (_vm.ProblemList)
         {
-            rtf = _formatter.FormatProblemListReport();
-            documentText += FormatText(rtf);
+            _Rtf = _formatter.FormatProblemListReport();
+            _documentText += FormatText(_Rtf);
         }
         if (_vm.CharacterList)
         {
-            rtf = _formatter.FormatCharacterListReport();
-            documentText += FormatText(rtf);
+            _Rtf = _formatter.FormatCharacterListReport();
+            _documentText += FormatText(_Rtf);
         }
         if (_vm.SettingList)
         {
-            rtf = _formatter.FormatSettingListReport();
-            documentText += FormatText(rtf);
+            _Rtf = _formatter.FormatSettingListReport();
+            _documentText += FormatText(_Rtf);
         }
         if (_vm.SceneList)
         {
-            rtf = _formatter.FormatSceneListReport();
-            documentText += FormatText(rtf);
+            _Rtf = _formatter.FormatSceneListReport();
+            _documentText += FormatText(_Rtf);
         }
         if (_vm.SceneList)
         {
-            rtf = _formatter.FormatSceneListReport();
-            documentText += FormatText(rtf);
+            _Rtf = _formatter.FormatSceneListReport();
+            _documentText += FormatText(_Rtf);
         }
         if (_vm.WebList)
         {
-            rtf = _formatter.FormatWebListReport();
-            documentText += FormatText(rtf);
+            _Rtf = _formatter.FormatWebListReport();
+            _documentText += FormatText(_Rtf);
         }
 
-        foreach (StoryNodeItem node in _vm.SelectedNodes)
+        foreach (StoryNodeItem _Node in _vm.SelectedNodes)
         {
-            StoryElement element = null;
-            if (_model.StoryElements.StoryElementGuids.ContainsKey(node.Uuid))
-                element = _model.StoryElements.StoryElementGuids[node.Uuid];
-            if (element != null)
+            StoryElement _Element = null;
+            if (_model.StoryElements.StoryElementGuids.ContainsKey(_Node.Uuid))
+                _Element = _model.StoryElements.StoryElementGuids[_Node.Uuid];
+            if (_Element != null)
             {
-                switch (node.Type)
+                switch (_Node.Type)
                 {
                     case StoryItemType.Problem:
-                        rtf = _formatter.FormatProblemReport(element);
+                        _Rtf = _formatter.FormatProblemReport(_Element);
                         break;
                     case StoryItemType.Character:
-                        rtf = _formatter.FormatCharacterReport(element);
+                        _Rtf = _formatter.FormatCharacterReport(_Element);
                         break;
                     case StoryItemType.Setting:
-                        rtf = _formatter.FormatSettingReport(element);
+                        _Rtf = _formatter.FormatSettingReport(_Element);
                         break;
                     case StoryItemType.Scene:
-                        rtf = _formatter.FormatSceneReport(element);
+                        _Rtf = _formatter.FormatSceneReport(_Element);
                         break;
                     case StoryItemType.Web:
-                        rtf = _formatter.FormatWebReport(element);
+                        _Rtf = _formatter.FormatWebReport(_Element);
                         break;
                 }
-                documentText += FormatText(rtf);
+                _documentText += FormatText(_Rtf);
             }
         }
 
-        if (string.IsNullOrEmpty(documentText))
+        if (string.IsNullOrEmpty(_documentText))
         {
-            Ioc.Default.GetService<ShellViewModel>().ShowMessage(LogLevel.Warn, "No nodes selected for report generation", true);
+            Ioc.Default.GetRequiredService<ShellViewModel>().ShowMessage(LogLevel.Warn, "No nodes selected for report generation", true);
             return;
         }
-        Print(documentText);
-        Ioc.Default.GetService<ShellViewModel>().ShowMessage(LogLevel.Info, "Generate Print Reports complete", true);
+        Print(_documentText);
+        Ioc.Default.GetRequiredService<ShellViewModel>().ShowMessage(LogLevel.Info, "Generate Print Reports complete", true);
 
     }
 
     private StoryElement Overview()
     {
-        foreach (StoryElement element in _model.StoryElements)
-            if (element.Type == StoryItemType.StoryOverview)
-                return element;
+        foreach (StoryElement _Element in _model.StoryElements)
+        {
+            if (_Element.Type == StoryItemType.StoryOverview) { return _Element; }
+        }
         return null;
     }
 
     // The PrintPage event is raised for each page to be printed.
     private void pd_PrintPage(object sender, PrintPageEventArgs ev)
     {
-        int count = 0;
-        float leftMargin = ev.MarginBounds.Left;
-        float topMargin = ev.MarginBounds.Top;
-        string line = null;
+        int _Count = 0;
+        float _LeftMargin = ev.MarginBounds.Left;
+        float _TopMargin = ev.MarginBounds.Top;
+        string _Line = null;
 
         // Calculate the number of lines per page.
-        float linesPerPage = ev.MarginBounds.Height / printFont.GetHeight(ev.Graphics);
+        float _LinesPerPage = ev.MarginBounds.Height / _printFont.GetHeight(ev.Graphics);
 
         // Iterate over the file, printing each line.
-        while (count < linesPerPage && (line = fileStream.ReadLine()) != null)
+        while (_Count < _LinesPerPage && (_Line = _fileStream.ReadLine()) != null)
         {
-            if (line == @"\PageBreak")
+            if (_Line == @"\PageBreak")
             {
                 ev.HasMorePages = true;
                 break;
             }
-            float yPos = topMargin + count * printFont.GetHeight(ev.Graphics);
-            ev.Graphics.DrawString(line, printFont, Brushes.Black, leftMargin, yPos, new StringFormat());
-            count++;
+            float _YPos = _TopMargin + _Count * _printFont.GetHeight(ev.Graphics);
+            ev.Graphics.DrawString(_Line, _printFont, Brushes.Black, _LeftMargin, _YPos, new StringFormat());
+            _Count++;
         }
 
         // If more lines exist, print another page.
-        if (line != null) { ev.HasMorePages = true; }
+        if (_Line != null) { ev.HasMorePages = true; }
         else { ev.HasMorePages = false; }
     }
 
@@ -154,20 +155,17 @@ public class PrintReports
     {
         try
         {
-            fileStream = new StringReader(file);
-            printFont = new Font("Arial", 12, FontStyle.Regular, GraphicsUnit.Pixel);
-            PrintDoc.PrintPage += pd_PrintPage;
-            Margins margins = new(100, 100, 100, 100);
-            PrintDoc.DefaultPageSettings.Margins = margins;
-            float pixelsPerChar = printFont.Size;
-            float lineWidth = PrintDoc.DefaultPageSettings.PrintableArea.Width;
-            int charsPerLine = Convert.ToInt32(lineWidth / pixelsPerChar);
+            _fileStream = new StringReader(file);
+            _printFont = new Font("Arial", 12, FontStyle.Regular, GraphicsUnit.Pixel);
+            _printDoc.PrintPage += pd_PrintPage;
+            Margins _Margins = new(100, 100, 100, 100);
+            _printDoc.DefaultPageSettings.Margins = _Margins;
             // Print the document.
-            PrintDoc.Print();
+            _printDoc.Print();
         }
-        catch (Exception ex)
+        catch (Exception _Ex)
         {
-            Ioc.Default.GetService<LogService>().LogException(LogLevel.Error, ex, "Error in Print reports.");
+            Ioc.Default.GetRequiredService<LogService>().LogException(LogLevel.Error, _Ex, "Error in Print reports.");
         }
     }
     /// <summary>
@@ -175,40 +173,40 @@ public class PrintReports
     /// then some formatting is changed to make summary reports more pleasant
     /// </summary>
     /// <param name="rtfInput"></param>
-    /// <param name="SummaryMode"></param>
+    /// <param name="summaryMode"></param>
     /// <returns></returns>
-    private string FormatText(string rtfInput, bool SummaryMode = false)
+    private string FormatText(string rtfInput, bool summaryMode = false)
     {
-        string text = _formatter.GetText(rtfInput, false);
-        string[] lines = text.Split('\n');
-        StringBuilder sb = new();
+        string _Text = _formatter.GetText(rtfInput, false);
+        string[] _Lines = _Text.Split('\n');
+        StringBuilder _Sb = new();
 
-        //TODO: rewrite this for readabilty and maintainability
-        foreach (string t in lines)
+        //TODO: rewrite this for readability and maintainability
+        foreach (string _T in _Lines)
         {
-            string line = t.TrimEnd();
-            if (line.Equals("\r"))
+            string _Line = _T.TrimEnd();
+            if (_Line.Equals("\r"))
                 continue;
-            while (line.Length > 72)
+            while (_Line.Length > 72)
             {
-                string temp = line[..72];
-                if (!temp.Contains(" ")) { temp += " "; } //wrapping fix
-                int j = temp.LastIndexOf(' ');
-                temp = temp[..j];
-                sb.Append(temp);
-                sb.Append(Environment.NewLine);
-                line = line[j..];
-                line = line.TrimStart();
+                string _Temp = _Line[..72];
+                if (!_Temp.Contains(" ")) { _Temp += " "; } //wrapping fix
+                int _J = _Temp.LastIndexOf(' ');
+                _Temp = _Temp[.._J];
+                _Sb.Append(_Temp);
+                _Sb.Append(Environment.NewLine);
+                _Line = _Line[_J..];
+                _Line = _Line.TrimStart();
             }
-            sb.Append(line + Environment.NewLine);
+            _Sb.Append(_Line + Environment.NewLine);
         }
-        if (SummaryMode)
+        if (summaryMode)
         {
-            sb.Replace("[", "\r\n[");
-            sb.Replace("]", "]\r\n");
+            _Sb.Replace("[", "\r\n[");
+            _Sb.Replace("]", "]\r\n");
         }
-        sb.Append("\n\\PageBreak\n");
-        return sb.ToString();
+        _Sb.Append("\n\\PageBreak\n");
+        return _Sb.ToString();
     }
 
     #region Constructor
