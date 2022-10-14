@@ -21,69 +21,69 @@ namespace StoryBuilder.Services.Logging;
 public class LogService : ILogService
 {
     private static readonly Logger Logger;
-    private static readonly string logFilePath;
-    private static string stackTraceHelper; //Elmah for some reason doesn't show the stack trace of an exception so this one does.
-    private string apiKey = string.Empty;
-    private string logID = string.Empty;
+    private static readonly string LogFilePath;
+    private static string _stackTraceHelper; //Elmah for some reason doesn't show the stack trace of an exception so this one does.
+    private string _apiKey = string.Empty;
+    private string _logId = string.Empty;
     static LogService()
     {
         try
         {
-            LoggingConfiguration config = new();
+            LoggingConfiguration _Config = new();
 
             // Create the file logging target
-            FileTarget fileTarget = new();
-            logFilePath = Path.Combine(GlobalData.RootDirectory, "logs");
-            fileTarget.FileName = Path.Combine(logFilePath, "updater.${date:format=yyyy-MM-dd}.log");
-            fileTarget.CreateDirs = true;
-            fileTarget.MaxArchiveFiles = 7;
-            fileTarget.ArchiveEvery = FileArchivePeriod.Day;
-            fileTarget.ConcurrentWrites = true;
-            fileTarget.Layout = "${longdate} | ${level} | ${message} | ${exception:format=Message,StackTrace,Data:MaxInnerExceptionLevel=5}";
-            LoggingRule fileRule = new("*", NLog.LogLevel.Info, fileTarget);
-            config.AddTarget("logfile", fileTarget);
-            config.LoggingRules.Add(fileRule);
+            FileTarget _FileTarget = new();
+            LogFilePath = Path.Combine(GlobalData.RootDirectory, "logs");
+            _FileTarget.FileName = Path.Combine(LogFilePath, "updater.${date:format=yyyy-MM-dd}.log");
+            _FileTarget.CreateDirs = true;
+            _FileTarget.MaxArchiveFiles = 7;
+            _FileTarget.ArchiveEvery = FileArchivePeriod.Day;
+            _FileTarget.ConcurrentWrites = true;
+            _FileTarget.Layout = "${longdate} | ${level} | ${message} | ${exception:format=Message,StackTrace,Data:MaxInnerExceptionLevel=5}";
+            LoggingRule _FileRule = new("*", NLog.LogLevel.Info, _FileTarget);
+            _Config.AddTarget("logfile", _FileTarget);
+            _Config.LoggingRules.Add(_FileRule);
 
             // create console target
             if (Debugger.IsAttached)
             {
-                ColoredConsoleTarget consoleTarget = new();
-                consoleTarget.Layout = @"${date:format=HH\\:MM\\:ss} ${logger} ${message}";
-                config.AddTarget("console", consoleTarget);
-                LoggingRule consoleRule = new("*", NLog.LogLevel.Info, consoleTarget);
-                config.LoggingRules.Add(consoleRule);
+                ColoredConsoleTarget _ConsoleTarget = new();
+                _ConsoleTarget.Layout = @"${date:format=HH\\:MM\\:ss} ${logger} ${message}";
+                _Config.AddTarget("console", _ConsoleTarget);
+                LoggingRule _ConsoleRule = new("*", NLog.LogLevel.Info, _ConsoleTarget);
+                _Config.LoggingRules.Add(_ConsoleRule);
             }
-            LogManager.Configuration = config;
+            LogManager.Configuration = _Config;
             Logger = LogManager.GetCurrentClassLogger();
         }
-        catch (Exception e)
+        catch (Exception _E)
         {
-            Debug.WriteLine(e.Message);
-            Debug.WriteLine(e.StackTrace);
+            Debug.WriteLine(_E.Message);
+            Debug.WriteLine(_E.StackTrace);
         }
     }
 
-    public async Task<bool> AddElmahTarget()
+    public Task<bool> AddElmahTarget()
     {
-        if (apiKey == string.Empty | logID == string.Empty)
-            return false;
+        if (_apiKey == string.Empty | _logId == string.Empty)
+            return Task.FromResult(false);
 
         try
         {
             // create elmah.io target
-            var elmahIoTarget = new ElmahIoTarget();
+            var _ElmahIoTarget = new ElmahIoTarget();
 
-            elmahIoTarget.OnMessage += msg =>
+            _ElmahIoTarget.OnMessage += msg =>
             {
                 msg.Version = Package.Current.Id.Version.Major + "."
                                                                + Package.Current.Id.Version.Minor + "."
                                                                + Package.Current.Id.Version.Revision;
                 
                 try { msg.User = GlobalData.Preferences.Name + $"({GlobalData.Preferences.Email})"; }
-                catch (Exception e) { msg.User = $"There was an error attempting to obtain user information Error: {e.Message}"; }
+                catch (Exception _E) { msg.User = $"There was an error attempting to obtain user information Error: {_E.Message}"; }
 
-                try { msg.Source = stackTraceHelper; } 
-                catch (Exception e) {msg.Source = $"There was an error attempting to obtain StackTrace helper Error: {e.Message}";}
+                try { msg.Source = _stackTraceHelper; } 
+                catch (Exception _E) {msg.Source = $"There was an error attempting to obtain StackTrace helper Error: {_E.Message}";}
                 
                 try
                 {
@@ -91,73 +91,79 @@ public class LogService : ILogService
                                                                    + Package.Current.Id.Version.Minor + "."
                                                                    + Package.Current.Id.Version.Build + " Build " + Package.Current.Id.Version.Revision;
                 }
-                catch (Exception e) { msg.Version = $"There was an error trying to obtain version information Error: {e.Message}"; }
+                catch (Exception _E) { msg.Version = $"There was an error trying to obtain version information Error: {_E.Message}"; }
 
                 try
                 {
                     msg.Data = new List<Item>();
-                    string LogString = string.Empty;
-                    using (FileStream stream = File.Open(Path.Combine(GlobalData.RootDirectory, "logs", $"updater.{DateTime.Now.ToString("yyyy-MM-dd")}.log"), FileMode.Open, FileAccess.Read,FileShare.ReadWrite))
+                    string _LogString;
+                    using (FileStream _Stream = File.Open(Path.Combine(GlobalData.RootDirectory, "logs", $"updater.{DateTime.Now.ToString("yyyy-MM-dd")}.log"), FileMode.Open, FileAccess.Read,FileShare.ReadWrite))
                     {
-                        using (StreamReader reader = new(stream))
+                        using (StreamReader _Reader = new(_Stream))
                         {
-                            LogString = reader.ReadToEnd();
+                            _LogString = _Reader.ReadToEnd();
                         }
                     }
 
-                    int ln = 0;
-                    if (LogString.Split("\n").Length > 50)
+                    int _Ln = 0;
+                    if (_LogString.Split("\n").Length > 50)
                     {
-                        foreach (var line in LogString.Split("\n").TakeLast(50))
+                        foreach (var _Line in _LogString.Split("\n").TakeLast(50))
                         {
-                            msg.Data.Add(new(key: "Line " + ln, value: line));
-                            ln++;
+                            msg.Data.Add(new(key: "Line " + _Ln, value: _Line));
+                            _Ln++;
                         }
                     }
                     else
                     {
-                        foreach (var line in LogString.Split("\n").TakeLast(50))
+                        foreach (var _Line in _LogString.Split("\n").TakeLast(50))
                         {
-                            msg.Data.Add(new(key: "Line ", value: line));
-                            ln++;
+                            msg.Data.Add(new(key: "Line ", value: _Line));
+                            _Ln++;
                         }
                     }
                     msg.Data.Add(new(key: "Log ","end"));
                 }
-                catch (Exception e) { msg.Data.Add(new("Error", $"There was an error attempting to obtain the log Error: {e.Message}"));}
+                catch (Exception _E) { msg.Data.Add(new("Error", $"There was an error attempting to obtain the log Error: {_E.Message}"));}
             };
 
-            elmahIoTarget.Name = "elmahio";
-            elmahIoTarget.ApiKey = apiKey;
-            elmahIoTarget.LogId = logID;
-            LogManager.Configuration.AddTarget(elmahIoTarget);
-            LogManager.Configuration.AddRule(NLog.LogLevel.Error, NLog.LogLevel.Fatal, elmahIoTarget);
+            _ElmahIoTarget.Name = "elmahio";
+            _ElmahIoTarget.ApiKey = _apiKey;
+            _ElmahIoTarget.LogId = _logId;
+            LogManager.Configuration.AddTarget(_ElmahIoTarget);
+            LogManager.Configuration.AddRule(NLog.LogLevel.Error, NLog.LogLevel.Fatal, _ElmahIoTarget);
             LogManager.ReconfigExistingLoggers();
             GlobalData.ElmahLogging = true;
-            return true;
+            return Task.FromResult(true);
         }
-        catch (Exception ex)
+        catch (Exception _Ex)
         {
-            LogException(LogLevel.Error, ex, ex.Message);
-            return false;
+            LogException(LogLevel.Error, _Ex, _Ex.Message);
+            return Task.FromResult(false);
         }
     }
 
     public void SetElmahTokens(Doppler keys)
     {
+<<<<<<< Updated upstream
         apiKey = keys.APIKEY;
         logID = keys.LOGID;
+=======
+        _apiKey = keys.APIKEY;
+        _logId = keys.LOGID;
+>>>>>>> Stashed changes
     }
 
     public LogService()
     {
         Log(LogLevel.Info, "Starting Log service");
-        Log(LogLevel.Info, "Detailed log at " + logFilePath);
+        Log(LogLevel.Info, "Detailed log at " + LogFilePath);
     }
 
 
     public void Log(LogLevel level, string message)
     {
+        // ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault
         switch (level)
         {
             case LogLevel.Trace:
@@ -183,14 +189,15 @@ public class LogService : ILogService
 
     public void LogException(LogLevel level, Exception exception, string message)
     {
+        // ReSharper disable once SwitchStatementMissingSomeEnumCasesNoDefault
         switch (level)
         {
             case LogLevel.Error:
-                stackTraceHelper = exception.StackTrace;
+                _stackTraceHelper = exception.StackTrace;
                 Logger.Error(exception, message);
                 break;
             case LogLevel.Fatal:
-                stackTraceHelper = exception.StackTrace;
+                _stackTraceHelper = exception.StackTrace;
                 Logger.Fatal(exception, message);
                 break;
         }

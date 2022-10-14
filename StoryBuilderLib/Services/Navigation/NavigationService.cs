@@ -32,9 +32,9 @@ namespace StoryBuilder.Services.Navigation;
 /// Note that if if a Frame is passed, GoBack isn't available; using it will
 /// get you in trouble. 
 /// <summary>
-/// Windows 10 UWP implementation of <see cref="INavigationService"/>.
+/// Windows 10 UWP implementation of <see ref="INavigationService"/>.
 /// </summary>
-public class NavigationService : INavigationService
+public class NavigationService
 {
     /// <summary>
     /// The key that is returned by the <see cref="CurrentPageKey"/> property
@@ -96,18 +96,6 @@ public class NavigationService : INavigationService
 
                 return _Item.Key;
             }
-        }
-    }
-
-    /// <summary>
-    /// If possible, discards the current page and displays the previous page
-    /// on the navigation stack.
-    /// </summary>
-    public void GoBack()
-    {
-        if (CurrentFrame.CanGoBack)
-        {
-            CurrentFrame.GoBack();
         }
     }
 
