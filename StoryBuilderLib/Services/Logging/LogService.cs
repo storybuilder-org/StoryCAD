@@ -145,13 +145,8 @@ public class LogService : ILogService
 
     public void SetElmahTokens(Doppler keys)
     {
-<<<<<<< Updated upstream
-        apiKey = keys.APIKEY;
-        logID = keys.LOGID;
-=======
         _apiKey = keys.APIKEY;
         _logId = keys.LOGID;
->>>>>>> Stashed changes
     }
 
     public LogService()

@@ -103,6 +103,7 @@ public class BackupService
         }
         catch (Exception _Ex)
         {
+            // ReSharper disable once AsyncVoidLambda
             DispatcherQueue.GetForCurrentThread().TryEnqueue(async () =>
             {
                 await new ContentDialog

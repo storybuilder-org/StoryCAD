@@ -4,7 +4,6 @@ using System.Runtime.InteropServices;
 using Windows.Storage;
 using Windows.Storage.Pickers;
 using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
 using StoryBuilder.ViewModels;
 using WinRT;
 
