@@ -16,7 +16,6 @@ public sealed class CharacterName : ComboBox
 
     private void CharacterName_Loaded(object o, RoutedEventArgs routedEventArgs)
     {
-        StoryModel model = ShellViewModel.GetModel();
-        ItemsSource = model.StoryElements.Characters;
+        ItemsSource = ShellViewModel.GetModel().StoryElements.Characters;
     }
 }
