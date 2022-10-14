@@ -186,11 +186,11 @@ public class BackendService
             StorageFolder _TempFolder = ApplicationData.Current.TemporaryFolder;
             StorageFile _TempFile = 
                 await _TempFolder.CreateFileAsync("storybuilder.pem", CreationCollisionOption.ReplaceExisting);
-            string _CaFile = keys.Cafile;
+            string _CaFile = keys.CAFILE;
             await FileIO.WriteTextAsync(_TempFile, _CaFile);
             _sslCa = $"SslCa={_TempFile.Path};";
             // create MySQL connection string if keys are defined
-            _connection = keys.Connection + _sslCa; 
+            _connection = keys.CONNECTION + _sslCa; 
             // can compare the c:\certs and temp file to see if they are the same
         }
         catch (Exception _Ex)
