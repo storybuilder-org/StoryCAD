@@ -68,8 +68,8 @@
                         <editors:SfComboBox Grid.Row="0" IsEditable="True" Header="Eye Color" Grid.Column="0" ItemsSource="{x:Bind CharVm.EyesList}" Text="{x:Bind CharVm.Eyes, Mode=TwoWay}" />
                         <editors:SfComboBox Grid.Row="0" IsEditable="True" Header="Hair Color" Grid.Column="2" ItemsSource="{x:Bind CharVm.HairList}" Text="{x:Bind CharVm.Hair, Mode=TwoWay}" />
 
-                        <editors:SfComboBox Grid.Column="0" Grid.Row="1" IsEditable="True" Header="Build" ItemsSource="{x:Bind CharVm.BuildList}" Text="{x:Bind CharVm.Build, Mode=TwoWay}" />
-                        <editors:SfComboBox Grid.Row="1" IsEditable="True" Header="Complexion" Grid.Column="2" ItemsSource="{x:Bind CharVm.SkinList}" Text="{x:Bind CharVm.Complexion, Mode=TwoWay}" />
+                        <editors:SfComboBox Grid.Row="1" Grid.Column="0" IsEditable="True" Header="Build" ItemsSource="{x:Bind CharVm.BuildList}" Text="{x:Bind CharVm.Build, Mode=TwoWay}" />
+                        <editors:SfComboBox Grid.Row="1" Grid.Column="2" IsEditable="True" Header="Complexion" ItemsSource="{x:Bind CharVm.SkinList}" Text="{x:Bind CharVm.Complexion, Mode=TwoWay}" />
 
                         <editors:SfComboBox Grid.Row="2" IsEditable="True" Header="Race"  Grid.Column="0" ItemsSource="{x:Bind CharVm.RaceList}" Text="{x:Bind CharVm.Race, Mode=TwoWay}" />
                         <editors:SfComboBox Grid.Row="2" IsEditable="True" Header="Nationality" Grid.Column="2"  ItemsSource="{x:Bind CharVm.NationalityList}" Text="{x:Bind CharVm.Nationality, Mode=TwoWay}"/>

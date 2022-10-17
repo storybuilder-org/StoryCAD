@@ -3,6 +3,45 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:editors="using:Syncfusion.UI.Xaml.Editors"
     xmlns:usercontrols="using:StoryBuilder.Controls">
+    <ResourceDictionary.MergedDictionaries>
+        <XamlControlsResources  xmlns="using:Microsoft.UI.Xaml.Controls"/>
+    </ResourceDictionary.MergedDictionaries>
+
+    <!-- Overrides to default styles based on TargetType.
+         Note that implicit overrides (so that a control can be styled
+         without specifying a key) require creating an exlicit (keyed)
+         style before the implicit style in order to have our implicit
+         styles override, rather than replace, the WinUI defaults.
+    -->
+
+    <Style x:Key="MyButton" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+        <Setter Property="Background" Value="Blue"></Setter>
+    </Style>
+
+
+    <Style TargetType="Button" BasedOn="{StaticResource MyButton}">
+        <Setter Property="Margin" Value="5"/>
+        <Setter Property="HorizontalAlignment" Value="Center"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="CornerRadius" Value="5"/>
+    </Style>
+
+    <Style TargetType="editors:SfComboBox">
+        <Setter Property="MinWidth" Value="200" />
+        <Setter Property="Margin" Value="5"/>
+    </Style>
+
+    <Style TargetType="usercontrols:RichEditBoxExtended">
+        <Setter Property="AcceptsReturn" Value="True"/>
+        <Setter Property="IsSpellCheckEnabled" Value="True"/>
+        <Setter Property="TextWrapping" Value="Wrap"/>
+        <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Visible"/>
+    </Style>
+
+    <Style TargetType="ComboBox">
+        <Setter Property="Margin" Value="5"/>
+
+    </Style>
 
     <!-- Note: Using a style appears to override some of the things winui3 does such rounded corners
         You may have to add some extras here, such as corner radius
@@ -52,28 +91,5 @@
         <Setter Property="CornerRadius" Value="5"/>
     </Style>
 
-    <!-- Default Styles -->
-    <Style TargetType="Button">
-        <Setter Property="Margin" Value="5"/>
-        <Setter Property="HorizontalAlignment" Value="Center"/>
-        <Setter Property="VerticalAlignment" Value="Center"/>
-        <Setter Property="CornerRadius" Value="5"/>
-    </Style>
 
-    <Style TargetType="editors:SfComboBox">
-        <Setter Property="MinWidth" Value="200" />
-        <Setter Property="Margin" Value="5"/>
-    </Style>
-
-    <Style TargetType="usercontrols:RichEditBoxExtended">
-        <Setter Property="AcceptsReturn" Value="True"/>
-        <Setter Property="IsSpellCheckEnabled" Value="True"/>
-        <Setter Property="TextWrapping" Value="Wrap"/>
-        <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Visible"/>
-    </Style>
-
-    <Style TargetType="ComboBox">
-        <Setter Property="Margin" Value="5"/>
-
-    </Style>
 </ResourceDictionary>
