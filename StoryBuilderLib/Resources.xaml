@@ -9,13 +9,13 @@
 
     <!-- Overrides to default styles based on TargetType.
          Note that implicit overrides (so that a control can be styled
-         without specifying a key) require creating an exlicit (keyed)
+         without specifying a key) require creating an explicit (keyed)
          style before the implicit style in order to have our implicit
          styles override, rather than replace, the WinUI defaults.
     -->
 
     <Style x:Key="MyButton" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
-        <Setter Property="Background" Value="Blue"></Setter>
+        <Setter Property="CornerRadius" Value="4"/>
     </Style>
 
 
@@ -23,7 +23,7 @@
         <Setter Property="Margin" Value="5"/>
         <Setter Property="HorizontalAlignment" Value="Center"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
-        <Setter Property="CornerRadius" Value="5"/>
+        <Setter Property="CornerRadius" Value="4"/>
     </Style>
 
     <Style TargetType="editors:SfComboBox">

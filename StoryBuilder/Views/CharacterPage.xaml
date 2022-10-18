@@ -158,7 +158,7 @@
                     <editors:SfComboBox Grid.Row="2" Grid.Column="0" IsEditable="True" Header="Focus" Width="200" Margin="5"
                                         ItemsSource="{x:Bind CharVm.FocusList}"
                                         Text="{x:Bind CharVm.Focus, Mode=TwoWay}" />
-                    <editors:SfComboBox Grid.Row="2" Grid.Column="1" IsEditable="True" Header="Abnormality"  Width="200" Margin="5"
+                    <editors:SfComboBox Grid.Row="2" Grid.Column="1" IsEditable="True" Header="Abnormality" Width="200" Margin="5"
                                         ItemsSource="{x:Bind CharVm.AbnormalityList}"
                                         Text="{x:Bind CharVm.Abnormality, Mode=TwoWay}" />
 
