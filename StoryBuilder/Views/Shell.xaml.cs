@@ -1,15 +1,18 @@
 ﻿using System;
+using ABI.Microsoft.UI;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Input;
+using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
 using Microsoft.Web.WebView2.Core;
 using StoryBuilder.Models;
 using StoryBuilder.Models.Tools;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.ViewModels;
+using Colors = Microsoft.UI.Colors;
 
 namespace StoryBuilder.Views;
 
@@ -107,4 +110,8 @@ public sealed partial class Shell
         foreach (StoryNodeItem node in ShellVm.DataSource[0]) { node.Background = null; }
     }
 
+    private void UIElement_OnPointerPressed(object sender, PointerRoutedEventArgs e)
+    {
+        (sender as TreeViewItem).Background = new SolidColorBrush(Colors.Red);
+    }
 }
