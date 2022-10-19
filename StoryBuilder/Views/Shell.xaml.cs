@@ -109,9 +109,4 @@ public sealed partial class Shell
         if (ShellVm.DataSource == null || ShellVm.DataSource.Count == 0) { return; }
         foreach (StoryNodeItem node in ShellVm.DataSource[0]) { node.Background = null; }
     }
-
-    private void UIElement_OnPointerPressed(object sender, PointerRoutedEventArgs e)
-    {
-        (sender as TreeViewItem).Background = new SolidColorBrush(Colors.Red);
-    }
 }
