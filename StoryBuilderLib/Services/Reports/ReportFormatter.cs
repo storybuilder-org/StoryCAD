@@ -9,11 +9,6 @@ using StoryBuilder.DAL;
 using StoryBuilder.Models;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.ViewModels;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.Web.WebView2.Core;
-using Windows.Storage.Streams;
-using System.IO;
-using Google.Protobuf.WellKnownTypes;
 
 namespace StoryBuilder.Services.Reports;
 
@@ -27,458 +22,458 @@ public class ReportFormatter
 
     public string FormatStoryOverviewReport(StoryElement element)
     {
-        OverviewModel overview = (OverviewModel)element;
-        string[] lines = _templates["Story Overview"];  
-        RtfDocument doc = new(string.Empty);
+        OverviewModel _Overview = (OverviewModel)element;
+        string[] _Lines = _templates["Story Overview"];  
+        RtfDocument _Doc = new(string.Empty);
 
-        StoryElement vpChar = StringToStoryElement(overview.ViewpointCharacter);
-        string vpName = vpChar?.Name ?? string.Empty;
-        StoryElement seProblem = StringToStoryElement(overview.StoryProblem);
-        string problemName = seProblem?.Name ?? string.Empty;
-        ProblemModel problem = (ProblemModel)seProblem;
-        string premise = problem?.Premise ?? string.Empty;
+        StoryElement _VpChar = StringToStoryElement(_Overview.ViewpointCharacter);
+        string _VpName = _VpChar?.Name ?? string.Empty;
+        StoryElement _SeProblem = StringToStoryElement(_Overview.StoryProblem);
+        string _ProblemName = _SeProblem?.Name ?? string.Empty;
+        ProblemModel _Problem = (ProblemModel)_SeProblem;
+        string _Premise = _Problem?.Premise ?? string.Empty;
 
         // Parse and write the report
-        foreach (string line in lines)
+        foreach (string _Line in _Lines)
         {
             // Parse the report
-            StringBuilder sb = new(line);
-            sb.Replace("@Title", overview.Name);
-            sb.Replace("@CreateDate", overview.DateCreated);
-            sb.Replace("@ModifiedDate", overview.DateModified);
-            sb.Replace("@Author", overview.Author);
-            sb.Replace("@StoryType", overview.StoryType);
-            sb.Replace("@Genre", overview.StoryGenre);
-            sb.Replace("@Viewpoint", overview.Viewpoint);
-            sb.Replace("@StoryIdea", GetText(overview.StoryIdea));
-            sb.Replace("@Concept", GetText(overview.Concept));
-            sb.Replace("@StoryProblem", problemName);
-            sb.Replace("@Premise", GetText(premise));
-            sb.Replace("@StoryType", overview.StoryType);
-            sb.Replace("@StoryGenre", overview.StoryGenre);
-            sb.Replace("@LiteraryDevice", overview.LiteraryDevice);
-            sb.Replace("@viewpointCharacter", vpName);
-            sb.Replace("@Voice", overview.Voice);
-            sb.Replace("@Tense", overview.Tense);
-            sb.Replace("@Style", overview.Style);
-            sb.Replace("@StructureNotes", GetText(overview.StructureNotes));
-            sb.Replace("@Tone", overview.Tone);
-            sb.Replace("@Notes", GetText(overview.Notes));
-            doc.AddText(sb.ToString());
-            doc.AddNewLine();
+            StringBuilder _Sb = new(_Line);
+            _Sb.Replace("@Title", _Overview.Name);
+            _Sb.Replace("@CreateDate", _Overview.DateCreated);
+            _Sb.Replace("@ModifiedDate", _Overview.DateModified);
+            _Sb.Replace("@Author", _Overview.Author);
+            _Sb.Replace("@StoryType", _Overview.StoryType);
+            _Sb.Replace("@Genre", _Overview.StoryGenre);
+            _Sb.Replace("@Viewpoint", _Overview.Viewpoint);
+            _Sb.Replace("@StoryIdea", GetText(_Overview.StoryIdea));
+            _Sb.Replace("@Concept", GetText(_Overview.Concept));
+            _Sb.Replace("@StoryProblem", _ProblemName);
+            _Sb.Replace("@Premise", GetText(_Premise));
+            _Sb.Replace("@StoryType", _Overview.StoryType);
+            _Sb.Replace("@StoryGenre", _Overview.StoryGenre);
+            _Sb.Replace("@LiteraryDevice", _Overview.LiteraryDevice);
+            _Sb.Replace("@viewpointCharacter", _VpName);
+            _Sb.Replace("@Voice", _Overview.Voice);
+            _Sb.Replace("@Tense", _Overview.Tense);
+            _Sb.Replace("@Style", _Overview.Style);
+            _Sb.Replace("@StructureNotes", GetText(_Overview.StructureNotes));
+            _Sb.Replace("@Tone", _Overview.Tone);
+            _Sb.Replace("@Notes", GetText(_Overview.Notes));
+            _Doc.AddText(_Sb.ToString());
+            _Doc.AddNewLine();
         }
-        return doc.GetRtf();
+        return _Doc.GetRtf();
     }
 
     public string FormatProblemListReport()
     {
-        string[] lines = _templates["List of Problems"];
-        RtfDocument doc = new(string.Empty);
+        string[] _Lines = _templates["List of Problems"];
+        RtfDocument _Doc = new(string.Empty);
 
         // Parse and write the report
-        foreach (string line in lines)
+        foreach (string _Line in _Lines)
         {
-            if (line.Contains("@Description"))
+            if (_Line.Contains("@Description"))
             {
-                foreach (StoryElement element in _model.StoryElements)
-                    if (element.Type == StoryItemType.Problem)
+                foreach (StoryElement _Element in _model.StoryElements)
+                    if (_Element.Type == StoryItemType.Problem)
                     {
-                        ProblemModel chr = (ProblemModel)element;
-                        StringBuilder sb = new(line);
-                        sb.Replace("@Description", chr.Name);
-                        doc.AddText(sb.ToString());
-                        doc.AddNewLine();
+                        ProblemModel _Chr = (ProblemModel)_Element;
+                        StringBuilder _Sb = new(_Line);
+                        _Sb.Replace("@Description", _Chr.Name);
+                        _Doc.AddText(_Sb.ToString());
+                        _Doc.AddNewLine();
                     }
             }
             else
             {
-                doc.AddText(line);
-                doc.AddNewLine();
+                _Doc.AddText(_Line);
+                _Doc.AddNewLine();
             }
         }
-        return doc.GetRtf();
+        return _Doc.GetRtf();
     }
 
     public string FormatProblemReport(StoryElement element)
     {
-        ProblemModel problem = (ProblemModel)element;
-        string[] lines = _templates["Problem Description"];
-        RtfDocument doc = new(string.Empty);
+        ProblemModel _Problem = (ProblemModel)element;
+        string[] _Lines = _templates["Problem Description"];
+        RtfDocument _Doc = new(string.Empty);
 
-        StoryElement vpProtagonist = StringToStoryElement(problem.Protagonist);
-        StoryElement vpAntagonist = StringToStoryElement(problem.Antagonist);
+        StoryElement _VpProtagonist = StringToStoryElement(_Problem.Protagonist);
+        StoryElement _VpAntagonist = StringToStoryElement(_Problem.Antagonist);
 
         // Parse and write the report
-        foreach (string line in lines)
+        foreach (string _Line in _Lines)
         {
-            StringBuilder sb = new(line);
-            if (String.IsNullOrEmpty(problem.Name)) { sb.Replace("@Title", ""); }
-            else { sb.Replace("@Title", problem.Name); }
+            StringBuilder _Sb = new(_Line);
+            if (string.IsNullOrEmpty(_Problem.Name)) { _Sb.Replace("@Title", ""); }
+            else { _Sb.Replace("@Title", _Problem.Name); }
 
-            sb.Replace("@ProblemType", problem.ProblemType);
+            _Sb.Replace("@ProblemType", _Problem.ProblemType);
 
-            if (String.IsNullOrEmpty(problem.ConflictType)) { sb.Replace("@ConflictType", ""); }
-            else { sb.Replace("@ConflictType", problem.ConflictType); }
+            if (string.IsNullOrEmpty(_Problem.ConflictType)) { _Sb.Replace("@ConflictType", ""); }
+            else { _Sb.Replace("@ConflictType", _Problem.ConflictType); }
             
-            if (String.IsNullOrEmpty(problem.Subject)) { sb.Replace("@Subject", ""); }
-            else { sb.Replace("@Subject", problem.Subject); }
+            if (string.IsNullOrEmpty(_Problem.Subject)) { _Sb.Replace("@Subject", ""); }
+            else { _Sb.Replace("@Subject", _Problem.Subject); }
 
-            if (String.IsNullOrEmpty(problem.StoryQuestion)) { sb.Replace("@StoryQuestion", ""); } 
-            else { sb.Replace("@StoryQuestion", GetText(problem.StoryQuestion)); }
+            if (string.IsNullOrEmpty(_Problem.StoryQuestion)) { _Sb.Replace("@StoryQuestion", ""); } 
+            else { _Sb.Replace("@StoryQuestion", GetText(_Problem.StoryQuestion)); }
             
-            if (String.IsNullOrEmpty(problem.ProblemSource)) { sb.Replace("@ProblemSource", ""); }
-            else { sb.Replace("@ProblemSource", problem.ProblemSource); }
+            if (string.IsNullOrEmpty(_Problem.ProblemSource)) { _Sb.Replace("@ProblemSource", ""); }
+            else { _Sb.Replace("@ProblemSource", _Problem.ProblemSource); }
 
-            if (String.IsNullOrEmpty(problem.ProtMotive)) { sb.Replace("@ProtagMotive", ""); }
-            else { sb.Replace("@ProtagMotive", problem.ProtMotive); }
+            if (string.IsNullOrEmpty(_Problem.ProtMotive)) { _Sb.Replace("@ProtagMotive", ""); }
+            else { _Sb.Replace("@ProtagMotive", _Problem.ProtMotive); }
 
-            if (String.IsNullOrEmpty(problem.ProtGoal)) { sb.Replace("@ProtagGoal", ""); }
-            else { sb.Replace("@ProtagGoal", problem.ProtGoal); }
+            if (string.IsNullOrEmpty(_Problem.ProtGoal)) { _Sb.Replace("@ProtagGoal", ""); }
+            else { _Sb.Replace("@ProtagGoal", _Problem.ProtGoal); }
             
-            if (vpProtagonist != null)
+            if (_VpProtagonist != null)
             {
-                if (String.IsNullOrEmpty(vpProtagonist.Name)) { sb.Replace("@ProtagName", ""); }
-                else { sb.Replace("@ProtagName", vpProtagonist.Name); }
+                if (string.IsNullOrEmpty(_VpProtagonist.Name)) { _Sb.Replace("@ProtagName", ""); }
+                else { _Sb.Replace("@ProtagName", _VpProtagonist.Name); }
             }
-            else { sb.Replace("@ProtagName", ""); }
+            else { _Sb.Replace("@ProtagName", ""); }
 
-            if (String.IsNullOrEmpty(problem.ProtConflict)) { sb.Replace("@ProtagConflict", ""); }
-            else { sb.Replace("@ProtagConflict", problem.ProtConflict); }
+            if (string.IsNullOrEmpty(_Problem.ProtConflict)) { _Sb.Replace("@ProtagConflict", ""); }
+            else { _Sb.Replace("@ProtagConflict", _Problem.ProtConflict); }
 
-            if (vpAntagonist != null)
+            if (_VpAntagonist != null)
             {
-                if (String.IsNullOrEmpty(vpAntagonist.Name)) { sb.Replace("@AntagName", ""); }
-                else { sb.Replace("@AntagName", vpAntagonist.Name); }
+                if (string.IsNullOrEmpty(_VpAntagonist.Name)) { _Sb.Replace("@AntagName", ""); }
+                else { _Sb.Replace("@AntagName", _VpAntagonist.Name); }
             }
-            else { sb.Replace("@AntagName", ""); }
+            else { _Sb.Replace("@AntagName", ""); }
             
-            if (String.IsNullOrEmpty(problem.AntagMotive)) { sb.Replace("@AntagMotive", ""); }
-            else { sb.Replace("@AntagMotive", problem.AntagMotive); }
+            if (string.IsNullOrEmpty(_Problem.AntagMotive)) { _Sb.Replace("@AntagMotive", ""); }
+            else { _Sb.Replace("@AntagMotive", _Problem.AntagMotive); }
 
-            if (String.IsNullOrEmpty(problem.AntagGoal)) { sb.Replace("@AntagGoal", ""); }
-            else { sb.Replace("@AntagGoal", problem.AntagGoal); }
+            if (string.IsNullOrEmpty(_Problem.AntagGoal)) { _Sb.Replace("@AntagGoal", ""); }
+            else { _Sb.Replace("@AntagGoal", _Problem.AntagGoal); }
 
-            if (String.IsNullOrEmpty(problem.AntagConflict)) { sb.Replace("@AntagConflict", ""); }
-            else { sb.Replace("@AntagConflict", problem.AntagConflict); }
+            if (string.IsNullOrEmpty(_Problem.AntagConflict)) { _Sb.Replace("@AntagConflict", ""); }
+            else { _Sb.Replace("@AntagConflict", _Problem.AntagConflict); }
 
-            if (String.IsNullOrEmpty(problem.Outcome)) { sb.Replace("@Outcome", ""); }
-            else { sb.Replace("@Outcome", problem.Outcome); }
+            if (string.IsNullOrEmpty(_Problem.Outcome)) { _Sb.Replace("@Outcome", ""); }
+            else { _Sb.Replace("@Outcome", _Problem.Outcome); }
 
-            if (String.IsNullOrEmpty(problem.Method)) { sb.Replace("@Method", ""); }
-            else { sb.Replace("@Method", problem.Method); }
+            if (string.IsNullOrEmpty(_Problem.Method)) { _Sb.Replace("@Method", ""); }
+            else { _Sb.Replace("@Method", _Problem.Method); }
             
-            if (String.IsNullOrEmpty(problem.Theme)) { sb.Replace("@Theme", ""); }
-            else { sb.Replace("@Theme", problem.Theme); }
+            if (string.IsNullOrEmpty(_Problem.Theme)) { _Sb.Replace("@Theme", ""); }
+            else { _Sb.Replace("@Theme", _Problem.Theme); }
 
-            if (String.IsNullOrEmpty(problem.Premise)) { sb.Replace("@Premise", ""); }
-            else { sb.Replace("@Premise", GetText(problem.Premise)); }
+            if (string.IsNullOrEmpty(_Problem.Premise)) { _Sb.Replace("@Premise", ""); }
+            else { _Sb.Replace("@Premise", GetText(_Problem.Premise)); }
             
-            if (String.IsNullOrEmpty(problem.Notes)) { sb.Replace("@Notes", ""); }
-            else { sb.Replace("@Notes", GetText(problem.Notes)); }
+            if (string.IsNullOrEmpty(_Problem.Notes)) { _Sb.Replace("@Notes", ""); }
+            else { _Sb.Replace("@Notes", GetText(_Problem.Notes)); }
 
-            doc.AddText(sb.ToString());
-            doc.AddNewLine();
+            _Doc.AddText(_Sb.ToString());
+            _Doc.AddNewLine();
         }
 
-        return doc.GetRtf();
+        return _Doc.GetRtf();
     }
 
     public string FormatCharacterRelationshipReport(StoryElement element)
     {
-        CharacterModel character = (CharacterModel)element;
-        RtfDocument doc = new(string.Empty);
-        foreach (var rel in character.RelationshipList)
+        CharacterModel _Character = (CharacterModel)element;
+        RtfDocument _Doc = new(string.Empty);
+        foreach (RelationshipModel _Rel in _Character.RelationshipList)
         {
-            foreach (string line in _templates["Character Relationship Description"])
+            foreach (string _Line in _templates["Character Relationship Description"])
             {
-                StringBuilder sb = new(line);
-                if (rel.Partner == null)
+                StringBuilder _Sb = new(_Line);
+                if (_Rel.Partner == null)
                 {
-                    foreach (var VARIABLE in Ioc.Default.GetService<ShellViewModel>().StoryModel.StoryElements.Characters)
+                    foreach (StoryElement _Variable in Ioc.Default.GetRequiredService<ShellViewModel>().StoryModel.StoryElements.Characters)
                     {
-                        if (VARIABLE.Uuid.Equals(Guid.Parse(rel.PartnerUuid)))
+                        if (_Variable.Uuid.Equals(Guid.Parse(_Rel.PartnerUuid)))
                         {
-                            sb.Replace("@Relationship", VARIABLE.Name);
+                            _Sb.Replace("@Relationship", _Variable.Name);
                             break;
                         }
                     }
                 }
                 else
                 {
-                    sb.Replace("@Relationship", rel.Partner.Name);
+                    _Sb.Replace("@Relationship", _Rel.Partner.Name);
 
                 }
 
-                sb.Replace("@relationType", rel.RelationType);
-                sb.Replace("@relationTrait", rel.Trait);
-                sb.Replace("@Attitude", rel.Attitude);
-                sb.Replace("@Notes", GetText(rel.Notes));
+                _Sb.Replace("@relationType", _Rel.RelationType);
+                _Sb.Replace("@relationTrait", _Rel.Trait);
+                _Sb.Replace("@Attitude", _Rel.Attitude);
+                _Sb.Replace("@Notes", GetText(_Rel.Notes));
 
-                doc.AddText(sb.ToString());
-                doc.AddNewLine();
+                _Doc.AddText(_Sb.ToString());
+                _Doc.AddNewLine();
             }
-            doc.AddNewLine();
-            doc.AddNewLine();
+            _Doc.AddNewLine();
+            _Doc.AddNewLine();
         }
 
-        return doc.GetRtf();
+        return _Doc.GetRtf();
     }
 
     public string FormatCharacterListReport()
     {
-        string[] lines = _templates["List of Characters"];
-        RtfDocument doc = new(string.Empty);
+        string[] _Lines = _templates["List of Characters"];
+        RtfDocument _Doc = new(string.Empty);
 
         // Parse and write the report
-        foreach (string line in lines)
+        foreach (string _Line in _Lines)
         {
-            if (line.Contains("@Description"))
+            if (_Line.Contains("@Description"))
             {
-                foreach (StoryElement element in _model.StoryElements)
-                    if (element.Type == StoryItemType.Character)
+                foreach (StoryElement _Element in _model.StoryElements)
+                    if (_Element.Type == StoryItemType.Character)
                     {
-                        CharacterModel chr = (CharacterModel)element;
-                        StringBuilder sb = new(line);
-                        sb.Replace("@Description", chr.Name);
-                        doc.AddText(sb.ToString());
-                        doc.AddNewLine();
+                        CharacterModel _Chr = (CharacterModel)_Element;
+                        StringBuilder _Sb = new(_Line);
+                        _Sb.Replace("@Description", _Chr.Name);
+                        _Doc.AddText(_Sb.ToString());
+                        _Doc.AddNewLine();
                     }
             }
             else
             {
-                doc.AddText(line);
-                doc.AddNewLine();
+                _Doc.AddText(_Line);
+                _Doc.AddNewLine();
             }
         }
-        return doc.GetRtf();
+        return _Doc.GetRtf();
     }
 
     public string FormatCharacterReport(StoryElement element)
     {
-        CharacterModel character = (CharacterModel)element;
-        string[] lines = _templates["Character Description"];
-        RtfDocument doc = new(string.Empty);
+        CharacterModel _Character = (CharacterModel)element;
+        string[] _Lines = _templates["Character Description"];
+        RtfDocument _Doc = new(string.Empty);
 
 
         // Parse and write the report
-        foreach (string line in lines)
+        foreach (string _Line in _Lines)
         {
-            StringBuilder sb = new(line);
+            StringBuilder _Sb = new(_Line);
             //Story Role section
-            sb.Replace("@Id", character.Id.ToString());
-            sb.Replace("@Title", character.Name);
-            sb.Replace("@Role", character.Role);
-            sb.Replace("@StoryRole", character.StoryRole);
-            sb.Replace("@Archetype", character.Archetype);
-            sb.Replace("@CharacterSketch", GetText(character.CharacterSketch));
+            _Sb.Replace("@Id", _Character.Id.ToString());
+            _Sb.Replace("@Title", _Character.Name);
+            _Sb.Replace("@Role", _Character.Role);
+            _Sb.Replace("@StoryRole", _Character.StoryRole);
+            _Sb.Replace("@Archetype", _Character.Archetype);
+            _Sb.Replace("@CharacterSketch", GetText(_Character.CharacterSketch));
             //Physical section
-            sb.Replace("@Age", character.Age);
-            sb.Replace("@Sex", character.Sex);
-            sb.Replace("@Height", character.CharHeight);
-            sb.Replace("@Weight", character.Weight);
-            sb.Replace("@Eyes", character.Eyes);
-            sb.Replace("@Hair", character.Hair);
-            sb.Replace("@Build", character.Build);
-            sb.Replace("@Skin", character.Complexion);
-            sb.Replace("@Race", character.Race);
-            sb.Replace("@Nationality", character.Nationality);
-            sb.Replace("@Health", character.Health);
-            sb.Replace("@PhysNotes", GetText(character.PhysNotes));
+            _Sb.Replace("@Age", _Character.Age);
+            _Sb.Replace("@Sex", _Character.Sex);
+            _Sb.Replace("@Height", _Character.CharHeight);
+            _Sb.Replace("@Weight", _Character.Weight);
+            _Sb.Replace("@Eyes", _Character.Eyes);
+            _Sb.Replace("@Hair", _Character.Hair);
+            _Sb.Replace("@Build", _Character.Build);
+            _Sb.Replace("@Skin", _Character.Complexion);
+            _Sb.Replace("@Race", _Character.Race);
+            _Sb.Replace("@Nationality", _Character.Nationality);
+            _Sb.Replace("@Health", _Character.Health);
+            _Sb.Replace("@PhysNotes", GetText(_Character.PhysNotes));
             //Appearance section
-            sb.Replace("@Appearance", GetText(character.Appearance));
+            _Sb.Replace("@Appearance", GetText(_Character.Appearance));
             //Relationships section
-            if (sb.ToString() == "@Relationships" && character.RelationshipList.Count > 0)
+            if (_Sb.ToString() == "@Relationships" && _Character.RelationshipList.Count > 0)
             {
-                sb.Replace("@Relationships", FormatCharacterRelationshipReport(element));
+                _Sb.Replace("@Relationships", FormatCharacterRelationshipReport(element));
             }
 
             //Flaw section
-            sb.Replace("@Flaw", GetText(character.Flaw));
+            _Sb.Replace("@Flaw", GetText(_Character.Flaw));
             //Backstory section
-            sb.Replace("@Notes", GetText(character.BackStory));
+            _Sb.Replace("@Notes", GetText(_Character.BackStory));
             //Social Traits section
-            sb.Replace("@Economic", GetText(character.Economic));
-            sb.Replace("@Education", GetText(character.Education));
-            sb.Replace("@Ethnic", GetText(character.Ethnic));
-            sb.Replace("@Religion", GetText(character.Religion));
+            _Sb.Replace("@Economic", GetText(_Character.Economic));
+            _Sb.Replace("@Education", GetText(_Character.Education));
+            _Sb.Replace("@Ethnic", GetText(_Character.Ethnic));
+            _Sb.Replace("@Religion", GetText(_Character.Religion));
             //Psychological Traits section
-            sb.Replace("@Personality", character.Enneagram);
-            sb.Replace("@Intelligence", character.Intelligence);
-            sb.Replace("@Values", character.Values);
-            sb.Replace("@Focus", character.Focus);
-            sb.Replace("@Abnormality", character.Abnormality);
-            sb.Replace("@PsychNotes", GetText(character.PsychNotes));
+            _Sb.Replace("@Personality", _Character.Enneagram);
+            _Sb.Replace("@Intelligence", _Character.Intelligence);
+            _Sb.Replace("@Values", _Character.Values);
+            _Sb.Replace("@Focus", _Character.Focus);
+            _Sb.Replace("@Abnormality", _Character.Abnormality);
+            _Sb.Replace("@PsychNotes", GetText(_Character.PsychNotes));
             //Inner Traits section
-            sb.Replace("@Adventure", character.Adventureousness);
-            sb.Replace("@Aggression", character.Aggression);
-            sb.Replace("@Confidence", character.Confidence);
-            sb.Replace("@Conscientious", character.Conscientiousness);
-            sb.Replace("@Creative", character.Creativity);
-            sb.Replace("@Dominance", character.Dominance);
-            sb.Replace("@Enthusiasm", character.Enthusiasm);
-            sb.Replace("@Assurance", character.Assurance);
-            sb.Replace("@Sensitivity", character.Sensitivity);
-            sb.Replace("@Shrewdness", character.Shrewdness);
-            sb.Replace("@Sociability", character.Sociability);
-            sb.Replace("@Stability", character.Stability);
+            _Sb.Replace("@Adventure", _Character.Adventureousness);
+            _Sb.Replace("@Aggression", _Character.Aggression);
+            _Sb.Replace("@Confidence", _Character.Confidence);
+            _Sb.Replace("@Conscientious", _Character.Conscientiousness);
+            _Sb.Replace("@Creative", _Character.Creativity);
+            _Sb.Replace("@Dominance", _Character.Dominance);
+            _Sb.Replace("@Enthusiasm", _Character.Enthusiasm);
+            _Sb.Replace("@Assurance", _Character.Assurance);
+            _Sb.Replace("@Sensitivity", _Character.Sensitivity);
+            _Sb.Replace("@Shrewdness", _Character.Shrewdness);
+            _Sb.Replace("@Sociability", _Character.Sociability);
+            _Sb.Replace("@Stability", _Character.Stability);
             //Outer Traits section
-            string traits = "";
-            foreach (var trait in character.TraitList)
+            string _Traits = "";
+            foreach (string _Trait in _Character.TraitList)
             {
-                traits += trait + "\n";
+                _Traits += _Trait + "\n";
             }
-            sb.Replace("@Traits", traits);
+            _Sb.Replace("@Traits", _Traits);
             // Notes section
-            sb.Replace("@Notes", GetText(character.Notes));
+            _Sb.Replace("@Notes", GetText(_Character.Notes));
 
-            doc.AddText(sb.ToString());
-            doc.AddNewLine();
+            _Doc.AddText(_Sb.ToString());
+            _Doc.AddNewLine();
         }
          
-        return doc.GetRtf();
+        return _Doc.GetRtf();
     }
 
     public string FormatSettingListReport()
     {
-        string[] lines = _templates["List of Settings"];
-        RtfDocument doc = new(string.Empty);
+        string[] _Lines = _templates["List of Settings"];
+        RtfDocument _Doc = new(string.Empty);
 
         // Parse and write the report
-        foreach (string line in lines)
+        foreach (string _Line in _Lines)
         {
-            if (line.Contains("@Description"))
+            if (_Line.Contains("@Description"))
             {
-                foreach (StoryElement element in _model.StoryElements)
-                    if (element.Type == StoryItemType.Setting)
+                foreach (StoryElement _Element in _model.StoryElements)
+                    if (_Element.Type == StoryItemType.Setting)
                     {
-                        SettingModel setting = (SettingModel)element;
-                        StringBuilder sb = new(line);
-                        sb.Replace("@Description", setting.Name);
-                        doc.AddText(sb.ToString());
-                        doc.AddNewLine();
+                        SettingModel _Setting = (SettingModel)_Element;
+                        StringBuilder _Sb = new(_Line);
+                        _Sb.Replace("@Description", _Setting.Name);
+                        _Doc.AddText(_Sb.ToString());
+                        _Doc.AddNewLine();
                     }
             }
             else
             {
-                doc.AddText(line);
-                doc.AddNewLine();
+                _Doc.AddText(_Line);
+                _Doc.AddNewLine();
             }
         }
-        return doc.GetRtf();
+        return _Doc.GetRtf();
     }
 
     public string FormatSettingReport(StoryElement element)
     {
-        SettingModel setting = (SettingModel)element;
-        string[] lines = _templates["Setting Description"];
-        RtfDocument doc = new(string.Empty);
+        SettingModel _Setting = (SettingModel)element;
+        string[] _Lines = _templates["Setting Description"];
+        RtfDocument _Doc = new(string.Empty);
 
         // Parse and write the report
-        foreach (string line in lines)
+        foreach (string _Line in _Lines)
         {
-            StringBuilder sb = new(line);
-            sb.Replace("@Id", setting.Id.ToString());
-            sb.Replace("@Title", setting.Name);
-            sb.Replace("@Locale", setting.Locale);
-            sb.Replace("@Season", setting.Season);
-            sb.Replace("@Period", setting.Period);
-            sb.Replace("@Lighting", setting.Lighting);
-            sb.Replace("@Weather", setting.Weather);
-            sb.Replace("@Temperature", setting.Temperature);
-            sb.Replace("@Props", setting.Props);
-            sb.Replace("@Summary", GetText(setting.Summary));
-            sb.Replace("@Sights", GetText(setting.Sights));
-            sb.Replace("@Sounds", GetText(setting.Sounds));
-            sb.Replace("@Touch", GetText(setting.Touch));
-            sb.Replace("@SmellTaste", GetText(setting.SmellTaste));
-            sb.Replace("@Notes", GetText(setting.Notes));
-            doc.AddText(sb.ToString());
-            doc.AddNewLine();
+            StringBuilder _Sb = new(_Line);
+            _Sb.Replace("@Id", _Setting.Id.ToString());
+            _Sb.Replace("@Title", _Setting.Name);
+            _Sb.Replace("@Locale", _Setting.Locale);
+            _Sb.Replace("@Season", _Setting.Season);
+            _Sb.Replace("@Period", _Setting.Period);
+            _Sb.Replace("@Lighting", _Setting.Lighting);
+            _Sb.Replace("@Weather", _Setting.Weather);
+            _Sb.Replace("@Temperature", _Setting.Temperature);
+            _Sb.Replace("@Props", _Setting.Props);
+            _Sb.Replace("@Summary", GetText(_Setting.Summary));
+            _Sb.Replace("@Sights", GetText(_Setting.Sights));
+            _Sb.Replace("@Sounds", GetText(_Setting.Sounds));
+            _Sb.Replace("@Touch", GetText(_Setting.Touch));
+            _Sb.Replace("@SmellTaste", GetText(_Setting.SmellTaste));
+            _Sb.Replace("@Notes", GetText(_Setting.Notes));
+            _Doc.AddText(_Sb.ToString());
+            _Doc.AddNewLine();
         }
-        return doc.GetRtf();
+        return _Doc.GetRtf();
     }
 
     public string FormatSceneListReport()
     {
-        string[] lines = _templates["List of Scenes"];
-        RtfDocument doc = new(string.Empty);
+        string[] _Lines = _templates["List of Scenes"];
+        RtfDocument _Doc = new(string.Empty);
 
         // Parse and write the report
-        foreach (string line in lines)
+        foreach (string _Line in _Lines)
         {
-            if (line.Contains("@Description"))
+            if (_Line.Contains("@Description"))
             {
-                foreach (StoryElement element in _model.StoryElements)
-                    if (element.Type == StoryItemType.Scene)
+                foreach (StoryElement _Element in _model.StoryElements)
+                    if (_Element.Type == StoryItemType.Scene)
                     {
-                        SceneModel scene = (SceneModel)element;
-                        StringBuilder sb = new(line);
-                        sb.Replace("@Description", scene.Name);
-                        doc.AddText(sb.ToString());
-                        doc.AddNewLine();
+                        SceneModel _Scene = (SceneModel)_Element;
+                        StringBuilder _Sb = new(_Line);
+                        _Sb.Replace("@Description", _Scene.Name);
+                        _Doc.AddText(_Sb.ToString());
+                        _Doc.AddNewLine();
                     }
             }
             else
             {
-                doc.AddText(line);
-                doc.AddNewLine();
+                _Doc.AddText(_Line);
+                _Doc.AddNewLine();
             }
         }
-        return doc.GetRtf(); 
+        return _Doc.GetRtf(); 
     }
 
     public string FormatSceneReport(StoryElement element)
     {
-        SceneModel scene = (SceneModel)element;
-        string[] lines = _templates["Scene Description"];
-        RtfDocument doc = new(string.Empty);
+        SceneModel _Scene = (SceneModel)element;
+        string[] _Lines = _templates["Scene Description"];
+        RtfDocument _Doc = new(string.Empty);
 
-        StoryElement vpCharacter = StringToStoryElement(scene.ViewpointCharacter);
-        string vpCharacterName = vpCharacter?.Name ?? string.Empty;
-        StoryElement antagonist = StringToStoryElement(scene.Antagonist);
-        string antagonistName = antagonist?.Name ?? string.Empty;
-        StoryElement protagonist = StringToStoryElement(scene.Protagonist);
-        string protagonistName = protagonist?.Name ?? string.Empty;
-        StoryElement setting = StringToStoryElement(scene.Setting);
-        string settingName = setting?.Name ?? string.Empty;
+        StoryElement _VpCharacter = StringToStoryElement(_Scene.ViewpointCharacter);
+        string _VpCharacterName = _VpCharacter?.Name ?? string.Empty;
+        StoryElement _Antagonist = StringToStoryElement(_Scene.Antagonist);
+        string _AntagonistName = _Antagonist?.Name ?? string.Empty;
+        StoryElement _Protagonist = StringToStoryElement(_Scene.Protagonist);
+        string _ProtagonistName = _Protagonist?.Name ?? string.Empty;
+        StoryElement _Setting = StringToStoryElement(_Scene.Setting);
+        string _SettingName = _Setting?.Name ?? string.Empty;
 
         // Parse and write the report
-        foreach (string line in lines)
+        foreach (string _Line in _Lines)
         {
-            StringBuilder sb = new(line);
+            StringBuilder _Sb = new(_Line);
             //SCENE OVERVIEW SECTION
-            sb.Replace("@Title", scene.Name);
-            sb.Replace("@Date", scene.Date);
-            sb.Replace("@Time", scene.Time);
-            if (line.Contains("@ViewpointCharacter")) 
-            sb.Replace("@ViewpointCharacter", vpCharacterName);
-            sb.Replace("@Setting", settingName);
-            sb.Replace("@SceneType", scene.SceneType);
+            _Sb.Replace("@Title", _Scene.Name);
+            _Sb.Replace("@Date", _Scene.Date);
+            _Sb.Replace("@Time", _Scene.Time);
+            if (_Line.Contains("@ViewpointCharacter")) 
+                _Sb.Replace("@ViewpointCharacter", _VpCharacterName);
+            _Sb.Replace("@Setting", _SettingName);
+            _Sb.Replace("@SceneType", _Scene.SceneType);
             
-            if (line.Contains("@CastMember"))
+            if (_Line.Contains("@CastMember"))
             {
-                foreach (string seCastMember in scene.CastMembers)
+                foreach (string _SeCastMember in _Scene.CastMembers)
                 {
-                    StoryElement castMember = StringToStoryElement(seCastMember);
-                    string castMemberName = castMember?.Name ?? string.Empty;
-                    StringBuilder sbCast = new(line);
+                    StoryElement _CastMember = StringToStoryElement(_SeCastMember);
+                    string _CastMemberName = _CastMember?.Name ?? string.Empty;
+                    StringBuilder _SbCast = new(_Line);
                             
-                    sbCast.Replace("@CastMember", castMemberName);
-                    doc.AddText(sbCast.ToString());
-                    doc.AddNewLine();
+                    _SbCast.Replace("@CastMember", _CastMemberName);
+                    _Doc.AddText(_SbCast.ToString());
+                    _Doc.AddNewLine();
                 }
-                sb.Clear();
+                _Sb.Clear();
             }
 
-            sb.Replace("@Remarks", GetText(scene.Remarks));
+            _Sb.Replace("@Remarks", GetText(_Scene.Remarks));
             //DEVELOPMENT SECTION
-            if (line.Contains("@PurposeOfScene"))
+            if (_Line.Contains("@PurposeOfScene"))
             {
-                string PurposeString = "";
-                foreach (string Purpose in scene.ScenePurpose) { PurposeString += Purpose + ", "; }
-                sb.Replace("@PurposeOfScene", PurposeString);
-                doc.AddText(sb.ToString());
-                sb.Clear();
+                string _PurposeString = "";
+                foreach (string _Purpose in _Scene.ScenePurpose) { _PurposeString += _Purpose + ", "; }
+                _Sb.Replace("@PurposeOfScene", _PurposeString);
+                _Doc.AddText(_Sb.ToString());
+                _Sb.Clear();
                 /*              
                                 foreach (string sePurpose in scene.ScenePurpose)
                                 {
@@ -492,48 +487,47 @@ public class ReportFormatter
                                 }*/
             }
 
-            sb.Replace("@ValueExchange", scene.ValueExchange);
-            sb.Replace("@Events", GetText(scene.Events));
-            sb.Replace("@Consequence", GetText(scene.Consequences));
-            sb.Replace("@Significance", GetText(scene.Significance));
-            sb.Replace("@Realization", GetText(scene.Realization));
+            _Sb.Replace("@ValueExchange", _Scene.ValueExchange);
+            _Sb.Replace("@Events", GetText(_Scene.Events));
+            _Sb.Replace("@Consequence", GetText(_Scene.Consequences));
+            _Sb.Replace("@Significance", GetText(_Scene.Significance));
+            _Sb.Replace("@Realization", GetText(_Scene.Realization));
             //SCENE CONFLICT SECTION
-            sb.Replace("@ProtagName", protagonistName);
-            sb.Replace("@ProtagEmotion", scene.ProtagEmotion);
-            sb.Replace("@ProtagGoal", scene.ProtagGoal);
-            sb.Replace("@Opposition", scene.Opposition);
-            sb.Replace("@AntagName", antagonistName);
-            sb.Replace("@AntagEmotion", scene.AntagEmotion);
-            sb.Replace("@AntagGoal", scene.AntagGoal);
-            sb.Replace("@Outcome", scene.Outcome);
+            _Sb.Replace("@ProtagName", _ProtagonistName);
+            _Sb.Replace("@ProtagEmotion", _Scene.ProtagEmotion);
+            _Sb.Replace("@ProtagGoal", _Scene.ProtagGoal);
+            _Sb.Replace("@Opposition", _Scene.Opposition);
+            _Sb.Replace("@AntagName", _AntagonistName);
+            _Sb.Replace("@AntagEmotion", _Scene.AntagEmotion);
+            _Sb.Replace("@AntagGoal", _Scene.AntagGoal);
+            _Sb.Replace("@Outcome", _Scene.Outcome);
             //SEQUEL SECTION
-            sb.Replace("@Emotion", scene.Emotion);
-            sb.Replace("@Review", GetText(scene.Review));
-            sb.Replace("@NewGoal", scene.NewGoal);
+            _Sb.Replace("@Emotion", _Scene.Emotion);
+            _Sb.Replace("@Review", GetText(_Scene.Review));
+            _Sb.Replace("@NewGoal", _Scene.NewGoal);
             //SCENE NOTES SECTION
-            sb.Replace("@Notes", GetText(scene.Notes));
+            _Sb.Replace("@Notes", GetText(_Scene.Notes));
 
-            doc.AddText(sb.ToString());
-            doc.AddNewLine();
+            _Doc.AddText(_Sb.ToString());
+            _Doc.AddNewLine();
         }
 
-        return doc.GetRtf();
+        return _Doc.GetRtf();
     }
 
     public string FormatWebReport (StoryElement element)
     {
-        RtfDocument doc = new(string.Empty);
-        StringBuilder sb = new();
-        WebModel model = element as WebModel;
-        sb.AppendLine(model.Name);
-        sb.AppendLine(model.URL.ToString());
-        doc.AddText(sb.ToString());
-        doc.AddNewLine();
-        return doc.GetRtf();
+        RtfDocument _Doc = new(string.Empty);
+        StringBuilder _Sb = new();
+        WebModel _Model = element as WebModel;
+        _Sb.AppendLine(_Model!.Name);
+        _Sb.AppendLine(_Model.URL.ToString());
+        _Doc.AddText(_Sb.ToString());
+        _Doc.AddNewLine();
+        return _Doc.GetRtf();
 
-        // STUB: Reimpliment this code at a later date, because
         /*
-        //Create new Webview, then initalise corewebview and configure URL. 
+         STUB: Re-implement this code at a later date, because
         var _webview = new WebView2();
         _webview.Source = ((WebModel)element).URL;
         _webview.Height = 1080;
@@ -563,107 +557,107 @@ public class ReportFormatter
 
     public string FormatWebListReport()
     {
-        string[] lines = _templates["List of Websites"];
-        RtfDocument doc = new(string.Empty);
+        string[] _Lines = _templates["List of Websites"];
+        RtfDocument _Doc = new(string.Empty);
 
         // Parse and write the report
-        foreach (string line in lines)
+        foreach (string _Line in _Lines)
         {
-            if (line.Contains("@Description"))
+            if (_Line.Contains("@Description"))
             {
-                foreach (StoryElement element in _model.StoryElements)
+                foreach (StoryElement _Element in _model.StoryElements)
                 {
-                                        if (element.Type == StoryItemType.Web)
+                    if (_Element.Type == StoryItemType.Web)
                     {
-                        WebModel scene = (WebModel)element;
-                        StringBuilder sb = new(line);
-                        sb.Replace("@Description", scene.Name);
-                        doc.AddText(sb.ToString());
-                        doc.AddNewLine();
+                        WebModel _Scene = (WebModel)_Element;
+                        StringBuilder _Sb = new(_Line);
+                        _Sb.Replace("@Description", _Scene.Name);
+                        _Doc.AddText(_Sb.ToString());
+                        _Doc.AddNewLine();
                     }
                 }
 
             }
             else
             {
-                doc.AddText(line);
-                doc.AddNewLine();
+                _Doc.AddText(_Line);
+                _Doc.AddNewLine();
             }
         }
-        return doc.GetRtf();
+        return _Doc.GetRtf();
     }
 
     public string FormatFolderReport(StoryElement element)
     {
-        FolderModel folder = (FolderModel)element;
-        string[] lines = _templates["Folder Description"];
-        RtfDocument doc = new(string.Empty);
+        FolderModel _Folder = (FolderModel)element;
+        string[] _Lines = _templates["Folder Description"];
+        RtfDocument _Doc = new(string.Empty);
         // Parse and write the report
-        foreach (string line in lines)
+        foreach (string _Line in _Lines)
         {
-            StringBuilder sb = new(line);
-            sb.Replace("@Name", folder.Name);
-            sb.Replace("@Notes", GetText(folder.Notes));
-            doc.AddText(sb.ToString());  //,format);
-            doc.AddNewLine();
+            StringBuilder _Sb = new(_Line);
+            _Sb.Replace("@Name", _Folder.Name);
+            _Sb.Replace("@Notes", GetText(_Folder.Notes));
+            _Doc.AddText(_Sb.ToString());  //,format);
+            _Doc.AddNewLine();
         }
-        return doc.GetRtf();
+        return _Doc.GetRtf();
     }
 
     public string FormatSectionReport(StoryElement element)
     {
-        SectionModel section = (SectionModel)element;
-        string[] lines = _templates["Section Description"];
-        RtfDocument doc = new(string.Empty);
+        SectionModel _Section = (SectionModel)element;
+        string[] _Lines = _templates["Section Description"];
+        RtfDocument _Doc = new(string.Empty);
 
         // Parse and write the report
-        foreach (string line in lines)
+        foreach (string _Line in _Lines)
         {
-            StringBuilder sb = new(line);
-            sb.Replace("@Name", section.Name);
-            sb.Replace("@Notes", GetText(section.Notes));
-            doc.AddText(sb.ToString()); // , format);
-            doc.AddNewLine();
+            StringBuilder _Sb = new(_Line);
+            _Sb.Replace("@Name", _Section.Name);
+            _Sb.Replace("@Notes", GetText(_Section.Notes));
+            _Doc.AddText(_Sb.ToString()); // , format);
+            _Doc.AddNewLine();
         }
-        return doc.GetRtf();
+        return _Doc.GetRtf();
     }
 
     public string FormatSynopsisReport()
     {
 
-        string[] lines = _templates["Story Synopsis"];
-        RtfDocument doc = new(string.Empty);
+        string[] _Lines = _templates["Story Synopsis"];
+        RtfDocument _Doc = new(string.Empty);
 
         // Pre-process RTF properties to preserve [FILE:x.rtf] tag for long fields
         // and then load long fields from their corresponding file in its subfolder
 
         // Parse and write the report
-        foreach (string line in lines)
+        foreach (string _Line in _Lines)
         {
-            if (line.Contains("@Synopsis"))
+            if (_Line.Contains("@Synopsis"))
             {
                 // Find StoryNarrator' Scenes
-                foreach (StoryNodeItem child in _model.NarratorView[0].Children)
+                foreach (StoryNodeItem _Child in _model.NarratorView[0].Children)
                 {
-                    StoryElement scn = _model.StoryElements.StoryElementGuids[child.Uuid];
-                    if (scn.Type != StoryItemType.Scene)
+                    StoryElement _Scn = _model.StoryElements.StoryElementGuids[_Child.Uuid];
+                    if (_Scn.Type != StoryItemType.Scene)
                         continue;
-                    SceneModel scene = (SceneModel)scn;
-                    StringBuilder sb = new(line);
-                    sb.Replace("@Synopsis", $"[{scene.Name}] {scene.Description}");
-                    doc.AddText(sb.ToString());
-                    doc.AddNewLine();
-                    doc.AddText(scene.Remarks);
-                    doc.AddNewLine();
+                    SceneModel _Scene = (SceneModel)_Scn;
+                    StringBuilder _Sb = new(_Line);
+                    _Sb.Replace("@Synopsis", $"[{_Scene.Name}] {_Scene.Description}");
+                    _Doc.AddText(_Sb.ToString());
+                    _Doc.AddNewLine();
+                    _Doc.AddText(_Scene.Remarks);
+                    _Doc.AddNewLine();
                 }
             }
             else
             {
-                doc.AddText(line);
-                doc.AddNewLine();
+                _Doc.AddText(_Line);
+                _Doc.AddNewLine();
             }
         }
-        return doc.GetRtf();
+        return _Doc.GetRtf();
     }
 
     public async Task LoadReportTemplates()
@@ -671,53 +665,53 @@ public class ReportFormatter
         try
         {
             _templates.Clear();
-            StorageFolder localFolder = ApplicationData.Current.RoamingFolder;
-            StorageFolder stbFolder = await localFolder.GetFolderAsync("StoryBuilder");
-            StorageFolder templatesFolder = await stbFolder.GetFolderAsync("reports");
-            IReadOnlyList<StorageFile> templates = await templatesFolder.GetFilesAsync();
-            foreach (StorageFile fi in templates)
+            StorageFolder _LocalFolder = ApplicationData.Current.RoamingFolder;
+            StorageFolder _StbFolder = await _LocalFolder.GetFolderAsync("StoryBuilder");
+            StorageFolder _TemplatesFolder = await _StbFolder.GetFolderAsync("reports");
+            IReadOnlyList<StorageFile> _Templates = await _TemplatesFolder.GetFilesAsync();
+            foreach (StorageFile _Fi in _Templates)
             {
-                string name = fi.DisplayName[..(fi.Name.Length - 4)];
-                string text = await FileIO.ReadTextAsync(fi);
-                string[] lines = text.Split(
+                string _Name = _Fi.DisplayName[..(_Fi.Name.Length - 4)];
+                string _Text = await FileIO.ReadTextAsync(_Fi);
+                string[] _Lines = _Text.Split(
                     new[] { Environment.NewLine },
                     StringSplitOptions.None
                 );
-                _templates.Add(name, lines);
+                _templates.Add(_Name, _Lines);
             }
         }
-        catch (Exception ex)
+        catch (Exception _Ex)
         {
-            Ioc.Default.GetService<LogService>().LogException(LogLevel.Error, ex, "Error loading report templates.");
+            Ioc.Default.GetRequiredService<LogService>().LogException(LogLevel.Error, _Ex, "Error loading report templates.");
         }
     }
 
     #endregion
 
     #region Private methods
-    private StoryElement StringToStoryElement(string value)
+    private static StoryElement StringToStoryElement(string value)
     {
         if (value == null)
             return null;
         if (value.Equals(string.Empty))
             return null;
         // Get the current StoryModel's StoryElementsCollection
-        ShellViewModel shell = Ioc.Default.GetService<ShellViewModel>();
-        StoryElementCollection elements = shell.StoryModel.StoryElements;
+        ShellViewModel _Shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        StoryElementCollection _Elements = _Shell.StoryModel.StoryElements;
         // legacy: locate the StoryElement from its Name
-        foreach (StoryElement element in elements)  // Character or Setting??? Search both?
+        foreach (StoryElement _Element in _Elements)  // Character or Setting??? Search both?
         {
-            if (element.Type == StoryItemType.Character | element.Type == StoryItemType.Setting)
+            if (_Element.Type == StoryItemType.Character | _Element.Type == StoryItemType.Setting)
             {
-                if (value.Equals(element.Name))
-                    return element;
+                if (value.Equals(_Element.Name))
+                    return _Element;
             }
         }
         // Look for the StoryElement corresponding to the passed guid
         // (This is the normal approach)
-        if (Guid.TryParse(value, out Guid guid))
-            if (elements.StoryElementGuids.ContainsKey(guid))
-                return elements.StoryElementGuids[guid];
+        if (Guid.TryParse(value, out Guid _Guid))
+            if (_Elements.StoryElementGuids.ContainsKey(_Guid))
+                return _Elements.StoryElementGuids[_Guid];
         return null;  // Not found
     }
 
@@ -731,15 +725,14 @@ public class ReportFormatter
     /// </summary>
     public string GetText(string rtfInput, bool formatNewLines = true)
     {
-        string text = rtfInput ?? string.Empty;
-        if (rtfInput.Equals(string.Empty))
-            return string.Empty;
-        RichTextStripper rts = new();
-        text =  rts.StripRichTextFormat(text);
-        text = text.Replace("\'0d", "");
-        text = text.Replace("\'0a", "");
-        text = text.Replace("\\","");
-        return text;
+        string _Text = rtfInput ?? string.Empty;
+        if (rtfInput.Equals(string.Empty)) {return string.Empty;}
+        RichTextStripper _Rts = new();
+        _Text =  _Rts.StripRichTextFormat(_Text);
+        _Text = _Text.Replace("\'0d", "");
+        _Text = _Text.Replace("\'0a", "");
+        _Text = _Text.Replace("\\","");
+        return _Text;
     }
 
     /// <summary>
@@ -754,8 +747,8 @@ public class ReportFormatter
     public ReportFormatter() 
     {
         _rdr = Ioc.Default.GetService<StoryReader>();
-        ShellViewModel shell = Ioc.Default.GetService<ShellViewModel>();
-        _model = shell.StoryModel;
+        ShellViewModel _Shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        _model = _Shell.StoryModel;
     }
 
     #endregion

@@ -4,7 +4,5 @@ namespace StoryBuilder.Services.Messages;
 
 public class IsChangedMessage : ValueChangedMessage<bool>
 {
-    public IsChangedMessage(bool value) : base(value)
-    {
-    }
+    public IsChangedMessage(bool value) : base(value) { }
 }

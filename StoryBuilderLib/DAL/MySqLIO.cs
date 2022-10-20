@@ -8,15 +8,15 @@ public class MySqlIo
 {
     public async Task<int> AddOrUpdateUser(MySqlConnection conn, string name, string email)
     {
-        await using MySqlCommand _cmd = new("spAddUser", conn);
-        _cmd.CommandType = CommandType.StoredProcedure;
-        _cmd.Parameters.AddWithValue("name", name);
-        _cmd.Parameters.AddWithValue("email", email);
-        _cmd.Parameters.Add("@user_id", MySqlDbType.Int32);
-        _cmd.Parameters["@user_id"].Direction = ParameterDirection.Output;
-        await _cmd.ExecuteNonQueryAsync();
-        int _id = (int)_cmd.Parameters["@user_id"].Value;
-        return _id;
+        await using MySqlCommand _Cmd = new("spAddUser", conn);
+        _Cmd.CommandType = CommandType.StoredProcedure;
+        _Cmd.Parameters.AddWithValue("name", name);
+        _Cmd.Parameters.AddWithValue("email", email);
+        _Cmd.Parameters.Add("@user_id", MySqlDbType.Int32);
+        _Cmd.Parameters["@user_id"].Direction = ParameterDirection.Output;
+        await _Cmd.ExecuteNonQueryAsync();
+        int _Id = (int)_Cmd.Parameters["@user_id"].Value;
+        return _Id;
     }
     public async Task AddOrUpdatePreferences(MySqlConnection conn, int id, bool elmah, bool newsletter, string version)
     {
@@ -24,12 +24,12 @@ public class MySqlIo
                             " (user_id, elmah_consent, newsletter_consent, version)" +
                             " VALUES (@user_id,@elmah,@newsletter, @version)" +
                             " ON DUPLICATE KEY UPDATE elmah_consent = @elmah, newsletter_consent = @newsletter, version = @version";
-        await using MySqlCommand _cmd = new(sql, conn);
-        _cmd.Parameters.AddWithValue("@user_id", id);
-        _cmd.Parameters.AddWithValue("@elmah", elmah);
-        _cmd.Parameters.AddWithValue("@newsletter", newsletter);
-        _cmd.Parameters.AddWithValue("@version", version);
-        await _cmd.ExecuteNonQueryAsync();
+        await using MySqlCommand _Cmd = new(sql, conn);
+        _Cmd.Parameters.AddWithValue("@user_id", id);
+        _Cmd.Parameters.AddWithValue("@elmah", elmah);
+        _Cmd.Parameters.AddWithValue("@newsletter", newsletter);
+        _Cmd.Parameters.AddWithValue("@version", version);
+        await _Cmd.ExecuteNonQueryAsync();
     }
 
     public async Task AddVersion(MySqlConnection conn, int id, string currentVersion, string previousVersion)
@@ -37,12 +37,12 @@ public class MySqlIo
         const string sql = "INSERT INTO StoryBuilder.versions" +
                             " (user_id, current_version, previous_version)" +
                             " VALUES (@user_id,@current,@previous)";
-        await using (MySqlCommand _cmd = new(sql, conn))
+        await using (MySqlCommand _Cmd = new(sql, conn))
         {
-            _cmd.Parameters.AddWithValue("@user_id", id);
-            _cmd.Parameters.AddWithValue("@current", currentVersion);
-            _cmd.Parameters.AddWithValue("@previous", previousVersion);
-            await _cmd.ExecuteNonQueryAsync();
+            _Cmd.Parameters.AddWithValue("@user_id", id);
+            _Cmd.Parameters.AddWithValue("@current", currentVersion);
+            _Cmd.Parameters.AddWithValue("@previous", previousVersion);
+            await _Cmd.ExecuteNonQueryAsync();
         }
     }
 }

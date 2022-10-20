@@ -4,13 +4,12 @@ using System.Runtime.InteropServices;
 using Windows.Storage;
 using Windows.Storage.Pickers;
 using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
 using StoryBuilder.ViewModels;
 using WinRT;
 
 namespace StoryBuilder.Services.Dialogs;
 
-public sealed partial class NewProjectPage : Page
+public sealed partial class NewProjectPage
 {
     public NewProjectPage(UnifiedVM vm)
     {
@@ -29,33 +28,25 @@ public sealed partial class NewProjectPage : Page
     private async void Browse_Click(object sender, RoutedEventArgs e)
     {
         // Find a home for the new project
-        FolderPicker folderPicker = new();
+        FolderPicker _FolderPicker = new();
         if (Window.Current == null)
         {
-            IntPtr hwnd = GetActiveWindow();
+            IntPtr _Hwnd = GetActiveWindow();
             //IntPtr hwnd = GlobalData.WindowHandle;
-            IInitializeWithWindow initializeWithWindow = folderPicker.As<IInitializeWithWindow>();
-            initializeWithWindow.Initialize(hwnd);
+            IInitializeWithWindow _InitializeWithWindow = _FolderPicker.As<IInitializeWithWindow>();
+            _InitializeWithWindow.Initialize(_Hwnd);
         }
-        folderPicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
-        folderPicker.FileTypeFilter.Add("*");
-        StorageFolder folder = await folderPicker.PickSingleFolderAsync();
-        if (folder != null)
+        _FolderPicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
+        _FolderPicker.FileTypeFilter.Add("*");
+        StorageFolder _Folder = await _FolderPicker.PickSingleFolderAsync();
+        if (_Folder != null)
         {
-            ParentFolderPath = folder.Path;
-            UnifiedVM.ProjectPath = folder.Path;
+            ParentFolderPath = _Folder.Path;
+            UnifiedVM.ProjectPath = _Folder.Path;
         }
 
     }
-
-    [ComImport]
-    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-    [Guid("EECDBF0E-BAE9-4CB6-A68E-9598E1CB57BB")]
-    internal interface IWindowNative
-    {
-        IntPtr WindowHandle { get; }
-    }
-
+    
     [ComImport]
     [Guid("3E68D4BD-7135-4D10-8018-9FB6D9F33FA1")]
     [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
@@ -74,9 +65,9 @@ public sealed partial class NewProjectPage : Page
         {
             File.Create(Path.Combine(Path.GetTempPath(), ProjectName.Text));
         }
-        catch (Exception ex)
+        catch (Exception _Ex)
         {
-            if (ex.Message.Contains("The filename, directory name, or volume label syntax is incorrect. "))
+            if (_Ex.Message.Contains("The filename, directory name, or volume label syntax is incorrect. "))
             {
                 ProjectName.Text = "";
                 ProjectName.PlaceholderText = "You can't call your file that!";
