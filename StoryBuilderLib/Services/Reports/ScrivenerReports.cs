@@ -136,13 +136,13 @@ namespace StoryBuilder.Services.Reports
             if (_storyBuilderNode == null)
                 _storyBuilderNode = InsertFolderBefore(_binderNode, "Research", "StoryBuilder");
             // Locate or add StoryBuilder's three child folders
-            _explorerNode = LocateFolder(_storyBuilderNode, "Explorer");
+            _explorerNode = LocateFolder(_storyBuilderNode, "ExplorerView");
             if (_explorerNode == null)
-                _explorerNode = AddFolder(_storyBuilderNode, "Explorer");
+                _explorerNode = AddFolder(_storyBuilderNode, "ExplorerView");
             _explorerNode.Children.Clear();
-            _narratorNode = LocateFolder(_storyBuilderNode, "Narrator");
+            _narratorNode = LocateFolder(_storyBuilderNode, "NarratorView");
             if (_narratorNode == null)
-                _narratorNode = AddFolder(_storyBuilderNode, "Narrator");
+                _narratorNode = AddFolder(_storyBuilderNode, "NarratorView");
             _narratorNode.Children.Clear();
             _miscNode = LocateFolder(_storyBuilderNode, "Miscellaneous");
             if (_miscNode == null)

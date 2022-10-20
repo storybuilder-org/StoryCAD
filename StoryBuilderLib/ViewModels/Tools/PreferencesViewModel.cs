@@ -77,7 +77,7 @@ public class PreferencesViewModel : ObservableRecipient
         get => _backupOnOpen;
         set => _backupOnOpen = value;
     }
-    
+
     private bool _autoSave;
     public bool AutoSave
     {
@@ -90,15 +90,23 @@ public class PreferencesViewModel : ObservableRecipient
         get => _autoSaveInterval;
         set => _autoSaveInterval = value;
     }
+
+    private BrowserType _preferredSearchEngine;
+    public int PreferredSearchEngine
+    {
+        get => (int)_preferredSearchEngine;
+        set => _preferredSearchEngine = (BrowserType)value;
+    }
+
     /// <summary>
     /// Saves the users preferences to disk.
     /// </summary>
     public async Task SaveAsync()
-    {   
+    {
         PreferencesModel prf = new();
         PreferencesIo prfIO = new(prf, Path.Combine(ApplicationData.Current.RoamingFolder.Path, "Storybuilder"));
         await prfIO.UpdateModel();
-    
+
         prf.Name = Name;
         prf.Email = Email;
         prf.ErrorCollectionConsent = ErrorConsent;
@@ -110,12 +118,13 @@ public class PreferencesViewModel : ObservableRecipient
         prf.PreferencesInitialized = init;
         prf.BackupOnOpen = BackupUpOnOpen;
         prf.AutoSave = AutoSave;
-        if ( AutoSaveInterval > 31 || AutoSaveInterval < 4) { AutoSaveInterval = 20; }
+        prf.PreferredSearchEngine = (BrowserType)PreferredSearchEngine;
+        if (AutoSaveInterval > 31 || AutoSaveInterval < 4) { AutoSaveInterval = 20; }
         else { prf.AutoSaveInterval = AutoSaveInterval; }
-        
 
-        if (WrapNodeNames) {prf.WrapNodeNames = TextWrapping.WrapWholeWords;}
-        else {prf.WrapNodeNames = TextWrapping.NoWrap;}
+        if (WrapNodeNames) { prf.WrapNodeNames = TextWrapping.WrapWholeWords; }
+        else { prf.WrapNodeNames = TextWrapping.NoWrap; }
+
 
         await prfIO.UpdateFile();
         PreferencesIo loader = new(GlobalData.Preferences, Path.Combine(ApplicationData.Current.RoamingFolder.Path, "Storybuilder"));
@@ -143,8 +152,9 @@ public class PreferencesViewModel : ObservableRecipient
         BackupUpOnOpen = _model.BackupOnOpen;
         AutoSave = _model.AutoSave;
         AutoSaveInterval = _model.AutoSaveInterval;
+        PreferredSearchEngine = (int)_model.PreferredSearchEngine;
 
-        if (_model.WrapNodeNames == TextWrapping.WrapWholeWords) {WrapNodeNames = true;}
-        else {WrapNodeNames = false; }
+        if (_model.WrapNodeNames == TextWrapping.WrapWholeWords) { WrapNodeNames = true; }
+        else { WrapNodeNames = false; }
     }
 }

@@ -37,6 +37,9 @@ using StoryBuilder.Services.Backend;
 using System.Net.Http;
 using System.Net;
 using Microsoft.Web.WebView2.Core;
+using Org.BouncyCastle.Bcpg.OpenPgp;
+using System.Collections;
+using System.Security.Policy;
 
 namespace StoryBuilder.ViewModels
 {
@@ -61,7 +64,7 @@ namespace StoryBuilder.ViewModels
         public StoryNodeItem RightTappedNode;
         public TreeViewItem RightClickedTreeviewItem;
 
-        public StoryViewType ViewType;
+        public StoryViewType CurrentViewType;
 
         private ContentDialog _contentDialog;
 
@@ -601,10 +604,10 @@ namespace StoryBuilder.ViewModels
             if (await dialog.ShowAsync() == ContentDialogResult.Primary) //Okay clicked.
             {
                 Ioc.Default.GetService<LogService>().Log(LogLevel.Error, "Installing webview...");
-                
+
                 //Download file
                 new WebClient().DownloadFile("https://go.microsoft.com/fwlink/p/?LinkId=2124703", Path.Combine(GlobalData.RootDirectory, "evergreenbootstrapper.exe"));
-                
+
                 //Run installer and wait for it to finish
                 Process p = Process.Start(Path.Combine(GlobalData.RootDirectory, "evergreenbootstrapper.exe"));
                 p.WaitForExit();
@@ -612,7 +615,7 @@ namespace StoryBuilder.ViewModels
                 //Check again for webview and show relevant message to user.
                 try
                 {
-                    if (CoreWebView2Environment.GetAvailableBrowserVersionString() != null) 
+                    if (CoreWebView2Environment.GetAvailableBrowserVersionString() != null)
                     {
                         dialog.SecondaryButtonText = null;
                         dialog.PrimaryButtonText = "Okay";
@@ -1153,79 +1156,75 @@ namespace StoryBuilder.ViewModels
         private async void MasterPlotTool()
         {
             Logger.Log(LogLevel.Info, "Displaying MasterPlot tool dialog");
-            if (RightTappedNode == null) { RightTappedNode = CurrentNode; }
-
-            //Creates and shows content dialog
-            ContentDialog dialog = new();
-            dialog.XamlRoot = GlobalData.XamlRoot;
-            dialog.Title = "Master plots";
-            dialog.PrimaryButtonText = "Copy";
-            dialog.SecondaryButtonText = "Cancel";
-            dialog.Content = new MasterPlotsDialog();
-            ContentDialogResult result = await dialog.ShowAsync();
-
-            if (result == ContentDialogResult.Primary)   // Copy command
+            if (VerifyToolUse(true, true))
             {
-                string masterPlotName = Ioc.Default.GetService<MasterPlotsViewModel>().MasterPlotName;
-                MasterPlotModel model = Ioc.Default.GetService<MasterPlotsViewModel>().MasterPlots[masterPlotName];
-                IList<MasterPlotScene> scenes = model.MasterPlotScenes;
-                foreach (MasterPlotScene scene in scenes)
-                {
-                    SceneModel child = new SceneModel(StoryModel);
-                    child.Name = scene.SceneTitle;
-                    child.Remarks = "See Notes.";
-                    child.Notes = scene.Notes;
+                //Creates and shows content dialog
+                ContentDialog dialog = new();
+                dialog.XamlRoot = GlobalData.XamlRoot;
+                dialog.Title = "Master plots";
+                dialog.PrimaryButtonText = "Copy";
+                dialog.SecondaryButtonText = "Cancel";
+                dialog.Content = new MasterPlotsDialog();
+                ContentDialogResult result = await dialog.ShowAsync();
 
-                    if (RightTappedNode == null)
+                if (result == ContentDialogResult.Primary) // Copy command
+                {
+                    string masterPlotName = Ioc.Default.GetService<MasterPlotsViewModel>().MasterPlotName;
+                    MasterPlotModel model = Ioc.Default.GetService<MasterPlotsViewModel>().MasterPlots[masterPlotName];
+                    IList<MasterPlotScene> scenes = model.MasterPlotScenes;
+                    foreach (MasterPlotScene scene in scenes)
                     {
-                        Messenger.Send(new StatusChangedMessage(new($"You need to right click a node to", LogLevel.Info)));
-                        return;
+                        SceneModel child = new SceneModel(StoryModel);
+                        child.Name = scene.SceneTitle;
+                        child.Remarks = "See Notes.";
+                        child.Notes = scene.Notes;
+
+                        if (RightTappedNode == null)
+                        {
+                            Messenger.Send(new StatusChangedMessage(new($"You need to right click a node to",
+                                LogLevel.Info)));
+                            return;
+                        }
+
+                        // add the new SceneModel & node to the end of the target's children 
+                        StoryNodeItem newNode = new(child, RightTappedNode);
+                        RightTappedNode.IsExpanded = true;
+                        newNode.IsSelected = true;
                     }
 
-                    // add the new SceneModel & node to the end of the target's children 
-                    StoryNodeItem newNode = new(child, RightTappedNode);
-                    RightTappedNode.IsExpanded = true;
-                    newNode.IsSelected = true;
+                    Messenger.Send(new StatusChangedMessage(new($"MasterPlot {masterPlotName} inserted", LogLevel.Info,
+                        true)));
+                    ShowChange();
+                    Logger.Log(LogLevel.Info, "MasterPlot complete");
                 }
-                Messenger.Send(new StatusChangedMessage(new($"MasterPlot {masterPlotName} inserted", LogLevel.Info, true)));
-                ShowChange();
-                Logger.Log(LogLevel.Info, "MasterPlot complete");
-            }
-            else  // canceled
-            {
-                Messenger.Send(new StatusChangedMessage(new($"MasterPlot cancelled", LogLevel.Info, true)));
             }
         }
 
         private async void DramaticSituationsTool()
         {
-            Logger.Log(LogLevel.Info, "Dislaying Dramatic Situations tool dialog");
-            if (RightTappedNode == null) { RightTappedNode = CurrentNode; }
-
-            //Creates and shows dialog
-            ContentDialog dialog = new();
-            dialog.XamlRoot = GlobalData.XamlRoot;
-            dialog.Title = "Dramatic situations";
-            dialog.PrimaryButtonText = "Copy as problem";
-            dialog.SecondaryButtonText = "Copy as scene";
-            dialog.CloseButtonText = "Cancel";
-            dialog.Content = new DramaticSituationsDialog();
-            ContentDialogResult result = await dialog.ShowAsync();
-
-            DramaticSituationModel situationModel = Ioc.Default.GetService<DramaticSituationsViewModel>().Situation;
-            StoryNodeItem newNode = null;
-            string msg;
-            if (RightTappedNode == null)
+            Logger.Log(LogLevel.Info, "Displaying Dramatic Situations tool dialog");
+            if (VerifyToolUse(true, true))
             {
-                msg = $"Right tap a node to add this node to.";
-                Messenger.Send(new StatusChangedMessage(new StatusMessage(msg, LogLevel.Warn, false)));
-                return;
-            }
-            switch (result)
-            {
-                case ContentDialogResult.Primary:
+
+                //Creates and shows dialog
+                ContentDialog dialog = new();
+                dialog.XamlRoot = GlobalData.XamlRoot;
+                dialog.Title = "Dramatic situations";
+                dialog.PrimaryButtonText = "Copy as problem";
+                dialog.SecondaryButtonText = "Copy as scene";
+                dialog.CloseButtonText = "Cancel";
+                dialog.Content = new DramaticSituationsDialog();
+                ContentDialogResult result = await dialog.ShowAsync();
+
+                DramaticSituationModel situationModel = Ioc.Default.GetService<DramaticSituationsViewModel>().Situation;
+                StoryNodeItem newNode = null;
+                string msg;
+
+                switch (result)
+                {
+                    case ContentDialogResult.Primary:
                     {
-                        ProblemModel problem = new(StoryModel);
+                        ProblemModel problem = new ProblemModel(StoryModel);
                         problem.Name = situationModel.SituationName;
                         problem.StoryQuestion = "See Notes.";
                         problem.Notes = situationModel.Notes;
@@ -1236,7 +1235,7 @@ namespace StoryBuilder.ViewModels
                         ShowChange();
                         break;
                     }
-                case ContentDialogResult.Secondary:
+                    case ContentDialogResult.Secondary:
                     {
                         SceneModel sceneVar = new SceneModel(StoryModel);
                         sceneVar.Name = situationModel.SituationName;
@@ -1248,13 +1247,14 @@ namespace StoryBuilder.ViewModels
                         ShowChange();
                         break;
                     }
-                default:
-                    msg = "Dratatic Situation tool cancelled";
-                    break;
-            }
-            Logger.Log(LogLevel.Info, msg);
-            Messenger.Send(new StatusChangedMessage(new(msg, LogLevel.Info, true)));
+                    default:
+                        msg = "Dramatic Situation tool cancelled";
+                        break;
+                }
 
+                Logger.Log(LogLevel.Info, msg);
+                Messenger.Send(new StatusChangedMessage(new(msg, LogLevel.Info, true)));
+            }
             Logger.Log(LogLevel.Info, "Dramatic Situations finished");
         }
 
@@ -1264,41 +1264,41 @@ namespace StoryBuilder.ViewModels
         private async void StockScenesTool()
         {
             Logger.Log(LogLevel.Info, "Displaying Stock Scenes tool dialog");
-            if (RightTappedNode == null) { RightTappedNode = CurrentNode; }
-            try
-            {
-                //Creates and shows dialog
-                ContentDialog dialog = new();
-                dialog.Title = "Stock scenes";
-                dialog.Content = new StockScenesDialog();
-                dialog.PrimaryButtonText = "Add Scene";
-                dialog.CloseButtonText = "Cancel";
-                dialog.XamlRoot = GlobalData.XamlRoot;
-                ContentDialogResult result = await dialog.ShowAsync();
-
-                if (result == ContentDialogResult.Primary)   // Copy command
+            if (VerifyToolUse(true, true))
+                try
                 {
-                    if (string.IsNullOrWhiteSpace(Ioc.Default.GetService<StockScenesViewModel>().SceneName))
+                    //Creates and shows dialog
+                    ContentDialog dialog = new();
+                    dialog.Title = "Stock scenes";
+                    dialog.Content = new StockScenesDialog();
+                    dialog.PrimaryButtonText = "Add Scene";
+                    dialog.CloseButtonText = "Cancel";
+                    dialog.XamlRoot = GlobalData.XamlRoot;
+                    ContentDialogResult result = await dialog.ShowAsync();
+
+                    if (result == ContentDialogResult.Primary)   // Copy command
                     {
-                        Messenger.Send(new StatusChangedMessage(new($"You need to select a stock scene", LogLevel.Warn)));
-                        return;
-                    }
+                        if (string.IsNullOrWhiteSpace(Ioc.Default.GetService<StockScenesViewModel>().SceneName))
+                        {
+                            Messenger.Send(new StatusChangedMessage(new($"You need to select a stock scene", LogLevel.Warn)));
+                            return;
+                        }
 
-                    SceneModel sceneVar = new SceneModel(StoryModel);
-                    sceneVar.Name = Ioc.Default.GetService<StockScenesViewModel>().SceneName;
-                    StoryNodeItem newNode = new(sceneVar, RightTappedNode);
-                    _sourceChildren = RightTappedNode.Children;
-                    TreeViewNodeClicked(newNode);
-                    RightTappedNode.IsExpanded = true;
-                    newNode.IsSelected = true;
-                    Messenger.Send(new StatusChangedMessage(new("Stock Scenes inserted", LogLevel.Info)));
+                        SceneModel sceneVar = new SceneModel(StoryModel);
+                        sceneVar.Name = Ioc.Default.GetService<StockScenesViewModel>().SceneName;
+                        StoryNodeItem newNode = new(sceneVar, RightTappedNode);
+                        _sourceChildren = RightTappedNode.Children;
+                        TreeViewNodeClicked(newNode);
+                        RightTappedNode.IsExpanded = true;
+                        newNode.IsSelected = true;
+                        Messenger.Send(new StatusChangedMessage(new("Stock Scenes inserted", LogLevel.Info)));
+                    }
+                    else
+                    {
+                        Messenger.Send(new StatusChangedMessage(new("Stock Scenes canceled", LogLevel.Warn)));
+                    }
                 }
-                else
-                {
-                    Messenger.Send(new StatusChangedMessage(new("Stock Scenes canceled", LogLevel.Warn)));
-                }
-            }
-            catch (Exception e) { Logger.LogException(LogLevel.Error, e, e.Message); }
+                catch (Exception e) { Logger.LogException(LogLevel.Error, e, e.Message); }
         }
 
         private async void GeneratePrintReports()
@@ -1388,6 +1388,51 @@ namespace StoryBuilder.ViewModels
             _canExecuteCommands = true;
         }
 
+        /// <summary>
+        /// Verify that the tool being called has its prerequisites met.
+        /// </summary>
+        /// <param name="explorerViewOnly">This tool can only run in StoryExplorer view</param>
+        /// <param name="nodeRequired">A node (right-clicked or clicked) must be present</param>
+        /// <returns>true if prerequisites are met</returns>
+        private bool VerifyToolUse(bool explorerViewOnly, bool nodeRequired)
+        {
+            if (explorerViewOnly && !IsExplorerView())
+            {
+                Messenger.Send(new StatusChangedMessage(new($"This tool can only be run in Story Explorer view", LogLevel.Warn)));
+                return false;
+            }
+
+            if (nodeRequired)
+            {
+                if (StoryModel == null)
+                {
+                    Messenger.Send(new StatusChangedMessage(new($"Open or create an outline first", LogLevel.Warn)));
+                    return false;
+                }
+                if (CurrentViewType == StoryViewType.ExplorerView
+                    & StoryModel.ExplorerView[0].Children.Count == 0) 
+                {
+                    Messenger.Send(new StatusChangedMessage(new($"Open or create an outline first", LogLevel.Warn)));
+                    return false;
+                }
+                if (CurrentViewType == StoryViewType.NarratorView
+                    & StoryModel.NarratorView[0].Children.Count == 0)
+                {
+                    Messenger.Send(new StatusChangedMessage(new($"Open or create an outline first", LogLevel.Warn)));
+                    return false;
+                }
+                if (RightTappedNode == null)
+                    RightTappedNode = CurrentNode;
+                if (RightTappedNode == null)
+                {
+                    Messenger.Send(new StatusChangedMessage(new($"You need to select a node first", LogLevel.Warn)));
+                    return false;
+                }
+
+            }
+            return true;    
+        }
+
         #endregion  
 
         #region Move TreeViewItem Commands
@@ -1396,21 +1441,19 @@ namespace StoryBuilder.ViewModels
         {
             if (CurrentNode == null)
             {
-                Messenger.Send(new StatusChangedMessage(new($"Click or touch a node to move", LogLevel.Info)));
+                Messenger.Send(new StatusChangedMessage(new($"Click or touch a node to move", LogLevel.Warn)));
                 return;
             }
 
             if (CurrentNode.Parent != null && CurrentNode.Parent.IsRoot)
             {
-                Messenger.Send(new StatusChangedMessage(new($"Cannot move further left", LogLevel.Info)));
+                Messenger.Send(new StatusChangedMessage(new($"Cannot move further left", LogLevel.Warn)));
                 return;
             }
 
 
             if (!MoveIsValid()) // Verify message
-            {
                 return;
-            }
 
             if (CurrentNode.Parent != null)
             {
@@ -1432,10 +1475,7 @@ namespace StoryBuilder.ViewModels
                 Logger.Log(LogLevel.Info, $"Moving {CurrentNode.Name} left to parent {CurrentNode.Parent.Name}");
             }
             else
-            {
-                Messenger.Send(new StatusChangedMessage(new($"Cannot move root node.", LogLevel.Info)));
-                return;
-            }
+                Messenger.Send(new StatusChangedMessage(new($"Cannot move root node.", LogLevel.Warn)));
         }
 
         private void MoveTreeViewItemRight()
@@ -1445,7 +1485,7 @@ namespace StoryBuilder.ViewModels
 
             if (CurrentNode == null)
             {
-                Messenger.Send(new StatusChangedMessage(new($"Click or touch a node to move", LogLevel.Info)));
+                Messenger.Send(new StatusChangedMessage(new($"Click or touch a node to move", LogLevel.Warn)));
                 return;
             }
 
@@ -1464,7 +1504,7 @@ namespace StoryBuilder.ViewModels
             }
             else
             {
-                Messenger.Send(new StatusChangedMessage(new($"Cannot move root node.", LogLevel.Info)));
+                Messenger.Send(new StatusChangedMessage(new($"Cannot move root node.", LogLevel.Warn)));
                 return;
             }
 
@@ -1480,7 +1520,7 @@ namespace StoryBuilder.ViewModels
                 // find parent's predecessor
                 if (CurrentNode.Parent.Parent == null)
                 {
-                    Messenger.Send(new StatusChangedMessage(new($"Cannot move further right", LogLevel.Info)));
+                    Messenger.Send(new StatusChangedMessage(new($"Cannot move further right", LogLevel.Warn)));
                     return;
                 }
 
@@ -1526,7 +1566,7 @@ namespace StoryBuilder.ViewModels
         {
             if (CurrentNode == null)
             {
-                Messenger.Send(new StatusChangedMessage(new($"Click or touch a node to move", LogLevel.Info)));
+                Messenger.Send(new StatusChangedMessage(new($"Click or touch a node to move", LogLevel.Warn)));
                 return;
             }
 
@@ -1588,12 +1628,12 @@ namespace StoryBuilder.ViewModels
         {
             if (CurrentNode == null)
             {
-                Messenger.Send(new StatusChangedMessage(new($"Click or touch a node to move", LogLevel.Info)));
+                Messenger.Send(new StatusChangedMessage(new($"Click or touch a node to move", LogLevel.Warn)));
                 return;
             }
             if (CurrentNode.IsRoot)
             {
-                Messenger.Send(new StatusChangedMessage(new($"Cannot move a root node", LogLevel.Info)));
+                Messenger.Send(new StatusChangedMessage(new($"Cannot move a root node", LogLevel.Warn)));
                 return;
             }
 
@@ -1736,7 +1776,24 @@ namespace StoryBuilder.ViewModels
                     NewNode = new StoryNodeItem(new SceneModel(StoryModel), RightTappedNode);
                     break;
                 case StoryItemType.Web:
-                    NewNode = new StoryNodeItem(new WebModel(StoryModel), RightTappedNode);
+                    switch (GlobalData.Preferences.PreferredSearchEngine)
+                    {
+                        case BrowserType.DuckDuckGo:
+                            NewNode = new StoryNodeItem(new WebModel(StoryModel) { URL = new Uri("https://duckduckgo.com/") }, RightTappedNode);
+                            break;
+                        case BrowserType.Google:
+                            NewNode = new StoryNodeItem(new WebModel(StoryModel) { URL = new Uri("https://google.com/") }, RightTappedNode);
+                            break;
+                        case BrowserType.Bing:
+                            NewNode = new StoryNodeItem(new WebModel(StoryModel) { URL = new Uri("https://bing.com/") }, RightTappedNode);
+                            break;
+                        case BrowserType.Yahoo:
+                            NewNode = new StoryNodeItem(new WebModel(StoryModel) { URL = new Uri("https://yahoo.com/") }, RightTappedNode);
+                            break;
+                        default: //Just default to DDG.
+                            NewNode = new StoryNodeItem(new WebModel(StoryModel) { URL = new Uri("https://duckduckgo.com/") }, RightTappedNode);
+                            break;
+                    }
                     break;
                 case StoryItemType.Notes:
                     NewNode = new StoryNodeItem(new NotesModel(StoryModel), RightTappedNode);
@@ -1814,8 +1871,8 @@ namespace StoryBuilder.ViewModels
                     Ioc.Default.GetRequiredService<DeletionService>().SearchStoryElement(node, RightTappedNode.Uuid, StoryModel, true);
                 }
 
-                if (CurrentView.ToString().Contains("Explorer")) { RightTappedNode.Delete(Models.ViewType.Explorer); }
-                else { RightTappedNode.Delete(Models.ViewType.Narrator); }
+                if (CurrentView.ToString().Contains("ExplorerView")) { RightTappedNode.Delete(Models.StoryViewType.ExplorerView); }
+                else { RightTappedNode.Delete(Models.StoryViewType.NarratorView); }
             }
         }
 
@@ -1849,7 +1906,7 @@ namespace StoryBuilder.ViewModels
 
         /// <summary>
         /// Add a Scene StoryNodeItem to the end of the Narrative view
-        /// by copying from the Scene's StoryNodeItem in the Explorer
+        /// by copying from the Scene's StoryNodeItem in the ExplorerView
         /// view.
         /// </summary>
         private void CopyToNarrative()
@@ -1974,13 +2031,13 @@ namespace StoryBuilder.ViewModels
         /// 
         /// It alters the visibility of the command bar flyout 
         /// AppBarButtons depending on which portion of the tree 
-        /// is tapped and which view (Explorer or Navigator) is selected.
+        /// is tapped and which view (ExplorerView or Navigator) is selected.
         /// </summary>
         public void ShowFlyoutButtons()
         {
             switch (RootNodeType(RightTappedNode))
             {
-                case StoryItemType.StoryOverview:   // Explorer tree
+                case StoryItemType.StoryOverview:   // ExplorerView tree
                     AddFolderVisibility = Visibility.Visible;
                     AddSectionVisibility = Visibility.Collapsed;
                     AddProblemVisibility = Visibility.Visible;
@@ -1997,7 +2054,7 @@ namespace StoryBuilder.ViewModels
                     PrintNodeVisibility = Visibility.Visible;
                     EmptyTrashVisibility = Visibility.Collapsed;
                     break;
-                case StoryItemType.Section:         // Narrator tree
+                case StoryItemType.Section:         // NarratorView tree
                     AddFolderVisibility = Visibility.Collapsed;
                     AddSectionVisibility = Visibility.Visible;
                     AddProblemVisibility = Visibility.Collapsed;
@@ -2044,15 +2101,17 @@ namespace StoryBuilder.ViewModels
             {
                 case StoryViewType.ExplorerView:
                     DataSource = StoryModel.ExplorerView;
+                    CurrentViewType = StoryViewType.ExplorerView;
                     break;
                 case StoryViewType.NarratorView:
                     DataSource = StoryModel.NarratorView;
-                    break;
-                case StoryViewType.SearchView:
+                    CurrentViewType = StoryViewType.NarratorView;
                     break;
             }
-            if (DataSource.Count > 0) { CurrentNode = DataSource[0]; }
         }
+
+        private bool IsExplorerView() => CurrentViewType == StoryViewType.ExplorerView;
+        private bool IsNarratorView() => CurrentViewType == StoryViewType.NarratorView;
 
         #region MVVM  processing
         private void IsChangedMessageReceived(IsChangedMessage isDirty)

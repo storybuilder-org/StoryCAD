@@ -51,7 +51,7 @@ public class NarrativeToolVM: ObservableRecipient
 
         if (IsNarratorSelected)
         { 
-            SelectedNode.Delete(ViewType.Narrator);
+            SelectedNode.Delete(StoryViewType.NarratorView);
             Message = $"Deleted {SelectedNode}";
         }
         else{ Message = "You can't delete from here!";}
@@ -137,7 +137,7 @@ public class NarrativeToolVM: ObservableRecipient
     /// </summary>
     private void CopyAllUnused()
     {
-        //Recurses the children of Narrator View.
+        //Recurses the children of NarratorView View.
         try { foreach (var item in ShellVM.StoryModel.ExplorerView[0].Children) { RecurseCopyUnused(item); } }
         catch (Exception e) { Logger.LogException(LogLevel.Error, e, "Error in recursive check"); }
     }
@@ -156,7 +156,7 @@ public class NarrativeToolVM: ObservableRecipient
     }
 
     /// <summary>
-    /// This recursively copies any unused scene in the Explorer view.
+    /// This recursively copies any unused scene in the ExplorerView view.
     /// </summary>
     /// <param name="Item">The parent item </param>
     private void RecurseCopyUnused(StoryNodeItem Item)

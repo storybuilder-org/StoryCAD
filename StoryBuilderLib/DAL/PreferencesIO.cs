@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
+using StoryBuilder.Models;
 using StoryBuilder.Models.Tools;
 using StoryBuilder.Services.Logging;
 
@@ -40,7 +41,7 @@ public class PreferencesIo
     {
         //Tries to read file
         StorageFolder _preferencesFolder = await StorageFolder.GetFolderFromPathAsync(_path);
-        IStorageFile _preferencesFile = (IStorageFile) await _preferencesFolder.TryGetItemAsync("StoryBuilder.prf");
+        IStorageFile _preferencesFile = (IStorageFile)await _preferencesFolder.TryGetItemAsync("StoryBuilder.prf");
 
         if (_preferencesFile != null) //Checks if file exists
         {
@@ -122,20 +123,20 @@ public class PreferencesIo
                         _model.Version = _tokens[1];
                         break;
                     case "RecordPreferencesStatus":
-                         if (_tokens[1] == "True") 
-                            _model.RecordPreferencesStatus = true; 
-                         else 
-                            _model.RecordPreferencesStatus = false; 
-                         break;
+                        if (_tokens[1] == "True")
+                            _model.RecordPreferencesStatus = true;
+                        else
+                            _model.RecordPreferencesStatus = false;
+                        break;
                     case "RecordVersionStatus":
                         if (_tokens[1] == "True")
                             _model.RecordVersionStatus = true;
                         else
-                            _model.RecordVersionStatus= false;
+                            _model.RecordVersionStatus = false;
                         break;
                     case "WrapNodeNames":
                         if (_tokens[1] == "True") { _model.WrapNodeNames = TextWrapping.Wrap; }
-                        else {_model.WrapNodeNames = TextWrapping.NoWrap;}
+                        else { _model.WrapNodeNames = TextWrapping.NoWrap; }
                         break;
                     case "AutoSave":
                         if (_tokens[1] == "True") { _model.AutoSave = true; }
@@ -143,6 +144,11 @@ public class PreferencesIo
                         break;
                     case "AutoSaveInterval":
                         _model.AutoSaveInterval = Convert.ToInt32(_tokens[1]);
+                        break;
+                    case "SearchEngine":
+                        object val;
+                        BrowserType.TryParse(typeof(BrowserType), _tokens[1].ToCharArray(), true, out val);
+                        _model.PreferredSearchEngine = (BrowserType)val;
                         break;
                 }
             }
@@ -195,7 +201,8 @@ public class PreferencesIo
             "RecordPreferencesStatus=" + _model.RecordPreferencesStatus, //TODO: Fix spelling error
             "RecordVersionStatus=" + _model.RecordVersionStatus,
             "AutoSave=" + _model.AutoSave,
-            "AutoSaveInterval=" + _model.AutoSaveInterval
+            "AutoSaveInterval=" + _model.AutoSaveInterval,
+            "SearchEngine=" + _model.PreferredSearchEngine
         };
 
         if (_model.WrapNodeNames == TextWrapping.WrapWholeWords) { _newPreferences.Add("WrapNodeNames=True"); }

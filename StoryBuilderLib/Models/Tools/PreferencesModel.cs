@@ -51,7 +51,7 @@ public class PreferencesModel
     //Directories
     public string ProjectDirectory { get; set; }
     public string BackupDirectory { get; set; }
-        
+
     // Recent files (set automatically)
     public string LastFile1 { get; set; }
     public string LastFile2 { get; set; }
@@ -65,6 +65,7 @@ public class PreferencesModel
     // Backend server log status
     public bool RecordPreferencesStatus { get; set; }  // Last preferences change was logged successfully or not
     public bool RecordVersionStatus { get; set; }      // Last version change was logged successfully or not
+    public BrowserType PreferredSearchEngine { get; set; }      // Last version change was logged successfully or not
     #endregion
 
     #region Constructor
@@ -75,7 +76,6 @@ public class PreferencesModel
         LastFile3 = string.Empty;
         LastFile4 = string.Empty;
         LastFile5 = string.Empty;
-
     }
     #endregion
 }

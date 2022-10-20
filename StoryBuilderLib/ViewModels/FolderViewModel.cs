@@ -12,8 +12,8 @@ using StoryBuilder.Services.Navigation;
 namespace StoryBuilder.ViewModels;
 
 /// <summary>
-/// A Folder StoryElement is a divider in the Story Explorer
-/// view. A 'folder' in the Narrator view, by contrast, 
+/// A Folder StoryElement is a divider in the Story ExplorerView
+/// view. A 'folder' in the NarratorView view, by contrast, 
 /// is a Section StoryElement. A Folder can have anything as
 /// a parent (including another Folder.) A Section can only have
 /// another Section as its parent. Sections are Chapters, Acts,
