@@ -25,14 +25,14 @@
 
                 <StackPanel Grid.Row="1" VerticalAlignment="Stretch">
                     <Border Height="50"/>
-                    <TextBox PlaceholderText="What's your name?" Margin="15" VerticalAlignment="Center" Text="{x:Bind InitVM.Name, Mode=TwoWay}"/>
-                    <TextBox PlaceholderText="What's your email address?" IsSpellCheckEnabled="False"  Margin="15" VerticalAlignment="Center"  Text="{x:Bind InitVM.Email, Mode=TwoWay}"/>
+                    <TextBox PlaceholderText="What's your name?" Style="{StaticResource  EntryField}"  Text="{x:Bind InitVM.Name, Mode=TwoWay}"/>
+                    <TextBox PlaceholderText="What's your email address?" IsSpellCheckEnabled="False" Style="{StaticResource  EntryField}"  Text="{x:Bind InitVM.Email, Mode=TwoWay}"/>
                     <StackPanel Orientation="Horizontal">
-                        <TextBox IsReadOnly="true" PlaceholderText="Select a folder to hold your story outlines." Name="ProjPath" Margin="15" VerticalAlignment="Center" Width="435" HorizontalAlignment="Left" Text="{x:Bind InitVM.Path, Mode=TwoWay}"/>
+                        <TextBox PlaceholderText="Select a folder to hold your story outlines." Name="ProjPath" Style="{StaticResource  PathField}" Text="{x:Bind InitVM.Path, Mode=TwoWay}"/>
                         <Button Content="Browse" HorizontalAlignment="Center" Click="SetProjectPath"/>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal">
-                        <TextBox IsReadOnly="True" PlaceholderText="Select a folder to hold your outline backups." Name="BackPath" Margin="15" VerticalAlignment="Center" Width="435" HorizontalAlignment="Left" Text="{x:Bind InitVM.BackupPath, Mode=TwoWay}"/>
+                        <TextBox PlaceholderText="Select a folder to hold your outline backups." Name="BackPath" Style="{StaticResource  PathField}" Text="{x:Bind InitVM.BackupPath, Mode=TwoWay}"/>
                         <Button Content="Browse" HorizontalAlignment="Center" Click="SetBackupPath"/>
                     </StackPanel>
                 </StackPanel>
@@ -43,7 +43,7 @@
                 </StackPanel>
                 <TextBlock Text="{x:Bind InitVM.ErrorMessage, Mode=TwoWay}" Foreground="Red" Grid.Row="3" HorizontalAlignment="Center"/>
                 <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Center">
-                    <Button x:Name="ContinueButton" Content="Continue" Margin="25" HorizontalAlignment="Center" Click="Check"/>
+                    <Button Content="Continue" Margin="25" HorizontalAlignment="Center" Click="Check"/>
                     <Button Content="Join our community discord!" Background="#5865F2" Foreground="White"  Margin="25" HorizontalAlignment="Center" Click="Discord"/>
                 </StackPanel>
 
