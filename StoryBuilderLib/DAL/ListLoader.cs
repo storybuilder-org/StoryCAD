@@ -18,8 +18,6 @@ public class ListLoader
         StorageFolder _controlFolder = await StorageFolder.GetFolderFromPathAsync(path);
         StorageFile _iniFile = await _controlFolder.GetFileAsync("Lists.ini");
         //See if the .INI file exists
-        //if (!File.Exists(iniFile))
-        //    throw new Exception(@"STORY.INI initialization file not found");
 
         // Read the Application .INI file. Each record is the format 'KeyWord=Keyvalue'.
         // As each record is read, it's moved to the corresponding initialization
@@ -31,17 +29,14 @@ public class ListLoader
         while ((_line = await _sr.ReadLineAsync()) != null)
         {
             _line = _line.TrimEnd();
-            if (_line.Equals(string.Empty))
-                continue;
-            if (_line.StartsWith(";")) // Comment
+            if (_line.Equals(string.Empty) || _line.StartsWith(";"))
                 continue;
             if (_line.Contains("="))
             {
                 string[] _tokens = _line.Split(new[] { '=' });
                 string _keyword = _tokens[0];
                 string _keyvalue = _tokens[1];
-                if (!_lists.ContainsKey(_keyword))
-                    _lists.Add(_keyword, new ObservableCollection<string>());
+                if (!_lists.ContainsKey(_keyword)) { _lists.Add(_keyword, new ObservableCollection<string>()); }
                 _lists[_keyword].Add(_keyvalue);
             }
         }

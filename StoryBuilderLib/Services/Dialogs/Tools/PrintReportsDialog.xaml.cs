@@ -7,7 +7,7 @@ using StoryBuilder.ViewModels;
 using StoryBuilder.ViewModels.Tools;
 
 namespace StoryBuilder.Services.Dialogs.Tools;
-public sealed partial class PrintReportsDialog : Page
+public sealed partial class PrintReportsDialog
 {
     public PrintReportDialogVM PrintVM = Ioc.Default.GetRequiredService<PrintReportDialogVM>();
 
@@ -35,14 +35,11 @@ public sealed partial class PrintReportsDialog : Page
         //Gets all nodes that aren't deleted
         try
         {
-            foreach (StoryNodeItem rootChild in Ioc.Default.GetRequiredService<ShellViewModel>().DataSource[0].Children)
-            {
-                PrintVM.TraverseNode(rootChild);
-            }
+            foreach (StoryNodeItem _Child in Ioc.Default.GetRequiredService<ShellViewModel>().StoryModel.ExplorerView[0]) { PrintVM.TraverseNode(_Child); }
         }
-        catch (Exception ex)
+        catch (Exception _Ex)
         {
-            Ioc.Default.GetService<LogService>().LogException(LogLevel.Error, ex, "Error parsing nodes.");
+            Ioc.Default.GetService<LogService>()?.LogException(LogLevel.Error, _Ex, "Error parsing nodes.");
         }
     }
 
@@ -57,31 +54,31 @@ public sealed partial class PrintReportsDialog : Page
 
         if (!PrintVM.SelectAllProblems)
         {
-            foreach (StoryNodeItem item in ProblemsList.SelectedItems) { PrintVM.SelectedNodes.Add(item); }
+            foreach (StoryNodeItem _Item in ProblemsList.SelectedItems) { PrintVM.SelectedNodes.Add(_Item); }
         }
         else { PrintVM.SelectedNodes.AddRange(PrintVM.ProblemNodes); }
 
         if (!PrintVM.SelectAllCharacters)
         {
-            foreach (StoryNodeItem item in CharactersList.SelectedItems) { PrintVM.SelectedNodes.Add(item); }
+            foreach (StoryNodeItem _Item in CharactersList.SelectedItems) { PrintVM.SelectedNodes.Add(_Item); }
         }
         else { PrintVM.SelectedNodes.AddRange(PrintVM.CharacterNodes); }
 
         if (!PrintVM.SelectAllScenes)
         {
-            foreach (StoryNodeItem item in ScenesList.SelectedItems) { PrintVM.SelectedNodes.Add(item); }
+            foreach (StoryNodeItem _Item in ScenesList.SelectedItems) { PrintVM.SelectedNodes.Add(_Item); }
         }
         else { PrintVM.SelectedNodes.AddRange(PrintVM.SceneNodes); }
 
         if (!PrintVM.SelectAllSettings)
         {
-            foreach (StoryNodeItem item in SettingsList.SelectedItems) { PrintVM.SelectedNodes.Add(item); }
+            foreach (StoryNodeItem _Item in SettingsList.SelectedItems) { PrintVM.SelectedNodes.Add(_Item); }
         }
         else { PrintVM.SelectedNodes.AddRange(PrintVM.SettingNodes); }
 
         if (!PrintVM.SelectAllWeb)
         {
-            foreach (StoryNodeItem item in WebList.SelectedItems) { PrintVM.SelectedNodes.Add(item); }
+            foreach (StoryNodeItem _Item in WebList.SelectedItems) { PrintVM.SelectedNodes.Add(_Item); }
         }
         else { PrintVM.SelectedNodes.AddRange(PrintVM.WebNodes); }
 
@@ -96,7 +93,7 @@ public sealed partial class PrintReportsDialog : Page
     private void CheckboxClicked(object sender, RoutedEventArgs e)
     {
         //This clears any selected checkboxes
-        switch ((sender as CheckBox).Content.ToString())
+        switch ((sender as CheckBox)?.Content.ToString())
         {
             case "Print all problems": ProblemsList.SelectedItems.Clear(); break;
             case "Print all characters": CharactersList.SelectedItems.Clear(); break;

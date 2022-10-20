@@ -25,8 +25,7 @@ namespace StoryBuilder.Controls;
 public class RichEditBoxExtended : RichEditBox
 {
     public static readonly DependencyProperty RtfTextProperty =
-        DependencyProperty.Register(
-            "RtfText", typeof(string), typeof(RichEditBoxExtended),
+        DependencyProperty.Register(nameof(RtfText), typeof(string), typeof(RichEditBoxExtended),
             new PropertyMetadata(default(string), RtfTextPropertyChanged));
 
     private bool _lockChangeExecution;
@@ -51,15 +50,15 @@ public class RichEditBoxExtended : RichEditBox
         if (!_lockChangeExecution)
         {
             _lockChangeExecution = true;
-            Document.GetText(TextGetOptions.None, out string text);
-            if (string.IsNullOrWhiteSpace(text))  
+            Document.GetText(TextGetOptions.None, out string _Text);
+            if (string.IsNullOrWhiteSpace(_Text))  
             {
                 RtfText = "";
             }
             else
             {
-                Document.GetText(TextGetOptions.FormatRtf, out text);
-                RtfText = text.TrimEnd('\0'); // remove end of string marker
+                Document.GetText(TextGetOptions.FormatRtf, out _Text);
+                RtfText = _Text.TrimEnd('\0'); // remove end of string marker
             }
             _lockChangeExecution = false;
         }
@@ -68,16 +67,16 @@ public class RichEditBoxExtended : RichEditBox
     private static void RtfTextPropertyChanged(DependencyObject dependencyObject,
         DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
     {
-        TextSetOptions options = TextSetOptions.FormatRtf | TextSetOptions.ApplyRtfDocumentDefaults;
-        RichEditBoxExtended rtb = dependencyObject as RichEditBoxExtended;
-        if (rtb == null) return;
-        if (!rtb._lockChangeExecution)
+        TextSetOptions _Options = TextSetOptions.FormatRtf | TextSetOptions.ApplyRtfDocumentDefaults;
+        RichEditBoxExtended _Rtb = dependencyObject as RichEditBoxExtended;
+        if (_Rtb == null) return;
+        if (!_Rtb._lockChangeExecution)
         {
-            rtb._lockChangeExecution = true;
+            _Rtb._lockChangeExecution = true;
                 
-            rtb.Document.SetText(options, rtb.RtfText);
+            _Rtb.Document.SetText(_Options, _Rtb.RtfText);
             // get rid of new EOP (cr/lf) somehow
-            rtb._lockChangeExecution = false;
+            _Rtb._lockChangeExecution = false;
         }
     }
 }
