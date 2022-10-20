@@ -12,6 +12,7 @@ using StoryBuilder.Models;
 using StoryBuilder.Models.Tools;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.ViewModels;
+using Windows.UI.ViewManagement;
 using Colors = Microsoft.UI.Colors;
 
 namespace StoryBuilder.Views;
@@ -74,8 +75,13 @@ public sealed partial class Shell
     }
     private void TreeViewItem_RightTapped(object sender, RightTappedRoutedEventArgs e)
     {
+        if (ShellVm.RightClickedTreeviewItem != null) { ShellVm.RightClickedTreeviewItem.Background = null; } //Remove old right clicked nodes background
+
         TreeViewItem item = (TreeViewItem)sender;
+        item.Background = new SolidColorBrush(new UISettings().GetColorValue(UIColorType.Accent));
+
         ShellVm.RightTappedNode = (StoryNodeItem)item.DataContext;
+        ShellVm.RightClickedTreeviewItem = item; //We can't set the background through righttappednode so we set a reference to the node itself to reset the background later
         ShellVm.ShowFlyoutButtons();
     }
 

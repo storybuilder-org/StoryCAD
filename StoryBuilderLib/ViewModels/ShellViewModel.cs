@@ -59,6 +59,7 @@ namespace StoryBuilder.ViewModels
         // Navigation navigation landmark nodes
         public StoryNodeItem CurrentNode { get; set; }
         public StoryNodeItem RightTappedNode;
+        public TreeViewItem RightClickedTreeviewItem;
 
         public StoryViewType ViewType;
 
