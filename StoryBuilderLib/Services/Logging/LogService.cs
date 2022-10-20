@@ -145,8 +145,8 @@ public class LogService : ILogService
 
     public void SetElmahTokens(Doppler keys)
     {
-        apiKey = keys.APIKEY;
-        logID = keys.LOGID;
+        _apiKey = keys.APIKEY;
+        _logId = keys.LOGID;
     }
 
     public LogService()
