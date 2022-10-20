@@ -157,10 +157,12 @@ public class PreferencesIo
         if (Application.Current.RequestedTheme == ApplicationTheme.Light)
         {
             _model.PrimaryColor = new SolidColorBrush(Colors.LightGray);
+            _model.SecondaryColor = new SolidColorBrush(Colors.Black);
         }
         else
         {
             _model.PrimaryColor = new SolidColorBrush(Colors.DarkSlateGray);
+            _model.SecondaryColor = new SolidColorBrush(Colors.White);
         }
     }
 
