@@ -16,7 +16,7 @@ public sealed class ProblemName : ComboBox
 
     private void ProblemName_Loaded(object sender, RoutedEventArgs e)
     {
-        StoryModel _Model = ShellViewModel.GetModel();
-        ItemsSource = _Model.StoryElements.Problems;
+        StoryModel model = ShellViewModel.GetModel();
+        ItemsSource = model.StoryElements.Problems;
     }
 }

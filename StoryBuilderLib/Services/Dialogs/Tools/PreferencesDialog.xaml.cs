@@ -13,10 +13,11 @@ using StoryBuilder.Services.Installation;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.ViewModels.Tools;
 using WinRT;
+using Page = Microsoft.UI.Xaml.Controls.Page;
 
 namespace StoryBuilder.Services.Dialogs.Tools;
 
-public sealed partial class PreferencesDialog
+public sealed partial class PreferencesDialog : Page
 {
     public PreferencesViewModel PreferencesVm => Ioc.Default.GetService<PreferencesViewModel>();
     public PreferencesDialog()
@@ -50,15 +51,12 @@ public sealed partial class PreferencesDialog
     {
         try
         {
-            GitHubClient _Client = new(new ProductHeaderValue("Stb2ChangelogGrabber"));
-            Changelog.Text = (await _Client.Repository.Release.Get("storybuilder-org", "StoryBuilder-2", GlobalData.Version.Replace("Version: ", ""))).Body;
+            GitHubClient client = new(new ProductHeaderValue("Stb2ChangelogGrabber"));
+            Changelog.Text = (await client.Repository.Release.Get("storybuilder-org", "StoryBuilder-2", GlobalData.Version.Replace("Version: ", ""))).Body;
         }
         catch
         {
-            Changelog.Text = "Failed to get changelog for this version, this because either:\n " +
-                             "- You are running an automated build version" +
-                             "\n- There is an issue connecting to Github\n\n" +
-                             $" For reference your version is {GlobalData.Version}";
+            Changelog.Text = "Failed to get changelog for this version, this because either:\n - You are running an autobuild version\n- There is an issue conntecting to Github";
         }
 
     }
@@ -73,52 +71,60 @@ public sealed partial class PreferencesDialog
         });
     }
 
-    private void OpenDiscordUrl(object sender, RoutedEventArgs e)
+    private void OpenDiscordURL(object sender, RoutedEventArgs e)
     {
-        Process _Browser = new();
-        _Browser.StartInfo.FileName = @"https://discord.gg/wfZxU4bx6n";
-        _Browser.StartInfo.UseShellExecute = true;
-        _Browser.Start();
+        Process Browser = new();
+        Browser.StartInfo.FileName = @"https://discord.gg/wfZxU4bx6n";
+        Browser.StartInfo.UseShellExecute = true;
+        Browser.Start();
     }
 
     private async void SetBackupPath(object sender, RoutedEventArgs e)
     {
-        FolderPicker _FolderPicker = new();
+        FolderPicker folderPicker = new();
         if (Window.Current == null)
         {
             //IntPtr hwnd = GetActiveWindow();
-            IntPtr _Hwnd = GlobalData.WindowHandle;
-            IInitializeWithWindow _InitializeWithWindow = _FolderPicker.As<IInitializeWithWindow>();
-            _InitializeWithWindow.Initialize(_Hwnd);
+            IntPtr hwnd = GlobalData.WindowHandle;
+            IInitializeWithWindow initializeWithWindow = folderPicker.As<IInitializeWithWindow>();
+            initializeWithWindow.Initialize(hwnd);
         }
 
-        _FolderPicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
-        _FolderPicker.FileTypeFilter.Add("*");
-        StorageFolder _Folder = await _FolderPicker.PickSingleFolderAsync();
-        if (_Folder != null)
+        folderPicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
+        folderPicker.FileTypeFilter.Add("*");
+        StorageFolder folder = await folderPicker.PickSingleFolderAsync();
+        if (folder != null)
         {
-            Ioc.Default.GetRequiredService<PreferencesViewModel>().BackupDir = _Folder.Path;
+            Ioc.Default.GetRequiredService<PreferencesViewModel>().BackupDir = folder.Path;
         }
     }
     private async void SetProjectPath(object sender, RoutedEventArgs e)
     {
-        FolderPicker _FolderPicker = new();
+        FolderPicker folderPicker = new();
         if (Window.Current == null)
         {
             //IntPtr hwnd = GetActiveWindow();
-            IntPtr _Hwnd = GlobalData.WindowHandle;
-            IInitializeWithWindow _InitializeWithWindow = _FolderPicker.As<IInitializeWithWindow>();
-            _InitializeWithWindow.Initialize(_Hwnd);
+            IntPtr hwnd = GlobalData.WindowHandle;
+            IInitializeWithWindow initializeWithWindow = folderPicker.As<IInitializeWithWindow>();
+            initializeWithWindow.Initialize(hwnd);
         }
 
-        _FolderPicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
-        _FolderPicker.FileTypeFilter.Add("*");
-        StorageFolder _Folder = await _FolderPicker.PickSingleFolderAsync();
-        if (_Folder != null)
+        folderPicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
+        folderPicker.FileTypeFilter.Add("*");
+        StorageFolder folder = await folderPicker.PickSingleFolderAsync();
+        if (folder != null)
         {
-            Ioc.Default.GetRequiredService<PreferencesViewModel>().ProjectDir = _Folder.Path;
-            ProjDirBox.Text = _Folder.Path; //Updates the box visually (fixes visual glitch.)
+            Ioc.Default.GetRequiredService<PreferencesViewModel>().ProjectDir = folder.Path;
+            ProjDirBox.Text = folder.Path; //Updates the box visually (fixes visual glitch.)
         }
+    }
+
+    [ComImport]
+    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    [Guid("EECDBF0E-BAE9-4CB6-A68E-9598E1CB57BB")]
+    internal interface IWindowNative
+    {
+        IntPtr WindowHandle { get; }
     }
 
     [ComImport]
@@ -128,6 +134,9 @@ public sealed partial class PreferencesDialog
     {
         void Initialize(IntPtr hwnd);
     }
+
+    [DllImport("user32.dll", ExactSpelling = true, CharSet = CharSet.Auto, PreserveSig = true, SetLastError = false)]
+    public static extern IntPtr GetActiveWindow();
 
     private void ThrowException(object sender, RoutedEventArgs e)
     {

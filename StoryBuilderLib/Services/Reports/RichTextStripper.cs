@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Globalization;
 using System.Text.RegularExpressions;
-// ReSharper disable StringLiteralTypo
 
 namespace StoryBuilder.Services.Reports;
 
@@ -17,8 +16,8 @@ public class RichTextStripper
 {
     private class StackEntry
     {
-        public int NumberOfCharactersToSkip { get; }
-        public bool Ignorable { get; }
+        public int NumberOfCharactersToSkip { get; set; }
+        public bool Ignorable { get; set; }
 
         public StackEntry(int numberOfCharactersToSkip, bool ignorable)
         {
@@ -27,9 +26,9 @@ public class RichTextStripper
         }
     }
 
-    private static readonly Regex RtfRegex = new(@"\\([a-z]{1,32})(-?\d{1,10})?[ ]?|\\'([0-9a-f]{2})|\\([^a-z])|([{}])|[\r\n]+|(.)", RegexOptions.Singleline | RegexOptions.IgnoreCase);
+    private static readonly Regex _rtfRegex = new(@"\\([a-z]{1,32})(-?\d{1,10})?[ ]?|\\'([0-9a-f]{2})|\\([^a-z])|([{}])|[\r\n]+|(.)", RegexOptions.Singleline | RegexOptions.IgnoreCase);
 
-    private static readonly List<string> Destinations = new()
+    private static readonly List<string> destinations = new()
     {
         "aftncn","aftnsep","aftnsepc","annotation","atnauthor","atndate","atnicn","atnid",
         "atnparent","atnref","atntime","atrfend","atrfstart","author","background",
@@ -73,7 +72,7 @@ public class RichTextStripper
         "xmlopen"
     };
 
-    private static readonly Dictionary<string, string> SpecialCharacters = new()
+    private static readonly Dictionary<string, string> specialCharacters = new()
     {
         { "par", "\n" },
         { "sect", "\n\n" },
@@ -103,124 +102,127 @@ public class RichTextStripper
             return null;
         }
 
-        Stack<StackEntry> _Stack = new();
-        bool _Ignorable = false;              // Whether this group (and all inside it) are "ignorable".
-        int _Ucskip = 1;                      // Number of ASCII characters to skip after a unicode character.
-        int _Curskip = 0;                     // Number of ASCII characters left to skip
-        List<string> _OutList = new();    // Output buffer.
+        string returnString;
 
-        MatchCollection _Matches = RtfRegex.Matches(inputRtf);
+        Stack<StackEntry> stack = new();
+        bool ignorable = false;              // Whether this group (and all inside it) are "ignorable".
+        int ucskip = 1;                      // Number of ASCII characters to skip after a unicode character.
+        int curskip = 0;                     // Number of ASCII characters left to skip
+        List<string> outList = new();    // Output buffer.
 
-        if (_Matches.Count > 0)
+        MatchCollection matches = _rtfRegex.Matches(inputRtf);
+
+        if (matches.Count > 0)
         {
-            foreach (Match _Match in _Matches)
+            foreach (Match match in matches)
             {
-                string _Word = _Match.Groups[1].Value;
-                string _Arg = _Match.Groups[2].Value;
-                string _Hex = _Match.Groups[3].Value;
-                string _Character = _Match.Groups[4].Value;
-                string _Brace = _Match.Groups[5].Value;
-                string _Tchar = _Match.Groups[6].Value;
+                string word = match.Groups[1].Value;
+                string arg = match.Groups[2].Value;
+                string hex = match.Groups[3].Value;
+                string character = match.Groups[4].Value;
+                string brace = match.Groups[5].Value;
+                string tchar = match.Groups[6].Value;
 
-                if (!string.IsNullOrEmpty(_Brace))
+                if (!string.IsNullOrEmpty(brace))
                 {
-                    _Curskip = 0;
-                    switch (_Brace)
+                    curskip = 0;
+                    switch (brace)
                     {
                         case "{":
                             // Push state
-                            _Stack.Push(new StackEntry(_Ucskip, _Ignorable));
+                            stack.Push(new StackEntry(ucskip, ignorable));
                             break;
                         case "}":
                         {
                             // Pop state
-                            StackEntry _Entry = _Stack.Pop();
-                            _Ucskip = _Entry.NumberOfCharactersToSkip;
-                            _Ignorable = _Entry.Ignorable;
+                            StackEntry entry = stack.Pop();
+                            ucskip = entry.NumberOfCharactersToSkip;
+                            ignorable = entry.Ignorable;
                             break;
                         }
                     }
                 }
-                else if (!string.IsNullOrEmpty(_Character)) // \x (not a letter)
+                else if (!string.IsNullOrEmpty(character)) // \x (not a letter)
                 {
-                    _Curskip = 0;
-                    if (_Character == "~")
+                    curskip = 0;
+                    if (character == "~")
                     {
-                        if (!_Ignorable)
+                        if (!ignorable)
                         {
-                            _OutList.Add("\xA0");
+                            outList.Add("\xA0");
                         }
                     }
-                    else if ("{}\\".Contains(_Character))
+                    else if ("{}\\".Contains(character))
                     {
-                        if (!_Ignorable)
+                        if (!ignorable)
                         {
-                            _OutList.Add(_Character);
+                            outList.Add(character);
                         }
                     }
-                    else if (_Character == "*")
+                    else if (character == "*")
                     {
-                        _Ignorable = true;
+                        ignorable = true;
                     }
                 }
-                else if (!string.IsNullOrEmpty(_Word)) // \foo
+                else if (!string.IsNullOrEmpty(word)) // \foo
                 {
-                    _Curskip = 0;
-                    if (Destinations.Contains(_Word))
+                    curskip = 0;
+                    if (destinations.Contains(word))
                     {
-                        _Ignorable = true;
+                        ignorable = true;
                     }
-                    else if (_Ignorable)
+                    else if (ignorable)
                     {
                     }
-                    else if (SpecialCharacters.ContainsKey(_Word))
+                    else if (specialCharacters.ContainsKey(word))
                     {
-                        _OutList.Add(SpecialCharacters[_Word]);
+                        outList.Add(specialCharacters[word]);
                     }
-                    else if (_Word == "uc")
+                    else if (word == "uc")
                     {
-                        _Ucskip = int.Parse(_Arg);
+                        ucskip = int.Parse(arg);
                     }
-                    else if (_Word == "u")
+                    else if (word == "u")
                     {
-                        int _C = int.Parse(_Arg);
-                        if (_C < 0)
+                        int c = int.Parse(arg);
+                        if (c < 0)
                         {
-                            _C += 0x10000;
+                            c += 0x10000;
                         }
-                        _OutList.Add(char.ConvertFromUtf32(_C));
-                        _Curskip = _Ucskip;
+                        outList.Add(char.ConvertFromUtf32(c));
+                        curskip = ucskip;
                     }
                 }
-                else if (!string.IsNullOrEmpty(_Hex)) // \'xx
+                else if (!string.IsNullOrEmpty(hex)) // \'xx
                 {
-                    if (_Curskip > 0)
+                    if (curskip > 0)
                     {
-                        _Curskip -= 1;
+                        curskip -= 1;
                     }
-                    else if (!_Ignorable)
+                    else if (!ignorable)
                     {
-                        int _C = int.Parse(_Hex, NumberStyles.HexNumber);
-                        _OutList.Add(char.ConvertFromUtf32(_C));
+                        int c = int.Parse(hex, NumberStyles.HexNumber);
+                        outList.Add(char.ConvertFromUtf32(c));
                     }
                 }
-                else if (!string.IsNullOrEmpty(_Tchar))
+                else if (!string.IsNullOrEmpty(tchar))
                 {
-                    if (_Curskip > 0)
+                    if (curskip > 0)
                     {
-                        _Curskip -= 1;
+                        curskip -= 1;
                     }
-                    else if (!_Ignorable)
+                    else if (!ignorable)
                     {
-                        _OutList.Add(_Tchar);
+                        outList.Add(tchar);
                     }
                 }
             }
         }
 
-        string _ReturnString = string.Join(string.Empty, _OutList.ToArray());
+        returnString = string.Join(string.Empty, outList.ToArray());
 
         // MakeStringUnicodeCompatible(ref returnString);
-        return _ReturnString;
+
+        return returnString;
     }
 }

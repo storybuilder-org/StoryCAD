@@ -2,6 +2,6 @@
 
 namespace StoryBuilder.Services.Messages;
 
-public class IsChangedRequestMessage : RequestMessage<bool>
+class StatusRequestMessage : RequestMessage<StatusMessage>
 {
 }

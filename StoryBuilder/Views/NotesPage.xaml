@@ -13,8 +13,8 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <TextBox Text="{x:Bind NotesVM.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource NameBox}"/>
-        <usercontrols:RichEditBoxExtended Header="Notes" Grid.Row="1" RtfText="{x:Bind NotesVM.Notes, Mode=TwoWay}"  Margin="10"/>
+        <TextBox Header="Name" Grid.Row="0" Text="{x:Bind NotesVM.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="10,10,10,0" />
+        <usercontrols:RichEditBoxExtended Header="Notes" Grid.Row="1" RtfText="{x:Bind NotesVM.Notes, Mode=TwoWay}" AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap" ScrollViewer.VerticalScrollBarVisibility="Visible" Margin="10,10,10,0" />
     </Grid>   
 
 </local:BindablePage>

@@ -10,54 +10,86 @@
 
     <Page.Resources>
         <CommandBarFlyout x:Key="AddStoryElementFlyout" Placement="Right" x:Name="AddStoryElementCommandBarFlyout" >
-            <CommandBarFlyout.SecondaryCommands>
-                <AppBarButton Icon="Add" Label="Add Elements" Command="{x:Bind ShellVm.AddFolderCommand, Mode=OneWay}" 
-                              Visibility="{x:Bind ShellVm.AddFolderVisibility, Mode=TwoWay}"  >
-                    <AppBarButton.Flyout>
-                        <MenuFlyout>
-                            <MenuFlyoutItem Icon="Folder" Text="Add folder"  Command="{x:Bind ShellVm.AddFolderCommand, Mode=OneWay}" Visibility="{x:Bind ShellVm.AddFolderVisibility, Mode=TwoWay}" />
-                            <MenuFlyoutItem Icon="Folder" Text="Add Section"  Command="{x:Bind ShellVm.AddSectionCommand, Mode=OneWay}" Visibility="{x:Bind ShellVm.AddSectionVisibility, Mode=TwoWay}" />
-                            <MenuFlyoutItem Icon="Help" Text="Add Problem"  Command="{x:Bind ShellVm.AddProblemCommand, Mode=OneWay}" Visibility="{x:Bind ShellVm.AddProblemVisibility, Mode=TwoWay}" />
-                            <MenuFlyoutItem Icon="Contact" Text="Add Character"  Command="{x:Bind ShellVm.AddCharacterCommand, Mode=OneWay}" Visibility="{x:Bind ShellVm.AddCharacterVisibility, Mode=TwoWay}" />
-                            <MenuFlyoutItem Icon="Globe" Text="Add Setting"  Command="{x:Bind ShellVm.AddSettingCommand, Mode=OneWay}" Visibility="{x:Bind ShellVm.AddSettingVisibility, Mode=TwoWay}" />
-                            <MenuFlyoutItem Icon="AllApps" Text="Add Scene"  Command="{x:Bind ShellVm.AddSceneCommand, Mode=OneWay}" Visibility="{x:Bind ShellVm.AddSceneVisibility, Mode=TwoWay}" />
-                            <MenuFlyoutItem Icon="TwoPage" Text="Add Notes"  Command="{x:Bind ShellVm.AddNotesCommand, Mode=OneWay}" Visibility="{x:Bind ShellVm.AddFolderVisibility, Mode=TwoWay}" />
-                            <MenuFlyoutItem Icon="PreviewLink" Text="Add Website"  Command="{x:Bind ShellVm.AddWebCommand, Mode=OneWay}" Visibility="{x:Bind ShellVm.AddFolderVisibility, Mode=TwoWay}" />
-                        </MenuFlyout>
-                    </AppBarButton.Flyout>
+            <CommandBarFlyout.PrimaryCommands>
+                <AppBarButton Icon="Folder" Command="{x:Bind ShellVm.AddFolderCommand, Mode=OneWay}" 
+                          Visibility="{x:Bind ShellVm.AddFolderVisibility, Mode=TwoWay}" >
+                    <ToolTipService.ToolTip>
+                        <ToolTip Content="Add Folder" />
+                    </ToolTipService.ToolTip>
+                </AppBarButton>
+                <AppBarButton Icon="Folder" Command="{x:Bind ShellVm.AddSectionCommand, Mode=OneWay}" 
+                          Visibility="{x:Bind ShellVm.AddSectionVisibility, Mode=TwoWay}" >
+                    <ToolTipService.ToolTip>
+                        <ToolTip Content="Add Section" />
+                    </ToolTipService.ToolTip>
+                </AppBarButton>
+                <AppBarButton Icon="Help" Command="{x:Bind ShellVm.AddProblemCommand, Mode=OneWay}" 
+                          Visibility="{x:Bind ShellVm.AddProblemVisibility, Mode=TwoWay}" >
+                    <ToolTipService.ToolTip>
+                        <ToolTip Content="Add New Problem" />
+                    </ToolTipService.ToolTip>
+                </AppBarButton>
+                <AppBarButton Icon="Contact" Command="{x:Bind ShellVm.AddCharacterCommand, Mode=OneWay}" 
+                        Visibility="{x:Bind ShellVm.AddCharacterVisibility, Mode=TwoWay}" >
+                    <ToolTipService.ToolTip>
+                        <ToolTip Content="Add New Character" />
+                    </ToolTipService.ToolTip>
+                </AppBarButton>
+                <AppBarButton Icon="Globe" Command="{x:Bind ShellVm.AddSettingCommand, Mode=OneWay}"
+                          Visibility="{x:Bind ShellVm.AddSettingVisibility, Mode=TwoWay}" >
+                    <ToolTipService.ToolTip>
+                        <ToolTip Content="Add New Setting" />
+                    </ToolTipService.ToolTip>
+                </AppBarButton>
+                <AppBarButton Icon="AllApps" Command="{x:Bind ShellVm.AddSceneCommand, Mode=OneWay}"
+                          Visibility="{x:Bind ShellVm.AddSceneVisibility, Mode=TwoWay}" >
+                    <ToolTipService.ToolTip>
+                        <ToolTip Content="Add New Scene" />
+                    </ToolTipService.ToolTip>
+                </AppBarButton>
+                <AppBarButton Icon="TwoPage" Command="{x:Bind ShellVm.AddNotesCommand, Mode=OneWay}"
+                          Visibility="{x:Bind ShellVm.AddSceneVisibility, Mode=TwoWay}" >
+                    <ToolTipService.ToolTip>
+                        <ToolTip Content="Add New Notes" />
+                    </ToolTipService.ToolTip>
+                </AppBarButton>
+                <AppBarButton Icon="PreviewLink" Command="{x:Bind ShellVm.AddWebCommand, Mode=OneWay}" Visibility="{x:Bind ShellVm.AddSceneVisibility, Mode=TwoWay}" >
+                    <ToolTipService.ToolTip>
+                        <ToolTip Content="Add new Web Node" />
+                    </ToolTipService.ToolTip>
                 </AppBarButton>
                 <AppBarSeparator />
-                <AppBarButton Icon="Delete" Label="Delete element"  Command="{x:Bind ShellVm.RemoveStoryElementCommand, Mode=OneWay}" 
+                <AppBarButton Icon="Delete"  Command="{x:Bind ShellVm.RemoveStoryElementCommand, Mode=OneWay}" 
                           Visibility="{x:Bind ShellVm.RemoveStoryElementVisibility, Mode=TwoWay}" >
                     <ToolTipService.ToolTip>
                         <ToolTip Content="Move Story Element to Trashcan" />
                     </ToolTipService.ToolTip>
                 </AppBarButton>
-                <AppBarButton Icon="Refresh" Label="Restore Element" Command="{x:Bind ShellVm.RestoreStoryElementCommand, Mode=OneWay}" 
+                <AppBarButton Icon="Refresh" Command="{x:Bind ShellVm.RestoreStoryElementCommand, Mode=OneWay}" 
                           Visibility="{x:Bind ShellVm.RestoreStoryElementVisibility, Mode=TwoWay}" >
                     <ToolTipService.ToolTip>
                         <ToolTip Content="Restore Story Element from Trashcan" />
                     </ToolTipService.ToolTip>
                 </AppBarButton>
-                <AppBarButton Icon="Switch" Label="Add to Narrative" Command="{x:Bind ShellVm.AddToNarrativeCommand, Mode=OneWay}" 
+                <AppBarButton Icon="Switch" Command="{x:Bind ShellVm.AddToNarrativeCommand, Mode=OneWay}" 
                           Visibility="{x:Bind ShellVm.AddToNarrativeVisibility, Mode=TwoWay}" >
                     <ToolTipService.ToolTip>
                         <ToolTip Content="Add Scene to Narrative" />
                     </ToolTipService.ToolTip>
                 </AppBarButton>
-                <AppBarButton Icon="Switch" Label="Remove from narrative" Command="{x:Bind ShellVm.RemoveFromNarrativeCommand, Mode=OneWay}" 
+                <AppBarButton Icon="Switch" Command="{x:Bind ShellVm.RemoveFromNarrativeCommand, Mode=OneWay}" 
                           Visibility="{x:Bind ShellVm.RemoveFromNarrativeVisibility, Mode=TwoWay}" >
                     <ToolTipService.ToolTip>
                         <ToolTip Content="Remove Scene from Narrative" />
                     </ToolTipService.ToolTip>
                 </AppBarButton>
-                <AppBarButton Icon="Print" Label="Print node" Command="{x:Bind ShellVm.PrintNodeCommand, Mode=OneWay}" 
+                <AppBarButton Icon="Print" Command="{x:Bind ShellVm.PrintNodeCommand, Mode=OneWay}" 
                           Visibility="{x:Bind ShellVm.PrintNodeVisibility, Mode=TwoWay}" >
                     <ToolTipService.ToolTip>
                         <ToolTip Content="Print selected node"/>
                     </ToolTipService.ToolTip>
                 </AppBarButton>
-                <AppBarButton Icon="Cancel" Label="Delete node" Visibility="{x:Bind ShellVm.EmptyTrashVisibility, Mode=TwoWay}" >
+                <AppBarButton Icon="Cancel" Visibility="{x:Bind ShellVm.EmptyTrashVisibility, Mode=TwoWay}" >
                     <ToolTipService.ToolTip>
                         <ToolTip Content="Empty trash"/>
                     </ToolTipService.ToolTip>
@@ -70,7 +102,7 @@
                         </Flyout>
                     </AppBarButton.Flyout>
                 </AppBarButton>
-            </CommandBarFlyout.SecondaryCommands>
+            </CommandBarFlyout.PrimaryCommands>
         </CommandBarFlyout>
     </Page.Resources>
 
@@ -211,14 +243,18 @@
                                     <ColumnDefinition Width="50"/>
                                     <ColumnDefinition Width="45"/>
                                 </Grid.ColumnDefinitions>
-                                <Button ToolTipService.ToolTip="Move Left" FontFamily="Segoe MDL2 Assets" Content="&#xE09A;"
-                                        Command="{x:Bind ShellVm.MoveLeftCommand, Mode=OneWay}"  Margin="5"  Grid.Row="1"/>
-                                <Button ToolTipService.ToolTip="Move Right" FontFamily="Segoe MDL2 Assets" Content="&#xE013;"
-                                        Command="{x:Bind ShellVm.MoveRightCommand, Mode=OneWay}"  Margin="5" Grid.Row="1" Grid.Column="2"/>
-                                <Button Grid.Row="0" ToolTipService.ToolTip="Move Up" FontFamily= "Segoe MDL2 Assets" Content="&#xE09C;"
-                                        Command="{x:Bind ShellVm.MoveUpCommand, Mode=OneWay}"  Margin="5" Grid.Column="1"/>
-                                <Button ToolTipService.ToolTip="Move Down" FontFamily="Segoe MDL2 Assets" Content="&#xE09D;"
-                                        Command="{x:Bind ShellVm.MoveDownCommand, Mode=OneWay}" Margin="5" Grid.Column="1" Grid.Row="2"/>
+                                <Button ToolTipService.ToolTip="Move Left"
+                                        FontFamily="Segoe MDL2 Assets" Content="&#xE09A;"
+                                        Command="{x:Bind ShellVm.MoveLeftCommand, Mode=OneWay}"  Margin="0,5,0,5"  Grid.Row="1"/>
+                                <Button ToolTipService.ToolTip="Move Right"
+                                        FontFamily="Segoe MDL2 Assets" Content="&#xE013;"
+                                        Command="{x:Bind ShellVm.MoveRightCommand, Mode=OneWay}"  Margin="0,5,0,5" Grid.Row="1" Grid.Column="2"/>
+                                <Button ToolTipService.ToolTip="Move Up"
+                                        FontFamily="Segoe MDL2 Assets" Content="&#xE09C;"
+                                        Command="{x:Bind ShellVm.MoveUpCommand, Mode=OneWay}"  Margin="5,0,5,0" Grid.Column="1"/>
+                                <Button ToolTipService.ToolTip="Move Down"
+                                        FontFamily="Segoe MDL2 Assets" Content="&#xE09D;"
+                                        Command="{x:Bind ShellVm.MoveDownCommand, Mode=OneWay}" Margin="5,0,5,0" Grid.Column="1" Grid.Row="2"/>
                             </Grid>
                         </Flyout>
                     </AppBarButton.Flyout>

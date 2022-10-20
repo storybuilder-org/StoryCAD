@@ -6,26 +6,26 @@ using StoryBuilder.ViewModels;
 
 namespace StoryBuilder.Services.Dialogs;
 
-public sealed partial class RecentFiles
+public sealed partial class RecentFiles : Page
 {
     public RecentFiles(UnifiedVM vm)
     {
         InitializeComponent();
         UnifiedMenuVM = vm;
 
-        string[] _RecentFiles = { GlobalData.Preferences.LastFile1 , GlobalData.Preferences.LastFile2, GlobalData.Preferences.LastFile3, GlobalData.Preferences.LastFile4, GlobalData.Preferences.LastFile5};
-        foreach (string _File in _RecentFiles)
+        string[] RecentFiles = { GlobalData.Preferences.LastFile1 , GlobalData.Preferences.LastFile2, GlobalData.Preferences.LastFile3, GlobalData.Preferences.LastFile4, GlobalData.Preferences.LastFile5};
+        foreach (var File in RecentFiles)
         {
-            if (!string.IsNullOrWhiteSpace(_File))
+            if (!string.IsNullOrWhiteSpace(File) )
             {
-                if (File.Exists(_File))
+                if (System.IO.File.Exists(File))
                 {
-                    StackPanel _Item = new();
-                    ToolTipService.SetToolTip(_Item,_File);
-                    _Item.Width = 300;
-                    _Item.Children.Add(new TextBlock { Text = Path.GetFileName(_File).Replace(".stbx", ""), FontSize = 20 });
-                    _Item.Children.Add(new TextBlock { Text = "Last edited: " + File.GetLastWriteTime(_File), FontSize = 10, VerticalAlignment = VerticalAlignment.Center });
-                    Recents.Items.Add(_Item);
+                    StackPanel Item = new();
+                    ToolTipService.SetToolTip(Item,File);
+                    Item.Width = 300;
+                    Item.Children.Add(new TextBlock { Text = Path.GetFileName(File).Replace(".stbx", ""), FontSize = 20 });
+                    Item.Children.Add(new TextBlock { Text = "Last edited: " + System.IO.File.GetLastWriteTime(File), FontSize = 10, VerticalAlignment = VerticalAlignment.Center });
+                    Recents.Items.Add(Item);
                 }
             }
         }

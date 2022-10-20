@@ -7,7 +7,7 @@ using StoryBuilder.ViewModels;
 
 namespace StoryBuilder.Services.Dialogs;
 
-public sealed partial class UnifiedMenuPage
+public sealed partial class UnifiedMenuPage : Page
 {
     public delegate void UpdateContentDelegate();
 
@@ -36,11 +36,9 @@ public sealed partial class UnifiedMenuPage
     public UnifiedMenuPage()
     {
         InitializeComponent();
-        UnifiedMenuVM = new()
-        {
-            UpdateContent = UpdateContent, // Connect the VM's delegate to HideDialog
-            CurrentTab = new ListBoxItem { Name = "Recent" } //Makes unified VM load recent by default
-        };
+        UnifiedMenuVM = new();
+        UnifiedMenuVM.UpdateContent = UpdateContent;  // Connect the VM's delegate to HideDialog
+        UnifiedMenuVM.CurrentTab = new ListBoxItem { Name = "Recent" }; //Makes unified VM load recents by default
         UnifiedMenuVM.SidebarChange(null, null);
         if (ActualTheme == ElementTheme.Light) {UnifiedMenuVM.AdjustmentColor = new SolidColorBrush(Colors.White);}
     }
