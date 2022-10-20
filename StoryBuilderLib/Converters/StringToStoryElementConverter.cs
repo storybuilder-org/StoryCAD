@@ -45,23 +45,23 @@ public class StringToStoryElementConverter : IValueConverter
         if (value.Equals(string.Empty))
             return null;
         // Get the current StoryModel's StoryElementsCollection
-        StoryModel _Model = ShellViewModel.GetModel();
-        StoryElementCollection _Elements = _Model.StoryElements;
+        StoryModel _model = ShellViewModel.GetModel();
+        StoryElementCollection _elements = _model.StoryElements;
         // legacy: locate the StoryElement from its Name
-        foreach (StoryElement _Element in _Elements)  // Character or Setting??? Search both?
+        foreach (StoryElement _element in _elements)  // Character or Setting??? Search both?
         {
-            if (_Element.Type == StoryItemType.Character | _Element.Type == StoryItemType.Setting)
+            if (_element.Type == StoryItemType.Character | _element.Type == StoryItemType.Setting)
             {
-                string _Source = (string)value;
-                if (_Source.Trim().Equals(_Element.Name.Trim()))
-                    return _Element;
+                string _source = (string)value;
+                if (_source.Trim().Equals(_element.Name.Trim()))
+                    return _element;
             }
         }
         // Look for the StoryElement corresponding to the passed guid
         // (This is the normal approach)
-        if (Guid.TryParse(value.ToString(), out Guid _Guid))
-            if (_Elements.StoryElementGuids.ContainsKey(_Guid))
-                return _Elements.StoryElementGuids[_Guid];
+        if (Guid.TryParse(value.ToString(), out Guid _guid))
+            if (_elements.StoryElementGuids.ContainsKey(_guid))
+                return _elements.StoryElementGuids[_guid];
         return null;  // Not found
     }
 
@@ -77,8 +77,8 @@ public class StringToStoryElementConverter : IValueConverter
     {
         if (value == null)
             return string.Empty;
-        StoryElement _Element = (StoryElement)value;
-        return _Element.Uuid.ToString();
+        StoryElement _element = (StoryElement)value;
+        return _element.Uuid.ToString();
     }
 
 }

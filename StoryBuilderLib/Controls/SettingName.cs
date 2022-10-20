@@ -16,7 +16,7 @@ public sealed class SettingName : ComboBox
 
     private void SettingName_Loaded(object sender, RoutedEventArgs e)
     {
-        StoryModel _Model = ShellViewModel.GetModel();
-        ItemsSource = _Model.StoryElements.Settings;
+        StoryModel model = ShellViewModel.GetModel();
+        ItemsSource = model.StoryElements.Settings;
     }
 }

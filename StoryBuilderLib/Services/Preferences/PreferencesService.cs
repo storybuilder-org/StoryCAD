@@ -18,15 +18,15 @@ public class PreferencesService
         try
         {
             Logger.Log(LogLevel.Info, "Loading Preferences");
-            PreferencesModel _Model = new();
-            PreferencesIo _Loader = new(_Model, path);
-            await _Loader.UpdateModel();
+            PreferencesModel model = new();
+            PreferencesIo loader = new(model, path);
+            await loader.UpdateModel();
                 
-            GlobalData.Preferences = _Model;
+            GlobalData.Preferences = model;
         }
-        catch (Exception _Ex)
+        catch (Exception ex)
         {
-            Logger.LogException(LogLevel.Error, _Ex, "Error loading Preferences");
+            Logger.LogException(LogLevel.Error, ex, "Error loading Preferences");
             Application.Current.Exit();  // Win32;  // Win32
         }
     }

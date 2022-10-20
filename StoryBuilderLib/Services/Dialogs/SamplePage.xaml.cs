@@ -2,20 +2,25 @@
 using System.IO;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
 using StoryBuilder.Models;
 using StoryBuilder.ViewModels;
 
 namespace StoryBuilder.Services.Dialogs;
-public sealed partial class SamplePage
+
+/// <summary>
+/// An empty page that can be used on its own or navigated to within a Frame.
+/// </summary>
+public sealed partial class SamplePage : Page
 {
-    private List<string> _paths = new();
+    private List<string> paths = new();
     public SamplePage(UnifiedVM vm)
     {
         InitializeComponent();
-        foreach (string _SampleStory in Directory.GetFiles(Path.Combine(GlobalData.RootDirectory, "samples")))
+        foreach (string sampleStory in Directory.GetFiles(Path.Combine(GlobalData.RootDirectory, "samples")))
         {
-            Samples.Items.Add(Path.GetFileName(_SampleStory).Replace(".stbx", ""));
-            _paths.Add(_SampleStory);
+            Samples.Items.Add(Path.GetFileName(sampleStory).Replace(".stbx", ""));
+            paths.Add(sampleStory);
         }
         UnifiedVM = vm;
     }
@@ -25,7 +30,7 @@ public sealed partial class SamplePage
     {
         if (Samples.SelectedIndex != -1)
         {
-            await Ioc.Default.GetRequiredService<ShellViewModel>().OpenFile(_paths[Samples.SelectedIndex]);
+            await Ioc.Default.GetService<ShellViewModel>().OpenFile(paths[Samples.SelectedIndex]);
             UnifiedVM.Hide();
         }
     }

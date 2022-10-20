@@ -13,8 +13,25 @@ public sealed partial class RelationshipView
 {
     public CharacterViewModel CharVm => Ioc.Default.GetService<CharacterViewModel>();
     public LogService Logger => Ioc.Default.GetService<LogService>();
-    public RelationshipView() { InitializeComponent(); }
-    
+    public RelationshipView()
+    {
+        InitializeComponent();
+    }
+
+    /// Instead of loading a Character's RelationshipModels directly into
+    /// the ViewModel and binding them, the models themselves are loaded 
+    /// into the VM's CharacterRelationships ObservableCollection, but
+    /// its properties are bound only when one of of the ComboBox items
+    /// CharacterRelationships is bound to is selected.
+    /// However, one property need modified during LoadModel: the Partner  
+    /// StoryElement in the RelationshipModel needs loaded from its Uuid.
+    private void RelationshipChanged(object sender, SelectionChangedEventArgs e)
+    {
+        CharVm.SaveRelationship(CharVm.CurrentRelationship);
+        CharVm.LoadRelationship(CharVm.SelectedRelationship);
+        CharVm.CurrentRelationship = CharVm.SelectedRelationship;
+    }
+
     /// <summary>
     /// This removes a relationship from the 'master' character.
     /// </summary>
@@ -26,40 +43,40 @@ public sealed partial class RelationshipView
         {
             //First identify the relationship.
             Logger.Log(LogLevel.Info, "Starting to remove relationship");
-            RelationshipModel _CharacterToDelete = null;
-            foreach (RelationshipModel _Character in CharVm.CharacterRelationships)
+            RelationshipModel characterToDelete = null;
+            foreach (var character in CharVm.CharacterRelationships)
             {   //UUID is stored in tag as a cheeky hack to identify the relationship.
-                if (_Character.PartnerUuid.Equals((sender as SymbolIcon)?.Tag)) //Identify via tag.
+                if (character.PartnerUuid.Equals((sender as SymbolIcon).Tag)) //Identify via tag.
                 {
-                    _CharacterToDelete = _Character;
+                    characterToDelete = character;
                 }
             }
-            Logger.Log(LogLevel.Info, $"Character to delete: {_CharacterToDelete!.Partner.Name}({_CharacterToDelete.Partner.Uuid})");
+            Logger.Log(LogLevel.Info, $"Character to delete: {characterToDelete.Partner.Name}({characterToDelete.Partner.Uuid})");
 
             //Show confirmation dialog and gets result.
-            ContentDialog _Cd = new()
+            ContentDialog CD = new()
             {
                 Title = "Are you sure?",
-                Content = $"Are you sure you want to delete the relationship between {CharVm.Name} and {_CharacterToDelete.Partner.Name}?",
+                Content = $"Are you sure you want to delete the relationship between {CharVm.Name} and {characterToDelete.Partner.Name}?",
                 XamlRoot = GlobalData.XamlRoot,
                 PrimaryButtonText = "Yes",
                 SecondaryButtonText = "No"
             };
-            ContentDialogResult _Result = await _Cd.ShowAsync();
-            Logger.Log(LogLevel.Info, $"Dialog Result: {_Result}");
+            var result = await CD.ShowAsync();
+            Logger.Log(LogLevel.Info, $"Dialog Result: {result}");
 
-            if (_Result == ContentDialogResult.Primary) //If positive, then delete.
+            if (result == ContentDialogResult.Primary) //If positive, then delete.
             {
-                Logger.Log(LogLevel.Info, $"Deleting Relationship to {_CharacterToDelete.Partner.Name}");
-                Ioc.Default.GetService<CharacterViewModel>()!.CharacterRelationships.Remove(_CharacterToDelete);
+                Logger.Log(LogLevel.Info, $"Deleting Relationship to {characterToDelete.Partner.Name}");
+                Ioc.Default.GetService<CharacterViewModel>().CharacterRelationships.Remove(characterToDelete);
                 Logger.Log(LogLevel.Info, "Deleted");
                 CharVm.SaveRelationships();
             }
             Logger.Log(LogLevel.Info, "Remove relationship complete!");
         }
-        catch (Exception _Ex)
+        catch (Exception ex)
         {
-            Logger.LogException(LogLevel.Error, _Ex, "Error removing relationship");
+            Logger.LogException(LogLevel.Error, ex, "Error removing relationship");
         }
     }
 

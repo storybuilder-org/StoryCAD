@@ -18,22 +18,22 @@ public class InstallationService
     public readonly LogService Logger;
 
     /// <summary>
-    /// This copies all the files from \Assets\install to GlobalData.RootDirectory.
+    /// This copies all the files from \assets\install to GlobalData.RootDirectory.
     /// This is done by using manifest resource steams and writing them to the disk.
     /// </summary>
     public async Task InstallFiles()
     {
         await DeleteFiles();
-        foreach (string _InstallerFile in Assembly.GetExecutingAssembly().GetManifestResourceNames())
+        foreach (var InstallerFile in Assembly.GetExecutingAssembly().GetManifestResourceNames())
         {
             try
             {
                 //This processes the internal path into one that is able to be written to the disk
-                string _File = ProcessFileName(_InstallerFile);
-                StorageFile _DiskFile = await CreateDummyFileAsync(_File);
-                WriteManifestData(_DiskFile,_InstallerFile);
+                string File = ProcessFileName(InstallerFile);
+                StorageFile DiskFile = await CreateDummyFileAsync(File);
+                WriteManifestData(DiskFile,InstallerFile);
             }
-            catch (Exception _Ex) { Logger.LogException(LogLevel.Error, _Ex, "Error in installer"); }
+            catch (Exception ex) { Logger.LogException(LogLevel.Error, ex, "Error in installer"); }
         }
     }
 
@@ -42,23 +42,23 @@ public class InstallationService
     /// </summary>
     private async Task DeleteFiles()
     {
-        StorageFolder _ParentFolder = await StorageFolder.GetFolderFromPathAsync(GlobalData.RootDirectory);
-        foreach (StorageFile _Item in await _ParentFolder.GetFilesAsync())
+        StorageFolder ParentFolder = await StorageFolder.GetFolderFromPathAsync(GlobalData.RootDirectory);
+        foreach (StorageFile Item in await ParentFolder.GetFilesAsync())
         {
-            if (_Item.Name == "StoryBuilder.prf") { continue; } //Don't delete prf
+            if (Item.Name == "StoryBuilder.prf") { continue; } //Don't delete prf
 
-            try { await _Item.DeleteAsync(); }
-            catch (Exception _Ex)
+            try { await Item.DeleteAsync(); }
+            catch (Exception ex)
             {
-                Logger.LogException(LogLevel.Error, _Ex, "Error when deleting files");
+                Logger.LogException(LogLevel.Error, ex, "Error when deleting files");
             }
         }
-        foreach (StorageFolder _Item in await _ParentFolder.GetFoldersAsync())
+        foreach (StorageFolder Item in await ParentFolder.GetFoldersAsync())
         {
-            if (_Item.Name == "logs") { continue; }
+            if (Item.Name == "logs") { continue; }
 
-            try { await _Item.DeleteAsync(); }
-            catch (Exception _Ex) { Logger.LogException(LogLevel.Error, _Ex, "Error when deleting files"); }
+            try { await Item.DeleteAsync(); }
+            catch (Exception ex) { Logger.LogException(LogLevel.Error, ex, "Error when deleting files"); }
         }
     }
 
@@ -71,73 +71,73 @@ public class InstallationService
         Logger.Log(LogLevel.Trace, $"Processing file path of {inputFileName}");
 
         //Removes the parent container as the files are relative.
-        string _File = inputFileName.Replace("StoryBuilder.Assets.Install", "");
+        string file = inputFileName.Replace("StoryBuilder.Assets.Install", "");
 
-        //This replaces all the . with \ (except the last . as that is the file type)
-        int _LastIndex = _File.LastIndexOf('.');
-        if (_LastIndex > 0) { _File = _File[.._LastIndex].Replace(".", @"\") + _File[_LastIndex..]; }
-        _File = _File.Replace(@"\stbx", "stbx").Remove(0, 1).Replace("stbx", ".stbx").Replace("..", ".").Replace('_', ' ');
+        //This replaces all the . with \ (except the last . as thats the file type)
+        int lastIndex = file.LastIndexOf('.');
+        if (lastIndex > 0) { file = file[..lastIndex].Replace(".", @"\") + file[lastIndex..]; }
+        file = file.Replace(@"\stbx", "stbx").Remove(0, 1).Replace("stbx", ".stbx").Replace("..", ".").Replace('_', ' ');
 
         //Fixes a dolls house name as all non ASCII (I think) characters are replaced with spaces except for the file name
-        if (_File.Contains("A Doll s House.stbx")) { _File = _File.Replace(" s ", "'s "); }
+        if (file.Contains("A Doll s House.stbx")) { file = file.Replace(" s ", "'s "); }
 
         //This fixes the UUID for samples.
-        if (_File.Contains("files"))
+        if (file.Contains("files"))
         {
-            string[] _Path = _File.Split("files");
-            string _Uuid = _Path[1].Replace(" ", "-");
-            _File = _Path[0] + "files\\" + _Uuid[2..]; //Removes extra space in UUID
+            string[] path = file.Split("files");
+            string UUID = path[1].Replace(" ", "-");
+            file = path[0] + "files\\" + UUID[2..]; //Removes extra space in UUID
         }
 
-        Logger.Log(LogLevel.Trace, $"Got ideal path as {_File}");
-        return _File;
+        Logger.Log(LogLevel.Trace, $"Got ideal path as {file}");
+        return file;
     }
 
     /// <summary>
     /// Creates empty placeholder files.
     /// </summary>
-    /// <param name="file">The file.</param>
+    /// <param name="File">The file.</param>
     /// <returns></returns>
-    private async Task<StorageFile> CreateDummyFileAsync(string file)
+    private async Task<StorageFile> CreateDummyFileAsync(string File)
     {
-        StorageFolder _ParentFolder = ApplicationData.Current.RoamingFolder;
-        _ParentFolder = await _ParentFolder.CreateFolderAsync("StoryBuilder", CreationCollisionOption.OpenIfExists);
-        if (file.Contains(@"\"))
+        StorageFolder ParentFolder = ApplicationData.Current.RoamingFolder;
+        ParentFolder = await ParentFolder.CreateFolderAsync("StoryBuilder", CreationCollisionOption.OpenIfExists);
+        if (File.Contains(@"\"))
         {
-            Logger.Log(LogLevel.Trace, $"{file} contains subdirectories");
-            List<string> _Dirs = new(file.Split(@"\"));
-            int _Iteration = 1;
-            foreach (string _Dir in _Dirs)
+            Logger.Log(LogLevel.Trace, $"{File} contains subdirectories");
+            List<string> dirs = new(File.Split(@"\"));
+            int iteration = 1;
+            foreach (string dir in dirs)
             {
-                if (_Iteration >= _Dirs.Count) { continue; }
+                if (iteration >= dirs.Count) { continue; }
                 //Logger.Log(LogLevel.Trace, $"{File} mounting sub directory {dir}");
-                _ParentFolder = await _ParentFolder.CreateFolderAsync(_Dir, CreationCollisionOption.OpenIfExists);
-                _Iteration++;
+                ParentFolder = await ParentFolder.CreateFolderAsync(dir, CreationCollisionOption.OpenIfExists);
+                iteration++;
             }
         }
 
-        return await _ParentFolder.CreateFileAsync(Path.GetFileName(file), CreationCollisionOption.ReplaceExisting);
+        return await ParentFolder.CreateFileAsync(Path.GetFileName(File), CreationCollisionOption.ReplaceExisting);
     }
 
     /// <summary>
     /// This opens the internal manifest data for a file and writes to the blank file made in CreateDummyFileAsync
-    /// <param name="diskFile"> File to be written to</param>
-    /// <param name="installerFile"> manifest path ie StoryBuilder.Assets.Install</param>
+    /// <param name="DiskFile"> File to be written to</param>
+    /// <param name="InstallerFile"> manifest path ie StoryBuilder.Assets.Install</param>
     /// </summary>
-    private async void WriteManifestData(StorageFile diskFile, string installerFile)
+    private async void WriteManifestData(StorageFile DiskFile, string InstallerFile)
     {
-        await using Stream _InternalResourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(installerFile);
-        await using (Stream _FileDiskStream = await diskFile.OpenStreamForWriteAsync())
+        await using Stream internalResourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(InstallerFile);
+        await using (Stream fileDiskStream = await DiskFile.OpenStreamForWriteAsync())
         {
-            Logger.Log(LogLevel.Trace, $"Opened manifest stream and stream for file on disk ({diskFile.Path})");
+            Logger.Log(LogLevel.Trace, $"Opened manifest stream and stream for file on disk ({DiskFile.Path})");
 
-            while (_InternalResourceStream!.Position < _InternalResourceStream.Length)
+            while (internalResourceStream.Position < internalResourceStream.Length)
             {
-                _FileDiskStream.WriteByte((byte)_InternalResourceStream.ReadByte());
+                fileDiskStream.WriteByte((byte)internalResourceStream.ReadByte());
             }
-            await _FileDiskStream.FlushAsync();
+            await fileDiskStream.FlushAsync();
         }
-        await _InternalResourceStream.FlushAsync();
+        await internalResourceStream.FlushAsync();
     }
 
     public InstallationService() { Logger = Ioc.Default.GetService<LogService>(); }

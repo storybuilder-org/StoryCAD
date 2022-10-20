@@ -9,9 +9,9 @@ namespace StoryBuilder.Controls;
 public sealed partial class Conflict
 {
     public SortedDictionary<string, ConflictCategoryModel> ConflictTypes;
-    private string _category;
-    private string _subCategory;
-    private ConflictCategoryModel _model;
+    private string category;
+    private string subCategory;
+    private ConflictCategoryModel model;
     public string ExampleText { get; set; }
 
     public Conflict()
@@ -20,9 +20,9 @@ public sealed partial class Conflict
     }
     private void Category_SelectionChanged(object sender, ComboBoxSelectionChangedEventArgs e)
     {
-        _category = (string)Category.Items[Category.SelectedIndex];
-        _model = ConflictTypes[_category];
-        SubCategory.ItemsSource = _model.SubCategories;
+        category = (string)Category.Items[Category.SelectedIndex];
+        model = ConflictTypes[category];
+        SubCategory.ItemsSource = model.SubCategories;
         SubCategory.SelectedIndex = -1;
         Example.SelectedIndex = -1;
     }
@@ -31,8 +31,8 @@ public sealed partial class Conflict
     {
         if (SubCategory.SelectedIndex > -1)
         {
-            _subCategory = (string)SubCategory.Items[SubCategory.SelectedIndex];
-            Example.ItemsSource = _model.Examples[_subCategory];
+            subCategory = (string)SubCategory.Items[SubCategory.SelectedIndex];
+            Example.ItemsSource = model.Examples[subCategory];
         }
     }
 

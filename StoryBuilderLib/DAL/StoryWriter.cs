@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
@@ -38,8 +39,6 @@ public class StoryWriter
     private XmlNode _elements;    // The collection of StoryElements
     private XmlNode _explorer;    // StoryExplorer
     private XmlNode _narrator;    // StoryNarrator
-    private XmlNode _relationships; // Character Relationships
-    private XmlNode _web; // Character Relationships
     private XmlNode _stbSettings; // Settings
 
     private readonly LogService _logger = Ioc.Default.GetRequiredService<LogService>();
@@ -85,6 +84,7 @@ public class StoryWriter
         //Create an attribute.
         XmlAttribute _attr = _xml.CreateAttribute("Version");
         _attr.Value = "2.0";
+        Debug.Assert(_stb.Attributes != null, "_stb.Attributes != null");
         _stb.Attributes.Append(_attr);
         _xml.AppendChild(_stb);
         _elements = _xml.CreateElement("StoryElements");
@@ -93,11 +93,7 @@ public class StoryWriter
         _stb.AppendChild(_explorer);
         _narrator = _xml.CreateElement("Narrator");
         _stb.AppendChild(_narrator);
-        _relationships = _xml.CreateElement("Relationships");
-        _stb.AppendChild(_relationships);
-        _web = _xml.CreateElement("Web");
-        _stb.AppendChild(_web);
-
+  
         _stbSettings = _xml.CreateElement("Settings");
         _stb.AppendChild(_stbSettings);
     }
@@ -150,9 +146,11 @@ public class StoryWriter
     {
         WebModel _rec = (WebModel)element;
         XmlNode _web = _xml.CreateElement("Web");
+        Debug.Assert(_web != null, nameof(_web) + " != null");
 
         XmlAttribute _attr = _xml.CreateAttribute("UUID");
         _attr.Value = UuidString(_rec.Uuid);
+        Debug.Assert(_web.Attributes != null, "_web.Attributes != null");
         _web.Attributes.Append(_attr);
         _attr = _xml.CreateAttribute("Name");
         _attr.Value = _rec.Name;
@@ -161,7 +159,9 @@ public class StoryWriter
         _attr.Value = _rec.URL.ToString();
         _web.Attributes.Append(_attr);
         _attr = _xml.CreateAttribute("Timestamp");
+        // ReSharper disable SpecifyACultureInStringConversionExplicitly
         _attr.Value = _rec.Timestamp.ToString();
+        // ReSharper restore SpecifyACultureInStringConversionExplicitly
         _web.Attributes.Append(_attr);
 
         _elements.AppendChild(_web);
@@ -174,6 +174,7 @@ public class StoryWriter
 
         XmlAttribute _attr = _xml.CreateAttribute("UUID");
         _attr.Value = UuidString(_rec.Uuid);
+        Debug.Assert(_overview.Attributes != null, "_overview.Attributes != null");
         _overview.Attributes.Append(_attr);
         _attr = _xml.CreateAttribute("Name");
         _attr.Value = _rec.Name;
@@ -240,6 +241,7 @@ public class StoryWriter
 
         XmlAttribute _attr = _xml.CreateAttribute("UUID");
         _attr.Value = UuidString(_rec.Uuid);
+        Debug.Assert(_prob.Attributes != null, "_prob.Attributes != null");
         _prob.Attributes.Append(_attr);
         _attr = _xml.CreateAttribute("Name");
         _attr.Value = _rec.Name;
@@ -313,6 +315,7 @@ public class StoryWriter
 
         XmlAttribute _attr = _xml.CreateAttribute("UUID");
         _attr.Value = UuidString(_rec.Uuid);
+        Debug.Assert(_chr.Attributes != null, "_chr.Attributes != null");
         _chr.Attributes.Append(_attr);
         _attr = _xml.CreateAttribute("Name");
         _attr.Value = _rec.Name;
@@ -489,6 +492,7 @@ public class StoryWriter
 
         XmlAttribute _attr = _xml.CreateAttribute("UUID");
         _attr.Value = UuidString(_rec.Uuid);
+        Debug.Assert(_loc.Attributes != null, "_loc.Attributes != null");
         _loc.Attributes.Append(_attr);
         _attr = _xml.CreateAttribute("Name");
         _attr.Value = _rec.Name;
@@ -546,6 +550,7 @@ public class StoryWriter
 
         XmlAttribute _attr = _xml.CreateAttribute("UUID");
         _attr.Value = UuidString(_rec.Uuid);
+        Debug.Assert(_scene.Attributes != null, "_scene.Attributes != null");
         _scene.Attributes.Append(_attr);
         _attr = _xml.CreateAttribute("Name");
         _attr.Value = _rec.Name;
@@ -652,6 +657,7 @@ public class StoryWriter
 
         XmlAttribute _attr = _xml.CreateAttribute("UUID");
         _attr.Value = UuidString(_rec.Uuid);
+        Debug.Assert(_node.Attributes != null, "_node.Attributes != null");
         _node.Attributes.Append(_attr);
         _attr = _xml.CreateAttribute("Name");
         _attr.Value = _rec.Name;
@@ -669,6 +675,7 @@ public class StoryWriter
 
         XmlAttribute _attr = _xml.CreateAttribute("UUID");
         _attr.Value = UuidString(_rec.Uuid);
+        Debug.Assert(_node.Attributes != null, "_node.Attributes != null");
         _node.Attributes.Append(_attr);
         _attr = _xml.CreateAttribute("Name");
         _attr.Value = _rec.Name;
@@ -687,6 +694,7 @@ public class StoryWriter
 
         XmlAttribute _attr = _xml.CreateAttribute("UUID");
         _attr.Value = UuidString(_rec.Uuid);
+        Debug.Assert(_node.Attributes != null, "_node.Attributes != null");
         _node.Attributes.Append(_attr);
         _attr = _xml.CreateAttribute("Name");
         _attr.Value = _rec.Name;
@@ -705,6 +713,7 @@ public class StoryWriter
 
         XmlAttribute _attr = _xml.CreateAttribute("UUID");
         _attr.Value = UuidString(_rec.Uuid);
+        Debug.Assert(_node.Attributes != null, "_node.Attributes != null");
         _node.Attributes.Append(_attr);
         _attr = _xml.CreateAttribute("Name");
         _attr.Value = _rec.Name;
@@ -735,8 +744,8 @@ public class StoryWriter
 
     /// <summary>
     /// Create the TreeView's Xml equivalent of the StoryNodeModel
-    /// via recursive descent. This is ran once for the Explorer
-    /// view and again for the Narrator view.
+    /// via recursive descent. This is ran once for the ExplorerView
+    /// view and again for the NarratorView view.
     /// 
     /// Since it's a TreeView node model, all the XML version of the
     /// node needs is to point to its StoryElement model and its

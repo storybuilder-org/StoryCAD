@@ -31,7 +31,7 @@ public class StoryReader : ObservableRecipient
     private static XmlDocument _xml;
 
     /// Story contains a collection of StoryElements, a representation of the StoryExplorer tree,
-    /// a representation of the Narrator tree, and a collection of story-specific settings.
+    /// a representation of the NarratorView tree, and a collection of story-specific settings.
     private StoryModel _model;
 
     // There's one OverviewModel per story; it's also the Treeview root
@@ -52,7 +52,7 @@ public class StoryReader : ObservableRecipient
             _model.ProjectFilename = Path.GetFileName(file.Path);
             // Early story outlines may have been built or converted
             // without a TrashCan node added. If this model is one of 
-            // those, add the node to both the Explorer and Narrator views.
+            // those, add the node to both the ExplorerView and NarratorView views.
             if (_model.ExplorerView.Count == 1)
             {
                 TrashCanModel _trash = new(_model);
@@ -192,7 +192,7 @@ public class StoryReader : ObservableRecipient
     private void ParseOverView(IXmlNode xn)
     {
         // There's one OverviewModel per story. Its corresponding
-        //StoryNode is the root of the Explorer TreeView.
+        //StoryNode is the root of the ExplorerView TreeView.
         _overview = new OverviewModel(xn, _model);
         foreach (IXmlNode _attr in xn.Attributes)
         {
