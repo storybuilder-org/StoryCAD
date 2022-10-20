@@ -2,8 +2,6 @@
 using Microsoft.UI.Xaml;
 using StoryBuilder.ViewModels.Tools;
 
-// The Content Dialog item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
-
 namespace StoryBuilder.Services.Dialogs.Tools;
 
 public sealed partial class KeyQuestionsDialog
@@ -16,13 +14,7 @@ public sealed partial class KeyQuestionsDialog
         DataContext = KeyQuestionsVm;
     }
 
-    public void Next_Click(object o, RoutedEventArgs routedEventArgs)
-    {
-        KeyQuestionsVm.NextQuestion();
-    }
+    public void Next_Click(object o, RoutedEventArgs routedEventArgs) { KeyQuestionsVm.NextQuestion(); }
 
-    public void Previous_Click(object o, RoutedEventArgs routedEventArgs)
-    {
-        KeyQuestionsVm.PreviousQuestion();
-    }
+    public void Previous_Click(object o, RoutedEventArgs routedEventArgs) { KeyQuestionsVm.PreviousQuestion(); }
 }

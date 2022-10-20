@@ -42,6 +42,7 @@
     <None Remove="Controls\Flaw.xaml" />
     <None Remove="Controls\RelationshipView.xaml" />
     <None Remove="Controls\Traits.xaml" />
+    <None Remove="Resources.xaml" />
     <None Remove="Services\Dialogs\NewProjectPage.xaml" />
     <None Remove="Services\Dialogs\NewRelationshipPage.xaml" />
     <None Remove="Services\Dialogs\RecentFiles.xaml" />
@@ -55,11 +56,17 @@
     <EmbeddedResource Include="Assets\Install\**" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Remove="Services\TeachingTips\**" />
     <Compile Remove="Services\Theming\**" />
+    <Content Remove="Services\TeachingTips\**" />
     <Content Remove="Services\Theming\**" />
+    <EmbeddedResource Remove="Services\TeachingTips\**" />
     <EmbeddedResource Remove="Services\Theming\**" />
+    <None Remove="Services\TeachingTips\**" />
     <None Remove="Services\Theming\**" />
+    <Page Remove="Services\TeachingTips\**" />
     <Page Remove="Services\Theming\**" />
+    <PRIResource Remove="Services\TeachingTips\**" />
     <PRIResource Remove="Services\Theming\**" />
   </ItemGroup>
 
@@ -83,7 +90,6 @@
     <Folder Include="Services\Installation\" />
     <Folder Include="Services\Logging\" />
     <Folder Include="Services\Navigation\" />
-    <Folder Include="Services\TeachingTips\" />
   </ItemGroup>
 
   <ItemGroup>
@@ -94,6 +100,9 @@
     <None Update="NLog.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <Page Update="Resources.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Update="Services\Dialogs\Tools\NarrativeTool.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>

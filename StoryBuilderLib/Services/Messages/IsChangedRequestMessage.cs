@@ -2,6 +2,4 @@
 
 namespace StoryBuilder.Services.Messages;
 
-public class IsChangedRequestMessage : RequestMessage<bool>
-{
-}
+public class IsChangedRequestMessage : RequestMessage<bool> { }

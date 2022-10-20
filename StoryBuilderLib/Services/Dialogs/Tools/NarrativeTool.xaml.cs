@@ -5,34 +5,33 @@ using Microsoft.UI.Xaml.Input;
 using StoryBuilder.ViewModels;
 using StoryBuilder.ViewModels.Tools;
 
-namespace StoryBuilder.Services.Dialogs.Tools
+namespace StoryBuilder.Services.Dialogs.Tools;
+
+public sealed partial class NarrativeTool
 {
-    public sealed partial class NarrativeTool : Page
+    ShellViewModel _shellVM = Ioc.Default.GetService<ShellViewModel>();
+    NarrativeToolVM _toolVM = Ioc.Default.GetService<NarrativeToolVM>();
+
+    public NarrativeTool() { InitializeComponent(); }
+
+    //This is ran when a item is clicked on either tree.
+    private void ItemInvoked(object sender, TappedRoutedEventArgs e)
     {
-        ShellViewModel ShellVM = Ioc.Default.GetService<ShellViewModel>();
-        NarrativeToolVM ToolVM = Ioc.Default.GetService<NarrativeToolVM>();
+        TreeViewItem _Item = (TreeViewItem)sender;
+        _toolVM.SelectedNode = (StoryNodeItem)_Item.DataContext;
 
-        public NarrativeTool() { InitializeComponent(); }
+        //Only shows one selected item between either tree.
+        if (_Item.Tag.Equals("Nar")) { _toolVM.IsNarratorSelected = true; } //Narrator Tree was clicked, so clear the explorer tree items.
+        else { _toolVM.IsNarratorSelected = false; } //Explorer Tree was clicked, so clear the narrator tree items.
+    }
 
-        //This is ran when a item is clicked on either tree.
-        private void ItemInvoked(object sender, TappedRoutedEventArgs e)
-        {
-            TreeViewItem item = (TreeViewItem)sender;
-            ToolVM.SelectedNode = (StoryNodeItem)item.DataContext;
-
-            //Only shows one selected item between either tree.
-            if (item.Tag.Equals("Nar")) { ToolVM.IsNarratorSelected = true; } //NarratorView Tree was clicked, so clear the explorer tree items.
-            else { ToolVM.IsNarratorSelected = false; } //ExplorerView Tree was clicked, so clear the narrator tree items.
-        }
-
-        private void Move(object sender, RoutedEventArgs e)
-        {
-            if (ToolVM.SelectedNode == null) { return; }
-            var old = ShellVM.CurrentNode;
-            ShellVM.CurrentNode = ToolVM.SelectedNode;
-            if ((sender as Button).Tag.ToString().Contains("UP")) { ShellVM.MoveUpCommand.Execute(null); } //Move up
-            else { ShellVM.MoveDownCommand.Execute(null); } //Move down
-            ShellVM.CurrentNode = old; 
-        }
+    private void Move(object sender, RoutedEventArgs e)
+    {
+        if (_toolVM.SelectedNode == null) { return; }
+        StoryNodeItem _Old = _shellVM.CurrentNode;
+        _shellVM.CurrentNode = _toolVM.SelectedNode;
+        if ((sender as Button).Tag.ToString()!.Contains("UP")) { _shellVM.MoveUpCommand.Execute(null); } //Move up
+        else { _shellVM.MoveDownCommand.Execute(null); } //Move down
+        _shellVM.CurrentNode = _Old; 
     }
 }
