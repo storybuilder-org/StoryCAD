@@ -7,7 +7,6 @@
     xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
     xmlns:viewmodels="using:StoryBuilder.ViewModels"   
     mc:Ignorable="d">
-
     <Page.Resources>
         <CommandBarFlyout x:Key="AddStoryElementFlyout" Placement="Right" x:Name="AddStoryElementCommandBarFlyout" >
             <CommandBarFlyout.PrimaryCommands>
@@ -344,21 +343,17 @@
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    <muxc:TreeView x:Name="NavigationTree" AllowDrop="False"
-                                   ContextFlyout="{StaticResource AddStoryElementFlyout}"
-                                   ContextRequested="AddButton_ContextRequested"
-                                   ItemsSource="{x:Bind ShellVm.DataSource, Mode=TwoWay}"
-                                   ItemInvoked="TreeViewItem_Invoked">
+                    <muxc:TreeView x:Name="NavigationTree" AllowDrop="False" ContextFlyout="{StaticResource AddStoryElementFlyout}"  ContextRequested="AddButton_ContextRequested"  ItemsSource="{x:Bind ShellVm.DataSource, Mode=TwoWay}" ItemInvoked="TreeViewItem_Invoked" >
+                        <muxc:TreeView.Resources>
+                            <SolidColorBrush x:Key="TreeViewItemBackgroundSelected" Color="DarkGoldenrod" />
+                            <SolidColorBrush x:Key="TreeViewItemBackgroundSelectedPointerOver" Color="DarkGoldenrod" />
+                        </muxc:TreeView.Resources>
                         <muxc:TreeView.ItemTemplate>
-                            <DataTemplate  x:DataType="viewmodels:StoryNodeItem">
-                                <muxc:TreeViewItem ItemsSource="{x:Bind Children}" 
-                                                   Background="{x:Bind Background, Mode=OneWay}" 
-                                                   IsExpanded="{x:Bind IsExpanded, Mode=TwoWay}" 
-                                                   RightTapped="TreeViewItem_RightTapped">
-                                    <StackPanel Orientation="Horizontal">
+                            <DataTemplate x:DataType="viewmodels:StoryNodeItem">
+                                <muxc:TreeViewItem ItemsSource="{x:Bind Children}" Background="{x:Bind Background, Mode=OneWay}" IsExpanded="{x:Bind IsExpanded, Mode=TwoWay}" RightTapped="TreeViewItem_RightTapped" >
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="{x:Bind Background, Mode=OneWay}" >
                                         <SymbolIcon Symbol="{x:Bind Symbol, Mode=OneWay}" Width="20" Height="20"/>
-                                        <TextBlock Text="{x:Bind Name, Mode=TwoWay}" TextWrapping="{x:Bind TextWrapping}"
-                                                   MaxWidth="220" Margin="10,0,10,0"/>
+                                        <TextBlock Text="{x:Bind Name, Mode=TwoWay}" TextWrapping="{Binding  TextWrapping}" MaxWidth="220" Margin="10,0,10,0"/>
                                     </StackPanel>
                                 </muxc:TreeViewItem>
                             </DataTemplate>

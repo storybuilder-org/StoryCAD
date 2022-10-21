@@ -1,6 +1,7 @@
 ﻿using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
+using Windows.UI.ViewManagement;
 
 namespace StoryBuilder.Models.Tools;
 
@@ -37,7 +38,7 @@ public class PreferencesModel
 
     // Visual changes
     public SolidColorBrush PrimaryColor { get; set; } //Sets UI Color
-    public SolidColorBrush SecondaryColor = new(Colors.Black); //Sets Text Color
+    public SolidColorBrush SecondaryColor = new(new UISettings().GetColorValue(UIColorType.Accent)); //Sets Text Color
     public TextWrapping WrapNodeNames { get; set; }
 
     // Backup Information

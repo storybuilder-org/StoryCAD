@@ -3,12 +3,15 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using Windows.Data.Xml.Dom;
+using ABI.Windows.UI;
 using CommunityToolkit.Mvvm.DependencyInjection;
+using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using StoryBuilder.Models;
 using StoryBuilder.Services.Logging;
+using Microsoft.UI.Xaml.Input;
 
 namespace StoryBuilder.ViewModels;
 
@@ -472,5 +475,10 @@ public class StoryNodeItem : DependencyObject, INotifyPropertyChanged
     private void NotifyPropertyChanged(string propertyName)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+
+    public void Highlight(object sender, PointerRoutedEventArgs e)
+    {
+        Background = new SolidColorBrush(Colors.Red);
     }
 }

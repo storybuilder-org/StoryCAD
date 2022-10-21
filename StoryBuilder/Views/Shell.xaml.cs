@@ -1,15 +1,19 @@
 ﻿using System;
+using ABI.Microsoft.UI;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Input;
+using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
 using Microsoft.Web.WebView2.Core;
 using StoryBuilder.Models;
 using StoryBuilder.Models.Tools;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.ViewModels;
+using Windows.UI.ViewManagement;
+using Colors = Microsoft.UI.Colors;
 
 namespace StoryBuilder.Views;
 
@@ -71,8 +75,13 @@ public sealed partial class Shell
     }
     private void TreeViewItem_RightTapped(object sender, RightTappedRoutedEventArgs e)
     {
+        if (ShellVm.RightClickedTreeviewItem != null) { ShellVm.RightClickedTreeviewItem.Background = null; } //Remove old right clicked nodes background
+
         TreeViewItem item = (TreeViewItem)sender;
+        item.Background = new SolidColorBrush(new UISettings().GetColorValue(UIColorType.Accent));
+
         ShellVm.RightTappedNode = (StoryNodeItem)item.DataContext;
+        ShellVm.RightClickedTreeviewItem = item; //We can't set the background through righttappednode so we set a reference to the node itself to reset the background later
         ShellVm.ShowFlyoutButtons();
     }
 
@@ -106,5 +115,4 @@ public sealed partial class Shell
         if (ShellVm.DataSource == null || ShellVm.DataSource.Count == 0) { return; }
         foreach (StoryNodeItem node in ShellVm.DataSource[0]) { node.Background = null; }
     }
-
 }
