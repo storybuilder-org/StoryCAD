@@ -324,8 +324,7 @@
                         <KeyboardAccelerator Modifiers="Control" Key="P"/>
                     </AppBarButton.KeyboardAccelerators>
                 </AppBarButton>
-                <AppBarButton Label="Help" ToolTipService.ToolTip="Help"
-                              Command="{x:Bind ShellVm.HelpCommand, Mode=OneWay}" >
+                <AppBarButton Label="Help" ToolTipService.ToolTip="Help" Command="{x:Bind ShellVm.HelpCommand, Mode=OneWay}" >
                     <AppBarButton.Icon>
                         <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE897;"/>
                     </AppBarButton.Icon>

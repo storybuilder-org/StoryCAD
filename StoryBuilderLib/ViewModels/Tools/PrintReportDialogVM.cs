@@ -1,11 +1,26 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel;
+using System.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.DependencyInjection;
+using Microsoft.UI.Dispatching;
+using Microsoft.UI.Xaml.Controls;
 using StoryBuilder.Models;
+using StoryBuilder.Services.Reports;
 
 namespace StoryBuilder.ViewModels.Tools;
 
 public class PrintReportDialogVM : ObservableRecipient
 {
+    public ContentDialog Dialog;
+
+    private int _LoadingBarOpacity = 0;
+    public int LoadingBarOpacity
+    {
+        get => _LoadingBarOpacity;
+        set => SetProperty(ref _LoadingBarOpacity, value);
+    }
+
     private bool _createSummary;
     public bool CreateSummary
     {
@@ -146,4 +161,22 @@ public class PrintReportDialogVM : ObservableRecipient
         foreach (StoryNodeItem storyNodeItem in node.Children) { TraverseNode(storyNodeItem); }
     }
 
+    public async void StartGeneratingReports()
+    {
+        DispatcherQueue.GetForCurrentThread().TryEnqueue(() => { LoadingBarOpacity = 1; });
+        BackgroundWorker backgroundthread = new();
+        backgroundthread.DoWork += GenerateReports;
+        backgroundthread.RunWorkerAsync();
+    }
+
+    private async void GenerateReports(object sender, DoWorkEventArgs e)
+    {
+        PrintReportDialogVM ReportVM = Ioc.Default.GetRequiredService<PrintReportDialogVM>();
+        ShellViewModel ShellVM = Ioc.Default.GetRequiredService<ShellViewModel>();
+        PrintReports rpt = new(ReportVM, ShellVM.StoryModel);
+        await rpt.Generate();
+        DispatcherQueue.GetForCurrentThread().TryEnqueue(() => { Dialog.Hide(); })
+;    }
+
+    public void CloseDialog() { Dialog.Hide(); }
 }

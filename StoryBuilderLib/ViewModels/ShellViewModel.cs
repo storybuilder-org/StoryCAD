@@ -1303,6 +1303,7 @@ namespace StoryBuilder.ViewModels
 
         private async void GeneratePrintReports()
         {
+            PrintReportDialogVM ReportVM = Ioc.Default.GetRequiredService<PrintReportDialogVM>();
             if (Ioc.Default.GetRequiredService<ShellViewModel>().DataSource == null)
             {
                 Messenger.Send(new StatusChangedMessage(new($"You need to load a Story first!", LogLevel.Warn)));
@@ -1314,25 +1315,13 @@ namespace StoryBuilder.ViewModels
             SaveModel();
 
             // Run reports dialog
-            ContentDialog ReportDialog = new();
-            ReportDialog.Title = "Generate Reports";
-            ReportDialog.PrimaryButtonText = "Generate";
-            ReportDialog.CloseButtonText = "Cancel";
-            ReportDialog.XamlRoot = GlobalData.XamlRoot;
-            ReportDialog.Content = new PrintReportsDialog();
-            var result = await ReportDialog.ShowAsync();
-
-            if (result == ContentDialogResult.Primary)
+            ReportVM.Dialog = new()
             {
-                PrintReportDialogVM ReportVM = Ioc.Default.GetRequiredService<PrintReportDialogVM>();
-
-                PrintReports rpt = new(ReportVM, StoryModel);
-                await rpt.Generate();
-            }
-            else
-            {
-                Messenger.Send(new StatusChangedMessage(new($"Generate Print Reports canceled", LogLevel.Info, true)));
-            }
+                Title = "Generate Reports",
+                XamlRoot = GlobalData.XamlRoot,
+                Content = new PrintReportsDialog()
+            };
+            await ReportVM.Dialog.ShowAsync();
             _canExecuteCommands = true;
         }
 

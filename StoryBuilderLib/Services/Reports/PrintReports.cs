@@ -104,11 +104,11 @@ public class PrintReports
 
         if (string.IsNullOrEmpty(documentText))
         {
-            Ioc.Default.GetService<ShellViewModel>().ShowMessage(LogLevel.Warn, "No nodes selected for report generation", true);
+            //Ioc.Default.GetService<ShellViewModel>().ShowMessage(LogLevel.Warn, "No nodes selected for report generation", true);
             return;
         }
         Print(documentText);
-        Ioc.Default.GetService<ShellViewModel>().ShowMessage(LogLevel.Info, "Generate Print Reports complete", true);
+       // Ioc.Default.GetService<ShellViewModel>().ShowMessage(LogLevel.Info, "Generate Print Reports complete", true);
 
     }
 
