@@ -51,9 +51,9 @@
                 </StackPanel>
             </PivotItem>
         </Pivot>
-        <ProgressBar Width="300" IsIndeterminate="True" Opacity="0" Margin="5"/>
+        <ProgressBar Width="300" IsIndeterminate="True" Opacity="0" Margin="5" Name="LoadingBar"/>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-            <Button Content="Generate" Margin="10,5,0,0" Click="{x:Bind PrintVM.StartGeneratingReports}"/>
+            <Button Content="Generate" Margin="10,5,0,0" Click="GenerateReports"/>
             <Button Content="Close" Margin="10,5,0,0" Click="{x:Bind PrintVM.CloseDialog}"/>
         </StackPanel>
     </StackPanel>

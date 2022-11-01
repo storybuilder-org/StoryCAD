@@ -5,6 +5,7 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.DependencyInjection;
+using NLog;
 using StoryBuilder.Models;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.ViewModels;
@@ -104,12 +105,10 @@ public class PrintReports
 
         if (string.IsNullOrEmpty(documentText))
         {
-            //Ioc.Default.GetService<ShellViewModel>().ShowMessage(LogLevel.Warn, "No nodes selected for report generation", true);
+            Ioc.Default.GetRequiredService<LogService>().Log(Logging.LogLevel.Warn, "No nodes selected for report generation");
             return;
         }
         Print(documentText);
-       // Ioc.Default.GetService<ShellViewModel>().ShowMessage(LogLevel.Info, "Generate Print Reports complete", true);
-
     }
 
     private StoryElement Overview()
@@ -167,7 +166,7 @@ public class PrintReports
         }
         catch (Exception ex)
         {
-            Ioc.Default.GetService<LogService>().LogException(LogLevel.Error, ex, "Error in Print reports.");
+            Ioc.Default.GetService<LogService>().LogException(Logging.LogLevel.Error, ex, "Error in Print reports.");
         }
     }
     /// <summary>

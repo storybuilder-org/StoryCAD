@@ -14,11 +14,11 @@ public class PrintReportDialogVM : ObservableRecipient
 {
     public ContentDialog Dialog;
 
-    private int _LoadingBarOpacity = 0;
-    public int LoadingBarOpacity
+    private bool _ShowLoadingBar = true;
+    public bool ShowLoadingBar
     {
-        get => _LoadingBarOpacity;
-        set => SetProperty(ref _LoadingBarOpacity, value);
+        get => _ShowLoadingBar;
+        set => SetProperty(ref _ShowLoadingBar, value);
     }
 
     private bool _createSummary;
@@ -163,7 +163,7 @@ public class PrintReportDialogVM : ObservableRecipient
 
     public async void StartGeneratingReports()
     {
-        DispatcherQueue.GetForCurrentThread().TryEnqueue(() => { LoadingBarOpacity = 1; });
+        ShowLoadingBar = true;
         BackgroundWorker backgroundthread = new();
         backgroundthread.DoWork += GenerateReports;
         backgroundthread.RunWorkerAsync();
@@ -175,8 +175,8 @@ public class PrintReportDialogVM : ObservableRecipient
         ShellViewModel ShellVM = Ioc.Default.GetRequiredService<ShellViewModel>();
         PrintReports rpt = new(ReportVM, ShellVM.StoryModel);
         await rpt.Generate();
-        DispatcherQueue.GetForCurrentThread().TryEnqueue(() => { Dialog.Hide(); })
-;    }
+        ShowLoadingBar = false;
+    }
 
     public void CloseDialog() { Dialog.Hide(); }
 }
