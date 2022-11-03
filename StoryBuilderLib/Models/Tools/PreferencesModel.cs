@@ -34,7 +34,7 @@ public class PreferencesModel
     /// installation. 
     /// </summary>
     public bool PreferencesInitialized { get; set; }
-    public int LastSelectedTemplate { get; set; } //This is the Last Template Selected by the user.3
+    public int LastSelectedTemplate { get; set; } //This is the Last Template Selected by the user.
 
     // Visual changes
     public SolidColorBrush PrimaryColor { get; set; } //Sets UI Color
@@ -76,6 +76,12 @@ public class PreferencesModel
         LastFile3 = string.Empty;
         LastFile4 = string.Empty;
         LastFile5 = string.Empty;
+        AutoSave = true;
+        TimedBackup = true;
+        PreferredSearchEngine = BrowserType.DuckDuckGo;
+        AutoSaveInterval = 5;
+        TimedBackupInterval = 5;
+        WrapNodeNames = TextWrapping.WrapWholeWords;
     }
     #endregion
 }

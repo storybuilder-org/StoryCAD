@@ -5,11 +5,18 @@ using StoryBuilder.DAL;
 using StoryBuilder.Models;
 using StoryBuilder.Models.Tools;
 using StoryBuilder.Services.Backend;
+using System;
 
 namespace StoryBuilder.ViewModels.Tools;
 
 public class InitVM : ObservableRecipient
 {
+    public InitVM()
+    {
+       _path = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "StoryBuilder", "Projects");
+       _Backuppath = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "StoryBuilder", "Backups");
+    } 
+
     private string _errorMessage;
     public string ErrorMessage
     {
@@ -68,7 +75,11 @@ public class InitVM : ObservableRecipient
         prf.ProjectDirectory = Path;
         prf.BackupDirectory = BackupPath;
         prf.Name = Name;
-        prf.PreferencesInitialized = true; //Makes sure this window isn't shown to the user
+        prf.PreferencesInitialized = true; //Makes sure this window isn't shown to the user again
+
+        //Create paths
+        System.IO.Directory.CreateDirectory(Path);
+        System.IO.Directory.CreateDirectory(BackupPath);
 
         //Updates the file, then rereads into memory.
         PreferencesIo prfIO = new(prf, System.IO.Path.Combine(ApplicationData.Current.RoamingFolder.Path,"Storybuilder"));
@@ -76,7 +87,6 @@ public class InitVM : ObservableRecipient
         PreferencesIo loader = new(GlobalData.Preferences, System.IO.Path.Combine(ApplicationData.Current.RoamingFolder.Path, "Storybuilder"));
         await loader.UpdateModel();
         BackendService backend = Ioc.Default.GetService<BackendService>();
-        if (!GlobalData.Preferences.RecordPreferencesStatus)
-            await backend.PostPreferences(GlobalData.Preferences);
+        if (!GlobalData.Preferences.RecordPreferencesStatus) { await backend.PostPreferences(GlobalData.Preferences); }
     }
 }
