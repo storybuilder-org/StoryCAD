@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Controls.Primitives;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.ViewModels;
 using StoryBuilder.ViewModels.Tools;
@@ -10,7 +11,7 @@ namespace StoryBuilder.Services.Dialogs.Tools;
 public sealed partial class PrintReportsDialog : Page
 {
     public PrintReportDialogVM PrintVM = Ioc.Default.GetRequiredService<PrintReportDialogVM>();
-
+    DispatcherTimer IsDone = new() { Interval = new(0,0,0,1,0)};
     public PrintReportsDialog()
     {
         InitializeComponent();
@@ -105,5 +106,30 @@ public sealed partial class PrintReportsDialog : Page
             case "Print all websites": WebList.SelectedItems.Clear(); break;
         }
         UpdateSelection(null,null);
+    }
+
+    /// <summary>
+    /// This sets the opacity of the loading bar, then calls the VM.
+    /// </summary>
+    private void GenerateReports(object sender, RoutedEventArgs e)
+    {
+        PrintVM.ShowLoadingBar = true;
+        LoadingBar.Opacity = 1;
+        PrintVM.StartGeneratingReports();
+        IsDone.Tick += IsReportGenerationFinished;
+        IsDone.Start();
+    }
+
+    private void IsReportGenerationFinished(object sender, object e)
+    {
+        if (!PrintVM.ShowLoadingBar)
+        {
+            IsDone.Stop();
+            LoadingBar.Opacity = 0;
+            IsDone.Tick -= IsReportGenerationFinished;
+            PrintVM.ShowLoadingBar = false;
+            PrintVM.CloseDialog();
+            Ioc.Default.GetService<ShellViewModel>().ShowMessage(LogLevel.Info, "Generate Print Reports complete", true);
+        }
     }
 }
