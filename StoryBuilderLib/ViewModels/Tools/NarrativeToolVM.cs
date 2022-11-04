@@ -47,14 +47,22 @@ public class NarrativeToolVM: ObservableRecipient
     /// </summary>
     public void Delete()
     {
-        if (SelectedNode.Type == StoryItemType.TrashCan || SelectedNode.IsRoot) { Message = "You can't delete this node!"; }
+        try
+        {
+            if (SelectedNode != null)
+            {
+                if (SelectedNode.Type == StoryItemType.TrashCan || SelectedNode.IsRoot) { Message = "You can't delete this node!"; }
 
-        if (IsNarratorSelected)
-        { 
-            SelectedNode.Delete(StoryViewType.NarratorView);
-            Message = $"Deleted {SelectedNode}";
+                if (IsNarratorSelected)
+                {
+                    SelectedNode.Delete(StoryViewType.NarratorView);
+                    Message = $"Deleted {SelectedNode}";
+                }
+                else { Message = "You can't delete from here!"; }
+            }
+            else { Logger.Log(LogLevel.Warn, "Selected node was null, doing nothing"); }
         }
-        else{ Message = "You can't delete from here!";}
+        catch (Exception ex) { Logger.LogException(LogLevel.Error, ex, "Error in NarrativeToolVM.Delete()"); }
     }
     
 
@@ -147,7 +155,7 @@ public class NarrativeToolVM: ObservableRecipient
     /// </summary>
     private void MakeSection()
     {
-        if (ShellVM.DataSource == null || ShellVM.DataSource.Count > 0)
+        if (ShellVM.DataSource == null || ShellVM.DataSource.Count < 0)
         {
             Logger.Log(LogLevel.Warn, "DataSource is empty or null, not adding section");
             return;

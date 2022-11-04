@@ -1383,43 +1383,51 @@ namespace StoryBuilder.ViewModels
         /// <param name="explorerViewOnly">This tool can only run in StoryExplorer view</param>
         /// <param name="nodeRequired">A node (right-clicked or clicked) must be present</param>
         /// <returns>true if prerequisites are met</returns>
-        private bool VerifyToolUse(bool explorerViewOnly, bool nodeRequired)
+        private bool VerifyToolUse(bool explorerViewOnly, bool nodeRequired, bool CheckOutlineIsOpen = true)
         {
-            if (explorerViewOnly && !IsExplorerView())
+            try
             {
-                Messenger.Send(new StatusChangedMessage(new($"This tool can only be run in Story Explorer view", LogLevel.Warn)));
-                return false;
-            }
 
-            if (nodeRequired)
-            {
-                if (StoryModel == null)
+                if (explorerViewOnly && !IsExplorerView())
                 {
-                    Messenger.Send(new StatusChangedMessage(new($"Open or create an outline first", LogLevel.Warn)));
-                    return false;
-                }
-                if (CurrentViewType == StoryViewType.ExplorerView
-                    & StoryModel.ExplorerView[0].Children.Count == 0) 
-                {
-                    Messenger.Send(new StatusChangedMessage(new($"Open or create an outline first", LogLevel.Warn)));
-                    return false;
-                }
-                if (CurrentViewType == StoryViewType.NarratorView
-                    & StoryModel.NarratorView[0].Children.Count == 0)
-                {
-                    Messenger.Send(new StatusChangedMessage(new($"Open or create an outline first", LogLevel.Warn)));
-                    return false;
-                }
-                if (RightTappedNode == null)
-                    RightTappedNode = CurrentNode;
-                if (RightTappedNode == null)
-                {
-                    Messenger.Send(new StatusChangedMessage(new($"You need to select a node first", LogLevel.Warn)));
+                    Messenger.Send(new StatusChangedMessage(new($"This tool can only be run in Story Explorer view", LogLevel.Warn)));
                     return false;
                 }
 
+                if (CheckOutlineIsOpen)
+                {
+                    if (StoryModel == null)
+                    {
+                        Messenger.Send(new StatusChangedMessage(new($"Open or create an outline first", LogLevel.Warn)));
+                        return false;
+                    }
+                    if (CurrentViewType == StoryViewType.ExplorerView && StoryModel.ExplorerView.Count == 0)
+                    {
+                        Messenger.Send(new StatusChangedMessage(new($"Open or create an outline first", LogLevel.Warn)));
+                        return false;
+                    }
+                    if (CurrentViewType == StoryViewType.NarratorView && StoryModel.NarratorView.Count == 0)
+                    {
+                        Messenger.Send(new StatusChangedMessage(new($"Open or create an outline first", LogLevel.Warn)));
+                        return false;
+                    }
+                }
+                if (nodeRequired)
+                {
+                    if (RightTappedNode == null) { RightTappedNode = CurrentNode; }
+                    if (RightTappedNode == null)
+                    {
+                        Messenger.Send(new StatusChangedMessage(new($"You need to select a node first", LogLevel.Warn)));
+                        return false;
+                    }
+                }
+                return true;
             }
-            return true;    
+            catch (Exception ex)
+            {
+                Logger.LogException(LogLevel.Error, ex, "Error in ShellVM.VerifyToolUse()");
+                return false; // Return false to prevent any issues.
+            }
         }
 
         #endregion  
@@ -2279,12 +2287,17 @@ namespace StoryBuilder.ViewModels
 
         private async Task OpenNarrativeTool()
         {
-            ContentDialog dialog = new();
-            dialog.XamlRoot = GlobalData.XamlRoot;
-            dialog.Title = "Narrative Editor";
-            dialog.PrimaryButtonText = "Done";
-            dialog.Content = new NarrativeTool();
-            ContentDialogResult result = await dialog.ShowAsync();
+            if (VerifyToolUse(false,false))
+            {
+                ContentDialog dialog = new()
+                {
+                    XamlRoot = GlobalData.XamlRoot,
+                    Title = "Narrative Editor",
+                    PrimaryButtonText = "Done",
+                    Content = new NarrativeTool()
+                };
+                await dialog.ShowAsync();
+            }
         }
 
         public void SearchNodes()
