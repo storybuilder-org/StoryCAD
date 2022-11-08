@@ -67,7 +67,7 @@
 		<None Remove="Views\NotesPage.xaml" />
 		<None Remove="Views\PreferencesInitialization.xaml" />
 		<None Remove="Views\WebPage.xaml" />
-	</ItemGroup>
+	</ItemGroup>	
 
 	<ItemGroup>
 		<ProjectReference Include="..\StoryBuilderLib\StoryBuilderLib.csproj" />
