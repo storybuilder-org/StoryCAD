@@ -253,6 +253,7 @@ public partial class App : Application
 
         _log.Log(LogLevel.Debug, $"Layout: Window size width={mainWindow.Width} height={mainWindow.Height}");
         _log.Log(LogLevel.Info, "StoryBuilder App loaded and launched");
+
     }
 
     private async Task ProcessInstallationFiles()

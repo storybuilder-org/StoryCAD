@@ -79,7 +79,7 @@ public class LogService : ILogService
                                                                + Package.Current.Id.Version.Minor + "."
                                                                + Package.Current.Id.Version.Revision;
                 
-                try     { msg.User = GlobalData.Preferences.Name + $"({GlobalData.Preferences.Email})"; }
+                try { msg.User = GlobalData.Preferences.Name + $"({GlobalData.Preferences.Email})"; }
                 catch (Exception e) { msg.User = $"There was an error attempting to obtain user information Error: {e.Message}"; }
 
                 try { msg.Source = stackTraceHelper; } 
@@ -87,11 +87,11 @@ public class LogService : ILogService
                 
                 try
                 {
-                    msg.Version = Package.Current.Id.Version.Major + "." + Package.Current.Id.Version.Minor + "."
-                                + Package.Current.Id.Version.Build + " Build " + Package.Current.Id.Version.Revision;
+                    msg.Version = Package.Current.Id.Version.Major + "."
+                                                                   + Package.Current.Id.Version.Minor + "."
+                                                                   + Package.Current.Id.Version.Build + " Build " + Package.Current.Id.Version.Revision;
                 }
                 catch (Exception e) { msg.Version = $"There was an error trying to obtain version information Error: {e.Message}"; }
-
 
                 try
                 {
