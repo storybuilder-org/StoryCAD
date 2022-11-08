@@ -60,7 +60,7 @@ public class MasterPlotsViewModel : ObservableRecipient
 
         MasterNames.Sort();
         MasterPlotNames = new ObservableCollection<string>();
-        foreach (var name in MasterNames) { MasterPlotNames.Add(name); }
+        foreach (string name in MasterNames) { MasterPlotNames.Add(name); }
         MasterPlotName = GlobalData.MasterPlotsSource[0].MasterPlotName;
     }
 

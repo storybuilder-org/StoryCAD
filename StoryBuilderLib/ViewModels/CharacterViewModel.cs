@@ -843,7 +843,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable
                 if (VM.InverseRelationship && !string.IsNullOrWhiteSpace(VM.InverseRelationType))
                 {
                     bool _MakeChar = true;
-                    foreach (var Relation in (VM.SelectedPartner as CharacterModel).RelationshipList)
+                    foreach (RelationshipModel Relation in (VM.SelectedPartner as CharacterModel).RelationshipList)
                     {
                         if (Relation.Partner == VM.Member)
                         {

@@ -552,7 +552,7 @@ public class SceneViewModel : ObservableRecipient, INavigable
         string viewpoint = overview?.Viewpoint != null ? overview.Viewpoint : string.Empty;
         if (!viewpoint.Equals(string.Empty))
             viewpointText = "Story viewpoint = " + viewpoint;
-        var viewpointChar = overview?.ViewpointCharacter != null ? overview.ViewpointCharacter : string.Empty;
+        string viewpointChar = overview?.ViewpointCharacter != null ? overview.ViewpointCharacter : string.Empty;
         if (!viewpointChar.Equals(string.Empty))
         {
             if (Guid.TryParse(viewpointChar, out Guid guid))
@@ -560,7 +560,7 @@ public class SceneViewModel : ObservableRecipient, INavigable
             else
                 viewpointName = "Story viewpoint character not found";
         }
-        var tip = new StringBuilder();
+        StringBuilder tip = new StringBuilder();
         tip.AppendLine(string.Empty);
         tip.AppendLine(viewpointText);
         tip.AppendLine(viewpointName);

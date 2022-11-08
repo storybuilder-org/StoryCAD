@@ -187,14 +187,14 @@ public class ReportFormatter
     {
         CharacterModel character = (CharacterModel)element;
         RtfDocument doc = new(string.Empty);
-        foreach (var rel in character.RelationshipList)
+        foreach (RelationshipModel rel in character.RelationshipList)
         {
             foreach (string line in _templates["Character Relationship Description"])
             {
                 StringBuilder sb = new(line);
                 if (rel.Partner == null)
                 {
-                    foreach (var VARIABLE in Ioc.Default.GetService<ShellViewModel>().StoryModel.StoryElements.Characters)
+                    foreach (StoryElement VARIABLE in Ioc.Default.GetService<ShellViewModel>().StoryModel.StoryElements.Characters)
                     {
                         if (VARIABLE.Uuid.Equals(Guid.Parse(rel.PartnerUuid)))
                         {
@@ -323,7 +323,7 @@ public class ReportFormatter
             sb.Replace("@Stability", character.Stability);
             //Outer Traits section
             string traits = "";
-            foreach (var trait in character.TraitList)
+            foreach (string trait in character.TraitList)
             {
                 traits += trait + "\n";
             }
@@ -450,8 +450,7 @@ public class ReportFormatter
             sb.Replace("@Title", scene.Name);
             sb.Replace("@Date", scene.Date);
             sb.Replace("@Time", scene.Time);
-            if (line.Contains("@ViewpointCharacter")) 
-            sb.Replace("@ViewpointCharacter", vpCharacterName);
+            if (line.Contains("@ViewpointCharacter")) {sb.Replace("@ViewpointCharacter", vpCharacterName);}
             sb.Replace("@Setting", settingName);
             sb.Replace("@SceneType", scene.SceneType);
             
@@ -573,7 +572,7 @@ public class ReportFormatter
             {
                 foreach (StoryElement element in _model.StoryElements)
                 {
-                                        if (element.Type == StoryItemType.Web)
+                    if (element.Type == StoryItemType.Web)
                     {
                         WebModel scene = (WebModel)element;
                         StringBuilder sb = new(line);

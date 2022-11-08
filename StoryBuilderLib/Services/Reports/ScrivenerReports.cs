@@ -281,7 +281,7 @@ namespace StoryBuilder.Services.Reports
                     {
                         StorageFolder di = await _scrivener.GetSubFolder(node.Uuid);
                         // There should be only one text file in the folder
-                        var files = await di.GetFilesAsync();
+                        IReadOnlyList<StorageFile> files = await di.GetFilesAsync();
                         if (files.Count != 1)
                             return;
                         // It should be a content.rtf file
@@ -319,7 +319,7 @@ namespace StoryBuilder.Services.Reports
                                 string header = string.Format("SCRIVENER NOTES FOR '{0} {1}' as of {2}",
                                     node.Parent.Title, node.Title, node.Modified);
                                 _stbNotes.AppendLine(header);
-                                var text = await _scrivener.ReadRtfText(fi.Path);
+                                string text = await _scrivener.ReadRtfText(fi.Path);
                                 _stbNotes.AppendLine(text);
                             }
                     }

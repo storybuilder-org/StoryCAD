@@ -1005,7 +1005,7 @@ namespace StoryBuilder.ViewModels
                 };
                 return await replaceDialog.ShowAsync() == ContentDialogResult.Primary;
             }
-            else { return true; }
+            return true;
         }
 
         private async void CloseFile()
@@ -1855,7 +1855,7 @@ namespace StoryBuilder.ViewModels
                 _contentDialog.Width = 500;
                 _contentDialog.PrimaryButtonText = "Confirm";
                 _contentDialog.SecondaryButtonText = "Cancel";
-                var result = await _contentDialog.ShowAsync();
+                ContentDialogResult result = await _contentDialog.ShowAsync();
 
                 if (result == ContentDialogResult.Secondary) { delete = false; }
             }
@@ -1868,8 +1868,8 @@ namespace StoryBuilder.ViewModels
                     Ioc.Default.GetRequiredService<DeletionService>().SearchStoryElement(node, RightTappedNode.Uuid, StoryModel, true);
                 }
 
-                if (CurrentView.ToString().Contains("ExplorerView")) { RightTappedNode.Delete(Models.StoryViewType.ExplorerView); }
-                else { RightTappedNode.Delete(Models.StoryViewType.NarratorView); }
+                if (CurrentView.Contains("ExplorerView")) { RightTappedNode.Delete(StoryViewType.ExplorerView); }
+                else { RightTappedNode.Delete(StoryViewType.NarratorView); }
             }
         }
 

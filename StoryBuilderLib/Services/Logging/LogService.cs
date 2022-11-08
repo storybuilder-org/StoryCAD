@@ -71,7 +71,7 @@ public class LogService : ILogService
         try
         {
             // create elmah.io target
-            var elmahIoTarget = new ElmahIoTarget();
+            ElmahIoTarget elmahIoTarget = new ElmahIoTarget();
 
             elmahIoTarget.OnMessage += msg =>
             {
@@ -108,7 +108,7 @@ public class LogService : ILogService
                     int ln = 0;
                     if (LogString.Split("\n").Length > 50)
                     {
-                        foreach (var line in LogString.Split("\n").TakeLast(50))
+                        foreach (string line in LogString.Split("\n").TakeLast(50))
                         {
                             msg.Data.Add(new(key: "Line " + ln, value: line));
                             ln++;
@@ -116,7 +116,7 @@ public class LogService : ILogService
                     }
                     else
                     {
-                        foreach (var line in LogString.Split("\n").TakeLast(50))
+                        foreach (string line in LogString.Split("\n").TakeLast(50))
                         {
                             msg.Data.Add(new(key: "Line ", value: line));
                             ln++;

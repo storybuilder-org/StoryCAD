@@ -80,7 +80,7 @@ namespace StoryBuilder.Services.Backend
                         log.Log(LogLevel.Info,
                             "Version mismatch: " + GlobalData.Version + " != " + GlobalData.Preferences.Version);
                         GlobalData.LoadedWithVersionChange = true;
-                        var preferences = GlobalData.Preferences;
+                        PreferencesModel preferences = GlobalData.Preferences;
                         // Update Preferences
                         preferences.Version = GlobalData.Version;
                         PreferencesIo prefIO = new(preferences, GlobalData.RootDirectory);
@@ -147,7 +147,7 @@ namespace StoryBuilder.Services.Backend
         {
             log.Log(LogLevel.Info, "Posting version data to parse");
 
-            var preferences = GlobalData.Preferences;
+            PreferencesModel preferences = GlobalData.Preferences;
             MySqlIo sql = Ioc.Default.GetService<MySqlIo>();
 
             // Get a connection to the database

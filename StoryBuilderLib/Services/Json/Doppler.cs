@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -41,18 +42,18 @@ namespace StoryBuilder.Services.Json
         {
             try
             {
-                var token = EnvReader.GetStringValue("DOPPLER_TOKEN");
-                var basicAuthHeaderValue = Convert.ToBase64String(Encoding.Default.GetBytes(token + ":"));
+                string token = EnvReader.GetStringValue("DOPPLER_TOKEN");
+                string basicAuthHeaderValue = Convert.ToBase64String(Encoding.Default.GetBytes(token + ":"));
 
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", basicAuthHeaderValue);
-                var streamTask = client.GetStreamAsync("https://api.doppler.com/v3/configs/config/secrets/download?format=json");
-                var secrets = await JsonSerializer.DeserializeAsync<Doppler>(await streamTask);
+                Task<Stream> streamTask = client.GetStreamAsync("https://api.doppler.com/v3/configs/config/secrets/download?format=json");
+                Doppler secrets = await JsonSerializer.DeserializeAsync<Doppler>(await streamTask);
                 GlobalData.DopplerConnection = true;
                 return secrets;
             }
             catch (Exception ex)
             {
-                var log = Ioc.Default.GetService<LogService>();
+                LogService log = Ioc.Default.GetService<LogService>();
                 log.LogException(LogLevel.Warn, ex, ex.Message);
                 return this;
             }

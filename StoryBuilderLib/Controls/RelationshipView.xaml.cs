@@ -44,7 +44,7 @@ public sealed partial class RelationshipView
             //First identify the relationship.
             Logger.Log(LogLevel.Info, "Starting to remove relationship");
             RelationshipModel characterToDelete = null;
-            foreach (var character in CharVm.CharacterRelationships)
+            foreach (RelationshipModel character in CharVm.CharacterRelationships)
             {   //UUID is stored in tag as a cheeky hack to identify the relationship.
                 if (character.PartnerUuid.Equals((sender as SymbolIcon).Tag)) //Identify via tag.
                 {
@@ -62,7 +62,7 @@ public sealed partial class RelationshipView
                 PrimaryButtonText = "Yes",
                 SecondaryButtonText = "No"
             };
-            var result = await CD.ShowAsync();
+            ContentDialogResult result = await CD.ShowAsync();
             Logger.Log(LogLevel.Info, $"Dialog Result: {result}");
 
             if (result == ContentDialogResult.Primary) //If positive, then delete.
