@@ -140,7 +140,7 @@ public sealed partial class PreferencesDialog : Page
 
     private void ThrowException(object sender, RoutedEventArgs e)
     {
-        throw new NotImplementedException();
+        throw new Exception("This is a test error, don't do anything!");
     }
 
     private void SetInitToFalse(object sender, RoutedEventArgs e)
