@@ -24,7 +24,7 @@ public class InstallationService
     public async Task InstallFiles()
     {
         await DeleteFiles();
-        foreach (var InstallerFile in Assembly.GetExecutingAssembly().GetManifestResourceNames())
+        foreach (string InstallerFile in Assembly.GetExecutingAssembly().GetManifestResourceNames())
         {
             try
             {

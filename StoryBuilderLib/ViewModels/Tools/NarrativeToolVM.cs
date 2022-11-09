@@ -100,7 +100,7 @@ public class NarrativeToolVM: ObservableRecipient
             else if (SelectedNode.Type is StoryItemType.Folder or StoryItemType.Section) //If its a folder then recurse and add all unused scenes to the narrative view.
             {
                 Logger.Log(LogLevel.Info, "Item is a folder/section, getting flattened list of all children.");
-                foreach (var item in RecursiveCheck(SelectedNode.Children))
+                foreach (StoryNodeItem item in RecursiveCheck(SelectedNode.Children))
                 {
                     if (item.Type == StoryItemType.Scene && !RecursiveCheck(ShellVM.StoryModel.NarratorView[0].Children).Any(StoryNodeItem => StoryNodeItem.Uuid == item.Uuid))
                     {
@@ -129,7 +129,7 @@ public class NarrativeToolVM: ObservableRecipient
         List<StoryNodeItem> NewList = new();
         try
         {
-            foreach (var VARIABLE in List)
+            foreach (StoryNodeItem VARIABLE in List)
             {
                 NewList.Add(VARIABLE);
                 NewList.AddRange(RecursiveCheck(VARIABLE.Children));
@@ -146,7 +146,7 @@ public class NarrativeToolVM: ObservableRecipient
     private void CopyAllUnused()
     {
         //Recurses the children of NarratorView View.
-        try { foreach (var item in ShellVM.StoryModel.ExplorerView[0].Children) { RecurseCopyUnused(item); } }
+        try { foreach (StoryNodeItem item in ShellVM.StoryModel.ExplorerView[0].Children) { RecurseCopyUnused(item); } }
         catch (Exception e) { Logger.LogException(LogLevel.Error, e, "Error in recursive check"); }
     }
 
@@ -183,7 +183,7 @@ public class NarrativeToolVM: ObservableRecipient
                 }
             }
 
-            foreach (var child in Item.Children) { RecurseCopyUnused(child); }  
+            foreach (StoryNodeItem child in Item.Children) { RecurseCopyUnused(child); }  
         }
         catch (Exception ex)
         {

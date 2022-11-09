@@ -14,7 +14,7 @@ public sealed partial class RecentFiles : Page
         UnifiedMenuVM = vm;
 
         string[] RecentFiles = { GlobalData.Preferences.LastFile1 , GlobalData.Preferences.LastFile2, GlobalData.Preferences.LastFile3, GlobalData.Preferences.LastFile4, GlobalData.Preferences.LastFile5};
-        foreach (var File in RecentFiles)
+        foreach (string File in RecentFiles)
         {
             if (!string.IsNullOrWhiteSpace(File) )
             {

@@ -28,7 +28,7 @@ namespace StoryBuilder.Services.Dialogs.Tools
         private void Move(object sender, RoutedEventArgs e)
         {
             if (ToolVM.SelectedNode == null) { return; }
-            var old = ShellVM.CurrentNode;
+            StoryNodeItem old = ShellVM.CurrentNode;
             ShellVM.CurrentNode = ToolVM.SelectedNode;
             if ((sender as Button).Tag.ToString().Contains("UP")) { ShellVM.MoveUpCommand.Execute(null); } //Move up
             else { ShellVM.MoveDownCommand.Execute(null); } //Move down

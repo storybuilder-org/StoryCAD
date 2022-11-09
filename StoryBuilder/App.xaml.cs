@@ -73,7 +73,7 @@ public partial class App : Application
             DotEnv.Load(options);
 
             //Register Syncfusion license
-            var token = EnvReader.GetStringValue("SYNCFUSION_TOKEN");
+            string token = EnvReader.GetStringValue("SYNCFUSION_TOKEN");
             SyncfusionLicenseProvider.RegisterLicense(token);
         }
         catch { GlobalData.ShowDotEnvWarning = true; }
@@ -183,8 +183,8 @@ public partial class App : Application
         // Obtain keys if defined
         try
         {
-            var doppler = new Doppler();
-            var keys = await doppler.FetchSecretsAsync();
+            Doppler doppler = new Doppler();
+            Doppler keys = await doppler.FetchSecretsAsync();
             BackendService backend = Ioc.Default.GetService<BackendService>();
             await backend.SetConnectionString(keys);
             _log.SetElmahTokens(keys);
