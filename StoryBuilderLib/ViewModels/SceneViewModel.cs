@@ -27,7 +27,6 @@ public class SceneViewModel : ObservableRecipient, INavigable
     private StatusMessage _smsg;
     private bool _changeable; // process property changes for this story element
     private bool _changed;    // this story element has changed
-    private StoryModel _storyModel;
     private CastViewType _castViewType;
 
     #endregion
@@ -359,7 +358,10 @@ public class SceneViewModel : ObservableRecipient, INavigable
         Time = Model.Time;
         Setting = Model.Setting;
         SceneType = Model.SceneType;
-        // Set up the cast list/character selectionlist code
+        // The Scene tab's cast list switches between either a list of
+        // selected cast members or all Characters in the StoryModel.
+        // The current choice is CastSource.
+        // Initialize these lists for this scene.e
         CastMembers.Clear();
         foreach (string member in Model.CastMembers)
         {
@@ -370,6 +372,7 @@ public class SceneViewModel : ObservableRecipient, INavigable
                 //element.IsSelected = true;
             }
         }
+        CharacterList = ShellViewModel.ShellInstance.StoryModel.StoryElements.Characters;
         InitializeCharacterList();
         if (CastMembers.Count > 0)
         {
@@ -673,7 +676,6 @@ public class SceneViewModel : ObservableRecipient, INavigable
         _logger = Ioc.Default.GetService<LogService>();
         _wtr = Ioc.Default.GetService<StoryWriter>();
         _rdr = Ioc.Default.GetService<StoryReader>();
-        _storyModel = ShellViewModel.GetModel();
 
         Date = string.Empty;
         Time = string.Empty;
@@ -714,7 +716,8 @@ public class SceneViewModel : ObservableRecipient, INavigable
         ValueExchangeList = lists["ValueExchange"];
 
         CastMembers = new ObservableCollection<StoryElement>();
-        CharacterList = _storyModel.StoryElements.Characters;
+
+        CharacterList = ShellViewModel.ShellInstance.StoryModel.StoryElements.Characters;
         _castViewType = CastViewType.CharacterListView;
         CastSource = CharacterList;
 
