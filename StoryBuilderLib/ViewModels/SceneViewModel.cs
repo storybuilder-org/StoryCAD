@@ -381,7 +381,6 @@ public class SceneViewModel : ObservableRecipient, INavigable
             if (element != null)
             {
                 CastMembers.Add(StringToStoryElement(member));
-                //element.IsSelected = true;
             }
         }
         CharacterList = ShellViewModel.ShellInstance.StoryModel.StoryElements.Characters;
@@ -502,11 +501,13 @@ public class SceneViewModel : ObservableRecipient, INavigable
         if (ShowAllMembers)
         {
             CastSource = CastMembers;
+            ShowAllMembers = false;
             Messenger.Send(new StatusChangedMessage(new($"Add / Remove Cast Members", LogLevel.Info, true)));
         }
         else
         {
             CastSource = CharacterList;
+            ShowAllMembers = true;
             Messenger.Send(new StatusChangedMessage(new($"Show Selected Cast Members", LogLevel.Info, true)));
         }
     }

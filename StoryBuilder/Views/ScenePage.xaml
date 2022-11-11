@@ -70,7 +70,10 @@
                         <StackPanel Orientation="Vertical">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="Scene Cast"/>
-                                <ToggleSwitch HorizontalAlignment="Center" Width="200" Header="Show all members" Margin="50,0,0,0" IsOn="{x:Bind  SceneVm.ShowAllMembers, Mode=TwoWay}" Toggled="{x:Bind SceneVm.SwitchCastView, Mode=OneWay}" >
+                                <ToggleSwitch HorizontalAlignment="Center" Width="200" Header="Cast Display" Margin="50,0,0,0" 
+                                              IsOn="{x:Bind  SceneVm.ShowAllMembers, Mode=TwoWay}" 
+                                              OffContent="Cast Members" OnContent="AllCharacters"
+                                              Toggled="{x:Bind SceneVm.SwitchCastView, Mode=OneWay}" >
                                     <ToolTipService.ToolTip>
                                         <ToolTip Content="Show or Add/Remove Cast Members" />
                                     </ToolTipService.ToolTip>
