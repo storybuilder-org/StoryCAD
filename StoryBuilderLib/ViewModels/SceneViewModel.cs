@@ -27,7 +27,6 @@ public class SceneViewModel : ObservableRecipient, INavigable
     private StatusMessage _smsg;
     private bool _changeable; // process property changes for this story element
     private bool _changed;    // this story element has changed
-    private CastViewType _castViewType;
 
     #endregion
 
@@ -58,6 +57,12 @@ public class SceneViewModel : ObservableRecipient, INavigable
         }
     }
 
+    private bool _ShowAllMembers;
+    public bool ShowAllMembers
+    {
+        get => _ShowAllMembers;
+        set => SetProperty(ref _ShowAllMembers, value);
+    }
     //  Scene general data
 
     private string _description;
@@ -309,6 +314,13 @@ public class SceneViewModel : ObservableRecipient, INavigable
         set => SetProperty(ref _characterList, value);
     }
 
+    private string _castButtonText;
+    public string CastButtonText
+    {
+        get => _castButtonText;
+        set => SetProperty(ref _castButtonText, value);
+    }
+
     private ObservableCollection<StoryElement> _castSource;
     public ObservableCollection<StoryElement> CastSource
     {
@@ -377,12 +389,10 @@ public class SceneViewModel : ObservableRecipient, INavigable
         if (CastMembers.Count > 0)
         {
             CastSource = CastMembers;
-            _castViewType = CastViewType.CastListView;
         }
         else
         {
             CastSource = CharacterList;
-            _castViewType = CastViewType.CharacterListView;
         }
 
         // Resume initialization
@@ -489,20 +499,15 @@ public class SceneViewModel : ObservableRecipient, INavigable
     /// </summary>
     public void SwitchCastView()
     {
-        switch (_castViewType)
+        if (ShowAllMembers)
         {
-            case CastViewType.CastListView:
-                CastSource = CharacterList;
-                _castViewType = CastViewType.CharacterListView;
-                Messenger.Send(new StatusChangedMessage(new($"Show Selected Cast Members",
-                    LogLevel.Info, true)));
-                break;
-            case CastViewType.CharacterListView:
-                CastSource = CastMembers;
-                _castViewType = CastViewType.CastListView;
-                Messenger.Send(new StatusChangedMessage(new($"Add / Remove Cast Members",
-                    LogLevel.Info, true)));
-                break;
+            CastSource = CastMembers;
+            Messenger.Send(new StatusChangedMessage(new($"Add / Remove Cast Members", LogLevel.Info, true)));
+        }
+        else
+        {
+            CastSource = CharacterList;
+            Messenger.Send(new StatusChangedMessage(new($"Show Selected Cast Members", LogLevel.Info, true)));
         }
     }
 
@@ -718,8 +723,8 @@ public class SceneViewModel : ObservableRecipient, INavigable
         CastMembers = new ObservableCollection<StoryElement>();
 
         CharacterList = ShellViewModel.ShellInstance.StoryModel.StoryElements.Characters;
-        _castViewType = CastViewType.CharacterListView;
-        CastSource = CharacterList;
+        ShowAllMembers = true;
+        SwitchCastView();
 
         SwitchCastViewCommand = new RelayCommand(SwitchCastView, () => true);
 

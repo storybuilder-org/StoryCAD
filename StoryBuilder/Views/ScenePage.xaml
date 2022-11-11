@@ -69,14 +69,12 @@
                     <Grid Grid.Row="2" HorizontalAlignment="Left" >
                         <StackPanel Orientation="Vertical">
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="Scene Cast" Width="150"/>
-                                <ToggleButton FontFamily="Segoe MDL2 Assets" Content="&#xE133;" 
-                                              HorizontalAlignment="Right"
-                                              Command="{x:Bind SceneVm.SwitchCastViewCommand, Mode=OneWay}" >
+                                <TextBlock Text="Scene Cast"/>
+                                <ToggleSwitch HorizontalAlignment="Center" Width="200" Header="Show all members" Margin="50,0,0,0" IsOn="{x:Bind  SceneVm.ShowAllMembers, Mode=TwoWay}" Toggled="{x:Bind SceneVm.SwitchCastView, Mode=OneWay}" >
                                     <ToolTipService.ToolTip>
                                         <ToolTip Content="Show or Add/Remove Cast Members" />
                                     </ToolTipService.ToolTip>
-                                </ToggleButton>
+                                </ToggleSwitch>
                             </StackPanel>
                             <ScrollViewer Height="125" >
                                 <ListView MinWidth="300" x:Name="SceneCast"
