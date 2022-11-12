@@ -27,7 +27,10 @@ public class SceneViewModel : ObservableRecipient, INavigable
     private StatusMessage _smsg;
     private bool _changeable; // process property changes for this story element
     private bool _changed;    // this story element has changed
-
+    private bool _toggleEnabled = false;
+    private const bool _showCastMembers = false;
+    private const bool _showAllCharacters = true;
+    
     #endregion
 
     #region Properties
@@ -57,11 +60,11 @@ public class SceneViewModel : ObservableRecipient, INavigable
         }
     }
 
-    private bool _ShowAllMembers;
-    public bool ShowAllMembers
-    {
-        get => _ShowAllMembers;
-        set => SetProperty(ref _ShowAllMembers, value);
+    private bool _showCastSelection;
+    public bool ShowCastSelection
+    {    
+        get => _showCastSelection;
+        set => SetProperty(ref _showCastSelection, value);
     }
     //  Scene general data
 
@@ -114,26 +117,6 @@ public class SceneViewModel : ObservableRecipient, INavigable
     {
         get => _sceneType;
         set => SetProperty(ref _sceneType, value);
-    }
-
-    private int _existingCastIndex;
-    public int ExistingCastIndex
-    {
-        get => _existingCastIndex;
-        set
-        {
-            SetProperty(ref _existingCastIndex, value);
-            if (_existingCastIndex == -1)
-                return;
-            Messenger.Send(new StatusChangedMessage(new($"Existing cast member {CastMembers[value].Name} selected", LogLevel.Info)));
-        }
-    }
-
-    private string _newCastMember;
-    public string NewCastMember
-    {
-        get => _newCastMember;
-        set => SetProperty(ref _newCastMember, value);
     }
 
     private string _remarks;
@@ -362,6 +345,7 @@ public class SceneViewModel : ObservableRecipient, INavigable
     {
         _changeable = false;
         _changed = false;
+        _toggleEnabled = false;
 
         Uuid = Model.Uuid;
         Name = Model.Name;
@@ -388,13 +372,14 @@ public class SceneViewModel : ObservableRecipient, INavigable
         if (CastMembers.Count > 0)
         {
             CastSource = CastMembers;
+            ShowCastSelection = _showCastMembers;
         }
         else
         {
             CastSource = CharacterList;
+            ShowCastSelection = _showAllCharacters;
         }
 
-        // Resume initialization
         ViewpointCharacter = Model.ViewpointCharacter;
 
         // The ScenePurpose multi-select SfComboBox
@@ -427,9 +412,9 @@ public class SceneViewModel : ObservableRecipient, INavigable
         Realization = Model.Realization;
         Review = Model.Review;
         Notes = Model.Notes;
-        NewCastMember = string.Empty;
         GetOverviewViewpoint();
 
+        _toggleEnabled = true;
         _changeable = true;
     }
 
@@ -498,17 +483,20 @@ public class SceneViewModel : ObservableRecipient, INavigable
     /// </summary>
     public void SwitchCastView()
     {
-        if (ShowAllMembers)
+        if (_toggleEnabled)
         {
-            CastSource = CastMembers;
-            ShowAllMembers = false;
-            Messenger.Send(new StatusChangedMessage(new($"Add / Remove Cast Members", LogLevel.Info, true)));
-        }
-        else
-        {
-            CastSource = CharacterList;
-            ShowAllMembers = true;
-            Messenger.Send(new StatusChangedMessage(new($"Show Selected Cast Members", LogLevel.Info, true)));
+            if (ShowCastSelection == _showAllCharacters) 
+            {
+                CastSource = CastMembers;
+                //ShowCastSelection = _showCastMembers;
+                Messenger.Send(new StatusChangedMessage(new($"Add / Remove Cast Members", LogLevel.Info, true)));
+            }
+            else if (ShowCastSelection == _showCastMembers)
+            {
+                CastSource = CharacterList;
+                //ShowCastSelection = _showAllCharacters;
+                Messenger.Send(new StatusChangedMessage(new($"Show Selected Cast Members", LogLevel.Info, true)));
+            }
         }
     }
 
@@ -721,12 +709,12 @@ public class SceneViewModel : ObservableRecipient, INavigable
         ViewpointList = lists["Viewpoint"];
         ValueExchangeList = lists["ValueExchange"];
 
+        // Initialize cast member lists / display
         CastMembers = new ObservableCollection<StoryElement>();
-
         CharacterList = ShellViewModel.ShellInstance.StoryModel.StoryElements.Characters;
-        ShowAllMembers = true;
-        SwitchCastView();
-
+        CastSource = CharacterList;
+        _showCastSelection = _showAllCharacters;
+        
         SwitchCastViewCommand = new RelayCommand(SwitchCastView, () => true);
 
         PropertyChanged += OnPropertyChanged;
