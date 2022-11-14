@@ -14,7 +14,7 @@ public class InitVM : ObservableRecipient
     public InitVM()
     {
        _path = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "StoryBuilder", "Projects");
-       _Backuppath = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "StoryBuilder", "Backups");
+       _backupDir = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "StoryBuilder", "Backups");
     } 
 
     private string _errorMessage;
@@ -44,11 +44,11 @@ public class InitVM : ObservableRecipient
         set => SetProperty(ref _path, value);
     }
 
-    private string _Backuppath;
+    private string _backupDir;
     public string BackupPath
     {
-        get => _Backuppath;
-        set => SetProperty(ref _Backuppath, value);
+        get => _backupDir;
+        set => SetProperty(ref _backupDir, value);
     }
 
     private bool _errorlogging;
@@ -68,25 +68,27 @@ public class InitVM : ObservableRecipient
     public async void Save()
     {
         //Creates new preferences model and sets the values
-        PreferencesModel prf = new();
-        prf.Email = Email;
-        prf.ErrorCollectionConsent = ErrorLogging;
-        prf.Newsletter = News;
-        prf.ProjectDirectory = Path;
-        prf.BackupDirectory = BackupPath;
-        prf.Name = Name;
-        prf.PreferencesInitialized = true; //Makes sure this window isn't shown to the user again
+        PreferencesModel _prf = new()
+        {
+            Email = Email,
+            ErrorCollectionConsent = ErrorLogging,
+            Newsletter = News,
+            ProjectDirectory = Path,
+            BackupDirectory = BackupPath,
+            Name = Name,
+            PreferencesInitialized = true //Makes sure this window isn't shown to the user again
+        };
 
         //Create paths
         System.IO.Directory.CreateDirectory(Path);
         System.IO.Directory.CreateDirectory(BackupPath);
 
         //Updates the file, then rereads into memory.
-        PreferencesIo prfIO = new(prf, System.IO.Path.Combine(ApplicationData.Current.RoamingFolder.Path,"Storybuilder"));
-        await prfIO.UpdateFile();
-        PreferencesIo loader = new(GlobalData.Preferences, System.IO.Path.Combine(ApplicationData.Current.RoamingFolder.Path, "Storybuilder"));
-        await loader.UpdateModel();
-        BackendService backend = Ioc.Default.GetService<BackendService>();
-        if (!GlobalData.Preferences.RecordPreferencesStatus) { await backend.PostPreferences(GlobalData.Preferences); }
+        PreferencesIo _prfIo = new(_prf, System.IO.Path.Combine(ApplicationData.Current.RoamingFolder.Path,"Storybuilder"));
+        await _prfIo.UpdateFile();
+        PreferencesIo _loader = new(GlobalData.Preferences, System.IO.Path.Combine(ApplicationData.Current.RoamingFolder.Path, "Storybuilder"));
+        await _loader.UpdateModel();
+        BackendService _backend = Ioc.Default.GetRequiredService<BackendService>();
+        if (!GlobalData.Preferences.RecordPreferencesStatus) { await _backend.PostPreferences(GlobalData.Preferences); }
     }
 }

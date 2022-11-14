@@ -50,8 +50,7 @@ public sealed partial class Shell
         ShellVm.ShowHomePage();
         ShellVm.ShowConnectionStatus();        
         if (GlobalData.ShowDotEnvWarning) { await ShellVm.ShowDotEnvWarningAsync(); }
-        try { CoreWebView2Environment.GetAvailableBrowserVersionString(); }
-        catch { await ShellVm.ShowWebviewErrorAsync(); }
+        await Ioc.Default.GetRequiredService<WebViewModel>().CheckWebviewState(true);
         if (GlobalData.LoadedWithVersionChange ) { await ShellVm.ShowChangelog(); }
         await ShellVm.OpenUnifiedMenu();
     }

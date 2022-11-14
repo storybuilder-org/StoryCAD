@@ -41,7 +41,7 @@ public class DramaticSituationsViewModel : ObservableRecipient
         set
         {
             SetProperty(ref _situationName, value);
-            Situation = situations[value];
+            Situation = _situations[value];
         }
     }
 
@@ -110,7 +110,7 @@ public class DramaticSituationsViewModel : ObservableRecipient
 
     public ObservableCollection<string> SituationsSource;
 
-    private SortedDictionary<string, DramaticSituationModel> situations;
+    private SortedDictionary<string, DramaticSituationModel> _situations;
 
     #endregion
 
@@ -118,11 +118,11 @@ public class DramaticSituationsViewModel : ObservableRecipient
 
     public DramaticSituationsViewModel()
     {
-        situations = GlobalData.DramaticSituationsSource;
+        _situations = GlobalData.DramaticSituationsSource;
 
         SituationsSource = new ObservableCollection<string>();
-        foreach (string situation in situations.Keys)
-            SituationsSource.Add(situation);
+        foreach (string _situation in _situations.Keys)
+            SituationsSource.Add(_situation);
     }
     #endregion
 }

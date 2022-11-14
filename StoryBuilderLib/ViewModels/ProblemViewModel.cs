@@ -9,7 +9,6 @@ using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Data;
 using StoryBuilder.Controls;
-using StoryBuilder.DAL;
 using StoryBuilder.Models;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.Services.Messages;
@@ -49,8 +48,8 @@ public class ProblemViewModel : ObservableRecipient, INavigable
             if (_changeable && _name != value) // Name changed?
             {
                 _logger.Log(LogLevel.Info, $"Requesting Name change from {_name} to {value}");
-                NameChangeMessage msg = new(_name, value);
-                Messenger.Send(new NameChangedMessage(msg));
+                NameChangeMessage _msg = new(_name, value);
+                Messenger.Send(new NameChangedMessage(_msg));
             }
             SetProperty(ref _name, value);
         }
@@ -305,27 +304,29 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         _logger.Log(LogLevel.Info, "Displaying Conflict Finder tool dialog");
 
         //Creates and shows content
-        ContentDialog ConflictDialog = new();
-        ConflictDialog.Title = "Conflict builder";
-        ConflictDialog.XamlRoot = GlobalData.XamlRoot;
-        ConflictDialog.PrimaryButtonText = "Copy to Protagonist";
-        ConflictDialog.SecondaryButtonText = "Copy to Antagonist";
-        ConflictDialog.CloseButtonText = "Close";
-        Conflict selectedConflict = new();
-        ConflictDialog.Content = selectedConflict;
-        ContentDialogResult result = await ConflictDialog.ShowAsync();
+        ContentDialog _conflictDialog = new()
+        {
+            Title = "Conflict builder",
+            XamlRoot = GlobalData.XamlRoot,
+            PrimaryButtonText = "Copy to Protagonist",
+            SecondaryButtonText = "Copy to Antagonist",
+            CloseButtonText = "Close"
+        };
+        Conflict _selectedConflict = new();
+        _conflictDialog.Content = _selectedConflict;
+        ContentDialogResult _result = await _conflictDialog.ShowAsync();
 
-        if (selectedConflict.ExampleText == null) {selectedConflict.ExampleText = "";}
-        switch (result)
+        if (_selectedConflict.ExampleText == null) {_selectedConflict.ExampleText = "";}
+        switch (_result)
         {
             // Copy to Protagonist conflict
             case ContentDialogResult.Primary:
-                ProtConflict = selectedConflict.ExampleText;
+                ProtConflict = _selectedConflict.ExampleText;
                 _logger.Log(LogLevel.Info, "Conflict Finder finished (copied to protagonist)");
                 break;
             // Copy to Antagonist conflict
             case ContentDialogResult.Secondary:
-                AntagConflict = selectedConflict.ExampleText;
+                AntagConflict = _selectedConflict.ExampleText;
                 _logger.Log(LogLevel.Info, "Conflict Finder finished (copied to antagonist)");
                 break;
             default:
@@ -381,17 +382,17 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         Premise = string.Empty;
         Notes = string.Empty;
 
-        Dictionary<string, ObservableCollection<string>> lists = GlobalData.ListControlSource;
-        ProblemTypeList = lists["ProblemType"];
-        ConflictTypeList = lists["ConflictType"];
-        SubjectList = lists["ProblemSubject"];
-        ProblemSourceList = lists["ProblemSource"];
-        GoalList = lists["Goal"];
-        MotiveList = lists["Motive"];
-        ConflictList = lists["Conflict"];
-        OutcomeList = lists["Outcome"];
-        MethodList = lists["Method"];
-        ThemeList = lists["Theme"];
+        Dictionary<string, ObservableCollection<string>> _lists = GlobalData.ListControlSource;
+        ProblemTypeList = _lists["ProblemType"];
+        ConflictTypeList = _lists["ConflictType"];
+        SubjectList = _lists["ProblemSubject"];
+        ProblemSourceList = _lists["ProblemSource"];
+        GoalList = _lists["Goal"];
+        MotiveList = _lists["Motive"];
+        ConflictList = _lists["Conflict"];
+        OutcomeList = _lists["Outcome"];
+        MethodList = _lists["Method"];
+        ThemeList = _lists["Theme"];
 
         ConflictCommand = new RelayCommand(ConflictTool, () => true);
 

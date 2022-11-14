@@ -50,17 +50,17 @@ public class MasterPlotsViewModel : ObservableRecipient
 
     public MasterPlotsViewModel()
     {
-        List<string> MasterNames = new();
+        List<string> _masterNames = new();
         MasterPlots = new Dictionary<string, MasterPlotModel>();
-        foreach (MasterPlotModel plot in GlobalData.MasterPlotsSource)
+        foreach (MasterPlotModel _plot in GlobalData.MasterPlotsSource)
         {
-            MasterNames.Add(plot.MasterPlotName);
-            MasterPlots.Add(plot.MasterPlotName, plot);
+            _masterNames.Add(_plot.MasterPlotName);
+            MasterPlots.Add(_plot.MasterPlotName, _plot);
         }
 
-        MasterNames.Sort();
+        _masterNames.Sort();
         MasterPlotNames = new ObservableCollection<string>();
-        foreach (string name in MasterNames) { MasterPlotNames.Add(name); }
+        foreach (string _name in _masterNames) { MasterPlotNames.Add(_name); }
         MasterPlotName = GlobalData.MasterPlotsSource[0].MasterPlotName;
     }
 

@@ -8,61 +8,60 @@ using StoryBuilder.DAL;
 using StoryBuilder.Models;
 using StoryBuilder.Models.Tools;
 using StoryBuilder.Services.Backend;
-using System;
 
 namespace StoryBuilder.ViewModels.Tools;
 
 public class PreferencesViewModel : ObservableRecipient
 {
-    public bool init = true;
-    private string _backupdir;
+    public bool Init = true;
+    private string _backupDir;
     public string BackupDir
     {
-        get => _backupdir;
-        set => SetProperty(ref _backupdir, value);
+        get => _backupDir;
+        set => SetProperty(ref _backupDir, value);
     }
 
-    private string _Name;
+    private string _name;
     public string Name
     {
-        get => _Name;
-        set => _Name = value;
+        get => _name;
+        set => _name = value;
     }
-    private string _Email;
+    private string _email;
     public string Email
     {
-        get => _Email;
-        set => _Email = value;
+        get => _email;
+        set => _email = value;
     }
-    private bool _ErrorConsent;
+    private bool _errorConsent;
     public bool ErrorConsent
     {
-        get => _ErrorConsent;
-        set => _ErrorConsent = value;
+        get => _errorConsent;
+        set => _errorConsent = value;
     }
-    private bool _NewsConsent;
+    private bool _newsConsent;
     public bool NewsConsent
     {
-        get => _NewsConsent;
-        set => _NewsConsent = value;
+        get => _newsConsent;
+        set => _newsConsent = value;
     }
-    private bool _Backup;
+    private bool _backup;
     public bool Backup
     {
-        get => _Backup;
-        set => _Backup = value;
+        get => _backup;
+        set => _backup = value;
     }
-    private int _BackupInterval;
+    private int _backupInterval;
     public int BackupInterval
     {
-        get => _BackupInterval;
-        set => _BackupInterval = value;
+        get => _backupInterval;
+        set => _backupInterval = value;
     }
-    private string _ProjectDir;
+    private string _projectDir;
     public string ProjectDir
     {
-        get => _ProjectDir;
-        set => _ProjectDir = value;
+        get => _projectDir;
+        set => _projectDir = value;
     }
 
     private bool _wrapNodeNames;
@@ -104,35 +103,35 @@ public class PreferencesViewModel : ObservableRecipient
     /// </summary>
     public async Task SaveAsync()
     {
-        PreferencesModel prf = new();
-        PreferencesIo prfIO = new(prf, Path.Combine(ApplicationData.Current.RoamingFolder.Path, "Storybuilder"));
-        await prfIO.UpdateModel();
+        PreferencesModel _prf = new();
+        PreferencesIo _prfIo = new(_prf, Path.Combine(ApplicationData.Current.RoamingFolder.Path, "Storybuilder"));
+        await _prfIo.UpdateModel();
 
-        prf.Name = Name;
-        prf.Email = Email;
-        prf.ErrorCollectionConsent = ErrorConsent;
-        prf.ProjectDirectory = ProjectDir;
-        prf.BackupDirectory = BackupDir;
-        prf.TimedBackupInterval = BackupInterval;
-        prf.TimedBackup = Backup;
-        prf.Newsletter = NewsConsent;
-        prf.PreferencesInitialized = init;
-        prf.BackupOnOpen = BackupUpOnOpen;
-        prf.AutoSave = AutoSave;
-        prf.PreferredSearchEngine = (BrowserType)PreferredSearchEngine;
-        if (AutoSaveInterval > 31 || AutoSaveInterval < 4) { AutoSaveInterval = 20; }
-        else { prf.AutoSaveInterval = AutoSaveInterval; }
+        _prf.Name = Name;
+        _prf.Email = Email;
+        _prf.ErrorCollectionConsent = ErrorConsent;
+        _prf.ProjectDirectory = ProjectDir;
+        _prf.BackupDirectory = BackupDir;
+        _prf.TimedBackupInterval = BackupInterval;
+        _prf.TimedBackup = Backup;
+        _prf.Newsletter = NewsConsent;
+        _prf.PreferencesInitialized = Init;
+        _prf.BackupOnOpen = BackupUpOnOpen;
+        _prf.AutoSave = AutoSave;
+        _prf.PreferredSearchEngine = (BrowserType)PreferredSearchEngine;
+        if (AutoSaveInterval is > 31 or < 4) { AutoSaveInterval = 20; }
+        else { _prf.AutoSaveInterval = AutoSaveInterval; }
 
-        if (WrapNodeNames) { prf.WrapNodeNames = TextWrapping.WrapWholeWords; }
-        else { prf.WrapNodeNames = TextWrapping.NoWrap; }
+        if (WrapNodeNames) { _prf.WrapNodeNames = TextWrapping.WrapWholeWords; }
+        else { _prf.WrapNodeNames = TextWrapping.NoWrap; }
 
 
-        await prfIO.UpdateFile();
-        PreferencesIo loader = new(GlobalData.Preferences, Path.Combine(ApplicationData.Current.RoamingFolder.Path, "Storybuilder"));
-        await loader.UpdateModel();
-        BackendService backend = Ioc.Default.GetService<BackendService>();
+        await _prfIo.UpdateFile();
+        PreferencesIo _loader = new(GlobalData.Preferences, Path.Combine(ApplicationData.Current.RoamingFolder.Path, "Storybuilder"));
+        await _loader.UpdateModel();
+        BackendService _backend = Ioc.Default.GetService<BackendService>();
         GlobalData.Preferences.RecordPreferencesStatus = false;  // indicate need to update
-        await backend.PostPreferences(GlobalData.Preferences);
+        await _backend.PostPreferences(GlobalData.Preferences);
     }
 
     /// <summary>

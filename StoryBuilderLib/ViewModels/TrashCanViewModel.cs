@@ -49,10 +49,7 @@ public class TrashCanViewModel : ObservableRecipient, INavigable
         LoadModel();
     }
 
-    public void Deactivate(object parameter)
-    {
-        SaveModel();
-    }
+    public void Deactivate(object parameter) { }
 
     private void LoadModel()
     {
@@ -60,11 +57,5 @@ public class TrashCanViewModel : ObservableRecipient, INavigable
         Name = Model.Name;
 
     }
-
-    private void SaveModel()
-    {
-        /* Nothing to do */
-    }
-
     #endregion
 }

@@ -12,7 +12,7 @@ namespace StoryBuilder.ViewModels;
 
 public class UnifiedVM : ObservableRecipient
 {
-    ShellViewModel shell = Ioc.Default.GetService<ShellViewModel>();
+    private ShellViewModel _shell = Ioc.Default.GetService<ShellViewModel>();
 
     private int _selectedRecentIndex;
     public int SelectedRecentIndex
@@ -41,11 +41,11 @@ public class UnifiedVM : ObservableRecipient
         set => SetProperty(ref _projectName, value);
     }
 
-    private string _ProjectPath;
+    private string _projectPath;
     public string ProjectPath
     {
-        get => _ProjectPath;
-        set => SetProperty(ref _ProjectPath, value);
+        get => _projectPath;
+        set => SetProperty(ref _projectPath, value);
     }
 
     /// <summary>
@@ -69,15 +69,15 @@ public class UnifiedVM : ObservableRecipient
     {
         SelectedRecentIndex = -1;
         ProjectName = string.Empty;
-        PreferencesModel prefs = GlobalData.Preferences;
-        ProjectPath = prefs.ProjectDirectory;
+        PreferencesModel _prefs = GlobalData.Preferences;
+        ProjectPath = _prefs.ProjectDirectory;
     }
 
     public UnifiedMenuPage.UpdateContentDelegate UpdateContent;
 
     public void Hide()
     {
-        shell.CloseUnifiedCommand.Execute(null);
+        _shell.CloseUnifiedCommand.Execute(null);
     }
 
     /// <summary>
@@ -102,7 +102,7 @@ public class UnifiedVM : ObservableRecipient
 
     public async void LoadStory()
     {
-        await shell.OpenFile(); //Calls the open file in shell so it can load the file
+        await _shell.OpenFile(); //Calls the open file in shell so it can load the file
         Hide();
     }
 
@@ -113,11 +113,11 @@ public class UnifiedVM : ObservableRecipient
     {
         switch (SelectedRecentIndex)
         {
-            case 0: await shell.OpenFile(GlobalData.Preferences.LastFile1); break;
-            case 1: await shell.OpenFile(GlobalData.Preferences.LastFile2); break;
-            case 2: await shell.OpenFile(GlobalData.Preferences.LastFile3); break;
-            case 3: await shell.OpenFile(GlobalData.Preferences.LastFile4); break;
-            case 4: await shell.OpenFile(GlobalData.Preferences.LastFile5); break;
+            case 0: await _shell.OpenFile(GlobalData.Preferences.LastFile1); break;
+            case 1: await _shell.OpenFile(GlobalData.Preferences.LastFile2); break;
+            case 2: await _shell.OpenFile(GlobalData.Preferences.LastFile3); break;
+            case 3: await _shell.OpenFile(GlobalData.Preferences.LastFile4); break;
+            case 4: await _shell.OpenFile(GlobalData.Preferences.LastFile5); break;
         }
         if (SelectedRecentIndex != -1)
         {
@@ -132,9 +132,9 @@ public class UnifiedVM : ObservableRecipient
     {
         GlobalData.Preferences.LastSelectedTemplate = SelectedTemplateIndex;
 
-        PreferencesIo loader = new(GlobalData.Preferences, GlobalData.RootDirectory);
-        await loader.UpdateFile();
-        await shell.UnifiedNewFile(this);
+        PreferencesIo _loader = new(GlobalData.Preferences, GlobalData.RootDirectory);
+        await _loader.UpdateFile();
+        await _shell.UnifiedNewFile(this);
         Hide();
 
     }
@@ -142,36 +142,36 @@ public class UnifiedVM : ObservableRecipient
     /// <summary>
     /// This updates preferences.RecentFiles 1 through 5
     /// </summary>
-    public async void UpdateRecents(string Path)
+    public async void UpdateRecents(string path)
     {
-        if (Path != GlobalData.Preferences.LastFile1 && Path != GlobalData.Preferences.LastFile2 && Path != GlobalData.Preferences.LastFile3 && Path != GlobalData.Preferences.LastFile4 && Path != GlobalData.Preferences.LastFile5)
+        if (path != GlobalData.Preferences.LastFile1 && path != GlobalData.Preferences.LastFile2 && path != GlobalData.Preferences.LastFile3 && path != GlobalData.Preferences.LastFile4 && path != GlobalData.Preferences.LastFile5)
         {
             GlobalData.Preferences.LastFile5 = GlobalData.Preferences.LastFile4;
             GlobalData.Preferences.LastFile4 = GlobalData.Preferences.LastFile3;
             GlobalData.Preferences.LastFile3 = GlobalData.Preferences.LastFile2;
             GlobalData.Preferences.LastFile2 = GlobalData.Preferences.LastFile1;
-            GlobalData.Preferences.LastFile1 = Path;
+            GlobalData.Preferences.LastFile1 = path;
         }
         else //This shuffle the file used to the top
         {
-            string[] newRecents = Array.Empty<string>();
-            if (Path == GlobalData.Preferences.LastFile2) { newRecents = new[] { GlobalData.Preferences.LastFile2, GlobalData.Preferences.LastFile1, GlobalData.Preferences.LastFile3, GlobalData.Preferences.LastFile4, GlobalData.Preferences.LastFile5 }; }
-            else if (Path == GlobalData.Preferences.LastFile3) { newRecents = new[] { GlobalData.Preferences.LastFile3, GlobalData.Preferences.LastFile1, GlobalData.Preferences.LastFile2, GlobalData.Preferences.LastFile4, GlobalData.Preferences.LastFile5 }; }
-            else if (Path == GlobalData.Preferences.LastFile4) { newRecents = new[] { GlobalData.Preferences.LastFile4, GlobalData.Preferences.LastFile1, GlobalData.Preferences.LastFile2, GlobalData.Preferences.LastFile3, GlobalData.Preferences.LastFile5 }; }
-            else if (Path == GlobalData.Preferences.LastFile5) { newRecents = new[] { GlobalData.Preferences.LastFile5, GlobalData.Preferences.LastFile1, GlobalData.Preferences.LastFile2, GlobalData.Preferences.LastFile3, GlobalData.Preferences.LastFile4 }; }
+            string[] _newRecents = Array.Empty<string>();
+            if (path == GlobalData.Preferences.LastFile2) { _newRecents = new[] { GlobalData.Preferences.LastFile2, GlobalData.Preferences.LastFile1, GlobalData.Preferences.LastFile3, GlobalData.Preferences.LastFile4, GlobalData.Preferences.LastFile5 }; }
+            else if (path == GlobalData.Preferences.LastFile3) { _newRecents = new[] { GlobalData.Preferences.LastFile3, GlobalData.Preferences.LastFile1, GlobalData.Preferences.LastFile2, GlobalData.Preferences.LastFile4, GlobalData.Preferences.LastFile5 }; }
+            else if (path == GlobalData.Preferences.LastFile4) { _newRecents = new[] { GlobalData.Preferences.LastFile4, GlobalData.Preferences.LastFile1, GlobalData.Preferences.LastFile2, GlobalData.Preferences.LastFile3, GlobalData.Preferences.LastFile5 }; }
+            else if (path == GlobalData.Preferences.LastFile5) { _newRecents = new[] { GlobalData.Preferences.LastFile5, GlobalData.Preferences.LastFile1, GlobalData.Preferences.LastFile2, GlobalData.Preferences.LastFile3, GlobalData.Preferences.LastFile4 }; }
                 
-            if (newRecents.Length > 0)
+            if (_newRecents.Length > 0)
             {
-                GlobalData.Preferences.LastFile1 = newRecents[0];
-                GlobalData.Preferences.LastFile2 = newRecents[1];
-                GlobalData.Preferences.LastFile3 = newRecents[2];
-                GlobalData.Preferences.LastFile4 = newRecents[3];
-                GlobalData.Preferences.LastFile5 = newRecents[4];
+                GlobalData.Preferences.LastFile1 = _newRecents[0];
+                GlobalData.Preferences.LastFile2 = _newRecents[1];
+                GlobalData.Preferences.LastFile3 = _newRecents[2];
+                GlobalData.Preferences.LastFile4 = _newRecents[3];
+                GlobalData.Preferences.LastFile5 = _newRecents[4];
             }
         }
 
-        PreferencesIo loader = new(GlobalData.Preferences, GlobalData.RootDirectory);
-        await loader.UpdateFile();
+        PreferencesIo _loader = new(GlobalData.Preferences, GlobalData.RootDirectory);
+        await _loader.UpdateFile();
     }
 
 }

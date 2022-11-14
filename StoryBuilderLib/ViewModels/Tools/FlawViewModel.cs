@@ -37,10 +37,10 @@ public class FlawViewModel : ObservableRecipient
     #region Constructor
     public FlawViewModel()
     {
-        Dictionary<string, ObservableCollection<string>> lists = GlobalData.ListControlSource;
+        Dictionary<string, ObservableCollection<string>> _lists = GlobalData.ListControlSource;
 
-        WoundCategoryList = lists["WoundCategory"];
-        WoundSummaryList = lists["Wound"];
+        WoundCategoryList = _lists["WoundCategory"];
+        WoundSummaryList = _lists["Wound"];
     }
 
     #endregion

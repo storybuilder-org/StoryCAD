@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using Windows.Data.Xml.Dom;
-using ABI.Windows.UI;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI;
 using Microsoft.UI.Xaml;
@@ -44,8 +43,8 @@ namespace StoryBuilder.ViewModels;
 /// </summary>
 public class StoryNodeItem : DependencyObject, INotifyPropertyChanged
 {
-    private LogService logger = Ioc.Default.GetRequiredService<LogService>();
-    private ShellViewModel shellvm = Ioc.Default.GetRequiredService<ShellViewModel>();
+    private LogService _logger = Ioc.Default.GetRequiredService<LogService>();
+    private ShellViewModel _shellvm = Ioc.Default.GetRequiredService<ShellViewModel>();
 
     // is it INavigable?
     #region Properties
@@ -217,10 +216,7 @@ public class StoryNodeItem : DependencyObject, INotifyPropertyChanged
         }
     }
 
-    public TextWrapping TextWrapping
-    {
-        get => GlobalData.Preferences.WrapNodeNames;
-    }
+    public TextWrapping TextWrapping => GlobalData.Preferences.WrapNodeNames;
 
     //// Use a DependencyProperty as the backing store for IsSelected
     //public static readonly DependencyProperty IsSelectedProperty =
@@ -269,12 +265,12 @@ public class StoryNodeItem : DependencyObject, INotifyPropertyChanged
     public IEnumerator<StoryNodeItem> GetEnumerator()
     {
         yield return this;
-        foreach (StoryNodeItem child in Children)
+        foreach (StoryNodeItem _child in Children)
         {
             // ReSharper disable once GenericEnumeratorNotDisposed
-            IEnumerator<StoryNodeItem> childEnumerator = child.GetEnumerator();
-            while (childEnumerator.MoveNext())
-                yield return childEnumerator.Current;
+            IEnumerator<StoryNodeItem> _childEnumerator = _child.GetEnumerator();
+            while (_childEnumerator.MoveNext())
+                yield return _childEnumerator.Current;
         }
     }
 
@@ -334,12 +330,12 @@ public class StoryNodeItem : DependencyObject, INotifyPropertyChanged
 
     public StoryNodeItem(StoryNodeItem parent, IXmlNode node)
     {
-        XmlNamedNodeMap attrs = node.Attributes;
-        if (attrs != null)
+        XmlNamedNodeMap _attrs = node.Attributes;
+        if (_attrs != null)
         {
-            Uuid = new Guid((string)attrs.GetNamedItem("UUID")?.NodeValue);
-            string type = (string)attrs.GetNamedItem("Type")?.NodeValue;
-            switch (type.ToLower()) //Fixes differences in casing between versions.
+            Uuid = new Guid((string)_attrs.GetNamedItem("UUID")?.NodeValue);
+            string _type = (string)_attrs.GetNamedItem("Type")?.NodeValue;
+            switch (_type.ToLower()) //Fixes differences in casing between versions.
             {
                 case "storyoverview":
                     Type = StoryItemType.StoryOverview;
@@ -391,12 +387,12 @@ public class StoryNodeItem : DependencyObject, INotifyPropertyChanged
                     break;
             }
 
-            Name = (string)attrs.GetNamedItem("Name")?.NodeValue;
-            if ((string)attrs.GetNamedItem("IsExpanded")?.NodeValue == "True")
+            Name = (string)_attrs.GetNamedItem("Name")?.NodeValue;
+            if ((string)_attrs.GetNamedItem("IsExpanded")?.NodeValue == "True")
                 IsExpanded = true;
-            if ((string)attrs.GetNamedItem("IsSelected")?.NodeValue == "True")
+            if ((string)_attrs.GetNamedItem("IsSelected")?.NodeValue == "True")
                 IsSelected = true;
-            if ((string)attrs.GetNamedItem("IsRoot")?.NodeValue == "True")
+            if ((string)_attrs.GetNamedItem("IsRoot")?.NodeValue == "True")
                 IsRoot = true;
         }
 
@@ -408,66 +404,66 @@ public class StoryNodeItem : DependencyObject, INotifyPropertyChanged
 
     public void Delete(StoryViewType storyView)
     {
-        logger.Log(LogLevel.Trace, $"Starting to delete element {Name} ({Uuid}) from {storyView}");
+        _logger.Log(LogLevel.Trace, $"Starting to delete element {Name} ({Uuid}) from {storyView}");
         //Sanity check
         if (Type == StoryItemType.TrashCan || IsRoot)
         {
-            Ioc.Default.GetService<ShellViewModel>().ShowMessage(LogLevel.Warn, "This element can't be deleted.",false);
-            logger.Log(LogLevel.Info, "User tried to delete Root or Trashcan node.");
+            Ioc.Default.GetRequiredService<ShellViewModel>().ShowMessage(LogLevel.Warn, "This element can't be deleted.",false);
+            _logger.Log(LogLevel.Info, "User tried to delete Root or Trashcan node.");
         }
 
         //Set source collection to either narrative view or explorer view, we use the first item [0] so we don't delete from trash.
-        StoryNodeItem SourceCollection;
-        if (storyView == StoryViewType.ExplorerView) { SourceCollection = shellvm.StoryModel.ExplorerView[0]; }
-        else { SourceCollection = shellvm.StoryModel.NarratorView[0]; }
+        StoryNodeItem _sourceCollection;
+        if (storyView == StoryViewType.ExplorerView) { _sourceCollection = _shellvm.StoryModel.ExplorerView[0]; }
+        else { _sourceCollection = _shellvm.StoryModel.NarratorView[0]; }
 
-        if (SourceCollection.Children.Contains(this))
+        if (_sourceCollection.Children.Contains(this))
         {
             //Delete node from selected view.
-            logger.Log(LogLevel.Info, "Node found in root, deleting it.");
-            SourceCollection.Children.Remove(this);
+            _logger.Log(LogLevel.Info, "Node found in root, deleting it.");
+            _sourceCollection.Children.Remove(this);
             TrashItem(storyView); //Add to appropriate trash node.
         }
         else
         {
-            foreach (StoryNodeItem childItem in SourceCollection.Children)
+            foreach (StoryNodeItem _childItem in _sourceCollection.Children)
             {
-                logger.Log(LogLevel.Info, "Recursing tree to find node.");
-                RecursiveDelete(childItem, storyView);
+                _logger.Log(LogLevel.Info, "Recursing tree to find node.");
+                RecursiveDelete(_childItem, storyView);
             }
         }
     }
 
-    private void RecursiveDelete(StoryNodeItem ParentItem, StoryViewType storyView)
+    private void RecursiveDelete(StoryNodeItem parentItem, StoryViewType storyView)
     {
-        logger.Log(LogLevel.Info, $"Starting recursive delete instance for parent {ParentItem.Name} ({ParentItem.Uuid}) in {storyView}");
+        _logger.Log(LogLevel.Info, $"Starting recursive delete instance for parent {parentItem.Name} ({parentItem.Uuid}) in {storyView}");
         try
         {
-            if (ParentItem.Children.Contains(this)) //Checks parent contains child we are looking.
+            if (parentItem.Children.Contains(this)) //Checks parent contains child we are looking.
             {
-                logger.Log(LogLevel.Info, "StoryNodeItem found, deleting it.");
-                ParentItem.Children.Remove(this); //Deletes child.
+                _logger.Log(LogLevel.Info, "StoryNodeItem found, deleting it.");
+                parentItem.Children.Remove(this); //Deletes child.
                 TrashItem(storyView); //Add to appropriate trash node.
             }
             else //If child isn't in parent, recurse again.
             {
-                logger.Log(LogLevel.Info, "StoryNodeItem not found, recursing again");
-                foreach (StoryNodeItem ChildItem in ParentItem.Children)
+                _logger.Log(LogLevel.Info, "StoryNodeItem not found, recursing again");
+                foreach (StoryNodeItem _childItem in parentItem.Children)
                 {
-                    logger.Log(LogLevel.Debug, $"ChildItem is {ChildItem.Name} {ChildItem.Uuid}");
-                    RecursiveDelete(ChildItem, storyView);
+                    _logger.Log(LogLevel.Debug, $"ChildItem is {_childItem.Name} {_childItem.Uuid}");
+                    RecursiveDelete(_childItem, storyView);
                 }
             }
         }
-        catch (Exception ex) { logger.LogException(LogLevel.Error, ex, "Error deleting node in Recursive delete"); }
+        catch (Exception _ex) { _logger.LogException(LogLevel.Error, _ex, "Error deleting node in Recursive delete"); }
     }
 
     private void TrashItem(StoryViewType storyView)
     {
         if (storyView == StoryViewType.ExplorerView)
         {
-            shellvm.StoryModel.ExplorerView[1].Children.Add(this);
-            Parent = shellvm.StoryModel.ExplorerView[1];
+            _shellvm.StoryModel.ExplorerView[1].Children.Add(this);
+            Parent = _shellvm.StoryModel.ExplorerView[1];
         }
         //Narrative view nodes are not added to trash.
     }

@@ -10,6 +10,11 @@ using StoryBuilder.Services.Messages;
 using LogLevel = StoryBuilder.Services.Logging.LogLevel;
 using System.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Web.WebView2.Core;
+using System.Diagnostics;
+using System.IO;
+using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace StoryBuilder.ViewModels;
 
@@ -37,8 +42,8 @@ public class WebViewModel : ObservableRecipient, INavigable
             if (_name != value) // Name changed?
             {
                 _logger.Log(LogLevel.Info, $"Requesting Name change from {_name} to {value}");
-                NameChangeMessage msg = new(_name, value);
-                Messenger.Send(new NameChangedMessage(msg));
+                NameChangeMessage _msg = new(_name, value);
+                Messenger.Send(new NameChangedMessage(_msg));
             }
 
             SetProperty(ref _name, value);
@@ -46,7 +51,7 @@ public class WebViewModel : ObservableRecipient, INavigable
     }
 
     private Guid _uuid;
-    public Guid guid
+    public Guid Guid
     {
         get => _uuid;
         set => SetProperty(ref _uuid, value);
@@ -65,11 +70,11 @@ public class WebViewModel : ObservableRecipient, INavigable
     /// <summary>
     /// This is the real webview URL, it may differ query but usually should be the same.
     /// </summary>
-    private Uri _url = new Uri("https://google.com/");
-    public Uri URL
+    private Uri _url = new("https://google.com/");
+    public Uri Url
     {
         get => _url;
-        set { SetProperty(ref _url, value); }
+        set => SetProperty(ref _url, value);
     }
 
     /// <summary>
@@ -80,7 +85,7 @@ public class WebViewModel : ObservableRecipient, INavigable
     public DateTime Timestamp
     {
         get => _timestamp;
-        set { SetProperty(ref _timestamp, value); }
+        set => SetProperty(ref _timestamp, value);
     }
 
     private WebModel _model;
@@ -90,8 +95,90 @@ public class WebViewModel : ObservableRecipient, INavigable
         set => SetProperty(ref _model, value);
     }
 
-    #endregion  
+    #endregion
 
+    #region Methods
+
+    /// <summary>
+    /// This checks if webview is installed
+    /// </summary>
+    /// <returns>True if webview is installed</returns>
+    public Task<bool> CheckWebviewState(bool installIfMissing)
+    {
+        try
+        {
+            if (CoreWebView2Environment.GetAvailableBrowserVersionString() != null)
+            {
+                return Task.FromResult(true);
+            }
+        }
+        catch 
+        {
+            if (installIfMissing) { ShowWebviewDialog(); }
+            return Task.FromResult(false);
+        }
+
+        return Task.FromResult(false);
+    }
+
+
+    /// <summary>
+    /// This method installs the Evergreen webview runtime.
+    /// </summary>
+    public async void ShowWebviewDialog()
+    {
+        Ioc.Default.GetRequiredService<LogService>().Log(LogLevel.Error, "Showing webview install dialog.");
+
+        ContentDialog _dialog = new()
+        {
+            Title = "Webview is missing.",
+            Content = "This computer is missing the WebView2 Runtime, without it some features may not work.\nWould you like to install this now?",
+            XamlRoot = GlobalData.XamlRoot,
+            PrimaryButtonText = "Yes",
+            SecondaryButtonText = "No"
+        };
+
+        ContentDialogResult _result = await _dialog.ShowAsync();
+        _logger.Log(LogLevel.Error, $"User clicked {_result}");
+
+        //Ok clicked
+        if (_result == ContentDialogResult.Primary) { InstallWebview(); }
+    }
+
+    /// <summary>
+    /// This installs the evergreen webview runtime
+    /// </summary>
+    public async void InstallWebview()
+    {
+        Ioc.Default.GetRequiredService<LogService>().Log(LogLevel.Error, "Installing webview...");
+
+        //Download file
+        HttpResponseMessage _httpResult = await new HttpClient().GetAsync("https://go.microsoft.com/fwlink/p/?LinkId=2124703"); //Get HTTP response
+        await using Stream _resultStream = await _httpResult.Content.ReadAsStreamAsync(); //Read stream
+        await using FileStream _fileStream = File.Create(Path.Combine(GlobalData.RootDirectory, "evergreenbootstrapper.exe")); //Create File.
+        await _resultStream.CopyToAsync(_fileStream); //Write file
+
+        //Run installer and wait for it to finish
+        await Process.Start(Path.Combine(GlobalData.RootDirectory, "evergreenbootstrapper.exe"))!.WaitForExitAsync();
+        
+        //Show success/fail dialog
+        ContentDialog _dialog = new() {PrimaryButtonText = "Ok"};
+        try
+        {
+            _dialog.Title = "Webview installed!";
+            _dialog.Content = "You are good to go, everything should work now.";
+            _logger.Log(LogLevel.Info, "Webview installed");
+        }
+        catch (Exception _ex)
+        {
+            _dialog.Title = "Something went wrong.";
+            _dialog.Content = "Looks like something went wrong, you can still use StoryBuilder however some features may not work.";
+            _logger.Log(LogLevel.Warn, $"An error occurred installing the Evergreen Webview Runtime ({_ex.Message})");
+        }
+        await _dialog.ShowAsync();
+        _logger.Log(LogLevel.Warn, "Finished installing webview runtime.");
+    }
+    #endregion
     #region Relay Commands
 
     public RelayCommand RefreshCommand { get; }
@@ -124,9 +211,9 @@ public class WebViewModel : ObservableRecipient, INavigable
         _changeable = false;
         _changed = false;
         
-        guid = Model.Uuid;
+        Guid = Model.Uuid;
         Name = Model.Name;
-        URL = Model.URL;
+        Url = Model.URL;
         Timestamp = Model.Timestamp;
 
         _changeable = true;
@@ -138,7 +225,7 @@ public class WebViewModel : ObservableRecipient, INavigable
         {
             // Story.Uuid is read-only and cannot be assigned
             Model.Name = Name;
-            Model.URL = URL;
+            Model.URL = Url;
             Model.Timestamp = Timestamp;
 
         }
@@ -157,36 +244,36 @@ public class WebViewModel : ObservableRecipient, INavigable
             if (!string.IsNullOrEmpty(Query))
             {
                 _logger.Log(LogLevel.Info, $"Checking if {Query} is a URI.");
-                URL = new Uri(Query);
+                Url = new Uri(Query);
                 _logger.Log(LogLevel.Info, $"{Query} is a valid URI, navigating to it.");
             }
 
         }
-        catch (UriFormatException ex)
+        catch (UriFormatException)
         {
             _logger.Log(LogLevel.Info, $"Checking if {Query} is not URI, searching it.");
-
+            if (Query == null) { Query = string.Empty; }
+            string _dataString = Uri.EscapeDataString(Query);
             switch (GlobalData.Preferences.PreferredSearchEngine)
             {
                 case BrowserType.DuckDuckGo:
-                    URL = new Uri("https://duckduckgo.com/?va=j&q=" + Uri.EscapeDataString(Query));
+                    Url = new Uri("https://duckduckgo.com/?va=j&q=" + _dataString);
                     break;
                 case BrowserType.Google:
-                    URL = new Uri("https://www.google.com/search?q=" + Uri.EscapeDataString(Query));
+                    Url = new Uri("https://www.google.com/search?q=" + _dataString);
                     break;
                 case BrowserType.Bing:
-                    URL = new Uri("https://www.bing.com/search?q=" + Uri.EscapeDataString(Query));
+                    Url = new Uri("https://www.bing.com/search?q=" + _dataString);
                     break;
                 case BrowserType.Yahoo:
-                    URL = new Uri("https://search.yahoo.com/search?p=" + Uri.EscapeDataString(Query));
+                    Url = new Uri("https://search.yahoo.com/search?p=" + _dataString);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
-
-            _logger.Log(LogLevel.Info, $"URL is: {URL}");
-
+            _logger.Log(LogLevel.Info, $"URL is: {Url}");
         }
+        catch (Exception _ex) { _logger.LogException(LogLevel.Error, _ex, "Error in WebVM.SubmitQuery()"); }
     }
 
     /// Delegate types and instances for WebView2 navigation controls
@@ -206,7 +293,6 @@ public class WebViewModel : ObservableRecipient, INavigable
 
     public WebViewModel()
     {
-        _logger = Ioc.Default.GetService<LogService>();
         PropertyChanged += OnPropertyChanged;
 
         RefreshCommand = new RelayCommand(ExecuteRefresh, () => true);

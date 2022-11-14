@@ -32,7 +32,7 @@ public sealed partial class WebPage : BindablePage
     /// </summary>
     private void Web_OnNavigationCompleted(WebView2 sender, CoreWebView2NavigationCompletedEventArgs args)
     {
-        WebVM.Query = WebVM.URL.ToString();
+        WebVM.Query = WebVM.Url.ToString();
         WebVM.Timestamp = DateTime.Now;
         Logger.Log(LogLevel.Info, $"Updated Query to {WebVM.Query} ");
     }

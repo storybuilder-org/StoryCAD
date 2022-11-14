@@ -64,10 +64,10 @@ public class TopicsViewModel : ObservableRecipient
             case TopicTypeEnum.Inline:
                 SubTopicNames.Clear();
                 SubTopicNotes.Clear();
-                foreach (SubTopicModel model in _topic.SubTopics)
+                foreach (SubTopicModel _model in _topic.SubTopics)
                 {
-                    SubTopicNames.Add(model.SubTopicName);
-                    SubTopicNotes.Add(model.SubTopicNotes);
+                    SubTopicNames.Add(_model.SubTopicName);
+                    SubTopicNotes.Add(_model.SubTopicNotes);
                 }
                 _index = 0;
                 SubTopicName = SubTopicNames[0];

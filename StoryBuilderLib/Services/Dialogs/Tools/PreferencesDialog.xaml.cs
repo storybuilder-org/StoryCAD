@@ -145,7 +145,7 @@ public sealed partial class PreferencesDialog : Page
 
     private void SetInitToFalse(object sender, RoutedEventArgs e)
     {
-        PreferencesVm.init = false;
+        PreferencesVm.Init = false;
     }
 
     private async void AttachElmah(object sender, RoutedEventArgs e)

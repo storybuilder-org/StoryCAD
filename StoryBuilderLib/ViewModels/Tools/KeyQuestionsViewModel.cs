@@ -78,8 +78,8 @@ public class KeyQuestionsViewModel : ObservableRecipient
     {
         KeyQuestionElements = new ObservableCollection<string>();
 
-        foreach (string element in GlobalData.KeyQuestionsSource.Keys)
-            KeyQuestionElements.Add(element);
+        foreach (string _element in GlobalData.KeyQuestionsSource.Keys)
+            KeyQuestionElements.Add(_element);
         StoryElementName = KeyQuestionElements[0];
     }
     #endregion

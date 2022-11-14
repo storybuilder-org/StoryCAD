@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
 using System.Text;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
@@ -23,7 +24,7 @@ public class SceneViewModel : ObservableRecipient, INavigable
     private readonly StoryReader _rdr;
     private readonly StoryWriter _wtr;
     private readonly LogService _logger;
-    private StatusMessage _smsg;
+    private StatusMessage _statusMessage;
     private bool _changeable; // process property changes for this story element
     private bool _changed;    // this story element has changed
 
@@ -49,8 +50,8 @@ public class SceneViewModel : ObservableRecipient, INavigable
             if (_changeable && _name != value) // Name changed?
             {
                 _logger.Log(LogLevel.Info, $"Requesting Name change from {_name} to {value}");
-                NameChangeMessage msg = new(_name, value);
-                Messenger.Send(new NameChangedMessage(msg));
+                NameChangeMessage _msg = new(_name, value);
+                Messenger.Send(new NameChangedMessage(_msg));
             }
             SetProperty(ref _name, value);
         }
@@ -341,11 +342,11 @@ public class SceneViewModel : ObservableRecipient, INavigable
         Setting = Model.Setting;
         SceneType = Model.SceneType;
         CastMembers.Clear();
-        foreach (string member in Model.CastMembers)
+        foreach (string _member in Model.CastMembers)
         {
-            StoryElement element = StringToStoryElement(member);
-            if (element != null)        // found
-                CastMembers.Add(StringToStoryElement(member));
+            StoryElement _element = StringToStoryElement(_member);
+            if (_element != null)        // found
+                CastMembers.Add(StringToStoryElement(_member));
         }
         ViewpointCharacter = Model.ViewpointCharacter;
 
@@ -355,9 +356,9 @@ public class SceneViewModel : ObservableRecipient, INavigable
         // the scene's list of purposes from delegate
         // methods declared in ScenePage.xaml.cs
         ClearScenePurpose();
-        foreach (string purpose in Model.ScenePurpose)
+        foreach (string _purpose in Model.ScenePurpose)
         {
-            AddScenePurpose(purpose);
+            AddScenePurpose(_purpose);
             //ScenePurpose.Add(purpose);
         }
 
@@ -399,11 +400,11 @@ public class SceneViewModel : ObservableRecipient, INavigable
             Model.Setting = Setting;
             Model.SceneType = SceneType;
             Model.CastMembers.Clear();
-            foreach (StoryElement element in CastMembers)
-                Model.CastMembers.Add(element.ToString());
+            foreach (StoryElement _element in CastMembers)
+                Model.CastMembers.Add(_element.ToString());
             Model.ScenePurpose.Clear();
-            foreach(string purpose in ScenePurpose)
-                Model.ScenePurpose.Add(purpose);    
+            foreach(string _purpose in ScenePurpose)
+                Model.ScenePurpose.Add(_purpose);    
             Model.ValueExchange = ValueExchange;
             Model.Protagonist = Protagonist;
             Model.ProtagEmotion = ProtagEmotion;
@@ -448,52 +449,51 @@ public class SceneViewModel : ObservableRecipient, INavigable
     /// <param name="e"></param>
     public void ScenePurpose_SelectionChanged(object sender, ComboBoxSelectionChangedEventArgs e)
     {
-        foreach (string purpose in e.AddedItems)
-            ScenePurpose.Add(purpose);
-        foreach (string purpose in e.RemovedItems)
-            ScenePurpose.Remove(purpose);
+        foreach (string _purpose in e.AddedItems)
+            ScenePurpose.Add(_purpose);
+        foreach (string _purpose in e.RemovedItems)
+            ScenePurpose.Remove(_purpose);
         OnPropertyChanged(ScenePurpose, new PropertyChangedEventArgs("ScenePurpose"));
     }
 
     private bool CastMemberExists(string uuid)
     {
-        foreach (StoryElement element in CastMembers) {if (uuid == element.Uuid.ToString()) {return true;}}
-        return false;
+        return CastMembers.Any(element => uuid == element.Uuid.ToString());
     }
 
     private void AddCastMember()
     {
         // Edit the character to add
-        StoryElement element = StringToStoryElement(NewCastMember);
-        if (element == null)
+        StoryElement _element = StringToStoryElement(NewCastMember);
+        if (_element == null)
         {
             Messenger.Send(new StatusChangedMessage(new StatusMessage("Select a character to add to scene cast", LogLevel.Warn, true)));
             return;
         }
         if (CastMemberExists(NewCastMember))
         {
-            _smsg = new StatusMessage("Character is already in scene cast", LogLevel.Warn);
-            Messenger.Send(new StatusChangedMessage(_smsg));
+            _statusMessage = new StatusMessage("Character is already in scene cast", LogLevel.Warn);
+            Messenger.Send(new StatusChangedMessage(_statusMessage));
             return;
         }
 
-        CastMembers.Add(element);
+        CastMembers.Add(_element);
         OnPropertyChanged();
-        Messenger.Send(new StatusChangedMessage(new($"New cast member {element.Name} added", LogLevel.Info, true)));
+        Messenger.Send(new StatusChangedMessage(new($"New cast member {_element.Name} added", LogLevel.Info, true)));
     }
 
     private void RemoveCastMember()
     {
         if (ExistingCastIndex == -1)
         {
-            _smsg = new StatusMessage("Select a scene cast member to remove", LogLevel.Info);
-            Messenger.Send(new StatusChangedMessage(_smsg));
+            _statusMessage = new StatusMessage("Select a scene cast member to remove", LogLevel.Info);
+            Messenger.Send(new StatusChangedMessage(_statusMessage));
             return;
         }
-        StoryElement element = CastMembers[ExistingCastIndex];
+        StoryElement _element = CastMembers[ExistingCastIndex];
         CastMembers.RemoveAt(ExistingCastIndex);
         OnPropertyChanged();
-        Messenger.Send(new StatusChangedMessage(new($"Cast member {element.Name} removed", LogLevel.Info, true)));
+        Messenger.Send(new StatusChangedMessage(new($"Cast member {_element.Name} removed", LogLevel.Info, true)));
     }
 
     private StoryElement StringToStoryElement(string value)
@@ -506,26 +506,26 @@ public class SceneViewModel : ObservableRecipient, INavigable
         // Look for the StoryElement corresponding to the passed guid
         // (This is the normal approach)
         // Get the current StoryModel's StoryElementsCollection
-        StoryModel model = ShellViewModel.GetModel();
-        StoryElementCollection elements = model.StoryElements;
-        if (Guid.TryParse(value, out Guid guid))
+        StoryModel _model = ShellViewModel.GetModel();
+        StoryElementCollection _elements = _model.StoryElements;
+        if (Guid.TryParse(value, out Guid _guid))
         {
-            if (elements.StoryElementGuids.ContainsKey(guid)) { return elements.StoryElementGuids[guid]; }
+            if (_elements.StoryElementGuids.ContainsKey(_guid)) { return _elements.StoryElementGuids[_guid]; }
 
         }
 
         // legacy: locate the StoryElement from its Name
-        foreach (StoryElement element in elements)  // Character or Setting??? Search both?
+        foreach (StoryElement _element in _elements)  // Character or Setting??? Search both?
         {
-            if (element.Type == StoryItemType.Character | element.Type == StoryItemType.Setting)
+            if (_element.Type == StoryItemType.Character | _element.Type == StoryItemType.Setting)
             {
-                if (value.Trim().Equals(element.Name.Trim()))
-                    return element;
+                if (value.Trim().Equals(_element.Name.Trim()))
+                    return _element;
             }
         }
         // not found
-        string msg = $"Story Element not found name {value}";
-        _logger.Log(LogLevel.Warn, msg);
+        string _msg = $"Story Element not found name {value}";
+        _logger.Log(LogLevel.Warn, _msg);
         return null;   
     }
 
@@ -541,37 +541,37 @@ public class SceneViewModel : ObservableRecipient, INavigable
     /// </summary>
     private void GetOverviewViewpoint()
     {
-        string viewpointText = "No story viewpoint selected";
-        string viewpointName = "No story viewpoint character selected";
+        //TODO: Clean up and comment code for better understanding
+        string _viewpointText = "No story viewpoint selected";
+        string _viewpointName = "No story viewpoint character selected";
 
         VpCharTipIsOpen = false;
-        StoryModel model = ShellViewModel.GetModel();
-        StoryNodeItem node = model.ExplorerView[0];
-        OverviewModel overview = (OverviewModel)model.StoryElements.StoryElementGuids[node.Uuid];
+        StoryModel _model = ShellViewModel.GetModel();
+        StoryNodeItem _node = _model.ExplorerView[0];
+        OverviewModel _overview = (OverviewModel)_model.StoryElements.StoryElementGuids[_node.Uuid];
         //string viewpoint = overview?.Viewpoint;
-        string viewpoint = overview?.Viewpoint != null ? overview.Viewpoint : string.Empty;
-        if (!viewpoint.Equals(string.Empty))
-            viewpointText = "Story viewpoint = " + viewpoint;
-        string viewpointChar = overview?.ViewpointCharacter != null ? overview.ViewpointCharacter : string.Empty;
-        if (!viewpointChar.Equals(string.Empty))
+        string _viewpoint = _overview?.Viewpoint != null ? _overview.Viewpoint : string.Empty;
+        if (!_viewpoint.Equals(string.Empty))
+            _viewpointText = "Story viewpoint = " + _viewpoint;
+        string _viewpointChar = _overview?.ViewpointCharacter != null ? _overview.ViewpointCharacter : string.Empty;
+        if (!_viewpointChar.Equals(string.Empty))
         {
-            if (Guid.TryParse(viewpointChar, out Guid guid))
-                viewpointName = "Story viewpoint character = " + model.StoryElements.StoryElementGuids[guid].Name;
+            if (Guid.TryParse(_viewpointChar, out Guid _guid))
+                _viewpointName = "Story viewpoint character = " + _model.StoryElements.StoryElementGuids[_guid].Name;
             else
-                viewpointName = "Story viewpoint character not found";
+                _viewpointName = "Story viewpoint character not found";
         }
-        StringBuilder tip = new StringBuilder();
-        tip.AppendLine(string.Empty);
-        tip.AppendLine(viewpointText);
-        tip.AppendLine(viewpointName);
-        VpCharTip = tip.ToString();
+        StringBuilder _tip = new();
+        _tip.AppendLine(string.Empty);
+        _tip.AppendLine(_viewpointText);
+        _tip.AppendLine(_viewpointName);
+        VpCharTip = _tip.ToString();
 
-        // The TeachingTip should only display if there's no scene ViewpointCharcter selected
+        // The TeachingTip should only display if there's no scene Viewpoint Character selected
         if (ViewpointCharacter.Equals(string.Empty))
         {
             VpCharTipIsOpen = true;
-            string msg = "ViewpointCharacterTip displayed";
-            _logger.Log(LogLevel.Warn, msg);
+            _logger.Log(LogLevel.Warn, "ViewpointCharacterTip displayed");
         }
     }
     #endregion
@@ -625,17 +625,17 @@ public class SceneViewModel : ObservableRecipient, INavigable
         Review = string.Empty;
         Notes = string.Empty;
 
-        Dictionary<string, ObservableCollection<string>> lists = GlobalData.ListControlSource;
-        ViewpointList = lists["Viewpoint"];
-        SceneTypeList = lists["SceneType"];
-        ScenePurposeList = lists["ScenePurpose"];
-        StoryRoleList = lists["StoryRole"];
-        EmotionList = lists["Emotion"];
-        GoalList = lists["Goal"];
-        OppositionList = lists["Opposition"];
-        OutcomeList = lists["Outcome"];
-        ViewpointList = lists["Viewpoint"];
-        ValueExchangeList = lists["ValueExchange"];
+        Dictionary<string, ObservableCollection<string>> _lists = GlobalData.ListControlSource;
+        ViewpointList = _lists["Viewpoint"];
+        SceneTypeList = _lists["SceneType"];
+        ScenePurposeList = _lists["ScenePurpose"];
+        StoryRoleList = _lists["StoryRole"];
+        EmotionList = _lists["Emotion"];
+        GoalList = _lists["Goal"];
+        OppositionList = _lists["Opposition"];
+        OutcomeList = _lists["Outcome"];
+        ViewpointList = _lists["Viewpoint"];
+        ValueExchangeList = _lists["ValueExchange"];
 
         AddCastCommand = new RelayCommand(AddCastMember, () => true);
         RemoveCastCommand = new RelayCommand(RemoveCastMember, () => true);

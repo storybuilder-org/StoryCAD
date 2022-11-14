@@ -37,6 +37,6 @@
                             QueryIcon="Find" 
                             QuerySubmitted="QuerySubmitted" />
         </Grid>
-        <WebView2 Name="WebView" Grid.Row="2" Source="{x:Bind WebVM.URL, Mode=TwoWay}" NavigationCompleted="Web_OnNavigationCompleted" />
+        <WebView2 Name="WebView" Grid.Row="2" Source="{x:Bind WebVM.Url, Mode=TwoWay}" NavigationCompleted="Web_OnNavigationCompleted" />
     </Grid>
 </views:BindablePage>

@@ -1,9 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
-using System.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
-using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml.Controls;
 using StoryBuilder.Models;
 using StoryBuilder.Services.Reports;
@@ -14,11 +12,11 @@ public class PrintReportDialogVM : ObservableRecipient
 {
     public ContentDialog Dialog;
 
-    private bool _ShowLoadingBar = true;
+    private bool _showLoadingBar = true;
     public bool ShowLoadingBar
     {
-        get => _ShowLoadingBar;
-        set => SetProperty(ref _ShowLoadingBar, value);
+        get => _showLoadingBar;
+        set => SetProperty(ref _showLoadingBar, value);
     }
 
     private bool _createSummary;
@@ -158,23 +156,23 @@ public class PrintReportDialogVM : ObservableRecipient
         }
 
         //Recurs until children are empty 
-        foreach (StoryNodeItem storyNodeItem in node.Children) { TraverseNode(storyNodeItem); }
+        foreach (StoryNodeItem _storyNodeItem in node.Children) { TraverseNode(_storyNodeItem); }
     }
 
-    public async void StartGeneratingReports()
+    public void StartGeneratingReports()
     {
         ShowLoadingBar = true;
-        BackgroundWorker backgroundthread = new();
-        backgroundthread.DoWork += GenerateReports;
-        backgroundthread.RunWorkerAsync();
+        BackgroundWorker _backgroundthread = new();
+        _backgroundthread.DoWork += GenerateReports;
+        _backgroundthread.RunWorkerAsync();
     }
 
     private async void GenerateReports(object sender, DoWorkEventArgs e)
     {
-        PrintReportDialogVM ReportVM = Ioc.Default.GetRequiredService<PrintReportDialogVM>();
-        ShellViewModel ShellVM = Ioc.Default.GetRequiredService<ShellViewModel>();
-        PrintReports rpt = new(ReportVM, ShellVM.StoryModel);
-        await rpt.Generate();
+        PrintReportDialogVM _reportVM = Ioc.Default.GetRequiredService<PrintReportDialogVM>();
+        ShellViewModel _shellVM = Ioc.Default.GetRequiredService<ShellViewModel>();
+        PrintReports _rpt = new(_reportVM, _shellVM.StoryModel);
+        await _rpt.Generate();
         ShowLoadingBar = false;
     }
 

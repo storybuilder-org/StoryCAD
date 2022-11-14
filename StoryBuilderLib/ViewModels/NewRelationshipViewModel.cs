@@ -31,11 +31,11 @@ public class NewRelationshipViewModel : ObservableRecipient
         get => _relationType; 
         set => SetProperty(ref _relationType, value);
     }
-    private string _inverserelationType;
+    private string _inverseRelationType;
     public string InverseRelationType
     {
-        get => _inverserelationType;
-        set => SetProperty(ref _inverserelationType, value);
+        get => _inverseRelationType;
+        set => SetProperty(ref _inverseRelationType, value);
     }
     private bool _inverseRelationship;
     public bool InverseRelationship

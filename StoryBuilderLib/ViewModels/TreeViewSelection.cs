@@ -17,10 +17,8 @@ public class TreeViewSelection : DependencyObject, INotifyPropertyChanged
     }
 
     // Use a DependencyProperty as the backing store for SelectedItem
-    public static readonly DependencyProperty SelectedItemProperty =
-        DependencyProperty.Register("SelectedItem", typeof(object),
-            typeof(TreeViewSelection),
-            new PropertyMetadata(null));
+    public static readonly DependencyProperty SelectedItemProperty = DependencyProperty.Register(nameof(SelectedItem), typeof(object),
+            typeof(TreeViewSelection), new PropertyMetadata(null));
 
     private void NotifyPropertyChanged(string propertyName)
     {
