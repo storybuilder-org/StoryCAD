@@ -1,187 +1,58 @@
 # StoryBuilder Roadmap
+#### Last Updated: 2022-11-15
 
-## Current Release
+Our next Release will be 2.5.0.0, planned for around December 1st.
+We expect that this release will include the following features:
 
-As of October 3, 2022, we've rolled out Release 2.3.0.0 for general distribution 
-via the Microsoft Store. 
+### .Net7 (#438)
 
-2.3 has one significant new feature, the addition of researach tools. These take
-the form of two new Story Element types which can be added as nodes to your outlines:
-WebPage and Note nodes.
+Microsoft has released the next iteration in its .NET framework, .NET7, which has improvements in  
+ARM64 support, desktop app support, performance improvements, and app size reduction.
 
-WebPage nodes are used to store links to web pages. They're implemented using the
-WebView2 control, which is built on the Edge browser. A WebPage node can use search
-to find a page and will persist that page's URL in your outline so that when you 
-navigate to it the page is loaded and displays in the node's content area.
+### Sidebar index for StoryBuilder User Manual
 
-Note nodes are used to store text notes. They're implemented using the RichEditBox.
-Major Story Element nodes (Story Overview, Problem, Character, Setting and Scene) all
-have a Notes tabes which can be used to store notes about that particular Story Element,
-but the new Note nodes are intended to be used to store notes about any topic  you
-wish.
+One serious problem with the documentation is the lack of user-friendly index. We've
+looked at several options, but the one we think works best is a sidebar index which is 
+always visible. We're working on this for the next release (issue # xxx).
 
-StoryBuilder is a new product, and our priority remains bug fixes and improvements.
-2.3 is primarily a fix release, as will be future short-term releases. Some
-specific fixes in this release include:
+### Allow community to easily recommend documentation changes #384
 
-#### Implemented Single Instancing
+This feature already exists: each page contains an 'Improve this Page' link. 
 
-StoryBuilder now uses Single Instancing. If the app is already open and you launch 
-it again, the existing instance will be brought to the foreground rather than having
-a new instance launched. While the ability to edit more than one outline at one time
-has its uses, it can also cause problems. For example, if you have two instances of
-StoryBuilder open and you edit the same Story Element in both instances, the changes
-from one instance will overwrite the changes from the other instance. Single Instancing
-prevents that from happening.
+We just add a note encouraging users to use and and explaining how.
 
-#### Codebase cleanup
+### ARM64 Support (#109)
 
-Actively maintained programs tend to accumulate cruft over time. This release we've
-started a process of addressing this by working through the codebase and removing
-duplicate and unusued code, conforming to some newly-set naming conventions,
-and making other improvements.This is a long-term process, which will continue in
-future releases, but we're making progress.
+ARM64 support is planned for the next release. This will allow StoryBuilder to run on 
+ARM64 devices such as the Surface X Pro. We exect to see new, lower-cost Windows 11 computers
+in the comming year and this is a way to prepare for them.
 
-#### User Manual and sample updates
+We've been working on an ARM-native StoryBuilder for many months without a lot of progress,
+but with the release of Windows App SDK 1.2 and .NET7, both of which report improved ARM64
+support, we're hopeful that we'll be able to get this working in 2.5.
 
-We've updated the User Manual and several sample outlines to improve the documentation
-and to reflect changes in the app. As with the codebase cleanup, this will be an
-ongoing process. The User Manual changes are still mostly structural, and we're
-well aware that line and copy edits are needed. We'll be working on those in future
-releases.
+### Codebase cleanup (#439)
 
-#### Bug fixes:
-
-* Fixed a bug preventing cast information from being saved.
-* Fixes several issues causing progdram crashes.
-* Fixed some issues relating to topics. Besides in-line topic
-  data (topic/subtopic/notes), it's possible for a topic to 
-  launch Notepad to display a file. This fix has that working.
-* Fixed some issues with tracking changes.
-
-## Next Release
-
-Our next Release will be 2.4.0.0, planned for around November 1st.
-
-We expect that this next release will include the following features:
-
-### Windows App SDK Api 1.2
-
-We are hopeful that 1.2 contains features which will help with several
-StoryBuilder concerns, including drag-and-drop, printing (Print Manager),
-and MSTest integration. 1.2 can't be used with Windows Store apps until
-it's production, which should be around the November 1 timeframe. We'll
-develop our 2.4 release using the experimental channel of the Windows App SDK
-specifically for these features.
- 
-### UI Improvements
-
-#### Revised right-click menu
-
-The right-click menu is used to add new Story Elements, and to add new
-
-#### XAML cleanup
-
-StoryBuilder UI layout is done using Extensible Application Markup Language
-(XAML), a declarative language. One feature of XAML is Styles, which allow 
-certain layout settings such as margins and text size to be set once and reused 
-across the app for consistent appearance. 
-
-We haven't been using Styles in this way, and will use ResourceDictionary 
-style settings to standardize our layouts.
-
-#### Cast List revamp
-
-Scene Story Elements contain a Cast List control which, as its name implies,
-is used to list the characters in a scene. The Cast List control is based
-on a ListView and requires a convoluted set of interactions to add and
-delete cast members. We'd like to revise or replace the control with something
-easier for users.
-
-#### Highlight in-process node
-
-An outline is a tree of Story Elements which are displayed in the Navigation Pane. 
-Clicking (or touching) a Story Element node on the Navigation Pane displays that 
-Story Element’s content in the Content Pane. A node can also be right-clicked to
-display a commandbar flyout context menu. The current (clicked) node is highighted
-in the Navigation Pane, but the highlight is not very visible. Right-clicing a node
-momentarily highlights it but with the light theme it's almost impossible to see.
-We'd like to make the highlighting of the two nodes more visible.
-
-#### Loading indicator
-
-Several tasks, notably printing reports and loading installation data, take 
-a bit of time. We'd like a progress indicator for these tasks.
-
-### Default Preferences
-
-Some Preferences data, such as the default outline and backup folder locations,
-should be set to appropriate defaults. 
-
-### Search engine choice
-
-Be able to select the search engine to use with Webpages. The values we'll
-start with are:
-- Google
-- DuckDuckGo
-- Bing
-- Yahoo
-
-### Codebase cleanup
-
-The codebase cleanup from 2.3 continues. For consistencey we're using ReSharper 
+The codebase cleanup from 2.3 and 2.4 continues. For consistencey we're using ReSharper 
 to identify and many cases correct the warnings and standards violations.
 
-## Ongoing Issues
+### Remove Id property #396
 
-### Drag and Drop is buggy (#312)
+We also want to provide for users to report documentation isses and recommendations.
+Each page of the User Manual contains an 'Improve this page.' link footer. The
+link opens an issue on GitHub. We'll add documention and an example (issues # 384). 
 
-While powerful, when dragging and dropping story nodes to reorder them
-can and has caused a lot of inappropriate things to happen. For example,
-moving stuff to the trashcan, which causes issues as it's not able 
-to be track if the node being trashed is used elsewhere in the code.
-Deleting a currently-used story element can and does cause issues. 
+### Master Plots should be copied as a Problem rather than Scene (#260)
 
-We've tried using drag and drop events to restrict what and where a
-node can be dropped, but the event support has problems. We're told
-this may be fixed in Windows App SDK 1.2, and will test this. 
+Self-descriptive.
 
-#### Status:
+### Add an 'Overview and Main Story Problem' template for new story creation (#151)
 
-This has been reported by us to Microsoft as a WinUI 3 issue:
-https://github.com/microsoft/microsoft-ui-xaml/issues/7266
+Self-descriptive.
 
-It's one of a series of related issues:
-https://github.com/microsoft/microsoft-ui-xaml/issues/7002
-https://github.com/microsoft/microsoft-ui-xaml/issues/7007
-https://github.com/microsoft/microsoft-ui-xaml/issues/7231
+## Ongoing and Deferred Issues
 
-In the meantime, we recommend being very careful when using Drag-and-Drop
-to rearrange the Navigation Tree nodes (this is the only Drag-and-Drop
-StoryBuilder supports.)
-
-### ARM64 Support (Issue #108)
-
-ARM devices are the way forward for more affordable comptuter systems, 
-and Microsoft permits compiles to ARM64 and Intel x86 and x64
-architectures.  We want to build for all three device families.
-
-Support for ARM64 processors has been a longstanding issue 
-for us- specifically, figuring out what's wrong without much
-information given. We're trying to find 'the what really causes the issues.
-
-With Windows App SDK 1.2 production, whichhas improved ARM64 support. we may 
-be able to get some more traction, but won't be working on it in the 2.4 release.
-
-#### Status: 
-
-We've been working on this since January 2022 and aquired a Samsung
-tablet to test with. We've made some progress, but don't have a 
-functional StoryBuilder deployment that works on ARM64 devices.
-
-We've acquired a second test computer, a Surface X, and are working on this as time permits.
-
-### Implement a Print Manager for printed reports (#157)
+### Implement a Print Manager for printed reports (#157) (Planned for 2.6)
 
 A Print Manager dialog should be part of the Print Report menu. The ability to select a printer and specify its options is essential for 
 StoryBuilder print reports.
@@ -201,9 +72,61 @@ We'll implment this as soon as the API supports it. In the meantime,
 use the workaround, which is to set the default printer to the printer
 you'd like to print StoryBuilder reports on. This can include PDFs.
 
-Will check on status with Windows App SDK API 1.2.
+As of 11/15/2022 (with WinAppSdk 1.2) The Print Manager is available and works
+with Windows 11 and supposedly with Windows 10. We have a sample project which
+uses it. We need to integrate the PrintManager code into our existing reports.
 
-## Selected Future Updates 
+### Drag and Drop is buggy (#312) (Planned for Release 2.6)
+
+While powerful, when dragging and dropping story nodes to reorder them
+can and has caused a lot of inappropriate things to happen. For example,
+moving stuff to the trashcan, which causes issues as it's not able 
+to be track if the node being trashed is used elsewhere in the code.
+Deleting a currently-used story element can and does cause issues. 
+
+We've tried using drag and drop events to restrict what and where a
+node can be dropped, but the event support has problems.
+
+We're told this may be fixed in Windows App SDK 1.2, and will test this. 
+If so, we'll add it to the next release.
+
+#### Status:
+
+This has been reported by us to Microsoft as a WinUI 3 issue:
+https://github.com/microsoft/microsoft-ui-xaml/issues/7266
+
+It's one of a series of related issues:
+https://github.com/microsoft/microsoft-ui-xaml/issues/7002
+https://github.com/microsoft/microsoft-ui-xaml/issues/7007
+https://github.com/microsoft/microsoft-ui-xaml/issues/7231
+
+A/O 11/15/2022, awaiting testing.
+
+In the meantime, we recommend being very careful when using Drag-and-Drop
+to rearrange the Navigation Tree nodes (this is the only Drag-and-Drop
+StoryBuilder supports.)
+
+### ARM64 Support (Issue #108)
+
+ARM devices are the way forward for more affordable comptuter systems, 
+and Microsoft permits compiles to ARM64 and Intel x86 and x64
+architectures.  We want to build for all three device families.
+
+Support for ARM64 processors has been a longstanding issue 
+for us- specifically, figuring out what's wrong without much
+information given. We're trying to find 'the what really causes the issues.
+
+#### Status: 
+
+We've been working on this since January 2022 and aquired a Samsung
+tablet to test with. We've made some progress, but don't have a 
+functional StoryBuilder deployment that works on ARM64 devices.
+
+We've acquired a second test computer, a Surface X, and are working on this as time permits.
+
+With Windows App SDK 1.2 production and .NET 7, which have improved ARM64 support. we may 
+be able to get some more traction, but the Windows App SDK was delayed and we missed Release 2.4
+In process for Release 2.5.
 
 ### Picture pickers for characters and settings (#53)
 
