@@ -133,11 +133,11 @@ public class SettingViewModel : ObservableRecipient, INavigable
         set => SetProperty(ref _touch, value);
     }
 
-    private string _smelltaste;
+    private string _smellTaste;
     public string SmellTaste
     {
-        get => _smelltaste;
-        set => SetProperty(ref _smelltaste, value);
+        get => _smellTaste;
+        set => SetProperty(ref _smellTaste, value);
     }
 
     // Setting notes data

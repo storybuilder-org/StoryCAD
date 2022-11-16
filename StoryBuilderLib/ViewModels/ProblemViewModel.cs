@@ -7,7 +7,6 @@ using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Data;
 using StoryBuilder.Controls;
 using StoryBuilder.Models;
 using StoryBuilder.Services.Logging;
@@ -350,9 +349,6 @@ public class ProblemViewModel : ObservableRecipient, INavigable
     public ObservableCollection<string> OutcomeList;
     public ObservableCollection<string> MethodList;
     public ObservableCollection<string> ThemeList;
-
-    public ICollectionView CharacterList;
-
     #endregion;
 
     #region Constructors

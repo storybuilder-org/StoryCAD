@@ -23,26 +23,12 @@ public class SaveAsViewModel : ObservableRecipient
         get => _projectPathName;
         set => SetProperty(ref _projectPathName, value);
     }
-
-    private bool _projectFolderExists;
-    public bool ProjectFolderExists 
-    {
-        get => _projectFolderExists;
-        set => _projectFolderExists = value;
-    }
         
     private StorageFolder _parentFolder;
     public StorageFolder ParentFolder 
     {
         get => _parentFolder;
         set => _parentFolder = value; 
-    }
-
-    private StorageFolder _saveAsProjectFolder;
-    public StorageFolder SaveAsProjectFolder 
-    {
-        get => _saveAsProjectFolder;
-        set => _saveAsProjectFolder = value;
     }
 
     private string _saveAsProjectFolderPath;

@@ -129,7 +129,7 @@ public class PreferencesViewModel : ObservableRecipient
         await _prfIo.UpdateFile();
         PreferencesIo _loader = new(GlobalData.Preferences, Path.Combine(ApplicationData.Current.RoamingFolder.Path, "Storybuilder"));
         await _loader.UpdateModel();
-        BackendService _backend = Ioc.Default.GetService<BackendService>();
+        BackendService _backend = Ioc.Default.GetRequiredService<BackendService>();
         GlobalData.Preferences.RecordPreferencesStatus = false;  // indicate need to update
         await _backend.PostPreferences(GlobalData.Preferences);
     }

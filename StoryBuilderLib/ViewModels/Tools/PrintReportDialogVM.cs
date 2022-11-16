@@ -162,9 +162,9 @@ public class PrintReportDialogVM : ObservableRecipient
     public void StartGeneratingReports()
     {
         ShowLoadingBar = true;
-        BackgroundWorker _backgroundthread = new();
-        _backgroundthread.DoWork += GenerateReports;
-        _backgroundthread.RunWorkerAsync();
+        BackgroundWorker _backgroundThread = new();
+        _backgroundThread.DoWork += GenerateReports;
+        _backgroundThread.RunWorkerAsync();
     }
 
     private async void GenerateReports(object sender, DoWorkEventArgs e)

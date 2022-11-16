@@ -258,11 +258,11 @@ public class ShellViewModel : ObservableRecipient
         set => SetProperty(ref _printNodeVisibility, value);
     }
 
-    private Visibility _emptyTrashVisibilty;
+    private Visibility _emptyTrashVisibility;
     public Visibility EmptyTrashVisibility
     {
-        get => _emptyTrashVisibilty;
-        set => SetProperty(ref _emptyTrashVisibilty, value);
+        get => _emptyTrashVisibility;
+        set => SetProperty(ref _emptyTrashVisibility, value);
     }
 
     // Status Bar properties
@@ -310,14 +310,6 @@ public class ShellViewModel : ObservableRecipient
         get => _changeStatusColor;
         set => SetProperty(ref _changeStatusColor, value);
     }
-
-    private string _newNodeName;
-    public string NewNodeName
-    {
-        get => _newNodeName;
-        set => SetProperty(ref _newNodeName, value);
-    }
-
     #endregion
 
     #region Static members  
@@ -469,7 +461,7 @@ public class ShellViewModel : ObservableRecipient
             }
 
 
-            GlobalData.MainWindow.Title = $"StoryBuilder - Editing {dialogVM.ProjectName.Replace(".stbx", "")}";
+            GlobalData.MainWindow.Title = $"StoryBuilder - Editing {dialogVM.ProjectName!.Replace(".stbx", "")}";
             SetCurrentView(StoryViewType.ExplorerView);
             //TODO: Set expand and is selected?
 
@@ -597,8 +589,8 @@ public class ShellViewModel : ObservableRecipient
         catch (Exception _e)
         {
             //TODO: Update with proper exception catching
-            if (_e.Source.Contains("Net")) { Logger.Log(LogLevel.Info, "Error with network, user probably isn't connected to wifi or is using an auto build"); }
-            if (_e.Source.Contains("Octokit.NotFoundException")) { Logger.Log(LogLevel.Info, "Error finding changelog for this version"); }
+            if (_e.Source!.Contains("Net")) { Logger.Log(LogLevel.Info, "Error with network, user probably isn't connected to wifi or is using an auto build"); }
+            if (_e.Source!.Contains("Octokit.NotFoundException")) { Logger.Log(LogLevel.Info, "Error finding changelog for this version"); }
             else { Logger.Log(LogLevel.Info, "Error in ShowChangeLog()"); }
         }
     }
@@ -607,21 +599,8 @@ public class ShellViewModel : ObservableRecipient
     {
         Logger.Log(LogLevel.Info, "ShowHomePage");
 
-        NavigationService _nav = Ioc.Default.GetService<NavigationService>();
+        NavigationService _nav = Ioc.Default.GetRequiredService<NavigationService>();
         _nav.NavigateTo(SplitViewFrame, HomePage);
-    }
-
-    /// <summary>
-    /// Process the MainWindow's Closed event.
-    /// 
-    /// The user has clicked the window's close button.
-    /// Insure the file is saved before allowing the
-    /// app to terminate.
-    /// </summary>
-    public static void ProcessCloseButton()
-    {
-        //BUG: Process the close button
-        //throw new NotImplementedException();
     }
     private void TogglePane()
     {
@@ -648,36 +627,36 @@ public class ShellViewModel : ObservableRecipient
         switch (SplitViewFrame.CurrentSourcePageType.ToString())
         {
             case "StoryBuilder.Views.OverviewPage":
-                OverviewViewModel _ovm = Ioc.Default.GetService<OverviewViewModel>();
+                OverviewViewModel _ovm = Ioc.Default.GetRequiredService<OverviewViewModel>();
                 _ovm.SaveModel();
                 break;
             case "StoryBuilder.Views.ProblemPage":
-                ProblemViewModel _pvm = Ioc.Default.GetService<ProblemViewModel>();
+                ProblemViewModel _pvm = Ioc.Default.GetRequiredService<ProblemViewModel>();
                 _pvm.SaveModel();
                 break;
             case "StoryBuilder.Views.CharacterPage":
-                CharacterViewModel _cvm = Ioc.Default.GetService<CharacterViewModel>();
+                CharacterViewModel _cvm = Ioc.Default.GetRequiredService<CharacterViewModel>();
                 _cvm.SaveModel();
                 break;
             case "StoryBuilder.Views.ScenePage":
-                SceneViewModel _scvm = Ioc.Default.GetService<SceneViewModel>();
+                SceneViewModel _scvm = Ioc.Default.GetRequiredService<SceneViewModel>();
                 _scvm.SaveModel();
                 break;
             case "StoryBuilder.Views.FolderPage":
-                FolderViewModel _fpvm = Ioc.Default.GetService<FolderViewModel>();
-                _fpvm.SaveModel();
+                FolderViewModel _folderVM = Ioc.Default.GetRequiredService<FolderViewModel>();
+                _folderVM.SaveModel();
                 break;
             case "StoryBuilder.Views.SectionPage":
-                SectionViewModel _secpvm = Ioc.Default.GetService<SectionViewModel>();
-                _secpvm.SaveModel();
+                SectionViewModel _sectionVM = Ioc.Default.GetRequiredService<SectionViewModel>();
+                _sectionVM.SaveModel();
                 break;
             case "StoryBuilder.Views.SettingPage":
-                SettingViewModel _setvm = Ioc.Default.GetService<SettingViewModel>();
-                _setvm.SaveModel();
+                SettingViewModel _settingVM = Ioc.Default.GetRequiredService<SettingViewModel>();
+                _settingVM.SaveModel();
                 break;
             case "StoryBuilder.Views.WebPage":
-                WebViewModel _webvm = Ioc.Default.GetService<WebViewModel>();
-                _webvm.SaveModel();
+                WebViewModel _webVM = Ioc.Default.GetRequiredService<WebViewModel>();
+                _webVM.SaveModel();
                 break;
         }
     }
@@ -719,7 +698,6 @@ public class ShellViewModel : ObservableRecipient
                 //Make folder Picker work in Win32
                 WinRT.Interop.InitializeWithWindow.Initialize(_filePicker, GlobalData.WindowHandle);
                 _filePicker.CommitButtonText = "Project Folder";
-                PreferencesModel _prefs = GlobalData.Preferences;
                 //TODO: Use preferences project folder instead of DocumentsLibrary
                 //except you can't. Thanks, UWP.
                 _filePicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
@@ -746,13 +724,13 @@ public class ShellViewModel : ObservableRecipient
                 return;
             }
 
-            Ioc.Default.GetService<BackupService>().StopTimedBackup();
+            Ioc.Default.GetRequiredService<BackupService>().StopTimedBackup();
             //NOTE: BasicProperties.DateModified can be the date last changed
 
-            StoryReader _rdr = Ioc.Default.GetService<StoryReader>();
+            StoryReader _rdr = Ioc.Default.GetRequiredService<StoryReader>();
             StoryModel = await _rdr.ReadFile(StoryModel.ProjectFile);
 
-            if (GlobalData.Preferences.BackupOnOpen) { await Ioc.Default.GetService<BackupService>().BackupProject(); }
+            if (GlobalData.Preferences.BackupOnOpen) { await Ioc.Default.GetRequiredService<BackupService>().BackupProject(); }
 
             if (StoryModel.ExplorerView.Count > 0)
             {
@@ -761,7 +739,7 @@ public class ShellViewModel : ObservableRecipient
             }
             GlobalData.MainWindow.Title = $"StoryBuilder - Editing {StoryModel.ProjectFilename.Replace(".stbx", "")}";
             new UnifiedVM().UpdateRecents(Path.Combine(StoryModel.ProjectFolder.Path, StoryModel.ProjectFile.Name));
-            if (GlobalData.Preferences.TimedBackup) { Ioc.Default.GetService<BackupService>().StartTimedBackup(); }
+            if (GlobalData.Preferences.TimedBackup) { Ioc.Default.GetRequiredService<BackupService>().StartTimedBackup(); }
 
             ShowHomePage();
             if (GlobalData.Preferences.AutoSave) { _autoSaveTimer.Start(); }
@@ -788,7 +766,7 @@ public class ShellViewModel : ObservableRecipient
         Logger.Log(LogLevel.Trace, "Saving file");
         try //Updating the lost modified timer
         {
-            (StoryModel.StoryElements.StoryElementGuids[DataSource[0].Uuid] as OverviewModel).DateModified = DateTime.Now.ToString("d");
+            ((OverviewModel)StoryModel.StoryElements.StoryElementGuids[DataSource[0].Uuid]).DateModified = DateTime.Now.ToString("d");
         }
         catch (NullReferenceException) { Messenger.Send(new StatusChangedMessage(new("Failed to update Last Modified date", LogLevel.Warn))); } //This appears to happen when in narrative view but im not sure how to fix it.
 
@@ -833,7 +811,7 @@ public class ShellViewModel : ObservableRecipient
             StorageFile _file = StoryModel.ProjectFile;
             if (_file != null)
             {
-                StoryWriter _wtr = Ioc.Default.GetService<StoryWriter>();
+                StoryWriter _wtr = Ioc.Default.GetRequiredService<StoryWriter>();
                 //TODO: WriteFile isn't working; file is empty
                 await _wtr.WriteFile(StoryModel.ProjectFile, StoryModel);
                 // Prevent updates to the remote version of the file until
@@ -877,7 +855,7 @@ public class ShellViewModel : ObservableRecipient
             };
 
             //Sets needed data in VM and then shows the dialog
-            SaveAsViewModel _saveAsVM = Ioc.Default.GetService<SaveAsViewModel>();
+            SaveAsViewModel _saveAsVM = Ioc.Default.GetRequiredService<SaveAsViewModel>();
             // The default project name and project folder path are from the active StoryModel
             _saveAsVM.ProjectName = StoryModel.ProjectFilename;
             _saveAsVM.ProjectPathName = StoryModel.ProjectPath;
@@ -926,7 +904,7 @@ public class ShellViewModel : ObservableRecipient
     {
         Logger.Log(LogLevel.Trace, "VerifyReplaceOrCreated");
 
-        SaveAsViewModel _saveAsVM = Ioc.Default.GetService<SaveAsViewModel>();
+        SaveAsViewModel _saveAsVM = Ioc.Default.GetRequiredService<SaveAsViewModel>();
         _saveAsVM.SaveAsProjectFolderPath = _saveAsVM.ParentFolder.Path;
         if (File.Exists(Path.Combine(_saveAsVM.ProjectPathName, _saveAsVM.ProjectName)))
         {
@@ -1007,13 +985,6 @@ public class ShellViewModel : ObservableRecipient
         Microsoft.UI.Xaml.Application.Current.Exit();  // Win32
     }
 
-    private async Task CreateProjectFolder()
-    {
-        StorageFolder _folder = await StoryModel.ProjectFolder.CreateFolderAsync(StoryModel.ProjectFilename);
-        StoryModel.ProjectFolder = _folder;
-        StoryModel.ProjectPath = _folder.Path;
-    }
-
     private async Task CreateProjectFile()
     {
         StoryModel.ProjectFile = await StoryModel.ProjectFolder.CreateFileAsync(StoryModel.ProjectFilename, CreationCollisionOption.ReplaceExisting);
@@ -1043,7 +1014,7 @@ public class ShellViewModel : ObservableRecipient
         {
             // Save changes
             case ContentDialogResult.Primary:
-                await Ioc.Default.GetService<PreferencesViewModel>().SaveAsync();
+                await Ioc.Default.GetRequiredService<PreferencesViewModel>().SaveAsync();
                 Messenger.Send(new StatusChangedMessage(new("Preferences updated", LogLevel.Info, true)));
 
                 break;
@@ -1111,8 +1082,8 @@ public class ShellViewModel : ObservableRecipient
 
             if (_result == ContentDialogResult.Primary) // Copy command
             {
-                string _masterPlotName = Ioc.Default.GetService<MasterPlotsViewModel>().MasterPlotName;
-                MasterPlotModel _model = Ioc.Default.GetService<MasterPlotsViewModel>().MasterPlots[_masterPlotName];
+                string _masterPlotName = Ioc.Default.GetRequiredService<MasterPlotsViewModel>().MasterPlotName;
+                MasterPlotModel _model = Ioc.Default.GetRequiredService<MasterPlotsViewModel>().MasterPlots[_masterPlotName];
                 IList<MasterPlotScene> _scenes = _model.MasterPlotScenes;
                 foreach (MasterPlotScene _scene in _scenes)
                 {
@@ -1775,7 +1746,7 @@ public class ShellViewModel : ObservableRecipient
             _content.Children.Add(new ListView { ItemsSource = _foundNodes, HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center, Height = 300, Width = 480 });
 
             //Creates dialog and then shows it
-            ContentDialog _contentDialog = new()
+            _contentDialog = new()
             {
                 XamlRoot = GlobalData.XamlRoot,
                 Content = _content,
@@ -2036,6 +2007,7 @@ public class ShellViewModel : ObservableRecipient
     }
 
     private bool IsExplorerView() => CurrentViewType == StoryViewType.ExplorerView;
+    // ReSharper disable once UnusedMember.Local
     private bool IsNarratorView() => CurrentViewType == StoryViewType.NarratorView;
 
     #region MVVM  processing
@@ -2136,17 +2108,17 @@ public class ShellViewModel : ObservableRecipient
     public ShellViewModel()
     {
 
-        //_itemSelector = Ioc.Default.GetService<TreeViewSelection>();
+        //_itemSelector = Ioc.Default.GetRequiredService<TreeViewSelection>();
 
-        Messenger.Register<IsChangedRequestMessage>(this, (_, m) => { m.Reply(StoryModel.Changed); });
+        Messenger.Register<IsChangedRequestMessage>(this, (_, m) => { m.Reply(StoryModel!.Changed); });
         Messenger.Register<ShellViewModel, IsChangedMessage>(this, static (r, m) => r.IsChangedMessageReceived(m));
         Messenger.Register<ShellViewModel, StatusChangedMessage>(this, static (r, m) => r.StatusMessageReceived(m));
         Messenger.Register<ShellViewModel, NameChangedMessage>(this, static (r, m) => r.NameMessageReceived(m));
 
-        //Preferences = Ioc.Default.GetService<Preferences>();
-        Scrivener = Ioc.Default.GetService<ScrivenerIo>();
-        Logger = Ioc.Default.GetService<LogService>();
-        Search = Ioc.Default.GetService<SearchService>();
+        //Preferences = Ioc.Default.GetRequiredService<Preferences>();
+        Scrivener = Ioc.Default.GetRequiredService<ScrivenerIo>();
+        Logger = Ioc.Default.GetRequiredService<LogService>();
+        Search = Ioc.Default.GetRequiredService<SearchService>();
 
         StoryModel = new StoryModel();
 
@@ -2284,14 +2256,6 @@ public class ShellViewModel : ObservableRecipient
         _canExecuteCommands = true;    //Enables other commands from being used till this one is complete.
     }
     #endregion
-
-    [ComImport]
-    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-    [Guid("EECDBF0E-BAE9-4CB6-A68E-9598E1CB57BB")]
-    internal interface IWindowNative
-    {
-        IntPtr WindowHandle { get; }
-    }
 
     [ComImport]
     [Guid("3E68D4BD-7135-4D10-8018-9FB6D9F33FA1")]

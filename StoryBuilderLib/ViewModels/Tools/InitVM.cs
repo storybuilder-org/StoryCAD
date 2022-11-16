@@ -51,11 +51,11 @@ public class InitVM : ObservableRecipient
         set => SetProperty(ref _backupDir, value);
     }
 
-    private bool _errorlogging;
+    private bool _errorLogging;
     public bool ErrorLogging
     {
-        get => _errorlogging;
-        set => SetProperty(ref _errorlogging, value);
+        get => _errorLogging;
+        set => SetProperty(ref _errorLogging, value);
     }
 
     private bool _news;

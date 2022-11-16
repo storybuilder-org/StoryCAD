@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
@@ -44,17 +43,6 @@ public class CharacterViewModel : ObservableRecipient, INavigable
     public RelayCommand TraitCommand { get; }
 
     #endregion
-
-    /// <summary>
-    /// This enables the boxes in relationship view to be editable
-    /// </summary>
-    private bool _isLoaded;
-    public bool IsLoaded
-    {
-        get => _isLoaded;
-        set => SetProperty(ref _isLoaded, value);
-    }
-    
     // StoryElement data
 
     private Guid _uuid;
@@ -261,24 +249,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable
     {
         get => _relationshipNotes;
         set => SetProperty(ref _relationshipNotes, value);
-    }
-
-    private string _newRelationshipMember;
-    public string NewRelationshipMember
-    {
-        get => _newRelationshipMember;
-        set
-        {
-            if (RelationshipExists(value))
-            {
-                StatusMessage _smsg = new("Character is already in Relationships", LogLevel.Warn);
-                Messenger.Send(new StatusChangedMessage(_smsg));
-            }
-            SetProperty(ref _newRelationshipMember, value);
-            StoryElement _element = StringToStoryElement(value);
-            Messenger.Send(new StatusChangedMessage(new StatusMessage($"New cast member selected {_element.Name}", LogLevel.Info)));
-        }
-    }
+    } 
 
     // Character social data
 
@@ -792,10 +763,10 @@ public class CharacterViewModel : ObservableRecipient, INavigable
         //Sets up view model
         NewRelationshipViewModel _vm = new(Model);
         _vm.RelationTypes.Clear();
-        foreach (string _relationType in GlobalData.RelationTypes) { _vm.RelationTypes.Add(_relationType); }
+        foreach (string _relationshipType in GlobalData.RelationTypes) { _vm.RelationTypes.Add(_relationshipType); }
         _vm.ProspectivePartners.Clear(); //Prospective partners are chars who are not in a relationship with this char
-        StoryModel _model = ShellViewModel.GetModel();
-        foreach (StoryElement _character in _model.StoryElements.Characters)
+        StoryModel _storyModel = ShellViewModel.GetModel();
+        foreach (StoryElement _character in _storyModel.StoryElements.Characters)
         {
             if (_character == _vm.Member) continue;  // Skip me
             foreach (RelationshipModel _rel in CharacterRelationships)
@@ -845,7 +816,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable
                 if (_vm.InverseRelationship && !string.IsNullOrWhiteSpace(_vm.InverseRelationType))
                 {
                     bool _makeChar = true;
-                    foreach (RelationshipModel _relation in (_vm.SelectedPartner as CharacterModel).RelationshipList)
+                    foreach (RelationshipModel _relation in (_vm.SelectedPartner as CharacterModel)!.RelationshipList)
                     {
                         if (_relation.Partner == _vm.Member)
                         {
@@ -855,7 +826,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable
 
                     if (_makeChar)
                     {
-                        (_vm.SelectedPartner as CharacterModel).RelationshipList.Add(new(Uuid.ToString(), _vm.InverseRelationType));
+                        (_vm.SelectedPartner as CharacterModel)!.RelationshipList.Add(new(Uuid.ToString(), _vm.InverseRelationType));
                     }
 
 
@@ -884,30 +855,6 @@ public class CharacterViewModel : ObservableRecipient, INavigable
         }
     }
 
-    private void ClearActiveRelationship()
-    {
-        _changeable = false;
-
-        RelationType = string.Empty;
-        RelationshipTrait = string.Empty;
-        RelationshipAttitude = string.Empty;
-        RelationshipNotes = string.Empty;
-        SelectedRelationship = null;
-        CurrentRelationship = null;
-
-        _changeable = true;
-    }
-
-    /// <summary>
-    /// Test if the relationship to be added already exists.
-    /// </summary>
-    /// <param name="uuid">uuid of Partner to add</param>
-    /// <returns>true if found, false otherwise</returns>
-    private bool RelationshipExists(string uuid)
-    {
-        StoryElement _character = StringToStoryElement(uuid);
-        return CharacterRelationships.Any(relationship => _character == relationship.Partner);
-    }
 
     /// <summary>
     /// This opens and deals with the flaw tool
@@ -929,7 +876,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable
 
         if (_result == ContentDialogResult.Primary)   // Copy to Character Flaw  
         {
-            Flaw = Ioc.Default.GetService<FlawViewModel>().WoundSummary; //Sets the flaw.
+            Flaw = Ioc.Default.GetRequiredService<FlawViewModel>().WoundSummary; //Sets the flaw.
             _logger.Log(LogLevel.Info, "Flaw Finder complete");
         }
         else  // Cancel button pressed
@@ -955,7 +902,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable
 
         if (_result == ContentDialogResult.Primary)   // Copy to Character Trait 
         {
-            CharacterTraits.Add(Ioc.Default.GetService<TraitsViewModel>().Example);
+            CharacterTraits.Add(Ioc.Default.GetRequiredService<TraitsViewModel>().Example);
             _changed = true;
             ShellViewModel.ShowChange();
             _logger.Log(LogLevel.Info, "Trait Builder complete");

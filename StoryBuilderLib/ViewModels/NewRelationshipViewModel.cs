@@ -13,9 +13,7 @@ public class NewRelationshipViewModel : ObservableRecipient
     public StoryElement Member { get; set; }
 
     public ObservableCollection<StoryElement> ProspectivePartners;
-
-    public ObservableCollection<RelationshipModel> Relationships;
-
+    
     private StoryElement _selectedPartner;
     public StoryElement SelectedPartner 
     {

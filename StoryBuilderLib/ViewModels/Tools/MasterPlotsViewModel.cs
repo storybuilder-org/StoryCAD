@@ -29,13 +29,6 @@ public class MasterPlotsViewModel : ObservableRecipient
         set => SetProperty(ref _masterPlotNotes, value);
     }
 
-    private IList<MasterPlotScene> _masterPlotScenes;
-    public IList<MasterPlotScene> MasterPlotScenes
-    {
-        get => _masterPlotScenes;
-        set => SetProperty(ref _masterPlotScenes, value);
-    }
-
     #endregion
 
     #region ComboBox and ListBox sources

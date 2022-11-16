@@ -4,13 +4,11 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using Windows.Data.Xml.Dom;
 using CommunityToolkit.Mvvm.DependencyInjection;
-using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using StoryBuilder.Models;
 using StoryBuilder.Services.Logging;
-using Microsoft.UI.Xaml.Input;
 
 namespace StoryBuilder.ViewModels;
 
@@ -44,7 +42,7 @@ namespace StoryBuilder.ViewModels;
 public class StoryNodeItem : DependencyObject, INotifyPropertyChanged
 {
     private LogService _logger = Ioc.Default.GetRequiredService<LogService>();
-    private ShellViewModel _shellvm = Ioc.Default.GetRequiredService<ShellViewModel>();
+    private ShellViewModel _shellVM = Ioc.Default.GetRequiredService<ShellViewModel>();
 
     // is it INavigable?
     #region Properties
@@ -333,9 +331,9 @@ public class StoryNodeItem : DependencyObject, INotifyPropertyChanged
         XmlNamedNodeMap _attrs = node.Attributes;
         if (_attrs != null)
         {
-            Uuid = new Guid((string)_attrs.GetNamedItem("UUID")?.NodeValue);
-            string _type = (string)_attrs.GetNamedItem("Type")?.NodeValue;
-            switch (_type.ToLower()) //Fixes differences in casing between versions.
+            Uuid = new Guid(((string)_attrs.GetNamedItem("UUID")?.NodeValue)!);
+            string _nodeType = (string)_attrs.GetNamedItem("Type")?.NodeValue;
+            switch (_nodeType!.ToLower()) //Fixes differences in casing between versions.
             {
                 case "storyoverview":
                     Type = StoryItemType.StoryOverview;
@@ -414,8 +412,8 @@ public class StoryNodeItem : DependencyObject, INotifyPropertyChanged
 
         //Set source collection to either narrative view or explorer view, we use the first item [0] so we don't delete from trash.
         StoryNodeItem _sourceCollection;
-        if (storyView == StoryViewType.ExplorerView) { _sourceCollection = _shellvm.StoryModel.ExplorerView[0]; }
-        else { _sourceCollection = _shellvm.StoryModel.NarratorView[0]; }
+        if (storyView == StoryViewType.ExplorerView) { _sourceCollection = _shellVM.StoryModel.ExplorerView[0]; }
+        else { _sourceCollection = _shellVM.StoryModel.NarratorView[0]; }
 
         if (_sourceCollection.Children.Contains(this))
         {
@@ -462,8 +460,8 @@ public class StoryNodeItem : DependencyObject, INotifyPropertyChanged
     {
         if (storyView == StoryViewType.ExplorerView)
         {
-            _shellvm.StoryModel.ExplorerView[1].Children.Add(this);
-            Parent = _shellvm.StoryModel.ExplorerView[1];
+            _shellVM.StoryModel.ExplorerView[1].Children.Add(this);
+            Parent = _shellVM.StoryModel.ExplorerView[1];
         }
         //Narrative view nodes are not added to trash.
     }
@@ -471,10 +469,5 @@ public class StoryNodeItem : DependencyObject, INotifyPropertyChanged
     private void NotifyPropertyChanged(string propertyName)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-    }
-
-    public void Highlight(object sender, PointerRoutedEventArgs e)
-    {
-        Background = new SolidColorBrush(Colors.Red);
     }
 }

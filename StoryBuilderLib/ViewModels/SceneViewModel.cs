@@ -447,6 +447,7 @@ public class SceneViewModel : ObservableRecipient, INavigable
     /// </summary>
     /// <param name="sender"></param>
     /// <param name="e"></param>
+    // ReSharper disable once UnusedMember.Global
     public void ScenePurpose_SelectionChanged(object sender, ComboBoxSelectionChangedEventArgs e)
     {
         foreach (string _purpose in e.AddedItems)
@@ -455,6 +456,7 @@ public class SceneViewModel : ObservableRecipient, INavigable
             ScenePurpose.Remove(_purpose);
         OnPropertyChanged(ScenePurpose, new PropertyChangedEventArgs("ScenePurpose"));
     }
+
 
     private bool CastMemberExists(string uuid)
     {
@@ -506,8 +508,8 @@ public class SceneViewModel : ObservableRecipient, INavigable
         // Look for the StoryElement corresponding to the passed guid
         // (This is the normal approach)
         // Get the current StoryModel's StoryElementsCollection
-        StoryModel _model = ShellViewModel.GetModel();
-        StoryElementCollection _elements = _model.StoryElements;
+        StoryModel _shellVM = ShellViewModel.GetModel();
+        StoryElementCollection _elements = _shellVM.StoryElements;
         if (Guid.TryParse(value, out Guid _guid))
         {
             if (_elements.StoryElementGuids.ContainsKey(_guid)) { return _elements.StoryElementGuids[_guid]; }
@@ -546,9 +548,9 @@ public class SceneViewModel : ObservableRecipient, INavigable
         string _viewpointName = "No story viewpoint character selected";
 
         VpCharTipIsOpen = false;
-        StoryModel _model = ShellViewModel.GetModel();
-        StoryNodeItem _node = _model.ExplorerView[0];
-        OverviewModel _overview = (OverviewModel)_model.StoryElements.StoryElementGuids[_node.Uuid];
+        StoryModel _storyModel = ShellViewModel.GetModel();
+        StoryNodeItem _node = _storyModel.ExplorerView[0];
+        OverviewModel _overview = (OverviewModel)_storyModel.StoryElements.StoryElementGuids[_node.Uuid];
         //string viewpoint = overview?.Viewpoint;
         string _viewpoint = _overview?.Viewpoint != null ? _overview.Viewpoint : string.Empty;
         if (!_viewpoint.Equals(string.Empty))
@@ -557,7 +559,7 @@ public class SceneViewModel : ObservableRecipient, INavigable
         if (!_viewpointChar.Equals(string.Empty))
         {
             if (Guid.TryParse(_viewpointChar, out Guid _guid))
-                _viewpointName = "Story viewpoint character = " + _model.StoryElements.StoryElementGuids[_guid].Name;
+                _viewpointName = "Story viewpoint character = " + _storyModel.StoryElements.StoryElementGuids[_guid].Name;
             else
                 _viewpointName = "Story viewpoint character not found";
         }

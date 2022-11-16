@@ -9,11 +9,6 @@ using StoryBuilder.DAL;
 using StoryBuilder.Models;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.ViewModels;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.Web.WebView2.Core;
-using Windows.Storage.Streams;
-using System.IO;
-using Google.Protobuf.WellKnownTypes;
 
 namespace StoryBuilder.Services.Reports;
 

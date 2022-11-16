@@ -318,8 +318,8 @@ public class OverviewViewModel : ObservableRecipient, INavigable
         if (value == null || value.Equals(string.Empty)) {return null;}
 
         // Get the current StoryModel's StoryElementsCollection
-        StoryModel _model = ShellViewModel.GetModel();
-        StoryElementCollection _elements = _model.StoryElements;
+        StoryModel _storyModel = ShellViewModel.GetModel();
+        StoryElementCollection _elements = _storyModel.StoryElements;
         // legacy: locate the StoryElement from its Name
         foreach (StoryElement _element in _elements)  // Character or Setting??? Search both?
         {
@@ -347,14 +347,10 @@ public class OverviewViewModel : ObservableRecipient, INavigable
     public ObservableCollection<string> GenreList;
     public ObservableCollection<string> ViewpointList;
     public ObservableCollection<string> LiteraryTechniqueList;
-    public ObservableCollection<string> LiteraryStyleList;
     public ObservableCollection<string> VoiceList;
     public ObservableCollection<string> TenseList;
     public ObservableCollection<string> StyleList;
     public ObservableCollection<string> ToneList;
-
-    // StoryElement collections
-    public List<string> CharacterList;
 
     #endregion
 

@@ -6,13 +6,6 @@ namespace StoryBuilder.ViewModels;
 
 public class NewProjectViewModel : ObservableRecipient
 {
-    private string _selectedTemplate;
-
-    public string SelectedTemplate
-    {
-        get => _selectedTemplate;
-        set => SetProperty(ref _selectedTemplate, value);
-    }
     private string _projectName;
     public string ProjectName
     {
