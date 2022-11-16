@@ -1,3 +1,8 @@
+[Roadmap][24] / 
+[Change Log][25] / 
+[Issues](https://github.com/storybuilder-org/StoryBuilder-2/issues) /
+[Website][26] 
+
 # About StoryBuilder
 
 Our mission is to provide a free open-source resource for writers of all levels who struggle with the complexity of plotted fiction.
@@ -60,10 +65,6 @@ Strictly from the code side, take a look at [Programmer Notes][10].
 
 We will provide program demos video soon.
 
-## Roadmap
-
-Here's our [Roadmap][24].
-
 We group StoryBuilder's plans into a series of [GitHub Projects][18].
 
 Currently, we're completing the [Distribute StoryBuilder via WIndows Store][19] project.
@@ -116,4 +117,7 @@ We are most grateful for all of them- especially those who toil in the arena:
 [22]:https://github.com/terrycox/StoryBuilder-2/blob/master/PRIVACY_POLICY.TXT
 [23]:https://github.com/terrycox/StoryBuilder-2/blob/master/LICENSE.TXT
 [24]:https://github.com/storybuilder-org/StoryBuilder-2/blob/master/ROADMAP.md
+[25]:https://github.com/storybuilder-org/StoryBuilder-2/blob/master/CHANGELOG.md.
+[26]:https://storybuilder.org/
+[27]:https://apps.microsoft.com/store/detail/storybuilder/9PLBNHZV1XM2?hl=en-us&gl=us
 
