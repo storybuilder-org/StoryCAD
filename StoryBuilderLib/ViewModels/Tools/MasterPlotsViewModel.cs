@@ -17,8 +17,7 @@ public class MasterPlotsViewModel : ObservableRecipient
         set
         {
             SetProperty(ref _masterPlotName, value);
-            if (MasterPlots.ContainsKey(value))
-                MasterPlotNotes = MasterPlots[value].MasterPlotNotes;
+            if (MasterPlots.ContainsKey(value)) { MasterPlotNotes = MasterPlots[value].MasterPlotNotes; }
         }
     }
 

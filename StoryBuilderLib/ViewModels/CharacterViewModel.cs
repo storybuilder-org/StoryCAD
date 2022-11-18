@@ -592,8 +592,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable
         Id = Model.Id;
 
         CharacterTraits.Clear();
-        foreach (string _member in Model.TraitList)
-            CharacterTraits.Add(_member);
+        foreach (string _member in Model.TraitList) { CharacterTraits.Add(_member); }
 
         RelationType = string.Empty;
         RelationshipTrait = string.Empty;
@@ -650,8 +649,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable
             Model.Stability = Stability;
             Model.TraitList.Clear();
                 
-            foreach (string _element in CharacterTraits)
-                Model.TraitList.Add(_element);
+            foreach (string _element in CharacterTraits) { Model.TraitList.Add(_element); }
                 
             SaveRelationship(CurrentRelationship);  // Save any current changes
             CurrentRelationship = null;
@@ -697,10 +695,8 @@ public class CharacterViewModel : ObservableRecipient, INavigable
 
     private static StoryElement StringToStoryElement(string value)
     {
-        if (value == null)
-            return null;
-        if (value.Equals(string.Empty))
-            return null;
+        if (value == null || value.Equals(string.Empty)) {return null;}
+
         // Get the current StoryModel's StoryElementsCollection
         StoryModel _model = ShellViewModel.GetModel();
         StoryElementCollection _elements = _model.StoryElements;

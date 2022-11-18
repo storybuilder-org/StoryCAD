@@ -13,8 +13,6 @@ namespace StoryBuilder.ViewModels;
 public class SectionViewModel : ObservableRecipient, INavigable
 {
     #region Fields
-
-
     private readonly LogService _logger;
     private bool _changeable; // process property changes for this story element
     private bool _changed;    // this story element has changed
@@ -110,9 +108,6 @@ public class SectionViewModel : ObservableRecipient, INavigable
 
             // Write RYG file
             Model.Notes = Notes;
-
-            //_logger.Log(LogLevel.Info, string.Format("Requesting IsDirty change to true"));
-            //Messenger.Send(new IsChangedMessage(Changed));
         }
     }
 

@@ -56,7 +56,7 @@
                 <Button.Flyout>
                     <Flyout>
                         <StackPanel>
-                            <TextBox Header="Name of Section:" Margin="5" Width="250" Text="{x:Bind ToolVM.FlyoutText,Mode=TwoWay}" />
+                            <TextBox Header="Name of Section:" Margin="5" Width="250" Text="{x:Bind ToolVM.NewSectionName,Mode=TwoWay}" />
                             <Button Content="Create section" HorizontalAlignment="Center" Margin="5" Command="{x:Bind ToolVM.CreateFlyout}"/>
                         </StackPanel>
                     </Flyout>

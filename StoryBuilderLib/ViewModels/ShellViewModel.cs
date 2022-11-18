@@ -333,8 +333,7 @@ public class ShellViewModel : ObservableRecipient
     public static void ShowChange()
     {
 
-        if (ShellInstance.StoryModel.Changed)
-            return;
+        if (ShellInstance.StoryModel.Changed) { return; }
         ShellInstance.StoryModel.Changed = true;
         ShellInstance.ChangeStatusColor = Colors.Red;
     }
@@ -352,14 +351,7 @@ public class ShellViewModel : ObservableRecipient
             _canExecuteCommands = true;
             return;
         }
-
-        PrintReportDialogVM _printVM = Ioc.Default.GetRequiredService<PrintReportDialogVM>();
-        _printVM.SelectedNodes.Clear(); //Makes sure only one node is selected
-
-        if (RightTappedNode.Type == StoryItemType.StoryOverview) { _printVM.CreateOverview = true; }
-        else { _printVM.SelectedNodes.Add(RightTappedNode); }
-
-        await new PrintReports(_printVM, StoryModel).Generate();
+        await Ioc.Default.GetRequiredService<PrintReportDialogVM>().PrintSingleNode(RightTappedNode);
     }
 
     private void CloseUnifiedMenu() { _contentDialog.Hide(); }
@@ -368,11 +360,7 @@ public class ShellViewModel : ObservableRecipient
     {
         _canExecuteCommands = false;
         // Needs logging
-        _contentDialog = new()
-        {
-            XamlRoot = GlobalData.XamlRoot,
-            Content = new UnifiedMenuPage()
-        };
+        _contentDialog = new() { XamlRoot = GlobalData.XamlRoot, Content = new UnifiedMenuPage() };
         if (Microsoft.UI.Xaml.Application.Current.RequestedTheme == ApplicationTheme.Light) { _contentDialog.Background = new SolidColorBrush(Colors.LightGray); }
         await _contentDialog.ShowAsync();
         _canExecuteCommands = true;
@@ -541,7 +529,7 @@ public class ShellViewModel : ObservableRecipient
         }
         catch (Exception _e)
         {
-            Logger.LogException(LogLevel.Error, _e, "Error navigating in TreeViewNodeClicked");
+            Logger.LogException(LogLevel.Error, _e, "Error navigating in ShellVM.TreeViewNodeClicked");
         }
     }
 
@@ -568,7 +556,7 @@ public class ShellViewModel : ObservableRecipient
         {
             GitHubClient _client = new(new ProductHeaderValue("Stb2ChangelogGrabber"));
 
-            ContentDialog _changelogUi = new()
+            ContentDialog _changelogUI = new()
             {
                 Width = 800,
                 Content = new ScrollViewer
@@ -584,7 +572,7 @@ public class ShellViewModel : ObservableRecipient
                 PrimaryButtonText = "Okay",
                 XamlRoot = GlobalData.XamlRoot
             };
-            await _changelogUi.ShowAsync();
+            await _changelogUI.ShowAsync();
         }
         catch (Exception _e)
         {
@@ -619,11 +607,10 @@ public class ShellViewModel : ObservableRecipient
     /// <returns></returns>
     private void SaveModel()
     {
-        if (SplitViewFrame.CurrentSourcePageType is null)
-            return;
+        if (SplitViewFrame.CurrentSourcePageType is null){ return;}
+        
         Logger.Log(LogLevel.Trace, $"SaveModel- Page type={SplitViewFrame.CurrentSourcePageType}");
-        if (SplitViewFrame.CurrentSourcePageType == null)
-            return;
+
         switch (SplitViewFrame.CurrentSourcePageType.ToString())
         {
             case "StoryBuilder.Views.OverviewPage":
@@ -666,7 +653,7 @@ public class ShellViewModel : ObservableRecipient
     /// Opens a file picker to let the user chose a .stbx file and loads said file
     /// If fromPath is specified then the picker is skipped.
     /// </summary>
-    /// <param name="fromPath"></param>
+    /// <param name="fromPath">Path to open file from (Optional)</param>
     public async Task OpenFile(string fromPath = "")
     {
         if (GlobalData.Preferences.AutoSave)
@@ -795,13 +782,11 @@ public class ShellViewModel : ObservableRecipient
     private async void AutoSaveTimer_Tick(object sender, object e)
     {
         if (GlobalData.Preferences.AutoSave) { await SaveFile(); }
-
     }
 
     /// <summary>
     /// Write the current StoryModel to the backing project file
     /// </summary>
-    /// <returns>Task (async function)</returns>
     private async Task WriteModel()
     {
         Logger.Log(LogLevel.Info, $"In WriteModel, file={StoryModel.ProjectFilename}");
@@ -828,7 +813,6 @@ public class ShellViewModel : ObservableRecipient
         }
         Logger.Log(LogLevel.Info, "WriteModel successful");
     }
-
 
     private async void SaveFileAs()
     {
@@ -955,7 +939,7 @@ public class ShellViewModel : ObservableRecipient
 
     private void ResetModel()
     {
-        StoryModel = new StoryModel();
+        StoryModel = new();
         //TODO: Raise event for StoryModel change?
     }
 
@@ -988,7 +972,6 @@ public class ShellViewModel : ObservableRecipient
     private async Task CreateProjectFile()
     {
         StoryModel.ProjectFile = await StoryModel.ProjectFolder.CreateFileAsync(StoryModel.ProjectFilename, CreationCollisionOption.ReplaceExisting);
-        //Story.ProjectFolder = await Story.ProjectFile.GetParentAsync();
     }
 
     #endregion
@@ -1082,8 +1065,9 @@ public class ShellViewModel : ObservableRecipient
 
             if (_result == ContentDialogResult.Primary) // Copy command
             {
-                string _masterPlotName = Ioc.Default.GetRequiredService<MasterPlotsViewModel>().MasterPlotName;
-                MasterPlotModel _model = Ioc.Default.GetRequiredService<MasterPlotsViewModel>().MasterPlots[_masterPlotName];
+                MasterPlotsViewModel _masterPlotsVM = Ioc.Default.GetRequiredService<MasterPlotsViewModel>();
+                string _masterPlotName = _masterPlotsVM.MasterPlotName;
+                MasterPlotModel _model = _masterPlotsVM.MasterPlots[_masterPlotName];
                 IList<MasterPlotScene> _scenes = _model.MasterPlotScenes;
                 foreach (MasterPlotScene _scene in _scenes)
                 {
@@ -1091,8 +1075,7 @@ public class ShellViewModel : ObservableRecipient
 
                     if (RightTappedNode == null)
                     {
-                        Messenger.Send(new StatusChangedMessage(new("You need to right click a node to",
-                            LogLevel.Info)));
+                        Messenger.Send(new StatusChangedMessage(new("You need to right click a node to", LogLevel.Info)));
                         return;
                     }
 
@@ -1102,8 +1085,7 @@ public class ShellViewModel : ObservableRecipient
                     _newNode.IsSelected = true;
                 }
 
-                Messenger.Send(new StatusChangedMessage(new($"MasterPlot {_masterPlotName} inserted", LogLevel.Info,
-                    true)));
+                Messenger.Send(new StatusChangedMessage(new($"MasterPlot {_masterPlotName} inserted", LogLevel.Info, true)));
                 ShowChange();
                 Logger.Log(LogLevel.Info, "MasterPlot complete");
             }
@@ -1226,6 +1208,7 @@ public class ShellViewModel : ObservableRecipient
 
     private async void GenerateScrivenerReports()
     {
+        //TODO: revamp this to be more user friendly.
         _canExecuteCommands = false;
         Messenger.Send(new StatusChangedMessage(new("Generate Scrivener Reports executing", LogLevel.Info, true)));
         SaveModel();
@@ -1257,6 +1240,9 @@ public class ShellViewModel : ObservableRecipient
         _canExecuteCommands = true;
     }
 
+    /// <summary>
+    /// Opens help menu
+    /// </summary>
     private void LaunchGitHubPages()
     {
         _canExecuteCommands = false;

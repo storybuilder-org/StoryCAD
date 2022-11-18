@@ -53,8 +53,8 @@ public class TopicsViewModel : ObservableRecipient
     #region Public Methods
     public void LoadTopic(string topicName)
     {
-        if (topicName.Equals(string.Empty))
-            return;
+        if (topicName == null || topicName.Equals(string.Empty)) { return; } //Can't load topics that are null or empty.
+
         _topic = GlobalData.TopicsSource[TopicName];
         switch (_topic.TopicType)
         {
@@ -79,8 +79,7 @@ public class TopicsViewModel : ObservableRecipient
     public void NextSubTopic()
     {
         _index++;
-        if (_index >= SubTopicNames.Count)
-            _index = 0;
+        if (_index >= SubTopicNames.Count) { _index = 0; }
         SubTopicName = SubTopicNames[_index];
         SubTopicNote = SubTopicNotes[_index];
     }
@@ -88,8 +87,7 @@ public class TopicsViewModel : ObservableRecipient
     public void PreviousSubTopic()
     {
         _index--;
-        if (_index < 0)
-            _index = SubTopicNames.Count - 1;
+        if (_index < 0) { _index = SubTopicNames.Count - 1; }
         SubTopicName = SubTopicNames[_index];
         SubTopicNote = SubTopicNotes[_index];
     }

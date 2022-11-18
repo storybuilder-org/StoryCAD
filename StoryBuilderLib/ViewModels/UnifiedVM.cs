@@ -10,6 +10,14 @@ using StoryBuilder.Services.Dialogs;
 
 namespace StoryBuilder.ViewModels;
 
+/// <summary>
+/// UnifiedMenu/UnifiedVM is the file open menu for StoryBuilder.
+/// It's shown when StoryBuilder is first loaded besides from PreferenceInitialization
+/// which will be shown first if Preferences.Initialized is false.
+///
+/// Unified Menu shows the most recent files, sample stories and
+/// allows a user create a new story. 
+/// </summary>
 public class UnifiedVM : ObservableRecipient
 {
     private ShellViewModel _shell = Ioc.Default.GetService<ShellViewModel>();
@@ -44,6 +52,11 @@ public class UnifiedVM : ObservableRecipient
 
     /// <summary>
     /// This makes the UI one consistent color
+    ///
+    /// On Dark theme it's deep slate green and on 
+    /// light theme it's Light Gray.
+    ///
+    /// TODO: make user selectable
     /// </summary>
     private SolidColorBrush _adjustmentColor;
     public SolidColorBrush AdjustmentColor
@@ -63,12 +76,15 @@ public class UnifiedVM : ObservableRecipient
     {
         SelectedRecentIndex = -1;
         ProjectName = string.Empty;
-        PreferencesModel _prefs = GlobalData.Preferences;
+        PreferencesModel _prefs = GlobalData.Preferences; //Sets to current user prefs to show recent files and last template
         ProjectPath = _prefs.ProjectDirectory;
     }
 
     public UnifiedMenuPage.UpdateContentDelegate UpdateContent;
 
+    /// <summary>
+    /// Hides this menu.
+    /// </summary>
     public void Hide()
     {
         _shell.CloseUnifiedCommand.Execute(null);

@@ -47,8 +47,8 @@
             <PivotItem Header="About">
                 <StackPanel>
                     <TextBlock Name="Version" HorizontalAlignment="Center" Margin="5"/>
-                    <Button Content="Open Logs folder" HorizontalAlignment="Center" Click="OpenPath" Margin="5" Width="200"/>
-                    <Button Content="Join the StoryBuilder Discord!" HorizontalAlignment="Center" Click="OpenDiscordURL" Margin="5"/>
+                    <Button Content="Open Logs folder" HorizontalAlignment="Center" Click="OpenLogFolder" Margin="5" Width="200"/>
+                    <Button Content="Join the StoryBuilder Discord!" HorizontalAlignment="Center" Click="OpenDiscordUrl" Margin="5"/>
                     <TextBlock Text="StoryBuilder was created by Terry Cox, Jake Shaw (Rarisma) and Kyle Lemons" TextWrapping="WrapWholeWords" Margin="5" FontSize="13"/>
                 </StackPanel>
             </PivotItem>
@@ -66,8 +66,8 @@
                     <StackPanel Grid.Column="0">
                         <Button Content="Set Init to false" Click="SetInitToFalse" Width="200"/>
                         <Button Content="Throw exception" Click="ThrowException" Width="200"/>
-                        <Button Content="Attach Elmah" Click="AttachElmah" Width="200"/>
-                        <Button Content="Run InstallService" Click="Reinstall" Width="200"/>
+                        <Button Content="Attach Elmah" Click="{x:Bind Logger.AddElmahTarget}" Width="200"/>
+                        <Button Content="Run InstallService" Click="{x:Bind InstallVM.InstallFiles()}" Width="200"/>
                     </StackPanel>
                     <StackPanel VerticalAlignment="Bottom" Grid.Column="1" Margin="10,0,0,0">
                         <TextBlock Name="CPUArchitecture"/>

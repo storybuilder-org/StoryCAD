@@ -13,6 +13,16 @@ namespace StoryBuilder.ViewModels.Tools;
 
 public class PreferencesViewModel : ObservableRecipient
 {
+    #region Properties
+    
+    /// <summary>
+    /// Init is an 'undocumented' preference that controls
+    /// if the PreferencesInitialization Page is shown at boot.
+    ///
+    /// As this is the preferences page, the user has already gone
+    /// through preferences however Init can be set to false via
+    /// the Dev Menu (Shown if a debugger is attached.)
+    /// </summary>
     public bool Init = true;
     private string _backupDir;
     public string BackupDir
@@ -97,6 +107,7 @@ public class PreferencesViewModel : ObservableRecipient
         get => (int)_preferredSearchEngine;
         set => _preferredSearchEngine = (BrowserType)value;
     }
+    #endregion
 
     /// <summary>
     /// Saves the users preferences to disk.

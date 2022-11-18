@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
+using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml.Controls;
@@ -11,6 +12,8 @@ namespace StoryBuilder.ViewModels.Tools;
 public class PrintReportDialogVM : ObservableRecipient
 {
     public ContentDialog Dialog;
+
+    #region Properties
 
     private bool _showLoadingBar = true;
     public bool ShowLoadingBar
@@ -143,7 +146,12 @@ public class PrintReportDialogVM : ObservableRecipient
         get => _webNodes;
         set => SetProperty(ref _webNodes, value);
     }
+    #endregion
 
+    /// <summary>
+    /// This traverses a node and adds it to the relevant list.
+    /// </summary>
+    /// <param name="node"></param>
     public void TraverseNode(StoryNodeItem node)
     {
         switch (node.Type)
@@ -159,6 +167,10 @@ public class PrintReportDialogVM : ObservableRecipient
         foreach (StoryNodeItem _storyNodeItem in node.Children) { TraverseNode(_storyNodeItem); }
     }
 
+    /// <summary>
+    /// This starts report generation
+    /// (Calls GenerateReports() on a background worker)
+    /// </summary>
     public void StartGeneratingReports()
     {
         ShowLoadingBar = true;
@@ -167,14 +179,32 @@ public class PrintReportDialogVM : ObservableRecipient
         _backgroundThread.RunWorkerAsync();
     }
 
+    /// <summary>
+    /// This creates a reports 
+    /// </summary>
     private async void GenerateReports(object sender, DoWorkEventArgs e)
     {
-        PrintReportDialogVM _reportVM = Ioc.Default.GetRequiredService<PrintReportDialogVM>();
-        ShellViewModel _shellVM = Ioc.Default.GetRequiredService<ShellViewModel>();
-        PrintReports _rpt = new(_reportVM, _shellVM.StoryModel);
+        PrintReports _rpt = new(this, ShellViewModel.GetModel());
         await _rpt.Generate();
         ShowLoadingBar = false;
     }
 
+    /// <summary>
+    /// Hides the content dialog
+    /// </summary>
     public void CloseDialog() { Dialog.Hide(); }
+
+    /// <summary>
+    /// This prints a report of the node selected
+    /// </summary>
+    /// <param name="elementItem">Node to be printed.</param>
+    public async Task PrintSingleNode(StoryNodeItem elementItem)
+    {
+        SelectedNodes.Clear(); //Only print single node
+
+        PrintReports _rpt = new(this, ShellViewModel.GetModel());
+        await _rpt.Generate();
+
+        await new PrintReports(this, ShellViewModel.GetModel()).Generate();
+    }
 }

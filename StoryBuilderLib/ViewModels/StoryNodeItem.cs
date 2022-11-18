@@ -45,11 +45,11 @@ public class StoryNodeItem : DependencyObject, INotifyPropertyChanged
     private ShellViewModel _shellVM = Ioc.Default.GetRequiredService<ShellViewModel>();
 
     // is it INavigable?
-    #region Properties
-
     public event PropertyChangedEventHandler PropertyChanged;
 
     // StoryElement data
+
+    #region Properties
 
     private Guid _uuid;
     public Guid Uuid
@@ -94,6 +94,9 @@ public class StoryNodeItem : DependencyObject, INotifyPropertyChanged
     }
 
     private StoryItemType _type;
+    /// <summary>
+    /// Type of node
+    /// </summary>
     public StoryItemType Type
     {
         get => _type;
@@ -110,7 +113,9 @@ public class StoryNodeItem : DependencyObject, INotifyPropertyChanged
     // TreeViewItem data
 
     private Symbol _symbol;
-
+    /// <summary>
+    /// Icon for this node, dependent on node type.
+    /// </summary>
     public Symbol Symbol
     {
         get => _symbol;
@@ -125,6 +130,9 @@ public class StoryNodeItem : DependencyObject, INotifyPropertyChanged
     }
 
     private StoryNodeItem _parent;
+    /// <summary>
+    /// Parent node of this node
+    /// </summary>
     public StoryNodeItem Parent
     {
         get => _parent;
@@ -139,14 +147,14 @@ public class StoryNodeItem : DependencyObject, INotifyPropertyChanged
     }
 
     private ObservableCollection<StoryNodeItem> _children;
+    /// <summary>
+    /// Child nodes of this node
+    /// </summary>
     public ObservableCollection<StoryNodeItem> Children
     {
         get
         {
-            if (_children == null)
-            {
-                _children = new ObservableCollection<StoryNodeItem>();
-            }
+            if (_children == null) { _children = new ObservableCollection<StoryNodeItem>(); }
             return _children;
         }
         set
@@ -160,6 +168,9 @@ public class StoryNodeItem : DependencyObject, INotifyPropertyChanged
     }
 
     private bool _isExpanded;
+    /// <summary>
+    /// Is this node expanded
+    /// </summary>
     public bool IsExpanded
     {
         get => _isExpanded;
@@ -171,12 +182,6 @@ public class StoryNodeItem : DependencyObject, INotifyPropertyChanged
                 NotifyPropertyChanged("IsExpanded");
             }
         }
-        //get => (bool)GetValue(IsExpandedProperty);
-        //set
-        //{
-        //    SetValue(IsExpandedProperty, value);
-        //    NotifyPropertyChanged("IsExpanded");
-        //}
     }
 
     /// <summary>
@@ -196,12 +201,8 @@ public class StoryNodeItem : DependencyObject, INotifyPropertyChanged
         }
     }
 
-    //// Use a DependencyProperty as the backing store for IsExpanded. 
-    //public static readonly DependencyProperty IsExpandedProperty =
-    //    DependencyProperty.Register("IsExpanded", typeof(bool), typeof(StoryNodeItem), new PropertyMetadata(false));
-
     private bool _isSelected;
-    public bool IsSelected 
+    public bool IsSelected
     {
         get => _isSelected;
         set
@@ -216,12 +217,15 @@ public class StoryNodeItem : DependencyObject, INotifyPropertyChanged
 
     public TextWrapping TextWrapping => GlobalData.Preferences.WrapNodeNames;
 
-    //// Use a DependencyProperty as the backing store for IsSelected
-    //public static readonly DependencyProperty IsSelectedProperty =
-    //    DependencyProperty.Register("IsSelected", typeof(bool), typeof(StoryNodeItem), new PropertyMetadata(false));
-
-
     private bool _isRoot;
+    /// <summary>
+    /// Denotes if this note is root
+    /// There should only be three root nodes
+    /// 
+    /// Narrative Root
+    /// Overview node
+    /// Trash node
+    /// </summary>
     public bool IsRoot
     {
         get => _isRoot;
@@ -238,11 +242,6 @@ public class StoryNodeItem : DependencyObject, INotifyPropertyChanged
     #endregion
 
     #region Public Methods
-    public override string ToString()
-    {
-        return Name;
-    }
-
     /// <summary>
     /// This method allows a dept-first search (DFS) or 'pre-order traversal' of
     /// a BinderItem tree or subtree with a simple C# foreach.
@@ -320,9 +319,8 @@ public class StoryNodeItem : DependencyObject, INotifyPropertyChanged
 
         IsExpanded = false;
         IsRoot = false;
-        //IsSelected = false;
-        if (Parent == null)
-            return;
+        
+        if (Parent == null) { return; }
         Parent.Children.Add(this);
     }
 

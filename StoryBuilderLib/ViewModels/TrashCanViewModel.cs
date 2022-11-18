@@ -7,10 +7,6 @@ namespace StoryBuilder.ViewModels;
 
 public class TrashCanViewModel : ObservableRecipient, INavigable
 {
-    #region Fields
-
-    #endregion
-
     #region Properties
 
     // StoryElement data

@@ -4,12 +4,9 @@ using StoryBuilder.Models;
 
 namespace StoryBuilder.ViewModels;
 
-//TODO: Figure out what to do with this
 public class NewRelationshipViewModel : ObservableRecipient
 {
     #region public Properties
-
-
     public StoryElement Member { get; set; }
 
     public ObservableCollection<StoryElement> ProspectivePartners;

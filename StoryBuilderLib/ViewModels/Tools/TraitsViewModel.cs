@@ -8,9 +8,6 @@ namespace StoryBuilder.ViewModels.Tools;
 
 public class TraitsViewModel: ObservableRecipient
 {
-    #region Fields
-    #endregion
-
     #region Properties
 
     private string _category;
@@ -36,16 +33,13 @@ public class TraitsViewModel: ObservableRecipient
         switch (Category)
         {
             case "Behaviors":
-                foreach (string _item in BehaviorList)
-                    ExampleList.Add("(Behavior): " + _item);
+                foreach (string _item in BehaviorList) { ExampleList.Add("(Behavior): " + _item); }
                 break;
             case "Habits":
-                foreach (string _item in HabitList)
-                    ExampleList.Add("(Habit): " + _item);
+                foreach (string _item in HabitList) { ExampleList.Add("(Habit): " + _item); }
                 break;
             case "Skills and Abilities":
-                foreach (string _item in SkillList)
-                    ExampleList.Add("(Skill): " + _item);
+                foreach (string _item in SkillList) { ExampleList.Add("(Skill): " + _item); }
                 break;
         }
     }
@@ -69,12 +63,7 @@ public class TraitsViewModel: ObservableRecipient
     public TraitsViewModel()
     {
         Dictionary<string, ObservableCollection<string>> _lists = GlobalData.ListControlSource;
-        CategoryList = new ObservableCollection<string>
-        {
-            "Behaviors",
-            "Habits",
-            "Skills and Abilities"
-        };
+        CategoryList = new ObservableCollection<string> { "Behaviors", "Habits", "Skills and Abilities" };
         ExampleList = new ObservableCollection<string>();
 
         BehaviorList = _lists["Behavior"];

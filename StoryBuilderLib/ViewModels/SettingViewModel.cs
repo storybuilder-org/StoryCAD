@@ -18,8 +18,6 @@ public class SettingViewModel : ObservableRecipient, INavigable
     #region Fields
 
     private readonly LogService _logger;
-    private readonly StoryReader _rdr;
-    private readonly StoryWriter _wtr;
     private bool _changeable; // process property changes for this story element
     private bool _changed;    // this story element has changed
 
@@ -226,9 +224,6 @@ public class SettingViewModel : ObservableRecipient, INavigable
             Model.Touch = Touch;
             Model.SmellTaste = SmellTaste;
             Model.Notes = Notes;
-
-            //_logger.Log(LogLevel.Info, string.Format("Requesting IsDirty change to true"));
-            //Messenger.Send(new IsChangedMessage(Changed));
         }
     }
 
@@ -245,8 +240,6 @@ public class SettingViewModel : ObservableRecipient, INavigable
     public SettingViewModel()
     {
         _logger = Ioc.Default.GetService<LogService>();
-        _wtr = Ioc.Default.GetService<StoryWriter>();
-        _rdr = Ioc.Default.GetService<StoryReader>();
 
         Locale = string.Empty;
         Season = string.Empty;

@@ -22,17 +22,9 @@ namespace StoryBuilder.ViewModels;
 /// </summary>
 public class OverviewViewModel : ObservableRecipient, INavigable
 {
-    /* Handing date fields and author:
-     * System.DateTime wrkDate = DateTime.FromOADate(0);
-       wrkDate = DateTime.Parse(DateTime.Parse(frmStory.DefInstance.mskDateCreated.Text).ToString("MM/dd/yy"));
-     * StoryRec.DateCreated.Value = wrkDate.ToString("MM-dd-yy");
-     */
-
     #region Fields
 
     private readonly LogService _logger;
-    private readonly StoryReader _rdr;
-    private readonly StoryWriter _wtr;
     private bool _changeable; // process property changes for this story element
     private bool _changed;    // this story element has changed
 
@@ -359,8 +351,6 @@ public class OverviewViewModel : ObservableRecipient, INavigable
     public OverviewViewModel()
     {
         _logger = Ioc.Default.GetService<LogService>();
-        _wtr = Ioc.Default.GetService<StoryWriter>();
-        _rdr = Ioc.Default.GetService<StoryReader>();
 
         Dictionary<string, ObservableCollection<string>> _lists = GlobalData.ListControlSource;
         StoryTypeList = _lists["StoryType"];
@@ -390,14 +380,6 @@ public class OverviewViewModel : ObservableRecipient, INavigable
         StoryProblem = string.Empty;
 
         PropertyChanged += OnPropertyChanged;
-
-        //CharacterList = CharacterModel.CharacterNames;
-
-        // TODO: Set good defaults for these
-        //System.DateTime wrkDate = DateTime.FromOADate(0);
-        //wrkDate = DateTime.Parse(Convert.ToDateTime(StoryRec.DateCreated.Value).ToString("MM/dd/yy"));
-        //frmStory.DefInstance.mskDateCreated.Text = StringsHelper.Format(wrkDate, "Medium Date");
-
     }
 
     #endregion

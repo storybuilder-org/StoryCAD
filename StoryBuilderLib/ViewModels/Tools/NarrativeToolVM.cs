@@ -9,25 +9,49 @@ using StoryBuilder.Models;
 using StoryBuilder.Services.Logging;
 
 namespace StoryBuilder.ViewModels.Tools;
+
+/// <summary>
+/// This is the ViewModel for the Narrative tool.
+/// It contains data used via the NarrativeTool ContentDialog.
+///
+/// NarrativeTool is used to construct the Narrator view, which is
+/// the order a story is really told in rather than explorer.
+/// Explorer view is the main view and is how the planning.
+///
+/// To open Narrative Tool you can press CRTL + N or access it
+/// through the Shell via the Tools Menu (Spanner Icon)
+/// </summary>
 public class NarrativeToolVM: ObservableRecipient
 {
     private ShellViewModel _shellVM = Ioc.Default.GetRequiredService<ShellViewModel>();
-    private LogService _logger = Ioc.Default.GetRequiredService<LogService>();
-    public StoryNodeItem SelectedNode;
+    private LogService _logger = Ioc.Default.GetRequiredService<LogService>(); 
+    public StoryNodeItem SelectedNode; //Currently selected node
     public bool IsNarratorSelected = false;
-    public RelayCommand CopyCommand { get; } 
-    public RelayCommand DeleteCommand { get; } 
+
+    #region Relay Commands
+    public RelayCommand CopyCommand { get; }
+    public RelayCommand DeleteCommand { get; }
     public RelayCommand CopyAllUnusedCommand { get; }
     public RelayCommand CreateFlyout { get; }
 
-    //Name of the section in the flyout
-    private string _flyoutText;
-    public string FlyoutText
+    #endregion
+
+
+    private string _newSectionName;
+    /// <summary>
+    /// Name of a new section
+    /// Bound to the new section name in the new section flyout area.
+    /// </summary>
+    public string NewSectionName
     {
-        get => _flyoutText;
-        set => SetProperty(ref _flyoutText, value);
+        get => _newSectionName;
+        set => SetProperty(ref _newSectionName, value);
     }
+
     private string _message;
+    /// <summary>
+    /// Message show to the user on the UI
+    /// </summary>
     public string Message
     {
         get => _message;
@@ -44,6 +68,8 @@ public class NarrativeToolVM: ObservableRecipient
 
     /// <summary>
     /// Deletes a node from the tree.
+    ///
+    /// TODO: Possibly Merge with StoryElement.Delete() Method
     /// </summary>
     public void Delete()
     {
@@ -68,6 +94,8 @@ public class NarrativeToolVM: ObservableRecipient
 
     /// <summary>
     /// Copies all scenes, if the node has children then it will copy all children that are scenes
+    ///
+    /// TODO: Possibly move to StoryElement and make bi-directional
     /// </summary>
     private void Copy()
     {
@@ -122,7 +150,6 @@ public class NarrativeToolVM: ObservableRecipient
 
     }
 
-
     private List<StoryNodeItem> RecursiveCheck(ObservableCollection<StoryNodeItem> list)
     {
         _logger.Log(LogLevel.Info, "New instance of Recursive check starting.");
@@ -151,7 +178,8 @@ public class NarrativeToolVM: ObservableRecipient
     }
 
     /// <summary>
-    /// Creates new section
+    /// Creates new section, with the name of NewSectionName
+    /// in the NarratorView tree
     /// </summary>
     private void MakeSection()
     {
@@ -160,7 +188,7 @@ public class NarrativeToolVM: ObservableRecipient
             _logger.Log(LogLevel.Warn, "DataSource is empty or null, not adding section");
             return;
         }
-        _ = new StoryNodeItem(new SectionModel(FlyoutText, _shellVM.StoryModel), _shellVM.StoryModel.NarratorView[0]);
+        _ = new StoryNodeItem(new SectionModel(NewSectionName, _shellVM.StoryModel), _shellVM.StoryModel.NarratorView[0]);
     }
 
     /// <summary>

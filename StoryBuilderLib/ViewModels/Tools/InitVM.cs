@@ -9,8 +9,20 @@ using System;
 
 namespace StoryBuilder.ViewModels.Tools;
 
+/// <summary>
+/// This is the PreferencesInitialization ViewModel, this data
+/// </summary>
 public class InitVM : ObservableRecipient
 {
+
+    /// <summary>
+    /// This is the constructor for InitVM.
+    /// It sets the paths for Path and Backup Path to
+    /// \Userfolder\Documents\StoryBuilder\ and then Projects or backups respectively.
+    ///
+    /// For example this would give the following path for me
+    /// C:\Users\Jake\Documents\StoryBuilder\Projects
+    /// </summary>
     public InitVM()
     {
        _path = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "StoryBuilder", "Projects");
@@ -65,6 +77,14 @@ public class InitVM : ObservableRecipient
         set => SetProperty(ref _news, value);
     }
 
+    /// <summary>
+    /// This saves and checks the input of the user.
+    /// It creates a new preferences model and stores the
+    /// inputs of the user such as path, name, email ect.
+    ///
+    /// This will then be saved and the backup path and project
+    /// path folders will be created.
+    /// </summary>
     public async void Save()
     {
         //Creates new preferences model and sets the values

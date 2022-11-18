@@ -20,13 +20,15 @@ namespace StoryBuilder.Services.Dialogs.Tools;
 public sealed partial class PreferencesDialog : Page
 {
     public PreferencesViewModel PreferencesVm => Ioc.Default.GetService<PreferencesViewModel>();
+    public InstallationService InstallVM => Ioc.Default.GetRequiredService<InstallationService>();
+    public LogService Logger => Ioc.Default.GetRequiredService<LogService>();
     public PreferencesDialog()
     {
         InitializeComponent();
         DataContext = PreferencesVm;
-        Version.Text = "StoryBuilder Version: " + Package.Current.Id.Version.Major + "." + Package.Current.Id.Version.Minor + "." + Package.Current.Id.Version.Build + "." + Package.Current.Id.Version.Revision;
+        Version.Text = GlobalData.Version;
         SetChangelog();
-
+        
         //TODO: Put this in a VM and make this data get logged at start up with some more system info.
         if (Debugger.IsAttached)
         {
@@ -39,10 +41,6 @@ public sealed partial class PreferencesDialog : Page
         }
         else
         {
-            Dev.Header = "";
-            Dev.Content = null;
-            Dev.IsEnabled = false;
-            Dev.Opacity = 0;
             PivotView.Items.Remove(Dev);
         }
     }
@@ -51,67 +49,68 @@ public sealed partial class PreferencesDialog : Page
     {
         try
         {
-            GitHubClient client = new(new ProductHeaderValue("Stb2ChangelogGrabber"));
+            GitHubClient client = new(new ProductHeaderValue("STB"));
             Changelog.Text = (await client.Repository.Release.Get("storybuilder-org", "StoryBuilder-2", GlobalData.Version.Replace("Version: ", ""))).Body;
         }
         catch
         {
-            Changelog.Text = "Failed to get changelog for this version, this because either:\n - You are running an autobuild version\n- There is an issue conntecting to Github";
+            //TODO: Use .NET7 Raw String Literal?
+            Changelog.Text = "Failed to get changelog for this version, this because either:" +
+                             "\n - You are running an autobuild version" +
+                             "\n- There is an issue conntecting to Github";
         }
 
     }
 
-    private void OpenPath(object sender, RoutedEventArgs e)
+    /// <summary>
+    /// Opens the Log Folder
+    /// </summary>
+    private void OpenLogFolder(object sender, RoutedEventArgs e)
     {
-        Process.Start(new ProcessStartInfo
-        {
-            FileName = Path.Combine(GlobalData.RootDirectory, "Logs"),
-            UseShellExecute = true,
-            Verb = "open"
-        });
+        Process.Start(new ProcessStartInfo { FileName = Path.Combine(GlobalData.RootDirectory, "Logs"), UseShellExecute = true, Verb = "open" });
     }
 
-    private void OpenDiscordURL(object sender, RoutedEventArgs e)
+    /// <summary>
+    /// This opens the user's browser to join the StoryBuilder Discord Server
+    /// </summary>
+    private void OpenDiscordUrl(object sender, RoutedEventArgs e)
     {
-        Process Browser = new();
-        Browser.StartInfo.FileName = @"https://discord.gg/wfZxU4bx6n";
-        Browser.StartInfo.UseShellExecute = true;
-        Browser.Start();
+        Process.Start(new ProcessStartInfo { FileName = @"https://discord.gg/wfZxU4bx6n", UseShellExecute = true, Verb = "open" });
     }
 
     private async void SetBackupPath(object sender, RoutedEventArgs e)
     {
-        FolderPicker folderPicker = new();
+        FolderPicker _folderPicker = new();
         if (Window.Current == null)
         {
-            //IntPtr hwnd = GetActiveWindow();
+            //TODO: Can this be put into a helper class or removed at some point with WinAppSDK updates?
             IntPtr hwnd = GlobalData.WindowHandle;
-            IInitializeWithWindow initializeWithWindow = folderPicker.As<IInitializeWithWindow>();
+            IInitializeWithWindow initializeWithWindow = _folderPicker.As<IInitializeWithWindow>();
             initializeWithWindow.Initialize(hwnd);
         }
 
-        folderPicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
-        folderPicker.FileTypeFilter.Add("*");
-        StorageFolder folder = await folderPicker.PickSingleFolderAsync();
-        if (folder != null)
+        _folderPicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
+        _folderPicker.FileTypeFilter.Add("*");
+        StorageFolder _folder = await _folderPicker.PickSingleFolderAsync();
+        if (_folder != null)
         {
-            Ioc.Default.GetRequiredService<PreferencesViewModel>().BackupDir = folder.Path;
+            Ioc.Default.GetRequiredService<PreferencesViewModel>().BackupDir = _folder.Path;
         }
     }
     private async void SetProjectPath(object sender, RoutedEventArgs e)
     {
-        FolderPicker folderPicker = new();
+        FolderPicker _folderPicker = new();
         if (Window.Current == null)
         {
             //IntPtr hwnd = GetActiveWindow();
-            IntPtr hwnd = GlobalData.WindowHandle;
-            IInitializeWithWindow initializeWithWindow = folderPicker.As<IInitializeWithWindow>();
-            initializeWithWindow.Initialize(hwnd);
+            IntPtr _hwnd = GlobalData.WindowHandle;
+            IInitializeWithWindow _initializeWithWindow = _folderPicker.As<IInitializeWithWindow>();
+            _initializeWithWindow.Initialize(_hwnd);
         }
 
-        folderPicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
-        folderPicker.FileTypeFilter.Add("*");
-        StorageFolder folder = await folderPicker.PickSingleFolderAsync();
+        _folderPicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
+        _folderPicker.FileTypeFilter.Add("*");
+        StorageFolder folder = await _folderPicker.PickSingleFolderAsync();
         if (folder != null)
         {
             Ioc.Default.GetRequiredService<PreferencesViewModel>().ProjectDir = folder.Path;
@@ -120,41 +119,25 @@ public sealed partial class PreferencesDialog : Page
     }
 
     [ComImport]
-    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-    [Guid("EECDBF0E-BAE9-4CB6-A68E-9598E1CB57BB")]
-    internal interface IWindowNative
-    {
-        IntPtr WindowHandle { get; }
-    }
-
-    [ComImport]
     [Guid("3E68D4BD-7135-4D10-8018-9FB6D9F33FA1")]
     [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-    public interface IInitializeWithWindow
-    {
-        void Initialize(IntPtr hwnd);
-    }
+    public interface IInitializeWithWindow { void Initialize(IntPtr hwnd); }
 
-    [DllImport("user32.dll", ExactSpelling = true, CharSet = CharSet.Auto, PreserveSig = true, SetLastError = false)]
-    public static extern IntPtr GetActiveWindow();
-
+    /// <summary>
+    /// This function throws an error as it is used to test errors.
+    /// </summary>
     private void ThrowException(object sender, RoutedEventArgs e)
     {
-        throw new NotImplementedException();
+        throw new NotImplementedException("This is a test exception thrown by the developer Menu and should be ignored.");
     }
 
+    /// <summary>
+    /// This sets init to false, meaning the next time
+    /// StoryBuilder is opened the PreferencesInitialization
+    /// page will be shown.
+    /// </summary>
     private void SetInitToFalse(object sender, RoutedEventArgs e)
     {
         PreferencesVm.Init = false;
-    }
-
-    private async void AttachElmah(object sender, RoutedEventArgs e)
-    {
-        await Ioc.Default.GetRequiredService<LogService>().AddElmahTarget();
-    }
-
-    private async void Reinstall(object sender, RoutedEventArgs e)
-    {
-        await Ioc.Default.GetRequiredService<InstallationService>().InstallFiles();
     }
 }

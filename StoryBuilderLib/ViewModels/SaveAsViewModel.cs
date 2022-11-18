@@ -5,9 +5,6 @@ namespace StoryBuilder.ViewModels;
 
 public class SaveAsViewModel : ObservableRecipient
 {
-    #region Fields
-    #endregion
-
     #region Properties
 
     private string _projectName;
@@ -37,13 +34,6 @@ public class SaveAsViewModel : ObservableRecipient
         get => _saveAsProjectFolderPath;
         set => _saveAsProjectFolderPath = value;
     }
-
-    #endregion
-
-    #region Public Methods
-    #endregion
-
-    #region Constructor
 
     #endregion
 }

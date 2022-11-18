@@ -21,8 +21,6 @@ namespace StoryBuilder.ViewModels;
 public class WebViewModel : ObservableRecipient, INavigable
 {
     ///TODO: Make sure queries are async
-    ///TODO: Do we need WebView2Core, WebView2Environment?
-
     #region Fields
 
     private bool _changed; // this story element has changed
@@ -193,10 +191,7 @@ public class WebViewModel : ObservableRecipient, INavigable
         LoadModel();
     }
 
-    public void Deactivate(object parameter)
-    {
-        SaveModel();
-    }
+    public void Deactivate(object parameter) { SaveModel(); }
 
     private void OnPropertyChanged(object sender, PropertyChangedEventArgs args)
     { 
@@ -206,6 +201,10 @@ public class WebViewModel : ObservableRecipient, INavigable
             ShellViewModel.ShowChange();
         }
     }
+
+    /// <summary>
+    /// Ran when this model is loaded.
+    /// </summary>
     private void LoadModel()
     {
         _changeable = false;
