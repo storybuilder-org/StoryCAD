@@ -101,7 +101,7 @@ public class WebViewModel : ObservableRecipient, INavigable
     /// This checks if webview is installed
     /// </summary>
     /// <returns>True if webview is installed</returns>
-    public Task<bool> CheckWebviewState(bool installIfMissing)
+    public Task<bool> CheckWebviewState()
     {
         try
         {
@@ -110,20 +110,16 @@ public class WebViewModel : ObservableRecipient, INavigable
                 return Task.FromResult(true);
             }
         }
-        catch 
-        {
-            if (installIfMissing) { ShowWebviewDialog(); }
-            return Task.FromResult(false);
-        }
-
+        catch { }
         return Task.FromResult(false);
+
     }
 
 
     /// <summary>
     /// This method installs the Evergreen webview runtime.
     /// </summary>
-    public async void ShowWebviewDialog()
+    public async Task ShowWebviewDialog()
     {
         Ioc.Default.GetRequiredService<LogService>().Log(LogLevel.Error, "Showing webview install dialog.");
 
@@ -155,12 +151,14 @@ public class WebViewModel : ObservableRecipient, INavigable
         await using Stream _resultStream = await _httpResult.Content.ReadAsStreamAsync(); //Read stream
         await using FileStream _fileStream = File.Create(Path.Combine(GlobalData.RootDirectory, "evergreenbootstrapper.exe")); //Create File.
         await _resultStream.CopyToAsync(_fileStream); //Write file
+        await _fileStream.FlushAsync(); //Flushes steam.
+        await _fileStream.DisposeAsync(); //Cleans up resources
 
         //Run installer and wait for it to finish
         await Process.Start(Path.Combine(GlobalData.RootDirectory, "evergreenbootstrapper.exe"))!.WaitForExitAsync();
         
         //Show success/fail dialog
-        ContentDialog _dialog = new() {PrimaryButtonText = "Ok"};
+        ContentDialog _dialog = new() {PrimaryButtonText = "Ok", XamlRoot = GlobalData.XamlRoot};
         try
         {
             _dialog.Title = "Webview installed!";
