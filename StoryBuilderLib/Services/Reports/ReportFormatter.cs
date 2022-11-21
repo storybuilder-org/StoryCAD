@@ -606,7 +606,7 @@ public class ReportFormatter
 
     public string FormatSectionReport(StoryElement element)
     {
-        SectionModel section = (SectionModel)element;
+        FolderModel section = (FolderModel)element;
         string[] lines = _templates["Section Description"];
         RtfDocument doc = new(string.Empty);
 

@@ -398,7 +398,7 @@ public class ShellViewModel : ObservableRecipient
             TrashCanModel _trash = new(StoryModel);
             StoryNodeItem _trashNode = new(_trash, null);
             StoryModel.ExplorerView.Add(_trashNode);     // The trashcan is the second root
-            SectionModel _narrative = new("Narrative View", StoryModel);
+            FolderModel _narrative = new("Narrative View", StoryModel, StoryItemType.Folder);
             StoryNodeItem _narrativeNode = new(_narrative, null) { IsRoot = true };
             StoryModel.NarratorView.Add(_narrativeNode);
             // Use the NewProjectDialog template to complete the model
@@ -407,13 +407,13 @@ public class ShellViewModel : ObservableRecipient
                 case 0:
                     break;
                 case 1:
-                    StoryElement _problems = new FolderModel("Problems", StoryModel);
+                    StoryElement _problems = new FolderModel("Problems", StoryModel, StoryItemType.Folder);
                     StoryNodeItem _problemsNode = new(_problems, _overviewNode);
-                    StoryElement _characters = new FolderModel("Characters", StoryModel);
+                    StoryElement _characters = new FolderModel("Characters", StoryModel, StoryItemType.Folder);
                     StoryNodeItem _charactersNode = new(_characters, _overviewNode);
-                    StoryElement _settings = new FolderModel("Settings", StoryModel);
+                    StoryElement _settings = new FolderModel("Settings", StoryModel, StoryItemType.Folder);
                     StoryNodeItem _settingsNode = new(_settings, _overviewNode);
-                    StoryElement _scene = new FolderModel("Scenes", StoryModel);
+                    StoryElement _scene = new FolderModel("Scenes", StoryModel, StoryItemType.Folder);
                     StoryNodeItem _plotpointsNode = new(_scene, _overviewNode);
                     break;
                 case 2:
@@ -429,13 +429,13 @@ public class ShellViewModel : ObservableRecipient
                     StoryNodeItem _antagonistNode = new(_antagonist, _overviewNode);
                     break;
                 case 4:
-                    StoryElement _problemsFolder = new FolderModel("Problems", StoryModel);
+                    StoryElement _problemsFolder = new FolderModel("Problems", StoryModel, StoryItemType.Folder);
                     StoryNodeItem _problemsFolderNode = new(_problemsFolder, _overviewNode) { IsExpanded = true };
-                    StoryElement _charactersFolder = new FolderModel("Characters", StoryModel);
+                    StoryElement _charactersFolder = new FolderModel("Characters", StoryModel, StoryItemType.Folder);
                     StoryNodeItem _charactersFolderNode = new(_charactersFolder, _overviewNode) { IsExpanded = true };
-                    StoryElement _settingsFolder = new FolderModel("Settings", StoryModel);
+                    StoryElement _settingsFolder = new FolderModel("Settings", StoryModel, StoryItemType.Folder);
                     StoryNodeItem _settingsFolderNode = new(_settingsFolder, _overviewNode);
-                    StoryElement _plotpointsFolder = new FolderModel("Plot Points", StoryModel);
+                    StoryElement _plotpointsFolder = new FolderModel("Plot Points", StoryModel, StoryItemType.Folder);
                     StoryNodeItem _plotpointsFolderNode = new(_plotpointsFolder, _overviewNode);
                     StoryElement _externalProb = new ProblemModel("External Problem", StoryModel);
                     StoryNodeItem _externalProbNode = new(_externalProb, _problemsFolderNode);
@@ -503,7 +503,7 @@ public class ShellViewModel : ObservableRecipient
                         _nav.NavigateTo(SplitViewFrame, ProblemPage, _element);
                         break;
                     case StoryItemType.Section:
-                        _nav.NavigateTo(SplitViewFrame, SectionPage, _element);
+                        _nav.NavigateTo(SplitViewFrame, FolderPage, _element);
                         break;
                     case StoryItemType.Folder:
                         _nav.NavigateTo(SplitViewFrame, FolderPage, _element);
@@ -515,7 +515,7 @@ public class ShellViewModel : ObservableRecipient
                         _nav.NavigateTo(SplitViewFrame, WebPage, _element);
                         break;
                     case StoryItemType.Notes:
-                        _nav.NavigateTo(SplitViewFrame, NotesPage, _element);
+                        _nav.NavigateTo(SplitViewFrame, FolderPage, _element);
                         break;
                     case StoryItemType.StoryOverview:
                         _nav.NavigateTo(SplitViewFrame, OverviewPage, _element);
@@ -633,10 +633,6 @@ public class ShellViewModel : ObservableRecipient
                 FolderViewModel _folderVM = Ioc.Default.GetRequiredService<FolderViewModel>();
                 _folderVM.SaveModel();
                 break;
-            case "StoryBuilder.Views.SectionPage":
-                SectionViewModel _sectionVM = Ioc.Default.GetRequiredService<SectionViewModel>();
-                _sectionVM.SaveModel();
-                break;
             case "StoryBuilder.Views.SettingPage":
                 SettingViewModel _settingVM = Ioc.Default.GetRequiredService<SettingViewModel>();
                 _settingVM.SaveModel();
@@ -724,6 +720,7 @@ public class ShellViewModel : ObservableRecipient
                 SetCurrentView(StoryViewType.ExplorerView);
                 Messenger.Send(new StatusChangedMessage(new("Open Story completed", LogLevel.Info)));
             }
+
             GlobalData.MainWindow.Title = $"StoryBuilder - Editing {StoryModel.ProjectFilename.Replace(".stbx", "")}";
             new UnifiedVM().UpdateRecents(Path.Combine(StoryModel.ProjectFolder.Path, StoryModel.ProjectFile.Name));
             if (GlobalData.Preferences.TimedBackup) { Ioc.Default.GetRequiredService<BackupService>().StartTimedBackup(); }
@@ -1642,7 +1639,7 @@ public class ShellViewModel : ObservableRecipient
                 _newNode = new StoryNodeItem(new FolderModel(StoryModel), RightTappedNode);
                 break;
             case StoryItemType.Section:
-                _newNode = new StoryNodeItem(new SectionModel(StoryModel), RightTappedNode);
+                _newNode = new StoryNodeItem(new FolderModel("New Section", StoryModel, StoryItemType.Folder), RightTappedNode, StoryItemType.Folder);
                 break;
             case StoryItemType.Problem:
                 _newNode = new StoryNodeItem(new ProblemModel(StoryModel), RightTappedNode);
@@ -1657,27 +1654,10 @@ public class ShellViewModel : ObservableRecipient
                 _newNode = new StoryNodeItem(new SceneModel(StoryModel), RightTappedNode);
                 break;
             case StoryItemType.Web:
-                switch (GlobalData.Preferences.PreferredSearchEngine)
-                {
-                    case BrowserType.DuckDuckGo:
-                        _newNode = new StoryNodeItem(new WebModel(StoryModel) { URL = new Uri("https://duckduckgo.com/") }, RightTappedNode);
-                        break;
-                    case BrowserType.Google:
-                        _newNode = new StoryNodeItem(new WebModel(StoryModel) { URL = new Uri("https://google.com/") }, RightTappedNode);
-                        break;
-                    case BrowserType.Bing:
-                        _newNode = new StoryNodeItem(new WebModel(StoryModel) { URL = new Uri("https://bing.com/") }, RightTappedNode);
-                        break;
-                    case BrowserType.Yahoo:
-                        _newNode = new StoryNodeItem(new WebModel(StoryModel) { URL = new Uri("https://yahoo.com/") }, RightTappedNode);
-                        break;
-                    default: //Just default to DDG.
-                        _newNode = new StoryNodeItem(new WebModel(StoryModel) { URL = new Uri("https://duckduckgo.com/") }, RightTappedNode);
-                        break;
-                }
+                _newNode = new StoryNodeItem(new WebModel(StoryModel), RightTappedNode);
                 break;
             case StoryItemType.Notes:
-                _newNode = new StoryNodeItem(new NotesModel(StoryModel), RightTappedNode);
+                _newNode = new StoryNodeItem(new FolderModel("New Note", StoryModel, StoryItemType.Notes), RightTappedNode, StoryItemType.Notes);
                 break;
         }
 

@@ -275,11 +275,12 @@ public class StoryNodeItem : DependencyObject, INotifyPropertyChanged
 
     #region Constructors
 
-    public StoryNodeItem(StoryElement node, StoryNodeItem parent)
+    public StoryNodeItem(StoryElement node, StoryNodeItem parent, StoryItemType type = StoryItemType.Unknown)
     {
         Uuid = node.Uuid;
         Name = node.Name;
-        Type = node.Type;
+        if (type == StoryItemType.Unknown) { Type = node.Type; }
+        else { Type = type; }
         switch (_type)
         {
             case StoryItemType.StoryOverview:

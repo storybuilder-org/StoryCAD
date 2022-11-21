@@ -142,9 +142,7 @@ public partial class App : Application
                 .AddSingleton<SettingViewModel>()
                 .AddSingleton<SceneViewModel>()
                 .AddSingleton<FolderViewModel>()
-                .AddSingleton<SectionViewModel>()
                 .AddSingleton<WebViewModel>()
-                .AddSingleton<NotesViewModel>()
                 .AddSingleton<TrashCanViewModel>()
                 .AddSingleton<UnifiedVM>()
                 .AddSingleton<InitVM>()
@@ -342,13 +340,11 @@ public partial class App : Application
         {
             _log.Log(LogLevel.Info, "Configuring page navigation");
             NavigationService nav = Ioc.Default.GetService<NavigationService>();
-            nav.Configure(NotesPage, typeof(NotesPage));
             nav.Configure(HomePage, typeof(HomePage));
             nav.Configure(OverviewPage, typeof(OverviewPage));
             nav.Configure(ProblemPage, typeof(ProblemPage));
             nav.Configure(CharacterPage, typeof(CharacterPage));
             nav.Configure(FolderPage, typeof(FolderPage));
-            nav.Configure(SectionPage, typeof(SectionPage));
             nav.Configure(SettingPage, typeof(SettingPage));
             nav.Configure(ScenePage, typeof(ScenePage));
             nav.Configure(TrashCanPage, typeof(TrashCanPage));
