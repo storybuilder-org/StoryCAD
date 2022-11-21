@@ -46,10 +46,8 @@ public class ShellViewModel : ObservableRecipient
     private const string CharacterPage = "CharacterPage";
     private const string ScenePage = "ScenePage";
     private const string FolderPage = "FolderPage";
-    private const string SectionPage = "SectionPage";
     private const string SettingPage = "SettingPage";
     private const string TrashCanPage = "TrashCanPage";
-    private const string NotesPage = "NotesPage";
     private const string WebPage = "WebPage";
 
     // Navigation navigation landmark nodes
@@ -556,7 +554,7 @@ public class ShellViewModel : ObservableRecipient
         {
             GitHubClient _client = new(new ProductHeaderValue("Stb2ChangelogGrabber"));
 
-            ContentDialog _changelogUI = new()
+            ContentDialog _changelogUi = new()
             {
                 Width = 800,
                 Content = new ScrollViewer
@@ -572,7 +570,7 @@ public class ShellViewModel : ObservableRecipient
                 PrimaryButtonText = "Okay",
                 XamlRoot = GlobalData.XamlRoot
             };
-            await _changelogUI.ShowAsync();
+            await _changelogUi.ShowAsync();
         }
         catch (Exception _e)
         {

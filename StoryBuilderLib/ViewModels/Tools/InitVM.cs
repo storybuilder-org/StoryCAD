@@ -18,7 +18,7 @@ public class InitVM : ObservableRecipient
     /// <summary>
     /// This is the constructor for InitVM.
     /// It sets the paths for Path and Backup Path to
-    /// \Userfolder\Documents\StoryBuilder\ and then Projects or backups respectively.
+    /// \UserFolder\Documents\StoryBuilder\ and then Projects or backups respectively.
     ///
     /// For example this would give the following path for me
     /// C:\Users\Jake\Documents\StoryBuilder\Projects

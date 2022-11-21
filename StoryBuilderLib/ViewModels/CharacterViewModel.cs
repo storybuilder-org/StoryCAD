@@ -22,9 +22,7 @@ namespace StoryBuilder.ViewModels;
 public class CharacterViewModel : ObservableRecipient, INavigable
 {
     #region Fields
-
-    private readonly StoryReader _rdr;
-    private readonly StoryWriter _wtr;
+    
     private readonly LogService _logger;
     public RelationshipModel CurrentRelationship;
     private bool _changeable; // process property changes for this story element
@@ -952,9 +950,6 @@ public class CharacterViewModel : ObservableRecipient, INavigable
     public CharacterViewModel()
     {
         _logger = Ioc.Default.GetService<LogService>();
-        _wtr = Ioc.Default.GetService<StoryWriter>();
-        _rdr = Ioc.Default.GetService<StoryReader>();
-        Ioc.Default.GetService<NewProjectViewModel>();
 
         Dictionary<string, ObservableCollection<string>> _lists = GlobalData.ListControlSource;
         RoleList = _lists["Role"];
