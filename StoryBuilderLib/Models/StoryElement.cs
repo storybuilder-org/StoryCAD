@@ -26,6 +26,13 @@ public class StoryElement : ObservableObject
         set => _type = value;
     }
 
+    private bool _isSelected;
+    public bool IsSelected
+    {
+        get => _isSelected;
+        set => _isSelected = value;
+    }
+
     #endregion
 
     #region Public Methods
