@@ -5,7 +5,6 @@ using System.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Messaging;
-using StoryBuilder.DAL;
 using StoryBuilder.Models;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.Services.Messages;
@@ -22,17 +21,9 @@ namespace StoryBuilder.ViewModels;
 /// </summary>
 public class OverviewViewModel : ObservableRecipient, INavigable
 {
-    /* Handing date fields and author:
-     * System.DateTime wrkDate = DateTime.FromOADate(0);
-       wrkDate = DateTime.Parse(DateTime.Parse(frmStory.DefInstance.mskDateCreated.Text).ToString("MM/dd/yy"));
-     * StoryRec.DateCreated.Value = wrkDate.ToString("MM-dd-yy");
-     */
-
     #region Fields
 
     private readonly LogService _logger;
-    private readonly StoryReader _rdr;
-    private readonly StoryWriter _wtr;
     private bool _changeable; // process property changes for this story element
     private bool _changed;    // this story element has changed
 
@@ -58,8 +49,8 @@ public class OverviewViewModel : ObservableRecipient, INavigable
             if (_changeable && _name != value) // Name changed?
             {
                 _logger.Log(LogLevel.Info, $"Requesting Name change from {_name} to {value}");
-                NameChangeMessage msg = new(_name, value);
-                Messenger.Send(new NameChangedMessage(msg));
+                NameChangeMessage _msg = new(_name, value);
+                Messenger.Send(new NameChangedMessage(_msg));
             }
             SetProperty(ref _name, value);
         }
@@ -306,35 +297,34 @@ public class OverviewViewModel : ObservableRecipient, INavigable
     {
         if (value.Equals(string.Empty))
             return;
-        ProblemModel problem = (ProblemModel) StringToStoryElement(value);
+        ProblemModel _problem = (ProblemModel) StringToStoryElement(value);
         PremiseLock = false;    // Set Premise to read/write to allow update
-        Premise = problem.Premise;
+        Premise = _problem.Premise;
         PremiseLock = true;     // Set Premise to read-only
     }
 
+    // ReSharper disable once MemberCanBeMadeStatic.Local
     private StoryElement StringToStoryElement(string value)
     {
-        if (value == null)
-            return null;
-        if (value.Equals(string.Empty))
-            return null;
+        if (value == null || value.Equals(string.Empty)) {return null;}
+
         // Get the current StoryModel's StoryElementsCollection
-        StoryModel model = ShellViewModel.GetModel();
-        StoryElementCollection elements = model.StoryElements;
+        StoryModel _storyModel = ShellViewModel.GetModel();
+        StoryElementCollection _elements = _storyModel.StoryElements;
         // legacy: locate the StoryElement from its Name
-        foreach (StoryElement element in elements)  // Character or Setting??? Search both?
+        foreach (StoryElement _element in _elements)  // Character or Setting??? Search both?
         {
-            if (element.Type == StoryItemType.Character | element.Type == StoryItemType.Setting)
+            if (_element.Type == StoryItemType.Character | _element.Type == StoryItemType.Setting)
             {
-                if (value.Equals(element.Name))
-                    return element;
+                if (value.Equals(_element.Name))
+                    return _element;
             }
         }
         // Look for the StoryElement corresponding to the passed guid
         // (This is the normal approach)
-        if (Guid.TryParse(value, out Guid guid))
+        if (Guid.TryParse(value, out Guid _guid))
         {
-            if (elements.StoryElementGuids.ContainsKey(guid)) { return elements.StoryElementGuids[guid]; }
+            if (_elements.StoryElementGuids.ContainsKey(_guid)) { return _elements.StoryElementGuids[_guid]; }
         }
         return null;  // Not found
     }
@@ -348,14 +338,10 @@ public class OverviewViewModel : ObservableRecipient, INavigable
     public ObservableCollection<string> GenreList;
     public ObservableCollection<string> ViewpointList;
     public ObservableCollection<string> LiteraryTechniqueList;
-    public ObservableCollection<string> LiteraryStyleList;
     public ObservableCollection<string> VoiceList;
     public ObservableCollection<string> TenseList;
     public ObservableCollection<string> StyleList;
     public ObservableCollection<string> ToneList;
-
-    // StoryElement collections
-    public List<string> CharacterList;
 
     #endregion
 
@@ -364,18 +350,16 @@ public class OverviewViewModel : ObservableRecipient, INavigable
     public OverviewViewModel()
     {
         _logger = Ioc.Default.GetService<LogService>();
-        _wtr = Ioc.Default.GetService<StoryWriter>();
-        _rdr = Ioc.Default.GetService<StoryReader>();
 
-        Dictionary<string, ObservableCollection<string>> lists = GlobalData.ListControlSource;
-        StoryTypeList = lists["StoryType"];
-        GenreList = lists["Genre"];
-        ViewpointList = lists["Viewpoint"];
-        LiteraryTechniqueList = lists["LiteraryTechnique"];
-        VoiceList = lists["Voice"];
-        TenseList = lists["Tense"];
-        StyleList = lists["LiteraryStyle"];
-        ToneList = lists["Tone"];
+        Dictionary<string, ObservableCollection<string>> _lists = GlobalData.ListControlSource;
+        StoryTypeList = _lists["StoryType"];
+        GenreList = _lists["Genre"];
+        ViewpointList = _lists["Viewpoint"];
+        LiteraryTechniqueList = _lists["LiteraryTechnique"];
+        VoiceList = _lists["Voice"];
+        TenseList = _lists["Tense"];
+        StyleList = _lists["LiteraryStyle"];
+        ToneList = _lists["Tone"];
 
         DateCreated = string.Empty;
         Author = string.Empty;
@@ -395,14 +379,6 @@ public class OverviewViewModel : ObservableRecipient, INavigable
         StoryProblem = string.Empty;
 
         PropertyChanged += OnPropertyChanged;
-
-        //CharacterList = CharacterModel.CharacterNames;
-
-        // TODO: Set good defaults for these
-        //System.DateTime wrkDate = DateTime.FromOADate(0);
-        //wrkDate = DateTime.Parse(Convert.ToDateTime(StoryRec.DateCreated.Value).ToString("MM/dd/yy"));
-        //frmStory.DefInstance.mskDateCreated.Text = StringsHelper.Format(wrkDate, "Medium Date");
-
     }
 
     #endregion

@@ -9,25 +9,49 @@ using StoryBuilder.Models;
 using StoryBuilder.Services.Logging;
 
 namespace StoryBuilder.ViewModels.Tools;
+
+/// <summary>
+/// This is the ViewModel for the Narrative tool.
+/// It contains data used via the NarrativeTool ContentDialog.
+///
+/// NarrativeTool is used to construct the Narrator view, which is
+/// the order a story is really told in rather than explorer.
+/// Explorer view is the main view and is how the planning.
+///
+/// To open Narrative Tool you can press CRTL + N or access it
+/// through the Shell via the Tools Menu (Spanner Icon)
+/// </summary>
 public class NarrativeToolVM: ObservableRecipient
 {
-    private ShellViewModel ShellVM = Ioc.Default.GetRequiredService<ShellViewModel>();
-    private LogService Logger = Ioc.Default.GetRequiredService<LogService>();
-    public StoryNodeItem SelectedNode;
+    private ShellViewModel _shellVM = Ioc.Default.GetRequiredService<ShellViewModel>();
+    private LogService _logger = Ioc.Default.GetRequiredService<LogService>(); 
+    public StoryNodeItem SelectedNode; //Currently selected node
     public bool IsNarratorSelected = false;
-    public RelayCommand CopyCommand { get; } 
-    public RelayCommand DeleteCommand { get; } 
+
+    #region Relay Commands
+    public RelayCommand CopyCommand { get; }
+    public RelayCommand DeleteCommand { get; }
     public RelayCommand CopyAllUnusedCommand { get; }
     public RelayCommand CreateFlyout { get; }
 
-    //Name of the section in the flyout
-    private string _flyoutText;
-    public string FlyoutText
+    #endregion
+
+
+    private string _newSectionName;
+    /// <summary>
+    /// Name of a new section
+    /// Bound to the new section name in the new section flyout area.
+    /// </summary>
+    public string NewSectionName
     {
-        get => _flyoutText;
-        set => SetProperty(ref _flyoutText, value);
+        get => _newSectionName;
+        set => SetProperty(ref _newSectionName, value);
     }
+
     private string _message;
+    /// <summary>
+    /// Message show to the user on the UI
+    /// </summary>
     public string Message
     {
         get => _message;
@@ -44,6 +68,8 @@ public class NarrativeToolVM: ObservableRecipient
 
     /// <summary>
     /// Deletes a node from the tree.
+    ///
+    /// TODO: Possibly Merge with StoryElement.Delete() Method
     /// </summary>
     public void Delete()
     {
@@ -60,52 +86,54 @@ public class NarrativeToolVM: ObservableRecipient
                 }
                 else { Message = "You can't delete from here!"; }
             }
-            else { Logger.Log(LogLevel.Warn, "Selected node was null, doing nothing"); }
+            else { _logger.Log(LogLevel.Warn, "Selected node was null, doing nothing"); }
         }
-        catch (Exception ex) { Logger.LogException(LogLevel.Error, ex, "Error in NarrativeToolVM.Delete()"); }
+        catch (Exception _ex) { _logger.LogException(LogLevel.Error, _ex, "Error in NarrativeToolVM.Delete()"); }
     }
     
 
     /// <summary>
     /// Copies all scenes, if the node has children then it will copy all children that are scenes
+    ///
+    /// TODO: Possibly move to StoryElement and make bi-directional
     /// </summary>
     private void Copy()
     {
         try
         {
-            Logger.Log(LogLevel.Info, "Starting to copy node between trees.");
+            _logger.Log(LogLevel.Info, "Starting to copy node between trees.");
 
             //Check if selection is null
             if (SelectedNode == null)
             {
-                Logger.Log(LogLevel.Warn, "No node selected");
+                _logger.Log(LogLevel.Warn, "No node selected");
                 return;
             }
 
-            Logger.Log(LogLevel.Info, $"Node Selected is a {SelectedNode.Type}");
+            _logger.Log(LogLevel.Info, $"Node Selected is a {SelectedNode.Type}");
             if (SelectedNode.Type == StoryItemType.Scene)  //If its just a scene, add it immediately if not already in.
             {
-                if (!RecursiveCheck(ShellVM.StoryModel.NarratorView[0].Children).Any(StoryNodeItem => StoryNodeItem.Uuid == SelectedNode.Uuid)) //checks node isn't in the narrator view
+                if (RecursiveCheck(_shellVM.StoryModel.NarratorView[0].Children).All(storyNodeItem => storyNodeItem.Uuid != SelectedNode.Uuid)) //checks node isn't in the narrator view
                 {
-                    _ = new StoryNodeItem((SceneModel)ShellVM.StoryModel.StoryElements.StoryElementGuids[SelectedNode.Uuid], ShellVM.StoryModel.NarratorView[0]);
-                    Logger.Log(LogLevel.Info, $"Copied SelectedNode {SelectedNode.Name} ({SelectedNode.Uuid})");
+                    _ = new StoryNodeItem((SceneModel)_shellVM.StoryModel.StoryElements.StoryElementGuids[SelectedNode.Uuid], _shellVM.StoryModel.NarratorView[0]);
+                    _logger.Log(LogLevel.Info, $"Copied SelectedNode {SelectedNode.Name} ({SelectedNode.Uuid})");
                     Message = $"Copied {SelectedNode.Name}";
                 }
                 else
                 {
-                    Logger.Log(LogLevel.Warn, $"Node {SelectedNode.Name} ({SelectedNode.Uuid}) already exists in the NarratorView");
+                    _logger.Log(LogLevel.Warn, $"Node {SelectedNode.Name} ({SelectedNode.Uuid}) already exists in the NarratorView");
                     Message = "This scene already appears in the narrative view.";
                 }
             }
             else if (SelectedNode.Type is StoryItemType.Folder or StoryItemType.Section) //If its a folder then recurse and add all unused scenes to the narrative view.
             {
-                Logger.Log(LogLevel.Info, "Item is a folder/section, getting flattened list of all children.");
-                foreach (StoryNodeItem item in RecursiveCheck(SelectedNode.Children))
+                _logger.Log(LogLevel.Info, "Item is a folder/section, getting flattened list of all children.");
+                foreach (StoryNodeItem _item in RecursiveCheck(SelectedNode.Children))
                 {
-                    if (item.Type == StoryItemType.Scene && !RecursiveCheck(ShellVM.StoryModel.NarratorView[0].Children).Any(StoryNodeItem => StoryNodeItem.Uuid == item.Uuid))
+                    if (_item.Type == StoryItemType.Scene && RecursiveCheck(_shellVM.StoryModel.NarratorView[0].Children).All(storyNodeItem => storyNodeItem.Uuid != _item.Uuid))
                     {
-                        _ = new StoryNodeItem((SceneModel)ShellVM.StoryModel.StoryElements.StoryElementGuids[item.Uuid], ShellVM.StoryModel.NarratorView[0]);
-                        Logger.Log(LogLevel.Info, $"Copied item {SelectedNode.Name} ({SelectedNode.Uuid})");
+                        _ = new StoryNodeItem((SceneModel)_shellVM.StoryModel.StoryElements.StoryElementGuids[_item.Uuid], _shellVM.StoryModel.NarratorView[0]);
+                        _logger.Log(LogLevel.Info, $"Copied item {SelectedNode.Name} ({SelectedNode.Uuid})");
                     }
                 }
 
@@ -113,31 +141,30 @@ public class NarrativeToolVM: ObservableRecipient
             }
             else
             {
-                Logger.Log(LogLevel.Warn, $"Node {SelectedNode.Name} ({SelectedNode.Uuid}) wasn't copied, it was a {SelectedNode.Type}");
+                _logger.Log(LogLevel.Warn, $"Node {SelectedNode.Name} ({SelectedNode.Uuid}) wasn't copied, it was a {SelectedNode.Type}");
                 Message = "You can't copy that."; 
             }
         }
-        catch (Exception ex) { Logger.LogException(LogLevel.Error, ex, "Error in NarrativeTool.Copy()"); }
-        Logger.Log(LogLevel.Info, "NarrativeTool.Copy() complete.");
+        catch (Exception _ex) { _logger.LogException(LogLevel.Error, _ex, "Error in NarrativeTool.Copy()"); }
+        _logger.Log(LogLevel.Info, "NarrativeTool.Copy() complete.");
 
     }
 
-
-    private List<StoryNodeItem> RecursiveCheck(ObservableCollection<StoryNodeItem> List)
+    private List<StoryNodeItem> RecursiveCheck(ObservableCollection<StoryNodeItem> list)
     {
-        Logger.Log(LogLevel.Info, "New instance of Recursive check starting.");
-        List<StoryNodeItem> NewList = new();
+        _logger.Log(LogLevel.Info, "New instance of Recursive check starting.");
+        List<StoryNodeItem> _newList = new();
         try
         {
-            foreach (StoryNodeItem VARIABLE in List)
+            foreach (StoryNodeItem _variable in list)
             {
-                NewList.Add(VARIABLE);
-                NewList.AddRange(RecursiveCheck(VARIABLE.Children));
+                _newList.Add(_variable);
+                _newList.AddRange(RecursiveCheck(_variable.Children));
             }
         }
-        catch (Exception exception) { Logger.LogException(LogLevel.Error, exception, "Error in recursive check"); }
+        catch (Exception _exception) { _logger.LogException(LogLevel.Error, _exception, "Error in recursive check"); }
         
-        return NewList;
+        return _newList;
     }
 
     /// <summary>
@@ -145,49 +172,50 @@ public class NarrativeToolVM: ObservableRecipient
     /// </summary>
     private void CopyAllUnused()
     {
-        //Recurses the children of NarratorView View.
-        try { foreach (StoryNodeItem item in ShellVM.StoryModel.ExplorerView[0].Children) { RecurseCopyUnused(item); } }
-        catch (Exception e) { Logger.LogException(LogLevel.Error, e, "Error in recursive check"); }
+        //Recursively goes through the children of NarratorView View.
+        try { foreach (StoryNodeItem _item in _shellVM.StoryModel.ExplorerView[0].Children) { RecurseCopyUnused(_item); } }
+        catch (Exception _e) { _logger.LogException(LogLevel.Error, _e, "Error in recursive check"); }
     }
 
     /// <summary>
-    /// Creates new section
+    /// Creates new section, with the name of NewSectionName
+    /// in the NarratorView tree
     /// </summary>
     private void MakeSection()
     {
-        if (ShellVM.DataSource == null || ShellVM.DataSource.Count < 0)
+        if (_shellVM.DataSource == null || _shellVM.DataSource.Count < 0)
         {
-            Logger.Log(LogLevel.Warn, "DataSource is empty or null, not adding section");
+            _logger.Log(LogLevel.Warn, "DataSource is empty or null, not adding section");
             return;
         }
-        _ = new StoryNodeItem(new SectionModel(FlyoutText, ShellVM.StoryModel), ShellVM.StoryModel.NarratorView[0]);
+        _ = new StoryNodeItem(new FolderModel(NewSectionName, _shellVM.StoryModel, StoryItemType.Folder), _shellVM.StoryModel.NarratorView[0]);
     }
 
     /// <summary>
     /// This recursively copies any unused scene in the ExplorerView view.
     /// </summary>
-    /// <param name="Item">The parent item </param>
-    private void RecurseCopyUnused(StoryNodeItem Item)
+    /// <param name="item">The parent item </param>
+    private void RecurseCopyUnused(StoryNodeItem item)
     {
-        Logger.Log(LogLevel.Trace, $"Recursing through {Item.Name} ({Item.Uuid})");
+        _logger.Log(LogLevel.Trace, $"Recursing through {item.Name} ({item.Uuid})");
         try
         {
-            if (Item.Type == StoryItemType.Scene) //Check if scene/folder/section, if not then just continue.
+            if (item.Type == StoryItemType.Scene) //Check if scene/folder/section, if not then just continue.
             {
                 //This calls recursive check, which returns flattens the entire the tree and .Any() checks if the UUID is in anywhere in the model.
-                if (!RecursiveCheck(ShellVM.StoryModel.NarratorView[0].Children).Any(StoryNodeItem => StoryNodeItem.Uuid == Item.Uuid)) 
+                if (RecursiveCheck(_shellVM.StoryModel.NarratorView[0].Children).All(storyNodeItem => storyNodeItem.Uuid != item.Uuid)) 
                 {
                     //Since the node isn't in the node, then we add it here.
-                    Logger.Log(LogLevel.Trace, $"{Item.Name} ({Item.Uuid}) not found in Narrative view, adding it to the tree");
-                    _ = new StoryNodeItem((SceneModel)ShellVM.StoryModel.StoryElements.StoryElementGuids[Item.Uuid], ShellVM.StoryModel.NarratorView[0]);
+                    _logger.Log(LogLevel.Trace, $"{item.Name} ({item.Uuid}) not found in Narrative view, adding it to the tree");
+                    _ = new StoryNodeItem((SceneModel)_shellVM.StoryModel.StoryElements.StoryElementGuids[item.Uuid], _shellVM.StoryModel.NarratorView[0]);
                 }
             }
 
-            foreach (StoryNodeItem child in Item.Children) { RecurseCopyUnused(child); }  
+            foreach (StoryNodeItem _child in item.Children) { RecurseCopyUnused(_child); }  
         }
-        catch (Exception ex)
+        catch (Exception _ex)
         {
-            Logger.LogException(LogLevel.Error, ex, "Error in NarrativeTool.CopyAllUnused()");
+            _logger.LogException(LogLevel.Error, _ex, "Error in NarrativeTool.CopyAllUnused()");
             Message = "Error copying nodes.";
         }
     }

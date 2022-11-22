@@ -5,7 +5,6 @@ using System.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Messaging;
-using StoryBuilder.DAL;
 using StoryBuilder.Models;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.Services.Messages;
@@ -18,8 +17,6 @@ public class SettingViewModel : ObservableRecipient, INavigable
     #region Fields
 
     private readonly LogService _logger;
-    private readonly StoryReader _rdr;
-    private readonly StoryWriter _wtr;
     private bool _changeable; // process property changes for this story element
     private bool _changed;    // this story element has changed
 
@@ -45,8 +42,8 @@ public class SettingViewModel : ObservableRecipient, INavigable
             if (_changeable && _name != value) // Name changed?
             {
                 _logger.Log(LogLevel.Info, $"Requesting Name change from {_name} to {value}");
-                NameChangeMessage msg = new(_name, value);
-                Messenger.Send(new NameChangedMessage(msg));
+                NameChangeMessage _msg = new(_name, value);
+                Messenger.Send(new NameChangedMessage(_msg));
             }
             SetProperty(ref _name, value);
         }
@@ -133,11 +130,11 @@ public class SettingViewModel : ObservableRecipient, INavigable
         set => SetProperty(ref _touch, value);
     }
 
-    private string _smelltaste;
+    private string _smellTaste;
     public string SmellTaste
     {
-        get => _smelltaste;
-        set => SetProperty(ref _smelltaste, value);
+        get => _smellTaste;
+        set => SetProperty(ref _smellTaste, value);
     }
 
     // Setting notes data
@@ -226,9 +223,6 @@ public class SettingViewModel : ObservableRecipient, INavigable
             Model.Touch = Touch;
             Model.SmellTaste = SmellTaste;
             Model.Notes = Notes;
-
-            //_logger.Log(LogLevel.Info, string.Format("Requesting IsDirty change to true"));
-            //Messenger.Send(new IsChangedMessage(Changed));
         }
     }
 
@@ -245,8 +239,6 @@ public class SettingViewModel : ObservableRecipient, INavigable
     public SettingViewModel()
     {
         _logger = Ioc.Default.GetService<LogService>();
-        _wtr = Ioc.Default.GetService<StoryWriter>();
-        _rdr = Ioc.Default.GetService<StoryReader>();
 
         Locale = string.Empty;
         Season = string.Empty;
@@ -262,9 +254,9 @@ public class SettingViewModel : ObservableRecipient, INavigable
         SmellTaste = string.Empty;
         Notes = string.Empty;
 
-        Dictionary<string, ObservableCollection<string>> lists = GlobalData.ListControlSource;
-        LocaleList = lists["Locale"];
-        SeasonList = lists["Season"];
+        Dictionary<string, ObservableCollection<string>> _lists = GlobalData.ListControlSource;
+        LocaleList = _lists["Locale"];
+        SeasonList = _lists["Season"];
 
         PropertyChanged += OnPropertyChanged;
     }

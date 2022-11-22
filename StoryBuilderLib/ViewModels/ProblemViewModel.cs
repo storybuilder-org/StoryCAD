@@ -7,9 +7,7 @@ using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Data;
 using StoryBuilder.Controls;
-using StoryBuilder.DAL;
 using StoryBuilder.Models;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.Services.Messages;
@@ -22,8 +20,6 @@ public class ProblemViewModel : ObservableRecipient, INavigable
     #region Fields
 
     private readonly LogService _logger;
-    //internal readonly StoryReader _rdr;
-    //private readonly StoryWriter _wtr;
     private bool _changeable;
     private bool _changed;
 
@@ -49,8 +45,8 @@ public class ProblemViewModel : ObservableRecipient, INavigable
             if (_changeable && _name != value) // Name changed?
             {
                 _logger.Log(LogLevel.Info, $"Requesting Name change from {_name} to {value}");
-                NameChangeMessage msg = new(_name, value);
-                Messenger.Send(new NameChangedMessage(msg));
+                NameChangeMessage _msg = new(_name, value);
+                Messenger.Send(new NameChangedMessage(_msg));
             }
             SetProperty(ref _name, value);
         }
@@ -218,9 +214,13 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         LoadModel();
     }
 
+    /// <summary>
+    /// Saves this VM back to the story.
+    /// </summary>
+    /// <param name="parameter"></param>
     public void Deactivate(object parameter)
     {
-        SaveModel();    // Save the ViewModel back to the Story
+        SaveModel();
     }
 
     private void OnPropertyChanged(object sender, PropertyChangedEventArgs args)
@@ -305,27 +305,29 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         _logger.Log(LogLevel.Info, "Displaying Conflict Finder tool dialog");
 
         //Creates and shows content
-        ContentDialog ConflictDialog = new();
-        ConflictDialog.Title = "Conflict builder";
-        ConflictDialog.XamlRoot = GlobalData.XamlRoot;
-        ConflictDialog.PrimaryButtonText = "Copy to Protagonist";
-        ConflictDialog.SecondaryButtonText = "Copy to Antagonist";
-        ConflictDialog.CloseButtonText = "Close";
-        Conflict selectedConflict = new();
-        ConflictDialog.Content = selectedConflict;
-        ContentDialogResult result = await ConflictDialog.ShowAsync();
+        ContentDialog _conflictDialog = new()
+        {
+            Title = "Conflict builder",
+            XamlRoot = GlobalData.XamlRoot,
+            PrimaryButtonText = "Copy to Protagonist",
+            SecondaryButtonText = "Copy to Antagonist",
+            CloseButtonText = "Close"
+        };
+        Conflict _selectedConflict = new();
+        _conflictDialog.Content = _selectedConflict;
+        ContentDialogResult _result = await _conflictDialog.ShowAsync();
 
-        if (selectedConflict.ExampleText == null) {selectedConflict.ExampleText = "";}
-        switch (result)
+        if (_selectedConflict.ExampleText == null) {_selectedConflict.ExampleText = "";}
+        switch (_result)
         {
             // Copy to Protagonist conflict
             case ContentDialogResult.Primary:
-                ProtConflict = selectedConflict.ExampleText;
+                ProtConflict = _selectedConflict.ExampleText;
                 _logger.Log(LogLevel.Info, "Conflict Finder finished (copied to protagonist)");
                 break;
             // Copy to Antagonist conflict
             case ContentDialogResult.Secondary:
-                AntagConflict = selectedConflict.ExampleText;
+                AntagConflict = _selectedConflict.ExampleText;
                 _logger.Log(LogLevel.Info, "Conflict Finder finished (copied to antagonist)");
                 break;
             default:
@@ -349,9 +351,6 @@ public class ProblemViewModel : ObservableRecipient, INavigable
     public ObservableCollection<string> OutcomeList;
     public ObservableCollection<string> MethodList;
     public ObservableCollection<string> ThemeList;
-
-    public ICollectionView CharacterList;
-
     #endregion;
 
     #region Constructors
@@ -359,8 +358,6 @@ public class ProblemViewModel : ObservableRecipient, INavigable
     public ProblemViewModel()
     {
         _logger = Ioc.Default.GetService<LogService>();
-        //_wtr = Ioc.Default.GetService<StoryWriter>();
-        //_rdr = Ioc.Default.GetService<StoryReader>();
 
         ProblemType = string.Empty;
         ConflictType = string.Empty;
@@ -381,17 +378,17 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         Premise = string.Empty;
         Notes = string.Empty;
 
-        Dictionary<string, ObservableCollection<string>> lists = GlobalData.ListControlSource;
-        ProblemTypeList = lists["ProblemType"];
-        ConflictTypeList = lists["ConflictType"];
-        SubjectList = lists["ProblemSubject"];
-        ProblemSourceList = lists["ProblemSource"];
-        GoalList = lists["Goal"];
-        MotiveList = lists["Motive"];
-        ConflictList = lists["Conflict"];
-        OutcomeList = lists["Outcome"];
-        MethodList = lists["Method"];
-        ThemeList = lists["Theme"];
+        Dictionary<string, ObservableCollection<string>> _lists = GlobalData.ListControlSource;
+        ProblemTypeList = _lists["ProblemType"];
+        ConflictTypeList = _lists["ConflictType"];
+        SubjectList = _lists["ProblemSubject"];
+        ProblemSourceList = _lists["ProblemSource"];
+        GoalList = _lists["Goal"];
+        MotiveList = _lists["Motive"];
+        ConflictList = _lists["Conflict"];
+        OutcomeList = _lists["Outcome"];
+        MethodList = _lists["Method"];
+        ThemeList = _lists["Theme"];
 
         ConflictCommand = new RelayCommand(ConflictTool, () => true);
 

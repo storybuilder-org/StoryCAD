@@ -147,14 +147,14 @@ public class StoryReader : ObservableRecipient
                 case "Folder":
                     ParseFolder(node);
                     break;
-                case "Notes":
-                    ParseNotes(node);
+                case "Notes": //Notes are folders with different icons.
+                    ParseFolder(node);
                     break;
                 case "Web":
                     ParseWeb(node);
                     break;
                 case "Section":
-                    ParseSection(node);
+                    ParseFolder(node);
                     break;
                 case "TrashCan":
                     ParseTrashCan(node);
@@ -648,7 +648,7 @@ public class StoryReader : ObservableRecipient
     }
     private void ParseNotes(IXmlNode xn)
     {
-        NotesModel _Notes = new(xn, _model);
+        FolderModel _notes = new(xn, _model);
         foreach (IXmlNode _attr in xn.Attributes)
         {
             switch (_attr.NodeName)
@@ -656,10 +656,10 @@ public class StoryReader : ObservableRecipient
                 case "UUID":
                     break;
                 case "Name":
-                    _Notes.Name = _attr.InnerText;
+                    _notes.Name = _attr.InnerText;
                     break;
                 case "Notes":
-                    _Notes.Notes = _attr.InnerText;
+                    _notes.Notes = _attr.InnerText;
                     break;
             }
         }
@@ -679,25 +679,6 @@ public class StoryReader : ObservableRecipient
                     break;
                 case "Notes":
                     _folder.Notes = _attr.InnerText;
-                    break;
-            }
-        }
-    }
-
-    private void ParseSection(IXmlNode xn)
-    {
-        SectionModel _section = new(xn, _model);
-        foreach (IXmlNode _attr in xn.Attributes)
-        {
-            switch (_attr.NodeName)
-            {
-                case "UUID":
-                    break;
-                case "Name":
-                    _section.Name = _attr.InnerText;
-                    break;
-                case "Notes":
-                    _section.Notes = _attr.InnerText;
                     break;
             }
         }

@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using CommunityToolkit.Mvvm.DependencyInjection;
-using StoryBuilder.ViewModels;
+﻿using StoryBuilder.ViewModels;
+using System;
 using Windows.Data.Xml.Dom;
 
 namespace StoryBuilder.Models;
@@ -16,8 +11,26 @@ public class WebModel : StoryElement
 
     public WebModel(StoryModel model) : base("New Webpage", StoryItemType.Web, model)
     {
-        URL = new Uri("https://google.com/");
         Timestamp = DateTime.Now;
+
+        switch (GlobalData.Preferences.PreferredSearchEngine)
+        {
+            case BrowserType.DuckDuckGo:
+                 URL = new Uri("https://duckduckgo.com/");
+                break;
+            case BrowserType.Google:
+                URL = new Uri("https://google.com/");
+                break;
+            case BrowserType.Bing:
+                URL = new Uri("https://bing.com/");
+                break;
+            case BrowserType.Yahoo:
+               URL = new Uri("https://yahoo.com/");
+                break;
+            default: //Just default to DDG.
+               URL = new Uri("https://duckduckgo.com/");
+                break;
+        }
     }
 
     public WebModel(IXmlNode xn, StoryModel model) : base(xn, model)

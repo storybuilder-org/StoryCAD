@@ -50,8 +50,7 @@ public class StockScenesViewModel : ObservableRecipient
     {
         StockSceneCategories = new ObservableCollection<string>();
         _stockScenes = GlobalData.StockScenesSource;
-        foreach (string category in _stockScenes.Keys)
-            StockSceneCategories.Add(category);
+        foreach (string _category in _stockScenes.Keys) { StockSceneCategories.Add(_category); }
     }
 
     #endregion

@@ -3,7 +3,6 @@ using System.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Messaging;
-using StoryBuilder.DAL;
 using StoryBuilder.Models;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.Services.Messages;
@@ -24,8 +23,6 @@ public class FolderViewModel : ObservableRecipient, INavigable
     #region Fields
 
     private readonly LogService _logger;
-    private readonly StoryReader _rdr;
-    private readonly StoryWriter _wtr;
     private bool _changeable; // process property changes for this story element
     private bool _changed;    // this story element has changed
 
@@ -51,8 +48,8 @@ public class FolderViewModel : ObservableRecipient, INavigable
             if (_changeable && _name != value) // Name changed?
             {
                 _logger.Log(LogLevel.Info, $"Requesting Name change from {_name} to {value}");
-                NameChangeMessage msg = new(_name, value);
-                Messenger.Send(new NameChangedMessage(msg));
+                NameChangeMessage _msg = new(_name, value);
+                Messenger.Send(new NameChangedMessage(_msg));
             }
             SetProperty(ref _name, value);
         }
@@ -130,11 +127,7 @@ public class FolderViewModel : ObservableRecipient, INavigable
     public FolderViewModel()
     {
         _logger = Ioc.Default.GetService<LogService>();
-        _wtr = Ioc.Default.GetService<StoryWriter>();
-        _rdr = Ioc.Default.GetService<StoryReader>();
-
         Notes = string.Empty;
-
         PropertyChanged += OnPropertyChanged;
     }
 

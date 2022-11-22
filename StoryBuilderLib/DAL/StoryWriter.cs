@@ -123,11 +123,11 @@ public class StoryWriter
                 case StoryItemType.Folder:
                     ParseFolderElement(_element);
                     break;
-                case StoryItemType.Notes:
-                    ParseNotesElement(_element);
+                case StoryItemType.Notes: //Notes are just folders with a different icon
+                    ParseFolderElement(_element);
                     break;
                 case StoryItemType.Section:
-                    ParseSectionElement(_element);
+                    ParseFolderElement(_element);
                     break;
                 case StoryItemType.TrashCan:
                     ParseTrashCanElement(_element);
@@ -652,7 +652,7 @@ public class StoryWriter
 
     private void ParseNotesElement(StoryElement element)
     {
-        NotesModel _rec = (NotesModel)element;
+        FolderModel _rec = (FolderModel)element;
         XmlNode _node = _xml.CreateElement("Notes");
 
         XmlAttribute _attr = _xml.CreateAttribute("UUID");
@@ -672,25 +672,6 @@ public class StoryWriter
     {
         FolderModel _rec = (FolderModel)element;
         XmlNode _node = _xml.CreateElement("Folder");
-
-        XmlAttribute _attr = _xml.CreateAttribute("UUID");
-        _attr.Value = UuidString(_rec.Uuid);
-        Debug.Assert(_node.Attributes != null, "_node.Attributes != null");
-        _node.Attributes.Append(_attr);
-        _attr = _xml.CreateAttribute("Name");
-        _attr.Value = _rec.Name;
-        _node.Attributes.Append(_attr);
-        _attr = _xml.CreateAttribute("Notes");
-        _attr.Value = _rec.Notes;
-        _node.Attributes.Append(_attr);
-
-        _elements.AppendChild(_node);
-    }
-
-    private void ParseSectionElement(StoryElement element)
-    {
-        SectionModel _rec = (SectionModel)element;
-        XmlNode _node = _xml.CreateElement("Section");
 
         XmlAttribute _attr = _xml.CreateAttribute("UUID");
         _attr.Value = UuidString(_rec.Uuid);

@@ -40,8 +40,8 @@ public sealed partial class ScenePage : BindablePage
     /// We therefore update the ComboBox here via callback.
     /// </summary>
     /// <param name="purpose"></param>
-    public void AddScenePurposeMethod (string purpose)
-    {     
+    public void AddScenePurposeMethod(string purpose)
+    {
         ScenePurpose.SelectedItems.Add(purpose);
     }
 

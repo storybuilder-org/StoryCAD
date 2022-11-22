@@ -54,8 +54,7 @@ public class KeyQuestionsViewModel : ObservableRecipient
     public void NextQuestion()
     {
         _index++;
-        if (_index >= _questions.Count)
-            _index = 0;
+        if (_index >= _questions.Count) { _index = 0; }
         _questionModel = _questions[_index];
         Topic = _questionModel.Topic;
         Question = _questionModel.Question;
@@ -64,8 +63,7 @@ public class KeyQuestionsViewModel : ObservableRecipient
     public void PreviousQuestion()
     {
         _index--;
-        if (_index < 0)
-            _index = _questions.Count - 1;
+        if (_index < 0) { _index = _questions.Count - 1; }
         _questionModel = _questions[_index];
         Topic = _questionModel.Topic;
         Question = _questionModel.Question;
@@ -78,8 +76,7 @@ public class KeyQuestionsViewModel : ObservableRecipient
     {
         KeyQuestionElements = new ObservableCollection<string>();
 
-        foreach (string element in GlobalData.KeyQuestionsSource.Keys)
-            KeyQuestionElements.Add(element);
+        foreach (string _element in GlobalData.KeyQuestionsSource.Keys) { KeyQuestionElements.Add(_element); }
         StoryElementName = KeyQuestionElements[0];
     }
     #endregion

@@ -6,13 +6,6 @@ namespace StoryBuilder.ViewModels;
 
 public class NewProjectViewModel : ObservableRecipient
 {
-    private string _selectedTemplate;
-
-    public string SelectedTemplate
-    {
-        get => _selectedTemplate;
-        set => SetProperty(ref _selectedTemplate, value);
-    }
     private string _projectName;
     public string ProjectName
     {
@@ -30,7 +23,7 @@ public class NewProjectViewModel : ObservableRecipient
     public NewProjectViewModel()
     {
         ProjectName = string.Empty;
-        PreferencesModel prefs = GlobalData.Preferences;
-        ParentPathName = prefs.ProjectDirectory;
+        PreferencesModel _prefs = GlobalData.Preferences;
+        ParentPathName = _prefs.ProjectDirectory;
     }
 }

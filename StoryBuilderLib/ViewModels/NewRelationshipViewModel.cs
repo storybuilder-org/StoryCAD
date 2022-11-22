@@ -4,18 +4,13 @@ using StoryBuilder.Models;
 
 namespace StoryBuilder.ViewModels;
 
-//TODO: Figure out what to do with this
 public class NewRelationshipViewModel : ObservableRecipient
 {
     #region public Properties
-
-
     public StoryElement Member { get; set; }
 
     public ObservableCollection<StoryElement> ProspectivePartners;
-
-    public ObservableCollection<RelationshipModel> Relationships;
-
+    
     private StoryElement _selectedPartner;
     public StoryElement SelectedPartner 
     {
@@ -31,11 +26,11 @@ public class NewRelationshipViewModel : ObservableRecipient
         get => _relationType; 
         set => SetProperty(ref _relationType, value);
     }
-    private string _inverserelationType;
+    private string _inverseRelationType;
     public string InverseRelationType
     {
-        get => _inverserelationType;
-        set => SetProperty(ref _inverserelationType, value);
+        get => _inverseRelationType;
+        set => SetProperty(ref _inverseRelationType, value);
     }
     private bool _inverseRelationship;
     public bool InverseRelationship
