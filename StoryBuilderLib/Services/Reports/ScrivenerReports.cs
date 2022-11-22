@@ -189,14 +189,14 @@ namespace StoryBuilder.Services.Reports
 
         public BinderItem AddFolder(BinderItem parent, string title)
         {
-            BinderItem item = new BinderItem(0, NewUuid(), BinderItemType.Folder, title);
+            BinderItem item = new BinderItem(NewUuid(), BinderItemType.Folder, title);
             parent.Children.Add(item);
             return item;
         }
 
         public BinderItem InsertFolderBefore(BinderItem parent, string after, string title)
         {
-            BinderItem item = new BinderItem(0, NewUuid(), BinderItemType.Folder, title);
+            BinderItem item = new BinderItem(NewUuid(), BinderItemType.Folder, title);
             parent.Children.Insert(FolderIndex(_binderNode, after), item);
             return item;
         }
@@ -221,7 +221,7 @@ namespace StoryBuilder.Services.Reports
 
         public BinderItem AddText(BinderItem parent, string title)
         {
-            BinderItem item = new BinderItem(0, NewUuid(), BinderItemType.Text, title);
+            BinderItem item = new BinderItem(NewUuid(), BinderItemType.Text, title);
             parent.Children.Add(item);
             return item;
         }
@@ -241,7 +241,7 @@ namespace StoryBuilder.Services.Reports
                     type = BinderItemType.Text;
                     break;
             }
-            BinderItem binderItem = new BinderItem(0, StoryWriter.UuidString(node.Uuid), type, node.Name, parent);
+            BinderItem binderItem = new BinderItem(StoryWriter.UuidString(node.Uuid), type, node.Name, parent);
             foreach (StoryNodeItem child in node.Children)
                 RecurseStoryModelNode(child, binderItem);
         }
@@ -338,7 +338,7 @@ namespace StoryBuilder.Services.Reports
             await Task.Run(() =>
             {
                 // Add a BinderItem for the report under the Miscellaneous folder
-                BinderItem story = new BinderItem(0, NewUuid(), BinderItemType.Text, "Previous Scrivener Notes", _miscNode);
+                BinderItem story = new BinderItem(NewUuid(), BinderItemType.Text, "Previous Scrivener Notes", _miscNode);
                 // Create a folder for the document
                 string path = Path.Combine(_scrivener.ProjectPath, "Files", "Data", story.Uuid, "content.rtf");
                 // Locate and open the output content.rtf report

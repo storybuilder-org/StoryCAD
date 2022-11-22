@@ -79,20 +79,6 @@ public class StoryNodeItem : DependencyObject, INotifyPropertyChanged
         }
     }
 
-    private int _id;
-    public int Id
-    {
-        get => _id;
-        set
-        {
-            if (_id != value)
-            {
-                _id = value;
-                NotifyPropertyChanged("Id");
-            }
-        }
-    }
-
     private StoryItemType _type;
     /// <summary>
     /// Type of node

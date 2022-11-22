@@ -354,9 +354,6 @@ public class StoryReader : ObservableRecipient
                 case "Name":
                     _chr.Name = _attr.InnerText;
                     break;
-                case "Id":
-                    _chr.Id = Convert.ToInt32(_attr.InnerText);
-                    break;
                 case "Role":
                     _chr.Role = _attr.InnerText;
                     break;
@@ -499,9 +496,6 @@ public class StoryReader : ObservableRecipient
                 case "Name":
                     _loc.Name = _attr.InnerText;
                     break;
-                case "Id":
-                    _loc.Id = Convert.ToInt32(_attr.InnerText);
-                    break;
                 case "Locale":
                     _loc.Locale = _attr.InnerText;
                     break;
@@ -569,9 +563,6 @@ public class StoryReader : ObservableRecipient
                     break;
                 case "Name":
                     _scene.Name = _attr.InnerText;
-                    break;
-                case "Id":
-                    _scene.Id = Convert.ToInt32(_attr.InnerText);
                     break;
                 case "ViewpointCharacter":
                     _scene.ViewpointCharacter = _attr.InnerText;

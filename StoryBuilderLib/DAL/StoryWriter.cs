@@ -246,9 +246,6 @@ public class StoryWriter
         _attr = _xml.CreateAttribute("Name");
         _attr.Value = _rec.Name;
         _prob.Attributes.Append(_attr);
-        _attr = _xml.CreateAttribute("Id");
-        _attr.Value = _rec.Id.ToString();
-        _prob.Attributes.Append(_attr);
         _attr = _xml.CreateAttribute("ProblemType");
         _attr.Value = _rec.ProblemType;
         _prob.Attributes.Append(_attr);
@@ -319,9 +316,6 @@ public class StoryWriter
         _chr.Attributes.Append(_attr);
         _attr = _xml.CreateAttribute("Name");
         _attr.Value = _rec.Name;
-        _chr.Attributes.Append(_attr);
-        _attr = _xml.CreateAttribute("Id");
-        _attr.Value = _rec.Id.ToString();
         _chr.Attributes.Append(_attr);
         _attr = _xml.CreateAttribute("Role");
         _attr.Value = _rec.Role;
@@ -497,9 +491,6 @@ public class StoryWriter
         _attr = _xml.CreateAttribute("Name");
         _attr.Value = _rec.Name;
         _loc.Attributes.Append(_attr);
-        _attr = _xml.CreateAttribute("Id");
-        _attr.Value = _rec.Id.ToString();
-        _loc.Attributes.Append(_attr);
         _attr = _xml.CreateAttribute("Locale");
         _attr.Value = _rec.Locale;
         _loc.Attributes.Append(_attr);
@@ -554,9 +545,6 @@ public class StoryWriter
         _scene.Attributes.Append(_attr);
         _attr = _xml.CreateAttribute("Name");
         _attr.Value = _rec.Name;
-        _scene.Attributes.Append(_attr);
-        _attr = _xml.CreateAttribute("Id");
-        _attr.Value = _rec.Id.ToString();
         _scene.Attributes.Append(_attr);
         _attr = _xml.CreateAttribute("ViewpointCharacter");
         _attr.Value = _rec.ViewpointCharacter;
