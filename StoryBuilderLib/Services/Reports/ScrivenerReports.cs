@@ -189,14 +189,14 @@ namespace StoryBuilder.Services.Reports
 
         public BinderItem AddFolder(BinderItem parent, string title)
         {
-            BinderItem item = new BinderItem(0, NewUuid(), BinderItemType.Folder, title);
+            BinderItem item = new BinderItem(NewUuid(), BinderItemType.Folder, title);
             parent.Children.Add(item);
             return item;
         }
 
         public BinderItem InsertFolderBefore(BinderItem parent, string after, string title)
         {
-            BinderItem item = new BinderItem(0, NewUuid(), BinderItemType.Folder, title);
+            BinderItem item = new BinderItem(NewUuid(), BinderItemType.Folder, title);
             parent.Children.Insert(FolderIndex(_binderNode, after), item);
             return item;
         }
@@ -221,7 +221,7 @@ namespace StoryBuilder.Services.Reports
 
         public BinderItem AddText(BinderItem parent, string title)
         {
-            BinderItem item = new BinderItem(0, NewUuid(), BinderItemType.Text, title);
+            BinderItem item = new BinderItem(NewUuid(), BinderItemType.Text, title);
             parent.Children.Add(item);
             return item;
         }
@@ -241,7 +241,7 @@ namespace StoryBuilder.Services.Reports
                     type = BinderItemType.Text;
                     break;
             }
-            BinderItem binderItem = new BinderItem(0, StoryWriter.UuidString(node.Uuid), type, node.Name, parent);
+            BinderItem binderItem = new BinderItem(StoryWriter.UuidString(node.Uuid), type, node.Name, parent);
             foreach (StoryNodeItem child in node.Children)
                 RecurseStoryModelNode(child, binderItem);
         }
@@ -338,7 +338,7 @@ namespace StoryBuilder.Services.Reports
             await Task.Run(() =>
             {
                 // Add a BinderItem for the report under the Miscellaneous folder
-                BinderItem story = new BinderItem(0, NewUuid(), BinderItemType.Text, "Previous Scrivener Notes", _miscNode);
+                BinderItem story = new BinderItem(NewUuid(), BinderItemType.Text, "Previous Scrivener Notes", _miscNode);
                 // Create a folder for the document
                 string path = Path.Combine(_scrivener.ProjectPath, "Files", "Data", story.Uuid, "content.rtf");
                 // Locate and open the output content.rtf report
@@ -562,10 +562,10 @@ namespace StoryBuilder.Services.Reports
 
         private string NewUuid()
         {
-            string id = Guid.NewGuid().ToString("B").ToUpper();
-            id = id.Replace("{", string.Empty);
-            id = id.Replace("}", string.Empty);
-            return id;
+            string guid = Guid.NewGuid().ToString("B").ToUpper();
+            guid = guid.Replace("{", string.Empty);
+            guid = guid.Replace("}", string.Empty);
+            return guid;
         }
 
         #endregion
@@ -591,9 +591,6 @@ namespace StoryBuilder.Services.Reports
 
             attr = _scrivener.XmlDocument.CreateAttribute("Type");
             attr.Value = "Text";
-            stbUuid.Attributes.SetNamedItem(attr);
-            attr = _scrivener.XmlDocument.CreateAttribute("ID");
-            attr.Value = "stbuuid";
             stbUuid.Attributes.SetNamedItem(attr);
             attr = _scrivener.XmlDocument.CreateAttribute("Wraps");
             attr.Value = "No";
@@ -630,25 +627,13 @@ namespace StoryBuilder.Services.Reports
             labelSettings.AppendChild(labels);
             // Generate each label 
             IXmlNode label = _scrivener.XmlDocument.CreateElement("Label");
-            attr = _scrivener.XmlDocument.CreateAttribute("ID");
-            attr.Value = "-1";
-            label.Attributes.SetNamedItem(attr);
-            label.InnerText = "No Label";
-            labels.AppendChild(label);
             label = _scrivener.XmlDocument.CreateElement("Label");
-            attr = _scrivener.XmlDocument.CreateAttribute("ID");
-            attr.Value = "1";
-            label.Attributes.SetNamedItem(attr);
-            labels.AppendChild(label);
             attr = _scrivener.XmlDocument.CreateAttribute("Color");
             attr.Value = "1.000000 1.000000 1.000000";
             label.Attributes.SetNamedItem(attr);
             label.InnerText = "Not Started";
             labels.AppendChild(label);
             label = _scrivener.XmlDocument.CreateElement("Label");
-            attr = _scrivener.XmlDocument.CreateAttribute("ID");
-            attr.Value = "2";
-            labels.AppendChild(label);
             attr = _scrivener.XmlDocument.CreateAttribute("Color");
             attr.Value = "1.000000 1.000000 0.000000";
             label.Attributes.SetNamedItem(attr);
@@ -659,50 +644,30 @@ namespace StoryBuilder.Services.Reports
             label.InnerText = "In Progress";
             labels.AppendChild(label);
             label = _scrivener.XmlDocument.CreateElement("Label");
-            attr = _scrivener.XmlDocument.CreateAttribute("ID");
-            attr.Value = "3";
-            label.Attributes.SetNamedItem(attr);
-            labels.AppendChild(label);
             attr = _scrivener.XmlDocument.CreateAttribute("Color");
             attr.Value = "1.000000 0.000000 0.000000";
             label.Attributes.SetNamedItem(attr);
             label.InnerText = "First Draft";
             labels.AppendChild(label);
             label = _scrivener.XmlDocument.CreateElement("Label");
-            attr = _scrivener.XmlDocument.CreateAttribute("ID");
-            attr.Value = "4";
-            label.Attributes.SetNamedItem(attr);
-            labels.AppendChild(label);
             attr = _scrivener.XmlDocument.CreateAttribute("Color");
             attr.Value = "0.333333 1.000000 0.000000";
             label.Attributes.SetNamedItem(attr);
             label.InnerText = "Reviewed";
             labels.AppendChild(label);
             label = _scrivener.XmlDocument.CreateElement("Label");
-            attr = _scrivener.XmlDocument.CreateAttribute("ID");
-            attr.Value = "5";
-            label.Attributes.SetNamedItem(attr);
-            labels.AppendChild(label);
             attr = _scrivener.XmlDocument.CreateAttribute("Color");
             attr.Value = "0.000000 0.666667 0.000000";
             label.Attributes.SetNamedItem(attr);
             label.InnerText = "Revised Draft";
             labels.AppendChild(label);
             label = _scrivener.XmlDocument.CreateElement("Label");
-            attr = _scrivener.XmlDocument.CreateAttribute("ID");
-            attr.Value = "6";
-            label.Attributes.SetNamedItem(attr);
-            labels.AppendChild(label);
             attr = _scrivener.XmlDocument.CreateAttribute("Color");
             attr.Value = "0.000000 0.666667 0.000000";
             label.Attributes.SetNamedItem(attr);
             label.InnerText = "Final Draft";
             labels.AppendChild(label);
             label = _scrivener.XmlDocument.CreateElement("Label");
-            attr = _scrivener.XmlDocument.CreateAttribute("ID");
-            attr.Value = "7";
-            label.Attributes.SetNamedItem(attr);
-            labels.AppendChild(label);
             attr = _scrivener.XmlDocument.CreateAttribute("Color");
             attr.Value = "0.262745 0.262745 0.396078";
             label.Attributes.SetNamedItem(attr);

@@ -260,7 +260,6 @@ public class ReportFormatter
         {
             StringBuilder sb = new(line);
             //Story Role section
-            sb.Replace("@Id", character.Id.ToString());
             sb.Replace("@Title", character.Name);
             sb.Replace("@Role", character.Role);
             sb.Replace("@StoryRole", character.StoryRole);
@@ -372,7 +371,6 @@ public class ReportFormatter
         foreach (string line in lines)
         {
             StringBuilder sb = new(line);
-            sb.Replace("@Id", setting.Id.ToString());
             sb.Replace("@Title", setting.Name);
             sb.Replace("@Locale", setting.Locale);
             sb.Replace("@Season", setting.Season);

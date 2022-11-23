@@ -62,7 +62,7 @@ public class ScrivenerIo
 
     public BinderItem BuildBinderItemTree()
     {
-        BinderItem _root = new(0, "", BinderItemType.Root, "Root");
+        BinderItem _root = new("", BinderItemType.Root, "Root");
         RecurseXmlNode(Binder, _root);
         return _root;
     }
@@ -80,7 +80,6 @@ public class ScrivenerIo
         if (node.NodeType != NodeType.ElementNode)
             return;
 
-        int _id = 0;
         string _uuid = string.Empty;
         string _created = string.Empty;
         string _modified = string.Empty;
@@ -97,9 +96,6 @@ public class ScrivenerIo
             {
                 switch (_attr.NodeName)
                 {
-                    case "ID":
-                        _id = Convert.ToInt32(_attr.InnerText);
-                        break;
                     case "UUID":
                         _uuid = _attr.InnerText;
                         break;
@@ -157,7 +153,7 @@ public class ScrivenerIo
                     XmlElement _value = (XmlElement)_stbUuidNode.SelectSingleNode("./Value");
                     if (_value != null) _stbUuid = _value.InnerText;
                 }
-                BinderItem _newNode = new(_id, _uuid, _type, _title, parent, _created, _modified, _stbUuid) { Node = node };
+                BinderItem _newNode = new(_uuid, _type, _title, parent, _created, _modified, _stbUuid) { Node = node };
                 if (_children != null)
                 {
                     foreach (IXmlNode _child in _children.ChildNodes)

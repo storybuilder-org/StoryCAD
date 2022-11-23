@@ -52,13 +52,6 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         }
     }
 
-    private int _id;
-    public int Id
-    {
-        get => _id;
-        set => SetProperty(ref _id, value);
-    }
-
     // Problem problem data
     private string _problemType;
     public string ProblemType

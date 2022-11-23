@@ -12,16 +12,6 @@ public class SettingModel : StoryElement
     #endregion
     #region Properties
 
-    // Besides its GUID, each Setting has a unique (to this story)
-    // integer id number (useful in lists of settings.)
-    private static int _nextSettingId;
-    private int _id;
-    public int Id
-    {
-        get => _id;
-        set => _id = value;
-    }
-
     // Setting (General) data
 
     private string _locale;
@@ -124,7 +114,6 @@ public class SettingModel : StoryElement
     #region Constructors
     public SettingModel(StoryModel model) : base("New Setting", StoryItemType.Setting, model)
     {
-        Id = ++_nextSettingId;
         Locale = string.Empty;
         Season = string.Empty;
         Period = string.Empty;
@@ -143,7 +132,6 @@ public class SettingModel : StoryElement
 
     public SettingModel(IXmlNode xn, StoryModel model) : base(xn, model)
     {
-        Id = ++_nextSettingId;
         Locale = string.Empty;
         Season = string.Empty;
         Period = string.Empty;

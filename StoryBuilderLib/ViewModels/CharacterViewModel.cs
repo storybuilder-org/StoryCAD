@@ -460,16 +460,6 @@ public class CharacterViewModel : ObservableRecipient, INavigable
         set => SetProperty(ref _backStory, value);
     }
 
-    // Besides its GUID, each Character has a unique (to this story) 
-    // integer id number (useful in lists of characters.)
-    private int _id;
-
-    public int Id
-    {
-        get => _id;
-        set => SetProperty(ref _id, value);
-    }
-
     // The StoryModel is passed when CharacterPage is navigated to
     private CharacterModel _model;
     public CharacterModel Model
@@ -587,7 +577,6 @@ public class CharacterViewModel : ObservableRecipient, INavigable
         Notes = Model.Notes;
         Flaw = Model.Flaw;
         BackStory = Model.BackStory;
-        Id = Model.Id;
 
         CharacterTraits.Clear();
         foreach (string _member in Model.TraitList) { CharacterTraits.Add(_member); }
@@ -657,7 +646,6 @@ public class CharacterViewModel : ObservableRecipient, INavigable
                 Model.RelationshipList.Add(_relation);
             Model.Flaw = Flaw;
             Model.BackStory = BackStory;
-            Model.Id = Id;
 
             // Write and clear RTF files
             Model.CharacterSketch = CharacterSketch;

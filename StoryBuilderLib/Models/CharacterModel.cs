@@ -8,17 +8,6 @@ public class CharacterModel : StoryElement
 
     #region Properties
 
-    // Besides its GUID, each Character has a unique (to this story)
-    // integer id number (useful in lists of characters.)
-    private static int _nextCharacterId;
-
-    private int _id;
-    public int Id
-    {
-        get => _id;
-        set => _id = value;
-    }
-
     // Character role data
 
     private string _role;
@@ -355,7 +344,6 @@ public class CharacterModel : StoryElement
     #region Constructors
     public CharacterModel(StoryModel model) : base("New Character", StoryItemType.Character, model)
     {
-        Id = ++_nextCharacterId;
         Role = string.Empty;
         StoryRole = string.Empty;
         Archetype = string.Empty;
@@ -404,7 +392,6 @@ public class CharacterModel : StoryElement
 
     public CharacterModel(string name, StoryModel model) : base(name, StoryItemType.Character, model)
     {
-        Id = ++_nextCharacterId;
         Role = string.Empty;
         StoryRole = string.Empty;
         Archetype = string.Empty;
@@ -453,7 +440,6 @@ public class CharacterModel : StoryElement
 
     public CharacterModel(IXmlNode xn, StoryModel model) : base(xn, model)
     {
-        Id = ++_nextCharacterId;
         Role = string.Empty;
         StoryRole = string.Empty;
         Archetype = string.Empty;

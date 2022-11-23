@@ -75,9 +75,7 @@ public class LogService : ILogService
 
             elmahIoTarget.OnMessage += msg =>
             {
-                msg.Version = Package.Current.Id.Version.Major + "."
-                                                               + Package.Current.Id.Version.Minor + "."
-                                                               + Package.Current.Id.Version.Revision;
+                msg.Version = GlobalData.Version;
                 
                 try { msg.User = GlobalData.Preferences.Name + $"({GlobalData.Preferences.Email})"; }
                 catch (Exception e) { msg.User = $"There was an error attempting to obtain user information Error: {e.Message}"; }
@@ -85,12 +83,7 @@ public class LogService : ILogService
                 try { msg.Source = stackTraceHelper; } 
                 catch (Exception e) {msg.Source = $"There was an error attempting to obtain StackTrace helper Error: {e.Message}";}
                 
-                try
-                {
-                    msg.Version = Package.Current.Id.Version.Major + "."
-                                                                   + Package.Current.Id.Version.Minor + "."
-                                                                   + Package.Current.Id.Version.Build + " Build " + Package.Current.Id.Version.Revision;
-                }
+                try { msg.Version = GlobalData.Version; }
                 catch (Exception e) { msg.Version = $"There was an error trying to obtain version information Error: {e.Message}"; }
 
                 try

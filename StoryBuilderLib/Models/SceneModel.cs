@@ -7,17 +7,6 @@ public class SceneModel : StoryElement
 {
     #region Properties
 
-    // Besides its GUID, each Scene has a unique (to this story)
-    // integer id number (useful in lists of scenes.)
-
-    private static int _nextSceneId;
-    private int _id;
-    public int Id
-    {
-        get => _id;
-        set => _id = value;
-    }
-
     //  Scene General data
     private string _description;
     public string Description
@@ -208,15 +197,11 @@ public class SceneModel : StoryElement
         set => _notes = value;
     }
 
-    // Besides its GUID, each Scene has a unique (to this story)
-    // integer id number (useful in lists of scenes.)
-
     #endregion
 
     #region Constructors
     public SceneModel(StoryModel model) : base("New Scene", StoryItemType.Scene, model)
     {
-        Id = ++_nextSceneId;
         ViewpointCharacter = string.Empty;
         Date = string.Empty;
         Time = string.Empty;
@@ -246,7 +231,6 @@ public class SceneModel : StoryElement
 
     public SceneModel(IXmlNode xn, StoryModel model) : base(xn, model)
     {
-        Id = ++_nextSceneId;
         ViewpointCharacter = string.Empty;
         Date = string.Empty;
         Time = string.Empty;

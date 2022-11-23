@@ -15,8 +15,6 @@ public class BinderItem
     // ReSharper disable once AutoPropertyCanBeMadeGetOnly.Local
     public List<BinderItem> Children { get; private set; }
 
-    public int Id { get; set; }
-
     public string Uuid { get; set; }
 
     public string Created { get; set; }
@@ -39,16 +37,14 @@ public class BinderItem
 
     #region Constructors
 
-    public BinderItem(int id, string uuid, BinderItemType type, string header)
-        : this(id, uuid, type, header, null)
+    public BinderItem(string uuid, BinderItemType type, string header) : this(uuid, type, header, null)
     {
         Node = null;
         Children = new List<BinderItem>();
     }
 
-    public BinderItem(int id, string uuid, BinderItemType type, string header, BinderItem parent)
+    public BinderItem(string uuid, BinderItemType type, string header, BinderItem parent)
     {
-        Id = id;
         Uuid = uuid;
         Created = string.Empty;
         Modified = string.Empty;
@@ -59,9 +55,8 @@ public class BinderItem
         Children = new List<BinderItem>();
     }
 
-    public BinderItem(int id, string uuid, BinderItemType type, string header, BinderItem parent, string created, string modified, string stbUuid)
+    public BinderItem(string uuid, BinderItemType type, string header, BinderItem parent, string created, string modified, string stbUuid)
     {
-        Id = id;
         Uuid = uuid;
         Created = created;
         Modified = modified;

@@ -20,7 +20,6 @@ public class OverviewModel : StoryElement
     #region Properties
 
     // Because Overview is always the root of the StoryExplorer, there is only one instance of it.
-    // Consequently it has no Id property (although it does have a UUID.)
 
     // Overview data
 
