@@ -562,10 +562,10 @@ namespace StoryBuilder.Services.Reports
 
         private string NewUuid()
         {
-            string id = Guid.NewGuid().ToString("B").ToUpper();
-            id = id.Replace("{", string.Empty);
-            id = id.Replace("}", string.Empty);
-            return id;
+            string guid = Guid.NewGuid().ToString("B").ToUpper();
+            guid = guid.Replace("{", string.Empty);
+            guid = guid.Replace("}", string.Empty);
+            return guid;
         }
 
         #endregion
@@ -591,9 +591,6 @@ namespace StoryBuilder.Services.Reports
 
             attr = _scrivener.XmlDocument.CreateAttribute("Type");
             attr.Value = "Text";
-            stbUuid.Attributes.SetNamedItem(attr);
-            attr = _scrivener.XmlDocument.CreateAttribute("ID");
-            attr.Value = "stbuuid";
             stbUuid.Attributes.SetNamedItem(attr);
             attr = _scrivener.XmlDocument.CreateAttribute("Wraps");
             attr.Value = "No";
@@ -630,25 +627,13 @@ namespace StoryBuilder.Services.Reports
             labelSettings.AppendChild(labels);
             // Generate each label 
             IXmlNode label = _scrivener.XmlDocument.CreateElement("Label");
-            attr = _scrivener.XmlDocument.CreateAttribute("ID");
-            attr.Value = "-1";
-            label.Attributes.SetNamedItem(attr);
-            label.InnerText = "No Label";
-            labels.AppendChild(label);
             label = _scrivener.XmlDocument.CreateElement("Label");
-            attr = _scrivener.XmlDocument.CreateAttribute("ID");
-            attr.Value = "1";
-            label.Attributes.SetNamedItem(attr);
-            labels.AppendChild(label);
             attr = _scrivener.XmlDocument.CreateAttribute("Color");
             attr.Value = "1.000000 1.000000 1.000000";
             label.Attributes.SetNamedItem(attr);
             label.InnerText = "Not Started";
             labels.AppendChild(label);
             label = _scrivener.XmlDocument.CreateElement("Label");
-            attr = _scrivener.XmlDocument.CreateAttribute("ID");
-            attr.Value = "2";
-            labels.AppendChild(label);
             attr = _scrivener.XmlDocument.CreateAttribute("Color");
             attr.Value = "1.000000 1.000000 0.000000";
             label.Attributes.SetNamedItem(attr);
@@ -659,50 +644,30 @@ namespace StoryBuilder.Services.Reports
             label.InnerText = "In Progress";
             labels.AppendChild(label);
             label = _scrivener.XmlDocument.CreateElement("Label");
-            attr = _scrivener.XmlDocument.CreateAttribute("ID");
-            attr.Value = "3";
-            label.Attributes.SetNamedItem(attr);
-            labels.AppendChild(label);
             attr = _scrivener.XmlDocument.CreateAttribute("Color");
             attr.Value = "1.000000 0.000000 0.000000";
             label.Attributes.SetNamedItem(attr);
             label.InnerText = "First Draft";
             labels.AppendChild(label);
             label = _scrivener.XmlDocument.CreateElement("Label");
-            attr = _scrivener.XmlDocument.CreateAttribute("ID");
-            attr.Value = "4";
-            label.Attributes.SetNamedItem(attr);
-            labels.AppendChild(label);
             attr = _scrivener.XmlDocument.CreateAttribute("Color");
             attr.Value = "0.333333 1.000000 0.000000";
             label.Attributes.SetNamedItem(attr);
             label.InnerText = "Reviewed";
             labels.AppendChild(label);
             label = _scrivener.XmlDocument.CreateElement("Label");
-            attr = _scrivener.XmlDocument.CreateAttribute("ID");
-            attr.Value = "5";
-            label.Attributes.SetNamedItem(attr);
-            labels.AppendChild(label);
             attr = _scrivener.XmlDocument.CreateAttribute("Color");
             attr.Value = "0.000000 0.666667 0.000000";
             label.Attributes.SetNamedItem(attr);
             label.InnerText = "Revised Draft";
             labels.AppendChild(label);
             label = _scrivener.XmlDocument.CreateElement("Label");
-            attr = _scrivener.XmlDocument.CreateAttribute("ID");
-            attr.Value = "6";
-            label.Attributes.SetNamedItem(attr);
-            labels.AppendChild(label);
             attr = _scrivener.XmlDocument.CreateAttribute("Color");
             attr.Value = "0.000000 0.666667 0.000000";
             label.Attributes.SetNamedItem(attr);
             label.InnerText = "Final Draft";
             labels.AppendChild(label);
             label = _scrivener.XmlDocument.CreateElement("Label");
-            attr = _scrivener.XmlDocument.CreateAttribute("ID");
-            attr.Value = "7";
-            label.Attributes.SetNamedItem(attr);
-            labels.AppendChild(label);
             attr = _scrivener.XmlDocument.CreateAttribute("Color");
             attr.Value = "0.262745 0.262745 0.396078";
             label.Attributes.SetNamedItem(attr);

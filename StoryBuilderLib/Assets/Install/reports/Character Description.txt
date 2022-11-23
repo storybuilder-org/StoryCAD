@@ -2,8 +2,6 @@
 
                    ==============Story Role =================
 
-    Id:                 @Id
-
     Name:               @Title
 
     Role:               @Role

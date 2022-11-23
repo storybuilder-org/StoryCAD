@@ -228,6 +228,9 @@ public class StoryNodeItem : DependencyObject, INotifyPropertyChanged
     #endregion
 
     #region Public Methods
+    public override string ToString() { return Name; }
+
+
     /// <summary>
     /// This method allows a dept-first search (DFS) or 'pre-order traversal' of
     /// a BinderItem tree or subtree with a simple C# foreach.
