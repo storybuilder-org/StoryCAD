@@ -1692,7 +1692,7 @@ public class ShellViewModel : ObservableRecipient
         }
 
         List<StoryNodeItem> _foundNodes = new();
-        foreach (StoryNodeItem _node in DataSource[0]) //Gets all nodes in the tree
+        foreach (StoryNodeItem _node in DataSource[0]) //Gets all nodes in the tree #TODO: MAKE RECURSIVE
         {
             if (Ioc.Default.GetRequiredService<DeletionService>().SearchStoryElement(_node, RightTappedNode.Uuid, StoryModel))
             {
@@ -1730,7 +1730,7 @@ public class ShellViewModel : ObservableRecipient
                 Ioc.Default.GetRequiredService<DeletionService>().SearchStoryElement(_node, RightTappedNode.Uuid, StoryModel, true);
             }
 
-            if (CurrentView.Contains("ExplorerView")) { RightTappedNode.Delete(StoryViewType.ExplorerView); }
+            if (CurrentView.Equals("Story Explorer View")) { RightTappedNode.Delete(StoryViewType.ExplorerView); }
             else { RightTappedNode.Delete(StoryViewType.NarratorView); }
         }
     }
