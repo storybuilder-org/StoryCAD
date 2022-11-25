@@ -10,8 +10,7 @@
     <Page.Resources>
         <CommandBarFlyout x:Key="AddStoryElementFlyout" Placement="Right" x:Name="AddStoryElementCommandBarFlyout" >
             <CommandBarFlyout.SecondaryCommands>
-                <AppBarButton Icon="Add" Label="Add Elements" Command="{x:Bind ShellVm.AddFolderCommand, Mode=OneWay}" 
-                              Visibility="{x:Bind ShellVm.AddFolderVisibility, Mode=TwoWay}"  >
+                <AppBarButton Icon="Add" Label="Add Elements" >
                     <AppBarButton.Flyout>
                         <MenuFlyout>
                             <MenuFlyoutItem Icon="Folder" Text="Add folder"  Command="{x:Bind ShellVm.AddFolderCommand, Mode=OneWay}" Visibility="{x:Bind ShellVm.AddFolderVisibility, Mode=TwoWay}" />
@@ -56,7 +55,7 @@
                         <ToolTip Content="Print selected node"/>
                     </ToolTipService.ToolTip>
                 </AppBarButton>
-                <AppBarButton Icon="Cancel" Label="Delete node" Visibility="{x:Bind ShellVm.EmptyTrashVisibility, Mode=TwoWay}" >
+                <AppBarButton Icon="Cancel" Label="Empty Trash" Visibility="{x:Bind ShellVm.EmptyTrashVisibility, Mode=TwoWay}" >
                     <ToolTipService.ToolTip>
                         <ToolTip Content="Empty trash"/>
                     </ToolTipService.ToolTip>
