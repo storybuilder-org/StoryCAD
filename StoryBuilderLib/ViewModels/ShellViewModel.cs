@@ -33,6 +33,10 @@ using GuidAttribute = System.Runtime.InteropServices.GuidAttribute;
 using Octokit;
 using ProductHeaderValue = Octokit.ProductHeaderValue;
 using StoryBuilder.Services.Backend;
+using static System.Formats.Asn1.AsnWriter;
+using System.Diagnostics.Metrics;
+using Ubiety.Dns.Core.Records;
+using Ubiety.Dns.Core;
 
 namespace StoryBuilder.ViewModels;
 
@@ -444,33 +448,47 @@ public class ShellViewModel : ObservableRecipient
                     StoryElement _antag = new CharacterModel("Antagonist", StoryModel);
                     StoryNodeItem _antagNode = new(_antag, _charactersFolderNode);
                     break;
-            }
-
-
-            GlobalData.MainWindow.Title = $"StoryBuilder - Editing {dialogVM.ProjectName!.Replace(".stbx", "")}";
-            SetCurrentView(StoryViewType.ExplorerView);
-            //TODO: Set expand and is selected?
+                case 5:
+                    StoryElement _storyProb = new ProblemModel("Story Problem", StoryModel);
+                    StoryNodeItem _storyProbNode = new(_storyProb, _overviewNode);
+                    StoryElement _storyProtag = new CharacterModel("Protagonist", StoryModel);
+                    StoryNodeItem _storyProtagNode = new(_storyProtag, _storyProbNode);
+                    StoryElement _storyAntag = new CharacterModel("Antagonist", StoryModel);
+                    StoryNodeItem _storyAntagNode = new(_storyAntag, _storyProbNode);
+                    _overview.StoryProblem = _storyProb.ToString();
+                    var _problem = _storyProb as ProblemModel;
+                    _problem.Protagonist = _storyProtag.ToString();
+                    _problem.Antagonist = _storyAntag.ToString();
+                    _problem.Premise =
+                        @"Your[protagonist] in a situation[genre, setting] wants something[goal], which brings him" +
+                        @"into conflict with a second character[antagonist]. After a series of conflicts[additional " +
+                        @"problems], the final battle[climax scene] erupts, and the[protagonist] finally resolves the " +
+                        @"conflict[outcome].";
+                    break;
+        }
+        GlobalData.MainWindow.Title = $"StoryBuilder - Editing {dialogVM.ProjectName!.Replace(".stbx", "")}";
+        SetCurrentView(StoryViewType.ExplorerView);
+        //TODO: Set expand and is selected?
 
             Ioc.Default.GetRequiredService<UnifiedVM>().UpdateRecents(Path.Combine(dialogVM.ProjectPath, dialogVM.ProjectName)); //adds item to recent
 
-            // Save the new project
+        // Save the new project
             await SaveFile();
-            if (GlobalData.Preferences.BackupOnOpen) { await MakeBackup(); }
-            Ioc.Default.GetRequiredService<BackupService>().StartTimedBackup();
-            Messenger.Send(new StatusChangedMessage(new("New project command executing", LogLevel.Info, true)));
-
-        }
+        if (GlobalData.Preferences.BackupOnOpen) { await MakeBackup(); }
+        Ioc.Default.GetRequiredService<BackupService>().StartTimedBackup();
+        Messenger.Send(new StatusChangedMessage(new("New project command executing", LogLevel.Info, true)));
+    }
         catch (Exception _ex)
         {
             Logger.LogException(LogLevel.Error, _ex, "Error creating new project");
             Messenger.Send(new StatusChangedMessage(new("File make failure.", LogLevel.Error)));
         }
-        _canExecuteCommands = true;
+_canExecuteCommands = true;
     }
 
     public async Task MakeBackup()
-    {
-        await Ioc.Default.GetRequiredService<BackupService>().BackupProject();
+{
+    await Ioc.Default.GetRequiredService<BackupService>().BackupProject();
     }
 
     public void TreeViewNodeClicked(object selectedItem)
