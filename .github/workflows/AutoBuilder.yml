@@ -20,7 +20,7 @@ jobs:
 
     steps:
     - name: Download Repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         fetch-depth: 0
 
@@ -28,7 +28,7 @@ jobs:
     - name: Install .NET
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 6.0.x
+        dotnet-version: 7.x.x
 
     #Install MSBUILD
     - name: Setup MSBuild.exe
