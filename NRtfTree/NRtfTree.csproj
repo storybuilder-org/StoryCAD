@@ -2,7 +2,7 @@
 
 	<PropertyGroup>
 		<RuntimeIdentifiers>win10-x86;win10-x64</RuntimeIdentifiers>
-		<TargetFramework>net6.0</TargetFramework>
+		<TargetFramework>net7.0</TargetFramework>
 		<TargetPlatformMinVersion>10.0.17134.0</TargetPlatformMinVersion>
 		<OutputType>Library</OutputType>
 		<RuntimeIdentifiers>win10-x86;win10-x64</RuntimeIdentifiers>
