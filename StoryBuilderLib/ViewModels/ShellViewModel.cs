@@ -1064,19 +1064,24 @@ public class ShellViewModel : ObservableRecipient
                 string _masterPlotName = _masterPlotsVM.MasterPlotName;
                 MasterPlotModel _model = _masterPlotsVM.MasterPlots[_masterPlotName];
                 IList<MasterPlotScene> _scenes = _model.MasterPlotScenes;
+                ProblemModel _problem = new ProblemModel(_masterPlotName, StoryModel);
+                if (RightTappedNode == null)
+                {
+                    Messenger.Send(new StatusChangedMessage(new("You need to right click a node to", LogLevel.Info)));
+                    return;
+                }
+
+                // add the new ProblemModel & node to the end of the target's children 
+                StoryNodeItem _problemNode = new(_problem, RightTappedNode);
+                RightTappedNode.IsExpanded = true;
+                _problemNode.IsSelected = true;
+                _problemNode.IsExpanded = true;
                 foreach (MasterPlotScene _scene in _scenes)
                 {
                     SceneModel _child = new(StoryModel) { Name = _scene.SceneTitle, Remarks = "See Notes.", Notes = _scene.Notes };
 
-                    if (RightTappedNode == null)
-                    {
-                        Messenger.Send(new StatusChangedMessage(new("You need to right click a node to", LogLevel.Info)));
-                        return;
-                    }
-
-                    // add the new SceneModel & node to the end of the target's children 
+                    // add the new SceneModel & node to the end of the problem's children 
                     StoryNodeItem _newNode = new(_child, RightTappedNode);
-                    RightTappedNode.IsExpanded = true;
                     _newNode.IsSelected = true;
                 }
 
