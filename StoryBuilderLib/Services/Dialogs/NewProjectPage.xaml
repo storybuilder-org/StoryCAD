@@ -14,6 +14,7 @@
             <x:String>External and Internal Problems</x:String>
             <x:String>Protagonist and Antagonist</x:String>
             <x:String>Problems and Characters</x:String>
+            <x:String>Overview and Story Problem</x:String>
         </ComboBox>
 
         <TextBox x:Name="ProjectPathName" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Header="Project path:"  Text="{x:Bind UnifiedVM.ProjectPath, Mode=TwoWay}" Margin="5,20"/>
