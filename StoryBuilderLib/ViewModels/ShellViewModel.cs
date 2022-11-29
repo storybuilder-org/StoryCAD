@@ -67,9 +67,9 @@ public class ShellViewModel : ObservableRecipient
     private ObservableCollection<StoryNodeItem> _targetCollection;
     public readonly LogService Logger;
     public readonly SearchService Search;
+    private AutoSaveService _autoSaveService = Ioc.Default.GetRequiredService<AutoSaveService>();
 
     private DispatcherTimer _statusTimer;
-    private BackgroundWorker _autoSaveTimer = new(){WorkerSupportsCancellation = true};
 
     // The current story outline being processed. 
     public StoryModel StoryModel;
@@ -78,9 +78,6 @@ public class ShellViewModel : ObservableRecipient
 
     // The right-hand (detail) side of ShellView
     public Frame SplitViewFrame;
-
-    //UI Dispathcer to
-    DispatcherQueue Dispatcher = DispatcherQueue.GetForCurrentThread();
 
     #region CommandBar Relay Commands
 
@@ -607,7 +604,7 @@ public class ShellViewModel : ObservableRecipient
     /// call its SaveModel() method. Hence this method, which determines which viewmodel's active 
     /// and calls its SaveModel() method.
     /// </summary>
-    private void SaveModel()
+    public void SaveModel()
     {
         if (SplitViewFrame.CurrentSourcePageType is null){ return;}
         
@@ -654,13 +651,8 @@ public class ShellViewModel : ObservableRecipient
     /// <param name="fromPath">Path to open file from (Optional)</param>
     public async Task OpenFile(string fromPath = "")
     {
-        if (GlobalData.Preferences.AutoSave)
-        {
-            if (GlobalData.Preferences.AutoSaveInterval is > 31 or < 4) { GlobalData.Preferences.AutoSaveInterval = 20; }
-            else { GlobalData.Preferences.AutoSaveInterval = GlobalData.Preferences.AutoSaveInterval; }
-            _autoSaveTimer.DoWork += AutoSaveFile;
-        }
-        _autoSaveTimer.CancelAsync();
+        //Stop saving file, as new one is being opened.
+        _autoSaveService.StopService();
 
         if (StoryModel.Changed)
         {
@@ -727,7 +719,7 @@ public class ShellViewModel : ObservableRecipient
             if (GlobalData.Preferences.TimedBackup) { Ioc.Default.GetRequiredService<BackupService>().StartTimedBackup(); }
 
             ShowHomePage();
-            if (GlobalData.Preferences.AutoSave) { _autoSaveTimer.RunWorkerAsync(); }
+            if (GlobalData.Preferences.AutoSave) { _autoSaveService.StartService(); }
             string _msg = $"Opened project {StoryModel.ProjectFilename}";
             Logger.Log(LogLevel.Info, _msg);
         }
@@ -778,45 +770,9 @@ public class ShellViewModel : ObservableRecipient
     }
 
     /// <summary>
-    /// This is ran if the user has enabled Autosave,
-    /// it runs every x seconds, and simply saves the file
-    /// </summary>
-    private async void AutoSaveFile(object sender, object e)
-    {
-        while (true)
-        {
-            if (_autoSaveTimer.CancellationPending || !GlobalData.Preferences.AutoSave) { return; }
-            if (StoryModel.Changed)
-            {
-                try //Updating the lost modified timer
-                {
-                    ((OverviewModel)StoryModel.StoryElements.StoryElementGuids[StoryModel.ExplorerView[0].Uuid]).DateModified = DateTime.Now.ToString("d");
-                }
-                catch (NullReferenceException) { Messenger.Send(new StatusChangedMessage(new("Failed to update Last Modified date", LogLevel.Warn))); } //This appears to happen when in narrative view but im not sure how to fix it.
-
-                //Save and write.
-                Dispatcher.TryEnqueue(() =>
-                {
-                    SaveModel();
-                    ChangeStatusColor = Colors.Green;
-
-                });
-
-                await WriteModel();
-                StoryModel.Changed = false;
-                ChangeStatusColor = Colors.Green;
-            }
-
-            //Sleep Users Interval (in seconds)
-            System.Threading.Thread.Sleep(GlobalData.Preferences.AutoSaveInterval * 1000);
-        }
-
-    }
-
-    /// <summary>
     /// Write the current StoryModel to the backing project file
     /// </summary>
-    private async Task WriteModel()
+    public async Task WriteModel()
     {
         Logger.Log(LogLevel.Info, $"In WriteModel, file={StoryModel.ProjectFilename}");
         try
@@ -938,7 +894,7 @@ public class ShellViewModel : ObservableRecipient
     {
         _canExecuteCommands = false;
         Messenger.Send(new StatusChangedMessage(new("Closing project", LogLevel.Info, true)));
-        _autoSaveTimer.CancelAsync();
+        _autoSaveService.StopService();
         if (StoryModel.Changed)
         {
             ContentDialog _warning = new()
