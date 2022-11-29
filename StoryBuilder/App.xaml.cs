@@ -128,6 +128,7 @@ public partial class App : Application
                 .AddSingleton<StoryWriter>()
                 .AddSingleton<MySqlIo>()
                 .AddSingleton<BackupService>()
+                .AddSingleton<AutoSaveService>()
                 .AddSingleton<DeletionService>()
                 .AddSingleton<BackendService>()
                 // Register ViewModels 

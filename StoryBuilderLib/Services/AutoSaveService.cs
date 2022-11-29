@@ -14,7 +14,6 @@ namespace StoryBuilder.Services
     public class AutoSaveService
     {
         private LogService _logger = Ioc.Default.GetRequiredService<LogService>();
-        private ShellViewModel _ShellVM = Ioc.Default.GetRequiredService<ShellViewModel>();
         private BackgroundWorker Thread = new() { WorkerSupportsCancellation = true };
         public DispatcherQueue Dispatcher;
         private bool IsRunning = false;
@@ -57,6 +56,7 @@ namespace StoryBuilder.Services
             {
                 try
                 {
+                    ShellViewModel _ShellVM = Ioc.Default.GetRequiredService<ShellViewModel>();
                     if (Thread.CancellationPending || !GlobalData.Preferences.AutoSave) { return; }
                     if (_ShellVM.StoryModel.Changed)
                     {
