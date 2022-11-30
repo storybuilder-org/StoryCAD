@@ -20,6 +20,7 @@ using StoryBuilder.ViewModels.Tools;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -27,6 +28,7 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Windows.Storage;
 using Windows.Storage.Pickers;
+using Microsoft.UI.Dispatching;
 using StoryBuilder.Services;
 using WinRT;
 using GuidAttribute = System.Runtime.InteropServices.GuidAttribute;
@@ -69,9 +71,9 @@ public class ShellViewModel : ObservableRecipient
     private ObservableCollection<StoryNodeItem> _targetCollection;
     public readonly LogService Logger;
     public readonly SearchService Search;
+    private AutoSaveService _autoSaveService = Ioc.Default.GetRequiredService<AutoSaveService>();
 
     private DispatcherTimer _statusTimer;
-    private DispatcherTimer _autoSaveTimer = new();
 
     // The current story outline being processed. 
     public StoryModel StoryModel;
@@ -620,8 +622,7 @@ _canExecuteCommands = true;
     /// call its SaveModel() method. Hence this method, which determines which viewmodel's active 
     /// and calls its SaveModel() method.
     /// </summary>
-    /// <returns></returns>
-    private void SaveModel()
+    public void SaveModel()
     {
         if (SplitViewFrame.CurrentSourcePageType is null){ return;}
         
@@ -668,14 +669,8 @@ _canExecuteCommands = true;
     /// <param name="fromPath">Path to open file from (Optional)</param>
     public async Task OpenFile(string fromPath = "")
     {
-        if (GlobalData.Preferences.AutoSave)
-        {
-            if (GlobalData.Preferences.AutoSaveInterval is > 31 or < 4) { GlobalData.Preferences.AutoSaveInterval = 20; }
-            else { GlobalData.Preferences.AutoSaveInterval = GlobalData.Preferences.AutoSaveInterval; }
-            _autoSaveTimer.Tick += AutoSaveTimer_Tick;
-            _autoSaveTimer.Interval = new(0, 0, 0, GlobalData.Preferences.AutoSaveInterval, 0);
-        }
-        _autoSaveTimer.Stop();
+        //Stop saving file, as new one is being opened.
+        _autoSaveService.StopService();
 
         if (StoryModel.Changed)
         {
@@ -742,7 +737,7 @@ _canExecuteCommands = true;
             if (GlobalData.Preferences.TimedBackup) { Ioc.Default.GetRequiredService<BackupService>().StartTimedBackup(); }
 
             ShowHomePage();
-            if (GlobalData.Preferences.AutoSave) { _autoSaveTimer.Start(); }
+            if (GlobalData.Preferences.AutoSave) { _autoSaveService.StartService(); }
             string _msg = $"Opened project {StoryModel.ProjectFilename}";
             Logger.Log(LogLevel.Info, _msg);
         }
@@ -792,15 +787,10 @@ _canExecuteCommands = true;
         _canExecuteCommands = true;
     }
 
-    private async void AutoSaveTimer_Tick(object sender, object e)
-    {
-        if (GlobalData.Preferences.AutoSave) { await SaveFile(); }
-    }
-
     /// <summary>
     /// Write the current StoryModel to the backing project file
     /// </summary>
-    private async Task WriteModel()
+    public async Task WriteModel()
     {
         Logger.Log(LogLevel.Info, $"In WriteModel, file={StoryModel.ProjectFilename}");
         try
@@ -922,7 +912,7 @@ _canExecuteCommands = true;
     {
         _canExecuteCommands = false;
         Messenger.Send(new StatusChangedMessage(new("Closing project", LogLevel.Info, true)));
-        _autoSaveTimer.Stop();
+        _autoSaveService.StopService();
         if (StoryModel.Changed)
         {
             ContentDialog _warning = new()

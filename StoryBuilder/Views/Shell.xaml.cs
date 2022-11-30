@@ -13,6 +13,8 @@ using StoryBuilder.Models.Tools;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.ViewModels;
 using Windows.UI.ViewManagement;
+using Microsoft.UI.Dispatching;
+using StoryBuilder.Services;
 using Colors = Microsoft.UI.Colors;
 
 namespace StoryBuilder.Views;
@@ -26,6 +28,7 @@ public sealed partial class Shell
     {
         try
         {
+            Ioc.Default.GetRequiredService<AutoSaveService>().Dispatcher = DispatcherQueue.GetForCurrentThread();
             InitializeComponent();
             DataContext = ShellVm;
             Loaded += Shell_Loaded;

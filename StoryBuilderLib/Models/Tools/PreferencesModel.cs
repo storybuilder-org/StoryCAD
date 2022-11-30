@@ -78,7 +78,7 @@ public class PreferencesModel
         AutoSave = true;
         TimedBackup = true;
         PreferredSearchEngine = BrowserType.DuckDuckGo;
-        AutoSaveInterval = 5;
+        AutoSaveInterval = 15;
         TimedBackupInterval = 5;
         WrapNodeNames = TextWrapping.WrapWholeWords;
     }

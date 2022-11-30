@@ -8,7 +8,6 @@
   using dotenv.net;
   using dotenv.net.Utilities;
   using Microsoft.Extensions.DependencyInjection;
-  using Microsoft.UI.Dispatching;
   using Microsoft.UI.Xaml;
   using Microsoft.UI.Xaml.Controls;
   using Microsoft.Windows.AppLifecycle;
@@ -31,9 +30,8 @@
   using WinUIEx;
   using AppInstance = Microsoft.Windows.AppLifecycle.AppInstance;
   using UnhandledExceptionEventArgs = Microsoft.UI.Xaml.UnhandledExceptionEventArgs;
-using Microsoft.Web.WebView2.Core;
 
-namespace StoryBuilder;
+  namespace StoryBuilder;
 
 public partial class App : Application
 {
@@ -43,11 +41,9 @@ public partial class App : Application
     private const string CharacterPage = "CharacterPage";
     private const string ScenePage = "ScenePage";
     private const string FolderPage = "FolderPage";
-    private const string SectionPage = "SectionPage";
     private const string SettingPage = "SettingPage";
     private const string TrashCanPage = "TrashCanPage";
     private const string WebPage = "WebPage";
-    private const string NotesPage = "NotesPage";
 
 
     private LogService _log;
@@ -132,6 +128,7 @@ public partial class App : Application
                 .AddSingleton<StoryWriter>()
                 .AddSingleton<MySqlIo>()
                 .AddSingleton<BackupService>()
+                .AddSingleton<AutoSaveService>()
                 .AddSingleton<DeletionService>()
                 .AddSingleton<BackendService>()
                 // Register ViewModels 

@@ -130,7 +130,7 @@ public class PreferencesViewModel : ObservableRecipient
         _prf.BackupOnOpen = BackupUpOnOpen;
         _prf.AutoSave = AutoSave;
         _prf.PreferredSearchEngine = (BrowserType)PreferredSearchEngine;
-        if (AutoSaveInterval is > 31 or < 4) { AutoSaveInterval = 20; }
+        if (AutoSaveInterval is > 60 or < 14) { AutoSaveInterval = 30; }
         else { _prf.AutoSaveInterval = AutoSaveInterval; }
 
         if (WrapNodeNames) { _prf.WrapNodeNames = TextWrapping.WrapWholeWords; }
