@@ -1082,19 +1082,22 @@ _canExecuteCommands = true;
                 string _masterPlotName = _masterPlotsVM.MasterPlotName;
                 MasterPlotModel _model = _masterPlotsVM.MasterPlots[_masterPlotName];
                 IList<MasterPlotScene> _scenes = _model.MasterPlotScenes;
-                foreach (MasterPlotScene _scene in _scenes)
+                ProblemModel _problem = new ProblemModel(_masterPlotName, StoryModel);
+                // add the new ProblemModel & node to the end of the target (RightTappedNode) children 
+                StoryNodeItem _problemNode = new(_problem, RightTappedNode);
+                RightTappedNode.IsExpanded = true;
+                _problemNode.IsSelected = true;
+                _problemNode.IsExpanded = true;
+                if (_scenes.Count == 1)
+                {
+                    _problem.StoryQuestion = "See Notes.";
+                    _problem.Notes = _scenes[0].Notes;
+                }
+                else foreach (MasterPlotScene _scene in _scenes)
                 {
                     SceneModel _child = new(StoryModel) { Name = _scene.SceneTitle, Remarks = "See Notes.", Notes = _scene.Notes };
-
-                    if (RightTappedNode == null)
-                    {
-                        Messenger.Send(new StatusChangedMessage(new("You need to right click a node to", LogLevel.Info)));
-                        return;
-                    }
-
-                    // add the new SceneModel & node to the end of the target's children 
-                    StoryNodeItem _newNode = new(_child, RightTappedNode);
-                    RightTappedNode.IsExpanded = true;
+                    // add the new SceneModel & node to the end of the problem's children 
+                    StoryNodeItem _newNode = new(_child, _problemNode);
                     _newNode.IsSelected = true;
                 }
 
