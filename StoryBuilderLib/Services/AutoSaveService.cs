@@ -40,7 +40,7 @@ namespace StoryBuilder.Services
         {
             if (GlobalData.Preferences.AutoSave)
             {
-                if (GlobalData.Preferences.AutoSaveInterval is > 60 or < 15) { GlobalData.Preferences.AutoSaveInterval = 30; }
+                if (GlobalData.Preferences.AutoSaveInterval is > 61 or < 14) { GlobalData.Preferences.AutoSaveInterval = 30; }
                 else { GlobalData.Preferences.AutoSaveInterval = GlobalData.Preferences.AutoSaveInterval; }
                 Thread.DoWork += SaveFileTask;
                 Thread.RunWorkerAsync();
