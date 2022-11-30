@@ -1,10 +1,6 @@
-## Glossary ##
+## **Glossary** ##
 
-Glossary <br/>
-
-Glossary <br/>
-
-A <br/>
+**A** <br/>
 
 ab ovo: Telling a story by starting at the earliest possible scene.  See 'in media res.'  From the Latin 'from the egg.' <br/>
 
@@ -26,7 +22,7 @@ archetype: A model or pattern with  symbolic significance which recurs throughou
 
 atmosphere: The dominant impression a story creates through such elements as setting and dialog. <br/>
 
-C <br/>
+**C** <br/>
 
 catastrophe: A misfortune or disaster, usually sudden.   A plot in which events result in an outcome not in line with the protagonist's goals. <br/>
 
@@ -50,7 +46,7 @@ counterplot: A subplot  in a story which contrasts to the principal plot line.  
 
 crisis: A turning point in a story, at which a choice or change or decision must occur.  Climax refers to the emotional intensity a crisis should generate. <br/>
 
-D <br/>
+**D** <br/>
 
 denouement: The final outcome or unravelling of the complications in a story.  The falling action which follows the final climax. <br/>
 
@@ -64,11 +60,11 @@ drama: (1) Events which have vivid, conflicting elements.  (2) A literary compos
 
 dramatis personae: A list of the characters in a story and their relationships or roles.  Printed in the program of a play or at the beginning of a literary work. <br/>
 
-E <br/>
+**E** <br/>
 
 empathy: Identifying with or experiencing the sensations and emotions of another person.   A major goal of fiction is to invoke from the reader empathy for the characters  in the story. <br/>
 
-F <br/>
+**F** <br/>
 
 fable: A short story designed to teach a moral lesson.  Fables are often written for children and sometimes contain animals as characters. <br/>
 
@@ -90,29 +86,29 @@ formula: A plot created according to stereotyped or set forms.  Most stories fol
 
 frame: A border which encloses story elements.  Examples of frames are opening and closing a story with the same words or in the same setting,  and the prose which surrounds a story-within-a-story or tale. <br/>
 
-G <br/>
+**G** <br/>
 
 genre: A categorization of fiction according to similar milieus, locales, and dramatic situations. <br/>
 
-H <br/>
+**H** <br/>
 
 hero: A character who possesses physical or moral courage, bravery, and/or a noble nature.   The protagonist, or central character, may be but doesn't have to be a hero.  A heroine is a female hero. <br/>
 
 historical novel: A novel which is a fictional representation of actual historical events or persons. <br/>
 
-I <br/>
+**I** <br/>
 
 in media res: Starting a story in the middle of the events the story relates, rather than at their beginning.  This is often done to provide a narrative hook, by opening with an action scene.  Stories which employ this device often use flashbacks to provide information to the reader.  From the Latin 'in the middle of things.' <br/>
 
 incident: A distinct piece of action in a story.  Incidents may be related in a scene or in foreshortened prose. <br/>
 
-L <br/>
+**L** <br/>
 
 legend: A non-historical story handed down from earlier times, or a literary work which is supposed to be based on a legend.  See 'myth.' <br/>
 
 locale: The setting for a novel, play, or motion picture. <br/>
 
-M <br/>
+**M** <br/>
 
 
 McGuffin: An object which is searched for, fought over, or fled from, but which has no value other than to set the action in motion.  The term was devised by Alfred Hitchcock. <br/>
@@ -141,7 +137,7 @@ mystery: (1) Something kept secret or that remains unexplained.  Elements of mys
 
 myth: A traditional or legendary story, usually involving gods and heros or supernatural occurrences. <br/>
 
-N <br/>
+**N** <br/>
 
 narration: Relating or telling events.  Narration implies a narrator, always either the writer or someone involved in the action, and thus relates to point of view. <br/>
 
@@ -153,7 +149,7 @@ novelette: A short novel, typically 30,000-40,000 words in length. <br/>
 
 novella: A long short story.  Novellas span the range from short story to novelette. <br/>
 
-O <br/>
+**O** <br/>
 
 obligatory scene: An episode which the reader expects in the story so strongly that the writer is obliged to put it there.  Confrontations between protagonist and antagonist are often obligatory.  Obligatory scenes are a subset of stock scenes. <br/>
 
@@ -161,7 +157,7 @@ one-act play: A play consisting of one act.  A one-act play, like a short story,
 
 outline: The essential features or main aspects of a project, which reveal its order and organization.  'Every literary work of any distinction is so ordered and organized that an outline can be made of its contents and structure.' --- H. Shaw <br/>
 
-P <br/>
+**P** <br/>
 
 parable: A short story or play which is allegorical and which teaches some moral or religious truth. <br/>
 
@@ -189,7 +185,7 @@ props: Furniture,  ornaments, and objects handled by the characters in a scene. 
 
 protagonist: The leading character of a drama or literary work. <br/>
 
-R <br/>
+**R** <br/>
 
 resolution: The final state of affairs in the plot; the story's ending situation. <br/>
 
@@ -197,7 +193,7 @@ rising action: The episodes in the plot which lead up to the climax.  The rising
 
 roman a clef: A novel which depicts actual  historical events and persons under the guise of fiction. <br/>
 
-S <br/>
+**S** <br/>
 
 scene: A plot point which takes place in one time and place, and which involves a particular set of cast members, one of whom (the scene protagonist) is usually  pursuing a goal. <br/>
 
@@ -228,7 +224,7 @@ suspense: Uncertainty as to the outcome of an event or situation.  Suspense is  
 suspension of disbelief: The willingness of readers or the audience to suspend doubt about the reality of characters or events in a story.  For example, a movie goer may  ignore that he is sitting in a darkened room looking at projected image, and treat the film as 'real.'  Bad storytelling can break this spell. <br/>
 
 
-T <br/>
+**T** <br/>
 
 tale: A story which narrates (usually in the first person) the details of some incident in the story's 'past.'  The narration is a form of 'frame.' <br/>
 
@@ -242,7 +238,7 @@ transition: A piece of narrative which links one scene with another by  telling 
 
 twist: A sudden and unexpected turn of events.  A twist ending, in which the twist occurs at the end of a story, has effects similar to the deus ex machina, if not properly foreshadowed. <br/>
 
-V <br/>
+**V** <br/>
 
 verisimilitude: 'The appearance of truth.'  The aspects of a story which make it believable to the reader, so that he will 'suspend disbelief' while he's in the story.   Ways to achieve verisimilitude include showing rather than telling, use of specifics and details, and accuracy in factual (non-fictional) elements such as procedures, settings, or slang. <br/>
 
