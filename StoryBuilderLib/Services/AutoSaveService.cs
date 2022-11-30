@@ -43,6 +43,7 @@ namespace StoryBuilder.Services
                 if (GlobalData.Preferences.AutoSaveInterval is > 60 or < 15) { GlobalData.Preferences.AutoSaveInterval = 30; }
                 else { GlobalData.Preferences.AutoSaveInterval = GlobalData.Preferences.AutoSaveInterval; }
                 Thread.DoWork += SaveFileTask;
+                Thread.RunWorkerAsync();
             }
         }
 
