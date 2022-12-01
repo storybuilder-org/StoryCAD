@@ -9,7 +9,7 @@
     >
   
     <StackPanel Width="500" Height="400">
-        <editors:SfComboBox Margin="20" HorizontalAlignment="Center" Header="Master Plot" Width="300" ItemsSource="{x:Bind MasterPlotsVm.MasterPlotNames}" SelectedItem="{x:Bind MasterPlotsVm.MasterPlotName, Mode=TwoWay}" />
+        <ComboBox Margin="20" HorizontalAlignment="Center" Header="Master Plot" Width="300" ItemsSource="{x:Bind MasterPlotsVm.MasterPlotNames}" SelectedItem="{x:Bind MasterPlotsVm.MasterPlotName, Mode=TwoWay}" />
         <TextBlock Margin="20" VerticalAlignment="Center" HorizontalAlignment="Stretch" TextWrapping="Wrap" Text="{x:Bind MasterPlotsVm.MasterPlotNotes, Mode=TwoWay}" />
     </StackPanel>
 </Page>

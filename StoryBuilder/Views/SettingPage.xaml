@@ -32,11 +32,11 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
-                        <editors:SfComboBox IsEditable="True" Header="Locale" Grid.Column="0"  MinWidth="200"
+                        <ComboBox IsEditable="True" Header="Locale" Grid.Column="0"  MinWidth="200"
                                   ItemsSource="{x:Bind SettingVm.LocaleList}"
                                   Text="{x:Bind SettingVm.Locale, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                         <TextBlock Grid.Column="1" MinWidth="100"/>
-                        <editors:SfComboBox IsEditable="True" Header="Season" Grid.Column="2" MinWidth="200"
+                        <ComboBox IsEditable="True" Header="Season" Grid.Column="2" MinWidth="200"
                                         ItemsSource="{x:Bind SettingVm.SeasonList}"
                                         Text="{x:Bind SettingVm.Season, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     </Grid>
