@@ -669,9 +669,6 @@ _canExecuteCommands = true;
     /// <param name="fromPath">Path to open file from (Optional)</param>
     public async Task OpenFile(string fromPath = "")
     {
-        //Stop saving file, as new one is being opened.
-        _autoSaveService.StopService();
-
         if (StoryModel.Changed)
         {
             SaveModel();

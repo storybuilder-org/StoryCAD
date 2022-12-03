@@ -38,7 +38,7 @@ namespace StoryBuilder.Services
 
         public void StartService()
         {
-            if (GlobalData.Preferences.AutoSave)
+            if (GlobalData.Preferences.AutoSave && !IsRunning)
             {
                 if (GlobalData.Preferences.AutoSaveInterval is > 61 or < 14) { GlobalData.Preferences.AutoSaveInterval = 30; }
                 else { GlobalData.Preferences.AutoSaveInterval = GlobalData.Preferences.AutoSaveInterval; }
@@ -50,30 +50,39 @@ namespace StoryBuilder.Services
         /// <summary>
         /// This is ran if the user has enabled Autosave,
         /// it runs every x seconds, and simply saves the file
-        /// </summary>
+        /// </summary>  
         private async void SaveFileTask(object sender, object e)
         {
             while (true)
-            {
+            { 
                 try
                 {
+                    IsRunning = true;
                     ShellViewModel _ShellVM = Ioc.Default.GetRequiredService<ShellViewModel>();
-                    if (Thread.CancellationPending || !GlobalData.Preferences.AutoSave) { return; }
+                    if (Thread.CancellationPending || !GlobalData.Preferences.AutoSave || _ShellVM.StoryModel.StoryElements.Count == 0)
+                    {
+                        IsRunning = false;
+                        return;
+                    }
                     if (_ShellVM.StoryModel.Changed)
                     {
+                        _logger.Log(LogLevel.Info, "Starting SaveFileTask (AutoSave)");
                         try //Updating the lost modified timer
                         {
-                            ((OverviewModel)_ShellVM.StoryModel.StoryElements.StoryElementGuids[_ShellVM.StoryModel.ExplorerView[0].Uuid]).DateModified = DateTime.Now.ToString("d");
+                            OverviewModel _overview = (_ShellVM.StoryModel.StoryElements.StoryElementGuids[_ShellVM.StoryModel.ExplorerView[0].Uuid]) as OverviewModel;
+                            _overview.DateModified = DateTime.Now.ToString("d");
                         }
-                        catch (NullReferenceException) { _logger.Log(LogLevel.Warn, "Failed to update last modified date/time"); }
+                        catch (Exception ex) { _logger.Log(LogLevel.Warn, "Failed to update last modified date/time"); }
                         
                         //Save and write.
                         Dispatcher.TryEnqueue(() => { _ShellVM.SaveModel(); }); //Runs on UI Thread, so we can figure out what page is open and save the correct VM.
                         await _ShellVM.WriteModel(); //Write file to disk
                         _ShellVM.StoryModel.Changed = false;
+                        _logger.Log(LogLevel.Info, "Wrote autosave file");
 
                         //Change pen icon back to green so user can see all is good
-                        Dispatcher.TryEnqueue(() => { _ShellVM.ChangeStatusColor = Colors.Green; }); 
+                        Dispatcher.TryEnqueue(() => { _ShellVM.ChangeStatusColor = Colors.Green; });
+                        _logger.Log(LogLevel.Info, "changed pen back to green.");
                     }
                 }
                 catch (Exception _ex)
@@ -83,7 +92,6 @@ namespace StoryBuilder.Services
                 //Sleep Users Interval (in seconds)
                 System.Threading.Thread.Sleep(GlobalData.Preferences.AutoSaveInterval * 1000);
             }
-
         }
     }
 }
