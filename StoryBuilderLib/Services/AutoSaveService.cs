@@ -67,13 +67,6 @@ namespace StoryBuilder.Services
                     if (_ShellVM.StoryModel.Changed)
                     {
                         _logger.Log(LogLevel.Info, "Starting SaveFileTask (AutoSave)");
-                        try //Updating the lost modified timer
-                        {
-                            OverviewModel _overview = (_ShellVM.StoryModel.StoryElements.StoryElementGuids[_ShellVM.StoryModel.ExplorerView[0].Uuid]) as OverviewModel;
-                            _overview.DateModified = DateTime.Now.ToString("d");
-                        }
-                        catch (Exception ex) { _logger.Log(LogLevel.Warn, "Failed to update last modified date/time"); }
-                        
                         //Save and write.
                         Dispatcher.TryEnqueue(() => { _ShellVM.SaveModel(); }); //Runs on UI Thread, so we can figure out what page is open and save the correct VM.
                         await _ShellVM.WriteModel(); //Write file to disk
