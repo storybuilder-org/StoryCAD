@@ -15,6 +15,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
+using NLog;
 
 namespace StoryBuilder.ViewModels;
 
@@ -112,7 +113,6 @@ public class WebViewModel : ObservableRecipient, INavigable
         }
         catch { }
         return Task.FromResult(false);
-
     }
 
 
@@ -136,43 +136,57 @@ public class WebViewModel : ObservableRecipient, INavigable
         _logger.Log(LogLevel.Error, $"User clicked {_result}");
 
         //Ok clicked
-        if (_result == ContentDialogResult.Primary) { InstallWebview(); }
+        if (_result == ContentDialogResult.Primary) { await InstallWebview(); }
     }
 
     /// <summary>
     /// This installs the evergreen webview runtime
     /// </summary>
-    public async void InstallWebview()
+    public async Task InstallWebview()
     {
-        Ioc.Default.GetRequiredService<LogService>().Log(LogLevel.Error, "Installing webview...");
-
-        //Download file
-        HttpResponseMessage _httpResult = await new HttpClient().GetAsync("https://go.microsoft.com/fwlink/p/?LinkId=2124703"); //Get HTTP response
-        await using Stream _resultStream = await _httpResult.Content.ReadAsStreamAsync(); //Read stream
-        await using FileStream _fileStream = File.Create(Path.Combine(GlobalData.RootDirectory, "evergreenbootstrapper.exe")); //Create File.
-        await _resultStream.CopyToAsync(_fileStream); //Write file
-        await _fileStream.FlushAsync(); //Flushes steam.
-        await _fileStream.DisposeAsync(); //Cleans up resources
-
-        //Run installer and wait for it to finish
-        await Process.Start(Path.Combine(GlobalData.RootDirectory, "evergreenbootstrapper.exe"))!.WaitForExitAsync();
-        
-        //Show success/fail dialog
-        ContentDialog _dialog = new() {PrimaryButtonText = "Ok", XamlRoot = GlobalData.XamlRoot};
         try
         {
-            _dialog.Title = "Webview installed!";
-            _dialog.Content = "You are good to go, everything should work now.";
-            _logger.Log(LogLevel.Info, "Webview installed");
+            Ioc.Default.GetRequiredService<LogService>().Log(LogLevel.Error, "Installing webview...");
+
+            //Download file
+            HttpResponseMessage _httpResult =
+                await new HttpClient().GetAsync(
+                    "https://go.microsoft.com/fwlink/p/?LinkId=2124703"); //Get HTTP response
+            await using Stream _resultStream = await _httpResult.Content.ReadAsStreamAsync(); //Read stream
+            await using FileStream _fileStream =
+                File.Create(Path.Combine(GlobalData.RootDirectory, "evergreenbootstrapper.exe")); //Create File.
+            await _resultStream.CopyToAsync(_fileStream); //Write file
+            await _fileStream.FlushAsync(); //Flushes steam.
+            await _fileStream.DisposeAsync(); //Cleans up resources
+
+            //Run installer and wait for it to finish
+            await Process.Start(Path.Combine(GlobalData.RootDirectory, "evergreenbootstrapper.exe"))!
+                .WaitForExitAsync();
+
+            //Show success/fail dialog
+            ContentDialog _dialog = new() { PrimaryButtonText = "Ok", XamlRoot = GlobalData.XamlRoot };
+            try
+            {
+                _dialog.Title = "Webview installed!";
+                _dialog.Content = "You are good to go, everything should work now.";
+                _logger.Log(LogLevel.Info, "Webview installed");
+            }
+            catch (Exception _ex)
+            {
+                _dialog.Title = "Something went wrong.";
+                _dialog.Content =
+                    "Looks like something went wrong, you can still use StoryBuilder however some features may not work.";
+                _logger.Log(LogLevel.Warn,
+                    $"An error occurred installing the Evergreen Webview Runtime ({_ex.Message})");
+            }
+
+            await _dialog.ShowAsync();
+            _logger.Log(LogLevel.Warn, "Finished installing webview runtime.");
         }
         catch (Exception _ex)
         {
-            _dialog.Title = "Something went wrong.";
-            _dialog.Content = "Looks like something went wrong, you can still use StoryBuilder however some features may not work.";
-            _logger.Log(LogLevel.Warn, $"An error occurred installing the Evergreen Webview Runtime ({_ex.Message})");
+            _logger.LogException(LogLevel.Error, _ex,  "Error installing webview runtime.");
         }
-        await _dialog.ShowAsync();
-        _logger.Log(LogLevel.Warn, "Finished installing webview runtime.");
     }
     #endregion
     #region Relay Commands
