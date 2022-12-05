@@ -56,7 +56,9 @@ public sealed partial class Shell
 
         if (!await Ioc.Default.GetRequiredService<WebViewModel>().CheckWebviewState())
         {
+            ShellVm._canExecuteCommands = false;
             await Ioc.Default.GetRequiredService<WebViewModel>().ShowWebviewDialog();
+            ShellVm._canExecuteCommands = true;
         }
         if (GlobalData.LoadedWithVersionChange ) { await ShellVm.ShowChangelog(); }
         await ShellVm.OpenUnifiedMenu();

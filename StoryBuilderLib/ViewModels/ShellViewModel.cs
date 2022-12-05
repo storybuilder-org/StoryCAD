@@ -44,7 +44,7 @@ namespace StoryBuilder.ViewModels;
 
 public class ShellViewModel : ObservableRecipient
 {
-    private bool _canExecuteCommands;
+    public bool _canExecuteCommands;
 
     private const string HomePage = "HomePage";
     private const string OverviewPage = "OverviewPage";

@@ -136,13 +136,13 @@ public class WebViewModel : ObservableRecipient, INavigable
         _logger.Log(LogLevel.Error, $"User clicked {_result}");
 
         //Ok clicked
-        if (_result == ContentDialogResult.Primary) { InstallWebview(); }
+        if (_result == ContentDialogResult.Primary) { await InstallWebview(); }
     }
 
     /// <summary>
     /// This installs the evergreen webview runtime
     /// </summary>
-    public async void InstallWebview()
+    public async Task InstallWebview()
     {
         Ioc.Default.GetRequiredService<LogService>().Log(LogLevel.Error, "Installing webview...");
 
