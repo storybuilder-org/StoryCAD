@@ -669,9 +669,6 @@ _canExecuteCommands = true;
     /// <param name="fromPath">Path to open file from (Optional)</param>
     public async Task OpenFile(string fromPath = "")
     {
-        //Stop saving file, as new one is being opened.
-        _autoSaveService.StopService();
-
         if (StoryModel.Changed)
         {
             SaveModel();
@@ -759,12 +756,6 @@ _canExecuteCommands = true;
             return;
         }
         Logger.Log(LogLevel.Trace, "Saving file");
-        try //Updating the lost modified timer
-        {
-            ((OverviewModel)StoryModel.StoryElements.StoryElementGuids[StoryModel.ExplorerView[0].Uuid]).DateModified = DateTime.Now.ToString("d");
-        }
-        catch (NullReferenceException) { Messenger.Send(new StatusChangedMessage(new("Failed to update Last Modified date", LogLevel.Warn))); } //This appears to happen when in narrative view but im not sure how to fix it.
-
         _canExecuteCommands = false;
         Logger.Log(LogLevel.Info, "Executing SaveFile command");
         try
@@ -795,6 +786,13 @@ _canExecuteCommands = true;
         Logger.Log(LogLevel.Info, $"In WriteModel, file={StoryModel.ProjectFilename}");
         try
         {
+            try //Updating the lost modified time
+            {
+                OverviewModel _overview = (StoryModel.StoryElements.StoryElementGuids[StoryModel.ExplorerView[0].Uuid]) as OverviewModel;
+                _overview.DateModified = DateTime.Now.ToString("d");
+            }
+            catch { Logger.Log(LogLevel.Warn, "Failed to update last modified date/time"); }
+
             await CreateProjectFile();
             StorageFile _file = StoryModel.ProjectFile;
             if (_file != null)
