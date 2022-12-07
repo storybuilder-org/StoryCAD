@@ -3,7 +3,6 @@ using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml.Controls;
 using StoryBuilder.Models;
 using StoryBuilder.ViewModels;
-using Syncfusion.UI.Xaml.Editors;
 
 namespace StoryBuilder.Views;
 
@@ -64,10 +63,5 @@ public sealed partial class ScenePage : BindablePage
             return;
         StoryElement element = item as StoryElement;
         SceneVm.RemoveCastMember(element);
-    }
-
-    private void SelectionChanged(object sender, ComboBoxSelectionChangedEventArgs e)
-    {
-        SceneVm.UpdateScenePurpose(sender, e);
     }
 }

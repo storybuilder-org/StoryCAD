@@ -12,7 +12,6 @@ using StoryBuilder.Models;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.Services.Messages;
 using StoryBuilder.Services.Navigation;
-using Syncfusion.UI.Xaml.Editors;
 
 namespace StoryBuilder.ViewModels;
 
@@ -492,21 +491,6 @@ public class SceneViewModel : ObservableRecipient, INavigable
     public ClearScenePurposeDelegate ClearScenePurpose;
     public AddScenePurposeDelegate AddScenePurpose;
 
-    /// <summary>
-    /// This method is called by the ScenePage.xaml.cs file when the ScenePurpose changes.
-    /// Besides updating the ViewModel's list of purposes, it also Calls SceneVm's
-    /// OnPropertyChanged to set the changed (dirty) flag if appropriate
-    /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="e"></param>
-    public void UpdateScenePurpose(object sender, ComboBoxSelectionChangedEventArgs e)
-    {
-        foreach (string _purpose in e.AddedItems)
-            ScenePurpose.Add(_purpose);
-        foreach (string _purpose in e.RemovedItems)
-            ScenePurpose.Remove(_purpose);
-        OnPropertyChanged(ScenePurpose, new PropertyChangedEventArgs("ScenePurpose"));
-    }
 
     private bool CastMemberExists(string uuid)
     {
