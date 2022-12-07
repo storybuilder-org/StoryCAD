@@ -377,7 +377,7 @@ public class SceneViewModel : ObservableRecipient, INavigable
         foreach (string _purpose in Model.ScenePurpose)
         {
             AddScenePurpose(_purpose);
-            //ScenePurpose.Add(purpose);
+            ScenePurpose.Add(_purpose);
         }
 
         ValueExchange = Model.ValueExchange;

@@ -3,7 +3,6 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using StoryBuilder.Models;
 using StoryBuilder.Models.Tools;
-using Syncfusion.UI.Xaml.Editors;
 
 namespace StoryBuilder.Controls;
 

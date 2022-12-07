@@ -6,7 +6,6 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:local="using:StoryBuilder.Views"
     xmlns:usercontrols="using:StoryBuilder.Controls"
-    xmlns:editors="using:Syncfusion.UI.Xaml.Editors"
     mc:Ignorable="d" >
 
     <Grid>

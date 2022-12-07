@@ -15,7 +15,7 @@ public sealed partial class ScenePage : BindablePage
     {
         InitializeComponent();
         DataContext = SceneVm;
-        SceneVm.ClearScenePurpose = ClearScenePurposeMethod;
+        //SceneVm.ClearScenePurpose = ClearScenePurposeMethod;
         SceneVm.AddScenePurpose = AddScenePurposeMethod;
     }
 
@@ -29,7 +29,7 @@ public sealed partial class ScenePage : BindablePage
     /// <param name="purpose"></param>
     public void ClearScenePurposeMethod()
     {
-        ScenePurpose.SelectedItems.Clear();
+        //ScenePurpose.SelectedItems.Clear();
     }
 
     /// <summary>

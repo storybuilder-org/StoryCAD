@@ -2,7 +2,6 @@
     x:Class="StoryBuilder.Views.CharacterPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:editors="using:Syncfusion.UI.Xaml.Editors"
     xmlns:local="using:StoryBuilder.Views"
     xmlns:usercontrols="using:StoryBuilder.Controls" >
 
