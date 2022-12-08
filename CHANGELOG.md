@@ -1,5 +1,75 @@
 # StoryBuilder ChangeLog
 
+## Release 2.5.1.0
+
+Fixed some issues with Autosave
+Fixed Issues when installing WebView Runtime.
+
+## Release 2.5.0.0
+
+As pf December 1, 2022, we rolled out Release 2.5.0.0 for general 
+distribution via the Microsoft Store.
+
+#### Revised right-click menu
+
+The flyout menu changes distributed with Release 2.4.0.0 had an
+issue which was cleaned up in a point release (2.4.1.0) and 
+subsequently in this release. 
+
+#### Codebase cleanup
+
+We're continuing to clean up our codebase. This release includes significant
+cleanup and simplification of our viewmodels, which are among our most 
+complex classes. We're also making checks for clean code a part of our
+Pull Request process, in ordere to improve ongoing quality. Code cleanup
+will continue in the next release as well.
+
+#### Remove Id property  
+
+This particular code cleanup has been on our issue list for a long time,
+but was repeatedly bypassed because (a) it did no harm and (b) it was
+complicated. But hey, cleanup. It's done now.
+
+#### Update to .NET 7
+
+Updated to .NET 7 is the successor to Microsoft .NET cross-platform 
+.NET framework, .NET 6. .NET 7 is primarily a performance release and
+includes improvements in ARM64 support and desktop app support.
+
+.NET 7 supports a feature, IL Trimming, which will significantly reduce
+the size of applications (and thus speed up both download time and load
+time at execution.) The benefits of IL Trimming. These benefits are not
+yet present for packaged MSIX WinUI 3 applications like ours, but should 
+be forthcoming.
+
+
+### Add an 'Overview and Main Story Problem' template for new story creation
+
+This template focuses on the Story Problem and ties the Overview node's Premise
+to one Problem node by making it the Story Problem. It also adds Protagonist
+and Antagonist Character nodes to the problem.
+
+#### Master Plots should be copied as a Problem rather than Scene
+
+This issue was listed in the 2.5 Roadmap as 'self explanitory.' It 
+isn't, exactly. The MasterPlot tool will now copy a masterplot as a
+Problem story node with its description and notes contained in the problem
+if it has one 'scene' in its termplate, and as a Problem with series of Scene
+nodes if it's one of the 'story structure' masterplots such as Three Act Play
+or Hero's Journey. Previously MasterPlots wer added as series of scenes
+in all cases.
+
+#### AutoSave improvements
+
+Fixed a possible slowdown with AutoSave
+Increased the maximum time between autosaves from 30 to 60 seconds and minimum from 5 to 15 seconds.
+
+### Remarks
+
+Several things planned for this release didn't make it and will be rolled forward
+to future releases. These includee
+
+
 ## Release 2.4.0.0
 
 As of Novermber 13, 2022, we've rolled out Release 2.4.0.0 for general distribution 
