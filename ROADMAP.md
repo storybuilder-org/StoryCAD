@@ -1,11 +1,25 @@
 # StoryBuilder Roadmap
 
-#### Last Updated: 2022-12-03
+#### Last Updated: 2022-12-08
+
+Our next Release will be 2.6.0.0. We're taking a holiday break toward the end of December, but
+still plan for a release date of around January first.
+
+We expect that this release will include the following features:
 
 ### Expand market area to all stores
 
-Our next Release will be 2.5.0.0, planned for around January 1st.
-We expect that this release will include the following features:
+Our Windows Store distribution was limited to 'flights', lists
+of beta users, for early testing. For some reason we also 
+restricted our market countries to the ones our testers were
+in, the US, Canada, and the UK.
+
+We've now expanded our market area to all countries, since
+we're no longer in that type of testing.
+
+#### Status:
+
+This was implemented in point release 2.5.1.0.
 
 ### Produce first newsletter
 
@@ -31,14 +45,17 @@ they need their own personal SyncFusion licenses.
 We'll test to insure that the Microsoft rendering issue is fixed, and if so,
 replace SyncFusion's ComboBoxes with Microsoft's again.
 
-There is one additional consideration: the Purpose of Scene is a multi-valued ComboBox, which the Microsoft ComboBox doesn't support. However, it should be possible to switch to a ListView with checkboxes, 
-and show them as a tooltip
+There is one additional consideration: the Purpose of Scene is 
+a multi-valued ComboBox, which the Microsoft ComboBox doesn't 
+support. However, it should be possible to switch to a ListView 
+with checkboxes.
 
 ### Purpose of Scene rewrite (#457)
 
 To fix the Purpose of Scene issue mentioned above, we need to
-replace the multi-value ComboBox with a (Microsoft) Listview with a data template
-that contains a CheckBox. Checked values in the ListViewItems can contain multiple values.
+replace the multi-value ComboBox with a (Microsoft) Listview 
+with a data template that contains a CheckBox. Checked 
+values in the ListViewItems can contain multiple values.
 
 ### Revise Character Relationships 'Create a new relationship' (#458)
 
@@ -77,7 +94,6 @@ changing an existing outline, printing a report, etc. These can be
 based on file comparisons from program output to previously verified program output. Smoke tests are vital for the purpose
 of CI in automating PR reviews. This will come in a future release.
 
-
 ### Implement a Print Manager for printed reports (#157) 
 
 A Print Manager dialog should be part of the Print Report menu. The ability to
@@ -100,12 +116,6 @@ disable it (with a status message) if the user is not on Windows 11.
 The other is to trace the status of the Windows 10 fix and schedule
 according.
 
-### Sidebar index for StoryBuilder User Manual
-
-One serious problem with the documentation is the lack of user-friendly index. We've
-looked at several options, but the one we think works best is a sidebar index which is 
-always visible. We're working on this for the next release (issue # xxx).
-
 ### Codebase cleanup (#439)
 
 The codebase cleanup from  previous release continues. For consistency 
@@ -117,6 +127,19 @@ Pull Requests won't be merged until code conforms to the standards which
 ReSharper reports on.
 
 ## Ongoing and Deferred Issues
+
+Some of these are unresolved issues, others, we've deferrred
+due to lack of manpower. They're all on our plate.
+
+### Sidebar index for StoryBuilder User Manual
+
+One serious problem with the documentation is the lack of user-friendly index. We've
+looked at several options, but the one we think works best is a sidebar index which is 
+always visible. We're working on this for the next release (issue # xxx).
+
+#### Status: 
+
+Not started.
 
 ### ARM64 Support (#109)
 
