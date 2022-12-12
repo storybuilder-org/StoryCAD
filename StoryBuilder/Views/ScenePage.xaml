@@ -7,6 +7,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="using:StoryBuilder.Models"
     xmlns:usercontrols="using:StoryBuilder.Controls"
+    xmlns:system="using:System"
     mc:Ignorable="d" >
 
     <Page.Resources>
@@ -82,7 +83,6 @@
                                 <ListView MinWidth="300" x:Name="SceneCast"
                                     SelectionMode="Single"
                                     ItemsSource="{x:Bind SceneVm.CastSource, Mode=TwoWay}" >
-                                    <!--SelectedItem="{x:Bind SceneVm.SelectedCast}" >-->
                                     <ListView.ItemTemplate>
                                         <DataTemplate x:DataType="models:StoryElement" >
                                             <StackPanel Orientation="Horizontal" Spacing="5">
@@ -121,9 +121,19 @@
                             <ColumnDefinition Width="5*"/>
                         </Grid.ColumnDefinitions>
                         <ListView MinWidth="300" Height="125" x:Name="ScenePurpose" x:FieldModifier="public"
-                                  SelectionMode="Multiple" Header="Purpose of Scene" 
-                                  ItemsSource="{x:Bind SceneVm.ScenePurposeList, Mode=TwoWay}" >
-                            <!--SelectedItem="{x:Bind SceneVm.SelectedCast}" >-->
+                                  SelectionMode="Single" Header="Purpose of Scene" 
+                                  ItemsSource="{x:Bind SceneVm.ScenePurposes, Mode=TwoWay}" >
+                            <ListView.ItemTemplate>
+                                <DataTemplate x:DataType="models:StringSelection" >
+                                    <StackPanel Orientation="Horizontal" Spacing="2">
+                                        <CheckBox
+                                            Margin="0"
+                                            IsChecked="{x:Bind IsSelected ,Mode=TwoWay}"
+                                            Checked="ScenePurpose_Checked" Unchecked="ScenePurpose_Unchecked" />
+                                        <TextBlock Text="{x:Bind Value, Mode=OneWay}" MinWidth="250" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
                         </ListView>
                         <TextBlock Grid.Column="1" MinWidth="50"/>
                         <ComboBox Header="Value Exchange" Grid.Column="2" IsEditable="False" MinWidth="250"
