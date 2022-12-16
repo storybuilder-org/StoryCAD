@@ -130,6 +130,21 @@ public class SceneViewModel : ObservableRecipient, INavigable
         set => SetProperty(ref _scenePurposes, value);
     }
 
+    // The current CurrentPurpose
+    private StringSelection _currentPurpose;
+    public StringSelection CurrentPurpose
+    {
+        get => _currentPurpose;
+        set => SetProperty(ref _currentPurpose, value);
+    }
+
+    private int _purposeIndex;
+    public int PurposeIndex
+    {
+        get => _purposeIndex;
+        set => SetProperty(ref _purposeIndex, value);
+    }
+
     private string _valueExchange;
     public string ValueExchange
     {
@@ -317,7 +332,8 @@ public class SceneViewModel : ObservableRecipient, INavigable
     {
         SaveModel();    // Save the ViewModel back to the Story
     }
-    private void OnPropertyChanged(object sender, PropertyChangedEventArgs args)
+
+    public void OnPropertyChanged(object sender, PropertyChangedEventArgs args)
     {
         if (_changeable)
         {
@@ -373,12 +389,12 @@ public class SceneViewModel : ObservableRecipient, INavigable
         // uses a CheckBox to indicate that a purpose is true for
         // this Scene.
         // If a purpose is saved in the model, set it as selected.
-        foreach (StringSelection _purpose in ScenePurposes)
-        {
-            if (Model.ScenePurposes.Contains(_purpose.Value))
-                _purpose.IsSelected = true;
+        ScenePurposes.Clear();
+        foreach (string purpose in ScenePurposeList) {
+            if (Model.ScenePurposes.Contains(purpose))
+                ScenePurposes.Add(new StringSelection(purpose, true));
             else
-                _purpose.IsSelected = false;
+                ScenePurposes.Add(new StringSelection(purpose, false));
         }
 
         ValueExchange = Model.ValueExchange;
@@ -435,8 +451,8 @@ public class SceneViewModel : ObservableRecipient, INavigable
                 Model.CastMembers.Add(_element.ToString());
             Model.ScenePurposes.Clear();
             foreach (StringSelection _purpose in ScenePurposes)
-                if (_purpose.IsSelected)
-                    Model.ScenePurposes.Add(_purpose.Value);
+                if (_purpose.Selection)
+                    Model.ScenePurposes.Add(_purpose.StringName);
             Model.ValueExchange = ValueExchange;
             Model.Protagonist = Protagonist;
             Model.ProtagEmotion = ProtagEmotion;
@@ -464,35 +480,35 @@ public class SceneViewModel : ObservableRecipient, INavigable
         }
     }
 
-    public void AddScenePurpose(StringSelection selectedPurpose)
-    {
-        if (_changeable == false)
-            return;
-        foreach (StringSelection _purpose in ScenePurposes)
-        {
-            if (_purpose.Value == selectedPurpose.Value)
-            {
-                _purpose.IsSelected = true;
-                OnPropertyChanged();
-                Messenger.Send(new StatusChangedMessage(new($"Scene purpose {selectedPurpose.Value} added", LogLevel.Info, true)));
-            return;
-            }
-        }
-    }
+    //public void AddScenePurpose(StringSelection selectedPurpose)
+    //{
+    //    if (_changeable == false)
+    //        return;
+    //    foreach (StringSelection _purpose in ScenePurposes)
+    //    {
+    //        if (_purpose.Value == selectedPurpose.Value)
+    //        {
+    //            _purpose.Selection = true;
+    //            OnPropertyChanged();
+    //            Messenger.Send(new StatusChangedMessage(new($"Scene purpose {selectedPurpose.Value} added", LogLevel.Info, true)));
+    //        return;
+    //        }
+    //    }
+    //}
 
-    public void RemoveScenePurpose(StringSelection selectedPurpose)
-    {
-        if (_changeable == false)
-            return;
-        foreach (StringSelection selection in ScenePurposes)
-            if (selection.Value.Equals(selectedPurpose.Value))
-            {
-                selection.IsSelected = false;
-                OnPropertyChanged();
-                Messenger.Send(new StatusChangedMessage(new($"Purpose {selection.Value} removed", LogLevel.Info, true)));
-                return;
-            }
-    }
+    //public void RemoveScenePurpose(StringSelection selectedPurpose)
+    //{
+    //    if (_changeable == false)
+    //        return;
+    //    foreach (StringSelection selection in ScenePurposes)
+    //        if (selection.Value.Equals(selectedPurpose.Value))
+    //        {
+    //            selection.Selection = false;
+    //            OnPropertyChanged();
+    //            Messenger.Send(new StatusChangedMessage(new($"Purpose {selection.Value} removed", LogLevel.Info, true)));
+    //            return;
+    //        }
+    //}
 
     /// <summary>
     /// This method toggles the Scene Cast list from only the selected cast members

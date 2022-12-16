@@ -10,20 +10,24 @@ namespace StoryBuilder.Models
 {
     public class StringSelection : ObservableObject
     {
-        private readonly string _value;
-        public string Value => _value;
-
-        private bool _isSelected;
-        public bool IsSelected
+        private string _stringName;
+        public string StringName
         {
-            get => _isSelected;
-            set => _isSelected = value;
+            get => _stringName;
+            set => _stringName = value;
+        }
+        
+        private bool _selection;
+        public bool Selection
+        {
+            get => _selection;
+            set => _selection = value;
         }
 
-        public StringSelection(string value, bool selected = false)
+        public StringSelection(string stringName, bool selected = false)
         {
-            _value = value;
-            _isSelected = selected;
+            StringName = stringName;
+            Selection = selected;
         }
     }
 }
