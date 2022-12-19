@@ -26,7 +26,6 @@
   using StoryBuilder.ViewModels;
   using StoryBuilder.ViewModels.Tools;
   using StoryBuilder.Views;
-  using Syncfusion.Licensing;
   using WinUIEx;
   using AppInstance = Microsoft.Windows.AppLifecycle.AppInstance;
   using UnhandledExceptionEventArgs = Microsoft.UI.Xaml.UnhandledExceptionEventArgs;
@@ -68,9 +67,6 @@ public partial class App : Application
         {
             DotEnv.Load(options);
 
-            //Register Syncfusion license
-            string token = EnvReader.GetStringValue("SYNCFUSION_TOKEN");
-            SyncfusionLicenseProvider.RegisterLicense(token);
         }
         catch { GlobalData.ShowDotEnvWarning = true; }
         

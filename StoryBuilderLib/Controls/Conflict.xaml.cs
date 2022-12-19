@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
 using StoryBuilder.Models;
 using StoryBuilder.Models.Tools;
-using Syncfusion.UI.Xaml.Editors;
 
 namespace StoryBuilder.Controls;
 
@@ -18,7 +18,7 @@ public sealed partial class Conflict
     {
         InitializeComponent();
     }
-    private void Category_SelectionChanged(object sender, ComboBoxSelectionChangedEventArgs e)
+    private void Category_SelectionChanged(object sender, SelectionChangedEventArgs selectionChangedEventArgs)
     {
         category = (string)Category.Items[Category.SelectedIndex];
         model = ConflictTypes[category];
@@ -27,7 +27,7 @@ public sealed partial class Conflict
         Example.SelectedIndex = -1;
     }
 
-    private void SubCategory_SelectionChanged(object sender, ComboBoxSelectionChangedEventArgs e)
+    private void SubCategory_SelectionChanged(object sender, SelectionChangedEventArgs selectionChangedEventArgs)
     {
         if (SubCategory.SelectedIndex > -1)
         {
@@ -36,7 +36,7 @@ public sealed partial class Conflict
         }
     }
 
-    private void Example_SelectionChanged(object sender, ComboBoxSelectionChangedEventArgs e)
+    private void Example_SelectionChanged(object sender, SelectionChangedEventArgs selectionChangedEventArgs)
     {
         ExampleText = (string)Example.SelectedItem;
     }

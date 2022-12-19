@@ -467,12 +467,12 @@ public class ReportFormatter
             if (line.Contains("@PurposeOfScene"))
             {
                 string PurposeString = "";
-                foreach (string Purpose in scene.ScenePurpose) { PurposeString += Purpose + ", "; }
+                foreach (string Purpose in scene.ScenePurposes) { PurposeString += Purpose + ", "; }
                 sb.Replace("@PurposeOfScene", PurposeString);
                 doc.AddText(sb.ToString());
                 sb.Clear();
                 /*              
-                                foreach (string sePurpose in scene.ScenePurpose)
+                                foreach (string sePurpose in scene.ScenePurposes)
                                 {
                                     StoryElement Purpose = StringToStoryElement(sePurpose);
                                     string PurposeName = Purpose?.Name ?? string.Empty;
