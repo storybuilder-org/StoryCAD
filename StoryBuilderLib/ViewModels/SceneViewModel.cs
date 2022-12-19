@@ -124,7 +124,7 @@ public class SceneViewModel : ObservableRecipient, INavigable
 
     // Scene development data (from Lisa Cron's Story Genius)
     private ObservableCollection<StringSelection> _scenePurposes;
-    public ObservableCollection<StringSelection> ScenePurposes
+    public ObservableCollection<StringSelection> ScenePurposes 
     {
         get => _scenePurposes;
         set => SetProperty(ref _scenePurposes, value);
@@ -136,13 +136,6 @@ public class SceneViewModel : ObservableRecipient, INavigable
     {
         get => _currentPurpose;
         set => SetProperty(ref _currentPurpose, value);
-    }
-
-    private int _purposeIndex;
-    public int PurposeIndex
-    {
-        get => _purposeIndex;
-        set => SetProperty(ref _purposeIndex, value);
     }
 
     private string _valueExchange;

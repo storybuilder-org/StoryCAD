@@ -23,7 +23,8 @@ public sealed partial class ScenePage : BindablePage
         StringSelection element = chk.DataContext as StringSelection;
         if (element == null)
             return;
-        SceneVm.CurrentPurpose = element;
+        element.Selection = true;
+        SceneVm.OnPropertyChanged(null, null);
     }
 
     private void ScenePurpose_Unchecked(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
@@ -32,7 +33,8 @@ public sealed partial class ScenePage : BindablePage
         StringSelection element = chk.DataContext as StringSelection;
         if (element == null)
             return;
-        SceneVm.CurrentPurpose = element;
+        element.Selection = false;
+        SceneVm.OnPropertyChanged(null, null);
     }
 
     private void CastMember_Checked(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)

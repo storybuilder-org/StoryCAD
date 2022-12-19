@@ -5,6 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Messaging;
+using StoryBuilder.Services.Messages;
 
 namespace StoryBuilder.Models
 {
@@ -21,13 +23,20 @@ namespace StoryBuilder.Models
         public bool Selection
         {
             get => _selection;
-            set => _selection = value;
+            set
+            {
+                // ReSharper disable once RedundantCheckBeforeAssignment
+                if (_selection == value)
+                    return;
+                _selection = value;
+                OnPropertyChanged("Selection");
+            }
         }
 
         public StringSelection(string stringName, bool selected = false)
         {
-            StringName = stringName;
-            Selection = selected;
+            _stringName = stringName;
+            _selection = selected;
         }
     }
 }

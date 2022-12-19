@@ -122,15 +122,15 @@
                         </Grid.ColumnDefinitions>
                         <ListView MinWidth="300" Height="125" x:Name="ScenePurpose" x:FieldModifier="public"
                                   SelectionMode="Single" Header="Purpose of Scene" 
-                                  SelectedIndex="{x:Bind SceneVm.PurposeIndex, Mode=OneWay}"
                                   ItemsSource="{x:Bind SceneVm.ScenePurposes, Mode=TwoWay}" >
                             <ListView.ItemTemplate>
                                 <DataTemplate x:DataType="models:StringSelection" >
                                     <StackPanel Orientation="Horizontal" Spacing="2">
-                                        <CheckBox Margin="0"
+                                        <CheckBox Margin="0" 
                                                   Checked="ScenePurpose_Checked" Unchecked="ScenePurpose_Unchecked"
-                                                  IsChecked="{x:Bind Selection ,Mode=TwoWay}" />
-                                        <TextBlock Text="{x:Bind StringName , Mode=OneWay}" MinWidth="250" />
+                                            IsChecked="{x:Bind Selection ,Mode=OneWay}" />
+                                        <TextBlock MinWidth="250" 
+                                            Text="{x:Bind StringName , Mode=OneWay}" />
                                     </StackPanel>
                                 </DataTemplate>
                             </ListView.ItemTemplate>
