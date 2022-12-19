@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Drawing;
-using System.Drawing.Printing;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.DependencyInjection;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Printing;
 using StoryBuilder.Models;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.ViewModels;
@@ -20,12 +21,34 @@ public class PrintReports
     private StringReader fileStream;
     private Font printFont;
     private string documentText;
-    PrintDocument PrintDoc = new();
+    PrintDocument _document = new();
 
     //PrintHelper helper = new();
+    public PrintReports()
+    {
+        _document = new();
+        _document.Paginate += Paginate;
+        _document.GetPreviewPage += GetPreviewPage;
+        _document.AddPages += AddPages;
+    }
+
+    private void Paginate(object sender, PaginateEventArgs e)
+    {
+        // As I only want to print one Rectangle, so I set the count to 1
+        _document.SetPreviewPageCount(1, PreviewPageCountType.Final);
+    }
+    private void AddPages(object sender, AddPagesEventArgs e)
+    {
+        _document.AddPage(new TextBox { Text = "RARSIMAWDAW" });
+
+        // Indicate that all of the print pages have been provided
+        _document.AddPagesComplete();
+    }
+
 
     public async Task Generate()
     {
+
         string rtf = string.Empty;
         await _formatter.LoadReportTemplates(); // Load text report templates
 
@@ -119,8 +142,8 @@ public class PrintReports
     }
 
     // The PrintPage event is raised for each page to be printed.
-    private void pd_PrintPage(object sender, PrintPageEventArgs ev)
-    {
+    private void pd_PrintPage(/*object sender, PrintPageEventArgs ev*/)
+    {/*
         int count = 0;
         float leftMargin = ev.MarginBounds.Left;
         float topMargin = ev.MarginBounds.Top;
@@ -144,7 +167,7 @@ public class PrintReports
 
         // If more lines exist, print another page.
         if (line != null) { ev.HasMorePages = true; }
-        else { ev.HasMorePages = false; }
+        else { ev.HasMorePages = false; }*/
     }
 
     // Print the file.
@@ -154,14 +177,14 @@ public class PrintReports
         {
             fileStream = new StringReader(file);
             printFont = new Font("Arial", 12, FontStyle.Regular, GraphicsUnit.Pixel);
-            PrintDoc.PrintPage += pd_PrintPage;
-            Margins margins = new(100, 100, 100, 100);
-            PrintDoc.DefaultPageSettings.Margins = margins;
-            float pixelsPerChar = printFont.Size;
-            float lineWidth = PrintDoc.DefaultPageSettings.PrintableArea.Width;
-            int charsPerLine = Convert.ToInt32(lineWidth / pixelsPerChar);
+            //PrintDoc.PrintPage += pd_PrintPage;
+            //Margins margins = new(100, 100, 100, 100);
+            //PrintDoc.DefaultPageSettings.Margins = margins;
+            //float pixelsPerChar = printFont.Size;
+            //float lineWidth = PrintDoc.DefaultPageSettings.PrintableArea.Width;
+            //int charsPerLine = Convert.ToInt32(lineWidth / pixelsPerChar);
             // Print the document.
-            PrintDoc.Print();
+            //PrintDoc.Print();
         }
         catch (Exception ex)
         {

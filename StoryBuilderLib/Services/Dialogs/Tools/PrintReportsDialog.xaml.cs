@@ -2,18 +2,25 @@
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Printing;
+using StoryBuilder.Models;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.ViewModels;
 using StoryBuilder.ViewModels.Tools;
+using Windows.Graphics.Printing;
+using PrintDocument = Microsoft.UI.Xaml.Printing.PrintDocument;
 
 namespace StoryBuilder.Services.Dialogs.Tools;
 public sealed partial class PrintReportsDialog : Page
 {
     public PrintReportDialogVM PrintVM = Ioc.Default.GetRequiredService<PrintReportDialogVM>();
-    DispatcherTimer IsDone = new() { Interval = new(0,0,0,1,0)};
+    private PrintManager _PrintManager;
+    private IPrintDocumentSource _PrintDocSource;
+
     public PrintReportsDialog()
     {
         InitializeComponent();
+        RegisterPrint();
         PrintVM.SelectAllCharacters = false;
         PrintVM.SelectAllProblems = false;
         PrintVM.SelectAllScenes = false;
@@ -107,28 +114,87 @@ public sealed partial class PrintReportsDialog : Page
         UpdateSelection(null,null);
     }
 
-    /// <summary>
-    /// This sets the opacity of the loading bar, then calls the VM.
-    /// </summary>
-    private void GenerateReports(object sender, RoutedEventArgs e)
+    void RegisterPrint()
     {
-        PrintVM.ShowLoadingBar = true;
-        LoadingBar.Opacity = 1;
-        PrintVM.StartGeneratingReports();
-        IsDone.Tick += IsReportGenerationFinished;
-        IsDone.Start();
+        // Register for PrintTaskRequested event
+        _PrintManager = PrintManagerInterop.GetForWindow(GlobalData.WindowHandle);
+        _PrintManager.PrintTaskRequested += PrintTaskRequested;
     }
 
-    private void IsReportGenerationFinished(object sender, object e)
+    private async void StartPrintMenu(object sender, RoutedEventArgs e)
     {
-        if (!PrintVM.ShowLoadingBar)
+
+        _PrintDocSource = _document.DocumentSource;
+
+        if (PrintManager.IsSupported())
         {
-            IsDone.Stop();
-            LoadingBar.Opacity = 0;
-            IsDone.Tick -= IsReportGenerationFinished;
-            PrintVM.ShowLoadingBar = false;
-            PrintVM.CloseDialog();
-            Ioc.Default.GetService<ShellViewModel>().ShowMessage(LogLevel.Info, "Generate Print Reports complete", true);
+            try
+            {
+                // Show print UI
+                await PrintManagerInterop.ShowPrintUIForWindowAsync(GlobalData.WindowHandle);
+            }
+            catch //Error setting up printer
+            {
+                await new ContentDialog()
+                {
+                    XamlRoot = (sender as Button).XamlRoot,
+                    Title = "Printing error",
+                    Content = "An error occurred trying to print.",
+                    PrimaryButtonText = "Ok"
+                }.ShowAsync();
+            }
+        }
+        else // Printing isn't supported.
+        {
+            await new ContentDialog()
+            {
+                XamlRoot = (sender as Button).XamlRoot,
+                Title = "Printing not supported",
+                Content = "This device doesn't support printing.",
+                PrimaryButtonText = "OK"
+            }.ShowAsync();
+        }
+    }
+
+    private void PrintTaskRequested(PrintManager sender, PrintTaskRequestedEventArgs args)
+    {
+        // Create the PrintTask.
+        // Defines the title and delegate for PrintTaskSourceRequested
+        var printTask = args.Request.CreatePrintTask("Print", PrintTaskSourceRequrested);
+
+        // Handle PrintTask.Completed to catch failed print jobs
+        printTask.Completed += PrintTaskCompleted;
+    }
+
+    private void PrintTaskSourceRequrested(PrintTaskSourceRequestedArgs args)
+    {
+        // Set the document source.
+        args.SetSource(_PrintDocSource);
+    }
+
+    private void GetPreviewPage(object sender, GetPreviewPageEventArgs e)
+    {
+        // Provide a UIElement as the print preview.
+        //_document.SetPreviewPage(e.PageNumber, x);
+    }
+
+
+
+    private void PrintTaskCompleted(PrintTask sender, PrintTaskCompletedEventArgs args)
+    {
+        // Notify the user when the print operation fails.
+        if (args.Completion == PrintTaskCompletion.Failed)
+        {
+            DispatcherQueue.TryEnqueue(async () =>
+            {
+                await new ContentDialog()
+                {
+                    XamlRoot = Content.XamlRoot,
+                    Title = "Printing error",
+                    Content = "\nSorry, failed to print.",
+                    PrimaryButtonText = "OK"
+                }.ShowAsync();
+            });
         }
     }
 }
