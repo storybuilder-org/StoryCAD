@@ -58,7 +58,6 @@ public partial class App : Application
         CheckForOtherInstances(); //Check other instances aren't already open.
         
         ConfigureIoc();
-
         GlobalData.Version = "Version: " + Package.Current.Id.Version.Major + "." + Package.Current.Id.Version.Minor + "." + Package.Current.Id.Version.Build + "." + Package.Current.Id.Version.Revision;
         string path = Path.Combine(Package.Current.InstalledLocation.Path, ".env");
         DotEnvOptions options = new(false, new[] { path });

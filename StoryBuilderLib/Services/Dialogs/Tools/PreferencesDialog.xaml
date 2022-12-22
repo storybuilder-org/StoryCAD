@@ -3,7 +3,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-    <StackPanel Width="500">
+    <StackPanel Width="500" Height="auto">
         <Pivot Name="PivotView">
             <PivotItem Header="General">
                 <StackPanel>
@@ -64,16 +64,17 @@
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0">
-                        <Button Content="Set Init to false" Click="SetInitToFalse" Width="200"/>
-                        <Button Content="Throw exception" Click="ThrowException" Width="200"/>
-                        <Button Content="Attach Elmah" Click="{x:Bind Logger.AddElmahTarget}" Width="200"/>
-                        <Button Content="Run InstallService" Click="{x:Bind InstallVM.InstallFiles()}" Width="200"/>
+                        <Button Content="Set Init to false" Click="SetInitToFalse" Width="200" Margin="0,5"/>
+                        <Button Content="Throw exception" Click="ThrowException" Width="200" Margin="0,5"/>
+                        <Button Content="Attach Elmah" Click="{x:Bind Logger.AddElmahTarget}" Width="200" Margin="0,5"/>
+                        <Button Content="Run InstallService" Click="{x:Bind InstallVM.InstallFiles}" Width="200" Margin="0,5"/>
                     </StackPanel>
                     <StackPanel VerticalAlignment="Bottom" Grid.Column="1" Margin="10,0,0,0">
                         <TextBlock Name="CPUArchitecture"/>
                         <TextBlock Name="OSArchitecture"/>
                         <TextBlock Name="OSInfo"/>
                         <TextBlock Name="AppArchitecture"/>
+                        <TextBlock Name="NetVer"/>
                     </StackPanel>
                 </Grid>
 
