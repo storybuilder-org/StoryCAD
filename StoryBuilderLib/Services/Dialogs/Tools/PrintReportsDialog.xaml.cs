@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -8,7 +9,7 @@ using StoryBuilder.Services.Logging;
 using StoryBuilder.ViewModels;
 using StoryBuilder.ViewModels.Tools;
 using Windows.Graphics.Printing;
-using PrintDocument = Microsoft.UI.Xaml.Printing.PrintDocument;
+using StoryBuilder.Services.Reports;
 
 namespace StoryBuilder.Services.Dialogs.Tools;
 public sealed partial class PrintReportsDialog : Page
@@ -99,7 +100,6 @@ public sealed partial class PrintReportsDialog : Page
         WebList.IsEnabled = !PrintVM.SelectAllWeb;
     }
 
-
     private void CheckboxClicked(object sender, RoutedEventArgs e)
     {
         //This clears any selected checkboxes
@@ -123,7 +123,9 @@ public sealed partial class PrintReportsDialog : Page
 
     private async void StartPrintMenu(object sender, RoutedEventArgs e)
     {
+        PrintReports _rpt = new(PrintVM, ShellViewModel.GetModel());
 
+        PrintDocument _document = await _rpt.GenerateWinUIPrintManagerReport();
         _PrintDocSource = _document.DocumentSource;
 
         if (PrintManager.IsSupported())
@@ -135,6 +137,7 @@ public sealed partial class PrintReportsDialog : Page
             }
             catch //Error setting up printer
             {
+
                 await new ContentDialog()
                 {
                     XamlRoot = (sender as Button).XamlRoot,
@@ -150,51 +153,42 @@ public sealed partial class PrintReportsDialog : Page
             {
                 XamlRoot = (sender as Button).XamlRoot,
                 Title = "Printing not supported",
-                Content = "This device doesn't support printing.",
+                Content = "This device doesn't appear to support printing.",
                 PrimaryButtonText = "OK"
             }.ShowAsync();
         }
     }
 
+    /// <summary>
+    /// This creates a print task and handles it failure/completion
+    /// </summary>
     private void PrintTaskRequested(PrintManager sender, PrintTaskRequestedEventArgs args)
     {
-        // Create the PrintTask.
-        // Defines the title and delegate for PrintTaskSourceRequested
-        var printTask = args.Request.CreatePrintTask("Print", PrintTaskSourceRequrested);
-
-        // Handle PrintTask.Completed to catch failed print jobs
-        printTask.Completed += PrintTaskCompleted;
+        PrintTask printJob = args.Request.CreatePrintTask("StoryBuilder - " + ShellViewModel.GetModel().ProjectFilename, PrintSourceRequested);
+        printJob.Completed += PrintTaskCompleted; //Show message if job failed.
     }
 
-    private void PrintTaskSourceRequrested(PrintTaskSourceRequestedArgs args)
+    /// <summary>
+    /// Set print source
+    /// </summary>
+    /// <param name="args"></param>
+    private void PrintSourceRequested(PrintTaskSourceRequestedArgs args)
     {
-        // Set the document source.
         args.SetSource(_PrintDocSource);
     }
 
-    private void GetPreviewPage(object sender, GetPreviewPageEventArgs e)
+    private async void PrintTaskCompleted(PrintTask sender, PrintTaskCompletedEventArgs args)
     {
-        // Provide a UIElement as the print preview.
-        //_document.SetPreviewPage(e.PageNumber, x);
-    }
-
-
-
-    private void PrintTaskCompleted(PrintTask sender, PrintTaskCompletedEventArgs args)
-    {
-        // Notify the user when the print operation fails.
-        if (args.Completion == PrintTaskCompletion.Failed)
+        if (args.Completion == PrintTaskCompletion.Failed) //Show message if print fails
         {
-            DispatcherQueue.TryEnqueue(async () =>
+            //Use an enqueue here because the sample version doesn't use it properly (i think or it doesnt work here.)
+            await new ContentDialog()
             {
-                await new ContentDialog()
-                {
-                    XamlRoot = Content.XamlRoot,
-                    Title = "Printing error",
-                    Content = "\nSorry, failed to print.",
-                    PrimaryButtonText = "OK"
-                }.ShowAsync();
-            });
+                XamlRoot = Content.XamlRoot,
+                Title = "Printing error",
+                Content = "An error occurred trying to print your document.",
+                PrimaryButtonText = "OK"
+            }.ShowAsync();
         }
     }
 }

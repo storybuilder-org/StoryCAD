@@ -167,28 +167,6 @@ public class PrintReportDialogVM : ObservableRecipient
     }
 
     /// <summary>
-    /// This starts report generation
-    /// (Calls GenerateReports() on a background worker)
-    /// </summary>
-    public void StartGeneratingReports()
-    {
-        ShowLoadingBar = true;
-        BackgroundWorker _backgroundThread = new();
-        _backgroundThread.DoWork += GenerateReports;
-        _backgroundThread.RunWorkerAsync();
-    }
-
-    /// <summary>
-    /// This creates a reports 
-    /// </summary>
-    private async void GenerateReports(object sender, DoWorkEventArgs e)
-    {
-        PrintReports _rpt = new(this, ShellViewModel.GetModel());
-        await _rpt.Generate();
-        ShowLoadingBar = false;
-    }
-
-    /// <summary>
     /// Hides the content dialog
     /// </summary>
     public void CloseDialog() { Dialog.Hide(); }

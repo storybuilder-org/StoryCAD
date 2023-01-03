@@ -1,15 +1,23 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Threading.Tasks;
+using ABI.Microsoft.UI;
 using CommunityToolkit.Mvvm.DependencyInjection;
+using CommunityToolkit.WinUI.UI.Controls.TextToolbarSymbols;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Printing;
 using StoryBuilder.Models;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.ViewModels;
 using StoryBuilder.ViewModels.Tools;
+using static System.Net.Mime.MediaTypeNames;
+using Colors = Microsoft.UI.Colors;
 
 namespace StoryBuilder.Services.Reports;
 
@@ -21,32 +29,10 @@ public class PrintReports
     private StringReader fileStream;
     private Font printFont;
     private string documentText;
+
     PrintDocument _document = new();
-
-    //PrintHelper helper = new();
-    public PrintReports()
-    {
-        _document = new();
-        _document.Paginate += Paginate;
-        _document.GetPreviewPage += GetPreviewPage;
-        _document.AddPages += AddPages;
-    }
-
-    private void Paginate(object sender, PaginateEventArgs e)
-    {
-        // As I only want to print one Rectangle, so I set the count to 1
-        _document.SetPreviewPageCount(1, PreviewPageCountType.Final);
-    }
-    private void AddPages(object sender, AddPagesEventArgs e)
-    {
-        _document.AddPage(new TextBox { Text = "RARSIMAWDAW" });
-
-        // Indicate that all of the print pages have been provided
-        _document.AddPagesComplete();
-    }
-
-
-    public async Task Generate()
+    List<TextBlock> PrintPreviewCache; //This stores a list of textblocks for print preivew
+    public async Task<string> Generate()
     {
 
         string rtf = string.Empty;
@@ -127,10 +113,58 @@ public class PrintReports
 
         if (string.IsNullOrEmpty(documentText))
         {
-            Ioc.Default.GetRequiredService<LogService>().Log(Logging.LogLevel.Warn, "No nodes selected for report generation");
-            return;
+            Ioc.Default.GetRequiredService<LogService>().Log(LogLevel.Warn, "No nodes selected for report generation");
+            return "";
         }
-        Print(documentText);
+        return documentText;
+    }
+
+    public async Task<PrintDocument> GenerateWinUIPrintManagerReport()
+    {
+        _document = new();
+        PrintPreviewCache = new();
+
+        //Treat each page break as
+        foreach (string pageText in (await Generate()).Split(@"\PageBreak"))
+        {
+            //We specify black text as it will default to white on dark mode, making it look like nothing was printed
+            //(and leading to a week of wondering why noting was being printed.). 
+
+            TextBlock page = new()
+            {
+                Text = pageText,
+                Foreground = new SolidColorBrush(Colors.Black),
+                Margin = new(10, 0, 0, 0)
+            };
+            PrintPreviewCache.Add(page);
+        }
+
+        //Add the text as pages.
+        _document.AddPages += ((_, _) =>
+        {
+            //Treat each page break as
+            foreach (TextBlock page in PrintPreviewCache) { _document.AddPage(page); }
+
+            //All text has been handled, so we mark add pages as complete.
+            _document.AddPagesComplete();
+            _document.SetPreviewPage(0, PrintPreviewCache[0]);
+
+            //Set preview count
+            _document.SetPreviewPageCount(PrintPreviewCache.Count, PreviewPageCountType.Final);
+        });
+
+        //Fetch preview page
+        _document.GetPreviewPage += ((_, e) =>
+        {
+            try
+            {
+                _document.SetPreviewPage(e.PageNumber, PrintPreviewCache[e.PageNumber - 1]);
+            } catch { }
+        });
+
+        _document.Paginate += (_, _) => { _document.SetPreviewPageCount(PrintPreviewCache.Count, PreviewPageCountType.Intermediate); };  
+
+        return _document;
     }
 
     private StoryElement Overview()
@@ -170,27 +204,6 @@ public class PrintReports
         else { ev.HasMorePages = false; }*/
     }
 
-    // Print the file.
-    public void Print(string file)
-    {
-        try
-        {
-            fileStream = new StringReader(file);
-            printFont = new Font("Arial", 12, FontStyle.Regular, GraphicsUnit.Pixel);
-            //PrintDoc.PrintPage += pd_PrintPage;
-            //Margins margins = new(100, 100, 100, 100);
-            //PrintDoc.DefaultPageSettings.Margins = margins;
-            //float pixelsPerChar = printFont.Size;
-            //float lineWidth = PrintDoc.DefaultPageSettings.PrintableArea.Width;
-            //int charsPerLine = Convert.ToInt32(lineWidth / pixelsPerChar);
-            // Print the document.
-            //PrintDoc.Print();
-        }
-        catch (Exception ex)
-        {
-            Ioc.Default.GetService<LogService>().LogException(Logging.LogLevel.Error, ex, "Error in Print reports.");
-        }
-    }
     /// <summary>
     /// Formats text for a report, if SummaryMode is set to true
     /// then some formatting is changed to make summary reports more pleasant
