@@ -5,13 +5,14 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.UI.Xaml.Controls;
 using StoryBuilder.Models;
 using StoryBuilder.Services.Reports;
+using Windows.Graphics.Printing;
 
 namespace StoryBuilder.ViewModels.Tools;
 
 public class PrintReportDialogVM : ObservableRecipient
 {
     public ContentDialog Dialog;
-
+    public PrintTask PrintJobManager = null;
     #region Properties
 
     private bool _showLoadingBar = true;
@@ -183,5 +184,22 @@ public class PrintReportDialogVM : ObservableRecipient
         await _rpt.Generate();
 
         await new PrintReports(this, ShellViewModel.GetModel()).Generate();
+    }
+
+    /// <summary>
+    /// This starts report generation
+    /// (Calls GenerateReports() on a background worker)
+    /// </summary>
+    public async void StartGeneratingReports()
+    {
+        ShowLoadingBar = true;
+        BackgroundWorker _backgroundThread = new();
+        _backgroundThread.DoWork += (async (_,_) =>
+        {
+            PrintReports _rpt = new(this, ShellViewModel.GetModel());
+            await _rpt.Generate();
+            ShowLoadingBar = false;
+        });
+        _backgroundThread.RunWorkerAsync();
     }
 }

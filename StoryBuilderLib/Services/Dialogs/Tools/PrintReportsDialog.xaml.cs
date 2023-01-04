@@ -10,6 +10,8 @@ using StoryBuilder.ViewModels;
 using StoryBuilder.ViewModels.Tools;
 using Windows.Graphics.Printing;
 using StoryBuilder.Services.Reports;
+using System.Runtime.CompilerServices;
+using Microsoft.UI.Dispatching;
 
 namespace StoryBuilder.Services.Dialogs.Tools;
 public sealed partial class PrintReportsDialog : Page
@@ -17,6 +19,9 @@ public sealed partial class PrintReportsDialog : Page
     public PrintReportDialogVM PrintVM = Ioc.Default.GetRequiredService<PrintReportDialogVM>();
     private PrintManager _PrintManager;
     private IPrintDocumentSource _PrintDocSource;
+    DispatcherQueue Dispatcher = DispatcherQueue.GetForCurrentThread(); //Used to show errors
+
+    DispatcherTimer IsDone = new() { Interval = new(0, 0, 0, 1, 0) };
 
     public PrintReportsDialog()
     {
@@ -125,10 +130,12 @@ public sealed partial class PrintReportsDialog : Page
     {
         PrintReports _rpt = new(PrintVM, ShellViewModel.GetModel());
 
-        PrintDocument _document = await _rpt.GenerateWinUIPrintManagerReport();
+        PrintDocument _document = await _rpt.GenerateWinUIReport();
         _PrintDocSource = _document.DocumentSource;
 
-        if (PrintManager.IsSupported())
+        //Device has to support printing AND run windows 11 (Win11's RTM Build was build 22000 and Win10 Build will ever be above 22000)
+        //Windows 10 currently does not support PrintManagers due to a bug in windows 10, however this should get fixed soon (hopefully)
+        if (PrintManager.IsSupported() && Environment.OSVersion.Version.Build >= 22000) 
         {
             try
             {
@@ -137,25 +144,40 @@ public sealed partial class PrintReportsDialog : Page
             }
             catch //Error setting up printer
             {
-
-                await new ContentDialog()
+                Dispatcher.TryEnqueue(async () =>
                 {
-                    XamlRoot = (sender as Button).XamlRoot,
-                    Title = "Printing error",
-                    Content = "An error occurred trying to print.",
-                    PrimaryButtonText = "Ok"
-                }.ShowAsync();
+                    PrintVM.CloseDialog();
+                    await new ContentDialog()
+                    {
+                        XamlRoot = GlobalData.XamlRoot,
+                        Title = "Printing error",
+                        Content = "An error occurred trying to print.",
+                        PrimaryButtonText = "Ok"
+                    }.ShowAsync();
+                });
+;
             }
         }
-        else // Printing isn't supported.
+        else //Print Manager isn't supported so we fall back to the old version of printing directly.
         {
-            await new ContentDialog()
-            {
-                XamlRoot = (sender as Button).XamlRoot,
-                Title = "Printing not supported",
-                Content = "This device doesn't appear to support printing.",
-                PrimaryButtonText = "OK"
-            }.ShowAsync();
+            PrintVM.ShowLoadingBar = true;
+            LoadingBar.Opacity = 1;
+            PrintVM.StartGeneratingReports();
+            IsDone.Tick += IsReportGenerationFinished;
+            IsDone.Start();
+        }
+    }
+
+    private void IsReportGenerationFinished(object sender, object e)
+    {
+        if (!PrintVM.ShowLoadingBar)
+        {
+            IsDone.Stop();
+            LoadingBar.Opacity = 0;
+            IsDone.Tick -= IsReportGenerationFinished;
+            PrintVM.ShowLoadingBar = false;
+            PrintVM.CloseDialog();
+            Ioc.Default.GetService<ShellViewModel>().ShowMessage(LogLevel.Info, "Generate Print Reports complete", true);
         }
     }
 
@@ -164,8 +186,11 @@ public sealed partial class PrintReportsDialog : Page
     /// </summary>
     private void PrintTaskRequested(PrintManager sender, PrintTaskRequestedEventArgs args)
     {
-        PrintTask printJob = args.Request.CreatePrintTask("StoryBuilder - " + ShellViewModel.GetModel().ProjectFilename, PrintSourceRequested);
-        printJob.Completed += PrintTaskCompleted; //Show message if job failed.
+        if (PrintVM.PrintJobManager == null) //A PrintManager can only be initalised once per session.
+        {
+            PrintVM.PrintJobManager = args.Request.CreatePrintTask("StoryBuilder - Print report", PrintSourceRequested);
+            PrintVM.PrintJobManager.Completed += PrintTaskCompleted; //Show message if job failed.
+        }
     }
 
     /// <summary>
@@ -190,5 +215,7 @@ public sealed partial class PrintReportsDialog : Page
                 PrimaryButtonText = "OK"
             }.ShowAsync();
         }
+
+        _PrintManager.PrintTaskRequested -= PrintTaskRequested;
     }
 }

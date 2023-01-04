@@ -1,23 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Printing;
 using System.IO;
-using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Threading.Tasks;
-using ABI.Microsoft.UI;
 using CommunityToolkit.Mvvm.DependencyInjection;
-using CommunityToolkit.WinUI.UI.Controls.TextToolbarSymbols;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Printing;
+using Octokit;
 using StoryBuilder.Models;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.ViewModels;
 using StoryBuilder.ViewModels.Tools;
-using static System.Net.Mime.MediaTypeNames;
 using Colors = Microsoft.UI.Colors;
+using PrintDocument = Microsoft.UI.Xaml.Printing.PrintDocument;
 
 namespace StoryBuilder.Services.Reports;
 
@@ -31,7 +30,7 @@ public class PrintReports
     private string documentText;
 
     PrintDocument _document = new();
-    List<TextBlock> PrintPreviewCache; //This stores a list of textblocks for print preivew
+    List<StackPanel> _printPreviewCache; //This stores a list of pages for print preview
     public async Task<string> Generate()
     {
 
@@ -47,7 +46,6 @@ public class PrintReports
         if (_vm.CreateSummary)
         {
             rtf = _formatter.FormatSynopsisReport();
-            //documentText = FormatText(rtf);
             documentText += FormatText(rtf, true);
         }
 
@@ -119,10 +117,10 @@ public class PrintReports
         return documentText;
     }
 
-    public async Task<PrintDocument> GenerateWinUIPrintManagerReport()
+    public async Task<PrintDocument> GenerateWinUIReport()
     {
         _document = new();
-        PrintPreviewCache = new();
+        _printPreviewCache = new();
 
         //Treat each page break as
         foreach (string pageText in (await Generate()).Split(@"\PageBreak"))
@@ -130,39 +128,49 @@ public class PrintReports
             //We specify black text as it will default to white on dark mode, making it look like nothing was printed
             //(and leading to a week of wondering why noting was being printed.). 
 
-            TextBlock page = new()
+            StackPanel panel = new()
             {
-                Text = pageText,
-                Foreground = new SolidColorBrush(Colors.Black),
-                Margin = new(10, 0, 0, 0)
+                Children =
+                {
+                    new TextBlock() {
+                        Text = pageText,
+                        Foreground = new SolidColorBrush(Colors.Black),
+                        Margin = new(120, 50, 0, 0),
+                        HorizontalAlignment = HorizontalAlignment.Left,
+                        FontSize = 10
+                    }
+                }
             };
-            PrintPreviewCache.Add(page);
+
+            _printPreviewCache.Add(panel); //Add page to cache.
         }
+
 
         //Add the text as pages.
         _document.AddPages += ((_, _) =>
         {
             //Treat each page break as
-            foreach (TextBlock page in PrintPreviewCache) { _document.AddPage(page); }
+            foreach (StackPanel page in _printPreviewCache) { _document.AddPage(page); }
 
             //All text has been handled, so we mark add pages as complete.
             _document.AddPagesComplete();
-            _document.SetPreviewPage(0, PrintPreviewCache[0]);
+            _document.SetPreviewPage(0, _printPreviewCache[0]);
 
             //Set preview count
-            _document.SetPreviewPageCount(PrintPreviewCache.Count, PreviewPageCountType.Final);
+            _document.SetPreviewPageCount(_printPreviewCache.Count, PreviewPageCountType.Final);
         });
 
         //Fetch preview page
         _document.GetPreviewPage += ((_, e) =>
         {
-            try
+            try //Try Catched as this code may be called before AddPages is done.
             {
-                _document.SetPreviewPage(e.PageNumber, PrintPreviewCache[e.PageNumber - 1]);
+                _document.SetPreviewPage(e.PageNumber, _printPreviewCache[e.PageNumber - 1]);
             } catch { }
         });
 
-        _document.Paginate += (_, _) => { _document.SetPreviewPageCount(PrintPreviewCache.Count, PreviewPageCountType.Intermediate); };  
+        //As each page gets added through AddPages, and keeps preview count in line 
+        _document.Paginate += (_, _) => { _document.SetPreviewPageCount(_printPreviewCache.Count, PreviewPageCountType.Intermediate); };  
 
         return _document;
     }
@@ -176,8 +184,8 @@ public class PrintReports
     }
 
     // The PrintPage event is raised for each page to be printed.
-    private void pd_PrintPage(/*object sender, PrintPageEventArgs ev*/)
-    {/*
+    private void pd_PrintPage(object sender, PrintPageEventArgs ev)
+    {
         int count = 0;
         float leftMargin = ev.MarginBounds.Left;
         float topMargin = ev.MarginBounds.Top;
@@ -201,7 +209,7 @@ public class PrintReports
 
         // If more lines exist, print another page.
         if (line != null) { ev.HasMorePages = true; }
-        else { ev.HasMorePages = false; }*/
+        else { ev.HasMorePages = false; }
     }
 
     /// <summary>
@@ -217,7 +225,7 @@ public class PrintReports
         string[] lines = text.Split('\n');
         StringBuilder sb = new();
 
-        //TODO: rewrite this for readabilty and maintainability
+        //TODO: rewrite this for readability and maintainability
         foreach (string t in lines)
         {
             string line = t.TrimEnd();
