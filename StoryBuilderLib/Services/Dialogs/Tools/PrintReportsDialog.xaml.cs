@@ -1,32 +1,24 @@
 ﻿using System;
-using System.Threading;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Printing;
 using StoryBuilder.Models;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.ViewModels;
 using StoryBuilder.ViewModels.Tools;
 using Windows.Graphics.Printing;
-using StoryBuilder.Services.Reports;
-using System.Runtime.CompilerServices;
 using Microsoft.UI.Dispatching;
 
 namespace StoryBuilder.Services.Dialogs.Tools;
-public sealed partial class PrintReportsDialog : Page
+public sealed partial class PrintReportsDialog
 {
     public PrintReportDialogVM PrintVM = Ioc.Default.GetRequiredService<PrintReportDialogVM>();
-    private PrintManager _PrintManager;
-    private IPrintDocumentSource _PrintDocSource;
-    DispatcherQueue Dispatcher = DispatcherQueue.GetForCurrentThread(); //Used to show errors
-
-    DispatcherTimer IsDone = new() { Interval = new(0, 0, 0, 1, 0) };
+    DispatcherTimer _isDone = new() { Interval = new(0, 0, 0, 1, 0) };
 
     public PrintReportsDialog()
     {
         InitializeComponent();
-        RegisterPrint();
+        PrintVM.RegisterForPrint();
         PrintVM.SelectAllCharacters = false;
         PrintVM.SelectAllProblems = false;
         PrintVM.SelectAllScenes = false;
@@ -44,6 +36,10 @@ public sealed partial class PrintReportsDialog : Page
         PrintVM.SettingList = false;
         PrintVM.SceneList = false;
         PrintVM.WebList = false;
+        PrintVM.Dispatcher = DispatcherQueue.GetForCurrentThread(); //Used to show error messages.
+
+        //Warn user if they are on win10 as print manager can't be used.
+        if (Environment.OSVersion.Version.Build <= 22000) { Win10Warning.IsOpen = true; }
 
         //Gets all nodes that aren't deleted
         try
@@ -55,7 +51,7 @@ public sealed partial class PrintReportsDialog : Page
         }
         catch (Exception ex)
         {
-            Ioc.Default.GetService<LogService>().LogException(LogLevel.Error, ex, "Error parsing nodes.");
+            Ioc.Default.GetRequiredService<LogService>().LogException(LogLevel.Error, ex, "Error parsing nodes.");
         }
     }
 
@@ -108,7 +104,7 @@ public sealed partial class PrintReportsDialog : Page
     private void CheckboxClicked(object sender, RoutedEventArgs e)
     {
         //This clears any selected checkboxes
-        switch ((sender as CheckBox).Content.ToString())
+        switch ((sender as CheckBox)?.Content.ToString())
         {
             case "Print all problems": ProblemsList.SelectedItems.Clear(); break;
             case "Print all characters": CharactersList.SelectedItems.Clear(); break;
@@ -119,19 +115,10 @@ public sealed partial class PrintReportsDialog : Page
         UpdateSelection(null,null);
     }
 
-    void RegisterPrint()
-    {
-        // Register for PrintTaskRequested event
-        _PrintManager = PrintManagerInterop.GetForWindow(GlobalData.WindowHandle);
-        _PrintManager.PrintTaskRequested += PrintTaskRequested;
-    }
-
     private async void StartPrintMenu(object sender, RoutedEventArgs e)
     {
-        PrintReports _rpt = new(PrintVM, ShellViewModel.GetModel());
-
-        PrintDocument _document = await _rpt.GenerateWinUIReport();
-        _PrintDocSource = _document.DocumentSource;
+        PrintVM.GeneratePrintDocumentReport();
+        PrintVM.PrintDocSource = PrintVM.Document.DocumentSource;
 
         //Device has to support printing AND run windows 11 (Win11's RTM Build was build 22000 and Win10 Build will ever be above 22000)
         //Windows 10 currently does not support PrintManagers due to a bug in windows 10, however this should get fixed soon (hopefully)
@@ -142,16 +129,16 @@ public sealed partial class PrintReportsDialog : Page
                 // Show print UI
                 await PrintManagerInterop.ShowPrintUIForWindowAsync(GlobalData.WindowHandle);
             }
-            catch //Error setting up printer
+            catch (Exception ex) //Error setting up printer
             {
-                Dispatcher.TryEnqueue(async () =>
+                PrintVM.Dispatcher.TryEnqueue(async () =>
                 {
                     PrintVM.CloseDialog();
-                    await new ContentDialog()
+                    await new ContentDialog
                     {
                         XamlRoot = GlobalData.XamlRoot,
                         Title = "Printing error",
-                        Content = "An error occurred trying to print.",
+                        Content = "The following error occurred when trying to print:\n\n" + ex.Message,
                         PrimaryButtonText = "Ok"
                     }.ShowAsync();
                 });
@@ -163,59 +150,20 @@ public sealed partial class PrintReportsDialog : Page
             PrintVM.ShowLoadingBar = true;
             LoadingBar.Opacity = 1;
             PrintVM.StartGeneratingReports();
-            IsDone.Tick += IsReportGenerationFinished;
-            IsDone.Start();
+            _isDone.Tick += IsReportGenerationFinished;
+            _isDone.Start();
         }
     }
-
     private void IsReportGenerationFinished(object sender, object e)
     {
         if (!PrintVM.ShowLoadingBar)
         {
-            IsDone.Stop();
+            _isDone.Stop();
             LoadingBar.Opacity = 0;
-            IsDone.Tick -= IsReportGenerationFinished;
+            _isDone.Tick -= IsReportGenerationFinished;
             PrintVM.ShowLoadingBar = false;
             PrintVM.CloseDialog();
-            Ioc.Default.GetService<ShellViewModel>().ShowMessage(LogLevel.Info, "Generate Print Reports complete", true);
+            Ioc.Default.GetRequiredService<ShellViewModel>().ShowMessage(LogLevel.Info, "Generate Print Reports complete", true);
         }
-    }
-
-    /// <summary>
-    /// This creates a print task and handles it failure/completion
-    /// </summary>
-    private void PrintTaskRequested(PrintManager sender, PrintTaskRequestedEventArgs args)
-    {
-        if (PrintVM.PrintJobManager == null) //A PrintManager can only be initalised once per session.
-        {
-            PrintVM.PrintJobManager = args.Request.CreatePrintTask("StoryBuilder - Print report", PrintSourceRequested);
-            PrintVM.PrintJobManager.Completed += PrintTaskCompleted; //Show message if job failed.
-        }
-    }
-
-    /// <summary>
-    /// Set print source
-    /// </summary>
-    /// <param name="args"></param>
-    private void PrintSourceRequested(PrintTaskSourceRequestedArgs args)
-    {
-        args.SetSource(_PrintDocSource);
-    }
-
-    private async void PrintTaskCompleted(PrintTask sender, PrintTaskCompletedEventArgs args)
-    {
-        if (args.Completion == PrintTaskCompletion.Failed) //Show message if print fails
-        {
-            //Use an enqueue here because the sample version doesn't use it properly (i think or it doesnt work here.)
-            await new ContentDialog()
-            {
-                XamlRoot = Content.XamlRoot,
-                Title = "Printing error",
-                Content = "An error occurred trying to print your document.",
-                PrimaryButtonText = "OK"
-            }.ShowAsync();
-        }
-
-        _PrintManager.PrintTaskRequested -= PrintTaskRequested;
     }
 }

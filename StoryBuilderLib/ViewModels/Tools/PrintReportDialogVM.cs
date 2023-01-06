@@ -1,18 +1,30 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
+using Microsoft.UI.Xaml;
+using Microsoft.UI;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Printing;
 using StoryBuilder.Models;
 using StoryBuilder.Services.Reports;
 using Windows.Graphics.Printing;
+using Microsoft.UI.Dispatching;
 
 namespace StoryBuilder.ViewModels.Tools;
 
 public class PrintReportDialogVM : ObservableRecipient
 {
     public ContentDialog Dialog;
-    public PrintTask PrintJobManager = null;
+    public PrintTask PrintJobManager;
+    private PrintManager _printManager;
+    public PrintDocument Document = new();
+    public IPrintDocumentSource PrintDocSource;
+    public DispatcherQueue Dispatcher;
+
+    private List<StackPanel> _printPreviewCache; //This stores a list of pages for print preview
     #region Properties
 
     private bool _showLoadingBar = true;
@@ -186,20 +198,137 @@ public class PrintReportDialogVM : ObservableRecipient
         await new PrintReports(this, ShellViewModel.GetModel()).Generate();
     }
 
+    public void RegisterForPrint()
+    {
+        // Register for PrintTaskRequested event
+        _printManager = PrintManagerInterop.GetForWindow(GlobalData.WindowHandle);
+        _printManager.PrintTaskRequested += PrintTaskRequested;
+    }
     /// <summary>
     /// This starts report generation
     /// (Calls GenerateReports() on a background worker)
     /// </summary>
-    public async void StartGeneratingReports()
+    public void StartGeneratingReports()
     {
         ShowLoadingBar = true;
         BackgroundWorker _backgroundThread = new();
-        _backgroundThread.DoWork += (async (_,_) =>
+        _backgroundThread.DoWork += async (_,_) =>
         {
             PrintReports _rpt = new(this, ShellViewModel.GetModel());
-            await _rpt.Generate();
+            _rpt.Print(await _rpt.Generate());
             ShowLoadingBar = false;
-        });
+        };
         _backgroundThread.RunWorkerAsync();
+    }
+
+    public async void GeneratePrintDocumentReport()
+    {
+        Document = new();
+        _printPreviewCache = new();
+
+        //Treat each page break as it's own page.
+        foreach (string pageText in (await new PrintReports(this, ShellViewModel.GetModel()).Generate()).Split(@"\PageBreak"))
+        {
+            //We specify black text as it will default to white on dark mode, making it look like nothing was printed
+            //(and leading to a week of wondering why noting was being printed.). 
+
+            StackPanel panel = new()
+            {
+                Children =
+                {
+                    new TextBlock {
+                        Text = pageText,
+                        Foreground = new SolidColorBrush(Colors.Black),
+                        Margin = new(120, 50, 0, 0),
+                        HorizontalAlignment = HorizontalAlignment.Left,
+                        FontSize = 10
+                    }
+                }
+            };
+
+            _printPreviewCache.Add(panel); //Add page to cache.
+        }
+
+
+        //Add the text as pages.
+        Document.AddPages += AddPages;
+
+        //Fetch preview page
+        Document.GetPreviewPage += GetPreviewPage;
+
+        //As each page gets added through AddPages, and keeps preview count in line 
+        Document.Paginate += Paginate;
+    }
+
+    private void Paginate(object sender, PaginateEventArgs e)
+    {
+        Document.SetPreviewPageCount(_printPreviewCache.Count, PreviewPageCountType.Intermediate);
+    }
+
+    private void GetPreviewPage(object sender, GetPreviewPageEventArgs e)
+    {
+        //Try Catch as this code may be called before AddPages is done.
+        try
+        {
+            Document.SetPreviewPage(e.PageNumber, _printPreviewCache[e.PageNumber - 1]);
+        }
+        catch { }
+    }
+
+    private void AddPages(object sender, AddPagesEventArgs e)
+    {
+        //Treat each page break as
+        foreach (StackPanel page in _printPreviewCache) { Document.AddPage(page); }
+
+        //All text has been handled, so we mark add pages as complete.
+        Document.AddPagesComplete();
+        Document.SetPreviewPage(0, _printPreviewCache[0]);
+
+        //Set preview count
+        Document.SetPreviewPageCount(_printPreviewCache.Count, PreviewPageCountType.Final);
+    }
+
+    /// <summary>
+    /// This creates a print task and handles it failure/completion
+    /// </summary>
+    private void PrintTaskRequested(PrintManager sender, PrintTaskRequestedEventArgs args)
+    {
+        PrintJobManager = args.Request.CreatePrintTask("StoryBuilder - " + ShellViewModel.GetModel().ProjectFilename, PrintSourceRequested);
+        PrintJobManager.Completed += PrintTaskCompleted; //Show message if job failed.
+    }
+
+    /// <summary>
+    /// Set print source
+    /// </summary>
+    /// <param name="args"></param>
+    private void PrintSourceRequested(PrintTaskSourceRequestedArgs args)
+    {
+        args.SetSource(PrintDocSource);
+    }
+
+    private async void PrintTaskCompleted(PrintTask sender, PrintTaskCompletedEventArgs args)
+    {
+        if (args.Completion == PrintTaskCompletion.Failed) //Show message if print fails
+        {
+            //Use an enqueue here because the sample version doesn't use it properly (i think or it doesn't work here.)
+             ContentDialog cd = new()
+             {
+                XamlRoot = GlobalData.XamlRoot,
+                Title = "Printing error",
+                Content = "An error occurred trying to print your document.",
+                PrimaryButtonText = "OK"
+             };
+             await cd.ShowAsync();
+        }
+
+        Dispatcher.TryEnqueue(() =>
+        {
+            _printManager.PrintTaskRequested -= PrintTaskRequested;
+            Document.AddPages -= AddPages;
+            Document.GetPreviewPage -= GetPreviewPage;
+            Document.Paginate -= Paginate;
+            Document = null;
+            CloseDialog();
+        });
     }
 }
