@@ -229,26 +229,55 @@ public class PrintReportDialogVM : ObservableRecipient
         //Treat each page break as it's own page.
         foreach (string pageText in (await new PrintReports(this, ShellViewModel.GetModel()).Generate()).Split(@"\PageBreak"))
         {
+            //Wrap pages
+            string[] Lines = pageText.Split('\n');
+            List<string> WrappedPages = new();
+            int linecount = 0;
+            string currentpage = "";
+            for (int i = 0; i < Lines.Length; i++)
+            {
+                if (linecount >= 70)
+                {
+                    currentpage += Lines[i];
+                    WrappedPages.Add(currentpage);
+
+                    //Reset counter
+                    currentpage = "";
+                    linecount = 0;
+
+                }
+                else
+                {
+                    currentpage += Lines[i];
+                    linecount++;
+                }
+            }
+            WrappedPages.Add(currentpage);
+
             //We specify black text as it will default to white on dark mode, making it look like nothing was printed
             //(and leading to a week of wondering why noting was being printed.). 
-
-            StackPanel panel = new()
+            foreach (string Page in WrappedPages)
             {
-                Children =
+                if (!String.IsNullOrWhiteSpace(Page))
                 {
-                    new TextBlock {
-                        Text = pageText,
-                        Foreground = new SolidColorBrush(Colors.Black),
-                        Margin = new(120, 50, 0, 0),
-                        HorizontalAlignment = HorizontalAlignment.Left,
-                        FontSize = 10
-                    }
+                    StackPanel panel = new()
+                    {
+                        Children =
+                        {
+                            new TextBlock {
+                                Text = Page,
+                                Foreground = new SolidColorBrush(Colors.Black),
+                                Margin = new(120, 50, 0, 0),
+                                HorizontalAlignment = HorizontalAlignment.Left,
+                                FontSize = 10
+                            }
+                        }
+                    };
+
+                    _printPreviewCache.Add(panel); //Add page to cache.  
                 }
-            };
-
-            _printPreviewCache.Add(panel); //Add page to cache.
+            }
         }
-
 
         //Add the text as pages.
         Document.AddPages += AddPages;
