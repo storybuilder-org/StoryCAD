@@ -83,7 +83,7 @@ public class StoryWriter
         XmlNode _stb = _xml.CreateElement("StoryBuilder");
         //Create an attribute.
         XmlAttribute _attr = _xml.CreateAttribute("Version");
-        _attr.Value = "2.0";
+        _attr.Value = GlobalData.Version; //Write Version data
         Debug.Assert(_stb.Attributes != null, "_stb.Attributes != null");
         _stb.Attributes.Append(_attr);
         _xml.AppendChild(_stb);
