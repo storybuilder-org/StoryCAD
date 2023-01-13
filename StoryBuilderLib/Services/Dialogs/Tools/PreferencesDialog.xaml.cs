@@ -56,8 +56,8 @@ public sealed partial class PreferencesDialog : Page
         {
             //TODO: Use .NET7 Raw String Literal?
             Changelog.Text = "Failed to get changelog for this version, this because either:" +
-                             "\n - You are running an autobuild version" +
-                             "\n- There is an issue conntecting to Github";
+                             "\n - You are running an auto-build version" +
+                             "\n- There is an issue connecting to Github";
         }
 
     }
