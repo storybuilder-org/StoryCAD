@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Windows.ApplicationModel;
+using Windows.Devices.Input;
 using Elmah.Io.Client;
 using Elmah.Io.NLog;
 using NLog;
@@ -90,6 +92,21 @@ public class LogService : ILogService
                 {
                     msg.Data = new List<Item>();
                     string LogString = string.Empty;
+
+                    try
+                    {
+                        msg.Data.Add(new(key: "Line " + 0, value: "OS Version: " + Environment.OSVersion
+                            + "\nProcessor Count: " + Environment.ProcessorCount
+                            + "\nProcessID:" + Environment.ProcessId
+                            + "\nArchitecture:" + RuntimeInformation.ProcessArchitecture
+                            + "\nTouchscreen:" + PointerDevice.GetPointerDevices().Any(p => p.PointerDeviceType == Windows.Devices.Input.PointerDeviceType.Touch)
+                            + "\nWindows Build: " + Environment.OSVersion.Version.Build));
+                    }
+                    catch (Exception ex)
+                    {
+                        msg.Data.Add(new(key: "Line " + 0, value: $"failed getting system info ({ex.Message})"));
+                    }
+
                     using (FileStream stream = File.Open(Path.Combine(GlobalData.RootDirectory, "logs", $"updater.{DateTime.Now.ToString("yyyy-MM-dd")}.log"), FileMode.Open, FileAccess.Read,FileShare.ReadWrite))
                     {
                         using (StreamReader reader = new(stream))
