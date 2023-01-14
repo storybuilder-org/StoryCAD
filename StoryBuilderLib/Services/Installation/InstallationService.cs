@@ -18,7 +18,7 @@ public class InstallationService
     public readonly LogService Logger;
 
     /// <summary>
-    /// This copies all the files from \assets\install to GlobalData.RootDirectory.
+    /// This copies all the files from \asetts\install to GlobalData.RootDirectory.
     /// This is done by using manifest resource steams and writing them to the disk.
     /// </summary>
     public async Task InstallFiles()
@@ -42,24 +42,34 @@ public class InstallationService
     /// </summary>
     private async Task DeleteFiles()
     {
-        StorageFolder ParentFolder = await StorageFolder.GetFolderFromPathAsync(GlobalData.RootDirectory);
-        foreach (StorageFile Item in await ParentFolder.GetFilesAsync())
+        try
         {
-            if (Item.Name == "StoryBuilder.prf") { continue; } //Don't delete prf
-
-            try { await Item.DeleteAsync(); }
-            catch (Exception ex)
+            StorageFolder ParentFolder = await StorageFolder.GetFolderFromPathAsync(GlobalData.RootDirectory);
+            if (ParentFolder != null)
             {
-                Logger.LogException(LogLevel.Error, ex, "Error when deleting files");
+                ParentFolder = await StorageFolder.GetFolderFromPathAsync(Path.Combine(ApplicationData.Current.RoamingFolder.Path, "Storybuilder"));
+            }
+
+            foreach (StorageFile Item in await ParentFolder.GetFilesAsync())
+            {
+                if (Item.Name == "StoryBuilder.prf") { continue; } //Don't delete prf
+
+                try { await Item.DeleteAsync(); }
+                catch (Exception ex) { Logger.LogException(LogLevel.Error, ex, "Error when deleting files"); }
+            }
+            foreach (StorageFolder Item in await ParentFolder.GetFoldersAsync())
+            {
+                if (Item.Name == "logs") { continue; }
+
+                try { await Item.DeleteAsync(); }
+                catch (Exception ex) { Logger.LogException(LogLevel.Error, ex, "Error when deleting files"); }
             }
         }
-        foreach (StorageFolder Item in await ParentFolder.GetFoldersAsync())
+        catch (Exception ex)
         {
-            if (Item.Name == "logs") { continue; }
-
-            try { await Item.DeleteAsync(); }
-            catch (Exception ex) { Logger.LogException(LogLevel.Error, ex, "Error when deleting files"); }
+            Logger.LogException(LogLevel.Error,ex, "Error in deletefiles()");
         }
+
     }
 
     /// <summary>
@@ -73,7 +83,7 @@ public class InstallationService
         //Removes the parent container as the files are relative.
         string file = inputFileName.Replace("StoryBuilder.Assets.Install", "");
 
-        //This replaces all the . with \ (except the last . as thats the file type)
+        //This replaces all the . with \ (except the last . as that's the file type)
         int lastIndex = file.LastIndexOf('.');
         if (lastIndex > 0) { file = file[..lastIndex].Replace(".", @"\") + file[lastIndex..]; }
         file = file.Replace(@"\stbx", "stbx").Remove(0, 1).Replace("stbx", ".stbx").Replace("..", ".").Replace('_', ' ');
