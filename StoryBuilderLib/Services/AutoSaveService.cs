@@ -70,7 +70,7 @@ namespace StoryBuilder.Services
                         //Save and write.
                         Dispatcher.TryEnqueue(() => { _ShellVM.SaveModel(); }); //Runs on UI Thread, so we can figure out what page is open and save the correct VM.
                         await _ShellVM.WriteModel(); //Write file to disk
-                        _ShellVM.StoryModel.Changed = false;
+                         _ShellVM.StoryModel.Changed = false;
                         _logger.Log(LogLevel.Info, "Wrote autosave file");
 
                         //Change pen icon back to green so user can see all is good

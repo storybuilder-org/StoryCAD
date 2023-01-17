@@ -100,7 +100,8 @@ public class StoryWriter
 
     private void ParseStoryElementsAsync()
     {
-        foreach (StoryElement _element in _model.StoryElements)
+        StoryElementCollection tempCollection = _model.StoryElements; //Prevents rare error of collection was modified.
+        foreach (StoryElement _element in tempCollection)
         {
             // ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault
             switch (_element.Type)
