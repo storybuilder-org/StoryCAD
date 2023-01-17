@@ -49,7 +49,7 @@ public class StoryWriter
         _outFile = output;
         _xml = new XmlDocument();
         CreateStoryDocument();
-        //      write RTF if converting. 
+        //write RTF if converting. 
         ParseStoryElementsAsync();
         ParseExplorerView();
         ParseNarratorView();

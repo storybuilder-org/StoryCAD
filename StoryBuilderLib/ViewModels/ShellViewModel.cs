@@ -786,7 +786,7 @@ _canExecuteCommands = true;
 
     /// <summary>
     /// Write the current StoryModel to the backing project file
-    /// </summary>
+    /// </summary>|
     public async Task WriteModel()
     {
         Logger.Log(LogLevel.Info, $"In WriteModel, file={StoryModel.ProjectFilename}");
@@ -849,6 +849,7 @@ _canExecuteCommands = true;
             SaveAsViewModel _saveAsVM = Ioc.Default.GetRequiredService<SaveAsViewModel>();
             // The default project name and project folder path are from the active StoryModel
             _saveAsVM.ProjectName = StoryModel.ProjectFilename;
+            _saveAsVM.ParentFolder = StoryModel.ProjectFolder;
             _saveAsVM.ProjectPathName = StoryModel.ProjectPath;
 
             ContentDialogResult _result = await _saveAsDialog.ShowAsync();
@@ -860,9 +861,17 @@ _canExecuteCommands = true;
                     //Saves model to disk
                     SaveModel();
                     await WriteModel();
-
+                    if (Path.Combine(_saveAsVM.ProjectPathName, _saveAsVM.ProjectName) ==
+                        Path.Combine(StoryModel.ProjectFolder.Path, StoryModel.ProjectFile.Name))
+                    {
+                        //Stop SaveAs from crashing if the user sets the path to a place where the story is already located.
+                        Messenger.Send(new StatusChangedMessage(new("Save File As command completed", LogLevel.Info)));
+                        Logger.Log(LogLevel.Info, "User tried to as file to same file as parent.");
+                        _canExecuteCommands = true;
+                        return; 
+                    }
                     //Saves the current project folders and files to disk
-                    await StoryModel.ProjectFile.CopyAsync(_saveAsVM.ParentFolder, _saveAsVM.ProjectName);
+                    await StoryModel.ProjectFile.CopyAsync(_saveAsVM.ParentFolder, _saveAsVM.ProjectName,NameCollisionOption.ReplaceExisting);
 
                     //Update the StoryModel properties to use the newly saved copy
                     StoryModel.ProjectFilename = _saveAsVM.ProjectName;
@@ -903,8 +912,8 @@ _canExecuteCommands = true;
             {
                 PrimaryButtonText = "Yes",
                 SecondaryButtonText = "No",
-                Title = "Replace file",
-                Content = $"File {_saveAsVM.SaveAsProjectFolderPath} already exists. \n\nDo you want to replace it?",
+                Title = "Replace file?",
+                Content = $"File {Path.Combine(_saveAsVM.ProjectPathName, _saveAsVM.ProjectName)} already exists. \n\nDo you want to replace it?",
                 XamlRoot = GlobalData.XamlRoot
             };
             return await _replaceDialog.ShowAsync() == ContentDialogResult.Primary;
