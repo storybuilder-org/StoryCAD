@@ -804,12 +804,7 @@ _canExecuteCommands = true;
             if (_file != null)
             {
                 StoryWriter _wtr = Ioc.Default.GetRequiredService<StoryWriter>();
-                //TODO: WriteFile isn't working; file is empty
                 await _wtr.WriteFile(StoryModel.ProjectFile, StoryModel);
-                // Prevent updates to the remote version of the file until
-                // we finish making changes and call CompleteUpdatesAsync.
-                CachedFileManager.DeferUpdates(_file);
-                await CachedFileManager.CompleteUpdatesAsync(_file);
             }
         }
         catch (Exception _ex)
