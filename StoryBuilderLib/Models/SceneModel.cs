@@ -123,11 +123,11 @@ public class SceneModel : StoryElement
     }
     // Scene Development (Story Genius) data
 
-    private List<string> _scenePurposes;
-    public List<string> ScenePurposes
+    private List<string> _scenePurpose;
+    public List<string> ScenePurpose
     {
-        get => _scenePurposes;
-        set => _scenePurposes = value;
+        get => _scenePurpose;
+        set => _scenePurpose = value;
     }
 
     private string _valueExchange;
@@ -209,7 +209,7 @@ public class SceneModel : StoryElement
         SceneType = string.Empty;
         CastMembers = new List<string>();
         Remarks = string.Empty;
-        ScenePurposes = new List<string>();
+        ScenePurpose = new List<string>();
         ValueExchange = string.Empty;
         Protagonist = string.Empty;
         ProtagEmotion = string.Empty;
@@ -238,7 +238,7 @@ public class SceneModel : StoryElement
         SceneType = string.Empty;
         CastMembers = new List<string>();
         Remarks = string.Empty;
-        ScenePurposes = new List<string>();
+        ScenePurpose = new List<string>();
         ValueExchange = string.Empty;
         Protagonist = string.Empty;
         ProtagEmotion = string.Empty;

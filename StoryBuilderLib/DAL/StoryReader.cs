@@ -549,11 +549,11 @@ public class StoryReader : ObservableRecipient
                 if (_child.NodeName.Equals("Member"))
                     _scene.CastMembers.Add(_child.InnerText);
 
-        IXmlNode _scenePurpose = xn.SelectSingleNode("./ScenePurposes");
+        IXmlNode _scenePurpose = xn.SelectSingleNode("./ScenePurpose");
         if (_scenePurpose != null)
             foreach (IXmlNode _child in _scenePurpose.ChildNodes)
                 if (_child.NodeName.Equals("Purpose"))
-                    _scene.ScenePurposes.Add(_child.InnerText);
+                    _scene.ScenePurpose.Add(_child.InnerText);
 
         foreach (IXmlNode _attr in xn.Attributes)
         {

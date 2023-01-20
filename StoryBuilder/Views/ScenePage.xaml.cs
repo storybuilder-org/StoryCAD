@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics;
 using CommunityToolkit.Mvvm.DependencyInjection;
-using Elmah.Io.Client;
 using Microsoft.UI.Xaml.Controls;
 using StoryBuilder.Models;
 using StoryBuilder.ViewModels;
@@ -15,26 +14,35 @@ public sealed partial class ScenePage : BindablePage
     {
         InitializeComponent();
         DataContext = SceneVm;
+        SceneVm.ClearScenePurpose = ClearScenePurposeMethod;
+        SceneVm.AddScenePurpose = AddScenePurposeMethod;
     }
 
-    private void ScenePurpose_Checked(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+    /// <summary>
+    /// Clear the ScenePurpose SfComboBox SelectedItems property. 
+    /// 
+    /// This method is called via proxy from SceneViewModel,
+    /// because the binding to SelectedItems is read-only.
+    /// We therefore update the ComboBox here via callback.
+    /// </summary>
+    /// <param name="purpose"></param>
+    public void ClearScenePurposeMethod()
     {
-        CheckBox chk = sender as CheckBox;
-        StringSelection element = chk.DataContext as StringSelection;
-        if (element == null)
-            return;
-        element.Selection = true;
-        SceneVm.OnPropertyChanged(null, null);
+        ScenePurpose.SelectedItems.Clear();
     }
 
-    private void ScenePurpose_Unchecked(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+    /// <summary>
+    /// Add a 'purpose of scene' value to the ScenePurpose
+    /// SfComboBox SelectedItems property. 
+    /// 
+    /// This method is called via proxy from SceneViewModel,
+    /// because the binding to SelectedItems is read-only.
+    /// We therefore update the ComboBox here via callback.
+    /// </summary>
+    /// <param name="purpose"></param>
+    public void AddScenePurposeMethod(string purpose)
     {
-        CheckBox chk = sender as CheckBox;
-        StringSelection element = chk.DataContext as StringSelection;
-        if (element == null)
-            return;
-        element.Selection = false;
-        SceneVm.OnPropertyChanged(null, null);
+        ScenePurpose.SelectedItems.Add(purpose);
     }
 
     private void CastMember_Checked(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
@@ -55,5 +63,10 @@ public sealed partial class ScenePage : BindablePage
             return;
         StoryElement element = item as StoryElement;
         SceneVm.RemoveCastMember(element);
+    }
+
+    private void SelectionChanged(object sender, Syncfusion.UI.Xaml.Editors.ComboBoxSelectionChangedEventArgs e)
+    {
+        SceneVm.UpdateScenePurpose(sender, e);
     }
 }
