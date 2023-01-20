@@ -61,7 +61,8 @@ namespace StoryBuilder.Services
                 {
                     IsRunning = true;
 
-                    if (Thread.CancellationPending || !GlobalData.Preferences.AutoSave || _shellVM.StoryModel.StoryElements.Count == 0)
+                    if (Thread.CancellationPending || !GlobalData.Preferences.AutoSave || 
+                        _shellVM.StoryModel.StoryElements.Count == 0)
                     {
                         IsRunning = false;
                         return;
@@ -74,7 +75,8 @@ namespace StoryBuilder.Services
                 }
                 catch (Exception _ex)
                 {
-                    _logger.LogException(LogLevel.Error, _ex, "Error AutoSaving file in AutoSaveService.SaveFileTask()");
+                    _logger.LogException(LogLevel.Error, _ex, 
+                        "Error AutoSaving file in AutoSaveService.SaveFileTask()");
                 }
                 //Sleep Users Interval (in seconds)
                 System.Threading.Thread.Sleep(GlobalData.Preferences.AutoSaveInterval * 1000);
