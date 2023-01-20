@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:editors="using:Syncfusion.UI.Xaml.Editors"
     mc:Ignorable="d">
 
     <Grid>
@@ -12,8 +13,8 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <ComboBox Grid.Row="0" Name="Category" Header="Conflict Categories" MinWidth="200" SelectionChanged="Category_SelectionChanged" ItemsSource="{x:Bind ConflictTypes.Keys}" Margin="5"/>
-        <ComboBox Grid.Row="1" Name="SubCategory" Header="Subcategories" MinWidth="200" SelectionChanged="SubCategory_SelectionChanged" Margin="5"/>
-        <ComboBox Grid.Row="2" Name="Example" Header="Examples" MinWidth="200" Loaded="Example_Loaded" SelectionChanged="Example_SelectionChanged" Margin="5"/>
+        <editors:SfComboBox Grid.Row="0" Name="Category" Header="Conflict Categories" MinWidth="200" SelectionChanged="Category_SelectionChanged" ItemsSource="{x:Bind ConflictTypes.Keys}" Margin="5"/>
+        <editors:SfComboBox Grid.Row="1" Name="SubCategory" Header="Subcategories" MinWidth="200" SelectionChanged="SubCategory_SelectionChanged" Margin="5"/>
+        <editors:SfComboBox Grid.Row="2" Name="Example" Header="Examples" MinWidth="200" Loaded="Example_Loaded" SelectionChanged="Example_SelectionChanged" Margin="5"/>
     </Grid>
 </UserControl>

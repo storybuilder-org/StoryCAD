@@ -559,15 +559,9 @@ _canExecuteCommands = true;
         await new ContentDialog
         {
             Title = "File missing.",
-            Content =
-                """
-                This copy is missing a key file, if you are using a development copy,
-                this is expected and you do not need to do anything about this.
-                However if you are not a developer then report this as it should not happen!
-                
-                Please keep in mind that the following may have issues or possible errors
-                - error logging
-                """,
+            Content = "This copy is missing a key file, if you are working on a branch or fork this is expected and you do not need to do anything about this." +
+                      "\nHowever if you are not a developer then report this as it should not happen.\nThe following may have issues or possible errors\n" +
+                      "Syncfusion related items and error logging.",
             XamlRoot = GlobalData.XamlRoot,
             PrimaryButtonText = "Okay"
         }.ShowAsync();

@@ -19,7 +19,7 @@ namespace StoryBuilder.ViewModels;
 public class SceneViewModel : ObservableRecipient, INavigable
 {
     #region Fields
-    
+
     private readonly LogService _logger;
     private bool _changeable; // process property changes for this story element
     private bool _changed;    // this story element has changed
@@ -124,7 +124,7 @@ public class SceneViewModel : ObservableRecipient, INavigable
 
     // Scene development data (from Lisa Cron's Story Genius)
     private ObservableCollection<StringSelection> _scenePurposes;
-    public ObservableCollection<StringSelection> ScenePurposes 
+    public ObservableCollection<StringSelection> ScenePurposes
     {
         get => _scenePurposes;
         set => SetProperty(ref _scenePurposes, value);
@@ -383,8 +383,9 @@ public class SceneViewModel : ObservableRecipient, INavigable
         // this Scene.
         // If a purpose is saved in the model, set it as selected.
         ScenePurposes.Clear();
-        foreach (string purpose in ScenePurposeList) {
-            if (Model.ScenePurposes.Contains(purpose))
+        foreach (string purpose in ScenePurposeList)
+        {
+            if (Model.ScenePurpose.Contains(purpose))
                 ScenePurposes.Add(new StringSelection(purpose, true));
             else
                 ScenePurposes.Add(new StringSelection(purpose, false));
@@ -442,10 +443,10 @@ public class SceneViewModel : ObservableRecipient, INavigable
             Model.CastMembers.Clear();
             foreach (StoryElement _element in CastMembers)
                 Model.CastMembers.Add(_element.ToString());
-            Model.ScenePurposes.Clear();
+            Model.ScenePurpose.Clear();
             foreach (StringSelection _purpose in ScenePurposes)
                 if (_purpose.Selection)
-                    Model.ScenePurposes.Add(_purpose.StringName);
+                    Model.ScenePurpose.Add(_purpose.StringName);
             Model.ValueExchange = ValueExchange;
             Model.Protagonist = Protagonist;
             Model.ProtagEmotion = ProtagEmotion;
