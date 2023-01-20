@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
+using Windows.ApplicationModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
@@ -12,14 +13,13 @@ using StoryBuilder.Models;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.Services.Messages;
 using StoryBuilder.Services.Navigation;
-using Syncfusion.UI.Xaml.Editors;
 
 namespace StoryBuilder.ViewModels;
 
 public class SceneViewModel : ObservableRecipient, INavigable
 {
     #region Fields
-    
+
     private readonly LogService _logger;
     private bool _changeable; // process property changes for this story element
     private bool _changed;    // this story element has changed
@@ -123,12 +123,19 @@ public class SceneViewModel : ObservableRecipient, INavigable
     }
 
     // Scene development data (from Lisa Cron's Story Genius)
-
-    private ObservableCollection<string> _scenePurpose;
-    public ObservableCollection<string> ScenePurpose
+    private ObservableCollection<StringSelection> _scenePurposes;
+    public ObservableCollection<StringSelection> ScenePurposes
     {
-        get => _scenePurpose;
-        set => SetProperty(ref _scenePurpose, value);
+        get => _scenePurposes;
+        set => SetProperty(ref _scenePurposes, value);
+    }
+
+    // The current CurrentPurpose
+    private StringSelection _currentPurpose;
+    public StringSelection CurrentPurpose
+    {
+        get => _currentPurpose;
+        set => SetProperty(ref _currentPurpose, value);
     }
 
     private string _valueExchange;
@@ -318,7 +325,8 @@ public class SceneViewModel : ObservableRecipient, INavigable
     {
         SaveModel();    // Save the ViewModel back to the Story
     }
-    private void OnPropertyChanged(object sender, PropertyChangedEventArgs args)
+
+    public void OnPropertyChanged(object sender, PropertyChangedEventArgs args)
     {
         if (_changeable)
         {
@@ -343,7 +351,7 @@ public class SceneViewModel : ObservableRecipient, INavigable
         // The Scene tab's cast list switches between either a list of
         // selected cast members or all Characters in the StoryModel.
         // The current choice is CastSource.
-        // Initialize these lists for this scene.e
+        // Initialize these lists for this scene.
         CastMembers.Clear();
         foreach (string _member in Model.CastMembers)
         {
@@ -368,16 +376,19 @@ public class SceneViewModel : ObservableRecipient, INavigable
 
         ViewpointCharacter = Model.ViewpointCharacter;
 
-        // The ScenePurpose multi-select SfComboBox
-        // SelectedItems IList is read-only, so we
-        // use callback delegates to clear and add
-        // the scene's list of purposes from delegate
-        // methods declared in ScenePage.xaml.cs
-        ClearScenePurpose();
-        foreach (string _purpose in Model.ScenePurpose)
+        // The ScenePurposes ObservableCollection<StringSelection>
+        // supports multiple selected values (strings) because
+        // a Scene can and should do more than one thing. It
+        // uses a CheckBox to indicate that a purpose is true for
+        // this Scene.
+        // If a purpose is saved in the model, set it as selected.
+        ScenePurposes.Clear();
+        foreach (string purpose in ScenePurposeList)
         {
-            AddScenePurpose(_purpose);
-            //ScenePurpose.Add(purpose);
+            if (Model.ScenePurpose.Contains(purpose))
+                ScenePurposes.Add(new StringSelection(purpose, true));
+            else
+                ScenePurposes.Add(new StringSelection(purpose, false));
         }
 
         ValueExchange = Model.ValueExchange;
@@ -433,8 +444,9 @@ public class SceneViewModel : ObservableRecipient, INavigable
             foreach (StoryElement _element in CastMembers)
                 Model.CastMembers.Add(_element.ToString());
             Model.ScenePurpose.Clear();
-            foreach (string _purpose in ScenePurpose)
-                Model.ScenePurpose.Add(_purpose);
+            foreach (StringSelection _purpose in ScenePurposes)
+                if (_purpose.Selection)
+                    Model.ScenePurpose.Add(_purpose.StringName);
             Model.ValueExchange = ValueExchange;
             Model.Protagonist = Protagonist;
             Model.ProtagEmotion = ProtagEmotion;
@@ -462,6 +474,36 @@ public class SceneViewModel : ObservableRecipient, INavigable
         }
     }
 
+    //public void AddScenePurpose(StringSelection selectedPurpose)
+    //{
+    //    if (_changeable == false)
+    //        return;
+    //    foreach (StringSelection _purpose in ScenePurposes)
+    //    {
+    //        if (_purpose.Value == selectedPurpose.Value)
+    //        {
+    //            _purpose.Selection = true;
+    //            OnPropertyChanged();
+    //            Messenger.Send(new StatusChangedMessage(new($"Scene purpose {selectedPurpose.Value} added", LogLevel.Info, true)));
+    //        return;
+    //        }
+    //    }
+    //}
+
+    //public void RemoveScenePurpose(StringSelection selectedPurpose)
+    //{
+    //    if (_changeable == false)
+    //        return;
+    //    foreach (StringSelection selection in ScenePurposes)
+    //        if (selection.Value.Equals(selectedPurpose.Value))
+    //        {
+    //            selection.Selection = false;
+    //            OnPropertyChanged();
+    //            Messenger.Send(new StatusChangedMessage(new($"Purpose {selection.Value} removed", LogLevel.Info, true)));
+    //            return;
+    //        }
+    //}
+
     /// <summary>
     /// This method toggles the Scene Cast list from only the selected cast members
     /// to all characters (and vice versa.) The CharactersList is used to add or
@@ -482,30 +524,6 @@ public class SceneViewModel : ObservableRecipient, INavigable
                 Messenger.Send(new StatusChangedMessage(new("Show Selected Cast Members", LogLevel.Info, true)));
             }
         }
-    }
-
-    /// Delegate types and instances for updating the
-    /// ScenePurpose SfComboBox
-    public delegate void ClearScenePurposeDelegate();
-    public delegate void AddScenePurposeDelegate(string purpose);
-
-    public ClearScenePurposeDelegate ClearScenePurpose;
-    public AddScenePurposeDelegate AddScenePurpose;
-
-    /// <summary>
-    /// This method is called by the ScenePage.xaml.cs file when the ScenePurpose changes.
-    /// Besides updating the ViewModel's list of purposes, it also Calls SceneVm's
-    /// OnPropertyChanged to set the changed (dirty) flag if appropriate
-    /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="e"></param>
-    public void UpdateScenePurpose(object sender, ComboBoxSelectionChangedEventArgs e)
-    {
-        foreach (string _purpose in e.AddedItems)
-            ScenePurpose.Add(_purpose);
-        foreach (string _purpose in e.RemovedItems)
-            ScenePurpose.Remove(_purpose);
-        OnPropertyChanged(ScenePurpose, new PropertyChangedEventArgs("ScenePurpose"));
     }
 
     private bool CastMemberExists(string uuid)
@@ -650,7 +668,7 @@ public class SceneViewModel : ObservableRecipient, INavigable
         SceneType = string.Empty;
         CastMembers = new ObservableCollection<StoryElement>();
         ViewpointCharacter = string.Empty;
-        ScenePurpose = new ObservableCollection<string>();
+        ScenePurposes = new ObservableCollection<StringSelection>();
         ValueExchange = string.Empty;
         Remarks = string.Empty;
         Protagonist = string.Empty;
@@ -669,11 +687,14 @@ public class SceneViewModel : ObservableRecipient, INavigable
         Realization = string.Empty;
         Review = string.Empty;
         Notes = string.Empty;
+        ScenePurposes = new ObservableCollection<StringSelection>();
 
         Dictionary<string, ObservableCollection<string>> _lists = GlobalData.ListControlSource;
         ViewpointList = _lists["Viewpoint"];
         SceneTypeList = _lists["SceneType"];
         ScenePurposeList = _lists["ScenePurpose"];
+        foreach (string purpose in ScenePurposeList)
+            ScenePurposes.Add(new StringSelection(purpose, false));
         StoryRoleList = _lists["StoryRole"];
         EmotionList = _lists["Emotion"];
         GoalList = _lists["Goal"];
