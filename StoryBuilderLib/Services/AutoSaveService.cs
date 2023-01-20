@@ -14,6 +14,7 @@ namespace StoryBuilder.Services
     public class AutoSaveService
     {
         private LogService _logger = Ioc.Default.GetRequiredService<LogService>();
+        ShellViewModel _shellVM;
         private BackgroundWorker Thread = new() { WorkerSupportsCancellation = true };
         public DispatcherQueue Dispatcher;
         private bool IsRunning = false;
@@ -38,6 +39,7 @@ namespace StoryBuilder.Services
 
         public void StartService()
         {
+            _shellVM = Ioc.Default.GetRequiredService<ShellViewModel>();
             if (GlobalData.Preferences.AutoSave && !IsRunning)
             {
                 if (GlobalData.Preferences.AutoSaveInterval is > 61 or < 14) { GlobalData.Preferences.AutoSaveInterval = 30; }
@@ -58,24 +60,16 @@ namespace StoryBuilder.Services
                 try
                 {
                     IsRunning = true;
-                    ShellViewModel _ShellVM = Ioc.Default.GetRequiredService<ShellViewModel>();
-                    if (Thread.CancellationPending || !GlobalData.Preferences.AutoSave || _ShellVM.StoryModel.StoryElements.Count == 0)
+
+                    if (Thread.CancellationPending || !GlobalData.Preferences.AutoSave || _shellVM.StoryModel.StoryElements.Count == 0)
                     {
                         IsRunning = false;
                         return;
                     }
-                    if (_ShellVM.StoryModel.Changed)
+                    if (_shellVM.StoryModel.Changed)
                     {
-                        _logger.Log(LogLevel.Info, "Starting SaveFileTask (AutoSave)");
-                        //Save and write.
-                        Dispatcher.TryEnqueue(() => { _ShellVM.SaveModel(); }); //Runs on UI Thread, so we can figure out what page is open and save the correct VM.
-                        await _ShellVM.WriteModel(); //Write file to disk
-                         _ShellVM.StoryModel.Changed = false;
-                        _logger.Log(LogLevel.Info, "Wrote autosave file");
-
-                        //Change pen icon back to green so user can see all is good
-                        Dispatcher.TryEnqueue(() => { _ShellVM.ChangeStatusColor = Colors.Green; });
-                        _logger.Log(LogLevel.Info, "changed pen back to green.");
+                        // Save and write the model on the UI Thread,
+                        Dispatcher.TryEnqueue(async () =>  await _shellVM.SaveFile(true) ); 
                     }
                 }
                 catch (Exception _ex)

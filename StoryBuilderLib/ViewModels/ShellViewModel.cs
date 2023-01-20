@@ -753,34 +753,37 @@ _canExecuteCommands = true;
         Logger.Log(LogLevel.Info, "Open Story completed.");
         _canExecuteCommands = true;
     }
-    public async Task SaveFile()
+
+    /// <summary>
+    /// Save the currently active page from 
+    /// </summary>
+    /// <param name="autoSave"></param>
+    /// <returns></returns>
+    public async Task SaveFile(bool autoSave = false)
     {
+        string msg = autoSave ? "AutoSave" : "SaveFile command";
         if (DataSource == null || DataSource.Count == 0)
         {
             Messenger.Send(new StatusChangedMessage(new("You need to open a story first!", LogLevel.Info)));
-            Logger.Log(LogLevel.Info, "SaveFile command cancelled (DataSource was null or empty)");
+            Logger.Log(LogLevel.Info, $"{msg} cancelled (DataSource was null or empty)");
             return;
         }
-        Logger.Log(LogLevel.Trace, "Saving file");
         _canExecuteCommands = false;
-        Logger.Log(LogLevel.Info, "Executing SaveFile command");
         try
         {
             //TODO: SaveFile is both an AppButton command and called from NewFile and OpenFile. Split these.
-            Messenger.Send(new StatusChangedMessage(new("Save File command executing", LogLevel.Info)));
+            Messenger.Send(new StatusChangedMessage(new($"{msg} executing", LogLevel.Info)));
             SaveModel();
             await WriteModel();
-            Messenger.Send(new StatusChangedMessage(new("Save File command completed", LogLevel.Info)));
+            Messenger.Send(new StatusChangedMessage(new($"{msg} completed", LogLevel.Info)));
             StoryModel.Changed = false;
             ChangeStatusColor = Colors.Green;
         }
         catch (Exception _ex)
         {
-            Logger.LogException(LogLevel.Error, _ex, "Exception in SaveFile");
-            Messenger.Send(new StatusChangedMessage(new("Save File failed", LogLevel.Error)));
+            Logger.LogException(LogLevel.Error, _ex, $"Exception in {msg}");
+            Messenger.Send(new StatusChangedMessage(new($"{msg} failed", LogLevel.Error)));
         }
-
-        Logger.Log(LogLevel.Info, "SaveFile completed");
         _canExecuteCommands = true;
     }
 
@@ -794,10 +797,14 @@ _canExecuteCommands = true;
         {
             try //Updating the lost modified time
             {
-                OverviewModel _overview = (StoryModel.StoryElements.StoryElementGuids[StoryModel.ExplorerView[0].Uuid]) as OverviewModel;
+                OverviewModel _overview =
+                    (StoryModel.StoryElements.StoryElementGuids[StoryModel.ExplorerView[0].Uuid]) as OverviewModel;
                 _overview.DateModified = DateTime.Now.ToString("d");
             }
-            catch { Logger.Log(LogLevel.Warn, "Failed to update last modified date/time"); }
+            catch
+            {
+                Logger.Log(LogLevel.Warn, "Failed to update last modified date/time"); 
+            }
 
             await CreateProjectFile();
             StorageFile _file = StoryModel.ProjectFile;
