@@ -117,7 +117,7 @@ We are most grateful for all of them- especially those who toil in the arena:
 [22]:https://github.com/terrycox/StoryBuilder-2/blob/master/PRIVACY_POLICY.TXT
 [23]:https://github.com/terrycox/StoryBuilder-2/blob/master/LICENSE.TXT
 [24]:https://github.com/storybuilder-org/StoryBuilder-2/blob/master/ROADMAP.md
-[25]:https://github.com/storybuilder-org/StoryBuilder-2/blob/master/CHANGELOG.md.
+[25]:https://github.com/storybuilder-org/StoryBuilder-2/blob/master/CHANGELOG.md
 [26]:https://storybuilder.org/
 [27]:https://apps.microsoft.com/store/detail/storybuilder/9PLBNHZV1XM2?hl=en-us&gl=us
 

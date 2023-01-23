@@ -1,75 +1,54 @@
 # StoryBuilder Roadmap
 
-#### Last Updated: 2022-12-08
+#### Last Updated: 2023-01-23
 
-Our next Release will be 2.6.0.0. We're taking a holiday break toward the end of December, but
-still plan for a release date of around January first.
+Our next Release will be 2.7.0.0. We were very late with
+the 2.6.0.0 release, but will make this a short release in
+order to try to get back on track.
 
 We expect that this release will include the following features:
 
-### Expand market area to all stores
+### ARM64 Support (#109)
 
-Our Windows Store distribution was limited to 'flights', lists
-of beta users, for early testing. For some reason we also 
-restricted our market countries to the ones our testers were
-in, the US, Canada, and the UK.
+ARM64 support is planned for the next release. This will allow StoryBuilder to run on 
+ARM64 devices such as the Surface X Pro. We exect to see new, lower-cost Windows 11 computers
+in the comming year and this is a way to prepare for them.
 
-We've now expanded our market area to all countries, since
-we're no longer in that type of testing.
+We've been working on an ARM-native StoryBuilder for many months without a lot of progress,
+but with the release of Windows App SDK 1.2 and .NET7, both of which report improved ARM64
+support, we're confident that we can get this working.
 
-#### Status:
+### Improvements to Conflict Builder
 
-This was implemented in point release 2.5.1.0.
+Add additional subcategories of criminal conflucts, 
+'crimes of passion' and 'professional criminal', with 
+appropriate examples, and 'identify conflicts' as a new
+major category. 
+
+The existing examples will also be reviewed.
+ 
+### Problem Category
+
+We'll add a new field to the Problem class, ProblemCategory. 
+This is a non-editable drop-down list (SfComboBox) with 
+the following categories: complications, character flaws, subplots,
+antagonist, minor conflicts, relationship conflicts, societal
+conflicts, nature conflicts, and time conflicts.
+
+One of these will be the central main story conflict. 
 
 ### Produce first newsletter
 
-Although the bulk mailing process is not yet in place, we plan
-on producing and distributing the first StoryBuilder newsletter.
+The bulk mailing process is mostly in place, using MailChimp.
+We've started the newsletter email recipient list. The names
+we've collected from both software registrations and the website
+are in need of clean-up and verification, notably to remove
+junk email addresses. 
 
-An email newsletter has two components: creating and maintaining
-a list of recipients, and producing and formatting the content of
-the newsletter. For the newsletter to be viable, there's a need
-for regular quality product. For 
+The content for the first newsletter, besides the 2.6.0.0 changelog
+and this roadmap, are drafted, and a template for the newslett's
+being put together.
 
-### Remove SyncFusion ComboBoxes (#441)
-
-SyncFusion has been very good for us because it fixed a major problem with 
-Microsoft's ComboBoxes- the controls were rendered unacceptably clipped. 
-SyncFusion's also been generous with its open-source license.
-
-However, there's a problem with using the product: its makes it 
-difficult or prohibitative for others to fork and use StoryBuilder because 
-they need their own personal SyncFusion licenses. 
-(It should be noted that this is also a problem with elmah.io and secrets.)
-
-We'll test to insure that the Microsoft rendering issue is fixed, and if so,
-replace SyncFusion's ComboBoxes with Microsoft's again.
-
-There is one additional consideration: the Purpose of Scene is 
-a multi-valued ComboBox, which the Microsoft ComboBox doesn't 
-support. However, it should be possible to switch to a ListView 
-with checkboxes.
-
-### Purpose of Scene rewrite (#457)
-
-To fix the Purpose of Scene issue mentioned above, we need to
-replace the multi-value ComboBox with a (Microsoft) Listview 
-with a data template that contains a CheckBox. Checked 
-values in the ListViewItems can contain multiple values.
-
-### Revise Character Relationships 'Create a new relationship' (#458)
-
-When adding a new relationship, the relationship type is a
-non-editable ComboBox. Consequently, the new relationship
-type must be one of the entries in the list. The world's
-a bit more complicated than that. The user should be able
-to create a new relationship type at will.
-
-### Correct 'Contact Us' function on storybuilder.org
-
-The email us option on the website isn't configured properly.
-Correct it so that we can receive communications from 
-people visiting the website.
 
 ### Unit testing / additional unit tests (#17)
 Run all StoryBuilderTest scripts from Test Explorer as a part of 
@@ -94,28 +73,6 @@ changing an existing outline, printing a report, etc. These can be
 based on file comparisons from program output to previously verified program output. Smoke tests are vital for the purpose
 of CI in automating PR reviews. This will come in a future release.
 
-### Implement a Print Manager for printed reports (#157) 
-
-A Print Manager dialog should be part of the Print Report menu. The ability to
-select a printer and specify its options is essential for 
-StoryBuilder print reports. The current mechanism, printing to the default 
-printer, is a work-around, but not a long-term solution.
-
-This was a reported WInUI issue:
-https://github.com/microsoft/CsWinRT/issues/968#issuecomment-918923141
-
-It was requested on the Windows SDK API product board:
-https://portal.productboard.com/winappsdk/1-windows-app-sdk/c/50-support
-
-As of 11/15/2022 (with WinAppSdk 1.2) The Print Manager is available and works
-with Windows 11 but doesn't work with Windows 10. We have a sample project which
-uses it we can adapt for our purposes.
-
-We will explore two options. One is to add the print manager but
-disable it (with a status message) if the user is not on Windows 11.
-The other is to trace the status of the Windows 10 fix and schedule
-according.
-
 ### Codebase cleanup (#439)
 
 The codebase cleanup from  previous release continues. For consistency 
@@ -129,7 +86,10 @@ ReSharper reports on.
 ## Ongoing and Deferred Issues
 
 Some of these are unresolved issues, others, we've deferrred
-due to lack of manpower. They're all on our plate.
+due to lack of manpower. These are things we think will 
+make StoryBuilder feature complete, although we don't think
+that's the end of StoryBuilder development, but rather mark
+the place where you our users tell us what features you want.
 
 ### Sidebar index for StoryBuilder User Manual
 
@@ -139,18 +99,8 @@ always visible. We're working on this for the next release (issue # xxx).
 
 #### Status: 
 
-Not started.
+In progress. 
 
-### ARM64 Support (#109)
-
-ARM64 support is planned for the next release. This will allow StoryBuilder to run on 
-ARM64 devices such as the Surface X Pro. We exect to see new, lower-cost Windows 11 computers
-in the comming year and this is a way to prepare for them.
-
-We've been working on an ARM-native StoryBuilder for many months without a lot of progress,
-but with the release of Windows App SDK 1.2 and .NET7, both of which report improved ARM64
-support, If time is available we'll work on this in 2.6, but don't
-hold your breath.
 
 ### Drag and Drop is buggy (#312) (Planned for Release 2.6)
 
