@@ -1,5 +1,88 @@
 # StoryBuilder ChangeLog
 
+## Release 2.6.0.0
+
+As of January 24, 2023, we've rolled out Release 2.6.0.0.
+This release was late due to a number of issues as well
+as holiday and school schedules.
+
+### New Features
+
+#### Expand market area to all stores
+
+We've expanded our distribution to include all
+English-based countries in our  Microsoft Store
+market.
+
+(This was done in the 2.5.1.0 point release, which
+fixed issues with AutoSave and the WebView2 runtime, 
+used in our WebPage Story Element.)
+
+#### Remove SfComboBox (#464) 
+
+This change results in the replacement of SyncFusion's
+SfComboBox with the Microsoft ComboBox. This will make it 
+easier for developers to work with the codebase because they
+won't need their own SyncFusion licenses in order to do so.
+
+#### Back out remove SfComboBox (#477)
+
+We rolled back the SfCombobox replacement due to problems
+with the Microsoft ComboBox control; we were getting bind
+failures. This is still under investigation but we note
+that there appear to be quite a few open problems relating
+to ComboBox on the WinUI GitHub.
+
+#### Purpose of Scene rewrite (#457)
+
+Purpose of Scene was also an SfComboBox, because it allows
+the selection of multiple values (a scene should do more than
+one thing.) It's been converted to a custome control based on
+a Listview with radio buttons. Since this change doesn't
+depend on the Microsoft ComboBox, we're retained it.
+
+#### Revise Character Relationships 'Create a new relationship' (#458)
+
+Previously, the list of character Relations (relationship types,
+such as father -> son or boss -> employee) was fixed. This
+doesn't work, since the number of possible relastionships
+is large and dynamic. The list was made editable so that users
+can add their own relationship types.
+
+#### Implement a Print Manager for printed reports (#157)
+
+We added a Print Manager as a part of the Print Report menu.
+This allows a user to select a printer and specify its 
+StoryBuilder print report options. 
+
+As of 11/15/2022 (with WinAppSdk 1.2) the Print Manager is available and works
+with Windows 11 but doesn't work with Windows 10. 
+We disable the Print Manager with a status message if
+the if the user is not on Windows 11. Windows 10 users
+can continue to set their default printer before generating
+print reports.
+
+We'll continue to track the status of a fix for Windows 10
+users.
+ 
+#### Codebase Cleanup (#439) (ongoing)
+
+We're continuing to work on refactorings to
+improve our codebase and will continue to do so 
+indefinately. 
+
+### Bug fixes
+
+The following bugsd were addressed in this release:
+
+#### Update Deletion Service to catch potential errors (#470, #472)
+#### Track Version in .STBX file (#469)
+#### Improve filename checking (#471)
+#### Add system info to log (#473)
+#### Remove cached deferred write (#474)
+#### Autosave fixes (#476)
+#### Fix to SaveAs (#475)
+
 ## Release 2.5.1.0
 
 Fixed some issues with Autosave
@@ -67,7 +150,7 @@ Increased the maximum time between autosaves from 30 to 60 seconds and minimum f
 ### Remarks
 
 Several things planned for this release didn't make it and will be rolled forward
-to future releases. These includee
+to future releases. These include
 
 
 ## Release 2.4.0.0
