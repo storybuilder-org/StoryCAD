@@ -28,9 +28,9 @@ public sealed partial class Shell
     {
         try
         {
-            Ioc.Default.GetRequiredService<AutoSaveService>().Dispatcher = DispatcherQueue.GetForCurrentThread();
             InitializeComponent();
             DataContext = ShellVm;
+            Ioc.Default.GetRequiredService<AutoSaveService>().Dispatcher = DispatcherQueue.GetForCurrentThread();
             Loaded += Shell_Loaded;
         }
         catch (Exception ex)

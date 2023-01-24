@@ -49,7 +49,7 @@ public class StoryWriter
         _outFile = output;
         _xml = new XmlDocument();
         CreateStoryDocument();
-        //      write RTF if converting. 
+        //write RTF if converting. 
         ParseStoryElementsAsync();
         ParseExplorerView();
         ParseNarratorView();
@@ -83,7 +83,7 @@ public class StoryWriter
         XmlNode _stb = _xml.CreateElement("StoryBuilder");
         //Create an attribute.
         XmlAttribute _attr = _xml.CreateAttribute("Version");
-        _attr.Value = "2.0";
+        _attr.Value = GlobalData.Version; //Write Version data
         Debug.Assert(_stb.Attributes != null, "_stb.Attributes != null");
         _stb.Attributes.Append(_attr);
         _xml.AppendChild(_stb);
@@ -100,7 +100,8 @@ public class StoryWriter
 
     private void ParseStoryElementsAsync()
     {
-        foreach (StoryElement _element in _model.StoryElements)
+        StoryElementCollection tempCollection = _model.StoryElements; //Prevents rare error of collection was modified.
+        foreach (StoryElement _element in tempCollection)
         {
             // ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault
             switch (_element.Type)
@@ -569,8 +570,8 @@ public class StoryWriter
             _castList.AppendChild(_castMember);
         }
         _scene.AppendChild(_castList);
-        XmlNode _scenePurposeList = _xml.CreateElement("ScenePurposes");
-        foreach (string _item in _rec.ScenePurposes)
+        XmlNode _scenePurposeList = _xml.CreateElement("ScenePurpose");
+        foreach (string _item in _rec.ScenePurpose)
         {
             XmlElement _purpose = _xml.CreateElement("Purpose");
             _purpose.AppendChild(_xml.CreateTextNode(_item));

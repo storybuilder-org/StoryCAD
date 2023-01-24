@@ -559,15 +559,9 @@ _canExecuteCommands = true;
         await new ContentDialog
         {
             Title = "File missing.",
-            Content =
-                """
-                This copy is missing a key file, if you are using a development copy,
-                this is expected and you do not need to do anything about this.
-                However if you are not a developer then report this as it should not happen!
-                
-                Please keep in mind that the following may have issues or possible errors
-                - error logging
-                """,
+            Content = "This copy is missing a key file, if you are working on a branch or fork this is expected and you do not need to do anything about this." +
+                      "\nHowever if you are not a developer then report this as it should not happen.\nThe following may have issues or possible errors\n" +
+                      "Syncfusion related items and error logging.",
             XamlRoot = GlobalData.XamlRoot,
             PrimaryButtonText = "Okay"
         }.ShowAsync();
@@ -753,40 +747,43 @@ _canExecuteCommands = true;
         Logger.Log(LogLevel.Info, "Open Story completed.");
         _canExecuteCommands = true;
     }
-    public async Task SaveFile()
+
+    /// <summary>
+    /// Save the currently active page from 
+    /// </summary>
+    /// <param name="autoSave"></param>
+    /// <returns></returns>
+    public async Task SaveFile(bool autoSave = false)
     {
+        string msg = autoSave ? "AutoSave" : "SaveFile command";
         if (DataSource == null || DataSource.Count == 0)
         {
             Messenger.Send(new StatusChangedMessage(new("You need to open a story first!", LogLevel.Info)));
-            Logger.Log(LogLevel.Info, "SaveFile command cancelled (DataSource was null or empty)");
+            Logger.Log(LogLevel.Info, $"{msg} cancelled (DataSource was null or empty)");
             return;
         }
-        Logger.Log(LogLevel.Trace, "Saving file");
         _canExecuteCommands = false;
-        Logger.Log(LogLevel.Info, "Executing SaveFile command");
         try
         {
             //TODO: SaveFile is both an AppButton command and called from NewFile and OpenFile. Split these.
-            Messenger.Send(new StatusChangedMessage(new("Save File command executing", LogLevel.Info)));
+            Messenger.Send(new StatusChangedMessage(new($"{msg} executing", LogLevel.Info)));
             SaveModel();
             await WriteModel();
-            Messenger.Send(new StatusChangedMessage(new("Save File command completed", LogLevel.Info)));
+            Messenger.Send(new StatusChangedMessage(new($"{msg} completed", LogLevel.Info)));
             StoryModel.Changed = false;
             ChangeStatusColor = Colors.Green;
         }
         catch (Exception _ex)
         {
-            Logger.LogException(LogLevel.Error, _ex, "Exception in SaveFile");
-            Messenger.Send(new StatusChangedMessage(new("Save File failed", LogLevel.Error)));
+            Logger.LogException(LogLevel.Error, _ex, $"Exception in {msg}");
+            Messenger.Send(new StatusChangedMessage(new($"{msg} failed", LogLevel.Error)));
         }
-
-        Logger.Log(LogLevel.Info, "SaveFile completed");
         _canExecuteCommands = true;
     }
 
     /// <summary>
     /// Write the current StoryModel to the backing project file
-    /// </summary>
+    /// </summary>|
     public async Task WriteModel()
     {
         Logger.Log(LogLevel.Info, $"In WriteModel, file={StoryModel.ProjectFilename}");
@@ -794,22 +791,21 @@ _canExecuteCommands = true;
         {
             try //Updating the lost modified time
             {
-                OverviewModel _overview = (StoryModel.StoryElements.StoryElementGuids[StoryModel.ExplorerView[0].Uuid]) as OverviewModel;
+                OverviewModel _overview =
+                    (StoryModel.StoryElements.StoryElementGuids[StoryModel.ExplorerView[0].Uuid]) as OverviewModel;
                 _overview.DateModified = DateTime.Now.ToString("d");
             }
-            catch { Logger.Log(LogLevel.Warn, "Failed to update last modified date/time"); }
+            catch
+            {
+                Logger.Log(LogLevel.Warn, "Failed to update last modified date/time"); 
+            }
 
             await CreateProjectFile();
             StorageFile _file = StoryModel.ProjectFile;
             if (_file != null)
             {
                 StoryWriter _wtr = Ioc.Default.GetRequiredService<StoryWriter>();
-                //TODO: WriteFile isn't working; file is empty
                 await _wtr.WriteFile(StoryModel.ProjectFile, StoryModel);
-                // Prevent updates to the remote version of the file until
-                // we finish making changes and call CompleteUpdatesAsync.
-                CachedFileManager.DeferUpdates(_file);
-                await CachedFileManager.CompleteUpdatesAsync(_file);
             }
         }
         catch (Exception _ex)
@@ -849,6 +845,7 @@ _canExecuteCommands = true;
             SaveAsViewModel _saveAsVM = Ioc.Default.GetRequiredService<SaveAsViewModel>();
             // The default project name and project folder path are from the active StoryModel
             _saveAsVM.ProjectName = StoryModel.ProjectFilename;
+            _saveAsVM.ParentFolder = StoryModel.ProjectFolder;
             _saveAsVM.ProjectPathName = StoryModel.ProjectPath;
 
             ContentDialogResult _result = await _saveAsDialog.ShowAsync();
@@ -860,9 +857,17 @@ _canExecuteCommands = true;
                     //Saves model to disk
                     SaveModel();
                     await WriteModel();
-
+                    if (Path.Combine(_saveAsVM.ProjectPathName, _saveAsVM.ProjectName) ==
+                        Path.Combine(StoryModel.ProjectFolder.Path, StoryModel.ProjectFile.Name))
+                    {
+                        //Stop SaveAs from crashing if the user sets the path to a place where the story is already located.
+                        Messenger.Send(new StatusChangedMessage(new("Save File As command completed", LogLevel.Info)));
+                        Logger.Log(LogLevel.Info, "User tried to as file to same file as parent.");
+                        _canExecuteCommands = true;
+                        return; 
+                    }
                     //Saves the current project folders and files to disk
-                    await StoryModel.ProjectFile.CopyAsync(_saveAsVM.ParentFolder, _saveAsVM.ProjectName);
+                    await StoryModel.ProjectFile.CopyAsync(_saveAsVM.ParentFolder, _saveAsVM.ProjectName,NameCollisionOption.ReplaceExisting);
 
                     //Update the StoryModel properties to use the newly saved copy
                     StoryModel.ProjectFilename = _saveAsVM.ProjectName;
@@ -903,8 +908,8 @@ _canExecuteCommands = true;
             {
                 PrimaryButtonText = "Yes",
                 SecondaryButtonText = "No",
-                Title = "Replace file",
-                Content = $"File {_saveAsVM.SaveAsProjectFolderPath} already exists. \n\nDo you want to replace it?",
+                Title = "Replace file?",
+                Content = $"File {Path.Combine(_saveAsVM.ProjectPathName, _saveAsVM.ProjectName)} already exists. \n\nDo you want to replace it?",
                 XamlRoot = GlobalData.XamlRoot
             };
             return await _replaceDialog.ShowAsync() == ContentDialogResult.Primary;

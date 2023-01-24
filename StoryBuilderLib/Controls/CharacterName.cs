@@ -11,8 +11,7 @@ public sealed class CharacterName : ComboBox
     public CharacterName()
     {
         DefaultStyleKey = typeof(ComboBox);
-        Loaded += CharacterName_Loaded;
-        CornerRadius = new(4);
+        Loaded += CharacterName_Loaded; 
     }
 
     private void CharacterName_Loaded(object o, RoutedEventArgs routedEventArgs)

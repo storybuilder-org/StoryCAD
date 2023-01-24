@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-using CommunityToolkit.Mvvm.DependencyInjection;
-using Elmah.Io.Client;
+﻿using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml.Controls;
 using StoryBuilder.Models;
 using StoryBuilder.ViewModels;

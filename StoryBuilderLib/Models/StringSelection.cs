@@ -18,7 +18,7 @@ namespace StoryBuilder.Models
             get => _stringName;
             set => _stringName = value;
         }
-        
+
         private bool _selection;
         public bool Selection
         {
