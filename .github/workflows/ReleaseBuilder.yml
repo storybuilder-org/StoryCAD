@@ -78,6 +78,7 @@ jobs:
       run: |
         msbuild $env:Solution_Name /p:Configuration=Release /p:Platform=x64 /p:UapAppxPackageBuildMode=$env:Appx_Package_Build_Mode /p:AppxBundle=$env:Appx_Bundle /p:PackageCertificateKeyFile="D:\a\StoryBuilder-2\StoryBuilder-2\GitHubActionsWorkflow.pfx" /p:AppxPackageDir="$env:Appx_Package_Dir" /p:GenerateAppxPackageOnBuild=true
         msbuild $env:Solution_Name /p:Configuration=Release /p:Platform=x86 /p:UapAppxPackageBuildMode=$env:Appx_Package_Build_Mode /p:AppxBundle=$env:Appx_Bundle /p:PackageCertificateKeyFile="D:\a\StoryBuilder-2\StoryBuilder-2\GitHubActionsWorkflow.pfx" /p:AppxPackageDir="$env:Appx_Package_Dir" /p:GenerateAppxPackageOnBuild=true
+        msbuild $env:Solution_Name /p:Configuration=Release /p:Platform=arm64 /p:UapAppxPackageBuildMode=$env:Appx_Package_Build_Mode /p:AppxBundle=$env:Appx_Bundle /p:PackageCertificateKeyFile="D:\a\StoryBuilder-2\StoryBuilder-2\GitHubActionsWorkflow.pfx" /p:AppxPackageDir="$env:Appx_Package_Dir" /p:GenerateAppxPackageOnBuild=true
       env:
         Appx_Bundle: Never
         Appx_Package_Build_Mode: SideloadOnly
