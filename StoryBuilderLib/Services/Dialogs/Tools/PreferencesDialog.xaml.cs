@@ -28,18 +28,34 @@ public sealed partial class PreferencesDialog : Page
         DataContext = PreferencesVm;
         Version.Text = GlobalData.Version;
         SetChangelog();
-        
+
         //TODO: Put this in a VM and make this data get logged at start up with some more system info.
         if (Debugger.IsAttached)
         {
+            //Get Device Info such as architecture and .NET Version
             CPUArchitecture.Text = "CPU ARCH: " + RuntimeInformation.ProcessArchitecture;
             OSArchitecture.Text = "OS ARCH: " + RuntimeInformation.OSArchitecture;
-            OSInfo.Text = "OS Info: Windows Build " + Environment.OSVersion.VersionString.Replace("Microsoft Windows NT 10.0.","").Replace(".0","");
+            NetVer.Text = ".NET Version: " + RuntimeInformation.FrameworkDescription;
+
+            try
+            {
+                //Get Windows Build and Version
+                OSInfo.Text = "Windows Build: " + Environment.OSVersion.Version.Build;
+                if (Convert.ToInt32(Environment.OSVersion.Version.Build) >= 22000)
+                {
+                    OSInfo.Text += " (Windows 11)";
+                }
+                else { OSInfo.Text += " (Windows 10)"; }
+            }
+            catch { OSInfo.Text = "OS Info:Error";  }
+
+
+            //Detect if 32-bit or 64-bit process (I'm not sure if it's possible to )
             if (IntPtr.Size == 4) { AppArchitecture.Text = "We are running as a 32 bit process."; }
             else if (IntPtr.Size == 8) { AppArchitecture.Text = "We are running as a 64 bit process."; }
             else { AppArchitecture.Text = $"UNKNOWN ARCHITECTURE!\nIntPtr was {IntPtr.Size}, expected 4 or 8."; }
         }
-        else
+        else //Remove this because no debugger is attached.
         {
             PivotView.Items.Remove(Dev);
         }
