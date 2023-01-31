@@ -1,4 +1,4 @@
-#### Menu Bar ####
+### Menu Bar ###
 Menu Bar <br/>
 
 The Menu bar is located just below the title bar on the StoryBuilder form and provides access to StoryBuilder’s common tasks. <br/>

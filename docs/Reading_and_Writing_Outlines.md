@@ -1,9 +1,9 @@
-### Reading and Writing Outlines ###
+## Reading and Writing Outlines ##
 Reading and Writing Outlines <br/>
 
 The File Menu button displays a drop-down menu of file options: <br/>
 
-MISSING IMAGE: C:/dev/src/User Manual/Screenshots/File Menu.png <br/>
+![](File-Menu.png)
 
 
 A StoryBuilder outline is a single file with a file extension of .stbx: for instance, ‘The Maltese Falcon.stbx.’   A StoryBuilder file can be moved, copied, etc. <br/>

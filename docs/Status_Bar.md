@@ -1,4 +1,4 @@
-#### Status Bar ####
+### Status Bar ###
 Status Bar <br/>
 
 ![](Status-Bar.png)
@@ -12,7 +12,7 @@ Allows you to switch between Story Explorer and Story Narrator views. <br/>
 
 Story Explorer is the view in which you create and edit your outline. The order and arrangement of story elements in the Navigation Pane is entirely under your control. <br/>
 
-Story Narrator is your outline’s scenes arranged into the order you wish to tell your story in. <br/>
+Story Narrator is a separate display of your outline’s Scene Story Elements arranged into the order you wish to tell your story in. <br/>
 
 Status Message <br/>
 
@@ -26,4 +26,4 @@ Changed Indicator <br/>
 
 ![](Changed-Indicator.png)
 
-The Changed Indicator displays red if any editing has been done to the outline and green if not. It’s a reminder to save your work. <br/>
+The Changed Indicator displays red if any editing has been done to the outline and green if not. It’s a reminder to save your work. It’s also a command button which will save your outline if you click it. <br/>
