@@ -17,5 +17,5 @@ The next group of icons (to the right of the divider) operate directly on the it
 
 	•	Move Story Element to Trashcan <br/>
 	•	Restore Story Element from Trashcan  <br/>
-	•	Add Scene to Story Narrative View (see Story Explorer and Story Narrator Views)Story Explorer and Story Narrator Views <br/>
+	•	Add Scene to Story Narrative View (see Story Explorer and Story Narrator Views) <br/>
 

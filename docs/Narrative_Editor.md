@@ -1,11 +1,11 @@
-###### Narrative Editor ######
+## Narrative Editor ##
 Narrative Editor <br/>
 As is discussed in Story Explorer and Story Narrator Views, the sequence of scenes you choose to tell your story in (it’s narrative order) will frequently be different than the order you create the scenes as you develop your outline in Story Explorer. <br/>
 You can move a scene from Story Explorer to Story Narrator at any time with the aid of the Navigation Pane Flyout Command Bar’s ‘Move to Narrative’ button, but another tool, Narrative Editor, can help you quickly develop your Narrator View by moving scenes en masse. This might be done late in the outline’s development, for instance. <br/>
 
 Once you open the Narrative Editor, it will look similar to this. On one side you will the Story Explorer View (The view where you plan your story) and the Narrator View (This is the view that shows your story as it’s told.)  <br/>
 
-![](Clipboard-Image.png)
+![](Clipboard-Image-132.png)
 
 The Narrative view is different from the Explorer view and contains only Scenes and Sections. Along the bottom there are several buttons: <br/>
 

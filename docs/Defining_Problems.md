@@ -20,9 +20,24 @@ An inner problem is some want or need within the character himself, a need to gr
 
 It's often constructive to use StoryBuilder to define both an external and an internal problem for your protagonist, with separate Problem forms for each  of them. Both problems help to shape the story's plot. There’s even a Create New Story template for this: <br/>
 
-![](Clipboard-Image-101.png)
+![](Clipboard-Image-145.png)
 
 The outer problem asks 'what does the character want?'  The inner problem asks 'why does he want it?'  The outer problem is tangible. The inner problem is intangible, invisible.  The outer problem faces an external adversary.  The inner problem is Man against Himself, usually with something to decide or discover. The outer problem is solved when (win or loose) something is accomplished.  The inner problem is solved when the character grows or changes, or fails to do so.  The inner problem is related to theme. The two problems are connected because your protagonist must come to grips with his inner demon before he can solve the external, outer problem. <br/>
+Conflict <br/>
+
+While we often think we’d like to live our lives with a minimum of conflict, we’re fascinated by the stuff, and our fiction absolutely depends on it.   <br/>
+
+Fictional conflict is easy to define: it’s what prevents your character from achieving his or her goal. Picking the right conflicts is arguably the most important decision you’ll make in designing your story. If there’s no struggle, there’s no story. Robert McKee puts it this way: Nothing moves forward in a story except through conflict. <br/>
+
+Remember that conflict is only one third of the triangle of Problem. Goal and Motivation, for both your protagonist and antagonist, are equally important.  <br/>
+
+Not all conflict will suit your needs. It’s easy to swing towards either of two directions.  At the one extreme is senseless violence, with Black Bart villains and a need for your hero to wear tights and a cape. At the other lies the absence of meaningful conflict, replaced with shallow conflicts which are easily resolved and lead to Pollyanna outcomes.  The right conflicts adds complexity and layers of meaning to your story.  <br/>
+Crimes of passion and crimes of opportunity are different than the other types of crime. The legal definition of a crime of passion is that it’s committed ‘in a moment of passion’ in response to some provocation. We all known provocation, and have acted in ways we regret in response to provocation. It’s easy to see ourselves  committing  some crimes:  beating up a bully who ‘deserves it’ or the person who cuts us off in traffic. We can also all identify with someone stealing, in order to feed a starving child. <br/>
+The other crime subcategories are different because they’re deliberate and premeditated. We somehow feel that they’re more organic, a part of the individual’s nature, and it’s interesting to note that those committing these other categories often have characteristics of narcissistic personality disorder.  <br/>
+But it’s also worth noting that every one of us possess some basic traits of narcissism, such as being self-focused, having a lack of empathy, and desiring power and control, in one degree or another.  We are all potential criminals. <br/>
+When thinking about conflict in your fiction, you may want to consider two things. <br/>
+
+Likewise, solving a conflict doesn’t always resolve a story: if so, many of our novels would be short stories. One problem often leads to another (often less tractable) one. This is what makes The Old Man and The Sea such a beautifully plotted tale. <br/>
 Complications <br/>
 
  Just as in real life,  one problem often leads to another.  These complications must be causally linked, just as scenes must be. Complications make things worse for your protagonist, escalate conflict, and build toward your story’s climax.  <br/>
@@ -31,13 +46,14 @@ A good example of this is found in Hemingway's The Old Man and the Sea.  This no
 
 Rather than arrange these problems in a list: <br/>
 
-![](Clipboard-Image-102.png)
+![](Clipboard-Image-146.png)
 
 You may want arrange them as children of the original problem, which won’t be solved until the complications are: <br/>
 
-![](Clipboard-Image-103.png)
+![](Clipboard-Image-147.png)
 
 Where possible, complications should be ordered to make things progressively worse for the protagonist. By the end of the shark attack, the marlin is nothing but a head and tail and skeleton; things can’t get much worse for Santiago. <br/>
+Conflicts of start at one level and devolve into a more serious one: ‘it’s not a war until the guns start firing.’  Finding your way from inciting incident through middle story to climax is  the process of finding complications, and escalating conflicts is one approach to doing so.  The escalation can occur for many reasons: a character gets tipped over the edge, a ticking clock goes off, a secondary character does something rash, a dropped dish is mistaken for a gunshot. <br/>
 Subplots <br/>
 
 Complications and inner conflicts are two ways in which a story is made richer and more complex by containing more than one problem. A story can also contain problems distinct from the main story problem and which run parallel to it. These often center around characters other than the protagonist.  <br/>
@@ -96,7 +112,7 @@ Protagonist  declines morally <br/>
 The protagonist must start with some good qualities and hope of a good outcome, but at the moment of crisis he declines.  The seeds of the negative trait which dooms him must be present from the start. <br/>
 
 Protagonist is defeated <br/>
-The sympathetic protagonist has a desirable goal, but is defeated in the end.  This is true tragedy.  The *Conflict Type* is often 'Person vs. Fate' or 'Person vs. Society.' <br/>
+The sympathetic protagonist has a desirable goal, but is defeated in the end.  This is true tragedy.  The Conflict Type is often 'Person vs. Fate' or 'Person vs. Society.' <br/>
 
 Villain is successful <br/>
 Frequently the villain is a Trickster who succeeds through cleverness.  This outcome is common in comedies. <br/>

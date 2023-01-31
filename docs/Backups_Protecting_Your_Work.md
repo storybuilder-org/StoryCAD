@@ -14,5 +14,5 @@ Backups are suffixed with a date timestamp, for example: <br/>
 
 To revert to a backup, simply click on the .stbx file of your choice and use File | Save As to save it back where you want it. If you specify the same parent folder as your working outline, it’ll overlay it. <br/>
 
-See "Preferences" in this manual for further information. <br/>
+See Preferences in this manual for further information. <br/>
 

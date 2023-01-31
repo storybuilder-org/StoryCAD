@@ -1,4 +1,4 @@
-###### Topic Information ######
+## Topic Information ##
 Topic Information <br/>
 
 The Topic Information sub-menu on the Tools menu contains a list containing information specific to certain topic categories: <br/>
@@ -7,7 +7,7 @@ The Topic Information sub-menu on the Tools menu contains a list containing info
 
 A topic, once selected, may contain sub-topics: <br/>
 
-![](Clipboard-Image-94.png)
+![](Clipboard-Image-134.png)
 .  <br/>
 
 Information on some of the topic categories follows. <br/>

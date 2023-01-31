@@ -17,16 +17,16 @@ All we need to do is to change the skeleton plot point into one which presents t
 
 There are other tools to help you plot- for example, Stock Scenes: <br/>
 
-![](Research-Danger-Callse-Stock-Scenes.png)
+![](Danger-Callse-Stock-Scenes.png)
 
 Stock Scenes are exactly what their name implies: scenes that you’ve seen so often you recognize them instantly.   We used ‘The chase leads into an ambush’ as the setup to our ‘Leonard's impulsiveness lets Lacas capture him’ problem. <br/>
 We didn’t call it that, of course, and in fact the capture idea we started with didn’t work: capture implies escape, and it just didn’t fit. Instead, our ‘The chase leads into an ambush became this: <br/>
 
-![](Research-Danger-Calls-Shootout.png)
+![](Danger-Calls-Shootout-2.png)
 
 Although the Scene Type we selected was ‘Action scene’, this is actually the Climax. If we go back to our Master Plots Three Act Play, we’ll find one more piece: <br/>
 
-![](Research-Danger-Calls-Denouement.png)
+![](Danger-Calls-Denouement.png)
 
 We’ve added two scenes after Shootout, ‘Tony updates Leonard on the aftermath’ and ‘Tony confronts Jack Chun’, both of which constitute the denouement for our story. The  confrontation scene, we think, closes a plot hole, how the bad guys came to set up the ambush, namely, a double-cross by Chun. The Problem, ‘Leonard’s impulsiveness lets Lacas capture him’, turns out not to be the second problem all.  ‘Jack Chun double-crosses the detectives.’  Might be a better title, and one question to address is why the double-cross: the question of motive.  <br/>
 
