@@ -55,6 +55,7 @@ public class LogService : ILogService
                 LoggingRule consoleRule = new("*", NLog.LogLevel.Info, consoleTarget);
                 config.LoggingRules.Add(consoleRule);
             }
+
             LogManager.Configuration = config;
             Logger = LogManager.GetCurrentClassLogger();
         }
