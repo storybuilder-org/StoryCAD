@@ -20,7 +20,6 @@ using StoryBuilder.ViewModels.Tools;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -28,17 +27,12 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Windows.Storage;
 using Windows.Storage.Pickers;
-using Microsoft.UI.Dispatching;
 using StoryBuilder.Services;
 using WinRT;
 using GuidAttribute = System.Runtime.InteropServices.GuidAttribute;
 using Octokit;
 using ProductHeaderValue = Octokit.ProductHeaderValue;
 using StoryBuilder.Services.Backend;
-using static System.Formats.Asn1.AsnWriter;
-using System.Diagnostics.Metrics;
-using Ubiety.Dns.Core.Records;
-using Ubiety.Dns.Core;
 
 namespace StoryBuilder.ViewModels;
 
@@ -661,7 +655,7 @@ _canExecuteCommands = true;
         }
     }
 
-
+    
     /// <summary>
     /// Opens a file picker to let the user chose a .stbx file and loads said file
     /// If fromPath is specified then the picker is skipped.
@@ -720,6 +714,15 @@ _canExecuteCommands = true;
 
             StoryReader _rdr = Ioc.Default.GetRequiredService<StoryReader>();
             StoryModel = await _rdr.ReadFile(StoryModel.ProjectFile);
+
+            //Check the file we loaded actually has StoryBuilder Data.
+            if (StoryModel.StoryElements.Count == 0)
+            {
+                Messenger.Send(new StatusChangedMessage(new("Unable to open file (No Story Elements found)", LogLevel.Warn, true)));
+                _canExecuteCommands = true;  // unblock other commands
+                return;
+
+            }
 
             if (GlobalData.Preferences.BackupOnOpen) { await Ioc.Default.GetRequiredService<BackupService>().BackupProject(); }
 
