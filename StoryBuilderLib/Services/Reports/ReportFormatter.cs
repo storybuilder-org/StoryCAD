@@ -110,11 +110,15 @@ public class ReportFormatter
             if (String.IsNullOrEmpty(problem.Name)) { sb.Replace("@Title", ""); }
             else { sb.Replace("@Title", problem.Name); }
 
-            sb.Replace("@ProblemType", problem.ProblemType);
+            if (String.IsNullOrEmpty(problem.ProblemType)) { sb.Replace("@ProblemType", ""); }
+            else { sb.Replace("@ProblemType", problem.ProblemType); }
 
             if (String.IsNullOrEmpty(problem.ConflictType)) { sb.Replace("@ConflictType", ""); }
             else { sb.Replace("@ConflictType", problem.ConflictType); }
-            
+
+            if (String.IsNullOrEmpty(problem.ProblemCategory)) { sb.Replace("@ProblemCategory", ""); }
+            else { sb.Replace("@ProblemCategory", problem.ProblemCategory); }
+
             if (String.IsNullOrEmpty(problem.Subject)) { sb.Replace("@Subject", ""); }
             else { sb.Replace("@Subject", problem.Subject); }
 

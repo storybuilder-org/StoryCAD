@@ -60,7 +60,12 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         set => SetProperty(ref _problemType, value);
     }
 
-    private string _conflictType;
+    private string _problemCategory;
+    public string ProblemCategory
+    {
+        get => _problemCategory;
+        set => SetProperty(ref _problemCategory, value);
+    }
 
     private string _subject;
     public string Subject
@@ -76,6 +81,7 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         set => SetProperty(ref _problemSource, value);
     }
 
+    private string _conflictType;
     public string ConflictType
     {
         get => _conflictType;
@@ -192,7 +198,7 @@ public class ProblemViewModel : ObservableRecipient, INavigable
     public ProblemModel Model
     {
         get => _model;
-        set => SetProperty(ref _model, value);
+        set => _model = value;
     }
 
     public RelayCommand ConflictCommand { get; }
@@ -234,6 +240,7 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         Name = Model.Name;
         ProblemType = Model.ProblemType;
         ConflictType = Model.ConflictType;
+        ProblemCategory = Model.ProblemCategory;
         Subject = Model.Subject;
         StoryQuestion = Model.StoryQuestion;
         ProblemSource = Model.ProblemSource;
@@ -266,6 +273,7 @@ public class ProblemViewModel : ObservableRecipient, INavigable
             Model.Name = Name;
             Model.ProblemType = ProblemType;
             Model.ConflictType = ConflictType;
+            Model.ProblemCategory = ProblemCategory;
             Model.Subject = Subject;
             Model.ProblemSource = ProblemSource;
             Model.Protagonist = Protagonist ?? string.Empty;
@@ -336,6 +344,7 @@ public class ProblemViewModel : ObservableRecipient, INavigable
     // ListControls sources
     public ObservableCollection<string> ProblemTypeList;
     public ObservableCollection<string> ConflictTypeList;
+    public ObservableCollection<string> ProblemCategoryList;
     public ObservableCollection<string> SubjectList;
     public ObservableCollection<string> ProblemSourceList;
     public ObservableCollection<string> GoalList;
@@ -374,6 +383,7 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         Dictionary<string, ObservableCollection<string>> _lists = GlobalData.ListControlSource;
         ProblemTypeList = _lists["ProblemType"];
         ConflictTypeList = _lists["ConflictType"];
+        ProblemCategoryList = _lists["ProblemCategory"];
         SubjectList = _lists["ProblemSubject"];
         ProblemSourceList = _lists["ProblemSource"];
         GoalList = _lists["Goal"];

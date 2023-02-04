@@ -276,6 +276,9 @@ public class StoryReader : ObservableRecipient
                 case "ConflictType":
                     _prb.ConflictType = _attr.InnerText;
                     break;
+                case "ProblemCategory":
+                    _prb.ProblemCategory = _attr.InnerText;
+                    break;
                 case "Subject":
                     _prb.Subject = _attr.InnerText;
                     break;

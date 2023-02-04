@@ -32,7 +32,7 @@ public class TrashCanViewModel : ObservableRecipient, INavigable
     public TrashCanModel Model
     {
         get => _model;
-        set => SetProperty(ref _model, value);
+        set => _model = value;
     }
 
     #endregion

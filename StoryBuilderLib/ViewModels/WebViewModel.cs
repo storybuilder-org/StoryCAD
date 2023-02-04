@@ -91,7 +91,7 @@ public class WebViewModel : ObservableRecipient, INavigable
     public WebModel Model
     {
         get => _model;
-        set => SetProperty(ref _model, value);
+        set => _model = value;
     }
 
     #endregion
