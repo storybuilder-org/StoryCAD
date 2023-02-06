@@ -8,6 +8,8 @@
 
     Conflict Type       @ConflictType
 
+    Conflict Category   @ProblemCategory
+
     Subject:            @Subject
 
     Story Question:

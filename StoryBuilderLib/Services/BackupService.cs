@@ -16,7 +16,8 @@ namespace StoryBuilder.Services
 {
     public class BackupService
     {
-        private BackgroundWorker timeBackupWorker = new(){WorkerSupportsCancellation = true,WorkerReportsProgress = false};
+        private BackgroundWorker timeBackupWorker = new()
+            {WorkerSupportsCancellation = true,WorkerReportsProgress = false};
         private LogService Log = Ioc.Default.GetService<LogService>();
         ShellViewModel Shell = Ioc.Default.GetService<ShellViewModel>();
 

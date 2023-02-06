@@ -266,7 +266,7 @@ public class SceneViewModel : ObservableRecipient, INavigable
     public SceneModel Model
     {
         get => _model;
-        set => SetProperty(ref _model, value);
+        set => _model = value;
     }
 
     private string _vpCharTip;
