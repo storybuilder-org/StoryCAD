@@ -740,7 +740,7 @@ public class ShellViewModel : ObservableRecipient
             { Ioc.Default.GetRequiredService<BackupService>().StartTimedBackup(); }
 
             ShowHomePage();
-            if (GlobalData.Preferences.AutoSave) { _autoSaveService.StartService(); }
+            if (GlobalData.Preferences.AutoSave) { _autoSaveService.StartAutoSave(); }
             string _msg = $"Opened project {StoryModel.ProjectFilename}";
             Logger.Log(LogLevel.Info, _msg);
         }
