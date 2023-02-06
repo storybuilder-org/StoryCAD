@@ -13,6 +13,12 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<None Update=".env">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+
+	<ItemGroup>
 		<AppxManifest Include="Package.appxmanifest">
 			<SubType>Designer</SubType>
 		</AppxManifest>
@@ -35,6 +41,8 @@
 	<ItemGroup>
 		<PackageReference Include="Microsoft.WindowsAppSDK" Version="1.2.230118.102" />
 		<PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.25281-preview" />
+		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.0.0-preview2" />
+		<PackageReference Include="CommunityToolkit.WinUI.UI.Controls.Core" Version="7.1.2" />
 		<PackageReference Include="MSTest.TestAdapter">
 			<Version>3.0.2</Version>
 		</PackageReference>
@@ -47,4 +55,9 @@
 		</PackageReference>
 		<Manifest Include="$(ApplicationManifest)" />
 	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\StoryBuilderLib\StoryBuilderLib.csproj" />
+	</ItemGroup>
+
 </Project>
