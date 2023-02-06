@@ -84,12 +84,22 @@ namespace StoryBuilderTests
         /// will be used such as when the application is launched to open a specific file.
         /// </summary>
         /// <param name="args">Details about the launch request and process.</param>
-        protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
+        protected override async void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
         {
-            _log.Log(LogLevel.Info, "StoryBuilder.App launched");
+            _log.Log(LogLevel.Info, "StoryBuilderTests.App launched");
 
             string pathMsg = string.Format("Configuration data location = " + GlobalData.RootDirectory);
             _log.Log(LogLevel.Info, pathMsg);
+
+            // Load Preferences
+            PreferencesService pref = Ioc.Default.GetService<PreferencesService>();
+            await pref.LoadPreferences(GlobalData.RootDirectory);
+
+            await ProcessInstallationFiles();
+
+            await LoadControls(GlobalData.RootDirectory);
+            await LoadLists(GlobalData.RootDirectory);
+            await LoadTools(GlobalData.RootDirectory);
 
             Microsoft.VisualStudio.TestPlatform.TestExecutor.UnitTestClient.CreateDefaultUI();
 
@@ -155,6 +165,86 @@ namespace StoryBuilderTests
                     .AddSingleton<TraitsViewModel>()
                     // Complete 
                     .BuildServiceProvider());
+        }
+
+        private async Task ProcessInstallationFiles()
+        {
+            try
+            {
+                _log.Log(LogLevel.Info, "Processing Installation files");
+                await Ioc.Default.GetService<InstallationService>().InstallFiles(); //Runs InstallationService.InstallFiles()
+            }
+            catch (Exception ex)
+            {
+                _log.LogException(LogLevel.Error, ex, "Error loading Installation files");
+                AbortApp();
+            }
+        }
+
+        private async Task LoadControls(string path)
+        {
+            int subTypeCount = 0;
+            int exampleCount = 0;
+            try
+            {
+                _log.Log(LogLevel.Info, "Loading Controls.ini data");
+                ControlLoader loader = Ioc.Default.GetService<ControlLoader>();
+                await loader.Init(path);
+                _log.Log(LogLevel.Info, "ConflictType Counts");
+                _log.Log(LogLevel.Info,
+                    $"{GlobalData.ConflictTypes.Keys.Count} ConflictType keys created");
+                foreach (ConflictCategoryModel type in GlobalData.ConflictTypes.Values)
+                {
+                    subTypeCount += type.SubCategories.Count;
+                    exampleCount += type.SubCategories.Sum(subType => type.Examples[subType].Count);
+                }
+                _log.Log(LogLevel.Info,
+                    $"{subTypeCount} Total ConflictSubType keys created");
+                _log.Log(LogLevel.Info,
+                    $"{exampleCount} Total ConflictSubType keys created");
+            }
+            catch (Exception ex)
+            {
+                _log.LogException(LogLevel.Error, ex, "Error loading Controls.ini");
+                AbortApp();
+            }
+        }
+        private async Task LoadLists(string path)
+        {
+            try
+            {
+                _log.Log(LogLevel.Info, "Loading Lists.ini data");
+                ListLoader loader = Ioc.Default.GetService<ListLoader>();
+                GlobalData.ListControlSource = await loader.Init(path);
+                _log.Log(LogLevel.Info,
+                    $"{GlobalData.ListControlSource.Keys.Count} ListLoader.Init keys created");
+            }
+            catch (Exception ex)
+            {
+                _log.LogException(LogLevel.Error, ex, "Error loading Lists.ini");
+                AbortApp();
+            }
+        }
+
+        private async Task LoadTools(string path)
+        {
+            try
+            {
+                _log.Log(LogLevel.Info, "Loading Tools.ini data");
+                ToolLoader loader = Ioc.Default.GetService<ToolLoader>();
+                await loader.Init(path);
+                _log.Log(LogLevel.Info, $"{GlobalData.KeyQuestionsSource.Keys.Count} Key Questions created");
+                _log.Log(LogLevel.Info, $"{GlobalData.StockScenesSource.Keys.Count} Stock Scenes created");
+                _log.Log(LogLevel.Info, $"{GlobalData.TopicsSource.Count} Topics created");
+                _log.Log(LogLevel.Info, $"{GlobalData.MasterPlotsSource.Count} Master Plots created");
+                _log.Log(LogLevel.Info, $"{GlobalData.DramaticSituationsSource.Count} Dramatic Situations created");
+
+            }
+            catch (Exception ex)
+            {
+                _log.LogException(LogLevel.Error, ex, "Error loading Tools.ini");
+                AbortApp();
+            }
         }
 
         private void OnUnhandledException(object sender, UnhandledExceptionEventArgs e)
