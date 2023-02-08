@@ -1,5 +1,47 @@
 # StoryBuilder ChangeLog
 
+## Release 2.7.0.0
+
+As of February x, 2023, we've rolled out Release 2.7.0.0.
+
+### New Features
+
+#### ARM64 Support (#109)
+
+StoryBuilder now builds for three platforms: Intel x64 and x86, and ARM64.
+This supports Windows 11 running on ARM-based systems such as Surface Pro X.
+
+#### Improvements to Conflict Builder
+
+We've added  additional subcategories of criminal conflucts and
+expanded existing category/subcategories with more examples.
+
+#### Problem Category
+
+We've added a new field to the Problem class, ProblemCategory. 
+This is a non-editable drop-down list (SfComboBox) which describes
+the purpose of the problem in terms of story structure.
+
+#### Unit testing / additional unit tests (#17)
+
+We've got the StoryBuilderTest executing test scripts from Test Explorer.
+It's not yet running as a part of PR review prior to merge. We'll get 
+that added in the next (2.8.0.0) release.
+
+As time permits, tests need to be generated to fill in code coverage, 
+especially for user interactions.
+
+### Bug fixes
+
+### Ongoing and Deferred Issues
+
+#### Produce first newsletter
+
+We are up on MailChimp, and have content drafted for the first newsletter, 
+which is the 2.6.0.0 changelog and the 2.7 roadmap. We also have additional
+posts drafted, and a template with logo for the newsletter is being 
+put together.
+
 ## Release 2.6.0.0
 
 As of January 24, 2023, we've rolled out Release 2.6.0.0.
