@@ -1,4 +1,4 @@
-##### Move Story Elements #####
+#### Move Story Elements ####
 Move Story Elements <br/>
 
 ![](Move-Story-Elements.png)

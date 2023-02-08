@@ -1,4 +1,4 @@
-##### Show/Hide Navigation Pane #####
+#### Show/Hide Navigation Pane ####
 1 <br/>
 Show/Hide Navigation Pane <br/>
 

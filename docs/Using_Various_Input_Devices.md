@@ -4,8 +4,8 @@ Using Various Input Devices <br/>
 You can use a wide range of input devices with StoryBuilder:  keyboard, virtual keyboard, pen or stylus, mouse, and touch, depending on your computer or tablet ‘s capabilities. <br/>
 Invoke pop-up menus using the following actions: <br/>
 
-*Input* <br/>
-*Action* <br/>
+Input <br/>
+Action <br/>
 Mouse <br/>
 Right click <br/>
 Keyboard <br/>

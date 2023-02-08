@@ -69,7 +69,7 @@ public class FolderViewModel : ObservableRecipient, INavigable
     public FolderModel Model
     {
         get => _model;
-        set => SetProperty(ref _model, value);
+        set => _model = value;
     }
 
     #endregion

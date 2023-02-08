@@ -20,7 +20,6 @@ using StoryBuilder.ViewModels.Tools;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -28,17 +27,12 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Windows.Storage;
 using Windows.Storage.Pickers;
-using Microsoft.UI.Dispatching;
 using StoryBuilder.Services;
 using WinRT;
 using GuidAttribute = System.Runtime.InteropServices.GuidAttribute;
 using Octokit;
 using ProductHeaderValue = Octokit.ProductHeaderValue;
 using StoryBuilder.Services.Backend;
-using static System.Formats.Asn1.AsnWriter;
-using System.Diagnostics.Metrics;
-using Ubiety.Dns.Core.Records;
-using Ubiety.Dns.Core;
 
 namespace StoryBuilder.ViewModels;
 
@@ -395,8 +389,8 @@ public class ShellViewModel : ObservableRecipient
             StoryModel.ProjectFolder = await StorageFolder.GetFolderFromPathAsync(dialogVM.ProjectPath);
             StoryModel.ProjectPath = StoryModel.ProjectFolder.Path;
 
-            OverviewModel _overview = new(Path.GetFileNameWithoutExtension(dialogVM.ProjectName), StoryModel) 
-                { DateCreated = DateTime.Today.ToString("d"), Author = GlobalData.Preferences.Name };
+            OverviewModel _overview = new(Path.GetFileNameWithoutExtension(dialogVM.ProjectName), StoryModel)
+            { DateCreated = DateTime.Today.ToString("d"), Author = GlobalData.Preferences.Name };
             StoryNodeItem _overviewNode = new(_overview, null) { IsExpanded = true, IsRoot = true };
             StoryModel.ExplorerView.Add(_overviewNode);
             TrashCanModel _trash = new(StoryModel);
@@ -467,30 +461,30 @@ public class ShellViewModel : ObservableRecipient
                         @"problems], the final battle[climax scene] erupts, and the[protagonist] finally resolves the " +
                         @"conflict[outcome].";
                     break;
-        }
-        GlobalData.MainWindow.Title = $"StoryBuilder - Editing {dialogVM.ProjectName!.Replace(".stbx", "")}";
-        SetCurrentView(StoryViewType.ExplorerView);
-        //TODO: Set expand and is selected?
+            }
+            GlobalData.MainWindow.Title = $"StoryBuilder - Editing {dialogVM.ProjectName!.Replace(".stbx", "")}";
+            SetCurrentView(StoryViewType.ExplorerView);
+            //TODO: Set expand and is selected?
 
             Ioc.Default.GetRequiredService<UnifiedVM>().UpdateRecents(Path.Combine(dialogVM.ProjectPath, dialogVM.ProjectName)); //adds item to recent
 
-        // Save the new project
+            // Save the new project
             await SaveFile();
-        if (GlobalData.Preferences.BackupOnOpen) { await MakeBackup(); }
-        Ioc.Default.GetRequiredService<BackupService>().StartTimedBackup();
-        Messenger.Send(new StatusChangedMessage(new("New project command executing", LogLevel.Info, true)));
-    }
+            if (GlobalData.Preferences.BackupOnOpen) { await MakeBackup(); }
+            Ioc.Default.GetRequiredService<BackupService>().StartTimedBackup();
+            Messenger.Send(new StatusChangedMessage(new("New project command executing", LogLevel.Info, true)));
+        }
         catch (Exception _ex)
         {
             Logger.LogException(LogLevel.Error, _ex, "Error creating new project");
             Messenger.Send(new StatusChangedMessage(new("File make failure.", LogLevel.Error)));
         }
-_canExecuteCommands = true;
+        _canExecuteCommands = true;
     }
 
     public async Task MakeBackup()
-{
-    await Ioc.Default.GetRequiredService<BackupService>().BackupProject();
+    {
+        await Ioc.Default.GetRequiredService<BackupService>().BackupProject();
     }
 
     public void TreeViewNodeClicked(object selectedItem)
@@ -624,8 +618,8 @@ _canExecuteCommands = true;
     /// </summary>
     public void SaveModel()
     {
-        if (SplitViewFrame.CurrentSourcePageType is null){ return;}
-        
+        if (SplitViewFrame.CurrentSourcePageType is null) { return; }
+
         Logger.Log(LogLevel.Trace, $"SaveModel- Page type={SplitViewFrame.CurrentSourcePageType}");
 
         switch (SplitViewFrame.CurrentSourcePageType.ToString())
@@ -721,6 +715,15 @@ _canExecuteCommands = true;
             StoryReader _rdr = Ioc.Default.GetRequiredService<StoryReader>();
             StoryModel = await _rdr.ReadFile(StoryModel.ProjectFile);
 
+            //Check the file we loaded actually has StoryBuilder Data.
+            if (StoryModel.StoryElements.Count == 0)
+            {
+                Messenger.Send(new StatusChangedMessage(new("Unable to open file (No Story Elements found)", LogLevel.Warn, true)));
+                _canExecuteCommands = true;  // unblock other commands
+                return;
+
+            }
+
             if (GlobalData.Preferences.BackupOnOpen) { await Ioc.Default.GetRequiredService<BackupService>().BackupProject(); }
 
             if (StoryModel.ExplorerView.Count > 0)
@@ -729,12 +732,15 @@ _canExecuteCommands = true;
                 Messenger.Send(new StatusChangedMessage(new("Open Story completed", LogLevel.Info)));
             }
 
+            if (GlobalData.Preferences.AutoSave) { _autoSaveService.StopService(); }
+
             GlobalData.MainWindow.Title = $"StoryBuilder - Editing {StoryModel.ProjectFilename.Replace(".stbx", "")}";
             new UnifiedVM().UpdateRecents(Path.Combine(StoryModel.ProjectFolder.Path, StoryModel.ProjectFile.Name));
-            if (GlobalData.Preferences.TimedBackup) { Ioc.Default.GetRequiredService<BackupService>().StartTimedBackup(); }
+            if (GlobalData.Preferences.TimedBackup) 
+            { Ioc.Default.GetRequiredService<BackupService>().StartTimedBackup(); }
 
             ShowHomePage();
-            if (GlobalData.Preferences.AutoSave) { _autoSaveService.StartService(); }
+            if (GlobalData.Preferences.AutoSave) { _autoSaveService.StartAutoSave(); }
             string _msg = $"Opened project {StoryModel.ProjectFilename}";
             Logger.Log(LogLevel.Info, _msg);
         }
@@ -797,7 +803,7 @@ _canExecuteCommands = true;
             }
             catch
             {
-                Logger.Log(LogLevel.Warn, "Failed to update last modified date/time"); 
+                Logger.Log(LogLevel.Warn, "Failed to update last modified date/time");
             }
 
             await CreateProjectFile();
@@ -864,10 +870,10 @@ _canExecuteCommands = true;
                         Messenger.Send(new StatusChangedMessage(new("Save File As command completed", LogLevel.Info)));
                         Logger.Log(LogLevel.Info, "User tried to as file to same file as parent.");
                         _canExecuteCommands = true;
-                        return; 
+                        return;
                     }
                     //Saves the current project folders and files to disk
-                    await StoryModel.ProjectFile.CopyAsync(_saveAsVM.ParentFolder, _saveAsVM.ProjectName,NameCollisionOption.ReplaceExisting);
+                    await StoryModel.ProjectFile.CopyAsync(_saveAsVM.ParentFolder, _saveAsVM.ProjectName, NameCollisionOption.ReplaceExisting);
 
                     //Update the StoryModel properties to use the newly saved copy
                     StoryModel.ProjectFilename = _saveAsVM.ProjectName;
@@ -1093,12 +1099,12 @@ _canExecuteCommands = true;
                     _problem.Notes = _scenes[0].Notes;
                 }
                 else foreach (MasterPlotScene _scene in _scenes)
-                {
-                    SceneModel _child = new(StoryModel) { Name = _scene.SceneTitle, Remarks = "See Notes.", Notes = _scene.Notes };
-                    // add the new SceneModel & node to the end of the problem's children 
-                    StoryNodeItem _newNode = new(_child, _problemNode);
-                    _newNode.IsSelected = true;
-                }
+                    {
+                        SceneModel _child = new(StoryModel) { Name = _scene.SceneTitle, Remarks = "See Notes.", Notes = _scene.Notes };
+                        // add the new SceneModel & node to the end of the problem's children 
+                        StoryNodeItem _newNode = new(_child, _problemNode);
+                        _newNode.IsSelected = true;
+                    }
 
                 Messenger.Send(new StatusChangedMessage(new($"MasterPlot {_masterPlotName} inserted", LogLevel.Info, true)));
                 ShowChange();
@@ -1738,7 +1744,7 @@ _canExecuteCommands = true;
                 Width = 500,
                 PrimaryButtonText = "Confirm",
                 SecondaryButtonText = "Cancel"
-            }; 
+            };
             if (await _contentDialog.ShowAsync() == ContentDialogResult.Secondary) { _delete = false; }
         }
 
@@ -2172,7 +2178,7 @@ _canExecuteCommands = true;
 
     private async Task OpenNarrativeTool()
     {
-        if (VerifyToolUse(false,false))
+        if (VerifyToolUse(false, false))
         {
             ContentDialog _dialog = new()
             {

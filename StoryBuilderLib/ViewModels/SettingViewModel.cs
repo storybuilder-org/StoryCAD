@@ -151,7 +151,7 @@ public class SettingViewModel : ObservableRecipient, INavigable
     public SettingModel Model
     {
         get => _model;
-        set => SetProperty(ref _model, value);
+        set => _model = value;
     }
 
     #endregion

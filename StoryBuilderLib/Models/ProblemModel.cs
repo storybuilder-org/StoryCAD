@@ -21,6 +21,13 @@ public class ProblemModel : StoryElement
         set => _conflictType = value;
     }
 
+    private string _problemCategory;
+    public string ProblemCategory
+    {
+        get => _problemCategory;
+        set => _problemCategory = value;
+    }
+
     private string _subject;
     public string Subject
     {
@@ -146,6 +153,7 @@ public class ProblemModel : StoryElement
     {
         ProblemType = string.Empty;
         ConflictType = string.Empty;
+        ProblemCategory = string.Empty;
         Subject = string.Empty;
         ProblemSource = string.Empty;
         StoryQuestion = string.Empty;
@@ -167,6 +175,7 @@ public class ProblemModel : StoryElement
     {
         ProblemType = string.Empty;
         ConflictType = string.Empty;
+        ProblemCategory = string.Empty;
         Subject = string.Empty;
         ProblemSource = string.Empty;
         StoryQuestion = string.Empty;

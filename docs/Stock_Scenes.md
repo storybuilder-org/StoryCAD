@@ -1,4 +1,4 @@
-###### Stock Scenes ######
+### Stock Scenes ###
 Stock Scenes <br/>
 
 ![](Tools-Stock-Scenes.png)

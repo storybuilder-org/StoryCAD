@@ -253,6 +253,9 @@ public class StoryWriter
         _attr = _xml.CreateAttribute("ConflictType");
         _attr.Value = _rec.ConflictType;
         _prob.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("ProblemCategory");
+        _attr.Value = _rec.ProblemCategory;
+        _prob.Attributes.Append(_attr);
         _attr = _xml.CreateAttribute("Subject");
         _attr.Value = _rec.Subject;
         _prob.Attributes.Append(_attr);
