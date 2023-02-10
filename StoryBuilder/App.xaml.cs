@@ -30,10 +30,13 @@
   using WinUIEx;
   using AppInstance = Microsoft.Windows.AppLifecycle.AppInstance;
   using UnhandledExceptionEventArgs = Microsoft.UI.Xaml.UnhandledExceptionEventArgs;
+using Windows.ApplicationModel.Activation;
+using Windows.Storage;
+  using LaunchActivatedEventArgs = Microsoft.UI.Xaml.LaunchActivatedEventArgs;
 
   namespace StoryBuilder;
 
-public partial class App : Application
+public partial class App
 {
     private const string HomePage = "HomePage";
     private const string OverviewPage = "OverviewPage";
@@ -88,6 +91,24 @@ public partial class App : Application
         //If this instance is the first, then we will register it, otherwise we will get info about the other instance.
         AppInstance _MainInstance = AppInstance.FindOrRegisterForKey("main"); //Get main instance
         _MainInstance.Activated += ActivateMainInstance;
+
+        var activatedEventArgs = AppInstance.GetCurrent().GetActivatedEventArgs();
+        if (activatedEventArgs.Kind == ExtendedActivationKind.File)
+        {
+            if (activatedEventArgs.Data is IFileActivatedEventArgs fileArgs)
+            {
+                //If StoryBuilder isn't already open, calling OpenFile() this early will cause a crash.
+                try
+                {
+                    string FilePath = fileArgs.Files.FirstOrDefault().Path; //This is the path to the file that was used to invoke StoryBuilder
+                    Ioc.Default.GetRequiredService<ShellViewModel>().OpenFile(FilePath);
+                }
+                catch
+                {
+                    GlobalData.FilePathToLaunch = fileArgs.Files.FirstOrDefault().Path; //This will be launched when ShellVM has finished initalising
+                }
+            }
+        }
 
         //Redirect to other instance if one exists, otherwise continue initializing this instance.
         if (!_MainInstance.IsCurrent)
@@ -177,7 +198,7 @@ public partial class App : Application
         // Obtain keys if defined
         try
         {
-            Doppler doppler = new Doppler();
+            Doppler doppler = new();
             Doppler keys = await doppler.FetchSecretsAsync();
             BackendService backend = Ioc.Default.GetService<BackendService>();
             await backend.SetConnectionString(keys);
