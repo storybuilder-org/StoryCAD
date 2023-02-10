@@ -27,6 +27,14 @@ We'll also continue to code new scripts or change old
 ones, making it a routine part of the development process.
 
 
+### Add auto-update to StoryBuilder (#479)
+
+Windows Store provides an ability for a Store app to be aware of any updates
+and to download and install them. The update capability is described here: 
+
+https://learn.microsoft.com/en-us/windows/uwp/packaging/self-install-package-updates#mandatory-package-updates
+
+
 ### Codebase cleanup (#496)
 
 The codebase cleanup process continues. For consistency 
