@@ -84,3 +84,15 @@ interactive MySQL commands and editing the MailChimp list manually.
 Additionally, the MailChimp email addresses aren't currently validated.
 
 Adding back-end code and use the MailChimp API, automate these processes.
+
+### Create issues from elmah.io GitHub app integration #132
+
+We ship log events to the elmah.io server for error logging. 
+This provides the ability to use advanced elmah.io features. 
+One of these is elmah.io's GitHub App, which can create automatically 
+create GitHub issues from errors logged to elmah.io.
+
+We tried this before with no success; it's time to try again.
+
+More information here:
+https://docs.elmah.io/elmah-io-apps-github/
