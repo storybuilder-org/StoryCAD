@@ -67,6 +67,7 @@ public class StoryWriter
             try
             {
                 _xml.Save(_writer);
+                await _writer.FlushAsync();
             }
             catch (Exception _ex) { _logger.LogException(Services.Logging.LogLevel.Error,_ex, "Error in write file"); }
         }
