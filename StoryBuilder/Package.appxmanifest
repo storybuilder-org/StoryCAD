@@ -9,7 +9,7 @@
   <Identity
     Name="34432StoryBuilder.StoryBuilder"
     Publisher="CN=Jake"
-    Version="2.5.0.0" />
+    Version="2.8.0.0" />
 
   <Properties>
     <DisplayName>StoryBuilder</DisplayName>
@@ -48,7 +48,7 @@
             </uap:SupportedFileTypes>
             <uap:DisplayName>StoryBuilder Outline File</uap:DisplayName>
             <uap:EditFlags OpenIsSafe="true"/>
-            <uap:Logo>HomeLogo.png</uap:Logo>
+            <uap:Logo>Assets\HomeLogo.png</uap:Logo>
           </uap:FileTypeAssociation>
         </uap:Extension>
       </Extensions>

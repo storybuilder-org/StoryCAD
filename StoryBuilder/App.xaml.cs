@@ -32,6 +32,7 @@
   using UnhandledExceptionEventArgs = Microsoft.UI.Xaml.UnhandledExceptionEventArgs;
 using Windows.ApplicationModel.Activation;
 using Windows.Storage;
+  using Microsoft.UI.Dispatching;
   using LaunchActivatedEventArgs = Microsoft.UI.Xaml.LaunchActivatedEventArgs;
 
   namespace StoryBuilder;
@@ -92,31 +93,25 @@ public partial class App
         AppInstance _MainInstance = AppInstance.FindOrRegisterForKey("main"); //Get main instance
         _MainInstance.Activated += ActivateMainInstance;
 
-        var activatedEventArgs = AppInstance.GetCurrent().GetActivatedEventArgs();
-        if (activatedEventArgs.Kind == ExtendedActivationKind.File)
-        {
-            if (activatedEventArgs.Data is IFileActivatedEventArgs fileArgs)
-            {
-                //If StoryBuilder isn't already open, calling OpenFile() this early will cause a crash.
-                try
-                {
-                    string FilePath = fileArgs.Files.FirstOrDefault().Path; //This is the path to the file that was used to invoke StoryBuilder
-                    Ioc.Default.GetRequiredService<ShellViewModel>().OpenFile(FilePath);
-                }
-                catch
-                {
-                    GlobalData.FilePathToLaunch = fileArgs.Files.FirstOrDefault().Path; //This will be launched when ShellVM has finished initalising
-                }
-            }
-        }
+        AppActivationArguments activatedEventArgs = AppInstance.GetCurrent().GetActivatedEventArgs();
+
 
         //Redirect to other instance if one exists, otherwise continue initializing this instance.
         if (!_MainInstance.IsCurrent)
         {
             //Bring up the 'main' instance 
-            AppActivationArguments _ActivatedEventArgs = AppInstance.GetCurrent().GetActivatedEventArgs();
-            await _MainInstance.RedirectActivationToAsync(_ActivatedEventArgs);
+            await _MainInstance.RedirectActivationToAsync(activatedEventArgs);
             Process.GetCurrentProcess().Kill();
+        }
+        else
+        {
+            if (activatedEventArgs.Kind == ExtendedActivationKind.File)
+            {
+                if (activatedEventArgs.Data is IFileActivatedEventArgs fileArgs)
+                {
+                    GlobalData.FilePathToLaunch = fileArgs.Files.FirstOrDefault().Path; //This will be launched when ShellVM has finished initalising
+                }
+            }
         }
     }
 
@@ -128,6 +123,17 @@ public partial class App
     {
         GlobalData.MainWindow.Restore(); //Resize window and unminimize window
         GlobalData.MainWindow.BringToFront(); //Bring window to front
+
+        try
+        {
+            Ioc.Default.GetRequiredService<AutoSaveService>().Dispatcher.TryEnqueue(() =>
+            {
+                Ioc.Default.GetRequiredService<ShellViewModel>()
+                    .ShowMessage(LogLevel.Warn, "You can only have one file open at once", false);
+
+            });
+        }
+        catch { }
     }
 
     private static void ConfigureIoc()

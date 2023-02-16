@@ -3,14 +3,10 @@ using System.ComponentModel;
 using System.Threading.Tasks;
 using Microsoft.UI.Dispatching;
 using CommunityToolkit.Mvvm.DependencyInjection;
-using Microsoft.UI;
-using NLog;
-using Octokit;
 using StoryBuilder.Models;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.ViewModels;
 using LogLevel = StoryBuilder.Services.Logging.LogLevel;
-using System.Threading;
 
 namespace StoryBuilder.Services
 {
