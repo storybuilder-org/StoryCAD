@@ -42,17 +42,19 @@ for their support.
 
 ## Getting Started
 
-StoryBuilder is a duck with its feet in two ponds: the user community of writers and the community of developers. 
+StoryBuilder is a duck with its feet in two ponds: the user community
+of writers and the community of developers. 
 
 ### For writers
 
 If you are (or want to be) a fiction writer, welcome! StoryBuilder is for you. An introduction to StoryBuilder 
 for users is the [User Documentation][9].
 
-You're welcome to try the software for yourself (it's free.) StoryBuilder is currently in beta test. If you're interested 
-in becoming a beta tester, please email support@storybuilder.org and ask for a copy of the software.
+Our [YouTube videos][28] can help you learn more about StoryBuilder.
 
-you can find complete documentation in the [User Manual][8], which also serves as online help for the program.
+You're welcome to try the software for yourself (it's free.) 
+
+You can find complete documentation in the [User Manual][8], which also serves as online help for the program.
 
 ### For Developers
 
@@ -63,11 +65,11 @@ Strictly from the code side, take a look at [Programmer Notes][10].
 
 ## Usage
 
-We will provide program demos video soon.
+You can learn more about StoryBuilder from our [YouTube videos][28].
 
 We group StoryBuilder's plans into a series of [GitHub Projects][18].
-
-Currently, we're completing the [Distribute StoryBuilder via WIndows Store][19] project.
+As StoryBuilder approaches product completeness, ourcurrent project
+is to build the StoryBuilder community and reach out to more users.
 
 See the [open issues](https://github.com/storybuilder-org/StoryBuilder-2/issues) for a complete list of proposed 
 features and known bugs.
@@ -120,4 +122,4 @@ We are most grateful for all of them- especially those who toil in the arena:
 [25]:https://github.com/storybuilder-org/StoryBuilder-2/blob/master/CHANGELOG.md
 [26]:https://storybuilder.org/
 [27]:https://apps.microsoft.com/store/detail/storybuilder/9PLBNHZV1XM2?hl=en-us&gl=us
-
+[28]:https://www.youtube.com/watch?v=Oi7G9TEKsro
