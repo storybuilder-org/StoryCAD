@@ -14,6 +14,7 @@ using NLog.Config;
 using NLog.Targets;
 using StoryBuilder.Models;
 using StoryBuilder.Services.Json;
+using Microsoft.UI.Windowing;
 
 namespace StoryBuilder.Services.Logging;
 
@@ -24,7 +25,7 @@ public class LogService : ILogService
 {
     private static readonly Logger Logger;
     private static readonly string logFilePath;
-    private static string stackTraceHelper; //Elmah for some reason doesn't show the stack trace of an exception so this one does.
+    private static Exception exceptionHelper;
     private string apiKey = string.Empty;
     private string logID = string.Empty;
     static LogService()
@@ -83,15 +84,32 @@ public class LogService : ILogService
                 try { msg.User = GlobalData.Preferences.Name + $"({GlobalData.Preferences.Email})"; }
                 catch (Exception e) { msg.User = $"There was an error attempting to obtain user information Error: {e.Message}"; }
 
-                try { msg.Source = stackTraceHelper; } 
-                catch (Exception e) {msg.Source = $"There was an error attempting to obtain StackTrace helper Error: {e.Message}";}
+                try { msg.Detail = exceptionHelper?.ToString(); } 
+                catch (Exception e) {msg.Detail = $"There was an error attempting to obtain StackTrace helper Error: {e.Message}";}
                 
                 try { msg.Version = GlobalData.Version; }
                 catch (Exception e) { msg.Version = $"There was an error trying to obtain version information Error: {e.Message}"; }
 
+                var baseException = exceptionHelper?.GetBaseException();
+
+                msg.Type = baseException?.GetType().FullName;
+                msg.Source = baseException?.Source;
+                msg.Hostname = Hostname();
+                msg.ServerVariables = new List<Item>
+                {
+                    new Item("User-Agent", $"X-ELMAHIO-APPLICATION; OS=Windows; OSVERSION={Environment.OSVersion.Version}; ENGINE=WinUI")
+                };
+
                 try
                 {
                     msg.Data = new List<Item>();
+
+                    var mainWindow = GlobalData.MainWindow;
+                    if (mainWindow?.Width > 0) msg.Data.Add(new Item("Browser-Width", ((int)mainWindow.Width).ToString()));
+                    if (mainWindow?.Height > 0) msg.Data.Add(new Item("Browser-Height", ((int)mainWindow.Height).ToString()));
+                    if (DisplayArea.Primary?.WorkArea.Width > 0) msg.Data.Add(new Item("Screen-Width", DisplayArea.Primary.WorkArea.Width.ToString()));
+                    if (DisplayArea.Primary?.WorkArea.Height > 0) msg.Data.Add(new Item("Screen-Height", DisplayArea.Primary.WorkArea.Height.ToString()));
+
                     string LogString = string.Empty;
 
                     try
@@ -154,6 +172,14 @@ public class LogService : ILogService
         }
     }
 
+    private string Hostname()
+    {
+        var machineName = Environment.MachineName;
+        if (!string.IsNullOrWhiteSpace(machineName)) return machineName;
+
+        return Environment.GetEnvironmentVariable("COMPUTERNAME");
+    }
+
     public void SetElmahTokens(Doppler keys)
     {
         apiKey = keys.APIKEY;
@@ -197,11 +223,11 @@ public class LogService : ILogService
         switch (level)
         {
             case LogLevel.Error:
-                stackTraceHelper = exception.StackTrace;
+                exceptionHelper = exception;
                 Logger.Error(exception, message);
                 break;
             case LogLevel.Fatal:
-                stackTraceHelper = exception.StackTrace;
+                exceptionHelper = exception;
                 Logger.Fatal(exception, message);
                 break;
         }
