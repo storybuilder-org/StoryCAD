@@ -71,8 +71,8 @@ jobs:
       env:
         Configuration: ${{ matrix.configuration }}
     
-    - name: Restore StoryBuilder Tests
-      run: msbuild StoryBuilderTests\StoryBuilderTests.csproj /t:Restore /p:Configuration=Release
+   # - name: Restore StoryBuilder Tests
+   #   run: msbuild StoryBuilderTests\StoryBuilderTests.csproj /t:Restore /p:Configuration=Release
 
     # Decode the base 64 encoded pfx and save the Signing_Certificate
     - name: Decode the pfx
