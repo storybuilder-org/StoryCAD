@@ -36,7 +36,6 @@ public sealed partial class PrintReportsDialog
         PrintVM.SettingList = false;
         PrintVM.SceneList = false;
         PrintVM.WebList = false;
-        PrintVM.Dispatcher = DispatcherQueue.GetForCurrentThread(); //Used to show error messages.
 
         //Warn user if they are on win10 as print manager can't be used.
         if (Environment.OSVersion.Version.Build <= 22000) { Win10Warning.IsOpen = true; }
@@ -131,7 +130,7 @@ public sealed partial class PrintReportsDialog
             }
             catch (Exception ex) //Error setting up printer
             {
-                PrintVM.Dispatcher.TryEnqueue(async () =>
+                GlobalData.GlobalDispatcher.TryEnqueue(async () =>
                 {
                     PrintVM.CloseDialog();
                     await new ContentDialog

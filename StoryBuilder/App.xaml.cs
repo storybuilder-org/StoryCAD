@@ -126,14 +126,13 @@ public partial class App
 
         try
         {
-            Ioc.Default.GetRequiredService<AutoSaveService>().Dispatcher.TryEnqueue(() =>
+            GlobalData.GlobalDispatcher.TryEnqueue(() =>
             {
-                Ioc.Default.GetRequiredService<ShellViewModel>()
-                    .ShowMessage(LogLevel.Warn, "You can only have one file open at once", false);
+                Ioc.Default.GetRequiredService<ShellViewModel>().ShowMessage(LogLevel.Warn, "You can only have one file open at once", false);
 
             });
         }
-        catch { }
+        finally { }
     }
 
     private static void ConfigureIoc()

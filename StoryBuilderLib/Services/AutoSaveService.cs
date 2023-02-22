@@ -16,7 +16,6 @@ namespace StoryBuilder.Services
         ShellViewModel _shellVM;
         private BackgroundWorker autoSaveWorker = new()
         { WorkerSupportsCancellation = true, WorkerReportsProgress = false };
-        public DispatcherQueue Dispatcher;
 
         /// <summary>
         /// Performs an AutoSave every x seconds, x being the value of AutoSaveInterval in user preferences.
@@ -93,7 +92,7 @@ namespace StoryBuilder.Services
                 if (_shellVM.StoryModel.Changed)
                 {
                     // Save and write the model on the UI autoSaveWorker,
-                    Dispatcher.TryEnqueue(async () => await _shellVM.SaveFile(true));
+                    GlobalData.GlobalDispatcher.TryEnqueue(async () => await _shellVM.SaveFile(true));
                 }
             }
             catch (Exception _ex)

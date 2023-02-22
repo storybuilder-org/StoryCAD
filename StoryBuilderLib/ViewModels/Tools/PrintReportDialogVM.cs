@@ -22,7 +22,6 @@ public class PrintReportDialogVM : ObservableRecipient
     private PrintManager _printManager;
     public PrintDocument Document = new();
     public IPrintDocumentSource PrintDocSource;
-    public DispatcherQueue Dispatcher;
 
     private List<StackPanel> _printPreviewCache; //This stores a list of pages for print preview
     #region Properties
@@ -350,7 +349,7 @@ public class PrintReportDialogVM : ObservableRecipient
              await cd.ShowAsync();
         }
 
-        Dispatcher.TryEnqueue(() =>
+        GlobalData.GlobalDispatcher.TryEnqueue(() =>
         {
             _printManager.PrintTaskRequested -= PrintTaskRequested;
             Document.AddPages -= AddPages;
