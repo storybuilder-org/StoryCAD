@@ -344,6 +344,7 @@ public class ShellViewModel : ObservableRecipient
     {
         if (RightTappedNode == null)
         {
+            _canExecuteCommands = false;
             Messenger.Send(new StatusChangedMessage(new("Right tap a node to print", LogLevel.Warn)));
             Logger.Log(LogLevel.Info, "Print node failed as no node is selected");
             _canExecuteCommands = true;
@@ -356,130 +357,139 @@ public class ShellViewModel : ObservableRecipient
 
     public async Task OpenUnifiedMenu()
     {
-        _canExecuteCommands = false;
-        // Needs logging
-        _contentDialog = new() { XamlRoot = GlobalData.XamlRoot, Content = new UnifiedMenuPage() };
-        if (Microsoft.UI.Xaml.Application.Current.RequestedTheme == ApplicationTheme.Light) { _contentDialog.Background = new SolidColorBrush(Colors.LightGray); }
-        await _contentDialog.ShowAsync();
-        _canExecuteCommands = true;
+        if (_canExecuteCommands)
+        {
+            _canExecuteCommands = false;
+            // Needs logging
+            _contentDialog = new() { XamlRoot = GlobalData.XamlRoot, Content = new UnifiedMenuPage() };
+            if (Microsoft.UI.Xaml.Application.Current.RequestedTheme == ApplicationTheme.Light) { _contentDialog.Background = new SolidColorBrush(Colors.LightGray); }
+            await _contentDialog.ShowAsync();
+            _canExecuteCommands = true;
+        }   
     }
 
     public async Task UnifiedNewFile(UnifiedVM dialogVM)
     {
-        _canExecuteCommands = false;
         Logger.Log(LogLevel.Info, "FileOpenVM - New File starting");
-        try
-        {
-            Messenger.Send(new StatusChangedMessage(new("New project command executing", LogLevel.Info)));
 
-            // If the current project needs saved, do so
-            if (StoryModel.Changed)
+        if (_canExecuteCommands)
+        {
+            _canExecuteCommands = false;
+
+            try
             {
-                SaveModel();
-                await WriteModel();
+                Messenger.Send(new StatusChangedMessage(new("New project command executing", LogLevel.Info)));
+
+                // If the current project needs saved, do so
+                if (StoryModel.Changed)
+                {
+                    SaveModel();
+                    await WriteModel();
+                }
+
+                // Start with a blank StoryModel and populate it
+                // using the new project dialog's settings
+
+                ResetModel();
+
+                if (!Path.GetExtension(dialogVM.ProjectName)!.Equals(".stbx")) { dialogVM.ProjectName += ".stbx"; }
+                StoryModel.ProjectFilename = dialogVM.ProjectName;
+                StoryModel.ProjectFolder = await StorageFolder.GetFolderFromPathAsync(dialogVM.ProjectPath);
+                StoryModel.ProjectPath = StoryModel.ProjectFolder.Path;
+
+                OverviewModel _overview = new(Path.GetFileNameWithoutExtension(dialogVM.ProjectName), StoryModel)
+                { DateCreated = DateTime.Today.ToString("d"), Author = GlobalData.Preferences.Name };
+                StoryNodeItem _overviewNode = new(_overview, null) { IsExpanded = true, IsRoot = true };
+                StoryModel.ExplorerView.Add(_overviewNode);
+                TrashCanModel _trash = new(StoryModel);
+                StoryNodeItem _trashNode = new(_trash, null);
+                StoryModel.ExplorerView.Add(_trashNode);     // The trashcan is the second root
+                FolderModel _narrative = new("Narrative View", StoryModel, StoryItemType.Folder);
+                StoryNodeItem _narrativeNode = new(_narrative, null) { IsRoot = true };
+                StoryModel.NarratorView.Add(_narrativeNode);
+                // Use the NewProjectDialog template to complete the model
+                switch (dialogVM.SelectedTemplateIndex)
+                {
+                    case 0:
+                        break;
+                    case 1:
+                        StoryElement _problems = new FolderModel("Problems", StoryModel, StoryItemType.Folder);
+                        StoryNodeItem _problemsNode = new(_problems, _overviewNode);
+                        StoryElement _characters = new FolderModel("Characters", StoryModel, StoryItemType.Folder);
+                        StoryNodeItem _charactersNode = new(_characters, _overviewNode);
+                        StoryElement _settings = new FolderModel("Settings", StoryModel, StoryItemType.Folder);
+                        StoryNodeItem _settingsNode = new(_settings, _overviewNode);
+                        StoryElement _scene = new FolderModel("Scenes", StoryModel, StoryItemType.Folder);
+                        StoryNodeItem _plotpointsNode = new(_scene, _overviewNode);
+                        break;
+                    case 2:
+                        StoryElement _externalProblem = new ProblemModel("External Problem", StoryModel);
+                        StoryNodeItem _externalProblemNode = new(_externalProblem, _overviewNode);
+                        StoryElement _internalProblem = new ProblemModel("Internal Problem", StoryModel);
+                        StoryNodeItem _internalProblemNode = new(_internalProblem, _overviewNode);
+                        break;
+                    case 3:
+                        StoryElement _protagonist = new CharacterModel("Protagonist", StoryModel);
+                        StoryNodeItem _protagonistNode = new(_protagonist, _overviewNode);
+                        StoryElement _antagonist = new CharacterModel("Antagonist", StoryModel);
+                        StoryNodeItem _antagonistNode = new(_antagonist, _overviewNode);
+                        break;
+                    case 4:
+                        StoryElement _problemsFolder = new FolderModel("Problems", StoryModel, StoryItemType.Folder);
+                        StoryNodeItem _problemsFolderNode = new(_problemsFolder, _overviewNode) { IsExpanded = true };
+                        StoryElement _charactersFolder = new FolderModel("Characters", StoryModel, StoryItemType.Folder);
+                        StoryNodeItem _charactersFolderNode = new(_charactersFolder, _overviewNode) { IsExpanded = true };
+                        StoryElement _settingsFolder = new FolderModel("Settings", StoryModel, StoryItemType.Folder);
+                        StoryNodeItem _settingsFolderNode = new(_settingsFolder, _overviewNode);
+                        StoryElement _plotpointsFolder = new FolderModel("Plot Points", StoryModel, StoryItemType.Folder);
+                        StoryNodeItem _plotpointsFolderNode = new(_plotpointsFolder, _overviewNode);
+                        StoryElement _externalProb = new ProblemModel("External Problem", StoryModel);
+                        StoryNodeItem _externalProbNode = new(_externalProb, _problemsFolderNode);
+                        StoryElement _internalProb = new ProblemModel("Internal Problem", StoryModel);
+                        StoryNodeItem _internalProbNode = new(_internalProb, _problemsFolderNode);
+                        StoryElement _protag = new CharacterModel("Protagonist", StoryModel);
+                        StoryNodeItem _protagNode = new(_protag, _charactersFolderNode);
+                        StoryElement _antag = new CharacterModel("Antagonist", StoryModel);
+                        StoryNodeItem _antagNode = new(_antag, _charactersFolderNode);
+                        break;
+                    case 5:
+                        StoryElement _storyProb = new ProblemModel("Story Problem", StoryModel);
+                        StoryNodeItem _storyProbNode = new(_storyProb, _overviewNode);
+                        StoryElement _storyProtag = new CharacterModel("Protagonist", StoryModel);
+                        StoryNodeItem _storyProtagNode = new(_storyProtag, _storyProbNode);
+                        StoryElement _storyAntag = new CharacterModel("Antagonist", StoryModel);
+                        StoryNodeItem _storyAntagNode = new(_storyAntag, _storyProbNode);
+                        _overview.StoryProblem = _storyProb.ToString();
+                        var _problem = _storyProb as ProblemModel;
+                        _problem.Protagonist = _storyProtag.ToString();
+                        _problem.Antagonist = _storyAntag.ToString();
+                        _problem.Premise =
+                            @"Your[protagonist] in a situation[genre, setting] wants something[goal], which brings him" +
+                            @"into conflict with a second character[antagonist]. After a series of conflicts[additional " +
+                            @"problems], the final battle[climax scene] erupts, and the[protagonist] finally resolves the " +
+                            @"conflict[outcome].";
+                        break;
+                }
+                GlobalData.MainWindow.Title = $"StoryBuilder - Editing {dialogVM.ProjectName!.Replace(".stbx", "")}";
+                SetCurrentView(StoryViewType.ExplorerView);
+                //TODO: Set expand and is selected?
+
+                Ioc.Default.GetRequiredService<UnifiedVM>().UpdateRecents(Path.Combine(dialogVM.ProjectPath, dialogVM.ProjectName)); //adds item to recent
+
+                // Save the new project
+                await SaveFile();
+                if (GlobalData.Preferences.BackupOnOpen) { await MakeBackup(); }
+                Ioc.Default.GetRequiredService<BackupService>().StartTimedBackup();
+                Messenger.Send(new StatusChangedMessage(new("New project command executing", LogLevel.Info, true)));
+            }
+            catch (Exception _ex)
+            {
+                Logger.LogException(LogLevel.Error, _ex, "Error creating new project");
+                Messenger.Send(new StatusChangedMessage(new("File make failure.", LogLevel.Error)));
             }
 
-            // Start with a blank StoryModel and populate it
-            // using the new project dialog's settings
-
-            ResetModel();
-
-            if (!Path.GetExtension(dialogVM.ProjectName)!.Equals(".stbx")) { dialogVM.ProjectName += ".stbx"; }
-            StoryModel.ProjectFilename = dialogVM.ProjectName;
-            StoryModel.ProjectFolder = await StorageFolder.GetFolderFromPathAsync(dialogVM.ProjectPath);
-            StoryModel.ProjectPath = StoryModel.ProjectFolder.Path;
-
-            OverviewModel _overview = new(Path.GetFileNameWithoutExtension(dialogVM.ProjectName), StoryModel)
-            { DateCreated = DateTime.Today.ToString("d"), Author = GlobalData.Preferences.Name };
-            StoryNodeItem _overviewNode = new(_overview, null) { IsExpanded = true, IsRoot = true };
-            StoryModel.ExplorerView.Add(_overviewNode);
-            TrashCanModel _trash = new(StoryModel);
-            StoryNodeItem _trashNode = new(_trash, null);
-            StoryModel.ExplorerView.Add(_trashNode);     // The trashcan is the second root
-            FolderModel _narrative = new("Narrative View", StoryModel, StoryItemType.Folder);
-            StoryNodeItem _narrativeNode = new(_narrative, null) { IsRoot = true };
-            StoryModel.NarratorView.Add(_narrativeNode);
-            // Use the NewProjectDialog template to complete the model
-            switch (dialogVM.SelectedTemplateIndex)
-            {
-                case 0:
-                    break;
-                case 1:
-                    StoryElement _problems = new FolderModel("Problems", StoryModel, StoryItemType.Folder);
-                    StoryNodeItem _problemsNode = new(_problems, _overviewNode);
-                    StoryElement _characters = new FolderModel("Characters", StoryModel, StoryItemType.Folder);
-                    StoryNodeItem _charactersNode = new(_characters, _overviewNode);
-                    StoryElement _settings = new FolderModel("Settings", StoryModel, StoryItemType.Folder);
-                    StoryNodeItem _settingsNode = new(_settings, _overviewNode);
-                    StoryElement _scene = new FolderModel("Scenes", StoryModel, StoryItemType.Folder);
-                    StoryNodeItem _plotpointsNode = new(_scene, _overviewNode);
-                    break;
-                case 2:
-                    StoryElement _externalProblem = new ProblemModel("External Problem", StoryModel);
-                    StoryNodeItem _externalProblemNode = new(_externalProblem, _overviewNode);
-                    StoryElement _internalProblem = new ProblemModel("Internal Problem", StoryModel);
-                    StoryNodeItem _internalProblemNode = new(_internalProblem, _overviewNode);
-                    break;
-                case 3:
-                    StoryElement _protagonist = new CharacterModel("Protagonist", StoryModel);
-                    StoryNodeItem _protagonistNode = new(_protagonist, _overviewNode);
-                    StoryElement _antagonist = new CharacterModel("Antagonist", StoryModel);
-                    StoryNodeItem _antagonistNode = new(_antagonist, _overviewNode);
-                    break;
-                case 4:
-                    StoryElement _problemsFolder = new FolderModel("Problems", StoryModel, StoryItemType.Folder);
-                    StoryNodeItem _problemsFolderNode = new(_problemsFolder, _overviewNode) { IsExpanded = true };
-                    StoryElement _charactersFolder = new FolderModel("Characters", StoryModel, StoryItemType.Folder);
-                    StoryNodeItem _charactersFolderNode = new(_charactersFolder, _overviewNode) { IsExpanded = true };
-                    StoryElement _settingsFolder = new FolderModel("Settings", StoryModel, StoryItemType.Folder);
-                    StoryNodeItem _settingsFolderNode = new(_settingsFolder, _overviewNode);
-                    StoryElement _plotpointsFolder = new FolderModel("Plot Points", StoryModel, StoryItemType.Folder);
-                    StoryNodeItem _plotpointsFolderNode = new(_plotpointsFolder, _overviewNode);
-                    StoryElement _externalProb = new ProblemModel("External Problem", StoryModel);
-                    StoryNodeItem _externalProbNode = new(_externalProb, _problemsFolderNode);
-                    StoryElement _internalProb = new ProblemModel("Internal Problem", StoryModel);
-                    StoryNodeItem _internalProbNode = new(_internalProb, _problemsFolderNode);
-                    StoryElement _protag = new CharacterModel("Protagonist", StoryModel);
-                    StoryNodeItem _protagNode = new(_protag, _charactersFolderNode);
-                    StoryElement _antag = new CharacterModel("Antagonist", StoryModel);
-                    StoryNodeItem _antagNode = new(_antag, _charactersFolderNode);
-                    break;
-                case 5:
-                    StoryElement _storyProb = new ProblemModel("Story Problem", StoryModel);
-                    StoryNodeItem _storyProbNode = new(_storyProb, _overviewNode);
-                    StoryElement _storyProtag = new CharacterModel("Protagonist", StoryModel);
-                    StoryNodeItem _storyProtagNode = new(_storyProtag, _storyProbNode);
-                    StoryElement _storyAntag = new CharacterModel("Antagonist", StoryModel);
-                    StoryNodeItem _storyAntagNode = new(_storyAntag, _storyProbNode);
-                    _overview.StoryProblem = _storyProb.ToString();
-                    var _problem = _storyProb as ProblemModel;
-                    _problem.Protagonist = _storyProtag.ToString();
-                    _problem.Antagonist = _storyAntag.ToString();
-                    _problem.Premise =
-                        @"Your[protagonist] in a situation[genre, setting] wants something[goal], which brings him" +
-                        @"into conflict with a second character[antagonist]. After a series of conflicts[additional " +
-                        @"problems], the final battle[climax scene] erupts, and the[protagonist] finally resolves the " +
-                        @"conflict[outcome].";
-                    break;
-            }
-            GlobalData.MainWindow.Title = $"StoryBuilder - Editing {dialogVM.ProjectName!.Replace(".stbx", "")}";
-            SetCurrentView(StoryViewType.ExplorerView);
-            //TODO: Set expand and is selected?
-
-            Ioc.Default.GetRequiredService<UnifiedVM>().UpdateRecents(Path.Combine(dialogVM.ProjectPath, dialogVM.ProjectName)); //adds item to recent
-
-            // Save the new project
-            await SaveFile();
-            if (GlobalData.Preferences.BackupOnOpen) { await MakeBackup(); }
-            Ioc.Default.GetRequiredService<BackupService>().StartTimedBackup();
-            Messenger.Send(new StatusChangedMessage(new("New project command executing", LogLevel.Info, true)));
+            _canExecuteCommands = true;
         }
-        catch (Exception _ex)
-        {
-            Logger.LogException(LogLevel.Error, _ex, "Error creating new project");
-            Messenger.Send(new StatusChangedMessage(new("File make failure.", LogLevel.Error)));
-        }
-        _canExecuteCommands = true;
     }
 
     public async Task MakeBackup()
@@ -825,81 +835,84 @@ public class ShellViewModel : ObservableRecipient
 
     private async void SaveFileAs()
     {
-        _canExecuteCommands = false;
-        Messenger.Send(new StatusChangedMessage(new("Save File As command executing", LogLevel.Info, true)));
-        try
+        if (_canExecuteCommands)
         {
-            if (StoryModel.ProjectFile == null || StoryModel.ProjectPath == null)
+            _canExecuteCommands = false;
+            Messenger.Send(new StatusChangedMessage(new("Save File As command executing", LogLevel.Info, true)));
+            try
             {
-                Messenger.Send(new StatusChangedMessage(new("You need to load a story first!", LogLevel.Info)));
-                Logger.Log(LogLevel.Warn, "User tried to use save as without a story loaded.");
-                _canExecuteCommands = true;
-                return;
-            }
-
-            //Creates the content dialog
-            ContentDialog _saveAsDialog = new()
-            {
-                Title = "Save as",
-                XamlRoot = GlobalData.XamlRoot,
-                PrimaryButtonText = "Save",
-                SecondaryButtonText = "Cancel",
-                Content = new SaveAsDialog()
-            };
-
-            //Sets needed data in VM and then shows the dialog
-            SaveAsViewModel _saveAsVM = Ioc.Default.GetRequiredService<SaveAsViewModel>();
-            // The default project name and project folder path are from the active StoryModel
-            _saveAsVM.ProjectName = StoryModel.ProjectFilename;
-            _saveAsVM.ParentFolder = StoryModel.ProjectFolder;
-            _saveAsVM.ProjectPathName = StoryModel.ProjectPath;
-
-            ContentDialogResult _result = await _saveAsDialog.ShowAsync();
-
-            if (_result == ContentDialogResult.Primary) //If save is clicked
-            {
-                if (await VerifyReplaceOrCreate())
+                if (StoryModel.ProjectFile == null || StoryModel.ProjectPath == null)
                 {
-                    //Saves model to disk
-                    SaveModel();
-                    await WriteModel();
-                    if (Path.Combine(_saveAsVM.ProjectPathName, _saveAsVM.ProjectName) ==
-                        Path.Combine(StoryModel.ProjectFolder.Path, StoryModel.ProjectFile.Name))
-                    {
-                        //Stop SaveAs from crashing if the user sets the path to a place where the story is already located.
-                        Messenger.Send(new StatusChangedMessage(new("Save File As command completed", LogLevel.Info)));
-                        Logger.Log(LogLevel.Info, "User tried to as file to same file as parent.");
-                        _canExecuteCommands = true;
-                        return;
-                    }
-                    //Saves the current project folders and files to disk
-                    await StoryModel.ProjectFile.CopyAsync(_saveAsVM.ParentFolder, _saveAsVM.ProjectName, NameCollisionOption.ReplaceExisting);
+                    Messenger.Send(new StatusChangedMessage(new("You need to load a story first!", LogLevel.Info)));
+                    Logger.Log(LogLevel.Warn, "User tried to use save as without a story loaded.");
+                    _canExecuteCommands = true;
+                    return;
+                }
 
-                    //Update the StoryModel properties to use the newly saved copy
-                    StoryModel.ProjectFilename = _saveAsVM.ProjectName;
-                    StoryModel.ProjectFolder = _saveAsVM.ParentFolder;
-                    StoryModel.ProjectPath = _saveAsVM.SaveAsProjectFolderPath;
-                    // Add to the recent files stack
-                    GlobalData.MainWindow.Title = $"StoryBuilder - Editing {StoryModel.ProjectFilename.Replace(".stbx", "")}";
-                    new UnifiedVM().UpdateRecents(Path.Combine(StoryModel.ProjectFolder.Path, StoryModel.ProjectFile.Name));
-                    // Indicate everything's done
-                    Messenger.Send(new IsChangedMessage(true));
-                    StoryModel.Changed = false;
-                    ChangeStatusColor = Colors.Green;
-                    Messenger.Send(new StatusChangedMessage(new("Save File As command completed", LogLevel.Info, true)));
+                //Creates the content dialog
+                ContentDialog _saveAsDialog = new()
+                {
+                    Title = "Save as",
+                    XamlRoot = GlobalData.XamlRoot,
+                    PrimaryButtonText = "Save",
+                    SecondaryButtonText = "Cancel",
+                    Content = new SaveAsDialog()
+                };
+
+                //Sets needed data in VM and then shows the dialog
+                SaveAsViewModel _saveAsVM = Ioc.Default.GetRequiredService<SaveAsViewModel>();
+                // The default project name and project folder path are from the active StoryModel
+                _saveAsVM.ProjectName = StoryModel.ProjectFilename;
+                _saveAsVM.ParentFolder = StoryModel.ProjectFolder;
+                _saveAsVM.ProjectPathName = StoryModel.ProjectPath;
+
+                ContentDialogResult _result = await _saveAsDialog.ShowAsync();
+
+                if (_result == ContentDialogResult.Primary) //If save is clicked
+                {
+                    if (await VerifyReplaceOrCreate())
+                    {
+                        //Saves model to disk
+                        SaveModel();
+                        await WriteModel();
+                        if (Path.Combine(_saveAsVM.ProjectPathName, _saveAsVM.ProjectName) ==
+                            Path.Combine(StoryModel.ProjectFolder.Path, StoryModel.ProjectFile.Name))
+                        {
+                            //Stop SaveAs from crashing if the user sets the path to a place where the story is already located.
+                            Messenger.Send(new StatusChangedMessage(new("Save File As command completed", LogLevel.Info)));
+                            Logger.Log(LogLevel.Info, "User tried to as file to same file as parent.");
+                            _canExecuteCommands = true;
+                            return;
+                        }
+                        //Saves the current project folders and files to disk
+                        await StoryModel.ProjectFile.CopyAsync(_saveAsVM.ParentFolder, _saveAsVM.ProjectName, NameCollisionOption.ReplaceExisting);
+
+                        //Update the StoryModel properties to use the newly saved copy
+                        StoryModel.ProjectFilename = _saveAsVM.ProjectName;
+                        StoryModel.ProjectFolder = _saveAsVM.ParentFolder;
+                        StoryModel.ProjectPath = _saveAsVM.SaveAsProjectFolderPath;
+                        // Add to the recent files stack
+                        GlobalData.MainWindow.Title = $"StoryBuilder - Editing {StoryModel.ProjectFilename.Replace(".stbx", "")}";
+                        new UnifiedVM().UpdateRecents(Path.Combine(StoryModel.ProjectFolder.Path, StoryModel.ProjectFile.Name));
+                        // Indicate everything's done
+                        Messenger.Send(new IsChangedMessage(true));
+                        StoryModel.Changed = false;
+                        ChangeStatusColor = Colors.Green;
+                        Messenger.Send(new StatusChangedMessage(new("Save File As command completed", LogLevel.Info, true)));
+                    }
+                }
+                else // if cancelled
+                {
+                    Messenger.Send(new StatusChangedMessage(new("SaveAs dialog cancelled", LogLevel.Info, true)));
                 }
             }
-            else // if cancelled
+            catch (Exception _ex) //If error occurs in file.
             {
-                Messenger.Send(new StatusChangedMessage(new("SaveAs dialog cancelled", LogLevel.Info, true)));
+                Logger.LogException(LogLevel.Error, _ex, "Exception in SaveFileAs");
+                Messenger.Send(new StatusChangedMessage(new("Save File As failed", LogLevel.Info)));
             }
+            _canExecuteCommands = true;
         }
-        catch (Exception _ex) //If error occurs in file.
-        {
-            Logger.LogException(LogLevel.Error, _ex, "Exception in SaveFileAs");
-            Messenger.Send(new StatusChangedMessage(new("Save File As failed", LogLevel.Info)));
-        }
-        _canExecuteCommands = true;
     }
 
     private async Task<bool> VerifyReplaceOrCreate()
@@ -1030,35 +1043,48 @@ public class ShellViewModel : ObservableRecipient
     private async void KeyQuestionsTool()
     {
         Logger.Log(LogLevel.Info, "Displaying KeyQuestions tool dialog");
-        if (RightTappedNode == null) { RightTappedNode = CurrentNode; }
-
-        //Creates and shows dialog
-        ContentDialog _keyQuestionsDialog = new()
+        if (_canExecuteCommands)
         {
-            Title = "Key questions",
-            CloseButtonText = "Close",
-            XamlRoot = GlobalData.XamlRoot,
-            Content = new KeyQuestionsDialog()
-        };
-        await _keyQuestionsDialog.ShowAsync();
+            _canExecuteCommands = false;
+            if (RightTappedNode == null) { RightTappedNode = CurrentNode; }
 
-        Ioc.Default.GetRequiredService<KeyQuestionsViewModel>().NextQuestion();
-        Logger.Log(LogLevel.Info, "KeyQuestions finished");
+            //Creates and shows dialog
+            ContentDialog _keyQuestionsDialog = new()
+            {
+                Title = "Key questions",
+                CloseButtonText = "Close",
+                XamlRoot = GlobalData.XamlRoot,
+                Content = new KeyQuestionsDialog()
+            };
+            await _keyQuestionsDialog.ShowAsync();
+
+            Ioc.Default.GetRequiredService<KeyQuestionsViewModel>().NextQuestion();
+            Logger.Log(LogLevel.Info, "KeyQuestions finished");
+            _canExecuteCommands = true;
+        }
+
     }
 
     private async void TopicsTool()
     {
         Logger.Log(LogLevel.Info, "Displaying Topics tool dialog");
-        if (RightTappedNode == null) { RightTappedNode = CurrentNode; }
-
-        ContentDialog _dialog = new()
+        if (_canExecuteCommands)
         {
-            XamlRoot = GlobalData.XamlRoot,
-            Title = "Topic Information",
-            CloseButtonText = "Done",
-            Content = new TopicsDialog()
-        };
-        await _dialog.ShowAsync();
+            _canExecuteCommands = false;
+            if (RightTappedNode == null) { RightTappedNode = CurrentNode; }
+
+            ContentDialog _dialog = new()
+            {
+                XamlRoot = GlobalData.XamlRoot,
+                Title = "Topic Information",
+                CloseButtonText = "Done",
+                Content = new TopicsDialog()
+            };
+            await _dialog.ShowAsync();
+
+            _canExecuteCommands = true;
+        }
+
         Logger.Log(LogLevel.Info, "Topics finished");
     }
 
@@ -1067,94 +1093,106 @@ public class ShellViewModel : ObservableRecipient
     /// </summary>
     private async void MasterPlotTool()
     {
-        Logger.Log(LogLevel.Info, "Displaying MasterPlot tool dialog");
-        if (VerifyToolUse(true, true))
+        if (_canExecuteCommands)
         {
-            //Creates and shows content dialog
-            ContentDialog _dialog = new()
+            _canExecuteCommands = false;
+            Logger.Log(LogLevel.Info, "Displaying MasterPlot tool dialog");
+            if (VerifyToolUse(true, true))
             {
-                XamlRoot = GlobalData.XamlRoot,
-                Title = "Master plots",
-                PrimaryButtonText = "Copy",
-                SecondaryButtonText = "Cancel",
-                Content = new MasterPlotsDialog()
-            };
-            ContentDialogResult _result = await _dialog.ShowAsync();
-
-            if (_result == ContentDialogResult.Primary) // Copy command
-            {
-                MasterPlotsViewModel _masterPlotsVM = Ioc.Default.GetRequiredService<MasterPlotsViewModel>();
-                string _masterPlotName = _masterPlotsVM.MasterPlotName;
-                MasterPlotModel _model = _masterPlotsVM.MasterPlots[_masterPlotName];
-                IList<MasterPlotScene> _scenes = _model.MasterPlotScenes;
-                ProblemModel _problem = new ProblemModel(_masterPlotName, StoryModel);
-                // add the new ProblemModel & node to the end of the target (RightTappedNode) children 
-                StoryNodeItem _problemNode = new(_problem, RightTappedNode);
-                RightTappedNode.IsExpanded = true;
-                _problemNode.IsSelected = true;
-                _problemNode.IsExpanded = true;
-                if (_scenes.Count == 1)
+                //Creates and shows content dialog
+                ContentDialog _dialog = new()
                 {
-                    _problem.StoryQuestion = "See Notes.";
-                    _problem.Notes = _scenes[0].Notes;
-                }
-                else foreach (MasterPlotScene _scene in _scenes)
-                    {
-                        SceneModel _child = new(StoryModel) { Name = _scene.SceneTitle, Remarks = "See Notes.", Notes = _scene.Notes };
-                        // add the new SceneModel & node to the end of the problem's children 
-                        StoryNodeItem _newNode = new(_child, _problemNode);
-                        _newNode.IsSelected = true;
-                    }
+                    XamlRoot = GlobalData.XamlRoot,
+                    Title = "Master plots",
+                    PrimaryButtonText = "Copy",
+                    SecondaryButtonText = "Cancel",
+                    Content = new MasterPlotsDialog()
+                };
+                ContentDialogResult _result = await _dialog.ShowAsync();
 
-                Messenger.Send(new StatusChangedMessage(new($"MasterPlot {_masterPlotName} inserted", LogLevel.Info, true)));
-                ShowChange();
-                Logger.Log(LogLevel.Info, "MasterPlot complete");
+                if (_result == ContentDialogResult.Primary) // Copy command
+                {
+                    MasterPlotsViewModel _masterPlotsVM = Ioc.Default.GetRequiredService<MasterPlotsViewModel>();
+                    string _masterPlotName = _masterPlotsVM.MasterPlotName;
+                    MasterPlotModel _model = _masterPlotsVM.MasterPlots[_masterPlotName];
+                    IList<MasterPlotScene> _scenes = _model.MasterPlotScenes;
+                    ProblemModel _problem = new ProblemModel(_masterPlotName, StoryModel);
+                    // add the new ProblemModel & node to the end of the target (RightTappedNode) children 
+                    StoryNodeItem _problemNode = new(_problem, RightTappedNode);
+                    RightTappedNode.IsExpanded = true;
+                    _problemNode.IsSelected = true;
+                    _problemNode.IsExpanded = true;
+                    if (_scenes.Count == 1)
+                    {
+                        _problem.StoryQuestion = "See Notes.";
+                        _problem.Notes = _scenes[0].Notes;
+                    }
+                    else foreach (MasterPlotScene _scene in _scenes)
+                        {
+                            SceneModel _child = new(StoryModel) { Name = _scene.SceneTitle, Remarks = "See Notes.", Notes = _scene.Notes };
+                            // add the new SceneModel & node to the end of the problem's children 
+                            StoryNodeItem _newNode = new(_child, _problemNode);
+                            _newNode.IsSelected = true;
+                        }
+
+                    Messenger.Send(new StatusChangedMessage(new($"MasterPlot {_masterPlotName} inserted", LogLevel.Info, true)));
+                    ShowChange();
+                    Logger.Log(LogLevel.Info, "MasterPlot complete");
+                }
+                _canExecuteCommands = true;
             }
         }
+
     }
 
     private async void DramaticSituationsTool()
     {
         Logger.Log(LogLevel.Info, "Displaying Dramatic Situations tool dialog");
-        if (VerifyToolUse(true, true))
+        if (_canExecuteCommands)
         {
-
-            //Creates and shows dialog
-            ContentDialog _dialog = new()
+            _canExecuteCommands = false;
+        
+            if (VerifyToolUse(true, true))
             {
-                XamlRoot = GlobalData.XamlRoot,
-                Title = "Dramatic situations",
-                PrimaryButtonText = "Copy as problem",
-                SecondaryButtonText = "Copy as scene",
-                CloseButtonText = "Cancel",
-                Content = new DramaticSituationsDialog()
-            };
-            ContentDialogResult _result = await _dialog.ShowAsync();
+                //Creates and shows dialog
+                ContentDialog _dialog = new()
+                {
+                    XamlRoot = GlobalData.XamlRoot,
+                    Title = "Dramatic situations",
+                    PrimaryButtonText = "Copy as problem",
+                    SecondaryButtonText = "Copy as scene",
+                    CloseButtonText = "Cancel",
+                    Content = new DramaticSituationsDialog()
+                };
+                ContentDialogResult _result = await _dialog.ShowAsync();
 
-            DramaticSituationModel _situationModel = Ioc.Default.GetRequiredService<DramaticSituationsViewModel>().Situation;
-            string _msg;
+                DramaticSituationModel _situationModel = Ioc.Default.GetRequiredService<DramaticSituationsViewModel>().Situation;
+                string _msg;
 
-            if (_result == ContentDialogResult.Primary)
-            {
-                ProblemModel _problem = new(StoryModel) { Name = _situationModel.SituationName, StoryQuestion = "See Notes.", Notes = _situationModel.Notes };
+                if (_result == ContentDialogResult.Primary)
+                {
+                    ProblemModel _problem = new(StoryModel) { Name = _situationModel.SituationName, StoryQuestion = "See Notes.", Notes = _situationModel.Notes };
 
-                // Insert the new Problem as the target's child
-                _ = new StoryNodeItem(_problem, RightTappedNode);
-                _msg = $"Problem {_situationModel.SituationName} inserted";
-                ShowChange();
+                    // Insert the new Problem as the target's child
+                    _ = new StoryNodeItem(_problem, RightTappedNode);
+                    _msg = $"Problem {_situationModel.SituationName} inserted";
+                    ShowChange();
+                }
+                else if (_result == ContentDialogResult.Secondary)
+                {
+                    SceneModel _sceneVar = new(StoryModel) { Name = _situationModel.SituationName, Remarks = "See Notes.", Notes = _situationModel.Notes };
+                    // Insert the new Scene as the target's child
+                    _ = new StoryNodeItem(_sceneVar, RightTappedNode);
+                    _msg = $"Scene {_situationModel.SituationName} inserted";
+                    ShowChange();
+                }
+                else { _msg = "Dramatic Situation tool cancelled"; }
+
+                Logger.Log(LogLevel.Info, _msg);
+                Messenger.Send(new StatusChangedMessage(new(_msg, LogLevel.Info, true)));
             }
-            else if (_result == ContentDialogResult.Secondary)
-            {
-                SceneModel _sceneVar = new(StoryModel) { Name = _situationModel.SituationName, Remarks = "See Notes.", Notes = _situationModel.Notes };
-                // Insert the new Scene as the target's child
-                _ = new StoryNodeItem(_sceneVar, RightTappedNode);
-                _msg = $"Scene {_situationModel.SituationName} inserted";
-                ShowChange();
-            }
-            else { _msg = "Dramatic Situation tool cancelled"; }
 
-            Logger.Log(LogLevel.Info, _msg);
-            Messenger.Send(new StatusChangedMessage(new(_msg, LogLevel.Info, true)));
+            _canExecuteCommands = true;
         }
         Logger.Log(LogLevel.Info, "Dramatic Situations finished");
     }
@@ -1165,7 +1203,9 @@ public class ShellViewModel : ObservableRecipient
     private async void StockScenesTool()
     {
         Logger.Log(LogLevel.Info, "Displaying Stock Scenes tool dialog");
-        if (VerifyToolUse(true, true))
+        if (VerifyToolUse(true, true) && _canExecuteCommands)
+        {
+            _canExecuteCommands = false;
             try
             {
                 //Creates and shows dialog
@@ -1179,15 +1219,17 @@ public class ShellViewModel : ObservableRecipient
                 };
                 ContentDialogResult _result = await _dialog.ShowAsync();
 
-                if (_result == ContentDialogResult.Primary)   // Copy command
+                if (_result == ContentDialogResult.Primary) // Copy command
                 {
                     if (string.IsNullOrWhiteSpace(Ioc.Default.GetRequiredService<StockScenesViewModel>().SceneName))
                     {
-                        Messenger.Send(new StatusChangedMessage(new("You need to select a stock scene", LogLevel.Warn)));
+                        Messenger.Send(new StatusChangedMessage(new("You need to select a stock scene",
+                            LogLevel.Warn)));
                         return;
                     }
 
-                    SceneModel _sceneVar = new(StoryModel) { Name = Ioc.Default.GetRequiredService<StockScenesViewModel>().SceneName };
+                    SceneModel _sceneVar = new(StoryModel)
+                        { Name = Ioc.Default.GetRequiredService<StockScenesViewModel>().SceneName };
                     StoryNodeItem _newNode = new(_sceneVar, RightTappedNode);
                     _sourceChildren = RightTappedNode.Children;
                     TreeViewNodeClicked(_newNode);
@@ -1200,31 +1242,40 @@ public class ShellViewModel : ObservableRecipient
                     Messenger.Send(new StatusChangedMessage(new("Stock Scenes canceled", LogLevel.Warn)));
                 }
             }
-            catch (Exception _e) { Logger.LogException(LogLevel.Error, _e, _e.Message); }
+            catch (Exception _e)
+            {
+                Logger.LogException(LogLevel.Error, _e, _e.Message);
+            }
+            _canExecuteCommands = true;
+        }
     }
 
     private async void GeneratePrintReports()
     {
         PrintReportDialogVM _reportVM = Ioc.Default.GetRequiredService<PrintReportDialogVM>();
-        if (Ioc.Default.GetRequiredService<ShellViewModel>().DataSource == null)
+        if (_canExecuteCommands)
         {
-            Messenger.Send(new StatusChangedMessage(new("You need to load a Story first!", LogLevel.Warn)));
-            return;
+            if (Ioc.Default.GetRequiredService<ShellViewModel>().DataSource == null)
+            {
+                Messenger.Send(new StatusChangedMessage(new("You need to load a Story first!", LogLevel.Warn)));
+                return;
+            }
+            _canExecuteCommands = false;
+            Messenger.Send(new StatusChangedMessage(new("Generate Print Reports executing", LogLevel.Info, true)));
+
+            SaveModel();
+
+            // Run reports dialog
+            _reportVM.Dialog = new()
+            {
+                Title = "Generate Reports",
+                XamlRoot = GlobalData.XamlRoot,
+                Content = new PrintReportsDialog()
+            };
+            await _reportVM.Dialog.ShowAsync();
+            _canExecuteCommands = true;
+
         }
-        _canExecuteCommands = false;
-        Messenger.Send(new StatusChangedMessage(new("Generate Print Reports executing", LogLevel.Info, true)));
-
-        SaveModel();
-
-        // Run reports dialog
-        _reportVM.Dialog = new()
-        {
-            Title = "Generate Reports",
-            XamlRoot = GlobalData.XamlRoot,
-            Content = new PrintReportsDialog()
-        };
-        await _reportVM.Dialog.ShowAsync();
-        _canExecuteCommands = true;
     }
 
     private async void GenerateScrivenerReports()
@@ -2178,16 +2229,26 @@ public class ShellViewModel : ObservableRecipient
 
     private async Task OpenNarrativeTool()
     {
-        if (VerifyToolUse(false, false))
+        if (VerifyToolUse(false, false) && _canExecuteCommands)
         {
-            ContentDialog _dialog = new()
+            _canExecuteCommands = false;
+            try
             {
-                XamlRoot = GlobalData.XamlRoot,
-                Title = "Narrative Editor",
-                PrimaryButtonText = "Done",
-                Content = new NarrativeTool()
-            };
-            await _dialog.ShowAsync();
+                ContentDialog _dialog = new()
+                {
+                    XamlRoot = GlobalData.XamlRoot,
+                    Title = "Narrative Editor",
+                    PrimaryButtonText = "Done",
+                    Content = new NarrativeTool()
+                };
+                await _dialog.ShowAsync();
+            }
+            catch (Exception ex)
+            {
+                Logger.LogException(LogLevel.Error, ex, "Error in ShellVM.OpenNarrativeTool()");
+            }
+
+            _canExecuteCommands = true;
         }
     }
 
