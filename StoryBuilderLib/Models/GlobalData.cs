@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using Windows.Storage;
+using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using StoryBuilder.Models.Tools;
 using WinUIEx;
@@ -72,4 +73,9 @@ public static class GlobalData
 
     // Set to true if the app has loaded with a version change. (Changelog)
     public static bool LoadedWithVersionChange = false;
+
+    //If this is not "" then the app was invoked via a .STBX file and once initalised, should load it.
+    public static string FilePathToLaunch;
+
+    public static DispatcherQueue? GlobalDispatcher = null;
 }

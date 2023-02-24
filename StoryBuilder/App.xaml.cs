@@ -30,10 +30,14 @@
   using WinUIEx;
   using AppInstance = Microsoft.Windows.AppLifecycle.AppInstance;
   using UnhandledExceptionEventArgs = Microsoft.UI.Xaml.UnhandledExceptionEventArgs;
+using Windows.ApplicationModel.Activation;
+using Windows.Storage;
+  using Microsoft.UI.Dispatching;
+  using LaunchActivatedEventArgs = Microsoft.UI.Xaml.LaunchActivatedEventArgs;
 
   namespace StoryBuilder;
 
-public partial class App : Application
+public partial class App
 {
     private const string HomePage = "HomePage";
     private const string OverviewPage = "OverviewPage";
@@ -89,13 +93,25 @@ public partial class App : Application
         AppInstance _MainInstance = AppInstance.FindOrRegisterForKey("main"); //Get main instance
         _MainInstance.Activated += ActivateMainInstance;
 
+        AppActivationArguments activatedEventArgs = AppInstance.GetCurrent().GetActivatedEventArgs();
+
+
         //Redirect to other instance if one exists, otherwise continue initializing this instance.
         if (!_MainInstance.IsCurrent)
         {
             //Bring up the 'main' instance 
-            AppActivationArguments _ActivatedEventArgs = AppInstance.GetCurrent().GetActivatedEventArgs();
-            await _MainInstance.RedirectActivationToAsync(_ActivatedEventArgs);
+            await _MainInstance.RedirectActivationToAsync(activatedEventArgs);
             Process.GetCurrentProcess().Kill();
+        }
+        else
+        {
+            if (activatedEventArgs.Kind == ExtendedActivationKind.File)
+            {
+                if (activatedEventArgs.Data is IFileActivatedEventArgs fileArgs)
+                {
+                    GlobalData.FilePathToLaunch = fileArgs.Files.FirstOrDefault().Path; //This will be launched when ShellVM has finished initalising
+                }
+            }
         }
     }
 
@@ -107,6 +123,16 @@ public partial class App : Application
     {
         GlobalData.MainWindow.Restore(); //Resize window and unminimize window
         GlobalData.MainWindow.BringToFront(); //Bring window to front
+
+        try
+        {
+            GlobalData.GlobalDispatcher.TryEnqueue(() =>
+            {
+                Ioc.Default.GetRequiredService<ShellViewModel>().ShowMessage(LogLevel.Warn, "You can only have one file open at once", false);
+
+            });
+        }
+        finally { }
     }
 
     private static void ConfigureIoc()
@@ -177,7 +203,7 @@ public partial class App : Application
         // Obtain keys if defined
         try
         {
-            Doppler doppler = new Doppler();
+            Doppler doppler = new();
             Doppler keys = await doppler.FetchSecretsAsync();
             BackendService backend = Ioc.Default.GetService<BackendService>();
             await backend.SetConnectionString(keys);

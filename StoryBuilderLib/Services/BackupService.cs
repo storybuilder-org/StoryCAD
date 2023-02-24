@@ -104,7 +104,7 @@ namespace StoryBuilder.Services
             }
             catch (Exception ex)
             {
-                DispatcherQueue.GetForCurrentThread().TryEnqueue(async () =>
+                GlobalData.GlobalDispatcher.TryEnqueue(async () =>
                 {
                     ContentDialog warning = new();
                     warning.Title = "Backup Warning";

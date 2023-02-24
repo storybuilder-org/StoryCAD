@@ -1,5 +1,4 @@
 ﻿using System;
-using ABI.Microsoft.UI;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -7,7 +6,6 @@ using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
-using Microsoft.Web.WebView2.Core;
 using StoryBuilder.Models;
 using StoryBuilder.Models.Tools;
 using StoryBuilder.Services.Logging;
@@ -15,7 +13,6 @@ using StoryBuilder.ViewModels;
 using Windows.UI.ViewManagement;
 using Microsoft.UI.Dispatching;
 using StoryBuilder.Services;
-using Colors = Microsoft.UI.Colors;
 
 namespace StoryBuilder.Views;
 
@@ -30,7 +27,7 @@ public sealed partial class Shell
         {
             InitializeComponent();
             DataContext = ShellVm;
-            Ioc.Default.GetRequiredService<AutoSaveService>().Dispatcher = DispatcherQueue.GetForCurrentThread();
+            GlobalData.GlobalDispatcher = DispatcherQueue.GetForCurrentThread();
             Loaded += Shell_Loaded;
         }
         catch (Exception ex)
@@ -61,7 +58,11 @@ public sealed partial class Shell
             ShellVm._canExecuteCommands = true;
         }
         if (GlobalData.LoadedWithVersionChange ) { await ShellVm.ShowChangelog(); }
-        await ShellVm.OpenUnifiedMenu();
+
+        //If StoryBuilder was loaded from a .STBX File then instead of showing the Unified menu
+        //We will instead load the file instead.
+        if (GlobalData.FilePathToLaunch == null) { await ShellVm.OpenUnifiedMenu(); }
+        else { await ShellVm.OpenFile(GlobalData.FilePathToLaunch);}
     }
 
     /// <summary>
