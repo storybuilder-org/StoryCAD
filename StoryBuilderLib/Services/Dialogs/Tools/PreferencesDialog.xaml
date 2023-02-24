@@ -75,6 +75,7 @@
                         <TextBlock Name="OSInfo"/>
                         <TextBlock Name="AppArchitecture"/>
                         <TextBlock Name="NetVer"/>
+                        <TextBlock Name="Startup"/>
                     </StackPanel>
                 </Grid>
 

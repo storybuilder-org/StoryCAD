@@ -60,6 +60,7 @@ public partial class App
     /// </summary>
     public App()
     {
+        GlobalData.StartUpTimer = Stopwatch.StartNew();
         CheckForOtherInstances(); //Check other instances aren't already open.
         
         ConfigureIoc();
@@ -87,32 +88,35 @@ public partial class App
     /// This checks for other already open storybuilder instances
     /// If one is open, pull it up and kill this instance.
     /// </summary>
-    private async void CheckForOtherInstances()
+    private void CheckForOtherInstances()
     {
-        //If this instance is the first, then we will register it, otherwise we will get info about the other instance.
-        AppInstance _MainInstance = AppInstance.FindOrRegisterForKey("main"); //Get main instance
-        _MainInstance.Activated += ActivateMainInstance;
-
-        AppActivationArguments activatedEventArgs = AppInstance.GetCurrent().GetActivatedEventArgs();
-
-
-        //Redirect to other instance if one exists, otherwise continue initializing this instance.
-        if (!_MainInstance.IsCurrent)
+        Task.Run( async () =>
         {
-            //Bring up the 'main' instance 
-            await _MainInstance.RedirectActivationToAsync(activatedEventArgs);
-            Process.GetCurrentProcess().Kill();
-        }
-        else
-        {
-            if (activatedEventArgs.Kind == ExtendedActivationKind.File)
+            //If this instance is the first, then we will register it, otherwise we will get info about the other instance.
+            AppInstance _MainInstance = AppInstance.FindOrRegisterForKey("main"); //Get main instance
+            _MainInstance.Activated += ActivateMainInstance;
+
+            AppActivationArguments activatedEventArgs = AppInstance.GetCurrent().GetActivatedEventArgs();
+
+
+            //Redirect to other instance if one exists, otherwise continue initializing this instance.
+            if (!_MainInstance.IsCurrent)
             {
-                if (activatedEventArgs.Data is IFileActivatedEventArgs fileArgs)
+                //Bring up the 'main' instance 
+                await _MainInstance.RedirectActivationToAsync(activatedEventArgs);
+                Process.GetCurrentProcess().Kill();
+            }
+            else
+            {
+                if (activatedEventArgs.Kind == ExtendedActivationKind.File)
                 {
-                    GlobalData.FilePathToLaunch = fileArgs.Files.FirstOrDefault().Path; //This will be launched when ShellVM has finished initalising
+                    if (activatedEventArgs.Data is IFileActivatedEventArgs fileArgs)
+                    {
+                        GlobalData.FilePathToLaunch = fileArgs.Files.FirstOrDefault().Path; //This will be launched when ShellVM has finished initalising
+                    }
                 }
             }
-        }
+        });
     }
 
     /// <summary>

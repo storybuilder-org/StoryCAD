@@ -20,7 +20,6 @@ public sealed partial class Shell
 {
     public ShellViewModel ShellVm => Ioc.Default.GetService<ShellViewModel>();
     public UnifiedVM UnifiedVm => Ioc.Default.GetService<UnifiedVM>();
-    public PreferencesModel Preferences = GlobalData.Preferences;
     public Shell()
     {
         try
@@ -29,6 +28,7 @@ public sealed partial class Shell
             DataContext = ShellVm;
             GlobalData.GlobalDispatcher = DispatcherQueue.GetForCurrentThread();
             Loaded += Shell_Loaded;
+            GlobalData.StartUpTimer.Stop();
         }
         catch (Exception ex)
         {

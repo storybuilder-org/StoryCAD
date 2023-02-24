@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
+using System.Threading;
 using Windows.Storage;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
@@ -78,4 +80,7 @@ public static class GlobalData
     public static string FilePathToLaunch;
 
     public static DispatcherQueue? GlobalDispatcher = null;
+
+    //This counts the amount of time it takes from the app being started to the Shell being opened.
+    public static Stopwatch StartUpTimer;
 }
