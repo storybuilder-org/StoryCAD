@@ -6,8 +6,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Windows.Storage;
 using CommunityToolkit.Mvvm.DependencyInjection;
-using Microsoft.UI.Dispatching;
-using Microsoft.UI.Xaml.Controls;
 using StoryBuilder.Models;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.ViewModels;
@@ -104,16 +102,12 @@ namespace StoryBuilder.Services
             }
             catch (Exception ex)
             {
-                GlobalData.GlobalDispatcher.TryEnqueue(async () =>
+                //Show failed message.
+                GlobalData.GlobalDispatcher.TryEnqueue(() =>
                 {
-                    ContentDialog warning = new();
-                    warning.Title = "Backup Warning";
-                    warning.Content = "The last backup failed due to the following reason:\n" + ex.Message;
-                    warning.XamlRoot = GlobalData.XamlRoot;
-                    warning.CloseButtonText = "Understood.";
-                    await warning.ShowAsync();
+                    Ioc.Default.GetRequiredService<ShellViewModel>().ShowMessage(LogLevel.Warn,
+                        "Making a backup failed, check your backup settings.", false);
                 });
-
                 Log.LogException(LogLevel.Error, ex, $"Error backing up project {ex.Message}");
             }
             Log.Log(LogLevel.Info, "BackupProject complete");
