@@ -220,12 +220,10 @@ public partial class App
             {
                 await _log.AddElmahTarget();
                 _log.Log(LogLevel.Info, "elmah.io log target added");
-                GlobalData.Preferences.Version += "elmah";
             }
             else  // can have several reasons (no doppler, or an error adding the target){
             {
                 _log.Log(LogLevel.Info, "elmah.io log target bypassed");
-                GlobalData.Preferences.Version += "noelmah";
             }
 
 
