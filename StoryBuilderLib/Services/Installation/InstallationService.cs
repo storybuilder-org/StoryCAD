@@ -23,6 +23,12 @@ public class InstallationService
     /// </summary>
     public async Task InstallFiles()
     {
+        //Skip install files if version hasn't changed.
+        if (GlobalData.Version == GlobalData.Preferences.Version)
+        {
+            return;
+        }
+
         await DeleteFiles();
         foreach (string InstallerFile in Assembly.GetExecutingAssembly().GetManifestResourceNames())
         {

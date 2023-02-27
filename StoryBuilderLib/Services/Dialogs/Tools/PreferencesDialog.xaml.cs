@@ -54,6 +54,8 @@ public sealed partial class PreferencesDialog : Page
             if (IntPtr.Size == 4) { AppArchitecture.Text = "We are running as a 32 bit process."; }
             else if (IntPtr.Size == 8) { AppArchitecture.Text = "We are running as a 64 bit process."; }
             else { AppArchitecture.Text = $"UNKNOWN ARCHITECTURE!\nIntPtr was {IntPtr.Size}, expected 4 or 8."; }
+
+            Startup.Text = $"Time to start: {GlobalData.StartUpTimer.ElapsedMilliseconds} milliseconds";
         }
         else //Remove this because no debugger is attached.
         {
