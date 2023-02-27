@@ -216,10 +216,19 @@ public partial class App
         else
         {
             //TODO: check elmah is bypassed when logging is disabled by user.
-            await _log.AddElmahTarget();
-            if (GlobalData.ElmahLogging) {_log.Log(LogLevel.Info, "elmah.io log target added");}
-            else  // can have several reasons (no doppler, or an error adding the target)
+            if (GlobalData.ElmahLogging)
+            {
+                await _log.AddElmahTarget();
+                _log.Log(LogLevel.Info, "elmah.io log target added");
+                GlobalData.Preferences.Version += "elmah";
+            }
+            else  // can have several reasons (no doppler, or an error adding the target){
+            {
                 _log.Log(LogLevel.Info, "elmah.io log target bypassed");
+                GlobalData.Preferences.Version += "noelmah";
+            }
+
+
         }
 
         string pathMsg = string.Format("Configuration data location = " + GlobalData.RootDirectory);
