@@ -192,9 +192,12 @@ public class PrintReportDialogVM : ObservableRecipient
         SelectedNodes.Clear(); //Only print single node
 
         PrintReports _rpt = new(this, ShellViewModel.GetModel());
-        await _rpt.Generate();
+       
+        if (elementItem.Type == StoryItemType.StoryOverview) {CreateOverview = true; }
+        else { SelectedNodes.Add(elementItem); }
 
-        await new PrintReports(this, ShellViewModel.GetModel()).Generate();
+        _rpt.Print(await _rpt.Generate());
+        CreateOverview = false;
     }
 
     public void RegisterForPrint()
