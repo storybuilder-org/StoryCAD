@@ -25,11 +25,11 @@ public class InitVM : ObservableRecipient
     /// </summary>
     public InitVM()
     {
-        _preferences.ProjectDirectory = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "StoryBuilder", "Projects");
-       _preferences.BackupDirectory = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "StoryBuilder", "Backups");
+        Preferences.ProjectDirectory = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "StoryBuilder", "Projects");
+       Preferences.BackupDirectory = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "StoryBuilder", "Backups");
     }
 
-    public PreferencesModel _preferences = new();
+    public PreferencesModel Preferences = new();
 
     private string _errorMessage;
     public string ErrorMessage
@@ -49,14 +49,14 @@ public class InitVM : ObservableRecipient
     public async void Save()
     {
         //Create paths
-        System.IO.Directory.CreateDirectory(_preferences.BackupDirectory);
-        System.IO.Directory.CreateDirectory(_preferences.ProjectDirectory);
+        System.IO.Directory.CreateDirectory(Preferences.BackupDirectory);
+        System.IO.Directory.CreateDirectory(Preferences.ProjectDirectory);
 
         //Updates the file, then rereads into memory.
-        PreferencesIo _prfIo = new(_preferences, System.IO.Path.Combine(ApplicationData.Current.RoamingFolder.Path,"Storybuilder"));
+        PreferencesIo _prfIo = new(Preferences, System.IO.Path.Combine(ApplicationData.Current.RoamingFolder.Path,"Storybuilder"));
         await _prfIo.UpdateFile();
         PreferencesIo _loader = new(GlobalData.Preferences, System.IO.Path.Combine(ApplicationData.Current.RoamingFolder.Path, "Storybuilder"));
-        await _loader.UpdateModel();
+        await _loader.LoadModel();
         BackendService _backend = Ioc.Default.GetRequiredService<BackendService>();
         if (!GlobalData.Preferences.RecordPreferencesStatus) { await _backend.PostPreferences(GlobalData.Preferences); }
     }

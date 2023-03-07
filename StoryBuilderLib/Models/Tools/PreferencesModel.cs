@@ -30,7 +30,7 @@ public class PreferencesModel
 
     /// <summary>
     /// This switch tracks whether this is a new 
-    /// installation. 
+    /// installation and if Initialization should be shown.
     /// </summary>
     public bool PreferencesInitialized { get; set; }
     public int LastSelectedTemplate { get; set; } //This is the Last Template Selected by the user.

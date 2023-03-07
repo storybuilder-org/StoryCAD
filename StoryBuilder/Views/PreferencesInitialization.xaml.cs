@@ -99,28 +99,28 @@ public sealed partial class PreferencesInitialization
     /// </summary>
     public void Check(object sender, RoutedEventArgs e)
     {
-        if (string.IsNullOrWhiteSpace(_initVM._preferences.Name))
+        if (string.IsNullOrWhiteSpace(_initVM.Preferences.Name))
         {
             _initVM.ErrorMessage = "Please enter your Name";
             return;
         }
-        if (string.IsNullOrWhiteSpace(_initVM._preferences.Email))
+        if (string.IsNullOrWhiteSpace(_initVM.Preferences.Email))
         {
             _initVM.ErrorMessage = "Please enter your Email";
             return;
         }
 
-        if (!_initVM._preferences.Email.Contains("@") || !_initVM._preferences.Email.Contains("."))
+        if (!_initVM.Preferences.Email.Contains("@") || !_initVM.Preferences.Email.Contains("."))
         {
             _initVM.ErrorMessage = "Please enter a valid email address.";
             return;
         }
-        if (string.IsNullOrWhiteSpace(_initVM._preferences.ProjectDirectory))
+        if (string.IsNullOrWhiteSpace(_initVM.Preferences.ProjectDirectory))
         {
             _initVM.ErrorMessage = "Please set a Project path";
             return;
         }
-        if (string.IsNullOrWhiteSpace(_initVM._preferences.BackupDirectory))
+        if (string.IsNullOrWhiteSpace(_initVM.Preferences.BackupDirectory))
         {
             _initVM.ErrorMessage = "Please set a Backup path";
             return;
