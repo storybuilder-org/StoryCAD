@@ -7,33 +7,33 @@
         <Pivot Name="PivotView">
             <PivotItem Header="General">
                 <StackPanel>
-                    <TextBox Header="Your name:" PlaceholderText="Put the name want to publish under here" HorizontalAlignment="Center" Margin="8" Width="300" Text="{x:Bind PreferencesVm.Name, Mode=TwoWay}"/>
-                    <TextBox Header="Your email:" PlaceholderText="Put your email here" Margin="8" Width="300" Text="{x:Bind PreferencesVm.Email, Mode=TwoWay}"/>
+                    <TextBox Header="Your name:" PlaceholderText="Put the name want to publish under here" HorizontalAlignment="Center" Margin="8" Width="300" Text="{x:Bind PreferencesVm.CurrentModel.Name, Mode=TwoWay}"/>
+                    <TextBox Header="Your email:" PlaceholderText="Put your email here" Margin="8" Width="300" Text="{x:Bind PreferencesVm.CurrentModel.Email, Mode=TwoWay}"/>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                        <TextBox IsReadOnly="True" Name="ProjDirBox" Header="Project directory:" PlaceholderText="Where do you want to store your stories?" Margin="8" Width="300" VerticalAlignment="Center" Text="{x:Bind PreferencesVm.ProjectDir, Mode=OneWay}"/>
+                        <TextBox IsReadOnly="True" Name="ProjDirBox" Header="Project directory:" PlaceholderText="Where do you want to store your stories?" Margin="8" Width="300" VerticalAlignment="Center" Text="{x:Bind PreferencesVm.CurrentModel.ProjectDir, Mode=OneWay}"/>
                         <Button Content="Browse" Click="SetProjectPath" VerticalAlignment="Center" Margin="0,25,10,0"/>
                     </StackPanel>
                 </StackPanel>
             </PivotItem>
             <PivotItem Header="Backup">
                 <StackPanel HorizontalAlignment="Right">
-                    <CheckBox Content="Make a backup of the story when opened" Margin="4" HorizontalAlignment="Left" Name="BackupOnOpen" IsChecked="{x:Bind PreferencesVm.BackupUpOnOpen, Mode=TwoWay}"/>
-                    <CheckBox Content="Make timed backups" Margin="4" HorizontalAlignment="Left" Name="TimedBackups" IsChecked="{x:Bind PreferencesVm.Backup, Mode=TwoWay}"/>
-                    <NumberBox Header="How often should backups be made? (Minutes)" Maximum="300" Minimum="1" Margin="4" Width="300" HorizontalAlignment="Left" Value="{x:Bind PreferencesVm.BackupInterval, Mode=TwoWay}"/>
+                    <CheckBox Content="Make a backup of the story when opened" Margin="4" HorizontalAlignment="Left" IsChecked="{x:Bind PreferencesVm.CurrentModel.BackupOnOpen, Mode=TwoWay}"/>
+                    <CheckBox Content="Make timed backups" Margin="4" HorizontalAlignment="Left" IsChecked="{x:Bind PreferencesVm.CurrentModel.TimedBackup, Mode=TwoWay}"/>
+                    <NumberBox Header="How often should backups be made? (Minutes)" Maximum="300" Minimum="1" Margin="4" Width="300" HorizontalAlignment="Left" Value="{x:Bind PreferencesVm.CurrentModel.BackupInterval, Mode=TwoWay}"/>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                        <TextBox Header="Backup directory:" PlaceholderText="Where do you want to store your backups?" IsReadOnly="True" Margin="8" Width="300" HorizontalAlignment="Center" Text="{x:Bind PreferencesVm.BackupDir, Mode=TwoWay}"/>
+                        <TextBox Header="Backup directory:" PlaceholderText="Where do you want to store your backups?" IsReadOnly="True" Margin="8" Width="300" HorizontalAlignment="Center" Text="{x:Bind PreferencesVm.CurrentModel.BackupDir, Mode=TwoWay}"/>
                         <Button Content="Browse" Click="SetBackupPath" VerticalAlignment="Center" Margin="0,25,10,0"/>
                     </StackPanel>
                 </StackPanel>
             </PivotItem>
             <PivotItem Header="Other">
                 <StackPanel HorizontalAlignment="Center">
-                    <CheckBox Content="Send error logs to Team StoryBuilder" Margin="8" HorizontalAlignment="Left" IsChecked="{x:Bind PreferencesVm.ErrorConsent, Mode=TwoWay}"/>
-                    <CheckBox Content="Send me newsletters about StoryBuilder" Margin="8" HorizontalAlignment="Left" IsChecked="{x:Bind PreferencesVm.NewsConsent, Mode=TwoWay}"/>
-                    <CheckBox Content="Wrap node names" Margin="8" HorizontalAlignment="Left" IsChecked="{x:Bind PreferencesVm.WrapNodeNames, Mode=TwoWay}"/>
+                    <CheckBox Content="Send error logs to Team StoryBuilder" Margin="8" HorizontalAlignment="Left" IsChecked="{x:Bind PreferencesVm.CurrentModel.ErrorCollectionConsent, Mode=TwoWay}"/>
+                    <CheckBox Content="Send me newsletters about StoryBuilder" Margin="8" HorizontalAlignment="Left" IsChecked="{x:Bind PreferencesVm.CurrentModel.Newsletter, Mode=TwoWay}"/>
+                    <CheckBox Content="Wrap node names" Margin="8" HorizontalAlignment="Left" IsChecked="{x:Bind PreferencesVm.CurrentModel.WrapNodeNames, Mode=TwoWay}"/>
                     <StackPanel Orientation="Horizontal">
-                        <CheckBox Content="Automatically Save every" IsChecked="{x:Bind PreferencesVm.AutoSave, Mode=TwoWay}" HorizontalAlignment="Left" Margin="8"/>
-                        <NumberBox Minimum="15" Maximum="60" IsEnabled="{x:Bind PreferencesVm.AutoSave, Mode=TwoWay}" PlaceholderText="Enter a value (Seconds)" Value="{x:Bind PreferencesVm.AutoSaveInterval, Mode=TwoWay}" HorizontalAlignment="Left" Margin="8"/>
+                        <CheckBox Content="Automatically Save every" IsChecked="{x:Bind PreferencesVm.CurrentModel.AutoSave, Mode=TwoWay}" HorizontalAlignment="Left" Margin="8"/>
+                        <NumberBox Minimum="15" Maximum="60" IsEnabled="{x:Bind PreferencesVm.CurrentModel.AutoSaveInterval, Mode=TwoWay}" PlaceholderText="Enter a value (Seconds)" Value="{x:Bind PreferencesVm.AutoSaveInterval, Mode=TwoWay}" HorizontalAlignment="Left" Margin="8"/>
                         <TextBlock Text="Seconds" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                     </StackPanel>
                     <ComboBox Header="Preferred Search Engine" HorizontalAlignment="Stretch" SelectedIndex="{x:Bind PreferencesVm.PreferredSearchEngine, Mode=TwoWay}">

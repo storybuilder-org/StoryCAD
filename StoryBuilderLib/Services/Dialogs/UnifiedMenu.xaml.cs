@@ -7,7 +7,7 @@ using StoryBuilder.ViewModels;
 
 namespace StoryBuilder.Services.Dialogs;
 
-public sealed partial class UnifiedMenuPage : Page
+public sealed partial class UnifiedMenuPage
 {
     public delegate void UpdateContentDelegate();
 

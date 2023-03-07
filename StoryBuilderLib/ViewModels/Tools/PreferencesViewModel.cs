@@ -24,89 +24,9 @@ public class PreferencesViewModel : ObservableRecipient
     /// the Dev Menu (Shown if a debugger is attached.)
     /// </summary>
     public bool Init = true;
-    private string _backupDir;
-    public string BackupDir
-    {
-        get => _backupDir;
-        set => SetProperty(ref _backupDir, value);
-    }
 
-    private string _name;
-    public string Name
-    {
-        get => _name;
-        set => _name = value;
-    }
-    private string _email;
-    public string Email
-    {
-        get => _email;
-        set => _email = value;
-    }
-    private bool _errorConsent;
-    public bool ErrorConsent
-    {
-        get => _errorConsent;
-        set => _errorConsent = value;
-    }
-    private bool _newsConsent;
-    public bool NewsConsent
-    {
-        get => _newsConsent;
-        set => _newsConsent = value;
-    }
-    private bool _backup;
-    public bool Backup
-    {
-        get => _backup;
-        set => _backup = value;
-    }
-    private int _backupInterval;
-    public int BackupInterval
-    {
-        get => _backupInterval;
-        set => _backupInterval = value;
-    }
-    private string _projectDir;
-    public string ProjectDir
-    {
-        get => _projectDir;
-        set => _projectDir = value;
-    }
+    public PreferencesModel CurrentModel = GlobalData.Preferences;
 
-    private bool _wrapNodeNames;
-    public bool WrapNodeNames
-    {
-        get => _wrapNodeNames;
-        set => _wrapNodeNames = value;
-    }
-
-    private bool _backupOnOpen;
-    public bool BackupUpOnOpen
-    {
-        get => _backupOnOpen;
-        set => _backupOnOpen = value;
-    }
-
-    private bool _autoSave;
-    public bool AutoSave
-    {
-        get => _autoSave;
-        set => _autoSave = value;
-    }
-    private int _autoSaveInterval;
-    public int AutoSaveInterval
-    {
-        get => _autoSaveInterval;
-        set => _autoSaveInterval = value;
-    }
-
-    private BrowserType _preferredSearchEngine;
-    public int PreferredSearchEngine
-    {
-        get => (int)_preferredSearchEngine;
-        set => _preferredSearchEngine = (BrowserType)value;
-    }
     #endregion
 
     /// <summary>

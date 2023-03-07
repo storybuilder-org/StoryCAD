@@ -2156,7 +2156,6 @@ public class ShellViewModel : ObservableRecipient
         Messenger.Register<ShellViewModel, StatusChangedMessage>(this, static (r, m) => r.StatusMessageReceived(m));
         Messenger.Register<ShellViewModel, NameChangedMessage>(this, static (r, m) => r.NameMessageReceived(m));
 
-        //Preferences = Ioc.Default.GetRequiredService<Preferences>();
         Scrivener = Ioc.Default.GetRequiredService<ScrivenerIo>();
         Logger = Ioc.Default.GetRequiredService<LogService>();
         Search = Ioc.Default.GetRequiredService<SearchService>();
