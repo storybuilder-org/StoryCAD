@@ -36,7 +36,7 @@
                         <NumberBox Minimum="15" Maximum="60" IsEnabled="{x:Bind PreferencesVm.CurrentModel.AutoSave, Mode=TwoWay}" PlaceholderText="Enter a value (Seconds)" Value="{x:Bind PreferencesVm.CurrentModel.AutoSaveInterval, Mode=TwoWay}" HorizontalAlignment="Left" Margin="8"/>
                         <TextBlock Text="Seconds" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                     </StackPanel>
-                    <ComboBox Header="Preferred Search Engine" HorizontalAlignment="Stretch" SelectedValue="{x:Bind PreferencesVm.CurrentModel.PreferredSearchEngine, Mode=TwoWay}">
+                    <ComboBox Header="Preferred Search Engine" HorizontalAlignment="Stretch" Name="SearchEngine" SelectedIndex="{x:Bind PreferencesVm.CurrentModel.SearchEngineIndex, Mode=TwoWay}">
                         <ComboBoxItem Content="DuckDuckGo"/>
                         <ComboBoxItem Content="Google"/>
                         <ComboBoxItem Content="Bing"/>
@@ -46,10 +46,10 @@
             </PivotItem>
             <PivotItem Header="About" VerticalContentAlignment="Center" VerticalAlignment="Stretch">
                 <StackPanel>
-                    <TextBlock Name="Version" HorizontalAlignment="Center" Margin="5,0,0,40"/>
+                    <TextBlock Name="Version" HorizontalAlignment="Center" Margin="5,0,0,20"/>
                     <Button Content="Open Logs folder" HorizontalAlignment="Center" Click="OpenLogFolder" Margin="20" Width="200"/>
-                    <Button Content="Join the StoryBuilder Discord!" HorizontalAlignment="Center" Click="OpenDiscordUrl" Margin="20"/>
-                    <TextBlock Text="StoryBuilder was created by Terry Cox, Jake Shaw and Kyle Lemons" HorizontalAlignment="Center" TextWrapping="WrapWholeWords" Margin="5" FontSize="13"/>
+                    <HyperlinkButton Content="Join the StoryBuilder Discord!" HorizontalAlignment="Center" NavigateUri="" Margin="20"/>
+                    <HyperlinkButton Content="StoryBuilder was created by Terry Cox, Jake Shaw and Contributors"  HorizontalAlignment="Center" NavigateUri="https://github.com/storybuilder-org/StoryBuilder-2/graphs/contributors" Margin="5" FontSize="13"/>
                 </StackPanel>
             </PivotItem>
             <PivotItem Header="What's new">
@@ -58,18 +58,18 @@
                 </ScrollViewer>
             </PivotItem>
             <PivotItem Header="Dev" Name="Dev">
-                <Grid>
+                <Grid Width="500">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0">
-                        <Button Content="Set Init to false" Click="SetInitToFalse" Width="200" Margin="0,5"/>
-                        <Button Content="Throw exception" Click="ThrowException" Width="200" Margin="0,5"/>
-                        <Button Content="Attach Elmah" Click="{x:Bind Logger.AddElmahTarget}" Width="200" Margin="0,5"/>
-                        <Button Content="Run InstallService" Click="{x:Bind InstallVM.InstallFiles}" Width="200" Margin="0,5"/>
+                    <StackPanel Grid.Column="0" Grid.Row="0">
+                        <Button Content="Set Init to false" Click="SetInitToFalse" Width="150" Margin="0,5"/>
+                        <Button Content="Throw exception" Click="ThrowException" Width="150" Margin="0,5"/>
+                        <Button Content="Attach Elmah" Click="{x:Bind Logger.AddElmahTarget}" Width="150" Margin="0,5"/>
+                        <Button Content="Run InstallService" Click="{x:Bind InstallVM.InstallFiles}" Width="150" Margin="0,5"/>
                     </StackPanel>
-                    <StackPanel VerticalAlignment="Bottom" Grid.Column="1" Margin="10,0,0,0">
+                    <StackPanel VerticalAlignment="Bottom" Grid.Column="1" Grid.Row="0" Margin="0,0,5,0">
                         <TextBlock Name="CPUArchitecture"/>
                         <TextBlock Name="OSArchitecture"/>
                         <TextBlock Name="OSInfo"/>

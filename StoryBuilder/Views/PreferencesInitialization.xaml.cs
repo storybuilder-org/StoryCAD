@@ -43,7 +43,6 @@ public sealed partial class PreferencesInitialization
         if (folder != null)
         {
             ProjPath.Text = folder.Path;
-            BackPath.Text = folder.Path;
         }
     }
 
@@ -73,7 +72,6 @@ public sealed partial class PreferencesInitialization
         if (folder != null)
         {
             BackPath.Text = folder.Path;
-            ProjPath.Text = folder.Path;
         }
     }
 
@@ -125,7 +123,7 @@ public sealed partial class PreferencesInitialization
             _initVM.ErrorMessage = "Please set a Backup path";
             return;
         }
-        
+
         _initVM.Save();
         RootFrame.Navigate(typeof(Shell));
     }

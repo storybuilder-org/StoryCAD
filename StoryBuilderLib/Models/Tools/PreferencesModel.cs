@@ -1,6 +1,7 @@
 ﻿using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
 using Windows.UI.ViewManagement;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace StoryBuilder.Models.Tools;
 
@@ -17,7 +18,7 @@ namespace StoryBuilder.Models.Tools;
 /// InstallFiles() method will create one.
 /// 
 /// </summary>
-public class PreferencesModel
+public class PreferencesModel : ObservableRecipient
 {
     #region Properties
     public bool Changed { get; set; }
@@ -65,6 +66,12 @@ public class PreferencesModel
     public bool RecordPreferencesStatus { get; set; }  // Last preferences change was logged successfully or not
     public bool RecordVersionStatus { get; set; }      // Last version change was logged successfully or not
     public BrowserType PreferredSearchEngine { get; set; }      // Last version change was logged successfully or not
+
+    public int SearchEngineIndex
+    {
+        get => (int)PreferredSearchEngine;
+        set => PreferredSearchEngine = (BrowserType) value;
+    } // Last version change was logged successfully or not
     #endregion
 
     #region Constructor

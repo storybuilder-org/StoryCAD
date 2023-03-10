@@ -31,6 +31,8 @@ public sealed partial class PreferencesDialog
         if (PreferencesVm.CurrentModel.WrapNodeNames == TextWrapping.WrapWholeWords) { TextWrap.IsChecked = true; }
         else { TextWrap.IsChecked = false; }
 
+        SearchEngine.SelectedIndex = (int)PreferencesVm.CurrentModel.PreferredSearchEngine;
+
         //TODO: Put this in a VM and make this data get logged at start up with some more system info.
         if (Debugger.IsAttached)
         {
@@ -74,10 +76,11 @@ public sealed partial class PreferencesDialog
         }
         catch
         {
-            //TODO: Use .NET7 Raw String Literal?
-            Changelog.Text = "Failed to get changelog for this version, this because either:" +
-                             "\n - You are running an auto-build version" +
-                             "\n- There is an issue connecting to Github";
+            Changelog.Text = """
+                Failed to get changelog for this version, this because either:
+                 - You are running an auto-build version
+                 -There is an issue connecting to Github
+                """;
         }
 
     }
@@ -88,14 +91,6 @@ public sealed partial class PreferencesDialog
     private void OpenLogFolder(object sender, RoutedEventArgs e)
     {
         Process.Start(new ProcessStartInfo { FileName = Path.Combine(GlobalData.RootDirectory, "Logs"), UseShellExecute = true, Verb = "open" });
-    }
-
-    /// <summary>
-    /// This opens the user's browser to join the StoryBuilder Discord Server
-    /// </summary>
-    private void OpenDiscordUrl(object sender, RoutedEventArgs e)
-    {
-        Process.Start(new ProcessStartInfo { FileName = @"https://discord.gg/wfZxU4bx6n", UseShellExecute = true, Verb = "open" });
     }
 
     private async void SetBackupPath(object sender, RoutedEventArgs e)
@@ -168,7 +163,7 @@ public sealed partial class PreferencesDialog
     {
         if ((sender as CheckBox).IsChecked == true)
         {
-            PreferencesVm.CurrentModel.WrapNodeNames = TextWrapping.Wrap;
+            PreferencesVm.CurrentModel.WrapNodeNames = TextWrapping.WrapWholeWords;
         }
         else { PreferencesVm.CurrentModel.WrapNodeNames = TextWrapping.NoWrap; }
     }

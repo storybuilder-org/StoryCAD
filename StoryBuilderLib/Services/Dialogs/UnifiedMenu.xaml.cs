@@ -23,7 +23,7 @@ public sealed partial class UnifiedMenuPage
                 UnifiedMenuVM.SelectedTemplateIndex = GlobalData.Preferences.LastSelectedTemplate;
                 MenuContent.Children.Add(new NewProjectPage(UnifiedMenuVM));
                 break;
-            case "Example":
+            case "Sample":
                 MenuContent.Children.Add(new SamplePage(UnifiedMenuVM));
                 break;
         }

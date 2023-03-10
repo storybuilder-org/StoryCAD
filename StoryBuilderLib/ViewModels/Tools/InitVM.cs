@@ -26,7 +26,7 @@ public class InitVM : ObservableRecipient
     public InitVM()
     {
         Preferences.ProjectDirectory = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "StoryBuilder", "Projects");
-       Preferences.BackupDirectory = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "StoryBuilder", "Backups");
+        Preferences.BackupDirectory = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "StoryBuilder", "Backups");
     }
 
     public PreferencesModel Preferences = new();
@@ -52,9 +52,11 @@ public class InitVM : ObservableRecipient
         System.IO.Directory.CreateDirectory(Preferences.BackupDirectory);
         System.IO.Directory.CreateDirectory(Preferences.ProjectDirectory);
 
+        Preferences.PreferencesInitialized = true; //Make sure prefs init page isn't shown again
+
         //Updates the file, then rereads into memory.
         PreferencesIo _prfIo = new(Preferences, System.IO.Path.Combine(ApplicationData.Current.RoamingFolder.Path,"Storybuilder"));
-        await _prfIo.UpdateFile();
+        await _prfIo.SaveModel ();
         PreferencesIo _loader = new(GlobalData.Preferences, System.IO.Path.Combine(ApplicationData.Current.RoamingFolder.Path, "Storybuilder"));
         await _loader.LoadModel();
         BackendService _backend = Ioc.Default.GetRequiredService<BackendService>();

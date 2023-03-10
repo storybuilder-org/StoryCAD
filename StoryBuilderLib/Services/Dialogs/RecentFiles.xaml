@@ -7,7 +7,7 @@
     mc:Ignorable="d"
     Background="{x:Bind UnifiedMenuVM.AdjustmentColor, Mode=OneWay}">
 
-    <Grid VerticalAlignment="Stretch" HorizontalAlignment="Center" MinHeight="500"  Background="{x:Bind UnifiedMenuVM.AdjustmentColor}" Margin="0,0,70,0">
+    <Grid VerticalAlignment="Stretch" HorizontalAlignment="Center" Height="480"  Background="{x:Bind UnifiedMenuVM.AdjustmentColor}" Margin="0,0,70,0">
         <Grid.RowDefinitions>
             <RowDefinition Height="40"/>
             <RowDefinition Height="*"/>
