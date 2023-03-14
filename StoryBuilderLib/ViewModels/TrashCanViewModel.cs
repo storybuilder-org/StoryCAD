@@ -1,17 +1,12 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System;
+using CommunityToolkit.Mvvm.ComponentModel;
 using StoryBuilder.Models;
 using StoryBuilder.Services.Navigation;
-using System;
-using System.Threading.Tasks;
 
 namespace StoryBuilder.ViewModels;
 
 public class TrashCanViewModel : ObservableRecipient, INavigable
 {
-    #region Fields
-
-    #endregion
-
     #region Properties
 
     // StoryElement data
@@ -37,7 +32,7 @@ public class TrashCanViewModel : ObservableRecipient, INavigable
     public TrashCanModel Model
     {
         get => _model;
-        set => SetProperty(ref _model, value);
+        set => _model = value;
     }
 
     #endregion
@@ -50,10 +45,7 @@ public class TrashCanViewModel : ObservableRecipient, INavigable
         LoadModel();
     }
 
-    public void Deactivate(object parameter)
-    {
-        SaveModel();
-    }
+    public void Deactivate(object parameter) { }
 
     private void LoadModel()
     {
@@ -61,11 +53,5 @@ public class TrashCanViewModel : ObservableRecipient, INavigable
         Name = Model.Name;
 
     }
-
-    private void SaveModel()
-    {
-        /* Nothing to do */
-    }
-
     #endregion
 }

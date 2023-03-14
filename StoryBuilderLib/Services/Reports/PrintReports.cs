@@ -1,8 +1,9 @@
 ﻿using System;
-using System.Text;
 using System.Drawing;
 using System.Drawing.Printing;
 using System.IO;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using StoryBuilder.Models;
@@ -17,15 +18,14 @@ public class PrintReports
     private PrintReportDialogVM _vm;
     private StoryModel _model;
     private ReportFormatter _formatter;
-    private StringReader fileStream;
-    private Font printFont;
-    private string documentText;
+    private StringReader _fileStream; 
+    private Font _printFont;
+    private string _documentText;
     PrintDocument PrintDoc = new();
 
-    //PrintHelper helper = new();
-
-    public async Task Generate()
+    public async Task<string> Generate()
     {
+
         string rtf = string.Empty;
         await _formatter.LoadReportTemplates(); // Load text report templates
 
@@ -33,34 +33,43 @@ public class PrintReports
         if (_vm.CreateOverview)
         {
             rtf = _formatter.FormatStoryOverviewReport(Overview());
-            documentText += FormatText(rtf);
+            _documentText += FormatText(rtf);
         }
         if (_vm.CreateSummary)
         {
-            rtf =_formatter.FormatSynopsisReport();
-            //documentText = FormatText(rtf);
-            documentText += FormatText(rtf,true);
+            rtf = _formatter.FormatSynopsisReport();
+            _documentText += FormatText(rtf, true);
         }
 
         if (_vm.ProblemList)
         {
             rtf = _formatter.FormatProblemListReport();
-            documentText += FormatText(rtf);
+            _documentText += FormatText(rtf);
         }
         if (_vm.CharacterList)
         {
             rtf = _formatter.FormatCharacterListReport();
-            documentText += FormatText(rtf);
+            _documentText += FormatText(rtf);
         }
         if (_vm.SettingList)
         {
             rtf = _formatter.FormatSettingListReport();
-            documentText += FormatText(rtf);
+            _documentText += FormatText(rtf);
         }
         if (_vm.SceneList)
         {
             rtf = _formatter.FormatSceneListReport();
-            documentText += FormatText(rtf);
+            _documentText += FormatText(rtf);
+        }
+        if (_vm.SceneList)
+        {
+            rtf = _formatter.FormatSceneListReport();
+            _documentText += FormatText(rtf);
+        }
+        if (_vm.WebList)
+        {
+            rtf = _formatter.FormatWebListReport();
+            _documentText += FormatText(rtf);
         }
 
         foreach (StoryNodeItem node in _vm.SelectedNodes)
@@ -84,28 +93,47 @@ public class PrintReports
                     case StoryItemType.Scene:
                         rtf = _formatter.FormatSceneReport(element);
                         break;
+                    case StoryItemType.Web:
+                        rtf = _formatter.FormatWebReport(element);
+                        break;
                 }
-                documentText += FormatText(rtf);
+                _documentText += FormatText(rtf);
             }
         }
 
-        if (string.IsNullOrEmpty(documentText))
+        if (string.IsNullOrEmpty(_documentText))
         {
-            Ioc.Default.GetService<ShellViewModel>().ShowMessage(LogLevel.Warn, "No nodes selected for report generation",true);
-            return;
+            Ioc.Default.GetRequiredService<LogService>().Log(LogLevel.Warn, "No nodes selected for report generation");
+            return "";
         }
-        Print(documentText);
-        Ioc.Default.GetService<ShellViewModel>().ShowMessage( LogLevel.Info, "Generate Print Reports complete",true);
-
+        return _documentText;
     }
 
-    private StoryElement Overview() 
+    private StoryElement Overview()
     {
-        foreach (StoryElement element in _model.StoryElements)
-            if (element.Type == StoryItemType.StoryOverview)
-                return element;
-        return null;
+        return _model.StoryElements.FirstOrDefault(element => element.Type == StoryItemType.StoryOverview);
     }
+
+    public void Print(string file)
+    {
+        try
+        {
+            _fileStream = new StringReader(file);
+            _printFont = new Font("Arial", 12, FontStyle.Regular, GraphicsUnit.Pixel);
+            PrintDoc.PrintPage += pd_PrintPage;
+            Margins margins = new(100, 100, 100, 100);
+            PrintDoc.DefaultPageSettings.Margins = margins;
+            float pixelsPerChar = _printFont.Size;
+            float lineWidth = PrintDoc.DefaultPageSettings.PrintableArea.Width;
+            int charsPerLine = Convert.ToInt32(lineWidth / pixelsPerChar);
+            // Print the document.
+            PrintDoc.Print();
+        }
+        catch (Exception ex)
+        {
+            Ioc.Default.GetService<LogService>().LogException(Logging.LogLevel.Error, ex, "Error in Print reports.");
+        }
+    }   
 
     // The PrintPage event is raised for each page to be printed.
     private void pd_PrintPage(object sender, PrintPageEventArgs ev)
@@ -116,18 +144,18 @@ public class PrintReports
         string line = null;
 
         // Calculate the number of lines per page.
-        float linesPerPage = ev.MarginBounds.Height / printFont.GetHeight(ev.Graphics);
+        float linesPerPage = ev.MarginBounds.Height / _printFont.GetHeight(ev.Graphics);
 
         // Iterate over the file, printing each line.
-        while (count < linesPerPage && (line = fileStream.ReadLine()) != null)
+        while (count < linesPerPage && (line = _fileStream.ReadLine()) != null)
         {
             if (line == @"\PageBreak")
             {
                 ev.HasMorePages = true;
                 break;
             }
-            float yPos = topMargin + count * printFont.GetHeight(ev.Graphics);
-            ev.Graphics.DrawString(line, printFont, Brushes.Black, leftMargin, yPos, new StringFormat());
+            float yPos = topMargin + count * _printFont.GetHeight(ev.Graphics);
+            ev.Graphics.DrawString(line, _printFont, Brushes.Black, leftMargin, yPos, new StringFormat());
             count++;
         }
 
@@ -136,48 +164,29 @@ public class PrintReports
         else { ev.HasMorePages = false; }
     }
 
-    // Print the file.
-    public void Print(string file)
-    {
-        try
-        {
-            fileStream = new StringReader(file);
-            printFont = new Font("Arial", 12, FontStyle.Regular, GraphicsUnit.Pixel);
-            PrintDoc.PrintPage += new(pd_PrintPage);
-            Margins margins = new(100, 100, 100, 100);
-            PrintDoc.DefaultPageSettings.Margins = margins;
-            float pixelsPerChar = printFont.Size;
-            float lineWidth = PrintDoc.DefaultPageSettings.PrintableArea.Width;
-            int charsPerLine = Convert.ToInt32(lineWidth / pixelsPerChar);
-            // Print the document.
-            PrintDoc.Print();
-        }
-        catch (Exception ex)
-        {
-            Ioc.Default.GetService<LogService>().LogException(LogLevel.Error, ex, "Error in Print reports.");
-        }
-    }
     /// <summary>
     /// Formats text for a report, if SummaryMode is set to true
     /// then some formatting is changed to make summary reports more pleasant
     /// </summary>
     /// <param name="rtfInput"></param>
-    /// <param name="SummaryMode"></param>
+    /// <param name="summaryMode"></param>
     /// <returns></returns>
-    private string FormatText(string rtfInput, bool SummaryMode = false) 
+    private string FormatText(string rtfInput, bool summaryMode = false)
     {
         string text = _formatter.GetText(rtfInput, false);
         string[] lines = text.Split('\n');
         StringBuilder sb = new();
 
+        //TODO: rewrite this for readability and maintainability
         foreach (string t in lines)
         {
             string line = t.TrimEnd();
             if (line.Equals("\r"))
                 continue;
-            while (line.Length > 72) 
+            while (line.Length > 72)
             {
                 string temp = line[..72];
+                if (!temp.Contains(" ")) { temp += " "; } //wrapping fix
                 int j = temp.LastIndexOf(' ');
                 temp = temp[..j];
                 sb.Append(temp);
@@ -187,7 +196,7 @@ public class PrintReports
             }
             sb.Append(line + Environment.NewLine);
         }
-        if (SummaryMode)
+        if (summaryMode)
         {
             sb.Replace("[", "\r\n[");
             sb.Replace("]", "]\r\n");
@@ -195,8 +204,6 @@ public class PrintReports
         sb.Append("\n\\PageBreak\n");
         return sb.ToString();
     }
-
-
 
     #region Constructor
 

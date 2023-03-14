@@ -4,12 +4,16 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Input;
+using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
 using StoryBuilder.Models;
 using StoryBuilder.Models.Tools;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.Services.Messages;
 using StoryBuilder.ViewModels;
+using Windows.UI.ViewManagement;
+using Microsoft.UI.Dispatching;
+using StoryBuilder.Services;
 
 namespace StoryBuilder.Views;
 
@@ -34,8 +38,9 @@ public sealed partial class Shell
             InitializeComponent();
             Logger = Ioc.Default.GetService<LogService>();
             DataContext = ShellVm;
+            GlobalData.GlobalDispatcher = DispatcherQueue.GetForCurrentThread();
             Loaded += Shell_Loaded;
-        }
+        }                         
         catch (Exception ex)
         {
             // A shell initialization error is fatal
@@ -53,8 +58,21 @@ public sealed partial class Shell
         // https://docs.microsoft.com/en-us/windows/winui/api/microsoft.ui.xaml.controls.contentdialog?view=winui-3.0-preview
         GlobalData.XamlRoot = Content.XamlRoot;
         ShellVm.ShowHomePage();
-        ShellVm.ShowConnectionStatus();
-        await ShellVm.OpenUnifiedMenu();
+        ShellVm.ShowConnectionStatus();        
+        if (GlobalData.ShowDotEnvWarning) { await ShellVm.ShowDotEnvWarningAsync(); }
+
+        if (!await Ioc.Default.GetRequiredService<WebViewModel>().CheckWebviewState())
+        {
+            ShellVm._canExecuteCommands = false;
+            await Ioc.Default.GetRequiredService<WebViewModel>().ShowWebviewDialog();
+            ShellVm._canExecuteCommands = true;
+        }
+        if (GlobalData.LoadedWithVersionChange ) { await ShellVm.ShowChangelog(); }
+
+        //If StoryBuilder was loaded from a .STBX File then instead of showing the Unified menu
+        //We will instead load the file instead.
+        if (GlobalData.FilePathToLaunch == null) { await ShellVm.OpenUnifiedMenu(); }
+        else { await ShellVm.OpenFile(GlobalData.FilePathToLaunch);}
     }
 
     /// <summary>
@@ -76,8 +94,13 @@ public sealed partial class Shell
     }
     private void TreeViewItem_RightTapped(object sender, RightTappedRoutedEventArgs e)
     {
+        if (ShellVm.RightClickedTreeviewItem != null) { ShellVm.RightClickedTreeviewItem.Background = null; } //Remove old right clicked nodes background
+
         TreeViewItem item = (TreeViewItem)sender;
+        item.Background = new SolidColorBrush(new UISettings().GetColorValue(UIColorType.Accent));
+
         ShellVm.RightTappedNode = (StoryNodeItem)item.DataContext;
+        ShellVm.RightClickedTreeviewItem = item; //We can't set the background through righttappednode so we set a reference to the node itself to reset the background later
         ShellVm.ShowFlyoutButtons();
     }
 
@@ -112,95 +135,105 @@ public sealed partial class Shell
         foreach (StoryNodeItem node in ShellVm.DataSource[0]) { node.Background = null; }
     }
 
-    // Drag and Drop related
-
     private void TreeViewItem_OnDragEnter(object sender, DragEventArgs args)
     {
-        base.OnDragEnter(args);
-        try
-        {   
-            Logger.Log(LogLevel.Trace, $"OnDragEnter event");
-            var root = NavigationTree.RootNodes[0]; // The StoryExplorer (or StoryNarrator) root
-            var trash = NavigationTree.RootNodes[1]; // The Trash root
+        Logger.Log(LogLevel.Trace, $"OnDragEnter event");
 
-            // args.OriginalSource is the TreeViewItem you're dragging.
-            // There is some weirdness with the second root; if you're dragging from the root 
-            // over the Trashcan, args.OriginalSource will be the trashcan TreeViewItem and 
-            // sender will be ?
-            Type type = args.OriginalSource.GetType();
-            if (!type.Name.Equals("TreeViewItem"))
-            {
-                Logger.Log(LogLevel.Warn, $"Invalid dragSource type: {type.Name}");
-                var x = args.GetPosition(dragTargetItem);
-                args.AcceptedOperation = Windows.ApplicationModel.DataTransfer.DataPackageOperation.None;
-                args.Handled = true;
-                ShellVm.ShowMessage(LogLevel.Warn, "Invalid drag source", false);
-                return;
-            }
-            var item = args.OriginalSource as TreeViewItem;
-            var node = NavigationTree.NodeFromContainer(item);
-
-            // Insure that the source is below the TreeView root
-            if (node.Depth < 1)
-            {
-                Logger.Log(LogLevel.Warn, $"dragSource is not below root");
-                args.AcceptedOperation = Windows.ApplicationModel.DataTransfer.DataPackageOperation.None;
-                args.Handled = true;
-                ShellVm.ShowMessage(LogLevel.Warn, "Invalid drag source", false);
-                return;
-            }
-            while (node.Depth != 0)
-            {
-                node = node.Parent;
-            }
-            if (node != root)
-            {
-                Logger.Log(LogLevel.Warn, $"drag source is not below root");
-                args.AcceptedOperation = Windows.ApplicationModel.DataTransfer.DataPackageOperation.None;
-                args.Handled = true;
-                ShellVm.ShowMessage(LogLevel.Warn, "Invalid drag source", false);
-                return;
-            }
-
-            // sender is the node you're dragging over (the prospective target)
-            type = sender.GetType();
-            if (!type.Name.Equals("TreeViewItem"))
-            {
-                Logger.Log(LogLevel.Warn, $"Invalid dragTarget type: {type.Name}");
-                args.AcceptedOperation = Windows.ApplicationModel.DataTransfer.DataPackageOperation.None;
-                args.Handled = true;
-                ShellVm.ShowMessage(LogLevel.Warn, "Invalid drag target", false);
-                return;
-            }
-            item = sender as TreeViewItem;
-            node = NavigationTree.NodeFromContainer(item);
-            // Insure that the target is the treeview root or below
-              if (node.Depth < 0)
-            {
-                Logger.Log(LogLevel.Warn, $"dragTarget is not below root");
-                args.AcceptedOperation = Windows.ApplicationModel.DataTransfer.DataPackageOperation.None;
-                args.Handled = true;
-                ShellVm.ShowMessage(LogLevel.Warn, "Invalid drag target", false);
-                return;
-            }
-            while (node.Depth != 0)
-            {
-                node = node.Parent;
-            }
-            if (node != root)
-            {
-                Logger.Log(LogLevel.Warn, $"drag target is not below root");
-                args.AcceptedOperation = Windows.ApplicationModel.DataTransfer.DataPackageOperation.None;
-                args.Handled = true;
-                ShellVm.ShowMessage(LogLevel.Warn, "Invalid drag target", false);
-                return;
-            }
-
-            ShellVm.ShowMessage(LogLevel.Info, "Drag and drop successful", true);
-        }
-        catch (Exception e)
+        // args.OriginalSource is the TreeViewItem you're dragging
+        Type type = args.OriginalSource.GetType();
+        if (!type.Name.Equals("TreeViewItem"))
         {
-            Console.WriteLine(e.Message);
+            Logger.Log(LogLevel.Warn, $"Invalid dragSource type: {type.Name}");
+            args.AcceptedOperation = Windows.ApplicationModel.DataTransfer.DataPackageOperation.None;
+            args.Handled = true;
+            base.OnDragEnter(args);
+            ShellVm.ShowMessage(LogLevel.Warn, "Invalid drag source", false);
+            return;
         }
+        dragSourceItem = args.OriginalSource as TreeViewItem;
+        dragSourceNode = NavigationTree.NodeFromContainer(dragSourceItem);
+        Logger.Log(LogLevel.Trace, $"dragSource Depth: {dragSourceNode.Depth}");
+
+        var node = dragSourceNode;
+        // Insure the source is not a root or above
+        if (node.Depth < 1)
+        {
+            Logger.Log(LogLevel.Warn, $"dragSource is not below root");
+            args.AcceptedOperation = Windows.ApplicationModel.DataTransfer.DataPackageOperation.None;
+            args.Handled = true;
+            base.OnDragEnter(args);
+            ShellVm.ShowMessage(LogLevel.Warn, "Invalid drag source", false);
+            return;
+        }
+
+        dragSourceStoryNode = dragSourceNode.Content as StoryNodeItem;
+        Logger.Log(LogLevel.Trace, $"dragSource Name: {dragSourceStoryNode.Name}");
+        Logger.Log(LogLevel.Trace, $"dragSource type: {dragSourceStoryNode.Type.ToString()}");
+
+        // Insure that the source is not in the trashcan
+        while (node.Depth != 0)
+        {
+            node = node.Parent;
+        }
+        var root = node.Content as StoryNodeItem;
+        if (root.Type == StoryItemType.TrashCan)
+        {
+            Logger.Log(LogLevel.Warn, $"dragSource root is TrashCan");
+            args.AcceptedOperation = Windows.ApplicationModel.DataTransfer.DataPackageOperation.None;
+            args.Handled = true;
+            base.OnDragEnter(args);
+            ShellVm.ShowMessage(LogLevel.Warn, "Invalid drag source", false);
+            return;
+        }
+
+        // sender is the node you're dragging over (the prospective target)
+        type = sender.GetType();
+        if (!type.Name.Equals("TreeViewItem"))
+        {
+            Logger.Log(LogLevel.Warn, $"Invalid dragTarget type: {type.Name}");
+            args.AcceptedOperation = Windows.ApplicationModel.DataTransfer.DataPackageOperation.None;
+            args.Handled = true;
+            base.OnDragEnter(args);
+            ShellVm.ShowMessage(LogLevel.Warn, "Invalid drag target", false);
+            return;
+        }
+        dragTargetItem = sender as TreeViewItem;
+        dragTargetNode = NavigationTree.NodeFromContainer(dragTargetItem);
+        Logger.Log(LogLevel.Trace, $"dragTarget Depth: {dragTargetNode.Depth}");
+
+        node = dragTargetNode;
+        // Insure the target is not a root or above (yes, there's a -1)
+        // (you can't move a root)
+        if (node.Depth < 1)
+        {
+            Logger.Log(LogLevel.Warn, $"dragTarget is not below root");
+            args.AcceptedOperation = Windows.ApplicationModel.DataTransfer.DataPackageOperation.None;
+            args.Handled = true;
+            base.OnDragEnter(args);
+            ShellVm.ShowMessage(LogLevel.Warn, "Invalid drag target", false);
+            return;
+        }
+
+        dragTargetStoryNode = dragTargetNode.Content as StoryNodeItem;
+        Logger.Log(LogLevel.Trace, $"dragTarget Name: {dragTargetStoryNode.Name}");
+        Logger.Log(LogLevel.Trace, $"dragTarget type: {dragTargetStoryNode.Type.ToString()}");
+
+        // Insure that the target is not in the trashcan
+        while (node.Depth != 0)
+        {
+            node = node.Parent;
+        }
+        root = node.Content as StoryNodeItem;
+        if (root.Type == StoryItemType.TrashCan)
+        {
+            Logger.Log(LogLevel.Warn, $"dragTarget root is TrashCan");
+            args.AcceptedOperation = Windows.ApplicationModel.DataTransfer.DataPackageOperation.None;
+            args.Handled = true;
+            base.OnDragEnter(args);
+            ShellVm.ShowMessage(LogLevel.Warn, "Invalid drag target", false);
+            return;
+        }
+        ShellVm.ShowMessage(LogLevel.Info, "Drag and drop successful", true);
+        base.OnDragEnter(args);
     }
 }

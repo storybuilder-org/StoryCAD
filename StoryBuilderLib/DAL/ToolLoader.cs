@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Threading.Tasks;
 using Windows.Storage;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using StoryBuilder.Models;
 using StoryBuilder.Models.Tools;
 using StoryBuilder.Services.Logging;
@@ -12,19 +13,18 @@ namespace StoryBuilder.DAL;
 
 public class ToolLoader
 {
-    public readonly PreferencesModel Preferences;
-    public readonly LogService Logger;
+    public readonly LogService Logger = Ioc.Default.GetRequiredService<LogService>();
 
-    private IList<string> lines;
-    private string installFolder;
+    private IList<string> _lines;
+    private string _installFolder;
     public async Task Init(string path)
     {
         try
         {
-            StorageFolder toolFolder = await StorageFolder.GetFolderFromPathAsync(path);
-            installFolder = toolFolder.Path;
-            StorageFile iniFile = await toolFolder.GetFileAsync("Tools.ini");
-            lines = await FileIO.ReadLinesAsync(iniFile);
+            StorageFolder _toolFolder = await StorageFolder.GetFolderFromPathAsync(path);
+            _installFolder = _toolFolder.Path;
+            StorageFile _iniFile = await _toolFolder.GetFileAsync("Tools.ini");
+            _lines = await FileIO.ReadLinesAsync(_iniFile);
 
             // Populate tool data source collections
             GlobalData.KeyQuestionsSource = LoadKeyQuestions();
@@ -32,200 +32,195 @@ public class ToolLoader
             GlobalData.TopicsSource = LoadTopics();
             GlobalData.MasterPlotsSource = LoadMasterPlots();
             GlobalData.DramaticSituationsSource = LoadDramaticSituations();
-            GlobalData.QuotesSource = LoadQuotes();
             Clear();
         }
-        catch
-        {
-                
-            Logger.Log(LogLevel.Error, "Error in ToolLoader.Init");
-        }
+        catch (Exception _ex) { Logger.LogException(LogLevel.Error, _ex, "Error Initializing tool loader"); }
     }
 
     public Dictionary<string, List<KeyQuestionModel>> LoadKeyQuestions()
     {
-        string previousKey = string.Empty;
-        KeyQuestionModel current = null;
-        string section = string.Empty;
-        string keyword = string.Empty;
-        string keyvalue = string.Empty;
-        string element = string.Empty;
-        string topic = string.Empty;
-        Dictionary<string, List<KeyQuestionModel>> questions = new();
-        foreach (string line in lines)
+        string _previousKey = string.Empty;
+        KeyQuestionModel _current = null;
+        string _section = string.Empty;
+        string _keyword = string.Empty;
+        string _keyValue = string.Empty;
+        string _element = string.Empty;
+        string _topic = string.Empty;
+        Dictionary<string, List<KeyQuestionModel>> _questions = new();
+        foreach (string _line in _lines)
         {
-            ParseLine(line, ref section, ref keyword, ref keyvalue);
+            ParseLine(_line, ref _section, ref _keyword, ref _keyValue);
             //   Process the parsed values
-            switch (section)
+            switch (_section)
             {
                 case "Key Questions":
-                    switch (keyword)
+                    switch (_keyword)
                     {
                         case "$SECTION$":
                             break;
                         case "Element":  // new list of questions for each StoryElement (Overview, Problem, etc.)
-                            element = keyvalue;
-                            questions.Add(element, new List<KeyQuestionModel>());
+                            _element = _keyValue;
+                            _questions.Add(_element, new List<KeyQuestionModel>());
                             break;
                         case "Topic":
-                            topic = keyvalue;
+                            _topic = _keyValue;
                             break;
                         default:
-                            if (!keyword.Equals(previousKey))
+                            if (!_keyword.Equals(_previousKey))
                             {
-                                current = new KeyQuestionModel
+                                _current = new KeyQuestionModel
                                 {
-                                    Key = keyword,
-                                    Element = element,
-                                    Topic = topic,
-                                    Question = keyvalue
+                                    Key = _keyword,
+                                    Element = _element,
+                                    Topic = _topic,
+                                    Question = _keyValue
                                 };
-                                questions[element].Add(current);
-                                previousKey = keyword;
+                                _questions[_element].Add(_current);
+                                _previousKey = _keyword;
                             }
                             else
                             {
-                                current.Question = current.Question + " " + keyvalue;
+                                _current!.Question = _current.Question + " " + _keyValue;
                             }
                             break;
                     }
                     break;
             }
         }
-        return questions;
+        return _questions;
     }
 
     public SortedDictionary<string, ObservableCollection<string>> LoadStockScenes()
     {
-        string stockSceneCategory = string.Empty;
-        string section = string.Empty;
-        string keyword = string.Empty;
-        string keyvalue = string.Empty;
-        SortedDictionary<string, ObservableCollection<string>> stockScenes = new();
-        foreach (string line in lines)
+        string _stockSceneCategory = string.Empty;
+        string _section = string.Empty;
+        string _keyword = string.Empty;
+        string _keyvalue = string.Empty;
+        SortedDictionary<string, ObservableCollection<string>> _stockScenes = new();
+        foreach (string _line in _lines)
         {
-            ParseLine(line, ref section, ref keyword, ref keyvalue);
+            ParseLine(_line, ref _section, ref _keyword, ref _keyvalue);
             //   Process the parsed values
-            switch (section)
+            switch (_section)
             {
                 case "Stock Scenes":
-                    switch (keyword)
+                    switch (_keyword)
                     {
                         case "":
                             break;
                         case "Title":
-                            stockScenes.Add(keyvalue, new ObservableCollection<string>());
-                            stockSceneCategory = keyvalue;
+                            _stockScenes.Add(_keyvalue, new ObservableCollection<string>());
+                            _stockSceneCategory = _keyvalue;
                             break;
                         case "Scene":
-                            stockScenes[stockSceneCategory].Add(keyvalue);
+                            _stockScenes[_stockSceneCategory].Add(_keyvalue);
                             break;
                     }
                     break;
             }
         }
-        return stockScenes;
+        return _stockScenes;
     }
 
     public SortedDictionary<string, TopicModel> LoadTopics()
     {
-        string topicName = string.Empty;
-        TopicModel currentTopic = null;
-        SubTopicModel currentSubTopic = null;
-        SortedDictionary<string, TopicModel> topics = new();
-        string section = string.Empty;
-        string keyword = string.Empty;
-        string keyvalue = string.Empty;
-        foreach (string line in lines)
+        string _topicName = string.Empty;
+        TopicModel _currentTopic = null;
+        SubTopicModel _currentSubTopic = null;
+        SortedDictionary<string, TopicModel> _topics = new();
+        string _section = string.Empty;
+        string _keyword = string.Empty;
+        string _keyvalue = string.Empty;
+        foreach (string _line in _lines)
         {
-            ParseLine(line, ref section, ref keyword, ref keyvalue);
+            ParseLine(_line, ref _section, ref _keyword, ref _keyvalue);
             //   Process the parsed values
-            switch (section)
+            switch (_section)
             {
                 case "Topic Information":
-                    switch (keyword)
+                    switch (_keyword)
                     {
                         case "":
                             break;
                         case "Topic":
-                            topicName = keyvalue;
-                            currentSubTopic = null;
+                            _topicName = _keyvalue;
+                            _currentSubTopic = null;
                             break;
                         case "Notepad":
-                            string path = keyvalue.IndexOf('\\') >= 0 ? keyvalue : Path.Combine(installFolder, keyvalue);
-                            topics.Add(topicName, new TopicModel(topicName, path));
+                            string _path = _keyvalue.IndexOf('\\') >= 0 ? _keyvalue : Path.Combine(_installFolder, _keyvalue);
+                            _topics.Add(_topicName, new TopicModel(_topicName, _path));
                             break;
                         case "Subtopic":
-                            if (currentSubTopic == null)
+                            if (_currentSubTopic == null)
                             {
-                                currentTopic = new TopicModel(topicName);
-                                topics.Add(topicName, currentTopic);
+                                _currentTopic = new TopicModel(_topicName);
+                                _topics.Add(_topicName, _currentTopic);
                             }
-                            currentSubTopic = new SubTopicModel(keyvalue);
-                            currentTopic.SubTopics.Add(currentSubTopic);
+                            _currentSubTopic = new SubTopicModel(_keyvalue);
+                            _currentTopic!.SubTopics.Add(_currentSubTopic);
                             break;
                         case "Remarks":
-                            if (currentSubTopic.SubTopicNotes.Equals(string.Empty))
-                                currentSubTopic.SubTopicNotes = keyvalue;
+                            if (_currentSubTopic!.SubTopicNotes.Equals(string.Empty))
+                                _currentSubTopic.SubTopicNotes = _keyvalue;
                             else
                             {
-                                if (!currentSubTopic.SubTopicNotes.EndsWith(" "))
-                                    currentSubTopic.SubTopicNotes += " ";
-                                currentSubTopic.SubTopicNotes += keyvalue;
+                                if (!_currentSubTopic.SubTopicNotes.EndsWith(" "))
+                                    _currentSubTopic.SubTopicNotes += " ";
+                                _currentSubTopic.SubTopicNotes += _keyvalue;
                             }
                             break;
                     }
                     break;
             }
         }
-        return topics;
+        return _topics;
     }
 
     public List<MasterPlotModel> LoadMasterPlots()
     {
-        MasterPlotModel currentMasterPlot = null;
-        MasterPlotScene currentMasterPlotScene = null;
-        List<MasterPlotModel> masterPlots = new();
-        string section = string.Empty;
-        string keyword = string.Empty;
-        string keyvalue = string.Empty;
-        foreach (string line in lines)
+        MasterPlotModel _currentMasterPlot = null;
+        MasterPlotScene _currentMasterPlotScene = null;
+        List<MasterPlotModel> _masterPlots = new();
+        string _section = string.Empty;
+        string _keyword = string.Empty;
+        string _keyvalue = string.Empty;
+        foreach (string _line in _lines)
         {
-            ParseLine(line, ref section, ref keyword, ref keyvalue);
+            ParseLine(_line, ref _section, ref _keyword, ref _keyvalue);
             //   Process the parsed values
-            switch (section)
+            switch (_section)
             {
                 case "MasterPlots":
-                    switch (keyword)
+                    switch (_keyword)
                     {
                         case "":
                             break;
                         case "MasterPlot":
-                            currentMasterPlot = new MasterPlotModel(keyvalue);
-                            masterPlots.Add(currentMasterPlot);
+                            _currentMasterPlot = new MasterPlotModel(_keyvalue);
+                            _masterPlots.Add(_currentMasterPlot);
                             break;
                         case "Remarks":
                             // ReSharper disable PossibleNullReferenceException
-                            if (currentMasterPlot.MasterPlotNotes.Equals(string.Empty))
-                                currentMasterPlot.MasterPlotNotes = keyvalue;
+                            if (_currentMasterPlot.MasterPlotNotes.Equals(string.Empty))
+                                _currentMasterPlot.MasterPlotNotes = _keyvalue;
                             else
                             {
-                                currentMasterPlot.MasterPlotNotes += Environment.NewLine;
-                                currentMasterPlot.MasterPlotNotes += keyvalue;
+                                _currentMasterPlot.MasterPlotNotes += Environment.NewLine;
+                                _currentMasterPlot.MasterPlotNotes += _keyvalue;
                             }
                             break;
                         case "PlotPoint":
                         case "Scene":
-                            currentMasterPlotScene = new MasterPlotScene(keyvalue);
-                            currentMasterPlot.MasterPlotScenes.Add(currentMasterPlotScene);
+                            _currentMasterPlotScene = new MasterPlotScene(_keyvalue);
+                            _currentMasterPlot.MasterPlotScenes.Add(_currentMasterPlotScene);
                             break;
                         case "Notes":
-                            if (currentMasterPlotScene.Notes.Equals(string.Empty))
-                                currentMasterPlotScene.Notes = keyvalue;
+                            if (_currentMasterPlotScene.Notes.Equals(string.Empty))
+                                _currentMasterPlotScene.Notes = _keyvalue;
                             else
                             {
-                                currentMasterPlotScene.Notes += Environment.NewLine;
-                                currentMasterPlotScene.Notes += keyvalue;
+                                _currentMasterPlotScene.Notes += Environment.NewLine;
+                                _currentMasterPlotScene.Notes += _keyvalue;
                             }
                             // ReSharper restore PossibleNullReferenceException
                             break;
@@ -233,108 +228,68 @@ public class ToolLoader
                     break;
             }
         }
-        return masterPlots;
+        return _masterPlots;
     }
 
     public SortedDictionary<string, DramaticSituationModel> LoadDramaticSituations()
     {
-        DramaticSituationModel currentDramaticSituationModel = null;
-        SortedDictionary<string, DramaticSituationModel> dramaticSituations = new();
-        string section = string.Empty;
-        foreach (string line in lines)
+        DramaticSituationModel _currentDramaticSituationModel = null;
+        SortedDictionary<string, DramaticSituationModel> _dramaticSituations = new();
+        string _section = string.Empty;
+        foreach (string _line in _lines)
         {
-            string keyword = string.Empty;
-            string keyvalue = string.Empty;
-            ParseLine(line, ref section, ref keyword, ref keyvalue);
+            string _keyword = string.Empty;
+            string _keyvalue = string.Empty;
+            ParseLine(_line, ref _section, ref _keyword, ref _keyvalue);
             //   Process the parsed values
-            switch (section)
+            switch (_section)
             {
                 case "Dramatic Situations":
-                    switch (keyword)
+                    switch (_keyword)
                     {
                         case "":
                             break;
                         case "Situation":
-                            currentDramaticSituationModel = new DramaticSituationModel(keyvalue);
-                            dramaticSituations.Add(keyvalue, currentDramaticSituationModel);
+                            _currentDramaticSituationModel = new DramaticSituationModel(_keyvalue);
+                            _dramaticSituations.Add(_keyvalue, _currentDramaticSituationModel);
                             break;
                         case "Role1":
                             // ReSharper disable PossibleNullReferenceException
-                            currentDramaticSituationModel.Role1 = keyvalue;
+                            _currentDramaticSituationModel.Role1 = _keyvalue;
                             break;
                         case "Role2":
-                            currentDramaticSituationModel.Role2 = keyvalue;
+                            _currentDramaticSituationModel.Role2 = _keyvalue;
                             break;
                         case "Role3":
-                            currentDramaticSituationModel.Role3 = keyvalue;
+                            _currentDramaticSituationModel.Role3 = _keyvalue;
                             break;
                         case "Role4":
-                            currentDramaticSituationModel.Role4 = keyvalue;
+                            _currentDramaticSituationModel.Role4 = _keyvalue;
                             break;
                         case "Desc1":
-                            currentDramaticSituationModel.Description1 = keyvalue;
+                            _currentDramaticSituationModel.Description1 = _keyvalue;
                             break;
                         case "Desc2":
-                            currentDramaticSituationModel.Description2 = keyvalue;
+                            _currentDramaticSituationModel.Description2 = _keyvalue;
                             break;
                         case "Desc3":
-                            currentDramaticSituationModel.Description3 = keyvalue;
+                            _currentDramaticSituationModel.Description3 = _keyvalue;
                             break;
                         case "Desc4":
-                            currentDramaticSituationModel.Description4 = keyvalue;
+                            _currentDramaticSituationModel.Description4 = _keyvalue;
                             break;
                         case "Example":
                             //TODO: Process Example lines
                             break;
                         case "Notes":
-                            currentDramaticSituationModel.Notes += keyvalue;
+                            _currentDramaticSituationModel.Notes += _keyvalue;
                             // ReSharper restore PossibleNullReferenceException
                             break;
                     }
                     break;
             }
         }
-        return dramaticSituations;
-    }
-
-    public ObservableCollection<Quotation> LoadQuotes()
-    {
-        ObservableCollection<Quotation> quotes = new();
-        Quotation currentQuote = null;
-        string section = string.Empty;
-        string keyword = string.Empty;
-        string keyvalue = string.Empty;
-        foreach (string line in lines)
-        {
-            ParseLine(line, ref section, ref keyword, ref keyvalue);
-            //   Process the parsed values
-            switch (section)
-            {
-                case "Quotes":
-                    switch (keyword)
-                    {
-                        case "":
-                            break;
-                        case "Author":
-                            currentQuote = new Quotation { Author = keyvalue, Quote = string.Empty };
-                            quotes.Add(currentQuote);
-                            break;
-                        case "Quote":
-                            // ReSharper disable PossibleNullReferenceException
-                            if (currentQuote.Quote.Equals(string.Empty))
-                                currentQuote.Quote = keyvalue.TrimEnd();
-                            else
-                            {
-                                currentQuote.Quote += Environment.NewLine;
-                                currentQuote.Quote += keyvalue.TrimEnd();
-                            }
-                            // ReSharper restore PossibleNullReferenceException
-                            break;
-                    }
-                    break;
-            }
-        }
-        return quotes;
+        return _dramaticSituations;
     }
          
     /// <summary>
@@ -361,17 +316,17 @@ public class ToolLoader
             return;
         if (line.StartsWith("["))
         {
-            string[] tokens = line.Split('[', ']');
-            section = tokens[1];
+            string[] _tokens = line.Split('[', ']');
+            section = _tokens[1];
             keyword = "$SECTION$";
             keyvalue = string.Empty;
             return;
         }
         if (line.Contains("="))
         {
-            string[] tokens = line.Split(new[] { '=' });
-            keyword = tokens[0];
-            keyvalue = tokens[1].TrimEnd();
+            string[] _tokens = line.Split(new[] { '=' });
+            keyword = _tokens[0];
+            keyvalue = _tokens[1].TrimEnd();
             return;
         }
         if (line.StartsWith("="))
@@ -382,14 +337,5 @@ public class ToolLoader
 
     }
 
-    public void Clear()
-    {
-        lines = null;
-    }
-
-    private void LogEntry(string line)
-    {
-        // TODO: Code LogEntry details (requires logging framework)
-        throw new NotImplementedException();
-    }
+    public void Clear() { _lines = null; }
 }

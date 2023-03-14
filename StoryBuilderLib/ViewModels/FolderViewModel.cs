@@ -1,20 +1,18 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System;
+using System.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Messaging;
-using StoryBuilder.DAL;
 using StoryBuilder.Models;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.Services.Messages;
 using StoryBuilder.Services.Navigation;
-using System;
-using System.ComponentModel;
-using System.Threading.Tasks;
 
 namespace StoryBuilder.ViewModels;
 
 /// <summary>
-/// A Folder StoryElement is a divider in the Story Explorer
-/// view. A 'folder' in the Narrator view, by contrast, 
+/// A Folder StoryElement is a divider in the Story ExplorerView
+/// view. A 'folder' in the NarratorView view, by contrast, 
 /// is a Section StoryElement. A Folder can have anything as
 /// a parent (including another Folder.) A Section can only have
 /// another Section as its parent. Sections are Chapters, Acts,
@@ -25,8 +23,6 @@ public class FolderViewModel : ObservableRecipient, INavigable
     #region Fields
 
     private readonly LogService _logger;
-    private readonly StoryReader _rdr;
-    private readonly StoryWriter _wtr;
     private bool _changeable; // process property changes for this story element
     private bool _changed;    // this story element has changed
 
@@ -52,8 +48,8 @@ public class FolderViewModel : ObservableRecipient, INavigable
             if (_changeable && _name != value) // Name changed?
             {
                 _logger.Log(LogLevel.Info, $"Requesting Name change from {_name} to {value}");
-                NameChangeMessage msg = new(_name, value);
-                Messenger.Send(new NameChangedMessage(msg));
+                NameChangeMessage _msg = new(_name, value);
+                Messenger.Send(new NameChangedMessage(_msg));
             }
             SetProperty(ref _name, value);
         }
@@ -73,7 +69,7 @@ public class FolderViewModel : ObservableRecipient, INavigable
     public FolderModel Model
     {
         get => _model;
-        set => SetProperty(ref _model, value);
+        set => _model = value;
     }
 
     #endregion
@@ -131,11 +127,7 @@ public class FolderViewModel : ObservableRecipient, INavigable
     public FolderViewModel()
     {
         _logger = Ioc.Default.GetService<LogService>();
-        _wtr = Ioc.Default.GetService<StoryWriter>();
-        _rdr = Ioc.Default.GetService<StoryReader>();
-
         Notes = string.Empty;
-
         PropertyChanged += OnPropertyChanged;
     }
 

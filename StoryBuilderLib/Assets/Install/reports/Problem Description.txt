@@ -8,30 +8,36 @@
 
     Conflict Type       @ConflictType
 
+    Conflict Category   @ProblemCategory
+
     Subject:            @Subject
 
     Story Question:
     @StoryQuestion
-
-    Source of Conflict:
+	
+    Problem Source:
     @ProblemSource
 
                    =========== Problem Protagonist ===========
 
     Name:               @ProtagName
 
-    Motivation:         @ProtagMotive
-
     Goal:               @ProtagGoal
 
+    Motivation:         @ProtagMotive
+
+	 Conflict:           @ProtagConflict
+	
                    =========== Problem Antagonist ===========
 
     Name:               @AntagName
+	
+    Goal:               @AntagGoal
 
     Motivation:         @AntagMotive
 
-    Goal:               @AntagGoal
-
+	  Conflict:           @AntagConflict
+	
                    =========== Problem Resolution ===========
 
     Outcome:            @Outcome

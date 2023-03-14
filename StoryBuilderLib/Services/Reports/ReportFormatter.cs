@@ -1,14 +1,14 @@
-﻿using CommunityToolkit.Mvvm.DependencyInjection;
-using System;
-using NRtfTree.Util;
-using StoryBuilder.DAL;
-using StoryBuilder.Models;
-using StoryBuilder.ViewModels;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.Storage;
+using CommunityToolkit.Mvvm.DependencyInjection;
+using NRtfTree.Util;
+using StoryBuilder.DAL;
+using StoryBuilder.Models;
 using StoryBuilder.Services.Logging;
+using StoryBuilder.ViewModels;
 
 namespace StoryBuilder.Services.Reports;
 
@@ -110,11 +110,15 @@ public class ReportFormatter
             if (String.IsNullOrEmpty(problem.Name)) { sb.Replace("@Title", ""); }
             else { sb.Replace("@Title", problem.Name); }
 
-            sb.Replace("@ProblemType", problem.ProblemType);
+            if (String.IsNullOrEmpty(problem.ProblemType)) { sb.Replace("@ProblemType", ""); }
+            else { sb.Replace("@ProblemType", problem.ProblemType); }
 
             if (String.IsNullOrEmpty(problem.ConflictType)) { sb.Replace("@ConflictType", ""); }
             else { sb.Replace("@ConflictType", problem.ConflictType); }
-            
+
+            if (String.IsNullOrEmpty(problem.ProblemCategory)) { sb.Replace("@ProblemCategory", ""); }
+            else { sb.Replace("@ProblemCategory", problem.ProblemCategory); }
+
             if (String.IsNullOrEmpty(problem.Subject)) { sb.Replace("@Subject", ""); }
             else { sb.Replace("@Subject", problem.Subject); }
 
@@ -135,19 +139,27 @@ public class ReportFormatter
                 if (String.IsNullOrEmpty(vpProtagonist.Name)) { sb.Replace("@ProtagName", ""); }
                 else { sb.Replace("@ProtagName", vpProtagonist.Name); }
             }
+            else { sb.Replace("@ProtagName", ""); }
+
+            if (String.IsNullOrEmpty(problem.ProtConflict)) { sb.Replace("@ProtagConflict", ""); }
+            else { sb.Replace("@ProtagConflict", problem.ProtConflict); }
 
             if (vpAntagonist != null)
             {
                 if (String.IsNullOrEmpty(vpAntagonist.Name)) { sb.Replace("@AntagName", ""); }
                 else { sb.Replace("@AntagName", vpAntagonist.Name); }
             }
+            else { sb.Replace("@AntagName", ""); }
             
             if (String.IsNullOrEmpty(problem.AntagMotive)) { sb.Replace("@AntagMotive", ""); }
             else { sb.Replace("@AntagMotive", problem.AntagMotive); }
 
             if (String.IsNullOrEmpty(problem.AntagGoal)) { sb.Replace("@AntagGoal", ""); }
             else { sb.Replace("@AntagGoal", problem.AntagGoal); }
-            
+
+            if (String.IsNullOrEmpty(problem.AntagConflict)) { sb.Replace("@AntagConflict", ""); }
+            else { sb.Replace("@AntagConflict", problem.AntagConflict); }
+
             if (String.IsNullOrEmpty(problem.Outcome)) { sb.Replace("@Outcome", ""); }
             else { sb.Replace("@Outcome", problem.Outcome); }
 
@@ -164,6 +176,47 @@ public class ReportFormatter
             else { sb.Replace("@Notes", GetText(problem.Notes)); }
 
             doc.AddText(sb.ToString());
+            doc.AddNewLine();
+        }
+
+        return doc.GetRtf();
+    }
+
+    public string FormatCharacterRelationshipReport(StoryElement element)
+    {
+        CharacterModel character = (CharacterModel)element;
+        RtfDocument doc = new(string.Empty);
+        foreach (RelationshipModel rel in character.RelationshipList)
+        {
+            foreach (string line in _templates["Character Relationship Description"])
+            {
+                StringBuilder sb = new(line);
+                if (rel.Partner == null)
+                {
+                    foreach (StoryElement VARIABLE in Ioc.Default.GetService<ShellViewModel>().StoryModel.StoryElements.Characters)
+                    {
+                        if (VARIABLE.Uuid.Equals(Guid.Parse(rel.PartnerUuid)))
+                        {
+                            sb.Replace("@Relationship", VARIABLE.Name);
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    sb.Replace("@Relationship", rel.Partner.Name);
+
+                }
+
+                sb.Replace("@relationType", rel.RelationType);
+                sb.Replace("@relationTrait", rel.Trait);
+                sb.Replace("@Attitude", rel.Attitude);
+                sb.Replace("@Notes", GetText(rel.Notes));
+
+                doc.AddText(sb.ToString());
+                doc.AddNewLine();
+            }
+            doc.AddNewLine();
             doc.AddNewLine();
         }
 
@@ -211,7 +264,6 @@ public class ReportFormatter
         {
             StringBuilder sb = new(line);
             //Story Role section
-            sb.Replace("@Id", character.Id.ToString());
             sb.Replace("@Title", character.Name);
             sb.Replace("@Role", character.Role);
             sb.Replace("@StoryRole", character.StoryRole);
@@ -233,11 +285,11 @@ public class ReportFormatter
             //Appearance section
             sb.Replace("@Appearance", GetText(character.Appearance));
             //Relationships section
-            sb.Replace("@Relationship", character.Relationship);
-            sb.Replace("@relationType", character.RelationType);
-            sb.Replace("@relationTrait", character.RelationTrait);
-            sb.Replace("@Attitude", character.Attitude);
-            sb.Replace("@RelationshipNotes", character.RelationshipNotes);
+            if (sb.ToString() == "@Relationships" && character.RelationshipList.Count > 0)
+            {
+                sb.Replace("@Relationships", FormatCharacterRelationshipReport(element));
+            }
+
             //Flaw section
             sb.Replace("@Flaw", GetText(character.Flaw));
             //Backstory section
@@ -268,7 +320,12 @@ public class ReportFormatter
             sb.Replace("@Sociability", character.Sociability);
             sb.Replace("@Stability", character.Stability);
             //Outer Traits section
-            sb.Replace("@Traits", character.outerTrait);
+            string traits = "";
+            foreach (string trait in character.TraitList)
+            {
+                traits += trait + "\n";
+            }
+            sb.Replace("@Traits", traits);
             // Notes section
             sb.Replace("@Notes", GetText(character.Notes));
 
@@ -318,7 +375,6 @@ public class ReportFormatter
         foreach (string line in lines)
         {
             StringBuilder sb = new(line);
-            sb.Replace("@Id", setting.Id.ToString());
             sb.Replace("@Title", setting.Name);
             sb.Replace("@Locale", setting.Locale);
             sb.Replace("@Season", setting.Season);
@@ -391,11 +447,10 @@ public class ReportFormatter
             sb.Replace("@Title", scene.Name);
             sb.Replace("@Date", scene.Date);
             sb.Replace("@Time", scene.Time);
-            if (line.Contains("@ViewpointCharacter")) 
-            sb.Replace("@ViewpointCharacter", vpCharacterName);
+            if (line.Contains("@ViewpointCharacter")) {sb.Replace("@ViewpointCharacter", vpCharacterName);}
             sb.Replace("@Setting", settingName);
             sb.Replace("@SceneType", scene.SceneType);
-
+            
             if (line.Contains("@CastMember"))
             {
                 foreach (string seCastMember in scene.CastMembers)
@@ -415,17 +470,22 @@ public class ReportFormatter
             //DEVELOPMENT SECTION
             if (line.Contains("@PurposeOfScene"))
             {
-                foreach (string sePurpose in scene.ScenePurpose)
-                {
-                    StoryElement Purpose = StringToStoryElement(sePurpose);
-                    string PurposeName = Purpose?.Name ?? string.Empty;
-                    StringBuilder sbCast = new(line);
-
-                    sbCast.Replace("@CastMember", PurposeName);
-                    doc.AddText(sbCast.ToString());
-                    doc.AddNewLine();
-                }
+                string PurposeString = "";
+                foreach (string Purpose in scene.ScenePurpose) { PurposeString += Purpose + ", "; }
+                sb.Replace("@PurposeOfScene", PurposeString);
+                doc.AddText(sb.ToString());
                 sb.Clear();
+                /*              
+                                foreach (string sePurpose in scene.ScenePurpose)
+                                {
+                                    StoryElement Purpose = StringToStoryElement(sePurpose);
+                                    string PurposeName = Purpose?.Name ?? string.Empty;
+                                    StringBuilder sbCast = new(line);
+
+                                    sbCast.Replace("@CastMember", PurposeName);
+                                    doc.AddText(sbCast.ToString());
+                                    doc.AddNewLine();
+                                }*/
             }
 
             sb.Replace("@ValueExchange", scene.ValueExchange);
@@ -437,6 +497,7 @@ public class ReportFormatter
             sb.Replace("@ProtagName", protagonistName);
             sb.Replace("@ProtagEmotion", scene.ProtagEmotion);
             sb.Replace("@ProtagGoal", scene.ProtagGoal);
+            sb.Replace("@Opposition", scene.Opposition);
             sb.Replace("@AntagName", antagonistName);
             sb.Replace("@AntagEmotion", scene.AntagEmotion);
             sb.Replace("@AntagGoal", scene.AntagGoal);
@@ -452,6 +513,79 @@ public class ReportFormatter
             doc.AddNewLine();
         }
 
+        return doc.GetRtf();
+    }
+
+    public string FormatWebReport (StoryElement element)
+    {
+        RtfDocument doc = new(string.Empty);
+        StringBuilder sb = new();
+        WebModel model = element as WebModel;
+        sb.AppendLine(model.Name);
+        sb.AppendLine(model.URL.ToString());
+        doc.AddText(sb.ToString());
+        doc.AddNewLine();
+        return doc.GetRtf();
+
+        // STUB: Reimpliment this code at a later date, because
+        /*
+        //Create new Webview, then initalise corewebview and configure URL. 
+        var _webview = new WebView2();
+        _webview.Source = ((WebModel)element).URL;
+        _webview.Height = 1080;
+        _webview.Width = 1920;
+        await _webview.EnsureCoreWebView2Async();
+
+        //Create file
+        StorageFolder ParentFolder = ApplicationData.Current.RoamingFolder;
+        ParentFolder = await ParentFolder.CreateFolderAsync("Cache",CreationCollisionOption.OpenIfExists);
+        StorageFile imgfile = await ParentFolder.CreateFileAsync(Guid.NewGuid().ToString() + ".png");
+        
+        //Screenshot site
+        MemoryStream _buffer = new();
+        var x = _buffer.AsRandomAccessStream();
+
+        await _webview.CoreWebView2.CapturePreviewAsync(CoreWebView2CapturePreviewImageFormat.Png, (IRandomAccessStream)_buffer);
+        //await _webview.CoreWebView2.PrintToPdfAsync("C:\\test.pdf", null);
+        //Write to disk
+        Stream WriteStream = await imgfile.OpenStreamForWriteAsync();
+        WriteStream.Write(_buffer.ToArray());
+
+        //Add image
+        doc.AddImage(imgfile.Path, 1920, 1080);
+        */
+
+    }
+
+    public string FormatWebListReport()
+    {
+        string[] lines = _templates["List of Websites"];
+        RtfDocument doc = new(string.Empty);
+
+        // Parse and write the report
+        foreach (string line in lines)
+        {
+            if (line.Contains("@Description"))
+            {
+                foreach (StoryElement element in _model.StoryElements)
+                {
+                    if (element.Type == StoryItemType.Web)
+                    {
+                        WebModel scene = (WebModel)element;
+                        StringBuilder sb = new(line);
+                        sb.Replace("@Description", scene.Name);
+                        doc.AddText(sb.ToString());
+                        doc.AddNewLine();
+                    }
+                }
+
+            }
+            else
+            {
+                doc.AddText(line);
+                doc.AddNewLine();
+            }
+        }
         return doc.GetRtf();
     }
 
@@ -474,7 +608,7 @@ public class ReportFormatter
 
     public string FormatSectionReport(StoryElement element)
     {
-        SectionModel section = (SectionModel)element;
+        FolderModel section = (FolderModel)element;
         string[] lines = _templates["Section Description"];
         RtfDocument doc = new(string.Empty);
 

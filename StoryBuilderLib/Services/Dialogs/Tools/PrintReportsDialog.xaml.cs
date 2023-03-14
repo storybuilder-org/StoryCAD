@@ -1,19 +1,24 @@
 ﻿using System;
-using Microsoft.UI.Xaml.Controls;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using StoryBuilder.Models;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.ViewModels;
 using StoryBuilder.ViewModels.Tools;
+using Windows.Graphics.Printing;
+using Microsoft.UI.Dispatching;
 
 namespace StoryBuilder.Services.Dialogs.Tools;
-public sealed partial class PrintReportsDialog : Page
+public sealed partial class PrintReportsDialog
 {
     public PrintReportDialogVM PrintVM = Ioc.Default.GetRequiredService<PrintReportDialogVM>();
+    DispatcherTimer _isDone = new() { Interval = new(0, 0, 0, 1, 0) };
 
     public PrintReportsDialog()
     {
         InitializeComponent();
+        PrintVM.RegisterForPrint();
         PrintVM.SelectAllCharacters = false;
         PrintVM.SelectAllProblems = false;
         PrintVM.SelectAllScenes = false;
@@ -25,10 +30,15 @@ public sealed partial class PrintReportsDialog : Page
         PrintVM.CharacterNodes.Clear();
         PrintVM.SceneNodes.Clear();
         PrintVM.SettingNodes.Clear();
+        PrintVM.WebNodes.Clear();
         PrintVM.CharacterList = false;
         PrintVM.ProblemList = false;
         PrintVM.SettingList = false;
         PrintVM.SceneList = false;
+        PrintVM.WebList = false;
+
+        //Warn user if they are on win10 as print manager can't be used.
+        if (Environment.OSVersion.Version.Build <= 22000) { Win10Warning.IsOpen = true; }
 
         //Gets all nodes that aren't deleted
         try
@@ -40,7 +50,7 @@ public sealed partial class PrintReportsDialog : Page
         }
         catch (Exception ex)
         {
-            Ioc.Default.GetService<LogService>().LogException(LogLevel.Error, ex, "Error parsing nodes.");
+            Ioc.Default.GetRequiredService<LogService>().LogException(LogLevel.Error, ex, "Error parsing nodes.");
         }
     }
 
@@ -77,15 +87,82 @@ public sealed partial class PrintReportsDialog : Page
         }
         else { PrintVM.SelectedNodes.AddRange(PrintVM.SettingNodes); }
 
+        if (!PrintVM.SelectAllWeb)
+        {
+            foreach (StoryNodeItem item in WebList.SelectedItems) { PrintVM.SelectedNodes.Add(item); }
+        }
+        else { PrintVM.SelectedNodes.AddRange(PrintVM.WebNodes); }
+
         ProblemsList.IsEnabled = !PrintVM.SelectAllProblems;
         CharactersList.IsEnabled = !PrintVM.SelectAllCharacters;
         SettingsList.IsEnabled = !PrintVM.SelectAllSettings;
         ScenesList.IsEnabled = !PrintVM.SelectAllScenes;
+        WebList.IsEnabled = !PrintVM.SelectAllWeb;
     }
-
 
     private void CheckboxClicked(object sender, RoutedEventArgs e)
     {
+        //This clears any selected checkboxes
+        switch ((sender as CheckBox)?.Content.ToString())
+        {
+            case "Print all problems": ProblemsList.SelectedItems.Clear(); break;
+            case "Print all characters": CharactersList.SelectedItems.Clear(); break;
+            case "Print all scenes": ScenesList.SelectedItems.Clear(); break;
+            case "Print all settings": SettingsList.SelectedItems.Clear(); break;
+            case "Print all websites": WebList.SelectedItems.Clear(); break;
+        }
         UpdateSelection(null,null);
+    }
+
+    private async void StartPrintMenu(object sender, RoutedEventArgs e)
+    {
+        PrintVM.GeneratePrintDocumentReport();
+        PrintVM.PrintDocSource = PrintVM.Document.DocumentSource;
+
+        //Device has to support printing AND run windows 11 (Win11's RTM Build was build 22000 and Win10 Build will ever be above 22000)
+        //Windows 10 currently does not support PrintManagers due to a bug in windows 10, however this should get fixed soon (hopefully)
+        if (PrintManager.IsSupported() && Environment.OSVersion.Version.Build >= 22000) 
+        {
+            try
+            {
+                // Show print UI
+                await PrintManagerInterop.ShowPrintUIForWindowAsync(GlobalData.WindowHandle);
+            }
+            catch (Exception ex) //Error setting up printer
+            {
+                GlobalData.GlobalDispatcher.TryEnqueue(async () =>
+                {
+                    PrintVM.CloseDialog();
+                    await new ContentDialog
+                    {
+                        XamlRoot = GlobalData.XamlRoot,
+                        Title = "Printing error",
+                        Content = "The following error occurred when trying to print:\n\n" + ex.Message,
+                        PrimaryButtonText = "Ok"
+                    }.ShowAsync();
+                });
+;
+            }
+        }
+        else //Print Manager isn't supported so we fall back to the old version of printing directly.
+        {
+            PrintVM.ShowLoadingBar = true;
+            LoadingBar.Opacity = 1;
+            PrintVM.StartGeneratingReports();
+            _isDone.Tick += IsReportGenerationFinished;
+            _isDone.Start();
+        }
+    }
+    private void IsReportGenerationFinished(object sender, object e)
+    {
+        if (!PrintVM.ShowLoadingBar)
+        {
+            _isDone.Stop();
+            LoadingBar.Opacity = 0;
+            _isDone.Tick -= IsReportGenerationFinished;
+            PrintVM.ShowLoadingBar = false;
+            PrintVM.CloseDialog();
+            Ioc.Default.GetRequiredService<ShellViewModel>().ShowMessage(LogLevel.Info, "Generate Print Reports complete", true);
+        }
     }
 }

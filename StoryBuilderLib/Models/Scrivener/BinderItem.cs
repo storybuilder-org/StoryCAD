@@ -12,9 +12,8 @@ public class BinderItem
 
     public BinderItem Parent { get; set; }
 
+    // ReSharper disable once AutoPropertyCanBeMadeGetOnly.Local
     public List<BinderItem> Children { get; private set; }
-
-    public int Id { get; set; }
 
     public string Uuid { get; set; }
 
@@ -32,25 +31,20 @@ public class BinderItem
 
     public IXmlNode Node { get; set; }
 
-    public override string ToString()
-    {
-        return Title;
-    }
+    public override string ToString() { return Title; }
 
     #endregion
 
     #region Constructors
 
-    public BinderItem(int id, string uuid, BinderItemType type, string header)
-        : this(id, uuid, type, header, null)
+    public BinderItem(string uuid, BinderItemType type, string header) : this(uuid, type, header, null)
     {
         Node = null;
         Children = new List<BinderItem>();
     }
 
-    public BinderItem(int id, string uuid, BinderItemType type, string header, BinderItem parent)
+    public BinderItem(string uuid, BinderItemType type, string header, BinderItem parent)
     {
-        Id = id;
         Uuid = uuid;
         Created = string.Empty;
         Modified = string.Empty;
@@ -61,9 +55,8 @@ public class BinderItem
         Children = new List<BinderItem>();
     }
 
-    public BinderItem(int id, string uuid, BinderItemType type, string header, BinderItem parent, string created, string modified, string stbUuid)
+    public BinderItem(string uuid, BinderItemType type, string header, BinderItem parent, string created, string modified, string stbUuid)
     {
-        Id = id;
         Uuid = uuid;
         Created = created;
         Modified = modified;
@@ -78,10 +71,6 @@ public class BinderItem
     #endregion // Constructors
 
     #region Methods
-
-    public bool IsLeaf => Children.Count == 0;
-
-    public bool IsRoot => Parent == null;
 
     /// <summary>
     /// This method allows a dept-first search (DFS) or 'pre-order traversal' of
@@ -103,12 +92,12 @@ public class BinderItem
     public IEnumerator<BinderItem> GetEnumerator()
     {
         yield return this;
-        foreach (BinderItem child in Children)
+        foreach (BinderItem _child in Children)
         {
             // ReSharper disable once GenericEnumeratorNotDisposed
-            IEnumerator<BinderItem> childEnumerator = child.GetEnumerator();
-            while (childEnumerator.MoveNext())
-                yield return childEnumerator.Current;
+            IEnumerator<BinderItem> _childEnumerator = _child.GetEnumerator();
+            while (_childEnumerator.MoveNext())
+                yield return _childEnumerator.Current;
         }
     }
 

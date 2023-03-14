@@ -1,10 +1,14 @@
-﻿using WinUIEx;
-using Microsoft.UI.Xaml;
-using StoryBuilder.Models.Tools;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.IO;
+using System.Threading;
 using Windows.Storage;
+using Microsoft.UI.Dispatching;
+using Microsoft.UI.Xaml;
+using StoryBuilder.Models.Tools;
+using WinUIEx;
 
 namespace StoryBuilder.Models;
 
@@ -36,7 +40,7 @@ public static class GlobalData
     /// </summary>
     /// User Controls
     public static SortedDictionary<string, ConflictCategoryModel> ConflictTypes;
-    public static List<RelationType> RelationTypes;
+    public static List<string> RelationTypes;
 
     // Tools
     public static Dictionary<string, List<KeyQuestionModel>> KeyQuestionsSource;
@@ -44,8 +48,6 @@ public static class GlobalData
     public static SortedDictionary<string, TopicModel> TopicsSource;
     public static List<MasterPlotModel> MasterPlotsSource;
     public static SortedDictionary<string, DramaticSituationModel> DramaticSituationsSource;
-    //TODO: Use QuotesSource
-    public static ObservableCollection<Quotation> QuotesSource;
 
     // Connection status
     public static bool DopplerConnection;
@@ -55,7 +57,7 @@ public static class GlobalData
     public static PreferencesModel Preferences;
 
     //Path to root directory where data is stored
-    public static string RootDirectory = System.IO.Path.Combine(ApplicationData.Current.RoamingFolder.Path, "Storybuilder");
+    public static string RootDirectory = Path.Combine(ApplicationData.Current.RoamingFolder.Path, "Storybuilder");
 
     // MainWindow is the main window displayed by the app. It's an instance of
     // WinUIEx's WindowEx, which is an extension of Microsoft.Xaml.UI.Window 
@@ -67,4 +69,18 @@ public static class GlobalData
     // the root of a visible Page.
     // The Shell page's XamlRoot is stored here and accessed wherever needed. 
     public static XamlRoot XamlRoot;
+
+    // If DotEnv is fails, this will show a warning to the user.
+    public static bool ShowDotEnvWarning = false;
+
+    // Set to true if the app has loaded with a version change. (Changelog)
+    public static bool LoadedWithVersionChange = false;
+
+    //If this is not "" then the app was invoked via a .STBX file and once initalised, should load it.
+    public static string FilePathToLaunch;
+
+    public static DispatcherQueue? GlobalDispatcher = null;
+
+    //This counts the amount of time it takes from the app being started to the Shell being opened.
+    public static Stopwatch StartUpTimer;
 }

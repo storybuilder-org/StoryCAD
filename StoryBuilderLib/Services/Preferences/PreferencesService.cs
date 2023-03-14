@@ -1,11 +1,11 @@
-﻿using CommunityToolkit.Mvvm.DependencyInjection;
+﻿using System;
+using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml;
 using StoryBuilder.DAL;
 using StoryBuilder.Models;
 using StoryBuilder.Models.Tools;
 using StoryBuilder.Services.Logging;
-using System;
-using System.Threading.Tasks;
 
 namespace StoryBuilder.Services.Preferences;
 
@@ -19,7 +19,7 @@ public class PreferencesService
         {
             Logger.Log(LogLevel.Info, "Loading Preferences");
             PreferencesModel model = new();
-            PreferencesIO loader = new(model, path);
+            PreferencesIo loader = new(model, path);
             await loader.UpdateModel();
                 
             GlobalData.Preferences = model;

@@ -1,4 +1,5 @@
 ﻿using Windows.Data.Xml.Dom;
+using StoryBuilder.ViewModels;
 
 namespace StoryBuilder.Models;
 
@@ -19,7 +20,7 @@ public class FolderModel : StoryElement
     {
         Notes = string.Empty;
     }
-    public FolderModel(string name, StoryModel model) : base(name, StoryItemType.Folder, model)
+    public FolderModel(string name, StoryModel model, StoryItemType type) : base(name, type, model)
     {
         Notes = string.Empty;
     }

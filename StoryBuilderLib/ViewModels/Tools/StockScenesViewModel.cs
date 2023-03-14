@@ -1,7 +1,7 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using StoryBuilder.Models;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using CommunityToolkit.Mvvm.ComponentModel;
+using StoryBuilder.Models;
 
 namespace StoryBuilder.ViewModels.Tools;
 
@@ -50,8 +50,7 @@ public class StockScenesViewModel : ObservableRecipient
     {
         StockSceneCategories = new ObservableCollection<string>();
         _stockScenes = GlobalData.StockScenesSource;
-        foreach (string category in _stockScenes.Keys)
-            StockSceneCategories.Add(category);
+        foreach (string _category in _stockScenes.Keys) { StockSceneCategories.Add(_category); }
     }
 
     #endregion

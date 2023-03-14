@@ -1,7 +1,8 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System.Collections.ObjectModel;
+using System.Diagnostics;
+using CommunityToolkit.Mvvm.ComponentModel;
 using StoryBuilder.Models;
 using StoryBuilder.Models.Tools;
-using System.Collections.ObjectModel;
 
 namespace StoryBuilder.ViewModels.Tools;
 
@@ -52,26 +53,33 @@ public class TopicsViewModel : ObservableRecipient
     #region Public Methods
     public void LoadTopic(string topicName)
     {
-        if (topicName.Equals(string.Empty))
-            return;
+        if (topicName == null || topicName.Equals(string.Empty)) { return; } //Can't load topics that are null or empty.
+
         _topic = GlobalData.TopicsSource[TopicName];
-        SubTopicNames.Clear();
-        SubTopicNotes.Clear();
-        foreach (SubTopicModel model in _topic.SubTopics)
+        switch (_topic.TopicType)
         {
-            SubTopicNames.Add(model.SubTopicName);
-            SubTopicNotes.Add(model.SubTopicNotes);
+            case TopicTypeEnum.Notepad:
+                Process.Start("notepad.exe", _topic.Filename);
+                break;
+            case TopicTypeEnum.Inline:
+                SubTopicNames.Clear();
+                SubTopicNotes.Clear();
+                foreach (SubTopicModel _model in _topic.SubTopics)
+                {
+                    SubTopicNames.Add(_model.SubTopicName);
+                    SubTopicNotes.Add(_model.SubTopicNotes);
+                }
+                _index = 0;
+                SubTopicName = SubTopicNames[0];
+                SubTopicNote = SubTopicNotes[0];
+                break;
         }
-        _index = 0;
-        SubTopicName = SubTopicNames[0];
-        SubTopicNote = SubTopicNotes[0];
     }
 
     public void NextSubTopic()
     {
         _index++;
-        if (_index >= SubTopicNames.Count)
-            _index = 0;
+        if (_index >= SubTopicNames.Count) { _index = 0; }
         SubTopicName = SubTopicNames[_index];
         SubTopicNote = SubTopicNotes[_index];
     }
@@ -79,8 +87,7 @@ public class TopicsViewModel : ObservableRecipient
     public void PreviousSubTopic()
     {
         _index--;
-        if (_index < 0)
-            _index = SubTopicNames.Count - 1;
+        if (_index < 0) { _index = SubTopicNames.Count - 1; }
         SubTopicName = SubTopicNames[_index];
         SubTopicNote = SubTopicNotes[_index];
     }

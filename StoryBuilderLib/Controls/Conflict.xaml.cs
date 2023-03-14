@@ -1,14 +1,12 @@
-﻿#nullable enable
+﻿using System.Collections.Generic;
 using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
 using StoryBuilder.Models;
 using StoryBuilder.Models.Tools;
-using System.Collections.Generic;
 using Syncfusion.UI.Xaml.Editors;
 
 namespace StoryBuilder.Controls;
 
-public sealed partial class Conflict : UserControl
+public sealed partial class Conflict
 {
     public SortedDictionary<string, ConflictCategoryModel> ConflictTypes;
     private string category;

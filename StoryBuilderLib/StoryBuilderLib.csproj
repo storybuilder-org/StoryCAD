@@ -1,10 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-	  <TargetFramework>net6.0-windows10.0.19041.0</TargetFramework>
+	  <TargetFramework>net7.0-windows10.0.19041.0</TargetFramework>
     <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
     <RootNamespace>StoryBuilder</RootNamespace>
-    <RuntimeIdentifiers>win10-x86;win10-x64</RuntimeIdentifiers>
-    <Platforms>x86;x64</Platforms>
+    <RuntimeIdentifiers>win10-x86;win10-x64;win10-arm64</RuntimeIdentifiers>
+    <Platforms>x86;x64;arm64</Platforms>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
@@ -12,6 +12,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Content Remove="Assets\Install\Lists.ini" />
+    <Content Remove="Assets\Install\reports\Character Relationship Description.txt" />
+    <Content Remove="Assets\Install\reports\List of Websites.txt" />
     <Content Remove="Assets\Install\samples\Rocky.stbx" />
   </ItemGroup>
   <ItemGroup>
@@ -19,11 +21,13 @@
     <None Remove="Assets\Install\Controls.ini" />
     <None Remove="Assets\Install\Lists.ini" />
     <None Remove="Assets\Install\reports\Character Description.txt" />
+    <None Remove="Assets\Install\reports\Character Relationship Description.txt" />
     <None Remove="Assets\Install\reports\Folder Description.txt" />
     <None Remove="Assets\Install\reports\List of Characters.txt" /> 
     <None Remove="Assets\Install\reports\List of Problems.txt" />
     <None Remove="Assets\Install\reports\List of Scene.txt" />
     <None Remove="Assets\Install\reports\List of Settings.txt" />
+    <None Remove="Assets\Install\reports\List of Websites.txt" />
     <None Remove="Assets\Install\reports\Problem Description.txt" />
     <None Remove="Assets\Install\reports\Scene Description.txt" />
     <None Remove="Assets\Install\reports\Section Description.txt" />
@@ -43,7 +47,7 @@
     <None Remove="Services\Dialogs\RecentFiles.xaml" />
     <None Remove="Services\Dialogs\SamplePage.xaml" />
     <None Remove="Services\Dialogs\SaveAsDialog.xaml" />
-    <None Remove="Services\Dialogs\Tools\About.xaml" />
+    <None Remove="Services\Dialogs\Tools\NarrativeTool.xaml" />
     <None Remove="Services\Dialogs\Tools\PrintReportsDialog.xaml" />
     <None Remove="Services\Dialogs\UnifiedMenu.xaml" />
   </ItemGroup>
@@ -61,21 +65,21 @@
 
   <ItemGroup>
     <PackageReference Include="CommonServiceLocator" Version="2.0.6" />
-    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.0.0-preview2" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.1.0" />
     <PackageReference Include="CommunityToolkit.WinUI.UI.Controls.Core" Version="7.1.2" />
-    <PackageReference Include="dotenv.net" Version="3.1.1" />
+    <PackageReference Include="dotenv.net" Version="3.1.2" />
     <PackageReference Include="Elmah.Io.NLog" Version="4.1.25" />
-    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.0.1" />
-    <PackageReference Include="NLog" Version="5.0.0-rc2" />
-    <PackageReference Include="NLog.Extensions.Logging" Version="5.0.0-rc2" />
-    <PackageReference Include="Parse.NETStandard2" Version="2.0.0" />
-    <PackageReference Include="Syncfusion.Editors.WinUI" Version="19.4.0.56" />
-    <PackageReference Include="WinUIEx" Version="1.1.0" />
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.2.230118.102" />
+    <PackageReference Include="MySql.Data" Version="8.0.32" />
+    <PackageReference Include="NLog" Version="5.1.2" />
+    <PackageReference Include="NLog.Extensions.Logging" Version="5.2.2" />
+    <PackageReference Include="Octokit" Version="5.0.0" />
+    <PackageReference Include="Syncfusion.Editors.WinUI" Version="20.2.0.40" />
+    <PackageReference Include="WinUIEx" Version="2.1.0" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Models\Scrivener\" />
-    <Folder Include="Services\Icons\" />
     <Folder Include="Services\Installation\" />
     <Folder Include="Services\Logging\" />
     <Folder Include="Services\Navigation\" />
@@ -90,16 +94,13 @@
     <None Update="NLog.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Page Update="Services\Dialogs\Tools\PrintReportsDialog.xaml">
+    <Page Update="Services\Dialogs\Tools\NarrativeTool.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
 
   <ItemGroup>
-    <Page Update="Services\Dialogs\Tools\About.xaml">
+    <Page Update="Services\Dialogs\Tools\PrintReportsDialog.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
@@ -154,12 +155,6 @@
 
   <ItemGroup>
     <Page Update="Controls\RelationshipView.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Page Update="Themes\Generic.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>

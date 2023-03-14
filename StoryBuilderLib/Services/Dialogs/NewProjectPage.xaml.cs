@@ -1,12 +1,14 @@
-﻿using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using StoryBuilder.ViewModels;
-using System;
+﻿using System;
 using System.IO;
 using System.Runtime.InteropServices;
 using Windows.Storage;
 using Windows.Storage.Pickers;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using StoryBuilder.ViewModels;
 using WinRT;
+using System.Text.RegularExpressions;
+using Windows.Networking;
 
 namespace StoryBuilder.Services.Dialogs;
 
@@ -69,20 +71,6 @@ public sealed partial class NewProjectPage : Page
 
     private void CheckValidity(object sender, RoutedEventArgs e)
     {
-        //Checks file name validity
-        try
-        {
-            File.Create(Path.Combine(Path.GetTempPath(), ProjectName.Text));
-        }
-        catch (Exception ex)
-        {
-            if (ex.Message.Contains("The filename, directory name, or volume label syntax is incorrect. "))
-            {
-                ProjectName.Text = "";
-                ProjectName.PlaceholderText = "You can't call your file that!";
-                return;
-            }
-        }
 
         //Checks file path validity
         try { Directory.CreateDirectory(ProjectPathName.Text); }
@@ -92,6 +80,31 @@ public sealed partial class NewProjectPage : Page
             ProjectPathName.PlaceholderText = "You can't put files here!";
             return;
         }
+
+        //Checks file name validity
+        //NOTE: File.Create() Strips out anything past an illegal character (or throws an exception if it's just an illegal character)
+        try
+        {
+            string testfile = Path.Combine(ProjectPathName.Text, ProjectName.Text);
+            var x = Path.GetInvalidPathChars();
+            //Check validity
+            Regex BadChars = new("[" + Regex.Escape(Path.GetInvalidPathChars().ToString()) + "]");
+            if (BadChars.IsMatch(testfile))
+            {
+                throw new FileNotFoundException("the filename is invalid.");
+            }
+
+            //Try creating file and then checking it exists.
+            File.Create(testfile);
+            if (!File.Exists(testfile)){throw new FileNotFoundException("the filename was not found.");}
+        }
+        catch (Exception ex)
+        {
+            ProjectName.Text = "";
+            ProjectName.PlaceholderText = "You can't call your file that!";
+            return;
+        }
+
         UnifiedVM.MakeProject();
     }
 }

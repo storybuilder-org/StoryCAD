@@ -1,11 +1,38 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.ComponentModel;
+using Microsoft.UI.Xaml;
+using Microsoft.UI;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Printing;
 using StoryBuilder.Models;
+using StoryBuilder.Services.Reports;
+using Windows.Graphics.Printing;
+using Microsoft.UI.Dispatching;
 
 namespace StoryBuilder.ViewModels.Tools;
 
 public class PrintReportDialogVM : ObservableRecipient
 {
+    public ContentDialog Dialog;
+    public PrintTask PrintJobManager;
+    private PrintManager _printManager;
+    public PrintDocument Document = new();
+    public IPrintDocumentSource PrintDocSource;
+
+    private List<StackPanel> _printPreviewCache; //This stores a list of pages for print preview
+    #region Properties
+
+    private bool _showLoadingBar = true;
+    public bool ShowLoadingBar
+    {
+        get => _showLoadingBar;
+        set => SetProperty(ref _showLoadingBar, value);
+    }
+
     private bool _createSummary;
     public bool CreateSummary
     {
@@ -31,6 +58,13 @@ public class PrintReportDialogVM : ObservableRecipient
     {
         get => _selectAllScenes;
         set => SetProperty(ref _selectAllScenes, value);
+    }
+
+    private bool _selectAllWeb;
+    public bool SelectAllWeb
+    {
+        get => _selectAllWeb;
+        set => SetProperty(ref _selectAllWeb, value);
     }
 
     private bool _selectAllSetting;
@@ -75,6 +109,13 @@ public class PrintReportDialogVM : ObservableRecipient
         set => SetProperty(ref _sceneList, value);
     }
 
+    private bool _webList;
+    public bool WebList
+    {
+        get => _webList;
+        set => SetProperty(ref _webList, value);
+    }
+
     private List<StoryNodeItem> _selectedNodes = new();
     public List<StoryNodeItem> SelectedNodes
     {
@@ -110,6 +151,18 @@ public class PrintReportDialogVM : ObservableRecipient
         set => SetProperty(ref _sceneNodes, value);
     }
 
+    private List<StoryNodeItem> _webNodes = new();
+    public List<StoryNodeItem> WebNodes
+    {
+        get => _webNodes;
+        set => SetProperty(ref _webNodes, value);
+    }
+    #endregion
+
+    /// <summary>
+    /// This traverses a node and adds it to the relevant list.
+    /// </summary>
+    /// <param name="node"></param>
     public void TraverseNode(StoryNodeItem node)
     {
         switch (node.Type)
@@ -118,10 +171,195 @@ public class PrintReportDialogVM : ObservableRecipient
             case StoryItemType.Character: CharacterNodes.Add(node); break;
             case StoryItemType.Setting: SettingNodes.Add(node); break;
             case StoryItemType.Scene: SceneNodes.Add(node); break;
+            case StoryItemType.Web: WebNodes.Add(node); break;
         }
 
         //Recurs until children are empty 
-        foreach (StoryNodeItem storyNodeItem in node.Children) { TraverseNode(storyNodeItem); }
+        foreach (StoryNodeItem _storyNodeItem in node.Children) { TraverseNode(_storyNodeItem); }
     }
 
+    /// <summary>
+    /// Hides the content dialog
+    /// </summary>
+    public void CloseDialog() { Dialog.Hide(); }
+
+    /// <summary>
+    /// This prints a report of the node selected
+    /// </summary>
+    /// <param name="elementItem">Node to be printed.</param>
+    public async Task PrintSingleNode(StoryNodeItem elementItem)
+    {
+        SelectedNodes.Clear(); //Only print single node
+
+        PrintReports _rpt = new(this, ShellViewModel.GetModel());
+       
+        if (elementItem.Type == StoryItemType.StoryOverview) {CreateOverview = true; }
+        else { SelectedNodes.Add(elementItem); }
+
+        _rpt.Print(await _rpt.Generate());
+        CreateOverview = false;
+    }
+
+    public void RegisterForPrint()
+    {
+        // Register for PrintTaskRequested event
+        _printManager = PrintManagerInterop.GetForWindow(GlobalData.WindowHandle);
+        _printManager.PrintTaskRequested += PrintTaskRequested;
+    }
+    /// <summary>
+    /// This starts report generation
+    /// (Calls GenerateReports() on a background worker)
+    /// </summary>
+    public void StartGeneratingReports()
+    {
+        ShowLoadingBar = true;
+        BackgroundWorker _backgroundThread = new();
+        _backgroundThread.DoWork += async (_,_) =>
+        {
+            PrintReports _rpt = new(this, ShellViewModel.GetModel());
+            _rpt.Print(await _rpt.Generate());
+            ShowLoadingBar = false;
+        };
+        _backgroundThread.RunWorkerAsync();
+    }
+
+    public async void GeneratePrintDocumentReport()
+    {
+        Document = new();
+        _printPreviewCache = new();
+
+        //Treat each page break as it's own page.
+        foreach (string pageText in (await new PrintReports(this, ShellViewModel.GetModel()).Generate()).Split(@"\PageBreak"))
+        {
+            //Wrap pages
+            string[] Lines = pageText.Split('\n');
+            List<string> WrappedPages = new();
+            int linecount = 0;
+            string currentpage = "";
+            for (int i = 0; i < Lines.Length; i++)
+            {
+                if (linecount >= 70)
+                {
+                    currentpage += Lines[i];
+                    WrappedPages.Add(currentpage);
+
+                    //Reset counter
+                    currentpage = "";
+                    linecount = 0;
+
+                }
+                else
+                {
+                    currentpage += Lines[i];
+                    linecount++;
+                }
+            }
+            WrappedPages.Add(currentpage);
+
+            //We specify black text as it will default to white on dark mode, making it look like nothing was printed
+            //(and leading to a week of wondering why noting was being printed.). 
+            foreach (string Page in WrappedPages)
+            {
+                if (!String.IsNullOrWhiteSpace(Page))
+                {
+                    StackPanel panel = new()
+                    {
+                        Children =
+                        {
+                            new TextBlock {
+                                Text = Page,
+                                Foreground = new SolidColorBrush(Colors.Black),
+                                Margin = new(120, 50, 0, 0),
+                                HorizontalAlignment = HorizontalAlignment.Left,
+                                FontSize = 10
+                            }
+                        }
+                    };
+
+                    _printPreviewCache.Add(panel); //Add page to cache.  
+                }
+            }
+        }
+
+        //Add the text as pages.
+        Document.AddPages += AddPages;
+
+        //Fetch preview page
+        Document.GetPreviewPage += GetPreviewPage;
+
+        //As each page gets added through AddPages, and keeps preview count in line 
+        Document.Paginate += Paginate;
+    }
+
+    private void Paginate(object sender, PaginateEventArgs e)
+    {
+        Document.SetPreviewPageCount(_printPreviewCache.Count, PreviewPageCountType.Intermediate);
+    }
+
+    private void GetPreviewPage(object sender, GetPreviewPageEventArgs e)
+    {
+        //Try Catch as this code may be called before AddPages is done.
+        try
+        {
+            Document.SetPreviewPage(e.PageNumber, _printPreviewCache[e.PageNumber - 1]);
+        }
+        catch { }
+    }
+
+    private void AddPages(object sender, AddPagesEventArgs e)
+    {
+        //Treat each page break as
+        foreach (StackPanel page in _printPreviewCache) { Document.AddPage(page); }
+
+        //All text has been handled, so we mark add pages as complete.
+        Document.AddPagesComplete();
+        Document.SetPreviewPage(0, _printPreviewCache[0]);
+
+        //Set preview count
+        Document.SetPreviewPageCount(_printPreviewCache.Count, PreviewPageCountType.Final);
+    }
+
+    /// <summary>
+    /// This creates a print task and handles it failure/completion
+    /// </summary>
+    private void PrintTaskRequested(PrintManager sender, PrintTaskRequestedEventArgs args)
+    {
+        PrintJobManager = args.Request.CreatePrintTask("StoryBuilder - " + ShellViewModel.GetModel().ProjectFilename, PrintSourceRequested);
+        PrintJobManager.Completed += PrintTaskCompleted; //Show message if job failed.
+    }
+
+    /// <summary>
+    /// Set print source
+    /// </summary>
+    /// <param name="args"></param>
+    private void PrintSourceRequested(PrintTaskSourceRequestedArgs args)
+    {
+        args.SetSource(PrintDocSource);
+    }
+
+    private async void PrintTaskCompleted(PrintTask sender, PrintTaskCompletedEventArgs args)
+    {
+        if (args.Completion == PrintTaskCompletion.Failed) //Show message if print fails
+        {
+            //Use an enqueue here because the sample version doesn't use it properly (i think or it doesn't work here.)
+             ContentDialog cd = new()
+             {
+                XamlRoot = GlobalData.XamlRoot,
+                Title = "Printing error",
+                Content = "An error occurred trying to print your document.",
+                PrimaryButtonText = "OK"
+             };
+             await cd.ShowAsync();
+        }
+
+        GlobalData.GlobalDispatcher.TryEnqueue(() =>
+        {
+            _printManager.PrintTaskRequested -= PrintTaskRequested;
+            Document.AddPages -= AddPages;
+            Document.GetPreviewPage -= GetPreviewPage;
+            Document.Paginate -= Paginate;
+            Document = null;
+            CloseDialog();
+        });
+    }
 }

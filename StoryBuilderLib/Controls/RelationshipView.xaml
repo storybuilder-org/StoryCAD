@@ -2,55 +2,60 @@
     x:Class="StoryBuilder.Controls.RelationshipView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:usercontrols="using:StoryBuilder.Controls"
     xmlns:editors="using:Syncfusion.UI.Xaml.Editors"
-    mc:Ignorable="d">
+    xmlns:models="using:StoryBuilder.Models">
 
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
-        <ComboBox Grid.Row="0" Header="Relationship" PlaceholderText="Pick Relation" IsEditable="False" 
-                            ItemsSource="{x:Bind CharVm.CharacterRelationships}"
-                            SelectionChanged="RelationshipChanged"
-                            DisplayMemberPath ="Partner.Name"
-                            SelectedItem="{x:Bind CharVm.SelectedRelationship, Mode=TwoWay}" />
-        <TextBox Name="RelationType" Grid.Row="2" Header="Relation Type" MinWidth="200" 
-                              IsReadOnly="True" Text="{x:Bind CharVm.RelationType, Mode=OneWay}" />
-        <AutoSuggestBox Grid.Row="3" Header= "Trait" MinWidth="150"
-                              ItemsSource="{x:Bind CharVm.RelationshipTraitList}"
-                               Text="{x:Bind CharVm.RelationshipTrait, Mode=TwoWay}" />
-        <AutoSuggestBox Grid.Row="4" Header="Attitude"  MinWidth="150" 
-                        ItemsSource="{x:Bind CharVm.RelationshipAttitudeList}"
-                        Text="{x:Bind CharVm.RelationshipAttitude, Mode=TwoWay}" />
-        <usercontrols:RichEditBoxExtended Grid.Row="5" Header="Relationship Notes" 
-                             RtfText="{x:Bind CharVm.RelationshipNotes, Mode=TwoWay}" AcceptsReturn="True"
-                             IsSpellCheckEnabled="True" TextWrapping="Wrap"
-                             ScrollViewer.VerticalScrollBarVisibility="Visible" />
-        <TextBlock Grid.Row="6"  />        
-        <Grid Grid.Row="7" HorizontalAlignment="Left">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
-            <TextBlock Grid.Column="1" MinWidth="25" />
-            <Button Grid.Column="2" Content="Add Relation" 
-                             Command="{x:Bind CharVm.AddRelationshipCommand, Mode=OneWay}" />
-            <TextBlock Grid.Column="3" MinWidth="25" />
-            <Button Grid.Column="4" Content="Remove Relation" 
-                             Command="{x:Bind CharVm.RemoveRelationshipCommand, Mode=OneWay}" />
-        </Grid>
-    </Grid>
+    <ScrollViewer>
+        <StackPanel Orientation="Vertical" Margin="5">
+            <Button Content="Create a new relationship" Command="{x:Bind CharVm.AddRelationshipCommand, Mode=OneWay}" Margin="5" VerticalAlignment="Bottom" HorizontalAlignment="Center"/>
+            <ItemsRepeater ItemsSource="{x:Bind CharVm.CharacterRelationships}">
+                <ItemsRepeater.ItemTemplate>
+                    <DataTemplate x:DataType="models:RelationshipModel" >
+                        <Expander Width="auto" HorizontalAlignment="Stretch" IsExpanded="True" LosingFocus="OnLostFocus">
+                            <Expander.Header>
+                                <Grid Height="auto">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="auto"/>
+                                        <ColumnDefinition Width="15"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <SymbolIcon Symbol="Cancel" HorizontalAlignment="Left" Grid.Column="0" PointerPressed="RemoveRelationship" Tag="{x:Bind PartnerUuid}"/>
+                                    <Grid Grid.Row="0" Margin="0,10" HorizontalAlignment="Center" Grid.Column="2">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="{x:Bind CharVM.Name}" VerticalAlignment="Center" TextWrapping="Wrap" Margin="5,0,0,0" IsTextScaleFactorEnabled="True"/>
+                                        <TextBlock Grid.Column="1" Text=" is a " VerticalAlignment="Center"/>
+                                        <TextBox Grid.Column="2" MinWidth="200" Height="20" Text="{x:Bind RelationType, Mode=OneWay}"  Margin="10,0"/>
+                                        <TextBlock Grid.Column="3" Text=" to " VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                        <TextBlock Grid.Column="4" Text="{x:Bind Partner.Name}" VerticalAlignment="Center" TextWrapping="Wrap"  Margin="5,0,0,0"/>
+                                    </Grid>
+                                </Grid>
+                            </Expander.Header>
+                            <Grid HorizontalAlignment="Stretch" MinWidth="600">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <editors:SfComboBox Grid.Row="0" Grid.Column="1" IsEditable="True"  Header= "Trait" MinWidth="150" ItemsSource="{x:Bind CharVM.RelationshipTraitList}" Text="{x:Bind Trait, Mode=TwoWay}" Margin="0,0,10,0" />
+                                <editors:SfComboBox Grid.Row="0" Grid.Column="2" IsEditable="True" Header="Attitude"  MinWidth="150" ItemsSource="{x:Bind CharVM.RelationshipAttitudeList}" Text="{x:Bind Attitude, Mode=TwoWay}"/>
+                                <usercontrols:RichEditBoxExtended Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4" MinHeight="200" HorizontalAlignment="Stretch" Header="Relationship Notes"  RtfText="{x:Bind Notes, Mode=TwoWay}" AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap" ScrollViewer.VerticalScrollBarVisibility="Visible"/>
+                            </Grid>
+                        </Expander>
+                    </DataTemplate>
+                </ItemsRepeater.ItemTemplate>
+            </ItemsRepeater>
+        </StackPanel>
+    </ScrollViewer>
 </UserControl>

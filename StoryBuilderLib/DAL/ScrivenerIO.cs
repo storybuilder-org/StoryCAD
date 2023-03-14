@@ -1,14 +1,11 @@
-﻿using StoryBuilder.Models.Scrivener;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Windows.Data.Xml.Dom;
 using Windows.Storage;
 using NRtfTree.Core;
-using XmlDocument = Windows.Data.Xml.Dom.XmlDocument;
-using XmlElement = Windows.Data.Xml.Dom.XmlElement;
-using XmlText = Windows.Data.Xml.Dom.XmlText;
+using StoryBuilder.Models.Scrivener;
 
 namespace StoryBuilder.DAL;
 
@@ -18,7 +15,7 @@ namespace StoryBuilder.DAL;
 /// </summary>
 public class ScrivenerIo
 {
-    // The .scrivx document
+    // The .scrivener document
     public XmlDocument XmlDocument;
     public StorageFile ScrivenerFile;
     public string ProjectPath;
@@ -65,9 +62,9 @@ public class ScrivenerIo
 
     public BinderItem BuildBinderItemTree()
     {
-        BinderItem root = new(0, "", BinderItemType.Root, "Root");
-        RecurseXmlNode(Binder, root);
-        return root;
+        BinderItem _root = new("", BinderItemType.Root, "Root");
+        RecurseXmlNode(Binder, _root);
+        return _root;
     }
 
     /// <summary>
@@ -83,103 +80,87 @@ public class ScrivenerIo
         if (node.NodeType != NodeType.ElementNode)
             return;
 
-        int id = 0;
-        string uuid = string.Empty;
-        string created = string.Empty;
-        string modified = string.Empty;
-        BinderItemType type = BinderItemType.Unknown;
+        string _uuid = string.Empty;
+        string _created = string.Empty;
+        string _modified = string.Empty;
+        BinderItemType _type = BinderItemType.Unknown;
 
         if (node.NodeName.Equals("Binder"))
         {
-            foreach (IXmlNode Node in node.ChildNodes) { RecurseXmlNode(Node, parent); }
+            foreach (IXmlNode _node in node.ChildNodes) { RecurseXmlNode(_node, parent); }
         }
         else if (node.NodeName.Equals("BinderItem"))
         {
             // Search for the attributes we want on a BindItem.
-            foreach (IXmlNode attr in node.Attributes)
+            foreach (IXmlNode _attr in node.Attributes)
             {
-                switch (attr.NodeName)
+                switch (_attr.NodeName)
                 {
-                    case "ID":
-                        id = Convert.ToInt32(attr.InnerText);
-                        break;
                     case "UUID":
-                        uuid = attr.InnerText;
+                        _uuid = _attr.InnerText;
                         break;
                     case "Created":
-                        created = attr.InnerText;
+                        _created = _attr.InnerText;
                         break;
                     case "Modified":
-                        modified = attr.InnerText;
+                        _modified = _attr.InnerText;
                         break;
                     case "Type":
-                        switch (attr.InnerText)
+                        switch (_attr.InnerText)
                         {
                             case "Text":
-                                type = BinderItemType.Text;
+                                _type = BinderItemType.Text;
                                 break;
                             case "Folder":
-                                type = BinderItemType.Folder;
+                                _type = BinderItemType.Folder;
                                 break;
                             case "DraftFolder":
-                                type = BinderItemType.DraftFolder;
+                                _type = BinderItemType.DraftFolder;
                                 break;
                             case "ResearchFolder":
-                                type = BinderItemType.ResearchFolder;
+                                _type = BinderItemType.ResearchFolder;
                                 break;
                             case "TrashFolder":
-                                type = BinderItemType.TrashFolder;
+                                _type = BinderItemType.TrashFolder;
                                 break;
                             case "PDF":
-                                type = BinderItemType.Pdf;
+                                _type = BinderItemType.Pdf;
                                 break;
                             case "WebArchive":
-                                type = BinderItemType.WebArchive;
+                                _type = BinderItemType.WebArchive;
                                 break;
                             case "Root":
-                                type = BinderItemType.Root;
+                                _type = BinderItemType.Root;
                                 break;
                         }
                         break;
                 }
             }
-            IXmlNode titleNode = node.SelectSingleNode("./Title");
-            string title = titleNode != null ? titleNode.InnerText : string.Empty;
-            IXmlNode children = node.SelectSingleNode("./Children");
+            IXmlNode _titleNode = node.SelectSingleNode("./Title");
+            string _title = _titleNode != null ? _titleNode.InnerText : string.Empty;
+            IXmlNode _children = node.SelectSingleNode("./Children");
             // Process stbuuid
-            IXmlNode metaData = node.SelectSingleNode("./MetaData");
-            if (metaData != null)
+            IXmlNode _metaData = node.SelectSingleNode("./MetaData");
+            if (_metaData != null)
             {
-                IXmlNode customMetaData = metaData.SelectSingleNode("./CustomMetaData");
-                XmlElement stbUuidNode = null;
-                if (customMetaData != null)
-                    stbUuidNode = (XmlElement)customMetaData.SelectSingleNode("./MetaDataItem[FieldID='stbuuid']");
-                string stbUuid = string.Empty;
-                if (stbUuidNode != null)
+                IXmlNode _customMetaData = _metaData.SelectSingleNode("./CustomMetaData");
+                XmlElement _stbUuidNode = null;
+                if (_customMetaData != null)
+                    _stbUuidNode = (XmlElement)_customMetaData.SelectSingleNode("./MetaDataItem[FieldID='stbuuid']");
+                string _stbUuid = string.Empty;
+                if (_stbUuidNode != null)
                 {
-                    XmlElement value = (XmlElement)stbUuidNode.SelectSingleNode("./Value");
-                    if (value != null) stbUuid = value.InnerText;
+                    XmlElement _value = (XmlElement)_stbUuidNode.SelectSingleNode("./Value");
+                    if (_value != null) _stbUuid = _value.InnerText;
                 }
-                BinderItem newNode = new(id, uuid, type, title, parent, created, modified, stbUuid);
-                newNode.Node = node;
-                if (children != null)
-                    foreach (IXmlNode child in children.ChildNodes)
-                        if (child.NodeName.Equals("BinderItem"))
-                            RecurseXmlNode(child, newNode);
+                BinderItem _newNode = new(_uuid, _type, _title, parent, _created, _modified, _stbUuid) { Node = node };
+                if (_children != null)
+                {
+                    foreach (IXmlNode _child in _children.ChildNodes)
+                        if (_child.NodeName.Equals("BinderItem")) { RecurseXmlNode(_child, _newNode); }
+                }
             }
         }
-    }
-
-    /// <summary>
-    /// Replace an IXmlNode with a newer version.
-    /// </summary>
-    /// <param name="parentBinderItem">ex, Storybuilder</param>
-    /// <param name="newChild">the node to replace with</param>
-    /// <param name="referenceChild">the node to be replaced</param>
-    public void ReplaceXmlNode(IXmlNode parentBinderItem, IXmlNode newChild, IXmlNode referenceChild)
-    {
-        IXmlNode parent = parentBinderItem.ParentNode;  // The actual parent
-        parent.ReplaceChild(newChild, referenceChild);
     }
 
     /// <summary>
@@ -192,23 +173,22 @@ public class ScrivenerIo
     /// <returns></returns>
     public XmlElement CreateFromBinder(BinderItem rootItem)
     {
-        XmlElement xmlRootElement = CreateNode(rootItem);
-        RecurseBinderNode(rootItem, xmlRootElement);
+        XmlElement _xmlRootElement = CreateNode(rootItem);
+        RecurseBinderNode(rootItem, _xmlRootElement);
 
-        return xmlRootElement;
+        return _xmlRootElement;
     }
 
     private void RecurseBinderNode(BinderItem binderNode, IXmlNode xmlParentNode)
     {
-        IXmlNode parentChildren = xmlParentNode.SelectSingleNode(".//Children");
+        IXmlNode _parentChildren = xmlParentNode.SelectSingleNode(".//Children");
         // Traverse and create XmlNodes for the binderNode subtree
-        foreach (BinderItem child in binderNode.Children)
+        foreach (BinderItem _child in binderNode.Children)
         {
-            IXmlNode newNode = CreateNode(child);
-            if (parentChildren != null)
-                parentChildren.AppendChild(newNode);
+            IXmlNode _newNode = CreateNode(_child);
+            if (_parentChildren != null) {_parentChildren.AppendChild(_newNode);}
             //xmlParentNode.AppendChild(newNode);
-            RecurseBinderNode(child, newNode);
+            RecurseBinderNode(_child, _newNode);
         }
     }
 
@@ -220,43 +200,43 @@ public class ScrivenerIo
     public XmlElement CreateNode(BinderItem binderItem)
     {
         // Create new XmlElement for BinderItem
-        XmlElement element = XmlDocument.CreateElement("BinderItem");
+        XmlElement _element = XmlDocument.CreateElement("BinderItem");
         // Set attributes
-        element.SetAttribute("UUID", binderItem.Uuid);
-        element.SetAttribute("Type", GetType(binderItem.Type));
-        DateTime now = DateTime.Now;
-        element.SetAttribute("Created", now.ToString("yyyy-MM-dd - HH:mm:ss - K"));
-        element.SetAttribute("Modified", now.ToString("yyyy-MM-dd - HH:mm:ss - K"));
+        _element.SetAttribute("UUID", binderItem.Uuid);
+        _element.SetAttribute("Type", GetType(binderItem.Type));
+        DateTime _now = DateTime.Now;
+        _element.SetAttribute("Created", _now.ToString("yyyy-MM-dd - HH:mm:ss - K"));
+        _element.SetAttribute("Modified", _now.ToString("yyyy-MM-dd - HH:mm:ss - K"));
         // Add Title child
-        XmlElement title = XmlDocument.CreateElement("Title");
-        XmlText titleText = XmlDocument.CreateTextNode(binderItem.Title);
-        title.AppendChild(titleText);
-        element.AppendChild(title);
+        XmlElement _title = XmlDocument.CreateElement("Title");
+        XmlText _titleText = XmlDocument.CreateTextNode(binderItem.Title);
+        _title.AppendChild(_titleText);
+        _element.AppendChild(_title);
         // Add MetaData child and IncludeInCompile grandchild
-        XmlElement meta = XmlDocument.CreateElement("MetaData");
-        XmlElement include = XmlDocument.CreateElement("IncludeInCompile");
-        XmlText includeText = XmlDocument.CreateTextNode("Yes");
-        include.AppendChild(includeText);
-        meta.AppendChild(include);
-        element.AppendChild(meta);
+        XmlElement _meta = XmlDocument.CreateElement("MetaData");
+        XmlElement _include = XmlDocument.CreateElement("IncludeInCompile");
+        XmlText _includeText = XmlDocument.CreateTextNode("Yes");
+        _include.AppendChild(_includeText);
+        _meta.AppendChild(_include);
+        _element.AppendChild(_meta);
         // Add TextSettings child and TextSelection grandchild
-        XmlElement textSettings = XmlDocument.CreateElement("TextSettings");
-        XmlElement textSelection = XmlDocument.CreateElement("TextSelection");
-        XmlText textSelectionText = XmlDocument.CreateTextNode("0,0");
-        textSelection.AppendChild(textSelectionText);
-        textSettings.AppendChild(textSelection);
-        element.AppendChild(textSelection);
-        // Note: In Scrivener text nodes can have subdocuments and folders
+        XmlElement _textSettings = XmlDocument.CreateElement("TextSettings");
+        XmlElement _textSelection = XmlDocument.CreateElement("TextSelection");
+        XmlText _textSelectionText = XmlDocument.CreateTextNode("0,0");
+        _textSelection.AppendChild(_textSelectionText);
+        _textSettings.AppendChild(_textSelection);
+        _element.AppendChild(_textSelection);
+        // Note: In Scrivener text nodes can have sub-documents and folders
         // can have their own text.
-        XmlElement children = XmlDocument.CreateElement("Children");
-        element.AppendChild(children);
+        XmlElement _children = XmlDocument.CreateElement("Children");
+        _element.AppendChild(_children);
         //if (binderItem.Type.Equals((BinderItemType.Folder)))
         //{
         //    XmlElement children = XmlDocument.CreateElement("Children");
         //    element.AppendChild(children);
         //}
-        binderItem.Node = element;
-        return element;
+        binderItem.Node = _element;
+        return _element;
     }
 
     /// <summary>
@@ -266,44 +246,46 @@ public class ScrivenerIo
     /// <returns>A string representation of the enum value.</returns>
     private static string GetType(BinderItemType type)
     {
-        string value = string.Empty;
+        //TODO: Handle Unknown and default cases in switch (and hence remove the following Resharper ignore commend)
+        string _value = string.Empty;
+        // ReSharper disable once SwitchStatementMissingSomeEnumCasesNoDefault
         switch (type)
         {
             case BinderItemType.Text:
-                value = "Text";
+                _value = "Text";
                 break;
             case BinderItemType.Folder:
-                value = "Folder";
+                _value = "Folder";
                 break;
             case BinderItemType.DraftFolder:
-                value = "DraftFolder";
+                _value = "DraftFolder";
                 break;
             case BinderItemType.ResearchFolder:
-                value = "ResearchFolder";
+                _value = "ResearchFolder";
                 break;
             case BinderItemType.TrashFolder:
-                value = "TrashFolder";
+                _value = "TrashFolder";
                 break;
             case BinderItemType.Pdf:
-                value = "PDF";
+                _value = "PDF";
                 break;
             case BinderItemType.WebArchive:
-                value = "WebArchive";
+                _value = "WebArchive";
                 break;
             case BinderItemType.Root:
-                value = "Root";
+                _value = "Root";
                 break;
         }
-        return value;
+        return _value;
     }
 
     public async Task<bool> IsScrivenerRelease3()
     {
-        string path = Path.Combine(ProjectPath, "Files");
-        StorageFolder filesFolder = await StorageFolder.GetFolderFromPathAsync(path);
-        IReadOnlyList<StorageFolder> folders = await filesFolder.GetFoldersAsync();
-        foreach (StorageFolder folder in folders)
-            if (folder.Name.Equals("Data"))
+        string _path = Path.Combine(ProjectPath, "Files");
+        StorageFolder _filesFolder = await StorageFolder.GetFolderFromPathAsync(_path);
+        IReadOnlyList<StorageFolder> _folders = await _filesFolder.GetFoldersAsync();
+        foreach (StorageFolder _folder in _folders)
+            if (_folder.Name.Equals("Data"))
                 return true;    // The project is a Scrivener Release 3 folder
         return false;
     }
@@ -318,16 +300,16 @@ public class ScrivenerIo
     /// <returns>StorageFolder</returns>
     public async Task<StorageFolder> GetSubFolder(string uuid)
     {
-        string path = Path.Combine(ProjectPath, "Files", "Data");
-        StorageFolder parent = await StorageFolder.GetFolderFromPathAsync(path);
+        string _path = Path.Combine(ProjectPath, "Files", "Data");
+        StorageFolder _parent = await StorageFolder.GetFolderFromPathAsync(_path);
 
         try
         {
-            return await parent.GetFolderAsync(uuid);
+            return await _parent.GetFolderAsync(uuid);
         }
         catch (Exception)
         {
-            return await parent.CreateFolderAsync(uuid);
+            return await _parent.CreateFolderAsync(uuid);
         }
     }
 
@@ -339,19 +321,19 @@ public class ScrivenerIo
 
     public async Task<string> ReadRtfText(string path)
     {
-        string result = string.Empty;
+        string _result = string.Empty;
         await Task.Run(() =>
         {
             //Create an RTF object
-            RtfTree tree = new();
+            RtfTree _tree = new();
 
             //Load an RTF document from a file
-            tree.LoadRtfFile(path);
+            _tree.LoadRtfFile(path);
 
             // Get the file's contents
-            return tree.Text;
+            return _tree.Text;
         });
-        return result;
+        return _result;
     }
 
     /// <summary>
@@ -361,17 +343,17 @@ public class ScrivenerIo
     /// </summary>
     public async Task WriteTestFile(string fileName, XmlElement root)
     {
-        StorageFolder projectFolder = await StorageFolder.GetFolderFromPathAsync(ProjectPath);
-        StorageFile file = await projectFolder.CreateFileAsync(fileName, CreationCollisionOption.ReplaceExisting);
+        StorageFolder _projectFolder = await StorageFolder.GetFolderFromPathAsync(ProjectPath);
+        StorageFile _file = await _projectFolder.CreateFileAsync(fileName, CreationCollisionOption.ReplaceExisting);
         if (root != null)
         {
-            XmlDocument doc = new();
-            doc.AppendChild(doc.CreateProcessingInstruction("xml", "version=\"1.0\" encoding=\"UTF-8\""));
-            XmlElement newRoot = doc.CreateElement("Binder");
-            doc.AppendChild(newRoot);
-            IXmlNode newNode = doc.ImportNode(root, true);
-            newRoot.AppendChild(newNode);
-            await doc.SaveToFileAsync(file);
+            XmlDocument _doc = new();
+            _doc.AppendChild(_doc.CreateProcessingInstruction("xml", "version=\"1.0\" encoding=\"UTF-8\""));
+            XmlElement _newRoot = _doc.CreateElement("Binder");
+            _doc.AppendChild(_newRoot);
+            IXmlNode _newNode = _doc.ImportNode(root, true);
+            _newRoot.AppendChild(_newNode);
+            await _doc.SaveToFileAsync(_file);
         }
     }
 }

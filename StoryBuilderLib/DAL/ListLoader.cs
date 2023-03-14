@@ -13,40 +13,39 @@ public class ListLoader
 
     public async Task<Dictionary<string, ObservableCollection<string>>> Init(string path)
     {
-        Dictionary<string, ObservableCollection<string>> lists = new();
+        Dictionary<string, ObservableCollection<string>> _lists = new();
 
-        StorageFolder controlFolder = await StorageFolder.GetFolderFromPathAsync(path);
-        StorageFile iniFile = await controlFolder.GetFileAsync("Lists.ini");
+        StorageFolder _controlFolder = await StorageFolder.GetFolderFromPathAsync(path);
+        StorageFile _iniFile = await _controlFolder.GetFileAsync("Lists.ini");
         //See if the .INI file exists
-        //string iniFile = Path.Combine(Controller.Controller.SystemDirectory, @"\STORYB.INI");
-        // string iniFile = @"C:\STORYB\STORYB.INI";
         //if (!File.Exists(iniFile))
         //    throw new Exception(@"STORY.INI initialization file not found");
 
         // Read the Application .INI file. Each record is the format 'KeyWord=Keyvalue'.
         // As each record is read, it's moved to the corresponding initialization
-        // structure field or loaded as an initialization value for a contol
-        string text = await FileIO.ReadTextAsync(iniFile);
-        StringReader sr = new(text);
-        string line;
-        while ((line = await sr.ReadLineAsync()) != null)
+        // structure field or loaded as an initialization value for a control
+        string _text = await FileIO.ReadTextAsync(_iniFile);
+        StringReader _sr = new(_text);
+        // ReSharper disable once MoveVariableDeclarationInsideLoopCondition
+        string _line; //Not Inlining to keep code readability
+        while ((_line = await _sr.ReadLineAsync()) != null)
         {
-            line = line.TrimEnd();
-            if (line.Equals(string.Empty))
+            _line = _line.TrimEnd();
+            if (_line.Equals(string.Empty))
                 continue;
-            if (line.StartsWith(";")) // Comment
+            if (_line.StartsWith(";")) // Comment
                 continue;
-            if (line.Contains("="))
+            if (_line.Contains("="))
             {
-                string[] tokens = line.Split(new[] { '=' });
-                string keyword = tokens[0];
-                string keyvalue = tokens[1];
-                if (!lists.ContainsKey(keyword))
-                    lists.Add(keyword, new ObservableCollection<string>());
-                lists[keyword].Add(keyvalue);
+                string[] _tokens = _line.Split(new[] { '=' });
+                string _keyword = _tokens[0];
+                string _keyvalue = _tokens[1];
+                if (!_lists.ContainsKey(_keyword))
+                    _lists.Add(_keyword, new ObservableCollection<string>());
+                _lists[_keyword].Add(_keyvalue);
             }
         }
-        return lists;
+        return _lists;
     }
     #endregion
 }

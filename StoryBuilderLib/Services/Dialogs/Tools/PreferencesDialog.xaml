@@ -3,7 +3,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-    <StackPanel Width="500">
+    <StackPanel Width="500" Height="auto">
         <Pivot Name="PivotView">
             <PivotItem Header="General">
                 <StackPanel>
@@ -31,31 +31,54 @@
                     <CheckBox Content="Send error logs to Team StoryBuilder" Margin="8" HorizontalAlignment="Left" IsChecked="{x:Bind PreferencesVm.ErrorConsent, Mode=TwoWay}"/>
                     <CheckBox Content="Send me newsletters about StoryBuilder" Margin="8" HorizontalAlignment="Left" IsChecked="{x:Bind PreferencesVm.NewsConsent, Mode=TwoWay}"/>
                     <CheckBox Content="Wrap node names" Margin="8" HorizontalAlignment="Left" IsChecked="{x:Bind PreferencesVm.WrapNodeNames, Mode=TwoWay}"/>
+                    <StackPanel Orientation="Horizontal">
+                        <CheckBox Content="Automatically Save every" IsChecked="{x:Bind PreferencesVm.AutoSave, Mode=TwoWay}" HorizontalAlignment="Left" Margin="8"/>
+                        <NumberBox Minimum="15" Maximum="60" IsEnabled="{x:Bind PreferencesVm.AutoSave, Mode=TwoWay}" PlaceholderText="Enter a value (Seconds)" Value="{x:Bind PreferencesVm.AutoSaveInterval, Mode=TwoWay}" HorizontalAlignment="Left" Margin="8"/>
+                        <TextBlock Text="Seconds" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                    </StackPanel>
+                    <ComboBox Header="Preferred Search Engine" HorizontalAlignment="Stretch" SelectedIndex="{x:Bind PreferencesVm.PreferredSearchEngine, Mode=TwoWay}">
+                        <ComboBoxItem Content="DuckDuckGo"/>
+                        <ComboBoxItem Content="Google"/>
+                        <ComboBoxItem Content="Bing"/>
+                        <ComboBoxItem Content="Yahoo"/>
+                    </ComboBox>
                 </StackPanel>
             </PivotItem>
             <PivotItem Header="About">
                 <StackPanel>
                     <TextBlock Name="Version" HorizontalAlignment="Center" Margin="5"/>
-                    <Button Content="Open Logs folder" HorizontalAlignment="Center" Click="OpenPath" Margin="5" Width="200"/>
-                    <Button Content="Join the StoryBuilder Discord!" HorizontalAlignment="Center" Click="OpenDiscordURL" Margin="5"/>
+                    <Button Content="Open Logs folder" HorizontalAlignment="Center" Click="OpenLogFolder" Margin="5" Width="200"/>
+                    <Button Content="Join the StoryBuilder Discord!" HorizontalAlignment="Center" Click="OpenDiscordUrl" Margin="5"/>
                     <TextBlock Text="StoryBuilder was created by Terry Cox, Jake Shaw (Rarisma) and Kyle Lemons" TextWrapping="WrapWholeWords" Margin="5" FontSize="13"/>
                 </StackPanel>
             </PivotItem>
-            <PivotItem Opacity="0" IsEnabled="False" Header="" Name="Dev">
-                <StackPanel HorizontalAlignment="Center">
-                    <StackPanel Orientation="Horizontal">
-                        <Button Content="Set Init to false" Click="SetInitToFalse"/>
-                        <Button Content="Throw exception" Click="ThrowException" Margin="10,0"/>
-                        <Button Content="Attach Elmah" Click="AttachElmah"/>
+            <PivotItem Header="What's new">
+                <ScrollViewer VerticalScrollBarVisibility="Visible" Height="450">
+                    <TextBlock Name="Changelog" TextWrapping="Wrap"/>
+                </ScrollViewer>
+            </PivotItem>
+            <PivotItem Header="Dev" Name="Dev">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <Button Content="Set Init to false" Click="SetInitToFalse" Width="200" Margin="0,5"/>
+                        <Button Content="Throw exception" Click="ThrowException" Width="200" Margin="0,5"/>
+                        <Button Content="Attach Elmah" Click="{x:Bind Logger.AddElmahTarget}" Width="200" Margin="0,5"/>
+                        <Button Content="Run InstallService" Click="{x:Bind InstallVM.InstallFiles}" Width="200" Margin="0,5"/>
                     </StackPanel>
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom">
-                        <TextBlock Name="cpuarch"/>
-                        <TextBlock Name="osarch"/>
-                        <TextBlock Name="osinfo"/>
+                    <StackPanel VerticalAlignment="Bottom" Grid.Column="1" Margin="10,0,0,0">
+                        <TextBlock Name="CPUArchitecture"/>
+                        <TextBlock Name="OSArchitecture"/>
+                        <TextBlock Name="OSInfo"/>
+                        <TextBlock Name="AppArchitecture"/>
+                        <TextBlock Name="NetVer"/>
+                        <TextBlock Name="Startup"/>
                     </StackPanel>
+                </Grid>
 
-                    <TextBlock Name="apparch"/>
-                </StackPanel>
             </PivotItem>
         </Pivot>
         <TextBlock Text="Changing these settings may require a restart to take effect." HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,15,0,0"/>

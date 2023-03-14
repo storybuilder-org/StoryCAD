@@ -1,67 +1,77 @@
+using System.IO;
+using System.Threading.Tasks;
+using Windows.Storage;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
+using Microsoft.UI.Xaml;
 using StoryBuilder.DAL;
 using StoryBuilder.Models;
 using StoryBuilder.Models.Tools;
-using StoryBuilder.Services.Parse;
-using System.Threading.Tasks;
-using Windows.Storage;
-using Microsoft.UI.Xaml;
-using Microsoft.VisualBasic;
+using StoryBuilder.Services.Backend;
 
 namespace StoryBuilder.ViewModels.Tools;
 
 public class PreferencesViewModel : ObservableRecipient
 {
-    public bool init = true;
-    private string _backupdir;
+    #region Properties
+    
+    /// <summary>
+    /// Init is an 'undocumented' preference that controls
+    /// if the PreferencesInitialization Page is shown at boot.
+    ///
+    /// As this is the preferences page, the user has already gone
+    /// through preferences however Init can be set to false via
+    /// the Dev Menu (Shown if a debugger is attached.)
+    /// </summary>
+    public bool Init = true;
+    private string _backupDir;
     public string BackupDir
     {
-        get => _backupdir;
-        set => SetProperty(ref _backupdir, value);
+        get => _backupDir;
+        set => SetProperty(ref _backupDir, value);
     }
 
-    private string _Name;
+    private string _name;
     public string Name
     {
-        get => _Name;
-        set => _Name = value;
+        get => _name;
+        set => _name = value;
     }
-    private string _Email;
+    private string _email;
     public string Email
     {
-        get => _Email;
-        set => _Email = value;
+        get => _email;
+        set => _email = value;
     }
-    private bool _ErrorConsent;
+    private bool _errorConsent;
     public bool ErrorConsent
     {
-        get => _ErrorConsent;
-        set => _ErrorConsent = value;
+        get => _errorConsent;
+        set => _errorConsent = value;
     }
-    private bool _NewsConsent;
+    private bool _newsConsent;
     public bool NewsConsent
     {
-        get => _NewsConsent;
-        set => _NewsConsent = value;
+        get => _newsConsent;
+        set => _newsConsent = value;
     }
-    private bool _Backup;
+    private bool _backup;
     public bool Backup
     {
-        get => _Backup;
-        set => _Backup = value;
+        get => _backup;
+        set => _backup = value;
     }
-    private int _BackupInterval;
+    private int _backupInterval;
     public int BackupInterval
     {
-        get => _BackupInterval;
-        set => _BackupInterval = value;
+        get => _backupInterval;
+        set => _backupInterval = value;
     }
-    private string _ProjectDir;
+    private string _projectDir;
     public string ProjectDir
     {
-        get => _ProjectDir;
-        set => _ProjectDir = value;
+        get => _projectDir;
+        set => _projectDir = value;
     }
 
     private bool _wrapNodeNames;
@@ -78,35 +88,61 @@ public class PreferencesViewModel : ObservableRecipient
         set => _backupOnOpen = value;
     }
 
+    private bool _autoSave;
+    public bool AutoSave
+    {
+        get => _autoSave;
+        set => _autoSave = value;
+    }
+    private int _autoSaveInterval;
+    public int AutoSaveInterval
+    {
+        get => _autoSaveInterval;
+        set => _autoSaveInterval = value;
+    }
+
+    private BrowserType _preferredSearchEngine;
+    public int PreferredSearchEngine
+    {
+        get => (int)_preferredSearchEngine;
+        set => _preferredSearchEngine = (BrowserType)value;
+    }
+    #endregion
+
     /// <summary>
     /// Saves the users preferences to disk.
     /// </summary>
     public async Task SaveAsync()
-    {   
-        PreferencesModel prf = new();
-        PreferencesIO prfIO = new(prf, System.IO.Path.Combine(ApplicationData.Current.RoamingFolder.Path, "Storybuilder"));
-        await prfIO.UpdateModel();
-    
-        prf.Name = Name;
-        prf.Email = Email;
-        prf.ErrorCollectionConsent = ErrorConsent;
-        prf.ProjectDirectory = ProjectDir;
-        prf.BackupDirectory = BackupDir;
-        prf.TimedBackupInterval = BackupInterval;
-        prf.TimedBackup = Backup;
-        prf.Newsletter = NewsConsent;
-        prf.PreferencesInitialised = init;
-        prf.BackupOnOpen = BackupUpOnOpen;
+    {
+        PreferencesModel _prf = new();
+        PreferencesIo _prfIo = new(_prf, Path.Combine(ApplicationData.Current.RoamingFolder.Path, "Storybuilder"));
+        await _prfIo.UpdateModel();
 
-        if (WrapNodeNames) {prf.WrapNodeNames = TextWrapping.WrapWholeWords;}
-        else {prf.WrapNodeNames = TextWrapping.NoWrap;}
+        _prf.Name = Name;
+        _prf.Email = Email;
+        _prf.ErrorCollectionConsent = ErrorConsent;
+        _prf.ProjectDirectory = ProjectDir;
+        _prf.BackupDirectory = BackupDir;
+        _prf.TimedBackupInterval = BackupInterval;
+        _prf.TimedBackup = Backup;
+        _prf.Newsletter = NewsConsent;
+        _prf.PreferencesInitialized = Init;
+        _prf.BackupOnOpen = BackupUpOnOpen;
+        _prf.AutoSave = AutoSave;
+        _prf.PreferredSearchEngine = (BrowserType)PreferredSearchEngine;
+        if (AutoSaveInterval is > 60 or < 14) { AutoSaveInterval = 30; }
+        else { _prf.AutoSaveInterval = AutoSaveInterval; }
 
-        await prfIO.UpdateFile();
-        PreferencesIO loader = new(GlobalData.Preferences, System.IO.Path.Combine(ApplicationData.Current.RoamingFolder.Path, "Storybuilder"));
-        await loader.UpdateModel();
-        ParseService parse = Ioc.Default.GetService<ParseService>();
-        if (!GlobalData.Preferences.ParsePreferencesStatus)
-            await parse.PostPreferences(GlobalData.Preferences);
+        if (WrapNodeNames) { _prf.WrapNodeNames = TextWrapping.WrapWholeWords; }
+        else { _prf.WrapNodeNames = TextWrapping.NoWrap; }
+
+
+        await _prfIo.UpdateFile();
+        PreferencesIo _loader = new(GlobalData.Preferences, Path.Combine(ApplicationData.Current.RoamingFolder.Path, "Storybuilder"));
+        await _loader.UpdateModel();
+        BackendService _backend = Ioc.Default.GetRequiredService<BackendService>();
+        GlobalData.Preferences.RecordPreferencesStatus = false;  // indicate need to update
+        await _backend.PostPreferences(GlobalData.Preferences);
     }
 
     /// <summary>
@@ -125,9 +161,11 @@ public class PreferencesViewModel : ObservableRecipient
         NewsConsent = _model.Newsletter;
         BackupDir = _model.BackupDirectory;
         BackupUpOnOpen = _model.BackupOnOpen;
+        AutoSave = _model.AutoSave;
+        AutoSaveInterval = _model.AutoSaveInterval;
+        PreferredSearchEngine = (int)_model.PreferredSearchEngine;
 
-
-        if (_model.WrapNodeNames == TextWrapping.WrapWholeWords) {WrapNodeNames = true;}
-        else {WrapNodeNames = false; }
+        if (_model.WrapNodeNames == TextWrapping.WrapWholeWords) { WrapNodeNames = true; }
+        else { WrapNodeNames = false; }
     }
 }

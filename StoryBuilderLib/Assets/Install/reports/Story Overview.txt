@@ -45,11 +45,10 @@
 
     Style: @Style
 
-    Style Notes: @StructureNotes
+    Structure Notes: @StructureNotes
 
     Tone: @Tone
 
-    Tone Notes: @toneNotes
 
 
 

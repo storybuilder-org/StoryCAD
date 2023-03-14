@@ -40,6 +40,8 @@
     Feelings:           @ProtagEmotion
 
     Protagonist's Goal: @ProtagGoal
+	
+	Opposition:         @Opposition
 
     Antagonist:         @AntagName
 

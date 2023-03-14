@@ -17,6 +17,7 @@ public class StoryElementCollection : ObservableCollection<StoryElement>
     public ObservableCollection<StoryElement> Characters;
     public ObservableCollection<StoryElement> Settings;
     public ObservableCollection<StoryElement> Problems;
+    public ObservableCollection<StoryElement> Scenes;
 
     public StoryElementCollection()
     {
@@ -25,6 +26,7 @@ public class StoryElementCollection : ObservableCollection<StoryElement>
         Characters = new ObservableCollection<StoryElement>();
         Settings = new ObservableCollection<StoryElement>();
         Problems = new ObservableCollection<StoryElement>();
+        Scenes = new ObservableCollection<StoryElement>();
     }
 
     /// <summary>
@@ -36,24 +38,28 @@ public class StoryElementCollection : ObservableCollection<StoryElement>
     /// <param name="e"></param>
     private void OnStoryElementsChanged(object sender, NotifyCollectionChangedEventArgs e)
     {
-        StoryElement element;
+        StoryElement _element;
 
         switch (e.Action)
         {
             case NotifyCollectionChangedAction.Add:
                 //TODO: Assert that NewItems count is always 1, or make this a loop
-                element = (StoryElement)e.NewItems[0];
-                StoryElementGuids.Add(element.Uuid, element);
-                switch (element.Type)
+                _element = (StoryElement)e.NewItems![0];
+                StoryElementGuids.Add(_element!.Uuid, _element);
+                // ReSharper disable once SwitchStatementMissingSomeEnumCasesNoDefault
+                switch (_element.Type)
                 {
                     case StoryItemType.Character:
-                        Characters.Add(element);
+                        Characters.Add(_element);
                         break;
                     case StoryItemType.Setting:
-                        Settings.Add(element);
+                        Settings.Add(_element);
                         break;
                     case StoryItemType.Problem:
-                        Problems.Add(element);
+                        Problems.Add(_element);
+                        break;
+                    case StoryItemType.Scene:
+                        Scenes.Add(_element);
                         break;
                 }
                 break;
@@ -63,22 +69,24 @@ public class StoryElementCollection : ObservableCollection<StoryElement>
 
             case NotifyCollectionChangedAction.Remove:
                 //TODO: Assert that OldItems count is always 1, or make this a loop
-                element = (StoryElement)e.OldItems[0];
-                StoryElementGuids.Remove(element.Uuid);
-                int i;
-                switch (element.Type)
+                //TODO: Maybe replace the index of with just remove
+                _element = (StoryElement)e.OldItems![0];
+                StoryElementGuids.Remove(_element!.Uuid);
+                int _i;
+                // ReSharper disable once SwitchStatementMissingSomeEnumCasesNoDefault
+                switch (_element.Type)
                 {
                     case StoryItemType.Character:
-                        i = Characters.IndexOf(element);
-                        Characters.RemoveAt(i);
+                        _i = Characters.IndexOf(_element);
+                        Characters.RemoveAt(_i);
                         break;
                     case StoryItemType.Setting:
-                        i = Settings.IndexOf(element);
-                        Settings.RemoveAt(i);
+                        _i = Settings.IndexOf(_element);
+                        Settings.RemoveAt(_i);
                         break;
                     case StoryItemType.Problem:
-                        i = Problems.IndexOf(element);
-                        Problems.RemoveAt(i);
+                        _i = Problems.IndexOf(_element);
+                        Problems.RemoveAt(_i);
                         break;
                 }
                 break;

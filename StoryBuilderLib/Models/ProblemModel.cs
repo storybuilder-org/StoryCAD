@@ -6,16 +6,6 @@ public class ProblemModel : StoryElement
 {
     #region Properties
 
-    // Besides its GUID, each Problem has a unique (to this story)
-    // integer id number (useful in lists of problems.)
-    private static int _nextProblemId;
-    private int _id;
-    public int Id
-    {
-        get => _id;
-        set => _id = value;
-    }
-
     // Problem problem data
     private string _problemType;
     public string ProblemType
@@ -29,6 +19,13 @@ public class ProblemModel : StoryElement
     {
         get => _conflictType;
         set => _conflictType = value;
+    }
+
+    private string _problemCategory;
+    public string ProblemCategory
+    {
+        get => _problemCategory;
+        set => _problemCategory = value;
     }
 
     private string _subject;
@@ -154,9 +151,9 @@ public class ProblemModel : StoryElement
     #region Constructors
     public ProblemModel(StoryModel model) : base("New Problem", StoryItemType.Problem, model)
     {
-        Id = ++_nextProblemId;
         ProblemType = string.Empty;
         ConflictType = string.Empty;
+        ProblemCategory = string.Empty;
         Subject = string.Empty;
         ProblemSource = string.Empty;
         StoryQuestion = string.Empty;
@@ -176,9 +173,9 @@ public class ProblemModel : StoryElement
     }
     public ProblemModel(string name, StoryModel model) : base(name, StoryItemType.Problem, model)
     {
-        Id = ++_nextProblemId;
         ProblemType = string.Empty;
         ConflictType = string.Empty;
+        ProblemCategory = string.Empty;
         Subject = string.Empty;
         ProblemSource = string.Empty;
         StoryQuestion = string.Empty;
@@ -198,7 +195,6 @@ public class ProblemModel : StoryElement
     }
     public ProblemModel(IXmlNode xn, StoryModel model) : base(xn, model)
     {
-        Id = ++_nextProblemId;
         ProblemType = string.Empty;
         ConflictType = string.Empty;
         Subject = string.Empty;

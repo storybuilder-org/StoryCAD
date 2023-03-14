@@ -5,11 +5,7 @@ on:
       VersionNumber:
         description: 'Version'     
         required: true
-        default: '2.0.13.0'
-      LastTag:
-        description: 'Last release verison tag'     
-        required: true
-        default: '2.0.12.0'
+        default: '2.2.0.0'
 jobs:
   build:
     runs-on: windows-latest
@@ -19,19 +15,19 @@ jobs:
 
     steps:
     - name: Download Repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         fetch-depth: 0
 
     # Install .NET
     - name: Install .NET
-      uses: actions/setup-dotnet@v1
+      uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: 6.0.x
+        dotnet-version: 7.x.x
 
     #Install MSBUILD
     - name: Setup MSBuild.exe
-      uses: microsoft/setup-msbuild@v1.0.2
+      uses: microsoft/setup-msbuild@v1.1
 
     #Bump version number
     - name: Increase Version Number 
@@ -82,6 +78,7 @@ jobs:
       run: |
         msbuild $env:Solution_Name /p:Configuration=Release /p:Platform=x64 /p:UapAppxPackageBuildMode=$env:Appx_Package_Build_Mode /p:AppxBundle=$env:Appx_Bundle /p:PackageCertificateKeyFile="D:\a\StoryBuilder-2\StoryBuilder-2\GitHubActionsWorkflow.pfx" /p:AppxPackageDir="$env:Appx_Package_Dir" /p:GenerateAppxPackageOnBuild=true
         msbuild $env:Solution_Name /p:Configuration=Release /p:Platform=x86 /p:UapAppxPackageBuildMode=$env:Appx_Package_Build_Mode /p:AppxBundle=$env:Appx_Bundle /p:PackageCertificateKeyFile="D:\a\StoryBuilder-2\StoryBuilder-2\GitHubActionsWorkflow.pfx" /p:AppxPackageDir="$env:Appx_Package_Dir" /p:GenerateAppxPackageOnBuild=true
+        msbuild $env:Solution_Name /p:Configuration=Release /p:Platform=arm64 /p:UapAppxPackageBuildMode=$env:Appx_Package_Build_Mode /p:AppxBundle=$env:Appx_Bundle /p:PackageCertificateKeyFile="D:\a\StoryBuilder-2\StoryBuilder-2\GitHubActionsWorkflow.pfx" /p:AppxPackageDir="$env:Appx_Package_Dir" /p:GenerateAppxPackageOnBuild=true
       env:
         Appx_Bundle: Never
         Appx_Package_Build_Mode: SideloadOnly
@@ -119,7 +116,7 @@ jobs:
 
     # Upload the MSIX package: https://github.com/marketplace/actions/upload-a-build-artifact
     - name: Upload MSIX package
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: StoryBuilder
         path: D:\a\StoryBuilder-2\StoryBuilder-2\StoryBuilder\Packages\*
@@ -135,11 +132,6 @@ jobs:
       run: |
           Test-Path D:\a\StoryBuilder-2\StoryBuilder-2\StoryBuilder\Packages\Release.zip
           cd D:\a\StoryBuilder-2\StoryBuilder-2\StoryBuilder\Packages\
-
-    - name: Create changelog text
-      uses: loopwerk/tag-changelog@v1
-      with:
-        token: ${{ secrets.GitHubToken }}
 
     - name: Create Release
       uses: softprops/action-gh-release@v1

@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.DependencyInjection;
+using Microsoft.UI.Xaml.Controls;
+using StoryBuilder.Models;
 using StoryBuilder.ViewModels;
-using System.Collections.ObjectModel;
 
 namespace StoryBuilder.Views;
 
@@ -12,34 +13,45 @@ public sealed partial class ScenePage : BindablePage
     {
         InitializeComponent();
         DataContext = SceneVm;
-        SceneVm.ClearScenePurpose = ClearScenePurposeMethod;
-        SceneVm.AddScenePurpose = AddScenePurposeMethod;
     }
 
-    /// <summary>
-    /// Clear the ScenePurpose SfComboBox SelectedItems property. 
-    /// 
-    /// This method is called via proxy from SceneViewModel,
-    /// because the binding to SelectedItems is read-only.
-    /// We therefore update the ComboBox here via callback.
-    /// </summary>
-    /// <param name="purpose"></param>
-    public void ClearScenePurposeMethod()
+    private void ScenePurpose_Checked(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
     {
-        ScenePurpose.SelectedItems.Clear();
+        CheckBox chk = sender as CheckBox;
+        StringSelection element = chk.DataContext as StringSelection;
+        if (element == null)
+            return;
+        element.Selection = true;
+        SceneVm.OnPropertyChanged(null, null);
     }
 
-    /// <summary>
-    /// Add a 'purpose of scene' value to the ScenePurpose
-    /// SfComboBox SelectedItems property. 
-    /// 
-    /// This method is called via proxy from SceneViewModel,
-    /// because the binding to SelectedItems is read-only.
-    /// We therefore update the ComboBox here via callback.
-    /// </summary>
-    /// <param name="purpose"></param>
-    public void AddScenePurposeMethod (string purpose)
-    {     
-        ScenePurpose.SelectedItems.Add(purpose);
+    private void ScenePurpose_Unchecked(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+    {
+        CheckBox chk = sender as CheckBox;
+        StringSelection element = chk.DataContext as StringSelection;
+        if (element == null)
+            return;
+        element.Selection = false;
+        SceneVm.OnPropertyChanged(null, null);
+    }
+
+    private void CastMember_Checked(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+    {
+        CheckBox chk = sender as CheckBox;
+        object item = chk.DataContext;
+        if (item == null)
+            return;
+        StoryElement element = item as StoryElement;
+        SceneVm.AddCastMember(element);
+    }
+
+    private void CastMember_Unchecked(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+    {
+        CheckBox chk = sender as CheckBox;
+        object item = chk.DataContext;
+        if (item == null)
+            return;
+        StoryElement element = item as StoryElement;
+        SceneVm.RemoveCastMember(element);
     }
 }

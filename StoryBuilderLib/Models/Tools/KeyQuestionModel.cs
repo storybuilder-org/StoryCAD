@@ -15,10 +15,7 @@ public class KeyQuestionModel : ObservableObject
 
     #region Constructor
 
-    public KeyQuestionModel()
-    {
-        Question = string.Empty;
-    }
+    public KeyQuestionModel() { Question = string.Empty; }
 
     #endregion
 }

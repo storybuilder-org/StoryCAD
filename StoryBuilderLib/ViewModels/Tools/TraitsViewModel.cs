@@ -1,17 +1,13 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using StoryBuilder.Models;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.UI.Xaml.Controls;
-
+using StoryBuilder.Models;
 
 namespace StoryBuilder.ViewModels.Tools;
 
 public class TraitsViewModel: ObservableRecipient
 {
-    #region Fields
-    #endregion
-
     #region Properties
 
     private string _category;
@@ -37,16 +33,13 @@ public class TraitsViewModel: ObservableRecipient
         switch (Category)
         {
             case "Behaviors":
-                foreach (string item in BehaviorList)
-                    ExampleList.Add("(Behavior): " + item);
+                foreach (string _item in BehaviorList) { ExampleList.Add("(Behavior): " + _item); }
                 break;
             case "Habits":
-                foreach (string item in HabitList)
-                    ExampleList.Add("(Habit): " + item);
+                foreach (string _item in HabitList) { ExampleList.Add("(Habit): " + _item); }
                 break;
             case "Skills and Abilities":
-                foreach (string item in SkillList)
-                    ExampleList.Add("(Skill): " + item);
+                foreach (string _item in SkillList) { ExampleList.Add("(Skill): " + _item); }
                 break;
         }
     }
@@ -69,16 +62,13 @@ public class TraitsViewModel: ObservableRecipient
 
     public TraitsViewModel()
     {
-        Dictionary<string, ObservableCollection<string>> lists = GlobalData.ListControlSource;
-        CategoryList = new ObservableCollection<string>();
-        CategoryList.Add("Behaviors");
-        CategoryList.Add("Habits");
-        CategoryList.Add("Skills and Abilities");
+        Dictionary<string, ObservableCollection<string>> _lists = GlobalData.ListControlSource;
+        CategoryList = new ObservableCollection<string> { "Behaviors", "Habits", "Skills and Abilities" };
         ExampleList = new ObservableCollection<string>();
 
-        BehaviorList = lists["Behavior"];
-        HabitList = lists["Habit"];
-        SkillList = lists["Skill"];
+        BehaviorList = _lists["Behavior"];
+        HabitList = _lists["Habit"];
+        SkillList = _lists["Skill"];
     }
 
     #endregion

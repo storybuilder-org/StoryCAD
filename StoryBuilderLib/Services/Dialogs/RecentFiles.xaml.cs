@@ -1,21 +1,11 @@
-﻿using Microsoft.UI.Xaml;
+﻿using System.IO;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using StoryBuilder.Models;
 using StoryBuilder.ViewModels;
-using System.IO;
-using System.Linq;
-using System.Net.Mime;
-using CommunityToolkit.WinUI.UI;
-using Elmah.Io.Client;
-
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
 
 namespace StoryBuilder.Services.Dialogs;
 
-/// <summary>
-/// An empty page that can be used on its own or navigated to within a Frame.
-/// </summary>
 public sealed partial class RecentFiles : Page
 {
     public RecentFiles(UnifiedVM vm)
@@ -23,8 +13,8 @@ public sealed partial class RecentFiles : Page
         InitializeComponent();
         UnifiedMenuVM = vm;
 
-        string[] RecentFiles = new []{ GlobalData.Preferences.LastFile1 , GlobalData.Preferences.LastFile2, GlobalData.Preferences.LastFile3, GlobalData.Preferences.LastFile4, GlobalData.Preferences.LastFile5};
-        foreach (var File in RecentFiles)
+        string[] RecentFiles = { GlobalData.Preferences.LastFile1 , GlobalData.Preferences.LastFile2, GlobalData.Preferences.LastFile3, GlobalData.Preferences.LastFile4, GlobalData.Preferences.LastFile5};
+        foreach (string File in RecentFiles)
         {
             if (!string.IsNullOrWhiteSpace(File) )
             {

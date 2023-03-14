@@ -1,94 +1,134 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
 using System.Runtime.InteropServices;
-using System.Threading;
+using Windows.ApplicationModel;
 using Windows.Storage;
 using Windows.Storage.Pickers;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
+using Octokit;
 using StoryBuilder.Models;
+using StoryBuilder.Services.Installation;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.ViewModels.Tools;
 using WinRT;
+using Page = Microsoft.UI.Xaml.Controls.Page;
 
 namespace StoryBuilder.Services.Dialogs.Tools;
 
 public sealed partial class PreferencesDialog : Page
 {
     public PreferencesViewModel PreferencesVm => Ioc.Default.GetService<PreferencesViewModel>();
+    public InstallationService InstallVM => Ioc.Default.GetRequiredService<InstallationService>();
+    public LogService Logger => Ioc.Default.GetRequiredService<LogService>();
     public PreferencesDialog()
     {
         InitializeComponent();
         DataContext = PreferencesVm;
-        Version.Text = "StoryBuilder Version: " + Windows.ApplicationModel.Package.Current.Id.Version.Major + "." + Windows.ApplicationModel.Package.Current.Id.Version.Minor + "." + Windows.ApplicationModel.Package.Current.Id.Version.Build + "." + Windows.ApplicationModel.Package.Current.Id.Version.Revision;
+        Version.Text = GlobalData.Version;
+        SetChangelog();
 
-        if (Debugger.IsAttached || GlobalData.Preferences.Name == "ShowMeTheDevTab")
+        //TODO: Put this in a VM and make this data get logged at start up with some more system info.
+        if (Debugger.IsAttached)
         {
-            Dev.IsEnabled = true;
-            Dev.Opacity = 1;
-            Dev.Header = "Dev";
-            cpuarch.Text = "CPU ARCH: " + RuntimeInformation.ProcessArchitecture;
-            osarch.Text = "OS ARCH: " + RuntimeInformation.OSArchitecture;
-            osinfo.Text = "OS INFO: Windows Build " + Environment.OSVersion.VersionString.Replace("Microsoft Windows NT 10.0.","").Replace(".0","");
-            if (IntPtr.Size == 4) { apparch.Text = "Looks like we are running as a 32 bit process."; }
-            else if (IntPtr.Size == 8) { apparch.Text = "Looks like we are running as a 64 bit process."; }
-            else { apparch.Text = $"We don't know what architecture we are running on,\nMight want to call for help.\nIntPtr was {IntPtr.Size}, expected 4 or 8."; }
+            //Get Device Info such as architecture and .NET Version
+            CPUArchitecture.Text = "CPU ARCH: " + RuntimeInformation.ProcessArchitecture;
+            OSArchitecture.Text = "OS ARCH: " + RuntimeInformation.OSArchitecture;
+            NetVer.Text = ".NET Version: " + RuntimeInformation.FrameworkDescription;
+
+            try
+            {
+                //Get Windows Build and Version
+                OSInfo.Text = "Windows Build: " + Environment.OSVersion.Version.Build;
+                if (Convert.ToInt32(Environment.OSVersion.Version.Build) >= 22000)
+                {
+                    OSInfo.Text += " (Windows 11)";
+                }
+                else { OSInfo.Text += " (Windows 10)"; }
+            }
+            catch { OSInfo.Text = "OS Info:Error";  }
+
+
+            //Detect if 32-bit or 64-bit process (I'm not sure if it's possible to )
+            if (IntPtr.Size == 4) { AppArchitecture.Text = "We are running as a 32 bit process."; }
+            else if (IntPtr.Size == 8) { AppArchitecture.Text = "We are running as a 64 bit process."; }
+            else { AppArchitecture.Text = $"UNKNOWN ARCHITECTURE!\nIntPtr was {IntPtr.Size}, expected 4 or 8."; }
+
+            Startup.Text = $"Time to start: {GlobalData.StartUpTimer.ElapsedMilliseconds} milliseconds";
         }
-        else { PivotView.Items.Remove(Dev); }
-    }
-
-    private void OpenPath(object sender, RoutedEventArgs e)
-    {
-        Process.Start(new ProcessStartInfo()
+        else //Remove this because no debugger is attached.
         {
-            FileName = System.IO.Path.Combine(GlobalData.RootDirectory, "Logs"),
-            UseShellExecute = true,
-            Verb = "open"
-        });
+            PivotView.Items.Remove(Dev);
+        }
     }
 
-    private void OpenDiscordURL(object sender, RoutedEventArgs e)
+    private async void SetChangelog()
     {
-        Process Browser = new();
-        Browser.StartInfo.FileName = @"https://discord.gg/wfZxU4bx6n";
-        Browser.StartInfo.UseShellExecute = true;
-        Browser.Start();
+        try
+        {
+            GitHubClient client = new(new ProductHeaderValue("STB"));
+            Changelog.Text = (await client.Repository.Release.Get("storybuilder-org", "StoryBuilder-2", GlobalData.Version.Replace("Version: ", ""))).Body;
+        }
+        catch
+        {
+            //TODO: Use .NET7 Raw String Literal?
+            Changelog.Text = "Failed to get changelog for this version, this because either:" +
+                             "\n - You are running an auto-build version" +
+                             "\n- There is an issue connecting to Github";
+        }
+
+    }
+
+    /// <summary>
+    /// Opens the Log Folder
+    /// </summary>
+    private void OpenLogFolder(object sender, RoutedEventArgs e)
+    {
+        Process.Start(new ProcessStartInfo { FileName = Path.Combine(GlobalData.RootDirectory, "Logs"), UseShellExecute = true, Verb = "open" });
+    }
+
+    /// <summary>
+    /// This opens the user's browser to join the StoryBuilder Discord Server
+    /// </summary>
+    private void OpenDiscordUrl(object sender, RoutedEventArgs e)
+    {
+        Process.Start(new ProcessStartInfo { FileName = @"https://discord.gg/wfZxU4bx6n", UseShellExecute = true, Verb = "open" });
     }
 
     private async void SetBackupPath(object sender, RoutedEventArgs e)
     {
-        FolderPicker folderPicker = new();
+        FolderPicker _folderPicker = new();
         if (Window.Current == null)
         {
-            //IntPtr hwnd = GetActiveWindow();
+            //TODO: Can this be put into a helper class or removed at some point with WinAppSDK updates?
             IntPtr hwnd = GlobalData.WindowHandle;
-            IInitializeWithWindow initializeWithWindow = folderPicker.As<IInitializeWithWindow>();
+            IInitializeWithWindow initializeWithWindow = _folderPicker.As<IInitializeWithWindow>();
             initializeWithWindow.Initialize(hwnd);
         }
 
-        folderPicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
-        folderPicker.FileTypeFilter.Add("*");
-        StorageFolder folder = await folderPicker.PickSingleFolderAsync();
-        if (folder != null)
+        _folderPicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
+        _folderPicker.FileTypeFilter.Add("*");
+        StorageFolder _folder = await _folderPicker.PickSingleFolderAsync();
+        if (_folder != null)
         {
-            Ioc.Default.GetRequiredService<PreferencesViewModel>().BackupDir = folder.Path;
+            Ioc.Default.GetRequiredService<PreferencesViewModel>().BackupDir = _folder.Path;
         }
     }
     private async void SetProjectPath(object sender, RoutedEventArgs e)
     {
-        FolderPicker folderPicker = new();
+        FolderPicker _folderPicker = new();
         if (Window.Current == null)
         {
             //IntPtr hwnd = GetActiveWindow();
-            IntPtr hwnd = GlobalData.WindowHandle;
-            IInitializeWithWindow initializeWithWindow = folderPicker.As<IInitializeWithWindow>();
-            initializeWithWindow.Initialize(hwnd);
+            IntPtr _hwnd = GlobalData.WindowHandle;
+            IInitializeWithWindow _initializeWithWindow = _folderPicker.As<IInitializeWithWindow>();
+            _initializeWithWindow.Initialize(_hwnd);
         }
 
-        folderPicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
-        folderPicker.FileTypeFilter.Add("*");
-        StorageFolder folder = await folderPicker.PickSingleFolderAsync();
+        _folderPicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
+        _folderPicker.FileTypeFilter.Add("*");
+        StorageFolder folder = await _folderPicker.PickSingleFolderAsync();
         if (folder != null)
         {
             Ioc.Default.GetRequiredService<PreferencesViewModel>().ProjectDir = folder.Path;
@@ -97,36 +137,25 @@ public sealed partial class PreferencesDialog : Page
     }
 
     [ComImport]
-    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-    [Guid("EECDBF0E-BAE9-4CB6-A68E-9598E1CB57BB")]
-    internal interface IWindowNative
-    {
-        IntPtr WindowHandle { get; }
-    }
-
-    [ComImport]
     [Guid("3E68D4BD-7135-4D10-8018-9FB6D9F33FA1")]
     [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-    public interface IInitializeWithWindow
-    {
-        void Initialize(IntPtr hwnd);
-    }
+    public interface IInitializeWithWindow { void Initialize(IntPtr hwnd); }
 
-    [DllImport("user32.dll", ExactSpelling = true, CharSet = CharSet.Auto, PreserveSig = true, SetLastError = false)]
-    public static extern IntPtr GetActiveWindow();
-
+    /// <summary>
+    /// This function throws an error as it is used to test errors.
+    /// </summary>
     private void ThrowException(object sender, RoutedEventArgs e)
     {
-        throw new NotImplementedException();
+        throw new NotImplementedException("This is a test exception thrown by the developer Menu and should be ignored.");
     }
 
+    /// <summary>
+    /// This sets init to false, meaning the next time
+    /// StoryBuilder is opened the PreferencesInitialization
+    /// page will be shown.
+    /// </summary>
     private void SetInitToFalse(object sender, RoutedEventArgs e)
     {
-        PreferencesVm.init = false;
-    }
-
-    private async void AttachElmah(object sender, RoutedEventArgs e)
-    {
-        await Ioc.Default.GetRequiredService<LogService>().AddElmahTarget();
+        PreferencesVm.Init = false;
     }
 }

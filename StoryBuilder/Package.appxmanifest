@@ -7,13 +7,13 @@
   IgnorableNamespaces="uap rescap">
 
   <Identity
-    Name="3234e32c-9ca1-4ad4-99bc-6583d2362437"
-    Publisher="CN=Team-StoryBuilder"
-    Version="2.0.12.0" />
+    Name="34432StoryBuilder.StoryBuilder"
+    Publisher="CN=Jake"
+    Version="2.8.0.0" />
 
   <Properties>
     <DisplayName>StoryBuilder</DisplayName>
-    <PublisherDisplayName>Team StoryBuilder</PublisherDisplayName>
+    <PublisherDisplayName>StoryBuilder</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
 
@@ -40,9 +40,20 @@
         <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png" />
         <uap:SplashScreen Image="Assets\SplashScreen.png" />
       </uap:VisualElements>
+      <Extensions>
+        <uap:Extension Category="windows.fileTypeAssociation">
+          <uap:FileTypeAssociation Name="stbx">
+            <uap:SupportedFileTypes>
+              <uap:FileType>.stbx</uap:FileType>
+            </uap:SupportedFileTypes>
+            <uap:DisplayName>StoryBuilder Outline File</uap:DisplayName>
+            <uap:EditFlags OpenIsSafe="true"/>
+            <uap:Logo>Assets\HomeLogo.png</uap:Logo>
+          </uap:FileTypeAssociation>
+        </uap:Extension>
+      </Extensions>
     </Application>
   </Applications>
-
   <Capabilities>
     <rescap:Capability Name="runFullTrust" />
   </Capabilities>

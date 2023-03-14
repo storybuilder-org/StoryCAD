@@ -12,16 +12,6 @@ public class SettingModel : StoryElement
     #endregion
     #region Properties
 
-    // Besides its GUID, each Setting has a unique (to this story)
-    // integer id number (useful in lists of settings.)
-    private static int _nextSettingId;
-    private int _id;
-    public int Id
-    {
-        get => _id;
-        set => _id = value;
-    }
-
     // Setting (General) data
 
     private string _locale;
@@ -103,11 +93,11 @@ public class SettingModel : StoryElement
         set => _touch = value;
     }
 
-    private string _smelltaste;
+    private string _smellTaste;
     public string SmellTaste
     {
-        get => _smelltaste;
-        set => _smelltaste = value;
+        get => _smellTaste;
+        set => _smellTaste = value;
     }
 
     // Setting Note data
@@ -124,7 +114,6 @@ public class SettingModel : StoryElement
     #region Constructors
     public SettingModel(StoryModel model) : base("New Setting", StoryItemType.Setting, model)
     {
-        Id = ++_nextSettingId;
         Locale = string.Empty;
         Season = string.Empty;
         Period = string.Empty;
@@ -140,27 +129,9 @@ public class SettingModel : StoryElement
         Notes = string.Empty;
         SettingNames.Add(Name);
     }
-    public SettingModel(string name, StoryModel model) : base(name, StoryItemType.Setting, model)
-    {
-        Id = ++_nextSettingId;
-        Locale = string.Empty;
-        Season = string.Empty;
-        Period = string.Empty;
-        Lighting = string.Empty;
-        Weather = string.Empty;
-        Temperature = string.Empty;
-        Props = string.Empty;
-        Summary = string.Empty;
-        Sights = string.Empty;
-        Sounds = string.Empty;
-        Touch = string.Empty;
-        SmellTaste = string.Empty;
-        Notes = string.Empty;
-        SettingNames.Add(Name);
-    }
+
     public SettingModel(IXmlNode xn, StoryModel model) : base(xn, model)
     {
-        Id = ++_nextSettingId;
         Locale = string.Empty;
         Season = string.Empty;
         Period = string.Empty;

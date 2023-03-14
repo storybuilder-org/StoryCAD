@@ -1,9 +1,8 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using StoryBuilder.Models;
 using StoryBuilder.Models.Tools;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
 
 namespace StoryBuilder.ViewModels.Tools;
 
@@ -18,8 +17,7 @@ public class MasterPlotsViewModel : ObservableRecipient
         set
         {
             SetProperty(ref _masterPlotName, value);
-            if (MasterPlots.ContainsKey(value))
-                MasterPlotNotes = MasterPlots[value].MasterPlotNotes;
+            if (MasterPlots.ContainsKey(value)) { MasterPlotNotes = MasterPlots[value].MasterPlotNotes; }
         }
     }
 
@@ -28,13 +26,6 @@ public class MasterPlotsViewModel : ObservableRecipient
     {
         get => _masterPlotNotes;
         set => SetProperty(ref _masterPlotNotes, value);
-    }
-
-    private IList<MasterPlotScene> _masterPlotScenes;
-    public IList<MasterPlotScene> MasterPlotScenes
-    {
-        get => _masterPlotScenes;
-        set => SetProperty(ref _masterPlotScenes, value);
     }
 
     #endregion
@@ -51,17 +42,17 @@ public class MasterPlotsViewModel : ObservableRecipient
 
     public MasterPlotsViewModel()
     {
-        List<string> MasterNames = new();
+        List<string> _masterNames = new();
         MasterPlots = new Dictionary<string, MasterPlotModel>();
-        foreach (MasterPlotModel plot in GlobalData.MasterPlotsSource)
+        foreach (MasterPlotModel _plot in GlobalData.MasterPlotsSource)
         {
-            MasterNames.Add(plot.MasterPlotName);
-            MasterPlots.Add(plot.MasterPlotName, plot);
+            _masterNames.Add(_plot.MasterPlotName);
+            MasterPlots.Add(_plot.MasterPlotName, _plot);
         }
 
-        MasterNames.Sort();
+        _masterNames.Sort();
         MasterPlotNames = new ObservableCollection<string>();
-        foreach (var name in MasterNames) { MasterPlotNames.Add(name); }
+        foreach (string _name in _masterNames) { MasterPlotNames.Add(_name); }
         MasterPlotName = GlobalData.MasterPlotsSource[0].MasterPlotName;
     }
 

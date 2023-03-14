@@ -1,8 +1,10 @@
-﻿using CommunityToolkit.Mvvm.DependencyInjection;
-using StoryBuilder.Models;
-using StoryBuilder.ViewModels;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using CommunityToolkit.Mvvm.DependencyInjection;
+using StoryBuilder.Models;
+using StoryBuilder.Services.Logging;
+using StoryBuilder.ViewModels;
+using LogLevel = StoryBuilder.Services.Logging.LogLevel;
 
 namespace StoryBuilder.Services.Search;
 
@@ -13,37 +15,39 @@ namespace StoryBuilder.Services.Search;
 /// </summary>
 public class DeletionService
 {
-    private Guid arg;
-    StoryElementCollection ElementCollection;
+    private Guid _arg;
+    private StoryElementCollection _elementCollection;
+    private LogService _logger = Ioc.Default.GetRequiredService<LogService>();
+
     /// <summary>
     /// Search a StoryElement for a given string search argument
     /// </summary>
     /// <param name="node">StoryNodeItem whose StoryElement to search</param>
     /// <param name="searchArg">string to search for</param>
     /// <param name="model">model to search in</param>
-    /// <returns>true if StoryyElement contains search argument</returns>
-    public bool SearchStoryElement(StoryNodeItem node, Guid searchArg, StoryModel model, bool Delete = false)
+    /// <returns>true if StoryElement contains search argument</returns>
+    public bool SearchStoryElement(StoryNodeItem node, Guid searchArg, StoryModel model, bool delete = false)
     {
         bool result = false;
-        arg = searchArg;
+        _arg = searchArg;
         StoryElement element = null;
-        ElementCollection = Ioc.Default.GetService<ShellViewModel>().StoryModel.StoryElements;
+        _elementCollection = Ioc.Default.GetRequiredService<ShellViewModel>().StoryModel.StoryElements;
 
         if (model.StoryElements.StoryElementGuids.ContainsKey(node.Uuid)) { element = model.StoryElements.StoryElementGuids[node.Uuid]; }
         if (element == null) { return false; } 
         switch (element.Type)
         {
             case StoryItemType.StoryOverview:
-                result = SearchStoryOverview(node, element, Delete);
+                result = SearchStoryOverview(element, delete);
                 break;
             case StoryItemType.Problem:
-                result = SearchProblem(node, element, Delete);
+                result = SearchProblem(element, delete);
                 break;
             case StoryItemType.Character:
-                result = SearchCharacter(node, element, Delete);
+                result = SearchCharacter(element, delete);
                 break;
             case StoryItemType.Scene:
-                result = SearchScene(node, element, Delete);
+                result = SearchScene(element, delete);
                 break;
         }
         return result;
@@ -52,66 +56,94 @@ public class DeletionService
     /// <summary>
     /// Searches Cast members, viewpoint character, protagonist name, antagonist name and the name of the scene and the selected setting in a scene node
     /// </summary>
-    /// <param name="node"></param>
     /// <param name="element"></param>
     /// <returns></returns>
-    private bool SearchScene(StoryNodeItem node, StoryElement element, bool Delete)
+    private bool SearchScene(StoryElement element, bool delete)
     {
         SceneModel scene = (SceneModel)element;
 
-        List<string> NewCast = new();
+        List<string> newCast = new();
+        
         foreach (string member in scene.CastMembers) //Searches character in scene
         {
-            ElementCollection.StoryElementGuids.TryGetValue(Guid.Parse(member), out StoryElement Model);
-            Model = Model as CharacterModel;
-            if (Model.Uuid == arg) 
+            try
             {
-                if (!Delete) { return true; }
+                _elementCollection.StoryElementGuids.TryGetValue(Guid.Parse(member), out StoryElement model);
+                model = model as CharacterModel;
+                if (model.Uuid == _arg)
+                {
+                    if (!delete) { return true; }
+                }
+                else { newCast.Add(member); }
             }
-            else { NewCast.Add(member); }
-        }
-        if (Delete) { scene.CastMembers = NewCast; }
+            catch (Exception ex)
+            {
+                _logger.Log(LogLevel.Warn, $"Error checking scene cast member ({ex.Message})");
+            }
 
-        if (!string.IsNullOrEmpty(scene.ViewpointCharacter)) //Searches protagonist
+        }
+        if (delete) { scene.CastMembers = newCast; }
+
+        try
         {
-            ElementCollection.StoryElementGuids.TryGetValue(Guid.Parse(scene.ViewpointCharacter), out StoryElement vpChar);
-            if (vpChar.Uuid == arg)
+            if (!string.IsNullOrEmpty(scene.Protagonist)) //Searches protagonist
             {
-                if (Delete) { scene.ViewpointCharacter = null; }
-                else { return true; }
+                _elementCollection.StoryElementGuids.TryGetValue(Guid.Parse(scene.Protagonist), out StoryElement protag);
+                if (protag.Uuid == _arg)
+                {
+                    if (delete)
+                    {
+                        scene.Protagonist = null;
+                    }
+                    else
+                    {
+                        return true;
+                    }
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            _logger.Log(LogLevel.Warn, $"Error checking scene protagonist ({ex.Message})");
         }
 
-        if (!string.IsNullOrEmpty(scene.Protagonist)) //Searches protagonist
+
+        try
         {
-            ElementCollection.StoryElementGuids.TryGetValue(Guid.Parse(scene.Protagonist), out StoryElement protag);
-            if (protag.Uuid == arg) 
+            if (!string.IsNullOrEmpty(scene.Antagonist)) //Searches Antagonist
             {
-                if (Delete) { scene.Protagonist = null; }
-                else { return true; }
+                _elementCollection.StoryElementGuids.TryGetValue(Guid.Parse(scene.Antagonist), out StoryElement antag);
+                if (antag.Uuid == _arg)
+                {
+                    if (delete) { scene.Antagonist = null; }
+                    else { return true; }
+                }
+
             }
         }
-        
-        if (!string.IsNullOrEmpty(scene.Antagonist)) //Searches Antagonist
+        catch (Exception ex)
         {
-            ElementCollection.StoryElementGuids.TryGetValue(Guid.Parse(scene.Antagonist), out StoryElement antag);
-            if (antag.Uuid == arg) 
-            {
-                if (Delete) { scene.Antagonist = null; }
-                else { return true; } 
-            }
-        
+            _logger.Log(LogLevel.Warn, $"Error checking scene antagonist ({ex.Message})");
         }
 
-        if (!string.IsNullOrEmpty(scene.Setting))
+
+        try
         {
-            ElementCollection.StoryElementGuids.TryGetValue(Guid.Parse(scene.Setting), out StoryElement setting);
-            if (setting.Uuid == arg) 
+            if (!string.IsNullOrEmpty(scene.Setting))
             {
-                if (Delete) { scene.Setting = null; }
-                else { return true; }
+                _elementCollection.StoryElementGuids.TryGetValue(Guid.Parse(scene.Setting), out StoryElement setting);
+                if (setting.Uuid == _arg)
+                {
+                    if (delete) { scene.Setting = null; }
+                    else { return true; }
+                }
             }
         }
+        catch (Exception ex)
+        {
+            _logger.Log(LogLevel.Warn, $"Error checking scene setting ({ex.Message})");
+        }
+
 
         return false;
     }
@@ -119,57 +151,74 @@ public class DeletionService
     /// <summary>
     /// Searches the name of each character in a relationship and the name of the character
     /// </summary>
-    /// <param name="node"></param>
     /// <param name="element"></param>
     /// <returns></returns>
-    private bool SearchCharacter(StoryNodeItem node, StoryElement element, bool Delete)
+    private bool SearchCharacter(StoryElement element, bool delete)
     {
         CharacterModel characterModel = (CharacterModel)element;
 
-        List<RelationshipModel> NewReleationships = new();
+        List<RelationshipModel> newRelationships = new();
         foreach (RelationshipModel partner in characterModel.RelationshipList) //Checks each character in relationship
         {
-            ElementCollection.StoryElementGuids.TryGetValue(Guid.Parse(partner.PartnerUuid), out StoryElement Model);
-            if (Model.Uuid == arg) 
+            try
             {
-                if (!Delete) { return true; }
+                _elementCollection.StoryElementGuids.TryGetValue(Guid.Parse(partner.PartnerUuid), out StoryElement model);
+                if (model.Uuid == _arg)
+                {
+                    if (!delete) { return true; }
+                }
+                else { newRelationships.Add(partner); }
             }
-            else { NewReleationships.Add(partner); }
+            catch (Exception ex) { _logger.Log(LogLevel.Warn,$"Error checking partner in relationship list {ex.Message}"); }
+
         }
-        if (Delete) { characterModel.RelationshipList = NewReleationships; }
+        if (delete) { characterModel.RelationshipList = newRelationships; }
         return false;
     }
 
     /// <summary>
     /// Searches a problem for the element name, Antag name, protag name,
     /// </summary>
-    /// <param name="node"></param>
     /// <param name="element"></param>
     /// <returns></returns>
-    private bool SearchProblem(StoryNodeItem node, StoryElement element, bool Delete)
+    private bool SearchProblem(StoryElement element, bool delete)
     {
         ProblemModel problem = (ProblemModel)element;
 
-        if (!string.IsNullOrEmpty(problem.Protagonist))//Checks protags name
+        try
         {
-            ElementCollection.StoryElementGuids.TryGetValue(Guid.Parse(problem.Protagonist), out StoryElement protag);
-            if (protag.Uuid == arg) 
+            if (!string.IsNullOrEmpty(problem.Protagonist))//Checks protagonist's name
             {
-                if (Delete) { problem.Protagonist = null; }
-                else { return true; }
-            } 
-
+                _elementCollection.StoryElementGuids.TryGetValue(Guid.Parse(problem.Protagonist), out StoryElement protag);
+                if (protag.Uuid == _arg)
+                {
+                    if (delete) { problem.Protagonist = null; }
+                    else { return true; }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.Log(LogLevel.Warn, $"Failed to search scene for protagonist - ({problem.Protagonist}) got error {ex.Message}");
         }
 
-        if (!string.IsNullOrEmpty(problem.Antagonist))//Checks antags name
+        try
         {
-            ElementCollection.StoryElementGuids.TryGetValue(Guid.Parse(problem.Antagonist), out StoryElement antag);
-            if (antag.Uuid == arg) 
+            if (!string.IsNullOrEmpty(problem.Antagonist))//Checks antagonists name
             {
-                if (Delete) { problem.Antagonist = null; }
-                else { return true;}
-            } 
+                _elementCollection.StoryElementGuids.TryGetValue(Guid.Parse(problem.Antagonist), out StoryElement antag);
+                if (antag.Uuid == _arg)
+                {
+                    if (delete) { problem.Antagonist = null; }
+                    else { return true; }
+                }
+            }
         }
+        catch (Exception ex)
+        {
+            _logger.Log(LogLevel.Warn, $"Failed to search scene for antagonist - ({problem.Antagonist}) got error {ex.Message}");
+        }
+
 
         return false;
     }
@@ -177,21 +226,28 @@ public class DeletionService
     /// <summary>
     /// Searches the overview node for the name and main story problem
     /// </summary>
-    /// <param name="node"></param>
     /// <param name="element"></param>
     /// <returns></returns>
-    private bool SearchStoryOverview(StoryNodeItem node, StoryElement element, bool Delete)
+    private bool SearchStoryOverview(StoryElement element, bool delete)
     {
-        OverviewModel overview = (OverviewModel)element;
-        if (!string.IsNullOrEmpty(overview.StoryProblem))
+        try
         {
-            ElementCollection.StoryElementGuids.TryGetValue(Guid.Parse(overview.StoryProblem), out StoryElement problem);
-            if (problem.Uuid == arg) 
+            OverviewModel overview = (OverviewModel)element;
+            if (!string.IsNullOrEmpty(overview.StoryProblem))
             {
-                if (Delete) { overview.StoryProblem = null; }
-                else { return true; }  
-            } //Checks problem name
+                _elementCollection.StoryElementGuids.TryGetValue(Guid.Parse(overview.StoryProblem), out StoryElement problem);
+                if (problem.Uuid == _arg) 
+                {
+                    if (delete) { overview.StoryProblem = null; }
+                    else { return true; }  
+                } //Checks problem name
+            }
         }
-         return false;
+        catch (Exception ex)
+        {
+            _logger.Log(LogLevel.Warn, $"Failed to search scene for storyoverview got error {ex.Message}");
+        }
+
+        return false;
     }
 }

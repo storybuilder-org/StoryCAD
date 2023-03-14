@@ -1,21 +1,16 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System.Collections.ObjectModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using StoryBuilder.Models;
-using System.Collections.ObjectModel;
 
 namespace StoryBuilder.ViewModels;
 
-//TODO: Figure out what to do with this
 public class NewRelationshipViewModel : ObservableRecipient
 {
     #region public Properties
-
-
     public StoryElement Member { get; set; }
 
     public ObservableCollection<StoryElement> ProspectivePartners;
-
-    public ObservableCollection<RelationshipModel> Relationships;
-
+    
     private StoryElement _selectedPartner;
     public StoryElement SelectedPartner 
     {
@@ -23,15 +18,27 @@ public class NewRelationshipViewModel : ObservableRecipient
         set => SetProperty(ref _selectedPartner, value);
     }
 
-    public ObservableCollection<RelationType> RelationTypes { get; set; }
+    public ObservableCollection<string> RelationTypes { get; set; }
 
-    private RelationType _relationType;
-    public RelationType RelationType 
+    private string _relationType;
+    public string RelationType 
     { 
         get => _relationType; 
         set => SetProperty(ref _relationType, value);
     }
-        
+    private string _inverseRelationType;
+    public string InverseRelationType
+    {
+        get => _inverseRelationType;
+        set => SetProperty(ref _inverseRelationType, value);
+    }
+    private bool _inverseRelationship;
+    public bool InverseRelationship
+    {
+        get => _inverseRelationship;
+        set => SetProperty(ref _inverseRelationship, value);
+    }
+
     #endregion
 
     #region Constructor
@@ -40,7 +47,7 @@ public class NewRelationshipViewModel : ObservableRecipient
     {
         Member = member;
         ProspectivePartners = new ObservableCollection<StoryElement>();
-        RelationTypes = new ObservableCollection<RelationType>();
+        RelationTypes = new ObservableCollection<string>();
     }
 
     #endregion

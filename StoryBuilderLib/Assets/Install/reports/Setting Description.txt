@@ -2,8 +2,6 @@
 
                    =================== Setting ====================
 
-    Id:                 @Id
-
     Name:               @Title
 
     Locale:             @Locale
