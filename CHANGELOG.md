@@ -1,8 +1,21 @@
 # StoryBuilder ChangeLog
 
+## Release 2.8.0.0
+
+As of March 1st 2023 we are now rolling out 2.8.0.0
+
+### Create issues from elmah.io GitHub app integration #132
+Elmah.io now uploads new erros to GitHub so that everyone can now
+see error logs.
+
+### Launch StoryBuilder from .stbx file (#94)
+
+.STBX files are now associated with StoryBuilder meaning that, now users can double
+click .STBX files and it will automatically open in StoryBuilder.
+
 ## Release 2.7.0.0
 
-As of February 9, 2023, we're rolling out Release 2.7.0.0.
+As of February 9, 2023, we've rolling out Release 2.7.0.0.
 
 ### New Features
 
