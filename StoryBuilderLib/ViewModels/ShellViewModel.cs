@@ -371,125 +371,119 @@ public class ShellViewModel : ObservableRecipient
     public async Task UnifiedNewFile(UnifiedVM dialogVM)
     {
         Logger.Log(LogLevel.Info, "FileOpenVM - New File starting");
-
-        if (_canExecuteCommands)
+        try
         {
-            _canExecuteCommands = false;
+            Messenger.Send(new StatusChangedMessage(new("New project command executing", LogLevel.Info)));
 
-            try
+            // If the current project needs saved, do so
+            if (StoryModel.Changed)
             {
-                Messenger.Send(new StatusChangedMessage(new("New project command executing", LogLevel.Info)));
+                SaveModel();
+                await WriteModel();
+            }
 
-                // If the current project needs saved, do so
-                if (StoryModel.Changed)
-                {
-                    SaveModel();
-                    await WriteModel();
-                }
+            // Start with a blank StoryModel and populate it
+            // using the new project dialog's settings
 
-                // Start with a blank StoryModel and populate it
-                // using the new project dialog's settings
+            ResetModel();
 
-                ResetModel();
+            if (!Path.GetExtension(dialogVM.ProjectName)!.Equals(".stbx")) { dialogVM.ProjectName += ".stbx"; }
+            StoryModel.ProjectFilename = dialogVM.ProjectName;
+            StoryModel.ProjectFolder = await StorageFolder.GetFolderFromPathAsync(dialogVM.ProjectPath);
+            StoryModel.ProjectPath = StoryModel.ProjectFolder.Path;
 
-                if (!Path.GetExtension(dialogVM.ProjectName)!.Equals(".stbx")) { dialogVM.ProjectName += ".stbx"; }
-                StoryModel.ProjectFilename = dialogVM.ProjectName;
-                StoryModel.ProjectFolder = await StorageFolder.GetFolderFromPathAsync(dialogVM.ProjectPath);
-                StoryModel.ProjectPath = StoryModel.ProjectFolder.Path;
-
-                OverviewModel _overview = new(Path.GetFileNameWithoutExtension(dialogVM.ProjectName), StoryModel)
+            OverviewModel _overview = new(Path.GetFileNameWithoutExtension(dialogVM.ProjectName), StoryModel)
                 { DateCreated = DateTime.Today.ToString("d"), Author = GlobalData.Preferences.Name };
-                StoryNodeItem _overviewNode = new(_overview, null) { IsExpanded = true, IsRoot = true };
-                StoryModel.ExplorerView.Add(_overviewNode);
-                TrashCanModel _trash = new(StoryModel);
-                StoryNodeItem _trashNode = new(_trash, null);
-                StoryModel.ExplorerView.Add(_trashNode);     // The trashcan is the second root
-                FolderModel _narrative = new("Narrative View", StoryModel, StoryItemType.Folder);
-                StoryNodeItem _narrativeNode = new(_narrative, null) { IsRoot = true };
-                StoryModel.NarratorView.Add(_narrativeNode);
-                // Use the NewProjectDialog template to complete the model
-                switch (dialogVM.SelectedTemplateIndex)
-                {
-                    case 0:
-                        break;
-                    case 1:
-                        StoryElement _problems = new FolderModel("Problems", StoryModel, StoryItemType.Folder);
-                        StoryNodeItem _problemsNode = new(_problems, _overviewNode);
-                        StoryElement _characters = new FolderModel("Characters", StoryModel, StoryItemType.Folder);
-                        StoryNodeItem _charactersNode = new(_characters, _overviewNode);
-                        StoryElement _settings = new FolderModel("Settings", StoryModel, StoryItemType.Folder);
-                        StoryNodeItem _settingsNode = new(_settings, _overviewNode);
-                        StoryElement _scene = new FolderModel("Scenes", StoryModel, StoryItemType.Folder);
-                        StoryNodeItem _plotpointsNode = new(_scene, _overviewNode);
-                        break;
-                    case 2:
-                        StoryElement _externalProblem = new ProblemModel("External Problem", StoryModel);
-                        StoryNodeItem _externalProblemNode = new(_externalProblem, _overviewNode);
-                        StoryElement _internalProblem = new ProblemModel("Internal Problem", StoryModel);
-                        StoryNodeItem _internalProblemNode = new(_internalProblem, _overviewNode);
-                        break;
-                    case 3:
-                        StoryElement _protagonist = new CharacterModel("Protagonist", StoryModel);
-                        StoryNodeItem _protagonistNode = new(_protagonist, _overviewNode);
-                        StoryElement _antagonist = new CharacterModel("Antagonist", StoryModel);
-                        StoryNodeItem _antagonistNode = new(_antagonist, _overviewNode);
-                        break;
-                    case 4:
-                        StoryElement _problemsFolder = new FolderModel("Problems", StoryModel, StoryItemType.Folder);
-                        StoryNodeItem _problemsFolderNode = new(_problemsFolder, _overviewNode) { IsExpanded = true };
-                        StoryElement _charactersFolder = new FolderModel("Characters", StoryModel, StoryItemType.Folder);
-                        StoryNodeItem _charactersFolderNode = new(_charactersFolder, _overviewNode) { IsExpanded = true };
-                        StoryElement _settingsFolder = new FolderModel("Settings", StoryModel, StoryItemType.Folder);
-                        StoryNodeItem _settingsFolderNode = new(_settingsFolder, _overviewNode);
-                        StoryElement _plotpointsFolder = new FolderModel("Plot Points", StoryModel, StoryItemType.Folder);
-                        StoryNodeItem _plotpointsFolderNode = new(_plotpointsFolder, _overviewNode);
-                        StoryElement _externalProb = new ProblemModel("External Problem", StoryModel);
-                        StoryNodeItem _externalProbNode = new(_externalProb, _problemsFolderNode);
-                        StoryElement _internalProb = new ProblemModel("Internal Problem", StoryModel);
-                        StoryNodeItem _internalProbNode = new(_internalProb, _problemsFolderNode);
-                        StoryElement _protag = new CharacterModel("Protagonist", StoryModel);
-                        StoryNodeItem _protagNode = new(_protag, _charactersFolderNode);
-                        StoryElement _antag = new CharacterModel("Antagonist", StoryModel);
-                        StoryNodeItem _antagNode = new(_antag, _charactersFolderNode);
-                        break;
-                    case 5:
-                        StoryElement _storyProb = new ProblemModel("Story Problem", StoryModel);
-                        StoryNodeItem _storyProbNode = new(_storyProb, _overviewNode);
-                        StoryElement _storyProtag = new CharacterModel("Protagonist", StoryModel);
-                        StoryNodeItem _storyProtagNode = new(_storyProtag, _storyProbNode);
-                        StoryElement _storyAntag = new CharacterModel("Antagonist", StoryModel);
-                        StoryNodeItem _storyAntagNode = new(_storyAntag, _storyProbNode);
-                        _overview.StoryProblem = _storyProb.ToString();
-                        var _problem = _storyProb as ProblemModel;
-                        _problem.Protagonist = _storyProtag.ToString();
-                        _problem.Antagonist = _storyAntag.ToString();
-                        _problem.Premise =
-                            @"Your[protagonist] in a situation[genre, setting] wants something[goal], which brings him" +
-                            @"into conflict with a second character[antagonist]. After a series of conflicts[additional " +
-                            @"problems], the final battle[climax scene] erupts, and the[protagonist] finally resolves the " +
-                            @"conflict[outcome].";
-                        break;
-                }
-                GlobalData.MainWindow.Title = $"StoryBuilder - Editing {dialogVM.ProjectName!.Replace(".stbx", "")}";
-                SetCurrentView(StoryViewType.ExplorerView);
-                //TODO: Set expand and is selected?
-
-                Ioc.Default.GetRequiredService<UnifiedVM>().UpdateRecents(Path.Combine(dialogVM.ProjectPath, dialogVM.ProjectName)); //adds item to recent
-
-                // Save the new project
-                await SaveFile();
-                if (GlobalData.Preferences.BackupOnOpen) { await MakeBackup(); }
-                Ioc.Default.GetRequiredService<BackupService>().StartTimedBackup();
-                Messenger.Send(new StatusChangedMessage(new("New project command executing", LogLevel.Info, true)));
-            }
-            catch (Exception _ex)
+            StoryNodeItem _overviewNode = new(_overview, null) { IsExpanded = true, IsRoot = true };
+            StoryModel.ExplorerView.Add(_overviewNode);
+            TrashCanModel _trash = new(StoryModel);
+            StoryNodeItem _trashNode = new(_trash, null);
+            StoryModel.ExplorerView.Add(_trashNode);     // The trashcan is the second root
+            FolderModel _narrative = new("Narrative View", StoryModel, StoryItemType.Folder);
+            StoryNodeItem _narrativeNode = new(_narrative, null) { IsRoot = true };
+            StoryModel.NarratorView.Add(_narrativeNode);
+            // Use the NewProjectDialog template to complete the model
+            switch (dialogVM.SelectedTemplateIndex)
             {
-                Logger.LogException(LogLevel.Error, _ex, "Error creating new project");
-                Messenger.Send(new StatusChangedMessage(new("File make failure.", LogLevel.Error)));
+                case 0:
+                    break;
+                case 1:
+                    StoryElement _problems = new FolderModel("Problems", StoryModel, StoryItemType.Folder);
+                    StoryNodeItem _problemsNode = new(_problems, _overviewNode);
+                    StoryElement _characters = new FolderModel("Characters", StoryModel, StoryItemType.Folder);
+                    StoryNodeItem _charactersNode = new(_characters, _overviewNode);
+                    StoryElement _settings = new FolderModel("Settings", StoryModel, StoryItemType.Folder);
+                    StoryNodeItem _settingsNode = new(_settings, _overviewNode);
+                    StoryElement _scene = new FolderModel("Scenes", StoryModel, StoryItemType.Folder);
+                    StoryNodeItem _plotpointsNode = new(_scene, _overviewNode);
+                    break;
+                case 2:
+                    StoryElement _externalProblem = new ProblemModel("External Problem", StoryModel);
+                    StoryNodeItem _externalProblemNode = new(_externalProblem, _overviewNode);
+                    StoryElement _internalProblem = new ProblemModel("Internal Problem", StoryModel);
+                    StoryNodeItem _internalProblemNode = new(_internalProblem, _overviewNode);
+                    break;
+                case 3:
+                    StoryElement _protagonist = new CharacterModel("Protagonist", StoryModel);
+                    StoryNodeItem _protagonistNode = new(_protagonist, _overviewNode);
+                    StoryElement _antagonist = new CharacterModel("Antagonist", StoryModel);
+                    StoryNodeItem _antagonistNode = new(_antagonist, _overviewNode);
+                    break;
+                case 4:
+                    StoryElement _problemsFolder = new FolderModel("Problems", StoryModel, StoryItemType.Folder);
+                    StoryNodeItem _problemsFolderNode = new(_problemsFolder, _overviewNode) { IsExpanded = true };
+                    StoryElement _charactersFolder = new FolderModel("Characters", StoryModel, StoryItemType.Folder);
+                    StoryNodeItem _charactersFolderNode = new(_charactersFolder, _overviewNode) { IsExpanded = true };
+                    StoryElement _settingsFolder = new FolderModel("Settings", StoryModel, StoryItemType.Folder);
+                    StoryNodeItem _settingsFolderNode = new(_settingsFolder, _overviewNode);
+                    StoryElement _plotpointsFolder = new FolderModel("Plot Points", StoryModel, StoryItemType.Folder);
+                    StoryNodeItem _plotpointsFolderNode = new(_plotpointsFolder, _overviewNode);
+                    StoryElement _externalProb = new ProblemModel("External Problem", StoryModel);
+                    StoryNodeItem _externalProbNode = new(_externalProb, _problemsFolderNode);
+                    StoryElement _internalProb = new ProblemModel("Internal Problem", StoryModel);
+                    StoryNodeItem _internalProbNode = new(_internalProb, _problemsFolderNode);
+                    StoryElement _protag = new CharacterModel("Protagonist", StoryModel);
+                    StoryNodeItem _protagNode = new(_protag, _charactersFolderNode);
+                    StoryElement _antag = new CharacterModel("Antagonist", StoryModel);
+                    StoryNodeItem _antagNode = new(_antag, _charactersFolderNode);
+                    break;
+                case 5:
+                    StoryElement _storyProb = new ProblemModel("Story Problem", StoryModel);
+                    StoryNodeItem _storyProbNode = new(_storyProb, _overviewNode);
+                    StoryElement _storyProtag = new CharacterModel("Protagonist", StoryModel);
+                    StoryNodeItem _storyProtagNode = new(_storyProtag, _storyProbNode);
+                    StoryElement _storyAntag = new CharacterModel("Antagonist", StoryModel);
+                    StoryNodeItem _storyAntagNode = new(_storyAntag, _storyProbNode);
+                    _overview.StoryProblem = _storyProb.ToString();
+                    var _problem = _storyProb as ProblemModel;
+                    _problem.Protagonist = _storyProtag.ToString();
+                    _problem.Antagonist = _storyAntag.ToString();
+                    _problem.Premise =
+                        @"Your[protagonist] in a situation[genre, setting] wants something[goal], which brings him" +
+                        @"into conflict with a second character[antagonist]. After a series of conflicts[additional " +
+                        @"problems], the final battle[climax scene] erupts, and the[protagonist] finally resolves the " +
+                        @"conflict[outcome].";
+                    break;
             }
+            GlobalData.MainWindow.Title = $"StoryBuilder - Editing {dialogVM.ProjectName!.Replace(".stbx", "")}";
+            SetCurrentView(StoryViewType.ExplorerView);
+            //TODO: Set expand and is selected?
 
-            _canExecuteCommands = true;
+            Ioc.Default.GetRequiredService<UnifiedVM>().UpdateRecents(Path.Combine(dialogVM.ProjectPath, dialogVM.ProjectName)); //adds item to recent
+
+            // Save the new project
+            await SaveFile();
+            if (GlobalData.Preferences.BackupOnOpen) { await MakeBackup(); }
+            Ioc.Default.GetRequiredService<BackupService>().StartTimedBackup();
+            Messenger.Send(new StatusChangedMessage(new("New project command executing", LogLevel.Info, true)));
         }
+        catch (Exception _ex)
+        {
+            Logger.LogException(LogLevel.Error, _ex, "Error creating new project");
+            Messenger.Send(new StatusChangedMessage(new("File make failure.", LogLevel.Error)));
+        }
+
+        _canExecuteCommands = true;
     }
 
     public async Task MakeBackup()

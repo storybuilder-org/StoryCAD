@@ -42,15 +42,33 @@ public class PreferencesModel : ObservableRecipient
     public TextWrapping WrapNodeNames { get; set; }
 
     // Backup Information
-    public bool AutoSave { get; set; }
+    public bool AutoSave
+    {
+        get => _autoSave; 
+        set => SetProperty(ref _autoSave, value);
+    }
+
+    public bool _autoSave;
     public int AutoSaveInterval { get; set; }
     public bool BackupOnOpen { get; set; }
     public bool TimedBackup { get; set; }
     public int TimedBackupInterval { get; set; }
 
     //Directories
-    public string ProjectDirectory { get; set; }
-    public string BackupDirectory { get; set; }
+    public string ProjectDirectory
+    {
+        get => _ProjectDirectory;
+        set => SetProperty(ref _ProjectDirectory, value);
+    }
+
+    private string _ProjectDirectory;
+
+    public string BackupDirectory
+    {
+        get => _BackupDirectory;
+        set=> SetProperty(ref _BackupDirectory, value);
+    }
+    private string _BackupDirectory;
 
     // Recent files (set automatically)
     public string LastFile1 { get; set; }
@@ -64,7 +82,7 @@ public class PreferencesModel : ObservableRecipient
 
     // Backend server log status
     public bool RecordPreferencesStatus { get; set; }  // Last preferences change was logged successfully or not
-    public bool RecordVersionStatus { get; set; }      // Last version change was logged successfully or not
+    public bool RecordVersionStatus { get; set; }      // Last version change was logged successfully or notx
     public BrowserType PreferredSearchEngine { get; set; }      // Last version change was logged successfully or not
 
     public int SearchEngineIndex

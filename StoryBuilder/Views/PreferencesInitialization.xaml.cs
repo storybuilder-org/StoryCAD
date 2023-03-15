@@ -42,7 +42,7 @@ public sealed partial class PreferencesInitialization
         StorageFolder folder = await folderPicker.PickSingleFolderAsync();
         if (folder != null)
         {
-            ProjPath.Text = folder.Path;
+            _initVM.Preferences.ProjectDirectory = folder.Path;
         }
     }
 
@@ -71,7 +71,7 @@ public sealed partial class PreferencesInitialization
         StorageFolder folder = await folderPicker.PickSingleFolderAsync();
         if (folder != null)
         {
-            BackPath.Text = folder.Path;
+            _initVM.Preferences.BackupDirectory = folder.Path;
         }
     }
 
