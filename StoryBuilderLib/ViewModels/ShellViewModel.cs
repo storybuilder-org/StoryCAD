@@ -371,6 +371,9 @@ public class ShellViewModel : ObservableRecipient
     public async Task UnifiedNewFile(UnifiedVM dialogVM)
     {
         Logger.Log(LogLevel.Info, "FileOpenVM - New File starting");
+
+        _canExecuteCommands = false;
+
         try
         {
             Messenger.Send(new StatusChangedMessage(new("New project command executing", LogLevel.Info)));
@@ -384,7 +387,6 @@ public class ShellViewModel : ObservableRecipient
 
             // Start with a blank StoryModel and populate it
             // using the new project dialog's settings
-
             ResetModel();
 
             if (!Path.GetExtension(dialogVM.ProjectName)!.Equals(".stbx")) { dialogVM.ProjectName += ".stbx"; }
@@ -393,7 +395,8 @@ public class ShellViewModel : ObservableRecipient
             StoryModel.ProjectPath = StoryModel.ProjectFolder.Path;
 
             OverviewModel _overview = new(Path.GetFileNameWithoutExtension(dialogVM.ProjectName), StoryModel)
-                { DateCreated = DateTime.Today.ToString("d"), Author = GlobalData.Preferences.Name };
+            { DateCreated = DateTime.Today.ToString("d"), Author = GlobalData.Preferences.Name };
+
             StoryNodeItem _overviewNode = new(_overview, null) { IsExpanded = true, IsRoot = true };
             StoryModel.ExplorerView.Add(_overviewNode);
             TrashCanModel _trash = new(StoryModel);
@@ -482,8 +485,6 @@ public class ShellViewModel : ObservableRecipient
             Logger.LogException(LogLevel.Error, _ex, "Error creating new project");
             Messenger.Send(new StatusChangedMessage(new("File make failure.", LogLevel.Error)));
         }
-
-        _canExecuteCommands = true;
     }
 
     public async Task MakeBackup()
@@ -1907,23 +1908,23 @@ public class ShellViewModel : ObservableRecipient
 
     }
 
-    /// <summary>
-    /// Search up the StoryNodeItem tree to its
-    /// root from a specified node and return its StoryItemType. 
-    /// 
-    /// This allows code to determine which TreeView it's in.
-    /// </summary>
-    /// <param name="startNode">The node to begin searching from</param>
-    /// <returns>The StoryItemType of the root node</returns>
-    private static StoryItemType RootNodeType(StoryNodeItem startNode)
-    {
-        StoryNodeItem _node = startNode;
-        while (!_node.IsRoot)
-            _node = _node.Parent;
-        return _node.Type;
-    }
-
-    #endregion
+        /// <summary>
+        /// Search up the StoryNodeItem tree to its
+        /// root from a specified node and return its StoryItemType. 
+        /// 
+        /// This allows code to determine which TreeView it's in.
+        /// </summary>
+        /// <param name="startNode">The node to begin searching from</param>
+        /// <returns>The StoryItemType of the root node</returns>
+        public static StoryItemType RootNodeType(StoryNodeItem startNode)
+        {
+            StoryNodeItem node = startNode;
+            while (!node.IsRoot)
+                node = node.Parent;
+            return node.Type;
+        }
+        
+        #endregion
 
     /// <summary>
     /// TODO: This method is not implemented yet.
