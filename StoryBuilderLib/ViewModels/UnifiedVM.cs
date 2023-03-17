@@ -76,8 +76,7 @@ public class UnifiedVM : ObservableRecipient
     {
         SelectedRecentIndex = -1;
         ProjectName = string.Empty;
-        PreferencesModel _prefs = GlobalData.Preferences; //Sets to current user prefs to show recent files and last template
-        ProjectPath = _prefs.ProjectDirectory;
+        ProjectPath = GlobalData.Preferences.ProjectDirectory;
     }
 
     public UnifiedMenuPage.UpdateContentDelegate UpdateContent;
@@ -143,7 +142,7 @@ public class UnifiedVM : ObservableRecipient
         GlobalData.Preferences.LastSelectedTemplate = SelectedTemplateIndex;
 
         PreferencesIo _loader = new(GlobalData.Preferences, GlobalData.RootDirectory);
-        await _loader.UpdateFile();
+        await _loader.SaveModel();
         await _shell.UnifiedNewFile(this);
         Hide();
 
@@ -181,7 +180,7 @@ public class UnifiedVM : ObservableRecipient
         }
 
         PreferencesIo _loader = new(GlobalData.Preferences, GlobalData.RootDirectory);
-        await _loader.UpdateFile();
+        await _loader.SaveModel();
     }
 
 }

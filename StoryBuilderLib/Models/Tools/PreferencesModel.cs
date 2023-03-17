@@ -1,6 +1,7 @@
 ﻿using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
 using Windows.UI.ViewManagement;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace StoryBuilder.Models.Tools;
 
@@ -17,7 +18,7 @@ namespace StoryBuilder.Models.Tools;
 /// InstallFiles() method will create one.
 /// 
 /// </summary>
-public class PreferencesModel
+public class PreferencesModel : ObservableRecipient
 {
     #region Properties
     public bool Changed { get; set; }
@@ -30,7 +31,7 @@ public class PreferencesModel
 
     /// <summary>
     /// This switch tracks whether this is a new 
-    /// installation. 
+    /// installation and if Initialization should be shown.
     /// </summary>
     public bool PreferencesInitialized { get; set; }
     public int LastSelectedTemplate { get; set; } //This is the Last Template Selected by the user.
@@ -41,15 +42,33 @@ public class PreferencesModel
     public TextWrapping WrapNodeNames { get; set; }
 
     // Backup Information
-    public bool AutoSave { get; set; }
+    public bool AutoSave
+    {
+        get => _autoSave; 
+        set => SetProperty(ref _autoSave, value);
+    }
+
+    public bool _autoSave;
     public int AutoSaveInterval { get; set; }
     public bool BackupOnOpen { get; set; }
     public bool TimedBackup { get; set; }
     public int TimedBackupInterval { get; set; }
 
     //Directories
-    public string ProjectDirectory { get; set; }
-    public string BackupDirectory { get; set; }
+    public string ProjectDirectory
+    {
+        get => _ProjectDirectory;
+        set => SetProperty(ref _ProjectDirectory, value);
+    }
+
+    private string _ProjectDirectory;
+
+    public string BackupDirectory
+    {
+        get => _BackupDirectory;
+        set=> SetProperty(ref _BackupDirectory, value);
+    }
+    private string _BackupDirectory;
 
     // Recent files (set automatically)
     public string LastFile1 { get; set; }
@@ -63,8 +82,14 @@ public class PreferencesModel
 
     // Backend server log status
     public bool RecordPreferencesStatus { get; set; }  // Last preferences change was logged successfully or not
-    public bool RecordVersionStatus { get; set; }      // Last version change was logged successfully or not
+    public bool RecordVersionStatus { get; set; }      // Last version change was logged successfully or notx
     public BrowserType PreferredSearchEngine { get; set; }      // Last version change was logged successfully or not
+
+    public int SearchEngineIndex
+    {
+        get => (int)PreferredSearchEngine;
+        set => PreferredSearchEngine = (BrowserType) value;
+    } // Last version change was logged successfully or not
     #endregion
 
     #region Constructor

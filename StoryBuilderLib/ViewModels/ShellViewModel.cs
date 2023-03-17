@@ -387,7 +387,6 @@ public class ShellViewModel : ObservableRecipient
 
             // Start with a blank StoryModel and populate it
             // using the new project dialog's settings
-
             ResetModel();
 
             if (!Path.GetExtension(dialogVM.ProjectName)!.Equals(".stbx")) { dialogVM.ProjectName += ".stbx"; }
@@ -397,6 +396,7 @@ public class ShellViewModel : ObservableRecipient
 
             OverviewModel _overview = new(Path.GetFileNameWithoutExtension(dialogVM.ProjectName), StoryModel)
             { DateCreated = DateTime.Today.ToString("d"), Author = GlobalData.Preferences.Name };
+
             StoryNodeItem _overviewNode = new(_overview, null) { IsExpanded = true, IsRoot = true };
             StoryModel.ExplorerView.Add(_overviewNode);
             TrashCanModel _trash = new(StoryModel);
@@ -485,7 +485,6 @@ public class ShellViewModel : ObservableRecipient
             Logger.LogException(LogLevel.Error, _ex, "Error creating new project");
             Messenger.Send(new StatusChangedMessage(new("File make failure.", LogLevel.Error)));
         }
-
     }
 
     public async Task MakeBackup()
@@ -2152,7 +2151,6 @@ public class ShellViewModel : ObservableRecipient
         Messenger.Register<ShellViewModel, StatusChangedMessage>(this, static (r, m) => r.StatusMessageReceived(m));
         Messenger.Register<ShellViewModel, NameChangedMessage>(this, static (r, m) => r.NameMessageReceived(m));
 
-        //Preferences = Ioc.Default.GetRequiredService<Preferences>();
         Scrivener = Ioc.Default.GetRequiredService<ScrivenerIo>();
         Logger = Ioc.Default.GetRequiredService<LogService>();
         Search = Ioc.Default.GetRequiredService<SearchService>();

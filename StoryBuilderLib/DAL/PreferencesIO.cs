@@ -14,7 +14,7 @@ namespace StoryBuilder.DAL;
 
 /// <summary>
 /// This data access module handles file I/O and updates
-/// for the StoryBuilder.prf file and PreferencesModel  object. 
+/// for the StoryBuilder.prf file and PreferencesModel object. 
 /// </summary>
 public class PreferencesIo
 {
@@ -37,7 +37,7 @@ public class PreferencesIo
     /// <summary>
     /// Update the model from the .prf file's contents 
     /// </summary>
-    public async Task UpdateModel()
+    public async Task LoadModel()
     {
         //Tries to read file
         StorageFolder _preferencesFolder = await StorageFolder.GetFolderFromPathAsync(_path);
@@ -172,42 +172,45 @@ public class PreferencesIo
         }
     }
 
-    public async Task UpdateFile()
+    /// <summary>
+    /// This writes the file to disk using given
+    /// preferences model.
+    /// </summary>
+    public async Task SaveModel()
     {
         _log.Log(LogLevel.Info, "Updating prf from model.");
         StorageFolder _preferencesFolder = await StorageFolder.GetFolderFromPathAsync(_path);
         StorageFile _preferencesFile = await _preferencesFolder.CreateFileAsync("StoryBuilder.prf", CreationCollisionOption.ReplaceExisting);
 
-        //Updates file
-        List<string> _newPreferences = new()
-        {
-            "Newsletter=" + _model.Newsletter,
-            "Initalised=" + _model.PreferencesInitialized,
-            "Name=" + _model.Name,
-            "Email=" + _model.Email,
-            "TimedBackupInterval=" + _model.TimedBackupInterval,
-            "ProjectDirectory=" + _model.ProjectDirectory,
-            "BackupDirectory=" + _model.BackupDirectory,
-            "LastFile1=" + _model.LastFile1,
-            "LastFile2=" + _model.LastFile2,
-            "LastFile3=" + _model.LastFile3,
-            "LastFile4=" + _model.LastFile4,
-            "LastFile5=" + _model.LastFile5,
-            "BackupOnOpen=" + _model.BackupOnOpen,
-            "ErrorCollectionConsent=" + _model.ErrorCollectionConsent,
-            "TimedBackup=" + _model.TimedBackup,
-            "LastTemplate=" + _model.LastSelectedTemplate,
-            "Version=" + _model.Version,
-            "RecordPreferencesStatus=" + _model.RecordPreferencesStatus, //TODO: Fix spelling error
-            "RecordVersionStatus=" + _model.RecordVersionStatus,
-            "AutoSave=" + _model.AutoSave,
-            "AutoSaveInterval=" + _model.AutoSaveInterval,
-            "SearchEngine=" + _model.PreferredSearchEngine
-        };
+        string _newPreferences = $"""
+            Newsletter={_model.Newsletter}
+            Initalised={_model.PreferencesInitialized}
+            Name={_model.Name}
+            Email={_model.Email}
+            TimedBackupInterval={_model.TimedBackupInterval}
+            ProjectDirectory={_model.ProjectDirectory}
+            BackupDirectory={_model.BackupDirectory}
+            LastFile1={_model.LastFile1}
+            LastFile2={_model.LastFile2}
+            LastFile3={_model.LastFile3}
+            LastFile4={_model.LastFile4}
+            LastFile5={_model.LastFile5}
+            BackupOnOpen={_model.BackupOnOpen}
+            ErrorCollectionConsent={_model.ErrorCollectionConsent}
+            TimedBackup={_model.TimedBackup}
+            LastTemplate={_model.LastSelectedTemplate}
+            Version={_model.Version}
+            RecordPreferencesStatus={_model.RecordPreferencesStatus}
+            RecordVersionStatus={_model.RecordVersionStatus}
+            AutoSave={_model.AutoSave}
+            AutoSaveInterval={_model.AutoSaveInterval} 
+            SearchEngine={_model.PreferredSearchEngine}
+            """;
 
-        if (_model.WrapNodeNames == TextWrapping.WrapWholeWords) { _newPreferences.Add("WrapNodeNames=True"); }
-        else { _newPreferences.Add("WrapNodeNames=False"); }
 
-        await FileIO.WriteLinesAsync(_preferencesFile, _newPreferences); //Writes file to disk.
+        if (_model.WrapNodeNames == TextWrapping.WrapWholeWords) { _newPreferences += "\nWrapNodeNames=True"; }
+        else { _newPreferences += "\nWrapNodeNames=False"; }
+
+        await FileIO.WriteTextAsync(_preferencesFile, _newPreferences); //Writes file to disk.
     }
 }
