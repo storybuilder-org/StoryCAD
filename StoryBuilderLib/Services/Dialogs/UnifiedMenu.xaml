@@ -6,7 +6,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d" Background="{x:Bind UnifiedMenuVM.AdjustmentColor}">
 
-    <Grid Width="auto" MinHeight="500" MinWidth="600" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+    <Grid Width="auto" Height="500" MinWidth="600" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="150"/>
             <ColumnDefinition Width="*"/>
@@ -15,7 +15,7 @@
         <ListBox Grid.Column="0" VerticalAlignment="Stretch" CornerRadius="10" Background="{x:Bind UnifiedMenuVM.AdjustmentColor}" SelectionChanged="{x:Bind UnifiedMenuVM.SidebarChange, Mode=OneWay}" SelectedItem="{x:Bind UnifiedMenuVM.CurrentTab, Mode=TwoWay}">
             <ListBoxItem Content="Create new story" Name="New"/>
             <ListBoxItem Content="Recent files" Name="Recent"/>
-            <ListBoxItem Content="Sample stories" Name="Example"/>
+            <ListBoxItem Content="Sample stories" Name="Sample"/>
         </ListBox>
         <StackPanel Padding="20" Grid.Column="1" Name="MenuContent" MinWidth="500" HorizontalAlignment="Center" VerticalAlignment="Stretch"/>
     </Grid>

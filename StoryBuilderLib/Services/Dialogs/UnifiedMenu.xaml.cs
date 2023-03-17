@@ -7,7 +7,7 @@ using StoryBuilder.ViewModels;
 
 namespace StoryBuilder.Services.Dialogs;
 
-public sealed partial class UnifiedMenuPage : Page
+public sealed partial class UnifiedMenuPage
 {
     public delegate void UpdateContentDelegate();
 
@@ -23,7 +23,7 @@ public sealed partial class UnifiedMenuPage : Page
                 UnifiedMenuVM.SelectedTemplateIndex = GlobalData.Preferences.LastSelectedTemplate;
                 MenuContent.Children.Add(new NewProjectPage(UnifiedMenuVM));
                 break;
-            case "Example":
+            case "Sample":
                 MenuContent.Children.Add(new SamplePage(UnifiedMenuVM));
                 break;
         }

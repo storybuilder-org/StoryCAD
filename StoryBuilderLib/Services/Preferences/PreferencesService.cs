@@ -20,14 +20,14 @@ public class PreferencesService
             Logger.Log(LogLevel.Info, "Loading Preferences");
             PreferencesModel model = new();
             PreferencesIo loader = new(model, path);
-            await loader.UpdateModel();
+            await loader.LoadModel();
                 
             GlobalData.Preferences = model;
         }
         catch (Exception ex)
         {
             Logger.LogException(LogLevel.Error, ex, "Error loading Preferences");
-            Application.Current.Exit();  // Win32;  // Win32
+            Application.Current.Exit();  // Win32; 
         }
     }
 }

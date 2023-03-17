@@ -2,7 +2,6 @@
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
-using Windows.ApplicationModel;
 using Windows.Storage;
 using Windows.Storage.Pickers;
 using CommunityToolkit.Mvvm.DependencyInjection;
@@ -13,11 +12,11 @@ using StoryBuilder.Services.Installation;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.ViewModels.Tools;
 using WinRT;
-using Page = Microsoft.UI.Xaml.Controls.Page;
+using Microsoft.UI.Xaml.Controls;
 
 namespace StoryBuilder.Services.Dialogs.Tools;
 
-public sealed partial class PreferencesDialog : Page
+public sealed partial class PreferencesDialog
 {
     public PreferencesViewModel PreferencesVm => Ioc.Default.GetService<PreferencesViewModel>();
     public InstallationService InstallVM => Ioc.Default.GetRequiredService<InstallationService>();
@@ -26,8 +25,13 @@ public sealed partial class PreferencesDialog : Page
     {
         InitializeComponent();
         DataContext = PreferencesVm;
-        Version.Text = GlobalData.Version;
+        Version.Text = PreferencesVm.CurrentModel.Version;
         SetChangelog();
+
+        if (PreferencesVm.CurrentModel.WrapNodeNames == TextWrapping.WrapWholeWords) { TextWrap.IsChecked = true; }
+        else { TextWrap.IsChecked = false; }
+
+        SearchEngine.SelectedIndex = (int)PreferencesVm.CurrentModel.PreferredSearchEngine;
 
         //TODO: Put this in a VM and make this data get logged at start up with some more system info.
         if (Debugger.IsAttached)
@@ -72,10 +76,11 @@ public sealed partial class PreferencesDialog : Page
         }
         catch
         {
-            //TODO: Use .NET7 Raw String Literal?
-            Changelog.Text = "Failed to get changelog for this version, this because either:" +
-                             "\n - You are running an auto-build version" +
-                             "\n- There is an issue connecting to Github";
+            Changelog.Text = """
+                Failed to get changelog for this version, this because either:
+                 - You are running an auto-build version
+                 -There is an issue connecting to Github
+                """;
         }
 
     }
@@ -86,14 +91,6 @@ public sealed partial class PreferencesDialog : Page
     private void OpenLogFolder(object sender, RoutedEventArgs e)
     {
         Process.Start(new ProcessStartInfo { FileName = Path.Combine(GlobalData.RootDirectory, "Logs"), UseShellExecute = true, Verb = "open" });
-    }
-
-    /// <summary>
-    /// This opens the user's browser to join the StoryBuilder Discord Server
-    /// </summary>
-    private void OpenDiscordUrl(object sender, RoutedEventArgs e)
-    {
-        Process.Start(new ProcessStartInfo { FileName = @"https://discord.gg/wfZxU4bx6n", UseShellExecute = true, Verb = "open" });
     }
 
     private async void SetBackupPath(object sender, RoutedEventArgs e)
@@ -112,7 +109,7 @@ public sealed partial class PreferencesDialog : Page
         StorageFolder _folder = await _folderPicker.PickSingleFolderAsync();
         if (_folder != null)
         {
-            Ioc.Default.GetRequiredService<PreferencesViewModel>().BackupDir = _folder.Path;
+            PreferencesVm.CurrentModel.BackupDirectory = _folder.Path;
         }
     }
     private async void SetProjectPath(object sender, RoutedEventArgs e)
@@ -131,7 +128,7 @@ public sealed partial class PreferencesDialog : Page
         StorageFolder folder = await _folderPicker.PickSingleFolderAsync();
         if (folder != null)
         {
-            Ioc.Default.GetRequiredService<PreferencesViewModel>().ProjectDir = folder.Path;
+            PreferencesVm.CurrentModel.ProjectDirectory = folder.Path;
             ProjDirBox.Text = folder.Path; //Updates the box visually (fixes visual glitch.)
         }
     }
@@ -156,6 +153,18 @@ public sealed partial class PreferencesDialog : Page
     /// </summary>
     private void SetInitToFalse(object sender, RoutedEventArgs e)
     {
-        PreferencesVm.Init = false;
+        PreferencesVm.CurrentModel.PreferencesInitialized = false;
+    }
+
+    /// <summary>
+    /// This toggles the status of preferences.TextWrapping
+    /// </summary>
+    private void ToggleWrapping(object sender, RoutedEventArgs e)
+    {
+        if ((sender as CheckBox).IsChecked == true)
+        {
+            PreferencesVm.CurrentModel.WrapNodeNames = TextWrapping.WrapWholeWords;
+        }
+        else { PreferencesVm.CurrentModel.WrapNodeNames = TextWrapping.NoWrap; }
     }
 }

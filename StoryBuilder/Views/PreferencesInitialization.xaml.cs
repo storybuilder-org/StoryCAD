@@ -5,7 +5,6 @@ using Windows.Storage;
 using Windows.Storage.Pickers;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
 using StoryBuilder.Models;
 using StoryBuilder.ViewModels.Tools;
 using WinRT;
@@ -13,11 +12,11 @@ using WinRT;
 namespace StoryBuilder.Views;
 
 /// <summary>
-/// This Page is displayed if Preferences.Initialised is false.
+/// This Page is displayed if Preferences.Initialise is false.
 /// </summary>
-public sealed partial class PreferencesInitialization : Page
+public sealed partial class PreferencesInitialization
 {
-    InitVM InitVM = Ioc.Default.GetService<InitVM>();
+    private InitVM _initVM = Ioc.Default.GetService<InitVM>();
     public PreferencesInitialization() { InitializeComponent(); }
 
     /// <summary>
@@ -28,14 +27,11 @@ public sealed partial class PreferencesInitialization : Page
     /// If a folder is selected it will set the VM and UI versions
     /// of the variables to ensure they are in sync.
     /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="e"></param>
     private async void SetProjectPath(object sender, RoutedEventArgs e)
     {
         FolderPicker folderPicker = new();
         if (Window.Current == null)
         {
-            //IntPtr hwnd = GetActiveWindow();
             IntPtr hwnd = GlobalData.WindowHandle;
             IInitializeWithWindow initializeWithWindow = folderPicker.As<IInitializeWithWindow>();
             initializeWithWindow.Initialize(hwnd);
@@ -46,14 +42,13 @@ public sealed partial class PreferencesInitialization : Page
         StorageFolder folder = await folderPicker.PickSingleFolderAsync();
         if (folder != null)
         {
-            ProjPath.Text = folder.Path;
-            InitVM.Path = folder.Path;
+            _initVM.Preferences.ProjectDirectory = folder.Path;
         }
     }
 
     /// <summary>
     /// This is called when the browse button next to Project Path
-    /// once clicked it opens a folder picker. If canceled4 the folder
+    /// once clicked it opens a folder picker. If canceled the folder
     /// will be null and nothing will happen.
     /// 
     /// If a folder is selected it will set the VM and UI versions of
@@ -66,7 +61,6 @@ public sealed partial class PreferencesInitialization : Page
         FolderPicker folderPicker = new();
         if (Window.Current == null)
         {
-            //IntPtr hwnd = GetActiveWindow();
             IntPtr hwnd = GlobalData.WindowHandle;
             IInitializeWithWindow initializeWithWindow = folderPicker.As<IInitializeWithWindow>();
             initializeWithWindow.Initialize(hwnd);
@@ -77,17 +71,8 @@ public sealed partial class PreferencesInitialization : Page
         StorageFolder folder = await folderPicker.PickSingleFolderAsync();
         if (folder != null)
         {
-            BackPath.Text = folder.Path;
-            InitVM.BackupPath = folder.Path;
+            _initVM.Preferences.BackupDirectory = folder.Path;
         }
-    }
-
-    [ComImport]
-    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-    [Guid("EECDBF0E-BAE9-4CB6-A68E-9598E1CB57BB")]
-    internal interface IWindowNative
-    {
-        IntPtr WindowHandle { get; }
     }
 
     [ComImport]
@@ -98,16 +83,13 @@ public sealed partial class PreferencesInitialization : Page
         void Initialize(IntPtr hwnd);
     }
 
-    [DllImport("user32.dll", ExactSpelling = true, CharSet = CharSet.Auto, PreserveSig = true, SetLastError = false)]
-    public static extern IntPtr GetActiveWindow();
-
     /// <summary>
     /// Opens discord URL in default browser (Via ShellExecute)
     /// </summary>
     public void Discord(object sender, RoutedEventArgs e)
     {
-        Process Browser = new() { StartInfo = new() { FileName = "https://discord.gg/wfZxU4bx6n", UseShellExecute = true } };
-        Browser.Start();
+        Process browser = new() { StartInfo = new() { FileName = "https://discord.gg/wfZxU4bx6n", UseShellExecute = true } };
+        browser.Start();
     }
 
     /// <summary>
@@ -115,35 +97,34 @@ public sealed partial class PreferencesInitialization : Page
     /// </summary>
     public void Check(object sender, RoutedEventArgs e)
     {
-        if (String.IsNullOrWhiteSpace(InitVM.Name))
+        if (string.IsNullOrWhiteSpace(_initVM.Preferences.Name))
         {
-            InitVM.ErrorMessage = "Please enter your Name";
+            _initVM.ErrorMessage = "Please enter your Name";
             return;
         }
-        if (String.IsNullOrWhiteSpace(InitVM.Email))
+        if (string.IsNullOrWhiteSpace(_initVM.Preferences.Email))
         {
-            InitVM.ErrorMessage = "Please enter your Email";
-            return;
-        }
-
-        if (!InitVM.Email.Contains("@") || !InitVM.Email.Contains("."))
-        {
-            InitVM.ErrorMessage = "Please enter a valid email address.";
-            return;
-        }
-        if (String.IsNullOrWhiteSpace(InitVM.Path))
-        {
-            InitVM.ErrorMessage = "Please set a Project path";
-            return;
-        }
-        if (String.IsNullOrWhiteSpace(InitVM.BackupPath))
-        {
-            InitVM.ErrorMessage = "Please set a Backup path";
+            _initVM.ErrorMessage = "Please enter your Email";
             return;
         }
 
+        if (!_initVM.Preferences.Email.Contains("@") || !_initVM.Preferences.Email.Contains("."))
+        {
+            _initVM.ErrorMessage = "Please enter a valid email address.";
+            return;
+        }
+        if (string.IsNullOrWhiteSpace(_initVM.Preferences.ProjectDirectory))
+        {
+            _initVM.ErrorMessage = "Please set a Project path";
+            return;
+        }
+        if (string.IsNullOrWhiteSpace(_initVM.Preferences.BackupDirectory))
+        {
+            _initVM.ErrorMessage = "Please set a Backup path";
+            return;
+        }
 
-        InitVM.Save();
+        _initVM.Save();
         RootFrame.Navigate(typeof(Shell));
     }
 
