@@ -313,15 +313,18 @@
                                    ContextFlyout="{StaticResource AddStoryElementFlyout}" 
                                    ContextRequested="AddButton_ContextRequested" 
                                    CanDragItems="True" AllowDrop="True" CanReorderItems="True"
-                                   ItemsSource="{x:Bind ShellVm.DataSource, Mode=TwoWay}" 
+                                   ItemsSource="{x:Bind ShellVm.DataSource, Mode=TwoWay}"
+                                   SelectionMode="Single"
+                                   DragLeave="TreeView_OnDragLeave"
+                                   DragItemsStarting="TreeView_DragItemsStarting"
                                    ItemInvoked="TreeViewItem_Invoked" >
                         <muxc:TreeView.ItemTemplate>
                             <DataTemplate  x:DataType="viewmodels:StoryNodeItem">
                                 <muxc:TreeViewItem ItemsSource="{x:Bind Children}" 
                                                    Background="{x:Bind Background, Mode=OneWay}" 
                                                    IsExpanded="{x:Bind IsExpanded, Mode=TwoWay}" 
-                                                   RightTapped="TreeViewItem_RightTapped"
-                                                   DragEnter="TreeViewItem_OnDragEnter" >
+                                                   DragOver="TreeViewItem_OnDragOver"
+                                                   RightTapped="TreeViewItem_RightTapped" >
                                     <StackPanel Orientation="Horizontal">
                                         <SymbolIcon Symbol="{x:Bind Symbol, Mode=OneWay}" Width="20" Height="20"/>
                                         <TextBlock Text="{x:Bind Name, Mode=TwoWay}" TextWrapping="{Binding  TextWrapping}" MaxWidth="220" Margin="10,0,10,0"/>
