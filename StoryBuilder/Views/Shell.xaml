@@ -315,8 +315,8 @@
                                    CanDragItems="True" AllowDrop="True" CanReorderItems="True"
                                    ItemsSource="{x:Bind ShellVm.DataSource, Mode=TwoWay}"
                                    SelectionMode="Single"
-                                   DragLeave="TreeView_OnDragLeave"
                                    DragItemsStarting="TreeView_DragItemsStarting"
+                                   DragItemsCompleted="TreeViewItem_DragItemsCompleted"
                                    ItemInvoked="TreeViewItem_Invoked" >
                         <muxc:TreeView.ItemTemplate>
                             <DataTemplate  x:DataType="viewmodels:StoryNodeItem">

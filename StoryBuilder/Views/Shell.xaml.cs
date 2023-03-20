@@ -16,6 +16,7 @@ using Microsoft.UI.Dispatching;
 using StoryBuilder.Services;
 using System.Linq;
 using Windows.ApplicationModel.DataTransfer;
+using System.Diagnostics;
 
 namespace StoryBuilder.Views;
 
@@ -188,8 +189,8 @@ public sealed partial class Shell
         {
             Logger.Log(LogLevel.Warn, $"Invalid dragTarget type: {type.Name}");
             args.Data.RequestedOperation = DataPackageOperation.None;
-            ShellVm.ShowMessage(LogLevel.Warn, "Invalid drag target", false);
-            return;
+            ShellVm.ShowMessage(LogLevel.Warn, "Invalid drag target type", false);
+            args.Data.RequestedOperation = DataPackageOperation.None;
         }
         dragTargetItem = sender as TreeViewItem;
         dragTargetNode = NavigationTree.NodeFromContainer(dragTargetItem);
@@ -201,8 +202,8 @@ public sealed partial class Shell
         if (node.Depth < 1)
         {
             Logger.Log(LogLevel.Warn, $"dragTarget is not below root");
+            ShellVm.ShowMessage(LogLevel.Warn, "Drag target is not below root", false);
             args.Data.RequestedOperation = DataPackageOperation.None;
-            ShellVm.ShowMessage(LogLevel.Warn, "Invalid drag target", false);
             return;
         }
 
@@ -219,29 +220,52 @@ public sealed partial class Shell
         if (root.Type == StoryItemType.TrashCan)
         {
             Logger.Log(LogLevel.Warn, $"dragTarget root is TrashCan");
+            ShellVm.ShowMessage(LogLevel.Warn, "Drag to Trashcan invalid", false);
             args.Data.RequestedOperation = DataPackageOperation.None;
-            ShellVm.ShowMessage(LogLevel.Warn, "Invalid drag target", false);
             return;
         }
         // Move is valid, allow the drop operation.  
         args.Data.RequestedOperation = DataPackageOperation.Move;
     }
 
-    private void TreeView_OnDragLeave(object sender, DragEventArgs e)
+    private void TreeViewItem_DragItemsCompleted(TreeView sender, TreeViewDragItemsCompletedEventArgs args)
     {
-        // If the drag target identified in OnDragOver was valid, 
-        // the drag operation is allowed. Indicate a change too place
-        // and report it. 
-        // If the drag target was not valid, the drag operation didn't
-        // take place. Re-enable move operations for another try.
-        if (e.Data.RequestedOperation == DataPackageOperation.Move)
+        var sourceNode = dragSourceStoryNode;
+
+        if (sourceNode == null)
         {
-            ShellViewModel.ShowChange();
-            ShellVm.ShowMessage(LogLevel.Info, "Drag and drop successful", true);
+            Logger.Log(LogLevel.Warn, $"dragSource is null");
+            ShellVm.ShowMessage(LogLevel.Warn, "Invalid drag source", false);
+            return;
         }
-        else
+        
+        var targetNode = dragTargetStoryNode;
+
+        if (targetNode == null)
         {
-            e.Data.RequestedOperation = DataPackageOperation.Move;  // re-enable moves
+            Logger.Log(LogLevel.Warn, $"dragTarget is null");
+            ShellVm.ShowMessage(LogLevel.Warn, "Invalid drag target", false);
+            return;
         }
+
+        if (sourceNode == targetNode)
+        {
+            Logger.Log(LogLevel.Warn, $"Drag source and target are the same");
+            ShellVm.ShowMessage(LogLevel.Warn, "Drag source and target are same", false);
+            return;
+        }
+
+        // Remove the source node from its original parent's children collection
+        sourceNode.Parent.Children.Remove(sourceNode);
+
+        // Add the source node to the target node's parent's children collection
+        targetNode.Parent.Children.Insert(targetNode.Parent.Children.IndexOf(targetNode) + 1, sourceNode);
+
+        // Update the source node's parent
+        sourceNode.Parent = targetNode.Parent;
+
+        // Refresh the UI and log the changes
+        ShellViewModel.ShowChange();
+        ShellVm.ShowMessage(LogLevel.Info, "Drag and drop successful", true);
     }
 }
