@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Resources;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Messaging;
+using Microsoft.UI.Xaml.Controls;
 using StoryBuilder.Models;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.Services.Messages;
@@ -351,15 +353,24 @@ public class OverviewViewModel : ObservableRecipient, INavigable
     {
         _logger = Ioc.Default.GetService<LogService>();
 
-        Dictionary<string, ObservableCollection<string>> _lists = GlobalData.ListControlSource;
-        StoryTypeList = _lists["StoryType"];
-        GenreList = _lists["Genre"];
-        ViewpointList = _lists["Viewpoint"];
-        LiteraryTechniqueList = _lists["LiteraryTechnique"];
-        VoiceList = _lists["Voice"];
-        TenseList = _lists["Tense"];
-        StyleList = _lists["LiteraryStyle"];
-        ToneList = _lists["Tone"];
+        try
+        {
+            Dictionary<string, ObservableCollection<string>> _lists = GlobalData.ListControlSource;
+            StoryTypeList = _lists["StoryType"];
+            GenreList = _lists["Genre"];
+            ViewpointList = _lists["Viewpoint"];
+            LiteraryTechniqueList = _lists["LiteraryTechnique"];
+            VoiceList = _lists["Voice"];
+            TenseList = _lists["Tense"];
+            StyleList = _lists["LiteraryStyle"];
+            ToneList = _lists["Tone"];
+        }
+        catch (Exception e)
+        {
+            _logger.LogException(LogLevel.Fatal, e, "Error loading lists in Problem view model");
+            ShowError();
+            throw new MissingManifestResourceException();
+        }
 
         DateCreated = string.Empty;
         Author = string.Empty;
@@ -381,5 +392,15 @@ public class OverviewViewModel : ObservableRecipient, INavigable
         PropertyChanged += OnPropertyChanged;
     }
 
+    async void ShowError()
+    {
+        await new ContentDialog()
+        {
+            XamlRoot = GlobalData.XamlRoot,
+            Title = "Error loading resources",
+            Content = "An error has occurred, please reinstall or update StoryBuilder to continue.",
+            CloseButtonText = "Close"
+        }.ShowAsync();
+    }
     #endregion
 }

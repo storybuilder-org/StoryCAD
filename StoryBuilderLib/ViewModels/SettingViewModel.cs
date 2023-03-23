@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Resources;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Messaging;
+using Microsoft.UI.Xaml.Controls;
 using StoryBuilder.Models;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.Services.Messages;
@@ -255,11 +257,31 @@ public class SettingViewModel : ObservableRecipient, INavigable
         Notes = string.Empty;
 
         Dictionary<string, ObservableCollection<string>> _lists = GlobalData.ListControlSource;
-        LocaleList = _lists["Locale"];
-        SeasonList = _lists["Season"];
+        try
+        {
+            LocaleList = _lists["Locale"];
+            SeasonList = _lists["Season"];
+        }
+        catch (Exception e)
+        {
+            _logger.LogException(LogLevel.Fatal, e, "Error loading lists in Problem view model");
+            ShowError();
+            throw new MissingManifestResourceException();
+        }
+
 
         PropertyChanged += OnPropertyChanged;
     }
 
+    async void ShowError()
+    {
+        await new ContentDialog()
+        {
+            XamlRoot = GlobalData.XamlRoot,
+            Title = "Error loading resources",
+            Content = "An error has occurred, please reinstall or update StoryBuilder to continue.",
+            CloseButtonText = "Close"
+        }.ShowAsync();
+    }
     #endregion
 }

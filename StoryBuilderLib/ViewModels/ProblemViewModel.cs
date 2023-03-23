@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Resources;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
@@ -379,23 +380,42 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         Theme = string.Empty;
         Premise = string.Empty;
         Notes = string.Empty;
-
-        Dictionary<string, ObservableCollection<string>> _lists = GlobalData.ListControlSource;
-        ProblemTypeList = _lists["ProblemType"];
-        ConflictTypeList = _lists["ConflictType"];
-        ProblemCategoryList = _lists["ProblemCategory"];
-        SubjectList = _lists["ProblemSubject"];
-        ProblemSourceList = _lists["ProblemSource"];
-        GoalList = _lists["Goal"];
-        MotiveList = _lists["Motive"];
-        ConflictList = _lists["Conflict"];
-        OutcomeList = _lists["Outcome"];
-        MethodList = _lists["Method"];
-        ThemeList = _lists["Theme"];
+        try
+        {
+            Dictionary<string, ObservableCollection<string>> _lists = GlobalData.ListControlSource;
+            ProblemTypeList = _lists["ProblemType"];
+            ConflictTypeList = _lists["ConflictType"];
+            ProblemCategoryList = _lists["ProblemCategory"];
+            SubjectList = _lists["ProblemSubject"];
+            ProblemSourceList = _lists["ProblemSource"];
+            GoalList = _lists["Goal"];
+            MotiveList = _lists["Motive"];
+            ConflictList = _lists["Conflict"];
+            OutcomeList = _lists["Outcome"];
+            MethodList = _lists["Method"];
+            ThemeList = _lists["Theme"];
+        }
+        catch (Exception e)
+        {
+            _logger.LogException(LogLevel.Fatal, e, "Error loading lists in Problem view model");
+            ShowError();
+            throw new MissingManifestResourceException();
+        }
 
         ConflictCommand = new RelayCommand(ConflictTool, () => true);
 
         PropertyChanged += OnPropertyChanged;
     }
     #endregion
+
+    async void ShowError()
+    {
+        await new ContentDialog()
+        {
+            XamlRoot = GlobalData.XamlRoot,
+            Title = "Error loading resources",
+            Content = "An error has occurred, please reinstall or update StoryBuilder to continue.",
+            CloseButtonText = "Close"
+        }.ShowAsync();
+    }
 }
