@@ -256,9 +256,9 @@ public class SettingViewModel : ObservableRecipient, INavigable
         SmellTaste = string.Empty;
         Notes = string.Empty;
 
-        Dictionary<string, ObservableCollection<string>> _lists = GlobalData.ListControlSource;
         try
         {
+            Dictionary<string, ObservableCollection<string>> _lists = GlobalData.ListControlSource;
             LocaleList = _lists["Locale"];
             SeasonList = _lists["Season"];
         }
@@ -266,7 +266,6 @@ public class SettingViewModel : ObservableRecipient, INavigable
         {
             _logger.LogException(LogLevel.Fatal, e, "Error loading lists in Problem view model");
             ShowError();
-            throw new MissingManifestResourceException();
         }
 
 
@@ -282,6 +281,8 @@ public class SettingViewModel : ObservableRecipient, INavigable
             Content = "An error has occurred, please reinstall or update StoryBuilder to continue.",
             CloseButtonText = "Close"
         }.ShowAsync();
+        throw new MissingManifestResourceException();
+
     }
     #endregion
 }

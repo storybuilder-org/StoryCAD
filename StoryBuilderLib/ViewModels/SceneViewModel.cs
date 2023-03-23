@@ -711,7 +711,6 @@ public class SceneViewModel : ObservableRecipient, INavigable
         {
             _logger.LogException(LogLevel.Fatal, e, "Error loading lists in Problem view model");
             ShowError();
-            throw new MissingManifestResourceException();
         }
 
 
@@ -736,5 +735,7 @@ public class SceneViewModel : ObservableRecipient, INavigable
             Content = "An error has occurred, please reinstall or update StoryBuilder to continue.",
             CloseButtonText = "Close"
         }.ShowAsync();
+        throw new MissingManifestResourceException();
+
     }
 }
