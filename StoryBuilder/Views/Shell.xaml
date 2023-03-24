@@ -323,7 +323,7 @@
                                 <muxc:TreeViewItem ItemsSource="{x:Bind Children}" 
                                                    Background="{x:Bind Background, Mode=OneWay}" 
                                                    IsExpanded="{x:Bind IsExpanded, Mode=TwoWay}" 
-                                                   DragOver="TreeViewItem_OnDragOver"
+                                                   DragEnter="TreeViewItem_OnDragEnter"
                                                    RightTapped="TreeViewItem_RightTapped" >
                                     <StackPanel Orientation="Horizontal">
                                         <SymbolIcon Symbol="{x:Bind Symbol, Mode=OneWay}" Width="20" Height="20"/>
