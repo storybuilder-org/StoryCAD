@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
+using System.Resources;
 using System.Text;
 using Windows.ApplicationModel;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -13,6 +14,7 @@ using StoryBuilder.Models;
 using StoryBuilder.Services.Logging;
 using StoryBuilder.Services.Messages;
 using StoryBuilder.Services.Navigation;
+using Microsoft.UI.Xaml.Controls;
 
 namespace StoryBuilder.ViewModels;
 
@@ -689,19 +691,28 @@ public class SceneViewModel : ObservableRecipient, INavigable
         Notes = string.Empty;
         ScenePurposes = new ObservableCollection<StringSelection>();
 
-        Dictionary<string, ObservableCollection<string>> _lists = GlobalData.ListControlSource;
-        ViewpointList = _lists["Viewpoint"];
-        SceneTypeList = _lists["SceneType"];
-        ScenePurposeList = _lists["ScenePurpose"];
-        foreach (string purpose in ScenePurposeList)
-            ScenePurposes.Add(new StringSelection(purpose, false));
-        StoryRoleList = _lists["StoryRole"];
-        EmotionList = _lists["Emotion"];
-        GoalList = _lists["Goal"];
-        OppositionList = _lists["Opposition"];
-        OutcomeList = _lists["Outcome"];
-        ViewpointList = _lists["Viewpoint"];
-        ValueExchangeList = _lists["ValueExchange"];
+        try
+        {
+            Dictionary<string, ObservableCollection<string>> _lists = GlobalData.ListControlSource;
+            ViewpointList = _lists["Viewpoint"];
+            SceneTypeList = _lists["SceneType"];
+            ScenePurposeList = _lists["ScenePurpose"];
+            foreach (string purpose in ScenePurposeList)
+                ScenePurposes.Add(new StringSelection(purpose, false));
+            StoryRoleList = _lists["StoryRole"];
+            EmotionList = _lists["Emotion"];
+            GoalList = _lists["Goal"];
+            OppositionList = _lists["Opposition"];
+            OutcomeList = _lists["Outcome"];
+            ViewpointList = _lists["Viewpoint"];
+            ValueExchangeList = _lists["ValueExchange"];
+        }
+        catch (Exception e)
+        {
+            _logger.LogException(LogLevel.Fatal, e, "Error loading lists in Problem view model");
+            ShowError();
+        }
+
 
         // Initialize cast member lists / display
         CastMembers = new ObservableCollection<StoryElement>();
@@ -715,4 +726,16 @@ public class SceneViewModel : ObservableRecipient, INavigable
     }
 
     #endregion
+    async void ShowError()
+    {
+        await new ContentDialog()
+        {
+            XamlRoot = GlobalData.XamlRoot,
+            Title = "Error loading resources",
+            Content = "An error has occurred, please reinstall or update StoryBuilder to continue.",
+            CloseButtonText = "Close"
+        }.ShowAsync();
+        throw new MissingManifestResourceException();
+
+    }
 }

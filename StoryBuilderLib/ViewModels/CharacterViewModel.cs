@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Resources;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
@@ -939,37 +940,45 @@ public class CharacterViewModel : ObservableRecipient, INavigable
     {
         _logger = Ioc.Default.GetService<LogService>();
 
-        Dictionary<string, ObservableCollection<string>> _lists = GlobalData.ListControlSource;
-        RoleList = _lists["Role"];
-        StoryRoleList = _lists["StoryRole"];
-        ArchetypeList = _lists["Archetype"];
-        BuildList = _lists["Build"];
-        NationalityList = _lists["Country"];
-        // TODO: How do I bind to Sex option buttons?
-        EyesList = _lists["EyeColor"];
-        HairList = _lists["HairColor"];
-        SkinList = _lists["Complexion"];
-        RaceList = _lists["Race"];
-        EnneagramList = _lists["Enneagram"];
-        IntelligenceList = _lists["Intelligence"];
-        ValuesList = _lists["Value"];
-        AbnormalityList = _lists["MentalIllness"];
-        FocusList = _lists["Focus"];
-        AdventurousnessList = _lists["Adventurous"];
-        AggressionList = _lists["Aggressiveness"];
-        ConfidenceList = _lists["Confidence"];
-        ConscientiousnessList = _lists["Conscientiousness"];
-        CreativityList = _lists["Creativeness"];
-        DominanceList = _lists["Dominance"];
-        EnthusiasmList = _lists["Enthusiasm"];
-        AssuranceList = _lists["Assurance"];
-        SensitivityList = _lists["Sensitivity"];
-        ShrewdnessList = _lists["Shrewdness"];
-        SociabilityList = _lists["Sociability"];
-        StabilityList = _lists["Stability"];
-        TraitList = _lists["Trait"];
-        RelationshipTraitList = _lists["Trait"];
-        RelationshipAttitudeList = _lists["Attitude"];
+        try
+        {
+            Dictionary<string, ObservableCollection<string>> _lists = GlobalData.ListControlSource;
+            RoleList = _lists["Role"];
+            StoryRoleList = _lists["StoryRole"];
+            ArchetypeList = _lists["Archetype"];
+            BuildList = _lists["Build"];
+            NationalityList = _lists["Country"];
+            // TODO: How do I bind to Sex option buttons?
+            EyesList = _lists["EyeColor"];
+            HairList = _lists["HairColor"];
+            SkinList = _lists["Complexion"];
+            RaceList = _lists["Race"];
+            EnneagramList = _lists["Enneagram"];
+            IntelligenceList = _lists["Intelligence"];
+            ValuesList = _lists["Value"];
+            AbnormalityList = _lists["MentalIllness"];
+            FocusList = _lists["Focus"];
+            AdventurousnessList = _lists["Adventurous"];
+            AggressionList = _lists["Aggressiveness"];
+            ConfidenceList = _lists["Confidence"];
+            ConscientiousnessList = _lists["Conscientiousness"];
+            CreativityList = _lists["Creativeness"];
+            DominanceList = _lists["Dominance"];
+            EnthusiasmList = _lists["Enthusiasm"];
+            AssuranceList = _lists["Assurance"];
+            SensitivityList = _lists["Sensitivity"];
+            ShrewdnessList = _lists["Shrewdness"];
+            SociabilityList = _lists["Sociability"];
+            StabilityList = _lists["Stability"];
+            TraitList = _lists["Trait"];
+            RelationshipTraitList = _lists["Trait"];
+            RelationshipAttitudeList = _lists["Attitude"];
+        }
+        catch (Exception e)
+        {
+            _logger.LogException(LogLevel.Fatal, e, "Error loading lists in Problem view model");
+            ShowError();
+        }
 
         CharacterTraits = new ObservableCollection<string>();
         CharacterRelationships = new ObservableCollection<RelationshipModel>();
@@ -1025,6 +1034,20 @@ public class CharacterViewModel : ObservableRecipient, INavigable
 
         PropertyChanged += OnPropertyChanged;
     }
+
+    async void ShowError()
+    {
+        await new ContentDialog()
+        {
+            XamlRoot = GlobalData.XamlRoot,
+            Title = "Error loading resources",
+            Content = "An error has occurred, please reinstall or update StoryBuilder to continue.",
+            CloseButtonText = "Close"
+        }.ShowAsync();
+        throw new MissingManifestResourceException();
+
+    }
+
 }
 
 #endregion
