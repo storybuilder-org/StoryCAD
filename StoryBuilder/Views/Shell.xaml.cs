@@ -180,7 +180,6 @@ public sealed partial class Shell
         }
 
         // Source node is valid for move
-        //args.Data.RequestedOperation = DataPackageOperation.Move;
         dragIsValid = true;
 
         // Report status
@@ -192,7 +191,14 @@ public sealed partial class Shell
         Logger.Log(LogLevel.Info, $"OnDragEnter enter");
         // Assume the worst
         dragIsValid = false;
-        args.Data.RequestedOperation = DataPackageOperation.None;
+        //if (args.Data == null)
+        //{
+        //    Logger.Log(LogLevel.Warn, $"OnDragEnter args.Data is null");
+        //    return;
+        //}
+        //args.Data.RequestedOperation = DataPackageOperation.None;
+        //args.DragUIOverride.IsContentVisible = true;
+        //args.DragUIOverride.Caption = "Move to:";
 
         // sender is the node you're dragging over (the prospective target)
         Type type = sender.GetType();
@@ -252,14 +258,22 @@ public sealed partial class Shell
             sourceParent.Children.Remove(dragSourceStoryNode);
 
             // Add the source node to the target node's parent's children collection.
-            // Insert() places the source immediately before the target.
-            var targetParent = dragTargetStoryNode.Parent;
-            var targetIndex = targetParent.Children.IndexOf(dragTargetStoryNode);
-            targetParent.Children.Insert(targetIndex, dragSourceStoryNode);
-
-            // Update the source node's parent
-            dragSourceStoryNode.Parent = dragTargetStoryNode.Parent;
-
+            if (dragTargetStoryNode.Type == StoryItemType.Folder ||
+                dragTargetStoryNode.Type == StoryItemType.Section)
+            {
+                // If the target is a folder or section, add the source as a child
+                // at the start of the collection
+                dragTargetStoryNode.Children.Insert(0, dragSourceStoryNode);
+                dragSourceStoryNode.Parent = dragTargetStoryNode;
+            }
+            else
+            {
+                // If the target is anything else, add the source as a sibling
+                var targetParent = dragTargetStoryNode.Parent;
+                var targetIndex = targetParent.Children.IndexOf(dragTargetStoryNode);
+                targetParent.Children.Insert(targetIndex, dragSourceStoryNode);
+                dragSourceStoryNode.Parent = dragTargetStoryNode.Parent;
+            }
             Bindings.Update();
 
             // Refresh the UI and report the move
