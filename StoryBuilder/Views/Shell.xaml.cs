@@ -225,11 +225,7 @@ public sealed partial class Shell
         }
         
         dragTargetStoryNode = dragTargetNode.Content as StoryNodeItem;
-        //Logger.Log(LogLevel.Trace, $"dragTarget Name: {dragTargetStoryNode!.Name}");
-        //Logger.Log(LogLevel.Trace, $"dragTarget type: {dragTargetStoryNode.Type.ToString()}");
-
         // Target node is valid for move
-        //args.AcceptedOperation = DataPackageOperation.Move;
         dragIsValid = true;
         args.Handled = true;
         Logger.Log(LogLevel.Info, $"OnDragEnter exit");
