@@ -1,5 +1,5 @@
-﻿using System;
-using CommunityToolkit.Mvvm.DependencyInjection;
+﻿using CommunityToolkit.Mvvm.DependencyInjection;
+using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
@@ -9,14 +9,11 @@ using Microsoft.UI.Xaml.Navigation;
 using StoryBuilder.Models;
 using StoryBuilder.Models.Tools;
 using StoryBuilder.Services.Logging;
-using StoryBuilder.Services.Messages;
 using StoryBuilder.ViewModels;
-using Windows.UI.ViewManagement;
-using Microsoft.UI.Dispatching;
-using StoryBuilder.Services;
-using System.Linq;
+using System;
+using System.ComponentModel;
 using Windows.ApplicationModel.DataTransfer;
-using System.Diagnostics;
+using Windows.UI.ViewManagement;
 
 namespace StoryBuilder.Views;
 
@@ -31,6 +28,7 @@ public sealed partial class Shell
     private StoryNodeItem dragSourceStoryNode;
     private bool dragIsValid;
     private LogService Logger;
+    private readonly object dragLock = new object();
 
     public Shell()
     {
@@ -191,14 +189,6 @@ public sealed partial class Shell
         Logger.Log(LogLevel.Info, $"OnDragEnter enter");
         // Assume the worst
         dragIsValid = false;
-        //if (args.Data == null)
-        //{
-        //    Logger.Log(LogLevel.Warn, $"OnDragEnter args.Data is null");
-        //    return;
-        //}
-        //args.Data.RequestedOperation = DataPackageOperation.None;
-        //args.DragUIOverride.IsContentVisible = true;
-        //args.DragUIOverride.Caption = "Move to:";
 
         // sender is the node you're dragging over (the prospective target)
         Type type = sender.GetType();
@@ -242,45 +232,52 @@ public sealed partial class Shell
         Logger.Log(LogLevel.Trace, $"DragItemsCompleted entry");
         Logger.Log(LogLevel.Trace, $"dragIsValid: {dragIsValid.ToString()}");
 
-        if (dragSourceStoryNode == null)
+        if (dragSourceStoryNode! == null)
         {
             ShellVm.ShowMessage(LogLevel.Warn, "Invalid source node", true);
         }
-        else if (dragTargetStoryNode == null)
+        else if (dragTargetStoryNode! == null)
         {
             ShellVm.ShowMessage(LogLevel.Warn, "Invalid target node", true);
         }
-        else if (dragIsValid)
+        else if (dragSourceStoryNode.Uuid == dragTargetStoryNode.Uuid)
         {
-            var sourceParent = dragSourceStoryNode.Parent;
-
-            // Remove the source node from its original parent's children collection
-            sourceParent.Children.Remove(dragSourceStoryNode);
-
-            // Add the source node to the target node's parent's children collection.
-            if (dragTargetStoryNode.Type == StoryItemType.Folder ||
-                dragTargetStoryNode.Type == StoryItemType.Section)
-            {
-                // If the target is a folder or section, add the source as a child
-                // at the start of the collection
-                dragTargetStoryNode.Children.Insert(0, dragSourceStoryNode);
-                dragSourceStoryNode.Parent = dragTargetStoryNode;
-            }
-            else
-            {
-                // If the target is anything else, add the source as a sibling
-                var targetParent = dragTargetStoryNode.Parent;
-                var targetIndex = targetParent.Children.IndexOf(dragTargetStoryNode);
-                targetParent.Children.Insert(targetIndex, dragSourceStoryNode);
-                dragSourceStoryNode.Parent = dragTargetStoryNode.Parent;
-            }
-            Bindings.Update();
-
-            // Refresh the UI and report the move
-            ShellViewModel.ShowChange();
-            ShellVm.ShowMessage(LogLevel.Info, "Drag and drop successful", true);
+            ShellVm.ShowMessage(LogLevel.Warn, "Drag to self", true);
         }
-        
+        else {
+            int targetIndex = 0;
+            StoryNodeItem sourceParent = null;
+            StoryNodeItem targetParent = null;
+            if (dragIsValid)
+            {
+                Logger.Log(LogLevel.Trace, $"Source: {dragSourceStoryNode.Name}");
+                Logger.Log(LogLevel.Trace, $"Target: {dragTargetStoryNode.Name}");
+                lock (dragLock)
+                {
+                    try
+                    {
+                        sourceParent = dragSourceStoryNode.Parent;
+                        targetParent = dragTargetStoryNode.Parent;
+                        // Remove the source node from its original parent's children collection
+                        // And add it the target node's parent's children collection
+                        // just before the target.
+                        sourceParent.Children.Remove(dragSourceStoryNode);
+                        targetIndex = targetParent.Children.IndexOf(dragTargetStoryNode);
+                        targetParent.Children.Insert(targetIndex, dragSourceStoryNode);
+                        dragSourceStoryNode.Parent = dragTargetStoryNode.Parent;
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.LogException(LogLevel.Error, ex, "Error in drag/drop drop operation");
+                    }
+                }
+
+                // Refresh the UI and report the move
+                ShellViewModel.ShowChange();
+                ShellVm.ShowMessage(LogLevel.Info, "Drag and drop successful", true);
+            }
+        }
+
         NavigationTree.CanDrag = true;
         NavigationTree.AllowDrop = true;
         Logger.Log(LogLevel.Trace, $"OnDragItemsCompleted exit");
