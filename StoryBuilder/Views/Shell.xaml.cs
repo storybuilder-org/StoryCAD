@@ -257,14 +257,27 @@ public sealed partial class Shell
                     try
                     {
                         sourceParent = dragSourceStoryNode.Parent;
-                        targetParent = dragTargetStoryNode.Parent;
+
                         // Remove the source node from its original parent's children collection
-                        // And add it the target node's parent's children collection
-                        // just before the target.
                         sourceParent.Children.Remove(dragSourceStoryNode);
-                        targetIndex = targetParent.Children.IndexOf(dragTargetStoryNode);
-                        targetParent.Children.Insert(targetIndex, dragSourceStoryNode);
-                        dragSourceStoryNode.Parent = dragTargetStoryNode.Parent;
+
+                        // Add the source node to the target node's parent's children collection.
+                        if (dragTargetStoryNode.Type == StoryItemType.Folder ||
+                            dragTargetStoryNode.Type == StoryItemType.Section)
+                        {
+                            // If the target is a folder or section, add the source as a child
+                            // at the start of the collection
+                            dragTargetStoryNode.Children.Insert(0, dragSourceStoryNode);
+                            dragSourceStoryNode.Parent = dragTargetStoryNode;
+                        }
+                        else
+                        {
+                            // If the target is anything else, add the source as a sibling
+                            targetParent = dragTargetStoryNode.Parent;
+                            targetIndex = targetParent.Children.IndexOf(dragTargetStoryNode);
+                            targetParent.Children.Insert(targetIndex, dragSourceStoryNode);
+                            dragSourceStoryNode.Parent = dragTargetStoryNode.Parent;
+                        }
                     }
                     catch (Exception ex)
                     {
