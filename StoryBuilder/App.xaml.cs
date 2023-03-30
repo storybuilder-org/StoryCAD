@@ -220,9 +220,10 @@ public partial class App
         else
         {
             //TODO: check elmah is bypassed when logging is disabled by user.
-            if (GlobalData.ElmahLogging)
+            GlobalData.ElmahLogging = await _log.AddElmahTarget();
+            if (GlobalData.ElmahLogging )
             {
-                await _log.AddElmahTarget();
+                
                 _log.Log(LogLevel.Info, "elmah.io log target added");
             }
             else  // can have several reasons (no doppler, or an error adding the target){
