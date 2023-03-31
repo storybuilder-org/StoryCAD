@@ -139,6 +139,31 @@ public sealed partial class Shell
         foreach (StoryNodeItem node in ShellVm.DataSource[0]) { node.Background = null; }
     }
 
+    #region Drag and Drop exits 
+
+    // Drag and drop functionality for NavigationTree allows TreeViewItem nodes
+    // StoryNodeItems) to be moved from their current location to a new target
+    // folder. The following code implements the following features:
+    //
+    // When a drag operation starts on a source node, TreeView_DragItemsStarting is
+    // invoked. It edits that the source (node to drag) is valid and stores a reference
+    // to the node. 
+    //
+    // As the drag operation proceeds, TreeViewItem_OnDragEnter is invoked for the
+    // target node over which the user is currently hovering as long as the mouse is
+    // moving. It edits that the target node is valid and stores a reference to the
+    // target node.
+    //
+    //    When the user drops the source node on a target node, TreeView_DragItemsCompleted
+    //    is invoked. It validates that the source and target are good and locks the 
+    //    actual node move to prevent side effects (such as AutoSave timer firing) and
+    //    then performs the following steps:                  
+    //       Remove the source node from its original parent's collection of children nodes.
+    //       Add the source node as a child node to the target node's Children nodes.
+    //       Update the source node's parent reference to point to the target node.
+    //    Drag and drop is then re-enabled for subsequent drag and drop operations.
+  
+
     private void TreeView_DragItemsStarting(TreeView sender, TreeViewDragItemsStartingEventArgs args)
     {
         Logger.Log(LogLevel.Trace, $"OnDragItemsStarting enter");
@@ -200,6 +225,7 @@ public sealed partial class Shell
         }
         var dragTargetItem = sender as TreeViewItem;
         dragTargetNode = NavigationTree.NodeFromContainer(dragTargetItem);
+        
         // Find the node's root
         var node = dragTargetNode;
         while (node.Depth != 0) { node = node.Parent; }
@@ -212,10 +238,10 @@ public sealed partial class Shell
             return;
         }
 
-        // A moved node is inserted above the target node, so you can't move to the root.
-        if (dragTargetNode.Depth < 1)
+        // The drag target can be the root (Story Overview) node or any node below it
+        if (dragTargetNode.Depth < 0)
         {
-            ShellVm.ShowMessage(LogLevel.Warn, "Drag target is not below root", true);
+            ShellVm.ShowMessage(LogLevel.Warn, "Drag target is not root or below", true);
             args.Handled = true;
             return;
         }
@@ -245,9 +271,6 @@ public sealed partial class Shell
             ShellVm.ShowMessage(LogLevel.Warn, "Drag to self", true);
         }
         else {
-            int targetIndex = 0;
-            StoryNodeItem sourceParent = null;
-            StoryNodeItem targetParent = null;
             if (dragIsValid)
             {
                 Logger.Log(LogLevel.Trace, $"Source: {dragSourceStoryNode.Name}");
@@ -256,28 +279,15 @@ public sealed partial class Shell
                 {
                     try
                     {
-                        sourceParent = dragSourceStoryNode.Parent;
-
                         // Remove the source node from its original parent's children collection
+                        StoryNodeItem sourceParent = dragSourceStoryNode.Parent;
                         sourceParent.Children.Remove(dragSourceStoryNode);
 
-                        // Add the source node to the target node's parent's children collection.
-                        if (dragTargetStoryNode.Type == StoryItemType.Folder ||
-                            dragTargetStoryNode.Type == StoryItemType.Section)
-                        {
-                            // If the target is a folder or section, add the source as a child
-                            // at the start of the collection
-                            dragTargetStoryNode.Children.Insert(0, dragSourceStoryNode);
-                            dragSourceStoryNode.Parent = dragTargetStoryNode;
-                        }
-                        else
-                        {
-                            // If the target is anything else, add the source as a sibling
-                            targetParent = dragTargetStoryNode.Parent;
-                            targetIndex = targetParent.Children.IndexOf(dragTargetStoryNode);
-                            targetParent.Children.Insert(targetIndex, dragSourceStoryNode);
-                            dragSourceStoryNode.Parent = dragTargetStoryNode.Parent;
-                        }
+                        // Add the source node to the target node's children collection.
+                        dragTargetStoryNode.Children.Insert(0, dragSourceStoryNode);
+                        
+                        // Set the source node's parent to the target node (the new parent) 
+                        dragSourceStoryNode.Parent = dragTargetStoryNode;
                     }
                     catch (Exception ex)
                     {
@@ -295,4 +305,6 @@ public sealed partial class Shell
         NavigationTree.AllowDrop = true;
         Logger.Log(LogLevel.Trace, $"OnDragItemsCompleted exit");
     }
+
+    #endregion
 }
