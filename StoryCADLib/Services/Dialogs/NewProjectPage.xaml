@@ -1,0 +1,27 @@
+﻿<Page
+    x:Class="StoryCAD.Services.Dialogs.NewProjectPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{x:Bind UnifiedVM.AdjustmentColor, Mode=OneWay}">
+    <StackPanel HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0,0,70,0">
+        <TextBlock Text="New Project"  HorizontalAlignment="Center" FontSize="28" Margin="15"/>
+        <ComboBox  Header="Template:" MinWidth="220" SelectedIndex="{x:Bind UnifiedVM.SelectedTemplateIndex, Mode=TwoWay}" HorizontalAlignment="Center" Margin="0,20">
+            <x:String>Blank Project</x:String>
+            <x:String>Empty Folders</x:String>
+            <x:String>External and Internal Problems</x:String>
+            <x:String>Protagonist and Antagonist</x:String>
+            <x:String>Problems and Characters</x:String>
+            <x:String>Overview and Story Problem</x:String>
+        </ComboBox>
+
+        <TextBox x:Name="ProjectPathName" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Header="Project path:"  Text="{x:Bind UnifiedVM.ProjectPath, Mode=TwoWay}" Margin="5,20"/>
+        <Button Content="Browse" Click="Browse_Click" HorizontalAlignment="Center"/>
+
+        <TextBox x:Name="ProjectName" x:FieldModifier="public" MinWidth="250" HorizontalAlignment="Center" Header="Project Name: " Text="{x:Bind UnifiedVM.ProjectName, Mode=TwoWay}" Margin="0,20"/>
+
+        <Button Content="Create project" Margin="5,20" HorizontalAlignment="Center" Click="CheckValidity"/>
+    </StackPanel>
+</Page>

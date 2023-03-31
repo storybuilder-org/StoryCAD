@@ -32,5 +32,5 @@ Example -  Planning out a fictional character. <br/>
 
 Congrats, we have now got a map our fictional word and can start planning our story 		around this world <br/>
 
-Note: The Website Form requires the Microsoft Edge WebView 2 runtime, most 				Windows computers will already have this installed by default however if you are for 		any reason missing it, StoryBuilder will ask to automatically install it. <br/>
+Note: The Website Form requires the Microsoft Edge WebView 2 runtime, most 				Windows computers will already have this installed by default however if you are for 		any reason missing it, StoryCAD will ask to automatically install it. <br/>
 

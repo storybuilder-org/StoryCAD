@@ -1,0 +1,43 @@
+                   StoryCAD - Setting Description
+
+                   =================== Setting ====================
+
+    Name:               @Title
+
+    Locale:             @Locale
+
+    Season:             @Season
+
+    Period:             @Period
+
+    Lighting:           @Lighting
+
+    Weather:            @Weather
+
+    Temperature:        @Temperature
+
+    Props:              @Props
+
+    Scene Summary:
+    @Summary
+
+                       ============= Sensations ==================
+
+    Sights:
+    @Sights
+
+    Sounds:
+    @Sounds
+
+    Touch:
+    @Touch
+
+    Smell:
+    @SmellTaste
+
+                    =================== Notes ==================
+
+    Notes:
+    @Notes
+
+

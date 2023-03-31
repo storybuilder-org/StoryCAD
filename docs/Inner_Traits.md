@@ -11,5 +11,5 @@ A menu item on the Characterization Aids sub-menu of the Tools menu,  Virtues an
 
 Don't go overboard and provide every possible trait for a character.  Focus on the traits which serve your story's premise (see "Plotting through character".)  Real people are often  complicated and confusing.  Characters should be multi-dimensional, but their motives, strengths, flaws, and growth should be clear and understandable to the reader. <br/>
 
-Both the Inner Traits tab and the Virtues and Vices list in StoryBuilder can be tailored to your needs and wishes.  See "Customizing StoryBuilder" for details on how to add, delete, or modify the listed traits. <br/>
+Both the Inner Traits tab and the Virtues and Vices list in StoryCAD can be tailored to your needs and wishes.  See "Customizing StoryCAD" for details on how to add, delete, or modify the listed traits. <br/>
 

@@ -1,0 +1,130 @@
+                   StoryCAD - Character Description
+
+                   ==============Story Role =================
+
+    Name:               @Title
+
+    Role:               @Role
+
+    Story Role:         @StoryRole
+
+    Archetype:          @Archetype
+
+    Sketch:
+    @CharacterSketch
+
+                       ============= Physical ==================
+
+    Age:                @Age
+
+    Sex:                @Sex
+
+    Height:             @Height
+
+    Weight:             @Weight
+
+    Eyes:               @Eyes
+
+    Hair:               @Hair
+
+    Build:              @Build
+
+    Skin:               @Skin
+
+    Race:               @Race
+        
+    Nationality:        @Nationality
+
+    Health:             @Health
+
+    
+
+    Details:
+    @PhysNotes
+
+                ============= Appearance ==================
+
+    Appearance:
+    @Appearance
+
+                ============= Relationships ==================
+
+@Relationships
+
+                ============= Flaw ==================
+
+    Flaw: @Flaw
+
+          ================= Backstory =====================
+
+    Backstory:
+    @Notes
+
+             =========== Social Traits ======================
+
+    Economic Status:
+    @Economic
+
+    Education:
+    @Education
+
+    Ethnic / Cultural:
+    @Ethnic
+
+    Religion:
+    @Religion
+
+
+                 =========== Psychological Traits ==========
+
+    Personality:        @Personality
+
+    Intelligence:       @Intelligence
+
+      Values:           @Values
+
+      Focus:            @Focus
+
+      Abnormality:      @Abnormality
+
+      Psychological Notes:
+      @PsychNotes
+
+ 
+                   =========== Inner Traits ======================
+
+    Adventurousness:    @Adventure
+
+    Aggression:         @Aggression
+
+    Confidence:         @Confidence
+
+    Conscientiousness:  @Conscientious
+
+    Creativity:         @Creative
+
+    Dominance:          @Dominance
+
+    Enthusiasm:         @Enthusiasm
+
+    Self Assurance:     @Assurance
+
+    Sensitivity:        @Sensitivity
+
+    Shrewdness:         @Shrewdness
+
+    Sociability:        @Sociability
+
+    Stability:          @Stability
+
+                    =========== Outer Traits ======================
+
+   Traits:        @Traits
+
+                    =========== Notes ======================
+    Notes:    
+    @Notes
+   
+
+
+

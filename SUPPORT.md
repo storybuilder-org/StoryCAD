@@ -1,6 +1,6 @@
-# Support for using StoryBuilder
+# Support for using StoryCAD
 
-Welcome to StoryBuilder! We use GitHub for tracking bugs and feature requests.
+Welcome to StoryCAD! We use GitHub for tracking bugs and feature requests.
 If you're familiar with GitHub issues, please become a contributor by adding 
 your issue or desired feature on this repository.
 

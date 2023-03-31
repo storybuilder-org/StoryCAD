@@ -6,7 +6,7 @@ Any complex undertaking, such as writing a novel, creating a
 complex piece of software, or a marriage, requires cooperation.
 
 We would like to express our sincere appreciation and gratitude 
-to those whose generous ideas and time helped make StoryBuilder possible.
+to those whose generous ideas and time helped make StoryCAD possible.
 If we've missed anyone's contribution, our sincere apologies. Let us know
 and we'll rectify that.
 
@@ -19,7 +19,7 @@ and we'll rectify that.
 
 ## Software
 
-StoryBuilder uses or links to the following software:
+StoryCAD uses or links to the following software:
 
 * [WinUI 3][1]
 * [Windows App SDK][2]
@@ -36,25 +36,25 @@ livelihood freely available to public open source projects like ours.
 
 Hi, I'm Terry Cox. 
 
-I started StoryBuilder as a hobby, for my own attempts at fiction writing,
+I started StoryCAD as a hobby, for my own attempts at fiction writing,
  back  in the late 1980's. It began to attract attention at writer's conferences 
 (I had a very early laptop), and in the early 90's I had the dubious idea of polishing
-it and selling it commercially. StoryBuilder had modest success, selling over 3,000 
+it and selling it commercially. StoryCAD had modest success, selling over 3,000 
 copies, but inevitably software rot set in as my day job consumed more of time and
-energy, and first fell into disuse and then became unusable. The original StoryBuilder
+energy, and first fell into disuse and then became unusable. The original StoryCAD
 is the ancestor of this one version.
 
-After I retired, I had the idea of rewriting StoryBuilder and selling it again,
+After I retired, I had the idea of rewriting StoryCAD and selling it again,
 and started down that road. However, looking at my tired old face in the mirror one 
 morning, I came to realize that I wasn't interested in going into business again. I
 wasn't interested in scrapping my project either, which realization led to the decision
-to distribute StoryBuilder as free and open source software (FOSS.)
+to distribute StoryCAD as free and open source software (FOSS.)
 
 I'm pleased with how it's developing and I hope you find it useful.
 
 ## Software Influences
 
-Unless I'm deluding myself, version 2.0 of StoryBuilder is a better program
+Unless I'm deluding myself, version 2.0 of StoryCAD is a better program
 than the original. That's because I know the trick of how to write better
 software: You shamelessly shamelessly good ideas and code patterns from other developers.
 Five individuals and their work deserve mention for this reason.
@@ -69,7 +69,7 @@ Perigrin66, Pergrine's View, StaffManager
 http://peregrinesview.uk/mvvm-bringing-it-all-together/
 
 The navigation tree and details panel design is very old; it was one of the early driving
-forces in the creation of C++. StoryBuilder V1 used it (poorly.) When StoryBuilder V2
+forces in the creation of C++. StoryCAD V1 used it (poorly.) When StoryCAD V2
 was just a vague idea, this small project suggested a way forward.
 
 Diederik Krols, XAML Brewer, Using a TreeView Control for Navigation in UWP

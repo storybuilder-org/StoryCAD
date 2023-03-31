@@ -1,9 +1,9 @@
 ## Defining Problems ##
 Defining Problems <br/>
 
-In StoryBuilder the Problem form is the key to creating an outline. You want to motivate your audience to keep reading or viewing your story, and Problems create suspense and tension through uncertain outcomes.  <br/>
+In StoryCAD the Problem form is the key to creating an outline. You want to motivate your audience to keep reading or viewing your story, and Problems create suspense and tension through uncertain outcomes.  <br/>
 
-StoryBuilder’s Problem form is based on three  elements: Goal, Motivation, and Conflict, and is based on the book GMC: Goal, Motivation, and Conflict by Debra Dixon. The goal is what your character wants, the motivation is why they want it, and the conflict is what they’ll have to overcome to achieve the goal. Both your Protagonist and your Antagonist have their goals and motivations, and generally they are each other’s conflicts. <br/>
+StoryCAD’s Problem form is based on three  elements: Goal, Motivation, and Conflict, and is based on the book GMC: Goal, Motivation, and Conflict by Debra Dixon. The goal is what your character wants, the motivation is why they want it, and the conflict is what they’ll have to overcome to achieve the goal. Both your Protagonist and your Antagonist have their goals and motivations, and generally they are each other’s conflicts. <br/>
 What makes GMC interesting is that it deals with the intersection of character and plot. The literature of the craft of writing often discusses the need for strong characters and of the need for good plots. GMC ties them together. Plot is the character's attempt to overcome the opposition and achieve the goal. The Problem form links to the problem’s protagonist and antagonist, which you must have defined as Character story elements. This leads you further down the wormhole towards fully developing your outline. <br/>
 The Problem form’s tie to Character forms supports various approaches to story creation. You may start from an idea, concept or situation, and think of your problems more in terms of the events that must unfold (plot-oriented), or you may start from the conception of a character, and find that character’s problem. Your story needs both a plot and characters, and centering on your outline’s Problems can give you both. <br/>
 Problems server a variety of roles in a story: <br/>
@@ -18,7 +18,7 @@ An outer problem is the character's struggle to achieve some physical goal--- to
 
 An inner problem is some want or need within the character himself, a need to grow or change.  This problem may be some character flaw or psychological hurdle to overcome.  It may be the real reason why the character pursues his external goal, even though the superficial reason he gives is quite different.  The character frequently doesn't know that he has an inner problem at the start of the story, and sometimes, in tragic endings, refuses to acknowledge or resolve the inner problem. <br/>
 
-It's often constructive to use StoryBuilder to define both an external and an internal problem for your protagonist, with separate Problem forms for each  of them. Both problems help to shape the story's plot. There’s even a Create New Story template for this: <br/>
+It's often constructive to use StoryCAD to define both an external and an internal problem for your protagonist, with separate Problem forms for each  of them. Both problems help to shape the story's plot. There’s even a Create New Story template for this: <br/>
 
 ![](Clipboard-Image-145.png)
 
@@ -81,7 +81,7 @@ The role of Protagonist is not about good or bad; it’s about ‘Whose story is
 
 It’s important to understand that your Antagonist has his own Goal and Motivation, and his own Conflict: his opposition is your Protagonist. It’s been said that no man is a villain in his own eyes. That may or may not be true, but he will certainly have his reasons for his behavior, even if they’re rooted in abnormal psychiatry.  Of But a villain’s motive may be more relatable, rooted in greed, humiliation, pride, anger, or heartache.  A common characteristic of villains is that they’re in over their head: a small mistake grows larger over time. <br/>
 
-StoryBuilder includes a tool, Conflict Builder, which describers conflicts into categories and examples from the world of conflict resolution that go beyond creating a cardboard ‘bad guy’ adversary. <br/>
+StoryCAD includes a tool, Conflict Builder, which describers conflicts into categories and examples from the world of conflict resolution that go beyond creating a cardboard ‘bad guy’ adversary. <br/>
 Resolution Tab <br/>
 
 The resolution is the outcome of the problem. Outcomes can be generalized into 'successful' or 'not successful', but the choices listed for this story element are more useful.  They represent story patterns which recur throughout fiction. <br/>

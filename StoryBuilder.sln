@@ -5,16 +5,16 @@ VisualStudioVersion = 17.0.31825.309
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NRtfTree", "NRtfTree\NRtfTree.csproj", "{3038398B-A7A2-41BF-9FCC-0A8D12181AA3}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StoryBuilderLib", "StoryBuilderLib\StoryBuilderLib.csproj", "{BBC53610-1C2F-4137-AAB3-DDA496D8F105}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StoryCADLib", "StoryCADLib\StoryCADLib.csproj", "{BBC53610-1C2F-4137-AAB3-DDA496D8F105}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StoryBuilder", "StoryBuilder\StoryBuilder.csproj", "{BC359F5C-E784-4FD5-80E5-63A6A0FB853C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StoryCAD", "StoryCAD\StoryCAD.csproj", "{BC359F5C-E784-4FD5-80E5-63A6A0FB853C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{10629CB1-BAB9-4F98-9359-0E89CD116847}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StoryBuilderTests", "StoryBuilderTests\StoryBuilderTests.csproj", "{8B5321B8-95AA-4DFA-B238-04AD74B79707}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StoryCADTests", "StoryCADTests\StoryCADTests.csproj", "{8B5321B8-95AA-4DFA-B238-04AD74B79707}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

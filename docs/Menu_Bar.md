@@ -1,7 +1,7 @@
 ### Menu Bar ###
 Menu Bar <br/>
 
-The Menu bar is located just below the title bar on the StoryBuilder form and provides access to StoryBuilder’s common tasks. <br/>
+The Menu bar is located just below the title bar on the StoryCAD form and provides access to StoryCAD’s common tasks. <br/>
 
 Clicking the See more (...) button will display labels below each menu button: <br/>
 

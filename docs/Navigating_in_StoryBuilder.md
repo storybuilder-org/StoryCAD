@@ -1,4 +1,4 @@
-## Navigating in StoryBuilder ##
+## Navigating in StoryCAD ##
 [Story Elements](Story_Elements.md) <br/><br/>
 [Navigation Pane Flyout CommandBar](Navigation_Pane_Flyout_CommandBar.md) <br/><br/>
 [Tabs](Tabs.md) <br/><br/>

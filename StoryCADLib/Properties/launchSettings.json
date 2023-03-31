@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "StoryCADLib": {
+      "commandName": "Project",
+      "hotReloadEnabled": false,
+      "nativeDebugging": false
+    }
+  }
+}

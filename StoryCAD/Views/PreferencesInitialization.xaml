@@ -1,0 +1,58 @@
+<Page
+    x:Class="StoryCAD.Views.PreferencesInitialization"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <Frame Name="RootFrame">
+        <ScrollViewer VerticalScrollBarVisibility="Hidden">
+            <Grid HorizontalAlignment="Center">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <StackPanel Grid.Row="0" VerticalAlignment="Center">
+                    <TextBlock Text="Welcome to StoryCAD!" FontSize="30" Padding="12" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    <TextBlock Text="To get started we just need some info and you'll be on your way to create a brilliant story!" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </StackPanel>
+
+                <StackPanel Grid.Row="1" VerticalAlignment="Stretch">
+                    <Border Height="50"/>
+                    <TextBox PlaceholderText="What's your name?" Margin="15" VerticalAlignment="Center" Text="{x:Bind _initVM.Preferences.Name, Mode=TwoWay}"/>
+                    <TextBox PlaceholderText="What's your email address?" IsSpellCheckEnabled="False"  Margin="15" VerticalAlignment="Center"  Text="{x:Bind _initVM.Preferences.Email, Mode=TwoWay}"/>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBox IsReadOnly="true" PlaceholderText="Select a folder to hold your story outlines." Name="ProjPath" Margin="15" VerticalAlignment="Center" Width="435" HorizontalAlignment="Left" Text="{x:Bind _initVM.Preferences.ProjectDirectory, Mode=TwoWay}"/>
+                        <Button Content="Browse" HorizontalAlignment="Center" Click="SetProjectPath"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBox IsReadOnly="True" PlaceholderText="Select a folder to hold your outline backups." Name="BackPath" Margin="15" VerticalAlignment="Center" Width="435" HorizontalAlignment="Left" Text="{x:Bind _initVM.Preferences.BackupDirectory, Mode=TwoWay}"/>
+                        <Button Content="Browse" HorizontalAlignment="Center" Click="SetBackupPath"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <StackPanel Grid.Row="2">
+                    <CheckBox IsChecked="{x:Bind _initVM.Preferences.ErrorCollectionConsent, Mode=TwoWay}" Content="Send error logs to Team StoryCAD (Does not contain any personal information.)" VerticalAlignment="Bottom" Margin="5"/>
+                    <CheckBox IsChecked="{x:Bind _initVM.Preferences.Newsletter, Mode=TwoWay}" Content="Send me newsletters about StoryCAD" VerticalAlignment="Bottom" Margin="5"/>
+                </StackPanel>
+                <TextBlock Text="{x:Bind _initVM.ErrorMessage, Mode=TwoWay}" Foreground="Red" Grid.Row="3" HorizontalAlignment="Center"/>
+                <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Center">
+                    <Button Content="Continue" Margin="25" HorizontalAlignment="Center" Click="Check"/>
+                    <Button Content="Join our community discord!" Background="#5865F2" Foreground="White"  Margin="25" HorizontalAlignment="Center" Click="Discord"/>
+                </StackPanel>
+
+                <!--Target on the button but it causes a crash.-->
+                <TeachingTip Title="First time using StoryCAD?" PreferredPlacement="BottomLeft" PlacementMargin="10" IsOpen="True" IsLightDismissEnabled="False" CloseButtonContent="Not now">
+                    <TextBlock TextWrapping="WrapWholeWords" Margin="0,5,0,0">Why not check out the <Hyperlink NavigateUri="https://StoryCAD-org.github.io/StoryCAD-2/Quick_Start.html">Quick start guide?</Hyperlink>
+                    You can view the manual by clicking the ? icon.</TextBlock>
+                </TeachingTip>
+            </Grid>
+        </ScrollViewer>
+    </Frame>
+</Page>

@@ -11,7 +11,7 @@ jobs:
     runs-on: windows-latest
 
     env:
-      Solution_Name: StoryBuilder.sln
+      Solution_Name: StoryCAD.sln
 
     steps:
     - name: Download Repository
@@ -48,9 +48,9 @@ jobs:
         Write-Verbose "Version: $NewVersion"
         $AssemblyVersion = $NewVersion
         $ManifestVersion = " Version=""$NewVersion"""
-        $filecontent = Get-Content("D:\a\StoryBuilder-2\StoryBuilder-2\StoryBuilder\Package.appxmanifest")
+        $filecontent = Get-Content("D:\a\StoryCAD-2\StoryCAD-2\StoryCAD\Package.appxmanifest")
         attrib $file -r
-        $filecontent -replace $ManifestVersionRegex, $ManifestVersion | Out-File "D:\a\StoryBuilder-2\StoryBuilder-2\StoryBuilder\Package.appxmanifest" utf8
+        $filecontent -replace $ManifestVersionRegex, $ManifestVersion | Out-File "D:\a\StoryCAD-2\StoryCAD-2\StoryCAD\Package.appxmanifest" utf8
         
     # Restore the application to populate the obj folder with RuntimeIdentifiers
     - name: Restore the application
@@ -60,10 +60,10 @@ jobs:
       env:
         Configuration: ${{ matrix.configuration }}
     
-    - name: Restore StoryBuilder Tests
+    - name: Restore StoryCAD Tests
       run: |
-        msbuild StoryBuilderTests\StoryBuilderTests.csproj /t:Restore /p:Configuration=Release
-        msbuild StoryBuilderTests\StoryBuilderTests.csproj /t:Restore /p:Configuration=Debug
+        msbuild StoryCADTests\StoryCADTests.csproj /t:Restore /p:Configuration=Release
+        msbuild StoryCADTests\StoryCADTests.csproj /t:Restore /p:Configuration=Debug
 
     # Decode the base 64 encoded pfx and save the Signing_Certificate
     - name: Decode the pfx
@@ -71,14 +71,14 @@ jobs:
         $pfx_cert_byte = [System.Convert]::FromBase64String("${{ secrets.BASE64_ENCODED_PFX }}")
         $certificatePath = "GitHubActionsWorkflow.pfx"
         [IO.File]::WriteAllBytes("$certificatePath", $pfx_cert_byte)
-        [IO.File]::WriteAllText("D:\a\StoryBuilder-2\StoryBuilder-2\StoryBuilder\.env", "${{ secrets.ENV }}")
+        [IO.File]::WriteAllText("D:\a\StoryCAD-2\StoryCAD-2\StoryCAD\.env", "${{ secrets.ENV }}")
         
     # Create the app package by building and packaging the project
     - name: Create the MSIX
       run: |
-        msbuild $env:Solution_Name /p:Configuration=Release /p:Platform=x64 /p:UapAppxPackageBuildMode=$env:Appx_Package_Build_Mode /p:AppxBundle=$env:Appx_Bundle /p:PackageCertificateKeyFile="D:\a\StoryBuilder-2\StoryBuilder-2\GitHubActionsWorkflow.pfx" /p:AppxPackageDir="$env:Appx_Package_Dir" /p:GenerateAppxPackageOnBuild=true
-        msbuild $env:Solution_Name /p:Configuration=Release /p:Platform=x86 /p:UapAppxPackageBuildMode=$env:Appx_Package_Build_Mode /p:AppxBundle=$env:Appx_Bundle /p:PackageCertificateKeyFile="D:\a\StoryBuilder-2\StoryBuilder-2\GitHubActionsWorkflow.pfx" /p:AppxPackageDir="$env:Appx_Package_Dir" /p:GenerateAppxPackageOnBuild=true
-        msbuild $env:Solution_Name /p:Configuration=Release /p:Platform=arm64 /p:UapAppxPackageBuildMode=$env:Appx_Package_Build_Mode /p:AppxBundle=$env:Appx_Bundle /p:PackageCertificateKeyFile="D:\a\StoryBuilder-2\StoryBuilder-2\GitHubActionsWorkflow.pfx" /p:AppxPackageDir="$env:Appx_Package_Dir" /p:GenerateAppxPackageOnBuild=true
+        msbuild $env:Solution_Name /p:Configuration=Release /p:Platform=x64 /p:UapAppxPackageBuildMode=$env:Appx_Package_Build_Mode /p:AppxBundle=$env:Appx_Bundle /p:PackageCertificateKeyFile="D:\a\StoryCAD-2\StoryCAD-2\GitHubActionsWorkflow.pfx" /p:AppxPackageDir="$env:Appx_Package_Dir" /p:GenerateAppxPackageOnBuild=true
+        msbuild $env:Solution_Name /p:Configuration=Release /p:Platform=x86 /p:UapAppxPackageBuildMode=$env:Appx_Package_Build_Mode /p:AppxBundle=$env:Appx_Bundle /p:PackageCertificateKeyFile="D:\a\StoryCAD-2\StoryCAD-2\GitHubActionsWorkflow.pfx" /p:AppxPackageDir="$env:Appx_Package_Dir" /p:GenerateAppxPackageOnBuild=true
+        msbuild $env:Solution_Name /p:Configuration=Release /p:Platform=arm64 /p:UapAppxPackageBuildMode=$env:Appx_Package_Build_Mode /p:AppxBundle=$env:Appx_Bundle /p:PackageCertificateKeyFile="D:\a\StoryCAD-2\StoryCAD-2\GitHubActionsWorkflow.pfx" /p:AppxPackageDir="$env:Appx_Package_Dir" /p:GenerateAppxPackageOnBuild=true
       env:
         Appx_Bundle: Never
         Appx_Package_Build_Mode: SideloadOnly
@@ -92,34 +92,34 @@ jobs:
         Remove-Item -path GitHubActionsWorkflow.pfx
       
     - name: Clean MSIXs
-      run: 'D:\a\StoryBuilder-2\StoryBuilder-2\.github\workflows\MSIXCleaner.exe "D:\a\StoryBuilder-2\StoryBuilder-2\StoryBuilder\Packages\"'
+      run: 'D:\a\StoryCAD-2\StoryCAD-2\.github\workflows\MSIXCleaner.exe "D:\a\StoryCAD-2\StoryCAD-2\StoryCAD\Packages\"'
 
     - name: Write help file
       run: |
-        "Hello, Thank you for using StoryBuilder Release ${{ github.event.inputs.VersionNumber }} 
-        1) Open StoryBuilder.cer, this should bring up the certificate import wizard
+        "Hello, Thank you for using StoryCAD Release ${{ github.event.inputs.VersionNumber }} 
+        1) Open StoryCAD.cer, this should bring up the certificate import wizard
         2) Press install certificate, and change store location to Local Machine, then press next
         3) Change the option to Place All Certificates in the following store and click browse
         4) Select Trusted People and press OK and then press finish
         Now you will want to open the msix folder and select the configuration you want, 
-        if you don't know what configuration to pick then we recommend StoryBuilder Release x64.msix.
+        if you don't know what configuration to pick then we recommend StoryCAD Release x64.msix.
         
         See what's changed here:
-        https://github.com/storybuilder-org/StoryBuilder-2/releases/tag/${{ github.event.inputs.VersionNumber }}" | Out-File -FilePath "D:\a\StoryBuilder-2\StoryBuilder-2\StoryBuilder\Packages\Install Instructions.txt"
+        https://github.com/StoryCAD-org/StoryCAD-2/releases/tag/${{ github.event.inputs.VersionNumber }}" | Out-File -FilePath "D:\a\StoryCAD-2\StoryCAD-2\StoryCAD\Packages\Install Instructions.txt"
     
     - name: Archive Release
       uses: thedoctor0/zip-release@master
       with:
         type: 'zip'
         filename: 'Release.zip'
-        path: D:\a\StoryBuilder-2\StoryBuilder-2\StoryBuilder\Packages\
+        path: D:\a\StoryCAD-2\StoryCAD-2\StoryCAD\Packages\
 
     # Upload the MSIX package: https://github.com/marketplace/actions/upload-a-build-artifact
     - name: Upload MSIX package
       uses: actions/upload-artifact@v3
       with:
-        name: StoryBuilder
-        path: D:\a\StoryBuilder-2\StoryBuilder-2\StoryBuilder\Packages\*
+        name: StoryCAD
+        path: D:\a\StoryCAD-2\StoryCAD-2\StoryCAD\Packages\*
      
     - name: Create new tag
       uses: simpleactions/create-tag@v1.0.0
@@ -130,8 +130,8 @@ jobs:
   
     - name: Release Warm up
       run: |
-          Test-Path D:\a\StoryBuilder-2\StoryBuilder-2\StoryBuilder\Packages\Release.zip
-          cd D:\a\StoryBuilder-2\StoryBuilder-2\StoryBuilder\Packages\
+          Test-Path D:\a\StoryCAD-2\StoryCAD-2\StoryCAD\Packages\Release.zip
+          cd D:\a\StoryCAD-2\StoryCAD-2\StoryCAD\Packages\
 
     - name: Create Release
       uses: softprops/action-gh-release@v1
