@@ -1,15 +1,6 @@
-﻿
-// The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
+﻿namespace StoryCAD.Views;
 
-namespace StoryCAD.Views;
-
-/// <summary>
-/// An empty page that can be used on its own or navigated to within a Frame.
-/// </summary>
-public sealed partial class HomePage : BindablePage
+public sealed partial class HomePage
 {
-    public HomePage()
-    {
-        InitializeComponent();
-    }
+    public HomePage() { InitializeComponent(); }
 }
