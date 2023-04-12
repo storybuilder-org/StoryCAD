@@ -49,7 +49,7 @@
 
                 <!--Target on the button but it causes a crash.-->
                 <TeachingTip Title="First time using StoryCAD?" PreferredPlacement="BottomLeft" PlacementMargin="10" IsOpen="True" IsLightDismissEnabled="False" CloseButtonContent="Not now">
-                    <TextBlock TextWrapping="WrapWholeWords" Margin="0,5,0,0">Why not check out the <Hyperlink NavigateUri="https://StoryCAD-org.github.io/StoryCAD-2/Quick_Start.html">Quick start guide?</Hyperlink>
+                    <TextBlock TextWrapping="WrapWholeWords" Margin="0,5,0,0">Why not check out the <Hyperlink NavigateUri="https://storybuilder-org.github.io/StoryCAD-2/Quick_Start.html">Quick start guide?</Hyperlink>
                     You can view the manual by clicking the ? icon.</TextBlock>
                 </TeachingTip>
             </Grid>

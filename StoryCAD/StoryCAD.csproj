@@ -19,8 +19,8 @@
 		<AppxBundle>Auto</AppxBundle>
 		<AppInstallerUri>C:\msixs\</AppInstallerUri>
 		<HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
-		<AppxPackageDir>C:\Users\Rarisma\Desktop\TheHandOfHarshReality%27sUngloved\</AppxPackageDir>
-		<AppxBundlePlatforms>x64</AppxBundlePlatforms>
+		<AppxPackageDir>C:\Users\Rarisma\Desktop\SculpturesOfAnythingGoes\</AppxPackageDir>
+		<AppxBundlePlatforms>x86|x64</AppxBundlePlatforms>
 		<RunAnalyzersDuringLiveAnalysis>False</RunAnalyzersDuringLiveAnalysis>
 		<RunAnalyzersDuringBuild>False</RunAnalyzersDuringBuild>
 		<PackageCertificateKeyFile>StoryCAD_TemporaryKey.pfx</PackageCertificateKeyFile>
@@ -28,7 +28,6 @@
 
 	<ItemGroup>
 		<Content Include="Assets\SplashScreen.scale-200.png" />
-		<Content Include="Assets\LockScreenLogo.scale-200.png" />
 		<Content Include="Assets\Square150x150Logo.scale-200.png" />
 		<Content Include="Assets\Square44x44Logo.scale-200.png" />
 		<Content Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png" />
@@ -63,7 +62,12 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Content Remove="Assets\BadgeLogo.scale-400.png" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<None Remove="Assets\HomeLogo.png" />
+		<None Remove="Assets\Logo.png" />
 		<None Remove="Views\PreferencesInitialization.xaml" />
 		<None Remove="Views\WebPage.xaml" />
 	</ItemGroup>

@@ -49,7 +49,7 @@
                     <TextBlock Name="Version" HorizontalAlignment="Center" Margin="5,0,0,20"/>
                     <Button Content="Open Logs folder" HorizontalAlignment="Center" Click="OpenLogFolder" Margin="20" Width="200"/>
                     <HyperlinkButton Content="Join the StoryCAD Discord!" HorizontalAlignment="Center" NavigateUri="" Margin="20"/>
-                    <HyperlinkButton Content="StoryCAD was created by Terry Cox, Jake Shaw and Contributors"  HorizontalAlignment="Center" NavigateUri="https://github.com/StoryCAD-org/StoryCAD-2/graphs/contributors" Margin="5" FontSize="13"/>
+                    <HyperlinkButton Content="StoryCAD was created by Terry Cox, Jake Shaw and Contributors"  HorizontalAlignment="Center" NavigateUri="https://github.com/StoryBuilder-org/StoryCAD/graphs/contributors" Margin="5" FontSize="13"/>
                 </StackPanel>
             </PivotItem>
             <PivotItem Header="What's new">

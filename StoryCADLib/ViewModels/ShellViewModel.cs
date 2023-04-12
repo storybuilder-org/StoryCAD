@@ -1317,7 +1317,7 @@ public class ShellViewModel : ObservableRecipient
 
         ProcessStartInfo _psi = new()
         {
-            FileName = @"https://StoryCAD-org.github.io/StoryCAD-2/",
+            FileName = @"https://Storybuilder-org.github.io/StoryCAD/",
             UseShellExecute = true
         };
         Process.Start(_psi);

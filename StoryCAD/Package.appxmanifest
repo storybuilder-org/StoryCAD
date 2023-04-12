@@ -9,7 +9,7 @@
   <Identity
     Name="34432StoryCAD.StoryCAD"
     Publisher="CN=Jake"
-    Version="2.8.0.0" />
+    Version="2.10.0.0" />
 
   <Properties>
     <DisplayName>StoryCAD</DisplayName>
@@ -39,6 +39,7 @@
         Square44x44Logo="Assets\Square44x44Logo.png">
         <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png"  Square71x71Logo="Assets\SmallTile.png" Square310x310Logo="Assets\LargeTile.png"/>
         <uap:SplashScreen Image="Assets\SplashScreen.png" />
+        <uap:LockScreen BadgeLogo="Assets\BadgeLogo.png" Notification="badge"/>
       </uap:VisualElements>
       <Extensions>
         <uap:Extension Category="windows.fileTypeAssociation">
