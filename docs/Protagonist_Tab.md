@@ -19,7 +19,7 @@ Motivation is closely tied to character--- it could be thought of as the place w
 
 The list of provided motivations is not meant to be exhaustive, but covers many of those found in literature. <br/>
 
-As with many other controls, you can modify the motivations listed to suit your own needs and interests.  See "Customizing StoryBuilder" for details. <br/>
+As with many other controls, you can modify the motivations listed to suit your own needs and interests.  See "Customizing StoryCAD" for details. <br/>
 
 Goal <br/>
 

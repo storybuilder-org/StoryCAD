@@ -8,7 +8,7 @@ Plots tend to include the same story elements.  Aristotle was the first to ident
 
 The same story forms also repeat themselves in fiction: stories of adventure, discovery, pursuit, etc.  Stories based upon one or more of these forms will tend to repeat certain story elements. <br/>
 
-StoryBuilder's Master Plots tool helps you shape your story's plot based on suggestions from these two sources. <br/>
+StoryCAD's Master Plots tool helps you shape your story's plot based on suggestions from these two sources. <br/>
 
 The Master Plots tool is invoked from the Plotting Aids sub-menu of the Tools menu.  It provides a list of plot skeletons, or master plots.  Selecting one of the master plots from the list at the top of the form will display  notes relevant to that master plot.  <br/>
 
@@ -16,5 +16,5 @@ The first few master plots (Three Act Play, W-Diagram,  and Hero's Journey) are 
 
 Ronald Tobias' excellent book 20 Master Plots (And How to Build Them) is a detailed look at the fundamental plots which recur through all fiction. <br/>
 
-The master plots can be changed according to your preferences.  See "Customizing  Storybuilder" for details on how to add, delete, or modify the listed items. <br/>
+
 

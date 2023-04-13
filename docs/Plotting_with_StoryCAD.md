@@ -1,10 +1,10 @@
-## Plotting with StoryBuilder ##
-Using StoryBuilder to Plot Your Story <br/>
+## Plotting with StoryCAD ##
+Using StoryCAD to Plot Your Story <br/>
 
 
 Storytelling with Purpose <br/>
 
-A story is written as a sequence of scenes (in StoryBuilder, Scene story elements.) A scene is an event, and the events are causally related: one event causes, and leads to, the next. For example: <br/>
+A story is written as a sequence of scenes (in StoryCAD, Scene story elements.) A scene is an event, and the events are causally related: one event causes, and leads to, the next. For example: <br/>
 
 The Queen is told by her mirror that Show White is now the fairest in the land,  <br/>
 so she orders her huntsman to murder Show White and bring her the child’s heart,                      <br/>
@@ -28,20 +28,20 @@ How do you go about finding those 50-60  (or however many you need) scenes?   <b
 
 Don’t think in terms of scene count. Think of plotting as finding the scenes you need to resolve your story’s problems.  If you’ve been following this dialog, you know that you  have a top-level problem, the Story Problem, defined on the Story Overview form, and you’ve summarized the problem in its Premise: <br/>
 
-![](Plotting-with-StoryBuilder-Premise.png)
+![](Plotting-with-StoryCAD-Premise.png)
  When that problem is resolved, the story is finished. This is the top level design of your story. <br/>
 
 If you were to use Master Plots to create of Scene story elements for the plot points in this problem with the Three Act Structure template, it might look like this: <br/>
 
-![](Plotting-with-StoryBuilder-Story-Problem-MasterPlots-Scene-list.png)
+![](Plotting-with-StoryCAD-Story-Problem-MasterPlots-Scene-list.png)
 
 This is what plotting the main Story Problem might look like if it were, say, a short story. But it’s longer story (a Novella, in this case), and there aren’t enough scenes to carry the longer work. So instead of thinking of each part as  a scene, consider it just as a story beat or plot point. Ignoring the other plot points, consider First Obstacle and Subsequent Obstacles not as Scenes but as Problems= subproblems, Complications, in this case): <br/>
 
-![](Plotting-with-StoryBuilder-Complication-SubProblems.png)
+![](Plotting-with-StoryCAD-Complication-SubProblems.png)
 
 In real life one strategy to solve a problem is to decompose it into smaller problems. That same approach works when plotting, the twist being that you’ll be creating rather than solving subproblems. Don’t plot in Scenes;  plot in Problems. These problems can be further decomposed into scenes: <br/>
 
-![](Plotting-with-StoryBuilder-SubProblems-Epanded-into-Scenes.png)
+![](Plotting-with-StoryCAD-SubProblems-Epanded-into-Scenes.png)
 
 This process works not only with complications (subplots with bad outcomes which are designed to increase the conflict), but with other subplots. In The Old Man and the Sea, Manolin, the boy Santiago mentored and who loves him, has a character arc based on his relationship with the old man: <br/>
 

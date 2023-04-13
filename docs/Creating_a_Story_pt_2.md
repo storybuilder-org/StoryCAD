@@ -1,7 +1,7 @@
 ## Creating a Story pt 2 ##
-After a break, we decide to continue refining our story idea.  You need to reload the "Danger Calls" outline. Launch StoryBuilder.  <br/>
+After a break, we decide to continue refining our story idea.  You need to reload the "Danger Calls" outline. Launch StoryCAD.  <br/>
 
- StoryBuilder displays the File Open menu by default when launched,  and displays the last files you worked on the menu form. You can mouse over any of these files to see more details (like the file location.) If you haven’t edited the story you’re looking for in a while and it’s not on the list, Click the ‘Open story from disk’ button and browse for it. You can work on multiple story outlines in one StoryBuilder session, but StoryBuilder can only work with one story outline at a time.  <br/>
+ StoryCAD displays the File Open menu by default when launched,  and displays the last files you worked on the menu form. You can mouse over any of these files to see more details (like the file location.) If you haven’t edited the story you’re looking for in a while and it’s not on the list, Click the ‘Open story from disk’ button and browse for it. You can work on multiple story outlines in one StoryCAD session, but StoryCAD can only work with one story outline at a time.  <br/>
 
 At this point we've recorded the initial story idea.  However, there's a great gulf between a story idea and a finished story.  At rare intervals, a story idea may spring forth so complete and well formed that it practically writes itself.  Most ideas, though, are fragments--- a scene, a character, a situation (like this one), an ending, or something else.  The next step is to convert this fragment, this idea, into a concept. <br/>
 
@@ -12,7 +12,7 @@ Click on the Concept tab on your Story Overview and you’ll see this: <br/>
 ![](Tutorial-2-Concept-Tooltip.png)
 
 
-The note displayed is called a ToolTIp, and you’ll find many of these in StoryBuilder. It will be replaced with your text as soon as you start keying into the text box. <br/>
+The note displayed is called a ToolTIp, and you’ll find many of these in StoryCAD. It will be replaced with your text as soon as you start keying into the text box. <br/>
 
 Writing is thinking, and asking questions is at the core of critical thinking. Think of your concept as framed in the form of a question (or questions). The answer to that question is your story. If the question implies conflict, it’s a potentially effective story.  <br/>
 
@@ -27,7 +27,7 @@ For the “Danger Calls” concept, let’s use this: <br/>
 
 One nice thing about a question is that it can be refined by subsequent questions. A concept question often leads to other questions; The term ‘high concept’ is often used to describe a concept that will appeal to a wide audience, and is often a concept with broad possibilities. The da Vinci Code is an outstanding example of this. <br/>
 
-But questions can also be used to refine and test concepts and many other store elements. StoryBuilder contains a tool, Key Questions, for just  this purpose.  <br/>
+But questions can also be used to refine and test concepts and many other store elements. StoryCAD contains a tool, Key Questions, for just  this purpose.  <br/>
 
 Launch Key Questions from the Tool menu (use the wrench icon on the Menu Bar.) With Story Overview selected in the ComboBox, click Next Question until you find the first Concept question: <br/>
 
@@ -54,7 +54,7 @@ We can also add a second character, the bad guy, the same way:  <br/>
 
 You can set him as the Antagonist. <br/>
 
-Notice that the list of roles doesn’t have an entry for Drug Dealer, so this was just keyed in. Most StoryBuilder controls have lists of possible entries, but these lists are intended to be suggestions, not limitations. You can key whatever you want into most of these fields. <br/>
+Notice that the list of roles doesn’t have an entry for Drug Dealer, so this was just keyed in. Most StoryCAD controls have lists of possible entries, but these lists are intended to be suggestions, not limitations. You can key whatever you want into most of these fields. <br/>
 
 While we’re at it, let’s add a third character, another detective who’s a partner to Leonard. We’ll give him the name Tony Irwin. <br/>
 

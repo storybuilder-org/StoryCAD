@@ -7,8 +7,8 @@ If you use Scrivener, clicking Scrivener Reports will open a file picker to allo
 
 When the reports are done:    MISSING IMAGE: C:/dev/src/User Manual/Screenshots/Scrivener Reports Generated Status Message.png  you can open your Scrivener project. You’ll see a set of nodes added to the Binder, which contain your reports: <br/>
 
-![](Scrivener-Binder-with-StoryBuilder-Outline.png)
+![](Scrivener-Binder-with-StoryCAD-Outline.png)
 
 A convenient way to use these embedded reports is to split your screen, with one pane open to a text node in the Manuscript and the other to a node in the outline: <br/>
 
-![](Scrivener-Split-Screen-with-StoryBuilder.png)
+![](Scrivener-Split-Screen-with-StoryCAD.png)

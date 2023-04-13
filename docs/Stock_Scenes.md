@@ -9,5 +9,5 @@ While your plot and story should be as distinct and original as you can make it,
 
 Selecting one of the categories will result in the display of a form listing some stock scenes in that category.  Selecting one or more of these scenes, and clicking on the Copy control, will cause a scene to be added to the plot, immediately after the current scene, with the stock scene's title as the scene summary. <br/>
 
-Stock Scenes can be tailored to display any sub-menus of stock scenes you wish.  You can modify the contents of the exiting sub-menus, or add or replace sub-menus.  See "Customizing StoryBuilder" for more details. <br/>
+Stock Scenes can be tailored to display any sub-menus of stock scenes you wish.  You can modify the contents of the exiting sub-menus, or add or replace sub-menus.  See "Customizing StoryCAD" for more details. <br/>
 

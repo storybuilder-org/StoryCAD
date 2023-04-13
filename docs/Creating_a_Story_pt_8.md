@@ -1,5 +1,5 @@
 ## Creating a Story pt 8 ##
-Having developed the characters better, we can return to the plot.  So far we have a skeleton plot, created with the Master Plots tool, and have added a couple of specific scenes, an opening scene and a climax. Our goal is to replace the rest of the skeleton plot points with specific scenes, not in count but in content and shape. Having a beginning and an ending is a good start. Every story is a journey. Of course, you're not bound to follow the skeleton, but our goal here is to illustrate StoryBuilder's tools.   <br/>
+Having developed the characters better, we can return to the plot.  So far we have a skeleton plot, created with the Master Plots tool, and have added a couple of specific scenes, an opening scene and a climax. Our goal is to replace the rest of the skeleton plot points with specific scenes, not in count but in content and shape. Having a beginning and an ending is a good start. Every story is a journey. Of course, you're not bound to follow the skeleton, but our goal here is to illustrate StoryCAD's tools.   <br/>
 
 Let’s return to our opening scene (‘He’s like a ghost’) for a moment. .  Both scenes and problems are miniature stories in their own right. The Scene form contains several tabs, Development and Conflict, that address what might be called ‘intra-scene plotting.’  Here’s the use of the Development tab: <br/>
 
@@ -22,7 +22,7 @@ There are other tools to help you plot- for example, Stock Scenes: <br/>
 Stock Scenes are exactly what their name implies: scenes that you’ve seen so often you recognize them instantly.   We used ‘The chase leads into an ambush’ as the setup to our ‘Leonard's impulsiveness lets Lacas capture him’ problem. <br/>
 We didn’t call it that, of course, and in fact the capture idea we started with didn’t work: capture implies escape, and it just didn’t fit. Instead, our ‘The chase leads into an ambush became this: <br/>
 
-![](Danger-Calls-Shootout-2.png)
+![](Danger-Calls-Shootout-5.png)
 
 Although the Scene Type we selected was ‘Action scene’, this is actually the Climax. If we go back to our Master Plots Three Act Play, we’ll find one more piece: <br/>
 
@@ -32,5 +32,5 @@ We’ve added two scenes after Shootout, ‘Tony updates Leonard on the aftermat
 
 These changes, in the climax scene, Shootout, and a better understanding of the second sub-problem, are typical of what occurs when you’re plotting in scenes. Your story, whether a novel or a short story or an episodic television script, is a series of events which are process the problems your protagonist is trying to solve, and which are linked by cause and effect. Understanding your problems, and using story structure, are the workflow that drives your plotting process. <br/>
 
-Danger Calls is melodramatic and its characters aren’t as well drawn as they should be, but this exercise has been meant to show how an idea can evolve via a repeatable process into a workable story outline, and how StoryBuilder can help you do that. The following section of the manual, Writing with StoryBuilder, elaborates on this process, but the best way to learn is to do, making your own mistakes and solving your own problems. We hope StoryBuilder helps you in your writing journey. <br/>
+Danger Calls is melodramatic and its characters aren’t as well drawn as they should be, but this exercise has been meant to show how an idea can evolve via a repeatable process into a workable story outline, and how StoryCAD can help you do that. The following section of the manual, Writing with StoryCAD, elaborates on this process, but the best way to learn is to do, making your own mistakes and solving your own problems. We hope StoryCAD helps you in your writing journey. <br/>
 

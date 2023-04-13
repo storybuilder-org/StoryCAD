@@ -1,7 +1,7 @@
 ## Problem and Character  Development ##
 Problem and Character Development <br/>
 
-A StoryBuilder outline ‘begins’ on the Story Overview form, but as you’ve seen, it really starts with the selection of the Story Problem and its description in its Premise, whose definition could be condensed to ‘a character with a problem.’  <br/>
+A StoryCAD outline ‘begins’ on the Story Overview form, but as you’ve seen, it really starts with the selection of the Story Problem and its description in its Premise, whose definition could be condensed to ‘a character with a problem.’  <br/>
 
 How you approach these depends on the particular story, but also upon your own personality and style. You may be more character-driven, and need to understand your character’s journey to make sense of your story. Or perhaps you’re more driven by abstractions- ideas, concepts, situations and events.  Perhaps you’re comfortable with both. One isn’t better than the other, and you need both in order to complete your outline. <br/>
 

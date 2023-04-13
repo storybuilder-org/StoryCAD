@@ -18,7 +18,7 @@ Story Idea <br/>
 
 Every story starts with an idea. The idea might come from anywhere.  A conversation might lead to a bit of dialog; someone you see in a crowd could suggest an interesting character; a newspaper article or story you're read or movie you've seen might spark an idea for a conflict.  You’ll have more ideas than you can possibly write about, but regardless of where the idea comes from or how complete it is, at the moment of conception it's all you have, so a good place to start is to capture the idea.  <br/>
 
-Launch StoryBuilder and use Create New Story from the open menu. Change the story’s working title to something similar to its project name and simply jot down whatever notes or thoughts you have regarding the story. <br/>
+Launch StoryCAD and use Create New Story from the open menu. Change the story’s working title to something similar to its project name and simply jot down whatever notes or thoughts you have regarding the story. <br/>
 Idea to Concept <br/>
 A concept is an idea that asks a question that implies conflict.  <br/>
 The answer to that question is what gives you your story, and it often works best if framed as a "what if" question. The Concept question should be the question the reader needs answered- it’s what propells him to read your story. <br/>
@@ -43,7 +43,7 @@ Your Premise is the answer to the question the Concept poses.   <br/>
 
 Your story can have more than one Problem story element, and every Problem has its own Premise, contained on the Resolution tab. But only one of these problems is your Story Problem, and that Problem  (and its Premise) is the one you select on the Story Overview form, Premise tab: <br/>
 
-![](Clipboard-Image-144.png)
+![](Clipboard-Image-207.png)
 
 The heart of plotted fiction is drama--- a struggle in which the outcome is in doubt. Your Story Problem will lead you to understand whose problem it is (your major character), what her or she want (the goal), and what stands in their way (opposition.) The Story Problem is the wormhole you enter to understand your story. <br/>
 
