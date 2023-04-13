@@ -96,10 +96,13 @@ jobs:
     - name: Remove the pfx
       run: |
         Remove-Item -path GitHubActionsWorkflow.pfx
-      
-      #Cleans output and file names
-    #- name: Clean MSIXs
-    #  run: 'D:\a\StoryCAD\StoryCAD\.github\workflows\MSIXCleaner.exe "D:\a\StoryCAD\StoryCAD\StoryCAD\Packages\"'
+
+    - name: debug function [jake remove]
+      run: 'dir D:\a\StoryCAD\StoryCAD\StoryCAD\Packages\'
+
+    #Cleans output and file names
+    - name: Clean MSIXs
+      run: 'D:\a\StoryCAD\StoryCAD\.github\workflows\MSIXCleaner.exe "D:\a\StoryCAD\StoryCAD\StoryCAD\Packages\"'
 
     - name: Write help file
       run: |
