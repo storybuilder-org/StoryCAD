@@ -7,7 +7,7 @@ Your Premise is the answer to the question your concept poses. It’s a summary 
 
 A character in a situation [genre, setting] wants something, which brings him into conflict with a second character [opposition]. After a series of conflicts, which are handicapped by a subplot, and after a plot twist, the final battle erupts, and character one finally resolves the conflict.  <br/>
 
-In StoryBuilder, one story element type, Problem,  contains most of the elements of the Premise, and, in fact, the Problem form’s Resolution tab contains a Premise sub-element. Your story can (and usually will) contain more than one Problem, and every Problem has its own Premise. StoryBuilder is centered around Problems; they’re the heart of plotted fiction. <br/>
+In StoryCAD, one story element type, Problem,  contains most of the elements of the Premise, and, in fact, the Problem form’s Resolution tab contains a Premise sub-element. Your story can (and usually will) contain more than one Problem, and every Problem has its own Premise. StoryCAD is centered around Problems; they’re the heart of plotted fiction. <br/>
 
 Our immediate focus is to identify a specific protagonist with a specific problem. We have a protagonist, Leonard, and we can take a stab at a Problem. Right click on the empty Problems folder and click the ‘Add Problem’ button (the question mark.)  <br/>
 

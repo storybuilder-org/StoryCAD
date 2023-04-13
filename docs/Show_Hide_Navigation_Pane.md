@@ -6,4 +6,4 @@ This button toggles the Navigation Pane to either display or be hidden. Hiding t
 
 ![](Show-and-Hide-Navigation.png)
 
-(Hint: StoryBuilder detects and reports spelling errors on most text fields.) <br/>
+(Hint: StoryCAD detects and reports spelling errors on most text fields.) <br/>

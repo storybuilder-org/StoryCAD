@@ -1,5 +1,5 @@
-## The StoryBuilder User Interface ##
-The StoryBuilder User Interface <br/>
+## The StoryCAD User Interface ##
+The StoryCAD User Interface <br/>
 
 ![](User-Interface.png)
 

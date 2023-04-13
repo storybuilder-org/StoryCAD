@@ -1,10 +1,10 @@
-### StoryBuilder for Pantsers ###
-StoryBuilder for Pantsers <br/>
+### StoryCAD for Pantsers ###
+StoryCAD for Pantsers <br/>
 
 ‘Not all who wander are lost.’ - J.R.R. Tolkien <br/>
 
 
-The section Writing With StoryBuilder begins by asking the question ‘How much should I outline’, and discusses the difference in ‘plotters’ and ‘pantsers.’ It ends as follows: <br/>
+The section Writing With StoryCAD begins by asking the question ‘How much should I outline’, and discusses the difference in ‘plotters’ and ‘pantsers.’ It ends as follows: <br/>
 
 The gap between these two perspectives,  and the answer to the original questions, is to outline as little as possible to get to an effective first draft. The trick is to develop an effective workflow, one that gets you to the writing as quickly and efficiently as possible. <br/>
 
@@ -12,7 +12,7 @@ Before, during, and after  <br/>
 
 If you find yourself solidly in the pantsers’ camp, here are some techniques and tricks  to ‘outline as little as possible’.  <br/>
 
-You can use StoryBuilder before, during, and after you’ve started writing. <br/>
+You can use StoryCAD before, during, and after you’ve started writing. <br/>
 
 If you’re ready to start writing, take a moment and brainstorm a list of scenes. You almost certainly have some in mind. At the start the list doesn’t  have to be exhaustive; it’s unlikely it will be. You can add a scene with	 nothing more a title and perhaps a line or two of Scene Sketch.  If you’ve jumped in and started writing, add the scenes you’ve written. You can always add detail on scenes, most of it on the Scene tab: the setting, who’s in the scene, and a  sketch of what happens. You can also use the Stock Scenes tool to find possible scenes to add to your collection. <br/>
 
