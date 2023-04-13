@@ -3,7 +3,7 @@ Preferences <br/>
 
 The Preferences Dialog will be displayed when you press the Preferences button on the Menu Bar: <br/>
 
-![](Prefences-CommandBar-Button-2.png)
+![](Prefences-CommandBar-Button-5.png)
 
 
 

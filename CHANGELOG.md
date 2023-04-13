@@ -1,5 +1,38 @@
 # StoryCAD ChangeLog
 
+## Release 2.9.0.0
+
+As of April 3rd 2023 we've rolled out Release 2.9.0.0.
+
+Mostly a fix release, the changes include:
+
+### Preferences refactoring (#524)
+
+Code cleanup to standardize use of Preferences data
+throughout the app.
+
+### Enhanced Drag and Drop functionality (#526)
+
+Using your pointing device, you can now move a story node and drop it as a child of any other story node. Fine positioning within the list of children can be done with the move buttons.
+
+### Update Move button methods (#529)
+
+Correct MoveRightIsValid test when CurrentNode is first child of root
+
+Clear StatusMessage at start of all MoveTreeViewItemX methods
+
+### Update project dependencies (#534)
+
+Updated to latest version of WinAppSDK 1.2
+
+### Fix Not Connected message on release versions
+
+The Not Connected message was being displayed on release versions of StoryBuilder. This was due to a change in the way the WebView2 runtime is installed. The WebView2 runtime is now installed as a part of the StoryBuilder installation. 
+
+### Reinforce list loads
+
+Fixed crashes caused by bad copies of lists.ini
+
 ## Release 2.8.0.0
 
 As of March 1st 2023 we are now rolling out 2.8.0.0

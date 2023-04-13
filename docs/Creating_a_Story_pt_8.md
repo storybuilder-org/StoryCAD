@@ -22,7 +22,7 @@ There are other tools to help you plot- for example, Stock Scenes: <br/>
 Stock Scenes are exactly what their name implies: scenes that you’ve seen so often you recognize them instantly.   We used ‘The chase leads into an ambush’ as the setup to our ‘Leonard's impulsiveness lets Lacas capture him’ problem. <br/>
 We didn’t call it that, of course, and in fact the capture idea we started with didn’t work: capture implies escape, and it just didn’t fit. Instead, our ‘The chase leads into an ambush became this: <br/>
 
-![](Danger-Calls-Shootout-2.png)
+![](Danger-Calls-Shootout-5.png)
 
 Although the Scene Type we selected was ‘Action scene’, this is actually the Climax. If we go back to our Master Plots Three Act Play, we’ll find one more piece: <br/>
 

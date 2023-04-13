@@ -16,5 +16,5 @@ The first few master plots (Three Act Play, W-Diagram,  and Hero's Journey) are 
 
 Ronald Tobias' excellent book 20 Master Plots (And How to Build Them) is a detailed look at the fundamental plots which recur through all fiction. <br/>
 
-The master plots can be changed according to your preferences.  See "Customizing  StoryCAD" for details on how to add, delete, or modify the listed items. <br/>
+
 

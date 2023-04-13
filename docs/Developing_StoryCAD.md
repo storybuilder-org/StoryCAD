@@ -3,12 +3,12 @@ Developing StoryCAD <br/>
 If you are a C# developer and are somewhat familar with WinUI (or another XAML based UI language) then you can contribute to StoryCAD (Which is written in C# and uses WinUI 3). <br/>
 For more information about contributing, please check the GitHub Repository. <br/>
 Developer only menus / pop-ups <br/>
-![](Clipboard-Image-148.png)
+![](Clipboard-Image-211.png)
 
-If you have cloned StoryCAD to a separate repo and built it for the first time then you may be surprised to see this screen. It indicates a key file related to licensing is missing from your local clone. These licenses are in effect for the StoryCAD.org repo only. The missing licenses won’t cause any issues with the app functioning, but your copy won’t report errors via Elmah.io and you may see pops relating to syncfusion licensing errors. <br/>
+If you have cloned StoryCAD to a separate repo and built it for the first time then you may be surprised to see this screen. It indicates a key file related to licensing is missing from your local clone. These licenses are in effect for the storybuilder.org repo only. The missing licenses won’t cause any issues with the app functioning, but your copy won’t report errors via Elmah.io and you may see pops relating to syncfusion licensing errors. <br/>
 Regardless, congratulations on successfully compiling StoryCAD. <br/>
 
-![](Clipboard-Image-149.png)
+![](Clipboard-Image-212.png)
 
 If StoryCAD notices you have a debugger attached to the process, the developer menu will appear. <br/>
 This shows info about the computer and may contain buttons to test some parts of the StoryCAD. <br/>

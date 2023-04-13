@@ -1,20 +1,14 @@
 # StoryCAD Roadmap
 
-#### Last Updated: 2023-03-01
+#### Last Updated: 2023-04-04
+Dear Writers,
 
-Our next Release will be 2.9.0.0. 
+We are excited to announce that with the next release, 2.10.0.0, our application, StoryBuilder, is being rebranded as StoryCAD - computer aided design for fiction writers. Exciting new features are coming soon!
 
-We expect that this release will include the following features:
+We believe that the name, StoryCAD, better reflects the value we offer our users. Our software goes beyond just building stories - it provides you with a comprehensive set of design tools that helps you craft unique and captivating narratives. Novel, screenplay, or any other fiction type, StoryCAD will help you organise your thoughts and turn your ideas into polished works of art.
 
-## New Features
+StoryCAD continues to be available through the Microsoft Store. For now our website, at https://storybuilder.org/, and our GitHub repositories at https://github.com/storybuilder.org, will remain, although both will refer to the new StoryCAD brand.
 
-### Refactor Preferences (#320)
-The preferences system is in dire need of refactoring for the following reasons
-1) Preferences processing is scattered
-2) Prefences methods aren't consistent
-3) change tracking are not manged consistently
-4) one instance of preferences is used widely but not consistently
+Thank you for your continued support, and we look forward to sharing this new chapter with you.
 
-### Fix Drag n Drop is broken (#312)
-Drag and drop functionailty appears to broken in its implementation and needs to be fixed 
-as it does not properly update the tree when nodes are dragged and dropped.
+Regards, The StoryCAD Team

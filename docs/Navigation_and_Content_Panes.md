@@ -33,6 +33,6 @@ On some screen sizes and orientations the Navigation and Content panes may be st
 
 Your outline has only one Story Overview; it’s created automatically when you open or create a new outline. The Story Overview is the root of the Navigation Pane tree, and all other Story Elements are below it.  <br/>
 
-Every majfor form also has a full-page tab (labeled Notes) which holds your general notes and thoughts regarding the story element. We won’t talk about these again; just be aware that they’re there. <br/>
+Every major form also has a full-page tab (labeled Notes) which holds your general notes and thoughts regarding the story element. We won’t talk about these again; just be aware that they’re there. <br/>
 
 

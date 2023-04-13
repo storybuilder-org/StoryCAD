@@ -20,7 +20,7 @@ An inner problem is some want or need within the character himself, a need to gr
 
 It's often constructive to use StoryCAD to define both an external and an internal problem for your protagonist, with separate Problem forms for each  of them. Both problems help to shape the story's plot. There’s even a Create New Story template for this: <br/>
 
-![](Clipboard-Image-145.png)
+![](Clipboard-Image-208.png)
 
 The outer problem asks 'what does the character want?'  The inner problem asks 'why does he want it?'  The outer problem is tangible. The inner problem is intangible, invisible.  The outer problem faces an external adversary.  The inner problem is Man against Himself, usually with something to decide or discover. The outer problem is solved when (win or loose) something is accomplished.  The inner problem is solved when the character grows or changes, or fails to do so.  The inner problem is related to theme. The two problems are connected because your protagonist must come to grips with his inner demon before he can solve the external, outer problem. <br/>
 Conflict <br/>
@@ -46,11 +46,11 @@ A good example of this is found in Hemingway's The Old Man and the Sea.  This no
 
 Rather than arrange these problems in a list: <br/>
 
-![](Clipboard-Image-146.png)
+![](Clipboard-Image-209.png)
 
 You may want arrange them as children of the original problem, which won’t be solved until the complications are: <br/>
 
-![](Clipboard-Image-147.png)
+![](Clipboard-Image-210.png)
 
 Where possible, complications should be ordered to make things progressively worse for the protagonist. By the end of the shark attack, the marlin is nothing but a head and tail and skeleton; things can’t get much worse for Santiago. <br/>
 Conflicts of start at one level and devolve into a more serious one: ‘it’s not a war until the guns start firing.’  Finding your way from inciting incident through middle story to climax is  the process of finding complications, and escalating conflicts is one approach to doing so.  The escalation can occur for many reasons: a character gets tipped over the edge, a ticking clock goes off, a secondary character does something rash, a dropped dish is mistaken for a gunshot. <br/>

@@ -7,7 +7,7 @@ MasterPlots <br/>
 
 In recent decades, the three-act structure has been joined by a bevy of other story structures, with different plot points:  Dan Wells’ Seven Point Structure, The Hero’s Journey, Blake Snyder’s Save the Cat, and many more.  Since plot points are also called story beats, these structures are often called ‘beat sheets’. A beat sheet can serve as a sort of plot template. StoryCAD’s Master Plots tool provides a number of these templates, which will insert a set of Scene story elements into your outline at the place of your choosing: <br/>
 
-![](Tools-Master-Plots-7.png)
+![](Tools-Master-Plots-10.png)
 
 
 Since every Problem is a ‘small story’ and has its own set of events that define it, a Problem is good place to use this tool. A Problem can be thought of as a sequence, a term used frequently in scriptwriting, which is defined as ‘a series of scenes with a beginning, middle, and end.’ Or, if you prefer, setup, development, and resolution.  <br/>
