@@ -100,7 +100,7 @@ jobs:
    #Cleans output and file names
     - name: Run MSIX Cleaner
       run: |
-        .\MSIXCleaner.ps1 -TargetDirectory "D:\a\StoryCAD\StoryCAD\StoryCAD\Packages\"
+        D:\a\StoryCAD\StoryCAD\.github\workflows\MSIXCleaner.ps1 -TargetDirectory "D:\a\StoryCAD\StoryCAD\StoryCAD\Packages\"
       shell: pwsh
 
     - name: Write help file
