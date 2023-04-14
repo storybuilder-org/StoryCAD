@@ -98,8 +98,8 @@ jobs:
         Remove-Item -path GitHubActionsWorkflow.pfx
       
       #Cleans output and file names
-    - name: Clean MSIXs
-      run: 'D:\a\StoryCAD\StoryCAD\.github\workflows\MSIXCleaner.exe "D:\a\StoryCAD\StoryCAD\StoryCAD\Packages\"'
+    #- name: Clean MSIXs
+    #  run: 'D:\a\StoryCAD\StoryCAD\.github\workflows\MSIXCleaner.exe "D:\a\StoryCAD\StoryCAD\StoryCAD\Packages\"'
 
     - name: Write help file
       run: |
@@ -122,4 +122,4 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: StoryCAD
-        path: D:\a\StoryCAD\StoryCAD\StoryCAD\Packages\*
+        path: D:\a\StoryCAD\*
