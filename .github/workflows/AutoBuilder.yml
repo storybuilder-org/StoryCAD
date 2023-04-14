@@ -36,7 +36,7 @@ jobs:
     
     - uses: oprypin/find-latest-tag@v1
       with:
-        repository: Storybuilder-org/StoryCAD
+        repository: storybuilder-org/StoryCAD
         releases-only: true
       id: testtag
       
@@ -71,8 +71,8 @@ jobs:
       env:
         Configuration: ${{ matrix.configuration }}
     
-   # - name: Restore StoryCAD Tests
-   #   run: msbuild StoryCADTests\StoryCADTests.csproj /t:Restore /p:Configuration=Release
+   # - name: Restore StoryBuilder Tests
+   #   run: msbuild StoryBuilderTests\StoryBuilderTests.csproj /t:Restore /p:Configuration=Release
 
     # Decode the base 64 encoded pfx and save the Signing_Certificate
     - name: Decode the pfx
@@ -96,10 +96,10 @@ jobs:
     - name: Remove the pfx
       run: |
         Remove-Item -path GitHubActionsWorkflow.pfx
-
-    #Cleans output and file names
+      
+      #Cleans output and file names
     - name: Clean MSIXs
-      run: 'D:\a\StoryCAD\StoryCAD\.github\workflows\MSIXCleaner.exe "D:\a\StoryCAD\StoryCAD\Packages\"'
+      run: 'D:\a\StoryCAD\StoryCAD\.github\workflows\MSIXCleaner.exe "D:\a\StoryCAD\StoryCAD\StoryCAD\Packages\"'
 
     - name: Write help file
       run: |
