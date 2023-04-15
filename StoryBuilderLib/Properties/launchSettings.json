@@ -1,9 +1,0 @@
-{
-  "profiles": {
-    "StoryBuilderLib": {
-      "commandName": "Project",
-      "hotReloadEnabled": false,
-      "nativeDebugging": false
-    }
-  }
-}

@@ -1,0 +1,28 @@
+﻿<Page
+    x:Class="StoryCAD.Services.Dialogs.NewRelationshipPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+    
+    <StackPanel Width="auto" MinWidth="300">
+        <StackPanel Orientation="Horizontal" Width="500" HorizontalAlignment="Center">
+            <TextBlock  Text="{x:Bind CharVM.Name}" VerticalAlignment="Center" MaxWidth="120" TextWrapping="Wrap"/>
+            <TextBlock  Text=" is a " VerticalAlignment="Center" Margin="0,0,5,0"/>
+            <ComboBox  MinWidth="150" ItemsSource="{x:Bind  NewRelVM.RelationTypes}" IsEditable="True"  SelectedValue="{x:Bind  NewRelVM.RelationType, Mode=TwoWay}" Margin="0,10" VerticalAlignment="Center"/>
+            <TextBlock  Text=" to " VerticalAlignment="Center" Margin="5,0"/>
+            <ComboBox Name="PartnerBox" IsEditable="False" MinWidth="150" ItemsSource="{x:Bind NewRelVM.ProspectivePartners}" DisplayMemberPath="Name" SelectedItem="{x:Bind  NewRelVM.SelectedPartner, Mode=TwoWay}" VerticalAlignment="Center"/>
+        </StackPanel>
+
+        <CheckBox Content="Make a relationship on the other character" HorizontalAlignment="Center" Margin="0,20,0,0" IsChecked="{x:Bind NewRelVM.InverseRelationship, Mode=TwoWay}"/>
+        <StackPanel Orientation="Horizontal" Width="500" HorizontalAlignment="Center">
+            <TextBlock Text="{x:Bind  NewRelVM.SelectedPartner.Name, Mode=TwoWay}" VerticalAlignment="Center" MaxWidth="120" TextWrapping="Wrap"/>
+            <TextBlock  Text=" is a " VerticalAlignment="Center" Margin="10,0"/>
+            <ComboBox   MinWidth="150" ItemsSource="{x:Bind  NewRelVM.RelationTypes}" VerticalAlignment="Center" IsEditable="True"  SelectedValue="{x:Bind  NewRelVM.InverseRelationType, Mode=TwoWay}" IsEnabled="{x:Bind NewRelVM.InverseRelationship, Mode=TwoWay}"/>
+            <TextBlock  Text=" to" VerticalAlignment="Center" Margin="5,0"/>
+            <TextBlock  Text="{x:Bind CharVM.Name}"  VerticalAlignment="Center" MaxWidth="120" TextWrapping="Wrap"/>
+        </StackPanel>
+    </StackPanel>
+
+</Page>

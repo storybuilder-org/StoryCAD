@@ -1,7 +1,0 @@
-                        StoryBuilder - Folder Description
-
-    Name:               @Name
-
-    Description:
-    @Notes
-

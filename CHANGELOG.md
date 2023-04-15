@@ -1,4 +1,4 @@
-# StoryBuilder ChangeLog
+# StoryCAD ChangeLog
 
 ## Release 2.9.0.0
 
@@ -41,10 +41,10 @@ As of March 1st 2023 we are now rolling out 2.8.0.0
 Elmah.io now uploads new erros to GitHub so that everyone can now
 see error logs.
 
-### Launch StoryBuilder from .stbx file (#94)
+### Launch StoryCAD from .stbx file (#94)
 
-.STBX files are now associated with StoryBuilder meaning that, now users can double
-click .STBX files and it will automatically open in StoryBuilder.
+.STBX files are now associated with StoryCAD meaning that, now users can double
+click .STBX files and it will automatically open in StoryCAD.
 
 ## Release 2.7.0.0
 
@@ -54,7 +54,7 @@ As of February 9, 2023, we've rolling out Release 2.7.0.0.
 
 #### ARM64 Support (#109, #481)
 
-StoryBuilder now builds for three platforms: Intel x64 and x86, and ARM64.
+StoryCAD now builds for three platforms: Intel x64 and x86, and ARM64.
 This supports Windows 11 running on ARM-based systems such as Surface Pro X.
 
 #### Improvements to Conflict Builder (#484)
@@ -69,7 +69,7 @@ the purpose of the problem in terms of story structure.
 
 #### Unit testing / additional unit tests (#17, #492)
 
-We've got the StoryBuilderTest executing test scripts from Test Explorer.
+We've got the StoryCADTest executing test scripts from Test Explorer.
 It's not yet running as a part of PR review prior to merge. We'll get 
 that added in the next (2.8.0.0) release.
 
@@ -105,7 +105,7 @@ Rather than one monthly newsletter, we'll be producing several smaller
 newsletters throughout the month: a newsletter for each new release,
 and several newsletters with articles and tips.
 
-Blog posts on storybuilder.org and the newsletters will contain similar
+Blog posts on StoryCAD.org and the newsletters will contain similar
 content.
 
 ## Release 2.6.0.0
@@ -161,7 +161,7 @@ can add their own relationship types.
 
 We added a Print Manager as a part of the Print Report menu.
 This allows a user to select a printer and specify its 
-StoryBuilder print report options. 
+StoryCAD print report options. 
 
 As of 11/15/2022 (with WinAppSdk 1.2) the Print Manager is available and works
 with Windows 11 but doesn't work with Windows 10. 
@@ -282,7 +282,7 @@ Jake's rewriten the flyout menu to make it much more user-friendly.
 
 #### Highlight in-process node
 
-A StoryBuilder outline is a tree of Story Elements which are displayed in the Navigation Pane. 
+A StoryCAD outline is a tree of Story Elements which are displayed in the Navigation Pane. 
 Clicking (or touching) a Story Element node on the Navigation Pane displays that 
 Story Element’s content in the Content Pane. A node can also be right-clicked to
 display a commandbar flyout context menu. The current (clicked) node is highighted
@@ -312,7 +312,7 @@ hasn't frozen.
 
 Some Preferences data, such as the default outline and backup folder locations,
 have have been updated with some defaults (including preserving previous versions' 
-values) when installing StoryBuilder.
+values) when installing StoryCAD.
 
 #### Codebase cleanup
 
@@ -324,7 +324,7 @@ future releases, but we're making progress.
 
 #### Bug fixes:
 
-StoryBuilder is a new product, and our number-one priority remains bug fixes and improvements.
+StoryCAD is a new product, and our number-one priority remains bug fixes and improvements.
 Some specific fixes in this release include:
 
 *Fixed a problem where the node wrapping Preference setting was not persisting.
@@ -358,17 +358,17 @@ have a Notes tabes which can be used to store notes about that particular Story 
 but the new Note nodes are intended to be used to store notes about any topic  you
 wish.
 
-StoryBuilder is a new product, and our priority remains bug fixes and improvements.
+StoryCAD is a new product, and our priority remains bug fixes and improvements.
 2.3 is primarily a fix release, as will be future short-term releases. Some
 specific fixes in this release include:
 
 #### Implemented Single Instancing
 
-StoryBuilder now uses Single Instancing. If the app is already open and you launch 
+StoryCAD now uses Single Instancing. If the app is already open and you launch 
 it again, the existing instance will be brought to the foreground rather than having
 a new instance launched. While the ability to edit more than one outline at one time
 has its uses, it can also cause problems. For example, if you have two instances of
-StoryBuilder open and you edit the same Story Element in both instances, the changes
+StoryCAD open and you edit the same Story Element in both instances, the changes
 from one instance will overwrite the changes from the other instance. Single Instancing
 prevents that from happening.
 
@@ -397,7 +397,7 @@ releases.
   launch Notepad to display a file. This fix has that working.
 * Fixed some issues with tracking changes.
 
-https://github.com/storybuilder-org/StoryBuilder-2/compare/2.1.2.0...2.2.0.0
+https://github.com/StoryCAD-org/StoryCAD-2/compare/2.1.2.0...2.2.0.0
 
 ## Release 2.2.0.0
 
@@ -409,14 +409,14 @@ https://github.com/storybuilder-org/StoryBuilder-2/compare/2.1.2.0...2.2.0.0
 the narrator view easier.
 * Fixed Icons on certain nodes not showing up.
 * Added a prompt to open the quick start menu when opening
-StoryBuilder for the first time.
+StoryCAD for the first time.
 * Updated the Danger Calls sample story and the tutorial in the User Manual.
 * Fixed an error where the story said it was saved when it really wasn't.
 * Made some minor changes to the contents of the comboboxes.
 * New story overview nodes are now called the name of the story instead
 of just working title.
 
-https://github.com/storybuilder-org/StoryBuilder-2/compare/2.1.2.0...2.2.0.0
+https://github.com/StoryCAD-org/StoryCAD-2/compare/2.1.2.0...2.2.0.0
 
 ## Release 2.1.2.0
 
@@ -431,13 +431,13 @@ Updated dependencies.
 ## Release 2.1.0.0
 
 As of July 29, 2022, we've rolled out Release 2.1.0.0. This is the 
-completion of a major milestone, distributing StoryBuilder 
+completion of a major milestone, distributing StoryCAD 
 via Windows Store direct link. 
 
 This release has a ton of fixes, adds our privacy policy, and contains documentation improvements.
 A point release, 2.1.1.0, on August 1, 2022, fixed a scaling issue we missed in 2.1.0.0. 
 We allow Windows Store client installations for any Windows user who has a link to the download, from a
-link through the website (https://storybuilder.org) and other channels. 
+link through the website (https://StoryCAD.org) and other channels. 
 
 Added a roadmap
 
@@ -445,13 +445,13 @@ Added Autosave
 
 Updated some combobox choices
 
-Storybuilder will now show the changelog on an update.
+StoryCAD will now show the changelog on an update.
 
 Revamped Relationship layout
 
 Updated manual
 
-Added StoryBuilder Server support.
+Added StoryCAD Server support.
 
 
 ## Release 2.0.0.0
@@ -487,7 +487,7 @@ Reverted AutoComplete controls to SyncFusionComboboxes by @Rarisma in #352
 
 Added some new keybinds and fixes report issues relating to outertraits by @Rarisma in #355
 
-https://github.com/storybuilder-org/StoryBuilder-2/compare/2.0.14.0...2.0.0.0
+https://github.com/StoryCAD-org/StoryCAD-2/compare/2.0.14.0...2.0.0.0
 
 ## Release 2.0.14.0
 
@@ -523,7 +523,7 @@ Updated Automated Release
 
 ## Release 2.0.12.0
 
-Added privacy policy (Read it here https://github.com/storybuilder-org/StoryBuilder-2/blob/master/PRIVACY_POLICY.TXT)
+Added privacy policy (Read it here https://github.com/StoryCAD-org/StoryCAD-2/blob/master/PRIVACY_POLICY.TXT)
 
 Fix some issues with Cast Members
 
@@ -541,7 +541,7 @@ Added tool tip to the edit icon
 
 Updated Scene purpose to allow multiple values
 
-When StoryBuilder is opened, the file open menu is shown
+When StoryCAD is opened, the file open menu is shown
 
 Cleaned up code and removed unused values
 

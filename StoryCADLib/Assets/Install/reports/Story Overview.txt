@@ -1,0 +1,58 @@
+                             StoryCAD - Story Overview
+
+                   ============== Story Idea =============
+
+    Title:                  @Title
+
+    Username:               @Author
+
+    Creation Date:          @CreateDate
+
+    Last Changed:           @ModifiedDate
+        
+    Story Idea:             @StoryIdea
+
+    
+
+                   ============== Concept =============
+
+    Concept: 
+    @Concept
+
+                   ============== Premise =============
+
+    Story Problem:
+    @StoryProblem
+
+    Premise:
+    @Premise
+
+                  ============== Structure =============
+
+    Type: @StoryType
+    
+    Genre: @StoryGenre
+
+    Viewpoint: @Viewpoint
+
+    Literary Device: @LiteraryDevice
+
+    Viewpoint Character: @viewpointCharacter
+
+    Voice: @Voice
+
+    Tense: @Tense
+
+    Style: @Style
+
+    Structure Notes: @StructureNotes
+
+    Tone: @Tone
+
+
+
+
+                  =============== Notes ================
+
+    Notes:
+    @Notes

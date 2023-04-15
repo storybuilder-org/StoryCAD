@@ -45,11 +45,11 @@ In real life one strategy to solve a problem is to decompose it into smaller pro
 
 This process works not only with complications (subplots with bad outcomes which are designed to increase the conflict), but with other subplots. In The Old Man and the Sea, Manolin, the boy Santiago mentored and who loves him, has a character arc based on his relationship with the old man: <br/>
 
-MISSING IMAGE: C:/dev/src/User Manual/Screenshots/StoryBuilder Manolin Problem.png <br/>
+MISSING IMAGE: C:/dev/src/User Manual/Screenshots/StoryCAD Manolin Problem.png <br/>
 
 This is an inner problem for Manolin, a coming of age arc, and it’s plotted in just six scenes: <br/>
 
-MISSING IMAGE: C:/dev/src/User Manual/Screenshots/Plotting with StoryBuilder - Manolin Subplot.png <br/>
+MISSING IMAGE: C:/dev/src/User Manual/Screenshots/Plotting with StoryCAD - Manolin Subplot.png <br/>
 
 Hemingway uses this problem as a frame around Santiago’s battle, splitting the scenes and using the first three to introduce Santiago before his battle, and the last three to show Manolin vowing to fish with the old man again. Plot your scenes for your Problems, but you don’t have to arrange them in that order in your narrative. That’s what Story Narrator View is for. <br/>
 

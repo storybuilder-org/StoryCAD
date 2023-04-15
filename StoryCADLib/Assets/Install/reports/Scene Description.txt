@@ -1,0 +1,67 @@
+                   StoryCAD - Scene Description
+
+                   ============== Scene Overview ===========
+
+    Title:              @Title
+
+    Date:               @Date
+
+    Time:               @Time
+
+    Viewpoint Character: @ViewpointCharacter
+
+    Setting:            @Setting
+
+    SceneType:          @SceneType
+
+    Scene Cast:         @CastMember
+
+    Scene Sketch:
+    @Remarks
+
+                    ============ Development ================
+
+    Purpose of Scene:   @PurposeOfScene
+
+    Value Exchange:     @ValueExchange
+
+    What Happens:       @Events
+
+    The Consequence:    @Consequence
+
+    Why It Matters:     @Significance
+
+    The Realization:    @Realization
+
+                    ============ Scene Conflict ================
+
+    Protagonist:        @ProtagName
+
+    Feelings:           @ProtagEmotion
+
+    Protagonist's Goal: @ProtagGoal
+	
+	Opposition:         @Opposition
+
+    Antagonist:         @AntagName
+
+    Feelings:           @AntagEmotion
+
+    Antagonist's Goal:  @AntagGoal
+
+    Outcome:            @Outcome
+
+                 ============= Sequel =======================
+
+    Emotional Response: @Emotion
+
+    Review and Thought:
+    @Review
+
+    New Goal:           @NewGoal
+
+                 =========== Scene Notes ====================
+
+    Notes:
+    @Notes
+
