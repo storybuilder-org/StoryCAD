@@ -19,8 +19,8 @@
 		<AppxBundle>Auto</AppxBundle>
 		<AppInstallerUri>C:\msixs\</AppInstallerUri>
 		<HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
-		<AppxPackageDir>C:\Users\Rarisma\Desktop\SculpturesOfAnythingGoes\</AppxPackageDir>
-		<AppxBundlePlatforms>x86|x64</AppxBundlePlatforms>
+		<AppxPackageDir>C:\Users\Jaker\Desktop\cadapp\</AppxPackageDir>
+		<AppxBundlePlatforms>arm64</AppxBundlePlatforms>
 		<RunAnalyzersDuringLiveAnalysis>False</RunAnalyzersDuringLiveAnalysis>
 		<RunAnalyzersDuringBuild>False</RunAnalyzersDuringBuild>
 		<PackageCertificateKeyFile>StoryCAD_TemporaryKey.pfx</PackageCertificateKeyFile>

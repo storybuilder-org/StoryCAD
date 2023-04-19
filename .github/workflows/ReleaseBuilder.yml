@@ -91,9 +91,12 @@ jobs:
       run: |
         Remove-Item -path GitHubActionsWorkflow.pfx
       
-    - name: Clean MSIXs
-      run: 'D:\a\StoryCAD\StoryCAD\.github\workflows\MSIXCleaner.exe "D:\a\StoryCAD\StoryCAD\Packages\"'
+   #Cleans output and file names
+    - name: Run MSIX Cleaner
+      run: |
+        D:\a\StoryCAD\StoryCAD\.github\workflows\MSIX.ps1 -TargetDirectory "D:\a\StoryCAD\StoryCAD\StoryCAD\Packages"
 
+        
     - name: Write help file
       run: |
         "Hello, Thank you for using StoryCAD Release ${{ github.event.inputs.VersionNumber }} 
