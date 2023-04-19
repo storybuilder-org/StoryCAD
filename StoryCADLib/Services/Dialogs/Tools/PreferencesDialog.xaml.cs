@@ -25,13 +25,22 @@ public sealed partial class PreferencesDialog
     {
         InitializeComponent();
         DataContext = PreferencesVm;
+        ShowInfo();
+    }
+
+    /// <summary>
+    /// Sets info text for changelog and dev menu
+    /// </summary>
+    private async void ShowInfo()
+    {
         Version.Text = PreferencesVm.CurrentModel.Version;
-        SetChangelog();
+        Changelog.Text = await new Changelog().GetChangelogText();
 
         if (PreferencesVm.CurrentModel.WrapNodeNames == TextWrapping.WrapWholeWords) { TextWrap.IsChecked = true; }
         else { TextWrap.IsChecked = false; }
 
         SearchEngine.SelectedIndex = (int)PreferencesVm.CurrentModel.PreferredSearchEngine;
+
 
         //TODO: Put this in a VM and make this data get logged at start up with some more system info.
         if (Debugger.IsAttached)
@@ -51,7 +60,7 @@ public sealed partial class PreferencesDialog
                 }
                 else { OSInfo.Text += " (Windows 10)"; }
             }
-            catch { OSInfo.Text = "OS Info:Error";  }
+            catch { OSInfo.Text = "OS Info:Error"; }
 
 
             //Detect if 32-bit or 64-bit process (I'm not sure if it's possible to )
@@ -65,24 +74,6 @@ public sealed partial class PreferencesDialog
         {
             PivotView.Items.Remove(Dev);
         }
-    }
-
-    private async void SetChangelog()
-    {
-        try
-        {
-            GitHubClient client = new(new ProductHeaderValue("STB"));
-            Changelog.Text = (await client.Repository.Release.Get("StoryCAD-org", "StoryCAD-2", GlobalData.Version.Replace("Version: ", ""))).Body;
-        }
-        catch
-        {
-            Changelog.Text = """
-                Failed to get changelog for this version, this because either:
-                 - You are running an auto-build version
-                 -There is an issue connecting to Github
-                """;
-        }
-
     }
 
     /// <summary>

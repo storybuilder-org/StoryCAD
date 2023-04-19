@@ -67,7 +67,12 @@ public sealed partial class Shell
             await Ioc.Default.GetRequiredService<WebViewModel>().ShowWebviewDialog();
             ShellVm._canExecuteCommands = true;
         }
-        if (GlobalData.LoadedWithVersionChange ) { await ShellVm.ShowChangelog(); }
+
+        //Shows changelog if the app has been updated since the last launch.
+        if (GlobalData.LoadedWithVersionChange)
+        {
+            await new Services.Dialogs.Changelog().ShowChangeLog();
+        }
 
         //If StoryCAD was loaded from a .STBX File then instead of showing the Unified menu
         //We will instead load the file instead.
