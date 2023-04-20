@@ -567,39 +567,6 @@ public class ShellViewModel : ObservableRecipient
         Ioc.Default.GetRequiredService<LogService>().Log(LogLevel.Error, "Env missing.");
     }
 
-    public async Task ShowChangelog()
-    {
-        try
-        {
-            GitHubClient _client = new(new ProductHeaderValue("Stb2ChangelogGrabber"));
-
-            ContentDialog _changelogUi = new()
-            {
-                Width = 800,
-                Content = new ScrollViewer
-                {
-                    VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
-                    Content = new TextBlock
-                    {
-                        TextWrapping = TextWrapping.Wrap,
-                        Text = (await _client.Repository.Release.Get("StoryCAD-org", "StoryCAD-2", GlobalData.Version.Replace("Version: ", ""))).Body
-                    }
-                },
-                Title = "What's new in StoryCAD " + GlobalData.Version,
-                PrimaryButtonText = "Okay",
-                XamlRoot = GlobalData.XamlRoot
-            };
-            await _changelogUi.ShowAsync();
-        }
-        catch (Exception _e)
-        {
-            //TODO: Update with proper exception catching
-            if (_e.Source!.Contains("Net")) { Logger.Log(LogLevel.Info, "Error with network, user probably isn't connected to wifi or is using an auto build"); }
-            if (_e.Source!.Contains("Octokit.NotFoundException")) { Logger.Log(LogLevel.Info, "Error finding changelog for this version"); }
-            else { Logger.Log(LogLevel.Info, "Error in ShowChangeLog()"); }
-        }
-    }
-
     public void ShowHomePage()
     {
         Logger.Log(LogLevel.Info, "ShowHomePage");
