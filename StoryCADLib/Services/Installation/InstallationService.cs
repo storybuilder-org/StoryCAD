@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Windows.Storage;
 using CommunityToolkit.Mvvm.DependencyInjection;
+using Microsoft.UI.Xaml;
 using StoryCAD.Models;
 using StoryCAD.Services.Logging;
 

@@ -68,15 +68,9 @@
                         <Button Content="Throw exception" Click="ThrowException" Width="150" Margin="0,5"/>
                         <Button Content="Attach Elmah" Click="{x:Bind Logger.AddElmahTarget}" Width="150" Margin="0,5"/>
                         <Button Content="Run InstallService" Click="{x:Bind InstallVM.InstallFiles}" Width="150" Margin="0,5"/>
+                        <Button Content="Enable FastBackup" Click="FastBackupService" Width="150" Margin="0,5"/>
                     </StackPanel>
-                    <StackPanel VerticalAlignment="Bottom" Grid.Column="1" Grid.Row="0" Margin="0,0,5,0">
-                        <TextBlock Name="CPUArchitecture"/>
-                        <TextBlock Name="OSArchitecture"/>
-                        <TextBlock Name="OSInfo"/>
-                        <TextBlock Name="AppArchitecture"/>
-                        <TextBlock Name="NetVer"/>
-                        <TextBlock Name="Startup"/>
-                    </StackPanel>
+                    <TextBlock Name="DeviceInfo"  Grid.Column="1" Grid.Row="0" Margin="10"/>
                 </Grid>
 
             </PivotItem>
