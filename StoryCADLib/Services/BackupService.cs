@@ -43,7 +43,7 @@ namespace StoryCAD.Services
                 {
                     if (EnableFastBackupService)
                     {
-                        //Thread.Sleep(10000);
+                        Thread.Sleep(10000);
                     }
                     else if (!EnableFastBackupService)
                     {
