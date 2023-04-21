@@ -123,8 +123,6 @@ namespace StoryCAD.Services
                 //Copies file to temp dir and zips it
                 await Shell.StoryModel.ProjectFile.CopyAsync(TempDir, Shell.StoryModel.ProjectFile.Name, NameCollisionOption.ReplaceExisting);
 
-                ZipFile.CreateFromDirectory(TempDir.Path, Path.Combine(backupLocation.Path, fileName) + ".zip");
-
                 try
                 {
                     ZipFile.CreateFromDirectory(TempDir.Path, Path.Combine(backupLocation.Path, fileName) + ".zip");
@@ -141,7 +139,11 @@ namespace StoryCAD.Services
                     {
                         ZipFile.CreateFromDirectory(TempDir.Path, Path.Combine(backupLocation.Path, fileName) + ".zip");
                     }
-                    catch { }
+                    catch
+                    {
+                        Log.Log(LogLevel.Error, "Zip file still exists despite deleting, skipping this backup.");
+                        return;
+                    }
                 }
 
                 //Creates zip archive then cleans up
