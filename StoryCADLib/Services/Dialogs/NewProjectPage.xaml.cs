@@ -98,7 +98,7 @@ public sealed partial class NewProjectPage : Page
             File.Create(testfile);
             if (!File.Exists(testfile)){throw new FileNotFoundException("the filename was not found.");}
         }
-        catch (Exception ex)
+        catch
         {
             ProjectName.Text = "";
             ProjectName.PlaceholderText = "You can't call your file that!";

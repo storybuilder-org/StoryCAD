@@ -67,7 +67,7 @@ public class LogService : ILogService
         }
     }
 
-    public async Task<bool> AddElmahTarget()
+    public bool AddElmahTarget()
     {
         if (apiKey == string.Empty | logID == string.Empty)
             return false;

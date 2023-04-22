@@ -79,7 +79,7 @@ public static class GlobalData
     //If this is not "" then the app was invoked via a .STBX file and once initalised, should load it.
     public static string FilePathToLaunch;
 
-    public static DispatcherQueue? GlobalDispatcher = null;
+    public static DispatcherQueue GlobalDispatcher = null;
 
     //This counts the amount of time it takes from the app being started to the Shell being opened.
     public static Stopwatch StartUpTimer;

@@ -220,7 +220,7 @@ public partial class App
         else
         {
             //TODO: check elmah is bypassed when logging is disabled by user.
-            GlobalData.ElmahLogging = await _log.AddElmahTarget();
+            GlobalData.ElmahLogging = _log.AddElmahTarget();
             if (GlobalData.ElmahLogging )
             {
                 
