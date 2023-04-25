@@ -92,7 +92,10 @@ namespace StoryCAD.Services
                 if (_shellVM.StoryModel.Changed)
                 {
                     // Save and write the model on the UI autoSaveWorker,
-                    GlobalData.GlobalDispatcher.TryEnqueue(async () => await _shellVM.SaveFile(true));
+                    //GlobalData.GlobalDispatcher.TryEnqueue(async () => await _shellVM.SaveFile(true));
+                    // Note: Changed 'async' lambda to synchronous lambda using Task.Run in AutoSaveProject at line 95.
+                    GlobalData.GlobalDispatcher.TryEnqueue(() => Task.Run(() => _shellVM.SaveFile(true)));
+
                 }
             }
             catch (Exception _ex)

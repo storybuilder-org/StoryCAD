@@ -4,6 +4,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Timers;
 using Windows.Storage;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using StoryCAD.Models;
@@ -14,11 +15,13 @@ namespace StoryCAD.Services
 {
     public class BackupService
     {
-        private BackgroundWorker timeBackupWorker = new()
-            {WorkerSupportsCancellation = true,WorkerReportsProgress = false};
+        private BackgroundWorker timedBackupWorker;
+        private  System.Timers.Timer backupTimer;
+
         private LogService Log = Ioc.Default.GetService<LogService>();
         ShellViewModel Shell = Ioc.Default.GetService<ShellViewModel>();
 
+        //TODO: Merge BackupProject into this
         /// <summary>
         /// Makes a backup every x minutes, x being the value of TimedBackupInterval in user preferences.
         /// </summary>
@@ -29,7 +32,7 @@ namespace StoryCAD.Services
             try
             {
                 Log.Log(LogLevel.Info, "Timed backup task started.");
-                while (!timeBackupWorker.CancellationPending)
+                while (!timedBackupWorker.CancellationPending)
                 {
                     Thread.Sleep((GlobalData.Preferences.TimedBackupInterval * 60) * 1000);
                     Log.Log(LogLevel.Info, "Starting auto backup");
@@ -47,12 +50,33 @@ namespace StoryCAD.Services
         /// <summary>
         /// Launches the timed backup task
         /// </summary>
+        public void RunTimedBackup(object source, System.Timers.ElapsedEventArgs e)
+        {
+            if (!timedBackupWorker.IsBusy)
+                timedBackupWorker.RunWorkerAsync();
+        }
+
+        /// <summary>
+        /// This method is used to enable the timed backup
+        /// timer and start counting down. At the expiration
+        /// of the timer, BackupTask will be called to backup
+        /// the project.  The timer's AutoReset will cause it
+        /// to keep running timer events until it's stopped
+        /// via a call to StopBackupTimer().
+        /// These two methods are called from file open, file
+        /// new, and file close to insure that  timed backups
+        /// are taken only when a project is open.
+        /// 
+        /// If the user's Preferences don't want timed backups,
+        /// they won't be started. 
+        /// </summary>
         public void StartTimedBackup()
         {
-            if (!GlobalData.Preferences.TimedBackup) { return; }
-            timeBackupWorker.DoWork += BackupTask;
-            if (!timeBackupWorker.IsBusy)
-                timeBackupWorker.RunWorkerAsync();
+            //TODO: Don't start this if the user doesn't want it.
+            if (GlobalData.Preferences.TimedBackup)
+            {
+                backupTimer.Start();
+            }
         }
 
         /// <summary>
@@ -60,11 +84,11 @@ namespace StoryCAD.Services
         /// </summary>
         public void StopTimedBackup()
         {
-            if (timeBackupWorker.IsBusy)
+            if (timedBackupWorker.IsBusy)
             {
-                timeBackupWorker.CancelAsync();
+                timedBackupWorker.CancelAsync();
             }
-            timeBackupWorker.DoWork -= BackupTask;
+            timedBackupWorker.DoWork -= BackupTask;
         }
 
         public async Task BackupProject()
@@ -111,6 +135,22 @@ namespace StoryCAD.Services
                 Log.LogException(LogLevel.Error, ex, $"Error backing up project {ex.Message}");
             }
             Log.Log(LogLevel.Info, "BackupProject complete");
+        }
+
+        public BackupService()
+        {
+            timedBackupWorker = new BackgroundWorker
+            {
+                WorkerSupportsCancellation = true,
+                WorkerReportsProgress = false
+            };
+            timedBackupWorker.DoWork += BackupTask;
+
+            backupTimer = new System.Timers.Timer
+                (GlobalData.Preferences.TimedBackupInterval * 60 * 1000);
+            backupTimer.AutoReset = true;
+            backupTimer.Stop();
+            backupTimer.Elapsed += RunTimedBackup;
         }
     }
 }

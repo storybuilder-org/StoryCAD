@@ -682,7 +682,6 @@ public class ShellViewModel : ObservableRecipient
             }
 
             Ioc.Default.GetRequiredService<BackupService>().StopTimedBackup();
-            //NOTE: BasicProperties.DateModified can be the date last changed
 
             StoryReader _rdr = Ioc.Default.GetRequiredService<StoryReader>();
             StoryModel = await _rdr.ReadFile(StoryModel.ProjectFile);
