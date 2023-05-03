@@ -33,6 +33,7 @@ using GuidAttribute = System.Runtime.InteropServices.GuidAttribute;
 using Octokit;
 using ProductHeaderValue = Octokit.ProductHeaderValue;
 using StoryCAD.Services.Backend;
+using StoryCAD.Services.Backup;
 
 namespace StoryCAD.ViewModels;
 
@@ -476,8 +477,22 @@ public class ShellViewModel : ObservableRecipient
 
             // Save the new project
             await SaveFile();
-            if (GlobalData.Preferences.BackupOnOpen) { await MakeBackup(); }
-            Ioc.Default.GetRequiredService<BackupService>().StartTimedBackup();
+            if (GlobalData.Preferences.BackupOnOpen)
+            {
+                await MakeBackup();
+            }
+
+            // Start the timed backup and auto save services
+            if (GlobalData.Preferences.TimedBackup)
+            {
+                Ioc.Default.GetRequiredService<BackupService>().StartTimedBackup();
+            }
+
+            if (GlobalData.Preferences.AutoSave)
+            {
+                Ioc.Default.GetRequiredService<AutoSaveService>().StartAutoSave();
+            }   
+
             Messenger.Send(new StatusChangedMessage(new("New project command executing", LogLevel.Info, true)));
         }
         catch (Exception _ex)
@@ -485,6 +500,8 @@ public class ShellViewModel : ObservableRecipient
             Logger.LogException(LogLevel.Error, _ex, "Error creating new project");
             Messenger.Send(new StatusChangedMessage(new("File make failure.", LogLevel.Error)));
         }
+
+        _canExecuteCommands = true;
     }
 
     public async Task MakeBackup()
@@ -682,7 +699,6 @@ public class ShellViewModel : ObservableRecipient
             }
 
             Ioc.Default.GetRequiredService<BackupService>().StopTimedBackup();
-            //NOTE: BasicProperties.DateModified can be the date last changed
 
             StoryReader _rdr = Ioc.Default.GetRequiredService<StoryReader>();
             StoryModel = await _rdr.ReadFile(StoryModel.ProjectFile);
@@ -704,12 +720,19 @@ public class ShellViewModel : ObservableRecipient
                 Messenger.Send(new StatusChangedMessage(new("Open Story completed", LogLevel.Info)));
             }
 
-            if (GlobalData.Preferences.AutoSave) { _autoSaveService.StopService(); }
+            if (GlobalData.Preferences.AutoSave) { _autoSaveService.StopAutoSave(); }
 
             GlobalData.MainWindow.Title = $"StoryCAD - Editing {StoryModel.ProjectFilename.Replace(".stbx", "")}";
             new UnifiedVM().UpdateRecents(Path.Combine(StoryModel.ProjectFolder.Path, StoryModel.ProjectFile.Name));
-            if (GlobalData.Preferences.TimedBackup) 
-            { Ioc.Default.GetRequiredService<BackupService>().StartTimedBackup(); }
+            if (GlobalData.Preferences.TimedBackup)
+            {
+                Ioc.Default.GetRequiredService<BackupService>().StartTimedBackup();
+            }
+
+            if (GlobalData.Preferences.AutoSave)
+            {
+                _autoSaveService.StartAutoSave();
+            }
 
             ShowHomePage();
             if (GlobalData.Preferences.AutoSave) { _autoSaveService.StartAutoSave(); }
@@ -740,10 +763,14 @@ public class ShellViewModel : ObservableRecipient
             Logger.Log(LogLevel.Info, $"{msg} cancelled (DataSource was null or empty)");
             return;
         }
-        _canExecuteCommands = false;
+
+        if (!autoSave)
+        {
+            _canExecuteCommands = false;
+        }
+
         try
         {
-            //TODO: SaveFile is both an AppButton command and called from NewFile and OpenFile. Split these.
             Messenger.Send(new StatusChangedMessage(new($"{msg} executing", LogLevel.Info)));
             SaveModel();
             await WriteModel();
@@ -756,7 +783,11 @@ public class ShellViewModel : ObservableRecipient
             Logger.LogException(LogLevel.Error, _ex, $"Exception in {msg}");
             Messenger.Send(new StatusChangedMessage(new($"{msg} failed", LogLevel.Error)));
         }
-        _canExecuteCommands = true;
+
+        if (!autoSave)
+        {
+            _canExecuteCommands = true;
+        }
     }
 
     /// <summary>
@@ -902,7 +933,7 @@ public class ShellViewModel : ObservableRecipient
     {
         _canExecuteCommands = false;
         Messenger.Send(new StatusChangedMessage(new("Closing project", LogLevel.Info, true)));
-        _autoSaveService.StopService();
+        _autoSaveService.StopAutoSave();
         if (StoryModel.Changed)
         {
             ContentDialog _warning = new()

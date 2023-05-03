@@ -83,6 +83,7 @@
     <Folder Include="Services\Installation\" />
     <Folder Include="Services\Logging\" />
     <Folder Include="Services\Navigation\" />
+    <Folder Include="Services\Backup\" />
     <Folder Include="Services\TeachingTips\" />
   </ItemGroup>
 
@@ -158,6 +159,5 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
-
 
 </Project>
