@@ -6,6 +6,7 @@ using System.Resources;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Messaging;
+using Google.Protobuf.WellKnownTypes;
 using Microsoft.UI.Xaml.Controls;
 using StoryCAD.Models;
 using StoryCAD.Services.Logging;
@@ -100,22 +101,27 @@ public class OverviewViewModel : ObservableRecipient, INavigable
     }
 
     // Premise data
-
+    
     private string _storyProblem;  // The Guid of a Problem StoryElement
     public string StoryProblem
     {
         get => _storyProblem;
         set 
-        {   LoadStoryPremise(value);  // Copy the problem's Premise to this Premise
+        {   
+            //LoadStoryPremise(value);  // Copy the problem's Premise to this Premise
             SetProperty(ref _storyProblem, value);
         }
     }
 
-    private string _premise;
-    public string Premise
+    private ProblemModel _premiseModel;
+    public ProblemModel PremiseModel
     {
-        get => _premise;
-        set => SetProperty(ref _premise, value);
+        get  {
+            return _premiseModel;
+        }
+        set { 
+            SetProperty(ref _premiseModel, value);
+        }
     }
 
     private bool _premiseLock;
@@ -264,6 +270,8 @@ public class OverviewViewModel : ObservableRecipient, INavigable
         Concept = Model.Concept;
         StructureNotes = Model.StructureNotes;
         Notes = Model.Notes;
+        PremiseModel = (ProblemModel)StringToStoryElement(_storyProblem);
+
 
         _changeable = true;
     }
@@ -294,6 +302,7 @@ public class OverviewViewModel : ObservableRecipient, INavigable
             Model.Notes = Notes;
         }
     }
+   
 
     private void LoadStoryPremise(string value)
     {
@@ -301,7 +310,7 @@ public class OverviewViewModel : ObservableRecipient, INavigable
             return;
         ProblemModel _problem = (ProblemModel) StringToStoryElement(value);
         PremiseLock = false;    // Set Premise to read/write to allow update
-        Premise = _problem.Premise;
+        //Premise = _problem.Premise;
         PremiseLock = true;     // Set Premise to read-only
     }
 
@@ -382,7 +391,7 @@ public class OverviewViewModel : ObservableRecipient, INavigable
         Tone = string.Empty;
         StoryIdea = string.Empty;
         Concept = string.Empty;
-        Premise = string.Empty;
+        //Premise = string.Empty;
         PremiseLock = true;     // Premise is read-only and is only set when a story problem is selected
         StructureNotes = string.Empty;
         Notes = string.Empty;
