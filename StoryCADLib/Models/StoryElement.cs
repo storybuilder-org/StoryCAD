@@ -2,6 +2,8 @@
 using System.Diagnostics.CodeAnalysis;
 using Windows.Data.Xml.Dom;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.DependencyInjection;
+using StoryCAD.ViewModels;
 
 namespace StoryCAD.Models;
 
@@ -36,6 +38,31 @@ public class StoryElement : ObservableObject
     #endregion
 
     #region Public Methods
+    public static StoryElement StringToStoryElement(string value)
+    {
+        if (value == null)
+            return null;
+        if (value.Equals(string.Empty))
+            return null;
+        // Get the current StoryModel's StoryElementsCollection
+        ShellViewModel shell = Ioc.Default.GetService<ShellViewModel>();
+        StoryElementCollection elements = shell.StoryModel.StoryElements;
+        // legacy: locate the StoryElement from its Name
+        foreach (StoryElement element in elements)  // Character or Setting??? Search both?
+        {
+            if (element.Type == StoryItemType.Character | element.Type == StoryItemType.Setting)
+            {
+                if (value.Equals(element.Name))
+                    return element;
+            }
+        }
+        // Look for the StoryElement corresponding to the passed guid
+        // (This is the normal approach)
+        if (Guid.TryParse(value, out Guid guid))
+            if (elements.StoryElementGuids.ContainsKey(guid))
+                return elements.StoryElementGuids[guid];
+        return null;  // Not found
+    }
 
     public override string ToString()
     {

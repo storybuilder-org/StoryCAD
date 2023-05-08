@@ -26,11 +26,11 @@ public class ReportFormatter
         string[] lines = _templates["Story Overview"];  
         RtfDocument doc = new(string.Empty);
 
-        StoryElement vpChar = StringToStoryElement(overview.ViewpointCharacter);
+        StoryElement vpChar = StoryElement.StringToStoryElement(overview.ViewpointCharacter);
         string vpName = vpChar?.Name ?? string.Empty;
-        StoryElement seProblem = StringToStoryElement(overview.StoryProblem);
+        StoryElement seProblem = StoryElement.StringToStoryElement(overview.StoryProblem);
         string problemName = seProblem?.Name ?? string.Empty;
-        ProblemModel problem = (ProblemModel)seProblem;
+        ProblemModel problem = (ProblemModel) seProblem;
         string premise = problem?.Premise ?? string.Empty;
 
         // Parse and write the report
@@ -100,8 +100,8 @@ public class ReportFormatter
         string[] lines = _templates["Problem Description"];
         RtfDocument doc = new(string.Empty);
 
-        StoryElement vpProtagonist = StringToStoryElement(problem.Protagonist);
-        StoryElement vpAntagonist = StringToStoryElement(problem.Antagonist);
+        StoryElement vpProtagonist = StoryElement.StringToStoryElement(problem.Protagonist);
+        StoryElement vpAntagonist = StoryElement.StringToStoryElement(problem.Antagonist);
 
         // Parse and write the report
         foreach (string line in lines)
@@ -430,13 +430,13 @@ public class ReportFormatter
         string[] lines = _templates["Scene Description"];
         RtfDocument doc = new(string.Empty);
 
-        StoryElement vpCharacter = StringToStoryElement(scene.ViewpointCharacter);
+        StoryElement vpCharacter = StoryElement.StringToStoryElement(scene.ViewpointCharacter);
         string vpCharacterName = vpCharacter?.Name ?? string.Empty;
-        StoryElement antagonist = StringToStoryElement(scene.Antagonist);
+        StoryElement antagonist = StoryElement.StringToStoryElement(scene.Antagonist);
         string antagonistName = antagonist?.Name ?? string.Empty;
-        StoryElement protagonist = StringToStoryElement(scene.Protagonist);
+        StoryElement protagonist = StoryElement.StringToStoryElement(scene.Protagonist);
         string protagonistName = protagonist?.Name ?? string.Empty;
-        StoryElement setting = StringToStoryElement(scene.Setting);
+        StoryElement setting = StoryElement.StringToStoryElement(scene.Setting);
         string settingName = setting?.Name ?? string.Empty;
 
         // Parse and write the report
@@ -455,7 +455,7 @@ public class ReportFormatter
             {
                 foreach (string seCastMember in scene.CastMembers)
                 {
-                    StoryElement castMember = StringToStoryElement(seCastMember);
+                    StoryElement castMember = StoryElement.StringToStoryElement(seCastMember);
                     string castMemberName = castMember?.Name ?? string.Empty;
                     StringBuilder sbCast = new(line);
                             
@@ -691,31 +691,6 @@ public class ReportFormatter
     #endregion
 
     #region Private methods
-    private StoryElement StringToStoryElement(string value)
-    {
-        if (value == null)
-            return null;
-        if (value.Equals(string.Empty))
-            return null;
-        // Get the current StoryModel's StoryElementsCollection
-        ShellViewModel shell = Ioc.Default.GetService<ShellViewModel>();
-        StoryElementCollection elements = shell.StoryModel.StoryElements;
-        // legacy: locate the StoryElement from its Name
-        foreach (StoryElement element in elements)  // Character or Setting??? Search both?
-        {
-            if (element.Type == StoryItemType.Character | element.Type == StoryItemType.Setting)
-            {
-                if (value.Equals(element.Name))
-                    return element;
-            }
-        }
-        // Look for the StoryElement corresponding to the passed guid
-        // (This is the normal approach)
-        if (Guid.TryParse(value, out Guid guid))
-            if (elements.StoryElementGuids.ContainsKey(guid))
-                return elements.StoryElementGuids[guid];
-        return null;  // Not found
-    }
 
     /// <summary>
     /// A RichEditBox property is an a wrapper for an RTF 
@@ -728,7 +703,7 @@ public class ReportFormatter
     public string GetText(string rtfInput, bool formatNewLines = true)
     {
         string text = rtfInput ?? string.Empty;
-        if (rtfInput.Equals(string.Empty))
+        if (rtfInput!.Equals(string.Empty))
             return string.Empty;
         RichTextStripper rts = new();
         text =  rts.StripRichTextFormat(text);

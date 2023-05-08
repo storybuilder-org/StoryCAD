@@ -84,7 +84,7 @@ public class SceneViewModel : ObservableRecipient, INavigable
                 return;
             if (!CastMemberExists(value))
             {
-                CastMembers.Add(StringToStoryElement(value));
+                CastMembers.Add(StoryElement.StringToStoryElement(value));
             }
         }
     }
@@ -357,10 +357,10 @@ public class SceneViewModel : ObservableRecipient, INavigable
         CastMembers.Clear();
         foreach (string _member in Model.CastMembers)
         {
-            StoryElement _element = StringToStoryElement(_member);
+            StoryElement _element = StoryElement.StringToStoryElement(_member);
             if (_element != null)
             {
-                CastMembers.Add(StringToStoryElement(_member));
+                CastMembers.Add(StoryElement.StringToStoryElement(_member));
             }
         }
         CharacterList = ShellViewModel.ShellInstance.StoryModel.StoryElements.Characters;
@@ -562,39 +562,6 @@ public class SceneViewModel : ObservableRecipient, INavigable
                     new StatusChangedMessage(new($"Cast member {element.Name} removed", LogLevel.Info, true)));
                 return;
             }
-    }
-
-    private StoryElement StringToStoryElement(string value)
-    {
-        if (value == null)
-            return null;
-        if (value.Equals(string.Empty))
-            return null;
-
-        // Look for the StoryElement corresponding to the passed guid
-        // (This is the normal approach)
-        // Get the current StoryModel's StoryElementsCollection
-        StoryModel _shellModel = ShellViewModel.GetModel();
-        StoryElementCollection _elements = _shellModel.StoryElements;
-        if (Guid.TryParse(value, out Guid _guid))
-        {
-            if (_elements.StoryElementGuids.ContainsKey(_guid)) { return _elements.StoryElementGuids[_guid]; }
-
-        }
-
-        // legacy: locate the StoryElement from its Name
-        foreach (StoryElement _element in _elements)  // Character or Setting??? Search both?
-        {
-            if (_element.Type == StoryItemType.Character | _element.Type == StoryItemType.Setting)
-            {
-                if (value.Trim().Equals(_element.Name.Trim()))
-                    return _element;
-            }
-        }
-        // not found
-        string _msg = $"Story Element not found name {value}";
-        _logger.Log(LogLevel.Warn, _msg);
-        return null;
     }
 
     /// <summary>

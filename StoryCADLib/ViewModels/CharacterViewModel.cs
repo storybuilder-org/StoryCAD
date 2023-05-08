@@ -591,7 +591,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable
         CharacterRelationships.Clear();
         foreach (RelationshipModel _relation in Model.RelationshipList)
         {
-            _relation.Partner = StringToStoryElement(_relation.PartnerUuid); // Populate partner Character StoryElement for Name
+            _relation.Partner = StoryElement.StringToStoryElement(_relation.PartnerUuid); // Populate partner Character StoryElement for Name
             CharacterRelationships.Add(_relation);
         }
 
@@ -678,31 +678,6 @@ public class CharacterViewModel : ObservableRecipient, INavigable
             return;
         }
         CharacterTraits.RemoveAt(ExistingTraitIndex);
-    }
-
-    private static StoryElement StringToStoryElement(string value)
-    {
-        if (value == null || value.Equals(string.Empty)) {return null;}
-
-        // Get the current StoryModel's StoryElementsCollection
-        StoryModel _model = ShellViewModel.GetModel();
-        StoryElementCollection _elements = _model.StoryElements;
-        // legacy: locate the StoryElement from its Name
-        foreach (StoryElement _element in _elements)  // Character or Setting??? Search both?
-        {
-            if (_element.Type == StoryItemType.Character | _element.Type == StoryItemType.Setting)
-            {
-                if (value.Equals(_element.Name))
-                    return _element;
-            }
-        }
-        // Look for the StoryElement corresponding to the passed guid
-        // (This is the normal approach)
-        if (Guid.TryParse(value, out Guid _guid))
-        {
-            if (_elements.StoryElementGuids.ContainsKey(_guid)) { return _elements.StoryElementGuids[_guid]; }
-        }
-        return null;  // Not found
     }
 
     /// <summary>
@@ -811,12 +786,9 @@ public class CharacterViewModel : ObservableRecipient, INavigable
                     {
                         (_vm.SelectedPartner as CharacterModel)!.RelationshipList.Add(new(Uuid.ToString(), _vm.InverseRelationType));
                     }
-
-
                 }
 
-
-                _memberRelationship.Partner = StringToStoryElement(_partnerUuid); // Complete pairing
+                _memberRelationship.Partner = StoryElement.StringToStoryElement(_partnerUuid); // Complete pairing
                 // Add partner relationship to member's list of relationships 
                 CharacterRelationships.Add(_memberRelationship);
                 SelectedRelationship = _memberRelationship;
