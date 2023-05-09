@@ -248,6 +248,9 @@ public class StoryReader : ObservableRecipient
                 case "StoryProblem":
                     _overview.StoryProblem = _attr.InnerText;
                     break;
+                case "Premise":
+                    _overview.Premise = _attr.InnerText;
+                    break;
                 case "StructureNotes":
                     _overview.StructureNotes = _attr.InnerText;
                     break;

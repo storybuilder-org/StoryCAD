@@ -60,14 +60,11 @@ public class OverviewModel : StoryElement
         set => _concept = value;
     }
 
-    //private string _premise;
-
-    //public string Premise
-    //{
-    //    get => _premise;
-    //    set => _premise = value;
-    //}
-
+    /// Premise is a property on every ProblemModel. Your story can (and usually will) have
+    /// more than one Problem. Every Problem has a Premise, but only one of your ProblemModels
+    /// the story's problem, and it's identified by the StoryProblem property.
+    /// The StoryProblem the spine of your story; when it’s resolved,  your story is over.
+    /// All other Problem StoryElements are complications or subplots of the StoryProblem.
     private string _storyProblem;  // The Guid of a Problem StoryElement
     public string StoryProblem
     {
@@ -75,10 +72,19 @@ public class OverviewModel : StoryElement
         set => _storyProblem = value;
     }
 
-    // Note: the Premise is a read-only view of the story Problem Premise
-    //       and is not persisted in the model or on disk. Instead, when
-    //       this model is to the ViewModel, StoryProblem's Premise is
-    //       copied as read-only text to the OverViewViewModel.
+    /// The OverviewModel Premise is the story's premise. If a StoryProblem has been created
+    /// and selected (which may not be true in the story's early formulation), this
+    /// Premise property and the StoryProblem Premise will be synchronized: when you update
+    /// either of them, the other is also updated. The contents of the StoryProblem Premise
+    /// (or any Problem's Premise) relate to other properties on the ProblemModel, and defining
+    /// the story's Premise here is a headstart on understanding the story's Problem.
+    /// 
+    private string _premise;
+    public string Premise
+    {
+        get => _premise;
+        set => _premise = value;
+    }
 
     // Structure data
 
