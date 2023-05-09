@@ -119,7 +119,8 @@ public class LogService : ILogService
                             + "\nProcessID:" + Environment.ProcessId
                             + "\nArchitecture:" + RuntimeInformation.ProcessArchitecture
                             + "\nTouchscreen:" + PointerDevice.GetPointerDevices().Any(p => p.PointerDeviceType == Windows.Devices.Input.PointerDeviceType.Touch)
-                            + "\nWindows Build: " + Environment.OSVersion.Version.Build));
+                            + "\nWindows Build: " + Environment.OSVersion.Version.Build
+                            + "\nUnoffical Build: " + GlobalData.DeveloperBuild));
                     }
                     catch (Exception ex)
                     {

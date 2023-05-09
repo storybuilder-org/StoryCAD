@@ -83,4 +83,10 @@ public static class GlobalData
 
     //This counts the amount of time it takes from the app being started to the Shell being opened.
     public static Stopwatch StartUpTimer;
+
+    //This will be set to true if any of the following are met
+    //The revision number in build is not 0
+    //A debugger is attached
+    //.ENV is missing.
+    public static bool DeveloperBuild;
 }

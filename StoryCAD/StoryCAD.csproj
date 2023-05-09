@@ -90,4 +90,8 @@
 			<Generator>MSBuild:Compile</Generator>
 		</Page>
 	</ItemGroup>
+
+	<Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+	  <Exec Command="powershell -ExecutionPolicy Bypass -File &quot;$(ProjectDir)BuildIncrement.ps1&quot;&#xA;" />
+	</Target>
 </Project>

@@ -43,7 +43,7 @@ public sealed partial class PreferencesDialog
 
 
         //TODO: Put this in a VM and make this data get logged at start up with some more system info.
-        if (Debugger.IsAttached)
+        if (GlobalData.DeveloperBuild)
         {
             //Get Device Info such as architecture and .NET Version
             CPUArchitecture.Text = "CPU ARCH: " + RuntimeInformation.ProcessArchitecture;
