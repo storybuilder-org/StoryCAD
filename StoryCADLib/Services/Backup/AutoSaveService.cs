@@ -107,8 +107,14 @@ namespace StoryCAD.Services.Backup
             }
             catch (Exception _ex)
             {
+                //Show failed message.
+                GlobalData.GlobalDispatcher.TryEnqueue(() =>
+                {
+                    Ioc.Default.GetRequiredService<ShellViewModel>().ShowMessage(LogLevel.Warn,
+                        "Making an AutoSave failed.", false);
+                });
                 _logger.LogException(LogLevel.Error, _ex,
-                    "Error saving file in AutoSaveService.AutoSaveProject()");
+                    $"Error saving file in AutoSaveService.AutoSaveProject() {_ex.Message}");
             }
             return Task.CompletedTask;
         }
