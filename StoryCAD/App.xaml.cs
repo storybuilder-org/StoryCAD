@@ -78,7 +78,16 @@ public partial class App
             SyncfusionLicenseProvider.RegisterLicense(token);
         }
         catch { GlobalData.ShowDotEnvWarning = true; }
-        
+
+        //Developer build check
+        if (Debugger.IsAttached ||
+            GlobalData.ShowDotEnvWarning ||
+            Package.Current.Id.Version.Revision != 0)
+        {
+            GlobalData.DeveloperBuild = true;
+        }
+        else { GlobalData.DeveloperBuild = false; }
+
         InitializeComponent();
 
         _log = Ioc.Default.GetService<LogService>();
