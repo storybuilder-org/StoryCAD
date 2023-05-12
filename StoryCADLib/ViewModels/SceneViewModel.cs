@@ -513,18 +513,15 @@ public class SceneViewModel : ObservableRecipient, INavigable
     /// </summary>
     public void SwitchCastView()
     {
-        if (_toggleEnabled)
+        if (ShowCastSelection == ShowAllCharacters)
         {
-            if (ShowCastSelection == ShowAllCharacters)
-            {
-                CastSource = CastMembers;
-                Messenger.Send(new StatusChangedMessage(new("Add / Remove Cast Members", LogLevel.Info, true)));
-            }
-            else if (ShowCastSelection == ShowCastMembers)
-            {
-                CastSource = CharacterList;
-                Messenger.Send(new StatusChangedMessage(new("Show Selected Cast Members", LogLevel.Info, true)));
-            }
+            CastSource = CastMembers;
+            Messenger.Send(new StatusChangedMessage(new("Add / Remove Cast Members", LogLevel.Info, true)));
+        }
+        else if (ShowCastSelection == ShowCastMembers)
+        {
+            CastSource = CharacterList;
+            Messenger.Send(new StatusChangedMessage(new("Show Selected Cast Members", LogLevel.Info, true)));
         }
     }
 
