@@ -340,7 +340,6 @@ public class SceneViewModel : ObservableRecipient, INavigable
     {
         _changeable = false;
         _changed = false;
-        _toggleEnabled = false;
 
         Uuid = Model.Uuid;
         Name = Model.Name;
@@ -412,7 +411,6 @@ public class SceneViewModel : ObservableRecipient, INavigable
         Notes = Model.Notes;
         GetOverviewViewpoint();
 
-        _toggleEnabled = true;
         _changeable = true;
     }
 
