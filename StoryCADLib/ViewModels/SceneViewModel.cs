@@ -25,7 +25,6 @@ public class SceneViewModel : ObservableRecipient, INavigable
     private readonly LogService _logger;
     private bool _changeable; // process property changes for this story element
     private bool _changed;    // this story element has changed
-    private bool _toggleEnabled = false;
     private const bool ShowCastMembers = false;
     private const bool ShowAllCharacters = true;
 
