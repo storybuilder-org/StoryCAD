@@ -1679,7 +1679,8 @@ public class ShellViewModel : ObservableRecipient
 
     private void AddFolder()
     {
-        TreeViewNodeClicked(AddStoryElement(StoryItemType.Folder));
+        var z = AddStoryElement(StoryItemType.Folder);
+        TreeViewNodeClicked(z);
     }
 
     private void AddSection()
@@ -1771,12 +1772,13 @@ public class ShellViewModel : ObservableRecipient
             _newNode.Parent.IsExpanded = true;
             _newNode.IsRoot = false; //Only an overview node can be a root, which cant be created normally
         }
+        else { return null; }
 
         Messenger.Send(new IsChangedMessage(true));
         Messenger.Send(new StatusChangedMessage(new($"Added new {typeToAdd}", LogLevel.Info, true)));
         _canExecuteCommands = true;
 
-        return null;
+        return _newNode;
     }
 
     private async void RemoveStoryElement()
