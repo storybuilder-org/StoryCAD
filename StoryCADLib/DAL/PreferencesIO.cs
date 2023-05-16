@@ -9,6 +9,8 @@ using Microsoft.UI.Xaml.Media;
 using StoryCAD.Models;
 using StoryCAD.Models.Tools;
 using StoryCAD.Services.Logging;
+using Windows.UI.ViewManagement;
+using System.Diagnostics;
 
 namespace StoryCAD.DAL;
 
@@ -170,6 +172,8 @@ public class PreferencesIo
             _model.PrimaryColor = new SolidColorBrush(Colors.DarkSlateGray);
             _model.SecondaryColor = new SolidColorBrush(Colors.White);
         }
+
+        _model.AccentColor = new UISettings().GetColorValue(UIColorType.Accent);
     }
 
     /// <summary>
