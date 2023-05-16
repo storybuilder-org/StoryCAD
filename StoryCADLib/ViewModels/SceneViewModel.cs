@@ -25,7 +25,6 @@ public class SceneViewModel : ObservableRecipient, INavigable
     private readonly LogService _logger;
     private bool _changeable; // process property changes for this story element
     private bool _changed;    // this story element has changed
-    private bool _toggleEnabled = false;
     private const bool ShowCastMembers = false;
     private const bool ShowAllCharacters = true;
 
@@ -341,7 +340,6 @@ public class SceneViewModel : ObservableRecipient, INavigable
     {
         _changeable = false;
         _changed = false;
-        _toggleEnabled = false;
 
         Uuid = Model.Uuid;
         Name = Model.Name;
@@ -413,7 +411,6 @@ public class SceneViewModel : ObservableRecipient, INavigable
         Notes = Model.Notes;
         GetOverviewViewpoint();
 
-        _toggleEnabled = true;
         _changeable = true;
     }
 
@@ -513,18 +510,15 @@ public class SceneViewModel : ObservableRecipient, INavigable
     /// </summary>
     public void SwitchCastView()
     {
-        if (_toggleEnabled)
+        if (ShowCastSelection == ShowAllCharacters)
         {
-            if (ShowCastSelection == ShowAllCharacters)
-            {
-                CastSource = CastMembers;
-                Messenger.Send(new StatusChangedMessage(new("Add / Remove Cast Members", LogLevel.Info, true)));
-            }
-            else if (ShowCastSelection == ShowCastMembers)
-            {
-                CastSource = CharacterList;
-                Messenger.Send(new StatusChangedMessage(new("Show Selected Cast Members", LogLevel.Info, true)));
-            }
+            CastSource = CastMembers;
+            Messenger.Send(new StatusChangedMessage(new("Add / Remove Cast Members", LogLevel.Info, true)));
+        }
+        else if (ShowCastSelection == ShowCastMembers)
+        {
+            CastSource = CharacterList;
+            Messenger.Send(new StatusChangedMessage(new("Show Selected Cast Members", LogLevel.Info, true)));
         }
     }
 
