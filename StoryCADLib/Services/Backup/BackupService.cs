@@ -71,18 +71,14 @@ namespace StoryCAD.Services.Backup
         }
 
         /// <summary>
-        /// This method is used to enable the timed backup
-        /// timer and start counting down. At the expiration
-        /// of the timer, BackupTask will be called to backup
-        /// the project.  The timer's AutoReset will cause it
-        /// to keep running timer events until it's stopped
-       /// via a call to StopBackupTimer().
-        /// These two methods are called from file open, file
-        /// new, and file close to insure that  timed backups
-        /// are taken only when a project is open.
+        /// This method is used to enable the timed backup timer and start counting down. At the expiration
+        /// of the timer, BackupTask will be called to backup  the project.  The timer's AutoReset will cause 
+        /// ir to keep running timer events until it's stopped via a call to StopBackupTimer().
         /// 
-        /// If the user's Preferences don't want timed backups,
-        /// they won't be started. 
+        /// These two methods (start and stop) are called from file open, file  new, and file close to
+        /// insure that  timed backups are taken only when a project is open.
+        /// 
+        /// If the user's Preferences don't want timed backups, then the interval timer won't be started. 
         /// </summary>
         public void StartTimedBackup()
         {
@@ -116,7 +112,7 @@ namespace StoryCAD.Services.Backup
                 }
 
                 //Gets correct name for file
-                Log.Log(LogLevel.Info, "Getting backup path and file to made");
+                Log.Log(LogLevel.Info, "Getting backup path and file to make");
                 string fileName = $"{_shellVM!.StoryModel.ProjectFile.Name} as of {DateTime.Now}".Replace('/', ' ').Replace(':', ' ').Replace(".stbx", "");
                 StorageFolder backupRoot = await StorageFolder.GetFolderFromPathAsync(GlobalData.Preferences.BackupDirectory.Replace(".stbx", ""));
                 StorageFolder backupLocation = await backupRoot.CreateFolderAsync(_shellVM.StoryModel.ProjectFile.Name, CreationCollisionOption.OpenIfExists);

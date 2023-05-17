@@ -33,13 +33,13 @@ public sealed partial class PreferencesDialog
     /// </summary>
     private async void ShowInfo()
     {
-        Version.Text = PreferencesVm.CurrentModel.Version;
+        Version.Text = PreferencesVm.Version;
         Changelog.Text = await new Changelog().GetChangelogText();
 
-        if (PreferencesVm.CurrentModel.WrapNodeNames == TextWrapping.WrapWholeWords) { TextWrap.IsChecked = true; }
+        if (PreferencesVm.WrapNodeNames == TextWrapping.WrapWholeWords) { TextWrap.IsChecked = true; }
         else { TextWrap.IsChecked = false; }
 
-        SearchEngine.SelectedIndex = (int)PreferencesVm.CurrentModel.PreferredSearchEngine;
+        SearchEngine.SelectedIndex = (int)PreferencesVm.PreferredSearchEngine;
 
 
         //TODO: Put this in a VM and make this data get logged at start up with some more system info.
@@ -100,7 +100,7 @@ public sealed partial class PreferencesDialog
         StorageFolder _folder = await _folderPicker.PickSingleFolderAsync();
         if (_folder != null)
         {
-            PreferencesVm.CurrentModel.BackupDirectory = _folder.Path;
+            PreferencesVm.BackupDirectory = _folder.Path;
         }
     }
     private async void SetProjectPath(object sender, RoutedEventArgs e)
@@ -119,7 +119,7 @@ public sealed partial class PreferencesDialog
         StorageFolder folder = await _folderPicker.PickSingleFolderAsync();
         if (folder != null)
         {
-            PreferencesVm.CurrentModel.ProjectDirectory = folder.Path;
+            PreferencesVm.ProjectDirectory = folder.Path;
             ProjDirBox.Text = folder.Path; //Updates the box visually (fixes visual glitch.)
         }
     }
@@ -144,7 +144,7 @@ public sealed partial class PreferencesDialog
     /// </summary>
     private void SetInitToFalse(object sender, RoutedEventArgs e)
     {
-        PreferencesVm.CurrentModel.PreferencesInitialized = false;
+        PreferencesVm.PreferencesInitialized = false;
     }
 
     /// <summary>
@@ -154,8 +154,8 @@ public sealed partial class PreferencesDialog
     {
         if ((sender as CheckBox).IsChecked == true)
         {
-            PreferencesVm.CurrentModel.WrapNodeNames = TextWrapping.WrapWholeWords;
+            PreferencesVm.WrapNodeNames = TextWrapping.WrapWholeWords;
         }
-        else { PreferencesVm.CurrentModel.WrapNodeNames = TextWrapping.NoWrap; }
+        else { PreferencesVm.WrapNodeNames = TextWrapping.NoWrap; }
     }
 }

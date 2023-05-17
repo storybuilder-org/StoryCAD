@@ -602,14 +602,14 @@ public class ShellViewModel : ObservableRecipient
     /// 
     /// When an AppBar command button is pressed, the currently active StoryElement ViewModel
     /// displayed in SplitViewFrame's Content doesn't go through Deactivate() and hence doesn't
-    /// call its SaveModel() method. Hence this method, which determines which viewmodel's active 
-    /// and calls its SaveModel() method.
+    /// call its WritePreferences() method. Hence this method, which determines which viewmodel's active 
+    /// and calls its WritePreferences() method.
     /// </summary>
     public void SaveModel()
     {
         if (SplitViewFrame.CurrentSourcePageType is null) { return; }
 
-        Logger.Log(LogLevel.Trace, $"SaveModel- Page type={SplitViewFrame.CurrentSourcePageType}");
+        Logger.Log(LogLevel.Trace, $"WritePreferences- Page type={SplitViewFrame.CurrentSourcePageType}");
 
         switch (SplitViewFrame.CurrentSourcePageType.ToString())
         {
@@ -735,7 +735,7 @@ public class ShellViewModel : ObservableRecipient
             }
 
             ShowHomePage();
-            if (GlobalData.Preferences.AutoSave) { _autoSaveService.StartAutoSave(); }
+
             string _msg = $"Opened project {StoryModel.ProjectFilename}";
             Logger.Log(LogLevel.Info, _msg);
         }
@@ -1006,7 +1006,9 @@ public class ShellViewModel : ObservableRecipient
     {
         Messenger.Send(new StatusChangedMessage(new("Updating Preferences", LogLevel.Info, true)));
 
+
         //Creates and shows dialog
+        Ioc.Default.GetRequiredService<PreferencesViewModel>().LoadModel();
         ContentDialog _preferencesDialog = new()
         {
             XamlRoot = GlobalData.XamlRoot,
@@ -1021,6 +1023,7 @@ public class ShellViewModel : ObservableRecipient
         {
             // Save changes
             case ContentDialogResult.Primary:
+                Ioc.Default.GetRequiredService<PreferencesViewModel>().SaveModel();
                 await Ioc.Default.GetRequiredService<PreferencesViewModel>().SaveAsync();
                 Messenger.Send(new StatusChangedMessage(new("Preferences updated", LogLevel.Info, true)));
 
