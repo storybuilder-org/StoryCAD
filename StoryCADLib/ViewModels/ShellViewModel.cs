@@ -516,7 +516,7 @@ public class ShellViewModel : ObservableRecipient
             return;
         }
         Logger.Log(LogLevel.Info, $"TreeViewNodeClicked for {selectedItem}");
-        RightClickedTreeviewItem.Background = null;
+        //RightClickedTreeviewItem.Background = null;
         try
         {
             NavigationService _nav = Ioc.Default.GetRequiredService<NavigationService>();
@@ -1771,6 +1771,7 @@ public class ShellViewModel : ObservableRecipient
         {
             _newNode.Parent.IsExpanded = true;
             _newNode.IsRoot = false; //Only an overview node can be a root, which cant be created normally
+            _newNode.IsSelected = true;
         }
         else { return null; }
 
@@ -2195,6 +2196,13 @@ public class ShellViewModel : ObservableRecipient
                 break;
         }
     }
+
+    #endregion
+
+    #region Attched Properties
+
+
+
 
     #endregion
 

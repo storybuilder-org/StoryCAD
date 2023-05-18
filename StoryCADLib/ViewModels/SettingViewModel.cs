@@ -51,6 +51,13 @@ public class SettingViewModel : ObservableRecipient, INavigable
         }
     }
 
+    private bool _isTextBoxFocused;
+    public bool IsTextBoxFocused
+    {
+        get => _isTextBoxFocused;
+        set => SetProperty(ref _isTextBoxFocused, value);
+    }
+
     // Setting (General) data
 
     private string _locale;
@@ -187,6 +194,8 @@ public class SettingViewModel : ObservableRecipient, INavigable
 
         Uuid = Model.Uuid;
         Name = Model.Name;
+        if (Name.Equals("New Setting"))
+            IsTextBoxFocused = true;
         Locale = Model.Locale;
         Season = Model.Season;
         Period = Model.Period;
@@ -210,6 +219,7 @@ public class SettingViewModel : ObservableRecipient, INavigable
         {
             // Story.Uuid is read-only and cannot be assigned
             Model.Name = Name;
+            IsTextBoxFocused = false;
             Model.Locale = Locale;
             Model.Season = Season;
             Model.Period = Period;

@@ -338,7 +338,8 @@
                                                    RightTapped="TreeViewItem_RightTapped" >
                                     <StackPanel Orientation="Horizontal">
                                         <SymbolIcon Symbol="{x:Bind Symbol, Mode=OneWay}" Width="20" Height="20"/>
-                                        <TextBlock Text="{x:Bind Name, Mode=TwoWay}" TextWrapping="{Binding  TextWrapping}" MaxWidth="220" Margin="10,0,10,0"/>
+                                        <TextBlock Text="{x:Bind Name, Mode=TwoWay}"          
+                                                   TextWrapping="{x:Bind TextWrapping}" MaxWidth="220" Margin="10,0,10,0"/>
                                     </StackPanel>
                                 </muxc:TreeViewItem>
                             </DataTemplate>

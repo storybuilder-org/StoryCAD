@@ -55,6 +55,13 @@ public class FolderViewModel : ObservableRecipient, INavigable
         }
     }
 
+    private bool _isTextBoxFocused;
+    public bool IsTextBoxFocused
+    {
+        get => _isTextBoxFocused;
+        set => SetProperty(ref _isTextBoxFocused, value);
+    }
+
     // Folder data
 
     private string _notes;
@@ -103,6 +110,8 @@ public class FolderViewModel : ObservableRecipient, INavigable
 
         Uuid = Model.Uuid;
         Name = Model.Name;
+        if (Name.Equals("New Folder"))
+            IsTextBoxFocused = true;
         Notes = Model.Notes;
 
         _changeable = true;
@@ -114,6 +123,7 @@ public class FolderViewModel : ObservableRecipient, INavigable
         {
             // Story.Uuid is read-only; no need to save
             Model.Name = Name;
+            IsTextBoxFocused = false;   
 
             // Write RYG file
             Model.Notes = Notes;

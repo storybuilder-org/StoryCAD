@@ -6,6 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:usercontrols="using:StoryCAD.Controls"
+    xmlns:viewModels="using:StoryCAD.ViewModels"
     mc:Ignorable="d" >
 
     <Grid>
@@ -13,7 +14,9 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <TextBox Header="Name" Grid.Row="0" Text="{x:Bind FolderVm.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="10,10,10,0" />
+        <TextBox Header="Name" Grid.Row="0" Text="{x:Bind FolderVm.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                 viewModels:TextBoxFocus.IsFocused="{x:Bind FolderVm.IsTextBoxFocused, Mode=TwoWay}"
+                 Margin="10,10,10,0" />
         <usercontrols:RichEditBoxExtended Header="Notes" Grid.Row="1" RtfText="{x:Bind FolderVm.Notes, Mode=TwoWay}" AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap" ScrollViewer.VerticalScrollBarVisibility="Visible" Margin="10,10,10,0" />
     </Grid>   
 

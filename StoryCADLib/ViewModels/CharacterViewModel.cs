@@ -67,6 +67,13 @@ public class CharacterViewModel : ObservableRecipient, INavigable
         }
     }
 
+    private bool _isTextBoxFocused;
+    public bool IsTextBoxFocused
+    {
+        get => _isTextBoxFocused;
+        set => SetProperty(ref _isTextBoxFocused, value);
+    }
+
     // Character role data
 
     private string _role;
@@ -536,6 +543,8 @@ public class CharacterViewModel : ObservableRecipient, INavigable
 
         Uuid = Model.Uuid;
         Name = Model.Name;
+        if (Name.Equals("New Character"))
+            IsTextBoxFocused = true;
         Role = Model.Role;
         StoryRole = Model.StoryRole;
         Archetype = Model.Archetype;
@@ -604,6 +613,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable
         {
             // Story.Uuid is read-only and cannot be set
             Model.Name = Name;
+            IsTextBoxFocused = false;
             Model.Role = Role;
             Model.StoryRole = StoryRole;
             Model.Archetype = Archetype;
