@@ -516,7 +516,10 @@ public class ShellViewModel : ObservableRecipient
             return;
         }
         Logger.Log(LogLevel.Info, $"TreeViewNodeClicked for {selectedItem}");
-        //RightClickedTreeviewItem.Background = null;
+        
+
+        if (RightClickedTreeviewItem != null) { RightClickedTreeviewItem.Background = null; }
+        
         try
         {
             NavigationService _nav = Ioc.Default.GetRequiredService<NavigationService>();

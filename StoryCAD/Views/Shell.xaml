@@ -328,7 +328,7 @@
                                    SelectionMode="Single"
                                    DragLeave="TreeView_OnDragLeave"
                                    DragItemsStarting="TreeView_DragItemsStarting"
-                                   ItemInvoked="TreeViewItem_Invoked">
+                                   ItemInvoked="TreeViewItem_Invoked"> 
                         <muxc:TreeView.ItemTemplate>
                             <DataTemplate  x:DataType="viewmodels:StoryNodeItem">
                                 <muxc:TreeViewItem ItemsSource="{x:Bind Children}" 

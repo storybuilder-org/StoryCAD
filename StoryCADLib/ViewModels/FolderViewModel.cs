@@ -110,7 +110,7 @@ public class FolderViewModel : ObservableRecipient, INavigable
 
         Uuid = Model.Uuid;
         Name = Model.Name;
-        if (Name.Equals("New Folder"))
+        if (Name.Equals("New Folder") || Name.Equals("New Note"))
             IsTextBoxFocused = true;
         Notes = Model.Notes;
 
