@@ -33,7 +33,8 @@
                 </TreeView.ItemTemplate>
             </TreeView>
 
-            <TextBlock Text="NarratorView View" Grid.Column="1" Grid.Row="0" HorizontalAlignment="Center"/>
+            <TextBlock Text="NarratorView View"  Grid.Row="0" Grid.Column="1" HorizontalAlignment="Center"/>
+
             <TreeView ItemsSource="{x:Bind ShellVM.StoryModel.NarratorView, Mode=TwoWay}" Margin="0,5" Grid.Row="1" Grid.Column="1">
                 <TreeView.ItemTemplate>
                     <DataTemplate x:DataType="viewModels:StoryNodeItem">
@@ -44,7 +45,8 @@
                 </TreeView.ItemTemplate>
             </TreeView>
 
-            <TextBlock Grid.Row="2" Margin="0,0,0,5" Text="{x:Bind ToolVM.Message, Mode=OneWay}" HorizontalAlignment="Center" Grid.ColumnSpan="22" TextWrapping="Wrap"/>
+            <TextBlock Grid.Column="0"  Grid.Row="1" Margin="0,0,0,5" Text="{x:Bind ToolVM.Message, Mode=OneWay}" HorizontalAlignment="Center" 
+                       Grid.ColumnSpan="2" TextWrapping="Wrap"/>
         </Grid>
 
         <StackPanel Grid.Column="0" Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center">

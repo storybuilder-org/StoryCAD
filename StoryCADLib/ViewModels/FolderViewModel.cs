@@ -112,6 +112,8 @@ public class FolderViewModel : ObservableRecipient, INavigable
         Name = Model.Name;
         if (Name.Equals("New Folder") || Name.Equals("New Note"))
             IsTextBoxFocused = true;
+        if (Name.Equals("New Section"))
+            IsTextBoxFocused = true;
         Notes = Model.Notes;
 
         _changeable = true;
