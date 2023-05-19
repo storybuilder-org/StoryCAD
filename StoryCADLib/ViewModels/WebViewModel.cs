@@ -49,6 +49,13 @@ public class WebViewModel : ObservableRecipient, INavigable
         }
     }
 
+    private bool _isTextBoxFocused;
+    public bool IsTextBoxFocused
+    {
+        get => _isTextBoxFocused;
+        set => SetProperty(ref _isTextBoxFocused, value);
+    }
+
     private Guid _uuid;
     public Guid Guid
     {
@@ -224,6 +231,8 @@ public class WebViewModel : ObservableRecipient, INavigable
         
         Guid = Model.Uuid;
         Name = Model.Name;
+        if (Name.Equals("New Webpage"))
+            IsTextBoxFocused = true;
         Url = Model.URL;
         Timestamp = Model.Timestamp;
 
@@ -236,6 +245,7 @@ public class WebViewModel : ObservableRecipient, INavigable
         {
             // Story.Uuid is read-only and cannot be assigned
             Model.Name = Name;
+            IsTextBoxFocused = false;
             Model.URL = Url;
             Model.Timestamp = Timestamp;
 

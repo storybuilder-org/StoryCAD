@@ -50,6 +50,7 @@
     <None Remove="Services\Dialogs\Tools\NarrativeTool.xaml" />
     <None Remove="Services\Dialogs\Tools\PrintReportsDialog.xaml" />
     <None Remove="Services\Dialogs\UnifiedMenu.xaml" />
+    <None Remove="ViewModels\Shell.xaml" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Assets\Install\**" />
@@ -157,6 +158,9 @@
   <ItemGroup>
     <Page Update="Controls\RelationshipView.xaml">
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="ViewModels\Shell.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
     </Page>
   </ItemGroup>
 

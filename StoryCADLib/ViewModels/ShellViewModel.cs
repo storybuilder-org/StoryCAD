@@ -516,7 +516,10 @@ public class ShellViewModel : ObservableRecipient
             return;
         }
         Logger.Log(LogLevel.Info, $"TreeViewNodeClicked for {selectedItem}");
+        
 
+        if (RightClickedTreeviewItem != null) { RightClickedTreeviewItem.Background = null; }
+        
         try
         {
             NavigationService _nav = Ioc.Default.GetRequiredService<NavigationService>();
@@ -1680,6 +1683,7 @@ public class ShellViewModel : ObservableRecipient
     private void AddFolder()
     {
         TreeViewNodeClicked(AddStoryElement(StoryItemType.Folder));
+
     }
 
     private void AddSection()
@@ -1770,13 +1774,15 @@ public class ShellViewModel : ObservableRecipient
         {
             _newNode.Parent.IsExpanded = true;
             _newNode.IsRoot = false; //Only an overview node can be a root, which cant be created normally
+            _newNode.IsSelected = true;
         }
+        else { return null; }
 
         Messenger.Send(new IsChangedMessage(true));
         Messenger.Send(new StatusChangedMessage(new($"Added new {typeToAdd}", LogLevel.Info, true)));
         _canExecuteCommands = true;
 
-        return null;
+        return _newNode;
     }
 
     private async void RemoveStoryElement()
@@ -2193,6 +2199,13 @@ public class ShellViewModel : ObservableRecipient
                 break;
         }
     }
+
+    #endregion
+
+    #region Attched Properties
+
+
+
 
     #endregion
 
