@@ -46,29 +46,32 @@ public sealed partial class PreferencesDialog
         if (GlobalData.DeveloperBuild)
         {
             //Get Device Info such as architecture and .NET Version
-            CPUArchitecture.Text = "CPU ARCH: " + RuntimeInformation.ProcessArchitecture;
-            OSArchitecture.Text = "OS ARCH: " + RuntimeInformation.OSArchitecture;
-            NetVer.Text = ".NET Version: " + RuntimeInformation.FrameworkDescription;
+            DevInfo.Text = $"""
+                CPU ARCH - {RuntimeInformation.ProcessArchitecture}
+                 OS ARCH - {RuntimeInformation.OSArchitecture}
+                .NET Ver - {RuntimeInformation.OSArchitecture}
+                Startup  - {GlobalData.StartUpTimer.ElapsedMilliseconds} ms
+                Elmah Status - {GlobalData.ElmahLogging}
+                Developer Status - {GlobalData.DeveloperBuild}
+                Windows Build - {Environment.OSVersion.Version.Build}
+                """;
 
             try
             {
                 //Get Windows Build and Version
-                OSInfo.Text = "Windows Build: " + Environment.OSVersion.Version.Build;
                 if (Convert.ToInt32(Environment.OSVersion.Version.Build) >= 22000)
                 {
-                    OSInfo.Text += " (Windows 11)";
+                    DevInfo.Text += " (Windows 11)";
                 }
-                else { OSInfo.Text += " (Windows 10)"; }
+                else { DevInfo.Text += " (Windows 10)"; }
             }
-            catch { OSInfo.Text = "OS Info:Error"; }
+            catch { DevInfo.Text = "(Unknown)"; }
 
 
             //Detect if 32-bit or 64-bit process (I'm not sure if it's possible to )
-            if (IntPtr.Size == 4) { AppArchitecture.Text = "We are running as a 32 bit process."; }
-            else if (IntPtr.Size == 8) { AppArchitecture.Text = "We are running as a 64 bit process."; }
-            else { AppArchitecture.Text = $"UNKNOWN ARCHITECTURE!\nIntPtr was {IntPtr.Size}, expected 4 or 8."; }
-
-            Startup.Text = $"Time to start: {GlobalData.StartUpTimer.ElapsedMilliseconds} milliseconds";
+            if (IntPtr.Size == 4) { DevInfo.Text += "\nApp ARCH - 32 bit"; }
+            else if (IntPtr.Size == 8) { DevInfo.Text += "\nApp ARCH - 64 bit"; }
+            else { DevInfo.Text += $"\nApp Arch - Unknown"; }
         }
         else //Remove this because no debugger is attached.
         {
@@ -146,6 +149,9 @@ public sealed partial class PreferencesDialog
     {
         PreferencesVm.CurrentModel.PreferencesInitialized = false;
     }
+
+    //Reloads dev stats
+    public void RefreshDevStats(object sender, RoutedEventArgs e) => ShowInfo();
 
     /// <summary>
     /// This toggles the status of preferences.TextWrapping

@@ -69,7 +69,7 @@ public class LogService : ILogService
 
     public bool AddElmahTarget()
     {
-        if (apiKey == string.Empty | logID == string.Empty)
+        if (apiKey == string.Empty || logID == string.Empty)
             return false;
 
         try

@@ -226,34 +226,31 @@ public partial class App
         }
         catch (Exception ex) { _log.LogException(LogLevel.Error, ex, ex.Message); }
 
-        if (Debugger.IsAttached) {_log.Log(LogLevel.Info, "Bypassing elmah.io as debugger is attached.");}
-        else
-        {
-            //TODO: check elmah is bypassed when logging is disabled by user.
-            GlobalData.ElmahLogging = _log.AddElmahTarget();
-            if (GlobalData.ElmahLogging )
-            {
-                
-                _log.Log(LogLevel.Info, "elmah.io log target added");
-            }
-            else  // can have several reasons (no doppler, or an error adding the target){
-            {
-                _log.Log(LogLevel.Info, "elmah.io log target bypassed");
-            }
-
-
-        }
-
         string pathMsg = string.Format("Configuration data location = " + GlobalData.RootDirectory);
         _log.Log(LogLevel.Info, pathMsg);
         Trace.Listeners.Add(new TextWriterTraceListener(Console.Out));
         Trace.AutoFlush = true;
         Trace.Indent();
         Trace.WriteLine(pathMsg);
-        
+
         // Load Preferences
         PreferencesService pref = Ioc.Default.GetService<PreferencesService>();
         await pref.LoadPreferences(GlobalData.RootDirectory);
+
+        if (Debugger.IsAttached) {_log.Log(LogLevel.Info, "Bypassing elmah.io as debugger is attached.");}
+        else
+        {
+            if (GlobalData.Preferences.ErrorCollectionConsent)
+            {
+                GlobalData.ElmahLogging = _log.AddElmahTarget();
+                if (GlobalData.ElmahLogging) { _log.Log(LogLevel.Info, "elmah successfully added."); }
+                else { _log.Log(LogLevel.Info, "Couldn't add elmah."); }
+            }
+            else  // can have several reasons (no doppler, or an error adding the target){
+            {
+                _log.Log(LogLevel.Info, "elmah.io log target bypassed");
+            }
+        }
         
         Ioc.Default.GetService<BackendService>()!.StartupRecording();
 
