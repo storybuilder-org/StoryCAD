@@ -11,8 +11,9 @@
         <ResourceDictionary>
             <ResourceDictionary.ThemeDictionaries>
                 <ResourceDictionary x:Key="Default">
-                    <SolidColorBrush x:Key="TreeViewItemBackgroundPointerOver" Color="{x:Bind Preferences.AccentColor, Mode=OneWay}"/>
-                    <!-- <SolidColorBrush x:Key="TreeViewItemForegroundPointerOver" Color="Red"/>-->
+                    <SolidColorBrush x:Key="TreeViewItemBackgroundPointerOver" Color="{ThemeResource SystemAccentColor}" />
+                    <SolidColorBrush x:Key="TreeViewItemBackgroundSelected" Color="{ThemeResource SystemAccentColor}"  />
+                    <!-- Replace #FF00FF with your color -->
                 </ResourceDictionary>
             </ResourceDictionary.ThemeDictionaries>
 
