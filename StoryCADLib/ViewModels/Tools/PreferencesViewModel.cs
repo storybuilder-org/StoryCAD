@@ -48,18 +48,20 @@ public class PreferencesViewModel : ObservableValidator
 
     private string _name;
     [Required(ErrorMessage = "Name is required.")]
+    [MinLength(2, ErrorMessage = "Name should be longer than one character")]
     public string Name
     {
         get => _name;
-        set => SetProperty(ref _name, value, true);
+        set => SetProperty(ref _name, value, false);
     }
 
     [EmailAddress(ErrorMessage = "Must be a valid email address")]
+    [MinLength(2, ErrorMessage = "Name should be longer than one character")]
     private string _email;
     public string Email
     {
         get => _email;
-        set => SetProperty(ref _email, value, true);
+        set => SetProperty(ref _email, value, false);
     }
 
     private bool _errorCollectionConsent;
@@ -115,13 +117,11 @@ public class PreferencesViewModel : ObservableValidator
     /// <summary>
     /// AutoSaveInterval in seconds
     /// </summary>
-    // TODO: Add validation for AutoSaveInterval using RangeAttribute
-    [Range(15, 60,
-        ErrorMessage = "Value for {0} must be between {1} and {2} seconds.")]
+    [Range(15, 60, ErrorMessage = "Value for {0} must be between {1} and {2} seconds.")]
     public int AutoSaveInterval
     {
         get => _autoSaveInterval;
-        set => SetProperty(ref _autoSaveInterval, value, true);
+        set => SetProperty(ref _autoSaveInterval, value, false);
     }
     public bool BackupOnOpen { get; set; }
     public bool TimedBackup { get; set; }
@@ -130,29 +130,30 @@ public class PreferencesViewModel : ObservableValidator
     /// <summary>
     /// TimedBackupInterval in minutes
     /// </summary>
-    [Range(10, 60,
-        ErrorMessage = "Value for {0} must be between {1} and {2} minutes.")]
+    [Range(10, 60, ErrorMessage = "Value for {0} must be between {1} and {2} minutes.")]
     public int TimedBackupInterval
     {
         get => _timedBackupInterval;
-        set => SetProperty(ref _timedBackupInterval, value, true);
+        set => SetProperty(ref _timedBackupInterval, value, false);
     }
 
     //Directories
 
     private string _projectDirectory;
+    [FilePath(ErrorMessage = "Project Directory must be a valid filepath")]
     public string ProjectDirectory
     {
         get => _projectDirectory;
-        set => SetProperty(ref _projectDirectory, value);
+        set => SetProperty(ref _projectDirectory, value, false);
     }
 
 
     private string _backupDirectory;
+    [FilePath(ErrorMessage = "Backup Directory must be a valid filepath")]
     public string BackupDirectory
     {
         get => _backupDirectory;
-        set => SetProperty(ref _backupDirectory, value);
+        set => SetProperty(ref _backupDirectory, value, false);
     }
     
     // Recent files (set automatically)
