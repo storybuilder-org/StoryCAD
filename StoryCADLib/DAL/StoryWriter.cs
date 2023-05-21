@@ -226,6 +226,9 @@ public class StoryWriter
         _attr = _xml.CreateAttribute("StoryProblem");
         _attr.Value = _rec.StoryProblem;
         _overview.Attributes.Append(_attr);
+        _attr = _xml.CreateAttribute("Premise");
+        _attr.Value = _rec.Premise;
+        _overview.Attributes.Append(_attr);
         _attr = _xml.CreateAttribute("StructureNotes");
         _attr.Value = _rec.StructureNotes;
         _overview.Attributes.Append(_attr);

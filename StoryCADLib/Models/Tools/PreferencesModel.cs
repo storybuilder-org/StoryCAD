@@ -38,7 +38,8 @@ public class PreferencesModel : ObservableObject
 
     // Visual changes
     public SolidColorBrush PrimaryColor { get; set; } //Sets UI Color
-    public SolidColorBrush SecondaryColor { get; set; }
+    public SolidColorBrush SecondaryColor { get; set; } //Sets Text Color
+    public Windows.UI.Color AccentColor { get; set; } //Sets Text Color
     public TextWrapping WrapNodeNames { get; set; }
 
     // Backup Information

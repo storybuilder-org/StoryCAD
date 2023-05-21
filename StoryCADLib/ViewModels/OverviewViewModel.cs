@@ -29,6 +29,16 @@ public class OverviewViewModel : ObservableRecipient, INavigable
     private bool _changeable; // process property changes for this story element
     private bool _changed;    // this story element has changed
 
+    // Premise synchronization fields
+
+    // True if StoryProblem has been set, in which case any
+    // Overview Premise changes must also be made to that
+    // ProblemModel's Premise property.
+    private bool _syncPremise;
+
+    // If a StoryProblem is set, this is the ProblemModel it points to
+    private ProblemModel _storyProblemModel;
+
     #endregion
 
     #region Properties
@@ -56,6 +66,13 @@ public class OverviewViewModel : ObservableRecipient, INavigable
             }
             SetProperty(ref _name, value);
         }
+    }
+
+    private bool _isTextBoxFocused;
+    public bool IsTextBoxFocused
+    {
+        get => _isTextBoxFocused;
+        set => SetProperty(ref _isTextBoxFocused, value);
     }
 
     // Overview data
@@ -101,32 +118,32 @@ public class OverviewViewModel : ObservableRecipient, INavigable
 
     // Premise data
 
-    private string _storyProblem;  // The Guid of a Problem StoryElement
-    public string StoryProblem
-    {
-        get => _storyProblem;
-        set 
-        {   LoadStoryPremise(value);  // Copy the problem's Premise to this Premise
-            SetProperty(ref _storyProblem, value);
-        }
-    }
-
     private string _premise;
+
     public string Premise
     {
         get => _premise;
         set => SetProperty(ref _premise, value);
     }
 
-    private bool _premiseLock;
-
-    public bool PremiseLock
+    private string _storyProblem;  // The Guid of a Problem StoryElement
+    public string StoryProblem
     {
-        get => _premiseLock;
-        set => SetProperty(ref _premiseLock, value);
+        get => _storyProblem;
+        set 
+        {   
+            SetProperty(ref _storyProblem, value);
+            if (value.Equals(string.Empty))
+            {
+                _syncPremise = false;
+                return;
+            }
+            _storyProblemModel = (ProblemModel) StoryElement.StringToStoryElement(_storyProblem);
+            _syncPremise = true;     // Set Premise to read-only
+        }
     }
 
-    // Structure data
+     // Structure data
 
     private string _storyType;
     public string StoryType
@@ -246,6 +263,7 @@ public class OverviewViewModel : ObservableRecipient, INavigable
 
         Uuid = Model.Uuid;
         Name = Model.Name;
+        if (Name.Equals("New Outline"))
         DateCreated = Model.DateCreated;
         Author = Model.Author;
         DateModified = Model.DateModified;
@@ -262,9 +280,10 @@ public class OverviewViewModel : ObservableRecipient, INavigable
         StoryProblem = Model.StoryProblem;
         StoryIdea = Model.StoryIdea;
         Concept = Model.Concept;
+        Premise = Model.Premise;
         StructureNotes = Model.StructureNotes;
         Notes = Model.Notes;
-
+        
         _changeable = true;
     }
 
@@ -274,6 +293,7 @@ public class OverviewViewModel : ObservableRecipient, INavigable
         {
             // Story.Uuid is read-only and cannot be assigned
             Model.Name = Name;
+            IsTextBoxFocused = false;
             Model.DateCreated = DateCreated;
             Model.Author = Author;
             Model.DateModified = DateModified;
@@ -290,48 +310,16 @@ public class OverviewViewModel : ObservableRecipient, INavigable
             Model.StoryProblem = StoryProblem;
             Model.StoryIdea = StoryIdea;
             Model.Concept = Concept;
+            Model.Premise = Premise;
+            if (_syncPremise)
+            {
+                _storyProblemModel.Premise = Premise;
+            }
             Model.StructureNotes = StructureNotes;
             Model.Notes = Notes;
         }
     }
-
-    private void LoadStoryPremise(string value)
-    {
-        if (value.Equals(string.Empty))
-            return;
-        ProblemModel _problem = (ProblemModel) StringToStoryElement(value);
-        PremiseLock = false;    // Set Premise to read/write to allow update
-        Premise = _problem.Premise;
-        PremiseLock = true;     // Set Premise to read-only
-    }
-
-    // ReSharper disable once MemberCanBeMadeStatic.Local
-    private StoryElement StringToStoryElement(string value)
-    {
-        if (value == null || value.Equals(string.Empty)) {return null;}
-
-        // Get the current StoryModel's StoryElementsCollection
-        StoryModel _storyModel = ShellViewModel.GetModel();
-        StoryElementCollection _elements = _storyModel.StoryElements;
-        // legacy: locate the StoryElement from its Name
-        foreach (StoryElement _element in _elements)  // Character or Setting??? Search both?
-        {
-            if (_element.Type == StoryItemType.Character | _element.Type == StoryItemType.Setting)
-            {
-                if (value.Equals(_element.Name))
-                    return _element;
-            }
-        }
-        // Look for the StoryElement corresponding to the passed guid
-        // (This is the normal approach)
-        if (Guid.TryParse(value, out Guid _guid))
-        {
-            if (_elements.StoryElementGuids.ContainsKey(_guid)) { return _elements.StoryElementGuids[_guid]; }
-        }
-        return null;  // Not found
-    }
-
-
+    
     #endregion
 
     #region ComboBox ItemsSource collections
@@ -367,7 +355,7 @@ public class OverviewViewModel : ObservableRecipient, INavigable
         }
         catch (Exception e)
         {
-            _logger.LogException(LogLevel.Fatal, e, "Error loading lists in Problem view model");
+            _logger!.LogException(LogLevel.Fatal, e, "Error loading lists in Problem view model");
             ShowError();
         }
 
@@ -383,10 +371,10 @@ public class OverviewViewModel : ObservableRecipient, INavigable
         StoryIdea = string.Empty;
         Concept = string.Empty;
         Premise = string.Empty;
-        PremiseLock = true;     // Premise is read-only and is only set when a story problem is selected
+        StoryProblem = string.Empty;
+        _syncPremise = false;     
         StructureNotes = string.Empty;
         Notes = string.Empty;
-        StoryProblem = string.Empty;
 
         PropertyChanged += OnPropertyChanged;
     }

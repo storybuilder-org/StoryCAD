@@ -472,7 +472,6 @@ public class ShellViewModel : ObservableRecipient
                         @"conflict[outcome].";
                     break;
             }
-            GlobalData.MainWindow.Title = $"StoryCAD - Editing {dialogVM.ProjectName!.Replace(".stbx", "")}";
             SetCurrentView(StoryViewType.ExplorerView);
             //TODO: Set expand and is selected?
 
@@ -520,7 +519,10 @@ public class ShellViewModel : ObservableRecipient
             return;
         }
         Logger.Log(LogLevel.Info, $"TreeViewNodeClicked for {selectedItem}");
+        
 
+        if (RightClickedTreeviewItem != null) { RightClickedTreeviewItem.Background = null; }
+        
         try
         {
             NavigationService _nav = Ioc.Default.GetRequiredService<NavigationService>();
@@ -904,7 +906,7 @@ public class ShellViewModel : ObservableRecipient
                         StoryModel.ProjectFolder = _saveAsVM.ParentFolder;
                         StoryModel.ProjectPath = _saveAsVM.SaveAsProjectFolderPath;
                         // Add to the recent files stack
-                        GlobalData.MainWindow.Title = $"StoryCAD - Editing {StoryModel.ProjectFilename.Replace(".stbx", "")}";
+                        UpdateWindowTitle();
                         new UnifiedVM().UpdateRecents(Path.Combine(StoryModel.ProjectFolder.Path, StoryModel.ProjectFile.Name));
                         // Indicate everything's done
                         Messenger.Send(new IsChangedMessage(true));
@@ -972,7 +974,7 @@ public class ShellViewModel : ObservableRecipient
         ResetModel();
         RightTappedNode = null; //Null right tapped node to prevent possible issues.
         SetCurrentView(StoryViewType.ExplorerView);
-        GlobalData.MainWindow.Title = "StoryCAD";
+        UpdateWindowTitle();
         Ioc.Default.GetRequiredService<BackupService>().StopTimedBackup();
         DataSource = StoryModel.ExplorerView;
         ShowHomePage();
@@ -1704,6 +1706,7 @@ public class ShellViewModel : ObservableRecipient
     private void AddFolder()
     {
         TreeViewNodeClicked(AddStoryElement(StoryItemType.Folder));
+
     }
 
     private void AddSection()
@@ -1794,13 +1797,15 @@ public class ShellViewModel : ObservableRecipient
         {
             _newNode.Parent.IsExpanded = true;
             _newNode.IsRoot = false; //Only an overview node can be a root, which cant be created normally
+            _newNode.IsSelected = true;
         }
+        else { return null; }
 
         Messenger.Send(new IsChangedMessage(true));
         Messenger.Send(new StatusChangedMessage(new($"Added new {typeToAdd}", LogLevel.Info, true)));
         _canExecuteCommands = true;
 
-        return null;
+        return _newNode;
     }
 
     private async void RemoveStoryElement()
@@ -2101,6 +2106,28 @@ public class ShellViewModel : ObservableRecipient
         }
     }
 
+
+    /// <summary>
+    /// This will dynamically update the title based
+    /// on the current conditions of the app.
+    /// </summary>
+    public void UpdateWindowTitle()
+    {
+        string BaseTitle = "StoryCAD ";
+
+        //Devloper/Unoffical Build title warning
+        if (GlobalData.DeveloperBuild) { BaseTitle += "(DEV BUILD) "; }
+        
+        //Open file check
+        if (StoryModel != null && DataSource != null && DataSource.Count > 0)
+        {
+            BaseTitle += $"- Currently editing {StoryModel.ProjectFilename.Replace(".stbx","")} ";
+        }
+
+        //Set window Title.
+        GlobalData.MainWindow.Title = BaseTitle;
+    }
+
     private bool IsExplorerView() => CurrentViewType == StoryViewType.ExplorerView;
     // ReSharper disable once UnusedMember.Local
     private bool IsNarratorView() => CurrentViewType == StoryViewType.NarratorView;
@@ -2195,6 +2222,13 @@ public class ShellViewModel : ObservableRecipient
                 break;
         }
     }
+
+    #endregion
+
+    #region Attched Properties
+
+
+
 
     #endregion
 

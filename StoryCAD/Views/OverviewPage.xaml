@@ -58,11 +58,11 @@
                               DisplayMemberPath="Name"
                               SelectedItem="{x:Bind OverviewVm.StoryProblem, Mode=TwoWay, Converter={StaticResource ToStoryElement}}" />
                     <TextBlock Grid.Row="1" Text=" "/>
-                    <usercontrols:RichEditBoxExtended Header="Premise" Grid.Row="2" RtfText="{x:Bind OverviewVm.Premise, Mode=TwoWay}"
-                                    IsReadOnly ="{x:Bind OverviewVm.PremiseLock, Mode=TwoWay}" TextWrapping="Wrap"
+                    <usercontrols:RichEditBoxExtended Header="Premise" Grid.Row="2" 
+                                    RtfText="{x:Bind OverviewVm.Premise, Mode=TwoWay}" AcceptsReturn="True"
+                                    IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                     ScrollViewer.VerticalScrollBarVisibility="Visible"
-                                    ToolTipService.ToolTip="This box displays the content of the Story Problems premise. (To change what appears in this box, go to the problem and edit the premise)"
-                                    PlaceholderText="Select a Problem as your main story problem. That problem's premise is your story premise. "/>
+                                    PlaceholderText="A [character] in a situation [genre, setting] wants something [goal], which brings him into [conflict] with a second character [opposition]. After [a series of conflicts], the [final battle] erupts, and [the protagonist] finally [resolves] the conflict. "/>
                 </Grid>
             </PivotItem>
             <PivotItem Header="Structure">

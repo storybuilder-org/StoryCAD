@@ -24,6 +24,15 @@ public class ProblemViewModel : ObservableRecipient, INavigable
     private bool _changeable;
     private bool _changed;
 
+    // Premise sync fields
+
+    private OverviewModel _overviewModel;
+
+    // True if _overviewModel.StoryProblem has been set, in which
+    // case any ProblemViewModel Premise changes must also be made
+    // to the _overviewModel.Premise property.
+    private bool _syncPremise;
+
     #endregion
 
     #region Properties
@@ -51,6 +60,13 @@ public class ProblemViewModel : ObservableRecipient, INavigable
             }
             SetProperty(ref _name, value);
         }
+    }
+
+    private bool _isTextBoxFocused;
+    public bool IsTextBoxFocused
+    {
+        get => _isTextBoxFocused;
+        set => SetProperty(ref _isTextBoxFocused, value);
     }
 
     // Problem problem data
@@ -239,6 +255,8 @@ public class ProblemViewModel : ObservableRecipient, INavigable
 
         Uuid = Model.Uuid;
         Name = Model.Name;
+        if (Name.Equals("New Problem"))
+            IsTextBoxFocused = true;    
         ProblemType = Model.ProblemType;
         ConflictType = Model.ConflictType;
         ProblemCategory = Model.ProblemCategory;
@@ -262,7 +280,13 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         Theme = Model.Theme;
         Premise = Model.Premise;
         Notes = Model.Notes;
-
+        StoryModel model = ShellViewModel.GetModel();
+        Guid root = model.ExplorerView[0].Uuid;
+        _overviewModel = (OverviewModel) model.StoryElements.StoryElementGuids[root];
+        ProblemModel storyProblem = (ProblemModel) StoryElement.StringToStoryElement(_overviewModel.StoryProblem);
+        if (storyProblem != null) { _syncPremise = true; }
+        else _syncPremise = false; 
+        
         _changeable = true;
     }
 
@@ -270,6 +294,7 @@ public class ProblemViewModel : ObservableRecipient, INavigable
     {
         if (_changed)
         {
+            IsTextBoxFocused = false;
             // Story.Uuid is read-only and cannot be assigned
             Model.Name = Name;
             Model.ProblemType = ProblemType;
@@ -288,10 +313,9 @@ public class ProblemViewModel : ObservableRecipient, INavigable
             Model.Outcome = Outcome;
             Model.Method = Method;
             Model.Theme = Theme;
-
-            // Write RTF files
             Model.StoryQuestion = StoryQuestion;
             Model.Premise = Premise;
+            if (_syncPremise) { _overviewModel.Premise = Premise; }
             Model.Notes = Notes;
 
             //_logger.Log(LogLevel.Info, string.Format("Requesting IsDirty change to true"));
@@ -379,7 +403,9 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         Method = string.Empty;
         Theme = string.Empty;
         Premise = string.Empty;
+        _syncPremise = false;
         Notes = string.Empty;
+        
         try
         {
             Dictionary<string, ObservableCollection<string>> _lists = GlobalData.ListControlSource;
@@ -397,7 +423,7 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         }
         catch (Exception e)
         {
-            _logger.LogException(LogLevel.Fatal, e, "Error loading lists in Problem view model");
+            _logger!.LogException(LogLevel.Fatal, e, "Error loading lists in Problem view model");
             ShowError();
         }
 

@@ -3,7 +3,7 @@
     "StoryCAD (Package)": {
       "commandName": "MsixPackage",
       "hotReloadEnabled": false,
-      "nativeDebugging": false
+      "nativeDebugging": true
     },
     "StoryCAD (Unpackaged)": {
       "commandName": "Project"
