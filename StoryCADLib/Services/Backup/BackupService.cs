@@ -2,7 +2,6 @@
 using System.ComponentModel;
 using System.IO;
 using System.IO.Compression;
-using System.Threading;
 using System.Threading.Tasks;
 using Windows.Storage;
 using CommunityToolkit.Mvvm.DependencyInjection;
@@ -20,6 +19,9 @@ namespace StoryCAD.Services.Backup
 
         private LogService Log = Ioc.Default.GetService<LogService>();
         ShellViewModel _shellVM;
+
+        #region Constructor
+
         public BackupService()
         {
             timedBackupWorker = new BackgroundWorker
@@ -30,12 +32,39 @@ namespace StoryCAD.Services.Backup
             timedBackupWorker.DoWork += RunBackupTask;
 
             backupTimer = new System.Timers.Timer
-                (GlobalData.Preferences.TimedBackupInterval * 60 * 1000);
+                (GlobalData.Preferences.TimedBackupInterval * 60 * 1000);  // interval in minutes
             backupTimer.AutoReset = true;
-            backupTimer.Stop();
             backupTimer.Elapsed += BackupTimer_Elapsed;
         }
 
+        #endregion
+
+        #region Public Methods
+        public void StartTimedBackup()
+        {
+            if (!GlobalData.Preferences.TimedBackup)
+               return;
+            
+            // If the timer is already running, stop it
+            if (backupTimer.Enabled)
+                backupTimer.Stop();
+
+            // Reset the timer and start it 
+            backupTimer.Interval = (GlobalData.Preferences.TimedBackupInterval * 60 * 1000); // interval in minutes
+            backupTimer.Start();
+        }
+
+        /// <summary>
+        /// Stops the timed backup task
+        /// </summary>
+        public void StopTimedBackup()
+        {
+            backupTimer.Stop();
+        }
+
+        #endregion
+
+        #region Private Methods
 
         /// <summary>
         /// Makes a backup every x minutes, x being the value of
@@ -49,7 +78,7 @@ namespace StoryCAD.Services.Backup
             {
                 //while (!timedBackupWorker.CancellationPending)
                 //{
-                    Log.Log(LogLevel.Info, "Starting timed backup");
+                    Log.Log(LogLevel.Info, "Starting timed backup task.");
                     await BackupProject();
                 //}
                 //e.Cancel = true;
@@ -80,22 +109,9 @@ namespace StoryCAD.Services.Backup
         /// 
         /// If the user's Preferences don't want timed backups, then the interval timer won't be started. 
         /// </summary>
-        public void StartTimedBackup()
-        {
-            //TODO: Don't start this if the user doesn't want it.
-            if (GlobalData.Preferences.TimedBackup)
-            {
-                backupTimer.Start();
-            }
-        }
 
-        /// <summary>
-        /// Stops the timed backup task
-        /// </summary>
-        public void StopTimedBackup()
-        {
-           backupTimer.Stop();
-        }
+        #endregion
+
 
         public async Task BackupProject()
         {
