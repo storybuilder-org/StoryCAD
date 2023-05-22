@@ -10,6 +10,14 @@ using LogLevel = StoryCAD.Services.Logging.LogLevel;
 
 namespace StoryCAD.Services.Backup
 {
+    /// <summary>
+    /// Automatically save the active project at regular intervals.
+    ///
+    /// This class uses a BackgroundWorker to run the AutoSave task.
+    /// The worker runs on a separate thread from the UI thread and
+    /// is event-driven by a timer.  The timer is set to the user's
+    /// specified PreferencesAutoSaveInterval (in seconds).
+    /// </summary>
     public class AutoSaveService
     {
         private LogService _logger = Ioc.Default.GetRequiredService<LogService>();
@@ -18,16 +26,8 @@ namespace StoryCAD.Services.Backup
         private BackgroundWorker autoSaveWorker;
         private System.Timers.Timer autoSaveTimer;
 
-        /// <summary>
-        /// Automatically save the active project at regular intervals.
-        ///
-        /// This class uses a BackgroundWorker to run the AutoSave task.
-        /// The worker runs on a separate thread from the UI thread and
-        /// is event-driven by a timer.  The timer is set to the user's
-        /// specified PreferencesAutoSaveInterval (in seconds).
-        /// </summary>
-
         #region Constructor
+
         public AutoSaveService()
         {
             autoSaveWorker = new BackgroundWorker

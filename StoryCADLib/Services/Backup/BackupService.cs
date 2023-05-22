@@ -40,6 +40,17 @@ namespace StoryCAD.Services.Backup
         #endregion
 
         #region Public Methods
+
+        /// <summary>
+        /// This method is used to enable the timed backup timer and start counting down. At the expiration
+        /// of the timer, BackupTask will be called to backup  the project.  The timer's AutoReset will cause 
+        /// ir to keep running timer events until it's stopped via a call to StopBackupTimer().
+        /// 
+        /// These two methods (start and stop) are called from file open, file  new, and file close to
+        /// insure that  timed backups are taken only when a project is open.
+        /// 
+        /// If the user's Preferences don't want timed backups, then the interval timer won't be started. 
+        /// </summary>
         public void StartTimedBackup()
         {
             if (!GlobalData.Preferences.TimedBackup)
@@ -98,17 +109,6 @@ namespace StoryCAD.Services.Backup
             if (!timedBackupWorker.IsBusy)
                 timedBackupWorker.RunWorkerAsync();
         }
-
-        /// <summary>
-        /// This method is used to enable the timed backup timer and start counting down. At the expiration
-        /// of the timer, BackupTask will be called to backup  the project.  The timer's AutoReset will cause 
-        /// ir to keep running timer events until it's stopped via a call to StopBackupTimer().
-        /// 
-        /// These two methods (start and stop) are called from file open, file  new, and file close to
-        /// insure that  timed backups are taken only when a project is open.
-        /// 
-        /// If the user's Preferences don't want timed backups, then the interval timer won't be started. 
-        /// </summary>
 
         #endregion
 
