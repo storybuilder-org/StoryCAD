@@ -10,6 +10,14 @@ using LogLevel = StoryCAD.Services.Logging.LogLevel;
 
 namespace StoryCAD.Services.Backup
 {
+    /// <summary>
+    /// Automatically save the active project at regular intervals.
+    ///
+    /// This class uses a BackgroundWorker to run the AutoSave task.
+    /// The worker runs on a separate thread from the UI thread and
+    /// is event-driven by a timer.  The timer is set to the user's
+    /// specified PreferencesAutoSaveInterval (in seconds).
+    /// </summary>
     public class AutoSaveService
     {
         private LogService _logger = Ioc.Default.GetRequiredService<LogService>();
@@ -18,16 +26,8 @@ namespace StoryCAD.Services.Backup
         private BackgroundWorker autoSaveWorker;
         private System.Timers.Timer autoSaveTimer;
 
-        /// <summary>
-        /// Automatically save the active project at regular intervals.
-        ///
-        /// This class uses a BackgroundWorker to run the AutoSave task.
-        /// The worker runs on a separate thread from the UI thread and
-        /// is event-driven by a timer.  The timer is set to the user's
-        /// specified PreferencesAutoSaveInterval (in seconds).
-        /// </summary>
-        
         #region Constructor
+
         public AutoSaveService()
         {
             autoSaveWorker = new BackgroundWorker
@@ -43,13 +43,18 @@ namespace StoryCAD.Services.Backup
             autoSaveTimer = new System.Timers.Timer();
             autoSaveTimer.Elapsed += AutoSaveTimer_Elapsed;
             autoSaveTimer.Interval = GlobalData.Preferences.AutoSaveInterval * 1000;
-            autoSaveTimer.Stop();
         }
         #endregion
 
         #region Public Methods
         public void StartAutoSave()
         {
+            // If the timer is already running, stop it
+            if (autoSaveTimer.Enabled)
+                autoSaveTimer.Stop();
+
+            // Reset the timer and start it 
+            autoSaveTimer.Interval = GlobalData.Preferences.AutoSaveInterval * 1000;
             autoSaveTimer.Start();
         }
 
@@ -59,6 +64,8 @@ namespace StoryCAD.Services.Backup
         }
         #endregion
 
+        #region Private Methods
+
         /// <summary>
         /// Launches the AutoSave task when the timer elapses
         /// </summary>
@@ -67,7 +74,7 @@ namespace StoryCAD.Services.Backup
             if (!autoSaveWorker.IsBusy)
                 autoSaveWorker.RunWorkerAsync();
         }
-        
+
         /// <summary>
         /// Performs an AutoSave when triggered by AutoSaveTimer_Elapsed (the autoSaveTimer event)
         /// </summary>
@@ -119,6 +126,7 @@ namespace StoryCAD.Services.Backup
             return Task.CompletedTask;
         }
 
+        #endregion
     }
 }
 
