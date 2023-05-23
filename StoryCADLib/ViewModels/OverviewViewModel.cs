@@ -263,7 +263,6 @@ public class OverviewViewModel : ObservableRecipient, INavigable
 
         Uuid = Model.Uuid;
         Name = Model.Name;
-        if (Name.Equals("New Outline"))
         DateCreated = Model.DateCreated;
         Author = Model.Author;
         DateModified = Model.DateModified;
