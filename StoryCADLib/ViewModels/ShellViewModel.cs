@@ -431,13 +431,15 @@ public class ShellViewModel : ObservableRecipient
             // Use the NewProjectDialog template to complete the model
             switch (dialogVM.SelectedTemplateIndex)
             {
-                case 0:  // The simplest outline (just a story problem)
+                case 0:  // The simplest outline (just an overview)
+                    break;
+                case 1:  // Story problem and characters
                     _overviewNode.Children.Add(_storyProblemNode);
                     _storyProblemNode.Children.Add(_storyProtagNode);
                     _storyProblemNode.Children.Add(_storyAntagNode);
                     _storyProblemNode.IsExpanded = true;
                     break;
-                case 1:  // Folders for each type- story problem and characters belong in the corresponding folders
+                case 2:  // Folders for each type- story problem and characters belong in the corresponding folders
                     StoryElement _problems = new FolderModel("Problems", StoryModel, StoryItemType.Folder);
                     StoryNodeItem _problemsNode = new(_problems, _overviewNode);
                     StoryElement _characters = new FolderModel("Characters", StoryModel, StoryItemType.Folder);
@@ -453,7 +455,7 @@ public class ShellViewModel : ObservableRecipient
                     _problemsNode.IsExpanded =  true;
                     _charactersNode.IsExpanded = true;
                     break;
-                case 2:
+                case 3:
                     _storyProblemNode.Name = "External Problem";
                     _storyProblemNode.IsExpanded = true; 
                     _overviewNode.Children.Add(_storyProblemNode);
@@ -477,13 +479,13 @@ public class ShellViewModel : ObservableRecipient
                         @"he or she makes a decision or discovery that resolves the internal conflict [outcome]. Resolving this problem may enable your " +
                         @"[protagonist] to resolve another (external) problem.";
                     break;
-                case 3:
+                case 4:
                     _overviewNode.Children.Add(_storyProtagNode);
                     _overviewNode.Children.Add(_storyAntagNode);
                     _storyProtagNode.Children.Add(_storyProblemNode);
                     _storyProtagNode.IsExpanded = true;
                     break;
-                case 4:
+                case 5:
                     StoryElement _problemsFolder = new FolderModel("Problems", StoryModel, StoryItemType.Folder);
                     StoryNodeItem _problemsFolderNode = new(_problemsFolder, _overviewNode) { IsExpanded = true };
                     StoryElement _charactersFolder = new FolderModel("Characters", StoryModel, StoryItemType.Folder);
