@@ -23,7 +23,7 @@ public sealed partial class RelationshipView
     /// into the VM's CharacterRelationships ObservableCollection, but
     /// its properties are bound only when one of of the ComboBox items
     /// CharacterRelationships is bound to is selected.
-    /// However, one property need modified during LoadModel: the Partner  
+    /// However, one property need modified during ReadPreferences: the Partner  
     /// StoryElement in the RelationshipModel needs loaded from its Uuid.
     private void RelationshipChanged(object sender, SelectionChangedEventArgs e)
     {

@@ -7,6 +7,7 @@ using Windows.Storage;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using StoryCAD.Models;
 using StoryCAD.Services.Logging;
+using CommunityToolkit.Mvvm.Input;
 
 namespace StoryCAD.Services.Installation;
 
@@ -16,6 +17,12 @@ namespace StoryCAD.Services.Installation;
 public class InstallationService
 {
     public readonly LogService Logger;
+    public RelayCommand InstallFilesCommand { get; }
+
+    public async Task InstallFilesAsync()
+    {
+        await InstallFiles();
+    }
 
     /// <summary>
     /// This copies all the files from \asetts\install to GlobalData.RootDirectory.
@@ -156,5 +163,9 @@ public class InstallationService
         await internalResourceStream.FlushAsync();
     }
 
-    public InstallationService() { Logger = Ioc.Default.GetService<LogService>(); }
+    public InstallationService()
+    {
+        Logger = Ioc.Default.GetService<LogService>();
+        InstallFilesCommand = new RelayCommand(async () => await InstallFilesAsync());
+    }
 }

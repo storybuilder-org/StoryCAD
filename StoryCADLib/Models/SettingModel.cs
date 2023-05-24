@@ -10,6 +10,7 @@ public class SettingModel : StoryElement
     public static ObservableCollection<string> SettingNames = new();
 
     #endregion
+
     #region Properties
 
     // Setting (General) data

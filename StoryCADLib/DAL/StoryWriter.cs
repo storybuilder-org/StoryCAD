@@ -163,7 +163,7 @@ public class StoryWriter
         _web.Attributes.Append(_attr);
         _attr = _xml.CreateAttribute("Timestamp");
         // ReSharper disable SpecifyACultureInStringConversionExplicitly
-        _attr.Value = _rec.Timestamp.ToString();
+        _attr.Value = _rec.Timestamp.ToString("o");
         // ReSharper restore SpecifyACultureInStringConversionExplicitly
         _web.Attributes.Append(_attr);
 

@@ -33,6 +33,13 @@ using Windows.Storage;
 using Windows.Storage.Pickers;
 using WinRT;
 using GuidAttribute = System.Runtime.InteropServices.GuidAttribute;
+using Octokit;
+using ProductHeaderValue = Octokit.ProductHeaderValue;
+using StoryCAD.Services.Backend;
+using StoryCAD.Services.Backup;
+using System.Drawing;
+using Microsoft.UI.Xaml.Shapes;
+using Path = System.IO.Path;
 
 namespace StoryCAD.ViewModels;
 
@@ -644,14 +651,14 @@ public class ShellViewModel : ObservableRecipient
     /// 
     /// When an AppBar command button is pressed, the currently active StoryElement ViewModel
     /// displayed in SplitViewFrame's Content doesn't go through Deactivate() and hence doesn't
-    /// call its SaveModel() method. Hence this method, which determines which viewmodel's active 
-    /// and calls its SaveModel() method.
+    /// call its WritePreferences() method. Hence this method, which determines which viewmodel's active 
+    /// and calls its WritePreferences() method.
     /// </summary>
     public void SaveModel()
     {
         if (SplitViewFrame.CurrentSourcePageType is null) { return; }
 
-        Logger.Log(LogLevel.Trace, $"SaveModel- Page type={SplitViewFrame.CurrentSourcePageType}");
+        Logger.Log(LogLevel.Trace, $"WritePreferences- Page type={SplitViewFrame.CurrentSourcePageType}");
 
         switch (SplitViewFrame.CurrentSourcePageType.ToString())
         {
@@ -694,19 +701,30 @@ public class ShellViewModel : ObservableRecipient
     /// <param name="fromPath">Path to open file from (Optional)</param>
     public async Task OpenFile(string fromPath = "")
     {
+        // Check if current StoryModel has been changed, if so, save and write the model.
         if (StoryModel.Changed)
         {
             SaveModel();
             await WriteModel();
         }
 
+        // Stop the auto save service if it was running
+
+        if (GlobalData.Preferences.AutoSave) { _autoSaveService.StopAutoSave(); }
+        
+        // Stop the timed backup service if it was running
+        Ioc.Default.GetRequiredService<BackupService>().StopTimedBackup();
+
         _canExecuteCommands = false;
         Logger.Log(LogLevel.Info, "Executing OpenFile command");
 
         try
         {
+            // Reset the model and show the home page
             ResetModel();
             ShowHomePage();
+
+            // Open file picker if `fromPath` is not provided or file doesn't exist at the path.
             if (fromPath == "" || !File.Exists(fromPath))
             {
                 Logger.Log(LogLevel.Info, "Opening file picker as story wasn't able to be found");
@@ -728,9 +746,12 @@ public class ShellViewModel : ObservableRecipient
             }
             else
             {
+                //If `fromPath` is provided and file exists at the path, open that file.
                 StoryModel.ProjectFile = await StorageFile.GetFileFromPathAsync(fromPath);
             }
 
+
+            // Set the ProjectFolder to the folder the project file is in.
             StoryModel.ProjectFolder = await StoryModel.ProjectFile.GetParentAsync();
             if (StoryModel.ProjectFile == null)
             {
@@ -740,8 +761,7 @@ public class ShellViewModel : ObservableRecipient
                 return;
             }
 
-            Ioc.Default.GetRequiredService<BackupService>().StopTimedBackup();
-
+            // Read the file into the StoryModel.
             StoryReader _rdr = Ioc.Default.GetRequiredService<StoryReader>();
             StoryModel = await _rdr.ReadFile(StoryModel.ProjectFile);
 
@@ -754,17 +774,22 @@ public class ShellViewModel : ObservableRecipient
 
             }
 
-            if (GlobalData.Preferences.BackupOnOpen) { await Ioc.Default.GetRequiredService<BackupService>().BackupProject(); }
+            // Take a backup of the project if the user has the 'backup on open' preference set.
+            if (GlobalData.Preferences.BackupOnOpen)
+            {
+                await Ioc.Default.GetRequiredService<BackupService>().BackupProject();
+            }
 
+            // Set the current view to the ExplorerView 
             if (StoryModel.ExplorerView.Count > 0)
             {
                 SetCurrentView(StoryViewType.ExplorerView);
                 Messenger.Send(new StatusChangedMessage(new("Open Story completed", LogLevel.Info)));
             }
 
-            if (GlobalData.Preferences.AutoSave) { _autoSaveService.StopAutoSave(); }
-            UpdateWindowTitle();
+            GlobalData.MainWindow.Title = $"StoryCAD - Editing {StoryModel.ProjectFilename.Replace(".stbx", "")}";
             new UnifiedVM().UpdateRecents(Path.Combine(StoryModel.ProjectFolder.Path, StoryModel.ProjectFile.Name));
+
             if (GlobalData.Preferences.TimedBackup)
             {
                 Ioc.Default.GetRequiredService<BackupService>().StartTimedBackup();
@@ -775,13 +800,12 @@ public class ShellViewModel : ObservableRecipient
                 _autoSaveService.StartAutoSave();
             }
 
-            ShowHomePage();
-            if (GlobalData.Preferences.AutoSave) { _autoSaveService.StartAutoSave(); }
             string _msg = $"Opened project {StoryModel.ProjectFilename}";
             Logger.Log(LogLevel.Info, _msg);
         }
         catch (Exception _ex)
         {
+            // Report the error to the user
             Logger.LogException(LogLevel.Error, _ex, "Error in OpenFile command");
             Messenger.Send(new StatusChangedMessage(new("Open Story command failed", LogLevel.Error)));
         }
@@ -1047,7 +1071,9 @@ public class ShellViewModel : ObservableRecipient
     {
         Messenger.Send(new StatusChangedMessage(new("Updating Preferences", LogLevel.Info, true)));
 
+
         //Creates and shows dialog
+        Ioc.Default.GetRequiredService<PreferencesViewModel>().LoadModel();
         ContentDialog _preferencesDialog = new()
         {
             XamlRoot = GlobalData.XamlRoot,
@@ -1062,6 +1088,7 @@ public class ShellViewModel : ObservableRecipient
         {
             // Save changes
             case ContentDialogResult.Primary:
+                Ioc.Default.GetRequiredService<PreferencesViewModel>().SaveModel();
                 await Ioc.Default.GetRequiredService<PreferencesViewModel>().SaveAsync();
                 Messenger.Send(new StatusChangedMessage(new("Preferences updated", LogLevel.Info, true)));
 
