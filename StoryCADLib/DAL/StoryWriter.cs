@@ -69,12 +69,13 @@ public class StoryWriter
                 _xml.Save(_writer);
                 await _writer.FlushAsync();
             }
-            catch (Exception _ex) { _logger.LogException(Services.Logging.LogLevel.Error,_ex, "Error in write file"); }
+            catch (Exception _ex) { _logger.LogException(Services.Logging.LogLevel.Error, _ex, "Error in write file"); }
         }
 
         model.Changed = false;
         model.ProjectFolder = await output.GetParentAsync();  // is this needed?
     }
+
 
     private void CreateStoryDocument()
     {
