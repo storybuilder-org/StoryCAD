@@ -8,6 +8,7 @@ using StoryCAD.ViewModels;
 using StoryCAD.ViewModels.Tools;
 using Windows.Graphics.Printing;
 using Microsoft.UI.Dispatching;
+using CommunityToolkit.WinUI.UI.Controls;
 
 namespace StoryCAD.Services.Dialogs.Tools;
 public sealed partial class PrintReportsDialog
@@ -163,6 +164,20 @@ public sealed partial class PrintReportsDialog
             PrintVM.ShowLoadingBar = false;
             PrintVM.CloseDialog();
             Ioc.Default.GetRequiredService<ShellViewModel>().ShowMessage(LogLevel.Info, "Generate Print Reports complete", true);
+        }
+    }
+
+    /// <summary>
+    /// This will show the user a warning if synopsis is checked but
+    /// narrative view, which is used to build a synopsis, is empty.
+    /// </summary>
+    private void EmptySynopsisWarningCheck(object sender, RoutedEventArgs e)
+    {
+        //Check Narrative View is empty
+        if (ShellViewModel.GetModel().NarratorView[0].Children.Count == 0)
+        {
+            //Show warning
+            SynopsisWarning.IsOpen = true;
         }
     }
 }

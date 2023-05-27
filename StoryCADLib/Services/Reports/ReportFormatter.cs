@@ -9,6 +9,7 @@ using StoryCAD.DAL;
 using StoryCAD.Models;
 using StoryCAD.Services.Logging;
 using StoryCAD.ViewModels;
+using static System.Formats.Asn1.AsnWriter;
 
 namespace StoryCAD.Services.Reports;
 
@@ -650,6 +651,12 @@ public class ReportFormatter
                     doc.AddText(sb.ToString());
                     doc.AddNewLine();
                     doc.AddText(scene.Remarks);
+                    doc.AddNewLine();
+                }
+
+                if (_model.NarratorView[0].Children.Count == 0)
+                {
+                    doc.AddText("You currently have no scenes within your narrative view, add some to see them here.");
                     doc.AddNewLine();
                 }
             }
