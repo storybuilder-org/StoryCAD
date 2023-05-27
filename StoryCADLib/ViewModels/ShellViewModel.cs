@@ -6,8 +6,6 @@ using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
-using Microsoft.WindowsAppSDK.Runtime;
-using Octokit;
 using StoryCAD.DAL;
 using StoryCAD.Models;
 using StoryCAD.Models.Tools;
@@ -33,12 +31,6 @@ using Windows.Storage;
 using Windows.Storage.Pickers;
 using WinRT;
 using GuidAttribute = System.Runtime.InteropServices.GuidAttribute;
-using Octokit;
-using ProductHeaderValue = Octokit.ProductHeaderValue;
-using StoryCAD.Services.Backend;
-using StoryCAD.Services.Backup;
-using System.Drawing;
-using Microsoft.UI.Xaml.Shapes;
 using Path = System.IO.Path;
 
 namespace StoryCAD.ViewModels;
@@ -369,7 +361,7 @@ public class ShellViewModel : ObservableRecipient
             _canExecuteCommands = false;
             // Needs logging
             _contentDialog = new() { XamlRoot = GlobalData.XamlRoot, Content = new UnifiedMenuPage() };
-            if (Microsoft.UI.Xaml.Application.Current.RequestedTheme == ApplicationTheme.Light) { _contentDialog.Background = new SolidColorBrush(Colors.LightGray); }
+            if (Application.Current.RequestedTheme == ApplicationTheme.Light) { _contentDialog.Background = new SolidColorBrush(Colors.LightGray); }
             await _contentDialog.ShowAsync();
             _canExecuteCommands = true;
         }   
