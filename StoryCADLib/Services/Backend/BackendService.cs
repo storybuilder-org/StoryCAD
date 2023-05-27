@@ -84,7 +84,7 @@ namespace StoryCAD.Services.Backend
                         // Update Preferences
                         preferences.Version = GlobalData.Version;
                         PreferencesIo prefIO = new(preferences, GlobalData.RootDirectory);
-                        await prefIO.SaveModel();
+                        await prefIO.WritePreferences();
                         // Post deployment to backend server
                         await PostVersion();
                     }
@@ -128,7 +128,7 @@ namespace StoryCAD.Services.Backend
                 // Indicate we've stored them successfully
                 GlobalData.Preferences.RecordPreferencesStatus = true;
                 PreferencesIo loader = new(GlobalData.Preferences, GlobalData.RootDirectory);
-                await loader.SaveModel();
+                await loader.WritePreferences();
                 log.Log(LogLevel.Info, "Preferences:  elmah=" + elmah + " newsletter=" + newsletter);
             }
             // may want to use multiple catch clauses
@@ -169,7 +169,7 @@ namespace StoryCAD.Services.Backend
                 // Indicate we've stored it  successfully
                 GlobalData.Preferences.RecordVersionStatus = true;
                 PreferencesIo loader = new(GlobalData.Preferences, GlobalData.RootDirectory);
-                await loader.SaveModel();
+                await loader.WritePreferences();
                 log.Log(LogLevel.Info, "Version:  Current=" + current + " Previous=" + previous);
             }
             // May want to use multiple catch clauses

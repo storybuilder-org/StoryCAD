@@ -57,6 +57,13 @@ public class SceneViewModel : ObservableRecipient, INavigable
         }
     }
 
+    private bool _isTextBoxFocused;
+    public bool IsTextBoxFocused
+    {
+        get => _isTextBoxFocused;
+        set => SetProperty(ref _isTextBoxFocused, value);
+    }
+
     private bool _showCastSelection;
     public bool ShowCastSelection
     {
@@ -343,6 +350,8 @@ public class SceneViewModel : ObservableRecipient, INavigable
 
         Uuid = Model.Uuid;
         Name = Model.Name;
+        if (Name.Equals("New Scene"))
+            IsTextBoxFocused = true;
         Description = Model.Description;
         Date = Model.Date;
         Time = Model.Time;
@@ -433,6 +442,7 @@ public class SceneViewModel : ObservableRecipient, INavigable
         {
             // Story.Uuid is read-only and cannot be assigned
             Model.Name = Name;
+            IsTextBoxFocused = false;
             Model.Description = Description;
             Model.ViewpointCharacter = ViewpointCharacter;
             Model.Date = Date;

@@ -31,7 +31,7 @@
                                         </Grid.ColumnDefinitions>
                                         <TextBlock Text="{x:Bind CharVM.Name}" VerticalAlignment="Center" TextWrapping="Wrap" Margin="5,0,0,0" IsTextScaleFactorEnabled="True"/>
                                         <TextBlock Grid.Column="1" Text=" is a " VerticalAlignment="Center"/>
-                                        <TextBox Grid.Column="2" MinWidth="200" Height="20" Text="{x:Bind RelationType, Mode=OneWay}"  Margin="10,0"/>
+                                        <TextBox Grid.Column="2" MinWidth="200" Height="20" Text="{x:Bind RelationType, Mode=TwoWay}"  Margin="10,0"/>
                                         <TextBlock Grid.Column="3" Text=" to " VerticalAlignment="Center" Margin="0,0,10,0"/>
                                         <TextBlock Grid.Column="4" Text="{x:Bind Partner.Name}" VerticalAlignment="Center" TextWrapping="Wrap"  Margin="5,0,0,0"/>
                                     </Grid>

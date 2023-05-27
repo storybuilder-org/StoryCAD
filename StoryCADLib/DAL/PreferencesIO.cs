@@ -9,6 +9,8 @@ using Microsoft.UI.Xaml.Media;
 using StoryCAD.Models;
 using StoryCAD.Models.Tools;
 using StoryCAD.Services.Logging;
+using Windows.UI.ViewManagement;
+using System.Diagnostics;
 
 namespace StoryCAD.DAL;
 
@@ -37,7 +39,7 @@ public class PreferencesIo
     /// <summary>
     /// Update the model from the .prf file's contents 
     /// </summary>
-    public async Task LoadModel()
+    public async Task ReadPreferences()
     {
         //Tries to read file
         StorageFolder _preferencesFolder = await StorageFolder.GetFolderFromPathAsync(_path);
@@ -170,47 +172,47 @@ public class PreferencesIo
             _model.PrimaryColor = new SolidColorBrush(Colors.DarkSlateGray);
             _model.SecondaryColor = new SolidColorBrush(Colors.White);
         }
+
+        _model.AccentColor = new UISettings().GetColorValue(UIColorType.Accent);
     }
 
     /// <summary>
     /// This writes the file to disk using given
     /// preferences model.
     /// </summary>
-    public async Task SaveModel()
+    public async Task WritePreferences()
     {
         _log.Log(LogLevel.Info, "Updating prf from model.");
         StorageFolder _preferencesFolder = await StorageFolder.GetFolderFromPathAsync(_path);
         StorageFile _preferencesFile = await _preferencesFolder.CreateFileAsync("StoryCAD.prf", CreationCollisionOption.ReplaceExisting);
 
         string _newPreferences = $"""
-            Newsletter={_model.Newsletter}
-            Initalised={_model.PreferencesInitialized}
             Name={_model.Name}
             Email={_model.Email}
-            TimedBackupInterval={_model.TimedBackupInterval}
-            ProjectDirectory={_model.ProjectDirectory}
-            BackupDirectory={_model.BackupDirectory}
+            ErrorCollectionConsent={_model.ErrorCollectionConsent}
+            Newsletter={_model.Newsletter}
+            Initalised={_model.PreferencesInitialized}
+            LastTemplate={_model.LastSelectedTemplate}
+            WrapNodeNames={_model.WrapNodeNames}
             LastFile1={_model.LastFile1}
             LastFile2={_model.LastFile2}
             LastFile3={_model.LastFile3}
             LastFile4={_model.LastFile4}
             LastFile5={_model.LastFile5}
+            ProjectDirectory={_model.ProjectDirectory}
+            BackupDirectory={_model.BackupDirectory}
+            AutoSave={_model.AutoSave}
+            AutoSaveInterval={_model.AutoSaveInterval} 
             BackupOnOpen={_model.BackupOnOpen}
-            ErrorCollectionConsent={_model.ErrorCollectionConsent}
             TimedBackup={_model.TimedBackup}
-            LastTemplate={_model.LastSelectedTemplate}
+            TimedBackupInterval={_model.TimedBackupInterval}
             Version={_model.Version}
             RecordPreferencesStatus={_model.RecordPreferencesStatus}
             RecordVersionStatus={_model.RecordVersionStatus}
-            AutoSave={_model.AutoSave}
-            AutoSaveInterval={_model.AutoSaveInterval} 
             SearchEngine={_model.PreferredSearchEngine}
             """;
 
-
-        if (_model.WrapNodeNames == TextWrapping.WrapWholeWords) { _newPreferences += "\nWrapNodeNames=True"; }
-        else { _newPreferences += "\nWrapNodeNames=False"; }
-
+        _newPreferences += (_model.WrapNodeNames == TextWrapping.WrapWholeWords ? Environment.NewLine + "WrapNodeNames=True" : Environment.NewLine + "WrapNodeNames=False");
         await FileIO.WriteTextAsync(_preferencesFile, _newPreferences); //Writes file to disk.
     }
 }

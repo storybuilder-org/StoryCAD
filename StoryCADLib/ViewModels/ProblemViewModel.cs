@@ -62,6 +62,13 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         }
     }
 
+    private bool _isTextBoxFocused;
+    public bool IsTextBoxFocused
+    {
+        get => _isTextBoxFocused;
+        set => SetProperty(ref _isTextBoxFocused, value);
+    }
+
     // Problem problem data
     private string _problemType;
     public string ProblemType
@@ -248,6 +255,8 @@ public class ProblemViewModel : ObservableRecipient, INavigable
 
         Uuid = Model.Uuid;
         Name = Model.Name;
+        if (Name.Equals("New Problem"))
+            IsTextBoxFocused = true;    
         ProblemType = Model.ProblemType;
         ConflictType = Model.ConflictType;
         ProblemCategory = Model.ProblemCategory;
@@ -285,6 +294,7 @@ public class ProblemViewModel : ObservableRecipient, INavigable
     {
         if (_changed)
         {
+            IsTextBoxFocused = false;
             // Story.Uuid is read-only and cannot be assigned
             Model.Name = Name;
             Model.ProblemType = ProblemType;

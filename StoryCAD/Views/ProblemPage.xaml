@@ -4,14 +4,17 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:editors="using:Syncfusion.UI.Xaml.Editors"                    
     xmlns:local="using:StoryCAD.Views"
-    xmlns:usercontrols="using:StoryCAD.Controls" >
+    xmlns:usercontrols="using:StoryCAD.Controls"
+    xmlns:viewModels="using:StoryCAD.ViewModels">
 
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <TextBox Header="Name" Text="{x:Bind ProblemVm.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="10,10,10,0" />
+        <TextBox Header="Name" Text="{x:Bind ProblemVm.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                 viewModels:TextBoxFocus.IsFocused="{x:Bind ProblemVm.IsTextBoxFocused, Mode=TwoWay}"
+                 Margin="10,10,10,0" />
         <Pivot Grid.Row="1">
             <PivotItem Header="Problem">
                 <Grid>

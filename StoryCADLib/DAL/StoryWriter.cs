@@ -69,12 +69,13 @@ public class StoryWriter
                 _xml.Save(_writer);
                 await _writer.FlushAsync();
             }
-            catch (Exception _ex) { _logger.LogException(Services.Logging.LogLevel.Error,_ex, "Error in write file"); }
+            catch (Exception _ex) { _logger.LogException(Services.Logging.LogLevel.Error, _ex, "Error in write file"); }
         }
 
         model.Changed = false;
         model.ProjectFolder = await output.GetParentAsync();  // is this needed?
     }
+
 
     private void CreateStoryDocument()
     {
@@ -162,7 +163,7 @@ public class StoryWriter
         _web.Attributes.Append(_attr);
         _attr = _xml.CreateAttribute("Timestamp");
         // ReSharper disable SpecifyACultureInStringConversionExplicitly
-        _attr.Value = _rec.Timestamp.ToString();
+        _attr.Value = _rec.Timestamp.ToString("o");
         // ReSharper restore SpecifyACultureInStringConversionExplicitly
         _web.Attributes.Append(_attr);
 

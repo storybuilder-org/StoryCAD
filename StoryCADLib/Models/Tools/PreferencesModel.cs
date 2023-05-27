@@ -1,27 +1,27 @@
 ﻿using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
 using Windows.UI.ViewManagement;
+using ABI.Windows.Media.Protection.PlayReady;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace StoryCAD.Models.Tools;
 
 /// <summary>
-/// PreferencesModel contains product and licensing information,
-/// and (especially) user preferences. 
+/// PreferencesModel contains product and licensing information, and
+/// (especially) user preferences. 
 /// 
 /// The model is maintained from a Shell Preferences() method
-/// which is launched from a Command tied to a View button,
-/// and by PreferencesViewModel using a ContentDialog as the view.
-/// The backing store is a file, StoryCAD.prf, which is 
-/// contained with other installation files. If no .prf file is
-/// present, StoryCAD.Services.Install.InstallationService's
+/// which is launched from a Command tied to a View button, and by
+/// PreferencesViewModel using a ContentDialog as the view. The backing
+/// store is a file, StoryCAD.prf, which is  contained with other installation files.
+///
+/// If no .prf file is present, StoryCAD.Services.Install.InstallationService's
 /// InstallFiles() method will create one.
 /// 
 /// </summary>
-public class PreferencesModel : ObservableRecipient
+public class PreferencesModel : ObservableObject
 {
     #region Properties
-    public bool Changed { get; set; }
 
     //User information
     public string Name { get; set; }
@@ -38,37 +38,22 @@ public class PreferencesModel : ObservableRecipient
 
     // Visual changes
     public SolidColorBrush PrimaryColor { get; set; } //Sets UI Color
-    public SolidColorBrush SecondaryColor = new(new UISettings().GetColorValue(UIColorType.Accent)); //Sets Text Color
+    public SolidColorBrush SecondaryColor { get; set; } //Sets Text Color
+    public Windows.UI.Color AccentColor { get; set; } //Sets Text Color
     public TextWrapping WrapNodeNames { get; set; }
 
     // Backup Information
-    public bool AutoSave
-    {
-        get => _autoSave; 
-        set => SetProperty(ref _autoSave, value);
-    }
-
-    public bool _autoSave;
+    public bool AutoSave { get; set; }
     public int AutoSaveInterval { get; set; }
     public bool BackupOnOpen { get; set; }
     public bool TimedBackup { get; set; }
     public int TimedBackupInterval { get; set; }
 
     //Directories
-    public string ProjectDirectory
-    {
-        get => _ProjectDirectory;
-        set => SetProperty(ref _ProjectDirectory, value);
-    }
 
-    private string _ProjectDirectory;
+    public string ProjectDirectory { get; set; }  
 
-    public string BackupDirectory
-    {
-        get => _BackupDirectory;
-        set=> SetProperty(ref _BackupDirectory, value);
-    }
-    private string _BackupDirectory;
+    public string BackupDirectory { get; set; }
 
     // Recent files (set automatically)
     public string LastFile1 { get; set; }
@@ -85,27 +70,42 @@ public class PreferencesModel : ObservableRecipient
     public bool RecordVersionStatus { get; set; }      // Last version change was logged successfully or notx
     public BrowserType PreferredSearchEngine { get; set; }      // Last version change was logged successfully or not
 
-    public int SearchEngineIndex
-    {
-        get => (int)PreferredSearchEngine;
-        set => PreferredSearchEngine = (BrowserType) value;
-    } // Last version change was logged successfully or not
+    // Last version change was logged successfully or not
+    public int SearchEngineIndex { get; set; }
+
     #endregion
 
     #region Constructor
     public PreferencesModel()
     {
+        Name = string.Empty;
+        Email = string.Empty;
+        ErrorCollectionConsent = false;
+        Newsletter = false;
+        PreferencesInitialized = false;
+        LastSelectedTemplate = 0;
+
+        PrimaryColor = new SolidColorBrush(new UISettings().GetColorValue(UIColorType.Accent));
+        SecondaryColor = new SolidColorBrush(new UISettings().GetColorValue(UIColorType.Accent));
+        WrapNodeNames = TextWrapping.WrapWholeWords; 
+
         LastFile1 = string.Empty;
         LastFile2 = string.Empty;
         LastFile3 = string.Empty;
         LastFile4 = string.Empty;
         LastFile5 = string.Empty;
+
         AutoSave = true;
-        TimedBackup = true;
-        PreferredSearchEngine = BrowserType.DuckDuckGo;
         AutoSaveInterval = 15;
+        BackupOnOpen = false;
+        TimedBackup = false;
         TimedBackupInterval = 5;
-        WrapNodeNames = TextWrapping.WrapWholeWords;
+
+
+        Version = string.Empty;
+        RecordPreferencesStatus = false;
+        RecordVersionStatus = false;      // Last version change was logged successfully or notx
+        PreferredSearchEngine = BrowserType.DuckDuckGo;
     }
     #endregion
 }

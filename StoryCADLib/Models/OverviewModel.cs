@@ -189,12 +189,8 @@ public class OverviewModel : StoryElement
         StructureNotes = string.Empty;
         Notes = string.Empty;
         StoryProblem = string.Empty;
-
-        // TODO: Set good defaults for these
-        //System.DateTime wrkDate = DateTime.FromOADate(0);
-        //wrkDate = DateTime.Parse(Convert.ToDateTime(StoryRec.DateCreated.Value).ToString("MM/dd/yy"));
-        //frmStory.DefInstance.mskDateCreated.Text = StringsHelper.Format(wrkDate, "Medium Date");
     }
+
     public OverviewModel(IXmlNode xn, StoryModel model) : base(xn, model)
     {
         DateCreated = string.Empty;
@@ -215,11 +211,6 @@ public class OverviewModel : StoryElement
         StructureNotes = string.Empty;
         Notes = string.Empty;
         StoryProblem = string.Empty;
-
-        // TODO: Set good defaults for these
-        //System.DateTime wrkDate = DateTime.FromOADate(0);
-        //wrkDate = DateTime.Parse(Convert.ToDateTime(StoryRec.DateCreated.Value).ToString("MM/dd/yy"));
-        //frmStory.DefInstance.mskDateCreated.Text = StringsHelper.Format(wrkDate, "Medium Date");
     }
 
     #endregion

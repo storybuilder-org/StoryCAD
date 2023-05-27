@@ -68,6 +68,13 @@ public class OverviewViewModel : ObservableRecipient, INavigable
         }
     }
 
+    private bool _isTextBoxFocused;
+    public bool IsTextBoxFocused
+    {
+        get => _isTextBoxFocused;
+        set => SetProperty(ref _isTextBoxFocused, value);
+    }
+
     // Overview data
 
     private string _dateCreated;
@@ -285,6 +292,7 @@ public class OverviewViewModel : ObservableRecipient, INavigable
         {
             // Story.Uuid is read-only and cannot be assigned
             Model.Name = Name;
+            IsTextBoxFocused = false;
             Model.DateCreated = DateCreated;
             Model.Author = Author;
             Model.DateModified = DateModified;

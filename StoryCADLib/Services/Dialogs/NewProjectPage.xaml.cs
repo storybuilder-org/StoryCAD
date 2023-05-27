@@ -95,8 +95,13 @@ public sealed partial class NewProjectPage : Page
             }
 
             //Try creating file and then checking it exists.
-            File.Create(testfile);
-            if (!File.Exists(testfile)){throw new FileNotFoundException("the filename was not found.");}
+            using (FileStream fs = File.Create(testfile)) { }
+
+            if (!File.Exists(testfile))
+                throw new FileNotFoundException("the filename was not found.");
+            else
+                File.Delete(testfile);
+
         }
         catch
         {
