@@ -3,9 +3,9 @@
 ## General notes
 
 StoryCAD is written in C# and XAML and is a Windows desktop app. 
-It's written using [WinUI 3][2], [MVVM][6], [Project Reunion APIs][3], and [.NET6][8]. 
+It's written using [WinUI 3][2], [MVVM][6], [Project Reunion APIs][3], and [.NET7][8]. 
 Although the only programming skill you need to get started is some C#, familiarity with [asynchronous IO][5] and [MVVM][6] will be useful. 
-We maintain StoryCAD as a Visual Studio solution using either VS2022 (recommended) or VS2019.
+We maintain StoryCAD as a Visual Studio solution using Visual Studio 2022.
 StoryCAD began as a UWP program and now uses Windows UI (WinUI 3) [controls][7] and styles. It runs
 as a native Windows (Win32) program, but its UWP roots remain; it uses [UWP asynchronous IO][4].
 This allows StoryCAD outlines, which are XML files, to be stored locally or on cloud storage services like OneDrive, Dropbox, Google Drive or Box.
@@ -13,17 +13,17 @@ This allows StoryCAD outlines, which are XML files, to be stored locally or on c
 
 ## Installation and Setup
 
-We maintain the StoryCAD repository with Visual Studio. Either VS2019 or VS2022 will work. The Community editions of 
-these products are free. You can find them [here][11].
+We maintain the StoryCAD repository with Visual Studio 2022. The Community edition of 
+Visual Studio is free. You can find Visual Studio 2022 [here][11].
 
 StoryCAD uses the [Windows App SDK][2]. Set up your development as per [this guide][12]. We are currently running 
-version 1.0.
+version 1.3.
 
 We strongly recommend building and running the [HELLO sample][10]
 to verify your installation before proceeding.
 
 In Visual Studio, clone the StoryCAD repository from the GitHub repository 
-at https://github.com/terrycox/StoryCAD-2.git and build and run the solution.
+at https://github.com/StoryBuilder-org/StoryCAD.git and build and run the solution.
 
 
 ## Code Contributions
@@ -39,7 +39,7 @@ Contributions should always start from issues (bugs or feature requests) in orde
 
 ### Coding Workflow
 
-1. Create a branch off of master.
+1. Create a branch based on main.
 2. Code and make commits.
 3. Open a pull request. We recommend doing this early.
 4. Collaborate through PR comments.
@@ -59,14 +59,14 @@ Always work in a branch. You can build and debug in your branch with impunity.
 
 ### Test
 
-The StoryCADTest project is a MSTEST console application that accesses and runs scripted unit tests against StoryCADLib's back-end code and ViewModels. 
-We urge developers to add test cases for their contributed changes. You can add and ran unit tests from your branch while you're developing. It's recommended that you run the full set of tests to check for side effects of the new code.
+~~The StoryCADTests project is a MSTEST console application that accesses and runs scripted unit tests against StoryCADLib's back-end code and ViewModels. 
+We urge developers to add test cases for their contributed changes. You can add and ran unit tests from your branch while you're developing. It's recommended that you run the full set of tests to check for side effects of the new code.~~
 StoryCAD uses a Continuous Integration pipe line.  A Pull Request merge (after review) performs the following steps:
 1. Running the StoryCADTest unit tests as a final smoke test. If the tests fail, the merge fails.
 2. Publishing the app bundle from the StoryCAD (Package) project.
 3. Incrementing the release number.
 4. Zipping the app bundle along with the user's README.TXT file, which contains
-instructions for side-loading on a remote machine.
+instructions for side-loading on a remote machine.~~
 
 ## StoryCAD Solution Structure ##
 
@@ -92,7 +92,7 @@ initializaton is in **App.Xaml.cs**.
 
 ### StoryCADLib
 
-This .NET 6 DLL contains the non-IO code for the solution. 
+This .NET 7 DLL contains the non-IO code for the solution. 
 The DLL contains the following folders:
 
 **Assets**      The Install sub-folder holds runtime data.
@@ -114,9 +114,9 @@ SceneModel).
 and most dialogs use a ViewModel as both a target for
 XAML bindings and a collection point for View-oriented logic. 
 
-### StoryCADTest 
+### StoryCADTests 
 
-This .NET 6 Console application is a collection of MSTest 
+This .NET 7 Console application is a collection of MSTest 
 unit test classes. 
 
 You run the tests by setting StoryCADTests as the startup project and running Test Explorer. 
@@ -214,13 +214,15 @@ code-behind are in StoryCADLib's \Services\Dialogs
 folder. The dialogs should, like Page views, use 
 responsive (self-resizing) layouts.
 
-[1]:https://github.com/terrycox/StoryCAD-2/blob/master/docs/SOLUTION_PIC.bmp   
+[1]:https://github.com/StoryBuilder-org/StoryCAD/blob/master/docs/SOLUTION_PIC.bmp   
 [2]:https://docs.microsoft.com/en-us/windows/apps/winui/winui3/
 [3]:https://docs.microsoft.com/en-us/windows/apps/windows-app-sdk/
 [4]:https://docs.microsoft.com/en-us/windows/uwp/threading-async/asynchronous-programming-universal-windows-platform-apps
 [5]:https://docs.microsoft.com/en-us/uwp/api/windows.storage?view=winrt-22000
 [6]:https://docs.microsoft.com/en-us/windows/communitytoolkit/mvvm/introduction
 [7]:https://www.microsoft.com/en-us/p/winui-3-controls-gallery/9p3jfpwwdzrc?activetab=pivot:overviewtab
-[8]:https://docs.microsoft.com/en-us/dotnet/api/?view=net-6.0
-[9]:https://github.com/StoryCAD-org/StoryCAD-2/blob/master/README.md
+[8]:https://docs.microsoft.com/en-us/dotnet/api/?view=net-7.0
+[9]:https://github.com/StoryBuilder-org/StoryCAD/blob/master/README.md
 [10]:https://docs.microsoft.com/en-us/windows/apps/winui/winui3/create-your-first-winui3-app?pivots=winui3-packaged-csharp
+[11]:https://visualstudio.microsoft.com/vs/
+[12]:https://learn.microsoft.com/en-us/windows/apps/windows-app-sdk/set-up-your-development-environment?tabs=cs-vs-community%2Ccpp-vs-community%2Cvs-2022-17-1-a%2Cvs-2022-17-1-b

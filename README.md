@@ -1,6 +1,6 @@
 [Roadmap][24] / 
 [Change Log][25] / 
-[Issues](https://github.com/StoryCAD-org/StoryCAD-2/issues) /
+[Issues](https://github.com/StoryBuilder-org/StoryCAD/issues) /
 [Website][26] 
 
 # About StoryCAD
@@ -71,7 +71,7 @@ We group StoryCAD's plans into a series of [GitHub Projects][18].
 As StoryCAD approaches product completeness, ourcurrent project
 is to build the StoryCAD community and reach out to more users.
 
-See the [open issues](https://github.com/StoryCAD-org/StoryCAD-2/issues) for a complete list of proposed 
+See the [open issues](https://github.com/StoryBuilder-org/StoryCAD/issues) for a complete list of proposed 
 features and known bugs.
 
 ## Contributing
@@ -102,24 +102,24 @@ We are most grateful for all of them- especially those who toil in the arena:
 [5]:https://github.com/sgolivernet/nrtftree#readme
 [6]:https://www.literatureandlatte.com/scrivener/overview
 [7]:https://www.syncfusion.com/winui-controls
-[8]:https://StoryCAD-org.github.io/StoryCAD-2/
-[9]:https://github.com/StoryCAD-org/StoryCAD-2/blob/master/USERNOTES.md
-[10]:https://github.com/StoryCAD-org/StoryCAD-2/blob/master/DEVNOTES.md
+[8]:https://storybuilder-org.github.io/StoryCAD/
+[9]:https://github.com/StoryBuilder-org/StoryCAD/blob/main/USERNOTES.md
+[10]:https://github.com/StoryBuilder-org/StoryCAD/blob/main/DEVNOTES.md
 [11]:https://visualstudio.microsoft.com/downloads/
 [12]:https://docs.microsoft.com/en-us/windows/apps/windows-app-sdk/stable-channel
-[13]:https://github.com/terrycox/StoryCAD-2/blob/master/CONTRIBUTING.md
+[13]:https://github.com/StoryBuilder-org/StoryCAD/blob/main/CONTRIBUTING.md
 [14]:https://mit-license.org/
 [15]:https://elmah.io/sponsorship/opensource/
 [16]:https://github.com/sgolivernet/nrtftree/blob/master/LICENSE
 [17]:https://www.syncfusion.com/sales/speciallicensingprograms
-[18]:https://github.com/StoryCAD-org/StoryCAD-2/projects?type=beta
+[18]:https://github.com/orgs/storybuilder-org/projects/2
 [19]:https://github.com/orgs/StoryCAD-org/projects/3/
 [20]:https://choosealicense.com/licenses/gpl-3.0/
-[21]:https://github.com/StoryCAD-org/StoryCAD-2/blob/master/ACKNOWLEDGE.md
-[22]:https://github.com/terrycox/StoryCAD-2/blob/master/PRIVACY_POLICY.TXT
-[23]:https://github.com/terrycox/StoryCAD-2/blob/master/LICENSE.TXT
-[24]:https://github.com/StoryCAD-org/StoryCAD-2/blob/master/ROADMAP.md
-[25]:https://github.com/StoryCAD-org/StoryCAD-2/blob/master/CHANGELOG.md
-[26]:https://StoryCAD.org/
+[21]:https://github.com/StoryBuilder-org/StoryCAD/blob/main/ACKNOWLEDGE.md
+[22]:https://github.com/StoryBuilder-org/StoryCAD/blob/main/PRIVACY_POLICY.TXT
+[23]:https://github.com/StoryBuilder-org/StoryCAD/blob/main/LICENSE.TXT
+[24]:https://github.com/StoryBuilder-org/StoryCAD/blob/main/ROADMAP.md
+[25]:https://github.com/StoryBuilder-org/StoryCAD/blob/main/CHANGELOG.md
+[26]:https://StoryBuilder.org/
 [27]:https://apps.microsoft.com/store/detail/StoryCAD/9PLBNHZV1XM2?hl=en-us&gl=us
 [28]:https://www.youtube.com/watch?v=Oi7G9TEKsro

@@ -68,15 +68,15 @@ maintained apart from the StoryCAD repository. The process uses
 Scrivener's Compile to produce markdown, which is split and reformatted by some c# code,
 and then deployed to github-pages for the StoryCAD repository.
 
-If you're interested in working on the documentation, contact tcox@StoryCAD.org.
+If you're interested in working on the documentation, contact tcox@storybuilder.org.
 
 
 ## Development
 
 If you're interested in helping to develop StoryCAD, see the [Programmer Notes][5].
 
-[1]:https://github.com/StoryCAD-org/StoryCAD-2/issues
-[2]:https://github.com/StoryCAD-org/StoryCAD-2/blob/master/DEVNOTES.md
-[3]:https://github.com/StoryCAD-org/StoryCAD-2/discussions  
-[4]:https://discord.gg/9tu43zQS
-[5]:https://github.com/StoryCAD-org/StoryCAD-2/blob/master/DEVNOTES.md
+[1]:https://github.com/StoryBuilder-org/StoryCAD/issues
+[2]:https://github.com/StoryBuilder-org/StoryCAD/blob/main/DEVNOTES.md
+[3]:https://github.com/StoryBuilder-org/StoryCAD/discussions  
+[4]:https://discord.gg/bpCyAQnWCa
+[5]:https://github.com/StoryBuilder-org/StoryCAD/blob/main/DEVNOTES.md
