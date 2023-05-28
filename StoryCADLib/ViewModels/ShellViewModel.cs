@@ -2078,10 +2078,29 @@ public class ShellViewModel : ObservableRecipient
     /// </summary>
     public void ShowFlyoutButtons()
     {
-        switch (RootNodeType(RightTappedNode))
+        //Trash Can - View Hide all buttons except Empty Trash.
+        if (RootNodeType(RightTappedNode) == StoryItemType.TrashCan)
         {
-            case StoryItemType.StoryOverview:   // ExplorerView tree
-                AddFolderVisibility = Visibility.Visible;
+            AddFolderVisibility = Visibility.Collapsed;
+            AddSectionVisibility = Visibility.Collapsed;
+            AddProblemVisibility = Visibility.Collapsed;
+            AddCharacterVisibility = Visibility.Collapsed;
+            AddSettingVisibility = Visibility.Collapsed;
+            AddSceneVisibility = Visibility.Collapsed;
+            RemoveStoryElementVisibility = Visibility.Collapsed;
+            AddToNarrativeVisibility = Visibility.Collapsed;
+            RemoveFromNarrativeVisibility = Visibility.Collapsed;
+            PrintNodeVisibility = Visibility.Collapsed;
+
+            RestoreStoryElementVisibility = Visibility.Visible;
+            EmptyTrashVisibility = Visibility.Visible;
+        }
+        else
+        {
+            //Explorer tree, show everything but empty trash and add section
+            if (SelectedView == ViewList[0])
+            {
+                AddFolderVisibility = Visibility.Visible; 
                 AddSectionVisibility = Visibility.Collapsed;
                 AddProblemVisibility = Visibility.Visible;
                 AddCharacterVisibility = Visibility.Visible;
@@ -2091,40 +2110,28 @@ public class ShellViewModel : ObservableRecipient
                 //TODO: Use correct values (bug with this)
                 //RestoreStoryElementVisibility = Visibility.Collapsed;
                 RestoreStoryElementVisibility = Visibility.Visible;
-                AddToNarrativeVisibility = Visibility.Visible;
+                AddToNarrativeVisibility = Visibility.Visible; 
                 //RemoveFromNarrativeVisibility = Visibility.Collapsed;
                 RestoreStoryElementVisibility = Visibility.Visible;
                 PrintNodeVisibility = Visibility.Visible;
                 EmptyTrashVisibility = Visibility.Collapsed;
-                break;
-            case StoryItemType.Section:         // NarratorView tree
-                AddFolderVisibility = Visibility.Collapsed;
+            }
+            else //Narrator Tree, hide most things.
+            {
+                RemoveStoryElementVisibility = Visibility.Visible;
+                RemoveFromNarrativeVisibility = Visibility.Visible;
                 AddSectionVisibility = Visibility.Visible;
+                PrintNodeVisibility = Visibility.Visible;
+
+                AddFolderVisibility = Visibility.Collapsed; 
                 AddProblemVisibility = Visibility.Collapsed;
                 AddCharacterVisibility = Visibility.Collapsed;
                 AddSettingVisibility = Visibility.Collapsed;
                 AddSceneVisibility = Visibility.Collapsed;
-                RemoveStoryElementVisibility = Visibility.Visible;
                 RestoreStoryElementVisibility = Visibility.Collapsed;
                 AddToNarrativeVisibility = Visibility.Collapsed;
-                RemoveFromNarrativeVisibility = Visibility.Visible;
-                PrintNodeVisibility = Visibility.Visible;
                 EmptyTrashVisibility = Visibility.Collapsed;
-                break;
-            case StoryItemType.TrashCan:        // Trashcan tree (either view)
-                AddFolderVisibility = Visibility.Collapsed;
-                AddSectionVisibility = Visibility.Collapsed;
-                AddProblemVisibility = Visibility.Collapsed;
-                AddCharacterVisibility = Visibility.Collapsed;
-                AddSettingVisibility = Visibility.Collapsed;
-                AddSceneVisibility = Visibility.Collapsed;
-                RemoveStoryElementVisibility = Visibility.Collapsed;
-                RestoreStoryElementVisibility = Visibility.Visible;
-                AddToNarrativeVisibility = Visibility.Collapsed;
-                RemoveFromNarrativeVisibility = Visibility.Collapsed;
-                PrintNodeVisibility = Visibility.Collapsed;
-                EmptyTrashVisibility = Visibility.Visible;
-                break;
+            }
         }
     }
 
@@ -2143,11 +2150,13 @@ public class ShellViewModel : ObservableRecipient
         if (view == StoryViewType.ExplorerView)
         {
             DataSource = StoryModel.ExplorerView;
+            SelectedView = ViewList[0];
             CurrentViewType = StoryViewType.ExplorerView;
         }
         else if (view == StoryViewType.NarratorView)
         {
             DataSource = StoryModel.NarratorView;
+            SelectedView = ViewList[1];
             CurrentViewType = StoryViewType.NarratorView;
         }
     }
