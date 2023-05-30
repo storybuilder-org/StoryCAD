@@ -1,5 +1,9 @@
 # StoryCAD ChangeLog
 
+## Release 2.10.0.0
+As of April 18th 2023, we have released version 2.10.0.0
+This release simply rebrands StoryBuilder to StoryCAD.
+
 ## Release 2.9.0.0
 
 As of April 3rd 2023 we've rolled out Release 2.9.0.0.

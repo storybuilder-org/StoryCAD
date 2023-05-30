@@ -13,7 +13,6 @@
                 <ResourceDictionary x:Key="Default">
                     <SolidColorBrush x:Key="TreeViewItemBackgroundPointerOver" Color="{ThemeResource SystemAccentColor}" />
                     <SolidColorBrush x:Key="TreeViewItemBackgroundSelected" Color="{ThemeResource SystemAccentColor}"  />
-                    <!-- Replace #FF00FF with your color -->
                 </ResourceDictionary>
             </ResourceDictionary.ThemeDictionaries>
 
@@ -364,7 +363,7 @@
         <!-- Status Bar -->
         <StackPanel Grid.Row="2" Orientation="Horizontal" Background="{x:Bind ShellVm.UserPreferences.PrimaryColor}">
             <ComboBox IsEditable="False" Width="200"  Margin="10" ItemsSource="{x:Bind ShellVm.ViewList}" 
-                      SelectionChanged="{x:Bind ShellVm.ViewChanged, Mode=OneWay}"
+                      SelectionChanged="{x:Bind ShellVm.ViewChanged, Mode=OneWay}" 
                       SelectedItem="{x:Bind ShellVm.SelectedView, Mode=TwoWay}" />
             <TextBlock Text="{x:Bind ShellVm.StatusMessage, Mode=OneWay}"
                        Foreground="{x:Bind ShellVm.StatusColor, Mode=OneWay}"
