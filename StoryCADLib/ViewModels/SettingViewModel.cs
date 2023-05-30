@@ -183,6 +183,7 @@ public class SettingViewModel : ObservableRecipient, INavigable
         if (_changeable)
         {
             _changed = true;
+            _logger.Log(LogLevel.Info, $"SettingViewModel.OnPropertyChanged: {args.PropertyName} changed");
             ShellViewModel.ShowChange();
         }
     }

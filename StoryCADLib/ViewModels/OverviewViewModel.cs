@@ -252,6 +252,7 @@ public class OverviewViewModel : ObservableRecipient, INavigable
         if (_changeable)
         {
             _changed = true;
+            _logger.Log(LogLevel.Info, $"OverviewViewModel.OnPropertyChanged: {args.PropertyName} changed");
             ShellViewModel.ShowChange();
         }
     }
