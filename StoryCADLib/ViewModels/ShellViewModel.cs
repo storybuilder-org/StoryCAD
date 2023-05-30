@@ -660,7 +660,7 @@ public class ShellViewModel : ObservableRecipient
     {
         if (SplitViewFrame.CurrentSourcePageType is null) { return; }
 
-        Logger.Log(LogLevel.Trace, $"WritePreferences- Page type={SplitViewFrame.CurrentSourcePageType}");
+        Logger.Log(LogLevel.Trace, $"SaveModel Page type={SplitViewFrame.CurrentSourcePageType}");
 
         switch (SplitViewFrame.CurrentSourcePageType.ToString())
         {

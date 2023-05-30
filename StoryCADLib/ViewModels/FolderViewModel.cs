@@ -99,6 +99,7 @@ public class FolderViewModel : ObservableRecipient, INavigable
         if (_changeable)
         {
             _changed = true;
+            _logger.Log(LogLevel.Info, $"FolderViewModel.OnPropertyChanged: {args.PropertyName} changed"); 
             ShellViewModel.ShowChange();
         }
     }
