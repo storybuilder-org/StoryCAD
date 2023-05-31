@@ -371,11 +371,16 @@
                        FontSize="14"
                        Margin="10"
                        FontFamily="Segoe UI" Padding="0,5"/>
-            <SymbolIcon PointerPressed="SaveIconPressed" Symbol="Edit" Height="36" HorizontalAlignment="Right" ToolTipService.ToolTip="This icon becomes red when you've made changes that haven't been saved yet.">
-                <SymbolIcon.Foreground>
-                    <SolidColorBrush Color="{x:Bind ShellVm.ChangeStatusColor, Mode=TwoWay}"/>
-                </SymbolIcon.Foreground>
-            </SymbolIcon>
+            <Button Background="Transparent" Command="{x:Bind ShellVm.SaveFileCommand}" BorderBrush="Transparent">
+                <Button.Content>
+                    <SymbolIcon Symbol="Edit" Height="36" HorizontalAlignment="Right" ToolTipService.ToolTip="This icon becomes red when you've made changes that haven't been saved yet.">
+                        <SymbolIcon.Foreground>
+                            <SolidColorBrush Color="{x:Bind ShellVm.ChangeStatusColor, Mode=TwoWay}"/>
+                        </SymbolIcon.Foreground>
+                    </SymbolIcon>
+                </Button.Content>
+            </Button>
+
         </StackPanel>
     </Grid>
 </Page>

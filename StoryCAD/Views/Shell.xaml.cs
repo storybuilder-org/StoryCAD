@@ -129,13 +129,6 @@ public sealed partial class Shell
         AddStoryElementCommandBarFlyout.ShowAt(NavigationTree, myOption);
     }
 
-    /// <summary>
-    /// This is called when the user clicks the save pen
-    /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="e"></param>
-    private async void SaveIconPressed(object sender, PointerRoutedEventArgs e) { await ShellVm.SaveFile(); }
-
     private void Search(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
     {
         ShellVm.SearchNodes();
