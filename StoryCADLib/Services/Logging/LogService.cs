@@ -82,28 +82,15 @@ public class LogService : ILogService
             elmahIoTarget.OnMessage += msg =>
             {
                 msg.Version = GlobalData.Version;
-                try
-                {
-                    msg.User = GlobalData.Preferences.Name + $"({GlobalData.Preferences.Email})";
-                }
-                catch (Exception e)
-                {
-                    msg.User = $"There was an error attempting to obtain user information Error: {e.Message}";
-                }
 
-                try
-                {
-                    msg.Detail = exceptionHelper?.ToString();
-                }
+
+                try { msg.Detail = exceptionHelper?.ToString(); }
                 catch (Exception e)
                 {
                     msg.Detail = $"There was an error attempting to obtain StackTrace helper Error: {e.Message}";
                 }
 
-                try
-                {
-                    msg.Version = GlobalData.Version;
-                }
+                try { msg.Version = GlobalData.Version; }
                 catch (Exception e)
                 {
                     msg.Version = $"There was an error trying to obtain version information Error: {e.Message}";
@@ -288,8 +275,8 @@ public class LogService : ILogService
 
             GlobalData.SystemInfo = $"""
                 === System Info ===
-                CPU ARCH - {RuntimeInformation.ProcessArchitecture}
-                 OS ARCH - {RuntimeInformation.OSArchitecture}  
+                CPU ARCH - {RuntimeInformation.ProcessArchitecture}  
+                OS  ARCH - {RuntimeInformation.OSArchitecture}  
                 App ARCH - {AppArch}
                 .NET Ver - {RuntimeInformation.OSArchitecture}
                 Startup  - {GlobalData.StartUpTimer.ElapsedMilliseconds} ms
@@ -297,7 +284,11 @@ public class LogService : ILogService
                 Developer Status - {GlobalData.DeveloperBuild}
                 Windows {WinVer} Build - {Environment.OSVersion.Version.Build}
                 Debugger Attached - {Debugger.IsAttached}
-                
+                Touchscreen - {PointerDevice.GetPointerDevices().Any(p => p.PointerDeviceType == PointerDeviceType.Touch)}
+                ProcessID - {Environment.ProcessId}
+                Core Count - {Environment.ProcessorCount}
+                StoryCAD Version - {GlobalData.Version}
+
                 === User Prefs ===
                 Name - {GlobalData.Preferences.Name}
                 Email - {GlobalData.Preferences.Email}
