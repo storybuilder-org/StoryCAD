@@ -33,6 +33,7 @@ public sealed partial class PreferencesDialog
     /// </summary>
     private async void ShowInfo()
     {
+        DevInfo.Text = GlobalData.SystemInfo;
         Version.Text = PreferencesVm.Version;
         Changelog.Text = await new Changelog().GetChangelogText();
 
@@ -41,42 +42,8 @@ public sealed partial class PreferencesDialog
 
         SearchEngine.SelectedIndex = (int)PreferencesVm.PreferredSearchEngine;
 
-
-        //TODO: Put this in a VM and make this data get logged at start up with some more system info.
-        if (GlobalData.DeveloperBuild)
-        {
-            //Get Device Info such as architecture and .NET Version
-            DevInfo.Text = $"""
-                CPU ARCH - {RuntimeInformation.ProcessArchitecture}
-                 OS ARCH - {RuntimeInformation.OSArchitecture}
-                .NET Ver - {RuntimeInformation.OSArchitecture}
-                Startup  - {GlobalData.StartUpTimer.ElapsedMilliseconds} ms
-                Elmah Status - {GlobalData.ElmahLogging}
-                Developer Status - {GlobalData.DeveloperBuild}
-                Windows Build - {Environment.OSVersion.Version.Build}
-                """;
-
-            try
-            {
-                //Get Windows Build and Version
-                if (Convert.ToInt32(Environment.OSVersion.Version.Build) >= 22000)
-                {
-                    DevInfo.Text += " (Windows 11)";
-                }
-                else { DevInfo.Text += " (Windows 10)"; }
-            }
-            catch { DevInfo.Text = "(Unknown)"; }
-
-
-            //Detect if 32-bit or 64-bit process (I'm not sure if it's possible to )
-            if (IntPtr.Size == 4) { DevInfo.Text += "\nApp ARCH - 32 bit"; }
-            else if (IntPtr.Size == 8) { DevInfo.Text += "\nApp ARCH - 64 bit"; }
-            else { DevInfo.Text += $"\nApp Arch - Unknown"; }
-        }
-        else //Remove this because no debugger is attached.
-        {
-            PivotView.Items.Remove(Dev);
-        }
+        //Dev Menu is only shown on unoffical builds
+        if (!GlobalData.DeveloperBuild) { PivotView.Items.Remove(Dev); }
     }
 
     /// <summary>
@@ -151,7 +118,11 @@ public sealed partial class PreferencesDialog
     }
 
     //Reloads dev stats
-    public void RefreshDevStats(object sender, RoutedEventArgs e) => ShowInfo();
+    public void RefreshDevStats(object sender, RoutedEventArgs e)
+    {
+        Logger.GetSystemInfo();
+        DevInfo.Text = GlobalData.SystemInfo;
+    } 
 
     /// <summary>
     /// This toggles the status of preferences.TextWrapping

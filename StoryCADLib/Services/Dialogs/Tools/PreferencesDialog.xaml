@@ -70,7 +70,7 @@
                         <Button Content="Refresh Dev Stats" Click="RefreshDevStats" Width="150" Margin="0,5"/>
                     </StackPanel>
                     <StackPanel VerticalAlignment="Bottom" Grid.Column="1" Grid.Row="0" Margin="0,0,5,0">
-                        <TextBlock Name="DevInfo"/>
+                        <TextBox Name="DevInfo"  Width="300" Height="250" Margin="5,0" IsSpellCheckEnabled="False" IsReadOnly="True"/>
                     </StackPanel>
                 </Grid>
 

@@ -56,6 +56,7 @@ public sealed partial class Shell
         // The Shell_Loaded event is processed in order to obtain and save the XamlRool  
         // and pass it on to ContentDialogs as a WinUI work-around. See
         // https://docs.microsoft.com/en-us/windows/winui/api/microsoft.ui.xaml.controls.contentdialog?view=winui-3.0-preview
+        Ioc.Default.GetRequiredService<LogService>().GetSystemInfo();
         GlobalData.XamlRoot = Content.XamlRoot;
         GlobalData.StartUpTimer.Stop();
         ShellVm.ShowHomePage();
