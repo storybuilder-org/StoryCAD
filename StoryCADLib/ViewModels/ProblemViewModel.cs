@@ -243,8 +243,9 @@ public class ProblemViewModel : ObservableRecipient, INavigable
     {
         if (_changeable)
         {
+            if (!_changed)
+                _logger.Log(LogLevel.Info, $"ProblemViewModel.OnPropertyChanged: {args.PropertyName} changed");
             _changed = true;
-            _logger.Log(LogLevel.Info, $"ProblemViewModel.OnPropertyChanged: {args.PropertyName} changed");
             ShellViewModel.ShowChange();
         }
     }

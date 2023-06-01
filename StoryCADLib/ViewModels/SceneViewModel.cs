@@ -338,8 +338,9 @@ public class SceneViewModel : ObservableRecipient, INavigable
     {
         if (_changeable)
         {
+            if (!_changed)
+                _logger.Log(LogLevel.Info, $"SceneViewModel.OnPropertyChanged: {args.PropertyName} changed");
             _changed = true;
-            _logger.Log(LogLevel.Info, $"SceneViewModel.OnPropertyChanged: {args.PropertyName} changed");
             ShellViewModel.ShowChange();
         }
     }

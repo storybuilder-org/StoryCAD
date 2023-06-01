@@ -815,17 +815,21 @@ public class ShellViewModel : ObservableRecipient
     /// <returns></returns>
     public async Task SaveFile(bool autoSave = false)
     {
+        _autoSaveService.StopAutoSave();
+        bool _saveExecuteCommands = _canExecuteCommands;
+        _canExecuteCommands = false;
         string msg = autoSave ? "AutoSave" : "SaveFile command";
+        if (autoSave && !StoryModel.Changed)
+        {
+            Logger.Log(LogLevel.Info, $"{msg} skipped, no changes");
+            return;
+        }
+
         if (DataSource == null || DataSource.Count == 0)
         {
             Messenger.Send(new StatusChangedMessage(new("You need to open a story first!", LogLevel.Info)));
             Logger.Log(LogLevel.Info, $"{msg} cancelled (DataSource was null or empty)");
             return;
-        }
-
-        if (!autoSave)
-        {
-            _canExecuteCommands = false;
         }
 
         try
@@ -842,11 +846,8 @@ public class ShellViewModel : ObservableRecipient
             Logger.LogException(LogLevel.Error, _ex, $"Exception in {msg}");
             Messenger.Send(new StatusChangedMessage(new($"{msg} failed", LogLevel.Error)));
         }
-
-        if (!autoSave)
-        {
-            _canExecuteCommands = true;
-        }
+        _canExecuteCommands = _saveExecuteCommands;
+        _autoSaveService.StartAutoSave();
     }
 
     /// <summary>
@@ -1049,7 +1050,7 @@ public class ShellViewModel : ObservableRecipient
         BackendService _backend = Ioc.Default.GetRequiredService<BackendService>();
         await _backend.DeleteWorkFile();
         Logger.Flush();
-        Microsoft.UI.Xaml.Application.Current.Exit();  // Win32
+        Application.Current.Exit();  // Win32
     }
 
     private async Task CreateProjectFile()
@@ -1183,12 +1184,12 @@ public class ShellViewModel : ObservableRecipient
                         _problem.Notes = _scenes[0].Notes;
                     }
                     else foreach (MasterPlotScene _scene in _scenes)
-                        {
-                            SceneModel _child = new(StoryModel) { Name = _scene.SceneTitle, Remarks = "See Notes.", Notes = _scene.Notes };
-                            // add the new SceneModel & node to the end of the problem's children 
-                            StoryNodeItem _newNode = new(_child, _problemNode);
-                            _newNode.IsSelected = true;
-                        }
+                    {
+                        SceneModel _child = new(StoryModel) { Name = _scene.SceneTitle, Remarks = "See Notes.", Notes = _scene.Notes };
+                        // add the new SceneModel & node to the end of the problem's children 
+                        StoryNodeItem _newNode = new(_child, _problemNode);
+                        _newNode.IsSelected = true;
+                    }
 
                     Messenger.Send(new StatusChangedMessage(new($"MasterPlot {_masterPlotName} inserted", LogLevel.Info, true)));
                     ShowChange();
@@ -2028,15 +2029,7 @@ public class ShellViewModel : ObservableRecipient
         
         #endregion
 
-    /// <summary>
-    /// TODO: This method is not implemented yet.
-    /// Remove the Re sharper comment once implemented.
-    /// </summary>
-    /// <returns></returns>
-    // ReSharper disable once MemberCanBeMadeStatic.Local
-    private bool MoveIsValid() { return true; }
-
-    public void ViewChanged()
+        public void ViewChanged()
     {
         if (DataSource == null || DataSource.Count == 0)
         {
@@ -2407,8 +2400,14 @@ public class ShellViewModel : ObservableRecipient
             if (Search.SearchStoryElement(_node, FilterText, StoryModel)) //checks if node name contains the thing we are looking for
             {
                 _searchTotal++;
-                if (Microsoft.UI.Xaml.Application.Current.RequestedTheme == ApplicationTheme.Light) { _node.Background = new SolidColorBrush(Colors.LightGoldenrodYellow); }
-                else { _node.Background = new SolidColorBrush(Colors.DarkGoldenrod); } //Light Goldenrod is hard to read in dark theme
+                if (Application.Current.RequestedTheme == ApplicationTheme.Light)
+                {
+                    _node.Background = new SolidColorBrush(Colors.LightGoldenrodYellow);
+                }
+                else
+                {
+                    _node.Background = new SolidColorBrush(Colors.DarkGoldenrod);
+                } //Light Goldenrod is hard to read in dark theme
                 _node.IsExpanded = true;
 
                 StoryNodeItem _parent = _node.Parent;

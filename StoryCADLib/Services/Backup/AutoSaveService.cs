@@ -84,9 +84,9 @@ namespace StoryCAD.Services.Backup
         {
             try
             {
-                _logger.Log(LogLevel.Info, "AutoSave task started.");
+                _logger.Log(LogLevel.Info, "Invoking AutoSave.");
                 await AutoSaveProject();
-                _logger.Log(LogLevel.Info, "AutoSave task finished.");
+                //_logger.Log(LogLevel.Info, "AutoSave task finished.");
             }
             catch (Exception ex)
             {
