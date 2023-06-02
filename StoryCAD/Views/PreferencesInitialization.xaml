@@ -38,7 +38,7 @@
                 </StackPanel>
 
                 <StackPanel Grid.Row="2">
-                    <CheckBox IsChecked="{x:Bind _initVM.Preferences.ErrorCollectionConsent, Mode=TwoWay}" Content="Send error logs to Team StoryCAD (Does not contain any personal information.)" VerticalAlignment="Bottom" Margin="5"/>
+                    <CheckBox IsChecked="{x:Bind _initVM.Preferences.ErrorCollectionConsent, Mode=TwoWay}" Content="Send error logs to Team StoryCAD" VerticalAlignment="Bottom" Margin="5"/>
                     <CheckBox IsChecked="{x:Bind _initVM.Preferences.Newsletter, Mode=TwoWay}" Content="Send me newsletters about StoryCAD" VerticalAlignment="Bottom" Margin="5"/>
                 </StackPanel>
                 <TextBlock Text="{x:Bind _initVM.ErrorMessage, Mode=TwoWay}" Foreground="Red" Grid.Row="3" HorizontalAlignment="Center"/>

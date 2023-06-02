@@ -89,4 +89,6 @@ public static class GlobalData
     //A debugger is attached
     //.ENV is missing.
     public static bool DeveloperBuild;
+
+    public static string SystemInfo;
 }
