@@ -7,14 +7,14 @@
     mc:Ignorable="d">
 
     <StackPanel HorizontalAlignment="Center">
-        <InfoBar IsOpen="False" Name="Win10Warning" Severity="Warning" Message="You are using Windows 10, this means you will have a degraded printing experience to fix this please upgrade to Windows 11 if possible. "/>
+        <InfoBar IsOpen="False" Name="Win10Warning" Severity="Warning" Message="You are using Windows 10, please upgrade to Windows 11 for a better printing experience."/>
         <StackPanel HorizontalAlignment="Center" Margin="0,15">
             <TextBlock Text="Create reports for the following:"/>
             <CheckBox Content="Story Overview" IsChecked="{x:Bind PrintVM.CreateOverview, Mode=TwoWay}" />
             <CheckBox Content="Story Synopsis" IsChecked="{x:Bind PrintVM.CreateSummary, Mode=TwoWay}" Checked="EmptySynopsisWarningCheck"/>
         </StackPanel>
 
-        
+
         <Pivot>
             <PivotItem Header="Problems" TabIndex="0">
                 <StackPanel>
@@ -52,7 +52,7 @@
                 </StackPanel>
             </PivotItem>
         </Pivot>
-        <InfoBar IsOpen="False" Name="SynopsisWarning" Severity="Warning" Message="No scenes have been added to Narrative view, your synopsis will be empty." Height="auto"/>
+        <InfoBar IsOpen="False" Name="SynopsisWarning" Severity="Warning" Message="Add some scenes to your synopsis, otherwise it will be empty." Height="auto"/>
         <ProgressBar Width="300" IsIndeterminate="True" Opacity="0" Margin="5" Name="LoadingBar"/>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
             <Button Content="Generate" Margin="10,5,0,0" Click="StartPrintMenu"/>
