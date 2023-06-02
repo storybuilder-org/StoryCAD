@@ -216,6 +216,8 @@ public class WebViewModel : ObservableRecipient, INavigable
     { 
         if (_changeable)
         {
+            if (!_changed)
+                _logger.Log(LogLevel.Info, $"WebViewModel.OnPropertyChanged: {args.PropertyName} changed");
             _changed = true;
             ShellViewModel.ShowChange();
         }
