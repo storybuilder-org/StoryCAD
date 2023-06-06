@@ -27,6 +27,7 @@ public class KeyQuestionsViewModel : ObservableRecipient
             SetProperty(ref _storyElementName, value);
             _questions = GlobalData.KeyQuestionsSource[_storyElementName];
             _index = _questions.Count - 1;
+            NextQuestion();
         }
     }
 
