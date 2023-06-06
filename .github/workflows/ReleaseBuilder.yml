@@ -5,7 +5,7 @@ on:
       VersionNumber:
         description: 'Version'     
         required: true
-        default: '2.2.0.0'
+        default: '2.12.0.0'
 jobs:
   build:
     runs-on: windows-latest
@@ -123,13 +123,16 @@ jobs:
       with:
         name: StoryCAD
         path: D:\a\StoryCAD\StoryCAD\StoryCAD\Packages\*
-     
-    - name: Create new tag
-      uses: simpleactions/create-tag@v1.0.0
-      with: # The GitHub token (if not provided the environment variable GITHUB_TOKEN will be used instead)
-        github_token: ${{ secrets.GitHubToken }}
-        tag: ${{ github.event.inputs.VersionNumber }}
-        message: "Version ${{ github.event.inputs.VersionNumber }}"
+  
+    - name: Set up Git
+      run: |
+        git config user.name "Release Builder"
+        git config user.email "jake@storybuilder.org"
+
+    - name: Create tag
+      run: |
+        git tag -a "${{ github.event.inputs.VersionNumber }}" -m "${{ github.event.inputs.VersionNumber }}"
+        git push origin "${{ github.event.inputs.VersionNumber }}"
   
     - name: Release Warm up
       run: |
