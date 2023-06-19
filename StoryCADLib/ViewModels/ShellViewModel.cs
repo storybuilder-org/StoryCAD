@@ -29,8 +29,10 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Windows.Storage;
 using Windows.Storage.Pickers;
+using NLog;
 using WinRT;
 using GuidAttribute = System.Runtime.InteropServices.GuidAttribute;
+using LogLevel = StoryCAD.Services.Logging.LogLevel;
 using Path = System.IO.Path;
 
 namespace StoryCAD.ViewModels;
@@ -2021,16 +2023,26 @@ public class ShellViewModel : ObservableRecipient
         /// <returns>The StoryItemType of the root node</returns>
         public static StoryItemType RootNodeType(StoryNodeItem startNode)
         {
-            StoryNodeItem node = startNode;
-            while (!node.IsRoot)
-                node = node.Parent;
-            return node.Type;
+            try
+            {
+                StoryNodeItem node = startNode;
+                while (!node.IsRoot)
+                    node = node.Parent;
+                return node.Type;
+            }
+            catch (Exception ex)
+            {
+                //return overview node to prevent a possible crash.
+                Ioc.Default.GetRequiredService<LogService>().LogException(LogLevel.Warn, ex,
+                    "Exception within RootNodeType, substituting for an overview node)");
+                return StoryItemType.StoryOverview;
+            }
         }
         
         #endregion
 
         public void ViewChanged()
-    {
+        {
         if (DataSource == null || DataSource.Count == 0)
         {
             Messenger.Send(new StatusChangedMessage(new("You need to load a story first!", LogLevel.Warn)));
