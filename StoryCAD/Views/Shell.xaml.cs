@@ -224,12 +224,27 @@ public sealed partial class Shell
             ShellVm.ShowMessage(LogLevel.Warn, "Invalid drag target", false);
             return;
         }
+
+        if (args.Data == null)
+        {
+            ShellVm.ShowMessage(LogLevel.Info, "Drag and drop failed", true);
+            Logger.Log(LogLevel.Error, "Failed to drag n drop - arg.data is null (may be a file and not a story element)");
+            return;
+        }
+
         // Move is valid, allow the drop operation.  
         args.Data.RequestedOperation = DataPackageOperation.Move;
     }
 
     private void TreeView_OnDragLeave(object sender, DragEventArgs e)
     {
+        if (e.Data == null)
+        {
+            ShellVm.ShowMessage(LogLevel.Info, "Drag and drop failed", true);
+            Logger.Log(LogLevel.Error, "Failed to drag n drop - e.data is null (may be a file and not a story element)");
+            return;
+        }
+
         // If the drag target identified in OnDragOver was valid, 
         // the drag operation is allowed. Indicate a change too place
         // and report it. 
