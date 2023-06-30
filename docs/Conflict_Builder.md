@@ -2,8 +2,7 @@
 Conflict Builder <br/>
 
 
-![](Clipboard-Image-198.png)
-
+![](ConflictBuilderDialog.png)
 
 
 The Conflict Builder tool, invoked by buttons on the Protagonist and Antagonist tabs of the Problem Form. <br/>
@@ -30,3 +29,6 @@ Value Conflicts <br/>
 Value conflicts are caused by perceived or actual incompatible belief systems. Values are beliefs that people use to give meaning to their lives. People frequently coach values in terms of right and wrong. Value disputes arise when people attempt to force one set of values on others or lay claim to exclusive value systems that do not allow for divergent beliefs. Value conflicts are generally intractable. <br/>
 
 
+ <br/><br/>
+[Previous - Stock Scenes](Stock_Scenes.md) <br/><br/>
+[Next up - Flaw Builder](Flaw_Builder.md)

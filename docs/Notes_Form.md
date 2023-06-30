@@ -1,7 +1,10 @@
 ## Notes Form ##
 Notes Form <br/>
 
-Notes forms can be used to store any information you wish anywhere in the outline. <br/>
+Notes forms can be used to store any information you wish anywhere in the outline, this can be useful for writing down background information about your characters. <br/>
 
-![](Clipboard-Image-206.png)
 
+![](NotesElement.png)
+ <br/><br/>
+[Previous - Website Form](Website_Form.md) <br/><br/>
+[Next up - Tutorial: Creating a Story](Tutorial_Creating_a_Story.md)

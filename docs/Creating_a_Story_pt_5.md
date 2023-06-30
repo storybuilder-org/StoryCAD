@@ -51,3 +51,6 @@ The copy function populated the Scene folder with a series of plot points which 
 ![](Danger-Calls-Narrative-Hook.png)
 
 Although these are Scene story elements, they are not scenes, but placeholders: a reminder of things that your scenes need to do,   and roughly the order they need to do them in. In short, they are the structure of your story, its spine. Since your story is centered on one of your Problems, the main Story Problem, the story’s structure is the structure of that problem.   <br/>
+ <br/><br/>
+[Previous - Creating a Story pt 4](Creating_a_Story_pt_4.md) <br/><br/>
+[Next up - Creating a Story pt 6](Creating_a_Story_pt_6.md)

@@ -31,3 +31,6 @@ When a fish-out-of-water, big-city cop (protagonist) moves to a small, coastal t
 
 A Problem’s Premise works best if it contains the elements of just that Problem form. The one exception is the main Problem Story Element (see Story Overview Premise Tab). That Problem’s Premise is also the story’s Premise, which summarizes the entire story and might (as in the above example) contain details of other subplots.  <br/>
 
+ <br/><br/>
+[Previous - Antagonist Tab](Antagonist_Tab.md) <br/><br/>
+[Next up - Character Form](Character_Form.md)

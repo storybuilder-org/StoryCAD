@@ -22,7 +22,7 @@ There are other tools to help you plot- for example, Stock Scenes: <br/>
 Stock Scenes are exactly what their name implies: scenes that you’ve seen so often you recognize them instantly.   We used ‘The chase leads into an ambush’ as the setup to our ‘Leonard's impulsiveness lets Lacas capture him’ problem. <br/>
 We didn’t call it that, of course, and in fact the capture idea we started with didn’t work: capture implies escape, and it just didn’t fit. Instead, our ‘The chase leads into an ambush became this: <br/>
 
-![](Danger-Calls-Shootout-5.png)
+![](Danger-Calls-Shootout.png)
 
 Although the Scene Type we selected was ‘Action scene’, this is actually the Climax. If we go back to our Master Plots Three Act Play, we’ll find one more piece: <br/>
 
@@ -34,3 +34,6 @@ These changes, in the climax scene, Shootout, and a better understanding of the 
 
 Danger Calls is melodramatic and its characters aren’t as well drawn as they should be, but this exercise has been meant to show how an idea can evolve via a repeatable process into a workable story outline, and how StoryCAD can help you do that. The following section of the manual, Writing with StoryCAD, elaborates on this process, but the best way to learn is to do, making your own mistakes and solving your own problems. We hope StoryCAD helps you in your writing journey. <br/>
 
+ <br/><br/>
+[Previous - Creating a Story pt 7](Creating_a_Story_pt_7.md) <br/><br/>
+[Next up - Creating a Story pt 9](Creating_a_Story_pt_9.md)

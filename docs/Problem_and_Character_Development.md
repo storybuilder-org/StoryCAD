@@ -1,4 +1,4 @@
-## Problem and Character  Development ##
+## Problem and Character Development ##
 Problem and Character Development <br/>
 
 A StoryCAD outline ‘begins’ on the Story Overview form, but as you’ve seen, it really starts with the selection of the Story Problem and its description in its Premise, whose definition could be condensed to ‘a character with a problem.’  <br/>
@@ -10,3 +10,6 @@ Always honor your muse by recording whatever it gifts you about your story: a bi
  If you started with the problem (situation, idea, etc.), remember that there are infinitely many possible characters. Your job is to find the character who will face this particular problem. Ask why he wants to achieve that particular goal, and what sort of traits would lead to the story conclusion you want.  Then devise a back story which gives your character those traits. Until the moment your story concept is fully developed, your characters are as fluid and tractable to change as your plot or settings.  <br/>
 
 
+ <br/><br/>
+[Previous - Story Idea, Concept, and Premise](Story_Idea,_Concept,_and_Premise.md) <br/><br/>
+[Next up - Defining Problems](Defining_Problems.md)
