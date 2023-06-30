@@ -12,3 +12,6 @@ On Windows 11 systems, StoryCAD provides a Print Manager which allows you to sel
 
 
 If you’re running Windows 10, Clicking Generate will cause all of the selected reports to print on your default printer. <br/>
+ <br/><br/>
+[Previous - Reports](Reports.md) <br/><br/>
+[Next up - Scrivener Reports](Scrivener_Reports.md)

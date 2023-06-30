@@ -7,7 +7,7 @@ The Topic Information sub-menu on the Tools menu contains a list containing info
 
 A topic, once selected, may contain sub-topics: <br/>
 
-![](Clipboard-Image-197.png)
+![](TopicDialog.png)
 .  <br/>
 
 Information on some of the topic categories follows. <br/>
@@ -21,3 +21,6 @@ Subgenres <br/>
 
 Contains brief descriptions of some of  the finer classifications of a particular genre. <br/>
 
+ <br/><br/>
+[Previous - Key Questions](Key_Questions.md) <br/><br/>
+[Next up - Plotting Aids](Plotting_Aids.md)

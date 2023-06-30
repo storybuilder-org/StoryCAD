@@ -4,13 +4,13 @@ Ideation <br/>
 
 A new story outline begins with the Story Overview form. It contains: <br/>
 
-	•	Story Idea <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;&nbsp;Story Idea
 
-	•	Concept <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;&nbsp;Concept
 
-	•	Premise  <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;&nbsp;Premise 
 
-	•	Structure <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;&nbsp;Structure
 
 
 The Story Overview form contains everything needed to get started, working through each of these tabs in order. <br/>
@@ -26,13 +26,13 @@ Concept formulation is all about questions, and isn’t necessarily limited to j
 
 What if Leonardo da Vinci implanted clues as to his views on Christianity and the veracity of scripture within his painting of “The Last Supper?” <br/>
 
-	•	What if Christ didn’t die on the cross after all? <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;&nbsp;What if Christ didn’t die on the cross after all?
 
-	•	What if the entire Christian religion is a contrivance and a deeply held secret resulting in a conspiracy? <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;&nbsp;What if the entire Christian religion is a contrivance and a deeply held secret resulting in a conspiracy?
 
-	•	What if there is a highly secret group of men whose life mission is to preserve that secret? <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;&nbsp;What if there is a highly secret group of men whose life mission is to preserve that secret?
 
-	•	What if they are willing to kill to protect it? <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;&nbsp;What if they are willing to kill to protect it?
 
 ... and so on. <br/>
 Another good question is  “what happens?”,  particularly framed as a response to your “what if” question. It’s an account of your story’s resolution. <br/>
@@ -43,7 +43,7 @@ Your Premise is the answer to the question the Concept poses.   <br/>
 
 Your story can have more than one Problem story element, and every Problem has its own Premise, contained on the Resolution tab. But only one of these problems is your Story Problem, and that Problem  (and its Premise) is the one you select on the Story Overview form, Premise tab: <br/>
 
-![](Clipboard-Image-207.png)
+![](Clipboard-Image-7.png)
 
 The heart of plotted fiction is drama--- a struggle in which the outcome is in doubt. Your Story Problem will lead you to understand whose problem it is (your major character), what her or she want (the goal), and what stands in their way (opposition.) The Story Problem is the wormhole you enter to understand your story. <br/>
 
@@ -72,28 +72,31 @@ Literary (tone, style, voice and tense) <br/>
 ] <br/>
 
 
-	Character building <br/>
-	Plotting <br/>
-	Revision <br/>
-	Synopsis <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Character building <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Plotting <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Revision <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Synopsis <br/>
 Orthogonality: why workflow isn’t fixed / develop your own workflow <br/>
 
 Order from Chaos:  Deborah Chester’s The Fantasy Fiction Formula <br/>
-	A sample workflow for Novels <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;A sample workflow for Novels <br/>
 
 Beginning, Middle, and End <br/>
-	The importance of length <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;The importance of length <br/>
 
 Problems <br/>
 
-	Problems as the core of the plot <br/>
-	Problems as sequences <br/>
-	Problem patterns <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Problems as the core of the plot <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Problems as sequences <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Problem patterns <br/>
 
 Aggregation: collecting scenes <br/>
 
 Setting and Worldbuilding <br/>
 
 Creating a narrative <br/>
-	Narrative View and why it’s distinct from Story Explorer <br/>
-	Braids <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Narrative View and why it’s distinct from Story Explorer <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Braids <br/>
+ <br/><br/>
+[Previous - Workflow](Workflow.md) <br/><br/>
+[Next up - Problem and Character Development](Problem_and_Character_Development.md)

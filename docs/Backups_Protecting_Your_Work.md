@@ -9,10 +9,13 @@ The easiest and best backup is to save your work frequently at places where you'
 Backups are written to the folder specified in the ‘Backup directory’ selection in Preferences. Use  the browse button next to the specified folder to select (or create) the folder you wish to keep your story outline backups in. We recommend creating a folder just for this purpose. <br/>
 
 Backups are suffixed with a date timestamp, for example: <br/>
-	 <br/>
-	  My Story as of 11 01 2022 17 12 16.stbx <br/>
+&nbsp;&nbsp;&nbsp;&nbsp; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;  My Story as of 11 01 2022 17 12 16.stbx <br/>
 
 To revert to a backup, simply click on the .stbx file of your choice and use File | Save As to save it back where you want it. If you specify the same parent folder as your working outline, it’ll overlay it. <br/>
 
 See Preferences in this manual for further information. <br/>
 
+ <br/><br/>
+[Previous - Miscellaneous](Miscellaneous.md) <br/><br/>
+[Next up - Developing StoryCAD](Developing_StoryCAD.md)

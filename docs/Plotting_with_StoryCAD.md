@@ -14,7 +14,7 @@ but Show White pleads for her life,  <br/>
 
 Coming up with these scenes is an act of imagination- it’s storytelling, play acting, in which you take on the part of one character and then the other. <br/>
 
-In the previous topic Plotting In Scenes, we introduced the idea that every scene must advance the story’s plot: it must move toward the resolution of the story problem it’s a piece of.  This is another way of saying that every scene must have a purpose: show the Ordinary World, introduce the problem, resolve the conflict. A scene can and usually does have more than one purpose, but  must always contribute toward solving the Problem is a part of; otherwise, the story will meander aimlessly. A plotted story must aim toward its outcome as an arrow flies towards its target. Think of each story problem as having structure, of consisting of plot points or story beats. Each plot point is a potential scene, and the plot point’s function is that scene’s purpose. <br/>
+In the previous topic Plotting In Scenes, we introduced the idea that every scene must advance the story’s plot: it must move toward the resolution of the story problem it’s a piece of.  This is another way of saying that every scene must have a purpose: show the Ordinary World, introduce the problem, resolve the conflict. A scene can and usually does have more than one purpose, but  must always contribute toward solving the Problem  it’s a part of; otherwise, the story will meander aimlessly. A plotted story must aim toward its outcome as an arrow flies towards its target. Think of each story problem as having structure, of consisting of plot points or story beats. Each plot point is a potential scene, and the plot point’s function is that scene’s purpose. <br/>
 
 Scene Count (Story Length) <br/>
 
@@ -45,11 +45,11 @@ In real life one strategy to solve a problem is to decompose it into smaller pro
 
 This process works not only with complications (subplots with bad outcomes which are designed to increase the conflict), but with other subplots. In The Old Man and the Sea, Manolin, the boy Santiago mentored and who loves him, has a character arc based on his relationship with the old man: <br/>
 
-MISSING IMAGE: C:/dev/src/User Manual/Screenshots/StoryCAD Manolin Problem.png <br/>
+![](PlottingWithStoryCADOldManCharArc.png)
 
 This is an inner problem for Manolin, a coming of age arc, and it’s plotted in just six scenes: <br/>
 
-MISSING IMAGE: C:/dev/src/User Manual/Screenshots/Plotting with StoryCAD - Manolin Subplot.png <br/>
+![](PlottingWithStoryCADOldManSixScenes.png)
 
 Hemingway uses this problem as a frame around Santiago’s battle, splitting the scenes and using the first three to introduce Santiago before his battle, and the last three to show Manolin vowing to fish with the old man again. Plot your scenes for your Problems, but you don’t have to arrange them in that order in your narrative. That’s what Story Narrator View is for. <br/>
 
@@ -58,3 +58,6 @@ Eliminating Scenes  <br/>
 A quite different answer to the ‘How many scenes?’ question is ‘As few as possible’, following Robert Heinlein’s adage: “The most important lesson in the writing trade is that any manuscript is improved if you cut away the fat.” Or, if you prefer, William Faulkner’s: “In writing, you must kill your darlings.” <br/>
 
 The urge will be to create a scene for every plot point.  But you have a wonderful tool at your disposal, your reader’s imagination. If you can remove a scene and the reader can follow your story line, that thing can and should be cut. <br/>
+ <br/><br/>
+[Previous - Plotting Tools](Plotting_Tools.md) <br/><br/>
+[Next up - Defining Scenes](Defining_Scenes.md)
