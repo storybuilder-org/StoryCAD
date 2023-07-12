@@ -5,7 +5,6 @@ using System.ComponentModel;
 using System.Linq;
 using System.Resources;
 using System.Text;
-using Windows.ApplicationModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
@@ -359,6 +358,7 @@ public class SceneViewModel : ObservableRecipient, INavigable
         Time = Model.Time;
         Setting = Model.Setting;
         SceneType = Model.SceneType;
+
         // The Scene tab's cast list switches between either a list of
         // selected cast members or all Characters in the StoryModel.
         // The current choice is CastSource.
@@ -522,14 +522,14 @@ public class SceneViewModel : ObservableRecipient, INavigable
     /// </summary>
     public void SwitchCastView()
     {
-        if (ShowCastSelection == ShowAllCharacters)
-        {
-            CastSource = CastMembers;
-            Messenger.Send(new StatusChangedMessage(new("Add / Remove Cast Members", LogLevel.Info, true)));
-        }
-        else if (ShowCastSelection == ShowCastMembers)
+        if (ShowCastSelection == ShowCastMembers)
         {
             CastSource = CharacterList;
+            Messenger.Send(new StatusChangedMessage(new("Add / Remove Cast Members", LogLevel.Info, true)));
+        }
+        else if (ShowCastSelection == ShowAllCharacters)
+        {
+            CastSource = CastMembers;
             Messenger.Send(new StatusChangedMessage(new("Show Selected Cast Members", LogLevel.Info, true)));
         }
     }
