@@ -677,9 +677,16 @@ public class CharacterViewModel : ObservableRecipient, INavigable
 
     private void AddTrait()
     {
-        string _trait = "(Other) " + NewTrait;
-        CharacterTraits.Add(_trait);
-        NewTrait = string.Empty;
+        if (!string.IsNullOrEmpty(NewTrait))
+        {
+            string _trait = "(Other) " + NewTrait;
+            CharacterTraits.Add(_trait);
+            NewTrait = string.Empty;
+        }
+        else
+        {
+            Messenger.Send(new StatusChangedMessage(new("You can't add an empty trait!", LogLevel.Warn)));
+        }
     }
         
     private void RemoveTrait() 
