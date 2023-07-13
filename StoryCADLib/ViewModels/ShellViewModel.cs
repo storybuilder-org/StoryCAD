@@ -1195,10 +1195,9 @@ public class ShellViewModel : ObservableRecipient
                     ShowChange();
                     Logger.Log(LogLevel.Info, "MasterPlot complete");
                 }
-                _canExecuteCommands = true;
             }
         }
-
+        _canExecuteCommands = true;
     }
 
     private async void DramaticSituationsTool()
