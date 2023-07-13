@@ -2063,61 +2063,70 @@ public class ShellViewModel : ObservableRecipient
     /// </summary>
     public void ShowFlyoutButtons()
     {
-        //Trash Can - View Hide all buttons except Empty Trash.
-        if (RootNodeType(RightTappedNode) == StoryItemType.TrashCan)
+        try
         {
-            AddFolderVisibility = Visibility.Collapsed;
-            AddSectionVisibility = Visibility.Collapsed;
-            AddProblemVisibility = Visibility.Collapsed;
-            AddCharacterVisibility = Visibility.Collapsed;
-            AddSettingVisibility = Visibility.Collapsed;
-            AddSceneVisibility = Visibility.Collapsed;
-            RemoveStoryElementVisibility = Visibility.Collapsed;
-            AddToNarrativeVisibility = Visibility.Collapsed;
-            RemoveFromNarrativeVisibility = Visibility.Collapsed;
-            PrintNodeVisibility = Visibility.Collapsed;
-
-            RestoreStoryElementVisibility = Visibility.Visible;
-            EmptyTrashVisibility = Visibility.Visible;
-        }
-        else
-        {
-            //Explorer tree, show everything but empty trash and add section
-            if (SelectedView == ViewList[0])
+            //Trash Can - View Hide all buttons except Empty Trash.
+            if (RootNodeType(RightTappedNode) == StoryItemType.TrashCan)
             {
-                AddFolderVisibility = Visibility.Visible; 
+                AddFolderVisibility = Visibility.Collapsed;
                 AddSectionVisibility = Visibility.Collapsed;
-                AddProblemVisibility = Visibility.Visible;
-                AddCharacterVisibility = Visibility.Visible;
-                AddSettingVisibility = Visibility.Visible;
-                AddSceneVisibility = Visibility.Visible;
-                RemoveStoryElementVisibility = Visibility.Visible;
-                //TODO: Use correct values (bug with this)
-                //RestoreStoryElementVisibility = Visibility.Collapsed;
-                RestoreStoryElementVisibility = Visibility.Visible;
-                AddToNarrativeVisibility = Visibility.Visible; 
-                //RemoveFromNarrativeVisibility = Visibility.Collapsed;
-                RestoreStoryElementVisibility = Visibility.Visible;
-                PrintNodeVisibility = Visibility.Visible;
-                EmptyTrashVisibility = Visibility.Collapsed;
-            }
-            else //Narrator Tree, hide most things.
-            {
-                RemoveStoryElementVisibility = Visibility.Visible;
-                RemoveFromNarrativeVisibility = Visibility.Visible;
-                AddSectionVisibility = Visibility.Visible;
-                PrintNodeVisibility = Visibility.Visible;
-
-                AddFolderVisibility = Visibility.Collapsed; 
                 AddProblemVisibility = Visibility.Collapsed;
                 AddCharacterVisibility = Visibility.Collapsed;
                 AddSettingVisibility = Visibility.Collapsed;
                 AddSceneVisibility = Visibility.Collapsed;
-                RestoreStoryElementVisibility = Visibility.Collapsed;
+                RemoveStoryElementVisibility = Visibility.Collapsed;
                 AddToNarrativeVisibility = Visibility.Collapsed;
-                EmptyTrashVisibility = Visibility.Collapsed;
+                RemoveFromNarrativeVisibility = Visibility.Collapsed;
+                PrintNodeVisibility = Visibility.Collapsed;
+
+                RestoreStoryElementVisibility = Visibility.Visible;
+                EmptyTrashVisibility = Visibility.Visible;
+            }
+            else
+            {
+                //Explorer tree, show everything but empty trash and add section
+                if (SelectedView == ViewList[0])
+                {
+                    AddFolderVisibility = Visibility.Visible;
+                    AddSectionVisibility = Visibility.Collapsed;
+                    AddProblemVisibility = Visibility.Visible;
+                    AddCharacterVisibility = Visibility.Visible;
+                    AddSettingVisibility = Visibility.Visible;
+                    AddSceneVisibility = Visibility.Visible;
+                    RemoveStoryElementVisibility = Visibility.Visible;
+                    //TODO: Use correct values (bug with this)
+                    //RestoreStoryElementVisibility = Visibility.Collapsed;
+                    RestoreStoryElementVisibility = Visibility.Collapsed;
+                    AddToNarrativeVisibility = Visibility.Visible;
+                    //RemoveFromNarrativeVisibility = Visibility.Collapsed;
+                    PrintNodeVisibility = Visibility.Visible;
+                    EmptyTrashVisibility = Visibility.Collapsed;
+                }
+                else //Narrator Tree, hide most things.
+                {
+                    RemoveStoryElementVisibility = Visibility.Visible;
+                    RemoveFromNarrativeVisibility = Visibility.Visible;
+                    AddSectionVisibility = Visibility.Visible;
+                    PrintNodeVisibility = Visibility.Visible;
+
+                    AddFolderVisibility = Visibility.Collapsed;
+                    AddProblemVisibility = Visibility.Collapsed;
+                    AddCharacterVisibility = Visibility.Collapsed;
+                    AddSettingVisibility = Visibility.Collapsed;
+                    AddSceneVisibility = Visibility.Collapsed;
+                    RestoreStoryElementVisibility = Visibility.Collapsed;
+                    AddToNarrativeVisibility = Visibility.Collapsed;
+                    EmptyTrashVisibility = Visibility.Collapsed;
+                }
             }
         }
+        catch (Exception e) //errors (is RightTappedNode null?
+        {
+             Logger.Log(LogLevel.Error, "An error occurred inShowFlyouttButtons() - For reference RightTappedNode is " + RightTappedNode);
+        }
+
+
+
     }
 
     public void ShowConnectionStatus()
