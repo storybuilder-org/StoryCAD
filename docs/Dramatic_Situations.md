@@ -11,5 +11,8 @@ The Dramatic Situations form is invoked from the Plotting Aids sub-menu of the T
 
 The central story problem will frequently be based upon one of these situations, but the Dramatic Situations tool is intended more for use with the plot outline and with scenes.  Every scene can be thought of as a 'little story' with its own conflict; and each scene will therefore generally involve one or more of these dramatic situations. <br/>
 
-This tool works with the Scene tab on the Plot form to help define the conflict for a scene.  If you select Copy from the  Dramatic Situations form, the elements of the situation you have selected will be copied into the elements on the Scene tab of the Plot form for the currently selected plot point. <br/>
+This tool works with the Scene tab on the Plot form to help define the conflict for a scene.  If you select Copy from the Dramatic Situations form, the elements of the situation you have selected will be copied into the elements on the Scene tab of the Plot form for the currently selected plot point. <br/>
 
+ <br/><br/>
+[Previous - Master Plots](Master_Plots.md) <br/><br/>
+[Next up - Stock Scenes](Stock_Scenes.md)

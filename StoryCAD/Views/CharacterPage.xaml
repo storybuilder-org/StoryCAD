@@ -288,7 +288,7 @@
                     <!-- Character traits -->
                     <ListView Header="Traits" Grid.Row="1" MinWidth="300" MinHeight="150" 
                             ItemsSource="{x:Bind CharVm.CharacterTraits, Mode=TwoWay}"
-                            SelectedIndex="{x:Bind CharVm.ExistingTraitIndex, Mode=OneWay}" />
+                            SelectedIndex="{x:Bind CharVm.ExistingTraitIndex, Mode=TwoWay}" />
                     <Grid Grid.Row="2" HorizontalAlignment="Left">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="2*"/>
