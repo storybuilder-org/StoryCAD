@@ -18,7 +18,7 @@
         <CheckBox Content="Make a relationship on the other character" HorizontalAlignment="Center" Margin="0,20,0,0" IsChecked="{x:Bind NewRelVM.InverseRelationship, Mode=TwoWay}"/>
         <StackPanel Orientation="Horizontal" Width="500" HorizontalAlignment="Center">
             <TextBlock Text="{x:Bind  NewRelVM.SelectedPartner.Name, Mode=TwoWay}" VerticalAlignment="Center" MaxWidth="120" TextWrapping="Wrap"/>
-            <TextBlock  Text="is a " VerticalAlignment="Center"/>
+            <TextBlock  Text=" is a " VerticalAlignment="Center" Margin="2,0,0,0"/>
             <editors:SfComboBox   MinWidth="150" ItemsSource="{x:Bind  NewRelVM.RelationTypes}" VerticalAlignment="Center" IsEditable="True"  SelectedValue="{x:Bind  NewRelVM.InverseRelationType, Mode=TwoWay}" IsEnabled="{x:Bind NewRelVM.InverseRelationship, Mode=TwoWay}"/>
             <TextBlock  Text=" to" VerticalAlignment="Center" Margin="5,0"/>
             <TextBlock  Text="{x:Bind CharVM.Name}"  VerticalAlignment="Center" MaxWidth="120" TextWrapping="Wrap"/>
