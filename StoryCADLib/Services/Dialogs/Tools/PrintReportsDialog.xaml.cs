@@ -7,6 +7,8 @@ using StoryCAD.Services.Logging;
 using StoryCAD.ViewModels;
 using StoryCAD.ViewModels.Tools;
 using Windows.Graphics.Printing;
+using Microsoft.UI.Dispatching;
+using CommunityToolkit.WinUI.UI.Controls;
 
 namespace StoryCAD.Services.Dialogs.Tools;
 public sealed partial class PrintReportsDialog
@@ -115,16 +117,6 @@ public sealed partial class PrintReportsDialog
 
     private async void StartPrintMenu(object sender, RoutedEventArgs e)
     {
-        PrintVM.CloseDialog();
-
-        //Prevent empty report crash.
-        if (PrintVM.SelectedNodes.Count == 0)
-        {
-            Ioc.Default.GetRequiredService<ShellViewModel>().ShowMessage(LogLevel.Warn,
-                "You can't print an empty report!", true);
-            return;
-        }
-
         PrintVM.GeneratePrintDocumentReport();
         PrintVM.PrintDocSource = PrintVM.Document.DocumentSource;
 
@@ -141,6 +133,7 @@ public sealed partial class PrintReportsDialog
             {
                 GlobalData.GlobalDispatcher.TryEnqueue(async () =>
                 {
+                    PrintVM.CloseDialog();
                     await new ContentDialog
                     {
                         XamlRoot = GlobalData.XamlRoot,
@@ -169,6 +162,7 @@ public sealed partial class PrintReportsDialog
             LoadingBar.Opacity = 0;
             _isDone.Tick -= IsReportGenerationFinished;
             PrintVM.ShowLoadingBar = false;
+            PrintVM.CloseDialog();
             Ioc.Default.GetRequiredService<ShellViewModel>().ShowMessage(LogLevel.Info, "Generate Print Reports complete", true);
         }
     }
