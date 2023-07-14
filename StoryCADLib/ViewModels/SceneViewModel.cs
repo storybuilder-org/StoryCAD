@@ -376,13 +376,13 @@ public class SceneViewModel : ObservableRecipient, INavigable
         InitializeCharacterList();
         if (CastMembers.Count > 0)
         {
-            CastSource = CastMembers;
             ShowCastSelection = ShowCastMembers;
+            CastSource = CastMembers;
         }
         else
         {
-            CastSource = CharacterList;
             ShowCastSelection = ShowAllCharacters;
+            CastSource = CharacterList;
         }
 
         ViewpointCharacter = Model.ViewpointCharacter;
@@ -559,7 +559,7 @@ public class SceneViewModel : ObservableRecipient, INavigable
 
     public void RemoveCastMember(StoryElement element)
     {
-        for (int _i = 0; _i < CastMembers.Count - 1; _i++)
+        for (int _i = 0; _i <= CastMembers.Count - 1; _i++)
             if (CastMembers[_i].Uuid == element.Uuid)
             {
                 CastMembers.RemoveAt(_i);
