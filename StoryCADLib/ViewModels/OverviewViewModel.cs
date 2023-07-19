@@ -290,35 +290,44 @@ public class OverviewViewModel : ObservableRecipient, INavigable
 
     internal void SaveModel()
     {
-        if (_changed)
+        try
         {
-            // Story.Uuid is read-only and cannot be assigned
-            Model.Name = Name;
-            IsTextBoxFocused = false;
-            Model.DateCreated = DateCreated;
-            Model.Author = Author;
-            Model.DateModified = DateModified;
-            Model.StoryType = StoryType;
-            Model.StoryGenre = StoryGenre;
-            Model.Viewpoint = Viewpoint;
-            Model.ViewpointCharacter = ViewpointCharacter;
-            Model.Voice = Voice;
-            Model.LiteraryDevice = LiteraryTechnique;
-            Model.Style = Style;
-            Model.Tense = Tense;
-            Model.Style = Style;
-            Model.Tone = Tone;
-            Model.StoryProblem = StoryProblem;
-            Model.StoryIdea = StoryIdea;
-            Model.Concept = Concept;
-            Model.Premise = Premise;
-            if (_syncPremise)
+            if (_changed)
             {
-                _storyProblemModel.Premise = Premise;
+                // Story.Uuid is read-only and cannot be assigned
+                Model.Name = Name;
+                IsTextBoxFocused = false;
+                Model.DateCreated = DateCreated;
+                Model.Author = Author;
+                Model.DateModified = DateModified;
+                Model.StoryType = StoryType;
+                Model.StoryGenre = StoryGenre;
+                Model.Viewpoint = Viewpoint;
+                Model.ViewpointCharacter = ViewpointCharacter;
+                Model.Voice = Voice;
+                Model.LiteraryDevice = LiteraryTechnique;
+                Model.Style = Style;
+                Model.Tense = Tense;
+                Model.Style = Style;
+                Model.Tone = Tone;
+                Model.StoryProblem = StoryProblem;
+                Model.StoryIdea = StoryIdea;
+                Model.Concept = Concept;
+                Model.Premise = Premise;
+                if (_syncPremise)
+                {
+                    _storyProblemModel.Premise = Premise;
+                }
+                Model.StructureNotes = StructureNotes;
+                Model.Notes = Notes;
             }
-            Model.StructureNotes = StructureNotes;
-            Model.Notes = Notes;
         }
+        catch (Exception ex)
+        {
+            Ioc.Default.GetRequiredService<LogService>().LogException(LogLevel.Error,
+                ex, $"Failed to save overview model - {ex.Message}");
+        }
+
     }
     
     #endregion

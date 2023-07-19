@@ -6,6 +6,7 @@ using System.Resources;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Messaging;
+using Microsoft.UI.Xaml.Automation;
 using Microsoft.UI.Xaml.Controls;
 using StoryCAD.Models;
 using StoryCAD.Services.Logging;
@@ -217,27 +218,36 @@ public class SettingViewModel : ObservableRecipient, INavigable
 
     internal void SaveModel()
     {
-        if (_changed)
+        try
         {
-            // Story.Uuid is read-only and cannot be assigned
-            Model.Name = Name;
-            IsTextBoxFocused = false;
-            Model.Locale = Locale;
-            Model.Season = Season;
-            Model.Period = Period;
-            Model.Lighting = Lighting;
-            Model.Weather = Weather;
-            Model.Temperature = Temperature;
-            Model.Props = Props;
+            if (_changed)
+            {
+                // Story.Uuid is read-only and cannot be assigned
+                Model.Name = Name;
+                IsTextBoxFocused = false;
+                Model.Locale = Locale;
+                Model.Season = Season;
+                Model.Period = Period;
+                Model.Lighting = Lighting;
+                Model.Weather = Weather;
+                Model.Temperature = Temperature;
+                Model.Props = Props;
 
-            //Write RTF files
-            Model.Summary = Summary;
-            Model.Sights = Sights;
-            Model.Sounds = Sounds;
-            Model.Touch = Touch;
-            Model.SmellTaste = SmellTaste;
-            Model.Notes = Notes;
+                //Write RTF files
+                Model.Summary = Summary;
+                Model.Sights = Sights;
+                Model.Sounds = Sounds;
+                Model.Touch = Touch;
+                Model.SmellTaste = SmellTaste;
+                Model.Notes = Notes;
+            }
         }
+        catch (Exception ex)
+        {
+            Ioc.Default.GetRequiredService<LogService>().LogException(LogLevel.Error,
+                ex, $"Failed to save setting model - {ex.Message}");
+        }
+
     }
 
     #endregion
