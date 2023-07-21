@@ -11,7 +11,10 @@ using Microsoft.UI.Xaml.Printing;
 using StoryCAD.Models;
 using StoryCAD.Services.Reports;
 using Windows.Graphics.Printing;
-using Microsoft.UI.Dispatching;
+using CommunityToolkit.Mvvm.DependencyInjection;
+using StoryCAD.Services.Dialogs.Tools;
+using StoryCAD.Services.Messages;
+using StoryCAD.Services.Logging;
 
 namespace StoryCAD.ViewModels.Tools;
 
@@ -158,6 +161,35 @@ public class PrintReportDialogVM : ObservableRecipient
         set => SetProperty(ref _webNodes, value);
     }
     #endregion
+
+    public async void OpenPrintReportDialog()
+    {
+        ShellViewModel ShellVM = Ioc.Default.GetRequiredService<ShellViewModel>();
+        if (ShellVM._canExecuteCommands)
+        {
+            if (Ioc.Default.GetRequiredService<ShellViewModel>().DataSource == null)
+            {
+                ShellVM.ShowMessage(LogLevel.Warn, "You need to load a Story first!", false);
+                return;
+            }
+            
+            ShellVM._canExecuteCommands = false;
+            ShellVM.ShowMessage(LogLevel.Info, "Generate Print Reports executing",  true);
+
+            ShellVM.SaveModel();
+
+            // Run reports dialog
+            Dialog = new()
+            {
+                Title = "Generate Reports",
+                XamlRoot = GlobalData.XamlRoot,
+                Content = new PrintReportsDialog()
+            };
+            await Dialog.ShowAsync();
+            ShellVM._canExecuteCommands = true;
+
+        }
+    }
 
     /// <summary>
     /// This traverses a node and adds it to the relevant list.
