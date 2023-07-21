@@ -781,7 +781,7 @@ public class ShellViewModel : ObservableRecipient
                 Messenger.Send(new StatusChangedMessage(new("Open Story completed", LogLevel.Info)));
             }
 
-            GlobalData.MainWindow.Title = $"StoryCAD - Editing {StoryModel.ProjectFilename.Replace(".stbx", "")}";
+            UpdateWindowTitle();
             new UnifiedVM().UpdateRecents(Path.Combine(StoryModel.ProjectFolder.Path, StoryModel.ProjectFile.Name));
 
             if (GlobalData.Preferences.TimedBackup)
