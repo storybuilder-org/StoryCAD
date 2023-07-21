@@ -2121,7 +2121,8 @@ public class ShellViewModel : ObservableRecipient
         }
         catch (Exception e) //errors (is RightTappedNode null?
         {
-             Logger.Log(LogLevel.Error, "An error occurred inShowFlyouttButtons() - For reference RightTappedNode is " + RightTappedNode);
+             Logger.Log(LogLevel.Error, $"An error occurred inShowFlyouttButtons() \n{e.Message}\n" +
+                 $"- For reference RightTappedNode is " + RightTappedNode);
         }
 
 
