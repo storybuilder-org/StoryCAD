@@ -524,13 +524,11 @@ public class SceneViewModel : ObservableRecipient, INavigable
         if (AllCharactersSelected)
         {
             CastSource = CastMembers;
-            AllCharactersSelected = false;  
             Messenger.Send(new StatusChangedMessage(new("Add / Remove Cast Members", LogLevel.Info, true)));
         }
         else
         {
             CastSource = CharacterList;
-            AllCharactersSelected = true;   
             Messenger.Send(new StatusChangedMessage(new("Show Selected Cast Members", LogLevel.Info, true)));
         }
     }
