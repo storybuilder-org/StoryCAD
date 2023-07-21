@@ -1308,6 +1308,13 @@ public class ShellViewModel : ObservableRecipient
 
     private async void GenerateScrivenerReports()
     {
+        if (DataSource == null || DataSource.Count == 0)
+        {
+            Messenger.Send(new StatusChangedMessage(new("You need to open a story first!", LogLevel.Info)));
+            Logger.Log(LogLevel.Info, $"Scrivener Report cancelled (DataSource was null or empty)");
+            return;
+        }
+
         //TODO: revamp this to be more user friendly.
         _canExecuteCommands = false;
         Messenger.Send(new StatusChangedMessage(new("Generate Scrivener Reports executing", LogLevel.Info, true)));
