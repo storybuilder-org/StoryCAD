@@ -2,10 +2,13 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.UI.Xaml.Controls;
 using StoryCAD.Models;
+using StoryCAD.Services.Dialogs.Tools;
 using StoryCAD.Services.Logging;
 
 namespace StoryCAD.ViewModels.Tools;
@@ -65,6 +68,35 @@ public class NarrativeToolVM: ObservableRecipient
         CopyAllUnusedCommand = new RelayCommand(CopyAllUnused);
         DeleteCommand = new RelayCommand(Delete);
     }
+
+    /// <summary>
+    /// This opens the Narrative Tool Content Dialog.
+    /// </summary>
+    public async Task OpenNarrativeTool()
+    {
+        if (_shellVM.VerifyToolUse(false, false) && _shellVM._canExecuteCommands)
+        {
+            _shellVM._canExecuteCommands = false;
+            try
+            {
+                ContentDialog _dialog = new()
+                {
+                    XamlRoot = GlobalData.XamlRoot,
+                    Title = "Narrative Editor",
+                    PrimaryButtonText = "Done",
+                    Content = new NarrativeTool()
+                };
+                await _dialog.ShowAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogException(LogLevel.Error, ex, "Error in ShellVM.OpenNarrativeTool()");
+            }
+
+            _shellVM._canExecuteCommands = true;
+        }
+    }
+
 
     /// <summary>
     /// Deletes a node from the tree.
