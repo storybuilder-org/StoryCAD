@@ -54,6 +54,9 @@ namespace StoryCAD.Services.Dialogs
 
         public async Task ShowChangeLog()
         {
+            //Don't Show changelog on dev build's since its pointless.
+            if (GlobalData.DeveloperBuild) { return; }
+
             try
             {
                 ContentDialog _changelogUI = new()

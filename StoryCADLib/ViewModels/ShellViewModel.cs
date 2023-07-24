@@ -781,7 +781,7 @@ public class ShellViewModel : ObservableRecipient
                 Messenger.Send(new StatusChangedMessage(new("Open Story completed", LogLevel.Info)));
             }
 
-            GlobalData.MainWindow.Title = $"StoryCAD - Editing {StoryModel.ProjectFilename.Replace(".stbx", "")}";
+            UpdateWindowTitle();
             new UnifiedVM().UpdateRecents(Path.Combine(StoryModel.ProjectFolder.Path, StoryModel.ProjectFile.Name));
 
             if (GlobalData.Preferences.TimedBackup)
@@ -1305,36 +1305,16 @@ public class ShellViewModel : ObservableRecipient
         }
     }
 
-    private async void GeneratePrintReports()
-    {
-        PrintReportDialogVM _reportVM = Ioc.Default.GetRequiredService<PrintReportDialogVM>();
-        if (_canExecuteCommands)
-        {
-            if (Ioc.Default.GetRequiredService<ShellViewModel>().DataSource == null)
-            {
-                Messenger.Send(new StatusChangedMessage(new("You need to load a Story first!", LogLevel.Warn)));
-                return;
-            }
-            _canExecuteCommands = false;
-            Messenger.Send(new StatusChangedMessage(new("Generate Print Reports executing", LogLevel.Info, true)));
-
-            SaveModel();
-
-            // Run reports dialog
-            _reportVM.Dialog = new()
-            {
-                Title = "Generate Reports",
-                XamlRoot = GlobalData.XamlRoot,
-                Content = new PrintReportsDialog()
-            };
-            await _reportVM.Dialog.ShowAsync();
-            _canExecuteCommands = true;
-
-        }
-    }
 
     private async void GenerateScrivenerReports()
     {
+        if (DataSource == null || DataSource.Count == 0)
+        {
+            Messenger.Send(new StatusChangedMessage(new("You need to open a story first!", LogLevel.Info)));
+            Logger.Log(LogLevel.Info, $"Scrivener Report cancelled (DataSource was null or empty)");
+            return;
+        }
+
         //TODO: revamp this to be more user friendly.
         _canExecuteCommands = false;
         Messenger.Send(new StatusChangedMessage(new("Generate Scrivener Reports executing", LogLevel.Info, true)));
@@ -1375,12 +1355,10 @@ public class ShellViewModel : ObservableRecipient
         _canExecuteCommands = false;
         Messenger.Send(new StatusChangedMessage(new("Launching GitHub Pages User Manual", LogLevel.Info, true)));
 
-        ProcessStartInfo _psi = new()
-        {
+        Process.Start(new ProcessStartInfo(){
             FileName = @"https://Storybuilder-org.github.io/StoryCAD/",
             UseShellExecute = true
-        };
-        Process.Start(_psi);
+        });
 
         Messenger.Send(new StatusChangedMessage(new("Launch default browser completed", LogLevel.Info, true)));
 
@@ -1394,12 +1372,11 @@ public class ShellViewModel : ObservableRecipient
     /// <param name="nodeRequired">A node (right-clicked or clicked) must be present</param>
     /// <param name="checkOutlineIsOpen">A checks an outline is open (defaults to true)</param>
     /// <returns>true if prerequisites are met</returns>
-    private bool VerifyToolUse(bool explorerViewOnly, bool nodeRequired, bool checkOutlineIsOpen = true)
+    public bool VerifyToolUse(bool explorerViewOnly, bool nodeRequired, bool checkOutlineIsOpen = true)
     {
         try
         {
-
-            if (explorerViewOnly && !IsExplorerView())
+            if (explorerViewOnly && CurrentViewType != StoryViewType.ExplorerView)
             {
                 Messenger.Send(new StatusChangedMessage(new("This tool can only be run in Story Explorer view", LogLevel.Warn)));
                 return false;
@@ -1744,7 +1721,6 @@ public class ShellViewModel : ObservableRecipient
     private void AddFolder()
     {
         TreeViewNodeClicked(AddStoryElement(StoryItemType.Folder));
-
     }
 
     private void AddSection()
@@ -2028,7 +2004,7 @@ public class ShellViewModel : ObservableRecipient
         
         #endregion
 
-        public void ViewChanged()
+    public void ViewChanged()
     {
         if (DataSource == null || DataSource.Count == 0)
         {
@@ -2121,10 +2097,9 @@ public class ShellViewModel : ObservableRecipient
         }
         catch (Exception e) //errors (is RightTappedNode null?
         {
-             Logger.Log(LogLevel.Error, "An error occurred inShowFlyouttButtons() - For reference RightTappedNode is " + RightTappedNode);
+             Logger.Log(LogLevel.Error, $"An error occurred inShowFlyouttButtons() \n{e.Message}\n" +
+                 $"- For reference RightTappedNode is " + RightTappedNode);
         }
-
-
 
     }
 
@@ -2175,10 +2150,6 @@ public class ShellViewModel : ObservableRecipient
         //Set window Title.
         GlobalData.MainWindow.Title = BaseTitle;
     }
-
-    private bool IsExplorerView() => CurrentViewType == StoryViewType.ExplorerView;
-    // ReSharper disable once UnusedMember.Local
-    private bool IsNarratorView() => CurrentViewType == StoryViewType.NarratorView;
 
     #region MVVM  processing
     private void IsChangedMessageReceived(IsChangedMessage isDirty)
@@ -2307,7 +2278,7 @@ public class ShellViewModel : ObservableRecipient
         TogglePaneCommand = new RelayCommand(TogglePane, () => _canExecuteCommands);
         OpenUnifiedCommand = new RelayCommand(async () => await OpenUnifiedMenu(), () => _canExecuteCommands);
         CloseUnifiedCommand = new RelayCommand(CloseUnifiedMenu, () => _canExecuteCommands);
-        NarrativeToolCommand = new RelayCommand(async () => await OpenNarrativeTool(), () => _canExecuteCommands);
+        NarrativeToolCommand = new RelayCommand(async () => await Ioc.Default.GetRequiredService<NarrativeToolVM>().OpenNarrativeTool(), () => _canExecuteCommands);
         PrintNodeCommand = new RelayCommand(async () => await PrintCurrentNodeAsync(), () => _canExecuteCommands);
         OpenFileCommand = new RelayCommand(async () => await OpenFile(), () => _canExecuteCommands);
         SaveFileCommand = new RelayCommand(async () => await SaveFile(), () => _canExecuteCommands);
@@ -2324,7 +2295,7 @@ public class ShellViewModel : ObservableRecipient
 
         PreferencesCommand = new RelayCommand(Preferences, () => _canExecuteCommands);
 
-        PrintReportsCommand = new RelayCommand(GeneratePrintReports, () => _canExecuteCommands);
+        PrintReportsCommand = new RelayCommand(Ioc.Default.GetRequiredService<PrintReportDialogVM>().OpenPrintReportDialog, () => _canExecuteCommands);
         ScrivenerReportsCommand = new RelayCommand(GenerateScrivenerReports, () => _canExecuteCommands);
 
         HelpCommand = new RelayCommand(LaunchGitHubPages, () => _canExecuteCommands);
@@ -2360,31 +2331,6 @@ public class ShellViewModel : ObservableRecipient
         ChangeStatusColor = Colors.Green;
 
         ShellInstance = this;
-    }
-
-    private async Task OpenNarrativeTool()
-    {
-        if (VerifyToolUse(false, false) && _canExecuteCommands)
-        {
-            _canExecuteCommands = false;
-            try
-            {
-                ContentDialog _dialog = new()
-                {
-                    XamlRoot = GlobalData.XamlRoot,
-                    Title = "Narrative Editor",
-                    PrimaryButtonText = "Done",
-                    Content = new NarrativeTool()
-                };
-                await _dialog.ShowAsync();
-            }
-            catch (Exception ex)
-            {
-                Logger.LogException(LogLevel.Error, ex, "Error in ShellVM.OpenNarrativeTool()");
-            }
-
-            _canExecuteCommands = true;
-        }
     }
 
     public void SearchNodes()
