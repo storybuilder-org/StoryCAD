@@ -3,7 +3,7 @@ name: AppxManifestAutoMerge
 on:
   pull_request:
     paths:
-    - 'StoryCAD/StoryCAD/Package.appxmanifest'
+    - 'StoryCAD/Package.appxmanifest'
 
 jobs:
   resolve-conflict:
@@ -17,7 +17,7 @@ jobs:
     - name: Remove version conflict in appx manifest
       run: |
         # Navigate to StoryCAD directory
-        cd StoryCAD/StoryCAD
+        cd StoryCAD
 
         # Check if the file has a conflict
         if grep -q '<<<<<<<' Package.appxmanifest; then
