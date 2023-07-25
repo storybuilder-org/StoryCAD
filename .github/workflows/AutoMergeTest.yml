@@ -1,0 +1,37 @@
+name: AppxAutoMerge
+
+on:
+  push:
+    paths:
+    - 'Package.appxmanifest'
+
+jobs:
+  resolve-conflict:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+      with:
+        ref: ${{ github.head_ref }}
+
+    - name: Remove version conflict in appx manifest
+      run: |
+        # Check if the file has a conflict
+        if grep -q '<<<<<<< HEAD' Package.appxmanifest; then
+          # Extract both versions
+          VERSION1=$(grep -oP '(?<=Version=")[^"]*' Package.appxmanifest | sed -n '1p')
+          VERSION2=$(grep -oP '(?<=Version=")[^"]*' Package.appxmanifest | sed -n '2p')
+
+          # Use sort to determine the higher version
+          HIGHER_VERSION=$(printf "%s\n%s\n" $VERSION1 $VERSION2 | sort -V | tail -1)
+
+          # Replace conflicted section with higher version
+          sed -i "/<<<<<<< HEAD/,/>>>>>>> /c\    <Identity Name=\"34432StoryBuilder.StoryBuilder\" Publisher=\"CN=34A1944E-942C-4545-B217-ECE68E54ACF8\" Version=\"$HIGHER_VERSION\" />" Package.appxmanifest
+
+          # Commit the changes
+          git config user.name 'Github Action'
+          git config user.email 'action@github.com'
+          git add Package.appxmanifest
+          git commit -m 'Resolved version conflict by taking higher version'
+          git push
+        fi
