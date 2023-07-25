@@ -3,7 +3,7 @@ name: AppxAutoMerge
 on:
   push:
     paths:
-    - 'Package.appxmanifest'
+    - 'StoryCAD/Package.appxmanifest'
 
 jobs:
   resolve-conflict:
@@ -17,21 +17,21 @@ jobs:
     - name: Remove version conflict in appx manifest
       run: |
         # Check if the file has a conflict
-        if grep -q '<<<<<<< HEAD' Package.appxmanifest; then
+        if grep -q '<<<<<<< HEAD' StoryCAD/Package.appxmanifest; then
           # Extract both versions
-          VERSION1=$(grep -oP '(?<=Version=")[^"]*' Package.appxmanifest | sed -n '1p')
-          VERSION2=$(grep -oP '(?<=Version=")[^"]*' Package.appxmanifest | sed -n '2p')
+          VERSION1=$(grep -oP '(?<=Version=")[^"]*' StoryCAD/Package.appxmanifest | sed -n '1p')
+          VERSION2=$(grep -oP '(?<=Version=")[^"]*' StoryCAD/Package.appxmanifest | sed -n '2p')
 
           # Use sort to determine the higher version
           HIGHER_VERSION=$(printf "%s\n%s\n" $VERSION1 $VERSION2 | sort -V | tail -1)
 
           # Replace conflicted section with higher version
-          sed -i "/<<<<<<< HEAD/,/>>>>>>> /c\    <Identity Name=\"34432StoryBuilder.StoryBuilder\" Publisher=\"CN=34A1944E-942C-4545-B217-ECE68E54ACF8\" Version=\"$HIGHER_VERSION\" />" Package.appxmanifest
+          sed -i "/<<<<<<< HEAD/,/>>>>>>> /c\    <Identity Name=\"34432StoryBuilder.StoryBuilder\" Publisher=\"CN=34A1944E-942C-4545-B217-ECE68E54ACF8\" Version=\"$HIGHER_VERSION\" />" StoryCAD/Package.appxmanifest
 
           # Commit the changes
           git config user.name 'Github Action'
           git config user.email 'action@github.com'
-          git add Package.appxmanifest
+          git add StoryCAD/Package.appxmanifest
           git commit -m 'Resolved version conflict by taking higher version'
           git push
         fi
