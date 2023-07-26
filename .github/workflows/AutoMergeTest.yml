@@ -25,7 +25,7 @@ jobs:
     - name: Resolve merge conflict based on version
       run: |
         # Check if the file has a conflict
-        if grep -q '<<<<<<< HEAD' StoryCAD/Package.appxmanifest; then
+        if grep -q '<<<<<<< ' StoryCAD/Package.appxmanifest; then
 
           # Debug: Print the content of the file
           echo "-------File Content Start--------"
@@ -45,7 +45,8 @@ jobs:
           # Debug: Print the higher version
           echo "Higher Version: $HIGHER_VERSION"
 
-          sed -i "/<<<<<<< HEAD/,/>>>>>>> /c\    <Identity Name=\"34432StoryBuilder.StoryBuilder\" Publisher=\"CN=34A1944E-942C-4545-B217-ECE68E54ACF8\" Version=\"$HIGHER_VERSION\" />" StoryCAD/Package.appxmanifest
+          # Replace the conflicting lines with the higher version
+          sed -i "/<<<<<<< /,/>>>>>>> /c\    <Identity Name=\"34432StoryBuilder.StoryBuilder\" Publisher=\"CN=34A1944E-942C-4545-B217-ECE68E54ACF8\" Version=\"$HIGHER_VERSION\" />" StoryCAD/Package.appxmanifest
 
           # Debug: Print the content of the file after the sed command
           echo "-------Updated File Content Start--------"
