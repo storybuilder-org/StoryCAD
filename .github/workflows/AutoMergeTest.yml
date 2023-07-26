@@ -24,17 +24,20 @@ jobs:
 
     - name: Resolve merge conflict based on version
       run: |
+        # Absolute path to the manifest
+        MANIFEST_PATH="${{ github.workspace }}/StoryCAD/Package.appxmanifest"
+
         # Check if the file has a conflict
-        if grep -q '<<<<<<< ' StoryCAD/Package.appxmanifest; then
+        if grep -q '<<<<<<< ' $MANIFEST_PATH; then
 
           # Debug: Print the content of the file
           echo "-------File Content Start--------"
-          cat StoryCAD/Package.appxmanifest
+          cat $MANIFEST_PATH
           echo "-------File Content End--------"
 
           # Extract both versions
-          VERSION1=$(grep -oP '(?<=Version=")[^"]*' StoryCAD/Package.appxmanifest | sed -n '1p')
-          VERSION2=$(grep -oP '(?<=Version=")[^"]*' StoryCAD/Package.appxmanifest | sed -n '2p')
+          VERSION1=$(grep -oP '(?<=Version=")[^"]*' $MANIFEST_PATH | sed -n '1p')
+          VERSION2=$(grep -oP '(?<=Version=")[^"]*' $MANIFEST_PATH | sed -n '2p')
 
           # Debug: Print the extracted versions
           echo "Version 1: $VERSION1"
@@ -46,20 +49,20 @@ jobs:
           echo "Higher Version: $HIGHER_VERSION"
 
           # Replace the conflicting lines with the higher version
-          sed -i "/<<<<<<< /,/>>>>>>> /c\    <Identity Name=\"34432StoryBuilder.StoryBuilder\" Publisher=\"CN=34A1944E-942C-4545-B217-ECE68E54ACF8\" Version=\"$HIGHER_VERSION\" />" StoryCAD/Package.appxmanifest
+          sed -i "/<<<<<<< /,/>>>>>>> /c\    <Identity Name=\"34432StoryBuilder.StoryBuilder\" Publisher=\"CN=34A1944E-942C-4545-B217-ECE68E54ACF8\" Version=\"$HIGHER_VERSION\" />" $MANIFEST_PATH
 
           # Debug: Print the content of the file after the sed command
           echo "-------Updated File Content Start--------"
-          cat StoryCAD/Package.appxmanifest
+          cat $MANIFEST_PATH
           echo "-------Updated File Content End--------"
 
           # Commit the changes
           git config user.name 'Github Action'
           git config user.email 'action@github.com'
-          git add StoryCAD/Package.appxmanifest
+          git add $MANIFEST_PATH
           git commit -m 'Resolved version conflict'
           git push
         else
           # Debug: No merge conflict found
-          echo "No merge conflict found in StoryCAD/Package.appxmanifest"
+          echo "No merge conflict found in $MANIFEST_PATH"
         fi
