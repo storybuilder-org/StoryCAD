@@ -1,40 +1,43 @@
-name: AppxManifestAutoMerge
+name: AppxVersionAutoMerge
 
 on:
-  pull_request:
+  pull_request_target:
     paths:
     - 'StoryCAD/Package.appxmanifest'
+    types: [opened, synchronize, reopened]
 
 jobs:
   resolve-conflict:
     runs-on: ubuntu-latest
     steps:
+    - name: PR Origin check
+      run: |
+        if [[ "${{ github.event.pull_request.head.repo.full_name }}" != "${{ github.repository }}" ]]; then
+          echo "Error: This workflow does not process PRs from forks for security reasons."
+          exit 78
+        fi
+
     - name: Checkout code
       uses: actions/checkout@v2
       with:
         ref: ${{ github.head_ref }}
 
-    - name: Remove version conflict in appx manifest
+    - name: Resolve merge conflict based on version
       run: |
-        # Navigate to StoryCAD directory
-        cd StoryCAD
-
         # Check if the file has a conflict
-        if grep -q '<<<<<<<' Package.appxmanifest; then
+        if grep -q '<<<<<<< HEAD' StoryCAD/Package.appxmanifest; then
           # Extract both versions
-          VERSION1=$(grep -oP '(?<=Version=")[^"]*' Package.appxmanifest | sed -n '1p')
-          VERSION2=$(grep -oP '(?<=Version=")[^"]*' Package.appxmanifest | sed -n '2p')
+          VERSION1=$(grep -oP '(?<=Version=")[^"]*' StoryCAD/Package.appxmanifest | sed -n '1p')
+          VERSION2=$(grep -oP '(?<=Version=")[^"]*' StoryCAD/Package.appxmanifest | sed -n '2p')
 
-          # Use sort to determine the higher version
           HIGHER_VERSION=$(printf "%s\n%s\n" $VERSION1 $VERSION2 | sort -V | tail -1)
 
-          # Replace conflicted section with higher version
-          sed -i "/<<<<<<< HEAD/,/>>>>>>> /c\  <Identity Name=\"34432StoryBuilder.StoryBuilder\" Publisher=\"CN=34A1944E-942C-4545-B217-ECE68E54ACF8\" Version=\"$HIGHER_VERSION\" />" Package.appxmanifest
+          sed -i "/<<<<<<< HEAD/,/>>>>>>> /c\    <Identity Name=\"34432StoryBuilder.StoryBuilder\" Publisher=\"CN=34A1944E-942C-4545-B217-ECE68E54ACF8\" Version=\"$HIGHER_VERSION\" />" StoryCAD/Package.appxmanifest
 
           # Commit the changes
           git config user.name 'Github Action'
           git config user.email 'action@github.com'
-          git add Package.appxmanifest
-          git commit -m 'Resolved version conflict by taking higher version'
+          git add StoryCAD/Package.appxmanifest
+          git commit -m 'Resolved version conflict'
           git push
         fi
