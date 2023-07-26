@@ -8,14 +8,18 @@ on:
 
 jobs:
   resolve-conflict:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: powershell
+
     steps:
     - name: PR Origin check
       run: |
-        if [[ "${{ github.event.pull_request.head.repo.full_name }}" != "${{ github.repository }}" ]]; then
-          echo "Error: This workflow does not process PRs from forks for security reasons."
+        if ("${{ github.event.pull_request.head.repo.full_name }}" -ne "${{ github.repository }}") {
+          Write-Output "Error: This workflow does not process PRs from forks for security reasons."
           exit 78
-        fi
+        }
 
     - name: Checkout code
       uses: actions/checkout@v2
@@ -25,42 +29,44 @@ jobs:
     - name: Resolve merge conflict based on version
       run: |
         # Absolute path to the manifest
-        MANIFEST_PATH="${{ github.workspace }}/StoryCAD/Package.appxmanifest"
+        $MANIFEST_PATH = "${{ github.workspace }}\StoryCAD\Package.appxmanifest"
 
         # Check if the manifest exists
-        if [[ ! -f $MANIFEST_PATH ]]; then
-            echo "Error: $MANIFEST_PATH does not exist!"
+        if (-not (Test-Path $MANIFEST_PATH)) {
+            Write-Output "Error: $MANIFEST_PATH does not exist!"
             exit 1
-        fi
+        }
+
+        # Always print the content of the file
+        Write-Output "-------File Content Start--------"
+        Get-Content $MANIFEST_PATH
+        Write-Output "-------File Content End--------"
 
         # Check if the file has a conflict
-        if grep -q '<<<<<<< ' $MANIFEST_PATH; then
-
-          # Debug: Print the content of the file
-          echo "-------File Content Start--------"
-          cat $MANIFEST_PATH || echo "Failed to print the content of $MANIFEST_PATH"
-          echo "-------File Content End--------"
-
+        if (Select-String -Path $MANIFEST_PATH -Pattern '<<<<<<<') {
           # Extract both versions
-          VERSION1=$(grep -oP '(?<=Version=")[^"]*' $MANIFEST_PATH | sed -n '1p')
-          VERSION2=$(grep -oP '(?<=Version=")[^"]*' $MANIFEST_PATH | sed -n '2p')
+          $VERSIONS = Select-String -Path $MANIFEST_PATH -Pattern '(?<=Version=")[^"]*' -AllMatches | ForEach-Object { $_.Matches.Value }
+          $VERSION1 = $VERSIONS[0]
+          $VERSION2 = $VERSIONS[1]
 
           # Debug: Print the extracted versions
-          echo "Version 1: $VERSION1"
-          echo "Version 2: $VERSION2"
+          Write-Output "Version 1: $VERSION1"
+          Write-Output "Version 2: $VERSION2"
 
-          HIGHER_VERSION=$(printf "%s\n%s\n" $VERSION1 $VERSION2 | sort -V | tail -1)
+          $HIGHER_VERSION = @($VERSION1, $VERSION2) | Sort-Object { [version]$_ } | Select-Object -Last 1
 
           # Debug: Print the higher version
-          echo "Higher Version: $HIGHER_VERSION"
+          Write-Output "Higher Version: $HIGHER_VERSION"
 
           # Replace the conflicting lines with the higher version
-          sed -i "/<<<<<<< /,/>>>>>>> /c\    <Identity Name=\"34432StoryBuilder.StoryBuilder\" Publisher=\"CN=34A1944E-942C-4545-B217-ECE68E54ACF8\" Version=\"$HIGHER_VERSION\" />" $MANIFEST_PATH
+          $content = Get-Content $MANIFEST_PATH
+          $updatedContent = $content -replace '(?s)<<<<<<<.*?>>>>>>>', ('    <Identity Name="34432StoryBuilder.StoryBuilder" Publisher="CN=34A1944E-942C-4545-B217-ECE68E54ACF8" Version="'+$HIGHER_VERSION+'" />')
+          Set-Content -Path $MANIFEST_PATH -Value $updatedContent
 
-          # Debug: Print the content of the file after the sed command
-          echo "-------Updated File Content Start--------"
-          cat $MANIFEST_PATH
-          echo "-------Updated File Content End--------"
+          # Debug: Print the content of the file after the modification
+          Write-Output "-------Updated File Content Start--------"
+          Get-Content $MANIFEST_PATH
+          Write-Output "-------Updated File Content End--------"
 
           # Commit the changes
           git config user.name 'Github Action'
@@ -68,7 +74,8 @@ jobs:
           git add $MANIFEST_PATH
           git commit -m 'Resolved version conflict'
           git push
-        else
+        } else {
           # Debug: No merge conflict found
-          echo "No merge conflict found in $MANIFEST_PATH"
-        fi
+          Write-Output "No merge conflict found in $MANIFEST_PATH"
+        }
+
