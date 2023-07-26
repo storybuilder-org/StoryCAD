@@ -27,12 +27,18 @@ jobs:
         # Absolute path to the manifest
         MANIFEST_PATH="${{ github.workspace }}/StoryCAD/Package.appxmanifest"
 
+        # Check if the manifest exists
+        if [[ ! -f $MANIFEST_PATH ]]; then
+            echo "Error: $MANIFEST_PATH does not exist!"
+            exit 1
+        fi
+
         # Check if the file has a conflict
         if grep -q '<<<<<<< ' $MANIFEST_PATH; then
 
           # Debug: Print the content of the file
           echo "-------File Content Start--------"
-          cat $MANIFEST_PATH
+          cat $MANIFEST_PATH || echo "Failed to print the content of $MANIFEST_PATH"
           echo "-------File Content End--------"
 
           # Extract both versions
