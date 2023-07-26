@@ -26,13 +26,31 @@ jobs:
       run: |
         # Check if the file has a conflict
         if grep -q '<<<<<<< HEAD' StoryCAD/Package.appxmanifest; then
+
+          # Debug: Print the content of the file
+          echo "-------File Content Start--------"
+          cat StoryCAD/Package.appxmanifest
+          echo "-------File Content End--------"
+
           # Extract both versions
           VERSION1=$(grep -oP '(?<=Version=")[^"]*' StoryCAD/Package.appxmanifest | sed -n '1p')
           VERSION2=$(grep -oP '(?<=Version=")[^"]*' StoryCAD/Package.appxmanifest | sed -n '2p')
 
+          # Debug: Print the extracted versions
+          echo "Version 1: $VERSION1"
+          echo "Version 2: $VERSION2"
+
           HIGHER_VERSION=$(printf "%s\n%s\n" $VERSION1 $VERSION2 | sort -V | tail -1)
 
+          # Debug: Print the higher version
+          echo "Higher Version: $HIGHER_VERSION"
+
           sed -i "/<<<<<<< HEAD/,/>>>>>>> /c\    <Identity Name=\"34432StoryBuilder.StoryBuilder\" Publisher=\"CN=34A1944E-942C-4545-B217-ECE68E54ACF8\" Version=\"$HIGHER_VERSION\" />" StoryCAD/Package.appxmanifest
+
+          # Debug: Print the content of the file after the sed command
+          echo "-------Updated File Content Start--------"
+          cat StoryCAD/Package.appxmanifest
+          echo "-------Updated File Content End--------"
 
           # Commit the changes
           git config user.name 'Github Action'
@@ -40,4 +58,7 @@ jobs:
           git add StoryCAD/Package.appxmanifest
           git commit -m 'Resolved version conflict'
           git push
+        else
+          # Debug: No merge conflict found
+          echo "No merge conflict found in StoryCAD/Package.appxmanifest"
         fi
