@@ -1,32 +1,42 @@
-name: ManifestMergeFixer
+name: Resolve Manifest Conflict 
+
 on:
   pull_request_target:
+    types: [opened, synchronize, reopened]
     paths:
       - 'StoryCAD/Package.appxmanifest'
-    types: [opened, synchronize, reopened]
 
 jobs:
-  resolve-conflicts:
+  resolve-conflict:
     runs-on: windows-latest
     steps:
-      - name: Check for conflicted Package.appxmanifest
-        id: check_conflicted
-        run: |
-          $isConflicted = git diff --check | Select-String -Pattern "^[+-]{7}\s" -Quiet
-          echo "Is Conflicted: $isConflicted"
-          echo "::set-output name=is_conflicted::$isConflicted"
 
-      - name: Resolve conflicts if any
-        if: steps.check_conflicted.outputs.is_conflicted == 'true'
-        run: |
-          git checkout --theirs -- 'StoryCAD/Package.appxmanifest'
-          git add 'StoryCAD/Package.appxmanifest'
-          git commit -m "Resolved conflicts in Package.appxmanifest"
+    - name: Checkout code
+      uses: actions/checkout@v2
+      with:
+        ref: ${{ github.event.pull_request.head.sha }} # Check out the incoming branch
 
-      - name: Notify conflict resolution status
-        run: |
-          if($isConflicted) {
-            echo "Conflicts found and resolved."
-          } else {
-            echo "No conflicts found in Package.appxmanifest."
-          }
+    - name: jake debug
+      run: |
+        dir
+        cd ${{ github.workspace }}
+        Test-Path -Path .git
+        
+    - name: Resolve conflict in Package.appxmanifest
+      run: |
+        Set-Location ${{ github.workspace }}
+        $conflicted = (git diff --name-only --diff-filter=U) -contains 'StoryCAD/Package.appxmanifest'
+        if ($conflicted) {
+          git checkout --theirs StoryCAD/Package.appxmanifest
+          git add StoryCAD/Package.appxmanifest
+          git commit -m "Resolved conflict in Package.appxmanifest by taking incoming changes"
+        }
+      shell: pwsh
+
+    - name: Push changes if conflict resolved
+      run: |
+        Set-Location ${{ github.workspace }}
+        if (git log -1 --pretty=%B -s | Select-String -Pattern "Resolved conflict in Package.appxmanifest by taking incoming changes") {
+          git push origin ${{ github.event.pull_request.head.ref }}
+        }
+      shell: pwsh
