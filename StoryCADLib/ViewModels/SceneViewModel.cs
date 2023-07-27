@@ -9,6 +9,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using Microsoft.UI.Xaml;
 using StoryCAD.Models;
 using StoryCAD.Services.Logging;
 using StoryCAD.Services.Messages;
@@ -61,11 +62,11 @@ public class SceneViewModel : ObservableRecipient, INavigable
         set => SetProperty(ref _isTextBoxFocused, value);
     }
 
-    private bool _allCharactersSelected;
-    public bool AllCharactersSelected
+    private bool _allCharacters;
+    public bool AllCharacters
     {
-        get => _allCharactersSelected;
-        set => SetProperty(ref _allCharactersSelected, value);
+        get => _allCharacters;
+        set => SetProperty(ref _allCharacters, value);
     }
 
     //  Scene general data
@@ -88,7 +89,7 @@ public class SceneViewModel : ObservableRecipient, INavigable
                 return;
             if (!CastMemberExists(value))
             {
-                CastMembers.Add(StoryElement.StringToStoryElement(value));
+                CastList.Add(StoryElement.StringToStoryElement(value));
             }
         }
     }
@@ -121,6 +122,28 @@ public class SceneViewModel : ObservableRecipient, INavigable
         set => SetProperty(ref _sceneType, value);
     }
 
+    // CastSource is assigned to either CastList or CharacterList
+
+    private ObservableCollection<StoryElement> _castSource;
+    public ObservableCollection<StoryElement> CastSource
+    {
+        get => _castSource;
+        set => SetProperty(ref _castSource, value);
+    }
+    private ObservableCollection<StoryElement> _castList;
+    public ObservableCollection<StoryElement> CastList
+    {
+        get => _castList;
+        set => SetProperty(ref _castList, value);
+    }
+    private ObservableCollection<StoryElement> _characterList;
+    public ObservableCollection<StoryElement> CharacterList
+    {
+        get => _characterList;
+        set => SetProperty(ref _characterList, value);
+    }
+
+    // The Scene tab's Scene Sketch 
     private string _remarks;
     public string Remarks
     {
@@ -237,7 +260,7 @@ public class SceneViewModel : ObservableRecipient, INavigable
         set => SetProperty(ref _outcome, value);
     }
 
-    //  Scene Sequel data
+    //  Scene Sequel data (from Scene and Sequel)
 
     private string _emotion;
     public string Emotion
@@ -289,37 +312,9 @@ public class SceneViewModel : ObservableRecipient, INavigable
         set => SetProperty(ref _vpCharTipIsOpen, value);
     }
 
-    #endregion
+   #endregion
 
-    #region Cast collection properties
-
-    private ObservableCollection<StoryElement> _castMembers;
-    public ObservableCollection<StoryElement> CastMembers
-    {
-        get => _castMembers;
-        set => SetProperty(ref _castMembers, value);
-    }
-    private ObservableCollection<StoryElement> _characterList;
-    public ObservableCollection<StoryElement> CharacterList
-    {
-        get => _characterList;
-        set => SetProperty(ref _characterList, value);
-    }
-
-    private ObservableCollection<StoryElement> _castSource;
-    public ObservableCollection<StoryElement> CastSource
-    {
-        get => _castSource;
-        set => SetProperty(ref _castSource, value);
-    }
-    #endregion
-
-    #region Relay Commands
-    public RelayCommand SwitchCastViewCommand { get; }
-
-    #endregion
-
-    #region Methods
+   #region Methods
 
     public void Activate(object parameter)
     {
@@ -358,31 +353,7 @@ public class SceneViewModel : ObservableRecipient, INavigable
         Setting = Model.Setting;
         SceneType = Model.SceneType;
 
-        // The Scene tab's cast list switches between either a list of
-        // selected cast members or all Characters in the StoryModel.
-        // The current choice is CastSource.
-        // Initialize these lists for this scene.
-        CastMembers.Clear();
-        foreach (string _member in Model.CastMembers)
-        {
-            StoryElement _element = StoryElement.StringToStoryElement(_member);
-            if (_element != null)
-            {
-                CastMembers.Add(StoryElement.StringToStoryElement(_member));
-            }
-        }
-        CharacterList = ShellViewModel.ShellInstance.StoryModel.StoryElements.Characters;
-        InitializeCharacterList();
-        if (CastMembers.Count > 0)
-        {
-            AllCharactersSelected = false;  
-            CastSource = CastMembers;
-        }
-        else
-        {
-            AllCharactersSelected = true;
-            CastSource = CharacterList;
-        }
+        LoadCastList();
 
         ViewpointCharacter = Model.ViewpointCharacter;
 
@@ -424,9 +395,45 @@ public class SceneViewModel : ObservableRecipient, INavigable
         _changeable = true;
     }
 
+
+    /// <summary>
+    /// The scene tab's CastSource ListView is assigned to either a list of selected cast members
+    /// (CastList), or a list of all the characters in the StoryModel (CharacterList).
+    /// the Scene tab's also contains a ToggleSwitch which is bound to a RelayCommand and allows
+    /// the user to switch between the two lists.
+    /// This method (called from LoadModel) initialize these lists for the current scene.
+    /// </summary>
+    private void LoadCastList()
+    {
+        // Load the SceneVIewModel's cast list from the Model
+        CastList.Clear();
+        foreach (string _member in Model.CastMembers)
+        {
+            StoryElement _element = StoryElement.StringToStoryElement(_member);
+            if (_element != null)
+            {
+                CastList.Add(StoryElement.StringToStoryElement(_member));
+            }
+        }
+        // CharacterList is the StoryModel's list of all Character StoryElements
+        CharacterList = ShellViewModel.ShellInstance.StoryModel.StoryElements.Characters;
+        // If there are any cast members, CastList is what's displayed
+        if (CastList.Count > 0)
+        {
+            AllCharacters = false;
+        }
+        // Otherwise display all characters
+        else
+        {
+            AllCharacters = true;
+        }
+        InitializeCharacterList();
+    }
+
     private void InitializeCharacterList()
     {
-        foreach (StoryElement _element in CharacterList)
+        //TODO: Shouldn't this be for CastSource?
+        foreach (StoryElement _element in CastSource)
         {
             if (CastMemberExists(_element))
                 _element.IsSelected = true;
@@ -451,7 +458,7 @@ public class SceneViewModel : ObservableRecipient, INavigable
             Model.Setting = Setting;
             Model.SceneType = SceneType;
             Model.CastMembers.Clear();
-            foreach (StoryElement _element in CastMembers)
+            foreach (StoryElement _element in CastList)
                 Model.CastMembers.Add(_element.ToString());
             Model.ScenePurpose.Clear();
             foreach (StringSelection _purpose in ScenePurposes)
@@ -519,28 +526,29 @@ public class SceneViewModel : ObservableRecipient, INavigable
     /// to all characters (and vice versa.) The CharactersList is used to add or
     /// remove cast members.
     /// </summary>
-    public void SwitchCastView()
+    public void SwitchCastView(object sender, RoutedEventArgs e)
     {
-        if (AllCharactersSelected)
+        if (AllCharacters)
         {
-            CastSource = CastMembers;
+            CastSource = CharacterList;
             Messenger.Send(new StatusChangedMessage(new("Add / Remove Cast Members", LogLevel.Info, true)));
         }
         else
         {
-            CastSource = CharacterList;
+            CastSource = CastList;
             Messenger.Send(new StatusChangedMessage(new("Show Selected Cast Members", LogLevel.Info, true)));
         }
+        InitializeCharacterList();
     }
 
     private bool CastMemberExists(string uuid)
     {
-        return CastMembers.Any(element => uuid == element.Uuid.ToString());
+        return CastList.Any(element => uuid == element.Uuid.ToString());
     }
 
     private bool CastMemberExists(StoryElement element)
     {
-        return CastMembers.Any(castMember => castMember.Uuid == element.Uuid);
+        return CastList.Any(castMember => castMember.Uuid == element.Uuid);
     }
 
     public void AddCastMember(StoryElement element)
@@ -551,17 +559,17 @@ public class SceneViewModel : ObservableRecipient, INavigable
         if (CastMemberExists(element))
             return;
 
-        CastMembers.Add(element);
+        CastList.Add(element);
         OnPropertyChanged();
         Messenger.Send(new StatusChangedMessage(new($"New cast member {element.Name} added", LogLevel.Info, true)));
     }
 
     public void RemoveCastMember(StoryElement element)
     {
-        for (int _i = 0; _i <= CastMembers.Count - 1; _i++)
-            if (CastMembers[_i].Uuid == element.Uuid)
+        for (int _i = 0; _i <= CastList.Count - 1; _i++)
+            if (CastList[_i].Uuid == element.Uuid)
             {
-                CastMembers.RemoveAt(_i);
+                CastList.RemoveAt(_i);
                 OnPropertyChanged();
                 Messenger.Send(
                     new StatusChangedMessage(new($"Cast member {element.Name} removed", LogLevel.Info, true)));
@@ -640,7 +648,7 @@ public class SceneViewModel : ObservableRecipient, INavigable
         Time = string.Empty;
         Setting = string.Empty;
         SceneType = string.Empty;
-        CastMembers = new ObservableCollection<StoryElement>();
+        CastList = new ObservableCollection<StoryElement>();
         ViewpointCharacter = string.Empty;
         ScenePurposes = new ObservableCollection<StringSelection>();
         ValueExchange = string.Empty;
@@ -687,11 +695,10 @@ public class SceneViewModel : ObservableRecipient, INavigable
 
 
         // Initialize cast member lists / display
-        CastMembers = new ObservableCollection<StoryElement>();
+        CastList = new ObservableCollection<StoryElement>();
         CharacterList = ShellViewModel.ShellInstance.StoryModel.StoryElements.Characters;
         CastSource = CharacterList;
-        _allCharactersSelected = true;
-        SwitchCastViewCommand = new RelayCommand(SwitchCastView, () => true);
+        _allCharacters = true;
 
         PropertyChanged += OnPropertyChanged;
     }
