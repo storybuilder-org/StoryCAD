@@ -1,81 +1,32 @@
-name: AppxVersionAutoMerge
-
+name: ManifestMergeFixer
 on:
   pull_request_target:
     paths:
-    - 'StoryCAD/Package.appxmanifest'
+      - 'StoryCAD/Package.appxmanifest'
     types: [opened, synchronize, reopened]
 
 jobs:
-  resolve-conflict:
+  resolve-conflicts:
     runs-on: windows-latest
-    defaults:
-      run:
-        shell: powershell
-
     steps:
-    - name: PR Origin check
-      run: |
-        if ("${{ github.event.pull_request.head.repo.full_name }}" -ne "${{ github.repository }}") {
-          Write-Output "Error: This workflow does not process PRs from forks for security reasons."
-          exit 78
-        }
+      - name: Check for conflicted Package.appxmanifest
+        id: check_conflicted
+        run: |
+          $isConflicted = git diff --check | Select-String -Pattern "^[+-]{7}\s" -Quiet
+          echo "Is Conflicted: $isConflicted"
+          echo "::set-output name=is_conflicted::$isConflicted"
 
-    - name: Checkout code
-      uses: actions/checkout@v2
-      with:
-        ref: ${{ github.head_ref }}
+      - name: Resolve conflicts if any
+        if: steps.check_conflicted.outputs.is_conflicted == 'true'
+        run: |
+          git checkout --theirs -- 'StoryCAD/Package.appxmanifest'
+          git add 'StoryCAD/Package.appxmanifest'
+          git commit -m "Resolved conflicts in Package.appxmanifest"
 
-    - name: Resolve merge conflict based on version
-      run: |
-        # Absolute path to the manifest
-        $MANIFEST_PATH = "${{ github.workspace }}\StoryCAD\Package.appxmanifest"
-
-        # Check if the manifest exists
-        if (-not (Test-Path $MANIFEST_PATH)) {
-            Write-Output "Error: $MANIFEST_PATH does not exist!"
-            exit 1
-        }
-
-        # Always print the content of the file
-        Write-Output "-------File Content Start--------"
-        Get-Content $MANIFEST_PATH
-        Write-Output "-------File Content End--------"
-
-        # Check if the file has a conflict
-        if (Select-String -Path $MANIFEST_PATH -Pattern '<<<<<<<') {
-          # Extract both versions
-          $VERSIONS = Select-String -Path $MANIFEST_PATH -Pattern '(?<=Version=")[^"]*' -AllMatches | ForEach-Object { $_.Matches.Value }
-          $VERSION1 = $VERSIONS[0]
-          $VERSION2 = $VERSIONS[1]
-
-          # Debug: Print the extracted versions
-          Write-Output "Version 1: $VERSION1"
-          Write-Output "Version 2: $VERSION2"
-
-          $HIGHER_VERSION = @($VERSION1, $VERSION2) | Sort-Object { [version]$_ } | Select-Object -Last 1
-
-          # Debug: Print the higher version
-          Write-Output "Higher Version: $HIGHER_VERSION"
-
-          # Replace the conflicting lines with the higher version
-          $content = Get-Content $MANIFEST_PATH
-          $updatedContent = $content -replace '(?s)<<<<<<<.*?>>>>>>>', ('    <Identity Name="34432StoryBuilder.StoryBuilder" Publisher="CN=34A1944E-942C-4545-B217-ECE68E54ACF8" Version="'+$HIGHER_VERSION+'" />')
-          Set-Content -Path $MANIFEST_PATH -Value $updatedContent
-
-          # Debug: Print the content of the file after the modification
-          Write-Output "-------Updated File Content Start--------"
-          Get-Content $MANIFEST_PATH
-          Write-Output "-------Updated File Content End--------"
-
-          # Commit the changes
-          git config user.name 'Github Action'
-          git config user.email 'action@github.com'
-          git add $MANIFEST_PATH
-          git commit -m 'Resolved version conflict'
-          git push
-        } else {
-          # Debug: No merge conflict found
-          Write-Output "No merge conflict found in $MANIFEST_PATH"
-        }
-
+      - name: Notify conflict resolution status
+        run: |
+          if($isConflicted) {
+            echo "Conflicts found and resolved."
+          } else {
+            echo "No conflicts found in Package.appxmanifest."
+          }
