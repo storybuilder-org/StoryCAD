@@ -7,8 +7,6 @@ using StoryCAD.Services.Logging;
 using StoryCAD.ViewModels;
 using StoryCAD.ViewModels.Tools;
 using Windows.Graphics.Printing;
-using Microsoft.UI.Dispatching;
-using CommunityToolkit.WinUI.UI.Controls;
 
 namespace StoryCAD.Services.Dialogs.Tools;
 public sealed partial class PrintReportsDialog
@@ -39,7 +37,7 @@ public sealed partial class PrintReportsDialog
         PrintVM.WebList = false;
 
         //Warn user if they are on win10 as print manager can't be used.
-        if (Environment.OSVersion.Version.Build <= 22000) { Win10Warning.IsOpen = true; }
+        if (Environment.OSVersion.Version.Build <= 19045) { OldW10Warning.IsOpen = true; }
 
         //Gets all nodes that aren't deleted
         try
@@ -120,13 +118,13 @@ public sealed partial class PrintReportsDialog
         PrintVM.GeneratePrintDocumentReport();
         PrintVM.PrintDocSource = PrintVM.Document.DocumentSource;
 
-        //Device has to support printing AND run windows 11 (Win11's RTM Build was build 22000 and Win10 Build will ever be above 22000)
-        //Windows 10 currently does not support PrintManagers due to a bug in windows 10, however this should get fixed soon (hopefully)
-        if (PrintManager.IsSupported() && Environment.OSVersion.Version.Build >= 22000) 
+        //Device has to support printing AND run a build of Windows above 19045 (W10 22h2)
+        //Windows 10 builds below 19045 have bug that prevent us from using the new print manager
+        //TODO: gut old print stuff after oct 2023 since only 22h2 will be offically supported.
+        if (PrintManager.IsSupported() && Environment.OSVersion.Version.Build >= 19045) 
         {
             try
-            {
-                // Show print UI
+            {   // Show print UI
                 await PrintManagerInterop.ShowPrintUIForWindowAsync(GlobalData.WindowHandle);
             }
             catch (Exception ex) //Error setting up printer
