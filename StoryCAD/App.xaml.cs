@@ -35,6 +35,8 @@ using Windows.Storage;
   using Microsoft.UI.Dispatching;
   using StoryCAD.Services.Backup;
   using LaunchActivatedEventArgs = Microsoft.UI.Xaml.LaunchActivatedEventArgs;
+using System.Globalization;
+using System.Reflection;
 
   namespace StoryCAD;
 
@@ -65,7 +67,23 @@ public partial class App
         CheckForOtherInstances(); //Check other instances aren't already open.
         
         ConfigureIoc();
-        GlobalData.Version = "Version: " + Package.Current.Id.Version.Major + "." + Package.Current.Id.Version.Minor + "." + Package.Current.Id.Version.Build + "." + Package.Current.Id.Version.Revision;
+        if (Package.Current.Id.Version.Revision == 65535) //Read the StoryCAD.csproj manifest for a build time instead.
+        {
+
+            string StoryCADManifestVersion = System.Reflection.Assembly.GetExecutingAssembly()
+                .GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion
+                .Split("build")[1];
+
+            GlobalData.Version = $"Version: {Package.Current.Id.Version.Major}.{Package.Current.Id.Version.Minor}." +
+                $"{Package.Current.Id.Version.Build} Built on: { StoryCADManifestVersion}";
+        }
+        else
+        {
+            GlobalData.Version = $"Version: {Package.Current.Id.Version.Major}.{Package.Current.Id.Version.Minor}" +
+                $".{Package.Current.Id.Version.Build}.{Package.Current.Id.Version.Revision}";
+
+        }
+
         string path = Path.Combine(Package.Current.InstalledLocation.Path, ".env");
         DotEnvOptions options = new(false, new[] { path });
         
