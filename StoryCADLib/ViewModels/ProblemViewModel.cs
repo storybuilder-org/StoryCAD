@@ -294,34 +294,38 @@ public class ProblemViewModel : ObservableRecipient, INavigable
 
     internal void SaveModel()
     {
-        if (_changed)
+        try
         {
-            IsTextBoxFocused = false;
-            // Story.Uuid is read-only and cannot be assigned
-            Model.Name = Name;
-            Model.ProblemType = ProblemType;
-            Model.ConflictType = ConflictType;
-            Model.ProblemCategory = ProblemCategory;
-            Model.Subject = Subject;
-            Model.ProblemSource = ProblemSource;
-            Model.Protagonist = Protagonist ?? string.Empty;
-            Model.ProtGoal = ProtGoal;
-            Model.ProtMotive = ProtMotive;
-            Model.ProtConflict = ProtConflict;
-            Model.Antagonist = Antagonist ?? string.Empty;
-            Model.AntagGoal = AntagGoal;
-            Model.AntagMotive = AntagMotive;
-            Model.AntagConflict = AntagConflict;
-            Model.Outcome = Outcome;
-            Model.Method = Method;
-            Model.Theme = Theme;
-            Model.StoryQuestion = StoryQuestion;
-            Model.Premise = Premise;
-            if (_syncPremise) { _overviewModel.Premise = Premise; }
-            Model.Notes = Notes;
-
-            //_logger.Log(LogLevel.Info, string.Format("Requesting IsDirty change to true"));
-            //Messenger.Send(new IsChangedMessage(Changed));
+            if (_changed)
+            {
+                IsTextBoxFocused = false;
+                Model.Name = Name;
+                Model.ProblemType = ProblemType;
+                Model.ConflictType = ConflictType;
+                Model.ProblemCategory = ProblemCategory;
+                Model.Subject = Subject;
+                Model.ProblemSource = ProblemSource;
+                Model.Protagonist = Protagonist ?? string.Empty;
+                Model.ProtGoal = ProtGoal;
+                Model.ProtMotive = ProtMotive;
+                Model.ProtConflict = ProtConflict;
+                Model.Antagonist = Antagonist ?? string.Empty;
+                Model.AntagGoal = AntagGoal;
+                Model.AntagMotive = AntagMotive;
+                Model.AntagConflict = AntagConflict;
+                Model.Outcome = Outcome;
+                Model.Method = Method;
+                Model.Theme = Theme;
+                Model.StoryQuestion = StoryQuestion;
+                Model.Premise = Premise;
+                if (_syncPremise) { _overviewModel.Premise = Premise; }
+                Model.Notes = Notes;
+            }
+        }
+        catch (Exception ex)
+        {
+            Ioc.Default.GetRequiredService<LogService>().LogException(LogLevel.Error,
+                ex, $"Failed to save problem model - {ex.Message}");
         }
     }
 
