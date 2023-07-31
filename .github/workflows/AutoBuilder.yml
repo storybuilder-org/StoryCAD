@@ -46,7 +46,7 @@ jobs:
         $VersionRegex = "\d+\.\d+\.\d+\.\d+"
         $LastVer = "${{ steps.testtag.outputs.tag }}"
         $VersionSplit = $LastVer.Split(".")
-        $BUILD_BUILDNUMBER = $VersionSplit[0] + "." + $VersionSplit[1] + ".${{ github.run_number }}.0"
+        $BUILD_BUILDNUMBER = $VersionSplit[0] + "." + $VersionSplit[1] + ".${{ github.run_number }}.65535"
         $ManifestVersionRegex = " Version=""\d+\.\d+\.\d+\.\d+"""
         $ScriptPath = $null
         try
@@ -107,9 +107,9 @@ jobs:
       run: |
         $LastVer = "${{ steps.testtag.outputs.tag }}"
         $VersionSplit = $LastVer.Split(".")
-        $BUILD_BUILDNUMBER = $VersionSplit[0] + "." + $VersionSplit[1] + ".${{ github.run_number }}.0"
+        $BUILD_BUILDNUMBER = $VersionSplit[0] + "." + $VersionSplit[1] + ".${{ github.run_number }}.65535"
       
-        "Hello, Thank you for testing StoryCAD " + $VersionSplit[0] + "." + $VersionSplit[1] + ".${{ github.run_number }}.0" + " Alpha 
+        "Hello, Thank you for testing StoryCAD " + $VersionSplit[0] + "." + $VersionSplit[1] + ".${{ github.run_number }}.65535" + " Alpha 
         1) Open StoryCAD.cer, this should bring up the certificate import wizard
         2) Press install certificate, and change store location to Local Machine, then press next
         3) Change the option to Place All Certificates in the following store and click browse
