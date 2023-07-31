@@ -243,15 +243,22 @@ public class WebViewModel : ObservableRecipient, INavigable
 
     public void SaveModel()
     {
-        if (_changed)
+        try
         {
-            // Story.Uuid is read-only and cannot be assigned
-            Model.Name = Name;
-            IsTextBoxFocused = false;
-            Model.URL = Url;
-            Model.Timestamp = Timestamp;
-
+            if (_changed)
+            {
+                Model.Name = Name;
+                IsTextBoxFocused = false;
+                Model.URL = Url;
+                Model.Timestamp = Timestamp;
+            }
         }
+        catch (Exception ex)
+        {
+            Ioc.Default.GetRequiredService<LogService>().LogException(LogLevel.Error,
+                ex, $"Failed to save webview model - {ex.Message}");
+        }
+
     }
 
     /// <summary>
