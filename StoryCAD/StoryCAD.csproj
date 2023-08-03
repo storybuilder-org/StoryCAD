@@ -25,7 +25,9 @@
 		<RunAnalyzersDuringBuild>False</RunAnalyzersDuringBuild>
 		<PackageCertificateKeyFile>StoryCAD_TemporaryKey.pfx</PackageCertificateKeyFile>
 	</PropertyGroup>
-
+	<PropertyGroup>
+		<SourceRevisionId>build$([System.DateTime]::UtcNow.ToString("yyyy-MM-ddTHH:mm:ss:fffZ"))</SourceRevisionId>
+	</PropertyGroup>
 	<ItemGroup>
 		<Content Include="Assets\SplashScreen.scale-200.png" />
 		<Content Include="Assets\Square150x150Logo.scale-200.png" />
