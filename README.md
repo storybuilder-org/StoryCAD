@@ -95,7 +95,7 @@ We are grateful beyond words for those who have helped bring StoryCAD back to li
 We are most grateful for all of them- especially those who toil in the arena:
 [Acknowledgements][21].
 
-[1]:https://microsoft.github.io/microsoft-ui-xaml/
+[1]:https://github.com/microsoft/microsoft-ui-xaml
 [2]:https://github.com/microsoft/WindowsAppSDK#readme
 [3]:https://github.com/CommunityToolkit/WindowsCommunityToolkit#readme
 [4]:https://elmah.io/
