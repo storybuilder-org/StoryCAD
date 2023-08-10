@@ -432,7 +432,6 @@ public class SceneViewModel : ObservableRecipient, INavigable
 
     private void InitializeCharacterList()
     {
-        //TODO: Shouldn't this be for CastSource?
         foreach (StoryElement _element in CastSource)
         {
             if (CastMemberExists(_element))
@@ -528,7 +527,8 @@ public class SceneViewModel : ObservableRecipient, INavigable
     /// </summary>
     public void SwitchCastView(object sender, RoutedEventArgs e)
     {
-        if (AllCharacters)
+        ToggleSwitch toggleSwitch = sender as ToggleSwitch;
+        if (toggleSwitch!.IsOn)
         {
             CastSource = CharacterList;
             Messenger.Send(new StatusChangedMessage(new("Add / Remove Cast Members", LogLevel.Info, true)));
@@ -548,6 +548,8 @@ public class SceneViewModel : ObservableRecipient, INavigable
 
     private bool CastMemberExists(StoryElement element)
     {
+        // return true if the element is in the cast list
+
         return CastList.Any(castMember => castMember.Uuid == element.Uuid);
     }
 
