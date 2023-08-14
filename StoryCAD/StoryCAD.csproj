@@ -69,6 +69,13 @@
 
 	<ItemGroup>
 		<None Remove="Assets\HomeLogo.png" />
+		<None Remove="Assets\Icons\BootstrapEmailIcon.png" />
+		<None Remove="Assets\Icons\DiscordIcon.png" />
+		<None Remove="Assets\Icons\FaceBookIcon.png" />
+		<None Remove="Assets\Icons\GitHubIcon.png" />
+		<None Remove="Assets\Icons\PatreonIcon.png" />
+		<None Remove="Assets\Icons\TwitterIcon.png" />
+		<None Remove="Assets\Icons\YoutubeIcon.png" />
 		<None Remove="Assets\Logo.png" />
 		<None Remove="Views\PreferencesInitialization.xaml" />
 		<None Remove="Views\WebPage.xaml" />
