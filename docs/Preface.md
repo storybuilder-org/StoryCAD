@@ -13,5 +13,5 @@ StoryCAD frees your creativity and makes it fun. Mistakes in a StoryCAD outline 
 
 We hope you enjoy StoryCAD and find it useful to your craft.  <br/>
  <br/><br/>
-[Previous - Front Page (Image)](Front_Page_(Image).md) <br/><br/>
+[Previous - Front matter](Front_Matter.md) <br/><br/>
 [Next up - Legal Matters](Legal_Matters.md)
