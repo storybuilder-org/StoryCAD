@@ -135,4 +135,48 @@ public sealed partial class PreferencesDialog
         }
         else { PreferencesVm.WrapNodeNames = TextWrapping.NoWrap; }
     }
+
+
+    /// <summary>
+    /// This is used to open social media links when
+    /// they clicked in the about page.
+    /// </summary>
+    private void OpenURL(object sender, RoutedEventArgs e)
+    {
+        //Shell execute will just open the app in the default for
+        //That protocol i.e firefox for https:// and spark for mailto://
+        ProcessStartInfo URL = new(){ UseShellExecute = true};
+
+        //Select URL based on tag of button that was clicked.
+        switch ((sender as Button).Tag)
+        {
+            case "Mail":
+                URL.FileName = "mailto://support@storybuilder.org";
+                break;
+            case "Discord":
+                URL.FileName = "http://discord.gg/bpCyAQnWCa";
+                break;
+            case "Github":
+                URL.FileName = "https://github.com/storybuilder-org/StoryCAD";
+                break;
+            case "FaceBook":
+                URL.FileName = "https://www.facebook.com/StoryCAD";
+                break;
+            case "Patreon":
+                URL.FileName = "https://www.patreon.com/storybuilder2";
+                break;
+            case "Twitter":
+                URL.FileName = "https://twitter.com/StoryCAD";
+                break;
+            case "Youtube":
+                URL.FileName = "https://www.youtube.com/channel/UCoRI7Q8r-_T5O1jKrEJsvDg";
+                break;
+            case "Website":
+                URL.FileName = "https://storybuilder.org/";
+                break;
+        }
+
+        //Launch relevant app (browser/mail client)
+        Process.Start(URL);
+    }
 }

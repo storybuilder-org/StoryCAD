@@ -48,8 +48,57 @@
                 <StackPanel>
                     <TextBlock Name="Version" HorizontalAlignment="Center" Margin="5,0,0,20"/>
                     <Button Content="Open Logs folder" HorizontalAlignment="Center" Click="OpenLogFolder" Margin="20" Width="200"/>
-                    <HyperlinkButton Content="Join the StoryCAD Discord!" HorizontalAlignment="Center" NavigateUri="" Margin="20"/>
                     <HyperlinkButton Content="StoryCAD was created by Terry Cox, Jake Shaw and Contributors"  HorizontalAlignment="Center" NavigateUri="https://github.com/StoryBuilder-org/StoryCAD/graphs/contributors" Margin="5" FontSize="13"/>
+                    <TextBlock Text="Keep up with StoryCAD news:" Margin="0,10"/>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <Button Width="50" Height="50" Margin="5" Click="OpenURL" Tag="Discord">
+                            <Button.Content>
+                                <Image Source="/Assets/Icons/DiscordIcon.png"/>
+                            </Button.Content>
+                        </Button>
+
+                        <Button Width="50" Height="50" Margin="5" Click="OpenURL" Tag="FaceBook">
+                            <Button.Content>
+                                <Image Source="/Assets/Icons/FaceBookIcon.png"/>
+                            </Button.Content>
+                        </Button>
+
+                        <Button Width="50" Height="50" Margin="5" Click="OpenURL" Tag="Twitter">
+                            <Button.Content>
+                                <Image Source="/Assets/Icons/TwitterIcon.png"/>
+                            </Button.Content>
+                        </Button>
+
+                        <Button Width="50" Height="50" Margin="5" Click="OpenURL" Tag="Patreon">
+                            <Button.Content>
+                                <Image Source="/Assets/Icons/PatreonIcon.png"/>
+                            </Button.Content>
+                        </Button>
+
+                        <Button Width="50" Height="50" Margin="5"  Click="OpenURL" Tag="Youtube">
+                            <Button.Content>
+                                <Image Source="/Assets/Icons/YoutubeIcon.png"/>
+                            </Button.Content>
+                        </Button>
+
+                        <Button Width="50" Height="50" Margin="5"  Click="OpenURL" Tag="Mail">
+                            <Button.Content>
+                                <Image Source="/Assets/Icons/BootstrapEmailIcon.png"/>
+                            </Button.Content>
+                        </Button>
+
+                        <Button Width="50" Height="50" Margin="5" Click="OpenURL" Tag="Github">
+                            <Button.Content>
+                                <Image Source="/Assets/Icons/GithubIcon.png"/>
+                            </Button.Content>
+                        </Button>
+
+                        <Button Width="50" Height="50" Margin="5" Click="OpenURL" Tag="Website">
+                            <Button.Content>
+                                <Image Source="/Assets/Logo.png"/>
+                            </Button.Content>
+                        </Button>
+                    </StackPanel>
                 </StackPanel>
             </PivotItem>
             <PivotItem Header="What's new">
