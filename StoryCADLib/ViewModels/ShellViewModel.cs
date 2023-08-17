@@ -370,7 +370,6 @@ public class ShellViewModel : ObservableRecipient
     public async Task UnifiedNewFile(UnifiedVM dialogVM)
     {
         Logger.Log(LogLevel.Info, "FileOpenVM - New File starting");
-
         _canExecuteCommands = false;
 
         try
@@ -384,9 +383,9 @@ public class ShellViewModel : ObservableRecipient
                 await WriteModel();
             }
 
-            // Start with a blank StoryModel and populate it
-            // using the new project dialog's settings
+            // Start with a blank StoryModel and populate it using the new project dialog's 
             ResetModel();
+            ShowHomePage();
 
             if (!Path.GetExtension(dialogVM.ProjectName)!.Equals(".stbx")) { dialogVM.ProjectName += ".stbx"; }
             StoryModel.ProjectFilename = dialogVM.ProjectName;
@@ -531,7 +530,10 @@ public class ShellViewModel : ObservableRecipient
             if (GlobalData.Preferences.AutoSave)
             {
                 Ioc.Default.GetRequiredService<AutoSaveService>().StartAutoSave();
-            }   
+            }
+
+            TreeViewNodeClicked(StoryModel.ExplorerView[0]);
+            UpdateWindowTitle();
 
             Messenger.Send(new StatusChangedMessage(new("New project command completed", LogLevel.Info, true)));
         }
