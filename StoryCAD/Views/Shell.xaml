@@ -338,7 +338,8 @@
                                                    Background="{x:Bind Background, Mode=OneWay}" 
                                                    IsExpanded="{x:Bind IsExpanded, Mode=TwoWay}"
                                                    DragOver="TreeViewItem_OnDragOver"
-                                                   RightTapped="TreeViewItem_RightTapped" >
+                                                   RightTapped="TreeViewItem_RightTapped"
+                                                   Tapped="TreeViewItem_Tapped">
                                     <StackPanel Orientation="Horizontal">
                                         <SymbolIcon Symbol="{x:Bind Symbol, Mode=OneWay}" Width="20" Height="20"/>
                                         <TextBlock Text="{x:Bind Name, Mode=TwoWay}"          

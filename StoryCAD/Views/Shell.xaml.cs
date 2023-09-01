@@ -102,8 +102,12 @@ public sealed partial class Shell
     }
     private void TreeViewItem_RightTapped(object sender, RightTappedRoutedEventArgs e)
     {
-        if (ShellVm.RightClickedTreeviewItem != null) { ShellVm.RightClickedTreeviewItem.Background = null; } //Remove old right clicked nodes background
-
+        if (ShellVm.RightClickedTreeviewItem != null) 
+        {
+            ShellVm.RightClickedTreeviewItem.Background = null;
+            ShellVm.RightClickedTreeviewItem.IsSelected = false;
+        } //Remove old right clicked nodes background
+      
         TreeViewItem item = (TreeViewItem)sender;
         item.Background = new SolidColorBrush(new UISettings().GetColorValue(UIColorType.Accent));
 
@@ -259,5 +263,15 @@ public sealed partial class Shell
         {
             e.Data.RequestedOperation = DataPackageOperation.Move;  // re-enable moves
         }
+    }
+
+    private void TreeViewItem_Tapped(object sender, TappedRoutedEventArgs e)
+    {
+        if (ShellVm.RightClickedTreeviewItem != null) 
+        {
+            ShellVm.RightClickedTreeviewItem.Background = null;
+            ShellVm.RightClickedTreeviewItem.IsSelected = false;
+        }
+        ShellVm.RightClickedTreeviewItem = (TreeViewItem)sender;
     }
 }
