@@ -52,7 +52,7 @@ public class ShellViewModel : ObservableRecipient
     // Navigation navigation landmark nodes
     public StoryNodeItem CurrentNode { get; set; }
     public StoryNodeItem RightTappedNode;
-    public TreeViewItem RightClickedTreeviewItem;
+    public TreeViewItem LastClickedTreeviewItem;
 
     public StoryViewType CurrentViewType;
 
@@ -561,7 +561,7 @@ public class ShellViewModel : ObservableRecipient
         Logger.Log(LogLevel.Info, $"TreeViewNodeClicked for {selectedItem}");
         
 
-        if (RightClickedTreeviewItem != null) { RightClickedTreeviewItem.Background = null; }
+        if (LastClickedTreeviewItem != null) { LastClickedTreeviewItem.Background = null; }
         
         try
         {
