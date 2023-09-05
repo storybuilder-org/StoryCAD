@@ -1815,7 +1815,7 @@ public class ShellViewModel : ObservableRecipient
             _newNode.IsRoot = false; //Only an overview node can be a root, which cant be created normally
             LastClickedTreeviewItem.IsSelected = false;
             _newNode.IsSelected = true;
-            _newNode.Background = new SolidColorBrush(Colors.DarkSeaGreen);
+            _newNode.Background = GlobalData.Preferences.ContrastColor;
         }
         else { return null; }
 
