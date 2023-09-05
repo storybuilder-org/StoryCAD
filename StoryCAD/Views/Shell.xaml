@@ -11,7 +11,7 @@
         <ResourceDictionary>
             <ResourceDictionary.ThemeDictionaries>
                 <ResourceDictionary x:Key="Default">
-                    <SolidColorBrush x:Key="TreeViewItemBackgroundPointerOver" Color="{ThemeResource SystemAccentColor}" />
+                    <SolidColorBrush x:Key="TreeViewItemBackgroundPointerOver" Color="{ThemeResource SystemAccentColor}" Opacity="0.5" />
                     <SolidColorBrush x:Key="TreeViewItemBackgroundSelected" Color="{ThemeResource SystemAccentColor}"  />
                 </ResourceDictionary>
             </ResourceDictionary.ThemeDictionaries>
