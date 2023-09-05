@@ -440,8 +440,7 @@ public class SceneViewModel : ObservableRecipient, INavigable
                 _element.IsSelected = false;
         }
     }
-
-
+    
     internal void SaveModel()
     {
         _changeable = false;
@@ -527,6 +526,8 @@ public class SceneViewModel : ObservableRecipient, INavigable
     /// </summary>
     public void SwitchCastView(object sender, RoutedEventArgs e)
     {
+        bool saveChangeable = _changeable;
+        _changeable = false;
         ToggleSwitch toggleSwitch = sender as ToggleSwitch;
         if (toggleSwitch!.IsOn)
         {
@@ -539,6 +540,7 @@ public class SceneViewModel : ObservableRecipient, INavigable
             Messenger.Send(new StatusChangedMessage(new("Show Selected Cast Members", LogLevel.Info, true)));
         }
         InitializeCharacterList();
+        _changeable = saveChangeable;
     }
 
     private bool CastMemberExists(string uuid)
