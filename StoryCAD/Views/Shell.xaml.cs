@@ -106,6 +106,7 @@ public sealed partial class Shell
         {
             ShellVm.LastClickedTreeviewItem.Background = null;
             ShellVm.LastClickedTreeviewItem.IsSelected = false;
+            ShellVm.LastClickedTreeviewItem.BorderBrush = null;
         } //Remove old right clicked nodes background
       
         TreeViewItem item = (TreeViewItem)sender;
@@ -271,6 +272,7 @@ public sealed partial class Shell
         {
             ShellVm.LastClickedTreeviewItem.Background = null;
             ShellVm.LastClickedTreeviewItem.IsSelected = false;
+            ShellVm.LastClickedTreeviewItem.BorderBrush = null;
         }
         ShellVm.LastClickedTreeviewItem = (TreeViewItem)sender;
     }

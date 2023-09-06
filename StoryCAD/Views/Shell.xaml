@@ -336,6 +336,8 @@
                             <DataTemplate  x:DataType="viewmodels:StoryNodeItem">
                                 <muxc:TreeViewItem ItemsSource="{x:Bind Children}" 
                                                    Background="{x:Bind Background, Mode=OneWay}" 
+                                                   BorderBrush="{x:Bind boarderBrush, Mode=OneWay}"
+                                                   BorderThickness="1"
                                                    IsExpanded="{x:Bind IsExpanded, Mode=TwoWay}"
                                                    DragOver="TreeViewItem_OnDragOver"
                                                    RightTapped="TreeViewItem_RightTapped"
