@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Resources;
 using System.Text;
@@ -63,14 +64,15 @@ public class SceneViewModel : ObservableRecipient, INavigable
     }
 
     private bool _allCharacters;
+
     public bool AllCharacters
     {
         get => _allCharacters;
-        set => SetProperty(ref _allCharacters, value);
+        // Don't trigger OnPropertyChanged
+        set => _allCharacters = value;
     }
 
     //  Scene general data
-
     private string _description;
     public string Description
     {
@@ -421,11 +423,13 @@ public class SceneViewModel : ObservableRecipient, INavigable
         if (CastList.Count > 0)
         {
             AllCharacters = false;
+            CastSource = CastList;
         }
         // Otherwise display all characters
         else
         {
             AllCharacters = true;
+            CastSource = CharacterList;
         }
         InitializeCharacterList();
     }
@@ -526,10 +530,11 @@ public class SceneViewModel : ObservableRecipient, INavigable
     /// </summary>
     public void SwitchCastView(object sender, RoutedEventArgs e)
     {
-        bool saveChangeable = _changeable;
+        bool _changeState = _changeable;
         _changeable = false;
         ToggleSwitch toggleSwitch = sender as ToggleSwitch;
-        if (toggleSwitch!.IsOn)
+        AllCharacters = toggleSwitch.IsOn;
+        if (AllCharacters)
         {
             CastSource = CharacterList;
             Messenger.Send(new StatusChangedMessage(new("Add / Remove Cast Members", LogLevel.Info, true)));
@@ -540,7 +545,8 @@ public class SceneViewModel : ObservableRecipient, INavigable
             Messenger.Send(new StatusChangedMessage(new("Show Selected Cast Members", LogLevel.Info, true)));
         }
         InitializeCharacterList();
-        _changeable = saveChangeable;
+        AllCharacters = toggleSwitch.IsOn;
+        _changeable = _changeState; 
     }
 
     private bool CastMemberExists(string uuid)
@@ -548,11 +554,10 @@ public class SceneViewModel : ObservableRecipient, INavigable
         return CastList.Any(element => uuid == element.Uuid.ToString());
     }
 
-    private bool CastMemberExists(StoryElement element)
+    private bool CastMemberExists(StoryElement character)
     {
-        // return true if the element is in the cast list
-
-        return CastList.Any(castMember => castMember.Uuid == element.Uuid);
+        bool exists = CastList.Any(element => element.Uuid == character.Uuid);
+        return exists;
     }
 
     public void AddCastMember(StoryElement element)
@@ -702,7 +707,7 @@ public class SceneViewModel : ObservableRecipient, INavigable
         CastList = new ObservableCollection<StoryElement>();
         CharacterList = ShellViewModel.ShellInstance.StoryModel.StoryElements.Characters;
         CastSource = CharacterList;
-        _allCharacters = true;
+        AllCharacters = true;
 
         PropertyChanged += OnPropertyChanged;
     }
