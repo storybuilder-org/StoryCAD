@@ -268,12 +268,17 @@ public sealed partial class Shell
 
     private void TreeViewItem_Tapped(object sender, TappedRoutedEventArgs e)
     {
-        if (ShellVm.LastClickedTreeviewItem != null) 
+        if (ShellVm.LastClickedTreeviewItem != null && ShellVm.LastClickedTreeviewItem != (TreeViewItem)sender) 
         {
             ShellVm.LastClickedTreeviewItem.Background = null;
             ShellVm.LastClickedTreeviewItem.IsSelected = false;
             ShellVm.LastClickedTreeviewItem.BorderBrush = null;
         }
         ShellVm.LastClickedTreeviewItem = (TreeViewItem)sender;
+    }
+
+    private void TreeViewItem_PointerEntered(object sender, PointerRoutedEventArgs e)
+    {
+        (sender as TreeViewItem).BorderBrush = null;
     }
 }

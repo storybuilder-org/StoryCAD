@@ -11,11 +11,11 @@
         <ResourceDictionary>
             <ResourceDictionary.ThemeDictionaries>
                 <ResourceDictionary x:Key="Default">
-                    <SolidColorBrush x:Key="TreeViewItemBackgroundPointerOver" Color="{ThemeResource SystemAccentColor}" Opacity="0.5" />
+                    <SolidColorBrush x:Key="TreeViewItemBoarderBrushPointerOver" Color="{ThemeResource SystemAccentColor}"/>
                     <SolidColorBrush x:Key="TreeViewItemBackgroundSelected" Color="{ThemeResource SystemAccentColor}"  />
+                    <SolidColorBrush x:Key="TreeViewItemBackgroundSelectedPointerOver" Color="{ThemeResource SystemAccentColor}" />
                 </ResourceDictionary>
             </ResourceDictionary.ThemeDictionaries>
-
 
             <CommandBarFlyout x:Key="AddStoryElementFlyout" Placement="Right" x:Name="AddStoryElementCommandBarFlyout" >
                 <CommandBarFlyout.SecondaryCommands>
@@ -338,6 +338,7 @@
                                                    Background="{x:Bind Background, Mode=OneWay}" 
                                                    BorderBrush="{x:Bind boarderBrush, Mode=OneWay}"
                                                    BorderThickness="1"
+                                                   PointerEntered="TreeViewItem_PointerEntered"
                                                    IsExpanded="{x:Bind IsExpanded, Mode=TwoWay}"
                                                    DragOver="TreeViewItem_OnDragOver"
                                                    RightTapped="TreeViewItem_RightTapped"

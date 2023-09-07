@@ -1814,10 +1814,11 @@ public class ShellViewModel : ObservableRecipient
             _newNode.Parent.IsExpanded = true;
             _newNode.IsRoot = false; //Only an overview node can be a root, which cant be created normally
             LastClickedTreeviewItem.IsSelected = false;
-            _newNode.IsSelected = true;
+            LastClickedTreeviewItem.Background = new SolidColorBrush(GlobalData.Preferences.AccentColor);
+            _newNode.IsSelected = false;
             _newNode.boarderBrush = GlobalData.Preferences.ContrastColor;
         }
-        else { return null; }
+        else { return null; }   
 
         Messenger.Send(new IsChangedMessage(true));
         Messenger.Send(new StatusChangedMessage(new($"Added new {typeToAdd}", LogLevel.Info, true)));

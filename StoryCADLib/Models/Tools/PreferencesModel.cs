@@ -41,16 +41,16 @@ public class PreferencesModel : ObservableObject
     // Visual changes
     public SolidColorBrush PrimaryColor { get; set; } //Sets UI Color
     public SolidColorBrush SecondaryColor { get; set; } //Sets node color.
-    public SolidColorBrush ContrastColor
+    public SolidColorBrush ContrastColor // A color that contrasts nicely with the users accent color
     {
         get
         {
-            Color darkercontrastcolor = AccentColor;
-            darkercontrastcolor.R = (byte)(darkercontrastcolor.R * 1.4);
-            darkercontrastcolor.G = (byte)(darkercontrastcolor.G * 1.4);
-            darkercontrastcolor.B = (byte)(darkercontrastcolor.B * 1.4);
+            Color Contrast = AccentColor;
+            Contrast.R = (byte)((255 - Contrast.R) * 0.8);
+            Contrast.G = (byte)((255 - Contrast.G) * 0.8);
+            Contrast.B = (byte)((255 - Contrast.B) * 0.8);
 
-            return new SolidColorBrush(darkercontrastcolor);
+            return new SolidColorBrush(Contrast);
         }
     }
     public Color AccentColor { get; set; } //Sets Text Color
