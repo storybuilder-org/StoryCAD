@@ -16,6 +16,7 @@ using StoryCAD.Services.Logging;
 using StoryCAD.Services.Messages;
 using StoryCAD.Services.Navigation;
 using Microsoft.UI.Xaml.Controls;
+using System.Xml.Linq;
 
 namespace StoryCAD.ViewModels;
 
@@ -89,10 +90,7 @@ public class SceneViewModel : ObservableRecipient, INavigable
             SetProperty(ref _viewpointCharacter, value);
             if (value.Equals(string.Empty))
                 return;
-            if (!CastMemberExists(value))
-            {
-                CastList.Add(StoryElement.StringToStoryElement(value));
-            }
+            AddCastMember(StoryElement.StringToStoryElement(value));  // Insure the character is in the cast list
         }
     }
 
@@ -551,25 +549,33 @@ public class SceneViewModel : ObservableRecipient, INavigable
 
     private bool CastMemberExists(string uuid)
     {
-        return CastList.Any(element => uuid == element.Uuid.ToString());
+        foreach (StoryElement element in CastList)
+        {
+            if (uuid == element.Uuid.ToString())
+                return true;
+        }
+        return false;
     }
 
     private bool CastMemberExists(StoryElement character)
     {
-        bool exists = CastList.Any(element => element.Uuid == character.Uuid);
-        return exists;
+        foreach (StoryElement element in CastList)
+        {
+            if (element.Uuid == character.Uuid)
+                return true;
+        }
+        return false;
     }
 
     public void AddCastMember(StoryElement element)
     {
-        if (_changeable == false)
-            return;
         // Edit the character to add
         if (CastMemberExists(element))
             return;
-
         CastList.Add(element);
         OnPropertyChanged();
+        if (_changeable == false)
+            return;
         Messenger.Send(new StatusChangedMessage(new($"New cast member {element.Name} added", LogLevel.Info, true)));
     }
 
