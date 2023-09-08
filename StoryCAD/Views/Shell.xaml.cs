@@ -276,9 +276,4 @@ public sealed partial class Shell
         }
         ShellVm.LastClickedTreeviewItem = (TreeViewItem)sender;
     }
-
-    private void TreeViewItem_PointerEntered(object sender, PointerRoutedEventArgs e)
-    {
-        (sender as TreeViewItem).BorderBrush = null;
-    }
 }

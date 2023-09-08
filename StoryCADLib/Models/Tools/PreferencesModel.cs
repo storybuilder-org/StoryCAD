@@ -46,10 +46,9 @@ public class PreferencesModel : ObservableObject
         get
         {
             Color Contrast = AccentColor;
-            Contrast.R = (byte)((255 - Contrast.R) * 0.8);
-            Contrast.G = (byte)((255 - Contrast.G) * 0.8);
-            Contrast.B = (byte)((255 - Contrast.B) * 0.8);
-
+            Contrast.R = (byte)(Contrast.R * 1.4);
+            Contrast.B = (byte)(Contrast.B * 1.4);
+            Contrast.G = (byte)(Contrast.G * 1.4);
             return new SolidColorBrush(Contrast);
         }
     }

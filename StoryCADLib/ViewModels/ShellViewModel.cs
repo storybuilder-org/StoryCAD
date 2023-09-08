@@ -54,6 +54,9 @@ public class ShellViewModel : ObservableRecipient
     public StoryNodeItem RightTappedNode;
     public TreeViewItem LastClickedTreeviewItem;
 
+    //List of new nodes that have a background, these are cleared on navigation
+    public List<StoryNodeItem> NewNodeHighlightCache = new();
+
     public StoryViewType CurrentViewType;
 
     private ContentDialog _contentDialog;
@@ -551,7 +554,7 @@ public class ShellViewModel : ObservableRecipient
         await Ioc.Default.GetRequiredService<BackupService>().BackupProject();
     }
 
-    public void TreeViewNodeClicked(object selectedItem)
+    public void TreeViewNodeClicked(object selectedItem , bool ClearHighlightCache = true)
     {
         if (selectedItem is null)
         {
@@ -559,10 +562,7 @@ public class ShellViewModel : ObservableRecipient
             return;
         }
         Logger.Log(LogLevel.Info, $"TreeViewNodeClicked for {selectedItem}");
-        
 
-        if (LastClickedTreeviewItem != null) { LastClickedTreeviewItem.Background = null; }
-        
         try
         {
             NavigationService _nav = Ioc.Default.GetRequiredService<NavigationService>();
@@ -604,6 +604,13 @@ public class ShellViewModel : ObservableRecipient
                         break;
                 }
                 CurrentNode.IsExpanded = true;
+            }
+
+            //Clears background of new nodes on navigation as well as the last node.
+            if (ClearHighlightCache)
+            {
+                foreach (var item in NewNodeHighlightCache) { item.Background = null; }
+                if (LastClickedTreeviewItem != null) { LastClickedTreeviewItem.Background = null; }
             }
         }
         catch (Exception _e)
@@ -1722,40 +1729,40 @@ public class ShellViewModel : ObservableRecipient
 
     private void AddFolder()
     {
-        TreeViewNodeClicked(AddStoryElement(StoryItemType.Folder));
+        TreeViewNodeClicked(AddStoryElement(StoryItemType.Folder) , false);
     }
 
     private void AddSection()
     {
-        TreeViewNodeClicked(AddStoryElement(StoryItemType.Section));
+        TreeViewNodeClicked(AddStoryElement(StoryItemType.Section), false);
     }
 
     private void AddProblem()
     {
-        TreeViewNodeClicked(AddStoryElement(StoryItemType.Problem));
+        TreeViewNodeClicked(AddStoryElement(StoryItemType.Problem), false);
     }
 
     private void AddCharacter()
     {
-        TreeViewNodeClicked(AddStoryElement(StoryItemType.Character));
+        TreeViewNodeClicked(AddStoryElement(StoryItemType.Character), false);
     }
     private void AddWeb()
     {
-        TreeViewNodeClicked(AddStoryElement(StoryItemType.Web));
+        TreeViewNodeClicked(AddStoryElement(StoryItemType.Web), false);
     }
     private void AddNotes()
     {
-        TreeViewNodeClicked(AddStoryElement(StoryItemType.Notes));
+        TreeViewNodeClicked(AddStoryElement(StoryItemType.Notes), false);
     }
 
     private void AddSetting()
     {
-        TreeViewNodeClicked(AddStoryElement(StoryItemType.Setting));
+        TreeViewNodeClicked(AddStoryElement(StoryItemType.Setting), false);
     }
 
     private void AddScene()
     {
-        TreeViewNodeClicked(AddStoryElement(StoryItemType.Scene));
+        TreeViewNodeClicked(AddStoryElement(StoryItemType.Scene), false);
     }
 
     private StoryNodeItem AddStoryElement(StoryItemType typeToAdd)
@@ -1791,7 +1798,7 @@ public class ShellViewModel : ObservableRecipient
                 break;
             case StoryItemType.Problem:
                 _newNode = new StoryNodeItem(new ProblemModel(StoryModel), RightTappedNode);
-                break;
+                break; 
             case StoryItemType.Character:
                 _newNode = new StoryNodeItem(new CharacterModel(StoryModel), RightTappedNode);
                 break;
@@ -1813,10 +1820,9 @@ public class ShellViewModel : ObservableRecipient
         {
             _newNode.Parent.IsExpanded = true;
             _newNode.IsRoot = false; //Only an overview node can be a root, which cant be created normally
-            LastClickedTreeviewItem.IsSelected = false;
-            LastClickedTreeviewItem.Background = new SolidColorBrush(GlobalData.Preferences.AccentColor);
             _newNode.IsSelected = false;
-            _newNode.boarderBrush = GlobalData.Preferences.ContrastColor;
+            _newNode.Background = GlobalData.Preferences.ContrastColor;
+            NewNodeHighlightCache.Add(_newNode);
         }
         else { return null; }   
 
