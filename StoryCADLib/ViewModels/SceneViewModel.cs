@@ -353,9 +353,13 @@ public class SceneViewModel : ObservableRecipient, INavigable
         Setting = Model.Setting;
         SceneType = Model.SceneType;
 
+        // The list of cast members is loaded from the Model
         LoadCastList();
-
-        ViewpointCharacter = Model.ViewpointCharacter;
+        // CharacterList is the StoryModel's list of all Character StoryElements
+        CharacterList = ShellViewModel.ShellInstance.StoryModel.StoryElements.Characters;
+        ViewpointCharacter = Model.ViewpointCharacter; // Add viewpoint character if missing
+        // Now set the correct view and initialize the cast elements    
+        InitializeCharacterList(CastList.Count == 0); // true = all characters; false = cast members
 
         // The ScenePurposes ObservableCollection<StringSelection>
         // supports multiple selected values (strings) because
@@ -415,25 +419,23 @@ public class SceneViewModel : ObservableRecipient, INavigable
                 CastList.Add(StoryElement.StringToStoryElement(_member));
             }
         }
-        // CharacterList is the StoryModel's list of all Character StoryElements
-        CharacterList = ShellViewModel.ShellInstance.StoryModel.StoryElements.Characters;
+    }
+
+    private void InitializeCharacterList(bool allChars)
+    {
         // If there are any cast members, CastList is what's displayed
-        if (CastList.Count > 0)
-        {
-            AllCharacters = false;
-            CastSource = CastList;
-        }
+
         // Otherwise display all characters
-        else
+        if (allChars)  //Display all characters from the StoryModel's character list
         {
             AllCharacters = true;
             CastSource = CharacterList;
         }
-        InitializeCharacterList();
-    }
-
-    private void InitializeCharacterList()
-    {
+        else  // Display only the selected cast members
+        {
+            AllCharacters = false;
+            CastSource = CastList;
+        }
         foreach (StoryElement _element in CastSource)
         {
             if (CastMemberExists(_element))
@@ -531,19 +533,16 @@ public class SceneViewModel : ObservableRecipient, INavigable
         bool _changeState = _changeable;
         _changeable = false;
         ToggleSwitch toggleSwitch = sender as ToggleSwitch;
+        InitializeCharacterList(toggleSwitch.IsOn); // on = all characters; off = cast members
         AllCharacters = toggleSwitch.IsOn;
         if (AllCharacters)
         {
-            CastSource = CharacterList;
             Messenger.Send(new StatusChangedMessage(new("Add / Remove Cast Members", LogLevel.Info, true)));
         }
         else
         {
-            CastSource = CastList;
             Messenger.Send(new StatusChangedMessage(new("Show Selected Cast Members", LogLevel.Info, true)));
         }
-        InitializeCharacterList();
-        AllCharacters = toggleSwitch.IsOn;
         _changeable = _changeState; 
     }
 
