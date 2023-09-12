@@ -3,6 +3,8 @@ using Microsoft.UI.Xaml.Media;
 using Windows.UI.ViewManagement;
 using ABI.Windows.Media.Protection.PlayReady;
 using CommunityToolkit.Mvvm.ComponentModel;
+using System;
+using Windows.UI;
 
 namespace StoryCAD.Models.Tools;
 
@@ -38,8 +40,19 @@ public class PreferencesModel : ObservableObject
 
     // Visual changes
     public SolidColorBrush PrimaryColor { get; set; } //Sets UI Color
-    public SolidColorBrush SecondaryColor { get; set; } //Sets Text Color
-    public Windows.UI.Color AccentColor { get; set; } //Sets Text Color
+    public SolidColorBrush SecondaryColor { get; set; } //Sets node color.
+    public SolidColorBrush ContrastColor // A color that contrasts nicely with the users accent color
+    {
+        get
+        {
+            Color Contrast = AccentColor;
+            Contrast.R = (byte)(Contrast.R * 1.4);
+            Contrast.B = (byte)(Contrast.B * 1.4);
+            Contrast.G = (byte)(Contrast.G * 1.4);
+            return new SolidColorBrush(Contrast);
+        }
+    }
+    public Color AccentColor { get; set; } //Sets Text Color
     public TextWrapping WrapNodeNames { get; set; }
 
     // Backup Information

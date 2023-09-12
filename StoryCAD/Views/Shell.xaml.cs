@@ -102,13 +102,18 @@ public sealed partial class Shell
     }
     private void TreeViewItem_RightTapped(object sender, RightTappedRoutedEventArgs e)
     {
-        if (ShellVm.RightClickedTreeviewItem != null) { ShellVm.RightClickedTreeviewItem.Background = null; } //Remove old right clicked nodes background
-
+        if (ShellVm.LastClickedTreeviewItem != null) 
+        {
+            ShellVm.LastClickedTreeviewItem.Background = null;
+            ShellVm.LastClickedTreeviewItem.IsSelected = false;
+            ShellVm.LastClickedTreeviewItem.BorderBrush = null;
+        } //Remove old right clicked nodes background
+      
         TreeViewItem item = (TreeViewItem)sender;
         item.Background = new SolidColorBrush(new UISettings().GetColorValue(UIColorType.Accent));
 
         ShellVm.RightTappedNode = (StoryNodeItem)item.DataContext;
-        ShellVm.RightClickedTreeviewItem = item; //We can't set the background through righttappednode so we set a reference to the node itself to reset the background later
+        ShellVm.LastClickedTreeviewItem = item; //We can't set the background through righttappednode so we set a reference to the node itself to reset the background later
         ShellVm.ShowFlyoutButtons();
     }
 
@@ -259,5 +264,16 @@ public sealed partial class Shell
         {
             e.Data.RequestedOperation = DataPackageOperation.Move;  // re-enable moves
         }
+    }
+
+    private void TreeViewItem_Tapped(object sender, TappedRoutedEventArgs e)
+    {
+        if (ShellVm.LastClickedTreeviewItem != null && ShellVm.LastClickedTreeviewItem != (TreeViewItem)sender) 
+        {
+            ShellVm.LastClickedTreeviewItem.Background = null;
+            ShellVm.LastClickedTreeviewItem.IsSelected = false;
+            ShellVm.LastClickedTreeviewItem.BorderBrush = null;
+        }
+        ShellVm.LastClickedTreeviewItem = (TreeViewItem)sender;
     }
 }

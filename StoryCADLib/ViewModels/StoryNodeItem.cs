@@ -187,6 +187,23 @@ public class StoryNodeItem : DependencyObject, INotifyPropertyChanged
         }
     }
 
+    /// <summary>
+    /// Binds to boarder color.
+    /// </summary>
+    private SolidColorBrush _boarderBrush;
+    public SolidColorBrush boarderBrush
+    {
+        get => _boarderBrush;
+        set
+        {
+            if (_boarderBrush != value)
+            {
+                _boarderBrush = value;
+                NotifyPropertyChanged("Background");
+            }
+        }
+    }
+
     private bool _isSelected;
     public bool IsSelected
     {
