@@ -11,11 +11,11 @@
         <ResourceDictionary>
             <ResourceDictionary.ThemeDictionaries>
                 <ResourceDictionary x:Key="Default">
-                    <SolidColorBrush x:Key="TreeViewItemBackgroundPointerOver" Color="{ThemeResource SystemAccentColor}" />
+                    <SolidColorBrush x:Key="TreeViewItemBoarderBrushPointerOver" Color="{ThemeResource SystemAccentColor}"/>
                     <SolidColorBrush x:Key="TreeViewItemBackgroundSelected" Color="{ThemeResource SystemAccentColor}"  />
+                    <SolidColorBrush x:Key="TreeViewItemBackgroundSelectedPointerOver" Color="{ThemeResource SystemAccentColor}" />
                 </ResourceDictionary>
             </ResourceDictionary.ThemeDictionaries>
-
 
             <CommandBarFlyout x:Key="AddStoryElementFlyout" Placement="Right" x:Name="AddStoryElementCommandBarFlyout" >
                 <CommandBarFlyout.SecondaryCommands>
@@ -336,9 +336,12 @@
                             <DataTemplate  x:DataType="viewmodels:StoryNodeItem">
                                 <muxc:TreeViewItem ItemsSource="{x:Bind Children}" 
                                                    Background="{x:Bind Background, Mode=OneWay}" 
+                                                   BorderBrush="{x:Bind boarderBrush, Mode=OneWay}"
+                                                   BorderThickness="1"
                                                    IsExpanded="{x:Bind IsExpanded, Mode=TwoWay}"
                                                    DragOver="TreeViewItem_OnDragOver"
-                                                   RightTapped="TreeViewItem_RightTapped" >
+                                                   RightTapped="TreeViewItem_RightTapped"
+                                                   Tapped="TreeViewItem_Tapped">
                                     <StackPanel Orientation="Horizontal">
                                         <SymbolIcon Symbol="{x:Bind Symbol, Mode=OneWay}" Width="20" Height="20"/>
                                         <TextBlock Text="{x:Bind Name, Mode=TwoWay}"          

@@ -52,7 +52,10 @@ public class ShellViewModel : ObservableRecipient
     // Navigation navigation landmark nodes
     public StoryNodeItem CurrentNode { get; set; }
     public StoryNodeItem RightTappedNode;
-    public TreeViewItem RightClickedTreeviewItem;
+    public TreeViewItem LastClickedTreeviewItem;
+
+    //List of new nodes that have a background, these are cleared on navigation
+    public List<StoryNodeItem> NewNodeHighlightCache = new();
 
     public StoryViewType CurrentViewType;
 
@@ -370,7 +373,6 @@ public class ShellViewModel : ObservableRecipient
     public async Task UnifiedNewFile(UnifiedVM dialogVM)
     {
         Logger.Log(LogLevel.Info, "FileOpenVM - New File starting");
-
         _canExecuteCommands = false;
 
         try
@@ -384,9 +386,9 @@ public class ShellViewModel : ObservableRecipient
                 await WriteModel();
             }
 
-            // Start with a blank StoryModel and populate it
-            // using the new project dialog's settings
+            // Start with a blank StoryModel and populate it using the new project dialog's 
             ResetModel();
+            ShowHomePage();
 
             if (!Path.GetExtension(dialogVM.ProjectName)!.Equals(".stbx")) { dialogVM.ProjectName += ".stbx"; }
             StoryModel.ProjectFilename = dialogVM.ProjectName;
@@ -536,7 +538,10 @@ public class ShellViewModel : ObservableRecipient
             if (GlobalData.Preferences.AutoSave)
             {
                 Ioc.Default.GetRequiredService<AutoSaveService>().StartAutoSave();
-            }   
+            }
+
+            TreeViewNodeClicked(StoryModel.ExplorerView[0]);
+            UpdateWindowTitle();
 
             Messenger.Send(new StatusChangedMessage(new("New project command completed", LogLevel.Info, true)));
         }
@@ -554,7 +559,7 @@ public class ShellViewModel : ObservableRecipient
         await Ioc.Default.GetRequiredService<BackupService>().BackupProject();
     }
 
-    public void TreeViewNodeClicked(object selectedItem)
+    public void TreeViewNodeClicked(object selectedItem , bool ClearHighlightCache = true)
     {
         if (selectedItem is null)
         {
@@ -562,10 +567,7 @@ public class ShellViewModel : ObservableRecipient
             return;
         }
         Logger.Log(LogLevel.Info, $"TreeViewNodeClicked for {selectedItem}");
-        
 
-        if (RightClickedTreeviewItem != null) { RightClickedTreeviewItem.Background = null; }
-        
         try
         {
             NavigationService _nav = Ioc.Default.GetRequiredService<NavigationService>();
@@ -607,6 +609,13 @@ public class ShellViewModel : ObservableRecipient
                         break;
                 }
                 CurrentNode.IsExpanded = true;
+            }
+
+            //Clears background of new nodes on navigation as well as the last node.
+            if (ClearHighlightCache)
+            {
+                foreach (var item in NewNodeHighlightCache) { item.Background = null; }
+                if (LastClickedTreeviewItem != null) { LastClickedTreeviewItem.Background = null; }
             }
         }
         catch (Exception _e)
@@ -786,7 +795,7 @@ public class ShellViewModel : ObservableRecipient
                 Messenger.Send(new StatusChangedMessage(new("Open Story completed", LogLevel.Info)));
             }
 
-            GlobalData.MainWindow.Title = $"StoryCAD - Editing {StoryModel.ProjectFilename.Replace(".stbx", "")}";
+            UpdateWindowTitle();
             new UnifiedVM().UpdateRecents(Path.Combine(StoryModel.ProjectFolder.Path, StoryModel.ProjectFile.Name));
 
             if (GlobalData.Preferences.TimedBackup)
@@ -1200,10 +1209,9 @@ public class ShellViewModel : ObservableRecipient
                     ShowChange();
                     Logger.Log(LogLevel.Info, "MasterPlot complete");
                 }
-                _canExecuteCommands = true;
             }
         }
-
+        _canExecuteCommands = true;
     }
 
     private async void DramaticSituationsTool()
@@ -1311,36 +1319,16 @@ public class ShellViewModel : ObservableRecipient
         }
     }
 
-    private async void GeneratePrintReports()
-    {
-        PrintReportDialogVM _reportVM = Ioc.Default.GetRequiredService<PrintReportDialogVM>();
-        if (_canExecuteCommands)
-        {
-            if (Ioc.Default.GetRequiredService<ShellViewModel>().DataSource == null)
-            {
-                Messenger.Send(new StatusChangedMessage(new("You need to load a Story first!", LogLevel.Warn)));
-                return;
-            }
-            _canExecuteCommands = false;
-            Messenger.Send(new StatusChangedMessage(new("Generate Print Reports executing", LogLevel.Info, true)));
-
-            SaveModel();
-
-            // Run reports dialog
-            _reportVM.Dialog = new()
-            {
-                Title = "Generate Reports",
-                XamlRoot = GlobalData.XamlRoot,
-                Content = new PrintReportsDialog()
-            };
-            await _reportVM.Dialog.ShowAsync();
-            _canExecuteCommands = true;
-
-        }
-    }
 
     private async void GenerateScrivenerReports()
     {
+        if (DataSource == null || DataSource.Count == 0)
+        {
+            Messenger.Send(new StatusChangedMessage(new("You need to open a story first!", LogLevel.Info)));
+            Logger.Log(LogLevel.Info, $"Scrivener Report cancelled (DataSource was null or empty)");
+            return;
+        }
+
         //TODO: revamp this to be more user friendly.
         _canExecuteCommands = false;
         Messenger.Send(new StatusChangedMessage(new("Generate Scrivener Reports executing", LogLevel.Info, true)));
@@ -1381,12 +1369,10 @@ public class ShellViewModel : ObservableRecipient
         _canExecuteCommands = false;
         Messenger.Send(new StatusChangedMessage(new("Launching GitHub Pages User Manual", LogLevel.Info, true)));
 
-        ProcessStartInfo _psi = new()
-        {
+        Process.Start(new ProcessStartInfo(){
             FileName = @"https://Storybuilder-org.github.io/StoryCAD/",
             UseShellExecute = true
-        };
-        Process.Start(_psi);
+        });
 
         Messenger.Send(new StatusChangedMessage(new("Launch default browser completed", LogLevel.Info, true)));
 
@@ -1400,12 +1386,11 @@ public class ShellViewModel : ObservableRecipient
     /// <param name="nodeRequired">A node (right-clicked or clicked) must be present</param>
     /// <param name="checkOutlineIsOpen">A checks an outline is open (defaults to true)</param>
     /// <returns>true if prerequisites are met</returns>
-    private bool VerifyToolUse(bool explorerViewOnly, bool nodeRequired, bool checkOutlineIsOpen = true)
+    public bool VerifyToolUse(bool explorerViewOnly, bool nodeRequired, bool checkOutlineIsOpen = true)
     {
         try
         {
-
-            if (explorerViewOnly && !IsExplorerView())
+            if (explorerViewOnly && CurrentViewType != StoryViewType.ExplorerView)
             {
                 Messenger.Send(new StatusChangedMessage(new("This tool can only be run in Story Explorer view", LogLevel.Warn)));
                 return false;
@@ -1749,41 +1734,40 @@ public class ShellViewModel : ObservableRecipient
 
     private void AddFolder()
     {
-        TreeViewNodeClicked(AddStoryElement(StoryItemType.Folder));
-
+        TreeViewNodeClicked(AddStoryElement(StoryItemType.Folder) , false);
     }
 
     private void AddSection()
     {
-        TreeViewNodeClicked(AddStoryElement(StoryItemType.Section));
+        TreeViewNodeClicked(AddStoryElement(StoryItemType.Section), false);
     }
 
     private void AddProblem()
     {
-        TreeViewNodeClicked(AddStoryElement(StoryItemType.Problem));
+        TreeViewNodeClicked(AddStoryElement(StoryItemType.Problem), false);
     }
 
     private void AddCharacter()
     {
-        TreeViewNodeClicked(AddStoryElement(StoryItemType.Character));
+        TreeViewNodeClicked(AddStoryElement(StoryItemType.Character), false);
     }
     private void AddWeb()
     {
-        TreeViewNodeClicked(AddStoryElement(StoryItemType.Web));
+        TreeViewNodeClicked(AddStoryElement(StoryItemType.Web), false);
     }
     private void AddNotes()
     {
-        TreeViewNodeClicked(AddStoryElement(StoryItemType.Notes));
+        TreeViewNodeClicked(AddStoryElement(StoryItemType.Notes), false);
     }
 
     private void AddSetting()
     {
-        TreeViewNodeClicked(AddStoryElement(StoryItemType.Setting));
+        TreeViewNodeClicked(AddStoryElement(StoryItemType.Setting), false);
     }
 
     private void AddScene()
     {
-        TreeViewNodeClicked(AddStoryElement(StoryItemType.Scene));
+        TreeViewNodeClicked(AddStoryElement(StoryItemType.Scene), false);
     }
 
     private StoryNodeItem AddStoryElement(StoryItemType typeToAdd)
@@ -1819,7 +1803,7 @@ public class ShellViewModel : ObservableRecipient
                 break;
             case StoryItemType.Problem:
                 _newNode = new StoryNodeItem(new ProblemModel(StoryModel), RightTappedNode);
-                break;
+                break; 
             case StoryItemType.Character:
                 _newNode = new StoryNodeItem(new CharacterModel(StoryModel), RightTappedNode);
                 break;
@@ -1841,9 +1825,11 @@ public class ShellViewModel : ObservableRecipient
         {
             _newNode.Parent.IsExpanded = true;
             _newNode.IsRoot = false; //Only an overview node can be a root, which cant be created normally
-            _newNode.IsSelected = true;
+            _newNode.IsSelected = false;
+            _newNode.Background = GlobalData.Preferences.ContrastColor;
+            NewNodeHighlightCache.Add(_newNode);
         }
-        else { return null; }
+        else { return null; }   
 
         Messenger.Send(new IsChangedMessage(true));
         Messenger.Send(new StatusChangedMessage(new($"Added new {typeToAdd}", LogLevel.Info, true)));
@@ -2034,7 +2020,7 @@ public class ShellViewModel : ObservableRecipient
         
         #endregion
 
-        public void ViewChanged()
+    public void ViewChanged()
     {
         if (DataSource == null || DataSource.Count == 0)
         {
@@ -2068,61 +2054,69 @@ public class ShellViewModel : ObservableRecipient
     /// </summary>
     public void ShowFlyoutButtons()
     {
-        //Trash Can - View Hide all buttons except Empty Trash.
-        if (RootNodeType(RightTappedNode) == StoryItemType.TrashCan)
+        try
         {
-            AddFolderVisibility = Visibility.Collapsed;
-            AddSectionVisibility = Visibility.Collapsed;
-            AddProblemVisibility = Visibility.Collapsed;
-            AddCharacterVisibility = Visibility.Collapsed;
-            AddSettingVisibility = Visibility.Collapsed;
-            AddSceneVisibility = Visibility.Collapsed;
-            RemoveStoryElementVisibility = Visibility.Collapsed;
-            AddToNarrativeVisibility = Visibility.Collapsed;
-            RemoveFromNarrativeVisibility = Visibility.Collapsed;
-            PrintNodeVisibility = Visibility.Collapsed;
-
-            RestoreStoryElementVisibility = Visibility.Visible;
-            EmptyTrashVisibility = Visibility.Visible;
-        }
-        else
-        {
-            //Explorer tree, show everything but empty trash and add section
-            if (SelectedView == ViewList[0])
+            //Trash Can - View Hide all buttons except Empty Trash.
+            if (RootNodeType(RightTappedNode) == StoryItemType.TrashCan)
             {
-                AddFolderVisibility = Visibility.Visible; 
+                AddFolderVisibility = Visibility.Collapsed;
                 AddSectionVisibility = Visibility.Collapsed;
-                AddProblemVisibility = Visibility.Visible;
-                AddCharacterVisibility = Visibility.Visible;
-                AddSettingVisibility = Visibility.Visible;
-                AddSceneVisibility = Visibility.Visible;
-                RemoveStoryElementVisibility = Visibility.Visible;
-                //TODO: Use correct values (bug with this)
-                //RestoreStoryElementVisibility = Visibility.Collapsed;
-                RestoreStoryElementVisibility = Visibility.Visible;
-                AddToNarrativeVisibility = Visibility.Visible; 
-                //RemoveFromNarrativeVisibility = Visibility.Collapsed;
-                RestoreStoryElementVisibility = Visibility.Visible;
-                PrintNodeVisibility = Visibility.Visible;
-                EmptyTrashVisibility = Visibility.Collapsed;
-            }
-            else //Narrator Tree, hide most things.
-            {
-                RemoveStoryElementVisibility = Visibility.Visible;
-                RemoveFromNarrativeVisibility = Visibility.Visible;
-                AddSectionVisibility = Visibility.Visible;
-                PrintNodeVisibility = Visibility.Visible;
-
-                AddFolderVisibility = Visibility.Collapsed; 
                 AddProblemVisibility = Visibility.Collapsed;
                 AddCharacterVisibility = Visibility.Collapsed;
                 AddSettingVisibility = Visibility.Collapsed;
                 AddSceneVisibility = Visibility.Collapsed;
-                RestoreStoryElementVisibility = Visibility.Collapsed;
+                RemoveStoryElementVisibility = Visibility.Collapsed;
                 AddToNarrativeVisibility = Visibility.Collapsed;
-                EmptyTrashVisibility = Visibility.Collapsed;
+                RemoveFromNarrativeVisibility = Visibility.Collapsed;
+                PrintNodeVisibility = Visibility.Collapsed;
+
+                RestoreStoryElementVisibility = Visibility.Visible;
+                EmptyTrashVisibility = Visibility.Visible;
+            }
+            else
+            {
+                //Explorer tree, show everything but empty trash and add section
+                if (SelectedView == ViewList[0])
+                {
+                    AddFolderVisibility = Visibility.Visible;
+                    AddSectionVisibility = Visibility.Collapsed;
+                    AddProblemVisibility = Visibility.Visible;
+                    AddCharacterVisibility = Visibility.Visible;
+                    AddSettingVisibility = Visibility.Visible;
+                    AddSceneVisibility = Visibility.Visible;
+                    RemoveStoryElementVisibility = Visibility.Visible;
+                    //TODO: Use correct values (bug with this)
+                    //RestoreStoryElementVisibility = Visibility.Collapsed;
+                    RestoreStoryElementVisibility = Visibility.Collapsed;
+                    AddToNarrativeVisibility = Visibility.Visible;
+                    //RemoveFromNarrativeVisibility = Visibility.Collapsed;
+                    PrintNodeVisibility = Visibility.Visible;
+                    EmptyTrashVisibility = Visibility.Collapsed;
+                }
+                else //Narrator Tree, hide most things.
+                {
+                    RemoveStoryElementVisibility = Visibility.Visible;
+                    RemoveFromNarrativeVisibility = Visibility.Visible;
+                    AddSectionVisibility = Visibility.Visible;
+                    PrintNodeVisibility = Visibility.Visible;
+
+                    AddFolderVisibility = Visibility.Collapsed;
+                    AddProblemVisibility = Visibility.Collapsed;
+                    AddCharacterVisibility = Visibility.Collapsed;
+                    AddSettingVisibility = Visibility.Collapsed;
+                    AddSceneVisibility = Visibility.Collapsed;
+                    RestoreStoryElementVisibility = Visibility.Collapsed;
+                    AddToNarrativeVisibility = Visibility.Collapsed;
+                    EmptyTrashVisibility = Visibility.Collapsed;
+                }
             }
         }
+        catch (Exception e) //errors (is RightTappedNode null?
+        {
+             Logger.Log(LogLevel.Error, $"An error occurred inShowFlyouttButtons() \n{e.Message}\n" +
+                 $"- For reference RightTappedNode is " + RightTappedNode);
+        }
+
     }
 
     public void ShowConnectionStatus()
@@ -2172,10 +2166,6 @@ public class ShellViewModel : ObservableRecipient
         //Set window Title.
         GlobalData.MainWindow.Title = BaseTitle;
     }
-
-    private bool IsExplorerView() => CurrentViewType == StoryViewType.ExplorerView;
-    // ReSharper disable once UnusedMember.Local
-    private bool IsNarratorView() => CurrentViewType == StoryViewType.NarratorView;
 
     #region MVVM  processing
     private void IsChangedMessageReceived(IsChangedMessage isDirty)
@@ -2304,7 +2294,7 @@ public class ShellViewModel : ObservableRecipient
         TogglePaneCommand = new RelayCommand(TogglePane, () => _canExecuteCommands);
         OpenUnifiedCommand = new RelayCommand(async () => await OpenUnifiedMenu(), () => _canExecuteCommands);
         CloseUnifiedCommand = new RelayCommand(CloseUnifiedMenu, () => _canExecuteCommands);
-        NarrativeToolCommand = new RelayCommand(async () => await OpenNarrativeTool(), () => _canExecuteCommands);
+        NarrativeToolCommand = new RelayCommand(async () => await Ioc.Default.GetRequiredService<NarrativeToolVM>().OpenNarrativeTool(), () => _canExecuteCommands);
         PrintNodeCommand = new RelayCommand(async () => await PrintCurrentNodeAsync(), () => _canExecuteCommands);
         OpenFileCommand = new RelayCommand(async () => await OpenFile(), () => _canExecuteCommands);
         SaveFileCommand = new RelayCommand(async () => await SaveFile(), () => _canExecuteCommands);
@@ -2321,7 +2311,7 @@ public class ShellViewModel : ObservableRecipient
 
         PreferencesCommand = new RelayCommand(Preferences, () => _canExecuteCommands);
 
-        PrintReportsCommand = new RelayCommand(GeneratePrintReports, () => _canExecuteCommands);
+        PrintReportsCommand = new RelayCommand(Ioc.Default.GetRequiredService<PrintReportDialogVM>().OpenPrintReportDialog, () => _canExecuteCommands);
         ScrivenerReportsCommand = new RelayCommand(GenerateScrivenerReports, () => _canExecuteCommands);
 
         HelpCommand = new RelayCommand(LaunchGitHubPages, () => _canExecuteCommands);
@@ -2357,31 +2347,6 @@ public class ShellViewModel : ObservableRecipient
         ChangeStatusColor = Colors.Green;
 
         ShellInstance = this;
-    }
-
-    private async Task OpenNarrativeTool()
-    {
-        if (VerifyToolUse(false, false) && _canExecuteCommands)
-        {
-            _canExecuteCommands = false;
-            try
-            {
-                ContentDialog _dialog = new()
-                {
-                    XamlRoot = GlobalData.XamlRoot,
-                    Title = "Narrative Editor",
-                    PrimaryButtonText = "Done",
-                    Content = new NarrativeTool()
-                };
-                await _dialog.ShowAsync();
-            }
-            catch (Exception ex)
-            {
-                Logger.LogException(LogLevel.Error, ex, "Error in ShellVM.OpenNarrativeTool()");
-            }
-
-            _canExecuteCommands = true;
-        }
     }
 
     public void SearchNodes()

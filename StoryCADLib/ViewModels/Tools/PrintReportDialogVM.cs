@@ -11,7 +11,10 @@ using Microsoft.UI.Xaml.Printing;
 using StoryCAD.Models;
 using StoryCAD.Services.Reports;
 using Windows.Graphics.Printing;
-using Microsoft.UI.Dispatching;
+using CommunityToolkit.Mvvm.DependencyInjection;
+using StoryCAD.Services.Dialogs.Tools;
+using StoryCAD.Services.Messages;
+using StoryCAD.Services.Logging;
 
 namespace StoryCAD.ViewModels.Tools;
 
@@ -158,6 +161,35 @@ public class PrintReportDialogVM : ObservableRecipient
         set => SetProperty(ref _webNodes, value);
     }
     #endregion
+
+    public async void OpenPrintReportDialog()
+    {
+        ShellViewModel ShellVM = Ioc.Default.GetRequiredService<ShellViewModel>();
+        if (ShellVM._canExecuteCommands)
+        {
+            if (Ioc.Default.GetRequiredService<ShellViewModel>().DataSource == null)
+            {
+                ShellVM.ShowMessage(LogLevel.Warn, "You need to load a Story first!", false);
+                return;
+            }
+            
+            ShellVM._canExecuteCommands = false;
+            ShellVM.ShowMessage(LogLevel.Info, "Generate Print Reports executing",  true);
+
+            ShellVM.SaveModel();
+
+            // Run reports dialog
+            Dialog = new()
+            {
+                Title = "Generate Reports",
+                XamlRoot = GlobalData.XamlRoot,
+                Content = new PrintReportsDialog()
+            };
+            await Dialog.ShowAsync();
+            ShellVM._canExecuteCommands = true;
+
+        }
+    }
 
     /// <summary>
     /// This traverses a node and adds it to the relevant list.
@@ -308,7 +340,7 @@ public class PrintReportDialogVM : ObservableRecipient
 
     private void AddPages(object sender, AddPagesEventArgs e)
     {
-        //Treat each page break as
+        //Treat each page break as a new page
         foreach (StackPanel page in _printPreviewCache) { Document.AddPage(page); }
 
         //All text has been handled, so we mark add pages as complete.
@@ -324,8 +356,15 @@ public class PrintReportDialogVM : ObservableRecipient
     /// </summary>
     private void PrintTaskRequested(PrintManager sender, PrintTaskRequestedEventArgs args)
     {
-        PrintJobManager = args.Request.CreatePrintTask("StoryCAD - " + ShellViewModel.GetModel().ProjectFilename, PrintSourceRequested);
-        PrintJobManager.Completed += PrintTaskCompleted; //Show message if job failed.
+        try
+        {
+            PrintJobManager = args.Request.CreatePrintTask("StoryCAD - " + ShellViewModel.GetModel().ProjectFilename, PrintSourceRequested);
+            PrintJobManager.Completed += PrintTaskCompleted; //Show message if job failed.
+        }
+        catch (Exception e)
+        {
+            Ioc.Default.GetService<LogService>().LogException(LogLevel.Error, e, "Error trying to print report");
+        }
     }
 
     /// <summary>

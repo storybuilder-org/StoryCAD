@@ -12,9 +12,8 @@ if ($env:CI -eq $null) {
 
 	# Get current date in yyddd format
 	$currentDate = Get-Date
-	$dateRevision = [int]($currentDate.ToString("yy") + $currentDate.DayOfYear.ToString("D3"))
 
-	$newVersion = New-Object Version ($currentVersion.Major, $currentVersion.Minor, $currentVersion.Build, $dateRevision)
+	$newVersion = New-Object Version ($currentVersion.Major, $currentVersion.Minor, $currentVersion.Build, "65535")
 	$identityNode.Version = $newVersion.ToString()
 	$manifest.Save('Package.appxmanifest')
 }
