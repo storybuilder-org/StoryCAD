@@ -10,15 +10,17 @@
     xmlns:usercontrols="using:StoryCAD.Controls"
     xmlns:system="using:System"
     xmlns:viewModels="using:StoryCAD.ViewModels"
+    xmlns:converters="using:StoryCAD.Converters"
     mc:Ignorable="d" >
 
     <Page.Resources>
+        <converters:EnumToBoolConverter x:Key="EnumToBoolConverter" />
         <TeachingTip x:Name="ViewpointCharacterTip"
-	        Title="Reminder:"
-	        Subtitle="Pick a scene viewpoint character consistent with your story POV:"
-	        PreferredPlacement="Auto"
-            IsOpen="{x:Bind SceneVm.VpCharTipIsOpen}"
-            Content="{x:Bind SceneVm.VpCharTip}" >
+                     Title="Reminder:"
+                     Subtitle="Pick a scene viewpoint character consistent with your story POV:"
+                     PreferredPlacement="Auto"
+                     IsOpen="{x:Bind SceneVm.VpCharTipIsOpen}"
+                     Content="{x:Bind SceneVm.VpCharTip}" >
         </TeachingTip>
     </Page.Resources>
 
@@ -75,8 +77,8 @@
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="Scene Cast"/>
                                 <ToggleSwitch HorizontalAlignment="Center" Width="200" Header="Cast Display" Margin="50,0,0,0" 
-                                              IsOn="{x:Bind  SceneVm.ShowCastSelection, Mode=TwoWay}" 
-                                              OffContent="Cast Members" OnContent="All Characters"
+                                              IsOn="{x:Bind  SceneVm.AllCharacters, Mode=TwoWay}"  
+                                              OffContent="Cast Members" OnContent="All Characters" 
                                               Toggled="{x:Bind SceneVm.SwitchCastView, Mode=OneWay}" >
                                     <ToolTipService.ToolTip>
                                         <ToolTip Content="Show or Add/Remove Cast Members" />
