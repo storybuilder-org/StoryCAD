@@ -235,10 +235,12 @@ public class LogService : ILogService
             case LogLevel.Error:
                 exceptionHelper = exception;
                 Logger.Error(exception, message);
+                Logger.Error($"{message}\nStack Trace:\n{exception.StackTrace}");
                 break;
             case LogLevel.Fatal:
                 exceptionHelper = exception;
                 Logger.Fatal(exception, message);
+                Logger.Error($"{message}\nStack Trace:\n{exception.StackTrace}");
                 break;
         }
     }

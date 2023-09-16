@@ -747,7 +747,7 @@ public class ShellViewModel : ObservableRecipient
                 StoryModel.ProjectFile = await _filePicker.PickSingleFileAsync();
                 if (StoryModel.ProjectFile == null) //Picker was canceled.
                 {
-                    Logger.Log(LogLevel.Info, "File picked to locate file was canceled.");
+                    Logger.Log(LogLevel.Info, "Open file picker cancelled.");
                     _canExecuteCommands = true;  // unblock other commands
                     return;
                 }
@@ -758,9 +758,6 @@ public class ShellViewModel : ObservableRecipient
                 StoryModel.ProjectFile = await StorageFile.GetFileFromPathAsync(fromPath);
             }
 
-
-            // Set the ProjectFolder to the folder the project file is in.
-            StoryModel.ProjectFolder = await StoryModel.ProjectFile.GetParentAsync();
             if (StoryModel.ProjectFile == null)
             {
                 Logger.Log(LogLevel.Info, "Open File command cancelled (StoryModel.ProjectFile was null)");
@@ -768,6 +765,19 @@ public class ShellViewModel : ObservableRecipient
                 _canExecuteCommands = true;  // unblock other commands
                 return;
             }
+
+            // Check if the file is a OneDrive placeholder
+            var fileInfo = new System.IO.FileInfo(StoryModel.ProjectFile.Path);
+            if ((fileInfo.Attributes & System.IO.FileAttributes.ReparsePoint) != 0)
+            {
+                Logger.Log(LogLevel.Warn, "The selected file is a OneDrive placeholder. Please ensure the file is fully synced with OneDrive and try again.");
+                Messenger.Send(new StatusChangedMessage(new("OneDrive file not synced; open cancelled", LogLevel.Info)));
+                _canExecuteCommands = true;  // unblock other commands
+                return;
+            }
+
+            // Set the ProjectFolder to the folder the project file is in.
+            StoryModel.ProjectFolder = await StoryModel.ProjectFile.GetParentAsync();
 
             // Read the file into the StoryModel.
             StoryReader _rdr = Ioc.Default.GetRequiredService<StoryReader>();
