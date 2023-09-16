@@ -29,7 +29,7 @@ namespace StoryCAD.Models
                 if (_selection == value)
                     return;
                 _selection = value;
-                OnPropertyChanged("Selection");
+                OnPropertyChanged();
             }
         }
 
