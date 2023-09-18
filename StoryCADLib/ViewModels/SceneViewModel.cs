@@ -490,35 +490,19 @@ public class SceneViewModel : ObservableRecipient, INavigable
         }
     }
 
-    //public void AddScenePurpose(StringSelection selectedPurpose)
-    //{
-    //    if (_changeable == false)
-    //        return;
-    //    foreach (StringSelection _purpose in ScenePurposes)
-    //    {
-    //        if (_purpose.Value == selectedPurpose.Value)
-    //        {
-    //            _purpose.Selection = true;
-    //            OnPropertyChanged();
-    //            Messenger.Send(new StatusChangedMessage(new($"Scene purpose {selectedPurpose.Value} added", LogLevel.Info, true)));
-    //        return;
-    //        }
-    //    }
-    //}
+    public void AddScenePurpose(StringSelection selectedPurpose)
+    {
+        OnPropertyChanged();
+        string msg = $"Add Scene Purpose {selectedPurpose.StringName}";
+        Messenger.Send(new StatusChangedMessage(new(msg, LogLevel.Info, true)));
+    }
 
-    //public void RemoveScenePurpose(StringSelection selectedPurpose)
-    //{
-    //    if (_changeable == false)
-    //        return;
-    //    foreach (StringSelection selection in ScenePurposes)
-    //        if (selection.Value.Equals(selectedPurpose.Value))
-    //        {
-    //            selection.Selection = false;
-    //            OnPropertyChanged();
-    //            Messenger.Send(new StatusChangedMessage(new($"Purpose {selection.Value} removed", LogLevel.Info, true)));
-    //            return;
-    //        }
-    //}
+    public void RemoveScenePurpose(StringSelection selectedPurpose)
+    {
+        OnPropertyChanged();
+        string msg = $"Remove Scene Purpose {selectedPurpose.StringName}";
+        Messenger.Send(new StatusChangedMessage(new(msg, LogLevel.Info, true)));
+    }
 
     /// <summary>
     /// This method toggles the Scene Cast list from only the selected cast members

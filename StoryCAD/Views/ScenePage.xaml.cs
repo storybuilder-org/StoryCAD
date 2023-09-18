@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Mvvm.DependencyInjection;
+﻿using System.ComponentModel;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml.Controls;
 using StoryCAD.Models;
 using StoryCAD.ViewModels;
@@ -22,7 +23,7 @@ public sealed partial class ScenePage : BindablePage
         if (element == null)
             return;
         element.Selection = true;
-        SceneVm.OnPropertyChanged(null, null);
+        SceneVm.AddScenePurpose(element);
     }
 
     private void ScenePurpose_Unchecked(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
@@ -32,7 +33,7 @@ public sealed partial class ScenePage : BindablePage
         if (element == null)
             return;
         element.Selection = false;
-        SceneVm.OnPropertyChanged(null, null);
+        SceneVm.RemoveScenePurpose(element);
     }
 
     private void CastMember_Checked(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
