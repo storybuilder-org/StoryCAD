@@ -1,5 +1,6 @@
 ﻿using System;
 using CommunityToolkit.Mvvm.DependencyInjection;
+using Google.Protobuf.WellKnownTypes;
 using StoryCAD.Models;
 using StoryCAD.Services.Logging;
 using StoryCAD.ViewModels;
@@ -24,14 +25,14 @@ public class SearchService
             Ioc.Default.GetRequiredService<ShellViewModel>().Logger.Log(LogLevel.Warn, "Search argument is null, returning false.");
             return false;
         } // Fixes blank search
-        
+
         bool result = false;
         arg = searchArg.ToLower();
         StoryElement element = null;
         ElementCollection = Ioc.Default.GetService<ShellViewModel>().StoryModel.StoryElements;
 
         if (model.StoryElements.StoryElementGuids.ContainsKey(node.Uuid)) { element = model.StoryElements.StoryElementGuids[node.Uuid]; }
-        if (element == null) { return false; } 
+        if (element == null) { return false; }
         switch (element.Type)
         {
             case StoryItemType.StoryOverview:
@@ -85,33 +86,14 @@ public class SearchService
 
         foreach (string member in scene.CastMembers) //Searches character in scene
         {
-            ElementCollection.StoryElementGuids.TryGetValue(Guid.Parse(member), out StoryElement Model);
-            Model = Model as CharacterModel;
-            if (Comparator(Model.Name)) { return true; }
+            if (CompareStoryElement(member)) { return true; }
         }
-
         if (Comparator(element.Name)) { return true; }  //Searches node name
+        if (CompareStoryElement(scene.ViewpointCharacter)) { return true; }
+        if (CompareStoryElement(scene.Protagonist)) { return true; }
+        if (CompareStoryElement(scene.Antagonist)) { return true; }
+        if (CompareStoryElement(scene.Setting)) { return true; }
 
-        if (!string.IsNullOrEmpty(scene.ViewpointCharacter)) //Searches VP characters
-        {
-            ElementCollection.StoryElementGuids.TryGetValue(Guid.Parse(scene.ViewpointCharacter), out StoryElement vpChar);
-            if (Comparator(vpChar.Name)) { return true; }
-        }
-        if (!string.IsNullOrEmpty(scene.Protagonist)) //Searches protagonist
-        {
-            ElementCollection.StoryElementGuids.TryGetValue(Guid.Parse(scene.Protagonist), out StoryElement protag);
-            if (Comparator(protag.Name)) { return true; }
-        }
-        if (!string.IsNullOrEmpty(scene.Antagonist)) //Searches Antagonist
-        {
-            ElementCollection.StoryElementGuids.TryGetValue(Guid.Parse(scene.Antagonist), out StoryElement antag);
-            if (Comparator(antag.Name)) { return true; }
-        }
-        if (!string.IsNullOrEmpty(scene.Setting))
-        {
-            ElementCollection.StoryElementGuids.TryGetValue(Guid.Parse(scene.Setting), out StoryElement setting);
-            if (Comparator(setting.Name)) { return true; }
-        }
         return false; //No match, return false
     }
 
@@ -130,12 +112,12 @@ public class SearchService
     {
         CharacterModel characterModel = (CharacterModel)element;
 
-        foreach (RelationshipModel partner in characterModel.RelationshipList) //Checks each character in relationship
-        {
-            ElementCollection.StoryElementGuids.TryGetValue(Guid.Parse(partner.PartnerUuid), out StoryElement Model);
-            if (Comparator(Model.Name)) { return true; }
-        }
 
+        foreach (RelationshipModel relation in characterModel.RelationshipList) //Checks each character in relationship
+        {
+            string partner = relation.PartnerUuid;
+            if (CompareStoryElement(partner)) { return true; }
+        }
         return Comparator(element.Name); //Checks element name
     }
 
@@ -149,20 +131,11 @@ public class SearchService
     {
         ProblemModel problem = (ProblemModel)element;
 
-        if (!string.IsNullOrEmpty(problem.Protagonist))//Checks protags name
-        {
-            ElementCollection.StoryElementGuids.TryGetValue(Guid.Parse(problem.Protagonist), out StoryElement protag);
-            if (Comparator(protag.Name)) { return true; } 
+        if (CompareStoryElement(problem.Protagonist)) { return true; }
+        if (CompareStoryElement(problem.Antagonist)) { return true; }
+        if (Comparator(element.Name)) { return true; }
 
-        }
-        if (!string.IsNullOrEmpty(problem.Antagonist))//Checks antags name
-        {
-            ElementCollection.StoryElementGuids.TryGetValue(Guid.Parse(problem.Antagonist), out StoryElement antag);
-            if (Comparator(antag.Name)) { return true; } 
-        }
-
-        if (Comparator(element.Name)) { return true; } //Checks name of node
-        return false; 
+        return false;
     }
 
     /// <summary>
@@ -174,14 +147,36 @@ public class SearchService
     private bool SearchStoryOverview(StoryNodeItem node, StoryElement element)
     {
         OverviewModel overview = (OverviewModel)element;
-        if (!string.IsNullOrEmpty(overview.StoryProblem))
-        {
-            ElementCollection.StoryElementGuids.TryGetValue(Guid.Parse(overview.StoryProblem), out StoryElement problem);
-            if (Comparator(problem.Name)) { return true; } //Checks problem name
-        }
 
+        if (CompareStoryElement(overview.StoryProblem)) { return true; }
         if (Comparator(element.Name)) { return true; } //checks node name
 
         return false;
+    }
+
+    /// <summary>
+    /// Validate that the passed value is a valid StoryElement.ToString,
+    /// and if so, compare the StoryElement.Name to the Search argument
+    /// </summary>
+    /// <param name="value">a StoryElement guid as a string (possibly)</param>
+    /// <returns>true if the Search argument matches the StoryElement.Name, false othewise</returns>
+    private bool CompareStoryElement(string value)
+    {
+        if (value == null)
+            return false;
+        if (value.Equals(string.Empty))
+            return false;
+        // Get the current StoryModel's StoryElementsCollection
+        ShellViewModel shell = Ioc.Default.GetService<ShellViewModel>();
+        StoryElementCollection elements = shell.StoryModel.StoryElements;
+        // legacy: locate the StoryElement from its Name
+        // Look for the StoryElement corresponding to the passed guid
+        if (Guid.TryParse(value, out Guid guid))
+        {
+            StoryElement element = elements.StoryElementGuids[guid];
+            return Comparator(element.Name);
+        }
+        else
+            return false;
     }
 }
