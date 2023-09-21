@@ -29,11 +29,11 @@
                     <TextBox PlaceholderText="What's your email address?" IsSpellCheckEnabled="False"  Margin="15" VerticalAlignment="Center"  Text="{x:Bind _initVM.Preferences.Email, Mode=TwoWay}"/>
                     <StackPanel Orientation="Horizontal">
                         <TextBox IsReadOnly="True" PlaceholderText="Select a folder to hold your story outlines." Name="ProjPath" Margin="15" VerticalAlignment="Center" Width="435" HorizontalAlignment="Left" 
-                                 Text="{x:Bind _initVM.Preferences.ProjectDirectory, Mode=TwoWay}"/>
+                                 Text="{x:Bind _initVM.ProjectDir, Mode=TwoWay}"/>
                         <Button Content="Browse" HorizontalAlignment="Center" Click="SetProjectPath"/>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal">
-                        <TextBox IsReadOnly="true" PlaceholderText="Select a folder to hold your outline backups." Name="BackPath" Margin="15" VerticalAlignment="Center" Width="435" HorizontalAlignment="Left" Text="{x:Bind _initVM.Preferences.BackupDirectory, Mode=TwoWay}"/>
+                        <TextBox IsReadOnly="true" PlaceholderText="Select a folder to hold your outline backups." Name="BackPath" Margin="15" VerticalAlignment="Center" Width="435" HorizontalAlignment="Left" Text="{x:Bind _initVM.BackupDir, Mode=TwoWay}"/>
                         <Button Content="Browse" HorizontalAlignment="Center" Click="SetBackupPath"/>
                     </StackPanel>
                 </StackPanel>
