@@ -6,6 +6,7 @@ using StoryCAD.Models;
 using StoryCAD.Models.Tools;
 using StoryCAD.Services.Backend;
 using System;
+using System.ComponentModel;
 
 namespace StoryCAD.ViewModels.Tools;
 
@@ -25,9 +26,13 @@ public class InitVM : ObservableRecipient
     /// </summary>
     public InitVM()
     {
-        Preferences.ProjectDirectory = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "StoryCAD", "Projects");
-        Preferences.BackupDirectory = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "StoryCAD", "Backups");
+        ProjectDir = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "StoryCAD", "Projects");
+        BackupDir = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "StoryCAD", "Backups");
+
+        PropertyChanged += OnPropertyChanged;
     }
+
+    private void OnPropertyChanged(object sender, PropertyChangedEventArgs e) {}
 
     public PreferencesModel Preferences = new();
 
@@ -36,6 +41,20 @@ public class InitVM : ObservableRecipient
     {
         get => _errorMessage;
         set => SetProperty(ref _errorMessage, value);
+    }
+
+    private string _ProjectDir;
+    public string ProjectDir
+    {
+        get => _ProjectDir;
+        set => SetProperty(ref _ProjectDir, value);
+    }
+
+    private string _backupDir;
+    public string BackupDir
+    {
+        get => _backupDir;
+        set => SetProperty(ref _backupDir, value);
     }
 
     /// <summary>
@@ -48,11 +67,16 @@ public class InitVM : ObservableRecipient
     /// </summary>
     public async void Save()
     {
-        //Create paths
-        System.IO.Directory.CreateDirectory(Preferences.BackupDirectory);
-        System.IO.Directory.CreateDirectory(Preferences.ProjectDirectory);
+        //Create paths 
+        System.IO.Directory.CreateDirectory(ProjectDir);
+        System.IO.Directory.CreateDirectory(BackupDir);
 
-        Preferences.PreferencesInitialized = true; //Make sure prefs init page isn't shown again
+        //Save paths
+        Preferences.ProjectDirectory = ProjectDir;
+        Preferences.BackupDirectory = BackupDir;
+
+        //Make sure prefs init page isn't shown again
+        Preferences.PreferencesInitialized = true; 
 
         //Updates the file, then rereads into memory.
         PreferencesIo _prfIo = new(Preferences, System.IO.Path.Combine(ApplicationData.Current.RoamingFolder.Path,"StoryCAD"));

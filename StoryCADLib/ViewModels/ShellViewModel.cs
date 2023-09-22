@@ -332,7 +332,6 @@ public class ShellViewModel : ObservableRecipient
     /// </summary>
     public static void ShowChange()
     {
-
         if (ShellInstance.StoryModel.Changed) { return; }
         ShellInstance.StoryModel.Changed = true;
         ShellInstance.ChangeStatusColor = Colors.Red;

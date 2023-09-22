@@ -42,7 +42,7 @@ public sealed partial class PreferencesInitialization
         StorageFolder folder = await folderPicker.PickSingleFolderAsync();
         if (folder != null)
         {
-            _initVM.Preferences.ProjectDirectory = folder.Path;
+            _initVM.ProjectDir = folder.Path;
         }
     }
 
@@ -71,7 +71,7 @@ public sealed partial class PreferencesInitialization
         StorageFolder folder = await folderPicker.PickSingleFolderAsync();
         if (folder != null)
         {
-            _initVM.Preferences.BackupDirectory = folder.Path;
+            _initVM.BackupDir = folder.Path;
         }
     }
 
@@ -113,12 +113,12 @@ public sealed partial class PreferencesInitialization
             _initVM.ErrorMessage = "Please enter a valid email address.";
             return;
         }
-        if (string.IsNullOrWhiteSpace(_initVM.Preferences.ProjectDirectory))
+        if (string.IsNullOrWhiteSpace(_initVM.ProjectDir))
         {
             _initVM.ErrorMessage = "Please set a Project path";
             return;
         }
-        if (string.IsNullOrWhiteSpace(_initVM.Preferences.BackupDirectory))
+        if (string.IsNullOrWhiteSpace(_initVM.BackupDir))
         {
             _initVM.ErrorMessage = "Please set a Backup path";
             return;
