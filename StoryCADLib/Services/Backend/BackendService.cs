@@ -151,7 +151,7 @@ namespace StoryCAD.Services.Backend
             MySqlIo sql = Ioc.Default.GetService<MySqlIo>();
 
             // Get a connection to the database
-            MySqlConnection conn = new MySqlConnection(connection);
+            MySqlConnection conn = new(connection);
 
             try
             {
@@ -175,7 +175,7 @@ namespace StoryCAD.Services.Backend
             // May want to use multiple catch clauses
             catch (Exception ex)
             {
-                log.LogException(LogLevel.Warn, ex, ex.Message);
+                log.LogException(LogLevel.Error, ex, ex.Message);
             }
             finally
             {
@@ -201,7 +201,7 @@ namespace StoryCAD.Services.Backend
             }
             catch (Exception ex)
             {
-                log.LogException(LogLevel.Warn, ex, ex.Message);
+                log.LogException(LogLevel.Error, ex, ex.Message);
             }
         }
 
@@ -217,7 +217,7 @@ namespace StoryCAD.Services.Backend
             }
             catch (Exception ex)
             {
-                log.LogException(LogLevel.Warn, ex, ex.Message);
+                log.LogException(LogLevel.Error, ex, ex.Message);
             }
         }
     }
