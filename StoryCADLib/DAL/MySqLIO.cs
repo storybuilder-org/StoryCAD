@@ -1,6 +1,7 @@
 ﻿using System.Data;
 using System.Threading.Tasks;
 using MySql.Data.MySqlClient;
+using StoryCAD.Models;
 
 namespace StoryCAD.DAL;
 
@@ -20,7 +21,7 @@ public class MySqlIo
     }
     public async Task AddOrUpdatePreferences(MySqlConnection conn, int id, bool elmah, bool newsletter, string version)
     {
-        const string sql = "INSERT INTO StoryCAD.preferences" +
+        const string sql = "INSERT INTO StoryBuilder.preferences" +
                             " (user_id, elmah_consent, newsletter_consent, version)" +
                             " VALUES (@user_id,@elmah,@newsletter, @version)" +
                             " ON DUPLICATE KEY UPDATE elmah_consent = @elmah, newsletter_consent = @newsletter, version = @version";
@@ -34,7 +35,7 @@ public class MySqlIo
 
     public async Task AddVersion(MySqlConnection conn, int id, string currentVersion, string previousVersion)
     {
-        const string sql = "INSERT INTO StoryCAD.versions" +
+        const string sql = "INSERT INTO StoryBuilder.versions" +
                             " (user_id, current_version, previous_version)" +
                             " VALUES (@user_id,@current,@previous)";
         await using (MySqlCommand _cmd = new(sql, conn))
