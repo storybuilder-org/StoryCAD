@@ -425,6 +425,7 @@ public class SceneViewModel : ObservableRecipient, INavigable
 
     private void InitializeCharacterList()
     {
+        CastSource = null;    // Insure CastList setter invokes OnPropertyChanged   
         if (AllCharacters)    //Display all characters from the StoryModel's character list
         {
             CastSource = CharacterList;
