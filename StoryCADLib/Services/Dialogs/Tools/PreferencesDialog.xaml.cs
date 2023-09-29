@@ -34,7 +34,10 @@ public sealed partial class PreferencesDialog
     private async void ShowInfo()
     {
         DevInfo.Text = GlobalData.SystemInfo;
-        Version.Text = PreferencesVm.Version;
+
+        if (GlobalData.DeveloperBuild) { Version.Text = PreferencesVm.Version; }
+        else { Version.Text = GlobalData.Version; }
+
         Changelog.Text = await new Changelog().GetChangelogText();
 
         if (PreferencesVm.WrapNodeNames == TextWrapping.WrapWholeWords) { TextWrap.IsChecked = true; }
