@@ -245,13 +245,10 @@ public class WebViewModel : ObservableRecipient, INavigable
     {
         try
         {
-            if (_changed)
-            {
-                Model.Name = Name;
-                IsTextBoxFocused = false;
-                Model.URL = Url;
-                Model.Timestamp = Timestamp;
-            }
+            Model.Name = Name;
+            IsTextBoxFocused = false;
+            Model.URL = Url;
+            Model.Timestamp = Timestamp;
         }
         catch (Exception ex)
         {

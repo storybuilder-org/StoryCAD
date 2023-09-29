@@ -446,49 +446,47 @@ public class SceneViewModel : ObservableRecipient, INavigable
     internal void SaveModel()
     {
         _changeable = false;
-        if (_changed)
-        {
-            // Story.Uuid is read-only and cannot be assigned
-            Model.Name = Name;
-            IsTextBoxFocused = false;
-            Model.Description = Description;
-            Model.ViewpointCharacter = ViewpointCharacter;
-            Model.Date = Date;
-            Model.Time = Time;
-            Model.Setting = Setting;
-            Model.SceneType = SceneType;
-            Model.CastMembers.Clear();
-            foreach (StoryElement _element in CastList)
-                Model.CastMembers.Add(_element.ToString());
-            Model.ScenePurpose.Clear();
-            foreach (StringSelection _purpose in ScenePurposes)
-                if (_purpose.Selection)
-                    Model.ScenePurpose.Add(_purpose.StringName);
-            Model.ValueExchange = ValueExchange;
-            Model.Protagonist = Protagonist;
-            Model.ProtagEmotion = ProtagEmotion;
-            Model.ProtagGoal = ProtagGoal;
-            Model.Antagonist = Antagonist;
-            Model.AntagEmotion = AntagEmotion;
-            Model.AntagGoal = AntagGoal;
-            Model.Opposition = Opposition;
-            Model.Outcome = Outcome;
-            Model.Emotion = Emotion;
-            Model.NewGoal = NewGoal;
 
-            // Write RTF files
-            Model.Remarks = Remarks;
-            Model.Events = Events;
-            Model.Consequences = Consequences;
-            Model.Significance = Significance;
-            Model.Realization = Realization;
-            Model.Review = Review;
-            Model.Notes = Notes;
+        // Story.Uuid is read-only and cannot be assigned
+        Model.Name = Name;
+        IsTextBoxFocused = false;
+        Model.Description = Description;
+        Model.ViewpointCharacter = ViewpointCharacter;
+        Model.Date = Date;
+        Model.Time = Time;
+        Model.Setting = Setting;
+        Model.SceneType = SceneType;
+        Model.CastMembers.Clear();
+        foreach (StoryElement _element in CastList)
+            Model.CastMembers.Add(_element.ToString());
+        Model.ScenePurpose.Clear();
+        foreach (StringSelection _purpose in ScenePurposes)
+            if (_purpose.Selection)
+                Model.ScenePurpose.Add(_purpose.StringName);
+        Model.ValueExchange = ValueExchange;
+        Model.Protagonist = Protagonist;
+        Model.ProtagEmotion = ProtagEmotion;
+        Model.ProtagGoal = ProtagGoal;
+        Model.Antagonist = Antagonist;
+        Model.AntagEmotion = AntagEmotion;
+        Model.AntagGoal = AntagGoal;
+        Model.Opposition = Opposition;
+        Model.Outcome = Outcome;
+        Model.Emotion = Emotion;
+        Model.NewGoal = NewGoal;
 
-            //_logger.Log(LogLevel.Info, string.Format("Requesting IsDirty change to true"));
-            //Messenger.Send(new IsChangedMessage(Changed));
-            _changeable = true;
-        }
+        // Write RTF files
+        Model.Remarks = Remarks;
+        Model.Events = Events;
+        Model.Consequences = Consequences;
+        Model.Significance = Significance;
+        Model.Realization = Realization;
+        Model.Review = Review;
+        Model.Notes = Notes;
+
+        //_logger.Log(LogLevel.Info, string.Format("Requesting IsDirty change to true"));
+        //Messenger.Send(new IsChangedMessage(Changed));
+        _changeable = true;
     }
 
     public void AddScenePurpose(StringSelection selectedPurpose)

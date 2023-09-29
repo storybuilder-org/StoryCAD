@@ -292,35 +292,32 @@ public class OverviewViewModel : ObservableRecipient, INavigable
     {
         try
         {
-            if (_changed)
+            // Story.Uuid is read-only and cannot be assigned
+            Model.Name = Name;
+            IsTextBoxFocused = false;
+            Model.DateCreated = DateCreated;
+            Model.Author = Author;
+            Model.DateModified = DateModified;
+            Model.StoryType = StoryType;
+            Model.StoryGenre = StoryGenre;
+            Model.Viewpoint = Viewpoint;
+            Model.ViewpointCharacter = ViewpointCharacter;
+            Model.Voice = Voice;
+            Model.LiteraryDevice = LiteraryTechnique;
+            Model.Style = Style;
+            Model.Tense = Tense;
+            Model.Style = Style;
+            Model.Tone = Tone;
+            Model.StoryProblem = StoryProblem;
+            Model.StoryIdea = StoryIdea;
+            Model.Concept = Concept;
+            Model.Premise = Premise;
+            if (_syncPremise)
             {
-                // Story.Uuid is read-only and cannot be assigned
-                Model.Name = Name;
-                IsTextBoxFocused = false;
-                Model.DateCreated = DateCreated;
-                Model.Author = Author;
-                Model.DateModified = DateModified;
-                Model.StoryType = StoryType;
-                Model.StoryGenre = StoryGenre;
-                Model.Viewpoint = Viewpoint;
-                Model.ViewpointCharacter = ViewpointCharacter;
-                Model.Voice = Voice;
-                Model.LiteraryDevice = LiteraryTechnique;
-                Model.Style = Style;
-                Model.Tense = Tense;
-                Model.Style = Style;
-                Model.Tone = Tone;
-                Model.StoryProblem = StoryProblem;
-                Model.StoryIdea = StoryIdea;
-                Model.Concept = Concept;
-                Model.Premise = Premise;
-                if (_syncPremise)
-                {
-                    _storyProblemModel.Premise = Premise;
-                }
-                Model.StructureNotes = StructureNotes;
-                Model.Notes = Notes;
+                _storyProblemModel.Premise = Premise;
             }
+            Model.StructureNotes = StructureNotes;
+            Model.Notes = Notes;
         }
         catch (Exception ex)
         {
