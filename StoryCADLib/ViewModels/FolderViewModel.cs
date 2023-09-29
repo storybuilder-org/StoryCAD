@@ -123,15 +123,12 @@ public class FolderViewModel : ObservableRecipient, INavigable
 
     internal void SaveModel()
     {
-        if (_changed)
-        {
-            // Story.Uuid is read-only; no need to save
-            Model.Name = Name;
-            IsTextBoxFocused = false;   
+        // Story.Uuid is read-only; no need to save
+        Model.Name = Name;
+        IsTextBoxFocused = false;
 
-            // Write RYG file
-            Model.Notes = Notes;
-        }
+        // Write RYG file
+        Model.Notes = Notes;
     }
 
     #endregion

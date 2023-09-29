@@ -220,27 +220,24 @@ public class SettingViewModel : ObservableRecipient, INavigable
     {
         try
         {
-            if (_changed)
-            {
-                // Story.Uuid is read-only and cannot be assigned
-                Model.Name = Name;
-                IsTextBoxFocused = false;
-                Model.Locale = Locale;
-                Model.Season = Season;
-                Model.Period = Period;
-                Model.Lighting = Lighting;
-                Model.Weather = Weather;
-                Model.Temperature = Temperature;
-                Model.Props = Props;
+            // Story.Uuid is read-only and cannot be assigned
+            Model.Name = Name;
+            IsTextBoxFocused = false;
+            Model.Locale = Locale;
+            Model.Season = Season;
+            Model.Period = Period;
+            Model.Lighting = Lighting;
+            Model.Weather = Weather;
+            Model.Temperature = Temperature;
+            Model.Props = Props;
 
-                //Write RTF files
-                Model.Summary = Summary;
-                Model.Sights = Sights;
-                Model.Sounds = Sounds;
-                Model.Touch = Touch;
-                Model.SmellTaste = SmellTaste;
-                Model.Notes = Notes;
-            }
+            //Write RTF files
+            Model.Summary = Summary;
+            Model.Sights = Sights;
+            Model.Sounds = Sounds;
+            Model.Touch = Touch;
+            Model.SmellTaste = SmellTaste;
+            Model.Notes = Notes;
         }
         catch (Exception ex)
         {

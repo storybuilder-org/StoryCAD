@@ -296,31 +296,28 @@ public class ProblemViewModel : ObservableRecipient, INavigable
     {
         try
         {
-            if (_changed)
-            {
-                IsTextBoxFocused = false;
-                Model.Name = Name;
-                Model.ProblemType = ProblemType;
-                Model.ConflictType = ConflictType;
-                Model.ProblemCategory = ProblemCategory;
-                Model.Subject = Subject;
-                Model.ProblemSource = ProblemSource;
-                Model.Protagonist = Protagonist ?? string.Empty;
-                Model.ProtGoal = ProtGoal;
-                Model.ProtMotive = ProtMotive;
-                Model.ProtConflict = ProtConflict;
-                Model.Antagonist = Antagonist ?? string.Empty;
-                Model.AntagGoal = AntagGoal;
-                Model.AntagMotive = AntagMotive;
-                Model.AntagConflict = AntagConflict;
-                Model.Outcome = Outcome;
-                Model.Method = Method;
-                Model.Theme = Theme;
-                Model.StoryQuestion = StoryQuestion;
-                Model.Premise = Premise;
-                if (_syncPremise) { _overviewModel.Premise = Premise; }
-                Model.Notes = Notes;
-            }
+            IsTextBoxFocused = false;
+            Model.Name = Name;
+            Model.ProblemType = ProblemType;
+            Model.ConflictType = ConflictType;
+            Model.ProblemCategory = ProblemCategory;
+            Model.Subject = Subject;
+            Model.ProblemSource = ProblemSource;
+            Model.Protagonist = Protagonist ?? string.Empty;
+            Model.ProtGoal = ProtGoal;
+            Model.ProtMotive = ProtMotive;
+            Model.ProtConflict = ProtConflict;
+            Model.Antagonist = Antagonist ?? string.Empty;
+            Model.AntagGoal = AntagGoal;
+            Model.AntagMotive = AntagMotive;
+            Model.AntagConflict = AntagConflict;
+            Model.Outcome = Outcome;
+            Model.Method = Method;
+            Model.Theme = Theme;
+            Model.StoryQuestion = StoryQuestion;
+            Model.Premise = Premise;
+            if (_syncPremise) { _overviewModel.Premise = Premise; }
+            Model.Notes = Notes;
         }
         catch (Exception ex)
         {

@@ -611,68 +611,65 @@ public class CharacterViewModel : ObservableRecipient, INavigable
 
     internal void SaveModel()
     {
-        if (_changed)
-        {
-            // Story.Uuid is read-only and cannot be set
-            Model.Name = Name;
-            IsTextBoxFocused = false;
-            Model.Role = Role;
-            Model.StoryRole = StoryRole;
-            Model.Archetype = Archetype;
-            Model.Age = Age;
-            Model.Sex = Sex;
-            Model.Eyes = Eyes;
-            Model.Hair = Hair;
-            Model.Weight = Weight;
-            Model.CharHeight = CharHeight;
-            Model.Build = Build;
-            Model.Complexion = Complexion;
-            Model.Race = Race;
-            Model.Nationality = Nationality;
-            Model.Health = Health;
-            Model.Enneagram = Enneagram;
-            Model.Intelligence = Intelligence;
-            Model.Values = Values;
-            Model.Abnormality = Abnormality;
-            Model.Focus = Focus;
-            Model.Adventureousness = Adventurousness;
-            Model.Aggression = Aggression;
-            Model.Confidence = Confidence;
-            Model.Conscientiousness = Conscientiousness;
-            Model.Creativity = Creativity;
-            Model.Dominance = Dominance;
-            Model.Enthusiasm = Enthusiasm;
-            Model.Assurance = Assurance;
-            Model.Sensitivity = Sensitivity;
-            Model.Shrewdness = Shrewdness;
-            Model.Sociability = Sociability;
-            Model.Stability = Stability;
-            Model.TraitList.Clear();
-                
-            foreach (string _element in CharacterTraits) { Model.TraitList.Add(_element); }
-                
-            SaveRelationship(CurrentRelationship);  // Save any current changes
-            CurrentRelationship = null;
-            // Move relationships back to the character model
-            Model.RelationshipList.Clear();
-            foreach (RelationshipModel _relation in CharacterRelationships)
-                Model.RelationshipList.Add(_relation);
-            Model.Flaw = Flaw;
-            Model.BackStory = BackStory;
+        // Story.Uuid is read-only and cannot be set
+        Model.Name = Name;
+        IsTextBoxFocused = false;
+        Model.Role = Role;
+        Model.StoryRole = StoryRole;
+        Model.Archetype = Archetype;
+        Model.Age = Age;
+        Model.Sex = Sex;
+        Model.Eyes = Eyes;
+        Model.Hair = Hair;
+        Model.Weight = Weight;
+        Model.CharHeight = CharHeight;
+        Model.Build = Build;
+        Model.Complexion = Complexion;
+        Model.Race = Race;
+        Model.Nationality = Nationality;
+        Model.Health = Health;
+        Model.Enneagram = Enneagram;
+        Model.Intelligence = Intelligence;
+        Model.Values = Values;
+        Model.Abnormality = Abnormality;
+        Model.Focus = Focus;
+        Model.Adventureousness = Adventurousness;
+        Model.Aggression = Aggression;
+        Model.Confidence = Confidence;
+        Model.Conscientiousness = Conscientiousness;
+        Model.Creativity = Creativity;
+        Model.Dominance = Dominance;
+        Model.Enthusiasm = Enthusiasm;
+        Model.Assurance = Assurance;
+        Model.Sensitivity = Sensitivity;
+        Model.Shrewdness = Shrewdness;
+        Model.Sociability = Sociability;
+        Model.Stability = Stability;
+        Model.TraitList.Clear();
 
-            // Write and clear RTF files
-            Model.CharacterSketch = CharacterSketch;
-            Model.PhysNotes = PhysNotes;
-            Model.Appearance = Appearance;
-            Model.Economic = Economic;
-            Model.Education = Education;
-            Model.Ethnic = Ethnic;
-            Model.Religion = Religion;
-            Model.PsychNotes = PsychNotes;
-            Model.Notes = Notes;
-            Model.Flaw = Flaw;
-            Model.BackStory = BackStory;
-        }
+        foreach (string _element in CharacterTraits) { Model.TraitList.Add(_element); }
+
+        SaveRelationship(CurrentRelationship);  // Save any current changes
+        CurrentRelationship = null;
+        // Move relationships back to the character model
+        Model.RelationshipList.Clear();
+        foreach (RelationshipModel _relation in CharacterRelationships)
+            Model.RelationshipList.Add(_relation);
+        Model.Flaw = Flaw;
+        Model.BackStory = BackStory;
+
+        // Write and clear RTF files
+        Model.CharacterSketch = CharacterSketch;
+        Model.PhysNotes = PhysNotes;
+        Model.Appearance = Appearance;
+        Model.Economic = Economic;
+        Model.Education = Education;
+        Model.Ethnic = Ethnic;
+        Model.Religion = Religion;
+        Model.PsychNotes = PsychNotes;
+        Model.Notes = Notes;
+        Model.Flaw = Flaw;
+        Model.BackStory = BackStory;
     }
 
     private void AddTrait()
