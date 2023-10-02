@@ -20,7 +20,7 @@ namespace StoryCADTests
         [TestMethod]
         public void TestListLoaderLists()
         {
-            Assert.AreEqual(65,lists.Count);
+            Assert.AreEqual(66,lists.Count);
             // OverViewModel lists
             Assert.IsTrue(lists.ContainsKey("StoryType"));
             Assert.IsTrue(lists.ContainsKey("Voice"));
