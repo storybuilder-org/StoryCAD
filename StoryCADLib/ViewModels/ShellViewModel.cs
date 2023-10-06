@@ -115,6 +115,8 @@ public class ShellViewModel : ObservableRecipient
     public RelayCommand ScrivenerReportsCommand { get; }
     public RelayCommand PreferencesCommand { get; }
 
+    // Loaded Flags
+    public bool ShowDotEnvWarning = false;
 
     #endregion
 

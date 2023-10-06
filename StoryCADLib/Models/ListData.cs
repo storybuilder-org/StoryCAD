@@ -1,5 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.DependencyInjection;
+using Microsoft.UI.Xaml;
+using StoryCAD.DAL;
+using StoryCAD.Services.Logging;
 
 namespace StoryCAD.Models
 {
@@ -9,8 +15,33 @@ namespace StoryCAD.Models
     /// </summary>
     public class ListData
     {
+        LogService _log = Ioc.Default.GetService<LogService>();
+
         /// The ComboBox and ListBox source bindings in viewmodels point to lists in this Dictionary. 
         /// Each list has a unique key related to the ComboBox or ListBox use.
         public Dictionary<string, ObservableCollection<string>> ListControlSource;
+        /*(
+         * wierd crash
+        public ListData(string path) 
+        {
+            try
+            {
+                _log.Log(LogLevel.Info, "Loading Lists.ini data");
+                ListLoader loader = Ioc.Default.GetService<ListLoader>();
+                Task.Run(async () =>
+                {
+                    ListControlSource = await loader.Init(path);
+                }).Wait();
+
+
+                _log.Log(LogLevel.Info, $"{ListControlSource.Keys.Count} ListLoader.Init keys created");
+            }
+            catch (Exception ex)
+            {
+                _log.LogException(LogLevel.Error, ex, "Error loading Lists.ini");
+                Application.Current.Exit();
+            }
+        }*/
+
     }
 }

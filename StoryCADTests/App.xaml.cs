@@ -17,6 +17,7 @@ using Syncfusion.Licensing;
 using Path = System.IO.Path;
 using UnhandledExceptionEventArgs = Microsoft.UI.Xaml.UnhandledExceptionEventArgs;
 using StoryCAD.Services.IoC;
+using StoryCAD.ViewModels;
 
 namespace StoryCADTests
 {
@@ -46,7 +47,7 @@ namespace StoryCADTests
                 string token = EnvReader.GetStringValue("SYNCFUSION_TOKEN");
                 SyncfusionLicenseProvider.RegisterLicense(token);
             }
-            catch { GlobalData.ShowDotEnvWarning = true; }
+            catch { Ioc.Default.GetRequiredService<ShellViewModel>().ShowDotEnvWarning = true; }
 
             this.InitializeComponent();
 
@@ -112,10 +113,11 @@ namespace StoryCADTests
             {
                 _log.Log(LogLevel.Info, "Loading Controls.ini data");
                 ControlLoader loader = Ioc.Default.GetService<ControlLoader>();
+                ControlData controldata = Ioc.Default.GetService<ControlData>();
                 await loader.Init(path);
                 _log.Log(LogLevel.Info, "ConflictType Counts");
                 _log.Log(LogLevel.Info,
-                    $"{GlobalData.ConflictTypes.Keys.Count} ConflictType keys created");
+                    $"{controldata.ConflictTypes.Keys.Count} ConflictType keys created");
                 foreach (ConflictCategoryModel type in GlobalData.ConflictTypes.Values)
                 {
                     subTypeCount += type.SubCategories.Count;
@@ -136,11 +138,11 @@ namespace StoryCADTests
         {
             try
             {
-                ListData LD = Ioc.Default.GetService<ListData>();
+                ListData listdata = Ioc.Default.GetService<ListData>();
                 _log.Log(LogLevel.Info, "Loading Lists.ini data");
                 ListLoader loader = Ioc.Default.GetService<ListLoader>();
-                LD.ListControlSource = await loader.Init(path);
-                _log.Log(LogLevel.Info, $"{LD.ListControlSource.Keys.Count} ListLoader.Init keys created");
+                listdata.ListControlSource = await loader.Init(path);
+                _log.Log(LogLevel.Info, $"{listdata.ListControlSource.Keys.Count} ListLoader.Init keys created");
             }
             catch (Exception ex)
             {
@@ -153,15 +155,15 @@ namespace StoryCADTests
         {
             try
             {
-                ToolsData TD = Ioc.Default.GetService<ToolsData>();
+                ToolsData toolsdata = Ioc.Default.GetService<ToolsData>();
                 _log.Log(LogLevel.Info, "Loading Tools.ini data");
                 ToolLoader loader = Ioc.Default.GetService<ToolLoader>();
                 await loader.Init(path);
-                _log.Log(LogLevel.Info, $"{TD.KeyQuestionsSource.Keys.Count} Key Questions created");
-                _log.Log(LogLevel.Info, $"{TD.StockScenesSource.Keys.Count} Stock Scenes created");
-                _log.Log(LogLevel.Info, $"{TD.TopicsSource.Count} Topics created");
-                _log.Log(LogLevel.Info, $"{TD.MasterPlotsSource.Count} Master Plots created");
-                _log.Log(LogLevel.Info, $"{TD.DramaticSituationsSource.Count} Dramatic Situations created");
+                _log.Log(LogLevel.Info, $"{toolsdata.KeyQuestionsSource.Keys.Count} Key Questions created");
+                _log.Log(LogLevel.Info, $"{toolsdata.StockScenesSource.Keys.Count} Stock Scenes created");
+                _log.Log(LogLevel.Info, $"{toolsdata.TopicsSource.Count} Topics created");
+                _log.Log(LogLevel.Info, $"{toolsdata.MasterPlotsSource.Count} Master Plots created");
+                _log.Log(LogLevel.Info, $"{toolsdata.DramaticSituationsSource.Count} Dramatic Situations created");
 
             }
             catch (Exception ex)

@@ -18,12 +18,12 @@ namespace StoryCADTests
         [TestMethod]
         public void TestToolCounts()
         {
-            ToolsData TD = Ioc.Default.GetService<ToolsData>();
-            Assert.AreEqual(5, TD.KeyQuestionsSource.Keys.Count);
-            Assert.AreEqual(11, TD.StockScenesSource.Keys.Count);
-            Assert.AreEqual(9, TD.TopicsSource.Count);
-            Assert.AreEqual(22, TD.MasterPlotsSource.Count);
-            Assert.AreEqual(36, TD.DramaticSituationsSource.Count);
+            ToolsData toolsdata = Ioc.Default.GetService<ToolsData>();
+            Assert.AreEqual(5, toolsdata.KeyQuestionsSource.Keys.Count);
+            Assert.AreEqual(11, toolsdata.StockScenesSource.Keys.Count);
+            Assert.AreEqual(9, toolsdata.TopicsSource.Count);
+            Assert.AreEqual(22, toolsdata.MasterPlotsSource.Count);
+            Assert.AreEqual(36, toolsdata.DramaticSituationsSource.Count);
             //TODO: Test some details (subcounts)
         }
     }

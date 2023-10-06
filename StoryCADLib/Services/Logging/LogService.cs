@@ -3,10 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection.Metadata;
 using System.Runtime.InteropServices;
-using System.Threading.Tasks;
-using Windows.ApplicationModel;
 using Windows.Devices.Input;
 using CommunityToolkit.WinUI.Helpers;
 using Elmah.Io.Client;
@@ -30,6 +27,7 @@ public class LogService : ILogService
     private static Exception exceptionHelper;
     private string apiKey = string.Empty;
     private string logID = string.Empty;
+    public string SystemInfo = string.Empty;
     static LogService()
     {
         try
@@ -129,7 +127,7 @@ public class LogService : ILogService
                 
                     try
                     {
-                        msg.Data.Add(new(key: "SystemInfo",GlobalData.SystemInfo));
+                        msg.Data.Add(new(key: "SystemInfo", SystemInfo));
                     }
                     catch (Exception ex)
                     {
@@ -230,7 +228,7 @@ public class LogService : ILogService
 
     public void LogException(LogLevel level, Exception exception, string message)
     {
-        switch (level)
+       switch (level)
         {
             case LogLevel.Error:
                 exceptionHelper = exception;
@@ -275,7 +273,7 @@ public class LogService : ILogService
             else { AppArch = "Unknown"; }
 
 
-            GlobalData.SystemInfo = $"""
+            SystemInfo = $"""
                 === System Info ===
                 CPU ARCH - {RuntimeInformation.ProcessArchitecture}  
                 OS  ARCH - {RuntimeInformation.OSArchitecture}  
@@ -289,7 +287,6 @@ public class LogService : ILogService
                 Touchscreen - {PointerDevice.GetPointerDevices().Any(p => p.PointerDeviceType == PointerDeviceType.Touch)}
                 ProcessID - {Environment.ProcessId}
                 Core Count - {Environment.ProcessorCount}
-                StoryCAD Version - {GlobalData.Version}
 
                 === User Prefs ===
                 Name - {GlobalData.Preferences.Name}
@@ -306,14 +303,18 @@ public class LogService : ILogService
                 Backup on open - {GlobalData.Preferences.BackupOnOpen} 
                 Project Dir - {GlobalData.Preferences.ProjectDirectory}
                 Backup Dir - {GlobalData.Preferences.BackupDirectory} 
-                RecordPreferencesStatus - {GlobalData.Preferences.RecordPreferencesStatus}                
+                RecordPreferencesStatus - {GlobalData.Preferences.RecordPreferencesStatus}
+                
+                ===CAD Info===
+                StoryCAD Version - {GlobalData.Version}
                 """;
+            //dotEnv present - {!GlobalData.ShowDotEnvWarning}
 
-            Log(LogLevel.Info, GlobalData.SystemInfo);
+            Log(LogLevel.Info, SystemInfo);
         }
         catch (Exception e)
         {
-            GlobalData.SystemInfo = $"Error getting system info: {e.Message}";
+            SystemInfo = $"Error getting system info: {e.Message}";
             Logger.Warn(e, "Error getting system info");
         }
 

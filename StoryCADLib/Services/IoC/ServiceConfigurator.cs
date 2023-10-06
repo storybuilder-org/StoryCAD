@@ -37,6 +37,7 @@ public class ServiceConfigurator
              .AddSingleton<BackendService>()
              .AddSingleton<ListData>()
              .AddSingleton<ToolsData>()
+             .AddSingleton<ControlData>()
              // Register ViewModels 
              .AddSingleton<ShellViewModel>()
              .AddSingleton<OverviewViewModel>()

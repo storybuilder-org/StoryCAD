@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
-using System.Threading;
 using Windows.Storage;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
@@ -34,9 +32,7 @@ public static class GlobalData
     /// Some controls and all tools have their own specific data model. The following 
     /// data types hold data for user controls and tool forms.
     /// </summary>
-    /// User Controls
-    public static SortedDictionary<string, ConflictCategoryModel> ConflictTypes;
-    public static List<string> RelationTypes;
+
 
     // Connection status
     public static bool DopplerConnection;
@@ -59,9 +55,6 @@ public static class GlobalData
     // The Shell page's XamlRoot is stored here and accessed wherever needed. 
     public static XamlRoot XamlRoot;
 
-    // If DotEnv is fails, this will show a warning to the user.
-    public static bool ShowDotEnvWarning = false;
-
     // Set to true if the app has loaded with a version change. (Changelog)
     public static bool LoadedWithVersionChange = false;
 
@@ -78,6 +71,4 @@ public static class GlobalData
     //A debugger is attached
     //.ENV is missing.
     public static bool DeveloperBuild;
-
-    public static string SystemInfo;
 }

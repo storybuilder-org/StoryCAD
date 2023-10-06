@@ -33,7 +33,7 @@ public sealed partial class PreferencesDialog
     /// </summary>
     private async void ShowInfo()
     {
-        DevInfo.Text = GlobalData.SystemInfo;
+        DevInfo.Text = Logger.SystemInfo;
 
         if (GlobalData.DeveloperBuild) { Version.Text = PreferencesVm.Version; }
         else { Version.Text = GlobalData.Version; }
@@ -124,7 +124,7 @@ public sealed partial class PreferencesDialog
     public void RefreshDevStats(object sender, RoutedEventArgs e)
     {
         Logger.GetSystemInfo();
-        DevInfo.Text = GlobalData.SystemInfo;
+        DevInfo.Text = Logger.SystemInfo;
     } 
 
     /// <summary>

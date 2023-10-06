@@ -737,7 +737,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable
         //Sets up view model
         NewRelationshipViewModel _vm = new(Model);
         _vm.RelationTypes.Clear();
-        foreach (string _relationshipType in GlobalData.RelationTypes) { _vm.RelationTypes.Add(_relationshipType); }
+        foreach (string _relationshipType in Ioc.Default.GetRequiredService<ControlData>().RelationTypes) { _vm.RelationTypes.Add(_relationshipType); }
         _vm.ProspectivePartners.Clear(); //Prospective partners are chars who are not in a relationship with this char
         StoryModel _storyModel = ShellViewModel.GetModel();
         foreach (StoryElement _character in _storyModel.StoryElements.Characters)

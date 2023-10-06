@@ -97,11 +97,11 @@ public partial class App
             string token = EnvReader.GetStringValue("SYNCFUSION_TOKEN");
             SyncfusionLicenseProvider.RegisterLicense(token);
         }
-        catch { GlobalData.ShowDotEnvWarning = true; }
+        catch { Ioc.Default.GetRequiredService<ShellViewModel>().ShowDotEnvWarning = true; }
 
         //Developer build check
         if (Debugger.IsAttached ||
-            GlobalData.ShowDotEnvWarning ||
+            Ioc.Default.GetRequiredService<ShellViewModel>().ShowDotEnvWarning ||
             Package.Current.Id.Version.Revision != 0)
         {
             GlobalData.DeveloperBuild = true;
@@ -284,11 +284,12 @@ public partial class App
         {
             _log.Log(LogLevel.Info, "Loading Controls.ini data");
             ControlLoader loader = Ioc.Default.GetService<ControlLoader>();
+            ControlData controldata = Ioc.Default.GetService<ControlData>();
             await loader.Init(path);
             _log.Log(LogLevel.Info, "ConflictType Counts");
             _log.Log(LogLevel.Info,
-                $"{GlobalData.ConflictTypes.Keys.Count} ConflictType keys created");
-            foreach (ConflictCategoryModel type in GlobalData.ConflictTypes.Values)
+                $"{controldata.ConflictTypes.Keys.Count} ConflictType keys created");
+            foreach (ConflictCategoryModel type in controldata.ConflictTypes.Values)
             {
                 subTypeCount += type.SubCategories.Count;
                 exampleCount += type.SubCategories.Sum(subType => type.Examples[subType].Count);
@@ -308,12 +309,12 @@ public partial class App
     {
         try
         {
-            ListData LD = Ioc.Default.GetService<ListData>();
+            ListData listdata = Ioc.Default.GetService<ListData>();
             _log.Log(LogLevel.Info, "Loading Lists.ini data");
             ListLoader loader = Ioc.Default.GetService<ListLoader>();
-            LD.ListControlSource = await loader.Init(path);
+            listdata.ListControlSource = await loader.Init(path);
             _log.Log(LogLevel.Info,
-                $"{LD.ListControlSource.Keys.Count} ListLoader.Init keys created");
+                $"{listdata.ListControlSource.Keys.Count} ListLoader.Init keys created");
         }
         catch (Exception ex)
         {
@@ -328,13 +329,13 @@ public partial class App
         {
             _log.Log(LogLevel.Info, "Loading Tools.ini data");
             ToolLoader loader = Ioc.Default.GetService<ToolLoader>();
-            ToolsData TD = Ioc.Default.GetService<ToolsData>();
+            ToolsData toolsdata = Ioc.Default.GetService<ToolsData>();
             await loader.Init(path);
-            _log.Log(LogLevel.Info, $"{TD.KeyQuestionsSource.Keys.Count} Key Questions created");
-            _log.Log(LogLevel.Info, $"{TD.StockScenesSource.Keys.Count} Stock Scenes created");
-            _log.Log(LogLevel.Info, $"{TD.TopicsSource.Count} Topics created");
-            _log.Log(LogLevel.Info, $"{TD.MasterPlotsSource.Count} Master Plots created");
-            _log.Log(LogLevel.Info, $"{TD.DramaticSituationsSource.Count} Dramatic Situations created");
+            _log.Log(LogLevel.Info, $"{toolsdata.KeyQuestionsSource.Keys.Count} Key Questions created");
+            _log.Log(LogLevel.Info, $"{toolsdata.StockScenesSource.Keys.Count} Stock Scenes created");
+            _log.Log(LogLevel.Info, $"{toolsdata.TopicsSource.Count} Topics created");
+            _log.Log(LogLevel.Info, $"{toolsdata.MasterPlotsSource.Count} Master Plots created");
+            _log.Log(LogLevel.Info, $"{toolsdata.DramaticSituationsSource.Count} Dramatic Situations created");
 
         }
         catch (Exception ex)

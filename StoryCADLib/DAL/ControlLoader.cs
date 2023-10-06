@@ -5,11 +5,14 @@ using Windows.Storage;
 using Windows.Storage.Streams;
 using StoryCAD.Models;
 using StoryCAD.Models.Tools;
+using StoryCAD.ViewModels;
+using CommunityToolkit.Mvvm.DependencyInjection;
 
 namespace StoryCAD.DAL;
 
 public class ControlLoader
 {
+    ControlData controlData = Ioc.Default.GetService<ControlData>();
     private IList<string> _lines;
     public async Task Init(string path)
     {
@@ -24,8 +27,8 @@ public class ControlLoader
             Console.WriteLine(_ex.Message);
         }
         // Populate UserControl data source collections
-        GlobalData.ConflictTypes = LoadConflictTypes();
-        GlobalData.RelationTypes = LoadRelationTypes();
+        controlData.ConflictTypes = LoadConflictTypes();
+        controlData.RelationTypes = LoadRelationTypes();
         //story.KeyQuestionsSource = LoadKeyQuestions();
         //story.StockScenesSource = LoadStockScenes();
         //story.TopicsSource = LoadTopics();

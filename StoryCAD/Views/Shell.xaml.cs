@@ -62,7 +62,7 @@ public sealed partial class Shell
         ShellVm.ShowHomePage();
         ShellVm.ShowConnectionStatus();
         ShellVm.UpdateWindowTitle();
-        if (GlobalData.ShowDotEnvWarning) { await ShellVm.ShowDotEnvWarningAsync(); }
+        if (ShellVm.ShowDotEnvWarning) { await ShellVm.ShowDotEnvWarningAsync(); }
 
         if (!await Ioc.Default.GetRequiredService<WebViewModel>().CheckWebviewState())
         {
