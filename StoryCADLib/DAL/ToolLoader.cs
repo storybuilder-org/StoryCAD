@@ -14,6 +14,7 @@ namespace StoryCAD.DAL;
 public class ToolLoader
 {
     public readonly LogService Logger = Ioc.Default.GetRequiredService<LogService>();
+    private ToolsData Data = Ioc.Default.GetService<ToolsData>();
 
     private IList<string> _lines;
     private string _installFolder;
@@ -27,11 +28,11 @@ public class ToolLoader
             _lines = await FileIO.ReadLinesAsync(_iniFile);
 
             // Populate tool data source collections
-            GlobalData.KeyQuestionsSource = LoadKeyQuestions();
-            GlobalData.StockScenesSource = LoadStockScenes();
-            GlobalData.TopicsSource = LoadTopics();
-            GlobalData.MasterPlotsSource = LoadMasterPlots();
-            GlobalData.DramaticSituationsSource = LoadDramaticSituations();
+            Data.KeyQuestionsSource = LoadKeyQuestions();
+            Data.StockScenesSource = LoadStockScenes();
+            Data.TopicsSource = LoadTopics();
+            Data.MasterPlotsSource = LoadMasterPlots();
+            Data.DramaticSituationsSource = LoadDramaticSituations();
             Clear();
         }
         catch (Exception _ex) { Logger.LogException(LogLevel.Error, _ex, "Error Initializing tool loader"); }

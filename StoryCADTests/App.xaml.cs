@@ -1,48 +1,22 @@
 ﻿using System;
-using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Collections.Generic;
-using System.Runtime.InteropServices.WindowsRuntime;
 using CommunityToolkit.Mvvm.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Data;
-using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Navigation;
-using Microsoft.UI.Xaml.Shapes;
 using Microsoft.VisualStudio.TestTools.UnitTesting.AppContainer;
 using Windows.ApplicationModel;
-using Windows.ApplicationModel.Activation;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
 using StoryCAD.DAL;
 using StoryCAD.Models;
 using StoryCAD.Models.Tools;
-using StoryCAD.Services;
-using StoryCAD.Services.Backend;
 using StoryCAD.Services.Installation;
-using StoryCAD.Services.Json;
 using StoryCAD.Services.Logging;
-using StoryCAD.Services.Navigation;
 using StoryCAD.Services.Preferences;
-using StoryCAD.Services.Search;
-using StoryCAD.ViewModels;
-using StoryCAD.ViewModels.Tools;
 using dotenv.net.Utilities;
 using dotenv.net;
-using Microsoft.Extensions.Options;
-using StoryCAD.Services.Backup;
 using Syncfusion.Licensing;
 using Path = System.IO.Path;
 using UnhandledExceptionEventArgs = Microsoft.UI.Xaml.UnhandledExceptionEventArgs;
-
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
+using StoryCAD.Services.IoC;
 
 namespace StoryCADTests
 {
@@ -59,7 +33,8 @@ namespace StoryCADTests
         /// </summary>
         public App()
         {
-            ConfigureIoc();
+            //Loads Singletons/VMs
+            Ioc.Default.ConfigureServices(ServiceConfigurator.Configure());
 
             string path = Path.Combine(Package.Current.InstalledLocation.Path, ".env");
             DotEnvOptions options = new(false, new[] { path });
@@ -115,59 +90,6 @@ namespace StoryCADTests
             Microsoft.VisualStudio.TestPlatform.TestExecutor.UnitTestClient.Run(Environment.CommandLine);
         }
 
-        private static void ConfigureIoc()
-        {
-            Ioc.Default.ConfigureServices(
-                new ServiceCollection()
-                    // Register services
-                    .AddSingleton<PreferencesService>()
-                    .AddSingleton<NavigationService>()
-                    .AddSingleton<LogService>()
-                    .AddSingleton<SearchService>()
-                    .AddSingleton<InstallationService>()
-                    .AddSingleton<ControlLoader>()
-                    .AddSingleton<ListLoader>()
-                    .AddSingleton<ToolLoader>()
-                    .AddSingleton<ScrivenerIo>()
-                    .AddSingleton<StoryReader>()
-                    .AddSingleton<StoryWriter>()
-                    .AddSingleton<MySqlIo>()
-                    .AddSingleton<BackupService>()
-                    .AddSingleton<AutoSaveService>()
-                    .AddSingleton<DeletionService>()
-                    .AddSingleton<BackendService>()
-                    // Register ViewModels 
-                    .AddSingleton<ShellViewModel>()
-                    .AddSingleton<OverviewViewModel>()
-                    .AddSingleton<CharacterViewModel>()
-                    .AddSingleton<ProblemViewModel>()
-                    .AddSingleton<SettingViewModel>()
-                    .AddSingleton<SceneViewModel>()
-                    .AddSingleton<FolderViewModel>()
-                    .AddSingleton<WebViewModel>()
-                    .AddSingleton<TrashCanViewModel>()
-                    .AddSingleton<UnifiedVM>()
-                    .AddSingleton<InitVM>()
-                    .AddSingleton<TreeViewSelection>()
-                    // Register ContentDialog ViewModels
-                    .AddSingleton<NewProjectViewModel>()
-                    .AddSingleton<NewRelationshipViewModel>()
-                    .AddSingleton<PrintReportDialogVM>()
-                    .AddSingleton<NarrativeToolVM>()
-                    // Register Tools ViewModels  
-                    .AddSingleton<KeyQuestionsViewModel>()
-                    .AddSingleton<TopicsViewModel>()
-                    .AddSingleton<MasterPlotsViewModel>()
-                    .AddSingleton<StockScenesViewModel>()
-                    .AddSingleton<DramaticSituationsViewModel>()
-                    .AddSingleton<SaveAsViewModel>()
-                    .AddSingleton<PreferencesViewModel>()
-                    .AddSingleton<FlawViewModel>()
-                    .AddSingleton<TraitsViewModel>()
-                    // Complete 
-                    .BuildServiceProvider());
-        }
-
         private async Task ProcessInstallationFiles()
         {
             try
@@ -214,11 +136,11 @@ namespace StoryCADTests
         {
             try
             {
+                ListData LD = Ioc.Default.GetService<ListData>();
                 _log.Log(LogLevel.Info, "Loading Lists.ini data");
                 ListLoader loader = Ioc.Default.GetService<ListLoader>();
-                GlobalData.ListControlSource = await loader.Init(path);
-                _log.Log(LogLevel.Info,
-                    $"{GlobalData.ListControlSource.Keys.Count} ListLoader.Init keys created");
+                LD.ListControlSource = await loader.Init(path);
+                _log.Log(LogLevel.Info, $"{LD.ListControlSource.Keys.Count} ListLoader.Init keys created");
             }
             catch (Exception ex)
             {
@@ -231,14 +153,15 @@ namespace StoryCADTests
         {
             try
             {
+                ToolsData TD = Ioc.Default.GetService<ToolsData>();
                 _log.Log(LogLevel.Info, "Loading Tools.ini data");
                 ToolLoader loader = Ioc.Default.GetService<ToolLoader>();
                 await loader.Init(path);
-                _log.Log(LogLevel.Info, $"{GlobalData.KeyQuestionsSource.Keys.Count} Key Questions created");
-                _log.Log(LogLevel.Info, $"{GlobalData.StockScenesSource.Keys.Count} Stock Scenes created");
-                _log.Log(LogLevel.Info, $"{GlobalData.TopicsSource.Count} Topics created");
-                _log.Log(LogLevel.Info, $"{GlobalData.MasterPlotsSource.Count} Master Plots created");
-                _log.Log(LogLevel.Info, $"{GlobalData.DramaticSituationsSource.Count} Dramatic Situations created");
+                _log.Log(LogLevel.Info, $"{TD.KeyQuestionsSource.Keys.Count} Key Questions created");
+                _log.Log(LogLevel.Info, $"{TD.StockScenesSource.Keys.Count} Stock Scenes created");
+                _log.Log(LogLevel.Info, $"{TD.TopicsSource.Count} Topics created");
+                _log.Log(LogLevel.Info, $"{TD.MasterPlotsSource.Count} Master Plots created");
+                _log.Log(LogLevel.Info, $"{TD.DramaticSituationsSource.Count} Dramatic Situations created");
 
             }
             catch (Exception ex)

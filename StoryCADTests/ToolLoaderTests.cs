@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.VisualStudio.TestTools.UnitTesting.AppContainer;
 using StoryCAD.Models;
+using StoryCAD.Models.Tools;
 
 namespace StoryCADTests
 {
@@ -16,11 +18,12 @@ namespace StoryCADTests
         [TestMethod]
         public void TestToolCounts()
         {
-            Assert.AreEqual(5,GlobalData.KeyQuestionsSource.Keys.Count);
-            Assert.AreEqual(11,GlobalData.StockScenesSource.Keys.Count);
-            Assert.AreEqual(9,GlobalData.TopicsSource.Count);
-            Assert.AreEqual(22,GlobalData.MasterPlotsSource.Count);
-            Assert.AreEqual(36,GlobalData.DramaticSituationsSource.Count);
+            ToolsData TD = Ioc.Default.GetService<ToolsData>();
+            Assert.AreEqual(5, TD.KeyQuestionsSource.Keys.Count);
+            Assert.AreEqual(11, TD.StockScenesSource.Keys.Count);
+            Assert.AreEqual(9, TD.TopicsSource.Count);
+            Assert.AreEqual(22, TD.MasterPlotsSource.Count);
+            Assert.AreEqual(36, TD.DramaticSituationsSource.Count);
             //TODO: Test some details (subcounts)
         }
     }

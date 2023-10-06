@@ -930,7 +930,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable
 
         try
         {
-            Dictionary<string, ObservableCollection<string>> _lists = GlobalData.ListControlSource;
+            Dictionary<string, ObservableCollection<string>> _lists = Ioc.Default.GetService<ListData>().ListControlSource;
             RoleList = _lists["Role"];
             StoryRoleList = _lists["StoryRole"];
             ArchetypeList = _lists["Archetype"];

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using StoryCAD.Models;
 using StoryCAD.Models.Tools;
 
@@ -8,6 +9,7 @@ namespace StoryCAD.ViewModels.Tools;
 
 public class MasterPlotsViewModel : ObservableRecipient
 {
+    private ToolsData ToolSource = Ioc.Default.GetService<ToolsData>();
     #region Properties
 
     private string _masterPlotName;
@@ -44,7 +46,7 @@ public class MasterPlotsViewModel : ObservableRecipient
     {
         List<string> _masterNames = new();
         MasterPlots = new Dictionary<string, MasterPlotModel>();
-        foreach (MasterPlotModel _plot in GlobalData.MasterPlotsSource)
+        foreach (MasterPlotModel _plot in ToolSource.MasterPlotsSource)
         {
             _masterNames.Add(_plot.MasterPlotName);
             MasterPlots.Add(_plot.MasterPlotName, _plot);
@@ -53,7 +55,7 @@ public class MasterPlotsViewModel : ObservableRecipient
         _masterNames.Sort();
         MasterPlotNames = new ObservableCollection<string>();
         foreach (string _name in _masterNames) { MasterPlotNames.Add(_name); }
-        MasterPlotName = GlobalData.MasterPlotsSource[0].MasterPlotName;
+        MasterPlotName = ToolSource.MasterPlotsSource[0].MasterPlotName;
     }
 
     #endregion

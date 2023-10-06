@@ -277,7 +277,7 @@ public class SettingViewModel : ObservableRecipient, INavigable
 
         try
         {
-            Dictionary<string, ObservableCollection<string>> _lists = GlobalData.ListControlSource;
+            Dictionary<string, ObservableCollection<string>> _lists = Ioc.Default.GetService<ListData>().ListControlSource;
             LocaleList = _lists["Locale"];
             SeasonList = _lists["Season"];
         }

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using StoryCAD.Models;
 using StoryCAD.Models.Tools;
 
@@ -60,7 +61,7 @@ public class DramaticSituationsViewModel : ObservableRecipient
 
     public DramaticSituationsViewModel()
     {
-        _situations = GlobalData.DramaticSituationsSource;
+        _situations = Ioc.Default.GetService<ToolsData>().DramaticSituationsSource;
 
         SituationsSource = new ObservableCollection<string>();
         foreach (string _situationKey in _situations.Keys) {SituationsSource.Add(_situationKey);}

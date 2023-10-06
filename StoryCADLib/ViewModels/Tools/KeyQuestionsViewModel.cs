@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using StoryCAD.Models;
 using StoryCAD.Models.Tools;
 
@@ -25,7 +26,7 @@ public class KeyQuestionsViewModel : ObservableRecipient
         set
         {
             SetProperty(ref _storyElementName, value);
-            _questions = GlobalData.KeyQuestionsSource[_storyElementName];
+            _questions = Ioc.Default.GetService<ToolsData>().KeyQuestionsSource[_storyElementName];
             _index = _questions.Count - 1;
             NextQuestion();
         }
@@ -77,7 +78,7 @@ public class KeyQuestionsViewModel : ObservableRecipient
     {
         KeyQuestionElements = new ObservableCollection<string>();
 
-        foreach (string _element in GlobalData.KeyQuestionsSource.Keys) { KeyQuestionElements.Add(_element); }
+        foreach (string _element in Ioc.Default.GetService<ToolsData>().KeyQuestionsSource.Keys) { KeyQuestionElements.Add(_element); }
         StoryElementName = KeyQuestionElements[0];
     }
     #endregion

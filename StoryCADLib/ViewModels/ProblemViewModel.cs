@@ -411,7 +411,7 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         
         try
         {
-            Dictionary<string, ObservableCollection<string>> _lists = GlobalData.ListControlSource;
+            Dictionary<string, ObservableCollection<string>> _lists = Ioc.Default.GetService<ListData>().ListControlSource;
             ProblemTypeList = _lists["ProblemType"];
             ConflictTypeList = _lists["ConflictType"];
             ProblemCategoryList = _lists["ProblemCategory"];

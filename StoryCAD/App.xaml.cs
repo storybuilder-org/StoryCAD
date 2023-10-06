@@ -1,44 +1,44 @@
-﻿  using System;
-  using System.Diagnostics;
-  using System.IO;
-  using System.Linq;
-  using System.Threading.Tasks;
-  using Windows.ApplicationModel;
-  using CommunityToolkit.Mvvm.DependencyInjection;
-  using dotenv.net;
-  using dotenv.net.Utilities;
-  using Microsoft.Extensions.DependencyInjection;
-  using Microsoft.UI.Xaml;
-  using Microsoft.UI.Xaml.Controls;
-  using Microsoft.Windows.AppLifecycle;
-  using PInvoke;
-  using StoryCAD.DAL;
-  using StoryCAD.Models;
-  using StoryCAD.Models.Tools;
-  using StoryCAD.Services;
-  using StoryCAD.Services.Backend;
-  using StoryCAD.Services.Installation;
-  using StoryCAD.Services.Json;
-  using StoryCAD.Services.Logging;
-  using StoryCAD.Services.Navigation;
-  using StoryCAD.Services.Preferences;
-  using StoryCAD.Services.Search;
-  using StoryCAD.ViewModels;
-  using StoryCAD.ViewModels.Tools;
-  using StoryCAD.Views;
-  using Syncfusion.Licensing;
-  using WinUIEx;
-  using AppInstance = Microsoft.Windows.AppLifecycle.AppInstance;
-  using UnhandledExceptionEventArgs = Microsoft.UI.Xaml.UnhandledExceptionEventArgs;
+﻿using System;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using Windows.ApplicationModel;
+using CommunityToolkit.Mvvm.DependencyInjection;
+using dotenv.net;
+using dotenv.net.Utilities;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.Windows.AppLifecycle;
+using PInvoke;
+using StoryCAD.DAL;
+using StoryCAD.Models;
+using StoryCAD.Models.Tools;
+using StoryCAD.Services.Backend;
+using StoryCAD.Services.Installation;
+using StoryCAD.Services.Json;
+using StoryCAD.Services.Logging;
+using StoryCAD.Services.Navigation;
+using StoryCAD.Services.Preferences;
+using StoryCAD.Services.Search;
+using StoryCAD.ViewModels;
+using StoryCAD.ViewModels.Tools;
+using StoryCAD.Views;
+using Syncfusion.Licensing;
+using WinUIEx;
+using AppInstance = Microsoft.Windows.AppLifecycle.AppInstance;
+using UnhandledExceptionEventArgs = Microsoft.UI.Xaml.UnhandledExceptionEventArgs;
 using Windows.ApplicationModel.Activation;
 using Windows.Storage;
-  using Microsoft.UI.Dispatching;
-  using StoryCAD.Services.Backup;
-  using LaunchActivatedEventArgs = Microsoft.UI.Xaml.LaunchActivatedEventArgs;
+using Microsoft.UI.Dispatching;
+using StoryCAD.Services.Backup;
+using LaunchActivatedEventArgs = Microsoft.UI.Xaml.LaunchActivatedEventArgs;
 using System.Globalization;
 using System.Reflection;
+using StoryCAD.Services.IoC;
 
-  namespace StoryCAD;
+namespace StoryCAD;
 
 public partial class App
 {
@@ -65,8 +65,10 @@ public partial class App
     {
         GlobalData.StartUpTimer = Stopwatch.StartNew();
         CheckForOtherInstances(); //Check other instances aren't already open.
+
+        //Loads all Singletons/VMs
+        Ioc.Default.ConfigureServices(ServiceConfigurator.Configure());
         
-        ConfigureIoc();
         if (Package.Current.Id.Version.Revision == 65535) //Read the StoryCAD.csproj manifest for a build time instead.
         {
 
@@ -165,59 +167,6 @@ public partial class App
             });
         }
         finally { }
-    }
-
-    private static void ConfigureIoc()
-    {
-        Ioc.Default.ConfigureServices(
-            new ServiceCollection()
-                // Register services
-                .AddSingleton<PreferencesService>()
-                .AddSingleton<NavigationService>()
-                .AddSingleton<LogService>()
-                .AddSingleton<SearchService>()
-                .AddSingleton<InstallationService>()
-                .AddSingleton<ControlLoader>()
-                .AddSingleton<ListLoader>()
-                .AddSingleton<ToolLoader>()
-                .AddSingleton<ScrivenerIo>()
-                .AddSingleton<StoryReader>()
-                .AddSingleton<StoryWriter>()
-                .AddSingleton<MySqlIo>()
-                .AddSingleton<BackupService>()
-                .AddSingleton<AutoSaveService>()
-                .AddSingleton<DeletionService>()
-                .AddSingleton<BackendService>()
-                // Register ViewModels 
-                .AddSingleton<ShellViewModel>()
-                .AddSingleton<OverviewViewModel>()
-                .AddSingleton<CharacterViewModel>()
-                .AddSingleton<ProblemViewModel>()
-                .AddSingleton<SettingViewModel>()
-                .AddSingleton<SceneViewModel>()
-                .AddSingleton<FolderViewModel>()
-                .AddSingleton<WebViewModel>()
-                .AddSingleton<TrashCanViewModel>()
-                .AddSingleton<UnifiedVM>()
-                .AddSingleton<InitVM>()
-                .AddSingleton<TreeViewSelection>()
-                // Register ContentDialog ViewModels
-                .AddSingleton<NewProjectViewModel>()
-                .AddSingleton<NewRelationshipViewModel>()
-                .AddSingleton<PrintReportDialogVM>()
-                .AddSingleton<NarrativeToolVM>()
-                // Register Tools ViewModels  
-                .AddSingleton<KeyQuestionsViewModel>()
-                .AddSingleton<TopicsViewModel>()
-                .AddSingleton<MasterPlotsViewModel>()
-                .AddSingleton<StockScenesViewModel>()
-                .AddSingleton<DramaticSituationsViewModel>()
-                .AddSingleton<SaveAsViewModel>()
-                .AddSingleton<PreferencesViewModel>()
-                .AddSingleton<FlawViewModel>()
-                .AddSingleton<TraitsViewModel>()
-                // Complete 
-                .BuildServiceProvider());
     }
 
     /// <summary>
@@ -359,11 +308,12 @@ public partial class App
     {
         try
         {
+            ListData LD = Ioc.Default.GetService<ListData>();
             _log.Log(LogLevel.Info, "Loading Lists.ini data");
             ListLoader loader = Ioc.Default.GetService<ListLoader>();
-            GlobalData.ListControlSource = await loader.Init(path);
+            LD.ListControlSource = await loader.Init(path);
             _log.Log(LogLevel.Info,
-                $"{GlobalData.ListControlSource.Keys.Count} ListLoader.Init keys created");
+                $"{LD.ListControlSource.Keys.Count} ListLoader.Init keys created");
         }
         catch (Exception ex)
         {
@@ -378,12 +328,13 @@ public partial class App
         {
             _log.Log(LogLevel.Info, "Loading Tools.ini data");
             ToolLoader loader = Ioc.Default.GetService<ToolLoader>();
+            ToolsData TD = Ioc.Default.GetService<ToolsData>();
             await loader.Init(path);
-            _log.Log(LogLevel.Info, $"{GlobalData.KeyQuestionsSource.Keys.Count} Key Questions created");
-            _log.Log(LogLevel.Info, $"{GlobalData.StockScenesSource.Keys.Count} Stock Scenes created");
-            _log.Log(LogLevel.Info, $"{GlobalData.TopicsSource.Count} Topics created");
-            _log.Log(LogLevel.Info, $"{GlobalData.MasterPlotsSource.Count} Master Plots created");
-            _log.Log(LogLevel.Info, $"{GlobalData.DramaticSituationsSource.Count} Dramatic Situations created");
+            _log.Log(LogLevel.Info, $"{TD.KeyQuestionsSource.Keys.Count} Key Questions created");
+            _log.Log(LogLevel.Info, $"{TD.StockScenesSource.Keys.Count} Stock Scenes created");
+            _log.Log(LogLevel.Info, $"{TD.TopicsSource.Count} Topics created");
+            _log.Log(LogLevel.Info, $"{TD.MasterPlotsSource.Count} Master Plots created");
+            _log.Log(LogLevel.Info, $"{TD.DramaticSituationsSource.Count} Dramatic Situations created");
 
         }
         catch (Exception ex)

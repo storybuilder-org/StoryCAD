@@ -350,7 +350,7 @@ public class OverviewViewModel : ObservableRecipient, INavigable
 
         try
         {
-            Dictionary<string, ObservableCollection<string>> _lists = GlobalData.ListControlSource;
+            Dictionary<string, ObservableCollection<string>> _lists = Ioc.Default.GetService<ListData>().ListControlSource;
             StoryTypeList = _lists["StoryType"];
             GenreList = _lists["Genre"];
             ViewpointList = _lists["Viewpoint"];

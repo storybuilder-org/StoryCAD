@@ -14,7 +14,7 @@ namespace StoryCAD.Models;
 
 /// <summary>
 /// GlobalData provides access to the application data provided by the
-/// DAL loader classes ListLoader, ControlLoader, and ToolLoader, 
+/// DAL loader classes, ControlLoader
 /// 
 /// It also provides access the Preferences instance and other global items.
 /// </summary>
@@ -25,10 +25,6 @@ public static class GlobalData
 
     /// The current (running) version of StoryCAD
     public static string Version;
-
-    /// The ComboBox and ListBox source bindings in viewmodels point to lists in this Dictionary. 
-    /// Each list has a unique key related to the ComboBox or ListBox use.
-    public static Dictionary<string, ObservableCollection<string>> ListControlSource;
 
     /// Tools that copy data into StoryElements must access and update the viewmodel currently 
     /// active viewmodel at the time the tool is invoked. The viewmodel type is identified
@@ -41,13 +37,6 @@ public static class GlobalData
     /// User Controls
     public static SortedDictionary<string, ConflictCategoryModel> ConflictTypes;
     public static List<string> RelationTypes;
-
-    // Tools
-    public static Dictionary<string, List<KeyQuestionModel>> KeyQuestionsSource;
-    public static SortedDictionary<string, ObservableCollection<string>> StockScenesSource;
-    public static SortedDictionary<string, TopicModel> TopicsSource;
-    public static List<MasterPlotModel> MasterPlotsSource;
-    public static SortedDictionary<string, DramaticSituationModel> DramaticSituationsSource;
 
     // Connection status
     public static bool DopplerConnection;

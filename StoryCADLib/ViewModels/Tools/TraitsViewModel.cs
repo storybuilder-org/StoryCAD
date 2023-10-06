@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml.Controls;
 using StoryCAD.Models;
 
@@ -62,7 +63,7 @@ public class TraitsViewModel: ObservableRecipient
 
     public TraitsViewModel()
     {
-        Dictionary<string, ObservableCollection<string>> _lists = GlobalData.ListControlSource;
+        Dictionary<string, ObservableCollection<string>> _lists = Ioc.Default.GetService<ListData>().ListControlSource;
         CategoryList = new ObservableCollection<string> { "Behaviors", "Habits", "Skills and Abilities" };
         ExampleList = new ObservableCollection<string>();
 
