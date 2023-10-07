@@ -1,5 +1,53 @@
 # StoryCAD ChangeLog
 
+## Release 2.12.0.0
+StoryCAD 2.12.0.0 was released on September 29th, it mainly focused on fixing issues.
+
+- Fixed Crashes with Drag and Drop (#594)
+- Updated Manual (#595, #616)
+- Removed ability to create blank traits (#600)
+- Fixed an issue where deleting a trait would always remove the topmost one
+- Fixed a crash that could occur in the Right-Click Menu (#592)
+- Fixed issue where master plots could cause the app to enter a locked state (#598)
+- Update Packages (#601, #608, #630, #635)
+- Updated Relationships dialog to fix a potential issue (#601)
+- Cleaned up code and fixed warnings (#609)
+- Fixed title not updating properly (#607)
+- Updated change log to not show on developer builds (#605)
+- Fixed crashes in the print menu (#603)
+- Windows 10 Users on the latest version can now use the updated print UI (#604)
+- Fixed some issues with model loads (#606)
+- Updated how developer builds are numbered (#611)
+- Updated About page to show all StoryCAD Social URLS (#615)
+- Updated Readme (#614)
+- Fixed previously opened story page staying open when creating new file (#618)
+- Updated how node highlighting works to be more intuitive (#623)
+- Fixed issues with Scene Cast (#625, #647)
+- Fixed crash when navigating between two scene development tabs (#632)
+- Fixed crashes when searching (#631)
+- Fixed problems occurring when storing outlines in cloud storage (#633)
+- Fixed folder picker boxes in the initialisation screen not updating (#640)
+- Fixed issue preventing backend communication (#643)
+- Fixed duplicated 'Psychiatrist' role (#652)
+- Updated saving to save the model even if no changes have been made (#653)
+- Fixed version number not showing properly (#654)
+
+## Release 2.11.0.0
+As of June 6th 2023, we have released version 2.11.0.0
+- Added feature where new nodes will automatically be navigated to
+- Added warning for if a story synopsis is empty but selected anyway
+- Updated dependencies and story templates
+- Update backup and autosave to fix issues and warnings if they fail
+- Updated the premise box update the original story problem
+- Updated right click menu to show keybinds and fixed node visibility
+- Updated save pen to fix a possible issue
+- Update key question dialog to not be empty when opened.
+- Updated some text boxes to use the full space available
+- Fixed issues relating to the StoryCAD Rebrand
+- Fixed an issue where the cast list would not properly update
+- Fixed issue with logging
+- Fixed bug where opening a story from a different date format would crash
+
 ## Release 2.10.0.0
 As of April 18th 2023, we have released version 2.10.0.0
 This release simply rebrands StoryBuilder to StoryCAD.
