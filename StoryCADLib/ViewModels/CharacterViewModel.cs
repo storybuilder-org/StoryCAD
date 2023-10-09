@@ -764,7 +764,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable
             Title = "New relationship",
             PrimaryButtonText = "Add relationship",
             SecondaryButtonText = "Cancel",
-            XamlRoot = GlobalData.XamlRoot,
+            XamlRoot = Ioc.Default.GetRequiredService<Windowing>().XamlRoot,
             Content = new NewRelationshipPage(_vm),
             MinWidth = 200
         };
@@ -837,7 +837,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable
         //Creates and shows dialog
         ContentDialog _flawDialog = new()
         {
-            XamlRoot = GlobalData.XamlRoot,
+            XamlRoot = Ioc.Default.GetRequiredService<Windowing>().XamlRoot,
             Content = new Flaw(),
             Title = "Flaw Builder",
             PrimaryButtonText = "Copy flaw example",
@@ -866,7 +866,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable
             Title = "Trait builder",
             PrimaryButtonText = "Copy trait",
             CloseButtonText = "Cancel",
-            XamlRoot = GlobalData.XamlRoot,
+            XamlRoot = Ioc.Default.GetRequiredService<Windowing>().XamlRoot,
             Content = new Traits()
         };
         ContentDialogResult _result = await _traitDialog.ShowAsync();
@@ -1027,7 +1027,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable
     {
         await new ContentDialog()
         {
-            XamlRoot = GlobalData.XamlRoot,
+            XamlRoot = Ioc.Default.GetRequiredService<Windowing>().XamlRoot,
             Title = "Error loading resources",
             Content = "An error has occurred, please reinstall or update StoryCAD to continue.",
             CloseButtonText = "Close"

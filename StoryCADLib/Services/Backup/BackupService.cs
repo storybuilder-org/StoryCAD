@@ -151,7 +151,7 @@ namespace StoryCAD.Services.Backup
             catch (Exception ex)
             {
                 //Show failed message.
-                GlobalData.GlobalDispatcher.TryEnqueue(() =>
+                Ioc.Default.GetRequiredService<Windowing>().GlobalDispatcher.TryEnqueue(() =>
                 {
                     Ioc.Default.GetRequiredService<ShellViewModel>().ShowMessage(LogLevel.Warn,
                         "Making a backup failed, check your backup settings.", false);

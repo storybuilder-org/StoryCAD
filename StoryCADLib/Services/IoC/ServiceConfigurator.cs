@@ -38,6 +38,8 @@ public class ServiceConfigurator
              .AddSingleton<ListData>()
              .AddSingleton<ToolsData>()
              .AddSingleton<ControlData>()
+             .AddSingleton<Developer>()
+             .AddSingleton<Windowing>()
              // Register ViewModels 
              .AddSingleton<ShellViewModel>()
              .AddSingleton<OverviewViewModel>()

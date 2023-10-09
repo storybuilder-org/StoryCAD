@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using StoryCAD.Models;
@@ -212,7 +213,7 @@ public class NavigationService : INavigationService
             }
 
             frame.Navigate(_pagesByKey[pageKey], parameter);
-            GlobalData.PageKey = pageKey;
+            Ioc.Default.GetRequiredService<Windowing>().PageKey = pageKey;
         }
     }
 

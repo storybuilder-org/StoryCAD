@@ -63,7 +63,6 @@ public partial class App
     /// </summary>
     public App()
     {
-        GlobalData.StartUpTimer = Stopwatch.StartNew();
         CheckForOtherInstances(); //Check other instances aren't already open.
 
         //Loads all Singletons/VMs
@@ -96,17 +95,9 @@ public partial class App
             //Register Syncfusion license
             string token = EnvReader.GetStringValue("SYNCFUSION_TOKEN");
             SyncfusionLicenseProvider.RegisterLicense(token);
+            Ioc.Default.GetRequiredService<Developer>().EnvPresent = true;
         }
-        catch { Ioc.Default.GetRequiredService<ShellViewModel>().ShowDotEnvWarning = true; }
-
-        //Developer build check
-        if (Debugger.IsAttached ||
-            Ioc.Default.GetRequiredService<ShellViewModel>().ShowDotEnvWarning ||
-            Package.Current.Id.Version.Revision != 0)
-        {
-            GlobalData.DeveloperBuild = true;
-        }
-        else { GlobalData.DeveloperBuild = false; }
+        catch { }
 
         InitializeComponent();
 
@@ -127,7 +118,6 @@ public partial class App
             _MainInstance.Activated += ActivateMainInstance;
 
             AppActivationArguments activatedEventArgs = AppInstance.GetCurrent().GetActivatedEventArgs();
-
 
             //Redirect to other instance if one exists, otherwise continue initializing this instance.
             if (!_MainInstance.IsCurrent)
@@ -155,15 +145,15 @@ public partial class App
     /// </summary>
     private void ActivateMainInstance(object sender, AppActivationArguments e)
     {
-        GlobalData.MainWindow.Restore(); //Resize window and unminimize window
-        GlobalData.MainWindow.BringToFront(); //Bring window to front
+        Windowing wnd = Ioc.Default.GetRequiredService<Windowing>();
+        wnd.MainWindow.Restore(); //Resize window and unminimize window
+        wnd.MainWindow.BringToFront(); //Bring window to front
 
         try
         {
-            GlobalData.GlobalDispatcher.TryEnqueue(() =>
+            wnd.GlobalDispatcher.TryEnqueue(() =>
             {
                 Ioc.Default.GetRequiredService<ShellViewModel>().ShowMessage(LogLevel.Warn, "You can only have one file open at once", false);
-
             });
         }
         finally { }
@@ -222,20 +212,11 @@ public partial class App
         Ioc.Default.GetService<BackendService>()!.StartupRecording();
 
         await ProcessInstallationFiles();
-
-        await LoadControls(GlobalData.RootDirectory);
-        await LoadLists(GlobalData.RootDirectory);
-        await LoadTools(GlobalData.RootDirectory);
-
         ConfigureNavigation();
 
         // Construct a Window to hold our Pages
-        WindowEx mainWindow = new MainWindow();
-        mainWindow.MinHeight = 675;
-        mainWindow.MinWidth = 900;
-        mainWindow.Width = 1050;
-        mainWindow.Height = 750;
-        mainWindow.Title = "StoryCAD";
+        WindowEx mainWindow = new MainWindow() { MinHeight = 675, MinWidth = 900, Width = 1050,
+            Height=750, Title="StoryCAD" };
 
         // Create a Frame to act as the navigation context 
         Frame rootFrame = new();
@@ -252,10 +233,10 @@ public partial class App
         else {rootFrame.Navigate(typeof(Shell));}
 
         // Preserve both the Window and its Handle for future use
-        GlobalData.MainWindow = (MainWindow) mainWindow;
+        Ioc.Default.GetRequiredService<Windowing>().MainWindow = (MainWindow) mainWindow;
         //Get the Window's HWND
         m_windowHandle = User32.GetActiveWindow();
-        GlobalData.WindowHandle = m_windowHandle;
+        Ioc.Default.GetRequiredService<Windowing>().WindowHandle = m_windowHandle;
 
         _log.Log(LogLevel.Debug, $"Layout: Window size width={mainWindow.Width} height={mainWindow.Height}");
         _log.Log(LogLevel.Info, "StoryCAD App loaded and launched");
@@ -275,76 +256,6 @@ public partial class App
             AbortApp();
         }
     }
-
-    private async Task LoadControls(string path)
-    {
-        int subTypeCount = 0;
-        int exampleCount = 0;
-        try
-        {
-            _log.Log(LogLevel.Info, "Loading Controls.ini data");
-            ControlLoader loader = Ioc.Default.GetService<ControlLoader>();
-            ControlData controldata = Ioc.Default.GetService<ControlData>();
-            await loader.Init(path);
-            _log.Log(LogLevel.Info, "ConflictType Counts");
-            _log.Log(LogLevel.Info,
-                $"{controldata.ConflictTypes.Keys.Count} ConflictType keys created");
-            foreach (ConflictCategoryModel type in controldata.ConflictTypes.Values)
-            {
-                subTypeCount += type.SubCategories.Count;
-                exampleCount += type.SubCategories.Sum(subType => type.Examples[subType].Count);
-            }
-            _log.Log(LogLevel.Info,
-                $"{subTypeCount} Total ConflictSubType keys created");
-            _log.Log(LogLevel.Info,
-                $"{exampleCount} Total ConflictSubType keys created");
-        }
-        catch (Exception ex)
-        {
-            _log.LogException(LogLevel.Error, ex, "Error loading Controls.ini");
-            AbortApp();
-        }
-    }
-    private async Task LoadLists(string path)
-    {
-        try
-        {
-            ListData listdata = Ioc.Default.GetService<ListData>();
-            _log.Log(LogLevel.Info, "Loading Lists.ini data");
-            ListLoader loader = Ioc.Default.GetService<ListLoader>();
-            listdata.ListControlSource = await loader.Init(path);
-            _log.Log(LogLevel.Info,
-                $"{listdata.ListControlSource.Keys.Count} ListLoader.Init keys created");
-        }
-        catch (Exception ex)
-        {
-            _log.LogException(LogLevel.Error, ex, "Error loading Lists.ini");
-            AbortApp();
-        }
-    }
-
-    private async Task LoadTools(string path)
-    {
-        try
-        {
-            _log.Log(LogLevel.Info, "Loading Tools.ini data");
-            ToolLoader loader = Ioc.Default.GetService<ToolLoader>();
-            ToolsData toolsdata = Ioc.Default.GetService<ToolsData>();
-            await loader.Init(path);
-            _log.Log(LogLevel.Info, $"{toolsdata.KeyQuestionsSource.Keys.Count} Key Questions created");
-            _log.Log(LogLevel.Info, $"{toolsdata.StockScenesSource.Keys.Count} Stock Scenes created");
-            _log.Log(LogLevel.Info, $"{toolsdata.TopicsSource.Count} Topics created");
-            _log.Log(LogLevel.Info, $"{toolsdata.MasterPlotsSource.Count} Master Plots created");
-            _log.Log(LogLevel.Info, $"{toolsdata.DramaticSituationsSource.Count} Dramatic Situations created");
-
-        }
-        catch (Exception ex)
-        {
-            _log.LogException(LogLevel.Error, ex, "Error loading Tools.ini");
-            AbortApp();
-        }
-    }
-
     private void ConfigureNavigation()
     {
         try

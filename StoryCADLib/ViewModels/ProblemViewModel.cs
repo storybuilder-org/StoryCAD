@@ -337,7 +337,7 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         ContentDialog _conflictDialog = new()
         {
             Title = "Conflict builder",
-            XamlRoot = GlobalData.XamlRoot,
+            XamlRoot = Ioc.Default.GetRequiredService<Windowing>().XamlRoot,
             PrimaryButtonText = "Copy to Protagonist",
             SecondaryButtonText = "Copy to Antagonist",
             CloseButtonText = "Close"
@@ -440,7 +440,7 @@ public class ProblemViewModel : ObservableRecipient, INavigable
     {
         await new ContentDialog()
         {
-            XamlRoot = GlobalData.XamlRoot,
+            XamlRoot = Ioc.Default.GetRequiredService<Windowing>().XamlRoot,
             Title = "Error loading resources",
             Content = "An error has occurred, please reinstall or update StoryCAD to continue.",
             CloseButtonText = "Close"

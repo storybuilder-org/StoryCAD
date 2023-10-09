@@ -21,6 +21,8 @@ namespace StoryCAD.ViewModels;
 
 public class WebViewModel : ObservableRecipient, INavigable
 {
+    private Windowing Window = Ioc.Default.GetRequiredService<Windowing>();
+
     ///TODO: Make sure queries are async
     #region Fields
 
@@ -134,7 +136,7 @@ public class WebViewModel : ObservableRecipient, INavigable
         {
             Title = "Webview is missing.",
             Content = "This computer is missing the WebView2 Runtime, without it some features may not work.\nWould you like to install this now?",
-            XamlRoot = GlobalData.XamlRoot,
+            XamlRoot = Window.XamlRoot,
             PrimaryButtonText = "Yes",
             SecondaryButtonText = "No"
         };
@@ -171,7 +173,7 @@ public class WebViewModel : ObservableRecipient, INavigable
                 .WaitForExitAsync();
 
             //Show success/fail dialog
-            ContentDialog _dialog = new() { PrimaryButtonText = "Ok", XamlRoot = GlobalData.XamlRoot };
+            ContentDialog _dialog = new() { PrimaryButtonText = "Ok", XamlRoot = Window.XamlRoot };
             try
             {
                 _dialog.Title = "Webview installed!";

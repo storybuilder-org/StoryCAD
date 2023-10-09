@@ -14,6 +14,7 @@ using NLog.Targets;
 using StoryCAD.Models;
 using StoryCAD.Services.Json;
 using Microsoft.UI.Windowing;
+using CommunityToolkit.Mvvm.DependencyInjection;
 
 namespace StoryCAD.Services.Logging;
 
@@ -27,7 +28,7 @@ public class LogService : ILogService
     private static Exception exceptionHelper;
     private string apiKey = string.Empty;
     private string logID = string.Empty;
-    public string SystemInfo = string.Empty;
+    private Developer DevTools = Ioc.Default.GetService<Developer>();
     static LogService()
     {
         try
@@ -110,7 +111,7 @@ public class LogService : ILogService
                 {
                     try
                     {
-                        var mainWindow = GlobalData.MainWindow;
+                        var mainWindow = Ioc.Default.GetRequiredService<Windowing>().MainWindow;
                         if (mainWindow?.Width > 0)
                             msg.Data.Add(new Item("Browser-Width", ((int)mainWindow.Width).ToString()));
                         if (mainWindow?.Height > 0)
@@ -127,7 +128,7 @@ public class LogService : ILogService
                 
                     try
                     {
-                        msg.Data.Add(new(key: "SystemInfo", SystemInfo));
+                        msg.Data.Add(new(key: "SystemInfo", DevTools.SystemInfo));
                     }
                     catch (Exception ex)
                     {
@@ -246,77 +247,5 @@ public class LogService : ILogService
     public void Flush()
     {
         LogManager.Flush();
-    }
-
-
-    /// <summary>
-    /// This gets the system info of the current machine.
-    /// This includes the following:
-    /// </summary>
-    public void GetSystemInfo()
-    {
-        try
-        {
-            string WinVer;
-            try
-            {
-                //Get Windows Build and Version
-                if (Convert.ToInt32(Environment.OSVersion.Version.Build) >= 22000) { WinVer = "11"; }
-                else { WinVer = "10"; }
-            }
-            catch { WinVer = "?"; }
-
-            string AppArch;
-            //Detect if 32-bit or 64-bit process (I'm not sure if it's possible to )
-            if (IntPtr.Size == 4) { AppArch = "32 bit"; }
-            else if (IntPtr.Size == 8) { AppArch = "64 bit"; }
-            else { AppArch = "Unknown"; }
-
-
-            SystemInfo = $"""
-                === System Info ===
-                CPU ARCH - {RuntimeInformation.ProcessArchitecture}  
-                OS  ARCH - {RuntimeInformation.OSArchitecture}  
-                App ARCH - {AppArch}
-                .NET Ver - {RuntimeInformation.OSArchitecture}
-                Startup  - {GlobalData.StartUpTimer.ElapsedMilliseconds} ms
-                Elmah Status - {GlobalData.ElmahLogging}
-                Developer Status - {GlobalData.DeveloperBuild}
-                Windows {WinVer} Build - {Environment.OSVersion.Version.Build}
-                Debugger Attached - {Debugger.IsAttached}
-                Touchscreen - {PointerDevice.GetPointerDevices().Any(p => p.PointerDeviceType == PointerDeviceType.Touch)}
-                ProcessID - {Environment.ProcessId}
-                Core Count - {Environment.ProcessorCount}
-
-                === User Prefs ===
-                Name - {GlobalData.Preferences.Name}
-                Email - {GlobalData.Preferences.Email}
-                Elmah Consent - {GlobalData.Preferences.ErrorCollectionConsent}
-                Theme - {GlobalData.Preferences.PrimaryColor.Color.ToHex()}
-                Accent Color - {GlobalData.Preferences.AccentColor} 
-                Last Version Prefs logged - {GlobalData.Preferences.Version}
-                Search Engine - {GlobalData.Preferences.PreferredSearchEngine} 
-                AutoSave - {GlobalData.Preferences.AutoSave}
-                AutoSave Interval - {GlobalData.Preferences.AutoSaveInterval} 
-                Backup - {GlobalData.Preferences.TimedBackup}
-                Backup Interval - {GlobalData.Preferences.TimedBackupInterval}
-                Backup on open - {GlobalData.Preferences.BackupOnOpen} 
-                Project Dir - {GlobalData.Preferences.ProjectDirectory}
-                Backup Dir - {GlobalData.Preferences.BackupDirectory} 
-                RecordPreferencesStatus - {GlobalData.Preferences.RecordPreferencesStatus}
-                
-                ===CAD Info===
-                StoryCAD Version - {GlobalData.Version}
-                """;
-            //dotEnv present - {!GlobalData.ShowDotEnvWarning}
-
-            Log(LogLevel.Info, SystemInfo);
-        }
-        catch (Exception e)
-        {
-            SystemInfo = $"Error getting system info: {e.Message}";
-            Logger.Warn(e, "Error getting system info");
-        }
-
     }
 }

@@ -46,8 +46,10 @@ namespace StoryCADTests
                 //Register Syncfusion license
                 string token = EnvReader.GetStringValue("SYNCFUSION_TOKEN");
                 SyncfusionLicenseProvider.RegisterLicense(token);
+
+                Ioc.Default.GetRequiredService<Developer>().EnvPresent = true;
             }
-            catch { Ioc.Default.GetRequiredService<ShellViewModel>().ShowDotEnvWarning = true; }
+            catch {  }
 
             this.InitializeComponent();
 
@@ -74,8 +76,6 @@ namespace StoryCADTests
 
             await ProcessInstallationFiles();
 
-            await LoadControls(GlobalData.RootDirectory);
-            await LoadLists(GlobalData.RootDirectory);
             await LoadTools(GlobalData.RootDirectory);
 
             Microsoft.VisualStudio.TestPlatform.TestExecutor.UnitTestClient.CreateDefaultUI();
@@ -101,52 +101,6 @@ namespace StoryCADTests
             catch (Exception ex)
             {
                 _log.LogException(LogLevel.Error, ex, "Error loading Installation files");
-                AbortApp();
-            }
-        }
-
-        private async Task LoadControls(string path)
-        {
-            int subTypeCount = 0;
-            int exampleCount = 0;
-            try
-            {
-                _log.Log(LogLevel.Info, "Loading Controls.ini data");
-                ControlLoader loader = Ioc.Default.GetService<ControlLoader>();
-                ControlData controldata = Ioc.Default.GetService<ControlData>();
-                await loader.Init(path);
-                _log.Log(LogLevel.Info, "ConflictType Counts");
-                _log.Log(LogLevel.Info,
-                    $"{controldata.ConflictTypes.Keys.Count} ConflictType keys created");
-                foreach (ConflictCategoryModel type in GlobalData.ConflictTypes.Values)
-                {
-                    subTypeCount += type.SubCategories.Count;
-                    exampleCount += type.SubCategories.Sum(subType => type.Examples[subType].Count);
-                }
-                _log.Log(LogLevel.Info,
-                    $"{subTypeCount} Total ConflictSubType keys created");
-                _log.Log(LogLevel.Info,
-                    $"{exampleCount} Total ConflictSubType keys created");
-            }
-            catch (Exception ex)
-            {
-                _log.LogException(LogLevel.Error, ex, "Error loading Controls.ini");
-                AbortApp();
-            }
-        }
-        private async Task LoadLists(string path)
-        {
-            try
-            {
-                ListData listdata = Ioc.Default.GetService<ListData>();
-                _log.Log(LogLevel.Info, "Loading Lists.ini data");
-                ListLoader loader = Ioc.Default.GetService<ListLoader>();
-                listdata.ListControlSource = await loader.Init(path);
-                _log.Log(LogLevel.Info, $"{listdata.ListControlSource.Keys.Count} ListLoader.Init keys created");
-            }
-            catch (Exception ex)
-            {
-                _log.LogException(LogLevel.Error, ex, "Error loading Lists.ini");
                 AbortApp();
             }
         }

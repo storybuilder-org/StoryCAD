@@ -704,7 +704,7 @@ public class SceneViewModel : ObservableRecipient, INavigable
     {
         await new ContentDialog()
         {
-            XamlRoot = GlobalData.XamlRoot,
+            XamlRoot = Ioc.Default.GetRequiredService<Windowing>().XamlRoot,
             Title = "Error loading resources",
             Content = "An error has occurred, please reinstall or update StoryCAD to continue.",
             CloseButtonText = "Close"

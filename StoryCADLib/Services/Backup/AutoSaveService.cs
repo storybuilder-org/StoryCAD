@@ -20,6 +20,7 @@ namespace StoryCAD.Services.Backup
     /// </summary>
     public class AutoSaveService
     {
+        private Windowing Window = Ioc.Default.GetRequiredService<Windowing>();
         private LogService _logger = Ioc.Default.GetRequiredService<LogService>();
         private ShellViewModel _shellVM;
 
@@ -109,13 +110,13 @@ namespace StoryCAD.Services.Backup
                 {
                     _logger.Log(LogLevel.Info, "Initiating AutoSave backup.");
                     // Save and write the model on the UI thread
-                    GlobalData.GlobalDispatcher.TryEnqueue(async () => await _shellVM.SaveFile(true));
+                    Window.GlobalDispatcher.TryEnqueue(async () => await _shellVM.SaveFile(true));
                 }
             }
             catch (Exception _ex)
             {
                 //Show failed message.
-                GlobalData.GlobalDispatcher.TryEnqueue(() =>
+                Window.GlobalDispatcher.TryEnqueue(() =>
                 {
                     Ioc.Default.GetRequiredService<ShellViewModel>().ShowMessage(LogLevel.Warn,
                         "Making an AutoSave failed.", false);

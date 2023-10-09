@@ -38,7 +38,7 @@ public sealed partial class Shell
             InitializeComponent();
             Logger = Ioc.Default.GetService<LogService>();
             DataContext = ShellVm;
-            GlobalData.GlobalDispatcher = DispatcherQueue.GetForCurrentThread();
+            Ioc.Default.GetRequiredService<Windowing>().GlobalDispatcher = DispatcherQueue.GetForCurrentThread();
             Loaded += Shell_Loaded;
         }                         
         catch (Exception ex)
@@ -56,13 +56,12 @@ public sealed partial class Shell
         // The Shell_Loaded event is processed in order to obtain and save the XamlRool  
         // and pass it on to ContentDialogs as a WinUI work-around. See
         // https://docs.microsoft.com/en-us/windows/winui/api/microsoft.ui.xaml.controls.contentdialog?view=winui-3.0-preview
-        Ioc.Default.GetRequiredService<LogService>().GetSystemInfo();
-        GlobalData.XamlRoot = Content.XamlRoot;
-        GlobalData.StartUpTimer.Stop();
+        Ioc.Default.GetRequiredService<Windowing>().XamlRoot = Content.XamlRoot;
+        Ioc.Default.GetService<Developer>().StartUpTimer.Stop();
         ShellVm.ShowHomePage();
         ShellVm.ShowConnectionStatus();
-        ShellVm.UpdateWindowTitle();
-        if (ShellVm.ShowDotEnvWarning) { await ShellVm.ShowDotEnvWarningAsync(); }
+        Ioc.Default.GetRequiredService<Windowing>().UpdateWindowTitle();
+        if (!Ioc.Default.GetService<Developer>().EnvPresent) { await ShellVm.ShowDotEnvWarningAsync(); }
 
         if (!await Ioc.Default.GetRequiredService<WebViewModel>().CheckWebviewState())
         {

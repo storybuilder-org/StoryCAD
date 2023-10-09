@@ -55,7 +55,7 @@ namespace StoryCAD.Services.Dialogs
         public async Task ShowChangeLog()
         {
             //Don't Show changelog on dev build's since its pointless.
-            if (GlobalData.DeveloperBuild) { return; }
+            if (Ioc.Default.GetRequiredService<Developer>().DeveloperBuild) { return; }
 
             try
             {
@@ -73,7 +73,7 @@ namespace StoryCAD.Services.Dialogs
                     },
                     Title = "What's new in StoryCAD " + GlobalData.Version,
                     PrimaryButtonText = "Okay",
-                    XamlRoot = GlobalData.XamlRoot
+                    XamlRoot = Ioc.Default.GetRequiredService<Windowing>().XamlRoot,
                 };
                 await _changelogUI.ShowAsync();
             }
