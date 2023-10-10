@@ -76,6 +76,9 @@ public class ShellViewModel : ObservableRecipient
 
     public readonly ScrivenerIo Scrivener;
 
+    //File opened (if StoryCAD was opened via an STBX file)
+    public string FilePathToLaunch;
+
     // The right-hand (detail) side of ShellView
     public Frame SplitViewFrame;
 

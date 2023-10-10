@@ -78,8 +78,8 @@ public sealed partial class Shell
 
         //If StoryCAD was loaded from a .STBX File then instead of showing the Unified menu
         //We will instead load the file instead.
-        if (GlobalData.FilePathToLaunch == null) { await ShellVm.OpenUnifiedMenu(); }
-        else { await ShellVm.OpenFile(GlobalData.FilePathToLaunch);}
+        if (ShellVm.FilePathToLaunch == null) { await ShellVm.OpenUnifiedMenu(); }
+        else { await ShellVm.OpenFile(ShellVm.FilePathToLaunch);}
     }
 
     /// <summary>

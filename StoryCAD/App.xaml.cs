@@ -132,7 +132,8 @@ public partial class App
                 {
                     if (activatedEventArgs.Data is IFileActivatedEventArgs fileArgs)
                     {
-                        GlobalData.FilePathToLaunch = fileArgs.Files.FirstOrDefault().Path; //This will be launched when ShellVM has finished initalising
+                        //This will be launched when ShellVM has finished initalising
+                        Ioc.Default.GetRequiredService<ShellViewModel>().FilePathToLaunch = fileArgs.Files.FirstOrDefault().Path; 
                     }
                 }
             }
