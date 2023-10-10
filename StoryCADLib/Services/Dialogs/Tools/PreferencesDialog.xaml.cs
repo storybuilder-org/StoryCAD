@@ -38,7 +38,7 @@ public sealed partial class PreferencesDialog
         DevInfo.Text = DevTools.SystemInfo;
 
         if (DevTools.DeveloperBuild) { Version.Text = PreferencesVm.Version; }
-        else { Version.Text = GlobalData.Version; }
+        else { Version.Text = DevTools.Version; }
 
         Changelog.Text = await new Changelog().GetChangelogText();
 

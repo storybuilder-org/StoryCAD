@@ -31,7 +31,7 @@ public class InstallationService
     public async Task InstallFiles()
     {
         //Skip install files if version hasn't changed.
-        if (GlobalData.Version == GlobalData.Preferences.Version)
+        if (Ioc.Default.GetRequiredService<Developer>().Version == GlobalData.Preferences.Version)
         {
             return;
         }

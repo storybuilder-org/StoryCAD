@@ -13,6 +13,7 @@ using StoryCAD.Services.Backend;
 using StoryCAD.Services.Backup;
 using StoryCAD.Services.Dialogs;
 using StoryCAD.Services.Dialogs.Tools;
+using StoryCAD.Services.Json;
 using StoryCAD.Services.Logging;
 using StoryCAD.Services.Messages;
 using StoryCAD.Services.Navigation;
@@ -2133,7 +2134,7 @@ public class ShellViewModel : ObservableRecipient
     public void ShowConnectionStatus()
     {
         StatusMessage _msg;
-        if (!GlobalData.DopplerConnection | !GlobalData.ElmahLogging)
+        if (!Doppler.DopplerConnection | !Logger.ElmahLogging)
             _msg = new StatusMessage("Connection not established", LogLevel.Warn, true);
         else
             _msg = new StatusMessage("Connection established", LogLevel.Info, true);

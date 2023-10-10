@@ -5,6 +5,8 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.WinUI.Helpers;
+using StoryCAD.Services.Json;
+using StoryCAD.Services.Logging;
 using StoryCAD.ViewModels;
 using Windows.ApplicationModel;
 using Windows.Devices.Input;
@@ -48,6 +50,20 @@ public class Developer
     /// </summary>
     public bool EnvPresent = false;
 
+    /// <summary>
+    /// The current (running) version of StoryCAD
+    /// Returns a simple 4 number tuple on release versions i.e 2.12.0.0
+    /// Returns a 3 number tuple and build time on 
+    /// </summary>
+    public string Version;
+
+    /// <summary>
+    /// Returns true if the app has loaded with a version change.
+    /// If this is true a changelog will show, install service will
+    /// run and the server will update the version.
+    /// </summary>    
+    public bool LoadedWithVersionChange = false;
+
     public string SystemInfo
     {
         get {
@@ -71,13 +87,12 @@ public class Developer
 
                 return $"""
                      ===== SYSTEM INFO =====
-                     
                      CPU ARCH - {RuntimeInformation.ProcessArchitecture}  
                      OS  ARCH - {RuntimeInformation.OSArchitecture}  
                      App ARCH - {AppArch}
                      .NET Ver - {RuntimeInformation.OSArchitecture}
                      Startup  - {StartUpTimer.ElapsedMilliseconds} ms
-                     Elmah Status - {GlobalData.ElmahLogging}
+                     Elmah Status - {Ioc.Default.GetRequiredService<LogService>().ElmahLogging}
                      Windows {WinVer} Build - {Environment.OSVersion.Version.Build}
                      Debugger Attached - {Debugger.IsAttached}
                      Touchscreen - {PointerDevice.GetPointerDevices().Any(p => p.PointerDeviceType == PointerDeviceType.Touch)}
@@ -102,9 +117,12 @@ public class Developer
                      RecordPreferencesStatus - {GlobalData.Preferences.RecordPreferencesStatus}
 
                      ===CAD Info===
-                     StoryCAD Version - {GlobalData.Version}
+                     StoryCAD Version - {Version}
                      Developer - {DeveloperBuild}
                      Env Present - {EnvPresent}
+                     Doppler Connection - {Doppler.DopplerConnection}
+                     Loaded with version change - {LoadedWithVersionChange}
+                     Invoked through STBX File - {Ioc.Default.GetRequiredService<ShellViewModel>().FilePathToLaunch != ""}
                      """;
             }
             catch (Exception e) { return $"Error getting System Info, {e.Message}"; }       

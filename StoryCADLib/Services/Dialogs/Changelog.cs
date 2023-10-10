@@ -28,7 +28,7 @@ namespace StoryCAD.Services.Dialogs
             {
                 //Returns body of release
                 return (await _client.Repository.Release.Get("StoryBuilder-org", "StoryCAD",
-                    GlobalData.Version.Replace("Version: ", ""))).Body;
+                    Ioc.Default.GetRequiredService<Developer>().Version.Replace("Version: ", ""))).Body;
             }
             catch (Exception _e)
             {
@@ -71,7 +71,7 @@ namespace StoryCAD.Services.Dialogs
                             Text = (await GetChangelogText())
                         }
                     },
-                    Title = "What's new in StoryCAD " + GlobalData.Version,
+                    Title = "What's new in StoryCAD " + Ioc.Default.GetRequiredService<Developer>().Version,
                     PrimaryButtonText = "Okay",
                     XamlRoot = Ioc.Default.GetRequiredService<Windowing>().XamlRoot,
                 };

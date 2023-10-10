@@ -29,6 +29,7 @@ public class LogService : ILogService
     private string apiKey = string.Empty;
     private string logID = string.Empty;
     private Developer DevTools = Ioc.Default.GetService<Developer>();
+    public bool ElmahLogging;
     static LogService()
     {
         try
@@ -80,7 +81,7 @@ public class LogService : ILogService
 
             elmahIoTarget.OnMessage += msg =>
             {
-                msg.Version = GlobalData.Version;
+                msg.Version = DevTools.Version;
 
 
                 try { msg.Detail = exceptionHelper?.ToString(); }
@@ -89,7 +90,7 @@ public class LogService : ILogService
                     msg.Detail = $"There was an error attempting to obtain StackTrace helper Error: {e.Message}";
                 }
 
-                try { msg.Version = GlobalData.Version; }
+                try { msg.Version = DevTools.Version; }
                 catch (Exception e)
                 {
                     msg.Version = $"There was an error trying to obtain version information Error: {e.Message}";
@@ -171,7 +172,7 @@ public class LogService : ILogService
             LogManager.Configuration.AddTarget(elmahIoTarget);
             LogManager.Configuration.AddRule(NLog.LogLevel.Error, NLog.LogLevel.Fatal, elmahIoTarget);
             LogManager.ReconfigExistingLoggers();
-            GlobalData.ElmahLogging = true;
+            ElmahLogging = true;
             return true;
         }
         catch (Exception ex)

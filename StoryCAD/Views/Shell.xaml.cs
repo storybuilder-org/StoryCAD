@@ -71,7 +71,7 @@ public sealed partial class Shell
         }
 
         //Shows changelog if the app has been updated since the last launch.
-        if (GlobalData.LoadedWithVersionChange)
+        if (Ioc.Default.GetRequiredService<Developer>().LoadedWithVersionChange)
         {
             await new Services.Dialogs.Changelog().ShowChangeLog();
         }

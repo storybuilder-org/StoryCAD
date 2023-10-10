@@ -12,19 +12,9 @@ namespace StoryCAD.Models;
 /// </summary>
 public static class GlobalData
 {
-    /// The current (running) version of StoryCAD
-    public static string Version;
-
-    // Connection status
-    public static bool DopplerConnection;
-    public static bool ElmahLogging;
-
     // Preferences data
     public static PreferencesModel Preferences;
 
     //Path to root directory where data is stored
     public static string RootDirectory = Path.Combine(ApplicationData.Current.RoamingFolder.Path, "StoryCAD");
-
-    // Set to true if the app has loaded with a version change. (Changelog)
-    public static bool LoadedWithVersionChange = false;
 }

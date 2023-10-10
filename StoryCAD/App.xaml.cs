@@ -70,18 +70,17 @@ public partial class App
         
         if (Package.Current.Id.Version.Revision == 65535) //Read the StoryCAD.csproj manifest for a build time instead.
         {
-
             string StoryCADManifestVersion = System.Reflection.Assembly.GetExecutingAssembly()
                 .GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion
                 .Split("build")[1];
 
-            GlobalData.Version = $"Version: {Package.Current.Id.Version.Major}.{Package.Current.Id.Version.Minor}." +
-                $"{Package.Current.Id.Version.Build} Built on: { StoryCADManifestVersion}";
+            Ioc.Default.GetRequiredService<Developer>().Version = $"Version: {Package.Current.Id.Version.Major}" +
+                $".{Package.Current.Id.Version.Minor}.{Package.Current.Id.Version.Build} Built on: { StoryCADManifestVersion}";
         }
         else
         {
-            GlobalData.Version = $"Version: {Package.Current.Id.Version.Major}.{Package.Current.Id.Version.Minor}" +
-                $".{Package.Current.Id.Version.Build}.{Package.Current.Id.Version.Revision}";
+            Ioc.Default.GetRequiredService<Developer>().Version = $"Version: {Package.Current.Id.Version.Major}" +
+                $".{Package.Current.Id.Version.Minor}.{Package.Current.Id.Version.Build}.{Package.Current.Id.Version.Revision}";
 
         }
 
@@ -200,8 +199,8 @@ public partial class App
         {
             if (GlobalData.Preferences.ErrorCollectionConsent)
             {
-                GlobalData.ElmahLogging = _log.AddElmahTarget();
-                if (GlobalData.ElmahLogging) { _log.Log(LogLevel.Info, "elmah successfully added."); }
+                _log.ElmahLogging = _log.AddElmahTarget();
+                if (_log.ElmahLogging) { _log.Log(LogLevel.Info, "elmah successfully added."); }
                 else { _log.Log(LogLevel.Info, "Couldn't add elmah."); }
             }
             else  // can have several reasons (no doppler, or an error adding the target){

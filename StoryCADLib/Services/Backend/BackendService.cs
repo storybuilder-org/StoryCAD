@@ -48,6 +48,7 @@ namespace StoryCAD.Services.Backend
     public class BackendService
     {
         private LogService log = Ioc.Default.GetService<LogService>();
+        private Developer dev = Ioc.Default.GetService<Developer>();
         private string connection = string.Empty;
         private string sslCA = string.Empty;
 
@@ -74,15 +75,15 @@ namespace StoryCAD.Services.Backend
                     if (!GlobalData.Preferences.RecordVersionStatus)
                         await PostVersion();
                     // If the StoryCAD version has changed, post the version change
-                    if (!GlobalData.Version.Equals(GlobalData.Preferences.Version))
+                    if (!dev.Version.Equals(GlobalData.Preferences.Version))
                     {
                         // Process a version change (usually a new release)
                         log.Log(LogLevel.Info,
-                            "Version mismatch: " + GlobalData.Version + " != " + GlobalData.Preferences.Version);
-                        GlobalData.LoadedWithVersionChange = true;
+                            "Version mismatch: " + dev.Version + " != " + GlobalData.Preferences.Version);
+                        dev.LoadedWithVersionChange = true;
                         PreferencesModel preferences = GlobalData.Preferences;
                         // Update Preferences
-                        preferences.Version = GlobalData.Version;
+                        preferences.Version = dev.Version;
                         PreferencesIo prefIO = new(preferences, GlobalData.RootDirectory);
                         await prefIO.WritePreferences();
                         // Post deployment to backend server
@@ -162,7 +163,7 @@ namespace StoryCAD.Services.Backend
                 int id = await sql.AddOrUpdateUser(conn, name, email);
                 log.Log(LogLevel.Info, "User Name: " + name + " userId: " + id);
 
-                string current = GlobalData.Version;
+                string current = dev.Version;
                 string previous = preferences.Version ?? "";
                 // Post the version change to the database
                 await sql.AddVersion(conn, id, current, previous);
