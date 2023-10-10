@@ -183,7 +183,8 @@ public partial class App
         }
         catch (Exception ex) { _log.LogException(LogLevel.Error, ex, ex.Message); }
 
-        string pathMsg = string.Format("Configuration data location = " + GlobalData.RootDirectory);
+        Developer AppDat = Ioc.Default.GetRequiredService<Developer>();
+        string pathMsg = string.Format("Configuration data location = " + AppDat.RootDirectory);
         _log.Log(LogLevel.Info, pathMsg);
         Trace.Listeners.Add(new TextWriterTraceListener(Console.Out));
         Trace.AutoFlush = true;
@@ -192,7 +193,7 @@ public partial class App
 
         // Load Preferences
         PreferencesService pref = Ioc.Default.GetService<PreferencesService>();
-        await pref.LoadPreferences(GlobalData.RootDirectory);
+        await pref.LoadPreferences(AppDat.RootDirectory);
 
         if (Debugger.IsAttached) {_log.Log(LogLevel.Info, "Bypassing elmah.io as debugger is attached.");}
         else

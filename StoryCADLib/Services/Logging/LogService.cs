@@ -38,7 +38,7 @@ public class LogService : ILogService
 
             // Create the file logging target
             FileTarget fileTarget = new();
-            logFilePath = Path.Combine(GlobalData.RootDirectory, "logs");
+            logFilePath = Path.Combine(Ioc.Default.GetRequiredService<Developer>().RootDirectory, "logs");
             fileTarget.FileName = Path.Combine(logFilePath, "updater.${date:format=yyyy-MM-dd}.log");
             fileTarget.CreateDirs = true;
             fileTarget.MaxArchiveFiles = 7;
@@ -136,7 +136,7 @@ public class LogService : ILogService
                         msg.Data.Add(new(key: "Line " + 0, value: $"failed getting system info ({ex.Message})"));
                     }
 
-                    using (FileStream stream = File.Open(Path.Combine(GlobalData.RootDirectory, "logs", $"updater.{DateTime.Now.ToString("yyyy-MM-dd")}.log"), FileMode.Open, FileAccess.Read,FileShare.ReadWrite))
+                    using (FileStream stream = File.Open(Path.Combine(Ioc.Default.GetRequiredService<Developer>().RootDirectory, "logs", $"updater.{DateTime.Now.ToString("yyyy-MM-dd")}.log"), FileMode.Open, FileAccess.Read,FileShare.ReadWrite))
                     {
                         using (StreamReader reader = new(stream))
                         {

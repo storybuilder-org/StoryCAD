@@ -56,7 +56,7 @@ public sealed partial class PreferencesDialog
     /// </summary>
     private void OpenLogFolder(object sender, RoutedEventArgs e)
     {
-        Process.Start(new ProcessStartInfo { FileName = Path.Combine(GlobalData.RootDirectory, "Logs"), UseShellExecute = true, Verb = "open" });
+        Process.Start(new ProcessStartInfo { FileName = Path.Combine(Ioc.Default.GetRequiredService<Developer>().RootDirectory, "Logs"), UseShellExecute = true, Verb = "open" });
     }
 
     private async void SetBackupPath(object sender, RoutedEventArgs e)

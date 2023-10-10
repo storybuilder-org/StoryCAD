@@ -135,7 +135,7 @@ namespace StoryCAD.Services.Backup
                 Log.Log(LogLevel.Info, $"Backing up to {backupLocation.Path} as {fileName}.zip");
 
                 Log.Log(LogLevel.Info, "Writing file");
-                StorageFolder Temp = await StorageFolder.GetFolderFromPathAsync(GlobalData.RootDirectory);
+                StorageFolder Temp = await StorageFolder.GetFolderFromPathAsync(Ioc.Default.GetRequiredService<Developer>().RootDirectory);
                 Temp = await Temp.CreateFolderAsync("Temp", CreationCollisionOption.ReplaceExisting);
                 await _shellVM.StoryModel.ProjectFile.CopyAsync(Temp, _shellVM.StoryModel.ProjectFile.Name,
                     NameCollisionOption.ReplaceExisting);

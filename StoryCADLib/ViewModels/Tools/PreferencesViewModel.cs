@@ -252,7 +252,7 @@ public class PreferencesViewModel : ObservableValidator
     /// </summary>
     public async Task SaveAsync()
     {
-        PreferencesIo _prfIo = new(CurrentModel, Path.Combine(ApplicationData.Current.RoamingFolder.Path, "StoryCAD"));
+        PreferencesIo _prfIo = new(CurrentModel, Ioc.Default.GetRequiredService<Developer>().RootDirectory);
         await _prfIo.WritePreferences();
         await _prfIo.ReadPreferences();
         GlobalData.Preferences = CurrentModel;

@@ -79,9 +79,9 @@ public class InitVM : ObservableRecipient
         Preferences.PreferencesInitialized = true; 
 
         //Updates the file, then rereads into memory.
-        PreferencesIo _prfIo = new(Preferences, System.IO.Path.Combine(ApplicationData.Current.RoamingFolder.Path,"StoryCAD"));
+        PreferencesIo _prfIo = new(Preferences, Ioc.Default.GetRequiredService<Developer>().RootDirectory);
         await _prfIo.WritePreferences ();
-        PreferencesIo _loader = new(GlobalData.Preferences, System.IO.Path.Combine(ApplicationData.Current.RoamingFolder.Path, "StoryCAD"));
+        PreferencesIo _loader = new(GlobalData.Preferences, Ioc.Default.GetRequiredService<Developer>().RootDirectory);
         await _loader.ReadPreferences();
         BackendService _backend = Ioc.Default.GetRequiredService<BackendService>();
         if (!GlobalData.Preferences.RecordPreferencesStatus) { await _backend.PostPreferences(GlobalData.Preferences); }

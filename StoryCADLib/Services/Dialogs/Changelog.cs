@@ -17,6 +17,7 @@ namespace StoryCAD.Services.Dialogs
     {
         private GitHubClient _client = new(new ProductHeaderValue("STB"));
         private LogService Logger = Ioc.Default.GetRequiredService<LogService>();
+        private Developer AppDat = Ioc.Default.GetRequiredService<Developer>();
 
         /// <summary>
         /// This access the changelog for the latest version
@@ -28,7 +29,7 @@ namespace StoryCAD.Services.Dialogs
             {
                 //Returns body of release
                 return (await _client.Repository.Release.Get("StoryBuilder-org", "StoryCAD",
-                    Ioc.Default.GetRequiredService<Developer>().Version.Replace("Version: ", ""))).Body;
+                    AppDat.Version.Replace("Version: ", ""))).Body;
             }
             catch (Exception _e)
             {
@@ -55,7 +56,7 @@ namespace StoryCAD.Services.Dialogs
         public async Task ShowChangeLog()
         {
             //Don't Show changelog on dev build's since its pointless.
-            if (Ioc.Default.GetRequiredService<Developer>().DeveloperBuild) { return; }
+            if (AppDat.DeveloperBuild) { return; }
 
             try
             {
@@ -71,7 +72,7 @@ namespace StoryCAD.Services.Dialogs
                             Text = (await GetChangelogText())
                         }
                     },
-                    Title = "What's new in StoryCAD " + Ioc.Default.GetRequiredService<Developer>().Version,
+                    Title = "What's new in StoryCAD " + AppDat.Version,
                     PrimaryButtonText = "Okay",
                     XamlRoot = Ioc.Default.GetRequiredService<Windowing>().XamlRoot,
                 };

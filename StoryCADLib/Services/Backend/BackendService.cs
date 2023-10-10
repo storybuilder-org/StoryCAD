@@ -84,7 +84,7 @@ namespace StoryCAD.Services.Backend
                         PreferencesModel preferences = GlobalData.Preferences;
                         // Update Preferences
                         preferences.Version = dev.Version;
-                        PreferencesIo prefIO = new(preferences, GlobalData.RootDirectory);
+                        PreferencesIo prefIO = new(preferences, dev.RootDirectory);
                         await prefIO.WritePreferences();
                         // Post deployment to backend server
                         await PostVersion();
@@ -128,7 +128,7 @@ namespace StoryCAD.Services.Backend
                 await sql.AddOrUpdatePreferences(conn, id, elmah, newsletter, version);
                 // Indicate we've stored them successfully
                 GlobalData.Preferences.RecordPreferencesStatus = true;
-                PreferencesIo loader = new(GlobalData.Preferences, GlobalData.RootDirectory);
+                PreferencesIo loader = new(GlobalData.Preferences, dev.RootDirectory);
                 await loader.WritePreferences();
                 log.Log(LogLevel.Info, "Preferences:  elmah=" + elmah + " newsletter=" + newsletter);
             }
@@ -169,7 +169,7 @@ namespace StoryCAD.Services.Backend
                 await sql.AddVersion(conn, id, current, previous);
                 // Indicate we've stored it  successfully
                 GlobalData.Preferences.RecordVersionStatus = true;
-                PreferencesIo loader = new(GlobalData.Preferences, GlobalData.RootDirectory);
+                PreferencesIo loader = new(GlobalData.Preferences, dev.RootDirectory);
                 await loader.WritePreferences();
                 log.Log(LogLevel.Info, "Version:  Current=" + current + " Previous=" + previous);
             }

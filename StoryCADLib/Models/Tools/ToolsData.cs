@@ -31,7 +31,7 @@ public class ToolsData
             ToolsData toolsdata = Ioc.Default.GetService<ToolsData>();
             Task.Run(async () =>
             {
-                await loader.Init(GlobalData.RootDirectory);
+                await loader.Init(Ioc.Default.GetRequiredService<Developer>().RootDirectory);
             }).Wait();
             _log.Log(LogLevel.Info, $"{toolsdata.KeyQuestionsSource.Keys.Count} Key Questions created");
             _log.Log(LogLevel.Info, $"{toolsdata.StockScenesSource.Keys.Count} Stock Scenes created");

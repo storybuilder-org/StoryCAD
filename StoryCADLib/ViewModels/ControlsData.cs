@@ -41,7 +41,7 @@ namespace StoryCAD.ViewModels
                 ControlData controldata = Ioc.Default.GetService<ControlData>();
                 Task.Run(async () =>
                 {
-                    await loader.Init(GlobalData.RootDirectory);
+                    await loader.Init(Ioc.Default.GetRequiredService<Developer>().RootDirectory);
                 }).Wait();
 
                 _log.Log(LogLevel.Info, "ConflictType Counts");

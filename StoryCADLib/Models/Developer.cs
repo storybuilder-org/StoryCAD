@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -10,14 +11,23 @@ using StoryCAD.Services.Logging;
 using StoryCAD.ViewModels;
 using Windows.ApplicationModel;
 using Windows.Devices.Input;
+using Windows.Storage;
 
 namespace StoryCAD.Models;
 
 /// <summary>
-/// This class holde developer info/tooling.f
+/// This class holds developer tools
+/// and app data.
+/// 
+/// TODO: rename to app data or better name?
 /// </summary>
 public class Developer
 {
+    /// <summary>
+    /// This is the path where all app files are stored
+    /// </summary>
+    public string RootDirectory = Path.Combine(ApplicationData.Current.RoamingFolder.Path, "StoryCAD");
+
 
     /// <summary>
     /// This variable will return true if any of following are true:

@@ -29,7 +29,7 @@ namespace StoryCAD.Models
                 ListLoader loader = Ioc.Default.GetService<ListLoader>();
                 Task.Run(async () =>
                 {
-                    ListControlSource = await loader.Init(GlobalData.RootDirectory);
+                    ListControlSource = await loader.Init(Ioc.Default.GetRequiredService<Developer>().RootDirectory);
                 }).Wait();
 
                 _log.Log(LogLevel.Info, $"{ListControlSource.Keys.Count} ListLoader.Init keys created");

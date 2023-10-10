@@ -22,6 +22,7 @@ namespace StoryCAD.ViewModels;
 public class WebViewModel : ObservableRecipient, INavigable
 {
     private Windowing Window = Ioc.Default.GetRequiredService<Windowing>();
+    private Developer AppDat = Ioc.Default.GetRequiredService<Developer>();
 
     ///TODO: Make sure queries are async
     #region Fields
@@ -163,13 +164,13 @@ public class WebViewModel : ObservableRecipient, INavigable
                     "https://go.microsoft.com/fwlink/p/?LinkId=2124703"); //Get HTTP response
             await using Stream _resultStream = await _httpResult.Content.ReadAsStreamAsync(); //Read stream
             await using FileStream _fileStream =
-                File.Create(Path.Combine(GlobalData.RootDirectory, "evergreenbootstrapper.exe")); //Create File.
+                File.Create(Path.Combine(AppDat.RootDirectory, "evergreenbootstrapper.exe")); //Create File.
             await _resultStream.CopyToAsync(_fileStream); //Write file
             await _fileStream.FlushAsync(); //Flushes steam.
             await _fileStream.DisposeAsync(); //Cleans up resources
 
             //Run installer and wait for it to finish
-            await Process.Start(Path.Combine(GlobalData.RootDirectory, "evergreenbootstrapper.exe"))!
+            await Process.Start(Path.Combine(AppDat.RootDirectory, "evergreenbootstrapper.exe"))!
                 .WaitForExitAsync();
 
             //Show success/fail dialog

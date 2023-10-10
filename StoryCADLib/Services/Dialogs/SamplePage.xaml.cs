@@ -8,16 +8,13 @@ using StoryCAD.ViewModels;
 
 namespace StoryCAD.Services.Dialogs;
 
-/// <summary>
-/// An empty page that can be used on its own or navigated to within a Frame.
-/// </summary>
 public sealed partial class SamplePage : Page
 {
     private List<string> paths = new();
     public SamplePage(UnifiedVM vm)
     {
         InitializeComponent();
-        foreach (string sampleStory in Directory.GetFiles(Path.Combine(GlobalData.RootDirectory, "samples")))
+        foreach (string sampleStory in Directory.GetFiles(Path.Combine(Ioc.Default.GetRequiredService<Developer>().RootDirectory, "samples")))
         {
             Samples.Items.Add(Path.GetFileName(sampleStory).Replace(".stbx", ""));
             paths.Add(sampleStory);

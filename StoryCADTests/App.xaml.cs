@@ -66,17 +66,17 @@ namespace StoryCADTests
         protected override async void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
         {
             _log.Log(LogLevel.Info, "StoryCADTests.App launched");
-
-            string pathMsg = string.Format("Configuration data location = " + GlobalData.RootDirectory);
+            Developer AppDat = Ioc.Default.GetRequiredService<Developer>();
+            string pathMsg = string.Format("Configuration data location = " + AppDat.RootDirectory);
             _log.Log(LogLevel.Info, pathMsg);
 
             // Load Preferences
             PreferencesService pref = Ioc.Default.GetService<PreferencesService>();
-            await pref.LoadPreferences(GlobalData.RootDirectory);
+            await pref.LoadPreferences(AppDat.RootDirectory);
 
             await ProcessInstallationFiles();
 
-            await LoadTools(GlobalData.RootDirectory);
+            await LoadTools(AppDat.RootDirectory);
 
             Microsoft.VisualStudio.TestPlatform.TestExecutor.UnitTestClient.CreateDefaultUI();
 
