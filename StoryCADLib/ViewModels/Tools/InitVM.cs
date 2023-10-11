@@ -15,6 +15,8 @@ namespace StoryCAD.ViewModels.Tools;
 /// </summary>
 public class InitVM : ObservableRecipient
 {
+    private AppState State = Ioc.Default.GetService<AppState>();
+
 
     /// <summary>
     /// This is the constructor for InitVM.
@@ -79,11 +81,11 @@ public class InitVM : ObservableRecipient
         Preferences.PreferencesInitialized = true; 
 
         //Updates the file, then rereads into memory.
-        PreferencesIo _prfIo = new(Preferences, Ioc.Default.GetRequiredService<Developer>().RootDirectory);
+        PreferencesIo _prfIo = new(Preferences, Ioc.Default.GetRequiredService<AppState>().RootDirectory);
         await _prfIo.WritePreferences ();
-        PreferencesIo _loader = new(GlobalData.Preferences, Ioc.Default.GetRequiredService<Developer>().RootDirectory);
+        PreferencesIo _loader = new(State.Preferences, Ioc.Default.GetRequiredService<AppState>().RootDirectory);
         await _loader.ReadPreferences();
         BackendService _backend = Ioc.Default.GetRequiredService<BackendService>();
-        if (!GlobalData.Preferences.RecordPreferencesStatus) { await _backend.PostPreferences(GlobalData.Preferences); }
+        if (!State.Preferences.RecordPreferencesStatus) { await _backend.PostPreferences(State.Preferences); }
     }
 }

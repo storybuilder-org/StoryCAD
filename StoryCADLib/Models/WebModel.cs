@@ -1,4 +1,5 @@
-﻿using StoryCAD.ViewModels;
+﻿using CommunityToolkit.Mvvm.DependencyInjection;
+using StoryCAD.ViewModels;
 using System;
 using Windows.Data.Xml.Dom;
 
@@ -13,7 +14,7 @@ public class WebModel : StoryElement
     {
         Timestamp = DateTime.Now;
 
-        switch (GlobalData.Preferences.PreferredSearchEngine)
+        switch (Ioc.Default.GetRequiredService<AppState>().Preferences.PreferredSearchEngine)
         {
             case BrowserType.DuckDuckGo:
                  URL = new Uri("https://duckduckgo.com/");

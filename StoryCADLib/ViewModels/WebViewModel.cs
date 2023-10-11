@@ -22,7 +22,7 @@ namespace StoryCAD.ViewModels;
 public class WebViewModel : ObservableRecipient, INavigable
 {
     private Windowing Window = Ioc.Default.GetRequiredService<Windowing>();
-    private Developer AppDat = Ioc.Default.GetRequiredService<Developer>();
+    private AppState AppDat = Ioc.Default.GetRequiredService<AppState>();
 
     ///TODO: Make sure queries are async
     #region Fields
@@ -284,7 +284,7 @@ public class WebViewModel : ObservableRecipient, INavigable
             _logger.Log(LogLevel.Info, $"Checking if {Query} is not URI, searching it.");
             if (Query == null) { Query = string.Empty; }
             string _dataString = Uri.EscapeDataString(Query);
-            switch (GlobalData.Preferences.PreferredSearchEngine)
+            switch (Ioc.Default.GetRequiredService<AppState>().Preferences.PreferredSearchEngine)
             {
                 case BrowserType.DuckDuckGo:
                     Url = new Uri("https://duckduckgo.com/?va=j&q=" + _dataString);

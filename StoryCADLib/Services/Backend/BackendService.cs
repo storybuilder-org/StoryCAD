@@ -48,7 +48,7 @@ namespace StoryCAD.Services.Backend
     public class BackendService
     {
         private LogService log = Ioc.Default.GetService<LogService>();
-        private Developer dev = Ioc.Default.GetService<Developer>();
+        private AppState State = Ioc.Default.GetService<AppState>();
         private string connection = string.Empty;
         private string sslCA = string.Empty;
 
@@ -70,21 +70,21 @@ namespace StoryCAD.Services.Backend
                 {
                     // If the previous attempt to communicate to the back-end server
                     // or database failed, retry
-                    if (!GlobalData.Preferences.RecordPreferencesStatus)
-                        await PostPreferences(GlobalData.Preferences);
-                    if (!GlobalData.Preferences.RecordVersionStatus)
+                    if (!State.Preferences.RecordPreferencesStatus)
+                        await PostPreferences(State.Preferences);
+                    if (!State.Preferences.RecordVersionStatus)
                         await PostVersion();
                     // If the StoryCAD version has changed, post the version change
-                    if (!dev.Version.Equals(GlobalData.Preferences.Version))
+                    if (!State.Version.Equals(State.Preferences.Version))
                     {
                         // Process a version change (usually a new release)
                         log.Log(LogLevel.Info,
-                            "Version mismatch: " + dev.Version + " != " + GlobalData.Preferences.Version);
-                        dev.LoadedWithVersionChange = true;
-                        PreferencesModel preferences = GlobalData.Preferences;
+                            "Version mismatch: " + State.Version + " != " + State.Preferences.Version);
+                        State.LoadedWithVersionChange = true;
+                        PreferencesModel preferences = State.Preferences;
                         // Update Preferences
-                        preferences.Version = dev.Version;
-                        PreferencesIo prefIO = new(preferences, dev.RootDirectory);
+                        preferences.Version = State.Version;
+                        PreferencesIo prefIO = new(preferences, State.RootDirectory);
                         await prefIO.WritePreferences();
                         // Post deployment to backend server
                         await PostVersion();
@@ -127,8 +127,8 @@ namespace StoryCAD.Services.Backend
                 // Post the preferences to the database
                 await sql.AddOrUpdatePreferences(conn, id, elmah, newsletter, version);
                 // Indicate we've stored them successfully
-                GlobalData.Preferences.RecordPreferencesStatus = true;
-                PreferencesIo loader = new(GlobalData.Preferences, dev.RootDirectory);
+                State.Preferences.RecordPreferencesStatus = true;
+                PreferencesIo loader = new(State.Preferences, State.RootDirectory);
                 await loader.WritePreferences();
                 log.Log(LogLevel.Info, "Preferences:  elmah=" + elmah + " newsletter=" + newsletter);
             }
@@ -148,7 +148,7 @@ namespace StoryCAD.Services.Backend
         {
             log.Log(LogLevel.Info, "Posting version data to parse");
 
-            PreferencesModel preferences = GlobalData.Preferences;
+            PreferencesModel preferences = State.Preferences;
             MySqlIo sql = Ioc.Default.GetService<MySqlIo>();
 
             // Get a connection to the database
@@ -163,13 +163,13 @@ namespace StoryCAD.Services.Backend
                 int id = await sql.AddOrUpdateUser(conn, name, email);
                 log.Log(LogLevel.Info, "User Name: " + name + " userId: " + id);
 
-                string current = dev.Version;
+                string current = State.Version;
                 string previous = preferences.Version ?? "";
                 // Post the version change to the database
                 await sql.AddVersion(conn, id, current, previous);
                 // Indicate we've stored it  successfully
-                GlobalData.Preferences.RecordVersionStatus = true;
-                PreferencesIo loader = new(GlobalData.Preferences, dev.RootDirectory);
+                State.Preferences.RecordVersionStatus = true;
+                PreferencesIo loader = new(State.Preferences, State.RootDirectory);
                 await loader.WritePreferences();
                 log.Log(LogLevel.Info, "Version:  Current=" + current + " Previous=" + previous);
             }

@@ -10,7 +10,6 @@ using StoryCAD.Models;
 using StoryCAD.Models.Tools;
 using StoryCAD.Services.Installation;
 using StoryCAD.Services.Logging;
-using StoryCAD.Services.Preferences;
 using dotenv.net.Utilities;
 using dotenv.net;
 using Syncfusion.Licensing;
@@ -47,7 +46,7 @@ namespace StoryCADTests
                 string token = EnvReader.GetStringValue("SYNCFUSION_TOKEN");
                 SyncfusionLicenseProvider.RegisterLicense(token);
 
-                Ioc.Default.GetRequiredService<Developer>().EnvPresent = true;
+                Ioc.Default.GetRequiredService<AppState>().EnvPresent = true;
             }
             catch {  }
 
@@ -66,13 +65,9 @@ namespace StoryCADTests
         protected override async void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
         {
             _log.Log(LogLevel.Info, "StoryCADTests.App launched");
-            Developer AppDat = Ioc.Default.GetRequiredService<Developer>();
+            AppState AppDat = Ioc.Default.GetRequiredService<AppState>();
             string pathMsg = string.Format("Configuration data location = " + AppDat.RootDirectory);
             _log.Log(LogLevel.Info, pathMsg);
-
-            // Load Preferences
-            PreferencesService pref = Ioc.Default.GetService<PreferencesService>();
-            await pref.LoadPreferences(AppDat.RootDirectory);
 
             await ProcessInstallationFiles();
 

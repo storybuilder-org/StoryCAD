@@ -20,7 +20,6 @@ using StoryCAD.Services.Installation;
 using StoryCAD.Services.Json;
 using StoryCAD.Services.Logging;
 using StoryCAD.Services.Navigation;
-using StoryCAD.Services.Preferences;
 using StoryCAD.Services.Search;
 using StoryCAD.ViewModels;
 using StoryCAD.ViewModels.Tools;
@@ -74,12 +73,12 @@ public partial class App
                 .GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion
                 .Split("build")[1];
 
-            Ioc.Default.GetRequiredService<Developer>().Version = $"Version: {Package.Current.Id.Version.Major}" +
+            Ioc.Default.GetRequiredService<AppState>().Version = $"Version: {Package.Current.Id.Version.Major}" +
                 $".{Package.Current.Id.Version.Minor}.{Package.Current.Id.Version.Build} Built on: { StoryCADManifestVersion}";
         }
         else
         {
-            Ioc.Default.GetRequiredService<Developer>().Version = $"Version: {Package.Current.Id.Version.Major}" +
+            Ioc.Default.GetRequiredService<AppState>().Version = $"Version: {Package.Current.Id.Version.Major}" +
                 $".{Package.Current.Id.Version.Minor}.{Package.Current.Id.Version.Build}.{Package.Current.Id.Version.Revision}";
 
         }
@@ -94,7 +93,7 @@ public partial class App
             //Register Syncfusion license
             string token = EnvReader.GetStringValue("SYNCFUSION_TOKEN");
             SyncfusionLicenseProvider.RegisterLicense(token);
-            Ioc.Default.GetRequiredService<Developer>().EnvPresent = true;
+            Ioc.Default.GetRequiredService<AppState>().EnvPresent = true;
         }
         catch { }
 
@@ -183,7 +182,7 @@ public partial class App
         }
         catch (Exception ex) { _log.LogException(LogLevel.Error, ex, ex.Message); }
 
-        Developer AppDat = Ioc.Default.GetRequiredService<Developer>();
+        AppState AppDat = Ioc.Default.GetRequiredService<AppState>();
         string pathMsg = string.Format("Configuration data location = " + AppDat.RootDirectory);
         _log.Log(LogLevel.Info, pathMsg);
         Trace.Listeners.Add(new TextWriterTraceListener(Console.Out));
@@ -191,14 +190,10 @@ public partial class App
         Trace.Indent();
         Trace.WriteLine(pathMsg);
 
-        // Load Preferences
-        PreferencesService pref = Ioc.Default.GetService<PreferencesService>();
-        await pref.LoadPreferences(AppDat.RootDirectory);
-
         if (Debugger.IsAttached) {_log.Log(LogLevel.Info, "Bypassing elmah.io as debugger is attached.");}
         else
         {
-            if (GlobalData.Preferences.ErrorCollectionConsent)
+            if (Ioc.Default.GetRequiredService<AppState>().Preferences.ErrorCollectionConsent)
             {
                 _log.ElmahLogging = _log.AddElmahTarget();
                 if (_log.ElmahLogging) { _log.Log(LogLevel.Info, "elmah successfully added."); }
@@ -230,7 +225,7 @@ public partial class App
         //   If we've not yet initialized Preferences, it's PreferencesInitialization.
         //   If we have initialized Preferences, it Shell.
         // PreferencesInitialization will Navigate to Shell after it's done its business.
-        if (!GlobalData.Preferences.PreferencesInitialized) {rootFrame.Navigate(typeof(PreferencesInitialization));}
+        if (!Ioc.Default.GetRequiredService<AppState>().Preferences.PreferencesInitialized) {rootFrame.Navigate(typeof(PreferencesInitialization));}
         else {rootFrame.Navigate(typeof(Shell));}
 
         // Preserve both the Window and its Handle for future use

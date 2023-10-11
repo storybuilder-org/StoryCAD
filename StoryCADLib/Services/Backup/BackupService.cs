@@ -18,6 +18,7 @@ namespace StoryCAD.Services.Backup
         private System.Timers.Timer backupTimer;
 
         private LogService Log = Ioc.Default.GetService<LogService>();
+        private AppState State = Ioc.Default.GetService<AppState>();
         ShellViewModel _shellVM;
 
         #region Constructor
@@ -32,7 +33,7 @@ namespace StoryCAD.Services.Backup
             timedBackupWorker.DoWork += RunBackupTask;
 
             backupTimer = new System.Timers.Timer
-                (GlobalData.Preferences.TimedBackupInterval * 60 * 1000);  // interval in minutes
+                (State.Preferences.TimedBackupInterval * 60 * 1000);  // interval in minutes
             backupTimer.AutoReset = true;
             backupTimer.Elapsed += BackupTimer_Elapsed;
         }
@@ -53,7 +54,7 @@ namespace StoryCAD.Services.Backup
         /// </summary>
         public void StartTimedBackup()
         {
-            if (!GlobalData.Preferences.TimedBackup)
+            if (!State.Preferences.TimedBackup)
                return;
             
             // If the timer is already running, stop it
@@ -61,7 +62,7 @@ namespace StoryCAD.Services.Backup
                 backupTimer.Stop();
 
             // Reset the timer and start it 
-            backupTimer.Interval = (GlobalData.Preferences.TimedBackupInterval * 60 * 1000); // interval in minutes
+            backupTimer.Interval = (State.Preferences.TimedBackupInterval * 60 * 1000); // interval in minutes
             backupTimer.Start();
         }
 
@@ -117,25 +118,25 @@ namespace StoryCAD.Services.Backup
         {
             _shellVM = Ioc.Default.GetService<ShellViewModel>();
 
-            Log.Log(LogLevel.Info, $"Starting Project Backup at {GlobalData.Preferences.BackupDirectory}");
+            Log.Log(LogLevel.Info, $"Starting Project Backup at {State.Preferences.BackupDirectory}");
             try
             {
                 //Creates backup directory if it doesn't exist
-                if (!Directory.Exists(GlobalData.Preferences.BackupDirectory))
+                if (!Directory.Exists(State.Preferences.BackupDirectory))
                 {
                     Log.Log(LogLevel.Info, "Backup dir not found, making it.");
-                    Directory.CreateDirectory(GlobalData.Preferences.BackupDirectory);
+                    Directory.CreateDirectory(State.Preferences.BackupDirectory);
                 }
 
                 //Gets correct name for file
                 Log.Log(LogLevel.Info, "Getting backup path and file to make");
                 string fileName = $"{_shellVM!.StoryModel.ProjectFile.Name} as of {DateTime.Now}".Replace('/', ' ').Replace(':', ' ').Replace(".stbx", "");
-                StorageFolder backupRoot = await StorageFolder.GetFolderFromPathAsync(GlobalData.Preferences.BackupDirectory.Replace(".stbx", ""));
+                StorageFolder backupRoot = await StorageFolder.GetFolderFromPathAsync(State.Preferences.BackupDirectory.Replace(".stbx", ""));
                 StorageFolder backupLocation = await backupRoot.CreateFolderAsync(_shellVM.StoryModel.ProjectFile.Name, CreationCollisionOption.OpenIfExists);
                 Log.Log(LogLevel.Info, $"Backing up to {backupLocation.Path} as {fileName}.zip");
 
                 Log.Log(LogLevel.Info, "Writing file");
-                StorageFolder Temp = await StorageFolder.GetFolderFromPathAsync(Ioc.Default.GetRequiredService<Developer>().RootDirectory);
+                StorageFolder Temp = await StorageFolder.GetFolderFromPathAsync(Ioc.Default.GetRequiredService<AppState>().RootDirectory);
                 Temp = await Temp.CreateFolderAsync("Temp", CreationCollisionOption.ReplaceExisting);
                 await _shellVM.StoryModel.ProjectFile.CopyAsync(Temp, _shellVM.StoryModel.ProjectFile.Name,
                     NameCollisionOption.ReplaceExisting);

@@ -17,7 +17,7 @@ namespace StoryCAD.Services.Dialogs
     {
         private GitHubClient _client = new(new ProductHeaderValue("STB"));
         private LogService Logger = Ioc.Default.GetRequiredService<LogService>();
-        private Developer AppDat = Ioc.Default.GetRequiredService<Developer>();
+        private AppState AppDat = Ioc.Default.GetRequiredService<AppState>();
 
         /// <summary>
         /// This access the changelog for the latest version

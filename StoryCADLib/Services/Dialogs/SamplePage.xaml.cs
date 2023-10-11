@@ -14,7 +14,7 @@ public sealed partial class SamplePage : Page
     public SamplePage(UnifiedVM vm)
     {
         InitializeComponent();
-        foreach (string sampleStory in Directory.GetFiles(Path.Combine(Ioc.Default.GetRequiredService<Developer>().RootDirectory, "samples")))
+        foreach (string sampleStory in Directory.GetFiles(Path.Combine(Ioc.Default.GetRequiredService<AppState>().RootDirectory, "samples")))
         {
             Samples.Items.Add(Path.GetFileName(sampleStory).Replace(".stbx", ""));
             paths.Add(sampleStory);

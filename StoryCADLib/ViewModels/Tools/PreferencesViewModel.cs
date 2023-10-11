@@ -1,6 +1,4 @@
-using System.IO;
 using System.Threading.Tasks;
-using Windows.Storage;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using StoryCAD.DAL;
@@ -11,10 +9,8 @@ using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml;
 using Windows.UI.ViewManagement;
 using System;
-using WinRT.Interop;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 using System.Linq;
 
 namespace StoryCAD.ViewModels.Tools;
@@ -34,7 +30,7 @@ namespace StoryCAD.ViewModels.Tools;
 /// </summary>
 public class PreferencesViewModel : ObservableValidator
 {
-    public PreferencesModel CurrentModel = GlobalData.Preferences;
+    public PreferencesModel CurrentModel = Ioc.Default.GetRequiredService<AppState>().Preferences;
     public string Errors => string.Join(Environment.NewLine, from ValidationResult e in GetErrors(null) select e.ErrorMessage);
 
     #region Fields
@@ -252,14 +248,16 @@ public class PreferencesViewModel : ObservableValidator
     /// </summary>
     public async Task SaveAsync()
     {
-        PreferencesIo _prfIo = new(CurrentModel, Ioc.Default.GetRequiredService<Developer>().RootDirectory);
+        PreferencesIo _prfIo = new(CurrentModel, Ioc.Default.GetRequiredService<AppState>().RootDirectory);
         await _prfIo.WritePreferences();
         await _prfIo.ReadPreferences();
-        GlobalData.Preferences = CurrentModel;
+        AppState State = Ioc.Default.GetService<AppState>();
+
+        State.Preferences = CurrentModel;
 
         BackendService _backend = Ioc.Default.GetRequiredService<BackendService>();
-        GlobalData.Preferences.RecordPreferencesStatus = false;  // indicate need to update
-        await _backend.PostPreferences(GlobalData.Preferences);
+        State.Preferences.RecordPreferencesStatus = false;  // indicate need to update
+        await _backend.PostPreferences(State.Preferences);
     }
 
     private void OnPropertyChanged(object sender, PropertyChangedEventArgs args)

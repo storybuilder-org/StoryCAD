@@ -1,5 +1,7 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using CommunityToolkit.Mvvm.DependencyInjection;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using StoryCAD.Models;
+using StoryCAD.ViewModels;
 
 namespace StoryCADTests
 {
@@ -9,8 +11,9 @@ namespace StoryCADTests
         [TestMethod]
         public void TestConflictTypes()
         {
-            Assert.AreEqual(8, GlobalData.ConflictTypes.Keys.Count);
-            Assert.AreEqual(65, GlobalData.RelationTypes.Count);
+            ControlData data =  Ioc.Default.GetRequiredService<ControlData>();
+            Assert.AreEqual(8, data.ConflictTypes.Keys.Count);
+            Assert.AreEqual(65, data.RelationTypes.Count);
         }
     }
 }

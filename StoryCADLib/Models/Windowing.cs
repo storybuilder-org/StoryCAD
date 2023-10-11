@@ -51,7 +51,7 @@ public class Windowing
         string BaseTitle = "StoryCAD ";
 
         //Devloper/Unoffical Build title warning
-        if (Ioc.Default.GetRequiredService<Developer>().DeveloperBuild)
+        if (Ioc.Default.GetRequiredService<AppState>().DeveloperBuild)
         {
             BaseTitle += "(DEV BUILD) ";
         }

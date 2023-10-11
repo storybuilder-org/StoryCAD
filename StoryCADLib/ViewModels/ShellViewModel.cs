@@ -70,6 +70,7 @@ public class ShellViewModel : ObservableRecipient
     public readonly SearchService Search;
     private AutoSaveService _autoSaveService = Ioc.Default.GetRequiredService<AutoSaveService>();
     private Windowing Window = Ioc.Default.GetRequiredService<Windowing>();
+    private AppState State = Ioc.Default.GetRequiredService<AppState>();
     private DispatcherTimer _statusTimer;
 
     // The current story outline being processed. 
@@ -168,7 +169,7 @@ public class ShellViewModel : ObservableRecipient
     /// <summary>
     /// Used for theming
     /// </summary>
-    public PreferencesModel UserPreferences = GlobalData.Preferences;
+    public PreferencesModel UserPreferences = Ioc.Default.GetRequiredService<AppState>().Preferences;
 
     /// <summary>
     /// IsPaneOpen is bound to ShellSplitView's IsPaneOpen property with
@@ -398,7 +399,7 @@ public class ShellViewModel : ObservableRecipient
             StoryModel.ProjectPath = StoryModel.ProjectFolder.Path;
 
             OverviewModel _overview = new(Path.GetFileNameWithoutExtension(dialogVM.ProjectName), StoryModel)
-            { DateCreated = DateTime.Today.ToString("yyyy-MM-dd"), Author = GlobalData.Preferences.Name };
+            { DateCreated = DateTime.Today.ToString("yyyy-MM-dd"), Author = State.Preferences.Name };
 
             StoryNodeItem _overviewNode = new(_overview, null) { IsExpanded = true, IsRoot = true };
             StoryModel.ExplorerView.Add(_overviewNode);
@@ -526,18 +527,18 @@ public class ShellViewModel : ObservableRecipient
             // Save the new project
             StoryModel.Changed = true;
             await SaveFile();
-            if (GlobalData.Preferences.BackupOnOpen)
+            if (State.Preferences.BackupOnOpen)
             {
                 await MakeBackup();
             }
 
             // Start the timed backup and auto save services
-            if (GlobalData.Preferences.TimedBackup)
+            if (State.Preferences.TimedBackup)
             {
                 Ioc.Default.GetRequiredService<BackupService>().StartTimedBackup();
             }
 
-            if (GlobalData.Preferences.AutoSave)
+            if (State.Preferences.AutoSave)
             {
                 Ioc.Default.GetRequiredService<AutoSaveService>().StartAutoSave();
             }
@@ -720,7 +721,7 @@ public class ShellViewModel : ObservableRecipient
 
         // Stop the auto save service if it was running
 
-        if (GlobalData.Preferences.AutoSave) { _autoSaveService.StopAutoSave(); }
+        if (State.Preferences.AutoSave) { _autoSaveService.StopAutoSave(); }
         
         // Stop the timed backup service if it was running
         Ioc.Default.GetRequiredService<BackupService>().StopTimedBackup();
@@ -795,7 +796,7 @@ public class ShellViewModel : ObservableRecipient
             }
 
             // Take a backup of the project if the user has the 'backup on open' preference set.
-            if (GlobalData.Preferences.BackupOnOpen)
+            if (State.Preferences.BackupOnOpen)
             {
                 await Ioc.Default.GetRequiredService<BackupService>().BackupProject();
             }
@@ -810,12 +811,12 @@ public class ShellViewModel : ObservableRecipient
             Window.UpdateWindowTitle();
             new UnifiedVM().UpdateRecents(Path.Combine(StoryModel.ProjectFolder.Path, StoryModel.ProjectFile.Name));
 
-            if (GlobalData.Preferences.TimedBackup)
+            if (State.Preferences.TimedBackup)
             {
                 Ioc.Default.GetRequiredService<BackupService>().StartTimedBackup();
             }
 
-            if (GlobalData.Preferences.AutoSave)
+            if (State.Preferences.AutoSave)
             {
                 _autoSaveService.StartAutoSave();
             }
@@ -1838,7 +1839,7 @@ public class ShellViewModel : ObservableRecipient
             _newNode.Parent.IsExpanded = true;
             _newNode.IsRoot = false; //Only an overview node can be a root, which cant be created normally
             _newNode.IsSelected = false;
-            _newNode.Background = GlobalData.Preferences.ContrastColor;
+            _newNode.Background = State.Preferences.ContrastColor;
             NewNodeHighlightCache.Add(_newNode);
         }
         else { return null; }   
@@ -2192,7 +2193,7 @@ public class ShellViewModel : ObservableRecipient
         switch (statusMessage.Value.Level)
         {
             case LogLevel.Info:
-                StatusColor = GlobalData.Preferences.SecondaryColor;
+                StatusColor = State.Preferences.SecondaryColor;
                 _statusTimer.Interval = new TimeSpan(0, 0, 15);  // Timer will tick in 15 seconds
                 _statusTimer.Start();
                 break;

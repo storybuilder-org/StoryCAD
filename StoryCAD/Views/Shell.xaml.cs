@@ -23,7 +23,7 @@ public sealed partial class Shell
 {
     public ShellViewModel ShellVm => Ioc.Default.GetService<ShellViewModel>();
     public UnifiedVM UnifiedVm => Ioc.Default.GetService<UnifiedVM>();
-    public PreferencesModel Preferences = GlobalData.Preferences;
+    public PreferencesModel Preferences = Ioc.Default.GetRequiredService<AppState>().Preferences;
 
     private TreeViewItem dragTargetItem;
     private TreeViewNode dragTargetNode;
@@ -57,11 +57,11 @@ public sealed partial class Shell
         // and pass it on to ContentDialogs as a WinUI work-around. See
         // https://docs.microsoft.com/en-us/windows/winui/api/microsoft.ui.xaml.controls.contentdialog?view=winui-3.0-preview
         Ioc.Default.GetRequiredService<Windowing>().XamlRoot = Content.XamlRoot;
-        Ioc.Default.GetService<Developer>().StartUpTimer.Stop();
+        Ioc.Default.GetService<AppState>().StartUpTimer.Stop();
         ShellVm.ShowHomePage();
         ShellVm.ShowConnectionStatus();
         Ioc.Default.GetRequiredService<Windowing>().UpdateWindowTitle();
-        if (!Ioc.Default.GetService<Developer>().EnvPresent) { await ShellVm.ShowDotEnvWarningAsync(); }
+        if (!Ioc.Default.GetService<AppState>().EnvPresent) { await ShellVm.ShowDotEnvWarningAsync(); }
 
         if (!await Ioc.Default.GetRequiredService<WebViewModel>().CheckWebviewState())
         {
@@ -71,7 +71,7 @@ public sealed partial class Shell
         }
 
         //Shows changelog if the app has been updated since the last launch.
-        if (Ioc.Default.GetRequiredService<Developer>().LoadedWithVersionChange)
+        if (Ioc.Default.GetRequiredService<AppState>().LoadedWithVersionChange)
         {
             await new Services.Dialogs.Changelog().ShowChangeLog();
         }

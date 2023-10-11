@@ -5,7 +5,6 @@ using StoryCAD.Services.Backup;
 using StoryCAD.Services.Installation;
 using StoryCAD.Services.Logging;
 using StoryCAD.Services.Navigation;
-using StoryCAD.Services.Preferences;
 using StoryCAD.Services.Search;
 using StoryCAD.ViewModels.Tools;
 using StoryCAD.ViewModels;
@@ -19,7 +18,6 @@ public class ServiceConfigurator
     public static ServiceProvider Configure()
     {
         return new ServiceCollection()
-             .AddSingleton<PreferencesService>()
              .AddSingleton<NavigationService>()
              .AddSingleton<LogService>()
              .AddSingleton<SearchService>()
@@ -38,7 +36,7 @@ public class ServiceConfigurator
              .AddSingleton<ListData>()
              .AddSingleton<ToolsData>()
              .AddSingleton<ControlData>()
-             .AddSingleton<Developer>()
+             .AddSingleton<AppState>()
              .AddSingleton<Windowing>()
              // Register ViewModels 
              .AddSingleton<ShellViewModel>()

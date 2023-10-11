@@ -218,7 +218,7 @@ public class StoryNodeItem : DependencyObject, INotifyPropertyChanged
         }
     }
 
-    public TextWrapping TextWrapping => GlobalData.Preferences.WrapNodeNames;
+    public TextWrapping TextWrapping => Ioc.Default.GetRequiredService<AppState>().Preferences.WrapNodeNames;
 
     private bool _isRoot;
     /// <summary>

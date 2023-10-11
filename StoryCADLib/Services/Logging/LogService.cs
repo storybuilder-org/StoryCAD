@@ -3,9 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
-using Windows.Devices.Input;
-using CommunityToolkit.WinUI.Helpers;
 using Elmah.Io.Client;
 using Elmah.Io.NLog;
 using NLog;
@@ -28,7 +25,7 @@ public class LogService : ILogService
     private static Exception exceptionHelper;
     private string apiKey = string.Empty;
     private string logID = string.Empty;
-    private Developer DevTools = Ioc.Default.GetService<Developer>();
+    private AppState State = Ioc.Default.GetRequiredService<AppState>();
     public bool ElmahLogging;
     static LogService()
     {
@@ -38,7 +35,7 @@ public class LogService : ILogService
 
             // Create the file logging target
             FileTarget fileTarget = new();
-            logFilePath = Path.Combine(Ioc.Default.GetRequiredService<Developer>().RootDirectory, "logs");
+            logFilePath = Path.Combine(Ioc.Default.GetRequiredService<AppState>().RootDirectory, "logs");
             fileTarget.FileName = Path.Combine(logFilePath, "updater.${date:format=yyyy-MM-dd}.log");
             fileTarget.CreateDirs = true;
             fileTarget.MaxArchiveFiles = 7;
@@ -81,7 +78,7 @@ public class LogService : ILogService
 
             elmahIoTarget.OnMessage += msg =>
             {
-                msg.Version = DevTools.Version;
+                msg.Version = State.Version;
 
 
                 try { msg.Detail = exceptionHelper?.ToString(); }
@@ -90,7 +87,7 @@ public class LogService : ILogService
                     msg.Detail = $"There was an error attempting to obtain StackTrace helper Error: {e.Message}";
                 }
 
-                try { msg.Version = DevTools.Version; }
+                try { msg.Version = State.Version; }
                 catch (Exception e)
                 {
                     msg.Version = $"There was an error trying to obtain version information Error: {e.Message}";
@@ -129,14 +126,14 @@ public class LogService : ILogService
                 
                     try
                     {
-                        msg.Data.Add(new(key: "SystemInfo", DevTools.SystemInfo));
+                        msg.Data.Add(new(key: "SystemInfo", State.SystemInfo));
                     }
                     catch (Exception ex)
                     {
                         msg.Data.Add(new(key: "Line " + 0, value: $"failed getting system info ({ex.Message})"));
                     }
 
-                    using (FileStream stream = File.Open(Path.Combine(Ioc.Default.GetRequiredService<Developer>().RootDirectory, "logs", $"updater.{DateTime.Now.ToString("yyyy-MM-dd")}.log"), FileMode.Open, FileAccess.Read,FileShare.ReadWrite))
+                    using (FileStream stream = File.Open(Path.Combine(Ioc.Default.GetRequiredService<AppState>().RootDirectory, "logs", $"updater.{DateTime.Now.ToString("yyyy-MM-dd")}.log"), FileMode.Open, FileAccess.Read,FileShare.ReadWrite))
                     {
                         using (StreamReader reader = new(stream))
                         {

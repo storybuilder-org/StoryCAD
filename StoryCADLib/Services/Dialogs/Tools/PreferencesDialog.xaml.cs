@@ -21,7 +21,7 @@ public sealed partial class PreferencesDialog
     public PreferencesViewModel PreferencesVm => Ioc.Default.GetService<PreferencesViewModel>();
     public InstallationService InstallVM => Ioc.Default.GetRequiredService<InstallationService>();
     public LogService Logger => Ioc.Default.GetRequiredService<LogService>();
-    public Developer DevTools => Ioc.Default.GetRequiredService<Developer>();
+    public AppState State => Ioc.Default.GetRequiredService<AppState>();
     public Windowing window => Ioc.Default.GetRequiredService<Windowing>();
     public PreferencesDialog()
     {
@@ -35,10 +35,10 @@ public sealed partial class PreferencesDialog
     /// </summary>
     private async void ShowInfo()
     {
-        DevInfo.Text = DevTools.SystemInfo;
+        DevInfo.Text = State.SystemInfo;
 
-        if (DevTools.DeveloperBuild) { Version.Text = PreferencesVm.Version; }
-        else { Version.Text = DevTools.Version; }
+        if (State.DeveloperBuild) { Version.Text = PreferencesVm.Version; }
+        else { Version.Text = State.Version; }
 
         Changelog.Text = await new Changelog().GetChangelogText();
 
@@ -48,7 +48,7 @@ public sealed partial class PreferencesDialog
         SearchEngine.SelectedIndex = (int)PreferencesVm.PreferredSearchEngine;
 
         //Dev Menu is only shown on unoffical builds
-        if (!DevTools.DeveloperBuild) { PivotView.Items.Remove(Dev); }
+        if (!State.DeveloperBuild) { PivotView.Items.Remove(Dev); }
     }
 
     /// <summary>
@@ -56,7 +56,7 @@ public sealed partial class PreferencesDialog
     /// </summary>
     private void OpenLogFolder(object sender, RoutedEventArgs e)
     {
-        Process.Start(new ProcessStartInfo { FileName = Path.Combine(Ioc.Default.GetRequiredService<Developer>().RootDirectory, "Logs"), UseShellExecute = true, Verb = "open" });
+        Process.Start(new ProcessStartInfo { FileName = Path.Combine(Ioc.Default.GetRequiredService<AppState>().RootDirectory, "Logs"), UseShellExecute = true, Verb = "open" });
     }
 
     private async void SetBackupPath(object sender, RoutedEventArgs e)
@@ -125,7 +125,7 @@ public sealed partial class PreferencesDialog
     //Reloads dev stats
     public void RefreshDevStats(object sender, RoutedEventArgs e)
     {
-        DevInfo.Text = DevTools.SystemInfo;
+        DevInfo.Text = State.SystemInfo;
     } 
 
     /// <summary>

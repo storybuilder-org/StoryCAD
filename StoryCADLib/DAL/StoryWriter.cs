@@ -85,7 +85,7 @@ public class StoryWriter
         XmlNode _stb = _xml.CreateElement("StoryCAD");
         //Create an attribute.
         XmlAttribute _attr = _xml.CreateAttribute("Version");
-        _attr.Value = Ioc.Default.GetRequiredService<Developer>().Version; //Write Version data
+        _attr.Value = Ioc.Default.GetRequiredService<AppState>().Version; //Write Version data
         Debug.Assert(_stb.Attributes != null, "_stb.Attributes != null");
         _stb.Attributes.Append(_attr);
         _xml.AppendChild(_stb);

@@ -4,8 +4,13 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.WinUI.Helpers;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Shapes;
+using StoryCAD.DAL;
+using StoryCAD.Models.Tools;
 using StoryCAD.Services.Json;
 using StoryCAD.Services.Logging;
 using StoryCAD.ViewModels;
@@ -18,16 +23,41 @@ namespace StoryCAD.Models;
 /// <summary>
 /// This class holds developer tools
 /// and app data.
-/// 
-/// TODO: rename to app data or better name?
 /// </summary>
-public class Developer
+public class AppState
 {
+
+    private LogService Logger = Ioc.Default.GetRequiredService<LogService>();
+    public AppState()
+    {
+        try
+        {
+            Logger.Log(LogLevel.Info, "Loading Preferences");
+            PreferencesModel model = new();
+            PreferencesIo loader = new(model, RootDirectory);
+            Task.Run(async () =>
+            {
+                await loader.ReadPreferences();
+            }).Wait();
+
+            Preferences = model;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogException(LogLevel.Error, ex, "Error loading Preferences");
+            Application.Current.Exit();  // Win32; 
+        }
+    }
+
     /// <summary>
     /// This is the path where all app files are stored
     /// </summary>
-    public string RootDirectory = Path.Combine(ApplicationData.Current.RoamingFolder.Path, "StoryCAD");
+    public string RootDirectory = System.IO.Path.Combine(ApplicationData.Current.RoamingFolder.Path, "StoryCAD");
 
+    /// <summary>
+    /// User preferences
+    /// </summary>
+    public PreferencesModel Preferences;
 
     /// <summary>
     /// This variable will return true if any of following are true:
@@ -110,21 +140,21 @@ public class Developer
                      Core Count - {Environment.ProcessorCount}
 
                      === User Prefs ===
-                     Name - {GlobalData.Preferences.Name}
-                     Email - {GlobalData.Preferences.Email}
-                     Elmah Consent - {GlobalData.Preferences.ErrorCollectionConsent}
-                     Theme - {GlobalData.Preferences.PrimaryColor.Color.ToHex()}
-                     Accent Color - {GlobalData.Preferences.AccentColor} 
-                     Last Version Prefs logged - {GlobalData.Preferences.Version}
-                     Search Engine - {GlobalData.Preferences.PreferredSearchEngine} 
-                     AutoSave - {GlobalData.Preferences.AutoSave}
-                     AutoSave Interval - {GlobalData.Preferences.AutoSaveInterval} 
-                     Backup - {GlobalData.Preferences.TimedBackup}
-                     Backup Interval - {GlobalData.Preferences.TimedBackupInterval}
-                     Backup on open - {GlobalData.Preferences.BackupOnOpen} 
-                     Project Dir - {GlobalData.Preferences.ProjectDirectory}
-                     Backup Dir - {GlobalData.Preferences.BackupDirectory} 
-                     RecordPreferencesStatus - {GlobalData.Preferences.RecordPreferencesStatus}
+                     Name - {Preferences.Name}
+                     Email - {Preferences.Email}
+                     Elmah Consent - {Preferences.ErrorCollectionConsent}
+                     Theme - {Preferences.PrimaryColor.Color.ToHex()}
+                     Accent Color - {Preferences.AccentColor} 
+                     Last Version Prefs logged - {Preferences.Version}
+                     Search Engine - {Preferences.PreferredSearchEngine} 
+                     AutoSave - {Preferences.AutoSave}
+                     AutoSave Interval - {Preferences.AutoSaveInterval} 
+                     Backup - {Preferences.TimedBackup}
+                     Backup Interval - {Preferences.TimedBackupInterval}
+                     Backup on open - {Preferences.BackupOnOpen} 
+                     Project Dir - {Preferences.ProjectDirectory}
+                     Backup Dir - {Preferences.BackupDirectory} 
+                     RecordPreferencesStatus - {Preferences.RecordPreferencesStatus}
 
                      ===CAD Info===
                      StoryCAD Version - {Version}

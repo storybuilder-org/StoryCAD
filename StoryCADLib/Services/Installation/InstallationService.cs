@@ -17,7 +17,7 @@ namespace StoryCAD.Services.Installation;
 public class InstallationService
 {
     public readonly LogService Logger;
-    public Developer AppDat = Ioc.Default.GetRequiredService<Developer>();
+    public AppState State = Ioc.Default.GetRequiredService<AppState>();
     public RelayCommand InstallFilesCommand { get; }
 
     public async Task InstallFilesAsync()
@@ -32,7 +32,7 @@ public class InstallationService
     public async Task InstallFiles()
     {
         //Skip install files if version hasn't changed.
-        if (AppDat.Version == GlobalData.Preferences.Version)
+        if (State.Version == State.Preferences.Version)
         {
             return;
         }
@@ -58,10 +58,10 @@ public class InstallationService
     {
         try
         {
-            StorageFolder ParentFolder = await StorageFolder.GetFolderFromPathAsync(AppDat.RootDirectory);
+            StorageFolder ParentFolder = await StorageFolder.GetFolderFromPathAsync(State.RootDirectory);
             if (ParentFolder != null)
             {
-                ParentFolder = await StorageFolder.GetFolderFromPathAsync(AppDat.RootDirectory);
+                ParentFolder = await StorageFolder.GetFolderFromPathAsync(State.RootDirectory);
             }
 
             foreach (StorageFile Item in await ParentFolder.GetFilesAsync())
