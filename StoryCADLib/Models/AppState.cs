@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.WinUI.Helpers;
 using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Shapes;
 using StoryCAD.DAL;
 using StoryCAD.Models.Tools;
 using StoryCAD.Services.Json;
@@ -26,28 +23,7 @@ namespace StoryCAD.Models;
 /// </summary>
 public class AppState
 {
-
-    private LogService Logger = Ioc.Default.GetRequiredService<LogService>();
-    public AppState()
-    {
-        try
-        {
-            Logger.Log(LogLevel.Info, "Loading Preferences");
-            PreferencesModel model = new();
-            PreferencesIo loader = new(model, RootDirectory);
-            Task.Run(async () =>
-            {
-                await loader.ReadPreferences();
-            }).Wait();
-
-            Preferences = model;
-        }
-        catch (Exception ex)
-        {
-            Logger.LogException(LogLevel.Error, ex, "Error loading Preferences");
-            Application.Current.Exit();  // Win32; 
-        }
-    }
+    public AppState() { }
 
     /// <summary>
     /// This is the path where all app files are stored
@@ -166,6 +142,26 @@ public class AppState
                      """;
             }
             catch (Exception e) { return $"Error getting System Info, {e.Message}"; }       
-         }
+        }
+
     }
+
+    public async Task LoadPreferences() {
+        LogService Logger = Ioc.Default.GetService<LogService>();
+        try
+        {
+            Logger.Log(LogLevel.Info, "Loading Preferences");
+            PreferencesModel model = new();
+            PreferencesIo loader = new(model, RootDirectory);
+            await loader.ReadPreferences();
+
+            Preferences = model;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogException(LogLevel.Error, ex, "Error loading Preferences");
+            Application.Current.Exit();  // Win32; 
+        }
+    }
+
 }

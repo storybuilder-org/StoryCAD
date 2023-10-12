@@ -206,6 +206,7 @@ public partial class App
         }
         
         Ioc.Default.GetService<BackendService>()!.StartupRecording();
+        await Ioc.Default.GetService<AppState>().LoadPreferences();
 
         await ProcessInstallationFiles();
         ConfigureNavigation();
@@ -220,7 +221,6 @@ public partial class App
         mainWindow.Content = rootFrame;
         mainWindow.CenterOnScreen(); // Centers the window on the monitor
         mainWindow.Activate();
-
         // Navigate to the first page:
         //   If we've not yet initialized Preferences, it's PreferencesInitialization.
         //   If we have initialized Preferences, it Shell.
