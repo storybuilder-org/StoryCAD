@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using StoryCAD.Models;
@@ -8,12 +9,18 @@ namespace StoryCAD.Services.Dialogs;
 
 public sealed partial class RecentFiles : Page
 {
+    private AppState State = Ioc.Default.GetService<AppState>();
+
     public RecentFiles(UnifiedVM vm)
     {
         InitializeComponent();
         UnifiedMenuVM = vm;
 
-        string[] RecentFiles = { GlobalData.Preferences.LastFile1 , GlobalData.Preferences.LastFile2, GlobalData.Preferences.LastFile3, GlobalData.Preferences.LastFile4, GlobalData.Preferences.LastFile5};
+        string[] RecentFiles = { State.Preferences.LastFile1,
+            State.Preferences.LastFile2,
+            State.Preferences.LastFile3,
+            State.Preferences.LastFile4,
+            State.Preferences.LastFile5 };
         foreach (string File in RecentFiles)
         {
             if (!string.IsNullOrWhiteSpace(File) )

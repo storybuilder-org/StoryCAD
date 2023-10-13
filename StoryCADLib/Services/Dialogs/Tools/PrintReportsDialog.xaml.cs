@@ -12,6 +12,8 @@ namespace StoryCAD.Services.Dialogs.Tools;
 public sealed partial class PrintReportsDialog
 {
     public PrintReportDialogVM PrintVM = Ioc.Default.GetRequiredService<PrintReportDialogVM>();
+    private Windowing Window = Ioc.Default.GetRequiredService<Windowing>();
+
     DispatcherTimer _isDone = new() { Interval = new(0, 0, 0, 1, 0) };
 
     public PrintReportsDialog()
@@ -125,16 +127,16 @@ public sealed partial class PrintReportsDialog
         {
             try
             {   // Show print UI
-                await PrintManagerInterop.ShowPrintUIForWindowAsync(GlobalData.WindowHandle);
+                await PrintManagerInterop.ShowPrintUIForWindowAsync(Window.WindowHandle);
             }
             catch (Exception ex) //Error setting up printer
             {
-                GlobalData.GlobalDispatcher.TryEnqueue(async () =>
+                Window.GlobalDispatcher.TryEnqueue(async () =>
                 {
                     PrintVM.CloseDialog();
                     await new ContentDialog
                     {
-                        XamlRoot = GlobalData.XamlRoot,
+                        XamlRoot = Ioc.Default.GetRequiredService<Windowing>().XamlRoot,
                         Title = "Printing error",
                         Content = "The following error occurred when trying to print:\n\n" + ex.Message,
                         PrimaryButtonText = "Ok"

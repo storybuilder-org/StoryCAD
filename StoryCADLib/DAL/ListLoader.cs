@@ -47,5 +47,10 @@ public class ListLoader
         }
         return _lists;
     }
+
+    internal Task<Dictionary<string, ObservableCollection<string>>> Init(object path)
+    {
+        throw new NotImplementedException();
+    }
     #endregion
 }

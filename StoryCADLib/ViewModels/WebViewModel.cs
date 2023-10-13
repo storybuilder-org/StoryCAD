@@ -21,6 +21,9 @@ namespace StoryCAD.ViewModels;
 
 public class WebViewModel : ObservableRecipient, INavigable
 {
+    private Windowing Window = Ioc.Default.GetRequiredService<Windowing>();
+    private AppState AppDat = Ioc.Default.GetRequiredService<AppState>();
+
     ///TODO: Make sure queries are async
     #region Fields
 
@@ -134,7 +137,7 @@ public class WebViewModel : ObservableRecipient, INavigable
         {
             Title = "Webview is missing.",
             Content = "This computer is missing the WebView2 Runtime, without it some features may not work.\nWould you like to install this now?",
-            XamlRoot = GlobalData.XamlRoot,
+            XamlRoot = Window.XamlRoot,
             PrimaryButtonText = "Yes",
             SecondaryButtonText = "No"
         };
@@ -161,17 +164,17 @@ public class WebViewModel : ObservableRecipient, INavigable
                     "https://go.microsoft.com/fwlink/p/?LinkId=2124703"); //Get HTTP response
             await using Stream _resultStream = await _httpResult.Content.ReadAsStreamAsync(); //Read stream
             await using FileStream _fileStream =
-                File.Create(Path.Combine(GlobalData.RootDirectory, "evergreenbootstrapper.exe")); //Create File.
+                File.Create(Path.Combine(AppDat.RootDirectory, "evergreenbootstrapper.exe")); //Create File.
             await _resultStream.CopyToAsync(_fileStream); //Write file
             await _fileStream.FlushAsync(); //Flushes steam.
             await _fileStream.DisposeAsync(); //Cleans up resources
 
             //Run installer and wait for it to finish
-            await Process.Start(Path.Combine(GlobalData.RootDirectory, "evergreenbootstrapper.exe"))!
+            await Process.Start(Path.Combine(AppDat.RootDirectory, "evergreenbootstrapper.exe"))!
                 .WaitForExitAsync();
 
             //Show success/fail dialog
-            ContentDialog _dialog = new() { PrimaryButtonText = "Ok", XamlRoot = GlobalData.XamlRoot };
+            ContentDialog _dialog = new() { PrimaryButtonText = "Ok", XamlRoot = Window.XamlRoot };
             try
             {
                 _dialog.Title = "Webview installed!";
@@ -281,7 +284,7 @@ public class WebViewModel : ObservableRecipient, INavigable
             _logger.Log(LogLevel.Info, $"Checking if {Query} is not URI, searching it.");
             if (Query == null) { Query = string.Empty; }
             string _dataString = Uri.EscapeDataString(Query);
-            switch (GlobalData.Preferences.PreferredSearchEngine)
+            switch (Ioc.Default.GetRequiredService<AppState>().Preferences.PreferredSearchEngine)
             {
                 case BrowserType.DuckDuckGo:
                     Url = new Uri("https://duckduckgo.com/?va=j&q=" + _dataString);

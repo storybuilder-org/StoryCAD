@@ -32,7 +32,7 @@ public sealed partial class PreferencesInitialization
         FolderPicker folderPicker = new();
         if (Window.Current == null)
         {
-            IntPtr hwnd = GlobalData.WindowHandle;
+            IntPtr hwnd = Ioc.Default.GetRequiredService<Windowing>().WindowHandle;
             IInitializeWithWindow initializeWithWindow = folderPicker.As<IInitializeWithWindow>();
             initializeWithWindow.Initialize(hwnd);
         }
@@ -61,7 +61,7 @@ public sealed partial class PreferencesInitialization
         FolderPicker folderPicker = new();
         if (Window.Current == null)
         {
-            IntPtr hwnd = GlobalData.WindowHandle;
+            IntPtr hwnd = Ioc.Default.GetRequiredService<Windowing>().WindowHandle;
             IInitializeWithWindow initializeWithWindow = folderPicker.As<IInitializeWithWindow>();
             initializeWithWindow.Initialize(hwnd);
         }

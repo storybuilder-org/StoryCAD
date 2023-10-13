@@ -23,7 +23,7 @@ public sealed partial class Shell
 {
     public ShellViewModel ShellVm => Ioc.Default.GetService<ShellViewModel>();
     public UnifiedVM UnifiedVm => Ioc.Default.GetService<UnifiedVM>();
-    public PreferencesModel Preferences = GlobalData.Preferences;
+    public PreferencesModel Preferences = Ioc.Default.GetRequiredService<AppState>().Preferences;
 
     private TreeViewItem dragTargetItem;
     private TreeViewNode dragTargetNode;
@@ -38,7 +38,7 @@ public sealed partial class Shell
             InitializeComponent();
             Logger = Ioc.Default.GetService<LogService>();
             DataContext = ShellVm;
-            GlobalData.GlobalDispatcher = DispatcherQueue.GetForCurrentThread();
+            Ioc.Default.GetRequiredService<Windowing>().GlobalDispatcher = DispatcherQueue.GetForCurrentThread();
             Loaded += Shell_Loaded;
         }                         
         catch (Exception ex)
@@ -56,13 +56,12 @@ public sealed partial class Shell
         // The Shell_Loaded event is processed in order to obtain and save the XamlRool  
         // and pass it on to ContentDialogs as a WinUI work-around. See
         // https://docs.microsoft.com/en-us/windows/winui/api/microsoft.ui.xaml.controls.contentdialog?view=winui-3.0-preview
-        Ioc.Default.GetRequiredService<LogService>().GetSystemInfo();
-        GlobalData.XamlRoot = Content.XamlRoot;
-        GlobalData.StartUpTimer.Stop();
+        Ioc.Default.GetRequiredService<Windowing>().XamlRoot = Content.XamlRoot;
+        Ioc.Default.GetService<AppState>().StartUpTimer.Stop();
         ShellVm.ShowHomePage();
         ShellVm.ShowConnectionStatus();
-        ShellVm.UpdateWindowTitle();
-        if (GlobalData.ShowDotEnvWarning) { await ShellVm.ShowDotEnvWarningAsync(); }
+        Ioc.Default.GetRequiredService<Windowing>().UpdateWindowTitle();
+        if (!Ioc.Default.GetService<AppState>().EnvPresent) { await ShellVm.ShowDotEnvWarningAsync(); }
 
         if (!await Ioc.Default.GetRequiredService<WebViewModel>().CheckWebviewState())
         {
@@ -72,15 +71,15 @@ public sealed partial class Shell
         }
 
         //Shows changelog if the app has been updated since the last launch.
-        if (GlobalData.LoadedWithVersionChange)
+        if (Ioc.Default.GetRequiredService<AppState>().LoadedWithVersionChange)
         {
             await new Services.Dialogs.Changelog().ShowChangeLog();
         }
 
         //If StoryCAD was loaded from a .STBX File then instead of showing the Unified menu
         //We will instead load the file instead.
-        if (GlobalData.FilePathToLaunch == null) { await ShellVm.OpenUnifiedMenu(); }
-        else { await ShellVm.OpenFile(GlobalData.FilePathToLaunch);}
+        if (ShellVm.FilePathToLaunch == null) { await ShellVm.OpenUnifiedMenu(); }
+        else { await ShellVm.OpenFile(ShellVm.FilePathToLaunch);}
     }
 
     /// <summary>

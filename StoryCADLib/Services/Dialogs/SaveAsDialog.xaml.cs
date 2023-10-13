@@ -30,7 +30,7 @@ public sealed partial class SaveAsDialog : Page
         ProjectPathName.IsReadOnly = false;
         // may throw error if invalid folder location
         FolderPicker folderPicker = new();
-        InitializeWithWindow.Initialize(folderPicker, GlobalData.WindowHandle);
+        InitializeWithWindow.Initialize(folderPicker, Ioc.Default.GetRequiredService<Windowing>().WindowHandle);
 
         //Make FolderPicker work in Win32
         //if (Window.Current == null)

@@ -13,6 +13,7 @@ using StoryCAD.Services.Backend;
 using StoryCAD.Services.Backup;
 using StoryCAD.Services.Dialogs;
 using StoryCAD.Services.Dialogs.Tools;
+using StoryCAD.Services.Json;
 using StoryCAD.Services.Logging;
 using StoryCAD.Services.Messages;
 using StoryCAD.Services.Navigation;
@@ -68,13 +69,17 @@ public class ShellViewModel : ObservableRecipient
     public readonly LogService Logger;
     public readonly SearchService Search;
     private AutoSaveService _autoSaveService = Ioc.Default.GetRequiredService<AutoSaveService>();
-
+    private Windowing Window = Ioc.Default.GetRequiredService<Windowing>();
+    private AppState State = Ioc.Default.GetRequiredService<AppState>();
     private DispatcherTimer _statusTimer;
 
     // The current story outline being processed. 
     public StoryModel StoryModel;
 
     public readonly ScrivenerIo Scrivener;
+
+    //File opened (if StoryCAD was opened via an STBX file)
+    public string FilePathToLaunch;
 
     // The right-hand (detail) side of ShellView
     public Frame SplitViewFrame;
@@ -114,7 +119,6 @@ public class ShellViewModel : ObservableRecipient
     public RelayCommand PrintReportsCommand { get; }
     public RelayCommand ScrivenerReportsCommand { get; }
     public RelayCommand PreferencesCommand { get; }
-
 
     #endregion
 
@@ -165,7 +169,7 @@ public class ShellViewModel : ObservableRecipient
     /// <summary>
     /// Used for theming
     /// </summary>
-    public PreferencesModel UserPreferences = GlobalData.Preferences;
+    public PreferencesModel UserPreferences = Ioc.Default.GetRequiredService<AppState>().Preferences;
 
     /// <summary>
     /// IsPaneOpen is bound to ShellSplitView's IsPaneOpen property with
@@ -362,7 +366,7 @@ public class ShellViewModel : ObservableRecipient
         {
             _canExecuteCommands = false;
             // Needs logging
-            _contentDialog = new() { XamlRoot = GlobalData.XamlRoot, Content = new UnifiedMenuPage() };
+            _contentDialog = new() { XamlRoot = Ioc.Default.GetRequiredService<Windowing>().XamlRoot, Content = new UnifiedMenuPage() };
             if (Application.Current.RequestedTheme == ApplicationTheme.Light) { _contentDialog.Background = new SolidColorBrush(Colors.LightGray); }
             await _contentDialog.ShowAsync();
             _canExecuteCommands = true;
@@ -395,7 +399,7 @@ public class ShellViewModel : ObservableRecipient
             StoryModel.ProjectPath = StoryModel.ProjectFolder.Path;
 
             OverviewModel _overview = new(Path.GetFileNameWithoutExtension(dialogVM.ProjectName), StoryModel)
-            { DateCreated = DateTime.Today.ToString("yyyy-MM-dd"), Author = GlobalData.Preferences.Name };
+            { DateCreated = DateTime.Today.ToString("yyyy-MM-dd"), Author = State.Preferences.Name };
 
             StoryNodeItem _overviewNode = new(_overview, null) { IsExpanded = true, IsRoot = true };
             StoryModel.ExplorerView.Add(_overviewNode);
@@ -523,24 +527,24 @@ public class ShellViewModel : ObservableRecipient
             // Save the new project
             StoryModel.Changed = true;
             await SaveFile();
-            if (GlobalData.Preferences.BackupOnOpen)
+            if (State.Preferences.BackupOnOpen)
             {
                 await MakeBackup();
             }
 
             // Start the timed backup and auto save services
-            if (GlobalData.Preferences.TimedBackup)
+            if (State.Preferences.TimedBackup)
             {
                 Ioc.Default.GetRequiredService<BackupService>().StartTimedBackup();
             }
 
-            if (GlobalData.Preferences.AutoSave)
+            if (State.Preferences.AutoSave)
             {
                 Ioc.Default.GetRequiredService<AutoSaveService>().StartAutoSave();
             }
 
             TreeViewNodeClicked(StoryModel.ExplorerView[0]);
-            UpdateWindowTitle();
+            Window.UpdateWindowTitle();
 
             Messenger.Send(new StatusChangedMessage(new("New project command completed", LogLevel.Info, true)));
         }
@@ -634,7 +638,7 @@ public class ShellViewModel : ObservableRecipient
             Content = "This copy is missing a key file, if you are working on a branch or fork this is expected and you do not need to do anything about this." +
                       "\nHowever if you are not a developer then report this as it should not happen.\nThe following may have issues or possible errors\n" +
                       "Syncfusion related items and error logging.",
-            XamlRoot = GlobalData.XamlRoot,
+            XamlRoot = Window.XamlRoot,
             PrimaryButtonText = "Okay"
         }.ShowAsync();
         Ioc.Default.GetRequiredService<LogService>().Log(LogLevel.Error, "Env missing.");
@@ -717,7 +721,7 @@ public class ShellViewModel : ObservableRecipient
 
         // Stop the auto save service if it was running
 
-        if (GlobalData.Preferences.AutoSave) { _autoSaveService.StopAutoSave(); }
+        if (State.Preferences.AutoSave) { _autoSaveService.StopAutoSave(); }
         
         // Stop the timed backup service if it was running
         Ioc.Default.GetRequiredService<BackupService>().StopTimedBackup();
@@ -737,7 +741,7 @@ public class ShellViewModel : ObservableRecipient
                 Logger.Log(LogLevel.Info, "Opening file picker as story wasn't able to be found");
                 FileOpenPicker _filePicker = new();
                 //Make folder Picker work in Win32
-                WinRT.Interop.InitializeWithWindow.Initialize(_filePicker, GlobalData.WindowHandle);
+                WinRT.Interop.InitializeWithWindow.Initialize(_filePicker, Window.WindowHandle);
                 _filePicker.CommitButtonText = "Project Folder";
                 //TODO: Use preferences project folder instead of DocumentsLibrary
                 //except you can't. Thanks, UWP.
@@ -792,7 +796,7 @@ public class ShellViewModel : ObservableRecipient
             }
 
             // Take a backup of the project if the user has the 'backup on open' preference set.
-            if (GlobalData.Preferences.BackupOnOpen)
+            if (State.Preferences.BackupOnOpen)
             {
                 await Ioc.Default.GetRequiredService<BackupService>().BackupProject();
             }
@@ -804,15 +808,15 @@ public class ShellViewModel : ObservableRecipient
                 Messenger.Send(new StatusChangedMessage(new("Open Story completed", LogLevel.Info)));
             }
 
-            UpdateWindowTitle();
+            Window.UpdateWindowTitle();
             new UnifiedVM().UpdateRecents(Path.Combine(StoryModel.ProjectFolder.Path, StoryModel.ProjectFile.Name));
 
-            if (GlobalData.Preferences.TimedBackup)
+            if (State.Preferences.TimedBackup)
             {
                 Ioc.Default.GetRequiredService<BackupService>().StartTimedBackup();
             }
 
-            if (GlobalData.Preferences.AutoSave)
+            if (State.Preferences.AutoSave)
             {
                 _autoSaveService.StartAutoSave();
             }
@@ -929,7 +933,7 @@ public class ShellViewModel : ObservableRecipient
                 ContentDialog _saveAsDialog = new()
                 {
                     Title = "Save as",
-                    XamlRoot = GlobalData.XamlRoot,
+                    XamlRoot = Ioc.Default.GetRequiredService<Windowing>().XamlRoot,
                     PrimaryButtonText = "Save",
                     SecondaryButtonText = "Cancel",
                     Content = new SaveAsDialog()
@@ -968,7 +972,7 @@ public class ShellViewModel : ObservableRecipient
                         StoryModel.ProjectFolder = _saveAsVM.ParentFolder;
                         StoryModel.ProjectPath = _saveAsVM.SaveAsProjectFolderPath;
                         // Add to the recent files stack
-                        UpdateWindowTitle();
+                        Window.UpdateWindowTitle();
                         new UnifiedVM().UpdateRecents(Path.Combine(StoryModel.ProjectFolder.Path, StoryModel.ProjectFile.Name));
                         // Indicate everything's done
                         Messenger.Send(new IsChangedMessage(true));
@@ -1005,7 +1009,7 @@ public class ShellViewModel : ObservableRecipient
                 SecondaryButtonText = "No",
                 Title = "Replace file?",
                 Content = $"File {Path.Combine(_saveAsVM.ProjectPathName, _saveAsVM.ProjectName)} already exists. \n\nDo you want to replace it?",
-                XamlRoot = GlobalData.XamlRoot
+                XamlRoot = Window.XamlRoot
             };
             return await _replaceDialog.ShowAsync() == ContentDialogResult.Primary;
         }
@@ -1024,7 +1028,7 @@ public class ShellViewModel : ObservableRecipient
                 Title = "Save changes?",
                 PrimaryButtonText = "Yes",
                 SecondaryButtonText = "No",
-                XamlRoot = GlobalData.XamlRoot
+                XamlRoot = Window.XamlRoot
             };
             if (await _warning.ShowAsync() == ContentDialogResult.Primary)
             {
@@ -1036,7 +1040,7 @@ public class ShellViewModel : ObservableRecipient
         ResetModel();
         RightTappedNode = null; //Null right tapped node to prevent possible issues.
         SetCurrentView(StoryViewType.ExplorerView);
-        UpdateWindowTitle();
+        Window.UpdateWindowTitle();
         Ioc.Default.GetRequiredService<BackupService>().StopTimedBackup();
         DataSource = StoryModel.ExplorerView;
         ShowHomePage();
@@ -1062,7 +1066,7 @@ public class ShellViewModel : ObservableRecipient
                 Title = "Save changes?",
                 PrimaryButtonText = "Yes",
                 SecondaryButtonText = "No",
-                XamlRoot = GlobalData.XamlRoot
+                XamlRoot = Window.XamlRoot
             };
             if (await _warning.ShowAsync() == ContentDialogResult.Primary)
             {
@@ -1094,7 +1098,7 @@ public class ShellViewModel : ObservableRecipient
         Ioc.Default.GetRequiredService<PreferencesViewModel>().LoadModel();
         ContentDialog _preferencesDialog = new()
         {
-            XamlRoot = GlobalData.XamlRoot,
+            XamlRoot = Window.XamlRoot,
             Content = new PreferencesDialog(),
             Title = "Preferences",
             PrimaryButtonText = "Save",
@@ -1132,7 +1136,7 @@ public class ShellViewModel : ObservableRecipient
             {
                 Title = "Key questions",
                 CloseButtonText = "Close",
-                XamlRoot = GlobalData.XamlRoot,
+                XamlRoot = Window.XamlRoot,
                 Content = new KeyQuestionsDialog()
             };
             await _keyQuestionsDialog.ShowAsync();
@@ -1154,7 +1158,7 @@ public class ShellViewModel : ObservableRecipient
 
             ContentDialog _dialog = new()
             {
-                XamlRoot = GlobalData.XamlRoot,
+                XamlRoot = Window.XamlRoot,
                 Title = "Topic Information",
                 CloseButtonText = "Done",
                 Content = new TopicsDialog()
@@ -1181,7 +1185,7 @@ public class ShellViewModel : ObservableRecipient
                 //Creates and shows content dialog
                 ContentDialog _dialog = new()
                 {
-                    XamlRoot = GlobalData.XamlRoot,
+                    XamlRoot = Window.XamlRoot,
                     Title = "Master plots",
                     PrimaryButtonText = "Copy",
                     SecondaryButtonText = "Cancel",
@@ -1235,7 +1239,7 @@ public class ShellViewModel : ObservableRecipient
                 //Creates and shows dialog
                 ContentDialog _dialog = new()
                 {
-                    XamlRoot = GlobalData.XamlRoot,
+                    XamlRoot = Window.XamlRoot,
                     Title = "Dramatic situations",
                     PrimaryButtonText = "Copy as problem",
                     SecondaryButtonText = "Copy as scene",
@@ -1293,7 +1297,7 @@ public class ShellViewModel : ObservableRecipient
                     Content = new StockScenesDialog(),
                     PrimaryButtonText = "Add Scene",
                     CloseButtonText = "Cancel",
-                    XamlRoot = GlobalData.XamlRoot
+                    XamlRoot = Window.XamlRoot
                 };
                 ContentDialogResult _result = await _dialog.ShowAsync();
 
@@ -1345,7 +1349,7 @@ public class ShellViewModel : ObservableRecipient
 
         // Select the Scrivener .scrivx file to add the report to
         FileOpenPicker _openPicker = new();
-        if (Window.Current == null)
+        if (Microsoft.UI.Xaml.Window.Current == null)
         {
             IntPtr _hwnd = GetActiveWindow();
             IInitializeWithWindow _initializeWithWindow = _openPicker.As<IInitializeWithWindow>();
@@ -1835,7 +1839,7 @@ public class ShellViewModel : ObservableRecipient
             _newNode.Parent.IsExpanded = true;
             _newNode.IsRoot = false; //Only an overview node can be a root, which cant be created normally
             _newNode.IsSelected = false;
-            _newNode.Background = GlobalData.Preferences.ContrastColor;
+            _newNode.Background = State.Preferences.ContrastColor;
             NewNodeHighlightCache.Add(_newNode);
         }
         else { return null; }   
@@ -1887,7 +1891,7 @@ public class ShellViewModel : ObservableRecipient
             //Creates dialog and then shows it
             _contentDialog = new()
             {
-                XamlRoot = GlobalData.XamlRoot,
+                XamlRoot = Window.XamlRoot,
                 Content = _content,
                 Title = "Are you sure you want to delete this node?",
                 Width = 500,
@@ -2131,7 +2135,7 @@ public class ShellViewModel : ObservableRecipient
     public void ShowConnectionStatus()
     {
         StatusMessage _msg;
-        if (!GlobalData.DopplerConnection | !GlobalData.ElmahLogging)
+        if (!Doppler.DopplerConnection | !Logger.ElmahLogging)
             _msg = new StatusMessage("Connection not established", LogLevel.Warn, true);
         else
             _msg = new StatusMessage("Connection established", LogLevel.Info, true);
@@ -2152,28 +2156,6 @@ public class ShellViewModel : ObservableRecipient
             SelectedView = ViewList[1];
             CurrentViewType = StoryViewType.NarratorView;
         }
-    }
-
-
-    /// <summary>
-    /// This will dynamically update the title based
-    /// on the current conditions of the app.
-    /// </summary>
-    public void UpdateWindowTitle()
-    {
-        string BaseTitle = "StoryCAD ";
-
-        //Devloper/Unoffical Build title warning
-        if (GlobalData.DeveloperBuild) { BaseTitle += "(DEV BUILD) "; }
-        
-        //Open file check
-        if (StoryModel != null && DataSource != null && DataSource.Count > 0)
-        {
-            BaseTitle += $"- Currently editing {StoryModel.ProjectFilename.Replace(".stbx","")} ";
-        }
-
-        //Set window Title.
-        GlobalData.MainWindow.Title = BaseTitle;
     }
 
     #region MVVM  processing
@@ -2211,7 +2193,7 @@ public class ShellViewModel : ObservableRecipient
         switch (statusMessage.Value.Level)
         {
             case LogLevel.Info:
-                StatusColor = GlobalData.Preferences.SecondaryColor;
+                StatusColor = State.Preferences.SecondaryColor;
                 _statusTimer.Interval = new TimeSpan(0, 0, 15);  // Timer will tick in 15 seconds
                 _statusTimer.Start();
                 break;

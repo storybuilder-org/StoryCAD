@@ -21,6 +21,8 @@ public sealed partial class PreferencesDialog
     public PreferencesViewModel PreferencesVm => Ioc.Default.GetService<PreferencesViewModel>();
     public InstallationService InstallVM => Ioc.Default.GetRequiredService<InstallationService>();
     public LogService Logger => Ioc.Default.GetRequiredService<LogService>();
+    public AppState State => Ioc.Default.GetRequiredService<AppState>();
+    public Windowing window => Ioc.Default.GetRequiredService<Windowing>();
     public PreferencesDialog()
     {
         InitializeComponent();
@@ -33,10 +35,10 @@ public sealed partial class PreferencesDialog
     /// </summary>
     private async void ShowInfo()
     {
-        DevInfo.Text = GlobalData.SystemInfo;
+        DevInfo.Text = State.SystemInfo;
 
-        if (GlobalData.DeveloperBuild) { Version.Text = PreferencesVm.Version; }
-        else { Version.Text = GlobalData.Version; }
+        if (State.DeveloperBuild) { Version.Text = PreferencesVm.Version; }
+        else { Version.Text = State.Version; }
 
         Changelog.Text = await new Changelog().GetChangelogText();
 
@@ -46,7 +48,7 @@ public sealed partial class PreferencesDialog
         SearchEngine.SelectedIndex = (int)PreferencesVm.PreferredSearchEngine;
 
         //Dev Menu is only shown on unoffical builds
-        if (!GlobalData.DeveloperBuild) { PivotView.Items.Remove(Dev); }
+        if (!State.DeveloperBuild) { PivotView.Items.Remove(Dev); }
     }
 
     /// <summary>
@@ -54,7 +56,7 @@ public sealed partial class PreferencesDialog
     /// </summary>
     private void OpenLogFolder(object sender, RoutedEventArgs e)
     {
-        Process.Start(new ProcessStartInfo { FileName = Path.Combine(GlobalData.RootDirectory, "Logs"), UseShellExecute = true, Verb = "open" });
+        Process.Start(new ProcessStartInfo { FileName = Path.Combine(Ioc.Default.GetRequiredService<AppState>().RootDirectory, "Logs"), UseShellExecute = true, Verb = "open" });
     }
 
     private async void SetBackupPath(object sender, RoutedEventArgs e)
@@ -63,7 +65,7 @@ public sealed partial class PreferencesDialog
         if (Window.Current == null)
         {
             //TODO: Can this be put into a helper class or removed at some point with WinAppSDK updates?
-            IntPtr hwnd = GlobalData.WindowHandle;
+            IntPtr hwnd = window.WindowHandle;
             IInitializeWithWindow initializeWithWindow = _folderPicker.As<IInitializeWithWindow>();
             initializeWithWindow.Initialize(hwnd);
         }
@@ -82,7 +84,7 @@ public sealed partial class PreferencesDialog
         if (Window.Current == null)
         {
             //IntPtr hwnd = GetActiveWindow();
-            IntPtr _hwnd = GlobalData.WindowHandle;
+            IntPtr _hwnd = window.WindowHandle;
             IInitializeWithWindow _initializeWithWindow = _folderPicker.As<IInitializeWithWindow>();
             _initializeWithWindow.Initialize(_hwnd);
         }
@@ -123,8 +125,7 @@ public sealed partial class PreferencesDialog
     //Reloads dev stats
     public void RefreshDevStats(object sender, RoutedEventArgs e)
     {
-        Logger.GetSystemInfo();
-        DevInfo.Text = GlobalData.SystemInfo;
+        DevInfo.Text = State.SystemInfo;
     } 
 
     /// <summary>

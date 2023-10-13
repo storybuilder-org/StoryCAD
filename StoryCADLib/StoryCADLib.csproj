@@ -85,6 +85,7 @@
     <Folder Include="Services\Logging\" />
     <Folder Include="Services\Navigation\" />
     <Folder Include="Services\Backup\" />
+    <Folder Include="Services\Preferences\" />
   </ItemGroup>
 
   <ItemGroup>

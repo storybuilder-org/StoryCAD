@@ -737,7 +737,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable
         //Sets up view model
         NewRelationshipViewModel _vm = new(Model);
         _vm.RelationTypes.Clear();
-        foreach (string _relationshipType in GlobalData.RelationTypes) { _vm.RelationTypes.Add(_relationshipType); }
+        foreach (string _relationshipType in Ioc.Default.GetRequiredService<ControlData>().RelationTypes) { _vm.RelationTypes.Add(_relationshipType); }
         _vm.ProspectivePartners.Clear(); //Prospective partners are chars who are not in a relationship with this char
         StoryModel _storyModel = ShellViewModel.GetModel();
         foreach (StoryElement _character in _storyModel.StoryElements.Characters)
@@ -764,7 +764,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable
             Title = "New relationship",
             PrimaryButtonText = "Add relationship",
             SecondaryButtonText = "Cancel",
-            XamlRoot = GlobalData.XamlRoot,
+            XamlRoot = Ioc.Default.GetRequiredService<Windowing>().XamlRoot,
             Content = new NewRelationshipPage(_vm),
             MinWidth = 200
         };
@@ -837,7 +837,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable
         //Creates and shows dialog
         ContentDialog _flawDialog = new()
         {
-            XamlRoot = GlobalData.XamlRoot,
+            XamlRoot = Ioc.Default.GetRequiredService<Windowing>().XamlRoot,
             Content = new Flaw(),
             Title = "Flaw Builder",
             PrimaryButtonText = "Copy flaw example",
@@ -866,7 +866,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable
             Title = "Trait builder",
             PrimaryButtonText = "Copy trait",
             CloseButtonText = "Cancel",
-            XamlRoot = GlobalData.XamlRoot,
+            XamlRoot = Ioc.Default.GetRequiredService<Windowing>().XamlRoot,
             Content = new Traits()
         };
         ContentDialogResult _result = await _traitDialog.ShowAsync();
@@ -930,7 +930,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable
 
         try
         {
-            Dictionary<string, ObservableCollection<string>> _lists = GlobalData.ListControlSource;
+            Dictionary<string, ObservableCollection<string>> _lists = Ioc.Default.GetService<ListData>().ListControlSource;
             RoleList = _lists["Role"];
             StoryRoleList = _lists["StoryRole"];
             ArchetypeList = _lists["Archetype"];
@@ -1027,7 +1027,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable
     {
         await new ContentDialog()
         {
-            XamlRoot = GlobalData.XamlRoot,
+            XamlRoot = Ioc.Default.GetRequiredService<Windowing>().XamlRoot,
             Title = "Error loading resources",
             Content = "An error has occurred, please reinstall or update StoryCAD to continue.",
             CloseButtonText = "Close"

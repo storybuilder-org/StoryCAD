@@ -25,7 +25,7 @@ public class PrintReportDialogVM : ObservableRecipient
     private PrintManager _printManager;
     public PrintDocument Document = new();
     public IPrintDocumentSource PrintDocSource;
-
+    private Windowing Window = Ioc.Default.GetRequiredService<Windowing>();
     private List<StackPanel> _printPreviewCache; //This stores a list of pages for print preview
     #region Properties
 
@@ -182,7 +182,7 @@ public class PrintReportDialogVM : ObservableRecipient
             Dialog = new()
             {
                 Title = "Generate Reports",
-                XamlRoot = GlobalData.XamlRoot,
+                XamlRoot = Window.XamlRoot,
                 Content = new PrintReportsDialog()
             };
             await Dialog.ShowAsync();
@@ -235,7 +235,7 @@ public class PrintReportDialogVM : ObservableRecipient
     public void RegisterForPrint()
     {
         // Register for PrintTaskRequested event
-        _printManager = PrintManagerInterop.GetForWindow(GlobalData.WindowHandle);
+        _printManager = PrintManagerInterop.GetForWindow(Window.WindowHandle);
         _printManager.PrintTaskRequested += PrintTaskRequested;
     }
     /// <summary>
@@ -383,7 +383,7 @@ public class PrintReportDialogVM : ObservableRecipient
             //Use an enqueue here because the sample version doesn't use it properly (i think or it doesn't work here.)
              ContentDialog cd = new()
              {
-                XamlRoot = GlobalData.XamlRoot,
+                XamlRoot = Ioc.Default.GetRequiredService<Windowing>().XamlRoot,
                 Title = "Printing error",
                 Content = "An error occurred trying to print your document.",
                 PrimaryButtonText = "OK"
@@ -391,7 +391,7 @@ public class PrintReportDialogVM : ObservableRecipient
              await cd.ShowAsync();
         }
 
-        GlobalData.GlobalDispatcher.TryEnqueue(() =>
+        Window.GlobalDispatcher.TryEnqueue(() =>
         {
             _printManager.PrintTaskRequested -= PrintTaskRequested;
             Document.AddPages -= AddPages;

@@ -16,6 +16,11 @@ namespace StoryCAD.Services.Json
 
     public class Doppler
     {
+        /// <summary>
+        /// Set to true if doppler connection is successful
+        /// </summary>
+        public static bool DopplerConnection;
+
         [JsonPropertyName("APIKEY")]
         public string APIKEY { get; set; }
 
@@ -48,7 +53,7 @@ namespace StoryCAD.Services.Json
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", basicAuthHeaderValue);
                 Task<Stream> streamTask = client.GetStreamAsync("https://api.doppler.com/v3/configs/config/secrets/download?format=json");
                 Doppler secrets = await JsonSerializer.DeserializeAsync<Doppler>(await streamTask);
-                GlobalData.DopplerConnection = true;
+                DopplerConnection = true;
                 return secrets;
             }
             catch (Exception ex)

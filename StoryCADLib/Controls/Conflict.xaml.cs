@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml;
 using StoryCAD.Models;
 using StoryCAD.Models.Tools;
+using StoryCAD.ViewModels;
 using Syncfusion.UI.Xaml.Editors;
 
 namespace StoryCAD.Controls;
@@ -43,7 +45,7 @@ public sealed partial class Conflict
 
     private void Example_Loaded(object sender, RoutedEventArgs e)
     {
-        ConflictTypes = GlobalData.ConflictTypes;
+        ConflictTypes = Ioc.Default.GetRequiredService<ControlData>().ConflictTypes;
         Category.ItemsSource = ConflictTypes.Keys;
     }
 }

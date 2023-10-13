@@ -81,7 +81,7 @@ public class NarrativeToolVM: ObservableRecipient
             {
                 ContentDialog _dialog = new()
                 {
-                    XamlRoot = GlobalData.XamlRoot,
+                    XamlRoot = Ioc.Default.GetRequiredService<Windowing>().XamlRoot,
                     Title = "Narrative Editor",
                     PrimaryButtonText = "Done",
                     Content = new NarrativeTool()

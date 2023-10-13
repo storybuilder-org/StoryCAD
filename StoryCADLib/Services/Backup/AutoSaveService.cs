@@ -20,7 +20,9 @@ namespace StoryCAD.Services.Backup
     /// </summary>
     public class AutoSaveService
     {
+        private Windowing Window = Ioc.Default.GetRequiredService<Windowing>();
         private LogService _logger = Ioc.Default.GetRequiredService<LogService>();
+        private AppState State = Ioc.Default.GetRequiredService<AppState>();
         private ShellViewModel _shellVM;
 
         private BackgroundWorker autoSaveWorker;
@@ -38,11 +40,11 @@ namespace StoryCAD.Services.Backup
             autoSaveWorker.DoWork += RunAutoSaveTask;
 
             //TODO: Move the following line to Preferences, add appropriate Status and logging
-            if (GlobalData.Preferences.AutoSaveInterval is > 61 or < 14)
-                GlobalData.Preferences.AutoSaveInterval = 30;
+            if (State.Preferences.AutoSaveInterval is > 61 or < 14)
+                State.Preferences.AutoSaveInterval = 30;
             autoSaveTimer = new System.Timers.Timer();
             autoSaveTimer.Elapsed += AutoSaveTimer_Elapsed;
-            autoSaveTimer.Interval = GlobalData.Preferences.AutoSaveInterval * 1000;
+            autoSaveTimer.Interval = State.Preferences.AutoSaveInterval * 1000;
         }
         #endregion
 
@@ -54,7 +56,7 @@ namespace StoryCAD.Services.Backup
                 autoSaveTimer.Stop();
 
             // Reset the timer and start it 
-            autoSaveTimer.Interval = GlobalData.Preferences.AutoSaveInterval * 1000;
+            autoSaveTimer.Interval = State.Preferences.AutoSaveInterval * 1000;
             autoSaveTimer.Start();
         }
 
@@ -99,7 +101,7 @@ namespace StoryCAD.Services.Backup
             _shellVM = Ioc.Default.GetService<ShellViewModel>();
             try
             {
-                if (autoSaveWorker.CancellationPending || !GlobalData.Preferences.AutoSave ||
+                if (autoSaveWorker.CancellationPending || !State.Preferences.AutoSave ||
                     _shellVM!.StoryModel.StoryElements.Count == 0)
                 {
                     return Task.CompletedTask;
@@ -109,13 +111,13 @@ namespace StoryCAD.Services.Backup
                 {
                     _logger.Log(LogLevel.Info, "Initiating AutoSave backup.");
                     // Save and write the model on the UI thread
-                    GlobalData.GlobalDispatcher.TryEnqueue(async () => await _shellVM.SaveFile(true));
+                    Window.GlobalDispatcher.TryEnqueue(async () => await _shellVM.SaveFile(true));
                 }
             }
             catch (Exception _ex)
             {
                 //Show failed message.
-                GlobalData.GlobalDispatcher.TryEnqueue(() =>
+                Window.GlobalDispatcher.TryEnqueue(() =>
                 {
                     Ioc.Default.GetRequiredService<ShellViewModel>().ShowMessage(LogLevel.Warn,
                         "Making an AutoSave failed.", false);

@@ -669,7 +669,7 @@ public class SceneViewModel : ObservableRecipient, INavigable
 
         try
         {
-            Dictionary<string, ObservableCollection<string>> _lists = GlobalData.ListControlSource;
+            Dictionary<string, ObservableCollection<string>> _lists = Ioc.Default.GetService<ListData>().ListControlSource;
             ViewpointList = _lists["Viewpoint"];
             SceneTypeList = _lists["SceneType"];
             ScenePurposeList = _lists["ScenePurpose"];
@@ -704,7 +704,7 @@ public class SceneViewModel : ObservableRecipient, INavigable
     {
         await new ContentDialog()
         {
-            XamlRoot = GlobalData.XamlRoot,
+            XamlRoot = Ioc.Default.GetRequiredService<Windowing>().XamlRoot,
             Title = "Error loading resources",
             Content = "An error has occurred, please reinstall or update StoryCAD to continue.",
             CloseButtonText = "Close"

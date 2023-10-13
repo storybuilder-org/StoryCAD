@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using StoryCAD.Models;
+using StoryCAD.Models.Tools;
 
 namespace StoryCAD.ViewModels.Tools;
 
@@ -49,7 +51,7 @@ public class StockScenesViewModel : ObservableRecipient
     public StockScenesViewModel()
     {
         StockSceneCategories = new ObservableCollection<string>();
-        _stockScenes = GlobalData.StockScenesSource;
+        _stockScenes = Ioc.Default.GetService<ToolsData>().StockScenesSource;
         foreach (string _category in _stockScenes.Keys) { StockSceneCategories.Add(_category); }
     }
 

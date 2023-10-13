@@ -1,4 +1,5 @@
-﻿using Microsoft.UI;
+﻿using CommunityToolkit.Mvvm.DependencyInjection;
+using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
@@ -20,7 +21,7 @@ public sealed partial class UnifiedMenuPage
                 MenuContent.Children.Add(new RecentFiles(UnifiedMenuVM));
                 break;
             case "New":
-                UnifiedMenuVM.SelectedTemplateIndex = GlobalData.Preferences.LastSelectedTemplate;
+                UnifiedMenuVM.SelectedTemplateIndex = Ioc.Default.GetRequiredService<AppState>().Preferences.LastSelectedTemplate;
                 MenuContent.Children.Add(new NewProjectPage(UnifiedMenuVM));
                 break;
             case "Sample":

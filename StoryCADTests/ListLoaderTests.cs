@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using Google.Protobuf.Collections;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -15,7 +16,7 @@ namespace StoryCADTests
     [TestClass]
     public class ListLoaderTests
     {
-        private Dictionary<string, ObservableCollection<string>> lists = GlobalData.ListControlSource;
+        private Dictionary<string, ObservableCollection<string>> lists = Ioc.Default.GetService<ListData>().ListControlSource;
 
         [TestMethod]
         public void TestListLoaderLists()

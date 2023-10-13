@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using StoryCAD.Models;
 
 namespace StoryCAD.ViewModels.Tools;
@@ -34,7 +35,7 @@ public class FlawViewModel : ObservableRecipient
     #region Constructor
     public FlawViewModel()
     {
-        Dictionary<string, ObservableCollection<string>> _lists = GlobalData.ListControlSource;
+        Dictionary<string, ObservableCollection<string>> _lists = Ioc.Default.GetService<ListData>().ListControlSource;
 
         WoundCategoryList = _lists["WoundCategory"];
         WoundSummaryList = _lists["Wound"];

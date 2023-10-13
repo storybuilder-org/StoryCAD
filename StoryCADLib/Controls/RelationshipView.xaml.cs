@@ -58,7 +58,7 @@ public sealed partial class RelationshipView
             {
                 Title = "Are you sure?",
                 Content = $"Are you sure you want to delete the relationship between {CharVm.Name} and {characterToDelete.Partner.Name}?",
-                XamlRoot = GlobalData.XamlRoot,
+                XamlRoot = Ioc.Default.GetRequiredService<Windowing>().XamlRoot,
                 PrimaryButtonText = "Yes",
                 SecondaryButtonText = "No"
             };
