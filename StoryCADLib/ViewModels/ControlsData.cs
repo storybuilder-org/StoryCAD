@@ -29,7 +29,6 @@ namespace StoryCAD.ViewModels
         /// </summary>
         public List<string> RelationTypes;
 
-
         public ControlData()
         {
             int subTypeCount = 0;

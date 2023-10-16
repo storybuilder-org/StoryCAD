@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.DependencyInjection;
@@ -28,7 +29,21 @@ public class AppState
     /// <summary>
     /// This is the path where all app files are stored
     /// </summary>
-    public string RootDirectory = System.IO.Path.Combine(ApplicationData.Current.RoamingFolder.Path, "StoryCAD");
+    public string RootDirectory
+    {
+        get
+        {
+            var xyzz = Assembly.GetEntryAssembly().Location.ToString();
+            if (Assembly.GetEntryAssembly().Location.ToString().Contains("StoryCADTests.dll"))
+            {
+                return System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "StoryCADTests");
+            }
+            else 
+            {
+                return System.IO.Path.Combine(ApplicationData.Current.RoamingFolder.Path, "StoryCAD");
+            }
+        }
+    }
 
     /// <summary>
     /// User preferences

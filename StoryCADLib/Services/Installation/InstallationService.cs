@@ -31,11 +31,26 @@ public class InstallationService
     /// </summary>
     public async Task InstallFiles()
     {
-        //Skip install files if version hasn't changed.
-        if (State.Version == State.Preferences.Version)
+        Logger.Log(LogLevel.Debug, "Started InstallFiles()");
+
+        try
         {
-            return;
+            Logger.Log(LogLevel.Debug, "State.Version is " + State.Version);
+            Logger.Log(LogLevel.Debug, "State.Prefs.version is " + State.Preferences.Version);
+            //Skip install files if version hasn't changed.
+            if (State.Version == State.Preferences.Version)
+            {
+                Logger.Log(LogLevel.Debug, "Version is same.");
+                return;
+            }
         }
+        catch (Exception ex)
+        {
+            Logger.LogException(LogLevel.Error, ex, "Failed to evalute versions.");
+        }
+
+
+        Logger.Log(LogLevel.Debug, "Version is different deleting files.");
 
         await DeleteFiles();
         foreach (string InstallerFile in Assembly.GetExecutingAssembly().GetManifestResourceNames())

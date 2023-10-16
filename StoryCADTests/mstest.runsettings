@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+    <!-- Parameters used by tests at runtime -->
+    <RunConfiguration>
+        <ResultsDirectory>.\TestResults</ResultsDirectory>
+    </RunConfiguration>
+    
+    <LoggerRunSettings>
+        <Loggers>
+            <Logger friendlyName="console" enabled="True">
+                <Configuration>
+                    <Verbosity>quiet</Verbosity>
+                </Configuration>
+            </Logger>
+        </Loggers>
+    </LoggerRunSettings>
+
+    <configuration>
+	    <system.diagnostics>
+		    <sources>
+			    <source name="Class1" switchName="sourceSwitch" switchType="System.Diagnostics.SourceSwitch">
+				    <listeners>
+					    <add name="console"/>
+				    </listeners>
+			    </source>
+			    <!-- Add more sources as needed -->
+		    </sources>
+		    <switches>
+			    <!-- Change value to one of these: Off, Error, Warning, Info, Verbose -->
+			    <add name="sourceSwitch" value="Warning"/>
+		    </switches>
+		    <sharedListeners>
+			    <add name="console" type="System.Diagnostics.ConsoleTraceListener">
+				    <filter type="System.Diagnostics.EventTypeFilter" initializeData="Warning"/>
+			    </add>
+		    </sharedListeners>
+	    </system.diagnostics>
+    </configuration>
+
+</RunSettings>

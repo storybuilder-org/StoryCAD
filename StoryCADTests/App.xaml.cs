@@ -16,7 +16,8 @@ using Syncfusion.Licensing;
 using Path = System.IO.Path;
 using UnhandledExceptionEventArgs = Microsoft.UI.Xaml.UnhandledExceptionEventArgs;
 using StoryCAD.Services.IoC;
-using StoryCAD.ViewModels;
+using System.IO;
+using System.Reflection;
 
 namespace StoryCADTests
 {
@@ -35,8 +36,8 @@ namespace StoryCADTests
         {
             //Loads Singletons/VMs
             Ioc.Default.ConfigureServices(ServiceConfigurator.Configure());
-
-            string path = Path.Combine(Package.Current.InstalledLocation.Path, ".env");
+            Directory.CreateDirectory(Ioc.Default.GetRequiredService<AppState>().RootDirectory);
+            /*string path = Path.Combine(Package.Current.InstalledLocation.Path, ".env");
             DotEnvOptions options = new(false, new[] { path });
             try
             {
@@ -48,7 +49,7 @@ namespace StoryCADTests
 
                 Ioc.Default.GetRequiredService<AppState>().EnvPresent = true;
             }
-            catch {  }
+            catch {  }*/
 
             this.InitializeComponent();
 
@@ -62,16 +63,17 @@ namespace StoryCADTests
         /// will be used such as when the application is launched to open a specific file.
         /// </summary>
         /// <param name="args">Details about the launch request and process.</param>
-        protected override async void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
+        protected override async void OnLaunched(LaunchActivatedEventArgs args)
         {
             _log.Log(LogLevel.Info, "StoryCADTests.App launched");
             AppState AppDat = Ioc.Default.GetRequiredService<AppState>();
+            Ioc.Default.GetRequiredService<AppState>().Version = $"2.0.0.0";
+            await Ioc.Default.GetService<AppState>().LoadPreferences();
+
             string pathMsg = string.Format("Configuration data location = " + AppDat.RootDirectory);
             _log.Log(LogLevel.Info, pathMsg);
 
             await ProcessInstallationFiles();
-
-            await LoadTools(AppDat.RootDirectory);
 
             Microsoft.VisualStudio.TestPlatform.TestExecutor.UnitTestClient.CreateDefaultUI();
 
@@ -96,28 +98,6 @@ namespace StoryCADTests
             catch (Exception ex)
             {
                 _log.LogException(LogLevel.Error, ex, "Error loading Installation files");
-                AbortApp();
-            }
-        }
-
-        private async Task LoadTools(string path)
-        {
-            try
-            {
-                ToolsData toolsdata = Ioc.Default.GetService<ToolsData>();
-                _log.Log(LogLevel.Info, "Loading Tools.ini data");
-                ToolLoader loader = Ioc.Default.GetService<ToolLoader>();
-                await loader.Init(path);
-                _log.Log(LogLevel.Info, $"{toolsdata.KeyQuestionsSource.Keys.Count} Key Questions created");
-                _log.Log(LogLevel.Info, $"{toolsdata.StockScenesSource.Keys.Count} Stock Scenes created");
-                _log.Log(LogLevel.Info, $"{toolsdata.TopicsSource.Count} Topics created");
-                _log.Log(LogLevel.Info, $"{toolsdata.MasterPlotsSource.Count} Master Plots created");
-                _log.Log(LogLevel.Info, $"{toolsdata.DramaticSituationsSource.Count} Dramatic Situations created");
-
-            }
-            catch (Exception ex)
-            {
-                _log.LogException(LogLevel.Error, ex, "Error loading Tools.ini");
                 AbortApp();
             }
         }
