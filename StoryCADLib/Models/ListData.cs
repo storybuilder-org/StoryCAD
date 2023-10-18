@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.IO;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml;
@@ -27,10 +26,7 @@ namespace StoryCAD.Models
             {
                 _log.Log(LogLevel.Info, "Loading Lists.ini data");
                 ListLoader loader = Ioc.Default.GetService<ListLoader>();
-                Task.Run(async () =>
-                {
-                    ListControlSource = await loader.Init(Ioc.Default.GetRequiredService<AppState>().RootDirectory);
-                }).Wait();
+                Task.Run(async () => { ListControlSource = await loader.Init(); }).Wait();
 
                 _log.Log(LogLevel.Info, $"{ListControlSource.Keys.Count} ListLoader.Init keys created");
             }

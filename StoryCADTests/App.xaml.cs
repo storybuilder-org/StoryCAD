@@ -71,8 +71,6 @@ namespace StoryCADTests
 
             await ProcessInstallationFiles();
 
-            await LoadTools(AppDat.RootDirectory);
-
             Microsoft.VisualStudio.TestPlatform.TestExecutor.UnitTestClient.CreateDefaultUI();
 
             Window = new MainWindow();
@@ -96,28 +94,6 @@ namespace StoryCADTests
             catch (Exception ex)
             {
                 _log.LogException(LogLevel.Error, ex, "Error loading Installation files");
-                AbortApp();
-            }
-        }
-
-        private async Task LoadTools(string path)
-        {
-            try
-            {
-                ToolsData toolsdata = Ioc.Default.GetService<ToolsData>();
-                _log.Log(LogLevel.Info, "Loading Tools.ini data");
-                ToolLoader loader = Ioc.Default.GetService<ToolLoader>();
-                await loader.Init(path);
-                _log.Log(LogLevel.Info, $"{toolsdata.KeyQuestionsSource.Keys.Count} Key Questions created");
-                _log.Log(LogLevel.Info, $"{toolsdata.StockScenesSource.Keys.Count} Stock Scenes created");
-                _log.Log(LogLevel.Info, $"{toolsdata.TopicsSource.Count} Topics created");
-                _log.Log(LogLevel.Info, $"{toolsdata.MasterPlotsSource.Count} Master Plots created");
-                _log.Log(LogLevel.Info, $"{toolsdata.DramaticSituationsSource.Count} Dramatic Situations created");
-
-            }
-            catch (Exception ex)
-            {
-                _log.LogException(LogLevel.Error, ex, "Error loading Tools.ini");
                 AbortApp();
             }
         }

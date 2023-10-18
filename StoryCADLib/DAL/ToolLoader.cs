@@ -8,34 +8,38 @@ using CommunityToolkit.Mvvm.DependencyInjection;
 using StoryCAD.Models;
 using StoryCAD.Models.Tools;
 using StoryCAD.Services.Logging;
+using System.Reflection;
 
 namespace StoryCAD.DAL;
 
 public class ToolLoader
 {
     public readonly LogService Logger = Ioc.Default.GetRequiredService<LogService>();
-    private ToolsData Data = Ioc.Default.GetService<ToolsData>();
 
     private IList<string> _lines;
-    private string _installFolder;
-    public async Task Init(string path)
+    public async Task<List<object>> Init()
     {
         try
         {
-            StorageFolder _toolFolder = await StorageFolder.GetFolderFromPathAsync(path);
-            _installFolder = _toolFolder.Path;
-            StorageFile _iniFile = await _toolFolder.GetFileAsync("Tools.ini");
-            _lines = await FileIO.ReadLinesAsync(_iniFile);
+            await using Stream internalResourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("StoryCAD.Assets.Install.Tools.ini");
+            using StreamReader reader = new(internalResourceStream);
+            _lines = (await reader.ReadToEndAsync()).Split("\n");
 
             // Populate tool data source collections
-            Data.KeyQuestionsSource = LoadKeyQuestions();
-            Data.StockScenesSource = LoadStockScenes();
-            Data.TopicsSource = LoadTopics();
-            Data.MasterPlotsSource = LoadMasterPlots();
-            Data.DramaticSituationsSource = LoadDramaticSituations();
+            List<object> Tools = new()
+            {
+                LoadKeyQuestions(),
+                LoadStockScenes(),
+                LoadTopics(),
+                LoadMasterPlots(),
+                LoadDramaticSituations()
+            };
+
             Clear();
+            return Tools;
         }
         catch (Exception _ex) { Logger.LogException(LogLevel.Error, _ex, "Error Initializing tool loader"); }
+        return null;
     }
 
     public Dictionary<string, List<KeyQuestionModel>> LoadKeyQuestions()
@@ -148,7 +152,7 @@ public class ToolLoader
                             _currentSubTopic = null;
                             break;
                         case "Notepad":
-                            string _path = _keyvalue.IndexOf('\\') >= 0 ? _keyvalue : Path.Combine(_installFolder, _keyvalue);
+                            string _path = _keyvalue.IndexOf('\\') >= 0 ? _keyvalue : Path.Combine(Path.GetTempPath(), _keyvalue);
                             _topics.Add(_topicName, new TopicModel(_topicName, _path));
                             break;
                         case "Subtopic":

@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Reflection;
 using System.Threading.Tasks;
-using Windows.Storage;
 
 namespace StoryCAD.DAL;
 
@@ -11,20 +10,17 @@ public class ListLoader
 {
     #region Public Methods
 
-    public async Task<Dictionary<string, ObservableCollection<string>>> Init(string path)
+    public async Task<Dictionary<string, ObservableCollection<string>>> Init()
     {
         Dictionary<string, ObservableCollection<string>> _lists = new();
 
-        StorageFolder _controlFolder = await StorageFolder.GetFolderFromPathAsync(path);
-        StorageFile _iniFile = await _controlFolder.GetFileAsync("Lists.ini");
-        //See if the .INI file exists
-        //if (!File.Exists(iniFile))
-        //    throw new Exception(@"STORY.INI initialization file not found");
+        await using Stream internalResourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("StoryCAD.Assets.Install.Lists.ini");
+        using StreamReader reader = new(internalResourceStream);
 
         // Read the Application .INI file. Each record is the format 'KeyWord=Keyvalue'.
         // As each record is read, it's moved to the corresponding initialization
         // structure field or loaded as an initialization value for a control
-        string _text = await FileIO.ReadTextAsync(_iniFile);
+        string _text = await reader.ReadToEndAsync();
         StringReader _sr = new(_text);
         // ReSharper disable once MoveVariableDeclarationInsideLoopCondition
         string _line; //Not Inlining to keep code readability
@@ -46,11 +42,6 @@ public class ListLoader
             }
         }
         return _lists;
-    }
-
-    internal Task<Dictionary<string, ObservableCollection<string>>> Init(object path)
-    {
-        throw new NotImplementedException();
     }
     #endregion
 }

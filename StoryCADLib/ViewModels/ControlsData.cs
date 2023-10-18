@@ -29,7 +29,6 @@ namespace StoryCAD.ViewModels
         /// </summary>
         public List<string> RelationTypes;
 
-
         public ControlData()
         {
             int subTypeCount = 0;
@@ -38,15 +37,16 @@ namespace StoryCAD.ViewModels
             {
                 _log.Log(LogLevel.Info, "Loading Controls.ini data");
                 ControlLoader loader = Ioc.Default.GetService<ControlLoader>();
-                ControlData controldata = Ioc.Default.GetService<ControlData>();
-                Task.Run(async () =>
+                Task.Run(async () => 
                 {
-                    await loader.Init(Ioc.Default.GetRequiredService<AppState>().RootDirectory);
+                    List<Object> Controls = await loader.Init();
+                    ConflictTypes = (SortedDictionary<string, ConflictCategoryModel>)Controls[0];
+                    RelationTypes = (List<string>)Controls[1];
                 }).Wait();
 
                 _log.Log(LogLevel.Info, "ConflictType Counts");
                 _log.Log(LogLevel.Info,
-                    $"{controldata.ConflictTypes.Keys.Count} ConflictType keys created");
+                    $"{ConflictTypes.Keys.Count} ConflictType keys created");
                 foreach (ConflictCategoryModel type in ConflictTypes.Values)
                 {
                     subTypeCount += type.SubCategories.Count;
