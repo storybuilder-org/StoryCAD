@@ -1,23 +1,15 @@
 ﻿using System;
-using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.VisualStudio.TestTools.UnitTesting.AppContainer;
-using Windows.ApplicationModel;
-using StoryCAD.DAL;
 using StoryCAD.Models;
-using StoryCAD.Models.Tools;
 using StoryCAD.Services.Installation;
 using StoryCAD.Services.Logging;
-using dotenv.net.Utilities;
-using dotenv.net;
-using Syncfusion.Licensing;
-using Path = System.IO.Path;
 using UnhandledExceptionEventArgs = Microsoft.UI.Xaml.UnhandledExceptionEventArgs;
 using StoryCAD.Services.IoC;
 using System.IO;
-using System.Reflection;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace StoryCADTests
 {
@@ -35,7 +27,7 @@ namespace StoryCADTests
         public App()
         {
             //Loads Singletons/VMs
-            Ioc.Default.ConfigureServices(ServiceConfigurator.Configure());
+            //Ioc.Default.ConfigureServices(ServiceConfigurator.Configure());
             Directory.CreateDirectory(Ioc.Default.GetRequiredService<AppState>().RootDirectory);
             /*string path = Path.Combine(Package.Current.InstalledLocation.Path, ".env");
             DotEnvOptions options = new(false, new[] { path });
