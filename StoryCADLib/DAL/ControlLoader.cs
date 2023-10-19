@@ -1,41 +1,37 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Windows.Storage;
-using Windows.Storage.Streams;
-using StoryCAD.Models;
 using StoryCAD.Models.Tools;
 using StoryCAD.ViewModels;
 using CommunityToolkit.Mvvm.DependencyInjection;
+using System.IO;
+using System.Reflection;
 
 namespace StoryCAD.DAL;
 
 public class ControlLoader
 {
-    ControlData controlData = Ioc.Default.GetService<ControlData>();
     private IList<string> _lines;
-    public async Task Init(string path)
+    public async Task<List<object>> Init()
     {
         try
         {
-            StorageFolder _toolFolder = await StorageFolder.GetFolderFromPathAsync(path);
-            StorageFile _iniFile = await _toolFolder.GetFileAsync("Controls.ini");
-            _lines = await FileIO.ReadLinesAsync(_iniFile, UnicodeEncoding.Utf8);
+            await using Stream internalResourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("StoryCAD.Assets.Install.Controls.ini");
+            using StreamReader reader = new(internalResourceStream);
+
+            _lines = (await reader.ReadToEndAsync()).Split("\n");
         }
         catch (Exception _ex) 
         {
             Console.WriteLine(_ex.Message);
         }
         // Populate UserControl data source collections
-        controlData.ConflictTypes = LoadConflictTypes();
-        controlData.RelationTypes = LoadRelationTypes();
-        //story.KeyQuestionsSource = LoadKeyQuestions();
-        //story.StockScenesSource = LoadStockScenes();
-        //story.TopicsSource = LoadTopics();
-        //story.MasterPlotsSource = LoadMasterPlots();
-        //story.DramaticSituationsSource = LoadDramaticSituations();
-        //story.QuotesSource = LoadQuotes();
+        List<object> Controls = new() {
+            LoadConflictTypes(),
+            LoadRelationTypes()
+        };
         Clear();
+        return Controls;
     }
 
     public SortedDictionary<string, ConflictCategoryModel> LoadConflictTypes()
