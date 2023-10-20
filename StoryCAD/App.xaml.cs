@@ -51,7 +51,6 @@ public partial class App
     private const string TrashCanPage = "TrashCanPage";
     private const string WebPage = "WebPage";
 
-
     private LogService _log;
 
     private IntPtr m_windowHandle;
@@ -66,22 +65,6 @@ public partial class App
 
         //Loads all Singletons/VMs
         Ioc.Default.ConfigureServices(ServiceConfigurator.Configure());
-        
-        if (Package.Current.Id.Version.Revision == 65535) //Read the StoryCAD.csproj manifest for a build time instead.
-        {
-            string StoryCADManifestVersion = System.Reflection.Assembly.GetExecutingAssembly()
-                .GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion
-                .Split("build")[1];
-
-            Ioc.Default.GetRequiredService<AppState>().Version = $"Version: {Package.Current.Id.Version.Major}" +
-                $".{Package.Current.Id.Version.Minor}.{Package.Current.Id.Version.Build} Built on: { StoryCADManifestVersion}";
-        }
-        else
-        {
-            Ioc.Default.GetRequiredService<AppState>().Version = $"Version: {Package.Current.Id.Version.Major}" +
-                $".{Package.Current.Id.Version.Minor}.{Package.Current.Id.Version.Build}.{Package.Current.Id.Version.Revision}";
-
-        }
 
         string path = Path.Combine(Package.Current.InstalledLocation.Path, ".env");
         DotEnvOptions options = new(false, new[] { path });
@@ -113,7 +96,7 @@ public partial class App
         {
             //If this instance is the first, then we will register it, otherwise we will get info about the other instance.
             AppInstance _MainInstance = AppInstance.FindOrRegisterForKey("main"); //Get main instance
-            _MainInstance.Activated += ActivateMainInstance;
+            _MainInstance.Activated += new Windowing().ActivateMainInstance;
 
             AppActivationArguments activatedEventArgs = AppInstance.GetCurrent().GetActivatedEventArgs();
 
@@ -138,25 +121,6 @@ public partial class App
         });
     }
 
-    /// <summary>
-    /// When a second instance is opened, this code will be ran on the main (first) instance
-    /// It will bring up the main window.
-    /// </summary>
-    private void ActivateMainInstance(object sender, AppActivationArguments e)
-    {
-        Windowing wnd = Ioc.Default.GetRequiredService<Windowing>();
-        wnd.MainWindow.Restore(); //Resize window and unminimize window
-        wnd.MainWindow.BringToFront(); //Bring window to front
-
-        try
-        {
-            wnd.GlobalDispatcher.TryEnqueue(() =>
-            {
-                Ioc.Default.GetRequiredService<ShellViewModel>().ShowMessage(LogLevel.Warn, "You can only have one file open at once", false);
-            });
-        }
-        finally { }
-    }
 
     /// <summary>
     /// Invoked when the application is launched normally by the end user.  Other entry points
@@ -252,6 +216,7 @@ public partial class App
             AbortApp();
         }
     }
+
     private void ConfigureNavigation()
     {
         try
