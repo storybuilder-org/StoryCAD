@@ -2,7 +2,6 @@
 using StoryCAD.DAL;
 using StoryCAD.Services.Backend;
 using StoryCAD.Services.Backup;
-using StoryCAD.Services.Installation;
 using StoryCAD.Services.Logging;
 using StoryCAD.Services.Navigation;
 using StoryCAD.Services.Search;
@@ -21,7 +20,6 @@ public class ServiceConfigurator
              .AddSingleton<NavigationService>()
              .AddSingleton<LogService>()
              .AddSingleton<SearchService>()
-             .AddSingleton<InstallationService>()
              .AddSingleton<ControlLoader>()
              .AddSingleton<ListLoader>()
              .AddSingleton<ToolLoader>()

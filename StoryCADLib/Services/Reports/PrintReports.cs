@@ -131,7 +131,7 @@ public class PrintReports
         }
         catch (Exception ex)
         {
-            Ioc.Default.GetService<LogService>().LogException(Logging.LogLevel.Error, ex, "Error in Print reports.");
+            Ioc.Default.GetService<LogService>().LogException(LogLevel.Error, ex, "Error in Print reports.");
         }
     }   
 
