@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.VisualStudio.TestTools.UnitTesting.AppContainer;
 using Windows.ApplicationModel;
-using StoryCAD.DAL;
 using StoryCAD.Models;
-using StoryCAD.Models.Tools;
-using StoryCAD.Services.Installation;
 using StoryCAD.Services.Logging;
 using dotenv.net.Utilities;
 using dotenv.net;
@@ -16,7 +12,6 @@ using Syncfusion.Licensing;
 using Path = System.IO.Path;
 using UnhandledExceptionEventArgs = Microsoft.UI.Xaml.UnhandledExceptionEventArgs;
 using StoryCAD.Services.IoC;
-using StoryCAD.ViewModels;
 
 namespace StoryCADTests
 {
@@ -62,14 +57,12 @@ namespace StoryCADTests
         /// will be used such as when the application is launched to open a specific file.
         /// </summary>
         /// <param name="args">Details about the launch request and process.</param>
-        protected override async void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
+        protected override async void OnLaunched(LaunchActivatedEventArgs args)
         {
             _log.Log(LogLevel.Info, "StoryCADTests.App launched");
             AppState AppDat = Ioc.Default.GetRequiredService<AppState>();
             string pathMsg = string.Format("Configuration data location = " + AppDat.RootDirectory);
             _log.Log(LogLevel.Info, pathMsg);
-
-            await ProcessInstallationFiles();
 
             Microsoft.VisualStudio.TestPlatform.TestExecutor.UnitTestClient.CreateDefaultUI();
 
@@ -83,21 +76,6 @@ namespace StoryCADTests
             // Replace back with e.Arguments when https://github.com/microsoft/microsoft-ui-xaml/issues/3368 is fixed
             Microsoft.VisualStudio.TestPlatform.TestExecutor.UnitTestClient.Run(Environment.CommandLine);
         }
-
-        private async Task ProcessInstallationFiles()
-        {
-            try
-            {
-                _log.Log(LogLevel.Info, "Processing Installation files");
-                await Ioc.Default.GetService<InstallationService>().InstallFiles(); //Runs InstallationService.InstallFiles()
-            }
-            catch (Exception ex)
-            {
-                _log.LogException(LogLevel.Error, ex, "Error loading Installation files");
-                AbortApp();
-            }
-        }
-
         private void OnUnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
             _log.LogException(LogLevel.Fatal, e.Exception, e.Message);
