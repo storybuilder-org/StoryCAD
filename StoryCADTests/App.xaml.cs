@@ -4,7 +4,6 @@ using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.VisualStudio.TestTools.UnitTesting.AppContainer;
 using StoryCAD.Models;
-using StoryCAD.Services.Installation;
 using StoryCAD.Services.Logging;
 using UnhandledExceptionEventArgs = Microsoft.UI.Xaml.UnhandledExceptionEventArgs;
 using System.IO;
@@ -61,20 +60,6 @@ public partial class App : Application
 
         // Replace back with e.Arguments when https://github.com/microsoft/microsoft-ui-xaml/issues/3368 is fixed
         Microsoft.VisualStudio.TestPlatform.TestExecutor.UnitTestClient.Run(Environment.CommandLine);
-    }
-
-    private async Task ProcessInstallationFiles()
-    {
-        try
-        {
-            _log.Log(LogLevel.Info, "Processing Installation files");
-            await Ioc.Default.GetService<InstallationService>().InstallFiles(); //Runs InstallationService.InstallFiles()
-        }
-        catch (Exception ex)
-        {
-            _log.LogException(LogLevel.Error, ex, "Error loading Installation files");
-            AbortApp();
-        }
     }
 
     private void OnUnhandledException(object sender, UnhandledExceptionEventArgs e)

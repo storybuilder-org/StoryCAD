@@ -34,7 +34,6 @@ public class AppState
     {
         get
         {
-            var xyzz = Assembly.GetEntryAssembly().Location.ToString();
             if (Assembly.GetEntryAssembly().Location.ToString().Contains("StoryCADTests.dll") || Assembly.GetEntryAssembly().Location.ToString().Contains("testhost.dll"))
             {
                 return System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "StoryCADTests");

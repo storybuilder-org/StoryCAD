@@ -1,5 +1,8 @@
 ﻿using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.IO;
+using System.Reflection;
+using System.Reflection.Metadata;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using StoryCAD.Models;
@@ -54,7 +57,7 @@ public class TopicsViewModel : ObservableRecipient
     #endregion
 
     #region Public Methods
-    public void LoadTopic(string topicName)
+    public async void LoadTopic(string topicName)
     {
         if (topicName == null || topicName.Equals(string.Empty)) { return; } //Can't load topics that are null or empty.
 
@@ -62,7 +65,18 @@ public class TopicsViewModel : ObservableRecipient
         switch (_topic.TopicType)
         {
             case TopicTypeEnum.Notepad:
-                Process.Start("notepad.exe", _topic.Filename);
+                if (_topic.Filename.Contains("Symbols.txt") || _topic.Filename.Contains("Bibliog.txt"))
+                {
+                    //Gets content of Symbols.txt or Bibliog.txt 
+                    await using Stream internalResourceStream = Assembly.GetExecutingAssembly()
+                        .GetManifestResourceStream("StoryCAD.Assets.Install." + Path.GetFileName(_topic.Filename));
+                    using StreamReader reader = new(internalResourceStream);
+
+                    //Writes file to temp.
+                    File.WriteAllText(_topic.Filename, await reader.ReadToEndAsync());
+                }
+
+                Process.Start(new ProcessStartInfo() { UseShellExecute = true, FileName= _topic.Filename });
                 break;
             case TopicTypeEnum.Inline:
                 SubTopicNames.Clear();

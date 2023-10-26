@@ -16,7 +16,6 @@ using StoryCAD.DAL;
 using StoryCAD.Models;
 using StoryCAD.Models.Tools;
 using StoryCAD.Services.Backend;
-using StoryCAD.Services.Installation;
 using StoryCAD.Services.Json;
 using StoryCAD.Services.Logging;
 using StoryCAD.Services.Navigation;
@@ -171,8 +170,6 @@ public partial class App
         
         Ioc.Default.GetService<BackendService>()!.StartupRecording();
         await Ioc.Default.GetService<AppState>().LoadPreferences();
-
-        await ProcessInstallationFiles();
         ConfigureNavigation();
 
         // Construct a Window to hold our Pages
@@ -201,20 +198,6 @@ public partial class App
         _log.Log(LogLevel.Debug, $"Layout: Window size width={mainWindow.Width} height={mainWindow.Height}");
         _log.Log(LogLevel.Info, "StoryCAD App loaded and launched");
 
-    }
-
-    private async Task ProcessInstallationFiles()
-    {
-        try
-        {
-            _log.Log(LogLevel.Info, "Processing Installation files");
-            await Ioc.Default.GetService<InstallationService>().InstallFiles(); //Runs InstallationService.InstallFiles()
-        }
-        catch (Exception ex)
-        {
-            _log.LogException(LogLevel.Error, ex, "Error loading Installation files");
-            AbortApp();
-        }
     }
 
     private void ConfigureNavigation()
