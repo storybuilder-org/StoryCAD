@@ -6,9 +6,7 @@ using Windows.Storage;
 using Windows.Storage.Pickers;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml;
-using Octokit;
 using StoryCAD.Models;
-using StoryCAD.Services.Installation;
 using StoryCAD.Services.Logging;
 using StoryCAD.ViewModels.Tools;
 using WinRT;
@@ -19,7 +17,6 @@ namespace StoryCAD.Services.Dialogs.Tools;
 public sealed partial class PreferencesDialog
 {
     public PreferencesViewModel PreferencesVm => Ioc.Default.GetService<PreferencesViewModel>();
-    public InstallationService InstallVM => Ioc.Default.GetRequiredService<InstallationService>();
     public LogService Logger => Ioc.Default.GetRequiredService<LogService>();
     public AppState State => Ioc.Default.GetRequiredService<AppState>();
     public Windowing window => Ioc.Default.GetRequiredService<Windowing>();

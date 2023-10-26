@@ -28,16 +28,22 @@ public class ToolsData
         {
             _log.Log(LogLevel.Info, "Loading Tools.ini data");
             ToolLoader loader = Ioc.Default.GetService<ToolLoader>();
-            ToolsData toolsdata = Ioc.Default.GetService<ToolsData>();
             Task.Run(async () =>
             {
-                await loader.Init(Ioc.Default.GetRequiredService<AppState>().RootDirectory);
+               List<object> Tools = await loader.Init();
+                KeyQuestionsSource = (Dictionary<string, List<KeyQuestionModel>>)Tools[0];
+                StockScenesSource = (SortedDictionary<string, ObservableCollection<string>>)Tools[1];
+                TopicsSource = (SortedDictionary<string, TopicModel>)Tools[2];
+                MasterPlotsSource = (List<MasterPlotModel>)Tools[3];
+                DramaticSituationsSource = (SortedDictionary<string, DramaticSituationModel>)Tools[4];
             }).Wait();
-            _log.Log(LogLevel.Info, $"{toolsdata.KeyQuestionsSource.Keys.Count} Key Questions created");
-            _log.Log(LogLevel.Info, $"{toolsdata.StockScenesSource.Keys.Count} Stock Scenes created");
-            _log.Log(LogLevel.Info, $"{toolsdata.TopicsSource.Count} Topics created");
-            _log.Log(LogLevel.Info, $"{toolsdata.MasterPlotsSource.Count} Master Plots created");
-            _log.Log(LogLevel.Info, $"{toolsdata.DramaticSituationsSource.Count} Dramatic Situations created");
+            _log.Log(LogLevel.Info, $"""
+                                    {KeyQuestionsSource.Keys.Count} Key Questions created
+                                    {StockScenesSource.Keys.Count} Stock Scenes created
+                                    {TopicsSource.Count} Topics created
+                                    {MasterPlotsSource.Count} Master Plots created
+                                    {DramaticSituationsSource.Count} Dramatic Situations created
+                                    """);
 
         }
         catch (Exception ex)

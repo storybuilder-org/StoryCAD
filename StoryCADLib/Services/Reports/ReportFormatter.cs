@@ -10,6 +10,9 @@ using StoryCAD.Models;
 using StoryCAD.Services.Logging;
 using StoryCAD.ViewModels;
 using static System.Formats.Asn1.AsnWriter;
+using System.Reflection;
+using System.Linq;
+using System.IO;
 
 namespace StoryCAD.Services.Reports;
 
@@ -674,19 +677,20 @@ public class ReportFormatter
         try
         {
             _templates.Clear();
-            StorageFolder localFolder = ApplicationData.Current.RoamingFolder;
-            StorageFolder stbFolder = await localFolder.GetFolderAsync("StoryCAD");
-            StorageFolder templatesFolder = await stbFolder.GetFolderAsync("reports");
-            IReadOnlyList<StorageFile> templates = await templatesFolder.GetFilesAsync();
-            foreach (StorageFile fi in templates)
+            IEnumerable<string> Files = Assembly.GetExecutingAssembly().GetManifestResourceNames()
+                .Where(name => name.Contains("StoryCAD.Assets.Install.reports"));
+            foreach (string FileName in Files.ToList())
             {
-                string name = fi.DisplayName[..(fi.Name.Length - 4)];
-                string text = await FileIO.ReadTextAsync(fi);
-                string[] lines = text.Split(
-                    new[] { Environment.NewLine },
-                    StringSplitOptions.None
-                );
-                _templates.Add(name, lines);
+                //Read from manifest stream
+                await using Stream streams = Assembly.GetExecutingAssembly().GetManifestResourceStream(FileName);
+                using StreamReader reader = new(streams);
+
+                //Gets the stream, then formats it into line by line.
+                string[] lines = (await reader.ReadToEndAsync())
+                    .Split(new[] { Environment.NewLine }, StringSplitOptions.None );
+
+
+                _templates.Add(FileName.Split(".")[4], lines);
             }
         }
         catch (Exception ex)

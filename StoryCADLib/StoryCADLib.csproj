@@ -56,11 +56,17 @@
     <EmbeddedResource Include="Assets\Install\**" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Remove="Services\Preferences\**" />
     <Compile Remove="Services\Theming\**" />
+    <Content Remove="Services\Preferences\**" />
     <Content Remove="Services\Theming\**" />
+    <EmbeddedResource Remove="Services\Preferences\**" />
     <EmbeddedResource Remove="Services\Theming\**" />
+    <None Remove="Services\Preferences\**" />
     <None Remove="Services\Theming\**" />
+    <Page Remove="Services\Preferences\**" />
     <Page Remove="Services\Theming\**" />
+    <PRIResource Remove="Services\Preferences\**" />
     <PRIResource Remove="Services\Theming\**" />
   </ItemGroup>
 
@@ -81,11 +87,9 @@
 
   <ItemGroup>
     <Folder Include="Models\Scrivener\" />
-    <Folder Include="Services\Installation\" />
     <Folder Include="Services\Logging\" />
     <Folder Include="Services\Navigation\" />
     <Folder Include="Services\Backup\" />
-    <Folder Include="Services\Preferences\" />
   </ItemGroup>
 
   <ItemGroup>
