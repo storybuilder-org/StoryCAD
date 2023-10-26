@@ -70,9 +70,11 @@ jobs:
       run: msbuild $env:Solution_Name /t:Restore /p:Configuration=$env:Configuration
       env:
         Configuration: ${{ matrix.configuration }}
-    
-    - name: Run StoryCADTests
-      run: vstest.console.exe D:\a\StoryCAD\StoryCAD\StoryCADTests\bin\x64\Debug\net7.0-windows10.0.19041.0\StoryCADTests.dll /Logger:Console;verbosity=normal /Platform:x64 /Framework:.NETCoreApp,Version=v7.0
+  
+    - name: Run tests
+      uses: microsoft-approved-actions/vstest@master
+      with:
+        testAssembly: D:\a\StoryCAD\StoryCAD\StoryCADTests\bin\x64\Debug\net7.0-windows10.0.19041.0\StoryCADTests.dll
 
     # Decode the base 64 encoded pfx and save the Signing_Certificate
     - name: Decode the pfx
