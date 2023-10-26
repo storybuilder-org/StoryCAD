@@ -78,7 +78,7 @@ jobs:
       uses: darenm/Setup-VSTest@v1.2      
 
     - name: Run StoryCADTests
-      run: msbuild "StoryCADTests\StoryBuilderTests.csproj" /t:"Restore;Build" /p:Configuration=Debug /p:Platform=x64
+      run: msbuild "StoryCADTests\StoryBuilderTests.csproj" /t:Build /p:Configuration=Debug /p:Platform=x64
 
     # Decode the base 64 encoded pfx and save the Signing_Certificate
     - name: Decode the pfx
