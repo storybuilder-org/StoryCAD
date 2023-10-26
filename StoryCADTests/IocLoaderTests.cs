@@ -2,7 +2,6 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using StoryCAD.Services.Backend;
 using StoryCAD.Services.IoC;
-using StoryCAD.Services.Logging;
 using StoryCAD.ViewModels;
 using StoryCAD.ViewModels.Tools;
 
@@ -31,10 +30,6 @@ namespace StoryCADTests
             if (!IocSetupComplete)
             {
                 Ioc.Default.ConfigureServices(ServiceConfigurator.Configure());
-                LogService _log = Ioc.Default.GetService<LogService>();
-
-                new LogService();
-
                 IocSetupComplete = true;
             }
         }

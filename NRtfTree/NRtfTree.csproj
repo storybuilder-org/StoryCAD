@@ -4,21 +4,23 @@
 		<RuntimeIdentifiers>win10-x86;win10-x64;win10-arm64</RuntimeIdentifiers>
 		<TargetFramework>net7.0</TargetFramework>
 		<TargetPlatformMinVersion>10.0.17134.0</TargetPlatformMinVersion>
+		<TargetPlatformVersion>10.0.19041.0</TargetPlatformVersion>
 		<OutputType>Library</OutputType>
+		<TargetPlatformIdentifier>Windows</TargetPlatformIdentifier>
 		<RuntimeIdentifiers>win10-x86;win10-x64;win10-arm64</RuntimeIdentifiers>
 		<Platforms>AnyCPU;x64;x86;arm64</Platforms>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
-	  <NoWarn>1701;1702;IDE0090</NoWarn>
+		<NoWarn>1701;1702;IDE0090</NoWarn>
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <None Include="..\.editorconfig" Link=".editorconfig" />
+		<None Include="..\.editorconfig" Link=".editorconfig" />
 	</ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="System.Drawing.Common" Version="7.0.0" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="System.Drawing.Common" Version="7.0.0" />
+	</ItemGroup>
 
 </Project>
