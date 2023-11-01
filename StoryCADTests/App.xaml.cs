@@ -3,15 +3,10 @@ using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.VisualStudio.TestTools.UnitTesting.AppContainer;
-using Windows.ApplicationModel;
 using StoryCAD.Models;
 using StoryCAD.Services.Logging;
-using dotenv.net.Utilities;
-using dotenv.net;
-using Syncfusion.Licensing;
-using Path = System.IO.Path;
 using UnhandledExceptionEventArgs = Microsoft.UI.Xaml.UnhandledExceptionEventArgs;
-using StoryCAD.Services.IoC;
+using System.IO;
 
 namespace StoryCADTests;
 
@@ -29,23 +24,9 @@ public partial class App : Application
     public App()
     {
         //Loads Singletons/VMs
-        Ioc.Default.ConfigureServices(ServiceConfigurator.Configure());
-
-        string path = Path.Combine(Package.Current.InstalledLocation.Path, ".env");
-        DotEnvOptions options = new(false, new[] { path });
-        try
-        {
-            DotEnv.Load(options);
-
-            //Register Syncfusion license
-            string token = EnvReader.GetStringValue("SYNCFUSION_TOKEN");
-            SyncfusionLicenseProvider.RegisterLicense(token);
-
-            Ioc.Default.GetRequiredService<AppState>().EnvPresent = true;
-        }
-        catch {  }
-
-        this.InitializeComponent();
+        IocLoaderTests.Initalise(null);//Runs the initalisation code
+        Directory.CreateDirectory(Ioc.Default.GetRequiredService<AppState>().RootDirectory);
+        InitializeComponent();
 
         _log = Ioc.Default.GetService<LogService>();
         //TODO: Does the unhandled exception handler belong in the test project?
@@ -61,8 +42,12 @@ public partial class App : Application
     {
         _log.Log(LogLevel.Info, "StoryCADTests.App launched");
         AppState AppDat = Ioc.Default.GetRequiredService<AppState>();
+        await AppDat.LoadPreferences();
+
         string pathMsg = string.Format("Configuration data location = " + AppDat.RootDirectory);
         _log.Log(LogLevel.Info, pathMsg);
+
+        //await ProcessInstallationFiles();
 
         Microsoft.VisualStudio.TestPlatform.TestExecutor.UnitTestClient.CreateDefaultUI();
 
@@ -76,6 +61,7 @@ public partial class App : Application
         // Replace back with e.Arguments when https://github.com/microsoft/microsoft-ui-xaml/issues/3368 is fixed
         Microsoft.VisualStudio.TestPlatform.TestExecutor.UnitTestClient.Run(Environment.CommandLine);
     }
+
     private void OnUnhandledException(object sender, UnhandledExceptionEventArgs e)
     {
         _log.LogException(LogLevel.Fatal, e.Exception, e.Message);

@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.WinUI.Helpers;
 using Microsoft.UI.Xaml;
+using MySqlX.XDevAPI;
 using StoryCAD.DAL;
 using StoryCAD.Models.Tools;
 using StoryCAD.Services.Json;
@@ -28,7 +30,20 @@ public class AppState
     /// <summary>
     /// This is the path where all app files are stored
     /// </summary>
-    public string RootDirectory = System.IO.Path.Combine(ApplicationData.Current.RoamingFolder.Path, "StoryCAD");
+    public string RootDirectory
+    {
+        get
+        {
+            if (Assembly.GetEntryAssembly().Location.ToString().Contains("StoryCADTests.dll") || Assembly.GetEntryAssembly().Location.ToString().Contains("testhost.dll"))
+            {
+                return System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "StoryCADTests");
+            }
+            else 
+            {
+                return System.IO.Path.Combine(ApplicationData.Current.RoamingFolder.Path, "StoryCAD");
+            }
+        }
+    }
 
     /// <summary>
     /// User preferences
@@ -71,7 +86,24 @@ public class AppState
     /// Returns a simple 4 number tuple on release versions i.e 2.12.0.0
     /// Returns a 3 number tuple and build time on 
     /// </summary>
-    public string Version;
+    public string Version
+    {
+        get
+        {
+            string _packageVersion = $"{ Package.Current.Id.Version.Major }.{ Package.Current.Id.Version.Minor}.{ Package.Current.Id.Version.Build}";
+            if (Package.Current.Id.Version.Revision == 65535)
+            {
+                string StoryCADManifestVersion = Assembly.GetEntryAssembly()
+                    .GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion
+                    .Split("build")[1];
+                return $"Version: {_packageVersion} Built on: {StoryCADManifestVersion}";
+            }
+            else
+            {
+                return $"Version: {_packageVersion}";
+            }
+        }
+    }
 
     /// <summary>
     /// Returns true if the app has loaded with a version change.

@@ -1,6 +1,8 @@
 ﻿using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
+using Microsoft.Windows.AppLifecycle;
+using StoryCAD.Services.Logging;
 using StoryCAD.ViewModels;
 using System;
 using WinUIEx;
@@ -65,5 +67,26 @@ public class Windowing
 
         //Set window Title.
         MainWindow.Title = BaseTitle;
+    }
+
+
+    /// <summary>
+    /// When a second instance is opened, this code will be ran on the main (first) instance
+    /// It will bring up the main window.
+    /// </summary>
+    public void ActivateMainInstance(object sender, AppActivationArguments e)
+    {
+        Windowing wnd = Ioc.Default.GetRequiredService<Windowing>();
+        wnd.MainWindow.Restore(); //Resize window and unminimize window
+        wnd.MainWindow.BringToFront(); //Bring window to front
+
+        try
+        {
+            wnd.GlobalDispatcher.TryEnqueue(() =>
+            {
+                Ioc.Default.GetRequiredService<ShellViewModel>().ShowMessage(LogLevel.Warn, "You can only have one file open at once", false);
+            });
+        }
+        finally { }
     }
 }
