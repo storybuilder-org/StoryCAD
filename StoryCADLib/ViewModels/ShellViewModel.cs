@@ -2262,9 +2262,6 @@ public class ShellViewModel : ObservableRecipient
 
     public ShellViewModel()
     {
-
-        //_itemSelector = Ioc.Default.GetRequiredService<TreeViewSelection>();
-
         Messenger.Register<IsChangedRequestMessage>(this, (_, m) => { m.Reply(StoryModel!.Changed); });
         Messenger.Register<ShellViewModel, IsChangedMessage>(this, static (r, m) => r.IsChangedMessageReceived(m));
         Messenger.Register<ShellViewModel, StatusChangedMessage>(this, static (r, m) => r.StatusMessageReceived(m));

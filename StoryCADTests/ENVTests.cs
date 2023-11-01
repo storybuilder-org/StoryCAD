@@ -25,7 +25,6 @@ public class ENVTests
         string path = Path.Combine(Package.Current.InstalledLocation.Path, ".env");
         DotEnvOptions options = new(false, new[] { path });
         DotEnv.Load(options);
-
     }
 
     /// <summary>
@@ -36,6 +35,10 @@ public class ENVTests
     [TestMethod]
     public void CheckSFLicense()
     {
+        string path = Path.Combine(Package.Current.InstalledLocation.Path, ".env");
+        DotEnvOptions options = new(false, new[] { path });
+        DotEnv.Load(options);
+
         Assert.IsNotNull(EnvReader.GetStringValue("SYNCFUSION_TOKEN"));
     }
 }
