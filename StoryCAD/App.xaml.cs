@@ -141,7 +141,6 @@ public partial class App
             BackendService backend = Ioc.Default.GetService<BackendService>();
             await backend.SetConnectionString(keys);
             _log.SetElmahTokens(keys);
-
         }
         catch (Exception ex) { _log.LogException(LogLevel.Error, ex, ex.Message); }
 

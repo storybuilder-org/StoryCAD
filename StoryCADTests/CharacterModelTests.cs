@@ -16,6 +16,7 @@ public class CharacterModelTests
     [TestMethod]
     public void TestBlankTraits()
     {
+        throw new Exception("This is broken");
         CharacterViewModel CharVM = Ioc.Default.GetRequiredService<CharacterViewModel>();
         Ioc.Default.GetService<ShellViewModel>().StoryModel = new();
         var x = new CharacterModel(Ioc.Default.GetService<ShellViewModel>().StoryModel);

@@ -4,6 +4,10 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Syncfusion.Licensing;
 using System.IO;
 using Windows.ApplicationModel;
+using CommunityToolkit.Mvvm.DependencyInjection;
+using StoryCAD.Services.Backend;
+using StoryCAD.Services.Json;
+using System.Threading.Tasks;
 
 namespace StoryCADTests;
 
@@ -20,7 +24,7 @@ public class ENVTests
     /// Attempts to load the .ENV File to check its valid.
     /// </summary>
     [TestMethod]
-    public void CheckDotEnvFile() 
+    public void CheckDotEnvFile()
     {
         string path = Path.Combine(Package.Current.InstalledLocation.Path, ".env");
         DotEnvOptions options = new(false, new[] { path });
@@ -33,12 +37,19 @@ public class ENVTests
     /// offers no way to check that, besides the annoying popup it gives in the app.
     /// </summary>
     [TestMethod]
-    public void CheckSFLicense()
-    {
-        string path = Path.Combine(Package.Current.InstalledLocation.Path, ".env");
-        DotEnvOptions options = new(false, new[] { path });
-        DotEnv.Load(options);
+    public void CheckSFLicense() => Assert.IsNotNull(EnvReader.GetStringValue("SYNCFUSION_TOKEN"));
 
-        Assert.IsNotNull(EnvReader.GetStringValue("SYNCFUSION_TOKEN"));
+
+    [TestMethod]
+    public void CheckDoppler()
+    {
+        Doppler doppler = new();
+        Doppler keys = new();
+        Task.Run(async () =>
+        {
+            keys = await doppler.FetchSecretsAsync();
+        }).Wait();
+
+        Assert.IsNotNull(keys.CONNECTION,"Test Failed, The Doppler Value for connection is null");
     }
 }
