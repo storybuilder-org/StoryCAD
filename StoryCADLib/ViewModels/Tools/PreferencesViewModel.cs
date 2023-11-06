@@ -42,13 +42,22 @@ public class PreferencesViewModel : ObservableValidator
     
     //User information tab
 
-    private string _name;
-    [Required(ErrorMessage = "Name is required.")]
-    [MinLength(2, ErrorMessage = "Name should be longer than one character")]
-    public string Name
+    private string _firstName;
+    [Required(ErrorMessage = "First name is required.")]
+    [MinLength(2, ErrorMessage = "First name should be longer than one character")]
+    public string FirstName
     {
-        get => _name;
-        set => SetProperty(ref _name, value, false);
+        get => _firstName;
+        set => SetProperty(ref _firstName, value, false);
+    }
+
+    private string _lastName;
+    [Required(ErrorMessage = "First name is required.")]
+    [MinLength(2, ErrorMessage = "First name should be longer than one character")]
+    public string LastName
+    {
+        get => _lastName;
+        set => SetProperty(ref _lastName, value, false);
     }
 
     [EmailAddress(ErrorMessage = "Must be a valid email address")]
@@ -181,7 +190,8 @@ public class PreferencesViewModel : ObservableValidator
 
     internal void LoadModel()
     {
-        Name = CurrentModel.Name;
+        FirstName = CurrentModel.FirstName;
+        LastName = CurrentModel.LastName;
         Email = CurrentModel.Email;
         ErrorCollectionConsent = CurrentModel.ErrorCollectionConsent;
         Newsletter = CurrentModel.Newsletter;
@@ -214,7 +224,8 @@ public class PreferencesViewModel : ObservableValidator
 
     internal void SaveModel()
     {
-        CurrentModel.Name = Name;
+        CurrentModel.FirstName = FirstName;
+        CurrentModel.LastName = LastName;
         CurrentModel.Email = Email;
         CurrentModel.ErrorCollectionConsent = ErrorCollectionConsent;
         CurrentModel.Newsletter = Newsletter;

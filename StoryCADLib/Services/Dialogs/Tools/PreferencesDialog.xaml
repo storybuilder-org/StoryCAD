@@ -3,11 +3,12 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-    <StackPanel Width="500" Height="350">
-        <Pivot Name="PivotView" Height="315" Width="500" VerticalAlignment="Stretch">
+    <StackPanel Width="500" Height="400">
+        <Pivot Name="PivotView" Height="355" Width="500" VerticalAlignment="Stretch">
             <PivotItem Header="General" VerticalContentAlignment="Stretch" VerticalAlignment="Center">
                 <StackPanel>
-                    <TextBox Header="Your name:" PlaceholderText="Put the name want to publish under here" HorizontalAlignment="Center" Margin="8" Width="300" Text="{x:Bind PreferencesVm.Name, Mode=TwoWay}"/>
+                    <TextBox Header="Your first name:" PlaceholderText="Put the first name want to publish under here" HorizontalAlignment="Center" Margin="8" Width="300" Text="{x:Bind PreferencesVm.FirstName, Mode=TwoWay}"/>
+                    <TextBox Header="Your surname:" PlaceholderText="Put the surname want to publish under here" HorizontalAlignment="Center" Margin="8" Width="300" Text="{x:Bind PreferencesVm.LastName, Mode=TwoWay}"/>
                     <TextBox Header="Your email:" PlaceholderText="Put your email here" Margin="8" Width="300" Text="{x:Bind PreferencesVm.Email, Mode=TwoWay}"/>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                         <TextBox IsReadOnly="True" Name="ProjDirBox" Header="Project directory:" PlaceholderText="Where do you want to store your stories?" Margin="8" Width="300" VerticalAlignment="Center" Text="{x:Bind PreferencesVm.ProjectDirectory, Mode=OneWay}"/>

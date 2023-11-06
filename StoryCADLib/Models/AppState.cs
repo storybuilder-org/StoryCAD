@@ -148,7 +148,7 @@ public class AppState
                      Core Count - {Environment.ProcessorCount}
 
                      === User Prefs ===
-                     Name - {Preferences.Name}
+                     Name - {Preferences.FirstName}  {Preferences.LastName}
                      Email - {Preferences.Email}
                      Elmah Consent - {Preferences.ErrorCollectionConsent}
                      Theme - {Preferences.PrimaryColor.Color.ToHex()}
