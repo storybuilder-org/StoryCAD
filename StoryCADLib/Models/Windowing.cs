@@ -1,10 +1,15 @@
 ﻿using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
 using Microsoft.Windows.AppLifecycle;
 using StoryCAD.Services.Logging;
 using StoryCAD.ViewModels;
 using System;
+using System.Runtime.InteropServices;
+using System.Threading.Tasks;
+using Windows.Storage;
+using Windows.Storage.Pickers;
 using WinUIEx;
 
 namespace StoryCAD.Models;
@@ -89,4 +94,57 @@ public class Windowing
         }
         finally { }
     }
+
+    /// <summary>
+    /// Shows a file picker.
+    /// </summary>
+    /// <returns>A StorageFile object, of the file picked.</returns>
+    public async Task<StorageFile> ShowFilePicker(string ButtonText = "Open", string Filter = "*")
+    {
+        FileOpenPicker _filePicker = new()
+        {
+            CommitButtonText = ButtonText,
+            SuggestedStartLocation = PickerLocationId.DocumentsLibrary,
+        };
+        
+        WinRT.Interop.InitializeWithWindow.Initialize(_filePicker, MainWindow.GetWindowHandle());
+        //TODO: Use preferences project folder instead of DocumentsLibrary except you can't. Thanks, UWP.
+        _filePicker.FileTypeFilter.Add(Filter);
+
+        return await _filePicker.PickSingleFileAsync();
+    }
+
+    public async Task<StorageFolder> ShowFolderPicker(string ButtonText = "Select folder", string Filter = "*")
+    {
+        // Find a home for the new project
+        FolderPicker folderPicker = new() { 
+            CommitButtonText = ButtonText,
+            SuggestedStartLocation = PickerLocationId.DocumentsLibrary,
+        };
+
+        WinRT.Interop.InitializeWithWindow.Initialize(folderPicker, MainWindow.GetWindowHandle());
+        folderPicker.FileTypeFilter.Add(Filter);
+        return await folderPicker.PickSingleFolderAsync();
+    }
+
+    #region Various Com Imports for File/Folder Pickers
+    [ComImport]
+    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    [Guid("EECDBF0E-BAE9-4CB6-A68E-9598E1CB57BB")]
+    internal interface IWindowNative
+    {
+        IntPtr WindowHandle { get; }
+    }
+
+    [ComImport]
+    [Guid("3E68D4BD-7135-4D10-8018-9FB6D9F33FA1")]
+    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    public interface IInitializeWithWindow
+    {
+        void Initialize(IntPtr hwnd);
+    }
+
+    [DllImport("user32.dll", ExactSpelling = true, CharSet = CharSet.Auto, PreserveSig = true, SetLastError = false)]
+    public static extern IntPtr GetActiveWindow();
+    #endregion
 }
