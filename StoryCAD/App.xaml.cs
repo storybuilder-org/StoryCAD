@@ -148,10 +148,14 @@ public partial class App
         AppState AppDat = Ioc.Default.GetRequiredService<AppState>();
         string pathMsg = string.Format("Configuration data location = " + AppDat.RootDirectory);
         _log.Log(LogLevel.Info, pathMsg);
+        
         Trace.Listeners.Add(new TextWriterTraceListener(Console.Out));
         Trace.AutoFlush = true;
         Trace.Indent();
         Trace.WriteLine(pathMsg);
+
+        //Load user preferences or atleast initalise them.
+        await Ioc.Default.GetService<AppState>().LoadPreferences();
 
         if (Debugger.IsAttached) {_log.Log(LogLevel.Info, "Bypassing elmah.io as debugger is attached.");}
         else
@@ -167,9 +171,8 @@ public partial class App
                 _log.Log(LogLevel.Info, "elmah.io log target bypassed");
             }
         }
-        
+
         Ioc.Default.GetService<BackendService>()!.StartupRecording();
-        await Ioc.Default.GetService<AppState>().LoadPreferences();
         ConfigureNavigation();
 
         // Construct a Window to hold our Pages
