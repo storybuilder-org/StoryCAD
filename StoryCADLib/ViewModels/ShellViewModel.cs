@@ -59,9 +59,7 @@ public class ShellViewModel : ObservableRecipient
     public List<StoryNodeItem> NewNodeHighlightCache = new();
 
     public StoryViewType CurrentViewType;
-
     private ContentDialog _contentDialog;
-
     private int _sourceIndex;
     private ObservableCollection<StoryNodeItem> _sourceChildren;
     private int _targetIndex;
@@ -366,9 +364,13 @@ public class ShellViewModel : ObservableRecipient
         {
             _canExecuteCommands = false;
             // Needs logging
-            _contentDialog = new() { XamlRoot = Ioc.Default.GetRequiredService<Windowing>().XamlRoot, Content = new UnifiedMenuPage() };
-            if (Application.Current.RequestedTheme == ApplicationTheme.Light) { _contentDialog.Background = new SolidColorBrush(Colors.LightGray); }
-            await _contentDialog.ShowAsync();
+            _contentDialog = new() { Content = new UnifiedMenuPage() };
+            if (Window.RequestedTheme == ElementTheme.Light) 
+            {
+                _contentDialog.RequestedTheme = Window.RequestedTheme;
+                _contentDialog.Background = new SolidColorBrush(Colors.LightGray);
+            }
+            await Window.ShowContentDialog(_contentDialog);
             _canExecuteCommands = true;
         }   
     }
@@ -632,15 +634,15 @@ public class ShellViewModel : ObservableRecipient
     /// </summary>
     public async Task ShowDotEnvWarningAsync()
     {
-        await new ContentDialog
+        ContentDialog Dialog = new()
         {
             Title = "File missing.",
             Content = "This copy is missing a key file, if you are working on a branch or fork this is expected and you do not need to do anything about this." +
-                      "\nHowever if you are not a developer then report this as it should not happen.\nThe following may have issues or possible errors\n" +
-                      "Syncfusion related items and error logging.",
-            XamlRoot = Window.XamlRoot,
+                       "\nHowever if you are not a developer then report this as it should not happen.\nThe following may have issues or possible errors\n" +
+                       "Syncfusion related items and error logging.",
             PrimaryButtonText = "Okay"
-        }.ShowAsync();
+        };
+        await Window.ShowContentDialog(Dialog);
         Ioc.Default.GetRequiredService<LogService>().Log(LogLevel.Error, "Env missing.");
     }
 
@@ -933,7 +935,6 @@ public class ShellViewModel : ObservableRecipient
                 ContentDialog _saveAsDialog = new()
                 {
                     Title = "Save as",
-                    XamlRoot = Ioc.Default.GetRequiredService<Windowing>().XamlRoot,
                     PrimaryButtonText = "Save",
                     SecondaryButtonText = "Cancel",
                     Content = new SaveAsDialog()
@@ -946,7 +947,7 @@ public class ShellViewModel : ObservableRecipient
                 _saveAsVM.ParentFolder = StoryModel.ProjectFolder;
                 _saveAsVM.ProjectPathName = StoryModel.ProjectPath;
 
-                ContentDialogResult _result = await _saveAsDialog.ShowAsync();
+                ContentDialogResult _result = await Window.ShowContentDialog(_saveAsDialog);
 
                 if (_result == ContentDialogResult.Primary) //If save is clicked
                 {
@@ -1009,9 +1010,8 @@ public class ShellViewModel : ObservableRecipient
                 SecondaryButtonText = "No",
                 Title = "Replace file?",
                 Content = $"File {Path.Combine(_saveAsVM.ProjectPathName, _saveAsVM.ProjectName)} already exists. \n\nDo you want to replace it?",
-                XamlRoot = Window.XamlRoot
             };
-            return await _replaceDialog.ShowAsync() == ContentDialogResult.Primary;
+            return await Window.ShowContentDialog(_replaceDialog) == ContentDialogResult.Primary;
         }
         return true;
     }
@@ -1028,9 +1028,8 @@ public class ShellViewModel : ObservableRecipient
                 Title = "Save changes?",
                 PrimaryButtonText = "Yes",
                 SecondaryButtonText = "No",
-                XamlRoot = Window.XamlRoot
             };
-            if (await _warning.ShowAsync() == ContentDialogResult.Primary)
+            if (await Window.ShowContentDialog(_warning) == ContentDialogResult.Primary)
             {
                 SaveModel();
                 await WriteModel();
@@ -1066,9 +1065,8 @@ public class ShellViewModel : ObservableRecipient
                 Title = "Save changes?",
                 PrimaryButtonText = "Yes",
                 SecondaryButtonText = "No",
-                XamlRoot = Window.XamlRoot
             };
-            if (await _warning.ShowAsync() == ContentDialogResult.Primary)
+            if (await Window.ShowContentDialog(_warning) == ContentDialogResult.Primary)
             {
                 SaveModel();
                 await WriteModel();
@@ -1098,14 +1096,13 @@ public class ShellViewModel : ObservableRecipient
         Ioc.Default.GetRequiredService<PreferencesViewModel>().LoadModel();
         ContentDialog _preferencesDialog = new()
         {
-            XamlRoot = Window.XamlRoot,
             Content = new PreferencesDialog(),
             Title = "Preferences",
             PrimaryButtonText = "Save",
             CloseButtonText = "Cancel"
         };
 
-        ContentDialogResult _result = await _preferencesDialog.ShowAsync();
+        ContentDialogResult _result = await Window.ShowContentDialog(_preferencesDialog);
         switch (_result)
         {
             // Save changes
@@ -1136,10 +1133,9 @@ public class ShellViewModel : ObservableRecipient
             {
                 Title = "Key questions",
                 CloseButtonText = "Close",
-                XamlRoot = Window.XamlRoot,
                 Content = new KeyQuestionsDialog()
             };
-            await _keyQuestionsDialog.ShowAsync();
+            await Ioc.Default.GetService<Windowing>().ShowContentDialog(_keyQuestionsDialog);
 
             Ioc.Default.GetRequiredService<KeyQuestionsViewModel>().NextQuestion();
             Logger.Log(LogLevel.Info, "KeyQuestions finished");
@@ -1158,12 +1154,11 @@ public class ShellViewModel : ObservableRecipient
 
             ContentDialog _dialog = new()
             {
-                XamlRoot = Window.XamlRoot,
                 Title = "Topic Information",
                 CloseButtonText = "Done",
                 Content = new TopicsDialog()
             };
-            await _dialog.ShowAsync();
+            await Window.ShowContentDialog(_dialog);
 
             _canExecuteCommands = true;
         }
@@ -1185,13 +1180,12 @@ public class ShellViewModel : ObservableRecipient
                 //Creates and shows content dialog
                 ContentDialog _dialog = new()
                 {
-                    XamlRoot = Window.XamlRoot,
                     Title = "Master plots",
                     PrimaryButtonText = "Copy",
                     SecondaryButtonText = "Cancel",
                     Content = new MasterPlotsDialog()
                 };
-                ContentDialogResult _result = await _dialog.ShowAsync();
+                ContentDialogResult _result = await Window.ShowContentDialog(_dialog);
 
                 if (_result == ContentDialogResult.Primary) // Copy command
                 {
@@ -1239,14 +1233,13 @@ public class ShellViewModel : ObservableRecipient
                 //Creates and shows dialog
                 ContentDialog _dialog = new()
                 {
-                    XamlRoot = Window.XamlRoot,
                     Title = "Dramatic situations",
                     PrimaryButtonText = "Copy as problem",
                     SecondaryButtonText = "Copy as scene",
                     CloseButtonText = "Cancel",
                     Content = new DramaticSituationsDialog()
                 };
-                ContentDialogResult _result = await _dialog.ShowAsync();
+                ContentDialogResult _result = await Window.ShowContentDialog(_dialog);
 
                 DramaticSituationModel _situationModel = Ioc.Default.GetRequiredService<DramaticSituationsViewModel>().Situation;
                 string _msg;
@@ -1297,9 +1290,8 @@ public class ShellViewModel : ObservableRecipient
                     Content = new StockScenesDialog(),
                     PrimaryButtonText = "Add Scene",
                     CloseButtonText = "Cancel",
-                    XamlRoot = Window.XamlRoot
                 };
-                ContentDialogResult _result = await _dialog.ShowAsync();
+                ContentDialogResult _result = await Window.ShowContentDialog(_dialog);
 
                 if (_result == ContentDialogResult.Primary) // Copy command
                 {
@@ -1839,7 +1831,7 @@ public class ShellViewModel : ObservableRecipient
             _newNode.Parent.IsExpanded = true;
             _newNode.IsRoot = false; //Only an overview node can be a root, which cant be created normally
             _newNode.IsSelected = false;
-            _newNode.Background = State.Preferences.ContrastColor;
+            _newNode.Background = Window.ContrastColor;
             NewNodeHighlightCache.Add(_newNode);
         }
         else { return null; }   
@@ -1889,16 +1881,15 @@ public class ShellViewModel : ObservableRecipient
             _content.Children.Add(new ListView { ItemsSource = _foundNodes, HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center, Height = 300, Width = 480 });
 
             //Creates dialog and then shows it
-            _contentDialog = new()
+            ContentDialog _Dialog = new()
             {
-                XamlRoot = Window.XamlRoot,
                 Content = _content,
                 Title = "Are you sure you want to delete this node?",
                 Width = 500,
                 PrimaryButtonText = "Confirm",
                 SecondaryButtonText = "Cancel"
             };
-            if (await _contentDialog.ShowAsync() == ContentDialogResult.Secondary) { _delete = false; }
+            if (await Ioc.Default.GetRequiredService<Windowing>().ShowContentDialog(_Dialog)== ContentDialogResult.Secondary) { _delete = false; }
         }
 
 
@@ -2361,7 +2352,7 @@ public class ShellViewModel : ObservableRecipient
             if (Search.SearchStoryElement(_node, FilterText, StoryModel)) //checks if node name contains the thing we are looking for
             {
                 _searchTotal++;
-                if (Application.Current.RequestedTheme == ApplicationTheme.Light)
+                if (Window.RequestedTheme == ElementTheme.Light)
                 {
                     _node.Background = new SolidColorBrush(Colors.LightGoldenrodYellow);
                 }

@@ -10,6 +10,7 @@ namespace StoryCAD.Services.Dialogs;
 
 public sealed partial class UnifiedMenuPage
 {
+    Windowing Windowing = Ioc.Default.GetRequiredService<Windowing>();
     public delegate void UpdateContentDelegate();
 
     public void UpdateContent()

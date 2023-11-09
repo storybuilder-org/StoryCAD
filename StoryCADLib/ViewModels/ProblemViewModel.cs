@@ -337,14 +337,13 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         ContentDialog _conflictDialog = new()
         {
             Title = "Conflict builder",
-            XamlRoot = Ioc.Default.GetRequiredService<Windowing>().XamlRoot,
             PrimaryButtonText = "Copy to Protagonist",
             SecondaryButtonText = "Copy to Antagonist",
-            CloseButtonText = "Close"
+            CloseButtonText = "Close",
         };
         Conflict _selectedConflict = new();
         _conflictDialog.Content = _selectedConflict;
-        ContentDialogResult _result = await _conflictDialog.ShowAsync();
+        ContentDialogResult _result = await Ioc.Default.GetService<Windowing>().ShowContentDialog(_conflictDialog);
 
         if (_selectedConflict.ExampleText == null) {_selectedConflict.ExampleText = "";}
         switch (_result)
@@ -427,7 +426,7 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         catch (Exception e)
         {
             _logger!.LogException(LogLevel.Fatal, e, "Error loading lists in Problem view model");
-            ShowError();
+            Ioc.Default.GetRequiredService<Windowing>().ShowResourceErrorMessage();
         }
 
         ConflictCommand = new RelayCommand(ConflictTool, () => true);
@@ -435,16 +434,4 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         PropertyChanged += OnPropertyChanged;
     }
     #endregion
-
-    async void ShowError()
-    {
-        await new ContentDialog()
-        {
-            XamlRoot = Ioc.Default.GetRequiredService<Windowing>().XamlRoot,
-            Title = "Error loading resources",
-            Content = "An error has occurred, please reinstall or update StoryCAD to continue.",
-            CloseButtonText = "Close"
-        }.ShowAsync();
-        throw new MissingManifestResourceException();
-    }
 }

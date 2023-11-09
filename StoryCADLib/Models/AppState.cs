@@ -152,7 +152,7 @@ public class AppState
                      Email - {Preferences.Email}
                      Elmah Consent - {Preferences.ErrorCollectionConsent}
                      Theme - {Preferences.PrimaryColor.Color.ToHex()}
-                     Accent Color - {Preferences.AccentColor} 
+                     Accent Color - {Ioc.Default.GetRequiredService<Windowing>().AccentColor} 
                      Last Version Prefs logged - {Preferences.Version}
                      Search Engine - {Preferences.PreferredSearchEngine} 
                      AutoSave - {Preferences.AutoSave}

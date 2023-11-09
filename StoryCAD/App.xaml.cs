@@ -1,4 +1,4 @@
-﻿using System;
+﻿    using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -35,6 +35,8 @@ using LaunchActivatedEventArgs = Microsoft.UI.Xaml.LaunchActivatedEventArgs;
 using System.Globalization;
 using System.Reflection;
 using StoryCAD.Services.IoC;
+using Microsoft.UI.Xaml.Media;
+using Microsoft.UI;
 
 namespace StoryCAD;
 
@@ -182,6 +184,7 @@ public partial class App
         mainWindow.Content = rootFrame;
         mainWindow.CenterOnScreen(); // Centers the window on the monitor
         mainWindow.Activate();
+        (mainWindow.Content as FrameworkElement).RequestedTheme = ElementTheme.Light;
         // Navigate to the first page:
         //   If we've not yet initialized Preferences, it's PreferencesInitialization.
         //   If we have initialized Preferences, it Shell.

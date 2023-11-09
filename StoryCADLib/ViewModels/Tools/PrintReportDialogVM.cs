@@ -182,10 +182,9 @@ public class PrintReportDialogVM : ObservableRecipient
             Dialog = new()
             {
                 Title = "Generate Reports",
-                XamlRoot = Window.XamlRoot,
                 Content = new PrintReportsDialog()
             };
-            await Dialog.ShowAsync();
+            await Ioc.Default.GetService<Windowing>().ShowContentDialog(Dialog);
             ShellVM._canExecuteCommands = true;
 
         }
@@ -381,14 +380,13 @@ public class PrintReportDialogVM : ObservableRecipient
         if (args.Completion == PrintTaskCompletion.Failed) //Show message if print fails
         {
             //Use an enqueue here because the sample version doesn't use it properly (i think or it doesn't work here.)
-             ContentDialog cd = new()
+             ContentDialog Dialog = new()
              {
-                XamlRoot = Ioc.Default.GetRequiredService<Windowing>().XamlRoot,
                 Title = "Printing error",
                 Content = "An error occurred trying to print your document.",
                 PrimaryButtonText = "OK"
              };
-             await cd.ShowAsync();
+            await Window.ShowContentDialog(Dialog);
         }
 
         Window.GlobalDispatcher.TryEnqueue(() =>

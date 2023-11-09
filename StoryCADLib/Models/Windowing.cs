@@ -1,10 +1,17 @@
-﻿using CommunityToolkit.Mvvm.DependencyInjection;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
 using Microsoft.Windows.AppLifecycle;
 using StoryCAD.Services.Logging;
 using StoryCAD.ViewModels;
 using System;
+using System.ComponentModel;
+using System.Threading.Tasks;
+using Windows.UI;
+using Windows.UI.ViewManagement;
 using WinUIEx;
 
 namespace StoryCAD.Models;
@@ -12,8 +19,10 @@ namespace StoryCAD.Models;
 /// <summary>
 /// This class contains window (mainwindow) related items ect.
 /// </summary>
-public class Windowing
+public class Windowing : ObservableRecipient
 {
+    private void OnPropertyChanged(object sender, PropertyChangedEventArgs e) { }
+
     /// <summary>
     /// A pointer to the App Window (MainWindow) handle
     /// </summary>
@@ -43,6 +52,34 @@ public class Windowing
     /// </summary>
     public DispatcherQueue GlobalDispatcher = null;
 
+    private ElementTheme _requestedTheme = ElementTheme.Light;
+    public ElementTheme RequestedTheme
+    {
+        get => _requestedTheme;
+        set => SetProperty(ref _requestedTheme, value);
+    }
+
+    /// <summary>
+    /// Returns the users accent color
+    /// (Set in Windows Settings)
+    /// </summary>
+    public Color AccentColor => new UISettings().GetColorValue(UIColorType.Accent);
+
+    /// <summary>
+    /// This is a color that should in most cases
+    /// constrast the users accent color
+    /// </summary>
+    public SolidColorBrush ContrastColor
+    {
+        get
+        {
+            Color Contrast = AccentColor;
+            Contrast.R = (byte)(Contrast.R * 1.4);
+            Contrast.B = (byte)(Contrast.B * 1.4);
+            Contrast.G = (byte)(Contrast.G * 1.4);
+            return new SolidColorBrush(Contrast);
+        }
+    }
 
     /// <summary>
     /// This will dynamically update the title based
@@ -69,6 +106,29 @@ public class Windowing
         MainWindow.Title = BaseTitle;
     }
 
+    /// <summary>
+    /// This will update the elements of the UI to 
+    /// match the theme set in RequestedTheme.
+    /// </summary>
+    public void UpdateUIToTheme()
+    {
+
+    }
+
+    /// <summary>
+    /// This takes a ContentDialog and shows it to the user
+    /// It will handle themeing, XAMLRoot and showing the dialog.
+    /// </summary>
+    /// <returns>A ContentDialogResult enum value.</returns>
+    public async Task<ContentDialogResult> ShowContentDialog(ContentDialog Dialog)
+    {
+        //Set XAML root and correct theme.
+        Dialog.XamlRoot = XamlRoot;
+        Dialog.RequestedTheme = RequestedTheme;
+
+        return await Dialog.ShowAsync();
+    }
+
 
     /// <summary>
     /// When a second instance is opened, this code will be ran on the main (first) instance
@@ -88,5 +148,27 @@ public class Windowing
             });
         }
         finally { }
+    }
+
+
+    /// <summary>
+    /// Shows an error message to the user that there's an issue
+    /// with the app and it needs to be reinstalled
+    /// As of the RemoveInstallService merge, this is theoretically 
+    /// impossible to occur but it should stay incase something
+    /// goes wrong with resource loading.
+    /// </summary>
+    /// <exception cref="MissingManifestResourceException"></exception>
+    public async void ShowResourceErrorMessage()
+    {
+        await new ContentDialog()
+        {
+            XamlRoot = Ioc.Default.GetRequiredService<Windowing>().XamlRoot,
+            Title = "Error loading resources",
+            Content = "An error has occurred, please reinstall or update StoryCAD to continue.",
+            CloseButtonText = "Close",
+            RequestedTheme = RequestedTheme
+        }.ShowAsync();
+        throw new MissingManifestResourceException();
     }
 }

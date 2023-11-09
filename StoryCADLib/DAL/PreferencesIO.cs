@@ -162,7 +162,7 @@ public class PreferencesIo
             _log.Log(LogLevel.Info, "StoryCAD.prf not found; default created.");
         }
 
-        if (Application.Current.RequestedTheme == ApplicationTheme.Light)
+        if (Ioc.Default.GetService<Windowing>().RequestedTheme == ElementTheme.Light)
         {
             _model.PrimaryColor = new SolidColorBrush(Colors.LightGray);
             _model.SecondaryColor = new SolidColorBrush(Colors.Black);
@@ -171,9 +171,7 @@ public class PreferencesIo
         {
             _model.PrimaryColor = new SolidColorBrush(Colors.DarkSlateGray);
             _model.SecondaryColor = new SolidColorBrush(Colors.White);
-        }
-
-        _model.AccentColor = new UISettings().GetColorValue(UIColorType.Accent);
+        } 
     }
 
     /// <summary>
