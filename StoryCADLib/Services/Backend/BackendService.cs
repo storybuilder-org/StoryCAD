@@ -112,7 +112,7 @@ namespace StoryCAD.Services.Backend
             {
                 await conn.OpenAsync();
 
-                string name = preferences.Name;
+                string name = preferences.FirstName + " " + preferences.LastName;
                 string email = preferences.Email;
                 int id = await sql.AddOrUpdateUser(conn, name, email);
                 log.Log(LogLevel.Info, "Name: " + name + " userId: " + id);
@@ -158,7 +158,7 @@ namespace StoryCAD.Services.Backend
             {
                 await conn.OpenAsync();
 
-                string name = preferences.Name;
+                string name = preferences.FirstName + " " + preferences.LastName;
                 string email = preferences.Email;
                 int id = await sql.AddOrUpdateUser(conn, name, email);
                 log.Log(LogLevel.Info, "User Name: " + name + " userId: " + id);

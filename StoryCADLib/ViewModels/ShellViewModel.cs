@@ -399,7 +399,7 @@ public class ShellViewModel : ObservableRecipient
             StoryModel.ProjectPath = StoryModel.ProjectFolder.Path;
 
             OverviewModel _overview = new(Path.GetFileNameWithoutExtension(dialogVM.ProjectName), StoryModel)
-            { DateCreated = DateTime.Today.ToString("yyyy-MM-dd"), Author = State.Preferences.Name };
+            { DateCreated = DateTime.Today.ToString("yyyy-MM-dd"), Author = State.Preferences.FirstName + " " + State.Preferences.LastName };
 
             StoryNodeItem _overviewNode = new(_overview, null) { IsExpanded = true, IsRoot = true };
             StoryModel.ExplorerView.Add(_overviewNode);

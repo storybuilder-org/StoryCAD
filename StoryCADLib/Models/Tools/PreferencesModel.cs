@@ -26,7 +26,8 @@ public class PreferencesModel : ObservableObject
     #region Properties
 
     //User information
-    public string Name { get; set; }
+    public string FirstName { get; set; }
+    public string LastName { get; set; }
     public string Email { get; set; }
     public bool ErrorCollectionConsent { get; set; }
     public bool Newsletter { get; set; }
@@ -91,7 +92,8 @@ public class PreferencesModel : ObservableObject
     #region Constructor
     public PreferencesModel()
     {
-        Name = string.Empty;
+        FirstName = string.Empty;
+        LastName = string.Empty;
         Email = string.Empty;
         ErrorCollectionConsent = false;
         Newsletter = false;

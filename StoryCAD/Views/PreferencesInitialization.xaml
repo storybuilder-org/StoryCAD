@@ -25,7 +25,8 @@
 
                 <StackPanel Grid.Row="1" VerticalAlignment="Stretch">
                     <Border Height="50"/>
-                    <TextBox PlaceholderText="What's your name?" Margin="15" VerticalAlignment="Center" Text="{x:Bind _initVM.Preferences.Name, Mode=TwoWay}"/>
+                    <TextBox PlaceholderText="What's your first name?" Margin="15" VerticalAlignment="Center" Text="{x:Bind _initVM.Preferences.FirstName, Mode=TwoWay}"/>
+                    <TextBox PlaceholderText="What's your surname?" Margin="15" VerticalAlignment="Center" Text="{x:Bind _initVM.Preferences.LastName, Mode=TwoWay}"/>
                     <TextBox PlaceholderText="What's your email address?" IsSpellCheckEnabled="False"  Margin="15" VerticalAlignment="Center"  Text="{x:Bind _initVM.Preferences.Email, Mode=TwoWay}"/>
                     <StackPanel Orientation="Horizontal">
                         <TextBox IsReadOnly="True" PlaceholderText="Select a folder to hold your story outlines." Name="ProjPath" Margin="15" VerticalAlignment="Center" Width="435" HorizontalAlignment="Left" 
