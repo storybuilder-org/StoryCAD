@@ -56,10 +56,27 @@ public class PreferencesIo
                 string[] _tokens = _line.Split(new[] { '=' });
                 switch (_tokens[0])
                 {
+                    //TODO: Remove this case after March 2024.
+                    //This case can only ever execute on PRF files created pre-2.13
                     case "Name":
-                        _model.Name = _tokens[1];
+                        string[] names = _tokens[1].Split(" ");
+                        if (names.Length == 2)
+                        {
+                            _model.FirstName = names[0];
+                            _model.LastName = names[1];
+                        }
+                        else
+                        {
+                            _model.FirstName = _tokens[1];
+                            _model.LastName = "";
+                        }
                         break;
-
+                    case "FirstName":
+                        _model.FirstName = _tokens[1];
+                        break;
+                    case "LastName":
+                        _model.LastName = _tokens[1];
+                        break;
                     case "Email":
                         _model.Email = _tokens[1];
                         break;
@@ -185,7 +202,8 @@ public class PreferencesIo
         StorageFile _preferencesFile = await _preferencesFolder.CreateFileAsync("StoryCAD.prf", CreationCollisionOption.ReplaceExisting);
 
         string _newPreferences = $"""
-            Name={_model.Name}
+            FirstName={_model.FirstName}
+            LastName={_model.LastName}
             Email={_model.Email}
             ErrorCollectionConsent={_model.ErrorCollectionConsent}
             Newsletter={_model.Newsletter}
