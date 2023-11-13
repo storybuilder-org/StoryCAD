@@ -2,6 +2,7 @@
 using Microsoft.UI.Xaml.Media;
 using Windows.UI.ViewManagement;
 using CommunityToolkit.Mvvm.ComponentModel;
+using static Org.BouncyCastle.Crypto.Engines.SM2Engine;
 
 namespace StoryCAD.Models.Tools;
 
@@ -39,14 +40,10 @@ public class PreferencesModel : ObservableObject
 
     /// <summary>
     /// This is the users theme preference
-    /// It can be light, dark or default
+    /// It can be light, dark or default (System theme)
     /// </summary>
     public ElementTheme ThemePreference;
 
-
-    // Visual changes
-    public SolidColorBrush PrimaryColor { get; set; } //Sets UI Color
-    public SolidColorBrush SecondaryColor { get; set; } //Sets node color.
 
     public TextWrapping WrapNodeNames { get; set; }
 
@@ -93,9 +90,6 @@ public class PreferencesModel : ObservableObject
         Newsletter = false;
         PreferencesInitialized = false;
         LastSelectedTemplate = 0;
-
-        PrimaryColor = new SolidColorBrush(new UISettings().GetColorValue(UIColorType.Accent));
-        SecondaryColor = new SolidColorBrush(new UISettings().GetColorValue(UIColorType.Accent));
         WrapNodeNames = TextWrapping.WrapWholeWords; 
 
         LastFile1 = string.Empty;
@@ -113,8 +107,9 @@ public class PreferencesModel : ObservableObject
 
         Version = string.Empty;
         RecordPreferencesStatus = false;
-        RecordVersionStatus = false;      // Last version change was logged successfully or notx
+        RecordVersionStatus = false;      // Last version change was logged successfully or not
         PreferredSearchEngine = BrowserType.DuckDuckGo;
+        ThemePreference = ElementTheme.Default; // Use system theme
     }
     #endregion
 }

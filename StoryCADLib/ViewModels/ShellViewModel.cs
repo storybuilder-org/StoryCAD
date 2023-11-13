@@ -2184,7 +2184,7 @@ public class ShellViewModel : ObservableRecipient
         switch (statusMessage.Value.Level)
         {
             case LogLevel.Info:
-                StatusColor = State.Preferences.SecondaryColor;
+                StatusColor = Window.SecondaryColor;
                 _statusTimer.Interval = new TimeSpan(0, 0, 15);  // Timer will tick in 15 seconds
                 _statusTimer.Start();
                 break;

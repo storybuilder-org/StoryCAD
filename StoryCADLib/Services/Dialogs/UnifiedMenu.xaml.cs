@@ -41,6 +41,6 @@ public sealed partial class UnifiedMenuPage
         UnifiedMenuVM.UpdateContent = UpdateContent;  // Connect the VM's delegate to HideDialog
         UnifiedMenuVM.CurrentTab = new ListBoxItem { Name = "Recent" }; //Makes unified VM load recents by default
         UnifiedMenuVM.SidebarChange(null, null);
-        if (ActualTheme == ElementTheme.Light) {UnifiedMenuVM.AdjustmentColor = new SolidColorBrush(Colors.White);}
+        if (Windowing.RequestedTheme == ElementTheme.Light) {UnifiedMenuVM.AdjustmentColor = new SolidColorBrush(Colors.White);}
     }
 }

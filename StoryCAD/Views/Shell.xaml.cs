@@ -17,6 +17,7 @@ using StoryCAD.Services;
 using System.Linq;
 using Windows.ApplicationModel.DataTransfer;
 using Microsoft.UI;
+using Windows.Storage.Provider;
 
 namespace StoryCAD.Views;
 

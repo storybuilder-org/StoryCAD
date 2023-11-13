@@ -52,7 +52,7 @@ public class Windowing : ObservableRecipient
     /// </summary>
     public DispatcherQueue GlobalDispatcher = null;
 
-    private ElementTheme _requestedTheme = ElementTheme.Light;
+    private ElementTheme _requestedTheme = ElementTheme.Default;
     public ElementTheme RequestedTheme
     {
         get => _requestedTheme;
@@ -64,6 +64,28 @@ public class Windowing : ObservableRecipient
     /// (Set in Windows Settings)
     /// </summary>
     public Color AccentColor => new UISettings().GetColorValue(UIColorType.Accent);
+
+
+    // Visual changes
+    private SolidColorBrush _primaryBrush;
+    /// <summary>
+    /// Sets the shell color
+    /// </summary>
+    public SolidColorBrush PrimaryColor
+    {
+        get => _primaryBrush;
+        set => SetProperty(ref _primaryBrush, value);
+    }
+
+    private SolidColorBrush _secondaryBrush;
+    /// <summary>
+    /// Handles various other colorations
+    /// </summary>
+    public SolidColorBrush SecondaryColor
+    {
+        get => _secondaryBrush;
+        set => SetProperty(ref _secondaryBrush, value);
+    }
 
     /// <summary>
     /// This is a color that should in most cases
@@ -112,7 +134,7 @@ public class Windowing : ObservableRecipient
     /// </summary>
     public void UpdateUIToTheme()
     {
-
+        (MainWindow.Content as FrameworkElement).RequestedTheme = RequestedTheme;
     }
 
     /// <summary>
