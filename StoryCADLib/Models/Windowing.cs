@@ -136,11 +136,14 @@ public class Windowing : ObservableRecipient
     {
         (MainWindow.Content as FrameworkElement).RequestedTheme = RequestedTheme;
 
+        ShellViewModel ShellVM = Ioc.Default.GetRequiredService<ShellViewModel>();
         //Save file, close current node since it won't be the right theme.
-        Ioc.Default.GetRequiredService<ShellViewModel>().SaveFile();
-        Ioc.Default.GetRequiredService<ShellViewModel>().ShowHomePage();
-
-    }
+        if (ShellVM.StoryModel != null && ShellVM.DataSource != null && ShellVM.DataSource.Count > 0)
+        {
+            Ioc.Default.GetRequiredService<ShellViewModel>().SaveFile();
+            Ioc.Default.GetRequiredService<ShellViewModel>().ShowHomePage();
+        }
+        }
 
     /// <summary>
     /// This takes a ContentDialog and shows it to the user
