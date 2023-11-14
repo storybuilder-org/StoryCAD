@@ -169,6 +169,10 @@ public class PreferencesIo
                         BrowserType.TryParse(typeof(BrowserType), _tokens[1].ToCharArray(), true, out val);
                         _model.PreferredSearchEngine = (BrowserType)val;
                         break;
+                    case "Theme":
+                        _model.ThemePreference = (ElementTheme)(Convert.ToInt16(_tokens[1]));
+                        break;
+
                 }
             }
             _log.Log(LogLevel.Info, "PreferencesModel updated from StoryCAD.prf.");
@@ -179,18 +183,25 @@ public class PreferencesIo
             _log.Log(LogLevel.Info, "StoryCAD.prf not found; default created.");
         }
 
-        if (Application.Current.RequestedTheme == ApplicationTheme.Light)
+        //Handle UI Theme stuff
+        Windowing window = Ioc.Default.GetService<Windowing>();
+        if (_model.ThemePreference == ElementTheme.Default)
         {
-            _model.PrimaryColor = new SolidColorBrush(Colors.LightGray);
-            _model.SecondaryColor = new SolidColorBrush(Colors.Black);
+            window.RequestedTheme = Application.Current.RequestedTheme == ApplicationTheme.Dark ? ElementTheme.Dark : ElementTheme.Light;
         }
-        else
+        else { Ioc.Default.GetService<Windowing>().RequestedTheme = _model.ThemePreference; }
+
+        if (Ioc.Default.GetService<Windowing>().RequestedTheme == ElementTheme.Light)
         {
-            _model.PrimaryColor = new SolidColorBrush(Colors.DarkSlateGray);
-            _model.SecondaryColor = new SolidColorBrush(Colors.White);
+            window.PrimaryColor = new SolidColorBrush(Colors.LightGray);
+            window.SecondaryColor = new SolidColorBrush(Colors.Black);
+        }
+        else 
+        {
+            window.PrimaryColor = new SolidColorBrush(Colors.DarkSlateGray);
+            window.SecondaryColor = new SolidColorBrush(Colors.White);
         }
 
-        _model.AccentColor = new UISettings().GetColorValue(UIColorType.Accent);
     }
 
     /// <summary>
@@ -228,6 +239,7 @@ public class PreferencesIo
             RecordPreferencesStatus={_model.RecordPreferencesStatus}
             RecordVersionStatus={_model.RecordVersionStatus}
             SearchEngine={_model.PreferredSearchEngine}
+            Theme={(int)_model.ThemePreference}
             """;
 
         _newPreferences += (_model.WrapNodeNames == TextWrapping.WrapWholeWords ? Environment.NewLine + "WrapNodeNames=True" : Environment.NewLine + "WrapNodeNames=False");

@@ -151,8 +151,8 @@ public class AppState
                      Name - {Preferences.FirstName}  {Preferences.LastName}
                      Email - {Preferences.Email}
                      Elmah Consent - {Preferences.ErrorCollectionConsent}
-                     Theme - {Preferences.PrimaryColor.Color.ToHex()}
-                     Accent Color - {Preferences.AccentColor} 
+                     Theme - {Ioc.Default.GetRequiredService<Windowing>().PrimaryColor.Color.ToHex()}
+                     Accent Color - {Ioc.Default.GetRequiredService<Windowing>().AccentColor} 
                      Last Version Prefs logged - {Preferences.Version}
                      Search Engine - {Preferences.PreferredSearchEngine} 
                      AutoSave - {Preferences.AutoSave}

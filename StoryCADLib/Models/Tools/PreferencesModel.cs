@@ -1,10 +1,8 @@
 ﻿using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
 using Windows.UI.ViewManagement;
-using ABI.Windows.Media.Protection.PlayReady;
 using CommunityToolkit.Mvvm.ComponentModel;
-using System;
-using Windows.UI;
+using static Org.BouncyCastle.Crypto.Engines.SM2Engine;
 
 namespace StoryCAD.Models.Tools;
 
@@ -39,21 +37,14 @@ public class PreferencesModel : ObservableObject
     public bool PreferencesInitialized { get; set; }
     public int LastSelectedTemplate { get; set; } //This is the Last Template Selected by the user.
 
-    // Visual changes
-    public SolidColorBrush PrimaryColor { get; set; } //Sets UI Color
-    public SolidColorBrush SecondaryColor { get; set; } //Sets node color.
-    public SolidColorBrush ContrastColor // A color that contrasts nicely with the users accent color
-    {
-        get
-        {
-            Color Contrast = AccentColor;
-            Contrast.R = (byte)(Contrast.R * 1.4);
-            Contrast.B = (byte)(Contrast.B * 1.4);
-            Contrast.G = (byte)(Contrast.G * 1.4);
-            return new SolidColorBrush(Contrast);
-        }
-    }
-    public Color AccentColor { get; set; } //Sets Text Color
+
+    /// <summary>
+    /// This is the users theme preference
+    /// It can be light, dark or default (System theme)
+    /// </summary>
+    public ElementTheme ThemePreference;
+
+
     public TextWrapping WrapNodeNames { get; set; }
 
     // Backup Information
@@ -99,9 +90,6 @@ public class PreferencesModel : ObservableObject
         Newsletter = false;
         PreferencesInitialized = false;
         LastSelectedTemplate = 0;
-
-        PrimaryColor = new SolidColorBrush(new UISettings().GetColorValue(UIColorType.Accent));
-        SecondaryColor = new SolidColorBrush(new UISettings().GetColorValue(UIColorType.Accent));
         WrapNodeNames = TextWrapping.WrapWholeWords; 
 
         LastFile1 = string.Empty;
@@ -119,8 +107,9 @@ public class PreferencesModel : ObservableObject
 
         Version = string.Empty;
         RecordPreferencesStatus = false;
-        RecordVersionStatus = false;      // Last version change was logged successfully or notx
+        RecordVersionStatus = false;      // Last version change was logged successfully or not
         PreferredSearchEngine = BrowserType.DuckDuckGo;
+        ThemePreference = ElementTheme.Default; // Use system theme
     }
     #endregion
 }

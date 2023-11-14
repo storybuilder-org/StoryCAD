@@ -7,6 +7,7 @@ using StoryCAD.Models;
 using System;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using StoryCAD.Services.Logging;
+using MySqlX.XDevAPI.Common;
 
 namespace StoryCAD.Services.Dialogs
 {
@@ -74,9 +75,9 @@ namespace StoryCAD.Services.Dialogs
                     },
                     Title = "What's new in StoryCAD " + AppDat.Version,
                     PrimaryButtonText = "Okay",
-                    XamlRoot = Ioc.Default.GetRequiredService<Windowing>().XamlRoot,
                 };
-                await _changelogUI.ShowAsync();
+                await Ioc.Default.GetService<Windowing>().ShowContentDialog(_changelogUI);
+
             }
             catch (Exception _e)
             {

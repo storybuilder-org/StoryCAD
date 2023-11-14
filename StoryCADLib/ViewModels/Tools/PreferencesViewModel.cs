@@ -99,13 +99,6 @@ public class PreferencesViewModel : ObservableValidator
         set => SetProperty(ref _lastSelectedTemplate, value);
     }
 
-
-    // Visual changes
-
-    public SolidColorBrush PrimaryColor { get; set; } //Sets UI Color
-   
-    public SolidColorBrush SecondaryColor = new(new UISettings().GetColorValue(UIColorType.Accent)); //Sets Text Color
-    
     public TextWrapping WrapNodeNames { get; set; }
 
     // Backup Information
@@ -183,6 +176,12 @@ public class PreferencesViewModel : ObservableValidator
         set => PreferredSearchEngine = (BrowserType)value;
     } // Last version change was logged successfully or not
 
+    private ElementTheme PreferedTheme;
+    public int PreferredThemeIndex
+    {
+        get => (int)PreferedTheme;
+        set => PreferedTheme = (ElementTheme)value;
+    }
 
     #endregion
 
@@ -197,9 +196,6 @@ public class PreferencesViewModel : ObservableValidator
         Newsletter = CurrentModel.Newsletter;
         PreferencesInitialized = CurrentModel.PreferencesInitialized;
         LastSelectedTemplate = CurrentModel.LastSelectedTemplate;
-
-        PrimaryColor = CurrentModel.PrimaryColor;
-        SecondaryColor = CurrentModel.SecondaryColor;
         WrapNodeNames = CurrentModel.WrapNodeNames;
 
         LastFile1 = CurrentModel.LastFile1;
@@ -220,6 +216,7 @@ public class PreferencesViewModel : ObservableValidator
         RecordPreferencesStatus = CurrentModel.RecordPreferencesStatus;
         RecordVersionStatus = CurrentModel.RecordVersionStatus;
         PreferredSearchEngine = CurrentModel.PreferredSearchEngine;
+        PreferedTheme = CurrentModel.ThemePreference;
     }
 
     internal void SaveModel()
@@ -231,8 +228,6 @@ public class PreferencesViewModel : ObservableValidator
         CurrentModel.Newsletter = Newsletter;
         CurrentModel.PreferencesInitialized = PreferencesInitialized;
         CurrentModel.LastSelectedTemplate = LastSelectedTemplate;
-        CurrentModel.PrimaryColor = PrimaryColor;
-        CurrentModel.SecondaryColor = SecondaryColor;
         CurrentModel.WrapNodeNames = WrapNodeNames;
 
         CurrentModel.LastFile1 = LastFile1;
@@ -252,6 +247,13 @@ public class PreferencesViewModel : ObservableValidator
         CurrentModel.RecordPreferencesStatus = RecordPreferencesStatus;
         CurrentModel.RecordVersionStatus = RecordVersionStatus;
         CurrentModel.PreferredSearchEngine = PreferredSearchEngine;
+
+        if (CurrentModel.ThemePreference != PreferedTheme)
+        {
+            Ioc.Default.GetService<Windowing>().RequestedTheme = CurrentModel.ThemePreference;
+            Ioc.Default.GetService<Windowing>().UpdateUIToTheme();
+        }
+        CurrentModel.ThemePreference = PreferedTheme;
     }
 
     /// <summary>
