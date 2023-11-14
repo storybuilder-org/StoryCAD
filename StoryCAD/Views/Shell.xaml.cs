@@ -91,7 +91,7 @@ public sealed partial class Shell
         NavigationTree.SelectionMode = TreeViewSelectionMode.None;
         NavigationTree.SelectionMode = TreeViewSelectionMode.Single;
         (SplitViewFrame.Content as FrameworkElement).RequestedTheme = Windowing.RequestedTheme;
-        SplitViewFrame.Background = Windowing.RequestedTheme == ElementTheme.Light ? new SolidColorBrush(Colors.LightGray) : new SolidColorBrush(Colors.Black);
+        SplitViewFrame.Background = Windowing.RequestedTheme == ElementTheme.Light ? new SolidColorBrush(Colors.White) : new SolidColorBrush(Colors.Black);
         if (!(SplitViewFrame.Content as FrameworkElement).BaseUri.ToString().Contains("HomePage"))
         {
             (SplitViewFrame.Content as Page).Margin = new(0, 0, 0, 5);
