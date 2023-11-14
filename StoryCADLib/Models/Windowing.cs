@@ -135,6 +135,11 @@ public class Windowing : ObservableRecipient
     public void UpdateUIToTheme()
     {
         (MainWindow.Content as FrameworkElement).RequestedTheme = RequestedTheme;
+
+        //Save file, close current node since it won't be the right theme.
+        Ioc.Default.GetRequiredService<ShellViewModel>().SaveFile();
+        Ioc.Default.GetRequiredService<ShellViewModel>().ShowHomePage();
+
     }
 
     /// <summary>
