@@ -844,7 +844,7 @@ public class ShellViewModel : ObservableRecipient
     {
         _autoSaveService.StopAutoSave();
         bool _saveExecuteCommands = _canExecuteCommands;
-        _canExecuteCommands = false;
+       _canExecuteCommands = false;
         string msg = autoSave ? "AutoSave" : "SaveFile command";
         if (autoSave && !StoryModel.Changed)
         {
