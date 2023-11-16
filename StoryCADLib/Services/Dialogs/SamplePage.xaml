@@ -8,10 +8,12 @@
     Background="{x:Bind UnifiedVM.AdjustmentColor, Mode=OneWay}" Height="800">
 
     <StackPanel VerticalAlignment="Stretch" HorizontalAlignment="Center" Margin="0,0,70,0">
-        <InfoBar IsOpen="True" Severity="Warning" IsClosable="False" Width="300"
+        <InfoBar IsOpen="True" Severity="Warning" IsClosable="False" Width="350"
                  Message="Sample edits will be lost unless you use Save As to save them elsewhere."/>
         <TextBlock Text="Sample stories:" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="4" FontSize="25" />
-        <ListBox HorizontalAlignment="Center" VerticalAlignment="Center" Name="Samples" Width="200" Background="{x:Bind UnifiedVM.AdjustmentColor, Mode=OneWay}"/>
+        <ScrollViewer MaxHeight="350">
+            <ListBox HorizontalAlignment="Center" VerticalAlignment="Center" Name="Samples" Width="200" Background="{x:Bind UnifiedVM.AdjustmentColor, Mode=OneWay}"/>
+        </ScrollViewer>
         <Button HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="10" Click="LoadSample" Content="Open sample"/>
 
     </StackPanel>
