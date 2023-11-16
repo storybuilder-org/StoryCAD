@@ -72,44 +72,45 @@
                                             ItemsSource="{x:Bind SceneVm.SceneTypeList}"
                                             Text="{x:Bind SceneVm.SceneType, Mode=TwoWay}" />
                     </Grid>
-                    <Grid Grid.Row="2" HorizontalAlignment="Left" >
-                        <StackPanel Orientation="Vertical">
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="Scene Cast"/>
-                                <ToggleSwitch HorizontalAlignment="Center" Width="200" Header="Cast Display" Margin="50,0,0,0" 
-                                              IsOn="{x:Bind  SceneVm.AllCharacters, Mode=TwoWay}"  
-                                              OffContent="Cast Members" OnContent="All Characters" 
-                                              Toggled="{x:Bind SceneVm.SwitchCastView, Mode=OneWay}" >
-                                    <ToolTipService.ToolTip>
-                                        <ToolTip Content="Show or Add/Remove Cast Members" />
-                                    </ToolTipService.ToolTip>
-                                </ToggleSwitch>
-                            </StackPanel>
-                            <ScrollViewer Height="125" >
-                                <ListView MinWidth="300" x:Name="SceneCast"
-                                    SelectionMode="Single"
-                                    ItemsSource="{x:Bind SceneVm.CastSource, Mode=TwoWay}" >
-                                    <ListView.ItemTemplate>
-                                        <DataTemplate x:DataType="models:StoryElement" >
-                                            <StackPanel Orientation="Horizontal" Spacing="5">
-                                                <CheckBox
-                                                    Margin="0"
-                                                    IsChecked="{x:Bind IsSelected ,Mode=TwoWay}"
-                                                    Checked="CastMember_Checked" Unchecked="CastMember_Unchecked" />
-                                                <TextBlock Text="{x:Bind Name, Mode=OneWay}" MinWidth="250" />
-                                            </StackPanel>
-                                        </DataTemplate>
-                                    </ListView.ItemTemplate>
-                                </ListView>
-                            </ScrollViewer>
-                        </StackPanel>
-                    </Grid>
                     <usercontrols:RichEditBoxExtended Header="Scene Sketch" Grid.Row="3"
                                                       RtfText="{x:Bind SceneVm.Remarks, Mode=TwoWay}"
                                                       AcceptsReturn="True"
                                                       IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                                       ScrollViewer.VerticalScrollBarVisibility="Visible"/>
                 </Grid>
+            </PivotItem>
+            <PivotItem Header="Cast">
+                <StackPanel HorizontalAlignment="Left">
+                    <StackPanel Orientation="Vertical">
+                        <StackPanel Orientation="Horizontal">
+                            <ToggleSwitch HorizontalAlignment="Center" Width="200" Header="Cast Display" Margin="50,0,0,0" 
+                                              IsOn="{x:Bind  SceneVm.AllCharacters, Mode=TwoWay}"  
+                                              OffContent="Cast Members" OnContent="All Characters" 
+                                              Toggled="{x:Bind SceneVm.SwitchCastView, Mode=OneWay}" >
+                                <ToolTipService.ToolTip>
+                                    <ToolTip Content="Show or Add/Remove Cast Members" />
+                                </ToolTipService.ToolTip>
+                            </ToggleSwitch>
+                        </StackPanel>
+                    </StackPanel>
+                    <ScrollViewer Height="500">
+                        <ListView MinWidth="300" x:Name="SceneCast"
+                                    SelectionMode="Single"
+                                    ItemsSource="{x:Bind SceneVm.CastSource, Mode=TwoWay}" >
+                            <ListView.ItemTemplate>
+                                <DataTemplate x:DataType="models:StoryElement" >
+                                    <StackPanel Orientation="Horizontal" Spacing="5">
+                                        <CheckBox
+                                                    Margin="0"
+                                                    IsChecked="{x:Bind IsSelected ,Mode=TwoWay}"
+                                                    Checked="CastMember_Checked" Unchecked="CastMember_Unchecked" />
+                                        <TextBlock Text="{x:Bind Name, Mode=OneWay}" MinWidth="250" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                    </ScrollViewer>
+                </StackPanel>
             </PivotItem>
             <PivotItem Header="Development">
                 <Grid>

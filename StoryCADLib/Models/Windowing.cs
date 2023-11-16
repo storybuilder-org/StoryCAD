@@ -132,7 +132,7 @@ public class Windowing : ObservableRecipient
     /// This will update the elements of the UI to 
     /// match the theme set in RequestedTheme.
     /// </summary>
-    public void UpdateUIToTheme()
+    public async void UpdateUIToTheme()
     {
         (MainWindow.Content as FrameworkElement).RequestedTheme = RequestedTheme;
 
@@ -140,7 +140,7 @@ public class Windowing : ObservableRecipient
         //Save file, close current node since it won't be the right theme.
         if (ShellVM.StoryModel != null && ShellVM.DataSource != null && ShellVM.DataSource.Count > 0)
         {
-            Ioc.Default.GetRequiredService<ShellViewModel>().SaveFile();
+            await Ioc.Default.GetRequiredService<ShellViewModel>().SaveFile();
             Ioc.Default.GetRequiredService<ShellViewModel>().ShowHomePage();
         }
         }
