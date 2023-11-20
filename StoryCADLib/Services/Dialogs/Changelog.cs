@@ -28,9 +28,16 @@ namespace StoryCAD.Services.Dialogs
         {
             try
             {
-                //Returns body of release
-                return (await _client.Repository.Release.Get("StoryBuilder-org", "StoryCAD",
-                    AppDat.Version.Replace("Version: ", ""))).Body;
+                if (AppDat.Version.Contains("Built on:")) //Checks user isn't running a development version of StoryCAD
+                {
+                    return "Changelogs are unavailable for development versions of StoryCAD.";
+                }
+                else
+                {
+                    //Returns body of release
+                    return (await _client.Repository.Release.Get("StoryBuilder-org", "StoryCAD",
+                        AppDat.Version.Replace("Version: ", ""))).Body;
+                }
             }
             catch (Exception _e)
             {
@@ -54,6 +61,9 @@ namespace StoryCAD.Services.Dialogs
             }
         }
 
+        /// <summary>
+        /// Shows a changelog content dialog/
+        /// </summary>
         public async Task ShowChangeLog()
         {
             //Don't Show changelog on dev build's since its pointless.
