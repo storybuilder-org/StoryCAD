@@ -5,16 +5,13 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    Background="{x:Bind UnifiedVM.AdjustmentColor, Mode=OneWay}" Height="800">
-
-    <StackPanel VerticalAlignment="Stretch" HorizontalAlignment="Center" Margin="0,0,70,0">
-        <InfoBar IsOpen="True" Severity="Warning" IsClosable="False" Width="350"
-                 Message="Sample edits will be lost unless you use Save As to save them elsewhere."/>
-        <TextBlock Text="Sample stories:" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="4" FontSize="25" />
-        <ScrollViewer MaxHeight="350">
-            <ListBox HorizontalAlignment="Center" VerticalAlignment="Center" Name="Samples" Width="200" Background="{x:Bind UnifiedVM.AdjustmentColor, Mode=OneWay}"/>
-        </ScrollViewer>
-        <Button HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="10" Click="LoadSample" Content="Open sample"/>
-
-    </StackPanel>
+    Background="{x:Bind UnifiedVM.AdjustmentColor, Mode=OneWay}">
+    <ScrollViewer VerticalAlignment="Stretch" HorizontalAlignment="Center" Margin="0,0,70,0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" MaxHeight="480">
+        <StackPanel>
+            <InfoBar IsOpen="True" Severity="Warning" IsClosable="False" Width="300" Message="Sample edits will be lost unless you save them elsewhere."/>
+            <TextBlock Text="Sample stories:" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="4" FontSize="25" />
+            <ListBox HorizontalAlignment="Center" VerticalAlignment="Center" Name="Samples" Width="290" Background="{x:Bind UnifiedVM.AdjustmentColor, Mode=OneWay}"/>
+            <Button HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="10" Click="LoadSample" Content="Open sample"/>
+        </StackPanel>
+    </ScrollViewer>
 </Page>
