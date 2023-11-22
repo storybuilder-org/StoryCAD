@@ -52,6 +52,13 @@ public class Windowing : ObservableRecipient
     /// </summary>
     public DispatcherQueue GlobalDispatcher = null;
 
+    /// <summary>
+    /// This is used to track if a ContentDialog is already open
+    /// within ShowContentDialog() as spwaning two at once will 
+    /// cause a crash.
+    /// </summary>
+    private bool _IsContentDialogOpen = false;
+    
     private ElementTheme _requestedTheme = ElementTheme.Default;
     public ElementTheme RequestedTheme
     {
@@ -152,11 +159,19 @@ public class Windowing : ObservableRecipient
     /// <returns>A ContentDialogResult enum value.</returns>
     public async Task<ContentDialogResult> ShowContentDialog(ContentDialog Dialog)
     {
-        //Set XAML root and correct theme.
-        Dialog.XamlRoot = XamlRoot;
-        Dialog.RequestedTheme = RequestedTheme;
+        //Checks a content dialog isn't already open
+        if (!_IsContentDialogOpen)
+        {
+            //Set XAML root and correct theme.
+            Dialog.XamlRoot = XamlRoot;
+            Dialog.RequestedTheme = RequestedTheme;
 
-        return await Dialog.ShowAsync();
+            _IsContentDialogOpen = true;
+            ContentDialogResult Result = await Dialog.ShowAsync();
+            _IsContentDialogOpen = false;
+            return Result;
+        }
+        else { return ContentDialogResult.None; }
     }
 
 
