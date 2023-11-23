@@ -1,4 +1,4 @@
-/********************************************************************************
+Ôªø/********************************************************************************
  *   This file is part of NRtfTree Library.
  *
  *   NRtfTree Library is free software; you can redistribute it and/or modify
@@ -25,7 +25,7 @@
  * SF Project:	http://nrtftree.sourceforge.net
  *				http://sourceforge.net/projects/nrtftree
  * Class:		ImageNode
- * Description:	Nodo RTF especializado que contiene la informaciÛn de una imagen.
+ * Description:	Nodo RTF especializado que contiene la informaci√≥n de una imagen.
  * ******************************************************************************/
 
 using System.Drawing;
@@ -46,7 +46,7 @@ namespace NRtfTree
             #region Atributos privados
 
             /// <summary>
-            /// Array de bytes con la informaciÛn de la imagen.
+            /// Array de bytes con la informaci√≥n de la imagen.
             /// </summary>
             private byte[] data;
 
@@ -57,7 +57,7 @@ namespace NRtfTree
             /// <summary>
             /// Constructor de la clase ImageNode.
             /// </summary>
-            /// <param name="node">Nodo RTF del que se obtendr·n los datos de la imagen.</param>
+            /// <param name="node">Nodo RTF del que se obtendr√°n los datos de la imagen.</param>
             public ImageNode(RtfTreeNode node)
             {
                 if (node != null)
@@ -220,7 +220,7 @@ namespace NRtfTree
             /// <summary>
             /// Guarda una imagen a fichero con el formato original.
             /// </summary>
-            /// <param name="filePath">Ruta del fichero donde se guardar· la imagen.</param>
+            /// <param name="filePath">Ruta del fichero donde se guardar√° la imagen.</param>
             public void SaveImage(string filePath)
             {
                 if (data != null)
@@ -234,10 +234,10 @@ namespace NRtfTree
             }
 
             /// <summary>
-            /// Guarda una imagen a fichero con un formato determinado indicado como par·metro.
+            /// Guarda una imagen a fichero con un formato determinado indicado como par√°metro.
             /// </summary>
-            /// <param name="filePath">Ruta del fichero donde se guardar· la imagen.</param>
-            /// <param name="format">Formato con el que se escribir· la imagen.</param>
+            /// <param name="filePath">Ruta del fichero donde se guardar√° la imagen.</param>
+            /// <param name="format">Formato con el que se escribir√° la imagen.</param>
             public void SaveImage(string filePath, System.Drawing.Imaging.ImageFormat format)
             {
                 if (data != null)
@@ -264,7 +264,7 @@ namespace NRtfTree
             #region Metodos privados
 
             /// <summary>
-            /// Obtiene los datos de la imagen a partir de la informaciÛn contenida en el nodo RTF.
+            /// Obtiene los datos de la imagen a partir de la informaci√≥n contenida en el nodo RTF.
             /// </summary>
             private void GetImageData()
             {

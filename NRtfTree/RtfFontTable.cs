@@ -1,4 +1,4 @@
-/********************************************************************************
+ï»¿/********************************************************************************
  *   This file is part of NRtfTree Library.
  *
  *   NRtfTree Library is free software; you can redistribute it and/or modify
@@ -62,19 +62,19 @@ namespace NRtfTree
             }
 
             /// <summary>
-            /// Obtiene la fuente n-ésima de la tabla de fuentes.
+            /// Obtiene la fuente n-Ã©sima de la tabla de fuentes.
             /// </summary>
             /// <param name="index">Indice de la fuente a recuperar.</param>
-            /// <returns>Fuente n-ésima de la tabla de fuentes.</returns>
+            /// <returns>Fuente n-Ã©sima de la tabla de fuentes.</returns>
             public string this[int index] => fonts[index];
 
             /// <summary>
-            /// Número de fuentes en la tabla.
+            /// NÃºmero de fuentes en la tabla.
             /// </summary>
             public int Count => fonts.Count;
 
             /// <summary>
-            /// Obtiene el índice de una fuente determinado en la tabla.
+            /// Obtiene el Ã­ndice de una fuente determinado en la tabla.
             /// </summary>
             /// <returns>Indice de la fuente consultada.</returns>
             public int IndexOf(string name)
