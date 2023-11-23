@@ -1,4 +1,4 @@
-/********************************************************************************
+Ôªø/********************************************************************************
  *   This file is part of NRtfTree Library.
  *
  *   NRtfTree Library is free software; you can redistribute it and/or modify
@@ -25,7 +25,7 @@
  * SF Project:	http://nrtftree.sourceforge.net
  *				http://sourceforge.net/projects/nrtftree
  * Class:		RtfNodeCollection
- * Description:	ColecciÛn de nodos de un ·rbol RTF.
+ * Description:	Colecci√≥n de nodos de un √°rbol RTF.
  * ******************************************************************************/
 
 using System.Collections;
@@ -35,17 +35,17 @@ namespace NRtfTree
     namespace Core
     {
         /// <summary>
-        /// ColecciÛn de nodos de un documento RTF.
+        /// Colecci√≥n de nodos de un documento RTF.
         /// </summary>
         public class RtfNodeCollection : CollectionBase
         {
-            #region MÈtodos Publicos
+            #region M√©todos Publicos
 
             /// <summary>
-            /// AÒade un nuevo nodo a la colecciÛn actual.
+            /// A√±ade un nuevo nodo a la colecci√≥n actual.
             /// </summary>
-            /// <param name="node">Nuevo nodo a aÒadir.</param>
-            /// <returns>PosiciÛn en la que se ha insertado el nuevo nodo.</returns>
+            /// <param name="node">Nuevo nodo a a√±adir.</param>
+            /// <returns>Posici√≥n en la que se ha insertado el nuevo nodo.</returns>
             public int Add(RtfTreeNode node)
             {
                 InnerList.Add(node);
@@ -54,9 +54,9 @@ namespace NRtfTree
             }
 
             /// <summary>
-            /// Inserta un nuveo nodo en una posiciÛn determinada de la colecciÛn.
+            /// Inserta un nuveo nodo en una posici√≥n determinada de la colecci√≥n.
             /// </summary>
-            /// <param name="index">PosiciÛn en la que insertar el nodo.</param>
+            /// <param name="index">Posici√≥n en la que insertar el nodo.</param>
             /// <param name="node">Nuevo nodo a insertar.</param>
             public void Insert(int index, RtfTreeNode node)
             {
@@ -65,7 +65,7 @@ namespace NRtfTree
 
             /// <summary>
             /// Indizador de la clase RtfNodeCollection. 
-            /// Devuelve el nodo que ocupa la posiciÛn 'index' dentro de la colecciÛn.
+            /// Devuelve el nodo que ocupa la posici√≥n 'index' dentro de la colecci√≥n.
             /// </summary>
             public RtfTreeNode this[int index]
             {
@@ -74,29 +74,29 @@ namespace NRtfTree
             }
 
             /// <summary>
-            /// Devuelve el Ìndice del nodo pasado como par·metro dentro de la lista de nodos de la colecciÛn.
+            /// Devuelve el √≠ndice del nodo pasado como par√°metro dentro de la lista de nodos de la colecci√≥n.
             /// </summary>
-            /// <param name="node">Nodo a buscar en la colecciÛn.</param>
-            /// <returns>Indice del nodo buscado. Devolver· el valor -1 en caso de no encontrarse el nodo dentro de la colecciÛn.</returns>
+            /// <param name="node">Nodo a buscar en la colecci√≥n.</param>
+            /// <returns>Indice del nodo buscado. Devolver√° el valor -1 en caso de no encontrarse el nodo dentro de la colecci√≥n.</returns>
             public int IndexOf(RtfTreeNode node)
             {
                 return InnerList.IndexOf(node);
             }
 
             /// <summary>
-            /// AÒade al final de la colecciÛn una nueva lista de nodos.
+            /// A√±ade al final de la colecci√≥n una nueva lista de nodos.
             /// </summary>
-            /// <param name="collection">Nueva lista de nodos a aÒadir a la colecciÛn actual.</param>
+            /// <param name="collection">Nueva lista de nodos a a√±adir a la colecci√≥n actual.</param>
             public void AddRange(RtfNodeCollection collection)
             {
                 InnerList.AddRange(collection);
             }
 
             /// <summary>
-            /// Elimina un conjunto de nodos adyacentes de la colecciÛn.
+            /// Elimina un conjunto de nodos adyacentes de la colecci√≥n.
             /// </summary>
-            /// <param name="index">Õndice del primer nodo del conjunto a eliminar.</param>
-            /// <param name="count">N˙mero de nodos a eliminar.</param>
+            /// <param name="index">√çndice del primer nodo del conjunto a eliminar.</param>
+            /// <param name="count">N√∫mero de nodos a eliminar.</param>
             public void RemoveRange(int index, int count)
             {
                 InnerList.RemoveRange(index, count);
