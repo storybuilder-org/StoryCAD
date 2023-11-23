@@ -5,6 +5,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.Windows.AppLifecycle;
+using StoryCAD.Exceptions;
 using StoryCAD.Services.Logging;
 using StoryCAD.ViewModels;
 using System;
@@ -17,7 +18,7 @@ using WinUIEx;
 namespace StoryCAD.Models;
 
 /// <summary>
-/// This class contains window (mainwindow) related items ect.
+/// This class contains window (MainWindow) related items etc.
 /// </summary>
 public class Windowing : ObservableRecipient
 {
@@ -188,7 +189,6 @@ public class Windowing : ObservableRecipient
     /// impossible to occur but it should stay incase something
     /// goes wrong with resource loading.
     /// </summary>
-    /// <exception cref="MissingManifestResourceException"></exception>
     public async void ShowResourceErrorMessage()
     {
         await new ContentDialog()
@@ -199,6 +199,6 @@ public class Windowing : ObservableRecipient
             CloseButtonText = "Close",
             RequestedTheme = RequestedTheme
         }.ShowAsync();
-        throw new MissingManifestResourceException();
+        throw new ResourceLoadingException();
     }
 }
