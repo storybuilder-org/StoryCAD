@@ -1,4 +1,4 @@
-/********************************************************************************
+ï»¿/********************************************************************************
  *   This file is part of NRtfTree Library.
  *
  *   NRtfTree Library is free software; you can redistribute it and/or modify
@@ -63,19 +63,19 @@ namespace NRtfTree
             }
 
             /// <summary>
-            /// Obtiene el color n-ésimo de la tabla de colores.
+            /// Obtiene el color n-Ã©simo de la tabla de colores.
             /// </summary>
             /// <param name="index">Indice del color a recuperar.</param>
-            /// <returns>Color n-ésimo de la tabla de colores.</returns>
+            /// <returns>Color n-Ã©simo de la tabla de colores.</returns>
             public Color this[int index] => Color.FromArgb(colors[index]);
 
             /// <summary>
-            /// Número de colores en la tabla.
+            /// NÃºmero de colores en la tabla.
             /// </summary>
             public int Count => colors.Count;
 
             /// <summary>
-            /// Obtiene el índice de un color determinado en la tabla.
+            /// Obtiene el Ã­ndice de un color determinado en la tabla.
             /// </summary>
             /// <param name="color">Color a consultar.</param>
             /// <returns>Indice del color consultado.</returns>

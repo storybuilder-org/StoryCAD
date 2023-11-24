@@ -1,4 +1,4 @@
-/********************************************************************************
+ï»¿/********************************************************************************
  *   This file is part of NRtfTree Library.
  *
  *   NRtfTree Library is free software; you can redistribute it and/or modify
@@ -25,7 +25,7 @@
  * SF Project:	http://nrtftree.sourceforge.net
  *				http://sourceforge.net/projects/nrtftree
  * Class:		ObjectNode
- * Description:	Nodo RTF especializado que contiene la información de un objeto.
+ * Description:	Nodo RTF especializado que contiene la informaciÃ³n de un objeto.
  * ******************************************************************************/
 
 using System.Globalization;
@@ -44,7 +44,7 @@ namespace NRtfTree
             #region Atributos Privados
 
             /// <summary>
-            /// Array de bytes con la información del objeto.
+            /// Array de bytes con la informaciÃ³n del objeto.
             /// </summary>
             private byte[] objdata;
 
@@ -55,7 +55,7 @@ namespace NRtfTree
             /// <summary>
             /// Constructor de la clase ObjectNode.
             /// </summary>
-            /// <param name="node">Nodo RTF del que se obtendrán los datos de la imagen.</param>
+            /// <param name="node">Nodo RTF del que se obtendrÃ¡n los datos de la imagen.</param>
             public ObjectNode(RtfTreeNode node)
             {
                 if (node != null)
@@ -158,7 +158,7 @@ namespace NRtfTree
                     //Si existe el nodo
                     if (objdataNode != null)
                     {
-                        //Buscamos los datos en formato hexadecimal (último hijo del grupo de \objdata)
+                        //Buscamos los datos en formato hexadecimal (Ãºltimo hijo del grupo de \objdata)
                         Text = objdataNode.ParentNode.LastChild.NodeKey;
                     }
 
@@ -168,7 +168,7 @@ namespace NRtfTree
 
             #endregion
 
-            #region Métodos Publicos
+            #region MÃ©todos Publicos
 
             /// <summary>
             /// Devuelve un array de bytes con el contenido del objeto.
@@ -181,10 +181,10 @@ namespace NRtfTree
 
             #endregion
 
-            #region Métodos Privados
+            #region MÃ©todos Privados
 
             /// <summary>
-            /// Obtiene los datos binarios del objeto a partir de la información contenida en el nodo RTF.
+            /// Obtiene los datos binarios del objeto a partir de la informaciÃ³n contenida en el nodo RTF.
             /// </summary>
             private void getObjectData()
             {
@@ -200,7 +200,7 @@ namespace NRtfTree
                     //Si existe el nodo
                     if (objdataNode != null)
                     {
-                        //Buscamos los datos en formato hexadecimal (último hijo del grupo de \objdata)
+                        //Buscamos los datos en formato hexadecimal (Ãºltimo hijo del grupo de \objdata)
                         Text = objdataNode.ParentNode.LastChild.NodeKey;
 
                         int dataSize = Text.Length / 2;

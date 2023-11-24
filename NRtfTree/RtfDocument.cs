@@ -1,4 +1,4 @@
-/********************************************************************************
+Ôªø/********************************************************************************
  *   This file is part of NRtfTree Library.
  *
  *   NRtfTree Library is free software; you can redistribute it and/or modify
@@ -25,7 +25,7 @@
  * SF Project:	http://nrtftree.sourceforge.net
  *				http://sourceforge.net/projects/nrtftree
  * Class:		RtfDocument
- * Description:	Clase para la generaciÛn de documentos RTF.
+ * Description:	Clase para la generaci√≥n de documentos RTF.
  * ******************************************************************************/
 
 using System;
@@ -40,7 +40,7 @@ namespace NRtfTree
     namespace Util
     {
         /// <summary>
-        /// Clase para la generaciÛn de documentos RTF.
+        /// Clase para la generaci√≥n de documentos RTF.
         /// </summary>
         public class RtfDocument
         {
@@ -52,7 +52,7 @@ namespace NRtfTree
             private string path;
 
             /// <summary>
-            /// CodificaciÛn del documento.
+            /// Codificaci√≥n del documento.
             /// </summary>
             private Encoding encoding;
 
@@ -67,7 +67,7 @@ namespace NRtfTree
             private RtfColorTable colorTable;
 
             /// <summary>
-            /// ¡rbol RTF del documento.
+            /// √Årbol RTF del documento.
             /// </summary>
             public RtfTree Tree;
 
@@ -89,7 +89,7 @@ namespace NRtfTree
             /// Constructor de la clase RtfDocument.
             /// </summary>
             /// <param name="path">Ruta del fichero a generar.</param>
-            /// <param name="enc">CodificaciÛn del documento a generar.</param>
+            /// <param name="enc">Codificaci√≥n del documento a generar.</param>
             public RtfDocument(string path, Encoding enc)
             {
                 this.path = path;
@@ -110,7 +110,7 @@ namespace NRtfTree
             }
 
             /// <summary>
-            /// Constructor de la clase RtfDocument. Se utilizar· la codificaciÛn por defecto del sistema.
+            /// Constructor de la clase RtfDocument. Se utilizar√° la codificaci√≥n por defecto del sistema.
             /// </summary>
             /// <param name="path">Ruta del fichero a generar.</param>
             public RtfDocument(string path) : this(path, Encoding.Default)
@@ -174,7 +174,7 @@ namespace NRtfTree
             }
 
             /// <summary>
-            /// Inserta un salto de lÌnea en el documento.
+            /// Inserta un salto de l√≠nea en el documento.
             /// </summary>
             public void AddNewLine()
             {
@@ -240,10 +240,10 @@ namespace NRtfTree
             #region Metodos Privados
 
             /// <summary>
-            /// Obtiene el cÛdigo hexadecimal de un entero.
+            /// Obtiene el c√≥digo hexadecimal de un entero.
             /// </summary>
-            /// <param name="code">N˙mero entero.</param>
-            /// <returns>CÛdigo hexadecimal del entero pasado como par·metro.</returns>
+            /// <param name="code">N√∫mero entero.</param>
+            /// <returns>C√≥digo hexadecimal del entero pasado como par√°metro.</returns>
             private string GetHexa(byte code)
             {
                 string hexa = Convert.ToString(code, 16);
@@ -257,7 +257,7 @@ namespace NRtfTree
             }
 
             /// <summary>
-            /// Inserta el cÛdigo RTF de la tabla de fuentes en el documento.
+            /// Inserta el c√≥digo RTF de la tabla de fuentes en el documento.
             /// </summary>
             private void InsertFontTable()
             {
@@ -279,7 +279,7 @@ namespace NRtfTree
             }
 
             /// <summary>
-            /// Inserta el cÛdigo RTF de la tabla de colores en el documento.
+            /// Inserta el c√≥digo RTF de la tabla de colores en el documento.
             /// </summary>
             private void InsertColorTable()
             {
@@ -299,7 +299,7 @@ namespace NRtfTree
             }
 
             /// <summary>
-            /// Inserta el cÛdigo RTF de la aplicaciÛn generadora del documento.
+            /// Inserta el c√≥digo RTF de la aplicaci√≥n generadora del documento.
             /// </summary>
             private void InsertGenerator()
             {
@@ -376,7 +376,7 @@ namespace NRtfTree
             }
 
             /// <summary>
-            /// Inserta las claves RTF necesarias para representar el formato de texto pasado como par·metro.
+            /// Inserta las claves RTF necesarias para representar el formato de texto pasado como par√°metro.
             /// </summary>
             /// <param name="format">Formato de texto a representar.</param>
             private void InsertFormat(RtfTextFormat format)

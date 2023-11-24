@@ -5,6 +5,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.Windows.AppLifecycle;
+using StoryCAD.Exceptions;
 using StoryCAD.Services.Logging;
 using StoryCAD.ViewModels;
 using System;
@@ -17,7 +18,7 @@ using WinUIEx;
 namespace StoryCAD.Models;
 
 /// <summary>
-/// This class contains window (mainwindow) related items ect.
+/// This class contains window (MainWindow) related items etc.
 /// </summary>
 public class Windowing : ObservableRecipient
 {
@@ -52,6 +53,13 @@ public class Windowing : ObservableRecipient
     /// </summary>
     public DispatcherQueue GlobalDispatcher = null;
 
+    /// <summary>
+    /// This is used to track if a ContentDialog is already open
+    /// within ShowContentDialog() as spwaning two at once will 
+    /// cause a crash.
+    /// </summary>
+    private bool _IsContentDialogOpen = false;
+    
     private ElementTheme _requestedTheme = ElementTheme.Default;
     public ElementTheme RequestedTheme
     {
@@ -152,11 +160,19 @@ public class Windowing : ObservableRecipient
     /// <returns>A ContentDialogResult enum value.</returns>
     public async Task<ContentDialogResult> ShowContentDialog(ContentDialog Dialog)
     {
-        //Set XAML root and correct theme.
-        Dialog.XamlRoot = XamlRoot;
-        Dialog.RequestedTheme = RequestedTheme;
+        //Checks a content dialog isn't already open
+        if (!_IsContentDialogOpen)
+        {
+            //Set XAML root and correct theme.
+            Dialog.XamlRoot = XamlRoot;
+            Dialog.RequestedTheme = RequestedTheme;
 
-        return await Dialog.ShowAsync();
+            _IsContentDialogOpen = true;
+            ContentDialogResult Result = await Dialog.ShowAsync();
+            _IsContentDialogOpen = false;
+            return Result;
+        }
+        else { return ContentDialogResult.None; }
     }
 
 
@@ -188,7 +204,6 @@ public class Windowing : ObservableRecipient
     /// impossible to occur but it should stay incase something
     /// goes wrong with resource loading.
     /// </summary>
-    /// <exception cref="MissingManifestResourceException"></exception>
     public async void ShowResourceErrorMessage()
     {
         await new ContentDialog()
@@ -199,6 +214,6 @@ public class Windowing : ObservableRecipient
             CloseButtonText = "Close",
             RequestedTheme = RequestedTheme
         }.ShowAsync();
-        throw new MissingManifestResourceException();
+        throw new ResourceLoadingException();
     }
 }

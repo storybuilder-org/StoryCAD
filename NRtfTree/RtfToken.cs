@@ -1,4 +1,4 @@
-/********************************************************************************
+ï»¿/********************************************************************************
  *   This file is part of NRtfTree Library.
  *
  *   NRtfTree Library is free software; you can redistribute it and/or modify
@@ -25,7 +25,7 @@
  * SF Project:	http://nrtftree.sourceforge.net
  *				http://sourceforge.net/projects/nrtftree
  * Class:		RtfToken
- * Description:	Token leido por el analizador léxico para documentos RTF.
+ * Description:	Token leido por el analizador lÃ©xico para documentos RTF.
  * ******************************************************************************/
 
 namespace NRtfTree
@@ -33,26 +33,26 @@ namespace NRtfTree
     namespace Core
     {
         /// <summary>
-        /// Token leido por el analizador léxico para documentos RTF.
+        /// Token leido por el analizador lÃ©xico para documentos RTF.
         /// </summary>
         public class RtfToken
         {
-            #region Atributos Públicos
+            #region Atributos PÃºblicos
 
             /// <summary>
             /// Tipo del token.
             /// </summary>
             private RtfTokenType type;
             /// <summary>
-            /// Palabra clave / Símbolo de Control / Caracter.
+            /// Palabra clave / SÃ­mbolo de Control / Caracter.
             /// </summary>
             private string key;
             /// <summary>
-            /// Indica si el token tiene parámetro asociado.
+            /// Indica si el token tiene parÃ¡metro asociado.
             /// </summary>
             private bool hasParam;
             /// <summary>
-            /// Parámetro de la palabra clave o símbolo de Control.
+            /// ParÃ¡metro de la palabra clave o sÃ­mbolo de Control.
             /// </summary>
             private int param;
 
@@ -70,7 +70,7 @@ namespace NRtfTree
             }
 
             /// <summary>
-            /// Palabra clave / Símbolo de Control / Caracter.
+            /// Palabra clave / SÃ­mbolo de Control / Caracter.
             /// </summary>
             public string Key
             {
@@ -79,7 +79,7 @@ namespace NRtfTree
             }
 
             /// <summary>
-            /// Indica si el token tiene parámetro asociado.
+            /// Indica si el token tiene parÃ¡metro asociado.
             /// </summary>
             public bool HasParameter
             {
@@ -88,7 +88,7 @@ namespace NRtfTree
             }
 
             /// <summary>
-            /// Parámetro de la palabra clave o símbolo de Control.
+            /// ParÃ¡metro de la palabra clave o sÃ­mbolo de Control.
             /// </summary>
             public int Parameter
             {
@@ -98,10 +98,10 @@ namespace NRtfTree
 
             #endregion
 
-            #region Constructor Público
+            #region Constructor PÃºblico
 
             /// <summary>
-            /// Constructor de la clase RtfToken. Crea un token vacío.
+            /// Constructor de la clase RtfToken. Crea un token vacÃ­o.
             /// </summary>
             public RtfToken()
             {

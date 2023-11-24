@@ -1,4 +1,4 @@
-/********************************************************************************
+Ôªø/********************************************************************************
  *   This file is part of NRtfTree Library.
  *
  *   NRtfTree Library is free software; you can redistribute it and/or modify
@@ -25,7 +25,7 @@
  * SF Project:	http://nrtftree.sourceforge.net
  *				http://sourceforge.net/projects/nrtftree
  * Class:		RtfTokenType
- * Description:	Tipos de token de un ·rbol de documento RTF.
+ * Description:	Tipos de token de un √°rbol de documento RTF.
  * ******************************************************************************/
 
 namespace NRtfTree
@@ -33,20 +33,20 @@ namespace NRtfTree
     namespace Core
     {
         /// <summary>
-        /// Tipos de token de un ·rbol de documento RTF.
+        /// Tipos de token de un √°rbol de documento RTF.
         /// </summary>
         public enum RtfTokenType
         {
             /// <summary>
-            /// Indica que el token sÛlo se ha inicializado.
+            /// Indica que el token s√≥lo se ha inicializado.
             /// </summary>
             None = 0,
             /// <summary>
-            /// Palabra clave sin par·metro.
+            /// Palabra clave sin par√°metro.
             /// </summary>
             Keyword = 1,
             /// <summary>
-            /// SÌmbolo de Control sin par·metro.
+            /// S√≠mbolo de Control sin par√°metro.
             /// </summary>
             Control = 2,
             /// <summary>

@@ -1,4 +1,4 @@
-/********************************************************************************
+ï»¿/********************************************************************************
  *   This file is part of NRtfTree Library.
  *
  *   NRtfTree Library is free software; you can redistribute it and/or modify
@@ -25,7 +25,7 @@
  * SF Project:	http://nrtftree.sourceforge.net
  *				http://sourceforge.net/projects/nrtftree
  * Class:		InfoGroup
- * Description:	Clase para encapsular toda la información contenida en un
+ * Description:	Clase para encapsular toda la informaciÃ³n contenida en un
  *              grupo RTF de tipo "\info".
  * ******************************************************************************/
 
@@ -37,7 +37,7 @@ namespace NRtfTree
     namespace Util
     {
         /// <summary>
-        /// Clase que encapsula toda la información contenida en un grupo "\info" de un documento RTF.
+        /// Clase que encapsula toda la informaciÃ³n contenida en un grupo "\info" de un documento RTF.
         /// </summary>
         public class InfoGroup
         {
@@ -71,7 +71,7 @@ namespace NRtfTree
             #region Propiedades
 
             /// <summary>
-            /// Título del documento.
+            /// TÃ­tulo del documento.
             /// </summary>
             public string Title
             {
@@ -107,7 +107,7 @@ namespace NRtfTree
             }
 
             /// <summary>
-            /// Compañía del autor del documento.
+            /// CompaÃ±Ã­a del autor del documento.
             /// </summary>
             public string Company
             {
@@ -116,7 +116,7 @@ namespace NRtfTree
             }
 
             /// <summary>
-            /// Última persona que ha realizao cambios sobre el documento.
+            /// Ãšltima persona que ha realizao cambios sobre el documento.
             /// </summary>
             public string Operator
             {
@@ -125,7 +125,7 @@ namespace NRtfTree
             }
 
             /// <summary>
-            /// Categoría del documento.
+            /// CategorÃ­a del documento.
             /// </summary>
             public string Category
             {
@@ -161,7 +161,7 @@ namespace NRtfTree
             }
 
             /// <summary>
-            /// La dirección base usada en las rutas relativas de los enlaces del documento. Puede ser una ruta local o una URL.
+            /// La direcciÃ³n base usada en las rutas relativas de los enlaces del documento. Puede ser una ruta local o una URL.
             /// </summary>
             public string HlinkBase
             {
@@ -170,7 +170,7 @@ namespace NRtfTree
             }
 
             /// <summary>
-            /// Fecha/Hora de creación del documento.
+            /// Fecha/Hora de creaciÃ³n del documento.
             /// </summary>
             public DateTime CreationTime
             {
@@ -179,7 +179,7 @@ namespace NRtfTree
             }
 
             /// <summary>
-            /// Fecha/Hora de revisión del documento.
+            /// Fecha/Hora de revisiÃ³n del documento.
             /// </summary>
             public DateTime RevisionTime
             {
@@ -188,7 +188,7 @@ namespace NRtfTree
             }
 
             /// <summary>
-            /// Fecha/Hora de última impresión del documento.
+            /// Fecha/Hora de Ãºltima impresiÃ³n del documento.
             /// </summary>
             public DateTime LastPrintTime
             {
@@ -197,7 +197,7 @@ namespace NRtfTree
             }
 
             /// <summary>
-            /// Fecha/Hora de última copia del documento.
+            /// Fecha/Hora de Ãºltima copia del documento.
             /// </summary>
             public DateTime BackupTime
             {
@@ -206,7 +206,7 @@ namespace NRtfTree
             }
 
             /// <summary>
-            /// Versión del documento.
+            /// VersiÃ³n del documento.
             /// </summary>
             public int Version
             {
@@ -215,7 +215,7 @@ namespace NRtfTree
             }
 
             /// <summary>
-            /// Versión interna del documento.
+            /// VersiÃ³n interna del documento.
             /// </summary>
             public int InternalVersion
             {
@@ -224,7 +224,7 @@ namespace NRtfTree
             }
 
             /// <summary>
-            /// Tiempo total de edición del documento (en minutos).
+            /// Tiempo total de ediciÃ³n del documento (en minutos).
             /// </summary>
             public int EditingTime
             {
@@ -233,7 +233,7 @@ namespace NRtfTree
             }
 
             /// <summary>
-            /// Número de páginas del documento.
+            /// NÃºmero de pÃ¡ginas del documento.
             /// </summary>
             public int NumberOfPages
             {
@@ -242,7 +242,7 @@ namespace NRtfTree
             }
 
             /// <summary>
-            /// Número de palabras del documento.
+            /// NÃºmero de palabras del documento.
             /// </summary>
             public int NumberOfWords
             {
@@ -251,7 +251,7 @@ namespace NRtfTree
             }
 
             /// <summary>
-            /// Número de caracteres del documento.
+            /// NÃºmero de caracteres del documento.
             /// </summary>
             public int NumberOfChars
             {
@@ -260,7 +260,7 @@ namespace NRtfTree
             }
 
             /// <summary>
-            /// Identificación interna del documento.
+            /// IdentificaciÃ³n interna del documento.
             /// </summary>
             public int Id
             {
@@ -273,9 +273,9 @@ namespace NRtfTree
             #region Metodos publicos
 
             /// <summary>
-            /// Devuelve la representación del nodo en forma de cadena de caracteres.
+            /// Devuelve la representaciÃ³n del nodo en forma de cadena de caracteres.
             /// </summary>
-            /// <returns>Representación del nodo en forma de cadena de caracteres.</returns>
+            /// <returns>RepresentaciÃ³n del nodo en forma de cadena de caracteres.</returns>
             public override string ToString()
             {
                 StringBuilder str = new();
