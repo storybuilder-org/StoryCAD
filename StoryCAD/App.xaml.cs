@@ -174,7 +174,7 @@ public partial class App
             }
         }
 
-        Ioc.Default.GetService<BackendService>()!.StartupRecording();
+        await Ioc.Default.GetService<BackendService>()!.StartupRecording();
         ConfigureNavigation();
 
         // Construct a Window to hold our Pages
