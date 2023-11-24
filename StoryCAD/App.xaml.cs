@@ -174,11 +174,7 @@ public partial class App
             }
         }
 
-        //Don't try to report a new prefs model.
-        if (AppDat.Preferences.PreferencesInitialized) 
-        {
-            Ioc.Default.GetService<BackendService>()!.StartupRecording();
-        }
+        await Ioc.Default.GetService<BackendService>()!.StartupRecording();
         ConfigureNavigation();
 
         // Construct a Window to hold our Pages

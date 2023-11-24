@@ -1,7 +1,6 @@
 ﻿using System.Data;
 using System.Threading.Tasks;
 using MySql.Data.MySqlClient;
-using StoryCAD.Models;
 
 namespace StoryCAD.DAL;
 
@@ -36,8 +35,11 @@ public class MySqlIo
     public async Task AddVersion(MySqlConnection conn, int id, string currentVersion, string previousVersion)
     {
         const string sql = "INSERT INTO StoryBuilder.versions" +
-                            " (user_id, current_version, previous_version)" +
-                            " VALUES (@user_id,@current,@previous)";
+                           " (user_id, current_version, previous_version)" +
+                           " VALUES (@user_id, @current, @previous)" +
+                           " ON DUPLICATE KEY UPDATE" +
+                           " current_version = @current, previous_version = @previous";
+
         await using (MySqlCommand _cmd = new(sql, conn))
         {
             _cmd.Parameters.AddWithValue("@user_id", id);
@@ -46,4 +48,5 @@ public class MySqlIo
             await _cmd.ExecuteNonQueryAsync();
         }
     }
+
 }
