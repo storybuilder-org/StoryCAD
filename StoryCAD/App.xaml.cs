@@ -57,6 +57,13 @@ public partial class App
     private IntPtr m_windowHandle;
 
     /// <summary>
+    /// This is the path to the STBX file that StoryCAD
+    /// was launched with, if StoryCAD wasn't launched
+    /// with a file this will be null.
+    /// </summary>
+    string LaunchPath = null;
+
+    /// <summary>
     /// Initializes the singleton application object.  This is the first line of authored code
     /// executed, and as such is the logical equivalent of main() or WinMain().
     /// </summary>
@@ -115,7 +122,7 @@ public partial class App
                     if (activatedEventArgs.Data is IFileActivatedEventArgs fileArgs)
                     {
                         //This will be launched when ShellVM has finished initalising
-                        Ioc.Default.GetRequiredService<ShellViewModel>().FilePathToLaunch = fileArgs.Files.FirstOrDefault().Path; 
+                        LaunchPath = fileArgs.Files.FirstOrDefault().Path; 
                     }
                 }
             }
@@ -131,7 +138,6 @@ public partial class App
     protected override async void OnLaunched(LaunchActivatedEventArgs args)
     {
         _log.Log(LogLevel.Info, "StoryCAD.App launched");
-
         // Note: Shell_Loaded in Shell.xaml.cs will display a
         // connection status message as soon as it's displayable.
 
@@ -158,6 +164,10 @@ public partial class App
 
         //Load user preferences or atleast initalise them.
         await Ioc.Default.GetService<AppState>().LoadPreferences();
+
+        //Set the launch path in ShellVM so if a File was used to open StoryCAD,
+        //so that the file will be opened when shell has finished loading.
+        Ioc.Default.GetRequiredService<ShellViewModel>().FilePathToLaunch = LaunchPath;
 
         if (Debugger.IsAttached) {_log.Log(LogLevel.Info, "Bypassing elmah.io as debugger is attached.");}
         else
@@ -187,6 +197,7 @@ public partial class App
         mainWindow.Content = rootFrame;
         mainWindow.CenterOnScreen(); // Centers the window on the monitor
         mainWindow.Activate();
+
         // Navigate to the first page:
         //   If we've not yet initialized Preferences, it's PreferencesInitialization.
         //   If we have initialized Preferences, it Shell.
