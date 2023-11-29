@@ -363,7 +363,7 @@ public class OverviewViewModel : ObservableRecipient, INavigable
         catch (Exception e)
         {
             _logger!.LogException(LogLevel.Fatal, e, "Error loading lists in Problem view model");
-            ShowError();
+            Ioc.Default.GetService<Windowing>().ShowResourceErrorMessage();
         }
 
         DateCreated = string.Empty;
@@ -384,19 +384,6 @@ public class OverviewViewModel : ObservableRecipient, INavigable
         Notes = string.Empty;
 
         PropertyChanged += OnPropertyChanged;
-    }
-
-    async void ShowError()
-    {
-        await new ContentDialog()
-        {
-            XamlRoot = Ioc.Default.GetRequiredService<Windowing>().XamlRoot,
-            Title = "Error loading resources",
-            Content = "An error has occurred, please reinstall or update StoryCAD to continue.",
-            CloseButtonText = "Close"
-        }.ShowAsync();
-        throw new MissingManifestResourceException();
-
     }
     #endregion
 }

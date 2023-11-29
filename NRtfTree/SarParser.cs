@@ -1,4 +1,4 @@
-/********************************************************************************
+Ôªø/********************************************************************************
  *   This file is part of NRtfTree Library.
  *
  *   NRtfTree Library is free software; you can redistribute it and/or modify
@@ -33,52 +33,52 @@ namespace NRtfTree
     namespace Core
     {
         /// <summary>
-        /// Esta clase, utilizada por RtfReader, contiene todos los mÈtodos necesarios para tratar cada uno de 
-        /// los tipos de elementos presentes en un documento RTF. Estos mÈtodos ser·n llamados autom·ticamente 
-        /// durante el an·lisis del documento RTF realizado por la clase RtfReader.
+        /// Esta clase, utilizada por RtfReader, contiene todos los m√©todos necesarios para tratar cada uno de 
+        /// los tipos de elementos presentes en un documento RTF. Estos m√©todos ser√°n llamados autom√°ticamente 
+        /// durante el an√°lisis del documento RTF realizado por la clase RtfReader.
         /// </summary>
         public abstract class SarParser
         {
             /// <summary>
-            /// Este mÈtodo se llama una sÛla vez al comienzo del an·lisis del documento RTF.
+            /// Este m√©todo se llama una s√≥la vez al comienzo del an√°lisis del documento RTF.
             /// </summary>
             public abstract void StartRtfDocument();
             /// <summary>
-            /// Este mÈtodo se llama una sÛla vez al final del an·lisis del documento RTF.
+            /// Este m√©todo se llama una s√≥la vez al final del an√°lisis del documento RTF.
             /// </summary>
             public abstract void EndRtfDocument();
             /// <summary>
-            /// Este mÈtodo se llama cada vez que se lee una llave de comienzo de grupo RTF.
+            /// Este m√©todo se llama cada vez que se lee una llave de comienzo de grupo RTF.
             /// </summary>
             public abstract void StartRtfGroup();
             /// <summary>
-            /// Este mÈtodo se llama cada vez que se lee una llave de fin de grupo RTF.
+            /// Este m√©todo se llama cada vez que se lee una llave de fin de grupo RTF.
             /// </summary>
             public abstract void EndRtfGroup();
             /// <summary>
-            /// Este mÈtodo se llama cada vez que se lee una palabra clave RTF.
+            /// Este m√©todo se llama cada vez que se lee una palabra clave RTF.
             /// </summary>
             /// <param name="key">Palabra clave leida del documento.</param>
-            /// <param name="hasParameter">Indica si la palabra clave va acompaÒada de un par·metro.</param>
+            /// <param name="hasParameter">Indica si la palabra clave va acompa√±ada de un par√°metro.</param>
             /// <param name="parameter">
-            /// Par·metro que acompaÒa a la palabra clave. En caso de que la palabra clave no vaya acompaÒada
-            /// de ning˙n par·metro, es decir, que el campo hasParam sea 'false', 
-            /// este campo contendr· el valor 0.
+            /// Par√°metro que acompa√±a a la palabra clave. En caso de que la palabra clave no vaya acompa√±ada
+            /// de ning√∫n par√°metro, es decir, que el campo hasParam sea 'false', 
+            /// este campo contendr√° el valor 0.
             /// </param>
             public abstract void RtfKeyword(string key, bool hasParameter, int parameter);
             /// <summary>
-            /// Este mÈtodo se llama cada vez que se lee un sÌmbolo de Control RTF.
+            /// Este m√©todo se llama cada vez que se lee un s√≠mbolo de Control RTF.
             /// </summary>
-            /// <param name="key">SÌmbolo de Control leido del documento.</param>
-            /// <param name="hasParameter">Indica si el sÌmbolo de Control va acompaÒado de un par·metro.</param>
+            /// <param name="key">S√≠mbolo de Control leido del documento.</param>
+            /// <param name="hasParameter">Indica si el s√≠mbolo de Control va acompa√±ado de un par√°metro.</param>
             /// <param name="parameter">
-            /// Par·metro que acompaÒa al sÌmbolo de Control. En caso de que el sÌmbolo de Control no vaya acompaÒado
-            /// de ning˙n par·metro, es decir, que el campo hasParam sea 'false', 
-            /// este campo contendr· el valor 0.
+            /// Par√°metro que acompa√±a al s√≠mbolo de Control. En caso de que el s√≠mbolo de Control no vaya acompa√±ado
+            /// de ning√∫n par√°metro, es decir, que el campo hasParam sea 'false', 
+            /// este campo contendr√° el valor 0.
             /// </param>
             public abstract void RtfControl(string key, bool hasParameter, int parameter);
             /// <summary>
-            /// Este mÈtodo se llama cada vez que se lee un fragmento de Texto del documento RTF.
+            /// Este m√©todo se llama cada vez que se lee un fragmento de Texto del documento RTF.
             /// </summary>
             /// <param name="text">Texto leido del documento.</param>
             public abstract void RtfText(string text);

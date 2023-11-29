@@ -7,6 +7,7 @@ using StoryCAD.Models;
 using System;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using StoryCAD.Services.Logging;
+using MySqlX.XDevAPI.Common;
 
 namespace StoryCAD.Services.Dialogs
 {
@@ -27,9 +28,16 @@ namespace StoryCAD.Services.Dialogs
         {
             try
             {
-                //Returns body of release
-                return (await _client.Repository.Release.Get("StoryBuilder-org", "StoryCAD",
-                    AppDat.Version.Replace("Version: ", ""))).Body;
+                if (AppDat.Version.Contains("Built on:")) //Checks user isn't running a development version of StoryCAD
+                {
+                    return "Changelogs are unavailable for development versions of StoryCAD.";
+                }
+                else
+                {
+                    //Returns body of release
+                    return (await _client.Repository.Release.Get("StoryBuilder-org", "StoryCAD",
+                        AppDat.Version.Replace("Version: ", ""))).Body;
+                }
             }
             catch (Exception _e)
             {
@@ -53,6 +61,9 @@ namespace StoryCAD.Services.Dialogs
             }
         }
 
+        /// <summary>
+        /// Shows a changelog content dialog/
+        /// </summary>
         public async Task ShowChangeLog()
         {
             //Don't Show changelog on dev build's since its pointless.
@@ -74,9 +85,9 @@ namespace StoryCAD.Services.Dialogs
                     },
                     Title = "What's new in StoryCAD " + AppDat.Version,
                     PrimaryButtonText = "Okay",
-                    XamlRoot = Ioc.Default.GetRequiredService<Windowing>().XamlRoot,
                 };
-                await _changelogUI.ShowAsync();
+                await Ioc.Default.GetService<Windowing>().ShowContentDialog(_changelogUI);
+
             }
             catch (Exception _e)
             {

@@ -16,12 +16,15 @@ using Microsoft.UI.Dispatching;
 using StoryCAD.Services;
 using System.Linq;
 using Windows.ApplicationModel.DataTransfer;
+using Microsoft.UI;
+using Windows.Storage.Provider;
 
 namespace StoryCAD.Views;
 
 public sealed partial class Shell
 {
     public ShellViewModel ShellVm => Ioc.Default.GetService<ShellViewModel>();
+    public Windowing Windowing => Ioc.Default.GetService<Windowing>();
     public UnifiedVM UnifiedVm => Ioc.Default.GetService<UnifiedVM>();
     public PreferencesModel Preferences = Ioc.Default.GetRequiredService<AppState>().Preferences;
 
@@ -53,10 +56,7 @@ public sealed partial class Shell
 
     private async void Shell_Loaded(object sender, RoutedEventArgs e)
     {
-        // The Shell_Loaded event is processed in order to obtain and save the XamlRool  
-        // and pass it on to ContentDialogs as a WinUI work-around. See
-        // https://docs.microsoft.com/en-us/windows/winui/api/microsoft.ui.xaml.controls.contentdialog?view=winui-3.0-preview
-        Ioc.Default.GetRequiredService<Windowing>().XamlRoot = Content.XamlRoot;
+        Windowing.XamlRoot = Content.XamlRoot;
         Ioc.Default.GetService<AppState>().StartUpTimer.Stop();
         ShellVm.ShowHomePage();
         ShellVm.ShowConnectionStatus();
@@ -78,6 +78,7 @@ public sealed partial class Shell
 
         //If StoryCAD was loaded from a .STBX File then instead of showing the Unified menu
         //We will instead load the file instead.
+        Logger.Log(LogLevel.Info, $"Filepath to launch {ShellVm.FilePathToLaunch}");
         if (ShellVm.FilePathToLaunch == null) { await ShellVm.OpenUnifiedMenu(); }
         else { await ShellVm.OpenFile(ShellVm.FilePathToLaunch);}
     }
@@ -90,6 +91,12 @@ public sealed partial class Shell
     {
         NavigationTree.SelectionMode = TreeViewSelectionMode.None;
         NavigationTree.SelectionMode = TreeViewSelectionMode.Single;
+        (SplitViewFrame.Content as FrameworkElement).RequestedTheme = Windowing.RequestedTheme;
+        SplitViewFrame.Background = Windowing.RequestedTheme == ElementTheme.Light ? new SolidColorBrush(Colors.White) : new SolidColorBrush(Colors.Black);
+        if (!(SplitViewFrame.Content as FrameworkElement).BaseUri.ToString().Contains("HomePage"))
+        {
+            (SplitViewFrame.Content as Page).Margin = new(0, 0, 0, 5);
+        }
     }
 
     /// <summary>

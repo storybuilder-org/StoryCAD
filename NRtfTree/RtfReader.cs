@@ -1,4 +1,4 @@
-/********************************************************************************
+Ôªø/********************************************************************************
  *   This file is part of NRtfTree Library.
  *
  *   NRtfTree Library is free software; you can redistribute it and/or modify
@@ -35,14 +35,14 @@ namespace NRtfTree
     namespace Core
     {
         /// <summary>
-        /// Esta clase proporciona los mÈtodos necesarios para la carga y an·lisis secuencial de un documento RTF.
+        /// Esta clase proporciona los m√©todos necesarios para la carga y an√°lisis secuencial de un documento RTF.
         /// </summary>
         public class RtfReader
         {
             #region Atributos privados
 
             private TextReader rtf;		//Fichero/Cadena de entrada RTF
-            private RtfLex lex;		//Analizador lÈxico para RTF
+            private RtfLex lex;		//Analizador l√©xico para RTF
             private RtfToken tok;		//Token actual
             private SarParser reader;		//Rtf Reader
 
@@ -54,7 +54,7 @@ namespace NRtfTree
             /// Constructor de la clase RtfReader.
             /// </summary>
             /// <param name="reader">
-            /// Objeto del tipo SARParser que contienen los mÈtodos necesarios para el tratamiento de los
+            /// Objeto del tipo SARParser que contienen los m√©todos necesarios para el tratamiento de los
             /// distintos elementos de un documento RTF.
             /// </param>
             public RtfReader(SarParser reader)
@@ -69,7 +69,7 @@ namespace NRtfTree
 
             #endregion
 
-            #region MÈtodos P˙blicos
+            #region M√©todos P√∫blicos
 
             /// <summary>
             /// Carga un documento RTF dada la ruta del fichero que lo contiene.
@@ -87,7 +87,7 @@ namespace NRtfTree
                 //Se abre el fichero de entrada
                 rtf = new StreamReader(path);
 
-                //Se crea el analizador lÈxico para RTF
+                //Se crea el analizador l√©xico para RTF
                 lex = new RtfLex(rtf);
 
                 //Se devuelve el resultado de la carga
@@ -110,7 +110,7 @@ namespace NRtfTree
                 //Se abre el fichero de entrada
                 rtf = new StringReader(text);
 
-                //Se crea el analizador lÈxico para RTF
+                //Se crea el analizador l√©xico para RTF
                 lex = new RtfLex(rtf);
 
                 //Se devuelve el resultado de la carga
@@ -118,16 +118,16 @@ namespace NRtfTree
             }
 
             /// <summary>
-            /// Comienza el an·lisis del documento RTF y provoca la llamada a los distintos mÈtodos 
+            /// Comienza el an√°lisis del documento RTF y provoca la llamada a los distintos m√©todos 
             /// del objeto IRtfReader indicado en el constructor de la clase.
             /// </summary>
             /// <returns>
-            /// Resultado del an·lisis del documento. Si la carga se realiza correctamente
+            /// Resultado del an√°lisis del documento. Si la carga se realiza correctamente
             /// se devuelve el valor 0.
             /// </returns>
             public int Parse()
             {
-                //Resultado del an·lisis
+                //Resultado del an√°lisis
                 int res = 0;
 
                 //Comienza el documento

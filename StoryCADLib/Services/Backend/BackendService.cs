@@ -1,5 +1,4 @@
 ﻿using System;
-using System.ComponentModel;
 using System.Threading.Tasks;
 using Windows.Storage;
 using CommunityToolkit.Mvvm.DependencyInjection;
@@ -56,46 +55,43 @@ namespace StoryCAD.Services.Backend
         /// <summary>
         /// Do any necessary posting to the backend MySql server on app
         /// startup. This will include either preferences or versions
-        /// posting that weren't successfull during the last run.
+        /// posting that weren't successful during the last run.
         ///
         /// Also, if the app version has changed because of an update,
         /// post the new version.
         /// </summary>
-        public void StartupRecording()
+        public async Task StartupRecording()
         {
-            BackgroundWorker Worker = new();
-            Worker.DoWork += async (sender, e) =>
+            try
             {
-                try
+                // If the previous attempt to communicate to the back-end server
+                // or database failed, retry
+                if (!State.Preferences.RecordPreferencesStatus)
+                    await PostPreferences(State.Preferences);
+               
+                // If the StoryCAD version has changed, post the version change
+                if (!State.Version.Equals(State.Preferences.Version))
                 {
-                    // If the previous attempt to communicate to the back-end server
-                    // or database failed, retry
-                    if (!State.Preferences.RecordPreferencesStatus)
-                        await PostPreferences(State.Preferences);
-                    if (!State.Preferences.RecordVersionStatus)
-                        await PostVersion();
-                    // If the StoryCAD version has changed, post the version change
-                    if (!State.Version.Equals(State.Preferences.Version))
-                    {
-                        // Process a version change (usually a new release)
-                        log.Log(LogLevel.Info,
-                            "Version mismatch: " + State.Version + " != " + State.Preferences.Version);
-                        State.LoadedWithVersionChange = true;
-                        PreferencesModel preferences = State.Preferences;
-                        // Update Preferences
-                        preferences.Version = State.Version;
-                        PreferencesIo prefIO = new(preferences, State.RootDirectory);
-                        await prefIO.WritePreferences();
-                        // Post deployment to backend server
-                        await PostVersion();
-                    }
+                    // Process a version change (usually a new release)
+                    log.Log(LogLevel.Info, "Version mismatch: " + State.Version + " != " + State.Preferences.Version);
+                    State.LoadedWithVersionChange = true;
+                    PreferencesModel preferences = State.Preferences;
+
+                    // Update Preferences
+                    preferences.Version = State.Version;
+                    PreferencesIo prefIO = new(preferences, State.RootDirectory);
+                    await prefIO.WritePreferences();
+
+                    // Post deployment to backend server
+                    await PostVersion();
                 }
-                catch (Exception ex)
-                {
-                    log.LogException(LogLevel.Error, ex, "Error in parse service worker");
-                }
-            };
-            Worker.RunWorkerAsync();
+                else if (!State.Preferences.RecordVersionStatus)
+                    await PostVersion();
+            }
+            catch (Exception ex)
+            {
+                log.LogException(LogLevel.Error, ex, "Error in StartupRecording method");
+            }
         }
 
         public async Task PostPreferences(PreferencesModel preferences)
@@ -112,7 +108,7 @@ namespace StoryCAD.Services.Backend
             {
                 await conn.OpenAsync();
 
-                string name = preferences.Name;
+                string name = preferences.FirstName + " " + preferences.LastName;
                 string email = preferences.Email;
                 int id = await sql.AddOrUpdateUser(conn, name, email);
                 log.Log(LogLevel.Info, "Name: " + name + " userId: " + id);
@@ -158,7 +154,7 @@ namespace StoryCAD.Services.Backend
             {
                 await conn.OpenAsync();
 
-                string name = preferences.Name;
+                string name = preferences.FirstName + " " + preferences.LastName;
                 string email = preferences.Email;
                 int id = await sql.AddOrUpdateUser(conn, name, email);
                 log.Log(LogLevel.Info, "User Name: " + name + " userId: " + id);

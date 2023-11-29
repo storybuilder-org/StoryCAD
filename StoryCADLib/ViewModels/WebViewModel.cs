@@ -137,12 +137,11 @@ public class WebViewModel : ObservableRecipient, INavigable
         {
             Title = "Webview is missing.",
             Content = "This computer is missing the WebView2 Runtime, without it some features may not work.\nWould you like to install this now?",
-            XamlRoot = Window.XamlRoot,
             PrimaryButtonText = "Yes",
             SecondaryButtonText = "No"
         };
 
-        ContentDialogResult _result = await _dialog.ShowAsync();
+        ContentDialogResult _result = await Ioc.Default.GetService<Windowing>().ShowContentDialog(_dialog);
         _logger.Log(LogLevel.Error, $"User clicked {_result}");
 
         //Ok clicked
@@ -174,7 +173,7 @@ public class WebViewModel : ObservableRecipient, INavigable
                 .WaitForExitAsync();
 
             //Show success/fail dialog
-            ContentDialog _dialog = new() { PrimaryButtonText = "Ok", XamlRoot = Window.XamlRoot };
+            ContentDialog _dialog = new() { PrimaryButtonText = "Ok" };
             try
             {
                 _dialog.Title = "Webview installed!";
@@ -190,7 +189,7 @@ public class WebViewModel : ObservableRecipient, INavigable
                     $"An error occurred installing the Evergreen Webview Runtime ({_ex.Message})");
             }
 
-            await _dialog.ShowAsync();
+            await Ioc.Default.GetService<Windowing>().ShowContentDialog(_dialog);
             _logger.Log(LogLevel.Warn, "Finished installing webview runtime.");
         }
         catch (Exception _ex)

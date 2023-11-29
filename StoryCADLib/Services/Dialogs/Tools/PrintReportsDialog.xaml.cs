@@ -134,15 +134,17 @@ public sealed partial class PrintReportsDialog
                 Window.GlobalDispatcher.TryEnqueue(async () =>
                 {
                     PrintVM.CloseDialog();
-                    await new ContentDialog
+                    ContentDialog Dialog = new()
                     {
-                        XamlRoot = Ioc.Default.GetRequiredService<Windowing>().XamlRoot,
                         Title = "Printing error",
                         Content = "The following error occurred when trying to print:\n\n" + ex.Message,
                         PrimaryButtonText = "Ok"
-                    }.ShowAsync();
+                    };
+
+                    await Ioc.Default.GetService<Windowing>().ShowContentDialog(Dialog);
                 });
-;
+
+                ;
             }
         }
         else //Print Manager isn't supported so we fall back to the old version of printing directly.

@@ -1,4 +1,4 @@
-/********************************************************************************
+Ôªø/********************************************************************************
  *   This file is part of NRtfTree Library.
  *
  *   NRtfTree Library is free software; you can redistribute it and/or modify
@@ -25,7 +25,7 @@
  * SF Project:	http://nrtftree.sourceforge.net
  *				http://sourceforge.net/projects/nrtftree
  * Class:		RtfLex
- * Description:	Analizador lÈxico de documentos RTF.
+ * Description:	Analizador l√©xico de documentos RTF.
  * ******************************************************************************/
 
 using System;
@@ -37,7 +37,7 @@ namespace NRtfTree
     namespace Core
     {
         /// <summary>
-        /// Analizador lÈxico (tokenizador) para documentos en formato RTF. Analiza el documento y devuelve de 
+        /// Analizador l√©xico (tokenizador) para documentos en formato RTF. Analiza el documento y devuelve de 
         /// forma secuencial todos los elementos RTF leidos (tokens).
         /// </summary>
         public class RtfLex
@@ -73,7 +73,7 @@ namespace NRtfTree
 
             #endregion
 
-            #region MÈtodos P˙blicos
+            #region M√©todos P√∫blicos
 
             /// <summary>
             /// Lee un nuevo token del documento RTF.
@@ -126,12 +126,12 @@ namespace NRtfTree
 
             #endregion
 
-            #region MÈtodos Privados
+            #region M√©todos Privados
 
             /// <summary>
             /// Lee una palabra clave del documento RTF.
             /// </summary>
-            /// <param name="token">Token RTF al que se asignar· la palabra clave.</param>
+            /// <param name="token">Token RTF al que se asignar√° la palabra clave.</param>
             private void parseKeyword(RtfToken token)
             {
                 StringBuilder palabraClave = new();
@@ -144,7 +144,7 @@ namespace NRtfTree
 
                 c = rtf.Peek();
 
-                //Si el caracter leido no es una letra --> Se trata de un sÌmbolo de Control o un caracter especial: '\\', '\{' o '\}'
+                //Si el caracter leido no es una letra --> Se trata de un s√≠mbolo de Control o un caracter especial: '\\', '\{' o '\}'
                 if (!char.IsLetter((char)c))
                 {
                     rtf.Read();
@@ -159,7 +159,7 @@ namespace NRtfTree
                         token.Type = RtfTokenType.Control;
                         token.Key = ((char)c).ToString();
 
-                        //Si se trata de un caracter especial (codigo de 8 bits) se lee el par·metro hexadecimal
+                        //Si se trata de un caracter especial (codigo de 8 bits) se lee el par√°metro hexadecimal
                         if (token.Key == "\'")
                         {
                             string cod = "";
@@ -172,13 +172,13 @@ namespace NRtfTree
                             token.Parameter = Convert.ToInt32(cod, 16);
                         }
 
-                        //TODO: øHay m·s sÌmbolos de Control con par·metros?
+                        //TODO: ¬øHay m√°s s√≠mbolos de Control con par√°metros?
                     }
 
                     return;
                 }
 
-                //Se lee la palabra clave completa (hasta encontrar un caracter no alfanumÈrico, por ejemplo '\' Û ' '
+                //Se lee la palabra clave completa (hasta encontrar un caracter no alfanum√©rico, por ejemplo '\' √≥ ' '
                 c = rtf.Peek();
                 while (char.IsLetter((char)c))
                 {
@@ -192,12 +192,12 @@ namespace NRtfTree
                 token.Type = RtfTokenType.Keyword;
                 token.Key = palabraClave.ToString();
 
-                //Se comprueba si la palabra clave tiene par·metro
+                //Se comprueba si la palabra clave tiene par√°metro
                 if (char.IsDigit((char)c) || c == '-')
                 {
                     token.HasParameter = true;
 
-                    //Se comprubea si el par·metro es negativo
+                    //Se comprubea si el par√°metro es negativo
                     if (c == '-')
                     {
                         negativo = true;
@@ -205,7 +205,7 @@ namespace NRtfTree
                         rtf.Read();
                     }
 
-                    //Se lee el par·metro completo
+                    //Se lee el par√°metro completo
                     c = rtf.Peek();
                     while (char.IsDigit((char)c))
                     {
@@ -220,7 +220,7 @@ namespace NRtfTree
                     if (negativo)
                         parametroInt = -parametroInt;
 
-                    //Se asigna el par·metro de la palabra clave
+                    //Se asigna el par√°metro de la palabra clave
                     token.Parameter = parametroInt;
                 }
 
@@ -234,7 +234,7 @@ namespace NRtfTree
             /// Lee una cadena de Texto del documento RTF.
             /// </summary>
             /// <param name="car">Primer caracter de la cadena.</param>
-            /// <param name="token">Token RTF al que se asignar· la palabra clave.</param>
+            /// <param name="token">Token RTF al que se asignar√° la palabra clave.</param>
             private void parseText(int car, RtfToken token)
             {
                 int c = car;

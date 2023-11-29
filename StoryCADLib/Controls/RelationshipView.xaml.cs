@@ -58,11 +58,10 @@ public sealed partial class RelationshipView
             {
                 Title = "Are you sure?",
                 Content = $"Are you sure you want to delete the relationship between {CharVm.Name} and {characterToDelete.Partner.Name}?",
-                XamlRoot = Ioc.Default.GetRequiredService<Windowing>().XamlRoot,
                 PrimaryButtonText = "Yes",
                 SecondaryButtonText = "No"
             };
-            ContentDialogResult result = await CD.ShowAsync();
+            ContentDialogResult result = await Ioc.Default.GetService<Windowing>().ShowContentDialog(CD);
             Logger.Log(LogLevel.Info, $"Dialog Result: {result}");
 
             if (result == ContentDialogResult.Primary) //If positive, then delete.

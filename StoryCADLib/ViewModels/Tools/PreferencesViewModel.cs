@@ -42,13 +42,22 @@ public class PreferencesViewModel : ObservableValidator
     
     //User information tab
 
-    private string _name;
-    [Required(ErrorMessage = "Name is required.")]
-    [MinLength(2, ErrorMessage = "Name should be longer than one character")]
-    public string Name
+    private string _firstName;
+    [Required(ErrorMessage = "First name is required.")]
+    [MinLength(2, ErrorMessage = "First name should be longer than one character")]
+    public string FirstName
     {
-        get => _name;
-        set => SetProperty(ref _name, value, false);
+        get => _firstName;
+        set => SetProperty(ref _firstName, value, false);
+    }
+
+    private string _lastName;
+    [Required(ErrorMessage = "First name is required.")]
+    [MinLength(2, ErrorMessage = "First name should be longer than one character")]
+    public string LastName
+    {
+        get => _lastName;
+        set => SetProperty(ref _lastName, value, false);
     }
 
     [EmailAddress(ErrorMessage = "Must be a valid email address")]
@@ -90,13 +99,6 @@ public class PreferencesViewModel : ObservableValidator
         set => SetProperty(ref _lastSelectedTemplate, value);
     }
 
-
-    // Visual changes
-
-    public SolidColorBrush PrimaryColor { get; set; } //Sets UI Color
-   
-    public SolidColorBrush SecondaryColor = new(new UISettings().GetColorValue(UIColorType.Accent)); //Sets Text Color
-    
     public TextWrapping WrapNodeNames { get; set; }
 
     // Backup Information
@@ -174,6 +176,12 @@ public class PreferencesViewModel : ObservableValidator
         set => PreferredSearchEngine = (BrowserType)value;
     } // Last version change was logged successfully or not
 
+    private ElementTheme PreferedTheme;
+    public int PreferredThemeIndex
+    {
+        get => (int)PreferedTheme;
+        set => PreferedTheme = (ElementTheme)value;
+    }
 
     #endregion
 
@@ -181,15 +189,13 @@ public class PreferencesViewModel : ObservableValidator
 
     internal void LoadModel()
     {
-        Name = CurrentModel.Name;
+        FirstName = CurrentModel.FirstName;
+        LastName = CurrentModel.LastName;
         Email = CurrentModel.Email;
         ErrorCollectionConsent = CurrentModel.ErrorCollectionConsent;
         Newsletter = CurrentModel.Newsletter;
         PreferencesInitialized = CurrentModel.PreferencesInitialized;
         LastSelectedTemplate = CurrentModel.LastSelectedTemplate;
-
-        PrimaryColor = CurrentModel.PrimaryColor;
-        SecondaryColor = CurrentModel.SecondaryColor;
         WrapNodeNames = CurrentModel.WrapNodeNames;
 
         LastFile1 = CurrentModel.LastFile1;
@@ -210,18 +216,18 @@ public class PreferencesViewModel : ObservableValidator
         RecordPreferencesStatus = CurrentModel.RecordPreferencesStatus;
         RecordVersionStatus = CurrentModel.RecordVersionStatus;
         PreferredSearchEngine = CurrentModel.PreferredSearchEngine;
+        PreferedTheme = CurrentModel.ThemePreference;
     }
 
     internal void SaveModel()
     {
-        CurrentModel.Name = Name;
+        CurrentModel.FirstName = FirstName;
+        CurrentModel.LastName = LastName;
         CurrentModel.Email = Email;
         CurrentModel.ErrorCollectionConsent = ErrorCollectionConsent;
         CurrentModel.Newsletter = Newsletter;
         CurrentModel.PreferencesInitialized = PreferencesInitialized;
         CurrentModel.LastSelectedTemplate = LastSelectedTemplate;
-        CurrentModel.PrimaryColor = PrimaryColor;
-        CurrentModel.SecondaryColor = SecondaryColor;
         CurrentModel.WrapNodeNames = WrapNodeNames;
 
         CurrentModel.LastFile1 = LastFile1;
@@ -241,6 +247,13 @@ public class PreferencesViewModel : ObservableValidator
         CurrentModel.RecordPreferencesStatus = RecordPreferencesStatus;
         CurrentModel.RecordVersionStatus = RecordVersionStatus;
         CurrentModel.PreferredSearchEngine = PreferredSearchEngine;
+
+        if (CurrentModel.ThemePreference != PreferedTheme)
+        {
+            Ioc.Default.GetService<Windowing>().RequestedTheme = CurrentModel.ThemePreference;
+            Ioc.Default.GetService<Windowing>().UpdateUIToTheme();
+        }
+        CurrentModel.ThemePreference = PreferedTheme;
     }
 
     /// <summary>

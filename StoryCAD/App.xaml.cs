@@ -1,4 +1,4 @@
-﻿using System;
+﻿    using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -35,6 +35,8 @@ using LaunchActivatedEventArgs = Microsoft.UI.Xaml.LaunchActivatedEventArgs;
 using System.Globalization;
 using System.Reflection;
 using StoryCAD.Services.IoC;
+using Microsoft.UI.Xaml.Media;
+using Microsoft.UI;
 
 namespace StoryCAD;
 
@@ -53,6 +55,13 @@ public partial class App
     private LogService _log;
 
     private IntPtr m_windowHandle;
+
+    /// <summary>
+    /// This is the path to the STBX file that StoryCAD
+    /// was launched with, if StoryCAD wasn't launched
+    /// with a file this will be null.
+    /// </summary>
+    string LaunchPath = null;
 
     /// <summary>
     /// Initializes the singleton application object.  This is the first line of authored code
@@ -113,7 +122,7 @@ public partial class App
                     if (activatedEventArgs.Data is IFileActivatedEventArgs fileArgs)
                     {
                         //This will be launched when ShellVM has finished initalising
-                        Ioc.Default.GetRequiredService<ShellViewModel>().FilePathToLaunch = fileArgs.Files.FirstOrDefault().Path; 
+                        LaunchPath = fileArgs.Files.FirstOrDefault().Path; 
                     }
                 }
             }
@@ -129,7 +138,6 @@ public partial class App
     protected override async void OnLaunched(LaunchActivatedEventArgs args)
     {
         _log.Log(LogLevel.Info, "StoryCAD.App launched");
-
         // Note: Shell_Loaded in Shell.xaml.cs will display a
         // connection status message as soon as it's displayable.
 
@@ -147,10 +155,18 @@ public partial class App
         AppState AppDat = Ioc.Default.GetRequiredService<AppState>();
         string pathMsg = string.Format("Configuration data location = " + AppDat.RootDirectory);
         _log.Log(LogLevel.Info, pathMsg);
+        
         Trace.Listeners.Add(new TextWriterTraceListener(Console.Out));
         Trace.AutoFlush = true;
         Trace.Indent();
         Trace.WriteLine(pathMsg);
+
+        //Load user preferences or atleast initalise them.
+        await Ioc.Default.GetService<AppState>().LoadPreferences();
+
+        //Set the launch path in ShellVM so if a File was used to open StoryCAD,
+        //so that the file will be opened when shell has finished loading.
+        Ioc.Default.GetRequiredService<ShellViewModel>().FilePathToLaunch = LaunchPath;
 
         if (Debugger.IsAttached) {_log.Log(LogLevel.Info, "Bypassing elmah.io as debugger is attached.");}
         else
@@ -166,9 +182,8 @@ public partial class App
                 _log.Log(LogLevel.Info, "elmah.io log target bypassed");
             }
         }
-        
-        Ioc.Default.GetService<BackendService>()!.StartupRecording();
-        await Ioc.Default.GetService<AppState>().LoadPreferences();
+
+        await Ioc.Default.GetService<BackendService>()!.StartupRecording();
         ConfigureNavigation();
 
         // Construct a Window to hold our Pages
@@ -181,6 +196,7 @@ public partial class App
         mainWindow.Content = rootFrame;
         mainWindow.CenterOnScreen(); // Centers the window on the monitor
         mainWindow.Activate();
+
         // Navigate to the first page:
         //   If we've not yet initialized Preferences, it's PreferencesInitialization.
         //   If we have initialized Preferences, it Shell.
