@@ -32,11 +32,15 @@ public class BackendTests
 
         //Make sure app logic thinks versions need syncing
         State.Preferences.RecordVersionStatus = false;
-
+        State.Preferences.FirstName = "StoryCAD";
+        State.Preferences.LastName = "Tests";
+        State.Preferences.Email = "sysadmin@storybuilder.org";
+        
         //Call backend service to check connection
         Task.Run(async () =>
         {
             await Ioc.Default.GetRequiredService<BackendService>().PostVersion();
+            await Ioc.Default.GetRequiredService<BackendService>().PostPreferences(State.Preferences);
         }).Wait();
 
         //Check if test passed (RecordVersionStatus should be true now)
