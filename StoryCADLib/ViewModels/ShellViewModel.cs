@@ -26,6 +26,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Windows.Storage;
@@ -1221,6 +1222,14 @@ public class ShellViewModel : ObservableRecipient
         _canExecuteCommands = true;
     }
 
+    /// <summary>
+    /// This function just calls print reports dialog.
+    /// </summary>
+    private async void OpenPrintMenu() 
+    {
+        Ioc.Default.GetRequiredService<PrintReportDialogVM>().OpenPrintReportDialog();
+    }
+
     private async void DramaticSituationsTool()
     {
         Logger.Log(LogLevel.Info, "Displaying Dramatic Situations tool dialog");
@@ -2177,7 +2186,14 @@ public class ShellViewModel : ObservableRecipient
     /// <param name="statusMessage"></param>
     private void StatusMessageReceived(StatusChangedMessage statusMessage)
     {
-        if (_statusTimer.IsEnabled) { _statusTimer.Stop(); } //Stops a timer if one is already running
+        //Ignore status messages inside tests
+        if (Assembly.GetEntryAssembly().Location.ToString().Contains("StoryCADTests.dll")
+            || Assembly.GetEntryAssembly().Location.ToString().Contains("testhost.dll"))
+        {
+            return;
+        }
+
+            if (_statusTimer.IsEnabled) { _statusTimer.Stop(); } //Stops a timer if one is already running
 
         StatusMessage = statusMessage.Value.Status; //This shows the message
 
@@ -2264,8 +2280,14 @@ public class ShellViewModel : ObservableRecipient
 
         StoryModel = new StoryModel();
 
-        _statusTimer = new DispatcherTimer();
-        _statusTimer.Tick += statusTimer_Tick;
+        //Skip status timer initalisation in Tests.
+        if (!Assembly.GetEntryAssembly().Location.ToString().Contains("StoryCADTests.dll") 
+            && !Assembly.GetEntryAssembly().Location.ToString().Contains("testhost.dll"))
+        {
+            _statusTimer = new DispatcherTimer();
+            _statusTimer.Tick += statusTimer_Tick;
+        }
+
 
         Messenger.Send(new StatusChangedMessage(new("Ready", LogLevel.Info)));
 
@@ -2290,7 +2312,7 @@ public class ShellViewModel : ObservableRecipient
 
         PreferencesCommand = new RelayCommand(Preferences, () => _canExecuteCommands);
 
-        PrintReportsCommand = new RelayCommand(Ioc.Default.GetRequiredService<PrintReportDialogVM>().OpenPrintReportDialog, () => _canExecuteCommands);
+        PrintReportsCommand = new RelayCommand(OpenPrintMenu,() => _canExecuteCommands);
         ScrivenerReportsCommand = new RelayCommand(GenerateScrivenerReports, () => _canExecuteCommands);
 
         HelpCommand = new RelayCommand(LaunchGitHubPages, () => _canExecuteCommands);

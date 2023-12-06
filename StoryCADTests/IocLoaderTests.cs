@@ -37,7 +37,7 @@ namespace StoryCADTests
                 IocSetupComplete = true;
                 AppState State = Ioc.Default.GetService<AppState>();
                 State.Preferences = new();
-                State.Preferences.Name = "StoryCADTestUser";
+                State.Preferences.FirstName = "StoryCADTestUser";
                 State.Preferences.Email = "sysadmin@storybuilder.org";
                 //return;
                 try
