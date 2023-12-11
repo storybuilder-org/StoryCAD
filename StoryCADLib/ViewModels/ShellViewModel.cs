@@ -670,7 +670,7 @@ public class ShellViewModel : ObservableRecipient
     /// </summary>
     public void SaveModel()
     {
-        if (SplitViewFrame.CurrentSourcePageType is null) { return; }
+        if (SplitViewFrame == null|| SplitViewFrame.CurrentSourcePageType is null) { return; }
 
         Logger.Log(LogLevel.Trace, $"SaveModel Page type={SplitViewFrame.CurrentSourcePageType}");
 
@@ -852,13 +852,15 @@ public class ShellViewModel : ObservableRecipient
         if (autoSave && !StoryModel.Changed)
         {
             Logger.Log(LogLevel.Info, $"{msg} skipped, no changes");
+            _canExecuteCommands = true;
             return;
         }
 
-        if (DataSource == null || DataSource.Count == 0)
+        if (StoryModel.StoryElements.Count == 0)
         {
             Messenger.Send(new StatusChangedMessage(new("You need to open a story first!", LogLevel.Info)));
-            Logger.Log(LogLevel.Info, $"{msg} cancelled (DataSource was null or empty)");
+            Logger.Log(LogLevel.Info, $"{msg} cancelled (StoryModel.ProjectFile was null)");
+            _canExecuteCommands = true;
             return;
         }
 
