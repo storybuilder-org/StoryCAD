@@ -773,7 +773,7 @@ public class ShellViewModel : ObservableRecipient
             }
 
             // Check if the file is a OneDrive placeholder
-            var fileInfo = new System.IO.FileInfo(StoryModel.ProjectFile.Path);
+            var fileInfo = new FileInfo(StoryModel.ProjectFile.Path);
             if ((fileInfo.Attributes & System.IO.FileAttributes.ReparsePoint) != 0)
             {
                 Logger.Log(LogLevel.Warn, "The selected file is a OneDrive placeholder. Please ensure the file is fully synced with OneDrive and try again.");
