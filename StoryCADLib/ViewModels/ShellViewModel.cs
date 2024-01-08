@@ -439,13 +439,21 @@ public class ShellViewModel : ObservableRecipient
                         _overviewNode.Children.Add(_storyProblemNode);
                         _storyProblemNode.Children.Add(_storyProtagNode);
                         _storyProblemNode.Children.Add(_storyAntagNode);
+
+                        //Correctly set parents
+                        _storyProblemNode.Parent = _overviewNode;
+                        _storyProtagNode.Parent = _storyProblemNode;
+                        _storyAntagNode.Parent = _storyProblemNode;
                         _storyProblemNode.IsExpanded = true;
                         break;
                     case 2:  // Folders for each type- story problem and characters belong in the corresponding folders
                         StoryElement _problems = new FolderModel("Problems", StoryModel, StoryItemType.Folder);
                         StoryNodeItem _problemsNode = new(_problems, _overviewNode);
+                        _storyProblemNode.Parent = _problemsNode;
                         StoryElement _characters = new FolderModel("Characters", StoryModel, StoryItemType.Folder);
                         StoryNodeItem _charactersNode = new(_characters, _overviewNode);
+                        _storyProtagNode.Parent = _charactersNode;
+                        _storyAntagNode.Parent = _charactersNode;
                         StoryElement _settings = new FolderModel("Settings", StoryModel, StoryItemType.Folder);
                         StoryNodeItem _settingsNode = new(_settings, _overviewNode);
                         StoryElement _scenes = new FolderModel("Scenes", StoryModel, StoryItemType.Folder);
@@ -468,9 +476,10 @@ public class ShellViewModel : ObservableRecipient
                         _overview.StoryProblem = _problem.Uuid.ToString();
                         _problem.Protagonist = _storyProtag.ToString();
                         _problem.Antagonist = _storyAntagNode.ToString();
+                        _storyProtagNode.Parent = _storyProblemNode;
+                        _storyAntagNode.Parent = _storyProblemNode;
                         StoryElement _internalProblem = new ProblemModel("Internal Problem", StoryModel);
-                        StoryNodeItem _internalProblemNode = new(_internalProblem, null);
-                        _overviewNode.Children.Add(_internalProblemNode);
+                        StoryNodeItem _internalProblemNode = new(_internalProblem, _overviewNode);
                         _problem = _internalProblem as ProblemModel;
                         _problem.Protagonist = _storyProtag.ToString();
                         _problem.Antagonist = _storyProtag.ToString();
@@ -2117,7 +2126,7 @@ public class ShellViewModel : ObservableRecipient
         }
         catch (Exception e) //errors (is RightTappedNode null?
         {
-             Logger.Log(LogLevel.Error, $"An error occurred inShowFlyouttButtons() \n{e.Message}\n" +
+             Logger.Log(LogLevel.Error, $"An error occurred in ShowFlyoutButtons() \n{e.Message}\n" +
                  $"- For reference RightTappedNode is " + RightTappedNode);
         }
 
