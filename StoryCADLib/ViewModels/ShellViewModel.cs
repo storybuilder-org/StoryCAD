@@ -26,6 +26,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Windows.Storage;
@@ -696,7 +697,7 @@ public class ShellViewModel : ObservableRecipient
     /// </summary>
     public void SaveModel()
     {
-        if (SplitViewFrame.CurrentSourcePageType is null) { return; }
+        if (SplitViewFrame == null|| SplitViewFrame.CurrentSourcePageType is null) { return; }
 
         Logger.Log(LogLevel.Trace, $"SaveModel Page type={SplitViewFrame.CurrentSourcePageType}");
 
@@ -799,7 +800,7 @@ public class ShellViewModel : ObservableRecipient
             }
 
             // Check if the file is a OneDrive placeholder
-            var fileInfo = new System.IO.FileInfo(StoryModel.ProjectFile.Path);
+            var fileInfo = new FileInfo(StoryModel.ProjectFile.Path);
             if ((fileInfo.Attributes & System.IO.FileAttributes.ReparsePoint) != 0)
             {
                 Logger.Log(LogLevel.Warn, "The selected file is a OneDrive placeholder. Please ensure the file is fully synced with OneDrive and try again.");
@@ -878,13 +879,15 @@ public class ShellViewModel : ObservableRecipient
         if (autoSave && !StoryModel.Changed)
         {
             Logger.Log(LogLevel.Info, $"{msg} skipped, no changes");
+            _canExecuteCommands = true;
             return;
         }
 
-        if (DataSource == null || DataSource.Count == 0)
+        if (StoryModel.StoryElements.Count == 0)
         {
             Messenger.Send(new StatusChangedMessage(new("You need to open a story first!", LogLevel.Info)));
-            Logger.Log(LogLevel.Info, $"{msg} cancelled (DataSource was null or empty)");
+            Logger.Log(LogLevel.Info, $"{msg} cancelled (StoryModel.ProjectFile was null)");
+            _canExecuteCommands = true;
             return;
         }
 
@@ -1246,6 +1249,14 @@ public class ShellViewModel : ObservableRecipient
             }
         }
         _canExecuteCommands = true;
+    }
+
+    /// <summary>
+    /// This function just calls print reports dialog.
+    /// </summary>
+    private async void OpenPrintMenu() 
+    {
+        Ioc.Default.GetRequiredService<PrintReportDialogVM>().OpenPrintReportDialog();
     }
 
     private async void DramaticSituationsTool()
@@ -2214,7 +2225,14 @@ public class ShellViewModel : ObservableRecipient
     /// <param name="statusMessage"></param>
     private void StatusMessageReceived(StatusChangedMessage statusMessage)
     {
-        if (_statusTimer.IsEnabled) { _statusTimer.Stop(); } //Stops a timer if one is already running
+        //Ignore status messages inside tests
+        if (Assembly.GetEntryAssembly().Location.ToString().Contains("StoryCADTests.dll")
+            || Assembly.GetEntryAssembly().Location.ToString().Contains("testhost.dll"))
+        {
+            return;
+        }
+
+            if (_statusTimer.IsEnabled) { _statusTimer.Stop(); } //Stops a timer if one is already running
 
         StatusMessage = statusMessage.Value.Status; //This shows the message
 
@@ -2290,9 +2308,6 @@ public class ShellViewModel : ObservableRecipient
 
     public ShellViewModel()
     {
-
-        //_itemSelector = Ioc.Default.GetRequiredService<TreeViewSelection>();
-
         Messenger.Register<IsChangedRequestMessage>(this, (_, m) => { m.Reply(StoryModel!.Changed); });
         Messenger.Register<ShellViewModel, IsChangedMessage>(this, static (r, m) => r.IsChangedMessageReceived(m));
         Messenger.Register<ShellViewModel, StatusChangedMessage>(this, static (r, m) => r.StatusMessageReceived(m));
@@ -2304,8 +2319,14 @@ public class ShellViewModel : ObservableRecipient
 
         StoryModel = new StoryModel();
 
-        _statusTimer = new DispatcherTimer();
-        _statusTimer.Tick += statusTimer_Tick;
+        //Skip status timer initalisation in Tests.
+        if (!Assembly.GetEntryAssembly().Location.ToString().Contains("StoryCADTests.dll") 
+            && !Assembly.GetEntryAssembly().Location.ToString().Contains("testhost.dll"))
+        {
+            _statusTimer = new DispatcherTimer();
+            _statusTimer.Tick += statusTimer_Tick;
+        }
+
 
         Messenger.Send(new StatusChangedMessage(new("Ready", LogLevel.Info)));
 
@@ -2330,7 +2351,7 @@ public class ShellViewModel : ObservableRecipient
 
         PreferencesCommand = new RelayCommand(Preferences, () => _canExecuteCommands);
 
-        PrintReportsCommand = new RelayCommand(Ioc.Default.GetRequiredService<PrintReportDialogVM>().OpenPrintReportDialog, () => _canExecuteCommands);
+        PrintReportsCommand = new RelayCommand(OpenPrintMenu,() => _canExecuteCommands);
         ScrivenerReportsCommand = new RelayCommand(GenerateScrivenerReports, () => _canExecuteCommands);
 
         HelpCommand = new RelayCommand(LaunchGitHubPages, () => _canExecuteCommands);

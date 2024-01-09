@@ -14,10 +14,19 @@
 		<WindowsAppContainer>true</WindowsAppContainer>
 		<!--<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>-->
 	</PropertyGroup>
+	<ItemGroup>
+	  <Content Remove="Assets\OpenFromDesktopTest.stbx" />
+	</ItemGroup>
 
 	<ItemGroup>
 		<None Update=".env">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
+		<None Update="TestInputs\OpenFromDesktopTest.stbx">
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
+		<None Update="TestInputs\OpenTest.stbx">
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
 	</ItemGroup>
 
