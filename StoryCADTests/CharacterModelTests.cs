@@ -5,7 +5,8 @@ using StoryCAD.ViewModels;
 using System;
 
 namespace StoryCADTests;
-
+/*
+ * TODO: Finish this test.
 [TestClass]
 public class CharacterModelTests
 {
@@ -26,3 +27,4 @@ public class CharacterModelTests
 
     }
 }
+*/

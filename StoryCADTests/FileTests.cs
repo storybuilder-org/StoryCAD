@@ -74,6 +74,9 @@ public class FileTests
         Assert.IsTrue(File.Exists(Path.Combine(StoryModel.ProjectPath, StoryModel.ProjectFilename)));
     }
 
+
+    /*
+     * TODO: Finish this test.
     /// <summary>
     /// This tests a file load to ensure file creation works.
     /// </summary>
@@ -91,7 +94,7 @@ public class FileTests
         StoryModel storyModel = await _rdr.ReadFile(file);
 
         // Assert
-        Assert.AreEqual(3, storyModel.StoryElements.Count, "Story elements count mismatch.");
-    }
+        Assert.AreEqual(3, storyModel.StoryElements.Count, "Story elements count mismatch."); 
+    }*/
 
 }

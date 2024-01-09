@@ -397,7 +397,10 @@ public class ShellViewModel : ObservableRecipient
             ShowHomePage();
 
             if (!Path.GetExtension(dialogVM.ProjectName)!.Equals(".stbx")) { dialogVM.ProjectName += ".stbx"; }
-            await CreateTemplate(dialogVM.ProjectName, dialogVM.ProjectPath, dialogVM.SelectedTemplateIndex);
+            StoryModel.ProjectFilename = dialogVM.ProjectName;
+            StoryModel.ProjectFolder = await StorageFolder.GetFolderFromPathAsync(dialogVM.ProjectPath);
+            StoryModel.ProjectPath = StoryModel.ProjectFolder.Path;
+            CreateTemplate(dialogVM.ProjectName, dialogVM.SelectedTemplateIndex);
             SetCurrentView(StoryViewType.ExplorerView);
 
             Ioc.Default.GetRequiredService<UnifiedVM>().UpdateRecents(Path.Combine(dialogVM.ProjectPath, dialogVM.ProjectName!)); //adds item to recent
@@ -441,12 +444,8 @@ public class ShellViewModel : ObservableRecipient
     /// <param name="ProjectName">The name of the project</param>
     /// <param name="ProjectPath">The file path to the project</param>
     /// <param name="SelectedTemplateIndex">The template to use (see NewProject.xaml)</param>
-    public async Task CreateTemplate(string ProjectName, string ProjectPath, int SelectedTemplateIndex)
+    public void CreateTemplate(string ProjectName, int SelectedTemplateIndex)
     {
-        StoryModel.ProjectFilename = ProjectName;
-        StoryModel.ProjectFolder = await StorageFolder.GetFolderFromPathAsync(ProjectPath);
-        StoryModel.ProjectPath = StoryModel.ProjectFolder.Path;
-
         OverviewModel _overview = new(Path.GetFileNameWithoutExtension(ProjectName), StoryModel)
         { DateCreated = DateTime.Today.ToString("yyyy-MM-dd"), 
             Author = State.Preferences.FirstName + " " + State.Preferences.LastName };
