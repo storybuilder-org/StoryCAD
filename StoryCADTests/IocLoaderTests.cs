@@ -1,9 +1,13 @@
 ﻿using CommunityToolkit.Mvvm.DependencyInjection;
+using dotenv.net;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using StoryCAD.Models;
 using StoryCAD.Services.Backend;
 using StoryCAD.Services.IoC;
 using StoryCAD.ViewModels;
 using StoryCAD.ViewModels.Tools;
+using System.IO;
+using Windows.ApplicationModel;
 
 namespace StoryCADTests
 {
@@ -31,6 +35,19 @@ namespace StoryCADTests
             {
                 Ioc.Default.ConfigureServices(ServiceConfigurator.Configure());
                 IocSetupComplete = true;
+                AppState State = Ioc.Default.GetService<AppState>();
+                State.Preferences = new();
+                State.Preferences.FirstName = "StoryCADTestUser";
+                State.Preferences.Email = "sysadmin@storybuilder.org";
+                //return;
+                try
+                {
+
+                    string path = Path.Combine(Package.Current.InstalledLocation.Path, ".env");
+                    DotEnvOptions options = new(false, new[] { path });
+                    DotEnv.Load(options);
+                }
+                catch { }
             }
         }
 
