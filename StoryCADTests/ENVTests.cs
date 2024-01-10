@@ -1,4 +1,5 @@
-﻿using dotenv.net.Utilities;
+﻿using System;
+using dotenv.net.Utilities;
 using dotenv.net;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Syncfusion.Licensing;
@@ -26,7 +27,7 @@ public class ENVTests
     [TestMethod]
     public void CheckDotEnvFile()
     {
-        string path = Path.Combine(Package.Current.InstalledLocation.Path, ".env");
+        string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ".env");
         DotEnvOptions options = new(false, new[] { path });
         DotEnv.Load(options);
     }

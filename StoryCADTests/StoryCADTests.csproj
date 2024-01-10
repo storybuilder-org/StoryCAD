@@ -11,7 +11,6 @@
 		<RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
 		<EnableMsixTooling>true</EnableMsixTooling>
 		<UseWinUI>true</UseWinUI>
-		<WindowsAppContainer>true</WindowsAppContainer>
 		<!--<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>-->
 	</PropertyGroup>
 	<ItemGroup>
@@ -51,7 +50,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.WindowsAppSDK" Version="1.4.231008000" />
+		<PackageReference Include="Microsoft.WindowsAppSDK" Version="1.4.231219000" />
 		<PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22621.2428" />
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
 		<PackageReference Include="CommunityToolkit.WinUI.UI.Controls.Core" Version="7.1.2" />
@@ -62,7 +61,7 @@
 			<Version>3.1.1</Version>
 		</PackageReference>
 		<PackageReference Include="Microsoft.TestPlatform.TestHost">
-			<Version>17.7.2</Version>
+			<Version>17.8.0</Version>
 			<ExcludeAssets>build</ExcludeAssets>
 		</PackageReference>
 		<Manifest Include="$(ApplicationManifest)" />

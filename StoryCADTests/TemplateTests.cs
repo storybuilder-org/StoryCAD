@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.DependencyInjection;
+using Microsoft.UI.Xaml;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.VisualStudio.TestTools.UnitTesting.AppContainer;
 using StoryCAD.Models;
@@ -12,7 +13,7 @@ public class TemplateTests
     /// <summary>
     /// This tests if all the samples child nodes have parents
     /// </summary>
-    [UITestMethod]
+    [TestMethod]
     public void TestSamples()
     {
         ShellViewModel ShellVM = Ioc.Default.GetService<ShellViewModel>();

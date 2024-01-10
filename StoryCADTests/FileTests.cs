@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.DependencyInjection;
+using Microsoft.UI.Xaml;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.VisualStudio.TestTools.UnitTesting.AppContainer;
 using StoryCAD.DAL;
@@ -20,11 +21,12 @@ public class FileTests
     /// <summary>
     /// This creates a new STBX File to assure file creation works.
     /// </summary>
-    [UITestMethod]
+    [TestMethod]
     public void FileCreation()
     {
+        //Debugger.Launch();
+
         //Get ShellVM and clear the StoryModel
-        ShellViewModel ShellVM = Ioc.Default.GetService<ShellViewModel>();
         StoryModel StoryModel = new()
         {
             ProjectFilename ="TestProject.stbx",

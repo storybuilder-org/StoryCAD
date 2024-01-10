@@ -186,7 +186,7 @@ namespace StoryCAD.Services.Backend
             try
             {
                 log.Log(LogLevel.Info, "GetConnectionString");
-                StorageFolder tempFolder = ApplicationData.Current.TemporaryFolder;
+                StorageFolder tempFolder = await StorageFolder.GetFolderFromPathAsync(System.IO.Path.GetTempPath());
                 StorageFile tempFile = 
                     await tempFolder.CreateFileAsync("StoryCAD.pem", CreationCollisionOption.ReplaceExisting);
                 string caFile = keys.CAFILE;

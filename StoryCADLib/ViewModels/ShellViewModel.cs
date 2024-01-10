@@ -2319,11 +2319,13 @@ public class ShellViewModel : ObservableRecipient
         StoryModel = new StoryModel();
 
         //Skip status timer initalisation in Tests.
-        if (!Assembly.GetEntryAssembly().Location.ToString().Contains("StoryCADTests.dll") 
-            && !Assembly.GetEntryAssembly().Location.ToString().Contains("testhost.dll"))
+        if (!Assembly.GetEntryAssembly().Location.Contains("StoryCADTests.dll") 
+            && !Assembly.GetEntryAssembly().Location.Contains("testhost.dll"))
         {
             _statusTimer = new DispatcherTimer();
             _statusTimer.Tick += statusTimer_Tick;
+            ChangeStatusColor = Colors.Green;
+
         }
 
 
@@ -2382,8 +2384,6 @@ public class ShellViewModel : ObservableRecipient
 
         CurrentView = "Story Explorer View";
         SelectedView = "Story Explorer View";
-
-        ChangeStatusColor = Colors.Green;
 
         ShellInstance = this;
     }

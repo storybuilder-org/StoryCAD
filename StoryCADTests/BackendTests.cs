@@ -4,6 +4,7 @@ using StoryCAD.Models;
 using StoryCAD.Services.Backend;
 using StoryCAD.Services.Json;
 using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace StoryCADTests;
@@ -19,6 +20,7 @@ public class BackendTests
     [TestMethod]
     public void CheckConnection()
     {
+        Debugger.Launch();
         AppState State = Ioc.Default.GetService<AppState>();
         
         //Load keys.
