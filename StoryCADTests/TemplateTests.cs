@@ -17,7 +17,6 @@ public class TemplateTests
     public void TestSamples()
     {
         ShellViewModel ShellVM = Ioc.Default.GetService<ShellViewModel>();
-        AppState State = Ioc.Default.GetService<AppState>();
         for (int index = 0; index <= 5; index++) 
         {
             ShellVM.StoryModel = new();

@@ -24,8 +24,6 @@ public class FileTests
     [TestMethod]
     public void FileCreation()
     {
-        //Debugger.Launch();
-
         //Get ShellVM and clear the StoryModel
         StoryModel StoryModel = new()
         {
@@ -54,11 +52,11 @@ public class FileTests
         StoryModel.ExplorerView.Add(new(_scene, _overviewNode,StoryItemType.Scene));
 
 
-        //Check is loaded correcly
+        //Check is loaded correctly
         Assert.IsTrue(StoryModel.StoryElements.Count == 6);
         Assert.IsTrue(StoryModel.StoryElements[0].Type == StoryItemType.StoryOverview);
 
-        //Becuase we have created a file in this way we must populate ProjectFolder and ProjectFile.
+        //Because we have created a file in this way we must populate ProjectFolder and ProjectFile.
         Directory.CreateDirectory(StoryModel.ProjectPath);
 
         Task.Run(async () =>

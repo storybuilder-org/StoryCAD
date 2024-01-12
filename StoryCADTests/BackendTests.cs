@@ -20,7 +20,6 @@ public class BackendTests
     [TestMethod]
     public void CheckConnection()
     {
-        Debugger.Launch();
         AppState State = Ioc.Default.GetService<AppState>();
         
         //Load keys.

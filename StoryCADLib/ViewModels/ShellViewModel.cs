@@ -442,7 +442,6 @@ public class ShellViewModel : ObservableRecipient
     /// This creates a new StoryModel based on a template
     /// </summary>
     /// <param name="ProjectName">The name of the project</param>
-    /// <param name="ProjectPath">The file path to the project</param>
     /// <param name="SelectedTemplateIndex">The template to use (see NewProject.xaml)</param>
     public void CreateTemplate(string ProjectName, int SelectedTemplateIndex)
     {
@@ -2231,7 +2230,7 @@ public class ShellViewModel : ObservableRecipient
             return;
         }
 
-            if (_statusTimer.IsEnabled) { _statusTimer.Stop(); } //Stops a timer if one is already running
+        if (_statusTimer.IsEnabled) { _statusTimer.Stop(); } //Stops a timer if one is already running
 
         StatusMessage = statusMessage.Value.Status; //This shows the message
 
@@ -2318,16 +2317,13 @@ public class ShellViewModel : ObservableRecipient
 
         StoryModel = new StoryModel();
 
-        //Skip status timer initalisation in Tests.
-        if (!Assembly.GetEntryAssembly().Location.Contains("StoryCADTests.dll") 
-            && !Assembly.GetEntryAssembly().Location.Contains("testhost.dll"))
+        //Skip status timer initialization in Tests.
+        if (!State.StoryCADTestsMode)
         {
             _statusTimer = new DispatcherTimer();
             _statusTimer.Tick += statusTimer_Tick;
             ChangeStatusColor = Colors.Green;
-
         }
-
 
         Messenger.Send(new StatusChangedMessage(new("Ready", LogLevel.Info)));
 
