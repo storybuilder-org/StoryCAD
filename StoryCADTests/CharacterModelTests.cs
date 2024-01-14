@@ -5,8 +5,7 @@ using StoryCAD.ViewModels;
 using System;
 
 namespace StoryCADTests;
-/*
- * TODO: Finish this test.
+
 [TestClass]
 public class CharacterModelTests
 {
@@ -17,14 +16,15 @@ public class CharacterModelTests
     [TestMethod]
     public void TestBlankTraits()
     {
-        throw new Exception("This is broken");
         CharacterViewModel CharVM = Ioc.Default.GetRequiredService<CharacterViewModel>();
-        Ioc.Default.GetService<ShellViewModel>().StoryModel = new();
-        var x = new CharacterModel(Ioc.Default.GetService<ShellViewModel>().StoryModel);
+        Ioc.Default.GetService<ShellViewModel>()!.StoryModel = new();
+        var x = new CharacterModel(Ioc.Default.GetService<ShellViewModel>()!.StoryModel);
         CharVM.Activate(x);
         CharVM.NewTrait = String.Empty;
         CharVM.AddTraitCommand.Execute(null);
-
+        Assert.IsTrue(CharVM.CharacterTraits.Count == 0);
+        CharVM.NewTrait = " TEST ";
+        CharVM.AddTraitCommand.Execute(null);
+        Assert.IsTrue(CharVM.CharacterTraits.Count == 1);
     }
 }
-*/

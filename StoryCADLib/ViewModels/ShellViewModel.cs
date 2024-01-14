@@ -335,6 +335,7 @@ public class ShellViewModel : ObservableRecipient
     /// </summary>
     public static void ShowChange()
     {
+        if (Ioc.Default.GetRequiredService<AppState>().StoryCADTestsMode) { return; }
         if (ShellInstance.StoryModel.Changed) { return; }
         ShellInstance.StoryModel.Changed = true;
         ShellInstance.ChangeStatusColor = Colors.Red;

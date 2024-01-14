@@ -1,13 +1,9 @@
 ﻿using CommunityToolkit.Mvvm.DependencyInjection;
-using Microsoft.UI.Xaml;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.VisualStudio.TestTools.UnitTesting.AppContainer;
 using StoryCAD.DAL;
 using StoryCAD.Models;
 using StoryCAD.ViewModels;
 using System;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -76,8 +72,6 @@ public class FileTests
     }
 
 
-    /*
-     * TODO: Finish this test.
     /// <summary>
     /// This tests a file load to ensure file creation works.
     /// </summary>
@@ -85,8 +79,8 @@ public class FileTests
     public async Task FileLoad()
     {
         // Arrange
-        string filePath = @"C:\Users\RARI\Desktop\OpenTest.stbx"; // Ensure this file exists and is accessible
-        Assert.IsTrue(System.IO.File.Exists(filePath), "Test file does not exist.");
+        string filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "TestInputs", "OpenTest.stbx"); // Ensure this file exists and is accessible
+        Assert.IsTrue(File.Exists(filePath), "Test file does not exist.");
 
         StorageFile file = await StorageFile.GetFileFromPathAsync(filePath);
         StoryReader _rdr = Ioc.Default.GetRequiredService<StoryReader>();
@@ -95,7 +89,8 @@ public class FileTests
         StoryModel storyModel = await _rdr.ReadFile(file);
 
         // Assert
-        Assert.AreEqual(3, storyModel.StoryElements.Count, "Story elements count mismatch."); 
-    }*/
+        Assert.AreEqual(6, storyModel.StoryElements.Count, "Story elements count mismatch."); 
+        Assert.AreEqual(5, storyModel.ExplorerView.Count, "Overview Children count mismatch"); 
+    }
 
 }

@@ -1,18 +1,13 @@
 ﻿using CommunityToolkit.Mvvm.DependencyInjection;
 using dotenv.net;
-using Microsoft.UI.Xaml;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.VisualStudio.TestTools.UnitTesting.AppContainer;
 using StoryCAD.Models;
 using StoryCAD.Services.Backend;
 using StoryCAD.Services.IoC;
 using StoryCAD.ViewModels;
 using StoryCAD.ViewModels.Tools;
 using System;
-using System.Diagnostics;
 using System.IO;
-using Windows.ApplicationModel;
-using Microsoft.UI.Dispatching;
 
 namespace StoryCADTests
 {
