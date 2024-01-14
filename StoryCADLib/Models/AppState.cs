@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.WinUI.Helpers;
 using Microsoft.UI.Xaml;
-using MySqlX.XDevAPI;
 using StoryCAD.DAL;
 using StoryCAD.Models.Tools;
 using StoryCAD.Services.Json;
@@ -25,7 +24,11 @@ namespace StoryCAD.Models;
 /// </summary>
 public class AppState
 {
-    public AppState() { }
+    public AppState()
+    {
+        StoryCADTestsMode = Assembly.GetEntryAssembly().Location.Contains("StoryCADTests.dll") ||
+                            Assembly.GetEntryAssembly().Location.Contains("testhost.dll");
+    }
 
     /// <summary>
     /// This is the path where all app files are stored
@@ -35,12 +38,12 @@ public class AppState
         get
         {
             //Use a different path if we are within StoryCAD.
-            if (Assembly.GetEntryAssembly().Location.ToString().Contains("StoryCADTests.dll") ||
-                Assembly.GetEntryAssembly().Location.ToString().Contains("testhost.dll"))
+            if (StoryCADTestsMode)
             {
-                return System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "StoryCADTests");
+                return System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                    "StoryCADTests");
             }
-            else 
+            else
             {
                 return System.IO.Path.Combine(ApplicationData.Current.RoamingFolder.Path, "StoryCAD");
             }
@@ -68,12 +71,15 @@ public class AppState
             {
                 return true;
             }
-            else { return false; }
+            else
+            {
+                return false;
+            }
         }
     }
 
     /// <summary>
-    /// This is a debug timer that counts the ammount of time from
+    /// This is a debug timer that counts the amount of time from
     /// the app being opened to Shell being properly initalised.
     /// </summary>
     public Stopwatch StartUpTimer = Stopwatch.StartNew();
@@ -84,14 +90,23 @@ public class AppState
     public bool EnvPresent = false;
 
     /// <summary>
+    /// Returns true if code is running via StoryCADTests.dll instead of StoryCAD.exe
+    /// </summary>
+    public bool StoryCADTestsMode;
+
+    /// <summary>
     /// The current (running) version of StoryCAD
     /// Returns a simple 4 number tuple on release versions i.e 2.12.0.0
-    /// Returns a 3 number tuple and build time on 
+    /// Returns a 3 number tuple and build time on
+    ///
+    /// (Returns 2.0.0.0 (StoryCADTests) if spawned via StoryCADTests.dll)
     /// </summary>
     public string Version
     {
         get
         {
+            if (StoryCADTestsMode) {  return "2.0.0.0 (StoryCADTests)";  }
+
             string _packageVersion = $"{ Package.Current.Id.Version.Major }.{ Package.Current.Id.Version.Minor}.{ Package.Current.Id.Version.Build}";
             if (Package.Current.Id.Version.Revision == 65535)
             {

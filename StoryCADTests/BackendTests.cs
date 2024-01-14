@@ -4,6 +4,7 @@ using StoryCAD.Models;
 using StoryCAD.Services.Backend;
 using StoryCAD.Services.Json;
 using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace StoryCADTests;

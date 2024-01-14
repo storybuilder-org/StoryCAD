@@ -39,7 +39,7 @@ namespace StoryCAD.ViewModels;
 /// or hierarchies consist of StoreNodeModel instances, and contain a similar structure to StoryNodeItem.
 /// 
 /// </summary>
-public class StoryNodeItem : DependencyObject, INotifyPropertyChanged
+public class StoryNodeItem : INotifyPropertyChanged
 {
     private LogService _logger = Ioc.Default.GetRequiredService<LogService>();
     private ShellViewModel _shellVM = Ioc.Default.GetRequiredService<ShellViewModel>();

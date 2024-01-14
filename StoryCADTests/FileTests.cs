@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.DependencyInjection;
+using Microsoft.UI.Xaml;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.VisualStudio.TestTools.UnitTesting.AppContainer;
 using StoryCAD.DAL;
@@ -8,6 +9,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using Windows.Storage;
 
@@ -20,11 +22,10 @@ public class FileTests
     /// <summary>
     /// This creates a new STBX File to assure file creation works.
     /// </summary>
-    [UITestMethod]
+    [TestMethod]
     public void FileCreation()
     {
         //Get ShellVM and clear the StoryModel
-        ShellViewModel ShellVM = Ioc.Default.GetService<ShellViewModel>();
         StoryModel StoryModel = new()
         {
             ProjectFilename ="TestProject.stbx",
@@ -52,24 +53,24 @@ public class FileTests
         StoryModel.ExplorerView.Add(new(_scene, _overviewNode,StoryItemType.Scene));
 
 
-        //Check is loaded correcly
+        //Check is loaded correctly
         Assert.IsTrue(StoryModel.StoryElements.Count == 6);
         Assert.IsTrue(StoryModel.StoryElements[0].Type == StoryItemType.StoryOverview);
 
-        //Becuase we have created a file in this way we must populate ProjectFolder and ProjectFile.
+        //Because we have created a file in this way we must populate ProjectFolder and ProjectFile.
         Directory.CreateDirectory(StoryModel.ProjectPath);
 
-        Task.Run(async () =>
-        {
-            //Populate file/folder vars.
-            StoryModel.ProjectFolder = StorageFolder.GetFolderFromPathAsync(StoryModel.ProjectPath).GetAwaiter().GetResult();
-            StoryModel.ProjectFile = StoryModel.ProjectFolder.CreateFileAsync("TestProject.stbx", CreationCollisionOption.ReplaceExisting).GetAwaiter().GetResult();
+        //Populate file/folder vars.
+        StoryModel.ProjectFolder = StorageFolder.GetFolderFromPathAsync(StoryModel.ProjectPath).GetAwaiter().GetResult();
+        StoryModel.ProjectFile = StoryModel.ProjectFolder.CreateFileAsync("TestProject.stbx", CreationCollisionOption.ReplaceExisting).GetAwaiter().GetResult();
 
-            //Write file.
-            StoryWriter _wtr = Ioc.Default.GetRequiredService<StoryWriter>();
-            _wtr.WriteFile(StoryModel.ProjectFile, StoryModel).GetAwaiter().GetResult();
-        });
-        
+        //Write file.
+        StoryWriter _wtr = Ioc.Default.GetRequiredService<StoryWriter>();
+        _wtr.WriteFile(StoryModel.ProjectFile, StoryModel).GetAwaiter().GetResult();
+
+        //Sleep to ensure file is written.
+        Thread.Sleep(10000);
+
         //Check file was really written to the disk.
         Assert.IsTrue(File.Exists(Path.Combine(StoryModel.ProjectPath, StoryModel.ProjectFilename)));
     }

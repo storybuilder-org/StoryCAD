@@ -1,13 +1,18 @@
 ﻿using CommunityToolkit.Mvvm.DependencyInjection;
 using dotenv.net;
+using Microsoft.UI.Xaml;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.VisualStudio.TestTools.UnitTesting.AppContainer;
 using StoryCAD.Models;
 using StoryCAD.Services.Backend;
 using StoryCAD.Services.IoC;
 using StoryCAD.ViewModels;
 using StoryCAD.ViewModels.Tools;
+using System;
+using System.Diagnostics;
 using System.IO;
 using Windows.ApplicationModel;
+using Microsoft.UI.Dispatching;
 
 namespace StoryCADTests
 {
@@ -15,7 +20,7 @@ namespace StoryCADTests
     public class IocLoaderTests
     {
         /// <summary>
-        /// Stops initalise from running multiple times
+        /// Stops initialise from running multiple times
         /// as it seems to be called more than once some
         /// by the test manager, thus causing all tests
         /// to fail.
@@ -27,9 +32,9 @@ namespace StoryCADTests
         /// This MUST be public static and have a Test Context
         /// if you remove this, you will break automated test
         /// </summary>
-        /// <param name="ctx"></param>
+        /// <param name="ctx">Required by MSTest, useless to us</param>
         [AssemblyInitialize]
-        public static void Initalise(TestContext ctx) 
+        public static void Initialise(TestContext ctx) 
         {
             if (!IocSetupComplete)
             {
@@ -43,7 +48,7 @@ namespace StoryCADTests
                 try
                 {
 
-                    string path = Path.Combine(Package.Current.InstalledLocation.Path, ".env");
+                    string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ".env");
                     DotEnvOptions options = new(false, new[] { path });
                     DotEnv.Load(options);
                 }
