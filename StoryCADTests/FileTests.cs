@@ -9,6 +9,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using Windows.Storage;
 
@@ -59,17 +60,17 @@ public class FileTests
         //Because we have created a file in this way we must populate ProjectFolder and ProjectFile.
         Directory.CreateDirectory(StoryModel.ProjectPath);
 
-        Task.Run(async () =>
-        {
-            //Populate file/folder vars.
-            StoryModel.ProjectFolder = StorageFolder.GetFolderFromPathAsync(StoryModel.ProjectPath).GetAwaiter().GetResult();
-            StoryModel.ProjectFile = StoryModel.ProjectFolder.CreateFileAsync("TestProject.stbx", CreationCollisionOption.ReplaceExisting).GetAwaiter().GetResult();
+        //Populate file/folder vars.
+        StoryModel.ProjectFolder = StorageFolder.GetFolderFromPathAsync(StoryModel.ProjectPath).GetAwaiter().GetResult();
+        StoryModel.ProjectFile = StoryModel.ProjectFolder.CreateFileAsync("TestProject.stbx", CreationCollisionOption.ReplaceExisting).GetAwaiter().GetResult();
 
-            //Write file.
-            StoryWriter _wtr = Ioc.Default.GetRequiredService<StoryWriter>();
-            _wtr.WriteFile(StoryModel.ProjectFile, StoryModel).GetAwaiter().GetResult();
-        });
-        
+        //Write file.
+        StoryWriter _wtr = Ioc.Default.GetRequiredService<StoryWriter>();
+        _wtr.WriteFile(StoryModel.ProjectFile, StoryModel).GetAwaiter().GetResult();
+
+        //Sleep to ensure file is written.
+        Thread.Sleep(10000);
+
         //Check file was really written to the disk.
         Assert.IsTrue(File.Exists(Path.Combine(StoryModel.ProjectPath, StoryModel.ProjectFilename)));
     }
