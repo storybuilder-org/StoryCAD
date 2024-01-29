@@ -92,24 +92,14 @@
     <PackageReference Include="CommunityToolkit.WinUI.UI.Controls.Core" Version="7.1.2" />
     <PackageReference Include="dotenv.net" Version="3.1.3" />
     <PackageReference Include="Elmah.Io.NLog" Version="5.1.42" />
-    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.4.231115000" />
-    <PackageReference Include="MySql.Data" Version="8.2.0" />
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.4.231219000" />
+    <PackageReference Include="MySql.Data" Version="8.3.0" />
 	<PackageReference Include="NLog" Version="5.2.8" />
 	<PackageReference Include="NLog.Extensions.Logging" Version="5.3.8" />
-	<PackageReference Include="Octokit" Version="9.0.0" />
+	<PackageReference Include="Octokit" Version="9.1.1" />
 	<PackageReference Include="Syncfusion.Editors.WinUI" Version="23.1.36" />
     <PackageReference Include="WinUIEx" Version="2.3.3" />
   </ItemGroup>
-
-	<ItemGroup>
-		<PackageReference Include="Betalgo.OpenAI" Version="7.4.3" />
-		<PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
-		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
-		<PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22621.2428" />
-		<PackageReference Include="Microsoft.Xaml.Behaviors.WinUI.Managed" Version="2.0.9" />
-		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-		<PackageReference Include="SpecFlow" Version="4.0.31-beta" />
-	</ItemGroup>
 
   <ItemGroup>
     <Folder Include="Models\Scrivener\" />

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.VisualStudio.TestTools.UnitTesting.AppContainer;
@@ -24,13 +23,12 @@ public partial class App : Application
     public App()
     {
         //Loads Singletons/VMs
-        IocLoaderTests.Initalise(null);//Runs the initalisation code
+        IocLoaderTests.Initialise(null);//Runs the initialization code
         Directory.CreateDirectory(Ioc.Default.GetRequiredService<AppState>().RootDirectory);
         InitializeComponent();
 
         _log = Ioc.Default.GetService<LogService>();
-        //TODO: Does the unhandled exception handler belong in the test project?
-        Current.UnhandledException += OnUnhandledException;
+        Current.UnhandledException += OnUnhandledException;   //TODO: Does the unhandled exception handler belong in the test project?
     }
 
     /// <summary>
@@ -47,16 +45,12 @@ public partial class App : Application
         string pathMsg = string.Format("Configuration data location = " + AppDat.RootDirectory);
         _log.Log(LogLevel.Info, pathMsg);
 
-        //await ProcessInstallationFiles();
-
         Microsoft.VisualStudio.TestPlatform.TestExecutor.UnitTestClient.CreateDefaultUI();
-
         Window = new MainWindow();
-
         // Ensure the current window is active
         Window.Activate();
-
         UITestMethodAttribute.DispatcherQueue = Window.DispatcherQueue;
+
 
         // Replace back with e.Arguments when https://github.com/microsoft/microsoft-ui-xaml/issues/3368 is fixed
         Microsoft.VisualStudio.TestPlatform.TestExecutor.UnitTestClient.Run(Environment.CommandLine);

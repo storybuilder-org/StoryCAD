@@ -2,21 +2,20 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using StoryCAD.Models.Tools;
 
-namespace StoryCADTests
+namespace StoryCADTests;
+
+[TestClass]
+public class ToolLoaderTests
 {
-    [TestClass]
-    public class ToolLoaderTests
+    [TestMethod]
+    public void TestToolCounts()
     {
-        [TestMethod]
-        public void TestToolCounts()
-        {
-            ToolsData toolsdata = Ioc.Default.GetService<ToolsData>();
-            Assert.AreEqual(5, toolsdata.KeyQuestionsSource.Keys.Count);
-            Assert.AreEqual(11, toolsdata.StockScenesSource.Keys.Count);
-            Assert.AreEqual(9, toolsdata.TopicsSource.Count);
-            Assert.AreEqual(22, toolsdata.MasterPlotsSource.Count);
-            Assert.AreEqual(36, toolsdata.DramaticSituationsSource.Count);
-            //TODO: Test some details (subcounts)
-        }
+        ToolsData toolsdata = Ioc.Default.GetService<ToolsData>();
+        Assert.AreEqual(5, toolsdata.KeyQuestionsSource.Keys.Count);
+        Assert.AreEqual(11, toolsdata.StockScenesSource.Keys.Count);
+        Assert.AreEqual(9, toolsdata.TopicsSource.Count);
+        Assert.AreEqual(22, toolsdata.MasterPlotsSource.Count);
+        Assert.AreEqual(36, toolsdata.DramaticSituationsSource.Count);
+        //TODO: Test some details (subcounts)
     }
 }
