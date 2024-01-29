@@ -100,7 +100,15 @@
 	<PackageReference Include="Syncfusion.Editors.WinUI" Version="23.1.36" />
     <PackageReference Include="WinUIEx" Version="2.3.3" />
   </ItemGroup>
-
+	<ItemGroup>
+		<PackageReference Include="Betalgo.OpenAI" Version="7.4.3" />
+		<PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
+		<PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22621.2428" />
+		<PackageReference Include="Microsoft.Xaml.Behaviors.WinUI.Managed" Version="2.0.9" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+		<PackageReference Include="SpecFlow" Version="4.0.31-beta" />
+	</ItemGroup>
   <ItemGroup>
     <Folder Include="Models\Scrivener\" />
     <Folder Include="Services\Logging\" />
