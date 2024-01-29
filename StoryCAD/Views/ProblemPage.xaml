@@ -1,4 +1,4 @@
-﻿<local:BindablePage NavigationCacheMode="Required"
+﻿<usercontrols:BindablePage NavigationCacheMode="Required"
     x:Class="StoryCAD.Views.ProblemPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -137,4 +137,4 @@
             </PivotItem>
         </Pivot>
     </Grid>
-</local:BindablePage>
+</usercontrols:BindablePage>

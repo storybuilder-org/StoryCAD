@@ -9,6 +9,7 @@ using StoryCAD.ViewModels.Tools;
 using StoryCAD.ViewModels;
 using StoryCAD.Models;
 using StoryCAD.Models.Tools;
+using StoryCAD.Services.Collaborator;
 
 namespace StoryCAD.Services.IoC;
 
@@ -31,6 +32,7 @@ public class ServiceConfigurator
              .AddSingleton<AutoSaveService>()
              .AddSingleton<DeletionService>()
              .AddSingleton<BackendService>()
+             .AddSingleton<CollaboratorService>()
              .AddSingleton<ListData>()
              .AddSingleton<ToolsData>()
              .AddSingleton<ControlData>()

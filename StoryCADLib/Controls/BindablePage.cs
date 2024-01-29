@@ -2,7 +2,7 @@
 using Microsoft.UI.Xaml.Navigation;
 using StoryCAD.Services.Navigation;
 
-namespace StoryCAD.Views;
+namespace StoryCAD.Controls;
 
 public class BindablePage : Page
 {

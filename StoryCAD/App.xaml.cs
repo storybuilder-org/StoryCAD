@@ -34,11 +34,13 @@ using StoryCAD.Services.Backup;
 using LaunchActivatedEventArgs = Microsoft.UI.Xaml.LaunchActivatedEventArgs;
 using System.Globalization;
 using System.Reflection;
-using StoryCAD.Services.IoC;
+    using System.Runtime.Loader;
+    using StoryCAD.Services.IoC;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI;
+    using StoryCAD.Services.Collaborator;
 
-namespace StoryCAD;
+    namespace StoryCAD;
 
 public partial class App
 {
@@ -191,6 +193,20 @@ public partial class App
         WindowEx mainWindow = new MainWindow() { MinHeight = 675, MinWidth = 900, Width = 1050,
             Height=750, Title="StoryCAD" };
 
+        mainWindow.AppWindow.Closing += (sender, eventArgs) =>
+        {
+            //TODO: Appropiately kill collaborator when we close storycad if needed.
+            // Ensure collaborator does not remain in memory.
+            if (Ioc.Default.GetRequiredService<CollaboratorService>().Collaborator != null)
+            {
+                Ioc.Default.GetRequiredService<CollaboratorService>().DestroyWindow();
+                Ioc.Default.GetRequiredService<CollaboratorService>().CollabAssembly = null;
+                Ioc.Default.GetRequiredService<CollaboratorService>().Collaborator = null;
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+            }
+        };
+
         // Create a Frame to act as the navigation context 
         Frame rootFrame = new();
         // Place the frame in the current Window
@@ -205,8 +221,8 @@ public partial class App
         if (!Ioc.Default.GetRequiredService<AppState>().Preferences.PreferencesInitialized) {rootFrame.Navigate(typeof(PreferencesInitialization));}
         else {rootFrame.Navigate(typeof(Shell));}
 
-        // Preserve both the Window and its Handle for future use
-        Ioc.Default.GetRequiredService<Windowing>().MainWindow = (MainWindow) mainWindow;
+    // Preserve both the Window and its Handle for future use
+    Ioc.Default.GetRequiredService<Windowing>().MainWindow = (MainWindow) mainWindow;
         //Get the Window's HWND
         m_windowHandle = User32.GetActiveWindow();
         Ioc.Default.GetRequiredService<Windowing>().WindowHandle = m_windowHandle;

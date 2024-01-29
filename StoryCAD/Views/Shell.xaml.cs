@@ -18,6 +18,10 @@ using System.Linq;
 using Windows.ApplicationModel.DataTransfer;
 using Microsoft.UI;
 using Windows.Storage.Provider;
+using Octokit;
+using StoryCAD.Services.Collaborator;
+using Application = Microsoft.UI.Xaml.Application;
+using Page = Microsoft.UI.Xaml.Controls.Page;
 
 namespace StoryCAD.Views;
 
@@ -47,7 +51,7 @@ public sealed partial class Shell
         catch (Exception ex)
         {
             // A shell initialization error is fatal
-            Logger.LogException(LogLevel.Error, ex, ex.Message);
+            Logger!.LogException(LogLevel.Error, ex, ex.Message);
             Logger.Flush();
             Application.Current.Exit();  // Win32
         }
@@ -57,11 +61,17 @@ public sealed partial class Shell
     private async void Shell_Loaded(object sender, RoutedEventArgs e)
     {
         Windowing.XamlRoot = Content.XamlRoot;
-        Ioc.Default.GetService<AppState>().StartUpTimer.Stop();
+        Ioc.Default.GetService<AppState>()!.StartUpTimer.Stop();
+
+        if (Ioc.Default.GetService<CollaboratorService>()!.CollaboratorEnabled())
+            ShellVm.CollaboratorVisibility = Visibility.Visible;
+        else
+            ShellVm.CollaboratorVisibility = Visibility.Collapsed;
+
         ShellVm.ShowHomePage();
         ShellVm.ShowConnectionStatus();
         Ioc.Default.GetRequiredService<Windowing>().UpdateWindowTitle();
-        if (!Ioc.Default.GetService<AppState>().EnvPresent) { await ShellVm.ShowDotEnvWarningAsync(); }
+        if (!Ioc.Default.GetService<AppState>()!.EnvPresent) { await ShellVm.ShowDotEnvWarningAsync(); }
 
         if (!await Ioc.Default.GetRequiredService<WebViewModel>().CheckWebviewState())
         {

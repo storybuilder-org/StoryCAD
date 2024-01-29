@@ -11,6 +11,7 @@ using StoryCAD.Models;
 using StoryCAD.Models.Tools;
 using StoryCAD.Services.Backend;
 using StoryCAD.Services.Backup;
+using StoryCAD.Services.Collaborator;
 using StoryCAD.Services.Dialogs;
 using StoryCAD.Services.Dialogs.Tools;
 using StoryCAD.Services.Json;
@@ -71,6 +72,7 @@ public class ShellViewModel : ObservableRecipient
     private AppState State = Ioc.Default.GetRequiredService<AppState>();
     private DispatcherTimer _statusTimer;
 
+    private CollaboratorArgs CollabArgs;
     // The current story outline being processed. 
     public StoryModel StoryModel;
 
@@ -105,7 +107,10 @@ public class ShellViewModel : ObservableRecipient
     public RelayCommand MoveRightCommand { get; }
     public RelayCommand MoveUpCommand { get; }
     public RelayCommand MoveDownCommand { get; }
-
+    
+    // Launch Collaborator
+    public RelayCommand CollaboratorCommand { get; }
+   
     public RelayCommand HelpCommand { get; }
 
     // Tools MenuFlyOut Commands
@@ -117,6 +122,13 @@ public class ShellViewModel : ObservableRecipient
     public RelayCommand PrintReportsCommand { get; }
     public RelayCommand ScrivenerReportsCommand { get; }
     public RelayCommand PreferencesCommand { get; }
+
+    private Visibility _collaboratorVisibility;
+    public Visibility CollaboratorVisibility
+    {
+        get => _collaboratorVisibility;
+        set => SetProperty(ref _collaboratorVisibility, value);
+    }
 
     #endregion
 
@@ -1118,6 +1130,30 @@ public class ShellViewModel : ObservableRecipient
                 break;
         }
 
+    }
+
+    private void LaunchCollaborator()
+    {
+        if (_canExecuteCommands)
+        {
+            if (CurrentNode == null)
+            {
+                Messenger.Send(new StatusChangedMessage(new("Select a node to collaborate on", LogLevel.Warn, true)));
+                return;
+            }
+
+            if (CollabArgs == null)
+            {
+                CollabArgs = new();
+            }
+            var id = CurrentNode.Uuid; // get the story element;
+            CollabArgs.SelectedElement = StoryModel.StoryElements.StoryElementGuids[id];
+            CollabArgs.StoryModel = StoryModel;
+            //TODO: Logging
+            Ioc.Default.GetService<CollaboratorService>()!.RunCollaborator(CollabArgs);
+
+
+        }
     }
 
     private async void KeyQuestionsTool()
@@ -2283,6 +2319,9 @@ public class ShellViewModel : ObservableRecipient
         SaveAsCommand = new RelayCommand(SaveFileAs, () => _canExecuteCommands);
         CloseCommand = new RelayCommand(CloseFile, () => _canExecuteCommands);
         ExitCommand = new RelayCommand(ExitApp, () => _canExecuteCommands);
+
+        // StoryCAD Collaborator
+        CollaboratorCommand = new RelayCommand(LaunchCollaborator, () => _canExecuteCommands);
 
         // Tools commands
         KeyQuestionsCommand = new RelayCommand(KeyQuestionsTool, () => _canExecuteCommands);
