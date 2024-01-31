@@ -192,19 +192,7 @@ public partial class App
         WindowEx mainWindow = new MainWindow() { MinHeight = 675, MinWidth = 900, Width = 1050,
             Height=750, Title="StoryCAD" };
 
-        mainWindow.AppWindow.Closing += (sender, eventArgs) =>
-        {
-            //TODO: Appropiately kill collaborator when we close storycad if needed.
-            // Ensure collaborator does not remain in memory.
-            if (Ioc.Default.GetRequiredService<CollaboratorService>().Collaborator != null)
-            {
-                Ioc.Default.GetRequiredService<CollaboratorService>().DestroyWindow();
-                Ioc.Default.GetRequiredService<CollaboratorService>().CollabAssembly = null;
-                Ioc.Default.GetRequiredService<CollaboratorService>().Collaborator = null;
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
-            }
-        };
+        mainWindow.AppWindow.Closing += Ioc.Default.GetRequiredService<CollaboratorService>().DestroyCollaborator;
 
         // Create a Frame to act as the navigation context 
         Frame rootFrame = new();

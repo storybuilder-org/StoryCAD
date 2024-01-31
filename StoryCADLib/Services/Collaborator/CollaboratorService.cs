@@ -2,13 +2,10 @@
 using System.IO;
 using System.Reflection;
 using System.Diagnostics;
-using System.Linq;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using StoryCAD.Models;
 using System.Runtime.Loader;
-using System.Threading;
 using Microsoft.UI.Windowing;
-using Microsoft.UI.Xaml;
 using StoryCAD.Collaborator;
 using WinUIEx;
 
@@ -33,7 +30,7 @@ public class CollaboratorService
     private bool FindDll()
     {
         // Get the path to the Documents folder
-        string documentsPath = "C:\\Users\\RARI\\Desktop\\cadappcollab\\Collaborator\\CollaboratorLib\\bin\\x64\\Debug\\net8.0-windows10.0.22621.0";
+        string documentsPath = "C:\\Users\\RARI\\Documents\\Repos\\CADCorp\\CollabApp\\CollaboratorLib\\bin\\x64\\Debug\\net8.0-windows10.0.22621.0";
         dllPath = Path.Combine(documentsPath, "CollaboratorLib.dll");
 
         // Verify that the DLL is present
@@ -42,12 +39,25 @@ public class CollaboratorService
     }
 
     /// <summary>
-    /// Destroys collaborator window.
+    /// This closes, disposes and full removes collaborator from memory.
     /// </summary>
-    public void DestroyWindow()
+    public void DestroyCollaborator(AppWindow sender, AppWindowClosingEventArgs args)
     {
-        window.Close();
+        //TODO: Absolutely make sure Collaborator is not left in memory after this.
+        if (Collaborator != null)
+        {
+            window.Close(); // Destroy window object
+
+            //Null objects to deallocate them
+            CollabAssembly = null;
+            Collaborator = null;
+
+            //Run garbage collection to clean up any remnants.
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+        }
     }
+
 
     public void RunCollaborator(CollaboratorArgs args)
     {
@@ -83,9 +93,15 @@ public class CollaboratorService
         else { args.window.Show(); }
     }
 
+
+
+
+    /// <summary>
+    /// This will hide the collaborator window.
+    /// </summary>
     private void hideCollaborator(AppWindow appWindow, AppWindowClosingEventArgs e)
     {
-        e.Cancel = true;
-        appWindow.Hide();
+        e.Cancel = true; // Cancel stops the window from being disposed.
+        appWindow.Hide(); // Hide the window instead.
     }
 }
