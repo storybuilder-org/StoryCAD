@@ -30,7 +30,8 @@ public class CollaboratorService
     private bool FindDll()
     {
         // Get the path to the Documents folder
-        string documentsPath = "C:\\Users\\RARI\\Documents\\Repos\\CADCorp\\CollabApp\\CollaboratorLib\\bin\\x64\\Debug\\net8.0-windows10.0.22621.0";
+        //string documentsPath = "C:\\Users\\RARI\\Documents\\Repos\\CADCorp\\CollabApp\\CollaboratorLib\\bin\\x64\\Debug\\net8.0-windows10.0.22621.0";
+        string documentsPath = "C:\\dev\\src\\StoryBuilderCollaborator\\CollaboratorLib\\bin\\x64\\Debug\\net8.0-windows10.0.22621.0";
         dllPath = Path.Combine(documentsPath, "CollaboratorLib.dll");
 
         // Verify that the DLL is present
