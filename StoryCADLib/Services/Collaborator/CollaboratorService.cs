@@ -59,7 +59,6 @@ public class CollaboratorService
         }
     }
 
-
     public void RunCollaborator(CollaboratorArgs args)
     {
         // Check collaborator hasn't already been initalised.
@@ -93,9 +92,6 @@ public class CollaboratorService
         }
         else { args.window.Show(); }
     }
-
-
-
 
     /// <summary>
     /// This will hide the collaborator window.

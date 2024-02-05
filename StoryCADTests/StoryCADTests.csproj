@@ -14,7 +14,7 @@
 		<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
 	</PropertyGroup>
 	<ItemGroup>
-	  <Content Remove="Assets\OpenFromDesktopTest.stbx" />
+		<Content Remove="Assets\OpenFromDesktopTest.stbx" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -22,10 +22,10 @@
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
 		<None Update="TestInputs\OpenFromDesktopTest.stbx">
-		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
 		<None Update="TestInputs\OpenTest.stbx">
-		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
 	</ItemGroup>
 
@@ -50,16 +50,15 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
 		<PackageReference Include="Microsoft.WindowsAppSDK" Version="1.4.231219000" />
 		<PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22621.2428" />
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
 		<PackageReference Include="CommunityToolkit.WinUI.UI.Controls.Core" Version="7.1.2" />
 		<PackageReference Include="MSTest.TestAdapter">
-			<Version>3.2.0</Version>
+			<Version>3.1.1</Version>
 		</PackageReference>
 		<PackageReference Include="MSTest.TestFramework">
-			<Version>3.2.0</Version>
+			<Version>3.1.1</Version>
 		</PackageReference>
 		<PackageReference Include="Microsoft.TestPlatform.TestHost">
 			<Version>17.8.0</Version>
