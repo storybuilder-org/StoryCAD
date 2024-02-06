@@ -7,6 +7,7 @@ using StoryCAD.Models;
 using System.Runtime.Loader;
 using Microsoft.UI.Windowing;
 using StoryCAD.Collaborator;
+using StoryCAD.Services.Backup;
 using WinUIEx;
 
 namespace StoryCAD.Services.Collaborator;
@@ -30,8 +31,8 @@ public class CollaboratorService
     private bool FindDll()
     {
         // Get the path to the Documents folder
-        //string documentsPath = "C:\\Users\\RARI\\Documents\\Repos\\CADCorp\\CollabApp\\CollaboratorLib\\bin\\x64\\Debug\\net8.0-windows10.0.22621.0";
-        string documentsPath = "C:\\dev\\src\\StoryBuilderCollaborator\\CollaboratorLib\\bin\\x64\\Debug\\net8.0-windows10.0.22621.0";
+        string documentsPath = "C:\\Users\\RARI\\Documents\\Repos\\CADCorp\\CollabApp\\CollaboratorLib\\bin\\x64\\Debug\\net8.0-windows10.0.22621.0";
+        //string documentsPath = "C:\\dev\\src\\StoryBuilderCollaborator\\CollaboratorLib\\bin\\x64\\Debug\\net8.0-windows10.0.22621.0";
         dllPath = Path.Combine(documentsPath, "CollaboratorLib.dll");
 
         // Verify that the DLL is present
@@ -61,6 +62,9 @@ public class CollaboratorService
 
     public void RunCollaborator(CollaboratorArgs args)
     {
+        Ioc.Default.GetRequiredService<BackupService>().StopTimedBackup();
+        Ioc.Default.GetRequiredService<AutoSaveService>().StopAutoSave();
+
         // Check collaborator hasn't already been initalised.
         if (Collaborator == null)
         {
@@ -75,6 +79,7 @@ public class CollaboratorService
             window = new WindowEx();
             window.AppWindow.Closing += hideCollaborator;
             args.window = window;
+            args.onDoneCallback = FinishedCallback;
 
             // Get the type of the Collaborator class
             Type collaboratorType = CollabAssembly.GetType("StoryCollaborator.Collaborator");
@@ -101,4 +106,14 @@ public class CollaboratorService
         e.Cancel = true; // Cancel stops the window from being disposed.
         appWindow.Hide(); // Hide the window instead.
     }
+
+    /// <summary>
+    /// This is called when collaborator has finished doing stuff.
+    /// </summary>
+    private void FinishedCallback()
+    {
+        Ioc.Default.GetRequiredService<BackupService>().StartTimedBackup();
+        Ioc.Default.GetRequiredService<AutoSaveService>().StartAutoSave();
+    }
+
 }

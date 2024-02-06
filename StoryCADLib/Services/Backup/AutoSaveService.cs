@@ -49,6 +49,9 @@ namespace StoryCAD.Services.Backup
         #endregion
 
         #region Public Methods
+        /// <summary>
+        /// Starts the AutoSave Service
+        /// </summary>
         public void StartAutoSave()
         {
             // If the timer is already running, stop it
@@ -60,6 +63,9 @@ namespace StoryCAD.Services.Backup
             autoSaveTimer.Start();
         }
 
+        /// <summary>
+        /// Stops AutoSave service
+        /// </summary>
         public void StopAutoSave()
         {
             autoSaveTimer.Stop();
