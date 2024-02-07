@@ -8,6 +8,7 @@ using System.Runtime.Loader;
 using Microsoft.UI.Windowing;
 using StoryCAD.Collaborator;
 using StoryCAD.Services.Backup;
+using StoryCAD.ViewModels;
 using WinUIEx;
 
 namespace StoryCAD.Services.Collaborator;
@@ -62,6 +63,7 @@ public class CollaboratorService
 
     public void RunCollaborator(CollaboratorArgs args)
     {
+        Ioc.Default.GetRequiredService<ShellViewModel>()._canExecuteCommands = false;
         Ioc.Default.GetRequiredService<BackupService>().StopTimedBackup();
         Ioc.Default.GetRequiredService<AutoSaveService>().StopAutoSave();
 
@@ -109,11 +111,24 @@ public class CollaboratorService
 
     /// <summary>
     /// This is called when collaborator has finished doing stuff.
+    /// Note: This is invoked from the Collaborator side via a Delegate named onDoneCallback
     /// </summary>
     private void FinishedCallback()
     {
-        Ioc.Default.GetRequiredService<BackupService>().StartTimedBackup();
-        Ioc.Default.GetRequiredService<AutoSaveService>().StartAutoSave();
+        //Reenable Timed Backup if needed.
+        if (Ioc.Default.GetRequiredService<AppState>().Preferences.TimedBackup)
+        {
+            Ioc.Default.GetRequiredService<BackupService>().StartTimedBackup();
+        }
+
+        //Reenable auto save if needed.
+        if (Ioc.Default.GetRequiredService<AppState>().Preferences.AutoSave)
+        {
+            Ioc.Default.GetRequiredService<AutoSaveService>().StartAutoSave();
+        }
+
+        //Reenable StoryCAD buttons
+        Ioc.Default.GetRequiredService<ShellViewModel>()._canExecuteCommands = true;
     }
 
 }
