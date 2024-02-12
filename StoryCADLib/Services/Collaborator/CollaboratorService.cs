@@ -6,7 +6,7 @@ using CommunityToolkit.Mvvm.DependencyInjection;
 using StoryCAD.Models;
 using System.Runtime.Loader;
 using Microsoft.UI.Windowing;
-using StoryCAD.Collaborator;
+//using StoryCollaborator.Views;
 using StoryCAD.Services.Backup;
 using StoryCAD.ViewModels;
 using WinUIEx;
@@ -19,7 +19,7 @@ public class CollaboratorService
     private string dllPath; 
     private AppState State = Ioc.Default.GetRequiredService<AppState>();
     public object Collaborator;
-    public IWizardViewModel WizardVM;
+    //public IWizardViewModel WizardVM;
     public Assembly CollabAssembly;
     private WindowEx window; // Do not make public, control from the collaborator side.
     public bool CollaboratorEnabled()
@@ -32,8 +32,8 @@ public class CollaboratorService
     private bool FindDll()
     {
         // Get the path to the Documents folder
-        string documentsPath = "C:\\Users\\RARI\\Documents\\Repos\\CADCorp\\CollabApp\\CollaboratorLib\\bin\\x64\\Debug\\net8.0-windows10.0.22621.0";
-        //string documentsPath = "C:\\dev\\src\\StoryBuilderCollaborator\\CollaboratorLib\\bin\\x64\\Debug\\net8.0-windows10.0.22621.0";
+        //string documentsPath = "C:\\Users\\RARI\\Documents\\Repos\\CADCorp\\CollabApp\\CollaboratorLib\\bin\\x64\\Debug\\net8.0-windows10.0.22621.0";
+        string documentsPath = "C:\\dev\\src\\StoryBuilderCollaborator\\CollaboratorLib\\bin\\x64\\Debug\\net8.0-windows10.0.22621.0";
         dllPath = Path.Combine(documentsPath, "CollaboratorLib.dll");
 
         // Verify that the DLL is present
@@ -89,13 +89,13 @@ public class CollaboratorService
             // Create an instance of the Collaborator class
             Collaborator = collaboratorType.GetConstructors()[0].Invoke(new object[] { args });
 
-            // Get WizardVM
-            WizardVM = (IWizardViewModel)collaboratorType.GetField("wizard").GetValue(Collaborator);
-            WizardVM.Model = args.SelectedElement;
-            WizardVM.LoadModel();
+            //// Get WizardVM
+            //WizardVM = (IWizardViewModel)collaboratorType.GetField("wizard").GetValue(Collaborator);
+            //WizardVM.Model = args.SelectedElement;
+            //WizardVM.LoadModel();
 
-            // Set Collaborator Window to CollaboratorShell
-            collaboratorType.GetMethod("SetPage").Invoke(Collaborator, new object[] { new CollaboratorShell() });
+            //// Set Collaborator Window to CollaboratorShell
+            //collaboratorType.GetMethod("SetPage").Invoke(Collaborator, new object[] { new CollaboratorShell() });
         }
         else { args.window.Show(); }
     }
