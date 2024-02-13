@@ -6,7 +6,8 @@ using CommunityToolkit.Mvvm.DependencyInjection;
 using StoryCAD.Models;
 using System.Runtime.Loader;
 using Microsoft.UI.Windowing;
-//using StoryCollaborator.Views;
+using StoryCAD.Collaborator.Views;
+//using StoryCAD.Collaborator.Views;
 using StoryCAD.Services.Backup;
 using StoryCAD.ViewModels;
 using WinUIEx;
@@ -19,9 +20,10 @@ public class CollaboratorService
     private string dllPath; 
     private AppState State = Ioc.Default.GetRequiredService<AppState>();
     public object Collaborator;
-    //public IWizardViewModel WizardVM;
+    public IWizardViewModel WizardVM;
     public Assembly CollabAssembly;
     private WindowEx window; // Do not make public, control from the collaborator side.
+    public Type CollaboratorType;
     public bool CollaboratorEnabled()
     {
         return State.DeveloperBuild
@@ -84,20 +86,29 @@ public class CollaboratorService
             args.onDoneCallback = FinishedCallback;
 
             // Get the type of the Collaborator class
-            Type collaboratorType = CollabAssembly.GetType("StoryCollaborator.Collaborator");
+            CollaboratorType = CollabAssembly.GetType("StoryCollaborator.Collaborator");
 
             // Create an instance of the Collaborator class
-            Collaborator = collaboratorType.GetConstructors()[0].Invoke(new object[] { args });
+            Collaborator = CollaboratorType.GetConstructors()[0].Invoke(new object[] { args });
+
+            MethodInfo runMethod = CollaboratorType.GetMethod("RunWizard");
+            runMethod.Invoke(Collaborator, null);
 
             //// Get WizardVM
             //WizardVM = (IWizardViewModel)collaboratorType.GetField("wizard").GetValue(Collaborator);
+
             //WizardVM.Model = args.SelectedElement;
             //WizardVM.LoadModel();
 
             //// Set Collaborator Window to CollaboratorShell
             //collaboratorType.GetMethod("SetPage").Invoke(Collaborator, new object[] { new CollaboratorShell() });
         }
-        else { args.window.Show(); }
+        else
+        {
+            MethodInfo runMethod = CollaboratorType.GetMethod("RunWizard");
+            runMethod.Invoke(Collaborator, null);
+            args.window.Show();
+        }
     }
 
     /// <summary>
