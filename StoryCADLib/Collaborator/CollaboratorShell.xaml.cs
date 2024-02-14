@@ -26,31 +26,36 @@ public sealed partial class CollaboratorShell : Page
     //    }
     //}
 
-    public CollaboratorShell()
+    public CollaboratorShell(IWizardViewModel wizard )
     {
         this.InitializeComponent();
-        
-        //(this.Content as FrameworkElement).DataContext = CollabVM;
 
-        //CollabVM.ContentFrame = StepFrame;
-        //CollabVM.NavView = NavView;
+        CollabVM = wizard;
+        (this.Content as FrameworkElement).DataContext = CollabVM;
+
+        CollabVM.ContentFrame = StepFrame;
+        CollabVM.NavView = NavView;
     }
 
     private void StepFrame_OnNavigated(object sender, NavigationEventArgs e)
     {
-        //switch (e.SourcePageType.Name)
-        //{
-        //    case "WelcomePage":
-        //        CollabVM.CurrentStep =
-        //        break;
-        //    case "ComboPicker":
-        //        CollabVM.NavView.DataContext = CollabVM.CurrentStep;
-        //        CollabVM.CurrentStep.Model = CollabVM.Model;
-        //        break;
-        //    default:
-        //        throw new Exception("Invalid page type");
-        //        break;
-        //}
+        switch (e.SourcePageType.Name)
+        {
+            case "WelcomePage":
+                //CollabVM.CurrentStep =
+                break;
+            case "ComboPicker":
+                CollabVM.NavView.DataContext = CollabVM.CurrentStep;
+                CollabVM.CurrentStep.Model = CollabVM.Model;
+                break;
+            case "TextAppender":
+                CollabVM.NavView.DataContext = CollabVM.CurrentStep;
+                CollabVM.CurrentStep.Model = CollabVM.Model;
+                break;
+            default:
+                throw new Exception("Invalid page type");
+                break;
+        }
 
 
 
