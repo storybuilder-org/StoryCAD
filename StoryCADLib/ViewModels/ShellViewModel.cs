@@ -1181,7 +1181,6 @@ public class ShellViewModel : ObservableRecipient
             //TODO: Logging
             Ioc.Default.GetService<CollaboratorService>()!.RunCollaborator(CollabArgs);
 
-
         }
     }
 

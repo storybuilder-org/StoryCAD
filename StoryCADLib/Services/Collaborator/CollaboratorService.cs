@@ -65,13 +65,17 @@ public class CollaboratorService
 
     public void RunCollaborator(CollaboratorArgs args)
     {
+        // Prevent the user or timed services from making any changes on the 
+        // StoryCAD side while Collaborator is running
         Ioc.Default.GetRequiredService<ShellViewModel>()._canExecuteCommands = false;
         Ioc.Default.GetRequiredService<BackupService>().StopTimedBackup();
         Ioc.Default.GetRequiredService<AutoSaveService>().StopAutoSave();
 
-        // Check collaborator hasn't already been initalised.
+        // If Collaborator hasn't already been initalised, do so
         if (Collaborator == null)
         {
+            // Should we initialize when CollaboratorService is being initialized rather then when attempting to use?
+
             // Create custom AssemblyLoadContext for StoryCAD's location
             var assemblyPath = Assembly.GetExecutingAssembly().Location;
             var executingDirectory = Path.GetDirectoryName(assemblyPath);
@@ -87,28 +91,17 @@ public class CollaboratorService
 
             // Get the type of the Collaborator class
             CollaboratorType = CollabAssembly.GetType("StoryCollaborator.Collaborator");
-
             // Create an instance of the Collaborator class
-            Collaborator = CollaboratorType.GetConstructors()[0].Invoke(new object[] { args });
-
-            MethodInfo runMethod = CollaboratorType.GetMethod("RunWizard");
-            runMethod.Invoke(Collaborator, null);
-
-            //// Get WizardVM
-            //WizardVM = (IWizardViewModel)collaboratorType.GetField("wizard").GetValue(Collaborator);
-
-            //WizardVM.Model = args.SelectedElement;
-            //WizardVM.LoadModel();
-
-            //// Set Collaborator Window to CollaboratorShell
-            //collaboratorType.GetMethod("SetPage").Invoke(Collaborator, new object[] { new CollaboratorShell() });
+            Collaborator = CollaboratorType!.GetConstructors()[0].Invoke(new object[] { args });
         }
-        else
-        {
-            MethodInfo runMethod = CollaboratorType.GetMethod("RunWizard");
-            runMethod.Invoke(Collaborator, null);
-            args.window.Show();
-        }
+
+        // Get the 'RunWizard' method that expects a parameter of type 'CollaboratorArgs'
+        MethodInfo runMethod = CollaboratorType.GetMethod("RunWizard", new Type[] { typeof(CollaboratorArgs) });
+        object[] methodArgs = new object[] { args };
+        // ...and invoke it
+        runMethod!.Invoke(Collaborator, methodArgs);
+        // Display the Collaborator window
+        args.window.Show();
     }
 
     /// <summary>
