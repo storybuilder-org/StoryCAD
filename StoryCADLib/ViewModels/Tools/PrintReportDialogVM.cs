@@ -162,7 +162,7 @@ public class PrintReportDialogVM : ObservableRecipient
     }
     #endregion
 
-    public async void OpenPrintReportDialog()
+    public async Task OpenPrintReportDialog()
     {
         ShellViewModel ShellVM = Ioc.Default.GetRequiredService<ShellViewModel>();
         if (ShellVM._canExecuteCommands)

@@ -1290,7 +1290,7 @@ public class ShellViewModel : ObservableRecipient
     /// </summary>
     private async void OpenPrintMenu() 
     {
-        Ioc.Default.GetRequiredService<PrintReportDialogVM>().OpenPrintReportDialog();
+        await Ioc.Default.GetRequiredService<PrintReportDialogVM>().OpenPrintReportDialog();
     }
 
     private async void DramaticSituationsTool()
