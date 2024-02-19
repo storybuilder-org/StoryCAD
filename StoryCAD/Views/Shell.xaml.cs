@@ -9,15 +9,14 @@ using Microsoft.UI.Xaml.Navigation;
 using StoryCAD.Models;
 using StoryCAD.Models.Tools;
 using StoryCAD.Services.Logging;
-using StoryCAD.Services.Messages;
 using StoryCAD.ViewModels;
 using Windows.UI.ViewManagement;
 using Microsoft.UI.Dispatching;
-using StoryCAD.Services;
-using System.Linq;
 using Windows.ApplicationModel.DataTransfer;
 using Microsoft.UI;
-using Windows.Storage.Provider;
+using Octokit;
+using Application = Microsoft.UI.Xaml.Application;
+using Page = Microsoft.UI.Xaml.Controls.Page;
 
 namespace StoryCAD.Views;
 
@@ -34,6 +33,11 @@ public sealed partial class Shell
     private StoryNodeItem dragSourceStoryNode;
     private LogService Logger;
 
+    /// <summary>
+    /// Set to true by DND events, this will force
+    /// DND to terminate and not drop whatever is currently selected.
+    /// </summary>
+    private bool invalid_dnd_state;
     public Shell()
     {
         try
@@ -194,57 +198,69 @@ public sealed partial class Shell
 
     private void TreeViewItem_OnDragOver(object sender, DragEventArgs args)
     {
-        // sender is the node you're dragging over (the prospective target)
-        Type type = sender.GetType();
-        if (!type.Name.Equals("TreeViewItem"))
+        if (invalid_dnd_state)
         {
-            Logger.Log(LogLevel.Warn, $"Invalid dragTarget type: {type.Name}");
+            args.AcceptedOperation = DataPackageOperation.None;
+            args.Handled = true;
+            NavigationTree.AllowDrop = false;
+            return;
+        }
+
+        var dragTargetItem = sender as TreeViewItem;
+        if (dragTargetItem == null)
+        {
             args.Data.RequestedOperation = DataPackageOperation.None;
-            ShellVm.ShowMessage(LogLevel.Warn, "Invalid drag target", false);
+            ShellVm.ShowMessage(LogLevel.Warn, "Invalid drag target.", false);
             return;
         }
-        dragTargetItem = sender as TreeViewItem;
-        dragTargetNode = NavigationTree.NodeFromContainer(dragTargetItem);
-        Logger.Log(LogLevel.Trace, $"dragTarget Depth: {dragTargetNode.Depth}");
 
-        var node = dragTargetNode;
-        // Insure the target is not a root or above (yes, there's a -1)
-        // (you can't move a root)
-        if (node.Depth < 1)
+        var dragTargetNode = NavigationTree.NodeFromContainer(dragTargetItem);
+        var dragTargetStoryNode = dragTargetNode?.Content as StoryNodeItem;
+
+        if (dragSourceStoryNode == null || dragTargetStoryNode == null || IsInvalidMove(dragSourceStoryNode, dragTargetStoryNode))
         {
-            Logger.Log(LogLevel.Warn, $"dragTarget is not below root");
+            
+            args.AcceptedOperation = DataPackageOperation.None;
             args.Data.RequestedOperation = DataPackageOperation.None;
-            ShellVm.ShowMessage(LogLevel.Warn, "Invalid drag target", false);
+            args.DataView.ReportOperationCompleted(DataPackageOperation.None);
+            args.Handled = true;
+            invalid_dnd_state = true;
+            ShellVm.ShowMessage(LogLevel.Warn, "Cannot move a node above the root or to an invalid position.", false);
             return;
         }
 
-        dragTargetStoryNode = dragTargetNode.Content as StoryNodeItem;
-        Logger.Log(LogLevel.Trace, $"dragTarget Name: {dragTargetStoryNode.Name}");
-        Logger.Log(LogLevel.Trace, $"dragTarget type: {dragTargetStoryNode.Type.ToString()}");
-
-        // Insure that the target is not in the trashcan
-        while (node.Depth != 0)
-        {
-            node = node.Parent;
-        }
-        var root = node.Content as StoryNodeItem;
-        if (root.Type == StoryItemType.TrashCan)
-        {
-            Logger.Log(LogLevel.Warn, $"dragTarget root is TrashCan");
-            args.Data.RequestedOperation = DataPackageOperation.None;
-            ShellVm.ShowMessage(LogLevel.Warn, "Invalid drag target", false);
-            return;
-        }
-
-        if (args.Data == null)
-        {
-            ShellVm.ShowMessage(LogLevel.Info, "Drag and drop failed", true);
-            Logger.Log(LogLevel.Error, "Failed to drag n drop - arg.data is null (may be a file and not a story element)");
-            return;
-        }
-
-        // Move is valid, allow the drop operation.  
         args.Data.RequestedOperation = DataPackageOperation.Move;
+    }
+
+    /// <summary>
+    ///  Helper method to determine if a move is invalid
+    /// </summary>
+    /// <returns>True if move is invalid, false otherwise.</returns>
+    private bool IsInvalidMove(StoryNodeItem source, StoryNodeItem target)
+    {
+        // Prevent moving any node to become a sibling of a root node or above  
+        // Prevent moving a node into one of its own descendants
+        if (invalid_dnd_state || target.IsRoot || IsDescendant(source, target))
+        {            
+            return true;
+        }
+        
+        return false;
+    }
+
+    /// <summary>
+    /// Recursive method to check if target is a descendant of source
+    /// </summary>
+    private bool IsDescendant(StoryNodeItem source, StoryNodeItem target)
+    {
+        foreach (var child in source.Children)
+        {
+            if (child == target || IsDescendant(child, target))
+            {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void TreeView_OnDragLeave(object sender, DragEventArgs e)
@@ -254,6 +270,15 @@ public sealed partial class Shell
             ShellVm.ShowMessage(LogLevel.Info, "Drag and drop failed", true);
             Logger.Log(LogLevel.Error, "Failed to drag n drop - e.data is null (may be a file and not a story element)");
             return;
+        }
+
+        if (invalid_dnd_state)
+        {
+            e.AcceptedOperation = DataPackageOperation.None;
+            e.Data.RequestedOperation = DataPackageOperation.None;
+            e.Handled = true;
+            NavigationTree.AllowDrop = false;
+
         }
 
         // If the drag target identified in OnDragOver was valid, 
@@ -266,10 +291,11 @@ public sealed partial class Shell
             ShellViewModel.ShowChange();
             ShellVm.ShowMessage(LogLevel.Info, "Drag and drop successful", true);
         }
-        else
-        {
-            e.Data.RequestedOperation = DataPackageOperation.Move;  // re-enable moves
-        }
+        e.Data.RequestedOperation = DataPackageOperation.Move;  // re-enable moves
+
+        //Reset DNDBlock and ensure AllowDrop is enabled
+        invalid_dnd_state = false;
+        NavigationTree.AllowDrop = true;
     }
 
     private void TreeViewItem_Tapped(object sender, TappedRoutedEventArgs e)
@@ -282,4 +308,5 @@ public sealed partial class Shell
         }
         ShellVm.LastClickedTreeviewItem = (TreeViewItem)sender;
     }
+
 }
