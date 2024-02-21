@@ -224,7 +224,7 @@ public class OverviewViewModel : ObservableRecipient, INavigable
         set => SetProperty(ref _notes, value);
     }
 
-    // The StoryModel is passed when CharacterPage is navigated to
+    // The StoryModel is passed when OverviewPage is navigated to
     private OverviewModel _model;
     public OverviewModel Model
     {

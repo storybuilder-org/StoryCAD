@@ -6,14 +6,14 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using StoryCAD.Models;
 
-namespace StoryCAD.Collaborator.Views;
+namespace StoryCAD.Collaborator;
 
 public interface IWizardViewModel
 {
     // Properties
     string Title { get; set; }
     string Description { get; set; }
-    ObservableCollection<IWizardStepViewModel> Steps { get; set; }
+    ObservableCollection<IWizardStepModel> Steps { get; set; }
     ObservableCollection<NavigationViewItem> MenuSteps { get; set; }
     StoryElement Model { get; set; }
     SortedDictionary<string, PropertyInfo> ModelProperties { get; set; }
@@ -21,12 +21,10 @@ public interface IWizardViewModel
     Frame ContentFrame { get; set; }
     NavigationView NavView { get; set; }
     NavigationViewItem CurrentItem { get; set; }
-    IWizardStepViewModel CurrentStep { get; set; }
+    IWizardStepModel CurrentStep { get; set; }
 
     // Methods
-    void LoadModel();
-    void SaveModel();
-    void LoadProperties();
+
     void NavigationView_Loaded(object sender, RoutedEventArgs e);
     void NavigationView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args);
     void NavView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args);

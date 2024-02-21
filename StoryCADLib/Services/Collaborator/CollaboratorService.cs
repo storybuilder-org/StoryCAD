@@ -6,8 +6,8 @@ using CommunityToolkit.Mvvm.DependencyInjection;
 using StoryCAD.Models;
 using System.Runtime.Loader;
 using Microsoft.UI.Windowing;
+using StoryCAD.Collaborator;
 using StoryCAD.Collaborator.Views;
-//using StoryCAD.Collaborator.Views;
 using StoryCAD.Services.Backup;
 using StoryCAD.Services.Logging;
 using StoryCAD.ViewModels;
@@ -21,8 +21,8 @@ public class CollaboratorService
     private string dllPath; 
     private AppState State = Ioc.Default.GetRequiredService<AppState>();
     private LogService logger = Ioc.Default.GetRequiredService<LogService>();
-    public object Collaborator;
-    public IWizardViewModel WizardVM;
+    public  object Collaborator;
+    public IWizardStepViewModel StepVM;
     public Assembly CollabAssembly;
     private WindowEx window; // Do not make public, control from the collaborator side.
     public Type CollaboratorType;
@@ -40,8 +40,8 @@ public class CollaboratorService
     private bool FindDll()
     {
         // Get the path to the Documents folder
-        string documentsPath = "C:\\Users\\RARI\\Documents\\Repos\\CADCorp\\CollabApp\\CollaboratorLib\\bin\\x64\\Debug\\net8.0-windows10.0.22621.0";
-        //string documentsPath = "C:\\dev\\src\\StoryBuilderCollaborator\\CollaboratorLib\\bin\\x64\\Debug\\net8.0-windows10.0.22621.0";
+        //string documentsPath = "C:\\Users\\RARI\\Documents\\Repos\\CADCorp\\CollabApp\\CollaboratorLib\\bin\\x64\\Debug\\net8.0-windows10.0.22621.0";
+        string documentsPath = "C:\\dev\\src\\StoryBuilderCollaborator\\CollaboratorLib\\bin\\x64\\Debug\\net8.0-windows10.0.22621.0";
         dllPath = Path.Combine(documentsPath, "CollaboratorLib.dll");
 
         // Verify that the DLL is present
@@ -114,6 +114,17 @@ public class CollaboratorService
         // Display the Collaborator window
         args.window.Show();
     }
+
+    public IWizardStepViewModel GetWizardStepViewModel()
+    {
+        // Get the MethodInfo object representing the GetShellVM method.
+        MethodInfo methodInfo = CollaboratorType.GetMethod("GetShellVM");
+        // Invoke the method on the instance we created. No parameters are needed for this method.
+        object result = methodInfo!.Invoke(Collaborator, null);
+        // Cast the result back to the appropriate type.
+        return result as IWizardStepViewModel;
+    }
+
 
     /// <summary>
     /// This will hide the collaborator window.

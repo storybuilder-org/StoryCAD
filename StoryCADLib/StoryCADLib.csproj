@@ -111,7 +111,6 @@
 	</ItemGroup>
   <ItemGroup>
     <Folder Include="Models\Scrivener\" />
-    <Folder Include="Collaborator\" />
     <Folder Include="Services\Logging\" />
     <Folder Include="Services\Navigation\" />
     <Folder Include="Services\Backup\" />

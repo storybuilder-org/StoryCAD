@@ -1,10 +1,10 @@
-using System.Collections.Generic;
-using StoryCAD.Controls;
+﻿using StoryCAD.Controls;
 using StoryCAD.Models;
+using System.Collections.Generic;
 
-namespace StoryCAD.Collaborator.Views
+namespace StoryCAD.Collaborator
 {
-    public interface IWizardStepViewModel
+    public interface IWizardStepModel
     {
         // Properties
         string Title { get; set; }
@@ -20,6 +20,6 @@ namespace StoryCAD.Collaborator.Views
         Dictionary<string, string> Inputs { get; set; }
         string Prompt { get; set; }
         string Output { get; set; }
-
+        //StoryElement StoryElement { get; set; }
     }
 }

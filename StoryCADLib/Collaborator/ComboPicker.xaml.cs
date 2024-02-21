@@ -1,21 +1,17 @@
-using Microsoft.UI.Xaml;
+using CommunityToolkit.Mvvm.DependencyInjection;
+using StoryCAD.Services.Collaborator;
 using StoryCAD.Controls;
 
 namespace StoryCAD.Collaborator.Views;
 
 public sealed partial class ComboPicker : BindablePage
 {
-    public IWizardStepViewModel StepVM => (IWizardStepViewModel)DataContext;
+    public IWizardStepViewModel StepVM =
+        Ioc.Default.GetService<CollaboratorService>()!.GetWizardStepViewModel();
     public ComboPicker()
     {
         this.InitializeComponent();
-        Loaded += OnLoaded;
-    }
-
-    private void OnLoaded(object sender, RoutedEventArgs e)
-    {
-        StepVM.PageInstance = this;
-        //Bindings.Update();
-        StepVM.Activate(null);
+        this.DataContext = StepVM;
+        Bindings.Update();
     }
 }

@@ -1,13 +1,10 @@
 using System;
-using System.Diagnostics;
-using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
-using StoryCAD.Services.Collaborator;
 using Page = Microsoft.UI.Xaml.Controls.Page;
 
-namespace StoryCAD.Collaborator.Views;
+namespace StoryCAD.Collaborator;
 
 public sealed partial class CollaboratorShell : Page
 {
@@ -39,18 +36,19 @@ public sealed partial class CollaboratorShell : Page
 
     private void StepFrame_OnNavigated(object sender, NavigationEventArgs e)
     {
+        ///TODO: Figure out what this is supposed to do
         switch (e.SourcePageType.Name)
         {
             case "WelcomePage":
                 //CollabVM.CurrentStep =
-                break;
+                //break;
             case "ComboPicker":
-                CollabVM.NavView.DataContext = CollabVM.CurrentStep;
-                CollabVM.CurrentStep.Model = CollabVM.Model;
-                break;
+                //CollabVM.NavView.DataContext = CollabVM.CurrentStep;
+                //CollabVM.CurrentStep.Model = CollabVM.Model;
+                //break;
             case "TextAppender":
-                CollabVM.NavView.DataContext = CollabVM.CurrentStep;
-                CollabVM.CurrentStep.Model = CollabVM.Model;
+                //CollabVM.NavView.DataContext = CollabVM.CurrentStep;
+                //CollabVM.CurrentStep.Model = CollabVM.Model;
                 break;
             default:
                 throw new Exception("Invalid page type");

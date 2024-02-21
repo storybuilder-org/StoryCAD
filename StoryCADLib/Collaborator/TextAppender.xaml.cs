@@ -16,7 +16,6 @@ public sealed partial class TextAppender : BindablePage
     {
         if (DataContext is IWizardStepViewModel viewModel)
         {
-            viewModel.PageInstance = this;
             Bindings.Update();
         }
     }
