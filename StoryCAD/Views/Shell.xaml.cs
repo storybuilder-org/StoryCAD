@@ -14,7 +14,6 @@ using Windows.UI.ViewManagement;
 using Microsoft.UI.Dispatching;
 using Windows.ApplicationModel.DataTransfer;
 using Microsoft.UI;
-using Octokit;
 using Application = Microsoft.UI.Xaml.Application;
 using Page = Microsoft.UI.Xaml.Controls.Page;
 
@@ -33,11 +32,6 @@ public sealed partial class Shell
     private StoryNodeItem dragSourceStoryNode;
     private LogService Logger;
 
-    /// <summary>
-    /// Set to true by DND events, this will force
-    /// DND to terminate and not drop whatever is currently selected.
-    /// </summary>
-    private bool invalid_dnd_state;
     public Shell()
     {
         try
@@ -117,8 +111,8 @@ public sealed partial class Shell
             ShellVm.LastClickedTreeviewItem.Background = null;
             ShellVm.LastClickedTreeviewItem.IsSelected = false;
             ShellVm.LastClickedTreeviewItem.BorderBrush = null;
-        } //Remove old right clicked nodes background
-      
+        } 
+        //Remove old right clicked nodes background
         TreeViewItem item = (TreeViewItem)sender;
         item.Background = new SolidColorBrush(new UISettings().GetColorValue(UIColorType.Accent));
 
@@ -198,7 +192,7 @@ public sealed partial class Shell
 
     private void TreeViewItem_OnDragOver(object sender, DragEventArgs args)
     {
-        if (invalid_dnd_state)
+        if (ShellVm.invalid_dnd_state)
         {
             args.AcceptedOperation = DataPackageOperation.None;
             args.Handled = true;
@@ -217,50 +211,19 @@ public sealed partial class Shell
         var dragTargetNode = NavigationTree.NodeFromContainer(dragTargetItem);
         var dragTargetStoryNode = dragTargetNode?.Content as StoryNodeItem;
 
-        if (dragSourceStoryNode == null || dragTargetStoryNode == null || IsInvalidMove(dragSourceStoryNode, dragTargetStoryNode))
+        if (dragSourceStoryNode == null || dragTargetStoryNode == null || ShellVm.IsInvalidMove(dragSourceStoryNode, dragTargetStoryNode))
         {
             
             args.AcceptedOperation = DataPackageOperation.None;
             args.Data.RequestedOperation = DataPackageOperation.None;
             args.DataView.ReportOperationCompleted(DataPackageOperation.None);
             args.Handled = true;
-            invalid_dnd_state = true;
+            ShellVm.invalid_dnd_state = true;
             ShellVm.ShowMessage(LogLevel.Warn, "Cannot move a node above the root or to an invalid position.", false);
             return;
         }
 
         args.Data.RequestedOperation = DataPackageOperation.Move;
-    }
-
-    /// <summary>
-    ///  Helper method to determine if a move is invalid
-    /// </summary>
-    /// <returns>True if move is invalid, false otherwise.</returns>
-    private bool IsInvalidMove(StoryNodeItem source, StoryNodeItem target)
-    {
-        // Prevent moving any node to become a sibling of a root node or above  
-        // Prevent moving a node into one of its own descendants
-        if (invalid_dnd_state || target.IsRoot || IsDescendant(source, target))
-        {            
-            return true;
-        }
-        
-        return false;
-    }
-
-    /// <summary>
-    /// Recursive method to check if target is a descendant of source
-    /// </summary>
-    private bool IsDescendant(StoryNodeItem source, StoryNodeItem target)
-    {
-        foreach (var child in source.Children)
-        {
-            if (child == target || IsDescendant(child, target))
-            {
-                return true;
-            }
-        }
-        return false;
     }
 
     private void TreeView_OnDragLeave(object sender, DragEventArgs e)
@@ -272,7 +235,7 @@ public sealed partial class Shell
             return;
         }
 
-        if (invalid_dnd_state)
+        if (ShellVm.invalid_dnd_state)
         {
             e.AcceptedOperation = DataPackageOperation.None;
             e.Data.RequestedOperation = DataPackageOperation.None;
@@ -294,7 +257,7 @@ public sealed partial class Shell
         e.Data.RequestedOperation = DataPackageOperation.Move;  // re-enable moves
 
         //Reset DNDBlock and ensure AllowDrop is enabled
-        invalid_dnd_state = false;
+        ShellVm.invalid_dnd_state = false;
         NavigationTree.AllowDrop = true;
     }
 

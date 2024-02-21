@@ -83,6 +83,12 @@ public class ShellViewModel : ObservableRecipient
     // The right-hand (detail) side of ShellView
     public Frame SplitViewFrame;
 
+    /// <summary>
+    /// Set to true by DND events, this will force DND to terminate and
+    /// not drop whatever is currently selected.
+    /// </summary>
+    public bool invalid_dnd_state;
+
     #region CommandBar Relay Commands
 
     // Open/Close Navigation pane (Hamburger menu)
@@ -2268,6 +2274,42 @@ public class ShellViewModel : ObservableRecipient
         StatusMessage = string.Empty;
     }
 
+
+    /// <summary>
+    /// Recursive method to check if target is a descendant of source
+    /// </summary>
+    public bool IsDescendant(StoryNodeItem source, StoryNodeItem target)
+    {
+        foreach (var child in source.Children)
+        {
+            if (child == target || IsDescendant(child, target)) { return true;  }
+        }
+        return false;
+    }
+    
+    /// <summary>
+    ///  Helper method to determine if a move is invalid
+    /// </summary>
+    /// <returns>True if move is invalid, false otherwise.</returns>
+    public bool IsInvalidMove(StoryNodeItem source, StoryNodeItem target)
+    {
+        /* Prevents the following:
+         *  - Moving to nodes to the root
+         *  - Moving to a parent to its own child
+         *  - Moving the trash can
+         *  - Moving to/from the trashcan
+         */
+        if (invalid_dnd_state || target.IsRoot || IsDescendant(source, target) ||
+            target.Type == StoryItemType.TrashCan || source.Type == StoryItemType.TrashCan 
+            || IsDescendant(StoryModel.ExplorerView[1], target) || IsDescendant(StoryModel.ExplorerView[1], source))
+        {
+            invalid_dnd_state = true;
+            return true;
+        }
+
+        return false;
+    }
+    
     /// <summary>
     /// When a Story Element page's name changes the corresponding
     /// StoryNodeItem, which is bound to a TreeViewItem, must
@@ -2293,13 +2335,6 @@ public class ShellViewModel : ObservableRecipient
                 break;
         }
     }
-
-    #endregion
-
-    #region Attched Properties
-
-
-
 
     #endregion
 
