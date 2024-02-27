@@ -5,7 +5,7 @@ If you use Scrivener, clicking Scrivener Reports will open a file picker to allo
 
 ![](Scrivener-Reports-File-Picker.png)
 
-![](Research-Scrivener-Reports-Generated-Status-Message.png)
+![](Scrivener-Reports-Generated-Status-Message.png)
 
 You can open your Scrivener project. You’ll see a set of nodes added to the Binder, which contain your reports: <br/>
 
@@ -14,6 +14,3 @@ You can open your Scrivener project. You’ll see a set of nodes added to the Bi
 A convenient way to use these embedded reports is to split your screen, with one pane open to a text node in the Manuscript and the other to a node in the outline: <br/>
 
 ![](Scrivener-Split-Screen-with-StoryCAD.png)
- <br/><br/>
-[Previous - Print Reports](Print_Reports.md) <br/><br/>
-[Next up - Preferences](Preferences.md)

@@ -3,7 +3,7 @@ Preferences <br/>
 
 The Preferences Dialog will be displayed when you press the Preferences button on the Menu Bar: <br/>
 
-![](Prefences-CommandBar-Button-2.png)
+![](Prefences-CommandBar-Button-13.png)
 
 
 
@@ -69,6 +69,3 @@ What’s New tab: <br/>
 ![](Preferences-Whats-New-tb.png)
 
 The What’s New tab displays the Changelog for the current release.  <br/>
- <br/><br/>
-[Previous - Scrivener Reports](Scrivener_Reports.md) <br/><br/>
-[Next up - Researching your story](Researching_your_story.md)

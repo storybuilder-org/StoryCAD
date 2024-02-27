@@ -13,6 +13,3 @@ Story Narrator View is the view you’ll use when you’re ready to structure yo
 
 
 
- <br/><br/>
-[Previous - Tabs](Tabs.md) <br/><br/>
-[Next up - Rearranging Content](Rearranging_Content.md)

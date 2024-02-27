@@ -12,6 +12,3 @@
 [Defining Scenes](Defining_Scenes.md) <br/><br/>
 [Reviewing Your Outline](Reviewing_Your_Outline.md) <br/><br/>
 [Other Uses of StoryCAD](Other_Uses_of_StoryCAD.md) <br/><br/>
- <br/><br/>
-[Previous - Creating a Story pt 9](Creating_a_Story_pt_9.md) <br/><br/>
-[Next up - How to Think About Outlining](How_to_Think_About_Outlining.md)

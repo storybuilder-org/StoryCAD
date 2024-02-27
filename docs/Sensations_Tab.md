@@ -22,6 +22,3 @@ The other senses are often neglected but can be very important.  Smells in parti
 
 
 
- <br/><br/>
-[Previous - Setting Tab](Setting_Tab.md) <br/><br/>
-[Next up - Scene Form](Scene_Form.md)

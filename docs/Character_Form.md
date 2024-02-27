@@ -9,6 +9,3 @@
 [Psychological Tab](Psychological_Tab.md) <br/><br/>
 [Inner Traits](Inner_Traits.md) <br/><br/>
 [Outer Traits](Outer_Traits.md) <br/><br/>
- <br/><br/>
-[Previous - Resolution Tab](Resolution_Tab.md) <br/><br/>
-[Next up - Role Tab](Role_Tab.md)

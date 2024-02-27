@@ -25,6 +25,3 @@ Ctrl + L - Stock Scenes <br/>
 Report Commands <br/>
 Ctrl + P - Open Print Report Menu <br/>
 Ctrl +R - Scrivener Reports  <br/>
- <br/><br/>
-[Previous - Preferences](Preferences.md) <br/><br/>
-[Next up - Navigation and  Content Panes](Navigation_and_Content_Panes.md)

@@ -10,11 +10,11 @@ Problem Type <br/>
 
 There are three problem types: <br/>
 
-Conflict&nbsp;&nbsp;&nbsp;&nbsp;         The protagonist has a goal or objective, but something or someone (the antagonist) opposes the achievement of this goal.  The protagonist and the antagonist struggle until one or the other wins. <br/>
+Conflict	         The protagonist has a goal or objective, but something or someone (the antagonist) opposes the achievement of this goal.  The protagonist and the antagonist struggle until one or the other wins. <br/>
 
-Decision&nbsp;&nbsp;&nbsp;&nbsp;         This problem pattern ends with the protagonist making a difficult and important decision.  The problem is a choice. <br/>
+Decision	         This problem pattern ends with the protagonist making a difficult and important decision.  The problem is a choice. <br/>
 
-Discovery&nbsp;&nbsp;&nbsp;&nbsp;          The protagonist eventually makes a not too obvious discovery.  The discovery, which is the story's resolution, represents a change for him.&nbsp;&nbsp;&nbsp;&nbsp; <br/>
+Discovery	          The protagonist eventually makes a not too obvious discovery.  The discovery, which is the story's resolution, represents a change for him.	 <br/>
 
 Conflict Type <br/>
 
@@ -61,6 +61,3 @@ The Source of Conflict is useful in identifying your story's point of attack, th
 
 The provided choices are generalized sources from which many problems spring. Be specific.  If you start with a generic source, replace it with one specific to your story and your protagonist.  Instead of  'Protagonist wants to change his situation'', say 'Joe wants to escape his poverty.' <br/>
 
- <br/><br/>
-[Previous - Problem Form](Problem_Form.md) <br/><br/>
-[Next up - Protagonist Tab](Protagonist_Tab.md)
