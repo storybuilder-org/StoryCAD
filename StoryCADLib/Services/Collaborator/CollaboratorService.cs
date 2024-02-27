@@ -1,13 +1,12 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
-using System.Diagnostics;
-using CommunityToolkit.Mvvm.DependencyInjection;
-using StoryCAD.Models;
 using System.Runtime.Loader;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Windowing;
-using StoryCAD.Collaborator;
 using StoryCAD.Collaborator.Views;
+using StoryCAD.Models;
 using StoryCAD.Services.Backup;
 using StoryCAD.Services.Logging;
 using StoryCAD.ViewModels;
@@ -17,7 +16,7 @@ namespace StoryCAD.Services.Collaborator;
 
 public class CollaboratorService
 {
-    private bool dllExists = false;
+    private bool dllExists;
     private string dllPath; 
     private AppState State = Ioc.Default.GetRequiredService<AppState>();
     private LogService logger = Ioc.Default.GetRequiredService<LogService>();
@@ -56,21 +55,21 @@ public class CollaboratorService
     public void DestroyCollaborator(AppWindow sender, AppWindowClosingEventArgs args)
     {
         //TODO: Absolutely make sure Collaborator is not left in memory after this.
-        logger.Log(LogLevel.Warn, $"Destroying collaborator object.");
+        logger.Log(LogLevel.Warn, "Destroying collaborator object.");
         if (Collaborator != null)
         {
             window.Close(); // Destroy window object
-            logger.Log(LogLevel.Info, $"Closed collaborator window");
+            logger.Log(LogLevel.Info, "Closed collaborator window");
 
             //Null objects to deallocate them
             CollabAssembly = null;
             Collaborator = null;
-            logger.Log(LogLevel.Info, $"Nulled collaborator objects");
+            logger.Log(LogLevel.Info, "Nulled collaborator objects");
 
             //Run garbage collection to clean up any remnants.
             GC.Collect();
             GC.WaitForPendingFinalizers();
-            logger.Log(LogLevel.Info, $"Garbage collection finished.");
+            logger.Log(LogLevel.Info, "Garbage collection finished.");
 
         }
     }
@@ -107,8 +106,8 @@ public class CollaboratorService
         }
 
         // Get the 'RunWizard' method that expects a parameter of type 'CollaboratorArgs'
-        MethodInfo runMethod = CollaboratorType.GetMethod("RunWizard", new Type[] { typeof(CollaboratorArgs) });
-        object[] methodArgs = new object[] { args };
+        MethodInfo runMethod = CollaboratorType.GetMethod("RunWizard", new[] { typeof(CollaboratorArgs) });
+        object[] methodArgs = { args };
         // ...and invoke it
         runMethod!.Invoke(Collaborator, methodArgs);
         // Display the Collaborator window

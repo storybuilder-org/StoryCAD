@@ -5,7 +5,6 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:controls="using:StoryCAD.Controls"
-    xmlns:views="using:StoryCAD.Views"
     mc:Ignorable="d">
     <Grid>
         <Grid.RowDefinitions>
