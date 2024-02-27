@@ -11,6 +11,3 @@ Selecting one of the categories will result in the display of a form listing som
 
 Stock Scenes can be tailored to display any sub-menus of stock scenes you wish.  You can modify the contents of the exiting sub-menus, or add or replace sub-menus.  See "Customizing StoryCAD" for more details. <br/>
 
- <br/><br/>
-[Previous - Dramatic Situations](Dramatic_Situations.md) <br/><br/>
-[Next up - Conflict Builder](Conflict_Builder.md)

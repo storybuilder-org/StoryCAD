@@ -61,6 +61,3 @@ In this tutorial we've produced most of a story outline.  We've worked through p
 
    <br/>
 
- <br/><br/>
-[Previous - Creating a Story pt 8](Creating_a_Story_pt_8.md) <br/><br/>
-[Next up - Writing with StoryCAD](Writing_with_StoryCAD.md)

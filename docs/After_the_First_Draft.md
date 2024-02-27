@@ -7,6 +7,3 @@ In StoryCAD, Problem, and particular the Story Problem, is key. Start by adding 
 
 Using your outline as your guide gives you a number of places to start editing- and every story needs editing. With StoryCAD you’re editing for story (structural edits) as opposed to line or copy editing.  Key Questions, for Problem and Character and Scene, will ask about specific issues. Does your protagonist have a clear story goal? Do the scenes show her actively trying to achieve it, despite opposition? Does the Story Problem have a clear resolution, and does your story end when it’s resolved? Do problems other than the main story problem connect to the story problem? (A clue to this, and a plotting plus, is a scene which contributes to both problems’ structure.) Does your protagonist grow or change (does she have an internal problem and thus a character arc?) <br/>
 
- <br/><br/>
-[Previous - StoryCAD for Pantsers](StoryCAD_for_Pantsers.md) <br/><br/>
-[Next up - Critiquing with StoryCAD](Critiquing_with_StoryCAD.md)

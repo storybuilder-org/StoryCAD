@@ -34,6 +34,3 @@ These changes, in the climax scene, Shootout, and a better understanding of the 
 
 Danger Calls is melodramatic and its characters aren’t as well drawn as they should be, but this exercise has been meant to show how an idea can evolve via a repeatable process into a workable story outline, and how StoryCAD can help you do that. The following section of the manual, Writing with StoryCAD, elaborates on this process, but the best way to learn is to do, making your own mistakes and solving your own problems. We hope StoryCAD helps you in your writing journey. <br/>
 
- <br/><br/>
-[Previous - Creating a Story pt 7](Creating_a_Story_pt_7.md) <br/><br/>
-[Next up - Creating a Story pt 9](Creating_a_Story_pt_9.md)

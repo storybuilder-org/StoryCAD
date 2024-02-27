@@ -5,6 +5,3 @@ Notes forms can be used to store any information you wish anywhere in the outlin
 
 
 ![](NotesElement.png)
- <br/><br/>
-[Previous - Website Form](Website_Form.md) <br/><br/>
-[Next up - Tutorial: Creating a Story](Tutorial_Creating_a_Story.md)

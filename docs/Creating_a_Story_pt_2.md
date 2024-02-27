@@ -68,6 +68,3 @@ Remember to save your work frequently. <br/>
 
 
 
- <br/><br/>
-[Previous - Creating a Story pt 1](Creating_a_Story_pt_1.md) <br/><br/>
-[Next up - Creating a Story pt 3](Creating_a_Story_pt_3.md)

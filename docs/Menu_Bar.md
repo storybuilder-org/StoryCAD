@@ -26,6 +26,3 @@ The menu bar buttons either display drop-down menus (such as File), or launch pa
 [Reports](Reports.md) <br/><br/>
 [Preferences](Preferences.md) <br/><br/>
 [Key Binds](Key_Binds.md) <br/><br/>
- <br/><br/>
-[Previous - The StoryCAD User Interface](The_StoryCAD_User_Interface.md) <br/><br/>
-[Next up - Search](Search.md)

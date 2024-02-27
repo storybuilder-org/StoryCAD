@@ -14,7 +14,7 @@ If you find yourself solidly in the pantsers’ camp, here are some techniques a
 
 You can use StoryCAD before, during, and after you’ve started writing. <br/>
 
-If you’re ready to start writing, take a moment and brainstorm a list of scenes. You almost certainly have some in mind. At the start the list doesn’t  have to be exhaustive; it’s unlikely it will be. You can add a scene with&nbsp;&nbsp;&nbsp;&nbsp; nothing more a title and perhaps a line or two of Scene Sketch.  If you’ve jumped in and started writing, add the scenes you’ve written. You can always add detail on scenes, most of it on the Scene tab: the setting, who’s in the scene, and a  sketch of what happens. You can also use the Stock Scenes tool to find possible scenes to add to your collection. <br/>
+If you’re ready to start writing, take a moment and brainstorm a list of scenes. You almost certainly have some in mind. At the start the list doesn’t  have to be exhaustive; it’s unlikely it will be. You can add a scene with	 nothing more a title and perhaps a line or two of Scene Sketch.  If you’ve jumped in and started writing, add the scenes you’ve written. You can always add detail on scenes, most of it on the Scene tab: the setting, who’s in the scene, and a  sketch of what happens. You can also use the Stock Scenes tool to find possible scenes to add to your collection. <br/>
 
 But- and this is important- figure out which problem(s) the scenes belong to, and outline the problems. Do this as early as possible. Using any story structuring approach with these problems will suggest what scenes you’re missing and what you might want to write next. If a scene doesn’t fit into one of your story’s problems, it probably doesn’t belong in your story. <br/>
 
@@ -26,6 +26,3 @@ Your character’s problem will often be a character arc- an  internal problem i
 
 
 
- <br/><br/>
-[Previous - Other Uses of StoryCAD](Other_Uses_of_StoryCAD.md) <br/><br/>
-[Next up - After the First Draft](After_the_First_Draft.md)

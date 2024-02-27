@@ -3,21 +3,21 @@ Navigation and Content Panes <br/>
 
 The Navigation Pane allows you to view, organize, and manage the parts of your story outline in a hierarchical structure.  It’s similar to the Windows File Explorer, but instead of files and folders, each node in the tree is a Story Elements  Your outline is composed of five Story Element types: <br/>
 
-&nbsp;&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;&nbsp;Story Overview 
-&nbsp;&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;&nbsp;Problem
-&nbsp;&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;&nbsp;Character
-&nbsp;&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;&nbsp;Setting
-&nbsp;&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;&nbsp;Scene
+	•	Story Overview  <br/>
+	•	Problem <br/>
+	•	Character <br/>
+	•	Setting <br/>
+	•	Scene <br/>
 
 There are also two  Story Element types to assist in organizing your outline: <br/>
 
-&nbsp;&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;&nbsp;Folder
-&nbsp;&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;&nbsp;Section
+	•	Folder <br/>
+	•	Section <br/>
 
 Two more assist in researching your story: <br/>
 
-&nbsp;&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;&nbsp;Web
-&nbsp;&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;&nbsp;Notes
+	•	Web <br/>
+	•	Notes <br/>
 
 There’s also a Trashcan node which is the parent for other nodes you wish to discard. <br/>
 
@@ -36,6 +36,3 @@ Your outline has only one Story Overview; it’s created automatically when you 
 Every major form also has a full-page tab (labeled Notes) which holds your general notes and thoughts regarding the story element. We won’t talk about these again; just be aware that they’re there. <br/>
 
 
- <br/><br/>
-[Previous - Key Binds](Key_Binds.md) <br/><br/>
-[Next up - Status Bar](Status_Bar.md)

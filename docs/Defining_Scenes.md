@@ -22,6 +22,3 @@ The scene is the actions your character takes to achieve a goal (and the actions
 
 
 
- <br/><br/>
-[Previous - Plotting with StoryCAD](Plotting_with_StoryCAD.md) <br/><br/>
-[Next up - Reviewing Your Outline](Reviewing_Your_Outline.md)

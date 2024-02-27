@@ -125,6 +125,3 @@ A trait is a distinguishing quality.  Unlike Psychological qualities which are h
 
 
 
- <br/><br/>
-[Previous - Defining Problems](Defining_Problems.md) <br/><br/>
-[Next up - The Importance of Setting](The_Importance_of_Setting.md)
