@@ -329,8 +329,8 @@
                                    CanDragItems="True" AllowDrop="True" CanReorderItems="True"
                                    ItemsSource="{x:Bind ShellVm.DataSource, Mode=TwoWay}"
                                    SelectionMode="Single"
-                                   DragLeave="TreeView_OnDragLeave"
                                    DragItemsStarting="TreeView_DragItemsStarting"
+                                   DragItemsCompleted="TreeView_DragItemsCompleted"
                                    ItemInvoked="TreeViewItem_Invoked">
                         <muxc:TreeView.ItemTemplate>
                             <DataTemplate  x:DataType="viewmodels:StoryNodeItem">
@@ -339,7 +339,7 @@
                                                    BorderBrush="{x:Bind boarderBrush, Mode=OneWay}"
                                                    BorderThickness="1"
                                                    IsExpanded="{x:Bind IsExpanded, Mode=TwoWay}"
-                                                   DragOver="TreeViewItem_OnDragOver"
+                                                   DragOver="TreeViewItem_OnDragEnter"
                                                    RightTapped="TreeViewItem_RightTapped"
                                                    Tapped="TreeViewItem_Tapped">
                                     <StackPanel Orientation="Horizontal">
