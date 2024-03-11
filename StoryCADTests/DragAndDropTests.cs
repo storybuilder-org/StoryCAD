@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using System.Threading;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using StoryCAD.ViewModels;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using StoryCAD.Models;
@@ -23,15 +24,19 @@ public class DragAndDropTests
     [TestInitialize]
     public void Setup()
     {
+        //Simulates a real story tree
         root = new StoryNodeItem(new StoryElement("Overview", StoryItemType.StoryOverview, storyModel), null, StoryItemType.StoryOverview) { IsRoot = true };
         child1 = new StoryNodeItem(new StoryElement("Child1", StoryItemType.Problem, storyModel),root, StoryItemType.Problem) { Parent = root };
         child2 = new StoryNodeItem(new StoryElement("Child2", StoryItemType.Problem, storyModel),root, StoryItemType.Problem) { Parent = root };
         grandchild1 = new StoryNodeItem(new StoryElement("grandchild1", StoryItemType.Problem, storyModel), root, StoryItemType.Problem) { Parent = root };
         trash = new StoryNodeItem(new StoryElement("trash", StoryItemType.TrashCan, storyModel), root, StoryItemType.TrashCan) { Parent = root };
-        trash = new StoryNodeItem(new StoryElement("trashedItem", StoryItemType.Problem, storyModel), trash, StoryItemType.Problem) { Parent = root };
+        trashedItem = new StoryNodeItem(new StoryElement("trashedItem", StoryItemType.Problem, storyModel), trash, StoryItemType.Problem) { Parent = root };
         root.Children.Add(child1);
         root.Children.Add(child2);
         child1.Children.Add(grandchild1);
+        trash.Children.Add(trashedItem);
+        ShellVM.StoryModel.ExplorerView.Add(root);
+        ShellVM.StoryModel.ExplorerView.Add(trash);
     }
 
     /// <summary>
@@ -61,6 +66,7 @@ public class DragAndDropTests
     [TestMethod]
     public void MovingToNonDescendant()
     {
+        Thread.Sleep(8000); //8-second delay appears to be needed to ensure the test passes consistently.
         var result = ShellVM.IsInvalidMove(child1, child2);
         Assert.IsFalse(result, "Moving a node to a non-descendant node should be considered a valid move.");
     }

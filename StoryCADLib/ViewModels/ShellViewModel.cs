@@ -2231,8 +2231,8 @@ public class ShellViewModel : ObservableRecipient
     private void StatusMessageReceived(StatusChangedMessage statusMessage)
     {
         //Ignore status messages inside tests
-        if (Assembly.GetEntryAssembly().Location.ToString().Contains("StoryCADTests.dll")
-            || Assembly.GetEntryAssembly().Location.ToString().Contains("testhost.dll"))
+        if (Assembly.GetEntryAssembly().Location.Contains("StoryCADTests.dll")
+            || Assembly.GetEntryAssembly().Location.Contains("testhost.dll"))
         {
             return;
         }
@@ -2291,7 +2291,7 @@ public class ShellViewModel : ObservableRecipient
     ///  Helper method to determine if a move is invalid
     /// </summary>
     /// <returns>True if move is invalid, false otherwise.</returns>
-    public bool IsInvalidMove(StoryNodeItem source, StoryNodeItem target)
+    public bool IsInvalidMove(StoryNodeItem source, StoryNodeItem target, DragEventArgs args)
     {
         /* Prevents the following:
          *  - Moving to nodes to the root
@@ -2299,10 +2299,34 @@ public class ShellViewModel : ObservableRecipient
          *  - Moving the trash can
          *  - Moving to/from the trashcan
          */
-        if (invalid_dnd_state || target.IsRoot || IsDescendant(source, target) ||
+        
+        Logger.Log(LogLevel.Info, $"""
+                                  Drag and Drop debug information:
+                                  Invalid DND State - {invalid_dnd_state}
+                                  Root - {target.IsRoot}
+                                  Source Descendant - {IsDescendant(source, target)}
+                                  Target Type - {target.Type}
+                                  Source Type - {source.Type}
+                                  Trash Can Move - {IsDescendant(StoryModel.ExplorerView[1], target) ||
+                                                    IsDescendant(StoryModel.ExplorerView[1], source)}
+                                  """);
+
+		//Check we aren't draging some kind of non-story element file
+		if (args == null | args.Data == null)
+		{
+			invalid_dnd_state = true;
+			ShowMessage(LogLevel.Info, "Drag and drop failed", true);
+			Logger.Log(LogLevel.Error, "Failed to drag n drop - e.data is null (may be a file and not a story element)");
+			return true;
+		}
+
+
+		//Drag/Drop Conditions
+		if (invalid_dnd_state || target.IsRoot || IsDescendant(source, target) ||
             target.Type == StoryItemType.TrashCan || source.Type == StoryItemType.TrashCan 
             || IsDescendant(StoryModel.ExplorerView[1], target) || IsDescendant(StoryModel.ExplorerView[1], source))
         {
+            Logger.Log(LogLevel.Warn,"Blocking Drop.");
             invalid_dnd_state = true;
             return true;
         }

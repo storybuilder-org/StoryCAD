@@ -183,6 +183,7 @@ public sealed partial class Shell
             Logger.Log(LogLevel.Warn, $"dragSource root is TrashCan");
             args.Data.RequestedOperation = DataPackageOperation.None;
             ShellVm.ShowMessage(LogLevel.Warn, "Invalid drag source", false);
+            NavigationTree.AllowDrop = false;
             return;
         }
         // Source node is valid for move
@@ -211,15 +212,21 @@ public sealed partial class Shell
         var dragTargetNode = NavigationTree.NodeFromContainer(dragTargetItem);
         var dragTargetStoryNode = dragTargetNode?.Content as StoryNodeItem;
 
-        if (dragSourceStoryNode == null || dragTargetStoryNode == null || ShellVm.IsInvalidMove(dragSourceStoryNode, dragTargetStoryNode))
+        if (dragSourceStoryNode == null || dragTargetStoryNode == null || ShellVm.IsInvalidMove(dragSourceStoryNode, dragTargetStoryNode, args))
         {
             
             args.AcceptedOperation = DataPackageOperation.None;
-            args.Data.RequestedOperation = DataPackageOperation.None;
+			if (args.Data != null) 
+			{
+				args.Data.RequestedOperation = DataPackageOperation.None;
+			}
+
             args.DataView.ReportOperationCompleted(DataPackageOperation.None);
             args.Handled = true;
+            NavigationTree.AllowDrop = false;
             ShellVm.invalid_dnd_state = true;
-            ShellVm.ShowMessage(LogLevel.Warn, "Cannot move a node above the root or to an invalid position.", false);
+            ShellVm.ShowMessage(LogLevel.Warn, "Cannot move a node there.", false);
+
             return;
         }
 
@@ -228,20 +235,12 @@ public sealed partial class Shell
 
     private void TreeView_OnDragLeave(object sender, DragEventArgs e)
     {
-        if (e.Data == null)
-        {
-            ShellVm.ShowMessage(LogLevel.Info, "Drag and drop failed", true);
-            Logger.Log(LogLevel.Error, "Failed to drag n drop - e.data is null (may be a file and not a story element)");
-            return;
-        }
-
         if (ShellVm.invalid_dnd_state)
         {
             e.AcceptedOperation = DataPackageOperation.None;
             e.Data.RequestedOperation = DataPackageOperation.None;
             e.Handled = true;
             NavigationTree.AllowDrop = false;
-
         }
 
         // If the drag target identified in OnDragOver was valid, 
