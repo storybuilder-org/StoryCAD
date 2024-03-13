@@ -18,6 +18,7 @@ using System.Linq;
 using Windows.ApplicationModel.DataTransfer;
 using Microsoft.UI;
 using Windows.Storage.Provider;
+using StoryCAD.Services.Ratings;
 
 namespace StoryCAD.Views;
 
@@ -54,7 +55,7 @@ public sealed partial class Shell
         ShellVm.SplitViewFrame = SplitViewFrame;
     }
 
-    private async void Shell_Loaded(object sender, RoutedEventArgs e)
+	private async void Shell_Loaded(object sender, RoutedEventArgs e)
     {
         Windowing.XamlRoot = Content.XamlRoot;
         Ioc.Default.GetService<AppState>().StartUpTimer.Stop();
@@ -81,6 +82,13 @@ public sealed partial class Shell
         Logger.Log(LogLevel.Info, $"Filepath to launch {ShellVm.FilePathToLaunch}");
         if (ShellVm.FilePathToLaunch == null) { await ShellVm.OpenUnifiedMenu(); }
         else { await ShellVm.OpenFile(ShellVm.FilePathToLaunch);}
+
+		//Ask user for review if appropiate.
+		Rating RateService = Ioc.Default.GetService<Rating>();
+		if (RateService.AskForRatings())
+		{
+			RateService.OpenRatingPrompt();
+		}
     }
 
     /// <summary>
