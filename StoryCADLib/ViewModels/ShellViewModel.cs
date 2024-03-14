@@ -2275,6 +2275,7 @@ public class ShellViewModel : ObservableRecipient
     }
 
 
+    #region Drag and Drop tests
     /// <summary>
     /// Recursive method to check if target is a descendant of source
     /// </summary>
@@ -2288,51 +2289,51 @@ public class ShellViewModel : ObservableRecipient
     }
     
     /// <summary>
-    ///  Helper method to determine if a move is invalid
+    /// Determines if a drag-and-drop move is invalid.
     /// </summary>
-    /// <returns>True if move is invalid, false otherwise.</returns>
-    public bool IsInvalidMove(StoryNodeItem source, StoryNodeItem target, DragEventArgs args)
+    /// <param name="source">The source node being dragged.</param>
+    /// <param name="target">The target node for the drop.</param>
+    /// <param name="args">Drag event arguments.</param>
+    /// <returns>True if the move is invalid; otherwise, false.</returns>
+    public bool IsInvalidMove(StoryNodeItem source, StoryNodeItem target)
     {
-        /* Prevents the following:
-         *  - Moving to nodes to the root
-         *  - Moving to a parent to its own child
-         *  - Moving the trash can
-         *  - Moving to/from the trashcan
-         */
-        
-        Logger.Log(LogLevel.Info, $"""
-                                  Drag and Drop debug information:
-                                  Invalid DND State - {invalid_dnd_state}
-                                  Root - {target.IsRoot}
-                                  Source Descendant - {IsDescendant(source, target)}
-                                  Target Type - {target.Type}
-                                  Source Type - {source.Type}
-                                  Trash Can Move - {IsDescendant(StoryModel.ExplorerView[1], target) ||
-                                                    IsDescendant(StoryModel.ExplorerView[1], source)}
-                                  """);
-
-		//Check we aren't draging some kind of non-story element file
-		if (args == null | args.Data == null)
-		{
-			invalid_dnd_state = true;
-			ShowMessage(LogLevel.Info, "Drag and drop failed", true);
-			Logger.Log(LogLevel.Error, "Failed to drag n drop - e.data is null (may be a file and not a story element)");
-			return true;
-		}
-
-
-		//Drag/Drop Conditions
-		if (invalid_dnd_state || target.IsRoot || IsDescendant(source, target) ||
-            target.Type == StoryItemType.TrashCan || source.Type == StoryItemType.TrashCan 
-            || IsDescendant(StoryModel.ExplorerView[1], target) || IsDescendant(StoryModel.ExplorerView[1], source))
+        // Check for specific invalid move conditions.
+        if (invalid_dnd_state)
         {
-            Logger.Log(LogLevel.Warn,"Blocking Drop.");
-            invalid_dnd_state = true;
+            Logger.Log(LogLevel.Warn, "Blocking Drop: Invalid DND state.");
             return true;
         }
 
+        if (target.IsRoot)
+        {
+            Logger.Log(LogLevel.Warn, "Blocking Drop: Cannot move to root.");
+            return true;
+        }
+
+        if (IsDescendant(source, target))
+        {
+            Logger.Log(LogLevel.Warn, "Blocking Drop: Cannot move a parent to its own child.");
+            return true;
+        }
+
+        if (target.Type == StoryItemType.TrashCan || source.Type == StoryItemType.TrashCan)
+        {
+            Logger.Log(LogLevel.Warn, "Blocking Drop: Cannot move to/from the trashcan.");
+            return true;
+        }
+
+        if (IsDescendant(StoryModel.ExplorerView[1], target) || IsDescendant(StoryModel.ExplorerView[1], source))
+        {
+            Logger.Log(LogLevel.Warn, "Blocking Drop: Operation involves trashcan.");
+            return true;
+        }
+
+        // If none of the conditions are met, the move is considered valid.
         return false;
     }
+
+   #endregion
+    
     
     /// <summary>
     /// When a Story Element page's name changes the corresponding
