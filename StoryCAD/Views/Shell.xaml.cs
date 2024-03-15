@@ -85,7 +85,7 @@ public sealed partial class Shell
         else { await ShellVm.OpenFile(ShellVm.FilePathToLaunch);}
 
 		//Ask user for review if appropriate.
-		Rating RateService = Ioc.Default.GetService<Rating>();
+		RatingService RateService = Ioc.Default.GetService<RatingService>();
 		if (RateService.AskForRatings())
 		{
 			RateService.OpenRatingPrompt();

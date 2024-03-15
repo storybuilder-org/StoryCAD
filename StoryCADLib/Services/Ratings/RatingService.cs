@@ -6,7 +6,10 @@ using Windows.Services.Store;
 
 namespace StoryCAD.Services.Ratings;
 
-public class Rating
+/// <summary>
+/// Service for spawning the ratings prompt.
+/// </summary>
+public class RatingService
 {
 	AppState State = Ioc.Default.GetService<AppState>();
 	Windowing Windowing = Ioc.Default.GetService<Windowing>();
@@ -14,14 +17,14 @@ public class Rating
 
 	/// <summary>
 	/// returns True if we should show the rating prompt
-	/// false if it is inappropiate to ask for a review
+	/// false if it is inappropriate to ask for a review
 	/// </summary>
 	public bool AskForRatings()
 	{
 		/* Don't ask the following people to rate
 		 * - Devs
 		 * - Unstable build users
-		 * - People who have explictly asked not see the rating prompt
+		 * - People who have explicitly asked not see the rating prompt
 		 * - People who have used StoryCAD Less than an hour 
 		 * - People who have reviewed StoryCAD within the last sixty days.
 		 */

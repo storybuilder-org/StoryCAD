@@ -120,11 +120,6 @@ public sealed partial class PreferencesDialog
         PreferencesVm.PreferencesInitialized = false;
     }
 
-	private void ShowRatingPrompt(object sender, RoutedEventArgs e)
-	{
-		Ioc.Default.GetService<Rating>().OpenRatingPrompt();
-	}
-
 	/// <summary>
 	/// Refreshes developer statisitics such as sys info.
 	/// </summary>
