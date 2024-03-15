@@ -74,7 +74,8 @@ public sealed partial class Shell
         //Shows changelog if the app has been updated since the last launch.
         if (Ioc.Default.GetRequiredService<AppState>().LoadedWithVersionChange)
         {
-            await new Services.Dialogs.Changelog().ShowChangeLog();
+			Ioc.Default.GetService<AppState>().Preferences.HideRatingPrompt = false;  //rating prompt reenabled on updates.
+			await new Services.Dialogs.Changelog().ShowChangeLog();
         }
 
         //If StoryCAD was loaded from a .STBX File then instead of showing the Unified menu
@@ -83,7 +84,7 @@ public sealed partial class Shell
         if (ShellVm.FilePathToLaunch == null) { await ShellVm.OpenUnifiedMenu(); }
         else { await ShellVm.OpenFile(ShellVm.FilePathToLaunch);}
 
-		//Ask user for review if appropiate.
+		//Ask user for review if appropriate.
 		Rating RateService = Ioc.Default.GetService<Rating>();
 		if (RateService.AskForRatings())
 		{

@@ -47,7 +47,15 @@ public class Rating
 		if (State.Preferences.CumulativeTimeUsed < 3600) 
 		{
 			log.Log(LogLevel.Info, "User hasn't used StoryCAD for an hour, not showing rate dialog.");
-			return false; }
+			return false;
+		}
+
+		//Don't show rating prompt if the user has only just updated.
+		if (State.LoadedWithVersionChange)
+		{
+			log.Log(LogLevel.Info, "Not showing rate dialog since this is the first using this version.");
+			return false;
+		}
 
 		//If all of the above checks have passed, ask for review.
 		log.Log(LogLevel.Info, "Showing user rate dialog.");
