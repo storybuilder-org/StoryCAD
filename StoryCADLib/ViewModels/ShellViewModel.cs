@@ -1252,7 +1252,7 @@ public class ShellViewModel : ObservableRecipient
     /// <summary>
     /// This function just calls print reports dialog.
     /// </summary>
-    private async void OpenPrintMenu() 
+    private void OpenPrintMenu() 
     {
         Ioc.Default.GetRequiredService<PrintReportDialogVM>().OpenPrintReportDialog();
     }
@@ -1377,13 +1377,11 @@ public class ShellViewModel : ObservableRecipient
 
         // Select the Scrivener .scrivx file to add the report to
         FileOpenPicker _openPicker = new();
-        if (Microsoft.UI.Xaml.Window.Current == null)
-        {
-            IntPtr _hwnd = GetActiveWindow();
-            IInitializeWithWindow _initializeWithWindow = _openPicker.As<IInitializeWithWindow>();
-            _initializeWithWindow.Initialize(_hwnd);
-        }
-        _openPicker.ViewMode = PickerViewMode.List;
+        IntPtr _hwnd = GetActiveWindow();
+        IInitializeWithWindow _initializeWithWindow = _openPicker.As<IInitializeWithWindow>();
+        _initializeWithWindow.Initialize(_hwnd);
+
+		_openPicker.ViewMode = PickerViewMode.List;
         _openPicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
         _openPicker.FileTypeFilter.Add(".scrivx");
         StorageFile _file = await _openPicker.PickSingleFileAsync();

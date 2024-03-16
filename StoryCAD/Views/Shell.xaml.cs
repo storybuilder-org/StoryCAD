@@ -9,15 +9,12 @@ using Microsoft.UI.Xaml.Navigation;
 using StoryCAD.Models;
 using StoryCAD.Models.Tools;
 using StoryCAD.Services.Logging;
-using StoryCAD.Services.Messages;
 using StoryCAD.ViewModels;
 using Windows.UI.ViewManagement;
 using Microsoft.UI.Dispatching;
 using StoryCAD.Services;
-using System.Linq;
 using Windows.ApplicationModel.DataTransfer;
 using Microsoft.UI;
-using Windows.Storage.Provider;
 
 namespace StoryCAD.Views;
 
@@ -25,7 +22,6 @@ public sealed partial class Shell
 {
     public ShellViewModel ShellVm => Ioc.Default.GetService<ShellViewModel>();
     public Windowing Windowing => Ioc.Default.GetService<Windowing>();
-    public UnifiedVM UnifiedVm => Ioc.Default.GetService<UnifiedVM>();
     public PreferencesModel Preferences = Ioc.Default.GetRequiredService<PreferenceService>().Model;
 
     private TreeViewItem dragTargetItem;
