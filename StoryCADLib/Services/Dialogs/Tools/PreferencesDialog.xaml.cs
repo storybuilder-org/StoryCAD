@@ -32,7 +32,7 @@ public sealed partial class PreferencesDialog
     /// </summary>
     private async void ShowInfo()
     {
-        DevInfo.Text = State.SystemInfo;
+        DevInfo.Text = Logger.SystemInfo();
 
         if (State.DeveloperBuild) { Version.Text = PreferencesVm.Version; }
         else { Version.Text = State.Version; }
@@ -44,7 +44,7 @@ public sealed partial class PreferencesDialog
 
         SearchEngine.SelectedIndex = (int)PreferencesVm.PreferredSearchEngine;
 
-        //Dev Menu is only shown on unoffical builds
+        //Dev Menu is only shown on unofficial builds
         if (!State.DeveloperBuild) { PivotView.Items.Remove(Dev); }
     }
 
@@ -119,10 +119,12 @@ public sealed partial class PreferencesDialog
         PreferencesVm.PreferencesInitialized = false;
     }
 
-    //Reloads dev stats
+    /// <summary>
+	/// Reloads System report
+	/// </summary>
     public void RefreshDevStats(object sender, RoutedEventArgs e)
     {
-        DevInfo.Text = State.SystemInfo;
+        DevInfo.Text = Logger.SystemInfo();
     } 
 
     /// <summary>

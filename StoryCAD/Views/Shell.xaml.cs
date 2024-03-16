@@ -26,7 +26,7 @@ public sealed partial class Shell
     public ShellViewModel ShellVm => Ioc.Default.GetService<ShellViewModel>();
     public Windowing Windowing => Ioc.Default.GetService<Windowing>();
     public UnifiedVM UnifiedVm => Ioc.Default.GetService<UnifiedVM>();
-    public PreferencesModel Preferences = Ioc.Default.GetRequiredService<AppState>().Preferences;
+    public PreferencesModel Preferences = Ioc.Default.GetRequiredService<PreferenceService>().Model;
 
     private TreeViewItem dragTargetItem;
     private TreeViewNode dragTargetNode;

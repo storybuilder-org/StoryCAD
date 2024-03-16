@@ -31,9 +31,12 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Windows.Storage;
 using Windows.Storage.Pickers;
+using StoryCAD.Services;
 using WinRT;
 using GuidAttribute = System.Runtime.InteropServices.GuidAttribute;
 using Path = System.IO.Path;
+using Octokit;
+using Application = Microsoft.UI.Xaml.Application;
 
 namespace StoryCAD.ViewModels;
 
@@ -70,6 +73,7 @@ public class ShellViewModel : ObservableRecipient
     private AutoSaveService _autoSaveService = Ioc.Default.GetRequiredService<AutoSaveService>();
     private Windowing Window = Ioc.Default.GetRequiredService<Windowing>();
     private AppState State = Ioc.Default.GetRequiredService<AppState>();
+    private PreferenceService Preferences = Ioc.Default.GetRequiredService<PreferenceService>();
     private DispatcherTimer _statusTimer;
 
     // The current story outline being processed. 
@@ -164,11 +168,6 @@ public class ShellViewModel : ObservableRecipient
             _canExecuteCommands = true;
         }
     }
-
-    /// <summary>
-    /// Used for theming
-    /// </summary>
-    public PreferencesModel UserPreferences = Ioc.Default.GetRequiredService<AppState>().Preferences;
 
     /// <summary>
     /// IsPaneOpen is bound to ShellSplitView's IsPaneOpen property with
@@ -409,18 +408,18 @@ public class ShellViewModel : ObservableRecipient
             // Save the new project
             StoryModel.Changed = true;
             await SaveFile();
-            if (State.Preferences.BackupOnOpen)
+            if (Preferences.Model.BackupOnOpen)
             {
                 await MakeBackup();
             }
 
             // Start the timed backup and auto save services
-            if (State.Preferences.TimedBackup)
+            if (Preferences.Model.TimedBackup)
             {
                 Ioc.Default.GetRequiredService<BackupService>().StartTimedBackup();
             }
 
-            if (State.Preferences.AutoSave)
+            if (Preferences.Model.AutoSave)
             {
                 Ioc.Default.GetRequiredService<AutoSaveService>().StartAutoSave();
             }
@@ -448,7 +447,7 @@ public class ShellViewModel : ObservableRecipient
     {
         OverviewModel _overview = new(Path.GetFileNameWithoutExtension(ProjectName), StoryModel)
         { DateCreated = DateTime.Today.ToString("yyyy-MM-dd"), 
-            Author = State.Preferences.FirstName + " " + State.Preferences.LastName };
+            Author = Preferences.Model.FirstName + " " + Preferences.Model.LastName };
 
         StoryNodeItem _overviewNode = new(_overview, null) { IsExpanded = true, IsRoot = true };
         StoryModel.ExplorerView.Add(_overviewNode);
@@ -750,7 +749,7 @@ public class ShellViewModel : ObservableRecipient
 
         // Stop the auto save service if it was running
 
-        if (State.Preferences.AutoSave) { _autoSaveService.StopAutoSave(); }
+        if (Preferences.Model.AutoSave) { _autoSaveService.StopAutoSave(); }
         
         // Stop the timed backup service if it was running
         Ioc.Default.GetRequiredService<BackupService>().StopTimedBackup();
@@ -825,7 +824,7 @@ public class ShellViewModel : ObservableRecipient
             }
 
             // Take a backup of the project if the user has the 'backup on open' preference set.
-            if (State.Preferences.BackupOnOpen)
+            if (Preferences.Model.BackupOnOpen)
             {
                 await Ioc.Default.GetRequiredService<BackupService>().BackupProject();
             }
@@ -840,12 +839,12 @@ public class ShellViewModel : ObservableRecipient
             Window.UpdateWindowTitle();
             new UnifiedVM().UpdateRecents(Path.Combine(StoryModel.ProjectFolder.Path, StoryModel.ProjectFile.Name));
 
-            if (State.Preferences.TimedBackup)
+            if (Preferences.Model.TimedBackup)
             {
                 Ioc.Default.GetRequiredService<BackupService>().StartTimedBackup();
             }
 
-            if (State.Preferences.AutoSave)
+            if (Preferences.Model.AutoSave)
             {
                 _autoSaveService.StartAutoSave();
             }
@@ -1116,7 +1115,7 @@ public class ShellViewModel : ObservableRecipient
 
     #region Tool and Report Commands
 
-    private async void Preferences()
+    private async void OpenPreferences()
     {
         Messenger.Send(new StatusChangedMessage(new("Updating Preferences", LogLevel.Info, true)));
 
@@ -2347,7 +2346,7 @@ public class ShellViewModel : ObservableRecipient
         DramaticSituationsCommand = new RelayCommand(DramaticSituationsTool, () => _canExecuteCommands);
         StockScenesCommand = new RelayCommand(StockScenesTool, () => _canExecuteCommands);
 
-        PreferencesCommand = new RelayCommand(Preferences, () => _canExecuteCommands);
+        PreferencesCommand = new RelayCommand(OpenPreferences, () => _canExecuteCommands);
 
         PrintReportsCommand = new RelayCommand(OpenPrintMenu,() => _canExecuteCommands);
         ScrivenerReportsCommand = new RelayCommand(GenerateScrivenerReports, () => _canExecuteCommands);
