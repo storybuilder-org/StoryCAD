@@ -16,6 +16,7 @@ using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
 using NLog;
+using StoryCAD.Services;
 
 namespace StoryCAD.ViewModels;
 
@@ -283,7 +284,7 @@ public class WebViewModel : ObservableRecipient, INavigable
             _logger.Log(LogLevel.Info, $"Checking if {Query} is not URI, searching it.");
             if (Query == null) { Query = string.Empty; }
             string _dataString = Uri.EscapeDataString(Query);
-            switch (Ioc.Default.GetRequiredService<AppState>().Preferences.PreferredSearchEngine)
+            switch (Ioc.Default.GetRequiredService<PreferenceService>().Model.PreferredSearchEngine)
             {
                 case BrowserType.DuckDuckGo:
                     Url = new Uri("https://duckduckgo.com/?va=j&q=" + _dataString);

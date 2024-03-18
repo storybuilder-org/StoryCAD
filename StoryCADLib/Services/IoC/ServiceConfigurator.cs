@@ -36,6 +36,7 @@ public class ServiceConfigurator
              .AddSingleton<ControlData>()
              .AddSingleton<AppState>()
              .AddSingleton<Windowing>()
+             .AddSingleton<PreferenceService>()
              // Register ViewModels 
              .AddSingleton<ShellViewModel>()
              .AddSingleton<OverviewViewModel>()

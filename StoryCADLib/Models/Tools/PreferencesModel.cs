@@ -1,8 +1,5 @@
 ﻿using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Media;
-using Windows.UI.ViewManagement;
 using CommunityToolkit.Mvvm.ComponentModel;
-using static Org.BouncyCastle.Crypto.Engines.SM2Engine;
 
 namespace StoryCAD.Models.Tools;
 

@@ -1,4 +1,3 @@
-using Windows.Storage;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using StoryCAD.DAL;
@@ -7,6 +6,7 @@ using StoryCAD.Models.Tools;
 using StoryCAD.Services.Backend;
 using System;
 using System.ComponentModel;
+using StoryCAD.Services;
 
 namespace StoryCAD.ViewModels.Tools;
 
@@ -16,6 +16,7 @@ namespace StoryCAD.ViewModels.Tools;
 public class InitVM : ObservableRecipient
 {
     private AppState State = Ioc.Default.GetService<AppState>();
+    private PreferenceService preference = Ioc.Default.GetService<PreferenceService>();
 
 
     /// <summary>
@@ -81,11 +82,11 @@ public class InitVM : ObservableRecipient
         Preferences.PreferencesInitialized = true; 
 
         //Updates the file, then rereads into memory.
-        PreferencesIo _prfIo = new(Preferences, Ioc.Default.GetRequiredService<AppState>().RootDirectory);
+        PreferencesIo _prfIo = new(Preferences, State.RootDirectory);
         await _prfIo.WritePreferences ();
-        PreferencesIo _loader = new(State.Preferences, Ioc.Default.GetRequiredService<AppState>().RootDirectory);
+        PreferencesIo _loader = new(preference.Model, State.RootDirectory);
         await _loader.ReadPreferences();
         BackendService _backend = Ioc.Default.GetRequiredService<BackendService>();
-        if (!State.Preferences.RecordPreferencesStatus) { await _backend.PostPreferences(State.Preferences); }
+        if (preference.Model.RecordPreferencesStatus) { await _backend.PostPreferences(preference.Model); }
     }
 }

@@ -56,21 +56,6 @@ public class PreferencesIo
                 string[] _tokens = _line.Split(new[] { '=' });
                 switch (_tokens[0])
                 {
-                    //TODO: Remove this case after March 2024.
-                    //This case can only ever execute on PRF files created pre-2.13
-                    case "Name":
-                        string[] names = _tokens[1].Split(" ");
-                        if (names.Length == 2)
-                        {
-                            _model.FirstName = names[0];
-                            _model.LastName = names[1];
-                        }
-                        else
-                        {
-                            _model.FirstName = _tokens[1];
-                            _model.LastName = "";
-                        }
-                        break;
                     case "FirstName":
                         _model.FirstName = _tokens[1];
                         break;
