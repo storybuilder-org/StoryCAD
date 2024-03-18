@@ -38,7 +38,7 @@ public class RatingService
 		}
 		
 		//Don't ask for sixty days after a review.
-		if ((DateTime.Now - State.Preferences.LastReviewDate).TotalDays < 60) 
+		if ((DateTime.Now - State.Preferences.LastReviewDate).TotalDays < 180) 
 		{
 			log.Log(LogLevel.Info, 
 				$"User reviewed us {(DateTime.Now - State.Preferences.LastReviewDate).TotalDays} " +
