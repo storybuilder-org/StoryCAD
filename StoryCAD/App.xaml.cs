@@ -22,6 +22,9 @@ using WinUIEx;
 using AppInstance = Microsoft.Windows.AppLifecycle.AppInstance;
 using UnhandledExceptionEventArgs = Microsoft.UI.Xaml.UnhandledExceptionEventArgs;
 using Windows.ApplicationModel.Activation;
+using K4os.Hash.xxHash;
+using Microsoft.UI.Xaml;
+using StoryCAD.DAL;
 using LaunchActivatedEventArgs = Microsoft.UI.Xaml.LaunchActivatedEventArgs;
 using StoryCAD.Services.IoC;
 using StoryCAD.Services;
@@ -216,11 +219,12 @@ public partial class App
 	private void MainWindow_Closed(object sender, WindowEventArgs args)
 	{
 		//Update used time
+		PreferenceService Prefs = Ioc.Default.GetService<PreferenceService>();
 		AppState State = Ioc.Default.GetService<AppState>();
-		State.Preferences.CumulativeTimeUsed += Convert.ToInt64((DateTime.Now - StartTime).TotalSeconds);
+		Prefs.Model.CumulativeTimeUsed += Convert.ToInt64((DateTime.Now - StartTime).TotalSeconds);
 
 		//Save prefs
-		PreferencesIo prefIO = new(State.Preferences, State.RootDirectory);
+		PreferencesIo prefIO = new(Prefs.Model, State.RootDirectory);
 		Task.Run(async () => { await prefIO.WritePreferences(); });
 		
 	}

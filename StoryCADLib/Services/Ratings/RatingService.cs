@@ -12,6 +12,7 @@ namespace StoryCAD.Services.Ratings;
 public class RatingService
 {
 	AppState State = Ioc.Default.GetService<AppState>();
+	PreferenceService prefs = Ioc.Default.GetService<PreferenceService>();
 	Windowing Windowing = Ioc.Default.GetService<Windowing>();
 	LogService log = Ioc.Default.GetService<LogService>();
 
@@ -31,23 +32,23 @@ public class RatingService
 
 		log.Log(LogLevel.Info, "Checking if we should ask for a review");
 		//Dev / Don't ask me check
-		if (State.DeveloperBuild || State.Preferences.HideRatingPrompt) 
+		if (State.DeveloperBuild || prefs.Model.HideRatingPrompt) 
 		{
 			log.Log(LogLevel.Info, "User has already reviewed us or is a dev, not showing rate dialog.");
 			return false; 
 		}
 		
 		//Don't ask for sixty days after a review.
-		if ((DateTime.Now - State.Preferences.LastReviewDate).TotalDays < 180) 
+		if ((DateTime.Now - prefs.Model.LastReviewDate).TotalDays < 180) 
 		{
 			log.Log(LogLevel.Info, 
-				$"User reviewed us {(DateTime.Now - State.Preferences.LastReviewDate).TotalDays} " +
+				$"User reviewed us {(DateTime.Now - prefs.Model.LastReviewDate).TotalDays} " +
 				"days ago, not showing rate dialog");
 			return false;
 		}
 
 		//Check user has used StoryCAD for over an hour.
-		if (State.Preferences.CumulativeTimeUsed < 3600) 
+		if (prefs.Model.CumulativeTimeUsed < 3600) 
 		{
 			log.Log(LogLevel.Info, "User hasn't used StoryCAD for an hour, not showing rate dialog.");
 			return false;
@@ -86,8 +87,8 @@ public class RatingService
 				//Set so we don't ask the user again until the next update or 60 days, whichever occurs last.
 				case StoreRateAndReviewStatus.Succeeded:
 				case StoreRateAndReviewStatus.CanceledByUser:
-					State.Preferences.HideRatingPrompt = true;
-					State.Preferences.LastReviewDate = DateTime.Now;
+					prefs.Model.HideRatingPrompt = true;
+					prefs.Model.LastReviewDate = DateTime.Now;
 					break;
 			}
 		}
