@@ -12,7 +12,9 @@ using System;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using StoryCAD.Services.Ratings;
 using StoryCAD.Services;
+
 
 namespace StoryCAD.ViewModels.Tools;
 
@@ -283,11 +285,19 @@ public class PreferencesViewModel : ObservableValidator
         OnPropertyChanged(nameof(Errors)); // Update Errors on every Error change, so I can bind to it.
     }
 
-    #endregion
+	/// <summary>
+	/// Shows the MS Store prompt
+	/// </summary>
+    public void ShowRatingPrompt(object sender, RoutedEventArgs e)
+    {
+	    Ioc.Default.GetService<RatingService>().OpenRatingPrompt();
+    }
 
-    #region Constructor
+	#endregion
 
-    public PreferencesViewModel()
+	#region Constructor
+
+	public PreferencesViewModel()
     {
         this.ErrorsChanged += Preferences_ErrorsChanged;
     }

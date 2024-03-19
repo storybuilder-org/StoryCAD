@@ -11,6 +11,7 @@ using StoryCAD.Services.Logging;
 using StoryCAD.ViewModels.Tools;
 using WinRT;
 using Microsoft.UI.Xaml.Controls;
+using StoryCAD.Services.Ratings;
 
 namespace StoryCAD.Services.Dialogs.Tools;
 
@@ -119,8 +120,8 @@ public sealed partial class PreferencesDialog
         PreferencesVm.PreferencesInitialized = false;
     }
 
-    /// <summary>
-	/// Reloads System report
+	/// <summary>
+	/// Refreshes developer statisitics such as sys info.
 	/// </summary>
     public void RefreshDevStats(object sender, RoutedEventArgs e)
     {

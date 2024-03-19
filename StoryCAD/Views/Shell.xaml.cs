@@ -15,6 +15,9 @@ using Microsoft.UI.Dispatching;
 using StoryCAD.Services;
 using Windows.ApplicationModel.DataTransfer;
 using Microsoft.UI;
+using Windows.Storage.Provider;
+using StoryCAD.Services.Ratings;
+
 
 namespace StoryCAD.Views;
 
@@ -50,7 +53,7 @@ public sealed partial class Shell
         ShellVm.SplitViewFrame = SplitViewFrame;
     }
 
-    private async void Shell_Loaded(object sender, RoutedEventArgs e)
+	private async void Shell_Loaded(object sender, RoutedEventArgs e)
     {
         Windowing.XamlRoot = Content.XamlRoot;
         Ioc.Default.GetService<AppState>().StartUpTimer.Stop();
@@ -69,7 +72,8 @@ public sealed partial class Shell
         //Shows changelog if the app has been updated since the last launch.
         if (Ioc.Default.GetRequiredService<AppState>().LoadedWithVersionChange)
         {
-            await new Services.Dialogs.Changelog().ShowChangeLog();
+			Ioc.Default.GetService<PreferenceService>().Model.HideRatingPrompt = false;  //rating prompt reenabled on updates.
+			await new Services.Dialogs.Changelog().ShowChangeLog();
         }
 
         //If StoryCAD was loaded from a .STBX File then instead of showing the Unified menu
@@ -77,6 +81,13 @@ public sealed partial class Shell
         Logger.Log(LogLevel.Info, $"Filepath to launch {ShellVm.FilePathToLaunch}");
         if (ShellVm.FilePathToLaunch == null) { await ShellVm.OpenUnifiedMenu(); }
         else { await ShellVm.OpenFile(ShellVm.FilePathToLaunch);}
+
+		//Ask user for review if appropriate.
+		RatingService RateService = Ioc.Default.GetService<RatingService>();
+		if (RateService.AskForRatings())
+		{
+			RateService.OpenRatingPrompt();
+		}
     }
 
     /// <summary>

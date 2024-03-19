@@ -22,6 +22,9 @@ using WinUIEx;
 using AppInstance = Microsoft.Windows.AppLifecycle.AppInstance;
 using UnhandledExceptionEventArgs = Microsoft.UI.Xaml.UnhandledExceptionEventArgs;
 using Windows.ApplicationModel.Activation;
+using K4os.Hash.xxHash;
+using Microsoft.UI.Xaml;
+using StoryCAD.DAL;
 using LaunchActivatedEventArgs = Microsoft.UI.Xaml.LaunchActivatedEventArgs;
 using StoryCAD.Services.IoC;
 using StoryCAD.Services;
@@ -44,18 +47,22 @@ public partial class App
 
     private IntPtr m_windowHandle;
 
-    /// <summary>
-    /// This is the path to the STBX file that StoryCAD
-    /// was launched with, if StoryCAD wasn't launched
-    /// with a file this will be null.
-    /// </summary>
-    string LaunchPath = null;
+	/// <summary>
+	/// This is the path to the STBX file that StoryCAD was launched with,
+	/// if StoryCAD wasn't launched with a file this will be null.
+	/// </summary>
+	string LaunchPath = null;
 
-    /// <summary>
-    /// Initializes the singleton application object.  This is the first line of authored code
-    /// executed, and as such is the logical equivalent of main() or WinMain().
-    /// </summary>
-    public App()
+	/// <summary>
+	/// Used to track uptime of app
+	/// </summary>
+	DateTime StartTime = DateTime.Now;
+
+	/// <summary>
+	/// Initializes the singleton application object. This is the first line of authored code
+	/// executed, and as such is the logical equivalent of main() or WinMain().
+	/// </summary>
+	public App()
     {
         CheckForOtherInstances(); //Check other instances aren't already open.
 
@@ -178,9 +185,10 @@ public partial class App
 
         // Construct a Window to hold our Pages
         WindowEx mainWindow = new MainWindow() { MinHeight = 675, MinWidth = 900, Width = 1050,
-            Height=750, Title="StoryCAD" };
+            Height=750, Title="StoryCAD"};
 
-        // Create a Frame to act as the navigation context 
+		mainWindow.Closed += MainWindow_Closed;
+        // Create a Frame to act as the navigation context
         Frame rootFrame = new();
         // Place the frame in the current Window
         mainWindow.Content = rootFrame;
@@ -208,7 +216,20 @@ public partial class App
 
     }
 
-    private void ConfigureNavigation()
+	private void MainWindow_Closed(object sender, WindowEventArgs args)
+	{
+		//Update used time
+		PreferenceService Prefs = Ioc.Default.GetService<PreferenceService>();
+		AppState State = Ioc.Default.GetService<AppState>();
+		Prefs.Model.CumulativeTimeUsed += Convert.ToInt64((DateTime.Now - StartTime).TotalSeconds);
+
+		//Save prefs
+		PreferencesIo prefIO = new(Prefs.Model, State.RootDirectory);
+		Task.Run(async () => { await prefIO.WritePreferences(); });
+		
+	}
+
+	private void ConfigureNavigation()
     {
         try
         {
