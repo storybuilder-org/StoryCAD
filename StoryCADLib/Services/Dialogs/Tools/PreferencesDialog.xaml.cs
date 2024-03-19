@@ -163,9 +163,6 @@ public sealed partial class PreferencesDialog
             case "FaceBook":
                 URL.FileName = "https://www.facebook.com/StoryCAD";
                 break;
-            case "Patreon":
-                URL.FileName = "https://www.patreon.com/storybuilder2";
-                break;
             case "Twitter":
                 URL.FileName = "https://twitter.com/StoryCAD";
                 break;
