@@ -70,19 +70,13 @@
                             </Button.Content>
                         </Button>
 
-                        <Button Width="50" Height="50" Margin="5" Click="OpenURL" Tag="Twitter">
-                            <Button.Content>
-                                <Image Source="/Assets/Icons/TwitterIcon.png"/>
-                            </Button.Content>
-                        </Button>
+						<Button Width="50" Height="50" Margin="5" Click="OpenURL" Tag="Twitter">
+							<Button.Content>
+								<Image Source="/Assets/Icons/TwitterIcon.png"/>
+							</Button.Content>
+						</Button>
 
-                        <Button Width="50" Height="50" Margin="5" Click="OpenURL" Tag="Patreon">
-                            <Button.Content>
-                                <Image Source="/Assets/Icons/PatreonIcon.png"/>
-                            </Button.Content>
-                        </Button>
-
-                        <Button Width="50" Height="50" Margin="5"  Click="OpenURL" Tag="Youtube">
+						<Button Width="50" Height="50" Margin="5"  Click="OpenURL" Tag="Youtube">
                             <Button.Content>
                                 <Image Source="/Assets/Icons/YoutubeIcon.png"/>
                             </Button.Content>

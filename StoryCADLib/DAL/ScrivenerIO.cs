@@ -337,7 +337,7 @@ public class ScrivenerIo
     }
 
     /// <summary>
-    /// Write an Xml file or subtree to disk.
+    /// Write a Xml file or subtree to disk.
     ///
     /// This routine is intended as a debugging aid. 
     /// </summary>

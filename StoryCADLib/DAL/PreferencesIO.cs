@@ -259,4 +259,5 @@ public class PreferencesIo
 		_newPreferences += (_model.WrapNodeNames == TextWrapping.WrapWholeWords ? Environment.NewLine + "WrapNodeNames=True" : Environment.NewLine + "WrapNodeNames=False");
 		await FileIO.WriteTextAsync(_preferencesFile, _newPreferences); //Writes file to disk.
 	}
+
 }

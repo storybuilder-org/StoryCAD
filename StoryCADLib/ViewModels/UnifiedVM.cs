@@ -6,6 +6,7 @@ using Microsoft.UI.Xaml.Media;
 using StoryCAD.DAL;
 using StoryCAD.Models;
 using StoryCAD.Models.Tools;
+using StoryCAD.Services;
 using StoryCAD.Services.Dialogs;
 
 namespace StoryCAD.ViewModels;
@@ -21,7 +22,7 @@ namespace StoryCAD.ViewModels;
 public class UnifiedVM : ObservableRecipient
 {
     private ShellViewModel _shell = Ioc.Default.GetService<ShellViewModel>();
-    private AppState State = Ioc.Default.GetService<AppState>();
+    private PreferenceService Preferences = Ioc.Default.GetService<PreferenceService>();
 
     private int _selectedRecentIndex;
     public int SelectedRecentIndex
@@ -77,7 +78,7 @@ public class UnifiedVM : ObservableRecipient
     {
         SelectedRecentIndex = -1;
         ProjectName = string.Empty;
-        ProjectPath = State.Preferences.ProjectDirectory;
+        ProjectPath = Ioc.Default.GetRequiredService<PreferenceService>().Model.ProjectDirectory;
     }
 
     public UnifiedMenuPage.UpdateContentDelegate UpdateContent;
@@ -123,11 +124,11 @@ public class UnifiedVM : ObservableRecipient
     {
         switch (SelectedRecentIndex)
         {
-            case 0: await _shell.OpenFile(State.Preferences.LastFile1); break;
-            case 1: await _shell.OpenFile(State.Preferences.LastFile2); break;
-            case 2: await _shell.OpenFile(State.Preferences.LastFile3); break;
-            case 3: await _shell.OpenFile(State.Preferences.LastFile4); break;
-            case 4: await _shell.OpenFile(State.Preferences.LastFile5); break;
+            case 0: await _shell.OpenFile(Preferences.Model.LastFile1); break;
+            case 1: await _shell.OpenFile(Preferences.Model.LastFile2); break;
+            case 2: await _shell.OpenFile(Preferences.Model.LastFile3); break;
+            case 3: await _shell.OpenFile(Preferences.Model.LastFile4); break;
+            case 4: await _shell.OpenFile(Preferences.Model.LastFile5); break;
         }
         if (SelectedRecentIndex != -1)
         {
@@ -140,9 +141,9 @@ public class UnifiedVM : ObservableRecipient
     /// </summary>
     public async void MakeProject()
     {
-        State.Preferences.LastSelectedTemplate = SelectedTemplateIndex;
+        Preferences.Model.LastSelectedTemplate = SelectedTemplateIndex;
 
-        PreferencesIo _loader = new(State.Preferences, Ioc.Default.GetRequiredService<AppState>().RootDirectory);
+        PreferencesIo _loader = new(Preferences.Model, Ioc.Default.GetRequiredService<AppState>().RootDirectory);
         await _loader.WritePreferences();
         await _shell.UnifiedNewFile(this);
         Hide();
@@ -154,33 +155,34 @@ public class UnifiedVM : ObservableRecipient
     /// </summary>
     public async void UpdateRecents(string path)
     {
-        if (path != State.Preferences.LastFile1 && path != State.Preferences.LastFile2 && path != State.Preferences.LastFile3 && path != State.Preferences.LastFile4 && path != State.Preferences.LastFile5)
+		//TODO: Clean up this mess of a code below.
+        if (path != Preferences.Model.LastFile1 && path != Preferences.Model.LastFile2 && path != Preferences.Model.LastFile3 && path != Preferences.Model.LastFile4 && path != Preferences.Model.LastFile5)
         {
-            State.Preferences.LastFile5 = State.Preferences.LastFile4;
-            State.Preferences.LastFile4 = State.Preferences.LastFile3;
-            State.Preferences.LastFile3 = State.Preferences.LastFile2;
-            State.Preferences.LastFile2 = State.Preferences.LastFile1;
-            State.Preferences.LastFile1 = path;
+            Preferences.Model.LastFile5 = Preferences.Model.LastFile4;
+            Preferences.Model.LastFile4 = Preferences.Model.LastFile3;
+            Preferences.Model.LastFile3 = Preferences.Model.LastFile2;
+            Preferences.Model.LastFile2 = Preferences.Model.LastFile1;
+            Preferences.Model.LastFile1 = path;
         }
         else //This shuffle the file used to the top
         {
             string[] _newRecents = Array.Empty<string>();
-            if (path == State.Preferences.LastFile2) { _newRecents = new[] { State.Preferences.LastFile2, State.Preferences.LastFile1, State.Preferences.LastFile3, State.Preferences.LastFile4, State.Preferences.LastFile5 }; }
-            else if (path == State.Preferences.LastFile3) { _newRecents = new[] { State.Preferences.LastFile3, State.Preferences.LastFile1, State.Preferences.LastFile2, State.Preferences.LastFile4, State.Preferences.LastFile5 }; }
-            else if (path == State.Preferences.LastFile4) { _newRecents = new[] { State.Preferences.LastFile4, State.Preferences.LastFile1, State.Preferences.LastFile2, State.Preferences.LastFile3, State.Preferences.LastFile5 }; }
-            else if (path == State.Preferences.LastFile5) { _newRecents = new[] { State.Preferences.LastFile5, State.Preferences.LastFile1, State.Preferences.LastFile2, State.Preferences.LastFile3, State.Preferences.LastFile4 }; }
+            if (path == Preferences.Model.LastFile2) { _newRecents = new[] { Preferences.Model.LastFile2, Preferences.Model.LastFile1, Preferences.Model.LastFile3, Preferences.Model.LastFile4, Preferences.Model.LastFile5 }; }
+            else if (path == Preferences.Model.LastFile3) { _newRecents = new[] { Preferences.Model.LastFile3, Preferences.Model.LastFile1, Preferences.Model.LastFile2, Preferences.Model.LastFile4, Preferences.Model.LastFile5 }; }
+            else if (path == Preferences.Model.LastFile4) { _newRecents = new[] { Preferences.Model.LastFile4, Preferences.Model.LastFile1, Preferences.Model.LastFile2, Preferences.Model.LastFile3, Preferences.Model.LastFile5 }; }
+            else if (path == Preferences.Model.LastFile5) { _newRecents = new[] { Preferences.Model.LastFile5, Preferences.Model.LastFile1, Preferences.Model.LastFile2, Preferences.Model.LastFile3, Preferences.Model.LastFile4 }; }
                 
             if (_newRecents.Length > 0)
             {
-                State.Preferences.LastFile1 = _newRecents[0];
-                State.Preferences.LastFile2 = _newRecents[1];
-                State.Preferences.LastFile3 = _newRecents[2];
-                State.Preferences.LastFile4 = _newRecents[3];
-                State.Preferences.LastFile5 = _newRecents[4];
+                Preferences.Model.LastFile1 = _newRecents[0];
+                Preferences.Model.LastFile2 = _newRecents[1];
+                Preferences.Model.LastFile3 = _newRecents[2];
+                Preferences.Model.LastFile4 = _newRecents[3];
+                Preferences.Model.LastFile5 = _newRecents[4];
             }
         }
 
-        PreferencesIo _loader = new(State.Preferences, State.RootDirectory);
+        PreferencesIo _loader = new(Preferences.Model, Ioc.Default.GetRequiredService<AppState>().RootDirectory);
         await _loader.WritePreferences();
     }
 

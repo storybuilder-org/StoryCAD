@@ -8,6 +8,7 @@ using StoryCAD.ViewModels;
 using StoryCAD.ViewModels.Tools;
 using System;
 using System.IO;
+using StoryCAD.Services;
 
 namespace StoryCADTests
 {
@@ -36,9 +37,10 @@ namespace StoryCADTests
                 Ioc.Default.ConfigureServices(ServiceConfigurator.Configure());
                 IocSetupComplete = true;
                 AppState State = Ioc.Default.GetService<AppState>();
-                State.Preferences = new();
-                State.Preferences.FirstName = "StoryCADTestUser";
-                State.Preferences.Email = "sysadmin@storybuilder.org";
+                PreferenceService Prefs = Ioc.Default.GetService<PreferenceService>();
+                Prefs.Model = new();
+                Prefs.Model.FirstName = "StoryCADTestUser";
+                Prefs.Model.Email = "sysadmin@storybuilder.org";
                 //return;
                 try
                 {

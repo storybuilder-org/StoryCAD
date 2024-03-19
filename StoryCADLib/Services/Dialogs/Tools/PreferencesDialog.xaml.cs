@@ -33,7 +33,7 @@ public sealed partial class PreferencesDialog
     /// </summary>
     private async void ShowInfo()
     {
-        DevInfo.Text = State.SystemInfo;
+        DevInfo.Text = Logger.SystemInfo();
 
         if (State.DeveloperBuild) { Version.Text = PreferencesVm.Version; }
         else { Version.Text = State.Version; }
@@ -45,7 +45,7 @@ public sealed partial class PreferencesDialog
 
         SearchEngine.SelectedIndex = (int)PreferencesVm.PreferredSearchEngine;
 
-        //Dev Menu is only shown on unoffical builds
+        //Dev Menu is only shown on unofficial builds
         if (!State.DeveloperBuild) { PivotView.Items.Remove(Dev); }
     }
 
@@ -123,9 +123,9 @@ public sealed partial class PreferencesDialog
 	/// <summary>
 	/// Refreshes developer statisitics such as sys info.
 	/// </summary>
-	public void RefreshDevStats(object sender, RoutedEventArgs e)
+    public void RefreshDevStats(object sender, RoutedEventArgs e)
     {
-        DevInfo.Text = State.SystemInfo;
+        DevInfo.Text = Logger.SystemInfo();
     } 
 
     /// <summary>
@@ -165,9 +165,6 @@ public sealed partial class PreferencesDialog
                 break;
             case "FaceBook":
                 URL.FileName = "https://www.facebook.com/StoryCAD";
-                break;
-            case "Patreon":
-                URL.FileName = "https://www.patreon.com/storybuilder2";
                 break;
             case "Twitter":
                 URL.FileName = "https://twitter.com/StoryCAD";

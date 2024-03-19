@@ -1,8 +1,7 @@
 ﻿using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Media;
-using Windows.UI.ViewManagement;
 using CommunityToolkit.Mvvm.ComponentModel;
 using System;
+
 
 namespace StoryCAD.Models.Tools;
 

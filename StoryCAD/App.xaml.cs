@@ -7,36 +7,24 @@ using Windows.ApplicationModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using dotenv.net;
 using dotenv.net.Utilities;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.Windows.AppLifecycle;
 using PInvoke;
-using StoryCAD.DAL;
 using StoryCAD.Models;
-using StoryCAD.Models.Tools;
 using StoryCAD.Services.Backend;
 using StoryCAD.Services.Json;
 using StoryCAD.Services.Logging;
 using StoryCAD.Services.Navigation;
-using StoryCAD.Services.Search;
 using StoryCAD.ViewModels;
-using StoryCAD.ViewModels.Tools;
 using StoryCAD.Views;
 using Syncfusion.Licensing;
 using WinUIEx;
 using AppInstance = Microsoft.Windows.AppLifecycle.AppInstance;
 using UnhandledExceptionEventArgs = Microsoft.UI.Xaml.UnhandledExceptionEventArgs;
 using Windows.ApplicationModel.Activation;
-using Windows.Storage;
-using Microsoft.UI.Dispatching;
-using StoryCAD.Services.Backup;
 using LaunchActivatedEventArgs = Microsoft.UI.Xaml.LaunchActivatedEventArgs;
-using System.Globalization;
-using System.Reflection;
 using StoryCAD.Services.IoC;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI;
+using StoryCAD.Services;
 
 namespace StoryCAD;
 
@@ -125,7 +113,7 @@ public partial class App
                 {
                     if (activatedEventArgs.Data is IFileActivatedEventArgs fileArgs)
                     {
-                        //This will be launched when ShellVM has finished initalising
+                        //This will be launched when ShellVM has finished initialising
                         LaunchPath = fileArgs.Files.FirstOrDefault().Path; 
                     }
                 }
@@ -142,11 +130,13 @@ public partial class App
     protected override async void OnLaunched(LaunchActivatedEventArgs args)
     {
         _log.Log(LogLevel.Info, "StoryCAD.App launched");
-        // Note: Shell_Loaded in Shell.xaml.cs will display a
-        // connection status message as soon as it's displayable.
+		// Note: Shell_Loaded in Shell.xaml.cs will display a
+		// connection status message as soon as it's displayable.
 
-        // Obtain keys if defined
-        try
+		PreferenceService Preferences = Ioc.Default.GetRequiredService<PreferenceService>();
+
+		// Obtain keys if defined
+		try
         {
             Doppler doppler = new();
             Doppler keys = await doppler.FetchSecretsAsync();
@@ -165,8 +155,8 @@ public partial class App
         Trace.Indent();
         Trace.WriteLine(pathMsg);
 
-        //Load user preferences or atleast initalise them.
-        await Ioc.Default.GetService<AppState>().LoadPreferences();
+        //Load user preferences or initialise them.
+        await Preferences.LoadPreferences();
 
         //Set the launch path in ShellVM so if a File was used to open StoryCAD,
         //so that the file will be opened when shell has finished loading.
@@ -175,7 +165,7 @@ public partial class App
         if (Debugger.IsAttached) {_log.Log(LogLevel.Info, "Bypassing elmah.io as debugger is attached.");}
         else
         {
-            if (Ioc.Default.GetRequiredService<AppState>().Preferences.ErrorCollectionConsent)
+            if (Preferences.Model.ErrorCollectionConsent)
             {
                 _log.ElmahLogging = _log.AddElmahTarget();
                 if (_log.ElmahLogging) { _log.Log(LogLevel.Info, "elmah successfully added."); }
@@ -206,7 +196,10 @@ public partial class App
         //   If we've not yet initialized Preferences, it's PreferencesInitialization.
         //   If we have initialized Preferences, it Shell.
         // PreferencesInitialization will Navigate to Shell after it's done its business.
-        if (!Ioc.Default.GetRequiredService<AppState>().Preferences.PreferencesInitialized) {rootFrame.Navigate(typeof(PreferencesInitialization));}
+        if (!Preferences.Model.PreferencesInitialized)
+        {
+	        rootFrame.Navigate(typeof(PreferencesInitialization));
+        }
         else {rootFrame.Navigate(typeof(Shell));}
 
         // Preserve both the Window and its Handle for future use
