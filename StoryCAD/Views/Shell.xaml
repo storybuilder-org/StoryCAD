@@ -10,11 +10,7 @@
     <Page.Resources>
         <ResourceDictionary>
             <ResourceDictionary.ThemeDictionaries>
-                <ResourceDictionary x:Key="Default">
-                    <SolidColorBrush x:Key="TreeViewItemBoarderBrushPointerOver" Color="{ThemeResource SystemAccentColor}"/>
-                    <SolidColorBrush x:Key="TreeViewItemBackgroundSelected" Color="{ThemeResource SystemAccentColor}"  />
-                    <SolidColorBrush x:Key="TreeViewItemBackgroundSelectedPointerOver" Color="{ThemeResource SystemAccentColor}" />
-                </ResourceDictionary>
+                <ResourceDictionary x:Key="Default" />
             </ResourceDictionary.ThemeDictionaries>
 
             <CommandBarFlyout x:Key="AddStoryElementFlyout" Placement="Right" x:Name="AddStoryElementCommandBarFlyout" >
@@ -89,7 +85,7 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <!-- Command Bar -->
-        <CommandBar  Background="{x:Bind Windowing.PrimaryColor, Mode=OneWay}" IsOpen="False" x:Name="ToolBar">
+        <CommandBar  Background="{x:Bind Windowing.PrimaryColor, Mode=OneWay}" IsOpen="False">
             <CommandBar.Content>
                 <StackPanel Orientation="Horizontal">
                     <AutoSuggestBox PlaceholderText="Enter text to search for here" QueryIcon="Find" Width="335" Margin="0,8" QuerySubmitted="Search" TextChanged="ClearNodes" Text="{x:Bind ShellVm.FilterText, Mode=TwoWay}" VerticalAlignment="Center"/>
@@ -221,16 +217,20 @@
                                 </Grid.ColumnDefinitions>
                                 <Button ToolTipService.ToolTip="Move Left"
                                         FontFamily="Segoe MDL2 Assets" Content="&#xE09A;"
-                                        Command="{x:Bind ShellVm.MoveLeftCommand, Mode=OneWay}"  Margin="0,5,0,5"  Grid.Row="1"/>
+                                        Command="{x:Bind ShellVm.MoveLeftCommand, Mode=OneWay}"  
+                                        Margin="0,5,0,5"  Grid.Row="1"/>
                                 <Button ToolTipService.ToolTip="Move Right"
                                         FontFamily="Segoe MDL2 Assets" Content="&#xE013;"
-                                        Command="{x:Bind ShellVm.MoveRightCommand, Mode=OneWay}"  Margin="0,5,0,5" Grid.Row="1" Grid.Column="2"/>
+                                        Command="{x:Bind ShellVm.MoveRightCommand, Mode=OneWay}"  
+                                        Margin="0,5,0,5" Grid.Row="1" Grid.Column="2"/>
                                 <Button ToolTipService.ToolTip="Move Up"
                                         FontFamily="Segoe MDL2 Assets" Content="&#xE09C;"
-                                        Command="{x:Bind ShellVm.MoveUpCommand, Mode=OneWay}"  Margin="5,0,5,0" Grid.Column="1"/>
+                                        Command="{x:Bind ShellVm.MoveUpCommand, Mode=OneWay}"  
+                                        Margin="5,0,5,0" Grid.Row="0" Grid.Column="1"/>
                                 <Button ToolTipService.ToolTip="Move Down"
                                         FontFamily="Segoe MDL2 Assets" Content="&#xE09D;"
-                                        Command="{x:Bind ShellVm.MoveDownCommand, Mode=OneWay}" Margin="5,0,5,0" Grid.Column="1" Grid.Row="2"/>
+                                        Command="{x:Bind ShellVm.MoveDownCommand, Mode=OneWay}" 
+                                        Margin="5,0,5,0" Grid.Column="1" Grid.Row="2"/>
                             </Grid>
                         </Flyout>
                     </AppBarButton.Flyout>
@@ -329,8 +329,8 @@
                                    CanDragItems="True" AllowDrop="True" CanReorderItems="True"
                                    ItemsSource="{x:Bind ShellVm.DataSource, Mode=TwoWay}"
                                    SelectionMode="Single"
-                                   DragLeave="TreeView_OnDragLeave"
                                    DragItemsStarting="TreeView_DragItemsStarting"
+                                   DragItemsCompleted="TreeView_DragItemsCompleted"
                                    ItemInvoked="TreeViewItem_Invoked">
                         <muxc:TreeView.ItemTemplate>
                             <DataTemplate  x:DataType="viewmodels:StoryNodeItem">
@@ -339,7 +339,7 @@
                                                    BorderBrush="{x:Bind boarderBrush, Mode=OneWay}"
                                                    BorderThickness="1"
                                                    IsExpanded="{x:Bind IsExpanded, Mode=TwoWay}"
-                                                   DragOver="TreeViewItem_OnDragOver"
+                                                   CanDrag="True" DragEnter ="TreeViewItem_DragEnter"
                                                    RightTapped="TreeViewItem_RightTapped"
                                                    Tapped="TreeViewItem_Tapped">
                                     <StackPanel Orientation="Horizontal">
@@ -364,7 +364,7 @@
             </SplitView.Content>
         </SplitView>
         <!-- Status Bar -->
-        <StackPanel Grid.Row="2" Orientation="Horizontal" Background="{x:Bind Windowing.PrimaryColor, Mode=OneWay}" x:Name="StatusBar">
+        <StackPanel Grid.Row="2" Orientation="Horizontal" Background="{x:Bind Windowing.PrimaryColor, Mode=OneWay}">
             <ComboBox IsEditable="False" Width="200"  Margin="10" ItemsSource="{x:Bind ShellVm.ViewList}" 
                       SelectionChanged="{x:Bind ShellVm.ViewChanged, Mode=OneWay}" 
                       SelectedItem="{x:Bind ShellVm.SelectedView, Mode=TwoWay}" />

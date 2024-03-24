@@ -45,7 +45,7 @@ public class DragAndDropTests
     [TestMethod]
     public void MovingToRoot()
     {
-        var result = ShellVM.IsInvalidMove(child1, root);
+        var result = ShellVM.ValidateDragAndDrop(child1, root);
         Assert.IsTrue(result, "Moving a node to a root node should be considered an invalid move.");
     }
     
@@ -56,7 +56,7 @@ public class DragAndDropTests
     [TestMethod]
     public void MovingIntoDescendant()
     {
-        var result = ShellVM.IsInvalidMove(root, grandchild1);
+        var result = ShellVM.ValidateDragAndDrop(root, grandchild1);
         Assert.IsTrue(result, "Moving a node into one of its own descendants should be considered an invalid move.");
     }
 
@@ -67,7 +67,7 @@ public class DragAndDropTests
     public void MovingToNonDescendant()
     {
         Thread.Sleep(8000); //8-second delay appears to be needed to ensure the test passes consistently.
-        var result = ShellVM.IsInvalidMove(child1, child2);
+        var result = ShellVM.ValidateDragAndDrop(child1, child2);
         Assert.IsFalse(result, "Moving a node to a non-descendant node should be considered a valid move.");
     }
     
@@ -77,7 +77,7 @@ public class DragAndDropTests
     [TestMethod]
     public void MovingTrash()
     {
-        var result = ShellVM.IsInvalidMove(trash, child2);
+        var result = ShellVM.ValidateDragAndDrop(trash, child2);
         Assert.IsTrue(result, "Moving the trash node should be considered an invalid move.");
     }
     
@@ -87,7 +87,7 @@ public class DragAndDropTests
     [TestMethod]
     public void MovingOutOfTrash()
     {
-        var result = ShellVM.IsInvalidMove(trashedItem, child1);
+        var result = ShellVM.ValidateDragAndDrop(trashedItem, child1);
         Assert.IsTrue(result, "Moving an item from trash node should be considered an invalid move.");
     }
 
@@ -97,7 +97,7 @@ public class DragAndDropTests
     [TestMethod]
     public void MovingToTrash()
     {
-        var result = ShellVM.IsInvalidMove(child1, trashedItem);
+        var result = ShellVM.ValidateDragAndDrop(child1, trashedItem);
         Assert.IsTrue(result, "Moving an item to the trash node should be considered an invalid move.");
     }
 

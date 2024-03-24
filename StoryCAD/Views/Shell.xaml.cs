@@ -11,10 +11,13 @@ using StoryCAD.Models.Tools;
 using StoryCAD.Services.Logging;
 using StoryCAD.ViewModels;
 using Windows.UI.ViewManagement;
-using Microsoft.UI.Dispatching;
 using Windows.ApplicationModel.DataTransfer;
 using Microsoft.UI;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Threading.Tasks;
 using Application = Microsoft.UI.Xaml.Application;
+using DispatcherQueue = Microsoft.UI.Dispatching.DispatcherQueue;
 using Page = Microsoft.UI.Xaml.Controls.Page;
 
 namespace StoryCAD.Views;
@@ -27,9 +30,10 @@ public sealed partial class Shell
     public PreferencesModel Preferences = Ioc.Default.GetRequiredService<AppState>().Preferences;
     public LogService Logger;
 
-    private object lastDropTarget;
     private StoryNodeItem dragTargetStoryNode;
     private StoryNodeItem dragSourceStoryNode;
+    private bool dragSourceIsValid;
+    private bool dragTargetIsValid;
 
     public Shell()
     {
@@ -44,7 +48,7 @@ public sealed partial class Shell
         catch (Exception ex)
         {
             // A shell initialization error is fatal
-            Logger.LogException(LogLevel.Error, ex, ex.Message);
+            Logger!.LogException(LogLevel.Error, ex, ex.Message);
             Logger.Flush();
             Application.Current.Exit();  // Win32
         }
@@ -54,11 +58,11 @@ public sealed partial class Shell
     private async void Shell_Loaded(object sender, RoutedEventArgs e)
     {
         Windowing.XamlRoot = Content.XamlRoot;
-        Ioc.Default.GetService<AppState>().StartUpTimer.Stop();
+        Ioc.Default.GetService<AppState>()!.StartUpTimer.Stop();
         ShellVm.ShowHomePage();
         ShellVm.ShowConnectionStatus();
         Ioc.Default.GetRequiredService<Windowing>().UpdateWindowTitle();
-        if (!Ioc.Default.GetService<AppState>().EnvPresent) { await ShellVm.ShowDotEnvWarningAsync(); }
+        if (!Ioc.Default.GetService<AppState>()!.EnvPresent) { await ShellVm.ShowDotEnvWarningAsync(); }
 
         if (!await Ioc.Default.GetRequiredService<WebViewModel>().CheckWebviewState())
         {
@@ -88,11 +92,11 @@ public sealed partial class Shell
     {
         NavigationTree.SelectionMode = TreeViewSelectionMode.None;
         NavigationTree.SelectionMode = TreeViewSelectionMode.Single;
-        (SplitViewFrame.Content as FrameworkElement).RequestedTheme = Windowing.RequestedTheme;
+        ((SplitViewFrame.Content as FrameworkElement)!).RequestedTheme = Windowing.RequestedTheme;
         SplitViewFrame.Background = Windowing.RequestedTheme == ElementTheme.Light ? new SolidColorBrush(Colors.White) : new SolidColorBrush(Colors.Black);
-        if (!(SplitViewFrame.Content as FrameworkElement).BaseUri.ToString().Contains("HomePage"))
+        if (!((FrameworkElement)SplitViewFrame.Content).BaseUri.ToString().Contains("HomePage"))
         {
-            (SplitViewFrame.Content as Page).Margin = new(0, 0, 0, 5);
+            ((Page)SplitViewFrame.Content).Margin = new(0, 0, 0, 5);
         }
     }
 
@@ -151,92 +155,93 @@ public sealed partial class Shell
     }
     
 #region DragandDropOperations
-   
+
     ///<summary>
-    /// Initiates a drag operation for an item in a TreeView. It logs the drag start event, validates the drag source, and sets up for a move operation if valid. If the source is invalid, the drag operation is canceled.
+    /// Initiates a drag operation for an item in a TreeView. It logs the drag start event, validates the drag source,
+    /// and sets up for a move operation if valid. If the source is invalid, the drag operation is canceled.
     ///</summary>
     /// <param name="sender">The TreeView that is the source of the drag event.</param>
     /// <param name="args">Event data containing information about the drag items starting operation.</param>
     private void TreeView_DragItemsStarting(TreeView sender, TreeViewDragItemsStartingEventArgs args)
     {
-        Logger.Log(LogLevel.Trace, "OnDragItemsStarting event");
-        if (args.Items[0] is not StoryNodeItem dragSourceStoryNode)
-        {
-            SetInvalidDragDropState("Invalid drag source", LogLevel.Warn, true);
-            args.Cancel = true; // Cancel the drag operation
-            return;
-        }
-
-        // Initialization for a valid drag operation
-        this.dragSourceStoryNode = dragSourceStoryNode;
-        args.Data.RequestedOperation = DataPackageOperation.Move;
-    }
-
-    
-    ///<summary>
-    /// Handles the drag-over event on a TreeViewItem to determine if the dragged item can be dropped onto the target item.
-    /// It validates the target item and checks if the move operation is valid. If not valid, the operation is canceled and the event is marked as handled.
-    ///</summary>
-    /// <param name="sender">The object that is the source of the event, typically a TreeViewItem.</param>
-    /// <param name="args">Event data that provides information about the drag operation.</param>
-    private void TreeViewItem_OnDragOver(object sender, DragEventArgs args)
-    {
-        // OnDragOver fires repeatedly for even small movements within the
-        // target area, even when it's still on the same TreeViewItem.
-        // Check if the current target node is the same as the last target node.
-        // The event needs processed only if it's a different node.
-        if (sender == lastDropTarget)
-        {
-            // If yes, do nothing
-            return;
+        Logger.Log(LogLevel.Trace, "OnDragItemsStarting enter");
+        // Assume the worst
+        args.Data.RequestedOperation = DataPackageOperation.None;
+        dragTargetStoryNode = null;   // set in case OnDragEnter is not fired 
+        
+        dragSourceIsValid = ShellVm.ValidateDragSource(args);
+        if (dragSourceIsValid) 
+        { 
+            args.Data.RequestedOperation = DataPackageOperation.Move; 
         }
         else
-            lastDropTarget = sender;
-        
-        Logger.Log(LogLevel.Trace, "OnDragOver event");
-
-        // Test if TreeViewItem?
-        var currentDropTargetItem = sender as TreeViewItem;
-     
-        if (currentDropTargetItem == null)
-        {
-            SetInvalidDragDropState("Invalid drag target.");
-            args.Handled = true;
-            return;
-        }
-
-        GetCurrentTargetStoryNode(currentDropTargetItem); // Get the drag target's StoryNodeItem
-
-        // Use IsInvalidMove to check validity
-        // The first two tests are unnecessary?
-        if (dragSourceStoryNode == null || dragTargetStoryNode == null || ShellVm.IsInvalidMove(dragSourceStoryNode, dragTargetStoryNode))
-        {
-            SetInvalidDragDropState("Cannot move a node here.");
-            args.Handled = true;
-            return;
-        }
-
-        // if the drag location is valid, indicate so. The actual move only 
-        // occurs when the user releases the mouse button.
-        Logger.Log(LogLevel.Trace, "Drop location is valid");
-        args.Data.RequestedOperation = DataPackageOperation.Move;
+            args.Cancel = true;
     }
 
     /// <summary>
-    /// The drag target (OnDragOver's sender argument) is typically a TreeViewItem.
-    /// The TreeView (NavigationTree) is bound to an ObservableCollection of
-    /// StoryNodeItems (ShellViewModel.DataSource). Each StoryNodeItem
-    /// can be thought of as the ViewModel to a corresponding TreeViewItem's View.
-    ///
-    /// This routine finds the corresponding StoryNodeItem.
+    /// Handles the DragEnter event for TreeViewItem, setting the operation based on the sender's validity.
     /// </summary>
-    /// <param name="dragTargetItem"></param>
-    private void GetCurrentTargetStoryNode(TreeViewItem dragTargetItem)
+    /// <param name="sender">The source of the event, expected to be a TreeViewItem.</param>
+    /// <param name="args">Event data containing drag-and-drop information.</param>
+
+     private void TreeView_DragItemsCompleted(TreeView sender, TreeViewDragItemsCompletedEventArgs args)
     {
-        var dragTargetNode = NavigationTree.NodeFromContainer(dragTargetItem);
-        dragTargetStoryNode = dragTargetNode?.Content as StoryNodeItem;
-        Logger.Log(LogLevel.Trace, $"  Target node:{dragTargetStoryNode?.Name ?? "null"}");
+        Logger.Log(LogLevel.Trace, $"DragItemsCompleted entry");
+        Logger.Log(LogLevel.Trace, $"dragSourceIsValid: {dragSourceIsValid.ToString()}");
+
+        //if (dragSourceStoryNode! == null)
+        //{
+        //    ShellVm.ShowMessage(LogLevel.Warn, "Invalid source node", true);
+        //}
+        //else if (dragTargetStoryNode! == null)
+        //{
+        //    ShellVm.ShowMessage(LogLevel.Warn, "Invalid target node", true);
+        //}
+        //else if (dragSourceStoryNode.Uuid == dragTargetStoryNode.Uuid)
+        //{
+        //    ShellVm.ShowMessage(LogLevel.Warn, "Drag to self", true);
+        //}
+        
+        //else
+        {
+            if (dragSourceIsValid && dragTargetIsValid)
+            {
+                ShellVm.MoveStoryNode();
+                ShellVm.ShowMessage(LogLevel.Info, "Drag and drop successful", true);
+            }
+        }
+
+        NavigationTree.CanDrag = true;
+        NavigationTree.AllowDrop = true;
+        Logger.Log(LogLevel.Trace, $"OnDragItemsCompleted exit");
+    } 
+
+    /// <summary>
+    /// Handles the DragEnter event for TreeViewItem, setting the operation based on the sender's validity.
+    /// </summary>
+    /// <param name="sender">The source of the event, expected to be a TreeViewItem.</param>
+    /// <param name="args">Event data containing drag-and-drop information.</param>
+    private void TreeViewItem_DragEnter(object sender, DragEventArgs args)
+    {
+        Logger.Log(LogLevel.Trace, "OnDragEnter enter");
+        
+        dragTargetIsValid = ShellVm.ValidateDragTarget(sender, args, NavigationTree);
+
+         
+        // Use IsInvalidMove to check validity
+        // The first two tests are unnecessary?
+        if (!ShellVm.ValidateDragAndDrop(dragSourceStoryNode, dragTargetStoryNode))
+        {
+            args.Handled = true;
+            return;
+        }
+ 
+        // if the drag location is valid, indicate so. The actual move only 
+        // occurs when the user releases the mouse button (the Drop event).
+        args.AcceptedOperation = DataPackageOperation.Move;
+        //args.Handled = true; // Mark the event as handled.
     }
+
 
     ///<summary>
     /// Processes the drag leave event on a TreeView. It re-enables dropping for
@@ -248,31 +253,11 @@ public sealed partial class Shell
     {
         // Is the if statement even necessary?
         Logger.Log(LogLevel.Trace, "OnDragLeave event");
-        if (ShellVm.invalid_dnd_state)
-        {
-            e.Handled = true;
-            NavigationTree.AllowDrop = true; // Re-enable for next operation
-            ShellVm.invalid_dnd_state = false;
-        }
-    }
-    
-    
-    /// <summary>
-    /// Sets the application's drag-and-drop state to invalid, logs the specified message at the given log level, 
-    /// optionally displays a message to the user, and disables drag-and-drop in the navigation tree.
-    /// </summary>
-    /// <param name="message">The message to log and optionally display.</param>
-    /// <param name="logLevel">The severity level of the log message. Defaults to LogLevel.Warn.</param>
-    /// <param name="showMessage">Determines whether the message should be displayed to the user. Defaults to false.</param>
-    private void SetInvalidDragDropState(string message, LogLevel logLevel = LogLevel.Warn, bool showMessage = false)
-    {
-        ShellVm.invalid_dnd_state = true;
-        if (showMessage)
-        {
-            ShellVm.ShowMessage(logLevel, message, false);
-        }
-        Logger.Log(logLevel, message);
-        NavigationTree.AllowDrop = false;
+        //if (ShellVm.invalid_dnd_state)
+        //{
+        //    e.Handled = true;
+        //    ShellVm.invalid_dnd_state = false;
+        //}
     }
 
     #endregion

@@ -29,6 +29,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using Windows.ApplicationModel.DataTransfer;
 using Windows.Storage;
 using Windows.Storage.Pickers;
 using WinRT;
@@ -82,12 +83,13 @@ public class ShellViewModel : ObservableRecipient
 
     // The right-hand (detail) side of ShellView
     public Frame SplitViewFrame;
-
-    /// <summary>
-    /// Set to true by DND events, this will force DND to terminate and
-    /// not drop whatever is currently selected.
-    /// </summary>
-    public bool invalid_dnd_state;
+    
+    // Drag and drop variables
+    private TreeViewItem dragTargetItem;
+    private TreeViewNode dragTargetNode;
+    private StoryNodeItem dragTargetStoryNode;
+    private StoryNodeItem dragSourceStoryNode;
+    private readonly object dragLock = new object();
 
     #region CommandBar Relay Commands
 
@@ -2275,8 +2277,147 @@ public class ShellViewModel : ObservableRecipient
     }
 
 
-    #region Drag and Drop tests
+    #region Drag and Drop logic
+    
+    public bool ValidateDragSource(TreeViewDragItemsStartingEventArgs args)
+    { 
+        // args.Items[0] is the object you're dragging.
+        // With SelectionMode="Single" there will be only the one.
+        Type type = args.Items[0].GetType();
+        if (!type.Name.Equals("StoryNodeItem"))
+        {
+            ShowMessage(LogLevel.Warn, "Drag source isn't a tree node", true);
+            args.Cancel = true;
+            return false;
+        }
+
+        dragSourceStoryNode = args.Items[0] as StoryNodeItem;
+        StoryNodeItem _parent = dragSourceStoryNode!.Parent;
+        if (_parent == null)
+        {
+            ShowMessage(LogLevel.Warn, "Can't drag from root", true);
+            args.Cancel = true;
+            return false;
+        }
+
+        while (!_parent.IsRoot) // find the drag source's root
+        {
+            _parent = _parent.Parent;
+        }
+
+        if (_parent.Type == StoryItemType.TrashCan)
+        {
+            ShowMessage(LogLevel.Warn, "Can't drag from Trashcan", true);
+            args.Cancel = true;
+            return false;
+        }
+
+        // Report status
+        Logger.Log(LogLevel.Trace, $"ValidateDrgSource exit");
+        // Source node is valid for move
+        Logger.Log(LogLevel.Trace, $"  Source node:{dragSourceStoryNode?.Name ?? "null"}");
+        return true;
+    }
+
+    public bool ValidateDragTarget(object sender, DragEventArgs args, TreeView navTree)
+    {
+        // sender is the node you're dragging over (the prospective target)
+        Type type = sender.GetType();
+        if (!type.Name.Equals("TreeViewItem"))
+        {
+            ShowMessage(LogLevel.Warn, "Drag target isn't a tree node", true);
+            args.Handled = true;
+            return false;
+        }
+
+        dragTargetItem = (TreeViewItem) sender;
+        dragTargetNode = navTree.NodeFromContainer(dragTargetItem);
+        dragTargetStoryNode = dragTargetNode?.Content as StoryNodeItem;
+        Logger.Log(LogLevel.Trace, $"  Target node:{dragTargetStoryNode?.Name ?? "null"}");
+
+        // Find the node's root
+        var node = dragTargetNode;
+        while (node.Depth != 0) 
+        { 
+            node = node.Parent; 
+        }
+        var root = node.Content as StoryNodeItem;
+        
+        // Although for the drag source either root node is not valid, 
+        // as a target the first root (StoryOverview) is.
+        
+        if (root!.Type == StoryItemType.TrashCan)
+        {
+            ShowMessage(LogLevel.Warn, "Drag to Trashcan invalid", true);
+            args.Handled = true;
+            return false;
+        }
+
+        // The drag target can be the root (Story Overview) node or any node below it
+        if (dragTargetNode.Depth < 0)
+        {
+            ShowMessage(LogLevel.Warn, "Drag target is not root or below", true);
+            args.Handled = true;
+            return false;
+        }
+
+        // Target node is valid for move
+        args.Handled = true;
+        Logger.Log(LogLevel.Info, $"OnDragEnter exit");
+        return true;
+    }
+
+
     /// <summary>
+    /// Determine if a prospective NavigationTree drag-and-drop move is invalid.
+    /// This includes both edits on 
+    /// </summary>
+    /// <param name="source">The source node being dragged.</param>
+    /// <param name="target">The target node for the drop.</param>
+    /// <param name="args">Drag event arguments.</param>
+    /// <returns>True if the move is invalid; otherwise, false.</returns>
+    public bool ValidateDragAndDrop(StoryNodeItem source, StoryNodeItem target)
+    {
+        if (source == null)
+        { 
+            return false;
+        }
+
+        if (target == null)
+        { 
+            return false;
+        }
+
+        // Moved to ValidateDragSource and ValidateDragTarget
+        //if (target.IsRoot)
+        //{
+        //    Logger.Log(LogLevel.Warn, "Blocking Drop: Cannot move to root.");
+        //    return false;
+        //}
+
+        if (IsDescendant(source, target))
+        {
+            ShowMessage(LogLevel.Warn, "Cannot move a parent to its own child", true);
+            return false;
+        }
+
+        if (target.Type == StoryItemType.TrashCan || source.Type == StoryItemType.TrashCan)
+        {
+            ShowMessage(LogLevel.Warn, "Cannot move to/from the trashcan", true);
+            return false;
+        }
+
+        if (IsDescendant(StoryModel.ExplorerView[1], target) || IsDescendant(StoryModel.ExplorerView[1], source))
+        {
+            ShowMessage(LogLevel.Warn, "Operation involves trashcan", true);
+            return false;
+        }
+
+        // If none of the conditions are met, the move is considered valid.
+        return true;
+    }
+ 
+       /// <summary>
     /// Recursive method to check if target is a descendant of source
     /// </summary>
     public bool IsDescendant(StoryNodeItem source, StoryNodeItem target)
@@ -2287,51 +2428,67 @@ public class ShellViewModel : ObservableRecipient
         }
         return false;
     }
-    
-    /// <summary>
-    /// Determines if a drag-and-drop move is invalid.
+
+     /// <summary>
+    /// The drag target (OnDragOver's sender argument) is typically a TreeViewItem.
+    /// The TreeView (NavigationTree) is bound to an ObservableCollection of
+    /// StoryNodeItems (ShellViewModel.DataSource). Each StoryNodeItem
+    /// can be thought of as the ViewModel to a corresponding TreeViewItem's View.
+    ///
+    /// This routine finds the corresponding StoryNodeItem.
     /// </summary>
-    /// <param name="source">The source node being dragged.</param>
-    /// <param name="target">The target node for the drop.</param>
-    /// <param name="args">Drag event arguments.</param>
-    /// <returns>True if the move is invalid; otherwise, false.</returns>
-    public bool IsInvalidMove(StoryNodeItem source, StoryNodeItem target)
+    /// <param name="dragTargetItem"></param>
+    public StoryNodeItem GetStoryNodeItem(TreeViewItem treeViewItem, TreeView tree)
     {
-        // Check for specific invalid move conditions.
-        if (invalid_dnd_state)
-        {
-            Logger.Log(LogLevel.Warn, "Blocking Drop: Invalid DND state.");
-            return true;
-        }
-
-        if (target.IsRoot)
-        {
-            Logger.Log(LogLevel.Warn, "Blocking Drop: Cannot move to root.");
-            return true;
-        }
-
-        if (IsDescendant(source, target))
-        {
-            Logger.Log(LogLevel.Warn, "Blocking Drop: Cannot move a parent to its own child.");
-            return true;
-        }
-
-        if (target.Type == StoryItemType.TrashCan || source.Type == StoryItemType.TrashCan)
-        {
-            Logger.Log(LogLevel.Warn, "Blocking Drop: Cannot move to/from the trashcan.");
-            return true;
-        }
-
-        if (IsDescendant(StoryModel.ExplorerView[1], target) || IsDescendant(StoryModel.ExplorerView[1], source))
-        {
-            Logger.Log(LogLevel.Warn, "Blocking Drop: Operation involves trashcan.");
-            return true;
-        }
-
-        // If none of the conditions are met, the move is considered valid.
-        return false;
+        dragTargetNode = tree.NodeFromContainer(treeViewItem);
+        StoryNodeItem storyNode = dragTargetNode?.Content as StoryNodeItem;
+        Logger.Log(LogLevel.Trace, $"  Target node:{storyNode?.Name ?? "null"}");
+        return storyNode;
     }
+     /// <summary>
+     /// If both the source and target of a drag/drop are valid (that is, the
+     /// requested operation is a valid reordering of the nodes of the Navigation
+     /// TreeView), complete the move by modifying the TreeView's DataSource
+     /// ObservableCollection of StoryNodeItem instances.
+     /// </summary>
+    public void MoveStoryNode()
+    {
+        lock (dragLock)
+        {
+            try
+            {
+                StoryNodeItem sourceParent = dragSourceStoryNode.Parent;
+                StoryNodeItem targetParent = dragTargetStoryNode.Parent;
+                // Remove the source node from its original parent's children collection
+                sourceParent.Children.Remove(dragSourceStoryNode);
 
+                // Determine placement based on target node's details
+                if (dragTargetStoryNode.IsRoot || dragTargetStoryNode.Type == StoryItemType.Folder || dragTargetStoryNode.Type == StoryItemType.Section)
+                {
+                    // If the target is root or a Folder/Section, add the source as its child
+                    dragTargetStoryNode.Children.Insert(0, dragSourceStoryNode);
+                    dragSourceStoryNode.Parent = dragTargetStoryNode;
+                }
+                else
+                {
+                    // Otherwise, add the source node at the same level as the target, immediately after it
+                    int targetIndex = targetParent.Children.IndexOf(dragTargetStoryNode) + 1;
+                    targetParent.Children.Insert(targetIndex, dragSourceStoryNode);
+                    dragSourceStoryNode.Parent = targetParent;
+                }
+
+                ShowChange();
+            }
+            catch (Exception ex)
+            {
+                Logger.LogException(LogLevel.Error, ex, "Error in drag/drop operation");
+            }
+        }
+
+        // Refresh UI and report the move
+        ShellViewModel.ShowChange();
+    }
+    
    #endregion
     
     
