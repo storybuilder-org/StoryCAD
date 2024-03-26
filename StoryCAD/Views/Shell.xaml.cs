@@ -213,7 +213,6 @@ public sealed partial class Shell
             ShellVm.ShowMessage(LogLevel.Warn, ex.Message, true);
         }
 
-        NavigationTree.ItemsSource = ShellVm.DataSource;
         NavigationTree.CanDrag = true;
         NavigationTree.AllowDrop = true;
         Logger.Log(LogLevel.Trace, $"OnDragItemsCompleted exit");
