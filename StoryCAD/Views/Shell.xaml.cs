@@ -205,7 +205,8 @@ public sealed partial class Shell
         {
             if (dragSourceIsValid && dragTargetIsValid)
             {
-                ShellVm.MoveStoryNode();
+	            Logger.Log(LogLevel.Trace, $"Source and Target are valid.");
+				ShellVm.MoveStoryNode();
             }
         }
         catch (InvalidDragDropOperationException ex)
