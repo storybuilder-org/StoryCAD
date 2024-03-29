@@ -176,10 +176,12 @@ public sealed partial class Shell
             dragSourceIsValid = ShellVm.ValidateDragSource(args);
             if (dragSourceIsValid)
             {
-                args.Data.RequestedOperation = DataPackageOperation.Move;
+                args.Data.RequestedOperation = DataPackageOperation.None;
             }
             else
                 args.Cancel = true;
+                NavigationTree.UpdateLayout();
+                
         }
         catch (InvalidDragSourceException ex)
         {
@@ -212,8 +214,9 @@ public sealed partial class Shell
         catch (InvalidDragDropOperationException ex)
         {
             ShellVm.ShowMessage(LogLevel.Warn, ex.Message, true);
+            ShellVm.RefreshNavigationTree();
         }
-
+        
         NavigationTree.CanDrag = true;
         NavigationTree.AllowDrop = true;
         Logger.Log(LogLevel.Trace, $"OnDragItemsCompleted exit");
@@ -242,13 +245,14 @@ public sealed partial class Shell
         // The first two tests are unnecessary?
         //if (!ShellVm.ValidateDragAndDrop(dragSourceStoryNode, dragTargetStoryNode))
         //{
-        //    args.Handled = true;
+
         //    return;
         //}
  
         // if the drag location is valid, indicate so. The actual move only 
         // occurs when the user releases the mouse button (the Drop event).
-        args.AcceptedOperation = DataPackageOperation.Move;
+        args.AcceptedOperation = DataPackageOperation.None;
+        args.Handled = true;
         //args.Handled = true; // Mark the event as handled.
     }
 
@@ -264,7 +268,6 @@ public sealed partial class Shell
         // Is the if statement even necessary?
         Logger.Log(LogLevel.Trace, "OnDragLeave event");
         // Refresh the UI
-        NavigationTree.ItemsSource = ShellVm.DataSource;
         //if (ShellVm.invalid_dnd_state)
         //{
         //    e.Handled = true;

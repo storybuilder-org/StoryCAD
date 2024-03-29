@@ -2360,11 +2360,12 @@ public class ShellViewModel : ObservableRecipient
         {
             ShowMessage(LogLevel.Warn, "Drag to Trashcan invalid", true);
             args.Handled = true;
+            RefreshNavigationTree();
             return false;
         }
 
         // The drag target can be the root (Story Overview) node or any node below it
-        if (dragTargetNode.Depth < 0)
+        if (dragTargetNode!.Depth < 0)
         {
             ShowMessage(LogLevel.Warn, "Drag target is not root or below", true);
             args.Handled = true;
@@ -2377,6 +2378,14 @@ public class ShellViewModel : ObservableRecipient
         return true;
     }
 
+
+    public void RefreshNavigationTree()
+    {
+        var root = DataSource[0];
+        StoryElement dummyElement = new FolderModel("Dummy", StoryModel, StoryItemType.Folder);
+        StoryNodeItem dummyNode = new(dummyElement, root) { IsExpanded = true };
+        DataSource.Remove(dummyNode);
+    }
 
     /// <summary>
     /// Determine if a prospective NavigationTree drag-and-drop move is invalid.
@@ -2477,43 +2486,43 @@ public class ShellViewModel : ObservableRecipient
      {
          lock (dragLock)
          {
-             //try
-             //{
-				 
-             //    bool sourceIsTargetDescendant = IsDescendant(dragTargetStoryNode, dragSourceStoryNode);
-                 
-             //    StoryNodeItem sourceParent = dragSourceStoryNode.Parent;
-             //    // Remove the source node from its original parent's children collection
-             //    sourceParent.Children.Remove(dragSourceStoryNode);
+            try
+            {
 
-             //    // Determine the source node's placement based on the target node's details:
-             //    // If the target is a 'container' (root, folder, or section), 
-             //    // or if the source is a descendant of the target, the source node 
-             //    // is made the first child of the target.
-             //    if (dragTargetStoryNode.IsRoot || sourceIsTargetDescendant ||
-             //        dragTargetStoryNode.Type == StoryItemType.Folder || dragTargetStoryNode.Type == StoryItemType.Section)
-             //    {
-             //        // Add the source as the target's child
-             //        //dragTargetStoryNode.Children.Insert(0, dragSourceStoryNode);
-             //        //dragSourceStoryNode.Parent = dragTargetStoryNode;
-             //    }
-             //    // otherwise, the source is made a peer of the target by adding it to the target's parent's children.
-             //    else
-             //    {
-             //        // Otherwise, add the source node at the same level as the target, immediately after it
-             //        //int targetIndex = dragTargetStoryNode.Parent.Children.IndexOf(dragTargetStoryNode) + 1;
-             //        //dragTargetStoryNode.Parent.Children.Insert(targetIndex, dragSourceStoryNode);
-             //        //dragSourceStoryNode.Parent = dragTargetStoryNode.Parent;
-             //    }
-             //    ShowChange();
-             //    ShowMessage(LogLevel.Info, "Drag and drop successful", true);
-             //}
-             //catch (Exception ex)
-             //{
-             //    Logger.LogException(LogLevel.Error, ex, "Error in drag-drop operation");
-             //    ShowMessage(LogLevel.Error, "Error in drag-drop operation", false );
-             //}
-         }
+                bool sourceIsTargetDescendant = IsDescendant(dragTargetStoryNode, dragSourceStoryNode);
+
+                StoryNodeItem sourceParent = dragSourceStoryNode.Parent;
+                // Remove the source node from its original parent's children collection
+                sourceParent.Children.Remove(dragSourceStoryNode);
+
+                // Determine the source node's placement based on the target node's details:
+                // If the target is a 'container' (root, folder, or section), 
+                // or if the source is a descendant of the target, the source node 
+                // is made the first child of the target.
+                if (dragTargetStoryNode.IsRoot || sourceIsTargetDescendant ||
+                    dragTargetStoryNode.Type == StoryItemType.Folder || dragTargetStoryNode.Type == StoryItemType.Section)
+                {
+                    //Add the source as the target's child
+                    dragTargetStoryNode.Children.Insert(0, dragSourceStoryNode);
+                    dragSourceStoryNode.Parent = dragTargetStoryNode;
+                }
+                // otherwise, the source is made a peer of the target by adding it to the target's parent's children.
+                else
+                {
+                    // Otherwise, add the source node at the same level as the target, immediately after it
+                    int targetIndex = dragTargetStoryNode.Parent.Children.IndexOf(dragTargetStoryNode) + 1;
+                    dragTargetStoryNode.Parent.Children.Insert(targetIndex, dragSourceStoryNode);
+                    dragSourceStoryNode.Parent = dragTargetStoryNode.Parent;
+                }
+                ShowChange();  // Report the move
+                ShowMessage(LogLevel.Info, "Drag and drop successful", true);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogException(LogLevel.Error, ex, "Error in drag-drop operation");
+                ShowMessage(LogLevel.Error, "Error in drag-drop operation", false);
+            }
+        }
 
          // Refresh UI and report the move
          ShellViewModel.ShowChange();
