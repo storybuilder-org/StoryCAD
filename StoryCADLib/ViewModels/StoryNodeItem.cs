@@ -26,18 +26,17 @@ namespace StoryCAD.ViewModels;
 /// components are not visual, and have no Children, IsSelected or IsExpanded, and so on. 
 /// A StoryElement instance is displayed and modified on a Page such as ProblemPage or
 /// CharacterPage which is contained in Shell's SplitView.Content frame. In order to do so,
-/// it needs a TreeViewItem on the tree which binds to a StoryNodeItem, which
+/// it needs a TreeViewItem on the tree which binds to a StoryNodeItem, which is the visual
+/// representation of the StoryElement.
 /// 
 /// StoryCAD's data model is called StoryModel. StoryModel  contains two ObservableCollection
 /// lists of StoryNodeItems (and their counterpart StoryElements), a StoryExplorer collection which
 /// contains all Story Elements (the StoryOverview and all Problem, Character, Setting, Scene
-/// and Folder elements) and a NarratorView storyView which contains just Section (chapter, etc) and
-/// selected Scene elements and which represents the story as it's being narrated.
+/// and Folder elements and their TreeView nodes, and a NarratorView storyView which contains just
+/// Section (chapter, act, etc.) and Scene elements and which represents the story as it's being narrated.
 /// 
-/// In the Shell, the user can switch between the two views by loading one or the other model.
-/// NavigationTree will this point to one or the other of the collections. These two 'submodels' 
-/// or hierarchies consist of StoreNodeModel instances, and contain a similar structure to StoryNodeItem.
-/// 
+/// In the Shell, the user can switch between the two views by loading one or the other ObservableCollection.
+/// NavigationTree will thus point to one or the other of the collections as its bindings.  
 /// </summary>
 public class StoryNodeItem : INotifyPropertyChanged
 {

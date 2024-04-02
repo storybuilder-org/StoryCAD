@@ -2381,10 +2381,21 @@ public class ShellViewModel : ObservableRecipient
 
     public void RefreshNavigationTree()
     {
-        var root = DataSource[0];
-        StoryElement dummyElement = new FolderModel("Dummy", StoryModel, StoryItemType.Folder);
-        StoryNodeItem dummyNode = new(dummyElement, root) { IsExpanded = true };
-        DataSource.Remove(dummyNode);
+        switch (CurrentView)
+        {
+            case "Story Explorer View":
+                DataSource = StoryModel.NarratorView;
+                SelectedView = ViewList[1];
+                DataSource = StoryModel.ExplorerView;
+                SelectedView = ViewList[0];
+                break;
+            case "Story Narrator View":
+                DataSource = StoryModel.ExplorerView;
+                SelectedView = ViewList[0];
+                DataSource = StoryModel.NarratorView;
+                SelectedView = ViewList[1];
+                break;
+        }
     }
 
     /// <summary>

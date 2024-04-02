@@ -32,8 +32,6 @@ public sealed partial class Shell
     public PreferencesModel Preferences = Ioc.Default.GetRequiredService<AppState>().Preferences;
     public LogService Logger;
 
-    private StoryNodeItem dragTargetStoryNode;
-    private StoryNodeItem dragSourceStoryNode;
     private bool dragSourceIsValid;
     private bool dragTargetIsValid;
 
@@ -118,12 +116,13 @@ public sealed partial class Shell
             ShellVm.LastClickedTreeviewItem.IsSelected = false;
             ShellVm.LastClickedTreeviewItem.BorderBrush = null;
         } 
-        //Remove old right clicked nodes background
+        //Remove old right-clicked node's background
         TreeViewItem item = (TreeViewItem)sender;
         item.Background = new SolidColorBrush(new UISettings().GetColorValue(UIColorType.Accent));
 
         ShellVm.RightTappedNode = (StoryNodeItem)item.DataContext;
-        ShellVm.LastClickedTreeviewItem = item; //We can't set the background through righttappednode so we set a reference to the node itself to reset the background later
+        ShellVm.LastClickedTreeviewItem = item; //We can't set the background through RightTappedNode so
+                                                //we set a reference to the node itself to reset the background later
         ShellVm.ShowFlyoutButtons();
     }
 
@@ -169,7 +168,6 @@ public sealed partial class Shell
         Logger.Log(LogLevel.Trace, "OnDragItemsStarting enter");
         // Assume the worst
         args.Data.RequestedOperation = DataPackageOperation.None;
-        dragTargetStoryNode = null;   // set in case OnDragEnter is not fired 
 
         try
         {
@@ -180,13 +178,14 @@ public sealed partial class Shell
             }
             else
                 args.Cancel = true;
-                NavigationTree.UpdateLayout();
+            ShellVm.RefreshNavigationTree();
                 
         }
         catch (InvalidDragSourceException ex)
         {
             ShellVm.ShowMessage(LogLevel.Warn, ex.Message, true);
             args.Cancel = true;
+            ShellVm.RefreshNavigationTree();
         }
         
     }
@@ -239,40 +238,13 @@ public sealed partial class Shell
         {
             ShellVm.ShowMessage(LogLevel.Warn, ex.Message, true);
             args.Handled = true;
+            ShellVm.RefreshNavigationTree();
         }
-         
-        // Use IsInvalidMove to check validity
-        // The first two tests are unnecessary?
-        //if (!ShellVm.ValidateDragAndDrop(dragSourceStoryNode, dragTargetStoryNode))
-        //{
-
-        //    return;
-        //}
  
         // if the drag location is valid, indicate so. The actual move only 
         // occurs when the user releases the mouse button (the Drop event).
         args.AcceptedOperation = DataPackageOperation.None;
         args.Handled = true;
-        //args.Handled = true; // Mark the event as handled.
-    }
-
-
-    ///<summary>
-    /// Processes the drag leave event on a TreeView. It re-enables dropping for
-    /// future operations and resets any invalid drag-and-drop state flags.
-    ///</summary>
-    /// <param name="sender">The TreeView that is the source of the event.</param>
-    /// <param name="e">Event data that provides information about the drag operation.</param>
-    private void TreeView_OnDragLeave(object sender, DragEventArgs e)
-    {
-        // Is the if statement even necessary?
-        Logger.Log(LogLevel.Trace, "OnDragLeave event");
-        // Refresh the UI
-        //if (ShellVm.invalid_dnd_state)
-        //{
-        //    e.Handled = true;
-        //    ShellVm.invalid_dnd_state = false;
-        //}
     }
 
     #endregion
