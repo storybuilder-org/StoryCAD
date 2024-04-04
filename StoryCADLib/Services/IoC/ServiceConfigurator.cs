@@ -50,6 +50,7 @@ public class ServiceConfigurator
              .AddSingleton<TrashCanViewModel>()
              .AddSingleton<UnifiedVM>()
              .AddSingleton<InitVM>()
+             .AddSingleton<FeedbackViewModel>()
              .AddSingleton<TreeViewSelection>()
              // Register ContentDialog ViewModels
              .AddSingleton<NewProjectViewModel>()

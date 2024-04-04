@@ -28,6 +28,7 @@ using StoryCAD.DAL;
 using LaunchActivatedEventArgs = Microsoft.UI.Xaml.LaunchActivatedEventArgs;
 using StoryCAD.Services.IoC;
 using StoryCAD.Services;
+using StoryCAD.ViewModels.Tools;
 
 namespace StoryCAD;
 
