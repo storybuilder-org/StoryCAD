@@ -16,6 +16,7 @@ public class FeedbackViewModel : ObservableRecipient
 		{
 			Doppler doppler = new();
 			Doppler keys = await doppler.FetchSecretsAsync();
+			client.Credentials = new(keys.GITHUB_TOKEN, AuthenticationType.Bearer);
 		});
 	}
 
@@ -119,11 +120,17 @@ public class FeedbackViewModel : ObservableRecipient
 		if (FeedbackType == 0)
 		{
 			Issue = new("[BUG] " + Title);
-			Issue.Labels.Add("bug");
+			Issue.Body = $"""
+			              Describe your feature in detail such as what your feature should do:
+			              {Body}
+
+			              How your feature should work:
+			              {ExtraStepsText}
+			              """;
 		}
 		else
 		{
-			Issue = new("[Feature Request]");
+			Issue = new("[Feature Request] " + Title);
 			Issue.Labels.Add("enhancement");
 			Issue.Body = $"""
 			              Describe your feature in detail such as what your feature should do:

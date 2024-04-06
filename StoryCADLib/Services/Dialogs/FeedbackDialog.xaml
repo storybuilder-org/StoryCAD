@@ -21,7 +21,7 @@
 
 	    <!-- Warning to users to only submit meaningful feedback -->
 	    <InfoBar Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Content="On" Severity="Informational" Height="50" HorizontalAlignment="Stretch"
-	             Title="Try to make your feedback detailed, or it will be ignored."
+	             Title="Detailed feedback is more likely to be addressed quicker"
 	             IsOpen="True" IsClosable="False" Margin="10,0,10,10"/>
 
 	    <TextBox Grid.Row="1" Grid.Column="1" Header="Issue Title"
@@ -36,12 +36,12 @@
 
 		<TextBox Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" VerticalAlignment="Stretch"
 		         Header="{x:Bind FeedbackVM.DescriptionTitle, Mode=TwoWay}"
-		         Text="{x:Bind FeedbackVM.Body, Mode=TwoWay}"
+		         Text="{x:Bind FeedbackVM.Body, Mode=TwoWay}" TextWrapping="Wrap"
 		         PlaceholderText="{x:Bind FeedbackVM.DescriptionPlaceholderText, Mode=TwoWay}"/>
 
 		<TextBox Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" VerticalAlignment="Stretch"
 		         Header="{x:Bind FeedbackVM.ExtraStepsTitle, Mode=TwoWay}" MinHeight="50"
-				 Text="{x:Bind FeedbackVM.ExtraStepsText, Mode=TwoWay}"
+				 Text="{x:Bind FeedbackVM.ExtraStepsText, Mode=TwoWay}" TextWrapping="Wrap"
 		         PlaceholderText="{x:Bind FeedbackVM.ExtraStepsPlaceholderText, Mode=TwoWay}"/>
 	</Grid>
 </Page>
