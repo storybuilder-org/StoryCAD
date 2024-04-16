@@ -340,6 +340,7 @@
                                                    BorderThickness="1"
                                                    IsExpanded="{x:Bind IsExpanded, Mode=TwoWay}"
                                                    CanDrag="True" DragEnter ="TreeViewItem_DragEnter"
+                                                   DragLeave ="TreeViewItem_DragLeave"
                                                    RightTapped="TreeViewItem_RightTapped"
                                                    Tapped="TreeViewItem_Tapped">
                                     <StackPanel Orientation="Horizontal">

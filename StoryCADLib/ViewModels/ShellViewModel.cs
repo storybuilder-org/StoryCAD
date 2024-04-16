@@ -84,11 +84,8 @@ public class ShellViewModel : ObservableRecipient
 
     // The right-hand (detail) side of ShellView
     public Frame SplitViewFrame;
-    
+
     // Drag and drop variables
-    private TreeViewItem dragTargetItem;
-    private TreeViewNode dragTargetNode;
-    private StoryNodeItem dragTargetStoryNode;
     private StoryNodeItem dragSourceStoryNode;
     private readonly object dragLock = new object();
 
@@ -376,14 +373,14 @@ public class ShellViewModel : ObservableRecipient
             _canExecuteCommands = false;
             // Needs logging
             _contentDialog = new() { Content = new UnifiedMenuPage() };
-            if (Window.RequestedTheme == ElementTheme.Light) 
+            if (Window.RequestedTheme == ElementTheme.Light)
             {
                 _contentDialog.RequestedTheme = Window.RequestedTheme;
                 _contentDialog.Background = new SolidColorBrush(Colors.LightGray);
             }
             await Window.ShowContentDialog(_contentDialog);
             _canExecuteCommands = true;
-        }   
+        }
     }
 
     public async Task UnifiedNewFile(UnifiedVM dialogVM)
@@ -456,8 +453,10 @@ public class ShellViewModel : ObservableRecipient
     public void CreateTemplate(string ProjectName, int SelectedTemplateIndex)
     {
         OverviewModel _overview = new(Path.GetFileNameWithoutExtension(ProjectName), StoryModel)
-        { DateCreated = DateTime.Today.ToString("yyyy-MM-dd"), 
-            Author = State.Preferences.FirstName + " " + State.Preferences.LastName };
+        {
+            DateCreated = DateTime.Today.ToString("yyyy-MM-dd"),
+            Author = State.Preferences.FirstName + " " + State.Preferences.LastName
+        };
 
         StoryNodeItem _overviewNode = new(_overview, null) { IsExpanded = true, IsRoot = true };
         StoryModel.ExplorerView.Add(_overviewNode);
@@ -600,7 +599,7 @@ public class ShellViewModel : ObservableRecipient
         await Ioc.Default.GetRequiredService<BackupService>().BackupProject();
     }
 
-    public void TreeViewNodeClicked(object selectedItem , bool ClearHighlightCache = true)
+    public void TreeViewNodeClicked(object selectedItem, bool ClearHighlightCache = true)
     {
         if (selectedItem is null)
         {
@@ -705,7 +704,7 @@ public class ShellViewModel : ObservableRecipient
     /// </summary>
     public void SaveModel()
     {
-        if (SplitViewFrame == null|| SplitViewFrame.CurrentSourcePageType is null) { return; }
+        if (SplitViewFrame == null || SplitViewFrame.CurrentSourcePageType is null) { return; }
 
         Logger.Log(LogLevel.Trace, $"SaveModel Page type={SplitViewFrame.CurrentSourcePageType}");
 
@@ -760,7 +759,7 @@ public class ShellViewModel : ObservableRecipient
         // Stop the auto save service if it was running
 
         if (State.Preferences.AutoSave) { _autoSaveService.StopAutoSave(); }
-        
+
         // Stop the timed backup service if it was running
         Ioc.Default.GetRequiredService<BackupService>().StopTimedBackup();
 
@@ -882,7 +881,7 @@ public class ShellViewModel : ObservableRecipient
     {
         _autoSaveService.StopAutoSave();
         bool _saveExecuteCommands = _canExecuteCommands;
-       _canExecuteCommands = false;
+        _canExecuteCommands = false;
         string msg = autoSave ? "AutoSave" : "SaveFile command";
         if (autoSave && !StoryModel.Changed)
         {
@@ -1243,12 +1242,12 @@ public class ShellViewModel : ObservableRecipient
                         _problem.Notes = _scenes[0].Notes;
                     }
                     else foreach (MasterPlotScene _scene in _scenes)
-                    {
-                        SceneModel _child = new(StoryModel) { Name = _scene.SceneTitle, Remarks = "See Notes.", Notes = _scene.Notes };
-                        // add the new SceneModel & node to the end of the problem's children 
-                        StoryNodeItem _newNode = new(_child, _problemNode);
-                        _newNode.IsSelected = true;
-                    }
+                        {
+                            SceneModel _child = new(StoryModel) { Name = _scene.SceneTitle, Remarks = "See Notes.", Notes = _scene.Notes };
+                            // add the new SceneModel & node to the end of the problem's children 
+                            StoryNodeItem _newNode = new(_child, _problemNode);
+                            _newNode.IsSelected = true;
+                        }
 
                     Messenger.Send(new StatusChangedMessage(new($"MasterPlot {_masterPlotName} inserted", LogLevel.Info, true)));
                     ShowChange();
@@ -1262,7 +1261,7 @@ public class ShellViewModel : ObservableRecipient
     /// <summary>
     /// This function just calls print reports dialog.
     /// </summary>
-    private async void OpenPrintMenu() 
+    private async void OpenPrintMenu()
     {
         Ioc.Default.GetRequiredService<PrintReportDialogVM>().OpenPrintReportDialog();
     }
@@ -1273,7 +1272,7 @@ public class ShellViewModel : ObservableRecipient
         if (_canExecuteCommands)
         {
             _canExecuteCommands = false;
-        
+
             if (VerifyToolUse(true, true))
             {
                 //Creates and shows dialog
@@ -1349,7 +1348,7 @@ public class ShellViewModel : ObservableRecipient
                     }
 
                     SceneModel _sceneVar = new(StoryModel)
-                        { Name = Ioc.Default.GetRequiredService<StockScenesViewModel>().SceneName };
+                    { Name = Ioc.Default.GetRequiredService<StockScenesViewModel>().SceneName };
                     StoryNodeItem _newNode = new(_sceneVar, RightTappedNode);
                     _sourceChildren = RightTappedNode.Children;
                     TreeViewNodeClicked(_newNode);
@@ -1420,7 +1419,8 @@ public class ShellViewModel : ObservableRecipient
         _canExecuteCommands = false;
         Messenger.Send(new StatusChangedMessage(new("Launching GitHub Pages User Manual", LogLevel.Info, true)));
 
-        Process.Start(new ProcessStartInfo(){
+        Process.Start(new ProcessStartInfo()
+        {
             FileName = @"https://Storybuilder-org.github.io/StoryCAD/",
             UseShellExecute = true
         });
@@ -1617,7 +1617,7 @@ public class ShellViewModel : ObservableRecipient
             return false;
         }
 
-        if (CurrentNode.Parent.Parent == null 
+        if (CurrentNode.Parent.Parent == null
             && CurrentNode.Parent.Children.IndexOf(CurrentNode) == 0)
         {
             ShowStatusMessage("Cannot move further right", LogLevel.Warn);
@@ -1696,7 +1696,7 @@ public class ShellViewModel : ObservableRecipient
 
         return true;
     }
-    
+
     private void MoveTreeViewItemDown()
     {
         StatusMessage = string.Empty;
@@ -1760,7 +1760,7 @@ public class ShellViewModel : ObservableRecipient
         else
             return null;
     }
-    
+
     private bool MoveDownIsValid()
     {
         if (CurrentNode == null)
@@ -1785,7 +1785,7 @@ public class ShellViewModel : ObservableRecipient
 
     private void AddFolder()
     {
-        TreeViewNodeClicked(AddStoryElement(StoryItemType.Folder) , false);
+        TreeViewNodeClicked(AddStoryElement(StoryItemType.Folder), false);
     }
 
     private void AddSection()
@@ -1854,7 +1854,7 @@ public class ShellViewModel : ObservableRecipient
                 break;
             case StoryItemType.Problem:
                 _newNode = new StoryNodeItem(new ProblemModel(StoryModel), RightTappedNode);
-                break; 
+                break;
             case StoryItemType.Character:
                 _newNode = new StoryNodeItem(new CharacterModel(StoryModel), RightTappedNode);
                 break;
@@ -1880,7 +1880,7 @@ public class ShellViewModel : ObservableRecipient
             _newNode.Background = Window.ContrastColor;
             NewNodeHighlightCache.Add(_newNode);
         }
-        else { return null; }   
+        else { return null; }
 
         Messenger.Send(new IsChangedMessage(true));
         Messenger.Send(new StatusChangedMessage(new($"Added new {typeToAdd}", LogLevel.Info, true)));
@@ -1935,7 +1935,7 @@ public class ShellViewModel : ObservableRecipient
                 PrimaryButtonText = "Confirm",
                 SecondaryButtonText = "Cancel"
             };
-            if (await Ioc.Default.GetRequiredService<Windowing>().ShowContentDialog(_Dialog)== ContentDialogResult.Secondary) { _delete = false; }
+            if (await Ioc.Default.GetRequiredService<Windowing>().ShowContentDialog(_Dialog) == ContentDialogResult.Secondary) { _delete = false; }
         }
 
 
@@ -2052,33 +2052,33 @@ public class ShellViewModel : ObservableRecipient
 
     }
 
-        /// <summary>
-        /// Search up the StoryNodeItem tree to its
-        /// root from a specified node and return its StoryItemType. 
-        /// 
-        /// This allows code to determine which TreeView it's in.
-        /// </summary>
-        /// <param name="startNode">The node to begin searching from</param>
-        /// <returns>The StoryItemType of the root node</returns>
-        public static StoryItemType RootNodeType(StoryNodeItem startNode)
+    /// <summary>
+    /// Search up the StoryNodeItem tree to its
+    /// root from a specified node and return its StoryItemType. 
+    /// 
+    /// This allows code to determine which TreeView it's in.
+    /// </summary>
+    /// <param name="startNode">The node to begin searching from</param>
+    /// <returns>The StoryItemType of the root node</returns>
+    public static StoryItemType RootNodeType(StoryNodeItem startNode)
+    {
+        try
         {
-            try
-            {
-                StoryNodeItem node = startNode;
-                while (!node.IsRoot)
-                    node = node.Parent;
-                return node.Type;
-            }
-            catch (Exception ex)
-            {
-                Ioc.Default.GetService<LogService>().LogException(
-                    LogLevel.Error, ex, $"Root node type exception, this shouldn't happen {ex.Message} {ex.Message}");
-                return StoryItemType.Unknown;
-            }
-
+            StoryNodeItem node = startNode;
+            while (!node.IsRoot)
+                node = node.Parent;
+            return node.Type;
         }
-        
-        #endregion
+        catch (Exception ex)
+        {
+            Ioc.Default.GetService<LogService>().LogException(
+                LogLevel.Error, ex, $"Root node type exception, this shouldn't happen {ex.Message} {ex.Message}");
+            return StoryItemType.Unknown;
+        }
+
+    }
+
+    #endregion
 
     public void ViewChanged()
     {
@@ -2173,8 +2173,8 @@ public class ShellViewModel : ObservableRecipient
         }
         catch (Exception e) //errors (is RightTappedNode null?
         {
-             Logger.Log(LogLevel.Error, $"An error occurred in ShowFlyoutButtons() \n{e.Message}\n" +
-                 $"- For reference RightTappedNode is " + RightTappedNode);
+            Logger.Log(LogLevel.Error, $"An error occurred in ShowFlyoutButtons() \n{e.Message}\n" +
+                $"- For reference RightTappedNode is " + RightTappedNode);
         }
 
     }
@@ -2279,124 +2279,121 @@ public class ShellViewModel : ObservableRecipient
 
 
     #region Drag and Drop logic
-    
-    public bool ValidateDragSource(TreeViewDragItemsStartingEventArgs args)
-    { 
+
+    /// <summary>
+    /// Edit to validate a drag and drop source node.
+    ///
+    /// This routing is called from the Shell.xaml.cs DragItemsStarting event.
+    /// </summary>
+    /// <param name="source">object (should be StoryNodeItem)</param>
+    /// <returns>true if edits passed, false if not</returns>
+    public bool ValidateDragSource(object source)
+    {
+        Logger.Log(LogLevel.Trace, $"ValidateDragSource enter");
+
         // args.Items[0] is the object you're dragging.
         // With SelectionMode="Single" there will be only the one.
-        Type type = args.Items[0].GetType();
+        Type type = source.GetType();
         if (!type.Name.Equals("StoryNodeItem"))
         {
             ShowMessage(LogLevel.Warn, "Drag source isn't a tree node", true);
-            args.Cancel = true;
             return false;
         }
 
-        dragSourceStoryNode = args.Items[0] as StoryNodeItem;
+        dragSourceStoryNode = source as StoryNodeItem;
+        Logger.Log(LogLevel.Trace, $"  Source node:{dragSourceStoryNode?.Name ?? "null"}");
 
-        if (dragSourceStoryNode.IsRoot)
+        if (dragSourceStoryNode!.IsRoot)
         {
             ShowMessage(LogLevel.Warn, "Can't drag the tree root", true);
-            args.Cancel = true;
             return false;
         }
 
-        StoryNodeItem _parent = dragSourceStoryNode!.Parent;
-        if (_parent == null)
+        StoryNodeItem parent = dragSourceStoryNode!.Parent;
+        if (parent == null)
         {
             ShowMessage(LogLevel.Warn, "Can't drag from root", true);
-            args.Cancel = true;
             return false;
         }
 
-        while (!_parent.IsRoot) // find the drag source's root
+        while (!parent.IsRoot) // find the drag source's root
         {
-            _parent = _parent.Parent;
+            parent = parent.Parent;
         }
 
-        if (_parent.Type == StoryItemType.TrashCan)
+        Logger.Log(LogLevel.Trace, $"Root Type is {parent.Type}");
+
+        if (parent.Type == StoryItemType.TrashCan)
         {
             ShowMessage(LogLevel.Warn, "Can't drag from Trashcan", true);
-            args.Cancel = true;
             return false;
         }
 
         // Report status
-        Logger.Log(LogLevel.Trace, $"ValidateDrgSource exit");
+        Logger.Log(LogLevel.Trace, $"ValidateDragSource exit");
         // Source node is valid for move
-        Logger.Log(LogLevel.Trace, $"  Source node:{dragSourceStoryNode?.Name ?? "null"}");
         return true;
     }
 
-    public bool ValidateDragTarget(object sender, DragEventArgs args, TreeView navTree)
+    /// <summary>
+    /// Edit to validate a drag and drop  target node.
+    ///
+    /// This routing is called from the Shell.xaml.cs DragEnter event.
+    /// </summary>
+    /// <param name="target">The StoryNodeItem bound to the TreeViewItem being dragged over</param>
+    /// <returns>true if edits passed, false if not</returns>
+    public bool ValidateDragTarget(object target)
     {
-        // sender is the node you're dragging over (the prospective target)
-        Type type = sender.GetType();
-        if (!type.Name.Equals("TreeViewItem"))
+        Logger.Log(LogLevel.Trace, $"ValidateDragTarget enter");
+
+        // target is the node you're dragging over (the prospective target)
+        Type type = target.GetType();
+        if (!type.Name.Equals("StoryNodeItem"))
         {
-            ShowMessage(LogLevel.Warn, "Drag target isn't a tree node", true);
-            args.Handled = true;
+            ShowMessage(LogLevel.Warn, "Drag target isn't a story node", true);
             return false;
         }
 
-        dragTargetItem = (TreeViewItem) sender;
-        dragTargetNode = navTree.NodeFromContainer(dragTargetItem);
-        dragTargetStoryNode = dragTargetNode?.Content as StoryNodeItem;
+        var dragTargetStoryNode = target as StoryNodeItem;
         Logger.Log(LogLevel.Trace, $"  Target node:{dragTargetStoryNode?.Name ?? "null"}");
 
         // Find the node's root
-        var node = dragTargetNode;
-        while (node.Depth != 0) 
-        { 
-            node = node.Parent; 
+        var node= dragTargetStoryNode;
+        while (!node.IsRoot) // find the drag source's root
+        {
+            node = node.Parent;
         }
-		var root = node.Content as StoryNodeItem;
-		Logger.Log(LogLevel.Trace, $"Root Type is {root.Type}");
+        Logger.Log(LogLevel.Trace, $"Root Type is {node.Type}");
 
-		// Although for the drag source either root node is not valid, 
-		// as a target the first root (StoryOverview) is.
-
-		if (root!.Type == StoryItemType.TrashCan)
+        // Although for the drag source either root node is not valid, 
+        // as a target the first root (StoryOverview) is.
+        if (node!.Type == StoryItemType.TrashCan)
         {
             ShowMessage(LogLevel.Warn, "Drag to Trashcan invalid", true);
-            args.Handled = true;
-            RefreshNavigationTree();
             return false;
         }
 
-        // The drag target can be the root (Story Overview) node or any node below it
-        if (dragTargetNode!.Depth < 0)
-        {
-            ShowMessage(LogLevel.Warn, "Drag target is not root or below", true);
-            args.Handled = true;
-            return false;
-        }
+        //// The drag target can be the root (Story Overview) node or any node below it
+        //if (dragTargetNode!.Depth < 0)
+        //{
+        //    ShowMessage(LogLevel.Warn, "Drag target is not root or below", true);
+        //    return false;
+        //}
 
         // Target node is valid for move
-        args.Handled = true;
-        Logger.Log(LogLevel.Info, $"OnDragEnter exit");
+        Logger.Log(LogLevel.Info, $"ValidateDragTarget exit");
         return true;
     }
+    
+    /// <summary>
+    /// The visual feedback provided for drag-over effects can leave the TreeView
+    /// display hosed in some cases (such as attempting to drag the tree's root
+    /// node, for example.) This method repaints the TreeView to clean things up.
+    ///
+    /// Drag and drop can be used for either view (Explorer or Narrator), and so
+    /// both cases must be accounted for.
+    /// </summary>
 
-
-    public void RefreshNavigationTree()
-    {
-        switch (CurrentView)
-        {
-            case "Story Explorer View":
-                DataSource = StoryModel.NarratorView;
-                SelectedView = ViewList[1];
-                DataSource = StoryModel.ExplorerView;
-                SelectedView = ViewList[0];
-                break;
-            case "Story Narrator View":
-                DataSource = StoryModel.ExplorerView;
-                SelectedView = ViewList[0];
-                DataSource = StoryModel.NarratorView;
-                SelectedView = ViewList[1];
-                break;
-        }
-    }
 
     /// <summary>
     /// Determine if a prospective NavigationTree drag-and-drop move is invalid.
@@ -2404,28 +2401,20 @@ public class ShellViewModel : ObservableRecipient
     /// </summary>
     /// <param name="source">The source node being dragged.</param>
     /// <param name="target">The target node for the drop.</param>
-    /// <param name="args">Drag event arguments.</param>
     /// <returns>True if the move is invalid; otherwise, false.</returns>
     public bool ValidateDragAndDrop(StoryNodeItem source, StoryNodeItem target)
     {
         if (source == null)
         {
-	        Logger.Log(LogLevel.Trace, $"Source is null.");
-	        return false;
+            Logger.Log(LogLevel.Trace, $"Source is null.");
+            return false;
         }
 
         if (target == null)
         {
-			Logger.Log(LogLevel.Trace, $"Target is null.");
-			return false;
+            Logger.Log(LogLevel.Trace, $"Target is null.");
+            return false;
         }
-
-        // Moved to ValidateDragSource and ValidateDragTarget
-        //if (target.IsRoot)
-        //{
-        //    Logger.Log(LogLevel.Warn, "Blocking Drop: Cannot move to root.");
-        //    return false;
-        //}
 
         if (IsDescendant(source, target))
         {
@@ -2445,11 +2434,11 @@ public class ShellViewModel : ObservableRecipient
             return false;
         }
 
-		// If none of the conditions are met, the move is considered valid.
-		Logger.Log(LogLevel.Trace, $"Drag/Drop Operation is valid.");
-		return true;
+        // If none of the conditions are met, the move is considered valid.
+        Logger.Log(LogLevel.Trace, $"Drag/Drop Operation is valid.");
+        return true;
     }
- 
+
     /// <summary>
     /// Recursive method to check if StoryNodeItem 'x' is a descendant of StoryNodeItem 'y'.
     /// </summary>
@@ -2460,43 +2449,27 @@ public class ShellViewModel : ObservableRecipient
     {
         foreach (var child in y.Children)
         {
-            if (child == x || IsDescendant(child, x)) 
+            if (child == x || IsDescendant(child, x))
             {
-	            Logger.Log(LogLevel.Trace, $"{y.Name} is a descendant of {x.Name}");
-				return true;
+                Logger.Log(LogLevel.Trace, $"{y.Name} is a descendant of {x.Name}");
+                return true;
             }
         }
         Logger.Log(LogLevel.Trace, $"{y.Name} is not a descendant of {x.Name}");
 
-		return false;
+        return false;
     }
 
-     /// <summary>
-    /// The drag target (OnDragOver's sender argument) is typically a TreeViewItem.
-    /// The TreeView (NavigationTree) is bound to an ObservableCollection of
-    /// StoryNodeItems (ShellViewModel.DataSource). Each StoryNodeItem
-    /// can be thought of as the ViewModel to a corresponding TreeViewItem's View.
-    ///
-    /// This routine finds the corresponding StoryNodeItem.
+    /// <summary>
+    /// If both the source and target of a drag/drop are valid (that is, the
+    /// requested operation is a valid reordering of the nodes of the Navigation
+    /// TreeView), complete the move by modifying the TreeView's DataSource
+    /// ObservableCollection of StoryNodeItem instances.
     /// </summary>
-    /// <param name="dragTargetItem"></param>
-    public StoryNodeItem GetStoryNodeItem(TreeViewItem treeViewItem, TreeView tree)
+    public void MoveStoryNode(StoryNodeItem dragSourceStoryNode, StoryNodeItem dragTargetStoryNode)
     {
-        dragTargetNode = tree.NodeFromContainer(treeViewItem);
-        StoryNodeItem storyNode = dragTargetNode?.Content as StoryNodeItem;
-        Logger.Log(LogLevel.Trace, $"  Target node:{storyNode?.Name ?? "null"}");
-        return storyNode;
-    }
-     /// <summary>
-     /// If both the source and target of a drag/drop are valid (that is, the
-     /// requested operation is a valid reordering of the nodes of the Navigation
-     /// TreeView), complete the move by modifying the TreeView's DataSource
-     /// ObservableCollection of StoryNodeItem instances.
-     /// </summary>
-     public void MoveStoryNode()
-     {
-         lock (dragLock)
-         {
+        lock (dragLock)
+        {
             try
             {
 
@@ -2535,14 +2508,14 @@ public class ShellViewModel : ObservableRecipient
             }
         }
 
-         // Refresh UI and report the move
-         ShellViewModel.ShowChange();
-     }
+        // Refresh UI and report the move
+        ShellViewModel.ShowChange();
+    }
 
-     
-   #endregion
-    
-    
+
+    #endregion
+
+
     /// <summary>
     /// When a Story Element page's name changes the corresponding
     /// StoryNodeItem, which is bound to a TreeViewItem, must
@@ -2617,7 +2590,7 @@ public class ShellViewModel : ObservableRecipient
 
         PreferencesCommand = new RelayCommand(Preferences, () => _canExecuteCommands);
 
-        PrintReportsCommand = new RelayCommand(OpenPrintMenu,() => _canExecuteCommands);
+        PrintReportsCommand = new RelayCommand(OpenPrintMenu, () => _canExecuteCommands);
         ScrivenerReportsCommand = new RelayCommand(GenerateScrivenerReports, () => _canExecuteCommands);
 
         HelpCommand = new RelayCommand(LaunchGitHubPages, () => _canExecuteCommands);

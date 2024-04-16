@@ -45,6 +45,7 @@ public class DragAndDropTests
     [TestMethod]
     public void MovingToRoot()
     {
+        // Not an error?
         var result = ShellVM.ValidateDragAndDrop(child1, root);
         Assert.IsTrue(result, "Moving a node to a root node should be considered an invalid move.");
     }
