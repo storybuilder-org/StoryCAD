@@ -12,6 +12,7 @@ using StoryCAD.Models.Tools;
 using StoryCAD.Services.Logging;
 using StoryCAD.ViewModels;
 using Windows.Foundation;
+using Microsoft.UI.Input;
 using Windows.UI.ViewManagement;
 using Windows.ApplicationModel.DataTransfer;
 using Microsoft.UI;
@@ -35,8 +36,10 @@ public sealed partial class Shell
     public LogService Logger;
 
     private readonly object dragLock = new object();
+    private Point lastPointerPosition;
     private bool dragSourceIsValid;
-    private bool dragTargetAllowed;
+    private bool isDraggingOverTreeViewItem;
+    private bool isOutsideTreeView;
     private bool dragTargetIsValid;
     private StoryNodeItem dragSourceStoryNode;
     private StoryNodeItem dragTargetStoryNode;
@@ -176,7 +179,7 @@ public sealed partial class Shell
         // Don't let the default move or copy events take place
         args.Data.RequestedOperation = DataPackageOperation.None;
         // Assume the worst
-        dragTargetAllowed = false;  // target may not be in TreeView (i.e, AllowDrop = false)
+        isDraggingOverTreeViewItem = false;  // target may not be in TreeView (i.e, AllowDrop = false)
         dragSourceIsValid = false;
         dragTargetIsValid = false;
 
@@ -188,6 +191,7 @@ public sealed partial class Shell
             if (dragSourceIsValid)
             {
                 args.Data.RequestedOperation = DataPackageOperation.None;
+                NavigationTree.CanReorderItems = true;
             }
             else
             {
@@ -206,7 +210,7 @@ public sealed partial class Shell
         }
 
         Logger.Log(LogLevel.Trace, $"dragSourceIsValid: {dragSourceIsValid.ToString()}");
-        Logger.Log(LogLevel.Trace, $"dragTargetAllowed: {dragTargetAllowed.ToString()}");
+        Logger.Log(LogLevel.Trace, $"isDraggingOverTreeViewItem: {isDraggingOverTreeViewItem.ToString()}");
         Logger.Log(LogLevel.Trace, "OnDragItemsStarting exit");
     }
 
@@ -221,7 +225,7 @@ public sealed partial class Shell
         // Assume the worst:
         dragTargetIsValid = false;
         // If we're in DragEnter, the target is in the TreeView
-        dragTargetAllowed = true;
+        isDraggingOverTreeViewItem = true;
 
         try
         {
@@ -272,10 +276,10 @@ public sealed partial class Shell
         args.AcceptedOperation = DataPackageOperation.None;
         args.Handled = true;
 
-        Logger.Log(LogLevel.Trace, $"dragTargetAllowed: {dragTargetAllowed.ToString()}");
+        Logger.Log(LogLevel.Trace, $"isDraggingOverTreeViewItem: {isDraggingOverTreeViewItem.ToString()}");
         Logger.Log(LogLevel.Trace, $"dragTargetIsValid: {dragTargetIsValid.ToString()}");
         Logger.Log(LogLevel.Trace, "OnDragEnter exit");
-    }
+    } 
 
     /// <summary>
     /// Gets the StoryNodeItem that a TreeViewNode, represented by the sender, is bound to. This method is typically
@@ -329,50 +333,11 @@ public sealed partial class Shell
     /// </remarks>
     private void TreeViewItem_DragLeave(object sender, DragEventArgs e)
     {
-        lock (dragLock)
-        {
-            Logger.Log(LogLevel.Trace, $"DragLeave entry");
-            // Retrieve border thickness, padding, and margin directly
-            Thickness borderThickness = NavigationTree.BorderThickness;
-            Thickness padding = NavigationTree.Padding;
-            Thickness margin = NavigationTree.Margin;
 
-            // Calculate total horizontal and vertical adjustments
-            double horizontalAdjustment = borderThickness.Left + borderThickness.Right + padding.Left + padding.Right + margin.Left + margin.Right;
-            double verticalAdjustment = borderThickness.Top + borderThickness.Bottom + padding.Top + padding.Bottom + margin.Top + margin.Bottom;
-
-            // Log the retrieved values
-            Logger.Log(LogLevel.Trace, $"Border Thickness: {borderThickness}, Padding: {padding}, Margin: {margin}");
-            Logger.Log(LogLevel.Trace, $"Total Horizontal Adjustment: {horizontalAdjustment}, Total Vertical Adjustment: {verticalAdjustment}");
-
-            // Get the position of the mouse relative to the NavigationTree
-            Point position = e.GetPosition(NavigationTree);
-
-            // Log the position of the mouse
-            Logger.Log(LogLevel.Trace, $"Mouse Position Relative to NavigationTree: X={position.X}, Y={position.Y}");
-
-            // Adjust NavigationTree bounds to consider borders, padding, and margins
-            double adjustedWidth = NavigationTree.ActualWidth + horizontalAdjustment;
-            double adjustedHeight = NavigationTree.ActualHeight + verticalAdjustment;
-            Logger.Log(LogLevel.Trace, $"AdjustedWidth: {adjustedWidth}");
-            Logger.Log(LogLevel.Trace, $"AdjustedHeight: {adjustedWidth}");
-            Logger.Log(LogLevel.Trace, $"position.X: {position.X}");
-            Logger.Log(LogLevel.Trace, $"position.Y: {position.Y}");
-            
-            // Check if the position is outside the bounds of the adjusted NavigationTree
-            if (position.X < -horizontalAdjustment / 2 || position.Y < -verticalAdjustment / 2 ||
-                position.X > NavigationTree.ActualWidth + horizontalAdjustment / 2 || position.Y > NavigationTree.ActualHeight + verticalAdjustment / 2)
-            {
-                Logger.Log(LogLevel.Trace, "Dragged item outside of NavigationTree");
-                Console.WriteLine("Dragged item outside of NavigationTree");
-            }
-            else
-            {
-                Logger.Log(LogLevel.Trace, "Dragged item still inside TreeView bounds");
-            }
-            Logger.Log(LogLevel.Trace, $"DragLeave exit");
+        Logger.Log(LogLevel.Trace, $"DragLeave entry");
+        isDraggingOverTreeViewItem = false;
+        Logger.Log(LogLevel.Trace, $"DragLeave exit");
         }
-    }
 
     /// <summary>
     /// Handles the DragItemsCompleted event for TreeViewItem. This event will complete the drag and drop
@@ -386,23 +351,23 @@ public sealed partial class Shell
     {
         Logger.Log(LogLevel.Trace, $"DragItemsCompleted entry");
         Logger.Log(LogLevel.Trace, $"dragSourceIsValid: {dragSourceIsValid.ToString()}");
-        Logger.Log(LogLevel.Trace, $"dragTargetAllowed: {dragTargetAllowed.ToString()}");
+        Logger.Log(LogLevel.Trace, $"isOutsideTreeView: {isOutsideTreeView.ToString()}");
+        Logger.Log(LogLevel.Trace, $"isDraggingOverTreeViewItem: {isDraggingOverTreeViewItem.ToString()}");
         Logger.Log(LogLevel.Trace, $"dragTargetIsValid: {dragTargetIsValid.ToString()}");
         Logger.Log(LogLevel.Trace, $"DropResult: {args.DropResult.ToString()}");
 
         try
         {
+            //if (IsOutsideBoundary(lastPointerPosition, sender))
+            if (!isDraggingOverTreeViewItem ) 
+            {
+                ShellVm.ShowMessage(LogLevel.Warn, "Drag out of Navigation Tree not allowed", true);
+            }
+
             if (dragSourceIsValid && dragTargetIsValid)
             {
-                if (!dragTargetAllowed)
-                {
-                    ShellVm.ShowMessage(LogLevel.Warn, "Drag out of Navigation Tre not allowed", true);
-                }
-                else
-                {
-                    Logger.Log(LogLevel.Trace, $"Source and Target are valid.");
-                    ShellVm.MoveStoryNode(dragSourceStoryNode, dragSourceStoryNode);
-                }
+                Logger.Log(LogLevel.Trace, $"Source and Target are valid.");
+                //ShellVm.MoveStoryNode(dragSourceStoryNode, dragSourceStoryNode);
             }
         }
         catch (InvalidDragDropOperationException ex)
@@ -415,7 +380,48 @@ public sealed partial class Shell
         NavigationTree.CanDrag = true;
         NavigationTree.AllowDrop = true;
         NavigationTree.CanReorderItems = true;
+        dragSourceIsValid = false;
+        isDraggingOverTreeViewItem = false;
+        isOutsideTreeView = false;
+        dragTargetIsValid = false;
         Logger.Log(LogLevel.Trace, $"OnDragItemsCompleted exit");
+    }
+
+    private void NavigationTree_PointerMoved(object sender, PointerRoutedEventArgs e)
+    {
+        var pointerPosition = e.GetCurrentPoint((UIElement)sender).Position;
+        Logger.Log(LogLevel.Trace, $"Raw pointer position: X={pointerPosition.X}, Y={pointerPosition.Y}");
+        isOutsideTreeView = IsOutsideBoundary(pointerPosition, sender as TreeView);
+    }
+
+    private bool IsOutsideBoundary(Point position, TreeView treeView)
+    {
+        Logger.Log(LogLevel.Trace, $"IsOutsideBoundary entry");
+        // Calculate the bounds of the TreeView considering its actual size
+        var bounds = new Rect(0, 0, treeView.ActualWidth, treeView.ActualHeight);
+        double adjustedWidth = NavigationTree.ActualWidth;
+        double adjustedHeight = NavigationTree.ActualHeight;
+
+        // Get the TreeView's position relative to the window
+        var window = Ioc.Default.GetRequiredService<Windowing>().MainWindow as Window;
+        GeneralTransform treeViewTransform = treeView.TransformToVisual(window.Content);
+        Point treeViewPosition = treeViewTransform.TransformPoint(new Point(0, 0));
+
+        // Calculate the pointer's position relative to the TreeView
+        double pointerXRelativeToTreeView = position.X - treeViewPosition.X;
+        double pointerYRelativeToTreeView = position.Y - treeViewPosition.Y;
+
+        // Check if the pointer is outside the TreeView
+        bool isOutsideX = pointerXRelativeToTreeView < 0 || pointerXRelativeToTreeView > treeView.ActualWidth;
+        bool isOutsideY = pointerYRelativeToTreeView < 0 || pointerYRelativeToTreeView > treeView.ActualHeight;
+
+        Logger.Log(LogLevel.Trace, $"AdjustedWidth: {adjustedWidth}");
+        Logger.Log(LogLevel.Trace, $"AdjustedHeight: {adjustedWidth}");        
+        Logger.Log(LogLevel.Trace, $"Mouse Position Relative to NavigationTree: X={lastPointerPosition.X}, Y={lastPointerPosition.Y}");
+        // Check if the point lies outside the bounds
+        bool result = isOutsideX || isOutsideY;
+        Logger.Log(LogLevel.Trace, $"Result = {result.ToString()}" );
+        return result;
     }
 
     #endregion

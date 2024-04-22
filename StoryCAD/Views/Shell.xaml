@@ -329,6 +329,7 @@
                                    CanDragItems="True" AllowDrop="True" CanReorderItems="True"
                                    ItemsSource="{x:Bind ShellVm.DataSource, Mode=TwoWay}"
                                    SelectionMode="Single"
+                                   PointerMoved="NavigationTree_PointerMoved"
                                    DragItemsStarting="TreeView_DragItemsStarting"
                                    DragItemsCompleted="TreeView_DragItemsCompleted"
                                    ItemInvoked="TreeViewItem_Invoked">
@@ -339,7 +340,8 @@
                                                    BorderBrush="{x:Bind boarderBrush, Mode=OneWay}"
                                                    BorderThickness="1"
                                                    IsExpanded="{x:Bind IsExpanded, Mode=TwoWay}"
-                                                   CanDrag="True" DragEnter ="TreeViewItem_DragEnter"
+                                                   CanDrag="True" 
+                                                   DragEnter ="TreeViewItem_DragEnter"
                                                    DragLeave ="TreeViewItem_DragLeave"
                                                    RightTapped="TreeViewItem_RightTapped"
                                                    Tapped="TreeViewItem_Tapped">

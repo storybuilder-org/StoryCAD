@@ -2,7 +2,7 @@
   "profiles": {
     "StoryCAD (Package)": {
       "commandName": "MsixPackage",
-      "hotReloadEnabled": false,
+      "hotReloadEnabled": true,
       "nativeDebugging": true
     },
     "StoryCAD (Unpackaged)": {
