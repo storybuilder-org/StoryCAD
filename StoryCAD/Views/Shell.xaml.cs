@@ -378,6 +378,16 @@ public sealed partial class Shell
         Logger.Log(LogLevel.Trace, $"OnDragItemsCompleted exit");
     }
 
+    /// <summary>
+    /// This is the PointerMoved event for the NavigationTree TreeView.
+    /// it gets the current mouse position relative to the Tree4View.
+    ///
+    /// The mouse position is then used to identify if the mouse was moved
+    /// outside the TreeView bounds by calling IsOutsideBoundary. This
+    /// method 
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     private void NavigationTree_PointerMoved(object sender, PointerRoutedEventArgs e)
     {
         lastPointerPosition = e.GetCurrentPoint((UIElement)sender).Position;
@@ -390,6 +400,28 @@ public sealed partial class Shell
         }
     }
 
+    /// <summary>
+    /// This routine checks if the current mouse position is no longer within the NavigationTree
+    /// bounding box.  The mouse position is a Point relative to the TreeView returned from the
+    /// TreeView's MouseMoved event.
+    ///
+    /// The drag operation  which drives the mouse movement is not valid for a drop operation if
+    /// the mouse is no longer over the TreeView and thus valid to identify the current TreeViewItem
+    /// and the corresponding StoryNodeItem it's bound to. In that case PointerMoved will block
+    /// the TreeView node reordering and show the event as handled, triggering the
+    /// TreeViewItems_DragItemCompleted event, which will report the error and not perform the drop.
+    ///
+    /// If the mouse position is valid, it's saved, along with the current TreeViewItem as found
+    /// in the TreeViewItem_DragEnter event, for use in TreeViewItems_DragItemCompleted, to complete
+    /// the move. In that case it's used in a method similar to IsOutsideBoundary, GetMoveDIrection,
+    /// which compares the mouse location relative the current TreeViewItem to see if the mouse is
+    /// above, below or over the target TreeViewItem. If the node move is as a peer of the source
+    /// (in the list of Children of the two nodes' common Parent), the relative position of the
+    /// cursor icon decides where to insert before or after the target node.
+    /// </summary>
+    /// <param name="position">The Point which is the current mouse position relative to the tree</param>
+    /// <param name="treeView">the NavigationTree TreeView UI element</param>
+    /// <returns>bool True if the mouse is no longer within NavigationTree's bounding box</returns>
     private bool IsOutsideBoundary(Point position, TreeView treeView)
     {
         Logger.Log(LogLevel.Trace, $"IsOutsideBoundary entry");
