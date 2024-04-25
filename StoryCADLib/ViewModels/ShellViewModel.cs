@@ -2466,7 +2466,7 @@ public class ShellViewModel : ObservableRecipient
     /// TreeView), complete the move by modifying the TreeView's DataSource
     /// ObservableCollection of StoryNodeItem instances.
     /// </summary>
-    public void MoveStoryNode(StoryNodeItem dragSourceStoryNode, StoryNodeItem dragTargetStoryNode)
+    public void MoveStoryNode(StoryNodeItem dragSourceStoryNode, StoryNodeItem dragTargetStoryNode, DragAndDropDirection direction)
     {
         lock (dragLock)
         {
@@ -2492,11 +2492,21 @@ public class ShellViewModel : ObservableRecipient
                 }
                 // otherwise, the source is made a peer of the target by adding it to the target's parent's children.
                 else
-                {
-                    // Otherwise, add the source node at the same level as the target, immediately after it
-                    int targetIndex = dragTargetStoryNode.Parent.Children.IndexOf(dragTargetStoryNode) + 1;
-                    dragTargetStoryNode.Parent.Children.Insert(targetIndex, dragSourceStoryNode);
-                    dragSourceStoryNode.Parent = dragTargetStoryNode.Parent;
+                { 
+                    if (direction == DragAndDropDirection.AboveTargetItem)
+                    {
+                        // If the visual feedback (cursor icon) is above the target, add just before it
+                        int targetIndex = dragTargetStoryNode.Parent.Children.IndexOf(dragTargetStoryNode);
+                        dragTargetStoryNode.Parent.Children.Insert(targetIndex, dragSourceStoryNode);
+                        dragSourceStoryNode.Parent = dragTargetStoryNode.Parent;
+                    }
+                    else
+                    {
+                        // Otherwise, add the source node at the same level as the target, immediately after it
+                        int targetIndex = dragTargetStoryNode.Parent.Children.IndexOf(dragTargetStoryNode) + 1;
+                        dragTargetStoryNode.Parent.Children.Insert(targetIndex, dragSourceStoryNode);
+                        dragSourceStoryNode.Parent = dragTargetStoryNode.Parent;
+                    }
                 }
                 ShowChange();  // Report the move
                 ShowMessage(LogLevel.Info, "Drag and drop successful", true);

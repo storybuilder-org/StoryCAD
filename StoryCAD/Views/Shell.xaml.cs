@@ -42,6 +42,7 @@ public sealed partial class Shell
     private bool isOutsideTreeView;
     private bool dragTargetIsValid;
     private StoryNodeItem dragSourceStoryNode;
+    private TreeViewItem dragTargetItem;  // used to determine drag and drop direction if peer 
     private StoryNodeItem dragTargetStoryNode;
 
     public Shell()
@@ -242,17 +243,6 @@ public sealed partial class Shell
                 return;
             }
 
-            //if (node.Type == StoryItemType.TrashCan)
-            //{
-            //    ShellVm.ShowMessage(LogLevel.Warn, "Drag to Trashcan invalid", true);
-            //    dragTargetIsValid = false;
-            //    var item = sender as TreeViewItem;
-            //    NavigationTree.CanReorderItems = false;
-            //    args.Handled = true;
-            //    return;
-            //}
-
-
             // If we have a StoryNodeItem, perform other edits.
             dragTargetIsValid = ShellVm.ValidateDragTarget(dragTargetStoryNode);
             if (!dragTargetIsValid)
@@ -297,10 +287,12 @@ public sealed partial class Shell
     {
         Logger.Log(LogLevel.Trace, $"GetNodeFromTreeViewItem entry");
         // Ensure the sender is a TreeViewItem. If not, return null.
-        if (!(sender is TreeViewItem dragTargetItem))
+        var item = sender as TreeViewItem;
+        if (item is null)
         {
             return null; // Indicating that the sender is not a TreeViewItem.
         }
+        dragTargetItem = item;
 
         // Attempt to get the node and its content.
         var dragTargetNode = NavigationTree.NodeFromContainer(dragTargetItem);
@@ -359,7 +351,6 @@ public sealed partial class Shell
 
         try
         {
-            //if (IsOutsideBoundary(lastPointerPosition, sender))
             if (isOutsideTreeView) 
             {
                 ShellVm.ShowMessage(LogLevel.Warn, "Drag out of Navigation Tree not allowed", true);
@@ -367,7 +358,7 @@ public sealed partial class Shell
             else if (dragSourceIsValid && dragTargetIsValid)
             {
                 Logger.Log(LogLevel.Trace, $"Source and Target are valid.");
-                ShellVm.MoveStoryNode(dragSourceStoryNode, dragTargetStoryNode);
+                ShellVm.MoveStoryNode(dragSourceStoryNode, dragTargetStoryNode, GetMoveDirection(lastPointerPosition, dragTargetItem));
             }
         }
         catch (InvalidDragDropOperationException ex)
@@ -389,9 +380,9 @@ public sealed partial class Shell
 
     private void NavigationTree_PointerMoved(object sender, PointerRoutedEventArgs e)
     {
-        var pointerPosition = e.GetCurrentPoint((UIElement)sender).Position;
-        Logger.Log(LogLevel.Trace, $"Raw pointer position: X={pointerPosition.X}, Y={pointerPosition.Y}");
-        isOutsideTreeView = IsOutsideBoundary(pointerPosition, sender as TreeView);
+        lastPointerPosition = e.GetCurrentPoint((UIElement)sender).Position;
+        Logger.Log(LogLevel.Trace, $"Raw pointer position: X={lastPointerPosition.X}, Y={lastPointerPosition.Y}");
+        isOutsideTreeView = IsOutsideBoundary(lastPointerPosition, sender as TreeView);
         if (isOutsideTreeView)
         {
             NavigationTree.CanReorderItems = false;
@@ -427,6 +418,62 @@ public sealed partial class Shell
         bool result = isOutsideX || isOutsideY;
         Logger.Log(LogLevel.Trace, $"Result = {result.ToString()}" );
         return result;
+    }
+
+    /// <summary>
+    /// The drag cursor icon, which gives feedback on the drag operation, is always 'move'
+    /// rather than 'copy', since we're just reordering TreeView nodes, but the drag
+    /// direction can be either up or down, and thus the cursor icon may be above or below
+    /// the target TreeViewItem. If we're dragging to reorder a node in a list (under the
+    /// same parent node), we'll want to know whether to insert the source node before or
+    /// after the target node.
+    ///
+    /// We already have the current mouse position, from NavigationTree_PointerMoved, and
+    /// use it to decide if the mouse is outside its bounds (The NavigationTree rectangle)
+    /// and thus an invalid move. But if the move is still in bounds, we can use the
+    /// mouse position relative to the target TreeViewItem (which we have from
+    /// TreeViewItem_DragEnter) to see if we should insert above or below the target node. 
+    /// </summary>
+    /// <param name="position">The last mouse position when the drop occured</param>
+    /// <param name="targetTreeViewItem">The target TreeViewItem (the last TreeViewItem visited)
+    /// <returns>DragAndDropDirection (above or below target item)</returns>
+    private DragAndDropDirection GetMoveDirection(Point position, TreeViewItem targetTreeViewItem)
+    {
+        Logger.Log(LogLevel.Trace, $"GetMoveDirection entry");
+        // Calculate the bounds of the target TreeViewItem considering its actual size
+        var bounds = new Rect(0, 0, targetTreeViewItem.ActualWidth, targetTreeViewItem.ActualHeight);
+
+        // Get the targetTreeViewItem's position relative to the window
+        var window = Ioc.Default.GetRequiredService<Windowing>().MainWindow as Window;
+        GeneralTransform targetTreeViewItemTransform = targetTreeViewItem.TransformToVisual(window.Content);
+        Point targetTreeViewItemPosition = targetTreeViewItemTransform.TransformPoint(new Point(0, 0));
+
+        // Calculate the pointer's position relative to the targetTreeViewItem
+        //double pointerXRelativeToTreeViewItem = position.X - targetTreeViewItemPosition.X;
+        double pointerYRelativeToTreeViewItem = position.Y - targetTreeViewItemPosition.Y;
+
+        // Check if the pointer is outside the targetTreeViewItem
+        // This code gets replaced by 'above' or 'below'
+        //bool isOutsideX = pointerXRelativeToTreeViewItem < 0 || pointerXRelativeToTreeViewItem > targetTreeViewItem.ActualWidth;
+        bool isOutsideY = pointerYRelativeToTreeViewItem < 0 || pointerYRelativeToTreeViewItem > targetTreeViewItem.ActualHeight;
+        DragAndDropDirection direction;
+        if (pointerYRelativeToTreeViewItem < 0)
+        {
+            direction = DragAndDropDirection.AboveTargetItem;
+        }
+        else if (pointerYRelativeToTreeViewItem > targetTreeViewItem.ActualHeight)
+        {
+            direction = DragAndDropDirection.BelowTargetItem;
+        }
+        else
+        {
+            direction = DragAndDropDirection.OnTargetItem;
+        }
+
+        Logger.Log(LogLevel.Trace, $"TreeViewItem Height: {targetTreeViewItem.ActualHeight}");        
+        Logger.Log(LogLevel.Trace, $"Mouse Y Position Relative to NavigationTree: Y={lastPointerPosition.Y}");
+        Logger.Log(LogLevel.Trace, $"direction = {direction.ToString()}" );
+        return direction;
     }
 
     #endregion
