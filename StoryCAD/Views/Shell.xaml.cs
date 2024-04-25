@@ -179,9 +179,10 @@ public sealed partial class Shell
         // Don't let the default move or copy events take place
         args.Data.RequestedOperation = DataPackageOperation.None;
         // Assume the worst
-        isDraggingOverTreeViewItem = false;  // target may not be in TreeView (i.e, AllowDrop = false)
+        isOutsideTreeView = false; // target may not be in TreeView (i.e, AllowDrop = false)
         dragSourceIsValid = false;
         dragTargetIsValid = false;
+        ShellVm.ShowMessage(LogLevel.Info, "Drag starting", false);
 
         try
         {
@@ -359,15 +360,14 @@ public sealed partial class Shell
         try
         {
             //if (IsOutsideBoundary(lastPointerPosition, sender))
-            if (!isDraggingOverTreeViewItem ) 
+            if (isOutsideTreeView) 
             {
                 ShellVm.ShowMessage(LogLevel.Warn, "Drag out of Navigation Tree not allowed", true);
             }
-
-            if (dragSourceIsValid && dragTargetIsValid)
+            else if (dragSourceIsValid && dragTargetIsValid)
             {
                 Logger.Log(LogLevel.Trace, $"Source and Target are valid.");
-                //ShellVm.MoveStoryNode(dragSourceStoryNode, dragSourceStoryNode);
+                ShellVm.MoveStoryNode(dragSourceStoryNode, dragTargetStoryNode);
             }
         }
         catch (InvalidDragDropOperationException ex)
@@ -392,6 +392,11 @@ public sealed partial class Shell
         var pointerPosition = e.GetCurrentPoint((UIElement)sender).Position;
         Logger.Log(LogLevel.Trace, $"Raw pointer position: X={pointerPosition.X}, Y={pointerPosition.Y}");
         isOutsideTreeView = IsOutsideBoundary(pointerPosition, sender as TreeView);
+        if (isOutsideTreeView)
+        {
+            NavigationTree.CanReorderItems = false;
+            e.Handled = true;
+        }
     }
 
     private bool IsOutsideBoundary(Point position, TreeView treeView)
