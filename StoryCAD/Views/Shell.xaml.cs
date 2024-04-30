@@ -242,7 +242,7 @@ public sealed partial class Shell
                 //ShellVm.RefreshNavigationTree();
                 return;
             }
-
+            
             // If we have a StoryNodeItem, perform other edits.
             dragTargetIsValid = ShellVm.ValidateDragTarget(dragTargetStoryNode);
             if (!dragTargetIsValid)
@@ -251,6 +251,8 @@ public sealed partial class Shell
                 args.Handled = true;
                 //ShellVm.RefreshNavigationTree();
             }
+            
+            GetMoveDirection(lastPointerPosition, dragTargetItem);
         }
         catch (Exception ex)
         {
