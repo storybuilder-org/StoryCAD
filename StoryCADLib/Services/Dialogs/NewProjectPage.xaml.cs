@@ -111,12 +111,14 @@ public sealed partial class NewProjectPage : Page
         {
 	        Logger.Log(LogLevel.Warn, $"User lacks access to {ProjectFolderPath}");
 			//Set path to users documents if they try to save to an invalid location
+			UnifiedVM.ProjectPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
 			ProjectFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+			ProjectPathName.Text = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
 	        return;
         }
 		catch
         {
-            ProjectName.Text = "";
+			ProjectName.Text = "";
             ProjectName.PlaceholderText = "You can't call your file that!";
             return;
         }
