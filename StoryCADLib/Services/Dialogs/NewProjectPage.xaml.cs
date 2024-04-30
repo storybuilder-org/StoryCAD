@@ -8,12 +8,15 @@ using Microsoft.UI.Xaml.Controls;
 using StoryCAD.ViewModels;
 using WinRT;
 using System.Text.RegularExpressions;
-using Windows.Networking;
+using CommunityToolkit.Mvvm.DependencyInjection;
+using StoryCAD.Services.Logging;
 
 namespace StoryCAD.Services.Dialogs;
 
 public sealed partial class NewProjectPage : Page
 {
+	LogService Logger = Ioc.Default.GetRequiredService<LogService>();
+
     public NewProjectPage(UnifiedVM vm)
     {
         InitializeComponent();
@@ -71,9 +74,10 @@ public sealed partial class NewProjectPage : Page
 
     private void CheckValidity(object sender, RoutedEventArgs e)
     {
+	    Logger.Log(LogLevel.Info, $"Testing filename validity for {ProjectFolderPath}\\{ProjectName}");
 
-        //Checks file path validity
-        try { Directory.CreateDirectory(ProjectPathName.Text); }
+		//Checks file path validity
+		try { Directory.CreateDirectory(ProjectPathName.Text); }
         catch
         {
             ProjectPathName.Text = "";
@@ -82,7 +86,8 @@ public sealed partial class NewProjectPage : Page
         }
 
         //Checks file name validity
-        //NOTE: File.Create() Strips out anything past an illegal character (or throws an exception if it's just an illegal character)
+        //NOTE: File.Create() Strips out anything past an illegal character
+        //(or throws an exception if it's just an illegal character)
         try
         {
             string testfile = Path.Combine(ProjectPathName.Text, ProjectName.Text);
@@ -99,11 +104,17 @@ public sealed partial class NewProjectPage : Page
 
             if (!File.Exists(testfile))
                 throw new FileNotFoundException("the filename was not found.");
-            else
-                File.Delete(testfile);
+	        File.Delete(testfile);
 
         }
-        catch
+        catch (UnauthorizedAccessException)
+        {
+	        Logger.Log(LogLevel.Warn, $"User lacks access to {ProjectFolderPath}");
+			//Set path to users documents if they try to save to an invalid location
+			ProjectFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+	        return;
+        }
+		catch
         {
             ProjectName.Text = "";
             ProjectName.PlaceholderText = "You can't call your file that!";
