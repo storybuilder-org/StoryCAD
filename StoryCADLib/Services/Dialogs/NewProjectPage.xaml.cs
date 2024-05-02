@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using System.Runtime.InteropServices;
 using Windows.Storage;
 using Windows.Storage.Pickers;
@@ -7,16 +6,10 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using StoryCAD.ViewModels;
 using WinRT;
-using System.Text.RegularExpressions;
-using CommunityToolkit.Mvvm.DependencyInjection;
-using StoryCAD.Services.Logging;
-
 namespace StoryCAD.Services.Dialogs;
 
 public sealed partial class NewProjectPage : Page
 {
-	LogService Logger = Ioc.Default.GetRequiredService<LogService>();
-
     public NewProjectPage(UnifiedVM vm)
     {
         InitializeComponent();
@@ -71,58 +64,4 @@ public sealed partial class NewProjectPage : Page
 
     [DllImport("user32.dll", ExactSpelling = true, CharSet = CharSet.Auto, PreserveSig = true, SetLastError = false)]
     public static extern IntPtr GetActiveWindow();
-
-    private void CheckValidity(object sender, RoutedEventArgs e)
-    {
-	    Logger.Log(LogLevel.Info, $"Testing filename validity for {ProjectFolderPath}\\{ProjectName}");
-
-		//Checks file path validity
-		try { Directory.CreateDirectory(ProjectPathName.Text); }
-        catch
-        {
-            ProjectPathName.Text = "";
-            ProjectPathName.PlaceholderText = "You can't put files here!";
-            return;
-        }
-
-        //Checks file name validity
-        //NOTE: File.Create() Strips out anything past an illegal character
-        //(or throws an exception if it's just an illegal character)
-        try
-        {
-            string testfile = Path.Combine(ProjectPathName.Text, ProjectName.Text);
-            var x = Path.GetInvalidPathChars();
-            //Check validity
-            Regex BadChars = new("[" + Regex.Escape(Path.GetInvalidPathChars().ToString()) + "]");
-            if (BadChars.IsMatch(testfile))
-            {
-                throw new FileNotFoundException("the filename is invalid.");
-            }
-
-            //Try creating file and then checking it exists.
-            using (FileStream fs = File.Create(testfile)) { }
-
-            if (!File.Exists(testfile))
-                throw new FileNotFoundException("the filename was not found.");
-	        File.Delete(testfile);
-
-        }
-        catch (UnauthorizedAccessException)
-        {
-	        Logger.Log(LogLevel.Warn, $"User lacks access to {ProjectFolderPath}");
-			//Set path to users documents if they try to save to an invalid location
-			UnifiedVM.ProjectPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-			ProjectFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-			ProjectPathName.Text = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-	        return;
-        }
-		catch
-        {
-			ProjectName.Text = "";
-            ProjectName.PlaceholderText = "You can't call your file that!";
-            return;
-        }
-
-        UnifiedVM.MakeProject();
-    }
 }
