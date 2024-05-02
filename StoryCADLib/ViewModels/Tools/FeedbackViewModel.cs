@@ -1,7 +1,12 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.DependencyInjection;
+using NLog;
 using Octokit;
 using StoryCAD.Services.Json;
+using StoryCAD.Services.Logging;
+using LogLevel = StoryCAD.Services.Logging.LogLevel;
 
 namespace StoryCAD.ViewModels.Tools;
 
@@ -111,37 +116,46 @@ public class FeedbackViewModel : ObservableRecipient
 	#endregion
 
 	/// <summary>
-	/// Creates feedback on Github
+	/// Creates feedback on GitHub
 	/// </summary>
 	public async void CreateFeedback()
 	{
-		//Append issue type to title
-		NewIssue Issue;
-		if (FeedbackType == 0)
+		try
 		{
-			Issue = new("[BUG] " + Title);
-			Issue.Body = $"""
-			              Describe your feature in detail such as what your feature should do:
-			              {Body}
+			//Append issue type to title
+			NewIssue Issue;
+			if (FeedbackType == 0)
+			{
+				Issue = new("[BUG] " + Title);
+				Issue.Body = $"""
+				              Describe your feature in detail such as what your feature should do:
+				              {Body}
 
-			              How your feature should work:
-			              {ExtraStepsText}
-			              """;
+				              How your feature should work:
+				              {ExtraStepsText}
+				              """;
+			}
+			else
+			{
+				Issue = new("[Feature Request] " + Title);
+				Issue.Labels.Add("enhancement");
+				Issue.Body = $"""
+				              Describe your feature in detail such as what your feature should do:
+				              {Body}
+
+				              How your feature should work:
+				              {ExtraStepsText}
+				              """;
+			}
+
+
+			await client.Issue.Create("storybuilder-org", "StoryCAD", Issue);
 		}
-		else
+		catch (Exception e)
 		{
-			Issue = new("[Feature Request] " + Title);
-			Issue.Labels.Add("enhancement");
-			Issue.Body = $"""
-			              Describe your feature in detail such as what your feature should do:
-			              {Body}
-			              
-			              How your feature should work:
-			              {ExtraStepsText}
-			              """;
+			Ioc.Default.GetRequiredService<LogService>()
+				.LogException(LogLevel.Error, e, $"Failed to post feedback due to exception {e.Message}");
 		}
 
-		
-		await client.Issue.Create("storybuilder-org", "StoryCAD", Issue);
 	}
 }
