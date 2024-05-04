@@ -15,9 +15,9 @@ using Microsoft.UI.Dispatching;
 using StoryCAD.Services;
 using Windows.ApplicationModel.DataTransfer;
 using Microsoft.UI;
-using Windows.Storage.Provider;
+using StoryCAD.Services.Dialogs;
 using StoryCAD.Services.Ratings;
-
+using StoryCAD.ViewModels.Tools;
 
 namespace StoryCAD.Views;
 
@@ -288,5 +288,21 @@ public sealed partial class Shell
             ShellVm.LastClickedTreeviewItem.BorderBrush = null;
         }
         ShellVm.LastClickedTreeviewItem = (TreeViewItem)sender;
+    }
+
+    private async void ButtonBase_OnClick(object sender, RoutedEventArgs e)
+    {
+	    var Result = await Ioc.Default.GetRequiredService<Windowing>().ShowContentDialog(new()
+	    {
+		    Content = new FeedbackDialog(),
+		    PrimaryButtonText = "Submit Feedback",
+			SecondaryButtonText = "Close",
+		    Title = "Submit Feedback",
+	    });
+
+	    if (Result == ContentDialogResult.Primary)
+	    {
+		    Ioc.Default.GetRequiredService<FeedbackViewModel>().CreateFeedback();
+	    }
     }
 }
