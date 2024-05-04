@@ -471,44 +471,47 @@ public sealed partial class Shell
     /// <param name="position">The last mouse position when the drop occured</param>
     /// <param name="targetTreeViewItem">The target TreeViewItem (the last TreeViewItem visited)
     /// <returns>DragAndDropDirection (above or below target item)</returns>
-    private DragAndDropDirection GetMoveDirection(Point position, TreeViewItem targetTreeViewItem)
+private DragAndDropDirection GetMoveDirection(Point position, TreeViewItem targetTreeViewItem)
+{
+    Logger.Log(LogLevel.Trace, $"GetMoveDirection entry");
+    Logger.Log(LogLevel.Trace, $"TreeViewItem Height: {targetTreeViewItem.ActualHeight}");
+    Logger.Log(LogLevel.Trace, $"pointer position.X: {position.X}");
+    Logger.Log(LogLevel.Trace, $"pointer position.Y: {position.Y}");
+    
+    // Get the window and transform both the targetTreeViewItem and the pointer position to the same relative coordinates
+    var window = Ioc.Default.GetRequiredService<Windowing>().MainWindow as Window;
+    GeneralTransform targetTreeViewItemTransform = targetTreeViewItem.TransformToVisual(window.Content);
+    Point targetTreeViewItemPosition = targetTreeViewItemTransform.TransformPoint(new Point(0, 0));
+
+    // Transform the pointer position to the window.Content coordinates
+    GeneralTransform pointerTransform = window.Content.TransformToVisual(window.Content);
+    Point transformedPointerPosition = pointerTransform.TransformPoint(position);
+
+    // Calculate the pointer's position relative to the targetTreeViewItem
+    double pointerYRelativeToTreeViewItem = transformedPointerPosition.Y - targetTreeViewItemPosition.Y;
+
+    // Determine if the pointer is above or below the targetTreeViewItem
+    bool isOutsideY = pointerYRelativeToTreeViewItem < 0 || pointerYRelativeToTreeViewItem > targetTreeViewItem.ActualHeight;
+    DragAndDropDirection direction;
+    if (pointerYRelativeToTreeViewItem < 0)
     {
-        Logger.Log(LogLevel.Trace, $"GetMoveDirection entry");
-        // Calculate the bounds of the target TreeViewItem considering its actual size
-        var bounds = new Rect(0, 0, targetTreeViewItem.ActualWidth, targetTreeViewItem.ActualHeight);
-
-        // Get the targetTreeViewItem's position relative to the window
-        var window = Ioc.Default.GetRequiredService<Windowing>().MainWindow as Window;
-        GeneralTransform targetTreeViewItemTransform = targetTreeViewItem.TransformToVisual(window.Content);
-        Point targetTreeViewItemPosition = targetTreeViewItemTransform.TransformPoint(new Point(0, 0));
-
-        // Calculate the pointer's position relative to the targetTreeViewItem
-        //double pointerXRelativeToTreeViewItem = position.X - targetTreeViewItemPosition.X;
-        double pointerYRelativeToTreeViewItem = position.Y - targetTreeViewItemPosition.Y;
-
-        // Check if the pointer is outside the targetTreeViewItem
-        // This code gets replaced by 'above' or 'below'
-        //bool isOutsideX = pointerXRelativeToTreeViewItem < 0 || pointerXRelativeToTreeViewItem > targetTreeViewItem.ActualWidth;
-        bool isOutsideY = pointerYRelativeToTreeViewItem < 0 || pointerYRelativeToTreeViewItem > targetTreeViewItem.ActualHeight;
-        DragAndDropDirection direction;
-        if (pointerYRelativeToTreeViewItem < 0)
-        {
-            direction = DragAndDropDirection.AboveTargetItem;
-        }
-        else if (pointerYRelativeToTreeViewItem > targetTreeViewItem.ActualHeight)
-        {
-            direction = DragAndDropDirection.BelowTargetItem;
-        }
-        else
-        {
-            direction = DragAndDropDirection.OnTargetItem;
-        }
-
-        Logger.Log(LogLevel.Trace, $"TreeViewItem Height: {targetTreeViewItem.ActualHeight}");        
-        Logger.Log(LogLevel.Trace, $"Mouse Y Position Relative to NavigationTree: Y={lastPointerPosition.Y}");
-        Logger.Log(LogLevel.Trace, $"direction = {direction.ToString()}" );
-        return direction;
+        direction = DragAndDropDirection.AboveTargetItem;
     }
+    else if (pointerYRelativeToTreeViewItem > targetTreeViewItem.ActualHeight)
+    {
+        direction = DragAndDropDirection.BelowTargetItem;
+    }
+    else
+    {
+        direction = DragAndDropDirection.OnTargetItem;
+    }
+
+    Logger.Log(LogLevel.Trace, $"Mouse Y Position Relative to NavigationTree: Y={transformedPointerPosition.Y}");
+    Logger.Log(LogLevel.Trace, $"direction = {direction.ToString()}" );
+    Logger.Log
+    return direction;
+}
+
 
     #endregion
 
