@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Data.Common;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -12,14 +11,9 @@ using StoryCAD.Models.Tools;
 using StoryCAD.Services.Logging;
 using StoryCAD.ViewModels;
 using Windows.Foundation;
-using Microsoft.UI.Input;
 using Windows.UI.ViewManagement;
 using Windows.ApplicationModel.DataTransfer;
 using Microsoft.UI;
-using System.Text.Json;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
-using ABI.Windows.Graphics.Printing.Workflow;
 using StoryCAD.Exceptions;
 using Application = Microsoft.UI.Xaml.Application;
 using DispatcherQueue = Microsoft.UI.Dispatching.DispatcherQueue;
@@ -35,10 +29,8 @@ public sealed partial class Shell
     public PreferencesModel Preferences = Ioc.Default.GetRequiredService<AppState>().Preferences;
     public LogService Logger;
 
-    private readonly object dragLock = new object();
     private Point lastPointerPosition;
     private bool dragSourceIsValid;
-    private bool isDraggingOverTreeViewItem;
     private bool isOutsideTreeView;
     private bool dragTargetIsValid;
     private StoryNodeItem dragSourceStoryNode;
@@ -212,7 +204,6 @@ public sealed partial class Shell
         }
 
         Logger.Log(LogLevel.Trace, $"dragSourceIsValid: {dragSourceIsValid.ToString()}");
-        Logger.Log(LogLevel.Trace, $"isDraggingOverTreeViewItem: {isDraggingOverTreeViewItem.ToString()}");
         Logger.Log(LogLevel.Trace, "OnDragItemsStarting exit");
     }
 
@@ -226,12 +217,10 @@ public sealed partial class Shell
         Logger.Log(LogLevel.Trace, "OnDragEnter enter");
         // Assume the worst:
         dragTargetIsValid = false;
-        // If we're in DragEnter, the target is in the TreeView
-        isDraggingOverTreeViewItem = true;
 
         try
         {
-            StoryNodeItem node = GetNodeFromTreeViewItem(sender, args);
+            StoryNodeItem node = GetNodeFromTreeViewItem(sender);
             if (node == null)
             {
                 // Handle the null case: log warning, set dragTargetIsValid, etc.
@@ -269,10 +258,9 @@ public sealed partial class Shell
         args.AcceptedOperation = DataPackageOperation.None;
         args.Handled = true;
 
-        Logger.Log(LogLevel.Trace, $"isDraggingOverTreeViewItem: {isDraggingOverTreeViewItem.ToString()}");
         Logger.Log(LogLevel.Trace, $"dragTargetIsValid: {dragTargetIsValid.ToString()}");
         Logger.Log(LogLevel.Trace, "OnDragEnter exit");
-    } 
+    }
 
     /// <summary>
     /// Gets the StoryNodeItem that a TreeViewNode, represented by the sender, is bound to. This method is typically
@@ -282,10 +270,9 @@ public sealed partial class Shell
     /// marking the drag as invalid, and refreshing the navigation tree.
     /// </summary>
     /// <param name="sender">The source of the DragEnter event, expected to be a TreeViewItem.</param>
-    /// <param name="args">The DragEventArgs associated with the DragEnter event.</param>
     /// <returns>The StoryNodeItem that the TreeViewNode is bound to, or null if the sender is not a TreeViewItem or if the
     /// content cannot be successfully retrieved or cast.</returns>
-    private StoryNodeItem GetNodeFromTreeViewItem(object sender, DragEventArgs args)
+    private StoryNodeItem GetNodeFromTreeViewItem(object sender)
     {
         Logger.Log(LogLevel.Trace, $"GetNodeFromTreeViewItem entry");
         // Ensure the sender is a TreeViewItem. If not, return null.
@@ -299,10 +286,6 @@ public sealed partial class Shell
         // Attempt to get the node and its content.
         var dragTargetNode = NavigationTree.NodeFromContainer(dragTargetItem);
         dragTargetStoryNode = dragTargetNode?.Content as StoryNodeItem;
-
-        // If the node is a TrashCan, update the TreeViewItem to not allow
-        // a drop.
-
 
         // Return the retrieved StoryNodeItem, or null if the cast failed or the node was not found.
         Logger.Log(LogLevel.Trace, $"GetNodeFromTreeViewItem exit");
@@ -330,7 +313,6 @@ public sealed partial class Shell
     {
 
         Logger.Log(LogLevel.Trace, $"DragLeave entry");
-        isDraggingOverTreeViewItem = false;
         Logger.Log(LogLevel.Trace, $"DragLeave exit");
         }
 
@@ -347,7 +329,6 @@ public sealed partial class Shell
         Logger.Log(LogLevel.Trace, $"DragItemsCompleted entry");
         Logger.Log(LogLevel.Trace, $"dragSourceIsValid: {dragSourceIsValid.ToString()}");
         Logger.Log(LogLevel.Trace, $"isOutsideTreeView: {isOutsideTreeView.ToString()}");
-        Logger.Log(LogLevel.Trace, $"isDraggingOverTreeViewItem: {isDraggingOverTreeViewItem.ToString()}");
         Logger.Log(LogLevel.Trace, $"dragTargetIsValid: {dragTargetIsValid.ToString()}");
         Logger.Log(LogLevel.Trace, $"DropResult: {args.DropResult.ToString()}");
 
@@ -374,7 +355,6 @@ public sealed partial class Shell
         NavigationTree.AllowDrop = true;
         NavigationTree.CanReorderItems = true;
         dragSourceIsValid = false;
-        isDraggingOverTreeViewItem = false;
         isOutsideTreeView = false;
         dragTargetIsValid = false;
         Logger.Log(LogLevel.Trace, $"OnDragItemsCompleted exit");
@@ -428,7 +408,6 @@ public sealed partial class Shell
     {
         Logger.Log(LogLevel.Trace, $"IsOutsideBoundary entry");
         // Calculate the bounds of the TreeView considering its actual size
-        var bounds = new Rect(0, 0, treeView.ActualWidth, treeView.ActualHeight);
         double adjustedWidth = NavigationTree.ActualWidth;
         double adjustedHeight = NavigationTree.ActualHeight;
 
@@ -446,7 +425,7 @@ public sealed partial class Shell
         bool isOutsideY = pointerYRelativeToTreeView < 0 || pointerYRelativeToTreeView > treeView.ActualHeight;
 
         Logger.Log(LogLevel.Trace, $"AdjustedWidth: {adjustedWidth}");
-        Logger.Log(LogLevel.Trace, $"AdjustedHeight: {adjustedWidth}");        
+        Logger.Log(LogLevel.Trace, $"AdjustedHeight: {adjustedHeight}");        
         Logger.Log(LogLevel.Trace, $"Mouse Position Relative to NavigationTree: X={lastPointerPosition.X}, Y={lastPointerPosition.Y}");
         // Check if the point lies outside the bounds
         bool result = isOutsideX || isOutsideY;
@@ -469,7 +448,7 @@ public sealed partial class Shell
     /// TreeViewItem_DragEnter) to see if we should insert above or below the target node. 
     /// </summary>
     /// <param name="position">The last mouse position when the drop occured</param>
-    /// <param name="targetTreeViewItem">The target TreeViewItem (the last TreeViewItem visited)
+    /// <param name="targetTreeViewItem">The target TreeViewItem (the last TreeViewItem visited)</param>
     /// <returns>DragAndDropDirection (above or below target item)</returns>
 private DragAndDropDirection GetMoveDirection(Point position, TreeViewItem targetTreeViewItem)
 {
@@ -491,7 +470,6 @@ private DragAndDropDirection GetMoveDirection(Point position, TreeViewItem targe
     double pointerYRelativeToTreeViewItem = transformedPointerPosition.Y - targetTreeViewItemPosition.Y;
 
     // Determine if the pointer is above or below the targetTreeViewItem
-    bool isOutsideY = pointerYRelativeToTreeViewItem < 0 || pointerYRelativeToTreeViewItem > targetTreeViewItem.ActualHeight;
     DragAndDropDirection direction;
     if (pointerYRelativeToTreeViewItem < 0)
     {
@@ -506,9 +484,10 @@ private DragAndDropDirection GetMoveDirection(Point position, TreeViewItem targe
         direction = DragAndDropDirection.OnTargetItem;
     }
 
-    Logger.Log(LogLevel.Trace, $"Mouse Y Position Relative to NavigationTree: Y={transformedPointerPosition.Y}");
+    Logger.Log(LogLevel.Trace, $"dragTargetStoryNode={dragTargetStoryNode.Name}");
+    Logger.Log(LogLevel.Trace, $"Mouse Y Position Relative to TreeViewItem: Y={transformedPointerPosition.Y}");
     Logger.Log(LogLevel.Trace, $"direction = {direction.ToString()}" );
-    Logger.Log
+    Logger.Log(LogLevel.Trace, $"GetMoveDirection exit");
     return direction;
 }
 
