@@ -408,8 +408,6 @@ public sealed partial class Shell
     {
         Logger.Log(LogLevel.Trace, $"IsOutsideBoundary entry");
         // Calculate the bounds of the TreeView considering its actual size
-        double adjustedWidth = NavigationTree.ActualWidth;
-        double adjustedHeight = NavigationTree.ActualHeight;
 
         // Get the TreeView's position relative to the window
         var window = Ioc.Default.GetRequiredService<Windowing>().MainWindow as Window;
@@ -424,12 +422,13 @@ public sealed partial class Shell
         bool isOutsideX = pointerXRelativeToTreeView < 0 || pointerXRelativeToTreeView > treeView.ActualWidth;
         bool isOutsideY = pointerYRelativeToTreeView < 0 || pointerYRelativeToTreeView > treeView.ActualHeight;
 
-        Logger.Log(LogLevel.Trace, $"AdjustedWidth: {adjustedWidth}");
-        Logger.Log(LogLevel.Trace, $"AdjustedHeight: {adjustedHeight}");        
+        Logger.Log(LogLevel.Trace, $"AdjustedWidth: {treeView.ActualWidth}");
+        Logger.Log(LogLevel.Trace, $"AdjustedHeight: {treeView.ActualHeight}");        
         Logger.Log(LogLevel.Trace, $"Mouse Position Relative to NavigationTree: X={lastPointerPosition.X}, Y={lastPointerPosition.Y}");
         // Check if the point lies outside the bounds
         bool result = isOutsideX || isOutsideY;
         Logger.Log(LogLevel.Trace, $"Result = {result.ToString()}" );
+        Logger.Log(LogLevel.Trace, $"IsOutsideBoundary exit");
         return result;
     }
 
@@ -453,7 +452,6 @@ public sealed partial class Shell
 private DragAndDropDirection GetMoveDirection(Point position, TreeViewItem targetTreeViewItem)
 {
     Logger.Log(LogLevel.Trace, $"GetMoveDirection entry");
-    Logger.Log(LogLevel.Trace, $"TreeViewItem Height: {targetTreeViewItem.ActualHeight}");
     Logger.Log(LogLevel.Trace, $"pointer position.X: {position.X}");
     Logger.Log(LogLevel.Trace, $"pointer position.Y: {position.Y}");
     
@@ -461,7 +459,12 @@ private DragAndDropDirection GetMoveDirection(Point position, TreeViewItem targe
     var window = Ioc.Default.GetRequiredService<Windowing>().MainWindow as Window;
     GeneralTransform targetTreeViewItemTransform = targetTreeViewItem.TransformToVisual(window.Content);
     Point targetTreeViewItemPosition = targetTreeViewItemTransform.TransformPoint(new Point(0, 0));
+    Logger.Log(LogLevel.Trace, $"targetTreeViewItemPosition top={targetTreeViewItemPosition.Y}");
+    Logger.Log(LogLevel.Trace, $"TreeViewItem Height: {targetTreeViewItem.ActualHeight}");
+    Logger.Log(LogLevel.Trace, $"targetTreeViewItemPosition top={targetTreeViewItemPosition.Y}");
 
+
+    
     // Transform the pointer position to the window.Content coordinates
     GeneralTransform pointerTransform = window.Content.TransformToVisual(window.Content);
     Point transformedPointerPosition = pointerTransform.TransformPoint(position);
