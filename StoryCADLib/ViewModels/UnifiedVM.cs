@@ -84,6 +84,12 @@ public class UnifiedVM : ObservableRecipient
         SelectedRecentIndex = -1;
         ProjectName = string.Empty;
         ProjectPath = Ioc.Default.GetRequiredService<PreferenceService>().Model.ProjectDirectory;
+
+        if (!Ioc.Default.GetRequiredService<AppState>().StoryCADTestsMode)
+        {
+	        ContentView = new();
+
+        }
     }
 
     public UnifiedMenuPage.UpdateContentDelegate UpdateContent;
@@ -100,7 +106,7 @@ public class UnifiedVM : ObservableRecipient
     /// This controls the frame and sets it content.
     /// </summary>
     /// <returns></returns>
-    private StackPanel _contentView = new();
+    private StackPanel _contentView;
     public StackPanel ContentView
     {
         get => _contentView;

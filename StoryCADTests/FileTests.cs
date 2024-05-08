@@ -4,11 +4,11 @@ using StoryCAD.DAL;
 using StoryCAD.Models;
 using StoryCAD.ViewModels;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Windows.Storage;
-using Microsoft.VisualStudio.TestTools.UnitTesting.AppContainer;
 
 namespace StoryCADTests;
 
@@ -95,7 +95,7 @@ public class FileTests
     }
 
 
-    [UITestMethod]
+    [TestMethod]
     public Task InvalidFileAccessTest()
     {
 	    string Dir = AppDomain.CurrentDomain.BaseDirectory;
