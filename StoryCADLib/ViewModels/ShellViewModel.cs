@@ -912,7 +912,7 @@ public class ShellViewModel : ObservableRecipient
     /// </summary>|
     public async Task WriteModel()
     {
-        Logger.Log(LogLevel.Info, $"In WriteModel, file={StoryModel.ProjectFilename}");
+        Logger.Log(LogLevel.Info, $"In WriteModel, file={StoryModel.ProjectFilename} path={StoryModel.ProjectPath}");
         try
         {
             try //Updating the lost modified time
@@ -936,7 +936,8 @@ public class ShellViewModel : ObservableRecipient
         }
         catch (Exception _ex)
         {
-            Logger.LogException(LogLevel.Error, _ex, "Error writing file");
+            Logger.LogException(LogLevel.Error, _ex, 
+	            $"Error writing file {_ex.Message} {_ex.Source}");
             Messenger.Send(new StatusChangedMessage(new("Error writing file - see log", LogLevel.Error)));
             return;
         }

@@ -1,6 +1,9 @@
 ﻿using System;
+using System.IO;
+using System.Text.RegularExpressions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using StoryCAD.DAL;
@@ -8,6 +11,7 @@ using StoryCAD.Models;
 using StoryCAD.Models.Tools;
 using StoryCAD.Services;
 using StoryCAD.Services.Dialogs;
+using StoryCAD.Services.Logging;
 
 namespace StoryCAD.ViewModels;
 
@@ -21,7 +25,8 @@ namespace StoryCAD.ViewModels;
 /// </summary>
 public class UnifiedVM : ObservableRecipient
 {
-    private ShellViewModel _shell = Ioc.Default.GetService<ShellViewModel>();
+	private LogService Logger = Ioc.Default.GetRequiredService<LogService>();
+	private ShellViewModel _shell = Ioc.Default.GetService<ShellViewModel>();
     private PreferenceService Preferences = Ioc.Default.GetService<PreferenceService>();
 
     private int _selectedRecentIndex;
@@ -79,6 +84,12 @@ public class UnifiedVM : ObservableRecipient
         SelectedRecentIndex = -1;
         ProjectName = string.Empty;
         ProjectPath = Ioc.Default.GetRequiredService<PreferenceService>().Model.ProjectDirectory;
+
+        if (!Ioc.Default.GetRequiredService<AppState>().StoryCADTestsMode)
+        {
+	        ContentView = new();
+
+        }
     }
 
     public UnifiedMenuPage.UpdateContentDelegate UpdateContent;
@@ -95,7 +106,7 @@ public class UnifiedVM : ObservableRecipient
     /// This controls the frame and sets it content.
     /// </summary>
     /// <returns></returns>
-    private StackPanel _contentView = new();
+    private StackPanel _contentView;
     public StackPanel ContentView
     {
         get => _contentView;
@@ -186,4 +197,58 @@ public class UnifiedVM : ObservableRecipient
         await _loader.WritePreferences();
     }
 
+	/// <summary>
+	/// Checks the project directory and name are valid.
+	/// </summary>
+	public void CheckValidity(object sender, RoutedEventArgs e)
+	{
+		Logger.Log(LogLevel.Info, $"Testing filename validity for {ProjectPath}\\{ProjectName}");
+
+		//Checks file path validity
+		try { Directory.CreateDirectory(ProjectPath); }
+		catch
+		{
+			ProjectPath = "";
+			return;
+		}
+
+		//Checks file name validity
+		try
+		{
+			string testfile = Path.Combine(ProjectPath, ProjectName);
+			var x = Path.GetInvalidPathChars();
+			//Check validity
+			Regex BadChars = new("[" + Regex.Escape(Path.GetInvalidPathChars().ToString()) + "]");
+			if (BadChars.IsMatch(testfile))
+			{
+				throw new FileNotFoundException("the filename is invalid.");
+			}
+
+			//Try creating file and then checking it exists.
+			using (FileStream fs = File.Create(testfile)) { }
+
+			if (!File.Exists(testfile))
+				throw new FileNotFoundException("the filename was not found.");
+			File.Delete(testfile);
+
+			if (Ioc.Default.GetRequiredService<AppState>().StoryCADTestsMode)
+			{
+				throw new UnauthorizedAccessException("Test throw to ensure invalid states are handled correctly");
+			}
+		}
+		catch (UnauthorizedAccessException)
+		{
+			Logger.Log(LogLevel.Warn, $"User lacks access to {ProjectPath}");
+			//Set path to users documents if they try to save to an invalid location
+			ProjectPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+			return;
+		}
+		catch
+		{
+			ProjectName = "";
+			return;
+		}
+
+		MakeProject();
+	}
 }

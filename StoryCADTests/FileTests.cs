@@ -4,6 +4,7 @@ using StoryCAD.DAL;
 using StoryCAD.Models;
 using StoryCAD.ViewModels;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -93,4 +94,22 @@ public class FileTests
         Assert.AreEqual(5, storyModel.ExplorerView.Count, "Overview Children count mismatch"); 
     }
 
+
+    [TestMethod]
+    public Task InvalidFileAccessTest()
+    {
+	    string Dir = AppDomain.CurrentDomain.BaseDirectory;
+	    UnifiedVM UVM = new()
+	    {
+		    ProjectName = "TestProject",
+		    ProjectPath = Path.Combine(Dir, "TestProject")
+	    };
+
+		//Check file path validity
+		UVM.CheckValidity(null,null);
+
+	    //Check Project Path was reset to default.
+		Assert.IsTrue(UVM.ProjectPath == Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments));
+		return null;
+    }
 }
