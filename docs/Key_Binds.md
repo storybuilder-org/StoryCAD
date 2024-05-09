@@ -1,27 +1,31 @@
 #### Key Binds ####
-Key Binds <br/>
-Some options in the menu have key binds to speed up your story planning. Below is a comprehensive list of all the key binds on the menu bar: <br/>
+Key Binds
+Some options in the menu have key binds to speed up your story planning. Below is a comprehensive list of all the key binds on the menu bar:
 
-File Related Commands <br/>
-Ctrl + O - Open a story <br/>
-Crtl + S - Save story <br/>
-Crtl + Shift + S - Save as <br/>
+File Related Commands
+Ctrl + O - Open a story
+Crtl + S - Save story
+Crtl + Shift + S - Save as
 
-Story Manipulation Commands <br/>
-F1 - Add Folder <br/>
-F2 - Add Section <br/>
-F3 - Add Problem <br/>
-F4 - Add Character <br/>
-F5 - Add Setting <br/>
-F6 - Add Scene <br/>
-Delete - Move the selected Story Element to Trash <br/>
+Story Manipulation Commands
+F1 - Add Folder
+F2 - Add Section
+F3 - Add Problem
+F4 - Add Character
+F5 - Add Setting
+F6 - Add Scene
+Delete - Move the selected Story Element to Trash
 
-Story Writing Advice Commands <br/>
-Ctrl + Q - Key Questions <br/>
-Ctrl + M - Master Plots <br/>
-Ctrl + D - Dramatic Situations <br/>
-Ctrl + L - Stock Scenes <br/>
+Story Writing Advice Commands
+Ctrl + Q - Key Questions
+Ctrl + M - Master Plots
+Ctrl + D - Dramatic Situations
+Ctrl + L - Stock Scenes
 
-Report Commands <br/>
-Ctrl + P - Open Print Report Menu <br/>
-Ctrl +R - Scrivener Reports  <br/>
+Report Commands
+Ctrl + P - Open Print Report Menu
+Ctrl +R - Scrivener Reports 
+ <br/>
+ <br/>
+[Previous - Preferences](Preferences.md) <br/>
+[Next - Menu Bar](Menu_Bar.md) <br/>

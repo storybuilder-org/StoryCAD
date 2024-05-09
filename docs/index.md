@@ -1,4 +1,4 @@
-# Table of Contents #
+# Table of Contents
 
 [Front Matter](Front_Matter.md) <br/><br/>
 [Quick Start](Quick_Start.md) <br/><br/>
