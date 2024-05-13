@@ -373,7 +373,7 @@ public sealed partial class Shell
     private void NavigationTree_PointerMoved(object sender, PointerRoutedEventArgs e)
     {
         lastPointerPosition = e.GetCurrentPoint((UIElement)sender).Position;
-        Logger.Log(LogLevel.Trace, $"Raw pointer position: X={lastPointerPosition.X}, Y={lastPointerPosition.Y}");
+        //Logger.Log(LogLevel.Trace, $"Raw pointer position: X={lastPointerPosition.X}, Y={lastPointerPosition.Y}");
         isOutsideTreeView = IsOutsideBoundary(lastPointerPosition, sender as TreeView);
         if (isOutsideTreeView)
         {
@@ -406,7 +406,7 @@ public sealed partial class Shell
     /// <returns>bool True if the mouse is no longer within NavigationTree's bounding box</returns>
     private bool IsOutsideBoundary(Point position, TreeView treeView)
     {
-        Logger.Log(LogLevel.Trace, $"IsOutsideBoundary entry");
+        //Logger.Log(LogLevel.Trace, $"IsOutsideBoundary entry");
         // Calculate the bounds of the TreeView considering its actual size
 
         // Get the TreeView's position relative to the window
@@ -422,13 +422,13 @@ public sealed partial class Shell
         bool isOutsideX = pointerXRelativeToTreeView < 0 || pointerXRelativeToTreeView > treeView.ActualWidth;
         bool isOutsideY = pointerYRelativeToTreeView < 0 || pointerYRelativeToTreeView > treeView.ActualHeight;
 
-        Logger.Log(LogLevel.Trace, $"AdjustedWidth: {treeView.ActualWidth}");
-        Logger.Log(LogLevel.Trace, $"AdjustedHeight: {treeView.ActualHeight}");        
-        Logger.Log(LogLevel.Trace, $"Mouse Position Relative to NavigationTree: X={lastPointerPosition.X}, Y={lastPointerPosition.Y}");
+        //Logger.Log(LogLevel.Trace, $"AdjustedWidth: {treeView.ActualWidth}");
+        //Logger.Log(LogLevel.Trace, $"AdjustedHeight: {treeView.ActualHeight}");        
+        //Logger.Log(LogLevel.Trace, $"Mouse Position Relative to NavigationTree: X={lastPointerPosition.X}, Y={lastPointerPosition.Y}");
         // Check if the point lies outside the bounds
         bool result = isOutsideX || isOutsideY;
-        Logger.Log(LogLevel.Trace, $"Result = {result.ToString()}" );
-        Logger.Log(LogLevel.Trace, $"IsOutsideBoundary exit");
+        //Logger.Log(LogLevel.Trace, $"Result = {result.ToString()}" );
+        //Logger.Log(LogLevel.Trace, $"IsOutsideBoundary exit");
         return result;
     }
 
