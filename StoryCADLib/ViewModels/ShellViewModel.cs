@@ -2470,44 +2470,50 @@ public class ShellViewModel : ObservableRecipient
     {
         lock (dragLock)
         {
+            int targetIndex = -1;
             try
             {
-
                 bool sourceIsTargetDescendant = IsDescendant(dragTargetStoryNode, dragSourceStoryNode);
 
                 StoryNodeItem sourceParent = dragSourceStoryNode.Parent;
-                // Remove the source node from its original parent's children collection
+                if (sourceParent == null || !sourceParent.Children.Contains(dragSourceStoryNode))
+                {
+                    throw new InvalidOperationException("Source node is not a child of its parent or parent is null.");
+                }
                 sourceParent.Children.Remove(dragSourceStoryNode);
 
-                // Determine the source node's placement based on the target node's details:
-                // If the target is a 'container' (root, folder, or section), 
-                // or if the source is a descendant of the target, the source node 
-                // is made the first child of the target.
                 if (dragTargetStoryNode.IsRoot || sourceIsTargetDescendant ||
                     dragTargetStoryNode.Type == StoryItemType.Folder || dragTargetStoryNode.Type == StoryItemType.Section)
                 {
-                    //Add the source as the target's child
                     dragTargetStoryNode.Children.Insert(0, dragSourceStoryNode);
                     dragSourceStoryNode.Parent = dragTargetStoryNode;
                 }
-                // otherwise, the source is made a peer of the target by adding it to the target's parent's children.
                 else
-                { 
+                {
+                    StoryNodeItem targetParent = dragTargetStoryNode.Parent;
+                    if (targetParent == null || !targetParent.Children.Contains(dragTargetStoryNode))
+                    {
+                        throw new InvalidOperationException("Target node's parent is null or target node not found in its parent's children collection.");
+                    }
+
+                    targetIndex = targetParent.Children.IndexOf(dragTargetStoryNode);
+
+                    // Check if inserting above or below the target node
                     if (direction == DragAndDropDirection.AboveTargetItem)
                     {
-                        // If the visual feedback (cursor icon) is above the target, add just before it
-                        int targetIndex = dragTargetStoryNode.Parent.Children.IndexOf(dragTargetStoryNode);
-                        dragTargetStoryNode.Parent.Children.Insert(targetIndex, dragSourceStoryNode);
-                        dragSourceStoryNode.Parent = dragTargetStoryNode.Parent;
+                        // Pushes dragTargetStoryNode and all subsequent nodes forward
+                        targetParent.Children.Insert(targetIndex, dragSourceStoryNode);
                     }
                     else
                     {
-                        // Otherwise, add the source node at the same level as the target, immediately after it
-                        int targetIndex = dragTargetStoryNode.Parent.Children.IndexOf(dragTargetStoryNode) + 1;
-                        dragTargetStoryNode.Parent.Children.Insert(targetIndex, dragSourceStoryNode);
-                        dragSourceStoryNode.Parent = dragTargetStoryNode.Parent;
+                        // Adds just after dragTargetStoryNode. If dragTargetStoryNode's
+                        // index equals Count, it's added at the end of the list.
+                        targetParent.Children.Insert(targetIndex + 1, dragSourceStoryNode);
                     }
+
+                    dragSourceStoryNode.Parent = targetParent;
                 }
+
                 ShowChange();  // Report the move
                 ShowMessage(LogLevel.Info, "Drag and drop successful", true);
             }
@@ -2515,12 +2521,17 @@ public class ShellViewModel : ObservableRecipient
             {
                 Logger.LogException(LogLevel.Error, ex, "Error in drag-drop operation");
                 ShowMessage(LogLevel.Error, "Error in drag-drop operation", false);
+
+                // Log the target index for debugging
+                Logger.Log(LogLevel.Error, $"Target Index: {targetIndex}");
             }
         }
 
         // Refresh UI and report the move
         ShellViewModel.ShowChange();
     }
+
+
 
 
     #endregion
