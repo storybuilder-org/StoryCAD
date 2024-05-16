@@ -1,9 +1,11 @@
-## Reports ##
-Reports <br/>
+# Reports #
+ <br/>
+ <br/>
 
-Clicking on the Reports button on the Menu Bar displays a fly-out menu with two reporting options: <br/>
-
-![](Print-Reports-Button-and-Menu-2.png)
- <br/><br/>
-[Previous - Reports](Reports.md) <br/><br/>
-[Next up - Print Reports](Print_Reports.md)
+[Reports Menu](Reports_Menu.md) <br/><br/>
+[Print Reports](Print_Reports.md) <br/><br/>
+[Scrivener Reports](Scrivener_Reports.md) <br/><br/>
+ <br/>
+ <br/>
+[Previous - Tools](Tools.md) <br/>
+[Next - Reports Menu](Reports_Menu.md) <br/>
