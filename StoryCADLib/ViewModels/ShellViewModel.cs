@@ -2373,12 +2373,12 @@ public class ShellViewModel : ObservableRecipient
             return false;
         }
 
-        //// The drag target can be the root (Story Overview) node or any node below it
-        //if (dragTargetNode!.Depth < 0)
-        //{
-        //    ShowMessage(LogLevel.Warn, "Drag target is not root or below", true);
-        //    return false;
-        //}
+        // The drag target can't be the drag source
+        if (dragTargetStoryNode == dragSourceStoryNode)
+        {
+            ShowMessage(LogLevel.Warn, "Drag source can't be drag target", true);
+            return false;
+        }
 
         // Target node is valid for move
         Logger.Log(LogLevel.Info, $"ValidateDragTarget exit");
