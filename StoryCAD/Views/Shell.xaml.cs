@@ -342,6 +342,9 @@ public sealed partial class Shell
             {
                 Logger.Log(LogLevel.Trace, $"Source and Target are valid.");
                 ShellVm.MoveStoryNode(dragSourceStoryNode, dragTargetStoryNode, GetMoveDirection(lastPointerPosition, dragTargetItem));
+                Logger.Log(LogLevel.Info,$"Drag source: {dragSourceStoryNode.Name}");
+                Logger.Log(LogLevel.Info,$"Drag target: {dragTargetStoryNode.Name}");
+                Logger.Log(LogLevel.Info, $"Drag and drop successful");
             }
         }
         catch (InvalidDragDropOperationException ex)

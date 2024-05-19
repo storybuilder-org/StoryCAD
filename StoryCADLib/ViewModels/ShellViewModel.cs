@@ -2381,7 +2381,7 @@ public class ShellViewModel : ObservableRecipient
         }
 
         // Target node is valid for move
-        Logger.Log(LogLevel.Info, $"ValidateDragTarget exit");
+        Logger.Log(LogLevel.Trace, $"ValidateDragTarget exit");
         return true;
     }
     
@@ -2515,7 +2515,7 @@ public class ShellViewModel : ObservableRecipient
                 }
 
                 ShowChange();  // Report the move
-                ShowMessage(LogLevel.Info, "Drag and drop successful", true);
+                ShowMessage(LogLevel.Info, "Drag and drop successful", false);
             }
             catch (Exception ex)
             {
