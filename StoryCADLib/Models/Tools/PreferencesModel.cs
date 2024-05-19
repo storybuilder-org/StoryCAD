@@ -78,6 +78,11 @@ public class PreferencesModel : ObservableObject
     // Last version change was logged successfully or not
     public int SearchEngineIndex { get; set; }
 
+	/// <summary>
+	/// Do we want to log more in depth
+	/// </summary>
+    public bool AdvancedLogging { get; set; }
+
     #endregion
 
     #region Constructor
@@ -109,6 +114,7 @@ public class PreferencesModel : ObservableObject
         RecordPreferencesStatus = false;
         RecordVersionStatus = false;      // Last version change was logged successfully or not
         PreferredSearchEngine = BrowserType.DuckDuckGo;
+        AdvancedLogging = false;
         ThemePreference = ElementTheme.Default; // Use system theme
     }
     #endregion

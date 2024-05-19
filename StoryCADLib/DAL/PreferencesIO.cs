@@ -172,8 +172,10 @@ public class PreferencesIo
                     case "Theme":
                         _model.ThemePreference = (ElementTheme)(Convert.ToInt16(_tokens[1]));
                         break;
-
-                }
+					case "AdvancedLogging":
+						_model.AdvancedLogging = _tokens[1] == "True";
+						break;
+				}
             }
             _log.Log(LogLevel.Info, "PreferencesModel updated from StoryCAD.prf.");
         }
@@ -240,6 +242,7 @@ public class PreferencesIo
             RecordVersionStatus={_model.RecordVersionStatus}
             SearchEngine={_model.PreferredSearchEngine}
             Theme={(int)_model.ThemePreference}
+            AdvancedLogging={_model.AdvancedLogging}
             """;
 
         _newPreferences += (_model.WrapNodeNames == TextWrapping.WrapWholeWords ? Environment.NewLine + "WrapNodeNames=True" : Environment.NewLine + "WrapNodeNames=False");

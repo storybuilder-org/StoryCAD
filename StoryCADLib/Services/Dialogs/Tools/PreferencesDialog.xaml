@@ -18,7 +18,14 @@
             </PivotItem>
             <PivotItem Header="Backup" VerticalAlignment="Stretch" VerticalContentAlignment="Center">
                 <StackPanel HorizontalAlignment="Right" VerticalAlignment="Center">
-                    <CheckBox Content="Make a backup of the story when opened" Margin="4" HorizontalAlignment="Left" IsChecked="{x:Bind PreferencesVm.BackupOnOpen, Mode=TwoWay}"/>
+	                <StackPanel Orientation="Horizontal">
+		                <CheckBox Content="Automatically Save every" IsChecked="{x:Bind PreferencesVm.AutoSave, Mode=TwoWay}" HorizontalAlignment="Left" Margin="4"/>
+		                <NumberBox Minimum="15" Maximum="60" IsEnabled="{x:Bind PreferencesVm.AutoSave, Mode=TwoWay}" 
+		                           PlaceholderText="Enter a value (Seconds)"  HorizontalAlignment="Left" Margin="8"
+		                           Value="{x:Bind PreferencesVm.AutoSaveInterval, Mode=TwoWay}"/>
+		                <TextBlock Text="Seconds" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+	                </StackPanel>
+					<CheckBox Content="Make a backup of the story when opened" Margin="4" HorizontalAlignment="Left" IsChecked="{x:Bind PreferencesVm.BackupOnOpen, Mode=TwoWay}"/>
                     <CheckBox Content="Make timed backups" Margin="4" HorizontalAlignment="Left" IsChecked="{x:Bind PreferencesVm.TimedBackup, Mode=TwoWay}"/>
                     <NumberBox Header="How often should backups be made? (Minutes)" Maximum="300" Minimum="1" Margin="4" Width="300" HorizontalAlignment="Left" Value="{x:Bind PreferencesVm.TimedBackupInterval, Mode=TwoWay}"/>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
@@ -32,11 +39,8 @@
                     <CheckBox Content="Send error logs to Team StoryCAD" Margin="8" HorizontalAlignment="Left" IsChecked="{x:Bind PreferencesVm.ErrorCollectionConsent, Mode=TwoWay}"/>
                     <CheckBox Content="Send me newsletters about StoryCAD" Margin="8" HorizontalAlignment="Left" IsChecked="{x:Bind PreferencesVm.Newsletter, Mode=TwoWay}"/>
                     <CheckBox Content="Wrap node names" Margin="8" HorizontalAlignment="Left" Click="ToggleWrapping" Name="TextWrap"/>
-                    <StackPanel Orientation="Horizontal">
-                        <CheckBox Content="Automatically Save every" IsChecked="{x:Bind PreferencesVm.AutoSave, Mode=TwoWay}" HorizontalAlignment="Left" Margin="8"/>
-                        <NumberBox Minimum="15" Maximum="60" IsEnabled="{x:Bind PreferencesVm.AutoSave, Mode=TwoWay}" PlaceholderText="Enter a value (Seconds)" Value="{x:Bind PreferencesVm.AutoSaveInterval, Mode=TwoWay}" HorizontalAlignment="Left" Margin="8"/>
-                        <TextBlock Text="Seconds" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                    </StackPanel>
+					<CheckBox Content="Advanced logging" Margin="8" HorizontalAlignment="Left" IsChecked="{x:Bind PreferencesVm.AdvancedLogging, Mode=TwoWay}"/>  
+
                     <ComboBox Header="Preferred Theme" HorizontalAlignment="Stretch" SelectedIndex="{x:Bind PreferencesVm.PreferredThemeIndex, Mode=TwoWay}" Margin="8">
                         <ComboBoxItem Content="Use system theme"/>
                         <ComboBoxItem Content="Light Theme"/>
