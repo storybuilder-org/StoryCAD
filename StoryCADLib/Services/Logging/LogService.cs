@@ -50,7 +50,7 @@ public class LogService : ILogService
             fileTarget.ConcurrentWrites = true;
             fileTarget.Layout = "${longdate} | ${level} | ${message} | ${exception:format=Message,StackTrace,Data:MaxInnerExceptionLevel=5}";
             LoggingRule fileRule = new("*", NLog.LogLevel.Off, fileTarget);
-            if (State.Preferences.AdvancedLogging)
+            if (Ioc.Default.GetRequiredService<PreferenceService>().Model.AdvancedLogging)
                 MinLogLevel = NLog.LogLevel.Trace;
             else
                 MinLogLevel = NLog.LogLevel.Info;
