@@ -26,8 +26,8 @@ public class LogService : ILogService
     private static Exception exceptionHelper;
     private string apiKey = string.Empty;
     private string logID = string.Empty;
-    private AppState State = Ioc.Default.GetRequiredService<AppState>();
-    private static NLog.LogLevel minLogLevel = NLog.LogLevel.Info;
+    private static AppState State = Ioc.Default.GetRequiredService<AppState>();
+    public static NLog.LogLevel MinLogLevel = NLog.LogLevel.Info;
     public bool ElmahLogging;
     static LogService()
     {
@@ -45,7 +45,11 @@ public class LogService : ILogService
             fileTarget.ConcurrentWrites = true;
             fileTarget.Layout = "${longdate} | ${level} | ${message} | ${exception:format=Message,StackTrace,Data:MaxInnerExceptionLevel=5}";
             LoggingRule fileRule = new("*", NLog.LogLevel.Off, fileTarget);
-            fileRule.EnableLoggingForLevels(minLogLevel, NLog.LogLevel.Fatal);
+            if (State.Preferences.AdvancedLogging)
+                MinLogLevel = NLog.LogLevel.Trace;
+            else
+                MinLogLevel = NLog.LogLevel.Info;
+            fileRule.EnableLoggingForLevels(MinLogLevel, NLog.LogLevel.Fatal);
             config.AddTarget("logfile", fileTarget);
             config.LoggingRules.Add(fileRule);
 
@@ -56,7 +60,7 @@ public class LogService : ILogService
                 consoleTarget.Layout = @"${date:format=HH\\:MM\\:ss} ${logger} ${message}";
                 config.AddTarget("console", consoleTarget);
                 LoggingRule consoleRule = new("*", NLog.LogLevel.Off, consoleTarget);
-                fileRule.EnableLoggingForLevels(minLogLevel, NLog.LogLevel.Fatal);
+                fileRule.EnableLoggingForLevels(MinLogLevel, NLog.LogLevel.Fatal);
                 config.LoggingRules.Add(consoleRule);
             }
 
