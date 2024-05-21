@@ -18,6 +18,13 @@ using StoryCAD.Exceptions;
 using Application = Microsoft.UI.Xaml.Application;
 using DispatcherQueue = Microsoft.UI.Dispatching.DispatcherQueue;
 using Page = Microsoft.UI.Xaml.Controls.Page;
+using Microsoft.UI.Dispatching;
+using StoryCAD.Services;
+using Windows.ApplicationModel.DataTransfer;
+using Microsoft.UI;
+using StoryCAD.Services.Dialogs;
+using StoryCAD.Services.Ratings;
+using StoryCAD.ViewModels.Tools;
 
 namespace StoryCAD.Views;
 
@@ -26,8 +33,8 @@ public sealed partial class Shell
     public ShellViewModel ShellVm => Ioc.Default.GetService<ShellViewModel>();
     public Windowing Windowing => Ioc.Default.GetService<Windowing>();
     public UnifiedVM UnifiedVm => Ioc.Default.GetService<UnifiedVM>();
-    public PreferencesModel Preferences = Ioc.Default.GetRequiredService<AppState>().Preferences;
     public LogService Logger;
+    public PreferencesModel Preferences = Ioc.Default.GetRequiredService<PreferenceService>().Model;
 
     private Point lastPointerPosition;
     private bool dragSourceIsValid;
@@ -58,7 +65,7 @@ public sealed partial class Shell
         ShellVm.SplitViewFrame = SplitViewFrame;
     }
 
-    private async void Shell_Loaded(object sender, RoutedEventArgs e)
+	private async void Shell_Loaded(object sender, RoutedEventArgs e)
     {
         Windowing.XamlRoot = Content.XamlRoot;
         Ioc.Default.GetService<AppState>()!.StartUpTimer.Stop();
@@ -77,7 +84,8 @@ public sealed partial class Shell
         //Shows changelog if the app has been updated since the last launch.
         if (Ioc.Default.GetRequiredService<AppState>().LoadedWithVersionChange)
         {
-            await new Services.Dialogs.Changelog().ShowChangeLog();
+			Ioc.Default.GetService<PreferenceService>().Model.HideRatingPrompt = false;  //rating prompt reenabled on updates.
+			await new Services.Dialogs.Changelog().ShowChangeLog();
         }
 
         //If StoryCAD was loaded from a .STBX File then instead of showing the Unified menu
@@ -85,6 +93,13 @@ public sealed partial class Shell
         Logger.Log(LogLevel.Info, $"Filepath to launch {ShellVm.FilePathToLaunch}");
         if (ShellVm.FilePathToLaunch == null) { await ShellVm.OpenUnifiedMenu(); }
         else { await ShellVm.OpenFile(ShellVm.FilePathToLaunch); }
+
+		//Ask user for review if appropriate.
+		RatingService RateService = Ioc.Default.GetService<RatingService>();
+		if (RateService.AskForRatings())
+		{
+			RateService.OpenRatingPrompt();
+		}
     }
 
     /// <summary>
@@ -509,5 +524,21 @@ private DragAndDropDirection GetMoveDirection(Point position, TreeViewItem targe
             ShellVm.LastClickedTreeviewItem.BorderBrush = null;
         }
         ShellVm.LastClickedTreeviewItem = (TreeViewItem)sender;
+    }
+
+    private async void ButtonBase_OnClick(object sender, RoutedEventArgs e)
+    {
+	    var Result = await Ioc.Default.GetRequiredService<Windowing>().ShowContentDialog(new()
+	    {
+		    Content = new FeedbackDialog(),
+		    PrimaryButtonText = "Submit Feedback",
+			SecondaryButtonText = "Close",
+		    Title = "Submit Feedback",
+	    });
+
+	    if (Result == ContentDialogResult.Primary)
+	    {
+		    Ioc.Default.GetRequiredService<FeedbackViewModel>().CreateFeedback();
+	    }
     }
 }

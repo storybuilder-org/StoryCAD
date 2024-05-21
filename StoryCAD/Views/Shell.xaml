@@ -15,7 +15,7 @@
 
             <CommandBarFlyout x:Key="AddStoryElementFlyout" Placement="Right" x:Name="AddStoryElementCommandBarFlyout" >
                 <CommandBarFlyout.SecondaryCommands>
-                    <AppBarButton Icon="Add" Label="Add Elements" >
+	                <AppBarButton Icon="Add" Label="Add Elements" >
                         <AppBarButton.Flyout>
                             <MenuFlyout>
                                 <MenuFlyoutItem Icon="Folder" Text="Add Folder         Alt+F"  Command="{x:Bind ShellVm.AddFolderCommand, Mode=OneWay}" Visibility="{x:Bind ShellVm.AddFolderVisibility, Mode=TwoWay}" />
@@ -301,7 +301,12 @@
                         <KeyboardAccelerator Modifiers="Control" Key="P"/>
                     </AppBarButton.KeyboardAccelerators>
                 </AppBarButton>
-                <AppBarButton Label="Help" ToolTipService.ToolTip="Help" Command="{x:Bind ShellVm.HelpCommand, Mode=OneWay}" >
+				<AppBarButton Label="Report Feedback" ToolTipService.ToolTip="Report Feedback" Click="ButtonBase_OnClick">
+					<AppBarButton.Icon>
+						<FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xED15;"/>
+					</AppBarButton.Icon>
+				</AppBarButton>
+				<AppBarButton Label="Help" ToolTipService.ToolTip="Help" Command="{x:Bind ShellVm.HelpCommand, Mode=OneWay}" >
                     <AppBarButton.KeyboardAccelerators>
                         <KeyboardAccelerator Key="F1"/>
                     </AppBarButton.KeyboardAccelerators>

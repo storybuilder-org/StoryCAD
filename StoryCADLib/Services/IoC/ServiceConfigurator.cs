@@ -9,6 +9,7 @@ using StoryCAD.ViewModels.Tools;
 using StoryCAD.ViewModels;
 using StoryCAD.Models;
 using StoryCAD.Models.Tools;
+using StoryCAD.Services.Ratings;
 
 namespace StoryCAD.Services.IoC;
 
@@ -36,8 +37,9 @@ public class ServiceConfigurator
              .AddSingleton<ControlData>()
              .AddSingleton<AppState>()
              .AddSingleton<Windowing>()
-             // Register ViewModels 
+             .AddSingleton<RatingService>()
              .AddSingleton<ShellViewModel>()
+             .AddSingleton<PreferenceService>()
              .AddSingleton<OverviewViewModel>()
              .AddSingleton<CharacterViewModel>()
              .AddSingleton<ProblemViewModel>()
@@ -48,6 +50,7 @@ public class ServiceConfigurator
              .AddSingleton<TrashCanViewModel>()
              .AddSingleton<UnifiedVM>()
              .AddSingleton<InitVM>()
+             .AddSingleton<FeedbackViewModel>()
              .AddSingleton<TreeViewSelection>()
              // Register ContentDialog ViewModels
              .AddSingleton<NewProjectViewModel>()

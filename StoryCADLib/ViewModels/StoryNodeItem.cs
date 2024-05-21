@@ -8,6 +8,8 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using StoryCAD.Models;
+using StoryCAD.Models.Tools;
+using StoryCAD.Services;
 using StoryCAD.Services.Logging;
 
 namespace StoryCAD.ViewModels;
@@ -217,7 +219,7 @@ public class StoryNodeItem : INotifyPropertyChanged
         }
     }
 
-    public TextWrapping TextWrapping => Ioc.Default.GetRequiredService<AppState>().Preferences.WrapNodeNames;
+    public TextWrapping TextWrapping => Ioc.Default.GetRequiredService<PreferenceService>().Model.WrapNodeNames;
 
     private bool _isRoot;
     /// <summary>

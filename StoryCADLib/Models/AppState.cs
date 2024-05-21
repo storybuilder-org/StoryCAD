@@ -1,26 +1,13 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Linq;
 using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Threading.Tasks;
-using CommunityToolkit.Mvvm.DependencyInjection;
-using CommunityToolkit.WinUI.Helpers;
-using Microsoft.UI.Xaml;
-using StoryCAD.DAL;
-using StoryCAD.Models.Tools;
-using StoryCAD.Services.Json;
-using StoryCAD.Services.Logging;
-using StoryCAD.ViewModels;
 using Windows.ApplicationModel;
-using Windows.Devices.Input;
 using Windows.Storage;
 
 namespace StoryCAD.Models;
 
 /// <summary>
-/// This class holds developer tools
-/// and app data.
+/// This class holds developer tools and app data.
 /// </summary>
 public class AppState
 {
@@ -51,32 +38,14 @@ public class AppState
     }
 
     /// <summary>
-    /// User preferences
-    /// </summary>
-    public PreferencesModel Preferences;
-
-    /// <summary>
     /// This variable will return true if any of following are true:
     ///  - The Build revision is NOT 0.
-    ///  - A debugger i.e VS2022 is attached.
+    ///  - A debugger i.e. VS2022 is attached.
     ///  - .ENV is missing.
     ///  
     /// Usually it's all or none of the above.
     /// </summary>
-    public bool DeveloperBuild
-    {
-        get
-        {
-            if (Debugger.IsAttached || !EnvPresent || Package.Current.Id.Version.Revision != 0)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-    }
+    public bool DeveloperBuild => Debugger.IsAttached || !EnvPresent || Package.Current.Id.Version.Revision != 0;
 
     /// <summary>
     /// This is a debug timer that counts the amount of time from
@@ -115,12 +84,9 @@ public class AppState
                     .Split("build")[1];
                 return $"Version: {_packageVersion} Built on: {StoryCADManifestVersion}";
             }
-            else
-            {
-                return $"Version: {_packageVersion}";
-            }
-        }
-    }
+            return $"Version: {_packageVersion}";
+		}
+	}
 
     /// <summary>
     /// Returns true if the app has loaded with a version change.
@@ -128,89 +94,4 @@ public class AppState
     /// run and the server will update the version.
     /// </summary>    
     public bool LoadedWithVersionChange = false;
-
-    public string SystemInfo
-    {
-        get {
-
-            try
-            {
-                string AppArch = IntPtr.Size switch
-                {
-                    4 => "32 bit",
-                    8 => "64 bit",
-                    _ => "Unknown"
-                };
-
-                string WinVer;
-                try
-                {
-                    WinVer = Environment.OSVersion.Version.Build >= 22000 ? "11" : "10";
-                }
-                catch { WinVer = "?"; }
-
-
-                return $"""
-                     ===== SYSTEM INFO =====
-                     CPU ARCH - {RuntimeInformation.ProcessArchitecture}  
-                     OS  ARCH - {RuntimeInformation.OSArchitecture}  
-                     App ARCH - {AppArch}
-                     .NET Ver - {RuntimeInformation.OSArchitecture}
-                     Startup  - {StartUpTimer.ElapsedMilliseconds} ms
-                     Elmah Status - {Ioc.Default.GetRequiredService<LogService>().ElmahLogging}
-                     Windows {WinVer} Build - {Environment.OSVersion.Version.Build}
-                     Debugger Attached - {Debugger.IsAttached}
-                     Touchscreen - {PointerDevice.GetPointerDevices().Any(p => p.PointerDeviceType == PointerDeviceType.Touch)}
-                     ProcessID - {Environment.ProcessId}
-                     Core Count - {Environment.ProcessorCount}
-
-                     === User Prefs ===
-                     Name - {Preferences.FirstName}  {Preferences.LastName}
-                     Email - {Preferences.Email}
-                     Elmah Consent - {Preferences.ErrorCollectionConsent}
-                     Theme - {Ioc.Default.GetRequiredService<Windowing>().PrimaryColor.Color.ToHex()}
-                     Accent Color - {Ioc.Default.GetRequiredService<Windowing>().AccentColor} 
-                     Last Version Prefs logged - {Preferences.Version}
-                     Search Engine - {Preferences.PreferredSearchEngine} 
-                     AutoSave - {Preferences.AutoSave}
-                     AutoSave Interval - {Preferences.AutoSaveInterval} 
-                     Backup - {Preferences.TimedBackup}
-                     Backup Interval - {Preferences.TimedBackupInterval}
-                     Backup on open - {Preferences.BackupOnOpen} 
-                     Project Dir - {Preferences.ProjectDirectory}
-                     Backup Dir - {Preferences.BackupDirectory} 
-                     RecordPreferencesStatus - {Preferences.RecordPreferencesStatus}
-
-                     ===CAD Info===
-                     StoryCAD Version - {Version}
-                     Developer - {DeveloperBuild}
-                     Env Present - {EnvPresent}
-                     Doppler Connection - {Doppler.DopplerConnection}
-                     Loaded with version change - {LoadedWithVersionChange}
-                     Invoked through STBX File - {Ioc.Default.GetRequiredService<ShellViewModel>().FilePathToLaunch != ""}
-                     """;
-            }
-            catch (Exception e) { return $"Error getting System Info, {e.Message}"; }       
-        }
-
-    }
-
-    public async Task LoadPreferences() {
-        LogService Logger = Ioc.Default.GetService<LogService>();
-        try
-        {
-            Logger.Log(LogLevel.Info, "Loading Preferences");
-            PreferencesModel model = new();
-            PreferencesIo loader = new(model, RootDirectory);
-            await loader.ReadPreferences();
-
-            Preferences = model;
-        }
-        catch (Exception ex)
-        {
-            Logger.LogException(LogLevel.Error, ex, "Error loading Preferences");
-            Application.Current.Exit();  // Win32; 
-        }
-    }
-
 }
