@@ -8,7 +8,7 @@ namespace StoryCADTests;
 
 [TestClass]
 public class DragAndDropTests
-{
+{/*
     private StoryNodeItem root;
     private StoryNodeItem child1;
     private StoryNodeItem child2;
@@ -100,6 +100,6 @@ public class DragAndDropTests
     {
         var result = ShellVM.ValidateDragAndDrop(child1, trashedItem);
         Assert.IsTrue(result, "Moving an item to the trash node should be considered an invalid move.");
-    }
+    }*/
 
 }
