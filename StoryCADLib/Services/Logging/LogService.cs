@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using Windows.Foundation.Diagnostics;
 using Elmah.Io.Client;
 using Elmah.Io.NLog;
 using NLog;
@@ -30,7 +31,8 @@ public class LogService : ILogService
     private static Exception exceptionHelper;
     private string apiKey = string.Empty;
     private string logID = string.Empty;
-    private AppState State = Ioc.Default.GetRequiredService<AppState>();
+    private static AppState State = Ioc.Default.GetRequiredService<AppState>();
+    public static NLog.LogLevel MinLogLevel = NLog.LogLevel.Info;
     public bool ElmahLogging;
     static LogService()
     {
@@ -47,7 +49,12 @@ public class LogService : ILogService
             fileTarget.ArchiveEvery = FileArchivePeriod.Day;
             fileTarget.ConcurrentWrites = true;
             fileTarget.Layout = "${longdate} | ${level} | ${message} | ${exception:format=Message,StackTrace,Data:MaxInnerExceptionLevel=5}";
-            LoggingRule fileRule = new("*", NLog.LogLevel.Trace, fileTarget);
+            LoggingRule fileRule = new("*", NLog.LogLevel.Off, fileTarget);
+            if (Ioc.Default.GetRequiredService<PreferenceService>().Model.AdvancedLogging)
+                MinLogLevel = NLog.LogLevel.Trace;
+            else
+                MinLogLevel = NLog.LogLevel.Info;
+            fileRule.EnableLoggingForLevels(MinLogLevel, NLog.LogLevel.Fatal);
             config.AddTarget("logfile", fileTarget);
             config.LoggingRules.Add(fileRule);
 
@@ -57,7 +64,8 @@ public class LogService : ILogService
                 ColoredConsoleTarget consoleTarget = new();
                 consoleTarget.Layout = @"${date:format=HH\\:MM\\:ss} ${logger} ${message}";
                 config.AddTarget("console", consoleTarget);
-                LoggingRule consoleRule = new("*", NLog.LogLevel.Info, consoleTarget);
+                LoggingRule consoleRule = new("*", NLog.LogLevel.Off, consoleTarget);
+                fileRule.EnableLoggingForLevels(MinLogLevel, NLog.LogLevel.Fatal);
                 config.LoggingRules.Add(consoleRule);
             }
 

@@ -91,6 +91,12 @@ public class PreferencesModel : ObservableObject
 	/// DateTime of last review
 	/// </summary>
 	public DateTime LastReviewDate;
+  
+  
+	/// <summary>
+	/// Do we want to log more in depth
+	/// </summary>
+    public bool AdvancedLogging { get; set; }
 	#endregion
 
 	#region Constructor
@@ -125,6 +131,7 @@ public class PreferencesModel : ObservableObject
 		ThemePreference = ElementTheme.Default; // Use system theme
 		HideRatingPrompt = false;
 		CumulativeTimeUsed = 0;
+    AdvancedLogging = false;
 		LastReviewDate = DateTime.MinValue;
 	}
 	#endregion

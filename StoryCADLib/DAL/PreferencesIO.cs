@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Windows.Storage;
@@ -14,10 +14,6 @@ using System.Diagnostics;
 
 namespace StoryCAD.DAL;
 
-/// <summary>
-/// This data access module handles file I/O and updates
-/// for the StoryCAD.prf file and PreferencesModel object. 
-/// </summary>
 public class PreferencesIo
 {
 	private IList<string> _preferences;
@@ -56,21 +52,6 @@ public class PreferencesIo
 				string[] _tokens = _line.Split(new[] { '=' });
 				switch (_tokens[0])
 				{
-					//TODO: Remove this case after March 2024.
-					//This case can only ever execute on PRF files created pre-2.13
-					case "Name":
-						string[] names = _tokens[1].Split(" ");
-						if (names.Length == 2)
-						{
-							_model.FirstName = names[0];
-							_model.LastName = names[1];
-						}
-						else
-						{
-							_model.FirstName = _tokens[1];
-							_model.LastName = "";
-						}
-						break;
 					case "FirstName":
 						_model.FirstName = _tokens[1];
 						break;
@@ -82,13 +63,27 @@ public class PreferencesIo
 						break;
 
 					case "Initalised":
-						if (_tokens[1] == "True") { _model.PreferencesInitialized = true; }
-						else { _model.PreferencesInitialized = false; }
+						if (_tokens[1] == "True")
+						{
+							_model.PreferencesInitialized = true;
+						}
+						else
+						{
+							_model.PreferencesInitialized = false;
+						}
+
 						break;
 
 					case "ErrorCollectionConsent":
-						if (_tokens[1] == "True") { _model.ErrorCollectionConsent = true; }
-						else { _model.ErrorCollectionConsent = false; }
+						if (_tokens[1] == "True")
+						{
+							_model.ErrorCollectionConsent = true;
+						}
+						else
+						{
+							_model.ErrorCollectionConsent = false;
+						}
+
 						break;
 
 					case "Newsletter":
@@ -106,8 +101,15 @@ public class PreferencesIo
 						break;
 
 					case "TimedBackup":
-						if (_tokens[1] == "True") { _model.TimedBackup = true; }
-						else { _model.TimedBackup = false; }
+						if (_tokens[1] == "True")
+						{
+							_model.TimedBackup = true;
+						}
+						else
+						{
+							_model.TimedBackup = false;
+						}
+
 						break;
 
 					case "TimedBackupInterval":
@@ -154,12 +156,26 @@ public class PreferencesIo
 							_model.RecordVersionStatus = false;
 						break;
 					case "WrapNodeNames":
-						if (_tokens[1] == "True") { _model.WrapNodeNames = TextWrapping.WrapWholeWords; }
-						else { _model.WrapNodeNames = TextWrapping.NoWrap; }
+						if (_tokens[1] == "True")
+						{
+							_model.WrapNodeNames = TextWrapping.WrapWholeWords;
+						}
+						else
+						{
+							_model.WrapNodeNames = TextWrapping.NoWrap;
+						}
+
 						break;
 					case "AutoSave":
-						if (_tokens[1] == "True") { _model.AutoSave = true; }
-						else { _model.AutoSave = false; }
+						if (_tokens[1] == "True")
+						{
+							_model.AutoSave = true;
+						}
+						else
+						{
+							_model.AutoSave = false;
+						}
+
 						break;
 					case "AutoSaveInterval":
 						_model.AutoSaveInterval = Convert.ToInt32(_tokens[1]);
@@ -173,8 +189,15 @@ public class PreferencesIo
 						_model.ThemePreference = (ElementTheme)(Convert.ToInt16(_tokens[1]));
 						break;
 					case "DontAskForReview":
-						if (_tokens[1] == "True") { _model.HideRatingPrompt = true; }
-						else { _model.HideRatingPrompt = false; }
+						if (_tokens[1] == "True")
+						{
+							_model.HideRatingPrompt = true;
+						}
+						else
+						{
+							_model.HideRatingPrompt = false;
+						}
+
 						break;
 					case "CummulativeTimeUsed":
 						_model.CumulativeTimeUsed = Convert.ToInt32(_tokens[1]);
@@ -182,10 +205,13 @@ public class PreferencesIo
 					case "LastReviewDate":
 						_model.LastReviewDate = Convert.ToDateTime(_tokens[1]);
 						break;
-
+					case "AdvancedLogging":
+						_model.AdvancedLogging = _tokens[1] == "True";
+						break;
 
 				}
 			}
+
 			_log.Log(LogLevel.Info, "PreferencesModel updated from StoryCAD.prf.");
 		}
 		else
@@ -198,16 +224,21 @@ public class PreferencesIo
 		Windowing window = Ioc.Default.GetService<Windowing>();
 		if (_model.ThemePreference == ElementTheme.Default)
 		{
-			window.RequestedTheme = Application.Current.RequestedTheme == ApplicationTheme.Dark ? ElementTheme.Dark : ElementTheme.Light;
+			window.RequestedTheme = Application.Current.RequestedTheme == ApplicationTheme.Dark
+				? ElementTheme.Dark
+				: ElementTheme.Light;
 		}
-		else { Ioc.Default.GetService<Windowing>().RequestedTheme = _model.ThemePreference; }
+		else
+		{
+			Ioc.Default.GetService<Windowing>().RequestedTheme = _model.ThemePreference;
+		}
 
 		if (Ioc.Default.GetService<Windowing>().RequestedTheme == ElementTheme.Light)
 		{
 			window.PrimaryColor = new SolidColorBrush(Colors.LightGray);
 			window.SecondaryColor = new SolidColorBrush(Colors.Black);
 		}
-		else 
+		else
 		{
 			window.PrimaryColor = new SolidColorBrush(Colors.DarkSlateGray);
 			window.SecondaryColor = new SolidColorBrush(Colors.White);
@@ -223,41 +254,44 @@ public class PreferencesIo
 	{
 		_log.Log(LogLevel.Info, "Updating prf from model.");
 		StorageFolder _preferencesFolder = await StorageFolder.GetFolderFromPathAsync(_path);
-		StorageFile _preferencesFile = await _preferencesFolder.CreateFileAsync("StoryCAD.prf", CreationCollisionOption.ReplaceExisting);
+		StorageFile _preferencesFile =
+			await _preferencesFolder.CreateFileAsync("StoryCAD.prf", CreationCollisionOption.ReplaceExisting);
 
 		string _newPreferences = $"""
-			FirstName={_model.FirstName}
-			LastName={_model.LastName}
-			Email={_model.Email}
-			ErrorCollectionConsent={_model.ErrorCollectionConsent}
-			Newsletter={_model.Newsletter}
-			Initalised={_model.PreferencesInitialized}
-			LastTemplate={_model.LastSelectedTemplate}
-			WrapNodeNames={_model.WrapNodeNames}
-			LastFile1={_model.LastFile1}
-			LastFile2={_model.LastFile2}
-			LastFile3={_model.LastFile3}
-			LastFile4={_model.LastFile4}
-			LastFile5={_model.LastFile5}
-			ProjectDirectory={_model.ProjectDirectory}
-			BackupDirectory={_model.BackupDirectory}
-			AutoSave={_model.AutoSave}
-			AutoSaveInterval={_model.AutoSaveInterval} 
-			BackupOnOpen={_model.BackupOnOpen}
-			TimedBackup={_model.TimedBackup}
-			TimedBackupInterval={_model.TimedBackupInterval}
-			Version={_model.Version}
-			RecordPreferencesStatus={_model.RecordPreferencesStatus}
-			RecordVersionStatus={_model.RecordVersionStatus}
-			SearchEngine={_model.PreferredSearchEngine}
-			Theme={(int)_model.ThemePreference}
-			DontAskForReview={_model.HideRatingPrompt}
-			CummulativeTimeUsed={_model.CumulativeTimeUsed}
-			LastReviewDate={_model.LastReviewDate}
-			""";
+		                          FirstName={_model.FirstName}
+		                          LastName={_model.LastName}
+		                          Email={_model.Email}
+		                          ErrorCollectionConsent={_model.ErrorCollectionConsent}
+		                          Newsletter={_model.Newsletter}
+		                          Initalised={_model.PreferencesInitialized}
+		                          LastTemplate={_model.LastSelectedTemplate}
+		                          WrapNodeNames={_model.WrapNodeNames}
+		                          LastFile1={_model.LastFile1}
+		                          LastFile2={_model.LastFile2}
+		                          LastFile3={_model.LastFile3}
+		                          LastFile4={_model.LastFile4}
+		                          LastFile5={_model.LastFile5}
+		                          ProjectDirectory={_model.ProjectDirectory}
+		                          BackupDirectory={_model.BackupDirectory}
+		                          AutoSave={_model.AutoSave}
+		                          AutoSaveInterval={_model.AutoSaveInterval} 
+		                          BackupOnOpen={_model.BackupOnOpen}
+		                          TimedBackup={_model.TimedBackup}
+		                          TimedBackupInterval={_model.TimedBackupInterval}
+		                          Version={_model.Version}
+		                          RecordPreferencesStatus={_model.RecordPreferencesStatus}
+		                          RecordVersionStatus={_model.RecordVersionStatus}
+		                          SearchEngine={_model.PreferredSearchEngine}
+		                          Theme={(int)_model.ThemePreference}
+		                          DontAskForReview={_model.HideRatingPrompt}
+		                          CummulativeTimeUsed={_model.CumulativeTimeUsed}
+		                          LastReviewDate={_model.LastReviewDate}
+		                          AdvancedLogging={_model.AdvancedLogging}
+		                          """;
 
-		_newPreferences += (_model.WrapNodeNames == TextWrapping.WrapWholeWords ? Environment.NewLine + "WrapNodeNames=True" : Environment.NewLine + "WrapNodeNames=False");
+		_newPreferences += (_model.WrapNodeNames == TextWrapping.WrapWholeWords
+			? Environment.NewLine + "WrapNodeNames=True"
+			: Environment.NewLine + "WrapNodeNames=False");
 		await FileIO.WriteTextAsync(_preferencesFile, _newPreferences); //Writes file to disk.
 	}
-
 }

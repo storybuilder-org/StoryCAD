@@ -185,11 +185,19 @@ public class PreferencesViewModel : ObservableValidator
         set => PreferedTheme = (ElementTheme)value;
     }
 
-    #endregion
+    // Logging Information
+    public bool _advancedLogging;
+    public bool AdvancedLogging
+    {
+	    get => _advancedLogging;
+	    set => SetProperty(ref _advancedLogging, value);
+    }
 
-    #region Methods
+	#endregion
 
-    internal void LoadModel()
+	#region Methods
+
+	internal void LoadModel()
     {
         FirstName = CurrentModel.FirstName;
         LastName = CurrentModel.LastName;
@@ -219,6 +227,7 @@ public class PreferencesViewModel : ObservableValidator
         RecordVersionStatus = CurrentModel.RecordVersionStatus;
         PreferredSearchEngine = CurrentModel.PreferredSearchEngine;
         PreferedTheme = CurrentModel.ThemePreference;
+        AdvancedLogging = CurrentModel.AdvancedLogging;
     }
 
     internal void SaveModel()
@@ -249,6 +258,7 @@ public class PreferencesViewModel : ObservableValidator
         CurrentModel.RecordPreferencesStatus = RecordPreferencesStatus;
         CurrentModel.RecordVersionStatus = RecordVersionStatus;
         CurrentModel.PreferredSearchEngine = PreferredSearchEngine;
+        CurrentModel.AdvancedLogging = AdvancedLogging;
 
         if (CurrentModel.ThemePreference != PreferedTheme)
         {
