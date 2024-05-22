@@ -3,7 +3,7 @@
   <Identity Name="34432StoryBuilder.StoryBuilder" Publisher="CN=34A1944E-942C-4545-B217-ECE68E54ACF8" Version="2.13.0.65535" />
   <Properties>
     <DisplayName>StoryCAD</DisplayName>
-    <PublisherDisplayName>StoryBuilder</PublisherDisplayName>
+    <PublisherDisplayName>STORYBUILDER ORG</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
   <Dependencies>
