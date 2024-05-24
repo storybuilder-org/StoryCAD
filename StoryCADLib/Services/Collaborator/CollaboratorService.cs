@@ -39,8 +39,8 @@ public class CollaboratorService
     private bool FindDll()
     {
         // Get the path to the Documents folder
-        //string documentsPath = "C:\\Users\\RARI\\Documents\\Repos\\CADCorp\\CollabApp\\CollaboratorLib\\bin\\x64\\Debug\\net8.0-windows10.0.22621.0";
-        string documentsPath = "C:\\dev\\src\\StoryBuilderCollaborator\\CollaboratorLib\\bin\\x64\\Debug\\net8.0-windows10.0.22621.0";
+        string documentsPath = "C:\\Users\\RARI\\Documents\\Repos\\CADCorp\\CollabApp\\CollaboratorLib\\bin\\x64\\Debug\\net8.0-windows10.0.22621.0";
+        //string documentsPath = "C:\\dev\\src\\StoryBuilderCollaborator\\CollaboratorLib\\bin\\x64\\Debug\\net8.0-windows10.0.22621.0";
         dllPath = Path.Combine(documentsPath, "CollaboratorLib.dll");
 
         // Verify that the DLL is present
@@ -147,13 +147,13 @@ public class CollaboratorService
     {
         logger.Log(LogLevel.Info, "Collaborator Callback, re-enabling async");
         //Reenable Timed Backup if needed.
-        if (Ioc.Default.GetRequiredService<AppState>().Preferences.TimedBackup)
+        if (Ioc.Default.GetRequiredService<PreferenceService>().Model.TimedBackup)
         {
             Ioc.Default.GetRequiredService<BackupService>().StartTimedBackup();
         }
 
         //Reenable auto save if needed.
-        if (Ioc.Default.GetRequiredService<AppState>().Preferences.AutoSave)
+        if (Ioc.Default.GetRequiredService<PreferenceService>().Model.AutoSave)
         {
             Ioc.Default.GetRequiredService<AutoSaveService>().StartAutoSave();
         }

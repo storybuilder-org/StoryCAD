@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Reflection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using StoryCAD.Collaborator.Views;
 using StoryCAD.Models;
 
 namespace StoryCAD.Collaborator;
@@ -13,7 +14,7 @@ public interface IWizardViewModel
     // Properties
     string Title { get; set; }
     string Description { get; set; }
-    ObservableCollection<IWizardStepModel> Steps { get; set; }
+    ObservableCollection<IWizardStepViewModel> Steps { get; set; }
     ObservableCollection<NavigationViewItem> MenuSteps { get; set; }
     StoryElement Model { get; set; }
     SortedDictionary<string, PropertyInfo> ModelProperties { get; set; }

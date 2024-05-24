@@ -1293,7 +1293,7 @@ public class ShellViewModel : ObservableRecipient
     /// <summary>
     /// This function just calls print reports dialog.
     /// </summary>
-    private void OpenPrintMenu() 
+    private async void OpenPrintMenu() 
     {
         await Ioc.Default.GetRequiredService<PrintReportDialogVM>().OpenPrintReportDialog();
     }

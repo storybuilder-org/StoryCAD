@@ -10,6 +10,7 @@ using StoryCAD.ViewModels;
 using StoryCAD.Models;
 using StoryCAD.Models.Tools;
 using StoryCAD.Services.Collaborator;
+using StoryCAD.Services.Ratings;
 
 namespace StoryCAD.Services.IoC;
 
