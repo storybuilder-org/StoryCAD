@@ -36,7 +36,10 @@ namespace StoryCAD.Services.Json
         [JsonPropertyName("SSLCA")]
         public string SSLCA { get; set; }
 
-        private static HttpClient client = new();
+        [JsonPropertyName("GITHUB_TOKEN")]
+        public string GITHUB_TOKEN { get; set; }
+
+		private static HttpClient client = new();
 
         /// <summary>
         /// Obtain tokens for elmah.io and and MySQL connection to the backend server.

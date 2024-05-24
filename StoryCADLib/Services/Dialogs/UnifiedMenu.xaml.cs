@@ -22,7 +22,7 @@ public sealed partial class UnifiedMenuPage
                 MenuContent.Children.Add(new RecentFiles(UnifiedMenuVM));
                 break;
             case "New":
-                UnifiedMenuVM.SelectedTemplateIndex = Ioc.Default.GetRequiredService<AppState>().Preferences.LastSelectedTemplate;
+                UnifiedMenuVM.SelectedTemplateIndex = Ioc.Default.GetRequiredService<PreferenceService>().Model.LastSelectedTemplate;
                 MenuContent.Children.Add(new NewProjectPage(UnifiedMenuVM));
                 break;
             case "Sample":

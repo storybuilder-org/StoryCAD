@@ -7,6 +7,7 @@ using StoryCAD.Services.Logging;
 using UnhandledExceptionEventArgs = Microsoft.UI.Xaml.UnhandledExceptionEventArgs;
 using System.IO;
 using Microsoft.VisualStudio.TestTools.UnitTesting.AppContainer;
+using StoryCAD.Services;
 
 namespace StoryCADTests;
 
@@ -40,21 +41,21 @@ public partial class App : Application
     protected override async void OnLaunched(LaunchActivatedEventArgs args)
     {
         _log.Log(LogLevel.Info, "StoryCADTests.App launched");
-        AppState AppDat = Ioc.Default.GetRequiredService<AppState>();
-        await AppDat.LoadPreferences();
+        AppState State = Ioc.Default.GetRequiredService<AppState>();
+        await Ioc.Default.GetRequiredService<PreferenceService>().LoadPreferences();
 
-        string pathMsg = string.Format("Configuration data location = " + AppDat.RootDirectory);
+        string pathMsg = string.Format("Configuration data location = " + State.RootDirectory);
         _log.Log(LogLevel.Info, pathMsg);
 
-        Microsoft.VisualStudio.TestPlatform.TestExecutor.UnitTestClient.CreateDefaultUI();
-        Window = new MainWindow();
-        // Ensure the current window is active
-        Window.Activate();
-        UITestMethodAttribute.DispatcherQueue = Window.DispatcherQueue;
+		Microsoft.VisualStudio.TestPlatform.TestExecutor.UnitTestClient.CreateDefaultUI();
+		Window = new MainWindow();
+		// Ensure the current window is active
+		Window.Activate();
+		UITestMethodAttribute.DispatcherQueue = Window.DispatcherQueue;
 
 
-        // Replace back with e.Arguments when https://github.com/microsoft/microsoft-ui-xaml/issues/3368 is fixed
-        Microsoft.VisualStudio.TestPlatform.TestExecutor.UnitTestClient.Run(Environment.CommandLine);
+		// Replace back with e.Arguments when https://github.com/microsoft/microsoft-ui-xaml/issues/3368 is fixed
+		Microsoft.VisualStudio.TestPlatform.TestExecutor.UnitTestClient.Run(Environment.CommandLine);
     }
 
     private void OnUnhandledException(object sender, UnhandledExceptionEventArgs e)

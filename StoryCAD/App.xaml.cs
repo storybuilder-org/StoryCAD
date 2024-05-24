@@ -7,30 +7,24 @@ using Windows.ApplicationModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using dotenv.net;
 using dotenv.net.Utilities;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.Windows.AppLifecycle;
 using PInvoke;
-using StoryCAD.DAL;
 using StoryCAD.Models;
-using StoryCAD.Models.Tools;
 using StoryCAD.Services.Backend;
 using StoryCAD.Services.Json;
 using StoryCAD.Services.Logging;
 using StoryCAD.Services.Navigation;
-using StoryCAD.Services.Search;
 using StoryCAD.ViewModels;
-using StoryCAD.ViewModels.Tools;
 using StoryCAD.Views;
 using Syncfusion.Licensing;
 using WinUIEx;
 using AppInstance = Microsoft.Windows.AppLifecycle.AppInstance;
 using UnhandledExceptionEventArgs = Microsoft.UI.Xaml.UnhandledExceptionEventArgs;
 using Windows.ApplicationModel.Activation;
-using Windows.Storage;
-using Microsoft.UI.Dispatching;
-using StoryCAD.Services.Backup;
+using K4os.Hash.xxHash;
+using Microsoft.UI.Xaml;
+using StoryCAD.DAL;
 using LaunchActivatedEventArgs = Microsoft.UI.Xaml.LaunchActivatedEventArgs;
 using System.Globalization;
 using System.Reflection;
@@ -58,18 +52,22 @@ public partial class App
 
     private IntPtr m_windowHandle;
 
-    /// <summary>
-    /// This is the path to the STBX file that StoryCAD
-    /// was launched with, if StoryCAD wasn't launched
-    /// with a file this will be null.
-    /// </summary>
-    string LaunchPath = null;
+	/// <summary>
+	/// This is the path to the STBX file that StoryCAD was launched with,
+	/// if StoryCAD wasn't launched with a file this will be null.
+	/// </summary>
+	string LaunchPath = null;
 
-    /// <summary>
-    /// Initializes the singleton application object.  This is the first line of authored code
-    /// executed, and as such is the logical equivalent of main() or WinMain().
-    /// </summary>
-    public App()
+	/// <summary>
+	/// Used to track uptime of app
+	/// </summary>
+	DateTime StartTime = DateTime.Now;
+
+	/// <summary>
+	/// Initializes the singleton application object. This is the first line of authored code
+	/// executed, and as such is the logical equivalent of main() or WinMain().
+	/// </summary>
+	public App()
     {
         CheckForOtherInstances(); //Check other instances aren't already open.
 
@@ -123,7 +121,7 @@ public partial class App
                 {
                     if (activatedEventArgs.Data is IFileActivatedEventArgs fileArgs)
                     {
-                        //This will be launched when ShellVM has finished initalising
+                        //This will be launched when ShellVM has finished initialising
                         LaunchPath = fileArgs.Files.FirstOrDefault().Path; 
                     }
                 }
@@ -140,11 +138,13 @@ public partial class App
     protected override async void OnLaunched(LaunchActivatedEventArgs args)
     {
         _log.Log(LogLevel.Info, "StoryCAD.App launched");
-        // Note: Shell_Loaded in Shell.xaml.cs will display a
-        // connection status message as soon as it's displayable.
+		// Note: Shell_Loaded in Shell.xaml.cs will display a
+		// connection status message as soon as it's displayable.
 
-        // Obtain keys if defined
-        try
+		PreferenceService Preferences = Ioc.Default.GetRequiredService<PreferenceService>();
+
+		// Obtain keys if defined
+		try
         {
             Doppler doppler = new();
             Doppler keys = await doppler.FetchSecretsAsync();
@@ -163,8 +163,8 @@ public partial class App
         Trace.Indent();
         Trace.WriteLine(pathMsg);
 
-        //Load user preferences or atleast initalise them.
-        await Ioc.Default.GetService<AppState>().LoadPreferences();
+        //Load user preferences or initialise them.
+        await Preferences.LoadPreferences();
 
         //Set the launch path in ShellVM so if a File was used to open StoryCAD,
         //so that the file will be opened when shell has finished loading.
@@ -173,7 +173,7 @@ public partial class App
         if (Debugger.IsAttached) {_log.Log(LogLevel.Info, "Bypassing elmah.io as debugger is attached.");}
         else
         {
-            if (Ioc.Default.GetRequiredService<AppState>().Preferences.ErrorCollectionConsent)
+            if (Preferences.Model.ErrorCollectionConsent)
             {
                 _log.ElmahLogging = _log.AddElmahTarget();
                 if (_log.ElmahLogging) { _log.Log(LogLevel.Info, "elmah successfully added."); }
@@ -190,9 +190,7 @@ public partial class App
 
         // Construct a Window to hold our Pages
         WindowEx mainWindow = new MainWindow() { MinHeight = 675, MinWidth = 900, Width = 1050,
-            Height=750, Title="StoryCAD" };
-
-        mainWindow.AppWindow.Closing += Ioc.Default.GetRequiredService<CollaboratorService>().DestroyCollaborator;
+            Height=750, Title="StoryCAD"};
 
         // Create a Frame to act as the navigation context 
         Frame rootFrame = new();
@@ -205,7 +203,10 @@ public partial class App
         //   If we've not yet initialized Preferences, it's PreferencesInitialization.
         //   If we have initialized Preferences, it Shell.
         // PreferencesInitialization will Navigate to Shell after it's done its business.
-        if (!Ioc.Default.GetRequiredService<AppState>().Preferences.PreferencesInitialized) {rootFrame.Navigate(typeof(PreferencesInitialization));}
+        if (!Preferences.Model.PreferencesInitialized)
+        {
+	        rootFrame.Navigate(typeof(PreferencesInitialization));
+        }
         else {rootFrame.Navigate(typeof(Shell));}
 
     // Preserve both the Window and its Handle for future use
@@ -219,7 +220,20 @@ public partial class App
 
     }
 
-    private void ConfigureNavigation()
+	private void MainWindow_Closed(object sender, WindowEventArgs args)
+	{
+		//Update used time
+		PreferenceService Prefs = Ioc.Default.GetService<PreferenceService>();
+		AppState State = Ioc.Default.GetService<AppState>();
+		Prefs.Model.CumulativeTimeUsed += Convert.ToInt64((DateTime.Now - StartTime).TotalSeconds);
+
+		//Save prefs
+		PreferencesIo prefIO = new(Prefs.Model, State.RootDirectory);
+		Task.Run(async () => { await prefIO.WritePreferences(); });
+		
+	}
+
+	private void ConfigureNavigation()
     {
         try
         {

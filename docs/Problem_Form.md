@@ -3,6 +3,7 @@
 [Protagonist Tab](Protagonist_Tab.md) <br/><br/>
 [Antagonist Tab](Antagonist_Tab.md) <br/><br/>
 [Resolution Tab](Resolution_Tab.md) <br/><br/>
- <br/><br/>
-[Previous - Structure Tab](Structure_Tab.md) <br/><br/>
-[Next up - Problem Tab](Problem_Tab.md)
+ <br/>
+ <br/>
+[Previous - Story Overview Form](Story_Overview_Form.md) <br/>
+[Next - Problem Tab](Problem_Tab.md) <br/>

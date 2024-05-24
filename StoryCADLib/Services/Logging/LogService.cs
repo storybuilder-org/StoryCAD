@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using Windows.Foundation.Diagnostics;
 using Elmah.Io.Client;
 using Elmah.Io.NLog;
 using NLog;
@@ -12,6 +13,11 @@ using StoryCAD.Models;
 using StoryCAD.Services.Json;
 using Microsoft.UI.Windowing;
 using CommunityToolkit.Mvvm.DependencyInjection;
+using CommunityToolkit.WinUI.Helpers;
+using StoryCAD.ViewModels;
+using System.Runtime.InteropServices;
+using Windows.Devices.Input;
+using StoryCAD.Models.Tools;
 
 namespace StoryCAD.Services.Logging;
 
@@ -25,7 +31,8 @@ public class LogService : ILogService
     private static Exception exceptionHelper;
     private string apiKey = string.Empty;
     private string logID = string.Empty;
-    private AppState State = Ioc.Default.GetRequiredService<AppState>();
+    private static AppState State = Ioc.Default.GetRequiredService<AppState>();
+    public static NLog.LogLevel MinLogLevel = NLog.LogLevel.Info;
     public bool ElmahLogging;
     static LogService()
     {
@@ -42,7 +49,12 @@ public class LogService : ILogService
             fileTarget.ArchiveEvery = FileArchivePeriod.Day;
             fileTarget.ConcurrentWrites = true;
             fileTarget.Layout = "${longdate} | ${level} | ${message} | ${exception:format=Message,StackTrace,Data:MaxInnerExceptionLevel=5}";
-            LoggingRule fileRule = new("*", NLog.LogLevel.Trace, fileTarget);
+            LoggingRule fileRule = new("*", NLog.LogLevel.Off, fileTarget);
+            if (Ioc.Default.GetRequiredService<PreferenceService>().Model.AdvancedLogging)
+                MinLogLevel = NLog.LogLevel.Trace;
+            else
+                MinLogLevel = NLog.LogLevel.Info;
+            fileRule.EnableLoggingForLevels(MinLogLevel, NLog.LogLevel.Fatal);
             config.AddTarget("logfile", fileTarget);
             config.LoggingRules.Add(fileRule);
 
@@ -52,7 +64,8 @@ public class LogService : ILogService
                 ColoredConsoleTarget consoleTarget = new();
                 consoleTarget.Layout = @"${date:format=HH\\:MM\\:ss} ${logger} ${message}";
                 config.AddTarget("console", consoleTarget);
-                LoggingRule consoleRule = new("*", NLog.LogLevel.Info, consoleTarget);
+                LoggingRule consoleRule = new("*", NLog.LogLevel.Off, consoleTarget);
+                fileRule.EnableLoggingForLevels(MinLogLevel, NLog.LogLevel.Fatal);
                 config.LoggingRules.Add(consoleRule);
             }
 
@@ -126,7 +139,7 @@ public class LogService : ILogService
                 
                     try
                     {
-                        msg.Data.Add(new(key: "SystemInfo", State.SystemInfo));
+                        msg.Data.Add(new(key: "SystemInfo", SystemInfo()));
                     }
                     catch (Exception ex)
                     {
@@ -246,4 +259,73 @@ public class LogService : ILogService
     {
         LogManager.Flush();
     }
+
+
+	/// <summary>
+	/// Compiles a small report about the users device, StoryCAD information etc.
+	/// </summary>
+	/// <returns>StoryCAD Device Report</returns>
+	public string SystemInfo()
+	{
+		try
+		{
+			PreferencesModel Prefs =  Ioc.Default.GetRequiredService<PreferenceService>().Model;
+			AppState State =  Ioc.Default.GetRequiredService<AppState>();
+			string AppArch = IntPtr.Size switch
+			{
+				4 => "32 bit",
+				8 => "64 bit",
+				_ => "Unknown"
+			};
+
+			string WinVer;
+			try
+			{
+				WinVer = Environment.OSVersion.Version.Build >= 22000 ? "11" : "10";
+			}
+			catch { WinVer = "?"; }
+
+
+			return $"""
+                     ===== SYSTEM INFO =====
+                     CPU ARCH - {RuntimeInformation.ProcessArchitecture}  
+                     OS  ARCH - {RuntimeInformation.OSArchitecture}  
+                     App ARCH - {AppArch}
+                     .NET Ver - {RuntimeInformation.OSArchitecture}
+                     Startup  - {State.StartUpTimer.ElapsedMilliseconds} ms
+                     Elmah Status - {Ioc.Default.GetRequiredService<LogService>().ElmahLogging}
+                     Windows {WinVer} Build - {Environment.OSVersion.Version.Build}
+                     Debugger Attached - {Debugger.IsAttached}
+                     Touchscreen - {PointerDevice.GetPointerDevices().Any(p => p.PointerDeviceType == PointerDeviceType.Touch)}
+                     ProcessID - {Environment.ProcessId}
+                     Core Count - {Environment.ProcessorCount}
+
+                     === User Prefs ===
+                     Name - {Prefs.FirstName}  {Prefs.LastName}
+                     Email - {Prefs.Email}
+                     Elmah Consent - {Prefs.ErrorCollectionConsent}
+                     Theme - {Ioc.Default.GetRequiredService<Windowing>().PrimaryColor.Color.ToHex()}
+                     Accent Color - {Ioc.Default.GetRequiredService<Windowing>().AccentColor} 
+                     Last Version Prefs logged - {Prefs.Version}
+                     Search Engine - {Prefs.PreferredSearchEngine} 
+                     AutoSave - {Prefs.AutoSave}
+                     AutoSave Interval - {Prefs.AutoSaveInterval} 
+                     Backup - {Prefs.TimedBackup}
+                     Backup Interval - {Prefs.TimedBackupInterval}
+                     Backup on open - {Prefs.BackupOnOpen} 
+                     Project Dir - {Prefs.ProjectDirectory}
+                     Backup Dir - {Prefs.BackupDirectory} 
+                     RecordPrefsStatus - {Prefs.RecordPreferencesStatus}
+
+                     === CAD Info ===
+                     StoryCAD Version - {State.Version}
+                     Developer - {State.DeveloperBuild}
+                     Env Present - {State.EnvPresent}
+                     Doppler Connection - {Doppler.DopplerConnection}
+                     Loaded with version change - {State.LoadedWithVersionChange}
+                     Invoked through STBX File - {Ioc.Default.GetRequiredService<ShellViewModel>().FilePathToLaunch != ""}
+                     """;
+		}
+		catch (Exception e) { return $"Error getting System Info, {e.Message}"; }
+	}
 }

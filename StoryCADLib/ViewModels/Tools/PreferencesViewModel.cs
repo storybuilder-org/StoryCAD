@@ -12,9 +12,11 @@ using System;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using StoryCAD.Services.Ratings;
+using StoryCAD.Services;
+
 
 namespace StoryCAD.ViewModels.Tools;
-
 
 /// <summary>
 /// This view model handles the Services.Dialogs.Tools.PreferencesDialog.
@@ -30,7 +32,7 @@ namespace StoryCAD.ViewModels.Tools;
 /// </summary>
 public class PreferencesViewModel : ObservableValidator
 {
-    public PreferencesModel CurrentModel = Ioc.Default.GetRequiredService<AppState>().Preferences;
+    public PreferencesModel CurrentModel = Ioc.Default.GetRequiredService<StoryCAD.Services.PreferenceService>().Model;
     public string Errors => string.Join(Environment.NewLine, from ValidationResult e in GetErrors(null) select e.ErrorMessage);
 
     #region Fields
@@ -183,11 +185,19 @@ public class PreferencesViewModel : ObservableValidator
         set => PreferedTheme = (ElementTheme)value;
     }
 
-    #endregion
+    // Logging Information
+    public bool _advancedLogging;
+    public bool AdvancedLogging
+    {
+	    get => _advancedLogging;
+	    set => SetProperty(ref _advancedLogging, value);
+    }
 
-    #region Methods
+	#endregion
 
-    internal void LoadModel()
+	#region Methods
+
+	internal void LoadModel()
     {
         FirstName = CurrentModel.FirstName;
         LastName = CurrentModel.LastName;
@@ -217,6 +227,7 @@ public class PreferencesViewModel : ObservableValidator
         RecordVersionStatus = CurrentModel.RecordVersionStatus;
         PreferredSearchEngine = CurrentModel.PreferredSearchEngine;
         PreferedTheme = CurrentModel.ThemePreference;
+        AdvancedLogging = CurrentModel.AdvancedLogging;
     }
 
     internal void SaveModel()
@@ -247,6 +258,7 @@ public class PreferencesViewModel : ObservableValidator
         CurrentModel.RecordPreferencesStatus = RecordPreferencesStatus;
         CurrentModel.RecordVersionStatus = RecordVersionStatus;
         CurrentModel.PreferredSearchEngine = PreferredSearchEngine;
+        CurrentModel.AdvancedLogging = AdvancedLogging;
 
         if (CurrentModel.ThemePreference != PreferedTheme)
         {
@@ -264,13 +276,13 @@ public class PreferencesViewModel : ObservableValidator
         PreferencesIo _prfIo = new(CurrentModel, Ioc.Default.GetRequiredService<AppState>().RootDirectory);
         await _prfIo.WritePreferences();
         await _prfIo.ReadPreferences();
-        AppState State = Ioc.Default.GetService<AppState>();
+        PreferenceService Prefs = Ioc.Default.GetService<PreferenceService>();
 
-        State.Preferences = CurrentModel;
+		Prefs.Model = CurrentModel;
 
         BackendService _backend = Ioc.Default.GetRequiredService<BackendService>();
-        State.Preferences.RecordPreferencesStatus = false;  // indicate need to update
-        await _backend.PostPreferences(State.Preferences);
+        Prefs.Model.RecordPreferencesStatus = false;  // indicate need to update
+        await _backend.PostPreferences(Prefs.Model);
     }
 
     private void OnPropertyChanged(object sender, PropertyChangedEventArgs args)
@@ -283,11 +295,19 @@ public class PreferencesViewModel : ObservableValidator
         OnPropertyChanged(nameof(Errors)); // Update Errors on every Error change, so I can bind to it.
     }
 
-    #endregion
+	/// <summary>
+	/// Shows the MS Store prompt
+	/// </summary>
+    public void ShowRatingPrompt(object sender, RoutedEventArgs e)
+    {
+	    Ioc.Default.GetService<RatingService>().OpenRatingPrompt();
+    }
 
-    #region Constructor
+	#endregion
 
-    public PreferencesViewModel()
+	#region Constructor
+
+	public PreferencesViewModel()
     {
         this.ErrorsChanged += Preferences_ErrorsChanged;
     }

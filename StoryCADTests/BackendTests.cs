@@ -6,6 +6,7 @@ using StoryCAD.Services.Json;
 using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using StoryCAD.Services;
 
 namespace StoryCADTests;
 
@@ -20,7 +21,7 @@ public class BackendTests
     [TestMethod]
     public void CheckConnection()
     {
-        AppState State = Ioc.Default.GetService<AppState>();
+        PreferenceService Prefs = Ioc.Default.GetService<PreferenceService>();
         
         //Load keys.
         Doppler doppler = new();
@@ -32,20 +33,20 @@ public class BackendTests
         }).Wait();
 
         //Make sure app logic thinks versions need syncing
-        State.Preferences.RecordVersionStatus = false;
-        State.Preferences.FirstName = "StoryCAD";
-        State.Preferences.LastName = "Tests";
-        State.Preferences.Email = "sysadmin@storybuilder.org";
+        Prefs.Model.RecordVersionStatus = false;
+        Prefs.Model.FirstName = "StoryCAD";
+        Prefs.Model.LastName = "Tests";
+        Prefs.Model.Email = "sysadmin@storybuilder.org";
         
         //Call backend service to check connection
         Task.Run(async () =>
         {
             await Ioc.Default.GetRequiredService<BackendService>().PostVersion();
-            await Ioc.Default.GetRequiredService<BackendService>().PostPreferences(State.Preferences);
+            await Ioc.Default.GetRequiredService<BackendService>().PostPreferences(Prefs.Model);
         }).Wait();
 
         //Check if test passed (RecordVersionStatus should be true now)
-        Assert.IsTrue(State.Preferences.RecordVersionStatus);
+        Assert.IsTrue(Prefs.Model.RecordVersionStatus);
     }
 
 }

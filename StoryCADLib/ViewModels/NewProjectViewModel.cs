@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.DependencyInjection;
 using StoryCAD.Models;
 using StoryCAD.Models.Tools;
+using StoryCAD.Services;
 
 namespace StoryCAD.ViewModels;
 
@@ -24,7 +25,7 @@ public class NewProjectViewModel : ObservableRecipient
     public NewProjectViewModel()
     {
         ProjectName = string.Empty;
-        PreferencesModel _prefs = Ioc.Default.GetRequiredService<AppState>().Preferences;
+        PreferencesModel _prefs = Ioc.Default.GetRequiredService<PreferenceService>().Model;
         ParentPathName = _prefs.ProjectDirectory;
     }
 }

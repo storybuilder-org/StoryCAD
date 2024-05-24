@@ -1,19 +1,20 @@
 ### Scene Tab ###
-Scene Tab <br/>
+Scene Tab
 
 ![](Scene-Scene-Tab.png)
 
-Date and Time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Identify when the scene occurs. <br/>
+Date and Time		Identify when the scene occurs.
 
-Viewpoint&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Viewpoint should generally not change within a single scene. <br/>
+Viewpoint		Viewpoint should generally not change within a single scene.
 
-Setting&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;This control lists the settings defined on the Setting form.  Select one of the listed settings to provide a backdrop for the scene. <br/>
+Setting		This control lists the settings defined on the Setting form.  Select one of the listed settings to provide a backdrop for the scene.
 
-Cast&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The number of characters in a scene should be limited to those who contribute to the scene's purpose and dramatic structure. <br/>
+Cast		The number of characters in a scene should be limited to those who contribute to the scene's purpose and dramatic structure.
 
-Scene Sketch&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A thumbnail sketch of the scene. <br/>
+Scene Sketch		A thumbnail sketch of the scene.
 
 
- <br/><br/>
-[Previous - Scene Form](Scene_Form.md) <br/><br/>
-[Next up - Develpment Tab](Develpment_Tab.md)
+ <br/>
+ <br/>
+[Previous - Scene Form](Scene_Form.md) <br/>
+[Next - Develpment Tab](Develpment_Tab.md) <br/>
