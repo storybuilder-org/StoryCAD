@@ -28,17 +28,16 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Runtime.InteropServices.JavaScript;
 using System.Threading.Tasks;
-using Windows.ApplicationModel.DataTransfer;
 using Windows.Storage;
 using Windows.Storage.Pickers;
 using StoryCAD.Services;
 using WinRT;
 using GuidAttribute = System.Runtime.InteropServices.GuidAttribute;
 using Path = System.IO.Path;
-using Octokit;
 using Application = Microsoft.UI.Xaml.Application;
+using FileAttributes = System.IO.FileAttributes;
+using Org.BouncyCastle.Asn1.Cms;
 
 namespace StoryCAD.ViewModels;
 
@@ -794,20 +793,66 @@ public class ShellViewModel : ObservableRecipient
                 StoryModel.ProjectFile = await StorageFile.GetFileFromPathAsync(fromPath);
             }
 
-            if (StoryModel.ProjectFile == null)
+            var FileAttributes = File.GetAttributes(StoryModel.ProjectFile.Path);
+            bool ShowOfflineError = false;
+			if (StoryModel.ProjectFile.IsAvailable) // Microsoft thinks the file is accessible
+            {
+	            try
+	            {
+					//Test read file before continuing.
+					//If the file is saved on a cloud provider and not locally this should force
+					//the file to be pulled locally if possible. A file could be unavailable for
+					//many reasons, such as the user being offline, server outage, etc.
+					//Windows might pause StoryCAD while it syncs the file.
+					File.ReadAllText(StoryModel.ProjectFile.Path);
+	            }
+				catch (IOException) { ShowOfflineError = true;  }
+            }
+			else { ShowOfflineError = true; }
+
+			//Failed to access network file
+			if (ShowOfflineError)
+			{
+				//The file is actually inaccessible and microsoft is wrong.
+				if ((FileAttributes & FileAttributes.Offline) == 0)
+				{
+					Logger.Log(LogLevel.Error, $"File {StoryModel.ProjectFile.Path} is unavailable.");
+					CloseUnifiedCommand.Execute(null);
+
+					//Show warning so user knows their file isn't lost and is just on onedrive.
+					var result = await Window.ShowContentDialog(new()
+					{
+						Title = "File unavailable.",
+						Content = """
+						          The story outline you are trying to open is stored on a cloud service, and isn't available currently.
+						          Try going online and syncing the file, then try again. 
+						          
+						          Click show help article for more information.
+						          """,
+						PrimaryButtonText = "Show help article",
+						SecondaryButtonText = "Close",
+					}, true);
+
+					//Open help article in default browser
+					if (result == ContentDialogResult.Primary)
+					{
+						Process.Start(new ProcessStartInfo
+						{
+							FileName =
+								"https://storybuilder-org.github.io/StoryCAD/Troubleshooting_Cloud_Storage_Providers.html",
+							UseShellExecute = true
+						});
+					}
+
+					return; //Stop opening file.
+				}
+			}
+
+
+			if (StoryModel.ProjectFile == null)
             {
                 Logger.Log(LogLevel.Info, "Open File command cancelled (StoryModel.ProjectFile was null)");
                 Messenger.Send(new StatusChangedMessage(new("Open Story command cancelled", LogLevel.Info)));
-                _canExecuteCommands = true;  // unblock other commands
-                return;
-            }
-
-            // Check if the file is a OneDrive placeholder
-            var fileInfo = new FileInfo(StoryModel.ProjectFile.Path);
-            if ((fileInfo.Attributes & System.IO.FileAttributes.ReparsePoint) != 0)
-            {
-                Logger.Log(LogLevel.Warn, "The selected file is a OneDrive placeholder. Please ensure the file is fully synced with OneDrive and try again.");
-                Messenger.Send(new StatusChangedMessage(new("OneDrive file not synced; open cancelled", LogLevel.Info)));
                 _canExecuteCommands = true;  // unblock other commands
                 return;
             }
