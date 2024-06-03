@@ -820,7 +820,7 @@ public class ShellViewModel : ObservableRecipient
 					CloseUnifiedCommand.Execute(null);
 
 					//Show warning so user knows their file isn't lost and is just on onedrive.
-					await Window.ShowContentDialog(new()
+					var result = await Window.ShowContentDialog(new()
 					{
 						Title = "File unavailable.",
 						Content = """
@@ -830,8 +830,19 @@ public class ShellViewModel : ObservableRecipient
 						          Click show help article for more information.
 						          """,
 						PrimaryButtonText = "Show help article",
-						SecondaryButtonText = "Close"
+						SecondaryButtonText = "Close",
 					}, true);
+
+					//Open help article in default browser
+					if (result == ContentDialogResult.Primary)
+					{
+						Process.Start(new ProcessStartInfo
+						{
+							FileName =
+								"https://storybuilder-org.github.io/StoryCAD/Troubleshooting_Cloud_Storage_Providers.html",
+							UseShellExecute = true
+						});
+					}
 
 					return; //Stop opening file.
 				}
