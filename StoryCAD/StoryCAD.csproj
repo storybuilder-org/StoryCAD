@@ -67,6 +67,7 @@
 
 	<ItemGroup>
 	  <Content Remove="Assets\BadgeLogo.scale-400.png" />
+	  <Content Remove="Assets\StoryTree\4KRev1.1Square.png" />
 	</ItemGroup>
 
 	<ItemGroup>
