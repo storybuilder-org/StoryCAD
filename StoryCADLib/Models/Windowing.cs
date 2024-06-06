@@ -10,7 +10,6 @@ using StoryCAD.Services.Logging;
 using StoryCAD.ViewModels;
 using System;
 using System.ComponentModel;
-using System.Threading;
 using System.Threading.Tasks;
 using Windows.UI;
 using Windows.UI.ViewManagement;
@@ -73,7 +72,6 @@ public class Windowing : ObservableRecipient
     /// (Set in Windows Settings)
     /// </summary>
     public Color AccentColor => new UISettings().GetColorValue(UIColorType.Accent);
-
 
     // Visual changes
     private SolidColorBrush _primaryBrush;
