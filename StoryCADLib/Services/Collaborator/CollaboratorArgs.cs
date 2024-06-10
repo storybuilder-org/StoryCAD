@@ -1,5 +1,6 @@
 ﻿using StoryCAD.Models;
-using WinUIEx;
+using System.Collections.Generic;
+using StoryCAD.Collaborator.Models;
 
 namespace StoryCAD.Services.Collaborator;
 
@@ -8,8 +9,6 @@ public class CollaboratorArgs
     public StoryElement SelectedElement;
 
     public StoryModel StoryModel;
-
-    public WindowEx window;
 
     public delegate void OnDone();
 

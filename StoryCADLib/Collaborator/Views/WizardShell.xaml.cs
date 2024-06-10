@@ -1,37 +1,37 @@
 using System;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
+using StoryCAD.Collaborator.ViewModels;
 using Page = Microsoft.UI.Xaml.Controls.Page;
 
 namespace StoryCAD.Collaborator;
 
-public sealed partial class CollaboratorShell : Page
+public sealed partial class WizardShell : Page
 {
-    public IWizardViewModel CollabVM = null;
+    public WizardViewModel WizardVM => Ioc.Default.GetService<WizardViewModel>();
 
     //public string UsageText
     //{
     //    get
     //    {
-    //        if (CollabVM.CurrentStep != null)
+    //        if (WizardVM.CurrentStep != null)
     //        {
-    //            return CollabVM.CurrentStep.UsageText;
+    //            return WizardVM.CurrentStep.UsageText;
     //        }
 
     //        return "";
     //    }
     //}
 
-    public CollaboratorShell(IWizardViewModel wizard )
+    public WizardShell()
     {
         this.InitializeComponent();
 
-        CollabVM = wizard;
-        (this.Content as FrameworkElement).DataContext = CollabVM;
-
-        CollabVM.ContentFrame = StepFrame;
-        CollabVM.NavView = NavView;
+        (this.Content as FrameworkElement).DataContext = WizardVM;
+        WizardVM.ContentFrame = StepFrame;
+        WizardVM.NavView = NavView;
     }
 
     private void StepFrame_OnNavigated(object sender, NavigationEventArgs e)
@@ -40,19 +40,18 @@ public sealed partial class CollaboratorShell : Page
         switch (e.SourcePageType.Name)
         {
             case "WelcomePage":
-                //CollabVM.CurrentStep =
+                //WizardVM.CurrentStep =
                 //break;
             case "ComboPicker":
-                //CollabVM.NavView.DataContext = CollabVM.CurrentStep;
-                //CollabVM.CurrentStep.Model = CollabVM.Model;
+                //WizardVM.NavView.DataContext = WizardVM.CurrentStep;
+                //WizardVM.CurrentStep.Model = WizardVM.Model;
                 //break;
             case "TextAppender":
-                //CollabVM.NavView.DataContext = CollabVM.CurrentStep;
-                //CollabVM.CurrentStep.Model = CollabVM.Model;
+                //WizardVM.NavView.DataContext = WizardVM.CurrentStep;
+                //WizardVM.CurrentStep.Model = WizardVM.Model;
                 break;
             default:
                 throw new Exception("Invalid page type");
-                break;
         }
 
 
@@ -61,16 +60,16 @@ public sealed partial class CollaboratorShell : Page
         What is step page? Why is current step set to 1 when its a IStepWizard?
         if ( == typeof(WelcomePage))
         { 
-            //CollabVM.CurrentStep = 0;
+            //WizardVM.CurrentStep = 0;
         }
         else //if (/*e.SourcePageType == typeof(StepPage) false)
         {
-            //CollabVM.CurrentStep = 1;
+            //WizardVM.CurrentStep = 1;
         }*/
     }
 
     private void NavView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
     {
-        CollabVM.NavView_SelectionChanged(sender, args);
+        WizardVM.NavView_SelectionChanged(sender, args);
     }
 }

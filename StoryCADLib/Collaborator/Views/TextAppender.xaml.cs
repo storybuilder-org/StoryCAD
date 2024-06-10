@@ -1,11 +1,13 @@
 using Microsoft.UI.Xaml;
 using StoryCAD.Controls;
+using StoryCAD.Collaborator.ViewModels;
+using CommunityToolkit.Mvvm.DependencyInjection;
 
 namespace StoryCAD.Collaborator.Views;
 
 public sealed partial class TextAppender : BindablePage
 {
-    public IWizardStepViewModel StepVM => DataContext as IWizardStepViewModel;
+    public WizardStepViewModel StepVM => Ioc.Default.GetService<WizardStepViewModel>();
     public TextAppender()
     {
         this.InitializeComponent();
@@ -14,7 +16,7 @@ public sealed partial class TextAppender : BindablePage
 
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
-        if (DataContext is IWizardStepViewModel viewModel)
+        if (DataContext is WizardStepViewModel viewModel)
         {
             Bindings.Update();
         }

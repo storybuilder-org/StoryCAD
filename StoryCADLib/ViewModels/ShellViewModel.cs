@@ -39,6 +39,7 @@ using WinRT;
 using GuidAttribute = System.Runtime.InteropServices.GuidAttribute;
 using Path = System.IO.Path;
 using Octokit;
+using WinUIEx;
 using Application = Microsoft.UI.Xaml.Application;
 
 namespace StoryCAD.ViewModels;
@@ -1184,8 +1185,8 @@ public class ShellViewModel : ObservableRecipient
             CollabArgs.SelectedElement = StoryModel.StoryElements.StoryElementGuids[id];
             CollabArgs.StoryModel = StoryModel;
             //TODO: Logging
-            Ioc.Default.GetService<CollaboratorService>()!.RunCollaborator(CollabArgs);
-
+            Ioc.Default.GetService<CollaboratorService>()!.LoadWizardModel(CollabArgs);
+            Ioc.Default.GetService<CollaboratorService>()!.CollaboratorWindow.Show();
         }
     }
 

@@ -26,14 +26,14 @@
                                           RtfText="{x:Bind StepVM.InputText, Mode=TwoWay}" AcceptsReturn="True"
                                           IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                           ScrollViewer.VerticalScrollBarVisibility="Visible" />
-        <controls:RichEditBoxExtended Header="Prompt" Grid.Row="3"
-                                          RtfText="{x:Bind StepVM.PromptText, Mode=TwoWay}" AcceptsReturn="True"
-                                          IsSpellCheckEnabled="True" TextWrapping="Wrap"
-                                          ScrollViewer.VerticalScrollBarVisibility="Visible" />
-        <controls:RichEditBoxExtended Header="Output"  Grid.Row="4"
+        <controls:RichEditBoxExtended Header="Output"  Grid.Row="3"
                                           RtfText="{x:Bind StepVM.OutputText, Mode=TwoWay}" AcceptsReturn="True"
                                           IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                           ScrollViewer.VerticalScrollBarVisibility="Visible" />
+        <controls:RichEditBoxExtended Header="Prompt" Grid.Row="4"
+                                  RtfText="{x:Bind StepVM.PromptText, Mode=TwoWay}" AcceptsReturn="True"
+                                  IsSpellCheckEnabled="True" TextWrapping="Wrap"
+                                  ScrollViewer.VerticalScrollBarVisibility="Visible" />
         <controls:RichEditBoxExtended Header="Usage"  Grid.Row="5"
                                       RtfText="{x:Bind StepVM.UsageText, Mode=TwoWay}" AcceptsReturn="True"
                                       IsSpellCheckEnabled="True" TextWrapping="Wrap"

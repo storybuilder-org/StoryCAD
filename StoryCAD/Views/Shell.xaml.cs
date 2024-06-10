@@ -69,7 +69,10 @@ public sealed partial class Shell
         Ioc.Default.GetService<AppState>()!.StartUpTimer.Stop();
 
         if (Ioc.Default.GetService<CollaboratorService>()!.CollaboratorEnabled())
+        {
+            Ioc.Default.GetService<CollaboratorService>()!.ConnectCollaborator();
             ShellVm.CollaboratorVisibility = Visibility.Visible;
+        }
         else
             ShellVm.CollaboratorVisibility = Visibility.Collapsed;
 

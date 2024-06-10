@@ -7,6 +7,7 @@ using StoryCAD.Services.Navigation;
 using StoryCAD.Services.Search;
 using StoryCAD.ViewModels.Tools;
 using StoryCAD.ViewModels;
+using StoryCAD.Collaborator.ViewModels;
 using StoryCAD.Models;
 using StoryCAD.Models.Tools;
 using StoryCAD.Services.Collaborator;
@@ -49,6 +50,8 @@ public class ServiceConfigurator
              .AddSingleton<SceneViewModel>()
              .AddSingleton<FolderViewModel>()
              .AddSingleton<WebViewModel>()
+             .AddSingleton<WizardViewModel>()
+             .AddSingleton<WizardStepViewModel>()
              .AddSingleton<TrashCanViewModel>()
              .AddSingleton<UnifiedVM>()
              .AddSingleton<InitVM>()

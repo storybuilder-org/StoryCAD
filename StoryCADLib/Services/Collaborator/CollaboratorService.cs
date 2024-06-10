@@ -1,11 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Runtime.Loader;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Windowing;
-using StoryCAD.Collaborator.Views;
+using Microsoft.UI.Xaml.Controls;
+using StoryCAD.Collaborator;
+using StoryCAD.Collaborator.Models;
+using StoryCAD.Collaborator.ViewModels;
 using StoryCAD.Models;
 using StoryCAD.Services.Backup;
 using StoryCAD.Services.Logging;
@@ -20,11 +24,82 @@ public class CollaboratorService
     private string dllPath; 
     private AppState State = Ioc.Default.GetRequiredService<AppState>();
     private LogService logger = Ioc.Default.GetRequiredService<LogService>();
-    public  object Collaborator;
-    public IWizardStepViewModel StepVM;
-    public Assembly CollabAssembly;
-    private WindowEx window; // Do not make public, control from the collaborator side.
-    public Type CollaboratorType;
+    public  object CollaboratorProxy;
+    public WizardStepViewModel stepWizard;
+    private Assembly CollabAssembly;
+    public WindowEx CollaboratorWindow;  // The secondary window for Collaborator
+    private Type collaboratorType;
+    private object collaborator;
+
+    #region Collaborator calls
+    public void LoadWizardModel(CollaboratorArgs args)
+    {
+        var wizard = Ioc.Default.GetService<WizardViewModel>();
+        wizard!.Model = args.SelectedElement;
+        // Get the 'GetMenuItems' method that expects a parameter of type 'StoryItemType'
+        MethodInfo  menuCall = collaboratorType.GetMethod("GetMenuItems", new[] { typeof(StoryItemType) });
+        object[] methodArgs = { args.SelectedElement.Type };
+        // ...and invoke it
+        var menuItems = (List<MenuItem>) menuCall!.Invoke(collaborator, methodArgs);
+        // Load the model
+        wizard.LoadModel(menuItems);
+    }
+
+    /// <summary>
+    /// Request the WizardStepModel which contains the data for the selected
+    /// step, in order to populate and run WizardStepViewModel.
+    /// </summary>
+    /// <param name="model">The StoryElement to process</param>
+    /// <param name="stepName">The name (Title) of the StoryElement property to load</param>
+    public WizardStepArgs LoadWizardStepModel(StoryElement model, string stepName)
+    {
+        stepWizard = Ioc.Default.GetService<WizardStepViewModel>();
+        stepWizard!.Model = model;
+        // Get the 'GetWizardStepModel' method that expects a parameter of type string (the name of the step)
+        MethodInfo loadStep = collaboratorType.GetMethod("GetWizardStepModel", new[] { typeof(StoryElement), typeof(string) });
+        object[] methodArgs = { model, stepName  };
+        // ...and invoke it
+        var stepModel  = (WizardStepArgs) loadStep!.Invoke(collaborator, methodArgs);
+        return stepModel;
+    }
+
+    #endregion
+
+    #region Collaboratorlib connection
+    /// <summary>
+    /// If the plugin is active, connect CollaboratorLib and create an instance
+    /// of Collaborator. 
+    /// 
+    /// 
+    /// </summary>
+    public void ConnectCollaborator()
+    {
+        // Use the custom context to load the assembly
+        CollabAssembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(dllPath);
+        logger.Log(LogLevel.Info, "Loaded CollaboratorLib.dll");
+        //Create a new WindowEx for collaborator to prevent access errors.
+        CollaboratorWindow = new WindowEx();
+        CollaboratorWindow.AppWindow.Closing += HideCollaborator;
+        // Create a Window for StoryBuilder Collaborator
+        Frame rootFrame = new();
+        //CollaboratorWindow = args.window;
+        CollaboratorWindow.MinWidth = Convert.ToDouble("500");
+        CollaboratorWindow.MinHeight = Convert.ToDouble("500");
+        CollaboratorWindow.Closed += (sender, args) => CollaboratorClosed();
+        CollaboratorWindow.Title = "StoryCAD Collaborator";
+        CollaboratorWindow.Content = rootFrame;
+        logger.Log(LogLevel.Info, "Collaborator window created and configured.");
+
+        rootFrame.Content = new WizardShell();
+        logger.Log(LogLevel.Info, "Set collaborator window content to WizardShell.");
+
+        // Get the type of the Collaborator class
+        collaboratorType = CollabAssembly.GetType("StoryCollaborator.Collaborator");
+        // Create an instance of the Collaborator class
+        logger.Log(LogLevel.Info, "Calling Collaborator constructor.");
+        collaborator = collaboratorType!.GetConstructors()[0].Invoke(new object[0]);
+        logger.Log(LogLevel.Info, "Collaborator Constructor finished.");
+    }
     public bool CollaboratorEnabled()
     {
         return State.DeveloperBuild
@@ -39,8 +114,8 @@ public class CollaboratorService
     private bool FindDll()
     {
         // Get the path to the Documents folder
-        string documentsPath = "C:\\Users\\RARI\\Documents\\Repos\\CADCorp\\CollabApp\\CollaboratorLib\\bin\\x64\\Debug\\net8.0-windows10.0.22621.0";
-        //string documentsPath = "C:\\dev\\src\\StoryBuilderCollaborator\\CollaboratorLib\\bin\\x64\\Debug\\net8.0-windows10.0.22621.0";
+        //string documentsPath = "C:\\Users\\RARI\\Documents\\Repos\\CADCorp\\CollabApp\\CollaboratorLib\\bin\\x64\\Debug\\net8.0-windows10.0.22621.0";
+        string documentsPath = "C:\\dev\\src\\StoryBuilderCollaborator\\CollaboratorLib\\bin\\x64\\Debug\\net8.0-windows10.0.22621.0";
         dllPath = Path.Combine(documentsPath, "CollaboratorLib.dll");
 
         // Verify that the DLL is present
@@ -48,7 +123,13 @@ public class CollaboratorService
         logger.Log(LogLevel.Info, $"Collaborator.dll exists {dllExists}");
         return dllExists;
     }
+    #endregion
 
+    #region Show/Hide window
+    //TODO: Use Show and hide properly
+    //CollaboratorWindow.Show();
+    //CollaboratorWindow.Activate();
+    //Logger.Log(LogLevel.Debug, "Collaborator window opened and focused");
     /// <summary>
     /// This closes, disposes and full removes collaborator from memory.
     /// </summary>
@@ -56,14 +137,14 @@ public class CollaboratorService
     {
         //TODO: Absolutely make sure Collaborator is not left in memory after this.
         logger.Log(LogLevel.Warn, "Destroying collaborator object.");
-        if (Collaborator != null)
+        if (CollaboratorProxy != null)
         {
-            window.Close(); // Destroy window object
+            CollaboratorWindow.Close(); // Destroy window object
             logger.Log(LogLevel.Info, "Closed collaborator window");
 
             //Null objects to deallocate them
             CollabAssembly = null;
-            Collaborator = null;
+            CollaboratorProxy = null;
             logger.Log(LogLevel.Info, "Nulled collaborator objects");
 
             //Run garbage collection to clean up any remnants.
@@ -74,66 +155,15 @@ public class CollaboratorService
         }
     }
 
-    public void RunCollaborator(CollaboratorArgs args)
-    {
-        // Prevent the user or timed services from making any changes on the 
-        // StoryCAD side while Collaborator is running
-        logger.Log(LogLevel.Info, "Opening collaborator");
-        Ioc.Default.GetRequiredService<ShellViewModel>()._canExecuteCommands = false;
-        Ioc.Default.GetRequiredService<BackupService>().StopTimedBackup();
-        Ioc.Default.GetRequiredService<AutoSaveService>().StopAutoSave();
-        logger.Log(LogLevel.Info, "Disabled Async operations");
-
-        // If Collaborator hasn't already been initalised, so do so.
-        if (Collaborator == null)
-        {
-            // Should we initialize when CollaboratorService is being initialized rather then when attempting to use?
-            // Use the custom context to load the assembly
-            CollabAssembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(dllPath);
-            logger.Log(LogLevel.Info, "Loaded CollaboratorLib.dll");
-            //Create a new WindowEx for collaborator to prevent access errors.
-            window = new WindowEx();
-            window.AppWindow.Closing += hideCollaborator;
-            args.window = window;
-            args.onDoneCallback = FinishedCallback;
-
-            // Get the type of the Collaborator class
-            CollaboratorType = CollabAssembly.GetType("StoryCollaborator.Collaborator");
-            // Create an instance of the Collaborator class
-            logger.Log(LogLevel.Info, "Calling Collaborator constructor.");
-            Collaborator = CollaboratorType!.GetConstructors()[0].Invoke(new object[] { args });
-            logger.Log(LogLevel.Info, "Collaborator Constructor finished.");
-        }
-
-        // Get the 'RunWizard' method that expects a parameter of type 'CollaboratorArgs'
-        MethodInfo runMethod = CollaboratorType.GetMethod("RunWizard", new[] { typeof(CollaboratorArgs) });
-        object[] methodArgs = { args };
-        // ...and invoke it
-        runMethod!.Invoke(Collaborator, methodArgs);
-        // Display the Collaborator window
-        args.window.Show();
-    }
-
-    public IWizardStepViewModel GetWizardStepViewModel()
-    {
-        // Get the MethodInfo object representing the GetShellVM method.
-        MethodInfo methodInfo = CollaboratorType.GetMethod("GetShellVM");
-        // Invoke the method on the instance we created. No parameters are needed for this method.
-        object result = methodInfo!.Invoke(Collaborator, null);
-        // Cast the result back to the appropriate type.
-        return result as IWizardStepViewModel;
-    }
-
-
     /// <summary>
     /// This will hide the collaborator window.
     /// </summary>
-    private void hideCollaborator(AppWindow appWindow, AppWindowClosingEventArgs e)
+    private void HideCollaborator(AppWindow appWindow, AppWindowClosingEventArgs e)
     {
-        logger.Log(LogLevel.Info, "Hiding collaborator window.");
+        logger.Log(LogLevel.Debug, "Hiding collaborator window.");
         e.Cancel = true; // Cancel stops the window from being disposed.
         appWindow.Hide(); // Hide the window instead.
-        logger.Log(LogLevel.Info, "Successfully hid collaborator window.");
+        logger.Log(LogLevel.Debug, "Successfully hid collaborator window.");
 
         //Call collaborator callback since we need to reenable async to prevent a locked state.
         FinishedCallback();
@@ -151,17 +181,38 @@ public class CollaboratorService
         {
             Ioc.Default.GetRequiredService<BackupService>().StartTimedBackup();
         }
-
         //Reenable auto save if needed.
         if (Ioc.Default.GetRequiredService<PreferenceService>().Model.AutoSave)
         {
             Ioc.Default.GetRequiredService<AutoSaveService>().StartAutoSave();
         }
-
         //Reenable StoryCAD buttons
         Ioc.Default.GetRequiredService<ShellViewModel>()._canExecuteCommands = true;
-
         logger.Log(LogLevel.Info, "Async re-enabled.");
     }
+    public void CollaboratorClosed()
+    {
+        logger.Log(LogLevel.Debug, "Closing Collaborator.");
+        //TODO: Add FTP upload code here.
+
+    }
+    #endregion
 
 }
+
+//TODO: On calls, set callback delegate
+//args.onDoneCallback = FinishedCallback;
+// Logging
+//Logger.Log(LogLevel.Debug,
+//    $"""
+//     Collaborator Args Information
+//     StoryModel FilePath -  {args.StoryModel.ProjectFile.Path}
+//     StoryModel Elements - {args.StoryModel.StoryElements.Count}
+//     Story Element Name  - {args.SelectedElement.Name}
+//     Story Element GUID  - {args.SelectedElement.Uuid}
+//     Story Element Type  - {args.SelectedElement.Type}
+//     """);
+//TODO: On calls, set model etc.
+
+
+//CollaboratorWindow.Content = page;  // was WizardShell
