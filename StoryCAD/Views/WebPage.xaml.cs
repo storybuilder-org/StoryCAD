@@ -6,6 +6,7 @@ using Microsoft.Web.WebView2.Core;
 using StoryCAD.ViewModels;
 using StoryCAD.Services.Logging;
 using LogLevel = StoryCAD.Services.Logging.LogLevel;
+using StoryCAD.Controls;
 
 namespace StoryCAD.Views;
 

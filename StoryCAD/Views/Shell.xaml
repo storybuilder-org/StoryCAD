@@ -235,7 +235,14 @@
                         </Flyout>
                     </AppBarButton.Flyout>
                 </AppBarButton>
-                <AppBarButton Label="Tools" ToolTipService.ToolTip="Tools Menu" >
+                <AppBarButton Label="Collaborator" ToolTipService.ToolTip="Launch Collaborator"
+                              Visibility="{x:Bind ShellVm.CollaboratorVisibility, Mode=TwoWay}"
+                              Command="{x:Bind ShellVm.CollaboratorCommand, Mode=OneWay}" >
+                    <AppBarButton.Icon>
+                        <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE71B;"/>
+                    </AppBarButton.Icon>
+                </AppBarButton>
+                    <AppBarButton Label="Tools" ToolTipService.ToolTip="Tools Menu" >
                     <AppBarButton.Icon>
                         <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE90F;"/>
                     </AppBarButton.Icon>

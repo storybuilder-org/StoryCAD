@@ -6,7 +6,7 @@
 	<TargetPlatformVersion>10.0.22621.0</TargetPlatformVersion>
     <RootNamespace>StoryCAD</RootNamespace>
 	<RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
-    <Platforms>x86;x64;arm64</Platforms>
+    <Platforms>AnyCPU;x86;x64;arm64</Platforms>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
@@ -86,6 +86,10 @@
     <PRIResource Remove="Services\Preferences\**" />
     <PRIResource Remove="Services\Theming\**" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="Collaborator\ViewModels\IWizardStepViewModel.cs" />
+    <Compile Remove="Collaborator\ViewModels\IWizardViewModel.cs" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="CommonServiceLocator" Version="2.0.7" />
@@ -101,7 +105,15 @@
 	<PackageReference Include="Syncfusion.Editors.WinUI" Version="23.1.36" />
     <PackageReference Include="WinUIEx" Version="2.3.3" />
   </ItemGroup>
-
+	<ItemGroup>
+		<PackageReference Include="Betalgo.OpenAI" Version="7.4.6" />
+		<PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
+		<PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22621.2428" />
+		<PackageReference Include="Microsoft.Xaml.Behaviors.WinUI.Managed" Version="2.0.9" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+		<PackageReference Include="SpecFlow" Version="4.0.31-beta" />
+	</ItemGroup>
   <ItemGroup>
     <Folder Include="Models\Scrivener\" />
     <Folder Include="Services\Logging\" />

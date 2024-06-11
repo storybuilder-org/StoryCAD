@@ -14,7 +14,7 @@
 		<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
 	</PropertyGroup>
 	<ItemGroup>
-	  <Content Remove="Assets\OpenFromDesktopTest.stbx" />
+		<Content Remove="Assets\OpenFromDesktopTest.stbx" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -22,10 +22,10 @@
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
 		<None Update="TestInputs\OpenFromDesktopTest.stbx">
-		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
 		<None Update="TestInputs\OpenTest.stbx">
-		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
 	</ItemGroup>
 

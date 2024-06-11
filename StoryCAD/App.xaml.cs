@@ -26,11 +26,16 @@ using K4os.Hash.xxHash;
 using Microsoft.UI.Xaml;
 using StoryCAD.DAL;
 using LaunchActivatedEventArgs = Microsoft.UI.Xaml.LaunchActivatedEventArgs;
-using StoryCAD.Services.IoC;
+using System.Globalization;
+using System.Reflection;
+    using System.Runtime.Loader;
+    using StoryCAD.Services.IoC;
+using Microsoft.UI.Xaml.Media;
+using Microsoft.UI;
 using StoryCAD.Services;
-using StoryCAD.ViewModels.Tools;
+using StoryCAD.Services.Collaborator;
 
-namespace StoryCAD;
+    namespace StoryCAD;
 
 public partial class App
 {
@@ -188,8 +193,7 @@ public partial class App
         WindowEx mainWindow = new MainWindow() { MinHeight = 675, MinWidth = 900, Width = 1050,
             Height=750, Title="StoryCAD"};
 
-		mainWindow.Closed += MainWindow_Closed;
-        // Create a Frame to act as the navigation context
+        // Create a Frame to act as the navigation context 
         Frame rootFrame = new();
         // Place the frame in the current Window
         mainWindow.Content = rootFrame;
@@ -206,8 +210,8 @@ public partial class App
         }
         else {rootFrame.Navigate(typeof(Shell));}
 
-        // Preserve both the Window and its Handle for future use
-        Ioc.Default.GetRequiredService<Windowing>().MainWindow = (MainWindow) mainWindow;
+    // Preserve both the Window and its Handle for future use
+    Ioc.Default.GetRequiredService<Windowing>().MainWindow = (MainWindow) mainWindow;
         //Get the Window's HWND
         m_windowHandle = User32.GetActiveWindow();
         Ioc.Default.GetRequiredService<Windowing>().WindowHandle = m_windowHandle;

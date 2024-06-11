@@ -1,4 +1,4 @@
-﻿    <local:BindablePage NavigationCacheMode="Required"
+﻿    <usercontrols:BindablePage NavigationCacheMode="Required"
     x:Class="StoryCAD.Views.ScenePage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -250,4 +250,4 @@
         </Pivot>
     </Grid>
 
-</local:BindablePage>
+</usercontrols:BindablePage>
