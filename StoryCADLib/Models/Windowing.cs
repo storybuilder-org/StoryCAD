@@ -73,7 +73,6 @@ public class Windowing : ObservableRecipient
     /// </summary>
     public Color AccentColor => new UISettings().GetColorValue(UIColorType.Accent);
 
-
     // Visual changes
     private SolidColorBrush _primaryBrush;
     /// <summary>
@@ -151,17 +150,22 @@ public class Windowing : ObservableRecipient
             await Ioc.Default.GetRequiredService<ShellViewModel>().SaveFile();
             Ioc.Default.GetRequiredService<ShellViewModel>().ShowHomePage();
         }
-        }
+	}
 
     /// <summary>
     /// This takes a ContentDialog and shows it to the user
-    /// It will handle themeing, XAMLRoot and showing the dialog.
+    /// It will handle theming, XAMLRoot and showing the dialog.
     /// </summary>
+    /// <param name="Dialog">Content dialog to show</param>
+    /// <param name="force">Force show content dialog, bypasses protections;
+    /// This will crash the app unless you are immediately hiding the ContentDialog before this one.
+    /// Please do not use this unless you know what you are doing, and it is absolutely necessary.
+    /// </param>
     /// <returns>A ContentDialogResult enum value.</returns>
-    public async Task<ContentDialogResult> ShowContentDialog(ContentDialog Dialog)
+    public async Task<ContentDialogResult> ShowContentDialog(ContentDialog Dialog, bool force=false)
     {
         //Checks a content dialog isn't already open
-        if (!_IsContentDialogOpen)
+        if (!_IsContentDialogOpen || force)
         {
             //Set XAML root and correct theme.
             Dialog.XamlRoot = XamlRoot;
@@ -172,7 +176,7 @@ public class Windowing : ObservableRecipient
             _IsContentDialogOpen = false;
             return Result;
         }
-        else { return ContentDialogResult.None; }
+        return ContentDialogResult.None; 
     }
 
 
