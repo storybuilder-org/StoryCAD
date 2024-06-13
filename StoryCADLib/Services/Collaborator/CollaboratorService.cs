@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.Loader;
+using Windows.ApplicationModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml.Controls;
@@ -113,27 +115,40 @@ public class CollaboratorService
     /// <returns>True if CollaboratorLib.dll exists, false otherwise.</returns>
     private bool FindDll()
     {
-        // Get the path to the Documents folder
-        //string documentsPath = "C:\\Users\\RARI\\Documents\\Repos\\CADCorp\\CollabApp\\CollaboratorLib\\bin\\x64\\Debug\\net8.0-windows10.0.22621.0";
-        string documentsPath = "C:\\dev\\src\\StoryBuilderCollaborator\\CollaboratorLib\\bin\\x64\\Debug\\net8.0-windows10.0.22621.0";
-        dllPath = Path.Combine(documentsPath, "CollaboratorLib.dll");
+	    logger.Log(LogLevel.Info, "Locating Collaborator Package...");
+	    Package CollaboratorPkg = Package.Current.Dependencies.FirstOrDefault(pkg => pkg.DisplayName == "CollaboratorPackage");
+	    if (CollaboratorPkg != null)
+	    {
+		    logger.Log(LogLevel.Info, $"Found Collaborator Package, {CollaboratorPkg.DisplayName}" +
+		                              $" version {CollaboratorPkg.Id.Version.Major}.{CollaboratorPkg.Id.Version.Minor}" +
+		                              $".{CollaboratorPkg.Id.Version.Build} Located at {CollaboratorPkg.InstalledLocation}");
 
-        // Verify that the DLL is present
-        dllExists = File.Exists(dllPath);
-        logger.Log(LogLevel.Info, $"Collaborator.dll exists {dllExists}");
-        return dllExists;
+		    // Get the path to the DLL
+		    dllPath = Path.Combine(CollaboratorPkg.InstalledPath, "CollaboratorLib.dll");
+		    dllExists = File.Exists(dllPath); // Verify that the DLL is present
+
+	    }
+	    else
+	    {
+		    logger.Log(LogLevel.Info, "Failed to find Collaborator Package");
+		    dllExists = false;
+
+	    }
+
+	    logger.Log(LogLevel.Info, $"Collaborator.dll exists {dllExists}");
+	    return dllExists;
     }
-    #endregion
+	#endregion
 
-    #region Show/Hide window
-    //TODO: Use Show and hide properly
-    //CollaboratorWindow.Show();
-    //CollaboratorWindow.Activate();
-    //Logger.Log(LogLevel.Debug, "Collaborator window opened and focused");
-    /// <summary>
-    /// This closes, disposes and full removes collaborator from memory.
-    /// </summary>
-    public void DestroyCollaborator(AppWindow sender, AppWindowClosingEventArgs args)
+	#region Show/Hide window
+	//TODO: Use Show and hide properly
+	//CollaboratorWindow.Show();
+	//CollaboratorWindow.Activate();
+	//Logger.Log(LogLevel.Debug, "Collaborator window opened and focused");
+	/// <summary>
+	/// This closes, disposes and full removes collaborator from memory.
+	/// </summary>
+	public void DestroyCollaborator(AppWindow sender, AppWindowClosingEventArgs args)
     {
         //TODO: Absolutely make sure Collaborator is not left in memory after this.
         logger.Log(LogLevel.Warn, "Destroying collaborator object.");
