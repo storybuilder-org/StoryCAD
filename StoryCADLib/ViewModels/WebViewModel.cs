@@ -16,6 +16,7 @@ using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
 using NLog;
+using StoryCAD.Services;
 
 namespace StoryCAD.ViewModels;
 
@@ -137,12 +138,11 @@ public class WebViewModel : ObservableRecipient, INavigable
         {
             Title = "Webview is missing.",
             Content = "This computer is missing the WebView2 Runtime, without it some features may not work.\nWould you like to install this now?",
-            XamlRoot = Window.XamlRoot,
             PrimaryButtonText = "Yes",
             SecondaryButtonText = "No"
         };
 
-        ContentDialogResult _result = await _dialog.ShowAsync();
+        ContentDialogResult _result = await Ioc.Default.GetService<Windowing>().ShowContentDialog(_dialog);
         _logger.Log(LogLevel.Error, $"User clicked {_result}");
 
         //Ok clicked
@@ -174,7 +174,7 @@ public class WebViewModel : ObservableRecipient, INavigable
                 .WaitForExitAsync();
 
             //Show success/fail dialog
-            ContentDialog _dialog = new() { PrimaryButtonText = "Ok", XamlRoot = Window.XamlRoot };
+            ContentDialog _dialog = new() { PrimaryButtonText = "Ok" };
             try
             {
                 _dialog.Title = "Webview installed!";
@@ -190,7 +190,7 @@ public class WebViewModel : ObservableRecipient, INavigable
                     $"An error occurred installing the Evergreen Webview Runtime ({_ex.Message})");
             }
 
-            await _dialog.ShowAsync();
+            await Ioc.Default.GetService<Windowing>().ShowContentDialog(_dialog);
             _logger.Log(LogLevel.Warn, "Finished installing webview runtime.");
         }
         catch (Exception _ex)
@@ -284,7 +284,7 @@ public class WebViewModel : ObservableRecipient, INavigable
             _logger.Log(LogLevel.Info, $"Checking if {Query} is not URI, searching it.");
             if (Query == null) { Query = string.Empty; }
             string _dataString = Uri.EscapeDataString(Query);
-            switch (Ioc.Default.GetRequiredService<AppState>().Preferences.PreferredSearchEngine)
+            switch (Ioc.Default.GetRequiredService<PreferenceService>().Model.PreferredSearchEngine)
             {
                 case BrowserType.DuckDuckGo:
                     Url = new Uri("https://duckduckgo.com/?va=j&q=" + _dataString);

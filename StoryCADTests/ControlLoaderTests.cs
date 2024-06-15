@@ -2,17 +2,17 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using StoryCAD.ViewModels;
 
-namespace StoryCADTests
+namespace StoryCADTests;
+
+[TestClass]
+public class ControlLoaderTests
 {
-    [TestClass]
-    public class ControlLoaderTests
+    ControlData data = Ioc.Default.GetRequiredService<ControlData>();
+
+    [TestMethod]
+    public void TestConflictTypes()
     {
-        [TestMethod]
-        public void TestConflictTypes()
-        {
-            ControlData data =  Ioc.Default.GetRequiredService<ControlData>();
-            Assert.AreEqual(8, data.ConflictTypes.Keys.Count);
-            Assert.AreEqual(65, data.RelationTypes.Count);
-        }
+        Assert.AreEqual(8, data.ConflictTypes.Keys.Count);
+        Assert.AreEqual(65, data.RelationTypes.Count);
     }
 }

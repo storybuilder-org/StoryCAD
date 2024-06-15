@@ -10,6 +10,7 @@ namespace StoryCAD.Services.Dialogs;
 
 public sealed partial class UnifiedMenuPage
 {
+    Windowing Windowing = Ioc.Default.GetRequiredService<Windowing>();
     public delegate void UpdateContentDelegate();
 
     public void UpdateContent()
@@ -21,7 +22,7 @@ public sealed partial class UnifiedMenuPage
                 MenuContent.Children.Add(new RecentFiles(UnifiedMenuVM));
                 break;
             case "New":
-                UnifiedMenuVM.SelectedTemplateIndex = Ioc.Default.GetRequiredService<AppState>().Preferences.LastSelectedTemplate;
+                UnifiedMenuVM.SelectedTemplateIndex = Ioc.Default.GetRequiredService<PreferenceService>().Model.LastSelectedTemplate;
                 MenuContent.Children.Add(new NewProjectPage(UnifiedMenuVM));
                 break;
             case "Sample":
@@ -40,6 +41,6 @@ public sealed partial class UnifiedMenuPage
         UnifiedMenuVM.UpdateContent = UpdateContent;  // Connect the VM's delegate to HideDialog
         UnifiedMenuVM.CurrentTab = new ListBoxItem { Name = "Recent" }; //Makes unified VM load recents by default
         UnifiedMenuVM.SidebarChange(null, null);
-        if (ActualTheme == ElementTheme.Light) {UnifiedMenuVM.AdjustmentColor = new SolidColorBrush(Colors.White);}
+        if (Windowing.RequestedTheme == ElementTheme.Light) {UnifiedMenuVM.AdjustmentColor = new SolidColorBrush(Colors.White);}
     }
 }

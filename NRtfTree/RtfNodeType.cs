@@ -1,4 +1,4 @@
-/********************************************************************************
+ï»¿/********************************************************************************
  *   This file is part of NRtfTree Library.
  *
  *   NRtfTree Library is free software; you can redistribute it and/or modify
@@ -25,7 +25,7 @@
  * SF Project:	http://nrtftree.sourceforge.net
  *				http://sourceforge.net/projects/nrtftree
  * Class:		RtfNodeType
- * Description:	Tipos de nodo de un árbol RTF.
+ * Description:	Tipos de nodo de un Ã¡rbol RTF.
  * ******************************************************************************/
 
 namespace NRtfTree
@@ -38,7 +38,7 @@ namespace NRtfTree
         public enum RtfNodeType
         {
             /// <summary>
-            /// Nodo raíz.
+            /// Nodo raÃ­z.
             /// </summary>
             Root = 0,
             /// <summary>
@@ -46,7 +46,7 @@ namespace NRtfTree
             /// </summary>
             Keyword = 1,
             /// <summary>
-            /// Símbolo de Control.
+            /// SÃ­mbolo de Control.
             /// </summary>
             Control = 2,
             /// <summary>

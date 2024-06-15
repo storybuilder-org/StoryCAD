@@ -28,7 +28,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable
     public RelationshipModel CurrentRelationship;
     private bool _changeable; // process property changes for this story element
     private bool _changed;    // this story element has changed
-
+    Windowing Windowing = Ioc.Default.GetService<Windowing>();
     #endregion
 
     #region Properties
@@ -759,16 +759,15 @@ public class CharacterViewModel : ObservableRecipient, INavigable
         }
 
         //Creates dialog and shows dialog
-        ContentDialog _newRelationship = new()
+        ContentDialog _NewRelDialog = new()
         {
             Title = "New relationship",
             PrimaryButtonText = "Add relationship",
             SecondaryButtonText = "Cancel",
-            XamlRoot = Ioc.Default.GetRequiredService<Windowing>().XamlRoot,
             Content = new NewRelationshipPage(_vm),
             MinWidth = 200
         };
-        ContentDialogResult _result = await _newRelationship.ShowAsync();
+        ContentDialogResult _result = await Windowing.ShowContentDialog(_NewRelDialog);
 
         if (_result == ContentDialogResult.Primary) //User clicks add relationship
         {
@@ -837,13 +836,12 @@ public class CharacterViewModel : ObservableRecipient, INavigable
         //Creates and shows dialog
         ContentDialog _flawDialog = new()
         {
-            XamlRoot = Ioc.Default.GetRequiredService<Windowing>().XamlRoot,
             Content = new Flaw(),
             Title = "Flaw Builder",
             PrimaryButtonText = "Copy flaw example",
             CloseButtonText = "Cancel"
         };
-        ContentDialogResult _result = await _flawDialog.ShowAsync();
+        ContentDialogResult _result = await Windowing.ShowContentDialog(_flawDialog);
 
         if (_result == ContentDialogResult.Primary)   // Copy to Character Flaw  
         {
@@ -866,10 +864,9 @@ public class CharacterViewModel : ObservableRecipient, INavigable
             Title = "Trait builder",
             PrimaryButtonText = "Copy trait",
             CloseButtonText = "Cancel",
-            XamlRoot = Ioc.Default.GetRequiredService<Windowing>().XamlRoot,
             Content = new Traits()
         };
-        ContentDialogResult _result = await _traitDialog.ShowAsync();
+        ContentDialogResult _result = await Windowing.ShowContentDialog(_traitDialog);
 
         if (_result == ContentDialogResult.Primary)   // Copy to Character Trait 
         {
@@ -965,7 +962,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable
         catch (Exception e)
         {
             _logger.LogException(LogLevel.Fatal, e, "Error loading lists in Problem view model");
-            ShowError();
+            Windowing.ShowResourceErrorMessage();
         }
 
         CharacterTraits = new ObservableCollection<string>();
@@ -1022,20 +1019,6 @@ public class CharacterViewModel : ObservableRecipient, INavigable
 
         PropertyChanged += OnPropertyChanged;
     }
-
-    async void ShowError()
-    {
-        await new ContentDialog()
-        {
-            XamlRoot = Ioc.Default.GetRequiredService<Windowing>().XamlRoot,
-            Title = "Error loading resources",
-            Content = "An error has occurred, please reinstall or update StoryCAD to continue.",
-            CloseButtonText = "Close"
-        }.ShowAsync();
-        throw new MissingManifestResourceException();
-
-    }
-
 }
 
 #endregion

@@ -1,8 +1,10 @@
-﻿using Microsoft.UI;
+﻿using CommunityToolkit.Mvvm.DependencyInjection;
+using Microsoft.UI;
 using Microsoft.UI.Text;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
+using StoryCAD.Models;
 
 namespace StoryCAD.Controls;
 
@@ -36,7 +38,7 @@ public class RichEditBoxExtended : RichEditBox
         TextChanged += RichEditBoxExtended_TextChanged;
         TextAlignment = TextAlignment.Left;
         CornerRadius = new(5);
-        if (Application.Current.RequestedTheme == ApplicationTheme.Dark) { Foreground = new SolidColorBrush(Colors.LightGray); } //Color fix for dark mode
+        if (Ioc.Default.GetRequiredService<Windowing>().RequestedTheme == ElementTheme.Dark) { Foreground = new SolidColorBrush(Colors.LightGray); } //Color fix for dark mode
     }
 
 

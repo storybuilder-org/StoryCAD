@@ -23,6 +23,7 @@ namespace StoryCAD.Services.Backup
         private Windowing Window = Ioc.Default.GetRequiredService<Windowing>();
         private LogService _logger = Ioc.Default.GetRequiredService<LogService>();
         private AppState State = Ioc.Default.GetRequiredService<AppState>();
+        private PreferenceService Preferences = Ioc.Default.GetRequiredService<PreferenceService>();
         private ShellViewModel _shellVM;
 
         private BackgroundWorker autoSaveWorker;
@@ -40,15 +41,18 @@ namespace StoryCAD.Services.Backup
             autoSaveWorker.DoWork += RunAutoSaveTask;
 
             //TODO: Move the following line to Preferences, add appropriate Status and logging
-            if (State.Preferences.AutoSaveInterval is > 61 or < 14)
-                State.Preferences.AutoSaveInterval = 30;
+            if (Preferences.Model.AutoSaveInterval is > 61 or < 14)
+                Preferences.Model.AutoSaveInterval = 30;
             autoSaveTimer = new System.Timers.Timer();
             autoSaveTimer.Elapsed += AutoSaveTimer_Elapsed;
-            autoSaveTimer.Interval = State.Preferences.AutoSaveInterval * 1000;
+            autoSaveTimer.Interval = Preferences.Model.AutoSaveInterval * 1000;
         }
         #endregion
 
         #region Public Methods
+        /// <summary>
+        /// Starts the AutoSave Service
+        /// </summary>
         public void StartAutoSave()
         {
             // If the timer is already running, stop it
@@ -56,10 +60,13 @@ namespace StoryCAD.Services.Backup
                 autoSaveTimer.Stop();
 
             // Reset the timer and start it 
-            autoSaveTimer.Interval = State.Preferences.AutoSaveInterval * 1000;
+            autoSaveTimer.Interval = Preferences.Model.AutoSaveInterval * 1000;
             autoSaveTimer.Start();
         }
 
+        /// <summary>
+        /// Stops AutoSave service
+        /// </summary>
         public void StopAutoSave()
         {
             autoSaveTimer.Stop();
@@ -101,7 +108,7 @@ namespace StoryCAD.Services.Backup
             _shellVM = Ioc.Default.GetService<ShellViewModel>();
             try
             {
-                if (autoSaveWorker.CancellationPending || !State.Preferences.AutoSave ||
+                if (autoSaveWorker.CancellationPending || !Preferences.Model.AutoSave ||
                     _shellVM!.StoryModel.StoryElements.Count == 0)
                 {
                     return Task.CompletedTask;

@@ -1,4 +1,4 @@
-/********************************************************************************
+﻿/********************************************************************************
  *   This file is part of NRtfTree Library.
  *
  *   NRtfTree Library is free software; you can redistribute it and/or modify
@@ -60,7 +60,7 @@ namespace NRtfTree
             public string font = "Arial";
 
             /// <summary>
-            /// Tama�o de la fuente.
+            /// Tamaño de la fuente.
             /// </summary>
             public int size = 10;
 

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using StoryCAD.Models;
 using StoryCAD.Services.Dialogs.Tools;
@@ -81,12 +82,11 @@ public class NarrativeToolVM: ObservableRecipient
             {
                 ContentDialog _dialog = new()
                 {
-                    XamlRoot = Ioc.Default.GetRequiredService<Windowing>().XamlRoot,
                     Title = "Narrative Editor",
                     PrimaryButtonText = "Done",
                     Content = new NarrativeTool()
                 };
-                await _dialog.ShowAsync();
+                await Ioc.Default.GetService<Windowing>().ShowContentDialog(_dialog);
             }
             catch (Exception ex)
             {

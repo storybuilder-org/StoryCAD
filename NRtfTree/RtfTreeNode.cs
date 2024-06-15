@@ -1,4 +1,4 @@
-/********************************************************************************
+Ôªø/********************************************************************************
  *   This file is part of NRtfTree Library.
  *
  *   NRtfTree Library is free software; you can redistribute it and/or modify
@@ -25,7 +25,7 @@
  * SF Project:	http://nrtftree.sourceforge.net
  *				http://sourceforge.net/projects/nrtftree
  * Class:		RtfTreeNode
- * Description:	Nodo RTF de la representaciÛn en ·rbol de un documento.
+ * Description:	Nodo RTF de la representaci√≥n en √°rbol de un documento.
  * ******************************************************************************/
 
 using System;
@@ -36,7 +36,7 @@ namespace NRtfTree
     namespace Core
     {
         /// <summary>
-        /// Nodo RTF de la representaciÛn en ·rbol de un documento.
+        /// Nodo RTF de la representaci√≥n en √°rbol de un documento.
         /// </summary>
         public class RtfTreeNode
         {
@@ -47,15 +47,15 @@ namespace NRtfTree
             /// </summary>
             private RtfNodeType type;
             /// <summary>
-            /// Palabra clave / SÌmbolo de Control / Texto.
+            /// Palabra clave / S√≠mbolo de Control / Texto.
             /// </summary>
             private string key;
             /// <summary>
-            /// Indica si la palabra clave o sÌmbolo de Control tiene par·metro.
+            /// Indica si la palabra clave o s√≠mbolo de Control tiene par√°metro.
             /// </summary>
             private bool hasParam;
             /// <summary>
-            /// Par·metro de la palabra clave o sÌmbolo de Control.
+            /// Par√°metro de la palabra clave o s√≠mbolo de Control.
             /// </summary>
             private int param;
             /// <summary>
@@ -67,17 +67,17 @@ namespace NRtfTree
             /// </summary>
             private RtfTreeNode parent;
             /// <summary>
-            /// Nodo raÌz del documento.
+            /// Nodo ra√≠z del documento.
             /// </summary>
             private RtfTreeNode root;
             /// <summary>
-            /// ¡rbol Rtf al que pertenece el nodo
+            /// √Årbol Rtf al que pertenece el nodo
             /// </summary>
             private RtfTree tree;
 
             #endregion
 
-            #region Constructores P˙blicos
+            #region Constructores P√∫blicos
 
             /// <summary>
             /// Constructor de la clase RtfTreeNode. Crea un nodo sin inicializar.
@@ -115,12 +115,12 @@ namespace NRtfTree
             }
 
             /// <summary>
-            /// Constructor de la clase RtfTreeNode. Crea un nodo especificando su tipo, palabra clave y par·metro.
+            /// Constructor de la clase RtfTreeNode. Crea un nodo especificando su tipo, palabra clave y par√°metro.
             /// </summary>
             /// <param name="type">Tipo del nodo.</param>
-            /// <param name="key">Palabra clave o sÌmbolo de Control.</param>
-            /// <param name="hasParameter">Indica si la palabra clave o el sÌmbolo de Control va acompaÒado de un par·metro.</param>
-            /// <param name="parameter">Par·metro del la palabra clave o sÌmbolo de Control.</param>
+            /// <param name="key">Palabra clave o s√≠mbolo de Control.</param>
+            /// <param name="hasParameter">Indica si la palabra clave o el s√≠mbolo de Control va acompa√±ado de un par√°metro.</param>
+            /// <param name="parameter">Par√°metro del la palabra clave o s√≠mbolo de Control.</param>
             public RtfTreeNode(RtfNodeType type, string key, bool hasParameter, int parameter)
             {
                 children = new RtfNodeCollection();
@@ -140,9 +140,9 @@ namespace NRtfTree
             #region Constructor Privado
 
             /// <summary>
-            /// Constructor privado de la clase RtfTreeNode. Crea un nodo a partir de un token del analizador lÈxico.
+            /// Constructor privado de la clase RtfTreeNode. Crea un nodo a partir de un token del analizador l√©xico.
             /// </summary>
-            /// <param name="token">Token RTF devuelto por el analizador lÈxico.</param>
+            /// <param name="token">Token RTF devuelto por el analizador l√©xico.</param>
             internal RtfTreeNode(RtfToken token)
             {
                 children = new RtfNodeCollection();
@@ -159,12 +159,12 @@ namespace NRtfTree
 
             #endregion
 
-            #region MÈtodos P˙blicos
+            #region M√©todos P√∫blicos
 
             /// <summary>
-            /// AÒade un nodo al final de la lista de hijos.
+            /// A√±ade un nodo al final de la lista de hijos.
             /// </summary>
-            /// <param name="newNode">Nuevo nodo a aÒadir.</param>
+            /// <param name="newNode">Nuevo nodo a a√±adir.</param>
             public void AppendChild(RtfTreeNode newNode)
             {
                 if (newNode != null)
@@ -175,15 +175,15 @@ namespace NRtfTree
                     //Se actualizan las propiedades Root y Tree del nuevo nodo y sus posibles hijos
                     updateNodeRoot(newNode);
 
-                    //Se aÒade el nuevo nodo al final de la lista de nodos hijo
+                    //Se a√±ade el nuevo nodo al final de la lista de nodos hijo
                     children.Add(newNode);
                 }
             }
 
             /// <summary>
-            /// Inserta un nuevo nodo en una posiciÛn determinada de la lista de hijos.
+            /// Inserta un nuevo nodo en una posici√≥n determinada de la lista de hijos.
             /// </summary>
-            /// <param name="index">PosiciÛn en la que se insertar· el nodo.</param>
+            /// <param name="index">Posici√≥n en la que se insertar√° el nodo.</param>
             /// <param name="newNode">Nuevo nodo a insertar.</param>
             public void InsertChild(int index, RtfTreeNode newNode)
             {
@@ -195,7 +195,7 @@ namespace NRtfTree
                     //Se actualizan las propiedades Root y Tree del nuevo nodo y sus posibles hijos
                     updateNodeRoot(newNode);
 
-                    //Se aÒade el nuevo nodo al final de la lista de nodos hijo
+                    //Se a√±ade el nuevo nodo al final de la lista de nodos hijo
                     children.Insert(index, newNode);
                 }
             }
@@ -206,7 +206,7 @@ namespace NRtfTree
             /// <param name="index">Indice del nodo a eliminar.</param>
             public void RemoveChild(int index)
             {
-                //Se elimina el i-Èsimo hijo
+                //Se elimina el i-√©simo hijo
                 children.RemoveAt(index);
             }
 
@@ -219,14 +219,14 @@ namespace NRtfTree
                 //Se busca el nodo a eliminar
                 int index = children.IndexOf(node);
 
-                //Se elimina el i-Èsimo hijo
+                //Se elimina el i-√©simo hijo
                 children.RemoveAt(index);
             }
 
             /// <summary>
             /// Realiza una copia exacta del nodo actual.
             /// </summary>
-            /// <param name="cloneChildren">Si este par·metro recibe el valor true se clonar·n tambiÈn todos los nodos hijo del nodo actual.</param>
+            /// <param name="cloneChildren">Si este par√°metro recibe el valor true se clonar√°n tambi√©n todos los nodos hijo del nodo actual.</param>
             /// <returns>Devuelve una copia exacta del nodo actual.</returns>
             public RtfTreeNode CloneNode(bool cloneChildren)
             {
@@ -244,7 +244,7 @@ namespace NRtfTree
                 {
                     clon.children = children;
                 }
-                else  //En caso contrario se clonan tambiÈn cada uno de los hijos, propagando el par·metro cloneChildren=true
+                else  //En caso contrario se clonan tambi√©n cada uno de los hijos, propagando el par√°metro cloneChildren=true
                 {
                     clon.children = new RtfNodeCollection();
 
@@ -260,17 +260,17 @@ namespace NRtfTree
             /// <summary>
             /// Indica si el nodo actual tiene nodos hijos.
             /// </summary>
-            /// <returns>Devuelve true si el nodo actual tiene alg˙n nodo hijo.</returns>
+            /// <returns>Devuelve true si el nodo actual tiene alg√∫n nodo hijo.</returns>
             public bool HasChildNodes()
             {
                 return children.Count != 0;
             }
 
             /// <summary>
-            /// Devuelve el primer nodo de la lista de nodos hijos del nodo actual cuya palabra clave es la indicada como par·metro.
+            /// Devuelve el primer nodo de la lista de nodos hijos del nodo actual cuya palabra clave es la indicada como par√°metro.
             /// </summary>
             /// <param name="keyword">Palabra clave buscada.</param>
-            /// <returns>Primer nodo de la lista de nodos hijos del nodo actual cuya palabra clave es la indicada como par·metro.</returns>
+            /// <returns>Primer nodo de la lista de nodos hijos del nodo actual cuya palabra clave es la indicada como par√°metro.</returns>
             public RtfTreeNode SelectSingleChildNode(string keyword)
             {
                 int i = 0;
@@ -292,10 +292,10 @@ namespace NRtfTree
             }
 
             /// <summary>
-            /// Devuelve el primer nodo de la lista de nodos hijos del nodo actual cuyo tipo es el indicado como par·metro.
+            /// Devuelve el primer nodo de la lista de nodos hijos del nodo actual cuyo tipo es el indicado como par√°metro.
             /// </summary>
             /// <param name="nodeType">Tipo de nodo buscado.</param>
-            /// <returns>Primer nodo de la lista de nodos hijos del nodo actual cuyo tipo es el indicado como par·metro.</returns>
+            /// <returns>Primer nodo de la lista de nodos hijos del nodo actual cuyo tipo es el indicado como par√°metro.</returns>
             public RtfTreeNode SelectSingleChildNode(RtfNodeType nodeType)
             {
                 int i = 0;
@@ -317,11 +317,11 @@ namespace NRtfTree
             }
 
             /// <summary>
-            /// Devuelve el primer nodo de la lista de nodos hijos del nodo actual cuya palabra clave y par·metro son los indicados como par·metros.
+            /// Devuelve el primer nodo de la lista de nodos hijos del nodo actual cuya palabra clave y par√°metro son los indicados como par√°metros.
             /// </summary>
             /// <param name="keyword">Palabra clave buscada.</param>
-            /// <param name="param">Par·metro buscado.</param>
-            /// <returns>Primer nodo de la lista de nodos hijos del nodo actual cuya palabra clave y par·metro son los indicados como par·metros.</returns>
+            /// <param name="param">Par√°metro buscado.</param>
+            /// <returns>Primer nodo de la lista de nodos hijos del nodo actual cuya palabra clave y par√°metro son los indicados como par√°metros.</returns>
             public RtfTreeNode SelectSingleChildNode(string keyword, int param)
             {
                 int i = 0;
@@ -343,10 +343,10 @@ namespace NRtfTree
             }
 
             /// <summary>
-            /// Devuelve el primer nodo del ·rbol, a partir del nodo actual, cuyo tipo es el indicado como par·metro.
+            /// Devuelve el primer nodo del √°rbol, a partir del nodo actual, cuyo tipo es el indicado como par√°metro.
             /// </summary>
             /// <param name="nodeType">Tipo del nodo buscado.</param>
-            /// <returns>Primer nodo del ·rbol, a partir del nodo actual, cuyo tipo es el indicado como par·metro.</returns>
+            /// <returns>Primer nodo del √°rbol, a partir del nodo actual, cuyo tipo es el indicado como par√°metro.</returns>
             public RtfTreeNode SelectSingleNode(RtfNodeType nodeType)
             {
                 int i = 0;
@@ -377,10 +377,10 @@ namespace NRtfTree
             }
 
             /// <summary>
-            /// Devuelve el primer nodo del ·rbol, a partir del nodo actual, cuya palabra clave es la indicada como par·metro.
+            /// Devuelve el primer nodo del √°rbol, a partir del nodo actual, cuya palabra clave es la indicada como par√°metro.
             /// </summary>
             /// <param name="keyword">Palabra clave buscada.</param>
-            /// <returns>Primer nodo del ·rbol, a partir del nodo actual, cuya palabra clave es la indicada como par·metro.</returns>
+            /// <returns>Primer nodo del √°rbol, a partir del nodo actual, cuya palabra clave es la indicada como par√°metro.</returns>
             public RtfTreeNode SelectSingleNode(string keyword)
             {
                 int i = 0;
@@ -411,11 +411,11 @@ namespace NRtfTree
             }
 
             /// <summary>
-            /// Devuelve el primer nodo del ·rbol, a partir del nodo actual, cuya palabra clave y par·metro son los indicados como par·metro.
+            /// Devuelve el primer nodo del √°rbol, a partir del nodo actual, cuya palabra clave y par√°metro son los indicados como par√°metro.
             /// </summary>
             /// <param name="keyword">Palabra clave buscada.</param>
-            /// <param name="param">Par·metro buscado.</param>
-            /// <returns>Primer nodo del ·rbol, a partir del nodo actual, cuya palabra clave y par·metro son ls indicados como par·metro.</returns>
+            /// <param name="param">Par√°metro buscado.</param>
+            /// <returns>Primer nodo del √°rbol, a partir del nodo actual, cuya palabra clave y par√°metro son ls indicados como par√°metro.</returns>
             public RtfTreeNode SelectSingleNode(string keyword, int param)
             {
                 int i = 0;
@@ -446,10 +446,10 @@ namespace NRtfTree
             }
 
             /// <summary>
-            /// Devuelve todos los nodos, a partir del nodo actual, cuya palabra clave es la indicada como par·metro.
+            /// Devuelve todos los nodos, a partir del nodo actual, cuya palabra clave es la indicada como par√°metro.
             /// </summary>
             /// <param name="keyword">Palabra clave buscada.</param>
-            /// <returns>ColecciÛn de nodos, a partir del nodo actual, cuya palabra clave es la indicada como par·metro.</returns>
+            /// <returns>Colecci√≥n de nodos, a partir del nodo actual, cuya palabra clave es la indicada como par√°metro.</returns>
             public RtfNodeCollection SelectNodes(string keyword)
             {
                 RtfNodeCollection nodes = new();
@@ -468,10 +468,10 @@ namespace NRtfTree
             }
 
             /// <summary>
-            /// Devuelve todos los nodos, a partir del nodo actual, cuyo tipo es el indicado como par·metro.
+            /// Devuelve todos los nodos, a partir del nodo actual, cuyo tipo es el indicado como par√°metro.
             /// </summary>
             /// <param name="nodeType">Tipo del nodo buscado.</param>
-            /// <returns>ColecciÛn de nodos, a partir del nodo actual, cuyo tipo es la indicado como par·metro.</returns>
+            /// <returns>Colecci√≥n de nodos, a partir del nodo actual, cuyo tipo es la indicado como par√°metro.</returns>
             public RtfNodeCollection SelectNodes(RtfNodeType nodeType)
             {
                 RtfNodeCollection nodes = new();
@@ -490,11 +490,11 @@ namespace NRtfTree
             }
 
             /// <summary>
-            /// Devuelve todos los nodos, a partir del nodo actual, cuya palabra clave y par·metro son los indicados como par·metro.
+            /// Devuelve todos los nodos, a partir del nodo actual, cuya palabra clave y par√°metro son los indicados como par√°metro.
             /// </summary>
             /// <param name="keyword">Palabra clave buscada.</param>
-            /// <param name="param">Par·metro buscado.</param>
-            /// <returns>ColecciÛn de nodos, a partir del nodo actual, cuya palabra clave y par·metro son los indicados como par·metro.</returns>
+            /// <param name="param">Par√°metro buscado.</param>
+            /// <returns>Colecci√≥n de nodos, a partir del nodo actual, cuya palabra clave y par√°metro son los indicados como par√°metro.</returns>
             public RtfNodeCollection SelectNodes(string keyword, int param)
             {
                 RtfNodeCollection nodes = new();
@@ -513,10 +513,10 @@ namespace NRtfTree
             }
 
             /// <summary>
-            /// Devuelve todos los nodos de la lista de nodos hijos del nodo actual cuya palabra clave es la indicada como par·metro.
+            /// Devuelve todos los nodos de la lista de nodos hijos del nodo actual cuya palabra clave es la indicada como par√°metro.
             /// </summary>
             /// <param name="keyword">Palabra clave buscada.</param>
-            /// <returns>ColecciÛn de nodos de la lista de nodos hijos del nodo actual cuya palabra clave es la indicada como par·metro.</returns>
+            /// <returns>Colecci√≥n de nodos de la lista de nodos hijos del nodo actual cuya palabra clave es la indicada como par√°metro.</returns>
             public RtfNodeCollection SelectChildNodes(string keyword)
             {
                 RtfNodeCollection nodes = new();
@@ -533,10 +533,10 @@ namespace NRtfTree
             }
 
             /// <summary>
-            /// Devuelve todos los nodos de la lista de nodos hijos del nodo actual cuyo tipo es el indicado como par·metro.
+            /// Devuelve todos los nodos de la lista de nodos hijos del nodo actual cuyo tipo es el indicado como par√°metro.
             /// </summary>
             /// <param name="nodeType">Tipo del nodo buscado.</param>
-            /// <returns>ColecciÛn de nodos de la lista de nodos hijos del nodo actual cuyo tipo es el indicado como par·metro.</returns>
+            /// <returns>Colecci√≥n de nodos de la lista de nodos hijos del nodo actual cuyo tipo es el indicado como par√°metro.</returns>
             public RtfNodeCollection SelectChildNodes(RtfNodeType nodeType)
             {
                 RtfNodeCollection nodes = new();
@@ -553,11 +553,11 @@ namespace NRtfTree
             }
 
             /// <summary>
-            /// Devuelve todos los nodos de la lista de nodos hijos del nodo actual cuya palabra clave y par·metro son los indicados como par·metro.
+            /// Devuelve todos los nodos de la lista de nodos hijos del nodo actual cuya palabra clave y par√°metro son los indicados como par√°metro.
             /// </summary>
             /// <param name="keyword">Palabra clave buscada.</param>
-            /// <param name="param">Par·metro buscado.</param>
-            /// <returns>ColecciÛn de nodos de la lista de nodos hijos del nodo actual cuya palabra clave y par·metro son los indicados como par·metro.</returns>
+            /// <param name="param">Par√°metro buscado.</param>
+            /// <returns>Colecci√≥n de nodos de la lista de nodos hijos del nodo actual cuya palabra clave y par√°metro son los indicados como par√°metro.</returns>
             public RtfNodeCollection SelectChildNodes(string keyword, int param)
             {
                 RtfNodeCollection nodes = new();
@@ -574,10 +574,10 @@ namespace NRtfTree
             }
 
             /// <summary>
-            /// Devuelve el primer nodo hermano del actual cuya palabra clave es la indicada como par·metro.
+            /// Devuelve el primer nodo hermano del actual cuya palabra clave es la indicada como par√°metro.
             /// </summary>
             /// <param name="keyword">Palabra clave buscada.</param>
-            /// <returns>Primer nodo hermano del actual cuya palabra clave es la indicada como par·metro.</returns>
+            /// <returns>Primer nodo hermano del actual cuya palabra clave es la indicada como par√°metro.</returns>
             public RtfTreeNode SelectSibling(string keyword)
             {
                 RtfTreeNode par = parent;
@@ -602,10 +602,10 @@ namespace NRtfTree
             }
 
             /// <summary>
-            /// Devuelve el primer nodo hermano del actual cuyo tipo es el indicado como par·metro.
+            /// Devuelve el primer nodo hermano del actual cuyo tipo es el indicado como par√°metro.
             /// </summary>
             /// <param name="nodeType">Tpo de nodo buscado.</param>
-            /// <returns>Primer nodo hermano del actual cuyo tipo es el indicado como par·metro.</returns>
+            /// <returns>Primer nodo hermano del actual cuyo tipo es el indicado como par√°metro.</returns>
             public RtfTreeNode SelectSibling(RtfNodeType nodeType)
             {
                 RtfTreeNode par = parent;
@@ -630,11 +630,11 @@ namespace NRtfTree
             }
 
             /// <summary>
-            /// Devuelve el primer nodo hermano del actual cuya palabra clave y par·metro son los indicados como par·metro.
+            /// Devuelve el primer nodo hermano del actual cuya palabra clave y par√°metro son los indicados como par√°metro.
             /// </summary>
             /// <param name="keyword">Palabra clave buscada.</param>
-            /// <param name="param">Par·metro buscado.</param>
-            /// <returns>Primer nodo hermano del actual cuya palabra clave y par·metro son los indicados como par·metro.</returns>
+            /// <param name="param">Par√°metro buscado.</param>
+            /// <returns>Primer nodo hermano del actual cuya palabra clave y par√°metro son los indicados como par√°metro.</returns>
             public RtfTreeNode SelectSibling(string keyword, int param)
             {
                 RtfTreeNode par = parent;
@@ -659,7 +659,7 @@ namespace NRtfTree
             }
 
             /// <summary>
-            /// Devuelve una representaciÛn del nodo donde se indica su tipo, clave, indicador de par·metro y valor de par·metro
+            /// Devuelve una representaci√≥n del nodo donde se indica su tipo, clave, indicador de par√°metro y valor de par√°metro
             /// </summary>
             /// <returns>Cadena de caracteres del tipo [TIPO, CLAVE, IND_PARAMETRO, VAL_PARAMETRO]</returns>
             public override string ToString()
@@ -672,7 +672,7 @@ namespace NRtfTree
             #region Metodos Privados
 
             /// <summary>
-            /// Obtiene el Texto RTF a partir de la representaciÛn en ·rbol del nodo actual.
+            /// Obtiene el Texto RTF a partir de la representaci√≥n en √°rbol del nodo actual.
             /// </summary>
             /// <returns>Texto RTF del nodo.</returns>
             private string getRtf()
@@ -687,11 +687,11 @@ namespace NRtfTree
             }
 
             /// <summary>
-            /// MÈtodo auxiliar para obtener el Texto RTF del nodo actual a partir de su representaciÛn en ·rbol.
+            /// M√©todo auxiliar para obtener el Texto RTF del nodo actual a partir de su representaci√≥n en √°rbol.
             /// </summary>
-            /// <param name="curNode">Nodo actual del ·rbol.</param>
+            /// <param name="curNode">Nodo actual del √°rbol.</param>
             /// <param name="prevNode">Nodo anterior tratado.</param>
-            /// <param name="enc">CodificaciÛn del documento.</param>
+            /// <param name="enc">Codificaci√≥n del documento.</param>
             /// <returns>Texto en formato RTF del nodo.</returns>
             private string getRtfInm(RtfTreeNode curNode, RtfTreeNode prevNode, Encoding enc)
             {
@@ -764,14 +764,14 @@ namespace NRtfTree
             }
 
             /// <summary>
-            /// Concatena dos cadenas utilizando la codificaciÛn del documento.
+            /// Concatena dos cadenas utilizando la codificaci√≥n del documento.
             /// </summary>
             /// <param name="res">Cadena original.</param>
-            /// <param name="s">Cadena a aÒadir.</param>
-            /// <param name="enc">CodificaciÛn del documento.</param>
+            /// <param name="s">Cadena a a√±adir.</param>
+            /// <param name="enc">Codificaci√≥n del documento.</param>
             private void AppendEncoded(StringBuilder res, string s, Encoding enc)
             {
-                //Contributed by Jan StuchlÌk
+                //Contributed by Jan Stuchl√≠k
 
                 for (int i = 0; i < s.Length; i++)
                 {
@@ -791,13 +791,13 @@ namespace NRtfTree
             }
 
             /// <summary>
-            /// Obtiene el cÛdigo hexadecimal de un entero.
+            /// Obtiene el c√≥digo hexadecimal de un entero.
             /// </summary>
-            /// <param name="code">N˙mero entero.</param>
-            /// <returns>CÛdigo hexadecimal del entero pasado como par·metro.</returns>
+            /// <param name="code">N√∫mero entero.</param>
+            /// <returns>C√≥digo hexadecimal del entero pasado como par√°metro.</returns>
             private string GetHexa(int code)
             {
-                //Contributed by Jan StuchlÌk
+                //Contributed by Jan Stuchl√≠k
 
                 string hexa = Convert.ToString(code, 16);
 
@@ -815,10 +815,10 @@ namespace NRtfTree
             /// <param name="node">Nodo a actualizar.</param>
             private void updateNodeRoot(RtfTreeNode node)
             {
-                //Se asigna el nodo raÌz del documento
+                //Se asigna el nodo ra√≠z del documento
                 node.root = root;
 
-                //Se asigna el ·rbol propietario del nodo
+                //Se asigna el √°rbol propietario del nodo
                 node.tree = tree;
 
                 //Se actualizan recursivamente los hijos del nodo actual
@@ -833,11 +833,11 @@ namespace NRtfTree
             #region Propiedades
 
             /// <summary>
-            /// Devuelve el nodo raÌz del ·rbol del documento.
+            /// Devuelve el nodo ra√≠z del √°rbol del documento.
             /// </summary>
             /// <remarks>
-            /// …ste no es el nodo raÌz del ·rbol, sino que se trata simplemente de un nodo ficticio  de tipo ROOT del que parte el resto del ·rbol RTF.
-            /// Tendr· por tanto un solo nodo hijo de tipo GROUP, raiz real del ·rbol.
+            /// √âste no es el nodo ra√≠z del √°rbol, sino que se trata simplemente de un nodo ficticio  de tipo ROOT del que parte el resto del √°rbol RTF.
+            /// Tendr√° por tanto un solo nodo hijo de tipo GROUP, raiz real del √°rbol.
 			/// </remarks>
             public RtfTreeNode RootNode
             {
@@ -855,7 +855,7 @@ namespace NRtfTree
             }
 
             /// <summary>
-            /// Devuelve el ·rbol Rtf al que pertenece el nodo.
+            /// Devuelve el √°rbol Rtf al que pertenece el nodo.
             /// </summary>
             public RtfTree Tree
             {
@@ -873,7 +873,7 @@ namespace NRtfTree
             }
 
             /// <summary>
-            /// Devuelve la palabra clave, sÌmbolo de Control o Texto del nodo actual.
+            /// Devuelve la palabra clave, s√≠mbolo de Control o Texto del nodo actual.
             /// </summary>
             public string NodeKey
             {
@@ -882,7 +882,7 @@ namespace NRtfTree
             }
 
             /// <summary>
-            /// Indica si el nodo actual tiene par·metro asignado.
+            /// Indica si el nodo actual tiene par√°metro asignado.
             /// </summary>
             public bool HasParameter
             {
@@ -891,7 +891,7 @@ namespace NRtfTree
             }
 
             /// <summary>
-            /// Devuelve el par·metro asignado al nodo actual.
+            /// Devuelve el par√°metro asignado al nodo actual.
             /// </summary>
             public int Parameter
             {
@@ -900,15 +900,15 @@ namespace NRtfTree
             }
 
             /// <summary>
-            /// Devuelve la colecciÛn de nodos hijo del nodo actual.
+            /// Devuelve la colecci√≥n de nodos hijo del nodo actual.
             /// </summary>
             public RtfNodeCollection ChildNodes => children;
 
             /// <summary>
-            /// Devuelve el primer nodo hijo cuya palabra clave sea la indicada como par·metro.
+            /// Devuelve el primer nodo hijo cuya palabra clave sea la indicada como par√°metro.
             /// </summary>
             /// <param name="keyword">Palabra clave buscada.</param>
-            /// <returns>Primer nodo hijo cuya palabra clave sea la indicada como par·metro. En caso de no existir se devuelve null.</returns>
+            /// <returns>Primer nodo hijo cuya palabra clave sea la indicada como par√°metro. En caso de no existir se devuelve null.</returns>
             public RtfTreeNode this[string keyword] => SelectSingleChildNode(keyword);
 
             /// <summary>
@@ -926,7 +926,7 @@ namespace NRtfTree
             }
 
             /// <summary>
-            /// Devuelve el ˙ltimo nodo hijo del nodo actual.
+            /// Devuelve el √∫ltimo nodo hijo del nodo actual.
             /// </summary>
             public RtfTreeNode LastChild
             {
@@ -972,7 +972,7 @@ namespace NRtfTree
             }
 
             /// <summary>
-            /// Devuelve el cÛdigo RTF del nodo actual y todos sus nodos hijos.
+            /// Devuelve el c√≥digo RTF del nodo actual y todos sus nodos hijos.
             /// </summary>
             public string Rtf => getRtf();
 

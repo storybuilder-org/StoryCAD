@@ -123,9 +123,6 @@ public class PrintReports
             PrintDoc.PrintPage += pd_PrintPage;
             Margins margins = new(100, 100, 100, 100);
             PrintDoc.DefaultPageSettings.Margins = margins;
-            float pixelsPerChar = _printFont.Size;
-            float lineWidth = PrintDoc.DefaultPageSettings.PrintableArea.Width;
-            int charsPerLine = Convert.ToInt32(lineWidth / pixelsPerChar);
             // Print the document.
             PrintDoc.Print();
         }

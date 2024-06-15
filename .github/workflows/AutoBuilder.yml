@@ -1,3 +1,4 @@
+#IMPORTANT - Don't forget to bump the .NET Version for Install .NET AND StoryCADTests
 name: AutoBuild
 
 on:
@@ -28,7 +29,7 @@ jobs:
     - name: Install .NET
       uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: 7.x.x
+        dotnet-version: 8.x.x
 
     #Install MSBUILD
     - name: Setup MSBuild.exe
@@ -64,7 +65,16 @@ jobs:
         $filecontent = Get-Content("D:\a\StoryCAD\StoryCAD\StoryCAD\Package.appxmanifest")
         attrib $file -r
         $filecontent -replace $ManifestVersionRegex, $ManifestVersion | Out-File "D:\a\StoryCAD\StoryCAD\StoryCAD\Package.appxmanifest" utf8
-        
+
+    # Decode the base 64 encoded pfx and save the Signing_Certificate
+    - name: Decode the pfx
+      run: |
+        $pfx_cert_byte = [System.Convert]::FromBase64String("${{ secrets.BASE64_ENCODED_PFX }}")
+        $certificatePath = "GitHubActionsWorkflow.pfx"
+        [IO.File]::WriteAllBytes("$certificatePath", $pfx_cert_byte)
+        [IO.File]::WriteAllText("D:\a\StoryCAD\StoryCAD\StoryCAD\.env", "${{ secrets.ENV }}")
+        [IO.File]::WriteAllText("D:\a\StoryCAD\StoryCAD\StoryCADTests\.env", "${{ secrets.ENV }}")
+
     # Restore the application to populate the obj folder with RuntimeIdentifiers
     - name: Restore the application
       run: msbuild $env:Solution_Name /t:Restore /p:Configuration=$env:Configuration
@@ -78,15 +88,8 @@ jobs:
       uses: darenm/Setup-VSTest@v1.2      
 
     - name: Run StoryCADTests
-      run: vstest.console.exe D:\a\StoryCAD\StoryCAD\StoryCADTests\bin\x64\Debug\net7.0-windows10.0.19041.0\StoryCADTests.dll /Logger:Console /Platform:x64 /Framework:.NETCoreApp,Version=v7.0 
+      run: vstest.console.exe D:\a\StoryCAD\StoryCAD\StoryCADTests\bin\x64\Debug\net8.0-windows10.0.19041.0\StoryCADTests.dll /Logger:Console /Platform:x64 /Framework:.NETCoreApp,Version=v7.0 
 
-    # Decode the base 64 encoded pfx and save the Signing_Certificate
-    - name: Decode the pfx
-      run: |
-        $pfx_cert_byte = [System.Convert]::FromBase64String("${{ secrets.BASE64_ENCODED_PFX }}")
-        $certificatePath = "GitHubActionsWorkflow.pfx"
-        [IO.File]::WriteAllBytes("$certificatePath", $pfx_cert_byte)
-        [IO.File]::WriteAllText("D:\a\StoryCAD\StoryCAD\StoryCAD\.env", "${{ secrets.ENV }}")
         
     # Create the app package by building and packaging the project
     - name: Create the MSIX

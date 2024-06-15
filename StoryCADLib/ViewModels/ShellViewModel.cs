@@ -11,6 +11,7 @@ using StoryCAD.Models;
 using StoryCAD.Models.Tools;
 using StoryCAD.Services.Backend;
 using StoryCAD.Services.Backup;
+using StoryCAD.Services.Collaborator;
 using StoryCAD.Services.Dialogs;
 using StoryCAD.Services.Dialogs.Tools;
 using StoryCAD.Services.Json;
@@ -26,13 +27,20 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Windows.Storage;
 using Windows.Storage.Pickers;
+using StoryCAD.Services;
 using WinRT;
 using GuidAttribute = System.Runtime.InteropServices.GuidAttribute;
 using Path = System.IO.Path;
+using Octokit;
+using WinUIEx;
+using Application = Microsoft.UI.Xaml.Application;
+using FileAttributes = System.IO.FileAttributes;
+using Org.BouncyCastle.Asn1.Cms;
 
 namespace StoryCAD.ViewModels;
 
@@ -59,9 +67,7 @@ public class ShellViewModel : ObservableRecipient
     public List<StoryNodeItem> NewNodeHighlightCache = new();
 
     public StoryViewType CurrentViewType;
-
     private ContentDialog _contentDialog;
-
     private int _sourceIndex;
     private ObservableCollection<StoryNodeItem> _sourceChildren;
     private int _targetIndex;
@@ -71,8 +77,10 @@ public class ShellViewModel : ObservableRecipient
     private AutoSaveService _autoSaveService = Ioc.Default.GetRequiredService<AutoSaveService>();
     private Windowing Window = Ioc.Default.GetRequiredService<Windowing>();
     private AppState State = Ioc.Default.GetRequiredService<AppState>();
+    private PreferenceService Preferences = Ioc.Default.GetRequiredService<PreferenceService>();
     private DispatcherTimer _statusTimer;
 
+    private CollaboratorArgs CollabArgs;
     // The current story outline being processed. 
     public StoryModel StoryModel;
 
@@ -83,6 +91,10 @@ public class ShellViewModel : ObservableRecipient
 
     // The right-hand (detail) side of ShellView
     public Frame SplitViewFrame;
+
+    // Drag and drop variables
+    private StoryNodeItem dragSourceStoryNode;
+    private readonly object dragLock = new object();
 
     #region CommandBar Relay Commands
 
@@ -107,7 +119,10 @@ public class ShellViewModel : ObservableRecipient
     public RelayCommand MoveRightCommand { get; }
     public RelayCommand MoveUpCommand { get; }
     public RelayCommand MoveDownCommand { get; }
-
+    
+    // Launch Collaborator
+    public RelayCommand CollaboratorCommand { get; }
+   
     public RelayCommand HelpCommand { get; }
 
     // Tools MenuFlyOut Commands
@@ -119,6 +134,13 @@ public class ShellViewModel : ObservableRecipient
     public RelayCommand PrintReportsCommand { get; }
     public RelayCommand ScrivenerReportsCommand { get; }
     public RelayCommand PreferencesCommand { get; }
+
+    private Visibility _collaboratorVisibility;
+    public Visibility CollaboratorVisibility
+    {
+        get => _collaboratorVisibility;
+        set => SetProperty(ref _collaboratorVisibility, value);
+    }
 
     #endregion
 
@@ -165,11 +187,6 @@ public class ShellViewModel : ObservableRecipient
             _canExecuteCommands = true;
         }
     }
-
-    /// <summary>
-    /// Used for theming
-    /// </summary>
-    public PreferencesModel UserPreferences = Ioc.Default.GetRequiredService<AppState>().Preferences;
 
     /// <summary>
     /// IsPaneOpen is bound to ShellSplitView's IsPaneOpen property with
@@ -336,6 +353,7 @@ public class ShellViewModel : ObservableRecipient
     /// </summary>
     public static void ShowChange()
     {
+        if (Ioc.Default.GetRequiredService<AppState>().StoryCADTestsMode) { return; }
         if (ShellInstance.StoryModel.Changed) { return; }
         ShellInstance.StoryModel.Changed = true;
         ShellInstance.ChangeStatusColor = Colors.Red;
@@ -366,11 +384,15 @@ public class ShellViewModel : ObservableRecipient
         {
             _canExecuteCommands = false;
             // Needs logging
-            _contentDialog = new() { XamlRoot = Ioc.Default.GetRequiredService<Windowing>().XamlRoot, Content = new UnifiedMenuPage() };
-            if (Application.Current.RequestedTheme == ApplicationTheme.Light) { _contentDialog.Background = new SolidColorBrush(Colors.LightGray); }
-            await _contentDialog.ShowAsync();
+            _contentDialog = new() { Content = new UnifiedMenuPage() };
+            if (Window.RequestedTheme == ElementTheme.Light)
+            {
+                _contentDialog.RequestedTheme = Window.RequestedTheme;
+                _contentDialog.Background = new SolidColorBrush(Colors.LightGray);
+            }
+            await Window.ShowContentDialog(_contentDialog);
             _canExecuteCommands = true;
-        }   
+        }
     }
 
     public async Task UnifiedNewFile(UnifiedVM dialogVM)
@@ -397,129 +419,7 @@ public class ShellViewModel : ObservableRecipient
             StoryModel.ProjectFilename = dialogVM.ProjectName;
             StoryModel.ProjectFolder = await StorageFolder.GetFolderFromPathAsync(dialogVM.ProjectPath);
             StoryModel.ProjectPath = StoryModel.ProjectFolder.Path;
-
-            OverviewModel _overview = new(Path.GetFileNameWithoutExtension(dialogVM.ProjectName), StoryModel)
-            { DateCreated = DateTime.Today.ToString("yyyy-MM-dd"), Author = State.Preferences.Name };
-
-            StoryNodeItem _overviewNode = new(_overview, null) { IsExpanded = true, IsRoot = true };
-            StoryModel.ExplorerView.Add(_overviewNode);
-            TrashCanModel _trash = new(StoryModel);
-            StoryNodeItem _trashNode = new(_trash, null);
-            StoryModel.ExplorerView.Add(_trashNode);     // The trashcan is the second root
-            FolderModel _narrative = new("Narrative View", StoryModel, StoryItemType.Folder);
-            StoryNodeItem _narrativeNode = new(_narrative, null) { IsRoot = true };
-            StoryModel.NarratorView.Add(_narrativeNode);
-
-            // Every new story gets a StoryProblem with a Protagonist and Antagonist
-            // Except for Blank Project
-            if (dialogVM.SelectedTemplateIndex != 0)
-            {
-                StoryElement _storyProblem = new ProblemModel("Story Problem", StoryModel);
-                StoryNodeItem _storyProblemNode = new(_storyProblem, null);
-                StoryElement _storyProtag = new CharacterModel("Protagonist", StoryModel);
-                StoryNodeItem _storyProtagNode = new StoryNodeItem(_storyProtag, null);
-                StoryElement _storyAntag = new CharacterModel("Antagonist", StoryModel);
-                StoryNodeItem _storyAntagNode = new StoryNodeItem(_storyAntag, null);
-                _overview.StoryProblem = _storyProblem.Uuid.ToString();
-                var _problem = _storyProblem as ProblemModel;
-                _problem.Protagonist = _storyProtag.ToString();
-                _problem.Antagonist = _storyAntag.ToString();
-                _problem.Premise =
-                    @"Your[protagonist] in a situation[genre, setting] wants something[goal], which brings him" +
-                    @"into [conflict] with a second character[antagonist]. After a series of conflicts[additional " +
-                    @"problems], the final battle[climax scene] erupts, and the[protagonist] finally resolves the " +
-                    @"conflict[outcome].";
-
-                // Use the NewProjectDialog template to complete the model
-                switch (dialogVM.SelectedTemplateIndex)
-                {
-                    case 1:  // Story problem and characters
-                        _overviewNode.Children.Add(_storyProblemNode);
-                        _storyProblemNode.Children.Add(_storyProtagNode);
-                        _storyProblemNode.Children.Add(_storyAntagNode);
-                        _storyProblemNode.IsExpanded = true;
-                        break;
-                    case 2:  // Folders for each type- story problem and characters belong in the corresponding folders
-                        StoryElement _problems = new FolderModel("Problems", StoryModel, StoryItemType.Folder);
-                        StoryNodeItem _problemsNode = new(_problems, _overviewNode);
-                        StoryElement _characters = new FolderModel("Characters", StoryModel, StoryItemType.Folder);
-                        StoryNodeItem _charactersNode = new(_characters, _overviewNode);
-                        StoryElement _settings = new FolderModel("Settings", StoryModel, StoryItemType.Folder);
-                        StoryNodeItem _settingsNode = new(_settings, _overviewNode);
-                        StoryElement _scenes = new FolderModel("Scenes", StoryModel, StoryItemType.Folder);
-                        StoryNodeItem _scenesNode = new(_scenes, _overviewNode);
-                        _overview.StoryProblem = _storyProblem.Uuid.ToString();
-                        _problemsNode.Children.Add(_storyProblemNode);
-                        _charactersNode.Children.Add(_storyProtagNode);
-                        _charactersNode.Children.Add(_storyAntagNode);
-                        _problemsNode.IsExpanded = true;
-                        _charactersNode.IsExpanded = true;
-                        break;
-                    case 3:
-                        _storyProblemNode.Name = "External Problem";
-                        _storyProblemNode.IsExpanded = true;
-                        _overviewNode.Children.Add(_storyProblemNode);
-                        _storyProblemNode.Children.Add(_storyProtagNode);
-                        _storyProblemNode.Children.Add(_storyAntagNode);
-                        _problem = _storyProblem as ProblemModel;
-                        _problem.Name = "External Problem";
-                        _overview.StoryProblem = _problem.Uuid.ToString();
-                        _problem.Protagonist = _storyProtag.ToString();
-                        _problem.Antagonist = _storyAntagNode.ToString();
-                        StoryElement _internalProblem = new ProblemModel("Internal Problem", StoryModel);
-                        StoryNodeItem _internalProblemNode = new(_internalProblem, null);
-                        _overviewNode.Children.Add(_internalProblemNode);
-                        _problem = _internalProblem as ProblemModel;
-                        _problem.Protagonist = _storyProtag.ToString();
-                        _problem.Antagonist = _storyProtag.ToString();
-                        _problem.ConflictType = "Person vs. Self";
-                        _problem.Premise =
-                            @"Your [protagonist] grapples with an [internal conflict] and is their own antagonist, marred by self-doubt and fears " +
-                            @"or having a [goal] that masks this conflict rather than a real need. The [climax scene] is often a moment of introspection in which " +
-                            @"he or she makes a decision or discovery that resolves the internal conflict [outcome]. Resolving this problem may enable your " +
-                            @"[protagonist] to resolve another (external) problem.";
-                        break;
-                    case 4:
-                        _overviewNode.Children.Add(_storyProtagNode);
-                        _overviewNode.Children.Add(_storyAntagNode);
-                        _storyProtagNode.Children.Add(_storyProblemNode);
-                        _storyProtagNode.IsExpanded = true;
-                        break;
-                    case 5:
-                        StoryElement _problemsFolder = new FolderModel("Problems", StoryModel, StoryItemType.Folder);
-                        StoryNodeItem _problemsFolderNode = new(_problemsFolder, _overviewNode) { IsExpanded = true };
-                        StoryElement _charactersFolder = new FolderModel("Characters", StoryModel, StoryItemType.Folder);
-                        StoryNodeItem _charactersFolderNode = new(_charactersFolder, _overviewNode) { IsExpanded = true };
-                        StoryElement _settingsFolder = new FolderModel("Settings", StoryModel, StoryItemType.Folder);
-                        StoryNodeItem _settingsFolderNode = new(_settingsFolder, _overviewNode);
-                        StoryElement _plotpointsFolder = new FolderModel("Scenes", StoryModel, StoryItemType.Folder);
-                        StoryNodeItem _plotpointsFolderNode = new(_plotpointsFolder, _overviewNode);
-                        _storyProblemNode.Name = "External Problem";
-                        _storyProblemNode.IsExpanded = true;
-                        _problemsFolderNode.Children.Add(_storyProblemNode);
-                        _problem = _storyProblem as ProblemModel;
-                        _problem.Name = "External Problem";
-                        _problem.Protagonist = _storyProtag.ToString();
-                        _problem.Antagonist = _storyAntagNode.ToString();
-                        _overview.StoryProblem = _problem.Uuid.ToString();
-                        _internalProblem = new ProblemModel("Internal Problem", StoryModel);
-                        _internalProblemNode = new(_internalProblem, null);
-                        _problemsFolderNode.Children.Add(_internalProblemNode);
-                        _problem = _internalProblem as ProblemModel;
-                        _problem.Protagonist = _storyProtag.ToString();
-                        _problem.Antagonist = _storyProtag.ToString();
-                        _problem.ConflictType = "Person vs. Self";
-                        _problem.Premise =
-                            @"Your [protagonist] grapples with an [internal conflict] and is their own antagonist, marred by self-doubt and fears " +
-                            @"or having a [goal] that masks this conflict rather than a real need. The [climax scene] is often a moment of introspection in which " +
-                            @"he or she makes a decision or discovery that resolves the internal conflict [outcome]. Resolving this problem may enable your " +
-                            @"[protagonist] to resolve another (external) problem.";
-                        _charactersFolderNode.Children.Add(_storyProtagNode);
-                        _charactersFolderNode.Children.Add(_storyAntagNode);
-                        break;
-
-                }
-            }
+            CreateTemplate(dialogVM.ProjectName, dialogVM.SelectedTemplateIndex);
             SetCurrentView(StoryViewType.ExplorerView);
 
             Ioc.Default.GetRequiredService<UnifiedVM>().UpdateRecents(Path.Combine(dialogVM.ProjectPath, dialogVM.ProjectName!)); //adds item to recent
@@ -527,18 +427,18 @@ public class ShellViewModel : ObservableRecipient
             // Save the new project
             StoryModel.Changed = true;
             await SaveFile();
-            if (State.Preferences.BackupOnOpen)
+            if (Preferences.Model.BackupOnOpen)
             {
                 await MakeBackup();
             }
 
             // Start the timed backup and auto save services
-            if (State.Preferences.TimedBackup)
+            if (Preferences.Model.TimedBackup)
             {
                 Ioc.Default.GetRequiredService<BackupService>().StartTimedBackup();
             }
 
-            if (State.Preferences.AutoSave)
+            if (Preferences.Model.AutoSave)
             {
                 Ioc.Default.GetRequiredService<AutoSaveService>().StartAutoSave();
             }
@@ -557,12 +457,159 @@ public class ShellViewModel : ObservableRecipient
         _canExecuteCommands = true;
     }
 
+    /// <summary>
+    /// This creates a new StoryModel based on a template
+    /// </summary>
+    /// <param name="ProjectName">The name of the project</param>
+    /// <param name="SelectedTemplateIndex">The template to use (see NewProject.xaml)</param>
+    public void CreateTemplate(string ProjectName, int SelectedTemplateIndex)
+    {
+        OverviewModel _overview = new(Path.GetFileNameWithoutExtension(ProjectName), StoryModel)
+        { DateCreated = DateTime.Today.ToString("yyyy-MM-dd"), 
+            Author = Preferences.Model.FirstName + " " + Preferences.Model.LastName };
+            
+        StoryNodeItem _overviewNode = new(_overview, null) { IsExpanded = true, IsRoot = true };
+        StoryModel.ExplorerView.Add(_overviewNode);
+        TrashCanModel _trash = new(StoryModel);
+        StoryNodeItem _trashNode = new(_trash, null);
+        StoryModel.ExplorerView.Add(_trashNode);     // The trashcan is the second root
+        FolderModel _narrative = new("Narrative View", StoryModel, StoryItemType.Folder);
+        StoryNodeItem _narrativeNode = new(_narrative, null) { IsRoot = true };
+        StoryModel.NarratorView.Add(_narrativeNode);
+
+        // Every new story gets a StoryProblem with a Protagonist and Antagonist
+        // Except for Blank Project
+        if (SelectedTemplateIndex != 0)
+        {
+            StoryElement _storyProblem = new ProblemModel("Story Problem", StoryModel);
+            StoryNodeItem _storyProblemNode = new(_storyProblem, null);
+            StoryElement _storyProtag = new CharacterModel("Protagonist", StoryModel);
+            StoryNodeItem _storyProtagNode = new StoryNodeItem(_storyProtag, null);
+            StoryElement _storyAntag = new CharacterModel("Antagonist", StoryModel);
+            StoryNodeItem _storyAntagNode = new StoryNodeItem(_storyAntag, null);
+            _overview.StoryProblem = _storyProblem.Uuid.ToString();
+            var _problem = _storyProblem as ProblemModel;
+            _problem.Protagonist = _storyProtag.ToString();
+            _problem.Antagonist = _storyAntag.ToString();
+            _problem.Premise =
+                @"Your[protagonist] in a situation[genre, setting] wants something[goal], which brings him" +
+                @"into [conflict] with a second character[antagonist]. After a series of conflicts[additional " +
+                @"problems], the final battle[climax scene] erupts, and the[protagonist] finally resolves the " +
+                @"conflict[outcome].";
+
+            // Use the NewProjectDialog template to complete the model
+            switch (SelectedTemplateIndex)
+            {
+                case 1:  // Story problem and characters
+                    _overviewNode.Children.Add(_storyProblemNode);
+                    _storyProblemNode.Children.Add(_storyProtagNode);
+                    _storyProblemNode.Children.Add(_storyAntagNode);
+
+                    //Correctly set parents
+                    _storyProblemNode.Parent = _overviewNode;
+                    _storyProtagNode.Parent = _storyProblemNode;
+                    _storyAntagNode.Parent = _storyProblemNode;
+                    _storyProblemNode.IsExpanded = true;
+                    break;
+                case 2:  // Folders for each type- story problem and characters belong in the corresponding folders
+                    StoryElement _problems = new FolderModel("Problems", StoryModel, StoryItemType.Folder);
+                    StoryNodeItem _problemsNode = new(_problems, _overviewNode);
+                    _storyProblemNode.Parent = _problemsNode;
+                    StoryElement _characters = new FolderModel("Characters", StoryModel, StoryItemType.Folder);
+                    StoryNodeItem _charactersNode = new(_characters, _overviewNode);
+                    _storyProtagNode.Parent = _charactersNode;
+                    _storyAntagNode.Parent = _charactersNode;
+                    StoryElement _settings = new FolderModel("Settings", StoryModel, StoryItemType.Folder);
+                    StoryNodeItem _settingsNode = new(_settings, _overviewNode);
+                    StoryElement _scenes = new FolderModel("Scenes", StoryModel, StoryItemType.Folder);
+                    StoryNodeItem _scenesNode = new(_scenes, _overviewNode);
+                    _overview.StoryProblem = _storyProblem.Uuid.ToString();
+                    _problemsNode.Children.Add(_storyProblemNode);
+                    _charactersNode.Children.Add(_storyProtagNode);
+                    _charactersNode.Children.Add(_storyAntagNode);
+                    _problemsNode.IsExpanded = true;
+                    _charactersNode.IsExpanded = true;
+                    break;
+                case 3:
+                    _storyProblemNode.Name = "External Problem";
+                    _storyProblemNode.IsExpanded = true;
+                    _storyProblemNode.Parent = _overviewNode;
+                    _overviewNode.Children.Add(_storyProblemNode);
+                    _storyProblemNode.Children.Add(_storyProtagNode);
+                    _storyProblemNode.Children.Add(_storyAntagNode);
+                    _problem = _storyProblem as ProblemModel;
+                    _problem.Name = "External Problem";
+                    _overview.StoryProblem = _problem.Uuid.ToString();
+                    _problem.Protagonist = _storyProtag.ToString();
+                    _problem.Antagonist = _storyAntagNode.ToString();
+                    _storyProtagNode.Parent = _storyProblemNode;
+                    _storyAntagNode.Parent = _storyProblemNode;
+                    StoryElement _internalProblem = new ProblemModel("Internal Problem", StoryModel);
+                    StoryNodeItem _internalProblemNode = new(_internalProblem, _overviewNode);
+                    _problem = _internalProblem as ProblemModel;
+                    _problem.Protagonist = _storyProtag.ToString();
+                    _problem.Antagonist = _storyProtag.ToString();
+                    _problem.ConflictType = "Person vs. Self";
+                    _problem.Premise =
+                        @"Your [protagonist] grapples with an [internal conflict] and is their own antagonist, marred by self-doubt and fears " +
+                        @"or having a [goal] that masks this conflict rather than a real need. The [climax scene] is often a moment of introspection in which " +
+                        @"he or she makes a decision or discovery that resolves the internal conflict [outcome]. Resolving this problem may enable your " +
+                        @"[protagonist] to resolve another (external) problem.";
+                    break;
+                case 4:
+                    _overviewNode.Children.Add(_storyProtagNode);
+                    _overviewNode.Children.Add(_storyAntagNode);
+                    _storyProtagNode.Children.Add(_storyProblemNode);
+                    _storyProtagNode.IsExpanded = true;
+                    _storyProblemNode.Parent = _storyProtagNode;
+                    _storyProtagNode.Parent = _overviewNode;
+                    _storyAntagNode.Parent = _overviewNode;
+                    break;
+                case 5:
+                    StoryElement _problemsFolder = new FolderModel("Problems", StoryModel, StoryItemType.Folder);
+                    StoryNodeItem _problemsFolderNode = new(_problemsFolder, _overviewNode) { IsExpanded = true };
+                    StoryElement _charactersFolder = new FolderModel("Characters", StoryModel, StoryItemType.Folder);
+                    StoryNodeItem _charactersFolderNode = new(_charactersFolder, _overviewNode) { IsExpanded = true };
+                    StoryElement _settingsFolder = new FolderModel("Settings", StoryModel, StoryItemType.Folder);
+                    StoryNodeItem _settingsFolderNode = new(_settingsFolder, _overviewNode);
+                    StoryElement _plotpointsFolder = new FolderModel("Scenes", StoryModel, StoryItemType.Folder);
+                    StoryNodeItem _plotpointsFolderNode = new(_plotpointsFolder, _overviewNode);
+                    _storyProblemNode.Name = "External Problem";
+                    _storyProblemNode.IsExpanded = true;
+                    _problemsFolderNode.Children.Add(_storyProblemNode);
+                    _storyProblemNode.Parent = _problemsFolderNode;
+                    _problem = _storyProblem as ProblemModel;
+                    _problem.Name = "External Problem";
+                    _problem.Protagonist = _storyProtag.ToString();
+                    _problem.Antagonist = _storyAntagNode.ToString();
+                    _overview.StoryProblem = _problem.Uuid.ToString();
+                    _internalProblem = new ProblemModel("Internal Problem", StoryModel);
+                    _internalProblemNode = new(_internalProblem, _problemsFolderNode);
+                    _problem = _internalProblem as ProblemModel;
+                    _problem.Protagonist = _storyProtag.ToString();
+                    _problem.Antagonist = _storyProtag.ToString();
+                    _problem.ConflictType = "Person vs. Self";
+                    _problem.Premise =
+                        @"Your [protagonist] grapples with an [internal conflict] and is their own antagonist, marred by self-doubt and fears " +
+                        @"or having a [goal] that masks this conflict rather than a real need. The [climax scene] is often a moment of introspection in which " +
+                        @"he or she makes a decision or discovery that resolves the internal conflict [outcome]. Resolving this problem may enable your " +
+                        @"[protagonist] to resolve another (external) problem.";
+                    _charactersFolderNode.Children.Add(_storyProtagNode);
+                    _charactersFolderNode.Children.Add(_storyAntagNode);
+                    _storyProtagNode.Parent = _charactersFolderNode;
+                    _storyAntagNode.Parent = _charactersFolderNode;
+                    break;
+
+            }
+        }
+    }
+
     public async Task MakeBackup()
     {
         await Ioc.Default.GetRequiredService<BackupService>().BackupProject();
     }
 
-    public void TreeViewNodeClicked(object selectedItem , bool ClearHighlightCache = true)
+    public void TreeViewNodeClicked(object selectedItem, bool ClearHighlightCache = true)
     {
         if (selectedItem is null)
         {
@@ -632,15 +679,15 @@ public class ShellViewModel : ObservableRecipient
     /// </summary>
     public async Task ShowDotEnvWarningAsync()
     {
-        await new ContentDialog
+        ContentDialog Dialog = new()
         {
             Title = "File missing.",
             Content = "This copy is missing a key file, if you are working on a branch or fork this is expected and you do not need to do anything about this." +
-                      "\nHowever if you are not a developer then report this as it should not happen.\nThe following may have issues or possible errors\n" +
-                      "Syncfusion related items and error logging.",
-            XamlRoot = Window.XamlRoot,
+                       "\nHowever if you are not a developer then report this as it should not happen.\nThe following may have issues or possible errors\n" +
+                       "Syncfusion related items and error logging.",
             PrimaryButtonText = "Okay"
-        }.ShowAsync();
+        };
+        await Window.ShowContentDialog(Dialog);
         Ioc.Default.GetRequiredService<LogService>().Log(LogLevel.Error, "Env missing.");
     }
 
@@ -667,7 +714,7 @@ public class ShellViewModel : ObservableRecipient
     /// </summary>
     public void SaveModel()
     {
-        if (SplitViewFrame.CurrentSourcePageType is null) { return; }
+        if (SplitViewFrame == null || SplitViewFrame.CurrentSourcePageType is null) { return; }
 
         Logger.Log(LogLevel.Trace, $"SaveModel Page type={SplitViewFrame.CurrentSourcePageType}");
 
@@ -720,8 +767,7 @@ public class ShellViewModel : ObservableRecipient
         }
 
         // Stop the auto save service if it was running
-
-        if (State.Preferences.AutoSave) { _autoSaveService.StopAutoSave(); }
+        if (Preferences.Model.AutoSave) { _autoSaveService.StopAutoSave(); }
         
         // Stop the timed backup service if it was running
         Ioc.Default.GetRequiredService<BackupService>().StopTimedBackup();
@@ -754,20 +800,66 @@ public class ShellViewModel : ObservableRecipient
                 StoryModel.ProjectFile = await StorageFile.GetFileFromPathAsync(fromPath);
             }
 
-            if (StoryModel.ProjectFile == null)
+            var FileAttributes = File.GetAttributes(StoryModel.ProjectFile.Path);
+            bool ShowOfflineError = false;
+			if (StoryModel.ProjectFile.IsAvailable) // Microsoft thinks the file is accessible
+            {
+	            try
+	            {
+					//Test read file before continuing.
+					//If the file is saved on a cloud provider and not locally this should force
+					//the file to be pulled locally if possible. A file could be unavailable for
+					//many reasons, such as the user being offline, server outage, etc.
+					//Windows might pause StoryCAD while it syncs the file.
+					File.ReadAllText(StoryModel.ProjectFile.Path);
+	            }
+				catch (IOException) { ShowOfflineError = true;  }
+            }
+			else { ShowOfflineError = true; }
+
+			//Failed to access network file
+			if (ShowOfflineError)
+			{
+				//The file is actually inaccessible and microsoft is wrong.
+				if ((FileAttributes & FileAttributes.Offline) == 0)
+				{
+					Logger.Log(LogLevel.Error, $"File {StoryModel.ProjectFile.Path} is unavailable.");
+					CloseUnifiedCommand.Execute(null);
+
+					//Show warning so user knows their file isn't lost and is just on onedrive.
+					var result = await Window.ShowContentDialog(new()
+					{
+						Title = "File unavailable.",
+						Content = """
+						          The story outline you are trying to open is stored on a cloud service, and isn't available currently.
+						          Try going online and syncing the file, then try again. 
+						          
+						          Click show help article for more information.
+						          """,
+						PrimaryButtonText = "Show help article",
+						SecondaryButtonText = "Close",
+					}, true);
+
+					//Open help article in default browser
+					if (result == ContentDialogResult.Primary)
+					{
+						Process.Start(new ProcessStartInfo
+						{
+							FileName =
+								"https://storybuilder-org.github.io/StoryCAD/Troubleshooting_Cloud_Storage_Providers.html",
+							UseShellExecute = true
+						});
+					}
+
+					return; //Stop opening file.
+				}
+			}
+
+
+			if (StoryModel.ProjectFile == null)
             {
                 Logger.Log(LogLevel.Info, "Open File command cancelled (StoryModel.ProjectFile was null)");
                 Messenger.Send(new StatusChangedMessage(new("Open Story command cancelled", LogLevel.Info)));
-                _canExecuteCommands = true;  // unblock other commands
-                return;
-            }
-
-            // Check if the file is a OneDrive placeholder
-            var fileInfo = new System.IO.FileInfo(StoryModel.ProjectFile.Path);
-            if ((fileInfo.Attributes & System.IO.FileAttributes.ReparsePoint) != 0)
-            {
-                Logger.Log(LogLevel.Warn, "The selected file is a OneDrive placeholder. Please ensure the file is fully synced with OneDrive and try again.");
-                Messenger.Send(new StatusChangedMessage(new("OneDrive file not synced; open cancelled", LogLevel.Info)));
                 _canExecuteCommands = true;  // unblock other commands
                 return;
             }
@@ -789,7 +881,7 @@ public class ShellViewModel : ObservableRecipient
             }
 
             // Take a backup of the project if the user has the 'backup on open' preference set.
-            if (State.Preferences.BackupOnOpen)
+            if (Preferences.Model.BackupOnOpen)
             {
                 await Ioc.Default.GetRequiredService<BackupService>().BackupProject();
             }
@@ -804,12 +896,12 @@ public class ShellViewModel : ObservableRecipient
             Window.UpdateWindowTitle();
             new UnifiedVM().UpdateRecents(Path.Combine(StoryModel.ProjectFolder.Path, StoryModel.ProjectFile.Name));
 
-            if (State.Preferences.TimedBackup)
+            if (Preferences.Model.TimedBackup)
             {
                 Ioc.Default.GetRequiredService<BackupService>().StartTimedBackup();
             }
 
-            if (State.Preferences.AutoSave)
+            if (Preferences.Model.AutoSave)
             {
                 _autoSaveService.StartAutoSave();
             }
@@ -842,13 +934,15 @@ public class ShellViewModel : ObservableRecipient
         if (autoSave && !StoryModel.Changed)
         {
             Logger.Log(LogLevel.Info, $"{msg} skipped, no changes");
+            _canExecuteCommands = true;
             return;
         }
 
-        if (DataSource == null || DataSource.Count == 0)
+        if (StoryModel.StoryElements.Count == 0)
         {
             Messenger.Send(new StatusChangedMessage(new("You need to open a story first!", LogLevel.Info)));
-            Logger.Log(LogLevel.Info, $"{msg} cancelled (DataSource was null or empty)");
+            Logger.Log(LogLevel.Info, $"{msg} cancelled (StoryModel.ProjectFile was null)");
+            _canExecuteCommands = true;
             return;
         }
 
@@ -875,7 +969,7 @@ public class ShellViewModel : ObservableRecipient
     /// </summary>|
     public async Task WriteModel()
     {
-        Logger.Log(LogLevel.Info, $"In WriteModel, file={StoryModel.ProjectFilename}");
+        Logger.Log(LogLevel.Info, $"In WriteModel, file={StoryModel.ProjectFilename} path={StoryModel.ProjectPath}");
         try
         {
             try //Updating the lost modified time
@@ -899,7 +993,8 @@ public class ShellViewModel : ObservableRecipient
         }
         catch (Exception _ex)
         {
-            Logger.LogException(LogLevel.Error, _ex, "Error writing file");
+            Logger.LogException(LogLevel.Error, _ex, 
+	            $"Error writing file {_ex.Message} {_ex.Source}");
             Messenger.Send(new StatusChangedMessage(new("Error writing file - see log", LogLevel.Error)));
             return;
         }
@@ -926,7 +1021,6 @@ public class ShellViewModel : ObservableRecipient
                 ContentDialog _saveAsDialog = new()
                 {
                     Title = "Save as",
-                    XamlRoot = Ioc.Default.GetRequiredService<Windowing>().XamlRoot,
                     PrimaryButtonText = "Save",
                     SecondaryButtonText = "Cancel",
                     Content = new SaveAsDialog()
@@ -939,7 +1033,7 @@ public class ShellViewModel : ObservableRecipient
                 _saveAsVM.ParentFolder = StoryModel.ProjectFolder;
                 _saveAsVM.ProjectPathName = StoryModel.ProjectPath;
 
-                ContentDialogResult _result = await _saveAsDialog.ShowAsync();
+                ContentDialogResult _result = await Window.ShowContentDialog(_saveAsDialog);
 
                 if (_result == ContentDialogResult.Primary) //If save is clicked
                 {
@@ -1002,9 +1096,8 @@ public class ShellViewModel : ObservableRecipient
                 SecondaryButtonText = "No",
                 Title = "Replace file?",
                 Content = $"File {Path.Combine(_saveAsVM.ProjectPathName, _saveAsVM.ProjectName)} already exists. \n\nDo you want to replace it?",
-                XamlRoot = Window.XamlRoot
             };
-            return await _replaceDialog.ShowAsync() == ContentDialogResult.Primary;
+            return await Window.ShowContentDialog(_replaceDialog) == ContentDialogResult.Primary;
         }
         return true;
     }
@@ -1021,9 +1114,8 @@ public class ShellViewModel : ObservableRecipient
                 Title = "Save changes?",
                 PrimaryButtonText = "Yes",
                 SecondaryButtonText = "No",
-                XamlRoot = Window.XamlRoot
             };
-            if (await _warning.ShowAsync() == ContentDialogResult.Primary)
+            if (await Window.ShowContentDialog(_warning) == ContentDialogResult.Primary)
             {
                 SaveModel();
                 await WriteModel();
@@ -1059,9 +1151,8 @@ public class ShellViewModel : ObservableRecipient
                 Title = "Save changes?",
                 PrimaryButtonText = "Yes",
                 SecondaryButtonText = "No",
-                XamlRoot = Window.XamlRoot
             };
-            if (await _warning.ShowAsync() == ContentDialogResult.Primary)
+            if (await Window.ShowContentDialog(_warning) == ContentDialogResult.Primary)
             {
                 SaveModel();
                 await WriteModel();
@@ -1082,7 +1173,7 @@ public class ShellViewModel : ObservableRecipient
 
     #region Tool and Report Commands
 
-    private async void Preferences()
+    private async void OpenPreferences()
     {
         Messenger.Send(new StatusChangedMessage(new("Updating Preferences", LogLevel.Info, true)));
 
@@ -1091,14 +1182,13 @@ public class ShellViewModel : ObservableRecipient
         Ioc.Default.GetRequiredService<PreferencesViewModel>().LoadModel();
         ContentDialog _preferencesDialog = new()
         {
-            XamlRoot = Window.XamlRoot,
             Content = new PreferencesDialog(),
             Title = "Preferences",
             PrimaryButtonText = "Save",
             CloseButtonText = "Cancel"
         };
 
-        ContentDialogResult _result = await _preferencesDialog.ShowAsync();
+        ContentDialogResult _result = await Window.ShowContentDialog(_preferencesDialog);
         switch (_result)
         {
             // Save changes
@@ -1116,6 +1206,29 @@ public class ShellViewModel : ObservableRecipient
 
     }
 
+    private void LaunchCollaborator()
+    {
+        if (_canExecuteCommands)
+        {
+            if (CurrentNode == null)
+            {
+                Messenger.Send(new StatusChangedMessage(new("Select a node to collaborate on", LogLevel.Warn, true)));
+                return;
+            }
+
+            if (CollabArgs == null)
+            {
+                CollabArgs = new();
+            }
+            var id = CurrentNode.Uuid; // get the story element;
+            CollabArgs.SelectedElement = StoryModel.StoryElements.StoryElementGuids[id];
+            CollabArgs.StoryModel = StoryModel;
+            //TODO: Logging
+            Ioc.Default.GetService<CollaboratorService>()!.LoadWizardModel(CollabArgs);
+            Ioc.Default.GetService<CollaboratorService>()!.CollaboratorWindow.Show();
+        }
+    }
+
     private async void KeyQuestionsTool()
     {
         Logger.Log(LogLevel.Info, "Displaying KeyQuestions tool dialog");
@@ -1129,10 +1242,9 @@ public class ShellViewModel : ObservableRecipient
             {
                 Title = "Key questions",
                 CloseButtonText = "Close",
-                XamlRoot = Window.XamlRoot,
                 Content = new KeyQuestionsDialog()
             };
-            await _keyQuestionsDialog.ShowAsync();
+            await Ioc.Default.GetService<Windowing>().ShowContentDialog(_keyQuestionsDialog);
 
             Ioc.Default.GetRequiredService<KeyQuestionsViewModel>().NextQuestion();
             Logger.Log(LogLevel.Info, "KeyQuestions finished");
@@ -1151,12 +1263,11 @@ public class ShellViewModel : ObservableRecipient
 
             ContentDialog _dialog = new()
             {
-                XamlRoot = Window.XamlRoot,
                 Title = "Topic Information",
                 CloseButtonText = "Done",
                 Content = new TopicsDialog()
             };
-            await _dialog.ShowAsync();
+            await Window.ShowContentDialog(_dialog);
 
             _canExecuteCommands = true;
         }
@@ -1178,13 +1289,12 @@ public class ShellViewModel : ObservableRecipient
                 //Creates and shows content dialog
                 ContentDialog _dialog = new()
                 {
-                    XamlRoot = Window.XamlRoot,
                     Title = "Master plots",
                     PrimaryButtonText = "Copy",
                     SecondaryButtonText = "Cancel",
                     Content = new MasterPlotsDialog()
                 };
-                ContentDialogResult _result = await _dialog.ShowAsync();
+                ContentDialogResult _result = await Window.ShowContentDialog(_dialog);
 
                 if (_result == ContentDialogResult.Primary) // Copy command
                 {
@@ -1204,12 +1314,12 @@ public class ShellViewModel : ObservableRecipient
                         _problem.Notes = _scenes[0].Notes;
                     }
                     else foreach (MasterPlotScene _scene in _scenes)
-                    {
-                        SceneModel _child = new(StoryModel) { Name = _scene.SceneTitle, Remarks = "See Notes.", Notes = _scene.Notes };
-                        // add the new SceneModel & node to the end of the problem's children 
-                        StoryNodeItem _newNode = new(_child, _problemNode);
-                        _newNode.IsSelected = true;
-                    }
+                        {
+                            SceneModel _child = new(StoryModel) { Name = _scene.SceneTitle, Remarks = "See Notes.", Notes = _scene.Notes };
+                            // add the new SceneModel & node to the end of the problem's children 
+                            StoryNodeItem _newNode = new(_child, _problemNode);
+                            _newNode.IsSelected = true;
+                        }
 
                     Messenger.Send(new StatusChangedMessage(new($"MasterPlot {_masterPlotName} inserted", LogLevel.Info, true)));
                     ShowChange();
@@ -1220,26 +1330,33 @@ public class ShellViewModel : ObservableRecipient
         _canExecuteCommands = true;
     }
 
+    /// <summary>
+    /// This function just calls print reports dialog.
+    /// </summary>
+    private async void OpenPrintMenu() 
+    {
+        await Ioc.Default.GetRequiredService<PrintReportDialogVM>().OpenPrintReportDialog();
+    }
+
     private async void DramaticSituationsTool()
     {
         Logger.Log(LogLevel.Info, "Displaying Dramatic Situations tool dialog");
         if (_canExecuteCommands)
         {
             _canExecuteCommands = false;
-        
+
             if (VerifyToolUse(true, true))
             {
                 //Creates and shows dialog
                 ContentDialog _dialog = new()
                 {
-                    XamlRoot = Window.XamlRoot,
                     Title = "Dramatic situations",
                     PrimaryButtonText = "Copy as problem",
                     SecondaryButtonText = "Copy as scene",
                     CloseButtonText = "Cancel",
                     Content = new DramaticSituationsDialog()
                 };
-                ContentDialogResult _result = await _dialog.ShowAsync();
+                ContentDialogResult _result = await Window.ShowContentDialog(_dialog);
 
                 DramaticSituationModel _situationModel = Ioc.Default.GetRequiredService<DramaticSituationsViewModel>().Situation;
                 string _msg;
@@ -1290,9 +1407,8 @@ public class ShellViewModel : ObservableRecipient
                     Content = new StockScenesDialog(),
                     PrimaryButtonText = "Add Scene",
                     CloseButtonText = "Cancel",
-                    XamlRoot = Window.XamlRoot
                 };
-                ContentDialogResult _result = await _dialog.ShowAsync();
+                ContentDialogResult _result = await Window.ShowContentDialog(_dialog);
 
                 if (_result == ContentDialogResult.Primary) // Copy command
                 {
@@ -1304,7 +1420,7 @@ public class ShellViewModel : ObservableRecipient
                     }
 
                     SceneModel _sceneVar = new(StoryModel)
-                        { Name = Ioc.Default.GetRequiredService<StockScenesViewModel>().SceneName };
+                    { Name = Ioc.Default.GetRequiredService<StockScenesViewModel>().SceneName };
                     StoryNodeItem _newNode = new(_sceneVar, RightTappedNode);
                     _sourceChildren = RightTappedNode.Children;
                     TreeViewNodeClicked(_newNode);
@@ -1365,7 +1481,8 @@ public class ShellViewModel : ObservableRecipient
         _canExecuteCommands = false;
         Messenger.Send(new StatusChangedMessage(new("Launching GitHub Pages User Manual", LogLevel.Info, true)));
 
-        Process.Start(new ProcessStartInfo(){
+        Process.Start(new ProcessStartInfo()
+        {
             FileName = @"https://Storybuilder-org.github.io/StoryCAD/",
             UseShellExecute = true
         });
@@ -1562,7 +1679,7 @@ public class ShellViewModel : ObservableRecipient
             return false;
         }
 
-        if (CurrentNode.Parent.Parent == null 
+        if (CurrentNode.Parent.Parent == null
             && CurrentNode.Parent.Children.IndexOf(CurrentNode) == 0)
         {
             ShowStatusMessage("Cannot move further right", LogLevel.Warn);
@@ -1641,7 +1758,7 @@ public class ShellViewModel : ObservableRecipient
 
         return true;
     }
-    
+
     private void MoveTreeViewItemDown()
     {
         StatusMessage = string.Empty;
@@ -1705,7 +1822,7 @@ public class ShellViewModel : ObservableRecipient
         else
             return null;
     }
-    
+
     private bool MoveDownIsValid()
     {
         if (CurrentNode == null)
@@ -1730,7 +1847,7 @@ public class ShellViewModel : ObservableRecipient
 
     private void AddFolder()
     {
-        TreeViewNodeClicked(AddStoryElement(StoryItemType.Folder) , false);
+        TreeViewNodeClicked(AddStoryElement(StoryItemType.Folder), false);
     }
 
     private void AddSection()
@@ -1799,7 +1916,7 @@ public class ShellViewModel : ObservableRecipient
                 break;
             case StoryItemType.Problem:
                 _newNode = new StoryNodeItem(new ProblemModel(StoryModel), RightTappedNode);
-                break; 
+                break;
             case StoryItemType.Character:
                 _newNode = new StoryNodeItem(new CharacterModel(StoryModel), RightTappedNode);
                 break;
@@ -1822,10 +1939,10 @@ public class ShellViewModel : ObservableRecipient
             _newNode.Parent.IsExpanded = true;
             _newNode.IsRoot = false; //Only an overview node can be a root, which cant be created normally
             _newNode.IsSelected = false;
-            _newNode.Background = State.Preferences.ContrastColor;
+            _newNode.Background = Window.ContrastColor;
             NewNodeHighlightCache.Add(_newNode);
         }
-        else { return null; }   
+        else { return null; }
 
         Messenger.Send(new IsChangedMessage(true));
         Messenger.Send(new StatusChangedMessage(new($"Added new {typeToAdd}", LogLevel.Info, true)));
@@ -1872,16 +1989,15 @@ public class ShellViewModel : ObservableRecipient
             _content.Children.Add(new ListView { ItemsSource = _foundNodes, HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center, Height = 300, Width = 480 });
 
             //Creates dialog and then shows it
-            _contentDialog = new()
+            ContentDialog _Dialog = new()
             {
-                XamlRoot = Window.XamlRoot,
                 Content = _content,
                 Title = "Are you sure you want to delete this node?",
                 Width = 500,
                 PrimaryButtonText = "Confirm",
                 SecondaryButtonText = "Cancel"
             };
-            if (await _contentDialog.ShowAsync() == ContentDialogResult.Secondary) { _delete = false; }
+            if (await Ioc.Default.GetRequiredService<Windowing>().ShowContentDialog(_Dialog) == ContentDialogResult.Secondary) { _delete = false; }
         }
 
 
@@ -1998,23 +2114,33 @@ public class ShellViewModel : ObservableRecipient
 
     }
 
-        /// <summary>
-        /// Search up the StoryNodeItem tree to its
-        /// root from a specified node and return its StoryItemType. 
-        /// 
-        /// This allows code to determine which TreeView it's in.
-        /// </summary>
-        /// <param name="startNode">The node to begin searching from</param>
-        /// <returns>The StoryItemType of the root node</returns>
-        public static StoryItemType RootNodeType(StoryNodeItem startNode)
+    /// <summary>
+    /// Search up the StoryNodeItem tree to its
+    /// root from a specified node and return its StoryItemType. 
+    /// 
+    /// This allows code to determine which TreeView it's in.
+    /// </summary>
+    /// <param name="startNode">The node to begin searching from</param>
+    /// <returns>The StoryItemType of the root node</returns>
+    public static StoryItemType RootNodeType(StoryNodeItem startNode)
+    {
+        try
         {
             StoryNodeItem node = startNode;
             while (!node.IsRoot)
                 node = node.Parent;
             return node.Type;
         }
-        
-        #endregion
+        catch (Exception ex)
+        {
+            Ioc.Default.GetService<LogService>().LogException(
+                LogLevel.Error, ex, $"Root node type exception, this shouldn't happen {ex.Message} {ex.Message}");
+            return StoryItemType.Unknown;
+        }
+
+    }
+
+    #endregion
 
     public void ViewChanged()
     {
@@ -2109,8 +2235,8 @@ public class ShellViewModel : ObservableRecipient
         }
         catch (Exception e) //errors (is RightTappedNode null?
         {
-             Logger.Log(LogLevel.Error, $"An error occurred inShowFlyouttButtons() \n{e.Message}\n" +
-                 $"- For reference RightTappedNode is " + RightTappedNode);
+            Logger.Log(LogLevel.Error, $"An error occurred in ShowFlyoutButtons() \n{e.Message}\n" +
+                $"- For reference RightTappedNode is " + RightTappedNode);
         }
 
     }
@@ -2169,6 +2295,13 @@ public class ShellViewModel : ObservableRecipient
     /// <param name="statusMessage"></param>
     private void StatusMessageReceived(StatusChangedMessage statusMessage)
     {
+        //Ignore status messages inside tests
+        if (Assembly.GetEntryAssembly().Location.Contains("StoryCADTests.dll")
+            || Assembly.GetEntryAssembly().Location.Contains("testhost.dll"))
+        {
+            return;
+        }
+
         if (_statusTimer.IsEnabled) { _statusTimer.Stop(); } //Stops a timer if one is already running
 
         StatusMessage = statusMessage.Value.Status; //This shows the message
@@ -2176,7 +2309,7 @@ public class ShellViewModel : ObservableRecipient
         switch (statusMessage.Value.Level)
         {
             case LogLevel.Info:
-                StatusColor = State.Preferences.SecondaryColor;
+                StatusColor = Window.SecondaryColor;
                 _statusTimer.Interval = new TimeSpan(0, 0, 15);  // Timer will tick in 15 seconds
                 _statusTimer.Start();
                 break;
@@ -2206,6 +2339,266 @@ public class ShellViewModel : ObservableRecipient
         StatusMessage = string.Empty;
     }
 
+
+    #region Drag and Drop logic
+
+    /// <summary>
+    /// Edit to validate a drag and drop source node.
+    ///
+    /// This routing is called from the Shell.xaml.cs DragItemsStarting event.
+    /// </summary>
+    /// <param name="source">object (should be StoryNodeItem)</param>
+    /// <returns>true if edits passed, false if not</returns>
+    public bool ValidateDragSource(object source)
+    {
+        Logger.Log(LogLevel.Trace, $"ValidateDragSource enter");
+
+        // args.Items[0] is the object you're dragging.
+        // With SelectionMode="Single" there will be only the one.
+        Type type = source.GetType();
+        if (!type.Name.Equals("StoryNodeItem"))
+        {
+            ShowMessage(LogLevel.Warn, "Drag source isn't a tree node", true);
+            return false;
+        }
+
+        dragSourceStoryNode = source as StoryNodeItem;
+        Logger.Log(LogLevel.Trace, $"  Source node:{dragSourceStoryNode?.Name ?? "null"}");
+
+        if (dragSourceStoryNode!.IsRoot)
+        {
+            ShowMessage(LogLevel.Warn, "Can't drag the tree root", true);
+            return false;
+        }
+
+        StoryNodeItem parent = dragSourceStoryNode!.Parent;
+        if (parent == null)
+        {
+            ShowMessage(LogLevel.Warn, "Can't drag from root", true);
+            return false;
+        }
+
+        while (!parent.IsRoot) // find the drag source's root
+        {
+            parent = parent.Parent;
+        }
+
+        Logger.Log(LogLevel.Trace, $"Root Type is {parent.Type}");
+
+        if (parent.Type == StoryItemType.TrashCan)
+        {
+            ShowMessage(LogLevel.Warn, "Can't drag from Trashcan", true);
+            return false;
+        }
+
+        // Report status
+        Logger.Log(LogLevel.Trace, $"ValidateDragSource exit");
+        // Source node is valid for move
+        return true;
+    }
+
+    /// <summary>
+    /// Edit to validate a drag and drop  target node.
+    ///
+    /// This routing is called from the Shell.xaml.cs DragEnter event.
+    /// </summary>
+    /// <param name="target">The StoryNodeItem bound to the TreeViewItem being dragged over</param>
+    /// <returns>true if edits passed, false if not</returns>
+    public bool ValidateDragTarget(object target)
+    {
+        Logger.Log(LogLevel.Trace, $"ValidateDragTarget enter");
+
+        // target is the node you're dragging over (the prospective target)
+        Type type = target.GetType();
+        if (!type.Name.Equals("StoryNodeItem"))
+        {
+            ShowMessage(LogLevel.Warn, "Drag target isn't a story node", true);
+            return false;
+        }
+
+        var dragTargetStoryNode = target as StoryNodeItem;
+        Logger.Log(LogLevel.Trace, $"  Target node:{dragTargetStoryNode?.Name ?? "null"}");
+
+        // Find the node's root
+        var node= dragTargetStoryNode;
+        while (!node.IsRoot) // find the drag source's root
+        {
+            node = node.Parent;
+        }
+        Logger.Log(LogLevel.Trace, $"Root Type is {node.Type}");
+
+        // Although for the drag source either root node is not valid, 
+        // as a target the first root (StoryOverview) is.
+        if (node!.Type == StoryItemType.TrashCan)
+        {
+            ShowMessage(LogLevel.Warn, "Drag to Trashcan invalid", true);
+            return false;
+        }
+
+        // The drag target can't be the drag source
+        if (dragTargetStoryNode == dragSourceStoryNode)
+        {
+            ShowMessage(LogLevel.Warn, "Drag source can't be drag target", true);
+            return false;
+        }
+
+        // Target node is valid for move
+        Logger.Log(LogLevel.Trace, $"ValidateDragTarget exit");
+        return true;
+    }
+    
+    /// <summary>
+    /// The visual feedback provided for drag-over effects can leave the TreeView
+    /// display hosed in some cases (such as attempting to drag the tree's root
+    /// node, for example.) This method repaints the TreeView to clean things up.
+    ///
+    /// Drag and drop can be used for either view (Explorer or Narrator), and so
+    /// both cases must be accounted for.
+    /// </summary>
+
+
+    /// <summary>
+    /// Determine if a prospective NavigationTree drag-and-drop move is invalid.
+    /// This includes both edits on 
+    /// </summary>
+    /// <param name="source">The source node being dragged.</param>
+    /// <param name="target">The target node for the drop.</param>
+    /// <returns>True if the move is invalid; otherwise, false.</returns>
+    public bool ValidateDragAndDrop(StoryNodeItem source, StoryNodeItem target)
+    {
+        if (source == null)
+        {
+            Logger.Log(LogLevel.Trace, $"Source is null.");
+            return false;
+        }
+
+        if (target == null)
+        {
+            Logger.Log(LogLevel.Trace, $"Target is null.");
+            return false;
+        }
+
+        if (IsDescendant(source, target))
+        {
+            ShowMessage(LogLevel.Warn, "Cannot move a parent to its own child", true);
+            return false;
+        }
+
+        if (target.Type == StoryItemType.TrashCan || source.Type == StoryItemType.TrashCan)
+        {
+            ShowMessage(LogLevel.Warn, "Cannot move to/from the trashcan", true);
+            return false;
+        }
+
+        if (IsDescendant(StoryModel.ExplorerView[1], target) || IsDescendant(StoryModel.ExplorerView[1], source))
+        {
+            ShowMessage(LogLevel.Warn, "Operation involves trashcan", true);
+            return false;
+        }
+
+        // If none of the conditions are met, the move is considered valid.
+        Logger.Log(LogLevel.Trace, $"Drag/Drop Operation is valid.");
+        return true;
+    }
+
+    /// <summary>
+    /// Recursive method to check if StoryNodeItem 'x' is a descendant of StoryNodeItem 'y'.
+    /// </summary>
+    /// <param name="y">The potential ancestor node.</param>
+    /// <param name="x">The node to check if it is a descendant of 'y'.</param>
+    /// <returns>True if 'x' is a descendant of 'y'; otherwise, false.</returns>
+    public bool IsDescendant(StoryNodeItem y, StoryNodeItem x)
+    {
+        foreach (var child in y.Children)
+        {
+            if (child == x || IsDescendant(child, x))
+            {
+                Logger.Log(LogLevel.Trace, $"{y.Name} is a descendant of {x.Name}");
+                return true;
+            }
+        }
+        Logger.Log(LogLevel.Trace, $"{y.Name} is not a descendant of {x.Name}");
+
+        return false;
+    }
+
+    /// <summary>
+    /// If both the source and target of a drag/drop are valid (that is, the
+    /// requested operation is a valid reordering of the nodes of the Navigation
+    /// TreeView), complete the move by modifying the TreeView's DataSource
+    /// ObservableCollection of StoryNodeItem instances.
+    /// </summary>
+    public void MoveStoryNode(StoryNodeItem dragSourceStoryNode, StoryNodeItem dragTargetStoryNode, DragAndDropDirection direction)
+    {
+        lock (dragLock)
+        {
+            int targetIndex = -1;
+            try
+            {
+                bool sourceIsTargetDescendant = IsDescendant(dragTargetStoryNode, dragSourceStoryNode);
+
+                StoryNodeItem sourceParent = dragSourceStoryNode.Parent;
+                if (sourceParent == null || !sourceParent.Children.Contains(dragSourceStoryNode))
+                {
+                    throw new InvalidOperationException("Source node is not a child of its parent or parent is null.");
+                }
+                sourceParent.Children.Remove(dragSourceStoryNode);
+
+                if (dragTargetStoryNode.IsRoot || sourceIsTargetDescendant ||
+                    dragTargetStoryNode.Type == StoryItemType.Folder || dragTargetStoryNode.Type == StoryItemType.Section)
+                {
+                    dragTargetStoryNode.Children.Insert(0, dragSourceStoryNode);
+                    dragSourceStoryNode.Parent = dragTargetStoryNode;
+                }
+                else
+                {
+                    StoryNodeItem targetParent = dragTargetStoryNode.Parent;
+                    if (targetParent == null || !targetParent.Children.Contains(dragTargetStoryNode))
+                    {
+                        throw new InvalidOperationException("Target node's parent is null or target node not found in its parent's children collection.");
+                    }
+
+                    targetIndex = targetParent.Children.IndexOf(dragTargetStoryNode);
+
+                    // Check if inserting above or below the target node
+                    if (direction == DragAndDropDirection.AboveTargetItem)
+                    {
+                        // Pushes dragTargetStoryNode and all subsequent nodes forward
+                        targetParent.Children.Insert(targetIndex, dragSourceStoryNode);
+                    }
+                    else
+                    {
+                        // Adds just after dragTargetStoryNode. If dragTargetStoryNode's
+                        // index equals Count, it's added at the end of the list.
+                        targetParent.Children.Insert(targetIndex + 1, dragSourceStoryNode);
+                    }
+
+                    dragSourceStoryNode.Parent = targetParent;
+                }
+
+                ShowChange();  // Report the move
+                ShowMessage(LogLevel.Info, "Drag and drop successful", false);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogException(LogLevel.Error, ex, "Error in drag-drop operation");
+                ShowMessage(LogLevel.Error, "Error in drag-drop operation", false);
+
+                // Log the target index for debugging
+                Logger.Log(LogLevel.Error, $"Target Index: {targetIndex}");
+            }
+        }
+
+        // Refresh UI and report the move
+        ShellViewModel.ShowChange();
+    }
+
+
+
+
+    #endregion
+
+
     /// <summary>
     /// When a Story Element page's name changes the corresponding
     /// StoryNodeItem, which is bound to a TreeViewItem, must
@@ -2234,20 +2627,10 @@ public class ShellViewModel : ObservableRecipient
 
     #endregion
 
-    #region Attched Properties
-
-
-
-
-    #endregion
-
     #region Constructor(s)
 
     public ShellViewModel()
     {
-
-        //_itemSelector = Ioc.Default.GetRequiredService<TreeViewSelection>();
-
         Messenger.Register<IsChangedRequestMessage>(this, (_, m) => { m.Reply(StoryModel!.Changed); });
         Messenger.Register<ShellViewModel, IsChangedMessage>(this, static (r, m) => r.IsChangedMessageReceived(m));
         Messenger.Register<ShellViewModel, StatusChangedMessage>(this, static (r, m) => r.StatusMessageReceived(m));
@@ -2259,8 +2642,13 @@ public class ShellViewModel : ObservableRecipient
 
         StoryModel = new StoryModel();
 
-        _statusTimer = new DispatcherTimer();
-        _statusTimer.Tick += statusTimer_Tick;
+        //Skip status timer initialization in Tests.
+        if (!State.StoryCADTestsMode)
+        {
+            _statusTimer = new DispatcherTimer();
+            _statusTimer.Tick += statusTimer_Tick;
+            ChangeStatusColor = Colors.Green;
+        }
 
         Messenger.Send(new StatusChangedMessage(new("Ready", LogLevel.Info)));
 
@@ -2276,6 +2664,9 @@ public class ShellViewModel : ObservableRecipient
         CloseCommand = new RelayCommand(CloseFile, () => _canExecuteCommands);
         ExitCommand = new RelayCommand(ExitApp, () => _canExecuteCommands);
 
+        // StoryCAD Collaborator
+        CollaboratorCommand = new RelayCommand(LaunchCollaborator, () => _canExecuteCommands);
+
         // Tools commands
         KeyQuestionsCommand = new RelayCommand(KeyQuestionsTool, () => _canExecuteCommands);
         TopicsCommand = new RelayCommand(TopicsTool, () => _canExecuteCommands);
@@ -2283,9 +2674,9 @@ public class ShellViewModel : ObservableRecipient
         DramaticSituationsCommand = new RelayCommand(DramaticSituationsTool, () => _canExecuteCommands);
         StockScenesCommand = new RelayCommand(StockScenesTool, () => _canExecuteCommands);
 
-        PreferencesCommand = new RelayCommand(Preferences, () => _canExecuteCommands);
+        PreferencesCommand = new RelayCommand(OpenPreferences, () => _canExecuteCommands);
 
-        PrintReportsCommand = new RelayCommand(Ioc.Default.GetRequiredService<PrintReportDialogVM>().OpenPrintReportDialog, () => _canExecuteCommands);
+        PrintReportsCommand = new RelayCommand(OpenPrintMenu, () => _canExecuteCommands);
         ScrivenerReportsCommand = new RelayCommand(GenerateScrivenerReports, () => _canExecuteCommands);
 
         HelpCommand = new RelayCommand(LaunchGitHubPages, () => _canExecuteCommands);
@@ -2318,8 +2709,6 @@ public class ShellViewModel : ObservableRecipient
         CurrentView = "Story Explorer View";
         SelectedView = "Story Explorer View";
 
-        ChangeStatusColor = Colors.Green;
-
         ShellInstance = this;
     }
 
@@ -2344,7 +2733,7 @@ public class ShellViewModel : ObservableRecipient
             if (Search.SearchStoryElement(_node, FilterText, StoryModel)) //checks if node name contains the thing we are looking for
             {
                 _searchTotal++;
-                if (Application.Current.RequestedTheme == ApplicationTheme.Light)
+                if (Window.RequestedTheme == ElementTheme.Light)
                 {
                     _node.Background = new SolidColorBrush(Colors.LightGoldenrodYellow);
                 }

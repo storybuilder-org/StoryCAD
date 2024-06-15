@@ -5,7 +5,7 @@ on:
       VersionNumber:
         description: 'Version'     
         required: true
-        default: '2.12.0.0'
+        default: '2.13.0.0'
 jobs:
   build:
     runs-on: windows-latest
@@ -23,7 +23,7 @@ jobs:
     - name: Install .NET
       uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: 7.x.x
+        dotnet-version: 8.x.x
 
     #Install MSBUILD
     - name: Setup MSBuild.exe

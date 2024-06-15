@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<StoryCAD Version="Version: 2.13.0">
+  <StoryElements>
+    <Overview UUID="28EC80C2-6199-4DAF-B2DD-4D071AC38778" Name="OpenFromDesktopTest" DateCreated="2023-11-29" DateModified="2023-11-29" Author="Jake" StoryType="" StoryGenre="" ViewPoint="" ViewpointCharacter="" Voice="" LiteraryDevice="" Tense="" Style="" Tone="" StoryIdea="{\rtf1\fbidis\ansi\ansicpg1252\deff0\nouicompat\deflang1033{\fonttbl{\f0\fnil\fcharset0 Segoe UI;}{\f1\fnil Segoe UI;}}&#xD;&#xA;{\colortbl ;\red211\green211\blue211;}&#xD;&#xA;{\*\generator Riched20 3.1.0004}\viewkind4\uc1 &#xD;&#xA;\pard\cf1\f0\fs21\lang2057 Hello, if you have performed the test correctly and can now see this, the test has succeeded.\par&#xD;&#xA;\f1\par&#xD;&#xA;}&#xD;&#xA;" Concept="" StoryProblem="" Premise="" StructureNotes="" Notes="" />
+    <TrashCan UUID="7AB86A9B-6D60-46DB-A097-C965BAB05EA5" Name="Deleted Story Elements" />
+    <Folder UUID="2FE0FD7A-147E-432E-BC4E-7DD21F66A203" Name="Narrative View" Notes="" />
+    <Character UUID="BA8C6350-5DDA-4B34-BEA4-08FCC06609DD" Name="TestCharacter" Role="" StoryRole="" Archetype="" Age="" Sex="" Eyes="" Hair="" Weight="" CharHeight="" Build="" Complexion="" Race="" Nationality="" Health="" Enneagram="" Intelligence="" Values="" Abnormality="" Focus="" Adventureousness="" Aggression="" Confidence="" Conscientiousness="" Creativity="" Dominance="" Enthusiasm="" Assurance="" Sensitivity="" Shrewdness="" Sociability="" Stability="" CharacterSketch="" PhysNotes="" Appearance="" Economic="" Education="" Ethnic="" Religion="" PsychNotes="" Notes="" Flaw="" BackStory="">
+      <Relationships />
+      <CharacterTraits />
+    </Character>
+  </StoryElements>
+  <Explorer>
+    <StoryNode UUID="28EC80C2-6199-4DAF-B2DD-4D071AC38778" Type="StoryOverview" Name="OpenFromDesktopTest" IsExpanded="True" IsSelected="False" IsRoot="True">
+      <StoryNode UUID="BA8C6350-5DDA-4B34-BEA4-08FCC06609DD" Type="Character" Name="TestCharacter" IsExpanded="True" IsSelected="False" IsRoot="False" />
+    </StoryNode>
+    <StoryNode UUID="7AB86A9B-6D60-46DB-A097-C965BAB05EA5" Type="TrashCan" Name="Deleted Story Elements" IsExpanded="False" IsSelected="False" IsRoot="True" />
+  </Explorer>
+  <Narrator>
+    <StoryNode UUID="2FE0FD7A-147E-432E-BC4E-7DD21F66A203" Type="Folder" Name="Narrative View" IsExpanded="False" IsSelected="False" IsRoot="True" />
+  </Narrator>
+  <Settings />
+</StoryCAD>

@@ -69,9 +69,14 @@ public sealed partial class PreferencesInitialization
     /// </summary>
     public void Check(object sender, RoutedEventArgs e)
     {
-        if (string.IsNullOrWhiteSpace(_initVM.Preferences.Name))
+        if (string.IsNullOrWhiteSpace(_initVM.Preferences.FirstName))
         {
-            _initVM.ErrorMessage = "Please enter your Name";
+            _initVM.ErrorMessage = "Please enter your first name";
+            return;
+        }
+        if (string.IsNullOrWhiteSpace(_initVM.Preferences.LastName))
+        {
+            _initVM.ErrorMessage = "Please enter your last name";
             return;
         }
         if (string.IsNullOrWhiteSpace(_initVM.Preferences.Email))

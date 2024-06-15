@@ -12,9 +12,11 @@ using System;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using StoryCAD.Services.Ratings;
+using StoryCAD.Services;
+
 
 namespace StoryCAD.ViewModels.Tools;
-
 
 /// <summary>
 /// This view model handles the Services.Dialogs.Tools.PreferencesDialog.
@@ -30,7 +32,7 @@ namespace StoryCAD.ViewModels.Tools;
 /// </summary>
 public class PreferencesViewModel : ObservableValidator
 {
-    public PreferencesModel CurrentModel = Ioc.Default.GetRequiredService<AppState>().Preferences;
+    public PreferencesModel CurrentModel = Ioc.Default.GetRequiredService<StoryCAD.Services.PreferenceService>().Model;
     public string Errors => string.Join(Environment.NewLine, from ValidationResult e in GetErrors(null) select e.ErrorMessage);
 
     #region Fields
@@ -42,13 +44,22 @@ public class PreferencesViewModel : ObservableValidator
     
     //User information tab
 
-    private string _name;
-    [Required(ErrorMessage = "Name is required.")]
-    [MinLength(2, ErrorMessage = "Name should be longer than one character")]
-    public string Name
+    private string _firstName;
+    [Required(ErrorMessage = "First name is required.")]
+    [MinLength(2, ErrorMessage = "First name should be longer than one character")]
+    public string FirstName
     {
-        get => _name;
-        set => SetProperty(ref _name, value, false);
+        get => _firstName;
+        set => SetProperty(ref _firstName, value, false);
+    }
+
+    private string _lastName;
+    [Required(ErrorMessage = "First name is required.")]
+    [MinLength(2, ErrorMessage = "First name should be longer than one character")]
+    public string LastName
+    {
+        get => _lastName;
+        set => SetProperty(ref _lastName, value, false);
     }
 
     [EmailAddress(ErrorMessage = "Must be a valid email address")]
@@ -90,13 +101,6 @@ public class PreferencesViewModel : ObservableValidator
         set => SetProperty(ref _lastSelectedTemplate, value);
     }
 
-
-    // Visual changes
-
-    public SolidColorBrush PrimaryColor { get; set; } //Sets UI Color
-   
-    public SolidColorBrush SecondaryColor = new(new UISettings().GetColorValue(UIColorType.Accent)); //Sets Text Color
-    
     public TextWrapping WrapNodeNames { get; set; }
 
     // Backup Information
@@ -174,22 +178,34 @@ public class PreferencesViewModel : ObservableValidator
         set => PreferredSearchEngine = (BrowserType)value;
     } // Last version change was logged successfully or not
 
-
-    #endregion
-
-    #region Methods
-
-    internal void LoadModel()
+    private ElementTheme PreferedTheme;
+    public int PreferredThemeIndex
     {
-        Name = CurrentModel.Name;
+        get => (int)PreferedTheme;
+        set => PreferedTheme = (ElementTheme)value;
+    }
+
+    // Logging Information
+    public bool _advancedLogging;
+    public bool AdvancedLogging
+    {
+	    get => _advancedLogging;
+	    set => SetProperty(ref _advancedLogging, value);
+    }
+
+	#endregion
+
+	#region Methods
+
+	internal void LoadModel()
+    {
+        FirstName = CurrentModel.FirstName;
+        LastName = CurrentModel.LastName;
         Email = CurrentModel.Email;
         ErrorCollectionConsent = CurrentModel.ErrorCollectionConsent;
         Newsletter = CurrentModel.Newsletter;
         PreferencesInitialized = CurrentModel.PreferencesInitialized;
         LastSelectedTemplate = CurrentModel.LastSelectedTemplate;
-
-        PrimaryColor = CurrentModel.PrimaryColor;
-        SecondaryColor = CurrentModel.SecondaryColor;
         WrapNodeNames = CurrentModel.WrapNodeNames;
 
         LastFile1 = CurrentModel.LastFile1;
@@ -210,18 +226,19 @@ public class PreferencesViewModel : ObservableValidator
         RecordPreferencesStatus = CurrentModel.RecordPreferencesStatus;
         RecordVersionStatus = CurrentModel.RecordVersionStatus;
         PreferredSearchEngine = CurrentModel.PreferredSearchEngine;
+        PreferedTheme = CurrentModel.ThemePreference;
+        AdvancedLogging = CurrentModel.AdvancedLogging;
     }
 
     internal void SaveModel()
     {
-        CurrentModel.Name = Name;
+        CurrentModel.FirstName = FirstName;
+        CurrentModel.LastName = LastName;
         CurrentModel.Email = Email;
         CurrentModel.ErrorCollectionConsent = ErrorCollectionConsent;
         CurrentModel.Newsletter = Newsletter;
         CurrentModel.PreferencesInitialized = PreferencesInitialized;
         CurrentModel.LastSelectedTemplate = LastSelectedTemplate;
-        CurrentModel.PrimaryColor = PrimaryColor;
-        CurrentModel.SecondaryColor = SecondaryColor;
         CurrentModel.WrapNodeNames = WrapNodeNames;
 
         CurrentModel.LastFile1 = LastFile1;
@@ -241,6 +258,14 @@ public class PreferencesViewModel : ObservableValidator
         CurrentModel.RecordPreferencesStatus = RecordPreferencesStatus;
         CurrentModel.RecordVersionStatus = RecordVersionStatus;
         CurrentModel.PreferredSearchEngine = PreferredSearchEngine;
+        CurrentModel.AdvancedLogging = AdvancedLogging;
+
+        if (CurrentModel.ThemePreference != PreferedTheme)
+        {
+            Ioc.Default.GetService<Windowing>().RequestedTheme = CurrentModel.ThemePreference;
+            Ioc.Default.GetService<Windowing>().UpdateUIToTheme();
+        }
+        CurrentModel.ThemePreference = PreferedTheme;
     }
 
     /// <summary>
@@ -251,13 +276,13 @@ public class PreferencesViewModel : ObservableValidator
         PreferencesIo _prfIo = new(CurrentModel, Ioc.Default.GetRequiredService<AppState>().RootDirectory);
         await _prfIo.WritePreferences();
         await _prfIo.ReadPreferences();
-        AppState State = Ioc.Default.GetService<AppState>();
+        PreferenceService Prefs = Ioc.Default.GetService<PreferenceService>();
 
-        State.Preferences = CurrentModel;
+		Prefs.Model = CurrentModel;
 
         BackendService _backend = Ioc.Default.GetRequiredService<BackendService>();
-        State.Preferences.RecordPreferencesStatus = false;  // indicate need to update
-        await _backend.PostPreferences(State.Preferences);
+        Prefs.Model.RecordPreferencesStatus = false;  // indicate need to update
+        await _backend.PostPreferences(Prefs.Model);
     }
 
     private void OnPropertyChanged(object sender, PropertyChangedEventArgs args)
@@ -270,11 +295,19 @@ public class PreferencesViewModel : ObservableValidator
         OnPropertyChanged(nameof(Errors)); // Update Errors on every Error change, so I can bind to it.
     }
 
-    #endregion
+	/// <summary>
+	/// Shows the MS Store prompt
+	/// </summary>
+    public void ShowRatingPrompt(object sender, RoutedEventArgs e)
+    {
+	    Ioc.Default.GetService<RatingService>().OpenRatingPrompt();
+    }
 
-    #region Constructor
+	#endregion
 
-    public PreferencesViewModel()
+	#region Constructor
+
+	public PreferencesViewModel()
     {
         this.ErrorsChanged += Preferences_ErrorsChanged;
     }
