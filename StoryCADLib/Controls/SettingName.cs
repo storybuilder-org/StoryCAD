@@ -11,6 +11,7 @@ public sealed class SettingName : ComboBox
     public SettingName()
     {
         DefaultStyleKey = typeof(ComboBox);
+        CornerRadius = new(4);
         Loaded += SettingName_Loaded;
     }
 
