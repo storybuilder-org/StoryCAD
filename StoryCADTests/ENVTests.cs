@@ -28,14 +28,6 @@ public class ENVTests
         DotEnv.Load(options);
     }
 
-    /// <summary>
-    /// Ensures the SyncFusion license is there,
-    /// This does not check the license is valid as SF
-    /// offers no way to check that, besides the annoying popup it gives in the app.
-    /// </summary>
-    [TestMethod]
-    public void CheckSFLicense() => Assert.IsNotNull(EnvReader.GetStringValue("SYNCFUSION_TOKEN"));
-
 
     [TestMethod]
     public void CheckDoppler()

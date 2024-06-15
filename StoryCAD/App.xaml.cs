@@ -17,25 +17,17 @@ using StoryCAD.Services.Logging;
 using StoryCAD.Services.Navigation;
 using StoryCAD.ViewModels;
 using StoryCAD.Views;
-using Syncfusion.Licensing;
 using WinUIEx;
 using AppInstance = Microsoft.Windows.AppLifecycle.AppInstance;
 using UnhandledExceptionEventArgs = Microsoft.UI.Xaml.UnhandledExceptionEventArgs;
 using Windows.ApplicationModel.Activation;
-using K4os.Hash.xxHash;
 using Microsoft.UI.Xaml;
 using StoryCAD.DAL;
 using LaunchActivatedEventArgs = Microsoft.UI.Xaml.LaunchActivatedEventArgs;
-using System.Globalization;
-using System.Reflection;
-    using System.Runtime.Loader;
-    using StoryCAD.Services.IoC;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI;
+using StoryCAD.Services.IoC;
 using StoryCAD.Services;
-using StoryCAD.Services.Collaborator;
 
-    namespace StoryCAD;
+namespace StoryCAD;
 
 public partial class App
 {
@@ -81,10 +73,6 @@ public partial class App
         try
         {
             DotEnv.Load(options);
-
-            //Register Syncfusion license
-            string token = EnvReader.GetStringValue("SYNCFUSION_TOKEN");
-            SyncfusionLicenseProvider.RegisterLicense(token);
             Ioc.Default.GetRequiredService<AppState>().EnvPresent = true;
         }
         catch { }
