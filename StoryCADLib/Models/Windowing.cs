@@ -6,7 +6,6 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.Windows.AppLifecycle;
 using StoryCAD.Exceptions;
-using StoryCAD.Services.Logging;
 using StoryCAD.ViewModels;
 using System;
 using System.Runtime.InteropServices;
@@ -17,7 +16,10 @@ using System.ComponentModel;
 using System.Threading.Tasks;
 using Windows.UI;
 using Windows.UI.ViewManagement;
+using NLog;
+using StoryCAD.Services.Logging;
 using WinUIEx;
+using LogLevel = StoryCAD.Services.Logging.LogLevel;
 
 namespace StoryCAD.Models;
 
@@ -210,33 +212,80 @@ public class Windowing : ObservableRecipient
     /// <returns>A StorageFile object, of the file picked.</returns>
     public async Task<StorageFile> ShowFilePicker(string ButtonText = "Open", string Filter = "*")
     {
-        FileOpenPicker _filePicker = new()
-        {
-            CommitButtonText = ButtonText,
-            SuggestedStartLocation = PickerLocationId.DocumentsLibrary,
-        };
-        
-        WinRT.Interop.InitializeWithWindow.Initialize(_filePicker, MainWindow.GetWindowHandle());
-        //TODO: Use preferences project folder instead of DocumentsLibrary except you can't. Thanks, UWP.
-        _filePicker.FileTypeFilter.Add(Filter);
+	    LogService logger = Ioc.Default.GetRequiredService<LogService>();
 
-        return await _filePicker.PickSingleFileAsync();
+		try
+		{
+			logger.Log(LogLevel.Info, $"Trying to open a file picker with filter:{Filter}");
+
+
+			FileOpenPicker _filePicker = new()
+		    {
+			    CommitButtonText = ButtonText,
+			    SuggestedStartLocation = PickerLocationId.DocumentsLibrary,
+			    FileTypeFilter = { Filter }
+		    };
+
+			//Init and spawn file picker
+		    WinRT.Interop.InitializeWithWindow.Initialize(_filePicker, MainWindow.GetWindowHandle());
+			StorageFile file = await _filePicker.PickSingleFileAsync();
+
+			logger.Log(LogLevel.Info, $"Picked folder {file.Path} attributes:{file.Attributes}");
+			return file;
+		}
+	    catch (Exception e)
+	    {
+			//See below for possible exception cause.
+		    logger.Log(LogLevel.Error, $"File picker error!, ex:{e.Message} {e.StackTrace}");
+		    throw;
+	    }
+
     }
 
-    public async Task<StorageFolder> ShowFolderPicker(string ButtonText = "Select folder", string Filter = "*")
+	/// <summary>
+	/// Spawn a folder picker for the user to select a folder.
+	/// </summary>
+	/// <param name="ButtonText">Text shown on the confirmation button</param>
+	/// <param name="Filter">Filter filetype?</param>
+	/// <returns></returns>
+    public async Task<StorageFolder> ShowFolderPicker(string ButtonText = "Select folder",
+	    string Filter = "*")
     {
-        // Find a home for the new project
-        FolderPicker folderPicker = new() { 
-            CommitButtonText = ButtonText,
-            SuggestedStartLocation = PickerLocationId.DocumentsLibrary,
-        };
+		LogService logger = Ioc.Default.GetRequiredService<LogService>();
 
-        WinRT.Interop.InitializeWithWindow.Initialize(folderPicker, MainWindow.GetWindowHandle());
-        folderPicker.FileTypeFilter.Add(Filter);
-        return await folderPicker.PickSingleFolderAsync();
+		try
+	    {
+		    logger.Log(LogLevel.Info, $"Trying to open a folder picker with filter:{Filter}");
+		    // Find a home for the new project
+		    FolderPicker folderPicker = new()
+		    {
+			    CommitButtonText = ButtonText,
+			    SuggestedStartLocation = PickerLocationId.DocumentsLibrary,
+				FileTypeFilter = { Filter }
+		    };
+
+			//Initialize and show picker 
+		    WinRT.Interop.InitializeWithWindow.Initialize(folderPicker, 
+			    MainWindow.GetWindowHandle());
+			StorageFolder folder = await folderPicker.PickSingleFolderAsync();
+
+			//Log it was successful
+			logger.Log(LogLevel.Info, $"Picked folder {folder.Path} attributes:{folder.Attributes}");
+
+			return folder;
+	    }
+	    catch (Exception e)
+	    {
+			//I'm not really sure how we can get an error with the folder picker
+			//But I'm aware WinUI will throw an exception if the app is running
+			//as administrator. (See microsoft/WindowsAppSDK #2504)
+			logger.Log(LogLevel.Error, $"Folder picker error!, ex:{e.Message} {e.StackTrace}");
+		    throw;
+	    }
+
     }
 
-    #region Various Com Imports for File/Folder Pickers
+    #region Com stuff for File/Folder pickers
     [ComImport]
     [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
     [Guid("EECDBF0E-BAE9-4CB6-A68E-9598E1CB57BB")]
