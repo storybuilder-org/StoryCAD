@@ -129,6 +129,11 @@ public class WizardStepViewModel: ObservableRecipient, INavigable
         vm.OutputText = step.OutputText;
         vm.UsageText = step.UsageText;
         vm.PageType = step.PageType;
+        vm.Inputs = step.Inputs;
+        foreach (var kvp in step.Inputs)
+        {
+            InputText += $"{kvp.Key}\n";
+        }
     }
 
     private void GetInputValues()

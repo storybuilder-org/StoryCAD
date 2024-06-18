@@ -17,6 +17,7 @@ using StoryCAD.Services.Backup;
 using StoryCAD.Services.Logging;
 using StoryCAD.ViewModels;
 using WinUIEx;
+using static OpenAI.ObjectModels.Models;
 
 namespace StoryCAD.Services.Collaborator;
 
@@ -99,7 +100,12 @@ public class CollaboratorService
         collaboratorType = CollabAssembly.GetType("StoryCollaborator.Collaborator");
         // Create an instance of the Collaborator class
         logger.Log(LogLevel.Info, "Calling Collaborator constructor.");
-        collaborator = collaboratorType!.GetConstructors()[0].Invoke(new object[0]);
+        var collabArgs = Ioc.Default.GetService<ShellViewModel>()!.CollabArgs = new();
+        collabArgs.WizardVM = Ioc.Default.GetService<WizardViewModel>();
+        collabArgs.WizardStepVM = Ioc.Default.GetService<WizardStepViewModel>();
+        object[] methodArgs = { collabArgs };
+
+        collaborator = collaboratorType!.GetConstructors()[0].Invoke(methodArgs);
         logger.Log(LogLevel.Info, "Collaborator Constructor finished.");
     }
     public bool CollaboratorEnabled()
@@ -115,7 +121,11 @@ public class CollaboratorService
     /// <returns>True if CollaboratorLib.dll exists, false otherwise.</returns>
     private bool FindDll()
     {
-	    logger.Log(LogLevel.Info, "Locating Collaborator Package...");
+        //dllPath = Path.Combine("D:\\dev\\src\\StoryBuilderCollaborator\\CollaboratorLib\\bin\\x64\\Debug\\net8.0-windows10.0.22621.0","CollaboratorLib.dll");
+        //dllExists = File.Exists(dllPath);
+        //return dllExists;
+
+        logger.Log(LogLevel.Info, "Locating Collaborator Package...");
 	    Package CollaboratorPkg = Package.Current.Dependencies.FirstOrDefault(pkg => pkg.DisplayName == "CollaboratorPackage");
 	    if (CollaboratorPkg != null)
 	    {
