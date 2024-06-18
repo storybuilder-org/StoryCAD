@@ -78,7 +78,7 @@ public sealed partial class Shell
 
         ShellVm.ShowHomePage();
         ShellVm.ShowConnectionStatus();
-        Ioc.Default.GetRequiredService<Windowing>().UpdateWindowTitle();
+        Windowing.UpdateWindowTitle();
         if (!Ioc.Default.GetService<AppState>()!.EnvPresent) { await ShellVm.ShowDotEnvWarningAsync(); }
 
         if (!await Ioc.Default.GetRequiredService<WebViewModel>().CheckWebviewState())

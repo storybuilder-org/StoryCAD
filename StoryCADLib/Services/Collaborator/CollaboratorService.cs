@@ -17,7 +17,6 @@ using StoryCAD.Services.Backup;
 using StoryCAD.Services.Logging;
 using StoryCAD.ViewModels;
 using WinUIEx;
-using static OpenAI.ObjectModels.Models;
 
 namespace StoryCAD.Services.Collaborator;
 
@@ -121,11 +120,7 @@ public class CollaboratorService
     /// <returns>True if CollaboratorLib.dll exists, false otherwise.</returns>
     private bool FindDll()
     {
-        //dllPath = Path.Combine("D:\\dev\\src\\StoryBuilderCollaborator\\CollaboratorLib\\bin\\x64\\Debug\\net8.0-windows10.0.22621.0","CollaboratorLib.dll");
-        //dllExists = File.Exists(dllPath);
-        //return dllExists;
-
-        logger.Log(LogLevel.Info, "Locating Collaborator Package...");
+	    logger.Log(LogLevel.Info, "Locating Collaborator Package...");
 	    Package CollaboratorPkg = Package.Current.Dependencies.FirstOrDefault(pkg => pkg.DisplayName == "CollaboratorPackage");
 	    if (CollaboratorPkg != null)
 	    {
@@ -142,10 +137,10 @@ public class CollaboratorService
 	    {
 		    logger.Log(LogLevel.Info, "Failed to find Collaborator Package");
 		    dllExists = false;
-
 	    }
 
-	    logger.Log(LogLevel.Info, $"Collaborator.dll exists {dllExists}");
+
+		logger.Log(LogLevel.Info, $"Collaborator.dll exists {dllExists}");
 	    return dllExists;
     }
 	#endregion
@@ -158,7 +153,7 @@ public class CollaboratorService
 	/// <summary>
 	/// This closes, disposes and full removes collaborator from memory.
 	/// </summary>
-	public void DestroyCollaborator(AppWindow sender, AppWindowClosingEventArgs args)
+	public void DestroyCollaborator()
     {
         //TODO: Absolutely make sure Collaborator is not left in memory after this.
         logger.Log(LogLevel.Warn, "Destroying collaborator object.");

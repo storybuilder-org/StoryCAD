@@ -231,7 +231,9 @@ public partial class App
 		//Save prefs
 		PreferencesIo prefIO = new(Prefs.Model, State.RootDirectory);
 		Task.Run(async () => { await prefIO.WritePreferences(); });
-		
+
+		//Purge Collaborator from memory
+		Ioc.Default.GetRequiredService<CollaboratorService>().DestroyCollaborator();
 	}
 
 	private void ConfigureNavigation()
