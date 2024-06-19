@@ -16,6 +16,7 @@ and we'll rectify that.
 * Mylo
 * Tina
 * Tim        
+* Syncfusion
 
 ## Software
 
@@ -27,10 +28,12 @@ StoryCAD uses or links to the following software:
 * [Elmah.io][4]
 * [NRtfTree][5]
 * [Scrivener][6]
-* [SyncFusion][7]
 
-We are especially grateful to elmah.io and Syncfusion, commercial products who make their
+We are especially grateful to elmah.io commercial products who make their
 livelihood freely available to public open source projects like ours.
+
+(StoryCAD Versions before 2.14.2 relied on SyncFusion Controls and we are 
+eternally greatful for their support.)
 
 ## Origins
 
