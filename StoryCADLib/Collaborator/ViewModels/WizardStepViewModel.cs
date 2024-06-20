@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.DependencyInjection;
@@ -12,7 +13,6 @@ using OpenAI.ObjectModels.RequestModels;
 //using StoryCAD.Collaborator;
 using StoryCAD.Controls;
 using Microsoft.Extensions.DependencyInjection;
-using StoryCAD.Collaborator.Models;
 using StoryCAD.Collaborator.Views;
 using StoryCAD.Collaborator.ViewModels;
 
@@ -111,34 +111,23 @@ public class WizardStepViewModel: ObservableRecipient, INavigable
 
     public async void Activate(object parameter)
     {
+        Debugger.Break();
         //var chat = Ioc.GetService<ChatService>();
 
         //Model = (CharacterModel)parameter;
         //LoadModel(); // Load the ViewModel from the Story
     }
-
-    public void LoadModel(WizardStepArgs step)
+    public void LoadModel()
     {
-        var vm = Ioc.Default.GetService<WizardStepViewModel>();
-        vm.Title = step.Title;
-        vm.Description = step.Description;
-        vm.InputText = step.InputText;
-        vm.PromptText = step.PromptText;
-        vm.ChatModel = step.ChatModel;
-        vm.Temperature = step.Temperature;
-        vm.OutputText = step.OutputText;
-        vm.UsageText = step.UsageText;
-        vm.PageType = step.PageType;
-        vm.Inputs = step.Inputs;
-        foreach (var kvp in step.Inputs)
-        {
-            InputText += $"{kvp.Key}\n";
-        }
+        Debugger.Break();
+        GetInputValues();
     }
 
     private void GetInputValues()
     {
-        //TODO: I need this, just not sure where and when. See LoadModel in temp
+        Debugger.Break();
+        //TODO: I need this, just not sure where. Move to Collaborator?
+        // Maybe call from ProcessStep(), which would run Chat too?
         var vm = Ioc.Default.GetService<WizardViewModel>();
         foreach (string key in Inputs.Keys)
         {

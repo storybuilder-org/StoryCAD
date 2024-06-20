@@ -91,7 +91,7 @@ public sealed partial class Shell
         //Shows changelog if the app has been updated since the last launch.
         if (Ioc.Default.GetRequiredService<AppState>().LoadedWithVersionChange)
         {
-			Ioc.Default.GetService<PreferenceService>().Model.HideRatingPrompt = false;  //rating prompt reenabled on updates.
+			Ioc.Default.GetService<PreferenceService>()!.Model.HideRatingPrompt = false;  //rating prompt reenabled on updates.
 			await new Services.Dialogs.Changelog().ShowChangeLog();
         }
 

@@ -10,7 +10,6 @@ using Microsoft.UI.Xaml;
 using Type = System.Type;
 using System.Linq;
 using System.Reflection;
-using StoryCAD.Collaborator.Models;
 using StoryCAD.Services.Navigation;
 //using StoryCollaborator.Models;
 using StoryCAD.Collaborator.Views;
@@ -67,37 +66,10 @@ public class WizardViewModel : ObservableRecipient
     #region public methods
 
     #region Load and Save Model 
-    public void LoadModel(List<MenuItem> menuItems)
+    public void LoadModel()
     {
-        logger.Log(LogLevel.Info, $"Loading WizardModel, Model is type {Model.Type}");
-        MenuSteps.Clear();
-        foreach (var step in menuItems)
-        {
-            // Create a menu item for each step
-            var menuStep = new NavigationViewItem()
-            {
-                Content = step.Title,
-                Tag = step.PageType
-            };
-            MenuSteps.Add(menuStep);
-
-            // Add the StoryElement model and ModelProperties collection to the step
-            //step.Model = Model;
-
-        }
-        LoadProperties();
     }
     public void SaveModel() { }
-    public void LoadProperties()
-    {
-        ModelProperties.Clear();
-        Type type = Model.GetType();
-        PropertyInfo[] props = type.GetProperties();
-        foreach (var prop in props)
-        {
-            ModelProperties.Add(prop.Name, prop);
-        }
-    }
 
     #endregion
 
@@ -117,21 +89,16 @@ public class WizardViewModel : ObservableRecipient
 
     public void NavView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
     {
-        //if (args.IsSettingsSelected)
-        //{
-        //    StepFrame.Navigate(typeof(SettingsPage));
-        //}
-        //else
-        //{
         var item = args.SelectedItem as NavigationViewItem;
         CurrentItem = item;
         CollaboratorService collab = Ioc.Default.GetService<CollaboratorService>();
-        WizardStepArgs stepModel = collab.LoadWizardStepModel(Model, (string) item!.Content);
+        collab.ProcessWizardStep(Model, (string)item!.Content);
         WizardStepViewModel step = Ioc.Default.GetService<WizardStepViewModel>();
-        step.LoadModel(stepModel);
+        //step.LoadModel(stepModel);
+        step.LoadModel();
         CurrentStep = step.Title;
         NavigationService nav = Ioc.Default.GetService<NavigationService>();
-        // Navigate to the appriate WizardStep page, passing the WizardStep instance
+        // Navigate to the appropriate WizardStep page, passing the WizardStep instance
         // as the parameter. This invokes the Page's OnNavigatedTo() method, which
         // Establishes the WizardStepViewModel as the DataContext (for binding)
         // In turn the ViewModel's Activate() method is invoked.
@@ -196,7 +163,7 @@ public class WizardViewModel : ObservableRecipient
         ContentFrame.Navigate(type);
     }
 
-    public async void OnNavigatedTo(object parameter)
+    public void OnNavigatedTo(object parameter)
     {
 
         // TODO: Replace with real data.

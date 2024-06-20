@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -10,7 +9,6 @@ using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml.Controls;
 using StoryCAD.Collaborator;
-using StoryCAD.Collaborator.Models;
 using StoryCAD.Collaborator.ViewModels;
 using StoryCAD.Models;
 using StoryCAD.Services.Backup;
@@ -26,8 +24,7 @@ public class CollaboratorService
     private string dllPath; 
     private AppState State = Ioc.Default.GetRequiredService<AppState>();
     private LogService logger = Ioc.Default.GetRequiredService<LogService>();
-    public  object CollaboratorProxy;
-    public WizardStepViewModel stepWizard;
+    private WizardStepViewModel stepWizard;
     private Assembly CollabAssembly;
     public WindowEx CollaboratorWindow;  // The secondary window for Collaborator
     private Type collaboratorType;
@@ -42,37 +39,36 @@ public class CollaboratorService
         MethodInfo  menuCall = collaboratorType.GetMethod("GetMenuItems", new[] { typeof(StoryItemType) });
         object[] methodArgs = { args.SelectedElement.Type };
         // ...and invoke it
-        var menuItems = (List<MenuItem>) menuCall!.Invoke(collaborator, methodArgs);
+        menuCall!.Invoke(collaborator, methodArgs);
         // Load the model
-        wizard.LoadModel(menuItems);
+        wizard.LoadModel();
     }
 
     /// <summary>
-    /// Request the WizardStepModel which contains the data for the selected
-    /// step, in order to populate and run WizardStepViewModel.
+    /// Process the current WizardStep and populate WizardStepViewModel.
+    ///
+    /// This is a proxy for Collaborator's ProcessWizardStep.
     /// </summary>
-    /// <param name="model">The StoryElement to process</param>
+    /// <param name="element">The StoryElement to process</param>
     /// <param name="stepName">The name (Title) of the StoryElement property to load</param>
-    public WizardStepArgs LoadWizardStepModel(StoryElement model, string stepName)
+    public void ProcessWizardStep(StoryElement element, string stepName)
     {
         stepWizard = Ioc.Default.GetService<WizardStepViewModel>();
-        stepWizard!.Model = model;
-        // Get the 'GetWizardStepModel' method that expects a parameter of type string (the name of the step)
-        MethodInfo loadStep = collaboratorType.GetMethod("GetWizardStepModel", new[] { typeof(StoryElement), typeof(string) });
-        object[] methodArgs = { model, stepName  };
+        stepWizard!.Model = element;
+        // Get the 'ProcessWizardStep' method that expects a parameter of type string (the name of the step)
+        MethodInfo loadStep = collaboratorType.GetMethod("ProcessWizardStep", new[] { typeof(StoryElement), typeof(string) });
+        object[] methodArgs = { element, stepName  };
         // ...and invoke it
-        var stepModel  = (WizardStepArgs) loadStep!.Invoke(collaborator, methodArgs);
-        return stepModel;
+        loadStep!.Invoke(collaborator, methodArgs);
     }
 
     #endregion
 
     #region Collaboratorlib connection
+
     /// <summary>
-    /// If the plugin is active, connect CollaboratorLib and create an instance
+    /// If the plugin is active, connect to CollaboratorLib and create an instance
     /// of Collaborator. 
-    /// 
-    /// 
     /// </summary>
     public void ConnectCollaborator()
     {
@@ -157,14 +153,13 @@ public class CollaboratorService
     {
         //TODO: Absolutely make sure Collaborator is not left in memory after this.
         logger.Log(LogLevel.Warn, "Destroying collaborator object.");
-        if (CollaboratorProxy != null)
+        if (CollaboratorWindow != null)
         {
             CollaboratorWindow.Close(); // Destroy window object
             logger.Log(LogLevel.Info, "Closed collaborator window");
 
             //Null objects to deallocate them
             CollabAssembly = null;
-            CollaboratorProxy = null;
             logger.Log(LogLevel.Info, "Nulled collaborator objects");
 
             //Run garbage collection to clean up any remnants.

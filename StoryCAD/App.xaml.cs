@@ -223,6 +223,7 @@ public partial class App
 
 	private void MainWindow_Closed(object sender, WindowEventArgs args)
 	{
+        ///TODO: MainWindow_Closed is never called. Call when appropriate (from exit/shutdown)
 		//Update used time
 		PreferenceService Prefs = Ioc.Default.GetService<PreferenceService>();
 		AppState State = Ioc.Default.GetService<AppState>();
