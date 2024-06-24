@@ -16,9 +16,9 @@ public sealed partial class WizardShell : Page
     //{
     //    get
     //    {
-    //        if (WizardVM.CurrentStep != null)
+    //        if (WizardVm.CurrentStep != null)
     //        {
-    //            return WizardVM.CurrentStep.UsageText;
+    //            return WizardVm.CurrentStep.UsageText;
     //        }
 
     //        return "";
@@ -40,15 +40,15 @@ public sealed partial class WizardShell : Page
         switch (e.SourcePageType.Name)
         {
             case "WelcomePage":
-                //WizardVM.CurrentStep =
+                //WizardVm.CurrentStep =
                 //break;
             case "ComboPicker":
-                //WizardVM.NavView.DataContext = WizardVM.CurrentStep;
-                //WizardVM.CurrentStep.Model = WizardVM.Model;
+                //WizardVm.NavView.DataContext = WizardVm.CurrentStep;
+                //WizardVm.CurrentStep.Model = WizardVm.Model;
                 //break;
             case "TextAppender":
-                //WizardVM.NavView.DataContext = WizardVM.CurrentStep;
-                //WizardVM.CurrentStep.Model = WizardVM.Model;
+                //WizardVm.NavView.DataContext = WizardVm.CurrentStep;
+                //WizardVm.CurrentStep.Model = WizardVm.Model;
                 break;
             default:
                 throw new Exception("Invalid page type");
@@ -60,11 +60,11 @@ public sealed partial class WizardShell : Page
         What is step page? Why is current step set to 1 when its a IStepWizard?
         if ( == typeof(WelcomePage))
         { 
-            //WizardVM.CurrentStep = 0;
+            //WizardVm.CurrentStep = 0;
         }
         else //if (/*e.SourcePageType == typeof(StepPage) false)
         {
-            //WizardVM.CurrentStep = 1;
+            //WizardVm.CurrentStep = 1;
         }*/
     }
 

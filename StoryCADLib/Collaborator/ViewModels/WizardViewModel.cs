@@ -68,6 +68,7 @@ public class WizardViewModel : ObservableRecipient
     #region Load and Save Model 
     public void LoadModel()
     {
+        Ioc.Default.GetService<CollaboratorService>().LoadWizardViewModel();
     }
     public void SaveModel() { }
 
@@ -87,15 +88,28 @@ public class WizardViewModel : ObservableRecipient
         SetCurrentNavigationViewItem(args.SelectedItemContainer as NavigationViewItem);
     }
 
+    /// <summary>
+    /// Process the selection  of the WizardShell NavigationView
+    /// SelectionChanged event. This is triggered when the user clicks on
+    /// a NavigationView Menu Item on the WizardShell page, activating
+    /// the loading, display and processing of a WizardStepModel.
+    /// 
+    /// Each WizardStepModel corresponds to a property on a StoryElement,
+    /// a 'story property', and will use other property's input values, examples,
+    /// and a prompt to produce an OpenAI completion to recommend a value
+    /// for the desired output property.
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="args"></param>
     public void NavView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
     {
         var item = args.SelectedItem as NavigationViewItem;
         CurrentItem = item;
         CollaboratorService collab = Ioc.Default.GetService<CollaboratorService>();
-        collab.ProcessWizardStep(Model, (string)item!.Content);
+        collab.LoadWizardStep(Model, (string)item!.Content);
         WizardStepViewModel step = Ioc.Default.GetService<WizardStepViewModel>();
-        //step.LoadModel(stepModel);
-        step.LoadModel();
+        step!.LoadModel();
+        collab.ProcessWizardStep();
         CurrentStep = step.Title;
         NavigationService nav = Ioc.Default.GetService<NavigationService>();
         // Navigate to the appropriate WizardStep page, passing the WizardStep instance

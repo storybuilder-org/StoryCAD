@@ -10,7 +10,7 @@ public class CollaboratorArgs
 
     public StoryModel StoryModel;
     
-    public WizardViewModel WizardVM;
+    public WizardViewModel WizardVm;
 
     public WizardStepViewModel WizardStepVM;
     

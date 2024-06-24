@@ -13,6 +13,7 @@ using OpenAI.ObjectModels.RequestModels;
 //using StoryCAD.Collaborator;
 using StoryCAD.Controls;
 using Microsoft.Extensions.DependencyInjection;
+using StoryCAD.Services.Collaborator;
 using StoryCAD.Collaborator.Views;
 using StoryCAD.Collaborator.ViewModels;
 
@@ -111,34 +112,16 @@ public class WizardStepViewModel: ObservableRecipient, INavigable
 
     public async void Activate(object parameter)
     {
-        Debugger.Break();
         //var chat = Ioc.GetService<ChatService>();
 
         //Model = (CharacterModel)parameter;
-        //LoadModel(); // Load the ViewModel from the Story
+        LoadModel(); // Load the ViewModel from the Story
     }
     public void LoadModel()
     {
-        Debugger.Break();
-        GetInputValues();
+        Ioc.Default.GetService<CollaboratorService>()!.LoadWizardStepViewModel();
     }
-
-    private void GetInputValues()
-    {
-        Debugger.Break();
-        //TODO: I need this, just not sure where. Move to Collaborator?
-        // Maybe call from ProcessStep(), which would run Chat too?
-        var vm = Ioc.Default.GetService<WizardViewModel>();
-        foreach (string key in Inputs.Keys)
-        {
-            if (vm!.ModelProperties.ContainsKey(key))
-            {
-                string value = (string) vm.ModelProperties[key].GetValue(vm.Model);
-                Inputs[key] = value;
-            }
-        }
-    }
-
+ 
     public void Deactivate(object parameter)
     {
         //SaveModel(); // Save the ViewModel back to the Story

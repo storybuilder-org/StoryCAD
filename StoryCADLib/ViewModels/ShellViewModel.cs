@@ -1214,6 +1214,10 @@ public class ShellViewModel : ObservableRecipient
 
     }
 
+    /// <summary>
+    /// This method is invoked when the user clicks the Collaborator AppBarButton
+    /// on the Shell CommandBar. It Activates and displays the WizardShell. 
+    /// </summary>
     private void LaunchCollaborator()
     {
         if (_canExecuteCommands)
@@ -1224,12 +1228,14 @@ public class ShellViewModel : ObservableRecipient
                 return;
             }
 
-            //TODO: Logging
+            //TODO: Logging???
+            
             var id = CurrentNode.Uuid; // get the story element;
             CollabArgs.SelectedElement = StoryModel.StoryElements.StoryElementGuids[id];
             CollabArgs.StoryModel = StoryModel;
             Ioc.Default.GetService<CollaboratorService>()!.LoadWizardModel(CollabArgs);
             Ioc.Default.GetService<CollaboratorService>()!.CollaboratorWindow.Show();
+            Ioc.Default.GetRequiredService<WizardViewModel>()!.LoadModel();
         }
     }
 

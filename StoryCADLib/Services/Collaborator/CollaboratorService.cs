@@ -36,30 +36,71 @@ public class CollaboratorService
         var wizard = Ioc.Default.GetService<WizardViewModel>();
         wizard!.Model = args.SelectedElement;
         // Get the 'GetMenuItems' method that expects a parameter of type 'StoryItemType'
-        MethodInfo  menuCall = collaboratorType.GetMethod("GetMenuItems", new[] { typeof(StoryItemType) });
+        MethodInfo  menuCall = collaboratorType.GetMethod("LoadWizardModel", new[] { typeof(StoryItemType) });
         object[] methodArgs = { args.SelectedElement.Type };
         // ...and invoke it
         menuCall!.Invoke(collaborator, methodArgs);
-        // Load the model
-        wizard.LoadModel();
     }
 
     /// <summary>
-    /// Process the current WizardStep and populate WizardStepViewModel.
+    /// Load the WizardViewModel (WizardShell's VM) with the high level
+    /// NavigationView menu.
     ///
-    /// This is a proxy for Collaborator's ProcessWizardStep.
+    /// This is a proxy for Collaborator's LoadWizardViewModel.
+    /// </summary>
+    /// <param name="args"></param>
+    public void LoadWizardViewModel()
+    {
+        // Get the 'LoadWizardViewModel' method. The method has no parameters.
+        MethodInfo wizardCall = collaboratorType.GetMethod("LoadWizardViewModel");
+        // ...and invoke it
+        wizardCall!.Invoke(collaborator, null);
+    }
+
+    /// <summary>
+    /// Load the current WizardStep from the collection of step models
+    /// for this StoryElement type.
+    ///
+    /// This is a proxy for Collaborator's LoadWizardStep method.
     /// </summary>
     /// <param name="element">The StoryElement to process</param>
     /// <param name="stepName">The name (Title) of the StoryElement property to load</param>
-    public void ProcessWizardStep(StoryElement element, string stepName)
+    public void LoadWizardStep(StoryElement element, string stepName)
     {
         stepWizard = Ioc.Default.GetService<WizardStepViewModel>();
         stepWizard!.Model = element;
-        // Get the 'ProcessWizardStep' method that expects a parameter of type string (the name of the step)
-        MethodInfo loadStep = collaboratorType.GetMethod("ProcessWizardStep", new[] { typeof(StoryElement), typeof(string) });
+        // Get the 'LoadWizardStep' method that expects a parameter of type string (the name of the step)
+        MethodInfo loadStep = collaboratorType.GetMethod("LoadWizardStep", new[] { typeof(StoryElement), typeof(string) });
         object[] methodArgs = { element, stepName  };
         // ...and invoke it
         loadStep!.Invoke(collaborator, methodArgs);
+    }
+
+    /// <summary>
+    /// Load the WizardStepViewModel with the currentStep
+    /// WizardStepModel.
+    ///
+    /// This is a proxy for Collaborator's LoadWizardStepViewModel method.
+    /// </summary>
+    public void LoadWizardStepViewModel()
+    {
+        // Get the 'LoadWizardStepViewModel' method. The method has no parameters.
+        MethodInfo wizardCall = collaboratorType.GetMethod("LoadWizardStepViewModel");
+        // ...and invoke it
+        wizardCall!.Invoke(collaborator, null);
+    }
+
+    /// <summary>
+    /// Process the WizardStepModel prompt.
+    /// 
+    /// This is a proxy for Collaborator's ProcessWizardStep method.
+    /// </summary>
+    public void ProcessWizardStep()
+    {
+        // Get the 'ProcessWizardStep' method. The method has no parameters.
+        MethodInfo wizardCall = collaboratorType.GetMethod("ProcessWizardStep");
+        // ...and invoke it
+        wizardCall!.Invoke(collaborator, null);
     }
 
     #endregion
@@ -96,7 +137,7 @@ public class CollaboratorService
         // Create an instance of the Collaborator class
         logger.Log(LogLevel.Info, "Calling Collaborator constructor.");
         var collabArgs = Ioc.Default.GetService<ShellViewModel>()!.CollabArgs = new();
-        collabArgs.WizardVM = Ioc.Default.GetService<WizardViewModel>();
+        collabArgs.WizardVm = Ioc.Default.GetService<WizardViewModel>();
         collabArgs.WizardStepVM = Ioc.Default.GetService<WizardStepViewModel>();
         object[] methodArgs = { collabArgs };
 
