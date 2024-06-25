@@ -229,7 +229,37 @@ public class SceneModel : StoryElement
         Notes = string.Empty;
     }
 
-    public SceneModel(IXmlNode xn, StoryModel model) : base(xn, model)
+    public SceneModel(string name, StoryModel model) : base(name, StoryItemType.Scene, model)
+
+	{
+	    ViewpointCharacter = string.Empty;
+	    Date = string.Empty;
+	    Time = string.Empty;
+	    Setting = string.Empty;
+	    SceneType = string.Empty;
+	    CastMembers = new List<string>();
+	    Remarks = string.Empty;
+	    ScenePurpose = new List<string>();
+	    ValueExchange = string.Empty;
+	    Protagonist = string.Empty;
+	    ProtagEmotion = string.Empty;
+	    ProtagGoal = string.Empty;
+	    Antagonist = string.Empty;
+	    AntagEmotion = string.Empty;
+	    AntagGoal = string.Empty;
+	    Opposition = string.Empty;
+	    Outcome = string.Empty;
+	    Emotion = string.Empty;
+	    NewGoal = string.Empty;
+	    Events = string.Empty;
+	    Consequences = string.Empty;
+	    Significance = string.Empty;
+	    Realization = string.Empty;
+	    Review = string.Empty;
+	    Notes = string.Empty;
+    }
+
+	public SceneModel(IXmlNode xn, StoryModel model) : base(xn, model)
     {
         ViewpointCharacter = string.Empty;
         Date = string.Empty;

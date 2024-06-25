@@ -58,6 +58,7 @@
     <None Remove="Controls\Flaw.xaml" />
     <None Remove="Controls\RelationshipView.xaml" />
     <None Remove="Controls\Traits.xaml" />
+    <None Remove="Services\Dialogs\ElementPicker.xaml" />
     <None Remove="Services\Dialogs\FeedbackDialog.xaml" />
     <None Remove="Services\Dialogs\NewProjectPage.xaml" />
     <None Remove="Services\Dialogs\NewRelationshipPage.xaml" />
@@ -157,6 +158,9 @@
     <None Update="NLog.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <Page Update="Services\Dialogs\ElementPicker.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Update="Services\Dialogs\FeedbackDialog.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
