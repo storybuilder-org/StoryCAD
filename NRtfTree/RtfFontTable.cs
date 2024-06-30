@@ -28,8 +28,6 @@
  * Description:	Tabla de Fuentes de un documento RTF.
  * ******************************************************************************/
 
-using System.Collections.Generic;
-
 namespace NRtfTree
 {
     namespace Util
