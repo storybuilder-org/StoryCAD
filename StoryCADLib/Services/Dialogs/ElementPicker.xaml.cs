@@ -1,12 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
-using CommunityToolkit.Mvvm.DependencyInjection;
-using Microsoft.UI.Xaml.Controls;
-using StoryCAD.Models;
-using StoryCAD.ViewModels;
-
-namespace StoryCAD.Services.Dialogs;
+﻿namespace StoryCAD.Services.Dialogs;
 
 /// <summary>
 /// A simple picker allowing a user to pick the

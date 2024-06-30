@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics;
 using Windows.ApplicationModel;
 using dotenv.net;
-using dotenv.net.Utilities;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.Windows.AppLifecycle;
 using PInvoke;
@@ -15,7 +14,6 @@ using AppInstance = Microsoft.Windows.AppLifecycle.AppInstance;
 using Windows.ApplicationModel.Activation;
 using Microsoft.UI.Xaml;
 using StoryCAD.DAL;
-using LaunchActivatedEventArgs = Microsoft.UI.Xaml.LaunchActivatedEventArgs;
 using StoryCAD.Services.IoC;
 using StoryCAD.Services;
 

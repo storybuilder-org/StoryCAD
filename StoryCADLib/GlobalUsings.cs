@@ -9,4 +9,3 @@ global using CommunityToolkit.Mvvm.DependencyInjection;
 global using StoryCAD.Services.Logging;
 global using Microsoft.UI.Xaml.Controls;
 global using StoryCAD.ViewModels;
-using LogLevel = StoryCAD.Services.Logging.LogLevel;

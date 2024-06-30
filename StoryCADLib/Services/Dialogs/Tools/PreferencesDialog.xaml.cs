@@ -1,18 +1,7 @@
-using System;
 using System.Diagnostics;
-using System.IO;
 using Windows.Storage;
-using CommunityToolkit.Mvvm.DependencyInjection;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
-using Windows.Storage;
-using Windows.Storage.Pickers;
 using Microsoft.UI.Xaml;
 using StoryCAD.ViewModels.Tools;
-using Microsoft.UI.Xaml.Controls;
-using StoryCAD.Services.Ratings;
-using StoryCAD.ViewModels;
-using WinRT;
 
 namespace StoryCAD.Services.Dialogs.Tools;
 

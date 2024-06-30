@@ -1,12 +1,6 @@
-﻿using System.Runtime.InteropServices;
-using Windows.Storage;
-using Windows.Storage.Pickers;
-using CommunityToolkit.Mvvm.DependencyInjection;
+﻿using Windows.Storage;
 using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using StoryCAD.Models;
-using StoryCAD.ViewModels;
-using WinRT;
+
 namespace StoryCAD.Services.Dialogs;
 
 public sealed partial class NewProjectPage : Page

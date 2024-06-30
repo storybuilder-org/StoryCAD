@@ -20,11 +20,8 @@ using StoryCAD.ViewModels.Tools;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using Windows.Storage;
-using Windows.Storage.Pickers;
 using StoryCAD.Services;
-using WinRT;
 using WinUIEx;
 
 namespace StoryCAD.ViewModels;

@@ -1,6 +1,5 @@
 using Microsoft.UI.Xaml;
 using StoryCAD.Models.Tools;
-using Syncfusion.UI.Xaml.Editors;
 
 namespace StoryCAD.Controls;
 
