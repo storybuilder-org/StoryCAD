@@ -62,6 +62,7 @@ public class ServiceConfigurator
              .AddSingleton<NewRelationshipViewModel>()
              .AddSingleton<PrintReportDialogVM>()
              .AddSingleton<NarrativeToolVM>()
+             .AddSingleton<ElementPickerVM>()
              // Register Tools ViewModels  
              .AddSingleton<KeyQuestionsViewModel>()
              .AddSingleton<TopicsViewModel>()

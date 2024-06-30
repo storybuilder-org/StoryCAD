@@ -9,6 +9,7 @@ using StoryCAD.Services.Logging;
 using StoryCAD.ViewModels.Tools;
 using Microsoft.UI.Xaml.Controls;
 using StoryCAD.Services.Ratings;
+using StoryCAD.ViewModels;
 
 namespace StoryCAD.Services.Dialogs.Tools;
 
@@ -150,4 +151,22 @@ public sealed partial class PreferencesDialog
         //Launch relevant app (browser/mail client)
         Process.Start(URL);
     }
+    /// <summary>
+	/// Spawns the element picker UI and shows the result
+	/// </summary>
+    private async void OpenPickerUI(object sender, RoutedEventArgs e)
+    {
+	    // Show dialog
+		StoryElement Element = await Ioc.Default.GetRequiredService<ElementPickerVM
+			>().ShowPicker();
+
+		if (Element == null) return; // User cancelled (or error occurred)
+		// Show result
+	    await Ioc.Default.GetRequiredService<Windowing>().ShowContentDialog(new()
+	    {
+		    Title = "Result",
+		    Content = "User picked item " + Element.Name,
+			PrimaryButtonText = "OK"
+		}, true);
+	}
 }

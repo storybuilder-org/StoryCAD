@@ -158,28 +158,45 @@ public class Windowing : ObservableRecipient
         }
 	}
 
+	/// <summary>
+	/// Reference to currently open dialog.
+	/// </summary>
+    private ContentDialog OpenDialog;
+
     /// <summary>
     /// This takes a ContentDialog and shows it to the user
     /// It will handle theming, XAMLRoot and showing the dialog.
     /// </summary>
     /// <param name="Dialog">Content dialog to show</param>
-    /// <param name="force">Force show content dialog, bypasses protections;
-    /// This will crash the app unless you are immediately hiding the ContentDialog before this one.
-    /// Please do not use this unless you know what you are doing, and it is absolutely necessary.
+    /// <param name="force">Force show content dialog, will close currently open dialog if one
+    /// is already open
     /// </param>
     /// <returns>A ContentDialogResult enum value.</returns>
     public async Task<ContentDialogResult> ShowContentDialog(ContentDialog Dialog, bool force=false)
     {
-        //Checks a content dialog isn't already open
-        if (!_IsContentDialogOpen || force)
+		//force close any other dialog if one is open
+		//(if force is enabled)
+	    if (force && _IsContentDialogOpen && OpenDialog != null)
+	    {
+		    OpenDialog.Hide();
+
+			//This will be unset eventually but because we have called
+			//Hide() already we can unset this early.
+			_IsContentDialogOpen = false;
+	    }
+
+	    //Checks a content dialog isn't already open
+        if (!_IsContentDialogOpen) 
         {
-            //Set XAML root and correct theme.
-            Dialog.XamlRoot = XamlRoot;
-            Dialog.RequestedTheme = RequestedTheme;
+	        OpenDialog = Dialog;
+			//Set XAML root and correct theme.
+			OpenDialog.XamlRoot = XamlRoot;
+			OpenDialog.RequestedTheme = RequestedTheme;
 
             _IsContentDialogOpen = true;
-            ContentDialogResult Result = await Dialog.ShowAsync();
+            ContentDialogResult Result = await OpenDialog.ShowAsync();
             _IsContentDialogOpen = false;
+            OpenDialog = null;
             return Result;
         }
         return ContentDialogResult.None; 
