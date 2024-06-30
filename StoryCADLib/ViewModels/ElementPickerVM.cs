@@ -1,11 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
-using CommunityToolkit.Mvvm.DependencyInjection;
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using OpenAI.ObjectModels;
-using StoryCAD.Models;
-using StoryCAD.Services.Dialogs;
+﻿using StoryCAD.Services.Dialogs;
 
 namespace StoryCAD.ViewModels;
 

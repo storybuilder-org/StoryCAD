@@ -28,11 +28,7 @@
  * Description:	Clase para la generación de documentos RTF.
  * ******************************************************************************/
 
-using System;
-using System.Drawing;
 using System.Globalization;
-using System.IO;
-using System.Text;
 using NRtfTree.Core;
 
 namespace NRtfTree

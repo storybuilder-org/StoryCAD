@@ -1,15 +1,8 @@
-﻿using System;
-using System.IO;
-using System.Threading.Tasks;
-using Windows.Data.Xml.Dom;
+﻿using Windows.Data.Xml.Dom;
 using Windows.Storage;
 using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Messaging;
-using StoryCAD.Models;
-using StoryCAD.Services.Logging;
 using StoryCAD.Services.Messages;
-using StoryCAD.ViewModels;
 using static Windows.Data.Xml.Dom.XmlDocument;
 
 

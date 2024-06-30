@@ -1,8 +1,5 @@
-﻿using CommunityToolkit.Mvvm.DependencyInjection;
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
+﻿using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Input;
-using StoryCAD.ViewModels;
 using StoryCAD.ViewModels.Tools;
 
 namespace StoryCAD.Services.Dialogs.Tools

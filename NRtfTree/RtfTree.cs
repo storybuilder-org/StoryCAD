@@ -28,11 +28,7 @@
  * Description:	Representa un documento RTF en forma de árbol.
  * ******************************************************************************/
 
-using System;
 using System.Collections;
-using System.Drawing;
-using System.IO;
-using System.Text;
 using NRtfTree.Util;
 
 namespace NRtfTree

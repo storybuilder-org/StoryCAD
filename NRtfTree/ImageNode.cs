@@ -28,10 +28,7 @@
  * Description:	Nodo RTF especializado que contiene la información de una imagen.
  * ******************************************************************************/
 
-using System.Drawing;
 using System.Globalization;
-using System.IO;
-using System.Text;
 using NRtfTree.Core;
 
 namespace NRtfTree

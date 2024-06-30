@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace StoryCAD.Services.Backend
+﻿namespace StoryCAD.Services.Backend
 {
     public class UsersTable
     {

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace StoryCAD.Collaborator.Models
+﻿namespace StoryCAD.Collaborator.Models
 {
     /// <summary>
     /// The WizardShell displays a NavigationView for a StoryElement

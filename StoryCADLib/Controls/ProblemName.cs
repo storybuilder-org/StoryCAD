@@ -1,7 +1,4 @@
 ﻿using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using StoryCAD.Models;
-using StoryCAD.ViewModels;
 
 namespace StoryCAD.Controls;
 

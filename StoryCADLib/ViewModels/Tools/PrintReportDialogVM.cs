@@ -1,20 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Threading.Tasks;
+﻿using System.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.UI.Xaml;
 using Microsoft.UI;
-using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Printing;
-using StoryCAD.Models;
 using StoryCAD.Services.Reports;
 using Windows.Graphics.Printing;
-using CommunityToolkit.Mvvm.DependencyInjection;
 using StoryCAD.Services.Dialogs.Tools;
-using StoryCAD.Services.Messages;
-using StoryCAD.Services.Logging;
 
 namespace StoryCAD.ViewModels.Tools;
 

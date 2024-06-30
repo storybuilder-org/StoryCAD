@@ -1,7 +1,4 @@
-﻿using CommunityToolkit.Mvvm.DependencyInjection;
-using StoryCAD.ViewModels;
-
-namespace StoryCAD.Views;
+﻿namespace StoryCAD.Views;
 
 public sealed partial class TrashCanPage
 {

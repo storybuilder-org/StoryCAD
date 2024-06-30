@@ -28,10 +28,6 @@
  * Description:	Analizador léxico de documentos RTF.
  * ******************************************************************************/
 
-using System;
-using System.IO;
-using System.Text;
-
 namespace NRtfTree
 {
     namespace Core

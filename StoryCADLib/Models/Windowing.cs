@@ -1,23 +1,15 @@
 using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.Windows.AppLifecycle;
 using StoryCAD.Exceptions;
-using StoryCAD.ViewModels;
-using System;
 using System.Runtime.InteropServices;
-using System.Threading.Tasks;
 using Windows.Storage;
 using Windows.Storage.Pickers;
 using System.ComponentModel;
-using System.Threading.Tasks;
 using Windows.UI;
 using Windows.UI.ViewManagement;
-using NLog;
-using StoryCAD.Services.Logging;
 using WinUIEx;
 using LogLevel = StoryCAD.Services.Logging.LogLevel;
 

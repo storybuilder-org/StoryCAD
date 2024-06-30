@@ -1,7 +1,4 @@
-﻿using CommunityToolkit.Mvvm.DependencyInjection;
-using StoryCAD.ViewModels;
-using System;
-using Windows.Data.Xml.Dom;
+﻿using Windows.Data.Xml.Dom;
 using StoryCAD.Services;
 
 namespace StoryCAD.Models;

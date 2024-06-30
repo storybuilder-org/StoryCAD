@@ -1,8 +1,4 @@
-﻿using CommunityToolkit.Mvvm.DependencyInjection;
-using StoryCAD.Models;
-using StoryCAD.Services.Logging;
-using System;
-using Windows.Services.Store;
+﻿using Windows.Services.Store;
 
 namespace StoryCAD.Services.Ratings;
 

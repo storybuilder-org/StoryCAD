@@ -28,8 +28,6 @@
  * Description:	Representa un formato de texto.
  * ******************************************************************************/
 
-using System.Drawing;
-
 namespace NRtfTree
 {
     namespace Util

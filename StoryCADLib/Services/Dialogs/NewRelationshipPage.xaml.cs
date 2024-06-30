@@ -1,8 +1,4 @@
 ﻿using System.Collections.ObjectModel;
-using CommunityToolkit.Mvvm.DependencyInjection;
-using Microsoft.UI.Xaml.Controls;
-using StoryCAD.Models;
-using StoryCAD.ViewModels;
 
 namespace StoryCAD.Services.Dialogs;
 

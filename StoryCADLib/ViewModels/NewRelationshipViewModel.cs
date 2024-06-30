@@ -1,6 +1,5 @@
 ﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
-using StoryCAD.Models;
 
 namespace StoryCAD.ViewModels;
 

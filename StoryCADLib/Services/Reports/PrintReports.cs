@@ -1,14 +1,6 @@
-﻿using System;
-using System.Drawing;
+﻿using System.Drawing;
 using System.Drawing.Printing;
-using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using CommunityToolkit.Mvvm.DependencyInjection;
-using StoryCAD.Models;
-using StoryCAD.Services.Logging;
-using StoryCAD.ViewModels;
 using StoryCAD.ViewModels.Tools;
 
 namespace StoryCAD.Services.Reports;

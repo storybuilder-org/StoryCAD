@@ -1,7 +1,4 @@
-﻿using CommunityToolkit.Mvvm.DependencyInjection;
-using StoryCAD.Services.Logging;
-
-namespace StoryCAD.Services.Messages;
+﻿namespace StoryCAD.Services.Messages;
 
 public class StatusMessage
 {
