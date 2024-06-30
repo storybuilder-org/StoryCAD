@@ -681,10 +681,14 @@ public class ShellViewModel : ObservableRecipient
     {
         ContentDialog Dialog = new()
         {
-            Title = "File missing.",
-            Content = "This copy is missing a key file, if you are working on a branch or fork this is expected and you do not need to do anything about this." +
-                       "\nHowever if you are not a developer then report this as it should not happen.\nThe following may have issues or possible errors\n" +
-                       "Syncfusion related items and error logging.",
+            Title = "Key file missing.",
+            Content = """
+                      Your version of StoryCAD is missing a key file.
+                      If you are a developer you can safely ignore this message.
+                      If you are a user you should report this as you are not supposed to see this message.
+                      
+                      Things such as logging and elmah.io will not work without the key file.
+                      """,
             PrimaryButtonText = "Okay"
         };
         await Window.ShowContentDialog(Dialog);

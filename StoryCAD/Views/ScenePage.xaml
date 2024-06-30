@@ -5,8 +5,7 @@
     xmlns:local="using:StoryCAD.Views"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:models="using:StoryCAD.Models"
-    xmlns:editors="using:Syncfusion.UI.Xaml.Editors"                    
+    xmlns:models="using:StoryCAD.Models"            
     xmlns:usercontrols="using:StoryCAD.Controls"
     xmlns:system="using:System"
     xmlns:viewModels="using:StoryCAD.ViewModels"
@@ -68,7 +67,7 @@
                              DisplayMemberPath="Name"
                              SelectedItem="{x:Bind SceneVm.Setting, Mode=TwoWay, Converter={StaticResource ToStoryElement}}"/>
                         <TextBlock Grid.Column="1" MinWidth="50"/>
-                        <editors:SfComboBox IsEditable="True" Header="SceneType" Grid.Column="2" MinWidth="200"
+                        <ComboBox IsEditable="True" Header="SceneType" Grid.Column="2" MinWidth="200"
                                             ItemsSource="{x:Bind SceneVm.SceneTypeList}"
                                             Text="{x:Bind SceneVm.SceneType, Mode=TwoWay}" />
                     </Grid>
@@ -143,7 +142,7 @@
                             </ListView.ItemTemplate>
                         </ListView>
                         <TextBlock Grid.Column="1" MinWidth="50"/>
-                        <editors:SfComboBox Header="Value Exchange" Grid.Column="2" IsEditable="False" MinWidth="250"
+                        <ComboBox Header="Value Exchange" Grid.Column="2" IsEditable="False" MinWidth="250"
                                             ItemsSource="{x:Bind SceneVm.ValueExchangeList}"
                                             SelectedValue="{x:Bind SceneVm.ValueExchange, Mode=TwoWay}"
                                             PlaceholderText="What changes for your scene's protagonist?."/>
@@ -190,14 +189,14 @@
                             DisplayMemberPath="Name"
                             SelectedItem="{x:Bind SceneVm.Protagonist, Mode=TwoWay, Converter={StaticResource ToStoryElement}}" />
                         <TextBlock Grid.Column="1" MinWidth="50"/>
-                        <editors:SfComboBox IsEditable="True" Header="Feelings" Grid.Column="2" MinWidth="200"
+                        <ComboBox IsEditable="True" Header="Feelings" Grid.Column="2" MinWidth="200"
                                             ItemsSource="{x:Bind SceneVm.EmotionList}"
                                             Text="{x:Bind SceneVm.ProtagEmotion, Mode=TwoWay}" />
                     </Grid>
-                    <editors:SfComboBox IsEditable="True" Header="Protagonist's Goal" Grid.Row="1"  MinWidth="300"
+                    <ComboBox IsEditable="True" Header="Protagonist's Goal" Grid.Row="1"  MinWidth="300"
                                         ItemsSource="{x:Bind SceneVm.GoalList}"
                                         Text="{x:Bind SceneVm.ProtagGoal, Mode=TwoWay}" />
-                    <editors:SfComboBox IsEditable="True" Header="Opposition" Grid.Row="2" Width="400"
+                    <ComboBox IsEditable="True" Header="Opposition" Grid.Row="2" Width="400"
                                         ItemsSource="{x:Bind SceneVm.OppositionList}"
                                         Text="{x:Bind SceneVm.Opposition, Mode=TwoWay}" HorizontalAlignment="Left"/>
                     <Grid Grid.Row="3" HorizontalAlignment="Left">
@@ -210,15 +209,15 @@
                           DisplayMemberPath="Name"
                           SelectedItem ="{x:Bind SceneVm.Antagonist, Mode=TwoWay, Converter={StaticResource ToStoryElement}}" />
                         <TextBlock Grid.Column="1" MinWidth="50"/>
-                        <editors:SfComboBox IsEditable="True" Header="Feelings" Grid.Column="2"  MinWidth="200"
+                        <ComboBox IsEditable="True" Header="Feelings" Grid.Column="2"  MinWidth="200"
                                             ItemsSource="{x:Bind SceneVm.EmotionList}"
                                             Text="{x:Bind SceneVm.AntagEmotion, Mode=TwoWay}" />
                     </Grid>
-                    <editors:SfComboBox IsEditable="True" Header="Antagonist's Goal" Grid.Row="4" MinWidth="300"
+                    <ComboBox IsEditable="True" Header="Antagonist's Goal" Grid.Row="4" MinWidth="300"
                                         ItemsSource="{x:Bind SceneVm.GoalList}"
                                         Text="{x:Bind SceneVm.AntagGoal, Mode=TwoWay}" />
                     <TextBlock Grid.Row="5" Text=" "/>
-                    <editors:SfComboBox IsEditable="True" Header="Outcome" Grid.Row="5" Width="400"
+                    <ComboBox IsEditable="True" Header="Outcome" Grid.Row="5" Width="400"
                                         ItemsSource="{x:Bind SceneVm.OutcomeList}"
                                         Text="{x:Bind SceneVm.Outcome, Mode=TwoWay}" HorizontalAlignment="Left"/>
                 </Grid>
@@ -230,14 +229,14 @@
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
-                    <editors:SfComboBox IsEditable="True" Header="Emotional Response" Grid.Row="0" MinWidth="200"
+                    <ComboBox IsEditable="True" Header="Emotional Response" Grid.Row="0" MinWidth="200"
                                         ItemsSource="{x:Bind SceneVm.EmotionList}"
                                         Text="{x:Bind SceneVm.Emotion, Mode=TwoWay}" />
                     <usercontrols:RichEditBoxExtended Header="Review and Thought" Grid.Row="1"
                                                       RtfText="{x:Bind SceneVm.Review, Mode=TwoWay}" AcceptsReturn="True"
                                                       IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                                       ScrollViewer.VerticalScrollBarVisibility="Visible" />
-                    <editors:SfComboBox IsEditable="True" Header="New Goal" Grid.Row="2" MinWidth="400"
+                    <ComboBox IsEditable="True" Header="New Goal" Grid.Row="2" MinWidth="400"
                                         ItemsSource="{x:Bind SceneVm.GoalList}"
                                         Text="{x:Bind SceneVm.NewGoal, Mode=TwoWay}" />
                 </Grid>
