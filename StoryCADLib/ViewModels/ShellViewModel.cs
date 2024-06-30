@@ -785,15 +785,8 @@ public class ShellViewModel : ObservableRecipient
             if (fromPath == "" || !File.Exists(fromPath))
             {
                 Logger.Log(LogLevel.Info, "Opening file picker as story wasn't able to be found");
-                FileOpenPicker _filePicker = new();
-                //Make folder Picker work in Win32
-                WinRT.Interop.InitializeWithWindow.Initialize(_filePicker, Window.WindowHandle);
-                _filePicker.CommitButtonText = "Project Folder";
-                //TODO: Use preferences project folder instead of DocumentsLibrary
-                //except you can't. Thanks, UWP.
-                _filePicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
-                _filePicker.FileTypeFilter.Add(".stbx");
-                StoryModel.ProjectFile = await _filePicker.PickSingleFileAsync();
+
+                StoryModel.ProjectFile = await Ioc.Default.GetService<Windowing>().ShowFilePicker("Open Project File",".stbx");
                 if (StoryModel.ProjectFile == null) //Picker was canceled.
                 {
                     Logger.Log(LogLevel.Info, "Open file picker cancelled.");
@@ -1464,15 +1457,7 @@ public class ShellViewModel : ObservableRecipient
         SaveModel();
 
         // Select the Scrivener .scrivx file to add the report to
-        FileOpenPicker _openPicker = new();
-        IntPtr _hwnd = GetActiveWindow();
-        IInitializeWithWindow _initializeWithWindow = _openPicker.As<IInitializeWithWindow>();
-        _initializeWithWindow.Initialize(_hwnd);
-
-		_openPicker.ViewMode = PickerViewMode.List;
-        _openPicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
-        _openPicker.FileTypeFilter.Add(".scrivx");
-        StorageFile _file = await _openPicker.PickSingleFileAsync();
+        StorageFile _file = await Ioc.Default.GetService<Windowing>().ShowFilePicker("Open file", ".scrivx");
         if (_file != null)
         {
             Scrivener.ScrivenerFile = _file;
@@ -2789,14 +2774,5 @@ public class ShellViewModel : ObservableRecipient
     }
     #endregion
 
-    [ComImport]
-    [Guid("3E68D4BD-7135-4D10-8018-9FB6D9F33FA1")]
-    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-    public interface IInitializeWithWindow
-    {
-        void Initialize(IntPtr hwnd);
-    }
 
-    [DllImport("user32.dll", ExactSpelling = true, CharSet = CharSet.Auto, PreserveSig = true, SetLastError = false)]
-    private static extern IntPtr GetActiveWindow();
 }

@@ -29,17 +29,7 @@ public sealed partial class PreferencesInitialization
     /// </summary>
     private async void SetProjectPath(object sender, RoutedEventArgs e)
     {
-        FolderPicker folderPicker = new();
-        if (Window.Current == null)
-        {
-            IntPtr hwnd = Ioc.Default.GetRequiredService<Windowing>().WindowHandle;
-            IInitializeWithWindow initializeWithWindow = folderPicker.As<IInitializeWithWindow>();
-            initializeWithWindow.Initialize(hwnd);
-        }
-
-        folderPicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
-        folderPicker.FileTypeFilter.Add("*");
-        StorageFolder folder = await folderPicker.PickSingleFolderAsync();
+        StorageFolder folder = await Ioc.Default.GetService<Windowing>().ShowFolderPicker();
         if (folder != null)
         {
             _initVM.ProjectDir = folder.Path;
@@ -58,29 +48,11 @@ public sealed partial class PreferencesInitialization
     /// <param name="e"></param>
     private async void SetBackupPath(object sender, RoutedEventArgs e)
     {
-        FolderPicker folderPicker = new();
-        if (Window.Current == null)
-        {
-            IntPtr hwnd = Ioc.Default.GetRequiredService<Windowing>().WindowHandle;
-            IInitializeWithWindow initializeWithWindow = folderPicker.As<IInitializeWithWindow>();
-            initializeWithWindow.Initialize(hwnd);
-        }
-
-        folderPicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
-        folderPicker.FileTypeFilter.Add("*");
-        StorageFolder folder = await folderPicker.PickSingleFolderAsync();
+        StorageFolder folder = await Ioc.Default.GetRequiredService<Windowing>().ShowFolderPicker();
         if (folder != null)
         {
             _initVM.BackupDir = folder.Path;
         }
-    }
-
-    [ComImport]
-    [Guid("3E68D4BD-7135-4D10-8018-9FB6D9F33FA1")]
-    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-    public interface IInitializeWithWindow
-    {
-        void Initialize(IntPtr hwnd);
     }
 
     /// <summary>
