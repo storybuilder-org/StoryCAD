@@ -1,12 +1,6 @@
-﻿using System;
-using System.Threading.Tasks;
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.DependencyInjection;
-using NLog;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using Octokit;
 using StoryCAD.Services.Json;
-using StoryCAD.Services.Logging;
-using LogLevel = StoryCAD.Services.Logging.LogLevel;
 
 namespace StoryCAD.ViewModels.Tools;
 

@@ -1,6 +1,4 @@
 ﻿using Windows.Data.Xml.Dom;
-using CommunityToolkit.Mvvm.DependencyInjection;
-using StoryCAD.ViewModels;
 
 namespace StoryCAD.Models;
 

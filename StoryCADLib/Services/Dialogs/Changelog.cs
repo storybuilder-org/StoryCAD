@@ -1,13 +1,5 @@
-﻿using System.Threading.Tasks;
-using ABI.Windows.UI.Notifications;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml;
+﻿using Microsoft.UI.Xaml;
 using Octokit;
-using StoryCAD.Models;
-using System;
-using CommunityToolkit.Mvvm.DependencyInjection;
-using StoryCAD.Services.Logging;
-using MySqlX.XDevAPI.Common;
 
 namespace StoryCAD.Services.Dialogs
 {

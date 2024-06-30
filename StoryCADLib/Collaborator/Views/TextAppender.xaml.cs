@@ -1,7 +1,6 @@
 using Microsoft.UI.Xaml;
 using StoryCAD.Controls;
 using StoryCAD.Collaborator.ViewModels;
-using CommunityToolkit.Mvvm.DependencyInjection;
 
 namespace StoryCAD.Collaborator.Views;
 

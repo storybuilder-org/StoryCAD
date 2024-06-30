@@ -1,17 +1,10 @@
-using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.DependencyInjection;
 using StoryCAD.DAL;
-using StoryCAD.Models;
 using StoryCAD.Models.Tools;
 using StoryCAD.Services.Backend;
-using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml;
-using Windows.UI.ViewManagement;
-using System;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
 using StoryCAD.Services.Ratings;
 using StoryCAD.Services;
 

@@ -1,17 +1,10 @@
-﻿using System;
-using System.IO;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using StoryCAD.DAL;
-using StoryCAD.Models;
-using StoryCAD.Models.Tools;
 using StoryCAD.Services;
 using StoryCAD.Services.Dialogs;
-using StoryCAD.Services.Logging;
 
 namespace StoryCAD.ViewModels;
 

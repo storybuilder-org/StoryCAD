@@ -1,16 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Text;
 using Windows.Data.Xml.Dom;
 using Windows.Storage;
-using CommunityToolkit.Mvvm.DependencyInjection;
 using NRtfTree.Util;
 using StoryCAD.DAL;
-using StoryCAD.Models;
 using StoryCAD.Models.Scrivener;
-using StoryCAD.ViewModels;
 
 namespace StoryCAD.Services.Reports
 {

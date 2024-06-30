@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace StoryCAD.Collaborator.Models;
+﻿namespace StoryCAD.Collaborator.Models;
 
 public class WizardStepArgs
 {

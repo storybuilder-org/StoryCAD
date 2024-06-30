@@ -1,6 +1,5 @@
 using System.Collections.ObjectModel;
 using Windows.Storage;
-using StoryCAD.ViewModels;
 
 namespace StoryCAD.Models;
 

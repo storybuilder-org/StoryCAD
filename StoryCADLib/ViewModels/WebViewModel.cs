@@ -1,21 +1,11 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using StoryCAD.Services.Navigation;
-using System;
-using CommunityToolkit.Mvvm.DependencyInjection;
-using Microsoft.UI.Xaml.Controls;
-using StoryCAD.Services.Logging;
-using StoryCAD.Models;
 using CommunityToolkit.Mvvm.Messaging;
 using StoryCAD.Services.Messages;
-using LogLevel = StoryCAD.Services.Logging.LogLevel;
 using System.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Web.WebView2.Core;
 using System.Diagnostics;
-using System.IO;
-using System.Net.Http;
-using System.Threading.Tasks;
-using NLog;
 using StoryCAD.Services;
 
 namespace StoryCAD.ViewModels;

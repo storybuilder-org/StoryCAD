@@ -1,6 +1,4 @@
-﻿using Microsoft.UI.Xaml.Controls;
-
-namespace StoryCAD.Services.Navigation;
+﻿namespace StoryCAD.Services.Navigation;
 
     // ****************************************************************************
 // <copyright file="INavigationService.cs" company="GalaSoft Laurent Bugnion">

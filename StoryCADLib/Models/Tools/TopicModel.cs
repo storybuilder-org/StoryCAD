@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace StoryCAD.Models.Tools;
+﻿namespace StoryCAD.Models.Tools;
 
 public enum TopicTypeEnum { Notepad, Inline }
 public class TopicModel

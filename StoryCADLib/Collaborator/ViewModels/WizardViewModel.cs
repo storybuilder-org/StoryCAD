@@ -1,21 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
-using StoryCAD.Models;
-using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml;
-using Type = System.Type;
-using System.Linq;
 using System.Reflection;
 using StoryCAD.Collaborator.Models;
 using StoryCAD.Services.Navigation;
 //using StoryCollaborator.Models;
 using StoryCAD.Collaborator.Views;
 using StoryCAD.Services.Collaborator;
-using StoryCAD.Services.Logging;
 
 namespace StoryCAD.Collaborator.ViewModels;
 

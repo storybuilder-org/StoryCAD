@@ -1,13 +1,10 @@
 using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.UI;
 using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using StoryCAD.DAL;
-using StoryCAD.Models;
 using StoryCAD.Models.Tools;
 using StoryCAD.Services.Backend;
 using StoryCAD.Services.Backup;
@@ -15,32 +12,20 @@ using StoryCAD.Services.Collaborator;
 using StoryCAD.Services.Dialogs;
 using StoryCAD.Services.Dialogs.Tools;
 using StoryCAD.Services.Json;
-using StoryCAD.Services.Logging;
 using StoryCAD.Services.Messages;
 using StoryCAD.Services.Navigation;
 using StoryCAD.Services.Reports;
 using StoryCAD.Services.Search;
 using StoryCAD.ViewModels.Tools;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Threading.Tasks;
 using Windows.Storage;
 using Windows.Storage.Pickers;
 using StoryCAD.Services;
 using WinRT;
-using GuidAttribute = System.Runtime.InteropServices.GuidAttribute;
-using Path = System.IO.Path;
-using Octokit;
 using WinUIEx;
-using Application = Microsoft.UI.Xaml.Application;
-using FileAttributes = System.IO.FileAttributes;
-using Org.BouncyCastle.Asn1.Cms;
 
 namespace StoryCAD.ViewModels;
 
@@ -825,7 +810,7 @@ public class ShellViewModel : ObservableRecipient
 			if (ShowOfflineError)
 			{
 				//The file is actually inaccessible and microsoft is wrong.
-				if ((FileAttributes & FileAttributes.Offline) == 0)
+				if ((FileAttributes & System.IO.FileAttributes.Offline) == 0)
 				{
 					Logger.Log(LogLevel.Error, $"File {StoryModel.ProjectFile.Path} is unavailable.");
 					CloseUnifiedCommand.Execute(null);

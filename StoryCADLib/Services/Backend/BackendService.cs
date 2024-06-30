@@ -1,13 +1,8 @@
-﻿using System;
-using System.Threading.Tasks;
-using Windows.Storage;
-using CommunityToolkit.Mvvm.DependencyInjection;
+﻿using Windows.Storage;
 using MySql.Data.MySqlClient;
 using StoryCAD.DAL;
-using StoryCAD.Models;
 using StoryCAD.Models.Tools;
 using StoryCAD.Services.Json;
-using StoryCAD.Services.Logging;
 
 namespace StoryCAD.Services.Backend;
 

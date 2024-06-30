@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace StoryCAD.Exceptions
+﻿namespace StoryCAD.Exceptions
 {
     public class ResourceLoadingException : Exception
     {

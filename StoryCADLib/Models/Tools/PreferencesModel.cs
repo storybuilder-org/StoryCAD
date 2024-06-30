@@ -1,6 +1,5 @@
 ﻿using Microsoft.UI.Xaml;
 using CommunityToolkit.Mvvm.ComponentModel;
-using System;
 
 
 namespace StoryCAD.Models.Tools;
