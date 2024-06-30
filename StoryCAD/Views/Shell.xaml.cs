@@ -1,23 +1,16 @@
-﻿using System;
-using CommunityToolkit.Mvvm.DependencyInjection;
-using Microsoft.UI.Xaml;
+﻿using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
-using StoryCAD.Models;
 using StoryCAD.Models.Tools;
 using StoryCAD.Services.Logging;
-using StoryCAD.ViewModels;
 using Windows.Foundation;
 using Windows.UI.ViewManagement;
 using Windows.ApplicationModel.DataTransfer;
 using Microsoft.UI;
 using StoryCAD.Services.Collaborator;
-using Application = Microsoft.UI.Xaml.Application;
-using Page = Microsoft.UI.Xaml.Controls.Page;
-using DispatcherQueue = Microsoft.UI.Dispatching.DispatcherQueue;
 using StoryCAD.Exceptions;
 using StoryCAD.Services;
 using StoryCAD.Services.Dialogs;
@@ -50,7 +43,7 @@ public sealed partial class Shell
             AllowDrop = false;
             Logger = Ioc.Default.GetService<LogService>();
             DataContext = ShellVm;
-            Ioc.Default.GetRequiredService<Windowing>().GlobalDispatcher = DispatcherQueue.GetForCurrentThread();
+            Ioc.Default.GetRequiredService<Windowing>().GlobalDispatcher = Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread();
             Loaded += Shell_Loaded;
         }
         catch (Exception ex)

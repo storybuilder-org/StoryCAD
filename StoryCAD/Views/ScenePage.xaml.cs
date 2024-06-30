@@ -1,9 +1,4 @@
-﻿using System.ComponentModel;
-using CommunityToolkit.Mvvm.DependencyInjection;
-using Microsoft.UI.Xaml.Controls;
-using StoryCAD.Controls;
-using StoryCAD.Models;
-using StoryCAD.ViewModels;
+﻿using Microsoft.UI.Xaml.Controls;
 
 namespace StoryCAD.Views;
 

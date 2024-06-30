@@ -1,8 +1,4 @@
-﻿using ABI.Microsoft.UI.Xaml;
-using CommunityToolkit.Mvvm.DependencyInjection;
-using StoryCAD.Models;
-
-namespace StoryCAD.Views;
+﻿namespace StoryCAD.Views;
 
 public sealed partial class HomePage
 {

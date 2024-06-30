@@ -1,12 +1,6 @@
-﻿using CommunityToolkit.Mvvm.DependencyInjection;
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using System;
+﻿using Microsoft.UI.Xaml.Controls;
 using Microsoft.Web.WebView2.Core;
-using StoryCAD.ViewModels;
 using StoryCAD.Services.Logging;
-using LogLevel = StoryCAD.Services.Logging.LogLevel;
-using StoryCAD.Controls;
 
 namespace StoryCAD.Views;
 
