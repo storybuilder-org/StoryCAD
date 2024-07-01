@@ -16,6 +16,7 @@ using Microsoft.UI.Xaml;
 using StoryCAD.DAL;
 using StoryCAD.Services.IoC;
 using StoryCAD.Services;
+using StoryCAD.Services.Collaborator;
 
 namespace StoryCAD;
 

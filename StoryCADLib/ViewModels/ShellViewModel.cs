@@ -26,6 +26,7 @@ using WinUIEx;
 using Application = Microsoft.UI.Xaml.Application;
 using FileAttributes = System.IO.FileAttributes;
 using Org.BouncyCastle.Asn1.Cms;
+using StoryCAD.Collaborator.ViewModels;
 
 namespace StoryCAD.ViewModels;
 
