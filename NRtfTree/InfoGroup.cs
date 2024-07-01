@@ -29,9 +29,6 @@
  *              grupo RTF de tipo "\info".
  * ******************************************************************************/
 
-using System;
-using System.Text;
-
 namespace NRtfTree
 {
     namespace Util

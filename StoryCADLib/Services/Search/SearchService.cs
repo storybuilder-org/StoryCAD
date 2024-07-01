@@ -1,11 +1,4 @@
-﻿using System;
-using CommunityToolkit.Mvvm.DependencyInjection;
-using Google.Protobuf.WellKnownTypes;
-using StoryCAD.Models;
-using StoryCAD.Services.Logging;
-using StoryCAD.ViewModels;
-
-namespace StoryCAD.Services.Search;
+﻿namespace StoryCAD.Services.Search;
 
 public class SearchService
 {

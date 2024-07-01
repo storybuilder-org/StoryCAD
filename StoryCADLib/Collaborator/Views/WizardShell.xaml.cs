@@ -1,10 +1,6 @@
-using System;
-using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
 using StoryCAD.Collaborator.ViewModels;
-using Page = Microsoft.UI.Xaml.Controls.Page;
 
 namespace StoryCAD.Collaborator;
 

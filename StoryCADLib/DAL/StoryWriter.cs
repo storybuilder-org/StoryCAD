@@ -1,16 +1,8 @@
-﻿using System;
-using System.Diagnostics;
-using System.IO;
+﻿using System.Diagnostics;
 using System.Text;
-using System.Threading.Tasks;
 using System.Xml;
 using Windows.Storage;
-using CommunityToolkit.Mvvm.DependencyInjection;
 using NLog;
-using StoryCAD.Models;
-using StoryCAD.Services.Logging;
-using StoryCAD.ViewModels;
-using LogLevel = NLog.LogLevel;
 
 namespace StoryCAD.DAL;
 
@@ -139,7 +131,7 @@ public class StoryWriter
                     ParseWebElement(_element);
                     break;
                 default:
-                    Ioc.Default.GetRequiredService<Logger>().Log(LogLevel.Warn, "Unknown Element found in StoryWriter: " + _element.Type);
+                    Ioc.Default.GetRequiredService<Logger>().Log(NLog.LogLevel.Warn, "Unknown Element found in StoryWriter: " + _element.Type);
                     break;
             }
         }

@@ -28,8 +28,6 @@
  * Description:	Analizador secuencial de documentos RTF.
  * ******************************************************************************/
 
-using System.IO;
-
 namespace NRtfTree
 {
     namespace Core

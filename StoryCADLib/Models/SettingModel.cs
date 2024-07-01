@@ -130,8 +130,25 @@ public class SettingModel : StoryElement
         Notes = string.Empty;
         SettingNames.Add(Name);
     }
+    public SettingModel(string name, StoryModel model) : base(name, StoryItemType.Setting, model)
+    {
+	    Locale = string.Empty;
+	    Season = string.Empty;
+	    Period = string.Empty;
+	    Lighting = string.Empty;
+	    Weather = string.Empty;
+	    Temperature = string.Empty;
+	    Props = string.Empty;
+	    Summary = string.Empty;
+	    Sights = string.Empty;
+	    Sounds = string.Empty;
+	    Touch = string.Empty;
+	    SmellTaste = string.Empty;
+	    Notes = string.Empty;
+	    SettingNames.Add(Name);
+    }
 
-    public SettingModel(IXmlNode xn, StoryModel model) : base(xn, model)
+	public SettingModel(IXmlNode xn, StoryModel model) : base(xn, model)
     {
         Locale = string.Empty;
         Season = string.Empty;

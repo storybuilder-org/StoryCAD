@@ -28,9 +28,6 @@
  * Description:	Nodo RTF de la representación en árbol de un documento.
  * ******************************************************************************/
 
-using System;
-using System.Text;
-
 namespace NRtfTree
 {
     namespace Core

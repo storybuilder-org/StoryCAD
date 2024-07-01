@@ -1,11 +1,6 @@
-﻿using System;
-using CommunityToolkit.Mvvm.DependencyInjection;
-using StoryCAD.DAL;
+﻿using StoryCAD.DAL;
 using StoryCAD.Models.Tools;
-using StoryCAD.Services.Logging;
-using System.Threading.Tasks;
 using Microsoft.UI.Xaml;
-using StoryCAD.Models;
 
 namespace StoryCAD.Services;
 

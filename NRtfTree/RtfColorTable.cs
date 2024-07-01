@@ -28,9 +28,6 @@
  * Description:	Tabla de Colores de un documento RTF.
  * ******************************************************************************/
 
-using System.Collections.Generic;
-using System.Drawing;
-
 namespace NRtfTree
 {
     namespace Util

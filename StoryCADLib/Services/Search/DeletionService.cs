@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using CommunityToolkit.Mvvm.DependencyInjection;
-using StoryCAD.Models;
-using StoryCAD.Services.Logging;
-using StoryCAD.ViewModels;
-using LogLevel = StoryCAD.Services.Logging.LogLevel;
-
-namespace StoryCAD.Services.Search;
+﻿namespace StoryCAD.Services.Search;
 
 /// <summary>
 /// This is a copy of the search service however 

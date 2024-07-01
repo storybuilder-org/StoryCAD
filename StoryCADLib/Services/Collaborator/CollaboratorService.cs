@@ -1,19 +1,12 @@
 ﻿using System;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.Loader;
 using Windows.ApplicationModel;
-using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Windowing;
-using Microsoft.UI.Xaml.Controls;
 using StoryCAD.Collaborator;
 using StoryCAD.Collaborator.ViewModels;
-using StoryCAD.Models;
 using StoryCAD.Services.Backup;
-using StoryCAD.Services.Logging;
-using StoryCAD.ViewModels;
 using WinUIEx;
 
 namespace StoryCAD.Services.Collaborator;

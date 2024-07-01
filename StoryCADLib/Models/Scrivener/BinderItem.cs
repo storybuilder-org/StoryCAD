@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Windows.Data.Xml.Dom;
+﻿using Windows.Data.Xml.Dom;
 
 namespace StoryCAD.Models.Scrivener;
 

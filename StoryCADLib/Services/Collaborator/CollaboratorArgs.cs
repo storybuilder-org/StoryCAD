@@ -1,8 +1,6 @@
-﻿using StoryCAD.Models;
-using System.Collections.Generic;
 using StoryCAD.Collaborator.ViewModels;
 
-namespace StoryCAD.Services.Collaborator;
+﻿namespace StoryCAD.Services.Collaborator;
 
 public class CollaboratorArgs
 {

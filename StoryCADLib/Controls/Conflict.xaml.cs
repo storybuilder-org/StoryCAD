@@ -1,10 +1,5 @@
-﻿using System.Collections.Generic;
-using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml;
-using StoryCAD.Models;
 using StoryCAD.Models.Tools;
-using StoryCAD.ViewModels;
-using Syncfusion.UI.Xaml.Editors;
 
 namespace StoryCAD.Controls;
 
@@ -20,7 +15,7 @@ public sealed partial class Conflict
     {
         InitializeComponent();
     }
-    private void Category_SelectionChanged(object sender, ComboBoxSelectionChangedEventArgs e)
+    private void Category_SelectionChanged(object sender, SelectionChangedEventArgs selectionChangedEventArgs)
     {
         category = (string)Category.Items[Category.SelectedIndex];
         model = ConflictTypes[category];
@@ -29,7 +24,7 @@ public sealed partial class Conflict
         Example.SelectedIndex = -1;
     }
 
-    private void SubCategory_SelectionChanged(object sender, ComboBoxSelectionChangedEventArgs e)
+    private void SubCategory_SelectionChanged(object sender, SelectionChangedEventArgs selectionChangedEventArgs)
     {
         if (SubCategory.SelectedIndex > -1)
         {
@@ -38,7 +33,7 @@ public sealed partial class Conflict
         }
     }
 
-    private void Example_SelectionChanged(object sender, ComboBoxSelectionChangedEventArgs e)
+    private void Example_SelectionChanged(object sender, SelectionChangedEventArgs selectionChangedEventArgs)
     {
         ExampleText = (string)Example.SelectedItem;
     }

@@ -1,17 +1,7 @@
-﻿using System;
 using System.Diagnostics;
-using System.IO;
-using System.Runtime.InteropServices;
 using Windows.Storage;
-using Windows.Storage.Pickers;
-using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml;
-using StoryCAD.Models;
-using StoryCAD.Services.Logging;
 using StoryCAD.ViewModels.Tools;
-using WinRT;
-using Microsoft.UI.Xaml.Controls;
-using StoryCAD.Services.Ratings;
 
 namespace StoryCAD.Services.Dialogs.Tools;
 
@@ -59,18 +49,7 @@ public sealed partial class PreferencesDialog
 
     private async void SetBackupPath(object sender, RoutedEventArgs e)
     {
-        FolderPicker _folderPicker = new();
-        if (Window.Current == null)
-        {
-            //TODO: Can this be put into a helper class or removed at some point with WinAppSDK updates?
-            IntPtr hwnd = window.WindowHandle;
-            IInitializeWithWindow initializeWithWindow = _folderPicker.As<IInitializeWithWindow>();
-            initializeWithWindow.Initialize(hwnd);
-        }
-
-        _folderPicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
-        _folderPicker.FileTypeFilter.Add("*");
-        StorageFolder _folder = await _folderPicker.PickSingleFolderAsync();
+        StorageFolder _folder = await window.ShowFolderPicker();
         if (_folder != null)
         {
             PreferencesVm.BackupDirectory = _folder.Path;
@@ -78,29 +57,13 @@ public sealed partial class PreferencesDialog
     }
     private async void SetProjectPath(object sender, RoutedEventArgs e)
     {
-        FolderPicker _folderPicker = new();
-        if (Window.Current == null)
-        {
-            //IntPtr hwnd = GetActiveWindow();
-            IntPtr _hwnd = window.WindowHandle;
-            IInitializeWithWindow _initializeWithWindow = _folderPicker.As<IInitializeWithWindow>();
-            _initializeWithWindow.Initialize(_hwnd);
-        }
-
-        _folderPicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
-        _folderPicker.FileTypeFilter.Add("*");
-        StorageFolder folder = await _folderPicker.PickSingleFolderAsync();
+        StorageFolder folder = await window.ShowFolderPicker();
         if (folder != null)
         {
             PreferencesVm.ProjectDirectory = folder.Path;
             ProjDirBox.Text = folder.Path; //Updates the box visually (fixes visual glitch.)
         }
     }
-
-    [ComImport]
-    [Guid("3E68D4BD-7135-4D10-8018-9FB6D9F33FA1")]
-    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-    public interface IInitializeWithWindow { void Initialize(IntPtr hwnd); }
 
     /// <summary>
     /// This function throws an error as it is used to test errors.
@@ -180,4 +143,22 @@ public sealed partial class PreferencesDialog
         //Launch relevant app (browser/mail client)
         Process.Start(URL);
     }
+    /// <summary>
+	/// Spawns the element picker UI and shows the result
+	/// </summary>
+    private async void OpenPickerUI(object sender, RoutedEventArgs e)
+    {
+	    // Show dialog
+		StoryElement Element = await Ioc.Default.GetRequiredService<ElementPickerVM
+			>().ShowPicker();
+
+		if (Element == null) return; // User cancelled (or error occurred)
+		// Show result
+	    await Ioc.Default.GetRequiredService<Windowing>().ShowContentDialog(new()
+	    {
+		    Title = "Result",
+		    Content = "User picked item " + Element.Name,
+			PrimaryButtonText = "OK"
+		}, true);
+	}
 }

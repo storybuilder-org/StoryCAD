@@ -1,7 +1,4 @@
 ﻿using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using StoryCAD.Models;
-using StoryCAD.ViewModels;
 
 namespace StoryCAD.Controls;
 
@@ -11,6 +8,7 @@ public sealed class ProblemName : ComboBox
     public ProblemName()
     {
         DefaultStyleKey = typeof(ComboBox);
+        CornerRadius = new(4);
         Loaded += ProblemName_Loaded;
     }
 

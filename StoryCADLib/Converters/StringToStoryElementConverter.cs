@@ -1,7 +1,4 @@
-﻿using System;
-using Microsoft.UI.Xaml.Data;
-using StoryCAD.Models;
-using StoryCAD.ViewModels;
+﻿using Microsoft.UI.Xaml.Data;
 
 namespace StoryCAD.Converters;
 

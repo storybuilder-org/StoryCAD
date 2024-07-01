@@ -1,13 +1,10 @@
 using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.UI;
 using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using StoryCAD.DAL;
-using StoryCAD.Models;
 using StoryCAD.Models.Tools;
 using StoryCAD.Services.Backend;
 using StoryCAD.Services.Backup;
@@ -15,33 +12,20 @@ using StoryCAD.Services.Collaborator;
 using StoryCAD.Services.Dialogs;
 using StoryCAD.Services.Dialogs.Tools;
 using StoryCAD.Services.Json;
-using StoryCAD.Services.Logging;
 using StoryCAD.Services.Messages;
 using StoryCAD.Services.Navigation;
 using StoryCAD.Services.Reports;
 using StoryCAD.Services.Search;
 using StoryCAD.ViewModels.Tools;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Threading.Tasks;
 using Windows.Storage;
-using Windows.Storage.Pickers;
 using StoryCAD.Services;
-using WinRT;
-using GuidAttribute = System.Runtime.InteropServices.GuidAttribute;
-using Path = System.IO.Path;
-using Octokit;
 using WinUIEx;
 using Application = Microsoft.UI.Xaml.Application;
 using FileAttributes = System.IO.FileAttributes;
 using Org.BouncyCastle.Asn1.Cms;
-using StoryCAD.Collaborator.ViewModels;
 
 namespace StoryCAD.ViewModels;
 
@@ -682,10 +666,14 @@ public class ShellViewModel : ObservableRecipient
     {
         ContentDialog Dialog = new()
         {
-            Title = "File missing.",
-            Content = "This copy is missing a key file, if you are working on a branch or fork this is expected and you do not need to do anything about this." +
-                       "\nHowever if you are not a developer then report this as it should not happen.\nThe following may have issues or possible errors\n" +
-                       "Syncfusion related items and error logging.",
+            Title = "Key file missing.",
+            Content = """
+                      Your version of StoryCAD is missing a key file.
+                      If you are a developer you can safely ignore this message.
+                      If you are a user you should report this as you are not supposed to see this message.
+                      
+                      Things such as logging and elmah.io will not work without the key file.
+                      """,
             PrimaryButtonText = "Okay"
         };
         await Window.ShowContentDialog(Dialog);
@@ -786,15 +774,8 @@ public class ShellViewModel : ObservableRecipient
             if (fromPath == "" || !File.Exists(fromPath))
             {
                 Logger.Log(LogLevel.Info, "Opening file picker as story wasn't able to be found");
-                FileOpenPicker _filePicker = new();
-                //Make folder Picker work in Win32
-                WinRT.Interop.InitializeWithWindow.Initialize(_filePicker, Window.WindowHandle);
-                _filePicker.CommitButtonText = "Project Folder";
-                //TODO: Use preferences project folder instead of DocumentsLibrary
-                //except you can't. Thanks, UWP.
-                _filePicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
-                _filePicker.FileTypeFilter.Add(".stbx");
-                StoryModel.ProjectFile = await _filePicker.PickSingleFileAsync();
+
+                StoryModel.ProjectFile = await Ioc.Default.GetService<Windowing>().ShowFilePicker("Open Project File",".stbx");
                 if (StoryModel.ProjectFile == null) //Picker was canceled.
                 {
                     Logger.Log(LogLevel.Info, "Open file picker cancelled.");
@@ -829,7 +810,7 @@ public class ShellViewModel : ObservableRecipient
 			if (ShowOfflineError)
 			{
 				//The file is actually inaccessible and microsoft is wrong.
-				if ((FileAttributes & FileAttributes.Offline) == 0)
+				if ((FileAttributes & System.IO.FileAttributes.Offline) == 0)
 				{
 					Logger.Log(LogLevel.Error, $"File {StoryModel.ProjectFile.Path} is unavailable.");
 					CloseUnifiedCommand.Execute(null);
@@ -1467,15 +1448,7 @@ public class ShellViewModel : ObservableRecipient
         SaveModel();
 
         // Select the Scrivener .scrivx file to add the report to
-        FileOpenPicker _openPicker = new();
-        IntPtr _hwnd = GetActiveWindow();
-        IInitializeWithWindow _initializeWithWindow = _openPicker.As<IInitializeWithWindow>();
-        _initializeWithWindow.Initialize(_hwnd);
-
-		_openPicker.ViewMode = PickerViewMode.List;
-        _openPicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
-        _openPicker.FileTypeFilter.Add(".scrivx");
-        StorageFile _file = await _openPicker.PickSingleFileAsync();
+        StorageFile _file = await Ioc.Default.GetService<Windowing>().ShowFilePicker("Open file", ".scrivx");
         if (_file != null)
         {
             Scrivener.ScrivenerFile = _file;
@@ -2792,14 +2765,5 @@ public class ShellViewModel : ObservableRecipient
     }
     #endregion
 
-    [ComImport]
-    [Guid("3E68D4BD-7135-4D10-8018-9FB6D9F33FA1")]
-    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-    public interface IInitializeWithWindow
-    {
-        void Initialize(IntPtr hwnd);
-    }
 
-    [DllImport("user32.dll", ExactSpelling = true, CharSet = CharSet.Auto, PreserveSig = true, SetLastError = false)]
-    private static extern IntPtr GetActiveWindow();
 }

@@ -1,41 +1,23 @@
-﻿using System;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Diagnostics;
 using Windows.ApplicationModel;
-using CommunityToolkit.Mvvm.DependencyInjection;
 using dotenv.net;
-using dotenv.net.Utilities;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.Windows.AppLifecycle;
 using PInvoke;
-using StoryCAD.Models;
 using StoryCAD.Services.Backend;
 using StoryCAD.Services.Json;
 using StoryCAD.Services.Logging;
 using StoryCAD.Services.Navigation;
-using StoryCAD.ViewModels;
 using StoryCAD.Views;
-using Syncfusion.Licensing;
 using WinUIEx;
 using AppInstance = Microsoft.Windows.AppLifecycle.AppInstance;
-using UnhandledExceptionEventArgs = Microsoft.UI.Xaml.UnhandledExceptionEventArgs;
 using Windows.ApplicationModel.Activation;
-using K4os.Hash.xxHash;
 using Microsoft.UI.Xaml;
 using StoryCAD.DAL;
-using LaunchActivatedEventArgs = Microsoft.UI.Xaml.LaunchActivatedEventArgs;
-using System.Globalization;
-using System.Reflection;
-    using System.Runtime.Loader;
-    using StoryCAD.Services.IoC;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI;
+using StoryCAD.Services.IoC;
 using StoryCAD.Services;
-using StoryCAD.Services.Collaborator;
 
-    namespace StoryCAD;
+namespace StoryCAD;
 
 public partial class App
 {
@@ -81,10 +63,6 @@ public partial class App
         try
         {
             DotEnv.Load(options);
-
-            //Register Syncfusion license
-            string token = EnvReader.GetStringValue("SYNCFUSION_TOKEN");
-            SyncfusionLicenseProvider.RegisterLicense(token);
             Ioc.Default.GetRequiredService<AppState>().EnvPresent = true;
         }
         catch { }
@@ -136,7 +114,7 @@ public partial class App
     /// will be used such as when the application is launched to open a specific file.
     /// </summary>
     /// <param name="args">Details about the launch request and process.</param>
-    protected override async void OnLaunched(LaunchActivatedEventArgs args)
+    protected override async void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
     {
         _log.Log(LogLevel.Info, "StoryCAD.App launched");
 		// Note: Shell_Loaded in Shell.xaml.cs will display a
@@ -260,7 +238,7 @@ public partial class App
         }
     }
 
-    private void OnUnhandledException(object sender, UnhandledExceptionEventArgs e)
+    private void OnUnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
     {
         _log.LogException(LogLevel.Fatal, e.Exception, e.Message);
         _log.Flush();

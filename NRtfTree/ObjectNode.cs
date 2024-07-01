@@ -29,7 +29,6 @@
  * ******************************************************************************/
 
 using System.Globalization;
-using System.Text;
 using NRtfTree.Core;
 
 namespace NRtfTree

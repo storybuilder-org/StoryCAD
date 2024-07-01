@@ -1,9 +1,4 @@
-﻿using System.IO;
-using CommunityToolkit.Mvvm.DependencyInjection;
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using StoryCAD.Models;
-using StoryCAD.ViewModels;
+﻿using Microsoft.UI.Xaml;
 
 namespace StoryCAD.Services.Dialogs;
 
@@ -33,17 +28,8 @@ public sealed partial class RecentFiles : Page
                     StackPanel Item = new();
                     ToolTipService.SetToolTip(Item,File);
                     Item.Width = 300;
-                    Item.Children.Add(new TextBlock
-                    {
-	                    Text = Path.GetFileName(File).Replace(".stbx", ""),
-	                    FontSize = 20
-                    });
-                    Item.Children.Add(new TextBlock
-                    {
-	                    Text = "Last edited: " + System.IO.File.GetLastWriteTime(File),
-	                    FontSize = 10,
-	                    VerticalAlignment = VerticalAlignment.Center
-                    });
+                    Item.Children.Add(new TextBlock { Text = Path.GetFileNameWithoutExtension(File), FontSize = 20 });
+                    Item.Children.Add(new TextBlock { Text = "Last edited: " + System.IO.File.GetLastWriteTime(File), FontSize = 10, VerticalAlignment = VerticalAlignment.Center });
                     Recents.Items.Add(Item);
                 }
             }

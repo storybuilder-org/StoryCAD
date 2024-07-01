@@ -1,13 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using CommunityToolkit.Mvvm.DependencyInjection;
+﻿using System.Reflection;
 using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using StoryCAD.Models;
-using StoryCAD.ViewModels;
 
 namespace StoryCAD.Services.Dialogs;
 

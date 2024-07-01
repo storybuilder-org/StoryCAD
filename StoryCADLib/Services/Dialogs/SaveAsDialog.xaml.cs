@@ -1,13 +1,5 @@
-﻿using System;
-using System.Runtime.InteropServices;
-using Windows.Storage;
-using Windows.Storage.Pickers;
-using CommunityToolkit.Mvvm.DependencyInjection;
+﻿using Windows.Storage;
 using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using StoryCAD.Models;
-using StoryCAD.ViewModels;
-using WinRT.Interop;
 
 namespace StoryCAD.Services.Dialogs;
 
@@ -29,21 +21,7 @@ public sealed partial class SaveAsDialog : Page
     {
         ProjectPathName.IsReadOnly = false;
         // may throw error if invalid folder location
-        FolderPicker folderPicker = new();
-        InitializeWithWindow.Initialize(folderPicker, Ioc.Default.GetRequiredService<Windowing>().WindowHandle);
-
-        //Make FolderPicker work in Win32
-        //if (Window.Current == null)
-        //{
-        //    IntPtr hwnd = GetActiveWindow();
-        //    var initializeWithWindow = folderPicker.As<IInitializeWithWindow>();
-        //    initializeWithWindow.Initialize(hwnd);
-        //}
-        folderPicker.CommitButtonText = "Select folder";
-        folderPicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
-        folderPicker.FileTypeFilter.Add("*");
-
-        ParentFolder = await folderPicker.PickSingleFolderAsync();
+        ParentFolder = await Ioc.Default.GetService<Windowing>().ShowFolderPicker();
         SaveAsVm.ParentFolder = ParentFolder;
 
         if (ParentFolder != null)
@@ -54,24 +32,4 @@ public sealed partial class SaveAsDialog : Page
             ProjectPathName.IsReadOnly = true;
         }
     }
-
-    [ComImport]
-    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-    [Guid("EECDBF0E-BAE9-4CB6-A68E-9598E1CB57BB")]
-    internal interface IWindowNative
-    {
-        IntPtr WindowHandle { get; }
-    }
-
-    [ComImport]
-    [Guid("3E68D4BD-7135-4D10-8018-9FB6D9F33FA1")]
-    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-    public interface IInitializeWithWindow
-    {
-        void Initialize(IntPtr hwnd);
-    }
-
-    [DllImport("user32.dll", ExactSpelling = true, CharSet = CharSet.Auto, PreserveSig = true, SetLastError = false)]
-    public static extern IntPtr GetActiveWindow();
-
 }
