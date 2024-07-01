@@ -103,6 +103,15 @@ public class CollaboratorService
         wizardCall!.Invoke(collaborator, null);
     }
 
+    /// <summary>
+    /// Save any unchanged OutputProperty values to their StoryElement.
+    ///
+    /// This is a proxy for Collaborator's SaveOutputs() method.
+    /// </summary>
+    public void SaveOutputs()
+    {
+    }
+
     #endregion
 
     #region Collaboratorlib connection
@@ -180,36 +189,16 @@ public class CollaboratorService
 		logger.Log(LogLevel.Info, $"Collaborator.dll exists {dllExists}");
 	    return dllExists;
     }
-	#endregion
+    #endregion
 
-	#region Show/Hide window
-	//TODO: Use Show and hide properly
-	//CollaboratorWindow.Show();
-	//CollaboratorWindow.Activate();
-	//Logger.Log(LogLevel.Debug, "Collaborator window opened and focused");
-	/// <summary>
-	/// This closes, disposes and full removes collaborator from memory.
-	/// </summary>
-	public void DestroyCollaborator()
-    {
-        //TODO: Absolutely make sure Collaborator is not left in memory after this.
-        logger.Log(LogLevel.Warn, "Destroying collaborator object.");
-        if (CollaboratorWindow != null)
-        {
-            CollaboratorWindow.Close(); // Destroy window object
-            logger.Log(LogLevel.Info, "Closed collaborator window");
-
-            //Null objects to deallocate them
-            CollabAssembly = null;
-            logger.Log(LogLevel.Info, "Nulled collaborator objects");
-
-            //Run garbage collection to clean up any remnants.
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
-            logger.Log(LogLevel.Info, "Garbage collection finished.");
-
-        }
-    }
+    #region Show/Hide window
+    //TODO: Use Show and hide properly
+    //CollaboratorWindow.Show();
+    //CollaboratorWindow.Activate();
+    //Logger.Log(LogLevel.Debug, "Collaborator window opened and focused");
+    /// <summary>
+    /// This closes, disposes and full removes collaborator from memory.
+    /// </summary>
 
     /// <summary>
     /// This will hide the collaborator window.
@@ -246,6 +235,28 @@ public class CollaboratorService
         Ioc.Default.GetRequiredService<ShellViewModel>()._canExecuteCommands = true;
         logger.Log(LogLevel.Info, "Async re-enabled.");
     }
+
+    public void DestroyCollaborator()
+    {
+        //TODO: Absolutely make sure Collaborator is not left in memory after this.
+        logger.Log(LogLevel.Warn, "Destroying collaborator object.");
+        if (CollaboratorWindow != null)
+        {
+            CollaboratorWindow.Close(); // Destroy window object
+            logger.Log(LogLevel.Info, "Closed collaborator window");
+
+            //Null objects to deallocate them
+            CollabAssembly = null;
+            logger.Log(LogLevel.Info, "Nulled collaborator objects");
+
+            //Run garbage collection to clean up any remnants.
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            logger.Log(LogLevel.Info, "Garbage collection finished.");
+
+        }
+    }
+
     public void CollaboratorClosed()
     {
         logger.Log(LogLevel.Debug, "Closing Collaborator.");
@@ -255,6 +266,8 @@ public class CollaboratorService
     #endregion
 
 }
+
+
 
 //TODO: On calls, set callback delegate
 //args.onDoneCallback = FinishedCallback;

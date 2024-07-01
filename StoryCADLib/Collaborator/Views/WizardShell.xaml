@@ -12,7 +12,7 @@
     <NavigationView x:Name="NavView"
                     Grid.Row="1"
                     IsBackButtonVisible="Collapsed"
-                    MenuItemsSource="{x:Bind WizardVM.MenuSteps, Mode=OneWay}" 
+                    MenuItemsSource="{x:Bind WizardVm.MenuSteps, Mode=OneWay}" 
                     IsSettingsVisible="False"
                     SelectionChanged="NavView_SelectionChanged"
                     PaneDisplayMode="Left">
@@ -31,15 +31,23 @@
                             <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE897;"/>
                         </AppBarButton.Icon>
                     </AppBarButton>
+                    <AppBarButton Label="Accept" Margin="5"
+                                  Visibility="{x:Bind WizardVm.AcceptVisibility, Mode=TwoWay}"
+                                  Command="{x:Bind WizardVm.AcceptCommand, Mode=OneWay}" >
+                    </AppBarButton>
+                    <AppBarButton Margin="5">Retry</AppBarButton>
+                    <AppBarButton Margin="5">Previous</AppBarButton>
+                    <AppBarButton Margin="5">Next</AppBarButton>
+                    <AppBarButton Label="Exit" Margin="5"
+                        Visibility="{x:Bind WizardVm.ExitVisibility, Mode=TwoWay}"
+                        Command="{x:Bind WizardVm.ExitCommand, Mode=OneWay}" >
+                    </AppBarButton>
                 </CommandBar.PrimaryCommands>
             </CommandBar>
             <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Stretch">
                 <!--<TextBlock Text="{x:Bind UsageText, Mode=OneWay}" Width="100" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="10"/>-->
                 <!-- <AutoSuggestBox Height="35" Width="auto" MinWidth="500" HorizontalAlignment="Stretch" PlaceholderText="Type your ideas here..." QueryIcon="Send"/> -->
-                <Button Margin="5">Accept</Button>
-                <Button Margin="5">Retry</Button>
-                <Button Margin="5" Content="Back"/>
-                <Button Margin="5" Content="Exit"/>
+
 
             </StackPanel>
         </Grid>

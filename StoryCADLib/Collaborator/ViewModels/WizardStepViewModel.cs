@@ -19,29 +19,34 @@ using StoryCAD.Collaborator.ViewModels;
 
 namespace StoryCAD.Collaborator.ViewModels;
 
-public class WizardStepViewModel: ObservableRecipient, INavigable
+public class WizardStepViewModel : ObservableRecipient, INavigable
 {
     private string _title;
-    public string Title 
-    { 
-        get => _title; 
-        set => SetProperty(ref _title, value); }
+
+    public string Title
+    {
+        get => _title;
+        set => SetProperty(ref _title, value);
+    }
 
     private string _description;
+
     public string Description
     {
-        get => _description; 
-        set=> SetProperty(ref _description, value);
+        get => _description;
+        set => SetProperty(ref _description, value);
     }
 
     private string _inputText;
-    public  string InputText
+
+    public string InputText
     {
         get => _inputText;
         set => SetProperty(ref _inputText, value);
     }
 
     private string _promptText;
+
     public string PromptText
     {
         get => _promptText;
@@ -57,6 +62,7 @@ public class WizardStepViewModel: ObservableRecipient, INavigable
     }
 
     private float _temperature;
+
     public float Temperature
     {
         get => _temperature;
@@ -64,6 +70,7 @@ public class WizardStepViewModel: ObservableRecipient, INavigable
     }
 
     private string _outputText;
+
     public string OutputText
     {
         get => _outputText;
@@ -71,6 +78,7 @@ public class WizardStepViewModel: ObservableRecipient, INavigable
     }
 
     private string _usageText;
+
     public string UsageText
     {
         get => _usageText;
@@ -79,6 +87,7 @@ public class WizardStepViewModel: ObservableRecipient, INavigable
 
 
     private BindablePage _pageInstance;
+
     public BindablePage PageInstance
     {
         get => _pageInstance;
@@ -93,11 +102,7 @@ public class WizardStepViewModel: ObservableRecipient, INavigable
 
     public string Prompt { get; set; }
     public string Output { get; set; }
-    public StoryElement Model
-    {
-        get; 
-        set;
-    }
+    public StoryElement Model { get; set; }
 
     public WizardStepViewModel()
     {
@@ -117,43 +122,14 @@ public class WizardStepViewModel: ObservableRecipient, INavigable
         //Model = (CharacterModel)parameter;
         LoadModel(); // Load the ViewModel from the Story
     }
+
     public void LoadModel()
     {
         Ioc.Default.GetService<CollaboratorService>()!.LoadWizardStepViewModel();
     }
- 
+
     public void Deactivate(object parameter)
     {
         //SaveModel(); // Save the ViewModel back to the Story
     }
-
-    //public async Task<ChatResponse> RunStepCompletion(List<ChatMessage> prompt)
-    //{
-    //    //ConsoleExtensions.WriteLine("Chat Completion Testing is starting:", ConsoleColor.Cyan);
-
-    //    try
-    //    {
-    //        var reply = await chat.RunConversation(prompt,ChatModel);
-
-    //        if (reply.Status.Successful)
-    //        {
-    //            OutputText = reply.Choices.First().Message.Content;
-    //            UsageText = reply.Usage.ToString();
-    //            //Console.WriteLine(completionResult.Choices.First().Message.Content);
-    //        }
-    //        else
-    //        {
-    //            if (reply.ErrorMessage == null)
-    //            {
-    //                throw new Exception("Unknown Error");
-    //            }
-    //            Console.WriteLine((object)$"{reply.ErrorCode}: {reply.ErrorMessage}");
-    //        }
-    //    }
-    //    catch (Exception e)
-    //    {
-    //        Console.WriteLine(e);
-    //        throw;
-    //    }
-    //}
 }

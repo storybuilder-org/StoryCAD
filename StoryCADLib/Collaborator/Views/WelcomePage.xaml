@@ -9,6 +9,6 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <Grid>
-        <TextBlock Text="Welcome to the Collaborator Harness" Margin="10" FontSize="30" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+        <TextBlock Text="Welcome to the Collaborator Wizard" Margin="10" FontSize="30" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
     </Grid>
 </controls:BindablePage>
