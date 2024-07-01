@@ -1,19 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Threading.Tasks;
-using CommunityToolkit.Mvvm.DependencyInjection;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 //using StoryCollaborator.Services;
 using StoryCAD.Services.Navigation;
 //using StoryCAD.Collaborator;
 using StoryCAD.Controls;
-using Microsoft.Extensions.DependencyInjection;
 using StoryCAD.Services.Collaborator;
-using StoryCAD.Collaborator.Views;
-using StoryCAD.Collaborator.ViewModels;
 
 namespace StoryCAD.Collaborator.ViewModels;
 
