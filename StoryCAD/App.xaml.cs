@@ -16,6 +16,7 @@ using Microsoft.UI.Xaml;
 using StoryCAD.DAL;
 using StoryCAD.Services.IoC;
 using StoryCAD.Services;
+using StoryCAD.Services.Collaborator;
 
 namespace StoryCAD;
 
@@ -201,6 +202,7 @@ public partial class App
 
 	private void MainWindow_Closed(object sender, WindowEventArgs args)
 	{
+        ///TODO: MainWindow_Closed is never called. Call when appropriate (from exit/shutdown)
 		//Update used time
 		PreferenceService Prefs = Ioc.Default.GetService<PreferenceService>();
 		AppState State = Ioc.Default.GetService<AppState>();
@@ -209,7 +211,9 @@ public partial class App
 		//Save prefs
 		PreferencesIo prefIO = new(Prefs.Model, State.RootDirectory);
 		Task.Run(async () => { await prefIO.WritePreferences(); });
-		
+
+		//Purge Collaborator from memory
+		Ioc.Default.GetRequiredService<CollaboratorService>().DestroyCollaborator();
 	}
 
 	private void ConfigureNavigation()

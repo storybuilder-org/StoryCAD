@@ -23,6 +23,10 @@ using System.Reflection;
 using Windows.Storage;
 using StoryCAD.Services;
 using WinUIEx;
+using Application = Microsoft.UI.Xaml.Application;
+using FileAttributes = System.IO.FileAttributes;
+using Org.BouncyCastle.Asn1.Cms;
+using StoryCAD.Collaborator.ViewModels;
 
 namespace StoryCAD.ViewModels;
 
@@ -62,7 +66,7 @@ public class ShellViewModel : ObservableRecipient
     private PreferenceService Preferences = Ioc.Default.GetRequiredService<PreferenceService>();
     private DispatcherTimer _statusTimer;
 
-    private CollaboratorArgs CollabArgs;
+    public CollaboratorArgs CollabArgs;
     // The current story outline being processed. 
     public StoryModel StoryModel;
 
@@ -1192,6 +1196,10 @@ public class ShellViewModel : ObservableRecipient
 
     }
 
+    /// <summary>
+    /// This method is invoked when the user clicks the Collaborator AppBarButton
+    /// on the Shell CommandBar. It Activates and displays the WizardShell. 
+    /// </summary>
     private void LaunchCollaborator()
     {
         if (_canExecuteCommands)
@@ -1202,16 +1210,14 @@ public class ShellViewModel : ObservableRecipient
                 return;
             }
 
-            if (CollabArgs == null)
-            {
-                CollabArgs = new();
-            }
+            //TODO: Logging???
+            
             var id = CurrentNode.Uuid; // get the story element;
             CollabArgs.SelectedElement = StoryModel.StoryElements.StoryElementGuids[id];
             CollabArgs.StoryModel = StoryModel;
-            //TODO: Logging
             Ioc.Default.GetService<CollaboratorService>()!.LoadWizardModel(CollabArgs);
             Ioc.Default.GetService<CollaboratorService>()!.CollaboratorWindow.Show();
+            Ioc.Default.GetRequiredService<WizardViewModel>()!.LoadModel();
         }
     }
 

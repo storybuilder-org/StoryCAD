@@ -3,11 +3,10 @@ using StoryCAD.Collaborator.ViewModels;
 using StoryCAD.Controls;
 
 namespace StoryCAD.Collaborator.Views;
-
-public sealed partial class ComboPicker : BindablePage
+public sealed partial class WizardPage : BindablePage
 {
     public WizardStepViewModel StepVm = Ioc.Default.GetService<WizardStepViewModel>();
-    public ComboPicker()
+    public WizardPage()
     {
         this.InitializeComponent();
         this.DataContext = StepVm;

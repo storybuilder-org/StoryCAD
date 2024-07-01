@@ -3,7 +3,6 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Xaml;
 using System.Reflection;
-using StoryCAD.Collaborator.Models;
 using StoryCAD.Services.Navigation;
 //using StoryCollaborator.Models;
 using StoryCAD.Collaborator.Views;
@@ -11,12 +10,15 @@ using StoryCAD.Services.Collaborator;
 
 namespace StoryCAD.Collaborator.ViewModels;
 
+/// <summary>
+/// VM for the main window (WizardShell) of the application
+/// </summary>
 public class WizardViewModel : ObservableRecipient
 {
     public LogService logger = Ioc.Default.GetService<LogService>();
+    public CollaboratorService collaborator = Ioc.Default.GetService<CollaboratorService>();
 
-    //VM for the main window (WizardShell) of the application
-    // https://learn.microsoft.com/en-us/windows/apps/design/controls/navigationview
+    #region public properties
     public string Title { get; set; }
     public string Description { get; set; }
     public ObservableCollection<NavigationViewItem> MenuSteps
@@ -28,16 +30,6 @@ public class WizardViewModel : ObservableRecipient
         get => _model;
         set => SetProperty(ref _model, value);
     }
-
-    /// <summary>
-    /// All of the StoryElement model's properties are 
-    /// stored in a dictionary for easy access. They dictionary's
-    /// keyed by propertyname and returns the property's PropertyInfo
-    /// value. The PropertyInfo object's GetValue() and SetValue() 
-    /// methods can then be used to update the model.
-    /// LoadProperties() initializes ModelProperties for a given model.
-    /// </summary>
-    public SortedDictionary<string, PropertyInfo> ModelProperties { get; set; }
     public StoryItemType ItemType { get; set; }
     public Frame ContentFrame { get; set; }
     public NavigationView NavView { get; set; }
@@ -56,40 +48,66 @@ public class WizardViewModel : ObservableRecipient
         set => SetProperty(ref _currentStep, value);
     }
 
-    #region public methods
+    private Visibility _acceptVisibility;
+    public Visibility AcceptVisibility
+    {
+        get => _acceptVisibility;
+        set => SetProperty(ref _acceptVisibility, value);
+    }
+
+    private Visibility _exitVisibility;
+    public Visibility ExitVisibility
+    {
+        get => _exitVisibility;
+        set => SetProperty(ref _exitVisibility, value);
+    }
+
+
+    #endregion
+
+    #region Commands
+    public RelayCommand AcceptCommand { get; }
+
+    public RelayCommand ExitCommand { get; }
+
+    // public RelayCommand HelpCommand { get; }
+    #endregion
+
+    #region Constructor(s)
+
+    public WizardViewModel()
+    {
+        Title = "Story Collaborator";
+        Description = "A tool for creating and collaborating on stories.";
+        //Type = StoryItemType 
+        MenuSteps = new ObservableCollection<NavigationViewItem>();
+        // Configure Collaborator page navigation
+        NavigationService nav = Ioc.Default.GetService<NavigationService>();
+        try
+        {
+            nav.Configure("ComboPicker", typeof(ComboPicker));
+            nav.Configure("WizardPage", typeof(WizardPage));
+            nav.Configure("TextAppender", typeof(TextAppender));
+            nav.Configure("WelcomePage", typeof(WelcomePage));
+        }
+        catch (Exception e) { }
+
+        AcceptCommand = new RelayCommand(SaveOutputs);
+        ExitCommand = new RelayCommand(ExitCollaborator);
+
+    }
+
+    #endregion // of constructors
 
     #region Load and Save Model 
-    public void LoadModel(List<MenuItem> menuItems)
+    public void LoadModel()
     {
-        logger.Log(LogLevel.Info, $"Loading WizardModel, Model is type {Model.Type}");
-        MenuSteps.Clear();
-        foreach (var step in menuItems)
-        {
-            // Create a menu item for each step
-            var menuStep = new NavigationViewItem()
-            {
-                Content = step.Title,
-                Tag = step.PageType
-            };
-            MenuSteps.Add(menuStep);
-
-            // Add the StoryElement model and ModelProperties collection to the step
-            //step.Model = Model;
-
-        }
-        LoadProperties();
+        Ioc.Default.GetService<CollaboratorService>()!.LoadWizardViewModel();
     }
+
+    //   
+
     public void SaveModel() { }
-    public void LoadProperties()
-    {
-        ModelProperties.Clear();
-        Type type = Model.GetType();
-        PropertyInfo[] props = type.GetProperties();
-        foreach (var prop in props)
-        {
-            ModelProperties.Add(prop.Name, prop);
-        }
-    }
 
     #endregion
 
@@ -107,23 +125,31 @@ public class WizardViewModel : ObservableRecipient
         SetCurrentNavigationViewItem(args.SelectedItemContainer as NavigationViewItem);
     }
 
+    /// <summary>
+    /// Process the selection  of the WizardShell NavigationView
+    /// SelectionChanged event. This is triggered when the user clicks on
+    /// a NavigationView Menu Item on the WizardShell page, activating
+    /// the loading, display and processing of a WizardStepModel.
+    /// 
+    /// Each WizardStepModel corresponds to a property on a StoryElement,
+    /// a 'story property', and will use other property's input values, examples,
+    /// and a prompt to produce an OpenAI completion to recommend a value
+    /// for the desired output property.
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="args"></param>
     public void NavView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
     {
-        //if (args.IsSettingsSelected)
-        //{
-        //    StepFrame.Navigate(typeof(SettingsPage));
-        //}
-        //else
-        //{
         var item = args.SelectedItem as NavigationViewItem;
         CurrentItem = item;
         CollaboratorService collab = Ioc.Default.GetService<CollaboratorService>();
-        WizardStepArgs stepModel = collab.LoadWizardStepModel(Model, (string) item!.Content);
+        collab.LoadWizardStep(Model, (string)item!.Content);
         WizardStepViewModel step = Ioc.Default.GetService<WizardStepViewModel>();
-        step.LoadModel(stepModel);
+        step!.LoadModel();
+        collab.ProcessWizardStep();
         CurrentStep = step.Title;
         NavigationService nav = Ioc.Default.GetService<NavigationService>();
-        // Navigate to the appriate WizardStep page, passing the WizardStep instance
+        // Navigate to the appropriate WizardStep page, passing the WizardStep instance
         // as the parameter. This invokes the Page's OnNavigatedTo() method, which
         // Establishes the WizardStepViewModel as the DataContext (for binding)
         // In turn the ViewModel's Activate() method is invoked.
@@ -187,8 +213,8 @@ public class WizardViewModel : ObservableRecipient
         Type type = Type.GetType("StoryCAD.Collaborator.Views." + typeName);
         ContentFrame.Navigate(type);
     }
-
-    public async void OnNavigatedTo(object parameter)
+    
+    public void OnNavigatedTo(object parameter)
     {
 
         // TODO: Replace with real data.
@@ -211,37 +237,50 @@ public class WizardViewModel : ObservableRecipient
     //        Selected = SampleItems.First();
     //    }
     //}
+    #endregion // of navigation methods
 
-    #endregion
+    #region Command Buttons
 
-    #region CommandBar Relay Commands
-
-    public RelayCommand HelpCommand { get; }
-
-    #endregion
-
-    #region Constructor(s)
-
-    public WizardViewModel()
+    /// <summary>
+    /// Process the AcceptCommand button.
+    ///
+    /// Save any pending OutputProperty values.
+    /// </summary>
+    private void SaveOutputs()
     {
-        Title = "Story Collaborator";
-        Description = "A tool for creating and collaborating on stories.";
-        //ItemType = StoryItemType 
-        MenuSteps = new ObservableCollection<NavigationViewItem>();
-        ModelProperties = new SortedDictionary<string, PropertyInfo>();
-        // Configure Collaborator page navigation
-        NavigationService nav = Ioc.Default.GetService<NavigationService>();
-        try
-        {
-            nav.Configure("ComboPicker", typeof(ComboPicker));
-            nav.Configure("ResponsePicker", typeof(ResponsePicker));
-            nav.Configure("TextAppender", typeof(TextAppender));
-            nav.Configure("WelcomePage", typeof(WelcomePage));
-        }
-        catch (Exception e) { }
+        Ioc.Default.GetService<CollaboratorService>().SaveOutputs();
+        // This command is passed via
     }
 
+    /// <summary>
+    /// Process the ExitComand button.
+    ///
+    /// Resets the VM and hides the Collaborator window.
+    /// </summary>
+    private void ExitCollaborator()
+    {
+    
+        // Clear NavigationView items
+        //navigationView.MenuItems.Clear();
+
+        // Optionally, clear FooterMenuItems if used
+        //navigationView.FooterMenuItems.Clear();
+
+        // Reset the selected item
+        //navigationView.SelectedItem = null;
+
+        // Optionally, reset any associated content or state
+        //contentFrame.Navigate(typeof(DefaultPage));
+
+        collaborator.CollaboratorWindow.AppWindow.Hide();
+        // Assuming 'navigationView' is your NavigationView instance
+
+
+    }
+
+
+
     #endregion
 
-    #endregion  // of public methods
+
 }

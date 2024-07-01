@@ -1,10 +1,10 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.Loader;
 using Windows.ApplicationModel;
 using Microsoft.UI.Windowing;
 using StoryCAD.Collaborator;
-using StoryCAD.Collaborator.Models;
 using StoryCAD.Collaborator.ViewModels;
 using StoryCAD.Services.Backup;
 using WinUIEx;
@@ -17,8 +17,7 @@ public class CollaboratorService
     private string dllPath; 
     private AppState State = Ioc.Default.GetRequiredService<AppState>();
     private LogService logger = Ioc.Default.GetRequiredService<LogService>();
-    public  object CollaboratorProxy;
-    public WizardStepViewModel stepWizard;
+    private WizardStepViewModel stepWizard;
     private Assembly CollabAssembly;
     public WindowEx CollaboratorWindow;  // The secondary window for Collaborator
     private Type collaboratorType;
@@ -30,40 +29,89 @@ public class CollaboratorService
         var wizard = Ioc.Default.GetService<WizardViewModel>();
         wizard!.Model = args.SelectedElement;
         // Get the 'GetMenuItems' method that expects a parameter of type 'StoryItemType'
-        MethodInfo  menuCall = collaboratorType.GetMethod("GetMenuItems", new[] { typeof(StoryItemType) });
+        MethodInfo  menuCall = collaboratorType.GetMethod("LoadWizardModel", new[] { typeof(StoryItemType) });
         object[] methodArgs = { args.SelectedElement.Type };
         // ...and invoke it
-        var menuItems = (List<MenuItem>) menuCall!.Invoke(collaborator, methodArgs);
-        // Load the model
-        wizard.LoadModel(menuItems);
+        menuCall!.Invoke(collaborator, methodArgs);
     }
 
     /// <summary>
-    /// Request the WizardStepModel which contains the data for the selected
-    /// step, in order to populate and run WizardStepViewModel.
+    /// Load the WizardViewModel (WizardShell's VM) with the high level
+    /// NavigationView menu.
+    ///
+    /// This is a proxy for Collaborator's LoadWizardViewModel.
     /// </summary>
-    /// <param name="model">The StoryElement to process</param>
+    /// <param name="args"></param>
+    public void LoadWizardViewModel()
+    {
+        // Get the 'LoadWizardViewModel' method. The method has no parameters.
+        MethodInfo wizardCall = collaboratorType.GetMethod("LoadWizardViewModel");
+        // ...and invoke it
+        wizardCall!.Invoke(collaborator, null);
+    }
+
+    /// <summary>
+    /// Load the current WizardStep from the collection of step models
+    /// for this StoryElement type.
+    ///
+    /// This is a proxy for Collaborator's LoadWizardStep method.
+    /// </summary>
+    /// <param name="element">The StoryElement to process</param>
     /// <param name="stepName">The name (Title) of the StoryElement property to load</param>
-    public WizardStepArgs LoadWizardStepModel(StoryElement model, string stepName)
+    public void LoadWizardStep(StoryElement element, string stepName)
     {
         stepWizard = Ioc.Default.GetService<WizardStepViewModel>();
-        stepWizard!.Model = model;
-        // Get the 'GetWizardStepModel' method that expects a parameter of type string (the name of the step)
-        MethodInfo loadStep = collaboratorType.GetMethod("GetWizardStepModel", new[] { typeof(StoryElement), typeof(string) });
-        object[] methodArgs = { model, stepName  };
+        stepWizard!.Model = element;
+        // Get the 'LoadWizardStep' method that expects a parameter of type string (the name of the step)
+        MethodInfo loadStep = collaboratorType.GetMethod("LoadWizardStep", new[] { typeof(StoryElement), typeof(string) });
+        object[] methodArgs = { element, stepName  };
         // ...and invoke it
-        var stepModel  = (WizardStepArgs) loadStep!.Invoke(collaborator, methodArgs);
-        return stepModel;
+        loadStep!.Invoke(collaborator, methodArgs);
+    }
+
+    /// <summary>
+    /// Load the WizardStepViewModel with the currentStep
+    /// WizardStepModel.
+    ///
+    /// This is a proxy for Collaborator's LoadWizardStepViewModel method.
+    /// </summary>
+    public void LoadWizardStepViewModel()
+    {
+        // Get the 'LoadWizardStepViewModel' method. The method has no parameters.
+        MethodInfo wizardCall = collaboratorType.GetMethod("LoadWizardStepViewModel");
+        // ...and invoke it
+        wizardCall!.Invoke(collaborator, null);
+    }
+
+    /// <summary>
+    /// Process the WizardStepModel prompt.
+    /// 
+    /// This is a proxy for Collaborator's ProcessWizardStep method.
+    /// </summary>
+    public void ProcessWizardStep()
+    {
+        // Get the 'ProcessWizardStep' method. The method has no parameters.
+        MethodInfo wizardCall = collaboratorType.GetMethod("ProcessWizardStep");
+        // ...and invoke it
+        wizardCall!.Invoke(collaborator, null);
+    }
+
+    /// <summary>
+    /// Save any unchanged OutputProperty values to their StoryElement.
+    ///
+    /// This is a proxy for Collaborator's SaveOutputs() method.
+    /// </summary>
+    public void SaveOutputs()
+    {
     }
 
     #endregion
 
     #region Collaboratorlib connection
+
     /// <summary>
-    /// If the plugin is active, connect CollaboratorLib and create an instance
+    /// If the plugin is active, connect to CollaboratorLib and create an instance
     /// of Collaborator. 
-    /// 
-    /// 
     /// </summary>
     public void ConnectCollaborator()
     {
@@ -90,7 +138,12 @@ public class CollaboratorService
         collaboratorType = CollabAssembly.GetType("StoryCollaborator.Collaborator");
         // Create an instance of the Collaborator class
         logger.Log(LogLevel.Info, "Calling Collaborator constructor.");
-        collaborator = collaboratorType!.GetConstructors()[0].Invoke(new object[0]);
+        var collabArgs = Ioc.Default.GetService<ShellViewModel>()!.CollabArgs = new();
+        collabArgs.WizardVm = Ioc.Default.GetService<WizardViewModel>();
+        collabArgs.WizardStepVM = Ioc.Default.GetService<WizardStepViewModel>();
+        object[] methodArgs = { collabArgs };
+
+        collaborator = collaboratorType!.GetConstructors()[0].Invoke(methodArgs);
         logger.Log(LogLevel.Info, "Collaborator Constructor finished.");
     }
     public bool CollaboratorEnabled()
@@ -123,43 +176,22 @@ public class CollaboratorService
 	    {
 		    logger.Log(LogLevel.Info, "Failed to find Collaborator Package");
 		    dllExists = false;
-
 	    }
 
-	    logger.Log(LogLevel.Info, $"Collaborator.dll exists {dllExists}");
+
+		logger.Log(LogLevel.Info, $"Collaborator.dll exists {dllExists}");
 	    return dllExists;
     }
-	#endregion
+    #endregion
 
-	#region Show/Hide window
-	//TODO: Use Show and hide properly
-	//CollaboratorWindow.Show();
-	//CollaboratorWindow.Activate();
-	//Logger.Log(LogLevel.Debug, "Collaborator window opened and focused");
-	/// <summary>
-	/// This closes, disposes and full removes collaborator from memory.
-	/// </summary>
-	public void DestroyCollaborator(AppWindow sender, AppWindowClosingEventArgs args)
-    {
-        //TODO: Absolutely make sure Collaborator is not left in memory after this.
-        logger.Log(LogLevel.Warn, "Destroying collaborator object.");
-        if (CollaboratorProxy != null)
-        {
-            CollaboratorWindow.Close(); // Destroy window object
-            logger.Log(LogLevel.Info, "Closed collaborator window");
-
-            //Null objects to deallocate them
-            CollabAssembly = null;
-            CollaboratorProxy = null;
-            logger.Log(LogLevel.Info, "Nulled collaborator objects");
-
-            //Run garbage collection to clean up any remnants.
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
-            logger.Log(LogLevel.Info, "Garbage collection finished.");
-
-        }
-    }
+    #region Show/Hide window
+    //TODO: Use Show and hide properly
+    //CollaboratorWindow.Show();
+    //CollaboratorWindow.Activate();
+    //Logger.Log(LogLevel.Debug, "Collaborator window opened and focused");
+    /// <summary>
+    /// This closes, disposes and full removes collaborator from memory.
+    /// </summary>
 
     /// <summary>
     /// This will hide the collaborator window.
@@ -196,6 +228,28 @@ public class CollaboratorService
         Ioc.Default.GetRequiredService<ShellViewModel>()._canExecuteCommands = true;
         logger.Log(LogLevel.Info, "Async re-enabled.");
     }
+
+    public void DestroyCollaborator()
+    {
+        //TODO: Absolutely make sure Collaborator is not left in memory after this.
+        logger.Log(LogLevel.Warn, "Destroying collaborator object.");
+        if (CollaboratorWindow != null)
+        {
+            CollaboratorWindow.Close(); // Destroy window object
+            logger.Log(LogLevel.Info, "Closed collaborator window");
+
+            //Null objects to deallocate them
+            CollabAssembly = null;
+            logger.Log(LogLevel.Info, "Nulled collaborator objects");
+
+            //Run garbage collection to clean up any remnants.
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            logger.Log(LogLevel.Info, "Garbage collection finished.");
+
+        }
+    }
+
     public void CollaboratorClosed()
     {
         logger.Log(LogLevel.Debug, "Closing Collaborator.");
@@ -205,6 +259,8 @@ public class CollaboratorService
     #endregion
 
 }
+
+
 
 //TODO: On calls, set callback delegate
 //args.onDoneCallback = FinishedCallback;

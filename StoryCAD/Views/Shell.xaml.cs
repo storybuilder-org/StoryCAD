@@ -71,7 +71,7 @@ public sealed partial class Shell
 
         ShellVm.ShowHomePage();
         ShellVm.ShowConnectionStatus();
-        Ioc.Default.GetRequiredService<Windowing>().UpdateWindowTitle();
+        Windowing.UpdateWindowTitle();
         if (!Ioc.Default.GetService<AppState>()!.EnvPresent) { await ShellVm.ShowDotEnvWarningAsync(); }
 
         if (!await Ioc.Default.GetRequiredService<WebViewModel>().CheckWebviewState())
@@ -84,7 +84,7 @@ public sealed partial class Shell
         //Shows changelog if the app has been updated since the last launch.
         if (Ioc.Default.GetRequiredService<AppState>().LoadedWithVersionChange)
         {
-			Ioc.Default.GetService<PreferenceService>().Model.HideRatingPrompt = false;  //rating prompt reenabled on updates.
+			Ioc.Default.GetService<PreferenceService>()!.Model.HideRatingPrompt = false;  //rating prompt reenabled on updates.
 			await new Services.Dialogs.Changelog().ShowChangeLog();
         }
 

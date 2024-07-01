@@ -6,15 +6,15 @@ namespace StoryCAD.Collaborator;
 
 public sealed partial class WizardShell : Page
 {
-    public WizardViewModel WizardVM => Ioc.Default.GetService<WizardViewModel>();
+    public WizardViewModel WizardVm => Ioc.Default.GetService<WizardViewModel>();
 
     //public string UsageText
     //{
     //    get
     //    {
-    //        if (WizardVM.CurrentStep != null)
+    //        if (WizardVm.CurrentStep != null)
     //        {
-    //            return WizardVM.CurrentStep.UsageText;
+    //            return WizardVm.CurrentStep.UsageText;
     //        }
 
     //        return "";
@@ -25,30 +25,34 @@ public sealed partial class WizardShell : Page
     {
         this.InitializeComponent();
 
-        (this.Content as FrameworkElement).DataContext = WizardVM;
-        WizardVM.ContentFrame = StepFrame;
-        WizardVM.NavView = NavView;
+        (this.Content as FrameworkElement).DataContext = WizardVm;
+        WizardVm.ContentFrame = StepFrame;
+        WizardVm.NavView = NavView;
     }
 
     private void StepFrame_OnNavigated(object sender, NavigationEventArgs e)
     {
         ///TODO: Figure out what this is supposed to do
-        switch (e.SourcePageType.Name)
-        {
-            case "WelcomePage":
-                //WizardVM.CurrentStep =
-                //break;
-            case "ComboPicker":
-                //WizardVM.NavView.DataContext = WizardVM.CurrentStep;
-                //WizardVM.CurrentStep.Model = WizardVM.Model;
-                //break;
-            case "TextAppender":
-                //WizardVM.NavView.DataContext = WizardVM.CurrentStep;
-                //WizardVM.CurrentStep.Model = WizardVM.Model;
-                break;
-            default:
-                throw new Exception("Invalid page type");
-        }
+        //switch (e.SourcePageType.Name)
+        //{
+            //case "WelcomePage":
+            //    //WizardVm.CurrentStep =
+            //    //break;
+            //case "ComboPicker":
+            //    //WizardVm.NavView.DataContext = WizardVm.CurrentStep;
+            //    //WizardVm.CurrentStep.Model = WizardVm.Model;
+            //    //break;
+            //case "TextAppender":
+            //    //WizardVm.NavView.DataContext = WizardVm.CurrentStep;
+            //    //WizardVm.CurrentStep.Model = WizardVm.Model;
+            //    //break;
+            //case "WizardPage":
+            //WizardVm.NavView.DataContext = WizardVm.CurrentStep;
+            //WizardVm.CurrentStep.Model = WizardVm.Model;
+            //break;
+            //default:
+            //    throw new Exception("Invalid page type");
+        //}
 
 
 
@@ -56,16 +60,16 @@ public sealed partial class WizardShell : Page
         What is step page? Why is current step set to 1 when its a IStepWizard?
         if ( == typeof(WelcomePage))
         { 
-            //WizardVM.CurrentStep = 0;
+            //WizardVm.CurrentStep = 0;
         }
         else //if (/*e.SourcePageType == typeof(StepPage) false)
         {
-            //WizardVM.CurrentStep = 1;
+            //WizardVm.CurrentStep = 1;
         }*/
     }
 
     private void NavView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
     {
-        WizardVM.NavView_SelectionChanged(sender, args);
+        WizardVm.NavView_SelectionChanged(sender, args);
     }
 }
