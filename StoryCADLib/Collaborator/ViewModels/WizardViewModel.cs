@@ -7,6 +7,7 @@ using StoryCAD.Services.Navigation;
 //using StoryCollaborator.Models;
 using StoryCAD.Collaborator.Views;
 using StoryCAD.Services.Collaborator;
+using Microsoft.UI.Xaml.Controls;
 
 namespace StoryCAD.Collaborator.ViewModels;
 
@@ -23,6 +24,13 @@ public class WizardViewModel : ObservableRecipient
     public string Description { get; set; }
     public ObservableCollection<NavigationViewItem> MenuSteps
     { get; set; }
+
+    private object _selectedItem;
+    public object SelectedItem
+    {
+        get => _selectedItem;
+        set => SetProperty(ref _selectedItem, value);
+    }
 
     private StoryElement _model;
     public StoryElement Model
@@ -48,14 +56,14 @@ public class WizardViewModel : ObservableRecipient
         set => SetProperty(ref _currentStep, value);
     }
 
-    private Visibility _acceptVisibility;
+    private Visibility _acceptVisibility = Visibility.Visible;
     public Visibility AcceptVisibility
     {
         get => _acceptVisibility;
         set => SetProperty(ref _acceptVisibility, value);
     }
 
-    private Visibility _exitVisibility;
+    private Visibility _exitVisibility = Visibility.Visible;
     public Visibility ExitVisibility
     {
         get => _exitVisibility;
@@ -141,6 +149,8 @@ public class WizardViewModel : ObservableRecipient
     public void NavView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
     {
         var item = args.SelectedItem as NavigationViewItem;
+        if (item is null)
+            return;
         CurrentItem = item;
         CollaboratorService collab = Ioc.Default.GetService<CollaboratorService>();
         collab.LoadWizardStep(Model, (string)item!.Content);
@@ -255,29 +265,30 @@ public class WizardViewModel : ObservableRecipient
     /// <summary>
     /// Process the ExitComand button.
     ///
-    /// Resets the VM and hides the Collaborator window.
+    /// Resets the NavigationView and hides the Collaborator window.
     /// </summary>
     private void ExitCollaborator()
     {
-    
-        // Clear NavigationView items
-        //navigationView.MenuItems.Clear();
-
+        // Remove the event handler
+        SetCurrentPage(typeof(WelcomePage));
+        NavView.SelectionChanged -= NavView_SelectionChanged;
+        // Reset the NavigationView.
+        MenuSteps.Clear();
         // Optionally, clear FooterMenuItems if used
-        //navigationView.FooterMenuItems.Clear();
-
+        // FooterMenuItems.Clear();
         // Reset the selected item
-        //navigationView.SelectedItem = null;
+        SelectedItem = null;
 
-        // Optionally, reset any associated content or state
-        //contentFrame.Navigate(typeof(DefaultPage));
+        // Reset the current page (without navigation)
+        //ContentFrame.Navigate(typeof(WelcomePage));
 
         collaborator.CollaboratorWindow.AppWindow.Hide();
-        // Assuming 'navigationView' is your NavigationView instance
-
-
     }
 
+    public void EnableNavigation()
+    {
+        NavView.SelectionChanged -= NavView_SelectionChanged;
+    }
 
 
     #endregion
