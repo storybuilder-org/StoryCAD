@@ -398,7 +398,6 @@
                     </SymbolIcon>
                 </Button.Content>
             </Button>
-
         </StackPanel>
     </Grid>
 </Page>

@@ -1217,6 +1217,7 @@ public class ShellViewModel : ObservableRecipient
             CollabArgs.StoryModel = StoryModel;
             Ioc.Default.GetService<CollaboratorService>()!.LoadWizardModel(CollabArgs);
             Ioc.Default.GetService<CollaboratorService>()!.CollaboratorWindow.Show();
+            Ioc.Default.GetService<WizardViewModel>()!.EnableNavigation();
             Ioc.Default.GetRequiredService<WizardViewModel>()!.LoadModel();
         }
     }
