@@ -74,10 +74,10 @@ public sealed partial class Shell
         Windowing.UpdateWindowTitle();
         if (!Ioc.Default.GetService<AppState>()!.EnvPresent) { await ShellVm.ShowDotEnvWarningAsync(); }
 
-        if (!await Ioc.Default.GetRequiredService<WebViewModel>().CheckWebviewState())
+        if (!await Ioc.Default.GetRequiredService<WebViewModel>().CheckWebViewState())
         {
             ShellVm._canExecuteCommands = false;
-            await Ioc.Default.GetRequiredService<WebViewModel>().ShowWebviewDialog();
+            await Ioc.Default.GetRequiredService<WebViewModel>().ShowWebViewDialog();
             ShellVm._canExecuteCommands = true;
         }
 

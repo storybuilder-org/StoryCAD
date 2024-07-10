@@ -166,28 +166,49 @@ public class Windowing : ObservableRecipient
     /// <returns>A ContentDialogResult enum value.</returns>
     public async Task<ContentDialogResult> ShowContentDialog(ContentDialog Dialog, bool force=false)
     {
+	    LogService logger = Ioc.Default.GetRequiredService<LogService>();
+		logger.Log(LogLevel.Info, $"Requested to show dialog {Dialog.Title}");
+
 		//force close any other dialog if one is open
 		//(if force is enabled)
-	    if (force && _IsContentDialogOpen && OpenDialog != null)
+		if (force && _IsContentDialogOpen && OpenDialog != null)
 	    {
-		    OpenDialog.Hide();
+		    logger.Log(LogLevel.Info, $"Force closing open content dialog: ({OpenDialog.Title})");
+			OpenDialog.Hide();
 
 			//This will be unset eventually but because we have called
 			//Hide() already we can unset this early.
 			_IsContentDialogOpen = false;
-	    }
+			logger.Log(LogLevel.Info, $"Closed content dialog: ({OpenDialog.Title})");
+		}
 
-	    //Checks a content dialog isn't already open
-        if (!_IsContentDialogOpen) 
+		//Checks a content dialog isn't already open
+		if (!_IsContentDialogOpen) 
         {
-	        OpenDialog = Dialog;
+			logger.Log(LogLevel.Trace, $"Showing dialog {OpenDialog.Title}");
+			OpenDialog = Dialog;
+
 			//Set XAML root and correct theme.
 			OpenDialog.XamlRoot = XamlRoot;
 			OpenDialog.RequestedTheme = RequestedTheme;
 
             _IsContentDialogOpen = true;
+            
+			//Show and log result.
             ContentDialogResult Result = await OpenDialog.ShowAsync();
-            _IsContentDialogOpen = false;
+            switch (Result)
+            {
+	            case ContentDialogResult.None:
+		            logger.Log(LogLevel.Info, "User selected no option.");
+					break;
+	            case ContentDialogResult.Primary:
+		            logger.Log(LogLevel.Info, $"User selected primary option {Dialog.PrimaryButtonText}");
+					break;
+	            case ContentDialogResult.Secondary:
+		            logger.Log(LogLevel.Info, $"User selected secondary option {Dialog.SecondaryButtonText}");
+					break;
+            }
+			_IsContentDialogOpen = false;
             OpenDialog = null;
             return Result;
         }

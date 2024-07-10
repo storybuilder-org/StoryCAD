@@ -100,10 +100,10 @@ public class WebViewModel : ObservableRecipient, INavigable
     #region Methods
 
     /// <summary>
-    /// This checks if webview is installed
+    /// This checks if web view is installed
     /// </summary>
-    /// <returns>True if webview is installed</returns>
-    public Task<bool> CheckWebviewState()
+    /// <returns>True if web view is installed</returns>
+    public Task<bool> CheckWebViewState()
     {
         try
         {
@@ -118,35 +118,35 @@ public class WebViewModel : ObservableRecipient, INavigable
 
 
     /// <summary>
-    /// This method installs the Evergreen webview runtime.
+    /// This method installs the Evergreen Web View runtime.
     /// </summary>
-    public async Task ShowWebviewDialog()
+    public async Task ShowWebViewDialog()
     {
-        Ioc.Default.GetRequiredService<LogService>().Log(LogLevel.Error, "Showing webview install dialog.");
+	    _logger.Log(LogLevel.Error, "Showing WebView install dialog.");
 
         ContentDialog _dialog = new()
         {
-            Title = "Webview is missing.",
+            Title = "Web View is missing.",
             Content = "This computer is missing the WebView2 Runtime, without it some features may not work.\nWould you like to install this now?",
             PrimaryButtonText = "Yes",
             SecondaryButtonText = "No"
         };
 
-        ContentDialogResult _result = await Ioc.Default.GetService<Windowing>().ShowContentDialog(_dialog);
+        ContentDialogResult _result = await Window.ShowContentDialog(_dialog);
         _logger.Log(LogLevel.Error, $"User clicked {_result}");
 
         //Ok clicked
-        if (_result == ContentDialogResult.Primary) { await InstallWebview(); }
+        if (_result == ContentDialogResult.Primary) { await InstallWebView(); }
     }
 
     /// <summary>
-    /// This installs the evergreen webview runtime
+    /// This installs the evergreen WebView runtime
     /// </summary>
-    public async Task InstallWebview()
+    public async Task InstallWebView()
     {
         try
         {
-            Ioc.Default.GetRequiredService<LogService>().Log(LogLevel.Error, "Installing webview...");
+	        _logger.Log(LogLevel.Error, "Installing WebView runtime");
 
             //Download file
             HttpResponseMessage _httpResult =
@@ -167,28 +167,30 @@ public class WebViewModel : ObservableRecipient, INavigable
             ContentDialog _dialog = new() { PrimaryButtonText = "Ok" };
             try
             {
-                _dialog.Title = "Webview installed!";
+                _dialog.Title = "WebView installed!";
                 _dialog.Content = "You are good to go, everything should work now.";
-                _logger.Log(LogLevel.Info, "Webview installed");
+                _logger.Log(LogLevel.Info, "WebView installed");
             }
             catch (Exception _ex)
             {
                 _dialog.Title = "Something went wrong.";
-                _dialog.Content =
-                    "Looks like something went wrong, you can still use StoryCAD however some features may not work.";
-                _logger.Log(LogLevel.Warn,
-                    $"An error occurred installing the Evergreen Webview Runtime ({_ex.Message})");
+                _dialog.Content = "Looks like something went wrong, you can still use StoryCAD " +
+                                  "however some features may not work.";
+                _logger.Log(LogLevel.Warn, $"An error occurred installing the Evergreen" +
+                                           $" WebView Runtime ({_ex.Message})");
             }
 
-            await Ioc.Default.GetService<Windowing>().ShowContentDialog(_dialog);
-            _logger.Log(LogLevel.Warn, "Finished installing webview runtime.");
+            await Window.ShowContentDialog(_dialog);
+            _logger.Log(LogLevel.Warn, "Finished installing WebView runtime.");
         }
         catch (Exception _ex)
         {
-            _logger.LogException(LogLevel.Error, _ex,  "Error installing webview runtime.");
+            _logger.LogException(LogLevel.Warn, _ex,  $"Error installing WebView runtime. " +
+                                                      $"({_ex.Message})");
         }
     }
     #endregion
+
     #region Relay Commands
 
     public RelayCommand RefreshCommand { get; }
@@ -245,8 +247,7 @@ public class WebViewModel : ObservableRecipient, INavigable
         }
         catch (Exception ex)
         {
-            Ioc.Default.GetRequiredService<LogService>().LogException(LogLevel.Error,
-                ex, $"Failed to save webview model - {ex.Message}");
+	        _logger.LogException(LogLevel.Error, ex, $"Failed to save WebVM {ex.Message}");
         }
 
     }
