@@ -185,7 +185,7 @@ public class Windowing : ObservableRecipient
 		//Checks a content dialog isn't already open
 		if (!_IsContentDialogOpen) 
         {
-			logger.Log(LogLevel.Trace, $"Showing dialog {OpenDialog.Title}");
+			logger.Log(LogLevel.Trace, $"Showing dialog {Dialog.Title}");
 			OpenDialog = Dialog;
 
 			//Set XAML root and correct theme.
