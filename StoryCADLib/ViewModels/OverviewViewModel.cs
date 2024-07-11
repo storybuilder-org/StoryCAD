@@ -285,32 +285,44 @@ public class OverviewViewModel : ObservableRecipient, INavigable
     {
         try
         {
-            // Story.Uuid is read-only and cannot be assigned
-            Model.Name = Name;
-            IsTextBoxFocused = false;
-            Model.DateCreated = DateCreated;
-            Model.Author = Author;
-            Model.DateModified = DateModified;
-            Model.StoryType = StoryType;
-            Model.StoryGenre = StoryGenre;
-            Model.Viewpoint = Viewpoint;
-            Model.ViewpointCharacter = ViewpointCharacter;
-            Model.Voice = Voice;
-            Model.LiteraryDevice = LiteraryTechnique;
-            Model.Style = Style;
-            Model.Tense = Tense;
-            Model.Style = Style;
-            Model.Tone = Tone;
-            Model.StoryProblem = StoryProblem;
-            Model.StoryIdea = StoryIdea;
-            Model.Concept = Concept;
-            Model.Premise = Premise;
-            if (_syncPremise)
-            {
-                _storyProblemModel.Premise = Premise;
-            }
-            Model.StructureNotes = StructureNotes;
-            Model.Notes = Notes;
+	        if (Model != null) //ensure model isn't null.
+	        {
+		        // Story.Uuid is read-only and cannot be assigned
+		        Model.Name = Name ?? "";
+		        IsTextBoxFocused = false;
+		        Model.DateCreated = DateCreated ?? "";
+		        Model.Author = Author ?? "";
+		        Model.DateModified = DateModified;
+		        Model.StoryType = StoryType ?? "";
+		        Model.StoryGenre = StoryGenre ?? "";
+		        Model.Viewpoint = Viewpoint ?? "";
+		        Model.ViewpointCharacter = ViewpointCharacter ?? "";
+		        Model.Voice = Voice ?? "";
+		        Model.LiteraryDevice = LiteraryTechnique ?? "";
+		        Model.Style = Style ?? "";
+		        Model.Tense = Tense ?? "";
+		        Model.Style = Style ?? "";
+		        Model.Tone = Tone ?? "";
+		        Model.StoryProblem = StoryProblem ?? "";
+		        Model.StoryIdea = StoryIdea ?? "";
+		        Model.Concept = Concept ?? "";
+		        Model.Premise = Premise ?? "";
+		        if (_syncPremise)
+		        {
+			        if (_storyProblemModel != null)
+			        {
+				        _storyProblemModel.Premise = Premise;
+			        }
+		        }
+		        Model.StructureNotes = StructureNotes ?? "";
+		        Model.Notes = Notes ?? "";
+			}
+	        else
+	        {
+				_logger.Log(LogLevel.Fatal, "OverViewModel.Model is null, THIS SHOULDN'T HAPPEN.");
+				Model = new OverviewModel("Overview", ShellViewModel.GetModel());
+	        }
+
         }
         catch (Exception ex)
         {
