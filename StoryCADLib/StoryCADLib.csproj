@@ -104,7 +104,7 @@
 	<PackageReference Include="Octokit" Version="13.0.1" />
     <PackageReference Include="WinUIEx" Version="2.3.4" />
     <PackageReference Include="Betalgo.OpenAI" Version="8.6.0" />
-    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.1" />
+    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22621.3233" />
   </ItemGroup>
 
   <ItemGroup>
