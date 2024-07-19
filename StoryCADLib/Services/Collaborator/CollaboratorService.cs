@@ -1,5 +1,4 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.Loader;
 using Windows.ApplicationModel;
@@ -8,6 +7,7 @@ using StoryCAD.Collaborator;
 using StoryCAD.Collaborator.ViewModels;
 using StoryCAD.Services.Backup;
 using WinUIEx;
+using Windows.ApplicationModel.AppExtensions;
 
 namespace StoryCAD.Services.Collaborator;
 
@@ -146,30 +146,55 @@ public class CollaboratorService
         collaborator = collaboratorType!.GetConstructors()[0].Invoke(methodArgs);
         logger.Log(LogLevel.Info, "Collaborator Constructor finished.");
     }
-    public bool CollaboratorEnabled()
+    public async Task<bool> CollaboratorEnabled()
     {
         return State.DeveloperBuild
                && Debugger.IsAttached
-               && FindDll();
+               && await FindDll();
     }
 
     /// <summary>
     /// Checks if CollaboratorLib.dll exists.
     /// </summary>
     /// <returns>True if CollaboratorLib.dll exists, false otherwise.</returns>
-    private bool FindDll()
+    private async Task<bool> FindDll()
     {
 	    logger.Log(LogLevel.Info, "Locating Collaborator Package...");
-	    Package CollaboratorPkg = Package.Current.Dependencies.FirstOrDefault(pkg => pkg.DisplayName == "CollaboratorPackage");
-	    if (CollaboratorPkg != null)
-	    {
-		    logger.Log(LogLevel.Info, $"Found Collaborator Package, {CollaboratorPkg.DisplayName}" +
-		                              $" version {CollaboratorPkg.Id.Version.Major}.{CollaboratorPkg.Id.Version.Minor}" +
-		                              $".{CollaboratorPkg.Id.Version.Build} Located at {CollaboratorPkg.InstalledLocation}");
 
-		    // Get the path to the DLL
-		    dllPath = Path.Combine(CollaboratorPkg.InstalledPath, "CollaboratorLib.dll");
-		    dllExists = File.Exists(dllPath); // Verify that the DLL is present
+		//Find all installed extensions
+	    AppExtensionCatalog _catalog = AppExtensionCatalog.Open("org.storybuilder");
+	    var InstalledExtensions = await _catalog.FindAllAsync();
+	    logger.Log(LogLevel.Info, $"Found {InstalledExtensions} installed extensions");
+
+		//No point in continuing if we have no extensions.
+		if (InstalledExtensions.Count == 0)
+		{
+			return false;
+		}
+
+		//Get package information for collaborator if installed.
+		Package CollabPkg = InstalledExtensions.First(ext => 
+			ext.Package.DisplayName == "StoryCAD Collaborator").Package;
+	    if (CollabPkg != null)
+	    {
+		    logger.Log(LogLevel.Info, $"Found Collaborator Package, {CollabPkg.DisplayName}" +
+		                              $" version {CollabPkg.Id.Version.Major}" +
+		                              $".{CollabPkg.Id.Version.Minor}" +
+		                              $".{CollabPkg.Id.Version.Build} " +
+		                              $"Located at {CollabPkg.InstalledLocation}");
+
+		    if (await CollabPkg.VerifyContentIntegrityAsync())
+		    {
+			    // Get the path to the DLL
+			    dllPath = Path.Combine(CollabPkg.InstalledPath, "CollaboratorLib.dll");
+			    dllExists = File.Exists(dllPath); // Verify that the DLL is present
+			}
+		    else
+		    {
+				logger.Log(LogLevel.Error, "Failed to verify CollabPackage, " +
+				                           "not loading it (Not a StoryCAD issue)");
+		    }
+
 
 	    }
 	    else
