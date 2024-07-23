@@ -240,7 +240,7 @@ public class Windowing : ObservableRecipient
     /// Shows a file picker.
     /// </summary>
     /// <returns>A StorageFile object, of the file picked.</returns>
-    public async Task<StorageFile> ShowFilePicker(string ButtonText = "Open", string Filter = "*")
+    public async Task<StorageFile?> ShowFilePicker(string ButtonText = "Open", string Filter = "*")
     {
 	    LogService logger = Ioc.Default.GetRequiredService<LogService>();
 
@@ -259,6 +259,13 @@ public class Windowing : ObservableRecipient
 			//Init and spawn file picker
 		    WinRT.Interop.InitializeWithWindow.Initialize(_filePicker, MainWindow.GetWindowHandle());
 			StorageFile file = await _filePicker.PickSingleFileAsync();
+
+			//Null check
+			if (file == null)
+			{
+				logger.Log(LogLevel.Warn, "File picker returned null, this is because the user probably clicked cancel.");
+				return null;
+			}
 
 			logger.Log(LogLevel.Info, $"Picked folder {file.Path} attributes:{file.Attributes}");
 			return file;
@@ -299,6 +306,13 @@ public class Windowing : ObservableRecipient
 			    MainWindow.GetWindowHandle());
 			StorageFolder folder = await folderPicker.PickSingleFolderAsync();
 
+			//Null check
+			if (folder == null)
+			{
+				logger.Log(LogLevel.Warn, "File picker returned null, this is because the user probably clicked cancel.");
+				return null;
+			}
+
 			//Log it was successful
 			logger.Log(LogLevel.Info, $"Picked folder {folder.Path} attributes:{folder.Attributes}");
 
@@ -338,9 +352,9 @@ public class Windowing : ObservableRecipient
 
     /// <summary>
     /// Shows an error message to the user that there's an issue
-    /// with the app and it needs to be reinstalled
+    /// with the app, and it needs to be reinstalled
     /// As of the RemoveInstallService merge, this is theoretically 
-    /// impossible to occur but it should stay incase something
+    /// impossible to occur, but it should stay incase something
     /// goes wrong with resource loading.
     /// </summary>
     public async void ShowResourceErrorMessage()
