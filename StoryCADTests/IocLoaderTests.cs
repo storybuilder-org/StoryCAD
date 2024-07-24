@@ -9,6 +9,7 @@ using StoryCAD.ViewModels.Tools;
 using System;
 using System.IO;
 using StoryCAD.Services;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace StoryCADTests
 {
@@ -34,8 +35,14 @@ namespace StoryCADTests
         {
             if (!IocSetupComplete)
             {
-                Ioc.Default.ConfigureServices(ServiceConfigurator.Configure());
-                IocSetupComplete = true;
+	            ServiceLocator.Initialize();
+
+	            // Build the service provider
+	            var serviceProvider = ServiceLocator.Services.BuildServiceProvider();
+	            // Configure the default IOC container
+	            Ioc.Default.ConfigureServices(serviceProvider);
+
+				IocSetupComplete = true;
                 AppState State = Ioc.Default.GetService<AppState>();
                 PreferenceService Prefs = Ioc.Default.GetService<PreferenceService>();
                 Prefs.Model = new();

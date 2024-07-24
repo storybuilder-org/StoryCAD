@@ -14,7 +14,7 @@ namespace StoryCAD.Services.Collaborator;
 public class CollaboratorService
 {
     private bool dllExists;
-    private string dllPath; 
+    private string dllPath;
     private AppState State = Ioc.Default.GetRequiredService<AppState>();
     private LogService logger = Ioc.Default.GetRequiredService<LogService>();
     private WizardStepViewModel stepWizard;
