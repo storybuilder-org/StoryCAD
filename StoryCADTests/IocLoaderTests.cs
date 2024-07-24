@@ -35,11 +35,14 @@ namespace StoryCADTests
         {
             if (!IocSetupComplete)
             {
-                // Build the service provider
-                var serviceProvider = ServiceLocator.Services.BuildServiceProvider();
-                // Configure the default IOC container
-                Ioc.Default.ConfigureServices(serviceProvider);
-                IocSetupComplete = true;
+	            ServiceLocator.Initialize();
+
+	            // Build the service provider
+	            var serviceProvider = ServiceLocator.Services.BuildServiceProvider();
+	            // Configure the default IOC container
+	            Ioc.Default.ConfigureServices(serviceProvider);
+
+				IocSetupComplete = true;
                 AppState State = Ioc.Default.GetService<AppState>();
                 PreferenceService Prefs = Ioc.Default.GetService<PreferenceService>();
                 Prefs.Model = new();
