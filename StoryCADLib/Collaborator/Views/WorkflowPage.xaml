@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="StoryCAD.Collaborator.Views.WorkflowPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    <Grid>
+        <!-- Define column and row definitions to make the layout responsive -->
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <!-- Takes up remaining space -->
+            <RowDefinition Height="Auto"/>
+            <!-- Height based on content -->
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <!-- Takes up remaining space -->
+        </Grid.ColumnDefinitions>
+
+        <!-- Conversation area -->
+        <ScrollViewer x:Name="ConversationScrollViewer" Grid.Row="0" VerticalScrollBarVisibility="Auto">
+            <ItemsControl ItemsSource="{x:Bind WorkflowVm.ConversationList}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{x:Bind WorkflowVm.Text}" TextWrapping="Wrap" Margin="5" Foreground="{x:Bind Color}"/>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+
+        <!-- Progress bar -->
+        <ProgressBar x:Name="ResponseProgressBar" Grid.Row="1" Height="5" IsIndeterminate="True" Visibility="Collapsed"/>
+
+        <!-- Input and send button -->
+        <StackPanel Grid.Row="1" Orientation="Vertical" Margin="10">
+            <TextBox x:Name="InputTextBox" Text="{x:Bind WorkflowVm.InputText, Mode=TwoWay}" VerticalAlignment="Top" TextWrapping="Wrap" MinHeight="100"/>
+            <Button x:Name="SendButton" Content="Send" Click="SendButton_Click" HorizontalAlignment="Right" Margin="0,5,0,0"/>
+        </StackPanel>
+    </Grid>
+</Page>

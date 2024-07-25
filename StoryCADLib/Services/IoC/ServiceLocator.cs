@@ -55,6 +55,7 @@ namespace StoryCAD.Services.IoC
             Services.AddSingleton<WebViewModel>();
             Services.AddSingleton<WizardViewModel>();
             Services.AddSingleton<WizardStepViewModel>();
+            Services.AddSingleton<WorkflowViewModel>();
             Services.AddSingleton<TrashCanViewModel>();
             Services.AddSingleton<UnifiedVM>();
             Services.AddSingleton<InitVM>();

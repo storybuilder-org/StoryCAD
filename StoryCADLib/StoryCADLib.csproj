@@ -55,6 +55,7 @@
     <None Remove="Assets\Install\samples\The Maltese Falcon.stbx" />
     <None Remove="Assets\Install\samples\The Old Man and the Sea.stbx" />
     <None Remove="Assets\Install\Symbols.txt" />
+    <None Remove="Collaborator\Views\WorkflowPage.xaml" />
     <None Remove="Controls\Flaw.xaml" />
     <None Remove="Controls\RelationshipView.xaml" />
     <None Remove="Controls\Traits.xaml" />
@@ -146,6 +147,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Page Update="Collaborator\Views\WorkflowPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <None Update="NLog.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
