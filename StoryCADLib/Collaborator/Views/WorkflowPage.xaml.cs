@@ -14,13 +14,10 @@ using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
-
 namespace StoryCAD.Collaborator.Views
 {
     /// <summary>
-    /// An empty page that can be used on its own or navigated to within a Frame.
+	/// Updated version of WizardPage
     /// </summary>
     public sealed partial class WorkflowPage : Page
     {
@@ -30,6 +27,11 @@ namespace StoryCAD.Collaborator.Views
         {
             this.InitializeComponent();
             this.DataContext = WorkflowVm;
+        }
+
+        private void SendChat(object sender, RoutedEventArgs e)
+        {
+	        throw new NotImplementedException();
         }
     }
 }

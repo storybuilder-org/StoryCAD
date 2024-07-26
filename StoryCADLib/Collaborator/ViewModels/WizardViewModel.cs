@@ -94,7 +94,7 @@ public class WizardViewModel : ObservableRecipient
         try
         {
             nav.Configure("ComboPicker", typeof(ComboPicker));
-            nav.Configure("WizardPage", typeof(WizardPage));
+            nav.Configure("WizardPage", typeof(WorkflowPage));
             nav.Configure("TextAppender", typeof(TextAppender));
             nav.Configure("WelcomePage", typeof(WelcomePage));
         }

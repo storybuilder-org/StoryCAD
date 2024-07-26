@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Navigation;
 using StoryCAD.Collaborator.ViewModels;
@@ -24,7 +25,6 @@ public sealed partial class WizardShell : Page
     public WizardShell()
     {
         this.InitializeComponent();
-
         (this.Content as FrameworkElement).DataContext = WizardVm;
         WizardVm.ContentFrame = StepFrame;
         WizardVm.NavView = NavView;
