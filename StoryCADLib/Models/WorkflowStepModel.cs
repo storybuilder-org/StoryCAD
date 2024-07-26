@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace StoryCAD.Models
 {
-    public class WorkflowStep
+    public class WorkflowStepModel
     {
         public string Name { get; set; }
         public string Description { get; set; }

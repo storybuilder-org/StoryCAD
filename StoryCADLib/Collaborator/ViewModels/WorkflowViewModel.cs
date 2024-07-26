@@ -7,7 +7,7 @@ namespace StoryCAD.Collaborator.ViewModels
     {
         public string Title { get; set; }
         public string Description { get; set; }
-        public ObservableCollection<WorkflowStep> WorkflowSteps { get; set; }
+        public ObservableCollection<WorkflowStepModel> WorkflowSteps { get; set; }
         public ObservableCollection<string> ConversationList { get; set; }
         public string InputText { get; set; }  //  Chat input
 
@@ -16,7 +16,7 @@ namespace StoryCAD.Collaborator.ViewModels
         {
             Title = string.Empty;
             Description = string.Empty;
-            WorkflowSteps = new ObservableCollection<WorkflowStep>();
+            WorkflowSteps = new ObservableCollection<WorkflowStepModel>();
             InputText = string.Empty;
         }
     }
