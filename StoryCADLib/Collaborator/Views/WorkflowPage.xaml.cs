@@ -25,11 +25,19 @@ namespace StoryCAD.Collaborator.Views
         
         public WorkflowPage()
         {
+	        WorkflowVm.Title = "test";
+	        WorkflowVm.Description = "test description";
+	        WorkflowVm.ConversationList = new()
+	        {
+		        "Assistant says hello",
+		        "User says howdy"
+	        };
+
             this.InitializeComponent();
             this.DataContext = WorkflowVm;
         }
 
-        private void SendChat(object sender, RoutedEventArgs e)
+        private void SendChat(AutoSuggestBox autoSuggestBox, AutoSuggestBoxQuerySubmittedEventArgs args)
         {
 	        throw new NotImplementedException();
         }

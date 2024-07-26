@@ -5,8 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    mc:Ignorable="d">
     <Grid>
         <!-- Define column and row definitions to make the layout responsive -->
         <Grid.RowDefinitions>
@@ -23,22 +22,18 @@
         </Grid.ColumnDefinitions>
 
 		<!-- TitleBar -->
-		<StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="1" HorizontalAlignment="Center"
-		            MaxWidth="200">
+        <TextBlock Text="{x:Bind WorkflowVm.Title}" HorizontalAlignment="Center" 
+                   Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="1" MaxWidth="200">
+	        <Run FontWeight="Bold" Text="{x:Bind WorkflowVm.Title}"/>
+	        <LineBreak/>
+	        <Run FontWeight="Bold" Text="{x:Bind WorkflowVm.Description}"/>
+        </TextBlock>
 
-			<TextBlock Text="{x:Bind WorkflowVm.Title}" HorizontalAlignment="Center">
-				<Run FontWeight="Bold" Text="{x:Bind WorkflowVm.Title}"/>
-				<Run FontWeight="Bold" Text="{x:Bind WorkflowVm.Description}"/>
-			</TextBlock>
-		</StackPanel>
-
-        <!-- Progress bar -->
+		<!-- Progress bar -->
         <ProgressBar x:Name="ResponseProgressBar" Grid.Row="2" Height="5" IsIndeterminate="True" Visibility="Collapsed"/>
 
         <!-- Input and send button -->
-        <StackPanel Grid.Row="1" Orientation="Vertical" Margin="10">
-            <TextBox x:Name="InputTextBox" Text="{x:Bind WorkflowVm.InputText, Mode=TwoWay}" VerticalAlignment="Top" TextWrapping="Wrap" MinHeight="100"/>
-            <Button x:Name="SendButton" Content="Send" Click="SendChat" HorizontalAlignment="Right" Margin="0,5,0,0"/>
-        </StackPanel>
+        <AutoSuggestBox Grid.Row="1" Grid.Column="1" PlaceholderText="Chat with the LLM" QueryIcon="Find"
+                        Text="{x:Bind WorkflowVm.InputText, Mode=TwoWay}" QuerySubmitted="SendChat"/>
     </Grid>
 </Page>
