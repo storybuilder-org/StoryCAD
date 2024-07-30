@@ -6,6 +6,7 @@ using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
 using StoryCAD.Collaborator.ViewModels;
+using StoryCAD.Services.Collaborator;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -40,6 +41,20 @@ namespace StoryCAD.Collaborator.Views
         private void SendChat(AutoSuggestBox autoSuggestBox, AutoSuggestBoxQuerySubmittedEventArgs args)
         {
 	        throw new NotImplementedException();
+        }
+
+        private void InputTextBox_KeyDown(object sender, KeyRoutedEventArgs e)
+        {
+            if (e.Key == Windows.System.VirtualKey.Enter && !string.IsNullOrWhiteSpace(InputTextBox.Text))
+            {
+                SendButton_Click(this, new RoutedEventArgs());
+            }
+        }
+
+        private void SendButton_Click(object sender, RoutedEventArgs e)
+        {
+            Ioc.Default.GetService<CollaboratorService>()!.SendButtonClicked();
+            //WorkflowVm.SendButton_Click(sender, e);
         }
     }
 }

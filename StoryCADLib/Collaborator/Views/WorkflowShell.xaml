@@ -1,0 +1,42 @@
+<Page
+    x:Class="StoryCAD.Collaborator.WorkflowShell"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    MinHeight="500"
+    MinWidth="500"
+    mc:Ignorable="d">
+    <NavigationView x:Name="NavView"
+                    Grid.Row="0"
+                    IsBackButtonVisible="Collapsed"
+                    MenuItemsSource="{x:Bind WorkflowVm.MenuItems, Mode=OneWay}"
+                    SelectedItem="{x:Bind WorkflowVm.SelectedItem, Mode=TwoWay}"
+                    IsSettingsVisible="False"
+                    SelectionChanged="NavView_SelectionChanged"
+                    PaneDisplayMode="Left">
+        <StackPanel>
+            <Frame x:Name="StepFrame" Navigated="StepFrame_OnNavigated" Margin="5,0,5,5"  />
+            <CommandBar >
+                <CommandBar.PrimaryCommands>
+                    <AppBarButton Label="Help" ToolTipService.ToolTip="Help" Margin="5">
+                        <AppBarButton.Icon>
+                            <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE897;"/>
+                        </AppBarButton.Icon>
+                    </AppBarButton>
+                    <AppBarButton Label="Accept" Margin="5"
+                                  Visibility="{x:Bind WorkflowVm.AcceptVisibility, Mode=TwoWay}"
+                                  Command="{x:Bind WorkflowVm.AcceptCommand, Mode=OneWay}" >
+                    </AppBarButton>
+                    <AppBarButton Margin="5">Retry</AppBarButton>
+                    <AppBarButton Margin="5">Previous</AppBarButton>
+                    <AppBarButton Margin="5">Next</AppBarButton>
+                    <AppBarButton Label="Exit" Margin="5"
+                                  Visibility="{x:Bind WorkflowVm.ExitVisibility, Mode=TwoWay}"
+                                  Command="{x:Bind WorkflowVm.ExitCommand, Mode=OneWay}" >
+                    </AppBarButton>
+                </CommandBar.PrimaryCommands>
+            </CommandBar>
+        </StackPanel>
+    </NavigationView>
+</Page>

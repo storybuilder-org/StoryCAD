@@ -113,7 +113,7 @@ public class WizardStepViewModel : ObservableRecipient, INavigable
 
     public void LoadModel()
     {
-        Ioc.Default.GetService<CollaboratorService>()!.LoadWizardStepViewModel();
+        //Ioc.Default.GetService<CollaboratorService>()!.LoadWizardStepViewModel();
     }
 
     public void Deactivate(object parameter)

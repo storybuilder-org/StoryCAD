@@ -148,23 +148,23 @@ public class WizardViewModel : ObservableRecipient
     /// <param name="args"></param>
     public void NavView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
     {
-        var item = args.SelectedItem as NavigationViewItem;
-        if (item is null)
-            return;
-        CurrentItem = item;
-        CollaboratorService collab = Ioc.Default.GetService<CollaboratorService>();
-        collab.LoadWizardStep(Model, (string)item!.Content);
-        WizardStepViewModel step = Ioc.Default.GetService<WizardStepViewModel>();
-        step!.LoadModel();
-        collab.ProcessWizardStep();
-        CurrentStep = step.Title;
+        //var item = args.SelectedItem as NavigationViewItem;
+        //if (item is null)
+        //    return;
+        //CurrentItem = item;
+        //CollaboratorService collab = Ioc.Default.GetService<CollaboratorService>();
+        //collab.LoadWizardStep(Model, (string)item!.Content);
+        ////WizardStepViewModel step = Ioc.Default.GetService<WizardStepViewModel>();
+        //step!.LoadModel();
+        //collab.ProcessWizardStep();
+        //CurrentStep = step.Title;
         NavigationService nav = Ioc.Default.GetService<NavigationService>();
-        // Navigate to the appropriate WizardStep page, passing the WizardStep instance
-        // as the parameter. This invokes the Page's OnNavigatedTo() method, which
-        // Establishes the WizardStepViewModel as the DataContext (for binding)
-        // In turn the ViewModel's Activate() method is invoked.
+        //// Navigate to the appropriate WizardStep page, passing the WizardStep instance
+        //// as the parameter. This invokes the Page's OnNavigatedTo() method, which
+        //// Establishes the WizardStepViewModel as the DataContext (for binding)
+        //// In turn the ViewModel's Activate() method is invoked.
 
-        nav.NavigateTo(ContentFrame, step.PageType, step);
+        nav.NavigateTo(ContentFrame, "WorkflowPage", this);
     }
 
     public List<NavigationViewItem> GetNavigationViewItems()
