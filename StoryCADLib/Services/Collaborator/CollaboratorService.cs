@@ -17,19 +17,18 @@ public class CollaboratorService
     private string dllPath;
     private AppState State = Ioc.Default.GetRequiredService<AppState>();
     private LogService logger = Ioc.Default.GetRequiredService<LogService>();
-    private WizardStepViewModel stepWizard;
     private Assembly CollabAssembly;
     public WindowEx CollaboratorWindow;  // The secondary window for Collaborator
     private Type collaboratorType;
     private object collaborator;
 
     #region Collaborator calls
-    public void LoadWizardModel(CollaboratorArgs args)
+    public void LoadWorkflows(CollaboratorArgs args)
     {
-        var wizard = Ioc.Default.GetService<WizardViewModel>();
+        var wizard = Ioc.Default.GetService<WorkflowViewModel>();
         wizard!.Model = args.SelectedElement;
         // Get the 'GetMenuItems' method that expects a parameter of type 'StoryItemType'
-        MethodInfo  menuCall = collaboratorType.GetMethod("LoadWizardModel", new[] { typeof(StoryItemType) });
+        MethodInfo  menuCall = collaboratorType.GetMethod("LoadWorkflowViewModel", new[] { typeof(StoryItemType) });
         object[] methodArgs = { args.SelectedElement.Type };
         // ...and invoke it
         menuCall!.Invoke(collaborator, methodArgs);
@@ -51,49 +50,39 @@ public class CollaboratorService
     }
 
     /// <summary>
-    /// Load the current WizardStep from the collection of step models
-    /// for this StoryElement type.
+    /// Load the WorkflowViewModel with the currently selected 
+    /// Workflow Model.
     ///
-    /// This is a proxy for Collaborator's LoadWizardStep method.
+    /// This is a proxy for Collaborator's LoadWorkflowModel method.
     /// </summary>
-    /// <param name="element">The StoryElement to process</param>
-    /// <param name="stepName">The name (Title) of the StoryElement property to load</param>
-    public void LoadWizardStep(StoryElement element, string stepName)
+    public void LoadWorkflowModel(StoryElement element, string workflow)
     {
-        stepWizard = Ioc.Default.GetService<WizardStepViewModel>();
-        stepWizard!.Model = element;
-        // Get the 'LoadWizardStep' method that expects a parameter of type string (the name of the step)
-        MethodInfo loadStep = collaboratorType.GetMethod("LoadWizardStep", new[] { typeof(StoryElement), typeof(string) });
-        object[] methodArgs = { element, stepName  };
+        // Get the 'LoadWorkflowModel' method. The method has no parameters.
+        MethodInfo loadCall = collaboratorType.GetMethod("LoadWorkflowModel");
         // ...and invoke it
-        loadStep!.Invoke(collaborator, methodArgs);
+        object[] methodArgs = { element, workflow };
+        loadCall!.Invoke(collaborator, methodArgs);
     }
 
     /// <summary>
-    /// Load the WizardStepViewModel with the currentStep
-    /// WizardStepModel.
-    ///
-    /// This is a proxy for Collaborator's LoadWizardStepViewModel method.
-    /// </summary>
-    public void LoadWizardStepViewModel()
-    {
-        // Get the 'LoadWizardStepViewModel' method. The method has no parameters.
-        MethodInfo wizardCall = collaboratorType.GetMethod("LoadWizardStepViewModel");
-        // ...and invoke it
-        wizardCall!.Invoke(collaborator, null);
-    }
-
-    /// <summary>
-    /// Process the WizardStepModel prompt.
+    /// Process the Workflow we've loaded.
     /// 
-    /// This is a proxy for Collaborator's ProcessWizardStep method.
+    /// This is a proxy for Collaborator's ProcessWorkflow method.
     /// </summary>
-    public void ProcessWizardStep()
+    public void ProcessWorkflow()
     {
         // Get the 'ProcessWizardStep' method. The method has no parameters.
-        MethodInfo wizardCall = collaboratorType.GetMethod("ProcessWizardStep");
+        MethodInfo wizardCall = collaboratorType.GetMethod("ProcessWorkflow");
         // ...and invoke it
         wizardCall!.Invoke(collaborator, null);
+    }
+
+    public void SendButtonClicked()
+    {
+        // Get the 'LoadWorkflowModel' method. The method has no parameters.
+        MethodInfo loadCall = collaboratorType.GetMethod("SendButtonClicked");
+        // ...and invoke it
+        loadCall!.Invoke(collaborator, null);
     }
 
     /// <summary>
@@ -131,7 +120,7 @@ public class CollaboratorService
         CollaboratorWindow.Content = rootFrame;
         logger.Log(LogLevel.Info, "Collaborator window created and configured.");
 
-        rootFrame.Content = new WizardShell();
+        rootFrame.Content = new WorkflowShell();
         logger.Log(LogLevel.Info, "Set collaborator window content to WizardShell.");
 
         // Get the type of the Collaborator class
@@ -139,8 +128,8 @@ public class CollaboratorService
         // Create an instance of the Collaborator class
         logger.Log(LogLevel.Info, "Calling Collaborator constructor.");
         var collabArgs = Ioc.Default.GetService<ShellViewModel>()!.CollabArgs = new();
-        collabArgs.WizardVm = Ioc.Default.GetService<WizardViewModel>();
-        collabArgs.WizardStepVM = Ioc.Default.GetService<WizardStepViewModel>();
+        collabArgs.WorkflowVm = Ioc.Default.GetService<WorkflowViewModel>();
+        //collabArgs.WizardStepVM = Ioc.Default.GetService<WizardStepViewModel>();
         object[] methodArgs = { collabArgs };
 
         collaborator = collaboratorType!.GetConstructors()[0].Invoke(methodArgs);

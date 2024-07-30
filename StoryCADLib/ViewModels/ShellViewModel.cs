@@ -1215,10 +1215,9 @@ public class ShellViewModel : ObservableRecipient
             var id = CurrentNode.Uuid; // get the story element;
             CollabArgs.SelectedElement = StoryModel.StoryElements.StoryElementGuids[id];
             CollabArgs.StoryModel = StoryModel;
-            Ioc.Default.GetService<CollaboratorService>()!.LoadWizardModel(CollabArgs);
+            Ioc.Default.GetService<CollaboratorService>()!.LoadWorkflows(CollabArgs);
             Ioc.Default.GetService<CollaboratorService>()!.CollaboratorWindow.Show();
-            Ioc.Default.GetService<WizardViewModel>()!.EnableNavigation();
-            Ioc.Default.GetRequiredService<WizardViewModel>()!.LoadModel();
+            Ioc.Default.GetService<WorkflowViewModel>()!.EnableNavigation();
         }
     }
 
