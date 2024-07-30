@@ -90,6 +90,7 @@ namespace StoryCAD.Collaborator.ViewModels
         public RelayCommand AcceptCommand { get; }
 
         public RelayCommand ExitCommand { get; }
+        public string PromptOutput { get; set; }
 
         // public RelayCommand HelpCommand { get; }
         #endregion
@@ -100,14 +101,12 @@ namespace StoryCAD.Collaborator.ViewModels
         {
             Ioc.Default.GetService<CollaboratorService>()!.LoadWorkflowModel(model, workflow);
         }
-
-
-
         #endregion
 
         #region Constructor(s)
         public WorkflowViewModel()
         {
+	        PromptOutput = "Prompt output empty";
             Title = string.Empty;
             Description = string.Empty;
             WorkflowSteps = new ObservableCollection<WorkflowStepModel>();
@@ -118,9 +117,6 @@ namespace StoryCAD.Collaborator.ViewModels
             try
             {
                 nav!.Configure("WorkflowPage", typeof(WorkflowPage));
-                nav.Configure("ComboPicker", typeof(ComboPicker));
-                nav.Configure("WizardPage", typeof(WorkflowPage));
-                nav.Configure("TextAppender", typeof(TextAppender));
                 nav.Configure("WelcomePage", typeof(WelcomePage));
             }
             catch (Exception e) { }

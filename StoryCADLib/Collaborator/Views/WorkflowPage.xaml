@@ -22,24 +22,26 @@
         </Grid.ColumnDefinitions>
 
 		<!-- TitleBar -->
-        <!--<TextBlock Text="{x:Bind WorkflowVm.Title}" HorizontalAlignment="Center" 
+        <TextBlock Text="{x:Bind WorkflowVm.Title}" HorizontalAlignment="Center" 
                    Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="1" MaxWidth="200">
 	        <Run FontWeight="Bold" Text="{x:Bind WorkflowVm.Title}"/>
 	        <LineBreak/>
 	        <Run FontWeight="Bold" Text="{x:Bind WorkflowVm.Description}"/>
-        </TextBlock>-->
+        </TextBlock>
+
         <TextBlock Text="{x:Bind WorkflowVm.Explanation}" HorizontalAlignment="Left" 
-                   Grid.Row="0" Grid.Column="0" />
+                   Grid.Row="0" Grid.Column="0" TextWrapping="Wrap"/>
+
+		<StackPanel Grid.Row="1" Grid.Column="0">
+			<TextBlock Text="{x:Bind WorkflowVm.PromptOutput}"/>
+		</StackPanel>
+
         <!-- Chat history -->
-        <ScrollViewer Grid.Column="1" Grid.Row="0"  x:Name="ConversationScrollViewer" VerticalScrollBarVisibility="Auto" MaxHeight="500">
-            <ItemsControl x:Name="ConversationList" Width="300">
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <TextBlock Text="{Binding Text}" TextWrapping="Wrap" Margin="5" Foreground="{Binding Color}"/>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-        </ScrollViewer>
+		<ListView ItemsSource="{x:Bind WorkflowVm.ConversationList}" Grid.Column="1" 
+		          Grid.Row="0" MaxHeight="500" Margin="2,0" >
+
+		</ListView>
+
         <!-- Input and send button -->
         <StackPanel Grid.Column="1" Grid.Row="1" Orientation="Vertical" Width="300">
             <TextBox Grid.Row="1" Grid.Column="1"  x:Name="InputTextBox" 
@@ -49,6 +51,7 @@
                      MinHeight="100" MaxWidth="300"/>
             <Button x:Name="SendButton" Content="Send" Click="SendButton_Click" HorizontalAlignment="Right"/>
         </StackPanel>
+
         <!-- Progress bar -->
         <ProgressBar x:Name="ResponseProgressBar" 
                      Grid.Row="2" Height="5" IsIndeterminate="True" 

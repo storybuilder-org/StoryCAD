@@ -17,7 +17,6 @@ public class CollaboratorService
     private string dllPath;
     private AppState State = Ioc.Default.GetRequiredService<AppState>();
     private LogService logger = Ioc.Default.GetRequiredService<LogService>();
-    private WizardStepViewModel stepWizard;
     private Assembly CollabAssembly;
     public WindowEx CollaboratorWindow;  // The secondary window for Collaborator
     private Type collaboratorType;

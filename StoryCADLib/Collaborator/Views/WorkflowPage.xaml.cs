@@ -18,7 +18,7 @@ using Windows.Foundation.Collections;
 namespace StoryCAD.Collaborator.Views
 {
     /// <summary>
-	/// Updated version of WizardPage
+	/// Updated version of WorkflowPage
     /// </summary>
     public sealed partial class WorkflowPage : Page
     {
