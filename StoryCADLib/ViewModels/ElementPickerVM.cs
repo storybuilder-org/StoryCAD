@@ -5,7 +5,7 @@ namespace StoryCAD.ViewModels;
 /// <summary>
 /// ViewModel for the Element Picker
 /// </summary>
-class ElementPickerVM
+public class ElementPickerVM
 {
 	/// <summary>
 	/// Currently selected item
@@ -26,22 +26,33 @@ class ElementPickerVM
 	/// Instance of element picker
 	/// </summary>
 	private ContentDialog dialog;
+
+	/// <summary>
+	/// Type the picker forces the user to pick
+	/// </summary>
+	public StoryItemType? ForcedType { get; set; }
+
 	/// <summary>
 	/// Spawns an instance of the picker.
 	/// </summary>
+	/// <param name="Type">Only allow the value of Type to be picked.</param>
 	/// <returns>The element the user picked</returns>
-	public async Task<StoryElement?> ShowPicker()
+	public async Task<StoryElement?> ShowPicker(StoryItemType? Type = null)
 	{
-		//Spawn new picker and reset VM
-		ElementPicker UI = new();
+		//Reset VM
 		SelectedType = null;
 		SelectedElement = null;
 		NewNodeName = "";
+		ForcedType = Type;
+
+		//Spawn new picker
+		ElementPicker UI = new();
+
 
 		//create and show dialog
 		dialog = new()
 		{
-			Title = "Select an element",
+			Title = $"Select a {Type.ToString()} element",
 			PrimaryButtonText = "Select",
 			SecondaryButtonText = "Cancel",
 			Content = UI,
@@ -53,8 +64,8 @@ class ElementPickerVM
 		//interpret result
 		if (res != ContentDialogResult.Secondary)
 		{
-			ComboBoxItem Type = SelectedType as ComboBoxItem;
-			if (Type != null) //check user has picked an item
+			ComboBoxItem item = SelectedType as ComboBoxItem;
+			if (item != null) //check user has picked an item
 			{
 				//The name can be parsed to an enum.
 				return SelectedElement as StoryElement;

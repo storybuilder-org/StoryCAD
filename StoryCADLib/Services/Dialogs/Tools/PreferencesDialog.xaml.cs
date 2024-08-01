@@ -150,7 +150,7 @@ public sealed partial class PreferencesDialog
     {
 	    // Show dialog
 		StoryElement Element = await Ioc.Default.GetRequiredService<ElementPickerVM
-			>().ShowPicker();
+			>().ShowPicker(StoryItemType.Character);
 
 		if (Element == null) return; // User cancelled (or error occurred)
 		// Show result
