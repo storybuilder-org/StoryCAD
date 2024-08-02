@@ -8,9 +8,9 @@ public class CollaboratorArgs
 
     public StoryModel StoryModel;
     
-    public WizardViewModel WizardVm;
+    public WorkflowViewModel WorkflowVm;
 
-    public WizardStepViewModel WizardStepVM;
+    //public WorkflowStepViewModel WorkflowStepVM;
     
     public delegate void OnDone();
 

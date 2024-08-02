@@ -55,6 +55,8 @@
     <None Remove="Assets\Install\samples\The Maltese Falcon.stbx" />
     <None Remove="Assets\Install\samples\The Old Man and the Sea.stbx" />
     <None Remove="Assets\Install\Symbols.txt" />
+    <None Remove="Collaborator\Views\WorkflowPage.xaml" />
+    <None Remove="Collaborator\Views\WorkflowShell.xaml" />
     <None Remove="Controls\Flaw.xaml" />
     <None Remove="Controls\RelationshipView.xaml" />
     <None Remove="Controls\Traits.xaml" />
@@ -103,8 +105,10 @@
 	<PackageReference Include="NLog.Extensions.Logging" Version="5.3.11" />
 	<PackageReference Include="Octokit" Version="13.0.1" />
     <PackageReference Include="WinUIEx" Version="2.3.4" />
-    <PackageReference Include="Betalgo.OpenAI" Version="8.6.0" />
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22621.3233" />
+    <PackageReference Include="Microsoft.SemanticKernel" Version="1.16.1" />
+    <PackageReference Include="Microsoft.SemanticKernel.Abstractions" Version="1.16.1" />
+    <PackageReference Include="Microsoft.SemanticKernel.Planners.OpenAI" Version="1.16.0-preview" />
   </ItemGroup>
 
   <ItemGroup>
@@ -146,6 +150,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Page Update="Collaborator\Views\WorkflowPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="Collaborator\Views\WorkflowShell.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <None Update="NLog.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
