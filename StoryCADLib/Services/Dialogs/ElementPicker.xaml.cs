@@ -1,4 +1,6 @@
-﻿namespace StoryCAD.Services.Dialogs;
+﻿using Microsoft.UI.Xaml;
+
+namespace StoryCAD.Services.Dialogs;
 
 /// <summary>
 /// A simple picker allowing a user to pick the
@@ -11,17 +13,36 @@ public sealed partial class ElementPicker : Page
 	/// <summary>
 	/// Don't spawn this on its own, use ElementPickerVM.ShowPicker()
 	/// </summary>
-	public ElementPicker() { InitializeComponent(); }
+	public ElementPicker()
+	{
+		InitializeComponent();
+
+		if (PickerVM.ForcedType != null)
+		{
+			TypeBox.Visibility = Visibility.Collapsed;
+			PickerVM.SelectedType = PickerVM.ForcedType;
+			Selector_OnSelectionChanged(null,null);
+		}
+	}
 
 	/// <summary>
 	/// This just handles the UI when the type Combobox is changed
 	/// </summary>
 	private void Selector_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
 	{
-		//Get elements
-		ComboBoxItem Type = PickerVM.SelectedType as ComboBoxItem;
-		StoryItemType type = Enum.Parse<StoryItemType>(Type.Content.ToString()!, 
-			true);
+		StoryItemType type;
+		if (PickerVM.ForcedType == null)
+		{
+			//Get elements
+			ComboBoxItem Type = PickerVM.SelectedType as ComboBoxItem;
+			type = Enum.Parse<StoryItemType>(Type.Content.ToString()!,
+				true);
+		}
+		else
+		{
+			type = (StoryItemType)PickerVM.ForcedType;
+		}
+
 
 		//Reset the UIs, so we can't enter an invalid state
 		PickerVM.SelectedElement = null;

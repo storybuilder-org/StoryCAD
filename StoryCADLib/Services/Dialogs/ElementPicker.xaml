@@ -10,6 +10,7 @@
 
 		<!-- ElementType Picker -->
 	    <ComboBox SelectedItem="{x:Bind PickerVM.SelectedType, Mode=TwoWay}"
+				  Name="TypeBox"
 	              PlaceholderText="Click here to select an element type" HorizontalAlignment="Center"
 	              MinWidth="200" SelectionChanged="Selector_OnSelectionChanged">
 			<ComboBoxItem Content="Problem"/>
