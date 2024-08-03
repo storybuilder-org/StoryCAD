@@ -61,7 +61,7 @@ public sealed partial class Shell
         Windowing.XamlRoot = Content.XamlRoot;
         Ioc.Default.GetService<AppState>()!.StartUpTimer.Stop();
 
-        if (Ioc.Default.GetService<CollaboratorService>()!.CollaboratorEnabled())
+        if (await Ioc.Default.GetService<CollaboratorService>()!.CollaboratorEnabled())
         {
             Ioc.Default.GetService<CollaboratorService>()!.ConnectCollaborator();
             ShellVm.CollaboratorVisibility = Visibility.Visible;
