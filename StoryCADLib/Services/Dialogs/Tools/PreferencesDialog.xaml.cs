@@ -149,15 +149,16 @@ public sealed partial class PreferencesDialog
     private async void OpenPickerUI(object sender, RoutedEventArgs e)
     {
 	    // Show dialog
-		StoryElement Element = await Ioc.Default.GetRequiredService<ElementPickerVM
-			>().ShowPicker(StoryItemType.Character);
+		//StoryElement Element = await Ioc.Default.GetRequiredService<ElementPickerVM
+			///>().ShowPicker(ShellViewModel.GetModel(),
+			//StoryItemType.Character);
 
-		if (Element == null) return; // User cancelled (or error occurred)
+		//if (Element == null) return; // User cancelled (or error occurred)
 		// Show result
 	    await Ioc.Default.GetRequiredService<Windowing>().ShowContentDialog(new()
 	    {
 		    Title = "Result",
-		    Content = "User picked item " + Element.Name,
+		    //Content = "User picked item " + Element.Name,
 			PrimaryButtonText = "OK"
 		}, true);
 	}
