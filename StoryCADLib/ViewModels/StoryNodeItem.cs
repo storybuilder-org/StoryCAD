@@ -35,7 +35,7 @@ namespace StoryCAD.ViewModels;
 /// </summary>
 public class StoryNodeItem : INotifyPropertyChanged
 {
-    private LogService _logger = Ioc.Default.GetRequiredService<LogService>();
+    private ILogService _logger;
     private ShellViewModel _shellVM = Ioc.Default.GetRequiredService<ShellViewModel>();
 
     // is it INavigable?
@@ -275,8 +275,9 @@ public class StoryNodeItem : INotifyPropertyChanged
 
     #region Constructors
 
-    public StoryNodeItem(StoryElement node, StoryNodeItem parent, StoryItemType type = StoryItemType.Unknown)
+    public StoryNodeItem(ILogService logger, StoryElement node, StoryNodeItem parent, StoryItemType type = StoryItemType.Unknown)
     {
+        _logger = logger;
         Uuid = node.Uuid;
         Name = node.Name;
         if (type == StoryItemType.Unknown) { Type = node.Type; }
@@ -325,8 +326,16 @@ public class StoryNodeItem : INotifyPropertyChanged
         Parent.Children.Add(this);
     }
 
-    public StoryNodeItem(StoryNodeItem parent, IXmlNode node)
+    // Overloaded constructor without logger
+    public StoryNodeItem(StoryElement node, StoryNodeItem parent,
+        StoryItemType type = StoryItemType.Unknown) : this(null, node, parent, type) 
     {
+    }
+
+    public StoryNodeItem(ILogService logger, StoryNodeItem parent, IXmlNode node)
+    {
+        _logger = logger;
+        
         XmlNamedNodeMap _attrs = node.Attributes;
         if (_attrs != null)
         {
@@ -397,9 +406,15 @@ public class StoryNodeItem : INotifyPropertyChanged
         Parent = parent;
         Parent?.Children.Add(this);  // (if parent != null)
     }
+
+    // Overloaded constructor without logger
+    public StoryNodeItem(StoryNodeItem parent, IXmlNode node) : this(null, parent, node)
+    {
+    }
+
     #endregion
 
-    public void Delete(StoryViewType storyView)
+        public void Delete(StoryViewType storyView)
     {
         _logger.Log(LogLevel.Trace, $"Starting to delete element {Name} ({Uuid}) from {storyView}");
         //Sanity check

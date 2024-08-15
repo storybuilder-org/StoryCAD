@@ -24,7 +24,7 @@ namespace StoryCAD.Services.IoC
         public static void Initialize()
         {
             Services.AddSingleton<NavigationService>();
-            Services.AddSingleton<LogService>();
+            Services.AddSingleton<ILogService, LogService>();
             Services.AddSingleton<SearchService>();
             Services.AddSingleton<ControlLoader>();
             Services.AddSingleton<ListLoader>();
