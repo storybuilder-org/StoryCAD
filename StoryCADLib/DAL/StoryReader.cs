@@ -17,7 +17,7 @@ public class StoryReader : ObservableRecipient
     /// StoryCAD's model is found in the StoryCAD.Models namespace and consists
     /// of various Plain Old CLR objects.
     ///
-    private readonly ILogService _logger;
+    public readonly LogService Logger;
 
     /// The in-memory representation of the .stbx file is an XmlDocument
     /// and its various components are all XmlNodes.
@@ -35,7 +35,7 @@ public class StoryReader : ObservableRecipient
         try
         {
             string _msg = $"Reading file {file.Path}.";
-            _logger.Log(LogLevel.Info, _msg);
+            Logger.Log(LogLevel.Info, _msg);
             _xml = await LoadFromFileAsync(file);
             LoadStoryModel();
             _model.ProjectFile = file;
@@ -65,7 +65,7 @@ public class StoryReader : ObservableRecipient
         }
         catch (Exception _ex)
         {
-            _logger.LogException(LogLevel.Error, _ex, "Error reading story");
+            Logger.LogException(LogLevel.Error, _ex, "Error reading story");
             Messenger.Send(new StatusChangedMessage(new("Error reading story", LogLevel.Error)));
             return new StoryModel();  // return an empty story model
         }
@@ -161,8 +161,8 @@ public class StoryReader : ObservableRecipient
     private void ParseWeb(IXmlNode xn)
     {
         WebModel _web = new(xn, _model);
-        foreach (IXmlNode 
-                     
+        foreach (IXmlNode
+
                      _attr in xn.Attributes)
         {
             switch (_attr.NodeName)
@@ -715,7 +715,7 @@ public class StoryReader : ObservableRecipient
     private void RecurseNarratorNode(StoryNodeItem parent, IXmlNode xn, bool root)
     {
         StoryNodeItem _node = new(parent, xn);
-        if (_node.Name == "Deleted Story Elements" && root) {return;}
+        if (_node.Name == "Deleted Story Elements" && root) { return; }
         if (root) _model.NarratorView.Add(_node);
 
         XmlNodeList _children = xn.SelectNodes("StoryNode");
@@ -725,10 +725,9 @@ public class StoryReader : ObservableRecipient
     }
 
     #region Constructor
-    public StoryReader(ILogService logger)
+    public StoryReader()
     {
-        _logger = logger;
-        //Logger = Ioc.Default.GetService<LogService>();
+        Logger = Ioc.Default.GetService<LogService>();
 
         XmlDocument _doc = new();
         _xml = _doc;

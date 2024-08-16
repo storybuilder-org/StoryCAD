@@ -35,7 +35,7 @@ namespace StoryCAD.ViewModels;
 /// </summary>
 public class StoryNodeItem : INotifyPropertyChanged
 {
-    private ILogService _logger;
+    private LogService _logger = Ioc.Default.GetRequiredService<LogService>();
     private ShellViewModel _shellVM = Ioc.Default.GetRequiredService<ShellViewModel>();
 
     // is it INavigable?
@@ -275,9 +275,8 @@ public class StoryNodeItem : INotifyPropertyChanged
 
     #region Constructors
 
-    public StoryNodeItem(ILogService logger, StoryElement node, StoryNodeItem parent, StoryItemType type = StoryItemType.Unknown)
+    public StoryNodeItem(StoryElement node, StoryNodeItem parent, StoryItemType type = StoryItemType.Unknown)
     {
-        _logger = logger;
         Uuid = node.Uuid;
         Name = node.Name;
         if (type == StoryItemType.Unknown) { Type = node.Type; }
@@ -321,21 +320,13 @@ public class StoryNodeItem : INotifyPropertyChanged
 
         IsExpanded = false;
         IsRoot = false;
-        
+
         if (Parent == null) { return; }
         Parent.Children.Add(this);
     }
 
-    // Overloaded constructor without logger
-    public StoryNodeItem(StoryElement node, StoryNodeItem parent,
-        StoryItemType type = StoryItemType.Unknown) : this(null, node, parent, type) 
+    public StoryNodeItem(StoryNodeItem parent, IXmlNode node)
     {
-    }
-
-    public StoryNodeItem(ILogService logger, StoryNodeItem parent, IXmlNode node)
-    {
-        _logger = logger;
-        
         XmlNamedNodeMap _attrs = node.Attributes;
         if (_attrs != null)
         {
@@ -406,21 +397,15 @@ public class StoryNodeItem : INotifyPropertyChanged
         Parent = parent;
         Parent?.Children.Add(this);  // (if parent != null)
     }
-
-    // Overloaded constructor without logger
-    public StoryNodeItem(StoryNodeItem parent, IXmlNode node) : this(null, parent, node)
-    {
-    }
-
     #endregion
 
-        public void Delete(StoryViewType storyView)
+    public void Delete(StoryViewType storyView)
     {
         _logger.Log(LogLevel.Trace, $"Starting to delete element {Name} ({Uuid}) from {storyView}");
         //Sanity check
         if (Type == StoryItemType.TrashCan || IsRoot)
         {
-            Ioc.Default.GetRequiredService<ShellViewModel>().ShowMessage(LogLevel.Warn, "This element can't be deleted.",false);
+            Ioc.Default.GetRequiredService<ShellViewModel>().ShowMessage(LogLevel.Warn, "This element can't be deleted.", false);
             _logger.Log(LogLevel.Info, "User tried to delete Root or Trashcan node.");
         }
 
