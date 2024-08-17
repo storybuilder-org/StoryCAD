@@ -1,4 +1,5 @@
-﻿using StoryCAD.Services.Dialogs;
+﻿using Microsoft.UI.Xaml;
+using StoryCAD.Services.Dialogs;
 
 namespace StoryCAD.ViewModels;
 
@@ -7,6 +8,12 @@ namespace StoryCAD.ViewModels;
 /// </summary>
 public class ElementPickerVM
 {
+
+	/// <summary>
+	/// Currently selected item
+	/// </summary>
+	public StoryModel StoryModel { get; set; }
+
 	/// <summary>
 	/// Currently selected item
 	/// </summary>
@@ -35,15 +42,19 @@ public class ElementPickerVM
 	/// <summary>
 	/// Spawns an instance of the picker.
 	/// </summary>
+	/// <param name="Model">StoryModel to show elements from</param>
+	/// <param name="XAMLRoot">Only allow the value of Type to be picked.</param>
 	/// <param name="Type">Only allow the value of Type to be picked.</param>
-	/// <returns>The element the user picked</returns>
-	public async Task<StoryElement?> ShowPicker(StoryItemType? Type = null)
+	/// <returns>The GUID of element the user picked</returns>
+	public async Task<string> ShowPicker(StoryModel Model,
+		XamlRoot XAMLRoot, StoryItemType? Type = null)
 	{
 		//Reset VM
 		SelectedType = null;
 		SelectedElement = null;
 		NewNodeName = "";
 		ForcedType = Type;
+		StoryModel = Model;
 
 		//Spawn new picker
 		ElementPicker UI = new();
@@ -56,19 +67,16 @@ public class ElementPickerVM
 			PrimaryButtonText = "Select",
 			SecondaryButtonText = "Cancel",
 			Content = UI,
-
+			XamlRoot = XAMLRoot
 		};
-		var res = await Ioc.Default.GetRequiredService<Windowing>()
-			.ShowContentDialog(dialog, true);
 
 		//interpret result
-		if (res != ContentDialogResult.Secondary)
+		if (await dialog.ShowAsync() != ContentDialogResult.Secondary)
 		{
 			ComboBoxItem item = SelectedType as ComboBoxItem;
 			if (item != null) //check user has picked an item
 			{
-				//The name can be parsed to an enum.
-				return SelectedElement as StoryElement;
+				return (SelectedElement as StoryElement).Uuid.ToString();
 			}
 		}
 		
@@ -81,20 +89,32 @@ public class ElementPickerVM
 	public void CreateNode()
 	{
 		StoryElement NewElement;
-		string type = (SelectedType as ComboBoxItem).Content.ToString();
+		StoryItemType type;
+		if (ForcedType == null)
+		{
+			//Get elements
+			ComboBoxItem Type = SelectedType as ComboBoxItem;
+			type = Enum.Parse<StoryItemType>(Type.Content.ToString()!,
+				true);
+		}
+		else
+		{
+			type = (StoryItemType)ForcedType;
+		}
+
 		switch (type)
 		{
-			case "Problem":
-				NewElement = new ProblemModel(NewNodeName, ShellViewModel.GetModel()); 
+			case StoryItemType.Problem:
+				NewElement = new ProblemModel(NewNodeName, StoryModel); 
 				break;
-			case "Character":
-				NewElement = new CharacterModel(NewNodeName, ShellViewModel.GetModel());
+			case StoryItemType.Character:
+				NewElement = new CharacterModel(NewNodeName, StoryModel);
 				break;
-			case "Setting":
-				NewElement = new SettingModel(NewNodeName, ShellViewModel.GetModel());
+			case StoryItemType.Setting:
+				NewElement = new SettingModel(NewNodeName, StoryModel);
 				break;
-			case "Scene":
-				NewElement = new SceneModel(NewNodeName, ShellViewModel.GetModel());
+			case StoryItemType.Scene:
+				NewElement = new SceneModel(NewNodeName, StoryModel);
 				break;
 			default:
 				//Throw an exception if we are asked to create a node type we don't expect
@@ -104,7 +124,7 @@ public class ElementPickerVM
 		}
 		
 		//Persist node to tree and set as selected element
-		StoryNodeItem Node = new(NewElement, ShellViewModel.GetModel().ExplorerView[0]);
+		StoryNodeItem Node = new(NewElement, StoryModel.ExplorerView[0]);
 		SelectedElement = NewElement;
 
 		//Close popup
