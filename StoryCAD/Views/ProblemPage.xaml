@@ -32,25 +32,30 @@
                         </Grid.ColumnDefinitions>
                         <ComboBox Grid.Column="0" IsEditable="True" Header="Problem Type" Grid.Row="0"  MinWidth="200"
                               ItemsSource="{x:Bind ProblemVm.ProblemTypeList}"
-                              Text="{x:Bind ProblemVm.ProblemType, Mode=TwoWay}" />
+                              Text="{x:Bind ProblemVm.ProblemType, Mode=TwoWay}"
+                              PlaceholderText="{x:Bind ProblemVm.ProblemType, Mode=TwoWay}"/>
                         <TextBlock Grid.Column="1" Grid.Row="0" MinWidth="300"/>
                         <ComboBox Grid.Column="2" IsEditable="True" Header="Conflict Type" Grid.Row="0"  MinWidth="200"
                                     ItemsSource="{x:Bind ProblemVm.ConflictTypeList}"
-                                    Text="{x:Bind ProblemVm.ConflictType, Mode=TwoWay}" />
+                                    Text="{x:Bind ProblemVm.ConflictType, Mode=TwoWay}"
+                                    PlaceholderText="{x:Bind ProblemVm.ConflictType, Mode=TwoWay}"  />
                     </Grid>
                     <ComboBox IsEditable="True" Header="Problem Category" Grid.Row="1" MinWidth="300"
                                         ItemsSource="{x:Bind ProblemVm.ProblemCategoryList}"
-                                        Text="{x:Bind ProblemVm.ProblemCategory, Mode=TwoWay}" />
+                                        Text="{x:Bind ProblemVm.ProblemCategory, Mode=TwoWay}" 
+                                        PlaceholderText="{x:Bind ProblemVm.ProblemCategory, Mode=TwoWay}" />
                     <ComboBox IsEditable="True" Header="Subject" Grid.Row="2" MinWidth="300"
                                     ItemsSource="{x:Bind ProblemVm.SubjectList}"
-                                    Text="{x:Bind ProblemVm.Subject, Mode=TwoWay}" />
+                                    Text="{x:Bind ProblemVm.Subject, Mode=TwoWay}" 
+                                    PlaceholderText="{x:Bind ProblemVm.Subject, Mode=TwoWay}" />
                     <usercontrols:RichEditBoxExtended Header="Story Question" Grid.Row="3"
                                                           RtfText="{x:Bind ProblemVm.StoryQuestion, Mode=TwoWay}" AcceptsReturn="True"
                                                           IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                                           ScrollViewer.VerticalScrollBarVisibility="Visible" />
                     <ComboBox IsEditable="True" Header="Problem Source" Grid.Row="4" MinWidth="300"
                                     ItemsSource="{x:Bind ProblemVm.ProblemSourceList}"
-                                    Text="{x:Bind ProblemVm.ProblemSource, Mode=TwoWay}" />
+                                    Text="{x:Bind ProblemVm.ProblemSource, Mode=TwoWay}"
+                                    PlaceholderText="{x:Bind ProblemVm.ProblemSource, Mode=TwoWay}" />
                 </Grid>
             </PivotItem>
             <PivotItem Header="Protagonist" >
@@ -67,10 +72,12 @@
                               SelectedItem="{x:Bind ProblemVm.Protagonist, Mode=TwoWay, Converter={StaticResource ToStoryElement}}" />
                     <ComboBox IsEditable="True" Header="Goal" Grid.Row="1" 
                               MinWidth="400" ItemsSource="{x:Bind ProblemVm.GoalList}"
-                              Text="{x:Bind ProblemVm.ProtGoal, Mode=TwoWay}" />
+                              Text="{x:Bind ProblemVm.ProtGoal, Mode=TwoWay}" 
+                              PlaceholderText="{x:Bind ProblemVm.ProtGoal, Mode=TwoWay}" />
                     <ComboBox IsEditable="True" Header="Motivation" Grid.Row="2" 
                                     MinWidth="300" ItemsSource="{x:Bind ProblemVm.MotiveList}"
-                                    Text="{x:Bind ProblemVm.ProtMotive, Mode=TwoWay}" />
+                                    Text="{x:Bind ProblemVm.ProtMotive, Mode=TwoWay}" 
+                                    PlaceholderText="{x:Bind ProblemVm.ProtMotive, Mode=TwoWay}" />
                     <Button  Content="Conflict Builder" Grid.Row="3" HorizontalAlignment="Left" Margin="0,10,10,10" 
                              Command="{x:Bind ProblemVm.ConflictCommand, Mode=OneWay}" />
                     <usercontrols:RichEditBoxExtended Header="Conflict" Grid.Row="4"  
@@ -93,10 +100,12 @@
                               SelectedItem="{x:Bind ProblemVm.Antagonist, Mode=TwoWay, Converter={StaticResource ToStoryElement}}" />
                     <ComboBox IsEditable="True" Header="Goal" Grid.Row="1" 
                               MinWidth="400" ItemsSource="{x:Bind ProblemVm.GoalList}"
-                              Text="{x:Bind ProblemVm.AntagGoal, Mode=TwoWay}" />
+                              Text="{x:Bind ProblemVm.AntagGoal, Mode=TwoWay}" 
+                              PlaceholderText="{x:Bind ProblemVm.AntagGoal, Mode=TwoWay}" />
                     <ComboBox IsEditable="True" Header="Motivation" Grid.Row="2" 
                               MinWidth="300" ItemsSource="{x:Bind ProblemVm.MotiveList}"
-                              Text="{x:Bind ProblemVm.AntagMotive, Mode=TwoWay}" />
+                              Text="{x:Bind ProblemVm.AntagMotive, Mode=TwoWay}" 
+                              PlaceholderText="{x:Bind ProblemVm.AntagMotive, Mode=TwoWay}" />
                     <Button  Content="Conflict Builder" Grid.Row="3" HorizontalAlignment="Left" Margin="0,10,10,10" 
                              Command="{x:Bind ProblemVm.ConflictCommand, Mode=OneWay}" />
                     <usercontrols:RichEditBoxExtended Header="Conflict" Grid.Row="4"  
@@ -115,13 +124,16 @@
                     </Grid.RowDefinitions>
                     <ComboBox IsEditable="True" Header="Outcome" Grid.Row="0" 
                               MinWidth="400" ItemsSource="{x:Bind ProblemVm.OutcomeList}"
-                              Text="{x:Bind ProblemVm.Outcome, Mode=TwoWay}" />
+                              Text="{x:Bind ProblemVm.Outcome, Mode=TwoWay}"
+                              PlaceholderText="{x:Bind ProblemVm.Outcome, Mode=TwoWay}" />
                     <ComboBox IsEditable="True" Header="Method" Grid.Row="1" 
                               MinWidth="400" ItemsSource="{x:Bind ProblemVm.MethodList}"
-                              Text="{x:Bind ProblemVm.Method, Mode=TwoWay}" />
+                              Text="{x:Bind ProblemVm.Method, Mode=TwoWay}" 
+                              PlaceholderText="{x:Bind ProblemVm.Method, Mode=TwoWay}" />
                     <ComboBox IsEditable="True" Header="Theme" Grid.Row="2" 
                               MinWidth="400" ItemsSource="{x:Bind ProblemVm.ThemeList}"
-                              Text="{x:Bind ProblemVm.Theme, Mode=TwoWay}" />
+                              Text="{x:Bind ProblemVm.Theme, Mode=TwoWay}" 
+                              PlaceholderText="{x:Bind ProblemVm.Theme, Mode=TwoWay}" />
                     <usercontrols:RichEditBoxExtended Header="Premise" Grid.Row="3"
                               RtfText="{x:Bind ProblemVm.Premise, Mode=TwoWay}" AcceptsReturn="True"
                               IsSpellCheckEnabled="True" TextWrapping="Wrap"

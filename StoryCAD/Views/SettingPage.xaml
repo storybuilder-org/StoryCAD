@@ -36,11 +36,13 @@
                         </Grid.ColumnDefinitions>
                         <ComboBox IsEditable="True" Header="Locale" Grid.Column="0"  MinWidth="200"
                                   ItemsSource="{x:Bind SettingVm.LocaleList}"
-                                  Text="{x:Bind SettingVm.Locale, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                  Text="{x:Bind SettingVm.Locale, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                  PlaceholderText="{x:Bind SettingVm.Locale, Mode=TwoWay}" />
                         <TextBlock Grid.Column="1" MinWidth="100"/>
                         <ComboBox IsEditable="True" Header="Season" Grid.Column="2" MinWidth="200"
                                         ItemsSource="{x:Bind SettingVm.SeasonList}"
-                                        Text="{x:Bind SettingVm.Season, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                        Text="{x:Bind SettingVm.Season, Mode=TwoWay}" 
+                                        PlaceholderText="{x:Bind SettingVm.Season, Mode=TwoWay}" />
                     </Grid>
                     <Grid Grid.Row="1" HorizontalAlignment="Left">
                         <Grid.ColumnDefinitions>

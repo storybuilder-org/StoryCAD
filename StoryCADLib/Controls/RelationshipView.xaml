@@ -47,8 +47,8 @@
                                     <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
-                                <ComboBox Grid.Row="0" Grid.Column="1" IsEditable="True"  Header= "Trait" MinWidth="150" ItemsSource="{x:Bind CharVM.RelationshipTraitList}" Text="{x:Bind Trait, Mode=TwoWay}" Margin="0,0,10,0" />
-                                <ComboBox Grid.Row="0" Grid.Column="2" IsEditable="True" Header="Attitude"  MinWidth="150" ItemsSource="{x:Bind CharVM.RelationshipAttitudeList}" Text="{x:Bind Attitude, Mode=TwoWay}"/>
+                                <ComboBox Grid.Row="0" Grid.Column="1" IsEditable="True"  Header= "Trait" MinWidth="150" ItemsSource="{x:Bind CharVM.RelationshipTraitList}" Text="{x:Bind Trait, Mode=TwoWay}" PlaceholderText="{x:Bind Trait, Mode=TwoWay}" Margin="0,0,10,0" />
+                                <ComboBox Grid.Row="0" Grid.Column="2" IsEditable="True" Header="Attitude"  MinWidth="150" ItemsSource="{x:Bind CharVM.RelationshipAttitudeList}" Text="{x:Bind Attitude, Mode=TwoWay}" PlaceholderText="{x:Bind Attitude, Mode =TwoWay}"/>
                                 <usercontrols:RichEditBoxExtended Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4" MinHeight="200" HorizontalAlignment="Stretch" Header="Relationship Notes"  RtfText="{x:Bind Notes, Mode=TwoWay}" AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap" ScrollViewer.VerticalScrollBarVisibility="Visible"/>
                             </Grid>
                         </Expander>

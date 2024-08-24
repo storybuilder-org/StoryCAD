@@ -69,7 +69,8 @@
                         <TextBlock Grid.Column="1" MinWidth="50"/>
                         <ComboBox IsEditable="True" Header="SceneType" Grid.Column="2" MinWidth="200"
                                             ItemsSource="{x:Bind SceneVm.SceneTypeList}"
-                                            Text="{x:Bind SceneVm.SceneType, Mode=TwoWay}" />
+                                            Text="{x:Bind SceneVm.SceneType, Mode=TwoWay}"
+                                            PlaceholderText="{x:Bind SceneVm.SceneType, Mode=TwoWay}"/>
                     </Grid>
                     <usercontrols:RichEditBoxExtended Header="Scene Sketch" Grid.Row="3"
                                                       RtfText="{x:Bind SceneVm.Remarks, Mode=TwoWay}"
@@ -191,14 +192,18 @@
                         <TextBlock Grid.Column="1" MinWidth="50"/>
                         <ComboBox IsEditable="True" Header="Feelings" Grid.Column="2" MinWidth="200"
                                             ItemsSource="{x:Bind SceneVm.EmotionList}"
-                                            Text="{x:Bind SceneVm.ProtagEmotion, Mode=TwoWay}" />
+                                            Text="{x:Bind SceneVm.ProtagEmotion, Mode=TwoWay}" 
+                                            PlaceholderText="{x:Bind SceneVm.ProtagEmotion, Mode=TwoWay}" />
                     </Grid>
                     <ComboBox IsEditable="True" Header="Protagonist's Goal" Grid.Row="1"  MinWidth="300"
                                         ItemsSource="{x:Bind SceneVm.GoalList}"
-                                        Text="{x:Bind SceneVm.ProtagGoal, Mode=TwoWay}" />
+                                        Text="{x:Bind SceneVm.ProtagGoal, Mode=TwoWay}"
+                                        PlaceholderText="{x:Bind SceneVm.ProtagGoal, Mode=TwoWay}"/>
                     <ComboBox IsEditable="True" Header="Opposition" Grid.Row="2" Width="400"
                                         ItemsSource="{x:Bind SceneVm.OppositionList}"
-                                        Text="{x:Bind SceneVm.Opposition, Mode=TwoWay}" HorizontalAlignment="Left"/>
+                                        Text="{x:Bind SceneVm.Opposition, Mode=TwoWay}" 
+                                        PlaceholderText="{x:Bind SceneVm.Opposition, Mode=TwoWay}" 
+                                        HorizontalAlignment="Left"/>
                     <Grid Grid.Row="3" HorizontalAlignment="Left">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="3*"/>
@@ -211,15 +216,19 @@
                         <TextBlock Grid.Column="1" MinWidth="50"/>
                         <ComboBox IsEditable="True" Header="Feelings" Grid.Column="2"  MinWidth="200"
                                             ItemsSource="{x:Bind SceneVm.EmotionList}"
-                                            Text="{x:Bind SceneVm.AntagEmotion, Mode=TwoWay}" />
+                                            Text="{x:Bind SceneVm.AntagEmotion, Mode=TwoWay}" 
+                                            PlaceholderText="{x:Bind SceneVm.AntagEmotion, Mode=TwoWay}" />
                     </Grid>
                     <ComboBox IsEditable="True" Header="Antagonist's Goal" Grid.Row="4" MinWidth="300"
                                         ItemsSource="{x:Bind SceneVm.GoalList}"
-                                        Text="{x:Bind SceneVm.AntagGoal, Mode=TwoWay}" />
+                                        Text="{x:Bind SceneVm.AntagGoal, Mode=TwoWay}" 
+                                        PlaceholderText="{x:Bind SceneVm.AntagGoal, Mode=TwoWay}" />
                     <TextBlock Grid.Row="5" Text=" "/>
                     <ComboBox IsEditable="True" Header="Outcome" Grid.Row="5" Width="400"
                                         ItemsSource="{x:Bind SceneVm.OutcomeList}"
-                                        Text="{x:Bind SceneVm.Outcome, Mode=TwoWay}" HorizontalAlignment="Left"/>
+                                        Text="{x:Bind SceneVm.Outcome, Mode=TwoWay}"
+                                        PlaceholderText="{x:Bind SceneVm.Outcome, Mode=TwoWay}"
+                                        HorizontalAlignment="Left"/>
                 </Grid>
             </PivotItem>
             <PivotItem Header="Sequel">
@@ -231,14 +240,16 @@
                     </Grid.RowDefinitions>
                     <ComboBox IsEditable="True" Header="Emotional Response" Grid.Row="0" MinWidth="200"
                                         ItemsSource="{x:Bind SceneVm.EmotionList}"
-                                        Text="{x:Bind SceneVm.Emotion, Mode=TwoWay}" />
+                                        Text="{x:Bind SceneVm.Emotion, Mode=TwoWay}" 
+                                        PlaceholderText="{x:Bind SceneVm.Emotion, Mode=TwoWay}" />
                     <usercontrols:RichEditBoxExtended Header="Review and Thought" Grid.Row="1"
                                                       RtfText="{x:Bind SceneVm.Review, Mode=TwoWay}" AcceptsReturn="True"
                                                       IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                                       ScrollViewer.VerticalScrollBarVisibility="Visible" />
                     <ComboBox IsEditable="True" Header="New Goal" Grid.Row="2" MinWidth="400"
                                         ItemsSource="{x:Bind SceneVm.GoalList}"
-                                        Text="{x:Bind SceneVm.NewGoal, Mode=TwoWay}" />
+                                        Text="{x:Bind SceneVm.NewGoal, Mode=TwoWay}" 
+                                        PlaceholderText="{x:Bind SceneVm.NewGoal, Mode=TwoWay}" />
                 </Grid>
             </PivotItem>
             <PivotItem Header="Notes">
