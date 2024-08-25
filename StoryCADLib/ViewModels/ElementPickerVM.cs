@@ -128,6 +128,7 @@ public class ElementPickerVM
 		SelectedElement = NewElement;
 
 		//Close popup
-		dialog.Hide();
+		if (dialog is not null)
+		    dialog.Hide();
 	}	
 }

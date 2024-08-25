@@ -59,6 +59,9 @@ namespace StoryCAD.Collaborator.ViewModels
             get => _currentStep;
             set => SetProperty(ref _currentStep, value);
         }
+
+        public XamlRoot WorkflowShellRoot { get; set; }
+
         #endregion
 
         #region Visibility bindings

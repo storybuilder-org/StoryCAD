@@ -62,9 +62,6 @@ public partial class App
         var serviceProvider = ServiceLocator.Services.BuildServiceProvider();
         // Configure the default IOC container
         Ioc.Default.ConfigureServices(serviceProvider);
-        
-        //Loads all Singletons/VMs
-        //Ioc.Default.ConfigureServices(ServiceConfigurator.Configure());
 
         string path = Path.Combine(Package.Current.InstalledLocation.Path, ".env");
         DotEnvOptions options = new(false, new[] { path });

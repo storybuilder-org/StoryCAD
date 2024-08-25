@@ -13,7 +13,8 @@ public class AppState
     public AppState()
     {
         StoryCADTestsMode = Assembly.GetEntryAssembly().Location.Contains("StoryCADTests.dll") ||
-                            Assembly.GetEntryAssembly().Location.Contains("testhost.dll");
+                                Assembly.GetEntryAssembly().Location.Contains("CollaboratorTests.dll") ||
+                                Assembly.GetEntryAssembly().Location.Contains("testhost.dll");
     }
 
     /// <summary>
