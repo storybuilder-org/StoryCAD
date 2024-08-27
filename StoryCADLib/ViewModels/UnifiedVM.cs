@@ -22,7 +22,14 @@ public class UnifiedVM : ObservableRecipient
 	private ShellViewModel _shell = Ioc.Default.GetService<ShellViewModel>();
     private PreferenceService Preferences = Ioc.Default.GetService<PreferenceService>();
 
-    private int _selectedRecentIndex;
+    public Visibility _ProjectNameErrorVisibility;
+    public Visibility ProjectNameErrorVisibility
+    {
+	    get => _ProjectNameErrorVisibility;
+	    set => SetProperty(ref _ProjectNameErrorVisibility, value);
+    }
+
+	private int _selectedRecentIndex;
     public int SelectedRecentIndex
     {
         get => _selectedRecentIndex;
@@ -196,7 +203,6 @@ public class UnifiedVM : ObservableRecipient
 	public void CheckValidity(object sender, RoutedEventArgs e)
 	{
 		Logger.Log(LogLevel.Info, $"Testing filename validity for {ProjectPath}\\{ProjectName}");
-
 		//Checks file path validity
 		try { Directory.CreateDirectory(ProjectPath); }
 		catch
@@ -208,21 +214,17 @@ public class UnifiedVM : ObservableRecipient
 		//Checks file name validity
 		try
 		{
-			string testfile = Path.Combine(ProjectPath, ProjectName);
-			var x = Path.GetInvalidPathChars();
-			//Check validity
-			Regex BadChars = new("[" + Regex.Escape(Path.GetInvalidPathChars().ToString()) + "]");
-			if (BadChars.IsMatch(testfile))
+			char[] invalidChars = Path.GetInvalidFileNameChars();
+
+			foreach (char c in ProjectName)
 			{
-				throw new FileNotFoundException("the filename is invalid.");
+				if (Array.Exists(invalidChars, invalidChar => invalidChar == c))
+				{
+					//Checks file name validity
+					ProjectNameErrorVisibility = Visibility.Visible;
+					throw new Exception("filename invalid");
+				}
 			}
-
-			//Try creating file and then checking it exists.
-			using (FileStream fs = File.Create(testfile)) { }
-
-			if (!File.Exists(testfile))
-				throw new FileNotFoundException("the filename was not found.");
-			File.Delete(testfile);
 
 			if (Ioc.Default.GetRequiredService<AppState>().StoryCADTestsMode)
 			{

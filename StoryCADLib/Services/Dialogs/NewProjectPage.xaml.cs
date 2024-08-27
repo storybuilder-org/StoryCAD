@@ -7,6 +7,7 @@ public sealed partial class NewProjectPage : Page
 {
 	public NewProjectPage(UnifiedVM vm)
 	{
+		vm.ProjectNameErrorVisibility = Visibility.Collapsed;
 		InitializeComponent();
 		UnifiedVM = vm;
 	}
