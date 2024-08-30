@@ -328,7 +328,7 @@ public class StoryNodeItem : INotifyPropertyChanged
 
     // Overloaded constructor without logger
     public StoryNodeItem(StoryElement node, StoryNodeItem parent,
-        StoryItemType type = StoryItemType.Unknown) : this(null, node, parent, type) 
+        StoryItemType type = StoryItemType.Unknown) : this(Ioc.Default.GetRequiredService<ILogService>(), node, parent, type)
     {
     }
 
@@ -408,13 +408,13 @@ public class StoryNodeItem : INotifyPropertyChanged
     }
 
     // Overloaded constructor without logger
-    public StoryNodeItem(StoryNodeItem parent, IXmlNode node) : this(null, parent, node)
+    public StoryNodeItem(StoryNodeItem parent, IXmlNode node) : this(Ioc.Default.GetRequiredService<ILogService>(), parent, node)
     {
     }
 
     #endregion
 
-        public void Delete(StoryViewType storyView)
+	public void Delete(StoryViewType storyView)
     {
         _logger.Log(LogLevel.Trace, $"Starting to delete element {Name} ({Uuid}) from {storyView}");
         //Sanity check
