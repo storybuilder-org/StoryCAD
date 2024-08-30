@@ -1,11 +1,9 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using Windows.Data.Xml.Dom;
-using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
 using StoryCAD.Services;
-using LogLevel = StoryCAD.Services.Logging.LogLevel;
 
 namespace StoryCAD.ViewModels;
 
@@ -330,14 +328,13 @@ public class StoryNodeItem : INotifyPropertyChanged
 
     // Overloaded constructor without logger
     public StoryNodeItem(StoryElement node, StoryNodeItem parent,
-        StoryItemType type = StoryItemType.Unknown) : this(null, node, parent, type)
+        StoryItemType type = StoryItemType.Unknown) : this(Ioc.Default.GetRequiredService<ILogService>(), node, parent, type)
     {
-	    ;
     }
 
     public StoryNodeItem(ILogService logger, StoryNodeItem parent, IXmlNode node)
     {
-         _logger = logger;
+        _logger = logger;
         
         XmlNamedNodeMap _attrs = node.Attributes;
         if (_attrs != null)
@@ -411,17 +408,15 @@ public class StoryNodeItem : INotifyPropertyChanged
     }
 
     // Overloaded constructor without logger
-    public StoryNodeItem(StoryNodeItem parent, IXmlNode node) : this(null, parent, node)
+    public StoryNodeItem(StoryNodeItem parent, IXmlNode node) : this(Ioc.Default.GetRequiredService<ILogService>(), parent, node)
     {
-	    
     }
 
     #endregion
 
-    public void Delete(ILogService logger, StoryViewType storyView)
+	public void Delete(StoryViewType storyView)
     {
-	    _logger = logger;
-		_logger.Log(LogLevel.Trace, $"Starting to delete element {Name} ({Uuid}) from {storyView}");
+        _logger.Log(LogLevel.Trace, $"Starting to delete element {Name} ({Uuid}) from {storyView}");
         //Sanity check
         if (Type == StoryItemType.TrashCan || IsRoot)
         {
