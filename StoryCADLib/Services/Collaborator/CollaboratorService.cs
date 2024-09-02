@@ -27,8 +27,8 @@ public class CollaboratorService
     {
         var wizard = Ioc.Default.GetService<WorkflowViewModel>();
         wizard!.Model = args.SelectedElement;
-        // Get the 'GetMenuItems' method that expects a parameter of type 'StoryItemType'
-        MethodInfo  menuCall = collaboratorType.GetMethod("LoadWorkflowViewModel", new[] { typeof(StoryItemType) });
+		// Get the 'GetMenuItems' method that expects a parameter of type 'StoryItemType'
+		MethodInfo  menuCall = collaboratorType.GetMethod("LoadWorkflowViewModel", new[] { typeof(StoryItemType) });
         object[] methodArgs = { args.SelectedElement.Type };
         // ...and invoke it
         menuCall!.Invoke(collaborator, methodArgs);
@@ -129,8 +129,9 @@ public class CollaboratorService
         logger.Log(LogLevel.Info, "Calling Collaborator constructor.");
         var collabArgs = Ioc.Default.GetService<ShellViewModel>()!.CollabArgs = new();
         collabArgs.WorkflowVm = Ioc.Default.GetService<WorkflowViewModel>();
-        //collabArgs.WizardStepVM = Ioc.Default.GetService<WizardStepViewModel>();
-        object[] methodArgs = { collabArgs };
+		collabArgs.CollaboratorWindow = CollaboratorWindow;
+		//collabArgs.WizardStepVM = Ioc.Default.GetService<WizardStepViewModel>();
+		object[] methodArgs = { collabArgs };
 
         collaborator = collaboratorType!.GetConstructors()[0].Invoke(methodArgs);
         logger.Log(LogLevel.Info, "Collaborator Constructor finished.");
