@@ -20,7 +20,6 @@ namespace StoryCAD.Collaborator
             (Content as FrameworkElement).DataContext = WorkflowVm;
             WorkflowVm.ContentFrame = StepFrame;
             WorkflowVm.NavView = NavView;
-            WorkflowVm.WorkflowShellRoot = XamlRoot;
         }
 
         private void StepFrame_OnNavigated(object sender, NavigationEventArgs e)
