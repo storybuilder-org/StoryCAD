@@ -59,6 +59,9 @@ namespace StoryCAD.Collaborator.ViewModels
             get => _currentStep;
             set => SetProperty(ref _currentStep, value);
         }
+
+        public XamlRoot WorkflowShellRoot { get; set; }
+
         #endregion
 
         #region Visibility bindings
@@ -88,7 +91,6 @@ namespace StoryCAD.Collaborator.ViewModels
 
         #region Commands
         public RelayCommand AcceptCommand { get; }
-
         public RelayCommand ExitCommand { get; }
         public string PromptOutput { get; set; }
 
@@ -112,8 +114,8 @@ namespace StoryCAD.Collaborator.ViewModels
             WorkflowSteps = new ObservableCollection<WorkflowStepModel>();
             InputText = string.Empty;
             MenuItems = new ObservableCollection<NavigationViewItem>();
-            // Configure Collaborator page navigation
-            NavigationService nav = Ioc.Default.GetService<NavigationService>();
+			// Configure Collaborator page navigation
+			NavigationService nav = Ioc.Default.GetService<NavigationService>();
             try
             {
                 nav!.Configure("WorkflowPage", typeof(WorkflowPage));

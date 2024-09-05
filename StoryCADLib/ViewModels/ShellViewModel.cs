@@ -2289,6 +2289,7 @@ public class ShellViewModel : ObservableRecipient
     {
         //Ignore status messages inside tests
         if (Assembly.GetEntryAssembly().Location.Contains("StoryCADTests.dll")
+            || Assembly.GetEntryAssembly().Location.Contains("CollaboratorTests.dll")
             || Assembly.GetEntryAssembly().Location.Contains("testhost.dll"))
         {
             return;

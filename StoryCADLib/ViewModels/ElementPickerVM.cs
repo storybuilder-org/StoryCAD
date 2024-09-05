@@ -73,13 +73,9 @@ public class ElementPickerVM
 		//interpret result
 		if (await dialog.ShowAsync() != ContentDialogResult.Secondary)
 		{
-			ComboBoxItem item = SelectedType as ComboBoxItem;
-			if (item != null) //check user has picked an item
-			{
-				return (SelectedElement as StoryElement).Uuid.ToString();
-			}
+			return (SelectedElement as StoryElement).Uuid.ToString();
 		}
-		
+
 		return null; //Return unknown if dialog is closed or element isn't selected.
 	}
 
@@ -128,6 +124,7 @@ public class ElementPickerVM
 		SelectedElement = NewElement;
 
 		//Close popup
-		dialog.Hide();
+		if (dialog is not null)
+		    dialog.Hide();
 	}	
 }
