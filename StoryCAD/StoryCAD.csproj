@@ -30,6 +30,9 @@
 		<SourceRevisionId>build$([System.DateTime]::UtcNow.ToString("yyyy-MM-ddTHH:mm:ss:fffZ"))</SourceRevisionId>
 		<PackageCertificateThumbprint>C234336AC91B9746B19C6DF8B4289A72994E1EA7</PackageCertificateThumbprint>
 	</PropertyGroup>
+	<PropertyGroup>
+		<WindowsSdkPackageVersion>10.0.22621.38</WindowsSdkPackageVersion>
+	</PropertyGroup>
 	<ItemGroup>
 		<Content Include="Assets\SplashScreen.scale-200.png" />
 		<Content Include="Assets\Square150x150Logo.scale-200.png" />
@@ -40,12 +43,12 @@
 
 	<ItemGroup>
 		<PackageReference Include="dotenv.net" Version="3.2.0" />
-		<PackageReference Include="Microsoft.WindowsAppSDK" Version="1.5.240627000" />
-		<PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22621.3233" />
+		<PackageReference Include="Microsoft.WindowsAppSDK" Version="1.6.240829007" />
+		<PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.1" />
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
 		<PackageReference Include="CommunityToolkit.WinUI.UI.Controls.Core" Version="7.1.2" />
-		<PackageReference Include="NLog" Version="5.3.2" />
-		<PackageReference Include="NLog.Extensions.Logging" Version="5.3.11" />
+		<PackageReference Include="NLog" Version="5.3.3" />
+		<PackageReference Include="NLog.Extensions.Logging" Version="5.3.12" />
 		<PackageReference Include="PInvoke.User32" Version="0.7.124" />
 		<PackageReference Include="WinUIEx" Version="2.3.4" />
 		<Manifest Include="$(ApplicationManifest)" />

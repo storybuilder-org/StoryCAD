@@ -117,7 +117,10 @@
     <Folder Include="Services\Navigation\" />
     <Folder Include="Services\Backup\" />
   </ItemGroup>
-
+  
+	<PropertyGroup>
+		<WindowsSdkPackageVersion>10.0.22621.38</WindowsSdkPackageVersion>
+	</PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\NRtfTree\NRtfTree.csproj" />
   </ItemGroup>
