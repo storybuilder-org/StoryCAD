@@ -43,6 +43,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="dotenv.net" Version="3.2.0" />
+		<PackageReference Include="Microsoft.Web.WebView2" Version="1.0.2739.15" />
 		<PackageReference Include="Microsoft.WindowsAppSDK" Version="1.6.240829007" />
 		<PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.1" />
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
