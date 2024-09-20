@@ -4,8 +4,10 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using StoryCAD.Controls;
+using StoryCAD.Models.Tools;
 using StoryCAD.Services.Messages;
 using StoryCAD.Services.Navigation;
+using StoryCAD.ViewModels.Tools;
 
 namespace StoryCAD.ViewModels;
 
@@ -202,9 +204,38 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         get => _notes;
         set => SetProperty(ref _notes, value);
     }
+    // Problem Structure data
 
-    // The ProblemModel is passed when ProblemPage is navigated to
-    private ProblemModel _model;
+    private string _structure;
+	/// <summary>
+	/// Name of MasterPlotModel used in structure tab
+	/// </summary>
+    public string Structure
+    {
+	    get => _structure;
+	    set
+	    {
+			//Update value
+		    SetProperty(ref _structure, value);
+
+			//Resolve master plot model
+			StructureModel = Ioc.Default.GetRequiredService
+				<MasterPlotsViewModel>().MasterPlots[value];
+		}
+    }
+
+    private MasterPlotModel _structureModel;
+    /// <summary>
+    /// MasterPlotModel used in structure tab
+    /// </summary>
+	public MasterPlotModel StructureModel
+    {
+	    get => _structureModel;
+	    set => SetProperty(ref _structureModel, value);
+    }
+
+	// The ProblemModel is passed when ProblemPage is navigated to
+	private ProblemModel _model;
     public ProblemModel Model
     {
         get => _model;

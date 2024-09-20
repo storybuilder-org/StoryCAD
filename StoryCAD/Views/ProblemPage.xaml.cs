@@ -1,12 +1,14 @@
-﻿namespace StoryCAD.Views;
+﻿using StoryCAD.ViewModels.Tools;
+
+namespace StoryCAD.Views;
 
 public sealed partial class ProblemPage : BindablePage
 {
     public ProblemViewModel ProblemVm;
     public ShellViewModel ShellVm => Ioc.Default.GetService<ShellViewModel>();
+    public MasterPlotsViewModel MasterPlotsViewModel = Ioc.Default.GetService<MasterPlotsViewModel>();
 
-
-    public ProblemPage()
+	public ProblemPage()
     {
         ProblemVm = Ioc.Default.GetService<ProblemViewModel>();
         InitializeComponent();
