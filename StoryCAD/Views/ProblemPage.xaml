@@ -152,10 +152,20 @@
 						<ListView ItemsSource="{x:Bind ProblemVm.StructureModel.MasterPlotScenes, Mode=TwoWay}">
 							<ListView.ItemTemplate>
 								<DataTemplate x:DataType="tools:MasterPlotScene">
-									<StackPanel>
-										<TextBlock Text="{x:Bind SceneTitle}" FontSize="18"/>
-										<TextBlock Text="{x:Bind Notes}"/>
-									</StackPanel>
+									<Grid>
+										<Grid.ColumnDefinitions>
+											<ColumnDefinition Width="Auto"/>
+											<ColumnDefinition Width="Auto"/>
+										</Grid.ColumnDefinitions>
+										<Grid.RowDefinitions>
+											<RowDefinition Height="Auto"/>
+											<RowDefinition Height="Auto"/>
+										</Grid.RowDefinitions>
+										<TextBlock Grid.Column="0" Grid.Row="0" Text="{x:Bind SceneTitle}" FontSize="18"/>
+										<TextBlock Grid.Column="0" Grid.Row="1" Text="{x:Bind Notes}"/>
+										<StackPanel Grid.Column="1" Grid.Row="0" Drop="DroppedItem" Height="250"
+										            Width="250" Background="Red" AllowDrop="True" DropCompleted="UIElement_OnDropCompleted"/>
+									</Grid>
 								</DataTemplate>
 							</ListView.ItemTemplate>
 						</ListView>
