@@ -164,11 +164,27 @@
 										<TextBlock Grid.Column="0" Grid.Row="0" Text="{x:Bind SceneTitle}" FontSize="18"/>
 										<TextBlock Grid.Column="0" Grid.Row="1" Text="{x:Bind Notes}"/>
 										<StackPanel Grid.Column="1" Grid.Row="0" Drop="DroppedItem" Height="250"
-										            Width="250" Background="Red" AllowDrop="True" DropCompleted="UIElement_OnDropCompleted"/>
+										            Width="250" AllowDrop="True" DragOver="UIElement_OnDragOver"
+										            CanDrag="True" BorderBrush="White" BorderThickness="2"/>
+
 									</Grid>
 								</DataTemplate>
 							</ListView.ItemTemplate>
 						</ListView>
+						<Button>
+							<Button.Flyout>
+								<Flyout>
+									<StackPanel>
+										<ListView ItemsSource="{x:Bind Scenes}" Width="350" CanDrag="True"
+										          Header="Scenes" DisplayMemberPath="Name" CanDragItems="True"
+										          AllowDrop="True" DragItemsStarting="ListViewBase_OnDragItemsStarting"/>
+										<ListView ItemsSource="{x:Bind Problems}" Width="350" CanDrag="True"
+										          Header="Problems" DisplayMemberPath="Name" CanDragItems="True"
+										          AllowDrop="True"/>
+									</StackPanel>
+								</Flyout>
+							</Button.Flyout>
+						</Button>
 					</StackPanel>
 				</ScrollViewer>
 			</PivotItem>

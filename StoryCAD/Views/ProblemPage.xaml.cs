@@ -1,4 +1,7 @@
-﻿using Microsoft.UI.Xaml;
+﻿using System.Collections.Generic;
+using Windows.ApplicationModel.DataTransfer;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
 using StoryCAD.ViewModels.Tools;
 
 namespace StoryCAD.Views;
@@ -8,7 +11,8 @@ public sealed partial class ProblemPage : BindablePage
     public ProblemViewModel ProblemVm;
     public ShellViewModel ShellVm => Ioc.Default.GetService<ShellViewModel>();
     public MasterPlotsViewModel MasterPlotsViewModel = Ioc.Default.GetService<MasterPlotsViewModel>();
-
+	public List<StoryElement> Problems = Ioc.Default.GetService<ShellViewModel>().StoryModel.StoryElements.Problems.ToList();
+	public List<StoryElement> Scenes = Ioc.Default.GetService<ShellViewModel>().StoryModel.StoryElements.Scenes.ToList();
 	public ProblemPage()
     {
         ProblemVm = Ioc.Default.GetService<ProblemViewModel>();
@@ -22,13 +26,29 @@ public sealed partial class ProblemPage : BindablePage
     //    myOption.ShowMode = FlyoutShowMode.Transient;
     //    ConflictCommandBarFlyout.ShowAt(NavigationTree, myOption);
     //}
-    private void DroppedItem(object sender, DragEventArgs e)
+    private async void DroppedItem(object sender, DragEventArgs e)
     {
-	    var x = sender;
+	    var x = await e.DataView.GetTextAsync();
     }
 
-    private void UIElement_OnDropCompleted(UIElement sender, DropCompletedEventArgs args)
+    private void UIElement_OnDragOver(object sender, DragEventArgs e)
     {
-	    throw new NotImplementedException();
+	    e.AcceptedOperation = DataPackageOperation.Move;
+	    e.Handled = true;
     }
+
+    private void ListViewBase_OnDragItemsStarting(object sender, DragItemsStartingEventArgs e)
+    {
+	    var listView = sender as ListView;
+	    if (e.Items.Count > 0)
+	    {
+		    var draggedStoryElement = e.Items[0] as StoryElement; // Cast to StoryElement
+		    if (draggedStoryElement != null)
+		    {
+			    // Set the StoryElement object as part of the drag data
+			    e.Data.SetText(draggedStoryElement.Uuid.ToString());
+			    e.Data.RequestedOperation = DataPackageOperation.Move;
+		    }
+	    }
+	}
 }

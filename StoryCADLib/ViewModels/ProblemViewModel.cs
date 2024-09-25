@@ -242,7 +242,14 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         set => _model = value;
     }
 
-    public RelayCommand ConflictCommand { get; }
+    private List<StructureBeatsModel> structureBeats;
+    public List<StructureBeatsModel> StructureBeats
+    {
+	    get => structureBeats;
+	    set => structureBeats = value;
+    }
+
+	public RelayCommand ConflictCommand { get; }
 
     #endregion
 
