@@ -239,14 +239,14 @@ public class ProblemViewModel : ObservableRecipient, INavigable
     public ProblemModel Model
     {
         get => _model;
-        set => _model = value;
+        set => SetProperty(ref _model, value);
     }
 
-    private List<StructureBeatsModel> structureBeats;
-    public List<StructureBeatsModel> StructureBeats
+    private ObservableCollection<StructureBeatsModel> structureBeats;
+    public ObservableCollection<StructureBeatsModel> StructureBeats
     {
 	    get => structureBeats;
-	    set => structureBeats = value;
+	    set => SetProperty(ref structureBeats, value);
     }
 
 	public RelayCommand ConflictCommand { get; }
@@ -438,8 +438,9 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         Premise = string.Empty;
         _syncPremise = false;
         Notes = string.Empty;
-        
-        try
+        StructureBeats = new();
+
+		try
         {
             Dictionary<string, ObservableCollection<string>> _lists = Ioc.Default.GetService<ListData>().ListControlSource;
             ProblemTypeList = _lists["ProblemType"];

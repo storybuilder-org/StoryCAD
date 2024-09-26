@@ -2,6 +2,7 @@
 using Windows.ApplicationModel.DataTransfer;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using StoryCAD.Models.Tools;
 using StoryCAD.ViewModels.Tools;
 
 namespace StoryCAD.Views;
@@ -19,16 +20,23 @@ public sealed partial class ProblemPage : BindablePage
         InitializeComponent();
         DataContext = ProblemVm;
     }
-
-    //private void Conflict_ContextRequested(UIElement sender, ContextRequestedEventArgs args)
-    //{
-    //    FlyoutShowOptions myOption = new();
-    //    myOption.ShowMode = FlyoutShowMode.Transient;
-    //    ConflictCommandBarFlyout.ShowAt(NavigationTree, myOption);
-    //}
     private async void DroppedItem(object sender, DragEventArgs e)
     {
-	    var x = await e.DataView.GetTextAsync();
+	    var stackPanel = sender as StackPanel;
+	    if (stackPanel == null) return;
+
+	    // Get the data context (StructureBeatsModel) bound to this specific StackPanel
+	    var grid = stackPanel.Parent as Grid;
+	    if (grid == null) return;
+
+	    var structureBeatsModel = grid.DataContext as StructureBeatsModel;
+
+	    // Now, you can access structureBeatsModel to know which item was dropped on
+	    if (structureBeatsModel != null)
+	    {
+			structureBeatsModel.Guid = await e.DataView.GetTextAsync();
+
+		}
     }
 
     private void UIElement_OnDragOver(object sender, DragEventArgs e)
@@ -51,4 +59,24 @@ public sealed partial class ProblemPage : BindablePage
 		    }
 	    }
 	}
+
+    private async void UpdateSelectedBeat(object sender, SelectionChangedEventArgs e)
+    {
+		/*await Ioc.Default.GetService<Windowing>().ShowContentDialog(new ContentDialog
+		{
+			Title = "This will clear selected story beats",
+			PrimaryButtonText = "Confirm",
+			SecondaryButtonText = "Cancel"
+		});*/
+
+	    ProblemVm.StructureBeats.Clear();
+	    foreach (var item in ProblemVm.StructureModel.MasterPlotScenes)
+	    {
+			ProblemVm.StructureBeats.Add(new StructureBeatsModel
+			{
+				Title = item.SceneTitle,
+				Description = item.Notes,
+			});
+		}
+    }
 }

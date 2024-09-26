@@ -146,35 +146,40 @@
 				<ScrollViewer>
 					<StackPanel>
 						<ComboBox Header="Structure" ItemsSource="{x:Bind MasterPlotsViewModel.MasterPlotNames}"
-						          MinWidth="200" SelectedItem="{x:Bind ProblemVm.Structure, Mode=TwoWay}"/>
+						          MinWidth="200" SelectedItem="{x:Bind ProblemVm.Structure, Mode=TwoWay}"
+						          SelectionChanged="UpdateSelectedBeat"/>
 						<TextBlock Text="{x:Bind ProblemVm.StructureModel.MasterPlotName, Mode=TwoWay}" FontSize="18"/>
 						<TextBlock Text="{x:Bind ProblemVm.StructureModel.MasterPlotNotes, Mode=TwoWay}"/>
-						<ListView ItemsSource="{x:Bind ProblemVm.StructureModel.MasterPlotScenes, Mode=TwoWay}">
-							<ListView.ItemTemplate>
-								<DataTemplate x:DataType="tools:MasterPlotScene">
-									<Grid>
-										<Grid.ColumnDefinitions>
-											<ColumnDefinition Width="Auto"/>
-											<ColumnDefinition Width="Auto"/>
-										</Grid.ColumnDefinitions>
+						<ItemsRepeater ItemsSource="{x:Bind ProblemVm.StructureBeats, Mode=TwoWay}">
+							<ItemsRepeater.ItemTemplate>
+								<DataTemplate x:DataType="tools:StructureBeatsModel">
+									<Grid DataContext="{x:Bind}">
 										<Grid.RowDefinitions>
 											<RowDefinition Height="Auto"/>
 											<RowDefinition Height="Auto"/>
 										</Grid.RowDefinitions>
-										<TextBlock Grid.Column="0" Grid.Row="0" Text="{x:Bind SceneTitle}" FontSize="18"/>
-										<TextBlock Grid.Column="0" Grid.Row="1" Text="{x:Bind Notes}"/>
-										<StackPanel Grid.Column="1" Grid.Row="0" Drop="DroppedItem" Height="250"
+										<Grid.ColumnDefinitions>
+											<ColumnDefinition Width="Auto"/>
+											<ColumnDefinition Width="Auto"/>
+										</Grid.ColumnDefinitions>
+										<TextBlock Grid.Column="0" Grid.Row="0" Text="{x:Bind Title}" FontSize="18"/>
+										<TextBlock Grid.Column="0" Grid.Row="1" Text="{x:Bind Description}"/>
+										<StackPanel Grid.Column="1" Grid.Row="0" Grid.RowSpan="2" Drop="DroppedItem" Height="250"
 										            Width="250" AllowDrop="True" DragOver="UIElement_OnDragOver"
-										            CanDrag="True" BorderBrush="White" BorderThickness="2"/>
+													Background="Transparent"
+										            CanDrag="True" BorderBrush="White" BorderThickness="2">
+											<TextBlock Text="{x:Bind ElementName, Mode=OneWay}"/>
+										</StackPanel>
 
 									</Grid>
 								</DataTemplate>
-							</ListView.ItemTemplate>
-						</ListView>
-						<Button>
+							</ItemsRepeater.ItemTemplate>
+						</ItemsRepeater>
+						<Button Content="Show Problems/Scenes">
 							<Button.Flyout>
 								<Flyout>
 									<StackPanel>
+										<!-- Shows scenes and problems in a list -->
 										<ListView ItemsSource="{x:Bind Scenes}" Width="350" CanDrag="True"
 										          Header="Scenes" DisplayMemberPath="Name" CanDragItems="True"
 										          AllowDrop="True" DragItemsStarting="ListViewBase_OnDragItemsStarting"/>
