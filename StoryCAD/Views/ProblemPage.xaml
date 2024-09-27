@@ -143,6 +143,8 @@
                 </Grid>
             </PivotItem>
 			<PivotItem Header="Structure">
+				<StackPanel Orientation="Horizontal">
+
 				<ScrollViewer>
 					<StackPanel>
 						<ComboBox Header="Structure" ItemsSource="{x:Bind MasterPlotsViewModel.MasterPlotNames}"
@@ -153,45 +155,36 @@
 						<ItemsRepeater ItemsSource="{x:Bind ProblemVm.StructureBeats, Mode=TwoWay}">
 							<ItemsRepeater.ItemTemplate>
 								<DataTemplate x:DataType="tools:StructureBeatsModel">
-									<Grid DataContext="{x:Bind}">
-										<Grid.RowDefinitions>
-											<RowDefinition Height="Auto"/>
-											<RowDefinition Height="Auto"/>
-										</Grid.RowDefinitions>
-										<Grid.ColumnDefinitions>
-											<ColumnDefinition Width="Auto"/>
-											<ColumnDefinition Width="Auto"/>
-										</Grid.ColumnDefinitions>
-										<TextBlock Grid.Column="0" Grid.Row="0" Text="{x:Bind Title}" FontSize="18"/>
-										<TextBlock Grid.Column="0" Grid.Row="1" Text="{x:Bind Description}"/>
-										<StackPanel Grid.Column="1" Grid.Row="0" Grid.RowSpan="2" Drop="DroppedItem" Height="250"
-										            Width="250" AllowDrop="True" DragOver="UIElement_OnDragOver"
-													Background="Transparent"
-										            CanDrag="True" BorderBrush="White" BorderThickness="2">
-											<TextBlock Text="{x:Bind ElementName, Mode=OneWay}"/>
-										</StackPanel>
+									<StackPanel DataContext="{x:Bind}" MinWidth="200" AllowDrop="True" DragOver="UIElement_OnDragOver"
+									            Background="Transparent" CanDrag="True" Drop="DroppedItem">
+										<Border Margin="0,10" BorderBrush="Gray" BorderThickness="1" CornerRadius="4"/>
+										<TextBlock Text="{x:Bind Title}" FontSize="18"/>
+										<TextBlock Text="{x:Bind Description}"/>
+										<TextBlock Text="{x:Bind ElementName, Mode=OneWay}" Margin="0,5,0,0"/>
 
-									</Grid>
+									</StackPanel>
 								</DataTemplate>
 							</ItemsRepeater.ItemTemplate>
 						</ItemsRepeater>
-						<Button Content="Show Problems/Scenes">
-							<Button.Flyout>
-								<Flyout>
-									<StackPanel>
-										<!-- Shows scenes and problems in a list -->
-										<ListView ItemsSource="{x:Bind Scenes}" Width="350" CanDrag="True"
-										          Header="Scenes" DisplayMemberPath="Name" CanDragItems="True"
-										          AllowDrop="True" DragItemsStarting="ListViewBase_OnDragItemsStarting"/>
-										<ListView ItemsSource="{x:Bind Problems}" Width="350" CanDrag="True"
-										          Header="Problems" DisplayMemberPath="Name" CanDragItems="True"
-										          AllowDrop="True"/>
-									</StackPanel>
-								</Flyout>
-							</Button.Flyout>
-						</Button>
 					</StackPanel>
 				</ScrollViewer>
+					<Button Content="Show Problems/Scenes">
+						<Button.Flyout>
+							<Flyout>
+								<StackPanel>
+									<!-- Shows scenes and problems in a list -->
+									<ListView ItemsSource="{x:Bind Scenes}" Width="350" CanDrag="True"
+									          Header="Scenes" DisplayMemberPath="Name" CanDragItems="True"
+									          AllowDrop="True" DragItemsStarting="ListViewBase_OnDragItemsStarting"/>
+									<ListView ItemsSource="{x:Bind Problems}" Width="350" CanDrag="True"
+									          Header="Problems" DisplayMemberPath="Name" CanDragItems="True"
+									          AllowDrop="True"/>
+								</StackPanel>
+							</Flyout>
+						</Button.Flyout>
+					</Button>
+				</StackPanel>
+
 			</PivotItem>
             <PivotItem Header="Notes">
                 <usercontrols:RichEditBoxExtended Header="Notes" RtfText="{x:Bind ProblemVm.Notes, Mode=TwoWay}"

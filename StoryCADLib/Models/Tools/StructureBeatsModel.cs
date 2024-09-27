@@ -36,7 +36,11 @@ public class StructureBeatsModel : ObservableObject
 	public string Guid
 	{
 		get => guid;
-		set => SetProperty(ref guid, value);
+		set
+		{
+			SetProperty(ref guid, value);
+			OnPropertyChanged(nameof(ElementName));
+		}
 	}
 
 	/// <summary>
@@ -63,7 +67,7 @@ public class StructureBeatsModel : ObservableObject
 		{
 			if (Element != null)
 			{
-				return ElementName;
+				return Element.Name;
 			}
 
 			return "Debug no name set";

@@ -31,11 +31,7 @@ public sealed partial class ProblemPage : BindablePage
 	    var stackPanel = sender as StackPanel;
 	    if (stackPanel == null) return;
 
-	    // Get the data context (StructureBeatsModel) bound to this specific StackPanel
-	    var grid = stackPanel.Parent as Grid;
-	    if (grid == null) return;
-
-	    var structureBeatsModel = grid.DataContext as StructureBeatsModel;
+	    var structureBeatsModel = stackPanel.DataContext as StructureBeatsModel;
 
 	    // Now, you can access structureBeatsModel to know which item was dropped on
 	    if (structureBeatsModel != null)
@@ -66,12 +62,12 @@ public sealed partial class ProblemPage : BindablePage
 
     private async void UpdateSelectedBeat(object sender, SelectionChangedEventArgs e)
     {
-		/*await Ioc.Default.GetService<Windowing>().ShowContentDialog(new ContentDialog
+		await Ioc.Default.GetService<Windowing>().ShowContentDialog(new ContentDialog
 		{
 			Title = "This will clear selected story beats",
 			PrimaryButtonText = "Confirm",
 			SecondaryButtonText = "Cancel"
-		});*/
+		});
 
 	    ProblemVm.StructureBeats.Clear();
 	    foreach (var item in ProblemVm.StructureModel.MasterPlotScenes)
