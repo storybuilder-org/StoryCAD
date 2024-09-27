@@ -15,7 +15,7 @@ public class StructureBeatsModel : ObservableObject
 	public string Title
 	{
 		get => title;
-		set => title = value;
+		set => SetProperty(ref title, value);
 	}
 
 	private string description;
@@ -25,7 +25,7 @@ public class StructureBeatsModel : ObservableObject
 	public string Description
 	{
 		get => description;
-		set => description = value;
+		set => SetProperty(ref description, value);
 	}
 
 
@@ -36,7 +36,7 @@ public class StructureBeatsModel : ObservableObject
 	public string Guid
 	{
 		get => guid;
-		set => guid = value;
+		set => SetProperty(ref guid, value);
 	}
 
 	/// <summary>
@@ -46,7 +46,7 @@ public class StructureBeatsModel : ObservableObject
 	{
 		get
 		{
-			if (guid == null)
+			if (guid != null)
 			{
 				return ShellViewModel.GetModel().StoryElements.StoryElementGuids[new Guid(Guid)];
 			}

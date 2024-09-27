@@ -20,6 +20,12 @@ public sealed partial class ProblemPage : BindablePage
         InitializeComponent();
         DataContext = ProblemVm;
     }
+
+	/// <summary>
+	/// Ran when an item is dropped on the right side of the beat panel
+	/// </summary>
+	/// <param name="sender"></param>
+	/// <param name="e"></param>
     private async void DroppedItem(object sender, DragEventArgs e)
     {
 	    var stackPanel = sender as StackPanel;
@@ -35,7 +41,6 @@ public sealed partial class ProblemPage : BindablePage
 	    if (structureBeatsModel != null)
 	    {
 			structureBeatsModel.Guid = await e.DataView.GetTextAsync();
-
 		}
     }
 
@@ -47,7 +52,6 @@ public sealed partial class ProblemPage : BindablePage
 
     private void ListViewBase_OnDragItemsStarting(object sender, DragItemsStartingEventArgs e)
     {
-	    var listView = sender as ListView;
 	    if (e.Items.Count > 0)
 	    {
 		    var draggedStoryElement = e.Items[0] as StoryElement; // Cast to StoryElement
