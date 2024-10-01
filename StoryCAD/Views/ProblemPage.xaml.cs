@@ -30,7 +30,7 @@ public sealed partial class ProblemPage : BindablePage
 	/// <param name="e"></param>
     private async void DroppedItem(object sender, DragEventArgs e)
     {
-	    var stackPanel = sender as StackPanel;
+	    var stackPanel = sender as Grid;
 	    if (stackPanel == null) return;
 
 	    var structureBeatsModel = stackPanel.DataContext as StructureBeatsModel;
@@ -94,4 +94,19 @@ public sealed partial class ProblemPage : BindablePage
 			});
 		}
     }
+
+    private void AddBeat(object sender, RoutedEventArgs e)
+    {
+		//Add beat
+		ProblemVm.StructureBeats.Add(new StructureBeatsModel
+		{
+			Title = ProblemVm.AddBeat_Name,
+			Description = ProblemVm.AddBeat_Description,
+			Guid = ""
+		});
+
+		//Reset boxes.
+		ProblemVm.AddBeat_Name = "";
+		ProblemVm.AddBeat_Description = "";
+	}
 }

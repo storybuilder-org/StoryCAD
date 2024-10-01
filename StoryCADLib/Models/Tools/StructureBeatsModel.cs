@@ -87,10 +87,11 @@ public class StructureBeatsModel : ObservableObject
 			{
 				if (Element.Type == StoryItemType.Problem)
 				{
+					return ((ProblemModel)Element).StoryQuestion;
 				}
 				else if (Element.Type == StoryItemType.Scene)
 				{
-					
+					return ((SceneModel)Element).Remarks;
 				}
 			}
 
