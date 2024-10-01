@@ -40,6 +40,8 @@ public class StructureBeatsModel : ObservableObject
 		{
 			SetProperty(ref guid, value);
 			OnPropertyChanged(nameof(ElementName));
+			OnPropertyChanged(nameof(ElementIcon));
+			OnPropertyChanged(nameof(ElementDescription));
 		}
 	}
 
@@ -70,7 +72,50 @@ public class StructureBeatsModel : ObservableObject
 				return Element.Name;
 			}
 
-			return "Debug no name set";
+			return "No element Selected";
+		}
+	}
+
+	/// <summary>
+	/// NElement Description
+	/// </summary>
+	public string ElementDescription
+	{
+		get
+		{
+			if (Element != null)
+			{
+				if (Element.Type == StoryItemType.Problem)
+				{
+				}
+				else if (Element.Type == StoryItemType.Scene)
+				{
+					
+				}
+			}
+
+			return "Select an element by clicking show Problems/Scenes and dragging it here";
+		}
+	}
+
+	public Symbol ElementIcon
+	{
+		get
+		{
+			if (Element != null)
+			{
+				if (Element.Type == StoryItemType.Problem)
+				{
+					return Symbol.Help;
+				}
+				else if (Element.Type == StoryItemType.Scene)
+				{
+					return Symbol.World;
+
+				}
+			}
+
+			return Symbol.Cancel;
 		}
 	}
 }

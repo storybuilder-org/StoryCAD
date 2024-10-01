@@ -143,32 +143,71 @@
                 </Grid>
             </PivotItem>
 			<PivotItem Header="Structure">
-				<StackPanel Orientation="Horizontal">
+				<Grid>
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition Width="*"/>
+						<ColumnDefinition Width="Auto"/>
+					</Grid.ColumnDefinitions>
+					<ScrollViewer Grid.Column="0">
+						<Grid>
+							<Grid.RowDefinitions>
+								<RowDefinition Height="Auto"/>
+								<RowDefinition Height="Auto"/>
+								<RowDefinition Height="Auto"/>
+								<RowDefinition Height="Auto"/>
+								<RowDefinition Height="*"/>
+								<RowDefinition Height="Auto"/>
+							</Grid.RowDefinitions>
 
-				<ScrollViewer>
-					<StackPanel>
-						<ComboBox Header="Structure" ItemsSource="{x:Bind MasterPlotsViewModel.MasterPlotNames}"
-						          MinWidth="200" SelectedItem="{x:Bind ProblemVm.Structure, Mode=TwoWay}"
-						          SelectionChanged="UpdateSelectedBeat"/>
-						<TextBlock Text="{x:Bind ProblemVm.StructureModel.MasterPlotName, Mode=TwoWay}" FontSize="18"/>
-						<TextBlock Text="{x:Bind ProblemVm.StructureModel.MasterPlotNotes, Mode=TwoWay}"/>
-						<ItemsRepeater ItemsSource="{x:Bind ProblemVm.StructureBeats, Mode=TwoWay}">
-							<ItemsRepeater.ItemTemplate>
-								<DataTemplate x:DataType="tools:StructureBeatsModel">
-									<StackPanel DataContext="{x:Bind}" MinWidth="200" AllowDrop="True" DragOver="UIElement_OnDragOver"
-									            Background="Transparent" CanDrag="True" Drop="DroppedItem">
-										<Border Margin="0,10" BorderBrush="Gray" BorderThickness="1" CornerRadius="4"/>
-										<TextBlock Text="{x:Bind Title}" FontSize="18"/>
-										<TextBlock Text="{x:Bind Description}"/>
-										<TextBlock Text="{x:Bind ElementName, Mode=OneWay}" Margin="0,5,0,0"/>
+							<!-- Beat picker and Title/Desc of Overall beat -->
+							<ComboBox Header="Structure" ItemsSource="{x:Bind MasterPlotsViewModel.MasterPlotNames}"
+							          MinWidth="200" SelectedItem="{x:Bind ProblemVm.Structure, Mode=TwoWay}"
+							          SelectionChanged="UpdateSelectedBeat" Grid.Row="0"/>
+							<TextBlock Text="{x:Bind ProblemVm.StructureModel.MasterPlotName, Mode=TwoWay}"
+							           FontSize="18" Grid.Row="1"/>
+							<TextBlock Text="Structure Description:" Margin="0,10,0,0" Grid.Row="2"/>
+							<TextBlock Text="{x:Bind ProblemVm.StructureModel.MasterPlotNotes, Mode=TwoWay}"
+							           Grid.Row="3"/>
 
-									</StackPanel>
-								</DataTemplate>
-							</ItemsRepeater.ItemTemplate>
-						</ItemsRepeater>
-					</StackPanel>
-				</ScrollViewer>
-					<Button Content="Show Problems/Scenes">
+							<!-- Beats viewer -->
+								<ItemsRepeater ItemsSource="{x:Bind ProblemVm.StructureBeats, Mode=TwoWay}"
+								               HorizontalAlignment="Stretch" Grid.Row="4">
+								<ItemsRepeater.ItemTemplate>
+									<DataTemplate x:DataType="tools:StructureBeatsModel">
+										<StackPanel DataContext="{x:Bind}" MinWidth="200" AllowDrop="True" DragOver="UIElement_OnDragOver"
+										            Background="Transparent" CanDrag="False" Drop="DroppedItem" Margin="0,5,10,5"
+										            BorderBrush="White" BorderThickness="2" CornerRadius="4" 
+										            Padding="5,10,10,10">
+											<!-- Separator -->
+											<TextBlock Text="{x:Bind Title}" FontSize="18"/>
+											<TextBlock Text="{x:Bind Description}"/>
+											<StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+												<SymbolIcon Symbol="{x:Bind ElementIcon, Mode=OneWay}" VerticalAlignment="Bottom"/>
+												<TextBlock Text="{x:Bind ElementName, Mode=OneWay}" Margin="10,5,0,0"/>
+											</StackPanel>
+										</StackPanel>
+									</DataTemplate>
+								</ItemsRepeater.ItemTemplate>
+							</ItemsRepeater>
+
+							<!-- Add beat -->
+							<Button Grid.Row="5" Content="Add Story Beat">
+								<Button.Flyout>
+									<Flyout>
+										<StackPanel>
+											<TextBox Header="Beat name" Width="400" HorizontalAlignment="Left" 
+											         Text="{x:Bind  ProblemVm.AddBeat_Name, Mode=TwoWay}"/>
+											<TextBox Header="Beat Description" Width="400" Height="400" 
+											         AcceptsReturn="True" Margin="0,10"
+											         Text="{x:Bind  ProblemVm.AddBeat_Name, Mode=TwoWay}"/>
+											<Button Content="Add Beat" HorizontalAlignment="Center"/>
+										</StackPanel>
+									</Flyout>
+								</Button.Flyout>
+							</Button>
+						</Grid>
+					</ScrollViewer>
+					<Button Content="Show Problems/Scenes" Grid.Column="1">
 						<Button.Flyout>
 							<Flyout>
 								<StackPanel>
@@ -178,12 +217,12 @@
 									          AllowDrop="True" DragItemsStarting="ListViewBase_OnDragItemsStarting"/>
 									<ListView ItemsSource="{x:Bind Problems}" Width="350" CanDrag="True"
 									          Header="Problems" DisplayMemberPath="Name" CanDragItems="True"
-									          AllowDrop="True"/>
+									          AllowDrop="True" DragItemsStarting="ListViewBase_OnDragItemsStarting"/>
 								</StackPanel>
 							</Flyout>
 						</Button.Flyout>
 					</Button>
-				</StackPanel>
+				</Grid>
 
 			</PivotItem>
             <PivotItem Header="Notes">

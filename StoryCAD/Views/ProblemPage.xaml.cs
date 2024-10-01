@@ -3,6 +3,7 @@ using Windows.ApplicationModel.DataTransfer;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using StoryCAD.Models.Tools;
+using StoryCAD.Services.Logging;
 using StoryCAD.ViewModels.Tools;
 
 namespace StoryCAD.Views;
@@ -12,6 +13,7 @@ public sealed partial class ProblemPage : BindablePage
     public ProblemViewModel ProblemVm;
     public ShellViewModel ShellVm => Ioc.Default.GetService<ShellViewModel>();
     public MasterPlotsViewModel MasterPlotsViewModel = Ioc.Default.GetService<MasterPlotsViewModel>();
+    public LogService LogService = Ioc.Default.GetService<LogService>();
 	public List<StoryElement> Problems = Ioc.Default.GetService<ShellViewModel>().StoryModel.StoryElements.Problems.ToList();
 	public List<StoryElement> Scenes = Ioc.Default.GetService<ShellViewModel>().StoryModel.StoryElements.Scenes.ToList();
 	public ProblemPage()
@@ -36,7 +38,20 @@ public sealed partial class ProblemPage : BindablePage
 	    // Now, you can access structureBeatsModel to know which item was dropped on
 	    if (structureBeatsModel != null)
 	    {
-			structureBeatsModel.Guid = await e.DataView.GetTextAsync();
+		    try
+		    {
+			    string text = await e.DataView.GetTextAsync();
+			    //Check we are dragging an element GUID and not something else
+				if (text.Contains("GUID"))
+				{
+					structureBeatsModel.Guid = text.Split(":")[1];
+				}
+			}
+			catch (Exception ex)
+		    {
+			    LogService.Log(LogLevel.Warn,$"Failed to drag valid element (StructureDND)" +
+			                                 $" (This is expected if non element object was DND) {ex.Message}");
+			}
 		}
     }
 
@@ -54,7 +69,7 @@ public sealed partial class ProblemPage : BindablePage
 		    if (draggedStoryElement != null)
 		    {
 			    // Set the StoryElement object as part of the drag data
-			    e.Data.SetText(draggedStoryElement.Uuid.ToString());
+			    e.Data.SetText("GUID:" + draggedStoryElement.Uuid.ToString());
 			    e.Data.RequestedOperation = DataPackageOperation.Move;
 		    }
 	    }

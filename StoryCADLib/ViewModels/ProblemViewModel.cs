@@ -251,11 +251,24 @@ public class ProblemViewModel : ObservableRecipient, INavigable
 
 	public RelayCommand ConflictCommand { get; }
 
-    #endregion
+	private string addBeat_Name;
+	public string AddBeat_Name
+	{
+		get => addBeat_Name;
+		set => SetProperty(ref addBeat_Name, value);
+	}
 
-    #region Methods
+	private string addBeat_Description;
+	public string AddBeat_Description
+	{
+		get => addBeat_Description;
+		set => SetProperty(ref addBeat_Description, value);
+	}
+	#endregion
 
-    public void Activate(object parameter)
+	#region Methods
+
+	public void Activate(object parameter)
     {
         Model = (ProblemModel)parameter;
         LoadModel();
