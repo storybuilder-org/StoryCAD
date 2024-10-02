@@ -1,4 +1,7 @@
-﻿using Windows.Data.Xml.Dom;
+﻿using StoryCAD.Models.Tools;
+using StoryCAD.ViewModels.Tools;
+using System.Collections.ObjectModel;
+using Windows.Data.Xml.Dom;
 
 namespace StoryCAD.Models;
 
@@ -146,10 +149,27 @@ public class ProblemModel : StoryElement
         set => _notes = value;
     }
 
-    #endregion
+	// Structure Tab Data
+	private ObservableCollection<StructureBeatModel> structureBeats;
+	public ObservableCollection<StructureBeatModel> StructureBeats
+	{
+		get => structureBeats;
+		set => structureBeats = value;
+	}
 
-    #region Constructors
-    public ProblemModel(StoryModel model) : base("New Problem", StoryItemType.Problem, model)
+	private string _structure;
+	/// <summary>
+	/// Name of MasterPlotModel used in structure tab
+	/// </summary>
+	public string Structure
+	{
+		get => _structure;
+		set => _structure = value;
+	}
+	#endregion
+
+	#region Constructors
+	public ProblemModel(StoryModel model) : base("New Problem", StoryItemType.Problem, model)
     {
         ProblemType = string.Empty;
         ConflictType = string.Empty;

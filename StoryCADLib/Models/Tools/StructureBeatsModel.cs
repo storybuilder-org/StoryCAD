@@ -5,7 +5,7 @@ namespace StoryCAD.Models.Tools;
 /// <summary>
 ///	Model for how the Structure Tab works in problem.
 /// </summary>
-public class StructureBeatsModel : ObservableObject
+public class StructureBeatModel : ObservableObject
 {
 
 	private string title;
@@ -112,7 +112,6 @@ public class StructureBeatsModel : ObservableObject
 				else if (Element.Type == StoryItemType.Scene)
 				{
 					return Symbol.World;
-
 				}
 			}
 

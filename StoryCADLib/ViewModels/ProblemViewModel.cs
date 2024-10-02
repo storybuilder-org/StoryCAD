@@ -3,6 +3,7 @@ using System.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using Microsoft.UI.Xaml;
 using StoryCAD.Controls;
 using StoryCAD.Models.Tools;
 using StoryCAD.Services.Messages;
@@ -242,8 +243,8 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         set => SetProperty(ref _model, value);
     }
 
-    private ObservableCollection<StructureBeatsModel> structureBeats;
-    public ObservableCollection<StructureBeatsModel> StructureBeats
+    private ObservableCollection<StructureBeatModel> structureBeats;
+    public ObservableCollection<StructureBeatModel> StructureBeats
     {
 	    get => structureBeats;
 	    set => SetProperty(ref structureBeats, value);
@@ -331,9 +332,11 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         _overviewModel = (OverviewModel) model.StoryElements.StoryElementGuids[root];
         ProblemModel storyProblem = (ProblemModel) StoryElement.StringToStoryElement(_overviewModel.StoryProblem);
         if (storyProblem != null) { _syncPremise = true; }
-        else _syncPremise = false; 
-        
-        _changeable = true;
+        else _syncPremise = false;
+
+		Structure = Model.Structure ?? "Rescue";
+		StructureBeats = Model.StructureBeats ?? new();
+		_changeable = true;
     }
 
     internal void SaveModel()
@@ -361,9 +364,11 @@ public class ProblemViewModel : ObservableRecipient, INavigable
             Model.StoryQuestion = StoryQuestion;
             Model.Premise = Premise;
             if (_syncPremise) { _overviewModel.Premise = Premise; }
-            Model.Notes = Notes;
+			Model.Notes = Notes;
+			Model.Structure = Structure;
+			Model.StructureBeats = StructureBeats;
         }
-        catch (Exception ex)
+		catch (Exception ex)
         {
             Ioc.Default.GetRequiredService<LogService>().LogException(LogLevel.Error,
                 ex, $"Failed to save problem model - {ex.Message}");
@@ -408,12 +413,55 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         }
     }
 
-    #endregion
 
-    #region Control initialization sources
+	/// <summary>
+	/// Adds a custom beat
+	/// </summary>
+    public void AddBeat()
+    {
+	    //Add beat
+	    StructureBeats.Add(new StructureBeatModel
+	    {
+		    Title = AddBeat_Name,
+		    Description = AddBeat_Description,
+	    });
 
-    // ListControls sources
-    public ObservableCollection<string> ProblemTypeList;
+	    //Reset boxes.
+	    AddBeat_Name = "";
+	    AddBeat_Description = "";
+    }
+
+	public async void UpdateSelectedBeat()
+	{
+		//Show dialog
+		var Result = await Ioc.Default.GetRequiredService<Windowing>()
+			.ShowContentDialog(new ContentDialog {
+			Title = "This will clear selected story beats",
+			PrimaryButtonText = "Confirm",
+			SecondaryButtonText = "Cancel"
+		});
+
+		if (Result == ContentDialogResult.Primary)
+		{
+			StructureBeats.Clear();
+
+			foreach (var item in StructureModel.MasterPlotScenes)
+			{
+				StructureBeats.Add(new StructureBeatModel
+				{
+					Title = item.SceneTitle,
+					Description = item.Notes,
+				});
+			}
+		}
+	}
+
+	#endregion
+
+	#region Control initialization sources
+
+	// ListControls sources
+	public ObservableCollection<string> ProblemTypeList;
     public ObservableCollection<string> ConflictTypeList;
     public ObservableCollection<string> ProblemCategoryList;
     public ObservableCollection<string> SubjectList;
