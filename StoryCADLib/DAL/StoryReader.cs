@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
 using StoryCAD.Services.Messages;
 using static Windows.Data.Xml.Dom.XmlDocument;
+using StoryCAD.Models.Tools;
 
 
 namespace StoryCAD.DAL;
@@ -323,8 +324,41 @@ public class StoryReader : ObservableRecipient
                 case "Notes":
                     _prb.Notes = _attr.InnerText;
                     break;
-            }
-        }
+				case "Structure":
+					_prb.Structure = _attr.InnerText;
+					break;
+				case "StructureDescription":
+					_prb.StructureDescription = _attr.InnerText;
+					break;
+				case "StructureBeats":
+					IXmlNode structureBeatsNode = xn.SelectSingleNode("./StructureBeats");
+					if (structureBeatsNode != null)
+					{
+						foreach (IXmlNode beatNode in structureBeatsNode.ChildNodes)
+						{
+							if (beatNode.NodeName.Equals("Beat"))
+							{
+								StructureBeatModel beat = new StructureBeatModel();
+
+								IXmlNode titleNode = beatNode.SelectSingleNode("./Title");
+								if (titleNode != null)
+									beat.Title = titleNode.InnerText;
+
+								IXmlNode descriptionNode = beatNode.SelectSingleNode("./Description");
+								if (descriptionNode != null)
+									beat.Description = descriptionNode.InnerText;
+
+								IXmlNode guidNode = beatNode.SelectSingleNode("./Guid");
+								if (guidNode != null)
+									beat.Guid = guidNode.InnerText;
+
+								_prb.StructureBeats.Add(beat);
+							}
+						}
+					}
+					break;
+			}
+		}
     }
 
     private void ParseCharacter(IXmlNode xn)

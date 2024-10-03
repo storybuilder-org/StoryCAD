@@ -166,6 +166,16 @@ public class ProblemModel : StoryElement
 		get => _structure;
 		set => _structure = value;
 	}
+
+	private string _structureDescription;
+	/// <summary>
+	/// Description of MasterPlotModel used in structure tab
+	/// </summary>
+	public string StructureDescription
+	{
+		get => _structureDescription;
+		set => _structureDescription = value;
+	}
 	#endregion
 
 	#region Constructors
@@ -190,6 +200,9 @@ public class ProblemModel : StoryElement
         Theme = string.Empty;
         Premise = string.Empty;
         Notes = string.Empty;
+        Structure = string.Empty;
+        StructureDescription = string.Empty;
+		StructureBeats = new();
     }
     public ProblemModel(string name, StoryModel model) : base(name, StoryItemType.Problem, model)
     {
@@ -212,7 +225,10 @@ public class ProblemModel : StoryElement
         Theme = string.Empty;
         Premise = string.Empty;
         Notes = string.Empty;
-    }
+        Structure = string.Empty;
+        StructureDescription = string.Empty;
+		StructureBeats = new();
+	}
     public ProblemModel(IXmlNode xn, StoryModel model) : base(xn, model)
     {
         ProblemType = string.Empty;
@@ -233,6 +249,9 @@ public class ProblemModel : StoryElement
         Theme = string.Empty;
         Premise = string.Empty;
         Notes = string.Empty;
+        Structure = string.Empty;
+        StructureBeats = new();
+        StructureDescription = string.Empty;
     }
 
     #endregion

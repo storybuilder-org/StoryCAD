@@ -164,7 +164,7 @@
 							          MinWidth="200" SelectedValue="{x:Bind ProblemVm.Structure, Mode=TwoWay}"
 							          SelectionChanged="{x:Bind ProblemVm.UpdateSelectedBeat}" Grid.Row="0"/>
 							<TextBlock Text="Structure Description:" Margin="0,10,0,0" Grid.Row="2"/>
-							<TextBlock Text="{x:Bind ProblemVm.StructureModel.MasterPlotNotes, Mode=TwoWay}"
+							<TextBlock Text="{x:Bind ProblemVm.StructureDescription, Mode=TwoWay}"
 							           Grid.Row="3"/>
 
 							<!-- Beats viewer -->

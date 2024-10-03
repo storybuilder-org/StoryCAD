@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.UI.Xaml;
+using Org.BouncyCastle.Tls;
 using StoryCAD.Controls;
 using StoryCAD.Models.Tools;
 using StoryCAD.Services.Messages;
@@ -219,20 +220,24 @@ public class ProblemViewModel : ObservableRecipient, INavigable
 			//Update value
 		    SetProperty(ref _structure, value);
 
-			//Resolve master plot model
-			StructureModel = Ioc.Default.GetRequiredService
-				<MasterPlotsViewModel>().MasterPlots[value];
+			//Resolve master plot model if not empty
+			if (!string.IsNullOrEmpty(_structure))
+			{
+				StructureDescription = Ioc.Default.GetRequiredService
+					<MasterPlotsViewModel>().MasterPlots[value].MasterPlotNotes;
+			}
+
 		}
     }
 
-    private MasterPlotModel _structureModel;
+    private string _structureDescription;
     /// <summary>
     /// MasterPlotModel used in structure tab
     /// </summary>
-	public MasterPlotModel StructureModel
-    {
-	    get => _structureModel;
-	    set => SetProperty(ref _structureModel, value);
+	public string StructureDescription
+	{
+	    get => _structureDescription;
+	    set => SetProperty(ref _structureDescription, value);
     }
 
 	// The ProblemModel is passed when ProblemPage is navigated to
@@ -335,6 +340,7 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         else _syncPremise = false;
 
 		Structure = Model.Structure ?? "Rescue";
+		StructureDescription = Model.StructureDescription ?? string.Empty;
 		StructureBeats = Model.StructureBeats ?? new();
 		_changeable = true;
     }
@@ -366,6 +372,7 @@ public class ProblemViewModel : ObservableRecipient, INavigable
             if (_syncPremise) { _overviewModel.Premise = Premise; }
 			Model.Notes = Notes;
 			Model.Structure = Structure;
+
 			Model.StructureBeats = StructureBeats;
         }
 		catch (Exception ex)
@@ -431,7 +438,7 @@ public class ProblemViewModel : ObservableRecipient, INavigable
 	    AddBeat_Description = "";
     }
 
-	public async void UpdateSelectedBeat()
+	public async void UpdateSelectedBeat(object sender, SelectionChangedEventArgs e)
 	{
 		//Show dialog
 		var Result = await Ioc.Default.GetRequiredService<Windowing>()
@@ -440,6 +447,11 @@ public class ProblemViewModel : ObservableRecipient, INavigable
 			PrimaryButtonText = "Confirm",
 			SecondaryButtonText = "Cancel"
 		});
+
+		
+		//Set model
+		var StructureModelName = (sender as ComboBox).SelectedItem;
+		var StructureModel = Ioc.Default.GetRequiredService<MasterPlotsViewModel>().MasterPlots[StructureModelName.ToString()];
 
 		if (Result == ContentDialogResult.Primary)
 		{
@@ -499,6 +511,7 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         Premise = string.Empty;
         _syncPremise = false;
         Notes = string.Empty;
+        Structure = string.Empty;
         StructureBeats = new();
 
 		try
