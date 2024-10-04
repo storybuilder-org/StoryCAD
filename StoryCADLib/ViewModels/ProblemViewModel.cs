@@ -372,7 +372,7 @@ public class ProblemViewModel : ObservableRecipient, INavigable
             if (_syncPremise) { _overviewModel.Premise = Premise; }
 			Model.Notes = Notes;
 			Model.Structure = Structure;
-
+			Model.StructureDescription = StructureDescription;
 			Model.StructureBeats = StructureBeats;
         }
 		catch (Exception ex)

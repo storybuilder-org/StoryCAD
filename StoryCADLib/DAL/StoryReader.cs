@@ -330,36 +330,32 @@ public class StoryReader : ObservableRecipient
 				case "StructureDescription":
 					_prb.StructureDescription = _attr.InnerText;
 					break;
-				case "StructureBeats":
-					IXmlNode structureBeatsNode = xn.SelectSingleNode("./StructureBeats");
-					if (structureBeatsNode != null)
-					{
-						foreach (IXmlNode beatNode in structureBeatsNode.ChildNodes)
-						{
-							if (beatNode.NodeName.Equals("Beat"))
-							{
-								StructureBeatModel beat = new StructureBeatModel();
-
-								IXmlNode titleNode = beatNode.SelectSingleNode("./Title");
-								if (titleNode != null)
-									beat.Title = titleNode.InnerText;
-
-								IXmlNode descriptionNode = beatNode.SelectSingleNode("./Description");
-								if (descriptionNode != null)
-									beat.Description = descriptionNode.InnerText;
-
-								IXmlNode guidNode = beatNode.SelectSingleNode("./Guid");
-								if (guidNode != null)
-									beat.Guid = guidNode.InnerText;
-
-								_prb.StructureBeats.Add(beat);
-							}
-						}
-					}
-					break;
 			}
 		}
-    }
+
+        IXmlNode structureBeatsNode = xn.SelectSingleNode("./StructureBeats");
+        if (structureBeatsNode != null)
+        {
+	        foreach (IXmlNode beatNode in structureBeatsNode.ChildNodes)
+	        {
+		        StructureBeatModel beat = new StructureBeatModel();
+
+		        IXmlNode titleNode = beatNode.SelectSingleNode("./Title");
+		        if (titleNode != null)
+			        beat.Title = titleNode.InnerText;
+
+		        IXmlNode descriptionNode = beatNode.SelectSingleNode("./Description");
+		        if (descriptionNode != null)
+			        beat.Description = descriptionNode.InnerText;
+
+		        IXmlNode guidNode = beatNode.SelectSingleNode("./Guid");
+		        if (guidNode != null)
+			        beat.Guid = guidNode.InnerText;
+
+		        _prb.StructureBeats.Add(beat);
+			}
+        }
+	}
 
     private void ParseCharacter(IXmlNode xn)
     {

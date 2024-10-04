@@ -52,7 +52,7 @@ public class StructureBeatModel : ObservableObject
 	{
 		get
 		{
-			if (guid != null)
+			if (!string.IsNullOrEmpty(guid))
 			{
 				return ShellViewModel.GetModel().StoryElements.StoryElementGuids[new Guid(Guid)];
 			}
