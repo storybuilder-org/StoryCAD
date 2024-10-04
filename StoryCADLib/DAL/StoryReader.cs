@@ -333,10 +333,10 @@ public class StoryReader : ObservableRecipient
 			}
 		}
 
-        IXmlNode structureBeatsNode = xn.SelectSingleNode("./StructureBeats");
-        if (structureBeatsNode != null)
+        XmlNodeList Beats = xn.SelectNodes("./StructureBeats/Beat");
+        if (Beats != null)
         {
-	        foreach (IXmlNode beatNode in structureBeatsNode.ChildNodes)
+	        foreach (IXmlNode beatNode in Beats)
 	        {
 		        StructureBeatModel beat = new StructureBeatModel();
 

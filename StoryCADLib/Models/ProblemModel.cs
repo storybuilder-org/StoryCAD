@@ -150,12 +150,7 @@ public class ProblemModel : StoryElement
     }
 
 	// Structure Tab Data
-	private ObservableCollection<StructureBeatModel> structureBeats;
-	public ObservableCollection<StructureBeatModel> StructureBeats
-	{
-		get => structureBeats;
-		set => structureBeats = value;
-	}
+
 
 	private string _structure;
 	/// <summary>
@@ -175,6 +170,16 @@ public class ProblemModel : StoryElement
 	{
 		get => _structureDescription;
 		set => _structureDescription = value;
+	}
+
+	private ObservableCollection<StructureBeatModel> structureBeats;
+	/// <summary>
+	/// Beat nodes of the structure
+	/// </summary>
+	public ObservableCollection<StructureBeatModel> StructureBeats
+	{
+		get => structureBeats;
+		set => structureBeats = value;
 	}
 	#endregion
 

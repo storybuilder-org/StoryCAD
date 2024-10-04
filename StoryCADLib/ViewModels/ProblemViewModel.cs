@@ -3,8 +3,6 @@ using System.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
-using Microsoft.UI.Xaml;
-using Org.BouncyCastle.Tls;
 using StoryCAD.Controls;
 using StoryCAD.Models.Tools;
 using StoryCAD.Services.Messages;
@@ -440,9 +438,12 @@ public class ProblemViewModel : ObservableRecipient, INavigable
 
 	public async void UpdateSelectedBeat(object sender, SelectionChangedEventArgs e)
 	{
+		//Don't fire this event while loading this VM.
+		if (!_changeable) { return; }
+
 		//Show dialog
 		var Result = await Ioc.Default.GetRequiredService<Windowing>()
-			.ShowContentDialog(new ContentDialog {
+			.ShowContentDialog(new() {
 			Title = "This will clear selected story beats",
 			PrimaryButtonText = "Confirm",
 			SecondaryButtonText = "Cancel"
