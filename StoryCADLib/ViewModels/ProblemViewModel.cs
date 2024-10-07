@@ -208,7 +208,7 @@ public class ProblemViewModel : ObservableRecipient, INavigable
 
     private string _structure;
 	/// <summary>
-	/// Name of MasterPlotModel used in structure tab
+	/// Name of PlotPatternModel used in structure tab
 	/// </summary>
     public string Structure
     {
@@ -224,11 +224,11 @@ public class ProblemViewModel : ObservableRecipient, INavigable
 		}
     }
 
-    private MasterPlotModel _structureModel;
+    private PlotPatternModel _structureModel;
     /// <summary>
-    /// MasterPlotModel used in structure tab
+    /// PlotPatternModel used in structure tab
     /// </summary>
-	public MasterPlotModel StructureModel
+	public PlotPatternModel StructureModel
     {
 	    get => _structureModel;
 	    set => SetProperty(ref _structureModel, value);

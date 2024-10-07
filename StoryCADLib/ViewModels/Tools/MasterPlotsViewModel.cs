@@ -9,31 +9,31 @@ public class MasterPlotsViewModel : ObservableRecipient
     private ToolsData ToolSource = Ioc.Default.GetService<ToolsData>();
     #region Properties
 
-    private string _masterPlotName;
-    public string MasterPlotName
+    private string _PlotPatternName;
+    public string PlotPatternName
     {
-        get => _masterPlotName;
+        get => _PlotPatternName;
         set
         {
-            SetProperty(ref _masterPlotName, value);
-            if (MasterPlots.ContainsKey(value)) { MasterPlotNotes = MasterPlots[value].MasterPlotNotes; }
+            SetProperty(ref _PlotPatternName, value);
+            if (MasterPlots.ContainsKey(value)) { PlotPatternNotes = MasterPlots[value].PlotPatternNotes; }
         }
     }
 
-    private string _masterPlotNotes;
-    public string MasterPlotNotes
+    private string _PlotPatternNotes;
+    public string PlotPatternNotes
     {
-        get => _masterPlotNotes;
-        set => SetProperty(ref _masterPlotNotes, value);
+        get => _PlotPatternNotes;
+        set => SetProperty(ref _PlotPatternNotes, value);
     }
 
     #endregion
 
     #region ComboBox and ListBox sources
 
-    public readonly ObservableCollection<string> MasterPlotNames;
+    public readonly ObservableCollection<string> PlotPatternNames;
 
-    public readonly Dictionary<string, MasterPlotModel> MasterPlots;
+    public readonly Dictionary<string, PlotPatternModel> MasterPlots;
 
     #endregion
 
@@ -42,17 +42,17 @@ public class MasterPlotsViewModel : ObservableRecipient
     public MasterPlotsViewModel()
     {
         List<string> _masterNames = new();
-        MasterPlots = new Dictionary<string, MasterPlotModel>();
-        foreach (MasterPlotModel _plot in ToolSource.MasterPlotsSource)
+        MasterPlots = new Dictionary<string, PlotPatternModel>();
+        foreach (PlotPatternModel _plot in ToolSource.MasterPlotsSource)
         {
-            _masterNames.Add(_plot.MasterPlotName);
-            MasterPlots.Add(_plot.MasterPlotName, _plot);
+            _masterNames.Add(_plot.PlotPatternName);
+            MasterPlots.Add(_plot.PlotPatternName, _plot);
         }
 
         _masterNames.Sort();
-        MasterPlotNames = new ObservableCollection<string>();
-        foreach (string _name in _masterNames) { MasterPlotNames.Add(_name); }
-        MasterPlotName = ToolSource.MasterPlotsSource[0].MasterPlotName;
+        PlotPatternNames = new ObservableCollection<string>();
+        foreach (string _name in _masterNames) { PlotPatternNames.Add(_name); }
+        PlotPatternName = ToolSource.MasterPlotsSource[0].PlotPatternName;
     }
 
     #endregion

@@ -163,10 +163,10 @@
 							<ComboBox Header="Structure" ItemsSource="{x:Bind MasterPlotsViewModel.PlotPatternNames}"
 							          MinWidth="200" SelectedItem="{x:Bind ProblemVm.Structure, Mode=TwoWay}"
 							          SelectionChanged="UpdateSelectedBeat" Grid.Row="0"/>
-							<TextBlock Text="{x:Bind ProblemVm.StructureModel.MasterPlotName, Mode=TwoWay}"
+							<TextBlock Text="{x:Bind ProblemVm.StructureModel.PlotPatternName, Mode=TwoWay}"
 							           FontSize="18" Grid.Row="1"/>
 							<TextBlock Text="Structure Description:" Margin="0,10,0,0" Grid.Row="2"/>
-							<TextBlock Text="{x:Bind ProblemVm.StructureModel.MasterPlotNotes, Mode=TwoWay}"
+							<TextBlock Text="{x:Bind ProblemVm.StructureModel.PlotPatternNotes, Mode=TwoWay}"
 							           Grid.Row="3"/>
 
 							<!-- Beats viewer -->

@@ -85,7 +85,7 @@ public sealed partial class ProblemPage : BindablePage
 		});
 
 	    ProblemVm.StructureBeats.Clear();
-	    foreach (var item in ProblemVm.StructureModel.MasterPlotScenes)
+	    foreach (var item in ProblemVm.StructureModel.PlotPatternScenes)
 	    {
 			ProblemVm.StructureBeats.Add(new StructureBeatsModel
 			{
