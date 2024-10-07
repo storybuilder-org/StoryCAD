@@ -1,4 +1,7 @@
-﻿using Windows.Data.Xml.Dom;
+﻿using StoryCAD.Models.Tools;
+using StoryCAD.ViewModels.Tools;
+using System.Collections.ObjectModel;
+using Windows.Data.Xml.Dom;
 
 namespace StoryCAD.Models;
 
@@ -146,10 +149,42 @@ public class ProblemModel : StoryElement
         set => _notes = value;
     }
 
-    #endregion
+	// Structure Tab Data
 
-    #region Constructors
-    public ProblemModel(StoryModel model) : base("New Problem", StoryItemType.Problem, model)
+
+	private string _structure;
+	/// <summary>
+	/// Name of MasterPlotModel used in structure tab
+	/// </summary>
+	public string Structure
+	{
+		get => _structure;
+		set => _structure = value;
+	}
+
+	private string _structureDescription;
+	/// <summary>
+	/// Description of MasterPlotModel used in structure tab
+	/// </summary>
+	public string StructureDescription
+	{
+		get => _structureDescription;
+		set => _structureDescription = value;
+	}
+
+	private ObservableCollection<StructureBeatModel> structureBeats;
+	/// <summary>
+	/// Beat nodes of the structure
+	/// </summary>
+	public ObservableCollection<StructureBeatModel> StructureBeats
+	{
+		get => structureBeats;
+		set => structureBeats = value;
+	}
+	#endregion
+
+	#region Constructors
+	public ProblemModel(StoryModel model) : base("New Problem", StoryItemType.Problem, model)
     {
         ProblemType = string.Empty;
         ConflictType = string.Empty;
@@ -170,6 +205,9 @@ public class ProblemModel : StoryElement
         Theme = string.Empty;
         Premise = string.Empty;
         Notes = string.Empty;
+        Structure = string.Empty;
+        StructureDescription = string.Empty;
+		StructureBeats = new();
     }
     public ProblemModel(string name, StoryModel model) : base(name, StoryItemType.Problem, model)
     {
@@ -192,7 +230,10 @@ public class ProblemModel : StoryElement
         Theme = string.Empty;
         Premise = string.Empty;
         Notes = string.Empty;
-    }
+        Structure = string.Empty;
+        StructureDescription = string.Empty;
+		StructureBeats = new();
+	}
     public ProblemModel(IXmlNode xn, StoryModel model) : base(xn, model)
     {
         ProblemType = string.Empty;
@@ -213,6 +254,9 @@ public class ProblemModel : StoryElement
         Theme = string.Empty;
         Premise = string.Empty;
         Notes = string.Empty;
+        Structure = string.Empty;
+        StructureBeats = new();
+        StructureDescription = string.Empty;
     }
 
     #endregion
