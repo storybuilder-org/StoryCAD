@@ -173,7 +173,7 @@
 								<ItemsRepeater ItemsSource="{x:Bind ProblemVm.StructureBeats, Mode=TwoWay}"
 								               HorizontalAlignment="Stretch" Grid.Row="4">
 								<ItemsRepeater.ItemTemplate>
-									<DataTemplate x:DataType="tools:StructureBeatsModel">
+									<DataTemplate x:DataType="tools:StructureBeatModel">
 										<StackPanel DataContext="{x:Bind}" MinWidth="200" AllowDrop="True" DragOver="UIElement_OnDragOver"
 										            Background="Transparent" CanDrag="False" Drop="DroppedItem" Margin="0,5,10,5"
 										            BorderBrush="White" BorderThickness="2" CornerRadius="4" 

@@ -76,8 +76,9 @@ public sealed partial class ProblemPage : BindablePage
 			}
 		}
 	}
+#endregion
 
-    private async void UpdateSelectedBeat(object sender, SelectionChangedEventArgs e)
+private async void UpdateSelectedBeat(object sender, SelectionChangedEventArgs e)
     {
 		await Ioc.Default.GetService<Windowing>().ShowContentDialog(new ContentDialog
 		{
@@ -87,9 +88,9 @@ public sealed partial class ProblemPage : BindablePage
 		});
 
 	    ProblemVm.StructureBeats.Clear();
-	    foreach (var item in ProblemVm.StructureModel.MasterPlotScenes)
+	    foreach (var item in ProblemVm.StructureModel.PlotPatternScenes)
 	    {
-			ProblemVm.StructureBeats.Add(new StructureBeatsModel
+			ProblemVm.StructureBeats.Add(new StructureBeatModel
 			{
 				Title = item.SceneTitle,
 				Description = item.Notes,

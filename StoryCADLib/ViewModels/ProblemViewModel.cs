@@ -242,8 +242,8 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         set => SetProperty(ref _model, value);
     }
 
-    private ObservableCollection<StructureBeatsModel> structureBeats;
-    public ObservableCollection<StructureBeatsModel> StructureBeats
+    private ObservableCollection<StructureBeatModel> structureBeats;
+    public ObservableCollection<StructureBeatModel> StructureBeats
     {
 	    get => structureBeats;
 	    set => SetProperty(ref structureBeats, value);
