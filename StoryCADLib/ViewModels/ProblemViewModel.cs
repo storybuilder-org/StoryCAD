@@ -215,17 +215,8 @@ public class ProblemViewModel : ObservableRecipient, INavigable
 	    get => _structure;
 	    set
 	    {
-			//Update value
-		    SetProperty(ref _structure, value);
-
-			//Resolve master plot model if not empty
-			if (!string.IsNullOrEmpty(_structure))
-			{
-				StructureDescription = Ioc.Default.GetRequiredService
-					<MasterPlotsViewModel>().MasterPlots[value].MasterPlotNotes;
-			}
-
-		}
+		    UpdateSelectedBeat(value);
+	    }
     }
 
     private string _structureDescription;
@@ -436,26 +427,35 @@ public class ProblemViewModel : ObservableRecipient, INavigable
 	    AddBeat_Description = "";
     }
 
-	public async void UpdateSelectedBeat(object sender, SelectionChangedEventArgs e)
+	public async void UpdateSelectedBeat(string value)
 	{
-		//Don't fire this event while loading this VM.
-		if (!_changeable) { return; }
-
-		//Show dialog
-		var Result = await Ioc.Default.GetRequiredService<Windowing>()
-			.ShowContentDialog(new() {
-			Title = "This will clear selected story beats",
-			PrimaryButtonText = "Confirm",
-			SecondaryButtonText = "Cancel"
-		});
-
-		
-		//Set model
-		var StructureModelName = (sender as ComboBox).SelectedItem;
-		var StructureModel = Ioc.Default.GetRequiredService<MasterPlotsViewModel>().MasterPlots[StructureModelName.ToString()];
-
-		if (Result == ContentDialogResult.Primary)
+		//Show dialog if structure has been set previously
+		ContentDialogResult Result;
+		if (!string.IsNullOrEmpty(Structure))
 		{
+			Result = await Ioc.Default.GetRequiredService<Windowing>()
+				.ShowContentDialog(new()
+				{
+					Title = "This will clear selected story beats",
+					PrimaryButtonText = "Confirm",
+					SecondaryButtonText = "Cancel"
+				});
+		}
+		else { Result = ContentDialogResult.Primary; }
+
+
+		if (Result == ContentDialogResult.Primary && !string.IsNullOrEmpty(value))
+		{
+			//Update value 
+			SetProperty(ref _structure, value);
+
+			//Resolve master plot model if not empty
+			StructureDescription = Ioc.Default.GetRequiredService
+				<MasterPlotsViewModel>().MasterPlots[value].MasterPlotNotes;
+
+			//Set model
+			var StructureModel = Ioc.Default.GetRequiredService<MasterPlotsViewModel>().MasterPlots[value];
+
 			StructureBeats.Clear();
 
 			foreach (var item in StructureModel.MasterPlotScenes)
