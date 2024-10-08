@@ -220,7 +220,7 @@ public class ProblemViewModel : ObservableRecipient, INavigable
 
 			//Resolve master plot model
 			StructureModel = Ioc.Default.GetRequiredService
-				<MasterPlotsViewModel>().MasterPlots[value];
+				<BeatSheetsViewModel>().BeatSheets[value];
 		}
     }
 

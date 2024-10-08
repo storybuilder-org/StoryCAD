@@ -262,7 +262,7 @@ public class ToolLoader
                                 _currentBeatsheet.PlotPatternNotes += _keyvalue;
                             }
                             break;
-                        case "Scene":
+                        case "Beat":
                             _currentPlotPatternScene = new PlotPatternScene(_keyvalue);
                             _currentBeatsheet.PlotPatternScenes.Add(_currentPlotPatternScene);
                             break;

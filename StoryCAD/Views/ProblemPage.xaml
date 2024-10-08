@@ -160,7 +160,7 @@
 							</Grid.RowDefinitions>
 
 							<!-- Beat picker and Title/Desc of Overall beat -->
-							<ComboBox Header="Structure" ItemsSource="{x:Bind MasterPlotsViewModel.PlotPatternNames}"
+							<ComboBox Header="Structure" ItemsSource="{x:Bind BeatSheetsViewModel.PlotPatternNames}"
 							          MinWidth="200" SelectedItem="{x:Bind ProblemVm.Structure, Mode=TwoWay}"
 							          SelectionChanged="UpdateSelectedBeat" Grid.Row="0"/>
 							<TextBlock Text="{x:Bind ProblemVm.StructureModel.PlotPatternName, Mode=TwoWay}"
