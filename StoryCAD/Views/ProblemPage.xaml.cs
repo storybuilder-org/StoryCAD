@@ -78,23 +78,9 @@ public sealed partial class ProblemPage : BindablePage
 	}
 #endregion
 
-private async void UpdateSelectedBeat(object sender, SelectionChangedEventArgs e)
-    {
-		await Ioc.Default.GetService<Windowing>().ShowContentDialog(new ContentDialog
-		{
-			Title = "This will clear selected story beats",
-			PrimaryButtonText = "Confirm",
-			SecondaryButtonText = "Cancel"
-		});
-
-	    ProblemVm.StructureBeats.Clear();
-	    foreach (var item in ProblemVm.StructureModel.PlotPatternScenes)
-	    {
-			ProblemVm.StructureBeats.Add(new StructureBeatModel
-			{
-				Title = item.SceneTitle,
-				Description = item.Notes,
-			});
-		}
-    }
+	public void Delete(object sender, RoutedEventArgs e)
+	{
+		StructureBeatModel model = (((sender as Button).Parent as Grid).DataContext as StructureBeatModel);
+		ProblemVm.StructureBeats.Remove(model);
+	}
 }
