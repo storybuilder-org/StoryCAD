@@ -190,7 +190,7 @@
 											<TextBlock Grid.Row="0" Grid.Column="1" Text="{x:Bind Title}" FontSize="18"/>
 											<TextBlock Grid.Row="1" Grid.Column="1" Text="{x:Bind Description}"/>
 											<SymbolIcon Grid.Row="2" Grid.Column="0" Symbol="{x:Bind ElementIcon}" VerticalAlignment="Bottom"/>
-											<Button Grid.Row="0" Grid.Column="2" VerticalAlignment="Bottom" Click="Delete">
+											<Button Grid.Row="0" Grid.Column="2" VerticalAlignment="Bottom" Click="DeleteBeat">
 												<Button.Content>
 													<SymbolIcon Symbol="Delete"/>
 												</Button.Content>

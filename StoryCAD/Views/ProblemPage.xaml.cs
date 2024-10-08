@@ -22,8 +22,8 @@ public sealed partial class ProblemPage : BindablePage
         InitializeComponent();
         DataContext = ProblemVm;
     }
-
-	#region DND
+	
+#region DND
 
 	/// <summary>
 	/// Ran when an item is dropped on the right side of the beat panel
@@ -76,9 +76,12 @@ public sealed partial class ProblemPage : BindablePage
 			}
 		}
 	}
-#endregion
-
-	public void Delete(object sender, RoutedEventArgs e)
+	#endregion
+	
+	/// <summary>
+	/// Deletes a beat
+	/// </summary>
+	public void DeleteBeat(object sender, RoutedEventArgs e)
 	{
 		StructureBeatModel model = (((sender as Button).Parent as Grid).DataContext as StructureBeatModel);
 		ProblemVm.StructureBeats.Remove(model);
