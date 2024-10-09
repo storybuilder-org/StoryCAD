@@ -83,7 +83,42 @@ public sealed partial class ProblemPage : BindablePage
 	/// </summary>
 	public void DeleteBeat(object sender, RoutedEventArgs e)
 	{
-		StructureBeatModel model = (((sender as Button).Parent as Grid).DataContext as StructureBeatModel);
+		StructureBeatModel model = ((sender as Button).Parent as StackPanel).DataContext as StructureBeatModel;
 		ProblemVm.StructureBeats.Remove(model);
+	}
+
+	/// <summary>
+	/// Moves a selected beat higher.
+	/// </summary>
+	private void MoveUp(object sender, RoutedEventArgs e)
+	{
+		StructureBeatModel model = ((sender as Button).Parent as StackPanel).DataContext as StructureBeatModel;
+		int ModelIndex = ProblemVm.StructureBeats.IndexOf(model);
+
+		//Sanity check
+		if (ModelIndex == 0)
+		{
+			ShellVm.ShowMessage(LogLevel.Warn, "Can't move Beat higher", true);
+			return;
+		}	
+
+		ProblemVm.StructureBeats.Move(ModelIndex, ModelIndex-1);
+	}
+	/// <summary>
+	/// Moves a selected beat lower.
+	/// </summary>
+	private void MoveDown(object sender, RoutedEventArgs e)
+	{
+		StructureBeatModel model = ((sender as Button).Parent as StackPanel).DataContext as StructureBeatModel;
+		int ModelIndex = ProblemVm.StructureBeats.IndexOf(model);
+
+		//Sanity check
+		if (ModelIndex+1 == ProblemVm.StructureBeats.Count)
+		{
+			ShellVm.ShowMessage(LogLevel.Warn, "Can't move Beat lower", true);
+			return;
+		}
+
+		ProblemVm.StructureBeats.Move(ModelIndex, ModelIndex + 1);
 	}
 }

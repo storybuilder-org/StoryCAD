@@ -224,7 +224,15 @@ public class ProblemViewModel : ObservableRecipient, INavigable
 	public string StructureDescription
 	{
 		get => _structureDescription;
-		set => SetProperty(ref _structureDescription, value);
+		set
+		{
+			//Set default text
+			if (string.IsNullOrEmpty(value))
+			{
+				value = "Select a story beat sheet above to get started!";
+			}
+			SetProperty(ref _structureDescription, value);
+		}
 	}
 
 	private PlotPatternModel _structureModel;

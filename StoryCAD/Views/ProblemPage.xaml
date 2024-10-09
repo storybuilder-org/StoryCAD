@@ -188,13 +188,35 @@
 											</Grid.RowDefinitions>
 
 											<TextBlock Grid.Row="0" Grid.Column="1" Text="{x:Bind Title}" FontSize="18"/>
-											<TextBlock Grid.Row="1" Grid.Column="1" Text="{x:Bind Description}"/>
+											<TextBlock Grid.Row="1" Grid.Column="1" Text="{x:Bind Description}" TextWrapping="Wrap"/>
 											<SymbolIcon Grid.Row="2" Grid.Column="0" Symbol="{x:Bind ElementIcon}" VerticalAlignment="Bottom"/>
-											<Button Grid.Row="0" Grid.Column="2" VerticalAlignment="Bottom" Click="DeleteBeat">
-												<Button.Content>
-													<SymbolIcon Symbol="Delete"/>
-												</Button.Content>
-											</Button>
+
+
+											<StackPanel  Grid.Row="0" Grid.Column="2" Orientation="Horizontal"
+											             DataContext="{x:Bind}">
+												<!-- Delete Beat button -->
+												<Button VerticalAlignment="Bottom" Click="DeleteBeat">
+													<Button.Content>
+														<SymbolIcon Symbol="Delete"/>
+													</Button.Content>
+												</Button>
+
+												<!-- Move beat up-->
+												<Button VerticalAlignment="Bottom" Click="MoveUp" Margin="10,0">
+													<Button.Content>
+														<SymbolIcon Symbol="Up"/>
+													</Button.Content>
+												</Button>
+
+												<!-- Move beat down-->
+												<Button VerticalAlignment="Bottom" Click="MoveDown">
+													<Button.Content>
+														<FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE74B;"/>
+													</Button.Content>
+												</Button>
+
+											</StackPanel>
+											
 											<TextBlock Grid.Row="2" Grid.Column="1"  Text="{x:Bind ElementName, Mode=OneWay}"
 											           Margin="10,5,0,0" VerticalAlignment="Top"/>
 											<usercontrols:RichEditBoxExtended Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" 
@@ -226,7 +248,7 @@
 					</ScrollViewer>
 
 					<!-- Scene/Problem picker -->
-					<Button Content="Show Problems/Scenes" Grid.Column="1">
+					<Button Content="Show Problems/Scenes" Grid.Column="1" VerticalAlignment="Top">
 						<Button.Flyout>
 							<Flyout>
 								<StackPanel>
