@@ -59,7 +59,7 @@
                                     PlaceholderText="{x:Bind ProblemVm.ProblemSource, Mode=TwoWay}" />
                 </Grid>
             </PivotItem>
-            <PivotItem Header="Protagonist" >
+            <PivotItem Header="Protagonist">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -190,7 +190,6 @@
 											<TextBlock Grid.Row="0" Grid.Column="1" Text="{x:Bind Title}" FontSize="18"/>
 											<TextBlock Grid.Row="1" Grid.Column="1" Text="{x:Bind Description}" TextWrapping="Wrap"/>
 											<SymbolIcon Grid.Row="2" Grid.Column="0" Symbol="{x:Bind ElementIcon}" VerticalAlignment="Bottom"/>
-
 
 											<StackPanel  Grid.Row="0" Grid.Column="2" Orientation="Horizontal"
 											             DataContext="{x:Bind}">

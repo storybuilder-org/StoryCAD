@@ -181,6 +181,16 @@ public class ProblemModel : StoryElement
 		get => structureBeats;
 		set => structureBeats = value;
 	}
+
+	private string _boundStructure;
+	/// <summary>
+	/// A problem cannot be bound to more than one structure
+	/// </summary>
+	public string BoundStructure
+	{
+		get => _boundStructure;
+		set => _boundStructure = value;
+	}
 	#endregion
 
 	#region Constructors

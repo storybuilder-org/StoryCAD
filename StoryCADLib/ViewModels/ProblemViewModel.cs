@@ -275,6 +275,16 @@ public class ProblemViewModel : ObservableRecipient, INavigable
 		get => addBeat_Description;
 		set => SetProperty(ref addBeat_Description, value);
 	}
+
+	private string _boundStructure;
+	/// <summary>
+	/// A problem cannot be bound to more than one structure
+	/// </summary>
+	public string BoundStructure
+	{
+		get => _boundStructure;
+		set => SetProperty(ref _boundStructure, value);
+	}
 	#endregion
 
 	#region Methods
@@ -347,7 +357,9 @@ public class ProblemViewModel : ObservableRecipient, INavigable
 		StructureDescription = Model.StructureDescription;
 		StructureBeats = Model.StructureBeats;
 		_changeable = true;
-    }
+		BoundStructure = Model.BoundStructure;
+
+	}
 
     internal void SaveModel()
     {
@@ -378,8 +390,10 @@ public class ProblemViewModel : ObservableRecipient, INavigable
 			Model.StructureBeats = StructureBeats;
 			if (_syncPremise) { _overviewModel.Premise = Premise; }
             Model.Notes = Notes;
-        }
-        catch (Exception ex)
+            Model.BoundStructure = BoundStructure;
+
+		}
+		catch (Exception ex)
         {
             Ioc.Default.GetRequiredService<LogService>().LogException(LogLevel.Error,
                 ex, $"Failed to save problem model - {ex.Message}");

@@ -46,7 +46,23 @@ public sealed partial class ProblemPage : BindablePage
 				//Check we are dragging an element GUID and not something else
 				if (text.Contains("GUID"))
 				{
-					structureBeatsModel.Guid = text.Split(":")[1];
+					string guid = text.Split(":")[1];
+					Guid uuid;
+					Guid.TryParse(guid,out uuid);
+					ProblemModel problem =(ProblemModel) ShellVm.StoryModel.StoryElements.Where(g => g.Uuid == uuid);
+
+					//Enforce rule that problems can only be bound to one structure
+					if (!string.IsNullOrEmpty(problem.BoundStructure))
+					{
+						await Ioc.Default.GetRequiredService<Windowing>().ShowContentDialog(new()
+						{
+							Title = "Already bound!",
+							Content = $"This problem is already bound to a different structure ({problem.Name}) " +
+							          $"Would you like to remove it from there and bind it here instead?",
+						});
+					}
+					problem.BoundStructure = ProblemVm.Uuid.ToString();
+					structureBeatsModel.Guid = guid;
 				}
 			}
 			catch (Exception ex)

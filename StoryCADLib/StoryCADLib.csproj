@@ -125,6 +125,7 @@
   
 	<PropertyGroup>
 		<WindowsSdkPackageVersion>10.0.22621.38</WindowsSdkPackageVersion>
+		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
 	</PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\NRtfTree\NRtfTree.csproj" />
