@@ -161,31 +161,70 @@
 
 							<!-- Beat picker and Title/Desc of Overall beat -->
 							<ComboBox Header="Structure" ItemsSource="{x:Bind BeatSheetsViewModel.PlotPatternNames}"
-							          MinWidth="200" SelectedItem="{x:Bind ProblemVm.Structure, Mode=TwoWay}"
-							          SelectionChanged="UpdateSelectedBeat" Grid.Row="0"/>
-							<TextBlock Text="{x:Bind ProblemVm.StructureModel.PlotPatternName, Mode=TwoWay}"
-							           FontSize="18" Grid.Row="1"/>
+							          MinWidth="200" SelectedValue="{x:Bind ProblemVm.Structure, Mode=TwoWay}"
+							          IsEditable="False" Grid.Row="0" PlaceholderText="{x:Bind ProblemVm.Structure, Mode=TwoWay}"/>
 							<TextBlock Text="Structure Description:" Margin="0,10,0,0" Grid.Row="2"/>
-							<TextBlock Text="{x:Bind ProblemVm.StructureModel.PlotPatternNotes, Mode=TwoWay}"
-							           Grid.Row="3"/>
+							<TextBlock Text="{x:Bind ProblemVm.StructureDescription, Mode=TwoWay}" Grid.Row="3"/>
 
 							<!-- Beats viewer -->
-								<ItemsRepeater ItemsSource="{x:Bind ProblemVm.StructureBeats, Mode=TwoWay}"
-								               HorizontalAlignment="Stretch" Grid.Row="4">
+							<ItemsRepeater ItemsSource="{x:Bind ProblemVm.StructureBeats, Mode=TwoWay}"
+							               HorizontalAlignment="Stretch" Grid.Row="4">
 								<ItemsRepeater.ItemTemplate>
 									<DataTemplate x:DataType="tools:StructureBeatModel">
-										<StackPanel DataContext="{x:Bind}" MinWidth="200" AllowDrop="True" DragOver="UIElement_OnDragOver"
+										<Grid DataContext="{x:Bind}" MinWidth="200" AllowDrop="True" DragOver="UIElement_OnDragOver"
 										            Background="Transparent" CanDrag="False" Drop="DroppedItem" Margin="0,5,10,5"
 										            BorderBrush="White" BorderThickness="2" CornerRadius="4" 
 										            Padding="5,10,10,10">
-											<!-- Separator -->
-											<TextBlock Text="{x:Bind Title}" FontSize="18"/>
-											<TextBlock Text="{x:Bind Description}"/>
-											<StackPanel Orientation="Horizontal" Margin="0,10,0,0">
-												<SymbolIcon Symbol="{x:Bind ElementIcon, Mode=OneWay}" VerticalAlignment="Bottom"/>
-												<TextBlock Text="{x:Bind ElementName, Mode=OneWay}" Margin="10,5,0,0"/>
+											<Grid.ColumnDefinitions>
+												<ColumnDefinition Width="Auto"/>
+												<ColumnDefinition Width="*"/>
+												<ColumnDefinition Width="Auto"/>
+											</Grid.ColumnDefinitions>
+											<Grid.RowDefinitions>
+												<RowDefinition Height="Auto"/>
+												<RowDefinition Height="Auto"/>
+												<RowDefinition Height="auto"/>
+												<RowDefinition Height="*"/>
+											</Grid.RowDefinitions>
+
+											<TextBlock Grid.Row="0" Grid.Column="1" Text="{x:Bind Title}" FontSize="18"/>
+											<TextBlock Grid.Row="1" Grid.Column="1" Text="{x:Bind Description}" TextWrapping="Wrap"/>
+											<SymbolIcon Grid.Row="2" Grid.Column="0" Symbol="{x:Bind ElementIcon}" VerticalAlignment="Bottom"/>
+
+
+											<StackPanel  Grid.Row="0" Grid.Column="2" Orientation="Horizontal"
+											             DataContext="{x:Bind}">
+												<!-- Delete Beat button -->
+												<Button VerticalAlignment="Bottom" Click="DeleteBeat">
+													<Button.Content>
+														<SymbolIcon Symbol="Delete"/>
+													</Button.Content>
+												</Button>
+
+												<!-- Move beat up-->
+												<Button VerticalAlignment="Bottom" Click="MoveUp" Margin="10,0">
+													<Button.Content>
+														<SymbolIcon Symbol="Up"/>
+													</Button.Content>
+												</Button>
+
+												<!-- Move beat down-->
+												<Button VerticalAlignment="Bottom" Click="MoveDown">
+													<Button.Content>
+														<FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE74B;"/>
+													</Button.Content>
+												</Button>
+
 											</StackPanel>
-										</StackPanel>
+											
+											<TextBlock Grid.Row="2" Grid.Column="1"  Text="{x:Bind ElementName, Mode=OneWay}"
+											           Margin="10,5,0,0" VerticalAlignment="Top"/>
+											<usercontrols:RichEditBoxExtended Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" 
+																			  RtfText="{x:Bind ElementDescription, Mode=OneWay}" 
+																			  Margin="10,5,0,0" IsEnabled="False"
+																			  VerticalAlignment="Top" TextWrapping="Wrap" BorderBrush="Transparent"
+																			  Background="Transparent"/>
+										</Grid>
 									</DataTemplate>
 								</ItemsRepeater.ItemTemplate>
 							</ItemsRepeater>
@@ -199,15 +238,17 @@
 											         Text="{x:Bind  ProblemVm.AddBeat_Name, Mode=TwoWay}"/>
 											<TextBox Header="Beat Description" Width="400" Height="400" 
 											         AcceptsReturn="True" Margin="0,10"
-											         Text="{x:Bind  ProblemVm.AddBeat_Name, Mode=TwoWay}"/>
-											<Button Content="Add Beat" HorizontalAlignment="Center"/>
+											         Text="{x:Bind  ProblemVm.AddBeat_Description, Mode=TwoWay}"/>
+											<Button Content="Add Beat" HorizontalAlignment="Center" Click="{x:Bind ProblemVm.AddBeat}"/>
 										</StackPanel>
 									</Flyout>
 								</Button.Flyout>
 							</Button>
 						</Grid>
 					</ScrollViewer>
-					<Button Content="Show Problems/Scenes" Grid.Column="1">
+
+					<!-- Scene/Problem picker -->
+					<Button Content="Show Problems/Scenes" Grid.Column="1" VerticalAlignment="Top">
 						<Button.Flyout>
 							<Flyout>
 								<StackPanel>
@@ -223,9 +264,8 @@
 						</Button.Flyout>
 					</Button>
 				</Grid>
-
 			</PivotItem>
-            <PivotItem Header="Notes">
+			<PivotItem Header="Notes">
                 <usercontrols:RichEditBoxExtended Header="Notes" RtfText="{x:Bind ProblemVm.Notes, Mode=TwoWay}"
                               AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                               ScrollViewer.VerticalScrollBarVisibility="Visible" />

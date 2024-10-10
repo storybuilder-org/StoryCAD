@@ -22,8 +22,8 @@ public sealed partial class ProblemPage : BindablePage
         InitializeComponent();
         DataContext = ProblemVm;
     }
-
-	#region DND
+	
+#region DND
 
 	/// <summary>
 	/// Ran when an item is dropped on the right side of the beat panel
@@ -76,25 +76,49 @@ public sealed partial class ProblemPage : BindablePage
 			}
 		}
 	}
-#endregion
+	#endregion
+	
+	/// <summary>
+	/// Deletes a beat
+	/// </summary>
+	public void DeleteBeat(object sender, RoutedEventArgs e)
+	{
+		StructureBeatModel model = ((sender as Button).Parent as StackPanel).DataContext as StructureBeatModel;
+		ProblemVm.StructureBeats.Remove(model);
+	}
 
-private async void UpdateSelectedBeat(object sender, SelectionChangedEventArgs e)
-    {
-		await Ioc.Default.GetService<Windowing>().ShowContentDialog(new ContentDialog
+	/// <summary>
+	/// Moves a selected beat higher.
+	/// </summary>
+	private void MoveUp(object sender, RoutedEventArgs e)
+	{
+		StructureBeatModel model = ((sender as Button).Parent as StackPanel).DataContext as StructureBeatModel;
+		int ModelIndex = ProblemVm.StructureBeats.IndexOf(model);
+
+		//Sanity check
+		if (ModelIndex == 0)
 		{
-			Title = "This will clear selected story beats",
-			PrimaryButtonText = "Confirm",
-			SecondaryButtonText = "Cancel"
-		});
+			ShellVm.ShowMessage(LogLevel.Warn, "Can't move Beat higher", true);
+			return;
+		}	
 
-	    ProblemVm.StructureBeats.Clear();
-	    foreach (var item in ProblemVm.StructureModel.PlotPatternScenes)
-	    {
-			ProblemVm.StructureBeats.Add(new StructureBeatModel
-			{
-				Title = item.SceneTitle,
-				Description = item.Notes,
-			});
+		ProblemVm.StructureBeats.Move(ModelIndex, ModelIndex-1);
+	}
+	/// <summary>
+	/// Moves a selected beat lower.
+	/// </summary>
+	private void MoveDown(object sender, RoutedEventArgs e)
+	{
+		StructureBeatModel model = ((sender as Button).Parent as StackPanel).DataContext as StructureBeatModel;
+		int ModelIndex = ProblemVm.StructureBeats.IndexOf(model);
+
+		//Sanity check
+		if (ModelIndex+1 == ProblemVm.StructureBeats.Count)
+		{
+			ShellVm.ShowMessage(LogLevel.Warn, "Can't move Beat lower", true);
+			return;
 		}
-    }
+
+		ProblemVm.StructureBeats.Move(ModelIndex, ModelIndex + 1);
+	}
 }
