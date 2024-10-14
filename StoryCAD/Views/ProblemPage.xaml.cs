@@ -49,19 +49,34 @@ public sealed partial class ProblemPage : BindablePage
 					string guid = text.Split(":")[1];
 					Guid uuid;
 					Guid.TryParse(guid,out uuid);
-					ProblemModel problem =(ProblemModel) ShellVm.StoryModel.StoryElements.Where(g => g.Uuid == uuid);
-
-					//Enforce rule that problems can only be bound to one structure
-					if (!string.IsNullOrEmpty(problem.BoundStructure))
+					StoryElement Element = ShellVm.StoryModel.StoryElements.First(g => g.Uuid == uuid);
+					if (Element.Type == StoryItemType.Problem)
 					{
-						await Ioc.Default.GetRequiredService<Windowing>().ShowContentDialog(new()
+						ProblemModel problem = (ProblemModel)Element;
+						//Enforce rule that problems can only be bound to one structure
+						if (!string.IsNullOrEmpty(problem.BoundStructure))
 						{
-							Title = "Already bound!",
-							Content = $"This problem is already bound to a different structure ({problem.Name}) " +
-							          $"Would you like to remove it from there and bind it here instead?",
-						});
+							//Show dialog asking to rebind.
+							var res = await Ioc.Default.GetRequiredService<Windowing>().ShowContentDialog(new()
+							{
+								Title = "Already bound!",
+								Content = $"This problem is already bound to a different structure ({problem.Name}) " +
+								          $"Would you like to remove it from there and bind it here instead?",
+								PrimaryButtonText = "Rebind here",
+								SecondaryButtonText = "Don't Rebind"
+							});
+
+							if (res == ContentDialogResult.Primary)
+							{
+								//Remove from old structure
+								StructureBeatModel oldStructure = ProblemVm.StructureBeats.First(g => g.Guid == problem.BoundStructure);
+								oldStructure.Guid = String.Empty;
+							}
+							else { return; }
+
+						}
+						problem.BoundStructure = ProblemVm.Uuid.ToString();
 					}
-					problem.BoundStructure = ProblemVm.Uuid.ToString();
 					structureBeatsModel.Guid = guid;
 				}
 			}

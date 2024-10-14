@@ -2,7 +2,6 @@
     x:Class="StoryCAD.Views.ProblemPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"               
-    xmlns:local="using:StoryCAD.Views"
     xmlns:usercontrols="using:StoryCAD.Controls"
     xmlns:viewModels="using:StoryCAD.ViewModels"
     xmlns:tools="using:StoryCAD.Models.Tools">
