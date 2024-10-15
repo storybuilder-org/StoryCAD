@@ -50,6 +50,7 @@ public sealed partial class ProblemPage : BindablePage
 					Guid uuid;
 					Guid.TryParse(guid,out uuid);
 					StoryElement Element = ShellVm.StoryModel.StoryElements.First(g => g.Uuid == uuid);
+					int ElementIndex = ShellVm.StoryModel.StoryElements.IndexOf(Element);
 					if (Element.Type == StoryItemType.Problem)
 					{
 						ProblemModel problem = (ProblemModel)Element;
@@ -68,14 +69,35 @@ public sealed partial class ProblemPage : BindablePage
 
 							if (res == ContentDialogResult.Primary)
 							{
-								//Remove from old structure
-								StructureBeatModel oldStructure = ProblemVm.StructureBeats.First(g => g.Guid == problem.BoundStructure);
-								oldStructure.Guid = String.Empty;
+								if (problem.Uuid == ProblemVm.Uuid)
+								{
+									StructureBeatModel oldStructure = problem.StructureBeats.First(g => g.Guid == problem.BoundStructure);
+									int index = ProblemVm.StructureBeats.IndexOf(oldStructure);
+									ProblemVm.StructureBeats[index].Guid = String.Empty;
+								}
+								else
+								{
+									//Remove from old structure and update story elements.
+									StructureBeatModel oldStructure = problem.StructureBeats.First(g => g.Guid == problem.BoundStructure);
+									int index = problem.StructureBeats.IndexOf(oldStructure);
+									problem.StructureBeats[index].Guid = String.Empty;
+									ShellVm.StoryModel.StoryElements[ElementIndex] = problem;
+								}
 							}
 							else { return; }
 
 						}
-						problem.BoundStructure = ProblemVm.Uuid.ToString();
+
+						if (problem.Uuid == ProblemVm.Uuid)
+						{
+							ProblemVm.BoundStructure = ProblemVm.Uuid.ToString();
+						}
+						else
+						{
+							problem.BoundStructure = ProblemVm.Uuid.ToString();
+							ShellVm.StoryModel.StoryElements[ElementIndex] = problem;
+
+						}
 					}
 					structureBeatsModel.Guid = guid;
 				}

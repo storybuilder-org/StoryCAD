@@ -333,7 +333,7 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         // Character instances like Protagonist and Antagonist are 
         // read and written as the CharacterModel's StoryElement Guid 
         // string. A binding converter, StringToStoryElementConverter,
-        // provides the UI the corresponding StoryElement itself.f
+        // provides the UI the corresponding StoryElement itself.
         Protagonist = Model.Protagonist ?? string.Empty;
         ProtGoal = Model.ProtGoal;
         ProtMotive = Model.ProtMotive;
@@ -353,6 +353,8 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         ProblemModel storyProblem = (ProblemModel) StoryElement.StringToStoryElement(_overviewModel.StoryProblem);
         if (storyProblem != null) { _syncPremise = true; }
         else _syncPremise = false;
+
+		//Bypass Custom Structure content dialog logic during loads
 		Structure = Model.Structure;
 		StructureDescription = Model.StructureDescription;
 		StructureBeats = Model.StructureBeats;
@@ -391,7 +393,6 @@ public class ProblemViewModel : ObservableRecipient, INavigable
 			if (_syncPremise) { _overviewModel.Premise = Premise; }
             Model.Notes = Notes;
             Model.BoundStructure = BoundStructure;
-
 		}
 		catch (Exception ex)
         {
@@ -439,8 +440,17 @@ public class ProblemViewModel : ObservableRecipient, INavigable
     }
     public async void UpdateSelectedBeat(string value)
     {
-	    //Show dialog if structure has been set previously
-	    ContentDialogResult Result;
+		Ioc.Default.GetRequiredService<Windowing>().MainWindow.Content.InvalidateMeasure();
+		Ioc.Default.GetRequiredService<Windowing>().MainWindow.Content.InvalidateArrange();
+
+		if (!_changeable)
+	    {
+		    SetProperty(ref _structure, value);
+		    return;
+	    }
+
+		//Show dialog if structure has been set previously
+		ContentDialogResult Result;
 	    if (!string.IsNullOrEmpty(Structure))
 	    {
 		    Result = await Ioc.Default.GetRequiredService<Windowing>()
