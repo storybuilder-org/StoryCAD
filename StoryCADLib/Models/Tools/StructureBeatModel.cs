@@ -38,10 +38,10 @@ public class StructureBeatModel : ObservableObject
 		get => guid;
 		set
 		{
-			SetProperty(ref guid, value);
 			OnPropertyChanged(nameof(ElementName));
 			OnPropertyChanged(nameof(ElementIcon));
 			OnPropertyChanged(nameof(ElementDescription));
+			SetProperty(ref guid, value);
 		}
 	}
 
