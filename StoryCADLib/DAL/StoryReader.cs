@@ -4,7 +4,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
 using StoryCAD.Services.Messages;
 using static Windows.Data.Xml.Dom.XmlDocument;
-using StoryCAD.Models.Tools;
+using StoryCAD.ViewModels.Tools;
 
 
 namespace StoryCAD.DAL;
@@ -324,8 +324,8 @@ public class StoryReader : ObservableRecipient
                 case "Notes":
                     _prb.Notes = _attr.InnerText;
                     break;
-				case "Structure":
-					_prb.Structure = _attr.InnerText;
+				case "StructureModelTitle":
+					_prb.StructureTitle = _attr.InnerText;
 					break;
 				case "StructureDescription":
 					_prb.StructureDescription = _attr.InnerText;
@@ -338,7 +338,7 @@ public class StoryReader : ObservableRecipient
         {
 	        foreach (IXmlNode beatNode in Beats)
 	        {
-		        StructureBeatModel beat = new StructureBeatModel();
+		        StructureBeatViewModel beat = new StructureBeatViewModel();
 
 		        IXmlNode titleNode = beatNode.SelectSingleNode("./Title");
 		        if (titleNode != null)

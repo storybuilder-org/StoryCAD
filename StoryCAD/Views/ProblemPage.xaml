@@ -4,7 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"               
     xmlns:usercontrols="using:StoryCAD.Controls"
     xmlns:viewModels="using:StoryCAD.ViewModels"
-    xmlns:tools="using:StoryCAD.Models.Tools">
+    xmlns:tools="using:StoryCAD.ViewModels.Tools">
 
     <Grid>
         <Grid.RowDefinitions>
@@ -160,8 +160,8 @@
 
 							<!-- Beat picker and Title/Desc of Overall beat -->
 							<ComboBox Header="Structure" ItemsSource="{x:Bind BeatSheetsViewModel.PlotPatternNames}"
-							          MinWidth="200" SelectedValue="{x:Bind ProblemVm.Structure, Mode=TwoWay}"
-							          Grid.Row="0" PlaceholderText="{x:Bind ProblemVm.Structure, Mode=TwoWay}"/>
+							          MinWidth="200" SelectionChanged="{x:Bind ProblemVm.UpdateSelectedBeat}"
+									  PlaceholderText="{x:Bind ProblemVm.StructureModelTitle, Mode=TwoWay}" Grid.Row="0"/>
 							<TextBlock Text="Structure Description:" Margin="0,10,0,0" Grid.Row="2"/>
 							<TextBlock Text="{x:Bind ProblemVm.StructureDescription, Mode=TwoWay}" Grid.Row="3"/>
 
@@ -169,7 +169,7 @@
 							<ItemsRepeater ItemsSource="{x:Bind ProblemVm.StructureBeats, Mode=TwoWay}"
 							               HorizontalAlignment="Stretch" Grid.Row="4">
 								<ItemsRepeater.ItemTemplate>
-									<DataTemplate x:DataType="tools:StructureBeatModel">
+									<DataTemplate x:DataType="tools:StructureBeatViewModel">
 										<Grid DataContext="{x:Bind}" MinWidth="200" AllowDrop="True" DragOver="UIElement_OnDragOver"
 										            Background="Transparent" CanDrag="False" Drop="DroppedItem" Margin="0,5,10,5"
 										            BorderBrush="White" BorderThickness="2" CornerRadius="4" 

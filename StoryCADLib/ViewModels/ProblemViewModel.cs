@@ -205,16 +205,16 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         get => _notes;
         set => SetProperty(ref _notes, value);
     }
-    // Problem Structure data
+    // Problem StructureModelTitle data
 
-    private string _structure;
+    private string _structureModelTitle;
 	/// <summary>
 	/// Name of PlotPatternModel used in structure tab
 	/// </summary>
-    public string Structure
+    public string StructureModelTitle
     {
-	    get => _structure;
-	    set => UpdateSelectedBeat(value);
+	    get => _structureModelTitle;
+	    set => SetProperty(ref _structureModelTitle, value);
 	}
 
 	private string _structureDescription;
@@ -253,8 +253,8 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         set => SetProperty(ref _model, value);
     }
 
-    private ObservableCollection<StructureBeatModel> structureBeats;
-    public ObservableCollection<StructureBeatModel> StructureBeats
+    private ObservableCollection<StructureBeatViewModel> structureBeats;
+    public ObservableCollection<StructureBeatViewModel> StructureBeats
     {
 	    get => structureBeats;
 	    set => SetProperty(ref structureBeats, value);
@@ -354,13 +354,11 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         if (storyProblem != null) { _syncPremise = true; }
         else _syncPremise = false;
 
-		//Bypass Custom Structure content dialog logic during loads
-		Structure = Model.Structure;
+		StructureModelTitle = Model.StructureTitle;
 		StructureDescription = Model.StructureDescription;
 		StructureBeats = Model.StructureBeats;
-		_changeable = true;
 		BoundStructure = Model.BoundStructure;
-
+		_changeable = true;
 	}
 
     internal void SaveModel()
@@ -387,7 +385,7 @@ public class ProblemViewModel : ObservableRecipient, INavigable
             Model.Theme = Theme;
             Model.StoryQuestion = StoryQuestion;
 			Model.Premise = Premise;
-			Model.Structure = Structure;
+			Model.StructureTitle = StructureModelTitle;
 			Model.StructureDescription = StructureDescription;
 			Model.StructureBeats = StructureBeats;
 			if (_syncPremise) { _overviewModel.Premise = Premise; }
@@ -438,20 +436,18 @@ public class ProblemViewModel : ObservableRecipient, INavigable
                 break;
         }
     }
-    public async void UpdateSelectedBeat(string value)
+    public async void UpdateSelectedBeat(object sender, SelectionChangedEventArgs e)
     {
-		Ioc.Default.GetRequiredService<Windowing>().MainWindow.Content.InvalidateMeasure();
-		Ioc.Default.GetRequiredService<Windowing>().MainWindow.Content.InvalidateArrange();
-
+	    string value = (sender as ComboBox).SelectedValue.ToString();
 		if (!_changeable)
 	    {
-		    SetProperty(ref _structure, value);
+		    SetProperty(ref _structureModelTitle, value);
 		    return;
 	    }
 
 		//Show dialog if structure has been set previously
 		ContentDialogResult Result;
-	    if (!string.IsNullOrEmpty(Structure))
+	    if (!string.IsNullOrEmpty(StructureModelTitle))
 	    {
 		    Result = await Ioc.Default.GetRequiredService<Windowing>()
 			    .ShowContentDialog(new()
@@ -467,7 +463,7 @@ public class ProblemViewModel : ObservableRecipient, INavigable
 	    if (Result == ContentDialogResult.Primary && !string.IsNullOrEmpty(value))
 	    {
 		    //Update value 
-		    SetProperty(ref _structure, value);
+		    SetProperty(ref _structureModelTitle, value);
 
 		    //Resolve master plot model if not empty
 		    PlotPatternModel BeatSheet = Ioc.Default.GetRequiredService<BeatSheetsViewModel>().BeatSheets[value];
@@ -479,18 +475,18 @@ public class ProblemViewModel : ObservableRecipient, INavigable
 
 		    foreach (var item in BeatSheet.PlotPatternScenes)
 		    {
-			    StructureBeats.Add(new StructureBeatModel
+			    StructureBeats.Add(new StructureBeatViewModel
 			    {
 				    Title = item.SceneTitle,
 				    Description = item.Notes,
 			    });
 		    }
 	    }
-    }
+	}
     public void AddBeat()
     {
 	    //Add beat
-	    StructureBeats.Add(new StructureBeatModel
+	    StructureBeats.Add(new StructureBeatViewModel
 	    {
 		    Title = AddBeat_Name,
 		    Description = AddBeat_Description,
@@ -544,7 +540,7 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         Premise = string.Empty;
         _syncPremise = false;
         Notes = string.Empty;
-        Structure = string.Empty;
+        StructureModelTitle = string.Empty;
 		StructureDescription = string.Empty;
         StructureBeats = new();
 

@@ -1,5 +1,4 @@
-﻿using StoryCAD.Models.Tools;
-using StoryCAD.ViewModels.Tools;
+﻿using StoryCAD.ViewModels.Tools;
 using System.Collections.ObjectModel;
 using Windows.Data.Xml.Dom;
 
@@ -149,22 +148,22 @@ public class ProblemModel : StoryElement
         set => _notes = value;
     }
 
-	// Structure Tab Data
+	// StructureModelTitle Tab Data
 
 
-	private string _structure;
+	private string _structureTitle;
 	/// <summary>
-	/// Name of MasterPlotModel used in structure tab
+	/// Name of StructureBeatsModel used in structure tab
 	/// </summary>
-	public string Structure
+	public string StructureTitle
 	{
-		get => _structure;
-		set => _structure = value;
+		get => _structureTitle;
+		set => _structureTitle = value;
 	}
 
 	private string _structureDescription;
 	/// <summary>
-	/// Description of MasterPlotModel used in structure tab
+	/// Description of StructureBeatsModel used in structure tab
 	/// </summary>
 	public string StructureDescription
 	{
@@ -172,11 +171,11 @@ public class ProblemModel : StoryElement
 		set => _structureDescription = value;
 	}
 
-	private ObservableCollection<StructureBeatModel> structureBeats;
+	private ObservableCollection<StructureBeatViewModel> structureBeats;
 	/// <summary>
 	/// Beat nodes of the structure
 	/// </summary>
-	public ObservableCollection<StructureBeatModel> StructureBeats
+	public ObservableCollection<StructureBeatViewModel> StructureBeats
 	{
 		get => structureBeats;
 		set => structureBeats = value;
@@ -215,7 +214,7 @@ public class ProblemModel : StoryElement
         Theme = string.Empty;
         Premise = string.Empty;
         Notes = string.Empty;
-        Structure = string.Empty;
+        StructureTitle = string.Empty;
         StructureDescription = string.Empty;
 		StructureBeats = new();
     }
@@ -240,7 +239,7 @@ public class ProblemModel : StoryElement
         Theme = string.Empty;
         Premise = string.Empty;
         Notes = string.Empty;
-        Structure = string.Empty;
+        StructureTitle = string.Empty;
         StructureDescription = string.Empty;
 		StructureBeats = new();
 	}
@@ -264,7 +263,7 @@ public class ProblemModel : StoryElement
         Theme = string.Empty;
         Premise = string.Empty;
         Notes = string.Empty;
-        Structure = string.Empty;
+        StructureTitle = string.Empty;
         StructureBeats = new();
         StructureDescription = string.Empty;
     }
