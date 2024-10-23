@@ -24,6 +24,7 @@ public class ToolLoader
                 LoadStockScenes(),
                 LoadTopics(),
                 LoadMasterPlots(),
+                LoadBeatsheets(),
                 LoadDramaticSituations()
             };
 
@@ -173,11 +174,11 @@ public class ToolLoader
         return _topics;
     }
 
-    public List<MasterPlotModel> LoadMasterPlots()
+    public List<PlotPatternModel> LoadMasterPlots()
     {
-        MasterPlotModel _currentMasterPlot = null;
-        MasterPlotScene _currentMasterPlotScene = null;
-        List<MasterPlotModel> _masterPlots = new();
+        PlotPatternModel _currentMasterPlot = null;
+        PlotPatternScene _currentPlotPatternScene = null;
+        List<PlotPatternModel> _masterPlots = new();
         string _section = string.Empty;
         string _keyword = string.Empty;
         string _keyvalue = string.Empty;
@@ -193,31 +194,31 @@ public class ToolLoader
                         case "":
                             break;
                         case "MasterPlot":
-                            _currentMasterPlot = new MasterPlotModel(_keyvalue);
+                            _currentMasterPlot = new PlotPatternModel(_keyvalue);
                             _masterPlots.Add(_currentMasterPlot);
                             break;
                         case "Remarks":
                             // ReSharper disable PossibleNullReferenceException
-                            if (_currentMasterPlot.MasterPlotNotes.Equals(string.Empty))
-                                _currentMasterPlot.MasterPlotNotes = _keyvalue;
+                            if (_currentMasterPlot.PlotPatternNotes.Equals(string.Empty))
+                                _currentMasterPlot.PlotPatternNotes = _keyvalue;
                             else
                             {
-                                _currentMasterPlot.MasterPlotNotes += Environment.NewLine;
-                                _currentMasterPlot.MasterPlotNotes += _keyvalue;
+                                _currentMasterPlot.PlotPatternNotes += Environment.NewLine;
+                                _currentMasterPlot.PlotPatternNotes += _keyvalue;
                             }
                             break;
                         case "PlotPoint":
                         case "Scene":
-                            _currentMasterPlotScene = new MasterPlotScene(_keyvalue);
-                            _currentMasterPlot.MasterPlotScenes.Add(_currentMasterPlotScene);
+                            _currentPlotPatternScene = new PlotPatternScene(_keyvalue);
+                            _currentMasterPlot.PlotPatternScenes.Add(_currentPlotPatternScene);
                             break;
                         case "Notes":
-                            if (_currentMasterPlotScene.Notes.Equals(string.Empty))
-                                _currentMasterPlotScene.Notes = _keyvalue;
+                            if (_currentPlotPatternScene.Notes.Equals(string.Empty))
+                                _currentPlotPatternScene.Notes = _keyvalue;
                             else
                             {
-                                _currentMasterPlotScene.Notes += Environment.NewLine;
-                                _currentMasterPlotScene.Notes += _keyvalue;
+                                _currentPlotPatternScene.Notes += Environment.NewLine;
+                                _currentPlotPatternScene.Notes += _keyvalue;
                             }
                             // ReSharper restore PossibleNullReferenceException
                             break;
@@ -226,6 +227,60 @@ public class ToolLoader
             }
         }
         return _masterPlots;
+    }
+
+        public List<PlotPatternModel> LoadBeatsheets()
+    {
+        PlotPatternModel _currentBeatsheet = null;
+        PlotPatternScene _currentPlotPatternScene = null;
+        List<PlotPatternModel> _beatSheets = new();
+        string _section = string.Empty;
+        string _keyword = string.Empty;
+        string _keyvalue = string.Empty;
+        foreach (string _line in _lines)
+        {
+            ParseLine(_line, ref _section, ref _keyword, ref _keyvalue);
+            //   Process the parsed values
+            switch (_section)
+            {
+                case "BeatSheets":
+                    switch (_keyword)
+                    {
+                        case "":
+                            break;
+                        case "BeatSheet":
+                            _currentBeatsheet = new PlotPatternModel(_keyvalue);
+                            _beatSheets.Add(_currentBeatsheet);
+                            break;
+                        case "Remarks":
+                            // ReSharper disable PossibleNullReferenceException
+                            if (_currentBeatsheet.PlotPatternNotes.Equals(string.Empty))
+                                _currentBeatsheet.PlotPatternNotes = _keyvalue;
+                            else
+                            {
+                                _currentBeatsheet.PlotPatternNotes += Environment.NewLine;
+                                _currentBeatsheet.PlotPatternNotes += _keyvalue;
+                            }
+                            break;
+                        case "Beat":
+                            _currentPlotPatternScene = new PlotPatternScene(_keyvalue);
+                            _currentBeatsheet.PlotPatternScenes.Add(_currentPlotPatternScene);
+                            break;
+                        case "Notes":
+                            if (_currentPlotPatternScene.Notes.Equals(string.Empty))
+                                _currentPlotPatternScene.Notes = _keyvalue;
+                            else
+                            {
+                                _currentPlotPatternScene.Notes += Environment.NewLine;
+                                _currentPlotPatternScene.Notes += _keyvalue;
+                            }
+                            // ReSharper restore PossibleNullReferenceException
+                            break;
+                    }
+                    break;
+            }
+        }
+        return _beatSheets;
     }
 
     public SortedDictionary<string, DramaticSituationModel> LoadDramaticSituations()

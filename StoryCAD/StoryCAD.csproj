@@ -32,6 +32,7 @@
 	</PropertyGroup>
 	<PropertyGroup>
 		<WindowsSdkPackageVersion>10.0.22621.38</WindowsSdkPackageVersion>
+		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
 	</PropertyGroup>
 	<ItemGroup>
 		<Content Include="Assets\SplashScreen.scale-200.png" />

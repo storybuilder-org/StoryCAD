@@ -24,8 +24,6 @@ using Windows.Storage;
 using StoryCAD.Services;
 using WinUIEx;
 using Application = Microsoft.UI.Xaml.Application;
-using FileAttributes = System.IO.FileAttributes;
-using Org.BouncyCastle.Asn1.Cms;
 using StoryCAD.Collaborator.ViewModels;
 
 namespace StoryCAD.ViewModels;
@@ -1291,9 +1289,9 @@ public class ShellViewModel : ObservableRecipient
                 if (_result == ContentDialogResult.Primary) // Copy command
                 {
                     MasterPlotsViewModel _masterPlotsVM = Ioc.Default.GetRequiredService<MasterPlotsViewModel>();
-                    string _masterPlotName = _masterPlotsVM.MasterPlotName;
-                    MasterPlotModel _model = _masterPlotsVM.MasterPlots[_masterPlotName];
-                    IList<MasterPlotScene> _scenes = _model.MasterPlotScenes;
+                    string _masterPlotName = _masterPlotsVM.PlotPatternName;
+                    PlotPatternModel _model = _masterPlotsVM.MasterPlots[_masterPlotName];
+                    IList<PlotPatternScene> _scenes = _model.PlotPatternScenes;
                     ProblemModel _problem = new ProblemModel(_masterPlotName, StoryModel);
                     // add the new ProblemModel & node to the end of the target (RightTappedNode) children 
                     StoryNodeItem _problemNode = new(_problem, RightTappedNode);
@@ -1305,7 +1303,7 @@ public class ShellViewModel : ObservableRecipient
                         _problem.StoryQuestion = "See Notes.";
                         _problem.Notes = _scenes[0].Notes;
                     }
-                    else foreach (MasterPlotScene _scene in _scenes)
+                    else foreach (PlotPatternScene _scene in _scenes)
                         {
                             SceneModel _child = new(StoryModel) { Name = _scene.SceneTitle, Remarks = "See Notes.", Notes = _scene.Notes };
                             // add the new SceneModel & node to the end of the problem's children 
