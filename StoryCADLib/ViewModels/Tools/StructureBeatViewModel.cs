@@ -7,8 +7,17 @@ namespace StoryCAD.ViewModels.Tools;
 /// </summary>
 public class StructureBeatViewModel : ObservableObject
 {
+	#region Constructor
+	public StructureBeatViewModel()
+	{
+		ProblemViewModel ProblemVM = Ioc.Default.GetRequiredService<ProblemViewModel>();
+		PropertyChanged += ProblemVM.OnPropertyChanged;
+	}
+	#endregion
 
-    private string title;
+	#region Properties
+
+	private string title;
     /// <summary>
     /// Title of beat
     /// </summary>
@@ -38,10 +47,11 @@ public class StructureBeatViewModel : ObservableObject
         get => guid;
         set
         {
-            OnPropertyChanged(nameof(ElementName));
+	        SetProperty(ref guid, value);
+			OnPropertyChanged(nameof(Element));
+			OnPropertyChanged(nameof(ElementName));
             OnPropertyChanged(nameof(ElementIcon));
             OnPropertyChanged(nameof(ElementDescription));
-            SetProperty(ref guid, value);
         }
     }
 
@@ -118,4 +128,5 @@ public class StructureBeatViewModel : ObservableObject
             return Symbol.Cancel;
         }
     }
+    #endregion
 }

@@ -3,7 +3,6 @@ using System.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
-using Microsoft.UI.Xaml;
 using StoryCAD.Controls;
 using StoryCAD.Models.Tools;
 using StoryCAD.Services.Messages;
@@ -28,7 +27,6 @@ public class ProblemViewModel : ObservableRecipient, INavigable
     // case any ProblemViewModel Premise changes must also be made
     // to the _overviewModel.Premise property.
     private bool _syncPremise;
-
     #endregion
 
     #region Properties
@@ -262,20 +260,6 @@ public class ProblemViewModel : ObservableRecipient, INavigable
 
 	public RelayCommand ConflictCommand { get; }
 
-	private string addBeat_Name;
-	public string AddBeat_Name
-	{
-		get => addBeat_Name;
-		set => SetProperty(ref addBeat_Name, value);
-	}
-
-	private string addBeat_Description;
-	public string AddBeat_Description
-	{
-		get => addBeat_Description;
-		set => SetProperty(ref addBeat_Description, value);
-	}
-
 	private string _boundStructure;
 	/// <summary>
 	/// A problem cannot be bound to more than one structure
@@ -284,6 +268,20 @@ public class ProblemViewModel : ObservableRecipient, INavigable
 	{
 		get => _boundStructure;
 		set => SetProperty(ref _boundStructure, value);
+	}
+
+	private ObservableCollection<StoryElement> _Scenes;
+	public ObservableCollection<StoryElement> Scenes
+	{
+		get => _Scenes;
+		set => SetProperty(ref _Scenes, value);
+	}
+
+	private ObservableCollection<StoryElement> _problems;
+	public ObservableCollection<StoryElement> Problems
+	{
+		get => _problems;
+		set => SetProperty(ref _problems, value);
 	}
 	#endregion
 
@@ -304,7 +302,7 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         SaveModel();
     }
 
-    private void OnPropertyChanged(object sender, PropertyChangedEventArgs args)
+    public void OnPropertyChanged(object sender, PropertyChangedEventArgs args)
     {
         if (_changeable)
         {
@@ -358,6 +356,10 @@ public class ProblemViewModel : ObservableRecipient, INavigable
 		StructureDescription = Model.StructureDescription;
 		StructureBeats = Model.StructureBeats;
 		BoundStructure = Model.BoundStructure;
+		
+		//Ensure correct set of Elements are loaded for Structure Lists
+		Problems = Ioc.Default.GetService<ShellViewModel>().StoryModel.StoryElements.Problems;
+		Scenes = Ioc.Default.GetService<ShellViewModel>().StoryModel.StoryElements.Scenes;
 		_changeable = true;
 	}
 
@@ -483,20 +485,6 @@ public class ProblemViewModel : ObservableRecipient, INavigable
 		    }
 	    }
 	}
-    public void AddBeat()
-    {
-	    //Add beat
-	    StructureBeats.Add(new StructureBeatViewModel
-	    {
-		    Title = AddBeat_Name,
-		    Description = AddBeat_Description,
-	    });
-
-	    //Reset boxes.
-	    AddBeat_Name = "";
-	    AddBeat_Description = "";
-    }
-
 	#endregion
 
 	#region Control initialization sources
