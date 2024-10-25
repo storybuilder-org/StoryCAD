@@ -305,7 +305,11 @@ public class StoryWriter
         _prob.Attributes.Append(_attr);
 
 
-		//StructureModelTitle tab
+		//Structure tab
+		_attr = _xml.CreateAttribute("BoundStructure");
+		_attr.Value = _rec.BoundStructure;
+		_prob.Attributes.Append(_attr);
+
 		_attr = _xml.CreateAttribute("StructureModelTitle");
 		_attr.Value = _rec.StructureTitle;
         _prob.Attributes.Append(_attr);

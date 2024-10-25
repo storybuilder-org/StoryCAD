@@ -330,6 +330,9 @@ public class StoryReader : ObservableRecipient
 				case "StructureDescription":
 					_prb.StructureDescription = _attr.InnerText;
 					break;
+				case "BoundStructure":
+					_prb.BoundStructure = _attr.InnerText;
+					break;
 			}
 		}
 

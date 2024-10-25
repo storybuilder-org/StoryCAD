@@ -91,6 +91,7 @@ public sealed partial class ProblemPage : BindablePage
 				}
 			}
 			structureBeatsModel.Guid = uuid.ToString();
+			stackPanel.DataContext = structureBeatsModel;
 		}
 		catch (Exception ex)
 		{

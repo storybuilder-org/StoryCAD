@@ -217,7 +217,8 @@ public class ProblemModel : StoryElement
         StructureTitle = string.Empty;
         StructureDescription = string.Empty;
 		StructureBeats = new();
-    }
+		BoundStructure = string.Empty;
+	}
     public ProblemModel(string name, StoryModel model) : base(name, StoryItemType.Problem, model)
     {
         ProblemType = string.Empty;
@@ -242,8 +243,9 @@ public class ProblemModel : StoryElement
         StructureTitle = string.Empty;
         StructureDescription = string.Empty;
 		StructureBeats = new();
+		BoundStructure = string.Empty;
 	}
-    public ProblemModel(IXmlNode xn, StoryModel model) : base(xn, model)
+	public ProblemModel(IXmlNode xn, StoryModel model) : base(xn, model)
     {
         ProblemType = string.Empty;
         ConflictType = string.Empty;
@@ -266,7 +268,8 @@ public class ProblemModel : StoryElement
         StructureTitle = string.Empty;
         StructureBeats = new();
         StructureDescription = string.Empty;
-    }
+        BoundStructure = string.Empty;
+	}
 
-    #endregion
+	#endregion
 }

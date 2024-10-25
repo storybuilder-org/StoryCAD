@@ -531,7 +531,7 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         StructureModelTitle = string.Empty;
 		StructureDescription = string.Empty;
         StructureBeats = new();
-
+        BoundStructure = string.Empty;
 		try
         {
             Dictionary<string, ObservableCollection<string>> _lists = Ioc.Default.GetService<ListData>().ListControlSource;

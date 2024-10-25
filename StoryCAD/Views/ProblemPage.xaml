@@ -160,7 +160,8 @@
 							<!-- Beat picker and Title/Desc of Overall beat -->
 							<ComboBox Header="Structure" ItemsSource="{x:Bind BeatSheetsViewModel.PlotPatternNames}"
 							          MinWidth="200" SelectionChanged="{x:Bind ProblemVm.UpdateSelectedBeat}"
-									  PlaceholderText="{x:Bind ProblemVm.StructureModelTitle, Mode=TwoWay}" Grid.Row="0"/>
+									  PlaceholderText="{x:Bind ProblemVm.StructureModelTitle, Mode=OneWay}"
+							          Text="{x:Bind ProblemVm.StructureModelTitle, Mode=OneWay}" Grid.Row="0"/>
 							<TextBlock Text="Structure Description:" Margin="0,10,0,0" Grid.Row="2"/>
 							<TextBlock Text="{x:Bind ProblemVm.StructureDescription, Mode=TwoWay}" Grid.Row="3" 
 							           TextWrapping="Wrap"/>
@@ -190,7 +191,7 @@
 											<TextBlock Grid.Row="1" Grid.Column="1" Text="{x:Bind Description}"
 											           TextWrapping="Wrap"/>
 											<StackPanel Grid.Row="0" Grid.Column="2" Orientation="Horizontal"
-											            DataContext="{x:Bind}">
+											            DataContext="{x:Bind Mode=TwoWay}">
 											</StackPanel>
 
 											<Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3">
