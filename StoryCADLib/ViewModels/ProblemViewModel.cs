@@ -440,12 +440,12 @@ public class ProblemViewModel : ObservableRecipient, INavigable
     }
     public async void UpdateSelectedBeat(object sender, SelectionChangedEventArgs e)
     {
-	    string value = (sender as ComboBox).SelectedValue.ToString();
 		if (!_changeable)
 	    {
-		    SetProperty(ref _structureModelTitle, value);
 		    return;
 	    }
+
+	    string value = (sender as ComboBox).SelectedValue.ToString();
 
 		//Show dialog if structure has been set previously
 		ContentDialogResult Result;

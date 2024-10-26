@@ -161,6 +161,7 @@
 							<ComboBox Header="Structure" ItemsSource="{x:Bind BeatSheetsViewModel.PlotPatternNames}"
 							          MinWidth="200" SelectionChanged="{x:Bind ProblemVm.UpdateSelectedBeat}"
 									  PlaceholderText="{x:Bind ProblemVm.StructureModelTitle, Mode=OneWay}"
+									  SelectedValue="{x:Bind ProblemVm.StructureModelTitle, Mode=OneWay}"
 							          Text="{x:Bind ProblemVm.StructureModelTitle, Mode=OneWay}" Grid.Row="0"/>
 							<TextBlock Text="Structure Description:" Margin="0,10,0,0" Grid.Row="2"/>
 							<TextBlock Text="{x:Bind ProblemVm.StructureDescription, Mode=TwoWay}" Grid.Row="3" 
