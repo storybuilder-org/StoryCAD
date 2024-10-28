@@ -52,11 +52,12 @@ public sealed partial class ProblemPage : BindablePage
 				//Enforce rule that problems can only be bound to one structure beat model
 				if (!string.IsNullOrEmpty(problem.BoundStructure)) //Check element is actually bound elsewhere
 				{
+					ProblemModel ContainingStructure = (ProblemModel)ShellVm.StoryModel.StoryElements.First(g => g.Uuid == Guid.Parse(problem.BoundStructure));
 					//Show dialog asking to rebind.
 					var res = await Ioc.Default.GetRequiredService<Windowing>().ShowContentDialog(new()
 					{
 						Title = "Already bound!",
-						Content = $"This problem is already bound to a different structure ({problem.Name}) " +
+						Content = $"This problem is already bound to a different structure ({ContainingStructure.Name}) " +
 						          $"Would you like to remove it from there and bind it here instead?",
 						PrimaryButtonText = "Rebind here",
 						SecondaryButtonText = "Don't Rebind"
@@ -65,18 +66,19 @@ public sealed partial class ProblemPage : BindablePage
 					//Do nothing if user clicks don't rebind.
 					if (res != ContentDialogResult.Primary) { return; }
 
-					if (problem.Uuid == ProblemVm.Uuid) //Rebind from VM
+					if (problem.BoundStructure.Equals(ProblemVm.Uuid.ToString())) //Rebind from VM
 					{
-						StructureBeatViewModel oldStructure = problem.StructureBeats.First(g => g.Guid == problem.BoundStructure);
+						StructureBeatViewModel oldStructure = ContainingStructure.StructureBeats.First(g => g.Guid == problem.Uuid.ToString());
 						int index = ProblemVm.StructureBeats.IndexOf(oldStructure);
 						ProblemVm.StructureBeats[index].Guid = String.Empty;
 					}
 					else //Remove from old structure and update story elements.
 					{
-						StructureBeatViewModel oldStructure = problem.StructureBeats.First(g => g.Guid == problem.BoundStructure);
-						int index = problem.StructureBeats.IndexOf(oldStructure);
-						problem.StructureBeats[index].Guid = String.Empty;
-						ShellVm.StoryModel.StoryElements[ElementIndex] = problem;
+						StructureBeatViewModel oldStructure = ContainingStructure.StructureBeats.First(g => g.Guid == problem.Uuid.ToString());
+						int index = ContainingStructure.StructureBeats.IndexOf(oldStructure);
+						ContainingStructure.StructureBeats[index].Guid = String.Empty;
+						int ContainingStructIndex = ShellVm.StoryModel.StoryElements.IndexOf(ContainingStructure);
+						ShellVm.StoryModel.StoryElements[ContainingStructIndex] = ContainingStructure;
 					}
 				}
 
