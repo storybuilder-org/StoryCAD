@@ -50,10 +50,10 @@ public class StructureBeatViewModel : ObservableObject
 	        SetProperty(ref guid, value);
 			OnPropertyChanged(nameof(Element));
 			OnPropertyChanged(nameof(ElementName));
-            OnPropertyChanged(nameof(ElementIcon));
             OnPropertyChanged(nameof(ElementDescription));
-        }
-    }
+            OnPropertyChanged(nameof(ElementIcon));
+		}
+	}
 
     /// <summary>
     /// Link to element

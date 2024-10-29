@@ -56,11 +56,11 @@ public sealed partial class ProblemPage : BindablePage
 					//Show dialog asking to rebind.
 					var res = await Ioc.Default.GetRequiredService<Windowing>().ShowContentDialog(new()
 					{
-						Title = "Already bound!",
-						Content = $"This problem is already bound to a different structure ({ContainingStructure.Name}) " +
-						          $"Would you like to remove it from there and bind it here instead?",
-						PrimaryButtonText = "Rebind here",
-						SecondaryButtonText = "Don't Rebind"
+						Title = "Already assigned!",
+						Content = $"This problem is already assigned to a different structure ({ContainingStructure.Name}) " +
+						          $"Would you like to assign it here instead?",
+						PrimaryButtonText = "Assign here",
+						SecondaryButtonText = "Cancel"
 					});
 							
 					//Do nothing if user clicks don't rebind.
