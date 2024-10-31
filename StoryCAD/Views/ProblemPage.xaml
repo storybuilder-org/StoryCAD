@@ -215,12 +215,13 @@
 
 												<TextBlock Grid.Row="1" Grid.Column="1"  Text="{x:Bind ElementName, Mode=OneWay}"
 												            Margin="10,5,0,0" VerticalAlignment="Top"/>
+
 												<usercontrols:RichEditBoxExtended Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="2" 
-													RtfText="{x:Bind ElementDescription, Mode=OneWay}" 
-													Margin="5" IsEnabled="False"
+													RtfText="{x:Bind ElementDescription}" 
+													Margin="5" IsReadOnly="True" 
 													VerticalAlignment="Top" TextWrapping="Wrap" BorderBrush="Transparent"
-													Background="Transparent" BorderThickness="1"
-													TextAlignment="Center"/>
+													Background="Transparent" BorderThickness="1" TextAlignment="Center"/>
+
 											</Grid>
 
 										</Grid>

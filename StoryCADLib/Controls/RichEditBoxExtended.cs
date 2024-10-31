@@ -73,8 +73,13 @@ public class RichEditBoxExtended : RichEditBox
         if (!rtb._lockChangeExecution)
         {
             rtb._lockChangeExecution = true;
-                
+
+			//Workaround for crash if readonly is true
+			bool isReadOnly = rtb.IsReadOnly;
+			rtb.IsReadOnly = false;
+
             rtb.Document.SetText(options, rtb.RtfText);
+            rtb.IsReadOnly = isReadOnly;
             // get rid of new EOP (cr/lf) somehow
             rtb._lockChangeExecution = false;
         }
