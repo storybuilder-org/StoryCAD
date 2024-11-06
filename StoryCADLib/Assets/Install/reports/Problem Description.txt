@@ -38,6 +38,14 @@
 
 	  Conflict:           @AntagConflict
 	
+                   =========== Problem Structure ===========
+	Structure Title:	@StructTitle
+
+	Structure Description:	@StructDescription
+
+	Beats:
+			@StructBeats
+	
                    =========== Problem Resolution ===========
 
     Outcome:            @Outcome
