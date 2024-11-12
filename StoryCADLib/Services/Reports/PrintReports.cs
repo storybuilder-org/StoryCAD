@@ -35,8 +35,8 @@ public class PrintReports
 
         if (_vm.CreateStructure)
         {
-	        _documentText += _formatter.FormatStoryProblemStructureReport();
-			rtf = FormatText(_formatter.FormatStoryProblemStructureReport());
+	        rtf = _formatter.FormatStoryProblemStructureReport();
+	        _documentText += FormatText(rtf);
 		}
 
 		if (_vm.ProblemList)
