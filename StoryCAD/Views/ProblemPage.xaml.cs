@@ -27,7 +27,6 @@ public sealed partial class ProblemPage : BindablePage
 	{
 		var stackPanel = sender as Grid;
 		if (stackPanel == null) return;
-
 		//Extract model
 		var structureBeatsModel = stackPanel.DataContext as StructureBeatViewModel;
 		if (structureBeatsModel == null) { return; }

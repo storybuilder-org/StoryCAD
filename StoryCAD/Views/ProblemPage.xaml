@@ -174,9 +174,9 @@
 								<ItemsRepeater.ItemTemplate>
 									<DataTemplate x:DataType="tools:StructureBeatViewModel">
 										<Grid DataContext="{x:Bind}" MinWidth="200" AllowDrop="True" DragOver="UIElement_OnDragOver"
-										            Background="Transparent" CanDrag="False" Drop="DroppedItem" Margin="0,5,10,5"
-										            BorderBrush="White" BorderThickness="1" CornerRadius="4" 
-										            Padding="5,10,10,10">
+										      Background="Transparent" CanDrag="False" Drop="DroppedItem" Margin="0,5,10,5"
+										      BorderBrush="White" BorderThickness="1" CornerRadius="4" 
+										      Padding="5,10,10,10">
 											<Grid.ColumnDefinitions>
 												<ColumnDefinition Width="Auto"/>
 												<ColumnDefinition Width="*"/>
@@ -185,9 +185,12 @@
 											<Grid.RowDefinitions>
 												<RowDefinition Height="Auto"/>
 												<RowDefinition Height="Auto"/>
+												<RowDefinition Height="Auto"/>
 												<RowDefinition Height="*"/>
+												<RowDefinition Height="Auto"/>
 											</Grid.RowDefinitions>
 
+											<!-- Outer Grid Content -->
 											<TextBlock Grid.Row="0" Grid.Column="1" Text="{x:Bind Title}"
 											           FontSize="18" TextWrapping="Wrap"/>
 											<TextBlock Grid.Row="1" Grid.Column="1" Text="{x:Bind Description}"
@@ -196,35 +199,23 @@
 											            DataContext="{x:Bind Mode=TwoWay}">
 											</StackPanel>
 
-											<Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3">
-												<Grid.ColumnDefinitions>
-													<ColumnDefinition Width="Auto"/>
-													<ColumnDefinition Width="*"/>
-												</Grid.ColumnDefinitions>
-												<Grid.RowDefinitions>
-													<RowDefinition Height="Auto"/>
-													<RowDefinition Height="*"/>
-													<RowDefinition Height="Auto"/>
-												</Grid.RowDefinitions>
+											<!-- Inner Grid Content Merged -->
+											<Border Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" Margin="0,10"
+											        BorderBrush="White" BorderThickness="1" CornerRadius="4"/>
 
-												<Border Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,10"
-												        BorderBrush="White" BorderThickness="1" CornerRadius="4"/>
+											<SymbolIcon Grid.Row="3" Grid.Column="0" Symbol="{Binding ElementIcon}"
+											            VerticalAlignment="Bottom"/>
 
-												<SymbolIcon Grid.Row="1" Grid.Column="0" Symbol="{Binding ElementIcon}"
-												            VerticalAlignment="Bottom"/>
+											<TextBlock Grid.Row="3" Grid.Column="1" Text="{x:Bind ElementName, Mode=OneWay}"
+											           Margin="10,5,0,0" VerticalAlignment="Top" TextWrapping="Wrap"/>
 
-												<TextBlock Grid.Row="1" Grid.Column="1"  Text="{x:Bind ElementName, Mode=OneWay}"
-												            Margin="10,5,0,0" VerticalAlignment="Top" TextWrapping="Wrap"/>
-
-												<usercontrols:RichEditBoxExtended Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="2" 
-													RtfText="{x:Bind ElementDescription, Mode=OneWay}" 
-													Margin="5" IsReadOnly="True" 
-													VerticalAlignment="Top" TextWrapping="Wrap" BorderBrush="Transparent"
-													Background="Transparent" BorderThickness="1" TextAlignment="Center"/>
-
-											</Grid>
-
+											<usercontrols:RichEditBoxExtended Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3"
+											                                  RtfText="{x:Bind ElementDescription, Mode=OneWay}" 
+											                                  Margin="5" IsReadOnly="True"
+											                                  VerticalAlignment="Top" TextWrapping="Wrap"
+											                                  TextAlignment="Center"/>
 										</Grid>
+
 									</DataTemplate>
 								</ItemsRepeater.ItemTemplate>
 							</ItemsRepeater>

@@ -32,12 +32,42 @@ public class RichEditBoxExtended : RichEditBox
 
     public RichEditBoxExtended()
     {
-        TextChanged += RichEditBoxExtended_TextChanged;
+		//Color fix for dark mode
+		TextChanged += RichEditBoxExtended_TextChanged;
         TextAlignment = TextAlignment.Left;
         CornerRadius = new(5);
-        if (Ioc.Default.GetRequiredService<Windowing>().RequestedTheme == ElementTheme.Dark) { Foreground = new SolidColorBrush(Colors.LightGray); } //Color fix for dark mode
-    }
+        HandleColoringOverrides();
+	}
 
+	/// <summary>
+	/// WinUI3's implementation of RichTextBox is sorta bugged.
+	/// Since rich text can set text color, WinUI doesn't color it
+	/// to handle theming and since all text is implicitly black unless
+	/// otherwise set this makes it impossible to read on dark theme.
+	///
+	/// Yet also conversely does somewhat account for this wierd edge case
+	/// by making black=white and white=black on theming on everything
+	///
+	/// Since StoryCAD has no option to color text, the only winning
+	/// move is not to play and just color the text constantly.
+	/// </summary>
+	public void HandleColoringOverrides()
+    {
+	    if (Ioc.Default.GetRequiredService<Windowing>().RequestedTheme == ElementTheme.Dark)
+	    {
+			/*
+		    RichEditTextDocument document = this.Document;
+
+		    // Select the desired text range (e.g., entire document)
+		    ITextRange textRange = document.GetRange(0, TextConstants.MaxUnitCount);
+
+		    textRange.CharacterFormat.ForegroundColor = Colors.LightGray; // Set the text color*/
+		}
+	    else
+	    {
+		    Foreground = new SolidColorBrush(Colors.Black);
+		}
+	}
 
     public string RtfText
     {
@@ -47,7 +77,7 @@ public class RichEditBoxExtended : RichEditBox
 
     private void RichEditBoxExtended_TextChanged(object sender, RoutedEventArgs e)
     {
-        if (!_lockChangeExecution)
+		if (!_lockChangeExecution)
         {
             _lockChangeExecution = true;
             Document.GetText(TextGetOptions.None, out string text);
@@ -62,15 +92,15 @@ public class RichEditBoxExtended : RichEditBox
             }
             _lockChangeExecution = false;
         }
-    }
+	}
 
-    private static void RtfTextPropertyChanged(DependencyObject dependencyObject,
+	private static void RtfTextPropertyChanged(DependencyObject dependencyObject,
         DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
     {
-        TextSetOptions options = TextSetOptions.FormatRtf | TextSetOptions.ApplyRtfDocumentDefaults;
+		TextSetOptions options = TextSetOptions.FormatRtf | TextSetOptions.ApplyRtfDocumentDefaults;
         RichEditBoxExtended rtb = dependencyObject as RichEditBoxExtended;
         if (rtb == null) return;
-        if (!rtb._lockChangeExecution)
+		if (!rtb._lockChangeExecution)
         {
             rtb._lockChangeExecution = true;
 
