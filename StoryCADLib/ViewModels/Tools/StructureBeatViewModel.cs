@@ -55,7 +55,7 @@ public class StructureBeatViewModel : ObservableObject
 			OnPropertyChanged(nameof(ElementName));
             OnPropertyChanged(nameof(ElementDescription));
             OnPropertyChanged(nameof(ElementIcon));
-		}
+        }
 	}
 
     /// <summary>

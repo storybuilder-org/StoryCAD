@@ -214,10 +214,10 @@
 												            VerticalAlignment="Bottom"/>
 
 												<TextBlock Grid.Row="1" Grid.Column="1"  Text="{x:Bind ElementName, Mode=OneWay}"
-												            Margin="10,5,0,0" VerticalAlignment="Top"/>
+												            Margin="10,5,0,0" VerticalAlignment="Top" TextWrapping="Wrap"/>
 
 												<usercontrols:RichEditBoxExtended Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="2" 
-													RtfText="{Binding ElementDescription}" 
+													RtfText="{x:Bind ElementDescription, Mode=OneWay}" 
 													Margin="5" IsReadOnly="True" 
 													VerticalAlignment="Top" TextWrapping="Wrap" BorderBrush="Transparent"
 													Background="Transparent" BorderThickness="1" TextAlignment="Center"/>

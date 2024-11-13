@@ -92,6 +92,7 @@ public sealed partial class ProblemPage : BindablePage
 					ShellVm.StoryModel.StoryElements[ElementIndex] = problem;
 				}
 			}
+
 			structureBeatsModel.Guid = uuid.ToString();
 			stackPanel.DataContext = structureBeatsModel;
 		}
