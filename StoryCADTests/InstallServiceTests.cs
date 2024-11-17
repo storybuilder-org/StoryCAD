@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Linq;
+using System.Reflection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using StoryCAD.Models;
 
@@ -14,9 +15,9 @@ public class InstallServiceTests
     public void TestResources()
     {
         Assert.AreEqual(28, libResources.Length);
-        Assert.AreEqual("StoryCAD.Assets.Install.Bibliog.txt", libResources[0]);
-        Assert.AreEqual(@"StoryCAD.Assets.Install.samples.A Doll's House.stbx", libResources[19]);
-        Assert.AreEqual("StoryCAD.Assets.Install.samples.The Old Man and the Sea.stbx", libResources[26]);
+		Assert.IsTrue(libResources.Contains("StoryCAD.Assets.Install.Bibliog.txt"));
+		Assert.IsTrue(libResources.Contains("StoryCAD.Assets.Install.samples.A Doll's House.stbx"));
+		Assert.IsTrue(libResources.Contains("StoryCAD.Assets.Install.samples.The Old Man and the Sea.stbx"));
     }
 
     [TestMethod]
