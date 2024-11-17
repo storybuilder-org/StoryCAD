@@ -16,6 +16,7 @@
     <Content Remove="Assets\Install\Lists.ini" />
     <Content Remove="Assets\Install\reports\Character Relationship Description.txt" />
     <Content Remove="Assets\Install\reports\List of Websites.txt" />
+    <Content Remove="Assets\Install\reports\Structure Beats.txt" />
     <Content Remove="Assets\Install\samples\A Doll's House.stbx" />
     <Content Remove="Assets\Install\samples\Danger Calls.stbx" />
     <Content Remove="Assets\Install\samples\Hamlet.stbx" />
@@ -125,6 +126,7 @@
   
 	<PropertyGroup>
 		<WindowsSdkPackageVersion>10.0.22621.38</WindowsSdkPackageVersion>
+		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
 	</PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\NRtfTree\NRtfTree.csproj" />

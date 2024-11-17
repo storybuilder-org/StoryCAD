@@ -1,11 +1,11 @@
 ﻿namespace StoryCAD.Models.Tools;
 
-public class MasterPlotScene
+public class PlotPatternScene
 {
     public string SceneTitle;
     public string Notes;
 
-    public MasterPlotScene(string title)
+    public PlotPatternScene(string title)
     {
         SceneTitle = title;
         Notes = string.Empty;

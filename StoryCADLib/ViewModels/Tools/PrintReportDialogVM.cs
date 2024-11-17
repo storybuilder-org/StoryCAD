@@ -34,6 +34,12 @@ public class PrintReportDialogVM : ObservableRecipient
         get => _createSummary;
         set => SetProperty(ref _createSummary, value);
     }
+    private bool _createStructure;
+    public bool CreateStructure
+    {
+        get => _createStructure;
+        set => SetProperty(ref _createStructure, value);
+    }
     private bool _selectAllProblems;
     public bool SelectAllProblems
     {
@@ -251,8 +257,10 @@ public class PrintReportDialogVM : ObservableRecipient
         Document = new();
         _printPreviewCache = new();
 
-        //Treat each page break as it's own page.
-        foreach (string pageText in (await new PrintReports(this, ShellViewModel.GetModel()).Generate()).Split(@"\PageBreak"))
+        //Treat each page break as its own page.
+        var report = await new PrintReports(this, ShellViewModel.GetModel()).Generate();
+
+		foreach (string pageText in report.Split(@"\PageBreak"))
         {
             //Wrap pages
             string[] Lines = pageText.Split('\n');

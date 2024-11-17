@@ -3,6 +3,7 @@ using System.Text;
 using System.Xml;
 using Windows.Storage;
 using NLog;
+using StoryCAD.Models.Tools;
 
 namespace StoryCAD.DAL;
 
@@ -229,7 +230,7 @@ public class StoryWriter
         _attr.Value = _rec.Notes;
         _overview.Attributes.Append(_attr);
 
-        _elements.AppendChild(_overview);
+		_elements.AppendChild(_overview);
     }
 
     private void ParseProblemElement(StoryElement element)
@@ -303,7 +304,42 @@ public class StoryWriter
         _attr.Value = _rec.Notes;
         _prob.Attributes.Append(_attr);
 
-        _elements.AppendChild(_prob);
+
+		//Structure tab
+		_attr = _xml.CreateAttribute("BoundStructure");
+		_attr.Value = _rec.BoundStructure;
+		_prob.Attributes.Append(_attr);
+
+		_attr = _xml.CreateAttribute("StructureModelTitle");
+		_attr.Value = _rec.StructureTitle;
+        _prob.Attributes.Append(_attr);
+
+        _attr = _xml.CreateAttribute("StructureDescription");
+        _attr.Value = _rec.StructureDescription;
+        _prob.Attributes.Append(_attr);
+
+		XmlNode structureBeatsNode = _xml.CreateElement("StructureBeats");
+        foreach (var beat in _rec.StructureBeats)
+        {
+	        XmlElement beatElement = _xml.CreateElement("Beat");
+
+	        XmlElement titleElement = _xml.CreateElement("Title");
+	        titleElement.AppendChild(_xml.CreateTextNode(beat.Title));
+	        beatElement.AppendChild(titleElement);
+
+	        XmlElement descriptionElement = _xml.CreateElement("Description");
+	        descriptionElement.AppendChild(_xml.CreateTextNode(beat.Description));
+	        beatElement.AppendChild(descriptionElement);
+
+	        XmlElement guidElement = _xml.CreateElement("Guid");
+	        guidElement.AppendChild(_xml.CreateTextNode(beat.Guid));
+	        beatElement.AppendChild(guidElement);
+
+	        structureBeatsNode.AppendChild(beatElement);
+        }
+        _prob.AppendChild(structureBeatsNode);
+
+		_elements.AppendChild(_prob);
     }
 
     private void ParseCharacterElement(StoryElement element)

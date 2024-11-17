@@ -1,0 +1,12 @@
+                               StoryCAD - Structure Beats report
+
+                   ============== Problem Overview =============
+
+    Story Problem:		@ProblemName
+
+    Problem Description:
+
+    @ProblemSource
+
+	                   ============== Structure =============
+					   @RecursiveStructure

@@ -329,7 +329,7 @@ public sealed partial class Shell
 
         Logger.Log(LogLevel.Trace, $"DragLeave entry");
         Logger.Log(LogLevel.Trace, $"DragLeave exit");
-        }
+	}
 
     /// <summary>
     /// Handles the DragItemsCompleted event for TreeViewItem. This event will complete the drag and drop

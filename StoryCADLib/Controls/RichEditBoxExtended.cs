@@ -32,12 +32,12 @@ public class RichEditBoxExtended : RichEditBox
 
     public RichEditBoxExtended()
     {
-        TextChanged += RichEditBoxExtended_TextChanged;
+	    RequestedTheme = ElementTheme.Light;        //Color fix for dark mode
+
+		TextChanged += RichEditBoxExtended_TextChanged;
         TextAlignment = TextAlignment.Left;
         CornerRadius = new(5);
-        if (Ioc.Default.GetRequiredService<Windowing>().RequestedTheme == ElementTheme.Dark) { Foreground = new SolidColorBrush(Colors.LightGray); } //Color fix for dark mode
-    }
-
+	}
 
     public string RtfText
     {
@@ -47,7 +47,7 @@ public class RichEditBoxExtended : RichEditBox
 
     private void RichEditBoxExtended_TextChanged(object sender, RoutedEventArgs e)
     {
-        if (!_lockChangeExecution)
+		if (!_lockChangeExecution)
         {
             _lockChangeExecution = true;
             Document.GetText(TextGetOptions.None, out string text);
@@ -62,19 +62,24 @@ public class RichEditBoxExtended : RichEditBox
             }
             _lockChangeExecution = false;
         }
-    }
+	}
 
-    private static void RtfTextPropertyChanged(DependencyObject dependencyObject,
+	private static void RtfTextPropertyChanged(DependencyObject dependencyObject,
         DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
     {
-        TextSetOptions options = TextSetOptions.FormatRtf | TextSetOptions.ApplyRtfDocumentDefaults;
+		TextSetOptions options = TextSetOptions.FormatRtf | TextSetOptions.ApplyRtfDocumentDefaults;
         RichEditBoxExtended rtb = dependencyObject as RichEditBoxExtended;
         if (rtb == null) return;
-        if (!rtb._lockChangeExecution)
+		if (!rtb._lockChangeExecution)
         {
             rtb._lockChangeExecution = true;
-                
+
+			//Workaround for crash if readonly is true
+			bool isReadOnly = rtb.IsReadOnly;
+			rtb.IsReadOnly = false;
+
             rtb.Document.SetText(options, rtb.RtfText);
+            rtb.IsReadOnly = isReadOnly;
             // get rid of new EOP (cr/lf) somehow
             rtb._lockChangeExecution = false;
         }

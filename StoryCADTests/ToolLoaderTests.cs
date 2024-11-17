@@ -14,7 +14,7 @@ public class ToolLoaderTests
         Assert.AreEqual(5, toolsdata.KeyQuestionsSource.Keys.Count);
         Assert.AreEqual(11, toolsdata.StockScenesSource.Keys.Count);
         Assert.AreEqual(9, toolsdata.TopicsSource.Count);
-        Assert.AreEqual(22, toolsdata.MasterPlotsSource.Count);
+        Assert.AreEqual(18, toolsdata.MasterPlotsSource.Count);
         Assert.AreEqual(36, toolsdata.DramaticSituationsSource.Count);
         //TODO: Test some details (subcounts)
     }

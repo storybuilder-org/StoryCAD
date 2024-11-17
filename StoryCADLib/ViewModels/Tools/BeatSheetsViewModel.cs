@@ -4,7 +4,7 @@ using StoryCAD.Models.Tools;
 
 namespace StoryCAD.ViewModels.Tools;
 
-public class MasterPlotsViewModel : ObservableRecipient
+public class BeatSheetsViewModel : ObservableRecipient
 {
     private ToolsData ToolSource = Ioc.Default.GetService<ToolsData>();
     #region Properties
@@ -16,7 +16,7 @@ public class MasterPlotsViewModel : ObservableRecipient
         set
         {
             SetProperty(ref _PlotPatternName, value);
-            if (MasterPlots.ContainsKey(value)) { PlotPatternNotes = MasterPlots[value].PlotPatternNotes; }
+            if (BeatSheets.ContainsKey(value)) { PlotPatternNotes = BeatSheets[value].PlotPatternNotes; }
         }
     }
 
@@ -33,25 +33,25 @@ public class MasterPlotsViewModel : ObservableRecipient
 
     public readonly ObservableCollection<string> PlotPatternNames;
 
-    public readonly Dictionary<string, PlotPatternModel> MasterPlots;
+    public readonly Dictionary<string, PlotPatternModel> BeatSheets;
 
     #endregion
 
     #region Constructor
 
-    public MasterPlotsViewModel()
+    public BeatSheetsViewModel()
     {
-        List<string> _masterNames = new();
-        MasterPlots = new Dictionary<string, PlotPatternModel>();
-        foreach (PlotPatternModel _plot in ToolSource.MasterPlotsSource)
+        List<string> _beatSheetNames = new();
+        BeatSheets = new Dictionary<string, PlotPatternModel>();
+        foreach (PlotPatternModel _plot in ToolSource.BeatSheetSource)
         {
-            _masterNames.Add(_plot.PlotPatternName);
-            MasterPlots.Add(_plot.PlotPatternName, _plot);
+            _beatSheetNames.Add(_plot.PlotPatternName);
+            BeatSheets.Add(_plot.PlotPatternName, _plot);
         }
 
-        _masterNames.Sort();
+        _beatSheetNames.Sort();
         PlotPatternNames = new ObservableCollection<string>();
-        foreach (string _name in _masterNames) { PlotPatternNames.Add(_name); }
+        foreach (string _name in _beatSheetNames) { PlotPatternNames.Add(_name); }
         PlotPatternName = ToolSource.MasterPlotsSource[0].PlotPatternName;
     }
 

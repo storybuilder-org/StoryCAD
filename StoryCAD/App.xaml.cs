@@ -18,6 +18,7 @@ using StoryCAD.Services.IoC;
 using StoryCAD.Services;
 using StoryCAD.Services.Collaborator;
 using Microsoft.Extensions.DependencyInjection;
+using StoryCAD.Models.Tools;
 
 namespace StoryCAD;
 
@@ -74,6 +75,9 @@ public partial class App
         catch { }
 
         InitializeComponent();
+
+        // Make sure ToolsData is loaded by forcing instantiation
+        serviceProvider.GetRequiredService<ToolsData>();
 
         _log = Ioc.Default.GetService<LogService>();
         Current.UnhandledException += OnUnhandledException;

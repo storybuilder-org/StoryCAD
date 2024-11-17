@@ -4,8 +4,10 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using StoryCAD.Controls;
+using StoryCAD.Models.Tools;
 using StoryCAD.Services.Messages;
 using StoryCAD.Services.Navigation;
+using StoryCAD.ViewModels.Tools;
 
 namespace StoryCAD.ViewModels;
 
@@ -25,7 +27,6 @@ public class ProblemViewModel : ObservableRecipient, INavigable
     // case any ProblemViewModel Premise changes must also be made
     // to the _overviewModel.Premise property.
     private bool _syncPremise;
-
     #endregion
 
     #region Properties
@@ -202,22 +203,91 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         get => _notes;
         set => SetProperty(ref _notes, value);
     }
+    // Problem StructureModelTitle data
 
-    // The ProblemModel is passed when ProblemPage is navigated to
-    private ProblemModel _model;
+    private string _structureModelTitle;
+	/// <summary>
+	/// Name of PlotPatternModel used in structure tab
+	/// </summary>
+    public string StructureModelTitle
+    {
+	    get => _structureModelTitle;
+	    set => SetProperty(ref _structureModelTitle, value);
+	}
+
+	private string _structureDescription;
+	/// <summary>
+	/// Name of PlotPatternModel used in structure tab
+	/// </summary>
+	public string StructureDescription
+	{
+		get => _structureDescription;
+		set
+		{
+			//Set default text
+			if (string.IsNullOrEmpty(value))
+			{
+				value = "Select a story beat sheet above to get started!";
+			}
+			SetProperty(ref _structureDescription, value);
+		}
+	}
+
+	private PlotPatternModel _structureModel;
+    /// <summary>
+    /// PlotPatternModel used in structure tab
+    /// </summary>
+	public PlotPatternModel StructureModel
+    {
+	    get => _structureModel;
+	    set => SetProperty(ref _structureModel, value);
+    }
+
+	// The ProblemModel is passed when ProblemPage is navigated to
+	private ProblemModel _model;
     public ProblemModel Model
     {
         get => _model;
-        set => _model = value;
+        set => SetProperty(ref _model, value);
     }
 
-    public RelayCommand ConflictCommand { get; }
+    private ObservableCollection<StructureBeatViewModel> structureBeats;
+    public ObservableCollection<StructureBeatViewModel> StructureBeats
+    {
+	    get => structureBeats;
+	    set => SetProperty(ref structureBeats, value);
+    }
 
-    #endregion
+	public RelayCommand ConflictCommand { get; }
 
-    #region Methods
+	private string _boundStructure;
+	/// <summary>
+	/// A problem cannot be bound to more than one structure
+	/// </summary>
+	public string BoundStructure
+	{
+		get => _boundStructure;
+		set => SetProperty(ref _boundStructure, value);
+	}
 
-    public void Activate(object parameter)
+	private ObservableCollection<StoryElement> _Scenes;
+	public ObservableCollection<StoryElement> Scenes
+	{
+		get => _Scenes;
+		set => SetProperty(ref _Scenes, value);
+	}
+
+	private ObservableCollection<StoryElement> _problems;
+	public ObservableCollection<StoryElement> Problems
+	{
+		get => _problems;
+		set => SetProperty(ref _problems, value);
+	}
+	#endregion
+
+	#region Methods
+
+	public void Activate(object parameter)
     {
         Model = (ProblemModel)parameter;
         LoadModel();
@@ -232,7 +302,7 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         SaveModel();
     }
 
-    private void OnPropertyChanged(object sender, PropertyChangedEventArgs args)
+    public void OnPropertyChanged(object sender, PropertyChangedEventArgs args)
     {
         if (_changeable)
         {
@@ -261,7 +331,7 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         // Character instances like Protagonist and Antagonist are 
         // read and written as the CharacterModel's StoryElement Guid 
         // string. A binding converter, StringToStoryElementConverter,
-        // provides the UI the corresponding StoryElement itself.f
+        // provides the UI the corresponding StoryElement itself.
         Protagonist = Model.Protagonist ?? string.Empty;
         ProtGoal = Model.ProtGoal;
         ProtMotive = Model.ProtMotive;
@@ -280,10 +350,18 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         _overviewModel = (OverviewModel) model.StoryElements.StoryElementGuids[root];
         ProblemModel storyProblem = (ProblemModel) StoryElement.StringToStoryElement(_overviewModel.StoryProblem);
         if (storyProblem != null) { _syncPremise = true; }
-        else _syncPremise = false; 
-        
-        _changeable = true;
-    }
+        else _syncPremise = false;
+
+		StructureModelTitle = Model.StructureTitle;
+		StructureDescription = Model.StructureDescription;
+		StructureBeats = Model.StructureBeats;
+		BoundStructure = Model.BoundStructure;
+		
+		//Ensure correct set of Elements are loaded for Structure Lists
+		Problems = Ioc.Default.GetService<ShellViewModel>().StoryModel.StoryElements.Problems;
+		Scenes = Ioc.Default.GetService<ShellViewModel>().StoryModel.StoryElements.Scenes;
+		_changeable = true;
+	}
 
     internal void SaveModel()
     {
@@ -308,11 +386,15 @@ public class ProblemViewModel : ObservableRecipient, INavigable
             Model.Method = Method;
             Model.Theme = Theme;
             Model.StoryQuestion = StoryQuestion;
-            Model.Premise = Premise;
-            if (_syncPremise) { _overviewModel.Premise = Premise; }
+			Model.Premise = Premise;
+			Model.StructureTitle = StructureModelTitle;
+			Model.StructureDescription = StructureDescription;
+			Model.StructureBeats = StructureBeats;
+			if (_syncPremise) { _overviewModel.Premise = Premise; }
             Model.Notes = Notes;
-        }
-        catch (Exception ex)
+            Model.BoundStructure = BoundStructure;
+		}
+		catch (Exception ex)
         {
             Ioc.Default.GetRequiredService<LogService>().LogException(LogLevel.Error,
                 ex, $"Failed to save problem model - {ex.Message}");
@@ -356,13 +438,59 @@ public class ProblemViewModel : ObservableRecipient, INavigable
                 break;
         }
     }
+    public async void UpdateSelectedBeat(object sender, SelectionChangedEventArgs e)
+    {
+		if (!_changeable)
+	    {
+		    return;
+	    }
 
-    #endregion
+	    string value = (sender as ComboBox).SelectedValue.ToString();
 
-    #region Control initialization sources
+		//Show dialog if structure has been set previously
+		ContentDialogResult Result;
+	    if (!string.IsNullOrEmpty(StructureModelTitle))
+	    {
+		    Result = await Ioc.Default.GetRequiredService<Windowing>()
+			    .ShowContentDialog(new()
+			    {
+				    Title = "This will clear selected story beats",
+				    PrimaryButtonText = "Confirm",
+				    SecondaryButtonText = "Cancel"
+			    });
+	    }
+	    else { Result = ContentDialogResult.Primary; }
 
-    // ListControls sources
-    public ObservableCollection<string> ProblemTypeList;
+
+	    if (Result == ContentDialogResult.Primary && !string.IsNullOrEmpty(value))
+	    {
+		    //Update value 
+		    SetProperty(ref _structureModelTitle, value);
+
+		    //Resolve master plot model if not empty
+		    PlotPatternModel BeatSheet = Ioc.Default.GetRequiredService<BeatSheetsViewModel>().BeatSheets[value];
+
+			StructureDescription = BeatSheet.PlotPatternNotes;
+
+		    //Set model
+		    StructureBeats.Clear();
+
+		    foreach (var item in BeatSheet.PlotPatternScenes)
+		    {
+			    StructureBeats.Add(new StructureBeatViewModel
+			    {
+				    Title = item.SceneTitle,
+				    Description = item.Notes,
+			    });
+		    }
+	    }
+	}
+	#endregion
+
+	#region Control initialization sources
+
+	// ListControls sources
+	public ObservableCollection<string> ProblemTypeList;
     public ObservableCollection<string> ConflictTypeList;
     public ObservableCollection<string> ProblemCategoryList;
     public ObservableCollection<string> SubjectList;
@@ -400,8 +528,11 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         Premise = string.Empty;
         _syncPremise = false;
         Notes = string.Empty;
-        
-        try
+        StructureModelTitle = string.Empty;
+		StructureDescription = string.Empty;
+        StructureBeats = new();
+        BoundStructure = string.Empty;
+		try
         {
             Dictionary<string, ObservableCollection<string>> _lists = Ioc.Default.GetService<ListData>().ListControlSource;
             ProblemTypeList = _lists["ProblemType"];
@@ -426,5 +557,5 @@ public class ProblemViewModel : ObservableRecipient, INavigable
 
         PropertyChanged += OnPropertyChanged;
     }
-    #endregion
+	#endregion
 }

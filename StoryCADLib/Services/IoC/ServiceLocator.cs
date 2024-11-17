@@ -70,6 +70,7 @@ namespace StoryCAD.Services.IoC
             Services.AddSingleton<KeyQuestionsViewModel>();
             Services.AddSingleton<TopicsViewModel>();
             Services.AddSingleton<MasterPlotsViewModel>();
+            Services.AddSingleton<BeatSheetsViewModel>();
             Services.AddSingleton<StockScenesViewModel>();
             Services.AddSingleton<DramaticSituationsViewModel>();
             Services.AddSingleton<SaveAsViewModel>();

@@ -1,7 +1,9 @@
-﻿using System.Text;
+﻿using System.Drawing;
+using System.Text;
 using NRtfTree.Util;
 using StoryCAD.DAL;
 using System.Reflection;
+using StoryCAD.ViewModels.Tools;
 
 namespace StoryCAD.Services.Reports;
 
@@ -168,14 +170,151 @@ public class ReportFormatter
             if (String.IsNullOrEmpty(problem.Notes)) { sb.Replace("@Notes", ""); }
             else { sb.Replace("@Notes", GetText(problem.Notes)); }
 
-            doc.AddText(sb.ToString());
+			//Structure Tab
+            if (String.IsNullOrEmpty(problem.StructureTitle)) { sb.Replace("@StructTitle", ""); }
+            else { sb.Replace("@StructTitle", GetText(problem.StructureTitle)); }
+
+            if (String.IsNullOrEmpty(problem.StructureDescription)) { sb.Replace("@StructDescription", ""); }
+            else { sb.Replace("@StructDescription", GetText(problem.StructureDescription)); }
+
+            if (problem.StructureBeats.Count == 0) { sb.Replace("@StructBeats", ""); }
+            else
+            {
+				string beats = FormatStructureBeatsElements(problem);
+				sb.Replace("@StructBeats", beats);
+			}
+
+			doc.AddText(sb.ToString());
             doc.AddNewLine();
         }
 
         return doc.GetRtf();
     }
+	public string FormatStoryProblemStructureReport()
+	{
+		var output = new StringBuilder();
 
-    public string FormatCharacterRelationshipReport(StoryElement element)
+		// Retrieve the ShellViewModel once
+		var shellViewModel = Ioc.Default.GetService<ShellViewModel>();
+		if (shellViewModel?.StoryModel?.StoryElements == null)
+		{
+			// StoryElements not available
+			return string.Empty;
+		}
+
+		// Retrieve the Overview element
+		var overview = shellViewModel.StoryModel.StoryElements
+			.OfType<OverviewModel>()
+			.FirstOrDefault(e => e.Type == StoryItemType.StoryOverview);
+
+		if (overview == null)
+		{
+			// Overview element not found
+			return string.Empty;
+		}
+
+		// Retrieve the StoryProblem GUID from Overview
+		var storyProblemGuid = overview.StoryProblem;
+		if (string.IsNullOrEmpty(storyProblemGuid))
+		{
+			// StoryProblem is null or empty
+			return string.Empty;
+		}
+
+		// Resolve the StoryProblem element using GUID
+		if (!Guid.TryParse(storyProblemGuid, out Guid parsedGuid))
+		{
+			// Invalid GUID format
+			return string.Empty;
+		}
+
+		var storyProblem = shellViewModel.StoryModel.StoryElements
+			.OfType<ProblemModel>()
+			.FirstOrDefault(e => e.Uuid.Equals(parsedGuid));
+
+		if (storyProblem == null)
+		{
+			// StoryProblem element not found
+			return string.Empty;
+		}
+
+		// Start building the tree with a separate root heading
+		output.AppendLine("StoryCAD - Story Problem Structure Report");
+
+		// Process each beat in the StoryProblem
+		var processedElements = new HashSet<Guid>(); // Keep track of processed elements
+		foreach (var beat in storyProblem.StructureBeats)
+		{
+			ProcessBeat(beat, output, shellViewModel.StoryModel, 1, processedElements);
+		}
+
+		return output.ToString();
+	}
+
+	private void ProcessBeat(StructureBeatViewModel beat, StringBuilder output, StoryModel storyModel, int indentLevel, HashSet<Guid> processedElements)
+	{
+		var indent = new string('\t', indentLevel);
+		var prefix = "- "; // Prefix to denote a beat
+
+		// If GUID is assigned, resolve and append Element details
+		if (!string.IsNullOrEmpty(beat.Guid) && Guid.TryParse(beat.Guid, out Guid beatGuid))
+		{
+			// Check if the element has already been processed
+			if (processedElements.Contains(beatGuid))
+			{
+				return; // Exit to prevent infinite recursion
+			}
+
+			// Mark the element as processed
+			processedElements.Add(beatGuid);
+
+			var element = storyModel.StoryElements
+				.FirstOrDefault(e => e.Uuid.Equals(beatGuid));
+
+			if (element != null)
+			{
+				// Append Beat Title with prefix
+				output.AppendLine($"{indent}{prefix}{beat.Title}");
+
+				// Append Element Name and Description with additional indentation
+				output.AppendLine($"{indent}   {beat.ElementName}");
+
+				// If the element is a Problem, process its beats recursively
+				if (element.Type == StoryItemType.Problem && element is ProblemModel problemElement)
+				{
+					if (problemElement.StructureBeats != null && problemElement.StructureBeats.Any())
+					{
+						foreach (var subBeat in problemElement.StructureBeats)
+						{
+							ProcessBeat(subBeat, output, storyModel, indentLevel + 1, processedElements);
+						}
+					}
+				}
+				// Append separator with proper indentation
+				output.AppendLine($"{indent}\t-------------");
+			}
+		}
+	}
+	private string FormatStructureBeatsElements(ProblemModel problem)
+    {
+	    StringBuilder beats = new();
+	    foreach (StructureBeatViewModel beat in problem.StructureBeats)
+	    {
+		    beats.AppendLine(beat.Title);
+		    beats.AppendLine(beat.Description);
+
+		    //Don't print element stuff if one is unassigned.
+		    if (!string.IsNullOrEmpty(beat.Guid))
+		    {
+			    beats.AppendLine(beat.ElementName);
+			    beats.AppendLine(beat.ElementDescription);
+		    }
+		    beats.AppendLine("\t\t-------------");
+	    }
+		return beats.ToString();
+	}
+
+	public string FormatCharacterRelationshipReport(StoryElement element)
     {
         CharacterModel character = (CharacterModel)element;
         RtfDocument doc = new(string.Empty);

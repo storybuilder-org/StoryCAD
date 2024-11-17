@@ -33,7 +33,13 @@ public class PrintReports
             _documentText += FormatText(rtf, true);
         }
 
-        if (_vm.ProblemList)
+        if (_vm.CreateStructure)
+        {
+	        rtf = _formatter.FormatStoryProblemStructureReport();
+	        _documentText += FormatText(rtf);
+		}
+
+		if (_vm.ProblemList)
         {
             rtf = _formatter.FormatProblemListReport();
             _documentText += FormatText(rtf);
