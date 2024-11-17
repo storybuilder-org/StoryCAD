@@ -32,41 +32,11 @@ public class RichEditBoxExtended : RichEditBox
 
     public RichEditBoxExtended()
     {
-		//Color fix for dark mode
+	    RequestedTheme = ElementTheme.Light;        //Color fix for dark mode
+
 		TextChanged += RichEditBoxExtended_TextChanged;
         TextAlignment = TextAlignment.Left;
         CornerRadius = new(5);
-        HandleColoringOverrides();
-	}
-
-	/// <summary>
-	/// WinUI3's implementation of RichTextBox is sorta bugged.
-	/// Since rich text can set text color, WinUI doesn't color it
-	/// to handle theming and since all text is implicitly black unless
-	/// otherwise set this makes it impossible to read on dark theme.
-	///
-	/// Yet also conversely does somewhat account for this wierd edge case
-	/// by making black=white and white=black on theming on everything
-	///
-	/// Since StoryCAD has no option to color text, the only winning
-	/// move is not to play and just color the text constantly.
-	/// </summary>
-	public void HandleColoringOverrides()
-    {
-	    if (Ioc.Default.GetRequiredService<Windowing>().RequestedTheme == ElementTheme.Dark)
-	    {
-			/*
-		    RichEditTextDocument document = this.Document;
-
-		    // Select the desired text range (e.g., entire document)
-		    ITextRange textRange = document.GetRange(0, TextConstants.MaxUnitCount);
-
-		    textRange.CharacterFormat.ForegroundColor = Colors.LightGray; // Set the text color*/
-		}
-	    else
-	    {
-		    Foreground = new SolidColorBrush(Colors.Black);
-		}
 	}
 
     public string RtfText
