@@ -88,6 +88,13 @@ public sealed partial class Shell
 			await new Services.Dialogs.Changelog().ShowChangeLog();
         }
 
+        ContentDialog CD = new()
+        {
+			Title = "Need help getting started?",
+			Content = new HelpPage(),
+			PrimaryButtonText = "Close",
+		};
+        await Ioc.Default.GetRequiredService<Windowing>().ShowContentDialog(CD);
         //If StoryCAD was loaded from a .STBX File then instead of showing the Unified menu
         //We will instead load the file instead.
         Logger.Log(LogLevel.Info, $"Filepath to launch {ShellVm.FilePathToLaunch}");

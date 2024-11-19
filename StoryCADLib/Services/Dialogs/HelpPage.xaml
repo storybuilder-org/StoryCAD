@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="StoryCAD.Services.Dialogs.HelpPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:StoryCAD.Services.Dialogs"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+<StackPanel>
+	<TextBlock Text="StoryCAD can be daunting, so here are some resources to help you get started"/>
+		<HyperlinkButton Content="StoryCAD Concepts (Video)" NavigateUri="https://www.youtube.com/watch?v=Oi7G9TEKsro"/>
+		<HyperlinkButton Content="A 5 minute Introduction to StoryCAD" NavigateUri="https://www.youtube.com/watch?v=qFpTI15-q7A"/>
+		<HyperlinkButton Content="Frequently Asked Questions" NavigateUri="https://www.storybuilder.org/faq"/>
+		<HyperlinkButton Content="Tutorial" NavigateUri="https://storybuilder-org.github.io/StoryCAD/Tutorial_Creating_a_Story.html"/>
+		<HyperlinkButton Content="User manual" NavigateUri="https://storybuilder-org.github.io/StoryCAD/"/>
+		<HyperlinkButton Content="Events" NavigateUri="https://storybuilder.org/events/"/>
+
+		<CheckBox Content="Don't show this again" HorizontalAlignment="Center" VerticalAlignment="Bottom"/>
+	</StackPanel>
+</Page>
