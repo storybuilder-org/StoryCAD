@@ -88,7 +88,7 @@
         <CommandBar  Background="{x:Bind Windowing.PrimaryColor, Mode=OneWay}" IsOpen="False">
             <CommandBar.Content>
                 <StackPanel Orientation="Horizontal">
-                    <AutoSuggestBox PlaceholderText="Enter text to search for here" QueryIcon="Find" Width="335" Margin="0,8" QuerySubmitted="Search" TextChanged="ClearNodes" Text="{x:Bind ShellVm.FilterText, Mode=TwoWay}" VerticalAlignment="Center"/>
+                    <AutoSuggestBox PlaceholderText="Enter text to search for here" QueryIcon="Find" Width="330" Margin="0,8" QuerySubmitted="Search" TextChanged="ClearNodes" Text="{x:Bind ShellVm.FilterText, Mode=TwoWay}" VerticalAlignment="Center"/>
                 </StackPanel>
             </CommandBar.Content>
             <CommandBar.PrimaryCommands>
@@ -276,27 +276,28 @@
                                     </MenuFlyoutItem.KeyboardAccelerators>
                                 </MenuFlyoutItem>
                             </MenuFlyoutSubItem>
-                        </MenuFlyout>
-                    </AppBarButton.Flyout>
-                </AppBarButton>
-                <AppBarButton Label="Reports" ToolTipService.ToolTip="Reports Menu" >
-                    <AppBarButton.Icon>
-                        <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xF571;"/>
-                    </AppBarButton.Icon>
-                    <AppBarButton.Flyout>
-                        <MenuFlyout>
-                            <MenuFlyoutItem Text="Print Reports" Command="{x:Bind ShellVm.PrintReportsCommand, Mode=OneWay}">
-                                <MenuFlyoutItem.KeyboardAccelerators>
-                                    <KeyboardAccelerator Key="P" Modifiers="Control"/>
-                                </MenuFlyoutItem.KeyboardAccelerators>
-                            </MenuFlyoutItem>
-                            <MenuFlyoutItem Text="Scrivener Reports" Command="{x:Bind ShellVm.ScrivenerReportsCommand, Mode=OneWay}">
-                                <MenuFlyoutItem.KeyboardAccelerators>
-                                    <KeyboardAccelerator Key="R" Modifiers="Control"/>
-                                </MenuFlyoutItem.KeyboardAccelerators>
-                            </MenuFlyoutItem>
+                            <MenuFlyoutSubItem Text="Reports" ToolTipService.ToolTip="Reports Menu" >
+								<MenuFlyoutSubItem.Icon>
+		                            <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xF571;"/>
+	                            </MenuFlyoutSubItem.Icon>
+								
+								<!-- Create Physical or PDF Report -->
+	                            <MenuFlyoutItem Text="Print Reports"
+	                                            Command="{x:Bind ShellVm.PrintReportsCommand, Mode=OneWay}">
+		                            <MenuFlyoutItem.KeyboardAccelerators>
+			                            <KeyboardAccelerator Key="P" Modifiers="Control"/>
+		                            </MenuFlyoutItem.KeyboardAccelerators>
+	                            </MenuFlyoutItem>
 
-                        </MenuFlyout>
+								<!-- Create Scrivener report-->
+	                            <MenuFlyoutItem Text="Scrivener Reports" 
+	                                            Command="{x:Bind ShellVm.ScrivenerReportsCommand, Mode=OneWay}">
+		                            <MenuFlyoutItem.KeyboardAccelerators>
+			                            <KeyboardAccelerator Key="R" Modifiers="Control"/>
+		                            </MenuFlyoutItem.KeyboardAccelerators>
+	                            </MenuFlyoutItem>
+							</MenuFlyoutSubItem>
+						</MenuFlyout>
                     </AppBarButton.Flyout>
                 </AppBarButton>
                 <AppBarButton Label="Preferences" ToolTipService.ToolTip="Preferences" 
@@ -308,20 +309,32 @@
                         <KeyboardAccelerator Modifiers="Control" Key="P"/>
                     </AppBarButton.KeyboardAccelerators>
                 </AppBarButton>
-				<AppBarButton Label="Report Feedback" ToolTipService.ToolTip="Report Feedback" Click="ButtonBase_OnClick">
+				<AppBarButton Label="Help">
 					<AppBarButton.Icon>
-						<FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xED15;"/>
+						<FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE897;"/>
 					</AppBarButton.Icon>
+					<AppBarButton.Flyout>
+						<MenuFlyout>
+							<!-- Open Manual -->
+							<MenuFlyoutItem Text="StoryCAD Manual" Command="{x:Bind ShellVm.HelpCommand, Mode=OneWay}">
+								<MenuFlyoutItem.KeyboardAccelerators>
+									<KeyboardAccelerator Key="F1"/>
+								</MenuFlyoutItem.KeyboardAccelerators>
+								<MenuFlyoutItem.Icon>
+									<FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE736;"/>
+								</MenuFlyoutItem.Icon>
+							</MenuFlyoutItem>
+
+							<!--Leave Feedback -->
+							<MenuFlyoutItem Text="Report feedback" ToolTipService.ToolTip="Report Feedback" Click="ButtonBase_OnClick">
+								<MenuFlyoutItem.Icon>
+									<FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xED15;"/>
+								</MenuFlyoutItem.Icon>
+							</MenuFlyoutItem>
+						</MenuFlyout>
+					</AppBarButton.Flyout>
 				</AppBarButton>
-				<AppBarButton Label="Help" ToolTipService.ToolTip="Help" Command="{x:Bind ShellVm.HelpCommand, Mode=OneWay}" >
-                    <AppBarButton.KeyboardAccelerators>
-                        <KeyboardAccelerator Key="F1"/>
-                    </AppBarButton.KeyboardAccelerators>
-                    <AppBarButton.Icon>
-                        <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE897;"/>
-                    </AppBarButton.Icon>
-                </AppBarButton>
-            </CommandBar.PrimaryCommands>
+			</CommandBar.PrimaryCommands>
         </CommandBar>
         <!-- SplitView: Navigation Tree and Story Element Pages -->
         <SplitView Grid.Row="1" IsPaneOpen="{x:Bind ShellVm.IsPaneOpen, Mode=TwoWay}"
