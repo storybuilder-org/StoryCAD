@@ -316,7 +316,7 @@
 					<AppBarButton.Flyout>
 						<MenuFlyout>
 							<!-- Open Manual -->
-							<MenuFlyoutItem Text="StoryCAD Manual" Command="{x:Bind ShellVm.HelpCommand, Mode=OneWay}">
+							<MenuFlyoutItem Text="Open StoryCAD Manual" Command="{x:Bind ShellVm.HelpCommand, Mode=OneWay}">
 								<MenuFlyoutItem.KeyboardAccelerators>
 									<KeyboardAccelerator Key="F1"/>
 								</MenuFlyoutItem.KeyboardAccelerators>
