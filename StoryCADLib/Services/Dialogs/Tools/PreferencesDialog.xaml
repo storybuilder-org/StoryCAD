@@ -35,24 +35,41 @@
                 </StackPanel>
             </PivotItem>
             <PivotItem Header="Other" VerticalAlignment="Stretch" VerticalContentAlignment="Stretch">
-                <StackPanel HorizontalAlignment="Center">
-                    <CheckBox Content="Send error logs to Team StoryCAD" Margin="8" HorizontalAlignment="Left" IsChecked="{x:Bind PreferencesVm.ErrorCollectionConsent, Mode=TwoWay}"/>
-                    <CheckBox Content="Send me newsletters about StoryCAD" Margin="8" HorizontalAlignment="Left" IsChecked="{x:Bind PreferencesVm.Newsletter, Mode=TwoWay}"/>
-                    <CheckBox Content="Wrap node names" Margin="8" HorizontalAlignment="Left" Click="ToggleWrapping" Name="TextWrap"/>
-					<CheckBox Content="Advanced logging" Margin="8" HorizontalAlignment="Left" IsChecked="{x:Bind PreferencesVm.AdvancedLogging, Mode=TwoWay}"/>  
+                <Grid HorizontalAlignment="Center">
+					<Grid.RowDefinitions>
+						<RowDefinition Height="Auto"/>
+						<RowDefinition Height="Auto"/>
+						<RowDefinition Height="Auto"/>
+						<RowDefinition Height="Auto"/>
+						<RowDefinition Height="Auto"/>
+					</Grid.RowDefinitions>
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition Width="Auto"/>
+						<ColumnDefinition Width="Auto"/>
+					</Grid.ColumnDefinitions>
+	                <CheckBox Grid.Row="0" Grid.Column="0" Content="Send error logs" Margin="8" HorizontalAlignment="Left" IsChecked="{x:Bind PreferencesVm.ErrorCollectionConsent, Mode=TwoWay}"/>
+					<CheckBox Grid.Row="0" Grid.Column="1" Content="Send me StoryCAD newsletters" Margin="8" HorizontalAlignment="Left" IsChecked="{x:Bind PreferencesVm.Newsletter, Mode=TwoWay}"/>
+                    <CheckBox Grid.Row="1" Grid.Column="0" Content="Wrap node names" Margin="8" HorizontalAlignment="Left" Click="ToggleWrapping" Name="TextWrap"/>
+					<CheckBox Grid.Row="1" Grid.Column="1" Content="Advanced logging" Margin="8" HorizontalAlignment="Left" IsChecked="{x:Bind PreferencesVm.AdvancedLogging, Mode=TwoWay}"/>
+					<CheckBox Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Center"
+					          Content="Show startup page" Margin="8" IsChecked="{x:Bind PreferencesVm.ShowStartupPage, Mode=TwoWay}" />
 
-                    <ComboBox Header="Preferred Theme" HorizontalAlignment="Stretch" SelectedIndex="{x:Bind PreferencesVm.PreferredThemeIndex, Mode=TwoWay}" Margin="8">
+					<ComboBox Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="3" Width="300"
+					          Header="Preferred Theme" HorizontalAlignment="Stretch"
+					          SelectedIndex="{x:Bind PreferencesVm.PreferredThemeIndex, Mode=TwoWay}" Margin="8">
                         <ComboBoxItem Content="Use system theme"/>
                         <ComboBoxItem Content="Light Theme"/>
                         <ComboBoxItem Content="Dark Theme"/>
                     </ComboBox>
-                    <ComboBox Header="Preferred Search Engine" HorizontalAlignment="Stretch" Name="SearchEngine" SelectedIndex="{x:Bind PreferencesVm.SearchEngineIndex, Mode=TwoWay}" Margin="0,4,0,0">
+					<ComboBox Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="4" Width="300"
+					          Header="Preferred Search Engine" HorizontalAlignment="Stretch" 
+					          Name="SearchEngine" SelectedIndex="{x:Bind PreferencesVm.SearchEngineIndex, Mode=TwoWay}" Margin="0,4,0,0">
                         <ComboBoxItem Content="DuckDuckGo"/>
                         <ComboBoxItem Content="Google"/>
                         <ComboBoxItem Content="Bing"/>
                         <ComboBoxItem Content="Yahoo"/>
                     </ComboBox>
-                </StackPanel>
+                </Grid>
             </PivotItem>
             <PivotItem Header="About" VerticalContentAlignment="Center" VerticalAlignment="Stretch">
                 <StackPanel>

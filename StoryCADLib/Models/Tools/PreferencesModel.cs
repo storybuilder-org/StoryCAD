@@ -90,7 +90,11 @@ public class PreferencesModel : ObservableObject
 	/// DateTime of last review
 	/// </summary>
 	public DateTime LastReviewDate;
-  
+
+	/// <summary>
+	/// Should the startup dialog (HelpPage) be shown
+	/// </summary>
+	public bool ShowStartupDialog;
   
 	/// <summary>
 	/// Do we want to log more in depth
@@ -130,8 +134,9 @@ public class PreferencesModel : ObservableObject
 		ThemePreference = ElementTheme.Default; // Use system theme
 		HideRatingPrompt = false;
 		CumulativeTimeUsed = 0;
-    AdvancedLogging = false;
+		AdvancedLogging = false;
 		LastReviewDate = DateTime.MinValue;
+		ShowStartupDialog = true;
 	}
 	#endregion
 }
