@@ -200,7 +200,9 @@ public class PreferencesIo
 					case "AdvancedLogging":
 						_model.AdvancedLogging = _tokens[1] == "True";
 						break;
-
+					case "StartupPage":
+						_model.ShowStartupDialog = _tokens[1] == "True";
+						break;
 				}
 			}
 
@@ -279,6 +281,7 @@ public class PreferencesIo
 		                          CummulativeTimeUsed={_model.CumulativeTimeUsed}
 		                          LastReviewDate={_model.LastReviewDate}
 		                          AdvancedLogging={_model.AdvancedLogging}
+		                          StartupPage={_model.ShowStartupDialog}
 		                          """;
 
 		_newPreferences += (_model.WrapNodeNames == TextWrapping.WrapWholeWords

@@ -186,6 +186,14 @@ public class PreferencesViewModel : ObservableValidator
 	    set => SetProperty(ref _advancedLogging, value);
     }
 
+	// Show startup page.
+    private bool _ShowStartupPage;
+	public bool ShowStartupPage
+    {
+	    get => _ShowStartupPage;
+	    set => SetProperty(ref _ShowStartupPage, value);
+	}
+
 	#endregion
 
 	#region Methods
@@ -221,6 +229,7 @@ public class PreferencesViewModel : ObservableValidator
         PreferredSearchEngine = CurrentModel.PreferredSearchEngine;
         PreferedTheme = CurrentModel.ThemePreference;
         AdvancedLogging = CurrentModel.AdvancedLogging;
+        ShowStartupPage = CurrentModel.ShowStartupDialog;
     }
 
     internal void SaveModel()
@@ -259,6 +268,7 @@ public class PreferencesViewModel : ObservableValidator
             Ioc.Default.GetService<Windowing>().UpdateUIToTheme();
         }
         CurrentModel.ThemePreference = PreferedTheme;
+        CurrentModel.ShowStartupDialog = ShowStartupPage;
     }
 
     /// <summary>
