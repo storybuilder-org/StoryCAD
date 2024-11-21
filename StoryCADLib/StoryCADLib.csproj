@@ -101,20 +101,20 @@
 	</PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.1" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.2" />
     <PackageReference Include="CommunityToolkit.WinUI.UI.Controls.Core" Version="7.1.2" />
-    <PackageReference Include="dotenv.net" Version="3.2.0" />
+    <PackageReference Include="dotenv.net" Version="3.2.1" />
     <PackageReference Include="Elmah.Io.NLog" Version="5.2.49" />
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.2739.15" />
-    <PackageReference Include="MySql.Data" Version="9.0.0" /> 
-    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.6.240829007" />
+    <PackageReference Include="MySql.Data" Version="9.1.0" /> 
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.6.241114003" />
 	<PackageReference Include="NLog" Version="5.3.4" />
-	<PackageReference Include="NLog.Extensions.Logging" Version="5.3.12" />
+	<PackageReference Include="NLog.Extensions.Logging" Version="5.3.14" />
 	<PackageReference Include="Octokit" Version="13.0.1" />
-    <PackageReference Include="WinUIEx" Version="2.4.0" />
-    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.1" />
-    <PackageReference Include="Microsoft.SemanticKernel" Version="1.19.0" />
-    <PackageReference Include="Microsoft.SemanticKernel.Abstractions" Version="1.19.0" />
+    <PackageReference Include="WinUIEx" Version="2.5.0" />
+    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.1742" />
+    <PackageReference Include="Microsoft.SemanticKernel" Version="1.30.0" />
+    <PackageReference Include="Microsoft.SemanticKernel.Abstractions" Version="1.30.0" />
     <PackageReference Include="Microsoft.SemanticKernel.Planners.OpenAI" Version="1.16.0-preview" />
   </ItemGroup>
 
