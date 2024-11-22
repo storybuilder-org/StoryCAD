@@ -85,16 +85,18 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <!-- Command Bar -->
-        <CommandBar  Background="{x:Bind Windowing.PrimaryColor, Mode=OneWay}" IsOpen="False">
+		<CommandBar Background="{x:Bind Windowing.PrimaryColor, Mode=OneWay}" HorizontalAlignment="Stretch"
+		            IsOpen="False" Padding="2,0" Margin="0,0" Width="auto" OverflowButtonVisibility="Collapsed">
             <CommandBar.Content>
                 <StackPanel Orientation="Horizontal">
-                    <AutoSuggestBox PlaceholderText="Enter text to search for here" QueryIcon="Find" Width="335" Margin="0,8" QuerySubmitted="Search" TextChanged="ClearNodes" Text="{x:Bind ShellVm.FilterText, Mode=TwoWay}" VerticalAlignment="Center"/>
+                    <AutoSuggestBox PlaceholderText="Enter text to search for here" QueryIcon="Find" Width="335" Margin="0,8" Padding="0,0"
+                                    QuerySubmitted="Search" TextChanged="ClearNodes" Text="{x:Bind ShellVm.FilterText, Mode=TwoWay}" VerticalAlignment="Center"/>
                 </StackPanel>
             </CommandBar.Content>
             <CommandBar.PrimaryCommands>
-                <AppBarButton Icon="GlobalNavigationButton" Label="Show" ToolTipService.ToolTip="Show/Hide Navigation Pane"
-                              Command="{x:Bind ShellVm.TogglePaneCommand, Mode=OneWay}" />
-                <AppBarButton Icon="Document" Label="File" ToolTipService.ToolTip="File Menu">
+				<AppBarButton  Width="50" IsCompact="True" Icon="GlobalNavigationButton" Label="Show" ToolTipService.ToolTip="Show/Hide Navigation Pane"
+				               Command="{x:Bind ShellVm.TogglePaneCommand, Mode=OneWay}"/>
+				<AppBarButton IsCompact="True" Icon="Document" Label="File" ToolTipService.ToolTip="File Menu" Width="50">
                     <AppBarButton.Flyout>
                         <MenuFlyout>
                             <MenuFlyoutItem Text="Open/Create file" Command="{x:Bind ShellVm.OpenUnifiedCommand}">
@@ -134,13 +136,13 @@
                         </MenuFlyout>
                     </AppBarButton.Flyout>
                 </AppBarButton>
-                <AppBarButton Label="Add" ToolTipService.ToolTip="Add/Remove Story Elements">
+				<AppBarButton IsCompact="True" Label="Add" ToolTipService.ToolTip="Add/Remove Story Elements" Width="50">
                     <AppBarButton.Icon>
                         <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE710;"/>
                     </AppBarButton.Icon>
                     <AppBarButton.Flyout>
                         <MenuFlyout>
-                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.AddFolderVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.AddFolderCommand, Mode=OneWay}" Icon="Folder" Text="Add folder">
+                            <MenuFlyoutItem  Visibility="{x:Bind ShellVm.AddFolderVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.AddFolderCommand, Mode=OneWay}" Icon="Folder" Text="Add folder">
                                 <MenuFlyoutItem.KeyboardAccelerators>
                                     <KeyboardAccelerator Key="F" Modifiers="Menu"/>
                                 </MenuFlyoutItem.KeyboardAccelerators>
@@ -198,7 +200,7 @@
                         </MenuFlyout>
                     </AppBarButton.Flyout>
                 </AppBarButton>
-                <AppBarButton Label="Move" ToolTipService.ToolTip="Move Story Elements" >
+				<AppBarButton Width="50" IsCompact="True" Label="Move" ToolTipService.ToolTip="Move Story Elements" >
                     <AppBarButton.Icon>
                         <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE759;"/>
                     </AppBarButton.Icon>
@@ -235,14 +237,14 @@
                         </Flyout>
                     </AppBarButton.Flyout>
                 </AppBarButton>
-                <AppBarButton Label="Collaborator" ToolTipService.ToolTip="Launch Collaborator"
-                              Visibility="{x:Bind ShellVm.CollaboratorVisibility, Mode=TwoWay}"
-                              Command="{x:Bind ShellVm.CollaboratorCommand, Mode=OneWay}" >
+				<AppBarButton Width="50" IsCompact="True" Label="Collaborator" ToolTipService.ToolTip="Launch Collaborator"
+				              Visibility="{x:Bind ShellVm.CollaboratorVisibility, Mode=TwoWay}"
+				              Command="{x:Bind ShellVm.CollaboratorCommand, Mode=OneWay}" >
                     <AppBarButton.Icon>
                         <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE71B;"/>
                     </AppBarButton.Icon>
                 </AppBarButton>
-                    <AppBarButton Label="Tools" ToolTipService.ToolTip="Tools Menu" >
+				<AppBarButton Width="50" IsCompact="True" Label="Tools" ToolTipService.ToolTip="Tools Menu" >
                     <AppBarButton.Icon>
                         <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE90F;"/>
                     </AppBarButton.Icon>
@@ -279,7 +281,7 @@
                         </MenuFlyout>
                     </AppBarButton.Flyout>
                 </AppBarButton>
-                <AppBarButton Label="Reports" ToolTipService.ToolTip="Reports Menu" >
+				<AppBarButton Width="50" IsCompact="True" Label="Reports" ToolTipService.ToolTip="Reports Menu" >
                     <AppBarButton.Icon>
                         <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xF571;"/>
                     </AppBarButton.Icon>
@@ -299,8 +301,8 @@
                         </MenuFlyout>
                     </AppBarButton.Flyout>
                 </AppBarButton>
-                <AppBarButton Label="Preferences" ToolTipService.ToolTip="Preferences" 
-                              Command="{x:Bind ShellVm.PreferencesCommand, Mode=OneWay}" >
+				<AppBarButton Width="50" IsCompact="True" Label="Preferences" ToolTipService.ToolTip="Preferences" 
+				              Command="{x:Bind ShellVm.PreferencesCommand, Mode=OneWay}" >
                     <AppBarButton.Icon>
                         <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE713;"/>
                     </AppBarButton.Icon>
@@ -308,12 +310,12 @@
                         <KeyboardAccelerator Modifiers="Control" Key="P"/>
                     </AppBarButton.KeyboardAccelerators>
                 </AppBarButton>
-				<AppBarButton Label="Report Feedback" ToolTipService.ToolTip="Report Feedback" Click="ButtonBase_OnClick">
+				<AppBarButton Width="50" IsCompact="True" Label="Report Feedback" ToolTipService.ToolTip="Report Feedback" Click="ButtonBase_OnClick">
 					<AppBarButton.Icon>
 						<FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xED15;"/>
 					</AppBarButton.Icon>
 				</AppBarButton>
-				<AppBarButton Label="Help" ToolTipService.ToolTip="Help" Command="{x:Bind ShellVm.HelpCommand, Mode=OneWay}" >
+				<AppBarButton Width="50" IsCompact="True" Label="Help" ToolTipService.ToolTip="Help" Command="{x:Bind ShellVm.HelpCommand, Mode=OneWay}" >
                     <AppBarButton.KeyboardAccelerators>
                         <KeyboardAccelerator Key="F1"/>
                     </AppBarButton.KeyboardAccelerators>
