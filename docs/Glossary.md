@@ -262,7 +262,7 @@ villain: A character who represents an evil or unwelcome force.  The villain is 
 
 [User-Interface]: User-Interface.png width=600px height=431px
 
-[Menu-Bar]: Menu-Bar.png width=599px height=63px
+[Menu-Bar]: Menu-Bar.png width=665px height=65px
 
 [Menu-Bar-Tooltip]: Menu-Bar-Tooltip.png width=204px height=92px
 
@@ -312,11 +312,15 @@ villain: A character who represents an evil or unwelcome force.  The villain is 
 
 [Problem-Problem-Tab]: Problem-Problem-Tab.png width=700px height=501px
 
-[Problem-Protagonist-Tab]: Problem-Protagonist-Tab.png width=685px height=492px
+[Problem-Protagonist-Tab]: Problem-Protagonist-Tab.png width=629px height=491px
 
 [Problem-Antagonist-Tab]: Problem-Antagonist-Tab.png width=676px height=485px
 
-[Problem-Resolution-Tab]: Problem-Resolution-Tab.png width=675px height=484px
+[Problem-Resolution-Tab]: Problem-Resolution-Tab.png width=612px height=476px
+
+[Image1]: Image1.png width=673px height=463px
+
+[Image1-1]: Image1-1.png width=673px height=463px
 
 [CharRoleTab]: CharRoleTab.png width=680px height=487px
 
@@ -376,7 +380,7 @@ villain: A character who represents an evil or unwelcome force.  The villain is 
 
 [Print-Reports-Button-and-Menu-1]: Print-Reports-Button-and-Menu-1.png width=165px height=161px
 
-[Generate-Reports-Dialog]: Generate-Reports-Dialog.png width=552px height=627px
+[Generate-Reports-Dialog]: Generate-Reports-Dialog.png width=560px height=616px
 
 [Print-Manager]: Print-Manager.png width=680px height=599px
 
