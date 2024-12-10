@@ -1,0 +1,32 @@
+name: Jekyll Build
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3.1' # You can specify the Ruby version you need
+          bundler-cache: true
+
+      - name: Install dependencies
+        run: |
+          # This step is not necessary if you use bundler-cache: true, but it's here for clarity
+          # bundle config path vendor/bundle
+          # bundle install --jobs 4 --retry 3
+
+      - name: Build Jekyll site
+        run: |
+          bundle exec jekyll build
