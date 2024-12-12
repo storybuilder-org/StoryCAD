@@ -6,7 +6,6 @@ using StoryCAD.Services.Messages;
 using static Windows.Data.Xml.Dom.XmlDocument;
 using StoryCAD.ViewModels.Tools;
 
-
 namespace StoryCAD.DAL;
 
 /// <summary>
@@ -38,7 +37,13 @@ public class StoryReader : ObservableRecipient
             string _msg = $"Reading file {file.Path}.";
             _logger.Log(LogLevel.Info, _msg);
             _xml = await LoadFromFileAsync(file);
-            LoadStoryModel();
+            if (_xml == null || _xml.DocumentElement == null)
+            {
+	            // Handle error: the XML is invalid or empty.
+	            throw new InvalidDataException("Error reading document");
+            }
+
+			LoadStoryModel();
             _model.ProjectFile = file;
             _model.ProjectFilename = file.Name;
             _model.ProjectFolder = await file.GetParentAsync();

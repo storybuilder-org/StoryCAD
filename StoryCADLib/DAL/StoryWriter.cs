@@ -22,7 +22,6 @@ public class StoryWriter
 
     /// The in-memory representation of the .stbx file is an XmlDocument
     /// and its various components are all XmlNodes.
-    /// p
     private XmlDocument _xml;
 
     private StorageFile _outFile;
