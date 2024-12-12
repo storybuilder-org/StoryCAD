@@ -860,6 +860,13 @@ public class ShellViewModel : ObservableRecipient
             StoryModel = await _rdr.ReadFile(StoryModel.ProjectFile);
 
             //Check the file we loaded actually has StoryCAD Data.
+            if (StoryModel == null)
+            {
+	            Messenger.Send(new StatusChangedMessage(new("Unable to open file (No Story Elements found)", LogLevel.Warn, true)));
+	            _canExecuteCommands = true;  // unblock other commands
+	            return;
+			}
+
             if (StoryModel.StoryElements.Count == 0)
             {
                 Messenger.Send(new StatusChangedMessage(new("Unable to open file (No Story Elements found)", LogLevel.Warn, true)));
