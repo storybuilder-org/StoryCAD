@@ -3,6 +3,10 @@
 [Issues](https://github.com/StoryBuilder-org/StoryCAD/issues) /
 [Website][26] 
 
+<a href="https://apps.microsoft.com/detail/9PLBNHZV1XM2?mode=direct">
+	<img src="https://get.microsoft.com/images/en-gb%20dark.svg" width="200"/>
+</a>
+
 # About StoryCAD
 
 Our mission is to provide a free open-source resource for writers of all levels who struggle with the complexity of plotted fiction.
@@ -21,16 +25,14 @@ and suspenseful plots, and settings that appeal to the senses.
 * [elmah.io][4]
 * [NRtfTree][5]
 * [Scrivener][6]
-* [SyncFusion][7]
 
-WinUI is the UI Framework for StoryCAD is [source available](https://github.com/microsoft/microsoft-ui-xaml/tree/main/src)
+WinUI is the UI Framework for StoryCAD and is [source available](https://github.com/microsoft/microsoft-ui-xaml/tree/main/src)
 
 Windows Community Toolkit is available under the [MIT License][14].
 
 elmah.io is a commercial cloud-based error logging and uptime monitor service. elmah.io graciously provides a [free subscription][15] to public repository open source projects. We are grateful for their support.
 
-NRtfTree is available under the [GNU GPL V3 License][16]. StoryCAD has changed this software locally to allow
-asynchronous IO.
+NRtfTree is available under the [GNU GPL V3 License][16]. StoryCAD has changed this software locally to allowasynchronous IO.
 
 [Scrivener][6] is a commercial writing application widely used by novelists, screenwriters, playwrights, and short fiction writers. 
 
@@ -81,7 +83,7 @@ We are most grateful for all of them especially those who toil in the arena:
 
 [1]:https://github.com/microsoft/microsoft-ui-xaml
 [2]:https://github.com/microsoft/WindowsAppSDK#readme
-[3]:https://github.com/CommunityToolkit/WindowsCommunityToolkit#readme
+[3]:https://github.com/CommunityToolkit/Windows
 [4]:https://elmah.io/
 [5]:https://github.com/sgolivernet/nrtftree#readme
 [6]:https://www.literatureandlatte.com/scrivener/overview
@@ -89,15 +91,10 @@ We are most grateful for all of them especially those who toil in the arena:
 [8]:https://storybuilder-org.github.io/StoryCAD/
 [9]:https://github.com/StoryBuilder-org/StoryCAD/blob/main/USERNOTES.md
 [10]:https://github.com/StoryBuilder-org/StoryCAD/blob/main/DEVNOTES.md
-[11]:https://visualstudio.microsoft.com/downloads/
-[12]:https://docs.microsoft.com/en-us/windows/apps/windows-app-sdk/stable-channel
 [13]:https://github.com/StoryBuilder-org/StoryCAD/blob/main/CONTRIBUTING.md
 [14]:https://mit-license.org/
 [15]:https://elmah.io/sponsorship/opensource/
 [16]:https://github.com/sgolivernet/nrtftree/blob/master/LICENSE
-[17]:https://www.syncfusion.com/sales/speciallicensingprograms
-[18]:https://github.com/orgs/storybuilder-org/projects/2
-[19]:https://github.com/orgs/StoryCAD-org/projects/3/
 [20]:https://choosealicense.com/licenses/gpl-3.0/
 [21]:https://github.com/StoryBuilder-org/StoryCAD/blob/main/ACKNOWLEDGE.md
 [22]:https://github.com/StoryBuilder-org/StoryCAD/blob/main/PRIVACY_POLICY.TXT
