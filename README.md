@@ -3,7 +3,7 @@
 [Issues](https://github.com/StoryBuilder-org/StoryCAD/issues) /
 [Website][26] 
 
-<a href="https://apps.microsoft.com/detail/9PLBNHZV1XM2?mode=direct">
+<a href="/.github/msbadge.svg">
 	<img src="https://get.microsoft.com/images/en-gb%20dark.svg" width="200"/>
 </a>
 
