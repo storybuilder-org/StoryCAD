@@ -36,6 +36,7 @@ elmah.io is a commercial cloud-based error logging and uptime monitor service. e
 NRtfTree is available under the [GNU GPL V3 License][16]. StoryCAD has changed this software locally to allowasynchronous IO.
 
 [Scrivener][6] is a commercial writing application widely used by novelists, screenwriters, playwrights, and short fiction writers. 
+StoryCAD contains a feature that inserts StoryCAD reports into a Scrivener project using their Scrivener 3 File Formatting Specification API. 
 
 ## Getting Started
 
