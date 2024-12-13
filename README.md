@@ -7,7 +7,7 @@
 
 Our mission is to provide a free open-source resource for writers of all levels who struggle with the complexity of plotted fiction.
 
-StoryCAD is an editor for fiction outlines from which writers can quickly create working drafts. It uses best-practice techniques and offers hundreds of suggestions for better stories. It's CAD for fiction writers.
+StoryCAD is an editor for fiction outlines from which writers can quickly create working drafts. It uses best-practice techniques and offers hundreds of suggestions for better stories. Put simply StoryCAD is CAD for fiction writers.
 
 The elements StoryCAD works with are the elements of good fiction: realistic three 
 dimensional characters who are engaged in meaningful and gripping problems, dramatic 
@@ -23,7 +23,7 @@ and suspenseful plots, and settings that appeal to the senses.
 * [Scrivener][6]
 * [SyncFusion][7]
 
-WinUI has announced plans to make its code available as open source.
+WinUI is the UI Framework for StoryCAD is [source available](https://github.com/microsoft/microsoft-ui-xaml/tree/main/src)
 
 Windows Community Toolkit is available under the [MIT License][14].
 
@@ -33,24 +33,16 @@ NRtfTree is available under the [GNU GPL V3 License][16]. StoryCAD has changed t
 asynchronous IO.
 
 [Scrivener][6] is a commercial writing application widely used by novelists, screenwriters, playwrights, and short fiction writers. 
-StoryCAD contains a feature that inserts StoryCAD reports into a Scrivener project using their Scrivener 3 File Formatting Specification API. 
-
-[Syncfusion WinUI Controls][7] is a commercial toolkit of controls for WinUI 3 projects. StoryCAD uses their 
-ComboBox control extensively. Syncfusion graciously provides an [Open Source Project License][17]. We are grateful 
-for their support.   
-
 
 ## Getting Started
 
-StoryCAD is a duck with its feet in two ponds: the user community
-of writers and the community of developers. 
+StoryCAD is a duck with its feet in two ponds: the user community of writers and the community of developers. 
 
 ### For writers
 
-If you are (or want to be) a fiction writer, welcome! StoryCAD is for you. An introduction to StoryCAD 
-for users is the [User Documentation][9].
+If you are (or want to be) a fiction writer, welcome! StoryCAD is for you. An introduction to StoryCAD for users is the [User Documentation][9].
 
-Our [YouTube videos][28] can help you learn more about StoryCAD.
+Our [YouTube videos][28] will help you learn more about StoryCAD.
 
 You're welcome to try the software for yourself (it's free.) 
 
@@ -58,8 +50,7 @@ You can find complete documentation in the [User Manual][8], which also serves a
 
 ### For Developers
 
-If you're a developer, welcome! A good starting place is to learn what StoryCAD is about, using the 
-same [User Documentation][9].
+If you're a developer, welcome! A good starting place is to learn what StoryCAD is about, using the same [User Documentation][9].
 
 Strictly from the code side, take a look at [Programmer Notes][10].
 
@@ -67,18 +58,11 @@ Strictly from the code side, take a look at [Programmer Notes][10].
 
 You can learn more about StoryCAD from our [YouTube videos][28].
 
-We group StoryCAD's plans into a series of [GitHub Projects][18].
-As StoryCAD approaches product completeness, ourcurrent project
-is to build the StoryCAD community and reach out to more users.
-
-See the [open issues](https://github.com/StoryBuilder-org/StoryCAD/issues) for a complete list of proposed 
-features and known bugs.
+See the [open issues](https://github.com/StoryBuilder-org/StoryCAD/issues) for a complete list of proposed features and known bugs.
 
 ## Contributing
 
-If you would like to join the StoryCAD community and help improve the software,
-here are some ways to [Contribute][13].
-
+If you would like to join the StoryCAD community and help improve the software, here are some ways to [Contribute][13].
 
 ## Copyright & License
 
@@ -92,7 +76,7 @@ Our privacy policy is [here][22].
 ## Acknowledgements
 
 We are grateful beyond words for those who have helped bring StoryCAD back to life as free and open-source software. Some have contributed time, others have contributed ideas, and others have inspired the project.
-We are most grateful for all of them- especially those who toil in the arena:
+We are most grateful for all of them especially those who toil in the arena:
 [Acknowledgements][21].
 
 [1]:https://github.com/microsoft/microsoft-ui-xaml
