@@ -3,9 +3,6 @@
 [Issues](https://github.com/StoryBuilder-org/StoryCAD/issues) /
 [Website][26] 
 
-<a href="/.github/msbadge.svg">
-	<img src="https://get.microsoft.com/images/en-gb%20dark.svg" width="200"/>
-</a>
 
 # About StoryCAD
 
@@ -16,6 +13,10 @@ StoryCAD is an editor for fiction outlines from which writers can quickly create
 The elements StoryCAD works with are the elements of good fiction: realistic three 
 dimensional characters who are engaged in meaningful and gripping problems, dramatic 
 and suspenseful plots, and settings that appeal to the senses.
+
+<a href="https://apps.microsoft.com/detail/9PLBNHZV1XM2?mode=direct">
+	<img src="/.github/msbadge.svg" width="200"/>
+</a>
 
 ## Built With
 
