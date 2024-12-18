@@ -7,8 +7,7 @@ parent: Home
 has_toc: false
 ---
 # Writing with StoryCAD
-<br/>
-<br/>
+Once you're familiar with StoryCAD you can focus less on the tool and more on what you can do with it. Here are some topics to help with that.
 
 [How to Think About Outlining](How_to_Think_About_Outlining.html) <br/><br/>
 [Workflow](Workflow.html) <br/><br/>
