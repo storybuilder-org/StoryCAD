@@ -68,8 +68,8 @@ public class InitVM : ObservableRecipient
     public async void Save()
     {
         //Create paths 
-        System.IO.Directory.CreateDirectory(ProjectDir);
-        System.IO.Directory.CreateDirectory(BackupDir);
+        Directory.CreateDirectory(ProjectDir);
+        Directory.CreateDirectory(BackupDir);
 
         //Save paths
         Preferences.ProjectDirectory = ProjectDir;
@@ -79,9 +79,9 @@ public class InitVM : ObservableRecipient
         Preferences.PreferencesInitialized = true; 
 
         //Updates the file, then rereads into memory.
-        PreferencesIo _prfIo = new(Preferences, State.RootDirectory);
+        PreferencesIo _prfIo = new(Preferences);
         await _prfIo.WritePreferences ();
-        PreferencesIo _loader = new(preference.Model, State.RootDirectory);
+        PreferencesIo _loader = new(preference.Model);
         await _loader.ReadPreferences();
         BackendService _backend = Ioc.Default.GetRequiredService<BackendService>();
         if (preference.Model.RecordPreferencesStatus) { await _backend.PostPreferences(preference.Model); }

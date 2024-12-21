@@ -1,107 +1,183 @@
 ﻿using Microsoft.UI.Xaml;
 using CommunityToolkit.Mvvm.ComponentModel;
+using System.Text.Json.Serialization;
+using Newtonsoft.Json;
 
 
 namespace StoryCAD.Models.Tools;
 
 /// <summary>
-/// PreferencesModel contains product and licensing information, and
-/// (especially) user preferences. 
+/// PreferencesModel contains StoryCAD User preferences.
 /// 
 /// The model is maintained from a Shell Preferences() method
 /// which is launched from a Command tied to a View button, and by
-/// PreferencesViewModel using a ContentDialog as the view. The backing
-/// store is a file, StoryCAD.prf, which is  contained with other installation files.
+/// PreferencesViewModel using a ContentDialog as the view.
 ///
-/// If no .prf file is present, StoryCAD.Services.Install.InstallationService's
-/// InstallFiles() method will create one.
-/// 
+/// The StoryCAD user preferences are stored as Preferences.json within AppState.RootDirectory.
+///
+/// If Preferences.json doesn't exist, it will be created once the user hits done within
+/// the preferences initialisation screen. 
 /// </summary>
 public class PreferencesModel : ObservableObject
 {
 	#region Properties
 
-	//User information
+	/// <summary>
+	/// This is the user's first name
+	/// </summary>
+	[JsonProperty("FirstName")]
 	public string FirstName { get; set; }
+	/// <summary>
+	/// This is the users surname
+	/// </summary>
+	[JsonProperty("LastName")]
 	public string LastName { get; set; }
+
+	/// <summary>
+	/// This is the users email
+	/// (Used to get in contact for errors and newsletter if enabled)
+	/// </summary>
+	[JsonProperty("Email")]
 	public string Email { get; set; }
+
+	/// <summary>
+	/// Disables Elmah.io integration if false
+	/// </summary>
+	[JsonProperty("ElmahConsent")]
 	public bool ErrorCollectionConsent { get; set; }
+
+	/// <summary>
+	/// If set to true user email will be added to the newsletter list
+	/// </summary>
+	[JsonProperty("NewsletterConsent")]
 	public bool Newsletter { get; set; }
 
 	/// <summary>
-	/// This switch tracks whether this is a new 
-	/// installation and if Initialization should be shown.
+	/// This switch tracks whether this is the first time StoryCAD is opened
 	/// </summary>
+	[JsonProperty("Initialized")]
 	public bool PreferencesInitialized { get; set; }
-	public int LastSelectedTemplate { get; set; } //This is the Last Template Selected by the user.
 
+	/// <summary>
+	/// Tracks the last used template, for new outline creation
+	/// </summary>
+	[JsonProperty("LastTemplate")]
+	public int LastSelectedTemplate { get; set; }
 
 	/// <summary>
 	/// This is the users theme preference
-	/// It can be light, dark or default (System theme)
 	/// </summary>
-	public ElementTheme ThemePreference;
+	[JsonProperty("Theme")]
+	public ElementTheme ThemePreference { get; set; }
 
-
+	/// <summary>
+	/// If set to wrap, node names will wrap in the tree.
+	/// If set to disabled, node names will cut off.
+	/// </summary>
+	[JsonProperty("NodeWrap")]
 	public TextWrapping WrapNodeNames { get; set; }
 
-	// Backup Information
+	/// <summary>
+	/// StoryCAD will automatically save the outline if true
+	/// </summary>
+	[JsonProperty("Autosave")]
 	public bool AutoSave { get; set; }
+
+	/// <summary>
+	/// Controls how often autosave is ran
+	/// (Ignored if AutoSave is off)
+	/// </summary>
+	[JsonProperty("AutosaveInterval")]
 	public int AutoSaveInterval { get; set; }
+
+	/// <summary>
+	/// StoryCAD will create a backup of the outline when opened if true
+	/// </summary>
+	[JsonProperty("BackupOnOpen")]
 	public bool BackupOnOpen { get; set; }
+
+	/// <summary>
+	/// StoryCAD will create a backup of the currently opened outline if true.
+	/// </summary>
+	[JsonProperty("TimedBackup")]
 	public bool TimedBackup { get; set; }
+
+	/// <summary>
+	/// Controls timed backup frequency.
+	/// </summary>
+	[JsonProperty("TimedBackupInterval")]
 	public int TimedBackupInterval { get; set; }
 
-	//Directories
-
+	/// <summary>
+	/// Default location where outlines are stored.
+	/// </summary>
+	[JsonProperty("OutlineDirectory")]
 	public string ProjectDirectory { get; set; }
 
+	/// <summary>
+	/// Location where backups are stored if enabled
+	/// </summary>
+	[JsonProperty("BackupDirectory")]
 	public string BackupDirectory { get; set; }
 
 	// Recent files (set automatically)
-	public string LastFile1 { get; set; }
+	public string LastFile1 { get; set; }	
 	public string LastFile2 { get; set; }
 	public string LastFile3 { get; set; }
 	public string LastFile4 { get; set; }
 	public string LastFile5 { get; set; }
 
-	//Version Tracking
+	/// <summary>
+	/// Tracks last version of StoryCAD that was opened
+	/// </summary>
+	[JsonProperty("Version")]
 	public string Version { get; set; }
 
 	// Backend server log status
 	public bool RecordPreferencesStatus { get; set; }  // Last preferences change was logged successfully or not
-	public bool RecordVersionStatus { get; set; }      // Last version change was logged successfully or notx
+	public bool RecordVersionStatus { get; set; }      // Last version change was logged successfully or not
+
+	[JsonProperty("PreferredSearchEngine")]
 	public BrowserType PreferredSearchEngine { get; set; }      // Last version change was logged successfully or not
 
-	// Last version change was logged successfully or not
+	/// <summary>
+	/// Search engine to use.
+	/// </summary>
+	[JsonProperty("SearchEngineIndex")]
 	public int SearchEngineIndex { get; set; }
 
 	/// <summary>
 	/// Hides the rating prompt until the next update
 	/// </summary>
+	[JsonProperty("ShowRatings")]
 	public bool HideRatingPrompt = false;
 
 	/// <summary>
-	/// Total ammount of time StoryCAD has been used/open on the system
+	/// Total amount of time StoryCAD has been used/open on the system
 	/// </summary>
+	[JsonProperty("TimeUsed")]
+
 	public long CumulativeTimeUsed = 0;
 
 	/// <summary>
 	/// DateTime of last review
 	/// </summary>
+	[JsonProperty("LastReview")]
 	public DateTime LastReviewDate;
 
 	/// <summary>
 	/// Should the startup dialog (HelpPage) be shown
 	/// </summary>
+	[JsonProperty("ShowStartupDialog")]
 	public bool ShowStartupDialog;
-  
+
 	/// <summary>
 	/// Do we want to log more in depth
 	/// </summary>
-    public bool AdvancedLogging { get; set; }
+	[JsonProperty("AdvancedLogging")]
+	public bool AdvancedLogging { get; set; }
 	#endregion
-
+		
 	#region Constructor
 	public PreferencesModel()
 	{

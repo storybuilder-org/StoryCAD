@@ -9,7 +9,6 @@ namespace StoryCAD.Services;
 /// </summary>
 public class PreferenceService
 {
-
 	/// <summary>
 	/// User preferences model that's currently loaded.
 	/// </summary>
@@ -25,7 +24,7 @@ public class PreferenceService
 		try
 		{
 			Logger.Log(LogLevel.Info, "Loading Preferences");
-			PreferencesIo loader = new(Model, Ioc.Default.GetRequiredService<AppState>().RootDirectory);
+			PreferencesIo loader = new(Model);
 			await loader.ReadPreferences();
 			Logger.Log(LogLevel.Info, "Loading Preferences");
 		}

@@ -218,7 +218,7 @@ public partial class App
 		Prefs.Model.CumulativeTimeUsed += Convert.ToInt64((DateTime.Now - StartTime).TotalSeconds);
 
 		//Save prefs
-		PreferencesIo prefIO = new(Prefs.Model, State.RootDirectory);
+		PreferencesIo prefIO = new(Prefs.Model);
 		Task.Run(async () => { await prefIO.WritePreferences(); });
 
 		//Purge Collaborator from memory

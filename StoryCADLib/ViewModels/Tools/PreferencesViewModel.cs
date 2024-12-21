@@ -276,7 +276,7 @@ public class PreferencesViewModel : ObservableValidator
     /// </summary>
     public async Task SaveAsync()
     {
-        PreferencesIo _prfIo = new(CurrentModel, Ioc.Default.GetRequiredService<AppState>().RootDirectory);
+        PreferencesIo _prfIo = new(CurrentModel);
         await _prfIo.WritePreferences();
         await _prfIo.ReadPreferences();
         PreferenceService Prefs = Ioc.Default.GetService<PreferenceService>();

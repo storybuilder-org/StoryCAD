@@ -74,7 +74,7 @@ public class BackendService
 
 				// Update Preferences
 				preferences.Version = State.Version;
-				PreferencesIo prefIO = new(preferences, State.RootDirectory);
+				PreferencesIo prefIO = new(preferences);
 				await prefIO.WritePreferences();
 
 				// Post deployment to backend server
@@ -119,7 +119,7 @@ public class BackendService
 			await sql.AddOrUpdatePreferences(conn, id, elmah, newsletter, version);
 			// Indicate we've stored them successfully
 			Preferences.RecordPreferencesStatus = true;
-			PreferencesIo loader = new(Preferences, State.RootDirectory);
+			PreferencesIo loader = new(Preferences);
 			await loader.WritePreferences();
 			log.Log(LogLevel.Info, "Preferences:  elmah=" + elmah + " newsletter=" + newsletter);
 		}
@@ -160,7 +160,7 @@ public class BackendService
 			await sql.AddVersion(conn, id, current, previous);
 			// Indicate we've stored it  successfully
 			Preferences.RecordVersionStatus = true;
-			PreferencesIo loader = new(Preferences, State.RootDirectory);
+			PreferencesIo loader = new(Preferences);
 			await loader.WritePreferences();
 			log.Log(LogLevel.Info, "Version:  Current=" + current + " Previous=" + previous);
 		}
