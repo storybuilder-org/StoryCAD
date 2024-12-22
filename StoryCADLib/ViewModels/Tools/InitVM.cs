@@ -12,7 +12,6 @@ namespace StoryCAD.ViewModels.Tools;
 /// </summary>
 public class InitVM : ObservableRecipient
 {
-    private AppState State = Ioc.Default.GetService<AppState>();
     private PreferenceService preference = Ioc.Default.GetService<PreferenceService>();
 
 
@@ -26,8 +25,8 @@ public class InitVM : ObservableRecipient
     /// </summary>
     public InitVM()
     {
-        ProjectDir = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "StoryCAD", "Projects");
-        BackupDir = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "StoryCAD", "Backups");
+        ProjectDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "StoryCAD", "Projects");
+        BackupDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "StoryCAD", "Backups");
 
         PropertyChanged += OnPropertyChanged;
     }
@@ -79,10 +78,9 @@ public class InitVM : ObservableRecipient
         Preferences.PreferencesInitialized = true; 
 
         //Updates the file, then rereads into memory.
-        PreferencesIo _prfIo = new(Preferences);
-        await _prfIo.WritePreferences ();
-        PreferencesIo _loader = new(preference.Model);
-        await _loader.ReadPreferences();
+        PreferencesIo _prfIo = new();
+        await _prfIo.WritePreferences(Preferences);
+        await _prfIo.ReadPreferences();
         BackendService _backend = Ioc.Default.GetRequiredService<BackendService>();
         if (preference.Model.RecordPreferencesStatus) { await _backend.PostPreferences(preference.Model); }
     }

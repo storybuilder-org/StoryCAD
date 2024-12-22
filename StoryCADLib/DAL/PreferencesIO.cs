@@ -4,10 +4,8 @@ using CommunityToolkit.WinUI.Helpers;
 using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
-using Newtonsoft.Json;
 using StoryCAD.Models.Tools;
 using StoryCAD.Services;
-using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace StoryCAD.DAL;
 /// <summary>
@@ -18,21 +16,11 @@ public class PreferencesIo
 	//TODO: Remove this variable after June 2025.
 	private IList<string> _preferences;
 
-	
-	private PreferencesModel _model;
 	private LogService _log = Ioc.Default.GetService<LogService>();
 	private AppState _state = Ioc.Default.GetService<AppState>();
 
-	/// <summary>
-	/// Constructor
-	/// </summary>
-	/// <param name="model">The PreferencesModel to read/write</param>
-	public PreferencesIo(PreferencesModel model)
-	{
-		_model = model;
-	}
 
-	public async Task ReadPreferences()
+	public async Task<PreferencesModel> ReadPreferences()
 	{
 		try
 		{
@@ -45,15 +33,17 @@ public class PreferencesIo
 				_log.Log(LogLevel.Info, "StoryCAD.prf file found, migrating preferences");
 
 				//Read old preferences file
-				await ReadOldPreferences();
+				PreferencesModel _OldModel = await ReadOldPreferences();
 				_log.Log(LogLevel.Info, "StoryCAD.prf read");
 
 				//Delete old preferences file
 				StorageFile _preferencesFile = await _preferencesFolder.GetFileAsync("StoryCAD.prf");
 				await _preferencesFile.DeleteAsync();
 				_log.Log(LogLevel.Info, "StoryCAD.prf deleted, writing Preferences.json");
-				await WritePreferences();
+				await WritePreferences(_OldModel);
 			}
+
+			PreferencesModel _model = new();
 
 			//Check if we have a preferences.json
 			if (await _preferencesFolder.FileExistsAsync("Preferences.json"))
@@ -65,7 +55,8 @@ public class PreferencesIo
 				_log.Log(LogLevel.Info, $"Preferences Contents: {_preferencesJson}");
 
 				//Update _model, with new values.
-				JsonConvert.PopulateObject(_preferencesJson, _model);
+				_model = JsonSerializer.Deserialize<PreferencesModel>(_preferencesJson);
+				Ioc.Default.GetRequiredService<PreferenceService>().Model = _model;
 				_log.Log(LogLevel.Info, "Preferences deserialized.");
 			}
 			else
@@ -73,34 +64,41 @@ public class PreferencesIo
 				_log.Log(LogLevel.Info, "Preferences.json not found; default created.");
 			}
 
-			//Handle UI Theme stuff
-			Windowing window = Ioc.Default.GetRequiredService<Windowing>();
-			if (_model.ThemePreference == ElementTheme.Default)
+			if (!Ioc.Default.GetRequiredService<AppState>().StoryCADTestsMode)
 			{
-				window.RequestedTheme = Application.Current.RequestedTheme == ApplicationTheme.Dark
-					? ElementTheme.Dark
-					: ElementTheme.Light;
-			}
-			else
-			{
-				window.RequestedTheme = _model.ThemePreference;
+				//Handle UI Theme stuff
+				Windowing window = Ioc.Default.GetRequiredService<Windowing>();
+				if (_model.ThemePreference == ElementTheme.Default)
+				{
+					window.RequestedTheme = Application.Current.RequestedTheme == ApplicationTheme.Dark
+						? ElementTheme.Dark
+						: ElementTheme.Light;
+				}
+				else
+				{
+					window.RequestedTheme = _model.ThemePreference;
+				}
+
+				if (window.RequestedTheme == ElementTheme.Light)
+				{
+					window.PrimaryColor = new SolidColorBrush(Colors.LightGray);
+					window.SecondaryColor = new SolidColorBrush(Colors.Black);
+				}
+				else
+				{
+					window.PrimaryColor = new SolidColorBrush(Colors.DarkSlateGray);
+					window.SecondaryColor = new SolidColorBrush(Colors.White);
+				}
+
 			}
 
-			if (window.RequestedTheme == ElementTheme.Light)
-			{
-				window.PrimaryColor = new SolidColorBrush(Colors.LightGray);
-				window.SecondaryColor = new SolidColorBrush(Colors.Black);
-			}
-			else
-			{
-				window.PrimaryColor = new SolidColorBrush(Colors.DarkSlateGray);
-				window.SecondaryColor = new SolidColorBrush(Colors.White);
-			}
+			return _model;
 		}
 		catch (Exception e)
 		{
 			_log.LogException(LogLevel.Error,e, 
 				$"Preferences read error {e.Data} {e.StackTrace} {e.Message}");
+			return new();
 		}
 	}
 
@@ -109,12 +107,12 @@ public class PreferencesIo
 	/// Deprecated, 
 	/// TODO: Remove this function on or after June 2025 as its deprecated.
 	/// </summary>
-	private async Task ReadOldPreferences()
+	private async Task<PreferencesModel> ReadOldPreferences()
 	{
 		//Tries to read file
 		StorageFolder _preferencesFolder = await StorageFolder.GetFolderFromPathAsync(_state.RootDirectory);
 		IStorageFile _preferencesFile = (IStorageFile)await _preferencesFolder.TryGetItemAsync("StoryCAD.prf");
-
+		PreferencesModel _model = new();
 		if (_preferencesFile != null) //Checks if file exists
 		{
 			_preferences = await FileIO.ReadLinesAsync(_preferencesFile);
@@ -295,12 +293,14 @@ public class PreferencesIo
 			// The file doesn't exist.
 			_log.Log(LogLevel.Info, "StoryCAD.prf not found; default created.");
 		}
+
+		return _model;
 	}
 
 	/// <summary>
 	/// This writes the file to disk using given preferences model.
 	/// </summary>
-	public async Task WritePreferences()
+	public async Task WritePreferences(PreferencesModel Model)
 	{
 		try
 		{
@@ -314,7 +314,8 @@ public class PreferencesIo
 					CreationCollisionOption.ReplaceExisting);
 			//Write file
 			_log.Log(LogLevel.Info, $"Saving Preferences to file {_preferencesFile.Path}");
-			string _newPreferences = JsonConvert.SerializeObject(_model, Formatting.Indented);
+			string _newPreferences = JsonSerializer.Serialize(Model, 
+				new JsonSerializerOptions{ WriteIndented = true});
 
 			//Log stuff
 			_log.Log(LogLevel.Info, $"Serialised preferences as {_newPreferences}");

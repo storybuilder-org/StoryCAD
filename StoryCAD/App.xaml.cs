@@ -153,11 +153,11 @@ public partial class App
         Trace.WriteLine(pathMsg);
 
         //Load user preferences or initialise them.
-        await Preferences.LoadPreferences();
+        await new PreferencesIo().ReadPreferences();
 
-        //Set the launch path in ShellVM so if a File was used to open StoryCAD,
-        //so that the file will be opened when shell has finished loading.
-        Ioc.Default.GetRequiredService<ShellViewModel>().FilePathToLaunch = LaunchPath;
+		//Set the launch path in ShellVM so if a File was used to open StoryCAD,
+		//so that the file will be opened when shell has finished loading.
+		Ioc.Default.GetRequiredService<ShellViewModel>().FilePathToLaunch = LaunchPath;
 
         if (Debugger.IsAttached) {_log.Log(LogLevel.Info, "Bypassing elmah.io as debugger is attached.");}
         else
@@ -218,8 +218,8 @@ public partial class App
 		Prefs.Model.CumulativeTimeUsed += Convert.ToInt64((DateTime.Now - StartTime).TotalSeconds);
 
 		//Save prefs
-		PreferencesIo prefIO = new(Prefs.Model);
-		Task.Run(async () => { await prefIO.WritePreferences(); });
+		PreferencesIo prefIO = new();
+		Task.Run(async () => { await prefIO.WritePreferences(Prefs.Model); });
 
 		//Purge Collaborator from memory
 		Ioc.Default.GetRequiredService<CollaboratorService>().DestroyCollaborator();
