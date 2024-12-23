@@ -37,6 +37,8 @@ public class StoryWriter
 
     public async Task WriteFile(StorageFile output, StoryModel model)
     {
+	    await new StoryIO().WriteStory(output, model);
+	    return;
         _model = model;
         _outFile = output;
         _xml = new XmlDocument();

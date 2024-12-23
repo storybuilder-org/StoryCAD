@@ -10,6 +10,8 @@ public class TrashCanModel : StoryElement
 {
     #region Constructors
     public TrashCanModel(StoryModel model) : base("Deleted Story Elements", StoryItemType.TrashCan, model) { }
+    
+    //TODO: REMOVE WITH STORYREADER
     public TrashCanModel(IXmlNode xn, StoryModel model) : base(xn, model) { }
 
     #endregion

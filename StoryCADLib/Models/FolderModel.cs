@@ -1,13 +1,16 @@
-﻿using Windows.Data.Xml.Dom;
+﻿using System.Text.Json.Serialization;
+using Windows.Data.Xml.Dom;
 
 namespace StoryCAD.Models;
 
 public class FolderModel : StoryElement
 {
-    #region Properties
-
-    private string _notes;
-    public string Notes
+	#region Properties
+	[JsonIgnore]
+	private string _notes;
+	[JsonInclude]
+	[JsonPropertyName("Notes")]
+	public string Notes
     {
         get => _notes;
         set => _notes = value;
