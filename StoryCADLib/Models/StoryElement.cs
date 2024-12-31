@@ -1,4 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.Drawing.Printing;
+using System.Text.Json.Serialization;
 using Windows.Data.Xml.Dom;
 using CommunityToolkit.Mvvm.ComponentModel;
 
@@ -6,26 +8,37 @@ namespace StoryCAD.Models;
 
 public class StoryElement : ObservableObject
 {
-    #region  Properties
+	#region  Properties
+	[JsonIgnore]
+	private readonly Guid _uuid;
 
-    private readonly Guid _uuid;
-    public Guid Uuid => _uuid;
+    [JsonInclude]
+    [JsonPropertyName("GUID")]
+	public Guid Uuid => _uuid;
 
+	[JsonIgnore]
     private string _name;
-    public string Name
+    [JsonInclude]
+    [JsonPropertyName("Name")]
+	public string Name
     {
         get => _name;
         set => _name = value;
     }
 
+	[JsonIgnore]
     private StoryItemType _type;
+	[JsonInclude]
+	[JsonPropertyName("Type")]
     public StoryItemType Type
     {
         get => _type;
         set => _type = value;
     }
 
+	[JsonIgnore]
     private bool _isSelected;
+	[JsonIgnore]
     public bool IsSelected
     {
         get => _isSelected;
@@ -66,16 +79,24 @@ public class StoryElement : ObservableObject
         return _uuid.ToString();
     }
 
-    #endregion
+	#endregion
 
-    #region Constructor 
-
+	#region Constructor 
     public StoryElement(string name, StoryItemType type, StoryModel model)
     {
         _uuid = Guid.NewGuid();
         _name = name;
         _type = type;
         model.StoryElements.Add(this);
+    }
+
+	/// <summary>
+	/// Parameterless constructor for JSON Deserialization.
+	/// Don't remove.
+	/// </summary>
+    public StoryElement()
+    {
+
     }
 
     [SuppressMessage("ReSharper", "InconsistentNaming")] //Some names conflict with class members, and I can't really think of any suitable alternatives.

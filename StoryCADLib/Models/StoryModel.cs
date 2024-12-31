@@ -43,6 +43,22 @@ public class StoryModel
 
 	#region StoryExplorer and NarratorView (TreeView) properties
 
+	/// <summary>
+	/// This is a list of all the StoryNodeItems in the outline
+	/// in a format that is easy to save to JSON.
+	/// This is only updated on saves.
+	/// </summary>
+	[JsonInclude]
+	internal List<PersistableNode> FlattenedExplorerView;
+
+	/// <summary>
+	/// This is a list of all the StoryNodeItems in the outline
+	/// in a format that is easy to save to JSON.
+	/// This is only updated on saves.
+	/// </summary>
+	[JsonInclude]
+	internal List<PersistableNode> FlattenedNarratorView;
+
 	/// A StoryModel is a collection of StoryElements (an overview, problems, characters, settings,
 	/// and scenes, plus containers).
 	[JsonInclude]
@@ -56,11 +72,9 @@ public class StoryModel
 	/// 
 	/// One of these persisted TreeViews is actively bound in the Shell page view to a StoryNodeItem tree 
 	/// based on  whichever of these two TreeView representations is presently selected.
-	[JsonInclude]
-	[JsonPropertyName("Explorer")]
+	[JsonIgnore]
 	public ObservableCollection<StoryNodeItem> ExplorerView;
-	[JsonInclude]
-	[JsonPropertyName("Narrator")]
+	[JsonIgnore]
 	public ObservableCollection<StoryNodeItem> NarratorView;
 	[JsonIgnore]
     public StorageFolder ProjectFolder;

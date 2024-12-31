@@ -20,7 +20,7 @@ public class RelationshipModel
 	[JsonPropertyName("RelationType")]
 	public string RelationType { get; set; }
 
-	[JsonInclude]
+	[JsonInclude] 
 	[JsonPropertyName("Trait")]
 	public string Trait { get; set; }
 

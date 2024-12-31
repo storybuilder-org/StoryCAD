@@ -1,5 +1,8 @@
-﻿namespace StoryCAD.Models;
+﻿using System.Text.Json.Serialization;
 
+namespace StoryCAD.Models;
+
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum StoryItemType
 {
     StoryOverview,

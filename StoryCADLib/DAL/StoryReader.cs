@@ -34,6 +34,7 @@ public class StoryReader : ObservableRecipient
     {
         try
         {
+			return await new StoryIO().ReadStory(file);
             string _msg = $"Reading file {file.Path}.";
             _logger.Log(LogLevel.Info, _msg);
             _xml = await LoadFromFileAsync(file);
