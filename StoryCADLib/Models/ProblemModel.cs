@@ -362,6 +362,7 @@ public class ProblemModel : StoryElement
         StructureDescription = string.Empty;
         BoundStructure = string.Empty;
 	}
+	public ProblemModel(){}
 
 	#endregion
 }

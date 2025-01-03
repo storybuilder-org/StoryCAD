@@ -33,7 +33,6 @@ public class StoryIO
 		string JSON = JsonSerializer.Serialize(model, new JsonSerializerOptions
 		{
 			WriteIndented = true,
-			ReferenceHandler = ReferenceHandler.Preserve,
 			Converters =
 			{
 				new StoryElementConverter(),
@@ -57,9 +56,16 @@ public class StoryIO
 		_logService.Log(LogLevel.Info, $"File read as {JSON}");
 		StoryModel _model = JsonSerializer.Deserialize<StoryModel>(JSON, new JsonSerializerOptions
 		{
-			ReferenceHandler = ReferenceHandler.Preserve,
-			PropertyNameCaseInsensitive = true
+			Converters =
+			{
+				new StoryElementConverter(),
+				new JsonStringEnumConverter()
+			}
 		});
+		
+		//Rebuild tree.
+		_model.ExplorerView = RebuildTree(_model.FlattenedExplorerView, _model.StoryElements, _logService);
+		_model.NarratorView = RebuildTree(_model.FlattenedNarratorView, _model.StoryElements, _logService);
 
 		//Log info about story
 		_logService.Log(LogLevel.Info, $"Model deserialized as {_model.ExplorerView[0].Name}");
@@ -68,9 +74,6 @@ public class StoryIO
 		_logService.Log(LogLevel.Info, $"Version created with {_model.FirstVersion ?? "Pre-JSON"}");
 		_logService.Log(LogLevel.Info, $"Version last saved with {_model.LastVersion ?? "Error"}");
 
-		//Rebuild tree.
-		_model.ExplorerView = RebuildTree(_model.FlattenedExplorerView, _model.StoryElements, _logService);
-		_model.NarratorView = RebuildTree(_model.FlattenedNarratorView, _model.StoryElements, _logService);
 
 		//Update file information
 		_model.ProjectFile = StoryFile;

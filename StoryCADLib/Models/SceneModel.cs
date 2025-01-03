@@ -386,5 +386,9 @@ public class SceneModel : StoryElement
         Notes = string.Empty;
     }
 
+	public SceneModel()
+	{
+
+	}
     #endregion
 }

@@ -283,5 +283,13 @@ public class OverviewModel : StoryElement
         StoryProblem = string.Empty;
     }
 
+	/// <summary>
+	/// JSON Constructor.
+	/// </summary>
+    public OverviewModel()
+    {
+
+    }
+
     #endregion
 }

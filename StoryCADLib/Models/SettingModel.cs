@@ -216,5 +216,6 @@ public class SettingModel : StoryElement
         SettingNames.Add(Name);
     }
 
+	public SettingModel(){}
     #endregion
 }

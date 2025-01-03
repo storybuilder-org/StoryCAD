@@ -61,9 +61,9 @@ public class FileTests
         StoryModel.ProjectFolder = StorageFolder.GetFolderFromPathAsync(StoryModel.ProjectPath).GetAwaiter().GetResult();
         StoryModel.ProjectFile = StoryModel.ProjectFolder.CreateFileAsync("TestProject.stbx", CreationCollisionOption.ReplaceExisting).GetAwaiter().GetResult();
 
-        //Write file.
-        StoryWriter _wtr = Ioc.Default.GetRequiredService<StoryWriter>();
-        _wtr.WriteFile(StoryModel.ProjectFile, StoryModel).GetAwaiter().GetResult();
+		//Write file.
+		StoryIO _storyIO = Ioc.Default.GetRequiredService<StoryIO>();
+		_storyIO.WriteStory(StoryModel.ProjectFile, StoryModel).GetAwaiter().GetResult();
 
         //Sleep to ensure file is written.
         Thread.Sleep(10000);

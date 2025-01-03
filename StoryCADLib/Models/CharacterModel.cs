@@ -661,6 +661,10 @@ public class CharacterModel : StoryElement
         BackStory = string.Empty;
     }
 
+    public CharacterModel()
+    {
+
+    }
     #endregion
 
 }

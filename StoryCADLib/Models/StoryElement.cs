@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using System.Drawing.Printing;
 using System.Text.Json.Serialization;
 using Windows.Data.Xml.Dom;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -10,14 +9,19 @@ public class StoryElement : ObservableObject
 {
 	#region  Properties
 	[JsonIgnore]
-	private readonly Guid _uuid;
+	private Guid _uuid;
 
-    [JsonInclude]
-    [JsonPropertyName("GUID")]
-	public Guid Uuid => _uuid;
+	[JsonInclude]
+	[JsonPropertyName("GUID")]
+	public Guid Uuid
+	{
+		get => _uuid;
+		private set => _uuid = value;
+	}
 
 	[JsonIgnore]
     private string _name;
+
     [JsonInclude]
     [JsonPropertyName("Name")]
 	public string Name

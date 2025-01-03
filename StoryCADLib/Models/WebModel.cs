@@ -38,6 +38,7 @@ public class WebModel : StoryElement
         }
     }
 
+	public WebModel(){}
 	
     //TODO: REMOVE WITH STORYREADER.
     public WebModel(IXmlNode xn, StoryModel model) : base(xn, model)

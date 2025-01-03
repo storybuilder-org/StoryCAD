@@ -31,5 +31,12 @@ public class FolderModel : StoryElement
         Notes = string.Empty;
     }
 
+	/// <summary>
+	/// Json constructor
+	/// </summary>
+    public FolderModel()
+    {
+
+    }
     #endregion
 }
