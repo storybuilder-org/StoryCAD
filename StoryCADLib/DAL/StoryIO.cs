@@ -2,7 +2,9 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Windows.Storage;
+using ABI.Windows.ApplicationModel.Email.DataProvider;
 using Org.BouncyCastle.X509;
+using StoryCAD.Services;
 
 namespace StoryCAD.DAL;
 
@@ -50,6 +52,14 @@ public class StoryIO
 		//Read file
 		_logService.Log(LogLevel.Info, $"Reading Model from disk ({StoryFile.Path})");
 		string JSON = await FileIO.ReadTextAsync(StoryFile);
+
+		//Check if file is legacy
+		if (JSON.Split("\n")[0].Contains("<?xml version=\"1.0\" encoding=\"utf-8\"?>"))
+		{
+			_logService.Log(LogLevel.Info, "File is legacy XML format");
+			MigrateModel(StoryFile);
+		}
+
 		_logService.Log(LogLevel.Info, $"Read file (Length: {JSON.Length})");
 
 		//Deserialize into real story model
@@ -115,7 +125,7 @@ public class StoryIO
 		}
 	}
 
-	public static ObservableCollection<StoryNodeItem> RebuildTree(
+	private static ObservableCollection<StoryNodeItem> RebuildTree(
 		List<PersistableNode> flatNodes,
 		StoryElementCollection storyElements,
 		ILogService logger)
@@ -150,5 +160,22 @@ public class StoryIO
 		return rootCollection;
 	}
 
+	private async void MigrateModel(StorageFile File)
+	{
+		//Read Legacy file
+		_logService.Log(LogLevel.Info, $"Migrating Old STBX File from {File.Path}");
+		LegacyXMLReader reader = new(_logService);
+		StoryModel Old = await reader.ReadFile(File);
+		
+		//Copy legacy file
+		_logService.Log(LogLevel.Info, "Read legacy file");
+		StorageFolder Folder = await StorageFolder.GetFolderFromPathAsync(
+			Ioc.Default.GetRequiredService<PreferenceService>().Model.BackupDirectory);
+		await File.CopyAsync(Folder,File.Name + ".old");
+		_logService.Log(LogLevel.Info, $"Copied legacy file to backup folder ({Folder.Path})");
 
+		//File is now backed up, now migrate to new format
+		await WriteStory(File, Old);
+		_logService.Log(LogLevel.Info, $"Updated legacy file to JSON File");
+	}
 }

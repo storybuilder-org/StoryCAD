@@ -10,7 +10,6 @@ namespace StoryCAD.Services.Reports;
 public class ReportFormatter
 {
     private Dictionary<string, string[]> _templates = new();
-    private StoryReader _rdr;
     private StoryModel _model;
 
     #region Public methods
@@ -863,7 +862,6 @@ public class ReportFormatter
 
     public ReportFormatter() 
     {
-        _rdr = Ioc.Default.GetService<StoryReader>();
         ShellViewModel shell = Ioc.Default.GetService<ShellViewModel>();
         _model = shell.StoryModel;
     }

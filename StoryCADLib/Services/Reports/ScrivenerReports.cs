@@ -12,7 +12,6 @@ namespace StoryCAD.Services.Reports
 
         private StoryModel _model;
         private ScrivenerIo _scrivener;
-        private StoryReader _rdr;
         private ReportFormatter _formatter;
 
         private BinderItem _binderNode;         // Binder root node (BinderItems' parent)
@@ -37,7 +36,6 @@ namespace StoryCAD.Services.Reports
             _scrivener = Ioc.Default.GetService<ScrivenerIo>();
             _scrivener.ScrivenerFile = file;
             _model = model;
-            _rdr = Ioc.Default.GetService<StoryReader>();
             _formatter = new ReportFormatter();
             //_root = root;
             //_misc = miscFolder;
