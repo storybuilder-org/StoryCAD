@@ -2,8 +2,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Windows.Storage;
-using ABI.Windows.ApplicationModel.Email.DataProvider;
-using Org.BouncyCastle.X509;
 using StoryCAD.Services;
 
 namespace StoryCAD.DAL;
@@ -20,8 +18,8 @@ public class StoryIO
 	/// </summary>
 	public async Task WriteStory(StorageFile output, StoryModel model)
 	{
-		_logService.Log(LogLevel.Info, $"Saving Model to disk as {output.Path}  " +
-		                               $"Elements: {model.StoryElements.StoryElementGuids.Count}");
+		_logService.Log(LogLevel.Info, $"Saving Model to disk as {output.Path}  " + 
+				$"Elements: {model.StoryElements.StoryElementGuids.Count}");
 
 		//Save version data
 		model.LastVersion = Ioc.Default.GetRequiredService<AppState>().Version;
@@ -29,7 +27,7 @@ public class StoryIO
 
 		//Flatten trees (solves issues when deserialization)
 		model.FlattenedExplorerView = FlattenTree(model.ExplorerView);
-		model.FlattenedNarratorView = FlattenTree(model.ExplorerView);
+		model.FlattenedNarratorView = FlattenTree(model.NarratorView);
 
 		//Serialise
 		string JSON = JsonSerializer.Serialize(model, new JsonSerializerOptions
@@ -49,50 +47,60 @@ public class StoryIO
 
 	public async Task<StoryModel> ReadStory(StorageFile StoryFile)
 	{
-		//Read file
-		_logService.Log(LogLevel.Info, $"Reading Model from disk ({StoryFile.Path})");
-		string JSON = await FileIO.ReadTextAsync(StoryFile);
-
-		//Check if file is legacy
-		if (JSON.Split("\n")[0].Contains("<?xml version=\"1.0\" encoding=\"utf-8\"?>"))
+		try
 		{
-			_logService.Log(LogLevel.Info, "File is legacy XML format");
-			MigrateModel(StoryFile);
+			//Read file
+			_logService.Log(LogLevel.Info, $"Reading Model from disk ({StoryFile.Path})");
+			string JSON = await FileIO.ReadTextAsync(StoryFile);
+
+			//Check if file is legacy
+			if (JSON.Split("\n")[0].Contains("<?xml version=\"1.0\" encoding=\"utf-8\"?>"))
+			{
+				_logService.Log(LogLevel.Info, "File is legacy XML format");
+				return await MigrateModel(StoryFile);
+			}
+
+			_logService.Log(LogLevel.Info, $"Read file (Length: {JSON.Length})");
+
+			//Deserialize into real story model
+			_logService.Log(LogLevel.Debug, $"File read as {JSON}");
+			StoryModel _model = JsonSerializer.Deserialize<StoryModel>(JSON, new JsonSerializerOptions
+			{
+				Converters =
+				{
+					new StoryElementConverter(),
+					new JsonStringEnumConverter()
+				}
+			});
+
+			//Rebuild tree.
+			_model.ExplorerView = RebuildTree(_model.FlattenedExplorerView, _model.StoryElements, _logService);
+			_model.NarratorView = RebuildTree(_model.FlattenedNarratorView, _model.StoryElements, _logService);
+
+			//Log info about story
+			_logService.Log(LogLevel.Info, $"Model deserialized as {_model.ExplorerView[0].Name}");
+			_logService.Log(LogLevel.Info, $"Model contains as {_model.StoryElements.Count}" +
+			                               $" (Explorer: {_model.ExplorerView.Count}/Narrator{_model.NarratorView.Count})");
+			_logService.Log(LogLevel.Info, $"Version created with {_model.FirstVersion ?? "Pre-JSON"}");
+			_logService.Log(LogLevel.Info, $"Version last saved with {_model.LastVersion ?? "Error"}");
+
+			//Update file information
+			_model.ProjectFile = StoryFile;
+			_model.ProjectFilename = StoryFile.Name;
+			_model.ProjectFolder = await StoryFile.GetParentAsync();
+			_model.ProjectPath = _model.ProjectFolder.Path;
+			_model.ProjectFilename = Path.GetFileName(StoryFile.Path);
+
+			return _model;
+		}
+		catch (Exception ex)
+		{
+			_logService.LogException(LogLevel.Error, ex, 
+				$"Failed to read file ({StoryFile.Path}) " +
+				$"{ex.Message}\n{ex.StackTrace}");
 		}
 
-		_logService.Log(LogLevel.Info, $"Read file (Length: {JSON.Length})");
-
-		//Deserialize into real story model
-		_logService.Log(LogLevel.Info, $"File read as {JSON}");
-		StoryModel _model = JsonSerializer.Deserialize<StoryModel>(JSON, new JsonSerializerOptions
-		{
-			Converters =
-			{
-				new StoryElementConverter(),
-				new JsonStringEnumConverter()
-			}
-		});
-		
-		//Rebuild tree.
-		_model.ExplorerView = RebuildTree(_model.FlattenedExplorerView, _model.StoryElements, _logService);
-		_model.NarratorView = RebuildTree(_model.FlattenedNarratorView, _model.StoryElements, _logService);
-
-		//Log info about story
-		_logService.Log(LogLevel.Info, $"Model deserialized as {_model.ExplorerView[0].Name}");
-		_logService.Log(LogLevel.Info, $"Model contains as {_model.StoryElements.Count}" +
-				$" (Explorer: {_model.ExplorerView.Count}/Narrator{_model.NarratorView.Count})");
-		_logService.Log(LogLevel.Info, $"Version created with {_model.FirstVersion ?? "Pre-JSON"}");
-		_logService.Log(LogLevel.Info, $"Version last saved with {_model.LastVersion ?? "Error"}");
-
-
-		//Update file information
-		_model.ProjectFile = StoryFile;
-		_model.ProjectFilename = StoryFile.Name;
-		_model.ProjectFolder = await StoryFile.GetParentAsync();
-		_model.ProjectPath = _model.ProjectFolder.Path;
-		_model.ProjectFilename = Path.GetFileName(StoryFile.Path);
-
-		return _model;
+		return new();
 	}
 
 
@@ -160,7 +168,7 @@ public class StoryIO
 		return rootCollection;
 	}
 
-	private async void MigrateModel(StorageFile File)
+	private async Task<StoryModel> MigrateModel(StorageFile File)
 	{
 		//Read Legacy file
 		_logService.Log(LogLevel.Info, $"Migrating Old STBX File from {File.Path}");
@@ -176,6 +184,7 @@ public class StoryIO
 
 		//File is now backed up, now migrate to new format
 		await WriteStory(File, Old);
-		_logService.Log(LogLevel.Info, $"Updated legacy file to JSON File");
+		_logService.Log(LogLevel.Info, "Updated legacy file to JSON File");
+		return Old;
 	}
 }

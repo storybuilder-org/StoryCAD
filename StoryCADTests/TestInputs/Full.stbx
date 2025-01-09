@@ -1,0 +1,390 @@
+{
+  "CreatedVersion": null,
+  "LastVersion": "Version: 2.14.6 Built on: 2025-01-08T18:20:21:827Z",
+  "FlattenedExplorerView": [
+    {
+      "Uuid": "e82751cd-9995-4249-9d69-8ecc26051497",
+      "ParentUuid": null
+    },
+    {
+      "Uuid": "c9345e37-c0fb-4699-ae21-7ac7a99ca3f9",
+      "ParentUuid": "e82751cd-9995-4249-9d69-8ecc26051497"
+    },
+    {
+      "Uuid": "1b6d0396-6de5-4557-918a-65c8e63bb6ab",
+      "ParentUuid": "e82751cd-9995-4249-9d69-8ecc26051497"
+    },
+    {
+      "Uuid": "2fecb7cb-4af7-4186-a169-d4c3acbaac9e",
+      "ParentUuid": "e82751cd-9995-4249-9d69-8ecc26051497"
+    },
+    {
+      "Uuid": "f711fa5b-223b-41e2-99e8-bb868f98bb66",
+      "ParentUuid": "e82751cd-9995-4249-9d69-8ecc26051497"
+    },
+    {
+      "Uuid": "a160f2a4-a1c5-4509-84a5-17dcab4ea706",
+      "ParentUuid": "e82751cd-9995-4249-9d69-8ecc26051497"
+    },
+    {
+      "Uuid": "5725c991-8ac1-4e40-a40e-34ba6e7cfcff",
+      "ParentUuid": "e82751cd-9995-4249-9d69-8ecc26051497"
+    },
+    {
+      "Uuid": "11519155-3c30-4dfb-916f-393327c9b248",
+      "ParentUuid": "e82751cd-9995-4249-9d69-8ecc26051497"
+    },
+    {
+      "Uuid": "14d9bff0-8ec2-4ac4-b77e-d999b818f542",
+      "ParentUuid": null
+    }
+  ],
+  "FlattenedNarratorView": [
+    {
+      "Uuid": "e82751cd-9995-4249-9d69-8ecc26051497",
+      "ParentUuid": null
+    },
+    {
+      "Uuid": "c9345e37-c0fb-4699-ae21-7ac7a99ca3f9",
+      "ParentUuid": "e82751cd-9995-4249-9d69-8ecc26051497"
+    },
+    {
+      "Uuid": "1b6d0396-6de5-4557-918a-65c8e63bb6ab",
+      "ParentUuid": "e82751cd-9995-4249-9d69-8ecc26051497"
+    },
+    {
+      "Uuid": "2fecb7cb-4af7-4186-a169-d4c3acbaac9e",
+      "ParentUuid": "e82751cd-9995-4249-9d69-8ecc26051497"
+    },
+    {
+      "Uuid": "f711fa5b-223b-41e2-99e8-bb868f98bb66",
+      "ParentUuid": "e82751cd-9995-4249-9d69-8ecc26051497"
+    },
+    {
+      "Uuid": "a160f2a4-a1c5-4509-84a5-17dcab4ea706",
+      "ParentUuid": "e82751cd-9995-4249-9d69-8ecc26051497"
+    },
+    {
+      "Uuid": "5725c991-8ac1-4e40-a40e-34ba6e7cfcff",
+      "ParentUuid": "e82751cd-9995-4249-9d69-8ecc26051497"
+    },
+    {
+      "Uuid": "11519155-3c30-4dfb-916f-393327c9b248",
+      "ParentUuid": "e82751cd-9995-4249-9d69-8ecc26051497"
+    },
+    {
+      "Uuid": "14d9bff0-8ec2-4ac4-b77e-d999b818f542",
+      "ParentUuid": null
+    }
+  ],
+  "Elements": [
+    {
+      "Type": "StoryOverview",
+      "DateCreated": "2025-01-03",
+      "Author": "jake shaw",
+      "DateModified": "2025-01-08",
+      "StoryIdea": "{\\rtf1\\fbidis\\ansi\\ansicpg1252\\deff0\\nouicompat\\deflang1033{\\fonttbl{\\f0\\fnil\\fcharset0 Segoe UI Variable;}{\\f1\\fnil Segoe UI Variable;}}\r\n{\\colortbl ;\\red0\\green0\\blue0;}\r\n{\\*\\generator Riched20 3.1.0006}\\viewkind4\\uc1 \r\n\\pard\\cf1\\f0\\fs21\\lang2057 Test\\f1\\par\r\n}\r\n",
+      "Concept": "{\\rtf1\\fbidis\\ansi\\ansicpg1252\\deff0\\nouicompat\\deflang1033{\\fonttbl{\\f0\\fnil\\fcharset0 Segoe UI Variable;}{\\f1\\fnil Segoe UI Variable;}}\r\n{\\colortbl ;\\red0\\green0\\blue0;}\r\n{\\*\\generator Riched20 3.1.0006}\\viewkind4\\uc1 \r\n\\pard\\cf1\\f0\\fs21\\lang2057 Test\\f1\\par\r\n\\par\r\n}\r\n",
+      "StoryProblem": "1b6d0396-6de5-4557-918a-65c8e63bb6ab",
+      "Premise": "{\\rtf1\\fbidis\\ansi\\ansicpg1252\\deff0\\nouicompat\\deflang1033{\\fonttbl{\\f0\\fnil\\fcharset0 Segoe UI Variable;}{\\f1\\fnil Segoe UI Variable;}}\r\n{\\colortbl ;\\red0\\green0\\blue0;}\r\n{\\*\\generator Riched20 3.1.0006}\\viewkind4\\uc1 \r\n\\pard\\cf1\\f0\\fs21\\lang2057 Test\\f1\\par\r\n\\par\r\n}\r\n",
+      "StoryType": "Short Story",
+      "StoryGenre": "Mainstream",
+      "Viewpoint": "Limited third person",
+      "ViewpointCharacter": "2fecb7cb-4af7-4186-a169-d4c3acbaac9e",
+      "Voice": "Third person subjective",
+      "LiteraryDevice": "Metafiction",
+      "Tense": "Present",
+      "Style": "Mystery",
+      "StructureNotes": "{\\rtf1\\fbidis\\ansi\\ansicpg1252\\deff0\\nouicompat\\deflang1033{\\fonttbl{\\f0\\fnil\\fcharset0 Segoe UI Variable;}{\\f1\\fnil Segoe UI Variable;}}\r\n{\\colortbl ;\\red0\\green0\\blue0;}\r\n{\\*\\generator Riched20 3.1.0006}\\viewkind4\\uc1 \r\n\\pard\\cf1\\f0\\fs21\\lang2057 Test\\f1\\par\r\n\\par\r\n}\r\n",
+      "Tone": "Indignant",
+      "Notes": "{\\rtf1\\fbidis\\ansi\\ansicpg1252\\deff0\\nouicompat\\deflang1033{\\fonttbl{\\f0\\fnil\\fcharset0 Segoe UI Variable;}{\\f1\\fnil Segoe UI Variable;}}\r\n{\\colortbl ;\\red0\\green0\\blue0;}\r\n{\\*\\generator Riched20 3.1.0006}\\viewkind4\\uc1 \r\n\\pard\\cf1\\f0\\fs21\\lang2057 This is a test outline, it should have everything populated.\\par\r\n(Excludes relationships, bound structures and narrator view)\\f1\\par\r\n}\r\n",
+      "GUID": "e82751cd-9995-4249-9d69-8ecc26051497",
+      "Name": "Full"
+    },
+    {
+      "Type": "TrashCan",
+      "GUID": "14d9bff0-8ec2-4ac4-b77e-d999b818f542",
+      "Name": "Deleted Story Elements"
+    },
+    {
+      "Type": "Folder",
+      "Notes": "",
+      "GUID": "fea07910-5afb-4965-86aa-8e78fc1a33e0",
+      "Name": "Narrative View"
+    },
+    {
+      "Type": "Folder",
+      "Notes": "{\\rtf1\\fbidis\\ansi\\ansicpg1252\\deff0\\nouicompat\\deflang1033{\\fonttbl{\\f0\\fnil\\fcharset0 Segoe UI Variable;}{\\f1\\fnil Segoe UI Variable;}}\r\n{\\colortbl ;\\red0\\green0\\blue0;}\r\n{\\*\\generator Riched20 3.1.0006}\\viewkind4\\uc1 \r\n\\pard\\cf1\\f0\\fs21\\lang2057 Test\\f1\\par\r\n\\par\r\n}\r\n",
+      "GUID": "c9345e37-c0fb-4699-ae21-7ac7a99ca3f9",
+      "Name": "New Folder"
+    },
+    {
+      "Type": "Problem",
+      "ProblemType": "Decision",
+      "ConflictType": "Person vs. Machine",
+      "ProblemCategory": "Complication",
+      "Subject": "Abuse",
+      "ProblemSource": "Event(s) upset the status quo",
+      "StoryQuestion": "{\\rtf1\\fbidis\\ansi\\ansicpg1252\\deff0\\nouicompat\\deflang1033{\\fonttbl{\\f0\\fnil\\fcharset0 Segoe UI Variable;}{\\f1\\fnil Segoe UI Variable;}}\r\n{\\colortbl ;\\red0\\green0\\blue0;}\r\n{\\*\\generator Riched20 3.1.0006}\\viewkind4\\uc1 \r\n\\pard\\cf1\\f0\\fs21\\lang2057 Test\\f1\\par\r\n\\par\r\n}\r\n",
+      "Protagonist": "2fecb7cb-4af7-4186-a169-d4c3acbaac9e",
+      "ProtGoal": "Relief from a false acquisition",
+      "ProtMotive": "Beating a diagnosis or condition",
+      "ProtConflict": "{\\rtf1\\fbidis\\ansi\\ansicpg1252\\deff0\\nouicompat\\deflang1033{\\fonttbl{\\f0\\fnil\\fcharset0 Segoe UI Variable;}{\\f1\\fnil Segoe UI Variable;}}\r\n{\\colortbl ;\\red0\\green0\\blue0;}\r\n{\\*\\generator Riched20 3.1.0006}\\viewkind4\\uc1 \r\n\\pard\\cf1\\f0\\fs21\\lang2057 Test\\f1\\par\r\n\\par\r\n}\r\n",
+      "Antagonist": "2fecb7cb-4af7-4186-a169-d4c3acbaac9e",
+      "AntagGoal": "Relief from danger",
+      "AntagMotive": "Avoiding certain death",
+      "AntagConflict": "{\\rtf1\\fbidis\\ansi\\ansicpg1252\\deff0\\nouicompat\\deflang1033{\\fonttbl{\\f0\\fnil\\fcharset0 Segoe UI Variable;}{\\f1\\fnil Segoe UI Variable;}}\r\n{\\colortbl ;\\red0\\green0\\blue0;}\r\n{\\*\\generator Riched20 3.1.0006}\\viewkind4\\uc1 \r\n\\pard\\cf1\\f0\\fs21\\lang2057 Test\\f1\\par\r\n\\par\r\n}\r\n",
+      "Outcome": "Protagonist declines morally",
+      "Method": "Captures or disarms the opponent",
+      "Theme": "Ambition overcomes poverty.",
+      "Premise": "{\\rtf1\\fbidis\\ansi\\ansicpg1252\\deff0\\nouicompat\\deflang1033{\\fonttbl{\\f0\\fnil\\fcharset0 Segoe UI Variable;}{\\f1\\fnil Segoe UI Variable;}}\r\n{\\colortbl ;\\red0\\green0\\blue0;}\r\n{\\*\\generator Riched20 3.1.0006}\\viewkind4\\uc1 \r\n\\pard\\cf1\\f0\\fs21\\lang2057 Test\\f1\\par\r\n\\par\r\n}\r\n",
+      "Notes": "{\\rtf1\\fbidis\\ansi\\ansicpg1252\\deff0\\nouicompat\\deflang1033{\\fonttbl{\\f0\\fnil\\fcharset0 Segoe UI Variable;}{\\f1\\fnil Segoe UI Variable;}}\r\n{\\colortbl ;\\red0\\green0\\blue0;}\r\n{\\*\\generator Riched20 3.1.0006}\\viewkind4\\uc1 \r\n\\pard\\cf1\\f0\\fs21\\lang2057 Test\\f1\\par\r\n\\par\r\n}\r\n",
+      "StructureTitle": "Save The Cat",
+      "StructureDescription": "Save the Cat is a popular story structure template created by screenwriter Blake Snyder. It consists of 15 key plot points (or \u0022beats\u0022) that help writers craft engaging and well-paced stories. This structure can be applied to novels, screenplays, and other narrative forms. The percentages indicate approximately where (by wordcount) in the  narrative each beat should take place.",
+      "StructureBeats": [
+        {
+          "Title": "Opening Image (0-1%)",
+          "Description": "The story begins by painting a picture of the protagonist\u0027s world before the adventure starts. This scene sets the tone, mood, and style of the story, offering a glimpse into the protagonist\u0027s current state of mind and foreshadowing her story arc.",
+          "Guid": null,
+          "ElementName": "No element Selected",
+          "ElementDescription": "Select an element by clicking show Problems/Scenes and dragging it here",
+          "ElementIcon": "Cancel"
+        },
+        {
+          "Title": "Theme Stated: 5%",
+          "Description": "This beat typically occurs early in the story. A character, often not the main protagonist, states the theme or central message of the story, usually in a way that the protagonist doesn\u0027t fully grasp yet.",
+          "Guid": null,
+          "ElementName": "No element Selected",
+          "ElementDescription": "Select an element by clicking show Problems/Scenes and dragging it here",
+          "ElementIcon": "Cancel"
+        },
+        {
+          "Title": "Setup: 1-10%",
+          "Description": "This section introduces the protagonist\u0027s world in more detail, revealing their daily life, relationships, and any existing problems. It establishes the status quo and often hints at the protagonist\u0027s flaws or areas for growth. Supporting characters are introduced, and the stage is set for the upcoming adventure.",
+          "Guid": null,
+          "ElementName": "No element Selected",
+          "ElementDescription": "Select an element by clicking show Problems/Scenes and dragging it here",
+          "ElementIcon": "Cancel"
+        },
+        {
+          "Title": "Catalyst: 10%",
+          "Description": "Also known as the inciting incident. A significant event disrupts the protagonist\u0027s world. This forces the character out of their comfort zone and sets the main story in motion. It could be a breakup, a death, an invitation, or any event that significantly alters the protagonist\u0027s course.",
+          "Guid": null,
+          "ElementName": "No element Selected",
+          "ElementDescription": "Select an element by clicking show Problems/Scenes and dragging it here",
+          "ElementIcon": "Cancel"
+        },
+        {
+          "Title": "Debate: 10-20%",
+          "Description": "Following the catalyst, the protagonist struggles with the decision to act. This is often an internal struggle where they question whether to accept the call to adventure. The character may resist change, longing for things to return to normal. Sometimes, a friend or mentor offers advice that the protagonist initially resists. This beat is similar to but less direct than the Refusal of the Call in the Hero\u0027s Journey.",
+          "Guid": null,
+          "ElementName": "No element Selected",
+          "ElementDescription": "Select an element by clicking show Problems/Scenes and dragging it here",
+          "ElementIcon": "Cancel"
+        },
+        {
+          "Title": "Break into Two: 20%",
+          "Description": "This marks the end of Act I and the beginning of Act II. The protagonist makes the choice to embark on their journey or face the challenge presented. They commit to a new goal or course of action, even if the path ahead is uncertain and fraught with obstacles.",
+          "Guid": null,
+          "ElementName": "No element Selected",
+          "ElementDescription": "Select an element by clicking show Problems/Scenes and dragging it here",
+          "ElementIcon": "Cancel"
+        },
+        {
+          "Title": "B Story: 22%",
+          "Description": "This beat typically introduces a secondary storyline, often involving a new relationship or character that will play a crucial role in the protagonist\u0027s journey.",
+          "Guid": null,
+          "ElementName": "No element Selected",
+          "ElementDescription": "Select an element by clicking show Problems/Scenes and dragging it here",
+          "ElementIcon": "Cancel"
+        },
+        {
+          "Title": "Fun and Games: 20-50%",
+          "Description": "This beat usually comprises the first half of Act II. It\u0027s where the premise of the story is explored, and the protagonist faces various challenges and obstacles related to their new goal.",
+          "Guid": null,
+          "ElementName": "No element Selected",
+          "ElementDescription": "Select an element by clicking show Problems/Scenes and dragging it here",
+          "ElementIcon": "Cancel"
+        },
+        {
+          "Title": "Midpoint: 50%",
+          "Description": "The midpoint marks a significant turning point in the story. It often involves a major event that raises the stakes and changes the direction of the narrative.",
+          "Guid": null,
+          "ElementName": "No element Selected",
+          "ElementDescription": "Select an element by clicking show Problems/Scenes and dragging it here",
+          "ElementIcon": "Cancel"
+        },
+        {
+          "Title": "Bad Guys Close In: 50-75%",
+          "Description": "The antagonistic forces (which could be literal bad guys, internal conflicts, or challenging circumstances) gain ground. The protagonist faces increasing pressure and obstacles as they approach the climax of the story.",
+          "Guid": null,
+          "ElementName": "No element Selected",
+          "ElementDescription": "Select an element by clicking show Problems/Scenes and dragging it here",
+          "ElementIcon": "Cancel"
+        },
+        {
+          "Title": "All Is Lost: 75%",
+          "Description": "At this point in the story, the protagonist experiences a major setback or loss. It\u0027s their lowest moment, where everything seems to have fallen apart. This beat represents the greatest challenge to the protagonist\u0027s goal or mission.",
+          "Guid": null,
+          "ElementName": "No element Selected",
+          "ElementDescription": "Select an element by clicking show Problems/Scenes and dragging it here",
+          "ElementIcon": "Cancel"
+        },
+        {
+          "Title": "Dark Night of the Soul: 75-80%",
+          "Description": "Following the \u0022All Is Lost\u0022 moment, the protagonist enters a period of deep reflection. This beat shows how the character has changed throughout the story and often involves a realization of the theme. It\u0027s a moment of introspection where the protagonist may finally learn their lesson or understand what truly matters.",
+          "Guid": null,
+          "ElementName": "No element Selected",
+          "ElementDescription": "Select an element by clicking show Problems/Scenes and dragging it here",
+          "ElementIcon": "Cancel"
+        },
+        {
+          "Title": "Break into Three: 80%",
+          "Description": "This beat marks the beginning of Act III. The protagonist experiences an epiphany, finally realizing what they must do to resolve their situation. Symbolically, they are reborn as an improved version of themselves, armed with resolve and new self-awareness.",
+          "Guid": null,
+          "ElementName": "No element Selected",
+          "ElementDescription": "Select an element by clicking show Problems/Scenes and dragging it here",
+          "ElementIcon": "Cancel"
+        },
+        {
+          "Title": "Finale: 80-99%",
+          "Description": "The finale is where the protagonist faces the main conflict head-on, armed with the lessons and growth they\u0027ve experienced throughout the story. This climactic sequence showcases the protagonist\u0027s transformation and resolution of the central conflict.",
+          "Guid": null,
+          "ElementName": "No element Selected",
+          "ElementDescription": "Select an element by clicking show Problems/Scenes and dragging it here",
+          "ElementIcon": "Cancel"
+        },
+        {
+          "Title": "Final Image: 99-100%",
+          "Description": "The story concludes with a scene that mirrors or contrasts with the opening image. This final snapshot demonstrates how much the protagonist and their world have changed as a result of the journey, bringing the story full circle.",
+          "Guid": null,
+          "ElementName": "No element Selected",
+          "ElementDescription": "Select an element by clicking show Problems/Scenes and dragging it here",
+          "ElementIcon": "Cancel"
+        }
+      ],
+      "BoundStructure": "",
+      "GUID": "1b6d0396-6de5-4557-918a-65c8e63bb6ab",
+      "Name": "New Problem"
+    },
+    {
+      "Type": "Character",
+      "Role": "Adman",
+      "StoryRole": "Supporting Role",
+      "Archetype": "Shapeshifter",
+      "CharacterSketch": "{\\rtf1\\fbidis\\ansi\\ansicpg1252\\deff0\\nouicompat\\deflang1033{\\fonttbl{\\f0\\fnil\\fcharset0 Segoe UI Variable;}{\\f1\\fnil Segoe UI Variable;}}\r\n{\\colortbl ;\\red0\\green0\\blue0;}\r\n{\\*\\generator Riched20 3.1.0006}\\viewkind4\\uc1 \r\n\\pard\\cf1\\f0\\fs21\\lang2057 Test\\f1\\par\r\n\\par\r\n}\r\n",
+      "Age": "Test",
+      "Sex": "Test",
+      "Eyes": "Brown",
+      "Hair": "Black",
+      "Weight": "Test",
+      "CharHeight": "Test",
+      "Build": "Muscular",
+      "Complexion": "Fair",
+      "Race": "African",
+      "Nationality": "Albania",
+      "Health": "Test",
+      "PhysNotes": "{\\rtf1\\fbidis\\ansi\\ansicpg1252\\deff0\\nouicompat\\deflang1033{\\fonttbl{\\f0\\fnil\\fcharset0 Segoe UI Variable;}{\\f1\\fnil Segoe UI Variable;}}\r\n{\\colortbl ;\\red0\\green0\\blue0;}\r\n{\\*\\generator Riched20 3.1.0006}\\viewkind4\\uc1 \r\n\\pard\\cf1\\f0\\fs21\\lang2057 Test\\f1\\par\r\n\\par\r\n}\r\n",
+      "Appearance": "{\\rtf1\\fbidis\\ansi\\ansicpg1252\\deff0\\nouicompat\\deflang1033{\\fonttbl{\\f0\\fnil\\fcharset0 Segoe UI Variable;}{\\f1\\fnil Segoe UI Variable;}}\r\n{\\colortbl ;\\red0\\green0\\blue0;}\r\n{\\*\\generator Riched20 3.1.0006}\\viewkind4\\uc1 \r\n\\pard\\cf1\\f0\\fs21\\lang2057 Test\\f1\\par\r\n\\par\r\n}\r\n",
+      "RelationshipList": [],
+      "Economic": "{\\rtf1\\fbidis\\ansi\\ansicpg1252\\deff0\\nouicompat\\deflang1033{\\fonttbl{\\f0\\fnil\\fcharset0 Segoe UI Variable;}{\\f1\\fnil Segoe UI Variable;}}\r\n{\\colortbl ;\\red0\\green0\\blue0;}\r\n{\\*\\generator Riched20 3.1.0006}\\viewkind4\\uc1 \r\n\\pard\\cf1\\f0\\fs21\\lang2057 Test\\f1\\par\r\n\\par\r\n}\r\n",
+      "Education": "{\\rtf1\\fbidis\\ansi\\ansicpg1252\\deff0\\nouicompat\\deflang1033{\\fonttbl{\\f0\\fnil\\fcharset0 Segoe UI Variable;}{\\f1\\fnil Segoe UI Variable;}}\r\n{\\colortbl ;\\red0\\green0\\blue0;}\r\n{\\*\\generator Riched20 3.1.0006}\\viewkind4\\uc1 \r\n\\pard\\cf1\\f0\\fs21\\lang2057 Test\\f1\\par\r\n\\par\r\n}\r\n",
+      "Ethnic": "{\\rtf1\\fbidis\\ansi\\ansicpg1252\\deff0\\nouicompat\\deflang1033{\\fonttbl{\\f0\\fnil\\fcharset0 Segoe UI Variable;}{\\f1\\fnil Segoe UI Variable;}}\r\n{\\colortbl ;\\red0\\green0\\blue0;}\r\n{\\*\\generator Riched20 3.1.0006}\\viewkind4\\uc1 \r\n\\pard\\cf1\\f0\\fs21\\lang2057 Test\\f1\\par\r\n\\par\r\n}\r\n",
+      "Religion": "{\\rtf1\\fbidis\\ansi\\ansicpg1252\\deff0\\nouicompat\\deflang1033{\\fonttbl{\\f0\\fnil\\fcharset0 Segoe UI Variable;}{\\f1\\fnil Segoe UI Variable;}}\r\n{\\colortbl ;\\red0\\green0\\blue0;}\r\n{\\*\\generator Riched20 3.1.0006}\\viewkind4\\uc1 \r\n\\pard\\cf1\\f0\\fs21\\lang2057 Test\\f1\\par\r\n\\par\r\n}\r\n",
+      "Enneagram": "Perfectionist",
+      "Intelligence": "Boorish",
+      "Values": "Courage",
+      "Abnormality": "Depressive",
+      "Focus": "Control",
+      "PsychNotes": "{\\rtf1\\fbidis\\ansi\\ansicpg1252\\deff0\\nouicompat\\deflang1033{\\fonttbl{\\f0\\fnil\\fcharset0 Segoe UI Variable;}{\\f1\\fnil Segoe UI Variable;}}\r\n{\\colortbl ;\\red0\\green0\\blue0;}\r\n{\\*\\generator Riched20 3.1.0006}\\viewkind4\\uc1 \r\n\\pard\\cf1\\f0\\fs21\\lang2057 Test\\f1\\par\r\n\\par\r\n}\r\n",
+      "Adventureousness": "Test",
+      "Aggression": "Test",
+      "Confidence": "Test",
+      "Conscientiousness": "Test",
+      "Creativity": "Test",
+      "Dominance": "Test",
+      "Enthusiasm": "Test",
+      "Assurance": "Test",
+      "Sensitivity": "Test",
+      "Shrewdness": "Test",
+      "Sociability": "Test",
+      "Stability": "Test",
+      "Notes": "{\\rtf1\\fbidis\\ansi\\ansicpg1252\\deff0\\nouicompat\\deflang1033{\\fonttbl{\\f0\\fnil\\fcharset0 Segoe UI Variable;}{\\f1\\fnil Segoe UI Variable;}}\r\n{\\colortbl ;\\red0\\green0\\blue0;}\r\n{\\*\\generator Riched20 3.1.0006}\\viewkind4\\uc1 \r\n\\pard\\cf1\\f0\\fs21\\lang2057 Test\\f1\\par\r\n\\par\r\n}\r\n",
+      "TraitList": [
+        "(Other) Test"
+      ],
+      "Flaw": "{\\rtf1\\fbidis\\ansi\\ansicpg1252\\deff0\\nouicompat\\deflang1033{\\fonttbl{\\f0\\fnil Segoe UI Variable;}}\r\n{\\colortbl ;\\red0\\green0\\blue0;}\r\n{\\*\\generator Riched20 3.1.0006}\\viewkind4\\uc1 \r\n\\pard\\cf1\\f0\\fs21\\lang2057 Cracking under pressure\\par\r\n}\r\n",
+      "BackStory": "{\\rtf1\\fbidis\\ansi\\ansicpg1252\\deff0\\nouicompat\\deflang1033{\\fonttbl{\\f0\\fnil\\fcharset0 Segoe UI Variable;}{\\f1\\fnil Segoe UI Variable;}}\r\n{\\colortbl ;\\red0\\green0\\blue0;}\r\n{\\*\\generator Riched20 3.1.0006}\\viewkind4\\uc1 \r\n\\pard\\cf1\\f0\\fs21\\lang2057 Test\\f1\\par\r\n\\par\r\n}\r\n",
+      "GUID": "2fecb7cb-4af7-4186-a169-d4c3acbaac9e",
+      "Name": "New Character"
+    },
+    {
+      "Type": "Setting",
+      "Locale": "Aboard plane",
+      "Season": "Late Summer",
+      "Period": "Test",
+      "Lighting": "Test",
+      "Weather": "Test",
+      "Temperature": "Test",
+      "Props": "Test",
+      "Summary": "{\\rtf1\\fbidis\\ansi\\ansicpg1252\\deff0\\nouicompat\\deflang1033{\\fonttbl{\\f0\\fnil\\fcharset0 Segoe UI Variable;}{\\f1\\fnil Segoe UI Variable;}}\r\n{\\colortbl ;\\red0\\green0\\blue0;}\r\n{\\*\\generator Riched20 3.1.0006}\\viewkind4\\uc1 \r\n\\pard\\cf1\\f0\\fs21\\lang2057 Test\\f1\\par\r\n\\par\r\n}\r\n",
+      "Sights": "{\\rtf1\\fbidis\\ansi\\ansicpg1252\\deff0\\nouicompat\\deflang1033{\\fonttbl{\\f0\\fnil\\fcharset0 Segoe UI Variable;}{\\f1\\fnil Segoe UI Variable;}}\r\n{\\colortbl ;\\red0\\green0\\blue0;}\r\n{\\*\\generator Riched20 3.1.0006}\\viewkind4\\uc1 \r\n\\pard\\cf1\\f0\\fs21\\lang2057 Test\\f1\\par\r\n\\par\r\n}\r\n",
+      "Sounds": "{\\rtf1\\fbidis\\ansi\\ansicpg1252\\deff0\\nouicompat\\deflang1033{\\fonttbl{\\f0\\fnil\\fcharset0 Segoe UI Variable;}{\\f1\\fnil Segoe UI Variable;}}\r\n{\\colortbl ;\\red0\\green0\\blue0;}\r\n{\\*\\generator Riched20 3.1.0006}\\viewkind4\\uc1 \r\n\\pard\\cf1\\f0\\fs21\\lang2057 Test\\f1\\par\r\n\\par\r\n}\r\n",
+      "Touch": "{\\rtf1\\fbidis\\ansi\\ansicpg1252\\deff0\\nouicompat\\deflang1033{\\fonttbl{\\f0\\fnil\\fcharset0 Segoe UI Variable;}{\\f1\\fnil Segoe UI Variable;}}\r\n{\\colortbl ;\\red0\\green0\\blue0;}\r\n{\\*\\generator Riched20 3.1.0006}\\viewkind4\\uc1 \r\n\\pard\\cf1\\f0\\fs21\\lang2057 Test\\f1\\par\r\n\\par\r\n}\r\n",
+      "SmellTaste": "{\\rtf1\\fbidis\\ansi\\ansicpg1252\\deff0\\nouicompat\\deflang1033{\\fonttbl{\\f0\\fnil\\fcharset0 Segoe UI Variable;}{\\f1\\fnil Segoe UI Variable;}}\r\n{\\colortbl ;\\red0\\green0\\blue0;}\r\n{\\*\\generator Riched20 3.1.0006}\\viewkind4\\uc1 \r\n\\pard\\cf1\\f0\\fs21\\lang2057 Test\\f1\\par\r\n\\par\r\n}\r\n",
+      "Notes": "{\\rtf1\\fbidis\\ansi\\ansicpg1252\\deff0\\nouicompat\\deflang1033{\\fonttbl{\\f0\\fnil\\fcharset0 Segoe UI Variable;}{\\f1\\fnil Segoe UI Variable;}}\r\n{\\colortbl ;\\red0\\green0\\blue0;}\r\n{\\*\\generator Riched20 3.1.0006}\\viewkind4\\uc1 \r\n\\pard\\cf1\\f0\\fs21\\lang2057 Test\\f1\\par\r\n\\par\r\n}\r\n",
+      "GUID": "f711fa5b-223b-41e2-99e8-bb868f98bb66",
+      "Name": "New Setting"
+    },
+    {
+      "Type": "Scene",
+      "Description": null,
+      "ViewpointCharacter": "2fecb7cb-4af7-4186-a169-d4c3acbaac9e",
+      "Date": "Test",
+      "Time": "Test",
+      "Setting": "f711fa5b-223b-41e2-99e8-bb868f98bb66",
+      "SceneType": "Contemplative (or sequel) scene",
+      "CastMembers": [
+        "2fecb7cb-4af7-4186-a169-d4c3acbaac9e"
+      ],
+      "Remarks": "{\\rtf1\\fbidis\\ansi\\ansicpg1252\\deff0\\nouicompat\\deflang1033{\\fonttbl{\\f0\\fnil\\fcharset0 Segoe UI Variable;}{\\f1\\fnil Segoe UI Variable;}}\r\n{\\colortbl ;\\red0\\green0\\blue0;}\r\n{\\*\\generator Riched20 3.1.0006}\\viewkind4\\uc1 \r\n\\pard\\cf1\\f0\\fs21\\lang2057 Test\\f1\\par\r\n\\par\r\n}\r\n",
+      "Protagonist": "2fecb7cb-4af7-4186-a169-d4c3acbaac9e",
+      "ProtagEmotion": "Ambition",
+      "ProtagGoal": "Relief from a destructive habit or trait",
+      "Antagonist": "2fecb7cb-4af7-4186-a169-d4c3acbaac9e",
+      "AntagEmotion": "Ambition",
+      "AntagGoal": "Relief from a destructive habit or trait",
+      "Opposition": "Disadvantage of birth or station",
+      "Outcome": "Protagonist \u0027comes to realize\u0027",
+      "ScenePurpose": [
+        "Advance the Plot",
+        "Build Conflict/Problems",
+        "Build Suspense"
+      ],
+      "ValueExchange": "Approval - Disapproval",
+      "Events": "{\\rtf1\\fbidis\\ansi\\ansicpg1252\\deff0\\nouicompat\\deflang1033{\\fonttbl{\\f0\\fnil\\fcharset0 Segoe UI Variable;}{\\f1\\fnil Segoe UI Variable;}}\r\n{\\colortbl ;\\red0\\green0\\blue0;}\r\n{\\*\\generator Riched20 3.1.0006}\\viewkind4\\uc1 \r\n\\pard\\cf1\\f0\\fs21\\lang2057 Test\\f1\\par\r\n\\par\r\n}\r\n",
+      "Consequences": "{\\rtf1\\fbidis\\ansi\\ansicpg1252\\deff0\\nouicompat\\deflang1033{\\fonttbl{\\f0\\fnil\\fcharset0 Segoe UI Variable;}{\\f1\\fnil Segoe UI Variable;}}\r\n{\\colortbl ;\\red0\\green0\\blue0;}\r\n{\\*\\generator Riched20 3.1.0006}\\viewkind4\\uc1 \r\n\\pard\\cf1\\f0\\fs21\\lang2057 Test\\f1\\par\r\n\\par\r\n}\r\n",
+      "Significance": "{\\rtf1\\fbidis\\ansi\\ansicpg1252\\deff0\\nouicompat\\deflang1033{\\fonttbl{\\f0\\fnil\\fcharset0 Segoe UI Variable;}{\\f1\\fnil Segoe UI Variable;}}\r\n{\\colortbl ;\\red0\\green0\\blue0;}\r\n{\\*\\generator Riched20 3.1.0006}\\viewkind4\\uc1 \r\n\\pard\\cf1\\f0\\fs21\\lang2057 Test\\f1\\par\r\n\\par\r\n}\r\n",
+      "Realization": "{\\rtf1\\fbidis\\ansi\\ansicpg1252\\deff0\\nouicompat\\deflang1033{\\fonttbl{\\f0\\fnil\\fcharset0 Segoe UI Variable;}{\\f1\\fnil Segoe UI Variable;}}\r\n{\\colortbl ;\\red0\\green0\\blue0;}\r\n{\\*\\generator Riched20 3.1.0006}\\viewkind4\\uc1 \r\n\\pard\\cf1\\f0\\fs21\\lang2057 Test\\f1\\par\r\n\\par\r\n}\r\n",
+      "Emotion": "Anger",
+      "NewGoal": "Relief from a destructive habit or trait",
+      "Review": "{\\rtf1\\fbidis\\ansi\\ansicpg1252\\deff0\\nouicompat\\deflang1033{\\fonttbl{\\f0\\fnil\\fcharset0 Segoe UI Variable;}{\\f1\\fnil Segoe UI Variable;}}\r\n{\\colortbl ;\\red0\\green0\\blue0;}\r\n{\\*\\generator Riched20 3.1.0006}\\viewkind4\\uc1 \r\n\\pard\\cf1\\f0\\fs21\\lang2057 Test\\f1\\par\r\n\\par\r\n}\r\n",
+      "Notes": "{\\rtf1\\fbidis\\ansi\\ansicpg1252\\deff0\\nouicompat\\deflang1033{\\fonttbl{\\f0\\fnil\\fcharset0 Segoe UI Variable;}{\\f1\\fnil Segoe UI Variable;}}\r\n{\\colortbl ;\\red0\\green0\\blue0;}\r\n{\\*\\generator Riched20 3.1.0006}\\viewkind4\\uc1 \r\n\\pard\\cf1\\f0\\fs21\\lang2057 Test\\f1\\par\r\n\\par\r\n}\r\n",
+      "GUID": "a160f2a4-a1c5-4509-84a5-17dcab4ea706",
+      "Name": "New Scene"
+    },
+    {
+      "Type": "Folder",
+      "Notes": "{\\rtf1\\fbidis\\ansi\\ansicpg1252\\deff0\\nouicompat\\deflang1033{\\fonttbl{\\f0\\fnil\\fcharset0 Segoe UI Variable;}{\\f1\\fnil Segoe UI Variable;}}\r\n{\\colortbl ;\\red0\\green0\\blue0;}\r\n{\\*\\generator Riched20 3.1.0006}\\viewkind4\\uc1 \r\n\\pard\\cf1\\f0\\fs21\\lang2057 Test\\f1\\par\r\n\\f0\\par\r\n}\r\n",
+      "GUID": "5725c991-8ac1-4e40-a40e-34ba6e7cfcff",
+      "Name": "New Note"
+    },
+    {
+      "Type": "Web",
+      "URI": "https://github.com/Rarisma",
+      "Timestamp": "2025-01-03T19:32:46.0680264\u002B00:00",
+      "GUID": "11519155-3c30-4dfb-916f-393327c9b248",
+      "Name": "New Webpage"
+    }
+  ]
+}

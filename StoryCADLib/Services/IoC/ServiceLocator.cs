@@ -62,6 +62,7 @@ namespace StoryCAD.Services.IoC
             // Register ContentDialog ViewModels
             Services.AddSingleton<NewProjectViewModel>();
             Services.AddSingleton<NewRelationshipViewModel>();
+            Services.AddSingleton<StoryIO>();
             Services.AddSingleton<PrintReportDialogVM>();
             Services.AddSingleton<NarrativeToolVM>();
             Services.AddSingleton<ElementPickerVM>();

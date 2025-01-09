@@ -84,10 +84,10 @@ public class FileTests
         Assert.IsTrue(File.Exists(filePath), "Test file does not exist.");
 
         StorageFile file = await StorageFile.GetFileFromPathAsync(filePath);
-        StoryReader _rdr = Ioc.Default.GetRequiredService<StoryReader>();
+        StoryIO _rdr = Ioc.Default.GetRequiredService<StoryIO>();
 
         // Act
-        StoryModel storyModel = await _rdr.ReadFile(file);
+        StoryModel storyModel = await _rdr.ReadStory(file);
 
         // Assert
         Assert.AreEqual(6, storyModel.StoryElements.Count, "Story elements count mismatch."); 
@@ -110,6 +110,35 @@ public class FileTests
 
 	    //Check Project Path was reset to default.
 		Assert.IsTrue(UVM.ProjectPath == Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments));
+		return null;
+    }
+
+
+    [TestMethod]
+    public Task FullFileTest()
+    {
+	    string Dir = AppDomain.CurrentDomain.BaseDirectory;
+		StorageFile File = StorageFile.GetFileFromPathAsync(Path.Combine(Dir, "TestInputs", "Full.stbx")).GetAwaiter().GetResult();
+		StoryModel Model = Ioc.Default.GetRequiredService<StoryIO>().ReadStory(File).GetAwaiter().GetResult();
+
+
+		Assert.IsTrue(((OverviewModel)Model.StoryElements[0]).Author == "jake shaw");
+		Assert.IsTrue(((OverviewModel)Model.StoryElements[0]).DateCreated == "2025-01-03");
+		Assert.IsTrue(((OverviewModel)Model.StoryElements[0]).StoryIdea.Contains("Test"));
+		Assert.IsTrue(((OverviewModel)Model.StoryElements[0]).Concept.Contains("Test"));
+		Assert.IsTrue(((OverviewModel)Model.StoryElements[0]).Premise.Contains("Test"));
+		Assert.IsTrue(((OverviewModel)Model.StoryElements[0]).StoryType == "Short Story");
+		Assert.IsTrue(((OverviewModel)Model.StoryElements[0]).Viewpoint.Contains("Limited third person));
+		Assert.IsTrue(((OverviewModel)Model.StoryElements[0]).StoryGenre == "Mainsteam");
+		Assert.IsTrue(((OverviewModel)Model.StoryElements[0]).LiteraryDevice == "Metafiction");
+		Assert.IsTrue(((OverviewModel)Model.StoryElements[0]).Voice == "Third person subjective");
+		Assert.IsTrue(((OverviewModel)Model.StoryElements[0]).Tense == "Present");
+		Assert.IsTrue(((OverviewModel)Model.StoryElements[0]).Style == "Mystery");
+		Assert.IsTrue(((OverviewModel)Model.StoryElements[0]).StructureNotes.Contains("Test"));
+		Assert.IsTrue(((OverviewModel)Model.StoryElements[0]).Tense == "Present");
+		Assert.IsTrue(((OverviewModel)Model.StoryElements[0]).Tone == "Indignant");
+		Assert.IsTrue(((OverviewModel)Model.StoryElements[0]).Notes.Contains("This is a test outline, " +
+		"it should have everything populated."));
 		return null;
     }
 }
