@@ -64,7 +64,9 @@ public class StoryElementConverter : JsonConverter<StoryElement>
 			CharacterModel _ => "Character",
 			SettingModel _ => "Setting",
 			SceneModel _ => "Scene",
-			FolderModel _ => "Folder",
+			FolderModel { Type: StoryItemType.Notes } => "Notes",
+			FolderModel { Type: StoryItemType.Folder } => "Folder",
+			FolderModel { Type: StoryItemType.Section } => "Section",
 			WebModel _ => "Web",
 			TrashCanModel _ => "TrashCan",
 			_ => "Unknown"

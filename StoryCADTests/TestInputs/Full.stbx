@@ -374,7 +374,7 @@
       "Name": "New Scene"
     },
     {
-      "Type": "Folder",
+      "Type": "Notes",
       "Notes": "{\\rtf1\\fbidis\\ansi\\ansicpg1252\\deff0\\nouicompat\\deflang1033{\\fonttbl{\\f0\\fnil\\fcharset0 Segoe UI Variable;}{\\f1\\fnil Segoe UI Variable;}}\r\n{\\colortbl ;\\red0\\green0\\blue0;}\r\n{\\*\\generator Riched20 3.1.0006}\\viewkind4\\uc1 \r\n\\pard\\cf1\\f0\\fs21\\lang2057 Test\\f1\\par\r\n\\f0\\par\r\n}\r\n",
       "GUID": "5725c991-8ac1-4e40-a40e-34ba6e7cfcff",
       "Name": "New Note"

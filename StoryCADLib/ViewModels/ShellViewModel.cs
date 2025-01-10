@@ -78,7 +78,7 @@ public class ShellViewModel : ObservableRecipient
 
     // Drag and drop variables
     private StoryNodeItem dragSourceStoryNode;
-    private readonly object dragLock = new object();
+    private readonly object dragLock = new ();
 
     #region CommandBar Relay Commands
 
@@ -2134,7 +2134,6 @@ public class ShellViewModel : ObservableRecipient
                 LogLevel.Error, ex, $"Root node type exception, this shouldn't happen {ex.Message} {ex.Message}");
             return StoryItemType.Unknown;
         }
-
     }
 
     #endregion
