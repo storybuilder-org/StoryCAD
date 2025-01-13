@@ -195,5 +195,7 @@ public class StoryIO
 			_logService.LogException(LogLevel.Error, ex, $"Failed to migrate file {File.Path}");
 		}
 
+		return new();
+
 	}
 }
