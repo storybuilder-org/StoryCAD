@@ -171,21 +171,29 @@ public class StoryIO
 
 	private async Task<StoryModel> MigrateModel(StorageFile File)
 	{
-		//Read Legacy file
-		_logService.Log(LogLevel.Info, $"Migrating Old STBX File from {File.Path}");
-		LegacyXMLReader reader = new(_logService);
-		StoryModel Old = await reader.ReadFile(File);
-		
-		//Copy legacy file
-		_logService.Log(LogLevel.Info, "Read legacy file");
-		StorageFolder Folder = await StorageFolder.GetFolderFromPathAsync(
-			Ioc.Default.GetRequiredService<PreferenceService>().Model.BackupDirectory);
-		await File.CopyAsync(Folder,File.Name + ".old");
-		_logService.Log(LogLevel.Info, $"Copied legacy file to backup folder ({Folder.Path})");
+		try
+		{
+			//Read Legacy file
+			_logService.Log(LogLevel.Info, $"Migrating Old STBX File from {File.Path}");
+			LegacyXMLReader reader = new(_logService);
+			StoryModel Old = await reader.ReadFile(File);
 
-		//File is now backed up, now migrate to new format
-		await WriteStory(File, Old);
-		_logService.Log(LogLevel.Info, "Updated legacy file to JSON File");
-		return Old;
+			//Copy legacy file
+			_logService.Log(LogLevel.Info, "Read legacy file");
+			StorageFolder Folder = await StorageFolder.GetFolderFromPathAsync(
+				Ioc.Default.GetRequiredService<PreferenceService>().Model.BackupDirectory);
+			await File.CopyAsync(Folder, File.Name + $"as of {DateTime.Now}.old");
+			_logService.Log(LogLevel.Info, $"Copied legacy file to backup folder ({Folder.Path})");
+
+			//File is now backed up, now migrate to new format
+			await WriteStory(File, Old);
+			_logService.Log(LogLevel.Info, "Updated legacy file to JSON File");
+			return Old;
+		}
+		catch (Exception ex)
+		{
+			_logService.LogException(LogLevel.Error, ex, $"Failed to migrate file {File.Path}");
+		}
+
 	}
 }
