@@ -1,12 +1,18 @@
 ﻿using Windows.Data.Xml.Dom;
 using StoryCAD.Services;
+using System.Text.Json.Serialization;
 
 namespace StoryCAD.Models;
 
 public class WebModel : StoryElement
 {
-    public Uri URL;
-    public DateTime Timestamp;
+	[JsonInclude]
+	[JsonPropertyName("URI")]
+	public Uri URL;
+
+	[JsonInclude]
+	[JsonPropertyName("Timestamp")]
+	public DateTime Timestamp;
 
     public WebModel(StoryModel model) : base("New Webpage", StoryItemType.Web, model)
     {
@@ -32,6 +38,9 @@ public class WebModel : StoryElement
         }
     }
 
+	public WebModel(){}
+	
+    //TODO: REMOVE WITH STORYREADER.
     public WebModel(IXmlNode xn, StoryModel model) : base(xn, model)
     {
         URL = new Uri("https://google.com/");

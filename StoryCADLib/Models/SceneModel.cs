@@ -1,205 +1,304 @@
-﻿using Windows.Data.Xml.Dom;
+﻿using System.Text.Json.Serialization;
+using Windows.Data.Xml.Dom;
 
 namespace StoryCAD.Models;
 
 public class SceneModel : StoryElement
 {
-    #region Properties
+	#region Properties
 
-    //  Scene General data
-    private string _description;
-    public string Description
-    {
-        get => _description;
-        set => _description = value;
-    }
+	[JsonIgnore]
+	private string _description;
 
-    private string _viewpointCharacter;
-    public string ViewpointCharacter
-    {
-        get => _viewpointCharacter;
-        set => _viewpointCharacter = value;
-    }
+	[JsonInclude]
+	[JsonPropertyName("Description")]
+	public string Description
+	{
+		get => _description;
+		set => _description = value;
+	}
 
-    private string _date;
-    public string Date
-    {
-        get => _date;
-        set => _date = value;
-    }
+	[JsonIgnore]
+	private string _viewpointCharacter;
 
-    private string _time;
-    public string Time
-    {
-        get => _time;
-        set => _time = value;
-    }
+	[JsonInclude]
+	[JsonPropertyName("ViewpointCharacter")]
+	public string ViewpointCharacter
+	{
+		get => _viewpointCharacter;
+		set => _viewpointCharacter = value;
+	}
 
-    private string _setting;
-    public string Setting
-    {
-        get => _setting;
-        set => _setting = value;
-    }
+	[JsonIgnore]
+	private string _date;
 
-    private string _sceneType;
-    public string SceneType
-    {
-        get => _sceneType;
-        set => _sceneType = value;
-    }
+	[JsonInclude]
+	[JsonPropertyName("Date")]
+	public string Date
+	{
+		get => _date;
+		set => _date = value;
+	}
 
-    private List<string> _castMembers;
-    public List<string> CastMembers
-    {
-        get => _castMembers;
-        set => _castMembers = value;
-    }
+	[JsonIgnore]
+	private string _time;
 
-    private string _remarks;
-    public string Remarks
-    {
-        get => _remarks;
-        set => _remarks = value;
-    }
+	[JsonInclude]
+	[JsonPropertyName("Time")]
+	public string Time
+	{
+		get => _time;
+		set => _time = value;
+	}
 
-    //  Scene Goal data
+	[JsonIgnore]
+	private string _setting;
 
-    private string _protagonist;
-    public string Protagonist
-    {
-        get => _protagonist;
-        set => _protagonist = value;
-    }
+	[JsonInclude]
+	[JsonPropertyName("Setting")]
+	public string Setting
+	{
+		get => _setting;
+		set => _setting = value;
+	}
 
-    private string _protagEmotion;
-    public string ProtagEmotion
-    {
-        get => _protagEmotion;
-        set => _protagEmotion = value;
-    }
+	[JsonIgnore]
+	private string _sceneType;
 
-    private string _protagGoal;
-    public string ProtagGoal
-    {
-        get => _protagGoal;
-        set => _protagGoal = value;
-    }
+	[JsonInclude]
+	[JsonPropertyName("SceneType")]
+	public string SceneType
+	{
+		get => _sceneType;
+		set => _sceneType = value;
+	}
 
-    private string _antagonist;
-    public string Antagonist
-    {
-        get => _antagonist;
-        set => _antagonist = value;
-    }
+	[JsonIgnore]
+	private List<string> _castMembers;
 
-    private string _antagEmotion;
-    public string AntagEmotion
-    {
-        get => _antagEmotion;
-        set => _antagEmotion = value;
-    }
+	[JsonInclude]
+	[JsonPropertyName("CastMembers")]
+	public List<string> CastMembers
+	{
+		get => _castMembers;
+		set => _castMembers = value;
+	}
 
-    private string _antagGoal;
-    public string AntagGoal
-    {
-        get => _antagGoal;
-        set => _antagGoal = value;
-    }
+	[JsonIgnore]
+	private string _remarks;
 
-    private string _opposition;
-    public string Opposition
-    {
-        get => _opposition;
-        set => _opposition = value;
-    }
+	[JsonInclude]
+	[JsonPropertyName("Remarks")]
+	public string Remarks
+	{
+		get => _remarks;
+		set => _remarks = value;
+	}
 
-    private string _outcome;
-    public string Outcome
-    {
-        get => _outcome;
-        set => _outcome = value;
-    }
-    // Scene Development (Story Genius) data
+	[JsonIgnore]
+	private string _protagonist;
 
-    private List<string> _scenePurpose;
-    public List<string> ScenePurpose
-    {
-        get => _scenePurpose;
-        set => _scenePurpose = value;
-    }
+	[JsonInclude]
+	[JsonPropertyName("Protagonist")]
+	public string Protagonist
+	{
+		get => _protagonist;
+		set => _protagonist = value;
+	}
 
-    private string _valueExchange;
-    public string ValueExchange
-    {
-        get => _valueExchange;
-        set => _valueExchange = value;
-    }
+	[JsonIgnore]
+	private string _protagEmotion;
 
-    private string _events;
-    public string Events
-    {
-        get => _events;
-        set => _events = value;
-    }
+	[JsonInclude]
+	[JsonPropertyName("ProtagEmotion")]
+	public string ProtagEmotion
+	{
+		get => _protagEmotion;
+		set => _protagEmotion = value;
+	}
 
-    private string _consequences;
-    public string Consequences
-    {
-        get => _consequences;
-        set => _consequences = value;
-    }
+	[JsonIgnore]
+	private string _protagGoal;
 
-    private string _significance;
-    public string Significance
-    {
-        get => _significance;
-        set => _significance = value;
-    }
+	[JsonInclude]
+	[JsonPropertyName("ProtagGoal")]
+	public string ProtagGoal
+	{
+		get => _protagGoal;
+		set => _protagGoal = value;
+	}
 
-    private string _realization;
-    public string Realization
-    {
-        get => _realization;
-        set => _realization = value;
-    }
+	[JsonIgnore]
+	private string _antagonist;
 
-    //  Scene Sequel data
+	[JsonInclude]
+	[JsonPropertyName("Antagonist")]
+	public string Antagonist
+	{
+		get => _antagonist;
+		set => _antagonist = value;
+	}
 
-    private string _emotion;
-    public string Emotion
-    {
-        get => _emotion;
-        set => _emotion = value;
-    }
+	[JsonIgnore]
+	private string _antagEmotion;
 
-    private string _newGoal;
-    public string NewGoal
-    {
-        get => _newGoal;
-        set => _newGoal = value;
-    }
+	[JsonInclude]
+	[JsonPropertyName("AntagEmotion")]
+	public string AntagEmotion
+	{
+		get => _antagEmotion;
+		set => _antagEmotion = value;
+	}
 
-    private string _review;
-    public string Review
-    {
-        get => _review;
-        set => _review = value;
-    }
+	[JsonIgnore]
+	private string _antagGoal;
 
-    //  Scene Note data
+	[JsonInclude]
+	[JsonPropertyName("AntagGoal")]
+	public string AntagGoal
+	{
+		get => _antagGoal;
+		set => _antagGoal = value;
+	}
 
-    private string _notes;
-    public string Notes
-    {
-        get => _notes;
-        set => _notes = value;
-    }
+	[JsonIgnore]
+	private string _opposition;
 
-    #endregion
+	[JsonInclude]
+	[JsonPropertyName("Opposition")]
+	public string Opposition
+	{
+		get => _opposition;
+		set => _opposition = value;
+	}
 
-    #region Constructors
-    public SceneModel(StoryModel model) : base("New Scene", StoryItemType.Scene, model)
+	[JsonIgnore]
+	private string _outcome;
+
+	[JsonInclude]
+	[JsonPropertyName("Outcome")]
+	public string Outcome
+	{
+		get => _outcome;
+		set => _outcome = value;
+	}
+	// Scene Development (Story Genius) data
+
+	[JsonIgnore]
+	private List<string> _scenePurpose;
+
+	[JsonInclude]
+	[JsonPropertyName("ScenePurpose")]
+	public List<string> ScenePurpose
+	{
+		get => _scenePurpose;
+		set => _scenePurpose = value;
+	}
+
+	[JsonIgnore]
+	private string _valueExchange;
+
+	[JsonInclude]
+	[JsonPropertyName("ValueExchange")]
+	public string ValueExchange
+	{
+		get => _valueExchange;
+		set => _valueExchange = value;
+	}
+
+	[JsonIgnore]
+	private string _events;
+
+	[JsonInclude]
+	[JsonPropertyName("Events")]
+	public string Events
+	{
+		get => _events;
+		set => _events = value;
+	}
+
+	[JsonIgnore]
+	private string _consequences;
+
+	[JsonInclude]
+	[JsonPropertyName("Consequences")]
+	public string Consequences
+	{
+		get => _consequences;
+		set => _consequences = value;
+	}
+
+	[JsonIgnore]
+	private string _significance;
+
+	[JsonInclude]
+	[JsonPropertyName("Significance")]
+	public string Significance
+	{
+		get => _significance;
+		set => _significance = value;
+	}
+
+	[JsonIgnore]
+	private string _realization;
+
+	[JsonInclude]
+	[JsonPropertyName("Realization")]
+	public string Realization
+	{
+		get => _realization;
+		set => _realization = value;
+	}
+
+	[JsonIgnore]
+	private string _emotion;
+
+	[JsonInclude]
+	[JsonPropertyName("Emotion")]
+	public string Emotion
+	{
+		get => _emotion;
+		set => _emotion = value;
+	}
+
+	[JsonIgnore]
+	private string _newGoal;
+
+	[JsonInclude]
+	[JsonPropertyName("NewGoal")]
+	public string NewGoal
+	{
+		get => _newGoal;
+		set => _newGoal = value;
+	}
+
+	[JsonIgnore]
+	private string _review;
+
+	[JsonInclude]
+	[JsonPropertyName("Review")]
+	public string Review
+	{
+		get => _review;
+		set => _review = value;
+	}
+
+	[JsonIgnore]
+	private string _notes;
+
+	[JsonInclude]
+	[JsonPropertyName("Notes")]
+	public string Notes
+	{
+		get => _notes;
+		set => _notes = value;
+	}
+
+
+	#endregion
+
+	#region Constructors
+	public SceneModel(StoryModel model) : base("New Scene", StoryItemType.Scene, model)
     {
         ViewpointCharacter = string.Empty;
         Date = string.Empty;
@@ -287,5 +386,9 @@ public class SceneModel : StoryElement
         Notes = string.Empty;
     }
 
+	public SceneModel()
+	{
+
+	}
     #endregion
 }

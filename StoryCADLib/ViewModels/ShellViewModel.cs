@@ -78,7 +78,7 @@ public class ShellViewModel : ObservableRecipient
 
     // Drag and drop variables
     private StoryNodeItem dragSourceStoryNode;
-    private readonly object dragLock = new object();
+    private readonly object dragLock = new ();
 
     #region CommandBar Relay Commands
 
@@ -856,8 +856,8 @@ public class ShellViewModel : ObservableRecipient
             StoryModel.ProjectFolder = await StoryModel.ProjectFile.GetParentAsync();
 
             // Read the file into the StoryModel.
-            StoryReader _rdr = Ioc.Default.GetRequiredService<StoryReader>();
-            StoryModel = await _rdr.ReadFile(StoryModel.ProjectFile);
+            StoryIO _rdr = Ioc.Default.GetRequiredService<StoryIO>();
+            StoryModel = await _rdr.ReadStory(StoryModel.ProjectFile);
 
             //Check the file we loaded actually has StoryCAD Data.
             if (StoryModel == null)
@@ -982,8 +982,8 @@ public class ShellViewModel : ObservableRecipient
             StorageFile _file = StoryModel.ProjectFile;
             if (_file != null)
             {
-                StoryWriter _wtr = Ioc.Default.GetRequiredService<StoryWriter>();
-                await _wtr.WriteFile(StoryModel.ProjectFile, StoryModel);
+	            StoryIO _wtr = Ioc.Default.GetRequiredService<StoryIO>();
+                await _wtr.WriteStory(StoryModel.ProjectFile, StoryModel);
             }
         }
         catch (Exception _ex)
@@ -2134,7 +2134,6 @@ public class ShellViewModel : ObservableRecipient
                 LogLevel.Error, ex, $"Root node type exception, this shouldn't happen {ex.Message} {ex.Message}");
             return StoryItemType.Unknown;
         }
-
     }
 
     #endregion

@@ -1,23 +1,45 @@
-﻿using Windows.Data.Xml.Dom;
+﻿using System.Text.Json.Serialization;
+using Windows.Data.Xml.Dom;
 
 namespace StoryCAD.Models;
 
 public class RelationshipModel
 {
-    #region Properties
+	#region Properties
+	// The other character in the relationship
+	[JsonIgnore]
+	public StoryElement Partner { get; set; }
 
-    public StoryElement Partner { get; set; } // The other character in the relationship
-    public string PartnerUuid { get; set; }  // The other character's UUID
-    public string RelationType { get; set; }
-    public string Trait { get; set; }
-    public string Attitude { get; set; }
-    public string Notes { get; set; }
-    public CharacterViewModel CharVM = Ioc.Default.GetService<CharacterViewModel>();
-    #endregion
+	// The other character's UUID
+	[JsonInclude]
+	[JsonPropertyName("PartnerUuid")]
+	public string PartnerUuid { get; set; }
 
-    #region Constructors
+	// Relationship type
+	[JsonInclude]
+	[JsonPropertyName("RelationType")]
+	public string RelationType { get; set; }
 
-    public RelationshipModel(string partnerUuid, string type)
+	[JsonInclude] 
+	[JsonPropertyName("Trait")]
+	public string Trait { get; set; }
+
+	[JsonInclude]
+	[JsonPropertyName("Attitude")]
+	public string Attitude { get; set; }
+
+	[JsonInclude]
+	[JsonPropertyName("Notes")]
+	public string Notes { get; set; }
+
+	[JsonIgnore]
+	public CharacterViewModel CharVM = Ioc.Default.GetService<CharacterViewModel>();
+
+	#endregion
+
+	#region Constructors
+
+	public RelationshipModel(string partnerUuid, string type)
     {
 
         PartnerUuid = partnerUuid;
