@@ -81,5 +81,7 @@ public class RelationshipModel
         }
     }
 
+    public RelationshipModel() { }
+
     #endregion
 }

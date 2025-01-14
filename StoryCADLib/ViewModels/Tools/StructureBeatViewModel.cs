@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System.Text.Json.Serialization;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace StoryCAD.ViewModels.Tools;
 
@@ -19,33 +20,40 @@ public class StructureBeatViewModel : ObservableObject
 	#endregion
 
 	#region Properties
-
+	[JsonIgnore]
 	private string title;
-    /// <summary>
-    /// Title of beat
-    /// </summary>
-    public string Title
+	/// <summary>
+	/// Title of beat
+	/// </summary>
+	[JsonInclude]
+	[JsonPropertyName("Title")]
+	public string Title
     {
         get => title;
         set => SetProperty(ref title, value);
     }
 
+	[JsonIgnore]
     private string description;
-    /// <summary>
-    /// Description of beat
-    /// </summary>
-    public string Description
+	/// <summary>
+	/// Description of beat
+	/// </summary>
+	[JsonInclude]
+	[JsonPropertyName("Description")]
+	public string Description
     {
         get => description;
         set => SetProperty(ref description, value);
     }
 
-
-    private string guid;
-    /// <summary>
-    /// GUID of problem/scene beat links to.
-    /// </summary>
-    public string Guid
+    [JsonInclude]
+	private string guid;
+	/// <summary>
+	/// GUID of problem/scene beat links to.
+	/// </summary>
+	[JsonInclude]
+	[JsonPropertyName("BoundGUID")]
+	public string Guid
     {
         get => guid;
         set
@@ -58,10 +66,11 @@ public class StructureBeatViewModel : ObservableObject
         }
 	}
 
-    /// <summary>
-    /// Link to element
-    /// </summary>
-    private StoryElement Element
+	/// <summary>
+	/// Link to element
+	/// </summary>
+	[Newtonsoft.Json.JsonIgnore]
+	private StoryElement Element
     {
         get
         {
@@ -73,10 +82,11 @@ public class StructureBeatViewModel : ObservableObject
         }
     }
 
-    /// <summary>
-    /// Name of the element
-    /// </summary>
-    public string ElementName
+	/// <summary>
+	/// Name of the element
+	/// </summary>
+	[Newtonsoft.Json.JsonIgnore]
+	public string ElementName
     {
         get
         {
@@ -89,10 +99,11 @@ public class StructureBeatViewModel : ObservableObject
         }
     }
 
-    /// <summary>
-    /// Element Description
-    /// </summary>
-    public string ElementDescription
+	/// <summary>
+	/// Element Description
+	/// </summary>
+	[Newtonsoft.Json.JsonIgnore]
+	public string ElementDescription
     {
         get
         {
@@ -112,6 +123,7 @@ public class StructureBeatViewModel : ObservableObject
         }
     }
 
+	[Newtonsoft.Json.JsonIgnore]
     public Symbol ElementIcon
     {
         get
