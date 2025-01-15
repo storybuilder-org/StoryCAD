@@ -17,7 +17,7 @@ however are still a good place to get started" TextWrapping="Wrap" Margin="10,10
 		<HyperlinkButton Content="StoryCAD Concepts (Video)" NavigateUri="https://www.youtube.com/watch?v=Oi7G9TEKsro"/>
 		<HyperlinkButton Content="A 5-minute Introduction to StoryCAD (Video)" NavigateUri="https://www.youtube.com/watch?v=qFpTI15-q7A"/>
 		<HyperlinkButton Content="Frequently Asked Questions" NavigateUri="https://www.storybuilder.org/faq"/>
-		<HyperlinkButton Content="Tutorial" NavigateUri="https://storybuilder-org.github.io/StoryCAD/Tutorial_Creating_a_Story.html"/>
+		<HyperlinkButton Content="Tutorial" NavigateUri="https://storybuilder-org.github.io/StoryCAD/docs/Tutorial%20Creating%20a%20Story/Tutorial_Creating_a_Story.html"/>
 		<HyperlinkButton Content="User manual" NavigateUri="https://storybuilder-org.github.io/StoryCAD/"/>
 		<HyperlinkButton Content="Events" NavigateUri="https://storybuilder.org/events/"/>
 

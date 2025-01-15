@@ -1,4 +1,5 @@
 using Microsoft.UI.Xaml;
+using StoryCAD.DAL;
 
 namespace StoryCAD.Services.Dialogs;
 
@@ -9,9 +10,11 @@ public sealed partial class HelpPage : Page
 	/// <summary>
 	/// Update preferences to hide/show menu
 	/// </summary>
-	private void Clicked(object sender, RoutedEventArgs e)
+	private async void Clicked(object sender, RoutedEventArgs e)
 	{
-		Ioc.Default.GetRequiredService<PreferenceService>().Model.ShowStartupDialog = 
-			(bool)(sender as CheckBox).IsChecked;
+		PreferenceService Pref = Ioc.Default.GetService<PreferenceService>();
+		Pref.Model.ShowStartupDialog = !(bool)(sender as CheckBox).IsChecked;
+		PreferencesIo _prfIo = new(Pref.Model, Ioc.Default.GetRequiredService<AppState>().RootDirectory);
+		await _prfIo.WritePreferences();
 	}
 }

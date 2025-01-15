@@ -12,7 +12,7 @@ namespace StoryCAD.DAL;
 /// StoryWriter parses StoryCAD's model and writes it to its backing store
 /// (the .stbx file), which is an Xml Document. 
 /// </summary>
-public class StoryReader : ObservableRecipient
+public class LegacyXMLReader : ObservableRecipient
 {
     /// StoryCAD's model is found in the StoryCAD.Models namespace and consists
     /// of various Plain Old CLR objects.
@@ -763,7 +763,7 @@ public class StoryReader : ObservableRecipient
     }
 
     #region Constructor
-    public StoryReader(ILogService logger)
+    public LegacyXMLReader(ILogService logger)
     {
         _logger = logger;
         //Logger = Ioc.Default.GetService<LogService>();

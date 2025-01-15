@@ -31,8 +31,7 @@ namespace StoryCAD.Services.IoC
             Services.AddSingleton<ListLoader>();
             Services.AddSingleton<ToolLoader>();
             Services.AddSingleton<ScrivenerIo>();
-            Services.AddSingleton<StoryReader>();
-            Services.AddSingleton<StoryWriter>();
+            Services.AddSingleton<StoryIO>();
             Services.AddSingleton<MySqlIo>();
             Services.AddSingleton<BackupService>();
             Services.AddSingleton<AutoSaveService>();
@@ -63,6 +62,7 @@ namespace StoryCAD.Services.IoC
             // Register ContentDialog ViewModels
             Services.AddSingleton<NewProjectViewModel>();
             Services.AddSingleton<NewRelationshipViewModel>();
+            Services.AddSingleton<StoryIO>();
             Services.AddSingleton<PrintReportDialogVM>();
             Services.AddSingleton<NarrativeToolVM>();
             Services.AddSingleton<ElementPickerVM>();

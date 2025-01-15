@@ -7,3 +7,5 @@ parent: Home
 has_toc: false
 ---
 # Miscellaneous
+
+A few things you should know about StoryCAD, once you know your way around.

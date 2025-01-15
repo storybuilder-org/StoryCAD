@@ -7,3 +7,5 @@ parent: Story Elements
 has_toc: false
 ---
 ## Setting Form
+
+Settings are where the story occurs. A setting specifies a specific time and place. 
