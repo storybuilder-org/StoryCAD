@@ -69,7 +69,7 @@ public class StructureBeatViewModel : ObservableObject
 	/// <summary>
 	/// Link to element
 	/// </summary>
-	[Newtonsoft.Json.JsonIgnore]
+	[JsonIgnore]
 	private StoryElement Element
     {
         get
@@ -85,7 +85,7 @@ public class StructureBeatViewModel : ObservableObject
 	/// <summary>
 	/// Name of the element
 	/// </summary>
-	[Newtonsoft.Json.JsonIgnore]
+	[JsonIgnore]
 	public string ElementName
     {
         get
@@ -102,7 +102,7 @@ public class StructureBeatViewModel : ObservableObject
 	/// <summary>
 	/// Element Description
 	/// </summary>
-	[Newtonsoft.Json.JsonIgnore]
+	[JsonIgnore]
 	public string ElementDescription
     {
         get
@@ -123,7 +123,7 @@ public class StructureBeatViewModel : ObservableObject
         }
     }
 
-	[Newtonsoft.Json.JsonIgnore]
+	[JsonIgnore]
     public Symbol ElementIcon
     {
         get
