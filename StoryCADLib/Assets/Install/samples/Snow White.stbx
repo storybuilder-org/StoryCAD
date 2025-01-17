@@ -1,285 +1,1590 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<StoryCAD Version="Version: 2.12.0.0">
-  <StoryElements>
-    <Overview UUID="A8D6A619-AD8F-482A-A556-32A41F806EDD" Name="Snow White                            " DateCreated="08-28-95" DateModified="2023-11-06" Author="Anonymous" StoryType="Short Story" StoryGenre="Fairy tale" ViewPoint="Omniscient" ViewpointCharacter="" Voice="" LiteraryDevice="" Tense="" Style="" Tone="" StoryIdea="{\rtf1\fbidis\ansi\ansicpg1252\deff0\nouicompat\deflang1033{\fonttbl{\f0\fnil Segoe UI;}{\f1\fnil\fcharset0 Segoe UI;}}&#xD;&#xA;{\colortbl ;\red0\green0\blue0;}&#xD;&#xA;{\*\generator Riched20 3.1.0004}\viewkind4\uc1 &#xD;&#xA;\pard\tx720\cf1\f0\fs23   \f1 A young princess named Snow White falls victim to her jealous stepmother's murderous vanity.\f0\par&#xD;&#xA;}&#xD;&#xA;" Concept="{\rtf1\fbidis\ansi\ansicpg1252\deff0\nouicompat\deflang1033{\fonttbl{\f0\fnil\fcharset0 Segoe UI;}{\f1\fnil Segoe UI;}}&#xD;&#xA;{\colortbl ;\red0\green0\blue0;}&#xD;&#xA;{\*\generator Riched20 3.1.0004}\viewkind4\uc1 &#xD;&#xA;\pard\cf1\f0\fs23 What if she flees to the forest and is rescued by dwarves?\par&#xD;&#xA;What if she falls into a deep sleep or coma after eating a poisoned apple given her by her stepmother? \f1\par&#xD;&#xA;}&#xD;&#xA;" StoryProblem="8e4d3ea5-4c39-4fbd-b221-20ea9ccb2d95" Premise="{\rtf1\fbidis\ansi\ansicpg1252\deff0\nouicompat\deflang1033{\fonttbl{\f0\fnil\fcharset0 Segoe UI;}{\f1\fnil Segoe UI;}}&#xD;&#xA;{\colortbl ;\red0\green0\blue0;}&#xD;&#xA;{\*\generator Riched20 3.1.0004}\viewkind4\uc1 &#xD;&#xA;\pard\cf1\f0\fs23 A young princess named Snow White falls victim to her jealous stepmother's murderous vanity, fleeing to the forest where she finds refuge with seven dwarfs. The stepmother's relentless pursuit leads to Snow White's enchanted slumber, broken only by a prince's kiss. The tale concludes with retributive justice for the wicked stepmother and a happily-ever-after for Snow White and her prince.\f1\par&#xD;&#xA;}&#xD;&#xA;" StructureNotes="" Notes="{\rtf1\fbidis\ansi\ansicpg1252\deff0\nouicompat\deflang1033{\fonttbl{\f0\fnil Segoe UI;}}&#xD;&#xA;{\colortbl ;\red0\green0\blue0;}&#xD;&#xA;{\*\generator Riched20 3.1.0004}\viewkind4\uc1 &#xD;&#xA;\pard\tx720\cf1\f0\fs23 This sample story outline is adapted from Jacob and Wilhelm Grimm's collection of fairy tales, published in 1812.  The more than two hundred stories in the collection were gathered from stories the brothers found in the farms and villages of their native Germany.\par&#xD;&#xA;   The Grimm fairy tales were told in a narrative form and aren't as scenic as most contemprary stories- even modern fairy tales.  However, scenes can still clearly be found in this story.\par&#xD;&#xA;&#xD;&#xA;\pard\fs23\par&#xD;&#xA;}&#xD;&#xA;" />
-    <Folder UUID="232F1535-13E5-42D4-A7B5-F47D862A508D" Name="Problems" Notes="" />
-    <Folder UUID="84B61C35-DC2D-4AF8-8731-20BE64FD7D74" Name="Characters" Notes="" />
-    <Folder UUID="B96920AF-A09C-4F27-9339-CFF37E40E9E4" Name="Settings" Notes="" />
-    <Folder UUID="0A284478-74D9-4031-8BD3-FC0B5BC89895" Name="Plot Points" Notes="" />
-    <Problem UUID="8E4D3EA5-4C39-4FBD-B221-20EA9CCB2D95" Name="Snow White struggles to survive the Queen's traps" ProblemType="Conflict" ConflictType="Man vs. Man" ProblemCategory="" Subject="Murder" ProblemSource=" Snow White's father, the king, remarries a jealous woman" Protagonist="b7a96067-780a-4f00-940e-4afd7be2d3a5" ProtGoal="Relief from danger" ProtMotive="Survival (deliverance)" ProtConflict="" Antagonist="70b611cd-2c09-438b-9585-34962a4053aa" AntagGoal="To be the fairest in the land" AntagMotive="Rivalry" AntagConflict="" Outcome="Protagonist obtains goal" Method="Rescued, by Dwarves and Princes" Theme="Good overcomes evil" StoryQuestion="{\rtf1\fbidis\ansi\ansicpg1252\deff0\nouicompat\deflang1033{\fonttbl{\f0\fnil Segoe UI;}{\f1\fnil\fcharset0 Segoe UI;}}&#xD;&#xA;{\colortbl ;\red0\green0\blue0;}&#xD;&#xA;{\*\generator Riched20 3.1.0004}\viewkind4\uc1 &#xD;&#xA;\pard\tx720\cf1\f0\fs25 Will Snow Whilte elude the attempts by her stepmother\f1  the\f0  Queen to kill her?\par&#xD;&#xA;}&#xD;&#xA;" Premise="{\rtf1\fbidis\ansi\ansicpg1252\deff0\nouicompat\deflang1033{\fonttbl{\f0\fnil\fcharset0 Segoe UI;}{\f1\fnil Segoe UI;}}&#xD;&#xA;{\colortbl ;\red0\green0\blue0;}&#xD;&#xA;{\*\generator Riched20 3.1.0004}\viewkind4\uc1 &#xD;&#xA;\pard\cf1\f0\fs23 A young princess named Snow White falls victim to her jealous stepmother's murderous vanity, fleeing to the forest where she finds refuge with seven dwarfs. The stepmother's relentless pursuit leads to Snow White's enchanted slumber, broken only by a prince's kiss. The tale concludes with retributive justice for the wicked stepmother and a happily-ever-after for Snow White and her prince.\f1\par&#xD;&#xA;}&#xD;&#xA;" Notes="Vanity and jealousy are the traits which propel the Queen to murder.&#xD;&#xA;&#xD;&#xA;Snow White doesn't succeed through her own efforts, but is repeatedly rescued by the Dwarves, and finaly by her Hero, the Prince.  The confrontation therefore  isn't between a strong willed protagonist and her antagonist, but  between good and evil.&#xD;&#xA;" />
-    <Character UUID="B7A96067-780A-4F00-940E-4AFD7BE2D3A5" Name="Snow White" Role="Princess" StoryRole="Protagonist" Archetype="" Age="" Sex="F" Eyes="" Hair="Black" Weight="" CharHeight="5'3&quot;" Build="Thin" Complexion="Pale" Race="" Nationality="" Health="" Enneagram="" Intelligence="Normal" Values="" Abnormality="" Focus="" Adventureousness="" Aggression="" Confidence="" Conscientiousness="" Creativity="" Dominance="" Enthusiasm="" Assurance="" Sensitivity="" Shrewdness="" Sociability="" Stability="" CharacterSketch="Snow White is typical of fairy tale characters in that she's rather passive and not too bright.  However, she is a Princess, and she's beautiful: 'with skin as white as snow, with lips as red as blood, and with hair as black as ebony.'" PhysNotes="Red, full lips." Appearance="" Economic="" Education="" Ethnic="" Religion="" PsychNotes="" Notes="" Flaw="" BackStory="">
-      <Relationships />
-      <CharacterTraits />
-    </Character>
-    <Character UUID="70B611CD-2C09-438B-9585-34962A4053AA" Name="Evil Queen" Role="Evil Stepmother" StoryRole="Antagonist" Archetype="Shadow" Age="" Sex="F" Eyes="" Hair="" Weight=" 0" CharHeight="" Build="" Complexion="" Race="" Nationality="" Health="" Enneagram="" Intelligence="Bright" Values="" Abnormality="Sociopath" Focus="" Adventureousness="" Aggression="" Confidence="" Conscientiousness="" Creativity="" Dominance="" Enthusiasm="" Assurance="" Sensitivity="" Shrewdness="" Sociability="" Stability="" CharacterSketch="{\rtf1\fbidis\ansi\ansicpg1252\deff0\nouicompat\deflang1033{\fonttbl{\f0\fnil Segoe UI;}}&#xD;&#xA;{\colortbl ;\red0\green0\blue0;}&#xD;&#xA;{\*\generator Riched20 10.0.10011}\viewkind4\uc1 &#xD;&#xA;\pard\tx720\cf1\f0\fs23 Vanity is the flaw that initiates this story.  But the Queen is also a Shadow figure, and her truly evil nature gradually emerges.\par&#xD;&#xA;}&#xD;&#xA;" PhysNotes="" Appearance="" Economic="" Education="" Ethnic="" Religion="" PsychNotes="" Notes="" Flaw="" BackStory="">
-      <Relationships />
-      <CharacterTraits />
-    </Character>
-    <Character UUID="846A364A-9EFA-489E-AA29-B7A193A5A42C" Name="Huntsman " Role="Huntsman" StoryRole="Minor Role" Archetype="Shapeshifter" Age=" 0" Sex="M" Eyes="" Hair="" Weight=" 0" CharHeight="" Build="" Complexion="" Race="" Nationality="" Health="" Enneagram="" Intelligence="" Values="Integrity" Abnormality="" Focus="Others' Positions" Adventureousness="" Aggression="" Confidence="" Conscientiousness="" Creativity="" Dominance="" Enthusiasm="" Assurance="" Sensitivity="" Shrewdness="" Sociability="" Stability="" CharacterSketch="The Huntsman is torn between duty (and fear of punishment), and his inner sense of right and wrong." PhysNotes="" Appearance="" Economic="" Education="" Ethnic="" Religion="" PsychNotes="" Notes="" Flaw="" BackStory="">
-      <Relationships />
-      <CharacterTraits />
-    </Character>
-    <Character UUID="FE23F4F5-6EB4-443B-885A-F661AF27A17F" Name="Seven Dwarves" Role="Dwarves" StoryRole="Supporting Role" Archetype="Mentor" Age=" 0" Sex="M" Eyes="" Hair="" Weight=" 0" CharHeight="" Build="" Complexion="" Race="" Nationality="" Health="" Enneagram="" Intelligence="" Values="" Abnormality="" Focus="" Adventureousness="" Aggression="" Confidence="" Conscientiousness="" Creativity="" Dominance="" Enthusiasm="" Assurance="" Sensitivity="" Shrewdness="" Sociability="" Stability="" CharacterSketch="Not differentiated, and used interchangably in the story, the Dwarves are Mentors, older and wiser figures who urge Snow White to be cautious- advice she ignores, to her peril." PhysNotes="" Appearance="" Economic="" Education="" Ethnic="" Religion="" PsychNotes="" Notes="" Flaw="" BackStory="">
-      <Relationships />
-      <CharacterTraits />
-    </Character>
-    <Character UUID="311B5C50-1D1C-4127-BD31-410767714C60" Name="Prince " Role="Prince" StoryRole="Supporting Role" Archetype="Hero" Age=" 0" Sex="M" Eyes="" Hair="" Weight=" 0" CharHeight="" Build="" Complexion="" Race="" Nationality="" Health="" Enneagram="" Intelligence="" Values="" Abnormality="" Focus="" Adventureousness="" Aggression="" Confidence="" Conscientiousness="" Creativity="" Dominance="" Enthusiasm="" Assurance="" Sensitivity="" Shrewdness="" Sociability="" Stability="" CharacterSketch="Another thinly drawn character, the Prince's arrival is a bit of machina ex deus." PhysNotes="" Appearance="" Economic="" Education="" Ethnic="" Religion="" PsychNotes="" Notes="" Flaw="" BackStory="">
-      <Relationships />
-      <CharacterTraits />
-    </Character>
-    <Setting UUID="8B517E9E-2C84-4792-87B1-6D5C138D1AEB" Name="Queen's bedroom" Locale="" Season="" Period="" Lighting="" Weather="" Temperature="" Props="Magic looking glass on the wall" Summary="" Sights="Stone walls with hanging tapestries.  Large canopied bed against one wall. Two windows with ledges to set upon lets in light.  The windows look over the countryside." Sounds="Sounds from the shops and peasantry below." Touch="" SmellTaste="" Notes="" />
-    <Setting UUID="3A5C3822-1B7B-4A07-9BB6-A190ACBDD5F0" Name="Queen's sitting room" Locale="Interior" Season="" Period="" Lighting="Grey" Weather="" Temperature="" Props="Desk  with chairs and Bench with upolstered pillows" Summary="" Sights="Ornate tapestries hanging from the wall.  A side table with a decanter of wine and a bowl of fruit.  A desk, bare of papers.&#xD;&#xA;An ornate mirror on the wall.&#xD;&#xA;" Sounds="None.  The thick door and wall coverings muffle all sounds.  &#xD;&#xA;" Touch="" SmellTaste="" Notes="" />
-    <Setting UUID="5F49BD51-1C12-4655-84E7-2A88A3EA8D88" Name="A glade deep in the woods" Locale="Forest" Season="Late Spring" Period="" Lighting="Mottled sunlight" Weather="Clear" Temperature="Warm" Props="A log to sit on" Summary="" Sights="Sunlight filtering through the tall trees&#xD;&#xA;" Sounds="Occasional small animal sounds- squirells, insects, etc.&#xD;&#xA;" Touch="" SmellTaste="The smell of earth and trees.&#xD;&#xA;" Notes="" />
-    <Setting UUID="4AE0EDA2-7FFD-4541-B596-F4F8478E8531" Name="The dwarves' house (ext.)" Locale="" Season="" Period="Late afternoon" Lighting="Brightly lit" Weather="" Temperature="" Props="Table with seven plates, seven knives, and seven mugs, Seven small beds, Candles and hanging lanterns, Cupboards and bins of food, a fireplace, etc." Summary="" Sights="Everything is small; Snow Whilte must stoop to enter the door.&#xD;&#xA;" Sounds="Forest sounds from the windows." Touch="" SmellTaste="The smells of good food.&#xD;&#xA;" Notes="" />
-    <Setting UUID="3E25E8C0-FB74-41AB-A61A-BD2F006C126A" Name="The dwarves' house (int.)" Locale="" Season="" Period="" Lighting="" Weather="" Temperature="" Props="Seven small plates and cups, Seven small beds" Summary="" Sights="One room.  A small table, covered with a white cloth, and set with seven small plates, seven knives and forks, and drinking cups.  Along one wall are  seven beds.  A large fireplace." Sounds="Open windows let in the sounds of small birds from the forest." Touch="" SmellTaste="The smells of hot porridge." Notes="" />
-    <Setting UUID="55F3967D-FDF4-4A8B-A77D-98BFD5C646BF" Name="The mountain bier" Locale="Mountain top" Season="Fall" Period="" Lighting="Bright sunlight" Weather="Clear" Temperature="Cold" Props="The glass coffin" Summary="" Sights="A windswept, level spot, partway up the dwarves' mountain of gold, framed by several large boulders and cedar trees .  A white dias supports a clear crystal coffin, framed in gold." Sounds="The sound of the wind in the trees." Touch="" SmellTaste="The smells of the wilderness, of the cedars and of raw rock." Notes="" />
-    <Setting UUID="9BA4D5E8-B20B-4E1C-B1D2-675B31B860FD" Name="The wedding feast" Locale="Castle" Season="" Period="" Lighting="Dim, smoky" Weather="" Temperature="" Props="" Summary="" Sights="The castle dining hall.  A large stonework room with a flagstone floor.  Tapestries and taxidermy on the walls; rows of benches, filled with partying guests.  At one end, a raised table." Sounds="Laughter, madrigil music, convesation." Touch="" SmellTaste="The smells of roast meat, garlic and onion; of wine and fresh baked bread." Notes="" />
-    <Scene UUID="62A71CAC-E140-4163-96F2-55970421831D" Name="Introduction" ViewpointCharacter="" Date="" Time="" Setting="" SceneType="" ValueExchange="" Protagonist="" ProtagEmotion="" ProtagGoal="" Antagonist="" AntagEmotion="" AntagGoal="" Opposition="" Outcome="" Emotion="" NewGoal="" Remarks="" Events="" Consequences="" Significance="" Realization="" Review="" Notes="  A queen wished for a child with skin as white as snow, with lips as red as blood, and with hair as black as ebony.&#xD;&#xA;  She later gave birth to a daughter, who was named Snow White.  The queen died giving birth.&#xD;&#xA;  A year passed, and the king remarried.  The new queen was beautiful, but proud. &#xD;&#xA;  She had a magic looking glass, and she would ask it:&#xD;&#xA;     &quot;Mirror, mirror, on the wall,&#xD;&#xA;       Who is fairest of them all?&quot;&#xD;&#xA;  And the glass would answer,&#xD;&#xA;     &quot;You are the fairest of them all.&quot;">
-      <CastMembers />
-      <ScenePurpose />
-    </Scene>
-    <Scene UUID="60DF45E3-30E4-49C6-A9E3-C6D38D16B3F0" Name="The Queen gets a shock" ViewpointCharacter="" Date="" Time="" Setting="" SceneType="" ValueExchange="" Protagonist="" ProtagEmotion="" ProtagGoal="" Antagonist="" AntagEmotion="" AntagGoal="" Opposition="" Outcome="" Emotion="" NewGoal="" Remarks="{\rtf1\fbidis\ansi\ansicpg1252\deff0\nouicompat\deflang1033{\fonttbl{\f0\fnil Segoe UI;}}&#xD;&#xA;{\colortbl ;\red0\green0\blue0;}&#xD;&#xA;{\*\generator Riched20 10.0.10011}\viewkind4\uc1 &#xD;&#xA;\pard\tx720\cf1\f0\fs25 The mirror tells the queen that Snow White is now fairer than she is.\par&#xD;&#xA;\par&#xD;&#xA;}&#xD;&#xA;" Events="" Consequences="" Significance="" Realization="" Review="" Notes="">
-      <CastMembers>
-        <Member>70b611cd-2c09-438b-9585-34962a4053aa</Member>
-      </CastMembers>
-      <ScenePurpose />
-    </Scene>
-    <Scene UUID="B12FD9D7-5270-4969-85E6-7A9707B1E1D5" Name="She orders Snow White murdered" ViewpointCharacter="" Date="" Time="early morn" Setting="3a5c3822-1b7b-4a07-9bb6-a190acbdd5f0" SceneType="" ValueExchange="" Protagonist="70b611cd-2c09-438b-9585-34962a4053aa" ProtagEmotion="Hate" ProtagGoal="To be rid of her rival" Antagonist="846a364a-9efa-489e-aa29-b7a193a5a42c" AntagEmotion="Reluctance" AntagGoal="To avoid the Queen's ire" Opposition="Reluctance to commit this crime" Outcome="Huntsman takes the chile away into the w" Emotion="" NewGoal="" Remarks="She orders him to to take Snow White into the woods, to kill her, and to bring the Queen the child's heart ." Events="" Consequences="" Significance="" Realization="" Review="" Notes="">
-      <CastMembers>
-        <Member>70b611cd-2c09-438b-9585-34962a4053aa</Member>
-        <Member>846a364a-9efa-489e-aa29-b7a193a5a42c</Member>
-      </CastMembers>
-      <ScenePurpose />
-    </Scene>
-    <Scene UUID="5D4FC7A9-7829-486F-B26A-2B0236B75A94" Name="The huntsman spares Snow White" ViewpointCharacter="" Date="" Time="morning" Setting="5f49bd51-1c12-4655-84e7-2a88a3ea8d88" SceneType="" ValueExchange="" Protagonist="846a364a-9efa-489e-aa29-b7a193a5a42c" ProtagEmotion="Pity" ProtagGoal="To commit the crime" Antagonist="b7a96067-780a-4f00-940e-4afd7be2d3a5" AntagEmotion="Fear" AntagGoal="Relief from danger" Opposition="The urge to do the right thing" Outcome="The huntsman lets her go" Emotion="" NewGoal="" Remarks="Snow White begs for her life" Events="" Consequences="" Significance="" Realization="" Review="" Notes="">
-      <CastMembers>
-        <Member>846a364a-9efa-489e-aa29-b7a193a5a42c</Member>
-        <Member>b7a96067-780a-4f00-940e-4afd7be2d3a5</Member>
-      </CastMembers>
-      <ScenePurpose />
-    </Scene>
-    <Scene UUID="2024E730-9883-45D6-B404-54ACD1DE2E0D" Name="The huntsman tricks the Queen" ViewpointCharacter="" Date="" Time="morning" Setting="5f49bd51-1c12-4655-84e7-2a88a3ea8d88" SceneType="" ValueExchange="" Protagonist="" ProtagEmotion="" ProtagGoal="" Antagonist="" AntagEmotion="" AntagGoal="" Opposition="" Outcome="" Emotion="" NewGoal="" Remarks="A boar comes by.  The huntsman has an idea.  He kills the beast and takes its heart back to the Queen.&#xD;&#xA;" Events="" Consequences="" Significance="" Realization="" Review="" Notes="">
-      <CastMembers>
-        <Member>846a364a-9efa-489e-aa29-b7a193a5a42c</Member>
-        <Member>70b611cd-2c09-438b-9585-34962a4053aa</Member>
-      </CastMembers>
-      <ScenePurpose />
-    </Scene>
-    <Scene UUID="AED7883A-765B-4340-8260-2084E87B1839" Name="Snow White finds a little house" ViewpointCharacter="" Date="xxxxxxxxxx" Time="late aft." Setting="4ae0eda2-7ffd-4541-b596-f4f8478e8531" SceneType="" ValueExchange="" Protagonist="b7a96067-780a-4f00-940e-4afd7be2d3a5" ProtagEmotion="Desire" ProtagGoal="Food, shelter, and protection" Antagonist="b7a96067-780a-4f00-940e-4afd7be2d3a5" AntagEmotion="Fear" AntagGoal="To avoid a possible danger" Opposition="" Outcome="" Emotion="" NewGoal="" Remarks="Snow White wanders in the woods, afraid, until late that day she finds a small house in the woods.&#xD;&#xA;" Events="" Consequences="" Significance="" Realization="" Review="" Notes="  The house is in a small clearing.  Still afraid, Snow White hesitates, but this is the only habitation she's found in the forest, and evening is approaching.  The deep forest is frightening and the darkening shadows seem threatening.&#xD;&#xA;   Still, the house is odd- it's too small.  Something seems strange about it. &#xD;&#xA;   But hunger and exhaustion and fear finally drive her forward from the edge of the clearing.">
-      <CastMembers>
-        <Member>b7a96067-780a-4f00-940e-4afd7be2d3a5</Member>
-      </CastMembers>
-      <ScenePurpose />
-    </Scene>
-    <Scene UUID="86A5D7D6-75F9-415E-A42E-578207457821" Name="She goes in, eats, and falls asleep" ViewpointCharacter="" Date="" Time=" late aft." Setting="3e25e8c0-fb74-41ab-a61a-bd2f006c126a" SceneType="" ValueExchange="" Protagonist="" ProtagEmotion="" ProtagGoal="" Antagonist="" AntagEmotion="" AntagGoal="" Opposition="" Outcome="" Emotion="" NewGoal="" Remarks="" Events="" Consequences="" Significance="" Realization="" Review="" Notes="  Describe the curious little house, how small everything is, how neat.  The table is set and there's food on the fire.  &#xD;&#xA;   Hungry, Snow White eats a little porridge and some bread from each plate, and drinks a litle wine from each cup.&#xD;&#xA;   Fed, and exhuasted from her ordeal, she grows sleepy.  She lies down in each bed.  One is too long, another too short, this one is too hard, that one is too soft.  Finally, she finds that the seventh bed is just the right size, and falls deep asleep.">
-      <CastMembers>
-        <Member>b7a96067-780a-4f00-940e-4afd7be2d3a5</Member>
-      </CastMembers>
-      <ScenePurpose />
-    </Scene>
-    <Scene UUID="79D4DB59-10AB-4746-8B7D-572FE83F456C" Name="The dwarves find the intruder" ViewpointCharacter="" Date="" Time="evening" Setting="3e25e8c0-fb74-41ab-a61a-bd2f006c126a" SceneType="" ValueExchange="" Protagonist="" ProtagEmotion="Anger, puzzlement" ProtagGoal="To solve the mystery" Antagonist="" AntagEmotion="(asleep)" AntagGoal="" Opposition="" Outcome="The dwarves find the child asleep" Emotion="" NewGoal="" Remarks="The dwarves come home and discover Snow White in their house." Events="" Consequences="" Significance="" Realization="" Review="" Notes="">
-      <CastMembers>
-        <Member>fe23f4f5-6eb4-443b-885a-f661af27a17f</Member>
-        <Member>b7a96067-780a-4f00-940e-4afd7be2d3a5</Member>
-      </CastMembers>
-      <ScenePurpose />
-    </Scene>
-    <Scene UUID="20213423-DBDF-4493-A63B-186E78262642" Name="The dwarves hear Show White's story" ViewpointCharacter="" Date="" Time="that morn." Setting="3e25e8c0-fb74-41ab-a61a-bd2f006c126a" SceneType="" ValueExchange="" Protagonist="" ProtagEmotion="" ProtagGoal="" Antagonist="" AntagEmotion="" AntagGoal="" Opposition="" Outcome="" Emotion="" NewGoal="" Remarks="Snow White tells the dwarves what happened; they decide to let her stay as housekeeper and cook." Events="" Consequences="" Significance="" Realization="" Review="" Notes="  Snow White is frightened when she first wakes up, but the dwarves seem friendly. &#xD;&#xA;   They listen to the tale of how she came to be in their house, and she tells them of her stepmother's attempt to murder her, and how she was spared.&#xD;&#xA;   The dwarves tell her that if she will keep house, and cook and wash, and make the beds, they will let her stay with them, and she will have food and a place to sleep.  Snow White agrees.&#xD;&#xA;   The next morning the dwarves go to the mountain  to dig gold, but they caution Snow White that her stepmother will soon be looking for her, and that she should let no one into the house.&#xD;&#xA;">
-      <CastMembers>
-        <Member>b7a96067-780a-4f00-940e-4afd7be2d3a5</Member>
-        <Member>fe23f4f5-6eb4-443b-885a-f661af27a17f</Member>
-      </CastMembers>
-      <ScenePurpose />
-    </Scene>
-    <Scene UUID="6B90B1C3-C17E-450D-820F-47E2031AC6F8" Name="The Queen learns that Snow White is alive" ViewpointCharacter="" Date="" Time="later" Setting="8b517e9e-2c84-4792-87b1-6d5c138d1aeb" SceneType="" ValueExchange="" Protagonist="" ProtagEmotion="" ProtagGoal="" Antagonist="" AntagEmotion="" AntagGoal="" Opposition="" Outcome="" Emotion="" NewGoal="" Remarks="The mirror tells the Queen that Snow White still lives." Events="" Consequences="" Significance="" Realization="" Review="" Notes="  Thinking that she's eaten Snow White's heart, the Queen goes to her mirror once more and asks:&#xD;&#xA;      &quot;Looking glass upon the wall, &#xD;&#xA;       Who is fairest of us all?&quot;&#xD;&#xA;   But she's startled when the mirror tells her:&#xD;&#xA;         &quot;Queen, thou art of beauty rare,&#xD;&#xA;          But Snow Whilte living in the glen&#xD;&#xA;          With the seven little men&#xD;&#xA;          Is a thousand times more fair.&quot;&#xD;&#xA;&#xD;&#xA;        &#xD;&#xA;">
-      <CastMembers>
-        <Member>70b611cd-2c09-438b-9585-34962a4053aa</Member>
-      </CastMembers>
-      <ScenePurpose />
-    </Scene>
-    <Scene UUID="629B05AA-D5F0-4483-AECC-7320EB6C7A3E" Name="The Queen visits, disguised as a peddler" ViewpointCharacter="" Date="" Time="that day" Setting="3e25e8c0-fb74-41ab-a61a-bd2f006c126a" SceneType="" ValueExchange="" Protagonist="" ProtagEmotion="" ProtagGoal="" Antagonist="" AntagEmotion="" AntagGoal="" Opposition="" Outcome="" Emotion="" NewGoal="" Remarks="She visits the cottage.  Snow White thinks she's harmless, lets her in, and buys a pretty bodice." Events="" Consequences="" Significance="" Realization="" Review="" Notes="">
-      <CastMembers>
-        <Member>70b611cd-2c09-438b-9585-34962a4053aa</Member>
-        <Member>b7a96067-780a-4f00-940e-4afd7be2d3a5</Member>
-      </CastMembers>
-      <ScenePurpose />
-    </Scene>
-    <Scene UUID="2059C06D-18EF-4814-A9AE-3D00A5CB3663" Name="The Queen tries to kill Snow White" ViewpointCharacter="" Date="" Time="that day" Setting="3e25e8c0-fb74-41ab-a61a-bd2f006c126a" SceneType="" ValueExchange="" Protagonist="70b611cd-2c09-438b-9585-34962a4053aa" ProtagEmotion="Anger" ProtagGoal="To commit murder" Antagonist="b7a96067-780a-4f00-940e-4afd7be2d3a5" AntagEmotion="Fear" AntagGoal="To say alive" Opposition="Pitted against superior opponent" Outcome="Snow White quits breathing" Emotion="" NewGoal="" Remarks="The Queen draws the lace on the bodice until Snow White can't breath, and passes out as though dead." Events="" Consequences="" Significance="" Realization="" Review="" Notes="">
-      <CastMembers>
-        <Member>70b611cd-2c09-438b-9585-34962a4053aa</Member>
-        <Member>b7a96067-780a-4f00-940e-4afd7be2d3a5</Member>
-      </CastMembers>
-      <ScenePurpose />
-    </Scene>
-    <Scene UUID="30221F23-D72B-455A-B244-B1504CF56C5C" Name="The dwarves revive Snow White" ViewpointCharacter="" Date="" Time="" Setting="3e25e8c0-fb74-41ab-a61a-bd2f006c126a" SceneType="" ValueExchange="" Protagonist="" ProtagEmotion="" ProtagGoal="" Antagonist="" AntagEmotion="" AntagGoal="" Opposition="" Outcome="" Emotion="" NewGoal="" Remarks="When they return from work, the dwarves find her unconscious.  They cut the laces, and she revives." Events="" Consequences="" Significance="" Realization="" Review="" Notes="">
-      <CastMembers>
-        <Member>fe23f4f5-6eb4-443b-885a-f661af27a17f</Member>
-        <Member>b7a96067-780a-4f00-940e-4afd7be2d3a5</Member>
-      </CastMembers>
-      <ScenePurpose />
-    </Scene>
-    <Scene UUID="A5B6EE8A-D770-4482-B015-C7B70C097788" Name="The Queen finds that her plot failed" ViewpointCharacter="" Date="" Time="next day" Setting="8b517e9e-2c84-4792-87b1-6d5c138d1aeb" SceneType="" ValueExchange="" Protagonist="" ProtagEmotion="" ProtagGoal="" Antagonist="" AntagEmotion="" AntagGoal="" Opposition="" Outcome="" Emotion="" NewGoal="" Remarks="Once more the mirror tells her." Events="" Consequences="" Significance="" Realization="" Review="" Notes="">
-      <CastMembers>
-        <Member>70b611cd-2c09-438b-9585-34962a4053aa</Member>
-      </CastMembers>
-      <ScenePurpose />
-    </Scene>
-    <Scene UUID="5589BF00-ECEE-4611-AC7F-85867817735F" Name="She tries a different ploy" ViewpointCharacter="" Date="" Time="that day" Setting="4ae0eda2-7ffd-4541-b596-f4f8478e8531" SceneType="" ValueExchange="" Protagonist="" ProtagEmotion="" ProtagGoal="" Antagonist="" AntagEmotion="" AntagGoal="" Opposition="" Outcome="" Emotion="" NewGoal="" Remarks="The Queen, disguised as a differnent peddler, shows Snow White a beautiful, but poisoned, comb." Events="" Consequences="" Significance="" Realization="" Review="" Notes="">
-      <CastMembers>
-        <Member>70b611cd-2c09-438b-9585-34962a4053aa</Member>
-        <Member>b7a96067-780a-4f00-940e-4afd7be2d3a5</Member>
-      </CastMembers>
-      <ScenePurpose />
-    </Scene>
-    <Scene UUID="86B1FF83-094E-45AE-8992-653DD7D18669" Name="The comb poisons Snow White" ViewpointCharacter="" Date="" Time="that day" Setting="3e25e8c0-fb74-41ab-a61a-bd2f006c126a" SceneType="" ValueExchange="" Protagonist="" ProtagEmotion="" ProtagGoal="" Antagonist="" AntagEmotion="" AntagGoal="" Opposition="" Outcome="" Emotion="" NewGoal="" Remarks="Snow White takes the offered comb through the window, combs her hair, and falls down senseless." Events="" Consequences="" Significance="" Realization="" Review="" Notes="">
-      <CastMembers>
-        <Member>70b611cd-2c09-438b-9585-34962a4053aa</Member>
-        <Member>b7a96067-780a-4f00-940e-4afd7be2d3a5</Member>
-      </CastMembers>
-      <ScenePurpose />
-    </Scene>
-    <Scene UUID="178ACE17-016F-42A0-8FF0-4FF840B5C6BE" Name="The dwarves revive Snow White" ViewpointCharacter="" Date="" Time=" that eve." Setting="3e25e8c0-fb74-41ab-a61a-bd2f006c126a" SceneType="" ValueExchange="" Protagonist="" ProtagEmotion="" ProtagGoal="" Antagonist="" AntagEmotion="" AntagGoal="" Opposition="" Outcome="" Emotion="" NewGoal="" Remarks="When they find her and remove the poisoned comb, Snow White revives." Events="" Consequences="" Significance="" Realization="" Review="" Notes="">
-      <CastMembers>
-        <Member>fe23f4f5-6eb4-443b-885a-f661af27a17f</Member>
-        <Member>b7a96067-780a-4f00-940e-4afd7be2d3a5</Member>
-      </CastMembers>
-      <ScenePurpose />
-    </Scene>
-    <Scene UUID="3A067EBF-732A-4FCA-9D2B-F6196FDD96C2" Name="The Queen hears the news again" ViewpointCharacter="" Date="" Time="next morn." Setting="8b517e9e-2c84-4792-87b1-6d5c138d1aeb" SceneType="" ValueExchange="" Protagonist="" ProtagEmotion="" ProtagGoal="" Antagonist="" AntagEmotion="" AntagGoal="" Opposition="" Outcome="" Emotion="" NewGoal="" Remarks="The mirror tells her the news for the third time." Events="" Consequences="" Significance="" Realization="" Review="" Notes="">
-      <CastMembers>
-        <Member>70b611cd-2c09-438b-9585-34962a4053aa</Member>
-      </CastMembers>
-      <ScenePurpose />
-    </Scene>
-    <Scene UUID="B31EC261-E1A6-4D62-8A9E-3D40DA9C2AF9" Name="The Queen gives Snow White a poisoned apple" ViewpointCharacter="" Date="" Time="" Setting="4ae0eda2-7ffd-4541-b596-f4f8478e8531" SceneType="" ValueExchange="" Protagonist="" ProtagEmotion="" ProtagGoal="" Antagonist="" AntagEmotion="" AntagGoal="" Opposition="" Outcome="" Emotion="" NewGoal="" Remarks="The Queen, disguised as a peasant woman, splits the apple and, to calm the girl's fears, she eats half.   She gives Snow White the other, poisoned half." Events="" Consequences="" Significance="" Realization="" Review="" Notes="">
-      <CastMembers>
-        <Member>b7a96067-780a-4f00-940e-4afd7be2d3a5</Member>
-      </CastMembers>
-      <ScenePurpose />
-    </Scene>
-    <Scene UUID="F14508DE-1986-4A93-965E-FF24E59489E6" Name="The Queen demands news from the mirror" ViewpointCharacter="" Date="" Time="" Setting="8b517e9e-2c84-4792-87b1-6d5c138d1aeb" SceneType="" ValueExchange="" Protagonist="" ProtagEmotion="" ProtagGoal="" Antagonist="" AntagEmotion="" AntagGoal="" Opposition="" Outcome="" Emotion="" NewGoal="" Remarks="The Queen rushes home and asks the mirror again." Events="" Consequences="" Significance="" Realization="" Review="" Notes="When she asks this time, the mirror replies,&#xD;&#xA;    &quot;You are the fairest now of all.&quot;&#xD;&#xA;The Queen has peace, thinking that she's finally destroyed Snow White.&#xD;&#xA;">
-      <CastMembers>
-        <Member>70b611cd-2c09-438b-9585-34962a4053aa</Member>
-      </CastMembers>
-      <ScenePurpose />
-    </Scene>
-    <Scene UUID="3F7EF538-B96A-4E29-A53E-B0E809C74924" Name="The dwarves make a glass coffin" ViewpointCharacter="" Date="" Time="" Setting="55f3967d-fdf4-4a8b-a77d-98bfd5c646bf" SceneType="" ValueExchange="" Protagonist="" ProtagEmotion="" ProtagGoal="" Antagonist="" AntagEmotion="" AntagGoal="" Opposition="" Outcome="" Emotion="" NewGoal="" Remarks="" Events="" Consequences="" Significance="" Realization="" Review="" Notes="    When they return, the dwarves try to revive her, but to no avail.  They mourn for three days.&#xD;&#xA;    But Snow White looks so life-like, with her beautiful red cheeks, that they can't stand to bury her, so they make a coffin of clear glass, and lay her in it, and put her name on it in gold.  They set the coffin on the mountain and took turns staying by it.  The birds, an own and a raven and a dove, also mourned.">
-      <CastMembers>
-        <Member>fe23f4f5-6eb4-443b-885a-f661af27a17f</Member>
-      </CastMembers>
-      <ScenePurpose />
-    </Scene>
-    <Scene UUID="B4F77F45-9193-4A66-8E4C-088553F03D01" Name="A king's son rides by and sees Snow White" ViewpointCharacter="" Date="" Time="a year lat" Setting="55f3967d-fdf4-4a8b-a77d-98bfd5c646bf" SceneType="" ValueExchange="" Protagonist="" ProtagEmotion="" ProtagGoal="" Antagonist="" AntagEmotion="" AntagGoal="" Opposition="" Outcome="" Emotion="" NewGoal="" Remarks="When he sees her, the Prince tells the dwarf that he must have the coffin, so he can gaze upon her" Events="" Consequences="" Significance="" Realization="" Review="" Notes="">
-      <CastMembers>
-        <Member>311b5c50-1d1c-4127-bd31-410767714c60</Member>
-      </CastMembers>
-      <ScenePurpose />
-    </Scene>
-    <Scene UUID="44A4787C-C6E8-4E0A-A858-B25AF882B0D6" Name="The poisonous apple is dislodged" ViewpointCharacter="" Date="" Time="" Setting="55f3967d-fdf4-4a8b-a77d-98bfd5c646bf" SceneType="" ValueExchange="" Protagonist="" ProtagEmotion="" ProtagGoal="" Antagonist="" AntagEmotion="" AntagGoal="" Opposition="" Outcome="" Emotion="" NewGoal="" Remarks="The prince's men, carrying the coffin, bump it, dislodging the apple piece from Snow White's thoat.  She revives." Events="" Consequences="" Significance="" Realization="" Review="" Notes="">
-      <CastMembers>
-        <Member>311b5c50-1d1c-4127-bd31-410767714c60</Member>
-        <Member>b7a96067-780a-4f00-940e-4afd7be2d3a5</Member>
-      </CastMembers>
-      <ScenePurpose />
-    </Scene>
-    <Scene UUID="AD013C15-6649-46C8-9766-553C58094EA6" Name="Snow White agrees to marry her rescuer" ViewpointCharacter="" Date="" Time="" Setting="55f3967d-fdf4-4a8b-a77d-98bfd5c646bf" SceneType="" ValueExchange="" Protagonist="" ProtagEmotion="" ProtagGoal="" Antagonist="" AntagEmotion="" AntagGoal="" Opposition="" Outcome="" Emotion="" NewGoal="" Remarks="The Prince is overjoyed that Snow White is alive.  She agrees to marry him." Events="" Consequences="" Significance="" Realization="" Review="" Notes="">
-      <CastMembers>
-        <Member>311b5c50-1d1c-4127-bd31-410767714c60</Member>
-        <Member>b7a96067-780a-4f00-940e-4afd7be2d3a5</Member>
-      </CastMembers>
-      <ScenePurpose />
-    </Scene>
-    <Scene UUID="84DE3C8C-48AD-4123-8BB6-DB346CF75554" Name="The Queen receives her punishment" ViewpointCharacter="" Date="" Time="later" Setting="9ba4d5e8-b20b-4e1c-b1d2-675b31b860fd" SceneType="" ValueExchange="" Protagonist="" ProtagEmotion="" ProtagGoal="" Antagonist="" AntagEmotion="" AntagGoal="" Opposition="" Outcome="" Emotion="" NewGoal="" Remarks="" Events="" Consequences="" Significance="" Realization="" Review="" Notes="  The Queen receives an invitation to the wedding, not knowing who the bride is.  But when she asks her mirror who is fairest of all, the mirror replies:&#xD;&#xA;     &quot;O Queen, although you are of beauty rare,&#xD;&#xA;     The young bride is a thousand times more fair.&quot;&#xD;&#xA;  The Queen rages and is terrified, but finally goes to the wedding.  And when she sees the bride she knows her for Snow White.&#xD;&#xA;   But the Price and his father have learned what happened to Snow White, and they are ready.  The evil Queen is ordered to dance in red-hot iron shoes until she falls down dead.">
-      <CastMembers>
-        <Member>70b611cd-2c09-438b-9585-34962a4053aa</Member>
-        <Member>b7a96067-780a-4f00-940e-4afd7be2d3a5</Member>
-        <Member>311b5c50-1d1c-4127-bd31-410767714c60</Member>
-      </CastMembers>
-      <ScenePurpose />
-    </Scene>
-    <TrashCan UUID="108AE2DA-A064-4112-81A9-491B24BF849E" Name="Deleted Story Elements" />
-    <Folder UUID="446BF558-9B50-4178-98BD-4B448169C505" Name="Narrative View" Notes="" />
-    <TrashCan UUID="B1D642B7-4D2B-4E72-932C-CA82DE66C244" Name="Deleted Story Elements" />
-  </StoryElements>
-  <Explorer>
-    <StoryNode UUID="A8D6A619-AD8F-482A-A556-32A41F806EDD" Type="StoryOverview" Name="Snow White                            " IsExpanded="True" IsSelected="False" IsRoot="True">
-      <StoryNode UUID="232F1535-13E5-42D4-A7B5-F47D862A508D" Type="Folder" Name="Problems" IsExpanded="True" IsSelected="False" IsRoot="False">
-        <StoryNode UUID="8E4D3EA5-4C39-4FBD-B221-20EA9CCB2D95" Type="Problem" Name="Snow White's struggles to survive the Queen's trap" IsExpanded="True" IsSelected="False" IsRoot="False" />
-      </StoryNode>
-      <StoryNode UUID="84B61C35-DC2D-4AF8-8731-20BE64FD7D74" Type="Folder" Name="Characters" IsExpanded="True" IsSelected="False" IsRoot="False">
-        <StoryNode UUID="B7A96067-780A-4F00-940E-4AFD7BE2D3A5" Type="Character" Name="Snow White" IsExpanded="False" IsSelected="False" IsRoot="False" />
-        <StoryNode UUID="70B611CD-2C09-438B-9585-34962A4053AA" Type="Character" Name="Evil Queen" IsExpanded="True" IsSelected="False" IsRoot="False" />
-        <StoryNode UUID="846A364A-9EFA-489E-AA29-B7A193A5A42C" Type="Character" Name="Huntsman " IsExpanded="False" IsSelected="False" IsRoot="False" />
-        <StoryNode UUID="FE23F4F5-6EB4-443B-885A-F661AF27A17F" Type="Character" Name="Seven Dwarves" IsExpanded="False" IsSelected="False" IsRoot="False" />
-        <StoryNode UUID="311B5C50-1D1C-4127-BD31-410767714C60" Type="Character" Name="Prince " IsExpanded="False" IsSelected="False" IsRoot="False" />
-      </StoryNode>
-      <StoryNode UUID="B96920AF-A09C-4F27-9339-CFF37E40E9E4" Type="Folder" Name="Settings" IsExpanded="False" IsSelected="False" IsRoot="False">
-        <StoryNode UUID="8B517E9E-2C84-4792-87B1-6D5C138D1AEB" Type="Setting" Name="Queen's bedroom" IsExpanded="True" IsSelected="False" IsRoot="False" />
-        <StoryNode UUID="3A5C3822-1B7B-4A07-9BB6-A190ACBDD5F0" Type="Setting" Name="Queen's sitting room" IsExpanded="True" IsSelected="False" IsRoot="False" />
-        <StoryNode UUID="5F49BD51-1C12-4655-84E7-2A88A3EA8D88" Type="Setting" Name="A glade deep in the woods" IsExpanded="False" IsSelected="False" IsRoot="False" />
-        <StoryNode UUID="4AE0EDA2-7FFD-4541-B596-F4F8478E8531" Type="Setting" Name="The dwarves' house (ext.)" IsExpanded="False" IsSelected="False" IsRoot="False" />
-        <StoryNode UUID="3E25E8C0-FB74-41AB-A61A-BD2F006C126A" Type="Setting" Name="The dwarves' house (int.)" IsExpanded="False" IsSelected="False" IsRoot="False" />
-        <StoryNode UUID="55F3967D-FDF4-4A8B-A77D-98BFD5C646BF" Type="Setting" Name="The mountain bier" IsExpanded="False" IsSelected="False" IsRoot="False" />
-        <StoryNode UUID="9BA4D5E8-B20B-4E1C-B1D2-675B31B860FD" Type="Setting" Name="The wedding feast" IsExpanded="False" IsSelected="False" IsRoot="False" />
-      </StoryNode>
-      <StoryNode UUID="0A284478-74D9-4031-8BD3-FC0B5BC89895" Type="Folder" Name="Plot Points" IsExpanded="True" IsSelected="False" IsRoot="False">
-        <StoryNode UUID="62A71CAC-E140-4163-96F2-55970421831D" Type="Scene" Name="Introduction" IsExpanded="True" IsSelected="False" IsRoot="False" />
-        <StoryNode UUID="60DF45E3-30E4-49C6-A9E3-C6D38D16B3F0" Type="Scene" Name="The Queen gets a shock" IsExpanded="True" IsSelected="False" IsRoot="False" />
-        <StoryNode UUID="B12FD9D7-5270-4969-85E6-7A9707B1E1D5" Type="Scene" Name="She orders Snow White murdered" IsExpanded="False" IsSelected="False" IsRoot="False" />
-        <StoryNode UUID="5D4FC7A9-7829-486F-B26A-2B0236B75A94" Type="Scene" Name="The huntsman spares Snow White" IsExpanded="False" IsSelected="False" IsRoot="False" />
-        <StoryNode UUID="2024E730-9883-45D6-B404-54ACD1DE2E0D" Type="Scene" Name="The huntsman tricks the Queen" IsExpanded="False" IsSelected="False" IsRoot="False" />
-        <StoryNode UUID="AED7883A-765B-4340-8260-2084E87B1839" Type="Scene" Name="Snow White finds a little house" IsExpanded="False" IsSelected="False" IsRoot="False" />
-        <StoryNode UUID="86A5D7D6-75F9-415E-A42E-578207457821" Type="Scene" Name="She goes in, eats, and falls asleep" IsExpanded="False" IsSelected="False" IsRoot="False" />
-        <StoryNode UUID="79D4DB59-10AB-4746-8B7D-572FE83F456C" Type="Scene" Name="The dwarves find the intruder" IsExpanded="False" IsSelected="False" IsRoot="False" />
-        <StoryNode UUID="20213423-DBDF-4493-A63B-186E78262642" Type="Scene" Name="The dwarves hear Show White's story" IsExpanded="False" IsSelected="False" IsRoot="False" />
-        <StoryNode UUID="6B90B1C3-C17E-450D-820F-47E2031AC6F8" Type="Scene" Name="The Queen learns that Snow White is alive" IsExpanded="False" IsSelected="False" IsRoot="False" />
-        <StoryNode UUID="629B05AA-D5F0-4483-AECC-7320EB6C7A3E" Type="Scene" Name="The Queen visits, disguised as a peddler" IsExpanded="False" IsSelected="False" IsRoot="False" />
-        <StoryNode UUID="2059C06D-18EF-4814-A9AE-3D00A5CB3663" Type="Scene" Name="The Queen tries to kill Snow White" IsExpanded="False" IsSelected="False" IsRoot="False" />
-        <StoryNode UUID="30221F23-D72B-455A-B244-B1504CF56C5C" Type="Scene" Name="The dwarves revive Snow White" IsExpanded="False" IsSelected="False" IsRoot="False" />
-        <StoryNode UUID="A5B6EE8A-D770-4482-B015-C7B70C097788" Type="Scene" Name="The Queen finds that her plot failed" IsExpanded="False" IsSelected="False" IsRoot="False" />
-        <StoryNode UUID="5589BF00-ECEE-4611-AC7F-85867817735F" Type="Scene" Name="She tries a different ploy" IsExpanded="False" IsSelected="False" IsRoot="False" />
-        <StoryNode UUID="86B1FF83-094E-45AE-8992-653DD7D18669" Type="Scene" Name="The comb poisons Snow White" IsExpanded="False" IsSelected="False" IsRoot="False" />
-        <StoryNode UUID="178ACE17-016F-42A0-8FF0-4FF840B5C6BE" Type="Scene" Name="The dwarves revive Snow White" IsExpanded="False" IsSelected="False" IsRoot="False" />
-        <StoryNode UUID="3A067EBF-732A-4FCA-9D2B-F6196FDD96C2" Type="Scene" Name="The Queen hears the news again" IsExpanded="False" IsSelected="False" IsRoot="False" />
-        <StoryNode UUID="B31EC261-E1A6-4D62-8A9E-3D40DA9C2AF9" Type="Scene" Name="The Queen gives Snow White a poisoned apple" IsExpanded="False" IsSelected="False" IsRoot="False" />
-        <StoryNode UUID="F14508DE-1986-4A93-965E-FF24E59489E6" Type="Scene" Name="The Queen demands news from the mirror" IsExpanded="False" IsSelected="False" IsRoot="False" />
-        <StoryNode UUID="3F7EF538-B96A-4E29-A53E-B0E809C74924" Type="Scene" Name="The dwarves make a glass coffin" IsExpanded="False" IsSelected="False" IsRoot="False" />
-        <StoryNode UUID="B4F77F45-9193-4A66-8E4C-088553F03D01" Type="Scene" Name="A king's son rides by and sees Snow White" IsExpanded="False" IsSelected="False" IsRoot="False" />
-        <StoryNode UUID="44A4787C-C6E8-4E0A-A858-B25AF882B0D6" Type="Scene" Name="The poisonous apple is dislodged" IsExpanded="False" IsSelected="False" IsRoot="False" />
-        <StoryNode UUID="AD013C15-6649-46C8-9766-553C58094EA6" Type="Scene" Name="Snow White agrees to marry her rescuer" IsExpanded="False" IsSelected="False" IsRoot="False" />
-        <StoryNode UUID="84DE3C8C-48AD-4123-8BB6-DB346CF75554" Type="Scene" Name="The Queen receives her punishment" IsExpanded="False" IsSelected="False" IsRoot="False" />
-      </StoryNode>
-    </StoryNode>
-    <StoryNode UUID="108AE2DA-A064-4112-81A9-491B24BF849E" Type="TrashCan" Name="Deleted Story Elements" IsExpanded="False" IsSelected="False" IsRoot="True" />
-  </Explorer>
-  <Narrator>
-    <StoryNode UUID="446BF558-9B50-4178-98BD-4B448169C505" Type="Section" Name="Narrative View" IsExpanded="False" IsSelected="False" IsRoot="True">
-      <StoryNode UUID="62A71CAC-E140-4163-96F2-55970421831D" Type="Scene" Name="Introduction" IsExpanded="False" IsSelected="False" IsRoot="False" />
-      <StoryNode UUID="60DF45E3-30E4-49C6-A9E3-C6D38D16B3F0" Type="Scene" Name="The Queen gets a shock" IsExpanded="False" IsSelected="False" IsRoot="False" />
-      <StoryNode UUID="B12FD9D7-5270-4969-85E6-7A9707B1E1D5" Type="Scene" Name="She orders Snow White murdered" IsExpanded="False" IsSelected="False" IsRoot="False" />
-      <StoryNode UUID="5D4FC7A9-7829-486F-B26A-2B0236B75A94" Type="Scene" Name="The huntsman spares Snow White" IsExpanded="False" IsSelected="False" IsRoot="False" />
-      <StoryNode UUID="2024E730-9883-45D6-B404-54ACD1DE2E0D" Type="Scene" Name="The huntsman tricks the Queen" IsExpanded="False" IsSelected="False" IsRoot="False" />
-      <StoryNode UUID="AED7883A-765B-4340-8260-2084E87B1839" Type="Scene" Name="Snow White finds a little house" IsExpanded="False" IsSelected="False" IsRoot="False" />
-      <StoryNode UUID="86A5D7D6-75F9-415E-A42E-578207457821" Type="Scene" Name="She goes in, eats, and falls asleep" IsExpanded="False" IsSelected="False" IsRoot="False" />
-      <StoryNode UUID="79D4DB59-10AB-4746-8B7D-572FE83F456C" Type="Scene" Name="The dwarves find the intruder" IsExpanded="False" IsSelected="False" IsRoot="False" />
-      <StoryNode UUID="20213423-DBDF-4493-A63B-186E78262642" Type="Scene" Name="The dwarves hear Show White's story" IsExpanded="False" IsSelected="False" IsRoot="False" />
-      <StoryNode UUID="6B90B1C3-C17E-450D-820F-47E2031AC6F8" Type="Scene" Name="The Queen learns that Snow White is alive" IsExpanded="False" IsSelected="False" IsRoot="False" />
-      <StoryNode UUID="629B05AA-D5F0-4483-AECC-7320EB6C7A3E" Type="Scene" Name="The Queen visits, disguised as a peddler" IsExpanded="False" IsSelected="False" IsRoot="False" />
-      <StoryNode UUID="2059C06D-18EF-4814-A9AE-3D00A5CB3663" Type="Scene" Name="The Queen tries to kill Snow White" IsExpanded="False" IsSelected="False" IsRoot="False" />
-      <StoryNode UUID="30221F23-D72B-455A-B244-B1504CF56C5C" Type="Scene" Name="The dwarves revive Snow White" IsExpanded="False" IsSelected="False" IsRoot="False" />
-      <StoryNode UUID="A5B6EE8A-D770-4482-B015-C7B70C097788" Type="Scene" Name="The Queen finds that her plot failed" IsExpanded="False" IsSelected="False" IsRoot="False" />
-      <StoryNode UUID="5589BF00-ECEE-4611-AC7F-85867817735F" Type="Scene" Name="She tries a different ploy" IsExpanded="False" IsSelected="False" IsRoot="False" />
-      <StoryNode UUID="86B1FF83-094E-45AE-8992-653DD7D18669" Type="Scene" Name="The comb poisons Snow White" IsExpanded="False" IsSelected="False" IsRoot="False" />
-      <StoryNode UUID="178ACE17-016F-42A0-8FF0-4FF840B5C6BE" Type="Scene" Name="The dwarves revive Snow White" IsExpanded="False" IsSelected="False" IsRoot="False" />
-      <StoryNode UUID="3A067EBF-732A-4FCA-9D2B-F6196FDD96C2" Type="Scene" Name="The Queen hears the news again" IsExpanded="False" IsSelected="False" IsRoot="False" />
-      <StoryNode UUID="B31EC261-E1A6-4D62-8A9E-3D40DA9C2AF9" Type="Scene" Name="The Queen gives Snow White a poisoned apple" IsExpanded="False" IsSelected="False" IsRoot="False" />
-      <StoryNode UUID="F14508DE-1986-4A93-965E-FF24E59489E6" Type="Scene" Name="The Queen demands news from the mirror" IsExpanded="False" IsSelected="False" IsRoot="False" />
-      <StoryNode UUID="3F7EF538-B96A-4E29-A53E-B0E809C74924" Type="Scene" Name="The dwarves make a glass coffin" IsExpanded="False" IsSelected="False" IsRoot="False" />
-      <StoryNode UUID="B4F77F45-9193-4A66-8E4C-088553F03D01" Type="Scene" Name="A king's son rides by and sees Snow White" IsExpanded="False" IsSelected="False" IsRoot="False" />
-      <StoryNode UUID="44A4787C-C6E8-4E0A-A858-B25AF882B0D6" Type="Scene" Name="The poisonous apple is dislodged" IsExpanded="False" IsSelected="False" IsRoot="False" />
-      <StoryNode UUID="AD013C15-6649-46C8-9766-553C58094EA6" Type="Scene" Name="Snow White agrees to marry her rescuer" IsExpanded="False" IsSelected="False" IsRoot="False" />
-      <StoryNode UUID="84DE3C8C-48AD-4123-8BB6-DB346CF75554" Type="Scene" Name="The Queen receives her punishment" IsExpanded="False" IsSelected="False" IsRoot="False" />
-    </StoryNode>
-  </Narrator>
-  <Settings />
-</StoryCAD>
+{
+  "CreatedVersion": null,
+  "LastVersion": "Version: 2.14.6 Built on: 2025-01-13T20:07:10:716Z",
+  "FlattenedExplorerView": [
+    {
+      "Uuid": "a8d6a619-ad8f-482a-a556-32a41f806edd",
+      "ParentUuid": null
+    },
+    {
+      "Uuid": "232f1535-13e5-42d4-a7b5-f47d862a508d",
+      "ParentUuid": "a8d6a619-ad8f-482a-a556-32a41f806edd"
+    },
+    {
+      "Uuid": "8e4d3ea5-4c39-4fbd-b221-20ea9ccb2d95",
+      "ParentUuid": "232f1535-13e5-42d4-a7b5-f47d862a508d"
+    },
+    {
+      "Uuid": "84b61c35-dc2d-4af8-8731-20be64fd7d74",
+      "ParentUuid": "a8d6a619-ad8f-482a-a556-32a41f806edd"
+    },
+    {
+      "Uuid": "b7a96067-780a-4f00-940e-4afd7be2d3a5",
+      "ParentUuid": "84b61c35-dc2d-4af8-8731-20be64fd7d74"
+    },
+    {
+      "Uuid": "70b611cd-2c09-438b-9585-34962a4053aa",
+      "ParentUuid": "84b61c35-dc2d-4af8-8731-20be64fd7d74"
+    },
+    {
+      "Uuid": "846a364a-9efa-489e-aa29-b7a193a5a42c",
+      "ParentUuid": "84b61c35-dc2d-4af8-8731-20be64fd7d74"
+    },
+    {
+      "Uuid": "fe23f4f5-6eb4-443b-885a-f661af27a17f",
+      "ParentUuid": "84b61c35-dc2d-4af8-8731-20be64fd7d74"
+    },
+    {
+      "Uuid": "311b5c50-1d1c-4127-bd31-410767714c60",
+      "ParentUuid": "84b61c35-dc2d-4af8-8731-20be64fd7d74"
+    },
+    {
+      "Uuid": "b96920af-a09c-4f27-9339-cff37e40e9e4",
+      "ParentUuid": "a8d6a619-ad8f-482a-a556-32a41f806edd"
+    },
+    {
+      "Uuid": "8b517e9e-2c84-4792-87b1-6d5c138d1aeb",
+      "ParentUuid": "b96920af-a09c-4f27-9339-cff37e40e9e4"
+    },
+    {
+      "Uuid": "3a5c3822-1b7b-4a07-9bb6-a190acbdd5f0",
+      "ParentUuid": "b96920af-a09c-4f27-9339-cff37e40e9e4"
+    },
+    {
+      "Uuid": "5f49bd51-1c12-4655-84e7-2a88a3ea8d88",
+      "ParentUuid": "b96920af-a09c-4f27-9339-cff37e40e9e4"
+    },
+    {
+      "Uuid": "4ae0eda2-7ffd-4541-b596-f4f8478e8531",
+      "ParentUuid": "b96920af-a09c-4f27-9339-cff37e40e9e4"
+    },
+    {
+      "Uuid": "3e25e8c0-fb74-41ab-a61a-bd2f006c126a",
+      "ParentUuid": "b96920af-a09c-4f27-9339-cff37e40e9e4"
+    },
+    {
+      "Uuid": "55f3967d-fdf4-4a8b-a77d-98bfd5c646bf",
+      "ParentUuid": "b96920af-a09c-4f27-9339-cff37e40e9e4"
+    },
+    {
+      "Uuid": "9ba4d5e8-b20b-4e1c-b1d2-675b31b860fd",
+      "ParentUuid": "b96920af-a09c-4f27-9339-cff37e40e9e4"
+    },
+    {
+      "Uuid": "0a284478-74d9-4031-8bd3-fc0b5bc89895",
+      "ParentUuid": "a8d6a619-ad8f-482a-a556-32a41f806edd"
+    },
+    {
+      "Uuid": "62a71cac-e140-4163-96f2-55970421831d",
+      "ParentUuid": "0a284478-74d9-4031-8bd3-fc0b5bc89895"
+    },
+    {
+      "Uuid": "60df45e3-30e4-49c6-a9e3-c6d38d16b3f0",
+      "ParentUuid": "0a284478-74d9-4031-8bd3-fc0b5bc89895"
+    },
+    {
+      "Uuid": "b12fd9d7-5270-4969-85e6-7a9707b1e1d5",
+      "ParentUuid": "0a284478-74d9-4031-8bd3-fc0b5bc89895"
+    },
+    {
+      "Uuid": "5d4fc7a9-7829-486f-b26a-2b0236b75a94",
+      "ParentUuid": "0a284478-74d9-4031-8bd3-fc0b5bc89895"
+    },
+    {
+      "Uuid": "2024e730-9883-45d6-b404-54acd1de2e0d",
+      "ParentUuid": "0a284478-74d9-4031-8bd3-fc0b5bc89895"
+    },
+    {
+      "Uuid": "aed7883a-765b-4340-8260-2084e87b1839",
+      "ParentUuid": "0a284478-74d9-4031-8bd3-fc0b5bc89895"
+    },
+    {
+      "Uuid": "86a5d7d6-75f9-415e-a42e-578207457821",
+      "ParentUuid": "0a284478-74d9-4031-8bd3-fc0b5bc89895"
+    },
+    {
+      "Uuid": "79d4db59-10ab-4746-8b7d-572fe83f456c",
+      "ParentUuid": "0a284478-74d9-4031-8bd3-fc0b5bc89895"
+    },
+    {
+      "Uuid": "20213423-dbdf-4493-a63b-186e78262642",
+      "ParentUuid": "0a284478-74d9-4031-8bd3-fc0b5bc89895"
+    },
+    {
+      "Uuid": "6b90b1c3-c17e-450d-820f-47e2031ac6f8",
+      "ParentUuid": "0a284478-74d9-4031-8bd3-fc0b5bc89895"
+    },
+    {
+      "Uuid": "629b05aa-d5f0-4483-aecc-7320eb6c7a3e",
+      "ParentUuid": "0a284478-74d9-4031-8bd3-fc0b5bc89895"
+    },
+    {
+      "Uuid": "2059c06d-18ef-4814-a9ae-3d00a5cb3663",
+      "ParentUuid": "0a284478-74d9-4031-8bd3-fc0b5bc89895"
+    },
+    {
+      "Uuid": "30221f23-d72b-455a-b244-b1504cf56c5c",
+      "ParentUuid": "0a284478-74d9-4031-8bd3-fc0b5bc89895"
+    },
+    {
+      "Uuid": "a5b6ee8a-d770-4482-b015-c7b70c097788",
+      "ParentUuid": "0a284478-74d9-4031-8bd3-fc0b5bc89895"
+    },
+    {
+      "Uuid": "5589bf00-ecee-4611-ac7f-85867817735f",
+      "ParentUuid": "0a284478-74d9-4031-8bd3-fc0b5bc89895"
+    },
+    {
+      "Uuid": "86b1ff83-094e-45ae-8992-653dd7d18669",
+      "ParentUuid": "0a284478-74d9-4031-8bd3-fc0b5bc89895"
+    },
+    {
+      "Uuid": "178ace17-016f-42a0-8ff0-4ff840b5c6be",
+      "ParentUuid": "0a284478-74d9-4031-8bd3-fc0b5bc89895"
+    },
+    {
+      "Uuid": "3a067ebf-732a-4fca-9d2b-f6196fdd96c2",
+      "ParentUuid": "0a284478-74d9-4031-8bd3-fc0b5bc89895"
+    },
+    {
+      "Uuid": "b31ec261-e1a6-4d62-8a9e-3d40da9c2af9",
+      "ParentUuid": "0a284478-74d9-4031-8bd3-fc0b5bc89895"
+    },
+    {
+      "Uuid": "f14508de-1986-4a93-965e-ff24e59489e6",
+      "ParentUuid": "0a284478-74d9-4031-8bd3-fc0b5bc89895"
+    },
+    {
+      "Uuid": "3f7ef538-b96a-4e29-a53e-b0e809c74924",
+      "ParentUuid": "0a284478-74d9-4031-8bd3-fc0b5bc89895"
+    },
+    {
+      "Uuid": "b4f77f45-9193-4a66-8e4c-088553f03d01",
+      "ParentUuid": "0a284478-74d9-4031-8bd3-fc0b5bc89895"
+    },
+    {
+      "Uuid": "44a4787c-c6e8-4e0a-a858-b25af882b0d6",
+      "ParentUuid": "0a284478-74d9-4031-8bd3-fc0b5bc89895"
+    },
+    {
+      "Uuid": "ad013c15-6649-46c8-9766-553c58094ea6",
+      "ParentUuid": "0a284478-74d9-4031-8bd3-fc0b5bc89895"
+    },
+    {
+      "Uuid": "84de3c8c-48ad-4123-8bb6-db346cf75554",
+      "ParentUuid": "0a284478-74d9-4031-8bd3-fc0b5bc89895"
+    },
+    {
+      "Uuid": "108ae2da-a064-4112-81a9-491b24bf849e",
+      "ParentUuid": null
+    }
+  ],
+  "FlattenedNarratorView": [
+    {
+      "Uuid": "446bf558-9b50-4178-98bd-4b448169c505",
+      "ParentUuid": null
+    },
+    {
+      "Uuid": "62a71cac-e140-4163-96f2-55970421831d",
+      "ParentUuid": "446bf558-9b50-4178-98bd-4b448169c505"
+    },
+    {
+      "Uuid": "60df45e3-30e4-49c6-a9e3-c6d38d16b3f0",
+      "ParentUuid": "446bf558-9b50-4178-98bd-4b448169c505"
+    },
+    {
+      "Uuid": "b12fd9d7-5270-4969-85e6-7a9707b1e1d5",
+      "ParentUuid": "446bf558-9b50-4178-98bd-4b448169c505"
+    },
+    {
+      "Uuid": "5d4fc7a9-7829-486f-b26a-2b0236b75a94",
+      "ParentUuid": "446bf558-9b50-4178-98bd-4b448169c505"
+    },
+    {
+      "Uuid": "2024e730-9883-45d6-b404-54acd1de2e0d",
+      "ParentUuid": "446bf558-9b50-4178-98bd-4b448169c505"
+    },
+    {
+      "Uuid": "aed7883a-765b-4340-8260-2084e87b1839",
+      "ParentUuid": "446bf558-9b50-4178-98bd-4b448169c505"
+    },
+    {
+      "Uuid": "86a5d7d6-75f9-415e-a42e-578207457821",
+      "ParentUuid": "446bf558-9b50-4178-98bd-4b448169c505"
+    },
+    {
+      "Uuid": "79d4db59-10ab-4746-8b7d-572fe83f456c",
+      "ParentUuid": "446bf558-9b50-4178-98bd-4b448169c505"
+    },
+    {
+      "Uuid": "20213423-dbdf-4493-a63b-186e78262642",
+      "ParentUuid": "446bf558-9b50-4178-98bd-4b448169c505"
+    },
+    {
+      "Uuid": "6b90b1c3-c17e-450d-820f-47e2031ac6f8",
+      "ParentUuid": "446bf558-9b50-4178-98bd-4b448169c505"
+    },
+    {
+      "Uuid": "629b05aa-d5f0-4483-aecc-7320eb6c7a3e",
+      "ParentUuid": "446bf558-9b50-4178-98bd-4b448169c505"
+    },
+    {
+      "Uuid": "2059c06d-18ef-4814-a9ae-3d00a5cb3663",
+      "ParentUuid": "446bf558-9b50-4178-98bd-4b448169c505"
+    },
+    {
+      "Uuid": "30221f23-d72b-455a-b244-b1504cf56c5c",
+      "ParentUuid": "446bf558-9b50-4178-98bd-4b448169c505"
+    },
+    {
+      "Uuid": "a5b6ee8a-d770-4482-b015-c7b70c097788",
+      "ParentUuid": "446bf558-9b50-4178-98bd-4b448169c505"
+    },
+    {
+      "Uuid": "5589bf00-ecee-4611-ac7f-85867817735f",
+      "ParentUuid": "446bf558-9b50-4178-98bd-4b448169c505"
+    },
+    {
+      "Uuid": "86b1ff83-094e-45ae-8992-653dd7d18669",
+      "ParentUuid": "446bf558-9b50-4178-98bd-4b448169c505"
+    },
+    {
+      "Uuid": "178ace17-016f-42a0-8ff0-4ff840b5c6be",
+      "ParentUuid": "446bf558-9b50-4178-98bd-4b448169c505"
+    },
+    {
+      "Uuid": "3a067ebf-732a-4fca-9d2b-f6196fdd96c2",
+      "ParentUuid": "446bf558-9b50-4178-98bd-4b448169c505"
+    },
+    {
+      "Uuid": "b31ec261-e1a6-4d62-8a9e-3d40da9c2af9",
+      "ParentUuid": "446bf558-9b50-4178-98bd-4b448169c505"
+    },
+    {
+      "Uuid": "f14508de-1986-4a93-965e-ff24e59489e6",
+      "ParentUuid": "446bf558-9b50-4178-98bd-4b448169c505"
+    },
+    {
+      "Uuid": "3f7ef538-b96a-4e29-a53e-b0e809c74924",
+      "ParentUuid": "446bf558-9b50-4178-98bd-4b448169c505"
+    },
+    {
+      "Uuid": "b4f77f45-9193-4a66-8e4c-088553f03d01",
+      "ParentUuid": "446bf558-9b50-4178-98bd-4b448169c505"
+    },
+    {
+      "Uuid": "44a4787c-c6e8-4e0a-a858-b25af882b0d6",
+      "ParentUuid": "446bf558-9b50-4178-98bd-4b448169c505"
+    },
+    {
+      "Uuid": "ad013c15-6649-46c8-9766-553c58094ea6",
+      "ParentUuid": "446bf558-9b50-4178-98bd-4b448169c505"
+    },
+    {
+      "Uuid": "84de3c8c-48ad-4123-8bb6-db346cf75554",
+      "ParentUuid": "446bf558-9b50-4178-98bd-4b448169c505"
+    }
+  ],
+  "Elements": [
+    {
+      "Type": "StoryOverview",
+      "DateCreated": "08-28-95",
+      "Author": "Anonymous",
+      "DateModified": "2025-01-13",
+      "StoryIdea": "{\\rtf1\\fbidis\\ansi\\ansicpg1252\\deff0\\nouicompat\\deflang1033{\\fonttbl{\\f0\\fnil Segoe UI;}{\\f1\\fnil\\fcharset0 Segoe UI;}}\r\n{\\colortbl ;\\red0\\green0\\blue0;}\r\n{\\*\\generator Riched20 3.1.0004}\\viewkind4\\uc1 \r\n\\pard\\tx720\\cf1\\f0\\fs23   \\f1 A young princess named Snow White falls victim to her jealous stepmother\u0027s murderous vanity.\\f0\\par\r\n}\r\n",
+      "Concept": "{\\rtf1\\fbidis\\ansi\\ansicpg1252\\deff0\\nouicompat\\deflang1033{\\fonttbl{\\f0\\fnil\\fcharset0 Segoe UI;}{\\f1\\fnil Segoe UI;}}\r\n{\\colortbl ;\\red0\\green0\\blue0;}\r\n{\\*\\generator Riched20 3.1.0004}\\viewkind4\\uc1 \r\n\\pard\\cf1\\f0\\fs23 What if she flees to the forest and is rescued by dwarves?\\par\r\nWhat if she falls into a deep sleep or coma after eating a poisoned apple given her by her stepmother? \\f1\\par\r\n}\r\n",
+      "StoryProblem": "8e4d3ea5-4c39-4fbd-b221-20ea9ccb2d95",
+      "Premise": "{\\rtf1\\fbidis\\ansi\\ansicpg1252\\deff0\\nouicompat\\deflang1033{\\fonttbl{\\f0\\fnil\\fcharset0 Segoe UI;}{\\f1\\fnil Segoe UI;}}\r\n{\\colortbl ;\\red0\\green0\\blue0;}\r\n{\\*\\generator Riched20 3.1.0004}\\viewkind4\\uc1 \r\n\\pard\\cf1\\f0\\fs23 A young princess named Snow White falls victim to her jealous stepmother\u0027s murderous vanity, fleeing to the forest where she finds refuge with seven dwarfs. The stepmother\u0027s relentless pursuit leads to Snow White\u0027s enchanted slumber, broken only by a prince\u0027s kiss. The tale concludes with retributive justice for the wicked stepmother and a happily-ever-after for Snow White and her prince.\\f1\\par\r\n}\r\n",
+      "StoryType": "Short Story",
+      "StoryGenre": "Fairy tale",
+      "Viewpoint": "Omniscient",
+      "ViewpointCharacter": "",
+      "Voice": "",
+      "LiteraryDevice": "",
+      "Tense": "",
+      "Style": "",
+      "StructureNotes": "",
+      "Tone": "",
+      "Notes": "{\\rtf1\\fbidis\\ansi\\ansicpg1252\\deff0\\nouicompat\\deflang1033{\\fonttbl{\\f0\\fnil Segoe UI;}}\r\n{\\colortbl ;\\red0\\green0\\blue0;}\r\n{\\*\\generator Riched20 3.1.0004}\\viewkind4\\uc1 \r\n\\pard\\tx720\\cf1\\f0\\fs23 This sample story outline is adapted from Jacob and Wilhelm Grimm\u0027s collection of fairy tales, published in 1812.  The more than two hundred stories in the collection were gathered from stories the brothers found in the farms and villages of their native Germany.\\par\r\n   The Grimm fairy tales were told in a narrative form and aren\u0027t as scenic as most contemprary stories- even modern fairy tales.  However, scenes can still clearly be found in this story.\\par\r\n\r\n\\pard\\fs23\\par\r\n}\r\n",
+      "GUID": "a8d6a619-ad8f-482a-a556-32a41f806edd",
+      "Name": "Snow White                            "
+    },
+    {
+      "Type": "Folder",
+      "Notes": "",
+      "GUID": "232f1535-13e5-42d4-a7b5-f47d862a508d",
+      "Name": "Problems"
+    },
+    {
+      "Type": "Folder",
+      "Notes": "",
+      "GUID": "84b61c35-dc2d-4af8-8731-20be64fd7d74",
+      "Name": "Characters"
+    },
+    {
+      "Type": "Folder",
+      "Notes": "",
+      "GUID": "b96920af-a09c-4f27-9339-cff37e40e9e4",
+      "Name": "Settings"
+    },
+    {
+      "Type": "Folder",
+      "Notes": "",
+      "GUID": "0a284478-74d9-4031-8bd3-fc0b5bc89895",
+      "Name": "Plot Points"
+    },
+    {
+      "Type": "Problem",
+      "ProblemType": "Conflict",
+      "ConflictType": "Man vs. Man",
+      "ProblemCategory": "",
+      "Subject": "Murder",
+      "ProblemSource": " Snow White\u0027s father, the king, remarries a jealous woman",
+      "StoryQuestion": "{\\rtf1\\fbidis\\ansi\\ansicpg1252\\deff0\\nouicompat\\deflang1033{\\fonttbl{\\f0\\fnil Segoe UI;}{\\f1\\fnil\\fcharset0 Segoe UI;}}\r\n{\\colortbl ;\\red0\\green0\\blue0;}\r\n{\\*\\generator Riched20 3.1.0004}\\viewkind4\\uc1 \r\n\\pard\\tx720\\cf1\\f0\\fs25 Will Snow Whilte elude the attempts by her stepmother\\f1  the\\f0  Queen to kill her?\\par\r\n}\r\n",
+      "Protagonist": "b7a96067-780a-4f00-940e-4afd7be2d3a5",
+      "ProtGoal": "Relief from danger",
+      "ProtMotive": "Survival (deliverance)",
+      "ProtConflict": "",
+      "Antagonist": "70b611cd-2c09-438b-9585-34962a4053aa",
+      "AntagGoal": "To be the fairest in the land",
+      "AntagMotive": "Rivalry",
+      "AntagConflict": "",
+      "Outcome": "Protagonist obtains goal",
+      "Method": "Rescued, by Dwarves and Princes",
+      "Theme": "Good overcomes evil",
+      "Premise": "{\\rtf1\\fbidis\\ansi\\ansicpg1252\\deff0\\nouicompat\\deflang1033{\\fonttbl{\\f0\\fnil\\fcharset0 Segoe UI;}{\\f1\\fnil Segoe UI;}}\r\n{\\colortbl ;\\red0\\green0\\blue0;}\r\n{\\*\\generator Riched20 3.1.0004}\\viewkind4\\uc1 \r\n\\pard\\cf1\\f0\\fs23 A young princess named Snow White falls victim to her jealous stepmother\u0027s murderous vanity, fleeing to the forest where she finds refuge with seven dwarfs. The stepmother\u0027s relentless pursuit leads to Snow White\u0027s enchanted slumber, broken only by a prince\u0027s kiss. The tale concludes with retributive justice for the wicked stepmother and a happily-ever-after for Snow White and her prince.\\f1\\par\r\n}\r\n",
+      "Notes": "Vanity and jealousy are the traits which propel the Queen to murder.\r\n\r\nSnow White doesn\u0027t succeed through her own efforts, but is repeatedly rescued by the Dwarves, and finaly by her Hero, the Prince.  The confrontation therefore  isn\u0027t between a strong willed protagonist and her antagonist, but  between good and evil.\r\n",
+      "StructureTitle": "",
+      "StructureDescription": "",
+      "StructureBeats": [],
+      "BoundStructure": "",
+      "GUID": "8e4d3ea5-4c39-4fbd-b221-20ea9ccb2d95",
+      "Name": "Snow White struggles to survive the Queen\u0027s traps"
+    },
+    {
+      "Type": "Character",
+      "Role": "Princess",
+      "StoryRole": "Protagonist",
+      "Archetype": "",
+      "CharacterSketch": "Snow White is typical of fairy tale characters in that she\u0027s rather passive and not too bright.  However, she is a Princess, and she\u0027s beautiful: \u0027with skin as white as snow, with lips as red as blood, and with hair as black as ebony.\u0027",
+      "Age": "",
+      "Sex": "F",
+      "Eyes": "",
+      "Hair": "Black",
+      "Weight": "",
+      "CharHeight": "5\u00273\u0022",
+      "Build": "Thin",
+      "Complexion": "Pale",
+      "Race": "",
+      "Nationality": "",
+      "Health": "",
+      "PhysNotes": "Red, full lips.",
+      "Appearance": "",
+      "RelationshipList": [],
+      "Economic": "",
+      "Education": "",
+      "Ethnic": "",
+      "Religion": "",
+      "Enneagram": "",
+      "Intelligence": "Normal",
+      "Values": "",
+      "Abnormality": "",
+      "Focus": "",
+      "PsychNotes": "",
+      "Adventureousness": "",
+      "Aggression": "",
+      "Confidence": "",
+      "Conscientiousness": "",
+      "Creativity": "",
+      "Dominance": "",
+      "Enthusiasm": "",
+      "Assurance": "",
+      "Sensitivity": "",
+      "Shrewdness": "",
+      "Sociability": "",
+      "Stability": "",
+      "Notes": "",
+      "TraitList": [],
+      "Flaw": "",
+      "BackStory": "",
+      "GUID": "b7a96067-780a-4f00-940e-4afd7be2d3a5",
+      "Name": "Snow White"
+    },
+    {
+      "Type": "Character",
+      "Role": "Evil Stepmother",
+      "StoryRole": "Antagonist",
+      "Archetype": "Shadow",
+      "CharacterSketch": "{\\rtf1\\fbidis\\ansi\\ansicpg1252\\deff0\\nouicompat\\deflang1033{\\fonttbl{\\f0\\fnil Segoe UI;}}\r\n{\\colortbl ;\\red0\\green0\\blue0;}\r\n{\\*\\generator Riched20 10.0.10011}\\viewkind4\\uc1 \r\n\\pard\\tx720\\cf1\\f0\\fs23 Vanity is the flaw that initiates this story.  But the Queen is also a Shadow figure, and her truly evil nature gradually emerges.\\par\r\n}\r\n",
+      "Age": "",
+      "Sex": "F",
+      "Eyes": "",
+      "Hair": "",
+      "Weight": " 0",
+      "CharHeight": "",
+      "Build": "",
+      "Complexion": "",
+      "Race": "",
+      "Nationality": "",
+      "Health": "",
+      "PhysNotes": "",
+      "Appearance": "",
+      "RelationshipList": [],
+      "Economic": "",
+      "Education": "",
+      "Ethnic": "",
+      "Religion": "",
+      "Enneagram": "",
+      "Intelligence": "Bright",
+      "Values": "",
+      "Abnormality": "Sociopath",
+      "Focus": "",
+      "PsychNotes": "",
+      "Adventureousness": "",
+      "Aggression": "",
+      "Confidence": "",
+      "Conscientiousness": "",
+      "Creativity": "",
+      "Dominance": "",
+      "Enthusiasm": "",
+      "Assurance": "",
+      "Sensitivity": "",
+      "Shrewdness": "",
+      "Sociability": "",
+      "Stability": "",
+      "Notes": "",
+      "TraitList": [],
+      "Flaw": "",
+      "BackStory": "",
+      "GUID": "70b611cd-2c09-438b-9585-34962a4053aa",
+      "Name": "Evil Queen"
+    },
+    {
+      "Type": "Character",
+      "Role": "Huntsman",
+      "StoryRole": "Minor Role",
+      "Archetype": "Shapeshifter",
+      "CharacterSketch": "The Huntsman is torn between duty (and fear of punishment), and his inner sense of right and wrong.",
+      "Age": " 0",
+      "Sex": "M",
+      "Eyes": "",
+      "Hair": "",
+      "Weight": " 0",
+      "CharHeight": "",
+      "Build": "",
+      "Complexion": "",
+      "Race": "",
+      "Nationality": "",
+      "Health": "",
+      "PhysNotes": "",
+      "Appearance": "",
+      "RelationshipList": [],
+      "Economic": "",
+      "Education": "",
+      "Ethnic": "",
+      "Religion": "",
+      "Enneagram": "",
+      "Intelligence": "",
+      "Values": "Integrity",
+      "Abnormality": "",
+      "Focus": "Others\u0027 Positions",
+      "PsychNotes": "",
+      "Adventureousness": "",
+      "Aggression": "",
+      "Confidence": "",
+      "Conscientiousness": "",
+      "Creativity": "",
+      "Dominance": "",
+      "Enthusiasm": "",
+      "Assurance": "",
+      "Sensitivity": "",
+      "Shrewdness": "",
+      "Sociability": "",
+      "Stability": "",
+      "Notes": "",
+      "TraitList": [],
+      "Flaw": "",
+      "BackStory": "",
+      "GUID": "846a364a-9efa-489e-aa29-b7a193a5a42c",
+      "Name": "Huntsman "
+    },
+    {
+      "Type": "Character",
+      "Role": "Dwarves",
+      "StoryRole": "Supporting Role",
+      "Archetype": "Mentor",
+      "CharacterSketch": "Not differentiated, and used interchangably in the story, the Dwarves are Mentors, older and wiser figures who urge Snow White to be cautious- advice she ignores, to her peril.",
+      "Age": " 0",
+      "Sex": "M",
+      "Eyes": "",
+      "Hair": "",
+      "Weight": " 0",
+      "CharHeight": "",
+      "Build": "",
+      "Complexion": "",
+      "Race": "",
+      "Nationality": "",
+      "Health": "",
+      "PhysNotes": "",
+      "Appearance": "",
+      "RelationshipList": [],
+      "Economic": "",
+      "Education": "",
+      "Ethnic": "",
+      "Religion": "",
+      "Enneagram": "",
+      "Intelligence": "",
+      "Values": "",
+      "Abnormality": "",
+      "Focus": "",
+      "PsychNotes": "",
+      "Adventureousness": "",
+      "Aggression": "",
+      "Confidence": "",
+      "Conscientiousness": "",
+      "Creativity": "",
+      "Dominance": "",
+      "Enthusiasm": "",
+      "Assurance": "",
+      "Sensitivity": "",
+      "Shrewdness": "",
+      "Sociability": "",
+      "Stability": "",
+      "Notes": "",
+      "TraitList": [],
+      "Flaw": "",
+      "BackStory": "",
+      "GUID": "fe23f4f5-6eb4-443b-885a-f661af27a17f",
+      "Name": "Seven Dwarves"
+    },
+    {
+      "Type": "Character",
+      "Role": "Prince",
+      "StoryRole": "Supporting Role",
+      "Archetype": "Hero",
+      "CharacterSketch": "Another thinly drawn character, the Prince\u0027s arrival is a bit of machina ex deus.",
+      "Age": " 0",
+      "Sex": "M",
+      "Eyes": "",
+      "Hair": "",
+      "Weight": " 0",
+      "CharHeight": "",
+      "Build": "",
+      "Complexion": "",
+      "Race": "",
+      "Nationality": "",
+      "Health": "",
+      "PhysNotes": "",
+      "Appearance": "",
+      "RelationshipList": [],
+      "Economic": "",
+      "Education": "",
+      "Ethnic": "",
+      "Religion": "",
+      "Enneagram": "",
+      "Intelligence": "",
+      "Values": "",
+      "Abnormality": "",
+      "Focus": "",
+      "PsychNotes": "",
+      "Adventureousness": "",
+      "Aggression": "",
+      "Confidence": "",
+      "Conscientiousness": "",
+      "Creativity": "",
+      "Dominance": "",
+      "Enthusiasm": "",
+      "Assurance": "",
+      "Sensitivity": "",
+      "Shrewdness": "",
+      "Sociability": "",
+      "Stability": "",
+      "Notes": "",
+      "TraitList": [],
+      "Flaw": "",
+      "BackStory": "",
+      "GUID": "311b5c50-1d1c-4127-bd31-410767714c60",
+      "Name": "Prince "
+    },
+    {
+      "Type": "Setting",
+      "Locale": "",
+      "Season": "",
+      "Period": "",
+      "Lighting": "",
+      "Weather": "",
+      "Temperature": "",
+      "Props": "Magic looking glass on the wall",
+      "Summary": "",
+      "Sights": "Stone walls with hanging tapestries.  Large canopied bed against one wall. Two windows with ledges to set upon lets in light.  The windows look over the countryside.",
+      "Sounds": "Sounds from the shops and peasantry below.",
+      "Touch": "",
+      "SmellTaste": "",
+      "Notes": "",
+      "GUID": "8b517e9e-2c84-4792-87b1-6d5c138d1aeb",
+      "Name": "Queen\u0027s bedroom"
+    },
+    {
+      "Type": "Setting",
+      "Locale": "Interior",
+      "Season": "",
+      "Period": "",
+      "Lighting": "Grey",
+      "Weather": "",
+      "Temperature": "",
+      "Props": "Desk  with chairs and Bench with upolstered pillows",
+      "Summary": "",
+      "Sights": "Ornate tapestries hanging from the wall.  A side table with a decanter of wine and a bowl of fruit.  A desk, bare of papers.\r\nAn ornate mirror on the wall.\r\n",
+      "Sounds": "None.  The thick door and wall coverings muffle all sounds.  \r\n",
+      "Touch": "",
+      "SmellTaste": "",
+      "Notes": "",
+      "GUID": "3a5c3822-1b7b-4a07-9bb6-a190acbdd5f0",
+      "Name": "Queen\u0027s sitting room"
+    },
+    {
+      "Type": "Setting",
+      "Locale": "Forest",
+      "Season": "Late Spring",
+      "Period": "",
+      "Lighting": "Mottled sunlight",
+      "Weather": "Clear",
+      "Temperature": "Warm",
+      "Props": "A log to sit on",
+      "Summary": "",
+      "Sights": "Sunlight filtering through the tall trees\r\n",
+      "Sounds": "Occasional small animal sounds- squirells, insects, etc.\r\n",
+      "Touch": "",
+      "SmellTaste": "The smell of earth and trees.\r\n",
+      "Notes": "",
+      "GUID": "5f49bd51-1c12-4655-84e7-2a88a3ea8d88",
+      "Name": "A glade deep in the woods"
+    },
+    {
+      "Type": "Setting",
+      "Locale": "",
+      "Season": "",
+      "Period": "Late afternoon",
+      "Lighting": "Brightly lit",
+      "Weather": "",
+      "Temperature": "",
+      "Props": "Table with seven plates, seven knives, and seven mugs, Seven small beds, Candles and hanging lanterns, Cupboards and bins of food, a fireplace, etc.",
+      "Summary": "",
+      "Sights": "Everything is small; Snow Whilte must stoop to enter the door.\r\n",
+      "Sounds": "Forest sounds from the windows.",
+      "Touch": "",
+      "SmellTaste": "The smells of good food.\r\n",
+      "Notes": "",
+      "GUID": "4ae0eda2-7ffd-4541-b596-f4f8478e8531",
+      "Name": "The dwarves\u0027 house (ext.)"
+    },
+    {
+      "Type": "Setting",
+      "Locale": "",
+      "Season": "",
+      "Period": "",
+      "Lighting": "",
+      "Weather": "",
+      "Temperature": "",
+      "Props": "Seven small plates and cups, Seven small beds",
+      "Summary": "",
+      "Sights": "One room.  A small table, covered with a white cloth, and set with seven small plates, seven knives and forks, and drinking cups.  Along one wall are  seven beds.  A large fireplace.",
+      "Sounds": "Open windows let in the sounds of small birds from the forest.",
+      "Touch": "",
+      "SmellTaste": "The smells of hot porridge.",
+      "Notes": "",
+      "GUID": "3e25e8c0-fb74-41ab-a61a-bd2f006c126a",
+      "Name": "The dwarves\u0027 house (int.)"
+    },
+    {
+      "Type": "Setting",
+      "Locale": "Mountain top",
+      "Season": "Fall",
+      "Period": "",
+      "Lighting": "Bright sunlight",
+      "Weather": "Clear",
+      "Temperature": "Cold",
+      "Props": "The glass coffin",
+      "Summary": "",
+      "Sights": "A windswept, level spot, partway up the dwarves\u0027 mountain of gold, framed by several large boulders and cedar trees .  A white dias supports a clear crystal coffin, framed in gold.",
+      "Sounds": "The sound of the wind in the trees.",
+      "Touch": "",
+      "SmellTaste": "The smells of the wilderness, of the cedars and of raw rock.",
+      "Notes": "",
+      "GUID": "55f3967d-fdf4-4a8b-a77d-98bfd5c646bf",
+      "Name": "The mountain bier"
+    },
+    {
+      "Type": "Setting",
+      "Locale": "Castle",
+      "Season": "",
+      "Period": "",
+      "Lighting": "Dim, smoky",
+      "Weather": "",
+      "Temperature": "",
+      "Props": "",
+      "Summary": "",
+      "Sights": "The castle dining hall.  A large stonework room with a flagstone floor.  Tapestries and taxidermy on the walls; rows of benches, filled with partying guests.  At one end, a raised table.",
+      "Sounds": "Laughter, madrigil music, convesation.",
+      "Touch": "",
+      "SmellTaste": "The smells of roast meat, garlic and onion; of wine and fresh baked bread.",
+      "Notes": "",
+      "GUID": "9ba4d5e8-b20b-4e1c-b1d2-675b31b860fd",
+      "Name": "The wedding feast"
+    },
+    {
+      "Type": "Scene",
+      "Description": null,
+      "ViewpointCharacter": "",
+      "Date": "",
+      "Time": "",
+      "Setting": "",
+      "SceneType": "",
+      "CastMembers": [],
+      "Remarks": "",
+      "Protagonist": "",
+      "ProtagEmotion": "",
+      "ProtagGoal": "",
+      "Antagonist": "",
+      "AntagEmotion": "",
+      "AntagGoal": "",
+      "Opposition": "",
+      "Outcome": "",
+      "ScenePurpose": [],
+      "ValueExchange": "",
+      "Events": "",
+      "Consequences": "",
+      "Significance": "",
+      "Realization": "",
+      "Emotion": "",
+      "NewGoal": "",
+      "Review": "",
+      "Notes": "  A queen wished for a child with skin as white as snow, with lips as red as blood, and with hair as black as ebony.\r\n  She later gave birth to a daughter, who was named Snow White.  The queen died giving birth.\r\n  A year passed, and the king remarried.  The new queen was beautiful, but proud. \r\n  She had a magic looking glass, and she would ask it:\r\n     \u0022Mirror, mirror, on the wall,\r\n       Who is fairest of them all?\u0022\r\n  And the glass would answer,\r\n     \u0022You are the fairest of them all.\u0022",
+      "GUID": "62a71cac-e140-4163-96f2-55970421831d",
+      "Name": "Introduction"
+    },
+    {
+      "Type": "Scene",
+      "Description": null,
+      "ViewpointCharacter": "",
+      "Date": "",
+      "Time": "",
+      "Setting": "",
+      "SceneType": "",
+      "CastMembers": [
+        "70b611cd-2c09-438b-9585-34962a4053aa"
+      ],
+      "Remarks": "{\\rtf1\\fbidis\\ansi\\ansicpg1252\\deff0\\nouicompat\\deflang1033{\\fonttbl{\\f0\\fnil Segoe UI;}}\r\n{\\colortbl ;\\red0\\green0\\blue0;}\r\n{\\*\\generator Riched20 10.0.10011}\\viewkind4\\uc1 \r\n\\pard\\tx720\\cf1\\f0\\fs25 The mirror tells the queen that Snow White is now fairer than she is.\\par\r\n\\par\r\n}\r\n",
+      "Protagonist": "",
+      "ProtagEmotion": "",
+      "ProtagGoal": "",
+      "Antagonist": "",
+      "AntagEmotion": "",
+      "AntagGoal": "",
+      "Opposition": "",
+      "Outcome": "",
+      "ScenePurpose": [],
+      "ValueExchange": "",
+      "Events": "",
+      "Consequences": "",
+      "Significance": "",
+      "Realization": "",
+      "Emotion": "",
+      "NewGoal": "",
+      "Review": "",
+      "Notes": "",
+      "GUID": "60df45e3-30e4-49c6-a9e3-c6d38d16b3f0",
+      "Name": "The Queen gets a shock"
+    },
+    {
+      "Type": "Scene",
+      "Description": null,
+      "ViewpointCharacter": "",
+      "Date": "",
+      "Time": "early morn",
+      "Setting": "3a5c3822-1b7b-4a07-9bb6-a190acbdd5f0",
+      "SceneType": "",
+      "CastMembers": [
+        "70b611cd-2c09-438b-9585-34962a4053aa",
+        "846a364a-9efa-489e-aa29-b7a193a5a42c"
+      ],
+      "Remarks": "She orders him to to take Snow White into the woods, to kill her, and to bring the Queen the child\u0027s heart .",
+      "Protagonist": "70b611cd-2c09-438b-9585-34962a4053aa",
+      "ProtagEmotion": "Hate",
+      "ProtagGoal": "To be rid of her rival",
+      "Antagonist": "846a364a-9efa-489e-aa29-b7a193a5a42c",
+      "AntagEmotion": "Reluctance",
+      "AntagGoal": "To avoid the Queen\u0027s ire",
+      "Opposition": "Reluctance to commit this crime",
+      "Outcome": "Huntsman takes the chile away into the w",
+      "ScenePurpose": [],
+      "ValueExchange": "",
+      "Events": "",
+      "Consequences": "",
+      "Significance": "",
+      "Realization": "",
+      "Emotion": "",
+      "NewGoal": "",
+      "Review": "",
+      "Notes": "",
+      "GUID": "b12fd9d7-5270-4969-85e6-7a9707b1e1d5",
+      "Name": "She orders Snow White murdered"
+    },
+    {
+      "Type": "Scene",
+      "Description": null,
+      "ViewpointCharacter": "",
+      "Date": "",
+      "Time": "morning",
+      "Setting": "5f49bd51-1c12-4655-84e7-2a88a3ea8d88",
+      "SceneType": "",
+      "CastMembers": [
+        "846a364a-9efa-489e-aa29-b7a193a5a42c",
+        "b7a96067-780a-4f00-940e-4afd7be2d3a5"
+      ],
+      "Remarks": "Snow White begs for her life",
+      "Protagonist": "846a364a-9efa-489e-aa29-b7a193a5a42c",
+      "ProtagEmotion": "Pity",
+      "ProtagGoal": "To commit the crime",
+      "Antagonist": "b7a96067-780a-4f00-940e-4afd7be2d3a5",
+      "AntagEmotion": "Fear",
+      "AntagGoal": "Relief from danger",
+      "Opposition": "The urge to do the right thing",
+      "Outcome": "The huntsman lets her go",
+      "ScenePurpose": [],
+      "ValueExchange": "",
+      "Events": "",
+      "Consequences": "",
+      "Significance": "",
+      "Realization": "",
+      "Emotion": "",
+      "NewGoal": "",
+      "Review": "",
+      "Notes": "",
+      "GUID": "5d4fc7a9-7829-486f-b26a-2b0236b75a94",
+      "Name": "The huntsman spares Snow White"
+    },
+    {
+      "Type": "Scene",
+      "Description": null,
+      "ViewpointCharacter": "",
+      "Date": "",
+      "Time": "morning",
+      "Setting": "5f49bd51-1c12-4655-84e7-2a88a3ea8d88",
+      "SceneType": "",
+      "CastMembers": [
+        "846a364a-9efa-489e-aa29-b7a193a5a42c",
+        "70b611cd-2c09-438b-9585-34962a4053aa"
+      ],
+      "Remarks": "A boar comes by.  The huntsman has an idea.  He kills the beast and takes its heart back to the Queen.\r\n",
+      "Protagonist": "",
+      "ProtagEmotion": "",
+      "ProtagGoal": "",
+      "Antagonist": "",
+      "AntagEmotion": "",
+      "AntagGoal": "",
+      "Opposition": "",
+      "Outcome": "",
+      "ScenePurpose": [],
+      "ValueExchange": "",
+      "Events": "",
+      "Consequences": "",
+      "Significance": "",
+      "Realization": "",
+      "Emotion": "",
+      "NewGoal": "",
+      "Review": "",
+      "Notes": "",
+      "GUID": "2024e730-9883-45d6-b404-54acd1de2e0d",
+      "Name": "The huntsman tricks the Queen"
+    },
+    {
+      "Type": "Scene",
+      "Description": null,
+      "ViewpointCharacter": "",
+      "Date": "xxxxxxxxxx",
+      "Time": "late aft.",
+      "Setting": "4ae0eda2-7ffd-4541-b596-f4f8478e8531",
+      "SceneType": "",
+      "CastMembers": [
+        "b7a96067-780a-4f00-940e-4afd7be2d3a5"
+      ],
+      "Remarks": "Snow White wanders in the woods, afraid, until late that day she finds a small house in the woods.\r\n",
+      "Protagonist": "b7a96067-780a-4f00-940e-4afd7be2d3a5",
+      "ProtagEmotion": "Desire",
+      "ProtagGoal": "Food, shelter, and protection",
+      "Antagonist": "b7a96067-780a-4f00-940e-4afd7be2d3a5",
+      "AntagEmotion": "Fear",
+      "AntagGoal": "To avoid a possible danger",
+      "Opposition": "",
+      "Outcome": "",
+      "ScenePurpose": [],
+      "ValueExchange": "",
+      "Events": "",
+      "Consequences": "",
+      "Significance": "",
+      "Realization": "",
+      "Emotion": "",
+      "NewGoal": "",
+      "Review": "",
+      "Notes": "  The house is in a small clearing.  Still afraid, Snow White hesitates, but this is the only habitation she\u0027s found in the forest, and evening is approaching.  The deep forest is frightening and the darkening shadows seem threatening.\r\n   Still, the house is odd- it\u0027s too small.  Something seems strange about it. \r\n   But hunger and exhaustion and fear finally drive her forward from the edge of the clearing.",
+      "GUID": "aed7883a-765b-4340-8260-2084e87b1839",
+      "Name": "Snow White finds a little house"
+    },
+    {
+      "Type": "Scene",
+      "Description": null,
+      "ViewpointCharacter": "",
+      "Date": "",
+      "Time": " late aft.",
+      "Setting": "3e25e8c0-fb74-41ab-a61a-bd2f006c126a",
+      "SceneType": "",
+      "CastMembers": [
+        "b7a96067-780a-4f00-940e-4afd7be2d3a5"
+      ],
+      "Remarks": "",
+      "Protagonist": "",
+      "ProtagEmotion": "",
+      "ProtagGoal": "",
+      "Antagonist": "",
+      "AntagEmotion": "",
+      "AntagGoal": "",
+      "Opposition": "",
+      "Outcome": "",
+      "ScenePurpose": [],
+      "ValueExchange": "",
+      "Events": "",
+      "Consequences": "",
+      "Significance": "",
+      "Realization": "",
+      "Emotion": "",
+      "NewGoal": "",
+      "Review": "",
+      "Notes": "  Describe the curious little house, how small everything is, how neat.  The table is set and there\u0027s food on the fire.  \r\n   Hungry, Snow White eats a little porridge and some bread from each plate, and drinks a litle wine from each cup.\r\n   Fed, and exhuasted from her ordeal, she grows sleepy.  She lies down in each bed.  One is too long, another too short, this one is too hard, that one is too soft.  Finally, she finds that the seventh bed is just the right size, and falls deep asleep.",
+      "GUID": "86a5d7d6-75f9-415e-a42e-578207457821",
+      "Name": "She goes in, eats, and falls asleep"
+    },
+    {
+      "Type": "Scene",
+      "Description": null,
+      "ViewpointCharacter": "",
+      "Date": "",
+      "Time": "evening",
+      "Setting": "3e25e8c0-fb74-41ab-a61a-bd2f006c126a",
+      "SceneType": "",
+      "CastMembers": [
+        "fe23f4f5-6eb4-443b-885a-f661af27a17f",
+        "b7a96067-780a-4f00-940e-4afd7be2d3a5"
+      ],
+      "Remarks": "The dwarves come home and discover Snow White in their house.",
+      "Protagonist": "",
+      "ProtagEmotion": "Anger, puzzlement",
+      "ProtagGoal": "To solve the mystery",
+      "Antagonist": "",
+      "AntagEmotion": "(asleep)",
+      "AntagGoal": "",
+      "Opposition": "",
+      "Outcome": "The dwarves find the child asleep",
+      "ScenePurpose": [],
+      "ValueExchange": "",
+      "Events": "",
+      "Consequences": "",
+      "Significance": "",
+      "Realization": "",
+      "Emotion": "",
+      "NewGoal": "",
+      "Review": "",
+      "Notes": "",
+      "GUID": "79d4db59-10ab-4746-8b7d-572fe83f456c",
+      "Name": "The dwarves find the intruder"
+    },
+    {
+      "Type": "Scene",
+      "Description": null,
+      "ViewpointCharacter": "",
+      "Date": "",
+      "Time": "that morn.",
+      "Setting": "3e25e8c0-fb74-41ab-a61a-bd2f006c126a",
+      "SceneType": "",
+      "CastMembers": [
+        "b7a96067-780a-4f00-940e-4afd7be2d3a5",
+        "fe23f4f5-6eb4-443b-885a-f661af27a17f"
+      ],
+      "Remarks": "Snow White tells the dwarves what happened; they decide to let her stay as housekeeper and cook.",
+      "Protagonist": "",
+      "ProtagEmotion": "",
+      "ProtagGoal": "",
+      "Antagonist": "",
+      "AntagEmotion": "",
+      "AntagGoal": "",
+      "Opposition": "",
+      "Outcome": "",
+      "ScenePurpose": [],
+      "ValueExchange": "",
+      "Events": "",
+      "Consequences": "",
+      "Significance": "",
+      "Realization": "",
+      "Emotion": "",
+      "NewGoal": "",
+      "Review": "",
+      "Notes": "  Snow White is frightened when she first wakes up, but the dwarves seem friendly. \r\n   They listen to the tale of how she came to be in their house, and she tells them of her stepmother\u0027s attempt to murder her, and how she was spared.\r\n   The dwarves tell her that if she will keep house, and cook and wash, and make the beds, they will let her stay with them, and she will have food and a place to sleep.  Snow White agrees.\r\n   The next morning the dwarves go to the mountain  to dig gold, but they caution Snow White that her stepmother will soon be looking for her, and that she should let no one into the house.\r\n",
+      "GUID": "20213423-dbdf-4493-a63b-186e78262642",
+      "Name": "The dwarves hear Show White\u0027s story"
+    },
+    {
+      "Type": "Scene",
+      "Description": null,
+      "ViewpointCharacter": "",
+      "Date": "",
+      "Time": "later",
+      "Setting": "8b517e9e-2c84-4792-87b1-6d5c138d1aeb",
+      "SceneType": "",
+      "CastMembers": [
+        "70b611cd-2c09-438b-9585-34962a4053aa"
+      ],
+      "Remarks": "The mirror tells the Queen that Snow White still lives.",
+      "Protagonist": "",
+      "ProtagEmotion": "",
+      "ProtagGoal": "",
+      "Antagonist": "",
+      "AntagEmotion": "",
+      "AntagGoal": "",
+      "Opposition": "",
+      "Outcome": "",
+      "ScenePurpose": [],
+      "ValueExchange": "",
+      "Events": "",
+      "Consequences": "",
+      "Significance": "",
+      "Realization": "",
+      "Emotion": "",
+      "NewGoal": "",
+      "Review": "",
+      "Notes": "  Thinking that she\u0027s eaten Snow White\u0027s heart, the Queen goes to her mirror once more and asks:\r\n      \u0022Looking glass upon the wall, \r\n       Who is fairest of us all?\u0022\r\n   But she\u0027s startled when the mirror tells her:\r\n         \u0022Queen, thou art of beauty rare,\r\n          But Snow Whilte living in the glen\r\n          With the seven little men\r\n          Is a thousand times more fair.\u0022\r\n\r\n        \r\n",
+      "GUID": "6b90b1c3-c17e-450d-820f-47e2031ac6f8",
+      "Name": "The Queen learns that Snow White is alive"
+    },
+    {
+      "Type": "Scene",
+      "Description": null,
+      "ViewpointCharacter": "",
+      "Date": "",
+      "Time": "that day",
+      "Setting": "3e25e8c0-fb74-41ab-a61a-bd2f006c126a",
+      "SceneType": "",
+      "CastMembers": [
+        "70b611cd-2c09-438b-9585-34962a4053aa",
+        "b7a96067-780a-4f00-940e-4afd7be2d3a5"
+      ],
+      "Remarks": "She visits the cottage.  Snow White thinks she\u0027s harmless, lets her in, and buys a pretty bodice.",
+      "Protagonist": "",
+      "ProtagEmotion": "",
+      "ProtagGoal": "",
+      "Antagonist": "",
+      "AntagEmotion": "",
+      "AntagGoal": "",
+      "Opposition": "",
+      "Outcome": "",
+      "ScenePurpose": [],
+      "ValueExchange": "",
+      "Events": "",
+      "Consequences": "",
+      "Significance": "",
+      "Realization": "",
+      "Emotion": "",
+      "NewGoal": "",
+      "Review": "",
+      "Notes": "",
+      "GUID": "629b05aa-d5f0-4483-aecc-7320eb6c7a3e",
+      "Name": "The Queen visits, disguised as a peddler"
+    },
+    {
+      "Type": "Scene",
+      "Description": null,
+      "ViewpointCharacter": "",
+      "Date": "",
+      "Time": "that day",
+      "Setting": "3e25e8c0-fb74-41ab-a61a-bd2f006c126a",
+      "SceneType": "",
+      "CastMembers": [
+        "70b611cd-2c09-438b-9585-34962a4053aa",
+        "b7a96067-780a-4f00-940e-4afd7be2d3a5"
+      ],
+      "Remarks": "The Queen draws the lace on the bodice until Snow White can\u0027t breath, and passes out as though dead.",
+      "Protagonist": "70b611cd-2c09-438b-9585-34962a4053aa",
+      "ProtagEmotion": "Anger",
+      "ProtagGoal": "To commit murder",
+      "Antagonist": "b7a96067-780a-4f00-940e-4afd7be2d3a5",
+      "AntagEmotion": "Fear",
+      "AntagGoal": "To say alive",
+      "Opposition": "Pitted against superior opponent",
+      "Outcome": "Snow White quits breathing",
+      "ScenePurpose": [],
+      "ValueExchange": "",
+      "Events": "",
+      "Consequences": "",
+      "Significance": "",
+      "Realization": "",
+      "Emotion": "",
+      "NewGoal": "",
+      "Review": "",
+      "Notes": "",
+      "GUID": "2059c06d-18ef-4814-a9ae-3d00a5cb3663",
+      "Name": "The Queen tries to kill Snow White"
+    },
+    {
+      "Type": "Scene",
+      "Description": null,
+      "ViewpointCharacter": "",
+      "Date": "",
+      "Time": "",
+      "Setting": "3e25e8c0-fb74-41ab-a61a-bd2f006c126a",
+      "SceneType": "",
+      "CastMembers": [
+        "fe23f4f5-6eb4-443b-885a-f661af27a17f",
+        "b7a96067-780a-4f00-940e-4afd7be2d3a5"
+      ],
+      "Remarks": "When they return from work, the dwarves find her unconscious.  They cut the laces, and she revives.",
+      "Protagonist": "",
+      "ProtagEmotion": "",
+      "ProtagGoal": "",
+      "Antagonist": "",
+      "AntagEmotion": "",
+      "AntagGoal": "",
+      "Opposition": "",
+      "Outcome": "",
+      "ScenePurpose": [],
+      "ValueExchange": "",
+      "Events": "",
+      "Consequences": "",
+      "Significance": "",
+      "Realization": "",
+      "Emotion": "",
+      "NewGoal": "",
+      "Review": "",
+      "Notes": "",
+      "GUID": "30221f23-d72b-455a-b244-b1504cf56c5c",
+      "Name": "The dwarves revive Snow White"
+    },
+    {
+      "Type": "Scene",
+      "Description": null,
+      "ViewpointCharacter": "",
+      "Date": "",
+      "Time": "next day",
+      "Setting": "8b517e9e-2c84-4792-87b1-6d5c138d1aeb",
+      "SceneType": "",
+      "CastMembers": [
+        "70b611cd-2c09-438b-9585-34962a4053aa"
+      ],
+      "Remarks": "Once more the mirror tells her.",
+      "Protagonist": "",
+      "ProtagEmotion": "",
+      "ProtagGoal": "",
+      "Antagonist": "",
+      "AntagEmotion": "",
+      "AntagGoal": "",
+      "Opposition": "",
+      "Outcome": "",
+      "ScenePurpose": [],
+      "ValueExchange": "",
+      "Events": "",
+      "Consequences": "",
+      "Significance": "",
+      "Realization": "",
+      "Emotion": "",
+      "NewGoal": "",
+      "Review": "",
+      "Notes": "",
+      "GUID": "a5b6ee8a-d770-4482-b015-c7b70c097788",
+      "Name": "The Queen finds that her plot failed"
+    },
+    {
+      "Type": "Scene",
+      "Description": null,
+      "ViewpointCharacter": "",
+      "Date": "",
+      "Time": "that day",
+      "Setting": "4ae0eda2-7ffd-4541-b596-f4f8478e8531",
+      "SceneType": "",
+      "CastMembers": [
+        "70b611cd-2c09-438b-9585-34962a4053aa",
+        "b7a96067-780a-4f00-940e-4afd7be2d3a5"
+      ],
+      "Remarks": "The Queen, disguised as a differnent peddler, shows Snow White a beautiful, but poisoned, comb.",
+      "Protagonist": "",
+      "ProtagEmotion": "",
+      "ProtagGoal": "",
+      "Antagonist": "",
+      "AntagEmotion": "",
+      "AntagGoal": "",
+      "Opposition": "",
+      "Outcome": "",
+      "ScenePurpose": [],
+      "ValueExchange": "",
+      "Events": "",
+      "Consequences": "",
+      "Significance": "",
+      "Realization": "",
+      "Emotion": "",
+      "NewGoal": "",
+      "Review": "",
+      "Notes": "",
+      "GUID": "5589bf00-ecee-4611-ac7f-85867817735f",
+      "Name": "She tries a different ploy"
+    },
+    {
+      "Type": "Scene",
+      "Description": null,
+      "ViewpointCharacter": "",
+      "Date": "",
+      "Time": "that day",
+      "Setting": "3e25e8c0-fb74-41ab-a61a-bd2f006c126a",
+      "SceneType": "",
+      "CastMembers": [
+        "70b611cd-2c09-438b-9585-34962a4053aa",
+        "b7a96067-780a-4f00-940e-4afd7be2d3a5"
+      ],
+      "Remarks": "Snow White takes the offered comb through the window, combs her hair, and falls down senseless.",
+      "Protagonist": "",
+      "ProtagEmotion": "",
+      "ProtagGoal": "",
+      "Antagonist": "",
+      "AntagEmotion": "",
+      "AntagGoal": "",
+      "Opposition": "",
+      "Outcome": "",
+      "ScenePurpose": [],
+      "ValueExchange": "",
+      "Events": "",
+      "Consequences": "",
+      "Significance": "",
+      "Realization": "",
+      "Emotion": "",
+      "NewGoal": "",
+      "Review": "",
+      "Notes": "",
+      "GUID": "86b1ff83-094e-45ae-8992-653dd7d18669",
+      "Name": "The comb poisons Snow White"
+    },
+    {
+      "Type": "Scene",
+      "Description": null,
+      "ViewpointCharacter": "",
+      "Date": "",
+      "Time": " that eve.",
+      "Setting": "3e25e8c0-fb74-41ab-a61a-bd2f006c126a",
+      "SceneType": "",
+      "CastMembers": [
+        "fe23f4f5-6eb4-443b-885a-f661af27a17f",
+        "b7a96067-780a-4f00-940e-4afd7be2d3a5"
+      ],
+      "Remarks": "When they find her and remove the poisoned comb, Snow White revives.",
+      "Protagonist": "",
+      "ProtagEmotion": "",
+      "ProtagGoal": "",
+      "Antagonist": "",
+      "AntagEmotion": "",
+      "AntagGoal": "",
+      "Opposition": "",
+      "Outcome": "",
+      "ScenePurpose": [],
+      "ValueExchange": "",
+      "Events": "",
+      "Consequences": "",
+      "Significance": "",
+      "Realization": "",
+      "Emotion": "",
+      "NewGoal": "",
+      "Review": "",
+      "Notes": "",
+      "GUID": "178ace17-016f-42a0-8ff0-4ff840b5c6be",
+      "Name": "The dwarves revive Snow White"
+    },
+    {
+      "Type": "Scene",
+      "Description": null,
+      "ViewpointCharacter": "",
+      "Date": "",
+      "Time": "next morn.",
+      "Setting": "8b517e9e-2c84-4792-87b1-6d5c138d1aeb",
+      "SceneType": "",
+      "CastMembers": [
+        "70b611cd-2c09-438b-9585-34962a4053aa"
+      ],
+      "Remarks": "The mirror tells her the news for the third time.",
+      "Protagonist": "",
+      "ProtagEmotion": "",
+      "ProtagGoal": "",
+      "Antagonist": "",
+      "AntagEmotion": "",
+      "AntagGoal": "",
+      "Opposition": "",
+      "Outcome": "",
+      "ScenePurpose": [],
+      "ValueExchange": "",
+      "Events": "",
+      "Consequences": "",
+      "Significance": "",
+      "Realization": "",
+      "Emotion": "",
+      "NewGoal": "",
+      "Review": "",
+      "Notes": "",
+      "GUID": "3a067ebf-732a-4fca-9d2b-f6196fdd96c2",
+      "Name": "The Queen hears the news again"
+    },
+    {
+      "Type": "Scene",
+      "Description": null,
+      "ViewpointCharacter": "",
+      "Date": "",
+      "Time": "",
+      "Setting": "4ae0eda2-7ffd-4541-b596-f4f8478e8531",
+      "SceneType": "",
+      "CastMembers": [
+        "b7a96067-780a-4f00-940e-4afd7be2d3a5"
+      ],
+      "Remarks": "The Queen, disguised as a peasant woman, splits the apple and, to calm the girl\u0027s fears, she eats half.   She gives Snow White the other, poisoned half.",
+      "Protagonist": "",
+      "ProtagEmotion": "",
+      "ProtagGoal": "",
+      "Antagonist": "",
+      "AntagEmotion": "",
+      "AntagGoal": "",
+      "Opposition": "",
+      "Outcome": "",
+      "ScenePurpose": [],
+      "ValueExchange": "",
+      "Events": "",
+      "Consequences": "",
+      "Significance": "",
+      "Realization": "",
+      "Emotion": "",
+      "NewGoal": "",
+      "Review": "",
+      "Notes": "",
+      "GUID": "b31ec261-e1a6-4d62-8a9e-3d40da9c2af9",
+      "Name": "The Queen gives Snow White a poisoned apple"
+    },
+    {
+      "Type": "Scene",
+      "Description": null,
+      "ViewpointCharacter": "",
+      "Date": "",
+      "Time": "",
+      "Setting": "8b517e9e-2c84-4792-87b1-6d5c138d1aeb",
+      "SceneType": "",
+      "CastMembers": [
+        "70b611cd-2c09-438b-9585-34962a4053aa"
+      ],
+      "Remarks": "The Queen rushes home and asks the mirror again.",
+      "Protagonist": "",
+      "ProtagEmotion": "",
+      "ProtagGoal": "",
+      "Antagonist": "",
+      "AntagEmotion": "",
+      "AntagGoal": "",
+      "Opposition": "",
+      "Outcome": "",
+      "ScenePurpose": [],
+      "ValueExchange": "",
+      "Events": "",
+      "Consequences": "",
+      "Significance": "",
+      "Realization": "",
+      "Emotion": "",
+      "NewGoal": "",
+      "Review": "",
+      "Notes": "When she asks this time, the mirror replies,\r\n    \u0022You are the fairest now of all.\u0022\r\nThe Queen has peace, thinking that she\u0027s finally destroyed Snow White.\r\n",
+      "GUID": "f14508de-1986-4a93-965e-ff24e59489e6",
+      "Name": "The Queen demands news from the mirror"
+    },
+    {
+      "Type": "Scene",
+      "Description": null,
+      "ViewpointCharacter": "",
+      "Date": "",
+      "Time": "",
+      "Setting": "55f3967d-fdf4-4a8b-a77d-98bfd5c646bf",
+      "SceneType": "",
+      "CastMembers": [
+        "fe23f4f5-6eb4-443b-885a-f661af27a17f"
+      ],
+      "Remarks": "",
+      "Protagonist": "",
+      "ProtagEmotion": "",
+      "ProtagGoal": "",
+      "Antagonist": "",
+      "AntagEmotion": "",
+      "AntagGoal": "",
+      "Opposition": "",
+      "Outcome": "",
+      "ScenePurpose": [],
+      "ValueExchange": "",
+      "Events": "",
+      "Consequences": "",
+      "Significance": "",
+      "Realization": "",
+      "Emotion": "",
+      "NewGoal": "",
+      "Review": "",
+      "Notes": "    When they return, the dwarves try to revive her, but to no avail.  They mourn for three days.\r\n    But Snow White looks so life-like, with her beautiful red cheeks, that they can\u0027t stand to bury her, so they make a coffin of clear glass, and lay her in it, and put her name on it in gold.  They set the coffin on the mountain and took turns staying by it.  The birds, an own and a raven and a dove, also mourned.",
+      "GUID": "3f7ef538-b96a-4e29-a53e-b0e809c74924",
+      "Name": "The dwarves make a glass coffin"
+    },
+    {
+      "Type": "Scene",
+      "Description": null,
+      "ViewpointCharacter": "",
+      "Date": "",
+      "Time": "a year lat",
+      "Setting": "55f3967d-fdf4-4a8b-a77d-98bfd5c646bf",
+      "SceneType": "",
+      "CastMembers": [
+        "311b5c50-1d1c-4127-bd31-410767714c60"
+      ],
+      "Remarks": "When he sees her, the Prince tells the dwarf that he must have the coffin, so he can gaze upon her",
+      "Protagonist": "",
+      "ProtagEmotion": "",
+      "ProtagGoal": "",
+      "Antagonist": "",
+      "AntagEmotion": "",
+      "AntagGoal": "",
+      "Opposition": "",
+      "Outcome": "",
+      "ScenePurpose": [],
+      "ValueExchange": "",
+      "Events": "",
+      "Consequences": "",
+      "Significance": "",
+      "Realization": "",
+      "Emotion": "",
+      "NewGoal": "",
+      "Review": "",
+      "Notes": "",
+      "GUID": "b4f77f45-9193-4a66-8e4c-088553f03d01",
+      "Name": "A king\u0027s son rides by and sees Snow White"
+    },
+    {
+      "Type": "Scene",
+      "Description": null,
+      "ViewpointCharacter": "",
+      "Date": "",
+      "Time": "",
+      "Setting": "55f3967d-fdf4-4a8b-a77d-98bfd5c646bf",
+      "SceneType": "",
+      "CastMembers": [
+        "311b5c50-1d1c-4127-bd31-410767714c60",
+        "b7a96067-780a-4f00-940e-4afd7be2d3a5"
+      ],
+      "Remarks": "The prince\u0027s men, carrying the coffin, bump it, dislodging the apple piece from Snow White\u0027s thoat.  She revives.",
+      "Protagonist": "",
+      "ProtagEmotion": "",
+      "ProtagGoal": "",
+      "Antagonist": "",
+      "AntagEmotion": "",
+      "AntagGoal": "",
+      "Opposition": "",
+      "Outcome": "",
+      "ScenePurpose": [],
+      "ValueExchange": "",
+      "Events": "",
+      "Consequences": "",
+      "Significance": "",
+      "Realization": "",
+      "Emotion": "",
+      "NewGoal": "",
+      "Review": "",
+      "Notes": "",
+      "GUID": "44a4787c-c6e8-4e0a-a858-b25af882b0d6",
+      "Name": "The poisonous apple is dislodged"
+    },
+    {
+      "Type": "Scene",
+      "Description": null,
+      "ViewpointCharacter": "",
+      "Date": "",
+      "Time": "",
+      "Setting": "55f3967d-fdf4-4a8b-a77d-98bfd5c646bf",
+      "SceneType": "",
+      "CastMembers": [
+        "311b5c50-1d1c-4127-bd31-410767714c60",
+        "b7a96067-780a-4f00-940e-4afd7be2d3a5"
+      ],
+      "Remarks": "The Prince is overjoyed that Snow White is alive.  She agrees to marry him.",
+      "Protagonist": "",
+      "ProtagEmotion": "",
+      "ProtagGoal": "",
+      "Antagonist": "",
+      "AntagEmotion": "",
+      "AntagGoal": "",
+      "Opposition": "",
+      "Outcome": "",
+      "ScenePurpose": [],
+      "ValueExchange": "",
+      "Events": "",
+      "Consequences": "",
+      "Significance": "",
+      "Realization": "",
+      "Emotion": "",
+      "NewGoal": "",
+      "Review": "",
+      "Notes": "",
+      "GUID": "ad013c15-6649-46c8-9766-553c58094ea6",
+      "Name": "Snow White agrees to marry her rescuer"
+    },
+    {
+      "Type": "Scene",
+      "Description": null,
+      "ViewpointCharacter": "",
+      "Date": "",
+      "Time": "later",
+      "Setting": "9ba4d5e8-b20b-4e1c-b1d2-675b31b860fd",
+      "SceneType": "",
+      "CastMembers": [
+        "70b611cd-2c09-438b-9585-34962a4053aa",
+        "b7a96067-780a-4f00-940e-4afd7be2d3a5",
+        "311b5c50-1d1c-4127-bd31-410767714c60"
+      ],
+      "Remarks": "",
+      "Protagonist": "",
+      "ProtagEmotion": "",
+      "ProtagGoal": "",
+      "Antagonist": "",
+      "AntagEmotion": "",
+      "AntagGoal": "",
+      "Opposition": "",
+      "Outcome": "",
+      "ScenePurpose": [],
+      "ValueExchange": "",
+      "Events": "",
+      "Consequences": "",
+      "Significance": "",
+      "Realization": "",
+      "Emotion": "",
+      "NewGoal": "",
+      "Review": "",
+      "Notes": "  The Queen receives an invitation to the wedding, not knowing who the bride is.  But when she asks her mirror who is fairest of all, the mirror replies:\r\n     \u0022O Queen, although you are of beauty rare,\r\n     The young bride is a thousand times more fair.\u0022\r\n  The Queen rages and is terrified, but finally goes to the wedding.  And when she sees the bride she knows her for Snow White.\r\n   But the Price and his father have learned what happened to Snow White, and they are ready.  The evil Queen is ordered to dance in red-hot iron shoes until she falls down dead.",
+      "GUID": "84de3c8c-48ad-4123-8bb6-db346cf75554",
+      "Name": "The Queen receives her punishment"
+    },
+    {
+      "Type": "TrashCan",
+      "GUID": "108ae2da-a064-4112-81a9-491b24bf849e",
+      "Name": "Deleted Story Elements"
+    },
+    {
+      "Type": "Folder",
+      "Notes": "",
+      "GUID": "446bf558-9b50-4178-98bd-4b448169c505",
+      "Name": "Narrative View"
+    },
+    {
+      "Type": "TrashCan",
+      "GUID": "b1d642b7-4d2b-4e72-932c-ca82de66c244",
+      "Name": "Deleted Story Elements"
+    }
+  ]
+}
