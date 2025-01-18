@@ -171,18 +171,20 @@ public class StoryIO
 
 	private async Task<StoryModel> MigrateModel(StorageFile File)
 	{
+		StoryModel Old = new();
 		try
 		{
 			//Read Legacy file
 			_logService.Log(LogLevel.Info, $"Migrating Old STBX File from {File.Path}");
 			LegacyXMLReader reader = new(_logService);
-			StoryModel Old = await reader.ReadFile(File);
+			Old = await reader.ReadFile(File);
 
 			//Copy legacy file
 			_logService.Log(LogLevel.Info, "Read legacy file");
 			StorageFolder Folder = await StorageFolder.GetFolderFromPathAsync(
 				Ioc.Default.GetRequiredService<PreferenceService>().Model.BackupDirectory);
-			await File.CopyAsync(Folder, File.Name + $"as of {DateTime.Now}.old");
+			await File.CopyAsync(Folder, File.Name + $" as of {DateTime.Now.ToString().Replace('/', ' ')
+				.Replace(':', ' ').Replace(".stbx", "")}.old");
 			_logService.Log(LogLevel.Info, $"Copied legacy file to backup folder ({Folder.Path})");
 
 			//File is now backed up, now migrate to new format
@@ -195,7 +197,6 @@ public class StoryIO
 			_logService.LogException(LogLevel.Error, ex, $"Failed to migrate file {File.Path}");
 		}
 
-		return new();
-
+		return await Task.FromResult(Old);
 	}
 }

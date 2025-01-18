@@ -1,0 +1,295 @@
+{
+  "CreatedVersion": null,
+  "LastVersion": "Version: 2.14.6 Built on: 2025-01-17T12:12:58:715Z",
+  "FlattenedExplorerView": [
+    {
+      "Uuid": "7cbe8239-0472-465e-9599-e1fa197c13fe",
+      "ParentUuid": null
+    },
+    {
+      "Uuid": "355afb2e-3499-44cd-88b4-24ff5d2d70cd",
+      "ParentUuid": "7cbe8239-0472-465e-9599-e1fa197c13fe"
+    },
+    {
+      "Uuid": "4e7c0217-64e8-4c74-8438-debb584cf3b8",
+      "ParentUuid": "7cbe8239-0472-465e-9599-e1fa197c13fe"
+    },
+    {
+      "Uuid": "e6e6fa8b-0bd0-4ca0-b25f-5fb454703398",
+      "ParentUuid": "7cbe8239-0472-465e-9599-e1fa197c13fe"
+    },
+    {
+      "Uuid": "ea818c91-0dd4-47f2-8bcc-7c5841030e09",
+      "ParentUuid": "7cbe8239-0472-465e-9599-e1fa197c13fe"
+    },
+    {
+      "Uuid": "f0008836-86b8-4f66-9d0c-ebcdcf9185f1",
+      "ParentUuid": "7cbe8239-0472-465e-9599-e1fa197c13fe"
+    },
+    {
+      "Uuid": "bbfb3577-2592-486f-9adf-60d5c1b1534c",
+      "ParentUuid": null
+    }
+  ],
+  "FlattenedNarratorView": [
+    {
+      "Uuid": "cc60a35d-13c8-4da9-bfb9-24fec9c8d197",
+      "ParentUuid": null
+    }
+  ],
+  "Elements": [
+    {
+      "Type": "StoryOverview",
+      "DateCreated": "2025-01-17",
+      "Author": "Jake Shaw",
+      "DateModified": "2025-01-17",
+      "StoryIdea": "",
+      "Concept": "",
+      "StoryProblem": "",
+      "Premise": "",
+      "StoryType": "",
+      "StoryGenre": "",
+      "Viewpoint": "",
+      "ViewpointCharacter": "",
+      "Voice": "",
+      "LiteraryDevice": "",
+      "Tense": "",
+      "Style": "",
+      "StructureNotes": "",
+      "Tone": "",
+      "Notes": "",
+      "GUID": "7cbe8239-0472-465e-9599-e1fa197c13fe",
+      "Name": "Structure Tab Tests"
+    },
+    {
+      "Type": "TrashCan",
+      "GUID": "bbfb3577-2592-486f-9adf-60d5c1b1534c",
+      "Name": "Deleted Story Elements"
+    },
+    {
+      "Type": "Folder",
+      "Notes": "",
+      "GUID": "cc60a35d-13c8-4da9-bfb9-24fec9c8d197",
+      "Name": "Narrative View"
+    },
+    {
+      "Type": "Problem",
+      "ProblemType": "",
+      "ConflictType": "",
+      "ProblemCategory": "",
+      "Subject": "",
+      "ProblemSource": "",
+      "StoryQuestion": "",
+      "Protagonist": "",
+      "ProtGoal": "",
+      "ProtMotive": "",
+      "ProtConflict": "",
+      "Antagonist": "",
+      "AntagGoal": "",
+      "AntagMotive": "",
+      "AntagConflict": "",
+      "Outcome": "",
+      "Method": "",
+      "Theme": "",
+      "Premise": "",
+      "Notes": "",
+      "StructureTitle": "Hero\u0027s Journey",
+      "StructureDescription": "The Hero\u0027s Journey is described in Joseph Campbell\u0027s \u0027The Hero with a Thousand Faces.\u0027 It\u0027s a distillation of the hero legend as it occurs through the ages in many cultures. The Hero\u0027s Journey taps into the deep roots of storytelling. In this Masterplot, every story is a quest, whether an outward journey or an inward one. The stages of the journey are a framework to the inward growth and understanding that mirrors the journey itself. This dual quest is the basis of the deep symbolism and the universal appeal of these story elements. The stages of the Journey can be used in any story, and can be combined with any other masterplot.",
+      "StructureBeats": [
+        {
+          "Title": "Ordinary World",
+          "Description": "  This plot point shows the protagonist in his customary, normal environment, before he is thrust into the special and alien environment of the story.",
+          "BoundGUID": "ea818c91-0dd4-47f2-8bcc-7c5841030e09",
+          "guid": "ea818c91-0dd4-47f2-8bcc-7c5841030e09"
+        },
+        {
+          "Title": "Call to Adventure",
+          "Description": "  The protagonist is presented with his goal: a problem to solve, an adventure to take, or a challenge to rise to.",
+          "BoundGUID": "f0008836-86b8-4f66-9d0c-ebcdcf9185f1",
+          "guid": "f0008836-86b8-4f66-9d0c-ebcdcf9185f1"
+        },
+        {
+          "Title": "Refusal of the Call",
+          "Description": "  The protagonist shows reluctance or fear to begin the journey. This is largely fear of unknown.",
+          "BoundGUID": "4e7c0217-64e8-4c74-8438-debb584cf3b8",
+          "guid": "4e7c0217-64e8-4c74-8438-debb584cf3b8"
+        },
+        {
+          "Title": "Mentor",
+          "Description": "  The protagonist allies with a wise and trusted advisor or teacher. The mentor\u0027s role is to prepare the protagonist for the journey. However, the protagonist must eventually face the challenge alone.",
+          "BoundGUID": "e6e6fa8b-0bd0-4ca0-b25f-5fb454703398",
+          "guid": "e6e6fa8b-0bd0-4ca0-b25f-5fb454703398"
+        },
+        {
+          "Title": "First Threshold",
+          "Description": "  The protagonist is now committed to the journey. In Quest stories this is the start of the travels; in other stories the First Threshold may be an act of challenge or defiance.",
+          "BoundGUID": null,
+          "guid": null
+        },
+        {
+          "Title": "Tests, Allies, and Enemies",
+          "Description": "These are the beginning of the middle story (Act II in Three Act Play.)  The protagonist\u0027s courage and determination are tested in a series of confrontations. These tests allow the protagonist to grow, learn, and acquire information.",
+          "BoundGUID": null,
+          "guid": null
+        },
+        {
+          "Title": "Approach to the Inmost Cave",
+          "Description": "  The protagonist approaches the place where the object of the quest is hidden. This is dangerous ground, often the territory of the antagonist. To approach the goal, the protagonist must overcome the obstacles of this second major threshold.",
+          "BoundGUID": null,
+          "guid": null
+        },
+        {
+          "Title": "Supreme Ordeal",
+          "Description": "  The protagonist directly confronts his greatest fear. Here he may loose his life or his soul, and the outcome is in the balance.",
+          "BoundGUID": null,
+          "guid": null
+        },
+        {
+          "Title": "Seizing the Reward",
+          "Description": "  The protagonist takes possession of the goal he has sought. The reward may be an object, some knowledge, or the end of a conflict with someone (as with romances.)",
+          "BoundGUID": null,
+          "guid": null
+        },
+        {
+          "Title": "The Road Back",
+          "Description": "  This is the beginning of Act II in the Three Act Play. The action isn\u0027t over yet; the forces the protagonist confronted in the Supreme Ordeal may rise again and pursue him. The protagonist begins his attempt to return to the Ordinary World.",
+          "BoundGUID": null,
+          "guid": null
+        },
+        {
+          "Title": "Resurrection",
+          "Description": "  This is the second major test of the protagonist, often almost a replay of the Supreme Ordeal. It represents a moment of renewal, which wins the protagonist new power, or which proves his growth as a result of what when before.",
+          "BoundGUID": null,
+          "guid": null
+        },
+        {
+          "Title": "Return With The Elixir",
+          "Description": "  The protagonist returns to the Ordinary World. A new equilibrium is restored, but things are different than they were at the start of the story, because the protagonist has brought back some treasure or knowledge from the journey.",
+          "BoundGUID": null,
+          "guid": null
+        }
+      ],
+      "BoundStructure": "",
+      "GUID": "355afb2e-3499-44cd-88b4-24ff5d2d70cd",
+      "Name": "Main Problem"
+    },
+    {
+      "Type": "Problem",
+      "ProblemType": "",
+      "ConflictType": "",
+      "ProblemCategory": "",
+      "Subject": "",
+      "ProblemSource": "",
+      "StoryQuestion": "",
+      "Protagonist": "",
+      "ProtGoal": "",
+      "ProtMotive": "",
+      "ProtConflict": "",
+      "Antagonist": "",
+      "AntagGoal": "",
+      "AntagMotive": "",
+      "AntagConflict": "",
+      "Outcome": "",
+      "Method": "",
+      "Theme": "",
+      "Premise": "",
+      "Notes": "",
+      "StructureTitle": "",
+      "StructureDescription": "Select a story beat sheet above to get started!",
+      "StructureBeats": [],
+      "BoundStructure": "355afb2e-3499-44cd-88b4-24ff5d2d70cd",
+      "GUID": "4e7c0217-64e8-4c74-8438-debb584cf3b8",
+      "Name": "Sub problem A"
+    },
+    {
+      "Type": "Problem",
+      "ProblemType": "",
+      "ConflictType": "",
+      "ProblemCategory": "",
+      "Subject": "",
+      "ProblemSource": "",
+      "StoryQuestion": "",
+      "Protagonist": "",
+      "ProtGoal": "",
+      "ProtMotive": "",
+      "ProtConflict": "",
+      "Antagonist": "",
+      "AntagGoal": "",
+      "AntagMotive": "",
+      "AntagConflict": "",
+      "Outcome": "",
+      "Method": "",
+      "Theme": "",
+      "Premise": "",
+      "Notes": "",
+      "StructureTitle": "",
+      "StructureDescription": "Select a story beat sheet above to get started!",
+      "StructureBeats": [],
+      "BoundStructure": "355afb2e-3499-44cd-88b4-24ff5d2d70cd",
+      "GUID": "e6e6fa8b-0bd0-4ca0-b25f-5fb454703398",
+      "Name": "Sub Problem B"
+    },
+    {
+      "Type": "Scene",
+      "Description": null,
+      "ViewpointCharacter": "",
+      "Date": "",
+      "Time": "",
+      "Setting": "",
+      "SceneType": "",
+      "CastMembers": [],
+      "Remarks": "",
+      "Protagonist": "",
+      "ProtagEmotion": "",
+      "ProtagGoal": "",
+      "Antagonist": "",
+      "AntagEmotion": "",
+      "AntagGoal": "",
+      "Opposition": "",
+      "Outcome": "",
+      "ScenePurpose": [],
+      "ValueExchange": "",
+      "Events": "",
+      "Consequences": "",
+      "Significance": "",
+      "Realization": "",
+      "Emotion": "",
+      "NewGoal": "",
+      "Review": "",
+      "Notes": "",
+      "GUID": "ea818c91-0dd4-47f2-8bcc-7c5841030e09",
+      "Name": "Scene A"
+    },
+    {
+      "Type": "Scene",
+      "Description": null,
+      "ViewpointCharacter": "",
+      "Date": "",
+      "Time": "",
+      "Setting": "",
+      "SceneType": "",
+      "CastMembers": [],
+      "Remarks": "",
+      "Protagonist": "",
+      "ProtagEmotion": "",
+      "ProtagGoal": "",
+      "Antagonist": "",
+      "AntagEmotion": "",
+      "AntagGoal": "",
+      "Opposition": "",
+      "Outcome": "",
+      "ScenePurpose": [],
+      "ValueExchange": "",
+      "Events": "",
+      "Consequences": "",
+      "Significance": "",
+      "Realization": "",
+      "Emotion": "",
+      "NewGoal": "",
+      "Review": "",
+      "Notes": "",
+      "GUID": "f0008836-86b8-4f66-9d0c-ebcdcf9185f1",
+      "Name": "Scene B"
+    }
+  ]
+}
