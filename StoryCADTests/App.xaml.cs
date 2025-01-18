@@ -7,6 +7,7 @@ using StoryCAD.Services.Logging;
 using UnhandledExceptionEventArgs = Microsoft.UI.Xaml.UnhandledExceptionEventArgs;
 using System.IO;
 using Microsoft.VisualStudio.TestTools.UnitTesting.AppContainer;
+using StoryCAD.DAL;
 using StoryCAD.Services;
 
 namespace StoryCADTests;
@@ -42,7 +43,8 @@ public partial class App : Application
     {
         _log.Log(LogLevel.Info, "StoryCADTests.App launched");
         AppState State = Ioc.Default.GetRequiredService<AppState>();
-        await Ioc.Default.GetRequiredService<PreferenceService>().LoadPreferences();
+        PreferencesIo preferencesIo = new();
+        await preferencesIo.ReadPreferences();
 
         string pathMsg = string.Format("Configuration data location = " + State.RootDirectory);
         _log.Log(LogLevel.Info, pathMsg);

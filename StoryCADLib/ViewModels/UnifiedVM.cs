@@ -160,8 +160,8 @@ public class UnifiedVM : ObservableRecipient
     {
         Preferences.Model.LastSelectedTemplate = SelectedTemplateIndex;
 
-        PreferencesIo _loader = new(Preferences.Model, Ioc.Default.GetRequiredService<AppState>().RootDirectory);
-        await _loader.WritePreferences();
+        PreferencesIo _loader = new();
+        await _loader.WritePreferences(Preferences.Model);
         await _shell.UnifiedNewFile(this);
         Hide();
 
@@ -199,8 +199,8 @@ public class UnifiedVM : ObservableRecipient
             }
         }
 
-        PreferencesIo _loader = new(Preferences.Model, Ioc.Default.GetRequiredService<AppState>().RootDirectory);
-        await _loader.WritePreferences();
+        PreferencesIo _loader = new();
+        await _loader.WritePreferences(Preferences.Model);
     }
 
 	/// <summary>
