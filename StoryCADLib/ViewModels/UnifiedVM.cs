@@ -22,11 +22,17 @@ public class UnifiedVM : ObservableRecipient
 	private ShellViewModel _shell = Ioc.Default.GetService<ShellViewModel>();
     private PreferenceService Preferences = Ioc.Default.GetService<PreferenceService>();
 
-    public Visibility _ProjectNameErrorVisibility;
+    private Visibility _ProjectNameErrorVisibility;
     public Visibility ProjectNameErrorVisibility
     {
 	    get => _ProjectNameErrorVisibility;
 	    set => SetProperty(ref _ProjectNameErrorVisibility, value);
+	}
+    private Visibility _ProjectFolderErrorVisibilty;
+    public Visibility ProjectFolderErrorVisibilty
+	{
+	    get => _ProjectFolderErrorVisibilty;
+	    set => SetProperty(ref _ProjectFolderErrorVisibilty, value);
     }
 
 	private int _selectedRecentIndex;

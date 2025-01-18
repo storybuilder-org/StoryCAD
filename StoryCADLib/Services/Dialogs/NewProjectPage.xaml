@@ -27,10 +27,13 @@
         <TextBox x:Name="ProjectName" x:FieldModifier="public" MinWidth="250" 
                  HorizontalAlignment="Center" Header="Project Name: "
                  Text="{x:Bind UnifiedVM.ProjectName, Mode=TwoWay}" Margin="0,20"/>
- 
-		<TextBlock Text="Your story name contains disallowed characters."
+
+		<TextBlock Text="Your outline name contains disallowed characters."
 		           HorizontalAlignment="Center" TextWrapping="Wrap"
 		           Visibility="{x:Bind UnifiedVM.ProjectNameErrorVisibility, Mode=TwoWay}"/>
+        <TextBlock Text="You cannot store your outlines there."
+                   HorizontalAlignment="Center" TextWrapping="Wrap"
+                   Visibility="{x:Bind UnifiedVM.ProjectFolderErrorVisibilty, Mode=TwoWay}"/>
 
 		<Button Content="Create project" Margin="5,20" HorizontalAlignment="Center" 
 		        Click="{x:Bind UnifiedVM.CheckValidity}"/>
