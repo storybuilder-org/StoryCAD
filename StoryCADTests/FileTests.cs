@@ -117,7 +117,7 @@ public class FileTests
 
 
     [TestMethod]
-    public as Task FullFileTest()
+    public Task FullFileTest()
     {
 	    string Dir = AppDomain.CurrentDomain.BaseDirectory;
 		StorageFile File = StorageFile.GetFileFromPathAsync(Path.Combine(Dir, "TestInputs", "Full.stbx")).GetAwaiter().GetResult();
@@ -255,6 +255,7 @@ public class FileTests
 		//Web Folder
 		WebModel Web = (WebModel)Model.StoryElements.First(se => se.Type == StoryItemType.Web);
 		Assert.IsTrue(Web.URL.ToString() == "https://github.com/Rarisma");
+		return null;
     }
 
     [TestMethod]
