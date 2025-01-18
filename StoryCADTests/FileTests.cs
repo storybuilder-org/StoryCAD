@@ -117,7 +117,7 @@ public class FileTests
 
 
     [TestMethod]
-    public Task FullFileTest()
+    public as Task FullFileTest()
     {
 	    string Dir = AppDomain.CurrentDomain.BaseDirectory;
 		StorageFile File = StorageFile.GetFileFromPathAsync(Path.Combine(Dir, "TestInputs", "Full.stbx")).GetAwaiter().GetResult();
@@ -255,6 +255,39 @@ public class FileTests
 		//Web Folder
 		WebModel Web = (WebModel)Model.StoryElements.First(se => se.Type == StoryItemType.Web);
 		Assert.IsTrue(Web.URL.ToString() == "https://github.com/Rarisma");
-		return null;
     }
+
+    [TestMethod]
+    public async Task StructureModelIsLoadedCorrectly()
+    {
+	    string Dir = AppDomain.CurrentDomain.BaseDirectory;
+
+		// Arrange: load the STBX file that contains the Hero's Journey beats
+		string filePath = Path.Combine(Dir, "TestInputs", "StructureTests.stbx");
+	    Assert.IsTrue(File.Exists(filePath), "Test file does not exist at the given path.");
+
+	    StorageFile file = await StorageFile.GetFileFromPathAsync(filePath);
+	    StoryIO storyIO = new StoryIO();
+
+	    // Act: read the story and find the “Main Problem” that has the Hero’s Journey data
+	    StoryModel model = await storyIO.ReadStory(file);
+	    ProblemModel mainProblem = model.StoryElements
+		    .OfType<ProblemModel>()
+		    .FirstOrDefault(p => p.Name == "Main Problem");
+
+	    // Assert: confirm structure data is loaded
+	    Assert.IsNotNull(mainProblem, "Main Problem with structure data not found.");
+	    Assert.AreEqual("Hero's Journey", mainProblem.StructureTitle, "StructureTitle mismatch.");
+
+	    // Check that the beats exist
+	    Assert.IsNotNull(mainProblem.StructureBeats, "StructureBeats collection was null.");
+	    Assert.IsTrue(mainProblem.StructureBeats.Count == 12, "No structure beats found.");
+
+	    // Quick sample checks on beat data
+	    Assert.AreEqual("Ordinary World", mainProblem.StructureBeats[0].Title, "First beat title mismatch.");
+		Assert.IsTrue("ea818c91-0dd4-47f2-8bcc-7c5841030e09" == mainProblem.StructureBeats[0].Guid, "First bound Beat GUID mismatch");
+	    Assert.AreEqual("Refusal of the Call", mainProblem.StructureBeats[2].Title, "Third beat title mismatch.");
+	    Assert.IsTrue("4e7c0217-64e8-4c74-8438-debb584cf3b8" == mainProblem.StructureBeats[2].Guid, "Third bound Beat GUID mismatch");
+
+	}
 }

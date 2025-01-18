@@ -30,6 +30,9 @@
 		<None Update="TestInputs\OpenTest.stbx">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
+		<None Update="TestInputs\StructureTests.stbx">
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
 	</ItemGroup>
 
 	<ItemGroup>
