@@ -553,9 +553,7 @@ namespace StoryCAD.Services.Reports
 
         private string NewUuid()
         {
-            string guid = Guid.NewGuid().ToString("B").ToUpper();
-            guid = guid.Replace("{", string.Empty);
-            guid = guid.Replace("}", string.Empty);
+            string guid = Guid.NewGuid().ToString("D").ToUpper();  // 32 digits, no hyphens
             return guid;
         }
 

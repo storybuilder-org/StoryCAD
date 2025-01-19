@@ -20,12 +20,15 @@ public class ReportFormatter
         string[] lines = _templates["Story Overview"];  
         RtfDocument doc = new(string.Empty);
 
-        StoryElement vpChar = StoryElement.StringToStoryElement(overview.ViewpointCharacter);
-        string vpName = vpChar?.Name ?? string.Empty;
-        StoryElement seProblem = StoryElement.StringToStoryElement(overview.StoryProblem);
-        string problemName = seProblem?.Name ?? string.Empty;
-        ProblemModel problem = (ProblemModel) seProblem;
-        string premise = problem?.Premise ?? string.Empty;
+        string vpName = StoryElement.GetByGuid(overview.ViewpointCharacter).Name;
+        string problemName = string.Empty;
+        string premise = string.Empty;
+        if (overview.StoryProblem != Guid.Empty)
+        {
+            ProblemModel problem = (ProblemModel)_model.StoryElements.StoryElementGuids[overview.StoryProblem];
+            problemName = problem.Name;
+            premise = problem?.Premise;
+        }
 
         // Parse and write the report
         foreach (string line in lines)
@@ -94,8 +97,8 @@ public class ReportFormatter
         string[] lines = _templates["Problem Description"];
         RtfDocument doc = new(string.Empty);
 
-        StoryElement vpProtagonist = StoryElement.StringToStoryElement(problem.Protagonist);
-        StoryElement vpAntagonist = StoryElement.StringToStoryElement(problem.Antagonist);
+        StoryElement vpProtagonist = (CharacterModel)_model.StoryElements.StoryElementGuids[problem.Protagonist];
+        StoryElement vpAntagonist = (CharacterModel)_model.StoryElements.StoryElementGuids[problem.Antagonist];
 
         // Parse and write the report
         foreach (string line in lines)
@@ -128,7 +131,7 @@ public class ReportFormatter
             if (String.IsNullOrEmpty(problem.ProtGoal)) { sb.Replace("@ProtagGoal", ""); }
             else { sb.Replace("@ProtagGoal", problem.ProtGoal); }
             
-            if (vpProtagonist != null)
+            if (problem.Protagonist != Guid.Empty)
             {
                 if (String.IsNullOrEmpty(vpProtagonist.Name)) { sb.Replace("@ProtagName", ""); }
                 else { sb.Replace("@ProtagName", vpProtagonist.Name); }
@@ -138,7 +141,7 @@ public class ReportFormatter
             if (String.IsNullOrEmpty(problem.ProtConflict)) { sb.Replace("@ProtagConflict", ""); }
             else { sb.Replace("@ProtagConflict", problem.ProtConflict); }
 
-            if (vpAntagonist != null)
+            if (problem.Antagonist != Guid.Empty)
             {
                 if (String.IsNullOrEmpty(vpAntagonist.Name)) { sb.Replace("@AntagName", ""); }
                 else { sb.Replace("@AntagName", vpAntagonist.Name); }
@@ -213,29 +216,13 @@ public class ReportFormatter
 		}
 
 		// Retrieve the StoryProblem GUID from Overview
-		var storyProblemGuid = overview.StoryProblem;
-		if (string.IsNullOrEmpty(storyProblemGuid))
+		if (overview.StoryProblem ==  Guid.Empty)
 		{
 			// StoryProblem is null or empty
 			return string.Empty;
 		}
-
-		// Resolve the StoryProblem element using GUID
-		if (!Guid.TryParse(storyProblemGuid, out Guid parsedGuid))
-		{
-			// Invalid GUID format
-			return string.Empty;
-		}
-
-		var storyProblem = shellViewModel.StoryModel.StoryElements
-			.OfType<ProblemModel>()
-			.FirstOrDefault(e => e.Uuid.Equals(parsedGuid));
-
-		if (storyProblem == null)
-		{
-			// StoryProblem element not found
-			return string.Empty;
-		}
+        
+        var storyProblem = (ProblemModel) shellViewModel.StoryModel.StoryElements.StoryElementGuids[overview.StoryProblem];
 
 		// Start building the tree with a separate root heading
 		output.AppendLine("StoryCAD - Story Problem Structure Report");
@@ -561,13 +548,13 @@ public class ReportFormatter
         string[] lines = _templates["Scene Description"];
         RtfDocument doc = new(string.Empty);
 
-        StoryElement vpCharacter = StoryElement.StringToStoryElement(scene.ViewpointCharacter);
+        StoryElement vpCharacter = StoryElement.GetByGuid(scene.ViewpointCharacter);
         string vpCharacterName = vpCharacter?.Name ?? string.Empty;
-        StoryElement antagonist = StoryElement.StringToStoryElement(scene.Antagonist);
+        StoryElement antagonist = StoryElement.GetByGuid(scene.Antagonist);
         string antagonistName = antagonist?.Name ?? string.Empty;
-        StoryElement protagonist = StoryElement.StringToStoryElement(scene.Protagonist);
+        StoryElement protagonist = StoryElement.GetByGuid(scene.Protagonist);
         string protagonistName = protagonist?.Name ?? string.Empty;
-        StoryElement setting = StoryElement.StringToStoryElement(scene.Setting);
+        StoryElement setting = StoryElement.GetByGuid(scene.Setting);
         string settingName = setting?.Name ?? string.Empty;
 
         // Parse and write the report

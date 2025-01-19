@@ -14,6 +14,7 @@ namespace StoryCAD.Converters;
 /// </summary>
 public class StringToStoryElementConverter : IValueConverter
 {
+    //TODO: Get rid of this once all placeholders are converted to Guid
     /// <summary>
     /// Convert a string to its StoryElement instance.
     /// 

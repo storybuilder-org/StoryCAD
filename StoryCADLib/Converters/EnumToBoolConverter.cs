@@ -5,6 +5,7 @@ namespace StoryCAD.Converters
 {
     public class EnumToBoolConverter : IValueConverter
     {
+        //TODO: This doesn't seem used; consider removing
         public object Convert(object value, Type targetType, object parameter, string language)
         {
             string parameterString = parameter as string;

@@ -19,11 +19,11 @@ public class SceneModel : StoryElement
 	}
 
 	[JsonIgnore]
-	private string _viewpointCharacter;
+	private Guid _viewpointCharacter;
 
 	[JsonInclude]
 	[JsonPropertyName("ViewpointCharacter")]
-	public string ViewpointCharacter
+	public Guid ViewpointCharacter
 	{
 		get => _viewpointCharacter;
 		set => _viewpointCharacter = value;
@@ -52,11 +52,11 @@ public class SceneModel : StoryElement
 	}
 
 	[JsonIgnore]
-	private string _setting;
+	private Guid _setting;
 
 	[JsonInclude]
 	[JsonPropertyName("Setting")]
-	public string Setting
+	public Guid Setting
 	{
 		get => _setting;
 		set => _setting = value;
@@ -75,7 +75,7 @@ public class SceneModel : StoryElement
 
 	[JsonIgnore]
 	private List<string> _castMembers;
-
+	//TODO: Convert to GUIDs	
 	[JsonInclude]
 	[JsonPropertyName("CastMembers")]
 	public List<string> CastMembers
@@ -96,11 +96,11 @@ public class SceneModel : StoryElement
 	}
 
 	[JsonIgnore]
-	private string _protagonist;
+	private Guid _protagonist;
 
 	[JsonInclude]
 	[JsonPropertyName("Protagonist")]
-	public string Protagonist
+	public Guid Protagonist
 	{
 		get => _protagonist;
 		set => _protagonist = value;
@@ -129,11 +129,11 @@ public class SceneModel : StoryElement
 	}
 
 	[JsonIgnore]
-	private string _antagonist;
+	private Guid _antagonist;
 
 	[JsonInclude]
 	[JsonPropertyName("Antagonist")]
-	public string Antagonist
+	public Guid Antagonist
 	{
 		get => _antagonist;
 		set => _antagonist = value;
@@ -300,19 +300,19 @@ public class SceneModel : StoryElement
 	#region Constructors
 	public SceneModel(StoryModel model) : base("New Scene", StoryItemType.Scene, model)
     {
-        ViewpointCharacter = string.Empty;
+        ViewpointCharacter = Guid.Empty;
         Date = string.Empty;
         Time = string.Empty;
-        Setting = string.Empty;
+        Setting = Guid.Empty;
         SceneType = string.Empty;
         CastMembers = new List<string>();
         Remarks = string.Empty;
         ScenePurpose = new List<string>();
         ValueExchange = string.Empty;
-        Protagonist = string.Empty;
+        Protagonist = Guid.Empty;
         ProtagEmotion = string.Empty;
         ProtagGoal = string.Empty;
-        Antagonist = string.Empty;
+        Antagonist = Guid.Empty;
         AntagEmotion = string.Empty;
         AntagGoal = string.Empty;
         Opposition = string.Empty;
@@ -330,19 +330,19 @@ public class SceneModel : StoryElement
     public SceneModel(string name, StoryModel model) : base(name, StoryItemType.Scene, model)
 
 	{
-	    ViewpointCharacter = string.Empty;
+	    ViewpointCharacter = Guid.Empty;
 	    Date = string.Empty;
 	    Time = string.Empty;
-	    Setting = string.Empty;
+	    Setting = Guid.Empty;
 	    SceneType = string.Empty;
 	    CastMembers = new List<string>();
 	    Remarks = string.Empty;
 	    ScenePurpose = new List<string>();
 	    ValueExchange = string.Empty;
-	    Protagonist = string.Empty;
+	    Protagonist = Guid.Empty;
 	    ProtagEmotion = string.Empty;
 	    ProtagGoal = string.Empty;
-	    Antagonist = string.Empty;
+	    Antagonist = Guid.Empty;
 	    AntagEmotion = string.Empty;
 	    AntagGoal = string.Empty;
 	    Opposition = string.Empty;
@@ -359,19 +359,19 @@ public class SceneModel : StoryElement
 
 	public SceneModel(IXmlNode xn, StoryModel model) : base(xn, model)
     {
-        ViewpointCharacter = string.Empty;
+        ViewpointCharacter = Guid.Empty;
         Date = string.Empty;
         Time = string.Empty;
-        Setting = string.Empty;
+        Setting = Guid.Empty;
         SceneType = string.Empty;
         CastMembers = new List<string>();
         Remarks = string.Empty;
         ScenePurpose = new List<string>();
         ValueExchange = string.Empty;
-        Protagonist = string.Empty;
+        Protagonist = Guid.Empty;
         ProtagEmotion = string.Empty;
         ProtagGoal = string.Empty;
-        Antagonist = string.Empty;
+        Antagonist = Guid.Empty;
         AntagEmotion = string.Empty;
         AntagGoal = string.Empty;
         Opposition = string.Empty;

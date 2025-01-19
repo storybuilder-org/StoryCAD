@@ -94,6 +94,7 @@
   <ItemGroup>
     <Compile Remove="Collaborator\ViewModels\IWizardStepViewModel.cs" />
     <Compile Remove="Collaborator\ViewModels\IWizardViewModel.cs" />
+    <Compile Remove="Controls\ProblemName.cs" />
   </ItemGroup>
 
 	<PropertyGroup>

@@ -192,7 +192,7 @@ class StoryWriter
 		_attr.Value = _rec.Viewpoint;
 		_overview.Attributes.Append(_attr);
 		_attr = _xml.CreateAttribute("ViewpointCharacter");
-		_attr.Value = _rec.ViewpointCharacter;
+		_attr.Value = _rec.ViewpointCharacter.ToString();
 		_overview.Attributes.Append(_attr);
 		_attr = _xml.CreateAttribute("Voice");
 		_attr.Value = _rec.Voice;
@@ -216,7 +216,7 @@ class StoryWriter
 		_attr.Value = _rec.Concept;
 		_overview.Attributes.Append(_attr);
 		_attr = _xml.CreateAttribute("StoryProblem");
-		_attr.Value = _rec.StoryProblem;
+		_attr.Value = _rec.StoryProblem.ToString();
 		_overview.Attributes.Append(_attr);
 		_attr = _xml.CreateAttribute("Premise");
 		_attr.Value = _rec.Premise;
@@ -259,7 +259,7 @@ class StoryWriter
 		_attr.Value = _rec.ProblemSource;
 		_prob.Attributes.Append(_attr);
 		_attr = _xml.CreateAttribute("Protagonist");
-		_attr.Value = _rec.Protagonist;
+		_attr.Value = _rec.Protagonist.ToString();
 		_prob.Attributes.Append(_attr);
 		_attr = _xml.CreateAttribute("ProtGoal");
 		_attr.Value = _rec.ProtGoal;
@@ -271,7 +271,7 @@ class StoryWriter
 		_attr.Value = _rec.ProtConflict;
 		_prob.Attributes.Append(_attr);
 		_attr = _xml.CreateAttribute("Antagonist");
-		_attr.Value = _rec.Antagonist;
+		_attr.Value = _rec.Antagonist.ToString();
 		_prob.Attributes.Append(_attr);
 		_attr = _xml.CreateAttribute("AntagGoal");
 		_attr.Value = _rec.AntagGoal;
@@ -582,7 +582,7 @@ class StoryWriter
 		_attr.Value = _rec.Name;
 		_scene.Attributes.Append(_attr);
 		_attr = _xml.CreateAttribute("ViewpointCharacter");
-		_attr.Value = _rec.ViewpointCharacter;
+        _attr.Value = _rec.ViewpointCharacter.ToString();
 		_scene.Attributes.Append(_attr);
 		_attr = _xml.CreateAttribute("Date");
 		_attr.Value = _rec.Date;
@@ -591,7 +591,7 @@ class StoryWriter
 		_attr.Value = _rec.Time;
 		_scene.Attributes.Append(_attr);
 		_attr = _xml.CreateAttribute("Setting");
-		_attr.Value = _rec.Setting;
+		_attr.Value = _rec.Setting.ToString();
 		_scene.Attributes.Append(_attr);
 		_attr = _xml.CreateAttribute("SceneType");
 		_attr.Value = _rec.SceneType;
@@ -619,8 +619,8 @@ class StoryWriter
 		_attr.Value = _rec.ValueExchange;
 		_scene.Attributes.Append(_attr);
 		_attr = _xml.CreateAttribute("Protagonist");
-		_attr.Value = _rec.Protagonist;
-		_scene.Attributes.Append(_attr);
+        _attr.Value = _rec.Protagonist.ToString();
+        _scene.Attributes.Append(_attr);
 		_attr = _xml.CreateAttribute("ProtagEmotion");
 		_attr.Value = _rec.ProtagEmotion;
 		_scene.Attributes.Append(_attr);
@@ -628,8 +628,8 @@ class StoryWriter
 		_attr.Value = _rec.ProtagGoal;
 		_scene.Attributes.Append(_attr);
 		_attr = _xml.CreateAttribute("Antagonist");
-		_attr.Value = _rec.Antagonist;
-		_scene.Attributes.Append(_attr);
+        _attr.Value = _rec.Antagonist.ToString();
+        _scene.Attributes.Append(_attr);
 		_attr = _xml.CreateAttribute("AntagEmotion");
 		_attr.Value = _rec.AntagEmotion;
 		_scene.Attributes.Append(_attr);

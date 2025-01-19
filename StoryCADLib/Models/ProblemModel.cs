@@ -77,11 +77,11 @@ public class ProblemModel : StoryElement
 	// Problem protagonist data
 
 	[JsonIgnore]
-	private string _protagonist;
+	private Guid _protagonist;
 
 	[JsonInclude]
 	[JsonPropertyName("Protagonist")]
-	public string Protagonist
+	public Guid Protagonist
 	{
 		get => _protagonist;
 		set => _protagonist = value;
@@ -123,11 +123,11 @@ public class ProblemModel : StoryElement
 	// Problem antagonist data
 
 	[JsonIgnore]
-	private string _antagonist;
+	private Guid _antagonist;
 
 	[JsonInclude]
 	[JsonPropertyName("Antagonist")]
-	public string Antagonist
+	public Guid Antagonist
 	{
 		get => _antagonist;
 		set => _antagonist = value;
@@ -293,11 +293,11 @@ public class ProblemModel : StoryElement
         Subject = string.Empty;
         ProblemSource = string.Empty;
         StoryQuestion = string.Empty;
-        Protagonist = string.Empty;     // Protagonist Guid 
+        Protagonist = Guid.Empty;     // Protagonist Guid 
         ProtGoal = string.Empty;
         ProtMotive = string.Empty;
         ProtConflict = string.Empty;
-        Antagonist = string.Empty;      // Antagonist Guid 
+        Antagonist = Guid.Empty;      // Antagonist Guid 
         AntagGoal = string.Empty;
         AntagMotive = string.Empty;
         AntagConflict = string.Empty;
@@ -319,11 +319,11 @@ public class ProblemModel : StoryElement
         Subject = string.Empty;
         ProblemSource = string.Empty;
         StoryQuestion = string.Empty;
-        Protagonist = string.Empty;
+        Protagonist = Guid.Empty;
         ProtGoal = string.Empty;
         ProtMotive = string.Empty;
         ProtConflict = string.Empty;
-        Antagonist = string.Empty;
+        Antagonist = Guid.Empty;
         AntagGoal = string.Empty;
         AntagMotive = string.Empty;
         AntagConflict = string.Empty;
@@ -344,11 +344,11 @@ public class ProblemModel : StoryElement
         Subject = string.Empty;
         ProblemSource = string.Empty;
         StoryQuestion = string.Empty;
-        Protagonist = string.Empty;
+        Protagonist = Guid.Empty;
         ProtGoal = string.Empty;
         ProtMotive = string.Empty;
         ProtConflict = string.Empty;
-        Antagonist = string.Empty;
+        Antagonist = Guid.Empty;
         AntagGoal = string.Empty;
         AntagMotive = string.Empty;
         AntagConflict = string.Empty;

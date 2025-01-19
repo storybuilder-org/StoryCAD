@@ -14,6 +14,9 @@
 		<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
 	</PropertyGroup>
 	<ItemGroup>
+	  <Compile Remove="SceneViewModelTests.cs" />
+	</ItemGroup>
+	<ItemGroup>
 		<Content Remove="Assets\OpenFromDesktopTest.stbx" />
 	</ItemGroup>
 
@@ -71,6 +74,9 @@
 			<ExcludeAssets>build</ExcludeAssets>
 		</PackageReference>
 		<Manifest Include="$(ApplicationManifest)" />
+	</ItemGroup>
+	<ItemGroup>
+	  <None Include="SceneViewModelTests.cs" />
 	</ItemGroup>
 
 	<ItemGroup>

@@ -141,10 +141,34 @@ public class SearchService
     {
         OverviewModel overview = (OverviewModel)element;
 
-        if (CompareStoryElement(overview.StoryProblem)) { return true; }
+        if (overview.StoryProblem != Guid.Empty)
+        {
+            ProblemModel problem = (ProblemModel) ElementCollection.StoryElementGuids[overview.StoryProblem];
+            string problemName = problem.Name;
+            if (Comparator(problemName)) { return true; }
+        }
+
         if (Comparator(element.Name)) { return true; } //checks node name
 
         return false;
+    }
+
+    //TODO: Once all StoryElement references are converted to Guid instead of Guid.ToString(), remove the string version
+    /// <summary>
+    /// Validate that the passed value is a valid StoryElement Guid
+    /// and if so, compare the StoryElement.Name to the Search argument
+    /// </summary>
+    /// <param name="value">a StoryElement guid as a string (possibly)</param>
+    /// <returns>true if the Search argument matches the StoryElement.Name, false othewise</returns>
+    private bool CompareStoryElement(Guid guid)
+    {
+        if (guid == Guid.Empty)
+            return false;
+        // Get the current StoryModel's StoryElementsCollection
+        ShellViewModel shell = Ioc.Default.GetService<ShellViewModel>();
+        StoryElementCollection elements = shell!.StoryModel.StoryElements;
+        StoryElement element = elements.StoryElementGuids[guid];
+        return Comparator(element.Name);
     }
 
     /// <summary>

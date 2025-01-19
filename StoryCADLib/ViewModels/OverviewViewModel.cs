@@ -19,6 +19,7 @@ public class OverviewViewModel : ObservableRecipient, INavigable
     #region Fields
 
     private readonly LogService _logger;
+    private readonly StoryModel _shellModel = ShellViewModel.GetModel();
     private bool _changeable; // process property changes for this story element
     private bool _changed;    // this story element has changed
 
@@ -119,19 +120,19 @@ public class OverviewViewModel : ObservableRecipient, INavigable
         set => SetProperty(ref _premise, value);
     }
 
-    private string _storyProblem;  // The Guid of a Problem StoryElement
-    public string StoryProblem
+    private Guid _storyProblem;  // The Guid of a Problem StoryElement
+    public Guid StoryProblem
     {
         get => _storyProblem;
         set 
         {   
             SetProperty(ref _storyProblem, value);
-            if (value.Equals(string.Empty))
+            if (value == Guid.Empty)
             {
                 _syncPremise = false;
                 return;
             }
-            _storyProblemModel = (ProblemModel) StoryElement.StringToStoryElement(_storyProblem);
+            _storyProblemModel = (ProblemModel) _shellModel.StoryElements.StoryElementGuids[_storyProblem];
             _syncPremise = true;     // Set Premise to read-only
         }
     }
@@ -159,8 +160,8 @@ public class OverviewViewModel : ObservableRecipient, INavigable
         set => SetProperty(ref _viewpoint, value);
     }
 
-    private string _viewpointCharacter;
-    public string ViewpointCharacter
+    private Guid _viewpointCharacter;
+    public Guid ViewpointCharacter
     {
         get => _viewpointCharacter;
         set => SetProperty(ref _viewpointCharacter, value);
@@ -296,14 +297,14 @@ public class OverviewViewModel : ObservableRecipient, INavigable
 		        Model.StoryType = StoryType ?? "";
 		        Model.StoryGenre = StoryGenre ?? "";
 		        Model.Viewpoint = Viewpoint ?? "";
-		        Model.ViewpointCharacter = ViewpointCharacter ?? "";
+                Model.ViewpointCharacter = ViewpointCharacter;
 		        Model.Voice = Voice ?? "";
 		        Model.LiteraryDevice = LiteraryTechnique ?? "";
 		        Model.Style = Style ?? "";
 		        Model.Tense = Tense ?? "";
 		        Model.Style = Style ?? "";
 		        Model.Tone = Tone ?? "";
-		        Model.StoryProblem = StoryProblem ?? "";
+		        Model.StoryProblem = StoryProblem;
 		        Model.StoryIdea = StoryIdea ?? "";
 		        Model.Concept = Concept ?? "";
 		        Model.Premise = Premise ?? "";
@@ -344,6 +345,7 @@ public class OverviewViewModel : ObservableRecipient, INavigable
     public ObservableCollection<string> TenseList;
     public ObservableCollection<string> StyleList;
     public ObservableCollection<string> ToneList;
+    public ObservableCollection<StoryElement> Problems { get; } 
 
     #endregion
 
@@ -352,23 +354,24 @@ public class OverviewViewModel : ObservableRecipient, INavigable
     public OverviewViewModel()
     {
         _logger = Ioc.Default.GetService<LogService>();
+        Problems = _shellModel.StoryElements.Problems;
 
         try
         {
-            Dictionary<string, ObservableCollection<string>> _lists = Ioc.Default.GetService<ListData>().ListControlSource;
-            StoryTypeList = _lists["StoryType"];
-            GenreList = _lists["Genre"];
-            ViewpointList = _lists["Viewpoint"];
-            LiteraryTechniqueList = _lists["LiteraryTechnique"];
-            VoiceList = _lists["Voice"];
-            TenseList = _lists["Tense"];
-            StyleList = _lists["LiteraryStyle"];
-            ToneList = _lists["Tone"];
+            Dictionary<string, ObservableCollection<string>> lists= Ioc.Default.GetService<ListData>()!.ListControlSource;
+            StoryTypeList = lists["StoryType"];
+            GenreList = lists["Genre"];
+            ViewpointList = lists["Viewpoint"];
+            LiteraryTechniqueList = lists["LiteraryTechnique"];
+            VoiceList = lists["Voice"];
+            TenseList = lists["Tense"];
+            StyleList = lists["LiteraryStyle"];
+            ToneList = lists["Tone"];
         }
         catch (Exception e)
         {
             _logger!.LogException(LogLevel.Fatal, e, "Error loading lists in Problem view model");
-            Ioc.Default.GetService<Windowing>().ShowResourceErrorMessage();
+            Ioc.Default.GetService<Windowing>()!.ShowResourceErrorMessage();
         }
 
         DateCreated = string.Empty;
@@ -383,7 +386,7 @@ public class OverviewViewModel : ObservableRecipient, INavigable
         StoryIdea = string.Empty;
         Concept = string.Empty;
         Premise = string.Empty;
-        StoryProblem = string.Empty;
+        StoryProblem = Guid.Empty;
         _syncPremise = false;     
         StructureNotes = string.Empty;
         Notes = string.Empty;

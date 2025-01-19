@@ -182,7 +182,8 @@ public class StoryIO
 			_logService.Log(LogLevel.Info, "Read legacy file");
 			StorageFolder Folder = await StorageFolder.GetFolderFromPathAsync(
 				Ioc.Default.GetRequiredService<PreferenceService>().Model.BackupDirectory);
-			await File.CopyAsync(Folder, File.Name + $"as of {DateTime.Now}.old");
+            await File.CopyAsync(Folder, File.Name + $" as of {DateTime.Now.ToString().Replace('/', ' ')
+                .Replace(':', ' ').Replace(".stbx", "")}.old");
 			_logService.Log(LogLevel.Info, $"Copied legacy file to backup folder ({Folder.Path})");
 
 			//File is now backed up, now migrate to new format

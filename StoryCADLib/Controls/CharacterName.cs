@@ -4,7 +4,7 @@ namespace StoryCAD.Controls;
 
 public sealed class CharacterName : ComboBox
 {
-
+    //TODO: Get rid of this control one all uses are converted to ComboBox
     public CharacterName()
     {
         DefaultStyleKey = typeof(ComboBox);

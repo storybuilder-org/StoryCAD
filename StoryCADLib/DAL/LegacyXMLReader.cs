@@ -224,7 +224,9 @@ public class LegacyXMLReader : ObservableRecipient
                     _overview.LiteraryDevice = _attr.InnerText;
                     break;
                 case "ViewpointCharacter":
-                    _overview.ViewpointCharacter = _attr.InnerText;
+                    _overview.ViewpointCharacter = Guid.TryParse(_attr.InnerText, out Guid viewpointCharacter) 
+                        ? viewpointCharacter 
+                        : Guid.Empty;
                     break;
                 case "Voice":
                     _overview.Voice = _attr.InnerText;
@@ -245,7 +247,9 @@ public class LegacyXMLReader : ObservableRecipient
                     _overview.Concept = _attr.InnerText;
                     break;
                 case "StoryProblem":
-                    _overview.StoryProblem = _attr.InnerText;
+                    _overview.StoryProblem = Guid.TryParse(_attr.InnerText, out Guid storyProblemGuid) 
+                        ? storyProblemGuid 
+                        : Guid.Empty;
                     break;
                 case "Premise":
                     _overview.Premise = _attr.InnerText;
@@ -288,7 +292,9 @@ public class LegacyXMLReader : ObservableRecipient
                     _prb.ProblemSource = _attr.InnerText;
                     break;
                 case "Protagonist":
-                    _prb.Protagonist = _attr.InnerText;
+                    _prb.Protagonist = Guid.TryParse(_attr.InnerText, out Guid protagonist) 
+                        ? protagonist
+                        : Guid.Empty;
                     break;
                 case "ProtGoal":
                     _prb.ProtGoal = _attr.InnerText;
@@ -300,7 +306,9 @@ public class LegacyXMLReader : ObservableRecipient
                     _prb.ProtConflict = _attr.InnerText;
                     break;
                 case "Antagonist":
-                    _prb.Antagonist = _attr.InnerText;
+                    _prb.Antagonist = Guid.TryParse(_attr.InnerText, out Guid antagonist) 
+                        ? antagonist
+                        : Guid.Empty;
                     break;
                 case "AntagGoal":
                     _prb.AntagGoal = _attr.InnerText;
@@ -602,7 +610,9 @@ public class LegacyXMLReader : ObservableRecipient
                     _scene.Name = _attr.InnerText;
                     break;
                 case "ViewpointCharacter":
-                    _scene.ViewpointCharacter = _attr.InnerText;
+                    _scene.ViewpointCharacter = Guid.TryParse(_attr.InnerText, out Guid viewpointCharacter) 
+                        ? viewpointCharacter
+                        : Guid.Empty;
                     break;
                 case "Date":
                     _scene.Date = _attr.InnerText;
@@ -611,13 +621,17 @@ public class LegacyXMLReader : ObservableRecipient
                     _scene.Time = _attr.InnerText;
                     break;
                 case "Setting":
-                    _scene.Setting = _attr.InnerText;
+                    _scene.Setting = Guid.TryParse(_attr.InnerText, out Guid setting) 
+                        ? setting
+                        : Guid.Empty;
                     break;
                 case "SceneType":
                     _scene.SceneType = _attr.InnerText;
                     break;
                 case "Protagonist":
-                    _scene.Protagonist = _attr.InnerText;
+                    _scene.Protagonist = Guid.TryParse(_attr.InnerText, out Guid protagonist) 
+                        ? protagonist
+                        : Guid.Empty;
                     break;
                 case "ProtagEmotion":
                     _scene.ProtagEmotion = _attr.InnerText;
@@ -626,7 +640,9 @@ public class LegacyXMLReader : ObservableRecipient
                     _scene.ProtagGoal = _attr.InnerText;
                     break;
                 case "Antagonist":
-                    _scene.Antagonist = _attr.InnerText;
+                    _scene.Antagonist = Guid.TryParse(_attr.InnerText, out Guid antagonist) 
+                        ? antagonist 
+                        : Guid.Empty;
                     break;
                 case "AntagEmotion":
                     _scene.AntagEmotion = _attr.InnerText;

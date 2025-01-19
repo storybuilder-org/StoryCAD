@@ -78,14 +78,14 @@ public class DeletionService
 
         try
         {
-            if (!string.IsNullOrEmpty(scene.Protagonist)) //Searches protagonist
+            if (scene.Protagonist != Guid.Empty) //Searches protagonist
             {
-                _elementCollection.StoryElementGuids.TryGetValue(Guid.Parse(scene.Protagonist), out StoryElement protag);
+                StoryElement protag = _elementCollection.StoryElementGuids[scene.Protagonist]; 
                 if (protag.Uuid == _arg)
                 {
                     if (delete)
                     {
-                        scene.Protagonist = null;
+                        scene.Protagonist = Guid.Empty;
                     }
                     else
                     {
@@ -102,12 +102,12 @@ public class DeletionService
 
         try
         {
-            if (!string.IsNullOrEmpty(scene.Antagonist)) //Searches Antagonist
+            if (scene.Antagonist != Guid.Empty) //Searches Antagonist
             {
-                _elementCollection.StoryElementGuids.TryGetValue(Guid.Parse(scene.Antagonist), out StoryElement antag);
+                var antag = _elementCollection.StoryElementGuids[scene.Antagonist]; 
                 if (antag.Uuid == _arg)
                 {
-                    if (delete) { scene.Antagonist = null; }
+                    if (delete) { scene.Antagonist = Guid.Empty; }
                     else { return true; }
                 }
 
@@ -121,12 +121,12 @@ public class DeletionService
 
         try
         {
-            if (!string.IsNullOrEmpty(scene.Setting))
+            if (scene.Setting != Guid.Empty)
             {
-                _elementCollection.StoryElementGuids.TryGetValue(Guid.Parse(scene.Setting), out StoryElement setting);
+                var setting = _elementCollection.StoryElementGuids[scene.Setting]; 
                 if (setting.Uuid == _arg)
                 {
-                    if (delete) { scene.Setting = null; }
+                    if (delete) { scene.Setting = Guid.Empty; }
                     else { return true; }
                 }
             }
@@ -169,9 +169,10 @@ public class DeletionService
     }
 
     /// <summary>
-    /// Searches a problem for the element name, Antag name, protag name,
+    /// Searches a problem for the element name, antag name, protag name,
     /// </summary>
     /// <param name="element"></param>
+    /// <param name="delete"></param>
     /// <returns></returns>
     private bool SearchProblem(StoryElement element, bool delete)
     {
@@ -179,14 +180,16 @@ public class DeletionService
 
         try
         {
-            if (!string.IsNullOrEmpty(problem.Protagonist))//Checks protagonist's name
+            //TODO: Test deletion service; this is changed code
+            if (problem.Protagonist != Guid.Empty)
             {
-                _elementCollection.StoryElementGuids.TryGetValue(Guid.Parse(problem.Protagonist), out StoryElement protag);
-                if (protag.Uuid == _arg)
+                var protagonist = (CharacterModel) _elementCollection.StoryElementGuids[problem.Protagonist];
+                if (problem.Uuid == _arg) 
                 {
-                    if (delete) { problem.Protagonist = null; }
-                    else { return true; }
-                }
+                    if (delete) { problem.Protagonist = Guid.Empty; }
+                    else 
+                        return true;  
+                } //Checks problem name
             }
         }
         catch (Exception ex)
@@ -196,14 +199,15 @@ public class DeletionService
 
         try
         {
-            if (!string.IsNullOrEmpty(problem.Antagonist))//Checks antagonists name
+            if (problem.Antagonist != Guid.Empty)
             {
-                _elementCollection.StoryElementGuids.TryGetValue(Guid.Parse(problem.Antagonist), out StoryElement antag);
-                if (antag.Uuid == _arg)
+                var antagonist = (CharacterModel) _elementCollection.StoryElementGuids[problem.Antagonist];
+                if (problem.Uuid == _arg) 
                 {
-                    if (delete) { problem.Antagonist = null; }
-                    else { return true; }
-                }
+                    if (delete) { problem.Antagonist = Guid.Empty; }
+                    else 
+                        return true;  
+                } //Checks problem name
             }
         }
         catch (Exception ex)
@@ -219,19 +223,21 @@ public class DeletionService
     /// Searches the overview node for the name and main story problem
     /// </summary>
     /// <param name="element"></param>
+    /// <param name="delete"></param>
     /// <returns></returns>
     private bool SearchStoryOverview(StoryElement element, bool delete)
     {
         try
         {
             OverviewModel overview = (OverviewModel)element;
-            if (!string.IsNullOrEmpty(overview.StoryProblem))
+            if (overview.StoryProblem != Guid.Empty)
             {
-                _elementCollection.StoryElementGuids.TryGetValue(Guid.Parse(overview.StoryProblem), out StoryElement problem);
+                var problem = (ProblemModel) _elementCollection.StoryElementGuids[overview.StoryProblem];
                 if (problem.Uuid == _arg) 
                 {
-                    if (delete) { overview.StoryProblem = null; }
-                    else { return true; }  
+                    if (delete) { overview.StoryProblem = Guid.Empty; }
+                    else 
+                        return true;  
                 } //Checks problem name
             }
         }

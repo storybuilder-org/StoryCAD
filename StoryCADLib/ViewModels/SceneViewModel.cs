@@ -71,16 +71,16 @@ public class SceneViewModel : ObservableRecipient, INavigable
         set => SetProperty(ref _description, value);
     }
 
-    private string _viewpointCharacter;
-    public string ViewpointCharacter
+    private Guid _viewpointCharacter;
+    public Guid ViewpointCharacter
     {
         get => _viewpointCharacter;
         set
         {
             SetProperty(ref _viewpointCharacter, value);
-            if (value.Equals(string.Empty))
+            if (value.Equals(Guid.Empty))
                 return;
-            AddCastMember(StoryElement.StringToStoryElement(value));  // Insure the character is in the cast list
+            AddCastMember(StoryElement.GetByGuid(value));  // Insure the character is in the cast list
         }
     }
 
@@ -98,8 +98,8 @@ public class SceneViewModel : ObservableRecipient, INavigable
         set => SetProperty(ref _time, value);
     }
 
-    private string _setting;
-    public string Setting
+    private Guid _setting;
+    public Guid Setting
     {
         get => _setting;
         set => SetProperty(ref _setting, value);
@@ -194,8 +194,8 @@ public class SceneViewModel : ObservableRecipient, INavigable
 
     //  Scene Conflict data
 
-    private string _protagonist;
-    public string Protagonist
+    private Guid _protagonist;
+    public Guid Protagonist
     {
         get => _protagonist;
         set => SetProperty(ref _protagonist, value);
@@ -215,8 +215,8 @@ public class SceneViewModel : ObservableRecipient, INavigable
         set => SetProperty(ref _protagGoal, value);
     }
 
-    private string _antagonist;
-    public string Antagonist
+    private Guid _antagonist;
+    public Guid Antagonist
     {
         get => _antagonist;
         set => SetProperty(ref _antagonist, value);
@@ -288,11 +288,11 @@ public class SceneViewModel : ObservableRecipient, INavigable
         set => _model = value;
     }
 
-    private string _vpCharTip;
+    private string vpCharTip;
     public string VpCharTip
     {
-        get => _vpCharTip;
-        set => SetProperty(ref _vpCharTip, value);
+        get => vpCharTip;
+        set => SetProperty(ref vpCharTip, value);
     }
 
     private bool _vpCharTipIsOpen;
@@ -302,6 +302,20 @@ public class SceneViewModel : ObservableRecipient, INavigable
         set => SetProperty(ref _vpCharTipIsOpen, value);
     }
 
+    private ObservableCollection<StoryElement> _characters;
+    public ObservableCollection<StoryElement> Characters
+    {
+        get => _characters;
+        set => SetProperty(ref _characters, value);
+    }
+    
+    private ObservableCollection<StoryElement> _settings;
+    public ObservableCollection<StoryElement> Settings
+    {
+        get => _settings;
+        set => SetProperty(ref _settings, value);
+    }
+    
    #endregion
 
    #region Methods
@@ -385,7 +399,11 @@ public class SceneViewModel : ObservableRecipient, INavigable
         Realization = Model.Realization;
         Review = Model.Review;
         Notes = Model.Notes;
-        GetOverviewViewpoint();
+        UpdateViewpointCharacterTip();
+        
+        Characters = Ioc.Default.GetService<ShellViewModel>()!.StoryModel.StoryElements.Characters;
+       
+        Settings = Ioc.Default.GetService<ShellViewModel>()!.StoryModel.StoryElements.Settings;
 
         _changeable = true;
     }
@@ -515,16 +533,6 @@ public class SceneViewModel : ObservableRecipient, INavigable
         _changeable = _changeState; 
     }
 
-    private bool CastMemberExists(string uuid)
-    {
-        foreach (StoryElement element in CastList)
-        {
-            if (uuid == element.Uuid.ToString())
-                return true;
-        }
-        return false;
-    }
-
     private bool CastMemberExists(StoryElement character)
     {
         foreach (StoryElement element in CastList)
@@ -537,11 +545,15 @@ public class SceneViewModel : ObservableRecipient, INavigable
 
     /// <summary>
     /// Add a Character to the cast list if it doesn't already exist.
+    ///
+    /// Placeholder (Guid.Empty) Characters are not added to the cast list.
     /// </summary>
     /// <param name="element"></param>
     public void AddCastMember(StoryElement element)
     {
-        // Edit the character to add
+        if (element.Uuid == Guid.Empty)
+            return;
+        // If the Character is already in the cast list, don't add it again
         if (CastMemberExists(element))
             return;
         CastList.Add(element);
@@ -563,49 +575,49 @@ public class SceneViewModel : ObservableRecipient, INavigable
     }
 
     /// <summary>
-    /// Build VpCharTip, the bound content of the ViewpointCharacterTip TeachingTip,
-    /// by finding and parsing OverViewModel's Viewpoint and ViewPointCharacter.
+    /// Builds VpCharTip, the bound content of the ViewpointCharacterTip TeachingTip,
+    /// by retrieving and parsing the OverviewModel's Viewpoint and ViewpointCharacter.
     /// 
     /// For example, if the Viewpoint is 'First person', the scene's viewpoint character
-    /// should be the same as the overview's viewpoint character (the entire story's
-    /// told in first person.) 
+    /// should match the overview's viewpoint character, indicating the entire story is
+    /// told in first person.
     /// 
-    /// This is presented as a suggestion, not a hard-and-fast rule.
+    /// This is presented as a suggestion, not a strict rule.
     /// </summary>
-    private void GetOverviewViewpoint()
+    private void UpdateViewpointCharacterTip()
     {
-        string _viewpointText = "No story viewpoint selected";
-        string _viewpointName = "No story viewpoint character selected";
-
         VpCharTipIsOpen = false;
-        StoryModel _shellModel = ShellViewModel.GetModel();
-        StoryNodeItem _node = _shellModel.ExplorerView[0];
-        OverviewModel _overview = (OverviewModel)_shellModel.StoryElements.StoryElementGuids[_node.Uuid];
-        //string viewpoint = overview?.Viewpoint;
-        string _viewpoint = _overview?.Viewpoint != null ? _overview.Viewpoint : string.Empty;
-        if (!_viewpoint.Equals(string.Empty))
-            _viewpointText = "Story viewpoint = " + _viewpoint;
-        string _viewpointChar = _overview?.ViewpointCharacter != null ? _overview.ViewpointCharacter : string.Empty;
-        if (!_viewpointChar.Equals(string.Empty))
-        {
-            if (Guid.TryParse(_viewpointChar, out Guid _guid))
-                _viewpointName = "Story viewpoint character = " + _shellModel.StoryElements.StoryElementGuids[_guid].Name;
-            else
-                _viewpointName = "Story viewpoint character not found";
-        }
-        StringBuilder _tip = new();
-        _tip.AppendLine(string.Empty);
-        _tip.AppendLine(_viewpointText);
-        _tip.AppendLine(_viewpointName);
-        VpCharTip = _tip.ToString();
 
-        // The TeachingTip should only display if there's no scene Viewpoint Character selected
-        if (ViewpointCharacter.Equals(string.Empty))
+        var shellModel = ShellViewModel.GetModel();
+        var node = shellModel.ExplorerView.FirstOrDefault();
+        if (node == null)
+        {
+            _logger.Log(LogLevel.Warn, "No node found in ExplorerView.");
+            return;
+        }
+
+        if (!shellModel.StoryElements.StoryElementGuids.TryGetValue(node.Uuid, out var element) || element is not OverviewModel overview)
+        {
+            _logger.Log(LogLevel.Warn, $"OverviewModel not found for node with UUID: {node.Uuid}");
+            return;
+        }
+
+        string viewpointTip = string.IsNullOrEmpty(overview.Viewpoint)
+            ? "No story viewpoint selected"
+            : $"Story viewpoint = {overview.Viewpoint}";
+
+        string viewpointCharacterTip = "No story viewpoint character selected";
+
+        VpCharTip = $"{Environment.NewLine}{viewpointTip}\n{viewpointCharacterTip}";
+
+        // Display the TeachingTip if a viewpoint character is selected
+        if (overview.ViewpointCharacter != Guid.Empty)
         {
             VpCharTipIsOpen = true;
             _logger.Log(LogLevel.Warn, "ViewpointCharacterTip displayed");
         }
     }
+
     #endregion
 
     #region ComboBox ItemsSource collections
@@ -631,17 +643,17 @@ public class SceneViewModel : ObservableRecipient, INavigable
 
         Date = string.Empty;
         Time = string.Empty;
-        Setting = string.Empty;
+        Setting = Guid.Empty;
         SceneType = string.Empty;
         CastList = new ObservableCollection<StoryElement>();
-        ViewpointCharacter = string.Empty;
+        ViewpointCharacter = Guid.Empty;
         ScenePurposes = new ObservableCollection<StringSelection>();
         ValueExchange = string.Empty;
         Remarks = string.Empty;
-        Protagonist = string.Empty;
+        Protagonist = Guid.Empty;
         ProtagEmotion = string.Empty;
         ProtagGoal = string.Empty;
-        Antagonist = string.Empty;
+        Antagonist = Guid.Empty;
         AntagEmotion = string.Empty;
         AntagGoal = string.Empty;
         Opposition = string.Empty;
