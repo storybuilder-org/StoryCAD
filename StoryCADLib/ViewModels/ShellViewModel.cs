@@ -967,26 +967,49 @@ public class ShellViewModel : ObservableRecipient
         Logger.Log(LogLevel.Info, $"In WriteModel, file={StoryModel.ProjectFilename} path={StoryModel.ProjectPath}");
         try
         {
-            try //Updating the lost modified time
-            {
-                OverviewModel _overview =
-                    StoryModel.StoryElements.StoryElementGuids[StoryModel.ExplorerView[0].Uuid] as OverviewModel;
-                _overview!.DateModified = DateTime.Today.ToString("yyyy-MM-dd");
-            }
-            catch
-            {
-                Logger.Log(LogLevel.Warn, "Failed to update last modified date/time");
-            }
+	        try //Updating the lost modified time
+	        {
+		        OverviewModel _overview =
+			        StoryModel.StoryElements.StoryElementGuids[StoryModel.ExplorerView[0].Uuid] as OverviewModel;
+		        _overview!.DateModified = DateTime.Today.ToString("yyyy-MM-dd");
+	        }
+	        catch
+	        {
+		        Logger.Log(LogLevel.Warn, "Failed to update last modified date/time");
+	        }
 
-            await CreateProjectFile();
-            StorageFile _file = StoryModel.ProjectFile;
-            if (_file != null)
-            {
-	            StoryIO _wtr = Ioc.Default.GetRequiredService<StoryIO>();
-                await _wtr.WriteStory(StoryModel.ProjectFile, StoryModel);
-            }
+	        await CreateProjectFile();
+	        StorageFile _file = StoryModel.ProjectFile;
+	        if (_file != null)
+	        {
+		        StoryIO _wtr = Ioc.Default.GetRequiredService<StoryIO>();
+		        await _wtr.WriteStory(StoryModel.ProjectFile, StoryModel);
+	        }
         }
-        catch (Exception _ex)
+        catch (UnauthorizedAccessException _ex)
+        {
+			//Catch write permission exceptions
+			await Ioc.Default.GetRequiredService<Windowing>().ShowContentDialog(new ContentDialog
+			{
+				Title = "Access error",
+				Content = $"""
+				           StoryCAD does not have permission to write to this location.
+				           You outline will now be saved at: 
+				           {Preferences.Model.ProjectDirectory}
+				           """,
+				PrimaryButtonText = "Okay"
+			},true);
+
+			//Reset to default location
+			StoryModel.ProjectFolder = await StorageFolder.GetFolderFromPathAsync(Preferences.Model.ProjectDirectory);
+			StoryModel.ProjectFile = await StoryModel.ProjectFolder.CreateFileAsync(StoryModel.ProjectFilename, 
+				CreationCollisionOption.GenerateUniqueName);
+			StoryModel.ProjectFilename = StoryModel.ProjectFile.Name;
+
+			//Last opened file with reference to this version of the file so this doesn't happen again.
+			Preferences.Model.LastFile1 = StoryModel.ProjectFile.Path;
+		}
+		catch (Exception _ex)
         {
             Logger.LogException(LogLevel.Error, _ex, 
 	            $"Error writing file {_ex.Message} {_ex.Source}");

@@ -42,7 +42,7 @@ public class BackendService
 {
 	private LogService log = Ioc.Default.GetService<LogService>();
 	private AppState State = Ioc.Default.GetService<AppState>();
-	private PreferencesModel Preferences = Ioc.Default.GetService<PreferenceService>().Model;
+	private PreferenceService Preferences = Ioc.Default.GetService<PreferenceService>();
 	private string connection = string.Empty;
 	private string sslCA = string.Empty;
 
@@ -61,26 +61,26 @@ public class BackendService
 		{
 			// If the previous attempt to communicate to the back-end server
 			// or database failed, retry
-			if (Preferences.RecordPreferencesStatus)
-				await PostPreferences(Preferences);
+			if (Preferences.Model.RecordPreferencesStatus)
+				await PostPreferences(Preferences.Model);
                
 			// If the StoryCAD version has changed, post the version change
-			if (!State.Version.Equals(Preferences.Version))
+			if (!State.Version.Equals(Preferences.Model.Version))
 			{
 				// Process a version change (usually a new release)
-				log.Log(LogLevel.Info, "Version mismatch: " + State.Version + " != " + Preferences.Version);
+				log.Log(LogLevel.Info, "Version mismatch: " + State.Version + " != " + Preferences.Model.Version);
 				State.LoadedWithVersionChange = true;
-				PreferencesModel preferences = Preferences;
+				PreferencesModel preferences = Preferences.Model;
 
 				// Update Preferences
 				preferences.Version = State.Version;
-				PreferencesIo prefIO = new(preferences, State.RootDirectory);
-				await prefIO.WritePreferences();
+				PreferencesIo prefIO = new();
+				await prefIO.WritePreferences(preferences);
 
 				// Post deployment to backend server
 				await PostVersion();
 			}
-			else if (!Preferences.RecordVersionStatus)
+			else if (!Preferences.Model.RecordVersionStatus)
 				await PostVersion();
 		}
 		catch (Exception ex)
@@ -118,9 +118,9 @@ public class BackendService
 			// Post the preferences to the database
 			await sql.AddOrUpdatePreferences(conn, id, elmah, newsletter, version);
 			// Indicate we've stored them successfully
-			Preferences.RecordPreferencesStatus = true;
-			PreferencesIo loader = new(Preferences, State.RootDirectory);
-			await loader.WritePreferences();
+			Preferences.Model.RecordPreferencesStatus = true;
+			PreferencesIo loader = new();
+			await loader.WritePreferences(Preferences.Model);
 			log.Log(LogLevel.Info, "Preferences:  elmah=" + elmah + " newsletter=" + newsletter);
 		}
 		// may want to use multiple catch clauses
@@ -139,7 +139,7 @@ public class BackendService
 	{
 		log.Log(LogLevel.Info, "Posting version data to parse");
 
-		PreferencesModel preferences = Preferences;
+		PreferencesModel preferences = Preferences.Model;
 		MySqlIo sql = Ioc.Default.GetService<MySqlIo>();
 
 		// Get a connection to the database
@@ -159,9 +159,9 @@ public class BackendService
 			// Post the version change to the database
 			await sql.AddVersion(conn, id, current, previous);
 			// Indicate we've stored it  successfully
-			Preferences.RecordVersionStatus = true;
-			PreferencesIo loader = new(Preferences, State.RootDirectory);
-			await loader.WritePreferences();
+			Preferences.Model.RecordVersionStatus = true;
+			PreferencesIo loader = new();
+			await loader.WritePreferences(Preferences.Model);
 			log.Log(LogLevel.Info, "Version:  Current=" + current + " Previous=" + previous);
 		}
 		// May want to use multiple catch clauses

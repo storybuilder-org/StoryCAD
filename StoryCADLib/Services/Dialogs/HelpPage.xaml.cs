@@ -14,7 +14,8 @@ public sealed partial class HelpPage : Page
 	{
 		PreferenceService Pref = Ioc.Default.GetService<PreferenceService>();
 		Pref.Model.ShowStartupDialog = !(bool)(sender as CheckBox).IsChecked;
-		PreferencesIo _prfIo = new(Pref.Model, Ioc.Default.GetRequiredService<AppState>().RootDirectory);
-		await _prfIo.WritePreferences();
+		
+		PreferencesIo _prfIo = new();
+		await _prfIo.WritePreferences(Pref.Model);
 	}
 }
