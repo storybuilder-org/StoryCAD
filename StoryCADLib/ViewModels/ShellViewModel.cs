@@ -857,7 +857,7 @@ public class ShellViewModel : ObservableRecipient
 
             // Read the file into the StoryModel.
             StoryIO _rdr = Ioc.Default.GetRequiredService<StoryIO>();
-            StoryModel = await _rdr.ReadStory(StoryModel.ProjectFile);
+             StoryModel = await _rdr.ReadStory(StoryModel.ProjectFile);
 
             //Check the file we loaded actually has StoryCAD Data.
             if (StoryModel == null)
