@@ -311,11 +311,11 @@ public class ReportFormatter
                 StringBuilder sb = new(line);
                 if (rel.Partner == null)
                 {
-                    foreach (StoryElement VARIABLE in Ioc.Default.GetService<ShellViewModel>().StoryModel.StoryElements.Characters)
+                    foreach (StoryElement otherCharacter in Ioc.Default.GetService<ShellViewModel>()!.StoryModel.StoryElements.Characters)
                     {
-                        if (VARIABLE.Uuid.Equals(Guid.Parse(rel.PartnerUuid)))
+                        if (otherCharacter.Uuid == rel.PartnerUuid)
                         {
-                            sb.Replace("@Relationship", VARIABLE.Name);
+                            sb.Replace("@Relationship", character.Name);
                             break;
                         }
                     }
@@ -571,10 +571,10 @@ public class ReportFormatter
             
             if (line.Contains("@CastMember"))
             {
-                foreach (string seCastMember in scene.CastMembers)
+                foreach (Guid seCastMember in scene.CastMembers)
                 {
-                    StoryElement castMember = StoryElement.StringToStoryElement(seCastMember);
-                    string castMemberName = castMember?.Name ?? string.Empty;
+                    StoryElement castMember = StoryElement.GetByGuid(seCastMember);
+                    string castMemberName = castMember?.Name ?? "Unknown Character";
                     StringBuilder sbCast = new(line);
                             
                     sbCast.Replace("@CastMember", castMemberName);

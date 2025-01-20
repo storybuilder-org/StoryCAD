@@ -400,7 +400,7 @@ class StoryWriter
 		{
 			XmlElement _relNode = _xml.CreateElement("Relation");
 			_attr = _xml.CreateAttribute("Partner");
-			_attr.Value = _relation.PartnerUuid;
+			_attr.Value = _relation.PartnerUuid.ToString();
 			_relNode.Attributes.Append(_attr);
 			_attr = _xml.CreateAttribute("RelationType");
 			_attr.Value = _relation.RelationType;
@@ -596,22 +596,23 @@ class StoryWriter
 		_attr = _xml.CreateAttribute("SceneType");
 		_attr.Value = _rec.SceneType;
 		_scene.Attributes.Append(_attr);
-		XmlNode _castList = _xml.CreateElement("CastMembers");
-		foreach (string _member in _rec.CastMembers)
-		{
-			XmlElement _castMember = _xml.CreateElement("Member");
-			_castMember.AppendChild(_xml.CreateTextNode(_member));
-			_castList.AppendChild(_castMember);
-		}
-		_scene.AppendChild(_castList);
-		XmlNode _scenePurposeList = _xml.CreateElement("ScenePurpose");
+		XmlNode castList = _xml.CreateElement("CastMembers");
+        foreach (Guid member in _rec.CastMembers)
+        {
+            XmlElement castMember = _xml.CreateElement("Member");
+            castMember.AppendChild(_xml.CreateTextNode(UuidString(member)));
+            castList.AppendChild(castMember);
+        }
+		
+		_scene.AppendChild(castList);
+		XmlNode scenePurposeList = _xml.CreateElement("ScenePurpose");
 		foreach (string _item in _rec.ScenePurpose)
 		{
-			XmlElement _purpose = _xml.CreateElement("Purpose");
-			_purpose.AppendChild(_xml.CreateTextNode(_item));
-			_scenePurposeList.AppendChild(_purpose);
+			XmlElement purpose = _xml.CreateElement("Purpose");
+			purpose.AppendChild(_xml.CreateTextNode(_item));
+			scenePurposeList.AppendChild(purpose);
 		}
-		_scene.AppendChild(_scenePurposeList);
+		_scene.AppendChild(scenePurposeList);
 		_attr = _xml.CreateAttribute("Remarks");
 		_attr.Value = _rec.Remarks;
 		_scene.Attributes.Append(_attr);
@@ -784,9 +785,7 @@ class StoryWriter
 	/// <returns>string UUID representation</returns>
 	public static string UuidString(Guid uuid)
 	{
-		string _id = uuid.ToString("B").ToUpper();
-		_id = _id.Replace("{", string.Empty);
-		_id = _id.Replace("}", string.Empty);
+		string _id = uuid.ToString("D").ToUpper();
 		return _id;
 	}
 }

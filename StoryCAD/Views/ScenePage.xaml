@@ -109,6 +109,13 @@
                                                     Margin="0"
                                                     IsChecked="{x:Bind IsSelected ,Mode=TwoWay}"
                                                     Checked="CastMember_Checked" Unchecked="CastMember_Unchecked" />
+                                        <ListView ItemsSource="{Binding CastSource}">
+                                            <ListView.ItemTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding Name}" />
+                                                </DataTemplate>
+                                            </ListView.ItemTemplate>
+                                        </ListView>
                                         <TextBlock Text="{x:Bind Name, Mode=OneWay}" MinWidth="250" />
                                     </StackPanel>
                                 </DataTemplate>

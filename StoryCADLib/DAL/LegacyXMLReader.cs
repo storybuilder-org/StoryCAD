@@ -588,103 +588,112 @@ public class LegacyXMLReader : ObservableRecipient
     private void ParseScene(IXmlNode xn)
     {
         SceneModel _scene = new(xn, _model);
-        IXmlNode _castMembers = xn.SelectSingleNode("./CastMembers");
-        if (_castMembers != null)
-            foreach (IXmlNode _child in _castMembers.ChildNodes)
-                if (_child.NodeName.Equals("Member"))
-                    _scene.CastMembers.Add(_child.InnerText);
+        IXmlNode castMembers = xn.SelectSingleNode("./CastMembers");
+        if (castMembers != null)
+            foreach (IXmlNode child in castMembers.ChildNodes)
+                if (child.NodeName.Equals("Member"))
+                {
+                    if (Guid.TryParse(child.InnerText, out Guid memberGuid))
+                    {
+                        _scene.CastMembers.Add(memberGuid);
+                    }
+                    else
+                    {
+                        _logger.Log(LogLevel.Warn, $"Invalid GUID '{child.InnerText}' for cast member in scene '{_scene.Name}'.");
+                    }
+                }
+;
+        IXmlNode scenePurpose = xn.SelectSingleNode("./ScenePurpose");
+        if (scenePurpose != null)
+            foreach (IXmlNode child in scenePurpose.ChildNodes)
+                if (child.NodeName.Equals("Purpose"))
+                    _scene.ScenePurpose.Add(child.InnerText);
 
-        IXmlNode _scenePurpose = xn.SelectSingleNode("./ScenePurpose");
-        if (_scenePurpose != null)
-            foreach (IXmlNode _child in _scenePurpose.ChildNodes)
-                if (_child.NodeName.Equals("Purpose"))
-                    _scene.ScenePurpose.Add(_child.InnerText);
-
-        foreach (IXmlNode _attr in xn.Attributes)
+        foreach (IXmlNode attr in xn.Attributes)
         {
-            switch (_attr.NodeName)
+            switch (attr.NodeName)
             {
                 case "UUID":
                     break;
                 case "Name":
-                    _scene.Name = _attr.InnerText;
+                    _scene.Name = attr.InnerText;
                     break;
                 case "ViewpointCharacter":
-                    _scene.ViewpointCharacter = Guid.TryParse(_attr.InnerText, out Guid viewpointCharacter) 
+                    _scene.ViewpointCharacter = Guid.TryParse(attr.InnerText, out Guid viewpointCharacter) 
                         ? viewpointCharacter
                         : Guid.Empty;
                     break;
                 case "Date":
-                    _scene.Date = _attr.InnerText;
+                    _scene.Date = attr.InnerText;
                     break;
                 case "Time":
-                    _scene.Time = _attr.InnerText;
+                    _scene.Time = attr.InnerText;
                     break;
                 case "Setting":
-                    _scene.Setting = Guid.TryParse(_attr.InnerText, out Guid setting) 
+                    _scene.Setting = Guid.TryParse(attr.InnerText, out Guid setting) 
                         ? setting
                         : Guid.Empty;
                     break;
                 case "SceneType":
-                    _scene.SceneType = _attr.InnerText;
+                    _scene.SceneType = attr.InnerText;
                     break;
                 case "Protagonist":
-                    _scene.Protagonist = Guid.TryParse(_attr.InnerText, out Guid protagonist) 
+                    _scene.Protagonist = Guid.TryParse(attr.InnerText, out Guid protagonist) 
                         ? protagonist
                         : Guid.Empty;
                     break;
                 case "ProtagEmotion":
-                    _scene.ProtagEmotion = _attr.InnerText;
+                    _scene.ProtagEmotion = attr.InnerText;
                     break;
                 case "ProtagGoal":
-                    _scene.ProtagGoal = _attr.InnerText;
+                    _scene.ProtagGoal = attr.InnerText;
                     break;
                 case "Antagonist":
-                    _scene.Antagonist = Guid.TryParse(_attr.InnerText, out Guid antagonist) 
+                    _scene.Antagonist = Guid.TryParse(attr.InnerText, out Guid antagonist) 
                         ? antagonist 
                         : Guid.Empty;
                     break;
                 case "AntagEmotion":
-                    _scene.AntagEmotion = _attr.InnerText;
+                    _scene.AntagEmotion = attr.InnerText;
                     break;
                 case "AntagGoal":
-                    _scene.AntagGoal = _attr.InnerText;
+                    _scene.AntagGoal = attr.InnerText;
                     break;
                 case "Opposition":
-                    _scene.Opposition = _attr.InnerText;
+                    _scene.Opposition = attr.InnerText;
                     break;
                 case "Outcome":
-                    _scene.Outcome = _attr.InnerText;
+                    _scene.Outcome = attr.InnerText;
                     break;
                 case "Emotion":
-                    _scene.Emotion = _attr.InnerText;
+                    _scene.Emotion = attr.InnerText;
                     break;
                 case "NewGoal":
-                    _scene.NewGoal = _attr.InnerText;
+                    _scene.NewGoal = attr.InnerText;
                     break;
                 case "ValueExchange":
-                    _scene.ValueExchange = _attr.InnerText;
+                    _scene.ValueExchange = attr.InnerText;
                     break;
                 case "Remarks":
-                    _scene.Remarks = _attr.InnerText;
+                    _scene.Remarks = attr.InnerText;
                     break;
                 case "Events":
-                    _scene.Events = _attr.InnerText;
+                    _scene.Events = attr.InnerText;
                     break;
                 case "Consequences":
-                    _scene.Consequences = _attr.InnerText;
+                    _scene.Consequences = attr.InnerText;
                     break;
                 case "Significance":
-                    _scene.Significance = _attr.InnerText;
+                    _scene.Significance = attr.InnerText;
                     break;
                 case "Realization":
-                    _scene.Realization = _attr.InnerText;
+                    _scene.Realization = attr.InnerText;
                     break;
                 case "Review":
-                    _scene.Review = _attr.InnerText;
+                    _scene.Review = attr.InnerText;
                     break;
                 case "Notes":
-                    _scene.Notes = _attr.InnerText;
+                    _scene.Notes = attr.InnerText;
                     break;
             }
         }

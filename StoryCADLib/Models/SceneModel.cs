@@ -74,11 +74,11 @@ public class SceneModel : StoryElement
 	}
 
 	[JsonIgnore]
-	private List<string> _castMembers;
+	private List<Guid> _castMembers;
 	//TODO: Convert to GUIDs	
 	[JsonInclude]
 	[JsonPropertyName("CastMembers")]
-	public List<string> CastMembers
+	public List<Guid> CastMembers
 	{
 		get => _castMembers;
 		set => _castMembers = value;
@@ -305,7 +305,7 @@ public class SceneModel : StoryElement
         Time = string.Empty;
         Setting = Guid.Empty;
         SceneType = string.Empty;
-        CastMembers = new List<string>();
+        CastMembers = new List<Guid>();
         Remarks = string.Empty;
         ScenePurpose = new List<string>();
         ValueExchange = string.Empty;
@@ -335,7 +335,7 @@ public class SceneModel : StoryElement
 	    Time = string.Empty;
 	    Setting = Guid.Empty;
 	    SceneType = string.Empty;
-	    CastMembers = new List<string>();
+	    CastMembers = new List<Guid>();
 	    Remarks = string.Empty;
 	    ScenePurpose = new List<string>();
 	    ValueExchange = string.Empty;
@@ -364,7 +364,7 @@ public class SceneModel : StoryElement
         Time = string.Empty;
         Setting = Guid.Empty;
         SceneType = string.Empty;
-        CastMembers = new List<string>();
+        CastMembers = new List<Guid>();
         Remarks = string.Empty;
         ScenePurpose = new List<string>();
         ValueExchange = string.Empty;

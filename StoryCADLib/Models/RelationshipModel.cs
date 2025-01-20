@@ -13,7 +13,7 @@ public class RelationshipModel
 	// The other character's UUID
 	[JsonInclude]
 	[JsonPropertyName("PartnerUuid")]
-	public string PartnerUuid { get; set; }
+	public Guid PartnerUuid { get; set; }
 
 	// Relationship type
 	[JsonInclude]
@@ -33,13 +33,13 @@ public class RelationshipModel
 	public string Notes { get; set; }
 
 	[JsonIgnore]
-	public CharacterViewModel CharVM = Ioc.Default.GetService<CharacterViewModel>();
+	public readonly CharacterViewModel CharVM = Ioc.Default.GetService<CharacterViewModel>();
 
 	#endregion
 
 	#region Constructors
 
-	public RelationshipModel(string partnerUuid, string type)
+	public RelationshipModel(Guid partnerUuid, string type)
     {
 
         PartnerUuid = partnerUuid;
@@ -52,7 +52,7 @@ public class RelationshipModel
     public RelationshipModel(IXmlNode xn)
     {
         Partner = null;
-        PartnerUuid = string.Empty;
+        PartnerUuid = Guid.Empty;
         RelationType = null;
         Trait = string.Empty;
         Attitude = string.Empty;
@@ -63,7 +63,7 @@ public class RelationshipModel
             switch (_attr.NodeName)
             {
                 case "Partner":
-                    PartnerUuid =  _attr.InnerText;
+                    PartnerUuid =  Guid.Parse(_attr.InnerText);
                     break;
                 case "RelationType":
                     RelationType = _attr.InnerText;

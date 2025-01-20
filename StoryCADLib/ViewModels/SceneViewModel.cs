@@ -1,6 +1,5 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Text;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.UI.Xaml;
@@ -418,14 +417,14 @@ public class SceneViewModel : ObservableRecipient, INavigable
     /// </summary>
     private void LoadCastList()
     {
-        // Load the SceneVIewModel's cast list from the Model
+        // Load the SceneViewModel's cast list from the Model
         CastList.Clear();
-        foreach (string _member in Model.CastMembers)
+        foreach (Guid memberGuid in Model.CastMembers)
         {
-            StoryElement _element = StoryElement.StringToStoryElement(_member);
-            if (_element != null)
+            StoryElement element = StoryElement.GetByGuid(memberGuid);
+            if (element != null && element.Type == StoryItemType.Character)
             {
-                CastList.Add(StoryElement.StringToStoryElement(_member));
+                CastList.Add(element);
             }
         }
     }
@@ -464,12 +463,12 @@ public class SceneViewModel : ObservableRecipient, INavigable
         Model.Setting = Setting;
         Model.SceneType = SceneType;
         Model.CastMembers.Clear();
-        foreach (StoryElement _element in CastList)
-            Model.CastMembers.Add(_element.ToString());
+        foreach (StoryElement element in CastList)
+            Model.CastMembers.Add(element.Uuid);
         Model.ScenePurpose.Clear();
-        foreach (StringSelection _purpose in ScenePurposes)
-            if (_purpose.Selection)
-                Model.ScenePurpose.Add(_purpose.StringName);
+        foreach (StringSelection purpose in ScenePurposes)
+            if (purpose.Selection)
+                Model.ScenePurpose.Add(purpose.StringName);
         Model.ValueExchange = ValueExchange;
         Model.Protagonist = Protagonist;
         Model.ProtagEmotion = ProtagEmotion;
@@ -694,7 +693,7 @@ public class SceneViewModel : ObservableRecipient, INavigable
         // Initialize cast member lists / display
         CastList = new ObservableCollection<StoryElement>();
         CharacterList = ShellViewModel.ShellInstance.StoryModel.StoryElements.Characters;
-        CastSource = CharacterList;
+        CastSource = AllCharacters ? CharacterList : CastList;
         AllCharacters = true;
 
         PropertyChanged += OnPropertyChanged;
