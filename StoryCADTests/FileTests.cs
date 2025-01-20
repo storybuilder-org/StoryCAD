@@ -4,6 +4,7 @@ using StoryCAD.DAL;
 using StoryCAD.Models;
 using StoryCAD.ViewModels;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -291,4 +292,164 @@ public class FileTests
 	    Assert.IsTrue("4e7c0217-64e8-4c74-8438-debb584cf3b8" == mainProblem.StructureBeats[2].Guid, "Third bound Beat GUID mismatch");
 
 	}
+	[TestMethod]
+	public async Task FileSaveTest()
+	{
+		// Arrange
+		string dir = AppDomain.CurrentDomain.BaseDirectory;
+		string testProjectPath = Path.Combine(dir, "TestOutputs", "TestProject");
+		Directory.CreateDirectory(testProjectPath);
+
+		StoryModel storyModel = new()
+		{
+			ProjectFilename = "SavedTest.stbx",
+			ProjectPath = testProjectPath
+		};
+
+		// Create and add an overview node
+		OverviewModel overview = new("Saved Test Project", storyModel)
+		{
+			DateCreated = DateTime.Today.ToString("yyyy-MM-dd"),
+			Author = "Jane Doe",
+			StoryIdea = "A thrilling adventure of self-discovery.",
+			Concept = "Exploring the depths of human resilience.",
+			Premise = "What defines a hero when facing insurmountable odds?",
+			StoryType = "Adventure",
+			Viewpoint = "First person",
+			StoryGenre = "Fantasy",
+			LiteraryDevice = "Foreshadowing",
+			Voice = "Narrative",
+			Tense = "Past",
+			Style = "Descriptive",
+			StructureNotes = "Follows a three-act structure.",
+			Tone = "Inspirational",
+			Notes = "Initial project setup."
+		};
+		StoryNodeItem overviewNode = new(overview, null, StoryItemType.StoryOverview) { IsRoot = true };
+		storyModel.ExplorerView.Add(overviewNode);
+
+		// Add test elements to the story
+		CharacterModel character = new("Aria Windrunner", storyModel)
+		{
+			Role = "Protagonist",
+			StoryRole = "Hero",
+			Archetype = "The Explorer",
+			CharacterSketch = "Brave and curious, with a knack for solving mysteries.",
+			Age = "28",
+			Sex = "Female",
+			CharHeight = "5'7\"",
+			Weight = "130 lbs",
+			Eyes = "Green",
+			Hair = "Chestnut",
+			Build = "Athletic",
+			Complexion = "Fair",
+			Race = "Caucasian",
+			Nationality = "American",
+			Health = "Excellent",
+			PhysNotes = "Scar on left cheek from a past adventure.",
+			Flaw = "Impulsive decision-making",
+			BackStory = "Grew up in a small town, always yearning for adventure.",
+			Economic = "Middle-class background",
+			Education = "Bachelor's in Archaeology",
+			Ethnic = "British descent",
+			Religion = "Agnostic",
+			Intelligence = "Highly intelligent",
+			Values = "Courage and loyalty",
+			Focus = "Discovery",
+			Abnormality = "Obsessive tendencies",
+			Adventureousness = "High",
+			Confidence = "Moderate",
+			Creativity = "High",
+			Enthusiasm = "Energetic",
+			Sensitivity = "High",
+			Sociability = "Outgoing",
+			Aggression = "Low",
+			Conscientiousness = "Very conscientious",
+			Dominance = "Moderate",
+			Assurance = "Confident",
+			Shrewdness = "Sharp",
+			Stability = "Stable",
+			TraitList = new List<string> { "Resourceful", "Quick-thinking" },
+			Notes = "Primary character for testing."
+		};
+
+		ProblemModel problem = new("Lost Artifact", storyModel)
+		{
+			ProblemType = "Mystery",
+			ConflictType = "Person vs. Nature",
+			ProblemCategory = "Discovery",
+			Subject = "Ancient civilizations",
+			StoryQuestion = "Can Aria find the lost artifact before it falls into the wrong hands?",
+			ProtGoal = "Recover the artifact to preserve history.",
+			ProtMotive = "Passion for archaeology and discovery.",
+			ProtConflict = "Harsh environmental conditions.",
+			AntagGoal = "Obtain the artifact for personal gain.",
+			AntagConflict = "Rival archaeologist competing for the same artifact.",
+			AntagMotive = "Desire for recognition and wealth.",
+			Antagonist = "Dr. Victor Blackthorn",
+			Outcome = "Aria successfully retrieves the artifact but faces moral dilemmas.",
+			Method = "Use of ancient maps and modern technology.",
+			Theme = "The true value of discovery lies in preservation, not possession.",
+			Premise = "In the quest for knowledge, ethical boundaries must be maintained.",
+			StructureTitle = "Hero's Journey",
+			Notes = "Sets the main conflict for the story."
+		};
+
+		SceneModel scene = new(storyModel)
+		{
+			Name = "The Hidden Temple",
+			Date = "June 21, 2025",
+			Time = "Dusk",
+			SceneType = "Climactic confrontation",
+			ValueExchange = "Trust vs. Betrayal",
+			Consequences = "Revelation of the artifact's true power.",
+			ProtagGoal = "Secure the artifact safely.",
+			Opposition = "Natural obstacles and human adversaries.",
+			ProtagEmotion = "Determination",
+			AntagGoal = "Take possession of the artifact.",
+			Outcome = "Artifact is secured, but at a personal cost.",
+			Review = "Reflect on the journey and its impacts.",
+			NewGoal = "Use the artifact to benefit society.",
+			Notes = "Final scene tying up the narrative."
+		};
+
+		storyModel.ExplorerView.Add(new(character, overviewNode, StoryItemType.Character));
+		storyModel.ExplorerView.Add(new(problem, overviewNode, StoryItemType.Problem));
+		storyModel.ExplorerView.Add(new(scene, overviewNode, StoryItemType.Scene));
+
+		// Prepare storage file
+		StorageFolder projectFolder = await StorageFolder.GetFolderFromPathAsync(testProjectPath);
+		StorageFile projectFile = await projectFolder.CreateFileAsync("SavedTest.stbx",
+			CreationCollisionOption.ReplaceExisting);
+
+		// Act
+		StoryIO storyIO = Ioc.Default.GetRequiredService<StoryIO>();
+		await storyIO.WriteStory(projectFile, storyModel);
+
+		// Assert
+		Assert.IsTrue(File.Exists(Path.Combine(testProjectPath, "SavedTest.stbx")), "The file was not saved correctly.");
+
+		// Optional: Load the file back to verify its contents
+		StoryModel loadedModel = await storyIO.ReadStory(projectFile);
+		Assert.AreEqual(storyModel.StoryElements.Count, loadedModel.StoryElements.Count, "Loaded story elements count mismatch.");
+
+		// Additional Assertions to verify populated fields
+		var loadedCharacter = loadedModel.StoryElements
+			.OfType<CharacterModel>()
+			.FirstOrDefault(c => c.Name == "Aria Windrunner");
+		Assert.IsNotNull(loadedCharacter, "Character 'Aria Windrunner' not found.");
+		Assert.AreEqual("Protagonist", loadedCharacter.Role);
+		Assert.AreEqual("Hero", loadedCharacter.StoryRole);
+		Assert.AreEqual("The Explorer", loadedCharacter.Archetype);
+		Assert.AreEqual("28", loadedCharacter.Age);
+		Assert.AreEqual("Female", loadedCharacter.Sex);
+		Assert.AreEqual("Green", loadedCharacter.Eyes);
+		Assert.AreEqual("Chestnut", loadedCharacter.Hair);
+		Assert.AreEqual("Athletic", loadedCharacter.Build);
+		Assert.AreEqual("Fair", loadedCharacter.Complexion);
+		Assert.AreEqual("Caucasian", loadedCharacter.Race);
+		Assert.AreEqual("American", loadedCharacter.Nationality);
+		Assert.AreEqual("Excellent", loadedCharacter.Health);
+	}
+
 }
