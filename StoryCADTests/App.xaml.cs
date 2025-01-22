@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Drawing.Drawing2D;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.VisualStudio.TestTools.UnitTesting; //.AppContainer;
@@ -17,6 +18,9 @@ namespace StoryCADTests;
 /// </summary>
 public partial class App : Application
 {
+	public static string InputDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"TestInputs");
+	public static string ResultsDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"TestResults");
+
     private LogService _log;
 
     /// <summary>

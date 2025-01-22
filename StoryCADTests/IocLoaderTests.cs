@@ -48,7 +48,8 @@ public class IocLoaderTests
 			Prefs.Model = new();
 			Prefs.Model.FirstName = "StoryCADTestUser";
 			Prefs.Model.Email = "sysadmin@storybuilder.org";
-			//return;
+			Prefs.Model.ProjectDirectory = App.InputDir;
+			Prefs.Model.BackupDirectory = App.ResultsDir;
 			try
 			{
 

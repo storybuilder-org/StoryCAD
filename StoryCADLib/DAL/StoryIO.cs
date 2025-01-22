@@ -169,7 +169,12 @@ public class StoryIO
 		return rootCollection;
 	}
 
-	private async Task<StoryModel> MigrateModel(StorageFile File)
+	/// <summary>
+	/// Migrates a given StoryModel from XML to JSON
+	/// </summary>
+	/// <param name="File">StorageFile Object</param>
+	/// <returns>StoryModel</returns>
+	public async Task<StoryModel> MigrateModel(StorageFile File)
 	{
 		StoryModel Old = new();
 		try
