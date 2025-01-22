@@ -236,51 +236,51 @@ public class ReportFormatter
 
 		return output.ToString();
 	}
+    private void ProcessBeat(StructureBeatViewModel beat, StringBuilder output, StoryModel storyModel, int indentLevel, HashSet<Guid> processedElements)
+    {
+        var indent = new string('\t', indentLevel);
+        var prefix = "- "; // Prefix to denote a beat
 
-	private void ProcessBeat(StructureBeatViewModel beat, StringBuilder output, StoryModel storyModel, int indentLevel, HashSet<Guid> processedElements)
-	{
-		var indent = new string('\t', indentLevel);
-		var prefix = "- "; // Prefix to denote a beat
+        // If GUID is assigned, resolve and append Element details
+        if (beat.Guid != Guid.Empty)
+        {
+            // Check if the element has already been processed
+            if (processedElements.Contains(beat.Guid))
+            {
+                return; // Exit to prevent infinite recursion
+            }
 
-		// If GUID is assigned, resolve and append Element details
-		if (!string.IsNullOrEmpty(beat.Guid) && Guid.TryParse(beat.Guid, out Guid beatGuid))
-		{
-			// Check if the element has already been processed
-			if (processedElements.Contains(beatGuid))
-			{
-				return; // Exit to prevent infinite recursion
-			}
+            // Mark the element as processed
+            processedElements.Add(beat.Guid);
 
-			// Mark the element as processed
-			processedElements.Add(beatGuid);
+            var element = storyModel.StoryElements
+                .FirstOrDefault(e => e.Uuid.Equals(beat.Guid));
 
-			var element = storyModel.StoryElements
-				.FirstOrDefault(e => e.Uuid.Equals(beatGuid));
+            if (element != null)
+            {
+                // Append Beat Title with prefix
+                output.AppendLine($"{indent}{prefix}{beat.Title}");
 
-			if (element != null)
-			{
-				// Append Beat Title with prefix
-				output.AppendLine($"{indent}{prefix}{beat.Title}");
+                // Append Element Name and Description with additional indentation
+                output.AppendLine($"{indent}   {beat.ElementName}");
 
-				// Append Element Name and Description with additional indentation
-				output.AppendLine($"{indent}   {beat.ElementName}");
+                // If the element is a Problem, process its beats recursively
+                if (element.Type == StoryItemType.Problem && element is ProblemModel problemElement)
+                {
+                    if (problemElement.StructureBeats != null && problemElement.StructureBeats.Any())
+                    {
+                        foreach (var subBeat in problemElement.StructureBeats)
+                        {
+                            ProcessBeat(subBeat, output, storyModel, indentLevel + 1, processedElements);
+                        }
+                    }
+                }
+                // Append separator with proper indentation
+                output.AppendLine($"{indent}\t-------------");
+            }
+        }
+    }
 
-				// If the element is a Problem, process its beats recursively
-				if (element.Type == StoryItemType.Problem && element is ProblemModel problemElement)
-				{
-					if (problemElement.StructureBeats != null && problemElement.StructureBeats.Any())
-					{
-						foreach (var subBeat in problemElement.StructureBeats)
-						{
-							ProcessBeat(subBeat, output, storyModel, indentLevel + 1, processedElements);
-						}
-					}
-				}
-				// Append separator with proper indentation
-				output.AppendLine($"{indent}\t-------------");
-			}
-		}
-	}
 	private string FormatStructureBeatsElements(ProblemModel problem)
     {
 	    StringBuilder beats = new();
@@ -290,11 +290,12 @@ public class ReportFormatter
 		    beats.AppendLine(beat.Description);
 
 		    //Don't print element stuff if one is unassigned.
-		    if (!string.IsNullOrEmpty(beat.Guid))
-		    {
-			    beats.AppendLine(beat.ElementName);
-			    beats.AppendLine(beat.ElementDescription);
-		    }
+            // Don't print element stuff if one is unassigned.
+            if (beat.Guid != Guid.Empty)
+            {
+                beats.AppendLine(beat.ElementName);
+                beats.AppendLine(beat.ElementDescription);
+            }
 		    beats.AppendLine("\t\t-------------");
 	    }
 		return beats.ToString();

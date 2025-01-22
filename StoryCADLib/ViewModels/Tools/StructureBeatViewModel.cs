@@ -47,13 +47,13 @@ public class StructureBeatViewModel : ObservableObject
     }
 
     [JsonInclude]
-	private string guid;
+	private Guid guid;
 	/// <summary>
 	/// GUID of problem/scene beat links to.
 	/// </summary>
 	[JsonInclude]
 	[JsonPropertyName("BoundGUID")]
-	public string Guid
+	public Guid Guid
     {
         get => guid;
         set
@@ -74,11 +74,12 @@ public class StructureBeatViewModel : ObservableObject
     {
         get
         {
-            if (!string.IsNullOrEmpty(guid))
+            if (guid != Guid.Empty)
             {
-                return ShellViewModel.GetModel().StoryElements.StoryElementGuids[new Guid(Guid)];
+                return ShellViewModel.GetModel().StoryElements.StoryElementGuids[guid];
             }
-            return null;
+
+            return new StoryElement();
         }
     }
 
@@ -86,16 +87,15 @@ public class StructureBeatViewModel : ObservableObject
 	/// Name of the element
 	/// </summary>
 	[JsonIgnore]
-	public string ElementName
+	public string ElementName  
     {
         get
         {
-            if (Element != null)
+            if (Element.Uuid == Guid.Empty)
             {
-                return Element.Name;
+                return "No element Selected";
             }
-
-            return "No element Selected";
+            return Element.Name;
         }
     }
 

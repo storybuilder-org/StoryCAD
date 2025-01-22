@@ -7,11 +7,9 @@
     xmlns:models="using:StoryCAD.Models"            
     xmlns:usercontrols="using:StoryCAD.Controls"
     xmlns:viewModels="using:StoryCAD.ViewModels"
-    xmlns:converters="using:StoryCAD.Converters"
     mc:Ignorable="d" >
 
     <Page.Resources>
-        <converters:EnumToBoolConverter x:Key="EnumToBoolConverter" />
         <TeachingTip x:Name="ViewpointCharacterTip"
                      Title="Reminder:"
                      Subtitle="Pick a scene viewpoint character consistent with your story POV:"

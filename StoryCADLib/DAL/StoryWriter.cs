@@ -330,7 +330,7 @@ class StoryWriter
 			beatElement.AppendChild(descriptionElement);
 
 			XmlElement guidElement = _xml.CreateElement("Guid");
-			guidElement.AppendChild(_xml.CreateTextNode(beat.Guid));
+			guidElement.AppendChild(_xml.CreateTextNode(beat.Guid.ToString()));
 			beatElement.AppendChild(guidElement);
 
 			structureBeatsNode.AppendChild(beatElement);

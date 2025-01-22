@@ -52,31 +52,6 @@ public class StoryElement : ObservableObject
     #endregion
 
     #region Public Methods
-    public static StoryElement StringToStoryElement(string value)
-    {
-        if (value == null)
-            return null;
-        if (value.Equals(string.Empty))
-            return null;
-        // Get the current StoryModel's StoryElementsCollection
-        ShellViewModel shell = Ioc.Default.GetService<ShellViewModel>();
-        StoryElementCollection elements = shell.StoryModel.StoryElements;
-        // legacy: locate the StoryElement from its Name
-        foreach (StoryElement element in elements)  // Character or Setting??? Search both?
-        {
-            if (element.Type == StoryItemType.Character | element.Type == StoryItemType.Setting)
-            {
-                if (value.Equals(element.Name))
-                    return element;
-            }
-        }
-        // Look for the StoryElement corresponding to the passed guid
-        // (This is the normal approach)
-        if (Guid.TryParse(value, out Guid guid))
-            if (elements.StoryElementGuids.ContainsKey(guid))
-                return elements.StoryElementGuids[guid];
-        return null;  // Not found
-    }
 
     /// <summary>
     /// Retrieve a StoryElement from its Guid.
@@ -106,6 +81,7 @@ public class StoryElement : ObservableObject
         // Look for the StoryElement corresponding to the passed guid
             if (elements.StoryElementGuids.ContainsKey(guid))
                 return elements.StoryElementGuids[guid];
+        //TODO: Log the error.
         return new StoryElement();  // Not found
     }
 

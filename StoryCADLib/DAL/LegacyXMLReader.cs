@@ -366,7 +366,7 @@ public class LegacyXMLReader : ObservableRecipient
 
 		        IXmlNode guidNode = beatNode.SelectSingleNode("./Guid");
 		        if (guidNode != null)
-			        beat.Guid = guidNode.InnerText;
+                    beat.Guid = Guid.TryParse(guidNode.InnerText, out Guid guid) ? guid : Guid.Empty;
 
 		        _prb.StructureBeats.Add(beat);
 			}
