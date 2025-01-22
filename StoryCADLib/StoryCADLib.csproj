@@ -101,12 +101,6 @@
 		<WindowsSdkPackageVersion>10.0.22621.38</WindowsSdkPackageVersion>
 	</PropertyGroup>
 
-	<ItemGroup>
-	  <EmbeddedResource Include="C:\temp\Snow White.stbx" Link="Snow White.stbx">
-	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-	  </EmbeddedResource>
-	</ItemGroup>
-
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.2" />
     <PackageReference Include="CommunityToolkit.WinUI.UI.Controls.Core" Version="7.1.2" />
@@ -153,6 +147,9 @@
     <EmbeddedResource Update="Assets\Install\samples\Rocky.stbx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
+	  <EmbeddedResource Update="Assets\Install\samples\Snow White.stbx">
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </EmbeddedResource>
     <EmbeddedResource Update="Assets\Install\samples\The Glass Menagerie.stbx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
