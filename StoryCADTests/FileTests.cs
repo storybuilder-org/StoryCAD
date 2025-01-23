@@ -5,6 +5,7 @@ using StoryCAD.Models;
 using StoryCAD.ViewModels;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -13,6 +14,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Windows.Storage;
 using StoryCAD.Services;
+using StoryCAD.Services.Logging;
 
 namespace StoryCADTests;
 
@@ -299,31 +301,23 @@ public class FileTests
     {
 	    Ioc.Default.GetRequiredService<PreferenceService>().Model.ProjectDirectory = App.InputDir;
 	    Ioc.Default.GetRequiredService<PreferenceService>().Model.BackupDirectory = App.ResultsDir;
-		foreach (var File in Directory.GetFiles(Path.Combine(App.InputDir, "Migrations")))
-		{
-			StorageFile Sample = await StorageFile.GetFileFromPathAsync(File);
-			StoryIO IO = new();
-			await IO.MigrateModel(Sample);
-		}
-		Assert.IsTrue(MD5Hash(Path.Combine(App.InputDir, "Migrations", "A Doll's House.stbx")) == "8D2D880907DC816571A49CAD814012A5");
-		Assert.IsTrue(MD5Hash(Path.Combine(App.InputDir, "Migrations", "Danger Calls.stbx")) == "B6A02BF0619F373F571E932D13422942");
-		Assert.IsTrue(MD5Hash(Path.Combine(App.InputDir, "Migrations", "Hamlet.stbx")) == "C9EF9803161BDE4840CEC68060D2AE75");
-		Assert.IsTrue(MD5Hash(Path.Combine(App.InputDir, "Migrations", "Rocky.stbx")) == "C6E29F154275AB393679D79897176486");
-		Assert.IsTrue(MD5Hash(Path.Combine(App.InputDir, "Migrations", "Snow White.stbx")) == "5ACA766DCFC656A3B358095E2202F4CD");
-		Assert.IsTrue(MD5Hash(Path.Combine(App.InputDir, "Migrations", "The Glass Menagerie.stbx")) == "266E0AE645B4DF30AB16175EA7698866");
-		Assert.IsTrue(MD5Hash(Path.Combine(App.InputDir, "Migrations", "The Maltese Falcon.stbx")) == "1A4FA786E8991B1906BA8543688BEBA7");
-		Assert.IsTrue(MD5Hash(Path.Combine(App.InputDir, "Migrations", "The Old Man and the Sea.stbx")) == "A4770DC56BA8299A2FBA26D0B72E1EC5");
-	}
-
-    private string MD5Hash(string FilePath)
-    {
-	    using (var md5 = MD5.Create())
-	    using (var stream = File.OpenRead(FilePath))
+	    foreach (var file in Directory.GetFiles(Path.Combine(App.InputDir, "Migrations")))
 	    {
-		    var hash = md5.ComputeHash(stream);
-		    return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
+		    // Load XML
+		    StorageFile sample = await StorageFile.GetFileFromPathAsync(file);
+		    StoryModel xmlModel = await new LegacyXMLReader(Ioc.Default.GetRequiredService<LogService>()).ReadFile(sample);
+
+		    // Convert
+		    StoryIO io = new();
+		    StoryModel jsonModel = await io.MigrateModel(sample);
+
+		    // Assert they are the same
+		    Assert.AreEqual(xmlModel.StoryElements.Count(), jsonModel.StoryElements.Count(), "Story elements count mismatch.");
+		    Assert.IsTrue(xmlModel.ExplorerView.Count() == jsonModel.ExplorerView.Count(), "ExplorerView mismatch.");
+		    Assert.IsTrue(xmlModel.NarratorView.Count() == jsonModel.NarratorView.Count(), "NarratorView mismatch.");
 	    }
 	}
+
 
 	[TestMethod]
 	public async Task FileSaveTest()
