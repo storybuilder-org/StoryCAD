@@ -1,7 +1,11 @@
-using System;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
+namespace StoryCAD.DAL;
+
+/// <summary>
+/// Custom converter to handle empty GUID strings.
+/// </summary>
 public class EmptyGuidConverter : JsonConverter<Guid>
 {
     public override Guid Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
