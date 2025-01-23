@@ -36,7 +36,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable
     #endregion
     // StoryElement data
 
-    private Guid _uuid;
+    private Guid _uuid = Guid.Empty;
     public Guid Uuid
     {
         get => _uuid;
@@ -594,7 +594,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable
         CharacterRelationships.Clear();
         foreach (RelationshipModel _relation in Model.RelationshipList)
         {
-            _relation.Partner = StoryElement.StringToStoryElement(_relation.PartnerUuid); // Populate partner Character StoryElement for Name
+            _relation.Partner = StoryElement.GetByGuid(_relation.PartnerUuid); // Populate partner Character StoryElement for Name
             CharacterRelationships.Add(_relation);
         }
 
@@ -696,7 +696,9 @@ public class CharacterViewModel : ObservableRecipient, INavigable
     {
         if (selectedRelation == null)
             return;
-
+        if (selectedRelation.PartnerUuid == Guid.Empty)
+            return;
+        
         _changeable = false;
 
         RelationType = selectedRelation.RelationType;
@@ -776,29 +778,29 @@ public class CharacterViewModel : ObservableRecipient, INavigable
                     return;
                 }
                 // Create the new RelationshipModel
-                string _partnerUuid = StoryWriter.UuidString(_vm.SelectedPartner.Uuid);
-                RelationshipModel _memberRelationship = new(_partnerUuid, _vm.RelationType);
+                Guid partnerUuid = (_vm.SelectedPartner.Uuid);
+                RelationshipModel memberRelationship = new(partnerUuid, _vm.RelationType);
                 if (_vm.InverseRelationship && !string.IsNullOrWhiteSpace(_vm.InverseRelationType))
                 {
-                    bool _makeChar = true;
+                    // Check for duplicate inverse relationship
+                    bool makeChar = true;
                     foreach (RelationshipModel _relation in (_vm.SelectedPartner as CharacterModel)!.RelationshipList)
                     {
                         if (_relation.Partner == _vm.Member)
                         {
-                            _makeChar = false;
+                            makeChar = false;
                         }
                     }
 
-                    if (_makeChar)
+                    if (makeChar)
                     {
-                        (_vm.SelectedPartner as CharacterModel)!.RelationshipList.Add(new(Uuid.ToString(), _vm.InverseRelationType));
-                    }
-                }
+                        (_vm.SelectedPartner as CharacterModel)!.RelationshipList.Add(new RelationshipModel(Uuid, _vm.InverseRelationType));
+                    }                }
 
-                _memberRelationship.Partner = StoryElement.StringToStoryElement(_partnerUuid); // Complete pairing
+                memberRelationship.Partner = StoryElement.GetByGuid(partnerUuid); // Complete pairing
                 // Add partner relationship to member's list of relationships 
-                CharacterRelationships.Add(_memberRelationship);
-                SelectedRelationship = _memberRelationship;
+                CharacterRelationships.Add(memberRelationship);
+                SelectedRelationship = memberRelationship;
                 LoadRelationship(SelectedRelationship);
                 CurrentRelationship = SelectedRelationship;
 

@@ -471,10 +471,10 @@ public class ShellViewModel : ObservableRecipient
             StoryNodeItem _storyProtagNode = new StoryNodeItem(_storyProtag, null);
             StoryElement _storyAntag = new CharacterModel("Antagonist", StoryModel);
             StoryNodeItem _storyAntagNode = new StoryNodeItem(_storyAntag, null);
-            _overview.StoryProblem = _storyProblem.Uuid.ToString();
+            _overview.StoryProblem = _storyProblem.Uuid;
             var _problem = _storyProblem as ProblemModel;
-            _problem.Protagonist = _storyProtag.ToString();
-            _problem.Antagonist = _storyAntag.ToString();
+            _problem.Protagonist = _storyProtag.Uuid;
+            _problem.Antagonist = _storyAntag.Uuid;
             _problem.Premise =
                 @"Your[protagonist] in a situation[genre, setting] wants something[goal], which brings him" +
                 @"into [conflict] with a second character[antagonist]. After a series of conflicts[additional " +
@@ -507,7 +507,7 @@ public class ShellViewModel : ObservableRecipient
                     StoryNodeItem _settingsNode = new(_settings, _overviewNode);
                     StoryElement _scenes = new FolderModel("Scenes", StoryModel, StoryItemType.Folder);
                     StoryNodeItem _scenesNode = new(_scenes, _overviewNode);
-                    _overview.StoryProblem = _storyProblem.Uuid.ToString();
+                    _overview.StoryProblem = _storyProblem.Uuid;
                     _problemsNode.Children.Add(_storyProblemNode);
                     _charactersNode.Children.Add(_storyProtagNode);
                     _charactersNode.Children.Add(_storyAntagNode);
@@ -523,16 +523,16 @@ public class ShellViewModel : ObservableRecipient
                     _storyProblemNode.Children.Add(_storyAntagNode);
                     _problem = _storyProblem as ProblemModel;
                     _problem.Name = "External Problem";
-                    _overview.StoryProblem = _problem.Uuid.ToString();
-                    _problem.Protagonist = _storyProtag.ToString();
-                    _problem.Antagonist = _storyAntagNode.ToString();
+                    _overview.StoryProblem = _problem.Uuid;
+                    _problem.Protagonist = _storyProtag.Uuid;
+                    _problem.Antagonist = _storyAntagNode.Uuid;
                     _storyProtagNode.Parent = _storyProblemNode;
                     _storyAntagNode.Parent = _storyProblemNode;
                     StoryElement _internalProblem = new ProblemModel("Internal Problem", StoryModel);
                     StoryNodeItem _internalProblemNode = new(_internalProblem, _overviewNode);
                     _problem = _internalProblem as ProblemModel;
-                    _problem.Protagonist = _storyProtag.ToString();
-                    _problem.Antagonist = _storyProtag.ToString();
+                    _problem.Protagonist = _storyProtag.Uuid;
+                    _problem.Antagonist = _storyProtag.Uuid;
                     _problem.ConflictType = "Person vs. Self";
                     _problem.Premise =
                         @"Your [protagonist] grapples with an [internal conflict] and is their own antagonist, marred by self-doubt and fears " +
@@ -564,14 +564,14 @@ public class ShellViewModel : ObservableRecipient
                     _storyProblemNode.Parent = _problemsFolderNode;
                     _problem = _storyProblem as ProblemModel;
                     _problem.Name = "External Problem";
-                    _problem.Protagonist = _storyProtag.ToString();
-                    _problem.Antagonist = _storyAntagNode.ToString();
-                    _overview.StoryProblem = _problem.Uuid.ToString();
+                    _problem.Protagonist = _storyProtag.Uuid;
+                    _problem.Antagonist = _storyAntagNode.Uuid;
+                    _overview.StoryProblem = _problem.Uuid;
                     _internalProblem = new ProblemModel("Internal Problem", StoryModel);
                     _internalProblemNode = new(_internalProblem, _problemsFolderNode);
                     _problem = _internalProblem as ProblemModel;
-                    _problem.Protagonist = _storyProtag.ToString();
-                    _problem.Antagonist = _storyProtag.ToString();
+                    _problem.Protagonist = _storyProtag.Uuid;
+                    _problem.Antagonist = _storyProtag.Uuid;
                     _problem.ConflictType = "Person vs. Self";
                     _problem.Premise =
                         @"Your [protagonist] grapples with an [internal conflict] and is their own antagonist, marred by self-doubt and fears " +
@@ -857,7 +857,7 @@ public class ShellViewModel : ObservableRecipient
 
             // Read the file into the StoryModel.
             StoryIO _rdr = Ioc.Default.GetRequiredService<StoryIO>();
-            StoryModel = await _rdr.ReadStory(StoryModel.ProjectFile);
+             StoryModel = await _rdr.ReadStory(StoryModel.ProjectFile);
 
             //Check the file we loaded actually has StoryCAD Data.
             if (StoryModel == null)

@@ -1,16 +1,21 @@
 ﻿namespace StoryCAD.Services.Search;
 
+/// <summary>
+/// Service responsible for searching StoryElements within the StoryModel based on a given search argument.
+/// It supports searching various types of StoryElements, including Scenes, Characters, Problems, Settings, etc.
+/// </summary>
 public class SearchService
 {
     private string arg;
     StoryElementCollection ElementCollection;
+    
     /// <summary>
-    /// Search a StoryElement for a given string search argument
+    /// Searches a <see cref="StoryElement"/> for a given string search argument.
     /// </summary>
-    /// <param name="node">StoryNodeItem whose StoryElement to search</param>
-    /// <param name="searchArg">string to search for</param>
-    /// <param name="model">model to search in</param>
-    /// <returns>true if StoryyElement contains search argument</returns>
+    /// <param name="node">The <see cref="StoryNodeItem"/> whose <see cref="StoryElement"/> will be searched.</param>
+    /// <param name="searchArg">The string to search for within the StoryElement.</param>
+    /// <param name="model">The <see cref="StoryModel"/> containing the StoryElements.</param>
+    /// <returns><c>true</c> if the StoryElement contains the search argument; otherwise, <c>false</c>.</returns>
     public bool SearchStoryElement(StoryNodeItem node, string searchArg, StoryModel model)
     {
         if (searchArg == null)
@@ -52,6 +57,12 @@ public class SearchService
         }
         return result;
     }
+    
+    /// <summary>
+    /// Compares the provided text with the search argument.
+    /// </summary>
+    /// <param name="text">The text to compare.</param>
+    /// <returns><c>true</c> if the text contains the search argument; otherwise, <c>false</c>.</returns>
     private bool Comparator(string text)
     {
         return text.ToLower().Contains(arg);
@@ -77,10 +88,16 @@ public class SearchService
     {
         SceneModel scene = (SceneModel)element;
 
-        foreach (string member in scene.CastMembers) //Searches character in scene
+        // Search through each CastMember represented by GUID
+        foreach (Guid memberGuid in scene.CastMembers) // Searches character in scene
         {
-            if (CompareStoryElement(member)) { return true; }
+            if (CompareStoryElement(memberGuid))
+            {
+                return true;
+            }
         }
+        
+        // Search the Scene's properties
         if (Comparator(element.Name)) { return true; }  //Searches node name
         if (CompareStoryElement(scene.ViewpointCharacter)) { return true; }
         if (CompareStoryElement(scene.Protagonist)) { return true; }
@@ -108,7 +125,7 @@ public class SearchService
 
         foreach (RelationshipModel relation in characterModel.RelationshipList) //Checks each character in relationship
         {
-            string partner = relation.PartnerUuid;
+            Guid partner = relation.PartnerUuid;
             if (CompareStoryElement(partner)) { return true; }
         }
         return Comparator(element.Name); //Checks element name
@@ -141,8 +158,37 @@ public class SearchService
     {
         OverviewModel overview = (OverviewModel)element;
 
-        if (CompareStoryElement(overview.StoryProblem)) { return true; }
+        if (overview.StoryProblem != Guid.Empty)
+        {
+            ProblemModel problem = (ProblemModel) ElementCollection.StoryElementGuids[overview.StoryProblem];
+            string problemName = problem.Name;
+            if (Comparator(problemName)) { return true; }
+        }
+
         if (Comparator(element.Name)) { return true; } //checks node name
+
+        return false;
+    }
+
+    //TODO: Once all StoryElement references are converted to Guid instead of Guid.ToString(), remove the string version
+    /// <summary>
+    /// Compares the name of the StoryElement associated with the provided GUID to the search argument.
+    /// </summary>
+    /// <param name="guid">The GUID of the StoryElement to compare.</param>
+    /// <returns><c>true</c> if the StoryElement's name contains the search argument; otherwise, <c>false</c>.</returns>
+    private bool CompareStoryElement(Guid guid)
+    {
+        if (guid == Guid.Empty)
+            return false;
+
+        // Retrieve the StoryElement associated with the GUID
+        ShellViewModel shell = Ioc.Default.GetService<ShellViewModel>();
+        StoryElementCollection elements = shell!.StoryModel.StoryElements;
+
+        if (elements.StoryElementGuids.TryGetValue(guid, out StoryElement element))
+        {
+            return Comparator(element.Name);
+        }
 
         return false;
     }

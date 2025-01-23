@@ -35,6 +35,7 @@ public class StoryIO
 			WriteIndented = true,
 			Converters =
 			{
+				new EmptyGuidConverter(),
 				new StoryElementConverter(),
 				new JsonStringEnumConverter()
 			}
@@ -68,6 +69,7 @@ public class StoryIO
 			{
 				Converters =
 				{
+					new EmptyGuidConverter(),
 					new StoryElementConverter(),
 					new JsonStringEnumConverter()
 				}

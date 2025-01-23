@@ -107,8 +107,8 @@ public class ProblemViewModel : ObservableRecipient, INavigable
 
     // Problem protagonist data
 
-    private string _protagonist;  // The Guid of a Character StoryElement
-    public string Protagonist
+    private Guid _protagonist;  // The Guid of a Character StoryElement
+    public Guid Protagonist
     {
         get => _protagonist;
         set => SetProperty(ref _protagonist, value);
@@ -137,8 +137,8 @@ public class ProblemViewModel : ObservableRecipient, INavigable
 
     // Problem antagonist data
 
-    private string _antagonist;  // The Guid of a Character StoryElement
-    public string Antagonist
+    private Guid _antagonist;  // The Guid of a Character StoryElement
+    public Guid Antagonist
     {
         get => _antagonist;
         set => SetProperty(ref _antagonist, value);
@@ -283,6 +283,13 @@ public class ProblemViewModel : ObservableRecipient, INavigable
 		get => _problems;
 		set => SetProperty(ref _problems, value);
 	}
+    private ObservableCollection<StoryElement> _characters;
+    public ObservableCollection<StoryElement> Characters
+    {
+        get => _characters;
+        set => SetProperty(ref _characters, value);
+    }
+
 	#endregion
 
 	#region Methods
@@ -330,13 +337,13 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         ProblemSource = Model.ProblemSource;
         // Character instances like Protagonist and Antagonist are 
         // read and written as the CharacterModel's StoryElement Guid 
-        // string. A binding converter, StringToStoryElementConverter,
+        // A binding converter, StringToStoryElementConverter,
         // provides the UI the corresponding StoryElement itself.
-        Protagonist = Model.Protagonist ?? string.Empty;
+        Protagonist = Model.Protagonist;
         ProtGoal = Model.ProtGoal;
         ProtMotive = Model.ProtMotive;
         ProtConflict = Model.ProtConflict;
-        Antagonist = Model.Antagonist ?? string.Empty;
+        Antagonist = Model.Antagonist;
         AntagGoal = Model.AntagGoal;
         AntagMotive = Model.AntagMotive;
         AntagConflict = Model.AntagConflict;
@@ -348,9 +355,10 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         StoryModel model = ShellViewModel.GetModel();
         Guid root = model.ExplorerView[0].Uuid;
         _overviewModel = (OverviewModel) model.StoryElements.StoryElementGuids[root];
-        ProblemModel storyProblem = (ProblemModel) StoryElement.StringToStoryElement(_overviewModel.StoryProblem);
-        if (storyProblem != null) { _syncPremise = true; }
-        else _syncPremise = false;
+        if (_overviewModel.StoryProblem != Guid.Empty)
+            _syncPremise = true; 
+        else
+            _syncPremise = false;
 
 		StructureModelTitle = Model.StructureTitle;
 		StructureDescription = Model.StructureDescription;
@@ -359,7 +367,8 @@ public class ProblemViewModel : ObservableRecipient, INavigable
 		
 		//Ensure correct set of Elements are loaded for Structure Lists
 		Problems = Ioc.Default.GetService<ShellViewModel>().StoryModel.StoryElements.Problems;
-		Scenes = Ioc.Default.GetService<ShellViewModel>().StoryModel.StoryElements.Scenes;
+        Characters = Ioc.Default.GetService<ShellViewModel>().StoryModel.StoryElements.Characters;
+        Scenes = Ioc.Default.GetService<ShellViewModel>().StoryModel.StoryElements.Scenes;
 		_changeable = true;
 	}
 
@@ -374,11 +383,11 @@ public class ProblemViewModel : ObservableRecipient, INavigable
             Model.ProblemCategory = ProblemCategory;
             Model.Subject = Subject;
             Model.ProblemSource = ProblemSource;
-            Model.Protagonist = Protagonist ?? string.Empty;
+            Model.Protagonist = Protagonist;
             Model.ProtGoal = ProtGoal;
             Model.ProtMotive = ProtMotive;
             Model.ProtConflict = ProtConflict;
-            Model.Antagonist = Antagonist ?? string.Empty;
+            Model.Antagonist = Antagonist;
             Model.AntagGoal = AntagGoal;
             Model.AntagMotive = AntagMotive;
             Model.AntagConflict = AntagConflict;
@@ -514,11 +523,11 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         Subject = string.Empty;
         ProblemSource = string.Empty;
         StoryQuestion = string.Empty;
-        Protagonist = null;
+        Protagonist = Guid.Empty;
         ProtGoal = string.Empty;
         ProtMotive = string.Empty;
         ProtConflict = string.Empty;
-        Antagonist = string.Empty;
+        Antagonist = Guid.Empty;
         AntagGoal = string.Empty;
         AntagMotive = string.Empty;
         AntagConflict = string.Empty;
