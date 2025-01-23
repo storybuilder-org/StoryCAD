@@ -291,10 +291,9 @@ public class FileTests
 
 	    // Quick sample checks on beat data
 	    Assert.AreEqual("Ordinary World", mainProblem.StructureBeats[0].Title, "First beat title mismatch.");
-		Assert.IsTrue("ea818c91-0dd4-47f2-8bcc-7c5841030e09" == mainProblem.StructureBeats[0].Guid, "First bound Beat GUID mismatch");
+        Assert.AreEqual(Guid.Parse("ea818c91-0dd4-47f2-8bcc-7c5841030e09"), mainProblem.StructureBeats[0].Guid, "First bound Beat GUID mismatch");
 	    Assert.AreEqual("Refusal of the Call", mainProblem.StructureBeats[2].Title, "Third beat title mismatch.");
-	    Assert.IsTrue("4e7c0217-64e8-4c74-8438-debb584cf3b8" == mainProblem.StructureBeats[2].Guid, "Third bound Beat GUID mismatch");
-	}
+        Assert.AreEqual(Guid.Parse("4e7c0217-64e8-4c74-8438-debb584cf3b8"), mainProblem.StructureBeats[2].Guid, "Third bound Beat GUID mismatch");
 
     [TestMethod]
     public async Task MigrationTests()

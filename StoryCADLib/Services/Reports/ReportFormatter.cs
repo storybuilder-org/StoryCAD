@@ -20,12 +20,15 @@ public class ReportFormatter
         string[] lines = _templates["Story Overview"];  
         RtfDocument doc = new(string.Empty);
 
-        StoryElement vpChar = StoryElement.StringToStoryElement(overview.ViewpointCharacter);
-        string vpName = vpChar?.Name ?? string.Empty;
-        StoryElement seProblem = StoryElement.StringToStoryElement(overview.StoryProblem);
-        string problemName = seProblem?.Name ?? string.Empty;
-        ProblemModel problem = (ProblemModel) seProblem;
-        string premise = problem?.Premise ?? string.Empty;
+        string vpName = StoryElement.GetByGuid(overview.ViewpointCharacter).Name;
+        string problemName = string.Empty;
+        string premise = string.Empty;
+        if (overview.StoryProblem != Guid.Empty)
+        {
+            ProblemModel problem = (ProblemModel)_model.StoryElements.StoryElementGuids[overview.StoryProblem];
+            problemName = problem.Name;
+            premise = problem?.Premise;
+        }
 
         // Parse and write the report
         foreach (string line in lines)
@@ -94,8 +97,8 @@ public class ReportFormatter
         string[] lines = _templates["Problem Description"];
         RtfDocument doc = new(string.Empty);
 
-        StoryElement vpProtagonist = StoryElement.StringToStoryElement(problem.Protagonist);
-        StoryElement vpAntagonist = StoryElement.StringToStoryElement(problem.Antagonist);
+        StoryElement vpProtagonist = (CharacterModel)_model.StoryElements.StoryElementGuids[problem.Protagonist];
+        StoryElement vpAntagonist = (CharacterModel)_model.StoryElements.StoryElementGuids[problem.Antagonist];
 
         // Parse and write the report
         foreach (string line in lines)
@@ -128,7 +131,7 @@ public class ReportFormatter
             if (String.IsNullOrEmpty(problem.ProtGoal)) { sb.Replace("@ProtagGoal", ""); }
             else { sb.Replace("@ProtagGoal", problem.ProtGoal); }
             
-            if (vpProtagonist != null)
+            if (problem.Protagonist != Guid.Empty)
             {
                 if (String.IsNullOrEmpty(vpProtagonist.Name)) { sb.Replace("@ProtagName", ""); }
                 else { sb.Replace("@ProtagName", vpProtagonist.Name); }
@@ -138,7 +141,7 @@ public class ReportFormatter
             if (String.IsNullOrEmpty(problem.ProtConflict)) { sb.Replace("@ProtagConflict", ""); }
             else { sb.Replace("@ProtagConflict", problem.ProtConflict); }
 
-            if (vpAntagonist != null)
+            if (problem.Antagonist != Guid.Empty)
             {
                 if (String.IsNullOrEmpty(vpAntagonist.Name)) { sb.Replace("@AntagName", ""); }
                 else { sb.Replace("@AntagName", vpAntagonist.Name); }
@@ -213,29 +216,13 @@ public class ReportFormatter
 		}
 
 		// Retrieve the StoryProblem GUID from Overview
-		var storyProblemGuid = overview.StoryProblem;
-		if (string.IsNullOrEmpty(storyProblemGuid))
+		if (overview.StoryProblem ==  Guid.Empty)
 		{
 			// StoryProblem is null or empty
 			return string.Empty;
 		}
-
-		// Resolve the StoryProblem element using GUID
-		if (!Guid.TryParse(storyProblemGuid, out Guid parsedGuid))
-		{
-			// Invalid GUID format
-			return string.Empty;
-		}
-
-		var storyProblem = shellViewModel.StoryModel.StoryElements
-			.OfType<ProblemModel>()
-			.FirstOrDefault(e => e.Uuid.Equals(parsedGuid));
-
-		if (storyProblem == null)
-		{
-			// StoryProblem element not found
-			return string.Empty;
-		}
+        
+        var storyProblem = (ProblemModel) shellViewModel.StoryModel.StoryElements.StoryElementGuids[overview.StoryProblem];
 
 		// Start building the tree with a separate root heading
 		output.AppendLine("StoryCAD - Story Problem Structure Report");
@@ -249,51 +236,51 @@ public class ReportFormatter
 
 		return output.ToString();
 	}
+    private void ProcessBeat(StructureBeatViewModel beat, StringBuilder output, StoryModel storyModel, int indentLevel, HashSet<Guid> processedElements)
+    {
+        var indent = new string('\t', indentLevel);
+        var prefix = "- "; // Prefix to denote a beat
 
-	private void ProcessBeat(StructureBeatViewModel beat, StringBuilder output, StoryModel storyModel, int indentLevel, HashSet<Guid> processedElements)
-	{
-		var indent = new string('\t', indentLevel);
-		var prefix = "- "; // Prefix to denote a beat
+        // If GUID is assigned, resolve and append Element details
+        if (beat.Guid != Guid.Empty)
+        {
+            // Check if the element has already been processed
+            if (processedElements.Contains(beat.Guid))
+            {
+                return; // Exit to prevent infinite recursion
+            }
 
-		// If GUID is assigned, resolve and append Element details
-		if (!string.IsNullOrEmpty(beat.Guid) && Guid.TryParse(beat.Guid, out Guid beatGuid))
-		{
-			// Check if the element has already been processed
-			if (processedElements.Contains(beatGuid))
-			{
-				return; // Exit to prevent infinite recursion
-			}
+            // Mark the element as processed
+            processedElements.Add(beat.Guid);
 
-			// Mark the element as processed
-			processedElements.Add(beatGuid);
+            var element = storyModel.StoryElements
+                .FirstOrDefault(e => e.Uuid.Equals(beat.Guid));
 
-			var element = storyModel.StoryElements
-				.FirstOrDefault(e => e.Uuid.Equals(beatGuid));
+            if (element != null)
+            {
+                // Append Beat Title with prefix
+                output.AppendLine($"{indent}{prefix}{beat.Title}");
 
-			if (element != null)
-			{
-				// Append Beat Title with prefix
-				output.AppendLine($"{indent}{prefix}{beat.Title}");
+                // Append Element Name and Description with additional indentation
+                output.AppendLine($"{indent}   {beat.ElementName}");
 
-				// Append Element Name and Description with additional indentation
-				output.AppendLine($"{indent}   {beat.ElementName}");
+                // If the element is a Problem, process its beats recursively
+                if (element.Type == StoryItemType.Problem && element is ProblemModel problemElement)
+                {
+                    if (problemElement.StructureBeats != null && problemElement.StructureBeats.Any())
+                    {
+                        foreach (var subBeat in problemElement.StructureBeats)
+                        {
+                            ProcessBeat(subBeat, output, storyModel, indentLevel + 1, processedElements);
+                        }
+                    }
+                }
+                // Append separator with proper indentation
+                output.AppendLine($"{indent}\t-------------");
+            }
+        }
+    }
 
-				// If the element is a Problem, process its beats recursively
-				if (element.Type == StoryItemType.Problem && element is ProblemModel problemElement)
-				{
-					if (problemElement.StructureBeats != null && problemElement.StructureBeats.Any())
-					{
-						foreach (var subBeat in problemElement.StructureBeats)
-						{
-							ProcessBeat(subBeat, output, storyModel, indentLevel + 1, processedElements);
-						}
-					}
-				}
-				// Append separator with proper indentation
-				output.AppendLine($"{indent}\t-------------");
-			}
-		}
-	}
 	private string FormatStructureBeatsElements(ProblemModel problem)
     {
 	    StringBuilder beats = new();
@@ -303,11 +290,12 @@ public class ReportFormatter
 		    beats.AppendLine(beat.Description);
 
 		    //Don't print element stuff if one is unassigned.
-		    if (!string.IsNullOrEmpty(beat.Guid))
-		    {
-			    beats.AppendLine(beat.ElementName);
-			    beats.AppendLine(beat.ElementDescription);
-		    }
+            // Don't print element stuff if one is unassigned.
+            if (beat.Guid != Guid.Empty)
+            {
+                beats.AppendLine(beat.ElementName);
+                beats.AppendLine(beat.ElementDescription);
+            }
 		    beats.AppendLine("\t\t-------------");
 	    }
 		return beats.ToString();
@@ -324,11 +312,11 @@ public class ReportFormatter
                 StringBuilder sb = new(line);
                 if (rel.Partner == null)
                 {
-                    foreach (StoryElement VARIABLE in Ioc.Default.GetService<ShellViewModel>().StoryModel.StoryElements.Characters)
+                    foreach (StoryElement otherCharacter in Ioc.Default.GetService<ShellViewModel>()!.StoryModel.StoryElements.Characters)
                     {
-                        if (VARIABLE.Uuid.Equals(Guid.Parse(rel.PartnerUuid)))
+                        if (otherCharacter.Uuid == rel.PartnerUuid)
                         {
-                            sb.Replace("@Relationship", VARIABLE.Name);
+                            sb.Replace("@Relationship", character.Name);
                             break;
                         }
                     }
@@ -561,13 +549,13 @@ public class ReportFormatter
         string[] lines = _templates["Scene Description"];
         RtfDocument doc = new(string.Empty);
 
-        StoryElement vpCharacter = StoryElement.StringToStoryElement(scene.ViewpointCharacter);
+        StoryElement vpCharacter = StoryElement.GetByGuid(scene.ViewpointCharacter);
         string vpCharacterName = vpCharacter?.Name ?? string.Empty;
-        StoryElement antagonist = StoryElement.StringToStoryElement(scene.Antagonist);
+        StoryElement antagonist = StoryElement.GetByGuid(scene.Antagonist);
         string antagonistName = antagonist?.Name ?? string.Empty;
-        StoryElement protagonist = StoryElement.StringToStoryElement(scene.Protagonist);
+        StoryElement protagonist = StoryElement.GetByGuid(scene.Protagonist);
         string protagonistName = protagonist?.Name ?? string.Empty;
-        StoryElement setting = StoryElement.StringToStoryElement(scene.Setting);
+        StoryElement setting = StoryElement.GetByGuid(scene.Setting);
         string settingName = setting?.Name ?? string.Empty;
 
         // Parse and write the report
@@ -584,10 +572,10 @@ public class ReportFormatter
             
             if (line.Contains("@CastMember"))
             {
-                foreach (string seCastMember in scene.CastMembers)
+                foreach (Guid seCastMember in scene.CastMembers)
                 {
-                    StoryElement castMember = StoryElement.StringToStoryElement(seCastMember);
-                    string castMemberName = castMember?.Name ?? string.Empty;
+                    StoryElement castMember = StoryElement.GetByGuid(seCastMember);
+                    string castMemberName = castMember?.Name ?? "Unknown Character";
                     StringBuilder sbCast = new(line);
                             
                     sbCast.Replace("@CastMember", castMemberName);

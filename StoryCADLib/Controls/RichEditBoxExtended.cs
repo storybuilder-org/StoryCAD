@@ -33,14 +33,47 @@ public class RichEditBoxExtended : RichEditBox
 
     public RichEditBoxExtended()
     {
-	    RequestedTheme = ElementTheme.Light;        //Color fix for dark mode
-
 		TextChanged += RichEditBoxExtended_TextChanged;
         TextAlignment = TextAlignment.Left;
         CornerRadius = new(5);
+        
+		//Fix theme issues.
+        Loaded += RichEditBoxExtended_Loaded;
+        ActualThemeChanged += RichEditBoxExtended_ActualThemeChanged;
+        SetTextColorBasedOnTheme();
 	}
 
-    public string RtfText
+    private void RichEditBoxExtended_Loaded(object sender, RoutedEventArgs e)
+    {
+	    SetTextColorBasedOnTheme();
+    }
+
+    private void RichEditBoxExtended_ActualThemeChanged(FrameworkElement sender, object args)
+    {
+	    SetTextColorBasedOnTheme();
+    }
+
+    private void SetTextColorBasedOnTheme()
+    {
+	    var theme = ActualTheme;
+
+	    ITextCharacterFormat format = Document.GetDefaultCharacterFormat();
+
+	    if (theme == ElementTheme.Dark)
+	    {
+		    // Set text color to white
+		    format.ForegroundColor = Colors.White;
+	    }
+	    else
+	    {
+		    // Set text color to black
+		    format.ForegroundColor = Colors.Black;
+	    }
+
+	    Document.SetDefaultCharacterFormat(format);
+    }
+
+	public string RtfText
     {
         get => (string) GetValue(RtfTextProperty);
         set => SetValue(RtfTextProperty, value);
@@ -62,6 +95,10 @@ public class RichEditBoxExtended : RichEditBox
                 RtfText = text.TrimEnd('\0'); // remove end of string marker
             }
             _lockChangeExecution = false;
+
+			//Update theme in edge cases like Structure Pages
+            SetTextColorBasedOnTheme();
+
         }
 	}
 

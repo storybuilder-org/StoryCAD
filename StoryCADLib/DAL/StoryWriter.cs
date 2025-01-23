@@ -192,7 +192,7 @@ class StoryWriter
 		_attr.Value = _rec.Viewpoint;
 		_overview.Attributes.Append(_attr);
 		_attr = _xml.CreateAttribute("ViewpointCharacter");
-		_attr.Value = _rec.ViewpointCharacter;
+		_attr.Value = _rec.ViewpointCharacter.ToString();
 		_overview.Attributes.Append(_attr);
 		_attr = _xml.CreateAttribute("Voice");
 		_attr.Value = _rec.Voice;
@@ -216,7 +216,7 @@ class StoryWriter
 		_attr.Value = _rec.Concept;
 		_overview.Attributes.Append(_attr);
 		_attr = _xml.CreateAttribute("StoryProblem");
-		_attr.Value = _rec.StoryProblem;
+		_attr.Value = _rec.StoryProblem.ToString();
 		_overview.Attributes.Append(_attr);
 		_attr = _xml.CreateAttribute("Premise");
 		_attr.Value = _rec.Premise;
@@ -259,7 +259,7 @@ class StoryWriter
 		_attr.Value = _rec.ProblemSource;
 		_prob.Attributes.Append(_attr);
 		_attr = _xml.CreateAttribute("Protagonist");
-		_attr.Value = _rec.Protagonist;
+		_attr.Value = _rec.Protagonist.ToString();
 		_prob.Attributes.Append(_attr);
 		_attr = _xml.CreateAttribute("ProtGoal");
 		_attr.Value = _rec.ProtGoal;
@@ -271,7 +271,7 @@ class StoryWriter
 		_attr.Value = _rec.ProtConflict;
 		_prob.Attributes.Append(_attr);
 		_attr = _xml.CreateAttribute("Antagonist");
-		_attr.Value = _rec.Antagonist;
+		_attr.Value = _rec.Antagonist.ToString();
 		_prob.Attributes.Append(_attr);
 		_attr = _xml.CreateAttribute("AntagGoal");
 		_attr.Value = _rec.AntagGoal;
@@ -330,7 +330,7 @@ class StoryWriter
 			beatElement.AppendChild(descriptionElement);
 
 			XmlElement guidElement = _xml.CreateElement("Guid");
-			guidElement.AppendChild(_xml.CreateTextNode(beat.Guid));
+			guidElement.AppendChild(_xml.CreateTextNode(beat.Guid.ToString()));
 			beatElement.AppendChild(guidElement);
 
 			structureBeatsNode.AppendChild(beatElement);
@@ -400,7 +400,7 @@ class StoryWriter
 		{
 			XmlElement _relNode = _xml.CreateElement("Relation");
 			_attr = _xml.CreateAttribute("Partner");
-			_attr.Value = _relation.PartnerUuid;
+			_attr.Value = _relation.PartnerUuid.ToString();
 			_relNode.Attributes.Append(_attr);
 			_attr = _xml.CreateAttribute("RelationType");
 			_attr.Value = _relation.RelationType;
@@ -582,7 +582,7 @@ class StoryWriter
 		_attr.Value = _rec.Name;
 		_scene.Attributes.Append(_attr);
 		_attr = _xml.CreateAttribute("ViewpointCharacter");
-		_attr.Value = _rec.ViewpointCharacter;
+        _attr.Value = _rec.ViewpointCharacter.ToString();
 		_scene.Attributes.Append(_attr);
 		_attr = _xml.CreateAttribute("Date");
 		_attr.Value = _rec.Date;
@@ -591,27 +591,28 @@ class StoryWriter
 		_attr.Value = _rec.Time;
 		_scene.Attributes.Append(_attr);
 		_attr = _xml.CreateAttribute("Setting");
-		_attr.Value = _rec.Setting;
+		_attr.Value = _rec.Setting.ToString();
 		_scene.Attributes.Append(_attr);
 		_attr = _xml.CreateAttribute("SceneType");
 		_attr.Value = _rec.SceneType;
 		_scene.Attributes.Append(_attr);
-		XmlNode _castList = _xml.CreateElement("CastMembers");
-		foreach (string _member in _rec.CastMembers)
-		{
-			XmlElement _castMember = _xml.CreateElement("Member");
-			_castMember.AppendChild(_xml.CreateTextNode(_member));
-			_castList.AppendChild(_castMember);
-		}
-		_scene.AppendChild(_castList);
-		XmlNode _scenePurposeList = _xml.CreateElement("ScenePurpose");
+		XmlNode castList = _xml.CreateElement("CastMembers");
+        foreach (Guid member in _rec.CastMembers)
+        {
+            XmlElement castMember = _xml.CreateElement("Member");
+            castMember.AppendChild(_xml.CreateTextNode(UuidString(member)));
+            castList.AppendChild(castMember);
+        }
+		
+		_scene.AppendChild(castList);
+		XmlNode scenePurposeList = _xml.CreateElement("ScenePurpose");
 		foreach (string _item in _rec.ScenePurpose)
 		{
-			XmlElement _purpose = _xml.CreateElement("Purpose");
-			_purpose.AppendChild(_xml.CreateTextNode(_item));
-			_scenePurposeList.AppendChild(_purpose);
+			XmlElement purpose = _xml.CreateElement("Purpose");
+			purpose.AppendChild(_xml.CreateTextNode(_item));
+			scenePurposeList.AppendChild(purpose);
 		}
-		_scene.AppendChild(_scenePurposeList);
+		_scene.AppendChild(scenePurposeList);
 		_attr = _xml.CreateAttribute("Remarks");
 		_attr.Value = _rec.Remarks;
 		_scene.Attributes.Append(_attr);
@@ -619,8 +620,8 @@ class StoryWriter
 		_attr.Value = _rec.ValueExchange;
 		_scene.Attributes.Append(_attr);
 		_attr = _xml.CreateAttribute("Protagonist");
-		_attr.Value = _rec.Protagonist;
-		_scene.Attributes.Append(_attr);
+        _attr.Value = _rec.Protagonist.ToString();
+        _scene.Attributes.Append(_attr);
 		_attr = _xml.CreateAttribute("ProtagEmotion");
 		_attr.Value = _rec.ProtagEmotion;
 		_scene.Attributes.Append(_attr);
@@ -628,8 +629,8 @@ class StoryWriter
 		_attr.Value = _rec.ProtagGoal;
 		_scene.Attributes.Append(_attr);
 		_attr = _xml.CreateAttribute("Antagonist");
-		_attr.Value = _rec.Antagonist;
-		_scene.Attributes.Append(_attr);
+        _attr.Value = _rec.Antagonist.ToString();
+        _scene.Attributes.Append(_attr);
 		_attr = _xml.CreateAttribute("AntagEmotion");
 		_attr.Value = _rec.AntagEmotion;
 		_scene.Attributes.Append(_attr);
@@ -784,9 +785,7 @@ class StoryWriter
 	/// <returns>string UUID representation</returns>
 	public static string UuidString(Guid uuid)
 	{
-		string _id = uuid.ToString("B").ToUpper();
-		_id = _id.Replace("{", string.Empty);
-		_id = _id.Replace("}", string.Empty);
+		string _id = uuid.ToString("D").ToUpper();
 		return _id;
 	}
 }

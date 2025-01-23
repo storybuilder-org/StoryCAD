@@ -52,30 +52,37 @@ public class StoryElement : ObservableObject
     #endregion
 
     #region Public Methods
-    public static StoryElement StringToStoryElement(string value)
+
+    /// <summary>
+    /// Retrieve a StoryElement from its Guid.
+    ///
+    /// Guids are used as keys to StoryElements, stored in
+    /// the StoryModel's StoryElementCollection. They also
+    /// identify links from one StoryElement to another,
+    /// such as the Setting or a cast member Character in
+    /// a Scene. We use Guid.Empty as the value for such a
+    /// link  until it's assigned.
+    ///
+    /// These placeholder links are often expected to be a
+    /// StoryElement key, such as to display the name of
+    /// the setting on the Scene Content pane. Treating
+    /// Guid.Empty as an 'Undefined' StoryElement, with
+    /// a blank name, simplifies that code. 
+    /// </summary>
+    /// <param name="guid">The Guid of the</param>
+    /// <returns></returns>
+    public static StoryElement GetByGuid(Guid guid)
     {
-        if (value == null)
-            return null;
-        if (value.Equals(string.Empty))
-            return null;
+        if (guid.Equals(Guid.Empty))
+            return new StoryElement();
         // Get the current StoryModel's StoryElementsCollection
         ShellViewModel shell = Ioc.Default.GetService<ShellViewModel>();
-        StoryElementCollection elements = shell.StoryModel.StoryElements;
-        // legacy: locate the StoryElement from its Name
-        foreach (StoryElement element in elements)  // Character or Setting??? Search both?
-        {
-            if (element.Type == StoryItemType.Character | element.Type == StoryItemType.Setting)
-            {
-                if (value.Equals(element.Name))
-                    return element;
-            }
-        }
+        StoryElementCollection elements = shell!.StoryModel.StoryElements;
         // Look for the StoryElement corresponding to the passed guid
-        // (This is the normal approach)
-        if (Guid.TryParse(value, out Guid guid))
             if (elements.StoryElementGuids.ContainsKey(guid))
                 return elements.StoryElementGuids[guid];
-        return null;  // Not found
+        //TODO: Log the error.
+        return new StoryElement();  // Not found
     }
 
     public override string ToString()
@@ -97,10 +104,13 @@ public class StoryElement : ObservableObject
 	/// <summary>
 	/// Parameterless constructor for JSON Deserialization.
 	/// Don't remove.
+	///
 	/// </summary>
     public StoryElement()
     {
-
+        _uuid = Guid.Empty;
+        _name = string.Empty;
+        _type = StoryItemType.Unknown;
     }
 
     [SuppressMessage("ReSharper", "InconsistentNaming")] //Some names conflict with class members, and I can't really think of any suitable alternatives.

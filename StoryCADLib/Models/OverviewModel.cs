@@ -84,11 +84,11 @@ public class OverviewModel : StoryElement
 	/// The StoryProblem the spine of your story; when it’s resolved, your story is over.
 	/// All other Problem StoryElements are complications or subplots of the StoryProblem.
 	[JsonIgnore]
-	private string _storyProblem;  // The Guid of a Problem StoryElement
+	private Guid _storyProblem;  // The Guid of a Problem StoryElement
 
 	[JsonInclude]
 	[JsonPropertyName("StoryProblem")]
-	public string StoryProblem
+	public Guid StoryProblem
 	{
 		get => _storyProblem;
 		set => _storyProblem = value;
@@ -146,12 +146,17 @@ public class OverviewModel : StoryElement
 		set => _viewpoint = value;
 	}
 
+	/// <summary>
+	/// If a story uses first person Viewpoint,
+	/// the ViewPoint Character identifies that
+	/// Character.
+	/// </summary>
 	[JsonIgnore]
-	private string _viewpointCharacter;
+	private Guid _viewpointCharacter;
 
 	[JsonInclude]
 	[JsonPropertyName("ViewpointCharacter")]
-	public string ViewpointCharacter
+	public Guid ViewpointCharacter
 	{
 		get => _viewpointCharacter;
 		set => _viewpointCharacter = value;
@@ -248,7 +253,7 @@ public class OverviewModel : StoryElement
         StoryType = string.Empty;
         StoryGenre = string.Empty;
         Viewpoint = string.Empty;
-        ViewpointCharacter = string.Empty;
+        ViewpointCharacter = Guid.Empty;
         Voice = string.Empty;
         LiteraryDevice = string.Empty;
         Tense = string.Empty;
@@ -258,7 +263,7 @@ public class OverviewModel : StoryElement
         Concept = string.Empty;
         StructureNotes = string.Empty;
         Notes = string.Empty;
-        StoryProblem = string.Empty;
+        StoryProblem = Guid.Empty;
     }
 
     public OverviewModel(IXmlNode xn, StoryModel model) : base(xn, model)
@@ -269,7 +274,7 @@ public class OverviewModel : StoryElement
         StoryType = string.Empty;
         StoryGenre = string.Empty;
         Viewpoint = string.Empty;
-        ViewpointCharacter = string.Empty;
+        ViewpointCharacter = Guid.Empty;
         Voice = string.Empty;
         LiteraryDevice = string.Empty;
         Style = string.Empty;
@@ -280,7 +285,7 @@ public class OverviewModel : StoryElement
         Concept = string.Empty;
         StructureNotes = string.Empty;
         Notes = string.Empty;
-        StoryProblem = string.Empty;
+        StoryProblem = Guid.Empty;
     }
 
 	/// <summary>

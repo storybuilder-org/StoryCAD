@@ -94,6 +94,7 @@
   <ItemGroup>
     <Compile Remove="Collaborator\ViewModels\IWizardStepViewModel.cs" />
     <Compile Remove="Collaborator\ViewModels\IWizardViewModel.cs" />
+    <Compile Remove="Controls\ProblemName.cs" />
   </ItemGroup>
 
 	<PropertyGroup>
@@ -146,9 +147,9 @@
     <EmbeddedResource Update="Assets\Install\samples\Rocky.stbx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Update="Assets\Install\samples\Snow White.stbx">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </EmbeddedResource>
+	  <EmbeddedResource Update="Assets\Install\samples\Snow White.stbx">
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </EmbeddedResource>
     <EmbeddedResource Update="Assets\Install\samples\The Glass Menagerie.stbx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>

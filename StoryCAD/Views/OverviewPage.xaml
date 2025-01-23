@@ -53,9 +53,11 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    <usercontrols:ProblemName Header="Story Problem" Grid.Row="0" IsEditable="False" MinWidth="300"
+                    <ComboBox Header="Story Problem" Grid.Row="0" IsEditable="False" MinWidth="300"
                               DisplayMemberPath="Name"
-                              SelectedItem="{x:Bind OverviewVm.StoryProblem, Mode=TwoWay, Converter={StaticResource ToStoryElement}}" />
+                              SelectedValue="{x:Bind OverviewVm.StoryProblem, Mode=TwoWay}"
+                              SelectedValuePath="Uuid"
+                              ItemsSource="{x:Bind OverviewVm.Problems}" />
                     <TextBlock Grid.Row="1" Text=" "/>
                     <usercontrols:RichEditBoxExtended Header="Premise" Grid.Row="2" 
                                     RtfText="{x:Bind OverviewVm.Premise, Mode=TwoWay}" AcceptsReturn="True"
@@ -102,9 +104,11 @@
                                   ItemsSource="{x:Bind OverviewVm.LiteraryTechniqueList}"
                                   SelectedItem="{x:Bind OverviewVm.LiteraryTechnique, Mode=TwoWay}" />
                     </Grid>
-                    <usercontrols:CharacterName  Header="Viewpoint Character" Grid.Row="2" IsEditable="False" MinWidth="300"
+                    <ComboBox Header="Viewpoint Character" Grid.Row="2" IsEditable="False" MinWidth="300"
                               DisplayMemberPath="Name"
-                              SelectedItem="{x:Bind OverviewVm.ViewpointCharacter, Mode=TwoWay, Converter={StaticResource ToStoryElement}}" />
+                              SelectedValue="{x:Bind OverviewVm.ViewpointCharacter, Mode=TwoWay}"
+                              SelectedValuePath="Uuid"
+                              ItemsSource="{x:Bind OverviewVm.Problems}" />
                     <Grid Grid.Row="3" HorizontalAlignment="Left" >
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="2*"/>

@@ -1,8 +1,7 @@
 ﻿<Application
     x:Class="StoryCAD.App"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:converters="using:StoryCAD.Converters">
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -10,7 +9,6 @@
                 <!-- Other merged dictionaries here -->
             </ResourceDictionary.MergedDictionaries>
             <!-- Other app resources here -->
-            <converters:StringToStoryElementConverter x:Key="ToStoryElement" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>

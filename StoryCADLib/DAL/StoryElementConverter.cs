@@ -1,5 +1,4 @@
-﻿using System;
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace StoryCAD.DAL;
@@ -60,7 +59,6 @@ public class StoryElementConverter : JsonConverter<StoryElement>
 			throw ex;
 		}
 	}
-
 	public override void Write(Utf8JsonWriter writer, StoryElement value, JsonSerializerOptions options)
 	{
 		try

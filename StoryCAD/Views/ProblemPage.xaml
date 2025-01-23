@@ -67,9 +67,11 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    <usercontrols:CharacterName Header="Protagonist" Grid.Row="0" IsEditable="False" MinWidth="300"
+                    <ComboBox Header="Protagonist" Grid.Row="0" IsEditable="False" MinWidth="300"
                               DisplayMemberPath="Name"
-                              SelectedItem="{x:Bind ProblemVm.Protagonist, Mode=TwoWay, Converter={StaticResource ToStoryElement}}" />
+                              SelectedValue="{x:Bind ProblemVm.Protagonist, Mode=TwoWay}"
+                              SelectedValuePath="Uuid"
+                              ItemsSource="{x:Bind ProblemVm.Characters}" />
                     <ComboBox IsEditable="True" Header="Goal" Grid.Row="1" 
                               MinWidth="400" ItemsSource="{x:Bind ProblemVm.GoalList}"
                               Text="{x:Bind ProblemVm.ProtGoal, Mode=TwoWay}" 
@@ -95,9 +97,11 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    <usercontrols:CharacterName Header="Antagonist" Grid.Row="0" IsEditable="False" MinWidth="300"
+                    <ComboBox Header="Antagonist" Grid.Row="0" IsEditable="False" MinWidth="300"
                               DisplayMemberPath="Name"
-                              SelectedItem="{x:Bind ProblemVm.Antagonist, Mode=TwoWay, Converter={StaticResource ToStoryElement}}" />
+                              SelectedValue="{x:Bind ProblemVm.Protagonist, Mode=TwoWay}"
+                              SelectedValuePath="Uuid"
+                              ItemsSource="{x:Bind ProblemVm.Characters}" />
                     <ComboBox IsEditable="True" Header="Goal" Grid.Row="1" 
                               MinWidth="400" ItemsSource="{x:Bind ProblemVm.GoalList}"
                               Text="{x:Bind ProblemVm.AntagGoal, Mode=TwoWay}" 
