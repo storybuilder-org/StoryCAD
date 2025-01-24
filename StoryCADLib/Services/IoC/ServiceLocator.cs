@@ -57,6 +57,7 @@ namespace StoryCAD.Services.IoC
             Services.AddSingleton<TrashCanViewModel>();
             Services.AddSingleton<UnifiedVM>();
             Services.AddSingleton<InitVM>();
+            Services.AddSingleton<BackupNowVM>();
             Services.AddSingleton<FeedbackViewModel>();
             Services.AddSingleton<TreeViewSelection>();
             // Register ContentDialog ViewModels

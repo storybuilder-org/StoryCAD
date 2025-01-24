@@ -90,6 +90,7 @@ public class ShellViewModel : ObservableRecipient
     public RelayCommand SaveFileCommand { get; }
     // SaveAs command
     public RelayCommand SaveAsCommand { get; }
+    public RelayCommand CreateBackupCommand { get; }
     // CloseCommand
     public RelayCommand CloseCommand { get; }
     // ExitCommand
@@ -106,7 +107,6 @@ public class ShellViewModel : ObservableRecipient
     
     // Launch Collaborator
     public RelayCommand CollaboratorCommand { get; }
-   
     public RelayCommand HelpCommand { get; }
 
     // Tools MenuFlyOut Commands
@@ -343,11 +343,33 @@ public class ShellViewModel : ObservableRecipient
         ShellInstance.ChangeStatusColor = Colors.Red;
     }
 
-    #endregion
+	#endregion
 
-    #region Public Methods
+	#region Public Methods
+	/// <summary>
+	/// Creates a backup of the current project
+	/// </summary>
+	public async Task CreateBackupNow()
+	{
+		//Show dialog
+		var Result = await Window.ShowContentDialog(new ContentDialog()
+		{
+			Title = "Create backup now",
+			PrimaryButtonText = "Create Backup",
+			SecondaryButtonText = "Cancel",
+			DefaultButton = ContentDialogButton.Primary,
+			Content = new BackupNow()
+		});
 
-    public async Task PrintCurrentNodeAsync()
+		//Check result
+		if (Result == ContentDialogResult.Primary)
+		{
+			BackupNowVM VM = Ioc.Default.GetRequiredService<BackupNowVM>();
+			await Ioc.Default.GetRequiredService<BackupService>().BackupProject(VM.Name, VM.Location);
+		}
+	}
+
+	public async Task PrintCurrentNodeAsync()
     {
         if (RightTappedNode == null)
         {
@@ -2681,6 +2703,7 @@ public class ShellViewModel : ObservableRecipient
         OpenFileCommand = new RelayCommand(async () => await OpenFile(), () => _canExecuteCommands);
         SaveFileCommand = new RelayCommand(async () => await SaveFile(), () => _canExecuteCommands);
         SaveAsCommand = new RelayCommand(SaveFileAs, () => _canExecuteCommands);
+        CreateBackupCommand = new RelayCommand(async () => await CreateBackupNow(), () => _canExecuteCommands);
         CloseCommand = new RelayCommand(CloseFile, () => _canExecuteCommands);
         ExitCommand = new RelayCommand(ExitApp, () => _canExecuteCommands);
 

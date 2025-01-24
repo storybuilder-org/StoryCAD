@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="StoryCAD.Services.Dialogs.BackupNow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d" Width="600">
+
+    <StackPanel HorizontalAlignment="Left">
+		<TextBox Header="Backup Name" Width="450" Text="{x:Bind BackupVM.Name, Mode=TwoWay}" Margin="10"/>
+		<TextBox Header="Backup Location" Width="450" Text="{x:Bind BackupVM.Location, Mode=TwoWay}"/>
+    </StackPanel>
+</Page>
