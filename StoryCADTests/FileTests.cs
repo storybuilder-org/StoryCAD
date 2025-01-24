@@ -207,7 +207,7 @@ public class FileTests
 		Assert.IsTrue(Char.Focus == "Control");
 		Assert.IsTrue(Char.Abnormality == "Depressive");
 		Assert.IsTrue(Char.PhysNotes.Contains("Test"));
-		Assert.IsTrue(Char.Adventureousness=="Test");
+		Assert.IsTrue(Char.Adventurous=="Test");
 		Assert.IsTrue(Char.Confidence=="Test");
 		Assert.IsTrue(Char.Creativity=="Test");
 		Assert.IsTrue(Char.Enthusiasm=="Test");
@@ -383,7 +383,7 @@ public class FileTests
 			Values = "Courage and loyalty",
 			Focus = "Discovery",
 			Abnormality = "Obsessive tendencies",
-			Adventurousness = "High",
+			Adventurous = "High",
 			Confidence = "Moderate",
 			Creativity = "High",
 			Enthusiasm = "Energetic",
