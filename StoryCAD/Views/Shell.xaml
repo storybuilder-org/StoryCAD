@@ -123,7 +123,15 @@
                                     <KeyboardAccelerator Modifiers="Control,Shift" Key="S"/>
                                 </MenuFlyoutItem.KeyboardAccelerators>
                             </MenuFlyoutItem>
-                            <MenuFlyoutItem Text="Close Story" Command="{x:Bind ShellVm.CloseCommand, Mode=OneWay}" >
+	                        <MenuFlyoutItem Text="Create Backup" Command="{x:Bind ShellVm.CreateBackupCommand, Mode=OneWay}" >
+		                        <MenuFlyoutItem.Icon>
+									<FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xe838;"/>
+		                        </MenuFlyoutItem.Icon>
+		                        <MenuFlyoutItem.KeyboardAccelerators>
+			                        <KeyboardAccelerator Key="B" Modifiers="Control"/>
+		                        </MenuFlyoutItem.KeyboardAccelerators>
+	                        </MenuFlyoutItem>
+							<MenuFlyoutItem Text="Close Story" Command="{x:Bind ShellVm.CloseCommand, Mode=OneWay}" >
                                 <MenuFlyoutItem.Icon>
                                     <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE127;"/>
                                 </MenuFlyoutItem.Icon>

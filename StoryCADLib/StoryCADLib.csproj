@@ -61,6 +61,7 @@
     <None Remove="Controls\Flaw.xaml" />
     <None Remove="Controls\RelationshipView.xaml" />
     <None Remove="Controls\Traits.xaml" />
+    <None Remove="Services\Dialogs\BackupNow.xaml" />
     <None Remove="Services\Dialogs\ElementPicker.xaml" />
     <None Remove="Services\Dialogs\FeedbackDialog.xaml" />
     <None Remove="Services\Dialogs\HelpPage.xaml" />
@@ -170,6 +171,9 @@
     <None Update="NLog.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <Page Update="Services\Dialogs\BackupNow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Update="Services\Dialogs\HelpPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
