@@ -8,7 +8,7 @@
     mc:Ignorable="d" Width="600">
 
     <StackPanel HorizontalAlignment="Left">
-		<TextBox Header="Backup Name" Width="500" Text="{x:Bind BackupVM.Name, Mode=TwoWay}" Margin="10"/>
-		<TextBox Header="Backup Location" Width="500" Text="{x:Bind BackupVM.Location, Mode=TwoWay}"/>
+		<TextBox Header="Backup Name" Width="450" Text="{x:Bind BackupVM.Name, Mode=TwoWay}" Margin="10"/>
+		<TextBox Header="Backup Location" Width="450" Text="{x:Bind BackupVM.Location, Mode=TwoWay}"/>
     </StackPanel>
 </Page>
