@@ -7,17 +7,20 @@
     xmlns:models="using:StoryCAD.Models"            
     xmlns:usercontrols="using:StoryCAD.Controls"
     xmlns:viewModels="using:StoryCAD.ViewModels"
+    xmlns:converters="using:StoryCAD.Converters"
     mc:Ignorable="d" >
 
-    <Page.Resources>
+    <usercontrols:BindablePage.Resources>
+        <converters:NullToGuidConverter x:Key="NullToGuidConverter"/>
+      
         <TeachingTip x:Name="ViewpointCharacterTip"
                      Title="Reminder:"
                      Subtitle="Pick a scene viewpoint character consistent with your story POV:"
                      PreferredPlacement="Auto"
                      IsOpen="{x:Bind SceneVm.VpCharTipIsOpen}"
                      Content="{x:Bind SceneVm.VpCharTip}" >
-        </TeachingTip>
-    </Page.Resources>
+        </TeachingTip>      
+    </usercontrols:BindablePage.Resources>
 
     <Grid>
         <Grid.RowDefinitions>
@@ -53,7 +56,7 @@
                         <ComboBox x:Name="ViewpointCharacter" Header="Viewpoint Character" 
                                   Grid.Column="4" IsEditable="False" MinWidth="250"
                                   DisplayMemberPath="Name"
-                                  SelectedValue="{x:Bind SceneVm.ViewpointCharacter, Mode=TwoWay}"
+                                  SelectedValue="{x:Bind SceneVm.ViewpointCharacter, Mode=TwoWay, Converter={StaticResource NullToGuidConverter}}"
                                   SelectedValuePath="Uuid"
                                   ItemsSource="{x:Bind SceneVm.Characters}" />
                     </Grid>
@@ -66,7 +69,7 @@
                         <ComboBox Header="Setting" Grid.Column="0" IsEditable="False" 
                                   MinWidth="300"  Margin="0,0,0,10"
                                   DisplayMemberPath="Name"
-                                  SelectedValue="{x:Bind SceneVm.Setting, Mode=TwoWay}"
+                                  SelectedValue="{x:Bind SceneVm.Setting, Mode=TwoWay, Converter={StaticResource NullToGuidConverter}}"
                                   SelectedValuePath="Uuid"
                                   ItemsSource="{x:Bind SceneVm.Settings}" />
                         <TextBlock Grid.Column="1" MinWidth="50"/>
@@ -198,7 +201,7 @@
                         </Grid.ColumnDefinitions>
                         <ComboBox Header="Protagonist" Grid.Row="0" IsEditable="False" MinWidth="300"
                                   DisplayMemberPath="Name"
-                                  SelectedValue="{x:Bind SceneVm.Protagonist, Mode=TwoWay}"
+                                  SelectedValue="{x:Bind SceneVm.Protagonist, Mode=TwoWay, Converter={StaticResource NullToGuidConverter}}"
                                   SelectedValuePath="Uuid"
                                   ItemsSource="{x:Bind SceneVm.Characters}" />
                         <TextBlock Grid.Column="1" MinWidth="50"/>
@@ -224,7 +227,7 @@
                         </Grid.ColumnDefinitions>
                         <ComboBox Header="Antagonist" Grid.Row="0" IsEditable="False" MinWidth="300"
                                   DisplayMemberPath="Name"
-                                  SelectedValue="{x:Bind SceneVm.Antagonist, Mode=TwoWay}"
+                                  SelectedValue="{x:Bind SceneVm.Antagonist, Mode=TwoWay, Converter={StaticResource NullToGuidConverter}}"
                                   SelectedValuePath="Uuid"
                                   ItemsSource="{x:Bind SceneVm.Characters}" />
                         <TextBlock Grid.Column="1" MinWidth="50"/>
