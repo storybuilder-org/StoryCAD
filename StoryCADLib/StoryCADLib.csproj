@@ -122,6 +122,7 @@
 
   <ItemGroup>
     <Folder Include="Models\Scrivener\" />
+    <Folder Include="Converters\" />
     <Folder Include="Services\Logging\" />
     <Folder Include="Services\Navigation\" />
     <Folder Include="Services\Backup\" />

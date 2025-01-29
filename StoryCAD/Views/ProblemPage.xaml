@@ -4,7 +4,12 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"               
     xmlns:usercontrols="using:StoryCAD.Controls"
     xmlns:viewModels="using:StoryCAD.ViewModels"
-    xmlns:tools="using:StoryCAD.ViewModels.Tools">
+    xmlns:tools="using:StoryCAD.ViewModels.Tools"
+    xmlns:converters="using:StoryCAD.Converters">
+
+    <usercontrols:BindablePage.Resources>
+        <converters:NullToGuidConverter x:Key="NullToGuidConverter"/>
+    </usercontrols:BindablePage.Resources>
 
     <Grid>
         <Grid.RowDefinitions>
@@ -69,7 +74,7 @@
                     </Grid.RowDefinitions>
                     <ComboBox Header="Protagonist" Grid.Row="0" IsEditable="False" MinWidth="300"
                               DisplayMemberPath="Name"
-                              SelectedValue="{x:Bind ProblemVm.Protagonist, Mode=TwoWay}"
+                              SelectedValue="{x:Bind ProblemVm.Protagonist, Mode=TwoWay, Converter={StaticResource NullToGuidConverter}}"
                               SelectedValuePath="Uuid"
                               ItemsSource="{x:Bind ProblemVm.Characters}" />
                     <ComboBox IsEditable="True" Header="Goal" Grid.Row="1" 
@@ -99,7 +104,7 @@
                     </Grid.RowDefinitions>
                     <ComboBox Header="Antagonist" Grid.Row="0" IsEditable="False" MinWidth="300"
                               DisplayMemberPath="Name"
-                              SelectedValue="{x:Bind ProblemVm.Protagonist, Mode=TwoWay}"
+                              SelectedValue="{x:Bind ProblemVm.Protagonist, Mode=TwoWay, Converter={StaticResource NullToGuidConverter}}"
                               SelectedValuePath="Uuid"
                               ItemsSource="{x:Bind ProblemVm.Characters}" />
                     <ComboBox IsEditable="True" Header="Goal" Grid.Row="1" 
