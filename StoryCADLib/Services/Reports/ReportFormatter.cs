@@ -96,10 +96,7 @@ public class ReportFormatter
         ProblemModel problem = (ProblemModel)element;
         string[] lines = _templates["Problem Description"];
         RtfDocument doc = new(string.Empty);
-
-        StoryElement vpProtagonist = (CharacterModel)_model.StoryElements.StoryElementGuids[problem.Protagonist];
-        StoryElement vpAntagonist = (CharacterModel)_model.StoryElements.StoryElementGuids[problem.Antagonist];
-
+		
         // Parse and write the report
         foreach (string line in lines)
         {
@@ -132,8 +129,9 @@ public class ReportFormatter
             else { sb.Replace("@ProtagGoal", problem.ProtGoal); }
             
             if (problem.Protagonist != Guid.Empty)
-            {
-                if (String.IsNullOrEmpty(vpProtagonist.Name)) { sb.Replace("@ProtagName", ""); }
+			{
+				StoryElement vpProtagonist = (CharacterModel)StoryElement.GetByGuid(problem.Protagonist);
+				if (String.IsNullOrEmpty(vpProtagonist.Name)) { sb.Replace("@ProtagName", ""); }
                 else { sb.Replace("@ProtagName", vpProtagonist.Name); }
             }
             else { sb.Replace("@ProtagName", ""); }
@@ -143,7 +141,9 @@ public class ReportFormatter
 
             if (problem.Antagonist != Guid.Empty)
             {
-                if (String.IsNullOrEmpty(vpAntagonist.Name)) { sb.Replace("@AntagName", ""); }
+	            StoryElement vpAntagonist = (CharacterModel)StoryElement.GetByGuid(problem.Antagonist);
+
+				if (String.IsNullOrEmpty(vpAntagonist.Name)) { sb.Replace("@AntagName", ""); }
                 else { sb.Replace("@AntagName", vpAntagonist.Name); }
             }
             else { sb.Replace("@AntagName", ""); }

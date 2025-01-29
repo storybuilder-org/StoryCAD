@@ -371,18 +371,20 @@ public class ShellViewModel : ObservableRecipient
 
 	public async Task PrintCurrentNodeAsync()
     {
-        if (RightTappedNode == null)
+	    _canExecuteCommands = false;
+
+		if (RightTappedNode == null)
         {
-            _canExecuteCommands = false;
             Messenger.Send(new StatusChangedMessage(new("Right tap a node to print", LogLevel.Warn)));
             Logger.Log(LogLevel.Info, "Print node failed as no node is selected");
             _canExecuteCommands = true;
             return;
         }
         await Ioc.Default.GetRequiredService<PrintReportDialogVM>().PrintSingleNode(RightTappedNode);
-    }
+        _canExecuteCommands = true;
+	}
 
-    private void CloseUnifiedMenu() { _contentDialog.Hide(); }
+	private void CloseUnifiedMenu() { _contentDialog.Hide(); }
 
     public async Task OpenUnifiedMenu()
     {

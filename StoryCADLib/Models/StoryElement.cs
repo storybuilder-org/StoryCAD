@@ -74,7 +74,7 @@ public class StoryElement : ObservableObject
     public static StoryElement GetByGuid(Guid guid)
     {
         if (guid.Equals(Guid.Empty))
-            return new StoryElement();
+             return new StoryElement();
         // Get the current StoryModel's StoryElementsCollection
         ShellViewModel shell = Ioc.Default.GetService<ShellViewModel>();
         StoryElementCollection elements = shell!.StoryModel.StoryElements;
@@ -104,7 +104,6 @@ public class StoryElement : ObservableObject
 	/// <summary>
 	/// Parameterless constructor for JSON Deserialization.
 	/// Don't remove.
-	///
 	/// </summary>
     public StoryElement()
     {
