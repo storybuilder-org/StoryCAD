@@ -94,6 +94,11 @@ public sealed partial class ProblemPage : BindablePage
 
             structureBeatsModel.Guid = uuid;
             stackPanel.DataContext = structureBeatsModel;
+
+
+            //Fix theming issue, since the text might need its font color updating
+            RichEditBoxExtended rtfex = (RichEditBoxExtended)stackPanel.Children.First(RTF => RTF.GetType() == typeof(RichEditBoxExtended));
+            rtfex.UpdateTheme(null, null);
         }
         catch (Exception ex)
         {
