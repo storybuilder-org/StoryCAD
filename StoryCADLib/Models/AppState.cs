@@ -76,7 +76,8 @@ public class AppState
         {
             if (StoryCADTestsMode) {  return "2.0.0.0 (StoryCADTests)";  }
 
-            string _packageVersion = $"{ Package.Current.Id.Version.Major }.{ Package.Current.Id.Version.Minor}.{ Package.Current.Id.Version.Build}";
+            string _packageVersion = $"{ Package.Current.Id.Version.Major }.{ Package.Current.Id.Version.Minor}." +
+                                     $"{ Package.Current.Id.Version.Build}";
             if (Package.Current.Id.Version.Revision == 65535)
             {
                 string StoryCADManifestVersion = Assembly.GetEntryAssembly()
