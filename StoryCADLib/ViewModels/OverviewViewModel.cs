@@ -346,7 +346,9 @@ public class OverviewViewModel : ObservableRecipient, INavigable
     public ObservableCollection<string> StyleList;
     public ObservableCollection<string> ToneList;
     public ObservableCollection<StoryElement> Problems { get; } 
-
+    public ObservableCollection<StoryElement> Characters { get; } 
+    
+    
     #endregion
 
     #region Constructor
@@ -355,7 +357,8 @@ public class OverviewViewModel : ObservableRecipient, INavigable
     {
         _logger = Ioc.Default.GetService<LogService>();
         Problems = _shellModel.StoryElements.Problems;
-
+        Characters = _shellModel.StoryElements.Characters;
+        
         try
         {
             Dictionary<string, ObservableCollection<string>> lists= Ioc.Default.GetService<ListData>()!.ListControlSource;

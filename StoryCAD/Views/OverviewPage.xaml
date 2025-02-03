@@ -113,7 +113,7 @@
                               DisplayMemberPath="Name"
                               SelectedValue="{x:Bind OverviewVm.ViewpointCharacter, Mode=TwoWay, Converter={StaticResource NullToGuidConverter}}"
                               SelectedValuePath="Uuid"
-                              ItemsSource="{x:Bind OverviewVm.Problems}" />
+                              ItemsSource="{x:Bind OverviewVm.Characters}" />
                     <Grid Grid.Row="3" HorizontalAlignment="Left" >
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="2*"/>
