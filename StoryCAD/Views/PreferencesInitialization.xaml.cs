@@ -57,7 +57,7 @@ public sealed partial class PreferencesInitialization
     /// </summary>
     public void Discord(object sender, RoutedEventArgs e)
     {
-        Process browser = new() { StartInfo = new() { FileName = "https://discord.gg/wfZxU4bx6n", UseShellExecute = true } };
+        Process browser = new() { StartInfo = new() { FileName = "http://discord.gg/bpCyAQnWCa", UseShellExecute = true } };
         browser.Start();
     }
 
