@@ -1,8 +1,6 @@
 ﻿using Microsoft.UI;
 using Microsoft.UI.Text;
 using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Media;
-using Org.BouncyCastle.Ocsp;
 
 namespace StoryCAD.Controls;
 
@@ -38,6 +36,7 @@ public class RichEditBoxExtended : RichEditBox
         CornerRadius = new(5);
         
 		//Fix theme issues.
+        PointerEntered += (((sender, args) => UpdateTheme(null, null)));
         Loaded += UpdateTheme;
         UpdateTheme(null, null);
 	}
