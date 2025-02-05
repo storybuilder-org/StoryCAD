@@ -184,7 +184,7 @@
 									<DataTemplate x:DataType="tools:StructureBeatViewModel">
 										<Grid DataContext="{x:Bind}" MinWidth="200" AllowDrop="True" DragOver="UIElement_OnDragOver"
 										      Background="Transparent" CanDrag="False" Drop="DroppedItem" Margin="0,5,10,5"
-										      BorderBrush="White" BorderThickness="1" CornerRadius="4" 
+										      BorderBrush="White" BorderThickness="1" CornerRadius="4"
 										      Padding="5,10,10,10">
 											<Grid.ColumnDefinitions>
 												<ColumnDefinition Width="Auto"/>

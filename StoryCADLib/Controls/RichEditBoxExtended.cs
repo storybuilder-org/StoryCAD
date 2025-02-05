@@ -1,8 +1,6 @@
 ﻿using Microsoft.UI;
 using Microsoft.UI.Text;
 using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Media;
-using Org.BouncyCastle.Ocsp;
 
 namespace StoryCAD.Controls;
 
@@ -38,40 +36,31 @@ public class RichEditBoxExtended : RichEditBox
         CornerRadius = new(5);
         
 		//Fix theme issues.
-        Loaded += RichEditBoxExtended_Loaded;
-        ActualThemeChanged += RichEditBoxExtended_ActualThemeChanged;
-        SetTextColorBasedOnTheme();
+        PointerEntered += (((sender, args) => UpdateTheme(null, null)));
+        Loaded += UpdateTheme;
+        UpdateTheme(null, null);
 	}
 
-    private void RichEditBoxExtended_Loaded(object sender, RoutedEventArgs e)
+    public void UpdateTheme(object sender, RoutedEventArgs e)
     {
-	    SetTextColorBasedOnTheme();
+        var theme = ActualTheme;
+
+        ITextCharacterFormat format = Document.GetDefaultCharacterFormat();
+
+        if (theme == ElementTheme.Dark)
+        {
+            // Set text color to white
+            format.ForegroundColor = Colors.White;
+        }
+        else
+        {
+            // Set text color to black
+            format.ForegroundColor = Colors.Black;
+        }
+
+        Document.SetDefaultCharacterFormat(format);
     }
 
-    private void RichEditBoxExtended_ActualThemeChanged(FrameworkElement sender, object args)
-    {
-	    SetTextColorBasedOnTheme();
-    }
-
-    private void SetTextColorBasedOnTheme()
-    {
-	    var theme = ActualTheme;
-
-	    ITextCharacterFormat format = Document.GetDefaultCharacterFormat();
-
-	    if (theme == ElementTheme.Dark)
-	    {
-		    // Set text color to white
-		    format.ForegroundColor = Colors.White;
-	    }
-	    else
-	    {
-		    // Set text color to black
-		    format.ForegroundColor = Colors.Black;
-	    }
-
-	    Document.SetDefaultCharacterFormat(format);
-    }
 
 	public string RtfText
     {
@@ -95,12 +84,8 @@ public class RichEditBoxExtended : RichEditBox
                 RtfText = text.TrimEnd('\0'); // remove end of string marker
             }
             _lockChangeExecution = false;
-
-			//Update theme in edge cases like Structure Pages
-            SetTextColorBasedOnTheme();
-
         }
-	}
+    }
 
 	private static void RtfTextPropertyChanged(DependencyObject dependencyObject,
         DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
