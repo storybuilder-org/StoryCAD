@@ -116,7 +116,6 @@ public class ElementPickerVM
 				//Throw an exception if we are asked to create a node type we don't expect
 				throw new Exception(
 					$"Unexpected element type {type}");
-			break;
 		}
 		
 		//Persist node to tree and set as selected element
