@@ -18,7 +18,7 @@ namespace StoryCAD.Models;
 /// <summary>
 /// This class contains window (MainWindow) related items etc.
 /// </summary>
-public class Windowing : ObservableRecipient
+public partial class Windowing : ObservableRecipient
 {
     private void OnPropertyChanged(object sender, PropertyChangedEventArgs e) { }
 
@@ -220,7 +220,7 @@ public class Windowing : ObservableRecipient
     /// When a second instance is opened, this code will be ran on the main (first) instance
     /// It will bring up the main window.
     /// </summary>
-    public void ActivateMainInstance(object sender, AppActivationArguments e)
+    public void ActivateMainInstance()
     {
         Windowing wnd = Ioc.Default.GetRequiredService<Windowing>();
         wnd.MainWindow.Restore(); //Resize window and unminimize window
@@ -240,25 +240,24 @@ public class Windowing : ObservableRecipient
     /// Shows a file picker.
     /// </summary>
     /// <returns>A StorageFile object, of the file picked.</returns>
-    public async Task<StorageFile?> ShowFilePicker(string ButtonText = "Open", string Filter = "*")
+    public async Task<StorageFile> ShowFilePicker(string buttonText = "Open", string filter = "*")
     {
 	    LogService logger = Ioc.Default.GetRequiredService<LogService>();
 
 		try
 		{
-			logger.Log(LogLevel.Info, $"Trying to open a file picker with filter:{Filter}");
+			logger.Log(LogLevel.Info, $"Trying to open a file picker with filter: {filter}");
 
-
-			FileOpenPicker _filePicker = new()
+			FileOpenPicker filePicker = new()
 		    {
-			    CommitButtonText = ButtonText,
+			    CommitButtonText = buttonText,
 			    SuggestedStartLocation = PickerLocationId.DocumentsLibrary,
-			    FileTypeFilter = { Filter }
+			    FileTypeFilter = { filter }
 		    };
 
 			//Init and spawn file picker
-		    WinRT.Interop.InitializeWithWindow.Initialize(_filePicker, MainWindow.GetWindowHandle());
-			StorageFile file = await _filePicker.PickSingleFileAsync();
+		    WinRT.Interop.InitializeWithWindow.Initialize(filePicker, MainWindow.GetWindowHandle());
+			StorageFile file = await filePicker.PickSingleFileAsync();
 
 			//Null check
 			if (file == null)
@@ -282,23 +281,22 @@ public class Windowing : ObservableRecipient
 	/// <summary>
 	/// Spawn a folder picker for the user to select a folder.
 	/// </summary>
-	/// <param name="ButtonText">Text shown on the confirmation button</param>
-	/// <param name="Filter">Filter filetype?</param>
+	/// <param name="buttonText">Text shown on the confirmation button</param>
+	/// <param name="filter">Filter filetype?</param>
 	/// <returns></returns>
-    public async Task<StorageFolder> ShowFolderPicker(string ButtonText = "Select folder",
-	    string Filter = "*")
+    public async Task<StorageFolder> ShowFolderPicker(string buttonText = "Select folder", string filter = "*")
     {
 		LogService logger = Ioc.Default.GetRequiredService<LogService>();
 
 		try
 	    {
-		    logger.Log(LogLevel.Info, $"Trying to open a folder picker with filter:{Filter}");
+		    logger.Log(LogLevel.Info, $"Trying to open a folder picker with filter:{filter}");
 		    // Find a home for the new project
 		    FolderPicker folderPicker = new()
 		    {
-			    CommitButtonText = ButtonText,
+			    CommitButtonText = buttonText,
 			    SuggestedStartLocation = PickerLocationId.DocumentsLibrary,
-				FileTypeFilter = { Filter }
+				FileTypeFilter = { filter }
 		    };
 
 			//Initialize and show picker 

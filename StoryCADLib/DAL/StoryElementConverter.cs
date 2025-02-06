@@ -1,5 +1,7 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
+using NLog;
+using LogLevel = StoryCAD.Services.Logging.LogLevel;
 
 namespace StoryCAD.DAL;
 
@@ -45,18 +47,19 @@ public class StoryElementConverter : JsonConverter<StoryElement>
 				_ => null // Handle unknown or unsupported types
 			};
 
-			if (targetType == null)
-			{
-				throw new JsonException($"Unsupported Type discriminator: {typeDiscriminator}");
-			}
+            if (targetType != null)
+            {
+                var element = (StoryElement)jsonObject.Deserialize(targetType, options);
+                return element;
+            }
 
-			// Deserialize into the target type
-			var element = (StoryElement)jsonObject.Deserialize(targetType, options);
-			return element;
-		}
+            // Deserialize into the target type
+            throw new JsonException($"Unsupported Type discriminator: {typeDiscriminator}");
+        }
 		catch (Exception ex)
 		{
-			throw ex;
+			Ioc.Default.GetRequiredService<LogService>().LogException(LogLevel.Error,ex, "");
+			throw;
 		}
 	}
 	public override void Write(Utf8JsonWriter writer, StoryElement value, JsonSerializerOptions options)
@@ -80,28 +83,27 @@ public class StoryElementConverter : JsonConverter<StoryElement>
 			};
 
 			// Create a copy of the object to include the Type discriminator
-			using (var jsonDoc = JsonDocument.Parse(JsonSerializer.Serialize(value, value.GetType(), options)))
-			{
-				writer.WriteStartObject();
+            using var jsonDoc = JsonDocument.Parse(JsonSerializer.Serialize(value, value.GetType(), options));
+            writer.WriteStartObject();
 
-				// Write the Type discriminator
-				writer.WriteString("Type", typeDiscriminator);
+            // Write the Type discriminator
+            writer.WriteString("Type", typeDiscriminator);
 
-				// Write all other properties
-				foreach (var property in jsonDoc.RootElement.EnumerateObject())
-				{
-					if (property.NameEquals("Type"))
-						continue; // Skip existing Type property if any
+            // Write all other properties
+            foreach (var property in jsonDoc.RootElement.EnumerateObject())
+            {
+                if (property.NameEquals("Type"))
+                    continue; // Skip existing Type property if any
 
-					property.WriteTo(writer);
-				}
+                property.WriteTo(writer);
+            }
 
-				writer.WriteEndObject();
-			}
-		}
+            writer.WriteEndObject();
+        }
 		catch (Exception ex)
 		{
-			throw ex;
+			Ioc.Default.GetRequiredService<LogService>().LogException(LogLevel.Error,ex, "Failed to write back");
+			throw;
 		}
 
 	}

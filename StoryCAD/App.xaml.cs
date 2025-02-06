@@ -93,7 +93,7 @@ public partial class App
         {
             //If this instance is the first, then we will register it, otherwise we will get info about the other instance.
             AppInstance _MainInstance = AppInstance.FindOrRegisterForKey("main"); //Get main instance
-            _MainInstance.Activated += new Windowing().ActivateMainInstance;
+            _MainInstance.Activated += (((sender, e) => new Windowing().ActivateMainInstance()));
 
             AppActivationArguments activatedEventArgs = AppInstance.GetCurrent().GetActivatedEventArgs();
 

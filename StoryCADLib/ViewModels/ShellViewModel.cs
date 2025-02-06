@@ -1012,6 +1012,7 @@ public class ShellViewModel : ObservableRecipient
         }
         catch (UnauthorizedAccessException _ex)
         {
+            Logger.LogException(LogLevel.Warn, _ex.InnerException, "User doesn't have perms to access this path.");
 			//Catch write permission exceptions
 			await Ioc.Default.GetRequiredService<Windowing>().ShowContentDialog(new ContentDialog
 			{

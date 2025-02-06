@@ -55,7 +55,7 @@ public class NavigationService : INavigationService
     /// </summary>
     public Frame CurrentFrame
     {
-        get => _currentFrame ??= (Frame)Window.Current.Content;
+        get => _currentFrame ??= (Frame)Ioc.Default.GetRequiredService<Windowing>().MainWindow.WindowContent;
 
         set => _currentFrame = value;
     }

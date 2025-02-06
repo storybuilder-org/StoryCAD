@@ -127,12 +127,16 @@ jobs:
         if you don't know what configuration to pick then we recommend StoryCAD Release x64.msix.
         
         Changelogs aren't available for Alpha Builds." | Out-File -FilePath "D:\a\StoryCAD\StoryCAD\StoryCAD\Packages\Install Instructions.txt"
+    - name: Zip the packages folder
+      run: |
+            $zipName = "StoryCAD_${{ github.run_number }}_${{ matrix.platform }}_${{ matrix.configuration }}.zip"
+            Compress-Archive -Path "D:\a\StoryCAD\StoryCAD\StoryCAD\Packages\*" -DestinationPath $zipName -Force
+      shell: pwsh
     
-    # Upload the MSIX package: https://github.com/marketplace/actions/upload-a-build-artifact
     - name: Upload MSIX package
       uses: actions/upload-artifact@v4
       with:
-        name: StoryCAD
-        path: StoryCAD/StoryCAD/StoryCAD/Packages/*
+        name: StoryCAD_${{ github.run_number }}_${{ matrix.platform }}_${{ matrix.configuration }}
+        path: StoryCAD_${{ github.run_number }}_${{ matrix.platform }}_${{ matrix.configuration }}.zip
         compression-level: 9
         include-hidden-files: true
