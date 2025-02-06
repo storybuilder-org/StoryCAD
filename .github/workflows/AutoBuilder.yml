@@ -131,7 +131,7 @@ jobs:
       run: |
             $zipName = "StoryCAD_${{ github.run_number }}_${{ matrix.platform }}.zip"
             Compress-Archive -Path "D:\a\StoryCAD\StoryCAD\StoryCAD\Packages\*" -DestinationPath $zipName -Force
-          shell: pwsh
+      shell: pwsh
 
 
     # Upload the MSIX package: https://github.com/marketplace/actions/upload-a-build-artifact
