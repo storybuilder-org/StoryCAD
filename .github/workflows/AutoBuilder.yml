@@ -132,7 +132,7 @@ jobs:
     - name: Upload MSIX package
       uses: actions/upload-artifact@v4
       with:
-        name: StoryCAD
-        path: D:\a\StoryCAD\StoryCAD\StoryCAD\Packages\*
+        name: StoryCAD_${{ github.run_number }}_${{ matrix.platform }}
+        path: StoryCAD_${{ github.run_number }}_${{ matrix.platform }}.zip
         compression-level: 9
         include-hidden-files: true
