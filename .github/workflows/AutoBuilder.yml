@@ -133,6 +133,6 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: StoryCAD
-        path: StoryCAD/StoryCAD/StoryCAD/Packages/*
+        path: D:\a\StoryCAD\StoryCAD\StoryCAD\Packages\*
         compression-level: 9
         include-hidden-files: true
