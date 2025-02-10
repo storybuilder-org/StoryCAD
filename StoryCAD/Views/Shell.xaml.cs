@@ -543,8 +543,8 @@ private DragAndDropDirection GetMoveDirection(Point position, TreeViewItem targe
 	    {
 		    Content = new FeedbackDialog(),
 		    PrimaryButtonText = "Submit Feedback",
-			SecondaryButtonText = "Close",
-		    Title = "Submit Feedback",
+			SecondaryButtonText = "Discard",
+		    Title = "Submit",
 	    });
 
 	    if (Result == ContentDialogResult.Primary)

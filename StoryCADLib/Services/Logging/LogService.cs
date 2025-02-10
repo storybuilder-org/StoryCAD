@@ -147,7 +147,7 @@ public class LogService : ILogService
                     }
 
                     int ln = 0;
-                    if (LogString.Split("\n").Length > 50)
+                    if (LogString.Split("\n").Length > 250)
                     {
                         foreach (string line in LogString.Split("\n").TakeLast(50))
                         {

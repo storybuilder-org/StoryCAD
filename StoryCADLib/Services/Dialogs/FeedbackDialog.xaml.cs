@@ -8,7 +8,7 @@ public sealed partial class FeedbackDialog : Microsoft.UI.Xaml.Controls.Page
 
 	public FeedbackDialog()
 	{
-		this.InitializeComponent();
+		InitializeComponent();
 	}
 
 	private void ChangeUIText(object sender, SelectionChangedEventArgs e)
