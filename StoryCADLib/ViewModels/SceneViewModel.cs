@@ -82,6 +82,19 @@ public class SceneViewModel : ObservableRecipient, INavigable
             AddCastMember(StoryElement.GetByGuid(value));  // Insure the character is in the cast list
         }
     }
+    private StoryElement _selectedViewpointCharacter;
+    public StoryElement SelectedViewpointCharacter
+    {
+        get => _selectedViewpointCharacter;
+        set
+        {
+            if (SetProperty(ref _selectedViewpointCharacter, value))
+            {
+                // Update StoryProblem GUID when SelectedProblem changes
+                ViewpointCharacter = _selectedViewpointCharacter?.Uuid ?? Guid.Empty;
+            }
+        }
+    }
 
     private string _date;
     public string Date
@@ -103,6 +116,21 @@ public class SceneViewModel : ObservableRecipient, INavigable
         get => _setting;
         set => SetProperty(ref _setting, value);
     }
+
+    private StoryElement _selectedSetting;
+    public StoryElement SelectedSetting
+    {
+        get => _selectedSetting;
+        set
+        {
+            if (SetProperty(ref _selectedSetting, value))
+            {
+                // Update Setting GUID when SelectedSetting changes
+                Setting = _selectedSetting?.Uuid ?? Guid.Empty;
+            }
+        }
+    }
+
 
     private string _sceneType;
     public string SceneType
@@ -200,6 +228,20 @@ public class SceneViewModel : ObservableRecipient, INavigable
         set => SetProperty(ref _protagonist, value);
     }
 
+    private StoryElement _selectedProtagonist;   
+    public StoryElement SelectedProtagonist
+    {
+        get => _selectedProtagonist;
+        set
+        {
+            if (SetProperty(ref _selectedProtagonist, value))
+            {
+                // Update Protagonist GUID when SelectedProtagonist changes
+                Protagonist = _selectedProtagonist?.Uuid ?? Guid.Empty;
+            }
+        }
+    }
+
     private string _protagEmotion;
     public string ProtagEmotion
     {
@@ -219,6 +261,20 @@ public class SceneViewModel : ObservableRecipient, INavigable
     {
         get => _antagonist;
         set => SetProperty(ref _antagonist, value);
+    }
+
+    private StoryElement _selectedAntagonist;   
+    public StoryElement SelectedAntagonist
+    {
+        get => _selectedAntagonist;
+        set
+        {
+            if (SetProperty(ref _selectedAntagonist, value))
+            {
+                // Update Antagonist GUID when SelectedAntagonist changes
+                Antagonist = _selectedAntagonist?.Uuid ?? Guid.Empty;
+            }
+        }
     }
 
     private string _antagEmotion;
@@ -354,6 +410,7 @@ public class SceneViewModel : ObservableRecipient, INavigable
         Date = Model.Date;
         Time = Model.Time;
         Setting = Model.Setting;
+        SelectedSetting = Settings.FirstOrDefault(p => p.Uuid == Setting);
         SceneType = Model.SceneType;
 
         // The list of cast members is loaded from the Model
@@ -361,6 +418,7 @@ public class SceneViewModel : ObservableRecipient, INavigable
         // CharacterList is the StoryModel's list of all Character StoryElements
         CharacterList = ShellViewModel.ShellInstance.StoryModel.StoryElements.Characters;
         ViewpointCharacter = Model.ViewpointCharacter; // Add viewpoint character if missing
+        SelectedViewpointCharacter = Characters.FirstOrDefault(p => p.Uuid == ViewpointCharacter);
         // Now set the correct view and initialize the cast elements    
         AllCharacters = CastList.Count == 0;
         InitializeCharacterList();
@@ -382,9 +440,11 @@ public class SceneViewModel : ObservableRecipient, INavigable
 
         ValueExchange = Model.ValueExchange;
         Protagonist = Model.Protagonist;
+        SelectedProtagonist = Characters.FirstOrDefault(p => p.Uuid == Protagonist);
         ProtagEmotion = Model.ProtagEmotion;
         ProtagGoal = Model.ProtagGoal;
         Antagonist = Model.Antagonist;
+        SelectedAntagonist = Characters.FirstOrDefault(p => p.Uuid == Antagonist);
         AntagEmotion = Model.AntagEmotion;
         AntagGoal = Model.AntagGoal;
         Opposition = Model.Opposition;
@@ -399,11 +459,6 @@ public class SceneViewModel : ObservableRecipient, INavigable
         Review = Model.Review;
         Notes = Model.Notes;
         UpdateViewpointCharacterTip();
-        
-        Characters = Ioc.Default.GetService<ShellViewModel>()!.StoryModel.StoryElements.Characters;
-       
-        Settings = Ioc.Default.GetService<ShellViewModel>()!.StoryModel.StoryElements.Settings;
-
         _changeable = true;
     }
 
@@ -639,6 +694,8 @@ public class SceneViewModel : ObservableRecipient, INavigable
     public SceneViewModel()
     {
         _logger = Ioc.Default.GetService<LogService>();
+        Characters = Ioc.Default.GetService<ShellViewModel>()!.StoryModel.StoryElements.Characters;
+        Settings = Ioc.Default.GetService<ShellViewModel>()!.StoryModel.StoryElements.Settings;
 
         Date = string.Empty;
         Time = string.Empty;

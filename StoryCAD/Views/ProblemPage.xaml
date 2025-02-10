@@ -4,12 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"               
     xmlns:usercontrols="using:StoryCAD.Controls"
     xmlns:viewModels="using:StoryCAD.ViewModels"
-    xmlns:tools="using:StoryCAD.ViewModels.Tools"
-    xmlns:converters="using:StoryCAD.Converters">
-
-    <usercontrols:BindablePage.Resources>
-        <converters:NullToGuidConverter x:Key="NullToGuidConverter"/>
-    </usercontrols:BindablePage.Resources>
+    xmlns:tools="using:StoryCAD.ViewModels.Tools">
 
     <Grid>
         <Grid.RowDefinitions>
@@ -74,9 +69,8 @@
                     </Grid.RowDefinitions>
                     <ComboBox Header="Protagonist" Grid.Row="0" IsEditable="False" MinWidth="300"
                               DisplayMemberPath="Name"
-                              SelectedValue="{x:Bind ProblemVm.Protagonist, Mode=TwoWay, Converter={StaticResource NullToGuidConverter}}"
-                              SelectedValuePath="Uuid"
-                              ItemsSource="{x:Bind ProblemVm.Characters}" />
+                              SelectedItem="{x:Bind ProblemVm.SelectedProtagonist, Mode=TwoWay}"
+                              ItemsSource="{x:Bind ProblemVm.Characters, Mode=OneWay}" />
                     <ComboBox IsEditable="True" Header="Goal" Grid.Row="1" 
                               MinWidth="400" ItemsSource="{x:Bind ProblemVm.GoalList}"
                               Text="{x:Bind ProblemVm.ProtGoal, Mode=TwoWay}" 
@@ -104,9 +98,9 @@
                     </Grid.RowDefinitions>
                     <ComboBox Header="Antagonist" Grid.Row="0" IsEditable="False" MinWidth="300"
                               DisplayMemberPath="Name"
-                              SelectedValue="{x:Bind ProblemVm.Protagonist, Mode=TwoWay, Converter={StaticResource NullToGuidConverter}}"
+                              SelectedItem="{x:Bind ProblemVm.SelectedAntagonist, Mode=TwoWay}"
                               SelectedValuePath="Uuid"
-                              ItemsSource="{x:Bind ProblemVm.Characters}" />
+                              ItemsSource="{x:Bind ProblemVm.Characters, Mode=OneWay}" />
                     <ComboBox IsEditable="True" Header="Goal" Grid.Row="1" 
                               MinWidth="400" ItemsSource="{x:Bind ProblemVm.GoalList}"
                               Text="{x:Bind ProblemVm.AntagGoal, Mode=TwoWay}" 

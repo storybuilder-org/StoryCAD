@@ -30,9 +30,6 @@ public class OverviewViewModel : ObservableRecipient, INavigable
     // ProblemModel's Premise property.
     private bool _syncPremise;
 
-    // If a StoryProblem is set, this is the ProblemModel it points to
-    private ProblemModel _storyProblemModel;
-
     #endregion
 
     #region Properties
@@ -55,8 +52,8 @@ public class OverviewViewModel : ObservableRecipient, INavigable
             if (_changeable && _name != value) // Name changed?
             {
                 _logger.Log(LogLevel.Info, $"Requesting Name change from {_name} to {value}");
-                NameChangeMessage _msg = new(_name, value);
-                Messenger.Send(new NameChangedMessage(_msg));
+                NameChangeMessage msg = new(_name, value);
+                Messenger.Send(new NameChangedMessage(msg));
             }
             SetProperty(ref _name, value);
         }
@@ -121,24 +118,35 @@ public class OverviewViewModel : ObservableRecipient, INavigable
     }
 
     private Guid _storyProblem;  // The Guid of a Problem StoryElement
+
     public Guid StoryProblem
     {
         get => _storyProblem;
-        set 
-        {   
+        set
+        {
             SetProperty(ref _storyProblem, value);
             if (value == Guid.Empty)
-            {
                 _syncPremise = false;
-                return;
-            }
-            _storyProblemModel = (ProblemModel) _shellModel.StoryElements.StoryElementGuids[_storyProblem];
-            _syncPremise = true;     // Set Premise to read-only
+            else
+                _syncPremise = true;  
         }
     }
 
-     // Structure data
+    private StoryElement _selectedProblem;
+    public StoryElement SelectedProblem
+    {
+        get => _selectedProblem;
+        set
+        {
+            if (SetProperty(ref _selectedProblem, value))
+            {
+                // Update StoryProblem GUID when SelectedProblem changes
+                StoryProblem = _selectedProblem?.Uuid ?? Guid.Empty;
+            }
+        }
+    }
 
+    // Structure data
     private string _storyType;
     public string StoryType
     {
@@ -165,6 +173,20 @@ public class OverviewViewModel : ObservableRecipient, INavigable
     {
         get => _viewpointCharacter;
         set => SetProperty(ref _viewpointCharacter, value);
+    }
+
+    private StoryElement _selectedViewpointCharacter;
+    public StoryElement SelectedViewpointCharacter
+    {
+        get => _selectedViewpointCharacter;
+        set
+        {
+            if (SetProperty(ref _selectedViewpointCharacter, value))
+            {
+                // Update StoryProblem GUID when SelectedProblem changes
+                ViewpointCharacter = _selectedViewpointCharacter?.Uuid ?? Guid.Empty;
+            }
+        }
     }
 
     private string _voice;
@@ -266,6 +288,7 @@ public class OverviewViewModel : ObservableRecipient, INavigable
         StoryGenre = Model.StoryGenre;
         Viewpoint = Model.Viewpoint;
         ViewpointCharacter = Model.ViewpointCharacter;
+        SelectedViewpointCharacter = Characters.FirstOrDefault(p => p.Uuid == ViewpointCharacter);
         Voice = Model.Voice;
         LiteraryTechnique = Model.LiteraryDevice;
         Tense = Model.Tense;
@@ -273,12 +296,14 @@ public class OverviewViewModel : ObservableRecipient, INavigable
         Tone = Model.Tone;
         Style = Model.Style;
         StoryProblem = Model.StoryProblem;
+        // Set SelectedProblem based on StoryProblem GUID
+        SelectedProblem = Problems.FirstOrDefault(p => p.Uuid == StoryProblem);
         StoryIdea = Model.StoryIdea;
         Concept = Model.Concept;
         Premise = Model.Premise;
         StructureNotes = Model.StructureNotes;
         Notes = Model.Notes;
-        
+
         _changeable = true;
     }
 
@@ -310,11 +335,9 @@ public class OverviewViewModel : ObservableRecipient, INavigable
 		        Model.Premise = Premise ?? "";
 		        if (_syncPremise)
 		        {
-			        if (_storyProblemModel != null)
-			        {
-				        _storyProblemModel.Premise = Premise;
-			        }
-		        }
+                    ProblemModel storyProblemModel = (ProblemModel) StoryElement.GetByGuid(StoryProblem);
+                    storyProblemModel.Premise = Premise;
+                }
 		        Model.StructureNotes = StructureNotes ?? "";
 		        Model.Notes = Notes ?? "";
 			}
@@ -361,6 +384,10 @@ public class OverviewViewModel : ObservableRecipient, INavigable
         
         try
         {
+            StoryProblem = Problems[0].Uuid;          // Set to "(none") (first Problem)
+            ViewpointCharacter = Characters[0].Uuid;  // Set to "(none") (first Character)
+
+
             Dictionary<string, ObservableCollection<string>> lists= Ioc.Default.GetService<ListData>()!.ListControlSource;
             StoryTypeList = lists["StoryType"];
             GenreList = lists["Genre"];
@@ -389,7 +416,6 @@ public class OverviewViewModel : ObservableRecipient, INavigable
         StoryIdea = string.Empty;
         Concept = string.Empty;
         Premise = string.Empty;
-        StoryProblem = Guid.Empty;
         _syncPremise = false;     
         StructureNotes = string.Empty;
         Notes = string.Empty;
