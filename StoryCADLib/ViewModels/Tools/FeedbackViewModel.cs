@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using Octokit;
+using StoryCAD.Services;
 using StoryCAD.Services.Json;
 
 namespace StoryCAD.ViewModels.Tools;
@@ -142,6 +143,9 @@ public class FeedbackViewModel : ObservableRecipient
 				              """;
 			}
 
+
+            Issue.Body += $"\nFeedback ID: {Ioc.Default.GetService<PreferenceService>()
+                .Model.Email.Substring(0,5)}";
 
 			await client.Issue.Create("storybuilder-org", "StoryCAD", Issue);
 		}
