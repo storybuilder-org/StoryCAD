@@ -11,6 +11,6 @@ public class NullToGuidConverter : IValueConverter
 
     public object ConvertBack(object value, Type targetType, object parameter, string language)
     {
-        return value is Guid guid && guid == Guid.Empty ? null : value;
+        return value is Guid guid ? guid : Guid.Empty;
     }
 }
