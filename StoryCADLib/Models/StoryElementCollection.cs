@@ -14,7 +14,8 @@ public class StoryElementCollection : ObservableCollection<StoryElement>
     public Dictionary<Guid, StoryElement> StoryElementGuids;
     public ObservableCollection<StoryElement> Characters;
     public ObservableCollection<StoryElement> Settings;
-    public ObservableCollection<StoryElement> Problems;
+    public ObservableCollection<StoryElement> Problems { get; } = new ObservableCollection<StoryElement>();
+
     public ObservableCollection<StoryElement> Scenes;
 
     public StoryElementCollection()
@@ -23,8 +24,11 @@ public class StoryElementCollection : ObservableCollection<StoryElement>
         StoryElementGuids = new Dictionary<Guid, StoryElement>();
         Characters = new ObservableCollection<StoryElement>();
         Settings = new ObservableCollection<StoryElement>();
-        Problems = new ObservableCollection<StoryElement>();
         Scenes = new ObservableCollection<StoryElement>();
+        Problems!.Add(new StoryElement {Type = StoryItemType.Problem,Name="(none)"});
+        Characters!.Add(new StoryElement {Type = StoryItemType.Character,Name="(none)"});
+        Settings!.Add(new StoryElement {Type = StoryItemType.Setting,Name="(none)"});
+        Scenes!.Add(new StoryElement {Type = StoryItemType.Scene,Name="(none)"});
     }
 
     /// <summary>

@@ -107,11 +107,25 @@ public class ProblemViewModel : ObservableRecipient, INavigable
 
     // Problem protagonist data
 
-    private Guid _protagonist;  // The Guid of a Character StoryElement
+    private Guid _protagonist;  // The Guid of a Character  
     public Guid Protagonist
     {
         get => _protagonist;
         set => SetProperty(ref _protagonist, value);
+    }
+
+    private StoryElement _selectedProtagonist;   
+    public StoryElement SelectedProtagonist
+    {
+        get => _selectedProtagonist;
+        set
+        {
+            if (SetProperty(ref _selectedProtagonist, value))
+            {
+                // Update Protagonist GUID when SelectedProtagonist changes
+                Protagonist = _selectedProtagonist?.Uuid ?? Guid.Empty;
+            }
+        }
     }
 
     private string _protGoal;
@@ -142,6 +156,20 @@ public class ProblemViewModel : ObservableRecipient, INavigable
     {
         get => _antagonist;
         set => SetProperty(ref _antagonist, value);
+    }
+
+    private StoryElement _selectedAntagonist;   
+    public StoryElement SelectedAntagonist
+    {
+        get => _selectedAntagonist;
+        set
+        {
+            if (SetProperty(ref _selectedAntagonist, value))
+            {
+                // Update Antagonist GUID when SelectedAntagonist changes
+                Antagonist = _selectedAntagonist?.Uuid ?? Guid.Empty;
+            }
+        }
     }
 
     private string _antagGoal;
@@ -335,15 +363,13 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         Subject = Model.Subject;
         StoryQuestion = Model.StoryQuestion;
         ProblemSource = Model.ProblemSource;
-        // Character instances like Protagonist and Antagonist are 
-        // read and written as the CharacterModel's StoryElement Guid 
-        // A binding converter, StringToStoryElementConverter,
-        // provides the UI the corresponding StoryElement itself.
         Protagonist = Model.Protagonist;
+        SelectedProtagonist = Characters.FirstOrDefault(p => p.Uuid == Protagonist);
         ProtGoal = Model.ProtGoal;
         ProtMotive = Model.ProtMotive;
         ProtConflict = Model.ProtConflict;
         Antagonist = Model.Antagonist;
+        SelectedAntagonist = Characters.FirstOrDefault(p => p.Uuid == Antagonist);
         AntagGoal = Model.AntagGoal;
         AntagMotive = Model.AntagMotive;
         AntagConflict = Model.AntagConflict;
@@ -367,7 +393,6 @@ public class ProblemViewModel : ObservableRecipient, INavigable
 		
 		//Ensure correct set of Elements are loaded for Structure Lists
 		Problems = Ioc.Default.GetService<ShellViewModel>().StoryModel.StoryElements.Problems;
-        Characters = Ioc.Default.GetService<ShellViewModel>().StoryModel.StoryElements.Characters;
         Scenes = Ioc.Default.GetService<ShellViewModel>().StoryModel.StoryElements.Scenes;
 		_changeable = true;
 	}
@@ -517,6 +542,7 @@ public class ProblemViewModel : ObservableRecipient, INavigable
     public ProblemViewModel()
     {
         _logger = Ioc.Default.GetService<LogService>();
+        Characters = ShellViewModel.GetModel().StoryElements.Characters;
 
         ProblemType = string.Empty;
         ConflictType = string.Empty;

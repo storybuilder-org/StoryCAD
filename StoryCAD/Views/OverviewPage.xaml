@@ -1,14 +1,8 @@
 <usercontrols:BindablePage NavigationCacheMode="Required"
     x:Class="StoryCAD.Views.OverviewPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"                  
-    xmlns:local="using:StoryCAD.Views"
-    xmlns:usercontrols="using:StoryCAD.Controls" 
-    xmlns:converters="using:StoryCAD.Converters">
-
-    <usercontrols:BindablePage.Resources>
-        <converters:NullToGuidConverter x:Key="NullToGuidConverter"/>
-    </usercontrols:BindablePage.Resources>
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:usercontrols="using:StoryCAD.Controls">
 
     <Grid>
         <Grid.RowDefinitions>
@@ -60,9 +54,8 @@
                     </Grid.RowDefinitions>
                     <ComboBox Header="Story Problem" Grid.Row="0" IsEditable="False" MinWidth="300"
                               DisplayMemberPath="Name"
-                              SelectedValue="{x:Bind OverviewVm.StoryProblem, Mode=TwoWay, Converter={StaticResource NullToGuidConverter}}"
-                              SelectedValuePath="Uuid"
-                              ItemsSource="{x:Bind OverviewVm.Problems}" />
+                              SelectedItem="{x:Bind OverviewVm.SelectedProblem, Mode=TwoWay}"
+                              ItemsSource="{x:Bind OverviewVm.Problems, Mode=OneWay}" />
                     <TextBlock Grid.Row="1" Text=" "/>
                     <usercontrols:RichEditBoxExtended Header="Premise" Grid.Row="2" 
                                     RtfText="{x:Bind OverviewVm.Premise, Mode=TwoWay}" AcceptsReturn="True"
@@ -111,9 +104,8 @@
                     </Grid>
                     <ComboBox Header="Viewpoint Character" Grid.Row="2" IsEditable="False" MinWidth="300"
                               DisplayMemberPath="Name"
-                              SelectedValue="{x:Bind OverviewVm.ViewpointCharacter, Mode=TwoWay, Converter={StaticResource NullToGuidConverter}}"
-                              SelectedValuePath="Uuid"
-                              ItemsSource="{x:Bind OverviewVm.Characters}" />
+                              SelectedItem="{x:Bind OverviewVm.SelectedViewpointCharacter, Mode=TwoWay}"
+                              ItemsSource="{x:Bind OverviewVm.Characters, Mode=OneWay}" />
                     <Grid Grid.Row="3" HorizontalAlignment="Left" >
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="2*"/>
