@@ -174,36 +174,43 @@ public class StoryIO
 	/// <summary>
 	/// Migrates a given StoryModel from XML to JSON
 	/// </summary>
-	/// <param name="File">StorageFile Object</param>
+	/// <param name="file">StorageFile Object</param>
 	/// <returns>StoryModel</returns>
-	public async Task<StoryModel> MigrateModel(StorageFile File)
+	public async Task<StoryModel> MigrateModel(StorageFile file)
 	{
-		StoryModel Old = new();
+		StoryModel old = new();
 		try
 		{
+			
 			//Read Legacy file
-			_logService.Log(LogLevel.Info, $"Migrating Old STBX File from {File.Path}");
+			_logService.Log(LogLevel.Info, $"Migrating Old STBX File from {file.Path}");
 			LegacyXMLReader reader = new(_logService);
-			Old = await reader.ReadFile(File);
+			old = await reader.ReadFile(file);
 
 			//Copy legacy file
 			_logService.Log(LogLevel.Info, "Read legacy file");
-			StorageFolder Folder = await StorageFolder.GetFolderFromPathAsync(
+			StorageFolder folder = await StorageFolder.GetFolderFromPathAsync(
 				Ioc.Default.GetRequiredService<PreferenceService>().Model.BackupDirectory);
-			await File.CopyAsync(Folder, File.Name + $" as of {DateTime.Now.ToString().Replace('/', ' ')
-				.Replace(':', ' ').Replace(".stbx", "")}.old");
-			_logService.Log(LogLevel.Info, $"Copied legacy file to backup folder ({Folder.Path})");
+
+            _logService.Log(LogLevel.Info, $"Got folder object at path {folder.Path}");
+
+            string name = file.Name + $" as of {DateTime.Now.ToString().Replace('/', ' ')
+                .Replace(':', ' ').Replace(".stbx", "")}.old";
+            _logService.Log(LogLevel.Info, $"Got backup name as {name}");
+
+            await file.CopyAsync(folder, name);
+            _logService.Log(LogLevel.Info, $"Copied legacy file to backup folder ({folder.Path})");
 
 			//File is now backed up, now migrate to new format
-			await WriteStory(File, Old);
+			await WriteStory(file, old);
 			_logService.Log(LogLevel.Info, "Updated legacy file to JSON File");
-			return Old;
+			return old;
 		}
 		catch (Exception ex)
 		{
-			_logService.LogException(LogLevel.Error, ex, $"Failed to migrate file {File.Path}");
+			_logService.LogException(LogLevel.Error, ex, $"Failed to migrate file {file.Path}");
 		}
 
-		return await Task.FromResult(Old);
+		return await Task.FromResult(old);
 	}
 }
