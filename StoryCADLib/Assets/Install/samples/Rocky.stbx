@@ -1,6 +1,6 @@
 {
   "CreatedVersion": null,
-  "LastVersion": "Version: 2.14.6 Built on: 2025-01-13T20:07:10:716Z",
+  "LastVersion": "Version: 3.0.0 Built on: 2025-02-10T21:47:18:755Z",
   "FlattenedExplorerView": [
     {
       "Uuid": "b30b7bf4-2c65-4b51-b8fd-7c2e3bf65f34",
@@ -463,10 +463,6 @@
       "ParentUuid": "92285e79-704b-41cc-a997-eebb487b8733"
     },
     {
-      "Uuid": "2a9b7c71-67c6-4cd1-b8d2-76020cec2b5b",
-      "ParentUuid": "92285e79-704b-41cc-a997-eebb487b8733"
-    },
-    {
       "Uuid": "3f78187b-fa20-4dce-8c00-0b15353587de",
       "ParentUuid": null
     }
@@ -775,10 +771,6 @@
     {
       "Uuid": "a5696b89-43a8-452a-a785-4c7abec5a695",
       "ParentUuid": "102f8a87-2165-48dc-939e-ad27c6146bb3"
-    },
-    {
-      "Uuid": "2a9b7c71-67c6-4cd1-b8d2-76020cec2b5b",
-      "ParentUuid": "102f8a87-2165-48dc-939e-ad27c6146bb3"
     }
   ],
   "Elements": [
@@ -786,7 +778,7 @@
       "Type": "StoryOverview",
       "DateCreated": "01-01-75",
       "Author": "Sylvester Stallone",
-      "DateModified": "2025-01-13",
+      "DateModified": "2025-02-10",
       "StoryIdea": "{\\rtf1\\fbidis\\ansi\\ansicpg1252\\deff0\\nouicompat\\deflang1033{\\fonttbl{\\f0\\fnil Segoe UI;}{\\f1\\fnil\\fcharset0 Segoe UI;}}\r\n{\\colortbl ;\\red0\\green0\\blue0;}\r\n{\\*\\generator Riched20 3.1.0004}\\viewkind4\\uc1 \r\n\\pard\\tx720\\cf1\\f0\\fs23 A resilient but underdog boxer gets a one-in-a-million chance to fight the reigning world heavyweight champion\\f1 .\\f0\\par\r\n}\r\n",
       "Concept": "{\\rtf1\\fbidis\\ansi\\ansicpg1252\\deff0\\nouicompat\\deflang1033{\\fonttbl{\\f0\\fnil\\fcharset0 Segoe UI;}{\\f1\\fnil Segoe UI;}}\r\n{\\colortbl ;\\red0\\green0\\blue0;}\r\n{\\*\\generator Riched20 3.1.0004}\\viewkind4\\uc1 \r\n\\pard\\cf1\\f0\\fs23 What if a down-and-out boxer is given a one-in-a-million chance to fight the reigning heavyweight champion, and through this unlikely opportunity, strives to reclaim his self-worth, mend his broken relationships, and rekindle the spirit of a city that has lost its hope?\\f1\\par\r\n}\r\n",
       "StoryProblem": "bab6f959-48f6-448a-a5ef-5ed2611dfc70",
