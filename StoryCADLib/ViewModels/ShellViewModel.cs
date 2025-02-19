@@ -812,67 +812,27 @@ public class ShellViewModel : ObservableRecipient
                 StoryModel.ProjectFile = await StorageFile.GetFileFromPathAsync(fromPath);
             }
 
-            var FileAttributes = File.GetAttributes(StoryModel.ProjectFile.Path);
-            bool ShowOfflineError = false;
-			if (StoryModel.ProjectFile.IsAvailable) // Microsoft thinks the file is accessible
+            if (StoryModel.ProjectFile == null)
             {
-	            try
-	            {
-					//Test read file before continuing.
-					//If the file is saved on a cloud provider and not locally this should force
-					//the file to be pulled locally if possible. A file could be unavailable for
-					//many reasons, such as the user being offline, server outage, etc.
-					//Windows might pause StoryCAD while it syncs the file.
-					File.ReadAllText(StoryModel.ProjectFile.Path);
-	            }
-				catch (IOException) { ShowOfflineError = true;  }
-            }
-			else { ShowOfflineError = true; }
-
-			//Failed to access network file
-			if (ShowOfflineError)
-			{
-				//The file is actually inaccessible and microsoft is wrong.
-				if ((FileAttributes & System.IO.FileAttributes.Offline) == 0)
-				{
-					Logger.Log(LogLevel.Error, $"File {StoryModel.ProjectFile.Path} is unavailable.");
-					CloseUnifiedCommand.Execute(null);
-
-					//Show warning so user knows their file isn't lost and is just on onedrive.
-					var result = await Window.ShowContentDialog(new()
-					{
-						Title = "File unavailable.",
-						Content = """
-						          The story outline you are trying to open is stored on a cloud service, and isn't available currently.
-						          Try going online and syncing the file, then try again. 
-						          
-						          Click show help article for more information.
-						          """,
-						PrimaryButtonText = "Show help article",
-						SecondaryButtonText = "Close",
-					}, true);
-
-					//Open help article in default browser
-					if (result == ContentDialogResult.Primary)
-					{
-						Process.Start(new ProcessStartInfo
-						{
-							FileName =
-								"https://storybuilder-org.github.io/StoryCAD/Troubleshooting_Cloud_Storage_Providers.html",
-							UseShellExecute = true
-						});
-					}
-
-					return; //Stop opening file.
-				}
-			}
-
-
-			if (StoryModel.ProjectFile == null)
-            {
-                Logger.Log(LogLevel.Info, "Open File command cancelled (StoryModel.ProjectFile was null)");
+                Logger.Log(LogLevel.Warn, "Open File command failed: StoryModel.ProjectFile is null.");
                 Messenger.Send(new StatusChangedMessage(new("Open Story command cancelled", LogLevel.Info)));
-                _canExecuteCommands = true;  // unblock other commands
+                _canExecuteCommands = true;  // Unblock other commands
+                return;
+            }
+
+            if (!File.Exists(StoryModel.ProjectFile.Path))
+            {
+                Messenger.Send(new StatusChangedMessage(new("Can't find file", LogLevel.Warn)));
+                Logger.Log(LogLevel.Warn, $"File {StoryModel.ProjectFile.Path} does not exist.");
+                _canExecuteCommands = true;
+                return;
+            }
+
+            //Check file is available.
+            StoryIO _rdr = Ioc.Default.GetRequiredService<StoryIO>();
+            if (!await _rdr.CheckFileAvailability(StoryModel.ProjectFile.Path))
+            {
+                Messenger.Send(new StatusChangedMessage(new("File Unavailable.", LogLevel.Warn)));
                 return;
             }
 
@@ -880,7 +840,6 @@ public class ShellViewModel : ObservableRecipient
             StoryModel.ProjectFolder = await StoryModel.ProjectFile.GetParentAsync();
 
             // Read the file into the StoryModel.
-            StoryIO _rdr = Ioc.Default.GetRequiredService<StoryIO>();
              StoryModel = await _rdr.ReadStory(StoryModel.ProjectFile);
 
             //Check the file we loaded actually has StoryCAD Data.

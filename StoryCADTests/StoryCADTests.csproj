@@ -36,6 +36,9 @@
 		<None Update="TestInputs\Migrations\Hamlet.stbx">
 		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
+		<None Update="TestInputs\Migrations\LegacyTest.stbx">
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
 		<None Update="TestInputs\Migrations\Rocky.stbx">
 		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>

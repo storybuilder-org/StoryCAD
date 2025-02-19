@@ -478,4 +478,13 @@ public class FileTests
 		Assert.AreEqual("Excellent", loadedCharacter.Health);
 	}
 
+    [TestMethod]
+    public async Task CheckFileAvailability()
+    {
+        var _storyIO = Ioc.Default.GetRequiredService<StoryIO>();
+        string _legacyFilePath = Path.Combine(App.InputDir,"Migrations","LegacyTest.stbx");
+        bool result = await _storyIO.CheckFileAvailability(_legacyFilePath);
+        Assert.IsTrue(result, $"Expected legacy file at {_legacyFilePath} to be available.");
+    }
+
 }
