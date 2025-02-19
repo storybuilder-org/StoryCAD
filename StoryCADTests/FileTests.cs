@@ -482,7 +482,7 @@ public class FileTests
     public async Task CheckFileAvailability()
     {
         var _storyIO = Ioc.Default.GetRequiredService<StoryIO>();
-        string _legacyFilePath = "/Migrations/LegacyTest.stbx";
+        string _legacyFilePath = Path.Combine(App.InputDir,"Migrations","LegacyTest.stbx");
         bool result = await _storyIO.CheckFileAvailability(_legacyFilePath);
         Assert.IsTrue(result, $"Expected legacy file at {_legacyFilePath} to be available.");
     }
