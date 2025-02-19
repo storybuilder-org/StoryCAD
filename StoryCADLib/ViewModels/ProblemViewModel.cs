@@ -352,7 +352,6 @@ public class ProblemViewModel : ObservableRecipient, INavigable
     {
         _changeable = false;
         _changed = false;
-        Characters = ShellViewModel.GetModel().StoryElements.Characters;
 
         Uuid = Model.Uuid;
         Name = Model.Name;
@@ -395,8 +394,7 @@ public class ProblemViewModel : ObservableRecipient, INavigable
 		//Ensure correct set of Elements are loaded for Structure Lists
 		Problems = Ioc.Default.GetService<ShellViewModel>().StoryModel.StoryElements.Problems;
         Scenes = Ioc.Default.GetService<ShellViewModel>().StoryModel.StoryElements.Scenes;
-
-        _changeable = true;
+		_changeable = true;
 	}
 
     internal void SaveModel()
@@ -544,6 +542,7 @@ public class ProblemViewModel : ObservableRecipient, INavigable
     public ProblemViewModel()
     {
         _logger = Ioc.Default.GetService<LogService>();
+        Characters = ShellViewModel.GetModel().StoryElements.Characters;
 
         ProblemType = string.Empty;
         ConflictType = string.Empty;
