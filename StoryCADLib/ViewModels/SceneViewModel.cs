@@ -402,6 +402,9 @@ public class SceneViewModel : ObservableRecipient, INavigable
         _changeable = false;
         _changed = false;
 
+        Characters = Ioc.Default.GetService<ShellViewModel>()!.StoryModel.StoryElements.Characters;
+        Settings = Ioc.Default.GetService<ShellViewModel>()!.StoryModel.StoryElements.Settings;
+
         Uuid = Model.Uuid;
         Name = Model.Name;
         if (Name.Equals("New Scene"))
@@ -694,8 +697,6 @@ public class SceneViewModel : ObservableRecipient, INavigable
     public SceneViewModel()
     {
         _logger = Ioc.Default.GetService<LogService>();
-        Characters = Ioc.Default.GetService<ShellViewModel>()!.StoryModel.StoryElements.Characters;
-        Settings = Ioc.Default.GetService<ShellViewModel>()!.StoryModel.StoryElements.Settings;
 
         Date = string.Empty;
         Time = string.Empty;

@@ -544,7 +544,7 @@ public class ProblemViewModel : ObservableRecipient, INavigable
     public ProblemViewModel()
     {
         _logger = Ioc.Default.GetService<LogService>();
-
+        Characters = ShellViewModel.GetModel().StoryElements.Characters;
         ProblemType = string.Empty;
         ConflictType = string.Empty;
         Subject = string.Empty;
