@@ -279,6 +279,9 @@ public class OverviewViewModel : ObservableRecipient, INavigable
         _changeable = false;
         _changed = false;
 
+        Problems = _shellModel.StoryElements.Problems;
+        Characters = _shellModel.StoryElements.Characters;
+
         Uuid = Model.Uuid;
         Name = Model.Name;
         DateCreated = Model.DateCreated;
@@ -368,10 +371,19 @@ public class OverviewViewModel : ObservableRecipient, INavigable
     public ObservableCollection<string> TenseList;
     public ObservableCollection<string> StyleList;
     public ObservableCollection<string> ToneList;
-    public ObservableCollection<StoryElement> Problems { get; } 
-    public ObservableCollection<StoryElement> Characters { get; } 
-    
-    
+    private ObservableCollection<StoryElement> _problems;
+    public ObservableCollection<StoryElement> Problems
+    {
+        get => _problems;
+        set => SetProperty(ref _problems, value);
+    }
+    private ObservableCollection<StoryElement> _characters;
+    public ObservableCollection<StoryElement> Characters
+    {
+        get => _characters;
+        set => SetProperty(ref _characters, value);
+    }
+
     #endregion
 
     #region Constructor
@@ -379,11 +391,11 @@ public class OverviewViewModel : ObservableRecipient, INavigable
     public OverviewViewModel()
     {
         _logger = Ioc.Default.GetService<LogService>();
-        Problems = _shellModel.StoryElements.Problems;
-        Characters = _shellModel.StoryElements.Characters;
         
         try
         {
+            Problems = _shellModel.StoryElements.Problems;
+            Characters = _shellModel.StoryElements.Characters;
             StoryProblem = Problems[0].Uuid;          // Set to "(none") (first Problem)
             ViewpointCharacter = Characters[0].Uuid;  // Set to "(none") (first Character)
 
