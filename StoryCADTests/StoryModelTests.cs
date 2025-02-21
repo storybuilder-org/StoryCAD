@@ -1,5 +1,7 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using CommunityToolkit.Mvvm.DependencyInjection;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using StoryCAD.Models;
+using StoryCAD.ViewModels.SubViewModels;
 
 namespace StoryCADTests;
 
@@ -19,7 +21,6 @@ public class StoryModelTests
         Assert.AreEqual(0, _storyModel.ExplorerView.Count);
         Assert.IsNotNull(_storyModel.NarratorView);
         Assert.AreEqual(0, _storyModel.NarratorView.Count);
-        Assert.IsNull(_storyModel.ProjectFilename);
         Assert.IsFalse(_storyModel.Changed);
     }
 }

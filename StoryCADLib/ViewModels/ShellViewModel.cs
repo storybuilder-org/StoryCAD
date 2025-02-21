@@ -602,92 +602,91 @@ public class ShellViewModel : ObservableRecipient
             {
                 Logger.Log(LogLevel.Info, "Opening file picker as story wasn't able to be found");
 
-                StoryModel.ProjectFile = await Ioc.Default.GetService<Windowing>().ShowFilePicker("Open Project File",".stbx");
-                if (StoryModel.ProjectFile == null) //Picker was canceled.
+                StorageFile? ProjectFile = await Ioc.Default.GetService<Windowing>().ShowFilePicker("Open Project File",".stbx");
+                if (ProjectFile == null) //Picker was canceled.
                 {
                     Logger.Log(LogLevel.Info, "Open file picker cancelled.");
                     _canExecuteCommands = true;  // unblock other commands
                     return;
                 }
-            }
-            else
-            {
-                //If `fromPath` is provided and file exists at the path, open that file.
-                OutlineManager.StoryModelFile = await StorageFile.GetFileFromPathAsync(fromPath);
-            }
 
-            var FileAttributes = File.GetAttributes(StoryModel.ProjectFile.Path);
-            bool ShowOfflineError = false;
-			if (StoryModel.ProjectFile.IsAvailable) // Microsoft thinks the file is accessible
-            {
-	            try
-	            {
-					//Test read file before continuing.
-					//If the file is saved on a cloud provider and not locally this should force
-					//the file to be pulled locally if possible. A file could be unavailable for
-					//many reasons, such as the user being offline, server outage, etc.
-					//Windows might pause StoryCAD while it syncs the file.
-					File.ReadAllText(StoryModel.ProjectFile.Path);
-	            }
-				catch (IOException) { ShowOfflineError = true;  }
-            }
-			else { ShowOfflineError = true; }
+                var FileAttributes = File.GetAttributes(fromPath);
+                bool ShowOfflineError = false;
+                if (ProjectFile.IsAvailable) // Microsoft thinks the file is accessible
+                {
+                    try
+                    {
+                        //Test read file before continuing.
+                        //If the file is saved on a cloud provider and not locally this should force
+                        //the file to be pulled locally if possible. A file could be unavailable for
+                        //many reasons, such as the user being offline, server outage, etc.
+                        //Windows might pause StoryCAD while it syncs the file.
+                        File.ReadAllText(ProjectFile.Path);
+                    }
+                    catch (IOException) { ShowOfflineError = true; }
+                }
+                else { ShowOfflineError = true; }
 
-			//Failed to access network file
-			if (ShowOfflineError)
-			{
-				//The file is actually inaccessible and microsoft is wrong.
-				if ((FileAttributes & System.IO.FileAttributes.Offline) == 0)
-				{
-					Logger.Log(LogLevel.Error, $"File {StoryModel.ProjectFile.Path} is unavailable.");
-					CloseUnifiedCommand.Execute(null);
+                //Failed to access network file
+                if (ShowOfflineError)
+                {
+                    //The file is actually inaccessible and microsoft is wrong.
+                    if ((FileAttributes & System.IO.FileAttributes.Offline) == 0)
+                    {
+                        Logger.Log(LogLevel.Error, $"File {ProjectFile.Path} is unavailable.");
+                        CloseUnifiedCommand.Execute(null);
 
-					//Show warning so user knows their file isn't lost and is just on onedrive.
-					var result = await Window.ShowContentDialog(new()
-					{
-						Title = "File unavailable.",
-						Content = """
+                        //Show warning so user knows their file isn't lost and is just on onedrive.
+                        var result = await Window.ShowContentDialog(new()
+                        {
+                            Title = "File unavailable.",
+                            Content = """
 						          The story outline you are trying to open is stored on a cloud service, and isn't available currently.
 						          Try going online and syncing the file, then try again. 
 						          
 						          Click show help article for more information.
 						          """,
-						PrimaryButtonText = "Show help article",
-						SecondaryButtonText = "Close",
-					}, true);
+                            PrimaryButtonText = "Show help article",
+                            SecondaryButtonText = "Close",
+                        }, true);
 
-					//Open help article in default browser
-					if (result == ContentDialogResult.Primary)
-					{
-						Process.Start(new ProcessStartInfo
-						{
-							FileName =
-								"https://storybuilder-org.github.io/StoryCAD/Troubleshooting_Cloud_Storage_Providers.html",
-							UseShellExecute = true
-						});
-					}
+                        //Open help article in default browser
+                        if (result == ContentDialogResult.Primary)
+                        {
+                            Process.Start(new ProcessStartInfo
+                            {
+                                FileName =
+                                    "https://storybuilder-org.github.io/StoryCAD/Troubleshooting_Cloud_Storage_Providers.html",
+                                UseShellExecute = true
+                            });
+                        }
 
-					return; //Stop opening file.
-				}
-			}
+                        return; //Stop opening file.
+                    }
+                }
+                
+                if (OutlineManager.StoryModelFile == null)
+                {
+                    Logger.Log(LogLevel.Info, "Open File command cancelled (StoryModel.ProjectFile was null)");
+                    Messenger.Send(new StatusChangedMessage(new("Open Story command cancelled", LogLevel.Info)));
+                    _canExecuteCommands = true;  // unblock other commands
+                    return;
+                }
 
-			if (StoryModel.ProjectFile == null)
+                // Set the StoryModel's path in OutlineViewModel
+                OutlineManager.StoryModelFile = ProjectFile.Path;
+
+                // Read the file into the StoryModel.
+                StoryIO _rdr = Ioc.Default.GetRequiredService<StoryIO>();
+                StoryModel = await _rdr.ReadStory(ProjectFile);
+            }
+            else
             {
-                Logger.Log(LogLevel.Info, "Open File command cancelled (StoryModel.ProjectFile was null)");
-                Messenger.Send(new StatusChangedMessage(new("Open Story command cancelled", LogLevel.Info)));
-                _canExecuteCommands = true;  // unblock other commands
-                return;
+                //If `fromPath` is provided and file exists at the path, open that file.
+                OutlineManager.StoryModelFile = fromPath;
             }
 
-            // Set the StoryModel's path in OutlineViewModel
-            OutlineManager.StoryModelFile = StoryModel.ProjectFile;
 
-            // Set the ProjectFolder to the folder the project file is in.
-            StoryModel.ProjectFolder = await StoryModel.ProjectFile.GetParentAsync();
-
-            // Read the file into the StoryModel.
-            StoryIO _rdr = Ioc.Default.GetRequiredService<StoryIO>();
-             StoryModel = await _rdr.ReadStory(StoryModel.ProjectFile);
 
             //Check the file we loaded actually has StoryCAD Data.
             if (StoryModel == null)
@@ -719,7 +718,7 @@ public class ShellViewModel : ObservableRecipient
             }
 
             Window.UpdateWindowTitle();
-            new UnifiedVM().UpdateRecents(Path.Combine(StoryModel.ProjectFolder.Path, StoryModel.ProjectFile.Name));
+            new UnifiedVM().UpdateRecents(OutlineManager.StoryModelFile);
 
             if (Preferences.Model.TimedBackup)
             {
@@ -731,7 +730,7 @@ public class ShellViewModel : ObservableRecipient
                 _autoSaveService.StartAutoSave();
             }
 
-            string _msg = $"Opened project {StoryModel.ProjectFilename}";
+            string _msg = $"Opened project {OutlineManager.StoryModelFile}";
             Logger.Log(LogLevel.Info, _msg);
         }
         catch (Exception _ex)
@@ -797,7 +796,7 @@ public class ShellViewModel : ObservableRecipient
             Messenger.Send(new StatusChangedMessage(new("Save File As command executing", LogLevel.Info, true)));
             try
             {
-                if (StoryModel.ProjectFile == null || StoryModel.ProjectPath == null)
+                if (string.IsNullOrEmpty(OutlineManager.StoryModelFile))
                 {
                     Messenger.Send(new StatusChangedMessage(new("You need to load a story first!", LogLevel.Info)));
                     Logger.Log(LogLevel.Warn, "User tried to use save as without a story loaded.");
@@ -805,8 +804,8 @@ public class ShellViewModel : ObservableRecipient
                     return;
                 }
 
-                //Creates the content dialog
-                ContentDialog _saveAsDialog = new()
+                // Create the content dialog
+                ContentDialog saveAsDialog = new()
                 {
                     Title = "Save as",
                     PrimaryButtonText = "Save",
@@ -814,61 +813,64 @@ public class ShellViewModel : ObservableRecipient
                     Content = new SaveAsDialog()
                 };
 
-                //Sets needed data in VM and then shows the dialog
-                SaveAsViewModel _saveAsVM = Ioc.Default.GetRequiredService<SaveAsViewModel>();
-                // The default project name and project folder path are from the active StoryModel
-                _saveAsVM.ProjectName = StoryModel.ProjectFilename;
-                _saveAsVM.ParentFolder = StoryModel.ProjectFolder;
-                _saveAsVM.ProjectPathName = StoryModel.ProjectPath;
+                // Set default values in the view model using the current story file info
+                SaveAsViewModel saveAsVM = Ioc.Default.GetRequiredService<SaveAsViewModel>();
+                saveAsVM.ProjectName = Path.GetFileName(OutlineManager.StoryModelFile);
+                saveAsVM.ParentFolder = await StorageFolder.GetFolderFromPathAsync(Path.GetDirectoryName(OutlineManager.StoryModelFile));
 
-                ContentDialogResult _result = await Window.ShowContentDialog(_saveAsDialog);
+                ContentDialogResult result = await Window.ShowContentDialog(saveAsDialog);
 
-                if (_result == ContentDialogResult.Primary) //If save is clicked
+                if (result == ContentDialogResult.Primary)
                 {
                     if (await VerifyReplaceOrCreate())
                     {
-                        //Saves model to disk
+                        // Save the model to disk at the current file location
                         SaveModel();
                         await outlineService.WriteModel(StoryModel, OutlineManager.StoryModelFile);
-                        if (Path.Combine(_saveAsVM.ProjectPathName, _saveAsVM.ProjectName) ==
-                            Path.Combine(StoryModel.ProjectFolder.Path, StoryModel.ProjectFile.Name))
+
+                        // If the new path is the same as the current one, exit early
+                        string newFilePath = Path.Combine(saveAsVM.ParentFolder.Path, saveAsVM.ProjectName);
+                        if (newFilePath.Equals(OutlineManager.StoryModelFile, StringComparison.OrdinalIgnoreCase))
                         {
-                            //Stop SaveAs from crashing if the user sets the path to a place where the story is already located.
                             Messenger.Send(new StatusChangedMessage(new("Save File As command completed", LogLevel.Info)));
-                            Logger.Log(LogLevel.Info, "User tried to as file to same file as parent.");
+                            Logger.Log(LogLevel.Info, "User tried to save file to same location as current file.");
                             _canExecuteCommands = true;
                             return;
                         }
-                        //Saves the current project folders and files to disk
-                        await StoryModel.ProjectFile.CopyAsync(_saveAsVM.ParentFolder, _saveAsVM.ProjectName, NameCollisionOption.ReplaceExisting);
 
-                        //Update the StoryModel properties to use the newly saved copy
-                        StoryModel.ProjectFilename = _saveAsVM.ProjectName;
-                        StoryModel.ProjectFolder = _saveAsVM.ParentFolder;
-                        StoryModel.ProjectPath = _saveAsVM.SaveAsProjectFolderPath;
-                        // Add to the recent files stack
+                        // Copy the current file to the new location/name
+                        StorageFile currentFile = await StorageFile.GetFileFromPathAsync(OutlineManager.StoryModelFile);
+                        await currentFile.CopyAsync(saveAsVM.ParentFolder, saveAsVM.ProjectName, NameCollisionOption.ReplaceExisting);
+
+                        // Update the story file path to the new location
+                        OutlineManager.StoryModelFile = newFilePath;
+
+                        // Update window title and recents
                         Window.UpdateWindowTitle();
-                        new UnifiedVM().UpdateRecents(Path.Combine(StoryModel.ProjectFolder.Path, StoryModel.ProjectFile.Name));
-                        // Indicate everything's done
+                        new UnifiedVM().UpdateRecents(OutlineManager.StoryModelFile);
+
+                        // Indicate the model is now saved and unchanged
                         Messenger.Send(new IsChangedMessage(true));
                         StoryModel.Changed = false;
                         ChangeStatusColor = Colors.Green;
                         Messenger.Send(new StatusChangedMessage(new("Save File As command completed", LogLevel.Info, true)));
                     }
                 }
-                else // if cancelled
+                else
                 {
                     Messenger.Send(new StatusChangedMessage(new("SaveAs dialog cancelled", LogLevel.Info, true)));
                 }
             }
-            catch (Exception _ex) //If error occurs in file.
+            catch (Exception ex)
             {
-                Logger.LogException(LogLevel.Error, _ex, "Exception in SaveFileAs");
+                Logger.LogException(LogLevel.Error, ex, "Exception in SaveFileAs");
                 Messenger.Send(new StatusChangedMessage(new("Save File As failed", LogLevel.Info)));
             }
             _canExecuteCommands = true;
         }
     }
+
+
 
     private async Task<bool> VerifyReplaceOrCreate()
     {

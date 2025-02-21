@@ -21,7 +21,7 @@ namespace StoryCAD.ViewModels.SubViewModels
         private readonly ShellViewModel shellVm;
 
         // Changed from a string to StorageFile
-        public StorageFile StoryModelFile;
+        public string StoryModelFile;
 
         public async Task UnifiedNewFile(UnifiedVM dialogVm)
         {
@@ -50,22 +50,16 @@ namespace StoryCAD.ViewModels.SubViewModels
               
                 // Create the new outline's file
                 StorageFolder folder = await StorageFolder.GetFolderFromPathAsync(dialogVm.ProjectPath);
-                StoryModelFile = await folder.CreateFileAsync(dialogVm.ProjectName, CreationCollisionOption.GenerateUniqueName
-                );
+                StoryModelFile = (await folder.CreateFileAsync(dialogVm.ProjectName, CreationCollisionOption.GenerateUniqueName)).Path;
 
                 // Create the StoryModel
-                string name = Path.GetFileNameWithoutExtension(StoryModelFile.Path);
+                string name = Path.GetFileNameWithoutExtension(StoryModelFile);
                 string author = preferences.Model.FirstName + " " + preferences.Model.LastName;
-                shellVm.StoryModel = await outlineService.CreateModel(
-                    StoryModelFile, name, author, dialogVm.SelectedTemplateIndex);
-                shellVm.StoryModel.ProjectFolder = folder;
-                shellVm.StoryModel.ProjectFile = StoryModelFile;
-                shellVm.StoryModel.ProjectPath = StoryModelFile.Path;
+
 
                 shellVm.SetCurrentView(StoryViewType.ExplorerView);
 
-                Ioc.Default.GetRequiredService<UnifiedVM>()
-                          .UpdateRecents(StoryModelFile.Path);
+                Ioc.Default.GetRequiredService<UnifiedVM>().UpdateRecents(StoryModelFile);
 
                 shellVm.StoryModel.Changed = true;
                 await shellVm.SaveFile();
@@ -104,7 +98,7 @@ namespace StoryCAD.ViewModels.SubViewModels
         /// </summary>
         public async Task WriteModel()
         {
-            logger.Log(LogLevel.Info, $"In WriteModel, file={shellVm.StoryModel.ProjectFilename} path={shellVm.StoryModel.ProjectPath}");
+            logger.Log(LogLevel.Info, $"In WriteModel, path={StoryModelFile}");
             try
             {
                 // Updating the last modified time
@@ -141,22 +135,10 @@ namespace StoryCAD.ViewModels.SubViewModels
                 );
 
                 // Reset to default location
-                shellVm.StoryModel.ProjectFolder = await StorageFolder.GetFolderFromPathAsync(preferences.Model.ProjectDirectory);
-                shellVm.StoryModel.ProjectFile = await shellVm.StoryModel.ProjectFolder.CreateFileAsync(
-                    shellVm.StoryModel.ProjectFilename,
-                    CreationCollisionOption.GenerateUniqueName
-                );
-                shellVm.StoryModel.ProjectFilename = StoryModelFile.Name;
-                shellVm.StoryModel.ProjectPath = shellVm.StoryModel.ProjectFolder.Path;
-                shellVm.StoryModel.ProjectFilename = Path.GetFileName(StoryModelFile.Path);
-
-                // Update OutlineViewModel's file reference so future saves work correctly
-                StoryModelFile = shellVm.StoryModel.ProjectFile;
-
-;
+                StoryModelFile = Path.Combine(preferences.Model.ProjectDirectory, Path.GetFileName(StoryModelFile)!);
 
                 // Last opened file with reference to this version
-                preferences.Model.LastFile1 = shellVm.StoryModel.ProjectFile.Path;
+                preferences.Model.LastFile1 = StoryModelFile;
             }
             catch (Exception ex)
             {

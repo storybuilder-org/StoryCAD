@@ -10,6 +10,7 @@ using Windows.Storage.Pickers;
 using System.ComponentModel;
 using Windows.UI;
 using Windows.UI.ViewManagement;
+using StoryCAD.ViewModels.SubViewModels;
 using WinUIEx;
 using LogLevel = StoryCAD.Services.Logging.LogLevel;
 
@@ -126,7 +127,8 @@ public partial class Windowing : ObservableRecipient
         ShellViewModel ShellVM = Ioc.Default.GetRequiredService<ShellViewModel>();
         if (ShellVM.StoryModel != null && ShellVM.DataSource != null && ShellVM.DataSource.Count > 0)
         {
-            BaseTitle += $"- Currently editing {ShellVM.StoryModel.ProjectFilename.Replace(".stbx", "")} ";
+            BaseTitle += $"- Currently editing {Path.GetFileNameWithoutExtension(
+                Ioc.Default.GetRequiredService<OutlineViewModel>().StoryModelFile)} ";
         }
 
         //Set window Title.

@@ -100,11 +100,9 @@ namespace StoryCAD.Services.API
                     return response;
                 }
 
-                // Get the StorageFile from the provided file path.
-                StorageFile file = await StorageFile.GetFileFromPathAsync(filePath);
 
                 // Write the model to disk using the OutlineService.
-                await _outlineService.WriteModel(model, file);
+                await _outlineService.WriteModel(model, filePath);
 
                 response.Success = true;
                 response.Payload = "Outline written successfully.";

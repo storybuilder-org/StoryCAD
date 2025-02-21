@@ -15,6 +15,8 @@ using System.Threading.Tasks;
 using Windows.Storage;
 using StoryCAD.Services;
 using StoryCAD.Services.Logging;
+using StoryCAD.Services.Outline;
+using StoryCAD.ViewModels.SubViewModels;
 
 namespace StoryCADTests;
 
@@ -28,12 +30,14 @@ public class FileTests
     [TestMethod]
     public void FileCreation()
     {
+        OutlineViewModel OutlineVM = Ioc.Default.GetRequiredService<OutlineViewModel>();
+
+
         //Get ShellVM and clear the StoryModel
-        StoryModel StoryModel = new()
-        {
-            ProjectFilename ="TestProject.stbx",
-            ProjectPath = Ioc.Default.GetRequiredService<AppState>().RootDirectory
-        };
+        StoryModel StoryModel = new();
+
+        OutlineVM.StoryModelFile = Path.Combine(Ioc.Default.GetRequiredService<AppState>().RootDirectory, "TestProject.stbx");
+
 
         OverviewModel _overview = new(Path.GetFileNameWithoutExtension("TestProject"), StoryModel)
         { DateCreated = DateTime.Today.ToString("yyyy-MM-dd"), Author = "StoryCAD Tests" };
@@ -61,22 +65,17 @@ public class FileTests
         Assert.IsTrue(StoryModel.StoryElements[0].Type == StoryItemType.StoryOverview);
 
         //Because we have created a file in this way we must populate ProjectFolder and ProjectFile.
-        Directory.CreateDirectory(StoryModel.ProjectPath);
-
-        //Populate file/folder vars.
-        StoryModel.ProjectFolder = StorageFolder.GetFolderFromPathAsync(StoryModel.ProjectPath).GetAwaiter().GetResult();
-        StoryModel.ProjectFile = StoryModel.ProjectFolder.CreateFileAsync("TestProject.stbx",
-	        CreationCollisionOption.ReplaceExisting).GetAwaiter().GetResult();
+        Directory.CreateDirectory(OutlineVM.StoryModelFile);
 
 		//Write file.
 		StoryIO _storyIO = Ioc.Default.GetRequiredService<StoryIO>();
-		_storyIO.WriteStory(StoryModel.ProjectFile, StoryModel).GetAwaiter().GetResult();
+		_storyIO.WriteStory(OutlineVM.StoryModelFile, StoryModel).GetAwaiter().GetResult();
 
         //Sleep to ensure file is written.
         Thread.Sleep(10000);
 
         //Check file was really written to the disk.
-        Assert.IsTrue(File.Exists(Path.Combine(StoryModel.ProjectPath, StoryModel.ProjectFilename)));
+        Assert.IsTrue(File.Exists(OutlineVM.StoryModelFile));
     }
 
 
@@ -326,11 +325,7 @@ public class FileTests
 		string testProjectPath = Path.Combine(App.ResultsDir, "TestProject");
 		Directory.CreateDirectory(testProjectPath);
 
-		StoryModel storyModel = new()
-		{
-			ProjectFilename = "SavedTest.stbx",
-			ProjectPath = testProjectPath
-		};
+        StoryModel storyModel = new();
 
 		// Create and add an overview node
 		OverviewModel overview = new("Saved Test Project", storyModel)
@@ -450,7 +445,7 @@ public class FileTests
 
 		// Act
 		StoryIO storyIO = Ioc.Default.GetRequiredService<StoryIO>();
-		await storyIO.WriteStory(projectFile, storyModel);
+		await storyIO.WriteStory(projectFile.Path, storyModel);
 
 		// Assert
 		Assert.IsTrue(File.Exists(Path.Combine(testProjectPath, "SavedTest.stbx")), "The file was not saved correctly.");

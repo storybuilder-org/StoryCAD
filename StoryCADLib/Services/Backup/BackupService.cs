@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using System.IO.Compression;
 using Windows.Storage;
+using StoryCAD.ViewModels.SubViewModels;
 
 
 namespace StoryCAD.Services.Backup;
@@ -12,6 +13,7 @@ public class BackupService
 
     private LogService Log = Ioc.Default.GetService<LogService>();
     private PreferenceService Prefs = Ioc.Default.GetService<PreferenceService>();
+    private OutlineViewModel OutlineManager = Ioc.Default.GetService<OutlineViewModel>();
     ShellViewModel _shellVM;
 
     #region Constructor
@@ -104,60 +106,67 @@ public class BackupService
             timedBackupWorker.RunWorkerAsync();
     }
 
-	#endregion
+    #endregion
 
-	/// <summary>
-	/// Creates a backup
-	/// </summary>
-	/// <param name="Filename">If null, will be the storymodel filename</param>
-	/// <param name="FilePath">If null, will be the backup directory</param>
-	/// <returns></returns>
-	public async Task BackupProject(string Filename = null, string FilePath = null)
+    /// <summary>
+    /// Creates a backup
+    /// </summary>
+    /// <param name="Filename">If null, will be the storymodel filename</param>
+    /// <param name="FilePath">If null, will be the backup directory</param>
+    /// <returns></returns>
+    public async Task BackupProject(string Filename = null, string FilePath = null)
     {
         _shellVM = Ioc.Default.GetService<ShellViewModel>();
 
-		//Set params to defaults if not provided
-		Filename ??= $"{_shellVM!.StoryModel.ProjectFile.Name} as of {DateTime.Now}"
-	        .Replace('/', ' ').Replace(':', ' ').Replace(".stbx", "");
+        // Use OutlineManager.StoryModelFile to get file details
+        string originalFileName = Path.GetFileName(OutlineManager.StoryModelFile);
+        Filename ??= $"{originalFileName} as of {DateTime.Now}"
+                        .Replace('/', ' ')
+                        .Replace(':', ' ')
+                        .Replace(".stbx", "");
         FilePath ??= Prefs.Model.BackupDirectory.Replace(".stbx", "");
 
         Log.Log(LogLevel.Info, $"Starting Project Backup at {FilePath}");
         try
         {
-            //Creates backup directory if it doesn't exist
+            // Create backup directory if it doesn't exist
             if (!Directory.Exists(FilePath))
             {
                 Log.Log(LogLevel.Info, "Backup dir not found, making it.");
                 Directory.CreateDirectory(FilePath);
             }
 
-            //Gets correct name for file
             Log.Log(LogLevel.Info, $"Backing up to {FilePath} as {Filename}.zip");
 
             Log.Log(LogLevel.Info, "Writing file");
-            StorageFolder Temp = await StorageFolder.GetFolderFromPathAsync(Ioc.Default.GetRequiredService<AppState>().RootDirectory);
-            Temp = await Temp.CreateFolderAsync("Temp", CreationCollisionOption.ReplaceExisting);
-            await _shellVM.StoryModel.ProjectFile.CopyAsync(Temp, _shellVM.StoryModel.ProjectFile.Name,
-                NameCollisionOption.ReplaceExisting);
-            ZipFile.CreateFromDirectory(Temp.Path, Path.Combine(FilePath, Filename) + ".zip");
+            StorageFolder rootFolder = await StorageFolder.GetFolderFromPathAsync(
+                Ioc.Default.GetRequiredService<AppState>().RootDirectory);
+            StorageFolder tempFolder = await rootFolder.CreateFolderAsync("Temp", CreationCollisionOption.ReplaceExisting);
 
-            //Creates zip archive then cleans up
-            Log.Log(LogLevel.Info, $"Created Zip file at {Path.Combine(FilePath, Filename)}.zip");
-            await Temp.DeleteAsync();
+            // Retrieve the project file using the file path
+            StorageFile projectFile = await StorageFile.GetFileFromPathAsync(OutlineManager.StoryModelFile);
+            await projectFile.CopyAsync(tempFolder, projectFile.Name, NameCollisionOption.ReplaceExisting);
 
-            //Creates entry and flushes to disk.
+            string zipFilePath = Path.Combine(FilePath, Filename) + ".zip";
+            ZipFile.CreateFromDirectory(tempFolder.Path, zipFilePath);
+
+            Log.Log(LogLevel.Info, $"Created Zip file at {zipFilePath}");
+            await tempFolder.DeleteAsync();
+
             Log.Log(LogLevel.Info, "Finished backup.");
         }
         catch (Exception ex)
         {
-            //Show failed message.
             Ioc.Default.GetRequiredService<Windowing>().GlobalDispatcher.TryEnqueue(() =>
             {
-                Ioc.Default.GetRequiredService<ShellViewModel>().ShowMessage(LogLevel.Warn,
-                    "Making a backup failed, check your backup settings.", false);
+                Ioc.Default.GetRequiredService<ShellViewModel>().ShowMessage(
+                    LogLevel.Warn,
+                    "Making a backup failed, check your backup settings.",
+                    false);
             });
             Log.LogException(LogLevel.Error, ex, $"Error backing up project {ex.Message}");
         }
         Log.Log(LogLevel.Info, "BackupProject complete");
     }
+
 }

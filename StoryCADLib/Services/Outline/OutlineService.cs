@@ -1,5 +1,6 @@
 ﻿using Windows.Storage;
 using StoryCAD.DAL;
+using StoryCAD.ViewModels.SubViewModels;
 
 namespace StoryCAD.Services.Outline 
 {
@@ -20,13 +21,7 @@ namespace StoryCAD.Services.Outline
         public async Task<StoryModel> CreateModel(StorageFile file, string name, string author, int selectedTemplateIndex)
         {   
             name = Path.GetFileNameWithoutExtension(file.Path);
-            StoryModel model = new()
-            {
-                ProjectFilename = Path.GetFileName(file.Path),
-                ProjectFolder = await StorageFolder.GetFolderFromPathAsync(file.Path),
-                ProjectFile = file,
-                ProjectPath = Path.GetDirectoryName(file.Path)
-            };
+            StoryModel model = new();
 
             OverviewModel overview = new(name, model)
             {
@@ -176,7 +171,7 @@ namespace StoryCAD.Services.Outline
         /// <param name="model">the StoryModel to write</param>
         /// <param name="file">The StorageFile to write it to</param>
         /// <returns></returns>
-        public async Task WriteModel(StoryModel model, StorageFile file)
+        public async Task WriteModel(StoryModel model, string file)
         {
             StoryIO wtr = Ioc.Default.GetRequiredService<StoryIO>();
             await wtr.WriteStory(file, model);

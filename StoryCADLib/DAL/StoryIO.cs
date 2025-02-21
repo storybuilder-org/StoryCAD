@@ -2,7 +2,9 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Windows.Storage;
+using Octokit;
 using StoryCAD.Services;
+using StoryCAD.ViewModels.SubViewModels;
 
 namespace StoryCAD.DAL;
 
@@ -12,13 +14,16 @@ namespace StoryCAD.DAL;
 public class StoryIO
 {
 	private LogService _logService = Ioc.Default.GetRequiredService<LogService>();
+    private OutlineViewModel OultineVM = Ioc.Default.GetRequiredService<OutlineViewModel>();
 
-	/// <summary>
-	/// Writes the current Story to the disk
-	/// </summary>
-	public async Task WriteStory(StorageFile output, StoryModel model)
-	{
-		_logService.Log(LogLevel.Info, $"Saving Model to disk as {output.Path}  " + 
+    /// <summary>
+    /// Writes the current Story to the disk
+    /// </summary>
+    public async Task WriteStory(string output_path, StoryModel model)
+    {
+		StorageFolder folder = await StorageFolder.GetFolderFromPathAsync(Path.GetDirectoryName(output_path));
+        var output = await folder.CreateFileAsync(Path.GetFileName(output_path), CreationCollisionOption.OpenIfExists);
+		_logService.Log(LogLevel.Info, $"Saving Model to disk as {output_path}  " + 
 				$"Elements: {model.StoryElements.StoryElementGuids.Count}");
 
 		//Save version data
@@ -87,12 +92,7 @@ public class StoryIO
 			_logService.Log(LogLevel.Info, $"Version last saved with {_model.LastVersion ?? "Error"}");
 
 			//Update file information
-			_model.ProjectFile = StoryFile;
-			_model.ProjectFilename = StoryFile.Name;
-			_model.ProjectFolder = await StoryFile.GetParentAsync();
-			_model.ProjectPath = _model.ProjectFolder.Path;
-			_model.ProjectFilename = Path.GetFileName(StoryFile.Path);
-
+            OultineVM.StoryModelFile = StoryFile.Path;
 			return _model;
 		}
 		catch (Exception ex)
@@ -200,9 +200,9 @@ public class StoryIO
 
             await file.CopyAsync(folder, name);
             _logService.Log(LogLevel.Info, $"Copied legacy file to backup folder ({folder.Path})");
-
+            
 			//File is now backed up, now migrate to new format
-			await WriteStory(file, old);
+			await WriteStory(file.Path, old);
 			_logService.Log(LogLevel.Info, "Updated legacy file to JSON File");
 			return old;
 		}

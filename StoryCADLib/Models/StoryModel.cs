@@ -74,14 +74,6 @@ public class StoryModel
 	public ObservableCollection<StoryNodeItem> ExplorerView;
 	[JsonIgnore]
 	public ObservableCollection<StoryNodeItem> NarratorView;
-	[JsonIgnore]
-    public StorageFolder ProjectFolder;
-	[JsonIgnore]
-	public StorageFile ProjectFile;
-	[JsonIgnore]
-	public string ProjectPath;
-	[JsonIgnore]
-	public string ProjectFilename { get; set; }
 
     #endregion
 
@@ -93,7 +85,6 @@ public class StoryModel
         NarratorView = new ObservableCollection<StoryNodeItem>();
 
         Changed = false;
-        ProjectFilename = null;
     }
     #endregion
 }
