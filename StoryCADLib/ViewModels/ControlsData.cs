@@ -12,7 +12,7 @@ namespace StoryCAD.ViewModels
     /// </summary>
     public class ControlData
     {
-        LogService _log = Ioc.Default.GetService<LogService>();
+        readonly LogService _log = Ioc.Default.GetService<LogService>();
 
         //Character conflics
         public SortedDictionary<string, ConflictCategoryModel> ConflictTypes;

@@ -18,8 +18,8 @@ namespace StoryCAD.ViewModels.Tools;
 /// </summary>
 public class NarrativeToolVM: ObservableRecipient
 {
-    private ShellViewModel _shellVM = Ioc.Default.GetRequiredService<ShellViewModel>();
-    private LogService _logger = Ioc.Default.GetRequiredService<LogService>(); 
+    private readonly ShellViewModel _shellVM = Ioc.Default.GetRequiredService<ShellViewModel>();
+    private readonly LogService _logger = Ioc.Default.GetRequiredService<LogService>(); 
     public StoryNodeItem SelectedNode; //Currently selected node
     public bool IsNarratorSelected = false;
 

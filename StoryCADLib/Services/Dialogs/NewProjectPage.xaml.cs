@@ -20,6 +20,7 @@ public sealed partial class NewProjectPage : Page
 	public StorageFolder ParentFolder { get; set; }
 	public string ParentFolderPath { get; set; }
 	public string ProjectFolderPath { get; set; }
+	public string ProjectFile { get; set; }
 
 	private async void Browse_Click(object sender, RoutedEventArgs e)
 	{

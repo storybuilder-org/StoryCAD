@@ -12,7 +12,7 @@ namespace StoryCAD.ViewModels.Tools;
 /// </summary>
 public class InitVM : ObservableRecipient
 {
-    private PreferenceService preference = Ioc.Default.GetService<PreferenceService>();
+    private readonly PreferenceService preference = Ioc.Default.GetService<PreferenceService>();
 
 
     /// <summary>

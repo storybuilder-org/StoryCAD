@@ -4,7 +4,6 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using StoryCAD.Controls;
-using StoryCAD.DAL;
 using StoryCAD.Services.Dialogs;
 using StoryCAD.Services.Messages;
 using StoryCAD.Services.Navigation;
@@ -20,7 +19,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable
     public RelationshipModel CurrentRelationship;
     private bool _changeable; // process property changes for this story element
     private bool _changed;    // this story element has changed
-    Windowing Windowing = Ioc.Default.GetService<Windowing>();
+    readonly Windowing Windowing = Ioc.Default.GetService<Windowing>();
     #endregion
 
     #region Properties

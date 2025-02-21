@@ -1,4 +1,9 @@
-﻿namespace StoryCAD.Services.Search;
+﻿using ABI.Windows.Media.Audio;
+//using NLog;
+using StoryCAD.Services.Logging;
+//using LogLevel = StoryCAD.Services.Logging.LogLevel;
+
+namespace StoryCAD.Services.Search;
 
 /// <summary>
 /// Service responsible for searching StoryElements within the StoryModel based on a given search argument.
@@ -6,6 +11,7 @@
 /// </summary>
 public class SearchService
 {
+    private readonly LogService logger;
     private string arg;
     StoryElementCollection ElementCollection;
     
@@ -20,7 +26,7 @@ public class SearchService
     {
         if (searchArg == null)
         {
-            Ioc.Default.GetRequiredService<ShellViewModel>().Logger.Log(LogLevel.Warn, "Search argument is null, returning false.");
+            logger.Log(LogLevel.Warn, "Search argument is null, returning false.");
             return false;
         } // Fixes blank search
 
@@ -193,29 +199,8 @@ public class SearchService
         return false;
     }
 
-    /// <summary>
-    /// Validate that the passed value is a valid StoryElement.ToString,
-    /// and if so, compare the StoryElement.Name to the Search argument
-    /// </summary>
-    /// <param name="value">a StoryElement guid as a string (possibly)</param>
-    /// <returns>true if the Search argument matches the StoryElement.Name, false othewise</returns>
-    private bool CompareStoryElement(string value)
+    public SearchService()
     {
-        if (value == null)
-            return false;
-        if (value.Equals(string.Empty))
-            return false;
-        // Get the current StoryModel's StoryElementsCollection
-        ShellViewModel shell = Ioc.Default.GetService<ShellViewModel>();
-        StoryElementCollection elements = shell.StoryModel.StoryElements;
-        // legacy: locate the StoryElement from its Name
-        // Look for the StoryElement corresponding to the passed guid
-        if (Guid.TryParse(value, out Guid guid))
-        {
-            StoryElement element = elements.StoryElementGuids[guid];
-            return Comparator(element.Name);
-        }
-        else
-            return false;
+        logger = Ioc.Default.GetService<LogService>();
     }
 }

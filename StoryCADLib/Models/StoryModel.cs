@@ -37,8 +37,6 @@ public class StoryModel
 	[JsonPropertyName("LastVersion")]
 	public string LastVersion;
 
-
-
 	#endregion
 
 	#region StoryExplorer and NarratorView (TreeView) properties
@@ -67,10 +65,10 @@ public class StoryModel
 
 	/// StoryModel also contains two persisted TreeView representations, a Story ExplorerView tree which
 	/// contains all Story Elements (the StoryOverview and all Problem, Character, Setting, Scene
-	/// and Folder elements) and a NarratorView View which contains just Section (chapter, etc) and
-	/// selected Scene elements. 
+	/// and Folder elements) and a NarratorView View which contains just Section (chapter, act, etc)
+	/// and selected Scene elements. 
 	/// 
-	/// One of these persisted TreeViews is actively bound in the Shell page view to a StoryNodeItem tree 
+	/// One of these TreeViews is actively bound in the Shell page view to a StoryNodeItem tree 
 	/// based on  whichever of these two TreeView representations is presently selected.
 	[JsonIgnore]
 	public ObservableCollection<StoryNodeItem> ExplorerView;
