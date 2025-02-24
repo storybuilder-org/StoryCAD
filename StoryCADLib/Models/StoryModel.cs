@@ -1,5 +1,7 @@
 using System.Collections.ObjectModel;
+using System.Text.Json;
 using System.Text.Json.Serialization;
+using StoryCAD.DAL;
 using Windows.Storage;
 
 namespace StoryCAD.Models;
@@ -76,6 +78,63 @@ public class StoryModel
 	public ObservableCollection<StoryNodeItem> NarratorView;
 
     #endregion
+
+
+    /// <summary>
+    /// Used to prepare tree for serialisation
+    /// </summary>
+    /// <param name="rootNodes"></param>
+    /// <returns></returns>
+    private static List<PersistableNode> FlattenTree(ObservableCollection<StoryNodeItem> rootNodes)
+    {
+        var list = new List<PersistableNode>();
+        foreach (var root in rootNodes)
+        {
+            AddNodeRecursively(root, list);
+        }
+        return list;
+    }
+
+    /// <summary>
+    /// used within Flatten Tree to handle serialisation effectively.
+    /// </summary>
+    private static void AddNodeRecursively(StoryNodeItem node, List<PersistableNode> list)
+    {
+        list.Add(new PersistableNode
+        {
+            Uuid = node.Uuid,
+            ParentUuid = node.Parent?.Uuid
+        });
+
+        foreach (var child in node.Children)
+        {
+            AddNodeRecursively(child, list);
+        }
+    }
+
+    /// <summary>
+    /// Serialises the model to JSON
+    /// </summary>
+    /// <param name="model">Story Model to serialise</param>
+    /// <returns></returns>
+    public string Serialize()
+    {
+        //Flatten trees (solves issues when deserialization)
+        FlattenedExplorerView = FlattenTree(ExplorerView);
+        FlattenedNarratorView = FlattenTree(NarratorView);
+
+        //Serialise
+        return JsonSerializer.Serialize(this, new JsonSerializerOptions
+        {
+            WriteIndented = true,
+            Converters =
+            {
+                new EmptyGuidConverter(),
+                new StoryElementConverter(),
+                new JsonStringEnumConverter()
+            }
+        });
+    }
 
     #region Constructor
     public StoryModel()

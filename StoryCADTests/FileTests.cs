@@ -17,6 +17,7 @@ using StoryCAD.Services;
 using StoryCAD.Services.Logging;
 using StoryCAD.Services.Outline;
 using StoryCAD.ViewModels.SubViewModels;
+using StoryCAD.Services.API;
 
 namespace StoryCADTests;
 
@@ -472,5 +473,19 @@ public class FileTests
 		Assert.AreEqual("American", loadedCharacter.Nationality);
 		Assert.AreEqual("Excellent", loadedCharacter.Health);
 	}
+
+    public async void TestAPIWrite()
+    {
+		//Set up file
+        OutlineService _outlineService = Ioc.Default.GetRequiredService<OutlineService>();
+        StorageFolder folder = await StorageFolder.GetFolderFromPathAsync(Path.GetTempPath());
+        StorageFile file = await folder.CreateFileAsync("Test.stbx", CreationCollisionOption.GenerateUniqueName);
+
+		//Create Model
+        OperationResult<StoryModel> model = await
+            OperationResult<StoryModel>.SafeExecuteAsync(_outlineService.CreateModel(file, "Test", "Test", 3));
+
+        OperationResult<void> write = OperationResult<void>.SafeExecuteAsync(_outlineService.WriteModel(model.Payload, file.Path));
+    }
 
 }

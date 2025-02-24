@@ -1,45 +1,44 @@
-﻿using Windows.Storage;
-using StoryCAD.DAL;
-using StoryCAD.ViewModels.SubViewModels;
+﻿using StoryCAD.DAL;
+using Windows.Storage;
 
-namespace StoryCAD.Services.Outline 
+namespace StoryCAD.Services.Outline;
+
+public class OutlineService
 {
     /// <summary>
-    /// OutlineService contains the raw methods which 
+    /// Creates a new StoryModel based on a template.
+    /// Returns the new model or throws an exception.
     /// </summary>
-    public class OutlineService
+    public async Task<StoryModel> CreateModel(StorageFile file, string name, string author, int selectedTemplateIndex)
     {
-        #region Public Methods
+        // Pre-validation.
+        if (file == null)
+            throw new ArgumentNullException(nameof(file), "StorageFile cannot be null.");
 
-        /// <summary>
-        /// This creates a new StoryModel based on a template
-        /// </summary>
-        /// <param name="file">The file the outline will be written to</param>
-        /// <param name="name">The outline's overview story element name</param>
-        /// <param name="author">The outline's overview story element author</param>
-        /// <param name="selectedTemplateIndex">The template to use (see NewProject.xaml)</param>
-        public async Task<StoryModel> CreateModel(StorageFile file, string name, string author, int selectedTemplateIndex)
-        {   
-            name = Path.GetFileNameWithoutExtension(file.Path);
-            StoryModel model = new();
+        string directory = Path.GetDirectoryName(file.Path);
+        if (string.IsNullOrWhiteSpace(directory) || !Directory.Exists(directory))
+            throw new DirectoryNotFoundException("The target folder does not exist.");
 
-            OverviewModel overview = new(name, model)
-            {
+        // Use the file name (without extension) as the name.
+        name = Path.GetFileNameWithoutExtension(file.Path);
+        StoryModel model = new();
+
+        OverviewModel overview = new(name, model)
+        {
             DateCreated = DateTime.Today.ToString("yyyy-MM-dd"),
             Author = author
-            };
-            
+        };
+
         StoryNodeItem overviewNode = new(overview, null) { IsExpanded = true, IsRoot = true };
         model.ExplorerView.Add(overviewNode);
         TrashCanModel trash = new(model);
         StoryNodeItem trashNode = new(trash, null);
-        model.ExplorerView.Add(trashNode);     // The trashcan is the second root
+        model.ExplorerView.Add(trashNode); // The trashcan is the second root
         FolderModel narrative = new("Narrative View", model, StoryItemType.Folder);
         StoryNodeItem narrativeNode = new(narrative, null) { IsRoot = true };
         model.NarratorView.Add(narrativeNode);
 
-        // Every new story gets a StoryProblem with a Protagonist and Antagonist
-        // Except for Blank Project
+        // For non-blank projects, add a StoryProblem with characters.
         if (selectedTemplateIndex != 0)
         {
             StoryElement storyProblem = new ProblemModel("Story Problem", model);
@@ -58,21 +57,18 @@ namespace StoryCAD.Services.Outline
                 @"problems], the final battle[climax scene] erupts, and the[protagonist] finally resolves the " +
                 @"conflict[outcome].";
 
-            // Use the NewProjectDialog template to complete the model
             switch (selectedTemplateIndex)
             {
-                case 1:  // Story problem and characters
+                case 1:
                     overviewNode.Children.Add(storyProblemNode);
                     storyProblemNode.Children.Add(storyProtagNode);
                     storyProblemNode.Children.Add(storyAntagNode);
-
-                    //Correctly set parents
                     storyProblemNode.Parent = overviewNode;
                     storyProtagNode.Parent = storyProblemNode;
                     storyAntagNode.Parent = storyProblemNode;
                     storyProblemNode.IsExpanded = true;
                     break;
-                case 2:  // Folders for each type- story problem and characters belong in the corresponding folders
+                case 2:
                     StoryElement problems = new FolderModel("Problems", model, StoryItemType.Folder);
                     StoryNodeItem problemsNode = new(problems, overviewNode);
                     storyProblemNode.Parent = problemsNode;
@@ -102,7 +98,7 @@ namespace StoryCAD.Services.Outline
                     problem.Name = "External Problem";
                     overview.StoryProblem = problem.Uuid;
                     problem.Protagonist = storyProtag.Uuid;
-                    problem.Antagonist = storyAntagNode.Uuid;
+                    problem.Antagonist = storyAntag.Uuid;
                     storyProtagNode.Parent = storyProblemNode;
                     storyAntagNode.Parent = storyProblemNode;
                     StoryElement internalProblem = new ProblemModel("Internal Problem", model);
@@ -142,11 +138,11 @@ namespace StoryCAD.Services.Outline
                     problem = storyProblem as ProblemModel;
                     problem.Name = "External Problem";
                     problem.Protagonist = storyProtag.Uuid;
-                    problem.Antagonist = storyAntagNode.Uuid;
+                    problem.Antagonist = storyAntag.Uuid;
                     overview.StoryProblem = problem.Uuid;
-                    internalProblem = new ProblemModel("Internal Problem", model);
-                    internalProblemNode = new(internalProblem, problemsFolderNode);
-                    problem = internalProblem as ProblemModel;
+                    StoryElement internalProblem2 = new ProblemModel("Internal Problem", model);
+                    StoryNodeItem internalProblemNode2 = new(internalProblem2, problemsFolderNode);
+                    problem = internalProblem2 as ProblemModel;
                     problem.Protagonist = storyProtag.Uuid;
                     problem.Antagonist = storyProtag.Uuid;
                     problem.ConflictType = "Person vs. Self";
@@ -165,18 +161,14 @@ namespace StoryCAD.Services.Outline
         return model;
     }
 
-        /// <summary>
-        /// This writes the StoryModel JSON file to the backing store (disk)
-        /// </summary>
-        /// <param name="model">the StoryModel to write</param>
-        /// <param name="file">The StorageFile to write it to</param>
-        /// <returns></returns>
-        public async Task WriteModel(StoryModel model, string file)
-        {
-            StoryIO wtr = Ioc.Default.GetRequiredService<StoryIO>();
-            await wtr.WriteStory(file, model);
-        }
-
-        #endregion
+    /// <summary>
+    /// Writes the StoryModel JSON file to disk.
+    /// Returns true if the write is successful or throws an exception.
+    /// </summary>
+    public async Task<bool> WriteModel(StoryModel model, string file)
+    {
+        StoryIO wtr = Ioc.Default.GetRequiredService<StoryIO>();
+        await wtr.WriteStory(file, model);
+        return true;
     }
 }

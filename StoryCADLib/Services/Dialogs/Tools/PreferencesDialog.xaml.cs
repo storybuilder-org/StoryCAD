@@ -1,7 +1,10 @@
 using System.Diagnostics;
 using Windows.Storage;
 using Microsoft.UI.Xaml;
+using StoryCAD.Services.API;
 using StoryCAD.ViewModels.Tools;
+using Octokit;
+using StoryCAD.Services.Outline;
 
 namespace StoryCAD.Services.Dialogs.Tools;
 
@@ -162,4 +165,9 @@ public sealed partial class PreferencesDialog
 			PrimaryButtonText = "OK"
 		}, true);
 	}
+
+    private async void TestAPI(object sender, RoutedEventArgs e)
+    {
+
+    }
 }

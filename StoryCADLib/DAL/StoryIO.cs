@@ -2,7 +2,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Windows.Storage;
-using Octokit;
 using StoryCAD.Services;
 using StoryCAD.ViewModels.SubViewModels;
 
@@ -30,28 +29,16 @@ public class StoryIO
 		model.LastVersion = Ioc.Default.GetRequiredService<AppState>().Version;
 		_logService.Log(LogLevel.Info, $"Saving version as {model.LastVersion}");
 
-		//Flatten trees (solves issues when deserialization)
-		model.FlattenedExplorerView = FlattenTree(model.ExplorerView);
-		model.FlattenedNarratorView = FlattenTree(model.NarratorView);
-
-		//Serialise
-		string JSON = JsonSerializer.Serialize(model, new JsonSerializerOptions
-		{
-			WriteIndented = true,
-			Converters =
-			{
-				new EmptyGuidConverter(),
-				new StoryElementConverter(),
-				new JsonStringEnumConverter()
-			}
-		});
-		_logService.Log(LogLevel.Info, $"Serialised as {JSON}");
+        var json = model.Serialize();
+        _logService.Log(LogLevel.Info, $"Serialised as {json}");
 
 		//Save file to disk
-		await FileIO.WriteTextAsync(output, JSON);
+		await FileIO.WriteTextAsync(output, json);
 	}
 
-	public async Task<StoryModel> ReadStory(StorageFile StoryFile)
+
+
+    public async Task<StoryModel> ReadStory(StorageFile StoryFile)
 	{
 		try
 		{
@@ -105,35 +92,6 @@ public class StoryIO
 		return new();
 	}
 
-
-	/// <summary>
-	/// Used to prepare tree for serialisation
-	/// </summary>
-	/// <param name="rootNodes"></param>
-	/// <returns></returns>
-	private static List<PersistableNode> FlattenTree(ObservableCollection<StoryNodeItem> rootNodes)
-	{
-		var list = new List<PersistableNode>();
-		foreach (var root in rootNodes)
-		{
-			AddNodeRecursively(root, list);
-		}
-		return list;
-	}
-
-	private static void AddNodeRecursively(StoryNodeItem node, List<PersistableNode> list)
-	{
-		list.Add(new PersistableNode
-		{
-			Uuid = node.Uuid,
-			ParentUuid = node.Parent?.Uuid
-		});
-
-		foreach (var child in node.Children)
-		{
-			AddNodeRecursively(child, list);
-		}
-	}
 
 	private static ObservableCollection<StoryNodeItem> RebuildTree(
 		List<PersistableNode> flatNodes,

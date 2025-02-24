@@ -136,6 +136,7 @@
                         <Button Content="Attach Elmah" Click="{x:Bind Logger.AddElmahTarget}" Width="150" Margin="0,5"/>
 						<Button Content="Refresh Dev Stats" Click="RefreshDevStats" Width="150" Margin="0,5"/>
 						<Button Content="Open Picker UI" Click="OpenPickerUI" Width="150" Margin="0,5"/>
+						<Button Content="TestAPI" Click="TestAPI" Width="150" Margin="0,5"/>
 					</StackPanel>
                     <ScrollViewer MaxHeight="400">
                         <StackPanel>
