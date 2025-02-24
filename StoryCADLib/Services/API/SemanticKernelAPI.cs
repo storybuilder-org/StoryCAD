@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
+﻿using System.ComponentModel;
 using System.Text.Json;
-using System.Threading.Tasks;
 using Windows.Storage;
-using StoryCAD.Models;
 using StoryCAD.Services.Outline;
-using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel;
 
 namespace StoryCAD.Services.API
