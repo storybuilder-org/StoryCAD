@@ -54,12 +54,12 @@ public class OperationResult<T>
         try
         {
             await action();
-            return OperationResult<T>.Success<default(T)>(default(T));
+            return OperationResult<T>.Success(default(T));
         }
         catch (Exception ex)
         {
             // Optionally log the exception.
-            return OperationResult<T>.Failure<default(T)>(ex.Message);
+            return OperationResult<T>.Success(default(T));
         }
     }
 }

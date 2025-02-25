@@ -11,11 +11,11 @@ namespace StoryCAD.Services.API;
 /// </summary>
 public class SemanticKernelApi
 {
-    private readonly OutlineService _outlineService;
+    private readonly OutlineService _outlineService = Ioc.Default.GetRequiredService<OutlineService>();
 
-    public SemanticKernelApi(OutlineService outlineService)
+    public SemanticKernelApi()
     {
-        _outlineService = outlineService;
+        //_outlineService = outlineService;
     }
 
     /// <summary>
@@ -41,7 +41,10 @@ public class SemanticKernelApi
         try
         {
             // Get the StorageFile from the provided file path.
-            StorageFile file = await StorageFile.GetFileFromPathAsync(filePath);
+            string path = Path.GetDirectoryName(filePath);
+            StorageFolder folder = await StorageFolder.GetFolderFromPathAsync(path);
+            string filename = Path.GetFileName(filePath);
+            StorageFile file = await folder.CreateFileAsync(filename, CreationCollisionOption.FailIfExists);
 
             // Create a new StoryModel using the OutlineService.
             var result = await OperationResult<StoryModel>.SafeExecuteAsync(_outlineService.CreateModel(file, name, author, idx));

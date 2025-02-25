@@ -7,6 +7,7 @@ using StoryCAD.Services.Search;
 using StoryCAD.ViewModels.Tools;
 using StoryCAD.Collaborator.ViewModels;
 using StoryCAD.Models.Tools;
+using StoryCAD.Services.API;
 using StoryCAD.Services.Collaborator;
 using StoryCAD.Services.Outline;
 using StoryCAD.Services.Ratings;
@@ -82,6 +83,8 @@ namespace StoryCAD.Services.IoC
             Services.AddSingleton<PreferencesViewModel>();
             Services.AddSingleton<FlawViewModel>();
             Services.AddSingleton<TraitsViewModel>();
+            Services.AddSingleton<SemanticKernelApi>();
+            Services.AddSingleton<OutlineService>();
         }
     }
 }

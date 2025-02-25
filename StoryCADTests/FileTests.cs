@@ -474,18 +474,21 @@ public class FileTests
 		Assert.AreEqual("Excellent", loadedCharacter.Health);
 	}
 
-    public async void TestAPIWrite()
+    [TestMethod]
+    public async Task TestAPIWrite()
     {
 		//Set up file
-        OutlineService _outlineService = Ioc.Default.GetRequiredService<OutlineService>();
+        OutlineService outlineService = Ioc.Default.GetRequiredService<OutlineService>();
         StorageFolder folder = await StorageFolder.GetFolderFromPathAsync(Path.GetTempPath());
         StorageFile file = await folder.CreateFileAsync("Test.stbx", CreationCollisionOption.GenerateUniqueName);
 
 		//Create Model
         OperationResult<StoryModel> model = await
-            OperationResult<StoryModel>.SafeExecuteAsync(_outlineService.CreateModel(file, "Test", "Test", 3));
+            OperationResult<StoryModel>.SafeExecuteAsync(outlineService.CreateModel(file, "Test", "Test", 3));
+		Assert.IsTrue(model.IsSuccess);
 
-        OperationResult<void> write = OperationResult<void>.SafeExecuteAsync(_outlineService.WriteModel(model.Payload, file.Path));
+        OperationResult<bool> write = await OperationResult<bool>.SafeExecuteAsync(outlineService.WriteModel(model.Payload, file.Path));
+        Assert.IsTrue(write.IsSuccess);
+		Assert.IsTrue(File.Exists(file.Path));
     }
-
 }
