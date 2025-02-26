@@ -12,7 +12,7 @@ namespace StoryCAD.Services.API;
 public class SemanticKernelApi
 {
     private readonly OutlineService _outlineService = Ioc.Default.GetRequiredService<OutlineService>();
-
+    private StoryModel? CurrentModel;
     public SemanticKernelApi()
     {
         //_outlineService = outlineService;
@@ -30,6 +30,7 @@ public class SemanticKernelApi
     [KernelFunction, Description("Creates a new empty story outline from a template.")]
     public async Task<OperationResult<List<Guid>>> CreateEmptyOutline(string filePath, string name, string author, string templateIndex)
     {
+        Console.WriteLine($"creating empty outline at {filePath}");
         var response = new OperationResult<List<Guid>>();
         if (!int.TryParse(templateIndex, out int idx))
         {
@@ -48,7 +49,7 @@ public class SemanticKernelApi
 
             // Create a new StoryModel using the OutlineService.
             var result = await OperationResult<StoryModel>.SafeExecuteAsync(_outlineService.CreateModel(file, name, author, idx));
-
+            //var result = 
             if (!result.IsSuccess)
             {
                 response.IsSuccess = false;
@@ -66,6 +67,7 @@ public class SemanticKernelApi
 
             response.IsSuccess = true;
             response.Payload = elementGuids;
+            CurrentModel = model;
         }
         catch (Exception ex)
         {
@@ -84,24 +86,22 @@ public class SemanticKernelApi
     /// Returns an OperationResult indicating IsSuccess or error.
     /// </summary>
     [KernelFunction, Description("Writes the story outline to the backing store.")]
-    public async Task<OperationResult<string>> WriteOutline(string jsonModel, string filePath)
+    public async Task<OperationResult<string>> WriteOutline(string filePath)
     {
         var response = new OperationResult<string>();
 
         try
         {
             // Deserialize the JSON into a StoryModel object.
-            StoryModel model = JsonSerializer.Deserialize<StoryModel>(jsonModel);
-            if (model == null)
+            if (CurrentModel == null)
             {
                 response.IsSuccess = false;
                 response.ErrorMessage = "Deserialized StoryModel is null.";
                 return response;
             }
 
-
             // Write the model to disk using the OutlineService.
-            await _outlineService.WriteModel(model, filePath);
+            await _outlineService.WriteModel(CurrentModel, filePath);
 
             response.IsSuccess = true;
             response.Payload = "Outline written IsSuccessfully.";

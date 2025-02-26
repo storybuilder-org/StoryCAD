@@ -2057,12 +2057,7 @@ public class ShellViewModel : ObservableRecipient
     private void StatusMessageReceived(StatusChangedMessage statusMessage)
     {
         //Ignore status messages inside tests
-        if (Assembly.GetEntryAssembly().Location.Contains("StoryCADTests.dll")
-            || Assembly.GetEntryAssembly().Location.Contains("CollaboratorTests.dll")
-            || Assembly.GetEntryAssembly().Location.Contains("testhost.dll"))
-        {
-            return;
-        }
+        if (State.StoryCADTestsMode) { return; }
 
         if (_statusTimer.IsEnabled) { _statusTimer.Stop(); } //Stops a timer if one is already running
 
