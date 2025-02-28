@@ -3,6 +3,8 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Windows.Storage;
 using StoryCAD.Services;
+using Microsoft.UI.Xaml;
+using System.Diagnostics;
 using StoryCAD.ViewModels.SubViewModels;
 
 namespace StoryCAD.DAL;
@@ -134,14 +136,20 @@ public class StoryIO
 	/// </summary>
 	/// <param name="file">StorageFile Object</param>
 	/// <returns>StoryModel</returns>
-	public async Task<StoryModel> MigrateModel(StorageFile file)
+	public async Task<StoryModel>  MigrateModel(StorageFile file)
 	{
 		StoryModel old = new();
 		try
 		{
-			
-			//Read Legacy file
-			_logService.Log(LogLevel.Info, $"Migrating Old STBX File from {file.Path}");
+			//Check file exists first.
+            if (!await CheckFileAvailability(file.Path))
+            {
+				_logService.Log(LogLevel.Warn,"File is unavailable or doesn't exist.");
+                return new();
+            }
+
+            //Read Legacy file
+            _logService.Log(LogLevel.Info, $"Migrating Old STBX File from {file.Path}");
 			LegacyXMLReader reader = new(_logService);
 			old = await reader.ReadFile(file);
 
@@ -171,4 +179,72 @@ public class StoryIO
 
 		return await Task.FromResult(old);
 	}
+
+	/// <summary>
+	/// Checks if a file exists and is genuniely available.
+	/// </summary>
+	/// <remarks>
+	///	Cloud storage can report a file as available here even if it's not.
+	/// </remarks>
+	/// <returns></returns>
+    public async Task<bool> CheckFileAvailability(string filePath)
+    {
+        if (!File.Exists(filePath))
+        {
+            return false;
+        }
+
+        var fileAttributes = File.GetAttributes(filePath);
+        StorageFile file = await StorageFile.GetFileFromPathAsync(filePath);
+        bool showOfflineError = false;
+        if (file.IsAvailable) // Microsoft thinks the file is accessible
+        {
+            try
+            {
+                //Test read file before continuing.
+                //If the file is saved on a cloud provider and not locally this should force
+                //the file to be pulled locally if possible. A file could be unavailable for
+                //many reasons, such as the user being offline, server outage, etc.
+                //Windows might pause StoryCAD while it syncs the file.
+                File.ReadAllText(file.Path);
+            }
+            catch (IOException) { showOfflineError = true; }
+        }
+        else { showOfflineError = true; }
+
+        //Failed to access network file
+        if (showOfflineError && (fileAttributes & System.IO.FileAttributes.Offline) == 0)
+        {
+            //The file is actually inaccessible and microsoft is wrong.
+            _logService.Log(LogLevel.Error, $"File {file.Path} is unavailable.");
+
+            //Show warning so user knows their file isn't lost and is just on onedrive.
+            var result = await Ioc.Default.GetRequiredService<Windowing>().ShowContentDialog(new()
+            {
+                Title = "File unavailable.",
+                Content = """
+                          The story outline you are trying to open is stored on a cloud service, and isn't available currently.
+                          Try going online and syncing the file, then try again. 
+
+                          Click show help article for more information.
+                          """,
+                PrimaryButtonText = "Show help article",
+                SecondaryButtonText = "Close",
+            }, true);
+
+            //Open help article in default browser
+            if (result == ContentDialogResult.Primary)
+            {
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName =
+                        "https://storybuilder-org.github.io/StoryCAD/docs/Miscellaneous/Troubleshooting_Cloud_Storage_Providers.html",
+                    UseShellExecute = true
+                });
+            }
+        }
+
+        return !showOfflineError;
+    }
+
 }
