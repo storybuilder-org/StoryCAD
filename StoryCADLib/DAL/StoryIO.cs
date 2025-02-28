@@ -3,7 +3,6 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Windows.Storage;
 using StoryCAD.Services;
-using Microsoft.UI.Xaml;
 using System.Diagnostics;
 using StoryCAD.ViewModels.SubViewModels;
 

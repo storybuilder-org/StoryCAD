@@ -602,15 +602,18 @@ public class ShellViewModel : ObservableRecipient
             {
                 Logger.Log(LogLevel.Info, "Opening file picker as story wasn't able to be found");
 
-                StorageFile? ProjectFile = await Ioc.Default.GetService<Windowing>().ShowFilePicker("Open Project File",".stbx");
+                StorageFile? ProjectFile = await Ioc.Default.GetService<Windowing>().ShowFilePicker("Open Project File", ".stbx");
                 if (ProjectFile == null) //Picker was canceled.
                 {
                     Logger.Log(LogLevel.Info, "Open file picker cancelled.");
-                    _canExecuteCommands = true;  // unblock other commands
+                    _canExecuteCommands = true; // unblock other commands
+                    OutlineManager.StoryModelFile = ProjectFile.Path;
                     return;
                 }
+            }
 
-            if (StoryModel.ProjectFile == null)
+            OutlineManager.StoryModelFile = fromPath;
+            if (OutlineManager.StoryModelFile == null)
             {
                 Logger.Log(LogLevel.Warn, "Open File command failed: StoryModel.ProjectFile is null.");
                 Messenger.Send(new StatusChangedMessage(new("Open Story command cancelled", LogLevel.Info)));
@@ -618,29 +621,25 @@ public class ShellViewModel : ObservableRecipient
                 return;
             }
 
-            if (!File.Exists(StoryModel.ProjectFile.Path))
+            if (!File.Exists(OutlineManager.StoryModelFile))
             {
                 Messenger.Send(new StatusChangedMessage(new("Can't find file", LogLevel.Warn)));
-                Logger.Log(LogLevel.Warn, $"File {StoryModel.ProjectFile.Path} does not exist.");
+                Logger.Log(LogLevel.Warn, $"File {OutlineManager.StoryModelFile} does not exist.");
                 _canExecuteCommands = true;
                 return;
             }
 
             //Check file is available.
             StoryIO _rdr = Ioc.Default.GetRequiredService<StoryIO>();
-            if (!await _rdr.CheckFileAvailability(StoryModel.ProjectFile.Path))
+            if (!await _rdr.CheckFileAvailability(OutlineManager.StoryModelFile))
             {
                 Messenger.Send(new StatusChangedMessage(new("File Unavailable.", LogLevel.Warn)));
                 return;
             }
-
-                // Set the StoryModel's path in OutlineViewModel
-                OutlineManager.StoryModelFile = ProjectFile.Path;
-
+            
             // Read the file into the StoryModel.
-             StoryModel = await _rdr.ReadStory(StoryModel.ProjectFile);
-
-
+            StorageFile file = await StorageFile.GetFileFromPathAsync(OutlineManager.StoryModelFile);
+            StoryModel = await _rdr.ReadStory(file);
 
             //Check the file we loaded actually has StoryCAD Data.
             if (StoryModel == null)
