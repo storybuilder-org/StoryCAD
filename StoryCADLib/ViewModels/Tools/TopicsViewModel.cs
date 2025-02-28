@@ -8,7 +8,7 @@ namespace StoryCAD.ViewModels.Tools;
 
 public class TopicsViewModel : ObservableRecipient
 {
-    private ToolsData ToolSource = Ioc.Default.GetService<ToolsData>();
+    private readonly ToolsData ToolSource = Ioc.Default.GetService<ToolsData>();
 
     #region Fields
 

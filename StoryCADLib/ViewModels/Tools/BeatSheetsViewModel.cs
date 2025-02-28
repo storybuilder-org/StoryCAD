@@ -6,7 +6,7 @@ namespace StoryCAD.ViewModels.Tools;
 
 public class BeatSheetsViewModel : ObservableRecipient
 {
-    private ToolsData ToolSource = Ioc.Default.GetService<ToolsData>();
+    private readonly ToolsData ToolSource = Ioc.Default.GetService<ToolsData>();
     #region Properties
 
     private string _PlotPatternName;

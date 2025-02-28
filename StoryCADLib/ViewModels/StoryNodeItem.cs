@@ -35,8 +35,8 @@ namespace StoryCAD.ViewModels;
 /// </summary>
 public class StoryNodeItem : INotifyPropertyChanged
 {
-    private ILogService _logger;
-    private ShellViewModel _shellVM = Ioc.Default.GetRequiredService<ShellViewModel>();
+    private readonly ILogService _logger;
+    private readonly ShellViewModel _shellVM = Ioc.Default.GetRequiredService<ShellViewModel>();
 
     // is it INavigable?
     public event PropertyChangedEventHandler PropertyChanged;
@@ -483,5 +483,31 @@ public class StoryNodeItem : INotifyPropertyChanged
     private void NotifyPropertyChanged(string propertyName)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+
+
+    /// <summary>
+    /// Search up the StoryNodeItem tree to its
+    /// root from a specified node and return its StoryItemType. 
+    /// 
+    /// This allows code to determine which TreeView a StoryNodeItem is in.
+    /// </summary>
+    /// <param name="startNode">The node to begin searching from</param>
+    /// <returns>The StoryItemType of the root node</returns>
+    public static StoryItemType RootNodeType(StoryNodeItem startNode)
+    {
+        try
+        {
+            StoryNodeItem node = startNode;
+            while (!node.IsRoot)
+                node = node.Parent;
+            return node.Type;
+        }
+        catch (Exception ex)
+        {
+            Ioc.Default.GetService<LogService>().LogException(
+                LogLevel.Error, ex, $"Root node type exception, this shouldn't happen {ex.Message} {ex.Message}");
+            return StoryItemType.Unknown;
+        }
     }
 }

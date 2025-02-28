@@ -3,8 +3,8 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Windows.Storage;
 using StoryCAD.Services;
-using Microsoft.UI.Xaml;
 using System.Diagnostics;
+using StoryCAD.ViewModels.SubViewModels;
 
 namespace StoryCAD.DAL;
 
@@ -14,41 +14,32 @@ namespace StoryCAD.DAL;
 public class StoryIO
 {
 	private LogService _logService = Ioc.Default.GetRequiredService<LogService>();
+    private OutlineViewModel OultineVM = Ioc.Default.GetRequiredService<OutlineViewModel>();
 
-	/// <summary>
-	/// Writes the current Story to the disk
-	/// </summary>
-	public async Task WriteStory(StorageFile output, StoryModel model)
-	{
-		_logService.Log(LogLevel.Info, $"Saving Model to disk as {output.Path}  " + 
+    /// <summary>
+    /// Writes the current Story to the disk
+    /// </summary>
+    public async Task WriteStory(string output_path, StoryModel model)
+    {
+		StorageFolder folder = await StorageFolder.GetFolderFromPathAsync(Path.GetDirectoryName(output_path));
+        var output = await folder.CreateFileAsync(Path.GetFileName(output_path), CreationCollisionOption.OpenIfExists);
+		_logService.Log(LogLevel.Info, $"Saving Model to disk as {output_path}  " + 
 				$"Elements: {model.StoryElements.StoryElementGuids.Count}");
 
 		//Save version data
 		model.LastVersion = Ioc.Default.GetRequiredService<AppState>().Version;
 		_logService.Log(LogLevel.Info, $"Saving version as {model.LastVersion}");
 
-		//Flatten trees (solves issues when deserialization)
-		model.FlattenedExplorerView = FlattenTree(model.ExplorerView);
-		model.FlattenedNarratorView = FlattenTree(model.NarratorView);
-
-		//Serialise
-		string JSON = JsonSerializer.Serialize(model, new JsonSerializerOptions
-		{
-			WriteIndented = true,
-			Converters =
-			{
-				new EmptyGuidConverter(),
-				new StoryElementConverter(),
-				new JsonStringEnumConverter()
-			}
-		});
-		_logService.Log(LogLevel.Info, $"Serialised as {JSON}");
+        var json = model.Serialize();
+        _logService.Log(LogLevel.Info, $"Serialised as {json}");
 
 		//Save file to disk
-		await FileIO.WriteTextAsync(output, JSON);
+		await FileIO.WriteTextAsync(output, json);
 	}
 
-	public async Task<StoryModel> ReadStory(StorageFile StoryFile)
+
+
+    public async Task<StoryModel> ReadStory(StorageFile StoryFile)
 	{
 		try
 		{
@@ -89,12 +80,7 @@ public class StoryIO
 			_logService.Log(LogLevel.Info, $"Version last saved with {_model.LastVersion ?? "Error"}");
 
 			//Update file information
-			_model.ProjectFile = StoryFile;
-			_model.ProjectFilename = StoryFile.Name;
-			_model.ProjectFolder = await StoryFile.GetParentAsync();
-			_model.ProjectPath = _model.ProjectFolder.Path;
-			_model.ProjectFilename = Path.GetFileName(StoryFile.Path);
-
+            OultineVM.StoryModelFile = StoryFile.Path;
 			return _model;
 		}
 		catch (Exception ex)
@@ -107,35 +93,6 @@ public class StoryIO
 		return new();
 	}
 
-
-	/// <summary>
-	/// Used to prepare tree for serialisation
-	/// </summary>
-	/// <param name="rootNodes"></param>
-	/// <returns></returns>
-	private static List<PersistableNode> FlattenTree(ObservableCollection<StoryNodeItem> rootNodes)
-	{
-		var list = new List<PersistableNode>();
-		foreach (var root in rootNodes)
-		{
-			AddNodeRecursively(root, list);
-		}
-		return list;
-	}
-
-	private static void AddNodeRecursively(StoryNodeItem node, List<PersistableNode> list)
-	{
-		list.Add(new PersistableNode
-		{
-			Uuid = node.Uuid,
-			ParentUuid = node.Parent?.Uuid
-		});
-
-		foreach (var child in node.Children)
-		{
-			AddNodeRecursively(child, list);
-		}
-	}
 
 	private static ObservableCollection<StoryNodeItem> RebuildTree(
 		List<PersistableNode> flatNodes,
@@ -208,9 +165,9 @@ public class StoryIO
 
             await file.CopyAsync(folder, name);
             _logService.Log(LogLevel.Info, $"Copied legacy file to backup folder ({folder.Path})");
-
+            
 			//File is now backed up, now migrate to new format
-			await WriteStory(file, old);
+			await WriteStory(file.Path, old);
 			_logService.Log(LogLevel.Info, "Updated legacy file to JSON File");
 			return old;
 		}

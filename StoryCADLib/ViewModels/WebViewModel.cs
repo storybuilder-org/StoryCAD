@@ -12,15 +12,15 @@ namespace StoryCAD.ViewModels;
 
 public class WebViewModel : ObservableRecipient, INavigable
 {
-    private Windowing Window = Ioc.Default.GetRequiredService<Windowing>();
-    private AppState AppDat = Ioc.Default.GetRequiredService<AppState>();
+    private readonly Windowing Window = Ioc.Default.GetRequiredService<Windowing>();
+    private readonly AppState AppDat = Ioc.Default.GetRequiredService<AppState>();
 
     ///TODO: Make sure queries are async
     #region Fields
 
     private bool _changed; // this story element has changed
     private bool _changeable;
-    private LogService _logger = Ioc.Default.GetRequiredService<LogService>();
+    private readonly LogService _logger = Ioc.Default.GetRequiredService<LogService>();
 
     #endregion
 

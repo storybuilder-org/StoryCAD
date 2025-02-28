@@ -32,7 +32,16 @@ public class AppState
             }
             else
             {
-                return System.IO.Path.Combine(ApplicationData.Current.RoamingFolder.Path, "StoryCAD");
+                try
+                {
+                    return System.IO.Path.Combine(ApplicationData.Current.RoamingFolder.Path, "StoryCAD");
+
+                }
+                catch
+                {
+                    // Return base directory for API
+                    return AppDomain.CurrentDomain.BaseDirectory;
+                }
             }
         }
     }

@@ -1,9 +1,11 @@
-﻿using CommunityToolkit.Mvvm.DependencyInjection;
-using Microsoft.UI.Xaml;
+﻿using System;
+using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.VisualStudio.TestTools.UnitTesting.AppContainer;
 using StoryCAD.Models;
+using StoryCAD.Services.Outline;
 using StoryCAD.ViewModels;
+using Windows.Storage;
 
 namespace StoryCADTests;
 
@@ -14,17 +16,19 @@ public class TemplateTests
     /// This tests if all the samples child nodes have parents
     /// </summary>
     [TestMethod]
-    public void TestSamples()
+    public async Task TestSamplesAsync()
     {
-        ShellViewModel ShellVM = Ioc.Default.GetService<ShellViewModel>();
+        OutlineService outline = Ioc.Default.GetService<OutlineService>();
         for (int index = 0; index <= 5; index++) 
         {
-            ShellVM.StoryModel = new();
-            ShellVM.CreateTemplate($"Test{index}", index);
+            StoryModel model = new();
+            string path = Ioc.Default.GetRequiredService<AppState>().RootDirectory;
+            StorageFile file = await StorageFile.GetFileFromPathAsync(path);
+            await outline!.CreateModel(file, $"Test{index}","I Robot", index);
 
-            Assert.IsNotNull(ShellVM.StoryModel);
+            Assert.IsNotNull(model);
 
-            foreach (StoryNodeItem item in ShellVM.StoryModel.ExplorerView[0].Children)
+            foreach (StoryNodeItem item in model.ExplorerView[0].Children)
             {
                 CheckChildren(item);
             }
@@ -33,7 +37,7 @@ public class TemplateTests
 
     private void CheckChildren(StoryNodeItem item)
     {
-        Assert.IsTrue(ShellViewModel.RootNodeType(item) != StoryItemType.Unknown);
+        Assert.IsTrue(StoryNodeItem.RootNodeType(item) != StoryItemType.Unknown);
         foreach (var child in item.Children)
         {
             CheckChildren(child);

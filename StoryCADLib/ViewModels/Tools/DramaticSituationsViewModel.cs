@@ -50,7 +50,7 @@ public class DramaticSituationsViewModel : ObservableRecipient
 
     public ObservableCollection<string> SituationsSource;
 
-    private SortedDictionary<string, DramaticSituationModel> _situations;
+    private readonly SortedDictionary<string, DramaticSituationModel> _situations;
 
     #endregion
 

@@ -25,11 +25,19 @@ using StoryCAD.Services;
 using WinUIEx;
 using Application = Microsoft.UI.Xaml.Application;
 using StoryCAD.Collaborator.ViewModels;
+using StoryCAD.Services.Outline;
+using StoryCAD.ViewModels.SubViewModels;
 
 namespace StoryCAD.ViewModels;
 
 public class ShellViewModel : ObservableRecipient
 {
+    #region SubViewModels
+    // ShellViewModel uses 'sub viewmodels' for different aspects in order
+    // to break this very large viewmodel into more manageable pieces.
+    public OutlineViewModel OutlineManager { get; }   
+    #endregion
+
     public bool _canExecuteCommands;
 
     private const string HomePage = "HomePage";
@@ -42,6 +50,16 @@ public class ShellViewModel : ObservableRecipient
     private const string TrashCanPage = "TrashCanPage";
     private const string WebPage = "WebPage";
 
+    // Required services 
+    private readonly LogService Logger;
+    private readonly SearchService Search;
+    private readonly AutoSaveService _autoSaveService;
+    private readonly Windowing Window;
+    private readonly AppState State;
+    private readonly PreferenceService Preferences;
+    private readonly OutlineService outlineService;
+
+    
     // Navigation navigation landmark nodes
     public StoryNodeItem CurrentNode { get; set; }
     public StoryNodeItem RightTappedNode;
@@ -56,18 +74,14 @@ public class ShellViewModel : ObservableRecipient
     private ObservableCollection<StoryNodeItem> _sourceChildren;
     private int _targetIndex;
     private ObservableCollection<StoryNodeItem> _targetCollection;
-    public readonly LogService Logger;
-    public readonly SearchService Search;
-    private AutoSaveService _autoSaveService = Ioc.Default.GetRequiredService<AutoSaveService>();
-    private Windowing Window = Ioc.Default.GetRequiredService<Windowing>();
-    private AppState State = Ioc.Default.GetRequiredService<AppState>();
-    private PreferenceService Preferences = Ioc.Default.GetRequiredService<PreferenceService>();
-    private DispatcherTimer _statusTimer;
+
+    private readonly DispatcherTimer _statusTimer;
 
     public CollaboratorArgs CollabArgs;
+
     // The current story outline being processed. 
     public StoryModel StoryModel;
-
+   
     public readonly ScrivenerIo Scrivener;
 
     //File opened (if StoryCAD was opened via an STBX file)
@@ -352,7 +366,7 @@ public class ShellViewModel : ObservableRecipient
 	public async Task CreateBackupNow()
 	{
 		//Show dialog
-		var Result = await Window.ShowContentDialog(new ContentDialog()
+		var result = await Window.ShowContentDialog(new ContentDialog()
 		{
 			Title = "Create backup now",
 			PrimaryButtonText = "Create Backup",
@@ -362,7 +376,7 @@ public class ShellViewModel : ObservableRecipient
 		});
 
 		//Check result
-		if (Result == ContentDialogResult.Primary)
+		if (result == ContentDialogResult.Primary)
 		{
 			BackupNowVM VM = Ioc.Default.GetRequiredService<BackupNowVM>();
 			await Ioc.Default.GetRequiredService<BackupService>().BackupProject(VM.Name, VM.Location);
@@ -400,215 +414,6 @@ public class ShellViewModel : ObservableRecipient
             }
             await Window.ShowContentDialog(_contentDialog);
             _canExecuteCommands = true;
-        }
-    }
-
-    public async Task UnifiedNewFile(UnifiedVM dialogVM)
-    {
-        Logger.Log(LogLevel.Info, "FileOpenVM - New File starting");
-        _canExecuteCommands = false;
-
-        try
-        {
-            Messenger.Send(new StatusChangedMessage(new("New project command executing", LogLevel.Info)));
-
-            // If the current project needs saved, do so
-            if (StoryModel.Changed)
-            {
-                SaveModel();
-                await WriteModel();
-            }
-
-            // Start with a blank StoryModel and populate it using the new project dialog's 
-            ResetModel();
-            ShowHomePage();
-
-            if (!Path.GetExtension(dialogVM.ProjectName)!.Equals(".stbx")) { dialogVM.ProjectName += ".stbx"; }
-            StoryModel.ProjectFilename = dialogVM.ProjectName;
-            StoryModel.ProjectFolder = await StorageFolder.GetFolderFromPathAsync(dialogVM.ProjectPath);
-            StoryModel.ProjectPath = StoryModel.ProjectFolder.Path;
-            CreateTemplate(dialogVM.ProjectName, dialogVM.SelectedTemplateIndex);
-            SetCurrentView(StoryViewType.ExplorerView);
-
-            Ioc.Default.GetRequiredService<UnifiedVM>().UpdateRecents(Path.Combine(dialogVM.ProjectPath, dialogVM.ProjectName!)); //adds item to recent
-
-            // Save the new project
-            StoryModel.Changed = true;
-            await SaveFile();
-            if (Preferences.Model.BackupOnOpen)
-            {
-                await MakeBackup();
-            }
-
-            // Start the timed backup and auto save services
-            if (Preferences.Model.TimedBackup)
-            {
-                Ioc.Default.GetRequiredService<BackupService>().StartTimedBackup();
-            }
-
-            if (Preferences.Model.AutoSave)
-            {
-                Ioc.Default.GetRequiredService<AutoSaveService>().StartAutoSave();
-            }
-
-            TreeViewNodeClicked(StoryModel.ExplorerView[0]);
-            Window.UpdateWindowTitle();
-
-            Messenger.Send(new StatusChangedMessage(new("New project command completed", LogLevel.Info, true)));
-        }
-        catch (Exception _ex)
-        {
-            Logger.LogException(LogLevel.Error, _ex, "Error creating new project");
-            Messenger.Send(new StatusChangedMessage(new("File make failure.", LogLevel.Error)));
-        }
-
-        _canExecuteCommands = true;
-    }
-
-    /// <summary>
-    /// This creates a new StoryModel based on a template
-    /// </summary>
-    /// <param name="ProjectName">The name of the project</param>
-    /// <param name="SelectedTemplateIndex">The template to use (see NewProject.xaml)</param>
-    public void CreateTemplate(string ProjectName, int SelectedTemplateIndex)
-    {
-        OverviewModel _overview = new(Path.GetFileNameWithoutExtension(ProjectName), StoryModel)
-        { DateCreated = DateTime.Today.ToString("yyyy-MM-dd"), 
-            Author = Preferences.Model.FirstName + " " + Preferences.Model.LastName };
-            
-        StoryNodeItem _overviewNode = new(_overview, null) { IsExpanded = true, IsRoot = true };
-        StoryModel.ExplorerView.Add(_overviewNode);
-        TrashCanModel _trash = new(StoryModel);
-        StoryNodeItem _trashNode = new(_trash, null);
-        StoryModel.ExplorerView.Add(_trashNode);     // The trashcan is the second root
-        FolderModel _narrative = new("Narrative View", StoryModel, StoryItemType.Folder);
-        StoryNodeItem _narrativeNode = new(_narrative, null) { IsRoot = true };
-        StoryModel.NarratorView.Add(_narrativeNode);
-
-        // Every new story gets a StoryProblem with a Protagonist and Antagonist
-        // Except for Blank Project
-        if (SelectedTemplateIndex != 0)
-        {
-            StoryElement _storyProblem = new ProblemModel("Story Problem", StoryModel);
-            StoryNodeItem _storyProblemNode = new(_storyProblem, null);
-            StoryElement _storyProtag = new CharacterModel("Protagonist", StoryModel);
-            StoryNodeItem _storyProtagNode = new StoryNodeItem(_storyProtag, null);
-            StoryElement _storyAntag = new CharacterModel("Antagonist", StoryModel);
-            StoryNodeItem _storyAntagNode = new StoryNodeItem(_storyAntag, null);
-            _overview.StoryProblem = _storyProblem.Uuid;
-            var _problem = _storyProblem as ProblemModel;
-            _problem.Protagonist = _storyProtag.Uuid;
-            _problem.Antagonist = _storyAntag.Uuid;
-            _problem.Premise =
-                @"Your[protagonist] in a situation[genre, setting] wants something[goal], which brings him" +
-                @"into [conflict] with a second character[antagonist]. After a series of conflicts[additional " +
-                @"problems], the final battle[climax scene] erupts, and the[protagonist] finally resolves the " +
-                @"conflict[outcome].";
-
-            // Use the NewProjectDialog template to complete the model
-            switch (SelectedTemplateIndex)
-            {
-                case 1:  // Story problem and characters
-                    _overviewNode.Children.Add(_storyProblemNode);
-                    _storyProblemNode.Children.Add(_storyProtagNode);
-                    _storyProblemNode.Children.Add(_storyAntagNode);
-
-                    //Correctly set parents
-                    _storyProblemNode.Parent = _overviewNode;
-                    _storyProtagNode.Parent = _storyProblemNode;
-                    _storyAntagNode.Parent = _storyProblemNode;
-                    _storyProblemNode.IsExpanded = true;
-                    break;
-                case 2:  // Folders for each type- story problem and characters belong in the corresponding folders
-                    StoryElement _problems = new FolderModel("Problems", StoryModel, StoryItemType.Folder);
-                    StoryNodeItem _problemsNode = new(_problems, _overviewNode);
-                    _storyProblemNode.Parent = _problemsNode;
-                    StoryElement _characters = new FolderModel("Characters", StoryModel, StoryItemType.Folder);
-                    StoryNodeItem _charactersNode = new(_characters, _overviewNode);
-                    _storyProtagNode.Parent = _charactersNode;
-                    _storyAntagNode.Parent = _charactersNode;
-                    StoryElement _settings = new FolderModel("Settings", StoryModel, StoryItemType.Folder);
-                    StoryNodeItem _settingsNode = new(_settings, _overviewNode);
-                    StoryElement _scenes = new FolderModel("Scenes", StoryModel, StoryItemType.Folder);
-                    StoryNodeItem _scenesNode = new(_scenes, _overviewNode);
-                    _overview.StoryProblem = _storyProblem.Uuid;
-                    _problemsNode.Children.Add(_storyProblemNode);
-                    _charactersNode.Children.Add(_storyProtagNode);
-                    _charactersNode.Children.Add(_storyAntagNode);
-                    _problemsNode.IsExpanded = true;
-                    _charactersNode.IsExpanded = true;
-                    break;
-                case 3:
-                    _storyProblemNode.Name = "External Problem";
-                    _storyProblemNode.IsExpanded = true;
-                    _storyProblemNode.Parent = _overviewNode;
-                    _overviewNode.Children.Add(_storyProblemNode);
-                    _storyProblemNode.Children.Add(_storyProtagNode);
-                    _storyProblemNode.Children.Add(_storyAntagNode);
-                    _problem = _storyProblem as ProblemModel;
-                    _problem.Name = "External Problem";
-                    _overview.StoryProblem = _problem.Uuid;
-                    _problem.Protagonist = _storyProtag.Uuid;
-                    _problem.Antagonist = _storyAntagNode.Uuid;
-                    _storyProtagNode.Parent = _storyProblemNode;
-                    _storyAntagNode.Parent = _storyProblemNode;
-                    StoryElement _internalProblem = new ProblemModel("Internal Problem", StoryModel);
-                    StoryNodeItem _internalProblemNode = new(_internalProblem, _overviewNode);
-                    _problem = _internalProblem as ProblemModel;
-                    _problem.Protagonist = _storyProtag.Uuid;
-                    _problem.Antagonist = _storyProtag.Uuid;
-                    _problem.ConflictType = "Person vs. Self";
-                    _problem.Premise =
-                        @"Your [protagonist] grapples with an [internal conflict] and is their own antagonist, marred by self-doubt and fears " +
-                        @"or having a [goal] that masks this conflict rather than a real need. The [climax scene] is often a moment of introspection in which " +
-                        @"he or she makes a decision or discovery that resolves the internal conflict [outcome]. Resolving this problem may enable your " +
-                        @"[protagonist] to resolve another (external) problem.";
-                    break;
-                case 4:
-                    _overviewNode.Children.Add(_storyProtagNode);
-                    _overviewNode.Children.Add(_storyAntagNode);
-                    _storyProtagNode.Children.Add(_storyProblemNode);
-                    _storyProtagNode.IsExpanded = true;
-                    _storyProblemNode.Parent = _storyProtagNode;
-                    _storyProtagNode.Parent = _overviewNode;
-                    _storyAntagNode.Parent = _overviewNode;
-                    break;
-                case 5:
-                    StoryElement _problemsFolder = new FolderModel("Problems", StoryModel, StoryItemType.Folder);
-                    StoryNodeItem _problemsFolderNode = new(_problemsFolder, _overviewNode) { IsExpanded = true };
-                    StoryElement _charactersFolder = new FolderModel("Characters", StoryModel, StoryItemType.Folder);
-                    StoryNodeItem _charactersFolderNode = new(_charactersFolder, _overviewNode) { IsExpanded = true };
-                    StoryElement _settingsFolder = new FolderModel("Settings", StoryModel, StoryItemType.Folder);
-                    StoryNodeItem _settingsFolderNode = new(_settingsFolder, _overviewNode);
-                    StoryElement _plotpointsFolder = new FolderModel("Scenes", StoryModel, StoryItemType.Folder);
-                    StoryNodeItem _plotpointsFolderNode = new(_plotpointsFolder, _overviewNode);
-                    _storyProblemNode.Name = "External Problem";
-                    _storyProblemNode.IsExpanded = true;
-                    _problemsFolderNode.Children.Add(_storyProblemNode);
-                    _storyProblemNode.Parent = _problemsFolderNode;
-                    _problem = _storyProblem as ProblemModel;
-                    _problem.Name = "External Problem";
-                    _problem.Protagonist = _storyProtag.Uuid;
-                    _problem.Antagonist = _storyAntagNode.Uuid;
-                    _overview.StoryProblem = _problem.Uuid;
-                    _internalProblem = new ProblemModel("Internal Problem", StoryModel);
-                    _internalProblemNode = new(_internalProblem, _problemsFolderNode);
-                    _problem = _internalProblem as ProblemModel;
-                    _problem.Protagonist = _storyProtag.Uuid;
-                    _problem.Antagonist = _storyProtag.Uuid;
-                    _problem.ConflictType = "Person vs. Self";
-                    _problem.Premise =
-                        @"Your [protagonist] grapples with an [internal conflict] and is their own antagonist, marred by self-doubt and fears " +
-                        @"or having a [goal] that masks this conflict rather than a real need. The [climax scene] is often a moment of introspection in which " +
-                        @"he or she makes a decision or discovery that resolves the internal conflict [outcome]. Resolving this problem may enable your " +
-                        @"[protagonist] to resolve another (external) problem.";
-                    _charactersFolderNode.Children.Add(_storyProtagNode);
-                    _charactersFolderNode.Children.Add(_storyAntagNode);
-                    _storyProtagNode.Parent = _charactersFolderNode;
-                    _storyAntagNode.Parent = _charactersFolderNode;
-                    break;
-
-            }
         }
     }
 
@@ -763,7 +568,6 @@ public class ShellViewModel : ObservableRecipient
         }
     }
 
-
     /// <summary>
     /// Opens a file picker to let the user chose a .stbx file and loads said file
     /// If fromPath is specified then the picker is skipped.
@@ -775,7 +579,7 @@ public class ShellViewModel : ObservableRecipient
         if (StoryModel.Changed)
         {
             SaveModel();
-            await WriteModel();
+            await outlineService.WriteModel(StoryModel, OutlineManager.StoryModelFile);
         }
 
         // Stop the auto save service if it was running
@@ -798,21 +602,18 @@ public class ShellViewModel : ObservableRecipient
             {
                 Logger.Log(LogLevel.Info, "Opening file picker as story wasn't able to be found");
 
-                StoryModel.ProjectFile = await Ioc.Default.GetService<Windowing>().ShowFilePicker("Open Project File",".stbx");
-                if (StoryModel.ProjectFile == null) //Picker was canceled.
+                StorageFile? ProjectFile = await Ioc.Default.GetService<Windowing>().ShowFilePicker("Open Project File", ".stbx");
+                if (ProjectFile == null) //Picker was canceled.
                 {
                     Logger.Log(LogLevel.Info, "Open file picker cancelled.");
-                    _canExecuteCommands = true;  // unblock other commands
+                    _canExecuteCommands = true; // unblock other commands
+                    OutlineManager.StoryModelFile = ProjectFile.Path;
                     return;
                 }
             }
-            else
-            {
-                //If `fromPath` is provided and file exists at the path, open that file.
-                StoryModel.ProjectFile = await StorageFile.GetFileFromPathAsync(fromPath);
-            }
 
-            if (StoryModel.ProjectFile == null)
+            OutlineManager.StoryModelFile = fromPath;
+            if (OutlineManager.StoryModelFile == null)
             {
                 Logger.Log(LogLevel.Warn, "Open File command failed: StoryModel.ProjectFile is null.");
                 Messenger.Send(new StatusChangedMessage(new("Open Story command cancelled", LogLevel.Info)));
@@ -820,27 +621,25 @@ public class ShellViewModel : ObservableRecipient
                 return;
             }
 
-            if (!File.Exists(StoryModel.ProjectFile.Path))
+            if (!File.Exists(OutlineManager.StoryModelFile))
             {
                 Messenger.Send(new StatusChangedMessage(new("Can't find file", LogLevel.Warn)));
-                Logger.Log(LogLevel.Warn, $"File {StoryModel.ProjectFile.Path} does not exist.");
+                Logger.Log(LogLevel.Warn, $"File {OutlineManager.StoryModelFile} does not exist.");
                 _canExecuteCommands = true;
                 return;
             }
 
             //Check file is available.
             StoryIO _rdr = Ioc.Default.GetRequiredService<StoryIO>();
-            if (!await _rdr.CheckFileAvailability(StoryModel.ProjectFile.Path))
+            if (!await _rdr.CheckFileAvailability(OutlineManager.StoryModelFile))
             {
                 Messenger.Send(new StatusChangedMessage(new("File Unavailable.", LogLevel.Warn)));
                 return;
             }
-
-            // Set the ProjectFolder to the folder the project file is in.
-            StoryModel.ProjectFolder = await StoryModel.ProjectFile.GetParentAsync();
-
+            
             // Read the file into the StoryModel.
-             StoryModel = await _rdr.ReadStory(StoryModel.ProjectFile);
+            StorageFile file = await StorageFile.GetFileFromPathAsync(OutlineManager.StoryModelFile);
+            StoryModel = await _rdr.ReadStory(file);
 
             //Check the file we loaded actually has StoryCAD Data.
             if (StoryModel == null)
@@ -872,7 +671,7 @@ public class ShellViewModel : ObservableRecipient
             }
 
             Window.UpdateWindowTitle();
-            new UnifiedVM().UpdateRecents(Path.Combine(StoryModel.ProjectFolder.Path, StoryModel.ProjectFile.Name));
+            new UnifiedVM().UpdateRecents(OutlineManager.StoryModelFile);
 
             if (Preferences.Model.TimedBackup)
             {
@@ -884,7 +683,7 @@ public class ShellViewModel : ObservableRecipient
                 _autoSaveService.StartAutoSave();
             }
 
-            string _msg = $"Opened project {StoryModel.ProjectFilename}";
+            string _msg = $"Opened project {OutlineManager.StoryModelFile}";
             Logger.Log(LogLevel.Info, _msg);
         }
         catch (Exception _ex)
@@ -928,8 +727,8 @@ public class ShellViewModel : ObservableRecipient
         {
             Messenger.Send(new StatusChangedMessage(new($"{msg} executing", LogLevel.Info)));
             SaveModel();
-            await WriteModel();
-            Messenger.Send(new StatusChangedMessage(new($"{msg} completed", LogLevel.Info)));
+            await outlineService.WriteModel(StoryModel, OutlineManager.StoryModelFile);
+             Messenger.Send(new StatusChangedMessage(new($"{msg} completed", LogLevel.Info)));
             StoryModel.Changed = false;
             ChangeStatusColor = Colors.Green;
         }
@@ -942,67 +741,6 @@ public class ShellViewModel : ObservableRecipient
         _autoSaveService.StartAutoSave();
     }
 
-    /// <summary>
-    /// Write the current StoryModel to the backing project file
-    /// </summary>|
-    public async Task WriteModel()
-    {
-        Logger.Log(LogLevel.Info, $"In WriteModel, file={StoryModel.ProjectFilename} path={StoryModel.ProjectPath}");
-        try
-        {
-	        try //Updating the lost modified time
-	        {
-		        OverviewModel _overview =
-			        StoryModel.StoryElements.StoryElementGuids[StoryModel.ExplorerView[0].Uuid] as OverviewModel;
-		        _overview!.DateModified = DateTime.Today.ToString("yyyy-MM-dd");
-	        }
-	        catch
-	        {
-		        Logger.Log(LogLevel.Warn, "Failed to update last modified date/time");
-	        }
-
-	        await CreateProjectFile();
-	        StorageFile _file = StoryModel.ProjectFile;
-	        if (_file != null)
-	        {
-		        StoryIO _wtr = Ioc.Default.GetRequiredService<StoryIO>();
-		        await _wtr.WriteStory(StoryModel.ProjectFile, StoryModel);
-	        }
-        }
-        catch (UnauthorizedAccessException _ex)
-        {
-            Logger.LogException(LogLevel.Warn, _ex.InnerException, "User doesn't have perms to access this path.");
-			//Catch write permission exceptions
-			await Ioc.Default.GetRequiredService<Windowing>().ShowContentDialog(new ContentDialog
-			{
-				Title = "Access error",
-				Content = $"""
-				           StoryCAD does not have permission to write to this location.
-				           You outline will now be saved at: 
-				           {Preferences.Model.ProjectDirectory}
-				           """,
-				PrimaryButtonText = "Okay"
-			},true);
-
-			//Reset to default location
-			StoryModel.ProjectFolder = await StorageFolder.GetFolderFromPathAsync(Preferences.Model.ProjectDirectory);
-			StoryModel.ProjectFile = await StoryModel.ProjectFolder.CreateFileAsync(StoryModel.ProjectFilename, 
-				CreationCollisionOption.GenerateUniqueName);
-			StoryModel.ProjectFilename = StoryModel.ProjectFile.Name;
-
-			//Last opened file with reference to this version of the file so this doesn't happen again.
-			Preferences.Model.LastFile1 = StoryModel.ProjectFile.Path;
-		}
-		catch (Exception _ex)
-        {
-            Logger.LogException(LogLevel.Error, _ex, 
-	            $"Error writing file {_ex.Message} {_ex.Source}");
-            Messenger.Send(new StatusChangedMessage(new("Error writing file - see log", LogLevel.Error)));
-            return;
-        }
-        Logger.Log(LogLevel.Info, "WriteModel successful");
-    }
-
     private async void SaveFileAs()
     {
         if (_canExecuteCommands)
@@ -1011,7 +749,7 @@ public class ShellViewModel : ObservableRecipient
             Messenger.Send(new StatusChangedMessage(new("Save File As command executing", LogLevel.Info, true)));
             try
             {
-                if (StoryModel.ProjectFile == null || StoryModel.ProjectPath == null)
+                if (string.IsNullOrEmpty(OutlineManager.StoryModelFile))
                 {
                     Messenger.Send(new StatusChangedMessage(new("You need to load a story first!", LogLevel.Info)));
                     Logger.Log(LogLevel.Warn, "User tried to use save as without a story loaded.");
@@ -1019,8 +757,8 @@ public class ShellViewModel : ObservableRecipient
                     return;
                 }
 
-                //Creates the content dialog
-                ContentDialog _saveAsDialog = new()
+                // Create the content dialog
+                ContentDialog saveAsDialog = new()
                 {
                     Title = "Save as",
                     PrimaryButtonText = "Save",
@@ -1028,61 +766,64 @@ public class ShellViewModel : ObservableRecipient
                     Content = new SaveAsDialog()
                 };
 
-                //Sets needed data in VM and then shows the dialog
-                SaveAsViewModel _saveAsVM = Ioc.Default.GetRequiredService<SaveAsViewModel>();
-                // The default project name and project folder path are from the active StoryModel
-                _saveAsVM.ProjectName = StoryModel.ProjectFilename;
-                _saveAsVM.ParentFolder = StoryModel.ProjectFolder;
-                _saveAsVM.ProjectPathName = StoryModel.ProjectPath;
+                // Set default values in the view model using the current story file info
+                SaveAsViewModel saveAsVM = Ioc.Default.GetRequiredService<SaveAsViewModel>();
+                saveAsVM.ProjectName = Path.GetFileName(OutlineManager.StoryModelFile);
+                saveAsVM.ParentFolder = await StorageFolder.GetFolderFromPathAsync(Path.GetDirectoryName(OutlineManager.StoryModelFile));
 
-                ContentDialogResult _result = await Window.ShowContentDialog(_saveAsDialog);
+                ContentDialogResult result = await Window.ShowContentDialog(saveAsDialog);
 
-                if (_result == ContentDialogResult.Primary) //If save is clicked
+                if (result == ContentDialogResult.Primary)
                 {
                     if (await VerifyReplaceOrCreate())
                     {
-                        //Saves model to disk
+                        // Save the model to disk at the current file location
                         SaveModel();
-                        await WriteModel();
-                        if (Path.Combine(_saveAsVM.ProjectPathName, _saveAsVM.ProjectName) ==
-                            Path.Combine(StoryModel.ProjectFolder.Path, StoryModel.ProjectFile.Name))
+                        await outlineService.WriteModel(StoryModel, OutlineManager.StoryModelFile);
+
+                        // If the new path is the same as the current one, exit early
+                        string newFilePath = Path.Combine(saveAsVM.ParentFolder.Path, saveAsVM.ProjectName);
+                        if (newFilePath.Equals(OutlineManager.StoryModelFile, StringComparison.OrdinalIgnoreCase))
                         {
-                            //Stop SaveAs from crashing if the user sets the path to a place where the story is already located.
                             Messenger.Send(new StatusChangedMessage(new("Save File As command completed", LogLevel.Info)));
-                            Logger.Log(LogLevel.Info, "User tried to as file to same file as parent.");
+                            Logger.Log(LogLevel.Info, "User tried to save file to same location as current file.");
                             _canExecuteCommands = true;
                             return;
                         }
-                        //Saves the current project folders and files to disk
-                        await StoryModel.ProjectFile.CopyAsync(_saveAsVM.ParentFolder, _saveAsVM.ProjectName, NameCollisionOption.ReplaceExisting);
 
-                        //Update the StoryModel properties to use the newly saved copy
-                        StoryModel.ProjectFilename = _saveAsVM.ProjectName;
-                        StoryModel.ProjectFolder = _saveAsVM.ParentFolder;
-                        StoryModel.ProjectPath = _saveAsVM.SaveAsProjectFolderPath;
-                        // Add to the recent files stack
+                        // Copy the current file to the new location/name
+                        StorageFile currentFile = await StorageFile.GetFileFromPathAsync(OutlineManager.StoryModelFile);
+                        await currentFile.CopyAsync(saveAsVM.ParentFolder, saveAsVM.ProjectName, NameCollisionOption.ReplaceExisting);
+
+                        // Update the story file path to the new location
+                        OutlineManager.StoryModelFile = newFilePath;
+
+                        // Update window title and recents
                         Window.UpdateWindowTitle();
-                        new UnifiedVM().UpdateRecents(Path.Combine(StoryModel.ProjectFolder.Path, StoryModel.ProjectFile.Name));
-                        // Indicate everything's done
+                        new UnifiedVM().UpdateRecents(OutlineManager.StoryModelFile);
+
+                        // Indicate the model is now saved and unchanged
                         Messenger.Send(new IsChangedMessage(true));
                         StoryModel.Changed = false;
                         ChangeStatusColor = Colors.Green;
                         Messenger.Send(new StatusChangedMessage(new("Save File As command completed", LogLevel.Info, true)));
                     }
                 }
-                else // if cancelled
+                else
                 {
                     Messenger.Send(new StatusChangedMessage(new("SaveAs dialog cancelled", LogLevel.Info, true)));
                 }
             }
-            catch (Exception _ex) //If error occurs in file.
+            catch (Exception ex)
             {
-                Logger.LogException(LogLevel.Error, _ex, "Exception in SaveFileAs");
+                Logger.LogException(LogLevel.Error, ex, "Exception in SaveFileAs");
                 Messenger.Send(new StatusChangedMessage(new("Save File As failed", LogLevel.Info)));
             }
             _canExecuteCommands = true;
         }
     }
+
+
 
     private async Task<bool> VerifyReplaceOrCreate()
     {
@@ -1120,7 +861,7 @@ public class ShellViewModel : ObservableRecipient
             if (await Window.ShowContentDialog(_warning) == ContentDialogResult.Primary)
             {
                 SaveModel();
-                await WriteModel();
+                await outlineService.WriteModel(StoryModel, OutlineManager.StoryModelFile);
             }
         }
 
@@ -1135,7 +876,7 @@ public class ShellViewModel : ObservableRecipient
         _canExecuteCommands = true;
     }
 
-    private void ResetModel()
+    public void ResetModel()
     {
         StoryModel = new();
         //TODO: Raise event for StoryModel change?
@@ -1157,18 +898,13 @@ public class ShellViewModel : ObservableRecipient
             if (await Window.ShowContentDialog(_warning) == ContentDialogResult.Primary)
             {
                 SaveModel();
-                await WriteModel();
+                await outlineService.WriteModel(StoryModel, OutlineManager.StoryModelFile);
             }
         }
-        BackendService _backend = Ioc.Default.GetRequiredService<BackendService>();
-        await _backend.DeleteWorkFile();
+        BackendService backend = Ioc.Default.GetRequiredService<BackendService>();
+        await backend.DeleteWorkFile();
         Logger.Flush();
         Application.Current.Exit();  // Win32
-    }
-
-    private async Task CreateProjectFile()
-    {
-        StoryModel.ProjectFile = await StoryModel.ProjectFolder.CreateFileAsync(StoryModel.ProjectFilename, CreationCollisionOption.ReplaceExisting);
     }
 
     #endregion
@@ -1901,7 +1637,7 @@ public class ShellViewModel : ObservableRecipient
             return null;
         }
 
-        if (RootNodeType(RightTappedNode) == StoryItemType.TrashCan)
+        if (StoryNodeItem.RootNodeType(RightTappedNode) == StoryItemType.TrashCan)
         {
             Messenger.Send(new StatusChangedMessage(new("You can't add to Deleted Items", LogLevel.Warn)));
             Logger.Log(LogLevel.Info, "Add StoryElement failed- can't add to TrashCan");
@@ -1963,7 +1699,7 @@ public class ShellViewModel : ObservableRecipient
             StatusMessage = "Right tap a node to delete";
             return;
         }
-        if (RootNodeType(RightTappedNode) == StoryItemType.TrashCan)
+        if (StoryNodeItem.RootNodeType(RightTappedNode) == StoryItemType.TrashCan)
         {
             StatusMessage = "You can't delete from the trash!";
             return;
@@ -2025,7 +1761,7 @@ public class ShellViewModel : ObservableRecipient
             Messenger.Send(new StatusChangedMessage(new("Right tap a node to restore", LogLevel.Warn)));
             return;
         }
-        if (RootNodeType(RightTappedNode) != StoryItemType.TrashCan)
+        if (StoryNodeItem.RootNodeType(RightTappedNode) != StoryItemType.TrashCan)
         {
             Messenger.Send(new StatusChangedMessage(new("You can only restore from Deleted StoryElements", LogLevel.Warn)));
             return;
@@ -2118,31 +1854,6 @@ public class ShellViewModel : ObservableRecipient
 
     }
 
-    /// <summary>
-    /// Search up the StoryNodeItem tree to its
-    /// root from a specified node and return its StoryItemType. 
-    /// 
-    /// This allows code to determine which TreeView it's in.
-    /// </summary>
-    /// <param name="startNode">The node to begin searching from</param>
-    /// <returns>The StoryItemType of the root node</returns>
-    public static StoryItemType RootNodeType(StoryNodeItem startNode)
-    {
-        try
-        {
-            StoryNodeItem node = startNode;
-            while (!node.IsRoot)
-                node = node.Parent;
-            return node.Type;
-        }
-        catch (Exception ex)
-        {
-            Ioc.Default.GetService<LogService>().LogException(
-                LogLevel.Error, ex, $"Root node type exception, this shouldn't happen {ex.Message} {ex.Message}");
-            return StoryItemType.Unknown;
-        }
-    }
-
     #endregion
 
     public void ViewChanged()
@@ -2182,7 +1893,7 @@ public class ShellViewModel : ObservableRecipient
         try
         {
             //Trash Can - View Hide all buttons except Empty Trash.
-            if (RootNodeType(RightTappedNode) == StoryItemType.TrashCan)
+            if (StoryNodeItem.RootNodeType(RightTappedNode) == StoryItemType.TrashCan)
             {
                 AddFolderVisibility = Visibility.Collapsed;
                 AddSectionVisibility = Visibility.Collapsed;
@@ -2254,7 +1965,7 @@ public class ShellViewModel : ObservableRecipient
         Messenger.Send(new StatusChangedMessage(_msg));
     }
 
-    private void SetCurrentView(StoryViewType view)
+    public void SetCurrentView(StoryViewType view)
     {
         if (view == StoryViewType.ExplorerView)
         {
@@ -2299,12 +2010,7 @@ public class ShellViewModel : ObservableRecipient
     private void StatusMessageReceived(StatusChangedMessage statusMessage)
     {
         //Ignore status messages inside tests
-        if (Assembly.GetEntryAssembly().Location.Contains("StoryCADTests.dll")
-            || Assembly.GetEntryAssembly().Location.Contains("CollaboratorTests.dll")
-            || Assembly.GetEntryAssembly().Location.Contains("testhost.dll"))
-        {
-            return;
-        }
+        if (State.StoryCADTestsMode) { return; }
 
         if (_statusTimer.IsEnabled) { _statusTimer.Stop(); } //Stops a timer if one is already running
 
@@ -2597,9 +2303,6 @@ public class ShellViewModel : ObservableRecipient
         ShellViewModel.ShowChange();
     }
 
-
-
-
     #endregion
 
 
@@ -2635,14 +2338,23 @@ public class ShellViewModel : ObservableRecipient
 
     public ShellViewModel()
     {
+        // Resolve services via Ioc as needed
+        Logger = Ioc.Default.GetRequiredService<LogService>();
+        Search = Ioc.Default.GetRequiredService<SearchService>();
+        _autoSaveService = Ioc.Default.GetRequiredService<AutoSaveService>();
+        Window = Ioc.Default.GetRequiredService<Windowing>();
+        State = Ioc.Default.GetRequiredService<AppState>();
+        Scrivener = Ioc.Default.GetRequiredService<ScrivenerIo>();
+        Preferences = Ioc.Default.GetRequiredService<PreferenceService>();
+        // Resolve sub ViewModels
+        OutlineManager = new OutlineViewModel(Logger, Preferences, Window, this);
+        outlineService = Ioc.Default.GetRequiredService<OutlineService>();
+
+        // Register inter-MVVM messaging
         Messenger.Register<IsChangedRequestMessage>(this, (_, m) => { m.Reply(StoryModel!.Changed); });
         Messenger.Register<ShellViewModel, IsChangedMessage>(this, static (r, m) => r.IsChangedMessageReceived(m));
         Messenger.Register<ShellViewModel, StatusChangedMessage>(this, static (r, m) => r.StatusMessageReceived(m));
         Messenger.Register<ShellViewModel, NameChangedMessage>(this, static (r, m) => r.NameMessageReceived(m));
-
-        Scrivener = Ioc.Default.GetRequiredService<ScrivenerIo>();
-        Logger = Ioc.Default.GetRequiredService<LogService>();
-        Search = Ioc.Default.GetRequiredService<SearchService>();
 
         StoryModel = new StoryModel();
 
@@ -2778,6 +2490,4 @@ public class ShellViewModel : ObservableRecipient
         _canExecuteCommands = true;    //Enables other commands from being used till this one is complete.
     }
     #endregion
-
-
 }

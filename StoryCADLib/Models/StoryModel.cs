@@ -1,5 +1,7 @@
 using System.Collections.ObjectModel;
+using System.Text.Json;
 using System.Text.Json.Serialization;
+using StoryCAD.DAL;
 using Windows.Storage;
 
 namespace StoryCAD.Models;
@@ -37,8 +39,6 @@ public class StoryModel
 	[JsonPropertyName("LastVersion")]
 	public string LastVersion;
 
-
-
 	#endregion
 
 	#region StoryExplorer and NarratorView (TreeView) properties
@@ -67,25 +67,74 @@ public class StoryModel
 
 	/// StoryModel also contains two persisted TreeView representations, a Story ExplorerView tree which
 	/// contains all Story Elements (the StoryOverview and all Problem, Character, Setting, Scene
-	/// and Folder elements) and a NarratorView View which contains just Section (chapter, etc) and
-	/// selected Scene elements. 
+	/// and Folder elements) and a NarratorView View which contains just Section (chapter, act, etc)
+	/// and selected Scene elements. 
 	/// 
-	/// One of these persisted TreeViews is actively bound in the Shell page view to a StoryNodeItem tree 
+	/// One of these TreeViews is actively bound in the Shell page view to a StoryNodeItem tree 
 	/// based on  whichever of these two TreeView representations is presently selected.
 	[JsonIgnore]
 	public ObservableCollection<StoryNodeItem> ExplorerView;
 	[JsonIgnore]
 	public ObservableCollection<StoryNodeItem> NarratorView;
-	[JsonIgnore]
-    public StorageFolder ProjectFolder;
-	[JsonIgnore]
-	public StorageFile ProjectFile;
-	[JsonIgnore]
-	public string ProjectPath;
-	[JsonIgnore]
-	public string ProjectFilename { get; set; }
 
     #endregion
+
+
+    /// <summary>
+    /// Used to prepare tree for serialisation
+    /// </summary>
+    /// <param name="rootNodes"></param>
+    /// <returns></returns>
+    private static List<PersistableNode> FlattenTree(ObservableCollection<StoryNodeItem> rootNodes)
+    {
+        var list = new List<PersistableNode>();
+        foreach (var root in rootNodes)
+        {
+            AddNodeRecursively(root, list);
+        }
+        return list;
+    }
+
+    /// <summary>
+    /// used within Flatten Tree to handle serialisation effectively.
+    /// </summary>
+    private static void AddNodeRecursively(StoryNodeItem node, List<PersistableNode> list)
+    {
+        list.Add(new PersistableNode
+        {
+            Uuid = node.Uuid,
+            ParentUuid = node.Parent?.Uuid
+        });
+
+        foreach (var child in node.Children)
+        {
+            AddNodeRecursively(child, list);
+        }
+    }
+
+    /// <summary>
+    /// Serialises the model to JSON
+    /// </summary>
+    /// <param name="model">Story Model to serialise</param>
+    /// <returns></returns>
+    public string Serialize()
+    {
+        //Flatten trees (solves issues when deserialization)
+        FlattenedExplorerView = FlattenTree(ExplorerView);
+        FlattenedNarratorView = FlattenTree(NarratorView);
+
+        //Serialise
+        return JsonSerializer.Serialize(this, new JsonSerializerOptions
+        {
+            WriteIndented = true,
+            Converters =
+            {
+                new EmptyGuidConverter(),
+                new StoryElementConverter(),
+                new JsonStringEnumConverter()
+            }
+        });
+    }
 
     #region Constructor
     public StoryModel()
@@ -95,7 +144,6 @@ public class StoryModel
         NarratorView = new ObservableCollection<StoryNodeItem>();
 
         Changed = false;
-        ProjectFilename = null;
     }
     #endregion
 }

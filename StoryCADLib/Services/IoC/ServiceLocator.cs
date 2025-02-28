@@ -7,8 +7,11 @@ using StoryCAD.Services.Search;
 using StoryCAD.ViewModels.Tools;
 using StoryCAD.Collaborator.ViewModels;
 using StoryCAD.Models.Tools;
+using StoryCAD.Services.API;
 using StoryCAD.Services.Collaborator;
+using StoryCAD.Services.Outline;
 using StoryCAD.Services.Ratings;
+using StoryCAD.ViewModels.SubViewModels;
 
 namespace StoryCAD.Services.IoC
 {
@@ -33,6 +36,7 @@ namespace StoryCAD.Services.IoC
             Services.AddSingleton<ScrivenerIo>();
             Services.AddSingleton<StoryIO>();
             Services.AddSingleton<MySqlIo>();
+            Services.AddSingleton<OutlineService>();
             Services.AddSingleton<BackupService>();
             Services.AddSingleton<AutoSaveService>();
             Services.AddSingleton<DeletionService>();
@@ -44,6 +48,7 @@ namespace StoryCAD.Services.IoC
             Services.AddSingleton<AppState>();
             Services.AddSingleton<Windowing>();
             Services.AddSingleton<RatingService>();
+            Services.AddSingleton<OutlineViewModel>();
             Services.AddSingleton<ShellViewModel>();
             Services.AddSingleton<PreferenceService>();
             Services.AddSingleton<OverviewViewModel>();
@@ -78,6 +83,8 @@ namespace StoryCAD.Services.IoC
             Services.AddSingleton<PreferencesViewModel>();
             Services.AddSingleton<FlawViewModel>();
             Services.AddSingleton<TraitsViewModel>();
+            Services.AddSingleton<SemanticKernelApi>();
+            Services.AddSingleton<OutlineService>();
         }
     }
 }

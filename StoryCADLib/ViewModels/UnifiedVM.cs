@@ -1,10 +1,15 @@
-﻿using System.Text.RegularExpressions;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
 using StoryCAD.DAL;
 using StoryCAD.Services;
 using StoryCAD.Services.Dialogs;
+// Messenger
+// Ioc.Default if needed
+// LogService
+// LogLevel, etc.
+// StatusChangedMessage, etc.
+// If referencing story data
 
 namespace StoryCAD.ViewModels;
 
@@ -18,9 +23,9 @@ namespace StoryCAD.ViewModels;
 /// </summary>
 public class UnifiedVM : ObservableRecipient
 {
-	private LogService Logger = Ioc.Default.GetRequiredService<LogService>();
-	private ShellViewModel _shell = Ioc.Default.GetService<ShellViewModel>();
-    private PreferenceService Preferences = Ioc.Default.GetService<PreferenceService>();
+	private readonly LogService Logger = Ioc.Default.GetRequiredService<LogService>();
+	private readonly ShellViewModel _shell = Ioc.Default.GetService<ShellViewModel>();
+    private readonly PreferenceService Preferences = Ioc.Default.GetService<PreferenceService>();
 
     private Visibility _ProjectNameErrorVisibility;
     public Visibility ProjectNameErrorVisibility
@@ -162,7 +167,7 @@ public class UnifiedVM : ObservableRecipient
 
         PreferencesIo _loader = new();
         await _loader.WritePreferences(Preferences.Model);
-        await _shell.UnifiedNewFile(this);
+        await _shell.OutlineManager.UnifiedNewFile(this);
         Hide();
 
     }

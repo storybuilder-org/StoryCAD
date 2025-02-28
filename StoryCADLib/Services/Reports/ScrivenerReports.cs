@@ -232,7 +232,7 @@ namespace StoryCAD.Services.Reports
                     type = BinderItemType.Text;
                     break;
             }
-            BinderItem binderItem = new BinderItem(StoryWriter.UuidString(node.Uuid), type, node.Name, parent);
+            BinderItem binderItem = new BinderItem(node.Uuid.ToString(), type, node.Name, parent);
             foreach (StoryNodeItem child in node.Children)
                 RecurseStoryModelNode(child, binderItem);
         }

@@ -7,6 +7,7 @@ using Microsoft.UI.Xaml.Printing;
 using StoryCAD.Services.Reports;
 using Windows.Graphics.Printing;
 using StoryCAD.Services.Dialogs.Tools;
+using StoryCAD.ViewModels.SubViewModels;
 
 namespace StoryCAD.ViewModels.Tools;
 
@@ -357,7 +358,10 @@ public class PrintReportDialogVM : ObservableRecipient
     {
         try
         {
-            PrintJobManager = args.Request.CreatePrintTask("StoryCAD - " + ShellViewModel.GetModel().ProjectFilename, PrintSourceRequested);
+            //Set print job name
+            PrintJobManager = args.Request.CreatePrintTask("StoryCAD - " + 
+                Path.GetFileNameWithoutExtension(Ioc.Default.GetRequiredService<OutlineViewModel>().StoryModelFile)
+                , PrintSourceRequested);
             PrintJobManager.Completed += PrintTaskCompleted; //Show message if job failed.
         }
         catch (Exception e)
