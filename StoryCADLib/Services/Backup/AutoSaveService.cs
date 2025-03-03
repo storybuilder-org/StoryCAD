@@ -110,7 +110,7 @@ namespace StoryCAD.Services.Backup
                 {
                     _logger.Log(LogLevel.Info, "Initiating AutoSave backup.");
                     // Save and write the model on the UI thread
-                    Window.GlobalDispatcher.TryEnqueue(async () => await _shellVM.SaveFile(true));
+                    Window.GlobalDispatcher.TryEnqueue(async () => await _shellVM.OutlineManager.SaveFile(true));
                 }
             }
             catch (Exception _ex)

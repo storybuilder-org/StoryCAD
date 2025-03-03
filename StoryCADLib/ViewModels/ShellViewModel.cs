@@ -53,7 +53,7 @@ public class ShellViewModel : ObservableRecipient
     // Required services 
     private readonly LogService Logger;
     private readonly SearchService Search;
-    private readonly AutoSaveService _autoSaveService;
+    public readonly AutoSaveService _autoSaveService;
     private readonly Windowing Window;
     private readonly AppState State;
     private readonly PreferenceService Preferences;
@@ -69,9 +69,9 @@ public class ShellViewModel : ObservableRecipient
     public List<StoryNodeItem> NewNodeHighlightCache = new();
 
     public StoryViewType CurrentViewType;
-    private ContentDialog _contentDialog;
+    public ContentDialog _contentDialog;
     private int _sourceIndex;
-    private ObservableCollection<StoryNodeItem> _sourceChildren;
+    public ObservableCollection<StoryNodeItem> _sourceChildren;
     private int _targetIndex;
     private ObservableCollection<StoryNodeItem> _targetCollection;
 
@@ -110,7 +110,7 @@ public class ShellViewModel : ObservableRecipient
     // ExitCommand
     public RelayCommand ExitCommand { get; }
     //Open/Closes unified menu
-    public RelayCommand OpenUnifiedCommand { get; }
+    public AsyncRelayCommand OpenUnifiedCommand { get; }
     public RelayCommand CloseUnifiedCommand { get; }
 
     // Move current TreeViewItem flyout
@@ -160,6 +160,7 @@ public class ShellViewModel : ObservableRecipient
     public RelayCommand RemoveStoryElementCommand { get; }
     public RelayCommand RestoreStoryElementCommand { get; }
     public RelayCommand EmptyTrashCommand { get; }
+
     // Copy to Narrative command
     public RelayCommand AddToNarrativeCommand { get; }
     public RelayCommand RemoveFromNarrativeCommand { get; }
@@ -378,51 +379,19 @@ public class ShellViewModel : ObservableRecipient
 		//Check result
 		if (result == ContentDialogResult.Primary)
 		{
-			BackupNowVM VM = Ioc.Default.GetRequiredService<BackupNowVM>();
-			await Ioc.Default.GetRequiredService<BackupService>().BackupProject(VM.Name, VM.Location);
+			BackupNowVM vm = Ioc.Default.GetRequiredService<BackupNowVM>();
+			await Ioc.Default.GetRequiredService<BackupService>().BackupProject(vm.Name, vm.Location);
 		}
 	}
 
-	public async Task PrintCurrentNodeAsync()
-    {
-	    _canExecuteCommands = false;
-
-		if (RightTappedNode == null)
-        {
-            Messenger.Send(new StatusChangedMessage(new("Right tap a node to print", LogLevel.Warn)));
-            Logger.Log(LogLevel.Info, "Print node failed as no node is selected");
-            _canExecuteCommands = true;
-            return;
-        }
-        await Ioc.Default.GetRequiredService<PrintReportDialogVM>().PrintSingleNode(RightTappedNode);
-        _canExecuteCommands = true;
-	}
-
 	private void CloseUnifiedMenu() { _contentDialog.Hide(); }
-
-    public async Task OpenUnifiedMenu()
-    {
-        if (_canExecuteCommands)
-        {
-            _canExecuteCommands = false;
-            // Needs logging
-            _contentDialog = new() { Content = new UnifiedMenuPage() };
-            if (Window.RequestedTheme == ElementTheme.Light)
-            {
-                _contentDialog.RequestedTheme = Window.RequestedTheme;
-                _contentDialog.Background = new SolidColorBrush(Colors.LightGray);
-            }
-            await Window.ShowContentDialog(_contentDialog);
-            _canExecuteCommands = true;
-        }
-    }
 
     public async Task MakeBackup()
     {
         await Ioc.Default.GetRequiredService<BackupService>().BackupProject();
     }
 
-    public void TreeViewNodeClicked(object selectedItem, bool ClearHighlightCache = true)
+    public void TreeViewNodeClicked(object selectedItem, bool clearHighlightCache = true)
     {
         if (selectedItem is null)
         {
@@ -433,57 +402,57 @@ public class ShellViewModel : ObservableRecipient
 
         try
         {
-            NavigationService _nav = Ioc.Default.GetRequiredService<NavigationService>();
-            if (selectedItem is StoryNodeItem _node)
+            NavigationService nav = Ioc.Default.GetRequiredService<NavigationService>();
+            if (selectedItem is StoryNodeItem node)
             {
-                CurrentNode = _node;
-                StoryElement _element = StoryModel.StoryElements.StoryElementGuids[_node.Uuid];
-                switch (_element.Type)
+                CurrentNode = node;
+                StoryElement element = StoryModel.StoryElements.StoryElementGuids[node.Uuid];
+                switch (element.Type)
                 {
                     case StoryItemType.Character:
-                        _nav.NavigateTo(SplitViewFrame, CharacterPage, _element);
+                        nav.NavigateTo(SplitViewFrame, CharacterPage, element);
                         break;
                     case StoryItemType.Scene:
-                        _nav.NavigateTo(SplitViewFrame, ScenePage, _element);
+                        nav.NavigateTo(SplitViewFrame, ScenePage, element);
                         break;
                     case StoryItemType.Problem:
-                        _nav.NavigateTo(SplitViewFrame, ProblemPage, _element);
+                        nav.NavigateTo(SplitViewFrame, ProblemPage, element);
                         break;
                     case StoryItemType.Section:
-                        _nav.NavigateTo(SplitViewFrame, FolderPage, _element);
+                        nav.NavigateTo(SplitViewFrame, FolderPage, element);
                         break;
                     case StoryItemType.Folder:
-                        _nav.NavigateTo(SplitViewFrame, FolderPage, _element);
+                        nav.NavigateTo(SplitViewFrame, FolderPage, element);
                         break;
                     case StoryItemType.Setting:
-                        _nav.NavigateTo(SplitViewFrame, SettingPage, _element);
+                        nav.NavigateTo(SplitViewFrame, SettingPage, element);
                         break;
                     case StoryItemType.Web:
-                        _nav.NavigateTo(SplitViewFrame, WebPage, _element);
+                        nav.NavigateTo(SplitViewFrame, WebPage, element);
                         break;
                     case StoryItemType.Notes:
-                        _nav.NavigateTo(SplitViewFrame, FolderPage, _element);
+                        nav.NavigateTo(SplitViewFrame, FolderPage, element);
                         break;
                     case StoryItemType.StoryOverview:
-                        _nav.NavigateTo(SplitViewFrame, OverviewPage, _element);
+                        nav.NavigateTo(SplitViewFrame, OverviewPage, element);
                         break;
                     case StoryItemType.TrashCan:
-                        _nav.NavigateTo(SplitViewFrame, TrashCanPage, _element);
+                        nav.NavigateTo(SplitViewFrame, TrashCanPage, element);
                         break;
                 }
                 CurrentNode.IsExpanded = true;
             }
 
             //Clears background of new nodes on navigation as well as the last node.
-            if (ClearHighlightCache)
+            if (clearHighlightCache)
             {
                 foreach (var item in NewNodeHighlightCache) { item.Background = null; }
                 if (LastClickedTreeviewItem != null) { LastClickedTreeviewItem.Background = null; }
             }
         }
-        catch (Exception _e)
+        catch (Exception e)
         {
-            Logger.LogException(LogLevel.Error, _e, "Error navigating in ShellVM.TreeViewNodeClicked");
+            Logger.LogException(LogLevel.Error, e, "Error navigating in ShellVM.TreeViewNodeClicked");
         }
     }
 
@@ -512,8 +481,8 @@ public class ShellViewModel : ObservableRecipient
     {
         Logger.Log(LogLevel.Info, "ShowHomePage");
 
-        NavigationService _nav = Ioc.Default.GetRequiredService<NavigationService>();
-        _nav.NavigateTo(SplitViewFrame, HomePage);
+        NavigationService nav = Ioc.Default.GetRequiredService<NavigationService>();
+        nav.NavigateTo(SplitViewFrame, HomePage);
     }
     private void TogglePane()
     {
@@ -522,12 +491,11 @@ public class ShellViewModel : ObservableRecipient
     }
 
     /// <summary>
-    /// Save the currently active page's story element viewmodel's contents back to the StoryModel.
-    /// 
     /// When an AppBar command button is pressed, the currently active StoryElement ViewModel
     /// displayed in SplitViewFrame's Content doesn't go through Deactivate() and hence doesn't
-    /// call its WritePreferences() method. Hence this method, which determines which viewmodel's active 
-    /// and calls its WritePreferences() method.
+    /// call its WritePreferences() method. Hence this method, which determines which Content
+    /// frame's page type is active, and calls its SaveModel() method. If there are changes,
+    /// the viewmodel is copied back to its corresponding active StoryElement Model.
     /// </summary>
     public void SaveModel()
     {
@@ -538,373 +506,39 @@ public class ShellViewModel : ObservableRecipient
         switch (SplitViewFrame.CurrentSourcePageType.ToString())
         {
             case "StoryCAD.Views.OverviewPage":
-                OverviewViewModel _ovm = Ioc.Default.GetRequiredService<OverviewViewModel>();
-                _ovm.SaveModel();
+                OverviewViewModel ovm = Ioc.Default.GetRequiredService<OverviewViewModel>();
+                ovm.SaveModel();
                 break;
             case "StoryCAD.Views.ProblemPage":
-                ProblemViewModel _pvm = Ioc.Default.GetRequiredService<ProblemViewModel>();
-                _pvm.SaveModel();
+                ProblemViewModel pvm = Ioc.Default.GetRequiredService<ProblemViewModel>();
+                pvm.SaveModel();
                 break;
             case "StoryCAD.Views.CharacterPage":
-                CharacterViewModel _cvm = Ioc.Default.GetRequiredService<CharacterViewModel>();
-                _cvm.SaveModel();
+                CharacterViewModel cvm = Ioc.Default.GetRequiredService<CharacterViewModel>();
+                cvm.SaveModel();
                 break;
             case "StoryCAD.Views.ScenePage":
-                SceneViewModel _scvm = Ioc.Default.GetRequiredService<SceneViewModel>();
-                _scvm.SaveModel();
+                SceneViewModel scvm = Ioc.Default.GetRequiredService<SceneViewModel>();
+                scvm.SaveModel();
                 break;
             case "StoryCAD.Views.FolderPage":
-                FolderViewModel _folderVM = Ioc.Default.GetRequiredService<FolderViewModel>();
-                _folderVM.SaveModel();
+                FolderViewModel folderVm = Ioc.Default.GetRequiredService<FolderViewModel>();
+                folderVm.SaveModel();
                 break;
             case "StoryCAD.Views.SettingPage":
-                SettingViewModel _settingVM = Ioc.Default.GetRequiredService<SettingViewModel>();
-                _settingVM.SaveModel();
+                SettingViewModel settingVm = Ioc.Default.GetRequiredService<SettingViewModel>();
+                settingVm.SaveModel();
                 break;
             case "StoryCAD.Views.WebPage":
-                WebViewModel _webVM = Ioc.Default.GetRequiredService<WebViewModel>();
-                _webVM.SaveModel();
+                WebViewModel webVm = Ioc.Default.GetRequiredService<WebViewModel>();
+                webVm.SaveModel();
                 break;
         }
     }
-
-    /// <summary>
-    /// Opens a file picker to let the user chose a .stbx file and loads said file
-    /// If fromPath is specified then the picker is skipped.
-    /// </summary>
-    /// <param name="fromPath">Path to open file from (Optional)</param>
-    public async Task OpenFile(string fromPath = "")
-    {
-        // Check if current StoryModel has been changed, if so, save and write the model.
-        if (StoryModel.Changed)
-        {
-            SaveModel();
-            await outlineService.WriteModel(StoryModel, OutlineManager.StoryModelFile);
-        }
-
-        // Stop the auto save service if it was running
-        if (Preferences.Model.AutoSave) { _autoSaveService.StopAutoSave(); }
-        
-        // Stop the timed backup service if it was running
-        Ioc.Default.GetRequiredService<BackupService>().StopTimedBackup();
-
-        _canExecuteCommands = false;
-        Logger.Log(LogLevel.Info, "Executing OpenFile command");
-
-        try
-        {
-            // Reset the model and show the home page
-            ResetModel();
-            ShowHomePage();
-
-            // Open file picker if `fromPath` is not provided or file doesn't exist at the path.
-            if (fromPath == "" || !File.Exists(fromPath))
-            {
-                Logger.Log(LogLevel.Info, "Opening file picker as story wasn't able to be found");
-
-                StorageFile? ProjectFile = await Ioc.Default.GetService<Windowing>().ShowFilePicker("Open Project File", ".stbx");
-                if (ProjectFile == null) //Picker was canceled.
-                {
-                    Logger.Log(LogLevel.Info, "Open file picker cancelled.");
-                    _canExecuteCommands = true; // unblock other commands
-                    OutlineManager.StoryModelFile = ProjectFile.Path;
-                    return;
-                }
-            }
-
-            OutlineManager.StoryModelFile = fromPath;
-            if (OutlineManager.StoryModelFile == null)
-            {
-                Logger.Log(LogLevel.Warn, "Open File command failed: StoryModel.ProjectFile is null.");
-                Messenger.Send(new StatusChangedMessage(new("Open Story command cancelled", LogLevel.Info)));
-                _canExecuteCommands = true;  // Unblock other commands
-                return;
-            }
-
-            if (!File.Exists(OutlineManager.StoryModelFile))
-            {
-                Messenger.Send(new StatusChangedMessage(new("Can't find file", LogLevel.Warn)));
-                Logger.Log(LogLevel.Warn, $"File {OutlineManager.StoryModelFile} does not exist.");
-                _canExecuteCommands = true;
-                return;
-            }
-
-            //Check file is available.
-            StoryIO _rdr = Ioc.Default.GetRequiredService<StoryIO>();
-            if (!await _rdr.CheckFileAvailability(OutlineManager.StoryModelFile))
-            {
-                Messenger.Send(new StatusChangedMessage(new("File Unavailable.", LogLevel.Warn)));
-                return;
-            }
-            
-            // Read the file into the StoryModel.
-            StorageFile file = await StorageFile.GetFileFromPathAsync(OutlineManager.StoryModelFile);
-            StoryModel = await _rdr.ReadStory(file);
-
-            //Check the file we loaded actually has StoryCAD Data.
-            if (StoryModel == null)
-            {
-	            Messenger.Send(new StatusChangedMessage(new("Unable to open file (No Story Elements found)", LogLevel.Warn, true)));
-	            _canExecuteCommands = true;  // unblock other commands
-	            return;
-			}
-
-            if (StoryModel.StoryElements.Count == 0)
-            {
-                Messenger.Send(new StatusChangedMessage(new("Unable to open file (No Story Elements found)", LogLevel.Warn, true)));
-                _canExecuteCommands = true;  // unblock other commands
-                return;
-
-            }
-
-            // Take a backup of the project if the user has the 'backup on open' preference set.
-            if (Preferences.Model.BackupOnOpen)
-            {
-                await Ioc.Default.GetRequiredService<BackupService>().BackupProject();
-            }
-
-            // Set the current view to the ExplorerView 
-            if (StoryModel.ExplorerView.Count > 0)
-            {
-                SetCurrentView(StoryViewType.ExplorerView);
-                Messenger.Send(new StatusChangedMessage(new("Open Story completed", LogLevel.Info)));
-            }
-
-            Window.UpdateWindowTitle();
-            new UnifiedVM().UpdateRecents(OutlineManager.StoryModelFile);
-
-            if (Preferences.Model.TimedBackup)
-            {
-                Ioc.Default.GetRequiredService<BackupService>().StartTimedBackup();
-            }
-
-            if (Preferences.Model.AutoSave)
-            {
-                _autoSaveService.StartAutoSave();
-            }
-
-            string _msg = $"Opened project {OutlineManager.StoryModelFile}";
-            Logger.Log(LogLevel.Info, _msg);
-        }
-        catch (Exception _ex)
-        {
-            // Report the error to the user
-            Logger.LogException(LogLevel.Error, _ex, "Error in OpenFile command");
-            Messenger.Send(new StatusChangedMessage(new("Open Story command failed", LogLevel.Error)));
-        }
-
-        Logger.Log(LogLevel.Info, "Open Story completed.");
-        _canExecuteCommands = true;
-    }
-
-    /// <summary>
-    /// Save the currently active page from 
-    /// </summary>
-    /// <param name="autoSave"></param>
-    /// <returns></returns>
-    public async Task SaveFile(bool autoSave = false)
-    {
-        _autoSaveService.StopAutoSave();
-        bool _saveExecuteCommands = _canExecuteCommands;
-        _canExecuteCommands = false;
-        string msg = autoSave ? "AutoSave" : "SaveFile command";
-        if (autoSave && !StoryModel.Changed)
-        {
-            Logger.Log(LogLevel.Info, $"{msg} skipped, no changes");
-            _canExecuteCommands = true;
-            return;
-        }
-
-        if (StoryModel.StoryElements.Count == 0)
-        {
-            Messenger.Send(new StatusChangedMessage(new("You need to open a story first!", LogLevel.Info)));
-            Logger.Log(LogLevel.Info, $"{msg} cancelled (StoryModel.ProjectFile was null)");
-            _canExecuteCommands = true;
-            return;
-        }
-
-        try
-        {
-            Messenger.Send(new StatusChangedMessage(new($"{msg} executing", LogLevel.Info)));
-            SaveModel();
-            await outlineService.WriteModel(StoryModel, OutlineManager.StoryModelFile);
-             Messenger.Send(new StatusChangedMessage(new($"{msg} completed", LogLevel.Info)));
-            StoryModel.Changed = false;
-            ChangeStatusColor = Colors.Green;
-        }
-        catch (Exception _ex)
-        {
-            Logger.LogException(LogLevel.Error, _ex, $"Exception in {msg}");
-            Messenger.Send(new StatusChangedMessage(new($"{msg} failed", LogLevel.Error)));
-        }
-        _canExecuteCommands = _saveExecuteCommands;
-        _autoSaveService.StartAutoSave();
-    }
-
-    private async void SaveFileAs()
-    {
-        if (_canExecuteCommands)
-        {
-            _canExecuteCommands = false;
-            Messenger.Send(new StatusChangedMessage(new("Save File As command executing", LogLevel.Info, true)));
-            try
-            {
-                if (string.IsNullOrEmpty(OutlineManager.StoryModelFile))
-                {
-                    Messenger.Send(new StatusChangedMessage(new("You need to load a story first!", LogLevel.Info)));
-                    Logger.Log(LogLevel.Warn, "User tried to use save as without a story loaded.");
-                    _canExecuteCommands = true;
-                    return;
-                }
-
-                // Create the content dialog
-                ContentDialog saveAsDialog = new()
-                {
-                    Title = "Save as",
-                    PrimaryButtonText = "Save",
-                    SecondaryButtonText = "Cancel",
-                    Content = new SaveAsDialog()
-                };
-
-                // Set default values in the view model using the current story file info
-                SaveAsViewModel saveAsVM = Ioc.Default.GetRequiredService<SaveAsViewModel>();
-                saveAsVM.ProjectName = Path.GetFileName(OutlineManager.StoryModelFile);
-                saveAsVM.ParentFolder = await StorageFolder.GetFolderFromPathAsync(Path.GetDirectoryName(OutlineManager.StoryModelFile));
-
-                ContentDialogResult result = await Window.ShowContentDialog(saveAsDialog);
-
-                if (result == ContentDialogResult.Primary)
-                {
-                    if (await VerifyReplaceOrCreate())
-                    {
-                        // Save the model to disk at the current file location
-                        SaveModel();
-                        await outlineService.WriteModel(StoryModel, OutlineManager.StoryModelFile);
-
-                        // If the new path is the same as the current one, exit early
-                        string newFilePath = Path.Combine(saveAsVM.ParentFolder.Path, saveAsVM.ProjectName);
-                        if (newFilePath.Equals(OutlineManager.StoryModelFile, StringComparison.OrdinalIgnoreCase))
-                        {
-                            Messenger.Send(new StatusChangedMessage(new("Save File As command completed", LogLevel.Info)));
-                            Logger.Log(LogLevel.Info, "User tried to save file to same location as current file.");
-                            _canExecuteCommands = true;
-                            return;
-                        }
-
-                        // Copy the current file to the new location/name
-                        StorageFile currentFile = await StorageFile.GetFileFromPathAsync(OutlineManager.StoryModelFile);
-                        await currentFile.CopyAsync(saveAsVM.ParentFolder, saveAsVM.ProjectName, NameCollisionOption.ReplaceExisting);
-
-                        // Update the story file path to the new location
-                        OutlineManager.StoryModelFile = newFilePath;
-
-                        // Update window title and recents
-                        Window.UpdateWindowTitle();
-                        new UnifiedVM().UpdateRecents(OutlineManager.StoryModelFile);
-
-                        // Indicate the model is now saved and unchanged
-                        Messenger.Send(new IsChangedMessage(true));
-                        StoryModel.Changed = false;
-                        ChangeStatusColor = Colors.Green;
-                        Messenger.Send(new StatusChangedMessage(new("Save File As command completed", LogLevel.Info, true)));
-                    }
-                }
-                else
-                {
-                    Messenger.Send(new StatusChangedMessage(new("SaveAs dialog cancelled", LogLevel.Info, true)));
-                }
-            }
-            catch (Exception ex)
-            {
-                Logger.LogException(LogLevel.Error, ex, "Exception in SaveFileAs");
-                Messenger.Send(new StatusChangedMessage(new("Save File As failed", LogLevel.Info)));
-            }
-            _canExecuteCommands = true;
-        }
-    }
-
-
-
-    private async Task<bool> VerifyReplaceOrCreate()
-    {
-        Logger.Log(LogLevel.Trace, "VerifyReplaceOrCreated");
-
-        SaveAsViewModel _saveAsVM = Ioc.Default.GetRequiredService<SaveAsViewModel>();
-        _saveAsVM.SaveAsProjectFolderPath = _saveAsVM.ParentFolder.Path;
-        if (File.Exists(Path.Combine(_saveAsVM.ProjectPathName, _saveAsVM.ProjectName)))
-        {
-            ContentDialog _replaceDialog = new()
-            {
-                PrimaryButtonText = "Yes",
-                SecondaryButtonText = "No",
-                Title = "Replace file?",
-                Content = $"File {Path.Combine(_saveAsVM.ProjectPathName, _saveAsVM.ProjectName)} already exists. \n\nDo you want to replace it?",
-            };
-            return await Window.ShowContentDialog(_replaceDialog) == ContentDialogResult.Primary;
-        }
-        return true;
-    }
-
-    private async void CloseFile()
-    {
-        _canExecuteCommands = false;
-        Messenger.Send(new StatusChangedMessage(new("Closing project", LogLevel.Info, true)));
-        _autoSaveService.StopAutoSave();
-        if (StoryModel.Changed)
-        {
-            ContentDialog _warning = new()
-            {
-                Title = "Save changes?",
-                PrimaryButtonText = "Yes",
-                SecondaryButtonText = "No",
-            };
-            if (await Window.ShowContentDialog(_warning) == ContentDialogResult.Primary)
-            {
-                SaveModel();
-                await outlineService.WriteModel(StoryModel, OutlineManager.StoryModelFile);
-            }
-        }
-
-        ResetModel();
-        RightTappedNode = null; //Null right tapped node to prevent possible issues.
-        SetCurrentView(StoryViewType.ExplorerView);
-        Window.UpdateWindowTitle();
-        Ioc.Default.GetRequiredService<BackupService>().StopTimedBackup();
-        DataSource = StoryModel.ExplorerView;
-        ShowHomePage();
-        Messenger.Send(new StatusChangedMessage(new("Close story command completed", LogLevel.Info, true)));
-        _canExecuteCommands = true;
-    }
-
     public void ResetModel()
     {
         StoryModel = new();
         //TODO: Raise event for StoryModel change?
-    }
-
-    private async void ExitApp()
-    {
-        _canExecuteCommands = false;
-        Messenger.Send(new StatusChangedMessage(new("Executing Exit project command", LogLevel.Info, true)));
-
-        if (StoryModel.Changed)
-        {
-            ContentDialog _warning = new()
-            {
-                Title = "Save changes?",
-                PrimaryButtonText = "Yes",
-                SecondaryButtonText = "No",
-            };
-            if (await Window.ShowContentDialog(_warning) == ContentDialogResult.Primary)
-            {
-                SaveModel();
-                await outlineService.WriteModel(StoryModel, OutlineManager.StoryModelFile);
-            }
-        }
-        BackendService backend = Ioc.Default.GetRequiredService<BackendService>();
-        await backend.DeleteWorkFile();
-        Logger.Flush();
-        Application.Current.Exit();  // Win32
     }
 
     #endregion
@@ -918,7 +552,7 @@ public class ShellViewModel : ObservableRecipient
 
         //Creates and shows dialog
         Ioc.Default.GetRequiredService<PreferencesViewModel>().LoadModel();
-        ContentDialog _preferencesDialog = new()
+        ContentDialog preferencesDialog = new()
         {
             Content = new PreferencesDialog(),
             Title = "Preferences",
@@ -926,8 +560,8 @@ public class ShellViewModel : ObservableRecipient
             CloseButtonText = "Cancel"
         };
 
-        ContentDialogResult _result = await Window.ShowContentDialog(_preferencesDialog);
-        switch (_result)
+        ContentDialogResult result = await Window.ShowContentDialog(preferencesDialog);
+        switch (result)
         {
             // Save changes
             case ContentDialogResult.Primary:
@@ -969,320 +603,12 @@ public class ShellViewModel : ObservableRecipient
         }
     }
 
-    private async void KeyQuestionsTool()
-    {
-        Logger.Log(LogLevel.Info, "Displaying KeyQuestions tool dialog");
-        if (_canExecuteCommands)
-        {
-            _canExecuteCommands = false;
-            if (RightTappedNode == null) { RightTappedNode = CurrentNode; }
-
-            //Creates and shows dialog
-            ContentDialog _keyQuestionsDialog = new()
-            {
-                Title = "Key questions",
-                CloseButtonText = "Close",
-                Content = new KeyQuestionsDialog()
-            };
-            await Ioc.Default.GetService<Windowing>().ShowContentDialog(_keyQuestionsDialog);
-
-            Ioc.Default.GetRequiredService<KeyQuestionsViewModel>().NextQuestion();
-            Logger.Log(LogLevel.Info, "KeyQuestions finished");
-            _canExecuteCommands = true;
-        }
-
-    }
-
-    private async void TopicsTool()
-    {
-        Logger.Log(LogLevel.Info, "Displaying Topics tool dialog");
-        if (_canExecuteCommands)
-        {
-            _canExecuteCommands = false;
-            if (RightTappedNode == null) { RightTappedNode = CurrentNode; }
-
-            ContentDialog _dialog = new()
-            {
-                Title = "Topic Information",
-                CloseButtonText = "Done",
-                Content = new TopicsDialog()
-            };
-            await Window.ShowContentDialog(_dialog);
-
-            _canExecuteCommands = true;
-        }
-
-        Logger.Log(LogLevel.Info, "Topics finished");
-    }
-
-    /// <summary>
-    /// This shows the master plot dialog
-    /// </summary>
-    private async void MasterPlotTool()
-    {
-        if (_canExecuteCommands)
-        {
-            _canExecuteCommands = false;
-            Logger.Log(LogLevel.Info, "Displaying MasterPlot tool dialog");
-            if (VerifyToolUse(true, true))
-            {
-                //Creates and shows content dialog
-                ContentDialog _dialog = new()
-                {
-                    Title = "Master plots",
-                    PrimaryButtonText = "Copy",
-                    SecondaryButtonText = "Cancel",
-                    Content = new MasterPlotsDialog()
-                };
-                ContentDialogResult _result = await Window.ShowContentDialog(_dialog);
-
-                if (_result == ContentDialogResult.Primary) // Copy command
-                {
-                    MasterPlotsViewModel _masterPlotsVM = Ioc.Default.GetRequiredService<MasterPlotsViewModel>();
-                    string _masterPlotName = _masterPlotsVM.PlotPatternName;
-                    PlotPatternModel _model = _masterPlotsVM.MasterPlots[_masterPlotName];
-                    IList<PlotPatternScene> _scenes = _model.PlotPatternScenes;
-                    ProblemModel _problem = new ProblemModel(_masterPlotName, StoryModel);
-                    // add the new ProblemModel & node to the end of the target (RightTappedNode) children 
-                    StoryNodeItem _problemNode = new(_problem, RightTappedNode);
-                    RightTappedNode.IsExpanded = true;
-                    _problemNode.IsSelected = true;
-                    _problemNode.IsExpanded = true;
-                    if (_scenes.Count == 1)
-                    {
-                        _problem.StoryQuestion = "See Notes.";
-                        _problem.Notes = _scenes[0].Notes;
-                    }
-                    else foreach (PlotPatternScene _scene in _scenes)
-                        {
-                            SceneModel _child = new(StoryModel) { Name = _scene.SceneTitle, Remarks = "See Notes.", Notes = _scene.Notes };
-                            // add the new SceneModel & node to the end of the problem's children 
-                            StoryNodeItem _newNode = new(_child, _problemNode);
-                            _newNode.IsSelected = true;
-                        }
-
-                    Messenger.Send(new StatusChangedMessage(new($"MasterPlot {_masterPlotName} inserted", LogLevel.Info, true)));
-                    ShowChange();
-                    Logger.Log(LogLevel.Info, "MasterPlot complete");
-                }
-            }
-        }
-        _canExecuteCommands = true;
-    }
-
     /// <summary>
     /// This function just calls print reports dialog.
     /// </summary>
     private async void OpenPrintMenu() 
     {
         await Ioc.Default.GetRequiredService<PrintReportDialogVM>().OpenPrintReportDialog();
-    }
-
-    private async void DramaticSituationsTool()
-    {
-        Logger.Log(LogLevel.Info, "Displaying Dramatic Situations tool dialog");
-        if (_canExecuteCommands)
-        {
-            _canExecuteCommands = false;
-
-            if (VerifyToolUse(true, true))
-            {
-                //Creates and shows dialog
-                ContentDialog _dialog = new()
-                {
-                    Title = "Dramatic situations",
-                    PrimaryButtonText = "Copy as problem",
-                    SecondaryButtonText = "Copy as scene",
-                    CloseButtonText = "Cancel",
-                    Content = new DramaticSituationsDialog()
-                };
-                ContentDialogResult _result = await Window.ShowContentDialog(_dialog);
-
-                DramaticSituationModel _situationModel = Ioc.Default.GetRequiredService<DramaticSituationsViewModel>().Situation;
-                string _msg;
-
-                if (_result == ContentDialogResult.Primary)
-                {
-                    ProblemModel _problem = new(StoryModel) { Name = _situationModel.SituationName, StoryQuestion = "See Notes.", Notes = _situationModel.Notes };
-
-                    // Insert the new Problem as the target's child
-                    _ = new StoryNodeItem(_problem, RightTappedNode);
-                    _msg = $"Problem {_situationModel.SituationName} inserted";
-                    ShowChange();
-                }
-                else if (_result == ContentDialogResult.Secondary)
-                {
-                    SceneModel _sceneVar = new(StoryModel) { Name = _situationModel.SituationName, Remarks = "See Notes.", Notes = _situationModel.Notes };
-                    // Insert the new Scene as the target's child
-                    _ = new StoryNodeItem(_sceneVar, RightTappedNode);
-                    _msg = $"Scene {_situationModel.SituationName} inserted";
-                    ShowChange();
-                }
-                else { _msg = "Dramatic Situation tool cancelled"; }
-
-                Logger.Log(LogLevel.Info, _msg);
-                Messenger.Send(new StatusChangedMessage(new(_msg, LogLevel.Info, true)));
-            }
-
-            _canExecuteCommands = true;
-        }
-        Logger.Log(LogLevel.Info, "Dramatic Situations finished");
-    }
-
-    /// <summary>
-    /// This loads the stock scenes dialog in the Plotting Aids submenu
-    /// </summary>
-    private async void StockScenesTool()
-    {
-        Logger.Log(LogLevel.Info, "Displaying Stock Scenes tool dialog");
-        if (VerifyToolUse(true, true) && _canExecuteCommands)
-        {
-            _canExecuteCommands = false;
-            try
-            {
-                //Creates and shows dialog
-                ContentDialog _dialog = new()
-                {
-                    Title = "Stock scenes",
-                    Content = new StockScenesDialog(),
-                    PrimaryButtonText = "Add Scene",
-                    CloseButtonText = "Cancel",
-                };
-                ContentDialogResult _result = await Window.ShowContentDialog(_dialog);
-
-                if (_result == ContentDialogResult.Primary) // Copy command
-                {
-                    if (string.IsNullOrWhiteSpace(Ioc.Default.GetRequiredService<StockScenesViewModel>().SceneName))
-                    {
-                        Messenger.Send(new StatusChangedMessage(new("You need to select a stock scene",
-                            LogLevel.Warn)));
-                        return;
-                    }
-
-                    SceneModel _sceneVar = new(StoryModel)
-                    { Name = Ioc.Default.GetRequiredService<StockScenesViewModel>().SceneName };
-                    StoryNodeItem _newNode = new(_sceneVar, RightTappedNode);
-                    _sourceChildren = RightTappedNode.Children;
-                    TreeViewNodeClicked(_newNode);
-                    RightTappedNode.IsExpanded = true;
-                    _newNode.IsSelected = true;
-                    Messenger.Send(new StatusChangedMessage(new("Stock Scenes inserted", LogLevel.Info)));
-                }
-                else
-                {
-                    Messenger.Send(new StatusChangedMessage(new("Stock Scenes canceled", LogLevel.Warn)));
-                }
-            }
-            catch (Exception _e)
-            {
-                Logger.LogException(LogLevel.Error, _e, _e.Message);
-            }
-            _canExecuteCommands = true;
-        }
-    }
-
-
-    private async void GenerateScrivenerReports()
-    {
-        if (DataSource == null || DataSource.Count == 0)
-        {
-            Messenger.Send(new StatusChangedMessage(new("You need to open a story first!", LogLevel.Info)));
-            Logger.Log(LogLevel.Info, $"Scrivener Report cancelled (DataSource was null or empty)");
-            return;
-        }
-
-        //TODO: revamp this to be more user friendly.
-        _canExecuteCommands = false;
-        Messenger.Send(new StatusChangedMessage(new("Generate Scrivener Reports executing", LogLevel.Info, true)));
-        SaveModel();
-
-        // Select the Scrivener .scrivx file to add the report to
-        StorageFile _file = await Ioc.Default.GetService<Windowing>().ShowFilePicker("Open file", ".scrivx");
-        if (_file != null)
-        {
-            Scrivener.ScrivenerFile = _file;
-            Scrivener.ProjectPath = Path.GetDirectoryName(_file.Path);
-            if (!await Scrivener.IsScrivenerRelease3())
-                throw new ApplicationException("Project is not Scrivener Release 3");
-            // Load the Scrivener project file's model
-            ScrivenerReports _rpt = new(_file, StoryModel);
-            await _rpt.GenerateReports();
-        }
-
-        Messenger.Send(new StatusChangedMessage(new("Generate Scrivener reports completed", LogLevel.Info, true)));
-        _canExecuteCommands = true;
-    }
-
-    /// <summary>
-    /// Opens help menu
-    /// </summary>
-    private void LaunchGitHubPages()
-    {
-        _canExecuteCommands = false;
-        Messenger.Send(new StatusChangedMessage(new("Launching GitHub Pages User Manual", LogLevel.Info, true)));
-
-        Process.Start(new ProcessStartInfo()
-        {
-            FileName = @"https://Storybuilder-org.github.io/StoryCAD/",
-            UseShellExecute = true
-        });
-
-        Messenger.Send(new StatusChangedMessage(new("Launch default browser completed", LogLevel.Info, true)));
-
-        _canExecuteCommands = true;
-    }
-
-    /// <summary>
-    /// Verify that the tool being called has its prerequisites met.
-    /// </summary>
-    /// <param name="explorerViewOnly">This tool can only run in StoryExplorer view</param>
-    /// <param name="nodeRequired">A node (right-clicked or clicked) must be present</param>
-    /// <param name="checkOutlineIsOpen">A checks an outline is open (defaults to true)</param>
-    /// <returns>true if prerequisites are met</returns>
-    public bool VerifyToolUse(bool explorerViewOnly, bool nodeRequired, bool checkOutlineIsOpen = true)
-    {
-        try
-        {
-            if (explorerViewOnly && CurrentViewType != StoryViewType.ExplorerView)
-            {
-                Messenger.Send(new StatusChangedMessage(new("This tool can only be run in Story Explorer view", LogLevel.Warn)));
-                return false;
-            }
-
-            if (checkOutlineIsOpen)
-            {
-                if (StoryModel == null)
-                {
-                    Messenger.Send(new StatusChangedMessage(new("Open or create an outline first", LogLevel.Warn)));
-                    return false;
-                }
-                if (CurrentViewType == StoryViewType.ExplorerView && StoryModel.ExplorerView.Count == 0)
-                {
-                    Messenger.Send(new StatusChangedMessage(new("Open or create an outline first", LogLevel.Warn)));
-                    return false;
-                }
-                if (CurrentViewType == StoryViewType.NarratorView && StoryModel.NarratorView.Count == 0)
-                {
-                    Messenger.Send(new StatusChangedMessage(new("Open or create an outline first", LogLevel.Warn)));
-                    return false;
-                }
-            }
-            if (nodeRequired)
-            {
-                if (RightTappedNode == null) { RightTappedNode = CurrentNode; }
-                if (RightTappedNode == null)
-                {
-                    Messenger.Send(new StatusChangedMessage(new("You need to select a node first", LogLevel.Warn)));
-                    return false;
-                }
-            }
-            return true;
-        }
-        catch (Exception _ex)
-        {
-            Logger.LogException(LogLevel.Error, _ex, "Error in ShellVM.VerifyToolUse()");
-            return false; // Return false to prevent any issues.
-        }
     }
 
     #endregion  
@@ -1298,7 +624,7 @@ public class ShellViewModel : ObservableRecipient
         _sourceIndex = _sourceChildren.IndexOf(CurrentNode);
         _targetCollection = null;
         _targetIndex = -1;
-        StoryNodeItem _targetParent = CurrentNode.Parent.Parent;
+        StoryNodeItem targetParent = CurrentNode.Parent.Parent;
         // The source must become the parent's successor
         _targetCollection = CurrentNode.Parent.Parent.Children;
         _targetIndex = _targetCollection.IndexOf(CurrentNode.Parent) + 1;
@@ -1306,7 +632,7 @@ public class ShellViewModel : ObservableRecipient
         _sourceChildren.RemoveAt(_sourceIndex);
         if (_targetIndex == -1) { _targetCollection.Add(CurrentNode); }
         else { _targetCollection.Insert(_targetIndex, CurrentNode); }
-        CurrentNode.Parent = _targetParent;
+        CurrentNode.Parent = targetParent;
         ShowChange();
         Logger.Log(LogLevel.Info, $"Moving {CurrentNode.Name} left to parent {CurrentNode.Parent.Name}");
     }
@@ -1438,7 +764,7 @@ public class ShellViewModel : ObservableRecipient
         _sourceIndex = _sourceChildren.IndexOf(CurrentNode);
         _targetCollection = null;
         _targetIndex = -1;
-        StoryNodeItem _targetParent = CurrentNode.Parent;
+        StoryNodeItem targetParent = CurrentNode.Parent;
 
         if (_sourceIndex == 0)
         {
@@ -1448,13 +774,13 @@ public class ShellViewModel : ObservableRecipient
                 return;
             }
 
-            ObservableCollection<StoryNodeItem> _grandparentCollection = CurrentNode.Parent.Parent.Children;
-            int _siblingIndex = _grandparentCollection.IndexOf(CurrentNode.Parent) - 1;
+            ObservableCollection<StoryNodeItem> grandparentCollection = CurrentNode.Parent.Parent.Children;
+            int siblingIndex = grandparentCollection.IndexOf(CurrentNode.Parent) - 1;
 
-            if (_siblingIndex >= 0)
+            if (siblingIndex >= 0)
             {
-                _targetCollection = _grandparentCollection[_siblingIndex].Children;
-                _targetParent = _grandparentCollection[_siblingIndex];
+                _targetCollection = grandparentCollection[siblingIndex].Children;
+                targetParent = grandparentCollection[siblingIndex];
                 _targetIndex = _targetCollection.Count;
             }
             else
@@ -1477,7 +803,7 @@ public class ShellViewModel : ObservableRecipient
         else
             _targetCollection.Insert(_targetIndex, CurrentNode);
 
-        CurrentNode.Parent = _targetParent;
+        CurrentNode.Parent = targetParent;
         ShowChange();
         Logger.Log(LogLevel.Info, $"Moving {CurrentNode.Name} up to parent {CurrentNode.Parent.Name}");
     }
@@ -1508,32 +834,32 @@ public class ShellViewModel : ObservableRecipient
         _sourceIndex = _sourceChildren.IndexOf(CurrentNode);
         _targetCollection = null;
         _targetIndex = 0;
-        StoryNodeItem _targetParent = CurrentNode.Parent;
+        StoryNodeItem targetParent = CurrentNode.Parent;
 
         // If last child, must move to end parent's successor (sibling node).
         // If there are no siblings, we're at the bottom of the tree?
         if (_sourceIndex == _sourceChildren.Count - 1)
         {
             // Find the next sibling of the parent.
-            StoryNodeItem _nextParentSibling = GetNextSibling(CurrentNode.Parent);
+            StoryNodeItem nextParentSibling = GetNextSibling(CurrentNode.Parent);
 
             // If there's no next sibling, then we're at the bottom of the first root's children.
-            if (_nextParentSibling == null)
+            if (nextParentSibling == null)
             {
                 ShowStatusMessage("Cannot move down further", LogLevel.Warn);
                 return;
             }
 
             // If the next sibling is the TrashCan, disallow moving the node to the TrashCan.
-            if (_nextParentSibling.Type == StoryItemType.TrashCan)
+            if (nextParentSibling.Type == StoryItemType.TrashCan)
             {
                 ShowStatusMessage("Cannot move to trash", LogLevel.Warn);
                 return;
             }
 
             // If the next sibling is not the TrashCan, move the node to the beginning of its children.
-            _targetCollection = _nextParentSibling.Children;
-            _targetParent = _nextParentSibling;
+            _targetCollection = nextParentSibling.Children;
+            targetParent = nextParentSibling;
         }
         // Otherwise, move down a notch
         else
@@ -1543,7 +869,7 @@ public class ShellViewModel : ObservableRecipient
         }
         _sourceChildren.RemoveAt(_sourceIndex);
         _targetCollection.Insert(_targetIndex, CurrentNode);
-        CurrentNode.Parent = _targetParent;
+        CurrentNode.Parent = targetParent;
 
         ShowChange();
         Logger.Log(LogLevel.Info, $"Moving {CurrentNode.Name} down up to parent {CurrentNode.Parent.Name}");
@@ -2332,6 +1658,16 @@ public class ShellViewModel : ObservableRecipient
         }
     }
 
+    internal void LockCommands()
+    {
+        _canExecuteCommands = false;
+    }
+
+    internal void UnlockCommands()
+    {
+        _canExecuteCommands = false;
+    }
+
     #endregion
 
     #region Constructor(s)
@@ -2370,33 +1706,34 @@ public class ShellViewModel : ObservableRecipient
 
         _canExecuteCommands = true;
         TogglePaneCommand = new RelayCommand(TogglePane, () => _canExecuteCommands);
-        OpenUnifiedCommand = new RelayCommand(async () => await OpenUnifiedMenu(), () => _canExecuteCommands);
+        //OpenUnifiedCommand = new RelayCommand(async () => await OutlineManager.OpenUnifiedMenu(), () => _canExecuteCommands);
+        OpenUnifiedCommand = new AsyncRelayCommand(OutlineManager.OpenUnifiedMenu, canExecute: () => _canExecuteCommands);  
         CloseUnifiedCommand = new RelayCommand(CloseUnifiedMenu, () => _canExecuteCommands);
         NarrativeToolCommand = new RelayCommand(async () => await Ioc.Default.GetRequiredService<NarrativeToolVM>().OpenNarrativeTool(), () => _canExecuteCommands);
-        PrintNodeCommand = new RelayCommand(async () => await PrintCurrentNodeAsync(), () => _canExecuteCommands);
-        OpenFileCommand = new RelayCommand(async () => await OpenFile(), () => _canExecuteCommands);
-        SaveFileCommand = new RelayCommand(async () => await SaveFile(), () => _canExecuteCommands);
-        SaveAsCommand = new RelayCommand(SaveFileAs, () => _canExecuteCommands);
+        PrintNodeCommand = new RelayCommand(async () => await OutlineManager.PrintCurrentNodeAsync(), () => _canExecuteCommands);
+        OpenFileCommand = new RelayCommand(async () => await OutlineManager.OpenFile(), () => _canExecuteCommands);
+        SaveFileCommand = new RelayCommand(async () => await OutlineManager.SaveFile(), () => _canExecuteCommands);
+        SaveAsCommand = new RelayCommand(async () => OutlineManager.SaveFileAs(), () => _canExecuteCommands);
         CreateBackupCommand = new RelayCommand(async () => await CreateBackupNow(), () => _canExecuteCommands);
-        CloseCommand = new RelayCommand(CloseFile, () => _canExecuteCommands);
-        ExitCommand = new RelayCommand(ExitApp, () => _canExecuteCommands);
+        CloseCommand = new RelayCommand(async () => await OutlineManager.CloseFile(), () => _canExecuteCommands);
+        ExitCommand = new RelayCommand(async () => await OutlineManager.ExitApp(), () => _canExecuteCommands);
 
         // StoryCAD Collaborator
         CollaboratorCommand = new RelayCommand(LaunchCollaborator, () => _canExecuteCommands);
 
         // Tools commands
-        KeyQuestionsCommand = new RelayCommand(KeyQuestionsTool, () => _canExecuteCommands);
-        TopicsCommand = new RelayCommand(TopicsTool, () => _canExecuteCommands);
-        MasterPlotsCommand = new RelayCommand(MasterPlotTool, () => _canExecuteCommands);
-        DramaticSituationsCommand = new RelayCommand(DramaticSituationsTool, () => _canExecuteCommands);
-        StockScenesCommand = new RelayCommand(StockScenesTool, () => _canExecuteCommands);
+        KeyQuestionsCommand = new RelayCommand(async () => await OutlineManager.KeyQuestionsTool(), () => _canExecuteCommands);
+        TopicsCommand = new RelayCommand(async () => await OutlineManager.TopicsTool(), () => _canExecuteCommands);
+        MasterPlotsCommand = new RelayCommand(async () => await OutlineManager.MasterPlotTool(), () => _canExecuteCommands);
+        DramaticSituationsCommand = new RelayCommand(async () => await OutlineManager.DramaticSituationsTool(), () => _canExecuteCommands);
+        StockScenesCommand = new RelayCommand(async () => await OutlineManager.StockScenesTool(), () => _canExecuteCommands);
 
         PreferencesCommand = new RelayCommand(OpenPreferences, () => _canExecuteCommands);
 
         PrintReportsCommand = new RelayCommand(OpenPrintMenu, () => _canExecuteCommands);
-        ScrivenerReportsCommand = new RelayCommand(GenerateScrivenerReports, () => _canExecuteCommands);
+        ScrivenerReportsCommand = new RelayCommand(async () => await OutlineManager.GenerateScrivenerReports(), () => _canExecuteCommands);
 
-        HelpCommand = new RelayCommand(LaunchGitHubPages, () => _canExecuteCommands);
+        HelpCommand = new RelayCommand(async () => await OutlineManager.LaunchGitHubPages(), () => _canExecuteCommands);
 
         // Move StoryElement commands
         MoveLeftCommand = new RelayCommand(MoveTreeViewItemLeft, () => _canExecuteCommands);
@@ -2429,65 +1766,5 @@ public class ShellViewModel : ObservableRecipient
         ShellInstance = this;
     }
 
-    public void SearchNodes()
-    {
-        _canExecuteCommands = false;    //This prevents other commands from being used till this one is complete.
-        Logger.Log(LogLevel.Info, $"Search started, Searching for {FilterText}");
-        SaveModel();
-        if (DataSource == null || DataSource.Count == 0)
-        {
-            Logger.Log(LogLevel.Info, "Data source is null or Empty.");
-            Messenger.Send(new StatusChangedMessage(new("You need to load a story first!", LogLevel.Warn)));
-
-            _canExecuteCommands = true;
-            return;
-        }
-
-        int _searchTotal = 0;
-
-        foreach (StoryNodeItem _node in DataSource[0])
-        {
-            if (Search.SearchStoryElement(_node, FilterText, StoryModel)) //checks if node name contains the thing we are looking for
-            {
-                _searchTotal++;
-                if (Window.RequestedTheme == ElementTheme.Light)
-                {
-                    _node.Background = new SolidColorBrush(Colors.LightGoldenrodYellow);
-                }
-                else
-                {
-                    _node.Background = new SolidColorBrush(Colors.DarkGoldenrod);
-                } //Light Goldenrod is hard to read in dark theme
-                _node.IsExpanded = true;
-
-                StoryNodeItem _parent = _node.Parent;
-                if (_parent != null)
-                {
-                    while (!_parent.IsRoot)
-                    {
-                        _parent.IsExpanded = true;
-                        _parent = _parent.Parent;
-                    }
-
-                    if (_parent.IsRoot) { _parent.IsExpanded = true; }
-                }
-            }
-            else { _node.Background = null; }
-        }
-
-        switch (_searchTotal)
-        {
-            case 0:
-                Messenger.Send(new StatusChangedMessage(new("Found no matches", LogLevel.Info, true)));
-                break;
-            case 1:
-                Messenger.Send(new StatusChangedMessage(new("Found 1 match", LogLevel.Info, true)));
-                break;
-            default:
-                Messenger.Send(new StatusChangedMessage(new($"Found {_searchTotal} matches", LogLevel.Info, true)));
-                break;
-        }
-        _canExecuteCommands = true;    //Enables other commands from being used till this one is complete.
-    }
     #endregion
 }

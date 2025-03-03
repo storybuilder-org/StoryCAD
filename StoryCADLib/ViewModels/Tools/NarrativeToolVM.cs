@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StoryCAD.Services.Dialogs.Tools;
+using StoryCAD.ViewModels.SubViewModels;
 
 namespace StoryCAD.ViewModels.Tools;
 
@@ -66,7 +67,7 @@ public class NarrativeToolVM: ObservableRecipient
     /// </summary>
     public async Task OpenNarrativeTool()
     {
-        if (_shellVM.VerifyToolUse(false, false) && _shellVM._canExecuteCommands)
+        if (_shellVM.OutlineManager.VerifyToolUse(false, false) && _shellVM._canExecuteCommands)
         {
             _shellVM._canExecuteCommands = false;
             try
@@ -81,7 +82,7 @@ public class NarrativeToolVM: ObservableRecipient
             }
             catch (Exception ex)
             {
-                _logger.LogException(LogLevel.Error, ex, "Error in ShellVM.OpenNarrativeTool()");
+                _logger.LogException(LogLevel.Error, ex, "Error in OpenNarrativeTool()");
             }
 
             _shellVM._canExecuteCommands = true;

@@ -147,7 +147,7 @@ public partial class Windowing : ObservableRecipient
         //Save file, close current node since it won't be the right theme.
         if (ShellVM.StoryModel != null && ShellVM.DataSource != null && ShellVM.DataSource.Count > 0)
         {
-            await Ioc.Default.GetRequiredService<ShellViewModel>().SaveFile();
+            await Ioc.Default.GetRequiredService<OutlineViewModel>().SaveFile();
             Ioc.Default.GetRequiredService<ShellViewModel>().ShowHomePage();
         }
 	}
