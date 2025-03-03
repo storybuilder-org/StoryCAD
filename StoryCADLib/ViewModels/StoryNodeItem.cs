@@ -4,6 +4,7 @@ using Windows.Data.Xml.Dom;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
 using StoryCAD.Services;
+using StoryCAD.ViewModels.SubViewModels;
 
 namespace StoryCAD.ViewModels;
 
@@ -37,6 +38,7 @@ public class StoryNodeItem : INotifyPropertyChanged
 {
     private readonly ILogService _logger;
     private readonly ShellViewModel _shellVM = Ioc.Default.GetRequiredService<ShellViewModel>();
+    private readonly OutlineViewModel _outlineVM = Ioc.Default.GetRequiredService<OutlineViewModel>();
 
     // is it INavigable?
     public event PropertyChangedEventHandler PropertyChanged;
@@ -426,8 +428,8 @@ public class StoryNodeItem : INotifyPropertyChanged
 
         //Set source collection to either narrative view or explorer view, we use the first item [0] so we don't delete from trash.
         StoryNodeItem _sourceCollection;
-        if (storyView == StoryViewType.ExplorerView) { _sourceCollection = _shellVM.StoryModel.ExplorerView[0]; }
-        else { _sourceCollection = _shellVM.StoryModel.NarratorView[0]; }
+        if (storyView == StoryViewType.ExplorerView) { _sourceCollection = _outlineVM.StoryModel.ExplorerView[0]; }
+        else { _sourceCollection = _outlineVM.StoryModel.NarratorView[0]; }
 
         if (_sourceCollection.Children.Contains(this))
         {
@@ -474,8 +476,8 @@ public class StoryNodeItem : INotifyPropertyChanged
     {
         if (storyView == StoryViewType.ExplorerView)
         {
-            _shellVM.StoryModel.ExplorerView[1].Children.Add(this);
-            Parent = _shellVM.StoryModel.ExplorerView[1];
+            _outlineVM.StoryModel.ExplorerView[1].Children.Add(this);
+            Parent = _outlineVM.StoryModel.ExplorerView[1];
         }
         //Narrative view nodes are not added to trash.
     }

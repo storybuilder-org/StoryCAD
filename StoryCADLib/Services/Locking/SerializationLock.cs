@@ -1,13 +1,14 @@
-﻿
-using StoryCAD.Services.Backup;
+﻿using StoryCAD.Services.Backup;
+using StoryCAD.ViewModels.SubViewModels;
 
 namespace StoryCAD.Services.Locking;
 public class SerializationLock : IDisposable
 {
     private readonly AutoSaveService _autoSaveService;
     private readonly BackupService _backupService;
-    private readonly LogService _logger; // or however you perform logging
+    private readonly LogService _logger;
     private readonly ShellViewModel shellVm;
+    private readonly OutlineViewModel outlineVm;
     private bool _disposed;
 
     public SerializationLock(AutoSaveService autoSaveService, BackupService backupService, LogService logger)
@@ -28,13 +29,15 @@ public class SerializationLock : IDisposable
     {
         // Set your _canExecuteCommands flag to false
         // (Assuming you can access it via a shared service or static member)
-        shellVm._canExecuteCommands = false;
+        outlineVm._canExecuteCommands = false;
     }
 
+    /// <summary>
+    /// Re-enables commands.
+    /// </summary>
     public void EnableCommands()
     {
-        // Re-enable the commands after the operation.
-        shellVm._canExecuteCommands = true;
+        outlineVm._canExecuteCommands = true;
     }
 
     public void Dispose()

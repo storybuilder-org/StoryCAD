@@ -5,13 +5,14 @@ using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.UI.Xaml;
 using StoryCAD.Services.Messages;
 using StoryCAD.Services.Navigation;
+using StoryCAD.ViewModels.SubViewModels;
 
 namespace StoryCAD.ViewModels;
 
 public class SceneViewModel : ObservableRecipient, INavigable
 {
     #region Fields
-
+    OutlineViewModel OutlineVM = Ioc.Default.GetRequiredService<OutlineViewModel>();
     private readonly LogService _logger;
     private bool _changeable; // process property changes for this story element
     private bool _changed;    // this story element has changed
@@ -401,9 +402,8 @@ public class SceneViewModel : ObservableRecipient, INavigable
     {
         _changeable = false;
         _changed = false;
-
-        Characters = Ioc.Default.GetService<ShellViewModel>()!.StoryModel.StoryElements.Characters;
-        Settings = Ioc.Default.GetService<ShellViewModel>()!.StoryModel.StoryElements.Settings;
+        Characters = OutlineVM.StoryModel.StoryElements.Characters;
+        Settings = OutlineVM.StoryModel.StoryElements.Settings;
 
         Uuid = Model.Uuid;
         Name = Model.Name;
@@ -419,7 +419,7 @@ public class SceneViewModel : ObservableRecipient, INavigable
         // The list of cast members is loaded from the Model
         LoadCastList();
         // CharacterList is the StoryModel's list of all Character StoryElements
-        CharacterList = ShellViewModel.ShellInstance.StoryModel.StoryElements.Characters;
+        CharacterList = OutlineVM.StoryModel.StoryElements.Characters;
         ViewpointCharacter = Model.ViewpointCharacter; // Add viewpoint character if missing
         SelectedViewpointCharacter = Characters.FirstOrDefault(p => p.Uuid == ViewpointCharacter);
         // Now set the correct view and initialize the cast elements    
@@ -645,7 +645,7 @@ public class SceneViewModel : ObservableRecipient, INavigable
     {
         VpCharTipIsOpen = false;
 
-        var shellModel = ShellViewModel.GetModel();
+        var shellModel = Ioc.Default.GetRequiredService<OutlineViewModel>().StoryModel;
         var node = shellModel.ExplorerView.FirstOrDefault();
         if (node == null)
         {
@@ -750,7 +750,7 @@ public class SceneViewModel : ObservableRecipient, INavigable
 
         // Initialize cast member lists / display
         CastList = new ObservableCollection<StoryElement>();
-        CharacterList = ShellViewModel.ShellInstance.StoryModel.StoryElements.Characters;
+        CharacterList = OutlineVM.StoryModel.StoryElements.Characters;
         CastSource = AllCharacters ? CharacterList : CastList;
         AllCharacters = true;
 

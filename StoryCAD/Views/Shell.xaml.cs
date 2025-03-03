@@ -15,6 +15,7 @@ using StoryCAD.Exceptions;
 using StoryCAD.Services;
 using StoryCAD.Services.Dialogs;
 using StoryCAD.Services.Ratings;
+using StoryCAD.ViewModels.SubViewModels;
 using StoryCAD.ViewModels.Tools;
 
 namespace StoryCAD.Views;
@@ -24,6 +25,7 @@ public sealed partial class Shell
     public ShellViewModel ShellVm => Ioc.Default.GetService<ShellViewModel>();
     public Windowing Windowing => Ioc.Default.GetService<Windowing>();
     public UnifiedVM UnifiedVm => Ioc.Default.GetService<UnifiedVM>();
+    public OutlineViewModel OutlineVM => Ioc.Default.GetService<OutlineViewModel>();
     public LogService Logger;
     public PreferencesModel Preferences = Ioc.Default.GetRequiredService<PreferenceService>().Model;
 
@@ -76,9 +78,9 @@ public sealed partial class Shell
 
         if (!await Ioc.Default.GetRequiredService<WebViewModel>().CheckWebViewState())
         {
-            ShellVm._canExecuteCommands = false;
+            OutlineVM._canExecuteCommands = false;
             await Ioc.Default.GetRequiredService<WebViewModel>().ShowWebViewDialog();
-            ShellVm._canExecuteCommands = true;
+            OutlineVM._canExecuteCommands = true;
         }
 
         //Shows changelog if the app has been updated since the last launch.

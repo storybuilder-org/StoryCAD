@@ -117,18 +117,17 @@ public partial class Windowing : ObservableRecipient
     {
         string BaseTitle = "StoryCAD ";
 
-        //Devloper/Unoffical Build title warning
+        //Developer Build title warning
         if (Ioc.Default.GetRequiredService<AppState>().DeveloperBuild)
         {
             BaseTitle += "(DEV BUILD) ";
         }
 
         //Open file check
-        ShellViewModel ShellVM = Ioc.Default.GetRequiredService<ShellViewModel>();
-        if (ShellVM.StoryModel != null && ShellVM.DataSource != null && ShellVM.DataSource.Count > 0)
+        OutlineViewModel outlineVM = Ioc.Default.GetRequiredService<OutlineViewModel>();
+        if (!string.IsNullOrEmpty(outlineVM.StoryModelFile))
         {
-            BaseTitle += $"- Currently editing {Path.GetFileNameWithoutExtension(
-                Ioc.Default.GetRequiredService<OutlineViewModel>().StoryModelFile)} ";
+            BaseTitle += $"- Currently editing {Path.GetFileNameWithoutExtension(outlineVM.StoryModelFile)}";
         }
 
         //Set window Title.
@@ -143,9 +142,9 @@ public partial class Windowing : ObservableRecipient
     {
         (MainWindow.Content as FrameworkElement).RequestedTheme = RequestedTheme;
 
-        ShellViewModel ShellVM = Ioc.Default.GetRequiredService<ShellViewModel>();
+        OutlineViewModel outlineVM = Ioc.Default.GetRequiredService<OutlineViewModel>();
         //Save file, close current node since it won't be the right theme.
-        if (ShellVM.StoryModel != null && ShellVM.DataSource != null && ShellVM.DataSource.Count > 0)
+        if (!string.IsNullOrEmpty(outlineVM.StoryModelFile))
         {
             await Ioc.Default.GetRequiredService<OutlineViewModel>().SaveFile();
             Ioc.Default.GetRequiredService<ShellViewModel>().ShowHomePage();

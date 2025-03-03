@@ -8,6 +8,7 @@ using StoryCAD.Collaborator.ViewModels;
 using StoryCAD.Services.Backup;
 using WinUIEx;
 using Windows.ApplicationModel.AppExtensions;
+using StoryCAD.ViewModels.SubViewModels;
 
 namespace StoryCAD.Services.Collaborator;
 
@@ -240,7 +241,7 @@ public class CollaboratorService
             Ioc.Default.GetRequiredService<AutoSaveService>().StartAutoSave();
         }
         //Reenable StoryCAD buttons
-        Ioc.Default.GetRequiredService<ShellViewModel>()._canExecuteCommands = true;
+        Ioc.Default.GetRequiredService<OutlineViewModel>()._canExecuteCommands = true;
         logger.Log(LogLevel.Info, "Async re-enabled.");
     }
 

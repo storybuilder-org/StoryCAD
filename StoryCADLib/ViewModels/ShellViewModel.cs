@@ -38,8 +38,6 @@ public class ShellViewModel : ObservableRecipient
     public OutlineViewModel OutlineManager { get; }   
     #endregion
 
-    public bool _canExecuteCommands;
-
     private const string HomePage = "HomePage";
     private const string OverviewPage = "OverviewPage";
     private const string ProblemPage = "ProblemPage";
@@ -78,9 +76,6 @@ public class ShellViewModel : ObservableRecipient
     private readonly DispatcherTimer _statusTimer;
 
     public CollaboratorArgs CollabArgs;
-
-    // The current story outline being processed. 
-    public StoryModel StoryModel;
    
     public readonly ScrivenerIo Scrivener;
 
@@ -173,7 +168,6 @@ public class ShellViewModel : ObservableRecipient
     /// DataSource is bound to Shell's NavigationTree TreeView control and
     /// contains either the StoryExplorer (ExplorerView) or StoryNarrator (NarratorView)
     /// ObservableCollection of StoryNodeItem instances.
-    /// ///
     /// </summary>
     private ObservableCollection<StoryNodeItem> _dataSource;
     public ObservableCollection<StoryNodeItem> DataSource
@@ -181,9 +175,9 @@ public class ShellViewModel : ObservableRecipient
         get => _dataSource;
         set
         {
-            _canExecuteCommands = false;
+            OutlineManager._canExecuteCommands = false;
             SetProperty(ref _dataSource, value);
-            _canExecuteCommands = true;
+            OutlineManager._canExecuteCommands = true;
         }
     }
 
@@ -337,11 +331,6 @@ public class ShellViewModel : ObservableRecipient
     // Static access to the ShellViewModel singleton for
     // change tracking at the application level
     public static ShellViewModel ShellInstance;
-
-    public static StoryModel GetModel()
-    {
-        return ShellInstance.StoryModel;
-    }
 
     /// <summary>
     /// If a story element is changed, identify that
@@ -584,7 +573,7 @@ public class ShellViewModel : ObservableRecipient
     /// </summary>
     private void LaunchCollaborator()
     {
-        if (_canExecuteCommands)
+        if (OutlineManager._canExecuteCommands)
         {
             if (CurrentNode == null)
             {
@@ -909,279 +898,6 @@ public class ShellViewModel : ObservableRecipient
 
     #endregion
 
-    #region Add and Remove Story Element Commands
-
-    private void AddFolder()
-    {
-        TreeViewNodeClicked(AddStoryElement(StoryItemType.Folder), false);
-    }
-
-    private void AddSection()
-    {
-        TreeViewNodeClicked(AddStoryElement(StoryItemType.Section), false);
-    }
-
-    private void AddProblem()
-    {
-        TreeViewNodeClicked(AddStoryElement(StoryItemType.Problem), false);
-    }
-
-    private void AddCharacter()
-    {
-        TreeViewNodeClicked(AddStoryElement(StoryItemType.Character), false);
-    }
-    private void AddWeb()
-    {
-        TreeViewNodeClicked(AddStoryElement(StoryItemType.Web), false);
-    }
-    private void AddNotes()
-    {
-        TreeViewNodeClicked(AddStoryElement(StoryItemType.Notes), false);
-    }
-
-    private void AddSetting()
-    {
-        TreeViewNodeClicked(AddStoryElement(StoryItemType.Setting), false);
-    }
-
-    private void AddScene()
-    {
-        TreeViewNodeClicked(AddStoryElement(StoryItemType.Scene), false);
-    }
-
-    private StoryNodeItem AddStoryElement(StoryItemType typeToAdd)
-    {
-        Logger.Log(LogLevel.Trace, "AddStoryElement");
-        _canExecuteCommands = false;
-        string _msg = $"Adding StoryElement {typeToAdd}";
-        Logger.Log(LogLevel.Info, _msg);
-        if (RightTappedNode == null)
-        {
-            Messenger.Send(new StatusChangedMessage(new("Right tap a node to add to", LogLevel.Warn)));
-            Logger.Log(LogLevel.Info, "Add StoryElement failed- node not selected");
-            _canExecuteCommands = true;
-            return null;
-        }
-
-        if (StoryNodeItem.RootNodeType(RightTappedNode) == StoryItemType.TrashCan)
-        {
-            Messenger.Send(new StatusChangedMessage(new("You can't add to Deleted Items", LogLevel.Warn)));
-            Logger.Log(LogLevel.Info, "Add StoryElement failed- can't add to TrashCan");
-            _canExecuteCommands = true;
-            return null;
-        }
-
-        StoryNodeItem _newNode = null;
-        switch (typeToAdd)
-        {
-            case StoryItemType.Folder:
-                _newNode = new StoryNodeItem(new FolderModel(StoryModel), RightTappedNode);
-                break;
-            case StoryItemType.Section:
-                _newNode = new StoryNodeItem(new FolderModel("New Section", StoryModel, StoryItemType.Folder), RightTappedNode, StoryItemType.Folder);
-                break;
-            case StoryItemType.Problem:
-                _newNode = new StoryNodeItem(new ProblemModel(StoryModel), RightTappedNode);
-                break;
-            case StoryItemType.Character:
-                _newNode = new StoryNodeItem(new CharacterModel(StoryModel), RightTappedNode);
-                break;
-            case StoryItemType.Setting:
-                _newNode = new StoryNodeItem(new SettingModel(StoryModel), RightTappedNode);
-                break;
-            case StoryItemType.Scene:
-                _newNode = new StoryNodeItem(new SceneModel(StoryModel), RightTappedNode);
-                break;
-            case StoryItemType.Web:
-                _newNode = new StoryNodeItem(new WebModel(StoryModel), RightTappedNode);
-                break;
-            case StoryItemType.Notes:
-                _newNode = new StoryNodeItem(new FolderModel("New Note", StoryModel, StoryItemType.Notes), RightTappedNode, StoryItemType.Notes);
-                break;
-        }
-
-        if (_newNode != null)
-        {
-            _newNode.Parent.IsExpanded = true;
-            _newNode.IsRoot = false; //Only an overview node can be a root, which cant be created normally
-            _newNode.IsSelected = false;
-            _newNode.Background = Window.ContrastColor;
-            NewNodeHighlightCache.Add(_newNode);
-        }
-        else { return null; }
-
-        Messenger.Send(new IsChangedMessage(true));
-        Messenger.Send(new StatusChangedMessage(new($"Added new {typeToAdd}", LogLevel.Info, true)));
-        _canExecuteCommands = true;
-
-        return _newNode;
-    }
-
-    private async void RemoveStoryElement()
-    {
-        Logger.Log(LogLevel.Trace, "RemoveStoryElement");
-        if (RightTappedNode == null)
-        {
-            StatusMessage = "Right tap a node to delete";
-            return;
-        }
-        if (StoryNodeItem.RootNodeType(RightTappedNode) == StoryItemType.TrashCan)
-        {
-            StatusMessage = "You can't delete from the trash!";
-            return;
-        }
-        if (RightTappedNode.IsRoot)
-        {
-            StatusMessage = "You can't delete a root node!";
-            return;
-        }
-
-        List<StoryNodeItem> _foundNodes = new();
-        foreach (StoryNodeItem _node in DataSource[0]) //Gets all nodes in the tree #TODO: MAKE RECURSIVE
-        {
-            if (Ioc.Default.GetRequiredService<DeletionService>().SearchStoryElement(_node, RightTappedNode.Uuid, StoryModel))
-            {
-                _foundNodes.Add(_node);
-            }
-        }
-
-        bool _delete = true;
-        //Only warns if it finds a node its referenced in
-        if (_foundNodes.Count >= 1)
-        {
-            //Creates UI
-            StackPanel _content = new();
-            _content.Children.Add(new TextBlock { Text = "The following nodes will be updated to remove references to this node:" });
-            _content.Children.Add(new ListView { ItemsSource = _foundNodes, HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center, Height = 300, Width = 480 });
-
-            //Creates dialog and then shows it
-            ContentDialog _Dialog = new()
-            {
-                Content = _content,
-                Title = "Are you sure you want to delete this node?",
-                Width = 500,
-                PrimaryButtonText = "Confirm",
-                SecondaryButtonText = "Cancel"
-            };
-            if (await Ioc.Default.GetRequiredService<Windowing>().ShowContentDialog(_Dialog) == ContentDialogResult.Secondary) { _delete = false; }
-        }
-
-
-        if (_delete)
-        {
-            foreach (StoryNodeItem _node in _foundNodes)
-            {
-                Ioc.Default.GetRequiredService<DeletionService>().SearchStoryElement(_node, RightTappedNode.Uuid, StoryModel, true);
-            }
-
-            if (CurrentView.Equals("Story Explorer View")) { RightTappedNode.Delete(StoryViewType.ExplorerView); }
-            else { RightTappedNode.Delete(StoryViewType.NarratorView); }
-        }
-    }
-
-    private void RestoreStoryElement()
-    {
-        Logger.Log(LogLevel.Trace, "RestoreStoryElement");
-        if (RightTappedNode == null)
-        {
-            Messenger.Send(new StatusChangedMessage(new("Right tap a node to restore", LogLevel.Warn)));
-            return;
-        }
-        if (StoryNodeItem.RootNodeType(RightTappedNode) != StoryItemType.TrashCan)
-        {
-            Messenger.Send(new StatusChangedMessage(new("You can only restore from Deleted StoryElements", LogLevel.Warn)));
-            return;
-        }
-
-        if (RightTappedNode.IsRoot)
-        {
-            Messenger.Send(new StatusChangedMessage(new("You can't restore a root node!", LogLevel.Warn)));
-            return;
-        }
-
-        //TODO: Add dialog to confirm restore
-        ObservableCollection<StoryNodeItem> _target = DataSource[0].Children;
-        DataSource[1].Children.Remove(RightTappedNode);
-        _target.Add(RightTappedNode);
-        RightTappedNode.Parent = DataSource[0];
-        Messenger.Send(new StatusChangedMessage(new($"Restored node {RightTappedNode.Name}", LogLevel.Info, true)));
-    }
-
-    /// <summary>
-    /// Add a Scene StoryNodeItem to the end of the Narrative view
-    /// by copying from the Scene's StoryNodeItem in the ExplorerView
-    /// view.
-    /// </summary>
-    private void CopyToNarrative()
-    {
-        Logger.Log(LogLevel.Trace, "CopyToNarrative");
-        if (RightTappedNode == null)
-        {
-            Messenger.Send(new StatusChangedMessage(new("Select a node to copy", LogLevel.Info)));
-            return;
-        }
-        if (RightTappedNode.Type != StoryItemType.Scene)
-        {
-            Messenger.Send(new StatusChangedMessage(new("You can only copy a scene", LogLevel.Warn)));
-            return;
-        }
-
-        SceneModel _sceneVar = (SceneModel)StoryModel.StoryElements.StoryElementGuids[RightTappedNode.Uuid];
-        _ = new StoryNodeItem(_sceneVar, StoryModel.NarratorView[0]);
-        Messenger.Send(new StatusChangedMessage(new($"Copied node {RightTappedNode.Name} to Narrative View", LogLevel.Info, true)));
-    }
-
-    /// <summary>
-    /// Clears trash
-    /// </summary>
-    private void EmptyTrash()
-    {
-        if (DataSource == null)
-        {
-            Messenger.Send(new StatusChangedMessage(new("You need to load a story first!", LogLevel.Warn)));
-            Logger.Log(LogLevel.Info, "Failed to empty trash as DataSource is null. (Is a story loaded?)");
-            return;
-        }
-
-        StatusMessage = "Trash Emptied.";
-        Logger.Log(LogLevel.Info, "Emptied Trash.");
-        DataSource[1].Children.Clear();
-    }
-
-    /// <summary>
-    /// Remove a TreeViewItem from the Narrative view for a copied Scene.
-    /// </summary>
-    private void RemoveFromNarrative()
-    {
-        Logger.Log(LogLevel.Trace, "RemoveFromNarrative");
-
-        if (RightTappedNode == null)
-        {
-            Messenger.Send(new StatusChangedMessage(new("Select a node to remove", LogLevel.Info)));
-            return;
-        }
-        if (RightTappedNode.Type != StoryItemType.Scene)
-        {
-            Messenger.Send(new StatusChangedMessage(new("You can only remove a Scene copy", LogLevel.Info)));
-            return;
-        }
-
-        foreach (StoryNodeItem _item in StoryModel.NarratorView[0].Children.ToList())
-        {
-            if (_item.Uuid == RightTappedNode.Uuid)
-            {
-                StoryModel.NarratorView[0].Children.Remove(_item);
-                Messenger.Send(new StatusChangedMessage(new($"Removed node {RightTappedNode.Name} from Narrative View", LogLevel.Info, true)));
-                return;
-            }
-        }
-
-        Messenger.Send(new StatusChangedMessage(new($"Node {RightTappedNode.Name} not in Narrative View", LogLevel.Info, true)));
-
-    }
-
-    #endregion
-
     public void ViewChanged()
     {
         if (DataSource == null || DataSource.Count == 0)
@@ -1279,6 +995,22 @@ public class ShellViewModel : ObservableRecipient
                 $"- For reference RightTappedNode is " + RightTappedNode);
         }
 
+    }
+
+    /// <summary>
+    /// Opens help menu in the users default browser.
+    /// </summary>
+    public void LaunchGitHubPages()
+    {
+        Messenger.Send(new StatusChangedMessage(new("Launching GitHub Pages User Manual", LogLevel.Info, true)));
+
+        Process.Start(new ProcessStartInfo
+        {
+            FileName = "https://Storybuilder-org.github.io/StoryCAD/",
+            UseShellExecute = true
+        });
+
+        Messenger.Send(new StatusChangedMessage(new("Launch default browser completed", LogLevel.Info, true)));
     }
 
     public void ShowConnectionStatus()
@@ -1660,12 +1392,12 @@ public class ShellViewModel : ObservableRecipient
 
     internal void LockCommands()
     {
-        _canExecuteCommands = false;
+        OutlineManager._canExecuteCommands = false;
     }
 
     internal void UnlockCommands()
     {
-        _canExecuteCommands = false;
+        OutlineManager._canExecuteCommands = false;
     }
 
     #endregion
@@ -1704,58 +1436,58 @@ public class ShellViewModel : ObservableRecipient
 
         Messenger.Send(new StatusChangedMessage(new("Ready", LogLevel.Info)));
 
-        _canExecuteCommands = true;
-        TogglePaneCommand = new RelayCommand(TogglePane, () => _canExecuteCommands);
-        //OpenUnifiedCommand = new RelayCommand(async () => await OutlineManager.OpenUnifiedMenu(), () => _canExecuteCommands);
-        OpenUnifiedCommand = new AsyncRelayCommand(OutlineManager.OpenUnifiedMenu, canExecute: () => _canExecuteCommands);  
-        CloseUnifiedCommand = new RelayCommand(CloseUnifiedMenu, () => _canExecuteCommands);
-        NarrativeToolCommand = new RelayCommand(async () => await Ioc.Default.GetRequiredService<NarrativeToolVM>().OpenNarrativeTool(), () => _canExecuteCommands);
-        PrintNodeCommand = new RelayCommand(async () => await OutlineManager.PrintCurrentNodeAsync(), () => _canExecuteCommands);
-        OpenFileCommand = new RelayCommand(async () => await OutlineManager.OpenFile(), () => _canExecuteCommands);
-        SaveFileCommand = new RelayCommand(async () => await OutlineManager.SaveFile(), () => _canExecuteCommands);
-        SaveAsCommand = new RelayCommand(async () => OutlineManager.SaveFileAs(), () => _canExecuteCommands);
-        CreateBackupCommand = new RelayCommand(async () => await CreateBackupNow(), () => _canExecuteCommands);
-        CloseCommand = new RelayCommand(async () => await OutlineManager.CloseFile(), () => _canExecuteCommands);
-        ExitCommand = new RelayCommand(async () => await OutlineManager.ExitApp(), () => _canExecuteCommands);
+        OutlineManager._canExecuteCommands = true;
+        TogglePaneCommand = new RelayCommand(TogglePane, () => OutlineManager._canExecuteCommands);
+        //OpenUnifiedCommand = new RelayCommand(async () => await OutlineManager.OpenUnifiedMenu(), () => OutlineManager._canExecuteCommands);
+        OpenUnifiedCommand = new AsyncRelayCommand(OutlineManager.OpenUnifiedMenu, canExecute: () => OutlineManager._canExecuteCommands);  
+        CloseUnifiedCommand = new RelayCommand(CloseUnifiedMenu, () => OutlineManager._canExecuteCommands);
+        NarrativeToolCommand = new RelayCommand(async () => await Ioc.Default.GetRequiredService<NarrativeToolVM>().OpenNarrativeTool(), () => OutlineManager._canExecuteCommands);
+        PrintNodeCommand = new RelayCommand(async () => await OutlineManager.PrintCurrentNodeAsync(), () => OutlineManager._canExecuteCommands);
+        OpenFileCommand = new RelayCommand(async () => await OutlineManager.OpenFile(), () => OutlineManager._canExecuteCommands);
+        SaveFileCommand = new RelayCommand(async () => await OutlineManager.SaveFile(), () => OutlineManager._canExecuteCommands);
+        SaveAsCommand = new RelayCommand(async () => OutlineManager.SaveFileAs(), () => OutlineManager._canExecuteCommands);
+        CreateBackupCommand = new RelayCommand(async () => await CreateBackupNow(), () => OutlineManager._canExecuteCommands);
+        CloseCommand = new RelayCommand(async () => await OutlineManager.CloseFile(), () => OutlineManager._canExecuteCommands);
+        ExitCommand = new RelayCommand(async () => await OutlineManager.ExitApp(), () => OutlineManager._canExecuteCommands);
 
         // StoryCAD Collaborator
-        CollaboratorCommand = new RelayCommand(LaunchCollaborator, () => _canExecuteCommands);
+        CollaboratorCommand = new RelayCommand(LaunchCollaborator, () => OutlineManager._canExecuteCommands);
 
         // Tools commands
-        KeyQuestionsCommand = new RelayCommand(async () => await OutlineManager.KeyQuestionsTool(), () => _canExecuteCommands);
-        TopicsCommand = new RelayCommand(async () => await OutlineManager.TopicsTool(), () => _canExecuteCommands);
-        MasterPlotsCommand = new RelayCommand(async () => await OutlineManager.MasterPlotTool(), () => _canExecuteCommands);
-        DramaticSituationsCommand = new RelayCommand(async () => await OutlineManager.DramaticSituationsTool(), () => _canExecuteCommands);
-        StockScenesCommand = new RelayCommand(async () => await OutlineManager.StockScenesTool(), () => _canExecuteCommands);
+        KeyQuestionsCommand = new RelayCommand(async () => await OutlineManager.KeyQuestionsTool(), () => OutlineManager._canExecuteCommands);
+        TopicsCommand = new RelayCommand(async () => await OutlineManager.TopicsTool(), () => OutlineManager._canExecuteCommands);
+        MasterPlotsCommand = new RelayCommand(async () => await OutlineManager.MasterPlotTool(), () => OutlineManager._canExecuteCommands);
+        DramaticSituationsCommand = new RelayCommand(async () => await OutlineManager.DramaticSituationsTool(), () => OutlineManager._canExecuteCommands);
+        StockScenesCommand = new RelayCommand(async () => await OutlineManager.StockScenesTool(), () => OutlineManager._canExecuteCommands);
 
-        PreferencesCommand = new RelayCommand(OpenPreferences, () => _canExecuteCommands);
+        PreferencesCommand = new RelayCommand(OpenPreferences, () => OutlineManager._canExecuteCommands);
 
-        PrintReportsCommand = new RelayCommand(OpenPrintMenu, () => _canExecuteCommands);
-        ScrivenerReportsCommand = new RelayCommand(async () => await OutlineManager.GenerateScrivenerReports(), () => _canExecuteCommands);
+        PrintReportsCommand = new RelayCommand(OpenPrintMenu, () => OutlineManager._canExecuteCommands);
+        ScrivenerReportsCommand = new RelayCommand(async () => await OutlineManager.GenerateScrivenerReports(), () => OutlineManager._canExecuteCommands);
 
-        HelpCommand = new RelayCommand(async () => await OutlineManager.LaunchGitHubPages(), () => _canExecuteCommands);
+        HelpCommand = new RelayCommand(LaunchGitHubPages);
 
         // Move StoryElement commands
-        MoveLeftCommand = new RelayCommand(MoveTreeViewItemLeft, () => _canExecuteCommands);
-        MoveRightCommand = new RelayCommand(MoveTreeViewItemRight, () => _canExecuteCommands);
-        MoveUpCommand = new RelayCommand(MoveTreeViewItemUp, () => _canExecuteCommands);
-        MoveDownCommand = new RelayCommand(MoveTreeViewItemDown, () => _canExecuteCommands);
+        MoveLeftCommand = new RelayCommand(MoveTreeViewItemLeft, () => OutlineManager._canExecuteCommands);
+        MoveRightCommand = new RelayCommand(MoveTreeViewItemRight, () => OutlineManager._canExecuteCommands);
+        MoveUpCommand = new RelayCommand(MoveTreeViewItemUp, () => OutlineManager._canExecuteCommands);
+        MoveDownCommand = new RelayCommand(MoveTreeViewItemDown, () => OutlineManager._canExecuteCommands);
         // Add StoryElement commands
-        AddFolderCommand = new RelayCommand(AddFolder, () => _canExecuteCommands);
-        AddSectionCommand = new RelayCommand(AddSection, () => _canExecuteCommands);
-        AddProblemCommand = new RelayCommand(AddProblem, () => _canExecuteCommands);
-        AddCharacterCommand = new RelayCommand(AddCharacter, () => _canExecuteCommands);
-        AddWebCommand = new RelayCommand(AddWeb, () => _canExecuteCommands);
-        AddNotesCommand = new RelayCommand(AddNotes, () => _canExecuteCommands);
-        AddSettingCommand = new RelayCommand(AddSetting, () => _canExecuteCommands);
-        AddSceneCommand = new RelayCommand(AddScene, () => _canExecuteCommands);
+        AddFolderCommand = new RelayCommand(OutlineManager.AddFolder, () => OutlineManager._canExecuteCommands);
+        AddSectionCommand = new RelayCommand(OutlineManager.AddSection, () => OutlineManager._canExecuteCommands);
+        AddProblemCommand = new RelayCommand(OutlineManager.AddProblem, () => OutlineManager._canExecuteCommands);
+        AddCharacterCommand = new RelayCommand(OutlineManager.AddCharacter, () => OutlineManager._canExecuteCommands);
+        AddWebCommand = new RelayCommand(OutlineManager.AddWeb, () => OutlineManager._canExecuteCommands);
+        AddNotesCommand = new RelayCommand(OutlineManager.AddNotes, () => OutlineManager._canExecuteCommands);
+        AddSettingCommand = new RelayCommand(OutlineManager.AddSetting, () => OutlineManager._canExecuteCommands);
+        AddSceneCommand = new RelayCommand(OutlineManager.AddScene, () => OutlineManager._canExecuteCommands);
         // Remove Story Element command (move to trash)
-        RemoveStoryElementCommand = new RelayCommand(RemoveStoryElement, () => _canExecuteCommands);
-        RestoreStoryElementCommand = new RelayCommand(RestoreStoryElement, () => _canExecuteCommands);
-        EmptyTrashCommand = new RelayCommand(EmptyTrash, () => _canExecuteCommands);
+        RemoveStoryElementCommand = new RelayCommand(OutlineManager.RemoveStoryElement, () => OutlineManager._canExecuteCommands);
+        RestoreStoryElementCommand = new RelayCommand(OutlineManager.RestoreStoryElement, () => OutlineManager._canExecuteCommands);
+        EmptyTrashCommand = new RelayCommand(OutlineManager.EmptyTrash, () => OutlineManager._canExecuteCommands);
         // Copy to Narrative command
-        AddToNarrativeCommand = new RelayCommand(CopyToNarrative, () => _canExecuteCommands);
-        RemoveFromNarrativeCommand = new RelayCommand(RemoveFromNarrative, () => _canExecuteCommands);
+        AddToNarrativeCommand = new RelayCommand(OutlineManager.CopyToNarrative, () => OutlineManager._canExecuteCommands);
+        RemoveFromNarrativeCommand = new RelayCommand(OutlineManager.RemoveFromNarrative, () => OutlineManager._canExecuteCommands);
 
         ViewList.Add("Story Explorer View");
         ViewList.Add("Story Narrator View");

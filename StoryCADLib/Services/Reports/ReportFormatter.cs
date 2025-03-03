@@ -3,6 +3,7 @@ using System.Text;
 using NRtfTree.Util;
 using StoryCAD.DAL;
 using System.Reflection;
+using StoryCAD.ViewModels.SubViewModels;
 using StoryCAD.ViewModels.Tools;
 
 namespace StoryCAD.Services.Reports;
@@ -197,15 +198,15 @@ public class ReportFormatter
 		var output = new StringBuilder();
 
 		// Retrieve the ShellViewModel once
-		var shellViewModel = Ioc.Default.GetService<ShellViewModel>();
-		if (shellViewModel?.StoryModel?.StoryElements == null)
+		var outlineViewModel = Ioc.Default.GetRequiredService<OutlineViewModel>();
+		if (outlineViewModel?.StoryModel?.StoryElements == null)
 		{
 			// StoryElements not available
 			return string.Empty;
 		}
 
 		// Retrieve the Overview element
-		var overview = shellViewModel.StoryModel.StoryElements
+		var overview = outlineViewModel.StoryModel.StoryElements
 			.OfType<OverviewModel>()
 			.FirstOrDefault(e => e.Type == StoryItemType.StoryOverview);
 
@@ -222,7 +223,8 @@ public class ReportFormatter
 			return string.Empty;
 		}
         
-        var storyProblem = (ProblemModel) shellViewModel.StoryModel.StoryElements.StoryElementGuids[overview.StoryProblem];
+        var storyProblem = (ProblemModel)outlineViewModel.StoryModel.StoryElements
+            .StoryElementGuids[overview.StoryProblem];
 
 		// Start building the tree with a separate root heading
 		output.AppendLine("StoryCAD - Story Problem Structure Report");
@@ -231,7 +233,7 @@ public class ReportFormatter
 		var processedElements = new HashSet<Guid>(); // Keep track of processed elements
 		foreach (var beat in storyProblem.StructureBeats)
 		{
-			ProcessBeat(beat, output, shellViewModel.StoryModel, 1, processedElements);
+			ProcessBeat(beat, output, outlineViewModel.StoryModel, 1, processedElements);
 		}
 
 		return output.ToString();
@@ -312,7 +314,7 @@ public class ReportFormatter
                 StringBuilder sb = new(line);
                 if (rel.Partner == null)
                 {
-                    foreach (StoryElement otherCharacter in Ioc.Default.GetService<ShellViewModel>()!.StoryModel.StoryElements.Characters)
+                    foreach (StoryElement otherCharacter in Ioc.Default.GetRequiredService<OutlineViewModel>()!.StoryModel.StoryElements.Characters)
                     {
                         if (otherCharacter.Uuid == rel.PartnerUuid)
                         {
@@ -850,8 +852,8 @@ public class ReportFormatter
 
     public ReportFormatter() 
     {
-        ShellViewModel shell = Ioc.Default.GetService<ShellViewModel>();
-        _model = shell.StoryModel;
+        OutlineViewModel outlineVM = Ioc.Default.GetService<OutlineViewModel>();
+        _model = outlineVM.StoryModel;
     }
 
     #endregion

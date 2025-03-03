@@ -23,7 +23,7 @@ public class DeletionService
         bool result = false;
         _arg = searchArg;
         StoryElement element = null;
-        _elementCollection = Ioc.Default.GetRequiredService<ShellViewModel>().StoryModel.StoryElements;
+        _elementCollection = model.StoryElements;
 
         if (model.StoryElements.StoryElementGuids.ContainsKey(node.Uuid)) { element = model.StoryElements.StoryElementGuids[node.Uuid]; }
         if (element == null) { return false; } 

@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using StoryCAD.ViewModels.SubViewModels;
 
 namespace StoryCAD.Services.Backup
 {
@@ -16,7 +17,7 @@ namespace StoryCAD.Services.Backup
         private LogService _logger = Ioc.Default.GetRequiredService<LogService>();
         private AppState State = Ioc.Default.GetRequiredService<AppState>();
         private PreferenceService Preferences = Ioc.Default.GetRequiredService<PreferenceService>();
-        private ShellViewModel _shellVM;
+        private OutlineViewModel _outlineVM;
 
         private BackgroundWorker autoSaveWorker;
         private System.Timers.Timer autoSaveTimer;
@@ -97,20 +98,20 @@ namespace StoryCAD.Services.Backup
 
         private Task AutoSaveProject()
         {
-            _shellVM = Ioc.Default.GetService<ShellViewModel>();
+            _outlineVM = Ioc.Default.GetService<OutlineViewModel>();
             try
             {
                 if (autoSaveWorker.CancellationPending || !Preferences.Model.AutoSave ||
-                    _shellVM!.StoryModel.StoryElements.Count == 0)
+                    _outlineVM.StoryModel.StoryElements.Count == 0)
                 {
                     return Task.CompletedTask;
                 }
 
-                if (_shellVM.StoryModel.Changed)
+                if (_outlineVM.StoryModel.Changed)
                 {
                     _logger.Log(LogLevel.Info, "Initiating AutoSave backup.");
                     // Save and write the model on the UI thread
-                    Window.GlobalDispatcher.TryEnqueue(async () => await _shellVM.OutlineManager.SaveFile(true));
+                    Window.GlobalDispatcher.TryEnqueue(async () => await _outlineVM.SaveFile(true));
                 }
             }
             catch (Exception _ex)
