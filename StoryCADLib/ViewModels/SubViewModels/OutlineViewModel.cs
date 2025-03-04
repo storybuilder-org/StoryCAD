@@ -31,7 +31,26 @@ public class OutlineViewModel : ObservableRecipient
     // The reference to ShellViewModel is temporary
     // until the ShellViewModel is refactored to fully
     // use OutlineViewModel for outline methods.
-    private readonly ShellViewModel shellVm;
+
+    /// <summary>
+    /// Private backing store for ShellVM since we can't
+    /// access it immediately on the constructor of this class
+    /// so we have shellVm as a property to get it when needed but
+    /// </summary>
+    private ShellViewModel? _shellVM;
+
+    private ShellViewModel shellVm
+    {
+        get
+        {
+            if (_shellVM == null)
+            {
+                _shellVM = Ioc.Default.GetRequiredService<ShellViewModel>();
+            }
+
+            return _shellVM;
+        }
+    }
 
     /// <summary>
     /// Path to outline file.
@@ -41,7 +60,7 @@ public class OutlineViewModel : ObservableRecipient
     /// <summary>
     /// Current Outline being edited
     /// </summary>
-    public StoryModel StoryModel;
+    public StoryModel StoryModel = new();
 
     /// <summary>
     /// Lock that controls the UI, Autosave, Backup.
@@ -1169,17 +1188,11 @@ public class OutlineViewModel : ObservableRecipient
 
     #region Constructor(s)
 
-    public OutlineViewModel(
-        LogService logService,
-        PreferenceService preferenceService,
-        Windowing window,
-        ShellViewModel shellViewModel
-    )
+    public OutlineViewModel()
     {
-        logger = logService;
-        preferences = preferenceService;
-        this.window = window;
-        shellVm = shellViewModel;
+        logger = Ioc.Default.GetRequiredService<LogService>();
+        preferences = Ioc.Default.GetRequiredService<PreferenceService>();
+        window = Ioc.Default.GetRequiredService<Windowing>();
         outlineService = Ioc.Default.GetRequiredService<OutlineService>();
         searchService = Ioc.Default.GetRequiredService<SearchService>();
     }

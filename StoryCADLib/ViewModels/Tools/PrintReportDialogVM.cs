@@ -222,7 +222,7 @@ public class PrintReportDialogVM : ObservableRecipient
     {
         SelectedNodes.Clear(); //Only print single node
 
-        PrintReports _rpt = new(this, ShellViewModel.GetModel());
+        PrintReports _rpt = new(this, OutlineVM.StoryModel);
        
         if (elementItem.Type == StoryItemType.StoryOverview) {CreateOverview = true; }
         else { SelectedNodes.Add(elementItem); }
@@ -247,7 +247,7 @@ public class PrintReportDialogVM : ObservableRecipient
         BackgroundWorker _backgroundThread = new();
         _backgroundThread.DoWork += async (_,_) =>
         {
-            PrintReports _rpt = new(this, ShellViewModel.GetModel());
+            PrintReports _rpt = new(this, OutlineVM.StoryModel);
             _rpt.Print(await _rpt.Generate());
             ShowLoadingBar = false;
         };
@@ -260,7 +260,7 @@ public class PrintReportDialogVM : ObservableRecipient
         _printPreviewCache = new();
 
         //Treat each page break as its own page.
-        var report = await new PrintReports(this, ShellViewModel.GetModel()).Generate();
+        var report = await new PrintReports(this, OutlineVM.StoryModel).Generate();
 
 		foreach (string pageText in report.Split(@"\PageBreak"))
         {

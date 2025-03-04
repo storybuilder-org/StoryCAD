@@ -1,5 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 using CommunityToolkit.Mvvm.ComponentModel;
+using StoryCAD.ViewModels.SubViewModels;
 
 namespace StoryCAD.ViewModels.Tools;
 
@@ -76,7 +77,8 @@ public class StructureBeatViewModel : ObservableObject
         {
             if (guid != Guid.Empty)
             {
-                return ShellViewModel.GetModel().StoryElements.StoryElementGuids[guid];
+                return Ioc.Default.GetRequiredService<OutlineViewModel>()
+                    .StoryModel.StoryElements.StoryElementGuids[guid];
             }
 
             return new StoryElement();

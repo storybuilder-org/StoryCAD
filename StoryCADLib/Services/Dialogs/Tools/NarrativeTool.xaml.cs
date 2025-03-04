@@ -1,5 +1,6 @@
 ﻿using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Input;
+using StoryCAD.ViewModels.SubViewModels;
 using StoryCAD.ViewModels.Tools;
 
 namespace StoryCAD.Services.Dialogs.Tools
@@ -7,6 +8,7 @@ namespace StoryCAD.Services.Dialogs.Tools
     public sealed partial class NarrativeTool : Page
     {
         ShellViewModel ShellVM = Ioc.Default.GetService<ShellViewModel>();
+        OutlineViewModel OutlineVM = Ioc.Default.GetService<OutlineViewModel>();
         NarrativeToolVM ToolVM = Ioc.Default.GetService<NarrativeToolVM>();
 
         public NarrativeTool() { InitializeComponent(); }

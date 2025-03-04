@@ -141,7 +141,8 @@ public class BackupService
             Log.Log(LogLevel.Info, "Writing file");
             StorageFolder rootFolder = await StorageFolder.GetFolderFromPathAsync(
                 Ioc.Default.GetRequiredService<AppState>().RootDirectory);
-            StorageFolder tempFolder = await rootFolder.CreateFolderAsync("Temp", CreationCollisionOption.ReplaceExisting);
+            StorageFolder tempFolder = await rootFolder.CreateFolderAsync(
+                "Temp", CreationCollisionOption.ReplaceExisting);
 
             // Retrieve the project file using the file path
             StorageFile projectFile = await StorageFile.GetFileFromPathAsync(OutlineManager.StoryModelFile);

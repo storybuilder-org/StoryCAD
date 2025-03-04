@@ -7,6 +7,7 @@ using StoryCAD.Controls;
 using StoryCAD.Services.Dialogs;
 using StoryCAD.Services.Messages;
 using StoryCAD.Services.Navigation;
+using StoryCAD.ViewModels.SubViewModels;
 using StoryCAD.ViewModels.Tools;
 
 namespace StoryCAD.ViewModels;
@@ -20,6 +21,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable
     private bool _changeable; // process property changes for this story element
     private bool _changed;    // this story element has changed
     readonly Windowing Windowing = Ioc.Default.GetService<Windowing>();
+    readonly OutlineViewModel OutlineVM = Ioc.Default.GetService<OutlineViewModel>();
     #endregion
 
     #region Properties
@@ -732,7 +734,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable
         _vm.RelationTypes.Clear();
         foreach (string _relationshipType in Ioc.Default.GetRequiredService<ControlData>().RelationTypes) { _vm.RelationTypes.Add(_relationshipType); }
         _vm.ProspectivePartners.Clear(); //Prospective partners are chars who are not in a relationship with this char
-        StoryModel _storyModel = ShellViewModel.GetModel();
+        StoryModel _storyModel = OutlineVM.StoryModel;
         foreach (StoryElement _character in _storyModel.StoryElements.Characters)
         {
             if (_character == _vm.Member) continue;  // Skip me

@@ -333,17 +333,16 @@ public class ShellViewModel : ObservableRecipient
     public static ShellViewModel ShellInstance;
 
     /// <summary>
-    /// If a story element is changed, identify that
-    /// the StoryModel is changed and needs written 
-    /// to the backing store. Also, provide a visual
-    /// traffic light on the Shell status bar that 
+    /// If a story element is changed, identify that the StoryModel is changed and needs written 
+    /// to the backing store. Also, provide a visual traffic light on the Shell status bar that 
     /// a save is needed.
     /// </summary>
     public static void ShowChange()
     {
+        StoryModel Model = Ioc.Default.GetRequiredService<OutlineViewModel>().StoryModel;
         if (Ioc.Default.GetRequiredService<AppState>().StoryCADTestsMode) { return; }
-        if (ShellInstance.StoryModel.Changed) { return; }
-        ShellInstance.StoryModel.Changed = true;
+        if (Model.Changed) { return; }
+        Model.Changed = true;
         ShellInstance.ChangeStatusColor = Colors.Red;
     }
 
@@ -395,7 +394,7 @@ public class ShellViewModel : ObservableRecipient
             if (selectedItem is StoryNodeItem node)
             {
                 CurrentNode = node;
-                StoryElement element = StoryModel.StoryElements.StoryElementGuids[node.Uuid];
+                StoryElement element = OutlineManager.StoryModel.StoryElements.StoryElementGuids[node.Uuid];
                 switch (element.Type)
                 {
                     case StoryItemType.Character:
@@ -526,7 +525,7 @@ public class ShellViewModel : ObservableRecipient
     }
     public void ResetModel()
     {
-        StoryModel = new();
+        OutlineManager.StoryModel = new();
         //TODO: Raise event for StoryModel change?
     }
 
@@ -584,8 +583,8 @@ public class ShellViewModel : ObservableRecipient
             //TODO: Logging???
             
             var id = CurrentNode.Uuid; // get the story element;
-            CollabArgs.SelectedElement = StoryModel.StoryElements.StoryElementGuids[id];
-            CollabArgs.StoryModel = StoryModel;
+            CollabArgs.SelectedElement = OutlineManager.StoryModel.StoryElements.StoryElementGuids[id];
+            CollabArgs.StoryModel = OutlineManager.StoryModel;
             Ioc.Default.GetService<CollaboratorService>()!.LoadWorkflows(CollabArgs);
             Ioc.Default.GetService<CollaboratorService>()!.CollaboratorWindow.Show();
             Ioc.Default.GetService<WorkflowViewModel>()!.EnableNavigation();
@@ -1027,13 +1026,13 @@ public class ShellViewModel : ObservableRecipient
     {
         if (view == StoryViewType.ExplorerView)
         {
-            DataSource = StoryModel.ExplorerView;
+            DataSource = OutlineManager.StoryModel.ExplorerView;
             SelectedView = ViewList[0];
             CurrentViewType = StoryViewType.ExplorerView;
         }
         else if (view == StoryViewType.NarratorView)
         {
-            DataSource = StoryModel.NarratorView;
+            DataSource = OutlineManager.StoryModel.NarratorView;
             SelectedView = ViewList[1];
             CurrentViewType = StoryViewType.NarratorView;
         }
@@ -1042,8 +1041,8 @@ public class ShellViewModel : ObservableRecipient
     #region MVVM  processing
     private void IsChangedMessageReceived(IsChangedMessage isDirty)
     {
-        StoryModel.Changed = StoryModel.Changed || isDirty.Value;
-        if (StoryModel.Changed)
+        OutlineManager.StoryModel.Changed = OutlineManager.StoryModel.Changed || isDirty.Value;
+        if (OutlineManager.StoryModel.Changed)
         {
             ChangeStatusColor = Colors.Red;
         }
@@ -1258,7 +1257,8 @@ public class ShellViewModel : ObservableRecipient
             return false;
         }
 
-        if (IsDescendant(StoryModel.ExplorerView[1], target) || IsDescendant(StoryModel.ExplorerView[1], source))
+        if (IsDescendant(OutlineManager.StoryModel.ExplorerView[1], target) ||
+            IsDescendant(OutlineManager.StoryModel.ExplorerView[1], source))
         {
             ShowMessage(LogLevel.Warn, "Operation involves trashcan", true);
             return false;
@@ -1415,16 +1415,16 @@ public class ShellViewModel : ObservableRecipient
         Scrivener = Ioc.Default.GetRequiredService<ScrivenerIo>();
         Preferences = Ioc.Default.GetRequiredService<PreferenceService>();
         // Resolve sub ViewModels
-        OutlineManager = new OutlineViewModel(Logger, Preferences, Window, this);
+        OutlineManager = Ioc.Default.GetRequiredService<OutlineViewModel>();
         outlineService = Ioc.Default.GetRequiredService<OutlineService>();
 
         // Register inter-MVVM messaging
-        Messenger.Register<IsChangedRequestMessage>(this, (_, m) => { m.Reply(StoryModel!.Changed); });
+        Messenger.Register<IsChangedRequestMessage>(this, (_, m) => { m.Reply(OutlineManager.StoryModel!.Changed); });
         Messenger.Register<ShellViewModel, IsChangedMessage>(this, static (r, m) => r.IsChangedMessageReceived(m));
         Messenger.Register<ShellViewModel, StatusChangedMessage>(this, static (r, m) => r.StatusMessageReceived(m));
         Messenger.Register<ShellViewModel, NameChangedMessage>(this, static (r, m) => r.NameMessageReceived(m));
 
-        StoryModel = new StoryModel();
+        OutlineManager.StoryModel = new StoryModel();
 
         //Skip status timer initialization in Tests.
         if (!State.StoryCADTestsMode)

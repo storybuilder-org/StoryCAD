@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
 using StoryCAD.Services.Messages;
 using StoryCAD.Services.Navigation;
+using StoryCAD.ViewModels.SubViewModels;
 
 namespace StoryCAD.ViewModels;
 
@@ -19,7 +20,7 @@ public class OverviewViewModel : ObservableRecipient, INavigable
     #region Fields
 
     private readonly LogService _logger;
-    private readonly StoryModel _shellModel = ShellViewModel.GetModel();
+    private readonly StoryModel _shellModel = Ioc.Default.GetRequiredService<OutlineViewModel>().StoryModel;
     private bool _changeable; // process property changes for this story element
     private bool _changed;    // this story element has changed
 
@@ -344,12 +345,6 @@ public class OverviewViewModel : ObservableRecipient, INavigable
 		        Model.StructureNotes = StructureNotes ?? "";
 		        Model.Notes = Notes ?? "";
 			}
-	        else
-	        {
-				_logger.Log(LogLevel.Fatal, "OverViewModel.Model is null, THIS SHOULDN'T HAPPEN.");
-				Model = new OverviewModel("Overview", ShellViewModel.GetModel());
-	        }
-
         }
         catch (Exception ex)
         {
