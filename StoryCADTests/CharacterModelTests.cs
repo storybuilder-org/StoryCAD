@@ -3,6 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using StoryCAD.Models;
 using StoryCAD.ViewModels;
 using System;
+using StoryCAD.ViewModels.SubViewModels;
 
 namespace StoryCADTests;
 
@@ -17,8 +18,8 @@ public class CharacterModelTests
     public void TestBlankTraits()
     {
         CharacterViewModel CharVM = Ioc.Default.GetRequiredService<CharacterViewModel>();
-        Ioc.Default.GetService<ShellViewModel>()!.StoryModel = new();
-        var x = new CharacterModel(Ioc.Default.GetService<ShellViewModel>()!.StoryModel);
+        Ioc.Default.GetService<OutlineViewModel>()!.StoryModel = new();
+        var x = new CharacterModel(Ioc.Default.GetService<OutlineViewModel>()!.StoryModel);
         CharVM.Activate(x);
         CharVM.NewTrait = String.Empty;
         CharVM.AddTraitCommand.Execute(null);

@@ -2,6 +2,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using StoryCAD.Models;
 using StoryCAD.ViewModels;
+using StoryCAD.ViewModels.SubViewModels;
 
 namespace StoryCADTests;
 
@@ -14,14 +15,14 @@ class NodeItemTests
 	[TestMethod]
 	public void TryDelete()
 	{
-		ShellViewModel Shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        OutlineViewModel OutlineVM = Ioc.Default.GetRequiredService<OutlineViewModel>();
 		StoryModel model = new();
 		ProblemModel Overview = new("Overview", model);
 		StoryNodeItem overview = new(null, Overview, null);
 		ProblemModel Problem = new("Test",model);
 		StoryNodeItem Prob = new(null, Problem, overview);
 
-		Shell.StoryModel = model;
+        OutlineVM.StoryModel = model;
 		Prob.Delete(StoryViewType.ExplorerView);
 	}
 }
