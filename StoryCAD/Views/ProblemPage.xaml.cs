@@ -2,6 +2,7 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using StoryCAD.Services.Logging;
+using StoryCAD.ViewModels.SubViewModels;
 using StoryCAD.ViewModels.Tools;
 
 namespace StoryCAD.Views;
@@ -10,6 +11,7 @@ public sealed partial class ProblemPage : BindablePage
 {
     public ProblemViewModel ProblemVm;
     public ShellViewModel ShellVm => Ioc.Default.GetService<ShellViewModel>();
+    public OutlineViewModel OutlineVM => Ioc.Default.GetService<OutlineViewModel>();
     public BeatSheetsViewModel BeatSheetsViewModel = Ioc.Default.GetService<BeatSheetsViewModel>();
     public LogService LogService = Ioc.Default.GetService<LogService>();
     public ProblemPage()
@@ -41,8 +43,8 @@ public sealed partial class ProblemPage : BindablePage
             Guid.TryParse(text.Split(":")[1], out Guid uuid);
 
             //Find element being dropped.
-            StoryElement Element = ShellVm.StoryModel.StoryElements.First(g => g.Uuid == uuid);
-            int ElementIndex = ShellVm.StoryModel.StoryElements.IndexOf(Element);
+            StoryElement Element = OutlineVM.StoryModel.StoryElements.First(g => g.Uuid == uuid);
+            int ElementIndex = OutlineVM.StoryModel.StoryElements.IndexOf(Element);
 
             //Check if problem is being dropped and enforce rule.
             if (Element.Type == StoryItemType.Problem)
@@ -51,7 +53,7 @@ public sealed partial class ProblemPage : BindablePage
                 //Enforce rule that problems can only be bound to one structure beat model
                 if (!string.IsNullOrEmpty(problem.BoundStructure)) //Check element is actually bound elsewhere
                 {
-                    ProblemModel ContainingStructure = (ProblemModel)ShellVm.StoryModel.StoryElements.First(g => g.Uuid == Guid.Parse(problem.BoundStructure));
+                    ProblemModel ContainingStructure = (ProblemModel)OutlineVM.StoryModel.StoryElements.First(g => g.Uuid == Guid.Parse(problem.BoundStructure));
                     //Show dialog asking to rebind.
                     var res = await Ioc.Default.GetRequiredService<Windowing>().ShowContentDialog(new()
                     {
@@ -76,8 +78,8 @@ public sealed partial class ProblemPage : BindablePage
                         StructureBeatViewModel oldStructure = ContainingStructure.StructureBeats.First(g => g.Guid == problem.Uuid);
                         int index = ContainingStructure.StructureBeats.IndexOf(oldStructure);
                         ContainingStructure.StructureBeats[index].Guid = Guid.Empty;
-                        int ContainingStructIndex = ShellVm.StoryModel.StoryElements.IndexOf(ContainingStructure);
-                        ShellVm.StoryModel.StoryElements[ContainingStructIndex] = ContainingStructure;
+                        int ContainingStructIndex = OutlineVM.StoryModel.StoryElements.IndexOf(ContainingStructure);
+                        OutlineVM.StoryModel.StoryElements[ContainingStructIndex] = ContainingStructure;
                     }
                 }
 
@@ -88,7 +90,7 @@ public sealed partial class ProblemPage : BindablePage
                 else
                 {
                     problem.BoundStructure = ProblemVm.Uuid.ToString();
-                    ShellVm.StoryModel.StoryElements[ElementIndex] = problem;
+                    OutlineVM.StoryModel.StoryElements[ElementIndex] = problem;
                 }
             }
 

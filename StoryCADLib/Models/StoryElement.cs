@@ -2,6 +2,7 @@
 using System.Text.Json.Serialization;
 using Windows.Data.Xml.Dom;
 using CommunityToolkit.Mvvm.ComponentModel;
+using StoryCAD.ViewModels.SubViewModels;
 
 namespace StoryCAD.Models;
 
@@ -76,8 +77,8 @@ public class StoryElement : ObservableObject
         if (guid.Equals(Guid.Empty))
              return new StoryElement();
         // Get the current StoryModel's StoryElementsCollection
-        ShellViewModel shell = Ioc.Default.GetService<ShellViewModel>();
-        StoryElementCollection elements = shell!.StoryModel.StoryElements;
+        OutlineViewModel outlineVM = Ioc.Default.GetRequiredService<OutlineViewModel>();
+        StoryElementCollection elements = outlineVM.StoryModel.StoryElements;
         // Look for the StoryElement corresponding to the passed guid
             if (elements.StoryElementGuids.ContainsKey(guid))
                 return elements.StoryElementGuids[guid];

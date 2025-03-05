@@ -7,6 +7,7 @@ using StoryCAD.Controls;
 using StoryCAD.Models.Tools;
 using StoryCAD.Services.Messages;
 using StoryCAD.Services.Navigation;
+using StoryCAD.ViewModels.SubViewModels;
 using StoryCAD.ViewModels.Tools;
 
 namespace StoryCAD.ViewModels;
@@ -350,9 +351,11 @@ public class ProblemViewModel : ObservableRecipient, INavigable
 
     private void LoadModel()
     {
+        StoryModel story_model = Ioc.Default.GetRequiredService<OutlineViewModel>().StoryModel;
+
         _changeable = false;
         _changed = false;
-        Characters = ShellViewModel.GetModel().StoryElements.Characters;
+        Characters = story_model.StoryElements.Characters;
 
         Uuid = Model.Uuid;
         Name = Model.Name;
@@ -379,9 +382,8 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         Theme = Model.Theme;
         Premise = Model.Premise;
         Notes = Model.Notes;
-        StoryModel model = ShellViewModel.GetModel();
-        Guid root = model.ExplorerView[0].Uuid;
-        _overviewModel = (OverviewModel) model.StoryElements.StoryElementGuids[root];
+        Guid root = story_model.ExplorerView[0].Uuid;
+        _overviewModel = (OverviewModel)story_model.StoryElements.StoryElementGuids[root];
         if (_overviewModel.StoryProblem != Guid.Empty)
             _syncPremise = true; 
         else
@@ -393,8 +395,8 @@ public class ProblemViewModel : ObservableRecipient, INavigable
 		BoundStructure = Model.BoundStructure;
 		
 		//Ensure correct set of Elements are loaded for Structure Lists
-		Problems = Ioc.Default.GetService<ShellViewModel>().StoryModel.StoryElements.Problems;
-        Scenes = Ioc.Default.GetService<ShellViewModel>().StoryModel.StoryElements.Scenes;
+		Problems = story_model.StoryElements.Problems;
+        Scenes = story_model.StoryElements.Scenes;
 
         _changeable = true;
 	}
@@ -544,7 +546,9 @@ public class ProblemViewModel : ObservableRecipient, INavigable
     public ProblemViewModel()
     {
         _logger = Ioc.Default.GetService<LogService>();
-        Characters = ShellViewModel.GetModel().StoryElements.Characters;
+        
+
+        Characters = Ioc.Default.GetRequiredService<OutlineViewModel>().StoryModel.StoryElements.Characters;
         ProblemType = string.Empty;
         ConflictType = string.Empty;
         Subject = string.Empty;

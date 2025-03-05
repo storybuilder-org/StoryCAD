@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using Microsoft.UI.Xaml;
+using StoryCAD.ViewModels.SubViewModels;
 
 namespace StoryCAD.Services.Dialogs;
 
@@ -39,7 +40,7 @@ public sealed partial class SamplePage : Page
             File.WriteAllText(FilePath, STBXContent);
 
             //Opens file, closes menu
-            await Ioc.Default.GetService<ShellViewModel>().OpenFile(FilePath);
+            await Ioc.Default.GetService<OutlineViewModel>()!.OpenFile(FilePath);
             UnifiedVM.Hide();
         }
     }

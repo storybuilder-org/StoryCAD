@@ -1,6 +1,7 @@
 ﻿using Microsoft.UI.Xaml;
 using StoryCAD.ViewModels.Tools;
 using Windows.Graphics.Printing;
+using StoryCAD.ViewModels.SubViewModels;
 
 namespace StoryCAD.Services.Dialogs.Tools;
 public sealed partial class PrintReportsDialog
@@ -170,7 +171,7 @@ public sealed partial class PrintReportsDialog
     private void EmptySynopsisWarningCheck(object sender, RoutedEventArgs e)
     {
         //Check Narrative View is empty
-        if (ShellViewModel.GetModel().NarratorView[0].Children.Count == 0)
+        if (Ioc.Default.GetRequiredService<OutlineViewModel>().StoryModel.NarratorView[0].Children.Count == 0)
         {
             //Show warning
             SynopsisWarning.IsOpen = true;

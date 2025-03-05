@@ -1,6 +1,8 @@
 ﻿using ABI.Windows.Media.Audio;
 //using NLog;
 using StoryCAD.Services.Logging;
+using StoryCAD.ViewModels.SubViewModels;
+
 //using LogLevel = StoryCAD.Services.Logging.LogLevel;
 
 namespace StoryCAD.Services.Search;
@@ -33,7 +35,7 @@ public class SearchService
         bool result = false;
         arg = searchArg.ToLower();
         StoryElement element = null;
-        ElementCollection = Ioc.Default.GetService<ShellViewModel>().StoryModel.StoryElements;
+        ElementCollection = model.StoryElements;
 
         if (model.StoryElements.StoryElementGuids.ContainsKey(node.Uuid)) { element = model.StoryElements.StoryElementGuids[node.Uuid]; }
         if (element == null) { return false; }
@@ -188,7 +190,7 @@ public class SearchService
             return false;
 
         // Retrieve the StoryElement associated with the GUID
-        ShellViewModel shell = Ioc.Default.GetService<ShellViewModel>();
+        OutlineViewModel shell = Ioc.Default.GetService<OutlineViewModel>();
         StoryElementCollection elements = shell!.StoryModel.StoryElements;
 
         if (elements.StoryElementGuids.TryGetValue(guid, out StoryElement element))

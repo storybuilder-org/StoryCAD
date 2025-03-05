@@ -4,6 +4,8 @@ using Microsoft.UI.Xaml.Media;
 using StoryCAD.DAL;
 using StoryCAD.Services;
 using StoryCAD.Services.Dialogs;
+using StoryCAD.ViewModels.SubViewModels;
+
 // Messenger
 // Ioc.Default if needed
 // LogService
@@ -25,6 +27,7 @@ public class UnifiedVM : ObservableRecipient
 {
 	private readonly LogService Logger = Ioc.Default.GetRequiredService<LogService>();
 	private readonly ShellViewModel _shell = Ioc.Default.GetService<ShellViewModel>();
+    private readonly OutlineViewModel _outlineVm = Ioc.Default.GetService<OutlineViewModel>();
     private readonly PreferenceService Preferences = Ioc.Default.GetService<PreferenceService>();
 
     private Visibility _ProjectNameErrorVisibility;
@@ -135,7 +138,7 @@ public class UnifiedVM : ObservableRecipient
 
     public async void LoadStory()
     {
-        await _shell.OpenFile(); //Calls the open file in shell so it can load the file
+        await _outlineVm.OpenFile(); //Calls the open file in shell so it can load the file
         Hide();
     }
 
@@ -146,11 +149,11 @@ public class UnifiedVM : ObservableRecipient
     {
         switch (SelectedRecentIndex)
         {
-            case 0: await _shell.OpenFile(Preferences.Model.LastFile1); break;
-            case 1: await _shell.OpenFile(Preferences.Model.LastFile2); break;
-            case 2: await _shell.OpenFile(Preferences.Model.LastFile3); break;
-            case 3: await _shell.OpenFile(Preferences.Model.LastFile4); break;
-            case 4: await _shell.OpenFile(Preferences.Model.LastFile5); break;
+            case 0: await _outlineVm.OpenFile(Preferences.Model.LastFile1); break;
+            case 1: await _outlineVm.OpenFile(Preferences.Model.LastFile2); break;
+            case 2: await _outlineVm.OpenFile(Preferences.Model.LastFile3); break;
+            case 3: await _outlineVm.OpenFile(Preferences.Model.LastFile4); break;
+            case 4: await _outlineVm.OpenFile(Preferences.Model.LastFile5); break;
         }
         if (SelectedRecentIndex != -1)
         {

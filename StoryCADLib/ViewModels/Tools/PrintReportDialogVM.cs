@@ -19,6 +19,7 @@ public class PrintReportDialogVM : ObservableRecipient
     public PrintDocument Document = new();
     public IPrintDocumentSource PrintDocSource;
     private Windowing Window = Ioc.Default.GetRequiredService<Windowing>();
+    private OutlineViewModel OutlineVM = Ioc.Default.GetRequiredService<OutlineViewModel>();
     private List<StackPanel> _printPreviewCache; //This stores a list of pages for print preview
     #region Properties
 
@@ -164,15 +165,15 @@ public class PrintReportDialogVM : ObservableRecipient
     public async Task OpenPrintReportDialog()
     {
         ShellViewModel ShellVM = Ioc.Default.GetRequiredService<ShellViewModel>();
-        if (ShellVM._canExecuteCommands)
+        if (OutlineVM._canExecuteCommands)
         {
             if (Ioc.Default.GetRequiredService<ShellViewModel>().DataSource == null)
             {
                 ShellVM.ShowMessage(LogLevel.Warn, "You need to load a Story first!", false);
                 return;
             }
-            
-            ShellVM._canExecuteCommands = false;
+
+            OutlineVM._canExecuteCommands = false;
             ShellVM.ShowMessage(LogLevel.Info, "Generate Print Reports executing",  true);
 
             ShellVM.SaveModel();
@@ -184,7 +185,7 @@ public class PrintReportDialogVM : ObservableRecipient
                 Content = new PrintReportsDialog()
             };
             await Ioc.Default.GetService<Windowing>().ShowContentDialog(Dialog);
-            ShellVM._canExecuteCommands = true;
+            OutlineVM._canExecuteCommands = true;
 
         }
     }
@@ -221,7 +222,7 @@ public class PrintReportDialogVM : ObservableRecipient
     {
         SelectedNodes.Clear(); //Only print single node
 
-        PrintReports _rpt = new(this, ShellViewModel.GetModel());
+        PrintReports _rpt = new(this, OutlineVM.StoryModel);
        
         if (elementItem.Type == StoryItemType.StoryOverview) {CreateOverview = true; }
         else { SelectedNodes.Add(elementItem); }
@@ -246,7 +247,7 @@ public class PrintReportDialogVM : ObservableRecipient
         BackgroundWorker _backgroundThread = new();
         _backgroundThread.DoWork += async (_,_) =>
         {
-            PrintReports _rpt = new(this, ShellViewModel.GetModel());
+            PrintReports _rpt = new(this, OutlineVM.StoryModel);
             _rpt.Print(await _rpt.Generate());
             ShowLoadingBar = false;
         };
@@ -259,7 +260,7 @@ public class PrintReportDialogVM : ObservableRecipient
         _printPreviewCache = new();
 
         //Treat each page break as its own page.
-        var report = await new PrintReports(this, ShellViewModel.GetModel()).Generate();
+        var report = await new PrintReports(this, OutlineVM.StoryModel).Generate();
 
 		foreach (string pageText in report.Split(@"\PageBreak"))
         {

@@ -23,7 +23,7 @@
             </Grid.RowDefinitions>
 
             <TextBlock Text="Story Explorer View" Grid.Row="0" Grid.Column="0" HorizontalAlignment="Center"/>
-            <TreeView ItemsSource="{x:Bind ShellVM.StoryModel.ExplorerView, Mode=TwoWay}" Margin="0,5" Grid.Row="1" Grid.Column="0"  Background="{x:Bind Background}" >
+            <TreeView ItemsSource="{x:Bind OutlineVM.StoryModel.ExplorerView, Mode=TwoWay}" Margin="0,5" Grid.Row="1" Grid.Column="0"  Background="{x:Bind Background}" >
                 <TreeView.ItemTemplate>
                     <DataTemplate x:DataType="viewModels:StoryNodeItem">
                         <TreeViewItem ItemsSource="{x:Bind Children}" IsExpanded="True" Tapped="ItemInvoked" Tag="Exp">
@@ -35,7 +35,7 @@
 
             <TextBlock Text="NarratorView View"  Grid.Row="0" Grid.Column="1" HorizontalAlignment="Center"/>
 
-            <TreeView ItemsSource="{x:Bind ShellVM.StoryModel.NarratorView, Mode=TwoWay}" Margin="0,5" Grid.Row="1" Grid.Column="1">
+            <TreeView ItemsSource="{x:Bind OutlineVM.StoryModel.NarratorView, Mode=TwoWay}" Margin="0,5" Grid.Row="1" Grid.Column="1">
                 <TreeView.ItemTemplate>
                     <DataTemplate x:DataType="viewModels:StoryNodeItem">
                         <TreeViewItem ItemsSource="{x:Bind Children}" IsExpanded="True" Tapped="ItemInvoked" Tag="Nar">

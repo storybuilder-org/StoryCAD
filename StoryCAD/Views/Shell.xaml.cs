@@ -15,6 +15,7 @@ using StoryCAD.Exceptions;
 using StoryCAD.Services;
 using StoryCAD.Services.Dialogs;
 using StoryCAD.Services.Ratings;
+using StoryCAD.ViewModels.SubViewModels;
 using StoryCAD.ViewModels.Tools;
 
 namespace StoryCAD.Views;
@@ -24,6 +25,7 @@ public sealed partial class Shell
     public ShellViewModel ShellVm => Ioc.Default.GetService<ShellViewModel>();
     public Windowing Windowing => Ioc.Default.GetService<Windowing>();
     public UnifiedVM UnifiedVm => Ioc.Default.GetService<UnifiedVM>();
+    public OutlineViewModel OutlineVM => Ioc.Default.GetService<OutlineViewModel>();
     public LogService Logger;
     public PreferencesModel Preferences = Ioc.Default.GetRequiredService<PreferenceService>().Model;
 
@@ -76,40 +78,40 @@ public sealed partial class Shell
 
         if (!await Ioc.Default.GetRequiredService<WebViewModel>().CheckWebViewState())
         {
-            ShellVm._canExecuteCommands = false;
+            OutlineVM._canExecuteCommands = false;
             await Ioc.Default.GetRequiredService<WebViewModel>().ShowWebViewDialog();
-            ShellVm._canExecuteCommands = true;
+            OutlineVM._canExecuteCommands = true;
         }
 
         //Shows changelog if the app has been updated since the last launch.
         if (Ioc.Default.GetRequiredService<AppState>().LoadedWithVersionChange)
         {
 			Ioc.Default.GetService<PreferenceService>()!.Model.HideRatingPrompt = false;  //rating prompt reenabled on updates.
-			await new Services.Dialogs.Changelog().ShowChangeLog();
+			await new Changelog().ShowChangeLog();
         }
 
         if (Preferences.ShowStartupDialog)
         {
-	        ContentDialog CD = new()
+	        ContentDialog cd = new()
 	        {
 		        Title = "Need help getting started?",
 		        Content = new HelpPage(),
 		        PrimaryButtonText = "Close",
 	        };
-	        await Ioc.Default.GetRequiredService<Windowing>().ShowContentDialog(CD);
+	        await Ioc.Default.GetRequiredService<Windowing>().ShowContentDialog(cd);
 		}
 
         //If StoryCAD was loaded from a .STBX File then instead of showing the Unified menu
         //We will instead load the file instead.
         Logger.Log(LogLevel.Info, $"Filepath to launch {ShellVm.FilePathToLaunch}");
-        if (ShellVm.FilePathToLaunch == null) { await ShellVm.OpenUnifiedMenu(); }
-        else { await ShellVm.OpenFile(ShellVm.FilePathToLaunch); }
+        if (ShellVm.FilePathToLaunch == null) { await ShellVm.OutlineManager.OpenUnifiedMenu(); }
+        else { await ShellVm.OutlineManager.OpenFile(ShellVm.FilePathToLaunch); }
 
 		//Ask user for review if appropriate.
-		RatingService RateService = Ioc.Default.GetService<RatingService>();
-		if (RateService.AskForRatings())
+		RatingService rateService = Ioc.Default.GetService<RatingService>();
+		if (rateService!.AskForRatings())
 		{
-			RateService.OpenRatingPrompt();
+			rateService.OpenRatingPrompt();
 		}
     }
 
@@ -175,7 +177,7 @@ public sealed partial class Shell
 
     private void Search(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
     {
-        ShellVm.SearchNodes();
+        ShellVm.OutlineManager.SearchNodes();
     }
 
     private void ClearNodes(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
@@ -539,7 +541,7 @@ private DragAndDropDirection GetMoveDirection(Point position, TreeViewItem targe
 
     private async void ButtonBase_OnClick(object sender, RoutedEventArgs e)
     {
-	    var Result = await Ioc.Default.GetRequiredService<Windowing>().ShowContentDialog(new()
+	    var result = await Ioc.Default.GetRequiredService<Windowing>().ShowContentDialog(new()
 	    {
 		    Content = new FeedbackDialog(),
 		    PrimaryButtonText = "Submit Feedback",
@@ -547,7 +549,7 @@ private DragAndDropDirection GetMoveDirection(Point position, TreeViewItem targe
 		    Title = "Submit",
 	    });
 
-	    if (Result == ContentDialogResult.Primary)
+	    if (result == ContentDialogResult.Primary)
 	    {
 		    Ioc.Default.GetRequiredService<FeedbackViewModel>().CreateFeedback();
 	    }
