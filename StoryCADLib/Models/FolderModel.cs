@@ -18,11 +18,11 @@ public class FolderModel : StoryElement
     #endregion
 
     #region Constructor
-    public FolderModel(StoryModel model) : base("New Folder", StoryItemType.Folder, model)
+    public FolderModel(StoryModel model, StoryNodeItem node) : base("New Folder", StoryItemType.Folder, model, node)
     {
         Notes = string.Empty;
     }
-    public FolderModel(string name, StoryModel model, StoryItemType type) : base(name, type, model)
+    public FolderModel(string name, StoryModel model, StoryItemType type, StoryNodeItem Node) : base(name, type, model, Node)
     {
         Notes = string.Empty;
     }

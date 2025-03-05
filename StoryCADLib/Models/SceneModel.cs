@@ -298,7 +298,7 @@ public class SceneModel : StoryElement
 	#endregion
 
 	#region Constructors
-	public SceneModel(StoryModel model) : base("New Scene", StoryItemType.Scene, model)
+	public SceneModel(StoryModel model, StoryNodeItem Node) : base("New Scene", StoryItemType.Scene, model, Node)
     {
         ViewpointCharacter = Guid.Empty;
         Date = string.Empty;
@@ -327,7 +327,7 @@ public class SceneModel : StoryElement
         Notes = string.Empty;
     }
 
-    public SceneModel(string name, StoryModel model) : base(name, StoryItemType.Scene, model)
+    public SceneModel(string name, StoryModel model, StoryNodeItem Node) : base(name, StoryItemType.Scene, model, Node)
 
 	{
 	    ViewpointCharacter = Guid.Empty;

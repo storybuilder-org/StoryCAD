@@ -35,10 +35,8 @@ public class LegacyXMLReader : ObservableRecipient
 
     public async Task<StoryModel> ReadFile(StorageFile file)
     {
-
         try
         {
-
             string _msg = $"Reading file {file.Path}.";
             _logger.Log(LogLevel.Info, _msg);
             _xml = await LoadFromFileAsync(file);

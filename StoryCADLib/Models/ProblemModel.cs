@@ -285,7 +285,7 @@ public class ProblemModel : StoryElement
 	#endregion
 
 	#region Constructors
-	public ProblemModel(StoryModel model) : base("New Problem", StoryItemType.Problem, model)
+	public ProblemModel(StoryModel model, StoryNodeItem Node) : base("New Problem", StoryItemType.Problem, model, Node)
     {
         ProblemType = string.Empty;
         ConflictType = string.Empty;
@@ -311,7 +311,7 @@ public class ProblemModel : StoryElement
 		StructureBeats = new();
 		BoundStructure = string.Empty;
 	}
-    public ProblemModel(string name, StoryModel model) : base(name, StoryItemType.Problem, model)
+    public ProblemModel(string name, StoryModel model, StoryNodeItem Node) : base(name, StoryItemType.Problem, model, Node)
     {
         ProblemType = string.Empty;
         ConflictType = string.Empty;

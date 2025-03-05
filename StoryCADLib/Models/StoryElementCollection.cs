@@ -25,10 +25,10 @@ public class StoryElementCollection : ObservableCollection<StoryElement>
         Characters = new ObservableCollection<StoryElement>();
         Settings = new ObservableCollection<StoryElement>();
         Scenes = new ObservableCollection<StoryElement>();
-        Problems!.Add(new StoryElement {Type = StoryItemType.Problem,Name="(none)"});
-        Characters!.Add(new StoryElement {Type = StoryItemType.Character,Name="(none)"});
-        Settings!.Add(new StoryElement {Type = StoryItemType.Setting,Name="(none)"});
-        Scenes!.Add(new StoryElement {Type = StoryItemType.Scene,Name="(none)"});
+        Problems!.Add(new StoryElement {ElementType = StoryItemType.Problem,Name="(none)"});
+        Characters!.Add(new StoryElement {ElementType = StoryItemType.Character,Name="(none)"});
+        Settings!.Add(new StoryElement {ElementType = StoryItemType.Setting,Name="(none)"});
+        Scenes!.Add(new StoryElement {ElementType = StoryItemType.Scene,Name="(none)"});
     }
 
     /// <summary>
@@ -49,7 +49,7 @@ public class StoryElementCollection : ObservableCollection<StoryElement>
                 _element = (StoryElement)e.NewItems![0];
                 StoryElementGuids.Add(_element!.Uuid, _element);
                 // ReSharper disable once SwitchStatementMissingSomeEnumCasesNoDefault
-                switch (_element.Type)
+                switch (_element.ElementType)
                 {
                     case StoryItemType.Character:
                         Characters.Add(_element);
@@ -76,7 +76,7 @@ public class StoryElementCollection : ObservableCollection<StoryElement>
                 StoryElementGuids.Remove(_element!.Uuid);
                 int _i;
                 // ReSharper disable once SwitchStatementMissingSomeEnumCasesNoDefault
-                switch (_element.Type)
+                switch (_element.ElementType)
                 {
                     case StoryItemType.Character:
                         _i = Characters.IndexOf(_element);

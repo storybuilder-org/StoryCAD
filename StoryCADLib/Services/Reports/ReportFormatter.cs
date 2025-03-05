@@ -74,7 +74,7 @@ public class ReportFormatter
             if (line.Contains("@Description"))
             {
                 foreach (StoryElement element in _model.StoryElements)
-                    if (element.Type == StoryItemType.Problem)
+                    if (element.ElementType == StoryItemType.Problem)
                     {
                         ProblemModel chr = (ProblemModel)element;
                         StringBuilder sb = new(line);
@@ -208,7 +208,7 @@ public class ReportFormatter
 		// Retrieve the Overview element
 		var overview = outlineViewModel.StoryModel.StoryElements
 			.OfType<OverviewModel>()
-			.FirstOrDefault(e => e.Type == StoryItemType.StoryOverview);
+			.FirstOrDefault(e => e.ElementType == StoryItemType.StoryOverview);
 
 		if (overview == null)
 		{
@@ -267,7 +267,7 @@ public class ReportFormatter
                 output.AppendLine($"{indent}   {beat.ElementName}");
 
                 // If the element is a Problem, process its beats recursively
-                if (element.Type == StoryItemType.Problem && element is ProblemModel problemElement)
+                if (element.ElementType == StoryItemType.Problem && element is ProblemModel problemElement)
                 {
                     if (problemElement.StructureBeats != null && problemElement.StructureBeats.Any())
                     {
@@ -355,7 +355,7 @@ public class ReportFormatter
             if (line.Contains("@Description"))
             {
                 foreach (StoryElement element in _model.StoryElements)
-                    if (element.Type == StoryItemType.Character)
+                    if (element.ElementType == StoryItemType.Character)
                     {
                         CharacterModel chr = (CharacterModel)element;
                         StringBuilder sb = new(line);
@@ -468,7 +468,7 @@ public class ReportFormatter
             if (line.Contains("@Description"))
             {
                 foreach (StoryElement element in _model.StoryElements)
-                    if (element.Type == StoryItemType.Setting)
+                    if (element.ElementType == StoryItemType.Setting)
                     {
                         SettingModel setting = (SettingModel)element;
                         StringBuilder sb = new(line);
@@ -527,7 +527,7 @@ public class ReportFormatter
             if (line.Contains("@Description"))
             {
                 foreach (StoryElement element in _model.StoryElements)
-                    if (element.Type == StoryItemType.Scene)
+                    if (element.ElementType == StoryItemType.Scene)
                     {
                         SceneModel scene = (SceneModel)element;
                         StringBuilder sb = new(line);
@@ -690,7 +690,7 @@ public class ReportFormatter
             {
                 foreach (StoryElement element in _model.StoryElements)
                 {
-                    if (element.Type == StoryItemType.Web)
+                    if (element.ElementType == StoryItemType.Web)
                     {
                         WebModel scene = (WebModel)element;
                         StringBuilder sb = new(line);
@@ -763,7 +763,7 @@ public class ReportFormatter
                 foreach (StoryNodeItem child in _model.NarratorView[0].Children)
                 {
                     StoryElement scn = _model.StoryElements.StoryElementGuids[child.Uuid];
-                    if (scn.Type != StoryItemType.Scene)
+                    if (scn.ElementType != StoryItemType.Scene)
                         continue;
                     SceneModel scene = (SceneModel)scn;
                     StringBuilder sb = new(line);

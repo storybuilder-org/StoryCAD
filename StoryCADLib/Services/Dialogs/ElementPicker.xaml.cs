@@ -50,7 +50,7 @@ public sealed partial class ElementPicker : Page
 		NewButton.IsEnabled = true;
 
 		var elements = PickerVM.StoryModel.StoryElements
-			.Where(element => element.Type == type);
+			.Where(element => element.ElementType == type);
 		if (elements.Count() == 0) // no elements so disable picker
 		{
 			ElementBox.IsEnabled = false;

@@ -47,7 +47,7 @@ public sealed partial class ProblemPage : BindablePage
             int ElementIndex = OutlineVM.StoryModel.StoryElements.IndexOf(Element);
 
             //Check if problem is being dropped and enforce rule.
-            if (Element.Type == StoryItemType.Problem)
+            if (Element.ElementType == StoryItemType.Problem)
             {
                 ProblemModel problem = (ProblemModel)Element;
                 //Enforce rule that problems can only be bound to one structure beat model

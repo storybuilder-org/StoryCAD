@@ -35,10 +35,20 @@ public class StoryElement : ObservableObject
     private StoryItemType _type;
 	[JsonInclude]
 	[JsonPropertyName("Type")]
-    public StoryItemType Type
+    public StoryItemType ElementType
     {
         get => _type;
         set => _type = value;
+    }
+
+	[JsonIgnore]
+    private StoryNodeItem _node;
+	[JsonInclude]
+	[JsonPropertyName("Node")]
+    public StoryNodeItem Node
+    {
+        get => _node;
+        set => _node = value;
     }
 
 	[JsonIgnore]
@@ -94,11 +104,12 @@ public class StoryElement : ObservableObject
 	#endregion
 
 	#region Constructor 
-    public StoryElement(string name, StoryItemType type, StoryModel model)
+    public StoryElement(string name, StoryItemType type, StoryModel model, StoryNodeItem node)
     {
         _uuid = Guid.NewGuid();
         _name = name;
         _type = type;
+        _node = node;
         model.StoryElements.Add(this);
     }
 
@@ -113,7 +124,6 @@ public class StoryElement : ObservableObject
         _type = StoryItemType.Unknown;
     }
 
-    [SuppressMessage("ReSharper", "InconsistentNaming")] //Some names conflict with class members, and I can't really think of any suitable alternatives.
     public StoryElement(IXmlNode xn, StoryModel model)
     {
         Guid uuid = default;
@@ -121,7 +131,7 @@ public class StoryElement : ObservableObject
         string name = string.Empty;
         bool _uuidFound = false;
         bool _nameFound = false;
-        Type = StoryItemType.Unknown;
+        ElementType = StoryItemType.Unknown;
         switch (xn.NodeName)
         {
             case "Overview":

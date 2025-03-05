@@ -480,7 +480,7 @@ public class SceneViewModel : ObservableRecipient, INavigable
         foreach (Guid memberGuid in Model.CastMembers)
         {
             StoryElement element = StoryElement.GetByGuid(memberGuid);
-            if (element != null && element.Type == StoryItemType.Character)
+            if (element != null && element.ElementType == StoryItemType.Character)
             {
                 CastList.Add(element);
             }

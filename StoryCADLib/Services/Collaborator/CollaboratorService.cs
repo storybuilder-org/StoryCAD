@@ -30,7 +30,7 @@ public class CollaboratorService
         wizard!.Model = args.SelectedElement;
 		// Get the 'GetMenuItems' method that expects a parameter of type 'StoryItemType'
 		MethodInfo  menuCall = collaboratorType.GetMethod("LoadWorkflowViewModel", new[] { typeof(StoryItemType) });
-        object[] methodArgs = { args.SelectedElement.Type };
+        object[] methodArgs = { args.SelectedElement.ElementType };
         // ...and invoke it
         menuCall!.Invoke(collaborator, methodArgs);
     }
