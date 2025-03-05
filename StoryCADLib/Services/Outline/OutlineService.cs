@@ -1,26 +1,23 @@
-﻿using StoryCAD.DAL;
+﻿using CommunityToolkit.Mvvm.Messaging;
+using StoryCAD.DAL;
+using StoryCAD.Services.Messages;
 using Windows.Storage;
 
 namespace StoryCAD.Services.Outline;
 
 public class OutlineService
 {
+
     /// <summary>
-    /// Creates a new StoryModel based on a template.
-    /// Returns the new model or throws an exception.
+    /// Creates a new story model
     /// </summary>
-    public async Task<StoryModel> CreateModel(StorageFile file, string name, string author, int selectedTemplateIndex)
+    /// <param name="name">name of the outline, i.e old man and the sea</param>
+    /// <param name="author">Creator of the outline</param>
+    /// <param name="selectedTemplateIndex">Template index</param>
+    /// <returns>A story outline variable.</returns>
+    public async Task<StoryModel> CreateModel(string name, string author, int selectedTemplateIndex)
     {
-        // Pre-validation.
-        if (file == null)
-            throw new ArgumentNullException(nameof(file), "StorageFile cannot be null.");
-
-        string directory = Path.GetDirectoryName(file.Path);
-        if (string.IsNullOrWhiteSpace(directory) || !Directory.Exists(directory))
-            throw new DirectoryNotFoundException("The target folder does not exist.");
-
-        // Use the file name (without extension) as the name.
-        name = Path.GetFileNameWithoutExtension(file.Path);
+        //TODO: Make template index an enum.
         StoryModel model = new();
 
         OverviewModel overview = new(name, model)
@@ -170,5 +167,28 @@ public class OutlineService
         StoryIO wtr = Ioc.Default.GetRequiredService<StoryIO>();
         await wtr.WriteStory(file, model);
         return true;
+    }
+
+
+    /// <summary>
+    /// Opens a StoryCAD Outline File.
+    /// </summary>
+    /// <param name="path">Path to Outline</param>
+    /// <returns>StoryModel Object</returns>
+    /// <exception cref="FileNotFoundException">Thrown if path doesn't exist.</exception>
+    public async Task<StoryModel> OpenFile(string path)
+    {
+        //Check file exists.
+        if (!File.Exists(path))
+        {
+            throw new FileNotFoundException("Cannot file Outline File: " + path);
+        }
+
+        //Get content
+        StorageFile file = await StorageFile.GetFileFromPathAsync(path);
+        StoryIO io = new();
+
+        //Return deserialized model.
+        return await io.ReadStory(file);
     }
 }

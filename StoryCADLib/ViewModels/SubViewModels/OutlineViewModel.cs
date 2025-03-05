@@ -122,8 +122,8 @@ public class OutlineViewModel : ObservableRecipient
 
             if (!File.Exists(StoryModelFile))
             {
-                Messenger.Send(new StatusChangedMessage(new("Can't find file", LogLevel.Warn)));
-                logger.Log(LogLevel.Warn, $"File {StoryModelFile} does not exist.");
+                Messenger.Send(new StatusChangedMessage(
+                    new($"Cannot find file {StoryModelFile}", LogLevel.Warn, true)));
                 _canExecuteCommands = true;
                 return;
             }
@@ -132,25 +132,26 @@ public class OutlineViewModel : ObservableRecipient
             StoryIO rdr = Ioc.Default.GetRequiredService<StoryIO>();
             if (!await rdr.CheckFileAvailability(StoryModelFile))
             {
-                Messenger.Send(new StatusChangedMessage(new("File Unavailable.", LogLevel.Warn)));
+                Messenger.Send(new StatusChangedMessage(new("File Unavailable.", LogLevel.Warn,true)));
                 return;
             }
 
-            // Read the file into the StoryModel.
-            StorageFile file = await StorageFile.GetFileFromPathAsync(StoryModelFile);
-            StoryModel = await rdr.ReadStory(file);
+            //Read file
+            StoryModel = await outlineService.OpenFile(StoryModelFile);
 
             //Check the file we loaded actually has StoryCAD Data.
             if (StoryModel == null)
             {
-                Messenger.Send(new StatusChangedMessage(new("Unable to open file (No Story Elements found)", LogLevel.Warn, true)));
+                Messenger.Send(new StatusChangedMessage(
+                    new("Unable to open file (No Story Elements found)", LogLevel.Warn, true)));
                 _canExecuteCommands = true;  // unblock other commands
                 return;
             }
 
             if (StoryModel.StoryElements.Count == 0)
             {
-                Messenger.Send(new StatusChangedMessage(new("Unable to open file (No Story Elements found)", LogLevel.Warn, true)));
+                Messenger.Send(new StatusChangedMessage(
+                    new("Unable to open file (No Story Elements found)", LogLevel.Warn, true)));
                 _canExecuteCommands = true;  // unblock other commands
                 return;
 
@@ -196,7 +197,7 @@ public class OutlineViewModel : ObservableRecipient
         _canExecuteCommands = true;
     }
 
-    public async Task UnifiedNewFile(UnifiedVM dialogVm)
+    public async Task CreateFile(UnifiedVM dialogVm)
     {
         logger.Log(LogLevel.Info, "FileOpenVM - New File starting");
         _canExecuteCommands = false;
@@ -228,9 +229,9 @@ public class OutlineViewModel : ObservableRecipient
             // Create the StoryModel
             string name = Path.GetFileNameWithoutExtension(StoryModelFile);
             string author = preferences.Model.FirstName + " " + preferences.Model.LastName;
+
             // Create the new project StorageFile; throw an exception if it already exists.
-            var file = await folder.CreateFileAsync(dialogVm.ProjectName, CreationCollisionOption.FailIfExists);
-            await outlineService.CreateModel(file, name, author, dialogVm.SelectedTemplateIndex);
+            await outlineService.CreateModel(name, author, dialogVm.SelectedTemplateIndex);
 
             shellVm.SetCurrentView(StoryViewType.ExplorerView);
 
@@ -254,15 +255,14 @@ public class OutlineViewModel : ObservableRecipient
                 Ioc.Default.GetRequiredService<AutoSaveService>().StartAutoSave();
             }
 
-             shellVm.TreeViewNodeClicked(StoryModel.ExplorerView[0]);
+            shellVm.TreeViewNodeClicked(StoryModel.ExplorerView[0]);
             window.UpdateWindowTitle();
 
             Messenger.Send(new StatusChangedMessage(new("New project command completed", LogLevel.Info, true)), true);
         }
         catch (Exception ex)
         {
-            logger.LogException(LogLevel.Error, ex, "Error creating new project");
-            Messenger.Send(new StatusChangedMessage(new("File make failure.", LogLevel.Error)), true);
+            Messenger.Send(new StatusChangedMessage(new("Error creating new project", LogLevel.Error)), true);
         }
 
         _canExecuteCommands = true;

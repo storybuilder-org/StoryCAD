@@ -170,7 +170,7 @@ public class UnifiedVM : ObservableRecipient
 
         PreferencesIo _loader = new();
         await _loader.WritePreferences(Preferences.Model);
-        await _shell.OutlineManager.UnifiedNewFile(this);
+        await _shell.OutlineManager.CreateFile(this);
         Hide();
 
     }

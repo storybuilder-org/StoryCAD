@@ -45,10 +45,9 @@ public class SemanticKernelApi
             string path = Path.GetDirectoryName(filePath);
             StorageFolder folder = await StorageFolder.GetFolderFromPathAsync(path);
             string filename = Path.GetFileName(filePath);
-            StorageFile file = await folder.CreateFileAsync(filename, CreationCollisionOption.FailIfExists);
 
             // Create a new StoryModel using the OutlineService.
-            var result = await OperationResult<StoryModel>.SafeExecuteAsync(_outlineService.CreateModel(file, name, author, idx));
+            var result = await OperationResult<StoryModel>.SafeExecuteAsync(_outlineService.CreateModel(name, author, idx));
             //var result = 
             if (!result.IsSuccess)
             {

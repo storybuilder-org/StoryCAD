@@ -34,7 +34,7 @@ namespace StoryCADTests
             };
 
             // Act
-            await outlineVM.UnifiedNewFile(dialogVm);
+            await outlineVM.CreateFile(dialogVm);
 
             // Assert
             // TODO: Add assertions to verify the StoryModel is reset,
