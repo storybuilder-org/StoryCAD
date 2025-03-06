@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 using Windows.Data.Xml.Dom;
 using CommunityToolkit.Mvvm.ComponentModel;
 using StoryCAD.ViewModels.SubViewModels;
@@ -43,8 +42,8 @@ public class StoryElement : ObservableObject
 
 	[JsonIgnore]
     private StoryNodeItem _node;
-	[JsonInclude]
-	[JsonPropertyName("Node")]
+
+    [JsonIgnore]
     public StoryNodeItem Node
     {
         get => _node;
@@ -104,12 +103,20 @@ public class StoryElement : ObservableObject
 	#endregion
 
 	#region Constructor 
-    public StoryElement(string name, StoryItemType type, StoryModel model, StoryNodeItem node)
+    
+    /// <summary>
+    /// Creates a new story element
+    /// </summary>
+    /// <param name="name">Name of element</param>
+    /// <param name="type">Type of element</param>
+    /// <param name="model">Story Model this element belongs to</param>
+    /// <param name="parentNode">Parent of this node</param>
+    public StoryElement(string name, StoryItemType type, StoryModel model, StoryNodeItem parentNode)
     {
         _uuid = Guid.NewGuid();
         _name = name;
         _type = type;
-        _node = node;
+        _node = new(this, parentNode, type);
         model.StoryElements.Add(this);
     }
 
@@ -122,6 +129,7 @@ public class StoryElement : ObservableObject
         _uuid = Guid.Empty;
         _name = string.Empty;
         _type = StoryItemType.Unknown;
+        _node = null;
     }
 
     public StoryElement(IXmlNode xn, StoryModel model)

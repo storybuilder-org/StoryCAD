@@ -98,32 +98,35 @@ public class ElementPickerVM
 			type = (StoryItemType)ForcedType;
 		}
 
-		switch (type)
-		{
-			case StoryItemType.Problem:
-				NewElement = new ProblemModel(NewNodeName, StoryModel); 
-				break;
-			case StoryItemType.Character:
-				NewElement = new CharacterModel(NewNodeName, StoryModel);
-				break;
-			case StoryItemType.Setting:
-				NewElement = new SettingModel(NewNodeName, StoryModel);
-				break;
-			case StoryItemType.Scene:
-				NewElement = new SceneModel(NewNodeName, StoryModel);
-				break;
-			default:
-				//Throw an exception if we are asked to create a node type we don't expect
-				throw new Exception(
-					$"Unexpected element type {type}");
-		}
-		
-		//Persist node to tree and set as selected element
-		StoryNodeItem Node = new(NewElement, StoryModel.ExplorerView[0]);
-		SelectedElement = NewElement;
 
-		//Close popup
-		if (dialog is not null)
-		    dialog.Hide();
-	}	
+        throw new NotImplementedException("This code needs to updated.");
+        /*
+        switch (type)
+        {
+            case StoryItemType.Problem:
+                NewElement = new ProblemModel(NewNodeName, StoryModel,);
+                break;
+            case StoryItemType.Character:
+                NewElement = new CharacterModel(NewNodeName, StoryModel);
+                break;
+            case StoryItemType.Setting:
+                NewElement = new SettingModel(NewNodeName, StoryModel);
+                break;
+            case StoryItemType.Scene:
+                NewElement = new SceneModel(NewNodeName, StoryModel);
+                break;
+            default:
+                //Throw an exception if we are asked to create a node type we don't expect
+                throw new Exception(
+                    $"Unexpected element type {type}");
+        }
+
+        //Persist node to tree and set as selected element
+        StoryNodeItem Node = new(NewElement, StoryModel.ExplorerView[0]);
+        SelectedElement = NewElement;
+
+        //Close popup
+        if (dialog is not null)
+            dialog.Hide();*/
+    }
 }

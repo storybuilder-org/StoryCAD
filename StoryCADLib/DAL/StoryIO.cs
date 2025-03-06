@@ -71,6 +71,8 @@ public class StoryIO
 			//Rebuild tree.
 			_model.ExplorerView = RebuildTree(_model.FlattenedExplorerView, _model.StoryElements, _logService);
 			_model.NarratorView = RebuildTree(_model.FlattenedNarratorView, _model.StoryElements, _logService);
+            
+			//TODO: set .Node again
 
 			//Log info about story
 			_logService.Log(LogLevel.Info, $"Model deserialized as {_model.ExplorerView[0].Name}");
@@ -95,8 +97,7 @@ public class StoryIO
 
 
 	private static ObservableCollection<StoryNodeItem> RebuildTree(
-		List<PersistableNode> flatNodes,
-		StoryElementCollection storyElements,
+		List<PersistableNode> flatNodes, StoryElementCollection storyElements,
 		ILogService logger)
 	{
 		var lookup = new Dictionary<Guid, StoryNodeItem>();
@@ -104,16 +105,16 @@ public class StoryIO
 		// First create all nodes (empty parent/children)
 		foreach (var n in flatNodes)
 		{
-			var element = storyElements.StoryElementGuids[n.Uuid];
-			var nodeItem = new StoryNodeItem(logger, element, parent: null);
+			StoryElement element = storyElements.StoryElementGuids[n.Uuid];
+			StoryNodeItem nodeItem = new(logger, element, parent: null);
 			lookup[n.Uuid] = nodeItem;
 		}
 
 		// Now link each node to its parent
-		var rootCollection = new ObservableCollection<StoryNodeItem>();
+		ObservableCollection<StoryNodeItem> rootCollection = new();
 		foreach (var n in flatNodes)
 		{
-			var nodeItem = lookup[n.Uuid];
+			StoryNodeItem nodeItem = lookup[n.Uuid];
 			if (n.ParentUuid.HasValue && lookup.TryGetValue(n.ParentUuid.Value, out var parentItem))
 			{
 				nodeItem.Parent = parentItem;
@@ -237,7 +238,8 @@ public class StoryIO
                 Process.Start(new ProcessStartInfo
                 {
                     FileName =
-                        "https://storybuilder-org.github.io/StoryCAD/docs/Miscellaneous/Troubleshooting_Cloud_Storage_Providers.html",
+                        "https://storybuilder-org.github.io/StoryCAD/docs/Miscellaneous" +
+                        "/Troubleshooting_Cloud_Storage_Providers.html",
                     UseShellExecute = true
                 });
             }

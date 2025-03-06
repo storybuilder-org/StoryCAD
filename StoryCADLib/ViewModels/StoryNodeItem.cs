@@ -403,7 +403,7 @@ public class StoryNodeItem : INotifyPropertyChanged
                 IsRoot = true;
         }
 
-        Children = new ObservableCollection<StoryNodeItem>();
+        Children = new();
         Parent = parent;
         Parent?.Children.Add(this);  // (if parent != null)
     }
