@@ -1,11 +1,12 @@
 using System.Text.Json;
 using Windows.Storage;
-using CommunityToolkit.WinUI.Helpers;
 using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
 using StoryCAD.Models.Tools;
 using StoryCAD.Services;
+using Octokit;
+using Application = Microsoft.UI.Xaml.Application;
 
 namespace StoryCAD.DAL;
 /// <summary>
@@ -45,8 +46,8 @@ public class PreferencesIo
 
 			PreferencesModel _model = new();
 
-			//Check if we have a preferences.json
-			if (await _preferencesFolder.FileExistsAsync("Preferences.json"))
+            //Check if we have a preferences.json
+			if (File.Exists(Path.Combine(_preferencesFolder.Path, "Preferences.json")))
 			{
 				//Read file into memory
 				_log.Log(LogLevel.Info, "Preferences.json found, reading it.");

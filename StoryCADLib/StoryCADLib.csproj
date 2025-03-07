@@ -110,7 +110,6 @@
 
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.2" />
-    <PackageReference Include="CommunityToolkit.WinUI.UI.Controls.Core" Version="7.1.2" />
     <PackageReference Include="dotenv.net" Version="3.2.1" />
     <PackageReference Include="Elmah.Io.NLog" Version="5.3.54" />
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.2792.45" />
