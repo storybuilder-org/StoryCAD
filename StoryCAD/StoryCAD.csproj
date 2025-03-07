@@ -44,12 +44,12 @@
 	<ItemGroup>
 		<PackageReference Include="dotenv.net" Version="3.2.1" />
 		<PackageReference Include="Microsoft.Web.WebView2" Version="1.0.2792.45" />
-		<PackageReference Include="Microsoft.WindowsAppSDK" Version="1.6.241114003" />
+		<PackageReference Include="Microsoft.WindowsAppSDK" Version="1.6.250205002" />
 		<PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.1742" />
-		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.2" />
-		<PackageReference Include="NLog" Version="5.3.4" />
-		<PackageReference Include="NLog.Extensions.Logging" Version="5.3.15" />
-		<PackageReference Include="WinUIEx" Version="2.5.0" />
+		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+		<PackageReference Include="NLog" Version="5.4.0" />
+		<PackageReference Include="NLog.Extensions.Logging" Version="5.4.0" />
+		<PackageReference Include="WinUIEx" Version="2.5.1" />
 		<Manifest Include="$(ApplicationManifest)" />
 	</ItemGroup>
 
