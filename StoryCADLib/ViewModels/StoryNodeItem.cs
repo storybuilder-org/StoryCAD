@@ -322,8 +322,13 @@ public class StoryNodeItem : INotifyPropertyChanged
 
         IsExpanded = false;
         IsRoot = false;
-        
-        if (Parent == null) { return; }
+
+        //If there's no parent this is a root node.
+        if (Parent == null)
+        {
+            IsRoot = true;
+            return;
+        }
         Parent.Children.Add(this);
     }
 

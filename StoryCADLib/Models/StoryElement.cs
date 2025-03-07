@@ -117,6 +117,7 @@ public class StoryElement : ObservableObject
         _name = name;
         _type = type;
         _node = new(this, parentNode, type);
+
         model.StoryElements.Add(this);
     }
 

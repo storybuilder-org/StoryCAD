@@ -29,11 +29,9 @@ public class OutlineService
 
         model.ExplorerView.Add(overview.Node);
         TrashCanModel trash = new(model, null);
-        StoryNodeItem trashNode = new(trash, null);
-        model.ExplorerView.Add(trashNode); // The trashcan is the second root
+        model.ExplorerView.Add(trash.Node); // The trashcan is the second root
         FolderModel narrative = new("Narrative View", model, StoryItemType.Folder, null);
-        StoryNodeItem narrativeNode = new(narrative, null) { IsRoot = true };
-        model.NarratorView.Add(narrativeNode);
+        model.NarratorView.Add(narrative.Node);
 
         // For non-blank projects, add a StoryProblem with characters.
         if (selectedTemplateIndex != 0)
@@ -45,11 +43,12 @@ public class OutlineService
             var problem = storyProblem as ProblemModel;
             problem.Protagonist = storyProtag.Uuid;
             problem.Antagonist = storyAntag.Uuid;
-            problem.Premise =
-                @"Your[protagonist] in a situation[genre, setting] wants something[goal], which brings him" +
-                @"into [conflict] with a second character[antagonist]. After a series of conflicts[additional " +
-                @"problems], the final battle[climax scene] erupts, and the[protagonist] finally resolves the " +
-                @"conflict[outcome].";
+            problem.Premise = """
+                              Your[protagonist] in a situation[genre, setting] wants something[goal], which brings him
+                              into [conflict] with a second character[antagonist]. After a series of conflicts[additional
+                              problems], the final battle[climax scene] erupts, and the[protagonist] finally resolves the 
+                              conflict[outcome].
+                              """;
 
             switch (selectedTemplateIndex)
             {
@@ -79,8 +78,6 @@ public class OutlineService
                     storyProblem.Node.IsExpanded = true;
                     storyProblem.Node.Parent = overview.Node;
                     overview.Node.Children.Add(storyProblem.Node);
-                    storyProblem.Node.Children.Add(storyProtag.Node);
-                    storyProblem.Node.Children.Add(storyAntag.Node);
                     problem = storyProblem as ProblemModel;
                     problem.Name = "External Problem";
                     overview.StoryProblem = problem.Uuid;
@@ -100,9 +97,6 @@ public class OutlineService
                         @"[protagonist] to resolve another (external) problem.";
                     break;
                 case 4:
-                    overview.Node.Children.Add(storyProtag.Node);
-                    overview.Node.Children.Add(storyAntag.Node);
-                    storyProtag.Node.Children.Add(storyProblem.Node);
                     storyProtag.Node.IsExpanded = true;
                     storyProblem.Node.Parent = storyProtag.Node;
                     storyProtag.Node.Parent = overview.Node;
@@ -115,7 +109,6 @@ public class OutlineService
                     StoryElement scenesFolder = new FolderModel("Scenes", model, StoryItemType.Folder, overview.Node);
                     storyProblem.Node.Name = "External Problem";
                     storyProblem.Node.IsExpanded = true;
-                    problemsFolder.Node.Children.Add(storyProblem.Node);
                     storyProblem.Node.Parent = problemsFolder.Node;
                     problem = storyProblem as ProblemModel;
                     problem.Name = "External Problem";
@@ -127,13 +120,12 @@ public class OutlineService
                     problem.Protagonist = storyProtag.Uuid;
                     problem.Antagonist = storyProtag.Uuid;
                     problem.ConflictType = "Person vs. Self";
-                    problem.Premise =
-                        @"Your [protagonist] grapples with an [internal conflict] and is their own antagonist, marred by self-doubt and fears " +
-                        @"or having a [goal] that masks this conflict rather than a real need. The [climax scene] is often a moment of introspection in which " +
-                        @"he or she makes a decision or discovery that resolves the internal conflict [outcome]. Resolving this problem may enable your " +
-                        @"[protagonist] to resolve another (external) problem.";
-                    problemsFolder.Node.Children.Add(storyProblem.Node);
-                    problemsFolder.Node.Children.Add(storyProblem.Node);
+                    problem.Premise = """
+                                      Your [protagonist] grapples with an [internal conflict] and is their own antagonist, marred by self-doubt and fears
+                                      or having a [goal] that masks this conflict rather than a real need. The [climax scene] is often a moment of
+                                      introspection in which he or she makes a decision or discovery that resolves the internal conflict [outcome]. 
+                                      Resolving this problem may enable your [protagonist] to resolve another (external) problem.
+                                      """;
                     storyProblem.Node.Parent = problemsFolder.Node;
                     storyProblem.Node.Parent = problemsFolder.Node;
                     break;

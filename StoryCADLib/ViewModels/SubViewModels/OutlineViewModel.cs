@@ -231,7 +231,7 @@ public class OutlineViewModel : ObservableRecipient
             string author = preferences.Model.FirstName + " " + preferences.Model.LastName;
 
             // Create the new project StorageFile; throw an exception if it already exists.
-            await outlineService.CreateModel(name, author, dialogVm.SelectedTemplateIndex);
+            StoryModel = await outlineService.CreateModel(name, author, dialogVm.SelectedTemplateIndex);
 
             shellVm.SetCurrentView(StoryViewType.ExplorerView);
 

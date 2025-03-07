@@ -71,8 +71,6 @@ public class StoryIO
 			//Rebuild tree.
 			_model.ExplorerView = RebuildTree(_model.FlattenedExplorerView, _model.StoryElements, _logService);
 			_model.NarratorView = RebuildTree(_model.FlattenedNarratorView, _model.StoryElements, _logService);
-            
-			//TODO: set .Node again
 
 			//Log info about story
 			_logService.Log(LogLevel.Info, $"Model deserialized as {_model.ExplorerView[0].Name}");
@@ -107,6 +105,7 @@ public class StoryIO
 		{
 			StoryElement element = storyElements.StoryElementGuids[n.Uuid];
 			StoryNodeItem nodeItem = new(logger, element, parent: null);
+            element.Node = nodeItem;
 			lookup[n.Uuid] = nodeItem;
 		}
 
@@ -181,7 +180,7 @@ public class StoryIO
 	}
 
 	/// <summary>
-	/// Checks if a file exists and is genuniely available.
+	/// Checks if a file exists and is genuinely available.
 	/// </summary>
 	/// <remarks>
 	///	Cloud storage can report a file as available here even if it's not.
