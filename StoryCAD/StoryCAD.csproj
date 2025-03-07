@@ -50,7 +50,6 @@
 		<PackageReference Include="CommunityToolkit.WinUI.UI.Controls.Core" Version="7.1.2" />
 		<PackageReference Include="NLog" Version="5.3.4" />
 		<PackageReference Include="NLog.Extensions.Logging" Version="5.3.15" />
-		<PackageReference Include="PInvoke.User32" Version="0.7.124" />
 		<PackageReference Include="WinUIEx" Version="2.5.0" />
 		<Manifest Include="$(ApplicationManifest)" />
 	</ItemGroup>
