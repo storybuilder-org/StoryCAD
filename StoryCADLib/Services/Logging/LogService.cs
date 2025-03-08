@@ -6,7 +6,6 @@ using NLog.Config;
 using NLog.Targets;
 using StoryCAD.Services.Json;
 using Microsoft.UI.Windowing;
-using CommunityToolkit.WinUI.Helpers;
 using System.Runtime.InteropServices;
 using Windows.Devices.Input;
 using StoryCAD.Models.Tools;
@@ -296,7 +295,6 @@ public class LogService : ILogService
                      Name - {Prefs.FirstName}  {Prefs.LastName}
                      Email - {Prefs.Email}
                      Elmah Consent - {Prefs.ErrorCollectionConsent}
-                     Theme - {Ioc.Default.GetRequiredService<Windowing>().PrimaryColor.Color.ToHex()}
                      Accent Color - {Ioc.Default.GetRequiredService<Windowing>().AccentColor} 
                      Last Version Prefs logged - {Prefs.Version}
                      Search Engine - {Prefs.PreferredSearchEngine} 

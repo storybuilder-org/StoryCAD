@@ -3,7 +3,6 @@ using Windows.ApplicationModel;
 using dotenv.net;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.Windows.AppLifecycle;
-using PInvoke;
 using StoryCAD.Services.Backend;
 using StoryCAD.Services.Json;
 using StoryCAD.Services.Logging;
@@ -198,15 +197,16 @@ public partial class App
         }
         else {rootFrame.Navigate(typeof(Shell));}
 
-    // Preserve both the Window and its Handle for future use
-    Ioc.Default.GetRequiredService<Windowing>().MainWindow = (MainWindow) mainWindow;
+        Windowing window = Ioc.Default.GetRequiredService<Windowing>();
+
+        // Preserve both the Window and its Handle for future use
+        window.MainWindow = (MainWindow) mainWindow;
+
         //Get the Window's HWND
-        m_windowHandle = User32.GetActiveWindow();
-        Ioc.Default.GetRequiredService<Windowing>().WindowHandle = m_windowHandle;
+        window.WindowHandle = window.MainWindow.GetWindowHandle();
 
         _log.Log(LogLevel.Debug, $"Layout: Window size width={mainWindow.Width} height={mainWindow.Height}");
         _log.Log(LogLevel.Info, "StoryCAD App loaded and launched");
-
     }
 
 	private void MainWindow_Closed(object sender, WindowEventArgs args)
