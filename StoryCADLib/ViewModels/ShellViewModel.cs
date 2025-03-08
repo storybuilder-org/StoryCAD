@@ -395,7 +395,7 @@ public class ShellViewModel : ObservableRecipient
             {
                 CurrentNode = node;
                 StoryElement element = OutlineManager.StoryModel.StoryElements.StoryElementGuids[node.Uuid];
-                switch (element.Type)
+                switch (element.ElementType)
                 {
                     case StoryItemType.Character:
                         nav.NavigateTo(SplitViewFrame, CharacterPage, element);

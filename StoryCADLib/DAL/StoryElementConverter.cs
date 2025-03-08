@@ -1,6 +1,5 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
-using NLog;
 using LogLevel = StoryCAD.Services.Logging.LogLevel;
 
 namespace StoryCAD.DAL;
@@ -74,9 +73,9 @@ public class StoryElementConverter : JsonConverter<StoryElement>
 				CharacterModel _ => "Character",
 				SettingModel _ => "Setting",
 				SceneModel _ => "Scene",
-				FolderModel { Type: StoryItemType.Notes } => "Notes",
-				FolderModel { Type: StoryItemType.Folder } => "Folder",
-				FolderModel { Type: StoryItemType.Section } => "Section",
+				FolderModel { ElementType: StoryItemType.Notes } => "Notes",
+				FolderModel { ElementType: StoryItemType.Folder } => "Folder",
+				FolderModel { ElementType: StoryItemType.Section } => "Section",
 				WebModel _ => "Web",
 				TrashCanModel _ => "TrashCan",
 				_ => "Unknown"

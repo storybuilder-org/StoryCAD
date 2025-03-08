@@ -517,7 +517,8 @@ public class CharacterModel : StoryElement
 	#endregion
 
 	#region Constructors
-	public CharacterModel(StoryModel model) : base("New Character", StoryItemType.Character, model)
+	public CharacterModel(StoryModel model, StoryNodeItem node) 
+        : base("New Character", StoryItemType.Character, model, node)
     {
         Role = string.Empty;
         StoryRole = string.Empty;
@@ -565,7 +566,8 @@ public class CharacterModel : StoryElement
         BackStory = string.Empty;
     }
 
-    public CharacterModel(string name, StoryModel model) : base(name, StoryItemType.Character, model)
+    public CharacterModel(string name, StoryModel model, StoryNodeItem Node) 
+        : base(name, StoryItemType.Character, model, Node)
     {
         Role = string.Empty;
         StoryRole = string.Empty;

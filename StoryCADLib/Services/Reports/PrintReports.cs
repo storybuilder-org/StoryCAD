@@ -109,7 +109,7 @@ public class PrintReports
 
     private StoryElement Overview()
     {
-        return _model.StoryElements.FirstOrDefault(element => element.Type == StoryItemType.StoryOverview);
+        return _model.StoryElements.FirstOrDefault(element => element.ElementType == StoryItemType.StoryOverview);
     }
 
     public void Print(string file)

@@ -162,7 +162,7 @@ public class SettingModel : StoryElement
 	#endregion
 
 	#region Constructors
-	public SettingModel(StoryModel model) : base("New Setting", StoryItemType.Setting, model)
+	public SettingModel(StoryModel model, StoryNodeItem node) : base("New Setting", StoryItemType.Setting, model, node)
     {
         Locale = string.Empty;
         Season = string.Empty;
@@ -179,7 +179,7 @@ public class SettingModel : StoryElement
         Notes = string.Empty;
         SettingNames.Add(Name);
     }
-    public SettingModel(string name, StoryModel model) : base(name, StoryItemType.Setting, model)
+    public SettingModel(string name, StoryModel model, StoryNodeItem Node) : base(name, StoryItemType.Setting, model, Node)
     {
 	    Locale = string.Empty;
 	    Season = string.Empty;

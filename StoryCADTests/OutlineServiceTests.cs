@@ -42,15 +42,15 @@ namespace StoryCADTests
             int templateIndex = 0;
 
             // Act
-            StoryModel result = await _outlineService.CreateModel(file, projectName, author, templateIndex);
+            StoryModel result = await _outlineService.CreateModel(projectName, author, templateIndex);
 
             // Assert
             Assert.IsNotNull(result, "StoryModel should not be null.");
             Assert.IsTrue(result.StoryElements.Count == 2, "StoryElements should contain exactly 2 elements.");
-            Assert.IsTrue(result.StoryElements.Any(e => e.Type == StoryItemType.StoryOverview), "StoryOverview should be present.");
-            Assert.IsTrue(result.StoryElements.Any(e => e.Type == StoryItemType.TrashCan), "Trash should be present.");
-            Assert.IsFalse(result.StoryElements.Any(e => e.Type == StoryItemType.Folder), "Folder should not be present.");
-            Assert.IsFalse(result.StoryElements.Any(e => e.Type == StoryItemType.Character), "Character should not be present.");
+            Assert.IsTrue(result.StoryElements.Any(e => e.ElementType == StoryItemType.StoryOverview), "StoryOverview should be present.");
+            Assert.IsTrue(result.StoryElements.Any(e => e.ElementType == StoryItemType.TrashCan), "Trash should be present.");
+            Assert.IsFalse(result.StoryElements.Any(e => e.ElementType == StoryItemType.Folder), "Folder should not be present.");
+            Assert.IsFalse(result.StoryElements.Any(e => e.ElementType == StoryItemType.Character), "Character should not be present.");
         }
 
         [TestMethod]
@@ -65,7 +65,7 @@ namespace StoryCADTests
             int templateIndex = 0;
 
             // Act
-            await _outlineService.CreateModel(file, invalidProjectName, author, templateIndex);
+            await _outlineService.CreateModel(invalidProjectName, author, templateIndex);
         }
 
         [TestMethod]
@@ -80,7 +80,7 @@ namespace StoryCADTests
             int templateIndex = 0;
 
             // Act
-            await _outlineService.CreateModel(file, projectName, author, templateIndex);
+            await _outlineService.CreateModel(projectName, author, templateIndex);
         }
 
         [TestMethod]
@@ -96,10 +96,10 @@ namespace StoryCADTests
             int templateIndex = 0;
 
             // Act
-            await _outlineService.CreateModel(file, projectName, author, templateIndex);
+            await _outlineService.CreateModel(projectName, author, templateIndex);
 
             // Attempt to create another model with the same path
-            await _outlineService.CreateModel(file, projectName, author, templateIndex);
+            await _outlineService.CreateModel(projectName, author, templateIndex);
         }
     }
 }

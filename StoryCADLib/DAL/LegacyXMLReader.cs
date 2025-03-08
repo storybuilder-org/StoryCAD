@@ -35,10 +35,8 @@ public class LegacyXMLReader : ObservableRecipient
 
     public async Task<StoryModel> ReadFile(StorageFile file)
     {
-
         try
         {
-
             string _msg = $"Reading file {file.Path}.";
             _logger.Log(LogLevel.Info, _msg);
             _xml = await LoadFromFileAsync(file);
@@ -57,7 +55,7 @@ public class LegacyXMLReader : ObservableRecipient
             // those, add the node to both the ExplorerView and NarratorView views.
             if (_model.ExplorerView.Count == 1)
             {
-                TrashCanModel _trash = new(_model);
+                TrashCanModel _trash = new(_model, null);
                 StoryNodeItem _trashNode = new(_trash, null);
                 _model.ExplorerView.Add(_trashNode);     // The trashcan is the second root
             }

@@ -111,11 +111,11 @@ public class StructureBeatViewModel : ObservableObject
         {
             if (Element != null)
             {
-                if (Element.Type == StoryItemType.Problem)
+                if (Element.ElementType == StoryItemType.Problem)
                 {
                     return ((ProblemModel)Element).StoryQuestion;
                 }
-                else if (Element.Type == StoryItemType.Scene)
+                else if (Element.ElementType == StoryItemType.Scene)
                 {
                     return ((SceneModel)Element).Remarks;
                 }
@@ -132,11 +132,11 @@ public class StructureBeatViewModel : ObservableObject
         {
             if (Element != null)
             {
-                if (Element.Type == StoryItemType.Problem)
+                if (Element.ElementType == StoryItemType.Problem)
                 {
                     return Symbol.Help;
                 }
-                else if (Element.Type == StoryItemType.Scene)
+                else if (Element.ElementType == StoryItemType.Scene)
                 {
                     return Symbol.World;
                 }

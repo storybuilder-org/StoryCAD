@@ -37,7 +37,6 @@ namespace StoryCAD.ViewModels;
 public class StoryNodeItem : INotifyPropertyChanged
 {
     private readonly ILogService _logger;
-    private readonly ShellViewModel _shellVM = Ioc.Default.GetRequiredService<ShellViewModel>();
     private readonly OutlineViewModel _outlineVM = Ioc.Default.GetRequiredService<OutlineViewModel>();
 
     // is it INavigable?
@@ -282,7 +281,7 @@ public class StoryNodeItem : INotifyPropertyChanged
         _logger = logger;
         Uuid = node.Uuid;
         Name = node.Name;
-        if (type == StoryItemType.Unknown) { Type = node.Type; }
+        if (type == StoryItemType.Unknown) { Type = node.ElementType; }
         else { Type = type; }
         switch (_type)
         {
@@ -323,8 +322,13 @@ public class StoryNodeItem : INotifyPropertyChanged
 
         IsExpanded = false;
         IsRoot = false;
-        
-        if (Parent == null) { return; }
+
+        //If there's no parent this is a root node.
+        if (Parent == null)
+        {
+            IsRoot = true;
+            return;
+        }
         Parent.Children.Add(this);
     }
 
@@ -404,7 +408,7 @@ public class StoryNodeItem : INotifyPropertyChanged
                 IsRoot = true;
         }
 
-        Children = new ObservableCollection<StoryNodeItem>();
+        Children = new();
         Parent = parent;
         Parent?.Children.Add(this);  // (if parent != null)
     }

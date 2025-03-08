@@ -379,7 +379,7 @@ namespace StoryCAD.Services.Reports
                 element = _model.StoryElements.StoryElementGuids[uuid];
             if (element != null)
             {
-                switch (element.Type)
+                switch (element.ElementType)
                 {
                     case StoryItemType.StoryOverview:
                         await GenerateStoryOverviewReport(node, element);

@@ -63,7 +63,7 @@ public class FileTests
 
         //Check is loaded correctly
         Assert.IsTrue(StoryModel.StoryElements.Count == 6);
-        Assert.IsTrue(StoryModel.StoryElements[0].Type == StoryItemType.StoryOverview);
+        Assert.IsTrue(StoryModel.StoryElements[0].ElementType == StoryItemType.StoryOverview);
 
         //Because we have created a file in this way we must populate ProjectFolder and ProjectFile.
         Directory.CreateDirectory(OutlineVM.StoryModelFile);
@@ -154,12 +154,12 @@ public class FileTests
 		//Folder
 		FolderModel Fold =
 			(FolderModel)Model.StoryElements.First(se =>
-				se.Type == StoryItemType.Folder && !se.Name.Contains("Narrative"));
+				se.ElementType == StoryItemType.Folder && !se.Name.Contains("Narrative"));
 		Assert.IsTrue(Fold.Name == "New Folder");
 		Assert.IsTrue(Fold.Notes.Contains("Test"));
 
 		//Problem Model Test
-		ProblemModel Prob = (ProblemModel)Model.StoryElements.First(se => se.Type == StoryItemType.Problem);
+		ProblemModel Prob = (ProblemModel)Model.StoryElements.First(se => se.ElementType == StoryItemType.Problem);
 		Assert.IsTrue(Prob.ProblemType == "Decision");
 		Assert.IsTrue(Prob.ConflictType == "Person vs. Machine");
 		Assert.IsTrue(Prob.ProblemCategory == "Complication");
@@ -179,7 +179,7 @@ public class FileTests
 		Assert.IsTrue(Prob.Notes.Contains("Test"));
 
 		//Character Model Test
-		CharacterModel Char = (CharacterModel)Model.StoryElements.First(se => se.Type == StoryItemType.Character);
+		CharacterModel Char = (CharacterModel)Model.StoryElements.First(se => se.ElementType == StoryItemType.Character);
 		Assert.IsTrue(Char.Role == "Adman");
 		Assert.IsTrue(Char.StoryRole == "Supporting Role");
 		Assert.IsTrue(Char.Archetype == "Shapeshifter");
@@ -224,7 +224,7 @@ public class FileTests
 		Assert.IsTrue(Char.Notes.Contains("Test"));
 
 		//Setting Model
-		SettingModel Sett = (SettingModel)Model.StoryElements.First(se => se.Type == StoryItemType.Setting);
+		SettingModel Sett = (SettingModel)Model.StoryElements.First(se => se.ElementType == StoryItemType.Setting);
 		Assert.IsTrue(Sett.Locale == "Aboard plane");
 		Assert.IsTrue(Sett.Season == "Late Summer");
 		Assert.IsTrue(Sett.Period == "Test");
@@ -240,7 +240,7 @@ public class FileTests
 		Assert.IsTrue(Sett.Notes.Contains("Test"));
 
 		//Scene Model
-		SceneModel Scen = (SceneModel)Model.StoryElements.First(se => se.Type == StoryItemType.Scene);
+		SceneModel Scen = (SceneModel)Model.StoryElements.First(se => se.ElementType == StoryItemType.Scene);
 		Assert.IsTrue(Scen.Date == "Test");
 		Assert.IsTrue(Scen.Time == "Test");
 		Assert.IsTrue(Scen.SceneType == "Contemplative (or sequel) scene");
@@ -256,11 +256,11 @@ public class FileTests
 		Assert.IsTrue(Scen.Notes.Contains("Test"));
 		
 		//Note Folder
-		FolderModel Note = (FolderModel)Model.StoryElements.First(se => se.Type == StoryItemType.Notes);
+		FolderModel Note = (FolderModel)Model.StoryElements.First(se => se.ElementType == StoryItemType.Notes);
 		Assert.IsTrue(Note.Notes.Contains("Test"));
 
 		//Web Folder
-		WebModel Web = (WebModel)Model.StoryElements.First(se => se.Type == StoryItemType.Web);
+		WebModel Web = (WebModel)Model.StoryElements.First(se => se.ElementType == StoryItemType.Web);
 		Assert.IsTrue(Web.URL.ToString() == "https://github.com/Rarisma");
 		return null;
     }
@@ -493,7 +493,7 @@ public class FileTests
 
 		//Create Model
         OperationResult<StoryModel> model = await
-            OperationResult<StoryModel>.SafeExecuteAsync(outlineService.CreateModel(file, "Test", "Test", 3));
+            OperationResult<StoryModel>.SafeExecuteAsync(outlineService.CreateModel("Test", "Test", 3));
 		Assert.IsTrue(model.IsSuccess);
 
         OperationResult<bool> write = await OperationResult<bool>.SafeExecuteAsync(outlineService.WriteModel(model.Payload, file.Path));

@@ -245,7 +245,7 @@ public class OverviewModel : StoryElement
 
 	#region Constructor
 
-	public OverviewModel(string name, StoryModel model) : base(name, StoryItemType.StoryOverview, model)
+	public OverviewModel(string name, StoryModel model, StoryNodeItem Node) : base(name, StoryItemType.StoryOverview, model, Node)
     {
         DateCreated = string.Empty;
         Author = string.Empty;

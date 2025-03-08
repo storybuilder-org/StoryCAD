@@ -2,7 +2,6 @@ using System.Collections.ObjectModel;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using StoryCAD.DAL;
-using Windows.Storage;
 
 namespace StoryCAD.Models;
 
@@ -115,8 +114,6 @@ public class StoryModel
     /// <summary>
     /// Serialises the model to JSON
     /// </summary>
-    /// <param name="model">Story Model to serialise</param>
-    /// <returns></returns>
     public string Serialize()
     {
         //Flatten trees (solves issues when deserialization)

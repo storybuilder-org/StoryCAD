@@ -14,8 +14,12 @@ public class TrashCanModel : StoryElement
 	/// JSON Constructor
 	/// </summary>
     public TrashCanModel() {}
-    
-    public TrashCanModel(StoryModel model) : base("Deleted Story Elements", StoryItemType.TrashCan, model) { }
+
+    public TrashCanModel(StoryModel model, StoryNodeItem node)
+        : base("Deleted Story Elements", StoryItemType.TrashCan, model, node)
+    {
+
+    }
     
     //TODO: REMOVE WITH STORYREADER
     public TrashCanModel(IXmlNode xn, StoryModel model) : base(xn, model) { }

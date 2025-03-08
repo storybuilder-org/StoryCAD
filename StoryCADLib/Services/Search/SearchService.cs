@@ -39,7 +39,7 @@ public class SearchService
 
         if (model.StoryElements.StoryElementGuids.ContainsKey(node.Uuid)) { element = model.StoryElements.StoryElementGuids[node.Uuid]; }
         if (element == null) { return false; }
-        switch (element.Type)
+        switch (element.ElementType)
         {
             case StoryItemType.StoryOverview:
                 result = SearchStoryOverview(node, element);

@@ -231,7 +231,7 @@ public class OutlineViewModel : ObservableRecipient
             string author = preferences.Model.FirstName + " " + preferences.Model.LastName;
 
             // Create the new project StorageFile; throw an exception if it already exists.
-            await outlineService.CreateModel(name, author, dialogVm.SelectedTemplateIndex);
+            StoryModel = await outlineService.CreateModel(name, author, dialogVm.SelectedTemplateIndex);
 
             shellVm.SetCurrentView(StoryViewType.ExplorerView);
 
@@ -727,7 +727,7 @@ public class OutlineViewModel : ObservableRecipient
                     string masterPlotName = masterPlotsVm.PlotPatternName;
                     PlotPatternModel model = masterPlotsVm.MasterPlots[masterPlotName];
                     IList<PlotPatternScene> scenes = model.PlotPatternScenes;
-                    ProblemModel problem = new ProblemModel(masterPlotName, StoryModel);
+                    ProblemModel problem = new ProblemModel(masterPlotName, StoryModel, shellVm.RightTappedNode);
                     // add the new ProblemModel & node to the end of the target (shellVm.RightTappedNode) children 
                     StoryNodeItem problemNode = new(problem, shellVm.RightTappedNode);
                     shellVm.RightTappedNode.IsExpanded = true;
@@ -740,7 +740,7 @@ public class OutlineViewModel : ObservableRecipient
                     }
                     else foreach (PlotPatternScene scene in scenes)
                     {
-                        SceneModel child = new(StoryModel)
+                        SceneModel child = new(StoryModel, shellVm.RightTappedNode)
                             { Name = scene.SceneTitle, Remarks = "See Notes.", Notes = scene.Notes };
                         // add the new SceneModel & node to the end of the problem's children 
                         StoryNodeItem newNode = new(child, problemNode);
@@ -980,28 +980,28 @@ public class OutlineViewModel : ObservableRecipient
         switch (typeToAdd)
         {
             case StoryItemType.Folder:
-                _newNode = new StoryNodeItem(new FolderModel(StoryModel), shellVm.RightTappedNode);
+                _newNode = new FolderModel(StoryModel, shellVm.RightTappedNode).Node;
                 break;
             case StoryItemType.Section:
-                _newNode = new StoryNodeItem(new FolderModel("New Section", StoryModel, StoryItemType.Folder), shellVm.RightTappedNode, StoryItemType.Folder);
+                _newNode = new FolderModel("New Section", StoryModel, StoryItemType.Folder, shellVm.RightTappedNode).Node;
                 break;
             case StoryItemType.Problem:
-                _newNode = new StoryNodeItem(new ProblemModel(StoryModel), shellVm.RightTappedNode);
+                _newNode = new ProblemModel(StoryModel, shellVm.RightTappedNode).Node;
                 break;
             case StoryItemType.Character:
-                _newNode = new StoryNodeItem(new CharacterModel(StoryModel), shellVm.RightTappedNode);
+                _newNode = new CharacterModel(StoryModel, shellVm.RightTappedNode).Node;
                 break;
             case StoryItemType.Setting:
-                _newNode = new StoryNodeItem(new SettingModel(StoryModel), shellVm.RightTappedNode);
+                _newNode = new SettingModel(StoryModel, shellVm.RightTappedNode).Node;
                 break;
             case StoryItemType.Scene:
-                _newNode = new StoryNodeItem(new SceneModel(StoryModel), shellVm.RightTappedNode);
+                _newNode = new SceneModel(StoryModel, shellVm.RightTappedNode).Node;
                 break;
             case StoryItemType.Web:
-                _newNode = new StoryNodeItem(new WebModel(StoryModel), shellVm.RightTappedNode);
+                _newNode = new WebModel(StoryModel,shellVm.RightTappedNode).Node;
                 break;
             case StoryItemType.Notes:
-                _newNode = new StoryNodeItem(new FolderModel("New Note", StoryModel, StoryItemType.Notes), shellVm.RightTappedNode, StoryItemType.Notes);
+                _newNode = new FolderModel("New Note", StoryModel, StoryItemType.Notes, shellVm.RightTappedNode).Node;
                 break;
         }
 
