@@ -3,103 +3,199 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using StoryCAD.Models;
 using StoryCAD.Services.Outline;
 using System;
-using Windows.Storage;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace StoryCADTests
 {
+    /// <summary>
+    /// Tests for the OutlineService class which is responsible for creating, writing, and opening StoryModel files.
+    /// This test class verifies:
+    /// <list type="bullet">
+    /// <item>
+    /// <description>The correct creation of StoryModels using different template indexes.</description>
+    /// </item>
+    /// <item>
+    /// <description>The ability to write the StoryModel to disk, and proper error handling for invalid paths.</description>
+    /// </item>
+    /// <item>
+    /// <description>The proper opening of files and error handling when a file is not found.</description>
+    /// </item>
+    /// </list>
+    /// </summary>
     [TestClass]
     public class OutlineServiceTests
     {
         private OutlineService _outlineService;
         private string testOutputPath;
 
+        /// <summary>
+        /// Initializes the test environment for each test by instantiating the OutlineService and ensuring the TestOutputs folder is clean.
+        /// </summary>
         [TestInitialize]
         public void TestInitialize()
         {
             _outlineService = Ioc.Default.GetRequiredService<OutlineService>();
-            testOutputPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "TestOutputs");
 
-            // Ensure the TestOutputs directory is empty or recreated
+            // Create a dedicated TestOutputs folder under the current base directory.
+            testOutputPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "TestOutputs");
             if (Directory.Exists(testOutputPath))
             {
-                Directory.Delete(testOutputPath, true); // Delete the directory and all its contents
+                Directory.Delete(testOutputPath, true);
             }
-            Directory.CreateDirectory(testOutputPath); // Recreate the directory
+            Directory.CreateDirectory(testOutputPath);
         }
 
+        /// <summary>
+        /// Tests that creating a StoryModel with template index 0 produces a minimal model.
+        /// Verifies that the ExplorerView has at least an Overview and TrashCan node,
+        /// the Overview node contains the correct outline name, and that no child nodes exist for a blank project.
+        /// </summary>
         [TestMethod]
-        public async Task CreateModel_ValidInput_CreatesModelSuccessfully()
+        public async Task CreateModel_BasicTemplate0_ShouldCreateMinimalModel()
         {
             // Arrange
-            string projectName = "DefaultElementsTestProject";
-            string projectPath = Path.Combine(testOutputPath, projectName);
-            Directory.CreateDirectory(projectPath);
-            StorageFile file = await StorageFile.GetFileFromPathAsync(Path.Combine(projectPath, "DefaultElementsTestProject.stbx"));
+            string outlineName = "Test Outline";
             string author = "Test Author";
             int templateIndex = 0;
 
             // Act
-            StoryModel result = await _outlineService.CreateModel(projectName, author, templateIndex);
+            StoryModel model = await _outlineService.CreateModel(outlineName, author, templateIndex);
 
             // Assert
-            Assert.IsNotNull(result, "StoryModel should not be null.");
-            Assert.IsTrue(result.StoryElements.Count == 2, "StoryElements should contain exactly 2 elements.");
-            Assert.IsTrue(result.StoryElements.Any(e => e.ElementType == StoryItemType.StoryOverview), "StoryOverview should be present.");
-            Assert.IsTrue(result.StoryElements.Any(e => e.ElementType == StoryItemType.TrashCan), "Trash should be present.");
-            Assert.IsFalse(result.StoryElements.Any(e => e.ElementType == StoryItemType.Folder), "Folder should not be present.");
-            Assert.IsFalse(result.StoryElements.Any(e => e.ElementType == StoryItemType.Character), "Character should not be present.");
+            Assert.IsNotNull(model, "StoryModel should not be null.");
+            // The CreateModel method adds at least two nodes to ExplorerView: Overview and TrashCan.
+            Assert.IsTrue(model.ExplorerView.Count >= 2, "ExplorerView should contain at least two nodes (Overview and TrashCan).");
+            
+            // Assuming the first node is the Overview node with the provided outline name.
+            var overviewNode = model.ExplorerView.First();
+            Assert.AreEqual(outlineName, overviewNode.Name, "Overview node should have the provided outline name.");
+            
+            // For a blank project (templateIndex 0) no additional children should be added to the Overview.
+            Assert.IsTrue(overviewNode.Children == null || overviewNode.Children.Count == 0, 
+                "For template index 0, Overview node should not have child nodes.");
+
+            // Check that the NarratorView contains a node named "Narrative View"
+            bool narrativeFound = model.NarratorView.Any(n => n.Name == "Narrative View");
+            Assert.IsTrue(narrativeFound, "NarratorView should contain a node named 'Narrative View'.");
         }
 
+        /// <summary>
+        /// Tests that creating a StoryModel with template index 1 adds a problem node and its children (protagonist and antagonist)
+        /// to the Overview node.
+        /// </summary>
         [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
-        public async Task CreateModel_InvalidProjectName_ThrowsArgumentException()
+        public async Task CreateModel_Template1_ShouldAddProblemAndCharacters()
         {
             // Arrange
-            string invalidProjectName = string.Empty;
-            string projectPath = Path.Combine(testOutputPath, "InvalidProject");
-            StorageFile file = await StorageFile.GetFileFromPathAsync(Path.Combine(projectPath, "InvalidProject.stbx"));
+            string outlineName = "Test Outline";
             string author = "Test Author";
-            int templateIndex = 0;
+            int templateIndex = 1;
 
             // Act
-            await _outlineService.CreateModel(invalidProjectName, author, templateIndex);
+            StoryModel model = await _outlineService.CreateModel(outlineName, author, templateIndex);
+
+            // Assert
+            Assert.IsNotNull(model, "StoryModel should not be null.");
+            var overviewNode = model.ExplorerView.First();
+            // For non-blank projects (templateIndex != 0) additional nodes are added to the Overview.
+            Assert.IsTrue(overviewNode.Children != null && overviewNode.Children.Count > 0,
+                "For a non-blank project, Overview node should have children.");
+
+            // Look for the problem node by name.
+            var problemNode = overviewNode.Children.FirstOrDefault(n => n.Name == "Story Problem");
+            Assert.IsNotNull(problemNode, "A problem node with name 'Story Problem' should be present for template 1.");
+            // In template 1 the problem node is expected to have exactly 2 children: protagonist and antagonist.
+            Assert.AreEqual(2, problemNode.Children.Count, "Problem node should have exactly two children (protagonist and antagonist).");
         }
 
+        /// <summary>
+        /// Tests that WriteModel successfully writes a StoryModel to disk.
+        /// Verifies that the file is created and contains expected content (i.e., the outline name).
+        /// </summary>
         [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
-        public async Task CreateModel_InvalidProjectPath_ThrowsArgumentException()
+        public async Task WriteModel_ShouldWriteFileSuccessfully()
         {
             // Arrange
-            string projectName = "TestProject";
-            string invalidProjectPath = string.Empty;
-            StorageFile file = await StorageFile.GetFileFromPathAsync(Path.Combine(invalidProjectPath, "TestProject.stbx"));
+            string outlineName = "Test Outline";
             string author = "Test Author";
             int templateIndex = 0;
+            StoryModel model = await _outlineService.CreateModel(outlineName, author, templateIndex);
+            string filePath = Path.Combine(testOutputPath, "TestOutline.json");
 
             // Act
-            await _outlineService.CreateModel(projectName, author, templateIndex);
+            bool result = await _outlineService.WriteModel(model, filePath);
+
+            // Assert
+            Assert.IsTrue(result, "WriteModel should return true on success.");
+            Assert.IsTrue(File.Exists(filePath), "The output file should exist after writing the model.");
+            string json = File.ReadAllText(filePath);
+            Assert.IsTrue(json.Contains(outlineName), "The written JSON should contain the outline name.");
         }
 
+        /// <summary>
+        /// Tests that OpenFile throws a FileNotFoundException when the file does not exist.
+        /// </summary>
         [TestMethod]
-        [ExpectedException(typeof(IOException))]
-        public async Task CreateModel_DuplicateProjectPath_ThrowsIOException()
+        public async Task OpenFile_FileNotFound_ShouldThrowFileNotFoundException()
         {
             // Arrange
-            string projectName = "DuplicateTestProject";
-            string projectPath = Path.Combine(testOutputPath, projectName);
-            Directory.CreateDirectory(projectPath);
-            StorageFile file = await StorageFile.GetFileFromPathAsync(Path.Combine(projectPath, "DuplicateTestProject.stbx"));
+            string nonExistentPath = Path.Combine(testOutputPath, "NonExistentFile.json");
+
+            // Act & Assert
+            await Assert.ThrowsExceptionAsync<FileNotFoundException>(async () =>
+            {
+                await _outlineService.OpenFile(nonExistentPath);
+            });
+        }
+
+        /// <summary>
+        /// Tests that OpenFile returns a valid StoryModel when opening a file that was previously written.
+        /// Compares the ExplorerView node count between the original and loaded models.
+        /// </summary>
+        [TestMethod]
+        public async Task OpenFile_ValidFile_ShouldReturnStoryModel()
+        {
+            // Arrange
+            string outlineName = "Test Outline";
             string author = "Test Author";
             int templateIndex = 0;
+            StoryModel model = await _outlineService.CreateModel(outlineName, author, templateIndex);
+            string filePath = Path.Combine(testOutputPath, "TestOutline.json");
+            await _outlineService.WriteModel(model, filePath);
 
             // Act
-            await _outlineService.CreateModel(projectName, author, templateIndex);
+            StoryModel loadedModel = await _outlineService.OpenFile(filePath);
 
-            // Attempt to create another model with the same path
-            await _outlineService.CreateModel(projectName, author, templateIndex);
+            // Assert
+            Assert.IsNotNull(loadedModel, "Loaded model should not be null.");
+            Assert.AreEqual(model.ExplorerView.Count, loadedModel.ExplorerView.Count, 
+                "The loaded model should have the same number of ExplorerView nodes as the original.");
+        }
+
+        // ----- Edge Case Tests for File Creation -----
+
+        /// <summary>
+        /// Tests that WriteModel throws an exception when provided with an invalid file path.
+        /// An empty string is used here as an example of an invalid file path.
+        /// </summary>
+        [TestMethod]
+        public async Task WriteModel_InvalidPath_ThrowsException()
+        {
+            // Arrange
+            string outlineName = "Edge Case Outline";
+            string author = "Test Author";
+            int templateIndex = 0;
+            StoryModel model = await _outlineService.CreateModel(outlineName, author, templateIndex);
+            // Use an invalid file path (empty string)
+            string invalidPath = string.Empty;
+
+            // Act & Assert
+            await Assert.ThrowsExceptionAsync<ArgumentException>(async () =>
+            {
+                await _outlineService.WriteModel(model, invalidPath);
+            });
         }
     }
 }

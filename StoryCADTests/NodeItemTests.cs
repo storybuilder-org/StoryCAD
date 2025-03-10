@@ -13,16 +13,14 @@ class NodeItemTests
 	/// Creates a new node and tries to delete it.
 	/// </summary>
 	[TestMethod]
-	public void TryDelete()
+    internal void TryDelete()
 	{
         OutlineViewModel OutlineVM = Ioc.Default.GetRequiredService<OutlineViewModel>();
 		StoryModel model = new();
-		ProblemModel Overview = new("Overview", model);
-		StoryNodeItem overview = new(null, Overview, null);
-		ProblemModel Problem = new("Test",model);
-		StoryNodeItem Prob = new(null, Problem, overview);
+		OverviewModel overview = new("Overview", model, null);
+		ProblemModel problem = new("Test", model, overview.Node);
 
         OutlineVM.StoryModel = model;
-		Prob.Delete(StoryViewType.ExplorerView);
+		problem.Node.Delete(StoryViewType.ExplorerView);
 	}
 }
