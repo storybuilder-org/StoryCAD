@@ -79,7 +79,7 @@ public class StoryElement : ObservableObject
     /// Guid.Empty as an 'Undefined' StoryElement, with
     /// a blank name, simplifies that code. 
     /// </summary>
-    /// <param name="guid">The Guid of the</param>
+    /// <param name="guid">The Guid of the StoryElement to retrieve</param>
     /// <returns></returns>
     public static StoryElement GetByGuid(Guid guid)
     {

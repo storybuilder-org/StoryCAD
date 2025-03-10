@@ -1,5 +1,4 @@
 ﻿using System;
-using dotenv.net.Utilities;
 using dotenv.net;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.IO;
@@ -15,7 +14,7 @@ namespace StoryCADTests;
 /// as a result will always fail.
 /// </summary>
 [TestClass]
-public class ENVTests
+public class EnvTests
 {
     /// <summary>
     /// Attempts to load the .ENV File to check its valid.

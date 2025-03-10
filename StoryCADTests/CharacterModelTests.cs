@@ -19,7 +19,7 @@ public class CharacterModelTests
     {
         CharacterViewModel CharVM = Ioc.Default.GetRequiredService<CharacterViewModel>();
         Ioc.Default.GetService<OutlineViewModel>()!.StoryModel = new();
-        var x = new CharacterModel(Ioc.Default.GetService<OutlineViewModel>()!.StoryModel);
+        var x = new CharacterModel("TestCharacter", Ioc.Default.GetService<OutlineViewModel>()!.StoryModel, null);
         CharVM.Activate(x);
         CharVM.NewTrait = String.Empty;
         CharVM.AddTraitCommand.Execute(null);
