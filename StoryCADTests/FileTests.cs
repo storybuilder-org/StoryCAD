@@ -18,6 +18,8 @@ using StoryCAD.Services.Logging;
 using StoryCAD.Services.Outline;
 using StoryCAD.ViewModels.SubViewModels;
 using StoryCAD.Services.API;
+using Octokit;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace StoryCADTests;
 
@@ -35,42 +37,45 @@ public class FileTests
 
 
         //Get ShellVM and clear the StoryModel
-        StoryModel StoryModel = new();
+        StoryModel storyModel = new();
 
         OutlineVM.StoryModelFile = Path.Combine(Ioc.Default.GetRequiredService<AppState>().RootDirectory, "TestProject.stbx");
+        
+		string name = Path.GetFileNameWithoutExtension(OutlineVM.StoryModelFile);
+        OverviewModel overview = new(name, storyModel, null)
+        {
+            DateCreated = DateTime.Today.ToString("yyyy-MM-dd"),
+            Author = "StoryCAD Tests"
+        };
 
-
-        OverviewModel _overview = new(Path.GetFileNameWithoutExtension("TestProject"), StoryModel)
-        { DateCreated = DateTime.Today.ToString("yyyy-MM-dd"), Author = "StoryCAD Tests" };
-
-        StoryNodeItem _overviewNode = new(_overview, null, StoryItemType.StoryOverview) {IsRoot = true };
-        StoryModel.ExplorerView.Add(_overviewNode);
-        TrashCanModel _trash = new(StoryModel);
-        StoryNodeItem _trashNode = new(_trash, null);
-        StoryModel.ExplorerView.Add(_trashNode);     // The trashcan is the second root
-        FolderModel _narrative = new("Narrative View", StoryModel, StoryItemType.Folder);
-        StoryNodeItem _narrativeNode = new(_narrative, null) { IsRoot = true };
-        StoryModel.NarratorView.Add(_narrativeNode);
-
+        storyModel.ExplorerView.Add(overview.Node);
+        TrashCanModel trash = new(storyModel, null);
+        storyModel.ExplorerView.Add(trash.Node); // The trashcan is the second root
+        FolderModel narrative = new("Narrative View", storyModel, StoryItemType.Folder, null);
+        storyModel.NarratorView.Add(narrative.Node);
+        
         //Add three test nodes.
-        CharacterModel _character = new("TestCharacter", StoryModel);
-        ProblemModel _problem = new("TestProblem", StoryModel);
-        SceneModel _scene = new(StoryModel) {Name="TestScene" };
-        StoryModel.ExplorerView.Add(new(_character, _overviewNode,StoryItemType.Character));
-        StoryModel.ExplorerView.Add(new(_problem, _overviewNode,StoryItemType.Problem));
-        StoryModel.ExplorerView.Add(new(_scene, _overviewNode,StoryItemType.Scene));
+        StoryElement _Problem = new ProblemModel("TestProblem", storyModel, overview.Node);
+        CharacterModel _character = new CharacterModel("TestCharacter", storyModel, overview.Node);
+        SceneModel _scene = new SceneModel("TestScene", storyModel, overview.Node); 
+        //storyModel.ExplorerView.Add(new(_character, overviewNode,StoryItemType.Character));
+        //storyModel.ExplorerView.Add(new(_problem, overviewNode,StoryItemType.Problem));
+        //storyModel.ExplorerView.Add(new(_scene, overviewNode,StoryItemType.Scene));
 
 
         //Check is loaded correctly
-        Assert.IsTrue(StoryModel.StoryElements.Count == 6);
-        Assert.IsTrue(StoryModel.StoryElements[0].ElementType == StoryItemType.StoryOverview);
+        Assert.IsTrue(storyModel.StoryElements.Count == 6);
+        Assert.IsTrue(storyModel.StoryElements[0].ElementType == StoryItemType.StoryOverview);
 
         //Because we have created a file in this way we must populate ProjectFolder and ProjectFile.
-        Directory.CreateDirectory(OutlineVM.StoryModelFile);
+        string dir = Path.GetDirectoryName(OutlineVM.StoryModelFile);
+		if (Directory.Exists(dir))
+			Directory.Delete(dir,true);
+        Directory.CreateDirectory((Path.GetDirectoryName(OutlineVM.StoryModelFile)));
 
 		//Write file.
 		StoryIO _storyIO = Ioc.Default.GetRequiredService<StoryIO>();
-		_storyIO.WriteStory(OutlineVM.StoryModelFile, StoryModel).GetAwaiter().GetResult();
+		_storyIO.WriteStory(OutlineVM.StoryModelFile, storyModel).GetAwaiter().GetResult();
 
         //Sleep to ensure file is written.
         Thread.Sleep(10000);
@@ -129,57 +134,57 @@ public class FileTests
     public Task FullFileTest()
     {
 	    string Dir = AppDomain.CurrentDomain.BaseDirectory;
-		StorageFile File = StorageFile.GetFileFromPathAsync(Path.Combine(Dir, "TestInputs", "Full.stbx")).GetAwaiter().GetResult();
-		StoryModel Model = Ioc.Default.GetRequiredService<StoryIO>().ReadStory(File).GetAwaiter().GetResult();
+		StorageFile file = StorageFile.GetFileFromPathAsync(Path.Combine(Dir, "TestInputs", "Full.stbx")).GetAwaiter().GetResult();
+		StoryModel model = Ioc.Default.GetRequiredService<StoryIO>().ReadStory(file).GetAwaiter().GetResult();
 
 		//Overview Model Test
-		Assert.IsTrue(((OverviewModel)Model.StoryElements[0]).Author == "jake shaw");
-		Assert.IsTrue(((OverviewModel)Model.StoryElements[0]).DateCreated == "2025-01-03");
-		Assert.IsTrue(((OverviewModel)Model.StoryElements[0]).StoryIdea.Contains("Test"));
-		Assert.IsTrue(((OverviewModel)Model.StoryElements[0]).Concept.Contains("Test"));
-		Assert.IsTrue(((OverviewModel)Model.StoryElements[0]).Premise.Contains("Test"));
-		Assert.IsTrue(((OverviewModel)Model.StoryElements[0]).StoryType == "Short Story");
-		Assert.IsTrue(((OverviewModel)Model.StoryElements[0]).Viewpoint.Contains("Limited third person"));
-		Assert.IsTrue(((OverviewModel)Model.StoryElements[0]).StoryGenre == "Mainstream");
-		Assert.IsTrue(((OverviewModel)Model.StoryElements[0]).LiteraryDevice == "Metafiction");
-		Assert.IsTrue(((OverviewModel)Model.StoryElements[0]).Voice == "Third person subjective");
-		Assert.IsTrue(((OverviewModel)Model.StoryElements[0]).Tense == "Present");
-		Assert.IsTrue(((OverviewModel)Model.StoryElements[0]).Style == "Mystery");
-		Assert.IsTrue(((OverviewModel)Model.StoryElements[0]).StructureNotes.Contains("Test"));
-		Assert.IsTrue(((OverviewModel)Model.StoryElements[0]).Tense == "Present");
-		Assert.IsTrue(((OverviewModel)Model.StoryElements[0]).Tone == "Indignant");
-		Assert.IsTrue(((OverviewModel)Model.StoryElements[0]).Notes.Contains("This is a test outline, " +
+		Assert.IsTrue(((OverviewModel)model.StoryElements[0]).Author == "jake shaw");
+		Assert.IsTrue(((OverviewModel)model.StoryElements[0]).DateCreated == "2025-01-03");
+		Assert.IsTrue(((OverviewModel)model.StoryElements[0]).StoryIdea.Contains("Test"));
+		Assert.IsTrue(((OverviewModel)model.StoryElements[0]).Concept.Contains("Test"));
+		Assert.IsTrue(((OverviewModel)model.StoryElements[0]).Premise.Contains("Test"));
+		Assert.IsTrue(((OverviewModel)model.StoryElements[0]).StoryType == "Short Story");
+		Assert.IsTrue(((OverviewModel)model.StoryElements[0]).Viewpoint.Contains("Limited third person"));
+		Assert.IsTrue(((OverviewModel)model.StoryElements[0]).StoryGenre == "Mainstream");
+		Assert.IsTrue(((OverviewModel)model.StoryElements[0]).LiteraryDevice == "Metafiction");
+		Assert.IsTrue(((OverviewModel)model.StoryElements[0]).Voice == "Third person subjective");
+		Assert.IsTrue(((OverviewModel)model.StoryElements[0]).Tense == "Present");
+		Assert.IsTrue(((OverviewModel)model.StoryElements[0]).Style == "Mystery");
+		Assert.IsTrue(((OverviewModel)model.StoryElements[0]).StructureNotes.Contains("Test"));
+		Assert.IsTrue(((OverviewModel)model.StoryElements[0]).Tense == "Present");
+		Assert.IsTrue(((OverviewModel)model.StoryElements[0]).Tone == "Indignant");
+		Assert.IsTrue(((OverviewModel)model.StoryElements[0]).Notes.Contains("This is a test outline, " +
 		"it should have everything populated."));
 
 		//Folder
 		FolderModel Fold =
-			(FolderModel)Model.StoryElements.First(se =>
+			(FolderModel)model.StoryElements.First(se =>
 				se.ElementType == StoryItemType.Folder && !se.Name.Contains("Narrative"));
 		Assert.IsTrue(Fold.Name == "New Folder");
 		Assert.IsTrue(Fold.Notes.Contains("Test"));
 
 		//Problem Model Test
-		ProblemModel Prob = (ProblemModel)Model.StoryElements.First(se => se.ElementType == StoryItemType.Problem);
-		Assert.IsTrue(Prob.ProblemType == "Decision");
-		Assert.IsTrue(Prob.ConflictType == "Person vs. Machine");
-		Assert.IsTrue(Prob.ProblemCategory == "Complication");
-		Assert.IsTrue(Prob.Subject == "Abuse");
-		Assert.IsTrue(Prob.StoryQuestion.Contains("Test"));
-		Assert.IsTrue(Prob.ProtGoal.Contains("Relief from a false acquisition"));
-		Assert.IsTrue(Prob.ProtMotive.Contains("Beating a diagnosis or condition"));
-		Assert.IsTrue(Prob.ProtConflict.Contains("Test"));
-		Assert.IsTrue(Prob.AntagGoal.Contains("Relief from danger"));
-		Assert.IsTrue(Prob.AntagConflict.Contains("Test"));
-		Assert.IsTrue(Prob.AntagMotive.Contains("Avoiding certain death"));
-		Assert.IsTrue(Prob.Outcome.Contains("Protagonist declines morally"));
-		Assert.IsTrue(Prob.Method.Contains("Captures or disarms the opponent"));
-		Assert.IsTrue(Prob.Theme.Contains("Ambition overcomes poverty."));
-		Assert.IsTrue(Prob.Premise.Contains("Test"));
-		Assert.IsTrue(Prob.StructureTitle.Contains("Save The Cat"));
-		Assert.IsTrue(Prob.Notes.Contains("Test"));
+		ProblemModel prob = (ProblemModel)model.StoryElements.First(se => se.ElementType == StoryItemType.Problem);
+		Assert.IsTrue(prob.ProblemType == "Decision");
+		Assert.IsTrue(prob.ConflictType == "Person vs. Machine");
+		Assert.IsTrue(prob.ProblemCategory == "Complication");
+		Assert.IsTrue(prob.Subject == "Abuse");
+		Assert.IsTrue(prob.StoryQuestion.Contains("Test"));
+		Assert.IsTrue(prob.ProtGoal.Contains("Relief from a false acquisition"));
+		Assert.IsTrue(prob.ProtMotive.Contains("Beating a diagnosis or condition"));
+		Assert.IsTrue(prob.ProtConflict.Contains("Test"));
+		Assert.IsTrue(prob.AntagGoal.Contains("Relief from danger"));
+		Assert.IsTrue(prob.AntagConflict.Contains("Test"));
+		Assert.IsTrue(prob.AntagMotive.Contains("Avoiding certain death"));
+		Assert.IsTrue(prob.Outcome.Contains("Protagonist declines morally"));
+		Assert.IsTrue(prob.Method.Contains("Captures or disarms the opponent"));
+		Assert.IsTrue(prob.Theme.Contains("Ambition overcomes poverty."));
+		Assert.IsTrue(prob.Premise.Contains("Test"));
+		Assert.IsTrue(prob.StructureTitle.Contains("Save The Cat"));
+		Assert.IsTrue(prob.Notes.Contains("Test"));
 
 		//Character Model Test
-		CharacterModel Char = (CharacterModel)Model.StoryElements.First(se => se.ElementType == StoryItemType.Character);
+		CharacterModel Char = (CharacterModel)model.StoryElements.First(se => se.ElementType == StoryItemType.Character);
 		Assert.IsTrue(Char.Role == "Adman");
 		Assert.IsTrue(Char.StoryRole == "Supporting Role");
 		Assert.IsTrue(Char.Archetype == "Shapeshifter");
@@ -224,7 +229,7 @@ public class FileTests
 		Assert.IsTrue(Char.Notes.Contains("Test"));
 
 		//Setting Model
-		SettingModel Sett = (SettingModel)Model.StoryElements.First(se => se.ElementType == StoryItemType.Setting);
+		SettingModel Sett = (SettingModel)model.StoryElements.First(se => se.ElementType == StoryItemType.Setting);
 		Assert.IsTrue(Sett.Locale == "Aboard plane");
 		Assert.IsTrue(Sett.Season == "Late Summer");
 		Assert.IsTrue(Sett.Period == "Test");
@@ -240,7 +245,7 @@ public class FileTests
 		Assert.IsTrue(Sett.Notes.Contains("Test"));
 
 		//Scene Model
-		SceneModel Scen = (SceneModel)Model.StoryElements.First(se => se.ElementType == StoryItemType.Scene);
+		SceneModel Scen = (SceneModel)model.StoryElements.First(se => se.ElementType == StoryItemType.Scene);
 		Assert.IsTrue(Scen.Date == "Test");
 		Assert.IsTrue(Scen.Time == "Test");
 		Assert.IsTrue(Scen.SceneType == "Contemplative (or sequel) scene");
@@ -256,11 +261,11 @@ public class FileTests
 		Assert.IsTrue(Scen.Notes.Contains("Test"));
 		
 		//Note Folder
-		FolderModel Note = (FolderModel)Model.StoryElements.First(se => se.ElementType == StoryItemType.Notes);
+		FolderModel Note = (FolderModel)model.StoryElements.First(se => se.ElementType == StoryItemType.Notes);
 		Assert.IsTrue(Note.Notes.Contains("Test"));
 
 		//Web Folder
-		WebModel Web = (WebModel)Model.StoryElements.First(se => se.ElementType == StoryItemType.Web);
+		WebModel Web = (WebModel)model.StoryElements.First(se => se.ElementType == StoryItemType.Web);
 		Assert.IsTrue(Web.URL.ToString() == "https://github.com/Rarisma");
 		return null;
     }
@@ -325,13 +330,11 @@ public class FileTests
 		// Arrange
 		string testProjectPath = Path.Combine(App.ResultsDir, "TestProject");
 		Directory.CreateDirectory(testProjectPath);
-
         StoryModel storyModel = new();
-
-		// Create and add an overview node
-		OverviewModel overview = new("Saved Test Project", storyModel)
-		{
-			DateCreated = DateTime.Today.ToString("yyyy-MM-dd"),
+        // Create and add an overview node
+		OverviewModel overview = new("Saved Test Project", storyModel, null)
+        {
+            DateCreated = DateTime.Today.ToString("yyyy-MM-dd"),
 			Author = "Jane Doe",
 			StoryIdea = "A thrilling adventure of self-discovery.",
 			Concept = "Exploring the depths of human resilience.",
@@ -351,7 +354,7 @@ public class FileTests
 		storyModel.ExplorerView.Add(overviewNode);
 
 		// Add test elements to the story
-		CharacterModel character = new("Aria Windrunner", storyModel)
+		CharacterModel character = new("Aria Windrunner", storyModel, overview.Node)
 		{
 			Role = "Protagonist",
 			StoryRole = "Hero",
@@ -395,7 +398,7 @@ public class FileTests
 			Notes = "Primary character for testing."
 		};
 
-		ProblemModel problem = new("Lost Artifact", storyModel)
+		ProblemModel problem = new("Lost Artifact", storyModel, overview.Node)
 		{
 			ProblemType = "Mystery",
 			ConflictType = "Person vs. Nature",
@@ -417,7 +420,7 @@ public class FileTests
 			Notes = "Sets the main conflict for the story."
 		};
 
-		SceneModel scene = new(storyModel)
+		SceneModel scene = new("The Hidden Temple", storyModel, overview.Node)
 		{
 			Name = "The Hidden Temple",
 			Date = "June 21, 2025",

@@ -18,13 +18,14 @@ public class TemplateTests
     [TestMethod]
     public async Task TestSamplesAsync()
     {
+        //TODO: This is not testing samples. Looks like outline creation tests 
         OutlineService outline = Ioc.Default.GetService<OutlineService>();
-        for (int index = 0; index <= 5; index++) 
+        for (int index = 0; index <= 5; index++)
         {
-            StoryModel model = new();
+            StoryModel model;
             string path = Ioc.Default.GetRequiredService<AppState>().RootDirectory;
-            StorageFile file = await StorageFile.GetFileFromPathAsync(path);
-            await outline!.CreateModel(file, $"Test{index}","I Robot", index);
+            //StorageFile file = await StorageFile.GetFileFromPathAsync(path);
+            model = await outline!.CreateModel($"Test{index}","I Robot", index);
 
             Assert.IsNotNull(model);
 
