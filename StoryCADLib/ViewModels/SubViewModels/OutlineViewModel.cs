@@ -916,111 +916,46 @@ public class OutlineViewModel : ObservableRecipient
     #endregion
 
     #region Add and Remove Story Element Commands
-    public void AddFolder()
-    {
-         shellVm.TreeViewNodeClicked(AddStoryElement(StoryItemType.Folder), false);
-    }
 
-    public void AddSection()
+    /// <summary>
+    /// Adds a new StoryElement to the open StoryModel
+    /// </summary>
+    /// <param name="typeToAdd">Element type that you want to add</param>
+    public void AddStoryElement(StoryItemType typeToAdd)
     {
-         shellVm.TreeViewNodeClicked(AddStoryElement(StoryItemType.Section), false);
-    }
-
-    public void AddProblem()
-    {
-         shellVm.TreeViewNodeClicked(AddStoryElement(StoryItemType.Problem), false);
-    }
-
-    public void AddCharacter()
-    {
-         shellVm.TreeViewNodeClicked(AddStoryElement(StoryItemType.Character), false);
-    }
-    public void AddWeb()
-    {
-         shellVm.TreeViewNodeClicked(AddStoryElement(StoryItemType.Web), false);
-    }
-    public void AddNotes()
-    {
-         shellVm.TreeViewNodeClicked(AddStoryElement(StoryItemType.Notes), false);
-    }
-
-    public void AddSetting()
-    {
-         shellVm.TreeViewNodeClicked(AddStoryElement(StoryItemType.Setting), false);
-    }
-
-    public void AddScene()
-    {
-         shellVm.TreeViewNodeClicked(AddStoryElement(StoryItemType.Scene), false);
-    }
-
-    private StoryNodeItem AddStoryElement(StoryItemType typeToAdd)
-    {
-        logger.Log(LogLevel.Trace, "AddStoryElement");
         _canExecuteCommands = false;
-        string _msg = $"Adding StoryElement {typeToAdd}";
-        logger.Log(LogLevel.Info, _msg);
+        logger.Log(LogLevel.Info, $"Adding StoryElement {typeToAdd}");
         if (shellVm.RightTappedNode == null)
         {
             Messenger.Send(new StatusChangedMessage(new("Right tap a node to add to", LogLevel.Warn)));
             logger.Log(LogLevel.Info, "Add StoryElement failed- node not selected");
             _canExecuteCommands = true;
-            return null;
+            return;
         }
 
         if (StoryNodeItem.RootNodeType(shellVm.RightTappedNode) == StoryItemType.TrashCan)
         {
-            Messenger.Send(new StatusChangedMessage(new("You can't add to Deleted Items", LogLevel.Warn)));
-            logger.Log(LogLevel.Info, "Add StoryElement failed- can't add to TrashCan");
+            Messenger.Send(new StatusChangedMessage(new("Cannot add add to Deleted Items", LogLevel.Warn, true)));
             _canExecuteCommands = true;
-            return null;
+            return;
         }
 
-        StoryNodeItem _newNode = null;
-        switch (typeToAdd)
-        {
-            case StoryItemType.Folder:
-                _newNode = new FolderModel(StoryModel, shellVm.RightTappedNode).Node;
-                break;
-            case StoryItemType.Section:
-                _newNode = new FolderModel("New Section", StoryModel, StoryItemType.Folder, shellVm.RightTappedNode).Node;
-                break;
-            case StoryItemType.Problem:
-                _newNode = new ProblemModel(StoryModel, shellVm.RightTappedNode).Node;
-                break;
-            case StoryItemType.Character:
-                _newNode = new CharacterModel(StoryModel, shellVm.RightTappedNode).Node;
-                break;
-            case StoryItemType.Setting:
-                _newNode = new SettingModel(StoryModel, shellVm.RightTappedNode).Node;
-                break;
-            case StoryItemType.Scene:
-                _newNode = new SceneModel(StoryModel, shellVm.RightTappedNode).Node;
-                break;
-            case StoryItemType.Web:
-                _newNode = new WebModel(StoryModel,shellVm.RightTappedNode).Node;
-                break;
-            case StoryItemType.Notes:
-                _newNode = new FolderModel("New Note", StoryModel, StoryItemType.Notes, shellVm.RightTappedNode).Node;
-                break;
-        }
+        //Create new element via outline service
+        StoryElement newNode = outlineService.AddStoryElement(StoryModel, typeToAdd, shellVm.RightTappedNode);
 
-        if (_newNode != null)
-        {
-            _newNode.Parent.IsExpanded = true;
-            _newNode.IsRoot = false; //Only an overview node can be a root, which cant be created normally
-            _newNode.IsSelected = false;
-            _newNode.Background = window.ContrastColor;
-            shellVm.NewNodeHighlightCache.Add(_newNode);
-        }
-        else { return null; }
+        newNode.Node.Parent.IsExpanded = true;
+        newNode.IsSelected = false;
+        newNode.Node.Background = window.ContrastColor;
+        shellVm.NewNodeHighlightCache.Add(newNode.Node);
+        logger.Log(LogLevel.Info, $"Added Story Element {newNode.Uuid}");
 
         Messenger.Send(new IsChangedMessage(true));
         Messenger.Send(new StatusChangedMessage(new($"Added new {typeToAdd}", LogLevel.Info, true)));
         _canExecuteCommands = true;
 
-        return _newNode;
+        shellVm.TreeViewNodeClicked(newNode, false);
     }
+
 
     public async void RemoveStoryElement()
     {

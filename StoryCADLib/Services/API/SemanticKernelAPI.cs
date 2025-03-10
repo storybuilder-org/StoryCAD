@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Text.Json;
 using Windows.Storage;
 using StoryCAD.Services.Outline;
@@ -113,4 +114,108 @@ public class SemanticKernelApi
 
         return response;
     }
+
+
+    /// <summary>
+    /// Adds a new StoryElement to the current StoryModel.
+    /// </summary>
+    /// <param name="typeToAdd">Type of element you want to add</param>
+    /// <param name="parentGUID">GUID of parent this node should be a child of</param>
+    /// <returns>StoryElement object that was created</returns>
+    [KernelFunction, Description("Adds a new StoryElement to the current StoryModel.")]
+    public OperationResult<StoryElement> AddElement(string typeToAdd, string parentGUID)
+    {
+        var response = new OperationResult<StoryElement>();
+        if (CurrentModel == null)
+        {
+            response.IsSuccess = false;
+            response.ErrorMessage = "No StoryModel available. Create a model first.";
+            return response;
+        }
+
+        try
+        {
+            if (!Enum.TryParse<StoryItemType>(typeToAdd, true, out var itemType))
+            {
+                response.IsSuccess = false;
+                response.ErrorMessage = $"Invalid StoryItemType: {typeToAdd}";
+                return response;
+            }
+
+            if (!Guid.TryParse(parentGUID, out var parentGuid))
+            {
+                response.IsSuccess = false;
+                response.ErrorMessage = $"Invalid parent GUID: {parentGUID}";
+                return response;
+            }
+
+            // Attempt to find the parent node in the current model.
+            StoryElement parent = CurrentModel.StoryElements.FirstOrDefault(e => e.Uuid == parentGuid) as StoryElement;
+            if (parent == null)
+            {
+                response.IsSuccess = false;
+                response.ErrorMessage = "Parent not found.";
+                return response;
+            }
+
+            // Call the OutlineService to add the new StoryElement.
+            var newElement = _outlineService.AddStoryElement(CurrentModel, itemType, parent.Node);
+            response.IsSuccess = true;
+            response.Payload = newElement;
+        }
+        catch (Exception ex)
+        {
+            response.IsSuccess = false;
+            response.ErrorMessage = $"Error in AddElement: {ex.Message}";
+        }
+
+        return response;
+    }
+
+    [KernelFunction, Description("Returns all elements in the story model.")]
+    public ObservableCollection<StoryElement> GetAllElements()
+    {
+        if (CurrentModel == null)
+        {
+            throw new InvalidOperationException("No StoryModel available. Create a model first.");
+        }
+
+        return CurrentModel.StoryElements;
+    }
+
+    /// <summary>
+    /// Deletes a story element from the current StoryModel.
+    /// </summary>
+    /// <remarks>Element is just moved to trashcan</remarks>
+    /// <param name="uuid"></param>
+    public void DeleteStoryElement(string uuid)
+    {
+        throw new NotImplementedException();
+    }
+
+    /// <summary>
+    /// Updates a story model element.
+    /// </summary>
+    /// <param name="NewElement">Element source</param>
+    /// <param name="uuid">UUID of element that will be updated.</param>
+    public void UpdateStoryElement(StoryElement NewElement, string uuid)
+    {
+        if (CurrentModel == null)
+        {
+            throw new InvalidOperationException("No StoryModel available. Create a model first.");
+        }
+
+        if (uuid != null)
+        {
+            throw new ArgumentNullException("GUID is null");
+        }
+
+        if (!CurrentModel.StoryElements.StoryElementGuids.ContainsKey(new Guid(uuid)))
+        {
+            throw new ArgumentNullException("GUID does not exist within storymodel.");
+        }
+
+        CurrentModel.StoryElements.StoryElementGuids[NewElement.Uuid] = NewElement;
+    }
+    
 }

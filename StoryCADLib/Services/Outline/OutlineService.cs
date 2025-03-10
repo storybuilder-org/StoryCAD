@@ -167,4 +167,64 @@ public class OutlineService
         //Return deserialized model.
         return await io.ReadStory(file);
     }
+
+    /// <summary>
+    /// Adds a new StoryElement to the StoryModel
+    /// </summary>
+    /// <param name="typeToAdd">Type of StoryElement that should be created</param>
+    /// <param name="parent">Parent of the node we are creating</param>
+    /// <param name="model">StoryModel we are using</param>
+    /// <returns></returns>
+    public StoryElement AddStoryElement(StoryModel model, StoryItemType typeToAdd, StoryNodeItem parent)
+    {
+        if (parent == null)
+        {
+            throw new ArgumentNullException(nameof(parent));
+        }
+
+        if (model == null || model.StoryElements.Count == 0)
+        {
+            throw new ArgumentNullException(nameof(model));
+        }
+
+        if (StoryNodeItem.RootNodeType(parent) == StoryItemType.TrashCan)
+        {
+            throw new InvalidOperationException("Cannot add a new node to the Trash Can.");
+        }
+
+        StoryElement newElement;
+        switch (typeToAdd)
+        {
+            case StoryItemType.Folder:
+                newElement = new FolderModel(model, parent);
+                break;
+            case StoryItemType.Section:
+                newElement = new FolderModel("New Section", model, StoryItemType.Folder, parent);
+                break;
+            case StoryItemType.Problem:
+                newElement = new ProblemModel(model, parent);
+                break;
+            case StoryItemType.Character:
+                newElement = new CharacterModel(model, parent);
+                break;
+            case StoryItemType.Setting:
+                newElement = new SettingModel(model, parent);
+                break;
+            case StoryItemType.Scene:
+                newElement = new SceneModel(model, parent);
+                break;
+            case StoryItemType.Web:
+                newElement = new WebModel(model, parent);
+                break;
+            case StoryItemType.Notes:
+                newElement = new FolderModel("New Note", model, StoryItemType.Notes, parent);
+                break;
+            default:
+                throw new InvalidOperationException("Cannot add a new element of type " + typeToAdd);
+                break;
+        }
+
+        //return new element
+        return newElement;
+    }
 }

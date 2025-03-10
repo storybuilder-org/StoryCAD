@@ -1472,15 +1472,17 @@ public class ShellViewModel : ObservableRecipient
         MoveRightCommand = new RelayCommand(MoveTreeViewItemRight, () => OutlineManager._canExecuteCommands);
         MoveUpCommand = new RelayCommand(MoveTreeViewItemUp, () => OutlineManager._canExecuteCommands);
         MoveDownCommand = new RelayCommand(MoveTreeViewItemDown, () => OutlineManager._canExecuteCommands);
+
         // Add StoryElement commands
-        AddFolderCommand = new RelayCommand(OutlineManager.AddFolder, () => OutlineManager._canExecuteCommands);
-        AddSectionCommand = new RelayCommand(OutlineManager.AddSection, () => OutlineManager._canExecuteCommands);
-        AddProblemCommand = new RelayCommand(OutlineManager.AddProblem, () => OutlineManager._canExecuteCommands);
-        AddCharacterCommand = new RelayCommand(OutlineManager.AddCharacter, () => OutlineManager._canExecuteCommands);
-        AddWebCommand = new RelayCommand(OutlineManager.AddWeb, () => OutlineManager._canExecuteCommands);
-        AddNotesCommand = new RelayCommand(OutlineManager.AddNotes, () => OutlineManager._canExecuteCommands);
-        AddSettingCommand = new RelayCommand(OutlineManager.AddSetting, () => OutlineManager._canExecuteCommands);
-        AddSceneCommand = new RelayCommand(OutlineManager.AddScene, () => OutlineManager._canExecuteCommands);
+        AddFolderCommand = new RelayCommand(() => OutlineManager.AddStoryElement(StoryItemType.Folder), () => OutlineManager._canExecuteCommands);
+        AddSectionCommand = new RelayCommand(() => OutlineManager.AddStoryElement(StoryItemType.Section), () => OutlineManager._canExecuteCommands);
+        AddProblemCommand = new RelayCommand(() => OutlineManager.AddStoryElement(StoryItemType.Problem), () => OutlineManager._canExecuteCommands);
+        AddCharacterCommand = new RelayCommand(() => OutlineManager.AddStoryElement(StoryItemType.Character), () => OutlineManager._canExecuteCommands);
+        AddWebCommand = new RelayCommand(() => OutlineManager.AddStoryElement(StoryItemType.Web), () => OutlineManager._canExecuteCommands);
+        AddNotesCommand = new RelayCommand(() => OutlineManager.AddStoryElement(StoryItemType.Notes), () => OutlineManager._canExecuteCommands);
+        AddSettingCommand = new RelayCommand(() => OutlineManager.AddStoryElement(StoryItemType.Setting), () => OutlineManager._canExecuteCommands);
+        AddSceneCommand = new RelayCommand(() => OutlineManager.AddStoryElement(StoryItemType.Scene), () => OutlineManager._canExecuteCommands);
+
         // Remove Story Element command (move to trash)
         RemoveStoryElementCommand = new RelayCommand(OutlineManager.RemoveStoryElement, () => OutlineManager._canExecuteCommands);
         RestoreStoryElementCommand = new RelayCommand(OutlineManager.RestoreStoryElement, () => OutlineManager._canExecuteCommands);
