@@ -2,6 +2,8 @@
 using Windows.Data.Xml.Dom;
 using CommunityToolkit.Mvvm.ComponentModel;
 using StoryCAD.ViewModels.SubViewModels;
+using StoryCAD.DAL;
+using System.Text.Json;
 
 namespace StoryCAD.Models;
 
@@ -93,6 +95,41 @@ public class StoryElement : ObservableObject
                 return elements.StoryElementGuids[guid];
         //TODO: Log the error.
         return new StoryElement();  // Not found
+    }
+
+    /// <summary>
+    /// Deserializes a JSON string into a StoryElement.
+    /// </summary>
+    /// <param name="json">JSON to deserialize.</param>
+    /// <returns>StoryElement Object.</returns>
+    public static StoryElement Deserialize(string json)
+    {
+        return JsonSerializer.Deserialize<StoryElement>(json, new JsonSerializerOptions()
+        {
+            Converters =
+            {
+                new EmptyGuidConverter(),
+                new StoryElementConverter(),
+                new JsonStringEnumConverter()
+            }
+        });
+    }
+
+    /// <summary>
+    /// Serialises this StoryElement into JSON.
+    /// </summary>
+    /// <returns>JSON Representation of this object.</returns>
+    public string Serialize()
+    {
+        return JsonSerializer.Serialize<StoryElement>(this, new JsonSerializerOptions()
+        {
+            Converters =
+            {
+                new EmptyGuidConverter(),
+                new StoryElementConverter(),
+                new JsonStringEnumConverter()
+            }
+        });
     }
 
     public override string ToString()

@@ -1,9 +1,11 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Windows.Storage;
 using StoryCAD.Services.Outline;
 using Microsoft.SemanticKernel;
+using StoryCAD.DAL;
 
 namespace StoryCAD.Services.API;
 
@@ -14,10 +16,6 @@ public class SemanticKernelApi
 {
     private readonly OutlineService _outlineService = Ioc.Default.GetRequiredService<OutlineService>();
     private StoryModel? CurrentModel;
-    public SemanticKernelApi()
-    {
-        //_outlineService = outlineService;
-    }
 
     /// <summary>
     /// Creates a new empty story outline based on a template.
@@ -29,9 +27,8 @@ public class SemanticKernelApi
     /// Returns a JSON-serialized OperationResult payload containing a list of the StoryElement Guids.
     /// </summary>
     [KernelFunction, Description("Creates a new empty story outline from a template.")]
-    public async Task<OperationResult<List<Guid>>> CreateEmptyOutline(string filePath, string name, string author, string templateIndex)
+    public async Task<OperationResult<List<Guid>>> CreateEmptyOutline(string name, string author, string templateIndex)
     {
-        Console.WriteLine($"creating empty outline at {filePath}");
         var response = new OperationResult<List<Guid>>();
         if (!int.TryParse(templateIndex, out int idx))
         {
@@ -42,11 +39,6 @@ public class SemanticKernelApi
 
         try
         {
-            // Get the StorageFile from the provided file path.
-            string path = Path.GetDirectoryName(filePath);
-            StorageFolder folder = await StorageFolder.GetFolderFromPathAsync(path);
-            string filename = Path.GetFileName(filePath);
-
             // Create a new StoryModel using the OutlineService.
             var result = await OperationResult<StoryModel>.SafeExecuteAsync(_outlineService.CreateModel(name, author, idx));
             //var result = 
@@ -85,7 +77,7 @@ public class SemanticKernelApi
     ///   filePath - full path to the file where the model should be saved
     /// Returns an OperationResult indicating IsSuccess or error.
     /// </summary>
-    [KernelFunction, Description("Writes the story outline to the backing store.")]
+    [KernelFunction, Description("Writes the story outline to the backing store, outline files must have the .stbx extension.")]
     public async Task<OperationResult<string>> WriteOutline(string filePath)
     {
         var response = new OperationResult<string>();
@@ -116,63 +108,7 @@ public class SemanticKernelApi
     }
 
 
-    /// <summary>
-    /// Adds a new StoryElement to the current StoryModel.
-    /// </summary>
-    /// <param name="typeToAdd">Type of element you want to add</param>
-    /// <param name="parentGUID">GUID of parent this node should be a child of</param>
-    /// <returns>StoryElement object that was created</returns>
-    [KernelFunction, Description("Adds a new StoryElement to the current StoryModel.")]
-    public OperationResult<StoryElement> AddElement(string typeToAdd, string parentGUID)
-    {
-        var response = new OperationResult<StoryElement>();
-        if (CurrentModel == null)
-        {
-            response.IsSuccess = false;
-            response.ErrorMessage = "No StoryModel available. Create a model first.";
-            return response;
-        }
-
-        try
-        {
-            if (!Enum.TryParse<StoryItemType>(typeToAdd, true, out var itemType))
-            {
-                response.IsSuccess = false;
-                response.ErrorMessage = $"Invalid StoryItemType: {typeToAdd}";
-                return response;
-            }
-
-            if (!Guid.TryParse(parentGUID, out var parentGuid))
-            {
-                response.IsSuccess = false;
-                response.ErrorMessage = $"Invalid parent GUID: {parentGUID}";
-                return response;
-            }
-
-            // Attempt to find the parent node in the current model.
-            StoryElement parent = CurrentModel.StoryElements.FirstOrDefault(e => e.Uuid == parentGuid) as StoryElement;
-            if (parent == null)
-            {
-                response.IsSuccess = false;
-                response.ErrorMessage = "Parent not found.";
-                return response;
-            }
-
-            // Call the OutlineService to add the new StoryElement.
-            var newElement = _outlineService.AddStoryElement(CurrentModel, itemType, parent.Node);
-            response.IsSuccess = true;
-            response.Payload = newElement;
-        }
-        catch (Exception ex)
-        {
-            response.IsSuccess = false;
-            response.ErrorMessage = $"Error in AddElement: {ex.Message}";
-        }
-
-        return response;
-    }
-
-    [KernelFunction, Description("Returns all elements in the story model.")]
+    [KernelFunction, Description("Returns basic information about all elements in the story model.")]
     public ObservableCollection<StoryElement> GetAllElements()
     {
         if (CurrentModel == null)
@@ -198,24 +134,104 @@ public class SemanticKernelApi
     /// </summary>
     /// <param name="NewElement">Element source</param>
     /// <param name="uuid">UUID of element that will be updated.</param>
-    public void UpdateStoryElement(StoryElement NewElement, string uuid)
+    [KernelFunction, Description("""
+                                 Updates a given story element within the outline, call get element first
+                                 Guidelines:
+                                  - Dont modify the fields, just thier content.
+                                  - The type you are replacing must be the same type.
+                                  - You cannot modify the trashcan with this element.
+                                  - You cannot modify the parent or children of this element using this method.
+                                  - You cannot move the element position in the tree using this method.
+                                  - You must provide the GUID in payload and separately as a parameter and should be the same value.
+                                  - You cannot create elements using this method.
+                                  - You must return all fields previously given to you for that element previously
+                                 """)]
+    public void UpdateStoryElement(object NewElement, Guid guid)
     {
         if (CurrentModel == null)
         {
             throw new InvalidOperationException("No StoryModel available. Create a model first.");
         }
 
-        if (uuid != null)
+        if (guid == null)
         {
             throw new ArgumentNullException("GUID is null");
         }
 
-        if (!CurrentModel.StoryElements.StoryElementGuids.ContainsKey(new Guid(uuid)))
+        if (!CurrentModel.StoryElements.StoryElementGuids.ContainsKey(guid))
         {
-            throw new ArgumentNullException("GUID does not exist within storymodel.");
+            throw new ArgumentNullException("StoryElement does not exist");
         }
 
-        CurrentModel.StoryElements.StoryElementGuids[NewElement.Uuid] = NewElement;
+        //Deserialise and update.
+        StoryElement updated = StoryElement.Deserialize(NewElement.ToString());
+        //TODO: force set uuid somehow.
+        updated.Uuid = guid;
+        CurrentModel.StoryElements.StoryElementGuids[guid] = updated;
     }
-    
+
+    [KernelFunction, Description("Returns a single element and all its fields.")]
+    public object GetElement(Guid guid)
+    {
+        if (CurrentModel == null)
+        {
+            throw new InvalidOperationException("No StoryModel available. Create a model first.");
+        }
+
+        if (guid == null)
+        {
+            throw new ArgumentNullException("GUID is null");
+        }
+
+        return CurrentModel.StoryElements.StoryElementGuids[guid].Serialize();
+    }
+
+
+    [KernelFunction, Description("""
+                                 Adds a new StoryElement to the current StoryModel. 
+                                 This function returns a object representing the story element that was added. 
+                                 Some included fields are GUIDs. These are the GUIDs of other StoryElements, and are how one story element links to another.
+                                 Examples include 'Protagonist' and 'Antagonist' in a ProblemModel, which link to CharacterModels, and 'Setting' and 'Cast' in a Scene,
+                                 which link to a SettingModel and CharacterModel elements, respectively.
+                                 
+                                 Dont ADD NEW FIELDS TO THE PAYLOAD.
+                                 Dont add GUIDs that are not within the current storymodel.
+                                 The following Types are supported: Problem, Character, Setting, Scene, Folder, Section, Web, Notes.
+                                 Dont add Folders to the the Narrator View or children of it, add Sections instead or vice versa.
+                                 Dont add any elements to the TrashCan or any type beside Section to the narrator view.
+                                 Dont add sections to the narrator view unless explictly asked to, always add to the Overview element 
+                                 unless told otherwise.
+                                 """)]
+    public OperationResult<object> AddElement(StoryItemType typeToAdd, string parentGUID)
+    {
+        if (CurrentModel == null)
+        {
+            return OperationResult<object>.Failure("No StoryModel available. Create a model first.");
+        }
+
+        if (!Guid.TryParse(parentGUID, out var parentGuid))
+        {
+            return OperationResult<object>.Failure($"Invalid parent GUID: {parentGUID}");
+        }
+
+        // Attempt to locate the parent element using the provided GUID.
+        var parent = CurrentModel.StoryElements.FirstOrDefault(e => e.Uuid == parentGuid);
+        if (parent == null)
+        {
+            return OperationResult<object>.Failure("Parent not found.");
+        }
+
+        try
+        {
+            // Create the new element using the OutlineService.
+            var newElement = _outlineService.AddStoryElement(CurrentModel, typeToAdd, parent.Node);
+            return OperationResult<object>.Success(newElement);
+        }
+        catch (Exception ex)
+        {
+            return OperationResult<object>.Failure($"Error in AddElement: {ex.Message}");
+        }
+    }
+
+
 }
