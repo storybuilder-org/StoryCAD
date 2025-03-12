@@ -18,7 +18,7 @@ public class StoryElement : ObservableObject
 	public Guid Uuid
 	{
 		get => _uuid;
-		private set => _uuid = value;
+		set => _uuid = value;
 	}
 
 	[JsonIgnore]
@@ -34,6 +34,7 @@ public class StoryElement : ObservableObject
 
 	[JsonIgnore]
     private StoryItemType _type;
+
 	[JsonInclude]
 	[JsonPropertyName("Type")]
     public StoryItemType ElementType

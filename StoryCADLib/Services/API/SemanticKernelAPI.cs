@@ -6,6 +6,8 @@ using Windows.Storage;
 using StoryCAD.Services.Outline;
 using Microsoft.SemanticKernel;
 using StoryCAD.DAL;
+using System.Reflection;
+using System.ClientModel.Primitives;
 
 namespace StoryCAD.Services.API;
 
@@ -132,28 +134,29 @@ public class SemanticKernelApi
     /// <summary>
     /// Updates a story model element.
     /// </summary>
-    /// <param name="NewElement">Element source</param>
-    /// <param name="uuid">UUID of element that will be updated.</param>
-    [KernelFunction, Description("""
-                                 Updates a given story element within the outline, call get element first
-                                 Guidelines:
-                                  - Dont modify the fields, just thier content.
-                                  - The type you are replacing must be the same type.
-                                  - You cannot modify the trashcan with this element.
-                                  - You cannot modify the parent or children of this element using this method.
-                                  - You cannot move the element position in the tree using this method.
-                                  - You must provide the GUID in payload and separately as a parameter and should be the same value.
-                                  - You cannot create elements using this method.
-                                  - You must return all fields previously given to you for that element previously
-                                 """)]
-    public void UpdateStoryElement(object NewElement, Guid guid)
+    /// <param name="newElement">Element source</param>
+    /// <param name="guid">UUID of element that will be updated.</param>
+    [KernelFunction, Description(
+         """
+        Updates a given story element within the outline, call get element first
+        Guidelines:
+        - Dont modify the fields, just thier content.
+        - The type you are replacing must be the same type.
+        - You cannot modify the trashcan with this element.
+        - You cannot modify the parent or children of this element using this method.
+        - You cannot move the element position in the tree using this method.
+        - You must provide the GUID in payload and separately as a parameter and should be the same value.
+        - You cannot create elements using this method.
+        - You must return all fields previously given to you for that element previously
+        """)]
+    public void UpdateStoryElement(object newElement, Guid guid)
     {
         if (CurrentModel == null)
         {
             throw new InvalidOperationException("No StoryModel available. Create a model first.");
         }
 
-        if (guid == null)
+        if (guid == Guid.Empty)
         {
             throw new ArgumentNullException("GUID is null");
         }
@@ -163,8 +166,8 @@ public class SemanticKernelApi
             throw new ArgumentNullException("StoryElement does not exist");
         }
 
-        //Deserialise and update.
-        StoryElement updated = StoryElement.Deserialize(NewElement.ToString());
+        //Deserialize and update.
+        StoryElement updated = StoryElement.Deserialize(newElement.ToString());
         //TODO: force set uuid somehow.
         updated.Uuid = guid;
         CurrentModel.StoryElements.StoryElementGuids[guid] = updated;
@@ -233,5 +236,83 @@ public class SemanticKernelApi
         }
     }
 
+    /// <summary>
+    /// Updates the specified property of a StoryElement identified by its UUID.
+    /// Only properties decorated with [JsonInclude] are allowed to be updated.
+    /// The function uses reflection to locate the property, verify its [JsonInclude] attribute,
+    /// and update its value (performing a type conversion if necessary).
+    /// If the property is not found, is read-only, or is missing the attribute, an error is returned.
+    /// </summary>
+    [KernelFunction, Description(
+         """
+         Updates the specified property on a StoryElement (identified by its UUID).
+         Only properties decorated with [JsonInclude] are updatable. If the property is missing the attribute
+         or if any error occurs (such as a type conversion issue), the operation will fails.
+         """)]
+    public OperationResult<StoryElement> UpdateElementProperty(Guid elementUuid, string propertyName, object value)
+    {
+        // Ensure we have a current StoryModel.
+        if (CurrentModel == null)
+            return OperationResult<StoryElement>.Failure("No StoryModel available. Create a model first.");
 
+        // Find the StoryElement in the current model.
+        StoryElement element = CurrentModel.StoryElements.FirstOrDefault(e => e.Uuid == elementUuid);
+        if (element == null)
+            return OperationResult<StoryElement>.Failure("StoryElement not found.");
+
+        try
+        {
+            // Get the property info by name.
+            PropertyInfo property = element.GetType().GetProperty(propertyName);
+            if (property == null)
+                throw new ArgumentException($"Property '{propertyName}' not found on type {element.GetType().FullName}.");
+
+            // Ensure the property has the [JsonInclude] attribute.
+            if (!Attribute.IsDefined(property, typeof(JsonIncludeAttribute)))
+                throw new InvalidOperationException($"Property '{propertyName}' does not have the JsonInclude attribute.");
+
+            // Ensure the property is writable.
+            if (!property.CanWrite)
+                throw new InvalidOperationException($"Property '{propertyName}' is read-only.");
+
+            // Convert the value to the property's type if needed.
+            if (value != null && !property.PropertyType.IsAssignableFrom(value.GetType()))
+            {
+                value = Convert.ChangeType(value, property.PropertyType);
+            }
+
+            // Update the property value.
+            property.SetValue(element, value);
+
+            return OperationResult<StoryElement>.Success(element);
+        }
+        catch (Exception ex)
+        {
+            return OperationResult<StoryElement>.Failure($"Error updating property: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Opens new outline from file.
+    /// </summary>
+    /// <param name="path">Outline to open</param>
+    [KernelFunction, Description("Opens an outline from a file.")]
+    public async Task<OperationResult<bool>> OpenOutline(string path)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(path) | !Path.Exists(path))
+            {
+                throw new ArgumentException("Invalid path");
+            }
+
+            CurrentModel = await _outlineService.OpenFile(path);
+            return OperationResult<bool>.Success(true);
+        }
+        catch (Exception ex)
+        {
+            return OperationResult<bool>.Failure($"Error in OpenOutline: {ex.Message}");
+        }
+
+    }
 }

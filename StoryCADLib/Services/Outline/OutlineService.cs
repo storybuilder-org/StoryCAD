@@ -1,7 +1,9 @@
-﻿using CommunityToolkit.Mvvm.Messaging;
+﻿using System.ClientModel.Primitives;
+using CommunityToolkit.Mvvm.Messaging;
 using StoryCAD.DAL;
 using StoryCAD.Models;
 using StoryCAD.Services.Messages;
+using StoryCAD.Services.Search;
 using Windows.Storage;
 
 namespace StoryCAD.Services.Outline;
@@ -226,5 +228,65 @@ public class OutlineService
 
         //return new element
         return newElement;
+    }
+
+    /// <summary>
+    /// Finds if an element can be safely deleted.
+    /// </summary>
+    public List<StoryElement> FindElementReferences(StoryModel Model, Guid elementGUID)
+    {
+        StoryElement ElementToDelete  = StoryElement.GetByGuid(elementGUID);
+        if (StoryNodeItem.RootNodeType(ElementToDelete.Node) == StoryItemType.TrashCan)
+        {
+            throw new InvalidOperationException("Cannot delete a node from the Trash Can.");
+        }
+        if (ElementToDelete.Node.IsRoot)
+        {
+            throw new InvalidOperationException("Cannot delete a root node.");
+        }
+
+        List<StoryElement> _foundNodes = new();
+        foreach (StoryElement element in Model.StoryElements) //Gets all nodes in the tree TODO: MAKE RECURSIVE
+        {
+            if (Ioc.Default.GetRequiredService<DeletionService>().SearchStoryElement(element.Node, elementGUID, Model))
+            {
+                _foundNodes.Add(element);
+            }
+        }
+        return _foundNodes;
+    }
+
+
+    /// <summary>
+    /// Removes a reference to an element from a list of elements.
+    /// </summary>
+    /// <param name="elementsToUpdate">Elements you are updating</param>
+    /// <param name="elementToRemove">Element you are removing references to</param>
+    /// <param name="model">StoryModel you are updating</param>
+    /// <returns>bool indicating success</returns>
+    public bool RemoveReferenceToElement(List<StoryElement> elementsToUpdate, Guid elementToRemove, StoryModel model)
+    {
+        if (elementsToUpdate == null)
+        {
+            throw new ArgumentNullException(nameof(elementsToUpdate));
+        }
+
+        if (elementToRemove == Guid.Empty)
+        {
+            throw new ArgumentNullException(nameof(elementToRemove));
+        }
+
+        if (model == null || model.StoryElements.Count == 0)
+        {
+            throw new ArgumentNullException(nameof(model));
+        }
+
+        foreach (StoryElement element in elementsToUpdate)
+        {
+            Ioc.Default.GetRequiredService<DeletionService>()
+                .SearchStoryElement(element.Node, elementToRemove, model, true);
+        }
+
+        return true;
     }
 }

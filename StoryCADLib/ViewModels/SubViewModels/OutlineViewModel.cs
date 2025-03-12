@@ -957,42 +957,19 @@ public class OutlineViewModel : ObservableRecipient
     }
 
 
-    public async void RemoveStoryElement()
+    public async void RemoveStoryElement(Guid elementToDelete)
     {
-        logger.Log(LogLevel.Trace, "RemoveStoryElement");
-        if (shellVm.RightTappedNode == null)
-        {
-            shellVm.StatusMessage = "Right tap a node to delete";
-            return;
-        }
-        if (StoryNodeItem.RootNodeType(shellVm.RightTappedNode) == StoryItemType.TrashCan)
-        {
-            shellVm.StatusMessage = "You can't delete from the trash!";
-            return;
-        }
-        if (shellVm.RightTappedNode.IsRoot)
-        {
-            shellVm.StatusMessage = "You can't delete a root node!";
-            return;
-        }
-
-        List<StoryNodeItem> _foundNodes = new();
-        foreach (StoryNodeItem _node in shellVm.DataSource[0]) //Gets all nodes in the tree #TODO: MAKE RECURSIVE
-        {
-            if (Ioc.Default.GetRequiredService<DeletionService>().SearchStoryElement(_node, shellVm.RightTappedNode.Uuid, StoryModel))
-            {
-                _foundNodes.Add(_node);
-            }
-        }
-
         bool _delete = true;
+        List<StoryElement> _foundElements = outlineService.FindElementReferences(StoryModel, elementToDelete);
         //Only warns if it finds a node its referenced in
-        if (_foundNodes.Count >= 1)
+        if (_foundElements.Count >= 1)
         {
             //Creates UI
             StackPanel _content = new();
             _content.Children.Add(new TextBlock { Text = "The following nodes will be updated to remove references to this node:" });
-            _content.Children.Add(new ListView { ItemsSource = _foundNodes, HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center, Height = 300, Width = 480 });
+            _content.Children.Add(new ListView { ItemsSource = _foundElements, 
+                HorizontalAlignment = HorizontalAlignment.Center, 
+                VerticalAlignment = VerticalAlignment.Center, Height = 300, Width = 480 });
 
             //Creates dialog and then shows it
             ContentDialog _Dialog = new()
@@ -1009,10 +986,7 @@ public class OutlineViewModel : ObservableRecipient
 
         if (_delete)
         {
-            foreach (StoryNodeItem _node in _foundNodes)
-            {
-                Ioc.Default.GetRequiredService<DeletionService>().SearchStoryElement(_node, shellVm.RightTappedNode.Uuid, StoryModel, true);
-            }
+
 
             if (shellVm.CurrentView.Equals("Story Explorer View")) { shellVm.RightTappedNode.Delete(StoryViewType.ExplorerView); }
             else { shellVm.RightTappedNode.Delete(StoryViewType.NarratorView); }
