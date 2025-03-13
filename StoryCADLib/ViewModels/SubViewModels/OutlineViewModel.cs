@@ -957,10 +957,12 @@ public class OutlineViewModel : ObservableRecipient
     }
 
 
-    public async void RemoveStoryElement(Guid elementToDelete)
+    public async void RemoveStoryElement()
     {
         bool _delete = true;
+        Guid elementToDelete = shellVm.RightTappedNode.Uuid;
         List<StoryElement> _foundElements = outlineService.FindElementReferences(StoryModel, elementToDelete);
+
         //Only warns if it finds a node its referenced in
         if (_foundElements.Count >= 1)
         {
@@ -980,16 +982,25 @@ public class OutlineViewModel : ObservableRecipient
                 PrimaryButtonText = "Confirm",
                 SecondaryButtonText = "Cancel"
             };
-            if (await Ioc.Default.GetRequiredService<Windowing>().ShowContentDialog(_Dialog) == ContentDialogResult.Secondary) { _delete = false; }
+
+            //Handle content dialog result
+            if (await Ioc.Default.GetRequiredService<Windowing>().ShowContentDialog(_Dialog) !=
+                ContentDialogResult.Primary)
+            {
+                _delete = false;
+            }
         }
 
-
+        // Go through with delete
         if (_delete)
         {
+            outlineService.RemoveReferenceToElement(elementToDelete, StoryModel);
 
-
-            if (shellVm.CurrentView.Equals("Story Explorer View")) { shellVm.RightTappedNode.Delete(StoryViewType.ExplorerView); }
-            else { shellVm.RightTappedNode.Delete(StoryViewType.NarratorView); }
+            if (shellVm.CurrentView.Equals("Story Explorer View"))
+            {
+                shellVm.RightTappedNode.Delete(StoryViewType.ExplorerView,StoryModel.ExplorerView[0]);
+            }
+            else { shellVm.RightTappedNode.Delete(StoryViewType.NarratorView, StoryModel.NarratorView[0]); }
         }
     }
 

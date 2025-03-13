@@ -420,7 +420,7 @@ public class StoryNodeItem : INotifyPropertyChanged
 
     #endregion
 
-	public void Delete(StoryViewType storyView)
+	public void Delete(StoryViewType storyView, StoryNodeItem _sourceCollection)
     {
         _logger.Log(LogLevel.Trace, $"Starting to delete element {Name} ({Uuid}) from {storyView}");
         //Sanity check
@@ -429,12 +429,6 @@ public class StoryNodeItem : INotifyPropertyChanged
             Ioc.Default.GetRequiredService<ShellViewModel>().ShowMessage(LogLevel.Warn, "This element can't be deleted.",false);
             _logger.Log(LogLevel.Info, "User tried to delete Root or Trashcan node.");
         }
-
-        //Set source collection to either narrative view or explorer view, we use the first item [0] so we don't delete from trash.
-        StoryNodeItem _sourceCollection;
-        if (storyView == StoryViewType.ExplorerView) { _sourceCollection = _outlineVM.StoryModel.ExplorerView[0]; }
-        else { _sourceCollection = _outlineVM.StoryModel.NarratorView[0]; }
-
         if (_sourceCollection.Children.Contains(this))
         {
             //Delete node from selected view.

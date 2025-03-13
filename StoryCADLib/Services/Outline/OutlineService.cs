@@ -1,8 +1,4 @@
-﻿using System.ClientModel.Primitives;
-using CommunityToolkit.Mvvm.Messaging;
-using StoryCAD.DAL;
-using StoryCAD.Models;
-using StoryCAD.Services.Messages;
+﻿using StoryCAD.DAL;
 using StoryCAD.Services.Search;
 using Windows.Storage;
 
@@ -258,19 +254,13 @@ public class OutlineService
 
 
     /// <summary>
-    /// Removes a reference to an element from a list of elements.
+    /// Removes a reference to an element from the StoryModel
     /// </summary>
-    /// <param name="elementsToUpdate">Elements you are updating</param>
     /// <param name="elementToRemove">Element you are removing references to</param>
     /// <param name="model">StoryModel you are updating</param>
     /// <returns>bool indicating success</returns>
-    public bool RemoveReferenceToElement(List<StoryElement> elementsToUpdate, Guid elementToRemove, StoryModel model)
+    public bool RemoveReferenceToElement(Guid elementToRemove, StoryModel model)
     {
-        if (elementsToUpdate == null)
-        {
-            throw new ArgumentNullException(nameof(elementsToUpdate));
-        }
-
         if (elementToRemove == Guid.Empty)
         {
             throw new ArgumentNullException(nameof(elementToRemove));
@@ -281,12 +271,27 @@ public class OutlineService
             throw new ArgumentNullException(nameof(model));
         }
 
-        foreach (StoryElement element in elementsToUpdate)
+        //Iterate through and remove refs.
+        foreach (StoryElement element in model.StoryElements)
         {
             Ioc.Default.GetRequiredService<DeletionService>()
                 .SearchStoryElement(element.Node, elementToRemove, model, true);
         }
 
+        return true;
+    }
+
+    /// <summary>
+    /// Deletes an element
+    /// </summary>
+    /// <remarks>Element is moved to trashcan node.</remarks>
+    /// <param name="elementToRemove">Element you want to remove</param>
+    /// <param name="Source">StoryModel you are deleting from.</param>
+    /// <param name="View">View you are deleting from</param>
+    /// <returns></returns>
+    public bool RemoveElement(StoryElement elementToRemove, StoryViewType View, StoryNodeItem Source)
+    {
+        elementToRemove.Node.Delete(View, Source);
         return true;
     }
 }

@@ -92,25 +92,50 @@ private bool SearchScene(StoryElement element, bool delete)
 
     try
     {
-        if (scene.Protagonist != Guid.Empty) // Searches protagonist
+        if (scene.Protagonist == _arg) // Searches protagonist
         {
-            if (_elementCollection.StoryElementGuids.TryGetValue(scene.Protagonist, out StoryElement protag))
+            if (delete)
             {
-                if (protag.Uuid == _arg)
-                {
-                    if (delete)
-                    {
-                        scene.Protagonist = Guid.Empty;
-                    }
-                    else
-                    {
-                        return true;
-                    }
-                }
+                scene.Protagonist = Guid.Empty;
             }
             else
             {
-                _logger.Log(LogLevel.Warn, $"Protagonist with GUID {scene.Protagonist} not found.");
+                return true;
+            }
+        }
+        if (scene.Antagonist == _arg) // Searches Antagonist
+        {
+            if (delete)
+            {
+                scene.Antagonist = Guid.Empty;
+            }
+            else
+            {
+                return true;
+            }
+        }
+
+        if (scene.ViewpointCharacter == _arg) // Searches ViewpointCharacter
+        {
+            if (delete)
+            {
+                scene.ViewpointCharacter = Guid.Empty;
+            }
+            else
+            {
+                return true;
+            }
+        }
+
+        if (scene.Setting == _arg) // Searches ViewpointCharacter
+        {
+            if (delete)
+            {
+                scene.Setting = Guid.Empty;
+            }
+            else
+            {
+                return true;
             }
         }
     }
@@ -223,16 +248,31 @@ private bool SearchScene(StoryElement element, bool delete)
 
         try
         {
-            //TODO: Test deletion service; this is changed code
-            if (problem.Protagonist != Guid.Empty)
+            if (problem.Protagonist == _arg)
             {
-                var protagonist = (CharacterModel) _elementCollection.StoryElementGuids[problem.Protagonist];
-                if (problem.Uuid == _arg) 
+                if (delete) { problem.Protagonist = Guid.Empty; }
+                else
+                    return true;
+            }
+
+            if (problem.Antagonist == _arg)
+            {
+                if (delete) { problem.Antagonist = Guid.Empty; }
+                else
+                    return true;
+            }
+
+            if (problem.StructureBeats != null)
+            {
+                foreach (var beat in problem.StructureBeats)
                 {
-                    if (delete) { problem.Protagonist = Guid.Empty; }
-                    else 
-                        return true;  
-                } //Checks problem name
+                    if (beat.Guid == _arg)
+                    {
+                        if (delete) { beat.Guid = Guid.Empty; }
+                        else
+                            return true;
+                    }
+                }
             }
         }
         catch (Exception ex)
@@ -274,15 +314,17 @@ private bool SearchScene(StoryElement element, bool delete)
         try
         {
             OverviewModel overview = (OverviewModel)element;
-            if (overview.StoryProblem != Guid.Empty)
+            if (overview.StoryProblem != _arg)
             {
-                var problem = (ProblemModel) _elementCollection.StoryElementGuids[overview.StoryProblem];
-                if (problem.Uuid == _arg) 
-                {
-                    if (delete) { overview.StoryProblem = Guid.Empty; }
-                    else 
-                        return true;  
-                } //Checks problem name
+                if (delete) { overview.StoryProblem = Guid.Empty; }
+                else
+                    return true;
+            }
+            if (overview.ViewpointCharacter != _arg)
+            {
+                if (delete) { overview.ViewpointCharacter = Guid.Empty; }
+                else
+                    return true;
             }
         }
         catch (Exception ex)

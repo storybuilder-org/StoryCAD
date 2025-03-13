@@ -315,4 +315,36 @@ public class SemanticKernelApi
         }
 
     }
+
+    [KernelFunction, Description("""
+                                 Move Element to the trashcan, this is a destructive action.
+                                 Do not call this unless the user wants you to delete the element.
+                                 You cannot delete the overview, narrator view, or trashcan elements.
+                                 Elements that are deleted will appear under the trashcan element.
+                                 Type is a enum that specifies if you are deleting from explorer or narrator
+                                 view.
+                                 """)]
+    public async Task<OperationResult<bool>> DeleteElement(Guid elementToDelete, StoryViewType Type)
+    {
+        // Ensure we have a current StoryModel.
+        if (CurrentModel == null)
+            return OperationResult<bool>.Failure("No outline is opened");
+
+        //Remove reference to element
+        StoryElement element = CurrentModel.StoryElements.StoryElementGuids[elementToDelete];
+        _outlineService.RemoveReferenceToElement(elementToDelete, CurrentModel);
+
+        // Remove the element from the model.
+        if (Type == StoryViewType.ExplorerView)
+        {
+            element.Node.Delete(Type, CurrentModel.ExplorerView[0]);
+        }
+        else
+        {
+            element.Node.Delete(Type, CurrentModel.NarratorView[0]);
+        }
+
+        return OperationResult<bool>.Success(true);
+
+    }
 }
