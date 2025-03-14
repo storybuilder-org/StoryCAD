@@ -345,6 +345,43 @@ public class SemanticKernelApi
         }
 
         return OperationResult<bool>.Success(true);
+    }
 
+    [KernelFunction, Description("""
+                                 Adds a new cast member to a scene.
+                                 Scene MUST be a GUID of element that is a scene
+                                 Character MUST be a GUID of an element that is a character.
+                                 """)]
+    public async Task<OperationResult<bool>> AddCastMember(Guid scene, Guid character)
+    {
+        if (CurrentModel == null)
+            return OperationResult<bool>.Failure("No outline is opened");
+
+        StoryElement element = StoryElement.GetByGuid(scene);
+        _outlineService.AddCastMember(CurrentModel, element, character);
+
+        return OperationResult<bool>.Success(true);
+    }
+    [KernelFunction, Description("""
+                                 Adds a relationship between characters.
+                                 Both Source and Recipient must be GUIDs of elements that are characters.
+                                 Description is the relationship between the two characters.
+                                 mirror is a boolean that specifies if the relationship
+                                 should be created on both characters.
+                                 """)]
+    public bool AddRelationship(Guid source, Guid recipient, string desc, bool mirror = false)
+    {
+        if (source == Guid.Empty)
+        {
+            throw new ArgumentNullException(nameof(source));
+        }
+
+        if (recipient == Guid.Empty)
+        {
+            throw new ArgumentNullException(nameof(recipient));
+        }
+
+        _outlineService.AddRelationship(CurrentModel,source, recipient, desc, mirror);
+        return true;
     }
 }
