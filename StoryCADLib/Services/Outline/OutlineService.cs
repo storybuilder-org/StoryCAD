@@ -239,7 +239,6 @@ public class OutlineService
         return foundNodes;
     }
 
-
     /// <summary>
     /// Removes a reference to an element from the StoryModel
     /// </summary>

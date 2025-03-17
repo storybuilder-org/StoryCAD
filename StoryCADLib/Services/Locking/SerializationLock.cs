@@ -16,6 +16,7 @@ public class SerializationLock : IDisposable
         _autoSaveService = autoSaveService;
         _backupService = backupService;
         _logger = logger;
+        outlineVm = Ioc.Default.GetService<OutlineViewModel>();
         shellVm = Ioc.Default.GetService<ShellViewModel>();
 
         // Acquire lock: disable commands, autosave, and backup.
@@ -27,6 +28,11 @@ public class SerializationLock : IDisposable
 
     private void DisableCommands()
     {
+        if (!outlineVm._canExecuteCommands)
+        {
+            throw new InvalidOperationException("Commands are already disabled.");
+        }
+
         // Set your _canExecuteCommands flag to false
         // (Assuming you can access it via a shared service or static member)
         outlineVm._canExecuteCommands = false;

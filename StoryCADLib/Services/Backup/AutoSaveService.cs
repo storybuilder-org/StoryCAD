@@ -21,6 +21,10 @@ namespace StoryCAD.Services.Backup
 
         private BackgroundWorker autoSaveWorker;
         private System.Timers.Timer autoSaveTimer;
+        /// <summary>
+        /// Returns the running status of the AutoSave service.
+        /// </summary>
+        public bool IsRunning => autoSaveTimer.Enabled;
 
         #region Constructor
 
@@ -99,6 +103,10 @@ namespace StoryCAD.Services.Backup
         private Task AutoSaveProject()
         {
             _outlineVM = Ioc.Default.GetService<OutlineViewModel>();
+
+            //Cant run if locked.
+            if (!_outlineVM._canExecuteCommands) { return Task.CompletedTask; }
+            _outlineVM._canExecuteCommands = false;
             try
             {
                 if (autoSaveWorker.CancellationPending || !Preferences.Model.AutoSave ||
@@ -125,6 +133,7 @@ namespace StoryCAD.Services.Backup
                 _logger.LogException(LogLevel.Error, _ex,
                     $"Error saving file in AutoSaveService.AutoSaveProject() {_ex.Message}");
             }
+            _outlineVM._canExecuteCommands = true;
             return Task.CompletedTask;
         }
 

@@ -44,24 +44,19 @@ public class SemanticKernelApi
             // Create a new StoryModel using the OutlineService.
             var result = await OperationResult<StoryModel>.SafeExecuteAsync(_outlineService.CreateModel(name, author, idx));
             //var result = 
-            if (!result.IsSuccess)
+            if (!result.IsSuccess || result.Payload == null)
             {
                 response.IsSuccess = false;
                 response.ErrorMessage = result.ErrorMessage;
                 return response;
             }
 
-            StoryModel model = result.Payload;
-
-            // Option 1: Return the entire StoryModel as JSON:
-            // response.Payload = JsonSerializer.Serialize(model);
-
-            // Option 2: Return just a list of the StoryElement Guids.
-            List<Guid> elementGuids = model.StoryElements.Select(e => e.Uuid).ToList();
+            // Set model.
+            CurrentModel = result.Payload;
+            List<Guid> elementGuids = CurrentModel.StoryElements.Select(e => e.Uuid).ToList();
 
             response.IsSuccess = true;
             response.Payload = elementGuids;
-            CurrentModel = model;
         }
         catch (Exception ex)
         {
@@ -181,7 +176,7 @@ public class SemanticKernelApi
             throw new InvalidOperationException("No StoryModel available. Create a model first.");
         }
 
-        if (guid == null)
+        if (guid == Guid.Empty)
         {
             throw new ArgumentNullException("GUID is null");
         }
@@ -362,6 +357,8 @@ public class SemanticKernelApi
 
         return OperationResult<bool>.Success(true);
     }
+
+
     [KernelFunction, Description("""
                                  Adds a relationship between characters.
                                  Both Source and Recipient must be GUIDs of elements that are characters.

@@ -46,10 +46,14 @@ public class IocLoaderTests
 			AppState State = Ioc.Default.GetService<AppState>();
 			PreferenceService Prefs = Ioc.Default.GetService<PreferenceService>();
 			Prefs.Model = new();
-			Prefs.Model.FirstName = "StoryCADTestUser";
-			Prefs.Model.Email = "sysadmin@storybuilder.org";
+			Prefs.Model.FirstName = "Headless";
+            Prefs.Model.LastName = "User";
+            Prefs.Model.Email = "sysadmin@storybuilder.org";
 			Prefs.Model.ProjectDirectory = App.InputDir;
 			Prefs.Model.BackupDirectory = App.ResultsDir;
+            Prefs.Model.BackupOnOpen = false;
+            Prefs.Model.AutoSave = false;
+            Prefs.Model.TimedBackup = false;
 			try
 			{
 

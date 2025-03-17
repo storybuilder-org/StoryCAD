@@ -16,6 +16,8 @@ public class BackupService
     private OutlineViewModel OutlineManager = Ioc.Default.GetService<OutlineViewModel>();
     ShellViewModel _shellVM;
 
+    public bool IsRunning => backupTimer.Enabled;
+
     #region Constructor
 
     public BackupService()
