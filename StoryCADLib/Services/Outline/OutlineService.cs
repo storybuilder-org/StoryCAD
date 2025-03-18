@@ -5,10 +5,11 @@ using Windows.Storage.Provider;
 
 namespace StoryCAD.Services.Outline;
 /// <summary>
-/// Service for interfacing with outlines at a low leve
+/// Service for interfacing with outlines at a low level.
 /// </summary>
 public class OutlineService
 {
+    private LogService _log = Ioc.Default.GetRequiredService<LogService>();
 
     /// <summary>
     /// Creates a new story model
@@ -18,8 +19,8 @@ public class OutlineService
     /// <param name="selectedTemplateIndex">Template index</param>
     /// <returns>A story outline variable.</returns>
     public async Task<StoryModel> CreateModel(string name, string author, int selectedTemplateIndex)
-    {
-        //TODO: Make template index an enum.
+    {  
+        _log.Log(LogLevel.Info, $"Creating new model: {name} by {author} with index {selectedTemplateIndex}");
         StoryModel model = new();
 
         OverviewModel overview = new(name, model, null)
@@ -34,7 +35,6 @@ public class OutlineService
         FolderModel narrative = new("Narrative View", model, StoryItemType.Folder, null);
         model.NarratorView.Add(narrative.Node);
 
-        // For non-blank projects, add a StoryProblem with characters.
         if (selectedTemplateIndex != 0)
         {
             StoryElement storyProblem = new ProblemModel("Story Problem", model, overview.Node);
@@ -133,10 +133,11 @@ public class OutlineService
                         this problem may enable your [protagonist] to resolve another (external) problem.
                         """;
                     storyProblem.Node.Parent = problemsFolder.Node;
-                    storyProblem.Node.Parent = problemsFolder.Node;
                     break;
             }
         }
+
+        _log.Log(LogLevel.Info, $"Model created, element count {model.StoryElements.Count}");
         return model;
     }
 
@@ -146,11 +147,12 @@ public class OutlineService
     /// </summary>
     public async Task<bool> WriteModel(StoryModel model, string file)
     {
+        _log.Log(LogLevel.Info, $"Writing model to {file}");
         var wtr = Ioc.Default.GetRequiredService<StoryIO>();
         await wtr.WriteStory(file, model);
+        _log.Log(LogLevel.Info, "Model write success.");
         return true;
     }
-
 
     /// <summary>
     /// Opens a StoryCAD Outline File.
@@ -160,29 +162,28 @@ public class OutlineService
     /// <exception cref="FileNotFoundException">Thrown if path doesn't exist.</exception>
     public async Task<StoryModel> OpenFile(string path)
     {
-        //Check file exists.
+        _log.Log(LogLevel.Info, $"Opening file {path}");
         if (!File.Exists(path))
         {
             throw new FileNotFoundException("Cannot file Outline File: " + path);
         }
 
-        //Get content
         var file = await StorageFile.GetFileFromPathAsync(path);
-        StoryIO io = new();
-
-        //Return deserialized model.
-        return await io.ReadStory(file);
+        StoryModel model = await new StoryIO().ReadStory(file);
+        _log.Log(LogLevel.Info, $"Opened model contains {model.StoryElements.Count} elements.");
+        return model;
     }
 
     /// <summary>
-    /// Adds a new StoryElement to the StoryModel
+    /// Adds a new StoryElement to the StoryModel.
     /// </summary>
+    /// <param name="model">StoryModel we are using</param>
     /// <param name="typeToAdd">Type of StoryElement that should be created</param>
     /// <param name="parent">Parent of the node we are creating</param>
-    /// <param name="model">StoryModel we are using</param>
-    /// <returns></returns>
+    /// <returns>Newly created StoryElement</returns>
     public StoryElement AddStoryElement(StoryModel model, StoryItemType typeToAdd, StoryNodeItem parent)
     {
+        _log.Log(LogLevel.Info, "AddStoryElement called.");
         if (parent == null)
         {
             throw new ArgumentNullException(nameof(parent));
@@ -198,7 +199,7 @@ public class OutlineService
             throw new InvalidOperationException("Cannot add a new node to the Trash Can.");
         }
 
-        return typeToAdd switch
+        StoryElement newElement = typeToAdd switch
         {
             StoryItemType.Folder => new FolderModel(model, parent),
             StoryItemType.Section => new FolderModel("New Section", model, StoryItemType.Folder, parent),
@@ -210,6 +211,8 @@ public class OutlineService
             StoryItemType.Notes => new FolderModel("New Note", model, StoryItemType.Notes, parent),
             _ => throw new InvalidOperationException("Cannot add a new element of type " + typeToAdd)
         };
+        _log.Log(LogLevel.Info, "AddStoryElement completed.");
+        return newElement;
     }
 
     /// <summary>
@@ -217,7 +220,8 @@ public class OutlineService
     /// </summary>
     public List<StoryElement> FindElementReferences(StoryModel model, Guid elementGuid)
     {
-        StoryElement elementToDelete  = StoryElement.GetByGuid(elementGuid);
+        _log.Log(LogLevel.Info, $"FindElementReferences called for element {elementGuid}.");
+        StoryElement elementToDelete = StoryElement.GetByGuid(elementGuid);
         if (StoryNodeItem.RootNodeType(elementToDelete.Node) == StoryItemType.TrashCan)
         {
             throw new InvalidOperationException("Cannot delete a node from the Trash Can.");
@@ -227,8 +231,7 @@ public class OutlineService
             throw new InvalidOperationException("Cannot delete a root node.");
         }
 
-        //Search for all nodes that reference our node.
-        List<StoryElement> foundNodes = [];
+        List<StoryElement> foundNodes = new();
         foreach (StoryElement element in model.StoryElements)
         {
             if (Ioc.Default.GetRequiredService<DeletionService>().SearchStoryElement(element.Node, elementGuid, model))
@@ -236,17 +239,19 @@ public class OutlineService
                 foundNodes.Add(element);
             }
         }
+        _log.Log(LogLevel.Info, $"FindElementReferences completed. Found {foundNodes.Count} references.");
         return foundNodes;
     }
 
     /// <summary>
-    /// Removes a reference to an element from the StoryModel
+    /// Removes a reference to an element from the StoryModel.
     /// </summary>
     /// <param name="elementToRemove">Element you are removing references to</param>
     /// <param name="model">StoryModel you are updating</param>
     /// <returns>bool indicating success</returns>
     public bool RemoveReferenceToElement(Guid elementToRemove, StoryModel model)
     {
+        _log.Log(LogLevel.Info, $"RemoveReferenceToElement called for element {elementToRemove}.");
         if (elementToRemove == Guid.Empty)
         {
             throw new ArgumentNullException(nameof(elementToRemove));
@@ -257,26 +262,26 @@ public class OutlineService
             throw new ArgumentNullException(nameof(model));
         }
 
-        //Iterate through and remove refs.
         foreach (StoryElement element in model.StoryElements)
         {
             Ioc.Default.GetRequiredService<DeletionService>()
                 .SearchStoryElement(element.Node, elementToRemove, model, true);
         }
-
+        _log.Log(LogLevel.Info, "RemoveReferenceToElement completed.");
         return true;
     }
 
     /// <summary>
-    /// Deletes an element
-    /// </summary>
+    /// Deletes an element.
     /// <remarks>Element is moved to trashcan node.</remarks>
+    /// </summary>
     /// <param name="elementToRemove">Element you want to remove</param>
-    /// <param name="source">StoryModel you are deleting from.</param>
     /// <param name="view">View you are deleting from</param>
+    /// <param name="source">StoryModel you are deleting from.</param>
     /// <returns>true if successful.</returns>
     public bool RemoveElement(StoryElement elementToRemove, StoryViewType view, StoryNodeItem source)
     {
+        _log.Log(LogLevel.Info, $"RemoveElement called for element {elementToRemove.Uuid}.");
         if (elementToRemove == null)
         {
             throw new ArgumentNullException(nameof(elementToRemove));
@@ -297,8 +302,9 @@ public class OutlineService
             throw new InvalidOperationException("Cannot delete a trash or overview node.");
         }
 
-        //Deleter node.
-        return elementToRemove.Node.Delete(view, source);
+        bool result = elementToRemove.Node.Delete(view, source);
+        _log.Log(LogLevel.Info, $"RemoveElement completed for element {elementToRemove.Uuid}.");
+        return result;
     }
 
     /// <summary>
@@ -306,17 +312,13 @@ public class OutlineService
     /// </summary>
     /// <param name="Model">StoryModel</param>
     /// <param name="source">Character you want to add relationship to.</param>
-    /// <param name="recipient">relationship character is with</param>
-    /// <param name="desc">relationship description</param>
+    /// <param name="recipient">Relationship character is with</param>
+    /// <param name="desc">Relationship description</param>
     /// <param name="mirror">Create same relationship on recipient</param>
-    /// <remarks>
-    /// Both recipient and source MUST be characters.
-    /// Mirror may not be appropriate in all cases, as the description on the node will be identical.
-    /// (i.e. brother and sister or parent and child)
-    /// </remarks>
     /// <returns></returns>
     public bool AddRelationship(StoryModel Model, Guid source, Guid recipient, string desc, bool mirror = false)
     {
+        _log.Log(LogLevel.Info, $"AddRelationship called from {source} to {recipient}.");
         if (source == Guid.Empty)
         {
             throw new ArgumentNullException(nameof(source));
@@ -327,11 +329,9 @@ public class OutlineService
             throw new ArgumentNullException(nameof(recipient));
         }
 
-        //Get elements
         StoryElement sourceElement = Model.StoryElements.StoryElementGuids[source];
         StoryElement recipientElement = Model.StoryElements.StoryElementGuids[recipient];
 
-        //Check if elements are characters.
         if (sourceElement.ElementType != StoryItemType.Character)
         {
             throw new InvalidOperationException("Source must be a character.");
@@ -342,29 +342,27 @@ public class OutlineService
             throw new InvalidOperationException("Recipient must be a character.");
         }
 
-        //Create Relationship
         RelationshipModel relationship = new(recipient, desc);
         ((CharacterModel)sourceElement).RelationshipList.Add(relationship);
 
-        //Create mirrored relationship.
         if (mirror)
         {
             RelationshipModel mirrorRelationship = new(source, desc);
             ((CharacterModel)recipientElement).RelationshipList.Add(mirrorRelationship);
         }
-
+        _log.Log(LogLevel.Info, $"AddRelationship completed from {source} to {recipient}.");
         return true;
     }
+
     /// <summary>
     /// Adds a new cast member to a scene.
     /// </summary>
     /// <param name="source">Scene element you are adding the cast member to </param>
     /// <param name="castMember">Cast member you want to add.</param>
     /// <returns></returns>
-    /// <exception cref="ArgumentNullException"></exception>
-    /// <exception cref="InvalidOperationException"></exception>
-    public bool AddCastMember(StoryModel Model,StoryElement source, Guid castMember)
+    public bool AddCastMember(StoryModel Model, StoryElement source, Guid castMember)
     {
+        _log.Log(LogLevel.Info, $"AddCastMember called for cast member {castMember} on source {source.Uuid}.");
         if (source == null)
         {
             throw new ArgumentNullException(nameof(source));
@@ -386,14 +384,14 @@ public class OutlineService
             throw new InvalidOperationException("castMember must be a character.");
         }
 
-        //Check cast member isn't already added.
         if (((SceneModel)source).CastMembers.Contains(castMember))
         {
+            _log.Log(LogLevel.Info, $"AddCastMember completed: cast member {castMember} already exists.");
             return true;
         }
 
-        //add cast member.
         ((SceneModel)source).CastMembers.Add(castMember);
+        _log.Log(LogLevel.Info, $"AddCastMember completed for cast member {castMember}.");
         return true;
     }
 }

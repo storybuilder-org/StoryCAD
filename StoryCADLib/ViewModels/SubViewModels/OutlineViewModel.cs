@@ -18,6 +18,7 @@ using StoryCAD.ViewModels.Tools;
 using StoryCAD.Models.Tools;
 using StoryCAD.Services.Reports;
 using StoryCAD.Services.Search;
+using StoryCAD.Services.Locking;
 
 namespace StoryCAD.ViewModels.SubViewModels;
 
@@ -67,6 +68,9 @@ public class OutlineViewModel : ObservableRecipient
     /// </summary>
     public bool _canExecuteCommands;
 
+    private AutoSaveService autoSaveService = Ioc.Default.GetRequiredService<AutoSaveService>();
+    private BackupService backupService = Ioc.Default.GetRequiredService<BackupService>();
+
     /// <summary>
     /// Opens a file picker to let the user chose a .stbx file and loads said file
     /// If fromPath is specified then the picker is skipped.
@@ -74,214 +78,220 @@ public class OutlineViewModel : ObservableRecipient
     /// <param name="fromPath">Path to open file from (Optional)</param>
     public async Task OpenFile(string fromPath = "")
     {
-        // Check if current StoryModel has been changed, if so, save and write the model.
-        if (StoryModel.Changed)
+        using (var serializationLock = new SerializationLock(autoSaveService, backupService, logger))
         {
-            shellVm.SaveModel();
-            await outlineService.WriteModel(StoryModel, StoryModelFile);
-        }
 
-        // Stop the auto save service if it was running
-        if (preferences.Model.AutoSave) { shellVm._autoSaveService.StopAutoSave(); }
-
-        // Stop the timed backup service if it was running
-        Ioc.Default.GetRequiredService<BackupService>().StopTimedBackup();
-
-        _canExecuteCommands = false;
-        logger.Log(LogLevel.Info, "Executing OpenFile command");
-
-        try
-        {
-            // Reset the model and show the home page
-            shellVm.ResetModel();
-            shellVm.ShowHomePage();
-
-            // Open file picker if `fromPath` is not provided or file doesn't exist at the path.
-            if (fromPath == "" || !File.Exists(fromPath))
+            // Check if current StoryModel has been changed, if so, save and write the model.
+            if (StoryModel.Changed)
             {
-                logger.Log(LogLevel.Info, "Opening file picker as story wasn't able to be found");
-
-                StorageFile? projectFile = await window.ShowFilePicker("Open Project File", ".stbx");
-                if (projectFile == null) //Picker was canceled.
-                {
-                    logger.Log(LogLevel.Info, "Open file picker cancelled.");
-                    _canExecuteCommands = true; // unblock other commands
-                    StoryModelFile = string.Empty;
-                    return;
-                }
-            }
-
-            StoryModelFile = fromPath;
-            if (StoryModelFile == null)
-            {
-                logger.Log(LogLevel.Warn, "Open File command failed: StoryModel.ProjectFile is null.");
-                Messenger.Send(new StatusChangedMessage(new("Open Story command cancelled", LogLevel.Info)));
-                _canExecuteCommands = true;  // Unblock other commands
-                return;
-            }
-
-            if (!File.Exists(StoryModelFile))
-            {
-                Messenger.Send(new StatusChangedMessage(
-                    new($"Cannot find file {StoryModelFile}", LogLevel.Warn, true)));
-                _canExecuteCommands = true;
-                return;
-            }
-
-            //Check file is available.
-            StoryIO rdr = Ioc.Default.GetRequiredService<StoryIO>();
-            if (!await rdr.CheckFileAvailability(StoryModelFile))
-            {
-                Messenger.Send(new StatusChangedMessage(new("File Unavailable.", LogLevel.Warn,true)));
-                return;
-            }
-
-            //Read file
-            StoryModel = await outlineService.OpenFile(StoryModelFile);
-
-            //Check the file we loaded actually has StoryCAD Data.
-            if (StoryModel == null)
-            {
-                Messenger.Send(new StatusChangedMessage(
-                    new("Unable to open file (No Story Elements found)", LogLevel.Warn, true)));
-                _canExecuteCommands = true;  // unblock other commands
-                return;
-            }
-
-            if (StoryModel.StoryElements.Count == 0)
-            {
-                Messenger.Send(new StatusChangedMessage(
-                    new("Unable to open file (No Story Elements found)", LogLevel.Warn, true)));
-                _canExecuteCommands = true;  // unblock other commands
-                return;
-
-            }
-
-            // Take a backup of the project if the user has the 'backup on open' preference set.
-            if (preferences.Model.BackupOnOpen)
-            {
-                await Ioc.Default.GetRequiredService<BackupService>().BackupProject();
-            }
-
-            // Set the current view to the ExplorerView 
-            if (StoryModel.ExplorerView.Count > 0)
-            {
-                shellVm.SetCurrentView(StoryViewType.ExplorerView);
-                Messenger.Send(new StatusChangedMessage(new("Open Story completed", LogLevel.Info)));
-            }
-
-            window.UpdateWindowTitle();
-            new UnifiedVM().UpdateRecents(StoryModelFile);
-
-            if (preferences.Model.TimedBackup)
-            {
-                Ioc.Default.GetRequiredService<BackupService>().StartTimedBackup();
-            }
-
-            if (preferences.Model.AutoSave)
-            {
-                shellVm._autoSaveService.StartAutoSave();
-            }
-
-            string msg = $"Opened project {StoryModelFile}";
-            logger.Log(LogLevel.Info, msg);
-        }
-        catch (Exception ex)
-        {
-            // Report the error to the user
-            logger.LogException(LogLevel.Error, ex, "Error in OpenFile command");
-            Messenger.Send(new StatusChangedMessage(new("Open Story command failed", LogLevel.Error)));
-        }
-
-        logger.Log(LogLevel.Info, "Open Story completed.");
-        _canExecuteCommands = true;
-    }
-
-    public async Task CreateFile(UnifiedVM dialogVm)
-    {
-        logger.Log(LogLevel.Info, "FileOpenVM - New File starting");
-        _canExecuteCommands = false;
-
-        try
-        {
-            Messenger.Send(new StatusChangedMessage(new StatusMessage("New project command executing", LogLevel.Info)), true);
-
-            // If the current project needs saved, do so
-            if (StoryModel.Changed && StoryModelFile != null)
-            {
+                shellVm.SaveModel();
                 await outlineService.WriteModel(StoryModel, StoryModelFile);
             }
 
-            // Start with a blank StoryModel
-            shellVm.ResetModel();
-            shellVm.ShowHomePage();
-
-            // Ensure the filename has .stbx extension
-            if (!Path.GetExtension(dialogVm.ProjectName)!.Equals(".stbx"))
-            {
-                dialogVm.ProjectName += ".stbx";
-            }
-
-            // Create the new outline's file
-            StorageFolder folder = await StorageFolder.GetFolderFromPathAsync(dialogVm.ProjectPath);
-            StoryModelFile = (await folder.CreateFileAsync(dialogVm.ProjectName, CreationCollisionOption.GenerateUniqueName)).Path;
-
-            // Create the StoryModel
-            string name = Path.GetFileNameWithoutExtension(StoryModelFile);
-            string author = preferences.Model.FirstName + " " + preferences.Model.LastName;
-
-            // Create the new project StorageFile; throw an exception if it already exists.
-            StoryModel = await outlineService.CreateModel(name, author, dialogVm.SelectedTemplateIndex);
-
-            shellVm.SetCurrentView(StoryViewType.ExplorerView);
-
-            Ioc.Default.GetRequiredService<UnifiedVM>().UpdateRecents(StoryModelFile);
-
-            StoryModel.Changed = true;
-            await SaveFile();
-
-            if (preferences.Model.BackupOnOpen)
-            {
-                await shellVm.MakeBackup();
-            }
-
-            // Start the timed backup and auto save services
-            if (preferences.Model.TimedBackup)
-            {
-                Ioc.Default.GetRequiredService<BackupService>().StartTimedBackup();
-            }
+            // Stop the auto save service if it was running
             if (preferences.Model.AutoSave)
             {
-                Ioc.Default.GetRequiredService<AutoSaveService>().StartAutoSave();
+                shellVm._autoSaveService.StopAutoSave();
             }
 
-            shellVm.TreeViewNodeClicked(StoryModel.ExplorerView[0]);
-            window.UpdateWindowTitle();
+            // Stop the timed backup service if it was running
+            Ioc.Default.GetRequiredService<BackupService>().StopTimedBackup();
+            logger.Log(LogLevel.Info, "Executing OpenFile command");
 
-            Messenger.Send(new StatusChangedMessage(new("New project command completed", LogLevel.Info, true)), true);
-        }
-        catch (Exception ex)
-        {
-            Messenger.Send(new StatusChangedMessage(new("Error creating new project", LogLevel.Error)), true);
-        }
+            try
+            {
+                // Reset the model and show the home page
+                shellVm.ResetModel();
+                shellVm.ShowHomePage();
 
-        _canExecuteCommands = true;
+                // Open file picker if `fromPath` is not provided or file doesn't exist at the path.
+                if (fromPath == "" || !File.Exists(fromPath))
+                {
+                    logger.Log(LogLevel.Info, "Opening file picker as story wasn't able to be found");
+
+                    StorageFile? projectFile = await window.ShowFilePicker("Open Project File", ".stbx");
+                    if (projectFile == null) //Picker was canceled.
+                    {
+                        logger.Log(LogLevel.Info, "Open file picker cancelled.");
+                        StoryModelFile = string.Empty;
+                        return;
+                    }
+                }
+
+                StoryModelFile = fromPath;
+                if (StoryModelFile == null)
+                {
+                    logger.Log(LogLevel.Warn, "Open File command failed: StoryModel.ProjectFile is null.");
+                    Messenger.Send(new StatusChangedMessage(new("Open Story command cancelled", LogLevel.Info)));
+                    return;
+                }
+
+                if (!File.Exists(StoryModelFile))
+                {
+                    Messenger.Send(new StatusChangedMessage(
+                        new($"Cannot find file {StoryModelFile}", LogLevel.Warn, true)));
+                    return;
+                }
+
+                //Check file is available.
+                StoryIO rdr = Ioc.Default.GetRequiredService<StoryIO>();
+                if (!await rdr.CheckFileAvailability(StoryModelFile))
+                {
+                    Messenger.Send(new StatusChangedMessage(new("File Unavailable.", LogLevel.Warn, true)));
+                    return;
+                }
+
+                //Read file
+                StoryModel = await outlineService.OpenFile(StoryModelFile);
+
+                //Check the file we loaded actually has StoryCAD Data.
+                if (StoryModel == null)
+                {
+                    Messenger.Send(new StatusChangedMessage(
+                        new("Unable to open file (No Story Elements found)", LogLevel.Warn, true)));
+                    return;
+                }
+
+                if (StoryModel.StoryElements.Count == 0)
+                {
+                    Messenger.Send(new StatusChangedMessage(
+                        new("Unable to open file (No Story Elements found)", LogLevel.Warn, true)));
+                    return;
+
+                }
+
+                // Take a backup of the project if the user has the 'backup on open' preference set.
+                if (preferences.Model.BackupOnOpen)
+                {
+                    await Ioc.Default.GetRequiredService<BackupService>().BackupProject();
+                }
+
+                // Set the current view to the ExplorerView 
+                if (StoryModel.ExplorerView.Count > 0)
+                {
+                    shellVm.SetCurrentView(StoryViewType.ExplorerView);
+                    Messenger.Send(new StatusChangedMessage(new("Open Story completed", LogLevel.Info)));
+                }
+
+                window.UpdateWindowTitle();
+                new UnifiedVM().UpdateRecents(StoryModelFile);
+
+                if (preferences.Model.TimedBackup)
+                {
+                    Ioc.Default.GetRequiredService<BackupService>().StartTimedBackup();
+                }
+
+                if (preferences.Model.AutoSave)
+                {
+                    shellVm._autoSaveService.StartAutoSave();
+                }
+
+                string msg = $"Opened project {StoryModelFile}";
+                logger.Log(LogLevel.Info, msg);
+            }
+            catch (Exception ex)
+            {
+                // Report the error to the user
+                logger.LogException(LogLevel.Error, ex, "Error in OpenFile command");
+                Messenger.Send(new StatusChangedMessage(new("Open Story command failed", LogLevel.Error)));
+            }
+
+            logger.Log(LogLevel.Info, "Open Story completed.");
+        }
     }
 
+    /// <summary>
+    /// Create a new file.
+    /// </summary>
+    /// <param name="dialogVm"></param>
+    /// <returns></returns>
+    public async Task CreateFile(UnifiedVM dialogVm)
+    {
+        logger.Log(LogLevel.Info, "FileOpenVM - New File starting");
+        using (var serializationLock = new SerializationLock(autoSaveService, backupService, logger))
+        {
+            try
+            {
+                Messenger.Send(new StatusChangedMessage(new StatusMessage("New project command executing", LogLevel.Info)), true);
+
+                // If the current project needs saved, do so
+                if (StoryModel.Changed && StoryModelFile != null)
+                {
+                    await outlineService.WriteModel(StoryModel, StoryModelFile);
+                }
+
+                // Start with a blank StoryModel
+                shellVm.ResetModel();
+                shellVm.ShowHomePage();
+
+                // Ensure the filename has .stbx extension
+                if (!Path.GetExtension(dialogVm.ProjectName)!.Equals(".stbx"))
+                {
+                    dialogVm.ProjectName += ".stbx";
+                }
+
+                // Create the new outline's file
+                StorageFolder folder = await StorageFolder.GetFolderFromPathAsync(dialogVm.ProjectPath);
+                StoryModelFile = (await folder.CreateFileAsync(dialogVm.ProjectName, CreationCollisionOption.GenerateUniqueName)).Path;
+
+                // Create the StoryModel
+                string name = Path.GetFileNameWithoutExtension(StoryModelFile);
+                string author = preferences.Model.FirstName + " " + preferences.Model.LastName;
+
+                // Create the new project StorageFile; throw an exception if it already exists.
+                StoryModel = await outlineService.CreateModel(name, author, dialogVm.SelectedTemplateIndex);
+
+                shellVm.SetCurrentView(StoryViewType.ExplorerView);
+
+                Ioc.Default.GetRequiredService<UnifiedVM>().UpdateRecents(StoryModelFile);
+
+                StoryModel.Changed = true;
+                await SaveFile();
+
+                if (preferences.Model.BackupOnOpen)
+                {
+                    await shellVm.MakeBackup();
+                }
+
+                // Start the timed backup and auto save services
+                if (preferences.Model.TimedBackup)
+                {
+                    Ioc.Default.GetRequiredService<BackupService>().StartTimedBackup();
+                }
+                if (preferences.Model.AutoSave)
+                {
+                    Ioc.Default.GetRequiredService<AutoSaveService>().StartAutoSave();
+                }
+
+                shellVm.TreeViewNodeClicked(StoryModel.ExplorerView[0]);
+                window.UpdateWindowTitle();
+
+                Messenger.Send(new StatusChangedMessage(new("New project command completed", LogLevel.Info, true)), true);
+            }
+            catch (Exception ex)
+            {
+                Messenger.Send(new StatusChangedMessage(new("Error creating new project", LogLevel.Error)), true);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Opens the unified menu
+    /// </summary>
     public async Task OpenUnifiedMenu()
     {
-        if (_canExecuteCommands)
+        logger.Log(LogLevel.Info, "Opening File Menu");
+        using (var serializationLock = new SerializationLock(autoSaveService, backupService, logger))
         {
-            _canExecuteCommands = false;
-            // Needs logging
             shellVm._contentDialog = new() { Content = new UnifiedMenuPage() };
             if (window.RequestedTheme == ElementTheme.Light)
             {
                 shellVm._contentDialog.RequestedTheme = window.RequestedTheme;
                 shellVm._contentDialog.Background = new SolidColorBrush(Colors.LightGray);
             }
+            logger.Log(LogLevel.Info, "Showing File Menu");
             await window.ShowContentDialog(shellVm._contentDialog);
-            _canExecuteCommands = true;
+            logger.Log(LogLevel.Info, "Closed File Menu");
         }
     }
 
@@ -292,48 +302,45 @@ public class OutlineViewModel : ObservableRecipient
     /// <returns></returns>
     public async Task SaveFile(bool autoSave = false)
     {
-        shellVm._autoSaveService.StopAutoSave();
-        bool saveExecuteCommands = _canExecuteCommands;
-        _canExecuteCommands = false;
-        string msg = autoSave ? "AutoSave" : "SaveFile command";
-        if (autoSave && !StoryModel.Changed)
+        using (var serializationLock = new SerializationLock(autoSaveService, backupService, logger))
         {
-            logger.Log(LogLevel.Info, $"{msg} skipped, no changes");
-            _canExecuteCommands = true;
-            return;
-        }
+            string msg = autoSave ? "AutoSave" : "SaveFile command";
+            if (autoSave && !StoryModel.Changed)
+            {
+                logger.Log(LogLevel.Info, $"{msg} skipped, no changes");
+                return;
+            }
 
-        if (StoryModel.StoryElements.Count == 0)
-        {
-            Messenger.Send(new StatusChangedMessage(new("You need to open a story first!", LogLevel.Info)));
-            logger.Log(LogLevel.Info, $"{msg} cancelled (StoryModel.ProjectFile was null)");
-            _canExecuteCommands = true;
-            return;
-        }
+            if (StoryModel.StoryElements.Count == 0)
+            {
+                Messenger.Send(new StatusChangedMessage(new("You need to open a story first!", LogLevel.Info)));
+                logger.Log(LogLevel.Info, $"{msg} cancelled (StoryModel.ProjectFile was null)");
+                return;
+            }
 
-        try
-        {
-            Messenger.Send(new StatusChangedMessage(new($"{msg} executing", LogLevel.Info)));
-            shellVm.SaveModel();
-            await outlineService.WriteModel(StoryModel, StoryModelFile);
-            Messenger.Send(new StatusChangedMessage(new($"{msg} completed", LogLevel.Info)));
-            StoryModel.Changed = false;
-            shellVm.ChangeStatusColor = Colors.Green;
+            try
+            {
+                Messenger.Send(new StatusChangedMessage(new($"{msg} executing", LogLevel.Info)));
+                shellVm.SaveModel();
+                await outlineService.WriteModel(StoryModel, StoryModelFile);
+                Messenger.Send(new StatusChangedMessage(new($"{msg} completed", LogLevel.Info)));
+                StoryModel.Changed = false;
+                shellVm.ChangeStatusColor = Colors.Green;
+            }
+            catch (Exception ex)
+            {
+                logger.LogException(LogLevel.Error, ex, $"Exception in {msg}");
+                Messenger.Send(new StatusChangedMessage(new($"{msg} failed", LogLevel.Error)));
+            }
+
+            shellVm._autoSaveService.StartAutoSave();
         }
-        catch (Exception ex)
-        {
-            logger.LogException(LogLevel.Error, ex, $"Exception in {msg}");
-            Messenger.Send(new StatusChangedMessage(new($"{msg} failed", LogLevel.Error)));
-        }
-        _canExecuteCommands = saveExecuteCommands;
-        shellVm._autoSaveService.StartAutoSave();
     }
 
     public async void SaveFileAs()
     {
-        if (_canExecuteCommands)
+        using (var serializationLock = new SerializationLock(autoSaveService, backupService, logger))
         {
-            _canExecuteCommands = false;
             Messenger.Send(new StatusChangedMessage(new("Save File As command executing", LogLevel.Info, true)));
             try
             {
@@ -341,7 +348,6 @@ public class OutlineViewModel : ObservableRecipient
                 {
                     Messenger.Send(new StatusChangedMessage(new("You need to load a story first!", LogLevel.Info)));
                     logger.Log(LogLevel.Warn, "User tried to use save as without a story loaded.");
-                    _canExecuteCommands = true;
                     return;
                 }
 
@@ -375,7 +381,6 @@ public class OutlineViewModel : ObservableRecipient
                         {
                             Messenger.Send(new StatusChangedMessage(new("Save File As command completed", LogLevel.Info)));
                             logger.Log(LogLevel.Info, "User tried to save file to same location as current file.");
-                            _canExecuteCommands = true;
                             return;
                         }
 
@@ -386,7 +391,7 @@ public class OutlineViewModel : ObservableRecipient
                         // Update the story file path to the new location
                         StoryModelFile = newFilePath;
 
-                        // Update window title and recents
+                        // Update window title and recent files
                         window.UpdateWindowTitle();
                         new UnifiedVM().UpdateRecents(StoryModelFile);
 
@@ -407,7 +412,6 @@ public class OutlineViewModel : ObservableRecipient
                 logger.LogException(LogLevel.Error, ex, "Exception in SaveFileAs");
                 Messenger.Send(new StatusChangedMessage(new("Save File As failed", LogLevel.Info)));
             }
-            _canExecuteCommands = true;
         }
     }
 
@@ -424,7 +428,8 @@ public class OutlineViewModel : ObservableRecipient
                 PrimaryButtonText = "Yes",
                 SecondaryButtonText = "No",
                 Title = "Replace file?",
-                Content = $"File {Path.Combine(saveAsVm.ProjectPathName, saveAsVm.ProjectName)} already exists. \n\nDo you want to replace it?",
+                Content = $"File {Path.Combine(saveAsVm.ProjectPathName,
+                    saveAsVm.ProjectName)} already exists. \n\nDo you want to replace it?",
             };
             return await window.ShowContentDialog(replaceDialog) == ContentDialogResult.Primary;
         }
@@ -433,40 +438,42 @@ public class OutlineViewModel : ObservableRecipient
 
     public async Task CloseFile()
     {
-        _canExecuteCommands = false;
         Messenger.Send(new StatusChangedMessage(new("Closing project", LogLevel.Info, true)));
-        shellVm._autoSaveService.StopAutoSave();
-        if (StoryModel.Changed)
+        using (var serializationLock = new SerializationLock(autoSaveService, backupService, logger))
         {
-            ContentDialog warning = new()
+            if (StoryModel.Changed)
             {
-                Title = "Save changes?",
-                PrimaryButtonText = "Yes",
-                SecondaryButtonText = "No",
-            };
-            if (await window.ShowContentDialog(warning) == ContentDialogResult.Primary)
-            {
-                shellVm.SaveModel();
-                await outlineService.WriteModel(StoryModel, StoryModelFile);
+                ContentDialog warning = new()
+                {
+                    Title = "Save changes?",
+                    PrimaryButtonText = "Yes",
+                    SecondaryButtonText = "No",
+                };
+                if (await window.ShowContentDialog(warning) == ContentDialogResult.Primary)
+                {
+                    shellVm.SaveModel();
+                    await outlineService.WriteModel(StoryModel, StoryModelFile);
+                }
             }
+            
+            shellVm.ResetModel();
+            StoryModelFile = string.Empty;
+            shellVm.RightTappedNode = null; //Null right tapped node to prevent possible issues.
+            shellVm.SetCurrentView(StoryViewType.ExplorerView);
+            window.UpdateWindowTitle();
+            Ioc.Default.GetRequiredService<BackupService>().StopTimedBackup();
+            shellVm.DataSource = StoryModel.ExplorerView;
+            shellVm.ShowHomePage();
+            Messenger.Send(new StatusChangedMessage(new("Close story command completed", LogLevel.Info, true)));
         }
-        
-        shellVm.ResetModel();
-        StoryModelFile = string.Empty;
-        shellVm.RightTappedNode = null; //Null right tapped node to prevent possible issues.
-        shellVm.SetCurrentView(StoryViewType.ExplorerView);
-        window.UpdateWindowTitle();
-        Ioc.Default.GetRequiredService<BackupService>().StopTimedBackup();
-        shellVm.DataSource = StoryModel.ExplorerView;
-        shellVm.ShowHomePage();
-        Messenger.Send(new StatusChangedMessage(new("Close story command completed", LogLevel.Info, true)));
-        _canExecuteCommands = true;
     }
 
     public async Task ExitApp()
     {
-        _canExecuteCommands = false;
-        Messenger.Send(new StatusChangedMessage(new("Executing Exit project command", LogLevel.Info, true)));
+
+        using (var serializationLock = new SerializationLock(autoSaveService, backupService, logger))
+        {
+            Messenger.Send(new StatusChangedMessage(new("Executing Exit project command", LogLevel.Info, true)));
 
         if (StoryModel.Changed)
         {
@@ -485,6 +492,7 @@ public class OutlineViewModel : ObservableRecipient
         BackendService backend = Ioc.Default.GetRequiredService<BackendService>();
         await backend.DeleteWorkFile();
         logger.Flush();
+        }
         Application.Current.Exit();  // Win32
     }
 
