@@ -858,7 +858,7 @@ public class OutlineViewModel : ObservableRecipient
     public async Task StockScenesTool()
     {
         logger.Log(LogLevel.Info, "Displaying Stock Scenes tool dialog");
-        if (VerifyToolUse(true, true) && _canExecuteCommands)
+        if (VerifyToolUse(true, true))
         {
             using (var serializationLock = new SerializationLock(autoSaveService, backupService, logger))
             {
