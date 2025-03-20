@@ -27,6 +27,7 @@ using Application = Microsoft.UI.Xaml.Application;
 using StoryCAD.Collaborator.ViewModels;
 using StoryCAD.Services.Outline;
 using StoryCAD.ViewModels.SubViewModels;
+using StoryCAD.Services.Locking;
 
 namespace StoryCAD.ViewModels;
 
@@ -52,6 +53,7 @@ public class ShellViewModel : ObservableRecipient
     private readonly LogService Logger;
     private readonly SearchService Search;
     public readonly AutoSaveService _autoSaveService;
+    public readonly BackupService _BackupService;
     private readonly Windowing Window;
     private readonly AppState State;
     private readonly PreferenceService Preferences;
@@ -1389,17 +1391,6 @@ public class ShellViewModel : ObservableRecipient
                 break;
         }
     }
-
-    internal void LockCommands()
-    {
-        OutlineManager._canExecuteCommands = false;
-    }
-
-    internal void UnlockCommands()
-    {
-        OutlineManager._canExecuteCommands = false;
-    }
-
     #endregion
 
     #region Constructor(s)
@@ -1410,6 +1401,7 @@ public class ShellViewModel : ObservableRecipient
         Logger = Ioc.Default.GetRequiredService<LogService>();
         Search = Ioc.Default.GetRequiredService<SearchService>();
         _autoSaveService = Ioc.Default.GetRequiredService<AutoSaveService>();
+        _BackupService = Ioc.Default.GetRequiredService<BackupService>();
         Window = Ioc.Default.GetRequiredService<Windowing>();
         State = Ioc.Default.GetRequiredService<AppState>();
         Scrivener = Ioc.Default.GetRequiredService<ScrivenerIo>();

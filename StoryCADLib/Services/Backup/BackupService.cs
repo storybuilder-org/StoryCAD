@@ -2,6 +2,7 @@
 using System.IO.Compression;
 using Windows.Storage;
 using StoryCAD.ViewModels.SubViewModels;
+using StoryCAD.Services.Locking;
 
 
 namespace StoryCAD.Services.Backup;
@@ -113,11 +114,11 @@ public class BackupService
     /// <summary>
     /// Creates a backup
     /// </summary>
-    /// <param name="Filename">If null, will be the storymodel filename</param>
+    /// <param name="Filename">If null, will be the story model filename</param>
     /// <param name="FilePath">If null, will be the backup directory</param>
-    /// <returns></returns>
     public async Task BackupProject(string Filename = null, string FilePath = null)
     {
+        var autoSaveService = Ioc.Default.GetRequiredService<AutoSaveService>();
         _shellVM = Ioc.Default.GetService<ShellViewModel>();
 
         // Use OutlineManager.StoryModelFile to get file details
@@ -143,18 +144,21 @@ public class BackupService
             Log.Log(LogLevel.Info, "Writing file");
             StorageFolder rootFolder = await StorageFolder.GetFolderFromPathAsync(
                 Ioc.Default.GetRequiredService<AppState>().RootDirectory);
-            StorageFolder tempFolder = await rootFolder.CreateFolderAsync(
-                "Temp", CreationCollisionOption.ReplaceExisting);
+            using (var serializationLock = new SerializationLock(autoSaveService, this, Log))
+            {
+                StorageFolder tempFolder = await rootFolder.CreateFolderAsync(
+                    "Temp", CreationCollisionOption.ReplaceExisting);
 
-            // Retrieve the project file using the file path
-            StorageFile projectFile = await StorageFile.GetFileFromPathAsync(OutlineManager.StoryModelFile);
-            await projectFile.CopyAsync(tempFolder, projectFile.Name, NameCollisionOption.ReplaceExisting);
+                // Retrieve the project file using the file path
+                StorageFile projectFile = await StorageFile.GetFileFromPathAsync(OutlineManager.StoryModelFile);
+                await projectFile.CopyAsync(tempFolder, projectFile.Name, NameCollisionOption.ReplaceExisting);
 
-            string zipFilePath = Path.Combine(FilePath, Filename) + ".zip";
-            ZipFile.CreateFromDirectory(tempFolder.Path, zipFilePath);
+                string zipFilePath = Path.Combine(FilePath, Filename) + ".zip";
+                ZipFile.CreateFromDirectory(tempFolder.Path, zipFilePath);
 
-            Log.Log(LogLevel.Info, $"Created Zip file at {zipFilePath}");
-            await tempFolder.DeleteAsync();
+                Log.Log(LogLevel.Info, $"Created Zip file at {zipFilePath}");
+                await tempFolder.DeleteAsync();
+            }
 
             Log.Log(LogLevel.Info, "Finished backup.");
         }
