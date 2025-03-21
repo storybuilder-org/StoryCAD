@@ -13,6 +13,7 @@
     <NoWarn>1701;1702;CA1416;CS0618</NoWarn>
   </PropertyGroup>
   <ItemGroup>
+    <Content Remove="Assets\Icon.png" />
     <Content Remove="Assets\Install\Lists.ini" />
     <Content Remove="Assets\Install\reports\Character Relationship Description.txt" />
     <Content Remove="Assets\Install\reports\List of Websites.txt" />
@@ -25,6 +26,7 @@
     <Content Remove="Assets\Install\samples\The Glass Menagerie.stbx" />
     <Content Remove="Assets\Install\samples\The Maltese Falcon.stbx" />
     <Content Remove="Assets\Install\samples\The Old Man and the Sea.stbx" />
+    <Content Remove="Assets\License.txt" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="Assets\Install\Bibliog.txt" />
@@ -139,7 +141,23 @@
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<IncludeSymbols>True</IncludeSymbols>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+		<Title>StoryCADLib</Title>
+		<Company>StoryBuilder Foundation</Company>
+		<Description>API for interacting with StoryCAD Outlines.</Description>
+		<Copyright>https://github.com/storybuilder-org/StoryCAD</Copyright>
+		<PackageProjectUrl>https://github.com/storybuilder-org/StoryCAD</PackageProjectUrl>
+		<PackageIcon>Icon.png</PackageIcon>
+		<RepositoryUrl>https://github.com/storybuilder-org/StoryCAD</RepositoryUrl>
+		<PackageLicenseFile>License.txt</PackageLicenseFile>
+		<PackageTags>StoryCAD, StoryBuilder, STBX, Writing Tools, API,</PackageTags>
 	</PropertyGroup>
+  
+	<ItemGroup>
+	  <None Include="Assets\Icon.png">
+	    <Pack>True</Pack>
+	    <PackagePath>\</PackagePath>
+	  </None>
+	</ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\NRtfTree\NRtfTree.csproj" />
   </ItemGroup>
@@ -178,6 +196,10 @@
     <Page Update="Collaborator\Views\WorkflowShell.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <None Update="Assets\License.txt">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
     <None Update="NLog.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
