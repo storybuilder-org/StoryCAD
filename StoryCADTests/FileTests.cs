@@ -35,11 +35,10 @@ public class FileTests
     {
         OutlineViewModel OutlineVM = Ioc.Default.GetRequiredService<OutlineViewModel>();
 
-
         //Get ShellVM and clear the StoryModel
         StoryModel storyModel = new();
 
-        OutlineVM.StoryModelFile = Path.Combine(Ioc.Default.GetRequiredService<AppState>().RootDirectory, "TestProject.stbx");
+        OutlineVM.StoryModelFile = Path.Combine(App.ResultsDir, "TestProject.stbx");
         
 		string name = Path.GetFileNameWithoutExtension(OutlineVM.StoryModelFile);
         OverviewModel overview = new(name, storyModel, null)
@@ -69,9 +68,10 @@ public class FileTests
 
         //Because we have created a file in this way we must populate ProjectFolder and ProjectFile.
         string dir = Path.GetDirectoryName(OutlineVM.StoryModelFile);
-		if (Directory.Exists(dir))
-			Directory.Delete(dir,true);
-        Directory.CreateDirectory((Path.GetDirectoryName(OutlineVM.StoryModelFile)));
+		if (File.Exists(OutlineVM.StoryModelFile))
+        {
+			File.Delete(OutlineVM.StoryModelFile);
+        }
 
 		//Write file.
 		StoryIO _storyIO = Ioc.Default.GetRequiredService<StoryIO>();

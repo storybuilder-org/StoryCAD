@@ -56,12 +56,8 @@ public partial class App
     {
         CheckForOtherInstances(); //Check other instances aren't already open.
  
-        ServiceLocator.Initialize();
-        
-        // Build the service provider
-        var serviceProvider = ServiceLocator.Services.BuildServiceProvider();
-        // Configure the default IOC container
-        Ioc.Default.ConfigureServices(serviceProvider);
+        //Set up IOC and the services.
+        BootStrapper.Initialise(false);
 
         string path = Path.Combine(Package.Current.InstalledLocation.Path, ".env");
         DotEnvOptions options = new(false, new[] { path });
@@ -76,7 +72,7 @@ public partial class App
         InitializeComponent();
 
         // Make sure ToolsData is loaded by forcing instantiation
-        serviceProvider.GetRequiredService<ToolsData>();
+        Ioc.Default.GetRequiredService<ToolsData>();
 
         _log = Ioc.Default.GetService<LogService>();
         Current.UnhandledException += OnUnhandledException;

@@ -343,7 +343,7 @@ public class ShellViewModel : ObservableRecipient
     public static void ShowChange()
     {
         StoryModel Model = Ioc.Default.GetRequiredService<OutlineViewModel>().StoryModel;
-        if (Ioc.Default.GetRequiredService<AppState>().StoryCADTestsMode) { return; }
+        if (Ioc.Default.GetRequiredService<AppState>().Headless) { return; }
         if (Model.Changed) { return; }
         Model.Changed = true;
         ShellInstance.ChangeStatusColor = Colors.Red;
@@ -1070,7 +1070,7 @@ public class ShellViewModel : ObservableRecipient
     private void StatusMessageReceived(StatusChangedMessage statusMessage)
     {
         //Ignore status messages inside tests
-        if (State.StoryCADTestsMode) { return; }
+        if (State.Headless) { return; }
 
         if (_statusTimer.IsEnabled) { _statusTimer.Stop(); } //Stops a timer if one is already running
 
@@ -1420,7 +1420,7 @@ public class ShellViewModel : ObservableRecipient
         OutlineManager.StoryModel = new StoryModel();
 
         //Skip status timer initialization in Tests.
-        if (!State.StoryCADTestsMode)
+        if (!State.Headless)
         {
             _statusTimer = new DispatcherTimer();
             _statusTimer.Tick += statusTimer_Tick;

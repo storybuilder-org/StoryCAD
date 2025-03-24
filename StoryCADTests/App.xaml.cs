@@ -1,15 +1,11 @@
 ﻿using System;
-using System.Drawing.Drawing2D;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml;
-using Microsoft.VisualStudio.TestTools.UnitTesting; //.AppContainer;
+//.AppContainer;
 using StoryCAD.Models;
 using StoryCAD.Services.Logging;
-using UnhandledExceptionEventArgs = Microsoft.UI.Xaml.UnhandledExceptionEventArgs;
 using System.IO;
-using Microsoft.VisualStudio.TestTools.UnitTesting.AppContainer;
 using StoryCAD.DAL;
-using StoryCAD.Services;
 
 namespace StoryCADTests;
 
@@ -35,7 +31,6 @@ public partial class App : Application
         InitializeComponent();
 
         _log = Ioc.Default.GetService<LogService>();
-        Current.UnhandledException += OnUnhandledException;   //TODO: Does the unhandled exception handler belong in the test project?
     }
 
     /// <summary>
@@ -53,28 +48,7 @@ public partial class App : Application
         string pathMsg = string.Format("Configuration data location = " + State.RootDirectory);
         _log.Log(LogLevel.Info, pathMsg);
 
-		//Microsoft.VisualStudio.TestPlatform.TestExecutor.UnitTestClient.CreateDefaultUI();
-		//Window = new MainWindow();
-		// Ensure the current window is active
-		//Window.Activate();
-		//UITestMethodAttribute.DispatcherQueue = Window.DispatcherQueue;
-
-
 		// Replace back with e.Arguments when https://github.com/microsoft/microsoft-ui-xaml/issues/3368 is fixed
 		Microsoft.VisualStudio.TestPlatform.TestExecutor.UnitTestClient.Run(Environment.CommandLine);
     }
-
-    private void OnUnhandledException(object sender, UnhandledExceptionEventArgs e)
-    {
-        _log.LogException(LogLevel.Fatal, e.Exception, e.Message);
-        _log.Flush();
-        AbortApp();
-    }
-
-    /// <summary>
-    /// Closes the app
-    /// </summary>
-    private static void AbortApp() { Current.Exit(); }
-
-    public static Window Window;
 }
