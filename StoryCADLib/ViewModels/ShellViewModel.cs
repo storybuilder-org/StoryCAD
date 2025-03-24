@@ -177,6 +177,7 @@ public class ShellViewModel : ObservableRecipient
         get => _dataSource;
         set
         {
+            //TODO: This should be using the serialisationLock but using one here appears to run twice 
             OutlineManager._canExecuteCommands = false;
             SetProperty(ref _dataSource, value);
             OutlineManager._canExecuteCommands = true;
