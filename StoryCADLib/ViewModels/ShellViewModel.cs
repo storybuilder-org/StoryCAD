@@ -470,10 +470,13 @@ public class ShellViewModel : ObservableRecipient
 
     public void ShowHomePage()
     {
-        Logger.Log(LogLevel.Info, "ShowHomePage");
+        if (!State.Headless)
+        {
+            Logger.Log(LogLevel.Info, "ShowHomePage");
 
-        NavigationService nav = Ioc.Default.GetRequiredService<NavigationService>();
-        nav.NavigateTo(SplitViewFrame, HomePage);
+            NavigationService nav = Ioc.Default.GetRequiredService<NavigationService>();
+            nav.NavigateTo(SplitViewFrame, HomePage);
+        }
     }
     private void TogglePane()
     {

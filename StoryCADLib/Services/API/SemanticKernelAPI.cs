@@ -259,6 +259,7 @@ public class SemanticKernelApi
         {
             // Get the property info by name.
             PropertyInfo property = element.GetType().GetProperty(propertyName);
+            
             if (property == null)
                 throw new ArgumentException($"Property '{propertyName}' not found on type {element.GetType().FullName}.");
 
@@ -274,6 +275,11 @@ public class SemanticKernelApi
             if (value != null && !property.PropertyType.IsAssignableFrom(value.GetType()))
             {
                 value = Convert.ChangeType(value, property.PropertyType);
+            }
+
+            if (property.PropertyType == typeof(Guid) && typeof(string) == value.GetType())
+            {
+                value = Guid.Parse(value.ToString());
             }
 
             // Update the property value.

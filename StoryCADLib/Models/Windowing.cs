@@ -115,6 +115,8 @@ public partial class Windowing : ObservableRecipient
     /// </summary>
     public void UpdateWindowTitle()
     {
+        if (Ioc.Default.GetRequiredService<AppState>().Headless) { return; }
+
         string BaseTitle = "StoryCAD ";
 
         //Developer Build title warning
