@@ -17,6 +17,8 @@ using StoryCAD.Services.Dialogs;
 using StoryCAD.Services.Ratings;
 using StoryCAD.ViewModels.SubViewModels;
 using StoryCAD.ViewModels.Tools;
+using StoryCAD.Services.Backup;
+using StoryCAD.Services.Locking;
 
 namespace StoryCAD.Views;
 
@@ -78,15 +80,19 @@ public sealed partial class Shell
 
         if (!await Ioc.Default.GetRequiredService<WebViewModel>().CheckWebViewState())
         {
-            OutlineVM._canExecuteCommands = false;
-            await Ioc.Default.GetRequiredService<WebViewModel>().ShowWebViewDialog();
-            OutlineVM._canExecuteCommands = true;
-        }
+            var autoSaveService = Ioc.Default.GetRequiredService<AutoSaveService>();
+            var backupService = Ioc.Default.GetRequiredService<BackupService>();
+            var logService = Ioc.Default.GetRequiredService<LogService>();
+            using (var serializationLock = new SerializationLock(autoSaveService, backupService, logService))
+            {
+                await Ioc.Default.GetRequiredService<WebViewModel>().ShowWebViewDialog();
+            }
 
+        }
         //Shows changelog if the app has been updated since the last launch.
         if (Ioc.Default.GetRequiredService<AppState>().LoadedWithVersionChange)
         {
-			Ioc.Default.GetService<PreferenceService>()!.Model.HideRatingPrompt = false;  //rating prompt reenabled on updates.
+			Ioc.Default.GetService<PreferenceService>()!.Model.HideRatingPrompt = false;  //rating prompt re-enabled on updates.
 			await new Changelog().ShowChangeLog();
         }
 

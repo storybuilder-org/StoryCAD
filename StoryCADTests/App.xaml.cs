@@ -53,11 +53,11 @@ public partial class App : Application
         string pathMsg = string.Format("Configuration data location = " + State.RootDirectory);
         _log.Log(LogLevel.Info, pathMsg);
 
-		Microsoft.VisualStudio.TestPlatform.TestExecutor.UnitTestClient.CreateDefaultUI();
-		Window = new MainWindow();
+		//Microsoft.VisualStudio.TestPlatform.TestExecutor.UnitTestClient.CreateDefaultUI();
+		//Window = new MainWindow();
 		// Ensure the current window is active
-		Window.Activate();
-		UITestMethodAttribute.DispatcherQueue = Window.DispatcherQueue;
+		//Window.Activate();
+		//UITestMethodAttribute.DispatcherQueue = Window.DispatcherQueue;
 
 
 		// Replace back with e.Arguments when https://github.com/microsoft/microsoft-ui-xaml/issues/3368 is fixed

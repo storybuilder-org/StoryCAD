@@ -420,7 +420,7 @@ public class StoryNodeItem : INotifyPropertyChanged
 
     #endregion
 
-	public void Delete(StoryViewType storyView)
+	public bool Delete(StoryViewType storyView, StoryNodeItem sourceCollection)
     {
         _logger.Log(LogLevel.Trace, $"Starting to delete element {Name} ({Uuid}) from {storyView}");
         //Sanity check
@@ -428,33 +428,33 @@ public class StoryNodeItem : INotifyPropertyChanged
         {
             Ioc.Default.GetRequiredService<ShellViewModel>().ShowMessage(LogLevel.Warn, "This element can't be deleted.",false);
             _logger.Log(LogLevel.Info, "User tried to delete Root or Trashcan node.");
+            return false;
         }
 
-        //Set source collection to either narrative view or explorer view, we use the first item [0] so we don't delete from trash.
-        StoryNodeItem _sourceCollection;
-        if (storyView == StoryViewType.ExplorerView) { _sourceCollection = _outlineVM.StoryModel.ExplorerView[0]; }
-        else { _sourceCollection = _outlineVM.StoryModel.NarratorView[0]; }
-
-        if (_sourceCollection.Children.Contains(this))
+        if (sourceCollection.Children.Contains(this))
         {
             //Delete node from selected view.
             _logger.Log(LogLevel.Info, "Node found in root, deleting it.");
-            _sourceCollection.Children.Remove(this);
+            sourceCollection.Children.Remove(this);
             TrashItem(storyView); //Add to appropriate trash node.
+            return true;
         }
-        else
+
+        //Node not found in root, recurse through tree.
+        foreach (StoryNodeItem childItem in sourceCollection.Children)
         {
-            foreach (StoryNodeItem _childItem in _sourceCollection.Children)
-            {
-                _logger.Log(LogLevel.Info, "Recursing tree to find node.");
-                RecursiveDelete(_childItem, storyView);
-            }
+            _logger.Log(LogLevel.Info, "Recursing tree to find node.");
+            RecursiveDelete(childItem, storyView);
+            return true;
         }
+
+        return false;
     }
 
     private void RecursiveDelete(StoryNodeItem parentItem, StoryViewType storyView)
     {
-        _logger.Log(LogLevel.Info, $"Starting recursive delete instance for parent {parentItem.Name} ({parentItem.Uuid}) in {storyView}");
+        _logger.Log(LogLevel.Info, 
+            $"Starting recursive delete instance for {parentItem.Name} ({parentItem.Uuid}) in {storyView}");
         try
         {
             if (parentItem.Children.Contains(this)) //Checks parent contains child we are looking.

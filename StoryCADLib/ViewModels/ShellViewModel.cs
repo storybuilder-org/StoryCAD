@@ -27,6 +27,7 @@ using Application = Microsoft.UI.Xaml.Application;
 using StoryCAD.Collaborator.ViewModels;
 using StoryCAD.Services.Outline;
 using StoryCAD.ViewModels.SubViewModels;
+using StoryCAD.Services.Locking;
 
 namespace StoryCAD.ViewModels;
 
@@ -52,6 +53,7 @@ public class ShellViewModel : ObservableRecipient
     private readonly LogService Logger;
     private readonly SearchService Search;
     public readonly AutoSaveService _autoSaveService;
+    public readonly BackupService _BackupService;
     private readonly Windowing Window;
     private readonly AppState State;
     private readonly PreferenceService Preferences;
@@ -175,6 +177,7 @@ public class ShellViewModel : ObservableRecipient
         get => _dataSource;
         set
         {
+            //TODO: This should be using the serialisationLock but using one here appears to run twice 
             OutlineManager._canExecuteCommands = false;
             SetProperty(ref _dataSource, value);
             OutlineManager._canExecuteCommands = true;
@@ -1389,17 +1392,6 @@ public class ShellViewModel : ObservableRecipient
                 break;
         }
     }
-
-    internal void LockCommands()
-    {
-        OutlineManager._canExecuteCommands = false;
-    }
-
-    internal void UnlockCommands()
-    {
-        OutlineManager._canExecuteCommands = false;
-    }
-
     #endregion
 
     #region Constructor(s)
@@ -1410,6 +1402,7 @@ public class ShellViewModel : ObservableRecipient
         Logger = Ioc.Default.GetRequiredService<LogService>();
         Search = Ioc.Default.GetRequiredService<SearchService>();
         _autoSaveService = Ioc.Default.GetRequiredService<AutoSaveService>();
+        _BackupService = Ioc.Default.GetRequiredService<BackupService>();
         Window = Ioc.Default.GetRequiredService<Windowing>();
         State = Ioc.Default.GetRequiredService<AppState>();
         Scrivener = Ioc.Default.GetRequiredService<ScrivenerIo>();
@@ -1472,15 +1465,17 @@ public class ShellViewModel : ObservableRecipient
         MoveRightCommand = new RelayCommand(MoveTreeViewItemRight, () => OutlineManager._canExecuteCommands);
         MoveUpCommand = new RelayCommand(MoveTreeViewItemUp, () => OutlineManager._canExecuteCommands);
         MoveDownCommand = new RelayCommand(MoveTreeViewItemDown, () => OutlineManager._canExecuteCommands);
+
         // Add StoryElement commands
-        AddFolderCommand = new RelayCommand(OutlineManager.AddFolder, () => OutlineManager._canExecuteCommands);
-        AddSectionCommand = new RelayCommand(OutlineManager.AddSection, () => OutlineManager._canExecuteCommands);
-        AddProblemCommand = new RelayCommand(OutlineManager.AddProblem, () => OutlineManager._canExecuteCommands);
-        AddCharacterCommand = new RelayCommand(OutlineManager.AddCharacter, () => OutlineManager._canExecuteCommands);
-        AddWebCommand = new RelayCommand(OutlineManager.AddWeb, () => OutlineManager._canExecuteCommands);
-        AddNotesCommand = new RelayCommand(OutlineManager.AddNotes, () => OutlineManager._canExecuteCommands);
-        AddSettingCommand = new RelayCommand(OutlineManager.AddSetting, () => OutlineManager._canExecuteCommands);
-        AddSceneCommand = new RelayCommand(OutlineManager.AddScene, () => OutlineManager._canExecuteCommands);
+        AddFolderCommand = new RelayCommand(() => OutlineManager.AddStoryElement(StoryItemType.Folder), () => OutlineManager._canExecuteCommands);
+        AddSectionCommand = new RelayCommand(() => OutlineManager.AddStoryElement(StoryItemType.Section), () => OutlineManager._canExecuteCommands);
+        AddProblemCommand = new RelayCommand(() => OutlineManager.AddStoryElement(StoryItemType.Problem), () => OutlineManager._canExecuteCommands);
+        AddCharacterCommand = new RelayCommand(() => OutlineManager.AddStoryElement(StoryItemType.Character), () => OutlineManager._canExecuteCommands);
+        AddWebCommand = new RelayCommand(() => OutlineManager.AddStoryElement(StoryItemType.Web), () => OutlineManager._canExecuteCommands);
+        AddNotesCommand = new RelayCommand(() => OutlineManager.AddStoryElement(StoryItemType.Notes), () => OutlineManager._canExecuteCommands);
+        AddSettingCommand = new RelayCommand(() => OutlineManager.AddStoryElement(StoryItemType.Setting), () => OutlineManager._canExecuteCommands);
+        AddSceneCommand = new RelayCommand(() => OutlineManager.AddStoryElement(StoryItemType.Scene), () => OutlineManager._canExecuteCommands);
+
         // Remove Story Element command (move to trash)
         RemoveStoryElementCommand = new RelayCommand(OutlineManager.RemoveStoryElement, () => OutlineManager._canExecuteCommands);
         RestoreStoryElementCommand = new RelayCommand(OutlineManager.RestoreStoryElement, () => OutlineManager._canExecuteCommands);

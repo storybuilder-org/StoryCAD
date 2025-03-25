@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using StoryCAD.Services.Locking;
 using StoryCAD.ViewModels.SubViewModels;
 
 namespace StoryCAD.Services.Backup
@@ -21,6 +22,10 @@ namespace StoryCAD.Services.Backup
 
         private BackgroundWorker autoSaveWorker;
         private System.Timers.Timer autoSaveTimer;
+        /// <summary>
+        /// Returns the running status of the AutoSave service.
+        /// </summary>
+        public bool IsRunning => autoSaveTimer.Enabled;
 
         #region Constructor
 
@@ -99,33 +104,40 @@ namespace StoryCAD.Services.Backup
         private Task AutoSaveProject()
         {
             _outlineVM = Ioc.Default.GetService<OutlineViewModel>();
-            try
+            var backupService = Ioc.Default.GetRequiredService<BackupService>();
+            var logService = Ioc.Default.GetRequiredService<LogService>();
+
+            using (var serializationLock = new SerializationLock(this, backupService, _logger))
             {
-                if (autoSaveWorker.CancellationPending || !Preferences.Model.AutoSave ||
-                    _outlineVM.StoryModel.StoryElements.Count == 0)
+                try
                 {
-                    return Task.CompletedTask;
+                    if (autoSaveWorker.CancellationPending || !Preferences.Model.AutoSave ||
+                        _outlineVM.StoryModel.StoryElements.Count == 0)
+                    {
+                        return Task.CompletedTask;
+                    }
+
+                    if (_outlineVM.StoryModel.Changed)
+                    {
+                        _logger.Log(LogLevel.Info, "Initiating AutoSave backup.");
+                        // Save and write the model on the UI thread
+                        Window.GlobalDispatcher.TryEnqueue(async () => await _outlineVM.SaveFile(true));
+                    }
+                }
+                catch (Exception _ex)
+                {
+                    //Show failed message.
+                    Window.GlobalDispatcher.TryEnqueue(() =>
+                    {
+                        Ioc.Default.GetRequiredService<ShellViewModel>().ShowMessage(LogLevel.Warn,
+                            "Making an AutoSave failed.", false);
+                    });
+                    _logger.LogException(LogLevel.Error, _ex,
+                        $"Error saving file in AutoSaveService.AutoSaveProject() {_ex.Message}");
                 }
 
-                if (_outlineVM.StoryModel.Changed)
-                {
-                    _logger.Log(LogLevel.Info, "Initiating AutoSave backup.");
-                    // Save and write the model on the UI thread
-                    Window.GlobalDispatcher.TryEnqueue(async () => await _outlineVM.SaveFile(true));
-                }
+                return Task.CompletedTask;
             }
-            catch (Exception _ex)
-            {
-                //Show failed message.
-                Window.GlobalDispatcher.TryEnqueue(() =>
-                {
-                    Ioc.Default.GetRequiredService<ShellViewModel>().ShowMessage(LogLevel.Warn,
-                        "Making an AutoSave failed.", false);
-                });
-                _logger.LogException(LogLevel.Error, _ex,
-                    $"Error saving file in AutoSaveService.AutoSaveProject() {_ex.Message}");
-            }
-            return Task.CompletedTask;
         }
 
         #endregion

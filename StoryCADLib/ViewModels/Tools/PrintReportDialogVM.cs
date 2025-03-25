@@ -8,6 +8,8 @@ using StoryCAD.Services.Reports;
 using Windows.Graphics.Printing;
 using StoryCAD.Services.Dialogs.Tools;
 using StoryCAD.ViewModels.SubViewModels;
+using StoryCAD.Services.Backup;
+using StoryCAD.Services.Locking;
 
 namespace StoryCAD.ViewModels.Tools;
 
@@ -165,7 +167,10 @@ public class PrintReportDialogVM : ObservableRecipient
     public async Task OpenPrintReportDialog()
     {
         ShellViewModel ShellVM = Ioc.Default.GetRequiredService<ShellViewModel>();
-        if (OutlineVM._canExecuteCommands)
+        var autoSaveService = Ioc.Default.GetRequiredService<AutoSaveService>();
+        var backupService = Ioc.Default.GetRequiredService<BackupService>();
+        var logService = Ioc.Default.GetRequiredService<LogService>();
+        using (var serializationLock = new SerializationLock(autoSaveService, backupService, logService))
         {
             if (Ioc.Default.GetRequiredService<ShellViewModel>().DataSource == null)
             {
@@ -173,8 +178,7 @@ public class PrintReportDialogVM : ObservableRecipient
                 return;
             }
 
-            OutlineVM._canExecuteCommands = false;
-            ShellVM.ShowMessage(LogLevel.Info, "Generate Print Reports executing",  true);
+            ShellVM.ShowMessage(LogLevel.Info, "Generate Print Reports executing", true);
 
             ShellVM.SaveModel();
 
@@ -185,8 +189,6 @@ public class PrintReportDialogVM : ObservableRecipient
                 Content = new PrintReportsDialog()
             };
             await Ioc.Default.GetService<Windowing>().ShowContentDialog(Dialog);
-            OutlineVM._canExecuteCommands = true;
-
         }
     }
 

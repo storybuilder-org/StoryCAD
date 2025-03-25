@@ -21,6 +21,6 @@ class NodeItemTests
 		ProblemModel problem = new("Test", model, overview.Node);
 
         OutlineVM.StoryModel = model;
-		problem.Node.Delete(StoryViewType.ExplorerView);
+		problem.Node.Delete(StoryViewType.ExplorerView, overview.Node);
 	}
 }

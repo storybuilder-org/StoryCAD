@@ -8,6 +8,9 @@
 	<RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
     <Platforms>AnyCPU;x86;x64;arm64</Platforms>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
+	  <Version>1.0.1</Version>
+	  <FileVersion>1.0.1.0</FileVersion>
+	  <AssemblyVersion>1.0.1.0</AssemblyVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
     <NoWarn>1701;1702;CA1416;CS0618</NoWarn>
@@ -25,6 +28,7 @@
     <Content Remove="Assets\Install\samples\The Glass Menagerie.stbx" />
     <Content Remove="Assets\Install\samples\The Maltese Falcon.stbx" />
     <Content Remove="Assets\Install\samples\The Old Man and the Sea.stbx" />
+    <Content Remove="Assets\License.txt" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="Assets\Install\Bibliog.txt" />
@@ -114,14 +118,15 @@
     <PackageReference Include="Elmah.Io.NLog" Version="5.3.55" />
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.2792.45" />
     <PackageReference Include="MySql.Data" Version="9.2.0" /> 
-    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.6.250205002" />
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.6.250228001" />
 	<PackageReference Include="NLog" Version="5.4.0" />
 	<PackageReference Include="NLog.Extensions.Logging" Version="5.4.0" />
+	<PackageReference Include="NRTFTree-Async" Version="1.0.0" />
 	<PackageReference Include="Octokit" Version="14.0.0" />
     <PackageReference Include="WinUIEx" Version="2.5.1" />
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.1742" />
-    <PackageReference Include="Microsoft.SemanticKernel" Version="1.40.1" />
-    <PackageReference Include="Microsoft.SemanticKernel.Abstractions" Version="1.40.1" />
+    <PackageReference Include="Microsoft.SemanticKernel" Version="1.41.0" />
+    <PackageReference Include="Microsoft.SemanticKernel.Abstractions" Version="1.41.0" />
     <PackageReference Include="Microsoft.SemanticKernel.Planners.OpenAI" Version="1.16.0-preview" />
   </ItemGroup>
 
@@ -136,10 +141,26 @@
 	<PropertyGroup>
 		<WindowsSdkPackageVersion>10.0.22621.38</WindowsSdkPackageVersion>
 		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+		<IncludeSymbols>True</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+		<Title>StoryCADLib</Title>
+		<Company>StoryBuilder Foundation</Company>
+		<Description>API for interacting with StoryCAD Outlines.</Description>
+		<Copyright>https://github.com/storybuilder-org/StoryCAD</Copyright>
+		<PackageProjectUrl>https://github.com/storybuilder-org/StoryCAD</PackageProjectUrl>
+		<PackageIcon>Icon.png</PackageIcon>
+		<RepositoryUrl>https://github.com/storybuilder-org/StoryCAD</RepositoryUrl>
+		<PackageLicenseFile>License.txt</PackageLicenseFile>
+		<PackageTags>StoryCAD, StoryBuilder, STBX, Writing Tools, API,</PackageTags>
 	</PropertyGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\NRtfTree\NRtfTree.csproj" />
-  </ItemGroup>
+  
+	<ItemGroup>
+	  <None Include="Assets\Icon.png">
+	    <Pack>True</Pack>
+	    <PackagePath>\</PackagePath>
+	  </None>
+	</ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Update="Assets\Install\samples\A Doll%27s House.stbx">
@@ -175,6 +196,10 @@
     <Page Update="Collaborator\Views\WorkflowShell.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <None Update="License.txt">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
     <None Update="NLog.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

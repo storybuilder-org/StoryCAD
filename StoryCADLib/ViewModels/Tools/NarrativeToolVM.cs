@@ -1,7 +1,9 @@
 ﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using StoryCAD.Services.Backup;
 using StoryCAD.Services.Dialogs.Tools;
+using StoryCAD.Services.Locking;
 using StoryCAD.ViewModels.SubViewModels;
 
 namespace StoryCAD.ViewModels.Tools;
@@ -68,25 +70,29 @@ public class NarrativeToolVM: ObservableRecipient
     /// </summary>
     public async Task OpenNarrativeTool()
     {
-        if (_shellVM.OutlineManager.VerifyToolUse(false, false) && outlineVM._canExecuteCommands)
+        if (_shellVM.OutlineManager.VerifyToolUse(false, false))
         {
-            outlineVM._canExecuteCommands = false;
-            try
-            {
-                ContentDialog _dialog = new()
-                {
-                    Title = "Narrative Editor",
-                    PrimaryButtonText = "Done",
-                    Content = new NarrativeTool()
-                };
-                await Ioc.Default.GetService<Windowing>().ShowContentDialog(_dialog);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogException(LogLevel.Error, ex, "Error in OpenNarrativeTool()");
-            }
+            var autoSaveService = Ioc.Default.GetRequiredService<AutoSaveService>();
+            var backupService = Ioc.Default.GetRequiredService<BackupService>();
 
-            outlineVM._canExecuteCommands = true;
+            using (var serializationLock = new SerializationLock(autoSaveService, backupService, _logger))
+            {
+                try
+                {
+                    ContentDialog _dialog = new()
+                    {
+                        Title = "Narrative Editor",
+                        PrimaryButtonText = "Done",
+                        Content = new NarrativeTool()
+                    };
+                    await Ioc.Default.GetService<Windowing>().ShowContentDialog(_dialog);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogException(LogLevel.Error, ex, "Error in OpenNarrativeTool()");
+                }
+
+            }
         }
     }
 
@@ -106,7 +112,7 @@ public class NarrativeToolVM: ObservableRecipient
 
                 if (IsNarratorSelected)
                 {
-                    SelectedNode.Delete(StoryViewType.NarratorView);
+                    SelectedNode.Delete(StoryViewType.NarratorView, Ioc.Default.GetRequiredService<OutlineViewModel>().StoryModel.NarratorView[0]);
                     Message = $"Deleted {SelectedNode}";
                 }
                 else { Message = "You can't delete from here!"; }
