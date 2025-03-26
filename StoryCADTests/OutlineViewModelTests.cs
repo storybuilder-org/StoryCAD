@@ -84,7 +84,7 @@ namespace StoryCADTests
         public async Task TestCloseFile()
         {
             //Check we have the file loaded
-            await outlineVM.OpenFile(Path.Combine(App.InputDir, "Full.stbx")); 
+            await outlineVM.OpenFile(Path.Combine(App.InputDir, "Full2.stbx")); 
             Assert.IsTrue(outlineVM.StoryModel.StoryElements.Count != 0, "Story not loaded.");
             await outlineVM.CloseFile();
             Assert.IsTrue(outlineVM.StoryModel.StoryElements.Count == 0, "Story not closed.");

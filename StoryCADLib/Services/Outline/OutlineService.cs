@@ -373,7 +373,7 @@ public class OutlineService
             throw new ArgumentNullException(nameof(castMember));
         }
 
-        if (source.ElementType != StoryItemType.Setting)
+        if (source.ElementType != StoryItemType.Scene)
         {
             throw new InvalidOperationException("Source must be a scene.");
         }
