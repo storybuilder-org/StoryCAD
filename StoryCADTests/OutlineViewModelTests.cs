@@ -5,7 +5,13 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.DependencyInjection;
+using Microsoft.VisualStudio.TestTools.UnitTesting.AppContainer;
+using StoryCAD.Models.Tools;
+using StoryCAD.Services.Logging;
+using StoryCAD.Services.Outline;
 using StoryCAD.ViewModels;
+using StoryCAD.ViewModels.Tools;
+using StoryCAD.Models;
 
 namespace StoryCADTests
 {
@@ -13,6 +19,7 @@ namespace StoryCADTests
     public class OutlineViewModelTests
     {
         private OutlineViewModel outlineVM;
+        private OutlineService outlineService;
 
         [TestInitialize]
         public void Setup()
@@ -20,6 +27,7 @@ namespace StoryCADTests
             // Assume IoC is properly configured for tests.
             // If necessary, you can initialize or mock dependencies here.
             outlineVM = Ioc.Default.GetRequiredService<OutlineViewModel>();
+            outlineService = Ioc.Default.GetRequiredService<OutlineService>();
         }
 
         // Test for UnifiedNewFile method
@@ -133,10 +141,17 @@ namespace StoryCADTests
         }
 
         [TestMethod]
-        public void TestDramaticSituationsTool()
+        public async Task TestDramaticSituationsTool()
         {
-            // TODO: Invoke outlineVM.DramaticSituationsTool and check for proper handling.
-            Assert.Inconclusive("Test for DramaticSituationsTool not implemented.");
+            var Shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+            outlineVM.StoryModel = await outlineService.CreateModel("Test", "StoryBuilder", 0);
+            outlineVM.StoryModelFile = Path.Combine(App.ResultsDir, "Dramatic.stbx");
+            Shell.SetCurrentView(StoryViewType.ExplorerView);
+            //await outlineVM.OpenFile(Path.Combine(App.InputDir, "Full3.stbx"));
+            Shell.RightTappedNode = outlineVM.StoryModel.StoryElements[0].Node;
+            Ioc.Default.GetRequiredService<DramaticSituationsViewModel>().SituationName = "Abduction";
+            await outlineVM.DramaticSituationsTool();
+            Assert.IsTrue(outlineVM.StoryModel.StoryElements.Count > 2, "Dramatic situation not added.");
         }
 
         [TestMethod]

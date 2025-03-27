@@ -166,11 +166,17 @@ public partial class Windowing : ObservableRecipient
     /// <param name="force">Force show content dialog, will close currently open dialog if one
     /// is already open
     /// </param>
-    /// <returns>A ContentDialogResult enum value.</returns>
+    /// <remarks>This will return primary if running under headless mode</remarks>
+    /// <returns>A ContentDialogResult value</returns>
     public async Task<ContentDialogResult> ShowContentDialog(ContentDialog Dialog, bool force=false)
     {
 	    LogService logger = Ioc.Default.GetRequiredService<LogService>();
-		logger.Log(LogLevel.Info, $"Requested to show dialog {Dialog.Title}");
+
+        // Don't show dialog if headless
+        AppState state = Ioc.Default.GetRequiredService<AppState>();
+        if (state.Headless) { return ContentDialogResult.Primary; }
+
+        logger.Log(LogLevel.Info, $"Requested to show dialog {Dialog.Title}");
 
 		//force close any other dialog if one is open
 		//(if force is enabled)

@@ -28,24 +28,23 @@ public class LockTest
         // Ensure a known initial state.
         // Assume commands are enabled and both services are running.
         Ioc.Default.GetRequiredService<PreferenceService>().Model.AutoSaveInterval = 1;
-        outlineVm._canExecuteCommands = true;
         autoSaveService.StartAutoSave();
         backupService.StartTimedBackup();
 
         // Pre-check initial state.
-        Assert.IsTrue(outlineVm._canExecuteCommands, "Pre-condition: Commands should be enabled.");
+        Assert.IsTrue(SerializationLock.IsLocked(), "Pre-condition: Commands should be enabled.");
 
         // Act: Create the SerializationLock (which disables commands and stops background services).
         using (var serializationLock = new SerializationLock(autoSaveService, backupService, logger))
         {
             // Within the lock, commands should be disabled and both services stopped.
-            Assert.IsFalse(outlineVm._canExecuteCommands, "During lock: Commands should be disabled.");
+            Assert.IsFalse(SerializationLock.IsLocked(), "During lock: Commands should be disabled.");
             Assert.IsFalse(autoSaveService.IsRunning, "During lock: AutoSave should be stopped.");
             Assert.IsFalse(backupService.IsRunning, "During lock: BackupService should be stopped.");
             System.Threading.Thread.Sleep(10000); 
         }
 
         // Assert: After disposing the lock, commands and services should be restored.
-        Assert.IsTrue(outlineVm._canExecuteCommands, "After disposal: Commands should be re-enabled.");
+        Assert.IsTrue(SerializationLock.IsLocked(), "After disposal: Commands should be re-enabled.");
     }
 }

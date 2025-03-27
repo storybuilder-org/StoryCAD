@@ -93,11 +93,6 @@ public class OutlineViewModel : ObservableRecipient
     public StoryModel StoryModel = new();
 
     /// <summary>
-    /// Lock that controls the UI, Autosave, Backup.
-    /// </summary>
-    public bool _canExecuteCommands;
-
-    /// <summary>
     /// Opens a file picker to let the user chose a .stbx file and loads said file
     /// If fromPath is specified then the picker is skipped.
     /// </summary>
@@ -207,8 +202,7 @@ public class OutlineViewModel : ObservableRecipient
                 shellVm._autoSaveService.StartAutoSave();
             }
 
-            string msg = $"Opened project {StoryModelFile}";
-            logger.Log(LogLevel.Info, msg);
+            logger.Log(LogLevel.Info, $"Opened project {StoryModelFile}");
         }
         catch (Exception ex)
         {
@@ -789,15 +783,19 @@ public class OutlineViewModel : ObservableRecipient
         {
             if (VerifyToolUse(true, true))
             {
-                //Creates and shows dialog
-                ContentDialog dialog = new()
+                ContentDialog? dialog = null;
+                if (!Ioc.Default.GetRequiredService<AppState>().Headless)
                 {
-                    Title = "Dramatic situations",
-                    PrimaryButtonText = "Copy as problem",
-                    SecondaryButtonText = "Copy as scene",
-                    CloseButtonText = "Cancel",
-                    Content = new DramaticSituationsDialog()
-                };
+                    //Creates and shows dialog
+                    dialog = new()
+                    {
+                        Title = "Dramatic situations",
+                        PrimaryButtonText = "Copy as problem",
+                        SecondaryButtonText = "Copy as scene",
+                        CloseButtonText = "Cancel",
+                        Content = new DramaticSituationsDialog()
+                    };
+                }
                 ContentDialogResult result = await window.ShowContentDialog(dialog);
 
                 DramaticSituationModel situationModel =

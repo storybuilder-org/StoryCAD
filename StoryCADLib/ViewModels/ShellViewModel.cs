@@ -177,10 +177,8 @@ public class ShellViewModel : ObservableRecipient
         get => _dataSource;
         set
         {
-            //TODO: This should be using the serialisationLock but using one here appears to run twice 
-            OutlineManager._canExecuteCommands = false;
+            using SerializationLock _lock = new(_autoSaveService, _BackupService, Logger);
             SetProperty(ref _dataSource, value);
-            OutlineManager._canExecuteCommands = true;
         }
     }
 
@@ -578,7 +576,7 @@ public class ShellViewModel : ObservableRecipient
     /// </summary>
     private void LaunchCollaborator()
     {
-        if (OutlineManager._canExecuteCommands)
+        if (SerializationLock.IsLocked())
         {
             if (CurrentNode == null)
             {
@@ -1432,60 +1430,58 @@ public class ShellViewModel : ObservableRecipient
 
         Messenger.Send(new StatusChangedMessage(new("Ready", LogLevel.Info)));
 
-        OutlineManager._canExecuteCommands = true;
-        TogglePaneCommand = new RelayCommand(TogglePane, () => OutlineManager._canExecuteCommands);
-        //OpenUnifiedCommand = new RelayCommand(async () => await OutlineManager.OpenUnifiedMenu(), () => OutlineManager._canExecuteCommands);
-        OpenUnifiedCommand = new AsyncRelayCommand(OutlineManager.OpenUnifiedMenu, canExecute: () => OutlineManager._canExecuteCommands);  
-        CloseUnifiedCommand = new RelayCommand(CloseUnifiedMenu, () => OutlineManager._canExecuteCommands);
-        NarrativeToolCommand = new RelayCommand(async () => await Ioc.Default.GetRequiredService<NarrativeToolVM>().OpenNarrativeTool(), () => OutlineManager._canExecuteCommands);
-        PrintNodeCommand = new RelayCommand(async () => await OutlineManager.PrintCurrentNodeAsync(), () => OutlineManager._canExecuteCommands);
-        OpenFileCommand = new RelayCommand(async () => await OutlineManager.OpenFile(), () => OutlineManager._canExecuteCommands);
-        SaveFileCommand = new RelayCommand(async () => await OutlineManager.SaveFile(), () => OutlineManager._canExecuteCommands);
-        SaveAsCommand = new RelayCommand(async () => OutlineManager.SaveFileAs(), () => OutlineManager._canExecuteCommands);
-        CreateBackupCommand = new RelayCommand(async () => await CreateBackupNow(), () => OutlineManager._canExecuteCommands);
-        CloseCommand = new RelayCommand(async () => await OutlineManager.CloseFile(), () => OutlineManager._canExecuteCommands);
-        ExitCommand = new RelayCommand(async () => await OutlineManager.ExitApp(), () => OutlineManager._canExecuteCommands);
+        TogglePaneCommand = new RelayCommand(TogglePane, SerializationLock.IsLocked);
+        OpenUnifiedCommand = new AsyncRelayCommand(OutlineManager.OpenUnifiedMenu, canExecute: SerializationLock.IsLocked);  
+        CloseUnifiedCommand = new RelayCommand(CloseUnifiedMenu, SerializationLock.IsLocked);
+        NarrativeToolCommand = new RelayCommand(async () => await Ioc.Default.GetRequiredService<NarrativeToolVM>().OpenNarrativeTool(), SerializationLock.IsLocked);
+        PrintNodeCommand = new RelayCommand(async () => await OutlineManager.PrintCurrentNodeAsync(), SerializationLock.IsLocked);
+        OpenFileCommand = new RelayCommand(async () => await OutlineManager.OpenFile(), SerializationLock.IsLocked);
+        SaveFileCommand = new RelayCommand(async () => await OutlineManager.SaveFile(), SerializationLock.IsLocked);
+        SaveAsCommand = new RelayCommand(async () => OutlineManager.SaveFileAs(), SerializationLock.IsLocked);
+        CreateBackupCommand = new RelayCommand(async () => await CreateBackupNow(), SerializationLock.IsLocked);
+        CloseCommand = new RelayCommand(async () => await OutlineManager.CloseFile(), SerializationLock.IsLocked);
+        ExitCommand = new RelayCommand(async () => await OutlineManager.ExitApp(), SerializationLock.IsLocked);
 
         // StoryCAD Collaborator
-        CollaboratorCommand = new RelayCommand(LaunchCollaborator, () => OutlineManager._canExecuteCommands);
+        CollaboratorCommand = new RelayCommand(LaunchCollaborator, SerializationLock.IsLocked);
 
         // Tools commands
-        KeyQuestionsCommand = new RelayCommand(async () => await OutlineManager.KeyQuestionsTool(), () => OutlineManager._canExecuteCommands);
-        TopicsCommand = new RelayCommand(async () => await OutlineManager.TopicsTool(), () => OutlineManager._canExecuteCommands);
-        MasterPlotsCommand = new RelayCommand(async () => await OutlineManager.MasterPlotTool(), () => OutlineManager._canExecuteCommands);
-        DramaticSituationsCommand = new RelayCommand(async () => await OutlineManager.DramaticSituationsTool(), () => OutlineManager._canExecuteCommands);
-        StockScenesCommand = new RelayCommand(async () => await OutlineManager.StockScenesTool(), () => OutlineManager._canExecuteCommands);
+        KeyQuestionsCommand = new RelayCommand(async () => await OutlineManager.KeyQuestionsTool(), SerializationLock.IsLocked);
+        TopicsCommand = new RelayCommand(async () => await OutlineManager.TopicsTool(), SerializationLock.IsLocked);
+        MasterPlotsCommand = new RelayCommand(async () => await OutlineManager.MasterPlotTool(), SerializationLock.IsLocked);
+        DramaticSituationsCommand = new RelayCommand(async () => await OutlineManager.DramaticSituationsTool(), SerializationLock.IsLocked);
+        StockScenesCommand = new RelayCommand(async () => await OutlineManager.StockScenesTool(), SerializationLock.IsLocked);
 
-        PreferencesCommand = new RelayCommand(OpenPreferences, () => OutlineManager._canExecuteCommands);
+        PreferencesCommand = new RelayCommand(OpenPreferences, SerializationLock.IsLocked);
 
-        PrintReportsCommand = new RelayCommand(OpenPrintMenu, () => OutlineManager._canExecuteCommands);
-        ScrivenerReportsCommand = new RelayCommand(async () => await OutlineManager.GenerateScrivenerReports(), () => OutlineManager._canExecuteCommands);
+        PrintReportsCommand = new RelayCommand(OpenPrintMenu, SerializationLock.IsLocked);
+        ScrivenerReportsCommand = new RelayCommand(async () => await OutlineManager.GenerateScrivenerReports(), SerializationLock.IsLocked);
 
         HelpCommand = new RelayCommand(LaunchGitHubPages);
 
         // Move StoryElement commands
-        MoveLeftCommand = new RelayCommand(MoveTreeViewItemLeft, () => OutlineManager._canExecuteCommands);
-        MoveRightCommand = new RelayCommand(MoveTreeViewItemRight, () => OutlineManager._canExecuteCommands);
-        MoveUpCommand = new RelayCommand(MoveTreeViewItemUp, () => OutlineManager._canExecuteCommands);
-        MoveDownCommand = new RelayCommand(MoveTreeViewItemDown, () => OutlineManager._canExecuteCommands);
+        MoveLeftCommand = new RelayCommand(MoveTreeViewItemLeft, SerializationLock.IsLocked);
+        MoveRightCommand = new RelayCommand(MoveTreeViewItemRight, SerializationLock.IsLocked);
+        MoveUpCommand = new RelayCommand(MoveTreeViewItemUp, SerializationLock.IsLocked);
+        MoveDownCommand = new RelayCommand(MoveTreeViewItemDown, SerializationLock.IsLocked);
 
         // Add StoryElement commands
-        AddFolderCommand = new RelayCommand(() => OutlineManager.AddStoryElement(StoryItemType.Folder), () => OutlineManager._canExecuteCommands);
-        AddSectionCommand = new RelayCommand(() => OutlineManager.AddStoryElement(StoryItemType.Section), () => OutlineManager._canExecuteCommands);
-        AddProblemCommand = new RelayCommand(() => OutlineManager.AddStoryElement(StoryItemType.Problem), () => OutlineManager._canExecuteCommands);
-        AddCharacterCommand = new RelayCommand(() => OutlineManager.AddStoryElement(StoryItemType.Character), () => OutlineManager._canExecuteCommands);
-        AddWebCommand = new RelayCommand(() => OutlineManager.AddStoryElement(StoryItemType.Web), () => OutlineManager._canExecuteCommands);
-        AddNotesCommand = new RelayCommand(() => OutlineManager.AddStoryElement(StoryItemType.Notes), () => OutlineManager._canExecuteCommands);
-        AddSettingCommand = new RelayCommand(() => OutlineManager.AddStoryElement(StoryItemType.Setting), () => OutlineManager._canExecuteCommands);
-        AddSceneCommand = new RelayCommand(() => OutlineManager.AddStoryElement(StoryItemType.Scene), () => OutlineManager._canExecuteCommands);
+        AddFolderCommand = new RelayCommand(() => OutlineManager.AddStoryElement(StoryItemType.Folder), SerializationLock.IsLocked);
+        AddSectionCommand = new RelayCommand(() => OutlineManager.AddStoryElement(StoryItemType.Section), SerializationLock.IsLocked);
+        AddProblemCommand = new RelayCommand(() => OutlineManager.AddStoryElement(StoryItemType.Problem), SerializationLock.IsLocked);
+        AddCharacterCommand = new RelayCommand(() => OutlineManager.AddStoryElement(StoryItemType.Character), SerializationLock.IsLocked);
+        AddWebCommand = new RelayCommand(() => OutlineManager.AddStoryElement(StoryItemType.Web), SerializationLock.IsLocked);
+        AddNotesCommand = new RelayCommand(() => OutlineManager.AddStoryElement(StoryItemType.Notes), SerializationLock.IsLocked);
+        AddSettingCommand = new RelayCommand(() => OutlineManager.AddStoryElement(StoryItemType.Setting), SerializationLock.IsLocked);
+        AddSceneCommand = new RelayCommand(() => OutlineManager.AddStoryElement(StoryItemType.Scene), SerializationLock.IsLocked);
 
         // Remove Story Element command (move to trash)
-        RemoveStoryElementCommand = new RelayCommand(OutlineManager.RemoveStoryElement, () => OutlineManager._canExecuteCommands);
-        RestoreStoryElementCommand = new RelayCommand(OutlineManager.RestoreStoryElement, () => OutlineManager._canExecuteCommands);
-        EmptyTrashCommand = new RelayCommand(OutlineManager.EmptyTrash, () => OutlineManager._canExecuteCommands);
+        RemoveStoryElementCommand = new RelayCommand(OutlineManager.RemoveStoryElement, SerializationLock.IsLocked);
+        RestoreStoryElementCommand = new RelayCommand(OutlineManager.RestoreStoryElement, SerializationLock.IsLocked);
+        EmptyTrashCommand = new RelayCommand(OutlineManager.EmptyTrash, SerializationLock.IsLocked);
         // Copy to Narrative command
-        AddToNarrativeCommand = new RelayCommand(OutlineManager.CopyToNarrative, () => OutlineManager._canExecuteCommands);
-        RemoveFromNarrativeCommand = new RelayCommand(OutlineManager.RemoveFromNarrative, () => OutlineManager._canExecuteCommands);
+        AddToNarrativeCommand = new RelayCommand(OutlineManager.CopyToNarrative, SerializationLock.IsLocked);
+        RemoveFromNarrativeCommand = new RelayCommand(OutlineManager.RemoveFromNarrative, SerializationLock.IsLocked);
 
         ViewList.Add("Story Explorer View");
         ViewList.Add("Story Narrator View");
