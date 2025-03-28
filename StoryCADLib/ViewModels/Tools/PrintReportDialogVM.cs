@@ -226,7 +226,6 @@ public class PrintReportDialogVM : ObservableRecipient
                     await Ioc.Default.GetService<Windowing>().ShowContentDialog(Dialog);
                 });
 
-                ;
             }
         }
         else //Print Manager isn't supported so we fall back to the old version of printing directly.
