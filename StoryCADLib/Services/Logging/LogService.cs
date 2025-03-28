@@ -5,7 +5,6 @@ using NLog;
 using NLog.Config;
 using NLog.Targets;
 using StoryCAD.Services.Json;
-using Microsoft.UI.Windowing;
 using System.Runtime.InteropServices;
 using Windows.Devices.Input;
 using StoryCAD.Models.Tools;
@@ -34,12 +33,12 @@ public class LogService : ILogService
             // Create the file logging target
             FileTarget fileTarget = new();
             logFilePath = Path.Combine(Ioc.Default.GetRequiredService<AppState>().RootDirectory, "logs");
-            fileTarget.FileName = Path.Combine(logFilePath, "updater.${date:format=yyyy-MM-dd}.log");
+            fileTarget.FileName = Path.Combine(logFilePath, "StoryCAD.${date:format=yyyy-MM-dd}.log");
             fileTarget.CreateDirs = true;
             fileTarget.MaxArchiveFiles = 7;
             fileTarget.ArchiveEvery = FileArchivePeriod.Day;
             fileTarget.ConcurrentWrites = true;
-            fileTarget.Layout = "${longdate} | ${level} | ${message} | ${exception:format=Message,StackTrace,Data:MaxInnerExceptionLevel=5}";
+            fileTarget.Layout = "${longdate} | ${level} | ${message} | ${exception:format=Message,StackTrace,Data:MaxInnerExceptionLevel=15}";
             LoggingRule fileRule = new("*", NLog.LogLevel.Off, fileTarget);
             if (Ioc.Default.GetRequiredService<PreferenceService>().Model.AdvancedLogging)
                 MinLogLevel = NLog.LogLevel.Trace;
@@ -88,13 +87,13 @@ public class LogService : ILogService
                 try { msg.Detail = exceptionHelper?.ToString(); }
                 catch (Exception e)
                 {
-                    msg.Detail = $"There was an error attempting to obtain StackTrace helper Error: {e.Message}";
+                    msg.Detail = $"Error trying to obtain StackTrace helper Error: {e.Message}";
                 }
 
                 try { msg.Version = State.Version; }
                 catch (Exception e)
                 {
-                    msg.Version = $"There was an error trying to obtain version information Error: {e.Message}";
+                    msg.Version = $"Error trying to obtain version information Error: {e.Message}";
                 }
 
                 var baseException = exceptionHelper?.GetBaseException();
@@ -111,21 +110,6 @@ public class LogService : ILogService
 
                 try
                 {
-                    try
-                    {
-                        var mainWindow = Ioc.Default.GetRequiredService<Windowing>().MainWindow;
-                        if (mainWindow?.Width > 0)
-                            msg.Data.Add(new Item("Browser-Width", ((int)mainWindow.Width).ToString()));
-                        if (mainWindow?.Height > 0)
-                            msg.Data.Add(new Item("Browser-Height", ((int)mainWindow.Height).ToString()));
-                        if (DisplayArea.Primary?.WorkArea.Width > 0)
-                            msg.Data.Add(new Item("Screen-Width", DisplayArea.Primary.WorkArea.Width.ToString()));
-                        if (DisplayArea.Primary?.WorkArea.Height > 0)
-                            msg.Data.Add(new Item("Screen-Height", DisplayArea.Primary.WorkArea.Height.ToString()));
-                    }
-                    catch (Exception ex) { msg.Data.Add(new Item($"An error occurred trying to obtain window size data {ex.Message}")); }
-
-
                     string LogString = string.Empty;
                 
                     try
@@ -148,7 +132,7 @@ public class LogService : ILogService
                     int ln = 0;
                     if (LogString.Split("\n").Length > 250)
                     {
-                        foreach (string line in LogString.Split("\n").TakeLast(50))
+                        foreach (string line in LogString.Split("\n").TakeLast(250))
                         {
                             msg.Data.Add(new(key: "Line " + ln, value: line));
                             ln++;
@@ -156,7 +140,7 @@ public class LogService : ILogService
                     }
                     else
                     {
-                        foreach (string line in LogString.Split("\n").TakeLast(50))
+                        foreach (string line in LogString.Split("\n").TakeLast(250))
                         {
                             msg.Data.Add(new(key: "Line ", value: line));
                             ln++;
@@ -164,7 +148,8 @@ public class LogService : ILogService
                     }
                     msg.Data.Add(new(key: "Log ","end")); 
                 }
-                catch (Exception e) { msg.Data.Add(new("Error", $"There was an error attempting to obtain the log Error: {e.Message}"));}
+                catch (Exception e) { msg.Data.Add(new("Error", 
+                    $"There was an error attempting to obtain the log, Error: {e.Message}"));}
             };
 
             elmahIoTarget.Name = "elmahio";

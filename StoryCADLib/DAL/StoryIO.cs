@@ -31,7 +31,7 @@ public class StoryIO
 		_logService.Log(LogLevel.Info, $"Saving version as {model.LastVersion}");
 
         var json = model.Serialize();
-        _logService.Log(LogLevel.Info, $"Serialised as {json}");
+        _logService.Log(LogLevel.Trace, $"Serialised as {json}");
 
 		//Save file to disk
 		await FileIO.WriteTextAsync(output, json);
@@ -57,7 +57,7 @@ public class StoryIO
 			_logService.Log(LogLevel.Info, $"Read file (Length: {JSON.Length})");
 
 			//Deserialize into real story model
-			_logService.Log(LogLevel.Debug, $"File read as {JSON}");
+			_logService.Log(LogLevel.Trace, $"File read as {JSON}");
 			StoryModel _model = JsonSerializer.Deserialize<StoryModel>(JSON, new JsonSerializerOptions
 			{
 				Converters =
