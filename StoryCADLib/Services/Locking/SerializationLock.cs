@@ -44,7 +44,11 @@ public class SerializationLock : IDisposable
         if (!_canExecuteCommands)
         {
             _logger.Log(LogLevel.Warn, $"{_caller} Tried to lock when already locked by {currentHolder}");
-            throw new InvalidOperationException($"Commands are already disabled by {currentHolder}");
+
+            if (currentHolder != _caller) //Some locks run twice i.e. datasource, (this shouldn't happen)
+            {
+                throw new InvalidOperationException($"Commands are already disabled by {currentHolder}");
+            }
         }
 
         currentHolder = _caller;
