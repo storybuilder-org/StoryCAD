@@ -1,15 +1,12 @@
 ﻿using Microsoft.UI.Xaml;
 using StoryCAD.ViewModels.Tools;
-using Windows.Graphics.Printing;
 using StoryCAD.ViewModels.SubViewModels;
 
 namespace StoryCAD.Services.Dialogs.Tools;
 public sealed partial class PrintReportsDialog
 {
     public PrintReportDialogVM PrintVM = Ioc.Default.GetRequiredService<PrintReportDialogVM>();
-    private Windowing Window = Ioc.Default.GetRequiredService<Windowing>();
-
-    DispatcherTimer _isDone = new() { Interval = new(0, 0, 0, 1, 0) };
+    private bool isGenerating = false;
 
     public PrintReportsDialog()
     {
@@ -108,60 +105,6 @@ public sealed partial class PrintReportsDialog
             case "Print all websites": WebList.SelectedItems.Clear(); break;
         }
         UpdateSelection(null,null);
-    }
-
-    private async void StartPrintMenu(object sender, RoutedEventArgs e)
-    {
-        PrintVM.GeneratePrintDocumentReport();
-        PrintVM.PrintDocSource = PrintVM.Document.DocumentSource;
-
-        //Device has to support printing AND run a build of Windows above 19045 (W10 22h2)
-        //Windows 10 builds below 19045 have bug that prevent us from using the new print manager
-        //TODO: gut old print stuff after oct 2023 since only 22h2 will be offically supported.
-        if (PrintManager.IsSupported() && Environment.OSVersion.Version.Build >= 19045) 
-        {
-            try
-            {   // Show print UI
-                await PrintManagerInterop.ShowPrintUIForWindowAsync(Window.WindowHandle);
-            }
-            catch (Exception ex) //Error setting up printer
-            {
-                Window.GlobalDispatcher.TryEnqueue(async () =>
-                {
-                    PrintVM.CloseDialog();
-                    ContentDialog Dialog = new()
-                    {
-                        Title = "Printing error",
-                        Content = "The following error occurred when trying to print:\n\n" + ex.Message,
-                        PrimaryButtonText = "Ok"
-                    };
-
-                    await Ioc.Default.GetService<Windowing>().ShowContentDialog(Dialog);
-                });
-
-                ;
-            }
-        }
-        else //Print Manager isn't supported so we fall back to the old version of printing directly.
-        {
-            PrintVM.ShowLoadingBar = true;
-            LoadingBar.Opacity = 1;
-            PrintVM.StartGeneratingReports();
-            _isDone.Tick += IsReportGenerationFinished;
-            _isDone.Start();
-        }
-    }
-    private void IsReportGenerationFinished(object sender, object e)
-    {
-        if (!PrintVM.ShowLoadingBar)
-        {
-            _isDone.Stop();
-            LoadingBar.Opacity = 0;
-            _isDone.Tick -= IsReportGenerationFinished;
-            PrintVM.ShowLoadingBar = false;
-            PrintVM.CloseDialog();
-            Ioc.Default.GetRequiredService<ShellViewModel>().ShowMessage(LogLevel.Info, "Generate Print Reports complete", true);
-        }
     }
 
     /// <summary>
