@@ -21,8 +21,8 @@ public class SaveAsViewModel : ObservableRecipient
         set => SetProperty(ref _projectPathName, value);
     }
         
-    private StorageFolder _parentFolder;
-    public StorageFolder ParentFolder 
+    private string _parentFolder;
+    public string ParentFolder 
     {
         get => _parentFolder;
         set => _parentFolder = value; 
