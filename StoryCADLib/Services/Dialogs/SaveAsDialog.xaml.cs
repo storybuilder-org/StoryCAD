@@ -22,7 +22,7 @@ public sealed partial class SaveAsDialog : Page
         ProjectPathName.IsReadOnly = false;
         // may throw error if invalid folder location
         ParentFolder = await Ioc.Default.GetService<Windowing>().ShowFolderPicker();
-        SaveAsVm.ParentFolder = ParentFolder;
+        SaveAsVm.ParentFolder = ParentFolder.Path;
 
         if (ParentFolder != null)
         {

@@ -211,53 +211,22 @@ public class UnifiedVM : ObservableRecipient
         await _loader.WritePreferences(Preferences.Model);
     }
 
-	/// <summary>
-	/// Checks the project directory and name are valid.
-	/// </summary>
-	public void CheckValidity(object sender, RoutedEventArgs e)
+    /// <summary>
+    /// Checks the project filename/path are valid and then creates the project if valid.
+    /// </summary>
+    public void CheckValidity(object sender, RoutedEventArgs e)
 	{
 		Logger.Log(LogLevel.Info, $"Testing filename validity for {ProjectPath}\\{ProjectName}");
-		//Checks file path validity
-		try { Directory.CreateDirectory(ProjectPath); }
-		catch
-		{
-			ProjectPath = "";
-			return;
-		}
 
-		//Checks file name validity
-		try
-		{
-			char[] invalidChars = Path.GetInvalidFileNameChars();
-
-			foreach (char c in ProjectName)
-			{
-				if (Array.Exists(invalidChars, invalidChar => invalidChar == c))
-				{
-					//Checks file name validity
-					ProjectNameErrorVisibility = Visibility.Visible;
-					throw new Exception("filename invalid");
-				}
-			}
-
-			if (Ioc.Default.GetRequiredService<AppState>().Headless)
-			{
-				throw new UnauthorizedAccessException("Test throw to ensure invalid states are handled correctly");
-			}
-		}
-		catch (UnauthorizedAccessException)
-		{
-			Logger.Log(LogLevel.Warn, $"User lacks access to {ProjectPath}");
-			//Set path to users documents if they try to save to an invalid location
-			ProjectPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-			return;
-		}
-		catch
-		{
-			ProjectName = "";
-			return;
-		}
-
-		MakeProject();
-	}
+        if (StoryIO.IsValidPath(Path.Combine(ProjectPath, ProjectName)))
+        {
+            MakeProject();
+        }
+        else
+        {
+            ProjectName = "";
+            ProjectPath = Preferences.Model.ProjectDirectory;
+            ProjectNameErrorVisibility = Visibility.Visible;
+        }
+    }
 }
