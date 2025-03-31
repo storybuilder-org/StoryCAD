@@ -32,7 +32,7 @@ public class StoryIO
         _logService.Log(LogLevel.Info, $"Saving version as {model.LastVersion}");
 
         var json = model.Serialize();
-        _logService.Log(LogLevel.Info, $"Serialised as {json}");
+        _logService.Log(LogLevel.Trace, $"Serialised as {json}");
 
         //Save file to disk
         await FileIO.WriteTextAsync(output, json);

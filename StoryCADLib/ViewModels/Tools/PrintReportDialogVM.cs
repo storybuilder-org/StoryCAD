@@ -179,18 +179,62 @@ public class PrintReportDialogVM : ObservableRecipient
             }
 
             ShellVM.ShowMessage(LogLevel.Info, "Generate Print Reports executing", true);
-
             ShellVM.SaveModel();
 
             // Run reports dialog
-            Dialog = new()
+            var result = await Ioc.Default.GetService<Windowing>().ShowContentDialog(new()
             {
                 Title = "Generate Reports",
-                Content = new PrintReportsDialog()
-            };
-            await Ioc.Default.GetService<Windowing>().ShowContentDialog(Dialog);
+                Content = new PrintReportsDialog(),
+                PrimaryButtonText = "Confirm",
+                SecondaryButtonText = "Cancel",
+            });
+
+            if (result == ContentDialogResult.Primary)
+            {
+                StartPrintMenu();
+            }
         }
     }
+
+    private async void StartPrintMenu()
+    {
+        GeneratePrintDocumentReport();
+        PrintDocSource = Document.DocumentSource;
+
+        //Device has to support printing AND run a build of Windows above 19045 (W10 22h2)
+        //Windows 10 builds below 19045 have bug that prevent us from using the new print manager
+        //TODO: gut old print stuff after oct 2023 since only 22h2 will be offically supported.
+        if (PrintManager.IsSupported() && Environment.OSVersion.Version.Build >= 19045)
+        {
+            try
+            {   // Show print UI
+                await PrintManagerInterop.ShowPrintUIForWindowAsync(Window.WindowHandle);
+            }
+            catch (Exception ex) //Error setting up printer
+            {
+                Window.GlobalDispatcher.TryEnqueue(async () =>
+                {
+                    CloseDialog();
+                    ContentDialog Dialog = new()
+                    {
+                        Title = "Printing error",
+                        Content = "The following error occurred when trying to print:\n\n" + ex.Message,
+                        PrimaryButtonText = "Ok"
+                    };
+
+                    await Ioc.Default.GetService<Windowing>().ShowContentDialog(Dialog);
+                });
+
+            }
+        }
+        else //Print Manager isn't supported so we fall back to the old version of printing directly.
+        {
+            ShowLoadingBar = true;
+            StartGeneratingReports();
+        }
+    }
+
 
     /// <summary>
     /// This traverses a node and adds it to the relevant list.
@@ -403,7 +447,6 @@ public class PrintReportDialogVM : ObservableRecipient
             Document.GetPreviewPage -= GetPreviewPage;
             Document.Paginate -= Paginate;
             Document = null;
-            CloseDialog();
         });
     }
 }
