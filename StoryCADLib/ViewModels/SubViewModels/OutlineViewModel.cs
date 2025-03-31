@@ -1,5 +1,4 @@
 ﻿using System.Collections.ObjectModel;
-using System.Diagnostics;
 using CommunityToolkit.Mvvm.ComponentModel;
 using StoryCAD.Services.Backup;
 using StoryCAD.Services.Messages;
@@ -403,22 +402,57 @@ public class OutlineViewModel : ObservableRecipient
                             return;
                         }
 
-                        // Copy the current file to the new location/name
-                        StorageFile currentFile = await StorageFile.GetFileFromPathAsync(StoryModelFile);
-                        await currentFile.CopyAsync(saveAsVm.ParentFolder, saveAsVm.ProjectName, NameCollisionOption.ReplaceExisting);
+                        logger.Log(LogLevel.Info, $"Testing filename validity for {saveAsVm.SaveAsProjectFolderPath}\\{saveAsVm.ProjectName}");
+                        //Checks file path validity
+                        try { Directory.CreateDirectory(saveAsVm.SaveAsProjectFolderPat); }
+                        catch
+                        {
+                            ProjectPath = "";
+                            return;
+                        }
 
-                        // Update the story file path to the new location
-                        StoryModelFile = newFilePath;
+                        //Checks file name validity
+                        try
+                        {
+                            char[] invalidChars = Path.GetInvalidFileNameChars();
 
-                        // Update window title and recent files
-                        window.UpdateWindowTitle();
-                        new UnifiedVM().UpdateRecents(StoryModelFile);
+                            foreach (char c in ProjectName)
+                            {
+                                if (Array.Exists(invalidChars, invalidChar => invalidChar == c))
+                                {
+                                    //Checks file name validity
+                                    throw new Exception("filename invalid");
+                                }
+                            }
 
-                        // Indicate the model is now saved and unchanged
-                        Messenger.Send(new IsChangedMessage(true));
-                        StoryModel.Changed = false;
-                        shellVm.ChangeStatusColor = Colors.Green;
-                        Messenger.Send(new StatusChangedMessage(new("Save File As command completed", LogLevel.Info, true)));
+                            // Copy the current file to the new location/name
+                            StorageFile currentFile = await StorageFile.GetFileFromPathAsync(StoryModelFile);
+                            await currentFile.CopyAsync(saveAsVm.ParentFolder, saveAsVm.ProjectName, NameCollisionOption.ReplaceExisting);
+
+                            // Update the story file path to the new location
+                            StoryModelFile = newFilePath;
+
+                            // Update window title and recent files
+                            window.UpdateWindowTitle();
+                            new UnifiedVM().UpdateRecents(StoryModelFile);
+
+                            // Indicate the model is now saved and unchanged
+                            Messenger.Send(new IsChangedMessage(true));
+                            StoryModel.Changed = false;
+                            shellVm.ChangeStatusColor = Colors.Green;
+                            Messenger.Send(new StatusChangedMessage(new("Save File As command completed", LogLevel.Info, true)));
+
+                        }
+                        catch (UnauthorizedAccessException)
+                        {
+                            Messenger.Send(new StatusChangedMessage(new("You can't save your file there.", LogLevel.Info, true)));
+
+                        }
+                        catch
+                        {
+                            Messenger.Send(new StatusChangedMessage(new("You can't name your file that.", LogLevel.Info, true)));
+                        }
+
                     }
                 }
                 else
