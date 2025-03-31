@@ -381,7 +381,7 @@ public class OutlineViewModel : ObservableRecipient
                 // Set default values in the view model using the current story file info
                 SaveAsViewModel saveAsVm = Ioc.Default.GetRequiredService<SaveAsViewModel>();
                 saveAsVm.ProjectName = Path.GetFileName(StoryModelFile);
-                saveAsVm.ParentFolder = await StorageFolder.GetFolderFromPathAsync(Path.GetDirectoryName(StoryModelFile));
+                saveAsVm.ParentFolder = Path.GetDirectoryName(StoryModelFile);
 
                 ContentDialogResult result = await window.ShowContentDialog(saveAsDialog);
 
@@ -389,12 +389,20 @@ public class OutlineViewModel : ObservableRecipient
                 {
                     if (await VerifyReplaceOrCreate())
                     {
+                        string newFilePath = Path.Combine(saveAsVm.ParentFolder, saveAsVm.ProjectName);
+
+                        if (!StoryIO.IsValidPath(newFilePath))
+                        {
+                            logger.Log(LogLevel.Warn, $"File path {newFilePath} is not valid");
+                            shellVm.ShowMessage(LogLevel.Warn,"File path contains invalid characters", false);
+                            return;
+                        }
+
                         // Save the model to disk at the current file location
                         shellVm.SaveModel();
                         await outlineService.WriteModel(StoryModel, StoryModelFile);
 
                         // If the new path is the same as the current one, exit early
-                        string newFilePath = Path.Combine(saveAsVm.ParentFolder.Path, saveAsVm.ProjectName);
                         if (newFilePath.Equals(StoryModelFile, StringComparison.OrdinalIgnoreCase))
                         {
                             Messenger.Send(new StatusChangedMessage(new("Save File As command completed", LogLevel.Info)));
@@ -403,56 +411,23 @@ public class OutlineViewModel : ObservableRecipient
                         }
 
                         logger.Log(LogLevel.Info, $"Testing filename validity for {saveAsVm.SaveAsProjectFolderPath}\\{saveAsVm.ProjectName}");
-                        //Checks file path validity
-                        try { Directory.CreateDirectory(saveAsVm.SaveAsProjectFolderPat); }
-                        catch
-                        {
-                            ProjectPath = "";
-                            return;
-                        }
+                        // Copy the current file to the new location/name
+                        StorageFile currentFile = await StorageFile.GetFileFromPathAsync(StoryModelFile); 
+                        StorageFolder folder = await StorageFolder.GetFolderFromPathAsync(saveAsVm.SaveAsProjectFolderPath);
+                        await currentFile.CopyAsync(folder, saveAsVm.ProjectName, NameCollisionOption.ReplaceExisting);
 
-                        //Checks file name validity
-                        try
-                        {
-                            char[] invalidChars = Path.GetInvalidFileNameChars();
+                        // Update the story file path to the new location
+                        StoryModelFile = newFilePath;
 
-                            foreach (char c in ProjectName)
-                            {
-                                if (Array.Exists(invalidChars, invalidChar => invalidChar == c))
-                                {
-                                    //Checks file name validity
-                                    throw new Exception("filename invalid");
-                                }
-                            }
+                        // Update window title and recent files
+                        window.UpdateWindowTitle();
+                        new UnifiedVM().UpdateRecents(StoryModelFile);
 
-                            // Copy the current file to the new location/name
-                            StorageFile currentFile = await StorageFile.GetFileFromPathAsync(StoryModelFile);
-                            await currentFile.CopyAsync(saveAsVm.ParentFolder, saveAsVm.ProjectName, NameCollisionOption.ReplaceExisting);
-
-                            // Update the story file path to the new location
-                            StoryModelFile = newFilePath;
-
-                            // Update window title and recent files
-                            window.UpdateWindowTitle();
-                            new UnifiedVM().UpdateRecents(StoryModelFile);
-
-                            // Indicate the model is now saved and unchanged
-                            Messenger.Send(new IsChangedMessage(true));
-                            StoryModel.Changed = false;
-                            shellVm.ChangeStatusColor = Colors.Green;
-                            Messenger.Send(new StatusChangedMessage(new("Save File As command completed", LogLevel.Info, true)));
-
-                        }
-                        catch (UnauthorizedAccessException)
-                        {
-                            Messenger.Send(new StatusChangedMessage(new("You can't save your file there.", LogLevel.Info, true)));
-
-                        }
-                        catch
-                        {
-                            Messenger.Send(new StatusChangedMessage(new("You can't name your file that.", LogLevel.Info, true)));
-                        }
-
+                        // Indicate the model is now saved and unchanged
+                        Messenger.Send(new IsChangedMessage(true));
+                        StoryModel.Changed = false;
+                        shellVm.ChangeStatusColor = Colors.Green;
+                        Messenger.Send(new StatusChangedMessage(new("Save File As command completed", LogLevel.Info, true)));
                     }
                 }
                 else
@@ -473,7 +448,6 @@ public class OutlineViewModel : ObservableRecipient
         logger.Log(LogLevel.Trace, "VerifyReplaceOrCreated");
 
         SaveAsViewModel saveAsVm = Ioc.Default.GetRequiredService<SaveAsViewModel>();
-        saveAsVm.SaveAsProjectFolderPath = saveAsVm.ParentFolder.Path;
         if (File.Exists(Path.Combine(saveAsVm.ProjectPathName, saveAsVm.ProjectName)))
         {
             ContentDialog replaceDialog = new()
