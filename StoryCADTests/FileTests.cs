@@ -108,21 +108,10 @@ public class FileTests
 
 
     [TestMethod]
-    public Task InvalidFileAccessTest()
+    public void InvalidFileAccessTest()
     {
-	    string Dir = AppDomain.CurrentDomain.BaseDirectory;
-	    UnifiedVM UVM = new()
-	    {
-		    ProjectName = "TestProject",
-		    ProjectPath = Path.Combine(Dir, "TestProject")
-	    };
-
-		//Check file path validity
-		UVM.CheckValidity(null,null);
-
-	    //Check Project Path was reset to default.
-		Assert.IsTrue(UVM.ProjectPath == Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments));
-		return null;
+        Assert.IsTrue(StoryIO.IsValidPath("C:\\"));
+        Assert.IsFalse(StoryIO.IsValidPath("C:\\:::StoryCADTests::\\//"));
     }
 
 
@@ -131,11 +120,11 @@ public class FileTests
 	/// </summary>
 	/// <returns></returns>
     [TestMethod]
-    public Task FullFileTest()
+    public async Task FullFileTest()
     {
 	    string Dir = AppDomain.CurrentDomain.BaseDirectory;
-		StorageFile file = StorageFile.GetFileFromPathAsync(Path.Combine(Dir, "TestInputs", "Full.stbx")).GetAwaiter().GetResult();
-		StoryModel model = Ioc.Default.GetRequiredService<StoryIO>().ReadStory(file).GetAwaiter().GetResult();
+		StorageFile file = await StorageFile.GetFileFromPathAsync(Path.Combine(App.InputDir, "Full.stbx"));
+		StoryModel model = await Ioc.Default.GetRequiredService<StoryIO>().ReadStory(file);
 
 		//Overview Model Test
 		Assert.IsTrue(((OverviewModel)model.StoryElements[0]).Author == "jake shaw");
@@ -266,8 +255,7 @@ public class FileTests
 
 		//Web Folder
 		WebModel Web = (WebModel)model.StoryElements.First(se => se.ElementType == StoryItemType.Web);
-		Assert.IsTrue(Web.URL.ToString() == "https://github.com/Rarisma");
-		return null;
+        Assert.IsTrue(Web.URL.ToString() == "https://github.com/Rarisma");
     }
 
     [TestMethod]

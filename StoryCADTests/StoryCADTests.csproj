@@ -24,10 +24,7 @@
 		<None Update=".env">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
-		<None Update="TestInputs\Full3.stbx">
-		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
-		<None Update="TestInputs\Full2.stbx">
+		<None Update="TestInputs\CloseFileTest.stbx">
 		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
 		<None Update="TestInputs\Full.stbx">

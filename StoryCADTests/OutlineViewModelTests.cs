@@ -55,31 +55,22 @@ namespace StoryCADTests
         [TestMethod]
         public async Task TestWriteModel()
         {
-            // Act
-            await outlineVM.WriteModel();
+            //Create challenge path
+            string file = Path.Combine(App.ResultsDir, Path.GetRandomFileName() + ".stbx");
 
-            // Assert
-            // TODO: Verify that the StoryModel was written to the expected file path,
-            // e.g. by checking file existence or contents.
-            Assert.Inconclusive("WriteModel test not implemented.");
+            // Ensure the file does not exist before writing the model
+            Assert.IsFalse(File.Exists(file), "File already exists.");
+            outlineVM.StoryModelFile = file;
+            outlineVM.StoryModel = await outlineService.CreateModel("Test", "StoryBuilder", 0);
+
+            //Write, check exists.
+            await outlineVM.WriteModel();
+            Assert.IsTrue(File.Exists(file), "File not written.");
         }
 
         // Stub tests for methods that follow the lock/unlock _canExecuteCommands pattern.
         // These tests act as placeholders until the methods are moved and implemented in OutlineViewModel.
 
-        [TestMethod]
-        public void TestOpenFile()
-        {
-            // TODO: Invoke outlineVM.OpenFile (or its replacement) and verify behavior.
-            Assert.Inconclusive("Test for OpenFile not implemented.");
-        }
-
-        [TestMethod]
-        public void TestSaveFile()
-        {
-            // TODO: Invoke outlineVM.SaveFile and check that changes are saved.
-            Assert.Inconclusive("Test for SaveFile not implemented.");
-        }
 
         [TestMethod]
         public void TestSaveFileAs()
@@ -92,17 +83,10 @@ namespace StoryCADTests
         public async Task TestCloseFile()
         {
             //Check we have the file loaded
-            await outlineVM.OpenFile(Path.Combine(App.InputDir, "Full2.stbx")); 
+            await outlineVM.OpenFile(Path.Combine(App.InputDir, "CloseFileTest.stbx")); 
             Assert.IsTrue(outlineVM.StoryModel.StoryElements.Count != 0, "Story not loaded.");
             await outlineVM.CloseFile();
             Assert.IsTrue(outlineVM.StoryModel.StoryElements.Count == 0, "Story not closed.");
-        }
-
-        [TestMethod]
-        public void TestExitApp()
-        {
-            // TODO: Simulate an exit scenario and verify any cleanup logic.
-            Assert.Inconclusive("Test for ExitApp not implemented.");
         }
 
         [TestMethod]
@@ -166,13 +150,6 @@ namespace StoryCADTests
         {
             // TODO: Invoke outlineVM.GenerateScrivenerReports and validate report generation.
             Assert.Inconclusive("Test for GenerateScrivenerReports not implemented.");
-        }
-
-        [TestMethod]
-        public void TestLaunchGitHubPages()
-        {
-            // TODO: Invoke outlineVM.LaunchGitHubPages and verify that the correct URL is launched.
-            Assert.Inconclusive("Test for LaunchGitHubPages not implemented.");
         }
 
         [TestMethod]

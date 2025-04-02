@@ -221,31 +221,36 @@ public class OutlineViewModel : ObservableRecipient
     public async Task CreateFile(UnifiedVM dialogVm)
     {
         logger.Log(LogLevel.Info, "FileOpenVM - New File starting");
-        using (var serializationLock = new SerializationLock(autoSaveService, backupService, logger))
-        {
-            try
-            {
-                Messenger.Send(new StatusChangedMessage(new StatusMessage("New project command executing", LogLevel.Info)), true);
 
+        try
+        {
+            Messenger.Send(new StatusChangedMessage(new StatusMessage("New project command executing", LogLevel.Info)), true);
+            using (var serializationLock = new SerializationLock(autoSaveService, backupService, logger))
+            {
                 // If the current project needs saved, do so
                 if (StoryModel.Changed && StoryModelFile != null)
                 {
                     await outlineService.WriteModel(StoryModel, StoryModelFile);
                 }
+            }
 
-                // Start with a blank StoryModel
-                shellVm.ResetModel();
-                shellVm.ShowHomePage();
+            // Start with a blank StoryModel
+            shellVm.ResetModel();
+            shellVm.ShowHomePage();
 
-                // Ensure the filename has .stbx extension
-                if (!Path.GetExtension(dialogVm.ProjectName)!.Equals(".stbx"))
-                {
-                    dialogVm.ProjectName += ".stbx";
-                }
+            // Ensure the filename has .stbx extension
+            if (!Path.GetExtension(dialogVm.ProjectName)!.Equals(".stbx"))
+            {
+                dialogVm.ProjectName += ".stbx";
+            }
 
+            using (var serializationLock = new SerializationLock(autoSaveService, backupService, logger))
+            {
                 // Create the new outline's file
                 StorageFolder folder = await StorageFolder.GetFolderFromPathAsync(dialogVm.ProjectPath);
-                StoryModelFile = (await folder.CreateFileAsync(dialogVm.ProjectName, CreationCollisionOption.GenerateUniqueName)).Path;
+                StoryModelFile =
+                    (await folder.CreateFileAsync(dialogVm.ProjectName, CreationCollisionOption.GenerateUniqueName))
+                    .Path;
 
                 // Create the StoryModel
                 string name = Path.GetFileNameWithoutExtension(StoryModelFile);
@@ -253,11 +258,13 @@ public class OutlineViewModel : ObservableRecipient
 
                 // Create the new project StorageFile; throw an exception if it already exists.
                 StoryModel = await outlineService.CreateModel(name, author, dialogVm.SelectedTemplateIndex);
+            }
 
-                shellVm.SetCurrentView(StoryViewType.ExplorerView);
+            shellVm.SetCurrentView(StoryViewType.ExplorerView);
 
-                Ioc.Default.GetRequiredService<UnifiedVM>().UpdateRecents(StoryModelFile);
-
+            Ioc.Default.GetRequiredService<UnifiedVM>().UpdateRecents(StoryModelFile);
+            using (var serializationLock = new SerializationLock(autoSaveService, backupService, logger))
+            {
                 StoryModel.Changed = true;
                 await SaveFile();
 
@@ -271,6 +278,7 @@ public class OutlineViewModel : ObservableRecipient
                 {
                     Ioc.Default.GetRequiredService<BackupService>().StartTimedBackup();
                 }
+
                 if (preferences.Model.AutoSave)
                 {
                     Ioc.Default.GetRequiredService<AutoSaveService>().StartAutoSave();
@@ -278,13 +286,13 @@ public class OutlineViewModel : ObservableRecipient
 
                 shellVm.TreeViewNodeClicked(StoryModel.ExplorerView[0]);
                 window.UpdateWindowTitle();
+            }
 
-                Messenger.Send(new StatusChangedMessage(new("New project command completed", LogLevel.Info, true)), true);
-            }
-            catch (Exception ex)
-            {
-                Messenger.Send(new StatusChangedMessage(new("Error creating new project", LogLevel.Error)), true);
-            }
+            Messenger.Send(new StatusChangedMessage(new("New project command completed", LogLevel.Info, true)), true);
+        }
+        catch (Exception ex)
+        {
+            Messenger.Send(new StatusChangedMessage(new("Error creating new project", LogLevel.Error)), true);
         }
     }
 
@@ -460,31 +468,32 @@ public class OutlineViewModel : ObservableRecipient
     public async Task CloseFile()
     {
         Messenger.Send(new StatusChangedMessage(new("Closing project", LogLevel.Info, true)));
-        using var serializationLock = new SerializationLock(autoSaveService, backupService, logger);
-
-        if (StoryModel.Changed)
+        using (var serializationLock = new SerializationLock(autoSaveService, backupService, logger))
         {
-            ContentDialog warning = new()
+            if (StoryModel.Changed && Ioc.Default.GetRequiredService<AppState>().Headless)
             {
-                Title = "Save changes?",
-                PrimaryButtonText = "Yes",
-                SecondaryButtonText = "No",
-            };
-            if (await window.ShowContentDialog(warning) == ContentDialogResult.Primary)
-            {
-                shellVm.SaveModel();
-                await outlineService.WriteModel(StoryModel, StoryModelFile);
+                ContentDialog warning = new()
+                {
+                    Title = "Save changes?",
+                    PrimaryButtonText = "Yes",
+                    SecondaryButtonText = "No",
+                };
+                if (await window.ShowContentDialog(warning) == ContentDialogResult.Primary)
+                {
+                    shellVm.SaveModel();
+                    await outlineService.WriteModel(StoryModel, StoryModelFile);
+                }
             }
+
+            shellVm.ResetModel();
+            StoryModelFile = string.Empty;
+            shellVm.RightTappedNode = null; //Null right tapped node to prevent possible issues.
+            window.UpdateWindowTitle();
+            Ioc.Default.GetRequiredService<BackupService>().StopTimedBackup();
+            shellVm.ShowHomePage();
         }
-            
-        shellVm.ResetModel();
-        StoryModelFile = string.Empty;
-        shellVm.RightTappedNode = null; //Null right tapped node to prevent possible issues.
+        
         shellVm.SetCurrentView(StoryViewType.ExplorerView);
-        window.UpdateWindowTitle();
-        Ioc.Default.GetRequiredService<BackupService>().StopTimedBackup();
-        shellVm.DataSource = StoryModel.ExplorerView;
-        shellVm.ShowHomePage();
         Messenger.Send(new StatusChangedMessage(new("Close story command completed", LogLevel.Info, true)));
     }
 
