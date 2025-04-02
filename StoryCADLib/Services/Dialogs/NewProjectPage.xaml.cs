@@ -5,7 +5,7 @@ namespace StoryCAD.Services.Dialogs;
 
 public sealed partial class NewProjectPage : Page
 {
-	public NewProjectPage(UnifiedVM vm)
+	public NewProjectPage(FileOpenVM vm)
 	{
 		vm.ProjectNameErrorVisibility = Visibility.Collapsed;
 		vm.ProjectFolderErrorVisibilty = Visibility.Collapsed;
@@ -13,7 +13,7 @@ public sealed partial class NewProjectPage : Page
 		UnifiedVM = vm;
 	}
 
-	public UnifiedVM UnifiedVM;
+	public FileOpenVM UnifiedVM;
 
 	public bool BrowseButtonClicked { get; set; }
 	public bool ProjectFolderExists { get; set; }

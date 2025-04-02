@@ -1,13 +1,8 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using StoryCAD.ViewModels.SubViewModels;
-using StoryCAD.Services;
-using System;
 using System.IO;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.DependencyInjection;
-using Microsoft.VisualStudio.TestTools.UnitTesting.AppContainer;
-using StoryCAD.Models.Tools;
-using StoryCAD.Services.Logging;
 using StoryCAD.Services.Outline;
 using StoryCAD.ViewModels;
 using StoryCAD.ViewModels.Tools;
@@ -36,7 +31,7 @@ namespace StoryCADTests
         {
             // Arrange
             // Create a stubbed UnifiedVM instance with test properties.
-            UnifiedVM dialogVm = new UnifiedVM
+            FileOpenVM dialogVm = new FileOpenVM
             {
                 ProjectName = "TestProject",
                 ProjectPath = System.IO.Path.GetTempPath() // Use temp path for testing

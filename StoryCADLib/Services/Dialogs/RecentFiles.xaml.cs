@@ -6,7 +6,7 @@ public sealed partial class RecentFiles : Page
 {
     private PreferenceService preferences = Ioc.Default.GetService<PreferenceService>();
 
-    public RecentFiles(UnifiedVM vm)
+    public RecentFiles(FileOpenVM vm)
     {
         InitializeComponent();
         UnifiedMenuVM = vm;
@@ -41,5 +41,5 @@ public sealed partial class RecentFiles : Page
             Recents.IsEnabled = false;
         }
     }
-    public UnifiedVM UnifiedMenuVM;
+    public FileOpenVM UnifiedMenuVM;
 }

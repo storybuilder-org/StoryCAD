@@ -1,17 +1,12 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System.Reflection;
+using System.Xml.Linq;
+using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
 using StoryCAD.DAL;
 using StoryCAD.Services;
 using StoryCAD.Services.Dialogs;
 using StoryCAD.ViewModels.SubViewModels;
-
-// Messenger
-// Ioc.Default if needed
-// LogService
-// LogLevel, etc.
-// StatusChangedMessage, etc.
-// If referencing story data
 
 namespace StoryCAD.ViewModels;
 
@@ -23,7 +18,7 @@ namespace StoryCAD.ViewModels;
 /// Unified Menu shows the most recent files, sample stories and
 /// allows a user create a new story. 
 /// </summary>
-public class UnifiedVM : ObservableRecipient
+public class FileOpenVM : ObservableRecipient
 {
 	private readonly LogService Logger = Ioc.Default.GetRequiredService<LogService>();
 	private readonly ShellViewModel _shell = Ioc.Default.GetService<ShellViewModel>();
@@ -42,8 +37,33 @@ public class UnifiedVM : ObservableRecipient
 	    get => _ProjectFolderErrorVisibilty;
 	    set => SetProperty(ref _ProjectFolderErrorVisibilty, value);
     }
+    
+    public Visibility RecentsTabContentVisibilty { get; set; }
+    public Visibility SamplesTabContentVisibilty { get; set; }
+    public Visibility NewTabContentVisibilty { get; set; }
 
-	private int _selectedRecentIndex;
+    /// <summary>
+    /// Internal names of samples
+    /// (used to resolve sample names to actual files)
+    /// </summary>
+    private List<string> SamplePaths;
+
+    private List<string> _SampleNames;
+    /// <summary>
+    /// List of all installed samples
+    /// </summary>
+    public List<string> SampleNames
+    {
+        get => _SampleNames;
+        set => SetProperty(ref _SampleNames, value);
+    }
+    private int _selectedSampleIndex;
+    public int SelectedSampleIndex
+    {
+        get => _selectedSampleIndex;
+        set => SetProperty(ref _selectedSampleIndex, value);
+    }
+    private int _selectedRecentIndex;
     public int SelectedRecentIndex
     {
         get => _selectedRecentIndex;
@@ -71,39 +91,68 @@ public class UnifiedVM : ObservableRecipient
         set => SetProperty(ref _projectPath, value);
     }
 
-    /// <summary>
-    /// This makes the UI one consistent color
-    ///
-    /// On Dark theme it's deep slate green and on 
-    /// light theme it's Light Gray.
-    ///
-    /// TODO: make user selectable
-    /// </summary>
-    private SolidColorBrush _adjustmentColor;
-    public SolidColorBrush AdjustmentColor
-    {
-        get => _adjustmentColor;
-        set => SetProperty(ref _adjustmentColor, value);
-    }
 
-    private ListBoxItem _currentTab;
-    public ListBoxItem CurrentTab
+    private NavigationViewItem _currentTab;
+    public NavigationViewItem CurrentTab
     {
         get => _currentTab;
-        set => SetProperty(ref _currentTab, value);
+        set
+        {
+            switch (value.Tag)
+            {
+                case "Recent":
+                    RecentsTabContentVisibilty = Visibility.Visible;
+                    SamplesTabContentVisibilty = Visibility.Collapsed;
+                    NewTabContentVisibilty = Visibility.Collapsed;
+                    break;
+                case "Sample":
+                    RecentsTabContentVisibilty = Visibility.Collapsed;
+                    SamplesTabContentVisibilty = Visibility.Visible;
+                    NewTabContentVisibilty = Visibility.Collapsed;
+                    break;
+                case "New":
+                    RecentsTabContentVisibilty = Visibility.Collapsed;
+                    SamplesTabContentVisibilty = Visibility.Collapsed;
+                    NewTabContentVisibilty = Visibility.Visible;
+                    break;
+                default:
+                    throw new NotImplementedException("Unexpected tag" + value.Tag);
+            }
+
+            OnPropertyChanged(nameof(RecentsTabContentVisibilty));
+            OnPropertyChanged(nameof(SamplesTabContentVisibilty));
+            OnPropertyChanged(nameof(NewTabContentVisibilty));
+            SetProperty(ref _currentTab, value);
+        }
     }
 
-    public UnifiedVM()
+    public FileOpenVM()
     {
         SelectedRecentIndex = -1;
         ProjectName = string.Empty;
         ProjectPath = Ioc.Default.GetRequiredService<PreferenceService>().Model.ProjectDirectory;
 
-        if (!Ioc.Default.GetRequiredService<AppState>().Headless)
-        {
-	        ContentView = new();
+        //Gets all samples in CadLib/Assets/Install/samples
+        SamplePaths = Assembly.GetExecutingAssembly().GetManifestResourceNames()
+            .Where(name => name.Contains("StoryCAD.Assets.Install.samples")).ToList();
+        SampleNames = SamplePaths .Select(name => name.Split('.')[4].Replace('_', ' '))
+            .ToList();
+    }
 
-        }
+    public async Task OpenSample()
+    {
+        if (SelectedSampleIndex == -1)
+            return;
+
+        var resourceName = SamplePaths[SelectedSampleIndex];
+        await using var resourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName);
+        using var reader = new StreamReader(resourceStream);
+        var content = await reader.ReadToEndAsync();
+
+        var filePath = Path.Combine(Path.GetTempPath(), $"{SampleNames[SelectedSampleIndex]}.stbx");
+        await File.WriteAllTextAsync(filePath, content);
+
+        await Ioc.Default.GetService<OutlineViewModel>()!.OpenFile(filePath);
     }
 
     public UnifiedMenuPage.UpdateContentDelegate UpdateContent;
@@ -118,22 +167,13 @@ public class UnifiedVM : ObservableRecipient
 
     /// <summary>
     /// This controls the frame and sets it content.
-    /// </summary>
+    /// </summary>c
     /// <returns></returns>
     private StackPanel _contentView;
     public StackPanel ContentView
     {
         get => _contentView;
         set => SetProperty(ref _contentView, value);
-    }
-
-    /// <summary>
-    /// This changes the content of the frame in unifiedUI.xaml depending on the selected option on the sidebar.
-    /// </summary>
-    public void SidebarChange(object sender, SelectionChangedEventArgs e)
-    {
-        ContentView.Children.Clear();
-        UpdateContent();
     }
 
     public async void LoadStory()

@@ -200,6 +200,7 @@ public partial class Windowing : ObservableRecipient
 			//Set XAML root and correct theme.
 			OpenDialog.XamlRoot = XamlRoot;
 			OpenDialog.RequestedTheme = RequestedTheme;
+            OpenDialog.Resources["ContentDialogMaxWidth"] = 1080;
 
             _IsContentDialogOpen = true;
             

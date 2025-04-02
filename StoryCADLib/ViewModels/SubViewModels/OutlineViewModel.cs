@@ -189,7 +189,7 @@ public class OutlineViewModel : ObservableRecipient
             }
 
             window.UpdateWindowTitle();
-            new UnifiedVM().UpdateRecents(StoryModelFile);
+            new FileOpenVM().UpdateRecents(StoryModelFile);
 
             if (preferences.Model.TimedBackup)
             {
@@ -218,7 +218,7 @@ public class OutlineViewModel : ObservableRecipient
     /// </summary>
     /// <param name="dialogVm"></param>
     /// <returns></returns>
-    public async Task CreateFile(UnifiedVM dialogVm)
+    public async Task CreateFile(FileOpenVM dialogVm)
     {
         logger.Log(LogLevel.Info, "FileOpenVM - New File starting");
 
@@ -262,7 +262,7 @@ public class OutlineViewModel : ObservableRecipient
 
             shellVm.SetCurrentView(StoryViewType.ExplorerView);
 
-            Ioc.Default.GetRequiredService<UnifiedVM>().UpdateRecents(StoryModelFile);
+            Ioc.Default.GetRequiredService<FileOpenVM>().UpdateRecents(StoryModelFile);
             using (var serializationLock = new SerializationLock(autoSaveService, backupService, logger))
             {
                 StoryModel.Changed = true;
@@ -423,7 +423,7 @@ public class OutlineViewModel : ObservableRecipient
 
                         // Update window title and recent files
                         window.UpdateWindowTitle();
-                        new UnifiedVM().UpdateRecents(StoryModelFile);
+                        new FileOpenVM().UpdateRecents(StoryModelFile);
 
                         // Indicate the model is now saved and unchanged
                         Messenger.Send(new IsChangedMessage(true));

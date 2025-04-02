@@ -26,7 +26,7 @@ public sealed partial class Shell
 {
     public ShellViewModel ShellVm => Ioc.Default.GetService<ShellViewModel>();
     public Windowing Windowing => Ioc.Default.GetService<Windowing>();
-    public UnifiedVM UnifiedVm => Ioc.Default.GetService<UnifiedVM>();
+    public FileOpenVM UnifiedVm => Ioc.Default.GetService<FileOpenVM>();
     public OutlineViewModel OutlineVM => Ioc.Default.GetService<OutlineViewModel>();
     public LogService Logger;
     public PreferencesModel Preferences = Ioc.Default.GetRequiredService<PreferenceService>().Model;
