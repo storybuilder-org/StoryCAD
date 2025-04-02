@@ -1,0 +1,266 @@
+{
+  "CreatedVersion": null,
+  "LastVersion": "1.0.1.0",
+  "FlattenedExplorerView": [
+    {
+      "Uuid": "ed5b562d-c973-43c4-9cce-2857321b9e48",
+      "ParentUuid": null
+    },
+    {
+      "Uuid": "5ef3bd72-9c2c-4b2c-b4ab-a20f301b24e1",
+      "ParentUuid": "94ad25c5-e61b-475c-bd8f-da99f13633df"
+    },
+    {
+      "Uuid": "404b4660-2311-440d-8db3-f8a3d4d7fce3",
+      "ParentUuid": "ed5b562d-c973-43c4-9cce-2857321b9e48"
+    },
+    {
+      "Uuid": "446c2112-1b5a-4f33-8a27-6146016df511",
+      "ParentUuid": "ed5b562d-c973-43c4-9cce-2857321b9e48"
+    },
+    {
+      "Uuid": "94ad25c5-e61b-475c-bd8f-da99f13633df",
+      "ParentUuid": "ed5b562d-c973-43c4-9cce-2857321b9e48"
+    },
+    {
+      "Uuid": "06aa6008-aeb2-4829-9b84-23dfb015761c",
+      "ParentUuid": "94ad25c5-e61b-475c-bd8f-da99f13633df"
+    },
+    {
+      "Uuid": "593e2b3b-5c2f-466b-9e9b-6c243f7731c9",
+      "ParentUuid": "ed5b562d-c973-43c4-9cce-2857321b9e48"
+    },
+    {
+      "Uuid": "ba259c4b-3c87-46e0-b75d-e22545fe525d",
+      "ParentUuid": "ed5b562d-c973-43c4-9cce-2857321b9e48"
+    },
+    {
+      "Uuid": "a45a1f8f-001d-41e3-9eab-16c694f93e7c",
+      "ParentUuid": "ed5b562d-c973-43c4-9cce-2857321b9e48"
+    },
+    {
+      "Uuid": "b271937f-902e-48a7-adb0-aff275b3e812",
+      "ParentUuid": null
+    }
+  ],
+  "FlattenedNarratorView": [
+    {
+      "Uuid": "8f54c4cc-0131-469a-89e3-aa1e9c193010",
+      "ParentUuid": null
+    }
+  ],
+  "Elements": [
+    {
+      "Type": "StoryOverview",
+      "DateCreated": "2025-04-02",
+      "Author": "Jake Shaw",
+      "DateModified": "",
+      "StoryIdea": "",
+      "Concept": "",
+      "StoryProblem": "5ef3bd72-9c2c-4b2c-b4ab-a20f301b24e1",
+      "Premise": null,
+      "StoryType": "",
+      "StoryGenre": "",
+      "Viewpoint": "",
+      "ViewpointCharacter": "",
+      "Voice": "",
+      "LiteraryDevice": "",
+      "Tense": "",
+      "Style": "",
+      "StructureNotes": "",
+      "Tone": "",
+      "Notes": "",
+      "GUID": "ed5b562d-c973-43c4-9cce-2857321b9e48",
+      "Name": "CloseFileTest"
+    },
+    {
+      "Type": "TrashCan",
+      "GUID": "b271937f-902e-48a7-adb0-aff275b3e812",
+      "Name": "Deleted Story Elements"
+    },
+    {
+      "Type": "Folder",
+      "Notes": "",
+      "GUID": "8f54c4cc-0131-469a-89e3-aa1e9c193010",
+      "Name": "Narrative View"
+    },
+    {
+      "Type": "Problem",
+      "ProblemType": "",
+      "ConflictType": "",
+      "ProblemCategory": "",
+      "Subject": "",
+      "ProblemSource": "",
+      "StoryQuestion": "",
+      "Protagonist": "404b4660-2311-440d-8db3-f8a3d4d7fce3",
+      "ProtGoal": "",
+      "ProtMotive": "",
+      "ProtConflict": "",
+      "Antagonist": "446c2112-1b5a-4f33-8a27-6146016df511",
+      "AntagGoal": "",
+      "AntagMotive": "",
+      "AntagConflict": "",
+      "Outcome": "",
+      "Method": "",
+      "Theme": "",
+      "Premise": "Your[protagonist] in a situation[genre, setting] wants something[goal], which brings him\r\ninto [conflict] with a second character[antagonist]. After a series of conflicts[additional\r\nproblems], the final battle[climax scene] erupts, and the[protagonist] finally resolves the \r\nconflict[outcome].",
+      "Notes": "",
+      "StructureTitle": "",
+      "StructureDescription": "",
+      "StructureBeats": [],
+      "BoundStructure": "",
+      "GUID": "5ef3bd72-9c2c-4b2c-b4ab-a20f301b24e1",
+      "Name": "External Problem"
+    },
+    {
+      "Type": "Character",
+      "Role": "",
+      "StoryRole": "",
+      "Archetype": "",
+      "CharacterSketch": "",
+      "Age": "",
+      "Sex": "",
+      "Eyes": "",
+      "Hair": "",
+      "Weight": "",
+      "CharHeight": "",
+      "Build": "",
+      "Complexion": "",
+      "Race": "",
+      "Nationality": "",
+      "Health": "",
+      "PhysNotes": "",
+      "Appearance": "",
+      "RelationshipList": [],
+      "Economic": "",
+      "Education": "",
+      "Ethnic": "",
+      "Religion": "",
+      "Enneagram": "",
+      "Intelligence": "",
+      "Values": "",
+      "Abnormality": "",
+      "Focus": "",
+      "PsychNotes": "",
+      "Adventureousness": "",
+      "Aggression": "",
+      "Confidence": "",
+      "Conscientiousness": "",
+      "Creativity": "",
+      "Dominance": "",
+      "Enthusiasm": "",
+      "Assurance": "",
+      "Sensitivity": "",
+      "Shrewdness": "",
+      "Sociability": "",
+      "Stability": "",
+      "Notes": "",
+      "TraitList": [],
+      "Flaw": "",
+      "BackStory": "",
+      "GUID": "404b4660-2311-440d-8db3-f8a3d4d7fce3",
+      "Name": "Protagonist"
+    },
+    {
+      "Type": "Character",
+      "Role": "",
+      "StoryRole": "",
+      "Archetype": "",
+      "CharacterSketch": "",
+      "Age": "",
+      "Sex": "",
+      "Eyes": "",
+      "Hair": "",
+      "Weight": "",
+      "CharHeight": "",
+      "Build": "",
+      "Complexion": "",
+      "Race": "",
+      "Nationality": "",
+      "Health": "",
+      "PhysNotes": "",
+      "Appearance": "",
+      "RelationshipList": [],
+      "Economic": "",
+      "Education": "",
+      "Ethnic": "",
+      "Religion": "",
+      "Enneagram": "",
+      "Intelligence": "",
+      "Values": "",
+      "Abnormality": "",
+      "Focus": "",
+      "PsychNotes": "",
+      "Adventureousness": "",
+      "Aggression": "",
+      "Confidence": "",
+      "Conscientiousness": "",
+      "Creativity": "",
+      "Dominance": "",
+      "Enthusiasm": "",
+      "Assurance": "",
+      "Sensitivity": "",
+      "Shrewdness": "",
+      "Sociability": "",
+      "Stability": "",
+      "Notes": "",
+      "TraitList": [],
+      "Flaw": "",
+      "BackStory": "",
+      "GUID": "446c2112-1b5a-4f33-8a27-6146016df511",
+      "Name": "Antagonist"
+    },
+    {
+      "Type": "Folder",
+      "Notes": "",
+      "GUID": "94ad25c5-e61b-475c-bd8f-da99f13633df",
+      "Name": "Problems"
+    },
+    {
+      "Type": "Folder",
+      "Notes": "",
+      "GUID": "593e2b3b-5c2f-466b-9e9b-6c243f7731c9",
+      "Name": "Characters"
+    },
+    {
+      "Type": "Folder",
+      "Notes": "",
+      "GUID": "ba259c4b-3c87-46e0-b75d-e22545fe525d",
+      "Name": "Settings"
+    },
+    {
+      "Type": "Folder",
+      "Notes": "",
+      "GUID": "a45a1f8f-001d-41e3-9eab-16c694f93e7c",
+      "Name": "Scenes"
+    },
+    {
+      "Type": "Problem",
+      "ProblemType": "",
+      "ConflictType": "Person vs. Self",
+      "ProblemCategory": "",
+      "Subject": "",
+      "ProblemSource": "",
+      "StoryQuestion": "",
+      "Protagonist": "404b4660-2311-440d-8db3-f8a3d4d7fce3",
+      "ProtGoal": "",
+      "ProtMotive": "",
+      "ProtConflict": "",
+      "Antagonist": "404b4660-2311-440d-8db3-f8a3d4d7fce3",
+      "AntagGoal": "",
+      "AntagMotive": "",
+      "AntagConflict": "",
+      "Outcome": "",
+      "Method": "",
+      "Theme": "",
+      "Premise": "Your [protagonist] grapples with an [internal conflict] and is their own antagonist,\r\nmarred by self-doubt and fears or having a [goal] that masks this conflict rather than\r\na real need. The [climax scene] is often a moment of introspection in which he or she\r\nmakes a decision or discovery that resolves the internal conflict [outcome]. Resolving\r\nthis problem may enable your [protagonist] to resolve another (external) problem.",
+      "Notes": "",
+      "StructureTitle": "",
+      "StructureDescription": "",
+      "StructureBeats": [],
+      "BoundStructure": "",
+      "GUID": "06aa6008-aeb2-4829-9b84-23dfb015761c",
+      "Name": "Internal Problem"
+    }
+  ]
+}

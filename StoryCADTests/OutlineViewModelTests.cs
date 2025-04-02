@@ -2,9 +2,16 @@
 using StoryCAD.ViewModels.SubViewModels;
 using StoryCAD.Services;
 using System;
+using System.IO;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.DependencyInjection;
+using Microsoft.VisualStudio.TestTools.UnitTesting.AppContainer;
+using StoryCAD.Models.Tools;
+using StoryCAD.Services.Logging;
+using StoryCAD.Services.Outline;
 using StoryCAD.ViewModels;
+using StoryCAD.ViewModels.Tools;
+using StoryCAD.Models;
 
 namespace StoryCADTests
 {
@@ -12,6 +19,7 @@ namespace StoryCADTests
     public class OutlineViewModelTests
     {
         private OutlineViewModel outlineVM;
+        private OutlineService outlineService;
 
         [TestInitialize]
         public void Setup()
@@ -19,6 +27,7 @@ namespace StoryCADTests
             // Assume IoC is properly configured for tests.
             // If necessary, you can initialize or mock dependencies here.
             outlineVM = Ioc.Default.GetRequiredService<OutlineViewModel>();
+            outlineService = Ioc.Default.GetRequiredService<OutlineService>();
         }
 
         // Test for UnifiedNewFile method
@@ -46,31 +55,22 @@ namespace StoryCADTests
         [TestMethod]
         public async Task TestWriteModel()
         {
-            // Act
-            await outlineVM.WriteModel();
+            //Create challenge path
+            string file = Path.Combine(App.ResultsDir, Path.GetRandomFileName() + ".stbx");
 
-            // Assert
-            // TODO: Verify that the StoryModel was written to the expected file path,
-            // e.g. by checking file existence or contents.
-            Assert.Inconclusive("WriteModel test not implemented.");
+            // Ensure the file does not exist before writing the model
+            Assert.IsFalse(File.Exists(file), "File already exists.");
+            outlineVM.StoryModelFile = file;
+            outlineVM.StoryModel = await outlineService.CreateModel("Test", "StoryBuilder", 0);
+
+            //Write, check exists.
+            await outlineVM.WriteModel();
+            Assert.IsTrue(File.Exists(file), "File not written.");
         }
 
         // Stub tests for methods that follow the lock/unlock _canExecuteCommands pattern.
         // These tests act as placeholders until the methods are moved and implemented in OutlineViewModel.
 
-        [TestMethod]
-        public void TestOpenFile()
-        {
-            // TODO: Invoke outlineVM.OpenFile (or its replacement) and verify behavior.
-            Assert.Inconclusive("Test for OpenFile not implemented.");
-        }
-
-        [TestMethod]
-        public void TestSaveFile()
-        {
-            // TODO: Invoke outlineVM.SaveFile and check that changes are saved.
-            Assert.Inconclusive("Test for SaveFile not implemented.");
-        }
 
         [TestMethod]
         public void TestSaveFileAs()
@@ -80,17 +80,13 @@ namespace StoryCADTests
         }
 
         [TestMethod]
-        public void TestCloseFile()
+        public async Task TestCloseFile()
         {
-            // TODO: Invoke outlineVM.CloseFile and assert that the model is reset appropriately.
-            Assert.Inconclusive("Test for CloseFile not implemented.");
-        }
-
-        [TestMethod]
-        public void TestExitApp()
-        {
-            // TODO: Simulate an exit scenario and verify any cleanup logic.
-            Assert.Inconclusive("Test for ExitApp not implemented.");
+            //Check we have the file loaded
+            await outlineVM.OpenFile(Path.Combine(App.InputDir, "CloseFileTest.stbx")); 
+            Assert.IsTrue(outlineVM.StoryModel.StoryElements.Count != 0, "Story not loaded.");
+            await outlineVM.CloseFile();
+            Assert.IsTrue(outlineVM.StoryModel.StoryElements.Count == 0, "Story not closed.");
         }
 
         [TestMethod]
@@ -129,10 +125,17 @@ namespace StoryCADTests
         }
 
         [TestMethod]
-        public void TestDramaticSituationsTool()
+        public async Task TestDramaticSituationsTool()
         {
-            // TODO: Invoke outlineVM.DramaticSituationsTool and check for proper handling.
-            Assert.Inconclusive("Test for DramaticSituationsTool not implemented.");
+            var Shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+            outlineVM.StoryModel = await outlineService.CreateModel("Test", "StoryBuilder", 0);
+            outlineVM.StoryModelFile = Path.Combine(App.ResultsDir, "Dramatic.stbx");
+            Shell.SetCurrentView(StoryViewType.ExplorerView);
+            //await outlineVM.OpenFile(Path.Combine(App.InputDir, "Full3.stbx"));
+            Shell.RightTappedNode = outlineVM.StoryModel.StoryElements[0].Node;
+            Ioc.Default.GetRequiredService<DramaticSituationsViewModel>().SituationName = "Abduction";
+            await outlineVM.DramaticSituationsTool();
+            Assert.IsTrue(outlineVM.StoryModel.StoryElements.Count > 2, "Dramatic situation not added.");
         }
 
         [TestMethod]
@@ -147,13 +150,6 @@ namespace StoryCADTests
         {
             // TODO: Invoke outlineVM.GenerateScrivenerReports and validate report generation.
             Assert.Inconclusive("Test for GenerateScrivenerReports not implemented.");
-        }
-
-        [TestMethod]
-        public void TestLaunchGitHubPages()
-        {
-            // TODO: Invoke outlineVM.LaunchGitHubPages and verify that the correct URL is launched.
-            Assert.Inconclusive("Test for LaunchGitHubPages not implemented.");
         }
 
         [TestMethod]

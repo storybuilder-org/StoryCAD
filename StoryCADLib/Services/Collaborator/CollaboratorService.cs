@@ -241,7 +241,8 @@ public class CollaboratorService
             Ioc.Default.GetRequiredService<AutoSaveService>().StartAutoSave();
         }
         //Reenable StoryCAD buttons
-        Ioc.Default.GetRequiredService<OutlineViewModel>()._canExecuteCommands = true;
+        //TODO: Use lock here.
+        //Ioc.Default.GetRequiredService<OutlineViewModel>()._canExecuteCommands = true;
         logger.Log(LogLevel.Info, "Async re-enabled.");
     }
 

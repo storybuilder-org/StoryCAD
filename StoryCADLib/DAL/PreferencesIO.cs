@@ -65,7 +65,7 @@ public class PreferencesIo
 				_log.Log(LogLevel.Info, "Preferences.json not found; default created.");
 			}
 
-			if (!Ioc.Default.GetRequiredService<AppState>().StoryCADTestsMode)
+			if (!Ioc.Default.GetRequiredService<AppState>().Headless)
 			{
 				//Handle UI Theme stuff
 				Windowing window = Ioc.Default.GetRequiredService<Windowing>();

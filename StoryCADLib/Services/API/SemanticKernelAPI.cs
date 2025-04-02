@@ -243,6 +243,7 @@ public class SemanticKernelApi
          Updates the specified property on a StoryElement (identified by its UUID).
          Only properties decorated with [JsonInclude] are updatable. If the property is missing the attribute
          or if any error occurs (such as a type conversion issue), the operation will fails.
+         You should use AddCastMember and AddRelationship for updating those fields when updating those fields.
          """)]
     public OperationResult<StoryElement> UpdateElementProperty(Guid elementUuid, string propertyName, object value)
     {
@@ -259,6 +260,7 @@ public class SemanticKernelApi
         {
             // Get the property info by name.
             PropertyInfo property = element.GetType().GetProperty(propertyName);
+            
             if (property == null)
                 throw new ArgumentException($"Property '{propertyName}' not found on type {element.GetType().FullName}.");
 
@@ -270,10 +272,18 @@ public class SemanticKernelApi
             if (!property.CanWrite)
                 throw new InvalidOperationException($"Property '{propertyName}' is read-only.");
 
-            // Convert the value to the property's type if needed.
-            if (value != null && !property.PropertyType.IsAssignableFrom(value.GetType()))
+
+            if (property.PropertyType == typeof(Guid) && typeof(string) == value.GetType())
             {
-                value = Convert.ChangeType(value, property.PropertyType);
+                value = Guid.Parse(value.ToString());
+            }
+            else
+            {
+                // Convert the value to the property's type if needed.
+                if (value != null && !property.PropertyType.IsAssignableFrom(value.GetType()))
+                {
+                    value = Convert.ChangeType(value, property.PropertyType);
+                }
             }
 
             // Update the property value.
@@ -349,13 +359,21 @@ public class SemanticKernelApi
                                  """)]
     public async Task<OperationResult<bool>> AddCastMember(Guid scene, Guid character)
     {
-        if (CurrentModel == null)
-            return OperationResult<bool>.Failure("No outline is opened");
+        try
+        {
+            if (CurrentModel == null)
+                return OperationResult<bool>.Failure("No outline is opened");
 
-        StoryElement element = StoryElement.GetByGuid(scene);
-        _outlineService.AddCastMember(CurrentModel, element, character);
+            StoryElement element = CurrentModel.StoryElements.StoryElementGuids[scene];
+            _outlineService.AddCastMember(CurrentModel, element, character);
 
-        return OperationResult<bool>.Success(true);
+            return OperationResult<bool>.Success(true);
+        }
+        catch (Exception ex)
+        {
+            return OperationResult<bool>.Failure($"Error in AddCastMember: {ex.Message}");
+        }
+
     }
 
 
@@ -368,17 +386,24 @@ public class SemanticKernelApi
                                  """)]
     public bool AddRelationship(Guid source, Guid recipient, string desc, bool mirror = false)
     {
-        if (source == Guid.Empty)
+        try
         {
-            throw new ArgumentNullException(nameof(source));
-        }
+            if (source == Guid.Empty)
+            {
+                throw new ArgumentNullException(nameof(source));
+            }
 
-        if (recipient == Guid.Empty)
+            if (recipient == Guid.Empty)
+            {
+                throw new ArgumentNullException(nameof(recipient));
+            }
+
+            _outlineService.AddRelationship(CurrentModel, source, recipient, desc, mirror);
+            return true;
+        }
+        catch (Exception ex)
         {
-            throw new ArgumentNullException(nameof(recipient));
+            throw new Exception($"Error in AddRelationship: {ex.Message}");
         }
-
-        _outlineService.AddRelationship(CurrentModel,source, recipient, desc, mirror);
-        return true;
     }
 }

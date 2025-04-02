@@ -5,10 +5,20 @@ using StoryCAD.ViewModels.SubViewModels;
 namespace StoryCAD.Services.Locking;
 public class SerializationLock : IDisposable
 {
+    /// <summary>
+    /// Lock that controls the UI, Autosave, Backup.
+    /// </summary>
+    private static bool _canExecuteCommands = true;
+
+    /// <summary>
+    /// Returns if a lock is currently active.
+    /// </summary>
+    /// <returns>Lock status</returns>
+    public static bool IsLocked() => _canExecuteCommands;
+
     private readonly AutoSaveService _autoSaveService;
     private readonly BackupService _backupService;
     private readonly LogService _logger;
-    private readonly ShellViewModel shellVm;
     private readonly OutlineViewModel outlineVm;
     private string _caller;
     private bool _disposed;
@@ -20,8 +30,7 @@ public class SerializationLock : IDisposable
         _autoSaveService = autoSaveService;
         _backupService = backupService;
         _logger = logger;
-        outlineVm = Ioc.Default.GetService<OutlineViewModel>();
-        shellVm = Ioc.Default.GetService<ShellViewModel>();
+
         _caller = caller;
         // Acquire lock: disable commands, autosave, and backup.
         DisableCommands();
@@ -32,10 +41,14 @@ public class SerializationLock : IDisposable
 
     private void DisableCommands()
     {
-        if (!outlineVm._canExecuteCommands)
+        if (!_canExecuteCommands)
         {
             _logger.Log(LogLevel.Warn, $"{_caller} Tried to lock when already locked by {currentHolder}");
-            throw new InvalidOperationException($"Commands are already disabled by {currentHolder}");
+
+            if (currentHolder != _caller) //Some locks run twice i.e. datasource, (this shouldn't happen)
+            {
+                throw new InvalidOperationException($"Commands are already disabled by {currentHolder}");
+            }
         }
 
         currentHolder = _caller;
@@ -43,7 +56,7 @@ public class SerializationLock : IDisposable
         // Set your _canExecuteCommands flag to false
         // (Assuming you can access it via a shared service or static member)
         _logger.Log(LogLevel.Warn, $"{_caller} has locked commands");
-        outlineVm._canExecuteCommands = false;
+        _canExecuteCommands = false;
     }
 
     /// <summary>
@@ -51,7 +64,7 @@ public class SerializationLock : IDisposable
     /// </summary>
     public void EnableCommands()
     {
-        outlineVm._canExecuteCommands = true;
+        _canExecuteCommands = true;
         _logger.Log(LogLevel.Warn, $"{_caller} has unlocked commands");
         currentHolder = null;
 

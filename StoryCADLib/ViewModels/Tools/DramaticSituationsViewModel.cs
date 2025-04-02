@@ -58,10 +58,8 @@ public class DramaticSituationsViewModel : ObservableRecipient
 
     public DramaticSituationsViewModel()
     {
-        _situations = Ioc.Default.GetService<ToolsData>().DramaticSituationsSource;
-
-        SituationsSource = new ObservableCollection<string>();
-        foreach (string _situationKey in _situations.Keys) {SituationsSource.Add(_situationKey);}
+        _situations = Ioc.Default.GetRequiredService<ToolsData>().DramaticSituationsSource;
+        SituationsSource = new ObservableCollection<string>(_situations.Keys);
     }
     #endregion
 }

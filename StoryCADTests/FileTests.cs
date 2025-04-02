@@ -35,11 +35,10 @@ public class FileTests
     {
         OutlineViewModel OutlineVM = Ioc.Default.GetRequiredService<OutlineViewModel>();
 
-
         //Get ShellVM and clear the StoryModel
         StoryModel storyModel = new();
 
-        OutlineVM.StoryModelFile = Path.Combine(Ioc.Default.GetRequiredService<AppState>().RootDirectory, "TestProject.stbx");
+        OutlineVM.StoryModelFile = Path.Combine(App.ResultsDir, "TestProject.stbx");
         
 		string name = Path.GetFileNameWithoutExtension(OutlineVM.StoryModelFile);
         OverviewModel overview = new(name, storyModel, null)
@@ -69,9 +68,10 @@ public class FileTests
 
         //Because we have created a file in this way we must populate ProjectFolder and ProjectFile.
         string dir = Path.GetDirectoryName(OutlineVM.StoryModelFile);
-		if (Directory.Exists(dir))
-			Directory.Delete(dir,true);
-        Directory.CreateDirectory((Path.GetDirectoryName(OutlineVM.StoryModelFile)));
+		if (File.Exists(OutlineVM.StoryModelFile))
+        {
+			File.Delete(OutlineVM.StoryModelFile);
+        }
 
 		//Write file.
 		StoryIO _storyIO = Ioc.Default.GetRequiredService<StoryIO>();
@@ -108,21 +108,10 @@ public class FileTests
 
 
     [TestMethod]
-    public Task InvalidFileAccessTest()
+    public void InvalidFileAccessTest()
     {
-	    string Dir = AppDomain.CurrentDomain.BaseDirectory;
-	    UnifiedVM UVM = new()
-	    {
-		    ProjectName = "TestProject",
-		    ProjectPath = Path.Combine(Dir, "TestProject")
-	    };
-
-		//Check file path validity
-		UVM.CheckValidity(null,null);
-
-	    //Check Project Path was reset to default.
-		Assert.IsTrue(UVM.ProjectPath == Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments));
-		return null;
+        Assert.IsTrue(StoryIO.IsValidPath("C:\\"));
+        Assert.IsFalse(StoryIO.IsValidPath("C:\\:::StoryCADTests::\\//"));
     }
 
 
@@ -131,11 +120,11 @@ public class FileTests
 	/// </summary>
 	/// <returns></returns>
     [TestMethod]
-    public Task FullFileTest()
+    public async Task FullFileTest()
     {
 	    string Dir = AppDomain.CurrentDomain.BaseDirectory;
-		StorageFile file = StorageFile.GetFileFromPathAsync(Path.Combine(Dir, "TestInputs", "Full.stbx")).GetAwaiter().GetResult();
-		StoryModel model = Ioc.Default.GetRequiredService<StoryIO>().ReadStory(file).GetAwaiter().GetResult();
+		StorageFile file = await StorageFile.GetFileFromPathAsync(Path.Combine(App.InputDir, "Full.stbx"));
+		StoryModel model = await Ioc.Default.GetRequiredService<StoryIO>().ReadStory(file);
 
 		//Overview Model Test
 		Assert.IsTrue(((OverviewModel)model.StoryElements[0]).Author == "jake shaw");
@@ -266,8 +255,7 @@ public class FileTests
 
 		//Web Folder
 		WebModel Web = (WebModel)model.StoryElements.First(se => se.ElementType == StoryItemType.Web);
-		Assert.IsTrue(Web.URL.ToString() == "https://github.com/Rarisma");
-		return null;
+        Assert.IsTrue(Web.URL.ToString() == "https://github.com/Rarisma");
     }
 
     [TestMethod]

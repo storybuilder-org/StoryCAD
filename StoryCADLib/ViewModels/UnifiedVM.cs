@@ -99,7 +99,7 @@ public class UnifiedVM : ObservableRecipient
         ProjectName = string.Empty;
         ProjectPath = Ioc.Default.GetRequiredService<PreferenceService>().Model.ProjectDirectory;
 
-        if (!Ioc.Default.GetRequiredService<AppState>().StoryCADTestsMode)
+        if (!Ioc.Default.GetRequiredService<AppState>().Headless)
         {
 	        ContentView = new();
 

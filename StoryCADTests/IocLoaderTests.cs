@@ -17,14 +17,6 @@ namespace StoryCADTests;
 public class IocLoaderTests
 {
 	/// <summary>
-	/// Stops initialise from running multiple times
-	/// as it seems to be called more than once some
-	/// by the test manager, thus causing all tests
-	/// to fail.
-	/// </summary>
-	private static bool IocSetupComplete = false;
-
-	/// <summary>
 	/// Don't modify this unless you know what you are doing
 	/// This MUST be public static and have a Test Context
 	/// if you remove this, you will break automated test
@@ -33,42 +25,26 @@ public class IocLoaderTests
 	[AssemblyInitialize]
 	public static void Initialise(TestContext ctx) 
 	{
-		if (!IocSetupComplete)
-		{
-			ServiceLocator.Initialize();
+        BootStrapper.Initialise(true, null);
+        PreferenceService prefs = Ioc.Default.GetRequiredService<PreferenceService>();
+        prefs.Model.ProjectDirectory = App.InputDir;
+        prefs.Model.BackupDirectory = App.ResultsDir;
 
-			// Build the service provider
-			var serviceProvider = ServiceLocator.Services.BuildServiceProvider();
-			// Configure the default IOC container
-			Ioc.Default.ConfigureServices(serviceProvider);
+        try
+        {
+            string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ".env");
+            DotEnvOptions options = new(false, [path]);
+            DotEnv.Load(options);
+        }
+        catch { }
+    }
 
-			IocSetupComplete = true;
-			AppState State = Ioc.Default.GetService<AppState>();
-			PreferenceService Prefs = Ioc.Default.GetService<PreferenceService>();
-			Prefs.Model = new();
-			Prefs.Model.FirstName = "Headless";
-            Prefs.Model.LastName = "User";
-            Prefs.Model.Email = "sysadmin@storybuilder.org";
-			Prefs.Model.ProjectDirectory = App.InputDir;
-			Prefs.Model.BackupDirectory = App.ResultsDir;
-            Prefs.Model.BackupOnOpen = false;
-            Prefs.Model.AutoSave = false;
-            Prefs.Model.TimedBackup = false;
-			try
-			{
-
-				string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ".env");
-				DotEnvOptions options = new(false, new[] { path });
-				DotEnv.Load(options);
-			}
-			catch { }
-		}
-	}
-
+	/// <summary>
+	/// Tests loading of IOC
+	/// </summary>
 	[TestMethod]
 	public void TestIOCLoad()
 	{
-		//IOC is initalised in App.xaml.cs
 		Assert.IsNotNull(Ioc.Default.GetService<CharacterViewModel>());
 		Assert.IsNotNull(Ioc.Default.GetService<ProblemViewModel>());
 		Assert.IsNotNull(Ioc.Default.GetService<WebViewModel>());
