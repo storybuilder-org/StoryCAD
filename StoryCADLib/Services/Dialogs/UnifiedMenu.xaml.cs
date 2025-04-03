@@ -1,22 +1,17 @@
-﻿using Microsoft.UI;
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Media;
+﻿using Microsoft.UI.Xaml;
 
 namespace StoryCAD.Services.Dialogs;
 
-public sealed partial class UnifiedMenuPage
+public sealed partial class FileOpenMenuPage
 {
-    readonly Windowing Windowing = Ioc.Default.GetRequiredService<Windowing>();
-    public delegate void UpdateContentDelegate();
-
     public FileOpenVM UnifiedMenuVM = Ioc.Default.GetRequiredService<FileOpenVM>();
 
-
-    public UnifiedMenuPage()
+    public FileOpenMenuPage()
     {
         InitializeComponent();
         UnifiedMenuVM.RecentsTabContentVisibilty = Visibility.Collapsed;
         UnifiedMenuVM.SamplesTabContentVisibilty = Visibility.Collapsed;
-        UnifiedMenuVM.NewTabContentVisibilty = Visibility.Visible;
+        UnifiedMenuVM.NewTabContentVisibilty = Visibility.Collapsed;
+        UnifiedMenuVM.CurrentTab = new NavigationViewItem() { Tag = "Recent" };
     }
 }

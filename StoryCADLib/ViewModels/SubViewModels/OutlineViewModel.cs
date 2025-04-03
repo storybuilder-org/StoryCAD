@@ -303,7 +303,7 @@ public class OutlineViewModel : ObservableRecipient
     {
         logger.Log(LogLevel.Info, "Opening File Menu");
 
-        shellVm._contentDialog = new() { Content = new UnifiedMenuPage() };
+        shellVm._contentDialog = new() { Content = new FileOpenMenuPage() };
         if (window.RequestedTheme == ElementTheme.Light)
         {
             shellVm._contentDialog.RequestedTheme = window.RequestedTheme;

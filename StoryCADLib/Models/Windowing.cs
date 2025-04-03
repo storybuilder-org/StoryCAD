@@ -225,6 +225,17 @@ public partial class Windowing : ObservableRecipient
         return ContentDialogResult.None; 
     }
 
+    /// <summary>
+    /// Dismisses the current content dialog
+    /// </summary>
+    public void CloseContentDialog()
+    {
+        if (_IsContentDialogOpen)
+        {
+            OpenDialog.Hide();
+        }
+    }
+
 
     /// <summary>
     /// When a second instance is opened, this code will be ran on the main (first) instance
