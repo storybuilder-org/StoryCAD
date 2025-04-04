@@ -298,7 +298,6 @@ public class FileOpenVM : ObservableRecipient
     /// </summary>
     public async Task ConfirmClicked()
     {
-        Close(); //Stop more dialog clicks
 
         //Track name of file we are opening
         string filePath;
@@ -338,6 +337,8 @@ public class FileOpenVM : ObservableRecipient
         {
             await UpdateRecents(filePath);
         }
+
+        Close(); //Stop more dialog clicks
 
         PreferencesIo loader = new();
         await loader.WritePreferences(_preferences.Model);
