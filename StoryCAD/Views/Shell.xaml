@@ -99,7 +99,7 @@
 				<AppBarButton IsCompact="True" Icon="Document" Label="File" ToolTipService.ToolTip="File Menu" Width="50">
                     <AppBarButton.Flyout>
                         <MenuFlyout>
-                            <MenuFlyoutItem Text="Open/Create file" Command="{x:Bind ShellVm.OpenUnifiedCommand}">
+                            <MenuFlyoutItem Text="Open/Create file" Command="{x:Bind ShellVm.OpenFileOpenMenuCommand}">
                                 <MenuFlyoutItem.Icon>
                                     <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE8F4;"/>
                                 </MenuFlyoutItem.Icon>

@@ -73,7 +73,6 @@
     <None Remove="Services\Dialogs\SaveAsDialog.xaml" />
     <None Remove="Services\Dialogs\Tools\NarrativeTool.xaml" />
     <None Remove="Services\Dialogs\Tools\PrintReportsDialog.xaml" />
-    <None Remove="Services\Dialogs\UnifiedMenu.xaml" />
     <None Remove="ViewModels\Shell.xaml" />
   </ItemGroup>
   <ItemGroup>
@@ -236,7 +235,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Page Update="Services\Dialogs\UnifiedMenu.xaml">
+    <Page Update="Services\Dialogs\FileOpenMenu.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>

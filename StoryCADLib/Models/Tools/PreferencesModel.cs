@@ -217,12 +217,7 @@ public class PreferencesModel : ObservableObject
 		PreferencesInitialized = false;
 		LastSelectedTemplate = 0;
 		WrapNodeNames = TextWrapping.WrapWholeWords;
-
-		LastFile1 = string.Empty;
-		LastFile2 = string.Empty;
-		LastFile3 = string.Empty;
-		LastFile4 = string.Empty;
-		LastFile5 = string.Empty;
+        RecentFiles = new();
 
 		AutoSave = true;
 		AutoSaveInterval = 15;
