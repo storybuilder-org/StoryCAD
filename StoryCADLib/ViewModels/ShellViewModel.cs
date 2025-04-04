@@ -106,9 +106,8 @@ public class ShellViewModel : ObservableRecipient
     public RelayCommand CloseCommand { get; }
     // ExitCommand
     public RelayCommand ExitCommand { get; }
-    //Open/Closes unified menu
-    public AsyncRelayCommand OpenUnifiedCommand { get; }
-    public RelayCommand CloseUnifiedCommand { get; }
+    //Open/Closes FileOpen menu
+    public AsyncRelayCommand OpenFileOpenMenuCommand { get; }
 
     // Move current TreeViewItem flyout
     public RelayCommand MoveLeftCommand { get; }
@@ -372,8 +371,6 @@ public class ShellViewModel : ObservableRecipient
 			await Ioc.Default.GetRequiredService<BackupService>().BackupProject(vm.Name, vm.Location);
 		}
 	}
-
-	private void CloseUnifiedMenu() { _contentDialog.Hide(); }
 
     public async Task MakeBackup()
     {
@@ -1431,8 +1428,7 @@ public class ShellViewModel : ObservableRecipient
         Messenger.Send(new StatusChangedMessage(new("Ready", LogLevel.Info)));
 
         TogglePaneCommand = new RelayCommand(TogglePane, SerializationLock.IsLocked);
-        OpenUnifiedCommand = new AsyncRelayCommand(OutlineManager.OpenUnifiedMenu, canExecute: SerializationLock.IsLocked);  
-        CloseUnifiedCommand = new RelayCommand(CloseUnifiedMenu, SerializationLock.IsLocked);
+        OpenFileOpenMenuCommand = new AsyncRelayCommand(OutlineManager.OpenFileOpenMenu, canExecute: SerializationLock.IsLocked);  
         NarrativeToolCommand = new RelayCommand(async () => await Ioc.Default.GetRequiredService<NarrativeToolVM>().OpenNarrativeTool(), SerializationLock.IsLocked);
         PrintNodeCommand = new RelayCommand(async () => await OutlineManager.PrintCurrentNodeAsync(), SerializationLock.IsLocked);
         OpenFileCommand = new RelayCommand(async () => await OutlineManager.OpenFile(), SerializationLock.IsLocked);

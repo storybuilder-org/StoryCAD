@@ -196,19 +196,19 @@ public class PreferencesIo
 						_model.BackupDirectory = _tokens[1];
 						break;
 					case "LastFile1":
-						_model.LastFile1 = _tokens[1];
+						_model.RecentFiles.Add(_tokens[1]);
 						break;
 					case "LastFile2":
-						_model.LastFile2 = _tokens[1];
+						_model.RecentFiles.Add(_tokens[1]);
 						break;
 					case "LastFile3":
-						_model.LastFile3 = _tokens[1];
+						_model.RecentFiles.Add(_tokens[1]);
 						break;
 					case "LastFile4":
-						_model.LastFile4 = _tokens[1];
-						break;
+						_model.RecentFiles.Add(_tokens[1]);
+						break;	
 					case "LastFile5":
-						_model.LastFile5 = _tokens[1];
+						_model.RecentFiles.Add(_tokens[1]);
 						break;
 					case "LastTemplate":
 						_model.LastSelectedTemplate = Convert.ToInt32(_tokens[1]);
