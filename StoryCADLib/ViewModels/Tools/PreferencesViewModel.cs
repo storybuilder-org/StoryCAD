@@ -8,7 +8,6 @@ using System.ComponentModel.DataAnnotations;
 using StoryCAD.Services.Ratings;
 using StoryCAD.Services;
 
-
 namespace StoryCAD.ViewModels.Tools;
 
 /// <summary>
@@ -151,11 +150,7 @@ public class PreferencesViewModel : ObservableValidator
     
     // Recent files (set automatically)
     
-    public string LastFile1 { get; set; }
-    public string LastFile2 { get; set; }
-    public string LastFile3 { get; set; }
-    public string LastFile4 { get; set; }
-    public string LastFile5 { get; set; }
+    public List<string> RecentFiles { get; set; }
 
     //Version Tracking
     public string Version { get; set; }
@@ -209,11 +204,7 @@ public class PreferencesViewModel : ObservableValidator
         LastSelectedTemplate = CurrentModel.LastSelectedTemplate;
         WrapNodeNames = CurrentModel.WrapNodeNames;
 
-        LastFile1 = CurrentModel.LastFile1;
-        LastFile2 = CurrentModel.LastFile2;
-        LastFile3 = CurrentModel.LastFile3;
-        LastFile4 = CurrentModel.LastFile4;
-        LastFile5 = CurrentModel.LastFile5;
+        RecentFiles = CurrentModel.RecentFiles;
 
         ProjectDirectory = CurrentModel.ProjectDirectory;
         BackupDirectory = CurrentModel.BackupDirectory;  
@@ -243,11 +234,7 @@ public class PreferencesViewModel : ObservableValidator
         CurrentModel.LastSelectedTemplate = LastSelectedTemplate;
         CurrentModel.WrapNodeNames = WrapNodeNames;
 
-        CurrentModel.LastFile1 = LastFile1;
-        CurrentModel.LastFile2 = LastFile2;
-        CurrentModel.LastFile3 = LastFile3;
-        CurrentModel.LastFile4 = LastFile4;
-        CurrentModel.LastFile5 = LastFile5;
+        CurrentModel.RecentFiles = RecentFiles;
 
         CurrentModel.ProjectDirectory = ProjectDirectory;
         CurrentModel.BackupDirectory = BackupDirectory;

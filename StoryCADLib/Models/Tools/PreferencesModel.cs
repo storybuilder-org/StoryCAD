@@ -134,26 +134,14 @@ public class PreferencesModel : ObservableObject
 	[JsonPropertyName("BackupDirectory")]
 	public string BackupDirectory { get; set; }
 
-	// Recent files (set automatically)
-	[JsonInclude]
-	[JsonPropertyName("LastFile1")]
-	public string LastFile1 { get; set; }
 
+	/// <summary>
+	/// Recently opened files
+	/// (Capped at 25)
+	/// </summary>
 	[JsonInclude]
-	[JsonPropertyName("LastFile2")]
-	public string LastFile2 { get; set; }
-
-	[JsonInclude]
-	[JsonPropertyName("LastFile3")]
-	public string LastFile3 { get; set; }
-
-	[JsonInclude]
-	[JsonPropertyName("LastFile4")]
-	public string LastFile4 { get; set; }
-
-	[JsonInclude]
-	[JsonPropertyName("LastFile5")]
-	public string LastFile5 { get; set; }
+	[JsonPropertyName("RecentFiles")]
+	public List<string> RecentFiles { get; set; }
 
 	/// <summary>
 	/// Tracks last version of StoryCAD that was opened
@@ -229,12 +217,7 @@ public class PreferencesModel : ObservableObject
 		PreferencesInitialized = false;
 		LastSelectedTemplate = 0;
 		WrapNodeNames = TextWrapping.WrapWholeWords;
-
-		LastFile1 = string.Empty;
-		LastFile2 = string.Empty;
-		LastFile3 = string.Empty;
-		LastFile4 = string.Empty;
-		LastFile5 = string.Empty;
+        RecentFiles = new();
 
 		AutoSave = true;
 		AutoSaveInterval = 15;

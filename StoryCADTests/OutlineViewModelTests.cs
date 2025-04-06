@@ -33,8 +33,8 @@ namespace StoryCADTests
             // Create a stubbed UnifiedVM instance with test properties.
             FileOpenVM dialogVm = new FileOpenVM
             {
-                ProjectName = "TestProject",
-                ProjectPath = System.IO.Path.GetTempPath() // Use temp path for testing
+                OutlineName = "TestProject",
+                OutlineFolder = System.IO.Path.GetTempPath() // Use temp path for testing
             };
 
             // Act

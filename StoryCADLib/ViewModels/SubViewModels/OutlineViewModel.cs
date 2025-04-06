@@ -130,9 +130,13 @@ public class OutlineViewModel : ObservableRecipient
                         StoryModelFile = string.Empty;
                         return;
                     }
+                    StoryModelFile = projectFile.Path;
+                }
+                else
+                {
+                    StoryModelFile = fromPath;
                 }
 
-                StoryModelFile = fromPath;
                 if (StoryModelFile == null)
                 {
                     logger.Log(LogLevel.Warn, "Open File command failed: StoryModel.ProjectFile is null.");
@@ -239,17 +243,17 @@ public class OutlineViewModel : ObservableRecipient
             shellVm.ShowHomePage();
 
             // Ensure the filename has .stbx extension
-            if (!Path.GetExtension(dialogVm.ProjectName)!.Equals(".stbx"))
+            if (!Path.GetExtension(dialogVm.OutlineName)!.Equals(".stbx"))
             {
-                dialogVm.ProjectName += ".stbx";
+                dialogVm.OutlineName += ".stbx";
             }
 
             using (var serializationLock = new SerializationLock(autoSaveService, backupService, logger))
             {
                 // Create the new outline's file
-                StorageFolder folder = await StorageFolder.GetFolderFromPathAsync(dialogVm.ProjectPath);
+                StorageFolder folder = await StorageFolder.GetFolderFromPathAsync(dialogVm.OutlineFolder);
                 StoryModelFile =
-                    (await folder.CreateFileAsync(dialogVm.ProjectName, CreationCollisionOption.GenerateUniqueName))
+                    (await folder.CreateFileAsync(dialogVm.OutlineName, CreationCollisionOption.GenerateUniqueName))
                     .Path;
 
                 // Create the StoryModel
@@ -297,13 +301,13 @@ public class OutlineViewModel : ObservableRecipient
     }
 
     /// <summary>
-    /// Opens the unified menu
+    /// Opens the file open menu
     /// </summary>
-    public async Task OpenUnifiedMenu()
+    public async Task OpenFileOpenMenu()
     {
         logger.Log(LogLevel.Info, "Opening File Menu");
 
-        shellVm._contentDialog = new() { Content = new UnifiedMenuPage() };
+        shellVm._contentDialog = new() { Content = new FileOpenMenuPage() };
         if (window.RequestedTheme == ElementTheme.Light)
         {
             shellVm._contentDialog.RequestedTheme = window.RequestedTheme;
@@ -572,7 +576,7 @@ public class OutlineViewModel : ObservableRecipient
             StoryModelFile = Path.Combine(preferences.Model.ProjectDirectory, Path.GetFileName(StoryModelFile)!);
 
             // Last opened file with reference to this version
-            preferences.Model.LastFile1 = StoryModelFile;
+            preferences.Model.RecentFiles.Insert(0, StoryModelFile);
         }
         catch (Exception ex)
         {

@@ -26,7 +26,6 @@ public sealed partial class Shell
 {
     public ShellViewModel ShellVm => Ioc.Default.GetService<ShellViewModel>();
     public Windowing Windowing => Ioc.Default.GetService<Windowing>();
-    public FileOpenVM UnifiedVm => Ioc.Default.GetService<FileOpenVM>();
     public OutlineViewModel OutlineVM => Ioc.Default.GetService<OutlineViewModel>();
     public LogService Logger;
     public PreferencesModel Preferences = Ioc.Default.GetRequiredService<PreferenceService>().Model;
@@ -107,10 +106,10 @@ public sealed partial class Shell
 	        await Ioc.Default.GetRequiredService<Windowing>().ShowContentDialog(cd);
 		}
 
-        //If StoryCAD was loaded from a .STBX File then instead of showing the Unified menu
+        //If StoryCAD was loaded from a .STBX File then instead of showing the file open menu
         //We will instead load the file instead.
         Logger.Log(LogLevel.Info, $"Filepath to launch {ShellVm.FilePathToLaunch}");
-        if (ShellVm.FilePathToLaunch == null) { await ShellVm.OutlineManager.OpenUnifiedMenu(); }
+        if (ShellVm.FilePathToLaunch == null) { await ShellVm.OutlineManager.OpenFileOpenMenu(); }
         else { await ShellVm.OutlineManager.OpenFile(ShellVm.FilePathToLaunch); }
 
 		//Ask user for review if appropriate.
