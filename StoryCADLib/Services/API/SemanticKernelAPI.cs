@@ -1,13 +1,9 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Text.Json;
 using System.Text.Json.Serialization;
-using Windows.Storage;
 using StoryCAD.Services.Outline;
 using Microsoft.SemanticKernel;
-using StoryCAD.DAL;
 using System.Reflection;
-using System.ClientModel.Primitives;
 
 namespace StoryCAD.Services.API;
 
@@ -166,6 +162,33 @@ public class SemanticKernelApi
         //TODO: force set uuid somehow.
         updated.Uuid = guid;
         CurrentModel.StoryElements.StoryElementGuids[guid] = updated;
+    }
+
+    /// <summary>
+    /// Updates specified properties for a story element identified by its GUID.
+    /// A dictionary is used to specify the properties to update, where keys are
+    /// property names and values are the new values.
+    /// Iterates over each property in the dictionary and calls UpdateElementProperty.
+    /// </summary>
+    /// <param name="elementGuid">The GUID of the story element to update.</param>
+    /// <param name="properties">A Dictionary where keys are property names and values are the new values.</param>
+    /// <returns>void if all properties are updated successfully, exception otherwise.</returns>
+    [KernelFunction, Description(
+         """
+         Updates multiple properties for a given story element within the outline.
+         This function is a wrapper for UpdateElementProperty and iterates over each 
+         property in a dictionary of properties to update.
+         Guidelines:
+         - You must provide the StoryElement GUID as a parameter. 
+         - All properties will be updated for the same StoryElement.
+         - UpdateElementProperty edits each properties of the StoryElement.
+         """)]
+    public void UpdateElementProperties(Guid elementGuid, Dictionary<string, object> properties)
+    {
+        foreach (var kvp in properties)
+        {
+            var result = UpdateElementProperty(elementGuid, kvp.Key, kvp.Value);
+        }
     }
 
     [KernelFunction, Description("Returns a single element and all its fields.")]
