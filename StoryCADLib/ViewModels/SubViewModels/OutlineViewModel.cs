@@ -267,11 +267,11 @@ public class OutlineViewModel : ObservableRecipient
             shellVm.SetCurrentView(StoryViewType.ExplorerView);
 
             Ioc.Default.GetRequiredService<FileOpenVM>().UpdateRecents(StoryModelFile);
+            StoryModel.Changed = true;
+            await SaveFile();
+
             using (var serializationLock = new SerializationLock(autoSaveService, backupService, logger))
             {
-                StoryModel.Changed = true;
-                await SaveFile();
-
                 if (preferences.Model.BackupOnOpen)
                 {
                     await shellVm.MakeBackup();

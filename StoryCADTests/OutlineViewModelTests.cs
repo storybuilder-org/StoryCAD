@@ -3,6 +3,7 @@ using StoryCAD.ViewModels.SubViewModels;
 using System.IO;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.DependencyInjection;
+using Microsoft.UI.Dispatching;
 using StoryCAD.Services.Outline;
 using StoryCAD.ViewModels;
 using StoryCAD.ViewModels.Tools;
@@ -27,23 +28,19 @@ namespace StoryCADTests
 
         // Test for UnifiedNewFile method
         [TestMethod]
-        public async Task TestUnifiedNewFile()
+        public async Task TestNewFileVM()
         {
-            // Arrange
-            // Create a stubbed UnifiedVM instance with test properties.
-            FileOpenVM dialogVm = new FileOpenVM
-            {
-                OutlineName = "TestProject",
-                OutlineFolder = System.IO.Path.GetTempPath() // Use temp path for testing
-            };
+            var filevm = Ioc.Default.GetRequiredService<FileOpenVM>();
 
-            // Act
-            await outlineVM.CreateFile(dialogVm);
+            //Set files
+            filevm.OutlineName = "NewFileTest.stbx";
+            filevm.OutlineFolder = App.ResultsDir;
+            filevm.SelectedTemplateIndex = 0;
 
-            // Assert
-            // TODO: Add assertions to verify the StoryModel is reset,
-            // the file is created at the expected location, etc.
-            Assert.Inconclusive("UnifiedNewFile test not implemented.");
+            //Assert
+            string file = await filevm.CreateFile();
+            Assert.IsTrue(!string.IsNullOrEmpty(file));
+            Assert.IsTrue(File.Exists(file));
         }
 
         // Test for WriteModel method
