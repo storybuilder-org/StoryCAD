@@ -1,0 +1,56 @@
+{
+  "CreatedVersion": null,
+  "LastVersion": "Version: 3.0.0 Built on: 2025-03-28T18:13:22:109Z",
+  "FlattenedExplorerView": [
+    {
+      "Uuid": "d87f378c-5601-4632-a5b1-50eec42c96e1",
+      "ParentUuid": null
+    },
+    {
+      "Uuid": "60fb5bb8-8c12-4168-8eb4-e84e9bb96d3b",
+      "ParentUuid": null
+    }
+  ],
+  "FlattenedNarratorView": [
+    {
+      "Uuid": "81621919-7257-4581-8399-ffee5531f8a2",
+      "ParentUuid": null
+    }
+  ],
+  "Elements": [
+    {
+      "Type": "StoryOverview",
+      "DateCreated": "2025-04-07",
+      "Author": "Jake Shaw",
+      "DateModified": "",
+      "StoryIdea": "",
+      "Concept": "",
+      "StoryProblem": "",
+      "Premise": "",
+      "StoryType": "",
+      "StoryGenre": "",
+      "Viewpoint": "",
+      "ViewpointCharacter": "",
+      "Voice": "",
+      "LiteraryDevice": "",
+      "Tense": "",
+      "Style": "",
+      "StructureNotes": "",
+      "Tone": "",
+      "Notes": "",
+      "GUID": "d87f378c-5601-4632-a5b1-50eec42c96e1",
+      "Name": "AddElement"
+    },
+    {
+      "Type": "TrashCan",
+      "GUID": "60fb5bb8-8c12-4168-8eb4-e84e9bb96d3b",
+      "Name": "Deleted Story Elements"
+    },
+    {
+      "Type": "Folder",
+      "Notes": "",
+      "GUID": "81621919-7257-4581-8399-ffee5531f8a2",
+      "Name": "Narrative View"
+    }
+  ]
+}
