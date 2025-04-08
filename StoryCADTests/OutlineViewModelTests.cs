@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using StoryCAD.ViewModels.SubViewModels;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Dispatching;
@@ -39,7 +40,7 @@ namespace StoryCADTests
 
             //Assert
             string file = await filevm.CreateFile();
-            Assert.IsTrue(!string.IsNullOrEmpty(file));
+            Assert.IsFalse(string.IsNullOrEmpty(file));
             Assert.IsTrue(File.Exists(file));
         }
 
@@ -82,13 +83,6 @@ namespace StoryCADTests
         }
 
         [TestMethod]
-        public void TestOpenUnifiedMenu()
-        {
-            // TODO: Invoke outlineVM.OpenUnifiedMenu and check that the UI dialog is handled.
-            Assert.Inconclusive("Test for OpenUnifiedMenu not implemented.");
-        }
-
-        [TestMethod]
         public async Task TestPrintCurrentNodeAsync()
         {
             // TODO: Setup a selected node and invoke PrintCurrentNodeAsync.
@@ -105,36 +99,70 @@ namespace StoryCADTests
         [TestMethod]
         public void TestTopicsTool()
         {
-            // TODO: Invoke outlineVM.TopicsTool and assert its side effects.
-            Assert.Inconclusive("Test for TopicsTool not implemented.");
+            var topicVm = Ioc.Default.GetRequiredService<TopicsViewModel>();
+            string title =  topicVm.SubTopicNote;
+            topicVm.NextSubTopic();
+            Assert.IsTrue(topicVm.SubTopicNote != title, "Topic name did not change.");
         }
 
         [TestMethod]
-        public void TestMasterPlotTool()
+        public async Task TestMasterPlotTool()
         {
-            // TODO: Invoke outlineVM.MasterPlotTool and validate that the master plot is inserted.
-            Assert.Inconclusive("Test for MasterPlotTool not implemented.");
+            //Create outline
+            var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+            outlineVM.StoryModel = await outlineService.CreateModel("Test-Masterplots", "StoryBuilder", 0);
+            outlineVM.StoryModelFile = Path.Combine(App.ResultsDir, "Masterplots.stbx");
+            shell.SetCurrentView(StoryViewType.ExplorerView);
+            shell.RightTappedNode = outlineVM.StoryModel.StoryElements[0].Node;
+
+
+            //Setup plot vm
+            var masterPlotsVM = Ioc.Default.GetRequiredService<MasterPlotsViewModel>();
+            masterPlotsVM.PlotPatternName = masterPlotsVM.PlotPatternNames[4];
+
+            //Run and assert
+            await outlineVM.MasterPlotTool();
+            Assert.IsTrue(outlineVM.StoryModel.StoryElements[3].Name  == masterPlotsVM.PlotPatternNames[4]);
         }
 
         [TestMethod]
         public async Task TestDramaticSituationsTool()
         {
-            var Shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+            //Create outline
+            var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
             outlineVM.StoryModel = await outlineService.CreateModel("Test", "StoryBuilder", 0);
             outlineVM.StoryModelFile = Path.Combine(App.ResultsDir, "Dramatic.stbx");
-            Shell.SetCurrentView(StoryViewType.ExplorerView);
-            //await outlineVM.OpenFile(Path.Combine(App.InputDir, "Full3.stbx"));
-            Shell.RightTappedNode = outlineVM.StoryModel.StoryElements[0].Node;
+
+            //Set view
+            shell.SetCurrentView(StoryViewType.ExplorerView);
+            shell.RightTappedNode = outlineVM.StoryModel.StoryElements[0].Node;
+
+            //Run scenario
             Ioc.Default.GetRequiredService<DramaticSituationsViewModel>().SituationName = "Abduction";
             await outlineVM.DramaticSituationsTool();
             Assert.IsTrue(outlineVM.StoryModel.StoryElements.Count > 2, "Dramatic situation not added.");
         }
 
         [TestMethod]
-        public void TestStockScenesTool()
+        public async Task TestStockScenesTool()
         {
-            // TODO: Invoke outlineVM.StockScenesTool and verify the scene insertion logic.
-            Assert.Inconclusive("Test for StockScenesTool not implemented.");
+            //Create outline
+            var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+            outlineVM.StoryModel = await outlineService.CreateModel("TestStock", "StoryBuilder", 0);
+            outlineVM.StoryModelFile = Path.Combine(App.ResultsDir, "Stock.stbx");
+
+            //Set view
+            shell.SetCurrentView(StoryViewType.ExplorerView);
+            shell.RightTappedNode = outlineVM.StoryModel.StoryElements[0].Node;
+
+            //run scenario
+            var stockVM = Ioc.Default.GetRequiredService<StockScenesViewModel>();
+            stockVM.SceneName = "The police join the chase";
+            await outlineVM.StockScenesTool();
+
+
+            Assert.IsTrue(outlineVM.StoryModel.StoryElements[3].Name == "The police join the chase",
+                "Stock scene not added.");
         }
 
         [TestMethod]

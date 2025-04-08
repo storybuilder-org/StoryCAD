@@ -266,7 +266,7 @@ public class OutlineViewModel : ObservableRecipient
 
             shellVm.SetCurrentView(StoryViewType.ExplorerView);
 
-            Ioc.Default.GetRequiredService<FileOpenVM>().UpdateRecents(StoryModelFile);
+            await Ioc.Default.GetRequiredService<FileOpenVM>().UpdateRecents(StoryModelFile);
             StoryModel.Changed = true;
             await SaveFile();
 
@@ -275,17 +275,6 @@ public class OutlineViewModel : ObservableRecipient
                 if (preferences.Model.BackupOnOpen)
                 {
                     await shellVm.MakeBackup();
-                }
-
-                // Start the timed backup and auto save services
-                if (preferences.Model.TimedBackup)
-                {
-                    Ioc.Default.GetRequiredService<BackupService>().StartTimedBackup();
-                }
-
-                if (preferences.Model.AutoSave)
-                {
-                    Ioc.Default.GetRequiredService<AutoSaveService>().StartAutoSave();
                 }
 
                 shellVm.TreeViewNodeClicked(StoryModel.ExplorerView[0]);
@@ -752,14 +741,19 @@ public class OutlineViewModel : ObservableRecipient
             logger.Log(LogLevel.Info, "Displaying MasterPlot tool dialog");
             if (VerifyToolUse(true, true))
             {
-                //Creates and shows content dialog
-                ContentDialog dialog = new()
+                ContentDialog? dialog = null;
+                if (!Ioc.Default.GetRequiredService<AppState>().Headless)
                 {
-                    Title = "Master plots",
-                    PrimaryButtonText = "Copy",
-                    SecondaryButtonText = "Cancel",
-                    Content = new MasterPlotsDialog()
-                };
+                    //Creates and shows content dialog
+                    dialog = new()
+                    {
+                        Title = "Master plots",
+                        PrimaryButtonText = "Copy",
+                        SecondaryButtonText = "Cancel",
+                        Content = new MasterPlotsDialog()
+                    };
+                }
+
                 ContentDialogResult result = await window.ShowContentDialog(dialog);
 
                 if (result == ContentDialogResult.Primary) // Copy command
@@ -876,13 +870,19 @@ public class OutlineViewModel : ObservableRecipient
                 try
                 {
                     //Creates and shows dialog
-                    ContentDialog dialog = new()
+                    ContentDialog? dialog = null;
+
+                    if (!Ioc.Default.GetRequiredService<AppState>().Headless)
                     {
-                        Title = "Stock scenes",
-                        Content = new StockScenesDialog(),
-                        PrimaryButtonText = "Add Scene",
-                        CloseButtonText = "Cancel",
-                    };
+                        dialog = new()
+                        {
+                            Title = "Stock scenes",
+                            Content = new StockScenesDialog(),
+                            PrimaryButtonText = "Add Scene",
+                            CloseButtonText = "Cancel",
+                        };
+                    }
+
                     ContentDialogResult result = await window.ShowContentDialog(dialog);
 
                     if (result == ContentDialogResult.Primary) // Copy command
@@ -894,13 +894,13 @@ public class OutlineViewModel : ObservableRecipient
                             return;
                         }
 
-                        SceneModel sceneVar = new()
-                            { Name = Ioc.Default.GetRequiredService<StockScenesViewModel>().SceneName };
-                        StoryNodeItem newNode = new(sceneVar, shellVm.RightTappedNode);
+                        SceneModel sceneVar = new(Ioc.Default.GetRequiredService<StockScenesViewModel>().SceneName,
+                            StoryModel, shellVm.RightTappedNode);
+
                         shellVm._sourceChildren = shellVm.RightTappedNode.Children;
-                        shellVm.TreeViewNodeClicked(newNode);
+                        shellVm.TreeViewNodeClicked(sceneVar.Node);
                         shellVm.RightTappedNode.IsExpanded = true;
-                        newNode.IsSelected = true;
+                        sceneVar.Node.IsSelected = true;
                         Messenger.Send(new StatusChangedMessage(new("Stock Scenes inserted", LogLevel.Info)));
                     }
                     else

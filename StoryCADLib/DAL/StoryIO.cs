@@ -259,7 +259,7 @@ public class StoryIO
         //Checks file name validity
         try
         {
-            string dir = Path.GetFullPath(path);
+            string dir = Path.GetDirectoryName(path);
             string file = Path.GetFileName(path);
             // Try creating directory (will throw if invalid)
             Directory.CreateDirectory(dir ?? "");
