@@ -1,5 +1,4 @@
-﻿using Windows.Storage;
-using Microsoft.UI.Xaml;
+﻿using Microsoft.UI.Xaml;
 
 namespace StoryCAD.Services.Dialogs;
 
@@ -13,22 +12,14 @@ public sealed partial class SaveAsDialog : Page
 
     public SaveAsViewModel SaveAsVm => Ioc.Default.GetService<SaveAsViewModel>();
 
-    public StorageFolder ParentFolder { get; set; }
-    public string ParentFolderPath { get; set; }
-    public string ProjectFolderPath { get; set; }
-
     private async void OnBrowse(object sender, RoutedEventArgs e)
     {
         ProjectPathName.IsReadOnly = false;
         // may throw error if invalid folder location
-        ParentFolder = await Ioc.Default.GetService<Windowing>().ShowFolderPicker();
-        SaveAsVm.ParentFolder = ParentFolder.Path;
+        SaveAsVm.ParentFolder = (await Ioc.Default.GetService<Windowing>().ShowFolderPicker()).Path;
 
-        if (ParentFolder != null)
+        if (SaveAsVm.ParentFolder != null)
         {
-            ProjectFolderPath = ParentFolder.Path;
-            ProjectPathName.Text = ProjectFolderPath;
-            SaveAsVm.ProjectPathName = ProjectFolderPath;
             ProjectPathName.IsReadOnly = true;
         }
     }

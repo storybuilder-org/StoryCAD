@@ -7,10 +7,10 @@
     mc:Ignorable="d">
 
     <StackPanel Padding="14,14,14,24">
-
-        <TextBox x:Name="ProjectName" Margin="10"  x:FieldModifier="public" Width="400" HorizontalAlignment="Left" Header="New project Name" Text="{x:Bind SaveAsVm.ProjectName, Mode=TwoWay}" />
+        <TextBox x:Name="ProjectName" Margin="10"  x:FieldModifier="public" Width="400"
+                 HorizontalAlignment="Left" Header="New project Name" Text="{x:Bind SaveAsVm.ProjectName, Mode=TwoWay}" />
         <StackPanel Orientation="Horizontal" Margin="14">
-            <TextBox x:Name="ProjectPathName" Header="Parent Folder Path" Width="330" Text="{x:Bind SaveAsVm.ProjectPathName, Mode=TwoWay}" Margin="0,0,5,0"/>
+            <TextBox x:Name="ProjectPathName" Header="Parent Folder Path" Width="330" Text="{x:Bind SaveAsVm.ParentFolder, Mode=TwoWay}" Margin="0,0,5,0"/>
             <Button Content="Browse" Click="OnBrowse" VerticalAlignment="Bottom"/>
         </StackPanel>
     </StackPanel>

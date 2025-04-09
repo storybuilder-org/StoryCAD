@@ -350,7 +350,7 @@ public class OutlineViewModel : ObservableRecipient
         }
     }
 
-    public async void SaveFileAs()
+    public async Task SaveFileAs()
     {
         using (var serializationLock = new SerializationLock(autoSaveService, backupService, logger))
         {
@@ -364,10 +364,16 @@ public class OutlineViewModel : ObservableRecipient
                     return;
                 }
 
+                SaveAsViewModel saveAsVm = Ioc.Default.GetRequiredService<SaveAsViewModel>();
+
                 // Create the content dialog
                 ContentDialog? saveAsDialog = null;
                 if (!Ioc.Default.GetRequiredService<AppState>().Headless)
                 {
+                    // Set default values in the view model using the current story file info
+                    saveAsVm.ProjectName = Path.GetFileName(StoryModelFile);
+                    saveAsVm.ParentFolder = Path.GetDirectoryName(StoryModelFile);
+
                     saveAsDialog = new()
                     {
                         Title = "Save as",
@@ -377,10 +383,6 @@ public class OutlineViewModel : ObservableRecipient
                     };
                 }
 
-                // Set default values in the view model using the current story file info
-                SaveAsViewModel saveAsVm = Ioc.Default.GetRequiredService<SaveAsViewModel>();
-                saveAsVm.ProjectName = Path.GetFileName(StoryModelFile);
-                saveAsVm.ParentFolder = Path.GetDirectoryName(StoryModelFile);
 
                 ContentDialogResult result = await window.ShowContentDialog(saveAsDialog);
 
@@ -409,10 +411,10 @@ public class OutlineViewModel : ObservableRecipient
                             return;
                         }
 
-                        logger.Log(LogLevel.Info, $"Testing filename validity for {saveAsVm.SaveAsProjectFolderPath}\\{saveAsVm.ProjectName}");
+                        logger.Log(LogLevel.Info, $"Testing filename validity for {saveAsVm.ParentFolder}\\{saveAsVm.ProjectName}");
                         // Copy the current file to the new location/name
                         StorageFile currentFile = await StorageFile.GetFileFromPathAsync(StoryModelFile); 
-                        StorageFolder folder = await StorageFolder.GetFolderFromPathAsync(saveAsVm.SaveAsProjectFolderPath);
+                        StorageFolder folder = await StorageFolder.GetFolderFromPathAsync(saveAsVm.ParentFolder);
                         await currentFile.CopyAsync(folder, saveAsVm.ProjectName, NameCollisionOption.ReplaceExisting);
 
                         // Update the story file path to the new location
@@ -447,7 +449,7 @@ public class OutlineViewModel : ObservableRecipient
         logger.Log(LogLevel.Trace, "VerifyReplaceOrCreated");
 
         SaveAsViewModel saveAsVm = Ioc.Default.GetRequiredService<SaveAsViewModel>();
-        if (File.Exists(Path.Combine(saveAsVm.ProjectPathName, saveAsVm.ProjectName)) 
+        if (File.Exists(Path.Combine(saveAsVm.ParentFolder, saveAsVm.ProjectName)) 
             && !Ioc.Default.GetRequiredService<AppState>().Headless)
         {
             ContentDialog replaceDialog = new()
@@ -455,7 +457,7 @@ public class OutlineViewModel : ObservableRecipient
                 PrimaryButtonText = "Yes",
                 SecondaryButtonText = "No",
                 Title = "Replace file?",
-                Content = $"File {Path.Combine(saveAsVm.ProjectPathName,
+                Content = $"File {Path.Combine(saveAsVm.ParentFolder,
                     saveAsVm.ProjectName)} already exists. \n\nDo you want to replace it?",
             };
             return await window.ShowContentDialog(replaceDialog) == ContentDialogResult.Primary;

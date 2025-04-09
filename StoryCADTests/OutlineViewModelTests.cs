@@ -2,6 +2,7 @@
 using StoryCAD.ViewModels.SubViewModels;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Dispatching;
@@ -74,8 +75,8 @@ namespace StoryCADTests
 
             var saveasVM = Ioc.Default.GetRequiredService<SaveAsViewModel>();
             saveasVM.ProjectName = "SaveAsTest2.stbx";
-            saveasVM.ProjectPathName = App.ResultsDir;
-            outlineVM.SaveFileAs();
+            saveasVM.ParentFolder = App.ResultsDir;
+            await outlineVM.SaveFileAs();
 
             Assert.IsTrue(outlineVM.StoryModelFile == Path.Combine(App.ResultsDir, "SaveAsTest2.stbx"));
         }
@@ -86,6 +87,7 @@ namespace StoryCADTests
             //Check we have the file loaded
             await outlineVM.OpenFile(Path.Combine(App.InputDir, "CloseFileTest.stbx")); 
             Assert.IsTrue(outlineVM.StoryModel.StoryElements.Count != 0, "Story not loaded.");
+            Thread.Sleep(2500);
             await outlineVM.CloseFile();
             Assert.IsTrue(outlineVM.StoryModel.StoryElements.Count == 0, "Story not closed.");
         }

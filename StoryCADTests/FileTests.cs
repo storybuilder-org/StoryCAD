@@ -31,7 +31,7 @@ public class FileTests
     /// This creates a new STBX File to assure file creation works.
     /// </summary>
     [TestMethod]
-    public void FileCreation()
+    public async Task FileCreation()
     {
         OutlineViewModel OutlineVM = Ioc.Default.GetRequiredService<OutlineViewModel>();
 
@@ -75,7 +75,7 @@ public class FileTests
 
 		//Write file.
 		StoryIO _storyIO = Ioc.Default.GetRequiredService<StoryIO>();
-		_storyIO.WriteStory(OutlineVM.StoryModelFile, storyModel).GetAwaiter().GetResult();
+        await _storyIO.WriteStory(OutlineVM.StoryModelFile, storyModel);
 
         //Sleep to ensure file is written.
         Thread.Sleep(10000);
