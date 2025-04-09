@@ -365,13 +365,17 @@ public class OutlineViewModel : ObservableRecipient
                 }
 
                 // Create the content dialog
-                ContentDialog saveAsDialog = new()
+                ContentDialog? saveAsDialog = null;
+                if (!Ioc.Default.GetRequiredService<AppState>().Headless)
                 {
-                    Title = "Save as",
-                    PrimaryButtonText = "Save",
-                    SecondaryButtonText = "Cancel",
-                    Content = new SaveAsDialog()
-                };
+                    saveAsDialog = new()
+                    {
+                        Title = "Save as",
+                        PrimaryButtonText = "Save",
+                        SecondaryButtonText = "Cancel",
+                        Content = new SaveAsDialog()
+                    };
+                }
 
                 // Set default values in the view model using the current story file info
                 SaveAsViewModel saveAsVm = Ioc.Default.GetRequiredService<SaveAsViewModel>();
@@ -443,7 +447,8 @@ public class OutlineViewModel : ObservableRecipient
         logger.Log(LogLevel.Trace, "VerifyReplaceOrCreated");
 
         SaveAsViewModel saveAsVm = Ioc.Default.GetRequiredService<SaveAsViewModel>();
-        if (File.Exists(Path.Combine(saveAsVm.ProjectPathName, saveAsVm.ProjectName)))
+        if (File.Exists(Path.Combine(saveAsVm.ProjectPathName, saveAsVm.ProjectName)) 
+            && !Ioc.Default.GetRequiredService<AppState>().Headless)
         {
             ContentDialog replaceDialog = new()
             {

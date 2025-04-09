@@ -110,7 +110,7 @@ public class FileTests
     [TestMethod]
     public void InvalidFileAccessTest()
     {
-        Assert.IsTrue(StoryIO.IsValidPath("C:\\"));
+        Assert.IsTrue(StoryIO.IsValidPath("C:\\mytestpath\\"));
         Assert.IsFalse(StoryIO.IsValidPath("C:\\:::StoryCADTests::\\//"));
     }
 

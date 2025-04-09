@@ -66,10 +66,18 @@ namespace StoryCADTests
 
 
         [TestMethod]
-        public void TestSaveFileAs()
+        public async Task TestSaveFileAs()
         {
-            // TODO: Invoke outlineVM.SaveFileAs and verify the file path update.
-            Assert.Inconclusive("Test for SaveFileAs not implemented.");
+            var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+            outlineVM.StoryModel = await outlineService.CreateModel("Test", "StoryBuilder", 0);
+            outlineVM.StoryModelFile = Path.Combine(App.ResultsDir, "saveas.stbx");
+
+            var saveasVM = Ioc.Default.GetRequiredService<SaveAsViewModel>();
+            saveasVM.ProjectName = "SaveAsTest2.stbx";
+            saveasVM.ProjectPathName = App.ResultsDir;
+            outlineVM.SaveFileAs();
+
+            Assert.IsTrue(outlineVM.StoryModelFile == Path.Combine(App.ResultsDir, "SaveAsTest2.stbx"));
         }
 
         [TestMethod]
@@ -92,8 +100,10 @@ namespace StoryCADTests
         [TestMethod]
         public void TestKeyQuestionsTool()
         {
-            // TODO: Invoke outlineVM.KeyQuestionsTool and verify expected changes.
-            Assert.Inconclusive("Test for KeyQuestionsTool not implemented.");
+            var keyQuestionsVM = Ioc.Default.GetRequiredService<KeyQuestionsViewModel>();
+            string text = keyQuestionsVM.Question;
+            keyQuestionsVM.NextQuestion();
+            Assert.IsTrue(keyQuestionsVM.Question != text, "Key question did not change.");
         }
 
         [TestMethod]
