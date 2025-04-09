@@ -18,15 +18,12 @@ using StoryCAD.Services.Logging;
 using StoryCAD.Services.Outline;
 using StoryCAD.ViewModels.SubViewModels;
 using StoryCAD.Services.API;
-using Octokit;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace StoryCADTests;
 
 [TestClass]
 public class FileTests
 {
-
     /// <summary>
     /// This creates a new STBX File to assure file creation works.
     /// </summary>
@@ -56,11 +53,7 @@ public class FileTests
         //Add three test nodes.
         StoryElement _Problem = new ProblemModel("TestProblem", storyModel, overview.Node);
         CharacterModel _character = new CharacterModel("TestCharacter", storyModel, overview.Node);
-        SceneModel _scene = new SceneModel("TestScene", storyModel, overview.Node); 
-        //storyModel.ExplorerView.Add(new(_character, overviewNode,StoryItemType.Character));
-        //storyModel.ExplorerView.Add(new(_problem, overviewNode,StoryItemType.Problem));
-        //storyModel.ExplorerView.Add(new(_scene, overviewNode,StoryItemType.Scene));
-
+        SceneModel _scene = new SceneModel("TestScene", storyModel, overview.Node);
 
         //Check is loaded correctly
         Assert.IsTrue(storyModel.StoryElements.Count == 6);
