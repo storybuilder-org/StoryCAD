@@ -1,11 +1,9 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using StoryCAD.ViewModels.SubViewModels;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.DependencyInjection;
-using Microsoft.UI.Dispatching;
 using StoryCAD.Services.Outline;
 using StoryCAD.ViewModels;
 using StoryCAD.ViewModels.Tools;
@@ -41,12 +39,14 @@ namespace StoryCADTests
 
             //Assert
             string file = await filevm.CreateFile();
+            await outlineVM.WriteModel();
+            Thread.Sleep(1000);
             Assert.IsFalse(string.IsNullOrEmpty(file));
             Assert.IsTrue(File.Exists(file));
         }
 
         // Test for WriteModel method
-        [TestMethod]
+        [TestMethod] 
         public async Task TestWriteModel()
         {
             //Create challenge path

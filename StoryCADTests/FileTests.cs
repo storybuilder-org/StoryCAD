@@ -35,7 +35,7 @@ public class FileTests
         //Get ShellVM and clear the StoryModel
         StoryModel storyModel = new();
 
-        OutlineVM.StoryModelFile = Path.Combine(App.ResultsDir, "TestProject.stbx");
+        OutlineVM.StoryModelFile = Path.Combine(App.ResultsDir, "NewTestProject.stbx");
         
 		string name = Path.GetFileNameWithoutExtension(OutlineVM.StoryModelFile);
         OverviewModel overview = new(name, storyModel, null)
