@@ -192,7 +192,7 @@ namespace StoryCADTests
             string invalidPath = string.Empty;
 
             // Act & Assert
-            await Assert.ThrowsExceptionAsync<ArgumentException>(async () =>
+            await Assert.ThrowsExceptionAsync<ArgumentNullException>(async () =>
             {
                 await _outlineService.WriteModel(model, invalidPath);
             });
