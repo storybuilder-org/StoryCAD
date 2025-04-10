@@ -33,31 +33,30 @@ public class FileTests
         OutlineViewModel OutlineVM = Ioc.Default.GetRequiredService<OutlineViewModel>();
 
         //Get ShellVM and clear the StoryModel
-        StoryModel storyModel = new();
 
         OutlineVM.StoryModelFile = Path.Combine(App.ResultsDir, "NewTestProject.stbx");
-        
+        OutlineVM.StoryModel = new();
 		string name = Path.GetFileNameWithoutExtension(OutlineVM.StoryModelFile);
-        OverviewModel overview = new(name, storyModel, null)
+        OverviewModel overview = new(name, OutlineVM.StoryModel, null)
         {
             DateCreated = DateTime.Today.ToString("yyyy-MM-dd"),
             Author = "StoryCAD Tests"
         };
 
-        storyModel.ExplorerView.Add(overview.Node);
-        TrashCanModel trash = new(storyModel, null);
-        storyModel.ExplorerView.Add(trash.Node); // The trashcan is the second root
-        FolderModel narrative = new("Narrative View", storyModel, StoryItemType.Folder, null);
-        storyModel.NarratorView.Add(narrative.Node);
+        OutlineVM.StoryModel.ExplorerView.Add(overview.Node);
+        TrashCanModel trash = new(OutlineVM.StoryModel, null);
+        OutlineVM.StoryModel.ExplorerView.Add(trash.Node); // The trashcan is the second root
+        FolderModel narrative = new("Narrative View", OutlineVM.StoryModel, StoryItemType.Folder, null);
+        OutlineVM.StoryModel.NarratorView.Add(narrative.Node);
         
         //Add three test nodes.
-        StoryElement _Problem = new ProblemModel("TestProblem", storyModel, overview.Node);
-        CharacterModel _character = new CharacterModel("TestCharacter", storyModel, overview.Node);
-        SceneModel _scene = new SceneModel("TestScene", storyModel, overview.Node);
+        StoryElement _Problem = new ProblemModel("TestProblem", OutlineVM.StoryModel, overview.Node);
+        CharacterModel _character = new CharacterModel("TestCharacter", OutlineVM.StoryModel, overview.Node);
+        SceneModel _scene = new SceneModel("TestScene", OutlineVM.StoryModel, overview.Node);
 
         //Check is loaded correctly
-        Assert.IsTrue(storyModel.StoryElements.Count == 6);
-        Assert.IsTrue(storyModel.StoryElements[0].ElementType == StoryItemType.StoryOverview);
+        Assert.IsTrue(OutlineVM.StoryModel.StoryElements.Count == 6);
+        Assert.IsTrue(OutlineVM.StoryModel.StoryElements[0].ElementType == StoryItemType.StoryOverview);
 
         //Because we have created a file in this way we must populate ProjectFolder and ProjectFile.
         string dir = Path.GetDirectoryName(OutlineVM.StoryModelFile);
@@ -67,8 +66,7 @@ public class FileTests
         }
 
 		//Write file.
-		StoryIO _storyIO = Ioc.Default.GetRequiredService<StoryIO>();
-        await _storyIO.WriteStory(OutlineVM.StoryModelFile, storyModel);
+        await OutlineVM.WriteModel();
 
         //Sleep to ensure file is written.
         Thread.Sleep(10000);
