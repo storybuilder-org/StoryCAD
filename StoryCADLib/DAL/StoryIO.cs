@@ -21,7 +21,10 @@ public class StoryIO
     /// </summary>
     public async Task WriteStory(string output_path, StoryModel model)
     {
-		StorageFolder folder = await StorageFolder.GetFolderFromPathAsync(Path.GetDirectoryName(output_path));
+        string parent = Path.GetDirectoryName(output_path);
+        Directory.CreateDirectory(parent);
+
+        StorageFolder folder = await StorageFolder.GetFolderFromPathAsync(parent);
         var output = await folder.CreateFileAsync(Path.GetFileName(output_path), CreationCollisionOption.OpenIfExists);
 		_logService.Log(LogLevel.Info, $"Saving Model to disk as {output_path}  " + 
 				$"Elements: {model.StoryElements.StoryElementGuids.Count}");
@@ -259,7 +262,7 @@ public class StoryIO
         //Checks file name validity
         try
         {
-            string dir = Path.GetFullPath(path);
+            string dir = Path.GetDirectoryName(path);
             string file = Path.GetFileName(path);
             // Try creating directory (will throw if invalid)
             Directory.CreateDirectory(dir ?? "");

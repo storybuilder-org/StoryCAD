@@ -164,13 +164,16 @@ public class BackupService
         }
         catch (Exception ex)
         {
-            Ioc.Default.GetRequiredService<Windowing>().GlobalDispatcher.TryEnqueue(() =>
+            if (!Ioc.Default.GetRequiredService<AppState>().Headless)
             {
-                Ioc.Default.GetRequiredService<ShellViewModel>().ShowMessage(
-                    LogLevel.Warn,
-                    "Making a backup failed, check your backup settings.",
-                    false);
-            });
+                Ioc.Default.GetRequiredService<Windowing>().GlobalDispatcher.TryEnqueue(() =>
+                {
+                    Ioc.Default.GetRequiredService<ShellViewModel>().ShowMessage(
+                        LogLevel.Warn,
+                        "Making a backup failed, check your backup settings.",
+                        false);
+                });
+            }
             Log.LogException(LogLevel.Error, ex, $"Error backing up project {ex.Message}");
         }
         Log.Log(LogLevel.Info, "BackupProject complete");

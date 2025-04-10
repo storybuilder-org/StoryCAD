@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using StoryCAD.ViewModels.SubViewModels;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using StoryCAD.Services.Outline;
@@ -27,27 +28,25 @@ namespace StoryCADTests
 
         // Test for UnifiedNewFile method
         [TestMethod]
-        public async Task TestUnifiedNewFile()
+        public async Task TestNewFileVM()
         {
-            // Arrange
-            // Create a stubbed UnifiedVM instance with test properties.
-            FileOpenVM dialogVm = new FileOpenVM
-            {
-                OutlineName = "TestProject",
-                OutlineFolder = System.IO.Path.GetTempPath() // Use temp path for testing
-            };
+            var filevm = Ioc.Default.GetRequiredService<FileOpenVM>();
 
-            // Act
-            await outlineVM.CreateFile(dialogVm);
+            //Set files
+            filevm.OutlineName = "NewFileTest.stbx";
+            filevm.OutlineFolder = App.ResultsDir;
+            filevm.SelectedTemplateIndex = 0;
 
-            // Assert
-            // TODO: Add assertions to verify the StoryModel is reset,
-            // the file is created at the expected location, etc.
-            Assert.Inconclusive("UnifiedNewFile test not implemented.");
+            //Assert
+            string file = await filevm.CreateFile();
+            await outlineVM.WriteModel();
+            Thread.Sleep(1000);
+            Assert.IsFalse(string.IsNullOrEmpty(file));
+            Assert.IsTrue(File.Exists(file));
         }
 
         // Test for WriteModel method
-        [TestMethod]
+        [TestMethod] 
         public async Task TestWriteModel()
         {
             //Create challenge path
@@ -68,10 +67,18 @@ namespace StoryCADTests
 
 
         [TestMethod]
-        public void TestSaveFileAs()
+        public async Task TestSaveFileAs()
         {
-            // TODO: Invoke outlineVM.SaveFileAs and verify the file path update.
-            Assert.Inconclusive("Test for SaveFileAs not implemented.");
+            var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+            outlineVM.StoryModel = await outlineService.CreateModel("Test", "StoryBuilder", 0);
+            outlineVM.StoryModelFile = Path.Combine(App.ResultsDir, "saveas.stbx");
+
+            var saveasVM = Ioc.Default.GetRequiredService<SaveAsViewModel>();
+            saveasVM.ProjectName = "SaveAsTest2.stbx";
+            saveasVM.ParentFolder = App.ResultsDir;
+            await outlineVM.SaveFileAs();
+
+            Assert.IsTrue(outlineVM.StoryModelFile == Path.Combine(App.ResultsDir, "SaveAsTest2.stbx"));
         }
 
         [TestMethod]
@@ -80,15 +87,9 @@ namespace StoryCADTests
             //Check we have the file loaded
             await outlineVM.OpenFile(Path.Combine(App.InputDir, "CloseFileTest.stbx")); 
             Assert.IsTrue(outlineVM.StoryModel.StoryElements.Count != 0, "Story not loaded.");
+            Thread.Sleep(2500);
             await outlineVM.CloseFile();
             Assert.IsTrue(outlineVM.StoryModel.StoryElements.Count == 0, "Story not closed.");
-        }
-
-        [TestMethod]
-        public void TestOpenUnifiedMenu()
-        {
-            // TODO: Invoke outlineVM.OpenUnifiedMenu and check that the UI dialog is handled.
-            Assert.Inconclusive("Test for OpenUnifiedMenu not implemented.");
         }
 
         [TestMethod]
@@ -101,43 +102,79 @@ namespace StoryCADTests
         [TestMethod]
         public void TestKeyQuestionsTool()
         {
-            // TODO: Invoke outlineVM.KeyQuestionsTool and verify expected changes.
-            Assert.Inconclusive("Test for KeyQuestionsTool not implemented.");
+            var keyQuestionsVM = Ioc.Default.GetRequiredService<KeyQuestionsViewModel>();
+            string text = keyQuestionsVM.Question;
+            keyQuestionsVM.NextQuestion();
+            Assert.IsTrue(keyQuestionsVM.Question != text, "Key question did not change.");
         }
 
         [TestMethod]
         public void TestTopicsTool()
         {
-            // TODO: Invoke outlineVM.TopicsTool and assert its side effects.
-            Assert.Inconclusive("Test for TopicsTool not implemented.");
+            var topicVm = Ioc.Default.GetRequiredService<TopicsViewModel>();
+            string title =  topicVm.SubTopicNote;
+            topicVm.NextSubTopic();
+            Assert.IsTrue(topicVm.SubTopicNote != title, "Topic name did not change.");
         }
 
         [TestMethod]
-        public void TestMasterPlotTool()
+        public async Task TestMasterPlotTool()
         {
-            // TODO: Invoke outlineVM.MasterPlotTool and validate that the master plot is inserted.
-            Assert.Inconclusive("Test for MasterPlotTool not implemented.");
+            //Create outline
+            var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+            outlineVM.StoryModel = await outlineService.CreateModel("Test-Masterplots", "StoryBuilder", 0);
+            outlineVM.StoryModelFile = Path.Combine(App.ResultsDir, "Masterplots.stbx");
+            shell.SetCurrentView(StoryViewType.ExplorerView);
+            shell.RightTappedNode = outlineVM.StoryModel.StoryElements[0].Node;
+
+
+            //Setup plot vm
+            var masterPlotsVM = Ioc.Default.GetRequiredService<MasterPlotsViewModel>();
+            masterPlotsVM.PlotPatternName = masterPlotsVM.PlotPatternNames[4];
+
+            //Run and assert
+            await outlineVM.MasterPlotTool();
+            Assert.IsTrue(outlineVM.StoryModel.StoryElements[3].Name  == masterPlotsVM.PlotPatternNames[4]);
         }
 
         [TestMethod]
         public async Task TestDramaticSituationsTool()
         {
-            var Shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+            //Create outline
+            var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
             outlineVM.StoryModel = await outlineService.CreateModel("Test", "StoryBuilder", 0);
             outlineVM.StoryModelFile = Path.Combine(App.ResultsDir, "Dramatic.stbx");
-            Shell.SetCurrentView(StoryViewType.ExplorerView);
-            //await outlineVM.OpenFile(Path.Combine(App.InputDir, "Full3.stbx"));
-            Shell.RightTappedNode = outlineVM.StoryModel.StoryElements[0].Node;
+
+            //Set view
+            shell.SetCurrentView(StoryViewType.ExplorerView);
+            shell.RightTappedNode = outlineVM.StoryModel.StoryElements[0].Node;
+
+            //Run scenario
             Ioc.Default.GetRequiredService<DramaticSituationsViewModel>().SituationName = "Abduction";
             await outlineVM.DramaticSituationsTool();
             Assert.IsTrue(outlineVM.StoryModel.StoryElements.Count > 2, "Dramatic situation not added.");
         }
 
         [TestMethod]
-        public void TestStockScenesTool()
+        public async Task TestStockScenesTool()
         {
-            // TODO: Invoke outlineVM.StockScenesTool and verify the scene insertion logic.
-            Assert.Inconclusive("Test for StockScenesTool not implemented.");
+            //Create outline
+            var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+            outlineVM.StoryModel = await outlineService.CreateModel("TestStock", "StoryBuilder", 0);
+            outlineVM.StoryModelFile = Path.Combine(App.ResultsDir, "Stock.stbx");
+
+            //Set view
+            shell.SetCurrentView(StoryViewType.ExplorerView);
+            shell.RightTappedNode = outlineVM.StoryModel.StoryElements[0].Node;
+
+            //run scenario
+            var stockVM = Ioc.Default.GetRequiredService<StockScenesViewModel>();
+            stockVM.SceneName = "The police join the chase";
+            await outlineVM.StockScenesTool();
+
+
+            Assert.IsTrue(outlineVM.StoryModel.StoryElements[3].Name == "The police join the chase",
+                "Stock scene not added.");
         }
 
         [TestMethod]

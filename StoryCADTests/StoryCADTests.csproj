@@ -24,6 +24,9 @@
 		<None Update=".env">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
+		<None Update="TestInputs\AddElement.stbx">
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
 		<None Update="TestInputs\CloseFileTest.stbx">
 		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>

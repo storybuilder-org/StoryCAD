@@ -409,24 +409,17 @@ public class SemanticKernelApi
                                  """)]
     public bool AddRelationship(Guid source, Guid recipient, string desc, bool mirror = false)
     {
-        try
+        if (source == Guid.Empty)
         {
-            if (source == Guid.Empty)
-            {
-                throw new ArgumentNullException(nameof(source));
-            }
-
-            if (recipient == Guid.Empty)
-            {
-                throw new ArgumentNullException(nameof(recipient));
-            }
-
-            _outlineService.AddRelationship(CurrentModel, source, recipient, desc, mirror);
-            return true;
+            throw new ArgumentNullException(nameof(source));
         }
-        catch (Exception ex)
+
+        if (recipient == Guid.Empty)
         {
-            throw new Exception($"Error in AddRelationship: {ex.Message}");
+            throw new ArgumentNullException(nameof(recipient));
         }
+
+        _outlineService.AddRelationship(CurrentModel, source, recipient, desc, mirror);
+        return true;
     }
 }

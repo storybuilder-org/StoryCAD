@@ -310,16 +310,10 @@ public class FileOpenVM : ObservableRecipient
                 break;
 
             case "New":
-                filePath = Path.Combine(OutlineFolder, OutlineName);
-                if (StoryIO.IsValidPath(filePath))
+                filePath = await CreateFile();
+                if (filePath == "")
                 {
-                    _preferences.Model.LastSelectedTemplate = SelectedTemplateIndex;
-                    await _outlineVm.CreateFile(this);
-                }
-                else
-                {
-                    OutlineName = "";
-                    OutlineFolder = _preferences.Model.ProjectDirectory;
+                    //Show warning if we have a bad file name
                     ShowWarning = true;
                     WarningText = "Your outline name or folder has disallowed characters";
                     return;
@@ -342,6 +336,19 @@ public class FileOpenVM : ObservableRecipient
 
         PreferencesIo loader = new();
         await loader.WritePreferences(_preferences.Model);
+    }
+
+    public async Task<string> CreateFile()
+    {
+        string filePath = Path.Combine(OutlineFolder, OutlineName);
+        if (StoryIO.IsValidPath(filePath))
+        {
+            _preferences.Model.LastSelectedTemplate = SelectedTemplateIndex;
+            await _outlineVm.CreateFile(this);
+            return filePath;
+        }
+
+        return "";
     }
 
     public void Close() => Ioc.Default.GetRequiredService<Windowing>().CloseContentDialog();

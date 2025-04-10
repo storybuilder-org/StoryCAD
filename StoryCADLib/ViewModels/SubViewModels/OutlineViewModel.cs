@@ -266,26 +266,15 @@ public class OutlineViewModel : ObservableRecipient
 
             shellVm.SetCurrentView(StoryViewType.ExplorerView);
 
-            Ioc.Default.GetRequiredService<FileOpenVM>().UpdateRecents(StoryModelFile);
+            await Ioc.Default.GetRequiredService<FileOpenVM>().UpdateRecents(StoryModelFile);
+            StoryModel.Changed = true;
+            await SaveFile();
+
             using (var serializationLock = new SerializationLock(autoSaveService, backupService, logger))
             {
-                StoryModel.Changed = true;
-                await SaveFile();
-
                 if (preferences.Model.BackupOnOpen)
                 {
                     await shellVm.MakeBackup();
-                }
-
-                // Start the timed backup and auto save services
-                if (preferences.Model.TimedBackup)
-                {
-                    Ioc.Default.GetRequiredService<BackupService>().StartTimedBackup();
-                }
-
-                if (preferences.Model.AutoSave)
-                {
-                    Ioc.Default.GetRequiredService<AutoSaveService>().StartAutoSave();
                 }
 
                 shellVm.TreeViewNodeClicked(StoryModel.ExplorerView[0]);
@@ -361,7 +350,7 @@ public class OutlineViewModel : ObservableRecipient
         }
     }
 
-    public async void SaveFileAs()
+    public async Task SaveFileAs()
     {
         using (var serializationLock = new SerializationLock(autoSaveService, backupService, logger))
         {
@@ -375,19 +364,25 @@ public class OutlineViewModel : ObservableRecipient
                     return;
                 }
 
-                // Create the content dialog
-                ContentDialog saveAsDialog = new()
-                {
-                    Title = "Save as",
-                    PrimaryButtonText = "Save",
-                    SecondaryButtonText = "Cancel",
-                    Content = new SaveAsDialog()
-                };
-
-                // Set default values in the view model using the current story file info
                 SaveAsViewModel saveAsVm = Ioc.Default.GetRequiredService<SaveAsViewModel>();
-                saveAsVm.ProjectName = Path.GetFileName(StoryModelFile);
-                saveAsVm.ParentFolder = Path.GetDirectoryName(StoryModelFile);
+
+                // Create the content dialog
+                ContentDialog? saveAsDialog = null;
+                if (!Ioc.Default.GetRequiredService<AppState>().Headless)
+                {
+                    // Set default values in the view model using the current story file info
+                    saveAsVm.ProjectName = Path.GetFileName(StoryModelFile);
+                    saveAsVm.ParentFolder = Path.GetDirectoryName(StoryModelFile);
+
+                    saveAsDialog = new()
+                    {
+                        Title = "Save as",
+                        PrimaryButtonText = "Save",
+                        SecondaryButtonText = "Cancel",
+                        Content = new SaveAsDialog()
+                    };
+                }
+
 
                 ContentDialogResult result = await window.ShowContentDialog(saveAsDialog);
 
@@ -416,10 +411,10 @@ public class OutlineViewModel : ObservableRecipient
                             return;
                         }
 
-                        logger.Log(LogLevel.Info, $"Testing filename validity for {saveAsVm.SaveAsProjectFolderPath}\\{saveAsVm.ProjectName}");
+                        logger.Log(LogLevel.Info, $"Testing filename validity for {saveAsVm.ParentFolder}\\{saveAsVm.ProjectName}");
                         // Copy the current file to the new location/name
                         StorageFile currentFile = await StorageFile.GetFileFromPathAsync(StoryModelFile); 
-                        StorageFolder folder = await StorageFolder.GetFolderFromPathAsync(saveAsVm.SaveAsProjectFolderPath);
+                        StorageFolder folder = await StorageFolder.GetFolderFromPathAsync(saveAsVm.ParentFolder);
                         await currentFile.CopyAsync(folder, saveAsVm.ProjectName, NameCollisionOption.ReplaceExisting);
 
                         // Update the story file path to the new location
@@ -454,14 +449,15 @@ public class OutlineViewModel : ObservableRecipient
         logger.Log(LogLevel.Trace, "VerifyReplaceOrCreated");
 
         SaveAsViewModel saveAsVm = Ioc.Default.GetRequiredService<SaveAsViewModel>();
-        if (File.Exists(Path.Combine(saveAsVm.ProjectPathName, saveAsVm.ProjectName)))
+        if (File.Exists(Path.Combine(saveAsVm.ParentFolder, saveAsVm.ProjectName)) 
+            && !Ioc.Default.GetRequiredService<AppState>().Headless)
         {
             ContentDialog replaceDialog = new()
             {
                 PrimaryButtonText = "Yes",
                 SecondaryButtonText = "No",
                 Title = "Replace file?",
-                Content = $"File {Path.Combine(saveAsVm.ProjectPathName,
+                Content = $"File {Path.Combine(saveAsVm.ParentFolder,
                     saveAsVm.ProjectName)} already exists. \n\nDo you want to replace it?",
             };
             return await window.ShowContentDialog(replaceDialog) == ContentDialogResult.Primary;
@@ -752,14 +748,19 @@ public class OutlineViewModel : ObservableRecipient
             logger.Log(LogLevel.Info, "Displaying MasterPlot tool dialog");
             if (VerifyToolUse(true, true))
             {
-                //Creates and shows content dialog
-                ContentDialog dialog = new()
+                ContentDialog? dialog = null;
+                if (!Ioc.Default.GetRequiredService<AppState>().Headless)
                 {
-                    Title = "Master plots",
-                    PrimaryButtonText = "Copy",
-                    SecondaryButtonText = "Cancel",
-                    Content = new MasterPlotsDialog()
-                };
+                    //Creates and shows content dialog
+                    dialog = new()
+                    {
+                        Title = "Master plots",
+                        PrimaryButtonText = "Copy",
+                        SecondaryButtonText = "Cancel",
+                        Content = new MasterPlotsDialog()
+                    };
+                }
+
                 ContentDialogResult result = await window.ShowContentDialog(dialog);
 
                 if (result == ContentDialogResult.Primary) // Copy command
@@ -876,13 +877,19 @@ public class OutlineViewModel : ObservableRecipient
                 try
                 {
                     //Creates and shows dialog
-                    ContentDialog dialog = new()
+                    ContentDialog? dialog = null;
+
+                    if (!Ioc.Default.GetRequiredService<AppState>().Headless)
                     {
-                        Title = "Stock scenes",
-                        Content = new StockScenesDialog(),
-                        PrimaryButtonText = "Add Scene",
-                        CloseButtonText = "Cancel",
-                    };
+                        dialog = new()
+                        {
+                            Title = "Stock scenes",
+                            Content = new StockScenesDialog(),
+                            PrimaryButtonText = "Add Scene",
+                            CloseButtonText = "Cancel",
+                        };
+                    }
+
                     ContentDialogResult result = await window.ShowContentDialog(dialog);
 
                     if (result == ContentDialogResult.Primary) // Copy command
@@ -894,13 +901,13 @@ public class OutlineViewModel : ObservableRecipient
                             return;
                         }
 
-                        SceneModel sceneVar = new()
-                            { Name = Ioc.Default.GetRequiredService<StockScenesViewModel>().SceneName };
-                        StoryNodeItem newNode = new(sceneVar, shellVm.RightTappedNode);
+                        SceneModel sceneVar = new(Ioc.Default.GetRequiredService<StockScenesViewModel>().SceneName,
+                            StoryModel, shellVm.RightTappedNode);
+
                         shellVm._sourceChildren = shellVm.RightTappedNode.Children;
-                        shellVm.TreeViewNodeClicked(newNode);
+                        shellVm.TreeViewNodeClicked(sceneVar.Node);
                         shellVm.RightTappedNode.IsExpanded = true;
-                        newNode.IsSelected = true;
+                        sceneVar.Node.IsSelected = true;
                         Messenger.Send(new StatusChangedMessage(new("Stock Scenes inserted", LogLevel.Info)));
                     }
                     else

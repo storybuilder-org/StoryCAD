@@ -18,53 +18,45 @@ using StoryCAD.Services.Logging;
 using StoryCAD.Services.Outline;
 using StoryCAD.ViewModels.SubViewModels;
 using StoryCAD.Services.API;
-using Octokit;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace StoryCADTests;
 
 [TestClass]
 public class FileTests
 {
-
     /// <summary>
     /// This creates a new STBX File to assure file creation works.
     /// </summary>
     [TestMethod]
-    public void FileCreation()
+    public async Task FileCreation()
     {
         OutlineViewModel OutlineVM = Ioc.Default.GetRequiredService<OutlineViewModel>();
 
         //Get ShellVM and clear the StoryModel
-        StoryModel storyModel = new();
 
-        OutlineVM.StoryModelFile = Path.Combine(App.ResultsDir, "TestProject.stbx");
-        
+        OutlineVM.StoryModelFile = Path.Combine(App.ResultsDir, "NewTestProject.stbx");
+        OutlineVM.StoryModel = new();
 		string name = Path.GetFileNameWithoutExtension(OutlineVM.StoryModelFile);
-        OverviewModel overview = new(name, storyModel, null)
+        OverviewModel overview = new(name, OutlineVM.StoryModel, null)
         {
             DateCreated = DateTime.Today.ToString("yyyy-MM-dd"),
             Author = "StoryCAD Tests"
         };
 
-        storyModel.ExplorerView.Add(overview.Node);
-        TrashCanModel trash = new(storyModel, null);
-        storyModel.ExplorerView.Add(trash.Node); // The trashcan is the second root
-        FolderModel narrative = new("Narrative View", storyModel, StoryItemType.Folder, null);
-        storyModel.NarratorView.Add(narrative.Node);
+        OutlineVM.StoryModel.ExplorerView.Add(overview.Node);
+        TrashCanModel trash = new(OutlineVM.StoryModel, null);
+        OutlineVM.StoryModel.ExplorerView.Add(trash.Node); // The trashcan is the second root
+        FolderModel narrative = new("Narrative View", OutlineVM.StoryModel, StoryItemType.Folder, null);
+        OutlineVM.StoryModel.NarratorView.Add(narrative.Node);
         
         //Add three test nodes.
-        StoryElement _Problem = new ProblemModel("TestProblem", storyModel, overview.Node);
-        CharacterModel _character = new CharacterModel("TestCharacter", storyModel, overview.Node);
-        SceneModel _scene = new SceneModel("TestScene", storyModel, overview.Node); 
-        //storyModel.ExplorerView.Add(new(_character, overviewNode,StoryItemType.Character));
-        //storyModel.ExplorerView.Add(new(_problem, overviewNode,StoryItemType.Problem));
-        //storyModel.ExplorerView.Add(new(_scene, overviewNode,StoryItemType.Scene));
-
+        StoryElement _Problem = new ProblemModel("TestProblem", OutlineVM.StoryModel, overview.Node);
+        CharacterModel _character = new CharacterModel("TestCharacter", OutlineVM.StoryModel, overview.Node);
+        SceneModel _scene = new SceneModel("TestScene", OutlineVM.StoryModel, overview.Node);
 
         //Check is loaded correctly
-        Assert.IsTrue(storyModel.StoryElements.Count == 6);
-        Assert.IsTrue(storyModel.StoryElements[0].ElementType == StoryItemType.StoryOverview);
+        Assert.IsTrue(OutlineVM.StoryModel.StoryElements.Count == 6);
+        Assert.IsTrue(OutlineVM.StoryModel.StoryElements[0].ElementType == StoryItemType.StoryOverview);
 
         //Because we have created a file in this way we must populate ProjectFolder and ProjectFile.
         string dir = Path.GetDirectoryName(OutlineVM.StoryModelFile);
@@ -74,8 +66,7 @@ public class FileTests
         }
 
 		//Write file.
-		StoryIO _storyIO = Ioc.Default.GetRequiredService<StoryIO>();
-		_storyIO.WriteStory(OutlineVM.StoryModelFile, storyModel).GetAwaiter().GetResult();
+        await OutlineVM.WriteModel();
 
         //Sleep to ensure file is written.
         Thread.Sleep(10000);
@@ -110,7 +101,7 @@ public class FileTests
     [TestMethod]
     public void InvalidFileAccessTest()
     {
-        Assert.IsTrue(StoryIO.IsValidPath("C:\\"));
+        Assert.IsTrue(StoryIO.IsValidPath("C:\\mytestpath\\"));
         Assert.IsFalse(StoryIO.IsValidPath("C:\\:::StoryCADTests::\\//"));
     }
 

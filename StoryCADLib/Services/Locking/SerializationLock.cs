@@ -76,8 +76,17 @@ public class SerializationLock : IDisposable
         {
             // Re-enable background tasks and commands.
             EnableCommands();
-            _autoSaveService.StartAutoSave();
-            _backupService.StartTimedBackup();
+
+            //Reenable backup/autosave 
+            if (Ioc.Default.GetRequiredService<PreferenceService>().Model.AutoSave)
+            {
+                _autoSaveService.StartAutoSave();
+            }
+            if (Ioc.Default.GetRequiredService<PreferenceService>().Model.TimedBackup )
+            {
+                _backupService.StartTimedBackup();
+            }
+            
             _logger.Log(LogLevel.Info,"Serialization lock released: commands enabled, autosave and backup restarted.");
             _disposed = true;
             currentHolder = null;
