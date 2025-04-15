@@ -65,6 +65,7 @@ jobs:
         $filecontent = Get-Content("D:\a\StoryCAD\StoryCAD\StoryCAD\Package.appxmanifest")
         attrib $file -r
         $filecontent -replace $ManifestVersionRegex, $ManifestVersion | Out-File "D:\a\StoryCAD\StoryCAD\StoryCAD\Package.appxmanifest" utf8
+        echo "new_version=$NewVersion" >> $GITHUB_OUTPUT
 
     # Decode the base 64 encoded pfx and save the Signing_Certificate
     - name: Decode the pfx
@@ -80,15 +81,19 @@ jobs:
       run: msbuild $env:Solution_Name /t:Restore /p:Configuration=$env:Configuration
       env:
         Configuration: ${{ matrix.configuration }}
-
+        
+    - name: Build StoryCADLib
+      run: |
+        msbuild StoryCADLib.csproj /t:Build /p:Configuration=Release /p:Version=${{ steps.increase_version.outputs.new_version }}
+        
     - name: Restore and Build StoryCADTests
       run: msbuild StoryCADTests\StoryCADTests.csproj /t:Build /p:Configuration=Debug /p:Platform=x64
 
     - name: Setup VSTest.console.exe
-      uses: darenm/Setup-VSTest@v1.2      
+      uses: darenm/Setup-VSTest@v1.2
 
     - name: Run StoryCADTests
-      run: vstest.console.exe D:\a\StoryCAD\StoryCAD\StoryCADTests\bin\x64\Debug\net8.0-windows10.0.19041.0\StoryCADTests.dll /Logger:Console /Platform:x64 /Framework:.NETCoreApp,Version=v7.0 
+      run: vstest.console.exe D:\a\StoryCAD\StoryCAD\StoryCADTests\bin\x64\Debug\net8.0-windows10.0.19041.0\StoryCADTests.dll /Logger:Console /Platform:x64
 
         
     # Create the app package by building and packaging the project
@@ -100,7 +105,7 @@ jobs:
         Appx_Package_Dir: Packages\
         Configuration: ${{ matrix.configuration }}
         Platform: ${{ matrix.platform }}
-
+        
     # Remove the pfx
     - name: Remove the pfx
       run: |
@@ -112,13 +117,18 @@ jobs:
         D:\a\StoryCAD\StoryCAD\.github\workflows\MSIX.ps1 -TargetDirectory "D:\a\StoryCAD\StoryCAD\StoryCAD\Packages"
       shell: pwsh
 
+    - name: Move StoryCADLib Nuget Package to Packages Directory
+      run: |
+      Get-ChildItem -Path "D:\a\StoryCAD\StoryCAD\StoryCADLib\bin\x64\*" -Include *.nupkg,*.snupkg -File |
+        Move-Item -Destination "D:\a\StoryCAD\StoryCAD\StoryCAD\Packages\" -Force
+
     - name: Write help file
       run: |
         $LastVer = "${{ steps.testtag.outputs.tag }}"
         $VersionSplit = $LastVer.Split(".")
         $BUILD_BUILDNUMBER = $VersionSplit[0] + "." + $VersionSplit[1] + ".${{ github.run_number }}.65535"
       
-        "Hello, Thank you for testing StoryCAD " + $VersionSplit[0] + "." + $VersionSplit[1] + ".${{ github.run_number }}.65535" + " Alpha 
+        "Hello, Thank you for testing StoryCAD " + ${{ steps.increase_version.outputs.new_version }} + " Alpha 
         1) Open StoryCAD.cer, this should bring up the certificate import wizard
         2) Press install certificate, and change store location to Local Machine, then press next
         3) Change the option to Place All Certificates in the following store and click browse
@@ -127,6 +137,50 @@ jobs:
         if you don't know what configuration to pick then we recommend StoryCAD Release x64.msix.
         
         Changelogs aren't available for Alpha Builds." | Out-File -FilePath "D:\a\StoryCAD\StoryCAD\StoryCAD\Packages\Install Instructions.txt"
+    
+        - name: Update StoryCADLib NuGet Package
+      run: |
+        $packagesDir = "D:\a\StoryCAD\StoryCAD\StoryCAD\Packages"
+        # Locate the single nuget package
+        $pkg = Get-ChildItem -Path $packagesDir -Filter "StoryCADLib*.nupkg" -File
+        if ($null -eq $pkg) {
+            Write-Error "No StoryCADLib nuget package found in $packagesDir"
+            exit 1
+        }
+        if ($pkg.Count -gt 1) {
+            Write-Error "Multiple StoryCADLib nuget packages found. Expected only one but found $($pkg.Count)."
+            exit 1
+        }
+        Write-Host "Found package: $($pkg.FullName)"
+        
+        # Create a temporary extraction directory
+        $tempDir = Join-Path $env:TEMP ("NuPkgExtract_" + [guid]::NewGuid().ToString())
+        New-Item -ItemType Directory -Force -Path $tempDir | Out-Null
+        
+        # Unzip the nuget package (nuget packages are zip archives)
+        Expand-Archive -Path $pkg.FullName -DestinationPath $tempDir -Force
+
+        # Define the source folder for the Release build binaries
+        $sourceBinaries = "D:\a\StoryCAD\StoryCAD\StoryCADLib\bin\x64\Release\net8.0-windows10.0.22621.0"
+        # Define the target folder in the package (lib folder for the target framework)
+        $targetLibDir = Join-Path $tempDir "lib\net8.0-windows10.0.22621.0"
+        if (-not (Test-Path $targetLibDir)) {
+            New-Item -ItemType Directory -Force -Path $targetLibDir | Out-Null
+        }
+        Write-Host "Copying binaries from $sourceBinaries to $targetLibDir"
+        Copy-Item -Path (Join-Path $sourceBinaries "*") -Destination $targetLibDir -Recurse -Force
+
+        # Rezip the updated package to a temporary file
+        $updatedPkgPath = Join-Path $env:TEMP ("updated_" + $pkg.Name)
+        Compress-Archive -Path (Join-Path $tempDir "*") -DestinationPath $updatedPkgPath -Force
+        # Overwrite the original nuget package with the updated version
+        Move-Item -Path $updatedPkgPath -Destination $pkg.FullName -Force
+
+        # Clean up temporary extraction folder
+        Remove-Item -Recurse -Force $tempDir
+      shell: pwsh
+
+    
     - name: Zip the packages folder
       run: |
             $zipName = "StoryCAD_${{ github.run_number }}_${{ matrix.platform }}_${{ matrix.configuration }}.zip"
