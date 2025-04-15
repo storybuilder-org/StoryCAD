@@ -119,8 +119,9 @@ jobs:
 
     - name: Move StoryCADLib Nuget Package to Packages Directory
       run: |
-      Get-ChildItem -Path "D:\a\StoryCAD\StoryCAD\StoryCADLib\bin\x64\*" -Include *.nupkg,*.snupkg -File |
-        Move-Item -Destination "D:\a\StoryCAD\StoryCAD\StoryCAD\Packages\" -Force
+        Get-ChildItem -Path "D:\a\StoryCAD\StoryCAD\StoryCADLib\bin\x64\*" -Include *.nupkg,*.snupkg -File |
+          Move-Item -Destination "D:\a\StoryCAD\StoryCAD\StoryCAD\Packages\" -Force
+
 
     - name: Write help file
       run: |
@@ -138,7 +139,7 @@ jobs:
         
         Changelogs aren't available for Alpha Builds." | Out-File -FilePath "D:\a\StoryCAD\StoryCAD\StoryCAD\Packages\Install Instructions.txt"
     
-        - name: Update StoryCADLib NuGet Package
+    - name: Repack StoryCADLib NuGet Package
       run: |
         $packagesDir = "D:\a\StoryCAD\StoryCAD\StoryCAD\Packages"
         # Locate the single nuget package
@@ -193,4 +194,4 @@ jobs:
         name: StoryCAD_${{ github.run_number }}_${{ matrix.platform }}_${{ matrix.configuration }}
         path: StoryCAD_${{ github.run_number }}_${{ matrix.platform }}_${{ matrix.configuration }}.zip
         compression-level: 9
-        include-hidden-files: true
+        include-hidden-files: true  
