@@ -84,7 +84,7 @@ jobs:
         
     - name: Build StoryCADLib
       run: |
-        msbuild StoryCADLib\StoryCADLib.csproj /t:Build /p:Configuration=Release /p:Version=${{ steps.increase_version.outputs.new_version }}
+        msbuild StoryCADLib\StoryCADLib.csproj /t:Build /p:Configuration=Release /p:Version=${{ steps.increase_version.outputs.new_version }} /p:NuGetVersion=${{ steps.increase_version.outputs.new_version }}
         
     - name: Restore and Build StoryCADTests
       run: msbuild StoryCADTests\StoryCADTests.csproj /t:Build /p:Configuration=Debug /p:Platform=x64
