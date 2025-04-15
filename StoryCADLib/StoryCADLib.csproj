@@ -8,13 +8,16 @@
 	<RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
     <Platforms>AnyCPU;x86;x64;arm64</Platforms>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
-	  <Version>1.0.1</Version>
-	  <FileVersion>1.0.1.0</FileVersion>
-	  <AssemblyVersion>1.0.1.0</AssemblyVersion>
+	  <Version>3.0.7.1</Version>
+	  <DisableEmbeddedXbf>false</DisableEmbeddedXbf>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
     <NoWarn>1701;1702;CA1416;CS0618</NoWarn>
   </PropertyGroup>
+	<ItemGroup>
+		<!-- Ensure the assets are placed under a folder named after your PackageId -->
+		<Content Update="Assets\*.*" PackagePath="contentFiles\any\net8.0-windows10.0-22621\$(PackageId)\Assets\%(Filename)%(Extension)" />
+	</ItemGroup>
   <ItemGroup>
     <Content Remove="Assets\Install\Lists.ini" />
     <Content Remove="Assets\Install\reports\Character Relationship Description.txt" />
