@@ -66,8 +66,10 @@ jobs:
         $filecontent = Get-Content("D:\a\StoryCAD\StoryCAD\StoryCAD\Package.appxmanifest")
         attrib $file -r
         $filecontent -replace $ManifestVersionRegex, $ManifestVersion | Out-File "D:\a\StoryCAD\StoryCAD\StoryCAD\Package.appxmanifest" utf8
-        echo "new_version=$NewVersion" >> $GITHUB_OUTPUT
-
+        "new_version=$NewVersion" | Out-File -Append -FilePath $env:GITHUB_OUTPUT
+        Write-Host "Last version (from tag): '$LastVer'"
+        Write-Host "Calculated new version: '$NewVersion'"
+        
     # Decode the base 64 encoded pfx and save the Signing_Certificate
     - name: Decode the pfx
       run: |
