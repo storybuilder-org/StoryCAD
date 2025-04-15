@@ -9,6 +9,8 @@
     <Platforms>AnyCPU;x86;x64;arm64</Platforms>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
 	  <Version>3.0.7.1</Version>
+	  <FileVersion>3.0.7.1</FileVersion>
+	  <AssemblyVersion>3.0.7.1</AssemblyVersion>
 	  <DisableEmbeddedXbf>false</DisableEmbeddedXbf>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
