@@ -192,7 +192,6 @@ jobs:
 
         # 6. Cleanup
         Remove-Item -Recurse -Force $tempDir
-      shell: pwsh
 
     - name: Zip the packages folder
       run: |
