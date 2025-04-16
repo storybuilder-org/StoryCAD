@@ -147,6 +147,20 @@ jobs:
         
         Changelogs aren't available for Alpha Builds." | Out-File -FilePath "D:\a\StoryCAD\StoryCAD\StoryCAD\Packages\Install Instructions.txt"
     
+    - name: List packages directory
+      run: |
+        Get-ChildItem -Path "D:\a\StoryCAD\StoryCAD\StoryCAD\Packages" | Format-List FullName
+        $nupkgFiles = Get-ChildItem -Path "D:\a\StoryCAD\StoryCAD\" -Filter *.nupkg -File -Recurse
+        if ($nupkgFiles.Count -eq 0) {
+            Write-Error "No .nupkg files found in D:\a\StoryCAD\StoryCAD\StoryCAD\Packages"
+            exit 1
+        } else {
+            Write-Host "Found the following .nupkg file(s):"
+            foreach ($pkg in $nupkgFiles) {
+                Write-Host $pkg.FullName
+            }
+        }
+    
     - name: Repack StoryCADLib NuGet Package
       run: |
         $packagesDir = "D:\a\StoryCAD\StoryCAD\StoryCAD\Packages"
