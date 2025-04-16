@@ -340,7 +340,7 @@ public class SemanticKernelApiTests
         StoryElement characterElement = JsonSerializer.Deserialize<StoryElement>(characterJson);
 
         // Act: Add the character as a cast member to the scene.
-        var castResult = await _api.AddCastMember(sceneElement.Uuid, characterElement.Uuid);
+        var castResult = _api.AddCastMember(sceneElement.Uuid, characterElement.Uuid);
 
         // Assert
         Assert.IsTrue(castResult.IsSuccess, "AddCastMember should succeed.");

@@ -285,6 +285,7 @@ public class OutlineViewModel : ObservableRecipient
         }
         catch (Exception ex)
         {
+            logger.LogException(LogLevel.Error, ex, "Error in CreateFile command");
             Messenger.Send(new StatusChangedMessage(new("Error creating new project", LogLevel.Error)), true);
         }
     }

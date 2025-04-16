@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Mvvm.DependencyInjection;
+﻿using System.Linq;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using StoryCAD.Models;
 using StoryCAD.ViewModels;
@@ -15,9 +16,10 @@ public class NodeItemTests
 	[TestMethod]
     public void TryDelete()
 	{
-        OutlineViewModel OutlineVM = Ioc.Default.GetRequiredService<OutlineViewModel>();
+        OutlineViewModel OutlineVM = Ioc.Default.GetService<OutlineViewModel>();
 		StoryModel model = new();
 		OverviewModel overview = new("Overview", model, null);
+		TrashCanModel Trash = new(model, null);
 		ProblemModel problem = new("Test", model, overview.Node);
 
         OutlineVM.StoryModel = model;

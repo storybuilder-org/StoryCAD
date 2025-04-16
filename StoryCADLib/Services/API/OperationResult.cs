@@ -59,7 +59,7 @@ public class OperationResult<T>
         catch (Exception ex)
         {
             // Optionally log the exception.
-            return OperationResult<T>.Success(default(T));
+            return OperationResult<T>.Failure(ex.Message);
         }
     }
 }
