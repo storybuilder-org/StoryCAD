@@ -162,6 +162,7 @@ jobs:
         }
     
     - name: Repack StoryCADLib NuGet Package
+      if: ${{ matrix.configuration == 'Release' && matrix.platform == 'x64' }}
       run: |
         # Search recursively for nuget packages matching StoryCADLib*
         $allNupkgFiles = Get-ChildItem -Path "D:\a\StoryCAD\StoryCAD" -Filter "StoryCADLib*.nupkg" -File -Recurse
@@ -209,8 +210,6 @@ jobs:
         Remove-Item -Recurse -Force $tempDir
       shell: pwsh
 
-
-    
     - name: Zip the packages folder
       run: |
             $zipName = "StoryCAD_${{ github.run_number }}_${{ matrix.platform }}_${{ matrix.configuration }}.zip"
