@@ -217,11 +217,11 @@ jobs:
       shell: pwsh
     
     - name: Upload repacked NuGet Package
-  if: ${{ matrix.configuration == 'Release' && matrix.platform == 'x64' }}
-  uses: actions/upload-artifact@v4
-  with:
-    name: repacked-nuget-package
-    path: 'D:\a\StoryCAD\StoryCAD\StoryCADLib\bin\Release\StoryCADLib*.nupkg'
+      if: ${{ matrix.configuration == 'Release' && matrix.platform == 'x64' }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: repacked-nuget-package
+        path: 'D:\a\StoryCAD\StoryCAD\StoryCADLib\bin\Release\StoryCADLib*.nupkg'
 
     
     - name: Upload MSIX package
