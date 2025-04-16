@@ -193,7 +193,7 @@ public class OutlineViewModel : ObservableRecipient
             }
 
             window.UpdateWindowTitle();
-            new FileOpenVM().UpdateRecents(StoryModelFile);
+            await new FileOpenVM().UpdateRecents(StoryModelFile);
 
             if (preferences.Model.TimedBackup)
             {
@@ -422,7 +422,7 @@ public class OutlineViewModel : ObservableRecipient
 
                         // Update window title and recent files
                         window.UpdateWindowTitle();
-                        new FileOpenVM().UpdateRecents(StoryModelFile);
+                        await new FileOpenVM().UpdateRecents(StoryModelFile);
 
                         // Indicate the model is now saved and unchanged
                         Messenger.Send(new IsChangedMessage(true));

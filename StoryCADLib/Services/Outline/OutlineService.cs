@@ -18,7 +18,7 @@ public class OutlineService
     /// <param name="author">Creator of the outline</param>
     /// <param name="selectedTemplateIndex">Template index</param>
     /// <returns>A story outline variable.</returns>
-    public async Task<StoryModel> CreateModel(string name, string author, int selectedTemplateIndex)
+    public Task<StoryModel> CreateModel(string name, string author, int selectedTemplateIndex)
     {  
         _log.Log(LogLevel.Info, $"Creating new model: {name} by {author} with index {selectedTemplateIndex}");
         StoryModel model = new();
@@ -138,7 +138,7 @@ public class OutlineService
         }
 
         _log.Log(LogLevel.Info, $"Model created, element count {model.StoryElements.Count}");
-        return model;
+        return Task.FromResult(model);
     }
 
     /// <summary>

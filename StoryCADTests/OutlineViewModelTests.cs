@@ -93,9 +93,9 @@ namespace StoryCADTests
         }
 
         [TestMethod]
-        public async Task TestPrintCurrentNodeAsync()
+        public void TestPrintCurrentNodeAsync()
         {
-            // TODO: Setup a selected node and invoke PrintCurrentNodeAsync.
+            // TODO: Set up a selected node and invoke PrintCurrentNodeAsync.
             Assert.Inconclusive("Test for PrintCurrentNodeAsync not implemented.");
         }
 

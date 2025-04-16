@@ -7,13 +7,13 @@ using StoryCAD.ViewModels.SubViewModels;
 namespace StoryCADTests;
 
 [TestClass]
-class NodeItemTests
+public class NodeItemTests
 {
 	/// <summary>
 	/// Creates a new node and tries to delete it.
 	/// </summary>
 	[TestMethod]
-    internal void TryDelete()
+    public void TryDelete()
 	{
         OutlineViewModel OutlineVM = Ioc.Default.GetRequiredService<OutlineViewModel>();
 		StoryModel model = new();

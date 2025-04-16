@@ -163,25 +163,31 @@ jobs:
     
     - name: Repack StoryCADLib NuGet Package
       run: |
-        $packagesDir = "D:\a\StoryCAD\StoryCAD\StoryCAD\Packages"
-        # Locate the single nuget package
-        $pkg = Get-ChildItem -Path $packagesDir -Filter "StoryCADLib*.nupkg" -File
-        if ($null -eq $pkg) {
-            Write-Error "No StoryCADLib nuget package found in $packagesDir"
+        # Search recursively for nuget packages matching StoryCADLib*
+        $allNupkgFiles = Get-ChildItem -Path "D:\a\StoryCAD\StoryCAD" -Filter "StoryCADLib*.nupkg" -File -Recurse
+        if ($allNupkgFiles.Count -eq 0) {
+            Write-Error "No .nupkg files found in D:\a\StoryCAD\StoryCAD"
             exit 1
         }
-        if ($pkg.Count -gt 1) {
-            Write-Error "Multiple StoryCADLib nuget packages found. Expected only one but found $($pkg.Count)."
+        Write-Host "Found the following .nupkg file(s):"
+        foreach ($pkg in $allNupkgFiles) {
+            Write-Host $pkg.FullName
+        }
+        
+        # Filter packages to choose only those with "\Release\" in the path
+        $releasePkg = $allNupkgFiles | Where-Object { $_.FullName -match "\\Release\\" } | Select-Object -First 1
+        if ($null -eq $releasePkg) {
+            Write-Error "No release nuget package found."
             exit 1
         }
-        Write-Host "Found package: $($pkg.FullName)"
+        Write-Host "Using release package: $($releasePkg.FullName)"
         
         # Create a temporary extraction directory
         $tempDir = Join-Path $env:TEMP ("NuPkgExtract_" + [guid]::NewGuid().ToString())
         New-Item -ItemType Directory -Force -Path $tempDir | Out-Null
         
         # Unzip the nuget package (nuget packages are zip archives)
-        Expand-Archive -Path $pkg.FullName -DestinationPath $tempDir -Force
+        Expand-Archive -Path $releasePkg.FullName -DestinationPath $tempDir -Force
 
         # Define the source folder for the Release build binaries
         $sourceBinaries = "D:\a\StoryCAD\StoryCAD\StoryCADLib\bin\x64\Release\net8.0-windows10.0.22621.0"
@@ -194,14 +200,15 @@ jobs:
         Copy-Item -Path (Join-Path $sourceBinaries "*") -Destination $targetLibDir -Recurse -Force
 
         # Rezip the updated package to a temporary file
-        $updatedPkgPath = Join-Path $env:TEMP ("updated_" + $pkg.Name)
+        $updatedPkgPath = Join-Path $env:TEMP ("updated_" + $releasePkg.Name)
         Compress-Archive -Path (Join-Path $tempDir "*") -DestinationPath $updatedPkgPath -Force
         # Overwrite the original nuget package with the updated version
-        Move-Item -Path $updatedPkgPath -Destination $pkg.FullName -Force
+        Move-Item -Path $updatedPkgPath -Destination $releasePkg.FullName -Force
 
         # Clean up temporary extraction folder
         Remove-Item -Recurse -Force $tempDir
       shell: pwsh
+
 
     
     - name: Zip the packages folder
