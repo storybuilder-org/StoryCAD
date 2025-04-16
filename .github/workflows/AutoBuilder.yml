@@ -180,7 +180,7 @@ jobs:
         Copy-Item "$binSrc\*" -Destination $libDir -Recurse -Force
 
         # 4. Copy your Assets folder into a StoryCADLib sub‑folder there
-        $assetsSrc = "D:\a\StoryCAD\StoryCAD\Assets"
+        $assetsSrc = "D:\a\StoryCAD\StoryCAD\StoryCADLib\Assets"
         $assetsDest = Join-Path $libDir "StoryCADLib"
         New-Item -ItemType Directory -Force -Path $assetsDest | Out-Null
         Copy-Item "$assetsSrc\*" -Destination $assetsDest -Recurse -Force
