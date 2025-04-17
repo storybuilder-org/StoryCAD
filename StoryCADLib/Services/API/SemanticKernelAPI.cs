@@ -13,7 +13,7 @@ namespace StoryCAD.Services.API;
 public class SemanticKernelApi
 {
     private readonly OutlineService _outlineService = Ioc.Default.GetRequiredService<OutlineService>();
-    private StoryModel? CurrentModel;
+    private StoryModel CurrentModel;
 
     /// <summary>
     /// Creates a new empty story outline based on a template.

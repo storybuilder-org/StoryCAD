@@ -37,7 +37,7 @@ public class OutlineViewModel : ObservableRecipient
     /// access it immediately on the constructor of this class
     /// so we have shellVm as a property to get it when needed but
     /// </summary>
-    private ShellViewModel? _shellVM;
+    private ShellViewModel _shellVM;
 
     private ShellViewModel shellVm
     {
@@ -51,7 +51,7 @@ public class OutlineViewModel : ObservableRecipient
             return _shellVM;
         }
     }
-    private AutoSaveService? _autoSaveService;
+    private AutoSaveService _autoSaveService;
 
     private AutoSaveService autoSaveService
     {
@@ -66,7 +66,7 @@ public class OutlineViewModel : ObservableRecipient
         }
     }
 
-    private BackupService? _backupService;
+    private BackupService _backupService;
 
     private BackupService backupService
     {
@@ -123,7 +123,7 @@ public class OutlineViewModel : ObservableRecipient
                 if (fromPath == "" || !File.Exists(fromPath))
                 {
                     logger.Log(LogLevel.Info, "Opening file picker as story wasn't able to be found");
-                    StorageFile? projectFile = await window.ShowFilePicker("Open Project File", ".stbx");
+                    StorageFile projectFile = await window.ShowFilePicker("Open Project File", ".stbx");
                     if (projectFile == null) //Picker was canceled.
                     {
                         logger.Log(LogLevel.Info, "Open file picker cancelled.");
@@ -368,7 +368,7 @@ public class OutlineViewModel : ObservableRecipient
                 SaveAsViewModel saveAsVm = Ioc.Default.GetRequiredService<SaveAsViewModel>();
 
                 // Create the content dialog
-                ContentDialog? saveAsDialog = null;
+                ContentDialog saveAsDialog = null;
                 if (!Ioc.Default.GetRequiredService<AppState>().Headless)
                 {
                     // Set default values in the view model using the current story file info
@@ -749,7 +749,7 @@ public class OutlineViewModel : ObservableRecipient
             logger.Log(LogLevel.Info, "Displaying MasterPlot tool dialog");
             if (VerifyToolUse(true, true))
             {
-                ContentDialog? dialog = null;
+                ContentDialog dialog = null;
                 if (!Ioc.Default.GetRequiredService<AppState>().Headless)
                 {
                     //Creates and shows content dialog
@@ -806,7 +806,7 @@ public class OutlineViewModel : ObservableRecipient
         {
             if (VerifyToolUse(true, true))
             {
-                ContentDialog? dialog = null;
+                ContentDialog dialog = null;
                 if (!Ioc.Default.GetRequiredService<AppState>().Headless)
                 {
                     //Creates and shows dialog
@@ -878,7 +878,7 @@ public class OutlineViewModel : ObservableRecipient
                 try
                 {
                     //Creates and shows dialog
-                    ContentDialog? dialog = null;
+                    ContentDialog dialog = null;
 
                     if (!Ioc.Default.GetRequiredService<AppState>().Headless)
                     {

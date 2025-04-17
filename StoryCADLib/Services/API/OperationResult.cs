@@ -23,7 +23,7 @@ public class OperationResult<T>
     public static OperationResult<T> Success(T payload) => new OperationResult<T>(true, payload, null);
     public static OperationResult<T> Failure(string errorMessage) => new OperationResult<T>(false, default, errorMessage);
 
-    public static async Task<OperationResult<T>> SafeExecuteAsync<T>(Func<Task<T>> operation)
+    public static async Task<OperationResult<T>> SafeExecuteAsync<U>(Func<Task<T>> operation)
     {
         try
         {
@@ -36,19 +36,19 @@ public class OperationResult<T>
             return OperationResult<T>.Failure(ex.Message);
         }
     }
-    public static async Task<OperationResult<T>> SafeExecuteAsync<T>(Task<T> task)
+    public static async Task<OperationResult<T>> SafeExecuteAsync(Task<T> task)
     {
         try
         {
-            T result = await task;
-            return OperationResult<T>.Success(result);
+            var result = await task.ConfigureAwait(false);
+            return Success(result);        // class‑level helper
         }
         catch (Exception ex)
         {
-            // Optionally log the exception here.
-            return OperationResult<T>.Failure(ex.Message);
+            return Failure(ex.Message);
         }
     }
+
     public static async Task<OperationResult<T>> SafeExecuteAsync(Func<Task> action)
     {
         try

@@ -27,7 +27,6 @@
 	</PropertyGroup>
 	<PropertyGroup>
 		<SourceRevisionId>build$([System.DateTime]::UtcNow.ToString("yyyy-MM-ddTHH:mm:ss:fffZ"))</SourceRevisionId>
-		<PackageCertificateThumbprint>C234336AC91B9746B19C6DF8B4289A72994E1EA7</PackageCertificateThumbprint>
 	</PropertyGroup>
 	<PropertyGroup>
 		<WindowsSdkPackageVersion>10.0.22621.38</WindowsSdkPackageVersion>
@@ -50,10 +49,6 @@
 		<PackageReference Include="NLog" Version="5.4.0" />
 		<PackageReference Include="NLog.Extensions.Logging" Version="5.4.0" />
 		<PackageReference Include="WinUIEx" Version="2.5.1" />
-
-		<!-- These are here to prevent MSB3277 Warnings and should be removed when we update to .NET10 -->
-		<PackageReference Include="System.Collections.Immutable" Version="8.0.0" />
-		<PackageReference Include="System.Reflection.Metadata" Version="8.0.0" />
 		<Manifest Include="$(ApplicationManifest)" />
 	</ItemGroup>
 

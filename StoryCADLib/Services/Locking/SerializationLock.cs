@@ -21,7 +21,7 @@ public class SerializationLock : IDisposable
     private readonly LogService _logger;
     private string _caller;
     private bool _disposed;
-    private static string? currentHolder;
+    private static string currentHolder;
 
     public SerializationLock(AutoSaveService autoSaveService, BackupService backupService, LogService logger,
     [CallerMemberName] string caller = null)
