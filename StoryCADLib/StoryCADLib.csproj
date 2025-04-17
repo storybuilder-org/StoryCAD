@@ -157,7 +157,8 @@
 	</PropertyGroup>
   
 	<ItemGroup>
-	  <None Include="Assets\Icon.png">
+		<Content Remove="Assets\Icon.png" />
+		<None Include="Assets\Icon.png">
 	    <Pack>True</Pack>
 	    <PackagePath>\</PackagePath>
 	  </None>
