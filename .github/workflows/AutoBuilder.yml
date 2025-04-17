@@ -85,9 +85,6 @@ jobs:
       env:
         Configuration: ${{ matrix.configuration }}
         
-    - name: Debug New Version
-      run: echo "The new version is ${{ steps.increase_version.outputs.new_version }}"        
-        
 
     - name: Build StoryCADLib
       run: |
@@ -146,20 +143,6 @@ jobs:
         if you don't know what configuration to pick then we recommend StoryCAD Release x64.msix.
         
         Changelogs aren't available for Alpha Builds." | Out-File -FilePath "D:\a\StoryCAD\StoryCAD\StoryCAD\Packages\Install Instructions.txt"
-    
-    - name: List packages directory
-      run: |
-        Get-ChildItem -Path "D:\a\StoryCAD\StoryCAD\StoryCAD\Packages" | Format-List FullName
-        $nupkgFiles = Get-ChildItem -Path "D:\a\StoryCAD\StoryCAD\" -Filter *.nupkg -File -Recurse
-        if ($nupkgFiles.Count -eq 0) {
-            Write-Error "No .nupkg files found in D:\a\StoryCAD\StoryCAD\StoryCAD\Packages"
-            exit 1
-        } else {
-            Write-Host "Found the following .nupkg file(s):"
-            foreach ($pkg in $nupkgFiles) {
-                Write-Host $pkg.FullName
-            }
-        }
     
     - name: Repack StoryCADLib NuGet Package
       if: ${{ matrix.configuration == 'Release' && matrix.platform == 'x64' }}
