@@ -165,9 +165,4 @@ public sealed partial class PreferencesDialog
 			PrimaryButtonText = "OK"
 		}, true);
 	}
-
-    private async void TestAPI(object sender, RoutedEventArgs e)
-    {
-
-    }
 }

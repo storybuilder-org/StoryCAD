@@ -37,7 +37,7 @@ namespace StoryCAD.ViewModels;
 public class StoryNodeItem : INotifyPropertyChanged
 {
     private readonly ILogService _logger;
-    private readonly OutlineViewModel _outlineVM = Ioc.Default.GetRequiredService<OutlineViewModel>();
+    private readonly OutlineViewModel _outlineVM = Ioc.Default.GetService<OutlineViewModel>();
 
     // is it INavigable?
     public event PropertyChangedEventHandler PropertyChanged;
@@ -480,8 +480,9 @@ public class StoryNodeItem : INotifyPropertyChanged
     {
         if (storyView == StoryViewType.ExplorerView)
         {
-            _outlineVM.StoryModel.ExplorerView[1].Children.Add(this);
-            Parent = _outlineVM.StoryModel.ExplorerView[1];
+            StoryElement Trash =  _outlineVM.StoryModel.StoryElements.First(e => e.ElementType == StoryItemType.TrashCan);
+            Trash.Node.Children.Add(this);
+            Parent = Trash.Node;
         }
         //Narrative view nodes are not added to trash.
     }

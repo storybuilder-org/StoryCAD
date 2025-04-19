@@ -6,7 +6,6 @@ namespace StoryCAD.Services.Dialogs.Tools;
 public sealed partial class PrintReportsDialog
 {
     public PrintReportDialogVM PrintVM = Ioc.Default.GetRequiredService<PrintReportDialogVM>();
-    private bool isGenerating = false;
 
     public PrintReportsDialog()
     {

@@ -96,7 +96,7 @@ public class ListLoaderTests
         
         if ( FailedLists != "" ) 
         {
-            throw new InternalTestFailureException("Lists.ini contains duplicate values in the following lists" + FailedLists);
+            throw new AssertFailedException("Lists.ini contains duplicate values in the following lists" + FailedLists);
         }
 
     }

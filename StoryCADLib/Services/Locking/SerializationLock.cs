@@ -19,10 +19,9 @@ public class SerializationLock : IDisposable
     private readonly AutoSaveService _autoSaveService;
     private readonly BackupService _backupService;
     private readonly LogService _logger;
-    private readonly OutlineViewModel outlineVm;
     private string _caller;
     private bool _disposed;
-    private static string? currentHolder;
+    private static string currentHolder;
 
     public SerializationLock(AutoSaveService autoSaveService, BackupService backupService, LogService logger,
     [CallerMemberName] string caller = null)

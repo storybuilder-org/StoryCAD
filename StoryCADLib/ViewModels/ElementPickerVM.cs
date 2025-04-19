@@ -83,7 +83,7 @@ public class ElementPickerVM
 	/// Creates a new node of the type the user selected
 	/// </summary>
 	public void CreateNode()
-	{
+	{/*
 		StoryElement NewElement;
 		StoryItemType type;
 		if (ForcedType == null)

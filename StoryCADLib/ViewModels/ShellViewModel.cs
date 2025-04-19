@@ -1433,7 +1433,7 @@ public class ShellViewModel : ObservableRecipient
         PrintNodeCommand = new RelayCommand(async () => await OutlineManager.PrintCurrentNodeAsync(), SerializationLock.IsLocked);
         OpenFileCommand = new RelayCommand(async () => await OutlineManager.OpenFile(), SerializationLock.IsLocked);
         SaveFileCommand = new RelayCommand(async () => await OutlineManager.SaveFile(), SerializationLock.IsLocked);
-        SaveAsCommand = new RelayCommand(async () => OutlineManager.SaveFileAs(), SerializationLock.IsLocked);
+        SaveAsCommand = new RelayCommand(async () => await OutlineManager.SaveFileAs(), SerializationLock.IsLocked);
         CreateBackupCommand = new RelayCommand(async () => await CreateBackupNow(), SerializationLock.IsLocked);
         CloseCommand = new RelayCommand(async () => await OutlineManager.CloseFile(), SerializationLock.IsLocked);
         ExitCommand = new RelayCommand(async () => await OutlineManager.ExitApp(), SerializationLock.IsLocked);

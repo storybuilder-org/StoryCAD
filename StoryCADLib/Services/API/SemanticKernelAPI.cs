@@ -13,7 +13,7 @@ namespace StoryCAD.Services.API;
 public class SemanticKernelApi
 {
     private readonly OutlineService _outlineService = Ioc.Default.GetRequiredService<OutlineService>();
-    private StoryModel? CurrentModel;
+    private StoryModel CurrentModel;
 
     /// <summary>
     /// Creates a new empty story outline based on a template.
@@ -352,11 +352,11 @@ public class SemanticKernelApi
                                  Type is a enum that specifies if you are deleting from explorer or narrator
                                  view.
                                  """)]
-    public async Task<OperationResult<bool>> DeleteElement(Guid elementToDelete, StoryViewType Type)
+    public Task<OperationResult<bool>> DeleteElement(Guid elementToDelete, StoryViewType Type)
     {
         // Ensure we have a current StoryModel.
         if (CurrentModel == null)
-            return OperationResult<bool>.Failure("No outline is opened");
+            return Task.FromResult(OperationResult<bool>.Failure("No outline is opened"));
 
         //Remove reference to element
         StoryElement element = CurrentModel.StoryElements.StoryElementGuids[elementToDelete];
@@ -372,7 +372,7 @@ public class SemanticKernelApi
             element.Node.Delete(Type, CurrentModel.NarratorView[0]);
         }
 
-        return OperationResult<bool>.Success(true);
+        return Task.FromResult(OperationResult<bool>.Success(true));
     }
 
     [KernelFunction, Description("""
@@ -380,7 +380,7 @@ public class SemanticKernelApi
                                  Scene MUST be a GUID of element that is a scene
                                  Character MUST be a GUID of an element that is a character.
                                  """)]
-    public async Task<OperationResult<bool>> AddCastMember(Guid scene, Guid character)
+    public OperationResult<bool> AddCastMember(Guid scene, Guid character)
     {
         try
         {

@@ -35,8 +35,6 @@ public partial class App
 
     private LogService _log;
 
-    private IntPtr m_windowHandle;
-
 	/// <summary>
 	/// This is the path to the STBX file that StoryCAD was launched with,
 	/// if StoryCAD wasn't launched with a file this will be null.

@@ -232,7 +232,7 @@ public class FileOpenVM : ObservableRecipient
     /// <summary>
     /// Load a story from file
     /// </summary>
-    public async Task LoadStoryFromFile()
+    public async void LoadStoryFromFile()
     {
         Close();
         await _outlineVm.OpenFile();
@@ -267,7 +267,7 @@ public class FileOpenVM : ObservableRecipient
     /// <summary>
     /// Browse click for new project
     /// </summary>
-    public async Task Browse_Click(object sender, RoutedEventArgs e)
+    public async void Browse_Click(object sender, RoutedEventArgs e)
     {
         // Find a home for the new project
         ShowWarning = false;
@@ -296,7 +296,7 @@ public class FileOpenVM : ObservableRecipient
     /// <summary>
     /// Handles closing menu and handling user action
     /// </summary>
-    public async Task ConfirmClicked()
+    public async void ConfirmClicked()
     {
 
         //Track name of file we are opening
