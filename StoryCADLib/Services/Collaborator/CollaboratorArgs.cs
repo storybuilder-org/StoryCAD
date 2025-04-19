@@ -1,6 +1,5 @@
 using Microsoft.UI.Xaml;
 using StoryCAD.Collaborator.ViewModels;
-using WinUIEx;
 
 ﻿namespace StoryCAD.Services.Collaborator;
 
@@ -15,7 +14,7 @@ public class CollaboratorArgs
 	/// <summary>
 	/// Reference to the Collaborator window
 	/// </summary>
-    public WindowEx CollaboratorWindow;
+    public Window CollaboratorWindow;
 
     //public WorkflowStepViewModel WorkflowStepVM;
     

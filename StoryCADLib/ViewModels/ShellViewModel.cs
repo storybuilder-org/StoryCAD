@@ -22,7 +22,6 @@ using System.Diagnostics;
 using System.Reflection;
 using Windows.Storage;
 using StoryCAD.Services;
-using WinUIEx;
 using Application = Microsoft.UI.Xaml.Application;
 using StoryCAD.Collaborator.ViewModels;
 using StoryCAD.Services.Outline;
@@ -587,7 +586,7 @@ public class ShellViewModel : ObservableRecipient
             CollabArgs.SelectedElement = OutlineManager.StoryModel.StoryElements.StoryElementGuids[id];
             CollabArgs.StoryModel = OutlineManager.StoryModel;
             Ioc.Default.GetService<CollaboratorService>()!.LoadWorkflows(CollabArgs);
-            Ioc.Default.GetService<CollaboratorService>()!.CollaboratorWindow.Show();
+            Ioc.Default.GetService<CollaboratorService>()!.CollaboratorWindow.Activate();
             Ioc.Default.GetService<WorkflowViewModel>()!.EnableNavigation();
         }
     }

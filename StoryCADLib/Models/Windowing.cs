@@ -11,7 +11,6 @@ using System.ComponentModel;
 using Windows.UI;
 using Windows.UI.ViewManagement;
 using StoryCAD.ViewModels.SubViewModels;
-using WinUIEx;
 using LogLevel = StoryCAD.Services.Logging.LogLevel;
 
 namespace StoryCAD.Models;
@@ -34,9 +33,9 @@ public partial class Windowing : ObservableRecipient
     public string PageKey;
 
     // MainWindow is the main window displayed by the app. It's an instance of
-    // WinUIEx's WindowEx, which is an extension of Microsoft.Xaml.UI.Window 
+    // WinUIEx's Window, which is an extension of Microsoft.Xaml.UI.Window 
     // and which hosts a Frame holding 
-    public WindowEx MainWindow;
+    public Window MainWindow;
 
     /// <summary>
     // A defect in early WinUI 3 Win32 code is that ContentDialog
@@ -244,8 +243,7 @@ public partial class Windowing : ObservableRecipient
     public void ActivateMainInstance()
     {
         Windowing wnd = Ioc.Default.GetRequiredService<Windowing>();
-        wnd.MainWindow.Restore(); //Resize window and unminimize window
-        wnd.MainWindow.BringToFront(); //Bring window to front
+        wnd.MainWindow.Activate();
 
         try
         {
@@ -277,7 +275,7 @@ public partial class Windowing : ObservableRecipient
 		    };
 
 			//Init and spawn file picker
-		    WinRT.Interop.InitializeWithWindow.Initialize(filePicker, MainWindow.GetWindowHandle());
+		    WinRT.Interop.InitializeWithWindow.Initialize(filePicker, WindowHandle);
 			StorageFile file = await filePicker.PickSingleFileAsync();
 
 			//Null check
@@ -321,8 +319,7 @@ public partial class Windowing : ObservableRecipient
 		    };
 
 			//Initialize and show picker 
-		    WinRT.Interop.InitializeWithWindow.Initialize(folderPicker, 
-			    MainWindow.GetWindowHandle());
+		    WinRT.Interop.InitializeWithWindow.Initialize(folderPicker, WindowHandle);
 			StorageFolder folder = await folderPicker.PickSingleFolderAsync();
 
 			//Null check

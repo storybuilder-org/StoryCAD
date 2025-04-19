@@ -6,8 +6,8 @@ using Microsoft.UI.Windowing;
 using StoryCAD.Collaborator;
 using StoryCAD.Collaborator.ViewModels;
 using StoryCAD.Services.Backup;
-using WinUIEx;
 using Windows.ApplicationModel.AppExtensions;
+using Microsoft.UI.Xaml;
 using StoryCAD.ViewModels.SubViewModels;
 
 namespace StoryCAD.Services.Collaborator;
@@ -19,7 +19,7 @@ public class CollaboratorService
     private AppState State = Ioc.Default.GetRequiredService<AppState>();
     private LogService logger = Ioc.Default.GetRequiredService<LogService>();
     private Assembly CollabAssembly;
-    public WindowEx CollaboratorWindow;  // The secondary window for Collaborator
+    public Window CollaboratorWindow;  // The secondary window for Collaborator
     private Type collaboratorType;
     private object collaborator;
 
@@ -108,14 +108,14 @@ public class CollaboratorService
         // Use the custom context to load the assembly
         CollabAssembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(dllPath);
         logger.Log(LogLevel.Info, "Loaded CollaboratorLib.dll");
-        //Create a new WindowEx for collaborator to prevent access errors.
-        CollaboratorWindow = new WindowEx();
+        //Create a new Window for collaborator to prevent access errors.
+        CollaboratorWindow = new Window();
         CollaboratorWindow.AppWindow.Closing += HideCollaborator;
         // Create a Window for StoryBuilder Collaborator
         Frame rootFrame = new();
         //CollaboratorWindow = args.window;
-        CollaboratorWindow.MinWidth = Convert.ToDouble("500");
-        CollaboratorWindow.MinHeight = Convert.ToDouble("500");
+        //CollaboratorWindow.MinWidth = Convert.ToDouble("500");
+        //CollaboratorWindow.MinHeight = Convert.ToDouble("500");
         CollaboratorWindow.Closed += (sender, args) => CollaboratorClosed();
         CollaboratorWindow.Title = "StoryCAD Collaborator";
         CollaboratorWindow.Content = rootFrame;

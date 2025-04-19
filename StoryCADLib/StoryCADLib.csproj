@@ -124,7 +124,6 @@
 	<PackageReference Include="NLog.Extensions.Logging" Version="5.4.0" />
 	<PackageReference Include="NRTFTree-Async" Version="1.0.0" />
 	<PackageReference Include="Octokit" Version="14.0.0" />
-    <PackageReference Include="WinUIEx" Version="2.5.1" />
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.1742" />
     <PackageReference Include="Microsoft.SemanticKernel" Version="1.41.0" />
     <PackageReference Include="Microsoft.SemanticKernel.Abstractions" Version="1.41.0" />

@@ -8,7 +8,6 @@ using StoryCAD.Services.Json;
 using StoryCAD.Services.Logging;
 using StoryCAD.Services.Navigation;
 using StoryCAD.Views;
-using WinUIEx;
 using AppInstance = Microsoft.Windows.AppLifecycle.AppInstance;
 using Windows.ApplicationModel.Activation;
 using Microsoft.UI.Xaml;
@@ -171,14 +170,12 @@ public partial class App
         ConfigureNavigation();
 
         // Construct a Window to hold our Pages
-        WindowEx mainWindow = new MainWindow() { MinHeight = 675, MinWidth = 900, Width = 1050,
-            Height=750, Title="StoryCAD"};
+        Window mainWindow = new MainWindow() {/* MinHeight = 675, MinWidth = 900, Width = 1050, Height=750,*/ Title="StoryCAD"};
 
         // Create a Frame to act as the navigation context 
         Frame rootFrame = new();
         // Place the frame in the current Window
         mainWindow.Content = rootFrame;
-        mainWindow.CenterOnScreen(); // Centers the window on the monitor
         mainWindow.Activate();
 
         // Navigate to the first page:
@@ -197,9 +194,9 @@ public partial class App
         window.MainWindow = (MainWindow) mainWindow;
 
         //Get the Window's HWND
-        window.WindowHandle = window.MainWindow.GetWindowHandle();
+        window.WindowHandle = WinRT.Interop.WindowNative.GetWindowHandle(window.MainWindow);
 
-        _log.Log(LogLevel.Debug, $"Layout: Window size width={mainWindow.Width} height={mainWindow.Height}");
+        //_log.Log(LogLevel.Debug, $"Layout: Window size width={mainWindow.Width} height={mainWindow.Height}");
         _log.Log(LogLevel.Info, "StoryCAD App loaded and launched");
     }
 
