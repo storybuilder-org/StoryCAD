@@ -1,6 +1,6 @@
 ﻿namespace StoryCAD.Views;
 
-public sealed partial class OverviewPage : BindablePage
+public sealed partial class OverviewPage : Page
 {
 
     public OverviewViewModel OverviewVm => Ioc.Default.GetService<OverviewViewModel>();

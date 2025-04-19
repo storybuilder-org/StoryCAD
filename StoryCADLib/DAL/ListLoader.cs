@@ -11,7 +11,7 @@ public class ListLoader
     {
         Dictionary<string, ObservableCollection<string>> _lists = new();
 
-        await using Stream internalResourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("StoryCAD.Assets.Install.Lists.ini");
+        await using Stream internalResourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("StoryCADLib.Assets.Install.Lists.ini");
         using StreamReader reader = new(internalResourceStream);
 
         // Read the Application .INI file. Each record is the format 'KeyWord=Keyvalue'.

@@ -13,7 +13,7 @@ public class ToolLoader
     {
         try
         {
-            await using Stream internalResourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("StoryCAD.Assets.Install.Tools.ini");
+            await using Stream internalResourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("StoryCADLib.Assets.Install.Tools.ini");
             using StreamReader reader = new(internalResourceStream);
             _lines = (await reader.ReadToEndAsync()).Split("\n");
 

@@ -1,10 +1,10 @@
-﻿using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Controls;
 using Microsoft.Web.WebView2.Core;
 using StoryCAD.Services.Logging;
 
 namespace StoryCAD.Views;
 
-public sealed partial class WebPage : BindablePage
+public sealed partial class WebPage : Page
 {
     WebViewModel WebVM = Ioc.Default.GetRequiredService<WebViewModel>();
     private LogService Logger = Ioc.Default.GetRequiredService<LogService>();

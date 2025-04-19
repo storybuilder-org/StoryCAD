@@ -1,113 +1,44 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-	<PropertyGroup>
-		<OutputType>WinExe</OutputType>
-		<TargetFramework>net8.0-windows10.0.22621.0</TargetFramework>
-		<TargetPlatformMinVersion>10.0.19041.0</TargetPlatformMinVersion>
-		<TargetPlatformVersion>10.0.22621.0</TargetPlatformVersion>
-		<TargetPlatformIdentifier>Windows</TargetPlatformIdentifier>
-		<RootNamespace>StoryCAD</RootNamespace>
-		<ApplicationManifest>app.manifest</ApplicationManifest>
-		<Platforms>x86;x64;arm64</Platforms>
-		<RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
-		<UseWinUI>true</UseWinUI>
-		<EnablePreviewMsixTooling>true</EnablePreviewMsixTooling>
-		<GenerateAppInstallerFile>False</GenerateAppInstallerFile>
-		<AppxPackageSigningEnabled>True</AppxPackageSigningEnabled>
-		<AppxPackageSigningTimestampDigestAlgorithm>SHA256</AppxPackageSigningTimestampDigestAlgorithm>
-		<AppxAutoIncrementPackageRevision>False</AppxAutoIncrementPackageRevision>
-		<AppxSymbolPackageEnabled>False</AppxSymbolPackageEnabled>
-		<GenerateTestArtifacts>True</GenerateTestArtifacts>
-		<AppxBundle>Auto</AppxBundle>
-		<AppInstallerUri>C:\msixs\</AppInstallerUri>
-		<HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
-		<AppxPackageDir>C:\Users\RARI\Desktop\CadApp\</AppxPackageDir>
-		<AppxBundlePlatforms>x86|x64|arm64</AppxBundlePlatforms>
-		<RunAnalyzersDuringLiveAnalysis>False</RunAnalyzersDuringLiveAnalysis>
-		<RunAnalyzersDuringBuild>False</RunAnalyzersDuringBuild>
-	</PropertyGroup>
-	<PropertyGroup>
-		<SourceRevisionId>build$([System.DateTime]::UtcNow.ToString("yyyy-MM-ddTHH:mm:ss:fffZ"))</SourceRevisionId>
-	</PropertyGroup>
-	<PropertyGroup>
-		<WindowsSdkPackageVersion>10.0.22621.38</WindowsSdkPackageVersion>
-		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
-	</PropertyGroup>
-	<ItemGroup>
-		<Content Include="Assets\SplashScreen.scale-200.png" />
-		<Content Include="Assets\Square150x150Logo.scale-200.png" />
-		<Content Include="Assets\Square44x44Logo.scale-200.png" />
-		<Content Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png" />
-		<Content Include="Assets\Wide310x150Logo.scale-200.png" />
-	</ItemGroup>
+<Project Sdk="Uno.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net9.0-windows10.0.26100</TargetFrameworks>
 
-	<ItemGroup>
-		<PackageReference Include="dotenv.net" Version="3.2.1" />
-		<PackageReference Include="Microsoft.Web.WebView2" Version="1.0.2792.45" />
-		<PackageReference Include="Microsoft.WindowsAppSDK" Version="1.6.250228001" />
-		<PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.1742" />
-		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
-		<PackageReference Include="NLog" Version="5.4.0" />
-		<PackageReference Include="NLog.Extensions.Logging" Version="5.4.0" />
-		<Manifest Include="$(ApplicationManifest)" />
-	</ItemGroup>
+    <OutputType>Exe</OutputType>
+    <UnoSingleProject>true</UnoSingleProject>
 
-	<!-- Defining the "Msix" ProjectCapability here allows the Single-project MSIX Packaging
-       Tools extension to be activated for this project even if the Windows App SDK Nuget
-       package has not yet been restored -->
-	<ItemGroup Condition="'$(DisableMsixProjectCapabilityAddedByProject)'!='true' and '$(EnablePreviewMsixTooling)'=='true'">
-		<ProjectCapability Include="Msix" />
-	</ItemGroup>
+    <!-- Display name -->
+    <ApplicationTitle>StoryCAD</ApplicationTitle>
+    <!-- App Identifier -->
+    <ApplicationId>net.storybuilder.storycad</ApplicationId>
+    <!-- Versions -->
+    <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
+    <ApplicationVersion>1</ApplicationVersion>
+    <!-- Package Publisher -->
+    <ApplicationPublisher>StoryBuilder Foundation</ApplicationPublisher>
+    <!-- Package Description -->
+    <Description>StoryCAD powered by Uno Platform.</Description>
+    <!--
+      If you encounter this error message:
 
-	<ItemGroup>
-		<Content Include="Assets\Install\**">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-	</ItemGroup>
+        error NETSDK1148: A referenced assembly was compiled using a newer version of Microsoft.Windows.SDK.NET.dll.
+        Please update to a newer .NET SDK in order to reference this assembly.
 
-	<ItemGroup>
-	  <Content Remove="Assets\BadgeLogo.scale-400.png" />
-	  <Content Remove="Assets\StoryTree\4KRev1.1Square.png" />
-	</ItemGroup>
+      This means that the two packages below must be aligned with the "build" version number of
+      the "Microsoft.Windows.SDK.BuildTools" package above, and the "revision" version number
+      must be the highest found in https://www.nuget.org/packages/Microsoft.Windows.SDK.NET.Ref.
+    -->
+    <!-- <WindowsSdkPackageVersion>10.0.22621.28</WindowsSdkPackageVersion> -->
 
-	<ItemGroup>
-		<None Remove="Assets\HomeLogo.png" />
-		<None Remove="Assets\Icons\BootstrapEmailIcon.png" />
-		<None Remove="Assets\Icons\DiscordIcon.png" />
-		<None Remove="Assets\Icons\FaceBookIcon.png" />
-		<None Remove="Assets\Icons\GitHubIcon.png" />
-		<None Remove="Assets\Icons\PatreonIcon.png" />
-		<None Remove="Assets\Icons\TwitterIcon.png" />
-		<None Remove="Assets\Icons\YoutubeIcon.png" />
-		<None Remove="Assets\Logo.png" />
-		<None Remove="Views\PreferencesInitialization.xaml" />
-		<None Remove="Views\WebPage.xaml" />
-	</ItemGroup>
+    <!--
+      UnoFeatures let's you quickly add and manage implicit package references based on the features you want to use.
+      https://aka.platform.uno/singleproject-features
+    -->
+    <UnoFeatures>
+      Lottie;
+      Toolkit;
+    </UnoFeatures>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\StoryCADLib\StoryCADLib.csproj" />
+  </ItemGroup>
 
-	<ItemGroup>
-		<ProjectReference Include="..\StoryCADLib\StoryCADLib.csproj" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<None Update=".env">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
-		<Page Update="Views\WebPage.xaml">
-			<Generator>MSBuild:Compile</Generator>
-		</Page>
-	</ItemGroup>
-
-	<ItemGroup>
-		<Page Update="Views\PreferencesInitialization.xaml">
-			<Generator>MSBuild:Compile</Generator>
-		</Page>
-	</ItemGroup>
-
-	<!-- This allows Runtime ID's like win10-x86 since .NET8 changed them-->
-	<ItemGroup>
-		<RuntimeHostConfigurationOption Include="System.Runtime.Loader.UseRidGraph" Value="true" />
-	</ItemGroup>
-
-	<Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-	  <Exec Command="powershell -ExecutionPolicy Bypass -File &quot;$(ProjectDir)BuildIncrement.ps1&quot;&#xA;" />
-	</Target>
 </Project>

@@ -22,7 +22,7 @@ public interface IWizardViewModel
     Frame ContentFrame { get; set; }
     NavigationView NavView { get; set; }
     NavigationViewItem CurrentItem { get; set; }
-    IWizardStepModel CurrentStep { get; set; }
+    // IWizardStepModel CurrentStep { get; set; }
 
     // Methods
 

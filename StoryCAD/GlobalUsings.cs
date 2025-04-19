@@ -1,4 +1,4 @@
-﻿global using System;
+global using System;
 global using System.IO;
 global using System.Linq;
 global using System.Threading.Tasks;
@@ -7,3 +7,7 @@ global using StoryCAD.ViewModels;
 global using StoryCAD.Controls;
 global using CommunityToolkit.Mvvm.DependencyInjection;
 global using StoryCAD.Models;
+global using System.Collections.Immutable;
+global using Microsoft.Extensions.DependencyInjection;
+global using Microsoft.Extensions.Logging;
+global using ApplicationExecutionState = Windows.ApplicationModel.Activation.ApplicationExecutionState;

@@ -198,7 +198,8 @@ public class PrintReportDialogVM : ObservableRecipient
     }
 
     private async void StartPrintMenu()
-    {
+    {//TODO: Reimplement 
+        /*
         GeneratePrintDocumentReport();
         PrintDocSource = Document.DocumentSource;
 
@@ -232,7 +233,7 @@ public class PrintReportDialogVM : ObservableRecipient
         {
             ShowLoadingBar = true;
             StartGeneratingReports();
-        }
+        }*/
     }
 
 
@@ -279,9 +280,10 @@ public class PrintReportDialogVM : ObservableRecipient
 
     public void RegisterForPrint()
     {
+        //TODO: Reimplement
         // Register for PrintTaskRequested event
-        _printManager = PrintManagerInterop.GetForWindow(Window.WindowHandle);
-        _printManager.PrintTaskRequested += PrintTaskRequested;
+        //_printManager = PrintManagerInterop.GetForWindow(Window.WindowHandle);
+        //_printManager.PrintTaskRequested += PrintTaskRequested;
     }
     /// <summary>
     /// This starts report generation

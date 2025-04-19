@@ -11,7 +11,7 @@ namespace StoryCAD.Views;
 /// <summary>
 /// This Page is displayed if Preferences.Initialise is false.
 /// </summary>
-public sealed partial class PreferencesInitialization
+public sealed partial class PreferencesInitialization : Page
 {
     private InitVM _initVM = Ioc.Default.GetService<InitVM>();
     public PreferencesInitialization() { InitializeComponent(); }

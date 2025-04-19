@@ -10,7 +10,7 @@ public class ControlLoader
     {
         try
         {
-            await using Stream internalResourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("StoryCAD.Assets.Install.Controls.ini");
+            await using Stream internalResourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("StoryCADLib.Assets.Install.Controls.ini");
             using StreamReader reader = new(internalResourceStream);
 
             _lines = (await reader.ReadToEndAsync()).Split("\n");

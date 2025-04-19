@@ -3,7 +3,7 @@ using Microsoft.UI.Xaml;
 
 namespace StoryCAD.ViewModels;
 
-public class TreeViewSelection : DependencyObject, INotifyPropertyChanged
+public partial class TreeViewSelection : DependencyObject, INotifyPropertyChanged
 {
     public event PropertyChangedEventHandler PropertyChanged;
     public object SelectedItem

@@ -1,6 +1,6 @@
-﻿namespace StoryCAD.Views;
+namespace StoryCAD.Views;
 
-public sealed partial class TrashCanPage
+public sealed partial class TrashCanPage : Page
 {
     public TrashCanViewModel TrashCanVm => Ioc.Default.GetService<TrashCanViewModel>();
     public TrashCanPage()

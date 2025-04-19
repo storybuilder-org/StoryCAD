@@ -1,4 +1,4 @@
-﻿    <usercontrols:BindablePage NavigationCacheMode="Required"
+﻿    <Page NavigationCacheMode="Required"
     x:Class="StoryCAD.Views.ScenePage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -9,7 +9,7 @@
     xmlns:viewModels="using:StoryCAD.ViewModels"
     mc:Ignorable="d" >
 
-    <usercontrols:BindablePage.Resources>
+    <Page.Resources>
       
         <TeachingTip x:Name="ViewpointCharacterTip"
                      Title="Reminder:"
@@ -18,7 +18,7 @@
                      IsOpen="{x:Bind SceneVm.VpCharTipIsOpen}"
                      Content="{x:Bind SceneVm.VpCharTip}" >
         </TeachingTip>      
-    </usercontrols:BindablePage.Resources>
+    </Page.Resources>
 
     <Grid>
         <Grid.RowDefinitions>
@@ -271,4 +271,4 @@
         </Pivot>
     </Grid>
 
-</usercontrols:BindablePage>
+</Page>

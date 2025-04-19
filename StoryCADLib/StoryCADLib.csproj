@@ -1,252 +1,52 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Uno.Sdk">
   <PropertyGroup>
-	  <TargetFramework>net8.0-windows10.0.22621.0</TargetFramework>
-	  <TargetPlatformIdentifier>Windows</TargetPlatformIdentifier>
-    <TargetPlatformMinVersion>10.0.19041.0</TargetPlatformMinVersion>
-	<TargetPlatformVersion>10.0.22621.0</TargetPlatformVersion>
-    <RootNamespace>StoryCAD</RootNamespace>
-	<RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
-    <Platforms>AnyCPU;x86;x64;arm64</Platforms>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-	  <Version>3.0.7.1</Version>
-	  <FileVersion>3.0.7.1</FileVersion>
-	  <AssemblyVersion>3.0.7.1</AssemblyVersion>
-	  <DisableEmbeddedXbf>false</DisableEmbeddedXbf>
+    <TargetFrameworks>net9.0-windows10.0.26100</TargetFrameworks>
+    <UnoSingleProject>true</UnoSingleProject>
+    <OutputType>Library</OutputType>
+    <!-- Ensures the .xr.xml files are generated in a proper layout folder -->
+    <GenerateLibraryLayout>true</GenerateLibraryLayout>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <!--
+      UnoFeatures let's you quickly add and manage implicit package references based on the features you want to use.
+      https://aka.platform.uno/singleproject-features
+    -->
+    <!--
+    <UnoFeatures></UnoFeatures>
+    -->
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
-    <NoWarn>1701;1702;CA1416;CS0618</NoWarn>
-  </PropertyGroup>
-	<ItemGroup>
-		<!-- Ensure the assets are placed under a folder named after your PackageId -->
-		<Content Update="Assets\*.*" PackagePath="contentFiles\any\net8.0-windows10.0-22621\$(PackageId)\Assets\%(Filename)%(Extension)" />
-	</ItemGroup>
-  <ItemGroup>
-    <Content Remove="Assets\Install\Lists.ini" />
-    <Content Remove="Assets\Install\reports\Character Relationship Description.txt" />
-    <Content Remove="Assets\Install\reports\List of Websites.txt" />
-    <Content Remove="Assets\Install\reports\Structure Beats.txt" />
-    <Content Remove="Assets\Install\samples\A Doll's House.stbx" />
-    <Content Remove="Assets\Install\samples\Danger Calls.stbx" />
-    <Content Remove="Assets\Install\samples\Hamlet.stbx" />
-    <Content Remove="Assets\Install\samples\Rocky.stbx" />
-    <Content Remove="Assets\Install\samples\Snow White.stbx" />
-    <Content Remove="Assets\Install\samples\The Glass Menagerie.stbx" />
-    <Content Remove="Assets\Install\samples\The Maltese Falcon.stbx" />
-    <Content Remove="Assets\Install\samples\The Old Man and the Sea.stbx" />
-    <Content Remove="Assets\License.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Remove="Assets\Install\Bibliog.txt" />
-    <None Remove="Assets\Install\Controls.ini" />
-    <None Remove="Assets\Install\Lists.ini" />
-    <None Remove="Assets\Install\reports\Character Description.txt" />
-    <None Remove="Assets\Install\reports\Character Relationship Description.txt" />
-    <None Remove="Assets\Install\reports\Folder Description.txt" />
-    <None Remove="Assets\Install\reports\List of Characters.txt" /> 
-    <None Remove="Assets\Install\reports\List of Problems.txt" />
-    <None Remove="Assets\Install\reports\List of Scene.txt" />
-    <None Remove="Assets\Install\reports\List of Settings.txt" />
-    <None Remove="Assets\Install\reports\List of Websites.txt" />
-    <None Remove="Assets\Install\reports\Problem Description.txt" />
-    <None Remove="Assets\Install\reports\Scene Description.txt" />
-    <None Remove="Assets\Install\reports\Section Description.txt" />
-    <None Remove="Assets\Install\reports\Setting Description.txt" />
-    <None Remove="Assets\Install\reports\Story Overview.txt" />
-    <None Remove="Assets\Install\reports\Story Synopsis.txt" />
-    <None Remove="Assets\Install\samples\A Doll's House.stbx" />
-    <None Remove="Assets\Install\samples\A Doll's House.stbx\A Doll's House.stbx" />
-    <None Remove="Assets\Install\samples\A Doll's House.stbx\files\9B3EC3ED-FABB-4E60-BA6A-CB70B6C0A585\notes.rtf" />
-    <None Remove="Assets\Install\samples\A Doll's House.stbx\files\CA4D9D53-F2FE-4B87-99A6-0EBC33F4F44A\storyidea.rtf" />
-    <None Remove="Assets\Install\samples\Danger Calls.stbx" />
-    <None Remove="Assets\Install\samples\Hamlet.stbx" />
-    <None Remove="Assets\Install\samples\Rocky.stbx" />
-    <None Remove="Assets\Install\samples\Snow White.stbx" />
-    <None Remove="Assets\Install\samples\The Glass Menagerie.stbx" />
-    <None Remove="Assets\Install\samples\The Maltese Falcon.stbx" />
-    <None Remove="Assets\Install\samples\The Old Man and the Sea.stbx" />
-    <None Remove="Assets\Install\Symbols.txt" />
-    <None Remove="Collaborator\Views\WorkflowPage.xaml" />
-    <None Remove="Collaborator\Views\WorkflowShell.xaml" />
-    <None Remove="Controls\Flaw.xaml" />
-    <None Remove="Controls\RelationshipView.xaml" />
-    <None Remove="Controls\Traits.xaml" />
-    <None Remove="Services\Dialogs\BackupNow.xaml" />
-    <None Remove="Services\Dialogs\ElementPicker.xaml" />
-    <None Remove="Services\Dialogs\FeedbackDialog.xaml" />
-    <None Remove="Services\Dialogs\HelpPage.xaml" />
-    <None Remove="Services\Dialogs\NewRelationshipPage.xaml" />
-    <None Remove="Services\Dialogs\SaveAsDialog.xaml" />
-    <None Remove="Services\Dialogs\Tools\NarrativeTool.xaml" />
-    <None Remove="Services\Dialogs\Tools\PrintReportsDialog.xaml" />
-    <None Remove="ViewModels\Shell.xaml" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Assets\Install\**" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Remove="Services\Preferences\**" />
-    <Compile Remove="Services\Theming\**" />
-    <Content Remove="Services\Preferences\**" />
-    <Content Remove="Services\Theming\**" />
-    <EmbeddedResource Remove="Services\Preferences\**" />
-    <EmbeddedResource Remove="Services\Theming\**" />
-    <None Remove="Services\Preferences\**" />
-    <None Remove="Services\Theming\**" />
-    <Page Remove="Services\Preferences\**" />
-    <Page Remove="Services\Theming\**" />
-    <PRIResource Remove="Services\Preferences\**" />
-    <PRIResource Remove="Services\Theming\**" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Remove="Collaborator\ViewModels\IWizardStepViewModel.cs" />
-    <Compile Remove="Collaborator\ViewModels\IWizardViewModel.cs" />
-    <Compile Remove="Controls\ProblemName.cs" />
-  </ItemGroup>
 
-	<PropertyGroup>
-		<WindowsSdkPackageVersion>10.0.22621.38</WindowsSdkPackageVersion>
-	</PropertyGroup>
+  <ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">
+    <!--
+    If you encounter this error message:
 
-	<ItemGroup>
-	  <AppxManifest Include="Package.appxmanifest">
-	    <SubType>Designer</SubType>
-	  </AppxManifest>
-	</ItemGroup>
+      error NETSDK1148: A referenced assembly was compiled using a newer version of Microsoft.Windows.SDK.NET.dll.
+      Please update to a newer .NET SDK in order to reference this assembly.
 
-  <ItemGroup>
-    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
-    <PackageReference Include="dotenv.net" Version="3.2.1" />
-    <PackageReference Include="Elmah.Io.NLog" Version="5.3.55" />
-    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.2792.45" />
-    <PackageReference Include="MySql.Data" Version="9.2.0" /> 
-    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.6.250228001" />
-	<PackageReference Include="NLog" Version="5.4.0" />
-	<PackageReference Include="NLog.Extensions.Logging" Version="5.4.0" />
-	<PackageReference Include="NRTFTree-Async" Version="1.0.0" />
-	<PackageReference Include="Octokit" Version="14.0.0" />
-    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.1742" />
-    <PackageReference Include="Microsoft.SemanticKernel" Version="1.41.0" />
-    <PackageReference Include="Microsoft.SemanticKernel.Abstractions" Version="1.41.0" />
-    <PackageReference Include="Microsoft.SemanticKernel.Planners.OpenAI" Version="1.16.0-preview" />
+    This means that the two packages below must be aligned with the "build" version number of
+    the "Microsoft.Windows.SDK.BuildTools" package above, and the "revision" version number
+    must be the highest found in https://www.nuget.org/packages/Microsoft.Windows.SDK.NET.Ref.
+    -->
+    <!-- <FrameworkReference Update="Microsoft.Windows.SDK.NET.Ref" RuntimeFrameworkVersion="10.0.22621.28" />
+    <FrameworkReference Update="Microsoft.Windows.SDK.NET.Ref" TargetingPackVersion="10.0.22621.28" /> -->
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Models\Scrivener\" />
-    <Folder Include="Converters\" />
-    <Folder Include="Services\Logging\" />
-    <Folder Include="Services\Navigation\" />
-    <Folder Include="Services\Backup\" />
-  </ItemGroup>
-  
-	<PropertyGroup>
-		<WindowsSdkPackageVersion>10.0.22621.38</WindowsSdkPackageVersion>
-		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
-		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-		<IncludeSymbols>True</IncludeSymbols>
-		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
-		<Title>StoryCADLib</Title>
-		<Company>StoryBuilder Foundation</Company>
-		<Description>API for interacting with StoryCAD Outlines.</Description>
-		<Copyright>https://github.com/storybuilder-org/StoryCAD</Copyright>
-		<PackageProjectUrl>https://github.com/storybuilder-org/StoryCAD</PackageProjectUrl>
-		<PackageIcon>Icon.png</PackageIcon>
-		<RepositoryUrl>https://github.com/storybuilder-org/StoryCAD</RepositoryUrl>
-		<PackageLicenseFile>License.txt</PackageLicenseFile>
-		<PackageTags>StoryCAD, StoryBuilder, STBX, Writing Tools, API,</PackageTags>
-	</PropertyGroup>
-  
-	<ItemGroup>
-		<Content Remove="Assets\Icon.png" />
-		<None Include="Assets\Icon.png">
-	    <Pack>True</Pack>
-	    <PackagePath>\</PackagePath>
-	  </None>
-	</ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Update="Assets\Install\samples\A Doll%27s House.stbx">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Assets\Install\samples\Danger Calls.stbx">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Assets\Install\samples\Hamlet.stbx">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Assets\Install\samples\Rocky.stbx">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </EmbeddedResource>
-	  <EmbeddedResource Update="Assets\Install\samples\Snow White.stbx">
-		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-	  </EmbeddedResource>
-    <EmbeddedResource Update="Assets\Install\samples\The Glass Menagerie.stbx">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Assets\Install\samples\The Maltese Falcon.stbx">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Assets\Install\samples\The Old Man and the Sea.stbx">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </EmbeddedResource>
+      <PackageReference Include="Microsoft.SemanticKernel" />
+      <PackageReference Include="Microsoft.SemanticKernel.Abstractions" />
+      <PackageReference Include="Microsoft.SemanticKernel.Planners.OpenAI" />
+      <PackageReference Include="CommunityToolkit.Mvvm" />
+      <PackageReference Include="dotenv.net" />
+      <PackageReference Include="Elmah.Io.NLog" />
+      <PackageReference Include="MySql.Data" />
+      <PackageReference Include="NLog" />
+      <PackageReference Include="NLog.Extensions.Logging" />
+      <PackageReference Include="NRTFTree-Async" />
+      <PackageReference Include="Octokit" />
   </ItemGroup>
 
   <ItemGroup>
-    <Page Update="Collaborator\Views\WorkflowPage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Update="Collaborator\Views\WorkflowShell.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <None Update="License.txt">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </None>
-    <None Update="NLog.config">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <Page Update="Services\Dialogs\BackupNow.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Update="Services\Dialogs\HelpPage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Update="Services\Dialogs\ElementPicker.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Update="Services\Dialogs\FeedbackDialog.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Update="Services\Dialogs\Tools\NarrativeTool.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Page Update="Services\Dialogs\Tools\PrintReportsDialog.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Page Update="Services\Dialogs\NewRelationshipPage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Page Update="Services\Dialogs\SaveAsDialog.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Page Update="Services\Dialogs\FileOpenMenu.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Page Update="Controls\Traits.xaml">
+    <Page Update="Services\Dialogs\Tools\StockScenesDialog.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
@@ -258,12 +58,185 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Page Update="Controls\RelationshipView.xaml">
+    <Page Update="Services\Dialogs\HelpPage.xaml">
       <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Update="ViewModels\Shell.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
     </Page>
   </ItemGroup>
 
+  <ItemGroup>
+    <Page Update="Services\Dialogs\Tools\TopicsDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="Collaborator\Views\WelcomePage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="Controls\RelationshipView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="Collaborator\Views\WorkflowShell.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="Collaborator\Views\WorkflowPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="Services\Dialogs\FeedbackDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="Services\Dialogs\Tools\MasterPlotsDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="Services\Dialogs\SaveAsDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="Services\Dialogs\BackupNow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="Controls\Traits.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="Services\Dialogs\NewRelationshipPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="Services\Dialogs\ElementPicker.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="Services\Dialogs\Tools\PreferencesDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="Services\Dialogs\Tools\PrintReportsDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="Services\Dialogs\Tools\DramaticSituationsDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="Services\Dialogs\FileOpenMenu.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="Controls\Conflict.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="Services\Dialogs\Tools\NarrativeTool.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="Services\Dialogs\Tools\KeyQuestionsDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+
+  <ItemGroup>
+	  <Content Remove="Assets\Icon.png" />
+	  <Content Remove="Assets\Install\Bibliog.txt" />
+	  <Content Remove="Assets\Install\Controls.ini" />
+	  <Content Remove="Assets\Install\Lists.ini" />
+	  <Content Remove="Assets\Install\reports\Character Description.txt" />
+	  <Content Remove="Assets\Install\reports\Character Relationship Description.txt" />
+	  <Content Remove="Assets\Install\reports\Folder Description.txt" />
+	  <Content Remove="Assets\Install\reports\List of Characters.txt" />
+	  <Content Remove="Assets\Install\reports\List of Problems.txt" />
+	  <Content Remove="Assets\Install\reports\List of Scenes.txt" />
+	  <Content Remove="Assets\Install\reports\List of Settings.txt" />
+	  <Content Remove="Assets\Install\reports\List of Websites.txt" />
+	  <Content Remove="Assets\Install\reports\Problem Description.txt" />
+	  <Content Remove="Assets\Install\reports\Scene Description.txt" />
+	  <Content Remove="Assets\Install\reports\Section Description.txt" />
+	  <Content Remove="Assets\Install\reports\Setting Description.txt" />
+	  <Content Remove="Assets\Install\reports\Story Overview.txt" />
+	  <Content Remove="Assets\Install\reports\Story Synopsis.txt" />
+	  <Content Remove="Assets\Install\reports\Structure Beats.txt" />
+	  <Content Remove="Assets\Install\samples\A Doll%27s House.stbx" />
+	  <Content Remove="Assets\Install\samples\Danger Calls.stbx" />
+	  <Content Remove="Assets\Install\samples\Hamlet.stbx" />
+	  <Content Remove="Assets\Install\samples\Rocky.stbx" />
+	  <Content Remove="Assets\Install\samples\Snow White.stbx" />
+	  <Content Remove="Assets\Install\samples\The Glass Menagerie.stbx" />
+	  <Content Remove="Assets\Install\samples\The Maltese Falcon.stbx" />
+	  <Content Remove="Assets\Install\samples\The Old Man and the Sea.stbx" />
+	  <Content Remove="Assets\Install\Symbols.txt" />
+	  <Content Remove="Assets\Install\Tools.ini" />
+	  <EmbeddedResource Include="Assets\Install\Bibliog.txt" />
+	  <EmbeddedResource Include="Assets\Install\Controls.ini" />
+	  <EmbeddedResource Include="Assets\Install\Lists.ini" />
+	  <EmbeddedResource Include="Assets\Install\reports\Character Description.txt" />
+	  <EmbeddedResource Include="Assets\Install\reports\Character Relationship Description.txt" />
+	  <EmbeddedResource Include="Assets\Install\reports\Folder Description.txt" />
+	  <EmbeddedResource Include="Assets\Install\reports\List of Characters.txt" />
+	  <EmbeddedResource Include="Assets\Install\reports\List of Problems.txt" />
+	  <EmbeddedResource Include="Assets\Install\reports\List of Scenes.txt" />
+	  <EmbeddedResource Include="Assets\Install\reports\List of Settings.txt" />
+	  <EmbeddedResource Include="Assets\Install\reports\List of Websites.txt" />
+	  <EmbeddedResource Include="Assets\Install\reports\Problem Description.txt" />
+	  <EmbeddedResource Include="Assets\Install\reports\Scene Description.txt" />
+	  <EmbeddedResource Include="Assets\Install\reports\Section Description.txt" />
+	  <EmbeddedResource Include="Assets\Install\reports\Setting Description.txt" />
+	  <EmbeddedResource Include="Assets\Install\reports\Story Overview.txt" />
+	  <EmbeddedResource Include="Assets\Install\reports\Story Synopsis.txt" />
+	  <EmbeddedResource Include="Assets\Install\reports\Structure Beats.txt" />
+	  <EmbeddedResource Include="Assets\Install\samples\A Doll's House.stbx" />
+	  <EmbeddedResource Include="Assets\Install\samples\Danger Calls.stbx" />
+	  <EmbeddedResource Include="Assets\Install\samples\Hamlet.stbx" />
+	  <EmbeddedResource Include="Assets\Install\samples\Rocky.stbx" />
+	  <EmbeddedResource Include="Assets\Install\samples\Snow White.stbx" />
+	  <EmbeddedResource Include="Assets\Install\samples\The Glass Menagerie.stbx" />
+	  <EmbeddedResource Include="Assets\Install\samples\The Maltese Falcon.stbx" />
+	  <EmbeddedResource Include="Assets\Install\samples\The Old Man and the Sea.stbx" />
+	  <EmbeddedResource Include="Assets\Install\Symbols.txt" />
+	  <EmbeddedResource Include="Assets\Install\Tools.ini" />
+	  <Content Update="Assets\Icon.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
 </Project>

@@ -2,7 +2,7 @@
 
 namespace StoryCAD.Views;
 
-public sealed partial class ScenePage : BindablePage
+public sealed partial class ScenePage : Page
 {
     public SceneViewModel SceneVm => Ioc.Default.GetService<SceneViewModel>();
 

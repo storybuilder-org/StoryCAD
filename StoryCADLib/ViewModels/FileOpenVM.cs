@@ -197,7 +197,7 @@ public class FileOpenVM : ObservableRecipient
 
         //Gets all samples in samples dir, paths is the manifest resource path
         _samplePaths = Assembly.GetExecutingAssembly().GetManifestResourceNames()
-            .Where(name => name.Contains("StoryCAD.Assets.Install.samples")).ToList();
+            .Where(name => name.Contains("StoryCADLib.Assets.Install.samples")).ToList();
 
         //User friendly names
         SampleNames = _samplePaths.Select(name => name.Split('.')[4].Replace('_', ' '))

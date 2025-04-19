@@ -7,7 +7,7 @@ using StoryCAD.ViewModels.Tools;
 
 namespace StoryCAD.Views;
 
-public sealed partial class ProblemPage : BindablePage
+public sealed partial class ProblemPage : Page
 {
     public ProblemViewModel ProblemVm;
     public ShellViewModel ShellVm => Ioc.Default.GetService<ShellViewModel>();
