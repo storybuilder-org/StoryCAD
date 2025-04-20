@@ -61,7 +61,7 @@ public sealed partial class Shell : Page
 
 	private async void Shell_Loaded(object sender, RoutedEventArgs e)
     {
-        Windowing.XamlRoot = Content.XamlRoot;
+        Windowing.XamlRoot = XamlRoot;
         Ioc.Default.GetService<AppState>()!.StartUpTimer.Stop();
 
         if (await Ioc.Default.GetService<CollaboratorService>()!.CollaboratorEnabled())
@@ -177,7 +177,12 @@ public sealed partial class Shell : Page
     {
         FlyoutShowOptions myOption = new();
         myOption.ShowMode = FlyoutShowMode.Transient;
-        AddStoryElementCommandBarFlyout.ShowAt(NavigationTree, myOption);
+
+        // x:Name="AddStoryElementCommandBarFlyout" does not work in ResourceDictionary elements on Uno, so
+        // instead of:
+        // AddStoryElementCommandBarFlyout.ShowAt(NavigationTree, myOption);
+        // Do this:
+        ((CommandBarFlyout)Resources["AddStoryElementFlyout"]).ShowAt(NavigationTree, myOption);
     }
 
     private void Search(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
