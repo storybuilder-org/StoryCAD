@@ -104,7 +104,7 @@
                                     <StackPanel Orientation="Horizontal" Spacing="5">
                                         <CheckBox
                                                     Margin="0"
-                                                    IsChecked="{x:Bind IsSelected ,Mode=TwoWay}"
+                                                    IsChecked="{x:Bind IsSelected, Mode=TwoWay}"
                                                     Checked="CastMember_Checked" Unchecked="CastMember_Unchecked" />
                                         <ListView ItemsSource="{Binding CastSource}">
                                             <ListView.ItemTemplate>
@@ -144,9 +144,9 @@
                                     <StackPanel Orientation="Horizontal" Spacing="2">
                                         <CheckBox Margin="0" 
                                                   Checked="ScenePurpose_Checked" Unchecked="ScenePurpose_Unchecked"
-                                            IsChecked="{x:Bind Selection ,Mode=OneWay}" />
+                                            IsChecked="{x:Bind Selection,Mode=OneWay}" />
                                         <TextBlock MinWidth="250" 
-                                            Text="{x:Bind StringName , Mode=OneWay}" />
+                                            Text="{x:Bind StringName, Mode=OneWay}" />
                                     </StackPanel>
                                 </DataTemplate>
                             </ListView.ItemTemplate>
