@@ -1,38 +1,70 @@
-# StoryCAD ChangeLog
+---
+title: Changelog
+layout: default
+nav_enabled: true
+nav_order: 116
+parent: For Developers	
+has_toc: false
+---
+## StoryCAD ChangeLog
 
-## Release 2.12.0.0
+#### Release 2.13.1.0
+StoryCAD 2.13.1.0 Was released in January 2024.
+- Fixed bug when using templates and you haven't reloaded your outline yet (#692)
+- Fixed issue in lists.ini (#693)
+- Upgraded tests to prevent regressions (#695)
+- Updated Dependencies
+
+#### Release 2.13.0.0
+StoryCAD 2.13.0.0 was release on November 28th 2023.
+**This version removes support for versions of Windows older than Windows 10 20H2**
+
+ - Added option to set StoryCAD's theme independtly of the system theme (#668, 666)
+ -  Removed Install Service to boost load times (#660)
+ - Updated StoryCAD to use an automated testing suite to prevent regressions (#661, #658, #655)
+ - Updated dependencies (#665)
+ - Updated StoryCAD to use .NET8 (#671)
+ - Updated and fixed issues with Samples and the Samples menu (#678, #669, #664)
+ - Split the name option into a first name and surname option (#663)
+ - Cleaned up code (#680)
+ - Fixed issues connecting to the backend server (#682, #677)
+ - Fixed potential issue with file open launches (#686)
+ - Fixed rare crash that could occur when opening a content dialog too fast after initalisation (#679)
+
+
+#### Release 2.12.0.0
 StoryCAD 2.12.0.0 was released on September 29th, it mainly focused on fixing issues.
 
-- Fixed Crashes with Drag and Drop (#594)
-- Updated Manual (#595, #616)
-- Removed ability to create blank traits (#600)
+- Fixed Crashes with Drag and Drop (##594)
+- Updated Manual (##595, ##616)
+- Removed ability to create blank traits (##600)
 - Fixed an issue where deleting a trait would always remove the topmost one
-- Fixed a crash that could occur in the Right-Click Menu (#592)
-- Fixed issue where master plots could cause the app to enter a locked state (#598)
-- Update Packages (#601, #608, #630, #635)
-- Updated Relationships dialog to fix a potential issue (#601)
-- Cleaned up code and fixed warnings (#609)
-- Fixed title not updating properly (#607)
-- Updated change log to not show on developer builds (#605)
-- Fixed crashes in the print menu (#603)
-- Windows 10 Users on the latest version can now use the updated print UI (#604)
-- Fixed some issues with model loads (#606)
-- Updated how developer builds are numbered (#611)
-- Updated About page to show all StoryCAD Social URLS (#615)
-- Updated Readme (#614)
-- Fixed previously opened story page staying open when creating new file (#618)
-- Updated how node highlighting works to be more intuitive (#623)
-- Fixed issues with Scene Cast (#625, #647)
-- Fixed crash when navigating between two scene development tabs (#632)
-- Fixed crashes when searching (#631)
-- Fixed problems occurring when storing outlines in cloud storage (#633)
-- Fixed folder picker boxes in the initialisation screen not updating (#640)
-- Fixed issue preventing backend communication (#643)
-- Fixed duplicated 'Psychiatrist' role (#652)
-- Updated saving to save the model even if no changes have been made (#653)
-- Fixed version number not showing properly (#654)
+- Fixed a crash that could occur in the Right-Click Menu (##592)
+- Fixed issue where master plots could cause the app to enter a locked state (##598)
+- Update Packages (##601, ##608, ##630, ##635)
+- Updated Relationships dialog to fix a potential issue (##601)
+- Cleaned up code and fixed warnings (##609)
+- Fixed title not updating properly (##607)
+- Updated change log to not show on developer builds (##605)
+- Fixed crashes in the print menu (##603)
+- Windows 10 Users on the latest version can now use the updated print UI (##604)
+- Fixed some issues with model loads (##606)
+- Updated how developer builds are numbered (##611)
+- Updated About page to show all StoryCAD Social URLS (##615)
+- Updated Readme (##614)
+- Fixed previously opened story page staying open when creating new file (##618)
+- Updated how node highlighting works to be more intuitive (##623)
+- Fixed issues with Scene Cast (##625, ##647)
+- Fixed crash when navigating between two scene development tabs (##632)
+- Fixed crashes when searching (##631)
+- Fixed problems occurring when storing outlines in cloud storage (##633)
+- Fixed folder picker boxes in the initialisation screen not updating (##640)
+- Fixed issue preventing backend communication (##643)
+- Fixed duplicated 'Psychiatrist' role (##652)
+- Updated saving to save the model even if no changes have been made (##653)
+- Fixed version number not showing properly (##654)
 
-## Release 2.11.0.0
+#### Release 2.11.0.0
 As of June 6th 2023, we have released version 2.11.0.0
 - Added feature where new nodes will automatically be navigated to
 - Added warning for if a story synopsis is empty but selected anyway
@@ -48,78 +80,78 @@ As of June 6th 2023, we have released version 2.11.0.0
 - Fixed issue with logging
 - Fixed bug where opening a story from a different date format would crash
 
-## Release 2.10.0.0
+#### Release 2.10.0.0
 As of April 18th 2023, we have released version 2.10.0.0
 This release simply rebrands StoryBuilder to StoryCAD.
 
-## Release 2.9.0.0
+#### Release 2.9.0.0
 
 As of April 3rd 2023 we've rolled out Release 2.9.0.0.
 
 Mostly a fix release, the changes include:
 
-### Preferences refactoring (#524)
+###### Preferences refactoring (##524)
 
 Code cleanup to standardize use of Preferences data
 throughout the app.
 
-### Enhanced Drag and Drop functionality (#526)
+###### Enhanced Drag and Drop functionality (##526)
 
 Using your pointing device, you can now move a story node and drop it as a child of any other story node. Fine positioning within the list of children can be done with the move buttons.
 
-### Update Move button methods (#529)
+###### Update Move button methods (##529)
 
 Correct MoveRightIsValid test when CurrentNode is first child of root
 
 Clear StatusMessage at start of all MoveTreeViewItemX methods
 
-### Update project dependencies (#534)
+###### Update project dependencies (##534)
 
 Updated to latest version of WinAppSDK 1.2
 
-### Fix Not Connected message on release versions
+###### Fix Not Connected message on release versions
 
 The Not Connected message was being displayed on release versions of StoryBuilder. This was due to a change in the way the WebView2 runtime is installed. The WebView2 runtime is now installed as a part of the StoryBuilder installation. 
 
-### Reinforce list loads
+###### Reinforce list loads
 
 Fixed crashes caused by bad copies of lists.ini
 
-## Release 2.8.0.0
+#### Release 2.8.0.0
 
 As of March 1st 2023 we are now rolling out 2.8.0.0
 
-### Create issues from elmah.io GitHub app integration #132
+###### Create issues from elmah.io GitHub app integration ##132
 Elmah.io now uploads new erros to GitHub so that everyone can now
 see error logs.
 
-### Launch StoryCAD from .stbx file (#94)
+###### Launch StoryCAD from .stbx file (##94)
 
 .STBX files are now associated with StoryCAD meaning that, now users can double
 click .STBX files and it will automatically open in StoryCAD.
 
-## Release 2.7.0.0
+#### Release 2.7.0.0
 
 As of February 9, 2023, we've rolling out Release 2.7.0.0.
 
-### New Features
+###### New Features
 
-#### ARM64 Support (#109, #481)
+######## ARM64 Support (##109, ##481)
 
 StoryCAD now builds for three platforms: Intel x64 and x86, and ARM64.
 This supports Windows 11 running on ARM-based systems such as Surface Pro X.
 
-#### Improvements to Conflict Builder (#484)
+######## Improvements to Conflict Builder (##484)
 
 We've added  additional subcategories of criminal conflucts and
 expanded existing category/subcategories with more examples.
 
-#### Problem Category (#491)
+######## Problem Category (##491)
 We've added a new field to the Problem class, ProblemCategory. 
 This is a non-editable drop-down list (SfComboBox) which describes
 the purpose of the problem in terms of story structure.
 
-#### Unit testing / additional unit tests (#17, #492)
+######## Unit testing / additional unit tests (##17, ##492)
 
 We've got the StoryCADTest executing test scripts from Test Explorer.
 It's not yet running as a part of PR review prior to merge. We'll get 
@@ -128,17 +160,17 @@ that added in the next (2.8.0.0) release.
 As time permits, tests need to be generated to fill in code coverage, 
 especially for user interactions.
 
-### Bug fixes
+###### Bug fixes
 
-#### Re-add Listview for Scene Purpose (#478)
+######## Re-add Listview for Scene Purpose (##478)
 
-#### Fix label on Setting Page for Setting Summary (#488)
+######## Fix label on Setting Page for Setting Summary (##488)
 
-#### Fix error when opening files (#489)
+######## Fix error when opening files (##489)
 
-### Ongoing and Deferred Issues
+###### Ongoing and Deferred Issues
 
-#### User manual updates (#487, #491)
+######## User manual updates (##487, ##491)
 
 Add write-up for Problem Category with screen shot.
 
@@ -146,7 +178,7 @@ Fix invalid markdown tag on bullet list items.
 
 Add Next/Previous navigation.
 
-#### Produce first newsletter (#)
+######## Produce first newsletter (##)
 
 We are up on MailChimp, and have content drafted for the first newsletter, 
 which is the 2.6.0.0 changelog and the 2.7 roadmap. We also have additional
@@ -160,15 +192,15 @@ and several newsletters with articles and tips.
 Blog posts on StoryCAD.org and the newsletters will contain similar
 content.
 
-## Release 2.6.0.0
+#### Release 2.6.0.0
 
 As of January 24, 2023, we've rolled out Release 2.6.0.0.
 This release was late due to a number of issues as well
 as holiday and school schedules.
 
-### New Features
+###### New Features
 
-#### Expand market area to all stores
+######## Expand market area to all stores
 
 We've expanded our distribution to include all
 English-based countries in our  Microsoft Store
@@ -178,14 +210,14 @@ market.
 fixed issues with AutoSave and the WebView2 runtime, 
 used in our WebPage Story Element.)
 
-#### Remove SfComboBox (#464) 
+######## Remove SfComboBox (##464) 
 
 This change results in the replacement of SyncFusion's
 SfComboBox with the Microsoft ComboBox. This will make it 
 easier for developers to work with the codebase because they
 won't need their own SyncFusion licenses in order to do so.
 
-#### Back out remove SfComboBox (#477)
+######## Back out remove SfComboBox (##477)
 
 We rolled back the SfCombobox replacement due to problems
 with the Microsoft ComboBox control; we were getting bind
@@ -193,7 +225,7 @@ failures. This is still under investigation but we note
 that there appear to be quite a few open problems relating
 to ComboBox on the WinUI GitHub.
 
-#### Purpose of Scene rewrite (#457)
+######## Purpose of Scene rewrite (##457)
 
 Purpose of Scene was also an SfComboBox, because it allows
 the selection of multiple values (a scene should do more than
@@ -201,7 +233,7 @@ one thing.) It's been converted to a custome control based on
 a Listview with radio buttons. Since this change doesn't
 depend on the Microsoft ComboBox, we're retained it.
 
-#### Revise Character Relationships 'Create a new relationship' (#458)
+######## Revise Character Relationships 'Create a new relationship' (##458)
 
 Previously, the list of character Relations (relationship types,
 such as father -> son or boss -> employee) was fixed. This
@@ -209,7 +241,7 @@ doesn't work, since the number of possible relastionships
 is large and dynamic. The list was made editable so that users
 can add their own relationship types.
 
-#### Implement a Print Manager for printed reports (#157)
+######## Implement a Print Manager for printed reports (##157)
 
 We added a Print Manager as a part of the Print Report menu.
 This allows a user to select a printer and specify its 
@@ -225,41 +257,41 @@ print reports.
 We'll continue to track the status of a fix for Windows 10
 users.
  
-#### Codebase Cleanup (#439) (ongoing)
+######## Codebase Cleanup (##439) (ongoing)
 
 We're continuing to work on refactorings to
 improve our codebase and will continue to do so 
 indefinately. 
 
-### Bug fixes
+###### Bug fixes
 
 The following bugsd were addressed in this release:
 
-#### Update Deletion Service to catch potential errors (#470, #472)
-#### Track Version in .STBX file (#469)
-#### Improve filename checking (#471)
-#### Add system info to log (#473)
-#### Remove cached deferred write (#474)
-#### Autosave fixes (#476)
-#### Fix to SaveAs (#475)
+######## Update Deletion Service to catch potential errors (##470, ##472)
+######## Track Version in .STBX file (##469)
+######## Improve filename checking (##471)
+######## Add system info to log (##473)
+######## Remove cached deferred write (##474)
+######## Autosave fixes (##476)
+######## Fix to SaveAs (##475)
 
-## Release 2.5.1.0
+#### Release 2.5.1.0
 
 Fixed some issues with Autosave
 Fixed Issues when installing WebView Runtime.
 
-## Release 2.5.0.0
+#### Release 2.5.0.0
 
 As pf December 1, 2022, we rolled out Release 2.5.0.0 for general 
 distribution via the Microsoft Store.
 
-#### Revised right-click menu
+######## Revised right-click menu
 
 The flyout menu changes distributed with Release 2.4.0.0 had an
 issue which was cleaned up in a point release (2.4.1.0) and 
 subsequently in this release. 
 
-#### Codebase cleanup
+######## Codebase cleanup
 
 We're continuing to clean up our codebase. This release includes significant
 cleanup and simplification of our viewmodels, which are among our most 
@@ -267,13 +299,13 @@ complex classes. We're also making checks for clean code a part of our
 Pull Request process, in ordere to improve ongoing quality. Code cleanup
 will continue in the next release as well.
 
-#### Remove Id property  
+######## Remove Id property  
 
 This particular code cleanup has been on our issue list for a long time,
 but was repeatedly bypassed because (a) it did no harm and (b) it was
 complicated. But hey, cleanup. It's done now.
 
-#### Update to .NET 7
+######## Update to .NET 7
 
 Updated to .NET 7 is the successor to Microsoft .NET cross-platform 
 .NET framework, .NET 6. .NET 7 is primarily a performance release and
@@ -286,13 +318,13 @@ yet present for packaged MSIX WinUI 3 applications like ours, but should
 be forthcoming.
 
 
-### Add an 'Overview and Main Story Problem' template for new story creation
+###### Add an 'Overview and Main Story Problem' template for new story creation
 
 This template focuses on the Story Problem and ties the Overview node's Premise
 to one Problem node by making it the Story Problem. It also adds Protagonist
 and Antagonist Character nodes to the problem.
 
-#### Master Plots should be copied as a Problem rather than Scene
+######## Master Plots should be copied as a Problem rather than Scene
 
 This issue was listed in the 2.5 Roadmap as 'self explanitory.' It 
 isn't, exactly. The MasterPlot tool will now copy a masterplot as a
@@ -302,18 +334,18 @@ nodes if it's one of the 'story structure' masterplots such as Three Act Play
 or Hero's Journey. Previously MasterPlots wer added as series of scenes
 in all cases.
 
-#### AutoSave improvements
+######## AutoSave improvements
 
 Fixed a possible slowdown with AutoSave
 Increased the maximum time between autosaves from 30 to 60 seconds and minimum from 5 to 15 seconds.
 
-### Remarks
+###### Remarks
 
 Several things planned for this release didn't make it and will be rolled forward
 to future releases. These include
 
 
-## Release 2.4.0.0
+#### Release 2.4.0.0
 
 As of Novermber 13, 2022, we've rolled out Release 2.4.0.0 for general distribution 
 via the Microsoft Store. 
@@ -324,15 +356,15 @@ The WebPage story element research tool introduced in Release 2.3 now has a Pref
 tab which allows you pick the search engine to use when locating the web resource you're 
 looking for. 
 
-### UI Improvements
+###### UI Improvements
 
 
-#### Revised right-click menu
+######## Revised right-click menu
 
 The flyout menu is a shortcut used to add new Story Elements and several other functions.
 Jake's rewriten the flyout menu to make it much more user-friendly. 
 
-#### Highlight in-process node
+######## Highlight in-process node
 
 A StoryCAD outline is a tree of Story Elements which are displayed in the Navigation Pane. 
 Clicking (or touching) a Story Element node on the Navigation Pane displays that 
@@ -345,7 +377,7 @@ The Navigation Pane now displays the current node and the right-mouse clicked no
 (used for a target for the flyout menu) using your Display Settings accent colors to 
 better highlight where you are.
 
-#### Cast List revamp
+######## Cast List revamp
 
 Scene Story Elements contain a Cast List control which, as its name implies,
 is used to list the characters in a scene. The Cast List control is based
@@ -354,19 +386,19 @@ delete cast members using a second control. Weve simplified this by allowing you
 to switch between a list of all characters, with a checkbox by each name to
 add or remove the character to this scene's cast, or a list of just the scene's members.
 
-#### Progress indicator
+######## Progress indicator
 
 Several tasks, notably printing reports and loading installation data, may take 
 a bit of time. We've added a progress indicator as an indicator that the app
 hasn't frozen. 
 
-### Default Preferences
+###### Default Preferences
 
 Some Preferences data, such as the default outline and backup folder locations,
 have have been updated with some defaults (including preserving previous versions' 
 values) when installing StoryCAD.
 
-#### Codebase cleanup
+######## Codebase cleanup
 
 Actively maintained programs tend to accumulate cruft over time. This release we've
 started a process of addressing this by working through the codebase and removing
@@ -374,7 +406,7 @@ duplicate and unusued code, conforming to some newly-set naming conventions,
 and making other improvements.This is a long-term process, which will continue in
 future releases, but we're making progress.
 
-#### Bug fixes:
+######## Bug fixes:
 
 StoryCAD is a new product, and our number-one priority remains bug fixes and improvements.
 Some specific fixes in this release include:
@@ -386,11 +418,11 @@ Some specific fixes in this release include:
 * Fixed a number of crashes relating to tool use and transitioning from one user action to 
 another.
 
-### Windows App SDK Api 1.2
+###### Windows App SDK Api 1.2
 
 We've updated to the latest version of the Windows App SDK (1.2).
 
-## Release 2.3.0.0
+#### Release 2.3.0.0
 
 As of October 3, 2022, we've rolled out Release 2.3.0.0 for general distribution 
 via the Microsoft Store. 
@@ -414,7 +446,7 @@ StoryCAD is a new product, and our priority remains bug fixes and improvements.
 2.3 is primarily a fix release, as will be future short-term releases. Some
 specific fixes in this release include:
 
-#### Implemented Single Instancing
+######## Implemented Single Instancing
 
 StoryCAD now uses Single Instancing. If the app is already open and you launch 
 it again, the existing instance will be brought to the foreground rather than having
@@ -424,7 +456,7 @@ StoryCAD open and you edit the same Story Element in both instances, the changes
 from one instance will overwrite the changes from the other instance. Single Instancing
 prevents that from happening.
 
-#### Codebase cleanup
+######## Codebase cleanup
 
 Actively maintained programs tend to accumulate cruft over time. This release we've
 started a process of addressing this by working through the codebase and removing
@@ -432,7 +464,7 @@ duplicate and unusued code, conforming to some newly-set naming conventions,
 and making other improvements.This is a long-term process, which will continue in
 future releases, but we're making progress.
 
-#### User Manual and sample updates
+######## User Manual and sample updates
 
 We've updated the User Manual and several sample outlines to improve the documentation
 and to reflect changes in the app. As with the codebase cleanup, this will be an
@@ -440,7 +472,7 @@ ongoing process. The User Manual changes are still mostly structural, and we're
 well aware that line and copy edits are needed. We'll be working on those in future
 releases.
 
-#### Bug fixes:
+######## Bug fixes:
 
 * Fixed a bug preventing cast information from being saved.
 * Fixes several issues causing progdram crashes.
@@ -451,7 +483,7 @@ releases.
 
 https://github.com/StoryCAD-org/StoryCAD-2/compare/2.1.2.0...2.2.0.0
 
-## Release 2.2.0.0
+#### Release 2.2.0.0
 
 * As of August 31st, 2022, we've rolled out Release 2.2.0.0. We have now opened the app up to general distribution via the Microsoft Store. 
 * This release has a few fixes and improvements whilst implementing new features such as the Narrative Editor.
@@ -470,17 +502,17 @@ of just working title.
 
 https://github.com/StoryCAD-org/StoryCAD-2/compare/2.1.2.0...2.2.0.0
 
-## Release 2.1.2.0
+#### Release 2.1.2.0
 
 Fixed syncfusion licensing issue.
 
-## Release 2.1.1.0
+#### Release 2.1.1.0
 
 Fixed scaling issues.
 
 Updated dependencies.
 
-## Release 2.1.0.0
+#### Release 2.1.0.0
 
 As of July 29, 2022, we've rolled out Release 2.1.0.0. This is the 
 completion of a major milestone, distributing StoryCAD 
@@ -506,42 +538,42 @@ Updated manual
 Added StoryCAD Server support.
 
 
-## Release 2.0.0.0
+#### Release 2.0.0.0
 
-Fixed warning by @Rarisma in #311
+Fixed warning by @Rarisma in ##311
 
 Updated preferences UI
 
-Fixed issues with Reports menu by @Rarisma in #317
+Fixed issues with Reports menu by @Rarisma in ##317
 
-Datalogging by @terrycox in #321
+Datalogging by @terrycox in ##321
 
 Fixed issues with Moving buttons
 
-Fixed issues with generated reports by @Rarisma in #323
+Fixed issues with generated reports by @Rarisma in ##323
 
-Updated dependencies by @Rarisma in #322
+Updated dependencies by @Rarisma in ##322
 
-Fixed some crashes and inconsistencies in report naming by @Rarisma in #335
+Fixed some crashes and inconsistencies in report naming by @Rarisma in ##335
 
-Make startup quicker by @Rarisma in #336
+Make startup quicker by @Rarisma in ##336
 
-Update packages by @Rarisma in #340
+Update packages by @Rarisma in ##340
 
-Fixed CharacterName, ProblemName and SceneName control issues by @Rarisma in #341
+Fixed CharacterName, ProblemName and SceneName control issues by @Rarisma in ##341
 
 User is now prevented from opening the add relationships menu if there arent any prospective partners
-Get ready for the store by @Rarisma in #344
+Get ready for the store by @Rarisma in ##344
 
-Fix DotEnv Requirement by @Rarisma in #346
+Fix DotEnv Requirement by @Rarisma in ##346
 
-Reverted AutoComplete controls to SyncFusionComboboxes by @Rarisma in #352
+Reverted AutoComplete controls to SyncFusionComboboxes by @Rarisma in ##352
 
-Added some new keybinds and fixes report issues relating to outertraits by @Rarisma in #355
+Added some new keybinds and fixes report issues relating to outertraits by @Rarisma in ##355
 
 https://github.com/StoryCAD-org/StoryCAD-2/compare/2.0.14.0...2.0.0.0
 
-## Release 2.0.14.0
+#### Release 2.0.14.0
 
 Tweak UI
 
@@ -549,31 +581,31 @@ Fixed logging
 
 Fixed bugs
 
-## Release 2.0.13.0
+#### Release 2.0.13.0
 
-Fixed Numerous smaller bugs by @Rarisma in #258
+Fixed Numerous smaller bugs by @Rarisma in ##258
 
-Fixed crash caused by teaching tip by @terrycox in #259
+Fixed crash caused by teaching tip by @terrycox in ##259
 
-Fix Dark Mode Coloring by @Rarisma in #265
+Fix Dark Mode Coloring by @Rarisma in ##265
 
-Fix some fields not saving by @Rarisma in #282
+Fix some fields not saving by @Rarisma in ##282
 
-Updated about pageby @Rarisma in #283
+Updated about pageby @Rarisma in ##283
 
-Updated search expirence by @Rarisma in #287
+Updated search expirence by @Rarisma in ##287
 
-Fix Releationship display issue by @Rarisma in #291
+Fix Releationship display issue by @Rarisma in ##291
 
-Correct Setting Combobox by @terrycox in #292
+Correct Setting Combobox by @terrycox in ##292
 
-Fix Logging Error by @Rarisma in #294
+Fix Logging Error by @Rarisma in ##294
 
-Added examples by @terrycox in #293
+Added examples by @terrycox in ##293
 
 Updated Automated Release
 
-## Release 2.0.12.0
+#### Release 2.0.12.0
 
 Added privacy policy (Read it here https://github.com/StoryCAD-org/StoryCAD-2/blob/master/PRIVACY_POLICY.TXT)
 
