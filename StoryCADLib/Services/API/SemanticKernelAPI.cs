@@ -223,7 +223,7 @@ public class SemanticKernelApi
                                  Dont add sections to the narrator view unless explictly asked to, always add to the Overview element 
                                  unless told otherwise.
                                  """)]
-    public OperationResult<object> AddElement(StoryItemType typeToAdd, string parentGUID)
+    public OperationResult<object> AddElement(StoryItemType typeToAdd, string parentGUID, string desiredName, Dictionary<string, object> properties)
     {
         if (CurrentModel == null)
         {
@@ -246,6 +246,12 @@ public class SemanticKernelApi
         {
             // Create the new element using the OutlineService.
             var newElement = _outlineService.AddStoryElement(CurrentModel, typeToAdd, parent.Node);
+            newElement.Name = desiredName;
+
+            newElement.Name = desiredName;
+            UpdateElementProperties(newElement.Uuid,  properties);
+
+
             return OperationResult<object>.Success(newElement);
         }
         catch (Exception ex)
