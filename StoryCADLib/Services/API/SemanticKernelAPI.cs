@@ -207,10 +207,9 @@ public class SemanticKernelApi
         return CurrentModel.StoryElements.StoryElementGuids[guid].Serialize();
     }
 
-
     [KernelFunction, Description("""
                                  Adds a new StoryElement to the current StoryModel. 
-                                 This function returns a object representing the story element that was added. 
+                                 This function returns the Guid of the story element that was added. 
                                  Some included fields are GUIDs. These are the GUIDs of other StoryElements, and are how one story element links to another.
                                  Examples include 'Protagonist' and 'Antagonist' in a ProblemModel, which link to CharacterModels, and 'Setting' and 'Cast' in a Scene,
                                  which link to a SettingModel and CharacterModel elements, respectively.
@@ -223,40 +222,92 @@ public class SemanticKernelApi
                                  Dont add sections to the narrator view unless explictly asked to, always add to the Overview element 
                                  unless told otherwise.
                                  """)]
-    public OperationResult<object> AddElement(StoryItemType typeToAdd, string parentGUID, string desiredName, Dictionary<string, object> properties)
+    public OperationResult<Guid> AddElement(StoryItemType typeToAdd, string parentGUID, string name)
     {
         if (CurrentModel == null)
         {
-            return OperationResult<object>.Failure("No StoryModel available. Create a model first.");
+            return OperationResult<Guid>.Failure("No StoryModel available. Create a model first.");
         }
 
         if (!Guid.TryParse(parentGUID, out var parentGuid))
         {
-            return OperationResult<object>.Failure($"Invalid parent GUID: {parentGUID}");
+            return OperationResult<Guid>.Failure($"Invalid parent GUID: {parentGUID}");
         }
 
         // Attempt to locate the parent element using the provided GUID.
         var parent = CurrentModel.StoryElements.FirstOrDefault(e => e.Uuid == parentGuid);
         if (parent == null)
         {
-            return OperationResult<object>.Failure("Parent not found.");
+            return OperationResult<Guid>.Failure("Parent not found.");
         }
 
         try
         {
             // Create the new element using the OutlineService.
             var newElement = _outlineService.AddStoryElement(CurrentModel, typeToAdd, parent.Node);
-            newElement.Name = desiredName;
+            newElement.Name = name;
 
-            newElement.Name = desiredName;
-            UpdateElementProperties(newElement.Uuid,  properties);
+            newElement.Name = name;
 
-
-            return OperationResult<object>.Success(newElement);
+            return OperationResult<Guid>.Success(newElement.Uuid);
         }
         catch (Exception ex)
         {
-            return OperationResult<object>.Failure($"Error in AddElement: {ex.Message}");
+            return OperationResult<Guid>.Failure($"Error in AddElement: {ex.Message}");
+        }
+    }
+
+    
+    [KernelFunction, Description("""
+                                 Adds a new StoryElement to the current StoryModel and sets some properties.
+                                 This function returns a objectthe Guid of the element that was added.
+                                 Some parameters in the properties Dictionary may be GUIDs. These are the GUIDs of other StoryElements, 
+                                 and are how one story element links to another.
+                                 Examples include 'Protagonist' and 'Antagonist' in a ProblemModel, which link to CharacterModels, and 'Setting' and 'Cast' in a Scene,
+                                 which link to a SettingModel and CharacterModel elements, respectively.
+
+                                 Dont ADD NEW FIELDS TO THE PAYLOAD. 
+                                 Dont add GUIDs that are not within the current storymodel.
+                                 The following Types are supported: Problem, Character, Setting, Scene, Folder, Section, Web, Notes.
+                                 Dont add Folders to the the Narrator View or children of it, add Sections instead or vice versa.
+                                 Dont add any elements to the TrashCan or any type beside Section to the narrator view.
+                                 Dont add sections to the narrator view unless explictly asked to, always add to the Overview element 
+                                 unless told otherwise.
+                                 """)]
+    public OperationResult<Guid> AddElement(StoryItemType typeToAdd, string parentGUID, string name, Dictionary<string, object> properties)
+    {
+        if (CurrentModel == null)
+        {
+            return OperationResult<Guid>.Failure("No StoryModel available. Create a model first.");
+        }
+
+        if (!Guid.TryParse(parentGUID, out var parentGuid))
+        {
+            return OperationResult<Guid>.Failure($"Invalid parent GUID: {parentGUID}");
+        }
+
+        // Attempt to locate the parent element using the provided GUID.
+        var parent = CurrentModel.StoryElements.FirstOrDefault(e => e.Uuid == parentGuid);
+        if (parent == null)
+        {
+            return OperationResult<Guid>.Failure("Parent not found.");
+        }
+
+        try
+        {
+            // Create the new element using the OutlineService.
+            var newElement = _outlineService.AddStoryElement(CurrentModel, typeToAdd, parent.Node);
+            newElement.Name = name;
+
+            newElement.Name = name;
+            UpdateElementProperties(newElement.Uuid,  properties);
+
+
+            return OperationResult<Guid>.Success(newElement.Uuid);
+        }
+        catch (Exception ex)
+        {
+            return OperationResult<Guid>.Failure($"Error in AddElement: {ex.Message}");
         }
     }
 
