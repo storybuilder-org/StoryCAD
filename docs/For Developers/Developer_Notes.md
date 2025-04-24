@@ -1,14 +1,23 @@
+---
+title: Developer Notes
+layout: default
+nav_enabled: true
+nav_order: 117
+parent: For Developers	
+has_toc: false
+---
+
 # Programmer Notes
 
 ## General notes
 
 StoryCAD is written in C# and XAML and is a Windows desktop app. 
-It's written using [WinUI 3][2], [MVVM][6], [Project Reunion APIs][3], and [.NET7][8]. 
+It's written using [WinUI 3][2], [MVVM][6], [Project Reunion APIs][3], and [.NET][8]. 
 Although the only programming skill you need to get started is some C#, familiarity with [asynchronous IO][5] and [MVVM][6] will be useful. 
-We maintain StoryCAD as a Visual Studio solution using Visual Studio 2022.
+We maintain StoryCAD as a Visual Studio Ssolution using Visual Studio 2022.
 StoryCAD began as a UWP program and now uses Windows UI (WinUI 3) [controls][7] and styles. It runs
 as a native Windows (Win32) program, but its UWP roots remain; it uses [UWP asynchronous IO][4].
-This allows StoryCAD outlines, which are XML files, to be stored locally or on cloud storage services like OneDrive, Dropbox, Google Drive or Box.
+This allows StoryCAD outlines, which are JSON files, to be stored locally or on cloud storage services like OneDrive, Dropbox, Google Drive or Box.
 
 
 ## Installation and Setup
@@ -16,8 +25,7 @@ This allows StoryCAD outlines, which are XML files, to be stored locally or on c
 We maintain the StoryCAD repository with Visual Studio 2022. The Community edition of 
 Visual Studio is free. You can find Visual Studio 2022 [here][11].
 
-StoryCAD uses the [Windows App SDK][2]. Set up your development as per [this guide][12]. We are currently running 
-version 1.3.
+StoryCAD uses the [Windows App SDK][2]. Set up your development as per [this guide][12]. 
 
 We strongly recommend building and running the [HELLO sample][10]
 to verify your installation before proceeding.
@@ -39,7 +47,7 @@ Contributions should always start from issues (bugs or feature requests) in orde
 
 ### Coding Workflow
 
-1. Create a branch based on main.
+1. Create a branch/fork based on main.
 2. Code and make commits.
 3. Open a pull request. We recommend doing this early.
 4. Collaborate through PR comments.
@@ -49,9 +57,7 @@ Contributions should always start from issues (bugs or feature requests) in orde
 8. Merge your branch into the main branch
 
 Although StoryCAD is a complex program, we try to keep it orderly: throughout
-the code, it does similar things similarly, and our organizing principle is KISS (Keep it simple stupid.) If you're adding 
-something to StoryCAD it could be like something already there: a Page, A Tab,
-a control, or new or changed installation data. If so, borrow that code.
+the code, it does similar things similarly, and our organizing principle is KISS (Keep it simple stupid.) If you're adding something to StoryCAD it could be like something already there: a Page, A Tab, a control, or new or changed installation data. If so, borrow that code.
 
 ### Build
 
@@ -59,26 +65,21 @@ Always work in a branch. You can build and debug in your branch with impunity.
 
 ### Test
 
-~~The StoryCADTests project is a MSTEST console application that accesses and runs scripted unit tests against StoryCADLib's back-end code and ViewModels. 
-We urge developers to add test cases for their contributed changes. You can add and ran unit tests from your branch while you're developing. It's recommended that you run the full set of tests to check for side effects of the new code.~~
+The StoryCADTests project is a MSTEST console application that accesses and runs scripted unit tests against StoryCADLib's back-end code and ViewModels. 
+We urge developers to add test cases for their contributed changes. You can add and run unit tests from your branch while you're developing. It's recommended that you run the full set of tests to check for side effects of the new code.
 StoryCAD uses a Continuous Integration pipe line.  A Pull Request merge (after review) performs the following steps:
 1. Running the StoryCADTest unit tests as a final smoke test. If the tests fail, the merge fails.
 2. Publishing the app bundle from the StoryCAD (Package) project.
 3. Incrementing the release number.
 4. Zipping the app bundle along with the user's README.TXT file, which contains
-instructions for side-loading on a remote machine.~~
+instructions for side-loading on a remote machine.
 
-## StoryCAD Solution Structure ##
+## StoryCAD Solution Structure
 
-### NRtfTree
-
-NRtfTree Library is a set of classes written in C# used to access RTF documents. StoryCAD uses the library in its Scrivener reports interface. It's a .NET 6 DLL project.
- 
-NRtfTree uses the GNU Lesser General Public License (LGPLv3).
 
 ### StoryCAD
 
-StoryCAD is a WinUI 3 Win32 application which was originally a UWP
+StoryCAD is a WinUI 3 application which was originally a UWP
 App. It uses WinUI 3 XAML controls only. It uses UWP’s StorageFile
 (async) IO. This project contains the App startup logic and all 
 control layout (views). All views are declarative (XAML), except dialogs.
@@ -92,8 +93,8 @@ initializaton is in **App.Xaml.cs**.
 
 ### StoryCADLib
 
-This .NET 7 DLL contains the non-IO code for the solution. 
-The DLL contains the following folders:
+This .NET library contains the non-IO code for the solution. 
+The library contains the following folders:
 
 **Assets**      The Install sub-folder holds runtime data.
 
@@ -116,7 +117,7 @@ XAML bindings and a collection point for View-oriented logic.
 
 ### StoryCADTests 
 
-This .NET 7 Console application is a collection of MSTest 
+This .NET Console application is a collection of MSTest 
 unit test classes. 
 
 You run the tests by setting StoryCADTests as the startup project and running Test Explorer. 
@@ -148,21 +149,6 @@ property is a RichEditBox, call StoryWriter.PutRtfText instead of a simple assig
 Test that changes to the field persist when you navigate from one StoryElement to
 another in the TreeView.
 
-#### Add code to StoryReader to read the Model property from the .stbx file:
-   Update the appropriate StoryElement's parse method (called from RecurseStoryElement).
-   These methods are case statements to find the property's named attribute in the xml
-   node and move its inner text to the Model's property.
-
-#### Add code to StoryWriter to write the Model property to the .stbx file.
-   The appropriate method will named 'ParseXElement', ex., ParseSettingElement. 
-   Use an existing property as a template.
-   Create a new XmlAttribute.
-   If the property is a RichEditBox, you must next set the Model's property by calling
-   PutRtfText.
-   Assign the attribute with the property's value.
-   Add the XmlAttribute to the current XmlNode.
-   Test by using the new property, saving the story outline, re-opening the story project,
-   and verifying that the data entry from the new control is present and correct.
 
 ### Dialogs
 

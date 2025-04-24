@@ -1,6 +1,14 @@
-# Acknowledgements
+---
+title: Acknowledgements
+layout: default
+nav_enabled: true
+nav_order: 115
+parent: For Developers	
+has_toc: false
+---
+## Acknowledgements
 
-## Contributors
+#### Contributors
 
 Any complex undertaking, such as writing a novel, creating a
 complex piece of software, or a marriage, requires cooperation.
@@ -12,13 +20,13 @@ and we'll rectify that.
 
 **Thanks go to these wonderful people:**
 
-* Rarisma     
+* Jake Shaw     
 * Mylo
 * Tina
 * Tim        
 * Syncfusion
 
-## Software
+#### Software
 
 StoryCAD uses or links to the following software:
 
@@ -35,12 +43,12 @@ livelihood freely available to public open source projects like ours.
 (StoryCAD Versions before 2.14.2 relied on SyncFusion Controls and we are 
 eternally greatful for their support.)
 
-## Origins
+#### Origins
 
 Hi, I'm Terry Cox. 
 
-I started StoryCAD as a hobby, for my own attempts at fiction writing,
- back  in the late 1980's. It began to attract attention at writer's conferences 
+I started StoryCAD as a hobby, for my own attempts at fiction writing, back  in the late 1980's.
+It began to attract attention at writer's conferences 
 (I had a very early laptop), and in the early 90's I had the dubious idea of polishing
 it and selling it commercially. StoryCAD had modest success, selling over 3,000 
 copies, but inevitably software rot set in as my day job consumed more of time and
@@ -51,13 +59,13 @@ After I retired, I had the idea of rewriting StoryCAD and selling it again,
 and started down that road. However, looking at my tired old face in the mirror one 
 morning, I came to realize that I wasn't interested in going into business again. I
 wasn't interested in scrapping my project either, which realization led to the decision
-to distribute StoryCAD as free and open source software (FOSS.)
+to distribute StoryCAD as free and open source software (FOSS).
 
 I'm pleased with how it's developing and I hope you find it useful.
 
-## Software Influences
+#### Software Influences
 
-Unless I'm deluding myself, version 2.0 of StoryCAD is a better program
+Unless I'm deluding myself, this version of StoryCAD is a better program
 than the original. That's because I know the trick of how to write better
 software: You shamelessly shamelessly good ideas and code patterns from other developers.
 Five individuals and their work deserve mention for this reason.
@@ -76,7 +84,7 @@ forces in the creation of C++. StoryCAD V1 used it (poorly.) When StoryCAD V2
 was just a vague idea, this small project suggested a way forward.
 
 Diederik Krols, XAML Brewer, Using a TreeView Control for Navigation in UWP
-https://xamlbrewer.wordpress.com/2018/06/08/using-a-treeview-control-for-navigation-in-uwp/comment-page-1/#comment-296
+https://xamlbrewer.wordpress.com/2018/06/08/using-a-treeview-control-for-navigation-in-uwp/comment-page-1/##comment-296
 
 This project lead me toward UWP, and the birth of the WinUI 3 project cemented the 
 way forward. XamlBrewer is a great stylist and his posts are always worth reading.
