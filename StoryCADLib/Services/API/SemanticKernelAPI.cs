@@ -247,8 +247,6 @@ public class SemanticKernelApi
             var newElement = _outlineService.AddStoryElement(CurrentModel, typeToAdd, parent.Node);
             newElement.Name = name;
 
-            newElement.Name = name;
-
             return OperationResult<Guid>.Success(newElement.Uuid);
         }
         catch (Exception ex)
