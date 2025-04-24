@@ -212,7 +212,7 @@ public class SemanticKernelApiTests
         await _api.OpenOutline(file);
 
         // Act
-        var addResult = _api.AddElement(StoryItemType.Section, invalidParentGuid);
+        var addResult = _api.AddElement(StoryItemType.Section, invalidParentGuid, "Added Section");
 
         // Assert
         Assert.IsFalse(addResult.IsSuccess, "AddElement should fail with an invalid parent GUID.");
@@ -231,16 +231,29 @@ public class SemanticKernelApiTests
         Guid parentGuid = createResult.Payload.First();
 
         // Act
-        var addResult = _api.AddElement(StoryItemType.Folder, parentGuid.ToString());
+        var addResult = _api.AddElement(StoryItemType.Folder, parentGuid.ToString(), "Added Section");
 
         // Assert
         Assert.IsTrue(addResult.IsSuccess, "AddElement should succeed with a valid parent.");
         Assert.IsNotNull(addResult.Payload, "The payload should not be null for a successfully added element.");
 
         // Optionally verify that the added element's type is Section.
-        string newElementJson = JsonSerializer.Serialize(addResult.Payload);
-        StoryElement newElement = JsonSerializer.Deserialize<StoryElement>(newElementJson);
+        StoryElement newElement = _api.CurrentModel.StoryElements.StoryElementGuids[addResult.Payload];
         Assert.AreEqual(StoryItemType.Folder, newElement.ElementType, "The new element should be of type Section.");
+
+        Guid elementGuid = createResult.Payload.First();
+
+        // Act: Update the "Name" property using the dictionary wrapper.
+        var propertiesToUpdate = new Dictionary<string, object>
+        {
+            { "Name", "Renamed Section" }
+        };
+        _api.UpdateElementProperties(elementGuid, propertiesToUpdate);
+
+        // Assert: Verify that the element's name is updated.
+        string updatedElementJson = (string)_api.GetElement(elementGuid);
+        StoryElement updatedElement = JsonSerializer.Deserialize<StoryElement>(updatedElementJson);
+        Assert.AreEqual("Renamed Section", updatedElement.Name, "The element's name should be updated via UpdateElementProperties.");
     }
 
     [TestMethod]
@@ -328,19 +341,17 @@ public class SemanticKernelApiTests
         Guid parentGuid = createResult.Payload.First();
 
         // Add a Scene element.
-        var sceneResult = _api.AddElement(StoryItemType.Scene, parentGuid.ToString());
+        var sceneResult = _api.AddElement(StoryItemType.Scene, parentGuid.ToString(), "Added Scene");
         Assert.IsTrue(sceneResult.IsSuccess, "Scene element should be added successfully.");
-        string sceneJson = JsonSerializer.Serialize(sceneResult.Payload);
-        StoryElement sceneElement = JsonSerializer.Deserialize<StoryElement>(sceneJson);
+        StoryElement sceneElement = _api.CurrentModel.StoryElements.StoryElementGuids[sceneResult.Payload];
 
         // Add a Character element.
-        var characterResult = _api.AddElement(StoryItemType.Character, parentGuid.ToString());
-        Assert.IsTrue(characterResult.IsSuccess, "Character element should be added successfully.");
-        string characterJson = JsonSerializer.Serialize(characterResult.Payload);
-        StoryElement characterElement = JsonSerializer.Deserialize<StoryElement>(characterJson);
+        Guid characterGuid = _api.AddElement(StoryItemType.Character, parentGuid.ToString(), "Added Character").Payload;
+        var characterResult = _api.CurrentModel.StoryElements.StoryElementGuids[characterGuid];
+        Assert.IsTrue(characterResult.ElementType == StoryItemType.Character, "Character element should be added successfully.");
 
         // Act: Add the character as a cast member to the scene.
-        var castResult = _api.AddCastMember(sceneElement.Uuid, characterElement.Uuid);
+        var castResult = _api.AddCastMember(sceneElement.Uuid, characterResult.Uuid);
 
         // Assert
         Assert.IsTrue(castResult.IsSuccess, "AddCastMember should succeed.");
@@ -358,15 +369,13 @@ public class SemanticKernelApiTests
         Guid parentGuid = createResult.Payload.First();
 
         // Add two Character elements.
-        var charResult1 = _api.AddElement(StoryItemType.Character, parentGuid.ToString());
-        var charResult2 = _api.AddElement(StoryItemType.Character, parentGuid.ToString());
+        var charResult1 = _api.AddElement(StoryItemType.Character, parentGuid.ToString(), "Character 1");
+        var charResult2 = _api.AddElement(StoryItemType.Character, parentGuid.ToString(), "Character 2");
         Assert.IsTrue(charResult1.IsSuccess && charResult2.IsSuccess, 
             "Both character elements should be added successfully.");
 
-        string charJson1 = JsonSerializer.Serialize(charResult1.Payload);
-        string charJson2 = JsonSerializer.Serialize(charResult2.Payload);
-        StoryElement charElement1 = JsonSerializer.Deserialize<StoryElement>(charJson1);
-        StoryElement charElement2 = JsonSerializer.Deserialize<StoryElement>(charJson2);
+        StoryElement charElement1 = _api.CurrentModel.StoryElements.StoryElementGuids[charResult1.Payload];
+        StoryElement charElement2 = _api.CurrentModel.StoryElements.StoryElementGuids[charResult2.Payload];
 
         // Act: Add a relationship between the two characters.
         bool relationshipResult = _api.AddRelationship(charElement1.Uuid, 
