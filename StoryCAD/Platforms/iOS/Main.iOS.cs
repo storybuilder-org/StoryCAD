@@ -1,6 +1,6 @@
 using UIKit;
 
-namespace StoryCAD.MacCatalyst;
+namespace StoryCAD.iOS;
 
 public class EntryPoint
 {

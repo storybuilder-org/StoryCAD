@@ -285,7 +285,11 @@ public partial class Windowing : ObservableRecipient
 				return null;
 			}
 
-			logger.Log(LogLevel.Info, $"Picked folder {file.Path} attributes:{file.Attributes}");
+			logger.Log(LogLevel.Info, $"Picked folder {file.Path}");
+
+            #if !HAS_UNO
+                logger.Log(LogLevel.Info, $"Picked file attributes {file.Attributes}");
+            #endif
 			return file;
 		}
 	    catch (Exception e)
@@ -330,8 +334,10 @@ public partial class Windowing : ObservableRecipient
 			}
 
 			//Log it was successful
-			logger.Log(LogLevel.Info, $"Picked folder {folder.Path} attributes:{folder.Attributes}");
-
+			logger.Log(LogLevel.Info, $"Picked folder {folder.Path}");
+            #if !HAS_UNO
+                logger.Log(LogLevel.Info, $"Picked folder attributes {folder.Attributes}");
+            #endif
 			return folder;
 	    }
 	    catch (Exception e)

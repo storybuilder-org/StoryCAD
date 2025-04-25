@@ -1,4 +1,4 @@
-<Page NavigationCacheMode="Required"  
+<Page NavigationCacheMode="Required"
     x:Class="StoryCAD.Views.Shell"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -6,6 +6,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:muxc="using:Microsoft.UI.Xaml.Controls" RequestedTheme="{x:Bind Windowing.RequestedTheme, Mode=OneWay}"
     xmlns:viewmodels="using:StoryCAD.ViewModels"
+    xmlns:win="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     mc:Ignorable="d">
     <Page.Resources>
         <ResourceDictionary>
@@ -13,8 +14,8 @@
                 <ResourceDictionary x:Key="Default" />
             </ResourceDictionary.ThemeDictionaries>
 
-            <CommandBarFlyout x:Key="AddStoryElementFlyout" Placement="Right">
-                <CommandBarFlyout.SecondaryCommands>
+            <win:CommandBarFlyout x:Key="AddStoryElementFlyout" Placement="Right">
+                <CommandBarFlyout.PrimaryCommands>
 	                <AppBarButton Icon="Add" Label="Add Elements">
                         <AppBarButton.Flyout>
                             <MenuFlyout>
@@ -30,31 +31,31 @@
                         </AppBarButton.Flyout>
                     </AppBarButton>
                     <AppBarSeparator />
-                    <AppBarButton Icon="Delete" Label="Delete element"  Command="{x:Bind ShellVm.RemoveStoryElementCommand, Mode=OneWay}" 
+                    <AppBarButton Icon="Delete" Label="Delete element"  Command="{x:Bind ShellVm.RemoveStoryElementCommand, Mode=OneWay}"
                           Visibility="{x:Bind ShellVm.RemoveStoryElementVisibility, Mode=TwoWay}" >
                         <ToolTipService.ToolTip>
                             <ToolTip Content="Move Story Element to Trashcan" />
                         </ToolTipService.ToolTip>
                     </AppBarButton>
-                    <AppBarButton Icon="Refresh" Label="Restore Element" Command="{x:Bind ShellVm.RestoreStoryElementCommand, Mode=OneWay}" 
+                    <AppBarButton Icon="Refresh" Label="Restore Element" Command="{x:Bind ShellVm.RestoreStoryElementCommand, Mode=OneWay}"
                           Visibility="{x:Bind ShellVm.RestoreStoryElementVisibility, Mode=TwoWay}" >
                         <ToolTipService.ToolTip>
                             <ToolTip Content="Restore Story Element from Trashcan" />
                         </ToolTipService.ToolTip>
                     </AppBarButton>
-                    <AppBarButton Icon="Switch" Label="Add to Narrative" Command="{x:Bind ShellVm.AddToNarrativeCommand, Mode=OneWay}" 
+                    <AppBarButton Icon="Switch" Label="Add to Narrative" Command="{x:Bind ShellVm.AddToNarrativeCommand, Mode=OneWay}"
                           Visibility="{x:Bind ShellVm.AddToNarrativeVisibility, Mode=TwoWay}" >
                         <ToolTipService.ToolTip>
                             <ToolTip Content="Add Scene to Narrative" />
                         </ToolTipService.ToolTip>
                     </AppBarButton>
-                    <AppBarButton Icon="Switch" Label="Remove from narrative" Command="{x:Bind ShellVm.RemoveFromNarrativeCommand, Mode=OneWay}" 
+                    <AppBarButton Icon="Switch" Label="Remove from narrative" Command="{x:Bind ShellVm.RemoveFromNarrativeCommand, Mode=OneWay}"
                           Visibility="{x:Bind ShellVm.RemoveFromNarrativeVisibility, Mode=TwoWay}" >
                         <ToolTipService.ToolTip>
                             <ToolTip Content="Remove Scene from Narrative" />
                         </ToolTipService.ToolTip>
                     </AppBarButton>
-                    <AppBarButton Icon="Print" Label="Print node" Command="{x:Bind ShellVm.PrintNodeCommand, Mode=OneWay}" 
+                    <AppBarButton Icon="Print" Label="Print node" Command="{x:Bind ShellVm.PrintNodeCommand, Mode=OneWay}"
                           Visibility="{x:Bind ShellVm.PrintNodeVisibility, Mode=TwoWay}" >
                         <ToolTipService.ToolTip>
                             <ToolTip Content="Print selected node"/>
@@ -73,8 +74,8 @@
                             </Flyout>
                         </AppBarButton.Flyout>
                     </AppBarButton>
-                </CommandBarFlyout.SecondaryCommands>
-            </CommandBarFlyout>
+                </CommandBarFlyout.PrimaryCommands>
+            </win:CommandBarFlyout>
         </ResourceDictionary>
     </Page.Resources>
 
@@ -227,19 +228,19 @@
                                 </Grid.ColumnDefinitions>
                                 <Button ToolTipService.ToolTip="Move Left"
                                         FontFamily="Segoe MDL2 Assets" Content="&#xE09A;"
-                                        Command="{x:Bind ShellVm.MoveLeftCommand, Mode=OneWay}"  
+                                        Command="{x:Bind ShellVm.MoveLeftCommand, Mode=OneWay}"
                                         Margin="0,5,0,5"  Grid.Row="1"/>
                                 <Button ToolTipService.ToolTip="Move Right"
                                         FontFamily="Segoe MDL2 Assets" Content="&#xE013;"
-                                        Command="{x:Bind ShellVm.MoveRightCommand, Mode=OneWay}"  
+                                        Command="{x:Bind ShellVm.MoveRightCommand, Mode=OneWay}"
                                         Margin="0,5,0,5" Grid.Row="1" Grid.Column="2"/>
                                 <Button ToolTipService.ToolTip="Move Up"
                                         FontFamily="Segoe MDL2 Assets" Content="&#xE09C;"
-                                        Command="{x:Bind ShellVm.MoveUpCommand, Mode=OneWay}"  
+                                        Command="{x:Bind ShellVm.MoveUpCommand, Mode=OneWay}"
                                         Margin="5,0,5,0" Grid.Row="0" Grid.Column="1"/>
                                 <Button ToolTipService.ToolTip="Move Down"
                                         FontFamily="Segoe MDL2 Assets" Content="&#xE09D;"
-                                        Command="{x:Bind ShellVm.MoveDownCommand, Mode=OneWay}" 
+                                        Command="{x:Bind ShellVm.MoveDownCommand, Mode=OneWay}"
                                         Margin="5,0,5,0" Grid.Column="1" Grid.Row="2"/>
                             </Grid>
                         </Flyout>
@@ -309,7 +310,7 @@
                         </MenuFlyout>
                     </AppBarButton.Flyout>
                 </AppBarButton>
-				<AppBarButton Width="50" IsCompact="True" Label="Preferences" ToolTipService.ToolTip="Preferences" 
+				<AppBarButton Width="50" IsCompact="True" Label="Preferences" ToolTipService.ToolTip="Preferences"
 				              Command="{x:Bind ShellVm.PreferencesCommand, Mode=OneWay}" >
                     <AppBarButton.Icon>
                         <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE713;"/>
@@ -345,9 +346,9 @@
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    <muxc:TreeView x:Name="NavigationTree" 
-                                   ContextFlyout="{StaticResource AddStoryElementFlyout}" 
-                                   ContextRequested="AddButton_ContextRequested" 
+                    <muxc:TreeView x:Name="NavigationTree"
+                                   ContextFlyout="{StaticResource AddStoryElementFlyout}"
+                                   ContextRequested="AddButton_ContextRequested"
                                    CanDragItems="True" AllowDrop="True" CanReorderItems="True"
                                    ItemsSource="{x:Bind ShellVm.DataSource, Mode=TwoWay}"
                                    SelectionMode="Single"
@@ -357,19 +358,19 @@
                                    ItemInvoked="TreeViewItem_Invoked">
                         <muxc:TreeView.ItemTemplate>
                             <DataTemplate  x:DataType="viewmodels:StoryNodeItem">
-                                <muxc:TreeViewItem ItemsSource="{x:Bind Children}" 
-                                                   Background="{x:Bind Background, Mode=OneWay}" 
+                                <muxc:TreeViewItem ItemsSource="{x:Bind Children}"
+                                                   Background="{x:Bind Background, Mode=OneWay}"
                                                    BorderBrush="{x:Bind boarderBrush, Mode=OneWay}"
                                                    BorderThickness="1"
                                                    IsExpanded="{x:Bind IsExpanded, Mode=TwoWay}"
-                                                   CanDrag="True" 
+                                                   CanDrag="True"
                                                    DragEnter ="TreeViewItem_DragEnter"
                                                    DragLeave ="TreeViewItem_DragLeave"
                                                    RightTapped="TreeViewItem_RightTapped"
                                                    Tapped="TreeViewItem_Tapped">
                                     <StackPanel Orientation="Horizontal">
                                         <SymbolIcon Symbol="{x:Bind Symbol, Mode=OneWay}" Width="20" Height="20"/>
-                                        <TextBlock Text="{x:Bind Name, Mode=TwoWay}"          
+                                        <TextBlock Text="{x:Bind Name, Mode=TwoWay}"
                                                    TextWrapping="{x:Bind TextWrapping}" MaxWidth="220" Margin="10,0,10,0"/>
                                     </StackPanel>
                                 </muxc:TreeViewItem>
@@ -390,8 +391,8 @@
         </SplitView>
         <!-- Status Bar -->
         <StackPanel Grid.Row="2" Orientation="Horizontal" Background="{x:Bind Windowing.PrimaryColor, Mode=OneWay}">
-            <ComboBox IsEditable="False" Width="200"  Margin="10" ItemsSource="{x:Bind ShellVm.ViewList}" 
-                      SelectionChanged="{x:Bind ShellVm.ViewChanged, Mode=OneWay}" 
+            <ComboBox IsEditable="False" Width="200"  Margin="10" ItemsSource="{x:Bind ShellVm.ViewList}"
+                      SelectionChanged="{x:Bind ShellVm.ViewChanged, Mode=OneWay}"
                       SelectedItem="{x:Bind ShellVm.SelectedView, Mode=TwoWay}" />
             <TextBlock Text="{x:Bind ShellVm.StatusMessage, Mode=OneWay}"
                        Foreground="{x:Bind ShellVm.StatusColor, Mode=OneWay}"

@@ -191,6 +191,12 @@ public class StoryIO
 	/// <returns></returns>
     public async Task<bool> CheckFileAvailability(string filePath)
     {
+        //TODO: investigate alternatives on other platforms.
+        #if HAS_UNO
+        _logService.Log(LogLevel.Warn, $"Checking file availability is not supported on non-windows platforms");
+        return true;
+        #endif
+        
         if (!File.Exists(filePath))
         {
             return false;
