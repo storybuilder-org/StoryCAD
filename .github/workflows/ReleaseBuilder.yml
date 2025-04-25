@@ -135,19 +135,21 @@ jobs:
     - name: Write install instructions
       shell: pwsh
       run: |
-        @"
-Hello, Thank you for using StoryCAD Release ${{ github.event.inputs.VersionNumber }}
+        $file = "D:\a\StoryCAD\StoryCAD\StoryCAD\Packages\Install Instructions.txt"
 
-1) Open StoryCAD.cer to launch the certificate import wizard.
-2) Choose **Local Machine** store location → Next.
-3) Select **Place all certificates in the following store** → **Trusted People**.
-4) Click **Finish**.
-
-Open **Packages/** and run *StoryCAD Release x64.msix* (recommended).
-
-See what’s changed:
-https://github.com/StoryBuilder-org/StoryCAD/releases/tag/${{ github.event.inputs.VersionNumber }}
-"@ | Set-Content "D:\a\StoryCAD\StoryCAD\StoryCAD\Packages\Install Instructions.txt"
+        @(
+          "Hello, Thank you for using StoryCAD Release ${{ github.event.inputs.VersionNumber }}",
+          "",
+          "1) Open StoryCAD.cer to launch the certificate import wizard.",
+          "2) Choose Local Machine store location and click Next.",
+          "3) Select Place all certificates in the following store → Trusted People, then OK.",
+          "4) Click Finish.",
+          "",
+          "Open Packages\ and run StoryCAD Release x64.msix (recommended).",
+          "",
+          "See what’s changed:",
+          "https://github.com/StoryBuilder-org/StoryCAD/releases/tag/${{ github.event.inputs.VersionNumber }}"
+        ) | Set-Content -Path $file -Encoding UTF8
 
     - name: Zip Packages → Release.zip
       uses: thedoctor0/zip-release@master
