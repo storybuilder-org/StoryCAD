@@ -114,7 +114,8 @@ jobs:
     - name: Move StoryCADLib package into Packages/
       shell: pwsh
       run: |
-        Get-ChildItem "D:\a\StoryCAD\StoryCAD\StoryCADLib\bin\x64" -Filter *.nupkg,*.snupkg -Recurse |
+        Get-ChildItem -Path "D:\a\StoryCAD\StoryCAD\StoryCADLib\bin\x64\*" `
+          -Include *.nupkg,*.snupkg -File -Recurse |
           Move-Item -Destination "D:\a\StoryCAD\StoryCAD\StoryCAD\Packages" -Force
 
     - name: Repack StoryCADLib with runtime binaries & Assets
