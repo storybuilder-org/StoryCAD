@@ -102,7 +102,7 @@
                         <MenuFlyout>
                             <MenuFlyoutItem Text="Open/Create file" Command="{x:Bind ShellVm.OpenFileOpenMenuCommand}">
                                 <MenuFlyoutItem.Icon>
-                                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE8F4;"/>
+                                    <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE8F4;"/>
                                 </MenuFlyoutItem.Icon>
                                 <MenuFlyoutItem.KeyboardAccelerators>
                                     <KeyboardAccelerator Modifiers="Control" Key="O"/>
@@ -110,7 +110,7 @@
                             </MenuFlyoutItem>
                             <MenuFlyoutItem Text="Save Story" Command="{x:Bind ShellVm.SaveFileCommand, Mode=OneWay}" >
                                 <MenuFlyoutItem.Icon>
-                                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE74E;"/>
+                                    <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE74E;"/>
                                 </MenuFlyoutItem.Icon>
                                 <MenuFlyoutItem.KeyboardAccelerators>
                                     <KeyboardAccelerator Key="S" Modifiers="Control"/>
@@ -118,7 +118,7 @@
                             </MenuFlyoutItem>
                             <MenuFlyoutItem Text="Save Story As" Command="{x:Bind ShellVm.SaveAsCommand, Mode=OneWay}" >
                                 <MenuFlyoutItem.Icon>
-                                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE792;"/>
+                                    <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE792;"/>
                                 </MenuFlyoutItem.Icon>
                                 <MenuFlyoutItem.KeyboardAccelerators>
                                     <KeyboardAccelerator Modifiers="Control,Shift" Key="S"/>
@@ -126,7 +126,7 @@
                             </MenuFlyoutItem>
 	                        <MenuFlyoutItem Text="Create Backup" Command="{x:Bind ShellVm.CreateBackupCommand, Mode=OneWay}" >
 		                        <MenuFlyoutItem.Icon>
-									<FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xe838;"/>
+									<FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xe838;"/>
 		                        </MenuFlyoutItem.Icon>
 		                        <MenuFlyoutItem.KeyboardAccelerators>
 			                        <KeyboardAccelerator Key="B" Modifiers="Control"/>
@@ -134,12 +134,12 @@
 	                        </MenuFlyoutItem>
 							<MenuFlyoutItem Text="Close Story" Command="{x:Bind ShellVm.CloseCommand, Mode=OneWay}" >
                                 <MenuFlyoutItem.Icon>
-                                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE127;"/>
+                                    <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE127;"/>
                                 </MenuFlyoutItem.Icon>
                             </MenuFlyoutItem>
                             <MenuFlyoutItem Text="Exit" Command="{x:Bind ShellVm.ExitCommand, Mode=OneWay}" >
                                 <MenuFlyoutItem.Icon>
-                                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE106;"/>
+                                    <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE106;"/>
                                 </MenuFlyoutItem.Icon>
                             </MenuFlyoutItem>
                         </MenuFlyout>
@@ -147,7 +147,7 @@
                 </AppBarButton>
 				<AppBarButton IsCompact="True" Label="Add" ToolTipService.ToolTip="Add/Remove Story Elements" Width="50">
                     <AppBarButton.Icon>
-                        <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE710;"/>
+                        <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE710;"/>
                     </AppBarButton.Icon>
                     <AppBarButton.Flyout>
                         <MenuFlyout>
@@ -211,7 +211,7 @@
                 </AppBarButton>
 				<AppBarButton Width="50" IsCompact="True" Label="Move" ToolTipService.ToolTip="Move Story Elements" >
                     <AppBarButton.Icon>
-                        <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE759;"/>
+                        <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE759;"/>
                     </AppBarButton.Icon>
                     <AppBarButton.Flyout>
                         <Flyout>
@@ -227,19 +227,19 @@
                                     <ColumnDefinition Width="45"/>
                                 </Grid.ColumnDefinitions>
                                 <Button ToolTipService.ToolTip="Move Left"
-                                        FontFamily="Segoe MDL2 Assets" Content="&#xE09A;"
+                                        FontFamily="{ThemeResource SymbolThemeFontFamily}" Content="&#xE09A;"
                                         Command="{x:Bind ShellVm.MoveLeftCommand, Mode=OneWay}"
                                         Margin="0,5,0,5"  Grid.Row="1"/>
                                 <Button ToolTipService.ToolTip="Move Right"
-                                        FontFamily="Segoe MDL2 Assets" Content="&#xE013;"
+                                        FontFamily="{ThemeResource SymbolThemeFontFamily}" Content="&#xE013;"
                                         Command="{x:Bind ShellVm.MoveRightCommand, Mode=OneWay}"
                                         Margin="0,5,0,5" Grid.Row="1" Grid.Column="2"/>
                                 <Button ToolTipService.ToolTip="Move Up"
-                                        FontFamily="Segoe MDL2 Assets" Content="&#xE09C;"
+                                        FontFamily="{ThemeResource SymbolThemeFontFamily}" Content="&#xE09C;"
                                         Command="{x:Bind ShellVm.MoveUpCommand, Mode=OneWay}"
                                         Margin="5,0,5,0" Grid.Row="0" Grid.Column="1"/>
                                 <Button ToolTipService.ToolTip="Move Down"
-                                        FontFamily="Segoe MDL2 Assets" Content="&#xE09D;"
+                                        FontFamily="{ThemeResource SymbolThemeFontFamily}" Content="&#xE09D;"
                                         Command="{x:Bind ShellVm.MoveDownCommand, Mode=OneWay}"
                                         Margin="5,0,5,0" Grid.Column="1" Grid.Row="2"/>
                             </Grid>
@@ -250,12 +250,12 @@
 				              Visibility="{x:Bind ShellVm.CollaboratorVisibility, Mode=TwoWay}"
 				              Command="{x:Bind ShellVm.CollaboratorCommand, Mode=OneWay}" >
                     <AppBarButton.Icon>
-                        <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE71B;"/>
+                        <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE71B;"/>
                     </AppBarButton.Icon>
                 </AppBarButton>
 				<AppBarButton Width="50" IsCompact="True" Label="Tools" ToolTipService.ToolTip="Tools Menu" >
                     <AppBarButton.Icon>
-                        <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE90F;"/>
+                        <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE90F;"/>
                     </AppBarButton.Icon>
                     <AppBarButton.Flyout>
                         <MenuFlyout>
@@ -292,7 +292,7 @@
                 </AppBarButton>
 				<AppBarButton Width="50" IsCompact="True" Label="Reports" ToolTipService.ToolTip="Reports Menu" >
                     <AppBarButton.Icon>
-                        <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xF571;"/>
+                        <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xF571;"/>
                     </AppBarButton.Icon>
                     <AppBarButton.Flyout>
                         <MenuFlyout>
@@ -313,7 +313,7 @@
 				<AppBarButton Width="50" IsCompact="True" Label="Preferences" ToolTipService.ToolTip="Preferences"
 				              Command="{x:Bind ShellVm.PreferencesCommand, Mode=OneWay}" >
                     <AppBarButton.Icon>
-                        <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE713;"/>
+                        <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE713;"/>
                     </AppBarButton.Icon>
                     <AppBarButton.KeyboardAccelerators>
                         <KeyboardAccelerator Modifiers="Control" Key="P"/>
@@ -321,7 +321,7 @@
                 </AppBarButton>
 				<AppBarButton Width="50" IsCompact="True" Label="Report Feedback" ToolTipService.ToolTip="Report Feedback" Click="ButtonBase_OnClick">
 					<AppBarButton.Icon>
-						<FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xED15;"/>
+						<FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xED15;"/>
 					</AppBarButton.Icon>
 				</AppBarButton>
 				<AppBarButton Width="50" IsCompact="True" Label="Help" ToolTipService.ToolTip="Help" Command="{x:Bind ShellVm.HelpCommand, Mode=OneWay}" >
@@ -329,7 +329,7 @@
                         <KeyboardAccelerator Key="F1"/>
                     </AppBarButton.KeyboardAccelerators>
                     <AppBarButton.Icon>
-                        <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE897;"/>
+                        <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE897;"/>
                     </AppBarButton.Icon>
                 </AppBarButton>
             </CommandBar.PrimaryCommands>
