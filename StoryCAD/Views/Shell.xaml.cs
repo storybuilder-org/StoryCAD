@@ -77,17 +77,6 @@ public sealed partial class Shell : Page
         Windowing.UpdateWindowTitle();
         if (!Ioc.Default.GetService<AppState>()!.EnvPresent) { await ShellVm.ShowDotEnvWarningAsync(); }
 
-        if (!await Ioc.Default.GetRequiredService<WebViewModel>().CheckWebViewState())
-        {
-            var autoSaveService = Ioc.Default.GetRequiredService<AutoSaveService>();
-            var backupService = Ioc.Default.GetRequiredService<BackupService>();
-            var logService = Ioc.Default.GetRequiredService<LogService>();
-            using (var serializationLock = new SerializationLock(autoSaveService, backupService, logService))
-            {
-                await Ioc.Default.GetRequiredService<WebViewModel>().ShowWebViewDialog();
-            }
-
-        }
         //Shows changelog if the app has been updated since the last launch.
         if (Ioc.Default.GetRequiredService<AppState>().LoadedWithVersionChange)
         {

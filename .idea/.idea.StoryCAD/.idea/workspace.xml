@@ -13,34 +13,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="2aa6752e-2366-4c4b-afb0-ba302c638291" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/StoryCAD/Platforms/Android/AndroidManifest.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/StoryCAD/Platforms/Android/Assets/AboutAssets.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/StoryCAD/Platforms/Android/Main.Android.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/StoryCAD/Platforms/Android/MainActivity.Android.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/StoryCAD/Platforms/Android/Resources/AboutResources.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/StoryCAD/Platforms/Android/Resources/values/Strings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/StoryCAD/Platforms/Android/Resources/values/Styles.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/StoryCAD/Platforms/Android/environment.conf" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/StoryCAD/Platforms/WebAssembly/LinkerConfig.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/StoryCAD/Platforms/WebAssembly/Program.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/StoryCAD/Platforms/WebAssembly/WasmCSS/Fonts.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/StoryCAD/Platforms/WebAssembly/WasmScripts/AppManifest.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/StoryCAD/Platforms/WebAssembly/manifest.webmanifest" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/StoryCAD/Platforms/WebAssembly/wwwroot/staticwebapp.config.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/StoryCAD/Platforms/WebAssembly/wwwroot/web.config" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/StoryCAD/Platforms/iOS/PrivacyInfo.xcprivacy" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/StoryCAD/Platforms/Desktop/Program.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/StoryCAD/Platforms/MacCatalyst/Entitlements.plist" beforeDir="false" afterPath="$PROJECT_DIR$/StoryCAD/Platforms/iOS/Entitlements.plist" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/StoryCAD/Platforms/MacCatalyst/Info.plist" beforeDir="false" afterPath="$PROJECT_DIR$/StoryCAD/Platforms/iOS/Info.plist" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/StoryCAD/Platforms/MacCatalyst/Main.maccatalyst.cs" beforeDir="false" afterPath="$PROJECT_DIR$/StoryCAD/Platforms/iOS/Main.iOS.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/StoryCAD/Platforms/MacCatalyst/Media.xcassets/LaunchImages.launchimage/Contents.json" beforeDir="false" afterPath="$PROJECT_DIR$/StoryCAD/Platforms/iOS/Media.xcassets/LaunchImages.launchimage/Contents.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/StoryCAD/StoryCAD.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/StoryCAD/StoryCAD.csproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/StoryCAD/Views/Shell.xaml" beforeDir="false" afterPath="$PROJECT_DIR$/StoryCAD/Views/Shell.xaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/StoryCADLib/DAL/StoryIO.cs" beforeDir="false" afterPath="$PROJECT_DIR$/StoryCADLib/DAL/StoryIO.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/StoryCADLib/Models/Windowing.cs" beforeDir="false" afterPath="$PROJECT_DIR$/StoryCADLib/Models/Windowing.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/StoryCADLib/Services/Dialogs/FileOpenMenu.xaml" beforeDir="false" afterPath="$PROJECT_DIR$/StoryCADLib/Services/Dialogs/FileOpenMenu.xaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/StoryCADLib/StoryCADLib.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/StoryCADLib/StoryCADLib.csproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/StoryCADLib/ViewModels/SubViewModels/OutlineViewModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/StoryCADLib/ViewModels/SubViewModels/OutlineViewModel.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.StoryCAD/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.StoryCAD/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/StoryCAD/Views/Shell.xaml.cs" beforeDir="false" afterPath="$PROJECT_DIR$/StoryCAD/Views/Shell.xaml.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/StoryCAD/Views/WebPage.xaml" beforeDir="false" afterPath="$PROJECT_DIR$/StoryCAD/Views/WebPage.xaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/StoryCADLib/Assets/Install/samples/Rocky.stbx" beforeDir="false" afterPath="$PROJECT_DIR$/StoryCADLib/Assets/Install/samples/Rocky.stbx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/StoryCADLib/Controls/RichEditBoxExtended.cs" beforeDir="false" afterPath="$PROJECT_DIR$/StoryCADLib/Controls/RichEditBoxExtended.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/StoryCADLib/ViewModels/WebViewModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/StoryCADLib/ViewModels/WebViewModel.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -70,6 +48,7 @@
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/d15de8ed93064806a163b97c7155b882d19c00/d2/083c48d0/StackFrameIterator.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/2631b5a2e6b6067b31b981a98d777d927a552f58e1a5286074ef3dca1af2/StorageFile.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/72e2015f6576c96241d1421c64465977c0dad6b6f881eb2205aaa1483f4f/Frame.partial.mux.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/f490757f1ae7efc222324519c58cae159b3e65b71a319d11b317a91b6fb4a/RichEditBox.cs" root0="FORCE_HIGHLIGHTING" />
   </component>
   <component name="InvalidFacetManager">
     <ignored-facets>
@@ -77,6 +56,7 @@
       <facet id="StoryCADLib/invalid/Android Facet - StoryCADLib" />
     </ignored-facets>
   </component>
+  <component name="MetaFilesCheckinStateConfiguration" checkMetaFiles="true" />
   <component name="ProblemsViewState">
     <option name="selectedTabId" value="CurrentFile" />
   </component>
@@ -88,23 +68,23 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    ".NET Launch Settings Profile.StoryCAD (Desktop).executor": "Debug",
-    "Android.StoryCAD.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "UNOTestBranch",
-    "last_opened_file_path": "/home/rari/repos/StoryCAD/StoryCAD.sln",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "preferences.lookFeel",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;.NET Launch Settings Profile.StoryCAD (Desktop).executor&quot;: &quot;Run&quot;,
+    &quot;Android.StoryCAD.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;#969 on UNO-FixIcons&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/rari/repos/StoryCAD/StoryCAD.sln&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.lookFeel&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager" selected=".NET Launch Settings Profile.StoryCAD (Desktop)">
     <configuration name="StoryCAD: win-arm64" type="DotNetMsBuildPublish" factoryName="Publish to IIS">
       <riderPublish publish_profile="win-arm64.pubxml" pubxml_path="$PROJECT_DIR$/StoryCAD/Properties/PublishProfiles/win-arm64.pubxml" uuid_high="1447019910798984671" uuid_low="-6138931482687074729" />
@@ -173,12 +153,17 @@
       <workItem from="1745162150016" duration="751000" />
       <workItem from="1745421566093" duration="78000" />
       <workItem from="1745571662247" duration="1390000" />
+      <workItem from="1745701085528" duration="145000" />
+      <workItem from="1745704682643" duration="236000" />
+      <workItem from="1745707061982" duration="15000" />
+      <workItem from="1745780303319" duration="2272000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
+  <component name="UnityCheckinConfiguration" checkUnsavedScenes="true" />
   <component name="UnityProjectConfiguration" hasMinimizedUI="false" />
   <component name="VcsManagerConfiguration">
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />

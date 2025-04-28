@@ -12,7 +12,7 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <TextBox Header="Name" Text="{x:Bind WebVM.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+        <TextBox Header="Name" Text="{x:Bind WebVM.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                  viewModels:TextBoxFocus.IsFocused="{x:Bind WebVM.IsTextBoxFocused, Mode=TwoWay}"
                  Grid.Row="0"/>
         <Grid Grid.Row="1">
@@ -37,10 +37,12 @@
                     <SymbolIcon Symbol="Forward"/>
                 </Button.Content>
             </Button>
-            <AutoSuggestBox  HorizontalAlignment="Stretch" Text="{x:Bind WebVM.Query, Mode=TwoWay}" Margin="2,8" Grid.Column="3" PlaceholderText="Enter a URL or Query here!" 
-                            QueryIcon="Find" 
+            <AutoSuggestBox HorizontalAlignment="Stretch" Text="{x:Bind WebVM.Query, Mode=TwoWay}" Margin="2,8"
+                            Grid.Column="3" PlaceholderText="Enter a URL or Query here!" QueryIcon="Find"
                             QuerySubmitted="QuerySubmitted" />
         </Grid>
-        <WebView2 Name="WebView" Grid.Row="2" Source="{x:Bind WebVM.Url, Mode=TwoWay}" NavigationCompleted="Web_OnNavigationCompleted" />
+        <WebView2 Name="WebView" Grid.Row="2" Source="https://www.youtube.com/watch?v=ScN4OaGPDng"
+                  NavigationCompleted="Web_OnNavigationCompleted" Height="500" Width="500" />
+
     </Grid>
 </Page>

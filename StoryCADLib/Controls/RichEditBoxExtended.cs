@@ -1,110 +1,111 @@
 ﻿using Microsoft.UI;
 using Microsoft.UI.Text;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using StoryCAD.Services.Reports;
 
-namespace StoryCAD.Controls;
-
-/// <summary>
-/// RichEditBoxExtended inherits from the UI.Xaml.Controls RichExitBox
-/// control and adds a DependencyProperty "RtfText", which allows binding
-/// (including TwoWay binding) to  RTF text in a ViewModel using the
-/// ITextDocument interface.
-///
-/// Use:
-/// Go to your XAML and enter the following:
-///     <local:RichTextBoxExtended RtfText="{Binding MyRichText, Mode=TwoWay}"/>
-///
-/// References:
-/// https://stackoverflow.com/questions/26549156/winrt-binding-a-rtf-string-to-a-richeditbox/26549205#26549205
-/// https://stackoverflow.com/questions/28909808/richeditbox-two-way-binbing-does-not-work-windows-store-app/28981762#28981762
-/// (esp. note Rob Caplan's comment at the end, which is not handled in the provided code.)
-/// https://social.msdn.microsoft.com/Forums/en-US/f9a83d4e-26e9-476b-8818-7ccdf91a2341/richeditbox-mvvm-pattern?forum=winappswithcsharp
-/// </summary>
-public partial class RichEditBoxExtended : RichEditBox
+namespace StoryCAD.Controls
 {
-    public static readonly DependencyProperty RtfTextProperty =
-        DependencyProperty.Register(
-            "RtfText", typeof(string), typeof(RichEditBoxExtended),
-            new PropertyMetadata(default(string), RtfTextPropertyChanged));
-
-    private bool _lockChangeExecution;
-
-    public RichEditBoxExtended()
+#if !HAS_UNO
+    public partial class RichEditBoxExtended : RichEditBox
     {
-		TextChanged += RichEditBoxExtended_TextChanged;
-        TextAlignment = TextAlignment.Left;
-        CornerRadius = new(5);
-        
-		//Fix theme issues.
-        PointerEntered += (((sender, args) => UpdateTheme(null, null)));
-        Loaded += UpdateTheme;
-        UpdateTheme(null, null);
-	}
+        public static readonly DependencyProperty RtfTextProperty =
+            DependencyProperty.Register(
+                nameof(RtfText), typeof(string), typeof(RichEditBoxExtended),
+                new PropertyMetadata(default(string), RtfTextPropertyChanged));
 
-    public void UpdateTheme(object sender, RoutedEventArgs e)
-    {
-        var theme = ActualTheme;
+        private bool _lockChangeExecution;
 
-        ITextCharacterFormat format = Document.GetDefaultCharacterFormat();
-
-        if (theme == ElementTheme.Dark)
+        public RichEditBoxExtended()
         {
-            // Set text color to white
-            format.ForegroundColor = Colors.White;
-        }
-        else
-        {
-            // Set text color to black
-            format.ForegroundColor = Colors.Black;
+            TextChanged += RichEditBoxExtended_TextChanged;
+            TextAlignment = TextAlignment.Left;
+            CornerRadius = new(5);
+
+            PointerEntered += ((s, e) => UpdateTheme(null, null));
+            Loaded += UpdateTheme;
+            UpdateTheme(null, null);
         }
 
-        Document.SetDefaultCharacterFormat(format);
-    }
-
-
-	public string RtfText
-    {
-        get => (string) GetValue(RtfTextProperty);
-        set => SetValue(RtfTextProperty, value);
-    }
-
-    private void RichEditBoxExtended_TextChanged(object sender, RoutedEventArgs e)
-    {
-		if (!_lockChangeExecution)
+        public void UpdateTheme(object sender, RoutedEventArgs e)
         {
+            var theme = ActualTheme;
+            var format = Document.GetDefaultCharacterFormat();
+            format.ForegroundColor = theme == ElementTheme.Dark
+                ? Colors.White
+                : Colors.Black;
+            Document.SetDefaultCharacterFormat(format);
+        }
+
+        public string RtfText
+        {
+            get => (string)GetValue(RtfTextProperty);
+            set => SetValue(RtfTextProperty, value);
+        }
+
+        private void RichEditBoxExtended_TextChanged(object sender, RoutedEventArgs e)
+        {
+            if (_lockChangeExecution) return;
             _lockChangeExecution = true;
-            Document.GetText(TextGetOptions.None, out string text);
-            if (string.IsNullOrWhiteSpace(text))  
-            {
+
+            Document.GetText(TextGetOptions.None, out var plain);
+            if (string.IsNullOrWhiteSpace(plain))
                 RtfText = "";
-            }
             else
             {
-                Document.GetText(TextGetOptions.FormatRtf, out text);
-                RtfText = text.TrimEnd('\0'); // remove end of string marker
+                Document.GetText(TextGetOptions.FormatRtf, out var rtf);
+                RtfText = rtf.TrimEnd('\0');
             }
+
             _lockChangeExecution = false;
         }
-    }
 
-	private static void RtfTextPropertyChanged(DependencyObject dependencyObject,
-        DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
-    {
-		TextSetOptions options = TextSetOptions.FormatRtf | TextSetOptions.ApplyRtfDocumentDefaults;
-        RichEditBoxExtended rtb = dependencyObject as RichEditBoxExtended;
-        if (rtb == null) return;
-		if (!rtb._lockChangeExecution)
+        private static void RtfTextPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
+            var rtb = d as RichEditBoxExtended;
+            if (rtb == null || rtb._lockChangeExecution) return;
+
             rtb._lockChangeExecution = true;
+            var wasReadOnly = rtb.IsReadOnly;
+            rtb.IsReadOnly = false;
 
-			//Workaround for crash if readonly is true
-			bool isReadOnly = rtb.IsReadOnly;
-			rtb.IsReadOnly = false;
+            rtb.Document.SetText(
+                TextSetOptions.FormatRtf | TextSetOptions.ApplyRtfDocumentDefaults,
+                rtb.RtfText ?? "");
 
-            rtb.Document.SetText(options, rtb.RtfText);
-            rtb.IsReadOnly = isReadOnly;
-            // get rid of new EOP (cr/lf) somehow
+            rtb.IsReadOnly = wasReadOnly;
             rtb._lockChangeExecution = false;
         }
     }
+#else
+    public partial class RichEditBoxExtended : TextBox
+    {
+        public static readonly DependencyProperty RtfTextProperty =
+            DependencyProperty.Register(
+                nameof(RtfText), typeof(string), typeof(RichEditBoxExtended),
+                new PropertyMetadata(default(string), RtfTextPropertyChanged));
+
+        public RichEditBoxExtended()
+        {
+            TextWrapping = TextWrapping.Wrap;
+        }
+
+        public string RtfText
+        {
+            get => Text;
+            set => Text = value ?? "";
+        }
+
+        private static void RtfTextPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            var tb = d as RichEditBoxExtended;
+            if (tb == null) return;
+            
+            tb.Text =new ReportFormatter().GetText(e.NewValue.ToString()?? "");
+        }
+        public void UpdateTheme(object sender, RoutedEventArgs e)
+        {
+        }
+    }
+#endif
 }
