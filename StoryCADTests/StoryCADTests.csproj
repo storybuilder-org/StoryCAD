@@ -11,6 +11,8 @@
 		<RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
 		<EnableMsixTooling>true</EnableMsixTooling>
 		<UseWinUI>true</UseWinUI>
+		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+		
 		<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
 	</PropertyGroup>
 	<ItemGroup>
