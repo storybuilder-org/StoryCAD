@@ -305,8 +305,12 @@ public class FileOpenVM : ObservableRecipient
         {
             //Open recent file and update list
             case "Recent":
-                filePath = _preferences.Model.RecentFiles[SelectedRecentIndex];
-                await _outlineVm.OpenFile(filePath);
+                if (SelectedRecentIndex != -1)
+                {
+                    filePath = _preferences.Model.RecentFiles[SelectedRecentIndex];
+                    await _outlineVm.OpenFile(filePath);
+                }
+                else{ return; }
                 break;
 
             case "New":
