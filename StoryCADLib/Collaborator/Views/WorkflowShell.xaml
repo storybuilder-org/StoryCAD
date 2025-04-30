@@ -30,7 +30,7 @@
 			<CommandBar.PrimaryCommands>
 				<AppBarButton Label="Help" ToolTipService.ToolTip="Help" Margin="5">
 					<AppBarButton.Icon>
-						<FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE897;"/>
+						<FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE897;"/>
 					</AppBarButton.Icon>
 				</AppBarButton>
 				<AppBarButton Label="Accept" Margin="5"

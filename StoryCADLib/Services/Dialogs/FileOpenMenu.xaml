@@ -13,21 +13,21 @@
             <!-- New button -->
             <NavigationViewItem Content="Create new outline" Tag="New">
                 <NavigationViewItem.Icon>
-                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE710;"/>
+                    <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE710;"/>
                 </NavigationViewItem.Icon>
             </NavigationViewItem>
 
             <!-- Recents button -->
             <NavigationViewItem Content="Recently opened" Tag="Recent">
                 <NavigationViewItem.Icon>
-                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xEC92;"/>
+                    <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xEC92;"/>
                 </NavigationViewItem.Icon>
             </NavigationViewItem>
 
             <!-- Samples button -->
             <NavigationViewItem Content="Sample outlines" Tag="Sample">
                 <NavigationViewItem.Icon>
-                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE753;"/>
+                    <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE753;"/>
                 </NavigationViewItem.Icon>
             </NavigationViewItem>
         </NavigationView.MenuItems>
@@ -37,7 +37,7 @@
             <Button HorizontalAlignment="Center" Click="{x:Bind FileOpenVM.LoadStoryFromFile}">
                 <Button.Content>
                     <StackPanel Orientation="Horizontal">
-                        <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE838;"/>
+                        <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE838;"/>
                         <TextBlock Text="Open Outline from file" Margin="10,0,0,0"/>
                     </StackPanel>
                 </Button.Content>
@@ -69,7 +69,7 @@
                             <RowDefinition Height="50"/>
                         </Grid.RowDefinitions>
 
-                        <ListBox Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center" 
+                        <ListBox Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center"
                              ItemsSource="{x:Bind FileOpenVM.RecentsUI}"
                              SelectedIndex="{x:Bind FileOpenVM.SelectedRecentIndex, Mode=TwoWay}"/>
                     </Grid>
