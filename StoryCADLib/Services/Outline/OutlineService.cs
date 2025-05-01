@@ -302,7 +302,7 @@ public class OutlineService
             throw new InvalidOperationException("Cannot delete a trash or overview node.");
         }
 
-        bool result = elementToRemove.Node.Delete(view, source);
+        bool result = elementToRemove.Node.Delete(view);
         _log.Log(LogLevel.Info, $"RemoveElement completed for element {elementToRemove.Uuid}.");
         return result;
     }

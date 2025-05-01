@@ -121,8 +121,9 @@ public class StoryIO
 			{
 				nodeItem.Parent = parentItem;
 				parentItem.Children.Add(nodeItem);
-			}
-			else  // No parent => it's a root node
+                nodeItem.IsRoot = false;
+            }
+            else  // No parent => it's a root node
 			{
 				nodeItem.IsRoot = true;
 				nodeItem.IsExpanded = true;

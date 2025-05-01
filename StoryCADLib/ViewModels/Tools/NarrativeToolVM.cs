@@ -112,7 +112,7 @@ public class NarrativeToolVM: ObservableRecipient
 
                 if (IsNarratorSelected)
                 {
-                    SelectedNode.Delete(StoryViewType.NarratorView, Ioc.Default.GetRequiredService<OutlineViewModel>().StoryModel.NarratorView[0]);
+                    SelectedNode.Delete(StoryViewType.NarratorView);
                     Message = $"Deleted {SelectedNode}";
                 }
                 else { Message = "You can't delete from here!"; }
