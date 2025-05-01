@@ -420,72 +420,41 @@ public class StoryNodeItem : INotifyPropertyChanged
 
     #endregion
 
-	public bool Delete(StoryViewType storyView, StoryNodeItem sourceCollection)
+    public bool Delete(StoryViewType view)
     {
-        _logger.Log(LogLevel.Trace, $"Starting to delete element {Name} ({Uuid}) from {storyView}");
-        //Sanity check
-        if (Type == StoryItemType.TrashCan || IsRoot)
-        {
-            Ioc.Default.GetRequiredService<ShellViewModel>().ShowMessage(LogLevel.Warn, "This element can't be deleted.",false);
-            _logger.Log(LogLevel.Info, "User tried to delete Root or Trashcan node.");
+        if (Type is StoryItemType.TrashCan || IsRoot)
             return false;
-        }
 
-        if (sourceCollection.Children.Contains(this))
-        {
-            //Delete node from selected view.
-            _logger.Log(LogLevel.Info, "Node found in root, deleting it.");
-            sourceCollection.Children.Remove(this);
-            TrashItem(storyView); //Add to appropriate trash node.
-            return true;
-        }
-
-        //Node not found in root, recurse through tree.
-        foreach (StoryNodeItem childItem in sourceCollection.Children)
-        {
-            _logger.Log(LogLevel.Info, "Recursing tree to find node.");
-            RecursiveDelete(childItem, storyView);
-            return true;
-        }
-
-        return false;
+        MoveToTrash(view);
+        return true;
     }
 
-    private void RecursiveDelete(StoryNodeItem parentItem, StoryViewType storyView)
+    /// <summary>
+    /// Moves this node to the trash. 
+    /// </summary>
+    /// <param name="view"></param>
+    private void MoveToTrash(StoryViewType view)
     {
-        _logger.Log(LogLevel.Info, 
-            $"Starting recursive delete instance for {parentItem.Name} ({parentItem.Uuid}) in {storyView}");
-        try
-        {
-            if (parentItem.Children.Contains(this)) //Checks parent contains child we are looking.
-            {
-                _logger.Log(LogLevel.Info, "StoryNodeItem found, deleting it.");
-                parentItem.Children.Remove(this); //Deletes child.
-                TrashItem(storyView); //Add to appropriate trash node.
-            }
-            else //If child isn't in parent, recurse again.
-            {
-                _logger.Log(LogLevel.Info, "StoryNodeItem not found, recursing again");
-                foreach (StoryNodeItem _childItem in parentItem.Children)
-                {
-                    _logger.Log(LogLevel.Debug, $"ChildItem is {_childItem.Name} {_childItem.Uuid}");
-                    RecursiveDelete(_childItem, storyView);
-                }
-            }
-        }
-        catch (Exception _ex) { _logger.LogException(LogLevel.Error, _ex, "Error deleting node in Recursive delete"); }
+        //Remove from current parent
+        if (IsRoot || Parent is null)
+            throw new InvalidOperationException("Root cannot be detached.");
+
+        if (!Parent.Children.Remove(this))
+            throw new InvalidOperationException("Parent/child link out of sync.");
+
+        Parent = null;
+
+        //Add to trash
+        if (view != StoryViewType.ExplorerView) return;
+
+        var trash = _outlineVM.StoryModel.StoryElements
+            .First(e => e.ElementType == StoryItemType.TrashCan)
+            .Node;
+
+        trash.Children.Add(this);
+        Parent = trash;
     }
 
-    private void TrashItem(StoryViewType storyView)
-    {
-        if (storyView == StoryViewType.ExplorerView)
-        {
-            StoryElement Trash =  _outlineVM.StoryModel.StoryElements.First(e => e.ElementType == StoryItemType.TrashCan);
-            Trash.Node.Children.Add(this);
-            Parent = Trash.Node;
-        }
-        //Narrative view nodes are not added to trash.
-    }
 
     private void NotifyPropertyChanged(string propertyName)
     {
