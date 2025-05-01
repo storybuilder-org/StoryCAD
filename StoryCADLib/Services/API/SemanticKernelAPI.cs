@@ -420,11 +420,11 @@ public class SemanticKernelApi
         // Remove the element from the model.
         if (Type == StoryViewType.ExplorerView)
         {
-            element.Node.Delete(Type, CurrentModel.ExplorerView[0]);
+            element.Node.Delete(Type);
         }
         else
         {
-            element.Node.Delete(Type, CurrentModel.NarratorView[0]);
+            element.Node.Delete(Type);
         }
 
         return Task.FromResult(OperationResult<bool>.Success(true));

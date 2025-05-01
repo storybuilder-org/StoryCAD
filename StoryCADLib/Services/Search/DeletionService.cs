@@ -1,4 +1,6 @@
-﻿namespace StoryCAD.Services.Search;
+﻿using System.Diagnostics;
+
+namespace StoryCAD.Services.Search;
 
 /// <summary>
 /// This is a copy of the search service however 
@@ -20,30 +22,43 @@ public class DeletionService
     /// <returns>true if StoryElement contains search argument</returns>
     public bool SearchStoryElement(StoryNodeItem node, Guid searchArg, StoryModel model, bool delete = false)
     {
-        bool result = false;
+        if (model?.StoryElements?.StoryElementGuids == null)
+        {
+            _logger.Log(LogLevel.Info, "StoryElements or its Guid dictionary is null");
+            return false;
+        }
+
+        if (node == null)
+        {
+            return false;
+        }
+
+        if (!model.StoryElements.StoryElementGuids.TryGetValue(node.Uuid, out var element)
+            || element == null)
+        {
+            _logger.Log(LogLevel.Info, $"No element found for UUID {node.Uuid}");
+            return false;
+        }
+
         _arg = searchArg;
-        StoryElement element = null;
         _elementCollection = model.StoryElements;
 
-        if (model.StoryElements.StoryElementGuids.ContainsKey(node.Uuid)) { element = model.StoryElements.StoryElementGuids[node.Uuid]; }
-        if (element == null) { return false; } 
         switch (element.ElementType)
         {
             case StoryItemType.StoryOverview:
-                result = SearchStoryOverview(element, delete);
-                break;
+                return SearchStoryOverview(element, delete);
             case StoryItemType.Problem:
-                result = SearchProblem(element, delete);
-                break;
+                return SearchProblem(element, delete);
             case StoryItemType.Character:
-                result = SearchCharacter(element, delete);
-                break;
+                return SearchCharacter(element, delete);
             case StoryItemType.Scene:
-                result = SearchScene(element, delete);
-                break;
+                return SearchScene(element, delete);
+            default:
+                _logger.Log(LogLevel.Info, $"Unhandled StoryItemType: {element.ElementType}");
+                return false;
         }
-        return result;
     }
+
 
     /// <summary>
     /// Searches Cast members, viewpoint character, protagonist name, antagonist name,
@@ -53,7 +68,7 @@ public class DeletionService
     /// <param name="element">The <see cref="StoryElement"/> representing the scene to search.</param>
     /// <param name="delete">If set to <c>true</c>, deletes references to the search argument.</param>
     /// <returns><c>true</c> if the search argument is found; otherwise, <c>false</c>.</returns>
-private bool SearchScene(StoryElement element, bool delete)
+    private bool SearchScene(StoryElement element, bool delete)
 {
     SceneModel scene = (SceneModel)element;
 
@@ -311,27 +326,22 @@ private bool SearchScene(StoryElement element, bool delete)
     /// <returns><c>true</c> if the search argument is found; otherwise, <c>false</c>.</returns>
     private bool SearchStoryOverview(StoryElement element, bool delete)
     {
-        try
+        if (element is not OverviewModel overview) return false;
+
+        bool found = false;
+
+        if (overview.StoryProblem == _arg)
         {
-            OverviewModel overview = (OverviewModel)element;
-            if (overview.StoryProblem != _arg)
-            {
-                if (delete) { overview.StoryProblem = Guid.Empty; }
-                else
-                    return true;
-            }
-            if (overview.ViewpointCharacter != _arg)
-            {
-                if (delete) { overview.ViewpointCharacter = Guid.Empty; }
-                else
-                    return true;
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.Log(LogLevel.Warn, $"Failed to search scene for storyoverview got error {ex.Message}");
+            found = true;
+            if (delete) overview.StoryProblem = Guid.Empty;
         }
 
-        return false;
+        if (overview.ViewpointCharacter == _arg)
+        {
+            found = true;
+            if (delete) overview.ViewpointCharacter = Guid.Empty;
+        }
+
+        return found;
     }
 }
