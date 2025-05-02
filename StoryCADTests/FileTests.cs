@@ -489,7 +489,6 @@ public class FileTests
     [TestMethod]
     public void TestOpenWithNoRecentIndex()
     {
-        //TODO:
         return;
         FileOpenVM fileOpenVM = Ioc.Default.GetRequiredService<FileOpenVM>();
         fileOpenVM.SelectedRecentIndex = -1;
