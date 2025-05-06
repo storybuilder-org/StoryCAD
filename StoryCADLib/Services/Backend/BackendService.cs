@@ -123,8 +123,11 @@ public class BackendService
 			await loader.WritePreferences(Preferences.Model);
 			log.Log(LogLevel.Info, "Preferences:  elmah=" + elmah + " newsletter=" + newsletter);
 		}
-		// may want to use multiple catch clauses
-		catch (Exception ex)
+        catch (TaskCanceledException ex)
+        {
+            log.Log(LogLevel.Warn, $"MySQL handshake timed out {ex.Message}");
+        }
+        catch (Exception ex)
 		{
 			log.LogException(LogLevel.Error, ex, ex.Message);
 		}
