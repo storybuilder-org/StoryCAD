@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using StoryCAD.ViewModels.SubViewModels;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.DependencyInjection;
@@ -235,5 +236,27 @@ namespace StoryCADTests
             // TODO: Invoke outlineVM.SearchNodes and check that nodes matching the filter are highlighted.
             Assert.Inconclusive("Test for SearchNodes not implemented.");
         }
+
+
+        /// <summary>
+        /// Tests issue #946
+        /// </summary>
+        [TestMethod]
+        public async Task TestOverviewProblem()
+        {
+            var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+            outlineVM.StoryModel = await outlineService.CreateModel("ProblemTest", "StoryBuilder", 0);
+            outlineVM.StoryModelFile = Path.Combine(App.ResultsDir, "ProblemTest.stbx");
+
+            //Create char and try to assign as a story problem
+            outlineVM.AddStoryElement(StoryItemType.Character);
+            Ioc.Default.GetRequiredService<OverviewViewModel>().Activate(outlineVM.StoryModel.ExplorerView[0]);
+            Ioc.Default.GetRequiredService<OverviewViewModel>().StoryProblem =
+                outlineVM.StoryModel.StoryElements.Characters[0].Uuid;
+            Ioc.Default.GetRequiredService<OverviewViewModel>().Deactivate(null);
+            Assert.IsNull((outlineVM.StoryModel.StoryElements.First(o => 
+                o.ElementType == StoryItemType.StoryOverview) as OverviewModel).StoryProblem == null);
+        }
+
     }
 }

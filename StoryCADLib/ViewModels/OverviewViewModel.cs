@@ -126,10 +126,10 @@ public class OverviewViewModel : ObservableRecipient, INavigable
         set
         {
             SetProperty(ref _storyProblem, value);
-            if (value == Guid.Empty)
-                _syncPremise = false;
-            else
-                _syncPremise = true;  
+
+            //guard against #946
+            _syncPremise = value != Guid.Empty &&
+                           StoryElement.GetByGuid(value) is ProblemModel;
         }
     }
 
@@ -337,12 +337,21 @@ public class OverviewViewModel : ObservableRecipient, INavigable
 		        Model.StoryIdea = StoryIdea ?? "";
 		        Model.Concept = Concept ?? "";
 		        Model.Premise = Premise ?? "";
-		        if (_syncPremise)
-		        {
-                    ProblemModel storyProblemModel = (ProblemModel) StoryElement.GetByGuid(StoryProblem);
-                    storyProblemModel.Premise = Premise;
+                if (_syncPremise)
+                {
+                    if (StoryElement.GetByGuid(StoryProblem) is ProblemModel sync_problem)
+                    {
+                        sync_problem.Premise = Premise;
+                    }
+                    else
+                    {
+                        _logger.Log(LogLevel.Warn,
+                            $"Premise sync skipped – GUID {StoryProblem} is not a ProblemModel.");
+                        StoryProblem = Guid.Empty;
+                    }
                 }
-		        Model.StructureNotes = StructureNotes ?? "";
+
+                Model.StructureNotes = StructureNotes ?? "";
 		        Model.Notes = Notes ?? "";
 			}
         }
