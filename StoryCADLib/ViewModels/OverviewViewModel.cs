@@ -125,13 +125,24 @@ public class OverviewViewModel : ObservableRecipient, INavigable
         get => _storyProblem;
         set
         {
-            SetProperty(ref _storyProblem, value);
+            // only try to load if it’s not Guid.Empty
+            var candidate = value != Guid.Empty
+                ? StoryElement.GetByGuid(value) as ProblemModel
+                : null;
 
-            //guard against #946
-            _syncPremise = value != Guid.Empty &&
-                           StoryElement.GetByGuid(value) is ProblemModel;
+            // if we got one, use its Uuid; otherwise clear it
+            var newGuid = candidate?.Uuid ?? Guid.Empty;
+            var newSync = candidate != null;
+
+            // update backing field and fire INotifyPropertyChanged
+            if (SetProperty(ref _storyProblem, newGuid))
+            {
+                _syncPremise = newSync;
+                OnPropertyChanged(nameof(_syncPremise));
+            }
         }
     }
+
 
     private StoryElement _selectedProblem;
     public StoryElement SelectedProblem

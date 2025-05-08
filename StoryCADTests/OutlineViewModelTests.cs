@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using System;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using StoryCAD.ViewModels.SubViewModels;
 using System.IO;
 using System.Linq;
@@ -247,15 +248,41 @@ namespace StoryCADTests
             var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
             outlineVM.StoryModel = await outlineService.CreateModel("ProblemTest", "StoryBuilder", 0);
             outlineVM.StoryModelFile = Path.Combine(App.ResultsDir, "ProblemTest.stbx");
+            shell.RightTappedNode = outlineVM.StoryModel.StoryElements[0].Node;
 
             //Create char and try to assign as a story problem
             outlineVM.AddStoryElement(StoryItemType.Character);
-            Ioc.Default.GetRequiredService<OverviewViewModel>().Activate(outlineVM.StoryModel.ExplorerView[0]);
+            Ioc.Default.GetRequiredService<OverviewViewModel>().Activate((outlineVM.StoryModel.StoryElements.First(o =>
+                o.ElementType == StoryItemType.StoryOverview) as OverviewModel));
             Ioc.Default.GetRequiredService<OverviewViewModel>().StoryProblem =
                 outlineVM.StoryModel.StoryElements.Characters[0].Uuid;
             Ioc.Default.GetRequiredService<OverviewViewModel>().Deactivate(null);
-            Assert.IsNull((outlineVM.StoryModel.StoryElements.First(o => 
-                o.ElementType == StoryItemType.StoryOverview) as OverviewModel).StoryProblem == null);
+            var ovm = (outlineVM.StoryModel.StoryElements.First(o =>
+                o.ElementType == StoryItemType.StoryOverview) as OverviewModel).StoryProblem;
+            Assert.IsTrue(ovm == Guid.Empty);
+        }
+
+        /// <summary>
+        /// Tests issue #946 fix doesn't break anything
+        /// </summary>
+        [TestMethod]
+        public async Task TestInverseOverviewProblem()
+        {
+            var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+            outlineVM.StoryModel = await outlineService.CreateModel("ProblemTest2", "StoryBuilder", 0);
+            outlineVM.StoryModelFile = Path.Combine(App.ResultsDir, "ProblemTest2.stbx");
+            shell.RightTappedNode = outlineVM.StoryModel.StoryElements[0].Node;
+
+            //Create char and try to assign as a story problem
+            outlineService.AddStoryElement(outlineVM.StoryModel, StoryItemType.Problem, outlineVM.StoryModel.ExplorerView[0]);
+            Ioc.Default.GetRequiredService<OverviewViewModel>().Activate((outlineVM.StoryModel.StoryElements.First(o =>
+                o.ElementType == StoryItemType.StoryOverview) as OverviewModel));
+            Ioc.Default.GetRequiredService<OverviewViewModel>().StoryProblem =
+                outlineVM.StoryModel.StoryElements[3].Uuid;
+            Ioc.Default.GetRequiredService<OverviewViewModel>().Deactivate(null);
+            var ovm = (outlineVM.StoryModel.StoryElements.First(o =>
+                o.ElementType == StoryItemType.StoryOverview) as OverviewModel).StoryProblem;
+            Assert.IsTrue(ovm != Guid.Empty);
         }
 
     }
