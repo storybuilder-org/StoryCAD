@@ -482,6 +482,7 @@ public class FileTests
         Assert.IsTrue(write.IsSuccess);
 		Assert.IsTrue(File.Exists(file.Path));
     }
+
     /// <summary>
     /// Tests the FileOpenVM with no issue to ensure it works correctly.
     /// https://github.com/storybuilder-org/StoryCAD/pull/971
