@@ -28,9 +28,6 @@ public sealed partial class PreferencesDialog
     {
         DevInfo.Text = Logger.SystemInfo();
 
-        if (State.DeveloperBuild) { Version.Text = PreferencesVm.Version; }
-        else { Version.Text = State.Version; }
-
         Changelog.Text = await new Changelog().GetChangelogText();
 
         if (PreferencesVm.WrapNodeNames == TextWrapping.WrapWholeWords) { TextWrap.IsChecked = true; }

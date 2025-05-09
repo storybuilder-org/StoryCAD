@@ -125,13 +125,24 @@ public class OverviewViewModel : ObservableRecipient, INavigable
         get => _storyProblem;
         set
         {
-            SetProperty(ref _storyProblem, value);
-            if (value == Guid.Empty)
-                _syncPremise = false;
-            else
-                _syncPremise = true;  
+            // only try to load if it’s not Guid.Empty
+            var candidate = value != Guid.Empty
+                ? StoryElement.GetByGuid(value) as ProblemModel
+                : null;
+
+            // if we got one, use its Uuid; otherwise clear it
+            var newGuid = candidate?.Uuid ?? Guid.Empty;
+            var newSync = candidate != null;
+
+            // update backing field and fire INotifyPropertyChanged
+            if (SetProperty(ref _storyProblem, newGuid))
+            {
+                _syncPremise = newSync;
+                OnPropertyChanged(nameof(_syncPremise));
+            }
         }
     }
+
 
     private StoryElement _selectedProblem;
     public StoryElement SelectedProblem
@@ -337,12 +348,21 @@ public class OverviewViewModel : ObservableRecipient, INavigable
 		        Model.StoryIdea = StoryIdea ?? "";
 		        Model.Concept = Concept ?? "";
 		        Model.Premise = Premise ?? "";
-		        if (_syncPremise)
-		        {
-                    ProblemModel storyProblemModel = (ProblemModel) StoryElement.GetByGuid(StoryProblem);
-                    storyProblemModel.Premise = Premise;
+                if (_syncPremise)
+                {
+                    if (StoryElement.GetByGuid(StoryProblem) is ProblemModel sync_problem)
+                    {
+                        sync_problem.Premise = Premise;
+                    }
+                    else
+                    {
+                        _logger.Log(LogLevel.Warn,
+                            $"Premise sync skipped – GUID {StoryProblem} is not a ProblemModel.");
+                        StoryProblem = Guid.Empty;
+                    }
                 }
-		        Model.StructureNotes = StructureNotes ?? "";
+
+                Model.StructureNotes = StructureNotes ?? "";
 		        Model.Notes = Notes ?? "";
 			}
         }
