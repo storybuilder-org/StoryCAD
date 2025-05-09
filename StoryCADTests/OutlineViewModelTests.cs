@@ -251,11 +251,11 @@ namespace StoryCADTests
             shell.RightTappedNode = outlineVM.StoryModel.StoryElements[0].Node;
 
             //Create char and try to assign as a story problem
-            outlineVM.AddStoryElement(StoryItemType.Character);
+            outlineService.AddStoryElement(outlineVM.StoryModel, StoryItemType.Character, outlineVM.StoryModel.ExplorerView[0]);
             Ioc.Default.GetRequiredService<OverviewViewModel>().Activate((outlineVM.StoryModel.StoryElements.First(o =>
                 o.ElementType == StoryItemType.StoryOverview) as OverviewModel));
             Ioc.Default.GetRequiredService<OverviewViewModel>().StoryProblem =
-                outlineVM.StoryModel.StoryElements.Characters[0].Uuid;
+                outlineVM.StoryModel.StoryElements[3].Uuid;
             Ioc.Default.GetRequiredService<OverviewViewModel>().Deactivate(null);
             var ovm = (outlineVM.StoryModel.StoryElements.First(o =>
                 o.ElementType == StoryItemType.StoryOverview) as OverviewModel).StoryProblem;
