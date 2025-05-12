@@ -405,3 +405,9 @@ solution-config.props
 !**/Properties/PublishProfiles/*.pubxml
 StoryCADTests/.ENV
 StoryCAD/.ENV
+.idea/.idea.StoryCAD/.idea/workspace.xml
+/.idea
+/.idea/.idea.StoryCAD/.idea
+/.idea/.idea.StoryCAD
+/.idea
+.idea/.idea.StoryCAD/.idea/workspace.xml
