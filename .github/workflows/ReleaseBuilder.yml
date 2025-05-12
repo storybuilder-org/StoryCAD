@@ -7,7 +7,7 @@ on:
       VersionNumber:
         description: 'Version'
         required: true
-        default: '2.13.0.0'
+        default: '3.1.3.0'
 
 jobs:
   build:
@@ -97,7 +97,9 @@ jobs:
             /p:PackageCertificateKeyFile="D:\a\StoryCAD\StoryCAD\GitHubActionsWorkflow.pfx" `
             /p:PackageCertificateKeyFile="D:\a\StoryCAD\StoryCAD\GitHubActionsWorkflow.pfx" `
             /p:AppxPackageDir="$env:Appx_Package_Dir" `
-            /p:GenerateAppxPackageOnBuild=true
+            /p:GenerateAppxPackageOnBuild=true `
+            /p:NuGetVersion=${{ github.event.inputs.VersionNumber }} `
+            /p:AssemblyVersion=${{ github.event.inputs.VersionNumber }}
         }
 
     - name: Remove PFX

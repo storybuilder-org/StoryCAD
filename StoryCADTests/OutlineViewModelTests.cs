@@ -1,6 +1,8 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using System;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using StoryCAD.ViewModels.SubViewModels;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.DependencyInjection;
@@ -24,6 +26,51 @@ namespace StoryCADTests
             // If necessary, you can initialize or mock dependencies here.
             outlineVM = Ioc.Default.GetRequiredService<OutlineViewModel>();
             outlineService = Ioc.Default.GetRequiredService<OutlineService>();
+        }
+
+        /// <summary>
+        /// Deletes a root node, this should fail
+        /// https://github.com/storybuilder-org/StoryCAD/issues/975
+        /// </summary>
+        [TestMethod]
+        public async Task DeleteRoot()
+        {
+            //Create outline
+            var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+            outlineVM.StoryModel = await outlineService.CreateModel("TestRootDelete", "StoryBuilder", 0);
+            outlineVM.StoryModelFile = Path.Combine(App.ResultsDir, "TestRootDelete.stbx");
+            shell.RightTappedNode = outlineVM.StoryModel.StoryElements[0].Node;
+
+            //Assert root is there and still is
+            Assert.IsTrue(outlineVM.StoryModel.StoryElements[0].Node.IsRoot && 
+                          outlineVM.StoryModel.StoryElements[0].ElementType == StoryItemType.StoryOverview);
+            outlineVM.RemoveStoryElement();
+            Assert.IsTrue(outlineVM.StoryModel.StoryElements[0].Node.IsRoot &&
+                          outlineVM.StoryModel.StoryElements[0].ElementType == StoryItemType.StoryOverview);
+        }
+        
+        /// <summary>
+        /// Deletes a node, this should pass
+        /// https://github.com/storybuilder-org/StoryCAD/issues/975
+        /// </summary>
+        [TestMethod]
+        public async Task DeleteNode()
+        {
+            //Create outline
+            var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+            outlineVM.StoryModel = await outlineService.CreateModel("TestNodeDelete", "StoryBuilder", 0);
+            outlineVM.StoryModelFile = Path.Combine(App.ResultsDir, "TestRootDelete.stbx");
+
+            //Create a character
+            shell.RightTappedNode = outlineService.AddStoryElement(outlineVM.StoryModel, StoryItemType.Character,
+                outlineVM.StoryModel.ExplorerView[0]).Node;
+
+            //Assert Character is still in explorer
+            Assert.IsTrue(outlineVM.StoryModel.StoryElements.Characters[1].Node.Parent == outlineVM.StoryModel.ExplorerView[0]);
+            outlineVM.RemoveStoryElement();
+
+            //Assert Character was trashed.
+            Assert.IsTrue(outlineVM.StoryModel.StoryElements.Characters[1].Node.Parent == outlineVM.StoryModel.ExplorerView[1]);
         }
 
         // Test for UnifiedNewFile method
@@ -190,5 +237,53 @@ namespace StoryCADTests
             // TODO: Invoke outlineVM.SearchNodes and check that nodes matching the filter are highlighted.
             Assert.Inconclusive("Test for SearchNodes not implemented.");
         }
+
+
+        /// <summary>
+        /// Tests issue #946
+        /// </summary>
+        [TestMethod]
+        public async Task TestOverviewProblem()
+        {
+            var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+            outlineVM.StoryModel = await outlineService.CreateModel("ProblemTest", "StoryBuilder", 0);
+            outlineVM.StoryModelFile = Path.Combine(App.ResultsDir, "ProblemTest.stbx");
+            shell.RightTappedNode = outlineVM.StoryModel.StoryElements[0].Node;
+
+            //Create char and try to assign as a story problem
+            outlineService.AddStoryElement(outlineVM.StoryModel, StoryItemType.Character, outlineVM.StoryModel.ExplorerView[0]);
+            Ioc.Default.GetRequiredService<OverviewViewModel>().Activate((outlineVM.StoryModel.StoryElements.First(o =>
+                o.ElementType == StoryItemType.StoryOverview) as OverviewModel));
+            Ioc.Default.GetRequiredService<OverviewViewModel>().StoryProblem =
+                outlineVM.StoryModel.StoryElements[3].Uuid;
+            Ioc.Default.GetRequiredService<OverviewViewModel>().Deactivate(null);
+            var ovm = (outlineVM.StoryModel.StoryElements.First(o =>
+                o.ElementType == StoryItemType.StoryOverview) as OverviewModel).StoryProblem;
+            Assert.IsTrue(ovm == Guid.Empty);
+        }
+
+        /// <summary>
+        /// Tests issue #946 fix doesn't break anything
+        /// </summary>
+        [TestMethod]
+        public async Task TestInverseOverviewProblem()
+        {
+            var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+            outlineVM.StoryModel = await outlineService.CreateModel("ProblemTest2", "StoryBuilder", 0);
+            outlineVM.StoryModelFile = Path.Combine(App.ResultsDir, "ProblemTest2.stbx");
+            shell.RightTappedNode = outlineVM.StoryModel.StoryElements[0].Node;
+
+            //Create char and try to assign as a story problem
+            outlineService.AddStoryElement(outlineVM.StoryModel, StoryItemType.Problem, outlineVM.StoryModel.ExplorerView[0]);
+            Ioc.Default.GetRequiredService<OverviewViewModel>().Activate((outlineVM.StoryModel.StoryElements.First(o =>
+                o.ElementType == StoryItemType.StoryOverview) as OverviewModel));
+            Ioc.Default.GetRequiredService<OverviewViewModel>().StoryProblem =
+                outlineVM.StoryModel.StoryElements[3].Uuid;
+            Ioc.Default.GetRequiredService<OverviewViewModel>().Deactivate(null);
+            var ovm = (outlineVM.StoryModel.StoryElements.First(o =>
+                o.ElementType == StoryItemType.StoryOverview) as OverviewModel).StoryProblem;
+            Assert.IsTrue(ovm != Guid.Empty);
+        }
+
     }
 }

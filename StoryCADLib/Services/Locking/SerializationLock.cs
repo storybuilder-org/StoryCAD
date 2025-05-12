@@ -46,7 +46,15 @@ public class SerializationLock : IDisposable
 
             if (currentHolder != _caller) //Some locks run twice i.e. datasource, (this shouldn't happen)
             {
-                throw new InvalidOperationException($"Commands are already disabled by {currentHolder}");
+                if (Ioc.Default.GetRequiredService<AppState>().Headless)
+                {
+                    throw new InvalidOperationException($"Commands are already disabled by {currentHolder}");
+                }
+                else
+                {
+                    _logger.Log(LogLevel.Warn, $"{_caller} tried to lock when already locked by {currentHolder}");
+                    return;
+                }
             }
         }
 

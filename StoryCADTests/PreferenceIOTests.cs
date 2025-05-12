@@ -1,11 +1,14 @@
 ﻿using System;
 using System.IO;
+using System.Text.Json;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.DependencyInjection;
+using Microsoft.UI.Xaml;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using StoryCAD.DAL;
 using StoryCAD.Models;
 using StoryCAD.Models.Tools;
+using StoryCAD.Services;
 
 namespace StoryCADTests;
 
@@ -38,7 +41,7 @@ public class PreferencesIoTests
 
 		// Read raw JSON to confirm
 		var rawJson = File.ReadAllText(filePath);
-		PreferencesModel actual = System.Text.Json.JsonSerializer.Deserialize<PreferencesModel>(rawJson);
+		PreferencesModel actual = JsonSerializer.Deserialize<PreferencesModel>(rawJson);
 
 		Assert.IsNotNull(actual, "Deserialization returned null model!");
 		Assert.AreEqual(expectedModel.FirstName, actual.FirstName);
@@ -65,7 +68,7 @@ public class PreferencesIoTests
 			AutoSaveInterval = 10
 		};
 		var filePath = Path.Combine(Ioc.Default.GetRequiredService<AppState>().RootDirectory, "Preferences.json");
-		File.WriteAllText(filePath, System.Text.Json.JsonSerializer.Serialize<PreferencesModel>(expectedModel));
+		File.WriteAllText(filePath, JsonSerializer.Serialize<PreferencesModel>(expectedModel));
 
 		var prefsIo = new PreferencesIo();
 
@@ -79,4 +82,42 @@ public class PreferencesIoTests
 		Assert.AreEqual(expectedModel.AutoSave, actual.AutoSave);
 		Assert.AreEqual(expectedModel.AutoSaveInterval, actual.AutoSaveInterval);
 	}
+
+    /// <summary>
+    /// Tests for some of the issues that can occur in
+    /// https://github.com/storybuilder-org/StoryCAD/issues/973
+    /// </summary>
+    [TestMethod]
+    public async Task ReadPreferences_ReturnsDefault_WhenFileMissing()
+    {
+		PreferencesIo _sut = new PreferencesIo();
+        var model = await _sut.ReadPreferences();
+
+        Assert.IsNotNull(model);
+        Assert.AreEqual(ElementTheme.Default, model.ThemePreference);
+        Assert.AreSame(model, Ioc.Default.GetRequiredService<PreferenceService>().Model);   // service was updated
+    }
+
+    /// <summary>
+    /// Tests for some of the issues that can occur in
+    /// https://github.com/storybuilder-org/StoryCAD/issues/973
+    /// </summary>
+    [TestMethod]
+    public async Task ReadPreferences_DeserialisesJson_WhenFilePresent()
+    {
+        PreferencesIo _sut = new PreferencesIo();
+
+        // arrange
+        var expected = new PreferencesModel { ThemePreference = ElementTheme.Dark };
+        var json = JsonSerializer.Serialize(expected);
+        await File.WriteAllTextAsync(Path.Combine(Ioc.Default.GetRequiredService<AppState>().RootDirectory,
+            "Preferences.json"), json);
+
+        // act
+        var model = await _sut.ReadPreferences();
+
+        // assert
+        Assert.AreEqual(expected.ThemePreference, model.ThemePreference);
+        Assert.AreSame(model, Ioc.Default.GetRequiredService<PreferenceService>().Model);
+    }
 }

@@ -121,7 +121,7 @@ public class LogService : ILogService
                         msg.Data.Add(new(key: "Line " + 0, value: $"failed getting system info ({ex.Message})"));
                     }
 
-                    using (FileStream stream = File.Open(Path.Combine(Ioc.Default.GetRequiredService<AppState>().RootDirectory, "logs", $"updater.{DateTime.Now.ToString("yyyy-MM-dd")}.log"), FileMode.Open, FileAccess.Read,FileShare.ReadWrite))
+                    using (FileStream stream = File.Open(Path.Combine(Ioc.Default.GetRequiredService<AppState>().RootDirectory, "logs", $"StoryCAD.{DateTime.Now.ToString("yyyy-MM-dd")}.log"), FileMode.Open, FileAccess.Read,FileShare.ReadWrite))
                     {
                         using (StreamReader reader = new(stream))
                         {

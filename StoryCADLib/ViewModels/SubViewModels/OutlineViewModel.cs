@@ -1022,54 +1022,73 @@ public class OutlineViewModel : ObservableRecipient
         }
     }
 
-
     public async void RemoveStoryElement()
     {
-        bool _delete = true;
-        Guid elementToDelete = shellVm.RightTappedNode.Uuid;
-        List<StoryElement> _foundElements = outlineService.FindElementReferences(StoryModel, elementToDelete);
-
-        //Only warns if it finds a node its referenced in
-        if (_foundElements.Count >= 1)
+        try
         {
-            //Creates UI
-            StackPanel _content = new();
-            _content.Children.Add(new TextBlock { Text = "The following nodes will be updated to remove references to this node:" });
-            _content.Children.Add(new ListView { ItemsSource = _foundElements, 
-                HorizontalAlignment = HorizontalAlignment.Center, 
-                VerticalAlignment = VerticalAlignment.Center, Height = 300, Width = 480 });
+            bool _delete = true;
+            Guid elementToDelete = shellVm.RightTappedNode.Uuid;
+            List<StoryElement> _foundElements = outlineService.FindElementReferences(StoryModel, elementToDelete);
 
-            //Creates dialog and then shows it
-            ContentDialog _Dialog = new()
+            var state = Ioc.Default.GetRequiredService<AppState>();
+            //Only warns if it finds a node its referenced in
+            if (_foundElements.Count > 0 && !state.Headless)
             {
-                Content = _content,
-                Title = "Are you sure you want to delete this node?",
-                Width = 500,
-                PrimaryButtonText = "Confirm",
-                SecondaryButtonText = "Cancel"
-            };
+                //Creates UI
+                StackPanel _content = new();
+                _content.Children.Add(new TextBlock { Text = "The following nodes will be updated to remove references to this node:" });
+                _content.Children.Add(new ListView { ItemsSource = _foundElements, DisplayMemberPath = "Name",
+                    HorizontalAlignment = HorizontalAlignment.Center, 
+                    VerticalAlignment = VerticalAlignment.Center, Height = 300, Width = 480 });
 
-            //Handle content dialog result
-            if (await Ioc.Default.GetRequiredService<Windowing>().ShowContentDialog(_Dialog) !=
-                ContentDialogResult.Primary)
+                //Creates dialog and then shows it
+                ContentDialog _Dialog = new()
+                {
+                    Content = _content,
+                    Title = "Are you sure you want to delete this node?",
+                    Width = 500,
+                    PrimaryButtonText = "Confirm",
+                    SecondaryButtonText = "Cancel"
+                };
+
+                //Handle content dialog result
+                if (await Ioc.Default.GetRequiredService<Windowing>().ShowContentDialog(_Dialog) !=
+                    ContentDialogResult.Primary)
+                {
+                    _delete = false;
+                }
+            }
+            else
             {
-                _delete = false;
+                _delete = true;
+            }
+            
+            // Go through with delete
+            if (_delete)
+            {
+                using (var serializationLock = new SerializationLock(autoSaveService, backupService, logger))
+                {
+                    outlineService.RemoveReferenceToElement(elementToDelete, StoryModel);
+
+                    if (shellVm.CurrentView.Equals("Story Explorer View"))
+                    {
+                        shellVm.RightTappedNode.Delete(StoryViewType.ExplorerView);
+                    }
+                    else
+                    {
+                        shellVm.RightTappedNode.Delete(StoryViewType.NarratorView);
+                    }
+                }
             }
         }
-
-        // Go through with delete
-        if (_delete)
+        //TODO: This suppresses API calls on failure and needs to be handled.
+        catch (InvalidOperationException)
         {
-            using (var serializationLock = new SerializationLock(autoSaveService, backupService, logger))
-            {
-                outlineService.RemoveReferenceToElement(elementToDelete, StoryModel);
-
-                if (shellVm.CurrentView.Equals("Story Explorer View"))
-                {
-                    shellVm.RightTappedNode.Delete(StoryViewType.ExplorerView, StoryModel.ExplorerView[0]);
-                }
-                else { shellVm.RightTappedNode.Delete(StoryViewType.NarratorView, StoryModel.NarratorView[0]); }
-            }
+            Messenger.Send(new StatusChangedMessage(new("You cannot delete this node", LogLevel.Warn)));
+        }
+        catch (Exception e)
+        {
+            logger.LogException(LogLevel.Error, e, "Error deleting node");
         }
     }
 
