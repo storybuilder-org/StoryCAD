@@ -42,6 +42,7 @@
       <PackageReference Include="NLog.Extensions.Logging" />
       <PackageReference Include="NRTFTree-Async" />
       <PackageReference Include="Octokit" />
+      <PackageReference Include="Microsoft.Web.WebView2" Aliases="WpfWebView" />
   </ItemGroup>
 
   <ItemGroup>
