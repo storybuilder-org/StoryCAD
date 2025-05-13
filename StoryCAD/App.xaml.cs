@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using Windows.UI.ViewManagement;
 using dotenv.net;
 using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
@@ -133,7 +134,6 @@ public partial class App : Application
         //Load user preferences or initialise them.
         await new PreferencesIo().ReadPreferences();
 
-
         MainWindow = new Window();
 #if DEBUG
         MainWindow.UseStudio();
@@ -177,9 +177,11 @@ public partial class App : Application
         //Get the Window's HWND
         window.WindowHandle = WinRT.Interop.WindowNative.GetWindowHandle(window.MainWindow);
 
+        ApplicationView.GetForCurrentView().SetPreferredMinSize(new Windows.Foundation.Size(1000, 700));
+        ApplicationView.GetForCurrentView().TryResizeView(new Windows.Foundation.Size(1200, 800));
         //_log.Log(LogLevel.Debug, $"Layout: Window size width={mainWindow.Width} height={mainWindow.Height}");
         _log.Log(LogLevel.Info, "StoryCAD App loaded and launched");
-
+            
 
         MainWindow.SetWindowIcon();
         // Ensure the current window is active

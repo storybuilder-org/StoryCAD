@@ -1,10 +1,10 @@
 <Project Sdk="Uno.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net9.0-desktop;net9.0-windows10.0.22621;</TargetFrameworks>
     <UnoSingleProject>true</UnoSingleProject>
     <OutputType>Library</OutputType>
-      
-    <!-- Ensures the .xr.xml files are generated in a proper layout folder -->
+      <UnoDisableValidateWinAppSDK3548>true</UnoDisableValidateWinAppSDK3548>
+
+      <!-- Ensures the .xr.xml files are generated in a proper layout folder -->
     <GenerateLibraryLayout>true</GenerateLibraryLayout>
     <ImplicitUsings>enable</ImplicitUsings>
     <!--
@@ -30,6 +30,16 @@
     <!-- <FrameworkReference Update="Microsoft.Windows.SDK.NET.Ref" RuntimeFrameworkVersion="10.0.22621.28" />
     <FrameworkReference Update="Microsoft.Windows.SDK.NET.Ref" TargetingPackVersion="10.0.22621.28" /> -->
   </ItemGroup>
+
+    <!-- on Windows, build both desktop + WinUI -->
+    <PropertyGroup Condition="'$(OS)'=='Windows_NT'">
+        <TargetFrameworks>net9.0-desktop;net9.0-windows10.0.22621</TargetFrameworks>
+    </PropertyGroup>
+
+    <!-- on non-Windows, only build desktop -->
+    <PropertyGroup Condition="'$(OS)'!='Windows_NT'">
+        <TargetFrameworks>net9.0-desktop</TargetFrameworks>
+    </PropertyGroup>
 
   <ItemGroup>
       <PackageReference Include="Microsoft.SemanticKernel" />

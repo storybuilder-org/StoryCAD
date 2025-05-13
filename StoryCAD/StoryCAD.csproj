@@ -1,11 +1,7 @@
 <Project Sdk="Uno.Sdk">
   <PropertyGroup>
-      <TargetFrameworks>net9.0-desktop;net9.0-windows10.0.22621;</TargetFrameworks>
-
       <OutputType>Exe</OutputType>
     <UnoSingleProject>true</UnoSingleProject>
-      <UseWinUI>true</UseWinUI>
-      <EnableMsixTooling>true</EnableMsixTooling>
     <!-- Display name -->
     <ApplicationTitle>StoryCAD</ApplicationTitle>
     <!-- App Identifier -->
@@ -17,16 +13,16 @@
     <ApplicationPublisher>StoryBuilder Foundation</ApplicationPublisher>
     <!-- Package Description -->
     <Description>StoryCAD powered by Uno Platform.</Description>
-    <!--
-      If you encounter this error message:
+      <!--
+        If you encounter this error message:
 
-        error NETSDK1148: A referenced assembly was compiled using a newer version of Microsoft.Windows.SDK.NET.dll.
-        Please update to a newer .NET SDK in order to reference this assembly.
+          error NETSDK1148: A referenced assembly was compiled using a newer version of Microsoft.Windows.SDK.NET.dll.
+          Please update to a newer .NET SDK in order to reference this assembly.
 
-      This means that the two packages below must be aligned with the "build" version number of
-      the "Microsoft.Windows.SDK.BuildTools" package above, and the "revision" version number
-      must be the highest found in https://www.nuget.org/packages/Microsoft.Windows.SDK.NET.Ref.
-    -->
+        This means that the two packages below must be aligned with the "build" version number of
+        the "Microsoft.Windows.SDK.BuildTools" package above, and the "revision" version number
+        must be the highest found in https://www.nuget.org/packages/Microsoft.Windows.SDK.NET.Ref.
+      -->
     <!-- <WindowsSdkPackageVersion>10.0.22621.28</WindowsSdkPackageVersion> -->
 
     <!--
@@ -38,7 +34,22 @@
       Toolkit;
     </UnoFeatures>
   </PropertyGroup>
-<ItemGroup>
+    <PropertyGroup Condition="'$(TargetFramework)'=='net9.0-windows10.0.22621'">
+        <UseWinUI>true</UseWinUI>
+        <EnableMsixTooling>true</EnableMsixTooling>
+    </PropertyGroup>
+    <!-- on Windows, build both desktop + WinUI -->
+    <PropertyGroup Condition="'$(OS)'=='Windows_NT'">
+        <TargetFrameworks>net9.0-desktop;net9.0-windows10.0.22621</TargetFrameworks>
+    </PropertyGroup>
+
+    <!-- on non-Windows, only build desktop -->
+    <PropertyGroup Condition="'$(OS)'!='Windows_NT'">
+        <TargetFrameworks>net9.0-desktop</TargetFrameworks>
+    </PropertyGroup>
+
+
+    <ItemGroup>
     <ProjectReference Include="..\StoryCADLib\StoryCADLib.csproj" />
   </ItemGroup>
   <ItemGroup>
