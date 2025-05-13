@@ -69,7 +69,7 @@
                             <RowDefinition Height="50"/>
                         </Grid.RowDefinitions>
 
-                        <ListBox Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center"
+                        <ListView Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center"
                              ItemsSource="{x:Bind FileOpenVM.RecentsUI}"
                              SelectedIndex="{x:Bind FileOpenVM.SelectedRecentIndex, Mode=TwoWay}"/>
                     </Grid>
@@ -105,9 +105,9 @@
 
                     <!-- Samples tab -->
                     <Grid Visibility="{x:Bind FileOpenVM.SamplesTabContentVisibility, Mode=TwoWay}">
-                        <ListBox HorizontalAlignment="Center" VerticalAlignment="Center"
-                             ItemsSource="{x:Bind FileOpenVM.SampleNames}" CornerRadius="4"
-                             SelectedIndex="{x:Bind FileOpenVM.SelectedSampleIndex, Mode=TwoWay}"/>
+                        <ListView HorizontalAlignment="Center" VerticalAlignment="Center"
+                                  ItemsSource="{x:Bind FileOpenVM.SampleNames}" CornerRadius="4"
+                                  SelectedIndex="{x:Bind FileOpenVM.SelectedSampleIndex, Mode=TwoWay}"/>
                     </Grid>
                 </Grid>
             </ScrollView>

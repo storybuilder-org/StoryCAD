@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using StoryCAD.Services.Navigation;
 using CommunityToolkit.Mvvm.Messaging;
 using StoryCAD.Services.Messages;

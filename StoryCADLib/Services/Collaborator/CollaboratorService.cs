@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.Loader;
 using Windows.ApplicationModel;
@@ -150,8 +150,9 @@ public class CollaboratorService
     /// <returns>True if CollaboratorLib.dll exists, false otherwise.</returns>
     private async Task<bool> FindDll()
     {
-	    logger.Log(LogLevel.Info, "Locating Collaborator Package...");
-
+#if !HAS_UNO
+        logger.Log(LogLevel.Info, "Locating Collaborator Package...");
+        
 		//Find all installed extensions
 	    AppExtensionCatalog _catalog = AppExtensionCatalog.Open("org.storybuilder");
 	    var InstalledExtensions = await _catalog.FindAllAsync();
@@ -197,8 +198,12 @@ public class CollaboratorService
 
 		logger.Log(LogLevel.Info, $"Collaborator.dll exists {dllExists}");
 	    return dllExists;
+#else
+        logger.Log(LogLevel.Error, "Collaborator is not supported on this platform.");
+        return false;
+#endif
     }
-    #endregion
+#endregion
 
     #region Show/Hide window
     //TODO: Use Show and hide properly

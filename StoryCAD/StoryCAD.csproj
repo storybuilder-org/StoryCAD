@@ -1,10 +1,11 @@
 <Project Sdk="Uno.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net9.0-desktop;</TargetFrameworks>
+      <TargetFrameworks>net9.0-desktop;net9.0-windows10.0.22621;</TargetFrameworks>
 
-    <OutputType>Exe</OutputType>
+      <OutputType>Exe</OutputType>
     <UnoSingleProject>true</UnoSingleProject>
-
+      <UseWinUI>true</UseWinUI>
+      <EnableMsixTooling>true</EnableMsixTooling>
     <!-- Display name -->
     <ApplicationTitle>StoryCAD</ApplicationTitle>
     <!-- App Identifier -->
@@ -37,8 +38,7 @@
       Toolkit;
     </UnoFeatures>
   </PropertyGroup>
-  <ItemGroup>
-    <PackageReference Include="Microsoft.Web.WebView2" Aliases="WpfWebView" />
+<ItemGroup>
     <ProjectReference Include="..\StoryCADLib\StoryCADLib.csproj" />
   </ItemGroup>
   <ItemGroup>
