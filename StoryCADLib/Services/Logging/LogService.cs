@@ -272,7 +272,6 @@ public class LogService : ILogService
                      Elmah Status - {Ioc.Default.GetRequiredService<LogService>().ElmahLogging}
                      Windows {WinVer} Build - {Environment.OSVersion.Version.Build}
                      Debugger Attached - {Debugger.IsAttached}
-                     Touchscreen - {PointerDevice.GetPointerDevices().Any(p => p.PointerDeviceType == PointerDeviceType.Touch)}
                      ProcessID - {Environment.ProcessId}
                      Core Count - {Environment.ProcessorCount}
 

@@ -45,7 +45,10 @@
 
     <!-- on non-Windows, only build desktop -->
     <PropertyGroup Condition="'$(OS)'!='Windows_NT'">
-        <TargetFrameworks>net9.0-desktop</TargetFrameworks>
+        <TargetFrameworks>net9.0-desktop;net9.0-maccatalyst;</TargetFrameworks>
+    </PropertyGroup>
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+      <CodesignKey>iPhone Developer</CodesignKey>
     </PropertyGroup>
 
 
@@ -57,8 +60,4 @@
     <Content Include="Platforms\MacCatalyst\Info.plist" />
     <Content Include="Platforms\MacCatalyst\Media.xcassets\LaunchImages.launchimage\Contents.json" />
   </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Platforms\MacCatalyst\Main.maccatalyst.cs" />
-  </ItemGroup>
-
 </Project>
