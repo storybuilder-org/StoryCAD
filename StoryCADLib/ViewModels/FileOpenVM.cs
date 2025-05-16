@@ -337,9 +337,6 @@ public class FileOpenVM : ObservableRecipient
         }
 
         Close(); //Stop more dialog clicks
-
-        PreferencesIo loader = new();
-        await loader.WritePreferences(_preferences.Model);
     }
 
     public async Task<string> CreateFile()
