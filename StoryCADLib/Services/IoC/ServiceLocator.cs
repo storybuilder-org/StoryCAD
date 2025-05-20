@@ -89,7 +89,6 @@ public static class BootStrapper
         Services.AddSingleton<OutlineService>();
         Services.AddSingleton<BackupService>();
         Services.AddSingleton<AutoSaveService>();
-        Services.AddSingleton<DeletionService>();
         Services.AddSingleton<BackendService>();
         Services.AddSingleton<CollaboratorService>();
         Services.AddSingleton<ListData>();

@@ -234,7 +234,7 @@ public class OutlineService
         List<StoryElement> foundNodes = new();
         foreach (StoryElement element in model.StoryElements)
         {
-            if (Ioc.Default.GetRequiredService<DeletionService>().SearchStoryElement(element.Node, elementGuid, model))
+            if (Ioc.Default.GetRequiredService<SearchService>().SearchStoryElement(element.Node, elementGuid, model))
             {
                 foundNodes.Add(element);
             }
@@ -264,7 +264,7 @@ public class OutlineService
 
         foreach (StoryElement element in model.StoryElements)
         {
-            Ioc.Default.GetRequiredService<DeletionService>()
+            Ioc.Default.GetRequiredService<SearchService>()
                 .SearchStoryElement(element.Node, elementToRemove, model, true);
         }
         _log.Log(LogLevel.Info, "RemoveReferenceToElement completed.");
