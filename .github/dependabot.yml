@@ -1,16 +1,5 @@
 version: 2
 updates:
-  # NRTFTree project
-  - package-ecosystem: "nuget"
-    directory: "/NRtfTree/NRTFTree.csproj"
-    schedule:
-      interval: "daily"
-    open-pull-requests-limit: 5
-    versioning-strategy: "auto"
-    ignore:
-      - dependency-name: "Syncfusion.Editors.WinUI"
-    commit-message:
-      prefix: "NRTFTree"
 
   # StoryCAD project
   - package-ecosystem: "nuget"
