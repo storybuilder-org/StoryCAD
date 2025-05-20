@@ -1,5 +1,6 @@
 ﻿using StoryCAD.DAL;
 using StoryCAD.Services.Search;
+using StoryCAD.ViewModels.Tools;
 using Windows.Storage;
 using Windows.Storage.Provider;
 
@@ -357,9 +358,9 @@ public class OutlineService
     /// <summary>
     /// Adds a new cast member to a scene.
     /// </summary>
-    /// <param name="source">Scene element you are adding the cast member to </param>
+    /// <param name="source">Scene element you are adding the cast member to.</param>
     /// <param name="castMember">Cast member you want to add.</param>
-    /// <returns></returns>
+    /// <returns>True if the cast member was added.</returns>
     public bool AddCastMember(StoryModel Model, StoryElement source, Guid castMember)
     {
         _log.Log(LogLevel.Info, $"AddCastMember called for cast member {castMember} on source {source.Uuid}.");
@@ -392,6 +393,108 @@ public class OutlineService
 
         ((SceneModel)source).CastMembers.Add(castMember);
         _log.Log(LogLevel.Info, $"AddCastMember completed for cast member {castMember}.");
+        return true;
+    }
+
+    /// <summary>
+    /// Applies a <paramref name="beatSheet"/> to the specified <paramref name="problem"/>, replacing
+    /// any existing beats.
+    /// </summary>
+    /// <param name="problem">The <see cref="ProblemModel"/> that will receive the beats.</param>
+    /// <param name="beatSheet">The <see cref="PlotPatternModel"/> containing the beats to apply.</param>
+    /// <returns>True if the beat sheet was applied.</returns>
+    public bool AddBeatSheet(ProblemModel problem, PlotPatternModel beatSheet)
+    {
+        _log.Log(LogLevel.Info, "AddBeatSheet called.");
+        if (problem == null)
+        {
+            throw new ArgumentNullException(nameof(problem));
+        }
+
+        if (beatSheet == null)
+        {
+            throw new ArgumentNullException(nameof(beatSheet));
+        }
+
+        problem.StructureTitle = beatSheet.PlotPatternName;
+        problem.StructureDescription = beatSheet.PlotPatternNotes;
+        problem.StructureBeats = new();
+
+        foreach (var scene in beatSheet.PlotPatternScenes)
+        {
+            var beat = new StructureBeatViewModel
+            {
+                Title = scene.SceneTitle,
+                Description = scene.Notes
+            };
+            problem.StructureBeats.Add(beat);
+        }
+
+        _log.Log(LogLevel.Info, "AddBeatSheet completed.");
+        return true;
+    }
+
+    /// <summary>
+    /// Adds a single beat to the specified <paramref name="problem"/>.
+    /// </summary>
+    /// <param name="problem">The <see cref="ProblemModel"/> to modify.</param>
+    /// <param name="title">The title of the beat.</param>
+    /// <param name="description">Optional description of the beat.</param>
+    /// <returns>True if the beat was added.</returns>
+    public bool AddBeat(ProblemModel problem, string title, string description)
+    {
+        _log.Log(LogLevel.Info, "AddBeat called.");
+        if (problem == null)
+        {
+            throw new ArgumentNullException(nameof(problem));
+        }
+
+        if (string.IsNullOrWhiteSpace(title))
+        {
+            throw new ArgumentNullException(nameof(title));
+        }
+
+        if (problem.StructureBeats == null)
+        {
+            problem.StructureBeats = new();
+        }
+
+        problem.StructureBeats.Add(new StructureBeatViewModel
+        {
+            Title = title,
+            Description = description
+        });
+
+        _log.Log(LogLevel.Info, "AddBeat completed.");
+        return true;
+    }
+
+    /// <summary>
+    /// Assigns a <see cref="StoryElement"/> to the specified <paramref name="beat"/>.
+    /// </summary>
+    /// <param name="beat">The beat to assign.</param>
+    /// <param name="element">The <see cref="StoryElement"/> (problem or scene) to link.</param>
+    /// <returns>True if the beat was successfully assigned.</returns>
+    public bool AssignBeat(StructureBeatViewModel beat, StoryElement element)
+    {
+        _log.Log(LogLevel.Info, "AssignBeat called.");
+        if (beat == null)
+        {
+            throw new ArgumentNullException(nameof(beat));
+        }
+
+        if (element == null)
+        {
+            throw new ArgumentNullException(nameof(element));
+        }
+
+        if (element.ElementType != StoryItemType.Problem && element.ElementType != StoryItemType.Scene)
+        {
+            throw new InvalidOperationException("Beats can only be assigned to problems or scenes.");
+        }
+
+        beat.Guid = element.Uuid;
+        _log.Log(LogLevel.Info, $"AssignBeat completed for beat {beat.Title}.");
         return true;
     }
 }

@@ -197,5 +197,48 @@ namespace StoryCADTests
                 await _outlineService.WriteModel(model, invalidPath);
             });
         }
+
+        /// <summary>
+        /// Verifies that <see cref="OutlineService.AddBeatSheet"/> populates a <see cref="ProblemModel"/> with beats from a <see cref="PlotPatternModel"/>.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous test.</returns>
+        [TestMethod]
+        public async Task AddBeatSheet_ShouldPopulateProblem()
+        {
+            StoryModel model = await _outlineService.CreateModel("Test", "Author", 0);
+            var overview = (OverviewModel)model.StoryElements.First(e => e.ElementType == StoryItemType.StoryOverview);
+            ProblemModel problem = (ProblemModel)_outlineService.AddStoryElement(model, StoryItemType.Problem, overview.Node);
+
+            PlotPatternModel sheet = new("Test Sheet") { PlotPatternNotes = "Notes" };
+            sheet.PlotPatternScenes.Add(new PlotPatternScene("Beat1") { Notes = "Desc" });
+
+            bool result = _outlineService.AddBeatSheet(problem, sheet);
+
+            Assert.IsTrue(result);
+            Assert.AreEqual("Test Sheet", problem.StructureTitle);
+            Assert.AreEqual(1, problem.StructureBeats.Count);
+            Assert.AreEqual("Beat1", problem.StructureBeats[0].Title);
+        }
+
+        /// <summary>
+        /// Ensures that a beat added to a problem can be assigned to a <see cref="SceneModel"/>.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous test.</returns>
+        [TestMethod]
+        public async Task AddBeatAndAssign_ShouldLinkElement()
+        {
+            StoryModel model = await _outlineService.CreateModel("Test", "Author", 0);
+            var overview = (OverviewModel)model.StoryElements.First(e => e.ElementType == StoryItemType.StoryOverview);
+            ProblemModel problem = (ProblemModel)_outlineService.AddStoryElement(model, StoryItemType.Problem, overview.Node);
+            SceneModel scene = (SceneModel)_outlineService.AddStoryElement(model, StoryItemType.Scene, overview.Node);
+
+            _outlineService.AddBeat(problem, "Beat1", "Desc");
+            var beat = problem.StructureBeats[0];
+
+            bool result = _outlineService.AssignBeat(beat, scene);
+
+            Assert.IsTrue(result);
+            Assert.AreEqual(scene.Uuid, beat.Guid);
+        }
     }
 }
