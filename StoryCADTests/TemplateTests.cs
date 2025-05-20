@@ -18,17 +18,27 @@ public class TemplateTests
     [TestMethod]
     public async Task TestSamplesAsync()
     {
-        //TODO: This is not testing samples. Looks like outline creation tests 
         OutlineService outline = Ioc.Default.GetService<OutlineService>();
+        FileOpenVM fileVm = Ioc.Default.GetRequiredService<FileOpenVM>();
+
+        // Validate templates
         for (int index = 0; index <= 5; index++)
         {
-            StoryModel model;
-            string path = Ioc.Default.GetRequiredService<AppState>().RootDirectory;
-            //StorageFile file = await StorageFile.GetFileFromPathAsync(path);
-            model = await outline!.CreateModel($"Test{index}","I Robot", index);
-
+            var model = await outline!.CreateModel($"Test{index}", "I Robot", index);
             Assert.IsNotNull(model);
+            foreach (StoryNodeItem item in model.ExplorerView[0].Children)
+            {
+                CheckChildren(item);
+            }
+        }
 
+        // Validate bundled sample projects
+        for (int i = 0; i < fileVm.SampleNames.Count; i++)
+        {
+            fileVm.SelectedSampleIndex = i;
+            await fileVm.OpenSample();
+            var model = Ioc.Default.GetRequiredService<OutlineViewModel>().StoryModel;
+            Assert.IsNotNull(model);
             foreach (StoryNodeItem item in model.ExplorerView[0].Children)
             {
                 CheckChildren(item);

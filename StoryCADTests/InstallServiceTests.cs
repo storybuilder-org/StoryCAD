@@ -1,5 +1,7 @@
 ﻿using System.Linq;
 using System.Reflection;
+using System.IO;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using StoryCAD.Models;
 
@@ -23,8 +25,16 @@ public class InstallServiceTests
     [TestMethod]
     public void TestRootDirectory()
     {
-        //TODO: Verify GlobalData.RootDirectory contains all resources
-        Assert.AreEqual(0, 0);
+        var rootDir = Ioc.Default.GetRequiredService<AppState>().RootDirectory;
+        foreach (string resource in libResources)
+        {
+            // convert manifest name to relative file path
+            var segments = resource.Split('.').Skip(2).ToArray();
+            string fileName = string.Join('.', segments[^2], segments[^1]);
+            string relativePath = Path.Combine(Path.Combine(segments.Take(segments.Length - 2).ToArray()), fileName);
+            string diskPath = Path.Combine(rootDir, relativePath);
+            Assert.IsTrue(File.Exists(diskPath), $"Missing resource on disk: {diskPath}");
+        }
     }
 
     public InstallServiceTests()
