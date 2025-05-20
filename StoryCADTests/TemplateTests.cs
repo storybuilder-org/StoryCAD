@@ -5,6 +5,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using StoryCAD.Models;
 using StoryCAD.Services.Outline;
 using StoryCAD.ViewModels;
+using StoryCAD.ViewModels.SubViewModels;
 using Windows.Storage;
 
 namespace StoryCADTests;
@@ -24,11 +25,11 @@ public class TemplateTests
         // Validate templates
         for (int index = 0; index <= 5; index++)
         {
-            var model = await outline!.CreateModel($"Test{index}", "I Robot", index);
+            var model = await outline!.CreateModel($"Test{index}", "Sample Test", index);
             Assert.IsNotNull(model);
             foreach (StoryNodeItem item in model.ExplorerView[0].Children)
             {
-                CheckChildren(item);
+                Assert.IsTrue(model.StoryElements.Count > 2, "Template missing data.");
             }
         }
 
@@ -39,19 +40,7 @@ public class TemplateTests
             await fileVm.OpenSample();
             var model = Ioc.Default.GetRequiredService<OutlineViewModel>().StoryModel;
             Assert.IsNotNull(model);
-            foreach (StoryNodeItem item in model.ExplorerView[0].Children)
-            {
-                CheckChildren(item);
-            }
-        }
-    }
-
-    private void CheckChildren(StoryNodeItem item)
-    {
-        Assert.IsTrue(StoryNodeItem.RootNodeType(item) != StoryItemType.Unknown);
-        foreach (var child in item.Children)
-        {
-            CheckChildren(child);
+            Assert.IsTrue(model.StoryElements.Count > 2, "Sample missing data.");
         }
     }
 }

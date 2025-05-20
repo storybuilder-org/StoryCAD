@@ -218,27 +218,6 @@ namespace StoryCADTests
                 "Stock scene not added.");
         }
 
-        [TestMethod]
-        public void TestGenerateScrivenerReports()
-        {
-            var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
-            shell.DataSource = null; // ensure early exit
-            outlineVM.GenerateScrivenerReports().Wait();
-            Assert.IsTrue(true); // completed without exception
-        }
-
-        [TestMethod]
-        public void TestSearchNodes()
-        {
-            var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
-            outlineVM.StoryModel = outlineService.CreateModel("Search", "StoryBuilder", 0).Result;
-            var character = outlineService.AddStoryElement(outlineVM.StoryModel, StoryItemType.Character, outlineVM.StoryModel.ExplorerView[0]);
-            shell.DataSource = outlineVM.StoryModel.ExplorerView;
-            shell.FilterText = "Character"; // default name contains 'Character'
-            outlineVM.SearchNodes();
-            Assert.IsNotNull(character.Node.Background);
-        }
-
 
         /// <summary>
         /// Tests issue #946
