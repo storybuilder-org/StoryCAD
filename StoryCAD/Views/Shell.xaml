@@ -48,13 +48,17 @@
                             <ToolTip Content="Add Scene to Narrative" />
                         </ToolTipService.ToolTip>
                     </AppBarButton>
-                    <AppBarButton Icon="Switch" Label="Remove from narrative" Command="{x:Bind ShellVm.RemoveFromNarrativeCommand, Mode=OneWay}" 
+                    <AppBarButton Icon="Switch" Label="Remove from narrative" Command="{x:Bind ShellVm.RemoveFromNarrativeCommand, Mode=OneWay}"
                           Visibility="{x:Bind ShellVm.RemoveFromNarrativeVisibility, Mode=TwoWay}" >
                         <ToolTipService.ToolTip>
                             <ToolTip Content="Remove Scene from Narrative" />
                         </ToolTipService.ToolTip>
                     </AppBarButton>
-                    <AppBarButton Icon="Print" Label="Print node" Command="{x:Bind ShellVm.PrintNodeCommand, Mode=OneWay}" 
+                    <AppBarButton Icon="Switch" Label="Convert to Scene" Command="{x:Bind ShellVm.ConvertToSceneCommand, Mode=OneWay}"
+                          Visibility="{x:Bind ShellVm.ConvertToSceneVisibility, Mode=TwoWay}" />
+                    <AppBarButton Icon="Switch" Label="Convert to Problem" Command="{x:Bind ShellVm.ConvertToProblemCommand, Mode=OneWay}"
+                          Visibility="{x:Bind ShellVm.ConvertToProblemVisibility, Mode=TwoWay}" />
+                    <AppBarButton Icon="Print" Label="Print node" Command="{x:Bind ShellVm.PrintNodeCommand, Mode=OneWay}"
                           Visibility="{x:Bind ShellVm.PrintNodeVisibility, Mode=TwoWay}" >
                         <ToolTipService.ToolTip>
                             <ToolTip Content="Print selected node"/>
@@ -205,6 +209,8 @@
                             <MenuFlyoutItem Visibility="{x:Bind ShellVm.RestoreStoryElementVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.RestoreStoryElementCommand,Mode=OneWay}" Icon="Refresh" Text="Restore Story element"/>
                             <MenuFlyoutItem Visibility="{x:Bind ShellVm.AddToNarrativeVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.AddToNarrativeCommand,Mode=OneWay}" Icon="Switch" Text="Add To Narrative"/>
                             <MenuFlyoutItem Visibility="{x:Bind ShellVm.RemoveFromNarrativeVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.RemoveFromNarrativeCommand,Mode=OneWay}" Icon="Switch" Text="Remove from Narrative"/>
+                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.ConvertToSceneVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.ConvertToSceneCommand,Mode=OneWay}" Icon="Switch" Text="Convert to Scene"/>
+                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.ConvertToProblemVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.ConvertToProblemCommand,Mode=OneWay}" Icon="Switch" Text="Convert to Problem"/>
                         </MenuFlyout>
                     </AppBarButton.Flyout>
                 </AppBarButton>

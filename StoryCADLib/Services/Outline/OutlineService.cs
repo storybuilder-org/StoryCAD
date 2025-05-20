@@ -394,4 +394,92 @@ public class OutlineService
         _log.Log(LogLevel.Info, $"AddCastMember completed for cast member {castMember}.");
         return true;
     }
+
+    /// <summary>
+    /// Convert a Problem element to a Scene element.
+    /// </summary>
+    public SceneModel ConvertProblemToScene(StoryModel model, ProblemModel problem)
+    {
+        _log.Log(LogLevel.Info, $"ConvertProblemToScene called for {problem.Uuid}.");
+
+        var parent = problem.Node.Parent;
+        int index = parent.Children.IndexOf(problem.Node);
+
+        // Create a new scene and position it where the problem was
+        SceneModel scene = new SceneModel(model, parent);
+        parent.Children.Remove(scene.Node);
+        parent.Children.Insert(index, scene.Node);
+
+        // Preserve identifiers
+        scene.Uuid = problem.Uuid;
+        scene.Node.Uuid = problem.Node.Uuid;
+
+        // Preserve node state
+        scene.Node.IsExpanded = problem.Node.IsExpanded;
+        scene.Node.IsSelected = problem.Node.IsSelected;
+
+        // Move any children
+        foreach (var child in problem.Node.Children.ToList())
+        {
+            scene.Node.Children.Add(child);
+            child.Parent = scene.Node;
+        }
+
+        // Copy basic fields
+        scene.Name = problem.Name;
+        scene.Protagonist = problem.Protagonist;
+        scene.ProtagGoal = problem.ProtGoal;
+        scene.Antagonist = problem.Antagonist;
+        scene.AntagGoal = problem.AntagGoal;
+        scene.Opposition = problem.ProtConflict;
+        scene.Outcome = problem.Outcome;
+        scene.Notes = problem.Notes;
+
+        // Remove the original problem
+        model.StoryElements.Remove(problem);
+
+        _log.Log(LogLevel.Info, $"ConvertProblemToScene completed for {scene.Uuid}.");
+        return scene;
+    }
+
+    /// <summary>
+    /// Convert a Scene element to a Problem element.
+    /// </summary>
+    public ProblemModel ConvertSceneToProblem(StoryModel model, SceneModel scene)
+    {
+        _log.Log(LogLevel.Info, $"ConvertSceneToProblem called for {scene.Uuid}.");
+
+        var parent = scene.Node.Parent;
+        int index = parent.Children.IndexOf(scene.Node);
+
+        ProblemModel problem = new ProblemModel(model, parent);
+        parent.Children.Remove(problem.Node);
+        parent.Children.Insert(index, problem.Node);
+
+        problem.Uuid = scene.Uuid;
+        problem.Node.Uuid = scene.Node.Uuid;
+
+        problem.Node.IsExpanded = scene.Node.IsExpanded;
+        problem.Node.IsSelected = scene.Node.IsSelected;
+
+        foreach (var child in scene.Node.Children.ToList())
+        {
+            problem.Node.Children.Add(child);
+            child.Parent = problem.Node;
+        }
+
+        problem.Name = scene.Name;
+        problem.Protagonist = scene.Protagonist;
+        problem.ProtGoal = scene.ProtagGoal;
+        problem.Antagonist = scene.Antagonist;
+        problem.AntagGoal = scene.AntagGoal;
+        problem.ProtConflict = scene.Opposition;
+        problem.Outcome = scene.Outcome;
+        problem.Notes = scene.Notes;
+
+        model.StoryElements.Remove(scene);
+
+        _log.Log(LogLevel.Info, $"ConvertSceneToProblem completed for {problem.Uuid}.");
+        return problem;
+    }
 }
