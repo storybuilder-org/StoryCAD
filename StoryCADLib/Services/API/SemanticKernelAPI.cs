@@ -413,9 +413,7 @@ public class SemanticKernelApi
         if (CurrentModel == null)
             return Task.FromResult(OperationResult<bool>.Failure("No outline is opened"));
 
-        //Remove reference to element
         StoryElement element = CurrentModel.StoryElements.StoryElementGuids[elementToDelete];
-        _outlineService.RemoveReferenceToElement(elementToDelete, CurrentModel);
 
         // Remove the element from the model.
         if (Type == StoryViewType.ExplorerView)

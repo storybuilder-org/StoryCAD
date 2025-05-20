@@ -4,6 +4,7 @@ using Windows.Data.Xml.Dom;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
 using StoryCAD.Services;
+using StoryCAD.Services.Outline;
 using StoryCAD.ViewModels.SubViewModels;
 
 namespace StoryCAD.ViewModels;
@@ -424,6 +425,13 @@ public class StoryNodeItem : INotifyPropertyChanged
     {
         if (Type is StoryItemType.TrashCan || IsRoot)
             return false;
+
+        // Remove any references to this element before deleting
+        var outlineService = Ioc.Default.GetService<OutlineService>();
+        if (outlineService != null && _outlineVM?.StoryModel != null)
+        {
+            outlineService.RemoveReferenceToElement(Uuid, _outlineVM.StoryModel);
+        }
 
         MoveToTrash(view);
         return true;

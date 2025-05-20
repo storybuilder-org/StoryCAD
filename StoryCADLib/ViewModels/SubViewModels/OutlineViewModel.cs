@@ -1068,8 +1068,6 @@ public class OutlineViewModel : ObservableRecipient
             {
                 using (var serializationLock = new SerializationLock(autoSaveService, backupService, logger))
                 {
-                    outlineService.RemoveReferenceToElement(elementToDelete, StoryModel);
-
                     if (shellVm.CurrentView.Equals("Story Explorer View"))
                     {
                         shellVm.RightTappedNode.Delete(StoryViewType.ExplorerView);

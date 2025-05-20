@@ -1,7 +1,6 @@
-﻿using ABI.Windows.Media.Audio;
-//using NLog;
-using StoryCAD.Services.Logging;
+﻿using StoryCAD.Services.Logging;
 using StoryCAD.ViewModels.SubViewModels;
+using System.Reflection;
 
 //using LogLevel = StoryCAD.Services.Logging.LogLevel;
 
@@ -15,6 +14,7 @@ public class SearchService
 {
     private readonly LogService logger;
     private string arg;
+    private Guid guidArg;
     StoryElementCollection ElementCollection;
     
     /// <summary>
@@ -76,14 +76,35 @@ public class SearchService
         return text.ToLower().Contains(arg);
     }
 
+    /// <summary>
+    /// Searches all public string properties of an object for the current search argument.
+    /// </summary>
+    /// <param name="element">Object whose properties to inspect.</param>
+    /// <returns>true if any string property contains the search text.</returns>
+    private bool SearchStringFields(object element)
+    {
+        foreach (PropertyInfo prop in element.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
+        {
+            if (prop.PropertyType == typeof(string))
+            {
+                string? value = prop.GetValue(element) as string;
+                if (!string.IsNullOrEmpty(value) && Comparator(value))
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     private bool SearchSection(StoryNodeItem node, StoryElement element)
     {
-        return Comparator(element.Name);
+        return SearchStringFields(element);
     }
 
     private bool SearchFolder(StoryNodeItem node, StoryElement element)
     {
-        return Comparator(element.Name);
+        return SearchStringFields(element);
     }
 
     /// <summary>
@@ -106,7 +127,7 @@ public class SearchService
         }
         
         // Search the Scene's properties
-        if (Comparator(element.Name)) { return true; }  //Searches node name
+        if (SearchStringFields(scene)) { return true; }
         if (CompareStoryElement(scene.ViewpointCharacter)) { return true; }
         if (CompareStoryElement(scene.Protagonist)) { return true; }
         if (CompareStoryElement(scene.Antagonist)) { return true; }
@@ -117,7 +138,7 @@ public class SearchService
 
     private bool SearchSetting(StoryNodeItem node, StoryElement element)
     {
-        return Comparator(element.Name);
+        return SearchStringFields(element);
     }
 
     /// <summary>
@@ -136,7 +157,8 @@ public class SearchService
             Guid partner = relation.PartnerUuid;
             if (CompareStoryElement(partner)) { return true; }
         }
-        return Comparator(element.Name); //Checks element name
+        if (SearchStringFields(characterModel)) { return true; }
+        return false;
     }
 
     /// <summary>
@@ -151,7 +173,7 @@ public class SearchService
 
         if (CompareStoryElement(problem.Protagonist)) { return true; }
         if (CompareStoryElement(problem.Antagonist)) { return true; }
-        if (Comparator(element.Name)) { return true; }
+        if (SearchStringFields(problem)) { return true; }
 
         return false;
     }
@@ -169,11 +191,10 @@ public class SearchService
         if (overview.StoryProblem != Guid.Empty)
         {
             ProblemModel problem = (ProblemModel) ElementCollection.StoryElementGuids[overview.StoryProblem];
-            string problemName = problem.Name;
-            if (Comparator(problemName)) { return true; }
+            if (SearchStringFields(problem)) { return true; }
         }
 
-        if (Comparator(element.Name)) { return true; } //checks node name
+        if (SearchStringFields(overview)) { return true; }
 
         return false;
     }
@@ -199,6 +220,134 @@ public class SearchService
         }
 
         return false;
+    }
+
+    /// <summary>
+    /// Searches a StoryElement for references to a specific Guid and optionally removes them.
+    /// </summary>
+    public bool SearchStoryElement(StoryNodeItem node, Guid searchGuid, StoryModel model, bool delete = false)
+    {
+        if (model?.StoryElements?.StoryElementGuids == null || node == null)
+        {
+            logger.Log(LogLevel.Info, "StoryElements or node is null");
+            return false;
+        }
+
+        if (!model.StoryElements.StoryElementGuids.TryGetValue(node.Uuid, out var element) || element == null)
+        {
+            logger.Log(LogLevel.Info, $"No element found for UUID {node.Uuid}");
+            return false;
+        }
+
+        guidArg = searchGuid;
+        ElementCollection = model.StoryElements;
+
+        return element.ElementType switch
+        {
+            StoryItemType.StoryOverview => SearchOverviewReferences((OverviewModel)element, delete),
+            StoryItemType.Problem => SearchProblemReferences((ProblemModel)element, delete),
+            StoryItemType.Character => SearchCharacterReferences((CharacterModel)element, delete),
+            StoryItemType.Scene => SearchSceneReferences((SceneModel)element, delete),
+            _ => false,
+        };
+    }
+
+    private bool SearchSceneReferences(SceneModel scene, bool delete)
+    {
+        List<Guid> newCast = new();
+        foreach (Guid memberGuid in scene.CastMembers)
+        {
+            if (ElementCollection.StoryElementGuids.TryGetValue(memberGuid, out StoryElement model))
+            {
+                if (model.Uuid == guidArg)
+                {
+                    if (!delete) return true;
+                }
+                else
+                {
+                    newCast.Add(memberGuid);
+                }
+            }
+        }
+
+        if (delete) scene.CastMembers = newCast;
+
+        if (scene.Protagonist == guidArg)
+        {
+            if (delete) scene.Protagonist = Guid.Empty; else return true;
+        }
+        if (scene.Antagonist == guidArg)
+        {
+            if (delete) scene.Antagonist = Guid.Empty; else return true;
+        }
+        if (scene.ViewpointCharacter == guidArg)
+        {
+            if (delete) scene.ViewpointCharacter = Guid.Empty; else return true;
+        }
+        if (scene.Setting == guidArg)
+        {
+            if (delete) scene.Setting = Guid.Empty; else return true;
+        }
+
+        return false;
+    }
+
+    private bool SearchCharacterReferences(CharacterModel character, bool delete)
+    {
+        List<RelationshipModel> newRelationships = new();
+        foreach (RelationshipModel partner in character.RelationshipList)
+        {
+            StoryElement model = StoryElement.GetByGuid(partner.PartnerUuid);
+            if (model.Uuid == guidArg)
+            {
+                if (!delete) return true;
+            }
+            else
+            {
+                newRelationships.Add(partner);
+            }
+        }
+        if (delete) character.RelationshipList = newRelationships;
+        return false;
+    }
+
+    private bool SearchProblemReferences(ProblemModel problem, bool delete)
+    {
+        if (problem.Protagonist == guidArg)
+        {
+            if (delete) problem.Protagonist = Guid.Empty; else return true;
+        }
+        if (problem.Antagonist == guidArg)
+        {
+            if (delete) problem.Antagonist = Guid.Empty; else return true;
+        }
+        if (problem.StructureBeats != null)
+        {
+            foreach (var beat in problem.StructureBeats)
+            {
+                if (beat.Guid == guidArg)
+                {
+                    if (delete) beat.Guid = Guid.Empty; else return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private bool SearchOverviewReferences(OverviewModel overview, bool delete)
+    {
+        bool found = false;
+        if (overview.StoryProblem == guidArg)
+        {
+            found = true;
+            if (delete) overview.StoryProblem = Guid.Empty;
+        }
+        if (overview.ViewpointCharacter == guidArg)
+        {
+            found = true;
+            if (delete) overview.ViewpointCharacter = Guid.Empty;
+        }
+        return found;
     }
 
     public SearchService()
