@@ -78,7 +78,9 @@ public class ListLoaderTests
         Assert.IsTrue(lists.ContainsKey("Outcome"));
         Assert.IsTrue(lists.ContainsKey("Viewpoint"));
         Assert.IsTrue(lists.ContainsKey("ValueExchange"));
-        //TODO: Test some specific key counts
+        Assert.AreEqual(7, lists["Season"].Count);
+        Assert.AreEqual(5, lists["Viewpoint"].Count);
+        Assert.AreEqual(5, lists["Tense"].Count);
     }
 
     [TestMethod]

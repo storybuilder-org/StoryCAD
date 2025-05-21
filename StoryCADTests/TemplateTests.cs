@@ -5,6 +5,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using StoryCAD.Models;
 using StoryCAD.Services.Outline;
 using StoryCAD.ViewModels;
+using StoryCAD.ViewModels.SubViewModels;
 using Windows.Storage;
 
 namespace StoryCADTests;
@@ -18,30 +19,28 @@ public class TemplateTests
     [TestMethod]
     public async Task TestSamplesAsync()
     {
-        //TODO: This is not testing samples. Looks like outline creation tests 
         OutlineService outline = Ioc.Default.GetService<OutlineService>();
+        FileOpenVM fileVm = Ioc.Default.GetRequiredService<FileOpenVM>();
+
+        // Validate templates
         for (int index = 0; index <= 5; index++)
         {
-            StoryModel model;
-            string path = Ioc.Default.GetRequiredService<AppState>().RootDirectory;
-            //StorageFile file = await StorageFile.GetFileFromPathAsync(path);
-            model = await outline!.CreateModel($"Test{index}","I Robot", index);
-
+            var model = await outline!.CreateModel($"Test{index}", "Sample Test", index);
             Assert.IsNotNull(model);
-
             foreach (StoryNodeItem item in model.ExplorerView[0].Children)
             {
-                CheckChildren(item);
+                Assert.IsTrue(model.StoryElements.Count > 2, "Template missing data.");
             }
         }
-    }
 
-    private void CheckChildren(StoryNodeItem item)
-    {
-        Assert.IsTrue(StoryNodeItem.RootNodeType(item) != StoryItemType.Unknown);
-        foreach (var child in item.Children)
+        // Validate bundled sample projects
+        for (int i = 0; i < fileVm.SampleNames.Count; i++)
         {
-            CheckChildren(child);
+            fileVm.SelectedSampleIndex = i;
+            await fileVm.OpenSample();
+            var model = Ioc.Default.GetRequiredService<OutlineViewModel>().StoryModel;
+            Assert.IsNotNull(model);
+            Assert.IsTrue(model.StoryElements.Count > 2, "Sample missing data.");
         }
     }
 }

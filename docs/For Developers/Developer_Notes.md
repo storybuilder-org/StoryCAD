@@ -14,7 +14,7 @@ has_toc: false
 StoryCAD is written in C# and XAML and is a Windows desktop app. 
 It's written using [WinUI 3][2], [MVVM][6], [Project Reunion APIs][3], and [.NET][8]. 
 Although the only programming skill you need to get started is some C#, familiarity with [asynchronous IO][5] and [MVVM][6] will be useful. 
-We maintain StoryCAD as a Visual Studio Ssolution using Visual Studio 2022.
+We maintain StoryCAD as a Visual Studio solution using Visual Studio 2022.
 StoryCAD began as a UWP program and now uses Windows UI (WinUI 3) [controls][7] and styles. It runs
 as a native Windows (Win32) program, but its UWP roots remain; it uses [UWP asynchronous IO][4].
 This allows StoryCAD outlines, which are JSON files, to be stored locally or on cloud storage services like OneDrive, Dropbox, Google Drive or Box.
