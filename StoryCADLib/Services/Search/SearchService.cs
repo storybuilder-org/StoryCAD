@@ -1,208 +1,122 @@
-﻿using ABI.Windows.Media.Audio;
-//using NLog;
+using System.Collections;
+using System.Reflection;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using StoryCAD.Services.Logging;
-using StoryCAD.ViewModels.SubViewModels;
-
-//using LogLevel = StoryCAD.Services.Logging.LogLevel;
 
 namespace StoryCAD.Services.Search;
 
 /// <summary>
-/// Service responsible for searching StoryElements within the StoryModel based on a given search argument.
-/// It supports searching various types of StoryElements, including Scenes, Characters, Problems, Settings, etc.
+/// Provides methods to search <see cref="StoryElement"/> instances for
+/// strings or GUID references using reflection.
 /// </summary>
 public class SearchService
 {
     private readonly LogService logger;
-    private string arg;
-    StoryElementCollection ElementCollection;
-    
-    /// <summary>
-    /// Searches a <see cref="StoryElement"/> for a given string search argument.
-    /// </summary>
-    /// <param name="node">The <see cref="StoryNodeItem"/> whose <see cref="StoryElement"/> will be searched.</param>
-    /// <param name="searchArg">The string to search for within the StoryElement.</param>
-    /// <param name="model">The <see cref="StoryModel"/> containing the StoryElements.</param>
-    /// <returns><c>true</c> if the StoryElement contains the search argument; otherwise, <c>false</c>.</returns>
-    public bool SearchStoryElement(StoryNodeItem node, string searchArg, StoryModel model)
-    {
-        if (searchArg == null)
-        {
-            logger.Log(LogLevel.Warn, "Search argument is null, returning false.");
-            return false;
-        } // Fixes blank search
-
-        bool result = false;
-        arg = searchArg.ToLower();
-        StoryElement element = null;
-        ElementCollection = model.StoryElements;
-
-        if (model.StoryElements.StoryElementGuids.ContainsKey(node.Uuid)) { element = model.StoryElements.StoryElementGuids[node.Uuid]; }
-        if (element == null) { return false; }
-        switch (element.ElementType)
-        {
-            case StoryItemType.StoryOverview:
-                result = SearchStoryOverview(node, element);
-                break;
-            case StoryItemType.Problem:
-                result = SearchProblem(node, element);
-                break;
-            case StoryItemType.Character:
-                result = SearchCharacter(node, element);
-                break;
-            case StoryItemType.Setting:
-                result = SearchSetting(node, element);
-                break;
-            case StoryItemType.Scene:
-                result = SearchScene(node, element);
-                break;
-            case StoryItemType.Folder:
-                result = SearchFolder(node, element);
-                break;
-            case StoryItemType.Section:
-                result = SearchSection(node, element);
-                break;
-        }
-        return result;
-    }
-    
-    /// <summary>
-    /// Compares the provided text with the search argument.
-    /// </summary>
-    /// <param name="text">The text to compare.</param>
-    /// <returns><c>true</c> if the text contains the search argument; otherwise, <c>false</c>.</returns>
-    private bool Comparator(string text)
-    {
-        return text.ToLower().Contains(arg);
-    }
-
-    private bool SearchSection(StoryNodeItem node, StoryElement element)
-    {
-        return Comparator(element.Name);
-    }
-
-    private bool SearchFolder(StoryNodeItem node, StoryElement element)
-    {
-        return Comparator(element.Name);
-    }
-
-    /// <summary>
-    /// Searches Cast members, protagonist name, antagonist name and the name of the scene and the selected setting in a scene node
-    /// </summary>
-    /// <param name="node"></param>
-    /// <param name="element"></param>
-    /// <returns></returns>
-    private bool SearchScene(StoryNodeItem node, StoryElement element)
-    {
-        SceneModel scene = (SceneModel)element;
-
-        // Search through each CastMember represented by GUID
-        foreach (Guid memberGuid in scene.CastMembers) // Searches character in scene
-        {
-            if (CompareStoryElement(memberGuid))
-            {
-                return true;
-            }
-        }
-        
-        // Search the Scene's properties
-        if (Comparator(element.Name)) { return true; }  //Searches node name
-        if (CompareStoryElement(scene.ViewpointCharacter)) { return true; }
-        if (CompareStoryElement(scene.Protagonist)) { return true; }
-        if (CompareStoryElement(scene.Antagonist)) { return true; }
-        if (CompareStoryElement(scene.Setting)) { return true; }
-
-        return false; //No match, return false
-    }
-
-    private bool SearchSetting(StoryNodeItem node, StoryElement element)
-    {
-        return Comparator(element.Name);
-    }
-
-    /// <summary>
-    /// Searches the name of each character in a relationship and the name of the character
-    /// </summary>
-    /// <param name="node"></param>
-    /// <param name="element"></param>
-    /// <returns></returns>
-    private bool SearchCharacter(StoryNodeItem node, StoryElement element)
-    {
-        CharacterModel characterModel = (CharacterModel)element;
-
-
-        foreach (RelationshipModel relation in characterModel.RelationshipList) //Checks each character in relationship
-        {
-            Guid partner = relation.PartnerUuid;
-            if (CompareStoryElement(partner)) { return true; }
-        }
-        return Comparator(element.Name); //Checks element name
-    }
-
-    /// <summary>
-    /// Searches a problem for the element name, Antag name, protag name,
-    /// </summary>
-    /// <param name="node"></param>
-    /// <param name="element"></param>
-    /// <returns></returns>
-    private bool SearchProblem(StoryNodeItem node, StoryElement element)
-    {
-        ProblemModel problem = (ProblemModel)element;
-
-        if (CompareStoryElement(problem.Protagonist)) { return true; }
-        if (CompareStoryElement(problem.Antagonist)) { return true; }
-        if (Comparator(element.Name)) { return true; }
-
-        return false;
-    }
-
-    /// <summary>
-    /// Searches the overview node for the name and main story problem
-    /// </summary>
-    /// <param name="node"></param>
-    /// <param name="element"></param>
-    /// <returns></returns>
-    private bool SearchStoryOverview(StoryNodeItem node, StoryElement element)
-    {
-        OverviewModel overview = (OverviewModel)element;
-
-        if (overview.StoryProblem != Guid.Empty)
-        {
-            ProblemModel problem = (ProblemModel) ElementCollection.StoryElementGuids[overview.StoryProblem];
-            string problemName = problem.Name;
-            if (Comparator(problemName)) { return true; }
-        }
-
-        if (Comparator(element.Name)) { return true; } //checks node name
-
-        return false;
-    }
-
-    //TODO: Once all StoryElement references are converted to Guid instead of Guid.ToString(), remove the string version
-    /// <summary>
-    /// Compares the name of the StoryElement associated with the provided GUID to the search argument.
-    /// </summary>
-    /// <param name="guid">The GUID of the StoryElement to compare.</param>
-    /// <returns><c>true</c> if the StoryElement's name contains the search argument; otherwise, <c>false</c>.</returns>
-    private bool CompareStoryElement(Guid guid)
-    {
-        if (guid == Guid.Empty)
-            return false;
-
-        // Retrieve the StoryElement associated with the GUID
-        OutlineViewModel shell = Ioc.Default.GetService<OutlineViewModel>();
-        StoryElementCollection elements = shell!.StoryModel.StoryElements;
-
-        if (elements.StoryElementGuids.TryGetValue(guid, out StoryElement element))
-        {
-            return Comparator(element.Name);
-        }
-
-        return false;
-    }
 
     public SearchService()
     {
-        logger = Ioc.Default.GetService<LogService>();
+        logger = Ioc.Default.GetRequiredService<LogService>();
+    }
+
+    /// <summary>
+    /// Searches a story element identified by <paramref name="node"/> for the
+    /// specified text.
+    /// </summary>
+    /// <param name="node">Node whose element will be scanned.</param>
+    /// <param name="searchArg">Text to search for.</param>
+    /// <param name="model">Model containing the element.</param>
+    /// <returns>true if the element contains the text.</returns>
+    public bool SearchForString(StoryNodeItem node, string searchArg, StoryModel model)
+    {
+        if (string.IsNullOrEmpty(searchArg) || model?.StoryElements == null || node == null)
+            return false;
+
+        if (!model.StoryElements.StoryElementGuids.TryGetValue(node.Uuid, out StoryElement element) || element == null)
+            return false;
+
+        return SearchObjectForString(element, searchArg.ToLowerInvariant());
+    }
+
+    private bool SearchObjectForString(object? obj, string query)
+    {
+        if (obj == null) return false;
+        if (obj is string s)
+        {
+            return s.ToLowerInvariant().Contains(query);
+        }
+
+        if (obj is IEnumerable enumerable && obj is not string)
+        {
+            foreach (var item in enumerable)
+                if (SearchObjectForString(item, query))
+                    return true;
+            return false;
+        }
+
+        foreach (PropertyInfo prop in obj.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
+        {
+            if (prop.GetIndexParameters().Length > 0) continue;
+            object? value;
+            try { value = prop.GetValue(obj); }
+            catch (Exception ex)
+            {
+                logger.Log(LogLevel.Warn, $"Reflection error: {ex.Message}");
+                continue;
+            }
+            if (SearchObjectForString(value, query))
+                return true;
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// Searches a story element identified by <paramref name="node"/> for a
+    /// reference to <paramref name="searchGuid"/>. The element itself is
+    /// ignored if its GUID matches the argument.
+    /// </summary>
+    /// <param name="node">Node whose element will be scanned.</param>
+    /// <param name="searchGuid">GUID to locate.</param>
+    /// <param name="model">Model containing the element.</param>
+    /// <returns>true if a reference is found.</returns>
+    public bool SearchForGuid(StoryNodeItem node, Guid searchGuid, StoryModel model)
+    {
+        if (searchGuid == Guid.Empty || model?.StoryElements == null || node == null)
+            return false;
+
+        if (!model.StoryElements.StoryElementGuids.TryGetValue(node.Uuid, out StoryElement element) || element == null)
+            return false;
+
+        if (element.Uuid == searchGuid)
+            return false;
+
+        return SearchObjectForGuid(element, searchGuid);
+    }
+
+    private bool SearchObjectForGuid(object? obj, Guid query)
+    {
+        if (obj == null) return false;
+        if (obj is Guid g)
+            return g == query;
+        if (obj is IEnumerable enumerable && obj is not string)
+        {
+            foreach (var item in enumerable)
+                if (SearchObjectForGuid(item, query))
+                    return true;
+            return false;
+        }
+        foreach (PropertyInfo prop in obj.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
+        {
+            if (prop.GetIndexParameters().Length > 0) continue;
+            object? value;
+            try { value = prop.GetValue(obj); }
+            catch (Exception ex)
+            {
+                logger.Log(LogLevel.Warn, $"Reflection error: {ex.Message}");
+                continue;
+            }
+            if (SearchObjectForGuid(value, query))
+                return true;
+        }
+        return false;
     }
 }

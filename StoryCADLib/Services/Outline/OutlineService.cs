@@ -232,9 +232,10 @@ public class OutlineService
         }
 
         List<StoryElement> foundNodes = new();
+        var search = Ioc.Default.GetRequiredService<SearchService>();
         foreach (StoryElement element in model.StoryElements)
         {
-            if (Ioc.Default.GetRequiredService<DeletionService>().SearchStoryElement(element.Node, elementGuid, model))
+            if (search.SearchForGuid(element.Node, elementGuid, model))
             {
                 foundNodes.Add(element);
             }
@@ -262,13 +263,52 @@ public class OutlineService
             throw new ArgumentNullException(nameof(model));
         }
 
+        var search = Ioc.Default.GetRequiredService<SearchService>();
         foreach (StoryElement element in model.StoryElements)
         {
-            Ioc.Default.GetRequiredService<DeletionService>()
-                .SearchStoryElement(element.Node, elementToRemove, model, true);
+            // Reuse the GUID search utility to remove references
+            search.SearchForGuid(element.Node, elementToRemove, model);
         }
         _log.Log(LogLevel.Info, "RemoveReferenceToElement completed.");
         return true;
+    }
+
+    /// <summary>
+    /// Searches all elements in a model for the provided text.
+    /// </summary>
+    /// <param name="model">Model to search.</param>
+    /// <param name="query">Text to find.</param>
+    /// <returns>List of elements containing the text.</returns>
+    public List<StoryElement> SearchByString(StoryModel model, string query)
+    {
+        if (model == null) throw new ArgumentNullException(nameof(model));
+        var results = new List<StoryElement>();
+        var search = Ioc.Default.GetRequiredService<SearchService>();
+        foreach (var element in model.StoryElements)
+        {
+            if (search.SearchForString(element.Node, query, model))
+                results.Add(element);
+        }
+        return results;
+    }
+
+    /// <summary>
+    /// Searches the model for elements that reference the given GUID.
+    /// </summary>
+    /// <param name="model">Model to search.</param>
+    /// <param name="guid">GUID to locate.</param>
+    /// <returns>List of referencing elements.</returns>
+    public List<StoryElement> SearchByGuid(StoryModel model, Guid guid)
+    {
+        if (model == null) throw new ArgumentNullException(nameof(model));
+        var results = new List<StoryElement>();
+        var search = Ioc.Default.GetRequiredService<SearchService>();
+        foreach (var element in model.StoryElements)
+        {
+            if (search.SearchForGuid(element.Node, guid, model))
+                results.Add(element);
+        }
+        return results;
     }
 
     /// <summary>

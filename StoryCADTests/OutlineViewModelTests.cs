@@ -231,12 +231,6 @@ namespace StoryCADTests
             Assert.Inconclusive("Test for GenerateScrivenerReports not implemented.");
         }
 
-        [TestMethod]
-        public void TestSearchNodes()
-        {
-            // TODO: Invoke outlineVM.SearchNodes and check that nodes matching the filter are highlighted.
-            Assert.Inconclusive("Test for SearchNodes not implemented.");
-        }
 
 
         /// <summary>

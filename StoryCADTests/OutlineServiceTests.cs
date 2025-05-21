@@ -197,5 +197,37 @@ namespace StoryCADTests
                 await _outlineService.WriteModel(model, invalidPath);
             });
         }
+
+        /// <summary>
+        /// Verifies searching the model by string returns matching elements.
+        /// </summary>
+        [TestMethod]
+        public async Task SearchByString_FindsElement()
+        {
+            var model = await _outlineService.CreateModel("Search", "Author", 0);
+            var element = _outlineService.AddStoryElement(model, StoryItemType.Character, model.ExplorerView[0]);
+            element.Name = "Hero";
+
+            var results = _outlineService.SearchByString(model, "Hero");
+
+            Assert.IsTrue(results.Contains(element), "Search did not return expected element.");
+        }
+
+        /// <summary>
+        /// Verifies GUID searches return referencing elements but not the element itself.
+        /// </summary>
+        [TestMethod]
+        public async Task SearchByGuid_FindsReferencingElement()
+        {
+            var model = await _outlineService.CreateModel("Search", "Author", 0);
+            var character = (CharacterModel)_outlineService.AddStoryElement(model, StoryItemType.Character, model.ExplorerView[0]);
+            var scene = (SceneModel)_outlineService.AddStoryElement(model, StoryItemType.Scene, model.ExplorerView[0]);
+            scene.Protagonist = character.Uuid;
+
+            var results = _outlineService.SearchByGuid(model, character.Uuid);
+
+            Assert.IsTrue(results.Contains(scene), "Scene referencing character was not found.");
+            Assert.IsFalse(results.Contains(character), "Search should not include the element with the GUID itself.");
+        }
     }
 }
