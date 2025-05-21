@@ -19,7 +19,7 @@ StoryCAD 2.13.1.0 Was released in January 2024.
 StoryCAD 2.13.0.0 was release on November 28th 2023.
 **This version removes support for versions of Windows older than Windows 10 20H2**
 
- - Added option to set StoryCAD's theme independtly of the system theme (#668, 666)
+ - Added option to set StoryCAD's theme independently of the system theme (#668, 666)
  -  Removed Install Service to boost load times (#660)
  - Updated StoryCAD to use an automated testing suite to prevent regressions (#661, #658, #655)
  - Updated dependencies (#665)
@@ -29,7 +29,7 @@ StoryCAD 2.13.0.0 was release on November 28th 2023.
  - Cleaned up code (#680)
  - Fixed issues connecting to the backend server (#682, #677)
  - Fixed potential issue with file open launches (#686)
- - Fixed rare crash that could occur when opening a content dialog too fast after initalisation (#679)
+ - Fixed rare crash that could occur when opening a content dialog too fast after initialization (#679)
 
 
 #### Release 2.12.0.0
