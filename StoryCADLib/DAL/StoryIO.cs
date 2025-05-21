@@ -21,8 +21,6 @@ public class StoryIO
     /// </summary>
     public async Task WriteStory(string output_path, StoryModel model)
     {
-        if (model == null || string.IsNullOrEmpty(output_path)) { return; }
-
         string parent = Path.GetDirectoryName(output_path);
         Directory.CreateDirectory(parent);
 
