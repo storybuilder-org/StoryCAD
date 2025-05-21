@@ -425,16 +425,15 @@ public class OutlineService
             scene.Node.Children.Add(child);
             child.Parent = scene.Node;
         }
+        model.StoryElements.StoryElementGuids.Remove(problem.Uuid);
 
         // copy basic fields
         if (problem.Name == "New Problem")
         {
-            scene.Node.Name = "New Scene";
+            scene.Name = "New Scene";
         }
-        else
-        {
-            scene.Node.Name = problem.Name;
-        }
+        scene.Node.Name = scene.Name;
+
         scene.Protagonist = problem.Protagonist;
         scene.ProtagGoal = problem.ProtGoal;
         scene.Antagonist = problem.Antagonist;
@@ -444,9 +443,15 @@ public class OutlineService
         scene.Notes = problem.Notes;
 
         // clean up model references
-        model.StoryElements.Remove(problem);
         model.ExplorerView.Remove(problem.Node);   // mirrors the reverse conversion
-        model.StoryElements.Add(scene);                 //register the new element
+        // delete every element whose Uuid matches problem.Uuid
+        for (int i = model.StoryElements.Count - 1; i >= 0; i--)
+        {
+            if (model.StoryElements[i].Uuid == problem.Uuid)
+                model.StoryElements.RemoveAt(i);
+
+        }
+        model.StoryElements.Add(scene);            // register the new element
 
         model.ExplorerView.Remove(problem.Node);
         problem.Node.Parent.IsExpanded = true; // expand the parent node
@@ -488,16 +493,15 @@ public class OutlineService
             problem.Node.Children.Add(child);
             child.Parent = problem.Node;
         }
+        model.StoryElements.StoryElementGuids.Remove(scene.Uuid);
 
         // copy basic fields
         if (scene.Name == "New Scene") // Change name if default to avoid confusion
         {
-            scene.Node.Name = "New Problem";
+            problem.Name = "New Problem";
         }
-        else
-        {
-            scene.Node.Name = problem.Name;
-        }
+
+        problem.Node.Name = problem.Name;
         problem.Protagonist = scene.Protagonist;
         problem.ProtGoal = scene.ProtagGoal;
         problem.Antagonist = scene.Antagonist;
@@ -508,6 +512,12 @@ public class OutlineService
 
         // clean up model references
         model.StoryElements.Remove(scene);
+        for (int i = model.StoryElements.Count - 1; i >= 0; i--)
+        {
+            if (model.StoryElements[i].Uuid == scene.Uuid)
+                model.StoryElements.RemoveAt(i);
+
+        }
         model.ExplorerView.Remove(scene.Node);   // mirrors the reverse conversion
         model.StoryElements.Add(problem);               // register the new element
 
