@@ -62,7 +62,7 @@ public class SerializationLock : IDisposable
 
         // Set your _canExecuteCommands flag to false
         // (Assuming you can access it via a shared service or static member)
-        _logger.Log(LogLevel.Warn, $"{_caller} has locked commands");
+        _logger.Log(LogLevel.Info, $"{_caller} has locked commands");
         _canExecuteCommands = false;
     }
 
@@ -72,7 +72,7 @@ public class SerializationLock : IDisposable
     public void EnableCommands()
     {
         _canExecuteCommands = true;
-        _logger.Log(LogLevel.Warn, $"{_caller} has unlocked commands");
+        _logger.Log(LogLevel.Info, $"{_caller} has unlocked commands");
         currentHolder = null;
 
     }

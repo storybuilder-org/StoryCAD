@@ -1,49 +1,26 @@
 version: 2
 updates:
-  # NRTFTree project
-  - package-ecosystem: "nuget"
-    directory: "/NRtfTree/NRTFTree.csproj"
-    schedule:
-      interval: "daily"
-    open-pull-requests-limit: 5
-    versioning-strategy: "auto"
-    ignore:
-      - dependency-name: "Syncfusion.Editors.WinUI"
-    commit-message:
-      prefix: "NRTFTree"
-
-  # StoryCAD project
   - package-ecosystem: "nuget"
     directory: "/StoryCAD/StoryCAD.csproj"
     schedule:
       interval: "daily"
     open-pull-requests-limit: 5
-    versioning-strategy: "auto"
-    ignore:
-      - dependency-name: "Syncfusion.Editors.WinUI"
+
     commit-message:
       prefix: "StoryCAD"
 
-  # StoryCADLib project
   - package-ecosystem: "nuget"
     directory: "/StoryCADLib/StoryCADLib.csproj"
     schedule:
       interval: "daily"
     open-pull-requests-limit: 5
-    versioning-strategy: "auto"
-    ignore:
-      - dependency-name: "Syncfusion.Editors.WinUI"
     commit-message:
       prefix: "StoryCADLib"
 
-  # StoryCADTests project
   - package-ecosystem: "nuget"
     directory: "/StoryCADTests/StoryCADTests.csproj"
     schedule:
       interval: "daily"
     open-pull-requests-limit: 5
-    versioning-strategy: "auto"
-    ignore:
-      - dependency-name: "Syncfusion.Editors.WinUI"
     commit-message:
       prefix: "StoryCADTests"

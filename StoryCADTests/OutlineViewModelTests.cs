@@ -139,12 +139,6 @@ namespace StoryCADTests
             Assert.IsTrue(outlineVM.StoryModel.StoryElements.Count == 0, "Story not closed.");
         }
 
-        [TestMethod]
-        public void TestPrintCurrentNodeAsync()
-        {
-            // TODO: Set up a selected node and invoke PrintCurrentNodeAsync.
-            Assert.Inconclusive("Test for PrintCurrentNodeAsync not implemented.");
-        }
 
         [TestMethod]
         public void TestKeyQuestionsTool()
@@ -222,20 +216,6 @@ namespace StoryCADTests
 
             Assert.IsTrue(outlineVM.StoryModel.StoryElements[3].Name == "The police join the chase",
                 "Stock scene not added.");
-        }
-
-        [TestMethod]
-        public void TestGenerateScrivenerReports()
-        {
-            // TODO: Invoke outlineVM.GenerateScrivenerReports and validate report generation.
-            Assert.Inconclusive("Test for GenerateScrivenerReports not implemented.");
-        }
-
-        [TestMethod]
-        public void TestSearchNodes()
-        {
-            // TODO: Invoke outlineVM.SearchNodes and check that nodes matching the filter are highlighted.
-            Assert.Inconclusive("Test for SearchNodes not implemented.");
         }
 
 

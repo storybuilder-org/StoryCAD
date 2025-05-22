@@ -24,7 +24,7 @@ and suspenseful plots, and settings that appeal to the senses.
 * [Windows App SDK][2]
 * [Windows Community Toolkit][3]
 * [elmah.io][4]
-* [NRtfTree][5]
+* [NRtfTree][5] (maintained separately with asynchronous IO support)
 * [Scrivener][6]
 
 WinUI is the UI Framework for StoryCAD and is [source available](https://github.com/microsoft/microsoft-ui-xaml/tree/main/src)
@@ -33,7 +33,7 @@ Windows Community Toolkit is available under the [MIT License][14].
 
 elmah.io is a commercial cloud-based error logging and uptime monitor service. elmah.io graciously provides a [free subscription][15] to public repository open source projects. We are grateful for their support.
 
-NRtfTree is available under the [GNU GPL V3 License][16]. StoryCAD has changed this software locally to allowasynchronous IO.
+NRtfTree is available under the [GNU GPL V3 License][16]. We maintain our asynchronous IO fork in a separate repository.
 
 [Scrivener][6] is a commercial writing application widely used by novelists, screenwriters, playwrights, and short fiction writers. 
 StoryCAD contains a feature that inserts StoryCAD reports into a Scrivener project using their Scrivener 3 File Formatting Specification API. 
@@ -87,7 +87,7 @@ We are most grateful for all of them especially those who toil in the arena:
 [2]:https://github.com/microsoft/WindowsAppSDK#readme
 [3]:https://github.com/CommunityToolkit/Windows
 [4]:https://elmah.io/
-[5]:https://github.com/sgolivernet/nrtftree#readme
+[5]:https://github.com/StoryBuilder-org/NRTFTree-Async
 [6]:https://www.literatureandlatte.com/scrivener/overview
 [7]:https://www.syncfusion.com/winui-controls
 [8]:https://storybuilder-org.github.io/StoryCAD/

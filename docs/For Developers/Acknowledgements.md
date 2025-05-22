@@ -34,7 +34,7 @@ StoryCAD uses or links to the following software:
 * [Windows App SDK][2]
 * [Windows Community Toolkit][3]
 * [Elmah.io][4]
-* [NRtfTree][5]
+* [NRtfTree][5] (maintained separately with asynchronous IO support)
 * [Scrivener][6]
 
 We are especially grateful to elmah.io commercial products who make their
@@ -101,6 +101,6 @@ https://dotnetfoundation.org/projects/windowscommunitytoolkit
 [2]:https://github.com/microsoft/WindowsAppSDK
 [3]:https://github.com/CommunityToolkit/WindowsCommunityToolkit
 [4]:https://elmah.io/
-[5]:https://github.com/sgolivernet/nrtftree
+[5]:https://github.com/StoryBuilder-org/NRTFTree-Async
 [6]:https://www.literatureandlatte.com/scrivener
 [7]:https://www.syncfusion.com/winui-controls

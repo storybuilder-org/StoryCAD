@@ -148,6 +148,8 @@ public class ShellViewModel : ObservableRecipient
     public RelayCommand AddNotesCommand { get; }
     public RelayCommand AddSettingCommand { get; }
     public RelayCommand AddSceneCommand { get; }
+    public RelayCommand ConvertToSceneCommand { get; }
+    public RelayCommand ConvertToProblemCommand { get; }
     public RelayCommand PrintNodeCommand { get; }
     public RelayCommand NarrativeToolCommand { get; }
 
@@ -234,6 +236,20 @@ public class ShellViewModel : ObservableRecipient
     {
         get => _addSceneVisibility;
         set => SetProperty(ref _addSceneVisibility, value);
+    }
+
+    private Visibility _convertToSceneVisibility;
+    public Visibility ConvertToSceneVisibility
+    {
+        get => _convertToSceneVisibility;
+        set => SetProperty(ref _convertToSceneVisibility, value);
+    }
+
+    private Visibility _convertToProblemVisibility;
+    public Visibility ConvertToProblemVisibility
+    {
+        get => _convertToProblemVisibility;
+        set => SetProperty(ref _convertToProblemVisibility, value);
     }
 
     private Visibility _removeStoryElementVisibility;
@@ -942,6 +958,8 @@ public class ShellViewModel : ObservableRecipient
                 AddCharacterVisibility = Visibility.Collapsed;
                 AddSettingVisibility = Visibility.Collapsed;
                 AddSceneVisibility = Visibility.Collapsed;
+                ConvertToSceneVisibility = Visibility.Collapsed;
+                ConvertToProblemVisibility = Visibility.Collapsed;
                 RemoveStoryElementVisibility = Visibility.Collapsed;
                 AddToNarrativeVisibility = Visibility.Collapsed;
                 RemoveFromNarrativeVisibility = Visibility.Collapsed;
@@ -961,6 +979,8 @@ public class ShellViewModel : ObservableRecipient
                     AddCharacterVisibility = Visibility.Visible;
                     AddSettingVisibility = Visibility.Visible;
                     AddSceneVisibility = Visibility.Visible;
+                    ConvertToSceneVisibility = RightTappedNode.Type == StoryItemType.Problem ? Visibility.Visible : Visibility.Collapsed;
+                    ConvertToProblemVisibility = RightTappedNode.Type == StoryItemType.Scene ? Visibility.Visible : Visibility.Collapsed;
                     RemoveStoryElementVisibility = Visibility.Visible;
                     //TODO: Use correct values (bug with this)
                     //RestoreStoryElementVisibility = Visibility.Collapsed;
@@ -982,6 +1002,8 @@ public class ShellViewModel : ObservableRecipient
                     AddCharacterVisibility = Visibility.Collapsed;
                     AddSettingVisibility = Visibility.Collapsed;
                     AddSceneVisibility = Visibility.Collapsed;
+                    ConvertToSceneVisibility = Visibility.Collapsed;
+                    ConvertToProblemVisibility = Visibility.Collapsed;
                     RestoreStoryElementVisibility = Visibility.Collapsed;
                     AddToNarrativeVisibility = Visibility.Collapsed;
                     EmptyTrashVisibility = Visibility.Collapsed;
@@ -1484,6 +1506,8 @@ public class ShellViewModel : ObservableRecipient
         AddNotesCommand = new RelayCommand(() => OutlineManager.AddStoryElement(StoryItemType.Notes), SerializationLock.IsLocked);
         AddSettingCommand = new RelayCommand(() => OutlineManager.AddStoryElement(StoryItemType.Setting), SerializationLock.IsLocked);
         AddSceneCommand = new RelayCommand(() => OutlineManager.AddStoryElement(StoryItemType.Scene), SerializationLock.IsLocked);
+        ConvertToSceneCommand = new RelayCommand(OutlineManager.ConvertProblemToScene, SerializationLock.IsLocked);
+        ConvertToProblemCommand = new RelayCommand(OutlineManager.ConvertSceneToProblem, SerializationLock.IsLocked);
 
         // Remove Story Element command (move to trash)
         RemoveStoryElementCommand = new RelayCommand(OutlineManager.RemoveStoryElement, SerializationLock.IsLocked);
