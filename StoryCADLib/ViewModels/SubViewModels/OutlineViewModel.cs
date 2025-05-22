@@ -1198,6 +1198,52 @@ public class OutlineViewModel : ObservableRecipient
         Messenger.Send(new StatusChangedMessage(new($"Node {shellVm.RightTappedNode.Name} not in Narrative View", LogLevel.Info, true)));
 
     }
+
+    /// <summary>
+    /// Convert the currently selected Problem to a Scene.
+    /// </summary>
+    public void ConvertProblemToScene()
+    {
+        if (shellVm.RightTappedNode == null)
+        {
+            Messenger.Send(new StatusChangedMessage(new("Select a node to convert", LogLevel.Info)));
+            return;
+        }
+
+        if (shellVm.RightTappedNode.Type != StoryItemType.Problem)
+        {
+            Messenger.Send(new StatusChangedMessage(new("You can only convert a Problem", LogLevel.Warn)));
+            return;
+        }
+
+        ProblemModel problem = (ProblemModel)StoryModel.StoryElements.StoryElementGuids[shellVm.RightTappedNode.Uuid];
+        SceneModel scene = outlineService.ConvertProblemToScene(StoryModel, problem);
+        shellVm.TreeViewNodeClicked(scene.Node, false);
+        Messenger.Send(new StatusChangedMessage(new("Converted Problem to Scene", LogLevel.Info, true)));
+    }
+
+    /// <summary>
+    /// Convert the currently selected Scene to a Problem.
+    /// </summary>
+    public void ConvertSceneToProblem()
+    {
+        if (shellVm.RightTappedNode == null)
+        {
+            Messenger.Send(new StatusChangedMessage(new("Select a node to convert", LogLevel.Info)));
+            return;
+        }
+
+        if (shellVm.RightTappedNode.Type != StoryItemType.Scene)
+        {
+            Messenger.Send(new StatusChangedMessage(new("You can only convert a Scene", LogLevel.Warn)));
+            return;
+        }
+
+        SceneModel scene = (SceneModel)StoryModel.StoryElements.StoryElementGuids[shellVm.RightTappedNode.Uuid];
+        ProblemModel problem = outlineService.ConvertSceneToProblem(StoryModel, scene);
+        shellVm.TreeViewNodeClicked(problem.Node, false);
+        Messenger.Send(new StatusChangedMessage(new("Converted Scene to Problem", LogLevel.Info, true)));
+    }
     #endregion
 
     #region Constructor(s)

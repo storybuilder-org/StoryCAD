@@ -394,4 +394,128 @@ public class OutlineService
         _log.Log(LogLevel.Info, $"AddCastMember completed for cast member {castMember}.");
         return true;
     }
+
+    public SceneModel ConvertProblemToScene(StoryModel model, ProblemModel problem)
+    {
+        _log.Log(LogLevel.Info, $"ConvertProblemToScene called for {problem.Uuid}.");
+
+        var parent = problem.Node.Parent;
+        int index = parent.Children.IndexOf(problem.Node);
+
+        // remove the old node from the tree
+        parent.Children.RemoveAt(index);
+
+        // create the new scene and insert it in the same slot
+        var scene = new SceneModel(model, parent);     // ctor adds its node to parent
+        parent.Children.Remove(scene.Node);            // detach the auto-added node
+        parent.Children.Insert(index, scene.Node);     // re-insert at original position
+
+        // preserve identifiers
+        scene.Name = problem.Name;
+        scene.Uuid = problem.Uuid;
+        scene.Node.Uuid = problem.Node.Uuid;
+
+        // preserve node state
+        scene.Node.IsExpanded = problem.Node.IsExpanded;
+        scene.Node.IsSelected = problem.Node.IsSelected;
+
+        // move any children
+        foreach (var child in problem.Node.Children.ToList())
+        {
+            scene.Node.Children.Add(child);
+            child.Parent = scene.Node;
+        }
+        model.StoryElements.StoryElementGuids.Remove(problem.Uuid);
+
+
+        scene.Protagonist = problem.Protagonist;
+        scene.ProtagGoal = problem.ProtGoal;
+        scene.Antagonist = problem.Antagonist;
+        scene.AntagGoal = problem.AntagGoal;
+        scene.Opposition = problem.ProtConflict;
+        scene.Outcome = problem.Outcome;
+        scene.Notes = problem.Notes;
+
+        // clean up model references
+        model.ExplorerView.Remove(problem.Node);   // mirrors the reverse conversion
+        // delete every element whose Uuid matches problem.Uuid
+        for (int i = model.StoryElements.Count - 1; i >= 0; i--)
+        {
+            if (model.StoryElements[i].Uuid == problem.Uuid)
+                model.StoryElements.RemoveAt(i);
+
+        }
+        model.StoryElements.Add(scene);            // register the new element
+
+        model.ExplorerView.Remove(problem.Node);
+        scene.Node.Parent.IsExpanded = true; // expand the parent node
+        scene.Name = problem.Name;
+        scene.Node.Name = problem.Name;
+        _log.Log(LogLevel.Info, $"ConvertProblemToScene completed for {scene.Uuid}.");
+        return scene;
+    }
+
+
+    /// <summary>
+    /// Convert a Scene element to a Problem element.
+    /// </summary>
+    public ProblemModel ConvertSceneToProblem(StoryModel model, SceneModel scene)
+    {
+        _log.Log(LogLevel.Info, $"ConvertSceneToProblem called for {scene.Uuid}.");
+
+        var parent = scene.Node.Parent;
+        int index = parent.Children.IndexOf(scene.Node);
+
+        // remove the old scene node from the tree
+        parent.Children.RemoveAt(index);
+
+        // create the replacement problem and put it back in the same slot
+        var problem = new ProblemModel(model, parent);   // ctor appends its node
+        parent.Children.Remove(problem.Node);            // detach
+        parent.Children.Insert(index, problem.Node);     // re-insert at original pos
+
+        // preserve identifiers
+        problem.Uuid = scene.Uuid;
+        problem.Node.Uuid = scene.Node.Uuid;
+
+        // preserve node state
+        problem.Node.IsExpanded = scene.Node.IsExpanded;
+        problem.Node.IsSelected = scene.Node.IsSelected;
+
+        // move children
+        foreach (var child in scene.Node.Children.ToList())
+        {
+            problem.Node.Children.Add(child);
+            child.Parent = problem.Node;
+        }
+        model.StoryElements.StoryElementGuids.Remove(scene.Uuid);
+
+        // copy basic fields
+        problem.Protagonist = scene.Protagonist;
+        problem.ProtGoal = scene.ProtagGoal;
+        problem.Antagonist = scene.Antagonist;
+        problem.AntagGoal = scene.AntagGoal;
+        problem.ProtConflict = scene.Opposition;
+        problem.Outcome = scene.Outcome;
+        problem.Notes = scene.Notes;
+
+        // clean up model references
+        model.StoryElements.Remove(scene);
+        for (int i = model.StoryElements.Count - 1; i >= 0; i--)
+        {
+            if (model.StoryElements[i].Uuid == scene.Uuid)
+                model.StoryElements.RemoveAt(i);
+
+        }
+        model.ExplorerView.Remove(scene.Node);   // mirrors the reverse conversion
+        model.StoryElements.Add(problem);               // register the new element
+
+        model.ExplorerView.Remove(scene.Node);
+        problem.Name = scene.Name;
+        problem.Node.Name = scene.Name;
+        scene.Node.Parent.IsExpanded = true; // expand the parent node
+        _log.Log(LogLevel.Info, $"ConvertSceneToProblem completed for {problem.Uuid}.");
+        return problem;
+    }
+
 }
