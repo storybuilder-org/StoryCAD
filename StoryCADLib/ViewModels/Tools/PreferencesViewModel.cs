@@ -177,13 +177,21 @@ public class PreferencesViewModel : ObservableValidator
     public bool _advancedLogging;
     public bool AdvancedLogging
     {
-	    get => _advancedLogging;
-	    set => SetProperty(ref _advancedLogging, value);
+            get => _advancedLogging;
+            set => SetProperty(ref _advancedLogging, value);
     }
 
-	// Show startup page.
+    // Hide missing key file warning
+    public bool _hideKeyFileWarning;
+    public bool HideKeyFileWarning
+    {
+            get => _hideKeyFileWarning;
+            set => SetProperty(ref _hideKeyFileWarning, value);
+    }
+
+        // Show startup page.
     private bool _ShowStartupPage;
-	public bool ShowStartupPage
+        public bool ShowStartupPage
     {
 	    get => _ShowStartupPage;
 	    set => SetProperty(ref _ShowStartupPage, value);
@@ -220,6 +228,7 @@ public class PreferencesViewModel : ObservableValidator
         PreferredSearchEngine = CurrentModel.PreferredSearchEngine;
         PreferedTheme = CurrentModel.ThemePreference;
         AdvancedLogging = CurrentModel.AdvancedLogging;
+        HideKeyFileWarning = CurrentModel.HideKeyFileWarning;
         ShowStartupPage = CurrentModel.ShowStartupDialog;
     }
 
@@ -248,6 +257,7 @@ public class PreferencesViewModel : ObservableValidator
         CurrentModel.RecordVersionStatus = RecordVersionStatus;
         CurrentModel.PreferredSearchEngine = PreferredSearchEngine;
         CurrentModel.AdvancedLogging = AdvancedLogging;
+        CurrentModel.HideKeyFileWarning = HideKeyFileWarning;
 
         if (CurrentModel.ThemePreference != PreferedTheme)
         {
