@@ -97,14 +97,16 @@ public sealed partial class Shell
 
         if (Preferences.ShowStartupDialog)
         {
-	        ContentDialog cd = new()
-	        {
-		        Title = "Need help getting started?",
-		        Content = new HelpPage(),
-		        PrimaryButtonText = "Close",
-	        };
-	        await Ioc.Default.GetRequiredService<Windowing>().ShowContentDialog(cd);
-		}
+                ContentDialog cd = new()
+                {
+                        Title = "Need help getting started?",
+                        Content = new HelpPage(),
+                        PrimaryButtonText = "Close",
+                };
+                await Ioc.Default.GetRequiredService<Windowing>().ShowContentDialog(cd);
+                }
+
+        AdjustSplitViewPane(ShellPage.ActualWidth);
 
         //If StoryCAD was loaded from a .STBX File then instead of showing the file open menu
         //We will instead load the file instead.
@@ -558,5 +560,18 @@ private DragAndDropDirection GetMoveDirection(Point position, TreeViewItem targe
 	    {
 		    Ioc.Default.GetRequiredService<FeedbackViewModel>().CreateFeedback();
 	    }
+    }
+    private void ShellPage_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        AdjustSplitViewPane(e.NewSize.Width);
+    }
+
+    private void AdjustSplitViewPane(double width)
+    {
+        if (ShellSplitView != null && ShellSplitView.IsPaneOpen)
+        {
+            double pane = Math.Max(200, width * 0.3);
+            ShellSplitView.OpenPaneLength = pane;
+        }
     }
 }

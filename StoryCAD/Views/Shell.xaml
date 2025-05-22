@@ -1,4 +1,4 @@
-﻿<Page NavigationCacheMode="Required"  
+<Page x:Name="ShellPage" NavigationCacheMode="Required"  
     x:Class="StoryCAD.Views.Shell"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -6,7 +6,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:muxc="using:Microsoft.UI.Xaml.Controls" RequestedTheme="{x:Bind Windowing.RequestedTheme, Mode=OneWay}"
     xmlns:viewmodels="using:StoryCAD.ViewModels"
-    mc:Ignorable="d">
+    mc:Ignorable="d" SizeChanged="ShellPage_SizeChanged">
     <Page.Resources>
         <ResourceDictionary>
             <ResourceDictionary.ThemeDictionaries>
@@ -334,9 +334,8 @@
             </CommandBar.PrimaryCommands>
         </CommandBar>
         <!-- SplitView: Navigation Tree and Story Element Pages -->
-        <SplitView Grid.Row="1" IsPaneOpen="{x:Bind ShellVm.IsPaneOpen, Mode=TwoWay}"
+        <SplitView x:Name="ShellSplitView" Grid.Row="1" IsPaneOpen="{x:Bind ShellVm.IsPaneOpen, Mode=TwoWay}"
                    VerticalAlignment="Stretch"
-                   OpenPaneLength="340"
                    DisplayMode="Inline"
                    FontFamily="Segoe UI">
             <!-- Nav tree -->
