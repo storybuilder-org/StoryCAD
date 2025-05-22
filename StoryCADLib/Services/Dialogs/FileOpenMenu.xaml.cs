@@ -33,7 +33,7 @@ public sealed partial class FileOpenMenuPage
             {
                 Text = "Last edited: " + File.GetLastWriteTime(file),
                 FontSize = 10,
-                VerticalAlignment = VerticalAlignment.Center
+                VerticalAlignment = VerticalAlignment.Center,
             });
             FileOpenVM.RecentsUI.Add(item);
         }
