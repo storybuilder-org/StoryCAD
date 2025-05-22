@@ -402,7 +402,7 @@ public class OutlineService
         var parent = problem.Node.Parent;
         int index = parent.Children.IndexOf(problem.Node);
 
-        // --- remove the old node from the tree ---
+        // remove the old node from the tree
         parent.Children.RemoveAt(index);
 
         // create the new scene and insert it in the same slot
@@ -427,12 +427,6 @@ public class OutlineService
         }
         model.StoryElements.StoryElementGuids.Remove(problem.Uuid);
 
-        // copy basic fields
-        if (problem.Name == "New Problem")
-        {
-            scene.Name = "New Scene";
-        }
-        scene.Node.Name = scene.Name;
 
         scene.Protagonist = problem.Protagonist;
         scene.ProtagGoal = problem.ProtGoal;
@@ -454,8 +448,9 @@ public class OutlineService
         model.StoryElements.Add(scene);            // register the new element
 
         model.ExplorerView.Remove(problem.Node);
-        problem.Node.Parent.IsExpanded = true; // expand the parent node
-
+        scene.Node.Parent.IsExpanded = true; // expand the parent node
+        scene.Name = problem.Name;
+        scene.Node.Name = problem.Name;
         _log.Log(LogLevel.Info, $"ConvertProblemToScene completed for {scene.Uuid}.");
         return scene;
     }
@@ -471,7 +466,7 @@ public class OutlineService
         var parent = scene.Node.Parent;
         int index = parent.Children.IndexOf(scene.Node);
 
-        // --- remove the old scene node from the tree ---
+        // remove the old scene node from the tree
         parent.Children.RemoveAt(index);
 
         // create the replacement problem and put it back in the same slot
@@ -496,12 +491,6 @@ public class OutlineService
         model.StoryElements.StoryElementGuids.Remove(scene.Uuid);
 
         // copy basic fields
-        if (scene.Name == "New Scene") // Change name if default to avoid confusion
-        {
-            problem.Name = "New Problem";
-        }
-
-        problem.Node.Name = problem.Name;
         problem.Protagonist = scene.Protagonist;
         problem.ProtGoal = scene.ProtagGoal;
         problem.Antagonist = scene.Antagonist;
@@ -522,6 +511,8 @@ public class OutlineService
         model.StoryElements.Add(problem);               // register the new element
 
         model.ExplorerView.Remove(scene.Node);
+        problem.Name = scene.Name;
+        problem.Node.Name = scene.Name;
         scene.Node.Parent.IsExpanded = true; // expand the parent node
         _log.Log(LogLevel.Info, $"ConvertSceneToProblem completed for {problem.Uuid}.");
         return problem;
