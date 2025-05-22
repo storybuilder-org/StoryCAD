@@ -456,6 +456,7 @@ public class ShellViewModel : ObservableRecipient
                       If you are a user you should report this as you are not supposed to see this message.
                       
                       Things such as logging and elmah.io will not work without the key file.
+                      You can disable this warning in the dev menu.
                       """,
             PrimaryButtonText = "Okay"
         };
