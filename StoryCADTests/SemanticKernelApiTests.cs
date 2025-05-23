@@ -7,7 +7,9 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using StoryCAD.Models;
+using StoryCAD.Models.Tools;
 using StoryCAD.Services.API;
+using StoryCAD.ViewModels.Tools;
 
 namespace StoryCADTests;
 
@@ -387,5 +389,81 @@ public class SemanticKernelApiTests
         // Also verify that calling with Guid.Empty throws an exception.
         Assert.ThrowsException<ArgumentNullException>(() =>
             _api.AddRelationship(Guid.Empty, charElement2.Uuid, "Invalid"));
+    }
+
+    [TestMethod]
+    public async Task AddBeatSheetById_WithValidProblem_AddsBeatsSuccessfully()
+    {
+        // Arrange
+        string outlineName = "Test Outline";
+        string author = "Test Author";
+        var createResult = await _api.CreateEmptyOutline(outlineName, author, "0");
+        Assert.IsTrue(createResult.IsSuccess, "Model creation should succeed.");
+        Guid parentGuid = createResult.Payload.First();
+
+        // Add a Problem element
+        var problemResult = _api.AddElement(StoryItemType.Problem, parentGuid.ToString(), "Test Problem");
+        Assert.IsTrue(problemResult.IsSuccess, "Problem element should be added successfully.");
+        Guid problemGuid = problemResult.Payload;
+
+        // Create a PlotPatternModel
+        var beatSheet = new PlotPatternModel("Test Beat Sheet")
+        {
+            PlotPatternNotes = "Sample beat sheet notes"
+        };
+        beatSheet.PlotPatternScenes.Add(new PlotPatternScene("Act 1") { Notes = "Beginning" });
+        beatSheet.PlotPatternScenes.Add(new PlotPatternScene("Act 2") { Notes = "Middle" });
+
+        // Convert to JSON
+        string beatSheetJson = JsonSerializer.Serialize(beatSheet);
+
+        // Act
+        var result = _api.AddBeatSheetById(problemGuid, beatSheetJson);
+
+        // Assert
+        Assert.IsTrue(result.IsSuccess, "AddBeatSheetById should succeed with a valid problem and beat sheet.");
+        Assert.IsTrue(result.Payload, "The payload should indicate success.");
+
+        // Verify the problem now has the beats
+        StoryElement element = _api.CurrentModel.StoryElements.StoryElementGuids[problemGuid];
+        Assert.IsInstanceOfType(element, typeof(ProblemModel), "The element should be a ProblemModel.");
+        ProblemModel problem = (ProblemModel)element;
+        Assert.AreEqual("Test Beat Sheet", problem.StructureTitle, "The structure title should match the beat sheet name.");
+        Assert.AreEqual(2, problem.StructureBeats.Count, "The problem should have 2 beats from the beat sheet.");
+        Assert.AreEqual("Act 1", problem.StructureBeats[0].Title, "The first beat's title should match.");
+        Assert.AreEqual("Act 2", problem.StructureBeats[1].Title, "The second beat's title should match.");
+    }
+
+    [TestMethod]
+    public async Task AddBeatById_WithValidProblem_AddsBeatSuccessfully()
+    {
+        // Arrange
+        string outlineName = "Test Outline";
+        string author = "Test Author";
+        var createResult = await _api.CreateEmptyOutline(outlineName, author, "0");
+        Assert.IsTrue(createResult.IsSuccess, "Model creation should succeed.");
+        Guid parentGuid = createResult.Payload.First();
+
+        // Add a Problem element
+        var problemResult = _api.AddElement(StoryItemType.Problem, parentGuid.ToString(), "Test Problem");
+        Assert.IsTrue(problemResult.IsSuccess, "Problem element should be added successfully.");
+        Guid problemGuid = problemResult.Payload;
+
+        // Act: Add a single beat to the problem
+        string beatTitle = "Inciting Incident";
+        string beatDescription = "The event that sets the story in motion";
+        var result = _api.AddBeatById(problemGuid, beatTitle, beatDescription);
+
+        // Assert
+        Assert.IsTrue(result.IsSuccess, "AddBeatById should succeed with a valid problem and beat.");
+        Assert.IsTrue(result.Payload, "The payload should indicate success.");
+
+        // Verify the problem now has the beat
+        StoryElement element = _api.CurrentModel.StoryElements.StoryElementGuids[problemGuid];
+        Assert.IsInstanceOfType(element, typeof(ProblemModel), "The element should be a ProblemModel.");
+        ProblemModel problem = (ProblemModel)element;
+        Assert.AreEqual(1, problem.StructureBeats.Count, "The problem should have 1 beat.");
+        Assert.AreEqual(beatTitle, problem.StructureBeats[0].Title, "The beat's title should match.");
+        Assert.AreEqual(beatDescription, problem.StructureBeats[0].Description, "The beat's description should match.");
     }
 }

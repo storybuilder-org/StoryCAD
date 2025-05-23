@@ -1,9 +1,16 @@
-﻿namespace StoryCAD.Models.Tools;
+﻿using System.Text.Json.Serialization;
+
+namespace StoryCAD.Models.Tools;
 
 public class PlotPatternModel
 {
+    [JsonInclude, JsonPropertyName("PlotPatternName")]
     public string PlotPatternName;
+
+    [JsonInclude, JsonPropertyName("PlotPatternNotes")]
     public string PlotPatternNotes;
+
+    [JsonInclude, JsonPropertyName("PlotPatternScenes")]
     public List<PlotPatternScene> PlotPatternScenes;
 
 

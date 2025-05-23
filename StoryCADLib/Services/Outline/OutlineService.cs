@@ -1,5 +1,7 @@
 ﻿using StoryCAD.DAL;
 using StoryCAD.Services.Search;
+using StoryCAD.ViewModels.Tools;
+using StoryCAD.Models.Tools;
 using Windows.Storage;
 using Windows.Storage.Provider;
 
@@ -392,6 +394,154 @@ public class OutlineService
 
         ((SceneModel)source).CastMembers.Add(castMember);
         _log.Log(LogLevel.Info, $"AddCastMember completed for cast member {castMember}.");
+        return true;
+    }
+
+    /// <summary>
+    /// Applies a beatsheet to a problem, replacing any existing beats.
+    /// </summary>
+    /// <param name="problem">Problem the beats will be added to.</param>
+    /// <param name="beatSheet">Beat sheet containing beats.</param>
+    /// <returns>True if beats were successfully added.</returns>
+    public bool AddBeatSheet(ProblemModel problem, PlotPatternModel beatSheet)
+    {
+        _log.Log(LogLevel.Info, "AddBeatSheet called.");
+        if (problem == null)
+        {
+            throw new ArgumentNullException(nameof(problem));
+        }
+
+        if (beatSheet == null)
+        {
+            throw new ArgumentNullException(nameof(beatSheet));
+        }
+
+        problem.StructureTitle = beatSheet.PlotPatternName;
+        problem.StructureDescription = beatSheet.PlotPatternNotes;
+        problem.StructureBeats = new();
+
+        foreach (var scene in beatSheet.PlotPatternScenes)
+        {
+            var beat = new StructureBeatViewModel
+            {
+                Title = scene.SceneTitle,
+                Description = scene.Notes
+            };
+            problem.StructureBeats.Add(beat);
+        }
+
+        _log.Log(LogLevel.Info, "AddBeatSheet completed.");
+        return true;
+    }
+
+    /// <summary>
+    /// Adds a single beat to a problem.
+    /// </summary>
+    /// <param name="problem">Problem being updated.</param>
+    /// <param name="title">Title of the new beat.</param>
+    /// <param name="description">Beat description.</param>
+    /// <returns>True if the beat was added.</returns>
+    public bool AddBeat(ProblemModel problem, string title, string description)
+    {
+        _log.Log(LogLevel.Info, "AddBeat called.");
+        if (problem == null)
+        {
+            throw new ArgumentNullException(nameof(problem));
+        }
+
+        if (string.IsNullOrWhiteSpace(title))
+        {
+            throw new ArgumentNullException(nameof(title));
+        }
+
+        if (problem.StructureBeats == null)
+        {
+            problem.StructureBeats = new();
+        }
+
+        problem.StructureBeats.Add(new StructureBeatViewModel
+        {
+            Title = title,
+            Description = description
+        });
+
+        _log.Log(LogLevel.Info, "AddBeat completed.");
+        return true;
+    }
+
+    /// <summary>
+    /// Assigns a problem or scene element to the given beat.
+    /// </summary>
+    /// <param name="beat">Beat to assign.</param>
+    /// <param name="element">Problem or scene element to link.</param>
+    /// <returns>True if the beat was assigned.</returns>
+    public bool AssignBeat(StructureBeatViewModel beat, StoryElement element)
+    {
+        _log.Log(LogLevel.Info, "AssignBeat called.");
+        if (beat == null)
+        {
+            throw new ArgumentNullException(nameof(beat));
+        }
+
+        if (element == null)
+        {
+            throw new ArgumentNullException(nameof(element));
+        }
+
+        if (element.ElementType != StoryItemType.Problem && element.ElementType != StoryItemType.Scene)
+        {
+            throw new InvalidOperationException("Beats can only be assigned to problems or scenes.");
+        }
+
+        beat.Guid = element.Uuid;
+        _log.Log(LogLevel.Info, $"AssignBeat completed for beat {beat.Title}.");
+        return true;
+    }
+
+    /// <summary>
+    /// Removes a beat from a problem.
+    /// </summary>
+    /// <param name="problem">Problem containing the beat.</param>
+    /// <param name="beat">Beat instance to remove.</param>
+    /// <returns>True if the beat was removed.</returns>
+    public bool RemoveBeat(ProblemModel problem, StructureBeatViewModel beat)
+    {
+        _log.Log(LogLevel.Info, "RemoveBeat called.");
+        if (problem == null)
+        {
+            throw new ArgumentNullException(nameof(problem));
+        }
+
+        if (beat == null)
+        {
+            throw new ArgumentNullException(nameof(beat));
+        }
+
+        if (problem.StructureBeats == null)
+        {
+            return false;
+        }
+
+        bool removed = problem.StructureBeats.Remove(beat);
+        _log.Log(LogLevel.Info, $"RemoveBeat completed for beat {beat.Title}.");
+        return removed;
+    }
+
+    /// <summary>
+    /// Unassigns any element from the given beat.
+    /// </summary>
+    /// <param name="beat">Beat to unassign.</param>
+    /// <returns>True if the beat was unassigned.</returns>
+    public bool UnassignBeat(StructureBeatViewModel beat)
+    {
+        _log.Log(LogLevel.Info, "UnassignBeat called.");
+        if (beat == null)
+        {
+            throw new ArgumentNullException(nameof(beat));
+        }
+
+        beat.Guid = Guid.Empty;
+        _log.Log(LogLevel.Info, $"UnassignBeat completed for beat {beat.Title}.");
         return true;
     }
 }

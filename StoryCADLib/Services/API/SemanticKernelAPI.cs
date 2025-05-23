@@ -1,9 +1,12 @@
-﻿using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Text.Json.Serialization;
+﻿using Microsoft.SemanticKernel;
+using StoryCAD.Models.Tools;
 using StoryCAD.Services.Outline;
-using Microsoft.SemanticKernel;
+using StoryCAD.ViewModels.Tools;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Reflection;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace StoryCAD.Services.API;
 
@@ -454,7 +457,6 @@ public class SemanticKernelApi
 
     }
 
-
     [KernelFunction, Description("""
                                  Adds a relationship between characters.
                                  Both Source and Recipient must be GUIDs of elements that are characters.
@@ -476,5 +478,103 @@ public class SemanticKernelApi
 
         _outlineService.AddRelationship(CurrentModel, source, recipient, desc, mirror);
         return true;
+    }
+
+    [KernelFunction, Description("Applies a beatsheet to a problem (by its GUID), replacing any existing beats.")]
+    public OperationResult<bool> AddBeatSheetById(Guid problemGuid, string beatSheetJson)
+    {
+        try
+        {
+            var story = CurrentModel.StoryElements.StoryElementGuids[problemGuid];
+            if (story is not ProblemModel problem)
+                return OperationResult<bool>.Failure($"Element {problemGuid} is not a ProblemModel.");
+
+            var beatSheet = JsonSerializer.Deserialize<PlotPatternModel>(beatSheetJson);
+            var ok = _outlineService.AddBeatSheet(problem, beatSheet);
+            return ok
+                ? OperationResult<bool>.Success(true)
+                : OperationResult<bool>.Failure("AddBeatSheet returned false.");
+        }
+        catch (Exception ex)
+        {
+            return OperationResult<bool>.Failure($"Error in AddBeatSheetById: {ex.Message}");
+        }
+    }
+
+    [KernelFunction, Description("Adds a single beat to a problem (by its GUID).")]
+    public OperationResult<bool> AddBeatById(Guid problemGuid, string title, string description)
+    {
+        try
+        {
+            var story = CurrentModel.StoryElements.StoryElementGuids[problemGuid];
+            if (story is not ProblemModel problem)
+                return OperationResult<bool>.Failure($"Element {problemGuid} is not a ProblemModel.");
+
+            var ok = _outlineService.AddBeat(problem, title, description);
+            return ok
+                ? OperationResult<bool>.Success(true)
+                : OperationResult<bool>.Failure("AddBeat returned false.");
+        }
+        catch (Exception ex)
+        {
+            return OperationResult<bool>.Failure($"Error in AddBeatById: {ex.Message}");
+        }
+    }
+
+    [KernelFunction, Description("Assigns a scene or problem element (by GUID) to an existing beat.")]
+    public OperationResult<bool> AssignBeatById(string beatJson, Guid elementGuid)
+    {
+        try
+        {
+            var beat = JsonSerializer.Deserialize<StructureBeatViewModel>(beatJson);
+            var element = CurrentModel.StoryElements.StoryElementGuids[elementGuid];
+
+            var ok = _outlineService.AssignBeat(beat, element);
+            return ok
+                ? OperationResult<bool>.Success(true)
+                : OperationResult<bool>.Failure("AssignBeat returned false.");
+        }
+        catch (Exception ex)
+        {
+            return OperationResult<bool>.Failure($"Error in AssignBeatById: {ex.Message}");
+        }
+    }
+
+    [KernelFunction, Description("Removes a beat from a problem (by problem GUID).")]
+    public OperationResult<bool> RemoveBeatById(Guid problemGuid, string beatJson)
+    {
+        try
+        {
+            var story = CurrentModel.StoryElements.StoryElementGuids[problemGuid];
+            if (story is not ProblemModel problem)
+                return OperationResult<bool>.Failure($"Element {problemGuid} is not a ProblemModel.");
+
+            var beat = JsonSerializer.Deserialize<StructureBeatViewModel>(beatJson);
+            var ok = _outlineService.RemoveBeat(problem, beat);
+            return ok
+                ? OperationResult<bool>.Success(true)
+                : OperationResult<bool>.Failure("RemoveBeat returned false.");
+        }
+        catch (Exception ex)
+        {
+            return OperationResult<bool>.Failure($"Error in RemoveBeatById: {ex.Message}");
+        }
+    }
+
+    [KernelFunction, Description("Unassigns any element from the given beat.")]
+    public OperationResult<bool> UnassignBeat(string beatJson)
+    {
+        try
+        {
+            var beat = JsonSerializer.Deserialize<StructureBeatViewModel>(beatJson);
+            var ok = _outlineService.UnassignBeat(beat);
+            return ok
+                ? OperationResult<bool>.Success(true)
+                : OperationResult<bool>.Failure("UnassignBeat returned false.");
+        }
+        catch (Exception ex)
+        {
+            return OperationResult<bool>.Failure($"Error in UnassignBeat: {ex.Message}");
+        }
     }
 }
