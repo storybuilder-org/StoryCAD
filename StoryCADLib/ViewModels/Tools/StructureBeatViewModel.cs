@@ -1,5 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 using CommunityToolkit.Mvvm.ComponentModel;
+using Microsoft.UI.Xaml;
 using StoryCAD.ViewModels.SubViewModels;
 
 namespace StoryCAD.ViewModels.Tools;
@@ -146,4 +147,47 @@ public class StructureBeatViewModel : ObservableObject
         }
     }
     #endregion
+
+    /// <summary>
+    /// Deletes this beat
+    /// </summary>
+    public void DeleteBeat(object sender, RoutedEventArgs e)
+    {
+        //TODO can this be done in the VM?
+        Ioc.Default.GetRequiredService<ProblemViewModel>().StructureBeats.Remove(this);
+    }
+
+    /// <summary>
+    /// Moves this beat up
+    /// </summary>
+    public void MoveUp(object sender, RoutedEventArgs e)
+    {
+        var pos = Ioc.Default.GetRequiredService<ProblemViewModel>().StructureBeats.IndexOf(this);
+
+        if (pos > 0)
+        {
+            Ioc.Default.GetRequiredService<ProblemViewModel>().StructureBeats.Move(pos, pos - 1);
+        }
+        else
+        {
+            Ioc.Default.GetRequiredService<ShellViewModel>().ShowMessage(LogLevel.Warn, "This is already the first beat.", true);
+        }
+    }
+    /// <summary>
+    /// Moves this beat up
+    /// </summary>
+    public void MoveDown(object sender, RoutedEventArgs e)
+    {
+        var pos = Ioc.Default.GetRequiredService<ProblemViewModel>().StructureBeats.IndexOf(this);
+        var max = Ioc.Default.GetRequiredService<ProblemViewModel>().StructureBeats.Count;
+
+        if (pos < max-1)
+        {
+            Ioc.Default.GetRequiredService<ProblemViewModel>().StructureBeats.Move(pos, pos + 1);
+        }
+        else
+        {
+            Ioc.Default.GetRequiredService<ShellViewModel>().ShowMessage(LogLevel.Warn, "This is already the last beat.", true);
+        }
+    }
 }

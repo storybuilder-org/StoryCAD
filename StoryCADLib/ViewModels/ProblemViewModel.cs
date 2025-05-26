@@ -3,6 +3,7 @@ using System.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using Microsoft.UI.Xaml;
 using StoryCAD.Controls;
 using StoryCAD.Models.Tools;
 using StoryCAD.Services.Messages;
@@ -280,11 +281,11 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         set => SetProperty(ref _model, value);
     }
 
-    private ObservableCollection<StructureBeatViewModel> structureBeats;
+    private ObservableCollection<StructureBeatViewModel> _structureBeats;
     public ObservableCollection<StructureBeatViewModel> StructureBeats
     {
-	    get => structureBeats;
-	    set => SetProperty(ref structureBeats, value);
+	    get => _structureBeats;
+	    set => SetProperty(ref _structureBeats, value);
     }
 
 	public RelayCommand ConflictCommand { get; }
@@ -598,4 +599,16 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         PropertyChanged += OnPropertyChanged;
     }
 	#endregion
+
+    /// <summary>
+    /// Creates a new story beat.
+    /// </summary>
+    public void CreateBeat(object sender, RoutedEventArgs e)
+    {
+        StructureBeats.Add(new StructureBeatViewModel
+        {
+            Title = "New Beat",
+            Description = "Describe your beat here"
+        });
+    } 
 }

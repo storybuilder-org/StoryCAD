@@ -4,7 +4,8 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"               
     xmlns:usercontrols="using:StoryCAD.Controls"
     xmlns:viewModels="using:StoryCAD.ViewModels"
-    xmlns:tools="using:StoryCAD.ViewModels.Tools">
+    xmlns:tools="using:StoryCAD.ViewModels.Tools"
+    x:Name="ProblemUI">
 
     <Grid>
         <Grid.RowDefinitions>
@@ -158,7 +159,9 @@
 								<RowDefinition Height="Auto"/>
 								<RowDefinition Height="Auto"/>
 								<RowDefinition Height="*"/>
-							</Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
 
 							<!-- Beat picker and Title/Desc of Overall beat -->
 							<!--Double bind to fix WinUI 3 binding issue -->
@@ -172,57 +175,68 @@
 							           TextWrapping="Wrap"/>
 
 							<!-- Beats viewer -->
-							<ItemsRepeater ItemsSource="{x:Bind ProblemVm.StructureBeats, Mode=TwoWay}"
-							               HorizontalAlignment="Stretch" Grid.Row="4">
-								<ItemsRepeater.ItemTemplate>
-									<DataTemplate x:DataType="tools:StructureBeatViewModel">
-										<Grid DataContext="{x:Bind}" MinWidth="200" AllowDrop="True" DragOver="UIElement_OnDragOver"
-										      Background="Transparent" CanDrag="False" Drop="DroppedItem" Margin="0,5,10,5"
-										      BorderBrush="White" BorderThickness="1" CornerRadius="4"
-										      Padding="5,10,10,10">
-											<Grid.ColumnDefinitions>
-												<ColumnDefinition Width="Auto"/>
-												<ColumnDefinition Width="*"/>
-												<ColumnDefinition Width="Auto"/>
-											</Grid.ColumnDefinitions>
-											<Grid.RowDefinitions>
-												<RowDefinition Height="Auto"/>
-												<RowDefinition Height="Auto"/>
-												<RowDefinition Height="Auto"/>
-												<RowDefinition Height="*"/>
-												<RowDefinition Height="Auto"/>
-											</Grid.RowDefinitions>
+                            <ItemsRepeater ItemsSource="{x:Bind ProblemVm.StructureBeats, Mode=TwoWay}"
+               HorizontalAlignment="Stretch" Grid.Row="4">
+                                <ItemsRepeater.ItemTemplate>
+                                    <DataTemplate x:DataType="tools:StructureBeatViewModel">
+                                        <Grid MinWidth="200" AllowDrop="True" DragOver="UIElement_OnDragOver"
+                                                Background="Transparent" CanDrag="False" Drop="DroppedItem"
+                                                Margin="0,5,5,0" Padding="5"
+                                                BorderBrush="White" BorderThickness="1" CornerRadius="4">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="2*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <!-- Title -->
+                                                <RowDefinition Height="Auto"/>
+                                                <!-- Description -->
+                                                <RowDefinition Height="1"/>
+                                                <!-- Divider -->
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="*"/>
+                                                <!-- Content row -->
+                                            </Grid.RowDefinitions>
 
-											<!-- Outer Grid Content -->
-											<TextBlock Grid.Row="0" Grid.Column="1" Text="{x:Bind Title}"
-											           FontSize="18" TextWrapping="Wrap"/>
-											<TextBlock Grid.Row="1" Grid.Column="1" Text="{x:Bind Description}"
-											           TextWrapping="Wrap"/>
-											<StackPanel Grid.Row="0" Grid.Column="2" Orientation="Horizontal"
-											            DataContext="{x:Bind Mode=TwoWay}">
-											</StackPanel>
+                                            <!-- Header -->
+                                            <TextBlock Grid.Row="0" Grid.Column="1" Text="{x:Bind Title}" FontSize="18" TextWrapping="Wrap"/>
+                                            <TextBlock Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3"  Text="{x:Bind Description}" TextWrapping="Wrap"/>
 
-											<!-- Inner Grid Content Merged -->
-											<Border Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" Margin="0,10"
-											        BorderBrush="White" BorderThickness="1" CornerRadius="4"/>
+                                            <!-- Separator -->
+                                            <Border Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" Background="White"
+                                                    Height="1" Margin="0,8"/>
 
-											<SymbolIcon Grid.Row="3" Grid.Column="0" Symbol="{Binding ElementIcon}"
-											            VerticalAlignment="Bottom"/>
+                                            <!-- Icon + Name -->
+                                            <StackPanel Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="3"  Orientation="Horizontal" VerticalAlignment="Center">
+                                                <SymbolIcon Symbol="{Binding ElementIcon}" />
+                                                <TextBlock Text="{x:Bind ElementName}" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                                            </StackPanel>
 
-											<TextBlock Grid.Row="3" Grid.Column="1" Text="{x:Bind ElementName, Mode=OneWay}"
-											           Margin="10,5,0,0" VerticalAlignment="Top" TextWrapping="Wrap"/>
+                                            <!-- Desc text -->
+                                            <usercontrols:RichEditBoxExtended
+                                                Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2"
+                                                RtfText="{x:Bind ElementDescription, Mode=OneWay}"
+                                                IsReadOnly="True" VerticalAlignment="Top"
+                                                Margin="5" TextWrapping="Wrap" TextAlignment="Center"/>
 
-											<usercontrols:RichEditBoxExtended Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3"
-											                                  RtfText="{x:Bind ElementDescription, Mode=OneWay}" 
-											                                  Margin="5" IsReadOnly="True"
-											                                  VerticalAlignment="Top" TextWrapping="Wrap"
-											                                  TextAlignment="Center"/>
-										</Grid>
+                                            <!-- Actions -->
+                                            <StackPanel Grid.Row="1" Grid.Column="3" Grid.RowSpan="3"
+                                                    Orientation="Vertical" VerticalAlignment="Center"
+                                                    Spacing="4" Margin="5">
+                                                <Button Content="DEL" Click="{x:Bind DeleteBeat}"/>
+                                                <Button Content="UP" Click="{x:Bind MoveUp}"/>
+                                                <Button Content="DWN" Click="{x:Bind MoveDown}"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsRepeater.ItemTemplate>
+                            </ItemsRepeater>
 
-									</DataTemplate>
-								</ItemsRepeater.ItemTemplate>
-							</ItemsRepeater>
-						</Grid>
+                            <Button Grid.Row="5" HorizontalAlignment="Stretch" Content="+ Add New Beat" Click="{x:Bind ProblemVm.CreateBeat}"/>
+                        </Grid>
 					</ScrollViewer>
 
 					<!-- Scene/Problem picker -->
