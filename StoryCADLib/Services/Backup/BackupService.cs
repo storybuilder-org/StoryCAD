@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using System.IO.Compression;
 using Windows.Storage;
+using Microsoft.UI;
 using StoryCAD.ViewModels.SubViewModels;
 using StoryCAD.Services.Locking;
 
@@ -105,6 +106,7 @@ public class BackupService
     /// </summary>
     private void BackupTimer_Elapsed(object source, System.Timers.ElapsedEventArgs e)
     {
+        Ioc.Default.GetRequiredService<ShellViewModel>().BackupStatusColor = Colors.Red;
         if (!timedBackupWorker.IsBusy)
             timedBackupWorker.RunWorkerAsync();
     }
@@ -159,7 +161,7 @@ public class BackupService
                 Log.Log(LogLevel.Info, $"Created Zip file at {zipFilePath}");
                 await tempFolder.DeleteAsync();
             }
-
+            Ioc.Default.GetRequiredService<ShellViewModel>().BackupStatusColor = Colors.Green;
             Log.Log(LogLevel.Info, "Finished backup.");
         }
         catch (Exception ex)
@@ -175,7 +177,9 @@ public class BackupService
                 });
             }
             Log.LogException(LogLevel.Error, ex, $"Error backing up project {ex.Message}");
+            Ioc.Default.GetRequiredService<ShellViewModel>().BackupStatusColor = Colors.Red;
         }
+
         Log.Log(LogLevel.Info, "BackupProject complete");
     }
 

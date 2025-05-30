@@ -30,6 +30,13 @@
                     <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE753;"/>
                 </NavigationViewItem.Icon>
             </NavigationViewItem>
+
+            <!-- Backup button -->
+            <NavigationViewItem Content="Backups" Tag="Backup">
+                <NavigationViewItem.Icon>
+                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE777;"/>
+                </NavigationViewItem.Icon>
+            </NavigationViewItem>
         </NavigationView.MenuItems>
 
         <!-- Open from file -->
@@ -72,6 +79,19 @@
                         <ListBox Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center" 
                              ItemsSource="{x:Bind FileOpenVM.RecentsUI}"
                              SelectedIndex="{x:Bind FileOpenVM.SelectedRecentIndex, Mode=TwoWay}"/>
+                    </Grid>
+
+                    <!-- Backups tab -->
+                    <Grid Visibility="{x:Bind FileOpenVM.BackupTabContentVisibility, Mode=TwoWay}" >
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="40"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="50"/>
+                        </Grid.RowDefinitions>
+
+                        <ListBox Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center" 
+                                 ItemsSource="{x:Bind FileOpenVM.BackupUI}" 
+                                 SelectedIndex="{x:Bind FileOpenVM.SelectedBackupIndex}"/>
                     </Grid>
 
                     <!-- New tab -->

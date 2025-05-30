@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.IO.Compression;
+using System.Reflection;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.UI.Xaml;
 using StoryCAD.DAL;
@@ -26,6 +27,12 @@ public class FileOpenVM : ObservableRecipient
     public Visibility RecentsTabContentVisibility { get; set; }
     public Visibility SamplesTabContentVisibility { get; set; }
     public Visibility NewTabContentVisibility { get; set; }
+    public Visibility BackupTabContentVisibility { get; set; }
+
+    /// <summary>
+    /// Used to track which backup to open if needed.
+    /// </summary>
+    public string[] BackupPaths;
 
     /// <summary>
     /// Internal names of samples
@@ -112,6 +119,16 @@ public class FileOpenVM : ObservableRecipient
         set => SetProperty(ref _selectedTemplateIndex, value);
     }
 
+    private int _selectedBackupIndex;
+    /// <summary>
+    /// Index of currently selected template in the UI
+    /// </summary>
+    public int SelectedBackupIndex
+    {
+        get => _selectedBackupIndex;
+        set => SetProperty(ref _selectedBackupIndex, value);
+    }
+
     private string _outlineName;
     /// <summary>
     /// Project file name
@@ -139,6 +156,13 @@ public class FileOpenVM : ObservableRecipient
         set => SetProperty(ref _recentsUI, value);
     }
 
+    private List<StackPanel> _backupUI = [];
+    public List<StackPanel> BackupUI
+    {
+        get => _backupUI;
+        set => SetProperty(ref _backupUI, value);
+    }
+
     private NavigationViewItem _currentTab;
 
     /// <summary>
@@ -158,6 +182,7 @@ public class FileOpenVM : ObservableRecipient
                     SamplesTabContentVisibility = Visibility.Collapsed;
                     NewTabContentVisibility = Visibility.Collapsed;
                     ShowWarning = false;
+                    BackupTabContentVisibility = Visibility.Collapsed;
                     break;
                 case "Sample":
                     TitleText = "Sample outlines";
@@ -167,6 +192,7 @@ public class FileOpenVM : ObservableRecipient
                     RecentsTabContentVisibility = Visibility.Collapsed;
                     SamplesTabContentVisibility = Visibility.Visible;
                     NewTabContentVisibility = Visibility.Collapsed;
+                    BackupTabContentVisibility = Visibility.Collapsed;
                     break;
                 case "New":
                     TitleText = "New outline";
@@ -175,6 +201,16 @@ public class FileOpenVM : ObservableRecipient
                     RecentsTabContentVisibility = Visibility.Collapsed;
                     SamplesTabContentVisibility = Visibility.Collapsed;
                     NewTabContentVisibility = Visibility.Visible;
+                    BackupTabContentVisibility = Visibility.Collapsed;
+                    break;
+                case "Backup":
+                    TitleText = "Restore a backup";
+                    ConfirmButtonText = "Open backup";
+                    ShowWarning = false;
+                    RecentsTabContentVisibility = Visibility.Collapsed;
+                    SamplesTabContentVisibility = Visibility.Collapsed;
+                    NewTabContentVisibility = Visibility.Collapsed;
+                    BackupTabContentVisibility = Visibility.Visible;
                     break;
                 default:
                     throw new NotImplementedException("Unexpected tag " + value.Tag);
@@ -183,6 +219,7 @@ public class FileOpenVM : ObservableRecipient
             OnPropertyChanged(nameof(RecentsTabContentVisibility));
             OnPropertyChanged(nameof(SamplesTabContentVisibility));
             OnPropertyChanged(nameof(NewTabContentVisibility));
+            OnPropertyChanged(nameof(BackupTabContentVisibility));
             SetProperty(ref _currentTab, value);
         }
     }
@@ -327,6 +364,10 @@ public class FileOpenVM : ObservableRecipient
             case "Sample": //Open Sample
                 filePath = await OpenSample();
                 break;
+            case "Backup":
+                filePath = BackupPaths[SelectedBackupIndex];
+                OpenBackup(filePath);
+                break;
             default:
                 throw new NotImplementedException("Unexpected tag " + CurrentTab.Tag);
         }
@@ -353,4 +394,29 @@ public class FileOpenVM : ObservableRecipient
     }
 
     public void Close() => Ioc.Default.GetRequiredService<Windowing>().CloseContentDialog();
+
+    private async void OpenBackup(string zipPath)
+    {
+
+        // make a timestamped temp folder
+        string tempRoot = Path.GetTempPath();
+        string unpackDir = Path.Combine(
+            tempRoot,
+            Path.GetFileNameWithoutExtension(zipPath)
+            + "_" + DateTime.Now.ToString("yyyyMMdd_HHmmss")
+        );
+        Directory.CreateDirectory(unpackDir);
+
+        // unpack
+        ZipFile.ExtractToDirectory(zipPath, unpackDir);
+
+        // find the one file inside (recursive in case of subfolders)
+        var files = Directory.GetFiles(unpackDir, "*", SearchOption.AllDirectories);
+        if (files.Length != 1)
+            throw new InvalidOperationException($"Expected exactly one file in archive, but found {files.Length}.");
+
+        //Open backup
+        await _outlineVm.OpenFile(files[0]);
+
+    }
 }
