@@ -135,8 +135,11 @@
                         <Button Content="Throw exception" Click="ThrowException" Width="150" Margin="0,5"/>
                         <Button Content="Attach Elmah" Click="{x:Bind Logger.AddElmahTarget}" Width="150" Margin="0,5"/>
 						<Button Content="Refresh Dev Stats" Click="RefreshDevStats" Width="150" Margin="0,5"/>
-						<Button Content="Open Picker UI" Click="OpenPickerUI" Width="150" Margin="0,5"/>
-					</StackPanel>
+                        <Button Content="Open Picker UI" Click="OpenPickerUI" Width="150" Margin="0,5"/>
+                        <CheckBox Content="Hide key file warning"
+                                  IsChecked="{x:Bind PreferencesVm.HideKeyFileWarning, Mode=TwoWay}"
+                                  Width="150" Margin="0,5"/>
+                                        </StackPanel>
                     <ScrollViewer MaxHeight="400">
                         <StackPanel>
                             <TextBlock Name="DevInfo"  Width="300" Height="250" Margin="5,0" />
