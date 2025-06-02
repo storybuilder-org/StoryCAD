@@ -365,9 +365,13 @@ public class FileOpenVM : ObservableRecipient
                 filePath = await OpenSample();
                 break;
             case "Backup":
-                filePath = BackupPaths[SelectedBackupIndex];
-                OpenBackup(filePath);
-                break;
+                if (SelectedBackupIndex != -1)
+                {
+                    filePath = BackupPaths[SelectedBackupIndex];
+                    OpenBackup(filePath);
+                }
+                else { return; }
+                    break;
             default:
                 throw new NotImplementedException("Unexpected tag " + CurrentTab.Tag);
         }

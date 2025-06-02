@@ -39,8 +39,11 @@ public sealed partial class FileOpenMenuPage
             FileOpenVM.RecentsUI.Add(item);
         }
 
-        FileOpenVM.BackupPaths =
-            Directory.GetFiles(Ioc.Default.GetRequiredService<PreferenceService>().Model.BackupDirectory);
+        // Get files from the backup directory in order of creation.
+        FileOpenVM.BackupPaths = Directory
+            .GetFiles(Ioc.Default.GetRequiredService<PreferenceService>().Model.BackupDirectory)
+            .OrderByDescending(File.GetCreationTime)
+            .ToArray();
         foreach (var file in FileOpenVM.BackupPaths)
         {
             //Skip entries that don't exist or are empty
@@ -52,8 +55,8 @@ public sealed partial class FileOpenMenuPage
             item.Children.Add(new TextBlock
             {
                 //Shows as OutlineName At DATETIME
-                Text = Path.GetFileNameWithoutExtension(file.Split( "as of ")[0]) 
-                       + " At " + File.GetLastWriteTime(file), FontSize = 16
+                Text = Path.GetFileNameWithoutExtension(file.Split(" as of ")[0]) 
+                       + " at " + File.GetLastWriteTime(file), FontSize = 16
             });
 
             FileOpenVM.BackupUI.Add(item);
