@@ -205,8 +205,9 @@ public class FileOpenVM : ObservableRecipient
                     break;
                 case "Backup":
                     TitleText = "Restore a backup";
+                    WarningText = "Sample edits will be lost unless you save them elsewhere.";
+                    ShowWarning = true;
                     ConfirmButtonText = "Open backup";
-                    ShowWarning = false;
                     RecentsTabContentVisibility = Visibility.Collapsed;
                     SamplesTabContentVisibility = Visibility.Collapsed;
                     NewTabContentVisibility = Visibility.Collapsed;

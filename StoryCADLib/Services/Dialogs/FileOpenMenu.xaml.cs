@@ -27,7 +27,7 @@ public sealed partial class FileOpenMenuPage
             if (string.IsNullOrWhiteSpace(file) || !File.Exists(file)) continue;
 
             //Create
-            StackPanel item = new() { Width = 300 };
+            StackPanel item = new() { Width = 400 };
             ToolTipService.SetToolTip(item, file);
             item.Children.Add(new TextBlock { Text = Path.GetFileNameWithoutExtension(file), FontSize = 20 });
             item.Children.Add(new TextBlock
@@ -42,7 +42,7 @@ public sealed partial class FileOpenMenuPage
         // Get files from the backup directory in order of creation.
         FileOpenVM.BackupPaths = Directory
             .GetFiles(Ioc.Default.GetRequiredService<PreferenceService>().Model.BackupDirectory)
-            .OrderByDescending(File.GetCreationTime)
+            .OrderByDescending(File.GetLastWriteTime)
             .ToArray();
         foreach (var file in FileOpenVM.BackupPaths)
         {
@@ -50,7 +50,7 @@ public sealed partial class FileOpenMenuPage
             if (string.IsNullOrWhiteSpace(file) || !File.Exists(file)) continue;
 
             //Create
-            StackPanel item = new() { Width = 300 };
+            StackPanel item = new() { Width = 400 };
             ToolTipService.SetToolTip(item, file);
             item.Children.Add(new TextBlock
             {

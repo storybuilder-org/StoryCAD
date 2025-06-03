@@ -176,7 +176,7 @@ public class BackupService
         if (Filename is null)
         {
             // safe timestamp avoids ':' and other invalid chars
-            Filename = $"{originalFileName} at {DateTime.Now:yyyyMMdd_HHmm}";
+            Filename = $"{originalFileName} as of {DateTime.Now:yyyyMMdd_HHmm}";
 
             // scrub anything Windows forbids in file names
             foreach (var bad in Path.GetInvalidFileNameChars())
@@ -202,6 +202,7 @@ public class BackupService
             StorageFolder rootFolder = await StorageFolder.GetFolderFromPathAsync(
                 Ioc.Default.GetRequiredService<AppState>().RootDirectory);
 
+            //Save file.
             using (var serializationLock = new SerializationLock(autoSaveService, this, Log))
             {
                 StorageFolder tempFolder = await rootFolder.CreateFolderAsync(
@@ -216,6 +217,8 @@ public class BackupService
                 Log.Log(LogLevel.Info, $"Created Zip file at {zipFilePath}");
                 await tempFolder.DeleteAsync();
             }
+            
+            //update indicator.
             Ioc.Default.GetRequiredService<Windowing>().GlobalDispatcher.TryEnqueue(() =>
                 Ioc.Default.GetRequiredService<ShellViewModel>().BackupStatusColor = Colors.Green
             );
