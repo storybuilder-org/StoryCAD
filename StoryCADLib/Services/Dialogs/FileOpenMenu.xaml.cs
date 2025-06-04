@@ -13,6 +13,7 @@ public sealed partial class FileOpenMenuPage
         InitializeComponent();
         FileOpenVM.RecentsTabContentVisibility = Visibility.Collapsed;
         FileOpenVM.SamplesTabContentVisibility = Visibility.Collapsed;
+        FileOpenVM.BackupTabContentVisibility = Visibility.Collapsed;
         FileOpenVM.NewTabContentVisibility = Visibility.Collapsed;
         FileOpenVM.OutlineName = "";
         FileOpenVM.CurrentTab = new NavigationViewItem() { Tag = "Recent" };
@@ -26,7 +27,7 @@ public sealed partial class FileOpenMenuPage
             if (string.IsNullOrWhiteSpace(file) || !File.Exists(file)) continue;
 
             //Create
-            StackPanel item = new() { Width = 300 };
+            StackPanel item = new() { Width = 400 };
             ToolTipService.SetToolTip(item, file);
             item.Children.Add(new TextBlock { Text = Path.GetFileNameWithoutExtension(file), FontSize = 20 });
             item.Children.Add(new TextBlock
@@ -36,6 +37,29 @@ public sealed partial class FileOpenMenuPage
                 VerticalAlignment = VerticalAlignment.Center,
             });
             FileOpenVM.RecentsUI.Add(item);
+        }
+
+        // Get files from the backup directory in order of creation.
+        FileOpenVM.BackupPaths = Directory
+            .GetFiles(Ioc.Default.GetRequiredService<PreferenceService>().Model.BackupDirectory)
+            .OrderByDescending(File.GetLastWriteTime)
+            .ToArray();
+        foreach (var file in FileOpenVM.BackupPaths)
+        {
+            //Skip entries that don't exist or are empty
+            if (string.IsNullOrWhiteSpace(file) || !File.Exists(file)) continue;
+
+            //Create
+            StackPanel item = new() { Width = 400 };
+            ToolTipService.SetToolTip(item, file);
+            item.Children.Add(new TextBlock
+            {
+                //Shows as OutlineName At DATETIME
+                Text = Path.GetFileNameWithoutExtension(file.Split(" as of ")[0]) 
+                       + " at " + File.GetLastWriteTime(file), FontSize = 16
+            });
+
+            FileOpenVM.BackupUI.Add(item);
         }
     }
 }

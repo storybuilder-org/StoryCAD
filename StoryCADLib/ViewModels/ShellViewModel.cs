@@ -23,7 +23,6 @@ using System.Reflection;
 using Windows.Storage;
 using StoryCAD.Services;
 using WinUIEx;
-using Application = Microsoft.UI.Xaml.Application;
 using StoryCAD.Collaborator.ViewModels;
 using StoryCAD.Services.Outline;
 using StoryCAD.ViewModels.SubViewModels;
@@ -340,6 +339,13 @@ public class ShellViewModel : ObservableRecipient
         get => _changeStatusColor;
         set => SetProperty(ref _changeStatusColor, value);
     }
+
+    private Windows.UI.Color _backupStatusColor;
+    public Windows.UI.Color BackupStatusColor
+    {
+        get => _backupStatusColor;
+        set => SetProperty(ref _backupStatusColor, value);
+    }
     #endregion
 
     #region Static members  
@@ -370,8 +376,15 @@ public class ShellViewModel : ObservableRecipient
 	/// </summary>
 	public async Task CreateBackupNow()
 	{
-		//Show dialog
-		var result = await Window.ShowContentDialog(new ContentDialog()
+        if (DataSource == null || DataSource.Count == 0)
+        {
+            Messenger.Send(new StatusChangedMessage(new("You need to load a story first!", LogLevel.Warn)));
+            Logger.Log(LogLevel.Info, "Failed to open backup menu as DataSource is null or empty. (Is a story loaded?)");
+            return;
+        }
+
+        //Show dialog
+        var result = await Window.ShowContentDialog(new ContentDialog()
 		{
 			Title = "Create backup now",
 			PrimaryButtonText = "Create Backup",
@@ -1461,6 +1474,7 @@ public class ShellViewModel : ObservableRecipient
             _statusTimer = new DispatcherTimer();
             _statusTimer.Tick += statusTimer_Tick;
             ChangeStatusColor = Colors.Green;
+            BackupStatusColor = Colors.Green;
         }
 
         Messenger.Send(new StatusChangedMessage(new("Ready", LogLevel.Info)));
