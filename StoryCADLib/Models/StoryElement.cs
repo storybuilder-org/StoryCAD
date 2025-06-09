@@ -67,6 +67,17 @@ public class StoryElement : ObservableObject
     #region Public Methods
 
     /// <summary>
+    /// Updates this elements GUID field.
+    /// (Call this immediately after creating an element)
+    /// </summary>
+    internal void UpdateGuid(StoryModel model, Guid newGuid)
+    {
+        model.StoryElements.StoryElementGuids.Remove(Uuid);
+        Uuid = newGuid;
+        model.StoryElements.StoryElementGuids.Add(newGuid, this);
+    }
+
+    /// <summary>
     /// Retrieve a StoryElement from its Guid.
     ///
     /// Guids are used as keys to StoryElements, stored in
