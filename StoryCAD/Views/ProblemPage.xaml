@@ -170,7 +170,8 @@
 									  PlaceholderText="{x:Bind ProblemVm.StructureModelTitle, Mode=OneWay}"
 									  SelectedValue="{x:Bind ProblemVm.StructureModelTitle, Mode=OneWay}"
 							          Text="{x:Bind ProblemVm.StructureModelTitle, Mode=OneWay}" Grid.Row="0"/>
-							<TextBlock Text="Structure Description:" Margin="0,10,0,0" Grid.Row="2"/>
+							<TextBox Text="Structure Description:" Margin="0,10,0,0" Grid.Row="2" 
+                                     IsReadOnly="{x:Bind ProblemVm.IsBeatSheetReadOnly}"/>
 							<usercontrols:RichEditBoxExtended RtfText="{x:Bind ProblemVm.StructureDescription, Mode=TwoWay}" Grid.Row="3" 
 							           TextWrapping="Wrap"/>
 
@@ -214,10 +215,9 @@
                                                 </StackPanel>
 
                                                 <!-- ACTION BUTTONS -->
-                                                <StackPanel Grid.Column="1"
-                                                    Orientation="Vertical"
-                                                    VerticalAlignment="Center"
-                                                    Spacing="4" Margin="8,0,0,0">
+                                                <StackPanel Grid.Column="1" Orientation="Vertical" VerticalAlignment="Center"
+                                                    Spacing="4" Margin="8,0,0,0" 
+                                                    Visibility="{x:Bind ProblemViewModel.BeatsheetEditButtonsVisibility}">
                                                     <Button Click="{x:Bind DeleteBeat}">
                                                         <SymbolIcon Symbol="Delete"/>
                                                     </Button>
@@ -235,7 +235,10 @@
                                 </ItemsRepeater.ItemTemplate>
                             </ItemsRepeater>
 
-                            <Button Grid.Row="5" HorizontalAlignment="Stretch" Content="+ Add New Beat" Click="{x:Bind ProblemVm.CreateBeat}"/>
+                            <!-- Add custom beats for custom beat sheets.-->
+                            <Button Grid.Row="5" HorizontalAlignment="Stretch" Content="+ Add New Beat"
+                                    Click="{x:Bind ProblemVm.CreateBeat}" 
+                                    Visibility="{x:Bind ProblemVm.BeatsheetEditButtonsVisibility}"/>
                         </Grid>
 					</ScrollViewer>
 

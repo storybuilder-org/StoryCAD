@@ -11,13 +11,14 @@ namespace StoryCAD.ViewModels.Tools;
 public class StructureBeatViewModel : ObservableObject
 {
 	public Windowing Windowing;
+	public ProblemViewModel ProblemViewModel;
 
 	#region Constructor
 	public StructureBeatViewModel()
 	{
 		Windowing = Ioc.Default.GetRequiredService<Windowing>();
-		ProblemViewModel ProblemVM = Ioc.Default.GetRequiredService<ProblemViewModel>();
-		PropertyChanged += ProblemVM.OnPropertyChanged;
+		ProblemViewModel = Ioc.Default.GetRequiredService<ProblemViewModel>();
+		PropertyChanged += ProblemViewModel.OnPropertyChanged;
 	}
 	#endregion
 

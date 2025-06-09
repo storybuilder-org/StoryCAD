@@ -320,11 +320,31 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         set => SetProperty(ref _characters, value);
     }
 
-	#endregion
+    private bool _isBeatSheetReadOnly;
+    /// <summary>
+    /// Controls if the beat sheet is read-only or not.
+    /// </summary>
+    public bool IsBeatSheetReadOnly
+    {
+        get => _isBeatSheetReadOnly;
+        set => SetProperty(ref _isBeatSheetReadOnly, value);
+    }
 
-	#region Methods
+    private Visibility _beatsheetEditButtonsVisibility;
 
-	public void Activate(object parameter)
+    /// <summary>
+    /// Controls if the beat sheet edit buttons are visible or not.
+    /// </summary>
+    public Visibility BeatsheetEditButtonsVisibility
+    {
+        get => _beatsheetEditButtonsVisibility;
+        set => SetProperty(ref _beatsheetEditButtonsVisibility, value);
+    }
+    #endregion
+
+    #region Methods
+
+    public void Activate(object parameter)
     {
         Model = (ProblemModel)parameter;
         LoadModel();
@@ -398,6 +418,18 @@ public class ProblemViewModel : ObservableRecipient, INavigable
 		//Ensure correct set of Elements are loaded for Structure Lists
 		Problems = story_model.StoryElements.Problems;
         Scenes = story_model.StoryElements.Scenes;
+
+        //Enable/disable edit buttons based on selection
+        if (StructureModelTitle == "Custom Beatsheet")
+        {
+            BeatsheetEditButtonsVisibility = Visibility.Visible;
+            IsBeatSheetReadOnly = false;
+        }
+        else
+        {
+            BeatsheetEditButtonsVisibility = Visibility.Collapsed;
+            IsBeatSheetReadOnly = true;
+        }
 
         _changeable = true;
 	}
@@ -500,29 +532,40 @@ public class ProblemViewModel : ObservableRecipient, INavigable
 	    }
 	    else { Result = ContentDialogResult.Primary; }
 
+        //Enable/disable edit buttons based on selection
+        if (value == "Custom Beatsheet")
+        {
+            BeatsheetEditButtonsVisibility = Visibility.Visible;
+            IsBeatSheetReadOnly = false;
+        }
+        else
+        {
+            BeatsheetEditButtonsVisibility = Visibility.Collapsed;
+            IsBeatSheetReadOnly = true;
+        }
 
-	    if (Result == ContentDialogResult.Primary && !string.IsNullOrEmpty(value))
-	    {
-		    //Update value 
-		    SetProperty(ref _structureModelTitle, value);
+        if (Result == ContentDialogResult.Primary && !string.IsNullOrEmpty(value))
+        {
+            //Update value 
+            SetProperty(ref _structureModelTitle, value);
 
-		    //Resolve master plot model if not empty
-		    PlotPatternModel BeatSheet = Ioc.Default.GetRequiredService<BeatSheetsViewModel>().BeatSheets[value];
+            //Resolve master plot model if not empty
+            PlotPatternModel BeatSheet = Ioc.Default.GetRequiredService<BeatSheetsViewModel>().BeatSheets[value];
 
-			StructureDescription = BeatSheet.PlotPatternNotes;
+            StructureDescription = BeatSheet.PlotPatternNotes;
 
-		    //Set model
-		    StructureBeats.Clear();
+            //Set model
+            StructureBeats.Clear();
 
-		    foreach (var item in BeatSheet.PlotPatternScenes)
-		    {
-			    StructureBeats.Add(new StructureBeatViewModel
-			    {
-				    Title = item.SceneTitle,
-				    Description = item.Notes,
-			    });
-		    }
-	    }
+            foreach (var item in BeatSheet.PlotPatternScenes)
+            {
+                StructureBeats.Add(new StructureBeatViewModel
+                {
+                    Title = item.SceneTitle,
+                    Description = item.Notes,
+                });
+            }
+        }
 	}
 	#endregion
 
