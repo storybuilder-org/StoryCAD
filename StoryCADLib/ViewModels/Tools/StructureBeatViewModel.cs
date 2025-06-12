@@ -123,7 +123,7 @@ public class StructureBeatViewModel : ObservableObject
                 }
             }
 
-            return "Select an element by clicking show Problems/Scenes and dragging it here";
+            return "Assign an element to this beat by clicking the edit button.";
         }
     }
 

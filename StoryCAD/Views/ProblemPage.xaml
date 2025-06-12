@@ -170,7 +170,7 @@
 									  PlaceholderText="{x:Bind ProblemVm.StructureModelTitle, Mode=OneWay}"
 									  SelectedValue="{x:Bind ProblemVm.StructureModelTitle, Mode=OneWay}"
 							          Text="{x:Bind ProblemVm.StructureModelTitle, Mode=OneWay}" Grid.Row="0"/>
-                            <TextBlock Text="Structure Description:" Margin="0,10,0,0" Grid.Row="2"/>
+                            <TextBlock Text="Structure Description:" Margin="0,10,0,0" Grid.Row="2" />
                             <usercontrols:RichEditBoxExtended RtfText="{x:Bind ProblemVm.StructureDescription, Mode=TwoWay}" Grid.Row="3" 
 							           TextWrapping="Wrap" IsReadOnly="{x:Bind ProblemVm.IsBeatSheetReadOnly}"/>
 
@@ -190,18 +190,18 @@
                                                     <ColumnDefinition Width="Auto"/>
                                                 </Grid.ColumnDefinitions>
 
-                                                <StackPanel Grid.Column="0" Orientation="Vertical" Spacing="6"
-                                                            AllowDrop="True" DragOver="UIElement_OnDragOver"
-                                                            CanDrag="False" Drop="DroppedItem">
+                                                <StackPanel Grid.Column="0" Orientation="Vertical" Spacing="6">
 
                                                     <!-- Icon + Title -->
                                                     <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
-                                                        <SymbolIcon Symbol="{x:Bind ElementIcon}"/>
-                                                        <TextBlock Text="{x:Bind Title}" FontSize="18" TextWrapping="Wrap"/>
+                                                        <SymbolIcon Symbol="{x:Bind ElementIcon, Mode=OneWay}"/>
+                                                        <TextBox Text="{x:Bind Title}" FontSize="18" TextWrapping="Wrap" MinWidth="500"
+                                                                  IsReadOnly="{x:Bind ProblemViewModel.IsBeatSheetReadOnly}"/>
                                                     </StackPanel>
 
                                                     <!-- Beat description (now just under title/icon) -->
-                                                    <TextBlock Text="{x:Bind Description}" TextWrapping="Wrap"/>
+                                                    <TextBox Text="{x:Bind Description}" TextWrapping="Wrap" 
+                                                             IsReadOnly="{x:Bind ProblemViewModel.IsBeatSheetReadOnly}"/>
 
                                                     <!-- Divider -->
                                                     <Border Background="{ThemeResource SystemControlForegroundBaseLowBrush}" Height="1"/>
@@ -213,6 +213,8 @@
                                                             <ColumnDefinition Width="auto"/>
                                                         </Grid.ColumnDefinitions>
                                                         <TextBlock Grid.Column="0" Text="{x:Bind ElementName, Mode=OneWay}" TextWrapping="Wrap" TextAlignment="Left"/>
+                                                        
+                                                        <!-- Bind button.-->
                                                         <Button Grid.Column="1" HorizontalAlignment="Right">
                                                             <Button.Content>
                                                                 <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE71B;"/>
@@ -220,21 +222,23 @@
                                                             <Button.Flyout>
                                                                 <Flyout>
                                                                     <StackPanel>
-                                                                        <Button Content="Unbind element for this beat" HorizontalAlignment="Center"/>
+                                                                        <Button Content="Unbind element for this beat" HorizontalAlignment="Center"
+                                                                                Click="{x:Bind ProblemViewModel.UnbindElement}" DataContext="{x:Bind}"/>
                                                                         <!-- Shows scenes and problems in a list -->
                                                                         <ListView ItemsSource="{x:Bind ProblemViewModel.Scenes, Mode=TwoWay}" Width="350" CanDrag="True"
-									                                        Header="Scenes" DisplayMemberPath="Name" CanDragItems="True"
-									                                        AllowDrop="True" DragItemsStarting="ListViewBase_OnDragItemsStarting"/>
+									                                              Header="Scenes" DisplayMemberPath="Name" 
+                                                                                  SelectionChanged="{x:Bind ProblemViewModel.AssignBeat}" DataContext="{x:Bind}"/>
                                                                         <ListView ItemsSource="{x:Bind ProblemViewModel.Problems, Mode=TwoWay}" Width="350" CanDrag="True"
-									                                        Header="Problems" DisplayMemberPath="Name" CanDragItems="True"
-									                                        AllowDrop="True" DragItemsStarting="ListViewBase_OnDragItemsStarting"/>
+									                                              Header="Problems" DisplayMemberPath="Name" 
+                                                                                  SelectionChanged="{x:Bind ProblemViewModel.AssignBeat}" DataContext="{x:Bind}"/>
                                                                     </StackPanel>
                                                                 </Flyout>
                                                             </Button.Flyout>
                                                         </Button>
                                                     </Grid>
 
-                                                    <usercontrols:RichEditBoxExtended RtfText="{x:Bind ElementDescription, Mode=OneWay}"
+                                                    <usercontrols:RichEditBoxExtended 
+                                                        RtfText="{x:Bind ElementDescription, Mode=OneWay}"
                                                         IsReadOnly="True" TextWrapping="Wrap" TextAlignment="Left"/>
                                                 </StackPanel>
 
@@ -262,7 +266,7 @@
                             <!-- Add custom beats for custom beat sheets.e-->
                             <Button Grid.Row="5" HorizontalAlignment="Stretch" Content="+ Add New Beat"
                                     Click="{x:Bind ProblemVm.CreateBeat}" 
-                                    Visibility="{x:Bind ProblemVm.BeatsheetEditButtonsVisibility}"/>
+                                    Visibility="{x:Bind ProblemVm.BeatsheetEditButtonsVisibility, Mode=OneWay}"/>
                         </Grid>
                     </ScrollViewer>
                 </Grid>

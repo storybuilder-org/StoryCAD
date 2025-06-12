@@ -518,4 +518,82 @@ public class OutlineService
         return problem;
     }
 
+    public void AssignElementToBeat(StoryModel Model, ProblemModel Parent, int Index, Guid DesiredBind)
+    {
+        //Check params
+        if (Model == null)
+        {
+            throw new ArgumentNullException(nameof(Model));
+        }
+        if (Parent == null)
+        {
+            throw new ArgumentNullException(nameof(Parent));
+        }
+        if (DesiredBind == Guid.Empty)
+        {
+            throw new ArgumentNullException(nameof(DesiredBind));
+        }
+
+        //Get desired bind
+        StoryElement? DesiredBindElement;
+        Model.StoryElements.StoryElementGuids.TryGetValue(DesiredBind, out DesiredBindElement);
+        Parent.StructureBeats[Index].Guid = DesiredBind;
+
+        //Check element really exists.
+        if (DesiredBindElement == null)
+        {
+            throw new NullReferenceException($"GUID: {DesiredBind} does not exist within StoryModel");
+        }
+
+        //Check we are binding the correct element
+        if (DesiredBindElement.ElementType != StoryItemType.Problem &&
+            DesiredBindElement.ElementType != StoryItemType.Scene)
+        {
+            throw new InvalidOperationException("You can only bind Scene or Problem Elements.");
+        }
+
+        //Check Index is valid
+        if (Index >= 0 && Parent.StructureBeats.Count-1 >= Index)
+        {
+            //Bind
+            Parent.StructureBeats[Index].Guid = DesiredBind;
+        }
+        else
+        {
+            // out of bounds
+            throw new InvalidOperationException("Index is out of bounds.");
+        }
+    }
+
+    /// <summary>
+    /// Removes bound element.
+    /// </summary>
+    /// <param name="Model">Story model</param>
+    /// <param name="Parent">Problem Element with beatsheet</param>
+    /// <param name="Index">Index you want to unbind from</param>
+    public void UnasignBeat(StoryModel Model, ProblemModel Parent, int Index)
+    {
+        //Check params
+        if (Model == null)
+        {
+            throw new ArgumentNullException(nameof(Model));
+        }
+        if (Parent == null)
+        {
+            throw new ArgumentNullException(nameof(Parent));
+        }
+
+
+        //Check Index is valid
+        if (Index >= 0 && Parent.StructureBeats.Count - 1 >= Index)
+        {
+            //unbind
+            Parent.StructureBeats[Index].Guid = Guid.Empty;
+        }
+        else
+        {
+            // out of bounds
+            throw new InvalidOperationException("Index is out of bounds.");
+        }
+    }
 }
