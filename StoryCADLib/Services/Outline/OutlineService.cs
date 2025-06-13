@@ -1,5 +1,9 @@
-﻿using StoryCAD.DAL;
+﻿using Octokit;
+using StoryCAD.DAL;
 using StoryCAD.Services.Search;
+using StoryCAD.ViewModels.Tools;
+using System.Collections.ObjectModel;
+using System.Security.Cryptography;
 using Windows.Storage;
 using Windows.Storage.Provider;
 
@@ -517,7 +521,13 @@ public class OutlineService
         _log.Log(LogLevel.Info, $"ConvertSceneToProblem completed for {problem.Uuid}.");
         return problem;
     }
-
+    /// <summary>
+    /// Assigns an element to a beat in a ProblemModel.
+    /// </summary>
+    /// <param name="Model">StoryModel</param>
+    /// <param name="Parent">Problem Element that contains the beatsheet you wish to bind to</param>
+    /// <param name="Index">Index of beat you are binding to</param>
+    /// <param name="DesiredBind">Guid of Element you want to bind to, MUST be scene or problem element</param>
     public void AssignElementToBeat(StoryModel Model, ProblemModel Parent, int Index, Guid DesiredBind)
     {
         //Check params
@@ -596,4 +606,99 @@ public class OutlineService
             throw new InvalidOperationException("Index is out of bounds.");
         }
     }
+
+    /// <summary>
+    /// Add beat to a ProblemModel.
+    /// </summary>
+    /// <param name="Parent"></param>
+    /// <param name="Title"></param>
+    /// <param name="Description"></param>
+    /// <exception cref="ArgumentNullException"></exception>
+    public void CreateBeat(ProblemModel Parent, string Title, string Description)
+    {
+        if (Parent == null)
+        {
+            throw new ArgumentNullException(nameof(Parent));
+        }
+
+        //Create and add beat.
+        StructureBeatViewModel NewBeat = new()
+        {
+            Title = Title,
+            Description = Description
+        };
+        Parent.StructureBeats.Add(NewBeat);
+    }
+
+    /// <summary>
+    /// Deletes a beat and unbinds elements if nesscessary.
+    /// </summary>
+    /// <param name="Model"></param>
+    /// <param name="Index"></param>
+    public void DeleteBeat(StoryModel Model, ProblemModel Parent, int Index)
+    {
+        if (Parent == null)
+        {
+            throw new ArgumentNullException(nameof(Parent));
+        }
+
+        if (Parent.StructureBeats.Count >= Index || Index < 0)
+        {
+            // No bound beat
+            if (Parent.StructureBeats[Index].Guid == Guid.Empty)
+            {
+                Parent.StructureBeats.RemoveAt(Index);
+                return;
+            }
+
+            StoryElement? BoundElement;
+            Model.StoryElements.StoryElementGuids.TryGetValue(Parent.StructureBeats[Index].Guid, out BoundElement);
+            
+            //An element is bound that doesn't exist
+            if (BoundElement == null)
+            {
+                Parent.StructureBeats.RemoveAt(Index);
+                return;
+            }
+            
+            //For Problem elements we MUST unassign first or StoryCAD will have issues
+            //when trying to assign that element to a beat in the future.
+            //Scenes are not limited and can be assigned to multiple
+            if (BoundElement.ElementType == StoryItemType.Problem)
+            {
+                UnasignBeat(Model, Parent, Index);
+            }
+            Parent.StructureBeats.RemoveAt(Index);
+        }
+        else
+        {
+            throw new ArgumentOutOfRangeException("Index is invalid");
+        }
+    }
+
+    /// <summary>
+    /// Sets basic infomation about the beat sheet/creates a new one
+    /// If one exists, it will be overwritten and any beats in it will be unbound.
+    /// </summary>
+    /// <param name="Description">Description of you beatsheet, i.e. what is its structure?</param>
+    /// <param name="Model">Problem element you are trying to add the beatsheet to</param>
+    /// <param name="Title">This is the title of your beat sheet,
+    /// if it is not Custom Beat Sheet it will not be editable within the StoryCAD app.
+    /// </param>
+    /// <param name="Beats">Beats that this sheet will contain, can be added later</param>
+    public void SetBeatSheet(StoryModel Model, ProblemModel Parent, string Description, 
+        string Title = "Custom Beat Sheet", ObservableCollection<StructureBeatViewModel> Beats = null)
+    {
+        Parent.StructureTitle = Title;
+        Parent.StructureDescription = Description;
+
+        //Unbind/Delete Beats first.
+        for (int i = Parent.StructureBeats.Count(); i >= 0; i--) {
+            DeleteBeat(Model, Parent, i);
+        }
+
+        //Create/Add beats.
+        Parent.StructureBeats = Beats ?? new();
+    }
+    
 }

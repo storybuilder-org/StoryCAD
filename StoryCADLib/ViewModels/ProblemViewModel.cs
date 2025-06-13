@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Security.Cryptography;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
@@ -8,6 +9,7 @@ using StoryCAD.Controls;
 using StoryCAD.Models.Tools;
 using StoryCAD.Services.Messages;
 using StoryCAD.Services.Navigation;
+using StoryCAD.Services.Outline;
 using StoryCAD.ViewModels.SubViewModels;
 using StoryCAD.ViewModels.Tools;
 
@@ -529,7 +531,13 @@ public class ProblemViewModel : ObservableRecipient, INavigable
 				    PrimaryButtonText = "Confirm",
 				    SecondaryButtonText = "Cancel"
 			    });
-	    }
+
+            //Delete beats (This handles binds)
+            for (int i = StructureBeats.Count - 1; i >= 0; i--)
+            {
+                StructureBeats[i].DeleteBeat(null, null);
+            }
+        }
 	    else { Result = ContentDialogResult.Primary; }
 
         //Enable/disable edit buttons based on selection
@@ -680,7 +688,8 @@ public class ProblemViewModel : ObservableRecipient, INavigable
                 //Enforce rule that problems can only be bound to one structure beat model
                 if (!string.IsNullOrEmpty(problem.BoundStructure)) //Check element is actually bound elsewhere
                 {
-                    ProblemModel ContainingStructure = (ProblemModel)OutlineVM.StoryModel.StoryElements.First(g => g.Uuid == Guid.Parse(problem.BoundStructure));
+                    ProblemModel ContainingStructure = (ProblemModel)OutlineVM.StoryModel.StoryElements
+                        .First(g => g.Uuid == Guid.Parse(problem.BoundStructure));
                     //Show dialog asking to rebind.
                     var res = await Ioc.Default.GetRequiredService<Windowing>().ShowContentDialog(new()
                     {
@@ -693,21 +702,7 @@ public class ProblemViewModel : ObservableRecipient, INavigable
 
                     //Do nothing if user clicks don't rebind.
                     if (res != ContentDialogResult.Primary) { return; }
-
-                    if (problem.BoundStructure.Equals(Uuid.ToString())) //Rebind from VM
-                    {
-                        StructureBeatViewModel oldStructure = ContainingStructure.StructureBeats.First(g => g.Guid == problem.Uuid);
-                        int index = StructureBeats.IndexOf(oldStructure);
-                        StructureBeats[index].Guid = Guid.Empty;
-                    }
-                    else //Remove from old structure and update story elements.
-                    {
-                        StructureBeatViewModel oldStructure = ContainingStructure.StructureBeats.First(g => g.Guid == problem.Uuid);
-                        int index = ContainingStructure.StructureBeats.IndexOf(oldStructure);
-                        ContainingStructure.StructureBeats[index].Guid = Guid.Empty;
-                        int ContainingStructIndex = OutlineVM.StoryModel.StoryElements.IndexOf(ContainingStructure);
-                        OutlineVM.StoryModel.StoryElements[ContainingStructIndex] = ContainingStructure;
-                    }
+                    removeBindData(ContainingStructure, problem);
                 }
 
                 //If its a problem Bind
@@ -740,6 +735,36 @@ public class ProblemViewModel : ObservableRecipient, INavigable
 
         //Get index of the beat we are unbinding from
         int BeatIndex = StructureBeats.IndexOf(BeatVM);
+
+        StoryElement boundElement = Ioc.Default.GetRequiredService<OutlineViewModel>()
+            .StoryModel.StoryElements.StoryElementGuids[BeatVM.Guid];
+        if (boundElement.ElementType == StoryItemType.Problem)
+        {
+            removeBindData(Model, boundElement as ProblemModel);
+        }
         BeatVM.Guid = Guid.Empty;
+    }
+
+   
+    /// <summary>
+    /// Helper to remove bind data 
+    /// </summary>
+    internal void removeBindData(ProblemModel ContainingStructure, ProblemModel problem)
+    {
+        OutlineViewModel OutlineVM = Ioc.Default.GetService<OutlineViewModel>();
+        if (problem.BoundStructure.Equals(Uuid.ToString())) //Rebind from VM
+        {
+            StructureBeatViewModel oldStructure = ContainingStructure.StructureBeats.First(g => g.Guid == problem.Uuid);
+            int index = StructureBeats.IndexOf(oldStructure);
+            StructureBeats[index].Guid = Guid.Empty;
+        }
+        else //Remove from old structure and update story elements.
+        {
+            StructureBeatViewModel oldStructure = ContainingStructure.StructureBeats.First(g => g.Guid == problem.Uuid);
+            int index = ContainingStructure.StructureBeats.IndexOf(oldStructure);
+            ContainingStructure.StructureBeats[index].Guid = Guid.Empty;
+            int ContainingStructIndex = OutlineVM.StoryModel.StoryElements.IndexOf(ContainingStructure);
+            OutlineVM.StoryModel.StoryElements[ContainingStructIndex] = ContainingStructure;
+        }
     }
 }
