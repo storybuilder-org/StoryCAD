@@ -1,5 +1,7 @@
 ﻿using System.Text.Json.Serialization;
 using CommunityToolkit.Mvvm.ComponentModel;
+using Microsoft.UI.Xaml;
+using StoryCAD.Services.Outline;
 using StoryCAD.ViewModels.SubViewModels;
 
 namespace StoryCAD.ViewModels.Tools;
@@ -10,13 +12,14 @@ namespace StoryCAD.ViewModels.Tools;
 public class StructureBeatViewModel : ObservableObject
 {
 	public Windowing Windowing;
+	public ProblemViewModel ProblemViewModel;
 
 	#region Constructor
 	public StructureBeatViewModel()
 	{
 		Windowing = Ioc.Default.GetRequiredService<Windowing>();
-		ProblemViewModel ProblemVM = Ioc.Default.GetRequiredService<ProblemViewModel>();
-		PropertyChanged += ProblemVM.OnPropertyChanged;
+		ProblemViewModel = Ioc.Default.GetRequiredService<ProblemViewModel>();
+		PropertyChanged += ProblemViewModel.OnPropertyChanged;
 	}
 	#endregion
 
@@ -121,7 +124,7 @@ public class StructureBeatViewModel : ObservableObject
                 }
             }
 
-            return "Select an element by clicking show Problems/Scenes and dragging it here";
+            return "Assign an element to this beat by clicking the edit button.";
         }
     }
 
@@ -146,4 +149,63 @@ public class StructureBeatViewModel : ObservableObject
         }
     }
     #endregion
+
+    /// <summary>
+    /// Deletes this beat
+    /// </summary>
+    public void DeleteBeat(object sender, RoutedEventArgs e)
+    {
+        if (Element.ElementType == StoryItemType.Problem)
+        {
+            // If this beat is bound to a problem, unbind it first.
+            if (Element.Uuid == ProblemViewModel.Uuid)
+            {
+                ProblemViewModel.BoundStructure = Guid.Empty.ToString();
+            }
+            else
+            {
+                (Ioc.Default.GetRequiredService<OutlineViewModel>().StoryModel.
+                    StoryElements.StoryElementGuids[guid] as ProblemModel)
+                    .BoundStructure = Guid.Empty.ToString();
+            }
+        }
+
+        ProblemViewModel.StructureBeats.Remove(this);
+    }
+
+    /// <summary>
+    /// Moves this beat up
+    /// </summary>
+    public void MoveUp(object sender, RoutedEventArgs e)
+    {
+        var pos = ProblemViewModel.StructureBeats.IndexOf(this);
+
+        if (pos > 0)
+        {
+            ProblemViewModel.StructureBeats.Move(pos, pos - 1);
+        }
+        else
+        {
+            Ioc.Default.GetRequiredService<ShellViewModel>().
+                ShowMessage(LogLevel.Warn, "This is already the first beat.", true);
+        }
+    }
+    /// <summary>
+    /// Moves this beat up
+    /// </summary>
+    public void MoveDown(object sender, RoutedEventArgs e)
+    {
+        var pos = ProblemViewModel.StructureBeats.IndexOf(this);
+        var max = ProblemViewModel.StructureBeats.Count;
+
+        if (pos < max-1)
+        {
+            Ioc.Default.GetRequiredService<ProblemViewModel>().StructureBeats.Move(pos, pos + 1);
+        }
+        else
+        {
+            Ioc.Default.GetRequiredService<ShellViewModel>()
+                .ShowMessage(LogLevel.Warn, "This is already the last beat.", true);
+        }
+    }
 }

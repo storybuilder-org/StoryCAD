@@ -1,12 +1,15 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Security.Cryptography;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using Microsoft.UI.Xaml;
 using StoryCAD.Controls;
 using StoryCAD.Models.Tools;
 using StoryCAD.Services.Messages;
 using StoryCAD.Services.Navigation;
+using StoryCAD.Services.Outline;
 using StoryCAD.ViewModels.SubViewModels;
 using StoryCAD.ViewModels.Tools;
 
@@ -280,11 +283,11 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         set => SetProperty(ref _model, value);
     }
 
-    private ObservableCollection<StructureBeatViewModel> structureBeats;
+    private ObservableCollection<StructureBeatViewModel> _structureBeats;
     public ObservableCollection<StructureBeatViewModel> StructureBeats
     {
-	    get => structureBeats;
-	    set => SetProperty(ref structureBeats, value);
+	    get => _structureBeats;
+	    set => SetProperty(ref _structureBeats, value);
     }
 
 	public RelayCommand ConflictCommand { get; }
@@ -319,11 +322,31 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         set => SetProperty(ref _characters, value);
     }
 
-	#endregion
+    private bool _isBeatSheetReadOnly;
+    /// <summary>
+    /// Controls if the beat sheet is read-only or not.
+    /// </summary>
+    public bool IsBeatSheetReadOnly
+    {
+        get => _isBeatSheetReadOnly;
+        set => SetProperty(ref _isBeatSheetReadOnly, value);
+    }
 
-	#region Methods
+    private Visibility _beatsheetEditButtonsVisibility;
 
-	public void Activate(object parameter)
+    /// <summary>
+    /// Controls if the beat sheet edit buttons are visible or not.
+    /// </summary>
+    public Visibility BeatsheetEditButtonsVisibility
+    {
+        get => _beatsheetEditButtonsVisibility;
+        set => SetProperty(ref _beatsheetEditButtonsVisibility, value);
+    }
+    #endregion
+
+    #region Methods
+
+    public void Activate(object parameter)
     {
         Model = (ProblemModel)parameter;
         LoadModel();
@@ -397,6 +420,18 @@ public class ProblemViewModel : ObservableRecipient, INavigable
 		//Ensure correct set of Elements are loaded for Structure Lists
 		Problems = story_model.StoryElements.Problems;
         Scenes = story_model.StoryElements.Scenes;
+
+        //Enable/disable edit buttons based on selection
+        if (StructureModelTitle == "Custom Beat Sheet")
+        {
+            BeatsheetEditButtonsVisibility = Visibility.Visible;
+            IsBeatSheetReadOnly = false;
+        }
+        else
+        {
+            BeatsheetEditButtonsVisibility = Visibility.Collapsed;
+            IsBeatSheetReadOnly = true;
+        }
 
         _changeable = true;
 	}
@@ -496,32 +531,49 @@ public class ProblemViewModel : ObservableRecipient, INavigable
 				    PrimaryButtonText = "Confirm",
 				    SecondaryButtonText = "Cancel"
 			    });
-	    }
+
+            //Delete beats (This handles binds)
+            for (int i = StructureBeats.Count - 1; i >= 0; i--)
+            {
+                StructureBeats[i].DeleteBeat(null, null);
+            }
+        }
 	    else { Result = ContentDialogResult.Primary; }
 
+        //Enable/disable edit buttons based on selection
+        if (value == "Custom Beatsheet")
+        {
+            BeatsheetEditButtonsVisibility = Visibility.Visible;
+            IsBeatSheetReadOnly = false;
+        }
+        else
+        {
+            BeatsheetEditButtonsVisibility = Visibility.Collapsed;
+            IsBeatSheetReadOnly = true;
+        }
 
-	    if (Result == ContentDialogResult.Primary && !string.IsNullOrEmpty(value))
-	    {
-		    //Update value 
-		    SetProperty(ref _structureModelTitle, value);
+        if (Result == ContentDialogResult.Primary && !string.IsNullOrEmpty(value))
+        {
+            //Update value 
+            SetProperty(ref _structureModelTitle, value);
 
-		    //Resolve master plot model if not empty
-		    PlotPatternModel BeatSheet = Ioc.Default.GetRequiredService<BeatSheetsViewModel>().BeatSheets[value];
+            //Resolve master plot model if not empty
+            PlotPatternModel BeatSheet = Ioc.Default.GetRequiredService<BeatSheetsViewModel>().BeatSheets[value];
 
-			StructureDescription = BeatSheet.PlotPatternNotes;
+            StructureDescription = BeatSheet.PlotPatternNotes;
 
-		    //Set model
-		    StructureBeats.Clear();
+            //Set model
+            StructureBeats.Clear();
 
-		    foreach (var item in BeatSheet.PlotPatternScenes)
-		    {
-			    StructureBeats.Add(new StructureBeatViewModel
-			    {
-				    Title = item.SceneTitle,
-				    Description = item.Notes,
-			    });
-		    }
-	    }
+            foreach (var item in BeatSheet.PlotPatternScenes)
+            {
+                StructureBeats.Add(new StructureBeatViewModel
+                {
+                    Title = item.SceneTitle,
+                    Description = item.Notes,
+                });
+            }
+        }
 	}
 	#endregion
 
@@ -598,4 +650,121 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         PropertyChanged += OnPropertyChanged;
     }
 	#endregion
+
+    /// <summary>
+    /// Creates a new story beat.
+    /// </summary>
+    public void CreateBeat(object sender, RoutedEventArgs e)
+    {
+        StructureBeats.Add(new StructureBeatViewModel
+        {
+            Title = "New Beat",
+            Description = "Describe your beat here"
+        });
+    }
+
+    /// <summary>
+    /// Assigns a new beat
+    /// </summary>
+    public async void AssignBeat(object sender, SelectionChangedEventArgs e)
+    {
+        //Get the element we want to bind.
+        Guid DesiredBind = (e.AddedItems[0] as StoryElement).Uuid;
+
+        //Get the beat we want to bind to
+        var structureBeatsModel = (sender as ListView).DataContext as StructureBeatViewModel;
+
+        OutlineViewModel OutlineVM = Ioc.Default.GetService<OutlineViewModel>();
+        try 
+        {
+            //Find element being bound.
+            StoryElement Element = OutlineVM.StoryModel.StoryElements.First(g => g.Uuid == DesiredBind);
+            int ElementIndex = OutlineVM.StoryModel.StoryElements.IndexOf(Element);
+
+            //Check if problem is being dropped and enforce rule.
+            if (Element.ElementType == StoryItemType.Problem)
+            {
+                ProblemModel problem = (ProblemModel)Element;
+                //Enforce rule that problems can only be bound to one structure beat model
+                if (!string.IsNullOrEmpty(problem.BoundStructure)) //Check element is actually bound elsewhere
+                {
+                    ProblemModel ContainingStructure = (ProblemModel)OutlineVM.StoryModel.StoryElements
+                        .First(g => g.Uuid == Guid.Parse(problem.BoundStructure));
+                    //Show dialog asking to rebind.
+                    var res = await Ioc.Default.GetRequiredService<Windowing>().ShowContentDialog(new()
+                    {
+                        Title = "Already assigned!",
+                        Content = $"This problem is already assigned to a different structure ({ContainingStructure.Name}) " +            
+                        $"Would you like to assign it here instead?",
+                        PrimaryButtonText = "Assign here",
+                        SecondaryButtonText = "Cancel"
+                    });
+
+                    //Do nothing if user clicks don't rebind.
+                    if (res != ContentDialogResult.Primary) { return; }
+                    removeBindData(ContainingStructure, problem);
+                }
+
+                //If its a problem Bind
+                if (problem.Uuid == Uuid)
+                {
+                    BoundStructure = Uuid.ToString();
+                }
+                else
+                {
+                    problem.BoundStructure = Uuid.ToString();
+                    OutlineVM.StoryModel.StoryElements[ElementIndex] = problem;
+                }
+            }
+
+            structureBeatsModel.Guid = DesiredBind;
+        }
+        catch (Exception ex)
+        {
+            _logger.Log(LogLevel.Warn, "Failed to bind valid element (Structure Tab) " + ex.Message);
+        }
+    }
+
+    /// <summary>
+    /// Unbinds an element from the selected beat.
+    /// </summary>
+    public void UnbindElement(object sender, RoutedEventArgs e)
+    {
+        //Get the beat we want to bind to
+        var BeatVM = (sender as Button).DataContext as StructureBeatViewModel;
+
+        //Get index of the beat we are unbinding from
+        int BeatIndex = StructureBeats.IndexOf(BeatVM);
+
+        StoryElement boundElement = Ioc.Default.GetRequiredService<OutlineViewModel>()
+            .StoryModel.StoryElements.StoryElementGuids[BeatVM.Guid];
+        if (boundElement.ElementType == StoryItemType.Problem)
+        {
+            removeBindData(Model, boundElement as ProblemModel);
+        }
+        BeatVM.Guid = Guid.Empty;
+    }
+
+   
+    /// <summary>
+    /// Helper to remove bind data 
+    /// </summary>
+    internal void removeBindData(ProblemModel ContainingStructure, ProblemModel problem)
+    {
+        OutlineViewModel OutlineVM = Ioc.Default.GetService<OutlineViewModel>();
+        if (problem.BoundStructure.Equals(Uuid.ToString())) //Rebind from VM
+        {
+            StructureBeatViewModel oldStructure = ContainingStructure.StructureBeats.First(g => g.Guid == problem.Uuid);
+            int index = StructureBeats.IndexOf(oldStructure);
+            StructureBeats[index].Guid = Guid.Empty;
+        }
+        else //Remove from old structure and update story elements.
+        {
+            StructureBeatViewModel oldStructure = ContainingStructure.StructureBeats.First(g => g.Guid == problem.Uuid);
+            int index = ContainingStructure.StructureBeats.IndexOf(oldStructure);
+            ContainingStructure.StructureBeats[index].Guid = Guid.Empty;
+            int ContainingStructIndex = OutlineVM.StoryModel.StoryElements.IndexOf(ContainingStructure);
+            OutlineVM.StoryModel.StoryElements[ContainingStructIndex] = ContainingStructure;
+        }
+    }
 }
