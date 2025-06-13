@@ -693,7 +693,7 @@ public class OutlineService
         Parent.StructureDescription = Description;
 
         //Unbind/Delete Beats first.
-        for (int i = Parent.StructureBeats.Count(); i >= 0; i--) {
+        for (int i = Parent.StructureBeats.Count - 1; i >= 0; i--) {
             DeleteBeat(Model, Parent, i);
         }
 
