@@ -55,29 +55,25 @@ jobs:
       name: Increase Version Number
       shell: pwsh
       run: |
-        $VersionRegex          = "\d+\.\d+\.\d+\.\d+"
-        $LastVer               = "${{ steps.testtag.outputs.tag }}"
-        $VersionSplit          = $LastVer.Split('.')
-        $BUILD_BUILDNUMBER     = "$($VersionSplit[0]).$($VersionSplit[1]).${{ github.run_number }}.65534"
-        $ManifestVersionRegex  = " Version=\"\d+\.\d+\.\d+\.\d+\""
-
-        # workspace‑relative paths
-        $repoRoot      = $env:WORK_DIR
-        $manifestPath  = Join-Path $repoRoot 'StoryCAD\Package.appxmanifest'
-
-        # Calculate new version & write it back
-        $NewVersion    = ([regex]::Matches($BUILD_BUILDNUMBER,$VersionRegex))[0]
-        Write-Verbose "Version: $NewVersion"
-        $ManifestVersion = " Version=\"$NewVersion\""
-
+        # Regex helpers
+        $VersionRegex         = '\d+\.\d+\.\d+\.\d+'            # unchanged
+        $ManifestVersionRegex = ' Version="\d+\.\d+\.\d+\.\d+"'  # <-- fixed
+    
+        $LastVer            = '${{ steps.testtag.outputs.tag }}'
+        $VersionSplit       = $LastVer.Split('.')
+        $BUILD_BUILDNUMBER  = "$($VersionSplit[0]).$($VersionSplit[1]).${{ github.run_number }}.65534"
+    
+        # workspace-relative paths
+        $repoRoot     = $env:WORK_DIR
+        $manifestPath = Join-Path $repoRoot 'StoryCAD\Package.appxmanifest'
+    
+        # Calculate & write new version
+        $NewVersion = ([regex]::Match($BUILD_BUILDNUMBER,$VersionRegex)).Value
         attrib $manifestPath -r
-        (Get-Content $manifestPath) -replace $ManifestVersionRegex, $ManifestVersion |
+        (Get-Content $manifestPath) -replace $ManifestVersionRegex, " Version=\"$NewVersion\"" |
           Out-File $manifestPath -Encoding utf8
-
+    
         "new_version=$NewVersion" | Out-File -Append -FilePath $env:GITHUB_OUTPUT
-
-        Write-Host "Last version (from tag): '$LastVer'"
-        Write-Host "Calculated new version: '$NewVersion'"
 
     # ------------------------------------------------------
     # Decode the base64‑encoded pfx and write .env files
