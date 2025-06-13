@@ -263,7 +263,7 @@
                                 </ItemsRepeater.ItemTemplate>
                             </ItemsRepeater>
 
-                            <!-- Add custom beats for custom beat sheets.e-->
+                            <!-- Add custom beats for custom beat sheets. -->
                             <Button Grid.Row="5" HorizontalAlignment="Stretch" Content="+ Add New Beat"
                                     Click="{x:Bind ProblemVm.CreateBeat}" 
                                     Visibility="{x:Bind ProblemVm.BeatsheetEditButtonsVisibility, Mode=OneWay}"/>
