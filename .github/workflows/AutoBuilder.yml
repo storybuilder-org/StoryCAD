@@ -1,4 +1,6 @@
-#IMPORTANT - Don't forget to bump the .NET Version for Install .NET AND StoryCADTests
+# AutoBuild – workspace‑agnostic version (uses ${{ github.workspace }})
+# IMPORTANT – Don't forget to bump the .NET version for Install .NET **and** StoryCADTests
+
 name: AutoBuild
 
 on:
@@ -11,86 +13,105 @@ jobs:
   build:
     strategy:
       matrix:
-        configuration: [Release, Debug]
-        platform: [x64, x86, arm64]
+        configuration: [ Release, Debug ]
+        platform: [ x64, x86, arm64 ]
 
     runs-on: windows-latest
 
     env:
       Solution_Name: StoryCAD.sln
+      # Make workspace root easy to reference in PowerShell
+      WORK_DIR: ${{ github.workspace }}
 
     steps:
+    # ------------------------------------------------------
     - name: Download Repository
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
 
-    # Install .NET
+    # ------------------------------------------------------
+    # Install .NET SDK & runtime
     - name: Install .NET
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 8.x.x
 
-    #Install MSBUILD
+    # ------------------------------------------------------
+    # Install MSBuild
     - name: Setup MSBuild.exe
       uses: microsoft/setup-msbuild@v2
-    
+
+    # ------------------------------------------------------
     - uses: oprypin/find-latest-tag@v1.1.2
       with:
         repository: storybuilder-org/StoryCAD
         releases-only: true
       id: testtag
-      
-    #Bump version number
+
+    # ------------------------------------------------------
+    # Bump version number – all paths via $env:WORK_DIR
     - id: increase_version
-      name: Increase Version Number 
+      name: Increase Version Number
+      shell: pwsh
       run: |
-        $VersionRegex = "\d+\.\d+\.\d+\.\d+"
-        $LastVer = "${{ steps.testtag.outputs.tag }}"
-        $VersionSplit = $LastVer.Split(".")
-        $BUILD_BUILDNUMBER = $VersionSplit[0] + "." + $VersionSplit[1] + ".${{ github.run_number }}.65534"
-        $ManifestVersionRegex = " Version=""\d+\.\d+\.\d+\.\d+"""
-        $ScriptPath = $null
-        try
-        {
-            $ScriptPath = (Get-Variable MyInvocation).Value.MyCommand.Path
-            $ScriptDir = Split-Path -Parent $ScriptPath
-        }
-        catch {}
-        # Get and validate the version data
-        $VersionData = [regex]::matches($BUILD_BUILDNUMBER,$VersionRegex)
-        $NewVersion = $VersionData[0]
+        $VersionRegex          = "\d+\.\d+\.\d+\.\d+"
+        $LastVer               = "${{ steps.testtag.outputs.tag }}"
+        $VersionSplit          = $LastVer.Split('.')
+        $BUILD_BUILDNUMBER     = "$($VersionSplit[0]).$($VersionSplit[1]).${{ github.run_number }}.65534"
+        $ManifestVersionRegex  = " Version=\"\d+\.\d+\.\d+\.\d+\""
+
+        # workspace‑relative paths
+        $repoRoot      = $env:WORK_DIR
+        $manifestPath  = Join-Path $repoRoot 'StoryCAD\Package.appxmanifest'
+
+        # Calculate new version & write it back
+        $NewVersion    = ([regex]::Matches($BUILD_BUILDNUMBER,$VersionRegex))[0]
         Write-Verbose "Version: $NewVersion"
-        $AssemblyVersion = $NewVersion
-        $ManifestVersion = " Version=""$NewVersion"""
-        $filecontent = Get-Content("D:\a\StoryCAD\StoryCAD\StoryCAD\Package.appxmanifest")
-        attrib $file -r
-        $filecontent -replace $ManifestVersionRegex, $ManifestVersion | Out-File "D:\a\StoryCAD\StoryCAD\StoryCAD\Package.appxmanifest" utf8
+        $ManifestVersion = " Version=\"$NewVersion\""
+
+        attrib $manifestPath -r
+        (Get-Content $manifestPath) -replace $ManifestVersionRegex, $ManifestVersion |
+          Out-File $manifestPath -Encoding utf8
+
         "new_version=$NewVersion" | Out-File -Append -FilePath $env:GITHUB_OUTPUT
+
         Write-Host "Last version (from tag): '$LastVer'"
         Write-Host "Calculated new version: '$NewVersion'"
-        
-    # Decode the base 64 encoded pfx and save the Signing_Certificate
-    - name: Decode the pfx
-      run: |
-        $pfx_cert_byte = [System.Convert]::FromBase64String("${{ secrets.BASE64_ENCODED_PFX }}")
-        $certificatePath = "GitHubActionsWorkflow.pfx"
-        [IO.File]::WriteAllBytes("$certificatePath", $pfx_cert_byte)
-        [IO.File]::WriteAllText("D:\a\StoryCAD\StoryCAD\StoryCAD\.env", "${{ secrets.ENV }}")
-        [IO.File]::WriteAllText("D:\a\StoryCAD\StoryCAD\StoryCADTests\.env", "${{ secrets.ENV }}")
 
-    # Restore the application to populate the obj folder with RuntimeIdentifiers
+    # ------------------------------------------------------
+    # Decode the base64‑encoded pfx and write .env files
+    - name: Decode the pfx & write env files
+      shell: pwsh
+      run: |
+        $repoRoot = $env:WORK_DIR
+        $pfx_cert_byte = [Convert]::FromBase64String("${{ secrets.BASE64_ENCODED_PFX }}")
+        $certificatePath = Join-Path $repoRoot 'GitHubActionsWorkflow.pfx'
+        [IO.File]::WriteAllBytes($certificatePath, $pfx_cert_byte)
+
+        [IO.File]::WriteAllText((Join-Path $repoRoot 'StoryCAD\.env'),      "${{ secrets.ENV }}")
+        [IO.File]::WriteAllText((Join-Path $repoRoot 'StoryCADTests\.env'), "${{ secrets.ENV }}")
+
+    # ------------------------------------------------------
+    # Restore the solution – keeps obj folder happy
     - name: Restore the application
       run: msbuild $env:Solution_Name /t:Restore /p:Configuration=$env:Configuration
       env:
         Configuration: ${{ matrix.configuration }}
-        
 
+    # ------------------------------------------------------
+    # Build StoryCADLib
     - name: Build StoryCADLib
       run: |
-        msbuild StoryCADLib\StoryCADLib.csproj /t:Build /p:Configuration=Release /p:Version=${{ steps.increase_version.outputs.new_version }} /p:NuGetVersion=${{ steps.increase_version.outputs.new_version }} /p:AssemblyVersion=${{ steps.increase_version.outputs.new_version }}
+        msbuild StoryCADLib\StoryCADLib.csproj /t:Build /
+          p:Configuration=Release /
+          p:Version=${{ steps.increase_version.outputs.new_version }} /
+          p:NuGetVersion=${{ steps.increase_version.outputs.new_version }} /
+          p:AssemblyVersion=${{ steps.increase_version.outputs.new_version }}
+      shell: pwsh
 
-        
+    # ------------------------------------------------------
+    # Build tests
     - name: Restore and Build StoryCADTests
       run: msbuild StoryCADTests\StoryCADTests.csproj /t:Build /p:Configuration=Debug /p:Platform=x64
 
@@ -98,77 +119,110 @@ jobs:
       uses: darenm/Setup-VSTest@v1.2
 
     - name: Run StoryCADTests
-      run: vstest.console.exe D:\a\StoryCAD\StoryCAD\StoryCADTests\bin\x64\Debug\net8.0-windows10.0.19041.0\StoryCADTests.dll /Logger:Console /Platform:x64
+      shell: pwsh
+      run: |
+        $testDll = Join-Path $env:WORK_DIR 'StoryCADTests\bin\x64\Debug\net8.0-windows10.0.19041.0\StoryCADTests.dll'
+        vstest.console.exe $testDll /Logger:Console /Platform:x64
 
-        
-    # Create the app package by building and packaging the project
+    # ------------------------------------------------------
+    # Create the MSIX package
     - name: Create the MSIX
-      run: msbuild $env:Solution_Name /p:Configuration=$env:Configuration /p:Platform=$env:Platform /p:UapAppxPackageBuildMode=$env:Appx_Package_Build_Mode /p:AppxBundle=$env:Appx_Bundle /p:PackageCertificateKeyFile="D:\a\StoryCAD\StoryCAD\GitHubActionsWorkflow.pfx" /p:AppxPackageDir="$env:Appx_Package_Dir" /p:GenerateAppxPackageOnBuild=true
+      shell: pwsh
+      run: |
+        $pfxPath = Join-Path $env:WORK_DIR 'GitHubActionsWorkflow.pfx'
+        msbuild $env:Solution_Name `
+          /p:Configuration=$env:Configuration `
+          /p:Platform=$env:Platform `
+          /p:UapAppxPackageBuildMode=$env:Appx_Package_Build_Mode `
+          /p:AppxBundle=$env:Appx_Bundle `
+          /p:PackageCertificateKeyFile="$pfxPath" `
+          /p:AppxPackageDir="$env:Appx_Package_Dir" `
+          /p:GenerateAppxPackageOnBuild=true
       env:
         Appx_Bundle: Never
         Appx_Package_Build_Mode: SideloadOnly
         Appx_Package_Dir: Packages\
         Configuration: ${{ matrix.configuration }}
         Platform: ${{ matrix.platform }}
-        
-    # Remove the pfx
+
+    # ------------------------------------------------------
+    # Remove the pfx once done
     - name: Remove the pfx
-      run: |
-        Remove-Item -path GitHubActionsWorkflow.pfx
-      
-   #Cleans output and file names
-    - name: Run MSIX Cleaner
-      run: |
-        D:\a\StoryCAD\StoryCAD\.github\workflows\MSIX.ps1 -TargetDirectory "D:\a\StoryCAD\StoryCAD\StoryCAD\Packages"
       shell: pwsh
+      run: Remove-Item -Path (Join-Path $env:WORK_DIR 'GitHubActionsWorkflow.pfx') -Force
 
-    - name: Move StoryCADLib Nuget Package to Packages Directory
+    # ------------------------------------------------------
+    # Clean MSIX output names
+    - name: Run MSIX Cleaner
+      shell: pwsh
       run: |
-        Get-ChildItem -Path "D:\a\StoryCAD\StoryCAD\StoryCADLib\bin\x64\*" -Include *.nupkg,*.snupkg -File |
-          Move-Item -Destination "D:\a\StoryCAD\StoryCAD\StoryCAD\Packages\" -Force
+        $script = Join-Path $env:WORK_DIR '.github\workflows\MSIX.ps1'
+        $target = Join-Path $env:WORK_DIR 'StoryCAD\Packages'
+        & $script -TargetDirectory $target
 
+    # ------------------------------------------------------
+    # Move StoryCADLib NuGet package into Packages dir
+    - name: Move StoryCADLib NuGet Package to Packages Directory
+      shell: pwsh
+      run: |
+        $repoRoot = $env:WORK_DIR
+        Get-ChildItem -Path (Join-Path $repoRoot 'StoryCADLib\bin\x64') -Include *.nupkg,*.snupkg -File |
+          Move-Item -Destination (Join-Path $repoRoot 'StoryCAD\Packages') -Force
 
+    # ------------------------------------------------------
+    # Write help file
     - name: Write help file
+      shell: pwsh
       run: |
-        $LastVer = "${{ steps.testtag.outputs.tag }}"
-        $VersionSplit = $LastVer.Split(".")
-        $BUILD_BUILDNUMBER = $VersionSplit[0] + "." + $VersionSplit[1] + ".${{ github.run_number }}.65534"
-      
-        "Hello, Thank you for testing StoryCAD " + ${{ steps.increase_version.outputs.new_version }} + " Alpha 
-        1) Open StoryCAD.cer, this should bring up the certificate import wizard
-        2) Press install certificate, and change store location to Local Machine, then press next
-        3) Change the option to Place All Certificates in the following store and click browse
-        4) Select Trusted People and press OK and then press finish
-        Now you will want to open the msix folder and select the configuration you want, 
-        if you don't know what configuration to pick then we recommend StoryCAD Release x64.msix.
-        
-        Changelogs aren't available for Alpha Builds." | Out-File -FilePath "D:\a\StoryCAD\StoryCAD\StoryCAD\Packages\Install Instructions.txt"
-    
+        $repoRoot = $env:WORK_DIR
+        $helpPath = Join-Path $repoRoot 'StoryCAD\Packages\Install Instructions.txt'
+        $LastVer   = "${{ steps.testtag.outputs.tag }}"
+        $VersionSplit = $LastVer.Split('.')
+        $BUILD_BUILDNUMBER = "$($VersionSplit[0]).$($VersionSplit[1]).${{ github.run_number }}.65534"
+
+        @"
+Hello, Thank you for testing StoryCAD ${{ steps.increase_version.outputs.new_version }} Alpha
+
+1)  Open StoryCAD.cer – this will start the certificate import wizard.
+2)  Select **Local Machine**, press *Next*.
+3)  Choose **Place all certificates in the following store**, click *Browse*.
+4)  Pick **Trusted People**, press *OK*, then *Finish*.
+
+Now open the **msix** folder and pick the configuration you want – most users should take **StoryCAD Release x64.msix**.
+
+Changelogs aren’t available for Alpha builds.
+"@ |
+          Out-File -FilePath $helpPath -Force -Encoding utf8
+
+    # ------------------------------------------------------
+    # Re‑pack NuGet (only once – Release x64)
     - name: Repack StoryCADLib NuGet Package
       if: ${{ matrix.configuration == 'Release' && matrix.platform == 'x64' }}
       shell: pwsh
       run: |
+        $repoRoot = $env:WORK_DIR
+
         # 1. Find the release .nupkg
-        $allNupkg = Get-ChildItem -Path "D:\a\StoryCAD\StoryCAD" -Filter "StoryCADLib*.nupkg" -Recurse
-        $releasePkg = $allNupkg | Where-Object FullName -Match "\\Release\\" | Select-Object -First 1
+        $allNupkg   = Get-ChildItem -Path $repoRoot -Filter 'StoryCADLib*.nupkg' -Recurse
+        $releasePkg = $allNupkg | Where-Object FullName -Match '\\Release\\' | Select-Object -First 1
 
         # 2. Unzip to temp
         $tempDir = Join-Path $env:TEMP ("NuPkg_" + [guid]::NewGuid())
         Expand-Archive -Path $releasePkg.FullName -DestinationPath $tempDir -Force
 
-        # 3. Copy your compiled binaries
-        $binSrc = "D:\a\StoryCAD\StoryCAD\StoryCADLib\bin\x64\Release\net8.0-windows10.0.22621.0"
-        $libDir = Join-Path $tempDir "lib\net8.0-windows10.0.22621"
+        # 3. Copy compiled binaries
+        $binSrc  = Join-Path $repoRoot 'StoryCADLib\bin\x64\Release\net8.0-windows10.0.22621.0'
+        $libDir  = Join-Path $tempDir  'lib\net8.0-windows10.0.22621'
         New-Item -ItemType Directory -Force -Path $libDir | Out-Null
         Copy-Item "$binSrc\*" -Destination $libDir -Recurse -Force
 
-        # 4. Copy your Assets folder into a StoryCADLib sub‑folder there
-        $assetsSrc = "D:\a\StoryCAD\StoryCAD\StoryCADLib\Assets"
-        $assetsDest = Join-Path $libDir "StoryCADLib"
+        # 4. Copy Assets
+        $assetsSrc  = Join-Path $repoRoot 'StoryCADLib\Assets'
+        $assetsDest = Join-Path $libDir  'StoryCADLib'
         New-Item -ItemType Directory -Force -Path $assetsDest | Out-Null
         Copy-Item "$assetsSrc\*" -Destination $assetsDest -Recurse -Force
 
-        # 5. Re‑zip and overwrite original
+        # 5. Re‑zip & overwrite original
         $outPkg = Join-Path $env:TEMP ("updated_" + $releasePkg.Name)
         Compress-Archive -Path (Join-Path $tempDir '*') -DestinationPath $outPkg -Force
         Move-Item -Path $outPkg -Destination $releasePkg.FullName -Force
@@ -176,24 +230,28 @@ jobs:
         # 6. Cleanup
         Remove-Item -Recurse -Force $tempDir
 
+    # ------------------------------------------------------
+    # Zip the Packages folder
     - name: Zip the packages folder
-      run: |
-            $zipName = "StoryCAD_${{ github.run_number }}_${{ matrix.platform }}_${{ matrix.configuration }}.zip"
-            Compress-Archive -Path "D:\a\StoryCAD\StoryCAD\StoryCAD\Packages\*" -DestinationPath $zipName -Force
       shell: pwsh
-    
+      run: |
+        $repoRoot = $env:WORK_DIR
+        $zipName  = "StoryCAD_${{ github.run_number }}_${{ matrix.platform }}_${{ matrix.configuration }}.zip"
+        Compress-Archive -Path (Join-Path $repoRoot 'StoryCAD\Packages\*') -DestinationPath $zipName -Force
+
+    # ------------------------------------------------------
+    # Upload artefacts
     - name: Upload repacked NuGet Package
       if: ${{ matrix.configuration == 'Release' && matrix.platform == 'x64' }}
       uses: actions/upload-artifact@v4
       with:
         name: repacked-nuget-package
-        path: 'D:\a\StoryCAD\StoryCAD\StoryCADLib\bin\Release\StoryCADLib*.nupkg'
+        path: '${{ env.WORK_DIR }}\\StoryCADLib\\bin\\Release\\StoryCADLib*.nupkg'
 
-    
     - name: Upload MSIX package
       uses: actions/upload-artifact@v4
       with:
         name: StoryCAD_${{ github.run_number }}_${{ matrix.platform }}_${{ matrix.configuration }}
         path: StoryCAD_${{ github.run_number }}_${{ matrix.platform }}_${{ matrix.configuration }}.zip
         compression-level: 9
-        include-hidden-files: true  
+        include-hidden-files: true
