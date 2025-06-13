@@ -181,17 +181,17 @@ jobs:
         $BUILD_BUILDNUMBER = "$($VersionSplit[0]).$($VersionSplit[1]).${{ github.run_number }}.65534"
 
         @"
-Hello, Thank you for testing StoryCAD ${{ steps.increase_version.outputs.new_version }} Alpha
+          Hello, Thank you for testing StoryCAD ${{ steps.increase_version.outputs.new_version }} Alpha
 
-1)  Open StoryCAD.cer – this will start the certificate import wizard.
-2)  Select **Local Machine**, press *Next*.
-3)  Choose **Place all certificates in the following store**, click *Browse*.
-4)  Pick **Trusted People**, press *OK*, then *Finish*.
-
-Now open the **msix** folder and pick the configuration you want – most users should take **StoryCAD Release x64.msix**.
-
-Changelogs aren’t available for Alpha builds.
-"@ |
+        1)  Open StoryCAD.cer – this will start the certificate import wizard.
+        2)  Select **Local Machine**, press *Next*.
+        3)  Choose **Place all certificates in the following store**, click *Browse*.
+        4)  Pick **Trusted People**, press *OK*, then *Finish*.
+        
+        Now open the **msix** folder and pick the configuration you want – most users should take **StoryCAD Release x64.msix**.
+        
+        Changelogs aren’t available for Alpha builds.
+        "@ |
           Out-File -FilePath $helpPath -Force -Encoding utf8
 
     # ------------------------------------------------------
