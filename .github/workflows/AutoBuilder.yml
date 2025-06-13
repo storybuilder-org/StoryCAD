@@ -14,22 +14,12 @@ jobs:
         configuration: [Release, Debug]
         platform: [x64, x86, arm64]
 
-    runs-on: windows-latest
+    runs-on: windows-2019
 
     env:
       Solution_Name: StoryCAD.sln
 
     steps:
-
-    - name: map drive for backwards compatability
-      shell: cmd
-      run: |
-        rem GitHub hosted runners (2025‑06) now clone to C:\a rather than D:\a.
-        rem Create a substitute drive so legacy absolute paths still resolve.
-        if not exist D:\ (
-          subst D: %SystemDrive%\
-        )
-
     - name: Download Repository
       uses: actions/checkout@v4
       with:
