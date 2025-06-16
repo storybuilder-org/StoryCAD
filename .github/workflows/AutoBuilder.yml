@@ -76,8 +76,8 @@ jobs:
         $bytes = [Convert]::FromBase64String("${{ secrets.BASE64_ENCODED_PFX }}")
         $pfxPath = "${{ github.workspace }}\StoryCAD\GitHubActionsWorkflow.pfx"
         [IO.File]::WriteAllBytes($pfxPath, $bytes)
-        [IO.File]::WriteAllText("D:\a\StoryCAD\StoryCAD\StoryCAD\.env", "${{ secrets.ENV }}")
-        [IO.File]::WriteAllText("D:\a\StoryCAD\StoryCAD\StoryCADTests\.env", "${{ secrets.ENV }}")
+        [IO.File]::WriteAllText("${{ github.workspace }}\StoryCAD\.env", "${{ secrets.ENV }}")
+        [IO.File]::WriteAllText("${{ github.workspace }}\StoryCADTests\.env", "${{ secrets.ENV }}")
         
     # Restore the application to populate the obj folder with RuntimeIdentifiers
     - name: Restore the application
