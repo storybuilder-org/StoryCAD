@@ -70,14 +70,15 @@ jobs:
         Write-Host "Last version (from tag): '$LastVer'"
         Write-Host "Calculated new version: '$NewVersion'"
         
-    # Decode the base 64 encoded pfx and save the Signing_Certificate
+      # Decode the PFX
     - name: Decode the pfx
       run: |
-        $pfx_cert_byte = [System.Convert]::FromBase64String("${{ secrets.BASE64_ENCODED_PFX }}")
-        $certificatePath = "GitHubActionsWorkflow.pfx"
-        [IO.File]::WriteAllBytes("$certificatePath", $pfx_cert_byte)
+        $bytes = [Convert]::FromBase64String("${{ secrets.BASE64_ENCODED_PFX }}")
+        $pfxPath = "${{ github.workspace }}\StoryCAD\GitHubActionsWorkflow.pfx"
+        [IO.File]::WriteAllBytes($pfxPath, $bytes)
         [IO.File]::WriteAllText("${{ github.workspace }}\StoryCAD\.env", "${{ secrets.ENV }}")
         [IO.File]::WriteAllText("${{ github.workspace }}\StoryCADTests\.env", "${{ secrets.ENV }}")
+
 
     # Restore the application to populate the obj folder with RuntimeIdentifiers
     - name: Restore the application
