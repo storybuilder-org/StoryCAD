@@ -195,15 +195,22 @@ public class PreferencesModel : ObservableObject
 	/// Should the startup dialog (HelpPage) be shown
 	/// </summary>
 	[JsonInclude]
-	[JsonPropertyName("ShowStartupDialog")]
-	public bool ShowStartupDialog { get; set; }
+        [JsonPropertyName("ShowStartupDialog")]
+        public bool ShowStartupDialog { get; set; }
 
-	/// <summary>
-	/// Do we want to log more in depth
-	/// </summary>
-	[JsonInclude]
-	[JsonPropertyName("AdvancedLogging")]
-	public bool AdvancedLogging { get; set; }
+        /// <summary>
+        /// Do we want to log more in depth
+        /// </summary>
+        [JsonInclude]
+        [JsonPropertyName("AdvancedLogging")]
+        public bool AdvancedLogging { get; set; }
+
+        /// <summary>
+        /// Hide the key file missing warning dialog.
+        /// </summary>
+        [JsonInclude]
+        [JsonPropertyName("HideKeyFileWarning")]
+        public bool HideKeyFileWarning { get; set; } = false;
 #endregion
 
 	#region Constructor
@@ -232,10 +239,11 @@ public class PreferencesModel : ObservableObject
 		PreferredSearchEngine = BrowserType.DuckDuckGo;
 		ThemePreference = ElementTheme.Default; // Use system theme
 		HideRatingPrompt = false;
-		CumulativeTimeUsed = 0;
-		AdvancedLogging = false;
-		LastReviewDate = DateTime.MinValue;
-		ShowStartupDialog = true;
-	}
-	#endregion
+                CumulativeTimeUsed = 0;
+                AdvancedLogging = false;
+                HideKeyFileWarning = false;
+                LastReviewDate = DateTime.MinValue;
+                ShowStartupDialog = true;
+        }
+        #endregion
 }
