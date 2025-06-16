@@ -76,9 +76,6 @@ jobs:
         $bytes = [Convert]::FromBase64String("${{ secrets.BASE64_ENCODED_PFX }}")
         $pfxPath = "${{ github.workspace }}\StoryCAD\GitHubActionsWorkflow.pfx"
         [IO.File]::WriteAllBytes($pfxPath, $bytes)
-        [IO.File]::WriteAllText("${{ github.workspace }}\StoryCAD\.env", "${{ secrets.ENV }}")
-        [IO.File]::WriteAllText("${{ github.workspace }}\StoryCADTests\.env", "${{ secrets.ENV }}")
-
 
     # Restore the application to populate the obj folder with RuntimeIdentifiers
     - name: Restore the application
@@ -115,12 +112,12 @@ jobs:
     # Remove the pfx
     - name: Remove the pfx
       run: |
-        Remove-Item -path GitHubActionsWorkflow.pfx
+        Remove-Item -path "${{ github.workspace }}\StoryCAD\GitHubActionsWorkflow.pfx"
       
    #Cleans output and file names
     - name: Run MSIX Cleaner
       run: |
-        ${{ github.workspace }}\StoryCAD\.github\workflows\MSIX.ps1 -TargetDirectory "${{ github.workspace }}\StoryCAD\Packages"
+        ${{ github.workspace }}\.github\workflows\MSIX.ps1 -TargetDirectory "${{ github.workspace }}\StoryCAD\Packages"
       shell: pwsh
 
     - name: Move StoryCADLib Nuget Package to Packages Directory
