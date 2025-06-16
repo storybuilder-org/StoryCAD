@@ -98,7 +98,7 @@ jobs:
       uses: darenm/Setup-VSTest@v1.2
 
     - name: Run StoryCADTests
-      run: vstest.console.exe ${{ github.workspace }}\StoryCAD\StoryCADTests\bin\x64\Debug\net8.0-windows10.0.19041.0\StoryCADTests.dll /Logger:Console /Platform:x64
+      run: vstest.console.exe ${{ github.workspace }}\StoryCADTests\bin\x64\Debug\net8.0-windows10.0.19041.0\StoryCADTests.dll /Logger:Console /Platform:x64
 
         
     # Create the app package by building and packaging the project
