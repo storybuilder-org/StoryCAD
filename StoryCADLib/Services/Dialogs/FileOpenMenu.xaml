@@ -4,7 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d" Height="500" Width="800">
+    mc:Ignorable="d" Height="500" MinWidth="800">
 
     <NavigationView OverflowLabelMode="NoLabel" IsBackButtonVisible="Collapsed"
                     SelectedItem="{x:Bind FileOpenVM.CurrentTab, Mode=TwoWay}"
@@ -28,6 +28,13 @@
             <NavigationViewItem Content="Sample outlines" Tag="Sample">
                 <NavigationViewItem.Icon>
                     <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE753;"/>
+                </NavigationViewItem.Icon>
+            </NavigationViewItem>
+
+            <!-- Backup button -->
+            <NavigationViewItem Content="Backups" Tag="Backup">
+                <NavigationViewItem.Icon>
+                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE777;"/>
                 </NavigationViewItem.Icon>
             </NavigationViewItem>
         </NavigationView.MenuItems>
@@ -69,9 +76,28 @@
                             <RowDefinition Height="50"/>
                         </Grid.RowDefinitions>
 
+                        <ListView Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center" 
+                             ItemsSource="{x:Bind FileOpenVM.RecentsUI}" 
+                             SelectedIndex="{x:Bind FileOpenVM.SelectedRecentIndex, Mode=TwoWay}">
+                            <ListView.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <ItemsStackPanel Orientation="Vertical" Margin="0,10,0,0"/>
+                                </ItemsPanelTemplate>
+                            </ListView.ItemsPanel>
+                        </ListView>
+                    </Grid>
+
+                    <!-- Backups tab -->
+                    <Grid Visibility="{x:Bind FileOpenVM.BackupTabContentVisibility, Mode=TwoWay}" >
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="40"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="50"/>
+                        </Grid.RowDefinitions>
+
                         <ListBox Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center" 
-                             ItemsSource="{x:Bind FileOpenVM.RecentsUI}"
-                             SelectedIndex="{x:Bind FileOpenVM.SelectedRecentIndex, Mode=TwoWay}"/>
+                                 ItemsSource="{x:Bind FileOpenVM.BackupUI}" 
+                                 SelectedIndex="{x:Bind FileOpenVM.SelectedBackupIndex, Mode=TwoWay}"/>
                     </Grid>
 
                     <!-- New tab -->
@@ -114,19 +140,15 @@
 
 
             <!-- Footer buttons -->
-            <Grid Grid.Row="3" HorizontalAlignment="Stretch">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition MinWidth="10"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition MinWidth="10"/>
-                </Grid.ColumnDefinitions>
-
+            <StackPanel Grid.Row="3" MinWidth="700" HorizontalAlignment="Stretch" Orientation="Horizontal"
+                        Margin="10">
                 <!-- buttons -->
-                <Button Grid.Column="1" Content="{x:Bind FileOpenVM.ConfirmButtonText, Mode=TwoWay}"
-                        Click="{x:Bind FileOpenVM.ConfirmClicked}" HorizontalAlignment="Stretch" />
-                <Button Grid.Column="2" Content="Close" HorizontalAlignment="Stretch" Click="{x:Bind FileOpenVM.Close}"/>
-            </Grid>
+                <Button Content="{x:Bind FileOpenVM.ConfirmButtonText, Mode=TwoWay}"
+                        Click="{x:Bind FileOpenVM.ConfirmClicked}" HorizontalAlignment="Stretch" Width="300" Margin="10,0" />
+                <Button Content="Close" HorizontalAlignment="Stretch" Width="300" Click="{x:Bind FileOpenVM.Close}"/>
+
+
+            </StackPanel>
         </Grid>
     </NavigationView>
 </Page>
