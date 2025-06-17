@@ -167,7 +167,7 @@
                         <usercontrols:RichEditBoxExtended RtfText="{x:Bind ProblemVm.StructureDescription, Mode=TwoWay}" Grid.Row="3" 
 							           TextWrapping="Wrap" IsReadOnly="{x:Bind ProblemVm.IsBeatSheetReadOnly}"/>
 
-                        <CommandBar DefaultLabelPosition="Right" FlowDirection="LeftToRight"
+                        <CommandBar DefaultLabelPosition="Right" FlowDirection="LeftToRight" HorizontalAlignment="Left"
                                     Visibility="{x:Bind ProblemVm.BeatsheetEditButtonsVisibility, Mode=OneWay}">
                             <AppBarButton Icon="Add"  Label="Beat" Click="{x:Bind ProblemVm.CreateBeat}" />
                         </CommandBar>
