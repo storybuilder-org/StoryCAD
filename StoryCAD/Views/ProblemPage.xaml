@@ -146,12 +146,18 @@
                 </Grid>
             </PivotItem>
 			<PivotItem Header="Structure">
-				<Grid>
-					<Grid.ColumnDefinitions>
-						<ColumnDefinition Width="*"/>
 						<ColumnDefinition Width="Auto"/>
-					</Grid.ColumnDefinitions>
-                    <ScrollViewer Grid.Column="0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Persistent toolbar with add button -->
+                    <Button HorizontalAlignment="Stretch" Content="+ Add New Beat"
+                                    Click="{x:Bind ProblemVm.CreateBeat}"  Grid.Row="0" Margin="0,20"
+                                    Visibility="{x:Bind ProblemVm.BeatsheetEditButtonsVisibility, Mode=OneWay}"/>
+                    <ScrollViewer Grid.Row="1">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
@@ -213,7 +219,7 @@
                                                             <ColumnDefinition Width="auto"/>
                                                         </Grid.ColumnDefinitions>
                                                         <TextBlock Grid.Column="0" Text="{x:Bind ElementName, Mode=OneWay}" TextWrapping="Wrap" TextAlignment="Left"/>
-                                                        
+
                                                         <!-- Bind button.-->
                                                         <Button Grid.Column="1" HorizontalAlignment="Right">
                                                             <Button.Content>
@@ -262,11 +268,6 @@
                                     </DataTemplate>
                                 </ItemsRepeater.ItemTemplate>
                             </ItemsRepeater>
-
-                            <!-- Add custom beats for custom beat sheets. -->
-                            <Button Grid.Row="5" HorizontalAlignment="Stretch" Content="+ Add New Beat"
-                                    Click="{x:Bind ProblemVm.CreateBeat}" 
-                                    Visibility="{x:Bind ProblemVm.BeatsheetEditButtonsVisibility, Mode=OneWay}"/>
                         </Grid>
                     </ScrollViewer>
                 </Grid>
