@@ -156,52 +156,85 @@
                     <StackPanel Grid.Row="0">
                         <!-- Beat picker and Title/Desc of Overall beat -->
                         <!-- Double bind to fix WinUI 3 binding issue -->
-                        <ComboBox Header="Structure" ItemsSource="{x:Bind BeatSheetsViewModel.PlotPatternNames}"
+                        <Expander Margin="0,0,0,20">
+                            <Expander.Header>
+                                <ComboBox Header="Structure (Click to show description)" ItemsSource="{x:Bind BeatSheetsViewModel.PlotPatternNames}"
 							          MinWidth="200" SelectionChanged="{x:Bind ProblemVm.UpdateSelectedBeat}"
 									  PlaceholderText="{x:Bind ProblemVm.StructureModelTitle, Mode=OneWay}"
 									  SelectedValue="{x:Bind ProblemVm.StructureModelTitle, Mode=OneWay}"
 							          Text="{x:Bind ProblemVm.StructureModelTitle, Mode=OneWay}" Grid.Row="0"/>
-                        
-                        <TextBlock Text="Structure Description:" Margin="0,10,0,0"/>
+                            </Expander.Header>
+                            <Expander.Content>
+                                <usercontrols:RichEditBoxExtended RtfText="{x:Bind ProblemVm.StructureDescription, Mode=TwoWay}" Grid.Row="3" 
+							           TextWrapping="Wrap" IsReadOnly="{x:Bind ProblemVm.IsBeatSheetReadOnly}" Header="Structure Description:"/>
+                            </Expander.Content>
+                        </Expander>
 
-                        <usercontrols:RichEditBoxExtended RtfText="{x:Bind ProblemVm.StructureDescription, Mode=TwoWay}" Grid.Row="3" 
-							           TextWrapping="Wrap" IsReadOnly="{x:Bind ProblemVm.IsBeatSheetReadOnly}"/>
 
                         <CommandBar DefaultLabelPosition="Right" FlowDirection="LeftToRight" HorizontalAlignment="Left"
                                     Visibility="{x:Bind ProblemVm.BeatsheetEditButtonsVisibility, Mode=OneWay}">
                             <AppBarButton Icon="Add"  Label="Beat" Click="{x:Bind ProblemVm.CreateBeat}" />
+
+                            <AppBarButton Grid.Column="1" HorizontalAlignment="Right">
+                                <AppBarButton.Content>
+                                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE71B;"/>
+                                </AppBarButton.Content>
+                                <AppBarButton.Flyout>
+                                    <Flyout>
+                                        <StackPanel>
+                                            <Button Content="Unbind element for this beat" HorizontalAlignment="Center"
+                                                                                   Click="{x:Bind ProblemVm.UnbindElement}" DataContext="{x:Bind}"/>
+                                            <!-- Shows scenes and problems in a list -->
+                                            <ListView ItemsSource="{x:Bind ProblemVm.Scenes, Mode=TwoWay}" Width="350" CanDrag="True"
+								                                                  Header="Scenes" DisplayMemberPath="Name" />
+                                            <ListView ItemsSource="{x:Bind ProblemVm.Problems, Mode=TwoWay}" Width="350" CanDrag="True"
+								                      Header="Problems" DisplayMemberPath="Name"/>
+                                        </StackPanel>
+                                    </Flyout>
+                                </AppBarButton.Flyout>
+                            </AppBarButton>
+
+                            <AppBarButton>
+                                <SymbolIcon Symbol="Delete"/>
+                            </AppBarButton>
+                            <AppBarButton>
+                                <SymbolIcon Symbol="Up"/>
+                            </AppBarButton>
+                            <AppBarButton>
+                                <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE74B;"/>
+                            </AppBarButton>
                         </CommandBar>
                     </StackPanel>
 
                     <ScrollViewer Grid.Row="1">
                         <!-- Beats viewer -->
                         <ItemsRepeater ItemsSource="{x:Bind ProblemVm.StructureBeats, Mode=TwoWay}"
-                                        HorizontalAlignment="Stretch" Grid.Row="1">
+                                        HorizontalAlignment="Stretch">
                             <ItemsRepeater.ItemTemplate>
                                 <DataTemplate x:DataType="tools:StructureBeatViewModel">
-                                    <!-- Small boarder -->
-                                    <Border BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}"
-                                            BorderThickness="1" CornerRadius="4" Padding="5" Margin="0,5,5,0">
-
-                                        <!-- Two columns: main content | buttons -->
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="Auto"/>
-                                            </Grid.ColumnDefinitions>
-
-                                            <StackPanel Grid.Column="0" Orientation="Vertical" Spacing="6">
-
-                                                <!-- Icon + Title -->
-                                                <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
-                                                    <SymbolIcon Symbol="{x:Bind ElementIcon, Mode=OneWay}"/>
-                                                    <TextBox Text="{x:Bind Title}" FontSize="18" TextWrapping="Wrap" MinWidth="500"
-                                                                  IsReadOnly="{x:Bind ProblemViewModel.IsBeatSheetReadOnly}"/>
-                                                </StackPanel>
-
+                                    <Expander MinWidth="400">
+                                        <Expander.Header>
+                                            <!-- Icon + Title -->
+                                            <Grid VerticalAlignment="Center">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="auto"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <SymbolIcon Symbol="{x:Bind ElementIcon, Mode=OneWay}" Grid.Column="0"/>
+                                                <TextBox Text="{x:Bind Title}" FontSize="18" TextWrapping="NoWrap" Grid.Column="1"
+                                                         IsReadOnly="{x:Bind ProblemViewModel.IsBeatSheetReadOnly}" Margin="10,0"
+                                                         Padding="5,0,20,0"/>
+                                                <TextBlock Text="{x:Bind ElementName, Mode=OneWay}" TextWrapping="Wrap" Grid.Column="2" 
+                                                           VerticalAlignment="Center"/>
+                                            </Grid>
+                                        </Expander.Header>
+                                        <Expander.Content>
+                                            <StackPanel>
                                                 <!-- Beat description (now just under title/icon) -->
                                                 <TextBox Text="{x:Bind Description}" TextWrapping="Wrap" 
-                                                             IsReadOnly="{x:Bind ProblemViewModel.IsBeatSheetReadOnly}"/>
+                                                         Header="Beat Description"
+                                                         IsReadOnly="{x:Bind ProblemViewModel.IsBeatSheetReadOnly}"/>
 
                                                 <!-- Divider -->
                                                 <Border Background="{ThemeResource SystemControlForegroundBaseLowBrush}" Height="1"/>
@@ -212,53 +245,17 @@
                                                         <ColumnDefinition Width="*"/>
                                                         <ColumnDefinition Width="auto"/>
                                                     </Grid.ColumnDefinitions>
-                                                    <TextBlock Grid.Column="0" Text="{x:Bind ElementName, Mode=OneWay}" TextWrapping="Wrap" TextAlignment="Left"/>
 
-                                                    <!-- Bind button.-->
-                                                    <Button Grid.Column="1" HorizontalAlignment="Right">
-                                                        <Button.Content>
-                                                            <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE71B;"/>
-                                                        </Button.Content>
-                                                        <Button.Flyout>
-                                                            <Flyout>
-                                                                <StackPanel>
-                                                                    <Button Content="Unbind element for this beat" HorizontalAlignment="Center"
-                                                                                Click="{x:Bind ProblemViewModel.UnbindElement}" DataContext="{x:Bind}"/>
-                                                                    <!-- Shows scenes and problems in a list -->
-                                                                    <ListView ItemsSource="{x:Bind ProblemViewModel.Scenes, Mode=TwoWay}" Width="350" CanDrag="True"
-									                                              Header="Scenes" DisplayMemberPath="Name" 
-                                                                                  SelectionChanged="{x:Bind ProblemViewModel.AssignBeat}" DataContext="{x:Bind}"/>
-                                                                    <ListView ItemsSource="{x:Bind ProblemViewModel.Problems, Mode=TwoWay}" Width="350" CanDrag="True"
-									                                              Header="Problems" DisplayMemberPath="Name" 
-                                                                                  SelectionChanged="{x:Bind ProblemViewModel.AssignBeat}" DataContext="{x:Bind}"/>
-                                                                </StackPanel>
-                                                            </Flyout>
-                                                        </Button.Flyout>
-                                                    </Button>
+
                                                 </Grid>
 
                                                 <usercontrols:RichEditBoxExtended 
-                                                        RtfText="{x:Bind ElementDescription, Mode=OneWay}"
-                                                        IsReadOnly="True" TextWrapping="Wrap" TextAlignment="Left"/>
+                                                           Header="Element Desription"
+                                                           RtfText="{x:Bind ElementDescription, Mode=OneWay}"
+                                                           IsReadOnly="True" TextWrapping="Wrap" TextAlignment="Left"/>
                                             </StackPanel>
-
-                                            <!-- ACTION BUTTONS -->
-                                            <StackPanel Grid.Column="1" Orientation="Vertical" VerticalAlignment="Center"
-                                                    Spacing="4" Margin="8,0,0,0" 
-                                                    Visibility="{x:Bind ProblemViewModel.BeatsheetEditButtonsVisibility}">
-                                                <Button Click="{x:Bind DeleteBeat}">
-                                                    <SymbolIcon Symbol="Delete"/>
-                                                </Button>
-                                                <Button Click="{x:Bind MoveUp}">
-                                                    <SymbolIcon Symbol="Up"/>
-                                                </Button>
-                                                <Button Click="{x:Bind MoveDown}">
-                                                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE74B;"/>
-                                                </Button>
-                                            </StackPanel>
-                                        </Grid>
-                                    </Border>
-
+                                        </Expander.Content>
+                                    </Expander>
                                 </DataTemplate>
                             </ItemsRepeater.ItemTemplate>
                         </ItemsRepeater>
