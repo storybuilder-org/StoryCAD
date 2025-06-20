@@ -342,6 +342,26 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         get => _beatsheetEditButtonsVisibility;
         set => SetProperty(ref _beatsheetEditButtonsVisibility, value);
     }
+
+    public int _selectedBeatIndex;
+    /// <summary>
+    /// Selected Beat Index
+    /// </summary>
+    public int SelectedBeatIndex
+    {
+        get => _selectedBeatIndex;
+        set => SetProperty(ref _selectedBeatIndex, value);
+    }
+    private StructureBeatViewModel _selectedBeat;
+
+    /// <summary>
+    /// Selected Beat Item
+    /// </summary>
+    public StructureBeatViewModel SelectedBeat
+    {
+        get => _selectedBeat;
+        set => SetProperty(ref _selectedBeat, value);
+    }
     #endregion
 
     #region Methods
@@ -535,7 +555,9 @@ public class ProblemViewModel : ObservableRecipient, INavigable
             //Delete beats (This handles binds)
             for (int i = StructureBeats.Count - 1; i >= 0; i--)
             {
-                StructureBeats[i].DeleteBeat(null, null);
+                SelectedBeat = StructureBeats[i];
+                SelectedBeatIndex = i;
+                DeleteBeat(null, null);
             }
         }
 	    else { Result = ContentDialogResult.Primary; }
@@ -664,15 +686,68 @@ public class ProblemViewModel : ObservableRecipient, INavigable
     }
 
     /// <summary>
+    /// Deletes this beat
+    /// </summary>
+    public void DeleteBeat(object sender, RoutedEventArgs e)
+    {
+        if (SelectedBeat.Element.ElementType == StoryItemType.Problem)
+        {
+            // If this beat is bound to a problem, unbind it first.
+            if (SelectedBeat.Element.Uuid == Uuid)
+            {
+                BoundStructure = String.Empty;
+            }
+            else
+            {
+                (Ioc.Default.GetRequiredService<OutlineViewModel>().StoryModel.
+                    StoryElements.StoryElementGuids[SelectedBeat.Guid] as ProblemModel)
+                    .BoundStructure = Guid.Empty.ToString();
+            }
+        }
+
+        StructureBeats.Remove(SelectedBeat);
+    }
+
+    /// <summary>
+    /// Moves this beat up
+    /// </summary>
+    public void MoveUp(object sender, RoutedEventArgs e)
+    {
+        if (SelectedBeatIndex > 0)
+        {
+            StructureBeats.Move(SelectedBeatIndex, SelectedBeatIndex - 1);
+        }
+        else
+        {
+            Ioc.Default.GetRequiredService<ShellViewModel>().
+                ShowMessage(LogLevel.Warn, "This is already the first beat.", true);
+        }
+    }
+    /// <summary>
+    /// Moves this beat up
+    /// </summary>
+    public void MoveDown(object sender, RoutedEventArgs e)
+    {   
+        var max = StructureBeats.Count;
+
+        if (SelectedBeatIndex < max-1)
+        {
+            StructureBeats.Move(SelectedBeatIndex, SelectedBeatIndex + 1);
+        }
+        else
+        {
+            Ioc.Default.GetRequiredService<ShellViewModel>()
+                .ShowMessage(LogLevel.Warn, "This is already the last beat.", true);
+        }
+    }
+
+    /// <summary>
     /// Assigns a new beat
     /// </summary>
     public async void AssignBeat(object sender, SelectionChangedEventArgs e)
     {
         //Get the element we want to bind.
         Guid DesiredBind = (e.AddedItems[0] as StoryElement).Uuid;
-
-        //Get the beat we want to bind to
-        var structureBeatsModel = (sender as ListView).DataContext as StructureBeatViewModel;
 
         OutlineViewModel OutlineVM = Ioc.Default.GetService<OutlineViewModel>();
         try 
@@ -717,7 +792,7 @@ public class ProblemViewModel : ObservableRecipient, INavigable
                 }
             }
 
-            structureBeatsModel.Guid = DesiredBind;
+            SelectedBeat.Guid = DesiredBind;
         }
         catch (Exception ex)
         {

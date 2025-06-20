@@ -74,7 +74,7 @@ public class StructureBeatViewModel : ObservableObject
 	/// Link to element
 	/// </summary>
 	[JsonIgnore]
-	private StoryElement Element
+	internal StoryElement Element
     {
         get
         {
@@ -150,62 +150,5 @@ public class StructureBeatViewModel : ObservableObject
     }
     #endregion
 
-    /// <summary>
-    /// Deletes this beat
-    /// </summary>
-    public void DeleteBeat(object sender, RoutedEventArgs e)
-    {
-        if (Element.ElementType == StoryItemType.Problem)
-        {
-            // If this beat is bound to a problem, unbind it first.
-            if (Element.Uuid == ProblemViewModel.Uuid)
-            {
-                ProblemViewModel.BoundStructure = Guid.Empty.ToString();
-            }
-            else
-            {
-                (Ioc.Default.GetRequiredService<OutlineViewModel>().StoryModel.
-                    StoryElements.StoryElementGuids[guid] as ProblemModel)
-                    .BoundStructure = Guid.Empty.ToString();
-            }
-        }
 
-        ProblemViewModel.StructureBeats.Remove(this);
-    }
-
-    /// <summary>
-    /// Moves this beat up
-    /// </summary>
-    public void MoveUp(object sender, RoutedEventArgs e)
-    {
-        var pos = ProblemViewModel.StructureBeats.IndexOf(this);
-
-        if (pos > 0)
-        {
-            ProblemViewModel.StructureBeats.Move(pos, pos - 1);
-        }
-        else
-        {
-            Ioc.Default.GetRequiredService<ShellViewModel>().
-                ShowMessage(LogLevel.Warn, "This is already the first beat.", true);
-        }
-    }
-    /// <summary>
-    /// Moves this beat up
-    /// </summary>
-    public void MoveDown(object sender, RoutedEventArgs e)
-    {
-        var pos = ProblemViewModel.StructureBeats.IndexOf(this);
-        var max = ProblemViewModel.StructureBeats.Count;
-
-        if (pos < max-1)
-        {
-            Ioc.Default.GetRequiredService<ProblemViewModel>().StructureBeats.Move(pos, pos + 1);
-        }
-        else
-        {
-            Ioc.Default.GetRequiredService<ShellViewModel>()
-                .ShowMessage(LogLevel.Warn, "This is already the last beat.", true);
-        }
-    }
 }

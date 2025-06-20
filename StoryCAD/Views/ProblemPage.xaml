@@ -4,9 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"               
     xmlns:usercontrols="using:StoryCAD.Controls"
     xmlns:viewModels="using:StoryCAD.ViewModels"
-    xmlns:tools="using:StoryCAD.ViewModels.Tools"
-    x:Name="ProblemUI">
-
+    xmlns:tools="using:StoryCAD.ViewModels.Tools">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -171,10 +169,8 @@
                         </Expander>
 
 
-                        <CommandBar DefaultLabelPosition="Right" FlowDirection="LeftToRight" HorizontalAlignment="Left"
-                                    Visibility="{x:Bind ProblemVm.BeatsheetEditButtonsVisibility, Mode=OneWay}">
-                            <AppBarButton Icon="Add"  Label="Beat" Click="{x:Bind ProblemVm.CreateBeat}" />
-
+                        <CommandBar DefaultLabelPosition="Right" FlowDirection="LeftToRight" HorizontalAlignment="Left">
+                            <!-- Beat Bind Button-->
                             <AppBarButton Grid.Column="1" HorizontalAlignment="Right">
                                 <AppBarButton.Content>
                                     <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE71B;"/>
@@ -193,14 +189,16 @@
                                     </Flyout>
                                 </AppBarButton.Flyout>
                             </AppBarButton>
-
-                            <AppBarButton>
-                                <SymbolIcon Symbol="Delete"/>
-                            </AppBarButton>
-                            <AppBarButton>
-                                <SymbolIcon Symbol="Up"/>
-                            </AppBarButton>
-                            <AppBarButton>
+                            
+                            <!-- Add/Delete/Move Buttons-->
+                            <AppBarButton Icon="Add"  Label="Beat" Click="{x:Bind ProblemVm.CreateBeat}" 
+                                          Visibility="{x:Bind ProblemVm.BeatsheetEditButtonsVisibility, Mode=OneWay}"/>
+                            <AppBarButton Icon="Delete" Label="Delete" Click="{x:Bind ProblemVm.DeleteBeat}"
+                                Visibility="{x:Bind ProblemVm.BeatsheetEditButtonsVisibility, Mode=OneWay}"/>
+                            <AppBarButton Icon="Up" Label="Move Up" Click="{x:Bind ProblemVm.MoveUp}"
+                                Visibility="{x:Bind ProblemVm.BeatsheetEditButtonsVisibility, Mode=OneWay}"/>
+                            <AppBarButton Label="Move Down" Click="{x:Bind ProblemVm.MoveDown}"
+                                Visibility="{x:Bind ProblemVm.BeatsheetEditButtonsVisibility, Mode=OneWay}">
                                 <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE74B;"/>
                             </AppBarButton>
                         </CommandBar>
@@ -208,11 +206,13 @@
 
                     <ScrollViewer Grid.Row="1">
                         <!-- Beats viewer -->
-                        <ItemsRepeater ItemsSource="{x:Bind ProblemVm.StructureBeats, Mode=TwoWay}"
-                                        HorizontalAlignment="Stretch">
-                            <ItemsRepeater.ItemTemplate>
+                        <ListView ItemsSource="{x:Bind ProblemVm.StructureBeats, Mode=TwoWay}"
+                                  SelectedItem="{x:Bind ProblemVm.SelectedBeat, Mode=TwoWay}"
+                                  SelectedIndex="{x:Bind ProblemVm.SelectedBeatIndex, Mode=TwoWay}"
+                                  HorizontalAlignment="Stretch">
+                            <ListView.ItemTemplate>
                                 <DataTemplate x:DataType="tools:StructureBeatViewModel">
-                                    <Expander MinWidth="400">
+                                    <Expander MinWidth="400" DataContext="{x:Bind}"  PointerPressed="Expander_PointerPressed">
                                         <Expander.Header>
                                             <!-- Icon + Title -->
                                             <Grid VerticalAlignment="Center">
@@ -236,18 +236,7 @@
                                                          Header="Beat Description"
                                                          IsReadOnly="{x:Bind ProblemViewModel.IsBeatSheetReadOnly}"/>
 
-                                                <!-- Divider -->
                                                 <Border Background="{ThemeResource SystemControlForegroundBaseLowBrush}" Height="1"/>
-
-                                                <!-- Rich text content -->
-                                                <Grid HorizontalAlignment="Stretch">
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="*"/>
-                                                        <ColumnDefinition Width="auto"/>
-                                                    </Grid.ColumnDefinitions>
-
-
-                                                </Grid>
 
                                                 <usercontrols:RichEditBoxExtended 
                                                            Header="Element Desription"
@@ -257,8 +246,8 @@
                                         </Expander.Content>
                                     </Expander>
                                 </DataTemplate>
-                            </ItemsRepeater.ItemTemplate>
-                        </ItemsRepeater>
+                            </ListView.ItemTemplate>
+                        </ListView>
                     </ScrollViewer>
                 </Grid>
 			</PivotItem>
