@@ -1,6 +1,5 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Security.Cryptography;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
@@ -9,7 +8,6 @@ using StoryCAD.Controls;
 using StoryCAD.Models.Tools;
 using StoryCAD.Services.Messages;
 using StoryCAD.Services.Navigation;
-using StoryCAD.Services.Outline;
 using StoryCAD.ViewModels.SubViewModels;
 using StoryCAD.ViewModels.Tools;
 
@@ -755,7 +753,7 @@ public class ProblemViewModel : ObservableRecipient, INavigable
             //Find element being bound.
             StoryElement Element = OutlineVM.StoryModel.StoryElements.First(g => g.Uuid == DesiredBind);
             int ElementIndex = OutlineVM.StoryModel.StoryElements.IndexOf(Element);
-
+            
             //Check if problem is being dropped and enforce rule.
             if (Element.ElementType == StoryItemType.Problem)
             {

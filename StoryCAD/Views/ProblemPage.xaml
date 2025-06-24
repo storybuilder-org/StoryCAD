@@ -151,40 +151,48 @@
                     </Grid.RowDefinitions>
 
                     <!-- Persistent toolbar with add button -->
-                    <StackPanel Grid.Row="0">
+                    <Grid Grid.Row="0">
                         <!-- Beat picker and Title/Desc of Overall beat -->
                         <!-- Double bind to fix WinUI 3 binding issue -->
                         <Expander Margin="0,0,0,20">
                             <Expander.Header>
-                                <ComboBox Header="Structure (Click to show description)" ItemsSource="{x:Bind BeatSheetsViewModel.PlotPatternNames}"
-							          MinWidth="200" SelectionChanged="{x:Bind ProblemVm.UpdateSelectedBeat}"
-									  PlaceholderText="{x:Bind ProblemVm.StructureModelTitle, Mode=OneWay}"
-									  SelectedValue="{x:Bind ProblemVm.StructureModelTitle, Mode=OneWay}"
-							          Text="{x:Bind ProblemVm.StructureModelTitle, Mode=OneWay}" Grid.Row="0"/>
+                                <ComboBox Header="Beat Sheet (Click to show description)"
+                                          ItemsSource="{x:Bind BeatSheetsViewModel.PlotPatternNames}"
+							              MinWidth="200" SelectionChanged="{x:Bind ProblemVm.UpdateSelectedBeat}"
+									      PlaceholderText="{x:Bind ProblemVm.StructureModelTitle, Mode=OneWay}"
+									      SelectedValue="{x:Bind ProblemVm.StructureModelTitle, Mode=OneWay}"
+							              Text="{x:Bind ProblemVm.StructureModelTitle, Mode=OneWay}" Grid.Row="0"/>
                             </Expander.Header>
                             <Expander.Content>
                                 <usercontrols:RichEditBoxExtended RtfText="{x:Bind ProblemVm.StructureDescription, Mode=TwoWay}" Grid.Row="3" 
-							           TextWrapping="Wrap" IsReadOnly="{x:Bind ProblemVm.IsBeatSheetReadOnly}" Header="Structure Description:"/>
+							           TextWrapping="Wrap" IsReadOnly="{x:Bind ProblemVm.IsBeatSheetReadOnly}" Header="Beat Sheet Description:"/>
                             </Expander.Content>
                         </Expander>
 
 
                         <CommandBar DefaultLabelPosition="Right" FlowDirection="LeftToRight" HorizontalAlignment="Left">
                             <!-- Beat Bind Button-->
-                            <AppBarButton Grid.Column="1" HorizontalAlignment="Right">
+                            <AppBarButton Grid.Column="1" HorizontalAlignment="Right" Label="Assign">
                                 <AppBarButton.Content>
                                     <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE71B;"/>
                                 </AppBarButton.Content>
                                 <AppBarButton.Flyout>
                                     <Flyout>
                                         <StackPanel>
-                                            <Button Content="Unbind element for this beat" HorizontalAlignment="Center"
-                                                                                   Click="{x:Bind ProblemVm.UnbindElement}" DataContext="{x:Bind}"/>
+                                            <Button Content="Unbind element for this beat" HorizontalAlignment="Left"
+                                                        Click="{x:Bind ProblemVm.UnbindElement}" DataContext="{x:Bind}"/>
                                             <!-- Shows scenes and problems in a list -->
-                                            <ListView ItemsSource="{x:Bind ProblemVm.Scenes, Mode=TwoWay}" Width="350" CanDrag="True"
-								                                                  Header="Scenes" DisplayMemberPath="Name" />
-                                            <ListView ItemsSource="{x:Bind ProblemVm.Problems, Mode=TwoWay}" Width="350" CanDrag="True"
-								                      Header="Problems" DisplayMemberPath="Name"/>
+
+                                            <Pivot>
+                                                <PivotItem Header="Scenes">
+                                                    <ListView ItemsSource="{x:Bind ProblemVm.Scenes, Mode=TwoWay}" CanDrag="True"
+                                                      SelectionChanged="{x:Bind ProblemVm.AssignBeat}" Header="Scenes" DisplayMemberPath="Name" />
+                                                </PivotItem>
+                                                <PivotItem Header="Problems">
+                                                    <ListView ItemsSource="{x:Bind ProblemVm.Problems, Mode=TwoWay}" CanDrag="True"
+                                                      SelectionChanged="{x:Bind ProblemVm.AssignBeat}" Header="Problems" DisplayMemberPath="Name"/>
+                                                </PivotItem>
+                                            </Pivot>
                                         </StackPanel>
                                     </Flyout>
                                 </AppBarButton.Flyout>
@@ -202,7 +210,7 @@
                                 <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE74B;"/>
                             </AppBarButton>
                         </CommandBar>
-                    </StackPanel>
+                    </Grid>
 
                     <ScrollViewer Grid.Row="1">
                         <!-- Beats viewer -->
