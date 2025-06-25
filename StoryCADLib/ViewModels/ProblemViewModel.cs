@@ -8,6 +8,7 @@ using StoryCAD.Controls;
 using StoryCAD.Models.Tools;
 using StoryCAD.Services.Messages;
 using StoryCAD.Services.Navigation;
+using StoryCAD.Services.Outline;
 using StoryCAD.ViewModels.SubViewModels;
 using StoryCAD.ViewModels.Tools;
 
@@ -560,8 +561,14 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         }
 	    else { Result = ContentDialogResult.Primary; }
 
+        if (value == "Load Custom Beat Sheet from file...")
+        {
+            value = "Custom Beat Sheet";
+            LoadBeatSheet();
+        }
+
         //Enable/disable edit buttons based on selection
-        if (value == "Custom Beatsheet")
+        if (value == "Custom Beat Sheet")
         {
             BeatsheetEditButtonsVisibility = Visibility.Visible;
             IsBeatSheetReadOnly = false;
@@ -838,6 +845,38 @@ public class ProblemViewModel : ObservableRecipient, INavigable
             ContainingStructure.StructureBeats[index].Guid = Guid.Empty;
             int ContainingStructIndex = OutlineVM.StoryModel.StoryElements.IndexOf(ContainingStructure);
             OutlineVM.StoryModel.StoryElements[ContainingStructIndex] = ContainingStructure;
+        }
+    }
+
+    public async void SaveBeatSheet()
+    {
+        try
+        {
+            var FilePath = await Ioc.Default.GetRequiredService<Windowing>().ShowFileSavePicker("Save", ".stbeat");
+
+            Ioc.Default.GetService<OutlineService>()
+                .SaveBeatsheet(FilePath.Path, StructureDescription, StructureBeats.ToList());
+        }
+        catch (Exception ex)
+        {
+            Ioc.Default.GetService<ShellViewModel>().ShowMessage(LogLevel.Error,"Failed to save Beatsheet", false);
+
+        }
+    }
+
+    public async void LoadBeatSheet()
+    {
+        try
+        {
+            var FilePath = await Ioc.Default.GetRequiredService<Windowing>().ShowFilePicker("Load", ".stbeat");
+            var model = Ioc.Default.GetService<OutlineService>().LoadBeatsheet(FilePath.Path);
+            StructureDescription = model.Description;
+            StructureBeats = new ObservableCollection<StructureBeatViewModel>(model.Beats);
+        }
+        catch (Exception ex)
+        {
+            Ioc.Default.GetService<ShellViewModel>().ShowMessage(LogLevel.Error, "Failed to save Beatsheet", false);
+
         }
     }
 }

@@ -1,11 +1,10 @@
-﻿using Octokit;
-using StoryCAD.DAL;
+﻿using StoryCAD.DAL;
 using StoryCAD.Services.Search;
 using StoryCAD.ViewModels.Tools;
 using System.Collections.ObjectModel;
 using System.Security.Cryptography;
+using System.Text.Json;
 using Windows.Storage;
-using Windows.Storage.Provider;
 
 namespace StoryCAD.Services.Outline;
 /// <summary>
@@ -700,5 +699,39 @@ public class OutlineService
         //Create/Add beats.
         Parent.StructureBeats = Beats ?? new();
     }
-    
+
+    /// <summary>
+    /// Saves a beatsheet to a file
+    /// </summary>
+    /// <param name="Path">File path to save to</param>
+    /// <param name="Description"> Beatsheet Description</param>
+    /// <param name="Beats">Beats</param>
+    public void SaveBeatsheet(string Path, string Description, List<StructureBeatViewModel> Beats)
+    {
+        SavedBeatsheet Model = new();
+        Model.Beats = new();
+        foreach (var Beat in Beats) 
+        {
+            Beat.Guid = Guid.Empty;
+            Model.Beats.Add(Beat);
+        }
+
+        Model.Description = Description;
+        string data = JsonSerializer.Serialize(Model);
+        File.WriteAllText(Path, data);
+    }
+
+    /// <summary>
+    /// Loads a beatsheet
+    /// </summary>
+    /// <param name="path">File path to load</param>
+    /// <returns>Model</returns>
+    public SavedBeatsheet LoadBeatsheet(string path)
+    {
+        string data = File.ReadAllText(path);
+        var model = JsonSerializer.Deserialize<SavedBeatsheet>(data);
+        foreach (var Beat in model.Beats) { Beat.Guid = Guid.Empty; }
+
+        return model;
+    }
 }

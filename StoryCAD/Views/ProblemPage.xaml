@@ -152,6 +152,11 @@
 
                     <!-- Persistent toolbar with add button -->
                     <Grid Grid.Row="0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        
                         <!-- Beat picker and Title/Desc of Overall beat -->
                         <!-- Double bind to fix WinUI 3 binding issue -->
                         <Expander Margin="0,0,0,20">
@@ -170,7 +175,8 @@
                         </Expander>
 
 
-                        <CommandBar DefaultLabelPosition="Right" FlowDirection="LeftToRight" HorizontalAlignment="Left">
+                        <CommandBar DefaultLabelPosition="Right" FlowDirection="LeftToRight" HorizontalAlignment="Left"
+                                    Grid.Row="1">
                             <!-- Beat Bind Button-->
                             <AppBarButton Grid.Column="1" HorizontalAlignment="Right" Label="Assign">
                                 <AppBarButton.Content>
@@ -182,15 +188,14 @@
                                             <Button Content="Unbind element for this beat" HorizontalAlignment="Left"
                                                         Click="{x:Bind ProblemVm.UnbindElement}" DataContext="{x:Bind}"/>
                                             <!-- Shows scenes and problems in a list -->
-
                                             <Pivot>
                                                 <PivotItem Header="Scenes">
                                                     <ListView ItemsSource="{x:Bind ProblemVm.Scenes, Mode=TwoWay}" CanDrag="True"
-                                                      SelectionChanged="{x:Bind ProblemVm.AssignBeat}" Header="Scenes" DisplayMemberPath="Name" />
+                                                      SelectionChanged="{x:Bind ProblemVm.AssignBeat}" DisplayMemberPath="Name" />
                                                 </PivotItem>
                                                 <PivotItem Header="Problems">
                                                     <ListView ItemsSource="{x:Bind ProblemVm.Problems, Mode=TwoWay}" CanDrag="True"
-                                                      SelectionChanged="{x:Bind ProblemVm.AssignBeat}" Header="Problems" DisplayMemberPath="Name"/>
+                                                              SelectionChanged="{x:Bind ProblemVm.AssignBeat}" DisplayMemberPath="Name"/>
                                                 </PivotItem>
                                             </Pivot>
                                         </StackPanel>
@@ -208,6 +213,10 @@
                             <AppBarButton Label="Move Down" Click="{x:Bind ProblemVm.MoveDown}"
                                 Visibility="{x:Bind ProblemVm.BeatsheetEditButtonsVisibility, Mode=OneWay}">
                                 <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE74B;"/>
+                            </AppBarButton>
+                            <AppBarButton Label="Save Beatsheet to file" Click="{x:Bind ProblemVm.SaveBeatSheet}"
+                                Visibility="{x:Bind ProblemVm.BeatsheetEditButtonsVisibility, Mode=OneWay}">
+                                <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE74E;"/>
                             </AppBarButton>
                         </CommandBar>
                     </Grid>
@@ -230,7 +239,7 @@
                                                     <ColumnDefinition Width="auto"/>
                                                 </Grid.ColumnDefinitions>
                                                 <SymbolIcon Symbol="{x:Bind ElementIcon, Mode=OneWay}" Grid.Column="0"/>
-                                                <TextBox Text="{x:Bind Title}" FontSize="18" TextWrapping="NoWrap" Grid.Column="1"
+                                                <TextBox Text="{x:Bind Title, Mode=TwoWay}" FontSize="18" TextWrapping="NoWrap" Grid.Column="1"
                                                          IsReadOnly="{x:Bind ProblemViewModel.IsBeatSheetReadOnly}" Margin="10,0"
                                                          Padding="5,0,20,0"/>
                                                 <TextBlock Text="{x:Bind ElementName, Mode=OneWay}" TextWrapping="Wrap" Grid.Column="2" 
@@ -240,7 +249,7 @@
                                         <Expander.Content>
                                             <StackPanel>
                                                 <!-- Beat description (now just under title/icon) -->
-                                                <TextBox Text="{x:Bind Description}" TextWrapping="Wrap" 
+                                                <TextBox Text="{x:Bind Description, Mode=TwoWay}" TextWrapping="Wrap" 
                                                          Header="Beat Description"
                                                          IsReadOnly="{x:Bind ProblemViewModel.IsBeatSheetReadOnly}"/>
 
@@ -248,7 +257,7 @@
 
                                                 <usercontrols:RichEditBoxExtended 
                                                            Header="Element Desription"
-                                                           RtfText="{x:Bind ElementDescription, Mode=OneWay}"
+                                                           RtfText="{x:Bind ElementDescription}"
                                                            IsReadOnly="True" TextWrapping="Wrap" TextAlignment="Left"/>
                                             </StackPanel>
                                         </Expander.Content>
