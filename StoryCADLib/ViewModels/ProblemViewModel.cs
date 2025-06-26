@@ -695,6 +695,12 @@ public class ProblemViewModel : ObservableRecipient, INavigable
     /// </summary>
     public void DeleteBeat(object sender, RoutedEventArgs e)
     {
+        if (SelectedBeat == null)
+        {
+            Ioc.Default.GetRequiredService<ShellViewModel>().ShowMessage(LogLevel.Warn, "Select a beat", false);
+            return;
+        }
+
         if (SelectedBeat.Element.ElementType == StoryItemType.Problem)
         {
             // If this beat is bound to a problem, unbind it first.
@@ -718,6 +724,12 @@ public class ProblemViewModel : ObservableRecipient, INavigable
     /// </summary>
     public void MoveUp(object sender, RoutedEventArgs e)
     {
+        if (SelectedBeat == null)
+        {
+            Ioc.Default.GetRequiredService<ShellViewModel>().ShowMessage(LogLevel.Warn, "Select a beat", false);
+            return;
+        }
+
         if (SelectedBeatIndex > 0)
         {
             StructureBeats.Move(SelectedBeatIndex, SelectedBeatIndex - 1);
@@ -732,7 +744,13 @@ public class ProblemViewModel : ObservableRecipient, INavigable
     /// Moves this beat up
     /// </summary>
     public void MoveDown(object sender, RoutedEventArgs e)
-    {   
+    {
+        if (SelectedBeat == null)
+        {
+            Ioc.Default.GetRequiredService<ShellViewModel>().ShowMessage(LogLevel.Warn, "Select a beat", false);
+            return;
+        }
+
         var max = StructureBeats.Count;
 
         if (SelectedBeatIndex < max-1)
@@ -751,6 +769,12 @@ public class ProblemViewModel : ObservableRecipient, INavigable
     /// </summary>
     public async void AssignBeat(object sender, SelectionChangedEventArgs e)
     {
+        if (SelectedBeat == null)
+        {
+            Ioc.Default.GetRequiredService<ShellViewModel>().ShowMessage(LogLevel.Warn, "Select a beat", false);
+            return;
+        }
+
         //Get the element we want to bind.
         Guid DesiredBind = (e.AddedItems[0] as StoryElement).Uuid;
 
@@ -810,6 +834,12 @@ public class ProblemViewModel : ObservableRecipient, INavigable
     /// </summary>
     public void UnbindElement(object sender, RoutedEventArgs e)
     {
+        if (SelectedBeat == null)
+        {
+            Ioc.Default.GetRequiredService<ShellViewModel>().ShowMessage(LogLevel.Warn, "Select a beat", false);
+            return;
+        }
+
         //Get the beat we want to bind to
         var BeatVM = (sender as Button).DataContext as StructureBeatViewModel;
 
@@ -853,6 +883,10 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         try
         {
             var FilePath = await Ioc.Default.GetRequiredService<Windowing>().ShowFileSavePicker("Save", ".stbeat");
+
+            //Picker error/canceled.
+            if (FilePath == null) {  return; }
+
 
             Ioc.Default.GetService<OutlineService>()
                 .SaveBeatsheet(FilePath.Path, StructureDescription, StructureBeats.ToList());

@@ -159,11 +159,11 @@
                         
                         <!-- Beat picker and Title/Desc of Overall beat -->
                         <!-- Double bind to fix WinUI 3 binding issue -->
-                        <Expander Margin="0,0,0,20">
+                        <Expander Margin="0,0,0,20"  HorizontalAlignment="Stretch">
                             <Expander.Header>
                                 <ComboBox Header="Beat Sheet (Click to show description)"
                                           ItemsSource="{x:Bind BeatSheetsViewModel.PlotPatternNames}"
-							              MinWidth="200" SelectionChanged="{x:Bind ProblemVm.UpdateSelectedBeat}"
+							              SelectionChanged="{x:Bind ProblemVm.UpdateSelectedBeat}"
 									      PlaceholderText="{x:Bind ProblemVm.StructureModelTitle, Mode=OneWay}"
 									      SelectedValue="{x:Bind ProblemVm.StructureModelTitle, Mode=OneWay}"
 							              Text="{x:Bind ProblemVm.StructureModelTitle, Mode=OneWay}" Grid.Row="0"/>
@@ -227,9 +227,14 @@
                                   SelectedItem="{x:Bind ProblemVm.SelectedBeat, Mode=TwoWay}"
                                   SelectedIndex="{x:Bind ProblemVm.SelectedBeatIndex, Mode=TwoWay}"
                                   HorizontalAlignment="Stretch">
+                            <ListView.ItemContainerStyle>
+                                <Style TargetType="ListViewItem">
+                                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                </Style>
+                            </ListView.ItemContainerStyle>
                             <ListView.ItemTemplate>
                                 <DataTemplate x:DataType="tools:StructureBeatViewModel">
-                                    <Expander MinWidth="400" DataContext="{x:Bind}"  PointerPressed="Expander_PointerPressed">
+                                    <Expander HorizontalAlignment="Stretch" DataContext="{x:Bind}"  PointerPressed="Expander_PointerPressed">
                                         <Expander.Header>
                                             <!-- Icon + Title -->
                                             <Grid VerticalAlignment="Center">
