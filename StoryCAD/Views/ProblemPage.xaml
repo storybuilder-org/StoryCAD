@@ -244,7 +244,7 @@
                                                     <ColumnDefinition Width="auto"/>
                                                 </Grid.ColumnDefinitions>
                                                 <SymbolIcon Symbol="{x:Bind ElementIcon, Mode=OneWay}" Grid.Column="0"/>
-                                                <TextBox Text="{x:Bind Title, Mode=TwoWay}" FontSize="18" TextWrapping="NoWrap" Grid.Column="1"
+                                                <TextBox Text="{x:Bind Title, Mode=TwoWay}" TextWrapping="NoWrap" Grid.Column="1"
                                                          IsReadOnly="{x:Bind ProblemViewModel.IsBeatSheetReadOnly}" Margin="10,0"
                                                          Padding="5,0,20,0"/>
                                                 <TextBlock Text="{x:Bind ElementName, Mode=OneWay}" TextWrapping="Wrap" Grid.Column="2" 
@@ -262,7 +262,7 @@
 
                                                 <usercontrols:RichEditBoxExtended 
                                                            Header="Element Desription"
-                                                           RtfText="{x:Bind ElementDescription}"
+                                                           RtfText="{x:Bind ElementDescription, Mode=OneWay}"
                                                            IsReadOnly="True" TextWrapping="Wrap" TextAlignment="Left"/>
                                             </StackPanel>
                                         </Expander.Content>
