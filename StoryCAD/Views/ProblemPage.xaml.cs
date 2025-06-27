@@ -21,8 +21,9 @@ public sealed partial class ProblemPage : BindablePage
         DataContext = ProblemVm;
     }
 
-    private void Expander_PointerPressed(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
+    private void ExpanderSet(Expander sender, ExpanderExpandingEventArgs args)
     {
         ProblemVm.SelectedBeat = (StructureBeatViewModel)(sender as Expander).DataContext;
+        ProblemVm.SelectedBeatIndex = ProblemVm.StructureBeats.IndexOf(ProblemVm.SelectedBeat);
     }
 }

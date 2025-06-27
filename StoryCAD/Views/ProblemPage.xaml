@@ -234,7 +234,7 @@
                             </ListView.ItemContainerStyle>
                             <ListView.ItemTemplate>
                                 <DataTemplate x:DataType="tools:StructureBeatViewModel">
-                                    <Expander HorizontalAlignment="Stretch" DataContext="{x:Bind}"  PointerPressed="Expander_PointerPressed">
+                                    <Expander HorizontalAlignment="Stretch" DataContext="{x:Bind}" Expanding="ExpanderSet">
                                         <Expander.Header>
                                             <!-- Icon + Title -->
                                             <Grid VerticalAlignment="Center">

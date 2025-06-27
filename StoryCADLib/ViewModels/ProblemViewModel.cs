@@ -435,6 +435,9 @@ public class ProblemViewModel : ObservableRecipient, INavigable
 		StructureDescription = Model.StructureDescription;
 		StructureBeats = Model.StructureBeats;
 		BoundStructure = Model.BoundStructure;
+
+        SelectedBeat = null;
+        SelectedBeatIndex = -1;
 		
 		//Ensure correct set of Elements are loaded for Structure Lists
 		Problems = story_model.StoryElements.Problems;
