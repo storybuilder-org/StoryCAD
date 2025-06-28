@@ -825,6 +825,8 @@ public class ProblemViewModel : ObservableRecipient, INavigable
             }
 
             SelectedBeat.Guid = DesiredBind;
+            SelectedBeat = null;
+            SelectedBeatIndex = -1;
         }
         catch (Exception ex)
         {
@@ -839,23 +841,25 @@ public class ProblemViewModel : ObservableRecipient, INavigable
     {
         if (SelectedBeat == null)
         {
-            Ioc.Default.GetRequiredService<ShellViewModel>().ShowMessage(LogLevel.Warn, "Select a beat", false);
+            Ioc.Default.GetRequiredService<ShellViewModel>()
+               .ShowMessage(LogLevel.Warn, "Select a beat", false);
             return;
         }
 
-        //Get the beat we want to bind to
-        var BeatVM = (sender as Button).DataContext as StructureBeatViewModel;
-
-        //Get index of the beat we are unbinding from
-        int BeatIndex = StructureBeats.IndexOf(BeatVM);
-
-        StoryElement boundElement = Ioc.Default.GetRequiredService<OutlineViewModel>()
-            .StoryModel.StoryElements.StoryElementGuids[BeatVM.Guid];
-        if (boundElement.ElementType == StoryItemType.Problem)
+        // unbind whatever beat is currently selected
+        if (Ioc.Default.GetRequiredService<OutlineViewModel>()
+               .StoryModel.StoryElements.StoryElementGuids[SelectedBeat.Guid].ElementType
+            == StoryItemType.Problem)
         {
-            removeBindData(Model, boundElement as ProblemModel);
+            removeBindData(Model,
+                (ProblemModel)Ioc.Default.GetRequiredService<OutlineViewModel>()
+                   .StoryModel.StoryElements.StoryElementGuids[SelectedBeat.Guid]);
         }
-        BeatVM.Guid = Guid.Empty;
+        SelectedBeat.Guid = Guid.Empty;
+
+        // clear selection so you force the user to re-select next time
+        SelectedBeat = null;
+        SelectedBeatIndex = -1;
     }
 
    

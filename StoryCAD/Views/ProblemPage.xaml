@@ -185,7 +185,7 @@
                                 <AppBarButton.Flyout>
                                     <Flyout>
                                         <StackPanel>
-                                            <Button Content="Unbind element for this beat" HorizontalAlignment="Left"
+                                            <Button Content="Unassign element for this beat" HorizontalAlignment="Left"
                                                         Click="{x:Bind ProblemVm.UnbindElement}" DataContext="{x:Bind}"/>
                                             <!-- Shows scenes and problems in a list -->
                                             <Pivot>
