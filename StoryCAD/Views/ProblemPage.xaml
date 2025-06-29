@@ -185,8 +185,6 @@
                                 <AppBarButton.Flyout>
                                     <Flyout>
                                         <StackPanel>
-                                            <Button Content="Unassign element for this beat" HorizontalAlignment="Left"
-                                                        Click="{x:Bind ProblemVm.UnbindElement}" DataContext="{x:Bind}"/>
                                             <!-- Shows scenes and problems in a list -->
                                             <Pivot>
                                                 <PivotItem Header="Scenes">
@@ -202,7 +200,10 @@
                                     </Flyout>
                                 </AppBarButton.Flyout>
                             </AppBarButton>
-                            
+
+                            <AppBarButton Label="Unassign" HorizontalAlignment="Left" Icon="Remove"
+                                    Click="{x:Bind ProblemVm.UnbindElement}" DataContext="{x:Bind}"/>
+
                             <!-- Add/Delete/Move Buttons-->
                             <AppBarButton Icon="Add"  Label="Beat" Click="{x:Bind ProblemVm.CreateBeat}" 
                                           Visibility="{x:Bind ProblemVm.BeatsheetEditButtonsVisibility, Mode=OneWay}"/>

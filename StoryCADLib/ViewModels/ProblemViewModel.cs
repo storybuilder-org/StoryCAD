@@ -846,6 +846,12 @@ public class ProblemViewModel : ObservableRecipient, INavigable
             return;
         }
 
+        if (SelectedBeat.Guid == Guid.Empty)
+        {
+            Ioc.Default.GetRequiredService<ShellViewModel>()
+            .ShowMessage(LogLevel.Warn, "Nothing is bound to this beat", false);
+        }
+
         // unbind whatever beat is currently selected
         if (Ioc.Default.GetRequiredService<OutlineViewModel>()
                .StoryModel.StoryElements.StoryElementGuids[SelectedBeat.Guid].ElementType
