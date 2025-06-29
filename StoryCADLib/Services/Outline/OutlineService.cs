@@ -641,7 +641,7 @@ public class OutlineService
             throw new ArgumentNullException(nameof(Parent));
         }
 
-        if (Parent.StructureBeats.Count >= Index || Index < 0)
+        if (Index < 0 || Index >= Parent.StructureBeats.Count)
         {
             // No bound beat
             if (Parent.StructureBeats[Index].Guid == Guid.Empty)
