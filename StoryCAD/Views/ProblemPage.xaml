@@ -5,7 +5,6 @@
     xmlns:usercontrols="using:StoryCAD.Controls"
     xmlns:viewModels="using:StoryCAD.ViewModels"
     xmlns:tools="using:StoryCAD.ViewModels.Tools">
-
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -145,103 +144,135 @@
                 </Grid>
             </PivotItem>
 			<PivotItem Header="Structure">
-				<Grid>
-					<Grid.ColumnDefinitions>
-						<ColumnDefinition Width="*"/>
-						<ColumnDefinition Width="Auto"/>
-					</Grid.ColumnDefinitions>
-					<ScrollViewer Grid.Column="0">
-						<Grid>
-							<Grid.RowDefinitions>
-								<RowDefinition Height="Auto"/>
-								<RowDefinition Height="Auto"/>
-								<RowDefinition Height="Auto"/>
-								<RowDefinition Height="Auto"/>
-								<RowDefinition Height="*"/>
-							</Grid.RowDefinitions>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
 
-							<!-- Beat picker and Title/Desc of Overall beat -->
-							<!--Double bind to fix WinUI 3 binding issue -->
-							<ComboBox Header="Structure" ItemsSource="{x:Bind BeatSheetsViewModel.PlotPatternNames}"
-							          MinWidth="200" SelectionChanged="{x:Bind ProblemVm.UpdateSelectedBeat}"
-									  PlaceholderText="{x:Bind ProblemVm.StructureModelTitle, Mode=OneWay}"
-									  SelectedValue="{x:Bind ProblemVm.StructureModelTitle, Mode=OneWay}"
-							          Text="{x:Bind ProblemVm.StructureModelTitle, Mode=OneWay}" Grid.Row="0"/>
-							<TextBlock Text="Structure Description:" Margin="0,10,0,0" Grid.Row="2"/>
-							<TextBlock Text="{x:Bind ProblemVm.StructureDescription, Mode=TwoWay}" Grid.Row="3" 
-							           TextWrapping="Wrap"/>
+                    <!-- Persistent toolbar with add button -->
+                    <Grid Grid.Row="0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        
+                        <!-- Beat picker and Title/Desc of Overall beat -->
+                        <!-- Double bind to fix WinUI 3 binding issue -->
+                        <Expander Margin="0,0,0,20"  HorizontalAlignment="Stretch">
+                            <Expander.Header>
+                                <ComboBox Header="Beat Sheet (Click to show description)"
+                                          ItemsSource="{x:Bind BeatSheetsViewModel.PlotPatternNames}"
+							              SelectionChanged="{x:Bind ProblemVm.UpdateSelectedBeat}"
+									      PlaceholderText="{x:Bind ProblemVm.StructureModelTitle, Mode=OneWay}"
+									      SelectedValue="{x:Bind ProblemVm.StructureModelTitle, Mode=OneWay}"
+							              Text="{x:Bind ProblemVm.StructureModelTitle, Mode=OneWay}" Grid.Row="0"/>
+                            </Expander.Header>
+                            <Expander.Content>
+                                <usercontrols:RichEditBoxExtended RtfText="{x:Bind ProblemVm.StructureDescription, Mode=TwoWay}" Grid.Row="3" 
+							           TextWrapping="Wrap" IsReadOnly="{x:Bind ProblemVm.IsBeatSheetReadOnly}" Header="Beat Sheet Description:"/>
+                            </Expander.Content>
+                        </Expander>
 
-							<!-- Beats viewer -->
-							<ItemsRepeater ItemsSource="{x:Bind ProblemVm.StructureBeats, Mode=TwoWay}"
-							               HorizontalAlignment="Stretch" Grid.Row="4">
-								<ItemsRepeater.ItemTemplate>
-									<DataTemplate x:DataType="tools:StructureBeatViewModel">
-										<Grid DataContext="{x:Bind}" MinWidth="200" AllowDrop="True" DragOver="UIElement_OnDragOver"
-										      Background="Transparent" CanDrag="False" Drop="DroppedItem" Margin="0,5,10,5"
-										      BorderBrush="White" BorderThickness="1" CornerRadius="4"
-										      Padding="5,10,10,10">
-											<Grid.ColumnDefinitions>
-												<ColumnDefinition Width="Auto"/>
-												<ColumnDefinition Width="*"/>
-												<ColumnDefinition Width="Auto"/>
-											</Grid.ColumnDefinitions>
-											<Grid.RowDefinitions>
-												<RowDefinition Height="Auto"/>
-												<RowDefinition Height="Auto"/>
-												<RowDefinition Height="Auto"/>
-												<RowDefinition Height="*"/>
-												<RowDefinition Height="Auto"/>
-											</Grid.RowDefinitions>
 
-											<!-- Outer Grid Content -->
-											<TextBlock Grid.Row="0" Grid.Column="1" Text="{x:Bind Title}"
-											           FontSize="18" TextWrapping="Wrap"/>
-											<TextBlock Grid.Row="1" Grid.Column="1" Text="{x:Bind Description}"
-											           TextWrapping="Wrap"/>
-											<StackPanel Grid.Row="0" Grid.Column="2" Orientation="Horizontal"
-											            DataContext="{x:Bind Mode=TwoWay}">
-											</StackPanel>
+                        <CommandBar DefaultLabelPosition="Right" FlowDirection="LeftToRight" HorizontalAlignment="Left"
+                                    Grid.Row="1">
+                            <!-- Beat Bind Button-->
+                            <AppBarButton Grid.Column="1" HorizontalAlignment="Right" Label="Assign">
+                                <AppBarButton.Content>
+                                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE71B;"/>
+                                </AppBarButton.Content>
+                                <AppBarButton.Flyout>
+                                    <Flyout>
+                                        <StackPanel>
+                                            <!-- Shows scenes and problems in a list -->
+                                            <Pivot>
+                                                <PivotItem Header="Scenes">
+                                                    <ListView ItemsSource="{x:Bind ProblemVm.Scenes, Mode=TwoWay}" CanDrag="True"
+                                                      SelectionChanged="{x:Bind ProblemVm.AssignBeat}" DisplayMemberPath="Name" />
+                                                </PivotItem>
+                                                <PivotItem Header="Problems">
+                                                    <ListView ItemsSource="{x:Bind ProblemVm.Problems, Mode=TwoWay}" CanDrag="True"
+                                                              SelectionChanged="{x:Bind ProblemVm.AssignBeat}" DisplayMemberPath="Name"/>
+                                                </PivotItem>
+                                            </Pivot>
+                                        </StackPanel>
+                                    </Flyout>
+                                </AppBarButton.Flyout>
+                            </AppBarButton>
 
-											<!-- Inner Grid Content Merged -->
-											<Border Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" Margin="0,10"
-											        BorderBrush="White" BorderThickness="1" CornerRadius="4"/>
+                            <AppBarButton Label="Unassign" HorizontalAlignment="Left" Icon="Remove"
+                                    Click="{x:Bind ProblemVm.UnbindElement}" DataContext="{x:Bind}"/>
 
-											<SymbolIcon Grid.Row="3" Grid.Column="0" Symbol="{Binding ElementIcon}"
-											            VerticalAlignment="Bottom"/>
+                            <!-- Add/Delete/Move Buttons-->
+                            <AppBarButton Icon="Add"  Label="Beat" Click="{x:Bind ProblemVm.CreateBeat}" 
+                                          Visibility="{x:Bind ProblemVm.BeatsheetEditButtonsVisibility, Mode=OneWay}"/>
+                            <AppBarButton Icon="Delete" Label="Delete" Click="{x:Bind ProblemVm.DeleteBeat}"
+                                Visibility="{x:Bind ProblemVm.BeatsheetEditButtonsVisibility, Mode=OneWay}"/>
+                            <AppBarButton Icon="Up" Label="Move Up" Click="{x:Bind ProblemVm.MoveUp}"
+                                Visibility="{x:Bind ProblemVm.BeatsheetEditButtonsVisibility, Mode=OneWay}"/>
+                            <AppBarButton Label="Move Down" Click="{x:Bind ProblemVm.MoveDown}"
+                                Visibility="{x:Bind ProblemVm.BeatsheetEditButtonsVisibility, Mode=OneWay}">
+                                <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE74B;"/>
+                            </AppBarButton>
+                            <AppBarButton Label="Save Beatsheet to file" Click="{x:Bind ProblemVm.SaveBeatSheet}"
+                                Visibility="{x:Bind ProblemVm.BeatsheetEditButtonsVisibility, Mode=OneWay}">
+                                <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE74E;"/>
+                            </AppBarButton>
+                        </CommandBar>
+                    </Grid>
 
-											<TextBlock Grid.Row="3" Grid.Column="1" Text="{x:Bind ElementName, Mode=OneWay}"
-											           Margin="10,5,0,0" VerticalAlignment="Top" TextWrapping="Wrap"/>
+                    <ScrollViewer Grid.Row="1">
+                        <!-- Beats viewer -->
+                        <ListView ItemsSource="{x:Bind ProblemVm.StructureBeats, Mode=TwoWay}"
+                                  SelectedItem="{x:Bind ProblemVm.SelectedBeat, Mode=TwoWay}"
+                                  SelectedIndex="{x:Bind ProblemVm.SelectedBeatIndex, Mode=TwoWay}"
+                                  HorizontalAlignment="Stretch">
+                            <ListView.ItemContainerStyle>
+                                <Style TargetType="ListViewItem">
+                                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                </Style>
+                            </ListView.ItemContainerStyle>
+                            <ListView.ItemTemplate>
+                                <DataTemplate x:DataType="tools:StructureBeatViewModel">
+                                    <Expander HorizontalAlignment="Stretch" DataContext="{x:Bind}" Expanding="ExpanderSet">
+                                        <Expander.Header>
+                                            <!-- Icon + Title -->
+                                            <Grid VerticalAlignment="Center">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="auto"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <SymbolIcon Symbol="{x:Bind ElementIcon, Mode=OneWay}" Grid.Column="0"/>
+                                                <TextBox Text="{x:Bind Title, Mode=TwoWay}" TextWrapping="NoWrap" Grid.Column="1"
+                                                         IsReadOnly="{x:Bind ProblemViewModel.IsBeatSheetReadOnly}" Margin="10,0"
+                                                         Padding="5,0,20,0"/>
+                                                <TextBlock Text="{x:Bind ElementName, Mode=OneWay}" TextWrapping="Wrap" Grid.Column="2" 
+                                                           VerticalAlignment="Center"/>
+                                            </Grid>
+                                        </Expander.Header>
+                                        <Expander.Content>
+                                            <StackPanel>
+                                                <!-- Beat description (now just under title/icon) -->
+                                                <TextBox Text="{x:Bind Description, Mode=TwoWay}" TextWrapping="Wrap" 
+                                                         Header="Beat Description"
+                                                         IsReadOnly="{x:Bind ProblemViewModel.IsBeatSheetReadOnly}"/>
 
-											<usercontrols:RichEditBoxExtended Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3"
-											                                  RtfText="{x:Bind ElementDescription, Mode=OneWay}" 
-											                                  Margin="5" IsReadOnly="True"
-											                                  VerticalAlignment="Top" TextWrapping="Wrap"
-											                                  TextAlignment="Center"/>
-										</Grid>
+                                                <Border Background="{ThemeResource SystemControlForegroundBaseLowBrush}" Height="1"/>
 
-									</DataTemplate>
-								</ItemsRepeater.ItemTemplate>
-							</ItemsRepeater>
-						</Grid>
-					</ScrollViewer>
-
-					<!-- Scene/Problem picker -->
-					<Button Content="Show Problems/Scenes" Grid.Column="1" VerticalAlignment="Top">
-						<Button.Flyout>
-							<Flyout>
-								<StackPanel>
-									<!-- Shows scenes and problems in a list -->
-									<ListView ItemsSource="{x:Bind ProblemVm.Scenes, Mode=TwoWay}" Width="350" CanDrag="True"
-									          Header="Scenes" DisplayMemberPath="Name" CanDragItems="True"
-									          AllowDrop="True" DragItemsStarting="ListViewBase_OnDragItemsStarting"/>
-									<ListView ItemsSource="{x:Bind ProblemVm.Problems, Mode=TwoWay}" Width="350" CanDrag="True"
-									          Header="Problems" DisplayMemberPath="Name" CanDragItems="True"
-									          AllowDrop="True" DragItemsStarting="ListViewBase_OnDragItemsStarting"/>
-								</StackPanel>
-							</Flyout>
-						</Button.Flyout>
-					</Button>
-				</Grid>
+                                                <usercontrols:RichEditBoxExtended 
+                                                           Header="Element Desription"
+                                                           RtfText="{x:Bind ElementDescription, Mode=OneWay}"
+                                                           IsReadOnly="True" TextWrapping="Wrap" TextAlignment="Left"/>
+                                            </StackPanel>
+                                        </Expander.Content>
+                                    </Expander>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                    </ScrollViewer>
+                </Grid>
 			</PivotItem>
 			<PivotItem Header="Notes">
                 <usercontrols:RichEditBoxExtended Header="Notes" RtfText="{x:Bind ProblemVm.Notes, Mode=TwoWay}"

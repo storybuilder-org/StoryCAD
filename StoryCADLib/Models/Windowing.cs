@@ -1,16 +1,17 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.Windows.AppLifecycle;
 using StoryCAD.Exceptions;
+using StoryCAD.ViewModels.SubViewModels;
+using System.ComponentModel;
 using System.Runtime.InteropServices;
 using Windows.Storage;
 using Windows.Storage.Pickers;
-using System.ComponentModel;
 using Windows.UI;
 using Windows.UI.ViewManagement;
-using StoryCAD.ViewModels.SubViewModels;
 using WinUIEx;
 using LogLevel = StoryCAD.Services.Logging.LogLevel;
 
@@ -279,6 +280,49 @@ public partial class Windowing : ObservableRecipient
 			//Init and spawn file picker
 		    WinRT.Interop.InitializeWithWindow.Initialize(filePicker, MainWindow.GetWindowHandle());
 			StorageFile file = await filePicker.PickSingleFileAsync();
+
+			//Null check
+			if (file == null)
+			{
+				logger.Log(LogLevel.Warn, "File picker returned null, this is because the user probably clicked cancel.");
+				return null;
+			}
+
+			logger.Log(LogLevel.Info, $"Picked folder {file.Path} attributes:{file.Attributes}");
+			return file;
+		}
+	    catch (Exception e)
+	    {
+			//See below for possible exception cause.
+		    logger.Log(LogLevel.Error, $"File picker error!, ex:{e.Message} {e.StackTrace}");
+		    throw;
+	    }
+
+    }
+    /// <summary>
+    /// Shows a file save as picker.
+    /// </summary>
+    /// <returns>A StorageFile object, of the file picked.</returns>
+    public async Task<StorageFile> ShowFileSavePicker(string buttonText, string extension)
+    {
+	    LogService logger = Ioc.Default.GetRequiredService<LogService>();
+
+		try
+		{
+			logger.Log(LogLevel.Info, $"Trying to save a file picker with extension: {extension}");
+
+			FileSavePicker filePicker = new()
+		    {
+			    CommitButtonText = buttonText,
+			    SuggestedStartLocation = PickerLocationId.DocumentsLibrary,
+                DefaultFileExtension = extension,
+            };
+
+            filePicker.FileTypeChoices.Add("File", new List<string>() {extension });
+
+            //Init and spawn file picker
+            WinRT.Interop.InitializeWithWindow.Initialize(filePicker, MainWindow.GetWindowHandle());
+			StorageFile file = await filePicker.PickSaveFileAsync();
 
 			//Null check
 			if (file == null)

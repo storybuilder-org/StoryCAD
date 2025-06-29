@@ -1,5 +1,7 @@
 ﻿using System.Text.Json.Serialization;
 using CommunityToolkit.Mvvm.ComponentModel;
+using Microsoft.UI.Xaml;
+using StoryCAD.Services.Outline;
 using StoryCAD.ViewModels.SubViewModels;
 
 namespace StoryCAD.ViewModels.Tools;
@@ -10,13 +12,14 @@ namespace StoryCAD.ViewModels.Tools;
 public class StructureBeatViewModel : ObservableObject
 {
 	public Windowing Windowing;
+	public ProblemViewModel ProblemViewModel;
 
 	#region Constructor
 	public StructureBeatViewModel()
 	{
 		Windowing = Ioc.Default.GetRequiredService<Windowing>();
-		ProblemViewModel ProblemVM = Ioc.Default.GetRequiredService<ProblemViewModel>();
-		PropertyChanged += ProblemVM.OnPropertyChanged;
+		ProblemViewModel = Ioc.Default.GetRequiredService<ProblemViewModel>();
+		PropertyChanged += ProblemViewModel.OnPropertyChanged;
 	}
 	#endregion
 
@@ -71,7 +74,7 @@ public class StructureBeatViewModel : ObservableObject
 	/// Link to element
 	/// </summary>
 	[JsonIgnore]
-	private StoryElement Element
+	internal StoryElement Element
     {
         get
         {
@@ -121,7 +124,7 @@ public class StructureBeatViewModel : ObservableObject
                 }
             }
 
-            return "Select an element by clicking show Problems/Scenes and dragging it here";
+            return "Assign an element to this beat by clicking the edit button.";
         }
     }
 
@@ -146,4 +149,6 @@ public class StructureBeatViewModel : ObservableObject
         }
     }
     #endregion
+
+
 }
