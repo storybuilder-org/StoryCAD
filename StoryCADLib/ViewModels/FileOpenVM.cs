@@ -412,16 +412,36 @@ public class FileOpenVM : ObservableRecipient
         );
         Directory.CreateDirectory(unpackDir);
 
-        // unpack
-        ZipFile.ExtractToDirectory(zipPath, unpackDir);
+        try
+        {
+            // unpack
+            ZipFile.ExtractToDirectory(zipPath, unpackDir);
 
-        // find the one file inside (recursive in case of subfolders)
-        var files = Directory.GetFiles(unpackDir, "*", SearchOption.AllDirectories);
-        if (files.Length != 1)
-            throw new InvalidOperationException($"Expected exactly one file in archive, but found {files.Length}.");
+            // find the one file inside (recursive in case of subfolders)
+            var files = Directory.GetFiles(unpackDir, "*", SearchOption.AllDirectories);
+            if (files.Length != 1)
+            {
+                _logger.Log(LogLevel.Warn, $"Invalid backup {zipPath}, {files.Length} files found");
+                Ioc.Default.GetRequiredService<Windowing>().GlobalDispatcher.TryEnqueue(() =>
+                    Ioc.Default.GetRequiredService<ShellViewModel>().ShowMessage(
+                        LogLevel.Warn,
+                        "Backup archive is invalid or contains multiple files.",
+                        false));
+                return;
+            }
 
-        //Open backup
-        await _outlineVm.OpenFile(files[0]);
+            //Open backup
+            await _outlineVm.OpenFile(files[0]);
+        }
+        catch (Exception ex)
+        {
+            Ioc.Default.GetRequiredService<Windowing>().GlobalDispatcher.TryEnqueue(() =>
+                Ioc.Default.GetRequiredService<ShellViewModel>().ShowMessage(
+                    LogLevel.Error,
+                    "Failed to open backup. The file may be corrupt.",
+                    false));
+            _logger.LogException(LogLevel.Error, ex, $"Error opening backup {zipPath}");
+        }
 
     }
 }
