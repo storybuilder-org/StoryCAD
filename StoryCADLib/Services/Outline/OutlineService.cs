@@ -709,13 +709,15 @@ public class OutlineService
     public void SaveBeatsheet(string Path, string Description, List<StructureBeatViewModel> Beats)
     {
         SavedBeatsheet Model = new();
-        Model.Beats = new();
-        foreach (var Beat in Beats) 
-        {
-            Beat.Guid = Guid.Empty;
-            Model.Beats.Add(Beat);
-        }
-
+        Model.Beats = Beats = Beats
+                .Select(b =>
+                {
+                    var copy = new StructureBeatViewModel();
+                    copy.Title = b.Title;
+                    copy.Description = b.Description;
+                    return copy;
+                })
+                .ToList();
         Model.Description = Description;
         string data = JsonSerializer.Serialize(Model);
         File.WriteAllText(Path, data);
