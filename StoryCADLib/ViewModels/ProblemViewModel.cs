@@ -770,7 +770,7 @@ public class ProblemViewModel : ObservableRecipient, INavigable
     /// <summary>
     /// Assigns a new beat
     /// </summary>
-    public async void AssignBeat(object sender, SelectionChangedEventArgs e)
+    public async void AssignBeat(object sender, ItemClickEventArgs e)
     {
         if (SelectedBeat == null)
         {
@@ -779,7 +779,7 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         }
 
         //Get the element we want to bind.
-        Guid DesiredBind = (e.AddedItems[0] as StoryElement).Uuid;
+        Guid DesiredBind = (e.ClickedItem as StoryElement).Uuid;
 
         OutlineViewModel OutlineVM = Ioc.Default.GetService<OutlineViewModel>();
         try 
@@ -850,6 +850,7 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         {
             Ioc.Default.GetRequiredService<ShellViewModel>()
             .ShowMessage(LogLevel.Warn, "Nothing is bound to this beat", false);
+            return;
         }
 
         // unbind whatever beat is currently selected

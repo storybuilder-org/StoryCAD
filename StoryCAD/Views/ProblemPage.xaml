@@ -170,7 +170,8 @@
                             </Expander.Header>
                             <Expander.Content>
                                 <usercontrols:RichEditBoxExtended RtfText="{x:Bind ProblemVm.StructureDescription, Mode=TwoWay}" Grid.Row="3" 
-							           TextWrapping="Wrap" IsReadOnly="{x:Bind ProblemVm.IsBeatSheetReadOnly}" Header="Beat Sheet Description:"/>
+							           TextWrapping="Wrap" IsReadOnly="{x:Bind ProblemVm.IsBeatSheetReadOnly}" Header="Beat Sheet Description:"
+                                       HorizontalAlignment="Stretch"/>
                             </Expander.Content>
                         </Expander>
 
@@ -188,12 +189,12 @@
                                             <!-- Shows scenes and problems in a list -->
                                             <Pivot>
                                                 <PivotItem Header="Scenes">
-                                                    <ListView ItemsSource="{x:Bind ProblemVm.Scenes, Mode=TwoWay}" CanDrag="True"
-                                                      SelectionChanged="{x:Bind ProblemVm.AssignBeat}" DisplayMemberPath="Name" />
+                                                    <ListView ItemsSource="{x:Bind ProblemVm.Scenes, Mode=TwoWay}" IsItemClickEnabled="True"
+                                                      ItemClick="{x:Bind ProblemVm.AssignBeat}" DisplayMemberPath="Name" />
                                                 </PivotItem>
                                                 <PivotItem Header="Problems">
-                                                    <ListView ItemsSource="{x:Bind ProblemVm.Problems, Mode=TwoWay}" CanDrag="True"
-                                                              SelectionChanged="{x:Bind ProblemVm.AssignBeat}" DisplayMemberPath="Name"/>
+                                                    <ListView ItemsSource="{x:Bind ProblemVm.Problems, Mode=TwoWay}" IsItemClickEnabled="True"
+                                                              ItemClick="{x:Bind ProblemVm.AssignBeat}" DisplayMemberPath="Name"/>
                                                 </PivotItem>
                                             </Pivot>
                                         </StackPanel>
@@ -256,12 +257,12 @@
                                             <StackPanel>
                                                 <!-- Beat description (now just under title/icon) -->
                                                 <TextBox Text="{x:Bind Description, Mode=TwoWay}" TextWrapping="Wrap" 
-                                                         Header="Beat Description"
+                                                         Header="Beat Description" HorizontalAlignment="Stretch"
                                                          IsReadOnly="{x:Bind ProblemViewModel.IsBeatSheetReadOnly}"/>
 
                                                 <Border Background="{ThemeResource SystemControlForegroundBaseLowBrush}" Height="1"/>
 
-                                                <usercontrols:RichEditBoxExtended 
+                                                <usercontrols:RichEditBoxExtended HorizontalAlignment="Stretch"
                                                            Header="Element Desription"
                                                            RtfText="{x:Bind ElementDescription, Mode=OneWay}"
                                                            IsReadOnly="True" TextWrapping="Wrap" TextAlignment="Left"/>
