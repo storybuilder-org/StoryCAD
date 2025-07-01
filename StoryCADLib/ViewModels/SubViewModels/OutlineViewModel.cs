@@ -229,6 +229,20 @@ public class OutlineViewModel : ObservableRecipient
         try
         {
             Messenger.Send(new StatusChangedMessage(new StatusMessage("New project command executing", LogLevel.Info)), true);
+            // Validate the requested file path before making any changes
+            if (!Path.GetExtension(dialogVm.OutlineName)!.Equals(".stbx"))
+            {
+                dialogVm.OutlineName += ".stbx";
+            }
+
+            string newFilePath = Path.Combine(dialogVm.OutlineFolder, dialogVm.OutlineName);
+
+            if (!StoryIO.IsValidPath(newFilePath))
+            {
+                logger.Log(LogLevel.Warn, $"Invalid file path {newFilePath}");
+                Messenger.Send(new StatusChangedMessage(new("Invalid file path", LogLevel.Error)), true);
+                return;
+            }
             using (var serializationLock = new SerializationLock(autoSaveService, backupService, logger))
             {
                 // If the current project needs saved, do so
@@ -241,12 +255,6 @@ public class OutlineViewModel : ObservableRecipient
             // Start with a blank StoryModel
             shellVm.ResetModel();
             shellVm.ShowHomePage();
-
-            // Ensure the filename has .stbx extension
-            if (!Path.GetExtension(dialogVm.OutlineName)!.Equals(".stbx"))
-            {
-                dialogVm.OutlineName += ".stbx";
-            }
 
             using (var serializationLock = new SerializationLock(autoSaveService, backupService, logger))
             {
