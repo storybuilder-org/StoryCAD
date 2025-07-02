@@ -75,7 +75,7 @@ public class ShellViewModel : ObservableRecipient
     private ObservableCollection<StoryNodeItem> _targetCollection;
 
     private readonly DispatcherTimer _statusTimer;
-    private bool _isClosing;
+    public bool IsClosing;
 
     public CollaboratorArgs CollabArgs;
    
@@ -1105,7 +1105,7 @@ public class ShellViewModel : ObservableRecipient
     private void StatusMessageReceived(StatusChangedMessage statusMessage)
     {
         // Bypass if in headless mode or if the app is closing
-        if (State.Headless || _isClosing) return;
+        if (State.Headless || IsClosing) return;
 
         try
         {
@@ -1452,8 +1452,6 @@ public class ShellViewModel : ObservableRecipient
 
     public ShellViewModel()
     {
-        // Track when the application is shutting down
-        Application.Current.Exit += (s, e) => _isClosing = true;
         // Resolve services via Ioc as needed
         Logger = Ioc.Default.GetRequiredService<LogService>();
         Search = Ioc.Default.GetRequiredService<SearchService>();
