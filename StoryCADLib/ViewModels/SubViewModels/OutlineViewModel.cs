@@ -1127,6 +1127,13 @@ public class OutlineViewModel : ObservableRecipient
         }
 
         //TODO: Add dialog to confirm restore
+        if (shellVm.DataSource.Count <= 1)
+        {
+            logger.Log(LogLevel.Warn, "Failed to restore element - Trash can not available in current view.");
+            Messenger.Send(new StatusChangedMessage(new("Unable to restore - Trash not available", LogLevel.Warn)));
+            return;
+        }
+
         ObservableCollection<StoryNodeItem> _target = shellVm.DataSource[0].Children;
         shellVm.DataSource[1].Children.Remove(shellVm.RightTappedNode);
         _target.Add(shellVm.RightTappedNode);
@@ -1170,6 +1177,13 @@ public class OutlineViewModel : ObservableRecipient
         {
             Messenger.Send(new StatusChangedMessage(new("You need to load a story first!", LogLevel.Warn)));
             logger.Log(LogLevel.Info, "Failed to empty trash as DataSource is null. (Is a story loaded?)");
+            return;
+        }
+
+        if (shellVm.DataSource.Count <= 1)
+        {
+            logger.Log(LogLevel.Warn, "Failed to empty trash - Trash can not available in current view.");
+            Messenger.Send(new StatusChangedMessage(new("No Deleted StoryElements to empty", LogLevel.Warn)));
             return;
         }
 
