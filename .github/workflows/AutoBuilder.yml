@@ -122,12 +122,6 @@ jobs:
         ${{ github.workspace }}\.github\workflows\MSIX.ps1 -TargetDirectory "${{ github.workspace }}\StoryCAD\Packages"
       shell: pwsh
 
-    - name: Move StoryCADLib Nuget Package to Packages Directory
-      run: |
-        Get-ChildItem -Path "${{ github.workspace }}\StoryCADLib\bin\x64\*" -Include *.nupkg,*.snupkg -File |
-          Move-Item -Destination "${{ github.workspace }}\StoryCAD\Packages\" -Force
-
-
     - name: Write help file
       run: |
         $LastVer = "${{ steps.testtag.outputs.tag }}"
@@ -175,6 +169,13 @@ jobs:
 
         # 6. Cleanup
         Remove-Item -Recurse -Force $tempDir
+
+    - name: Move repacked StoryCADLib to Packages
+      if: ${{ matrix.configuration == 'Release' && matrix.platform == 'x64' }}
+      shell: pwsh
+      run: |
+        Get-ChildItem -Path "${{ github.workspace }}\StoryCADLib\bin\Release" -Filter "StoryCADLib*.nupkg" |
+          Move-Item -Destination "${{ github.workspace }}\StoryCAD\Packages" -Force
 
     - name: Zip the packages folder
       run: |
