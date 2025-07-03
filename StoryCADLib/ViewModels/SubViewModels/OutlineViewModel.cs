@@ -815,6 +815,11 @@ public class OutlineViewModel : ObservableRecipient
         logger.Log(LogLevel.Info, "Displaying Dramatic Situations tool dialog");
         using (var serializationLock = new SerializationLock(autoSaveService, backupService, logger))
         {
+            if (shellVm.RightTappedNode == null)
+            {
+                shellVm.ShowMessage(LogLevel.Warn, "Right tap a node to insert a dramatic situation", false);
+            }
+
             if (VerifyToolUse(true, true))
             {
                 ContentDialog dialog = null;
@@ -838,28 +843,25 @@ public class OutlineViewModel : ObservableRecipient
 
                 if (result == ContentDialogResult.Primary)
                 {
-                    ProblemModel problem = new()
+                    ProblemModel problem = new(situationModel.SituationName, StoryModel, shellVm.RightTappedNode)
                     {
-                        Name = situationModel.SituationName,
                         StoryQuestion = "See Notes.",
                         Notes = situationModel.Notes
                     };
 
                     // Insert the new Problem as the target's child
-                    _ = new StoryNodeItem(problem, shellVm.RightTappedNode);
                     msg = $"Problem {situationModel.SituationName} inserted";
                     ShellViewModel.ShowChange();
                 }
                 else if (result == ContentDialogResult.Secondary)
                 {
-                    SceneModel sceneVar = new()
+                    SceneModel sceneVar = new(situationModel.SituationName, StoryModel, shellVm.RightTappedNode)
                     {
-                        Name = situationModel.SituationName,
                         Remarks = "See Notes.",
-                        Notes = situationModel.Notes
+                        Notes = situationModel.Notes,
+                        
                     };
                     // Insert the new Scene as the target's child
-                    _ = new StoryNodeItem(sceneVar, shellVm.RightTappedNode);
                     msg = $"Scene {situationModel.SituationName} inserted";
                     ShellViewModel.ShowChange();
                 }
