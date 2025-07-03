@@ -636,6 +636,7 @@ public class OutlineService
     /// <param name="Index"></param>
     public void DeleteBeat(StoryModel Model, ProblemModel Parent, int Index)
     {
+        if (Model == null)  {  throw new ArgumentNullException(nameof(Model)); }
         if (Parent == null)
         {
             throw new ArgumentNullException(nameof(Parent));
@@ -643,36 +644,35 @@ public class OutlineService
 
         if (Index < 0 || Index >= Parent.StructureBeats.Count)
         {
-            // No bound beat
-            if (Parent.StructureBeats[Index].Guid == Guid.Empty)
-            {
-                Parent.StructureBeats.RemoveAt(Index);
-                return;
-            }
-
-            StoryElement? BoundElement;
-            Model.StoryElements.StoryElementGuids.TryGetValue(Parent.StructureBeats[Index].Guid, out BoundElement);
-            
-            //An element is bound that doesn't exist
-            if (BoundElement == null)
-            {
-                Parent.StructureBeats.RemoveAt(Index);
-                return;
-            }
-            
-            //For Problem elements we MUST unassign first or StoryCAD will have issues
-            //when trying to assign that element to a beat in the future.
-            //Scenes are not limited and can be assigned to multiple
-            if (BoundElement.ElementType == StoryItemType.Problem)
-            {
-                UnasignBeat(Model, Parent, Index);
-            }
-            Parent.StructureBeats.RemoveAt(Index);
-        }
-        else
-        {
             throw new ArgumentOutOfRangeException("Index is invalid");
         }
+
+        // Index is valid, proceed with deletion
+        // No bound beat
+        if (Parent.StructureBeats[Index].Guid == Guid.Empty)
+        {
+            Parent.StructureBeats.RemoveAt(Index);
+            return;
+        }
+
+        StoryElement? BoundElement;
+        Model.StoryElements.StoryElementGuids.TryGetValue(Parent.StructureBeats[Index].Guid, out BoundElement);
+        
+        //An element is bound that doesn't exist
+        if (BoundElement == null)
+        {
+            Parent.StructureBeats.RemoveAt(Index);
+            return;
+        }
+        
+        //For Problem elements we MUST unassign first or StoryCAD will have issues
+        //when trying to assign that element to a beat in the future.
+        //Scenes are not limited and can be assigned to multiple
+        if (BoundElement.ElementType == StoryItemType.Problem)
+        {
+            UnasignBeat(Model, Parent, Index);
+        }
+        Parent.StructureBeats.RemoveAt(Index);
     }
 
     /// <summary>

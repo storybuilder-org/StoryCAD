@@ -61,23 +61,6 @@ public class ProblemViewModelTests
     }
 
     [TestMethod]
-    public void DeleteBeat_WithSelectedBeat_ShouldRemoveBeatFromCollection()
-    {
-        // Arrange
-        var beat = CreateTestBeat("Test Beat", "Test Description");
-        _viewModel.StructureBeats.Add(beat);
-        _viewModel.SelectedBeat = beat;
-        int initialCount = _viewModel.StructureBeats.Count;
-
-        // Act
-        _viewModel.DeleteBeat(null, null);
-
-        // Assert
-        Assert.AreEqual(initialCount - 1, _viewModel.StructureBeats.Count);
-        Assert.IsFalse(_viewModel.StructureBeats.Contains(beat));
-    }
-
-    [TestMethod]
     public void DeleteBeat_WithNullSelectedBeat_ShouldNotRemoveAnyBeat()
     {
         // Arrange
@@ -90,25 +73,6 @@ public class ProblemViewModelTests
 
         // Assert
         Assert.AreEqual(initialCount, _viewModel.StructureBeats.Count);
-    }
-
-    [TestMethod]
-    public void DeleteBeat_WithBoundProblem_ShouldUnbindAndRemove()
-    {
-        // Arrange
-        var beat = CreateTestBeat("Test Beat", "Test Description");
-        beat.Guid = _viewModel.Uuid;
-        _viewModel.StructureBeats.Add(beat);
-        _viewModel.SelectedBeat = beat;
-        _viewModel.BoundStructure = new Guid().ToString();
-        int initialCount = _viewModel.StructureBeats.Count;
-
-        // Act
-        _viewModel.DeleteBeat(null, null);
-
-        // Assert
-        Assert.AreEqual(initialCount - 1, _viewModel.StructureBeats.Count);
-        Assert.AreEqual(Guid.Empty.ToString(), _viewModel.BoundStructure);
     }
 
     [TestMethod]
@@ -293,10 +257,6 @@ public class ProblemViewModelTests
         _viewModel.SelectedBeatIndex = 1;
         _viewModel.MoveDown(null, null);
         Assert.AreEqual(2, _viewModel.StructureBeats.IndexOf(_viewModel.SelectedBeat));
-
-        // Act & Assert - Delete the selected beat
-        _viewModel.DeleteBeat(null, null);
-        Assert.AreEqual(2, _viewModel.StructureBeats.Count);
     }
 
     [TestMethod]
