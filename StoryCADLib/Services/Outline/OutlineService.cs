@@ -38,8 +38,20 @@ public class OutlineService
         FolderModel narrative = new("Narrative View", model, StoryItemType.Folder, null);
         model.NarratorView.Add(narrative.Node);
 
-        if (selectedTemplateIndex != 0)
+        //Folders only
+        if (selectedTemplateIndex == 2)
         {
+            StoryElement problems = new FolderModel("Problems", model, StoryItemType.Folder, overview.Node);
+            StoryElement characters = new FolderModel("Characters", model, StoryItemType.Folder, overview.Node);
+            StoryElement settings = new FolderModel("Settings", model, StoryItemType.Folder, overview.Node);
+            StoryElement scenes = new FolderModel("Scenes", model, StoryItemType.Folder, overview.Node);
+            problems.Node.IsExpanded = true;
+            characters.Node.IsExpanded = true;
+        }
+
+        if (selectedTemplateIndex != 0 && selectedTemplateIndex != 2)
+        {
+
             StoryElement storyProblem = new ProblemModel("Story Problem", model, overview.Node);
             StoryElement storyProtag = new CharacterModel("Protagonist", model, overview.Node);
             StoryElement storyAntag = new CharacterModel("Antagonist", model, overview.Node);
@@ -57,31 +69,15 @@ public class OutlineService
             switch (selectedTemplateIndex)
             {
                 case 1:
-                    overview.Node.Children.Add(storyProblem.Node);
-                    storyProblem.Node.Children.Add(storyProtag.Node);
-                    storyProblem.Node.Children.Add(storyAntag.Node);
                     storyProblem.Node.Parent = overview.Node;
                     storyProtag.Node.Parent = storyProblem.Node;
                     storyAntag.Node.Parent = storyProblem.Node;
                     storyProblem.Node.IsExpanded = true;
                     break;
-                case 2:
-                    StoryElement problems = new FolderModel("Problems", model, StoryItemType.Folder, overview.Node);
-                    StoryElement characters = new FolderModel("Characters", model, StoryItemType.Folder, overview.Node);
-                    StoryElement settings = new FolderModel("Settings", model, StoryItemType.Folder, overview.Node);
-                    StoryElement scenes = new FolderModel("Scenes", model, StoryItemType.Folder, overview.Node);
-                    overview.StoryProblem = storyProblem.Uuid;
-                    overview.Node.Children.Add(storyProblem.Node);
-                    overview.Node.Children.Add(storyProtag.Node);
-                    overview.Node.Children.Add(storyAntag.Node);
-                    problems.Node.IsExpanded = true;
-                    characters.Node.IsExpanded = true;
-                    break;
                 case 3:
                     storyProblem.Node.Name = "External Problem";
                     storyProblem.Node.IsExpanded = true;
                     storyProblem.Node.Parent = overview.Node;
-                    overview.Node.Children.Add(storyProblem.Node);
                     problem = (ProblemModel)storyProblem;
                     problem.Name = "External Problem";
                     overview.StoryProblem = problem.Uuid;
