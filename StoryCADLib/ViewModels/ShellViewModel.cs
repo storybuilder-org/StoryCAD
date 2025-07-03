@@ -75,6 +75,7 @@ public class ShellViewModel : ObservableRecipient
     private ObservableCollection<StoryNodeItem> _targetCollection;
 
     private readonly DispatcherTimer _statusTimer;
+    public bool IsClosing;
 
     public CollaboratorArgs CollabArgs;
    
@@ -1103,46 +1104,50 @@ public class ShellViewModel : ObservableRecipient
     /// <param name="statusMessage"></param>
     private void StatusMessageReceived(StatusChangedMessage statusMessage)
     {
-        // Ignore inside tests
-        if (State.Headless) return;
+        // Bypass if in headless mode or if the app is closing
+        if (State.Headless || IsClosing) return;
 
-        // Ensure we are on the UI Thread.
-        var dq = Window.GlobalDispatcher;
-        if (dq is { HasThreadAccess: false })
+        try
         {
-            dq.TryEnqueue(() => StatusMessageReceived(statusMessage));
-            return;
+            // Ensure we are on the UI thread
+            var dq = Window.GlobalDispatcher;
+            if (dq is { HasThreadAccess: false })
+            {
+                dq.TryEnqueue(() => StatusMessageReceived(statusMessage));
+                return;
+            }
+
+            if (_statusTimer.IsEnabled)
+                _statusTimer.Stop();
+
+            StatusMessage = statusMessage.Value.Status;
+            switch (statusMessage.Value.Level)
+            {
+                case LogLevel.Info:
+                    StatusColor = Window.SecondaryColor;
+                    _statusTimer.Interval = TimeSpan.FromSeconds(15);
+                    _statusTimer.Start();
+                    break;
+                case LogLevel.Warn:
+                    StatusColor = new SolidColorBrush(Colors.Yellow);
+                    _statusTimer.Interval = TimeSpan.FromSeconds(30);
+                    _statusTimer.Start();
+                    break;
+                case LogLevel.Error:
+                    StatusColor = new SolidColorBrush(Colors.Red);
+                    break;
+                case LogLevel.Fatal:
+                    StatusColor = new SolidColorBrush(Colors.DarkRed);
+                    break;
+            }
+
+            Logger.Log(statusMessage.Value.Level, StatusMessage);
         }
-
-        if (_statusTimer.IsEnabled)
-            _statusTimer.Stop();
-
-        StatusMessage = statusMessage.Value.Status;
-
-        switch (statusMessage.Value.Level)
+        catch (Exception ex)
         {
-            //Timer ticks for these, and will auto clear.
-            case LogLevel.Info:
-                StatusColor = Window.SecondaryColor;
-                _statusTimer.Interval = TimeSpan.FromSeconds(15);
-                _statusTimer.Start();
-                break;
-            case LogLevel.Warn:
-                StatusColor = new SolidColorBrush(Colors.Yellow);
-                _statusTimer.Interval = TimeSpan.FromSeconds(30);
-                _statusTimer.Start();
-                break;
-
-            //Time won't tick for these
-            case LogLevel.Error:
-                StatusColor = new SolidColorBrush(Colors.Red);
-                break;
-            case LogLevel.Fatal:
-                StatusColor = new SolidColorBrush(Colors.DarkRed);
-                break;
+            // Log or handle the exception safely
+            Logger.LogException(LogLevel.Warn, ex, "StatusMessageReceived failed during shutdown.");
         }
-
-        Logger.Log(statusMessage.Value.Level, statusMessage.Value.Status);
     }
 
 

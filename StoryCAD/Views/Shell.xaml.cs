@@ -124,6 +124,10 @@ public sealed partial class Shell
 		{
 			rateService.OpenRatingPrompt();
 		}
+
+        // Track when the application is shutting down
+        
+        Windowing.MainWindow.Closed += ((_, _) => ShellVm.IsClosing = true);
     }
 
     /// <summary>
