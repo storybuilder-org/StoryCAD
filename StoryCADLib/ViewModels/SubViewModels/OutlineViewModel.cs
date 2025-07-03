@@ -785,10 +785,9 @@ public class OutlineViewModel : ObservableRecipient
                     IList<PlotPatternScene> scenes = model.PlotPatternScenes;
                     ProblemModel problem = new ProblemModel(masterPlotName, StoryModel, shellVm.RightTappedNode);
                     // add the new ProblemModel & node to the end of the target (shellVm.RightTappedNode) children 
-                    StoryNodeItem problemNode = new(problem, shellVm.RightTappedNode);
                     shellVm.RightTappedNode.IsExpanded = true;
-                    problemNode.IsSelected = true;
-                    problemNode.IsExpanded = true;
+                    problem.Node.IsSelected = true;
+                    problem.Node.IsExpanded = true;
                     if (scenes.Count == 1)
                     {
                         problem.StoryQuestion = "See Notes.";
@@ -798,9 +797,8 @@ public class OutlineViewModel : ObservableRecipient
                     {
                         SceneModel child = new(StoryModel, shellVm.RightTappedNode)
                         { Name = scene.SceneTitle, Remarks = "See Notes.", Notes = scene.Notes };
-                        // add the new SceneModel & node to the end of the problem's children 
-                        StoryNodeItem newNode = new(child, problemNode);
-                        newNode.IsSelected = true;
+
+                        child.Node.IsSelected = true;
                     }
 
                     Messenger.Send(new StatusChangedMessage(new(
