@@ -113,13 +113,6 @@ jobs:
         -TargetDirectory "${{ github.workspace }}\StoryCAD\Packages"
 
     # ─── NuGet repack ───────────────────────────────────────────────────────────
-    - name: Move StoryCADLib package into Packages/
-      shell: pwsh
-      run: |
-        Get-ChildItem -Path "${{ github.workspace }}\StoryCADLib\bin\x64\*" `
-          -Include *.nupkg,*.snupkg -File -Recurse |
-          Move-Item -Destination "${{ github.workspace }}\StoryCAD\Packages" -Force
-
     - name: Repack StoryCADLib with runtime binaries & Assets
       shell: pwsh
       run: |
@@ -133,6 +126,12 @@ jobs:
         Copy-Item "${{ github.workspace }}\StoryCADLib\Assets\*" (Join-Path $lib StoryCADLib) -Recurse -Force
         Compress-Archive -Path (Join-Path $tmp '*') -DestinationPath $pkg.FullName -Force
         Remove-Item $tmp -Recurse -Force
+
+    - name: Move repacked StoryCADLib to Packages
+      shell: pwsh
+      run: |
+        Get-ChildItem -Path "${{ github.workspace }}\StoryCADLib\bin\Release" -Filter "StoryCADLib*.nupkg" |
+          Move-Item -Destination "${{ github.workspace }}\StoryCAD\Packages" -Force
 
     # ─── Help file & zipping ───────────────────────────────────────────────────
     - name: Write install instructions
