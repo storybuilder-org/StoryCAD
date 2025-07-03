@@ -567,6 +567,7 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         if (value == "Load Custom Beat Sheet from file...")
         {
             value = "Custom Beat Sheet";
+            StructureModelTitle = value;
             LoadBeatSheet();
         }
 
@@ -907,7 +908,7 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         }
         catch (Exception ex)
         {
-            Ioc.Default.GetService<ShellViewModel>().ShowMessage(LogLevel.Error, "Failed to save Beatsheet", false);
+            Ioc.Default.GetService<ShellViewModel>().ShowMessage(LogLevel.Error, "Failed to Load Beatsheet", false);
 
         }
     }
