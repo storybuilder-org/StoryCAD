@@ -698,28 +698,17 @@ public class ProblemViewModel : ObservableRecipient, INavigable
     /// </summary>
     public void DeleteBeat(object sender, RoutedEventArgs e)
     {
-        if (SelectedBeat == null)
+        try
         {
-            Ioc.Default.GetRequiredService<ShellViewModel>().ShowMessage(LogLevel.Warn, "Select a beat", false);
-            return;
+            Ioc.Default.GetService<OutlineService>().DeleteBeat(
+                Ioc.Default.GetRequiredService<OutlineViewModel>().StoryModel,
+                Model, SelectedBeatIndex);
         }
-
-        if (SelectedBeat.Element.ElementType == StoryItemType.Problem)
+        catch (Exception ex)
         {
-            // If this beat is bound to a problem, unbind it first.
-            if (SelectedBeat.Element.Uuid == Uuid)
-            {
-                BoundStructure = String.Empty;
-            }
-            else
-            {
-                (Ioc.Default.GetRequiredService<OutlineViewModel>().StoryModel.
-                    StoryElements.StoryElementGuids[SelectedBeat.Guid] as ProblemModel)
-                    .BoundStructure = Guid.Empty.ToString();
-            }
-        }
 
-        StructureBeats.Remove(SelectedBeat);
+            Ioc.Default.GetService<ShellViewModel>().ShowMessage(LogLevel.Warn, ex.Message, true);
+        }
     }
 
     /// <summary>
@@ -853,15 +842,9 @@ public class ProblemViewModel : ObservableRecipient, INavigable
             return;
         }
 
-        // unbind whatever beat is currently selected
-        if (Ioc.Default.GetRequiredService<OutlineViewModel>()
-               .StoryModel.StoryElements.StoryElementGuids[SelectedBeat.Guid].ElementType
-            == StoryItemType.Problem)
-        {
-            removeBindData(Model,
-                (ProblemModel)Ioc.Default.GetRequiredService<OutlineViewModel>()
-                   .StoryModel.StoryElements.StoryElementGuids[SelectedBeat.Guid]);
-        }
+        Ioc.Default.GetRequiredService<OutlineService>().UnasignBeat(
+            Ioc.Default.GetService<OutlineViewModel>().StoryModel,
+            Model, SelectedBeatIndex);
         SelectedBeat.Guid = Guid.Empty;
 
         // clear selection so you force the user to re-select next time
@@ -896,7 +879,8 @@ public class ProblemViewModel : ObservableRecipient, INavigable
     {
         try
         {
-            var FilePath = await Ioc.Default.GetRequiredService<Windowing>().ShowFileSavePicker("Save", ".stbeat");
+            var FilePath = await Ioc.Default.GetRequiredService<Windowing>()
+                                      .ShowFileSavePicker("Save", ".stbeat");
 
             //Picker error/canceled.
             if (FilePath == null) {  return; }
