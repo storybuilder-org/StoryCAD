@@ -785,10 +785,9 @@ public class OutlineViewModel : ObservableRecipient
                     IList<PlotPatternScene> scenes = model.PlotPatternScenes;
                     ProblemModel problem = new ProblemModel(masterPlotName, StoryModel, shellVm.RightTappedNode);
                     // add the new ProblemModel & node to the end of the target (shellVm.RightTappedNode) children 
-                    StoryNodeItem problemNode = new(problem, shellVm.RightTappedNode);
                     shellVm.RightTappedNode.IsExpanded = true;
-                    problemNode.IsSelected = true;
-                    problemNode.IsExpanded = true;
+                    problem.Node.IsSelected = true;
+                    problem.Node.IsExpanded = true;
                     if (scenes.Count == 1)
                     {
                         problem.StoryQuestion = "See Notes.";
@@ -798,9 +797,8 @@ public class OutlineViewModel : ObservableRecipient
                     {
                         SceneModel child = new(StoryModel, shellVm.RightTappedNode)
                         { Name = scene.SceneTitle, Remarks = "See Notes.", Notes = scene.Notes };
-                        // add the new SceneModel & node to the end of the problem's children 
-                        StoryNodeItem newNode = new(child, problemNode);
-                        newNode.IsSelected = true;
+
+                        child.Node.IsSelected = true;
                     }
 
                     Messenger.Send(new StatusChangedMessage(new(
@@ -817,6 +815,11 @@ public class OutlineViewModel : ObservableRecipient
         logger.Log(LogLevel.Info, "Displaying Dramatic Situations tool dialog");
         using (var serializationLock = new SerializationLock(autoSaveService, backupService, logger))
         {
+            if (shellVm.RightTappedNode == null)
+            {
+                shellVm.ShowMessage(LogLevel.Warn, "Right tap a node to insert a dramatic situation", false);
+            }
+
             if (VerifyToolUse(true, true))
             {
                 ContentDialog dialog = null;
@@ -840,28 +843,25 @@ public class OutlineViewModel : ObservableRecipient
 
                 if (result == ContentDialogResult.Primary)
                 {
-                    ProblemModel problem = new()
+                    ProblemModel problem = new(situationModel.SituationName, StoryModel, shellVm.RightTappedNode)
                     {
-                        Name = situationModel.SituationName,
                         StoryQuestion = "See Notes.",
                         Notes = situationModel.Notes
                     };
 
                     // Insert the new Problem as the target's child
-                    _ = new StoryNodeItem(problem, shellVm.RightTappedNode);
                     msg = $"Problem {situationModel.SituationName} inserted";
                     ShellViewModel.ShowChange();
                 }
                 else if (result == ContentDialogResult.Secondary)
                 {
-                    SceneModel sceneVar = new()
+                    SceneModel sceneVar = new(situationModel.SituationName, StoryModel, shellVm.RightTappedNode)
                     {
-                        Name = situationModel.SituationName,
                         Remarks = "See Notes.",
-                        Notes = situationModel.Notes
+                        Notes = situationModel.Notes,
+                        
                     };
                     // Insert the new Scene as the target's child
-                    _ = new StoryNodeItem(sceneVar, shellVm.RightTappedNode);
                     msg = $"Scene {situationModel.SituationName} inserted";
                     ShellViewModel.ShowChange();
                 }
