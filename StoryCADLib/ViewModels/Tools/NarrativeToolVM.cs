@@ -219,7 +219,16 @@ public class NarrativeToolVM: ObservableRecipient
             _logger.Log(LogLevel.Warn, "DataSource is empty or null, not adding section");
             return;
         }
-        _ = new FolderModel(NewSectionName, outlineVM.StoryModel, StoryItemType.Folder, outlineVM.StoryModel.NarratorView[0]);
+
+        //Check section name isn't empty
+        if (string.IsNullOrWhiteSpace(NewSectionName))
+        {
+            Message = "Please name your section";
+            return;
+        }
+        new FolderModel(NewSectionName, outlineVM.StoryModel, StoryItemType.Folder, outlineVM.StoryModel.NarratorView[0]);
+        NewSectionName = string.Empty;
+        Message = string.Empty;
     }
 
     /// <summary>
