@@ -1,6 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using System.Linq;
 using StoryCAD.Services.Backup;
 using StoryCAD.Services.Dialogs.Tools;
 using StoryCAD.Services.Locking;
@@ -63,6 +64,26 @@ public class NarrativeToolVM: ObservableRecipient
         CopyCommand = new RelayCommand(Copy);
         CopyAllUnusedCommand = new RelayCommand(CopyAllUnused);
         DeleteCommand = new RelayCommand(Delete);
+    }
+
+    /// <summary>
+    /// Retrieve the single root node for the narrator view.
+    /// Returns null if the structure is invalid.
+    /// </summary>
+    private StoryNodeItem? GetNarratorRoot()
+    {
+        var roots = outlineVM.StoryModel.NarratorView
+            .Where(n => n.IsRoot)
+            .ToList();
+
+        if (roots.Count != 1)
+        {
+            _logger.Log(LogLevel.Warn, $"NarratorView root invalid: {roots.Count}");
+            Message = "Narrative view has an invalid structure.";
+            return null;
+        }
+
+        return roots[0];
     }
 
     /// <summary>
@@ -142,11 +163,15 @@ public class NarrativeToolVM: ObservableRecipient
             }
 
             _logger.Log(LogLevel.Info, $"Node Selected is a {SelectedNode.Type}");
+            StoryNodeItem? root = GetNarratorRoot();
+            if (root == null)
+                return;
+
             if (SelectedNode.Type == StoryItemType.Scene)  //If its just a scene, add it immediately if not already in.
             {
-                if (RecursiveCheck(outlineVM.StoryModel.NarratorView[0].Children).All(storyNodeItem => storyNodeItem.Uuid != SelectedNode.Uuid)) //checks node isn't in the narrator view
+                if (RecursiveCheck(root.Children).All(storyNodeItem => storyNodeItem.Uuid != SelectedNode.Uuid)) //checks node isn't in the narrator view
                 {
-                    _ = new StoryNodeItem((SceneModel)outlineVM.StoryModel.StoryElements.StoryElementGuids[SelectedNode.Uuid], outlineVM.StoryModel.NarratorView[0]);
+                    _ = new StoryNodeItem((SceneModel)outlineVM.StoryModel.StoryElements.StoryElementGuids[SelectedNode.Uuid], root);
                     _logger.Log(LogLevel.Info, $"Copied SelectedNode {SelectedNode.Name} ({SelectedNode.Uuid})");
                     Message = $"Copied {SelectedNode.Name}";
                 }
@@ -161,9 +186,9 @@ public class NarrativeToolVM: ObservableRecipient
                 _logger.Log(LogLevel.Info, "Item is a folder/section, getting flattened list of all children.");
                 foreach (StoryNodeItem _item in RecursiveCheck(SelectedNode.Children))
                 {
-                    if (_item.Type == StoryItemType.Scene && RecursiveCheck(outlineVM.StoryModel.NarratorView[0].Children).All(storyNodeItem => storyNodeItem.Uuid != _item.Uuid))
+                    if (_item.Type == StoryItemType.Scene && RecursiveCheck(root.Children).All(storyNodeItem => storyNodeItem.Uuid != _item.Uuid))
                     {
-                        _ = new StoryNodeItem((SceneModel)outlineVM.StoryModel.StoryElements.StoryElementGuids[_item.Uuid], outlineVM.StoryModel.NarratorView[0]);
+                        _ = new StoryNodeItem((SceneModel)outlineVM.StoryModel.StoryElements.StoryElementGuids[_item.Uuid], root);
                         _logger.Log(LogLevel.Info, $"Copied item {SelectedNode.Name} ({SelectedNode.Uuid})");
                     }
                 }
@@ -204,7 +229,11 @@ public class NarrativeToolVM: ObservableRecipient
     private void CopyAllUnused()
     {
         //Recursively goes through the children of NarratorView View.
-        try { foreach (StoryNodeItem _item in outlineVM.StoryModel.ExplorerView[0].Children) { RecurseCopyUnused(_item); } }
+        StoryNodeItem? root = GetNarratorRoot();
+        if (root == null)
+            return;
+
+        try { foreach (StoryNodeItem _item in outlineVM.StoryModel.ExplorerView[0].Children) { RecurseCopyUnused(_item, root); } }
         catch (Exception _e) { _logger.LogException(LogLevel.Error, _e, "Error in recursive check"); }
     }
 
@@ -219,14 +248,18 @@ public class NarrativeToolVM: ObservableRecipient
             _logger.Log(LogLevel.Warn, "DataSource is empty or null, not adding section");
             return;
         }
-        _ = new FolderModel(NewSectionName, outlineVM.StoryModel, StoryItemType.Folder, outlineVM.StoryModel.NarratorView[0]);
+        StoryNodeItem? root = GetNarratorRoot();
+        if (root == null)
+            return;
+
+        _ = new FolderModel(NewSectionName, outlineVM.StoryModel, StoryItemType.Folder, root);
     }
 
     /// <summary>
     /// This recursively copies any unused scene in the ExplorerView view.
     /// </summary>
     /// <param name="item">The parent item </param>
-    private void RecurseCopyUnused(StoryNodeItem item)
+    private void RecurseCopyUnused(StoryNodeItem item, StoryNodeItem root)
     {
         _logger.Log(LogLevel.Trace, $"Recursing through {item.Name} ({item.Uuid})");
         try
@@ -234,15 +267,15 @@ public class NarrativeToolVM: ObservableRecipient
             if (item.Type == StoryItemType.Scene) //Check if scene/folder/section, if not then just continue.
             {
                 //This calls recursive check, which returns flattens the entire the tree and .Any() checks if the UUID is in anywhere in the model.
-                if (RecursiveCheck(outlineVM.StoryModel.NarratorView[0].Children).All(storyNodeItem => storyNodeItem.Uuid != item.Uuid)) 
+                if (RecursiveCheck(root.Children).All(storyNodeItem => storyNodeItem.Uuid != item.Uuid))
                 {
                     //Since the node isn't in the node, then we add it here.
                     _logger.Log(LogLevel.Trace, $"{item.Name} ({item.Uuid}) not found in Narrative view, adding it to the tree");
-                    _ = new StoryNodeItem((SceneModel)outlineVM.StoryModel.StoryElements.StoryElementGuids[item.Uuid], outlineVM.StoryModel.NarratorView[0]);
+                    _ = new StoryNodeItem((SceneModel)outlineVM.StoryModel.StoryElements.StoryElementGuids[item.Uuid], root);
                 }
             }
 
-            foreach (StoryNodeItem _child in item.Children) { RecurseCopyUnused(_child); }  
+            foreach (StoryNodeItem _child in item.Children) { RecurseCopyUnused(_child, root); }
         }
         catch (Exception _ex)
         {
