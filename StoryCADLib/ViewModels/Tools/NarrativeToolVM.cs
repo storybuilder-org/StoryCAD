@@ -228,6 +228,7 @@ public class NarrativeToolVM: ObservableRecipient
         }
         new FolderModel(NewSectionName, outlineVM.StoryModel, StoryItemType.Folder, outlineVM.StoryModel.NarratorView[0]);
         NewSectionName = string.Empty;
+        Message = string.Empty;
     }
 
     /// <summary>
