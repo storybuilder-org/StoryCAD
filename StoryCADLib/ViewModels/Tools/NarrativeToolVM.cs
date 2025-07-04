@@ -221,7 +221,7 @@ public class NarrativeToolVM: ObservableRecipient
         }
 
         //Check section name isn't empty
-        if (string.IsNullOrEmpty(NewSectionName))
+        if (string.IsNullOrWhiteSpace(NewSectionName))
         {
             Message = "Please name your section";
             return;
