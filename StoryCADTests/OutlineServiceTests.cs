@@ -82,8 +82,8 @@ namespace StoryCADTests
         }
 
         /// <summary>
-        /// Tests that creating a StoryModel with template index 1 adds a problem node and its children (protagonist and antagonist)
-        /// to the Overview node.
+        /// Tests that creating a StoryModel with template index 1 adds a problem node
+        /// and two characters (protagonist and antagonist to the Overview node.
         /// </summary>
         [TestMethod]
         public async Task CreateModel_Template1_ShouldAddProblemAndCharacters()
@@ -106,8 +106,9 @@ namespace StoryCADTests
             // Look for the problem node by name.
             var problemNode = overviewNode.Children.FirstOrDefault(n => n.Name == "Story Problem");
             Assert.IsNotNull(problemNode, "A problem node with name 'Story Problem' should be present for template 1.");
-            // In template 1 the problem node is expected to have exactly 2 children: protagonist and antagonist.
-            Assert.AreEqual(2, problemNode.Children.Count, "Problem node should have exactly two children (protagonist and antagonist).");
+            // In template 1 the overview node is expected to have exactly 2 characters: protagonist and antagonist.
+            Assert.AreEqual(2, model.StoryElements.Count(s => s.ElementType == StoryItemType.Character),
+                "Problem node should have exactly two characters (protagonist and antagonist).");
         }
 
         /// <summary>
