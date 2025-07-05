@@ -15,7 +15,7 @@
 
             <CommandBarFlyout x:Key="AddStoryElementFlyout" Placement="Right" x:Name="AddStoryElementCommandBarFlyout" >
                 <CommandBarFlyout.SecondaryCommands>
-	                <AppBarButton Icon="Add" Label="Add Elements" >
+                    <AppBarButton Icon="Add" Label="Add Elements" >
                         <AppBarButton.Flyout>
                             <MenuFlyout>
                                 <MenuFlyoutItem Icon="Folder" Text="Add Folder         Alt+F"  Command="{x:Bind ShellVm.AddFolderCommand, Mode=OneWay}" Visibility="{x:Bind ShellVm.AddFolderVisibility, Mode=TwoWay}" />
@@ -79,6 +79,20 @@
                     </AppBarButton>
                 </CommandBarFlyout.SecondaryCommands>
             </CommandBarFlyout>
+
+            <DataTemplate x:Key="StoryNodeContentTemplate" x:DataType="viewmodels:StoryNodeItem">
+                <StackPanel Orientation="Horizontal">
+                    <SymbolIcon 
+                    Symbol="{x:Bind Symbol, Mode=OneWay}" 
+                    Width="20" 
+                    Height="20"/>
+                    <TextBlock 
+                    Text="{x:Bind Name, Mode=TwoWay}"
+                    TextWrapping="{x:Bind TextWrapping}"
+                    MaxWidth="220"
+                    Margin="10,0,0,0"/>
+                </StackPanel>
+            </DataTemplate>
         </ResourceDictionary>
     </Page.Resources>
 
@@ -346,42 +360,63 @@
                    FontFamily="Segoe UI">
             <!-- Nav tree -->
             <SplitView.Pane>
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-                    <muxc:TreeView x:Name="NavigationTree" 
-                                   ContextFlyout="{StaticResource AddStoryElementFlyout}" 
-                                   ContextRequested="AddButton_ContextRequested" 
-                                   CanDragItems="True" AllowDrop="True" CanReorderItems="True"
-                                   ItemsSource="{x:Bind ShellVm.DataSource, Mode=TwoWay}"
-                                   SelectionMode="Single"
-                                   PointerMoved="NavigationTree_PointerMoved"
-                                   DragItemsStarting="TreeView_DragItemsStarting"
-                                   DragItemsCompleted="TreeView_DragItemsCompleted"
-                                   ItemInvoked="TreeViewItem_Invoked">
-                        <muxc:TreeView.ItemTemplate>
-                            <DataTemplate  x:DataType="viewmodels:StoryNodeItem">
-                                <muxc:TreeViewItem ItemsSource="{x:Bind Children}" 
-                                                   Background="{x:Bind Background, Mode=OneWay}" 
-                                                   BorderBrush="{x:Bind boarderBrush, Mode=OneWay}"
-                                                   BorderThickness="1"
-                                                   IsExpanded="{x:Bind IsExpanded, Mode=TwoWay}"
-                                                   CanDrag="True" 
-                                                   DragEnter ="TreeViewItem_DragEnter"
-                                                   DragLeave ="TreeViewItem_DragLeave"
-                                                   RightTapped="TreeViewItem_RightTapped"
-                                                   Tapped="TreeViewItem_Tapped">
-                                    <StackPanel Orientation="Horizontal">
+                <ItemsRepeater ItemsSource="{x:Bind ShellVm.DataSource, Mode=TwoWay}" x:Name="NavigationTree"
+                               ContextFlyout="{StaticResource AddStoryElementFlyout}" 
+                               ContextRequested="AddButton_ContextRequested" >
+
+                    <ItemsRepeater.ItemTemplate>
+                        <DataTemplate x:DataType="viewmodels:StoryNodeItem">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+
+
+                                <TreeViewItem Tapped="RootClick" RightTapped="TreeViewItem_RightTapped"
+                                              HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
+                                              Background="Transparent" BorderBrush="Transparent" DataContext="{x:Bind}">
+                                    <StackPanel Orientation="Horizontal"
+                                            Background="{x:Bind Background, Mode=OneWay}" 
+                                            BorderBrush="{x:Bind  boarderBrush, Mode=OneWay}"
+                                            BorderThickness="1">
                                         <SymbolIcon Symbol="{x:Bind Symbol, Mode=OneWay}" Width="20" Height="20"/>
                                         <TextBlock Text="{x:Bind Name, Mode=TwoWay}"          
                                                    TextWrapping="{x:Bind TextWrapping}" MaxWidth="220" Margin="10,0,10,0"/>
                                     </StackPanel>
-                                </muxc:TreeViewItem>
-                            </DataTemplate>
-                        </muxc:TreeView.ItemTemplate>
-                    </muxc:TreeView>
-                </Grid>
+                                </TreeViewItem>
+
+
+                                <muxc:TreeView Grid.Row="1"
+                                   CanDragItems="True" AllowDrop="True" CanReorderItems="True"
+                                   ItemsSource="{x:Bind Children, Mode=TwoWay}"
+                                   SelectionMode="Single" 
+                                   ItemInvoked="TreeViewItem_Invoked">
+
+                                    <muxc:TreeView.ItemTemplate>
+                                        <DataTemplate  x:DataType="viewmodels:StoryNodeItem">
+                                            <muxc:TreeViewItem ItemsSource="{x:Bind Children}" 
+                                                   Background="{x:Bind Background, Mode=OneWay}" 
+                                                   BorderBrush="{x:Bind boarderBrush, Mode=OneWay}"
+                                                   BorderThickness="1"
+                                                   RightTapped="TreeViewItem_RightTapped"
+                                                   IsExpanded="{x:Bind IsExpanded, Mode=TwoWay}"
+                                                   CanDrag="True">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <SymbolIcon Symbol="{x:Bind Symbol, Mode=OneWay}" Width="20" Height="20"/>
+                                                    <TextBlock Text="{x:Bind Name, Mode=TwoWay}"          
+                                                   TextWrapping="{x:Bind TextWrapping}" MaxWidth="220" Margin="10,0,10,0"/>
+                                                </StackPanel>
+                                            </muxc:TreeViewItem>
+                                        </DataTemplate>
+                                    </muxc:TreeView.ItemTemplate>
+                                </muxc:TreeView>
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsRepeater.ItemTemplate>
+                </ItemsRepeater>
+
+
             </SplitView.Pane>
             <SplitView.Content>
                 <Grid>
