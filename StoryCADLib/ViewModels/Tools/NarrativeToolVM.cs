@@ -168,7 +168,7 @@ public class NarrativeToolVM: ObservableRecipient
                     }
                 }
 
-                Message = $"Copied {SelectedNode.Children} and child scenes.";
+                Message = $"Copied {SelectedNode.Name} and child scenes.";
             }
             else
             {

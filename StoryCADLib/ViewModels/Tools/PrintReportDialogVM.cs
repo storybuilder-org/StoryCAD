@@ -428,20 +428,20 @@ public class PrintReportDialogVM : ObservableRecipient
 
     private async void PrintTaskCompleted(PrintTask sender, PrintTaskCompletedEventArgs args)
     {
-        if (args.Completion == PrintTaskCompletion.Failed) //Show message if print fails
+        Window.GlobalDispatcher.TryEnqueue(async () =>
         {
-            //Use an enqueue here because the sample version doesn't use it properly (i think or it doesn't work here.)
-             ContentDialog Dialog = new()
-             {
-                Title = "Printing error",
-                Content = "An error occurred trying to print your document.",
-                PrimaryButtonText = "OK"
-             };
-            await Window.ShowContentDialog(Dialog);
-        }
+            if (args.Completion == PrintTaskCompletion.Failed) //Show message if print fails
+            {
+                //Use an enqueue here because the sample version doesn't use it properly (i think or it doesn't work here.)
+                ContentDialog Dialog = new()
+                {
+                    Title = "Printing error",
+                    Content = "An error occurred trying to print your document.",
+                    PrimaryButtonText = "OK"
+                };
+                await Window.ShowContentDialog(Dialog, true);
+            }
 
-        Window.GlobalDispatcher.TryEnqueue(() =>
-        {
             _printManager.PrintTaskRequested -= PrintTaskRequested;
             Document.AddPages -= AddPages;
             Document.GetPreviewPage -= GetPreviewPage;

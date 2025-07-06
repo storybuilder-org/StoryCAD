@@ -21,128 +21,175 @@ public class OutlineService
     /// <param name="author">Creator of the outline</param>
     /// <param name="selectedTemplateIndex">Template index</param>
     /// <returns>A story outline variable.</returns>
-    public Task<StoryModel> CreateModel(string name, string author, int selectedTemplateIndex)
-    {  
-        _log.Log(LogLevel.Info, $"Creating new model: {name} by {author} with index {selectedTemplateIndex}");
-        StoryModel model = new();
+public Task<StoryModel> CreateModel(string name, string author, int selectedTemplateIndex)
+{
+    _log.Log(LogLevel.Info, $"Creating new model: {name} by {author} with index {selectedTemplateIndex}");
 
-        OverviewModel overview = new(name, model, null)
-        {
-            DateCreated = DateTime.Today.ToString("yyyy-MM-dd"),
-            Author = author
-        };
+    StoryModel model = new();
 
-        model.ExplorerView.Add(overview.Node);
-        TrashCanModel trash = new(model, null);
-        model.ExplorerView.Add(trash.Node); // The trashcan is the second root
-        FolderModel narrative = new("Narrative View", model, StoryItemType.Folder, null);
-        model.NarratorView.Add(narrative.Node);
+    OverviewModel overview = new(name, model, null)
+    {
+        DateCreated = DateTime.Today.ToString("yyyy-MM-dd"),
+        Author = author
+    };
+    model.ExplorerView.Add(overview.Node);
 
-        if (selectedTemplateIndex != 0)
+    TrashCanModel trash = new(model, null);
+    model.ExplorerView.Add(trash.Node);                             // second root
+
+    FolderModel narrative = new("Narrative View", model,
+                                StoryItemType.Folder, null);
+    model.NarratorView.Add(narrative.Node);
+
+    // branch on template type
+    switch (selectedTemplateIndex)
+    {
+        case 0: // Blank Outline
+            break;
+
+        case 1: // Overview and Story Problem
         {
             StoryElement storyProblem = new ProblemModel("Story Problem", model, overview.Node);
-            StoryElement storyProtag = new CharacterModel("Protagonist", model, overview.Node);
-            StoryElement storyAntag = new CharacterModel("Antagonist", model, overview.Node);
+            StoryElement storyProtag  = new CharacterModel("Protagonist",  model, storyProblem.Node);
+            StoryElement storyAntag   = new CharacterModel("Antagonist",   model, storyProblem.Node);
+
             overview.StoryProblem = storyProblem.Uuid;
             var problem = (ProblemModel)storyProblem;
             problem.Protagonist = storyProtag.Uuid;
-            problem.Antagonist = storyAntag.Uuid;
-            problem.Premise = """
-                              Your[protagonist] in a situation[genre, setting] wants something[goal], which brings him
-                              into [conflict] with a second character[antagonist]. After a series of conflicts[additional
-                              problems], the final battle[climax scene] erupts, and the[protagonist] finally resolves the 
-                              conflict[outcome].
-                              """;
-
-            switch (selectedTemplateIndex)
-            {
-                case 1:
-                    overview.Node.Children.Add(storyProblem.Node);
-                    storyProblem.Node.Children.Add(storyProtag.Node);
-                    storyProblem.Node.Children.Add(storyAntag.Node);
-                    storyProblem.Node.Parent = overview.Node;
-                    storyProtag.Node.Parent = storyProblem.Node;
-                    storyAntag.Node.Parent = storyProblem.Node;
-                    storyProblem.Node.IsExpanded = true;
-                    break;
-                case 2:
-                    StoryElement problems = new FolderModel("Problems", model, StoryItemType.Folder, overview.Node);
-                    StoryElement characters = new FolderModel("Characters", model, StoryItemType.Folder, overview.Node);
-                    StoryElement settings = new FolderModel("Settings", model, StoryItemType.Folder, overview.Node);
-                    StoryElement scenes = new FolderModel("Scenes", model, StoryItemType.Folder, overview.Node);
-                    overview.StoryProblem = storyProblem.Uuid;
-                    overview.Node.Children.Add(storyProblem.Node);
-                    overview.Node.Children.Add(storyProtag.Node);
-                    overview.Node.Children.Add(storyAntag.Node);
-                    problems.Node.IsExpanded = true;
-                    characters.Node.IsExpanded = true;
-                    break;
-                case 3:
-                    storyProblem.Node.Name = "External Problem";
-                    storyProblem.Node.IsExpanded = true;
-                    storyProblem.Node.Parent = overview.Node;
-                    overview.Node.Children.Add(storyProblem.Node);
-                    problem = (ProblemModel)storyProblem;
-                    problem.Name = "External Problem";
-                    overview.StoryProblem = problem.Uuid;
-                    problem.Protagonist = storyProtag.Uuid;
-                    problem.Antagonist = storyAntag.Uuid;
-                    storyProtag.Node.Parent = storyProblem.Node;
-                    storyAntag.Node.Parent = storyProblem.Node;
-                    StoryElement internalProblem = new ProblemModel("Internal Problem", model, overview.Node);
-                    problem = (ProblemModel)internalProblem;
-                    problem.Protagonist = storyProtag.Uuid;
-                    problem.Antagonist = storyProtag.Uuid;
-                    problem.ConflictType = "Person vs. Self";
-                    problem.Premise =
-                        """
-                        Your [protagonist] grapples with an [internal conflict] and is their own antagonist,
-                        marred by self-doubt and fears or having a [goal] that masks this conflict rather than
-                        a real need. The [climax scene] is often a moment of introspection in which he or she
-                        makes a decision or discovery that resolves the internal conflict [outcome]. Resolving
-                        this problem may enable your [protagonist] to resolve another (external) problem.
-                        """;
-                    break;
-                case 4:
-                    storyProtag.Node.IsExpanded = true;
-                    storyProblem.Node.Parent = storyProtag.Node;
-                    storyProtag.Node.Parent = overview.Node;
-                    storyAntag.Node.Parent = overview.Node;
-                    break;
-                case 5:
-                    StoryElement problemsFolder = new FolderModel("Problems", model, StoryItemType.Folder, overview.Node);
-                    StoryElement charactersFolder = new FolderModel("Characters", model, StoryItemType.Folder, overview.Node);
-                    StoryElement settingsFolder = new FolderModel("Settings", model, StoryItemType.Folder, overview.Node);
-                    StoryElement scenesFolder = new FolderModel("Scenes", model, StoryItemType.Folder, overview.Node);
-                    storyProblem.Node.Name = "External Problem";
-                    storyProblem.Node.IsExpanded = true;
-                    storyProblem.Node.Parent = problemsFolder.Node;
-                    problem = (ProblemModel)storyProblem;
-                    problem.Name = "External Problem";
-                    problem.Protagonist = storyProtag.Uuid;
-                    problem.Antagonist = storyAntag.Uuid;
-                    overview.StoryProblem = problem.Uuid;
-                    StoryElement internalProblem2 = new ProblemModel("Internal Problem", model, problemsFolder.Node);
-                    problem = (ProblemModel)internalProblem2;
-                    problem.Protagonist = storyProtag.Uuid;
-                    problem.Antagonist = storyProtag.Uuid;
-                    problem.ConflictType = "Person vs. Self";
-                    problem.Premise =
-                        """
-                        Your [protagonist] grapples with an [internal conflict] and is their own antagonist,
-                        marred by self-doubt and fears or having a [goal] that masks this conflict rather than
-                        a real need. The [climax scene] is often a moment of introspection in which he or she
-                        makes a decision or discovery that resolves the internal conflict [outcome]. Resolving
-                        this problem may enable your [protagonist] to resolve another (external) problem.
-                        """;
-                    storyProblem.Node.Parent = problemsFolder.Node;
-                    break;
-            }
+            problem.Antagonist  = storyAntag.Uuid;
+            problem.Premise =
+                """
+                Your [protagonist] in a situation [genre, setting] wants something [goal], which brings him
+                into [conflict] with a second character [antagonist]. After a series of conflicts [additional
+                problems], the final battle [climax scene] erupts, and the [protagonist] finally resolves the
+                conflict [outcome].
+                """;
+            storyProblem.Node.IsExpanded = true;
+            break;
         }
 
-        _log.Log(LogLevel.Info, $"Model created, element count {model.StoryElements.Count}");
-        return Task.FromResult(model);
+        case 2: // Folders
+        {
+            StoryElement problems   = new FolderModel("Problems",   model, StoryItemType.Folder, overview.Node);
+            StoryElement characters = new FolderModel("Characters", model, StoryItemType.Folder, overview.Node);
+            StoryElement settings   = new FolderModel("Settings",   model, StoryItemType.Folder, overview.Node);
+            StoryElement scenes     = new FolderModel("Scenes",     model, StoryItemType.Folder, overview.Node);
+
+            problems.Node.IsExpanded   = true;
+            characters.Node.IsExpanded = true;
+            settings.Node.IsExpanded = true;
+            scenes.Node.IsExpanded = true;
+            break;
+        }
+
+        case 3: // External and Internal Problems
+        {
+            StoryElement external = new ProblemModel("External Problem", model, overview.Node);
+            StoryElement protag   = new CharacterModel("Protagonist",     model, external.Node);
+            StoryElement antag    = new CharacterModel("Antagonist",      model, external.Node);
+
+            overview.StoryProblem = external.Uuid;
+            var extProb = (ProblemModel)external;
+            extProb.Name        = "External Problem";
+            extProb.Protagonist = protag.Uuid;
+            extProb.Antagonist  = antag.Uuid;
+            extProb.Premise =
+                """
+                Your [protagonist] in a situation [genre, setting] wants something [goal], which brings him
+                into [conflict] with a second character [antagonist]. After a series of conflicts [additional
+                problems], the final battle [climax scene] erupts, and the [protagonist] finally resolves the
+                conflict [outcome].
+                """;
+            external.Node.IsExpanded = true;
+
+            StoryElement internalProb = new ProblemModel("Internal Problem", model, overview.Node);
+            var intProb = (ProblemModel)internalProb;
+            intProb.Protagonist  = protag.Uuid;
+            intProb.Antagonist   = protag.Uuid;
+            intProb.ConflictType = "Person vs. Self";
+            intProb.Premise =
+                """
+                Your [protagonist] grapples with an [internal conflict] and is their own antagonist,
+                marred by self-doubt and fears or having a [goal] that masks this conflict rather than
+                a real need. The [climax scene] is often a moment of introspection in which he or she
+                makes a decision or discovery that resolves the internal conflict [outcome]. Resolving
+                this problem may enable your [protagonist] to resolve another (external) problem.
+                """;
+            break;
+        }
+
+        case 4: // Protagonist and Antagonist
+        {
+            StoryElement protag = new CharacterModel("Protagonist", model, overview.Node);
+            StoryElement antag  = new CharacterModel("Antagonist",  model, overview.Node);
+            protag.Node.IsExpanded = true;
+
+            StoryElement storyProblem = new ProblemModel("Story Problem", model, protag.Node);
+            overview.StoryProblem = storyProblem.Uuid;
+            var problem = (ProblemModel)storyProblem;
+            problem.Protagonist = protag.Uuid;
+            problem.Antagonist  = antag.Uuid;
+            problem.Premise =
+                """
+                Your [protagonist] in a situation [genre, setting] wants something [goal], which brings him
+                into [conflict] with a second character [antagonist]. After a series of conflicts [additional
+                problems], the final battle [climax scene] erupts, and the [protagonist] finally resolves the
+                conflict [outcome].
+                """;
+            break;
+        }
+
+        case 5: // Problems and Characters
+        {
+            StoryElement problemsFolder   = new FolderModel("Problems",   model, StoryItemType.Folder, overview.Node);
+            StoryElement charactersFolder = new FolderModel("Characters", model, StoryItemType.Folder, overview.Node);
+            StoryElement settingsFolder   = new FolderModel("Settings",   model, StoryItemType.Folder, overview.Node);
+            StoryElement scenesFolder     = new FolderModel("Scenes",     model, StoryItemType.Folder, overview.Node);
+
+            StoryElement external = new ProblemModel("External Problem", model, problemsFolder.Node);
+            StoryElement protag   = new CharacterModel("Protagonist",     model, charactersFolder.Node);
+            StoryElement antag    = new CharacterModel("Antagonist",      model, charactersFolder.Node);
+
+            overview.StoryProblem = external.Uuid;
+            var extProb = (ProblemModel)external;
+            extProb.Name        = "External Problem";
+            extProb.Protagonist = protag.Uuid;
+            extProb.Antagonist  = antag.Uuid;
+            extProb.Premise =
+                """
+                Your [protagonist] in a situation [genre, setting] wants something [goal], which brings him
+                into [conflict] with a second character [antagonist]. After a series of conflicts [additional
+                problems], the final battle [climax scene] erupts, and the [protagonist] finally resolves the
+                conflict [outcome].
+                """;
+            external.Node.IsExpanded = true;
+            settingsFolder.Node.IsExpanded = true;
+            scenesFolder.Node.IsExpanded = true;
+
+            StoryElement internalProb = new ProblemModel("Internal Problem", model, problemsFolder.Node);
+            var intProb = (ProblemModel)internalProb;
+            intProb.Protagonist  = protag.Uuid;
+            intProb.Antagonist   = protag.Uuid;
+            intProb.ConflictType = "Person vs. Self";
+            intProb.Premise =
+                """
+                Your [protagonist] grapples with an [internal conflict] and is their own antagonist,
+                marred by self-doubt and fears or having a [goal] that masks this conflict rather than
+                a real need. The [climax scene] is often a moment of introspection in which he or she
+                makes a decision or discovery that resolves the internal conflict [outcome]. Resolving
+                this problem may enable your [protagonist] to resolve another (external) problem.
+                """;
+            break;
+        }
+
+        default:
+            throw new ArgumentOutOfRangeException(nameof(selectedTemplateIndex));
     }
+
+    _log.Log(LogLevel.Info, $"Model created, element count {model.StoryElements.Count}");
+    return Task.FromResult(model);
+}
+
 
     /// <summary>
     /// Writes the StoryModel JSON file to disk.
