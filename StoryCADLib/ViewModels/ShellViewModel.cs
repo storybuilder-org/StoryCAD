@@ -1364,7 +1364,7 @@ public void MoveStoryNode(StoryNodeItem source, StoryNodeItem target, DragAndDro
         }
 
         // Use async dispatch to avoid reentrancy
-        Window.GlobalDispatcher.TryEnqueue(() =>
+        Ioc.Default.GetRequiredService<Windowing>().GlobalDispatcher.TryEnqueue(() =>
         {
             lock (dragLock)
             {
