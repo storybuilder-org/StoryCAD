@@ -77,6 +77,8 @@ public Task<StoryModel> CreateModel(string name, string author, int selectedTemp
 
             problems.Node.IsExpanded   = true;
             characters.Node.IsExpanded = true;
+            settings.Node.IsExpanded = true;
+            scenes.Node.IsExpanded = true;
             break;
         }
 
@@ -161,6 +163,8 @@ public Task<StoryModel> CreateModel(string name, string author, int selectedTemp
                 conflict [outcome].
                 """;
             external.Node.IsExpanded = true;
+            settingsFolder.Node.IsExpanded = true;
+            scenesFolder.Node.IsExpanded = true;
 
             StoryElement internalProb = new ProblemModel("Internal Problem", model, problemsFolder.Node);
             var intProb = (ProblemModel)internalProb;
