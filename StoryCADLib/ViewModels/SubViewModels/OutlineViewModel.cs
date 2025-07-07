@@ -275,6 +275,11 @@ public class OutlineViewModel : ObservableRecipient
                 if (preferences.Model.BackupOnOpen)
                 {
                     await shellVm.MakeBackup();
+                    shellVm.BackupStatusColor = Colors.Green;
+                }
+                else
+                {
+                    shellVm.BackupStatusColor = Colors.Green;
                 }
 
                 shellVm.TreeViewNodeClicked(StoryModel.ExplorerView[0]);

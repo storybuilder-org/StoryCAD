@@ -213,6 +213,7 @@ public class SemanticKernelApi
                                  Some included fields are GUIDs. These are the GUIDs of other StoryElements, and are how one story element links to another.
                                  Examples include 'Protagonist' and 'Antagonist' in a ProblemModel, which link to CharacterModels, and 'Setting' and 'Cast' in a Scene,
                                  which link to a SettingModel and CharacterModel elements, respectively.
+                                 You may specify the GUID of the element should you wish, but it must be unique.
                                  
                                  Dont ADD NEW FIELDS TO THE PAYLOAD.
                                  Dont add GUIDs that are not within the current storymodel.
@@ -222,7 +223,7 @@ public class SemanticKernelApi
                                  Dont add sections to the narrator view unless explictly asked to, always add to the Overview element 
                                  unless told otherwise.
                                  """)]
-    public OperationResult<Guid> AddElement(StoryItemType typeToAdd, string parentGUID, string name)
+    public OperationResult<Guid> AddElement(StoryItemType typeToAdd, string parentGUID, string name, string GUIDOverride = "")
     {
         if (CurrentModel == null)
         {
@@ -232,6 +233,20 @@ public class SemanticKernelApi
         if (!Guid.TryParse(parentGUID, out var parentGuid))
         {
             return OperationResult<Guid>.Failure($"Invalid parent GUID: {parentGUID}");
+        }
+
+        Guid DesiredGuid = Guid.Empty;
+        if (!String.IsNullOrEmpty(GUIDOverride))
+        {
+            if (!Guid.TryParse(GUIDOverride, out DesiredGuid))
+            {
+                return OperationResult<Guid>.Failure($"Invalid guid GUID: {parentGUID}");
+            }
+
+            if (CurrentModel.StoryElements.StoryElementGuids.ContainsKey(DesiredGuid))
+            {
+                return OperationResult<Guid>.Failure($"GUID Override already exists.");
+            }
         }
 
         // Attempt to locate the parent element using the provided GUID.
@@ -245,6 +260,10 @@ public class SemanticKernelApi
         {
             // Create the new element using the OutlineService.
             var newElement = _outlineService.AddStoryElement(CurrentModel, typeToAdd, parent.Node);
+            if (DesiredGuid != Guid.Empty)
+            {
+                newElement.UpdateGuid(CurrentModel, DesiredGuid);
+            }
             newElement.Name = name;
 
             return OperationResult<Guid>.Success(newElement.Uuid);
@@ -263,7 +282,8 @@ public class SemanticKernelApi
                                  and are how one story element links to another.
                                  Examples include 'Protagonist' and 'Antagonist' in a ProblemModel, which link to CharacterModels, and 'Setting' and 'Cast' in a Scene,
                                  which link to a SettingModel and CharacterModel elements, respectively.
-
+                                 You may specify the GUID of the element should you wish, but it must be unique.
+                                 
                                  Dont ADD NEW FIELDS TO THE PAYLOAD. 
                                  Dont add GUIDs that are not within the current storymodel.
                                  The following Types are supported: Problem, Character, Setting, Scene, Folder, Section, Web, Notes.
@@ -272,7 +292,7 @@ public class SemanticKernelApi
                                  Dont add sections to the narrator view unless explictly asked to, always add to the Overview element 
                                  unless told otherwise.
                                  """)]
-    public OperationResult<Guid> AddElement(StoryItemType typeToAdd, string parentGUID, string name, Dictionary<string, object> properties)
+    public OperationResult<Guid> AddElement(StoryItemType typeToAdd, string parentGUID, string name, Dictionary<string, object> properties, string GUIDOverride = "")
     {
         if (CurrentModel == null)
         {
@@ -282,6 +302,20 @@ public class SemanticKernelApi
         if (!Guid.TryParse(parentGUID, out var parentGuid))
         {
             return OperationResult<Guid>.Failure($"Invalid parent GUID: {parentGUID}");
+        }
+
+        Guid DesiredGuid = Guid.Empty;
+        if (!String.IsNullOrEmpty(GUIDOverride))
+        {
+            if (!Guid.TryParse(GUIDOverride, out DesiredGuid))
+            {
+                return OperationResult<Guid>.Failure($"Invalid guid GUID: {parentGUID}");
+            }
+
+            if (CurrentModel.StoryElements.StoryElementGuids.ContainsKey(DesiredGuid))
+            {
+                return OperationResult<Guid>.Failure($"GUID Override already exists.");
+            }
         }
 
         // Attempt to locate the parent element using the provided GUID.
@@ -295,11 +329,16 @@ public class SemanticKernelApi
         {
             // Create the new element using the OutlineService.
             var newElement = _outlineService.AddStoryElement(CurrentModel, typeToAdd, parent.Node);
+
+            if (DesiredGuid != Guid.Empty)
+            {
+                newElement.UpdateGuid(CurrentModel, DesiredGuid);
+            }
+
             newElement.Name = name;
 
             newElement.Name = name;
             UpdateElementProperties(newElement.Uuid,  properties);
-
 
             return OperationResult<Guid>.Success(newElement.Uuid);
         }
