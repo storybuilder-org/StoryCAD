@@ -1290,40 +1290,40 @@ public class ShellViewModel : ObservableRecipient
     /// <returns>True if the move is invalid; otherwise, false.</returns>
     public bool ValidateDragAndDrop(StoryNodeItem source, StoryNodeItem target)
     {
-        if (source == null)
+        if (source == null || target == null)
         {
-            Logger.Log(LogLevel.Trace, $"Source is null.");
+            Logger.Log(LogLevel.Warn, "Source or target node is null");
             return false;
         }
 
-        if (target == null)
+        try
         {
-            Logger.Log(LogLevel.Trace, $"Target is null.");
+            if (IsDescendant(source, target))
+            {
+                ShowMessage(LogLevel.Warn, "Cannot move a parent to its own child", true);
+                return false;
+            }
+
+            if (target.Type == StoryItemType.TrashCan || source.Type == StoryItemType.TrashCan)
+            {
+                ShowMessage(LogLevel.Warn, "Cannot move to/from the trashcan", true);
+                return false;
+            }
+
+            if (IsDescendant(OutlineManager.StoryModel.ExplorerView[1], target) ||
+                IsDescendant(OutlineManager.StoryModel.ExplorerView[1], source))
+            {
+                ShowMessage(LogLevel.Warn, "Operation involves trashcan", true);
+                return false;
+            }
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogException(LogLevel.Error, ex, "Error validating drag and drop operation");
             return false;
         }
-
-        if (IsDescendant(source, target))
-        {
-            ShowMessage(LogLevel.Warn, "Cannot move a parent to its own child", true);
-            return false;
-        }
-
-        if (target.Type == StoryItemType.TrashCan || source.Type == StoryItemType.TrashCan)
-        {
-            ShowMessage(LogLevel.Warn, "Cannot move to/from the trashcan", true);
-            return false;
-        }
-
-        if (IsDescendant(OutlineManager.StoryModel.ExplorerView[1], target) ||
-            IsDescendant(OutlineManager.StoryModel.ExplorerView[1], source))
-        {
-            ShowMessage(LogLevel.Warn, "Operation involves trashcan", true);
-            return false;
-        }
-
-        // If none of the conditions are met, the move is considered valid.
-        Logger.Log(LogLevel.Trace, $"Drag/Drop Operation is valid.");
-        return true;
     }
 
     /// <summary>
@@ -1353,70 +1353,68 @@ public class ShellViewModel : ObservableRecipient
     /// TreeView), complete the move by modifying the TreeView's DataSource
     /// ObservableCollection of StoryNodeItem instances.
     /// </summary>
-    public void MoveStoryNode(StoryNodeItem dragSourceStoryNode, StoryNodeItem dragTargetStoryNode, DragAndDropDirection direction)
+public void MoveStoryNode(StoryNodeItem source, StoryNodeItem target, DragAndDropDirection direction)
+{
+    try
     {
-        lock (dragLock)
+        // Move the validation outside the lock to reduce lock contention
+        if (!ValidateDragAndDrop(source, target))
         {
-            int targetIndex = -1;
-            try
-            {
-                bool sourceIsTargetDescendant = IsDescendant(dragTargetStoryNode, dragSourceStoryNode);
+            return;
+        }
 
-                StoryNodeItem sourceParent = dragSourceStoryNode.Parent;
-                if (sourceParent == null || !sourceParent.Children.Contains(dragSourceStoryNode))
+        // Use async dispatch to avoid reentrancy
+        Ioc.Default.GetRequiredService<Windowing>().GlobalDispatcher.TryEnqueue(() =>
+        {
+            lock (dragLock)
+            {
+                int targetIndex = -1;
+                StoryNodeItem sourceParent = source.Parent;
+                if (sourceParent == null || !sourceParent.Children.Contains(source))
                 {
                     throw new InvalidOperationException("Source node is not a child of its parent or parent is null.");
                 }
-                sourceParent.Children.Remove(dragSourceStoryNode);
+                
+                bool sourceIsTargetDescendant = IsDescendant(target, source);
+                sourceParent.Children.Remove(source);
 
-                if (dragTargetStoryNode.IsRoot || sourceIsTargetDescendant ||
-                    dragTargetStoryNode.Type == StoryItemType.Folder || dragTargetStoryNode.Type == StoryItemType.Section)
+                if (target.IsRoot || sourceIsTargetDescendant ||
+                    target.Type == StoryItemType.Folder || target.Type == StoryItemType.Section)
                 {
-                    dragTargetStoryNode.Children.Insert(0, dragSourceStoryNode);
-                    dragSourceStoryNode.Parent = dragTargetStoryNode;
+                    target.Children.Insert(0, source);
+                    source.Parent = target;
                 }
                 else
                 {
-                    StoryNodeItem targetParent = dragTargetStoryNode.Parent;
-                    if (targetParent == null || !targetParent.Children.Contains(dragTargetStoryNode))
+                    StoryNodeItem targetParent = target.Parent;
+                    if (targetParent == null || !targetParent.Children.Contains(target))
                     {
                         throw new InvalidOperationException("Target node's parent is null or target node not found in its parent's children collection.");
                     }
 
-                    targetIndex = targetParent.Children.IndexOf(dragTargetStoryNode);
-
-                    // Check if inserting above or below the target node
+                    targetIndex = targetParent.Children.IndexOf(target);
                     if (direction == DragAndDropDirection.AboveTargetItem)
                     {
-                        // Pushes dragTargetStoryNode and all subsequent nodes forward
-                        targetParent.Children.Insert(targetIndex, dragSourceStoryNode);
+                        targetParent.Children.Insert(targetIndex, source);
                     }
                     else
                     {
-                        // Adds just after dragTargetStoryNode. If dragTargetStoryNode's
-                        // index equals Count, it's added at the end of the list.
-                        targetParent.Children.Insert(targetIndex + 1, dragSourceStoryNode);
+                        targetParent.Children.Insert(targetIndex + 1, source);
                     }
-
-                    dragSourceStoryNode.Parent = targetParent;
+                    source.Parent = targetParent;
                 }
 
-                ShowChange();  // Report the move
+                ShowChange();
                 ShowMessage(LogLevel.Info, "Drag and drop successful", false);
             }
-            catch (Exception ex)
-            {
-                Logger.LogException(LogLevel.Error, ex, "Error in drag-drop operation");
-                ShowMessage(LogLevel.Error, "Error in drag-drop operation", false);
-
-                // Log the target index for debugging
-                Logger.Log(LogLevel.Error, $"Target Index: {targetIndex}");
-            }
-        }
-
-        // Refresh UI and report the move
-        ShellViewModel.ShowChange();
+        });
     }
+    catch (Exception ex)
+    {
+        Logger.LogException(LogLevel.Error, ex, "Error in drag-drop operation");
+        ShowMessage(LogLevel.Error, "Error in drag-drop operation", false);
+    }
+}
 
     #endregion
 
