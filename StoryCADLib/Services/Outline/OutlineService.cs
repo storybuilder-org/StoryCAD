@@ -35,7 +35,7 @@ public Task<StoryModel> CreateModel(string name, string author, int selectedTemp
     model.ExplorerView.Add(overview.Node);
 
     TrashCanModel trash = new(model, null);
-    model.ExplorerView.Add(trash.Node);                             // second root
+    model.TrashView.Add(trash.Node);
 
     FolderModel narrative = new("Narrative View", model,
                                 StoryItemType.Folder, null);

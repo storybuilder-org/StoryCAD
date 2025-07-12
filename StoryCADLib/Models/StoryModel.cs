@@ -56,7 +56,13 @@ public class StoryModel
 	/// This is only updated on saves.
 	/// </summary>
 	[JsonInclude]
-	internal List<PersistableNode> FlattenedNarratorView;
+        internal List<PersistableNode> FlattenedNarratorView;
+
+        /// <summary>
+        /// Flattened Trash view used for serialization.
+        /// </summary>
+        [JsonInclude]
+        internal List<PersistableNode> FlattenedTrashView;
 
 	/// A StoryModel is a collection of StoryElements (an overview, problems, characters, settings,
 	/// and scenes, plus containers).
@@ -74,7 +80,9 @@ public class StoryModel
 	[JsonIgnore]
 	public ObservableCollection<StoryNodeItem> ExplorerView;
 	[JsonIgnore]
-	public ObservableCollection<StoryNodeItem> NarratorView;
+        public ObservableCollection<StoryNodeItem> NarratorView;
+        [JsonIgnore]
+        public ObservableCollection<StoryNodeItem> TrashView;
 
     #endregion
 
@@ -119,6 +127,8 @@ public class StoryModel
         //Flatten trees (solves issues when deserialization)
         FlattenedExplorerView = FlattenTree(ExplorerView);
         FlattenedNarratorView = FlattenTree(NarratorView);
+        if (TrashView != null)
+            FlattenedTrashView = FlattenTree(TrashView);
 
         //Serialise
         return JsonSerializer.Serialize(this, new JsonSerializerOptions
@@ -139,6 +149,7 @@ public class StoryModel
         StoryElements = new StoryElementCollection();
         ExplorerView = new ObservableCollection<StoryNodeItem>();
         NarratorView = new ObservableCollection<StoryNodeItem>();
+        TrashView = new ObservableCollection<StoryNodeItem>();
 
         Changed = false;
     }

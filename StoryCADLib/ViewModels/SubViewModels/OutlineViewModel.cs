@@ -1134,8 +1134,9 @@ public class OutlineViewModel : ObservableRecipient
             return;
         }
 
-        ObservableCollection<StoryNodeItem> _target = shellVm.DataSource[0].Children;
-        shellVm.DataSource[1].Children.Remove(shellVm.RightTappedNode);
+        ObservableCollection<StoryNodeItem> _target = shellVm.ActiveNodes;
+        var trashRoot = shellVm.OutlineManager.StoryModel.TrashView.FirstOrDefault();
+        trashRoot?.Children.Remove(shellVm.RightTappedNode);
         _target.Add(shellVm.RightTappedNode);
         shellVm.RightTappedNode.Parent = shellVm.DataSource[0];
         Messenger.Send(new StatusChangedMessage(new(
@@ -1180,7 +1181,7 @@ public class OutlineViewModel : ObservableRecipient
             return;
         }
 
-        if (shellVm.DataSource.Count <= 1)
+        if (!shellVm.OutlineManager.StoryModel.TrashView.Any())
         {
             logger.Log(LogLevel.Warn, "Failed to empty trash - Trash can not available in current view.");
             Messenger.Send(new StatusChangedMessage(new("No Deleted StoryElements to empty", LogLevel.Warn)));
@@ -1189,7 +1190,7 @@ public class OutlineViewModel : ObservableRecipient
 
         shellVm.StatusMessage = "Trash Emptied.";
         logger.Log(LogLevel.Info, "Emptied Trash.");
-        shellVm.DataSource[1].Children.Clear();
+        shellVm.OutlineManager.StoryModel.TrashView.First().Children.Clear();
     }
 
     /// <summary>
