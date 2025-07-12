@@ -180,8 +180,18 @@ public class ShellViewModel : ObservableRecipient
         {
             using SerializationLock _lock = new(_autoSaveService, _BackupService, Logger);
             SetProperty(ref _dataSource, value);
+            OnPropertyChanged(nameof(ActiveNodes));
+            OnPropertyChanged(nameof(TrashNodes));
         }
     }
+
+    public ObservableCollection<StoryNodeItem>? ActiveNodes =>
+        DataSource?.Count > 0 ? DataSource[0].Children : null;
+
+    public ObservableCollection<StoryNodeItem>? TrashNodes =>
+        OutlineManager?.StoryModel?.TrashView?.Count > 0
+            ? OutlineManager.StoryModel.TrashView[0].Children
+            : null;
 
     /// <summary>
     /// IsPaneOpen is bound to ShellSplitView's IsPaneOpen property with

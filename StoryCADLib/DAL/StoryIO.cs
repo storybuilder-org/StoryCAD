@@ -71,9 +71,33 @@ public class StoryIO
 				}
 			});
 
-			//Rebuild tree.
-			_model.ExplorerView = RebuildTree(_model.FlattenedExplorerView, _model.StoryElements, _logService);
-			_model.NarratorView = RebuildTree(_model.FlattenedNarratorView, _model.StoryElements, _logService);
+                        //Rebuild tree.
+                        _model.ExplorerView = RebuildTree(_model.FlattenedExplorerView, _model.StoryElements, _logService);
+                        _model.NarratorView = RebuildTree(_model.FlattenedNarratorView, _model.StoryElements, _logService);
+                        if (_model.FlattenedTrashView != null)
+                        {
+                            _model.TrashView = RebuildTree(_model.FlattenedTrashView, _model.StoryElements, _logService);
+                        }
+                        else
+                        {
+                            _model.TrashView = new ObservableCollection<StoryNodeItem>();
+                        }
+
+                        // Legacy: trash may exist as second root in explorer view
+                        if (_model.TrashView.Count == 0 &&
+                            _model.ExplorerView.Count > 1 &&
+                            _model.ExplorerView[1].Type == StoryItemType.TrashCan)
+                        {
+                            _model.TrashView.Add(_model.ExplorerView[1]);
+                            _model.ExplorerView.RemoveAt(1);
+                        }
+                        if (_model.TrashView.Count == 0 &&
+                            _model.NarratorView.Count > 1 &&
+                            _model.NarratorView[1].Type == StoryItemType.TrashCan)
+                        {
+                            _model.TrashView.Add(_model.NarratorView[1]);
+                            _model.NarratorView.RemoveAt(1);
+                        }
 
 			//Log info about story
 			_logService.Log(LogLevel.Info, $"Model deserialized as {_model.ExplorerView[0].Name}");
