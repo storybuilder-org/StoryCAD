@@ -9,11 +9,33 @@
     mc:Ignorable="d" SizeChanged="ShellPage_SizeChanged">
     <Page.Resources>
         <ResourceDictionary>
-            <ResourceDictionary.ThemeDictionaries>
-                <ResourceDictionary x:Key="Default" />
-            </ResourceDictionary.ThemeDictionaries>
+            <!-- Theme dictionaries should be merged instead -->
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary>
+                    <ResourceDictionary.ThemeDictionaries>
+                        <ResourceDictionary x:Key="Default" />
+                    </ResourceDictionary.ThemeDictionaries>
+                </ResourceDictionary>
+            </ResourceDictionary.MergedDictionaries>
 
-            <CommandBarFlyout x:Key="AddStoryElementFlyout" Placement="Right" x:Name="AddStoryElementCommandBarFlyout" >
+            <DataTemplate x:Key="StoryNodeItemTemplate"
+                          x:DataType="viewmodels:StoryNodeItem">
+                <muxc:TreeViewItem ItemsSource="{x:Bind Children}"
+                                   Background="{x:Bind Background, Mode=OneWay}"
+                                   BorderBrush="{x:Bind boarderBrush, Mode=OneWay}"
+                                   BorderThickness="1"
+                                   IsExpanded="{x:Bind IsExpanded, Mode=TwoWay}">
+                    <StackPanel Orientation="Horizontal">
+                        <SymbolIcon Symbol="{x:Bind Symbol, Mode=OneWay}"
+                                    Width="20" Height="20"/>
+                        <TextBlock Text="{x:Bind Name, Mode=TwoWay}"
+                                   TextWrapping="{x:Bind TextWrapping}"
+                                   MaxWidth="220" Margin="10,0,10,0"/>
+                    </StackPanel>
+                </muxc:TreeViewItem>
+            </DataTemplate>
+ 
+            <CommandBarFlyout x:Key="AddStoryElementFlyout" Placement="Right" x:Name="AddStoryElementCommandBarFlyout">
                 <CommandBarFlyout.SecondaryCommands>
 	                <AppBarButton Icon="Add" Label="Add Elements" >
                         <AppBarButton.Flyout>
@@ -346,42 +368,25 @@
                    FontFamily="Segoe UI">
             <!-- Nav tree -->
             <SplitView.Pane>
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-                    <muxc:TreeView x:Name="NavigationTree" 
-                                   ContextFlyout="{StaticResource AddStoryElementFlyout}" 
-                                   ContextRequested="AddButton_ContextRequested" 
-                                   CanDragItems="True" AllowDrop="True" CanReorderItems="True"
-                                   ItemsSource="{x:Bind ShellVm.DataSource, Mode=TwoWay}"
+                <StackPanel>
+                    <muxc:TreeView x:Name="NavigationTree"
+                                   ContextFlyout="{StaticResource AddStoryElementFlyout}"
+                                   CanDragItems="True"
+                                   AllowDrop="True"
+                                   CanReorderItems="True"
+                                   ItemsSource="{x:Bind ShellVm.ActiveNodes, Mode=TwoWay}"
                                    SelectionMode="Single"
-                                   PointerMoved="NavigationTree_PointerMoved"
-                                   DragItemsStarting="TreeView_DragItemsStarting"
-                                   DragItemsCompleted="TreeView_DragItemsCompleted"
-                                   ItemInvoked="TreeViewItem_Invoked">
-                        <muxc:TreeView.ItemTemplate>
-                            <DataTemplate  x:DataType="viewmodels:StoryNodeItem">
-                                <muxc:TreeViewItem ItemsSource="{x:Bind Children}" 
-                                                   Background="{x:Bind Background, Mode=OneWay}" 
-                                                   BorderBrush="{x:Bind boarderBrush, Mode=OneWay}"
-                                                   BorderThickness="1"
-                                                   IsExpanded="{x:Bind IsExpanded, Mode=TwoWay}"
-                                                   CanDrag="True" 
-                                                   DragEnter ="TreeViewItem_DragEnter"
-                                                   DragLeave ="TreeViewItem_DragLeave"
-                                                   RightTapped="TreeViewItem_RightTapped"
-                                                   Tapped="TreeViewItem_Tapped">
-                                    <StackPanel Orientation="Horizontal">
-                                        <SymbolIcon Symbol="{x:Bind Symbol, Mode=OneWay}" Width="20" Height="20"/>
-                                        <TextBlock Text="{x:Bind Name, Mode=TwoWay}"          
-                                                   TextWrapping="{x:Bind TextWrapping}" MaxWidth="220" Margin="10,0,10,0"/>
-                                    </StackPanel>
-                                </muxc:TreeViewItem>
-                            </DataTemplate>
-                        </muxc:TreeView.ItemTemplate>
-                    </muxc:TreeView>
-                </Grid>
+                                   ItemInvoked="TreeViewItem_Invoked"
+                                   ItemTemplate="{StaticResource StoryNodeItemTemplate}" />
+
+                    <muxc:TreeView x:Name="TrashTree"
+                                   CanDragItems="False"
+                                   AllowDrop="False"
+                                   ItemsSource="{x:Bind ShellVm.TrashNodes, Mode=TwoWay}"
+                                   SelectionMode="Single"
+                                   ItemInvoked="TreeViewItem_Invoked"
+                                   ItemTemplate="{StaticResource StoryNodeItemTemplate}" />
+                </StackPanel>
             </SplitView.Pane>
             <SplitView.Content>
                 <Grid>

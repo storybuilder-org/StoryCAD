@@ -183,6 +183,20 @@ public class ShellViewModel : ObservableRecipient
         }
     }
 
+    private ObservableCollection<StoryNodeItem>? _activeNodes;
+    public ObservableCollection<StoryNodeItem>? ActiveNodes
+    {
+        get => DataSource?.Count > 0 ? DataSource[0].Children : null;
+        set => SetProperty(ref _activeNodes, value);
+    }
+
+    private ObservableCollection<StoryNodeItem>? _trashNodes;
+    public ObservableCollection<StoryNodeItem>? TrashNodes
+    {
+        get => DataSource?.Count > 1 ? DataSource[1].Children : null;
+        set => SetProperty(ref _trashNodes, value);
+    }
+
     /// <summary>
     /// IsPaneOpen is bound to ShellSplitView's IsPaneOpen property with
     /// two-way binding, so that it can read and update the property.

@@ -335,7 +335,6 @@ public sealed partial class Shell
         return dragTargetStoryNode;
     }
 
-
     /// <summary>
     /// Handles the DragLeave event for a TreeView control. This method calculates whether the dragged item
     /// has left the bounds of the TreeView, considering adjustments for border thickness, padding, and margin.
