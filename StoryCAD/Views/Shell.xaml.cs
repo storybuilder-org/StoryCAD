@@ -29,15 +29,6 @@ public sealed partial class Shell
     public OutlineViewModel OutlineVM => Ioc.Default.GetService<OutlineViewModel>();
     public LogService Logger;
     public PreferencesModel Preferences = Ioc.Default.GetRequiredService<PreferenceService>().Model;
-
-    private Point lastPointerPosition;
-    private bool dragSourceIsValid;
-    private bool isOutsideTreeView;
-    private bool dragTargetIsValid;
-    private StoryNodeItem dragSourceStoryNode;
-    private TreeViewItem dragTargetItem;  // used to determine drag and drop direction if peer 
-    private StoryNodeItem dragTargetStoryNode;
-
     public Shell()
     {
         try
