@@ -52,10 +52,17 @@ public partial class App
 	/// </summary>
 	public App()
     {
-        CheckForOtherInstances(); //Check other instances aren't already open.
+        //Check other instances aren't already open
+        CheckForOtherInstances().GetAwaiter().GetResult(); // Run this synchronously to ensure completion before proceeding
  
+        InitializeComponent();
+
+        Current.UnhandledException += OnUnhandledException;
+
         //Set up IOC and the services.
         BootStrapper.Initialise(false);
+        // Make sure the log is available
+        _log = Ioc.Default.GetService<LogService>();
 
         string path = Path.Combine(Package.Current.InstalledLocation.Path, ".env");
         DotEnvOptions options = new(false, new[] { path });
@@ -67,48 +74,40 @@ public partial class App
         }
         catch { }
 
-        InitializeComponent();
-
         // Make sure ToolsData is loaded by forcing instantiation
         Ioc.Default.GetRequiredService<ToolsData>();
 
-        _log = Ioc.Default.GetService<LogService>();
-        Current.UnhandledException += OnUnhandledException;
     }
 
     /// <summary>
     /// This checks for other already open StoryCAD instances
     /// If one is open, pull it up and kill this instance.
     /// </summary>
-    private void CheckForOtherInstances()
+    private async Task CheckForOtherInstances()
     {
-        Task.Run( async () =>
+        //If this instance is the first, then we will register it, otherwise we will get info about the other instance.
+        AppInstance _MainInstance = AppInstance.FindOrRegisterForKey("main"); //Get main instance
+        _MainInstance.Activated += (((sender, e) => new Windowing().ActivateMainInstance()));
+
+        AppActivationArguments activatedEventArgs = AppInstance.GetCurrent().GetActivatedEventArgs();
+
+        //Redirect to other instance if one exists, otherwise continue initializing this instance.
+        if (!_MainInstance.IsCurrent)
         {
-            //If this instance is the first, then we will register it, otherwise we will get info about the other instance.
-            AppInstance _MainInstance = AppInstance.FindOrRegisterForKey("main"); //Get main instance
-            _MainInstance.Activated += (((sender, e) => new Windowing().ActivateMainInstance()));
+            //Bring up the 'main' instance 
+            await _MainInstance.RedirectActivationToAsync(activatedEventArgs);
+            Process.GetCurrentProcess().Kill();
+            return;
+        }
 
-            AppActivationArguments activatedEventArgs = AppInstance.GetCurrent().GetActivatedEventArgs();
-
-            //Redirect to other instance if one exists, otherwise continue initializing this instance.
-            if (!_MainInstance.IsCurrent)
+        if (activatedEventArgs.Kind == ExtendedActivationKind.File)
+        {
+            if (activatedEventArgs.Data is IFileActivatedEventArgs fileArgs)
             {
-                //Bring up the 'main' instance 
-                await _MainInstance.RedirectActivationToAsync(activatedEventArgs);
-                Process.GetCurrentProcess().Kill();
+                //This will be launched when ShellVM has finished initialising
+                LaunchPath = fileArgs.Files.FirstOrDefault()!.Path; 
             }
-            else
-            {
-                if (activatedEventArgs.Kind == ExtendedActivationKind.File)
-                {
-                    if (activatedEventArgs.Data is IFileActivatedEventArgs fileArgs)
-                    {
-                        //This will be launched when ShellVM has finished initialising
-                        LaunchPath = fileArgs.Files.FirstOrDefault().Path; 
-                    }
-                }
-            }
-        });
+        }
     }
 
 
@@ -244,8 +243,12 @@ public partial class App
 
     private void OnUnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
     {
-        _log.LogException(LogLevel.Fatal, e.Exception, e.Message);
+        if (_log != null)     
+        {
+            _log.LogException(LogLevel.Fatal, e.Exception, e.Message);
         _log.Flush();
+        }
+
         AbortApp();
     }
 

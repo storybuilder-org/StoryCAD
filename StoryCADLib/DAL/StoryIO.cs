@@ -97,6 +97,8 @@ public class StoryIO
                 _model.NarratorView.RemoveAt(1);
             }
 
+
+
 			//Log info about story
 			_logService.Log(LogLevel.Info, $"Model deserialized as {_model.ExplorerView[0].Name}");
 			_logService.Log(LogLevel.Info, $"Model contains as {_model.StoryElements.Count}" +

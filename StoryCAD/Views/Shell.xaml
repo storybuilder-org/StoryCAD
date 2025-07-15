@@ -24,6 +24,7 @@
                                    Background="{x:Bind Background, Mode=OneWay}"
                                    BorderBrush="{x:Bind boarderBrush, Mode=OneWay}"
                                    BorderThickness="1"
+                                   DragOver="TreeViewItem_DragOver"
                                    IsExpanded="{x:Bind IsExpanded, Mode=TwoWay}">
                     <StackPanel Orientation="Horizontal">
                         <SymbolIcon Symbol="{x:Bind Symbol, Mode=OneWay}"
@@ -374,6 +375,7 @@
                                    CanDragItems="True"
                                    AllowDrop="True"
                                    CanReorderItems="True"
+                                   DragItemsStarting="NavigationTree_DragItemsStarting"
                                    ItemsSource="{x:Bind ShellVm.NavigationNodes, Mode=OneWay}"
                                    SelectionMode="Single"
                                    ItemInvoked="TreeViewItem_Invoked"
@@ -384,7 +386,7 @@
                                    AllowDrop="False"
                                    ItemsSource="{x:Bind ShellVm.TrashNodes, Mode=OneWay}"
                                    SelectionMode="Single"
-                                   ItemInvoked="TreeViewItem_Invoked"
+                                   ItemInvoked="TreeViewItem_Invoked"   
                                    ItemTemplate="{StaticResource StoryNodeItemTemplate}" />
                 </StackPanel>
             </SplitView.Pane>
