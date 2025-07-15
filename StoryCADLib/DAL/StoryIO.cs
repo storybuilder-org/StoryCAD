@@ -40,8 +40,6 @@ public class StoryIO
 		await FileIO.WriteTextAsync(output, json);
 	}
 
-
-
     public async Task<StoryModel> ReadStory(StorageFile StoryFile)
 	{
 		try

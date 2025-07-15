@@ -374,7 +374,7 @@
                                    CanDragItems="True"
                                    AllowDrop="True"
                                    CanReorderItems="True"
-                                   ItemsSource="{x:Bind ShellVm.ActiveNodes, Mode=TwoWay}"
+                                   ItemsSource="{x:Bind ShellVm.NavigationNodes, Mode=OneWay}"
                                    SelectionMode="Single"
                                    ItemInvoked="TreeViewItem_Invoked"
                                    ItemTemplate="{StaticResource StoryNodeItemTemplate}" />
@@ -382,7 +382,7 @@
                     <muxc:TreeView x:Name="TrashTree"
                                    CanDragItems="False"
                                    AllowDrop="False"
-                                   ItemsSource="{x:Bind ShellVm.TrashNodes, Mode=TwoWay}"
+                                   ItemsSource="{x:Bind ShellVm.TrashNodes, Mode=OneWay}"
                                    SelectionMode="Single"
                                    ItemInvoked="TreeViewItem_Invoked"
                                    ItemTemplate="{StaticResource StoryNodeItemTemplate}" />

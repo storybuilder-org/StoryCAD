@@ -168,34 +168,13 @@ public class ShellViewModel : ObservableRecipient
     #region Shell binding properties
 
     /// <summary>
-    /// DataSource is bound to Shell's NavigationTree TreeView control and
-    /// contains either the StoryExplorer (ExplorerView) or StoryNarrator (NarratorView)
-    /// ObservableCollection of StoryNodeItem instances.
+    /// Shell's NavigationTree TreeView control is bound to the StoryModel's CurrentView,
+    /// which is either the ExplorerView or the NarratorView, depending on which view is selected.
+    /// TrashTree is bound to the StoryModel's TrashView.
+    /// All of these views are ObservableCollections of StoryNodeItem.
     /// </summary>
-    private ObservableCollection<StoryNodeItem> _dataSource;
-    public ObservableCollection<StoryNodeItem> DataSource
-    {
-        get => _dataSource;
-        set
-        {
-            using SerializationLock _lock = new(_autoSaveService, _BackupService, Logger);
-            SetProperty(ref _dataSource, value);
-        }
-    }
-
-    private ObservableCollection<StoryNodeItem>? _activeNodes;
-    public ObservableCollection<StoryNodeItem>? ActiveNodes
-    {
-        get => DataSource?.Count > 0 ? DataSource[0].Children : null;
-        set => SetProperty(ref _activeNodes, value);
-    }
-
-    private ObservableCollection<StoryNodeItem>? _trashNodes;
-    public ObservableCollection<StoryNodeItem>? TrashNodes
-    {
-        get => DataSource?.Count > 1 ? DataSource[1].Children : null;
-        set => SetProperty(ref _trashNodes, value);
-    }
+    public ObservableCollection<StoryNodeItem> NavigationNodes => OutlineManager.StoryModel.CurrentView;
+    public ObservableCollection<StoryNodeItem> TrashNodes => OutlineManager.StoryModel.TrashView;
 
     /// <summary>
     /// IsPaneOpen is bound to ShellSplitView's IsPaneOpen property with
@@ -391,10 +370,10 @@ public class ShellViewModel : ObservableRecipient
 	/// </summary>
 	public async Task CreateBackupNow()
 	{
-        if (DataSource == null || DataSource.Count == 0)
+        if (NavigationNodes == null || NavigationNodes.Count == 0)
         {
             Messenger.Send(new StatusChangedMessage(new("You need to load a story first!", LogLevel.Warn)));
-            Logger.Log(LogLevel.Info, "Failed to open backup menu as DataSource is null or empty. (Is a story loaded?)");
+            Logger.Log(LogLevel.Info, "Failed to open backup menu as CurrentView is null or empty. (Is a story loaded?)");
             return;
         }
 
@@ -945,10 +924,10 @@ public class ShellViewModel : ObservableRecipient
 
     public void ViewChanged()
     {
-        if (DataSource == null || DataSource.Count == 0)
+        if (NavigationNodes == null || NavigationNodes.Count == 0)
         {
             Messenger.Send(new StatusChangedMessage(new("You need to load a story first!", LogLevel.Warn)));
-            Logger.Log(LogLevel.Info, "Failed to switch views as DataSource is null or empty. (Is a story loaded?)");
+            Logger.Log(LogLevel.Info, "Failed to switch views as CurrentView is null or empty. (Is a story loaded?)");
             return;
         }
         if (!SelectedView.Equals(CurrentView))
@@ -963,7 +942,7 @@ public class ShellViewModel : ObservableRecipient
                     SetCurrentView(StoryViewType.NarratorView);
                     break;
             }
-            TreeViewNodeClicked(Ioc.Default.GetRequiredService<ShellViewModel>().DataSource[0]);
+            TreeViewNodeClicked(Ioc.Default.GetRequiredService<ShellViewModel>().NavigationNodes[0]);
         }
     }
 
@@ -1078,16 +1057,18 @@ public class ShellViewModel : ObservableRecipient
     {
         if (view == StoryViewType.ExplorerView)
         {
-            DataSource = OutlineManager.StoryModel.ExplorerView;
+            OutlineManager.StoryModel.CurrentView = OutlineManager.StoryModel.ExplorerView;
             SelectedView = ViewList[0];
             CurrentViewType = StoryViewType.ExplorerView;
         }
         else if (view == StoryViewType.NarratorView)
         {
-            DataSource = OutlineManager.StoryModel.NarratorView;
+            OutlineManager.StoryModel.CurrentView = OutlineManager.StoryModel.NarratorView;
             SelectedView = ViewList[1];
             CurrentViewType = StoryViewType.NarratorView;
         }
+        OnPropertyChanged(nameof(NavigationNodes));
+        OnPropertyChanged(nameof(TrashNodes)); 
     }
 
     #region MVVM  processing
@@ -1364,7 +1345,7 @@ public class ShellViewModel : ObservableRecipient
     /// <summary>
     /// If both the source and target of a drag/drop are valid (that is, the
     /// requested operation is a valid reordering of the nodes of the Navigation
-    /// TreeView), complete the move by modifying the TreeView's DataSource
+    /// TreeView), complete the move by modifying the TreeView's CurrentView
     /// ObservableCollection of StoryNodeItem instances.
     /// </summary>
 public void MoveStoryNode(StoryNodeItem source, StoryNodeItem target, DragAndDropDirection direction)
@@ -1557,6 +1538,9 @@ public void MoveStoryNode(StoryNodeItem source, StoryNodeItem target, DragAndDro
         SelectedView = "Story Explorer View";
 
         ShellInstance = this;
+
+        // Initialize CurrentView with ExplorerView as default
+        SetCurrentView(StoryViewType.ExplorerView);
     }
 
     #endregion

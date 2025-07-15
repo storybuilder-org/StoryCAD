@@ -605,7 +605,7 @@ public class OutlineViewModel : ObservableRecipient
         {
             logger.Log(LogLevel.Info, $"Search started, Searching for {shellVm.FilterText}");
             shellVm.SaveModel();
-            if (shellVm.DataSource == null || shellVm.DataSource.Count == 0)
+            if (shellVm.NavigationNodes == null || shellVm.NavigationNodes.Count == 0)
             {
                 logger.Log(LogLevel.Info, "Data source is null or Empty.");
                 Messenger.Send(new StatusChangedMessage(new("You need to load a story first!", LogLevel.Warn)));
@@ -614,7 +614,7 @@ public class OutlineViewModel : ObservableRecipient
 
             int searchTotal = 0;
 
-            foreach (StoryNodeItem node in shellVm.DataSource[0])
+            foreach (StoryNodeItem node in shellVm.NavigationNodes[0])
             {
                 //checks if node name contains the thing we are looking for
                 if (searchService.SearchStoryElement(node, shellVm.FilterText, StoryModel)) 
@@ -662,10 +662,10 @@ public class OutlineViewModel : ObservableRecipient
 
     public async Task GenerateScrivenerReports()
     {
-        if (shellVm.DataSource == null || shellVm.DataSource.Count == 0)
+        if (shellVm.NavigationNodes == null || shellVm.NavigationNodes.Count == 0)
         {
             Messenger.Send(new StatusChangedMessage(new("You need to open a story first!", LogLevel.Info)));
-            logger.Log(LogLevel.Info, $"Scrivener Report cancelled (DataSource was null or empty)");
+            logger.Log(LogLevel.Info, $"Scrivener Report cancelled (CurrentView was null or empty)");
             return;
         }
 
@@ -1127,18 +1127,18 @@ public class OutlineViewModel : ObservableRecipient
         }
 
         //TODO: Add dialog to confirm restore
-        if (shellVm.DataSource.Count <= 1)
+        if (shellVm.NavigationNodes.Count <= 1)
         {
             logger.Log(LogLevel.Warn, "Failed to restore element - Trash can not available in current view.");
             Messenger.Send(new StatusChangedMessage(new("Unable to restore - Trash not available", LogLevel.Warn)));
             return;
         }
 
-        ObservableCollection<StoryNodeItem> _target = shellVm.ActiveNodes;
+        ObservableCollection<StoryNodeItem> _target = shellVm.NavigationNodes;
         var trashRoot = shellVm.OutlineManager.StoryModel.TrashView.FirstOrDefault();
         trashRoot?.Children.Remove(shellVm.RightTappedNode);
         _target.Add(shellVm.RightTappedNode);
-        shellVm.RightTappedNode.Parent = shellVm.DataSource[0];
+        shellVm.RightTappedNode.Parent = shellVm.NavigationNodes[0];
         Messenger.Send(new StatusChangedMessage(new(
             $"Restored node {shellVm.RightTappedNode.Name}", LogLevel.Info, true)));
     }
@@ -1174,10 +1174,10 @@ public class OutlineViewModel : ObservableRecipient
     /// </summary>
     public void EmptyTrash()
     {
-        if (shellVm.DataSource == null)
+        if (shellVm.NavigationNodes == null)
         {
             Messenger.Send(new StatusChangedMessage(new("You need to load a story first!", LogLevel.Warn)));
-            logger.Log(LogLevel.Info, "Failed to empty trash as DataSource is null. (Is a story loaded?)");
+            logger.Log(LogLevel.Info, "Failed to empty trash as CurrentView is null. (Is a story loaded?)");
             return;
         }
 

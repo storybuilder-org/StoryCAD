@@ -1,11 +1,12 @@
 using System.Collections.ObjectModel;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using CommunityToolkit.Mvvm.ComponentModel;
 using StoryCAD.DAL;
 
 namespace StoryCAD.Models;
 
-public class StoryModel
+public class StoryModel : ObservableObject
 {
 	// TODO: Note sorting filtering and grouping depend on ICollectionView (for TreeView?)
 	// TODO: See http://msdn.microsoft.com/en-us/library/ms752347.aspx#binding_to_collections
@@ -70,19 +71,27 @@ public class StoryModel
 	[JsonPropertyName("Elements")]
 	public StoryElementCollection StoryElements;
 
-	/// StoryModel also contains two persisted TreeView representations, a Story ExplorerView tree which
-	/// contains all Story Elements (the StoryOverview and all Problem, Character, Setting, Scene
-	/// and Folder elements) and a NarratorView View which contains just Section (chapter, act, etc)
-	/// and selected Scene elements. 
-	/// 
-	/// One of these TreeViews is actively bound in the Shell page view to a StoryNodeItem tree 
-	/// based on  whichever of these two TreeView representations is presently selected.
-	[JsonIgnore]
+    /// StoryModel also contains three persisted TreeView representations, a Story ExplorerView tree which
+    /// contains all Story Elements (the StoryOverview and all Problem, Character, Setting, Scene
+    /// and Folder elements) and a NarratorView View which contains just Section (chapter, act, etc)
+    /// and selected Scene elements. These two view relate to NavigationTree in Shell.xaml. There is
+    /// also a TrashView which contains all StoryNodeItems that have been moved to the TrashCan. 
+    /// 
+    /// One of these TreeViews is actively bound in the Shell page view to a StoryNodeItem tree 
+    /// based on  whichever of these two TreeView representations is presently selected.
+    [JsonIgnore]
 	public ObservableCollection<StoryNodeItem> ExplorerView;
 	[JsonIgnore]
 	public ObservableCollection<StoryNodeItem> NarratorView;
     [JsonIgnore]
     public ObservableCollection<StoryNodeItem> TrashView;
+
+    private ObservableCollection<StoryNodeItem> _currentView;
+    public ObservableCollection<StoryNodeItem> CurrentView 
+    {
+        get => _currentView;
+        set => SetProperty(ref _currentView, value);
+    }
 
     #endregion
 
@@ -150,6 +159,7 @@ public class StoryModel
         ExplorerView = new ObservableCollection<StoryNodeItem>();
         NarratorView = new ObservableCollection<StoryNodeItem>();
         TrashView = new ObservableCollection<StoryNodeItem>();
+        CurrentView = ExplorerView; // Default to ExplorerView
 
         Changed = false;
     }

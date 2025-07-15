@@ -188,8 +188,8 @@ public sealed partial class Shell
 
     private void ClearNodes(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
     {
-        if (ShellVm.DataSource == null || ShellVm.DataSource.Count == 0) { return; }
-        foreach (StoryNodeItem node in ShellVm.DataSource[0]) { node.Background = null; }
+        if (ShellVm.NavigationNodes == null || ShellVm.NavigationNodes.Count == 0) { return; }
+        foreach (StoryNodeItem node in ShellVm.NavigationNodes) { node.Background = null; }
     }
 
     private void TreeViewItem_Tapped(object sender, TappedRoutedEventArgs e)

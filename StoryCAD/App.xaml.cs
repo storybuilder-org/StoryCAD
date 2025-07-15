@@ -252,5 +252,14 @@ public partial class App
     /// <summary>
     /// Closes the app
     /// </summary>
-    private static void AbortApp() { Current.Exit();  }
+    private static void AbortApp()
+    {
+        // Trigger cleanup by simulating window closing
+        if (Current is App app)
+        {
+            app.MainWindow_Closed(null, null);
+        }
+        Current.Exit();  
+
+    }
 }

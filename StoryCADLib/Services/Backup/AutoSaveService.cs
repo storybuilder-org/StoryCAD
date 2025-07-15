@@ -29,8 +29,9 @@ namespace StoryCAD.Services.Backup
 
         #region Constructor
 
-        public AutoSaveService()
+        public AutoSaveService(OutlineViewModel outlineVM)
         {
+            _outlineVM = outlineVM ?? throw new ArgumentNullException(nameof(outlineVM));
             autoSaveWorker = new BackgroundWorker
             {
                 WorkerSupportsCancellation = true,
