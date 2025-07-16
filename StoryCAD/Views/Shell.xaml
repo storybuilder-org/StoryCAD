@@ -372,7 +372,7 @@
                                     <RowDefinition Height="*"/>
                                 </Grid.RowDefinitions>
 
-
+                                <!-- Shows the root node out of tree, prevents creating new roots. -->
                                 <TreeViewItem Tapped="RootClick" RightTapped="TreeViewItem_RightTapped"
                                               HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
                                               Background="Transparent" BorderBrush="Transparent" DataContext="{x:Bind}">
@@ -386,12 +386,13 @@
                                     </StackPanel>
                                 </TreeViewItem>
 
-
+                                <!-- children of root node.-->
                                 <muxc:TreeView Grid.Row="1"
                                    CanDragItems="True" AllowDrop="True" CanReorderItems="True"
                                    ItemsSource="{x:Bind Children, Mode=TwoWay}"
                                    SelectionMode="Single" 
-                                   ItemInvoked="TreeViewItem_Invoked">
+                                   ItemInvoked="TreeViewItem_Invoked"
+                                   DragItemsCompleted="NavigationTree_DragItemsCompleted">
 
                                     <muxc:TreeView.ItemTemplate>
                                         <DataTemplate  x:DataType="viewmodels:StoryNodeItem">

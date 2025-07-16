@@ -240,12 +240,31 @@ public sealed partial class Shell
     }
 
     /// <summary>
-    /// Alternative enterance for root nodes.
+    /// Alternative enterance for root nodes as iteminvoked isn't available.
     /// </summary>
     /// <param name="sender"></param>
     /// <param name="e"></param>
-    private void RootClick(object sender, RoutedEventArgs e)
+    private void RootClick(object s, RoutedEventArgs e) => ShellVm.TreeViewNodeClicked((s as FrameworkElement).DataContext);
+
+    /// <summary>
+    /// This updates the parent of a node when DND occurs to correctly update backing store.
+    /// </summary>
+    private void NavigationTree_DragItemsCompleted(TreeView sender, TreeViewDragItemsCompletedEventArgs args)
     {
-        ShellVm.TreeViewNodeClicked((sender as FrameworkElement).DataContext);
+        try
+        {
+            //Block all other opperations
+            if (args.DropResult != DataPackageOperation.Move) return;
+
+            //Update parent
+            var movedItem = (StoryNodeItem)args.Items[0];
+            var parent = args.NewParentItem as StoryNodeItem;
+            movedItem.Parent = parent;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogException(LogLevel.Error, ex, "Error during drag and drop operation.");
+        }
     }
+
 }
