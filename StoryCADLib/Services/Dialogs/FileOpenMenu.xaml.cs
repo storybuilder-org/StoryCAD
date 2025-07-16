@@ -40,10 +40,21 @@ public sealed partial class FileOpenMenuPage
         }
 
         // Get files from the backup directory in order of creation.
-        FileOpenVM.BackupPaths = Directory
-            .GetFiles(Ioc.Default.GetRequiredService<PreferenceService>().Model.BackupDirectory)
-            .OrderByDescending(File.GetLastWriteTime)
-            .ToArray();
+        // Ensure the directory exists to avoid exceptions on first run.
+        var backupDir = Ioc.Default.GetRequiredService<PreferenceService>().Model.BackupDirectory;
+        FileOpenVM.BackupPaths = Array.Empty<string>();
+        if (!string.IsNullOrWhiteSpace(backupDir))
+        {
+            if (!Directory.Exists(backupDir))
+            {
+                Directory.CreateDirectory(backupDir);
+            }
+
+            FileOpenVM.BackupPaths = Directory
+                .GetFiles(backupDir)
+                .OrderByDescending(File.GetLastWriteTime)
+                .ToArray();
+        }
         foreach (var file in FileOpenVM.BackupPaths)
         {
             //Skip entries that don't exist or are empty
