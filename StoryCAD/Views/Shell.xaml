@@ -6,6 +6,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:muxc="using:Microsoft.UI.Xaml.Controls" RequestedTheme="{x:Bind Windowing.RequestedTheme, Mode=OneWay}"
     xmlns:viewmodels="using:StoryCAD.ViewModels"
+    xmlns:converters="using:StoryCAD.Converters"
     mc:Ignorable="d" SizeChanged="ShellPage_SizeChanged">
     <Page.Resources>
         <ResourceDictionary>
@@ -18,13 +19,15 @@
                 </ResourceDictionary>
             </ResourceDictionary.MergedDictionaries>
 
+            <converters:BooleanNegationConverter x:Key="NotConverter"/>
+
             <DataTemplate x:Key="StoryNodeItemTemplate"
                           x:DataType="viewmodels:StoryNodeItem">
                 <muxc:TreeViewItem ItemsSource="{x:Bind Children}"
                                    Background="{x:Bind Background, Mode=OneWay}"
                                    BorderBrush="{x:Bind boarderBrush, Mode=OneWay}"
                                    BorderThickness="1"
-                                   DragOver="TreeViewItem_DragOver"
+                                   AllowDrop="{x:Bind IsRoot, Mode=OneWay, Converter={StaticResource NotConverter}}"
                                    IsExpanded="{x:Bind IsExpanded, Mode=TwoWay}">
                     <StackPanel Orientation="Horizontal">
                         <SymbolIcon Symbol="{x:Bind Symbol, Mode=OneWay}"
@@ -375,7 +378,6 @@
                                    CanDragItems="True"
                                    AllowDrop="True"
                                    CanReorderItems="True"
-                                   DragItemsStarting="NavigationTree_DragItemsStarting"
                                    ItemsSource="{x:Bind ShellVm.NavigationNodes, Mode=OneWay}"
                                    SelectionMode="Single"
                                    ItemInvoked="TreeViewItem_Invoked"
