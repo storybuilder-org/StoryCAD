@@ -239,15 +239,36 @@ public sealed partial class Shell
         }
     }
 
+    /* DND Explanation
+    Standalone root items
+        An ItemsRepeater walks over your view-model’s DataSource (the list of top-level StoryNodes).
+        For each node it emits a single TreeViewItem (not inside any <TreeView>), styled via your StoryNodeContentTemplate.
+        That lone TreeViewItem handles only tap/right-tap via the new RootClick method
+          (no drag-and-drop or pointer-tracking logic here), so roots behave like flat header buttons.
+
+    Nested child trees
+        Immediately below each root item, the repeater emits a separate <muxc:TreeView> 
+        whose ItemsSource is bound to that root’s .Children.
+        Those child-only trees use your simplified drag-and-drop 
+        complete handler (NavigationTree_DragItemsCompleted) plus the standard ItemInvoked for selection.
+        Visually, each root sits as a header in row 0 of a Grid; its own child tree
+        lives in row 1, indented and collapsible as usual.
+     */
+
     /// <summary>
-    /// Alternative enterance for root nodes as iteminvoked isn't available.
+    /// Ran when root nodes are clicked.
+    /// This is because you can't attach the TreViewItem_Invoked event 
+    /// to the root nodes as they are not within a tree view,
+    /// so this just forwards the click so it can run normally.
     /// </summary>
     /// <param name="sender"></param>
     /// <param name="e"></param>
     private void RootClick(object s, RoutedEventArgs e) => ShellVm.TreeViewNodeClicked((s as FrameworkElement).DataContext);
 
     /// <summary>
-    /// This updates the parent of a node when DND occurs to correctly update backing store.
+    /// This updates the parent of a node when DND occurs to correctly update backing store (story model)
+    /// Drag Operations do not update the parent of the item in the story model automatially,
+    /// so this function updates it for us.
     /// </summary>
     private void NavigationTree_DragItemsCompleted(TreeView sender, TreeViewDragItemsCompletedEventArgs args)
     {
@@ -256,7 +277,7 @@ public sealed partial class Shell
             //Block all other opperations
             if (args.DropResult != DataPackageOperation.Move) return;
 
-            //Update parent
+            //Update parent field of item in storymodel so its correct
             var movedItem = (StoryNodeItem)args.Items[0];
             var parent = args.NewParentItem as StoryNodeItem;
             movedItem.Parent = parent;
