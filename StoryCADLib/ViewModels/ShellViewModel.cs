@@ -5,8 +5,6 @@ using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
 using StoryCAD.DAL;
-using StoryCAD.Models.Tools;
-using StoryCAD.Services.Backend;
 using StoryCAD.Services.Backup;
 using StoryCAD.Services.Collaborator;
 using StoryCAD.Services.Dialogs;
@@ -14,13 +12,10 @@ using StoryCAD.Services.Dialogs.Tools;
 using StoryCAD.Services.Json;
 using StoryCAD.Services.Messages;
 using StoryCAD.Services.Navigation;
-using StoryCAD.Services.Reports;
 using StoryCAD.Services.Search;
 using StoryCAD.ViewModels.Tools;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Reflection;
-using Windows.Storage;
 using StoryCAD.Services;
 using WinUIEx;
 using StoryCAD.Collaborator.ViewModels;
@@ -1008,11 +1003,10 @@ public class ShellViewModel : ObservableRecipient
                 }
                 else //Narrator Tree, hide most things.
                 {
-                    RemoveStoryElementVisibility = Visibility.Visible;
                     RemoveFromNarrativeVisibility = Visibility.Visible;
                     AddSectionVisibility = Visibility.Visible;
                     PrintNodeVisibility = Visibility.Visible;
-
+                    RemoveStoryElementVisibility = Visibility.Collapsed;
                     AddFolderVisibility = Visibility.Collapsed;
                     AddProblemVisibility = Visibility.Collapsed;
                     AddCharacterVisibility = Visibility.Collapsed;
