@@ -442,17 +442,25 @@ public class StoryNodeItem : INotifyPropertyChanged
         if (!Parent.Children.Remove(this))
             throw new InvalidOperationException("Parent/child link out of sync.");
 
-        Parent = null;
+        // Handle different view types
+        if (view == StoryViewType.ExplorerView)
+        {
+            // For Explorer view: actually move to trash
+            Parent = null;
+            
+            var trash = _outlineVM.StoryModel.StoryElements
+                .First(e => e.ElementType == StoryItemType.TrashCan)
+                .Node;
 
-        //Add to trash
-        if (view != StoryViewType.ExplorerView) return;
-
-        var trash = _outlineVM.StoryModel.StoryElements
-            .First(e => e.ElementType == StoryItemType.TrashCan)
-            .Node;
-
-        trash.Children.Add(this);
-        Parent = trash;
+            trash.Children.Add(this);
+            Parent = trash;
+        }
+        else if (view == StoryViewType.NarratorView)
+        {
+            // For Narrator view: just remove from this logical view
+            // The node remains in its original location in Explorer view
+            // No parent relationship changes needed
+        }
     }
 
 
@@ -472,17 +480,46 @@ public class StoryNodeItem : INotifyPropertyChanged
     /// <returns>The StoryItemType of the root node</returns>
     public static StoryItemType RootNodeType(StoryNodeItem startNode)
     {
+        if (startNode == null)
+        {
+            Ioc.Default.GetService<LogService>().LogException(
+                LogLevel.Error, new ArgumentNullException(nameof(startNode)), 
+                "RootNodeType called with null startNode parameter");
+            return StoryItemType.Unknown;
+        }
+
         try
         {
             StoryNodeItem node = startNode;
+            int maxIterations = 1000; // Prevent infinite loops
+            int iterations = 0;
+            
             while (!node.IsRoot)
+            {
+                if (node.Parent == null)
+                {
+                    Ioc.Default.GetService<LogService>().LogException(
+                        LogLevel.Error, new InvalidOperationException("Broken parent chain"), 
+                        $"Node '{node.Name}' (Type: {node.Type}) is not root but has no parent");
+                    return StoryItemType.Unknown;
+                }
+                
+                if (++iterations > maxIterations)
+                {
+                    Ioc.Default.GetService<LogService>().LogException(
+                        LogLevel.Error, new InvalidOperationException("Infinite loop detected"), 
+                        $"RootNodeType exceeded maximum iterations traversing from node '{startNode.Name}'");
+                    return StoryItemType.Unknown;
+                }
+                
                 node = node.Parent;
+            }
             return node.Type;
         }
         catch (Exception ex)
         {
             Ioc.Default.GetService<LogService>().LogException(
-                LogLevel.Error, ex, $"Root node type exception, this shouldn't happen {ex.Message} {ex.Message}");
+                LogLevel.Error, ex, $"Root node type exception, this shouldn't happen {ex.Message}");
             return StoryItemType.Unknown;
         }
     }
