@@ -8,7 +8,7 @@ namespace StoryCADTests;
 
 [TestClass]
 public class DragAndDropTests
-{/*
+{
     private StoryNodeItem root;
     private StoryNodeItem child1;
     private StoryNodeItem child2;
@@ -24,17 +24,13 @@ public class DragAndDropTests
     [TestInitialize]
     public void Setup()
     {
-        //Simulates a real story tree
-        root = new StoryNodeItem(new StoryElement("Overview", StoryItemType.StoryOverview, storyModel), null, StoryItemType.StoryOverview) { IsRoot = true };
-        child1 = new StoryNodeItem(new StoryElement("Child1", StoryItemType.Problem, storyModel),root, StoryItemType.Problem) { Parent = root };
-        child2 = new StoryNodeItem(new StoryElement("Child2", StoryItemType.Problem, storyModel),root, StoryItemType.Problem) { Parent = root };
-        grandchild1 = new StoryNodeItem(new StoryElement("grandchild1", StoryItemType.Problem, storyModel), root, StoryItemType.Problem) { Parent = root };
-        trash = new StoryNodeItem(new StoryElement("trash", StoryItemType.TrashCan, storyModel), root, StoryItemType.TrashCan) { Parent = root };
-        trashedItem = new StoryNodeItem(new StoryElement("trashedItem", StoryItemType.Problem, storyModel), trash, StoryItemType.Problem) { Parent = root };
-        root.Children.Add(child1);
-        root.Children.Add(child2);
-        child1.Children.Add(grandchild1);
-        trash.Children.Add(trashedItem);
+        // Simulate a real story tree with two root nodes
+        root = new StoryNodeItem(new StoryElement("Overview", StoryItemType.StoryOverview, storyModel), null, StoryItemType.StoryOverview);
+        child1 = new StoryNodeItem(new StoryElement("Child1", StoryItemType.Problem, storyModel), root, StoryItemType.Problem);
+        child2 = new StoryNodeItem(new StoryElement("Child2", StoryItemType.Problem, storyModel), root, StoryItemType.Problem);
+        grandchild1 = new StoryNodeItem(new StoryElement("grandchild1", StoryItemType.Problem, storyModel), child1, StoryItemType.Problem);
+        trash = new StoryNodeItem(new StoryElement("trash", StoryItemType.TrashCan, storyModel), null, StoryItemType.TrashCan);
+        trashedItem = new StoryNodeItem(new StoryElement("trashedItem", StoryItemType.Problem, storyModel), trash, StoryItemType.Problem);
         ShellVM.StoryModel.ExplorerView.Add(root);
         ShellVM.StoryModel.ExplorerView.Add(trash);
     }
@@ -47,7 +43,7 @@ public class DragAndDropTests
     {
         // Not an error?
         var result = ShellVM.ValidateDragAndDrop(child1, root);
-        Assert.IsTrue(result, "Moving a node to a root node should be considered an invalid move.");
+        Assert.IsFalse(result, "Moving a node to a root node should be considered an invalid move.");
     }
     
     
@@ -58,7 +54,7 @@ public class DragAndDropTests
     public void MovingIntoDescendant()
     {
         var result = ShellVM.ValidateDragAndDrop(root, grandchild1);
-        Assert.IsTrue(result, "Moving a node into one of its own descendants should be considered an invalid move.");
+        Assert.IsFalse(result, "Moving a node into one of its own descendants should be considered an invalid move.");
     }
 
     /// <summary>
@@ -69,7 +65,7 @@ public class DragAndDropTests
     {
         Thread.Sleep(8000); //8-second delay appears to be needed to ensure the test passes consistently.
         var result = ShellVM.ValidateDragAndDrop(child1, child2);
-        Assert.IsFalse(result, "Moving a node to a non-descendant node should be considered a valid move.");
+        Assert.IsTrue(result, "Moving a node to a non-descendant node should be considered a valid move.");
     }
     
     /// <summary>
@@ -79,7 +75,7 @@ public class DragAndDropTests
     public void MovingTrash()
     {
         var result = ShellVM.ValidateDragAndDrop(trash, child2);
-        Assert.IsTrue(result, "Moving the trash node should be considered an invalid move.");
+        Assert.IsFalse(result, "Moving the trash node should be considered an invalid move.");
     }
     
     /// <summary>
@@ -89,7 +85,7 @@ public class DragAndDropTests
     public void MovingOutOfTrash()
     {
         var result = ShellVM.ValidateDragAndDrop(trashedItem, child1);
-        Assert.IsTrue(result, "Moving an item from trash node should be considered an invalid move.");
+        Assert.IsFalse(result, "Moving an item from trash node should be considered an invalid move.");
     }
 
     /// <summary>
@@ -99,7 +95,7 @@ public class DragAndDropTests
     public void MovingToTrash()
     {
         var result = ShellVM.ValidateDragAndDrop(child1, trashedItem);
-        Assert.IsTrue(result, "Moving an item to the trash node should be considered an invalid move.");
-    }*/
+        Assert.IsFalse(result, "Moving an item to the trash node should be considered an invalid move.");
+    }
 
 }
