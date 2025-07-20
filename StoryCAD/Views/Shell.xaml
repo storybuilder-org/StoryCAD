@@ -360,7 +360,7 @@
                    FontFamily="Segoe UI">
             <!-- Nav tree -->
             <SplitView.Pane>
-                <ItemsRepeater ItemsSource="{x:Bind ShellVm.DataSource, Mode=TwoWay}" x:Name="NavigationTree"
+                <ItemsRepeater ItemsSource="{x:Bind ShellVm.DataSource[0].Children, Mode=TwoWay}" x:Name="NavigationTree"
                                ContextFlyout="{StaticResource AddStoryElementFlyout}" 
                                ContextRequested="AddButton_ContextRequested" >
 
