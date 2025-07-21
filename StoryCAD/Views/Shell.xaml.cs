@@ -6,7 +6,6 @@ using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
 using StoryCAD.Models.Tools;
 using StoryCAD.Services.Logging;
-using Windows.Foundation;
 using Windows.UI.ViewManagement;
 using Windows.ApplicationModel.DataTransfer;
 using Microsoft.UI;
@@ -30,13 +29,6 @@ public sealed partial class Shell
     public LogService Logger;
     public PreferencesModel Preferences = Ioc.Default.GetRequiredService<PreferenceService>().Model;
 
-    private Point lastPointerPosition;
-    private bool dragSourceIsValid;
-    private bool isOutsideTreeView;
-    private bool dragTargetIsValid;
-    private StoryNodeItem dragSourceStoryNode;
-    private TreeViewItem dragTargetItem;  // used to determine drag and drop direction if peer 
-    private StoryNodeItem dragTargetStoryNode;
 
     public Shell()
     {
@@ -239,21 +231,16 @@ public sealed partial class Shell
         }
     }
 
-    /* DND Explanation
-    Standalone root items
-        An ItemsRepeater walks over your view-model’s DataSource (the list of top-level StoryNodes).
-        For each node it emits a single TreeViewItem (not inside any <TreeView>), styled via your StoryNodeContentTemplate.
-        That lone TreeViewItem handles only tap/right-tap via the new RootClick method
-          (no drag-and-drop or pointer-tracking logic here), so roots behave like flat header buttons.
+    /* Drag-and-drop overview
+       - Root nodes are rendered by an ItemsRepeater as standalone TreeViewItems.
+         They only handle tap or right-tap via RootClick and perform no pointer tracking.
 
-    Nested child trees
-        Immediately below each root item, the repeater emits a separate <muxc:TreeView> 
-        whose ItemsSource is bound to that root’s .Children.
-        Those child-only trees use your simplified drag-and-drop 
-        complete handler (NavigationTree_DragItemsCompleted) plus the standard ItemInvoked for selection.
-        Visually, each root sits as a header in row 0 of a Grid; its own child tree
-        lives in row 1, indented and collapsible as usual.
-     */
+       - Each root hosts a nested TreeView bound to its Children. The TreeView has
+         CanReorderItems enabled so the control handles dragging internally.
+
+       - NavigationTree_DragItemsCompleted runs after a drop to update the moved
+         item's parent in the story model.
+    */
 
     /// <summary>
     /// Ran when root nodes are clicked.
