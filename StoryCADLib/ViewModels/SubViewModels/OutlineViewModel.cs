@@ -1039,6 +1039,11 @@ public class OutlineViewModel : ObservableRecipient
     {
         try
         {
+            if (shellVm.RightTappedNode == null)
+            {
+                Messenger.Send(new StatusChangedMessage(new("Right tap a node to delete", LogLevel.Warn)));
+                return;
+            }
             bool _delete = true;
             Guid elementToDelete = shellVm.RightTappedNode.Uuid;
             List<StoryElement> _foundElements = outlineService.FindElementReferences(StoryModel, elementToDelete);
