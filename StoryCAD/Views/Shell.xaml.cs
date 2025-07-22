@@ -267,7 +267,21 @@ public sealed partial class Shell
             //Update parent field of item in storymodel so its correct
             var movedItem = (StoryNodeItem)args.Items[0];
             var parent = args.NewParentItem as StoryNodeItem;
-            movedItem.Parent = parent;
+            
+            // If parent is null, use the Explorer view's root node
+            if (parent == null)
+            {
+                // DataSource[0] is always the Explorer view's root (e.g., "A Doll's House")
+                var shellVm = ((FrameworkElement)sender).DataContext as ShellViewModel;
+                if (shellVm?.DataSource?.Count > 0)
+                {
+                    movedItem.Parent = shellVm.DataSource[0];
+                }
+            }
+            else
+            {
+                movedItem.Parent = parent;
+            }
         }
         catch (Exception ex)
         {
