@@ -253,21 +253,36 @@ public sealed partial class Shell
     private void RootClick(object s, RoutedEventArgs e) => ShellVm.TreeViewNodeClicked((s as FrameworkElement).DataContext);
 
     /// <summary>
-    /// This updates the parent of a node when DND occurs to correctly update backing store (story model)
-    /// Drag Operations do not update the parent of the item in the story model automatially,
-    /// so this function updates it for us.
+    /// This updates the parent of a node in a drag and drop to correctly update backing store (story model)
+    /// when the parent of the item being moved is supposed to be the root of the tree view.
     /// </summary>
     private void NavigationTree_DragItemsCompleted(TreeView sender, TreeViewDragItemsCompletedEventArgs args)
     {
         try
         {
-            //Block all other opperations
+            //Block all other operations
             if (args.DropResult != DataPackageOperation.Move) return;
 
-            //Update parent field of item in storymodel so its correct
+            //Update parent field of item in storymodel so it's correct
             var movedItem = (StoryNodeItem)args.Items[0];
             var parent = args.NewParentItem as StoryNodeItem;
-            movedItem.Parent = parent;
+            
+            // If parent is null, use the DataSource view's root node
+            if (parent == null)
+            {
+                if (ShellVm?.DataSource?.Count > 0)
+                {
+                    //This gets the parent grid containing the tree's data context
+                    //this will be the correct root in the cases where there are
+                    //multiple roots in view (i.e. explorer view has the overview and trash)
+                    var root = (sender.Parent as FrameworkElement).DataContext;
+                    movedItem.Parent = (StoryNodeItem)root;
+                }
+            }
+            else
+            {
+                movedItem.Parent = parent;
+            }
         }
         catch (Exception ex)
         {

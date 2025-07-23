@@ -363,10 +363,9 @@
                 <ItemsRepeater ItemsSource="{x:Bind ShellVm.DataSource, Mode=TwoWay}" x:Name="NavigationTree"
                                ContextFlyout="{StaticResource AddStoryElementFlyout}" 
                                ContextRequested="AddButton_ContextRequested" >
-
                     <ItemsRepeater.ItemTemplate>
                         <DataTemplate x:DataType="viewmodels:StoryNodeItem">
-                            <Grid>
+                            <Grid DataContext="{x:Bind}">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="auto"/>
                                     <RowDefinition Height="*"/>
@@ -375,7 +374,7 @@
                                 <!-- Shows the root node out of tree, prevents creating new roots. -->
                                 <TreeViewItem Tapped="RootClick" RightTapped="TreeViewItem_RightTapped"
                                               HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
-                                              Background="Transparent" BorderBrush="Transparent" DataContext="{x:Bind}">
+                                              Background="Transparent" BorderBrush="Transparent">
                                     <StackPanel Orientation="Horizontal"
                                             Background="{x:Bind Background, Mode=OneWay}" 
                                             BorderBrush="{x:Bind  boarderBrush, Mode=OneWay}"
