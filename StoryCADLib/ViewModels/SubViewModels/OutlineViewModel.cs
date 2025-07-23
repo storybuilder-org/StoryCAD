@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using StoryCAD.Services.Backup;
 using StoryCAD.Services.Messages;
@@ -1140,7 +1141,7 @@ public class OutlineViewModel : ObservableRecipient
         }
 
         ObservableCollection<StoryNodeItem> _target = shellVm.DataSource[0].Children;
-        shellVm.DataSource[1].Children.Remove(shellVm.RightTappedNode);
+        shellVm.RightTappedNode.Parent.Children.Remove(shellVm.RightTappedNode);
         _target.Add(shellVm.RightTappedNode);
         shellVm.RightTappedNode.Parent = shellVm.DataSource[0];
         Messenger.Send(new StatusChangedMessage(new(
