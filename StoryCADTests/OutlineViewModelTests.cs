@@ -73,6 +73,22 @@ namespace StoryCADTests
             Assert.IsTrue(outlineVM.StoryModel.StoryElements.Characters[1].Node.Parent == outlineVM.StoryModel.ExplorerView[1]);
         }
 
+        /// <summary>
+        /// Calling Delete without selecting a node should do nothing
+        /// </summary>
+        [TestMethod]
+        public async Task DeleteNodeWithoutSelection()
+        {
+            var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+            outlineVM.StoryModel = await outlineService.CreateModel("TestNullDelete", "StoryBuilder", 0);
+            outlineVM.StoryModelFile = Path.Combine(App.ResultsDir, "NullDelete.stbx");
+
+            shell.RightTappedNode = null;
+            int before = outlineVM.StoryModel.StoryElements.Count;
+            outlineVM.RemoveStoryElement();
+            Assert.AreEqual(before, outlineVM.StoryModel.StoryElements.Count);
+        }
+
         // Test for UnifiedNewFile method
         [TestMethod]
         public async Task TestNewFileVM()
