@@ -831,7 +831,7 @@ public class ReportFormatter
     public string GetText(string rtfInput, bool formatNewLines = true)
     {
         string text = rtfInput ?? string.Empty;
-        if (rtfInput!.Equals(string.Empty))
+        if (text.Equals(string.Empty))
             return string.Empty;
         RichTextStripper rts = new();
         text =  rts.StripRichTextFormat(text);
