@@ -261,21 +261,21 @@ public sealed partial class Shell
     {
         try
         {
-            //Block all other opperations
+            //Block all other operations
             if (args.DropResult != DataPackageOperation.Move) return;
 
-            //Update parent field of item in storymodel so its correct
+            //Update parent field of item in storymodel so it's correct
             var movedItem = (StoryNodeItem)args.Items[0];
             var parent = args.NewParentItem as StoryNodeItem;
             
-            // If parent is null, use the Explorer view's root node
+            // If parent is null, use the DataSource view's root node
             if (parent == null)
             {
-                // DataSource[0] is always the Explorer view's root (e.g., "A Doll's House")
-                var shellVm = ((FrameworkElement)sender).DataContext as ShellViewModel;
-                if (shellVm?.DataSource?.Count > 0)
+                // DataSource[0] is always the current DataSource view's root (e.g., "A Doll's House" or "Narrative View")
+                if (ShellVm?.DataSource?.Count > 0)
                 {
-                    movedItem.Parent = shellVm.DataSource[0];
+                    var rootNode = ShellVm.DataSource[0]; 
+                    movedItem.Parent = rootNode;
                 }
             }
             else
