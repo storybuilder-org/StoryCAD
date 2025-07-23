@@ -270,11 +270,13 @@ public sealed partial class Shell
             // If parent is null, use the DataSource view's root node
             if (parent == null)
             {
-                // DataSource[0] is always the current DataSource view's root (e.g., "A Doll's House" or "Narrative View")
                 if (ShellVm?.DataSource?.Count > 0)
                 {
-                    var rootNode = ShellVm.DataSource[0]; 
-                    movedItem.Parent = rootNode;
+                    //This gets the parent grid containing the tree's data context
+                    //this will be the correct root in the cases where there are
+                    //multiple roots in view (i.e. explorer view has the overview and trash)
+                    var root = (sender.Parent as FrameworkElement).DataContext;
+                    movedItem.Parent = (StoryNodeItem)root;
                 }
             }
             else
