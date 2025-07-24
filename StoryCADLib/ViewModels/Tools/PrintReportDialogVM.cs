@@ -226,6 +226,8 @@ public class PrintReportDialogVM : ObservableRecipient
 
             }
         }
+        
+        //Device somehow doesn't support printing; im not sure what exactly this means.
         else
         {
             await Window.ShowContentDialog(new ContentDialog()
@@ -234,10 +236,8 @@ public class PrintReportDialogVM : ObservableRecipient
                 Content = "Your device does not appear to support printing.",
                 PrimaryButtonText = "Ok"
             });
-            StartGeneratingReports();
         }
     }
-
 
     /// <summary>
     /// This traverses a node and adds it to the relevant list.
@@ -257,11 +257,6 @@ public class PrintReportDialogVM : ObservableRecipient
         //Recurs until children are empty 
         foreach (StoryNodeItem _storyNodeItem in node.Children) { TraverseNode(_storyNodeItem); }
     }
-
-    /// <summary>
-    /// Hides the content dialog
-    /// </summary>
-    public void CloseDialog() { Dialog.Hide(); }
 
     /// <summary>
     /// This prints a report of the node selected
@@ -287,20 +282,6 @@ public class PrintReportDialogVM : ObservableRecipient
         // Register for PrintTaskRequested event
         _printManager = PrintManagerInterop.GetForWindow(Window.WindowHandle);
         _printManager.PrintTaskRequested += PrintTaskRequested;
-    }
-    /// <summary>
-    /// This starts report generation
-    /// (Calls GenerateReports() on a background worker)
-    /// </summary>
-    public void StartGeneratingReports()
-    {
-        BackgroundWorker _backgroundThread = new();
-        _backgroundThread.DoWork += async (_,_) =>
-        {
-            PrintReports _rpt = new(this, OutlineVM.StoryModel);
-            _rpt.Print(await _rpt.Generate());
-        };
-        _backgroundThread.RunWorkerAsync();
     }
 
     public async void GeneratePrintDocumentReport()
@@ -432,14 +413,12 @@ public class PrintReportDialogVM : ObservableRecipient
     /// <summary>
     /// Fired when the print task is completed/failed.
     /// </summary>
-    private async void PrintTaskCompleted(PrintTask sender, PrintTaskCompletedEventArgs args)
+    private void PrintTaskCompleted(PrintTask sender, PrintTaskCompletedEventArgs args)
     {
         Window.GlobalDispatcher.TryEnqueue(async () =>
         {
             if (args.Completion == PrintTaskCompletion.Failed) //Show message if print fails
             {
-                //Use an enqueue here because the sample version doesn't use
-                //it properly (i think or it doesn't work here.)
                 ContentDialog Dialog = new()
                 {
                     Title = "Printing error",

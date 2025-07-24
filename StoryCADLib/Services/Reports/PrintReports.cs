@@ -9,6 +9,7 @@ public class PrintReports
     private StoryModel _model;
     private ReportFormatter _formatter;
     private string _documentText;
+    private LogService logger = Ioc.Default.GetRequiredService<LogService>();
 
     public async Task<string> Generate()
     {
@@ -18,7 +19,7 @@ public class PrintReports
         //Process single selection (non-Pivot) reports
         if (_vm.CreateOverview)
         {
-            rtf = _formatter.FormatStoryOverviewReport(Overview());
+            rtf = _formatter.FormatStoryOverviewReport();
             _documentText += FormatText(rtf);
         }
         if (_vm.CreateSummary)
@@ -35,32 +36,27 @@ public class PrintReports
 
 		if (_vm.ProblemList)
         {
-            rtf = _formatter.FormatProblemListReport();
+            rtf = _formatter.FormatListReport(StoryItemType.Problem);
             _documentText += FormatText(rtf);
         }
         if (_vm.CharacterList)
         {
-            rtf = _formatter.FormatCharacterListReport();
+            rtf = _formatter.FormatListReport(StoryItemType.Character);
             _documentText += FormatText(rtf);
         }
         if (_vm.SettingList)
         {
-            rtf = _formatter.FormatSettingListReport();
+            rtf = _formatter.FormatListReport(StoryItemType.Setting);
             _documentText += FormatText(rtf);
         }
         if (_vm.SceneList)
         {
-            rtf = _formatter.FormatSceneListReport();
-            _documentText += FormatText(rtf);
-        }
-        if (_vm.SceneList)
-        {
-            rtf = _formatter.FormatSceneListReport();
+            rtf = _formatter.FormatListReport(StoryItemType.Scene);
             _documentText += FormatText(rtf);
         }
         if (_vm.WebList)
         {
-            rtf = _formatter.FormatWebListReport();
+            rtf = _formatter.FormatListReport(StoryItemType.Web);
             _documentText += FormatText(rtf);
         }
 
@@ -95,15 +91,10 @@ public class PrintReports
 
         if (string.IsNullOrEmpty(_documentText))
         {
-            Ioc.Default.GetRequiredService<LogService>().Log(LogLevel.Warn, "No nodes selected for report generation");
+            logger.Log(LogLevel.Warn, "No nodes selected for report generation");
             return "";
         }
         return _documentText;
-    }
-
-    private StoryElement Overview()
-    {
-        return _model.StoryElements.FirstOrDefault(element => element.ElementType == StoryItemType.StoryOverview);
     }
 
     /// <summary>
@@ -114,36 +105,59 @@ public class PrintReports
     /// <param name="summaryMode"></param>
     private string FormatText(string rtfInput, bool summaryMode = false)
     {
+        const int MaxLineLength = 72;
+        
         string text = _formatter.GetText(rtfInput, false);
         string[] lines = text.Split('\n');
         StringBuilder sb = new();
 
-        //TODO: rewrite this for readability and maintainability
-        foreach (string t in lines)
+        foreach (string inputLine in lines)
         {
-            string line = t.TrimEnd();
+            string line = inputLine.TrimEnd();
             if (line.Equals("\r"))
                 continue;
-            while (line.Length > 72)
-            {
-                string temp = line[..72];
-                if (!temp.Contains(" ")) { temp += " "; } //wrapping fix
-                int j = temp.LastIndexOf(' ');
-                temp = temp[..j];
-                sb.Append(temp);
-                sb.Append(Environment.NewLine);
-                line = line[j..];
-                line = line.TrimStart();
-            }
-            sb.Append(line + Environment.NewLine);
+
+            WrapAndAppendLine(sb, line, MaxLineLength);
         }
+
         if (summaryMode)
         {
             sb.Replace("[", "\r\n[");
             sb.Replace("]", "]\r\n");
         }
+        
         sb.Append("\n\\PageBreak\n");
         return sb.ToString();
+    }
+
+    /// <summary>
+    /// Wraps a line to the specified maximum length and appends to StringBuilder
+    /// </summary>
+    /// <param name="sb">StringBuilder to append to</param>
+    /// <param name="line">Line to wrap</param>
+    /// <param name="maxLength">Maximum line length</param>
+    private void WrapAndAppendLine(StringBuilder sb, string line, int maxLength)
+    {
+        while (line.Length > maxLength)
+        {
+            string segment = line[..maxLength];
+            
+            // Ensure we have a space for wrapping
+            if (!segment.Contains(" "))
+            {
+                segment += " ";
+            }
+            
+            int lastSpaceIndex = segment.LastIndexOf(' ');
+            string wrappedPortion = segment[..lastSpaceIndex];
+            
+            sb.Append(wrappedPortion);
+            sb.Append(Environment.NewLine);
+            
+            line = line[lastSpaceIndex..].TrimStart();
+        }
+        
+        sb.Append(line + Environment.NewLine);
     }
 
     #region Constructor
