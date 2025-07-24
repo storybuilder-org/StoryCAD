@@ -11,29 +11,52 @@ namespace StoryCAD.Models.Tools;
 public class ToolsData
 {
     LogService _log = Ioc.Default.GetService<LogService>();
+    private readonly Lazy<Task> _initializationTask;
 
-    public Dictionary<string, List<KeyQuestionModel>> KeyQuestionsSource;
-    public SortedDictionary<string, ObservableCollection<string>> StockScenesSource;
-    public SortedDictionary<string, TopicModel> TopicsSource;
-    public List<PlotPatternModel> MasterPlotsSource;
-    public List<PlotPatternModel> BeatSheetSource;
-    public SortedDictionary<string, DramaticSituationModel> DramaticSituationsSource;
+    public Dictionary<string, List<KeyQuestionModel>> KeyQuestionsSource { get; private set; }
+    public SortedDictionary<string, ObservableCollection<string>> StockScenesSource { get; private set; }
+    public SortedDictionary<string, TopicModel> TopicsSource { get; private set; }
+    public List<PlotPatternModel> MasterPlotsSource { get; private set; }
+    public List<PlotPatternModel> BeatSheetSource { get; private set; }
+    public SortedDictionary<string, DramaticSituationModel> DramaticSituationsSource { get; private set; }
 
-    public ToolsData() {
+    public ToolsData() 
+    {
+        // Initialize collections with empty collections to prevent null reference exceptions
+        KeyQuestionsSource = new Dictionary<string, List<KeyQuestionModel>>();
+        StockScenesSource = new SortedDictionary<string, ObservableCollection<string>>();
+        TopicsSource = new SortedDictionary<string, TopicModel>();
+        MasterPlotsSource = new List<PlotPatternModel>();
+        BeatSheetSource = new List<PlotPatternModel>();
+        DramaticSituationsSource = new SortedDictionary<string, DramaticSituationModel>();
+
+        // Use lazy initialization to avoid blocking constructor
+        _initializationTask = new Lazy<Task>(InitializeAsync);
+    }
+
+    /// <summary>
+    /// Ensures data is loaded before accessing properties. Call this method before using any tools data.
+    /// </summary>
+    public async Task EnsureInitializedAsync()
+    {
+        await _initializationTask.Value.ConfigureAwait(false);
+    }
+
+    private async Task InitializeAsync()
+    {
         try
         {
             _log.Log(LogLevel.Info, "Loading Tools.ini data");
             ToolLoader loader = Ioc.Default.GetService<ToolLoader>();
-            Task.Run(async () =>
-            {
-               List<object> Tools = await loader.Init();
-                KeyQuestionsSource = (Dictionary<string, List<KeyQuestionModel>>)Tools[0];
-                StockScenesSource = (SortedDictionary<string, ObservableCollection<string>>)Tools[1];
-                TopicsSource = (SortedDictionary<string, TopicModel>)Tools[2];
-                MasterPlotsSource = (List<PlotPatternModel>)Tools[3];
-                BeatSheetSource = (List<PlotPatternModel>)Tools[4];
-                DramaticSituationsSource = (SortedDictionary<string, DramaticSituationModel>)Tools[5];
-            }).Wait();
+            
+            List<object> Tools = await loader.Init().ConfigureAwait(false);
+            KeyQuestionsSource = (Dictionary<string, List<KeyQuestionModel>>)Tools[0];
+            StockScenesSource = (SortedDictionary<string, ObservableCollection<string>>)Tools[1];
+            TopicsSource = (SortedDictionary<string, TopicModel>)Tools[2];
+            MasterPlotsSource = (List<PlotPatternModel>)Tools[3];
+            BeatSheetSource = (List<PlotPatternModel>)Tools[4];
+            DramaticSituationsSource = (SortedDictionary<string, DramaticSituationModel>)Tools[5];
+            
             _log.Log(LogLevel.Info, $"""
                                     {KeyQuestionsSource.Keys.Count} Key Questions created
                                     {StockScenesSource.Keys.Count} Stock Scenes created
@@ -42,7 +65,6 @@ public class ToolsData
                                     {BeatSheetSource.Count} Master Plots created
                                     {DramaticSituationsSource.Count} Dramatic Situations created
                                     """);
-
         }
         catch (Exception ex)
         {

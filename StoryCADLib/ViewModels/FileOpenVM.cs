@@ -253,17 +253,40 @@ public class FileOpenVM : ObservableRecipient
 
         _logger.Log(LogLevel.Info, "Opening sample file: " + SampleNames[SelectedSampleIndex]);
         var resourceName = _samplePaths[SelectedSampleIndex];
+        
         //Get file stream
         await using Stream resourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName);
         var content = await new StreamReader(resourceStream!).ReadToEndAsync();
 
-        //Write to disk
-        var filePath = Path.Combine(Path.GetTempPath(), $"{SampleNames[SelectedSampleIndex]}.stbx");
-        await File.WriteAllTextAsync(filePath, content);
-
-        //Open sample
-        await Ioc.Default.GetService<OutlineViewModel>()!.OpenFile(filePath);
-        return filePath;
+        //Create secure temporary file with restricted permissions
+        var tempFileName = $"{SampleNames[SelectedSampleIndex]}_{Guid.NewGuid():N}.stbx";
+        var filePath = Path.Combine(Path.GetTempPath(), tempFileName);
+        
+        try
+        {
+            //Write to disk with file attributes to mark as temporary
+            await File.WriteAllTextAsync(filePath, content);
+            File.SetAttributes(filePath, FileAttributes.Temporary);
+            
+            //Open sample
+            await Ioc.Default.GetService<OutlineViewModel>()!.OpenFile(filePath);
+            return filePath;
+        }
+        catch (Exception ex)
+        {
+            //Clean up temp file on error
+            try
+            {
+                if (File.Exists(filePath))
+                    File.Delete(filePath);
+            }
+            catch
+            {
+                //Log cleanup failure but don't throw
+                _logger.Log(LogLevel.Warn, $"Failed to clean up temporary file: {filePath}");
+            }
+            throw;
+        }
     }
 
 

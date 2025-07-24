@@ -13,16 +13,35 @@ namespace StoryCAD.ViewModels
     public class ControlData
     {
         readonly LogService _log = Ioc.Default.GetService<LogService>();
+        private readonly Lazy<Task> _initializationTask;
 
         //Character conflics
-        public SortedDictionary<string, ConflictCategoryModel> ConflictTypes;
+        public SortedDictionary<string, ConflictCategoryModel> ConflictTypes { get; private set; }
         
         /// <summary>
         /// Possible relations
         /// </summary>
-        public List<string> RelationTypes;
+        public List<string> RelationTypes { get; private set; }
 
         public ControlData()
+        {
+            // Initialize with empty collections to prevent null reference exceptions
+            ConflictTypes = new SortedDictionary<string, ConflictCategoryModel>();
+            RelationTypes = new List<string>();
+            
+            // Use lazy initialization to avoid blocking constructor
+            _initializationTask = new Lazy<Task>(InitializeAsync);
+        }
+
+        /// <summary>
+        /// Ensures data is loaded before accessing properties. Call this method before using any control data.
+        /// </summary>
+        public async Task EnsureInitializedAsync()
+        {
+            await _initializationTask.Value.ConfigureAwait(false);
+        }
+
+        private async Task InitializeAsync()
         {
             int subTypeCount = 0;
             int exampleCount = 0;
@@ -30,12 +49,10 @@ namespace StoryCAD.ViewModels
             {
                 _log.Log(LogLevel.Info, "Loading Controls.ini data");
                 ControlLoader loader = Ioc.Default.GetService<ControlLoader>();
-                Task.Run(async () => 
-                {
-                    List<Object> Controls = await loader.Init();
-                    ConflictTypes = (SortedDictionary<string, ConflictCategoryModel>)Controls[0];
-                    RelationTypes = (List<string>)Controls[1];
-                }).Wait();
+                
+                List<Object> Controls = await loader.Init().ConfigureAwait(false);
+                ConflictTypes = (SortedDictionary<string, ConflictCategoryModel>)Controls[0];
+                RelationTypes = (List<string>)Controls[1];
 
                 _log.Log(LogLevel.Info, "ConflictType Counts");
                 _log.Log(LogLevel.Info,
