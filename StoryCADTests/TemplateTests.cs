@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -41,6 +42,24 @@ public class TemplateTests
             var model = Ioc.Default.GetRequiredService<OutlineViewModel>().StoryModel;
             Assert.IsNotNull(model);
             Assert.IsTrue(model.StoryElements.Count > 2, "Sample missing data.");
+        }
+    }
+
+    [TestMethod]
+    public async Task Templates_DoNotCreateDuplicates()
+    {
+        var outline = Ioc.Default.GetRequiredService<OutlineService>();
+        for (int i = 0; i <= 5; i++)
+        {
+            var model = await outline.CreateModel($"T{i}", "Author", i);
+            var seen = new HashSet<Guid>();
+            void Walk(StoryNodeItem n)
+            {
+                Assert.IsTrue(seen.Add(n.Uuid), $"Duplicate node in template {i}");
+                if (n.Children != null)
+                    foreach (var c in n.Children) Walk(c);
+            }
+            Walk(model.ExplorerView[0]);
         }
     }
 }
