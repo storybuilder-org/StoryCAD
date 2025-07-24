@@ -290,4 +290,22 @@ public sealed partial class Shell
         }
     }
 
+    /// <summary>
+    /// Disables trashcan tree.
+    /// </summary>
+    private void TreeView_Loaded(object sender, RoutedEventArgs e)
+    {
+        // Get root node for tree
+        StoryNodeItem root = ((sender as FrameworkElement).DataContext as StoryNodeItem);
+
+        // disable tree for trash tree
+        if (root.Type == StoryItemType.TrashCan)
+        {
+            var tree = (sender as TreeView);
+            tree.CanDrag = false;
+            tree.CanReorderItems = false;
+            tree.CanDragItems = false;
+            tree.AllowDrop = false;
+        }
+    }
 }

@@ -391,7 +391,8 @@
                                    ItemsSource="{x:Bind Children, Mode=TwoWay}"
                                    SelectionMode="Single" 
                                    ItemInvoked="TreeViewItem_Invoked"
-                                   DragItemsCompleted="NavigationTree_DragItemsCompleted">
+                                   DragItemsCompleted="NavigationTree_DragItemsCompleted"
+                                   Loaded="TreeView_Loaded">
 
                                     <muxc:TreeView.ItemTemplate>
                                         <DataTemplate  x:DataType="viewmodels:StoryNodeItem">
