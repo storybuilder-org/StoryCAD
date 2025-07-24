@@ -702,7 +702,7 @@ public class OutlineViewModel : ObservableRecipient
                 logger.Log(LogLevel.Info, "Print node failed as no node is selected");
                 return;
             }
-            await Ioc.Default.GetRequiredService<PrintReportDialogVM>().PrintSingleNode(shellVm.RightTappedNode);
+            Ioc.Default.GetRequiredService<PrintReportDialogVM>().PrintSingleNode(shellVm.RightTappedNode);
         }
     }
 
