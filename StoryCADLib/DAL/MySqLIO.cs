@@ -13,7 +13,7 @@ public class MySqlIo
         _cmd.Parameters.AddWithValue("email", email);
         _cmd.Parameters.Add("@user_id", MySqlDbType.Int32);
         _cmd.Parameters["@user_id"].Direction = ParameterDirection.Output;
-        await _cmd.ExecuteNonQueryAsync();
+        await _cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
         int _id = (int)_cmd.Parameters["@user_id"].Value;
         return _id;
     }
@@ -28,7 +28,7 @@ public class MySqlIo
         _cmd.Parameters.AddWithValue("@elmah", elmah);
         _cmd.Parameters.AddWithValue("@newsletter", newsletter);
         _cmd.Parameters.AddWithValue("@version", version);
-        await _cmd.ExecuteNonQueryAsync();
+        await _cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
     }
 
     public async Task AddVersion(MySqlConnection conn, int id, string currentVersion, string previousVersion)
@@ -44,7 +44,7 @@ public class MySqlIo
             _cmd.Parameters.AddWithValue("@user_id", id);
             _cmd.Parameters.AddWithValue("@current", currentVersion);
             _cmd.Parameters.AddWithValue("@previous", previousVersion);
-            await _cmd.ExecuteNonQueryAsync();
+            await _cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
         }
     }
 

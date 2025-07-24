@@ -31,7 +31,7 @@ public class PreferencesIo
             var back = Ioc.Default.GetRequiredService<BackupService>();
             using (var serializationLock = new SerializationLock(save, back, _log))
             {
-                StorageFolder _preferencesFolder = await StorageFolder.GetFolderFromPathAsync(_state.RootDirectory);
+                StorageFolder _preferencesFolder = await StorageFolder.GetFolderFromPathAsync(_state.RootDirectory).ConfigureAwait(false);
 
                 PreferencesModel _model = new();
 
@@ -40,8 +40,8 @@ public class PreferencesIo
                 {
                     //Read file into memory
                     _log.Log(LogLevel.Info, "Preferences.json found, reading it.");
-                    StorageFile _preferencesFile = await _preferencesFolder.GetFileAsync("Preferences.json");
-                    string _preferencesJson = await FileIO.ReadTextAsync(_preferencesFile);
+                    StorageFile _preferencesFile = await _preferencesFolder.GetFileAsync("Preferences.json").ConfigureAwait(false);
+                    string _preferencesJson = await FileIO.ReadTextAsync(_preferencesFile).ConfigureAwait(false);
                     _log.Log(LogLevel.Info, $"Preferences Contents: {_preferencesJson}");
 
                     //Update _model, with new values.
@@ -105,12 +105,12 @@ public class PreferencesIo
             {
                 //Get/Create file.
                 _log.Log(LogLevel.Info, "Writing preferences model to disk.");
-                StorageFolder _preferencesFolder = await StorageFolder.GetFolderFromPathAsync(_state.RootDirectory);
+                StorageFolder _preferencesFolder = await StorageFolder.GetFolderFromPathAsync(_state.RootDirectory).ConfigureAwait(false);
                 _log.Log(LogLevel.Info, $"Saving to folder {_preferencesFolder.Path}");
 
                 StorageFile _preferencesFile =
                     await _preferencesFolder.CreateFileAsync("Preferences.json",
-                        CreationCollisionOption.ReplaceExisting);
+                        CreationCollisionOption.ReplaceExisting).ConfigureAwait(false);
                 //Write file
                 _log.Log(LogLevel.Info, $"Saving Preferences to file {_preferencesFile.Path}");
                 string _newPreferences = JsonSerializer.Serialize(Model,
@@ -118,7 +118,7 @@ public class PreferencesIo
 
                 //Log stuff
                 _log.Log(LogLevel.Info, $"Serialised preferences as {_newPreferences}");
-                await FileIO.WriteTextAsync(_preferencesFile, _newPreferences); //Writes file to disk
+                await FileIO.WriteTextAsync(_preferencesFile, _newPreferences).ConfigureAwait(false); //Writes file to disk
                 _log.Log(LogLevel.Info, "Preferences write complete.");
             }
 		}

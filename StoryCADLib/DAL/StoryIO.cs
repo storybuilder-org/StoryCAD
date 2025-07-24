@@ -24,8 +24,8 @@ public class StoryIO
         string parent = Path.GetDirectoryName(output_path);
         Directory.CreateDirectory(parent);
 
-        StorageFolder folder = await StorageFolder.GetFolderFromPathAsync(parent);
-        var output = await folder.CreateFileAsync(Path.GetFileName(output_path), CreationCollisionOption.OpenIfExists);
+        StorageFolder folder = await StorageFolder.GetFolderFromPathAsync(parent).ConfigureAwait(false);
+        var output = await folder.CreateFileAsync(Path.GetFileName(output_path), CreationCollisionOption.OpenIfExists).ConfigureAwait(false);
 		_logService.Log(LogLevel.Info, $"Saving Model to disk as {output_path}  " + 
 				$"Elements: {model.StoryElements.StoryElementGuids.Count}");
 
@@ -37,7 +37,7 @@ public class StoryIO
         _logService.Log(LogLevel.Trace, $"Serialised as {json}");
 
 		//Save file to disk
-		await FileIO.WriteTextAsync(output, json);
+		await FileIO.WriteTextAsync(output, json).ConfigureAwait(false);
 	}
 
 
@@ -48,13 +48,13 @@ public class StoryIO
 		{
 			//Read file
 			_logService.Log(LogLevel.Info, $"Reading Model from disk ({StoryFile.Path})");
-			string JSON = await FileIO.ReadTextAsync(StoryFile);
+			string JSON = await FileIO.ReadTextAsync(StoryFile).ConfigureAwait(false);
 
 			//Check if file is legacy
 			if (JSON.Split("\n")[0].Contains("<?xml version=\"1.0\" encoding=\"utf-8\"?>"))
 			{
 				_logService.Log(LogLevel.Info, "File is legacy XML format");
-				return await MigrateModel(StoryFile);
+				return await MigrateModel(StoryFile).ConfigureAwait(false);
 			}
 
 			_logService.Log(LogLevel.Info, $"Read file (Length: {JSON.Length})");
