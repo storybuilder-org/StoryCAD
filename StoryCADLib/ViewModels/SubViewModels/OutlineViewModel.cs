@@ -1196,6 +1196,10 @@ public class OutlineViewModel : ObservableRecipient
         shellVm.StatusMessage = "Trash Emptied.";
         logger.Log(LogLevel.Info, "Emptied Trash.");
         shellVm.DataSource[1].Children.Clear();
+
+        //Fix error #1056
+        shellVm.RightTappedNode = null;
+        shellVm.CurrentNode = null;
     }
 
     /// <summary>
