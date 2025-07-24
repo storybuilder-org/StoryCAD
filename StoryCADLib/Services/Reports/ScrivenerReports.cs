@@ -416,7 +416,7 @@ namespace StoryCAD.Services.Reports
             StorageFolder di = await _scrivener.GetSubFolder(node.Uuid); // Get subfolder path
             StorageFile contents = await di.CreateFileAsync("content.rtf", CreationCollisionOption.ReplaceExisting);
  
-            string rtf = _formatter.FormatStoryOverviewReport(overview);
+            string rtf = _formatter.FormatStoryOverviewReport();
             
             // Write the report
             await FileIO.WriteTextAsync(contents, rtf);
@@ -427,7 +427,7 @@ namespace StoryCAD.Services.Reports
             // Locate and open the output content.rtf report
             StorageFolder di = await _scrivener.GetSubFolder(node.Uuid); // Get subfolder path
             StorageFile contents = await di.CreateFileAsync("content.rtf", CreationCollisionOption.ReplaceExisting);
-            string rtf =  _formatter.FormatProblemListReport();
+            string rtf =  _formatter.FormatListReport(StoryItemType.Problem);
             // Write the report
             await FileIO.WriteTextAsync(contents, rtf);
         }
@@ -449,7 +449,7 @@ namespace StoryCAD.Services.Reports
             // Locate and open the output content.rtf report
             StorageFolder di = await _scrivener.GetSubFolder(node.Uuid); // Get subfolder path
             StorageFile contents = await di.CreateFileAsync("content.rtf", CreationCollisionOption.ReplaceExisting);
-            string rtf = _formatter.FormatCharacterListReport();
+            string rtf = _formatter.FormatListReport(StoryItemType.Character);
             // Write the report
             await FileIO.WriteTextAsync(contents, rtf);
         }
@@ -472,7 +472,7 @@ namespace StoryCAD.Services.Reports
             StorageFolder di = await _scrivener.GetSubFolder(node.Uuid); // Get subfolder path
             StorageFile contents = await di.CreateFileAsync("content.rtf", CreationCollisionOption.ReplaceExisting);
 
-            string rtf = _formatter.FormatSettingListReport();
+            string rtf = _formatter.FormatListReport(StoryItemType.Setting);
             
             // Write the report
             await FileIO.WriteTextAsync(contents, rtf);
@@ -496,7 +496,7 @@ namespace StoryCAD.Services.Reports
             StorageFolder di = await _scrivener.GetSubFolder(node.Uuid); // Get subfolder path
             StorageFile contents = await di.CreateFileAsync("content.rtf", CreationCollisionOption.ReplaceExisting);
 
-            string rtf = _formatter.FormatSceneListReport();
+            string rtf = _formatter.FormatListReport(StoryItemType.Scene);
             
             // Write the report
             await FileIO.WriteTextAsync(contents, rtf);

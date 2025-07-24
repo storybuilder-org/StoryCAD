@@ -24,14 +24,6 @@ public class PrintReportDialogVM : ObservableRecipient
     private OutlineViewModel OutlineVM = Ioc.Default.GetRequiredService<OutlineViewModel>();
     private List<StackPanel> _printPreviewCache; //This stores a list of pages for print preview
     #region Properties
-
-    private bool _showLoadingBar = true;
-    public bool ShowLoadingBar
-    {
-        get => _showLoadingBar;
-        set => SetProperty(ref _showLoadingBar, value);
-    }
-
     private bool _createSummary;
     public bool CreateSummary
     {
@@ -202,10 +194,17 @@ public class PrintReportDialogVM : ObservableRecipient
         GeneratePrintDocumentReport();
         PrintDocSource = Document.DocumentSource;
 
-        //Device has to support printing AND run a build of Windows above 19045 (W10 22h2)
-        //Windows 10 builds below 19045 have bug that prevent us from using the new print manager
-        //TODO: gut old print stuff after oct 2023 since only 22h2 will be offically supported.
-        if (PrintManager.IsSupported() && Environment.OSVersion.Version.Build >= 19045)
+        // Old windows build check (pre 19045 doesn't support PrintManager)
+        if (Environment.OSVersion.Version.Build <= 19045) 
+        {
+            await Window.ShowContentDialog(new ContentDialog()
+            {
+                Title = "Printing",
+                Content = "Printing is not supported on this version of Windows, please update",
+                PrimaryButtonText = "Ok"
+            });
+        }
+        if (PrintManager.IsSupported())
         {
             try
             {   // Show print UI
@@ -215,7 +214,6 @@ public class PrintReportDialogVM : ObservableRecipient
             {
                 Window.GlobalDispatcher.TryEnqueue(async () =>
                 {
-                    CloseDialog();
                     ContentDialog Dialog = new()
                     {
                         Title = "Printing error",
@@ -223,18 +221,23 @@ public class PrintReportDialogVM : ObservableRecipient
                         PrimaryButtonText = "Ok"
                     };
 
-                    await Ioc.Default.GetService<Windowing>().ShowContentDialog(Dialog);
+                    await Ioc.Default.GetService<Windowing>().ShowContentDialog(Dialog, true);
                 });
 
             }
         }
-        else //Print Manager isn't supported so we fall back to the old version of printing directly.
+        
+        //Device somehow doesn't support printing; im not sure what exactly this means.
+        else
         {
-            ShowLoadingBar = true;
-            StartGeneratingReports();
+            await Window.ShowContentDialog(new ContentDialog()
+            {
+                Title = "Printing",
+                Content = "Your device does not appear to support printing.",
+                PrimaryButtonText = "Ok"
+            });
         }
     }
-
 
     /// <summary>
     /// This traverses a node and adds it to the relevant list.
@@ -256,24 +259,21 @@ public class PrintReportDialogVM : ObservableRecipient
     }
 
     /// <summary>
-    /// Hides the content dialog
-    /// </summary>
-    public void CloseDialog() { Dialog.Hide(); }
-
-    /// <summary>
     /// This prints a report of the node selected
     /// </summary>
     /// <param name="elementItem">Node to be printed.</param>
-    public async Task PrintSingleNode(StoryNodeItem elementItem)
+    public void PrintSingleNode(StoryNodeItem elementItem)
     {
         SelectedNodes.Clear(); //Only print single node
 
         PrintReports _rpt = new(this, OutlineVM.StoryModel);
-       
-        if (elementItem.Type == StoryItemType.StoryOverview) {CreateOverview = true; }
+
+        if (elementItem.Type == StoryItemType.StoryOverview) { CreateOverview = true; }
         else { SelectedNodes.Add(elementItem); }
 
-        _rpt.Print(await _rpt.Generate());
+        StartPrintMenu();
+        //Reset value incase dialog opened later
+        SelectedNodes.Clear();
         CreateOverview = false;
     }
 
@@ -282,22 +282,6 @@ public class PrintReportDialogVM : ObservableRecipient
         // Register for PrintTaskRequested event
         _printManager = PrintManagerInterop.GetForWindow(Window.WindowHandle);
         _printManager.PrintTaskRequested += PrintTaskRequested;
-    }
-    /// <summary>
-    /// This starts report generation
-    /// (Calls GenerateReports() on a background worker)
-    /// </summary>
-    public void StartGeneratingReports()
-    {
-        ShowLoadingBar = true;
-        BackgroundWorker _backgroundThread = new();
-        _backgroundThread.DoWork += async (_,_) =>
-        {
-            PrintReports _rpt = new(this, OutlineVM.StoryModel);
-            _rpt.Print(await _rpt.Generate());
-            ShowLoadingBar = false;
-        };
-        _backgroundThread.RunWorkerAsync();
     }
 
     public async void GeneratePrintDocumentReport()
@@ -372,7 +356,8 @@ public class PrintReportDialogVM : ObservableRecipient
 
     private void Paginate(object sender, PaginateEventArgs e)
     {
-        Document.SetPreviewPageCount(_printPreviewCache.Count, PreviewPageCountType.Intermediate);
+        Document.SetPreviewPageCount(_printPreviewCache.Count, 
+            PreviewPageCountType.Intermediate);
     }
 
     private void GetPreviewPage(object sender, GetPreviewPageEventArgs e)
@@ -407,8 +392,8 @@ public class PrintReportDialogVM : ObservableRecipient
         {
             //Set print job name
             PrintJobManager = args.Request.CreatePrintTask("StoryCAD - " + 
-                Path.GetFileNameWithoutExtension(Ioc.Default.GetRequiredService<OutlineViewModel>().StoryModelFile)
-                , PrintSourceRequested);
+                Path.GetFileNameWithoutExtension(OutlineVM.StoryModelFile)
+                ,PrintSourceRequested);
             PrintJobManager.Completed += PrintTaskCompleted; //Show message if job failed.
         }
         catch (Exception e)
@@ -420,19 +405,20 @@ public class PrintReportDialogVM : ObservableRecipient
     /// <summary>
     /// Set print source
     /// </summary>
-    /// <param name="args"></param>
     private void PrintSourceRequested(PrintTaskSourceRequestedArgs args)
     {
         args.SetSource(PrintDocSource);
     }
 
-    private async void PrintTaskCompleted(PrintTask sender, PrintTaskCompletedEventArgs args)
+    /// <summary>
+    /// Fired when the print task is completed/failed.
+    /// </summary>
+    private void PrintTaskCompleted(PrintTask sender, PrintTaskCompletedEventArgs args)
     {
         Window.GlobalDispatcher.TryEnqueue(async () =>
         {
             if (args.Completion == PrintTaskCompletion.Failed) //Show message if print fails
             {
-                //Use an enqueue here because the sample version doesn't use it properly (i think or it doesn't work here.)
                 ContentDialog Dialog = new()
                 {
                     Title = "Printing error",
