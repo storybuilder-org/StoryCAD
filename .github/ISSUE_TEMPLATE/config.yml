@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: StoryCAD Community Discussions
+    url: https://github.com/storybuilder-org/StoryCAD/discussions
+    about: Ask questions and discuss StoryCAD with the community
+  - name: User Manual
+    url: https://storybuilder-org.github.io/StoryCAD/
+    about: Complete user documentation and guides
