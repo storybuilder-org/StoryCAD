@@ -214,7 +214,7 @@ public class NarrativeToolVM: ObservableRecipient
     /// </summary>
     private void MakeSection()
     {
-        if (_shellVM.DataSource == null || _shellVM.DataSource.Count < 0)
+        if (_shellVM.OutlineManager.StoryModel?.CurrentView == null || _shellVM.OutlineManager.StoryModel.CurrentView.Count < 0)
         {
             _logger.Log(LogLevel.Warn, "DataSource is empty or null, not adding section");
             return;

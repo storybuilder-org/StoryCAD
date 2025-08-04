@@ -35,7 +35,7 @@ public sealed partial class PrintReportsDialog
         //Gets all nodes that aren't deleted
         try
         {
-            foreach (StoryNodeItem rootChild in Ioc.Default.GetRequiredService<ShellViewModel>().DataSource[0].Children)
+            foreach (StoryNodeItem rootChild in Ioc.Default.GetRequiredService<ShellViewModel>().OutlineManager.StoryModel.CurrentView[0].Children)
             {
                 PrintVM.TraverseNode(rootChild);
             }

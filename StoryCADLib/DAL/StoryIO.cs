@@ -5,6 +5,7 @@ using Windows.Storage;
 using StoryCAD.Services;
 using System.Diagnostics;
 using StoryCAD.ViewModels.SubViewModels;
+using System.Linq;
 
 namespace StoryCAD.DAL;
 
@@ -74,6 +75,45 @@ public class StoryIO
 			//Rebuild tree.
 			_model.ExplorerView = RebuildTree(_model.FlattenedExplorerView, _model.StoryElements, _logService);
 			_model.NarratorView = RebuildTree(_model.FlattenedNarratorView, _model.StoryElements, _logService);
+			
+			// Rebuild TrashView if it exists
+			if (_model.FlattenedTrashView != null && _model.FlattenedTrashView.Any())
+			{
+				_model.TrashView = RebuildTree(_model.FlattenedTrashView, _model.StoryElements, _logService);
+			}
+			else
+			{
+				// Create empty TrashView with TrashCan root
+				_model.TrashView = new ObservableCollection<StoryNodeItem>();
+				var trashCan = new TrashCanModel(_model, null);
+				_model.TrashView.Add(trashCan.Node);
+			}
+			
+			// Check for legacy dual-root structure and migrate if needed
+			if (_model.ExplorerView.Count > 1 && _model.ExplorerView.Any(n => n.Type == StoryItemType.TrashCan))
+			{
+				_logService.Log(LogLevel.Info, "Detected legacy dual-root structure, migrating...");
+				
+				// Find and remove TrashCan from ExplorerView
+				var trashCanNode = _model.ExplorerView.FirstOrDefault(n => n.Type == StoryItemType.TrashCan);
+				if (trashCanNode != null)
+				{
+					_model.ExplorerView.Remove(trashCanNode);
+					
+					// Move TrashCan and its children to TrashView
+					_model.TrashView.Clear();
+					_model.TrashView.Add(trashCanNode);
+				}
+			}
+			
+			// Re-attach collection change handlers (they're not serialized)
+			_model.ReattachCollectionHandlers();
+			
+			// Set CurrentView to ExplorerView by default
+			_model.CurrentView = _model.ExplorerView;
+			_model.CurrentViewType = StoryViewType.ExplorerView;
+			
+			_logService.Log(LogLevel.Info, $"CurrentView set with {_model.CurrentView?.Count ?? 0} items");
 
 			//Log info about story
 			_logService.Log(LogLevel.Info, $"Model deserialized as {_model.ExplorerView[0].Name}");
@@ -102,6 +142,18 @@ public class StoryIO
 		ILogService logger)
 	{
 		var lookup = new Dictionary<Guid, StoryNodeItem>();
+
+		// Remove duplicate entries (same UUID with different parent relationships)
+		var uniqueNodes = new Dictionary<Guid, PersistableNode>();
+		foreach (var n in flatNodes)
+		{
+			// Keep the first occurrence of each UUID
+			if (!uniqueNodes.ContainsKey(n.Uuid))
+			{
+				uniqueNodes[n.Uuid] = n;
+			}
+		}
+		flatNodes = uniqueNodes.Values.ToList();
 
 		// First create all nodes (empty parent/children)
 		foreach (var n in flatNodes)

@@ -28,9 +28,8 @@ public class ShellTests
         var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
         outlineVM.StoryModel = await outlineService.CreateModel("Test1056", "StoryBuilder", 2);
         outlineVM.StoryModelFile = Path.Combine(App.ResultsDir, "NullDelete.stbx");
-        shell.DataSource = new() { outlineVM.StoryModel.StoryElements[0].Node,
-            outlineVM.StoryModel.StoryElements
-            .First(t => t.ElementType == StoryCAD.Models.StoryItemType.TrashCan).Node };
+        // Set up the current view (Explorer view)
+        outlineService.SetCurrentView(outlineVM.StoryModel, StoryCAD.Models.StoryViewType.ExplorerView);
 
         //Create node to be deleted
         shell.CurrentNode = outlineVM.StoryModel.StoryElements

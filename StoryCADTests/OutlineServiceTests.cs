@@ -6,6 +6,9 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using StoryCAD.Services.Logging;
+using StoryCAD.Services;
+using StoryCAD.ViewModels;
 
 namespace StoryCADTests
 {
@@ -66,7 +69,8 @@ namespace StoryCADTests
             // Assert
             Assert.IsNotNull(model, "StoryModel should not be null.");
             // The CreateModel method adds at least two nodes to ExplorerView: Overview and TrashCan.
-            Assert.IsTrue(model.ExplorerView.Count >= 2, "ExplorerView should contain at least two nodes (Overview and TrashCan).");
+            Assert.AreEqual(1, model.ExplorerView.Count, "ExplorerView should contain only Overview node.");
+            Assert.AreEqual(1, model.TrashView.Count, "TrashView should contain TrashCan node.");
             
             // Assuming the first node is the Overview node with the provided outline name.
             var overviewNode = model.ExplorerView.First();
@@ -197,6 +201,108 @@ namespace StoryCADTests
             {
                 await _outlineService.WriteModel(model, invalidPath);
             });
+        }
+
+        #region SetCurrentView Tests
+
+        /// <summary>
+        /// Tests that SetCurrentView properly switches to ExplorerView
+        /// </summary>
+        [TestMethod]
+        public void SetCurrentView_SwitchToExplorerView_UpdatesModelCorrectly()
+        {
+            // Arrange
+            var model = new StoryModel();
+            model.CurrentView = model.NarratorView; // Start with NarratorView
+            model.CurrentViewType = StoryViewType.NarratorView;
+
+            // Act
+            _outlineService.SetCurrentView(model, StoryViewType.ExplorerView);
+
+            // Assert
+            Assert.AreEqual(model.ExplorerView, model.CurrentView, "CurrentView should be set to ExplorerView");
+            Assert.AreEqual(StoryViewType.ExplorerView, model.CurrentViewType, "CurrentViewType should be ExplorerView");
+        }
+
+        /// <summary>
+        /// Tests that SetCurrentView properly switches to NarratorView
+        /// </summary>
+        [TestMethod]
+        public void SetCurrentView_SwitchToNarratorView_UpdatesModelCorrectly()
+        {
+            // Arrange
+            var model = new StoryModel();
+            // Model starts with ExplorerView by default
+
+            // Act
+            _outlineService.SetCurrentView(model, StoryViewType.NarratorView);
+
+            // Assert
+            Assert.AreEqual(model.NarratorView, model.CurrentView, "CurrentView should be set to NarratorView");
+            Assert.AreEqual(StoryViewType.NarratorView, model.CurrentViewType, "CurrentViewType should be NarratorView");
+        }
+
+        /// <summary>
+        /// Tests that SetCurrentView throws ArgumentNullException for null model
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void SetCurrentView_NullModel_ThrowsArgumentNullException()
+        {
+            // Act
+            _outlineService.SetCurrentView(null, StoryViewType.ExplorerView);
+        }
+
+        /// <summary>
+        /// Tests that SetCurrentView throws ArgumentException for invalid view type
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public void SetCurrentView_InvalidViewType_ThrowsArgumentException()
+        {
+            // Arrange
+            var model = new StoryModel();
+
+            // Act
+            _outlineService.SetCurrentView(model, (StoryViewType)999);
+        }
+
+        /// <summary>
+        /// Tests that SetCurrentView properly uses SerializationLock
+        /// </summary>
+        [TestMethod]
+        public void SetCurrentView_UsesSerializationLock_NoExceptions()
+        {
+            // Arrange
+            var model = new StoryModel();
+
+            // Act - Should not throw any exceptions related to concurrent access
+            _outlineService.SetCurrentView(model, StoryViewType.ExplorerView);
+            _outlineService.SetCurrentView(model, StoryViewType.NarratorView);
+
+            // Assert
+            Assert.AreEqual(model.NarratorView, model.CurrentView, "Last set view should be NarratorView");
+        }
+
+        #endregion
+
+        /// <summary>
+        /// Tests that a newly created model doesn't have Changed flag set
+        /// </summary>
+        [TestMethod]
+        public async Task CreateModel_NewModel_ShouldNotBeMarkedAsChanged()
+        {
+            // Arrange
+            string outlineName = "Test Outline";
+            string author = "Test Author";
+            int templateIndex = 3; // Same template as TestAPIWrite
+
+            // Act
+            StoryModel model = await _outlineService.CreateModel(outlineName, author, templateIndex);
+
+            // Assert
+            Assert.IsNotNull(model, "StoryModel should not be null.");
+            Assert.IsFalse(model.Changed, "Newly created model should not be marked as changed.");
         }
     }
 }

@@ -46,7 +46,10 @@
       "Bash(verbosity=detailed)",
       "Bash(\"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe\" \"StoryCADTests/bin/x64/Debug/net8.0-windows10.0.19041.0/StoryCADTests.dll\" /Tests:OutlineServiceTests.CreateModel_NewModel_ShouldNotBeMarkedAsChanged)",
       "Bash(touch:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(\"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe\" \"StoryCADTests/bin/x64/Debug/net8.0-windows10.0.19041.0/StoryCADTests.dll\" /Tests:TestDeleteMove,EmptyTrash)",
+      "Bash(\"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe\" \"StoryCADTests/bin/x64/Debug/net8.0-windows10.0.19041.0/StoryCADTests.dll\" /Tests:DeleteNode_SetsChangedFlag)",
+      "Bash(\"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/MSBuild.exe\" StoryCAD.sln -t:Rebuild -p:Configuration=Debug -p:Platform=x64 -v:q)"
     ],
     "deny": []
   }
