@@ -29,7 +29,6 @@ StoryCAD is a free, open-source Windows application for fiction writers that pro
 
 ### Workflow Documentation
 - [AI Workflow](/mnt/c/temp/AI_Workflow.md) - Issue-centric development process
-- [Design Documents](./design/) - Feature requirements and specifications
 
 ## Quick Start
 
@@ -97,6 +96,7 @@ When following AI_workflow.md:
 2. Update issue body with planned tasks between checkboxes
 3. Check off tasks as completed
 4. Add comments as specified in the workflow
+5. Include design documents in PR comments (not in repository files)
 
 Example: Updating Code tasks in issue body:
 ```bash
@@ -117,3 +117,6 @@ EOF
 # Update the issue
 gh issue edit 1067 --repo storybuilder-org/StoryCAD --body-file issue-update.md
 ```
+
+### Design Documentation
+When creating pull requests, include any design documentation directly in the PR description or comments rather than creating separate design files in the repository. This keeps the repository focused on code while maintaining important design context with the relevant changes.
