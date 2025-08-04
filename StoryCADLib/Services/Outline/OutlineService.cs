@@ -5,6 +5,10 @@ using System.Collections.ObjectModel;
 using System.Security.Cryptography;
 using System.Text.Json;
 using Windows.Storage;
+using StoryCAD.Services.Backend;
+using StoryCAD.Services.Locking;
+using StoryCAD.Services.Backup;
+using StoryCAD.ViewModels.SubViewModels;
 
 namespace StoryCAD.Services.Outline;
 /// <summary>
@@ -35,7 +39,7 @@ public Task<StoryModel> CreateModel(string name, string author, int selectedTemp
     model.ExplorerView.Add(overview.Node);
 
     TrashCanModel trash = new(model, null);
-    model.ExplorerView.Add(trash.Node);                             // second root
+    model.TrashView.Add(trash.Node);                             // Add to TrashView instead of ExplorerView
 
     FolderModel narrative = new("Narrative View", model,
                                 StoryItemType.Folder, null);
@@ -186,6 +190,10 @@ public Task<StoryModel> CreateModel(string name, string author, int selectedTemp
             throw new ArgumentOutOfRangeException(nameof(selectedTemplateIndex));
     }
 
+    // Reset Changed flag after template creation
+    // Template creation adds nodes which trigger change events, but a newly created model shouldn't be marked as changed
+    model.Changed = false;
+    
     _log.Log(LogLevel.Info, $"Model created, element count {model.StoryElements.Count}");
     return Task.FromResult(model);
 }
@@ -222,6 +230,41 @@ public Task<StoryModel> CreateModel(string name, string author, int selectedTemp
         StoryModel model = await new StoryIO().ReadStory(file);
         _log.Log(LogLevel.Info, $"Opened model contains {model.StoryElements.Count} elements.");
         return model;
+    }
+
+    /// <summary>
+    /// Sets the current view type for the story model and updates the CurrentView accordingly.
+    /// </summary>
+    /// <param name="model">The StoryModel to update</param>
+    /// <param name="viewType">The desired view type (Explorer or Narrator)</param>
+    /// <exception cref="ArgumentNullException">Thrown when model is null</exception>
+    /// <exception cref="ArgumentException">Thrown when viewType is invalid</exception>
+    public void SetCurrentView(StoryModel model, StoryViewType viewType)
+    {
+        if (model == null)
+            throw new ArgumentNullException(nameof(model));
+
+        var autoSaveService = Ioc.Default.GetRequiredService<AutoSaveService>();
+        var backupService = Ioc.Default.GetRequiredService<BackupService>();
+        
+        using (var serializationLock = new SerializationLock(autoSaveService, backupService, _log))
+        {
+            switch (viewType)
+            {
+                case StoryViewType.ExplorerView:
+                    model.CurrentView = model.ExplorerView;
+                    model.CurrentViewType = StoryViewType.ExplorerView;
+                    break;
+                case StoryViewType.NarratorView:
+                    model.CurrentView = model.NarratorView;
+                    model.CurrentViewType = StoryViewType.NarratorView;
+                    break;
+                default:
+                    throw new ArgumentException($"Unsupported view type: {viewType}", nameof(viewType));
+            }
+            
+            _log.Log(LogLevel.Info, $"View switched to {viewType}");
+        }
     }
 
     /// <summary>

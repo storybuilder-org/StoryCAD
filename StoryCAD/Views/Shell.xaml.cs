@@ -187,8 +187,8 @@ public sealed partial class Shell
 
     private void ClearNodes(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
     {
-        if (ShellVm.DataSource == null || ShellVm.DataSource.Count == 0) { return; }
-        foreach (StoryNodeItem node in ShellVm.DataSource[0]) { node.Background = null; }
+        if (ShellVm.OutlineManager.StoryModel?.CurrentView == null || ShellVm.OutlineManager.StoryModel.CurrentView.Count == 0) { return; }
+        foreach (StoryNodeItem node in ShellVm.OutlineManager.StoryModel.CurrentView[0]) { node.Background = null; }
     }
 
     private void TreeViewItem_Tapped(object sender, TappedRoutedEventArgs e)
@@ -267,10 +267,10 @@ public sealed partial class Shell
             var movedItem = (StoryNodeItem)args.Items[0];
             var parent = args.NewParentItem as StoryNodeItem;
             
-            // If parent is null, use the DataSource view's root node
+            // If parent is null, use the CurrentView view's root node
             if (parent == null)
             {
-                if (ShellVm?.DataSource?.Count > 0)
+                if (ShellVm?.OutlineManager.StoryModel?.CurrentView?.Count > 0)
                 {
                     //This gets the parent grid containing the tree's data context
                     //this will be the correct root in the cases where there are

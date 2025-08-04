@@ -360,7 +360,10 @@
                    FontFamily="Segoe UI">
             <!-- Nav tree -->
             <SplitView.Pane>
-                <ItemsRepeater ItemsSource="{x:Bind ShellVm.DataSource, Mode=TwoWay}" x:Name="NavigationTree"
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                    <StackPanel>
+                    <!-- Main Navigation Tree -->
+                    <ItemsRepeater ItemsSource="{x:Bind ShellVm.OutlineManager.StoryModel.CurrentView, Mode=TwoWay}" x:Name="NavigationTree"
                                ContextFlyout="{StaticResource AddStoryElementFlyout}" 
                                ContextRequested="AddButton_ContextRequested" >
                     <ItemsRepeater.ItemTemplate>
@@ -415,6 +418,34 @@
                         </DataTemplate>
                     </ItemsRepeater.ItemTemplate>
                 </ItemsRepeater>
+                
+                <!-- Separator -->
+                <Border Height="2" Background="Gray" Margin="5,10,5,2" />
+                
+                <!-- Trash Can TreeView -->
+                <muxc:TreeView ItemsSource="{x:Bind ShellVm.OutlineManager.StoryModel.TrashView, Mode=TwoWay}"
+                              ContextFlyout="{StaticResource AddStoryElementFlyout}"
+                              ContextRequested="AddButton_ContextRequested"
+                              ItemInvoked="TreeViewItem_Invoked"
+                              CanDragItems="False" AllowDrop="False" CanReorderItems="False"
+                              SelectionMode="Single">
+                    <muxc:TreeView.ItemTemplate>
+                        <DataTemplate x:DataType="viewmodels:StoryNodeItem">
+                            <muxc:TreeViewItem ItemsSource="{x:Bind Children}"
+                                              RightTapped="TreeViewItem_RightTapped"
+                                              IsExpanded="{x:Bind IsExpanded, Mode=TwoWay}"
+                                              CanDrag="False">
+                                <StackPanel Orientation="Horizontal">
+                                    <SymbolIcon Symbol="{x:Bind Symbol, Mode=OneWay}" Width="20" Height="20"/>
+                                    <TextBlock Text="{x:Bind Name, Mode=TwoWay}"
+                                              TextWrapping="{x:Bind TextWrapping}" MaxWidth="220" Margin="10,0,10,0"/>
+                                </StackPanel>
+                            </muxc:TreeViewItem>
+                        </DataTemplate>
+                    </muxc:TreeView.ItemTemplate>
+                </muxc:TreeView>
+                    </StackPanel>
+                </ScrollViewer>
             </SplitView.Pane>
             <SplitView.Content>
                 <Grid>
