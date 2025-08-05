@@ -28,15 +28,7 @@ public class StoryModel : ObservableObject
 	public bool Changed 
 	{
 		get => _changed;
-		set 
-		{
-			if (SetProperty(ref _changed, value))
-			{
-				// Call the existing ShowChange() method when changed is set to true
-				if (_changed)
-					ShellViewModel.ShowChange();
-			}
-		}
+		set => SetProperty(ref _changed, value);
 	}
 
 	#region StoryProperties

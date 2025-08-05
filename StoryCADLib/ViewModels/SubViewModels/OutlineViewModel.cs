@@ -281,7 +281,7 @@ public class OutlineViewModel : ObservableRecipient
             outlineService.SetCurrentView(StoryModel, StoryViewType.ExplorerView);
 
             await Ioc.Default.GetRequiredService<FileOpenVM>().UpdateRecents(StoryModelFile);
-            StoryModel.Changed = true;
+            outlineService.SetChanged(StoryModel, true);
             await SaveFile();
 
             using (var serializationLock = new SerializationLock(autoSaveService, backupService, logger))
@@ -357,7 +357,7 @@ public class OutlineViewModel : ObservableRecipient
                 shellVm.SaveModel();
                 await outlineService.WriteModel(StoryModel, StoryModelFile);
                 Messenger.Send(new StatusChangedMessage(new($"{msg} completed", LogLevel.Info)));
-                StoryModel.Changed = false;
+                outlineService.SetChanged(StoryModel, false);
                 shellVm.ChangeStatusColor = Colors.Green;
             }
             catch (Exception ex)
@@ -446,7 +446,7 @@ public class OutlineViewModel : ObservableRecipient
 
                         // Indicate the model is now saved and unchanged
                         Messenger.Send(new IsChangedMessage(true));
-                        StoryModel.Changed = false;
+                        outlineService.SetChanged(StoryModel, false);
                         shellVm.ChangeStatusColor = Colors.Green;
                         Messenger.Send(new StatusChangedMessage(new("Save File As command completed", LogLevel.Info, true)));
                     }

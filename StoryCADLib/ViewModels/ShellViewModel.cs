@@ -342,7 +342,10 @@ public class ShellViewModel : ObservableRecipient
         StoryModel Model = Ioc.Default.GetRequiredService<OutlineViewModel>().StoryModel;
         if (Ioc.Default.GetRequiredService<AppState>().Headless) { return; }
         if (Model.Changed) { return; }
-        Model.Changed = true;
+        
+        // Use OutlineService to set changed status with proper separation of concerns
+        var outlineService = Ioc.Default.GetRequiredService<OutlineService>();
+        outlineService.SetChanged(Model, true);
         ShellInstance.ChangeStatusColor = Colors.Red;
     }
 

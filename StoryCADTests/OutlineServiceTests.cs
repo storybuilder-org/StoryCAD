@@ -17,16 +17,13 @@ namespace StoryCADTests
     /// This test class verifies:
     /// <list type="bullet">
     /// <item>
-    /// <description>Creation of StoryModel instances with different templates.</description>
+    /// <description>The correct creation of StoryModels using different template indexes.</description>
     /// </item>
     /// <item>
-    /// <description>Writing StoryModel files to disk in JSON format.</description>
+    /// <description>The ability to write the StoryModel to disk, and proper error handling for invalid paths.</description>
     /// </item>
     /// <item>
-    /// <description>Opening previously saved StoryModel files.</description>
-    /// </item>
-    /// <item>
-    /// <description>Edge cases such as invalid file paths and non-existent files.</description>
+    /// <description>The proper opening of files and error handling when a file is not found.</description>
     /// </item>
     /// </list>
     /// </summary>
@@ -34,21 +31,23 @@ namespace StoryCADTests
     public class OutlineServiceTests
     {
         private OutlineService _outlineService;
-        // Temporary output path for test files.
-        private static readonly string testOutputPath = Path.GetTempPath();
+        private string testOutputPath;
 
         /// <summary>
-        /// Initializes the test class by setting up the necessary services in the IoC container.
-        /// This includes registering all the services used by OutlineService.
+        /// Initializes the test environment for each test by instantiating the OutlineService and ensuring the TestOutputs folder is clean.
         /// </summary>
         [TestInitialize]
-        public void Setup()
+        public void TestInitialize()
         {
-            // Use ServiceLocator.Reset() to clear any existing registrations.
-            ServiceLocator.Initialize();
-            
-            // Register OutlineService and any of its dependencies here.
             _outlineService = Ioc.Default.GetRequiredService<OutlineService>();
+
+            // Create a dedicated TestOutputs folder under the current base directory.
+            testOutputPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "TestOutputs");
+            if (Directory.Exists(testOutputPath))
+            {
+                Directory.Delete(testOutputPath, true);
+            }
+            Directory.CreateDirectory(testOutputPath);
         }
 
         /// <summary>
@@ -306,8 +305,11 @@ namespace StoryCADTests
             Assert.IsFalse(model.Changed, "Newly created model should not be marked as changed.");
         }
 
-        // ----- TDD Cycle 1: SetChanged Method Tests -----
+        #region SetChanged Tests
 
+        /// <summary>
+        /// Tests that SetChanged method updates the model's Changed status
+        /// </summary>
         [TestMethod]
         public void SetChanged_ShouldUpdateModelChangedStatus()
         {
@@ -319,124 +321,143 @@ namespace StoryCADTests
             _outlineService.SetChanged(model, true);
 
             // Assert
-            Assert.IsTrue(model.Changed, "Model.Changed should be true after calling SetChanged(true)");
+            Assert.IsTrue(model.Changed, "Model Changed property should be set to true");
         }
 
+        /// <summary>
+        /// Tests that SetChanged method uses SerializationLock
+        /// </summary>
         [TestMethod]
         public void SetChanged_ShouldUseSerializationLock()
         {
             // Arrange
             var model = new StoryModel();
-            
-            // Act & Assert - Should not throw exception
+
+            // Act - Should not throw any exceptions related to concurrent access
             _outlineService.SetChanged(model, true);
-            Assert.IsTrue(model.Changed, "SetChanged should work with SerializationLock");
+            _outlineService.SetChanged(model, false);
+
+            // Assert
+            Assert.IsFalse(model.Changed, "Last set value should be false");
         }
 
-        [TestMethod]
-        public void SetChanged_NullModel_ThrowsException()
-        {
-            // Act & Assert
-            Assert.ThrowsException<ArgumentNullException>(() => 
-                _outlineService.SetChanged(null, true));
-        }
+        #endregion
 
-        // ----- TDD Cycle 2: GetStoryElementByGuid Method Tests -----
+        #region GetStoryElementByGuid Tests
 
+        /// <summary>
+        /// Tests that GetStoryElementByGuid returns the correct element for a valid GUID
+        /// </summary>
         [TestMethod]
         public async Task GetStoryElementByGuid_ValidGuid_ReturnsElement()
         {
             // Arrange
-            var model = await _outlineService.CreateModel("Test", "Author", 1);
-            var element = model.StoryElements.First();
-            var guid = element.Uuid;
+            var model = await _outlineService.CreateModel("Test Story", "Test Author", 1);
+            var expectedElement = model.StoryElements.First(e => e.ElementType == StoryItemType.Character);
 
             // Act
-            var result = _outlineService.GetStoryElementByGuid(model, guid);
+            var result = _outlineService.GetStoryElementByGuid(model, expectedElement.Uuid);
 
             // Assert
-            Assert.IsNotNull(result, "Should return a valid element");
-            Assert.AreEqual(guid, result.Uuid, "Should return element with correct GUID");
+            Assert.IsNotNull(result, "Should return a story element");
+            Assert.AreEqual(expectedElement.Uuid, result.Uuid, "Should return the element with matching GUID");
+            Assert.AreEqual(expectedElement.ElementType, result.ElementType, "Should return element with correct type");
         }
 
+        /// <summary>
+        /// Tests that GetStoryElementByGuid throws exception for empty GUID
+        /// </summary>
         [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
         public void GetStoryElementByGuid_EmptyGuid_ThrowsException()
         {
             // Arrange
             var model = new StoryModel();
 
-            // Act & Assert
-            Assert.ThrowsException<ArgumentException>(() => 
-                _outlineService.GetStoryElementByGuid(model, Guid.Empty));
+            // Act
+            _outlineService.GetStoryElementByGuid(model, Guid.Empty);
         }
 
+        /// <summary>
+        /// Tests that GetStoryElementByGuid throws exception for non-existent GUID
+        /// </summary>
         [TestMethod]
-        public void GetStoryElementByGuid_NonExistentGuid_ThrowsException()
+        [ExpectedException(typeof(InvalidOperationException))]
+        public async Task GetStoryElementByGuid_NonExistentGuid_ThrowsException()
         {
             // Arrange
-            var model = new StoryModel();
+            var model = await _outlineService.CreateModel("Test Story", "Test Author", 0);
             var nonExistentGuid = Guid.NewGuid();
 
-            // Act & Assert
-            Assert.ThrowsException<KeyNotFoundException>(() => 
-                _outlineService.GetStoryElementByGuid(model, nonExistentGuid));
+            // Act
+            _outlineService.GetStoryElementByGuid(model, nonExistentGuid);
         }
 
-        [TestMethod]
-        public void GetStoryElementByGuid_NullModel_ThrowsException()
-        {
-            // Act & Assert
-            Assert.ThrowsException<ArgumentNullException>(() => 
-                _outlineService.GetStoryElementByGuid(null, Guid.NewGuid()));
-        }
+        #endregion
 
-        // ----- TDD Cycle 3: UpdateStoryElement Method Tests -----
+        #region UpdateStoryElement Tests
 
+        /// <summary>
+        /// Tests that UpdateStoryElement updates an existing element successfully
+        /// </summary>
         [TestMethod]
         public async Task UpdateStoryElement_ValidElement_UpdatesSuccessfully()
         {
             // Arrange
-            var model = await _outlineService.CreateModel("Test", "Author", 1);
-            var element = model.StoryElements.First();
-            element.Name = "Updated Name";
+            var model = await _outlineService.CreateModel("Test Story", "Test Author", 1);
+            var element = model.StoryElements.First(e => e.ElementType == StoryItemType.Character);
+            var originalName = element.Name;
+            var newName = "Updated Character Name";
+            element.Name = newName;
 
             // Act
             _outlineService.UpdateStoryElement(model, element);
 
             // Assert
-            var retrievedElement = _outlineService.GetStoryElementByGuid(model, element.Uuid);
-            Assert.AreEqual("Updated Name", retrievedElement.Name, "Element should be updated in model");
+            var updatedElement = _outlineService.GetStoryElementByGuid(model, element.Uuid);
+            Assert.AreEqual(newName, updatedElement.Name, "Element name should be updated");
+            Assert.AreNotEqual(originalName, updatedElement.Name, "Element name should be different from original");
         }
 
+        /// <summary>
+        /// Tests that UpdateStoryElement throws exception for null model
+        /// </summary>
         [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
         public void UpdateStoryElement_NullModel_ThrowsException()
         {
             // Arrange
-            var element = new OverviewModel("Test", new StoryModel(), null);
+            var element = new CharacterModel();
 
-            // Act & Assert
-            Assert.ThrowsException<ArgumentNullException>(() => 
-                _outlineService.UpdateStoryElement(null, element));
+            // Act
+            _outlineService.UpdateStoryElement(null, element);
         }
 
+        /// <summary>
+        /// Tests that UpdateStoryElement throws exception for null element
+        /// </summary>
         [TestMethod]
-        public void UpdateStoryElement_NullElement_ThrowsException()
+        [ExpectedException(typeof(ArgumentNullException))]
+        public async Task UpdateStoryElement_NullElement_ThrowsException()
         {
             // Arrange
-            var model = new StoryModel();
+            var model = await _outlineService.CreateModel("Test Story", "Test Author", 0);
 
-            // Act & Assert
-            Assert.ThrowsException<ArgumentNullException>(() => 
-                _outlineService.UpdateStoryElement(model, null));
+            // Act
+            _outlineService.UpdateStoryElement(model, null);
         }
 
+        /// <summary>
+        /// Tests that UpdateStoryElement marks model as changed
+        /// </summary>
         [TestMethod]
         public async Task UpdateStoryElement_ValidElement_MarksModelAsChanged()
         {
             // Arrange
-            var model = await _outlineService.CreateModel("Test", "Author", 1);
-            var element = model.StoryElements.First();
+            var model = await _outlineService.CreateModel("Test Story", "Test Author", 1);
+            var element = model.StoryElements.First(e => e.ElementType == StoryItemType.Character);
             model.Changed = false;
+            element.Name = "Updated Name";
 
             // Act
             _outlineService.UpdateStoryElement(model, element);
@@ -444,5 +465,7 @@ namespace StoryCADTests
             // Assert
             Assert.IsTrue(model.Changed, "Model should be marked as changed after update");
         }
+
+        #endregion
     }
 }

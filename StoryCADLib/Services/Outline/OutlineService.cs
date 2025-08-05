@@ -826,4 +826,86 @@ public Task<StoryModel> CreateModel(string name, string author, int selectedTemp
 
         return model;
     }
+
+    /// <summary>
+    /// Sets the Changed status of a StoryModel with proper SerializationLock handling
+    /// </summary>
+    /// <param name="model">The StoryModel to update</param>
+    /// <param name="changed">The desired Changed status</param>
+    /// <exception cref="ArgumentNullException">Thrown when model is null</exception>
+    public void SetChanged(StoryModel model, bool changed)
+    {
+        if (model == null)
+            throw new ArgumentNullException(nameof(model));
+
+        var autoSaveService = Ioc.Default.GetRequiredService<AutoSaveService>();
+        var backupService = Ioc.Default.GetRequiredService<BackupService>();
+        
+        using (var serializationLock = new SerializationLock(autoSaveService, backupService, _log))
+        {
+            model.Changed = changed;
+            _log.Log(LogLevel.Info, $"Model Changed status set to {changed}");
+        }
+    }
+
+    /// <summary>
+    /// Gets a StoryElement by its GUID from the StoryModel
+    /// </summary>
+    /// <param name="model">The StoryModel to search in</param>
+    /// <param name="guid">The GUID of the element to find</param>
+    /// <returns>The StoryElement with the matching GUID</returns>
+    /// <exception cref="ArgumentNullException">Thrown when model is null</exception>
+    /// <exception cref="ArgumentException">Thrown when guid is empty</exception>
+    /// <exception cref="InvalidOperationException">Thrown when element with guid is not found</exception>
+    public StoryElement GetStoryElementByGuid(StoryModel model, Guid guid)
+    {
+        if (model == null)
+            throw new ArgumentNullException(nameof(model));
+            
+        if (guid == Guid.Empty)
+            throw new ArgumentException("GUID cannot be empty", nameof(guid));
+
+        var autoSaveService = Ioc.Default.GetRequiredService<AutoSaveService>();
+        var backupService = Ioc.Default.GetRequiredService<BackupService>();
+        
+        using (var serializationLock = new SerializationLock(autoSaveService, backupService, _log))
+        {
+            if (!model.StoryElements.StoryElementGuids.TryGetValue(guid, out var element))
+            {
+                throw new InvalidOperationException($"StoryElement with GUID {guid} not found");
+            }
+            
+            _log.Log(LogLevel.Info, $"Retrieved StoryElement {element.Name} with GUID {guid}");
+            return element;
+        }
+    }
+
+    /// <summary>
+    /// Updates a StoryElement in the StoryModel with proper SerializationLock handling
+    /// </summary>
+    /// <param name="model">The StoryModel containing the element</param>
+    /// <param name="element">The StoryElement to update</param>
+    /// <exception cref="ArgumentNullException">Thrown when model or element is null</exception>
+    public void UpdateStoryElement(StoryModel model, StoryElement element)
+    {
+        if (model == null)
+            throw new ArgumentNullException(nameof(model));
+            
+        if (element == null)
+            throw new ArgumentNullException(nameof(element));
+
+        var autoSaveService = Ioc.Default.GetRequiredService<AutoSaveService>();
+        var backupService = Ioc.Default.GetRequiredService<BackupService>();
+        
+        using (var serializationLock = new SerializationLock(autoSaveService, backupService, _log))
+        {
+            // Update the element in the dictionary
+            model.StoryElements.StoryElementGuids[element.Uuid] = element;
+            
+            // Mark the model as changed
+            SetChanged(model, true);
+            
+            _log.Log(LogLevel.Info, $"Updated StoryElement {element.Name} with GUID {element.Uuid}");
+        }
+    }
 }
