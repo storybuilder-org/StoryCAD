@@ -118,10 +118,9 @@ EOF
 gh issue edit 1067 --repo storybuilder-org/StoryCAD --body-file issue-update.md
 ```
 
-<<<<<<< Updated upstream
 ### Design Documentation
 When creating pull requests, include any design documentation directly in the PR description or comments rather than creating separate design files in the repository. This keeps the repository focused on code while maintaining important design context with the relevant changes.
-=======
+
 ### Story Node Management
 - **StoryNodeItem**: Base class for all story elements with common properties
 - **Parent/Child Relationships**: Maintained through Parent property and Children collections
@@ -185,4 +184,3 @@ git commit -m "message"
 - **No Cloud Sync**: Data remains on user's device unless explicitly exported
 - **Open Source**: GNU GPL v3 license ensures transparency
 - **Optional Telemetry**: Error reporting requires user consent and API configuration
->>>>>>> Stashed changes
