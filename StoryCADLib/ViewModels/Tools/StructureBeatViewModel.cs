@@ -80,8 +80,16 @@ public class StructureBeatViewModel : ObservableObject
         {
             if (guid != Guid.Empty)
             {
-                return Ioc.Default.GetRequiredService<OutlineViewModel>()
-                    .StoryModel.StoryElements.StoryElementGuids[guid];
+                var outlineViewModel = Ioc.Default.GetRequiredService<OutlineViewModel>();
+                var outlineService = Ioc.Default.GetRequiredService<OutlineService>();
+                try
+                {
+                    return outlineService.GetStoryElementByGuid(outlineViewModel.StoryModel, guid);
+                }
+                catch (InvalidOperationException)
+                {
+                    return new StoryElement();
+                }
             }
 
             return new StoryElement();

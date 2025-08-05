@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using NRtfTree.Util;
 using System.Reflection;
+using StoryCAD.Services.Outline;
 using StoryCAD.ViewModels.SubViewModels;
 using StoryCAD.ViewModels.Tools;
 
@@ -24,7 +25,8 @@ public class ReportFormatter
         string premise = string.Empty;
         if (overview.StoryProblem != Guid.Empty)
         {
-            ProblemModel problem = (ProblemModel)_model.StoryElements.StoryElementGuids[overview.StoryProblem];
+            var outlineService = Ioc.Default.GetRequiredService<OutlineService>();
+            ProblemModel problem = (ProblemModel)outlineService.GetStoryElementByGuid(_model, overview.StoryProblem);
             problemName = problem.Name;
             premise = problem.Premise;
         }
@@ -760,7 +762,8 @@ public class ReportFormatter
                 // Find StoryNarrator' Scenes
                 foreach (StoryNodeItem child in _model.NarratorView[0].Children)
                 {
-                    StoryElement scn = _model.StoryElements.StoryElementGuids[child.Uuid];
+                    var outlineService = Ioc.Default.GetRequiredService<OutlineService>();
+                    StoryElement scn = outlineService.GetStoryElementByGuid(_model, child.Uuid);
                     if (scn.ElementType != StoryItemType.Scene)
                         continue;
                     SceneModel scene = (SceneModel)scn;

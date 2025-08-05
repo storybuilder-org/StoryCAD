@@ -1195,7 +1195,7 @@ public class OutlineViewModel : ObservableRecipient
             return;
         }
 
-        SceneModel _sceneVar = (SceneModel)StoryModel.StoryElements.StoryElementGuids[shellVm.RightTappedNode.Uuid];
+        SceneModel _sceneVar = (SceneModel)outlineService.GetStoryElementByGuid(StoryModel, shellVm.RightTappedNode.Uuid);
         _ = new StoryNodeItem(_sceneVar, StoryModel.NarratorView[0]);
         ShellViewModel.ShowChange();
         Messenger.Send(new StatusChangedMessage(new(
@@ -1291,7 +1291,7 @@ public class OutlineViewModel : ObservableRecipient
             return;
         }
 
-        ProblemModel problem = (ProblemModel)StoryModel.StoryElements.StoryElementGuids[shellVm.RightTappedNode.Uuid];
+        ProblemModel problem = (ProblemModel)outlineService.GetStoryElementByGuid(StoryModel, shellVm.RightTappedNode.Uuid);
         SceneModel scene = outlineService.ConvertProblemToScene(StoryModel, problem);
         shellVm.TreeViewNodeClicked(scene.Node, false);
         Messenger.Send(new StatusChangedMessage(new("Converted Problem to Scene", LogLevel.Info, true)));
@@ -1314,7 +1314,7 @@ public class OutlineViewModel : ObservableRecipient
             return;
         }
 
-        SceneModel scene = (SceneModel)StoryModel.StoryElements.StoryElementGuids[shellVm.RightTappedNode.Uuid];
+        SceneModel scene = (SceneModel)outlineService.GetStoryElementByGuid(StoryModel, shellVm.RightTappedNode.Uuid);
         ProblemModel problem = outlineService.ConvertSceneToProblem(StoryModel, scene);
         shellVm.TreeViewNodeClicked(problem.Node, false);
         Messenger.Send(new StatusChangedMessage(new("Converted Scene to Problem", LogLevel.Info, true)));

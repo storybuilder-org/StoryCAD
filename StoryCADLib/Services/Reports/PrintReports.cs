@@ -1,6 +1,7 @@
 ﻿using System.Drawing;
 using System.Drawing.Printing;
 using System.Text;
+using StoryCAD.Services.Outline;
 using StoryCAD.ViewModels.Tools;
 
 namespace StoryCAD.Services.Reports;
@@ -73,8 +74,15 @@ public class PrintReports
         foreach (StoryNodeItem node in _vm.SelectedNodes)
         {
             StoryElement element = null;
-            if (_model.StoryElements.StoryElementGuids.ContainsKey(node.Uuid))
-                element = _model.StoryElements.StoryElementGuids[node.Uuid];
+            var outlineService = Ioc.Default.GetRequiredService<OutlineService>();
+            try
+            {
+                element = outlineService.GetStoryElementByGuid(_model, node.Uuid);
+            }
+            catch (InvalidOperationException)
+            {
+                // Element not found, element remains null
+            }
             if (element != null)
             {
                 switch (node.Type)

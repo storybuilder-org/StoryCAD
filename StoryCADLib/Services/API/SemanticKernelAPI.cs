@@ -166,7 +166,7 @@ public class SemanticKernelApi
         StoryElement updated = StoryElement.Deserialize(newElement.ToString());
         //TODO: force set uuid somehow.
         updated.Uuid = guid;
-        CurrentModel.StoryElements.StoryElementGuids[guid] = updated;
+        _outlineService.UpdateStoryElement(CurrentModel, updated);
     }
 
     /// <summary>

@@ -402,7 +402,8 @@ public class ShellViewModel : ObservableRecipient
             if (selectedItem is StoryNodeItem node)
             {
                 CurrentNode = node;
-                StoryElement element = OutlineManager.StoryModel.StoryElements.StoryElementGuids[node.Uuid];
+                OutlineService outlineService = Ioc.Default.GetRequiredService<OutlineService>();
+                StoryElement element = outlineService.GetStoryElementByGuid(OutlineManager.StoryModel, node.Uuid);
                 switch (element.ElementType)
                 {
                     case StoryItemType.Character:
@@ -595,7 +596,8 @@ public class ShellViewModel : ObservableRecipient
             //TODO: Logging???
             
             var id = CurrentNode.Uuid; // get the story element;
-            CollabArgs.SelectedElement = OutlineManager.StoryModel.StoryElements.StoryElementGuids[id];
+            OutlineService outlineService = Ioc.Default.GetRequiredService<OutlineService>();
+            CollabArgs.SelectedElement = outlineService.GetStoryElementByGuid(OutlineManager.StoryModel, id);
             CollabArgs.StoryModel = OutlineManager.StoryModel;
             Ioc.Default.GetService<CollaboratorService>()!.LoadWorkflows(CollabArgs);
             Ioc.Default.GetService<CollaboratorService>()!.CollaboratorWindow.Show();
