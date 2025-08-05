@@ -118,5 +118,71 @@ EOF
 gh issue edit 1067 --repo storybuilder-org/StoryCAD --body-file issue-update.md
 ```
 
+<<<<<<< Updated upstream
 ### Design Documentation
 When creating pull requests, include any design documentation directly in the PR description or comments rather than creating separate design files in the repository. This keeps the repository focused on code while maintaining important design context with the relevant changes.
+=======
+### Story Node Management
+- **StoryNodeItem**: Base class for all story elements with common properties
+- **Parent/Child Relationships**: Maintained through Parent property and Children collections
+- **Validation**: Drag-and-drop operations validated through business rules
+- **Persistence**: Auto-save functionality with configurable intervals
+
+### UI State Management
+- **Selection State**: Managed through ShellViewModel with last-clicked tracking
+- **Expansion State**: TreeView expansion state persisted per node
+- **Background Colors**: Dynamic styling based on selection and validation state
+- **Context Menus**: Element-specific commands based on node type and position
+
+### Data Binding Patterns
+- **TwoWay Binding**: Used for editable content with immediate updates
+- **OneWay Binding**: Used for read-only display properties
+- **Command Binding**: MVVM commands for user actions
+- **Collection Binding**: ObservableCollection for dynamic list updates
+
+## Pre-Approved Commands
+
+The following commands are pre-approved for automated execution without user confirmation prompts:
+
+### Build Commands
+```bash
+# Visual Studio MSBuild (WSL path)
+"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/MSBuild.exe" StoryCAD.sln -t:Build -p:Configuration=Debug -p:Platform=x64
+"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/MSBuild.exe" StoryCAD.sln -t:Build -p:Configuration=Release -p:Platform=x64
+
+# Standard MSBuild
+msbuild StoryCAD.sln /t:Build /p:Configuration=Debug /p:Platform=x64
+msbuild StoryCAD.sln /t:Build /p:Configuration=Release /p:Platform=x64
+```
+
+### Test Commands
+```bash
+# Visual Studio Test Console (WSL path) - All wildcarded patterns
+"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net8.0-windows10.0.19041.0/StoryCADTests.dll"
+"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net8.0-windows10.0.19041.0/StoryCADTests.dll" --Tests:*
+"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net8.0-windows10.0.19041.0/StoryCADTests.dll" --Tests:*.*
+"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net8.0-windows10.0.19041.0/StoryCADTests.dll" --Tests:*,*
+"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net8.0-windows10.0.19041.0/StoryCADTests.dll" --Tests:*,*,*,*
+
+# Standard test commands
+dotnet test StoryCADTests/StoryCADTests.csproj --configuration Debug
+vstest.console.exe "StoryCADTests/bin/x64/Debug/net8.0-windows10.0.19041.0/StoryCADTests.dll"
+```
+
+### Git Commands
+```bash
+# Standard Git operations
+git status
+git diff
+git log --oneline -10
+git add .
+git commit -m "message"
+```
+
+## Security and Privacy
+
+- **Local Storage**: All data stored locally under user control
+- **No Cloud Sync**: Data remains on user's device unless explicitly exported
+- **Open Source**: GNU GPL v3 license ensures transparency
+- **Optional Telemetry**: Error reporting requires user consent and API configuration
+>>>>>>> Stashed changes
