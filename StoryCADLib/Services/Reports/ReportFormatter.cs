@@ -710,12 +710,14 @@ public class ReportFormatter
 
     public string FormatListReport(StoryItemType elementType)
     {
+        //Get element (override web for websites.)
+        string name = elementType == StoryItemType.Web ? "Websites" : elementType + "s";
+
         string[] lines = [
-        "                        StoryCAD - List of Websites",
+        $"                        StoryCAD - List of {name}",
         "",
         "                        @Description"];
         RtfDocument doc = new(string.Empty);
-        doc.AddText($"StoryCAD - List of {elementType}s");
 
         // Parse and write the report
         foreach (string line in lines)
