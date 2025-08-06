@@ -490,6 +490,9 @@ public class OutlineViewModel : ObservableRecipient
         Messenger.Send(new StatusChangedMessage(new("Closing project", LogLevel.Info, true)));
         using (var serializationLock = new SerializationLock(autoSaveService, backupService, logger))
         {
+            // Save any pending changes in the current view before closing
+            shellVm.SaveModel();
+            
             if (StoryModel.Changed && Ioc.Default.GetRequiredService<AppState>().Headless)
             {
                 ContentDialog warning = new()
@@ -500,7 +503,6 @@ public class OutlineViewModel : ObservableRecipient
                 };
                 if (await window.ShowContentDialog(warning) == ContentDialogResult.Primary)
                 {
-                    shellVm.SaveModel();
                     await outlineService.WriteModel(StoryModel, StoryModelFile);
                 }
             }
@@ -510,9 +512,10 @@ public class OutlineViewModel : ObservableRecipient
             shellVm.RightTappedNode = null; //Null right tapped node to prevent possible issues.
             window.UpdateWindowTitle();
             Ioc.Default.GetRequiredService<BackupService>().StopTimedBackup();
-            shellVm.ShowHomePage();
         }
         
+        // ShowHomePage is moved outside the serialization lock to avoid nested lock attempts
+        shellVm.ShowHomePage();
         Messenger.Send(new StatusChangedMessage(new("Close story command completed", LogLevel.Info, true)));
     }
 
