@@ -14,10 +14,11 @@ public class ReportFormatter
 
     #region Public methods
 
-    public string FormatStoryOverviewReport(StoryElement element)
+    public string FormatStoryOverviewReport()
     {
-        OverviewModel overview = (OverviewModel)element;
-        string[] lines = _templates["Story Overview"];  
+        OverviewModel overview = (OverviewModel)_model.StoryElements.
+            FirstOrDefault(element => element.ElementType == StoryItemType.StoryOverview);
+        string[] lines = _templates["Story Overview"]; 
         RtfDocument doc = new(string.Empty);
 
         string vpName = StoryElement.GetByGuid(overview.ViewpointCharacter).Name;
@@ -59,35 +60,6 @@ public class ReportFormatter
             sb.Replace("@Notes", GetText(overview.Notes));
             doc.AddText(sb.ToString());
             doc.AddNewLine();
-        }
-        return doc.GetRtf();
-    }
-
-    public string FormatProblemListReport()
-    {
-        string[] lines = _templates["List of Problems"];
-        RtfDocument doc = new(string.Empty);
-
-        // Parse and write the report
-        foreach (string line in lines)
-        {
-            if (line.Contains("@Description"))
-            {
-                foreach (StoryElement element in _model.StoryElements)
-                    if (element.ElementType == StoryItemType.Problem)
-                    {
-                        ProblemModel chr = (ProblemModel)element;
-                        StringBuilder sb = new(line);
-                        sb.Replace("@Description", chr.Name);
-                        doc.AddText(sb.ToString());
-                        doc.AddNewLine();
-                    }
-            }
-            else
-            {
-                doc.AddText(line);
-                doc.AddNewLine();
-            }
         }
         return doc.GetRtf();
     }
@@ -282,7 +254,6 @@ public class ReportFormatter
             }
         }
     }
-
 	private string FormatStructureBeatsElements(ProblemModel problem)
     {
 	    StringBuilder beats = new();
@@ -341,35 +312,6 @@ public class ReportFormatter
             doc.AddNewLine();
         }
 
-        return doc.GetRtf();
-    }
-
-    public string FormatCharacterListReport()
-    {
-        string[] lines = _templates["List of Characters"];
-        RtfDocument doc = new(string.Empty);
-
-        // Parse and write the report
-        foreach (string line in lines)
-        {
-            if (line.Contains("@Description"))
-            {
-                foreach (StoryElement element in _model.StoryElements)
-                    if (element.ElementType == StoryItemType.Character)
-                    {
-                        CharacterModel chr = (CharacterModel)element;
-                        StringBuilder sb = new(line);
-                        sb.Replace("@Description", chr.Name);
-                        doc.AddText(sb.ToString());
-                        doc.AddNewLine();
-                    }
-            }
-            else
-            {
-                doc.AddText(line);
-                doc.AddNewLine();
-            }
-        }
         return doc.GetRtf();
     }
 
@@ -457,35 +399,6 @@ public class ReportFormatter
         return doc.GetRtf();
     }
 
-    public string FormatSettingListReport()
-    {
-        string[] lines = _templates["List of Settings"];
-        RtfDocument doc = new(string.Empty);
-
-        // Parse and write the report
-        foreach (string line in lines)
-        {
-            if (line.Contains("@Description"))
-            {
-                foreach (StoryElement element in _model.StoryElements)
-                    if (element.ElementType == StoryItemType.Setting)
-                    {
-                        SettingModel setting = (SettingModel)element;
-                        StringBuilder sb = new(line);
-                        sb.Replace("@Description", setting.Name);
-                        doc.AddText(sb.ToString());
-                        doc.AddNewLine();
-                    }
-            }
-            else
-            {
-                doc.AddText(line);
-                doc.AddNewLine();
-            }
-        }
-        return doc.GetRtf();
-    }
-
     public string FormatSettingReport(StoryElement element)
     {
         SettingModel setting = (SettingModel)element;
@@ -514,35 +427,6 @@ public class ReportFormatter
             doc.AddNewLine();
         }
         return doc.GetRtf();
-    }
-
-    public string FormatSceneListReport()
-    {
-        string[] lines = _templates["List of Scenes"];
-        RtfDocument doc = new(string.Empty);
-
-        // Parse and write the report
-        foreach (string line in lines)
-        {
-            if (line.Contains("@Description"))
-            {
-                foreach (StoryElement element in _model.StoryElements)
-                    if (element.ElementType == StoryItemType.Scene)
-                    {
-                        SceneModel scene = (SceneModel)element;
-                        StringBuilder sb = new(line);
-                        sb.Replace("@Description", scene.Name);
-                        doc.AddText(sb.ToString());
-                        doc.AddNewLine();
-                    }
-            }
-            else
-            {
-                doc.AddText(line);
-                doc.AddNewLine();
-            }
-        }
-        return doc.GetRtf(); 
     }
 
     public string FormatSceneReport(StoryElement element)
@@ -676,38 +560,6 @@ public class ReportFormatter
         doc.AddImage(imgfile.Path, 1920, 1080);
         */
 
-    }
-
-    public string FormatWebListReport()
-    {
-        string[] lines = _templates["List of Websites"];
-        RtfDocument doc = new(string.Empty);
-
-        // Parse and write the report
-        foreach (string line in lines)
-        {
-            if (line.Contains("@Description"))
-            {
-                foreach (StoryElement element in _model.StoryElements)
-                {
-                    if (element.ElementType == StoryItemType.Web)
-                    {
-                        WebModel scene = (WebModel)element;
-                        StringBuilder sb = new(line);
-                        sb.Replace("@Description", scene.Name);
-                        doc.AddText(sb.ToString());
-                        doc.AddNewLine();
-                    }
-                }
-
-            }
-            else
-            {
-                doc.AddText(line);
-                doc.AddNewLine();
-            }
-        }
-        return doc.GetRtf();
     }
 
     public string FormatFolderReport(StoryElement element)
@@ -858,4 +710,38 @@ public class ReportFormatter
     }
 
     #endregion
+
+    public string FormatListReport(StoryItemType elementType)
+    {
+        //Get element (override web for websites.)
+        string name = elementType == StoryItemType.Web ? "Websites" : elementType + "s";
+
+        string[] lines = [
+        $"                        StoryCAD - List of {name}",
+        "",
+        "                        @Description"];
+        RtfDocument doc = new(string.Empty);
+
+        // Parse and write the report
+        foreach (string line in lines)
+        {
+            if (line.Contains("@Description"))
+            {
+                var elements = _model.StoryElements.Where(e => e.ElementType == elementType);
+                foreach (StoryElement element in elements)
+                {
+                    StringBuilder sb = new(line);
+                    sb.Replace("@Description", element.Name);
+                    doc.AddText(sb.ToString());
+                    doc.AddNewLine();
+                }
+            }
+            else
+            {
+                doc.AddText(line);
+                doc.AddNewLine();
+            }
+        }
+        return doc.GetRtf();
+    }
 }

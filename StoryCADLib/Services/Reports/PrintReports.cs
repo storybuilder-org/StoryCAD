@@ -1,3 +1,4 @@
+﻿using System.Text;
 ﻿using System.Drawing;
 using System.Drawing.Printing;
 using System.Text;
@@ -11,21 +12,18 @@ public class PrintReports
     private PrintReportDialogVM _vm;
     private StoryModel _model;
     private ReportFormatter _formatter;
-    private StringReader _fileStream; 
-    private Font _printFont;
     private string _documentText;
-    PrintDocument PrintDoc = new();
+    private LogService logger = Ioc.Default.GetRequiredService<LogService>();
 
     public async Task<string> Generate()
     {
-
         string rtf = string.Empty;
         await _formatter.LoadReportTemplates(); // Load text report templates
 
         //Process single selection (non-Pivot) reports
         if (_vm.CreateOverview)
         {
-            rtf = _formatter.FormatStoryOverviewReport(Overview());
+            rtf = _formatter.FormatStoryOverviewReport();
             _documentText += FormatText(rtf);
         }
         if (_vm.CreateSummary)
@@ -42,32 +40,27 @@ public class PrintReports
 
 		if (_vm.ProblemList)
         {
-            rtf = _formatter.FormatProblemListReport();
+            rtf = _formatter.FormatListReport(StoryItemType.Problem);
             _documentText += FormatText(rtf);
         }
         if (_vm.CharacterList)
         {
-            rtf = _formatter.FormatCharacterListReport();
+            rtf = _formatter.FormatListReport(StoryItemType.Character);
             _documentText += FormatText(rtf);
         }
         if (_vm.SettingList)
         {
-            rtf = _formatter.FormatSettingListReport();
+            rtf = _formatter.FormatListReport(StoryItemType.Setting);
             _documentText += FormatText(rtf);
         }
         if (_vm.SceneList)
         {
-            rtf = _formatter.FormatSceneListReport();
-            _documentText += FormatText(rtf);
-        }
-        if (_vm.SceneList)
-        {
-            rtf = _formatter.FormatSceneListReport();
+            rtf = _formatter.FormatListReport(StoryItemType.Scene);
             _documentText += FormatText(rtf);
         }
         if (_vm.WebList)
         {
-            rtf = _formatter.FormatWebListReport();
+            rtf = _formatter.FormatListReport(StoryItemType.Web);
             _documentText += FormatText(rtf);
         }
 
@@ -109,62 +102,10 @@ public class PrintReports
 
         if (string.IsNullOrEmpty(_documentText))
         {
-            Ioc.Default.GetRequiredService<LogService>().Log(LogLevel.Warn, "No nodes selected for report generation");
+            logger.Log(LogLevel.Warn, "No nodes selected for report generation");
             return "";
         }
         return _documentText;
-    }
-
-    private StoryElement Overview()
-    {
-        return _model.StoryElements.FirstOrDefault(element => element.ElementType == StoryItemType.StoryOverview);
-    }
-
-    public void Print(string file)
-    {
-        try
-        {
-            _fileStream = new StringReader(file);
-            _printFont = new Font("Arial", 12, FontStyle.Regular, GraphicsUnit.Pixel);
-            PrintDoc.PrintPage += pd_PrintPage;
-            Margins margins = new(100, 100, 100, 100);
-            PrintDoc.DefaultPageSettings.Margins = margins;
-            // Print the document.
-            PrintDoc.Print();
-        }
-        catch (Exception ex)
-        {
-            Ioc.Default.GetService<LogService>().LogException(LogLevel.Error, ex, "Error in Print reports.");
-        }
-    }   
-
-    // The PrintPage event is raised for each page to be printed.
-    private void pd_PrintPage(object sender, PrintPageEventArgs ev)
-    {
-        int count = 0;
-        float leftMargin = ev.MarginBounds.Left;
-        float topMargin = ev.MarginBounds.Top;
-        string line = null;
-
-        // Calculate the number of lines per page.
-        float linesPerPage = ev.MarginBounds.Height / _printFont.GetHeight(ev.Graphics);
-
-        // Iterate over the file, printing each line.
-        while (count < linesPerPage && (line = _fileStream.ReadLine()) != null)
-        {
-            if (line == @"\PageBreak")
-            {
-                ev.HasMorePages = true;
-                break;
-            }
-            float yPos = topMargin + count * _printFont.GetHeight(ev.Graphics);
-            ev.Graphics.DrawString(line, _printFont, Brushes.Black, leftMargin, yPos, new StringFormat());
-            count++;
-        }
-
-        // If more lines exist, print another page.
-        if (line != null) { ev.HasMorePages = true; }
-        else { ev.HasMorePages = false; }
     }
 
     /// <summary>
@@ -173,39 +114,61 @@ public class PrintReports
     /// </summary>
     /// <param name="rtfInput"></param>
     /// <param name="summaryMode"></param>
-    /// <returns></returns>
     private string FormatText(string rtfInput, bool summaryMode = false)
     {
+        const int MaxLineLength = 72;
+        
         string text = _formatter.GetText(rtfInput, false);
         string[] lines = text.Split('\n');
         StringBuilder sb = new();
 
-        //TODO: rewrite this for readability and maintainability
-        foreach (string t in lines)
+        foreach (string inputLine in lines)
         {
-            string line = t.TrimEnd();
+            string line = inputLine.TrimEnd();
             if (line.Equals("\r"))
                 continue;
-            while (line.Length > 72)
-            {
-                string temp = line[..72];
-                if (!temp.Contains(" ")) { temp += " "; } //wrapping fix
-                int j = temp.LastIndexOf(' ');
-                temp = temp[..j];
-                sb.Append(temp);
-                sb.Append(Environment.NewLine);
-                line = line[j..];
-                line = line.TrimStart();
-            }
-            sb.Append(line + Environment.NewLine);
+
+            WrapAndAppendLine(sb, line, MaxLineLength);
         }
+
         if (summaryMode)
         {
             sb.Replace("[", "\r\n[");
             sb.Replace("]", "]\r\n");
         }
+        
         sb.Append("\n\\PageBreak\n");
         return sb.ToString();
+    }
+
+    /// <summary>
+    /// Wraps a line to the specified maximum length and appends to StringBuilder
+    /// </summary>
+    /// <param name="sb">StringBuilder to append to</param>
+    /// <param name="line">Line to wrap</param>
+    /// <param name="maxLength">Maximum line length</param>
+    private void WrapAndAppendLine(StringBuilder sb, string line, int maxLength)
+    {
+        while (line.Length > maxLength)
+        {
+            string segment = line[..maxLength];
+            
+            // Ensure we have a space for wrapping
+            if (!segment.Contains(" "))
+            {
+                segment += " ";
+            }
+            
+            int lastSpaceIndex = segment.LastIndexOf(' ');
+            string wrappedPortion = segment[..lastSpaceIndex];
+            
+            sb.Append(wrappedPortion);
+            sb.Append(Environment.NewLine);
+            
+            line = line[lastSpaceIndex..].TrimStart();
+        }
+        
+        sb.Append(line + Environment.NewLine);
     }
 
     #region Constructor

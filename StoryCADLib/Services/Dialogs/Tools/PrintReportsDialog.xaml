@@ -7,8 +7,6 @@
     mc:Ignorable="d" Width="600">
 
     <StackPanel HorizontalAlignment="Center">
-        <InfoBar IsOpen="False" Name="OldW10Warning" Severity="Warning" 
-                 Message="You are using an outdated version of Windows 10, please upgrade to Windows 10 22H2 or Windows 11 for a better printing experience."/>
         <Grid HorizontalAlignment="Center" Margin="0,15">
 			<Grid.RowDefinitions>
 				<RowDefinition Height="Auto"/>

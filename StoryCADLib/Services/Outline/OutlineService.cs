@@ -287,7 +287,7 @@ public Task<StoryModel> CreateModel(string name, string author, int selectedTemp
             throw new ArgumentNullException(nameof(model));
         }
 
-        if (StoryNodeItem.RootNodeType(parent) == StoryItemType.TrashCan)
+            if (StoryNodeItem.RootNodeType(parent) == StoryItemType.TrashCan)
         {
             throw new InvalidOperationException("Cannot add a new node to the Trash Can.");
         }

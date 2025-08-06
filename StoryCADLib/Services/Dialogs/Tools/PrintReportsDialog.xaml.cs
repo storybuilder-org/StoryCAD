@@ -29,9 +29,6 @@ public sealed partial class PrintReportsDialog
         PrintVM.SceneList = false;
         PrintVM.WebList = false;
 
-        //Warn user if they are on win10 as print manager can't be used.
-        if (Environment.OSVersion.Version.Build <= 19045) { OldW10Warning.IsOpen = true; }
-
         //Gets all nodes that aren't deleted
         try
         {
@@ -47,10 +44,9 @@ public sealed partial class PrintReportsDialog
     }
 
     /// <summary>
-    /// You can't bind selected items so when the values change this function is ran which updates the values in the VM accordingly
+    /// You can't bind selected items so when the values change 
+    /// this function is ran which updates the values in the VM accordingly
     /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="e"></param>
     private void UpdateSelection(object sender, SelectionChangedEventArgs e)
     {
         PrintVM.SelectedNodes.Clear();
