@@ -513,7 +513,6 @@ public class OutlineViewModel : ObservableRecipient
             shellVm.ShowHomePage();
         }
         
-        outlineService.SetCurrentView(StoryModel, StoryViewType.ExplorerView);
         Messenger.Send(new StatusChangedMessage(new("Close story command completed", LogLevel.Info, true)));
     }
 
