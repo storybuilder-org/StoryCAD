@@ -1,6 +1,7 @@
 ﻿using ABI.Windows.Media.Audio;
 //using NLog;
 using StoryCAD.Services.Logging;
+using StoryCAD.Services.Outline;
 using StoryCAD.ViewModels.SubViewModels;
 
 //using LogLevel = StoryCAD.Services.Logging.LogLevel;
@@ -37,8 +38,15 @@ public class SearchService
         StoryElement element = null;
         ElementCollection = model.StoryElements;
 
-        if (model.StoryElements.StoryElementGuids.ContainsKey(node.Uuid)) { element = model.StoryElements.StoryElementGuids[node.Uuid]; }
-        if (element == null) { return false; }
+        OutlineService outlineService = Ioc.Default.GetRequiredService<OutlineService>();
+        try
+        {
+            element = outlineService.GetStoryElementByGuid(model, node.Uuid);
+        }
+        catch (InvalidOperationException)
+        {
+            return false;
+        }
         switch (element.ElementType)
         {
             case StoryItemType.StoryOverview:

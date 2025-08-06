@@ -164,7 +164,7 @@ public class PrintReportDialogVM : ObservableRecipient
         var logService = Ioc.Default.GetRequiredService<LogService>();
         using (var serializationLock = new SerializationLock(autoSaveService, backupService, logService))
         {
-            if (Ioc.Default.GetRequiredService<ShellViewModel>().DataSource == null)
+            if (Ioc.Default.GetRequiredService<ShellViewModel>().OutlineManager.StoryModel?.CurrentView == null)
             {
                 ShellVM.ShowMessage(LogLevel.Warn, "You need to load a Story first!", false);
                 return;

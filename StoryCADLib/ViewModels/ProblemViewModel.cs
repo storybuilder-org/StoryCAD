@@ -425,7 +425,8 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         Premise = Model.Premise;
         Notes = Model.Notes;
         Guid root = story_model.ExplorerView[0].Uuid;
-        _overviewModel = (OverviewModel)story_model.StoryElements.StoryElementGuids[root];
+        OutlineService outlineService = Ioc.Default.GetRequiredService<OutlineService>();
+        _overviewModel = (OverviewModel)outlineService.GetStoryElementByGuid(story_model, root);
         if (_overviewModel.StoryProblem != Guid.Empty)
             _syncPremise = true; 
         else

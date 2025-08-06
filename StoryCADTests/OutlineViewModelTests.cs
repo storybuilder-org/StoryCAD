@@ -48,6 +48,25 @@ namespace StoryCADTests
             Assert.IsTrue(outlineVM.StoryModel.StoryElements[0].Node.IsRoot &&
                           outlineVM.StoryModel.StoryElements[0].ElementType == StoryItemType.StoryOverview);
         }
+
+        /// <summary>
+        /// Test that deleting a node sets the StoryModel.Changed flag to true
+        /// </summary>
+        [TestMethod]
+        [Ignore] // TODO: Re-enable after architecture fix in issue #1068
+        public async Task DeleteNode_SetsChangedFlag()
+        {
+            // TODO: This test is currently disabled because it requires manipulating the Headless state,
+            // which affects other tests. The root cause is that the Changed flag is only set through
+            // ShellViewModel.ShowChange(), which doesn't work in Headless mode (used for tests and API).
+            // 
+            // After issue #1068 is implemented, OutlineService operations should set the Changed flag
+            // directly, making this test work properly in Headless mode without side effects.
+            // See: https://github.com/storybuilder-org/StoryCAD/issues/1068
+            
+            await Task.CompletedTask; // Placeholder to avoid compiler warning
+            Assert.Inconclusive("Test disabled pending architecture fix in issue #1068");
+        }
         
         /// <summary>
         /// Deletes a node, this should pass
@@ -70,7 +89,7 @@ namespace StoryCADTests
             outlineVM.RemoveStoryElement();
 
             //Assert Character was trashed.
-            Assert.IsTrue(outlineVM.StoryModel.StoryElements.Characters[1].Node.Parent == outlineVM.StoryModel.ExplorerView[1]);
+            Assert.IsTrue(outlineVM.StoryModel.StoryElements.Characters[1].Node.Parent == outlineVM.StoryModel.TrashView[0]);
         }
 
         /// <summary>
@@ -87,6 +106,57 @@ namespace StoryCADTests
             int before = outlineVM.StoryModel.StoryElements.Count;
             outlineVM.RemoveStoryElement();
             Assert.AreEqual(before, outlineVM.StoryModel.StoryElements.Count);
+        }
+
+        [TestMethod]
+        public async Task RestoreChildThenParent_DoesNotDuplicate()
+        {
+            var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+            outlineVM.StoryModel = await outlineService.CreateModel("RestoreTest", "StoryBuilder", 0);
+            outlineService.SetCurrentView(outlineVM.StoryModel, StoryViewType.ExplorerView);
+            var parent = outlineService.AddStoryElement(outlineVM.StoryModel, StoryItemType.Folder, outlineVM.StoryModel.ExplorerView[0]);
+            var child = outlineService.AddStoryElement(outlineVM.StoryModel, StoryItemType.Scene, parent.Node);
+
+            // Delete parent (child goes with it)
+            shell.RightTappedNode = parent.Node;
+            outlineVM.RemoveStoryElement();
+
+            // Try to restore child - should fail (not a top-level item in trash)
+            shell.RightTappedNode = child.Node;
+            outlineVM.RestoreStoryElement();
+
+            // Verify child is still in trash under parent
+            Assert.IsTrue(outlineVM.StoryModel.TrashView[0].Children.Any(n => n.Uuid == parent.Node.Uuid),
+                "Parent should still be in trash");
+            Assert.IsTrue(parent.Node.Children.Any(n => n.Uuid == child.Node.Uuid),
+                "Child should still be under parent in trash");
+
+            // Restore parent - child should come with it
+            shell.RightTappedNode = parent.Node;
+            outlineVM.RestoreStoryElement();
+
+            int CountNodes(StoryNodeItem n, Guid g)
+            {
+                int c = n.Uuid == g ? 1 : 0;
+                if (n.Children != null)
+                {
+                    foreach (var ch in n.Children)
+                        c += CountNodes(ch, g);
+                }
+                return c;
+            }
+
+            // Verify parent is restored to ExplorerView
+            int parentCount = CountNodes(outlineVM.StoryModel.ExplorerView[0], parent.Node.Uuid);
+            Assert.AreEqual(1, parentCount, "Parent should be restored exactly once");
+            
+            // Verify child came with parent
+            int childCount = CountNodes(outlineVM.StoryModel.ExplorerView[0], child.Node.Uuid);
+            Assert.AreEqual(1, childCount, "Child should be restored with parent exactly once");
+            
+            // Verify trash is now empty (except for TrashCan root)
+            Assert.AreEqual(0, outlineVM.StoryModel.TrashView[0].Children.Count,
+                "Trash should be empty after restore");
         }
 
         // Test for UnifiedNewFile method
@@ -155,6 +225,23 @@ namespace StoryCADTests
             Assert.IsTrue(outlineVM.StoryModel.StoryElements.Count == 0, "Story not closed.");
         }
 
+        [TestMethod]
+        public async Task MoveRootCommands_DoNotThrow()
+        {
+            var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+            outlineVM.StoryModel = await outlineService.CreateModel("MoveRoot", "StoryBuilder", 0);
+            outlineService.SetCurrentView(outlineVM.StoryModel, StoryViewType.ExplorerView);
+            shell.CurrentNode = outlineVM.StoryModel.StoryElements[0].Node;
+            shell.RightTappedNode = shell.CurrentNode;
+
+            shell.MoveLeftCommand.Execute(null);
+            shell.MoveRightCommand.Execute(null);
+            shell.MoveUpCommand.Execute(null);
+            shell.MoveDownCommand.Execute(null);
+
+            Assert.IsTrue(shell.CurrentNode.IsRoot);
+        }
+
 
         [TestMethod]
         public void TestKeyQuestionsTool()
@@ -181,7 +268,7 @@ namespace StoryCADTests
             var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
             outlineVM.StoryModel = await outlineService.CreateModel("Test-Masterplots", "StoryBuilder", 0);
             outlineVM.StoryModelFile = Path.Combine(App.ResultsDir, "Masterplots.stbx");
-            shell.SetCurrentView(StoryViewType.ExplorerView);
+            outlineService.SetCurrentView(outlineVM.StoryModel, StoryViewType.ExplorerView);
             shell.RightTappedNode = outlineVM.StoryModel.StoryElements[0].Node;
 
 
@@ -195,6 +282,20 @@ namespace StoryCADTests
         }
 
         [TestMethod]
+        public async Task MasterPlotTool_AddsSingleProblem()
+        {
+            var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+            outlineVM.StoryModel = await outlineService.CreateModel("MasterPlot", "StoryBuilder", 0);
+            outlineService.SetCurrentView(outlineVM.StoryModel, StoryViewType.ExplorerView);
+            shell.RightTappedNode = outlineVM.StoryModel.StoryElements[0].Node;
+            var master = Ioc.Default.GetRequiredService<MasterPlotsViewModel>();
+            master.PlotPatternName = master.PlotPatternNames[0];
+            await outlineVM.MasterPlotTool();
+            int count = outlineVM.StoryModel.StoryElements.Count(e => e.Name == master.PlotPatternNames[0]);
+            Assert.AreEqual(1, count, "MasterPlot created duplicate elements");
+        }
+
+        [TestMethod]
         public async Task TestDramaticSituationsTool()
         {
             //Create outline
@@ -203,13 +304,27 @@ namespace StoryCADTests
             outlineVM.StoryModelFile = Path.Combine(App.ResultsDir, "Dramatic.stbx");
 
             //Set view
-            shell.SetCurrentView(StoryViewType.ExplorerView);
+            outlineService.SetCurrentView(outlineVM.StoryModel, StoryViewType.ExplorerView);
             shell.RightTappedNode = outlineVM.StoryModel.StoryElements[0].Node;
 
             //Run scenario
             Ioc.Default.GetRequiredService<DramaticSituationsViewModel>().SituationName = "Abduction";
             await outlineVM.DramaticSituationsTool();
             Assert.IsTrue(outlineVM.StoryModel.StoryElements.Count > 2, "Dramatic situation not added.");
+        }
+
+        [TestMethod]
+        public async Task DramaticSituationsTool_CreatesScene()
+        {
+            var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+            outlineVM.StoryModel = await outlineService.CreateModel("Dramatic", "StoryBuilder", 0);
+            outlineService.SetCurrentView(outlineVM.StoryModel, StoryViewType.ExplorerView);
+            shell.RightTappedNode = outlineVM.StoryModel.StoryElements[0].Node;
+            var vm = Ioc.Default.GetRequiredService<DramaticSituationsViewModel>();
+            vm.SituationName = "Abduction";
+            await outlineVM.DramaticSituationsTool();
+            int count = outlineVM.StoryModel.StoryElements.Count(e => e.Name == "Abduction");
+            Assert.AreEqual(1, count, "Dramatic situation created incorrectly");
         }
 
         [TestMethod]
@@ -221,7 +336,7 @@ namespace StoryCADTests
             outlineVM.StoryModelFile = Path.Combine(App.ResultsDir, "Stock.stbx");
 
             //Set view
-            shell.SetCurrentView(StoryViewType.ExplorerView);
+            outlineService.SetCurrentView(outlineVM.StoryModel, StoryViewType.ExplorerView);
             shell.RightTappedNode = outlineVM.StoryModel.StoryElements[0].Node;
 
             //run scenario

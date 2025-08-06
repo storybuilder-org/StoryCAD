@@ -159,21 +159,6 @@ public class ShellViewModel : ObservableRecipient
 
     #region Shell binding properties
 
-    /// <summary>
-    /// DataSource is bound to Shell's NavigationTree TreeView control and
-    /// contains either the StoryExplorer (ExplorerView) or StoryNarrator (NarratorView)
-    /// ObservableCollection of StoryNodeItem instances.
-    /// </summary>
-    private ObservableCollection<StoryNodeItem> _dataSource;
-    public ObservableCollection<StoryNodeItem> DataSource
-    {
-        get => _dataSource;
-        set
-        {
-            using SerializationLock _lock = new(_autoSaveService, _BackupService, Logger);
-            SetProperty(ref _dataSource, value);
-        }
-    }
 
     /// <summary>
     /// IsPaneOpen is bound to ShellSplitView's IsPaneOpen property with
@@ -357,7 +342,10 @@ public class ShellViewModel : ObservableRecipient
         StoryModel Model = Ioc.Default.GetRequiredService<OutlineViewModel>().StoryModel;
         if (Ioc.Default.GetRequiredService<AppState>().Headless) { return; }
         if (Model.Changed) { return; }
-        Model.Changed = true;
+        
+        // Use OutlineService to set changed status with proper separation of concerns
+        var outlineService = Ioc.Default.GetRequiredService<OutlineService>();
+        outlineService.SetChanged(Model, true);
         ShellInstance.ChangeStatusColor = Colors.Red;
     }
 
@@ -369,10 +357,10 @@ public class ShellViewModel : ObservableRecipient
 	/// </summary>
 	public async Task CreateBackupNow()
 	{
-        if (DataSource == null || DataSource.Count == 0)
+        if (OutlineManager.StoryModel?.CurrentView == null || OutlineManager.StoryModel.CurrentView.Count == 0)
         {
             Messenger.Send(new StatusChangedMessage(new("You need to load a story first!", LogLevel.Warn)));
-            Logger.Log(LogLevel.Info, "Failed to open backup menu as DataSource is null or empty. (Is a story loaded?)");
+            Logger.Log(LogLevel.Info, "Failed to open backup menu as CurrentView is null or empty. (Is a story loaded?)");
             return;
         }
 
@@ -414,7 +402,8 @@ public class ShellViewModel : ObservableRecipient
             if (selectedItem is StoryNodeItem node)
             {
                 CurrentNode = node;
-                StoryElement element = OutlineManager.StoryModel.StoryElements.StoryElementGuids[node.Uuid];
+                OutlineService outlineService = Ioc.Default.GetRequiredService<OutlineService>();
+                StoryElement element = outlineService.GetStoryElementByGuid(OutlineManager.StoryModel, node.Uuid);
                 switch (element.ElementType)
                 {
                     case StoryItemType.Character:
@@ -607,7 +596,8 @@ public class ShellViewModel : ObservableRecipient
             //TODO: Logging???
             
             var id = CurrentNode.Uuid; // get the story element;
-            CollabArgs.SelectedElement = OutlineManager.StoryModel.StoryElements.StoryElementGuids[id];
+            OutlineService outlineService = Ioc.Default.GetRequiredService<OutlineService>();
+            CollabArgs.SelectedElement = outlineService.GetStoryElementByGuid(OutlineManager.StoryModel, id);
             CollabArgs.StoryModel = OutlineManager.StoryModel;
             Ioc.Default.GetService<CollaboratorService>()!.LoadWorkflows(CollabArgs);
             Ioc.Default.GetService<CollaboratorService>()!.CollaboratorWindow.Show();
@@ -923,25 +913,27 @@ public class ShellViewModel : ObservableRecipient
 
     public void ViewChanged()
     {
-        if (DataSource == null || DataSource.Count == 0)
+        if (OutlineManager.StoryModel?.CurrentView == null || OutlineManager.StoryModel.CurrentView.Count == 0)
         {
             Messenger.Send(new StatusChangedMessage(new("You need to load a story first!", LogLevel.Warn)));
-            Logger.Log(LogLevel.Info, "Failed to switch views as DataSource is null or empty. (Is a story loaded?)");
+            Logger.Log(LogLevel.Info, "Failed to switch views as CurrentView is null or empty. (Is a story loaded?)");
             return;
         }
         if (!SelectedView.Equals(CurrentView))
         {
             CurrentView = SelectedView;
+            var outlineService = Ioc.Default.GetRequiredService<OutlineService>();
             switch (CurrentView)
             {
                 case "Story Explorer View":
-                    SetCurrentView(StoryViewType.ExplorerView);
+                    outlineService.SetCurrentView(OutlineManager.StoryModel, StoryViewType.ExplorerView);
                     break;
                 case "Story Narrator View":
-                    SetCurrentView(StoryViewType.NarratorView);
+                    outlineService.SetCurrentView(OutlineManager.StoryModel, StoryViewType.NarratorView);
                     break;
             }
-            TreeViewNodeClicked(Ioc.Default.GetRequiredService<ShellViewModel>().DataSource[0]);
+            CurrentViewType = OutlineManager.StoryModel.CurrentViewType;
+            TreeViewNodeClicked(OutlineManager.StoryModel.CurrentView[0]);
         }
     }
 
@@ -1051,21 +1043,6 @@ public class ShellViewModel : ObservableRecipient
         Messenger.Send(new StatusChangedMessage(_msg));
     }
 
-    public void SetCurrentView(StoryViewType view)
-    {
-        if (view == StoryViewType.ExplorerView)
-        {
-            DataSource = OutlineManager.StoryModel.ExplorerView;
-            SelectedView = ViewList[0];
-            CurrentViewType = StoryViewType.ExplorerView;
-        }
-        else if (view == StoryViewType.NarratorView)
-        {
-            DataSource = OutlineManager.StoryModel.NarratorView;
-            SelectedView = ViewList[1];
-            CurrentViewType = StoryViewType.NarratorView;
-        }
-    }
 
     #region MVVM  processing
     private void IsChangedMessageReceived(IsChangedMessage isDirty)
@@ -1120,7 +1097,7 @@ public class ShellViewModel : ObservableRecipient
                     _statusTimer.Start();
                     break;
                 case LogLevel.Warn:
-                    StatusColor = new SolidColorBrush(Colors.Yellow);
+                    StatusColor = new SolidColorBrush(Colors.Goldenrod);
                     _statusTimer.Interval = TimeSpan.FromSeconds(30);
                     _statusTimer.Start();
                     break;

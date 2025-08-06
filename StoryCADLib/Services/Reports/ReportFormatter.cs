@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using NRtfTree.Util;
 using System.Reflection;
+using StoryCAD.Services.Outline;
 using StoryCAD.ViewModels.SubViewModels;
 using StoryCAD.ViewModels.Tools;
 
@@ -25,9 +26,10 @@ public class ReportFormatter
         string premise = string.Empty;
         if (overview.StoryProblem != Guid.Empty)
         {
-            ProblemModel problem = (ProblemModel)_model.StoryElements.StoryElementGuids[overview.StoryProblem];
+            var outlineService = Ioc.Default.GetRequiredService<OutlineService>();
+            ProblemModel problem = (ProblemModel)outlineService.GetStoryElementByGuid(_model, overview.StoryProblem);
             problemName = problem.Name;
-            premise = problem?.Premise;
+            premise = problem.Premise;
         }
 
         // Parse and write the report
@@ -169,7 +171,7 @@ public class ReportFormatter
 
 		// Retrieve the ShellViewModel once
 		var outlineViewModel = Ioc.Default.GetRequiredService<OutlineViewModel>();
-		if (outlineViewModel?.StoryModel?.StoryElements == null)
+		if (outlineViewModel.StoryModel?.StoryElements == null)
 		{
 			// StoryElements not available
 			return string.Empty;
@@ -524,7 +526,7 @@ public class ReportFormatter
         RtfDocument doc = new(string.Empty);
         StringBuilder sb = new();
         WebModel model = element as WebModel;
-        sb.AppendLine(model.Name);
+        sb.AppendLine(model!.Name);
         sb.AppendLine(model.URL.ToString());
         doc.AddText(sb.ToString());
         doc.AddNewLine();
@@ -612,7 +614,8 @@ public class ReportFormatter
                 // Find StoryNarrator' Scenes
                 foreach (StoryNodeItem child in _model.NarratorView[0].Children)
                 {
-                    StoryElement scn = _model.StoryElements.StoryElementGuids[child.Uuid];
+                    var outlineService = Ioc.Default.GetRequiredService<OutlineService>();
+                    StoryElement scn = outlineService.GetStoryElementByGuid(_model, child.Uuid);
                     if (scn.ElementType != StoryItemType.Scene)
                         continue;
                     SceneModel scene = (SceneModel)scn;
@@ -650,7 +653,7 @@ public class ReportFormatter
             {
                 //Read from manifest stream
                 await using Stream streams = Assembly.GetExecutingAssembly().GetManifestResourceStream(FileName);
-                using StreamReader reader = new(streams);
+                using StreamReader reader = new(streams!);
 
                 //Gets the stream, then formats it into line by line.
                 string[] lines = (await reader.ReadToEndAsync())
@@ -662,7 +665,7 @@ public class ReportFormatter
         }
         catch (Exception ex)
         {
-            Ioc.Default.GetService<LogService>().LogException(LogLevel.Error, ex, "Error loading report templates.");
+            Ioc.Default.GetService<LogService>()!.LogException(LogLevel.Error, ex, "Error loading report templates.");
         }
     }
 
@@ -671,7 +674,7 @@ public class ReportFormatter
     #region Private methods
 
     /// <summary>
-    /// A RichEditBox property is an a wrapper for an RTF 
+    /// A RichEditBox property is a wrapper for an RTF 
     /// document, with its header, font table, color table, etc.,
     /// and which can be read or written. This causes format problems
     /// when it's a cell on a StoryCAD report.  This function
@@ -681,7 +684,7 @@ public class ReportFormatter
     public string GetText(string rtfInput, bool formatNewLines = true)
     {
         string text = rtfInput ?? string.Empty;
-        if (rtfInput!.Equals(string.Empty))
+        if (text.Equals(string.Empty))
             return string.Empty;
         RichTextStripper rts = new();
         text =  rts.StripRichTextFormat(text);
@@ -700,10 +703,10 @@ public class ReportFormatter
 
     #region Constructor
 
-    public ReportFormatter() 
+    public ReportFormatter()
     {
         OutlineViewModel outlineVM = Ioc.Default.GetService<OutlineViewModel>();
-        _model = outlineVM.StoryModel;
+        if (outlineVM != null) _model = outlineVM.StoryModel;
     }
 
     #endregion

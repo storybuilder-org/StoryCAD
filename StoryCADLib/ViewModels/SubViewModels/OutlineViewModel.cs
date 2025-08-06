@@ -87,10 +87,15 @@ public class OutlineViewModel : ObservableRecipient
     /// </summary>
     public string StoryModelFile;
 
+    private StoryModel _storyModel = new();
     /// <summary>
     /// Current Outline being edited
     /// </summary>
-    public StoryModel StoryModel = new();
+    public StoryModel StoryModel
+    {
+        get => _storyModel;
+        set => SetProperty(ref _storyModel, value);
+    }
 
     /// <summary>
     /// Opens a file picker to let the user chose a .stbx file and loads said file
@@ -189,7 +194,7 @@ public class OutlineViewModel : ObservableRecipient
             // Set the current view to the ExplorerView 
             if (StoryModel.ExplorerView.Count > 0)
             {
-                shellVm.SetCurrentView(StoryViewType.ExplorerView);
+                outlineService.SetCurrentView(StoryModel, StoryViewType.ExplorerView);
                 Messenger.Send(new StatusChangedMessage(new("Open Story completed", LogLevel.Info)));
             }
 
@@ -273,10 +278,10 @@ public class OutlineViewModel : ObservableRecipient
                 StoryModel = await outlineService.CreateModel(name, author, dialogVm.SelectedTemplateIndex);
             }
 
-            shellVm.SetCurrentView(StoryViewType.ExplorerView);
+            outlineService.SetCurrentView(StoryModel, StoryViewType.ExplorerView);
 
             await Ioc.Default.GetRequiredService<FileOpenVM>().UpdateRecents(StoryModelFile);
-            StoryModel.Changed = true;
+            outlineService.SetChanged(StoryModel, true);
             await SaveFile();
 
             using (var serializationLock = new SerializationLock(autoSaveService, backupService, logger))
@@ -352,7 +357,7 @@ public class OutlineViewModel : ObservableRecipient
                 shellVm.SaveModel();
                 await outlineService.WriteModel(StoryModel, StoryModelFile);
                 Messenger.Send(new StatusChangedMessage(new($"{msg} completed", LogLevel.Info)));
-                StoryModel.Changed = false;
+                outlineService.SetChanged(StoryModel, false);
                 shellVm.ChangeStatusColor = Colors.Green;
             }
             catch (Exception ex)
@@ -441,7 +446,7 @@ public class OutlineViewModel : ObservableRecipient
 
                         // Indicate the model is now saved and unchanged
                         Messenger.Send(new IsChangedMessage(true));
-                        StoryModel.Changed = false;
+                        outlineService.SetChanged(StoryModel, false);
                         shellVm.ChangeStatusColor = Colors.Green;
                         Messenger.Send(new StatusChangedMessage(new("Save File As command completed", LogLevel.Info, true)));
                     }
@@ -485,7 +490,7 @@ public class OutlineViewModel : ObservableRecipient
         Messenger.Send(new StatusChangedMessage(new("Closing project", LogLevel.Info, true)));
         using (var serializationLock = new SerializationLock(autoSaveService, backupService, logger))
         {
-            if (StoryModel.Changed && Ioc.Default.GetRequiredService<AppState>().Headless)
+            if (StoryModel.Changed && !Ioc.Default.GetRequiredService<AppState>().Headless)
             {
                 ContentDialog warning = new()
                 {
@@ -505,10 +510,9 @@ public class OutlineViewModel : ObservableRecipient
             shellVm.RightTappedNode = null; //Null right tapped node to prevent possible issues.
             window.UpdateWindowTitle();
             Ioc.Default.GetRequiredService<BackupService>().StopTimedBackup();
-            shellVm.ShowHomePage();
         }
         
-        shellVm.SetCurrentView(StoryViewType.ExplorerView);
+        shellVm.ShowHomePage();
         Messenger.Send(new StatusChangedMessage(new("Close story command completed", LogLevel.Info, true)));
     }
 
@@ -606,7 +610,7 @@ public class OutlineViewModel : ObservableRecipient
         {
             logger.Log(LogLevel.Info, $"Search started, Searching for {shellVm.FilterText}");
             shellVm.SaveModel();
-            if (shellVm.DataSource == null || shellVm.DataSource.Count == 0)
+            if (shellVm.OutlineManager.StoryModel?.CurrentView == null || shellVm.OutlineManager.StoryModel.CurrentView.Count == 0)
             {
                 logger.Log(LogLevel.Info, "Data source is null or Empty.");
                 Messenger.Send(new StatusChangedMessage(new("You need to load a story first!", LogLevel.Warn)));
@@ -615,7 +619,7 @@ public class OutlineViewModel : ObservableRecipient
 
             int searchTotal = 0;
 
-            foreach (StoryNodeItem node in shellVm.DataSource[0])
+            foreach (StoryNodeItem node in shellVm.OutlineManager.StoryModel.CurrentView[0])
             {
                 //checks if node name contains the thing we are looking for
                 if (searchService.SearchStoryElement(node, shellVm.FilterText, StoryModel)) 
@@ -663,10 +667,10 @@ public class OutlineViewModel : ObservableRecipient
 
     public async Task GenerateScrivenerReports()
     {
-        if (shellVm.DataSource == null || shellVm.DataSource.Count == 0)
+        if (shellVm.OutlineManager.StoryModel?.CurrentView == null || shellVm.OutlineManager.StoryModel.CurrentView.Count == 0)
         {
             Messenger.Send(new StatusChangedMessage(new("You need to open a story first!", LogLevel.Info)));
-            logger.Log(LogLevel.Info, $"Scrivener Report cancelled (DataSource was null or empty)");
+            logger.Log(LogLevel.Info, $"Scrivener Report cancelled (CurrentView was null or empty)");
             return;
         }
 
@@ -1097,6 +1101,9 @@ public class OutlineViewModel : ObservableRecipient
                     {
                         shellVm.RightTappedNode.Delete(StoryViewType.NarratorView);
                     }
+                    
+                    // Mark the model as changed
+                    ShellViewModel.ShowChange();
                 }
             }
         }
@@ -1132,20 +1139,39 @@ public class OutlineViewModel : ObservableRecipient
             return;
         }
 
-        //TODO: Add dialog to confirm restore
-        if (shellVm.DataSource.Count <= 1)
+        // Rule 2: Don't allow children to be restored - only high-level nodes (direct children of TrashCan)
+        if (shellVm.RightTappedNode.Parent.Type != StoryItemType.TrashCan)
         {
-            logger.Log(LogLevel.Warn, "Failed to restore element - Trash can not available in current view.");
-            Messenger.Send(new StatusChangedMessage(new("Unable to restore - Trash not available", LogLevel.Warn)));
+            Messenger.Send(new StatusChangedMessage(new("You can only restore top-level items from trash. Restore the parent item instead.", LogLevel.Warn)));
             return;
         }
 
-        ObservableCollection<StoryNodeItem> _target = shellVm.DataSource[0].Children;
+        // Ensure we have a valid target view
+        if (StoryModel.CurrentView == null || StoryModel.CurrentView.Count == 0)
+        {
+            logger.Log(LogLevel.Warn, "Failed to restore element - No valid target view.");
+            Messenger.Send(new StatusChangedMessage(new("Unable to restore - No valid target view", LogLevel.Warn)));
+            return;
+        }
+
+        // Rule 1: Always restore to the end of the root (first node in CurrentView)
+        StoryNodeItem targetRoot = StoryModel.CurrentView[0];
+        ObservableCollection<StoryNodeItem> targetChildren = targetRoot.Children;
+        
+        // Remove from trash
         shellVm.RightTappedNode.Parent.Children.Remove(shellVm.RightTappedNode);
-        _target.Add(shellVm.RightTappedNode);
-        shellVm.RightTappedNode.Parent = shellVm.DataSource[0];
+        
+        // Update parent reference first
+        shellVm.RightTappedNode.Parent = targetRoot;
+        
+        // Rule 3: When restoring a parent, all children come with it (they're already attached)
+        targetChildren.Add(shellVm.RightTappedNode);
+        
+        // Mark the model as changed
+        ShellViewModel.ShowChange();
+        
         Messenger.Send(new StatusChangedMessage(new(
-            $"Restored node {shellVm.RightTappedNode.Name}", LogLevel.Info, true)));
+            $"Restored node {shellVm.RightTappedNode.Name} and all its contents", LogLevel.Info, true)));
     }
 
     /// <summary>
@@ -1168,8 +1194,9 @@ public class OutlineViewModel : ObservableRecipient
             return;
         }
 
-        SceneModel _sceneVar = (SceneModel)StoryModel.StoryElements.StoryElementGuids[shellVm.RightTappedNode.Uuid];
+        SceneModel _sceneVar = (SceneModel)outlineService.GetStoryElementByGuid(StoryModel, shellVm.RightTappedNode.Uuid);
         _ = new StoryNodeItem(_sceneVar, StoryModel.NarratorView[0]);
+        ShellViewModel.ShowChange();
         Messenger.Send(new StatusChangedMessage(new(
             $"Copied node {shellVm.RightTappedNode.Name} to Narrative View", LogLevel.Info, true)));
     }
@@ -1179,23 +1206,36 @@ public class OutlineViewModel : ObservableRecipient
     /// </summary>
     public void EmptyTrash()
     {
-        if (shellVm.DataSource == null)
+        if (shellVm.OutlineManager.StoryModel?.TrashView == null || shellVm.OutlineManager.StoryModel.TrashView.Count == 0)
         {
             Messenger.Send(new StatusChangedMessage(new("You need to load a story first!", LogLevel.Warn)));
-            logger.Log(LogLevel.Info, "Failed to empty trash as DataSource is null. (Is a story loaded?)");
+            logger.Log(LogLevel.Info, "Failed to empty trash as TrashView is null or empty. (Is a story loaded?)");
             return;
         }
 
-        if (shellVm.DataSource.Count <= 1)
+        // Get the TrashCan root node (should be the first/only item in TrashView)
+        var trashCanNode = shellVm.OutlineManager.StoryModel.TrashView.FirstOrDefault(n => n.Type == StoryItemType.TrashCan);
+        if (trashCanNode == null)
         {
-            logger.Log(LogLevel.Warn, "Failed to empty trash - Trash can not available in current view.");
+            logger.Log(LogLevel.Warn, "Failed to empty trash - TrashCan node not found in TrashView.");
+            Messenger.Send(new StatusChangedMessage(new("TrashCan structure error", LogLevel.Warn)));
+            return;
+        }
+
+        if (trashCanNode.Children.Count == 0)
+        {
+            logger.Log(LogLevel.Warn, "Failed to empty trash - No items in trash.");
             Messenger.Send(new StatusChangedMessage(new("No Deleted StoryElements to empty", LogLevel.Warn)));
             return;
         }
 
         shellVm.StatusMessage = "Trash Emptied.";
         logger.Log(LogLevel.Info, "Emptied Trash.");
-        shellVm.DataSource[1].Children.Clear();
+        trashCanNode.Children.Clear();
+
+        //Fix error #1056
+        shellVm.RightTappedNode = null;
+        shellVm.CurrentNode = null;
     }
 
     /// <summary>
@@ -1222,6 +1262,7 @@ public class OutlineViewModel : ObservableRecipient
             if (_item.Uuid == shellVm.RightTappedNode.Uuid)
             {
                 StoryModel.NarratorView[0].Children.Remove(_item);
+                ShellViewModel.ShowChange();
                 Messenger.Send(new StatusChangedMessage(new(
                     $"Removed node {shellVm.RightTappedNode.Name} from Narrative View", LogLevel.Info, true)));
                 return;
@@ -1249,7 +1290,7 @@ public class OutlineViewModel : ObservableRecipient
             return;
         }
 
-        ProblemModel problem = (ProblemModel)StoryModel.StoryElements.StoryElementGuids[shellVm.RightTappedNode.Uuid];
+        ProblemModel problem = (ProblemModel)outlineService.GetStoryElementByGuid(StoryModel, shellVm.RightTappedNode.Uuid);
         SceneModel scene = outlineService.ConvertProblemToScene(StoryModel, problem);
         shellVm.TreeViewNodeClicked(scene.Node, false);
         Messenger.Send(new StatusChangedMessage(new("Converted Problem to Scene", LogLevel.Info, true)));
@@ -1272,7 +1313,7 @@ public class OutlineViewModel : ObservableRecipient
             return;
         }
 
-        SceneModel scene = (SceneModel)StoryModel.StoryElements.StoryElementGuids[shellVm.RightTappedNode.Uuid];
+        SceneModel scene = (SceneModel)outlineService.GetStoryElementByGuid(StoryModel, shellVm.RightTappedNode.Uuid);
         ProblemModel problem = outlineService.ConvertSceneToProblem(StoryModel, scene);
         shellVm.TreeViewNodeClicked(problem.Node, false);
         Messenger.Send(new StatusChangedMessage(new("Converted Scene to Problem", LogLevel.Info, true)));
