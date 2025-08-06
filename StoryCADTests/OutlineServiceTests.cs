@@ -304,5 +304,450 @@ namespace StoryCADTests
             Assert.IsNotNull(model, "StoryModel should not be null.");
             Assert.IsFalse(model.Changed, "Newly created model should not be marked as changed.");
         }
+
+        #region SetChanged Tests
+
+        /// <summary>
+        /// Tests that SetChanged method updates the model's Changed status
+        /// </summary>
+        [TestMethod]
+        public void SetChanged_ShouldUpdateModelChangedStatus()
+        {
+            // Arrange
+            var model = new StoryModel();
+            model.Changed = false;
+
+            // Act
+            _outlineService.SetChanged(model, true);
+
+            // Assert
+            Assert.IsTrue(model.Changed, "Model Changed property should be set to true");
+        }
+
+        /// <summary>
+        /// Tests that SetChanged method uses SerializationLock
+        /// </summary>
+        [TestMethod]
+        public void SetChanged_ShouldUseSerializationLock()
+        {
+            // Arrange
+            var model = new StoryModel();
+
+            // Act - Should not throw any exceptions related to concurrent access
+            _outlineService.SetChanged(model, true);
+            _outlineService.SetChanged(model, false);
+
+            // Assert
+            Assert.IsFalse(model.Changed, "Last set value should be false");
+        }
+
+        #endregion
+
+        #region GetStoryElementByGuid Tests
+
+        /// <summary>
+        /// Tests that GetStoryElementByGuid returns the correct element for a valid GUID
+        /// </summary>
+        [TestMethod]
+        public async Task GetStoryElementByGuid_ValidGuid_ReturnsElement()
+        {
+            // Arrange
+            var model = await _outlineService.CreateModel("Test Story", "Test Author", 1);
+            var expectedElement = model.StoryElements.First(e => e.ElementType == StoryItemType.Character);
+
+            // Act
+            var result = _outlineService.GetStoryElementByGuid(model, expectedElement.Uuid);
+
+            // Assert
+            Assert.IsNotNull(result, "Should return a story element");
+            Assert.AreEqual(expectedElement.Uuid, result.Uuid, "Should return the element with matching GUID");
+            Assert.AreEqual(expectedElement.ElementType, result.ElementType, "Should return element with correct type");
+        }
+
+        /// <summary>
+        /// Tests that GetStoryElementByGuid throws exception for empty GUID
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public void GetStoryElementByGuid_EmptyGuid_ThrowsException()
+        {
+            // Arrange
+            var model = new StoryModel();
+
+            // Act
+            _outlineService.GetStoryElementByGuid(model, Guid.Empty);
+        }
+
+        /// <summary>
+        /// Tests that GetStoryElementByGuid throws exception for non-existent GUID
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public async Task GetStoryElementByGuid_NonExistentGuid_ThrowsException()
+        {
+            // Arrange
+            var model = await _outlineService.CreateModel("Test Story", "Test Author", 0);
+            var nonExistentGuid = Guid.NewGuid();
+
+            // Act
+            _outlineService.GetStoryElementByGuid(model, nonExistentGuid);
+        }
+
+        #endregion
+
+        #region UpdateStoryElement Tests
+
+        /// <summary>
+        /// Tests that UpdateStoryElement updates an existing element successfully
+        /// </summary>
+        [TestMethod]
+        public async Task UpdateStoryElement_ValidElement_UpdatesSuccessfully()
+        {
+            // Arrange
+            var model = await _outlineService.CreateModel("Test Story", "Test Author", 1);
+            var element = model.StoryElements.First(e => e.ElementType == StoryItemType.Character);
+            var originalName = element.Name;
+            var newName = "Updated Character Name";
+            element.Name = newName;
+
+            // Act
+            _outlineService.UpdateStoryElement(model, element);
+
+            // Assert
+            var updatedElement = _outlineService.GetStoryElementByGuid(model, element.Uuid);
+            Assert.AreEqual(newName, updatedElement.Name, "Element name should be updated");
+            Assert.AreNotEqual(originalName, updatedElement.Name, "Element name should be different from original");
+        }
+
+        /// <summary>
+        /// Tests that UpdateStoryElement throws exception for null model
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void UpdateStoryElement_NullModel_ThrowsException()
+        {
+            // Arrange
+            var element = new CharacterModel();
+
+            // Act
+            _outlineService.UpdateStoryElement(null, element);
+        }
+
+        /// <summary>
+        /// Tests that UpdateStoryElement throws exception for null element
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public async Task UpdateStoryElement_NullElement_ThrowsException()
+        {
+            // Arrange
+            var model = await _outlineService.CreateModel("Test Story", "Test Author", 0);
+
+            // Act
+            _outlineService.UpdateStoryElement(model, null);
+        }
+
+        /// <summary>
+        /// Tests that UpdateStoryElement marks model as changed
+        /// </summary>
+        [TestMethod]
+        public async Task UpdateStoryElement_ValidElement_MarksModelAsChanged()
+        {
+            // Arrange
+            var model = await _outlineService.CreateModel("Test Story", "Test Author", 1);
+            var element = model.StoryElements.First(e => e.ElementType == StoryItemType.Character);
+            model.Changed = false;
+            element.Name = "Updated Name";
+
+            // Act
+            _outlineService.UpdateStoryElement(model, element);
+
+            // Assert
+            Assert.IsTrue(model.Changed, "Model should be marked as changed after update");
+        }
+
+        #endregion
+
+        #region GetCharacterList Tests
+
+        /// <summary>
+        /// Tests that GetCharacterList returns all characters from the model
+        /// </summary>
+        [TestMethod]
+        public async Task GetCharacterList_WithCharacters_ReturnsAllCharacters()
+        {
+            // Arrange
+            var model = await _outlineService.CreateModel("Test Story", "Test Author", 1);
+            
+            // Act
+            var characters = _outlineService.GetCharacterList(model);
+            
+            // Assert
+            Assert.IsNotNull(characters, "Character list should not be null");
+            Assert.AreEqual(2, characters.Count, "Should return 2 characters from template 1");
+            Assert.IsTrue(characters.All(c => c.ElementType == StoryItemType.Character), 
+                "All returned elements should be characters");
+        }
+
+        /// <summary>
+        /// Tests that GetCharacterList returns empty list when no characters exist
+        /// </summary>
+        [TestMethod]
+        public async Task GetCharacterList_NoCharacters_ReturnsEmptyList()
+        {
+            // Arrange
+            var model = await _outlineService.CreateModel("Test Story", "Test Author", 0);
+            
+            // Act
+            var characters = _outlineService.GetCharacterList(model);
+            
+            // Assert
+            Assert.IsNotNull(characters, "Character list should not be null");
+            Assert.AreEqual(0, characters.Count, "Should return empty list when no characters");
+        }
+
+        /// <summary>
+        /// Tests that GetCharacterList throws exception for null model
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void GetCharacterList_NullModel_ThrowsException()
+        {
+            // Act
+            _outlineService.GetCharacterList(null);
+        }
+
+        /// <summary>
+        /// Tests that GetCharacterList uses SerializationLock
+        /// </summary>
+        [TestMethod]
+        public async Task GetCharacterList_UsesSerializationLock_NoExceptions()
+        {
+            // Arrange
+            var model = await _outlineService.CreateModel("Test Story", "Test Author", 1);
+            
+            // Act - Should not throw any exceptions related to concurrent access
+            var characters1 = _outlineService.GetCharacterList(model);
+            var characters2 = _outlineService.GetCharacterList(model);
+            
+            // Assert
+            Assert.AreEqual(characters1.Count, characters2.Count, "Both calls should return same count");
+        }
+
+        #endregion
+
+        #region UpdateStoryElementByGuid Tests
+
+        /// <summary>
+        /// Tests that UpdateStoryElementByGuid updates element successfully
+        /// </summary>
+        [TestMethod]
+        public async Task UpdateStoryElementByGuid_ValidGuid_UpdatesElement()
+        {
+            // Arrange
+            var model = await _outlineService.CreateModel("Test Story", "Test Author", 1);
+            var character = model.StoryElements.First(e => e.ElementType == StoryItemType.Character) as CharacterModel;
+            var originalName = character.Name;
+            var updatedCharacter = new CharacterModel
+            {
+                Uuid = character.Uuid,
+                Name = "Updated Character Name",
+                Role = "Updated Role",
+                StoryRole = "Updated Story Role"
+            };
+            
+            // Act
+            _outlineService.UpdateStoryElementByGuid(model, character.Uuid, updatedCharacter);
+            
+            // Assert
+            var result = _outlineService.GetStoryElementByGuid(model, character.Uuid) as CharacterModel;
+            Assert.AreEqual("Updated Character Name", result.Name, "Name should be updated");
+            Assert.AreEqual("Updated Role", result.Role, "Role should be updated");
+            Assert.AreEqual("Updated Story Role", result.StoryRole, "StoryRole should be updated");
+            Assert.IsTrue(model.Changed, "Model should be marked as changed");
+        }
+
+        /// <summary>
+        /// Tests that UpdateStoryElementByGuid throws exception for null model
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void UpdateStoryElementByGuid_NullModel_ThrowsException()
+        {
+            // Act
+            _outlineService.UpdateStoryElementByGuid(null, Guid.NewGuid(), new CharacterModel());
+        }
+
+        /// <summary>
+        /// Tests that UpdateStoryElementByGuid throws exception for empty GUID
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task UpdateStoryElementByGuid_EmptyGuid_ThrowsException()
+        {
+            // Arrange
+            var model = await _outlineService.CreateModel("Test Story", "Test Author", 0);
+            
+            // Act
+            _outlineService.UpdateStoryElementByGuid(model, Guid.Empty, new CharacterModel());
+        }
+
+        /// <summary>
+        /// Tests that UpdateStoryElementByGuid throws exception for null element
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public async Task UpdateStoryElementByGuid_NullElement_ThrowsException()
+        {
+            // Arrange
+            var model = await _outlineService.CreateModel("Test Story", "Test Author", 0);
+            
+            // Act
+            _outlineService.UpdateStoryElementByGuid(model, Guid.NewGuid(), null);
+        }
+
+        /// <summary>
+        /// Tests that UpdateStoryElementByGuid throws exception for non-existent GUID
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public async Task UpdateStoryElementByGuid_NonExistentGuid_ThrowsException()
+        {
+            // Arrange
+            var model = await _outlineService.CreateModel("Test Story", "Test Author", 0);
+            var nonExistentGuid = Guid.NewGuid();
+            
+            // Act
+            _outlineService.UpdateStoryElementByGuid(model, nonExistentGuid, new CharacterModel());
+        }
+
+        #endregion
+
+        #region GetSettingsList Tests
+
+        /// <summary>
+        /// Tests that GetSettingsList returns all settings from the model
+        /// </summary>
+        [TestMethod]
+        public async Task GetSettingsList_WithSettings_ReturnsAllSettings()
+        {
+            // Arrange
+            var model = await _outlineService.CreateModel("Test Story", "Test Author", 0);
+            var overview = model.ExplorerView.First();
+            
+            // Add some settings manually
+            var setting1 = _outlineService.AddStoryElement(model, StoryItemType.Setting, overview);
+            setting1.Name = "Test Setting 1";
+            var setting2 = _outlineService.AddStoryElement(model, StoryItemType.Setting, overview);
+            setting2.Name = "Test Setting 2";
+            
+            // Act
+            var settings = _outlineService.GetSettingsList(model);
+            
+            // Assert
+            Assert.IsNotNull(settings, "Settings list should not be null");
+            Assert.AreEqual(2, settings.Count, "Should return 2 settings");
+            Assert.IsTrue(settings.All(s => s.ElementType == StoryItemType.Setting), 
+                "All returned elements should be settings");
+            Assert.IsTrue(settings.Any(s => s.Name == "Test Setting 1"), "Should contain Test Setting 1");
+            Assert.IsTrue(settings.Any(s => s.Name == "Test Setting 2"), "Should contain Test Setting 2");
+        }
+
+        /// <summary>
+        /// Tests that GetSettingsList returns empty list when no settings exist
+        /// </summary>
+        [TestMethod]
+        public async Task GetSettingsList_NoSettings_ReturnsEmptyList()
+        {
+            // Arrange
+            var model = await _outlineService.CreateModel("Test Story", "Test Author", 0);
+            
+            // Act
+            var settings = _outlineService.GetSettingsList(model);
+            
+            // Assert
+            Assert.IsNotNull(settings, "Settings list should not be null");
+            Assert.AreEqual(0, settings.Count, "Should return empty list when no settings");
+        }
+
+        /// <summary>
+        /// Tests that GetSettingsList throws exception for null model
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void GetSettingsList_NullModel_ThrowsException()
+        {
+            // Act
+            _outlineService.GetSettingsList(null);
+        }
+
+        #endregion
+
+        #region GetAllStoryElements Tests
+
+        /// <summary>
+        /// Tests that GetAllStoryElements returns all elements from the model
+        /// </summary>
+        [TestMethod]
+        public async Task GetAllStoryElements_ReturnsAllElements()
+        {
+            // Arrange
+            var model = await _outlineService.CreateModel("Test Story", "Test Author", 1);
+            var expectedCount = model.StoryElements.Count;
+            
+            // Act
+            var elements = _outlineService.GetAllStoryElements(model);
+            
+            // Assert
+            Assert.IsNotNull(elements, "Elements collection should not be null");
+            Assert.AreEqual(expectedCount, elements.Count, "Should return all story elements");
+        }
+
+        /// <summary>
+        /// Tests that GetAllStoryElements returns empty list for empty model
+        /// </summary>
+        [TestMethod]
+        public async Task GetAllStoryElements_EmptyModel_ReturnsEmptyList()
+        {
+            // Arrange
+            var model = new StoryModel();
+            
+            // Act
+            var elements = _outlineService.GetAllStoryElements(model);
+            
+            // Assert
+            Assert.IsNotNull(elements, "Elements collection should not be null");
+            Assert.AreEqual(0, elements.Count, "Should return empty list for empty model");
+        }
+
+        /// <summary>
+        /// Tests that GetAllStoryElements throws exception for null model
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void GetAllStoryElements_NullModel_ThrowsException()
+        {
+            // Act
+            _outlineService.GetAllStoryElements(null);
+        }
+
+        /// <summary>
+        /// Tests that GetAllStoryElements uses SerializationLock
+        /// </summary>
+        [TestMethod]
+        public async Task GetAllStoryElements_UsesSerializationLock_NoExceptions()
+        {
+            // Arrange
+            var model = await _outlineService.CreateModel("Test Story", "Test Author", 1);
+            
+            // Act - Should not throw any exceptions related to concurrent access
+            var elements1 = _outlineService.GetAllStoryElements(model);
+            var elements2 = _outlineService.GetAllStoryElements(model);
+            
+            // Assert
+            Assert.AreEqual(elements1.Count, elements2.Count, "Both calls should return same count");
+        }
+
+        #endregion
     }
 }

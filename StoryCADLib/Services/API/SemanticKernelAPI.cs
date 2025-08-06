@@ -152,7 +152,12 @@ public class SemanticKernelApi
             throw new ArgumentNullException("GUID is null");
         }
 
-        if (!CurrentModel.StoryElements.StoryElementGuids.ContainsKey(guid))
+        // Use OutlineService to get the element
+        try
+        {
+            var existingElement = _outlineService.GetStoryElementByGuid(CurrentModel, guid);
+        }
+        catch (InvalidOperationException)
         {
             throw new ArgumentNullException("StoryElement does not exist");
         }
@@ -161,7 +166,7 @@ public class SemanticKernelApi
         StoryElement updated = StoryElement.Deserialize(newElement.ToString());
         //TODO: force set uuid somehow.
         updated.Uuid = guid;
-        CurrentModel.StoryElements.StoryElementGuids[guid] = updated;
+        _outlineService.UpdateStoryElement(CurrentModel, updated);
     }
 
     /// <summary>
@@ -204,7 +209,8 @@ public class SemanticKernelApi
             throw new ArgumentNullException("GUID is null");
         }
 
-        return CurrentModel.StoryElements.StoryElementGuids[guid].Serialize();
+        var element = _outlineService.GetStoryElementByGuid(CurrentModel, guid);
+        return element.Serialize();
     }
 
     [KernelFunction, Description("""
@@ -243,9 +249,14 @@ public class SemanticKernelApi
                 return OperationResult<Guid>.Failure($"Invalid guid GUID: {parentGUID}");
             }
 
-            if (CurrentModel.StoryElements.StoryElementGuids.ContainsKey(DesiredGuid))
+            try
             {
+                _outlineService.GetStoryElementByGuid(CurrentModel, DesiredGuid);
                 return OperationResult<Guid>.Failure($"GUID Override already exists.");
+            }
+            catch (InvalidOperationException)
+            {
+                // GUID doesn't exist, which is what we want
             }
         }
 
@@ -312,9 +323,14 @@ public class SemanticKernelApi
                 return OperationResult<Guid>.Failure($"Invalid guid GUID: {parentGUID}");
             }
 
-            if (CurrentModel.StoryElements.StoryElementGuids.ContainsKey(DesiredGuid))
+            try
             {
+                _outlineService.GetStoryElementByGuid(CurrentModel, DesiredGuid);
                 return OperationResult<Guid>.Failure($"GUID Override already exists.");
+            }
+            catch (InvalidOperationException)
+            {
+                // GUID doesn't exist, which is what we want
             }
         }
 
@@ -453,7 +469,7 @@ public class SemanticKernelApi
             return Task.FromResult(OperationResult<bool>.Failure("No outline is opened"));
 
         //Remove reference to element
-        StoryElement element = CurrentModel.StoryElements.StoryElementGuids[elementToDelete];
+        StoryElement element = _outlineService.GetStoryElementByGuid(CurrentModel, elementToDelete);
         _outlineService.RemoveReferenceToElement(elementToDelete, CurrentModel);
 
         // Remove the element from the model.
@@ -481,7 +497,7 @@ public class SemanticKernelApi
             if (CurrentModel == null)
                 return OperationResult<bool>.Failure("No outline is opened");
 
-            StoryElement element = CurrentModel.StoryElements.StoryElementGuids[scene];
+            StoryElement element = _outlineService.GetStoryElementByGuid(CurrentModel, scene);
             _outlineService.AddCastMember(CurrentModel, element, character);
 
             return OperationResult<bool>.Success(true);

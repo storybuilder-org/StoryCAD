@@ -4,6 +4,7 @@ using Windows.Storage;
 using NRtfTree.Util;
 using StoryCAD.DAL;
 using StoryCAD.Models.Scrivener;
+using StoryCAD.Services.Outline;
 
 namespace StoryCAD.Services.Reports
 {
@@ -375,8 +376,15 @@ namespace StoryCAD.Services.Reports
         {
             StoryElement element = null;
             Guid uuid = new Guid(node.Uuid);
-            if (_model.StoryElements.StoryElementGuids.ContainsKey(uuid))
-                element = _model.StoryElements.StoryElementGuids[uuid];
+            OutlineService outlineService = Ioc.Default.GetRequiredService<OutlineService>();
+            try
+            {
+                element = outlineService.GetStoryElementByGuid(_model, uuid);
+            }
+            catch (InvalidOperationException)
+            {
+                // Element not found, element remains null
+            }
             if (element != null)
             {
                 switch (element.ElementType)

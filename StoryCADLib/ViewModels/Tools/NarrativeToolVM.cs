@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 using StoryCAD.Services.Backup;
 using StoryCAD.Services.Dialogs.Tools;
 using StoryCAD.Services.Locking;
+using StoryCAD.Services.Outline;
 using StoryCAD.ViewModels.SubViewModels;
 
 namespace StoryCAD.ViewModels.Tools;
@@ -146,7 +147,8 @@ public class NarrativeToolVM: ObservableRecipient
             {
                 if (RecursiveCheck(outlineVM.StoryModel.NarratorView[0].Children).All(storyNodeItem => storyNodeItem.Uuid != SelectedNode.Uuid)) //checks node isn't in the narrator view
                 {
-                    _ = new StoryNodeItem((SceneModel)outlineVM.StoryModel.StoryElements.StoryElementGuids[SelectedNode.Uuid], outlineVM.StoryModel.NarratorView[0]);
+                    var outlineService = Ioc.Default.GetRequiredService<OutlineService>();
+                    _ = new StoryNodeItem((SceneModel)outlineService.GetStoryElementByGuid(outlineVM.StoryModel, SelectedNode.Uuid), outlineVM.StoryModel.NarratorView[0]);
                     _logger.Log(LogLevel.Info, $"Copied SelectedNode {SelectedNode.Name} ({SelectedNode.Uuid})");
                     Message = $"Copied {SelectedNode.Name}";
                 }
@@ -163,7 +165,8 @@ public class NarrativeToolVM: ObservableRecipient
                 {
                     if (_item.Type == StoryItemType.Scene && RecursiveCheck(outlineVM.StoryModel.NarratorView[0].Children).All(storyNodeItem => storyNodeItem.Uuid != _item.Uuid))
                     {
-                        _ = new StoryNodeItem((SceneModel)outlineVM.StoryModel.StoryElements.StoryElementGuids[_item.Uuid], outlineVM.StoryModel.NarratorView[0]);
+                        var outlineService = Ioc.Default.GetRequiredService<OutlineService>();
+                        _ = new StoryNodeItem((SceneModel)outlineService.GetStoryElementByGuid(outlineVM.StoryModel, _item.Uuid), outlineVM.StoryModel.NarratorView[0]);
                         _logger.Log(LogLevel.Info, $"Copied item {SelectedNode.Name} ({SelectedNode.Uuid})");
                     }
                 }
@@ -247,7 +250,8 @@ public class NarrativeToolVM: ObservableRecipient
                 {
                     //Since the node isn't in the node, then we add it here.
                     _logger.Log(LogLevel.Trace, $"{item.Name} ({item.Uuid}) not found in Narrative view, adding it to the tree");
-                    _ = new StoryNodeItem((SceneModel)outlineVM.StoryModel.StoryElements.StoryElementGuids[item.Uuid], outlineVM.StoryModel.NarratorView[0]);
+                    var outlineService = Ioc.Default.GetRequiredService<OutlineService>();
+                    _ = new StoryNodeItem((SceneModel)outlineService.GetStoryElementByGuid(outlineVM.StoryModel, item.Uuid), outlineVM.StoryModel.NarratorView[0]);
                 }
             }
 

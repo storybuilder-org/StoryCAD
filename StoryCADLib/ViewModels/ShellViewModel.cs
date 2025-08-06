@@ -342,7 +342,10 @@ public class ShellViewModel : ObservableRecipient
         StoryModel Model = Ioc.Default.GetRequiredService<OutlineViewModel>().StoryModel;
         if (Ioc.Default.GetRequiredService<AppState>().Headless) { return; }
         if (Model.Changed) { return; }
-        Model.Changed = true;
+        
+        // Use OutlineService to set changed status with proper separation of concerns
+        var outlineService = Ioc.Default.GetRequiredService<OutlineService>();
+        outlineService.SetChanged(Model, true);
         ShellInstance.ChangeStatusColor = Colors.Red;
     }
 
@@ -399,7 +402,8 @@ public class ShellViewModel : ObservableRecipient
             if (selectedItem is StoryNodeItem node)
             {
                 CurrentNode = node;
-                StoryElement element = OutlineManager.StoryModel.StoryElements.StoryElementGuids[node.Uuid];
+                OutlineService outlineService = Ioc.Default.GetRequiredService<OutlineService>();
+                StoryElement element = outlineService.GetStoryElementByGuid(OutlineManager.StoryModel, node.Uuid);
                 switch (element.ElementType)
                 {
                     case StoryItemType.Character:
@@ -592,7 +596,8 @@ public class ShellViewModel : ObservableRecipient
             //TODO: Logging???
             
             var id = CurrentNode.Uuid; // get the story element;
-            CollabArgs.SelectedElement = OutlineManager.StoryModel.StoryElements.StoryElementGuids[id];
+            OutlineService outlineService = Ioc.Default.GetRequiredService<OutlineService>();
+            CollabArgs.SelectedElement = outlineService.GetStoryElementByGuid(OutlineManager.StoryModel, id);
             CollabArgs.StoryModel = OutlineManager.StoryModel;
             Ioc.Default.GetService<CollaboratorService>()!.LoadWorkflows(CollabArgs);
             Ioc.Default.GetService<CollaboratorService>()!.CollaboratorWindow.Show();
@@ -1092,7 +1097,7 @@ public class ShellViewModel : ObservableRecipient
                     _statusTimer.Start();
                     break;
                 case LogLevel.Warn:
-                    StatusColor = new SolidColorBrush(Colors.Yellow);
+                    StatusColor = new SolidColorBrush(Colors.Goldenrod);
                     _statusTimer.Interval = TimeSpan.FromSeconds(30);
                     _statusTimer.Start();
                     break;

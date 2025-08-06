@@ -281,7 +281,7 @@ public class OutlineViewModel : ObservableRecipient
             outlineService.SetCurrentView(StoryModel, StoryViewType.ExplorerView);
 
             await Ioc.Default.GetRequiredService<FileOpenVM>().UpdateRecents(StoryModelFile);
-            StoryModel.Changed = true;
+            outlineService.SetChanged(StoryModel, true);
             await SaveFile();
 
             using (var serializationLock = new SerializationLock(autoSaveService, backupService, logger))
@@ -357,7 +357,7 @@ public class OutlineViewModel : ObservableRecipient
                 shellVm.SaveModel();
                 await outlineService.WriteModel(StoryModel, StoryModelFile);
                 Messenger.Send(new StatusChangedMessage(new($"{msg} completed", LogLevel.Info)));
-                StoryModel.Changed = false;
+                outlineService.SetChanged(StoryModel, false);
                 shellVm.ChangeStatusColor = Colors.Green;
             }
             catch (Exception ex)
@@ -446,7 +446,7 @@ public class OutlineViewModel : ObservableRecipient
 
                         // Indicate the model is now saved and unchanged
                         Messenger.Send(new IsChangedMessage(true));
-                        StoryModel.Changed = false;
+                        outlineService.SetChanged(StoryModel, false);
                         shellVm.ChangeStatusColor = Colors.Green;
                         Messenger.Send(new StatusChangedMessage(new("Save File As command completed", LogLevel.Info, true)));
                     }
@@ -490,7 +490,7 @@ public class OutlineViewModel : ObservableRecipient
         Messenger.Send(new StatusChangedMessage(new("Closing project", LogLevel.Info, true)));
         using (var serializationLock = new SerializationLock(autoSaveService, backupService, logger))
         {
-            if (StoryModel.Changed && Ioc.Default.GetRequiredService<AppState>().Headless)
+            if (StoryModel.Changed && !Ioc.Default.GetRequiredService<AppState>().Headless)
             {
                 ContentDialog warning = new()
                 {
@@ -510,10 +510,9 @@ public class OutlineViewModel : ObservableRecipient
             shellVm.RightTappedNode = null; //Null right tapped node to prevent possible issues.
             window.UpdateWindowTitle();
             Ioc.Default.GetRequiredService<BackupService>().StopTimedBackup();
-            shellVm.ShowHomePage();
         }
         
-        outlineService.SetCurrentView(StoryModel, StoryViewType.ExplorerView);
+        shellVm.ShowHomePage();
         Messenger.Send(new StatusChangedMessage(new("Close story command completed", LogLevel.Info, true)));
     }
 
@@ -1195,7 +1194,7 @@ public class OutlineViewModel : ObservableRecipient
             return;
         }
 
-        SceneModel _sceneVar = (SceneModel)StoryModel.StoryElements.StoryElementGuids[shellVm.RightTappedNode.Uuid];
+        SceneModel _sceneVar = (SceneModel)outlineService.GetStoryElementByGuid(StoryModel, shellVm.RightTappedNode.Uuid);
         _ = new StoryNodeItem(_sceneVar, StoryModel.NarratorView[0]);
         ShellViewModel.ShowChange();
         Messenger.Send(new StatusChangedMessage(new(
@@ -1291,7 +1290,7 @@ public class OutlineViewModel : ObservableRecipient
             return;
         }
 
-        ProblemModel problem = (ProblemModel)StoryModel.StoryElements.StoryElementGuids[shellVm.RightTappedNode.Uuid];
+        ProblemModel problem = (ProblemModel)outlineService.GetStoryElementByGuid(StoryModel, shellVm.RightTappedNode.Uuid);
         SceneModel scene = outlineService.ConvertProblemToScene(StoryModel, problem);
         shellVm.TreeViewNodeClicked(scene.Node, false);
         Messenger.Send(new StatusChangedMessage(new("Converted Problem to Scene", LogLevel.Info, true)));
@@ -1314,7 +1313,7 @@ public class OutlineViewModel : ObservableRecipient
             return;
         }
 
-        SceneModel scene = (SceneModel)StoryModel.StoryElements.StoryElementGuids[shellVm.RightTappedNode.Uuid];
+        SceneModel scene = (SceneModel)outlineService.GetStoryElementByGuid(StoryModel, shellVm.RightTappedNode.Uuid);
         ProblemModel problem = outlineService.ConvertSceneToProblem(StoryModel, scene);
         shellVm.TreeViewNodeClicked(problem.Node, false);
         Messenger.Send(new StatusChangedMessage(new("Converted Scene to Problem", LogLevel.Info, true)));
