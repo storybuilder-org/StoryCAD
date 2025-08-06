@@ -173,89 +173,42 @@ public class ShellViewModel : ObservableRecipient
         set => SetProperty(ref _isPaneOpen, value);
     }
 
-    // CommandBar Flyout AppBarButton properties
-    private Visibility _addFolderVisibility;
-    public Visibility AddFolderVisibility
+
+    private Visibility _explorerVisibility;
+    /// <summary>
+    /// Controls visibility for elements that should only be shown in the Explorer view.
+    /// </summary>
+    public Visibility ExplorerVisibility
     {
-        get => _addFolderVisibility;
-        set => SetProperty(ref _addFolderVisibility, value);
+        get => _explorerVisibility;
+        set => SetProperty(ref _explorerVisibility, value);
     }
 
-    private Visibility _addSectionVisibility;
-    public Visibility AddSectionVisibility
+    private Visibility _narratorVisibility;
+    /// <summary>
+    /// Controls visibility for elements that should only be shown in the Narrator view.
+    /// </summary>
+    public Visibility NarratorVisibility
     {
-        get => _addSectionVisibility;
-        set => SetProperty(ref _addSectionVisibility, value);
+        get => _narratorVisibility;
+        set => SetProperty(ref _narratorVisibility, value);
     }
 
-    private Visibility _addProblemVisibility;
-    public Visibility AddProblemVisibility
+    private Visibility _trashButtonVisibility;
+    /// <summary>
+    /// Controls visibility for elements that should only be shown in the Trash view.
+    /// </summary
+    public Visibility TrashButtonVisibility
     {
-        get => _addProblemVisibility;
-        set => SetProperty(ref _addProblemVisibility, value);
+        get => _trashButtonVisibility;
+        set => SetProperty(ref _trashButtonVisibility, value);
     }
 
-    private Visibility _addCharacterVisibility;
-    public Visibility AddCharacterVisibility
+    private Visibility _addButtonVisibility;
+    public Visibility AddButtonVisibility
     {
-        get => _addCharacterVisibility;
-        set => SetProperty(ref _addCharacterVisibility, value);
-    }
-
-    private Visibility _addSettingVisibility;
-    public Visibility AddSettingVisibility
-    {
-        get => _addSettingVisibility;
-        set => SetProperty(ref _addSettingVisibility, value);
-    }
-
-    private Visibility _addSceneVisibility;
-    public Visibility AddSceneVisibility
-    {
-        get => _addSceneVisibility;
-        set => SetProperty(ref _addSceneVisibility, value);
-    }
-
-    private Visibility _convertToSceneVisibility;
-    public Visibility ConvertToSceneVisibility
-    {
-        get => _convertToSceneVisibility;
-        set => SetProperty(ref _convertToSceneVisibility, value);
-    }
-
-    private Visibility _convertToProblemVisibility;
-    public Visibility ConvertToProblemVisibility
-    {
-        get => _convertToProblemVisibility;
-        set => SetProperty(ref _convertToProblemVisibility, value);
-    }
-
-    private Visibility _removeStoryElementVisibility;
-    public Visibility RemoveStoryElementVisibility
-    {
-        get => _removeStoryElementVisibility;
-        set => SetProperty(ref _removeStoryElementVisibility, value);
-    }
-
-    private Visibility _restoreStoryElementVisibility;
-    public Visibility RestoreStoryElementVisibility
-    {
-        get => _restoreStoryElementVisibility;
-        set => SetProperty(ref _restoreStoryElementVisibility, value);
-    }
-
-    private Visibility _addToNarrativeVisibility;
-    public Visibility AddToNarrativeVisibility
-    {
-        get => _addToNarrativeVisibility;
-        set => SetProperty(ref _addToNarrativeVisibility, value);
-    }
-
-    private Visibility _removeFromNarrativeVisibility;
-    public Visibility RemoveFromNarrativeVisibility
-    {
-        get => _removeFromNarrativeVisibility;
-        set => SetProperty(ref _removeFromNarrativeVisibility, value);
+        get => _addButtonVisibility;
+        set => SetProperty(ref _addButtonVisibility, value);
     }
 
     private Visibility _printNodeVisibility;
@@ -263,13 +216,6 @@ public class ShellViewModel : ObservableRecipient
     {
         get => _printNodeVisibility;
         set => SetProperty(ref _printNodeVisibility, value);
-    }
-
-    private Visibility _emptyTrashVisibility;
-    public Visibility EmptyTrashVisibility
-    {
-        get => _emptyTrashVisibility;
-        set => SetProperty(ref _emptyTrashVisibility, value);
     }
 
     // Status Bar properties
@@ -952,61 +898,33 @@ public class ShellViewModel : ObservableRecipient
             //Trash Can - View Hide all buttons except Empty Trash.
             if (StoryNodeItem.RootNodeType(RightTappedNode) == StoryItemType.TrashCan)
             {
-                AddFolderVisibility = Visibility.Collapsed;
-                AddSectionVisibility = Visibility.Collapsed;
-                AddProblemVisibility = Visibility.Collapsed;
-                AddCharacterVisibility = Visibility.Collapsed;
-                AddSettingVisibility = Visibility.Collapsed;
-                AddSceneVisibility = Visibility.Collapsed;
-                ConvertToSceneVisibility = Visibility.Collapsed;
-                ConvertToProblemVisibility = Visibility.Collapsed;
-                RemoveStoryElementVisibility = Visibility.Collapsed;
-                AddToNarrativeVisibility = Visibility.Collapsed;
-                RemoveFromNarrativeVisibility = Visibility.Collapsed;
+                ExplorerVisibility = Visibility.Collapsed;
+                NarratorVisibility = Visibility.Collapsed;
+                AddButtonVisibility = Visibility.Collapsed;
                 PrintNodeVisibility = Visibility.Collapsed;
-
-                RestoreStoryElementVisibility = Visibility.Visible;
-                EmptyTrashVisibility = Visibility.Visible;
+                AddButtonVisibility = Visibility.Collapsed;
+                TrashButtonVisibility = Visibility.Visible;
             }
             else
             {
                 //Explorer tree, show everything but empty trash and add section
                 if (SelectedView == ViewList[0])
                 {
-                    AddFolderVisibility = Visibility.Visible;
-                    AddSectionVisibility = Visibility.Collapsed;
-                    AddProblemVisibility = Visibility.Visible;
-                    AddCharacterVisibility = Visibility.Visible;
-                    AddSettingVisibility = Visibility.Visible;
-                    AddSceneVisibility = Visibility.Visible;
-                    ConvertToSceneVisibility = RightTappedNode.Type == StoryItemType.Problem ? Visibility.Visible : Visibility.Collapsed;
-                    ConvertToProblemVisibility = RightTappedNode.Type == StoryItemType.Scene ? Visibility.Visible : Visibility.Collapsed;
-                    RemoveStoryElementVisibility = Visibility.Visible;
-                    //TODO: Use correct values (bug with this)
-                    //RestoreStoryElementVisibility = Visibility.Collapsed;
-                    RestoreStoryElementVisibility = Visibility.Collapsed;
-                    AddToNarrativeVisibility = Visibility.Visible;
-                    //RemoveFromNarrativeVisibility = Visibility.Collapsed;
+                    ExplorerVisibility = Visibility.Visible;
+                    NarratorVisibility = Visibility.Collapsed;
+                    AddButtonVisibility = Visibility.Visible;
                     PrintNodeVisibility = Visibility.Visible;
-                    EmptyTrashVisibility = Visibility.Collapsed;
+                    TrashButtonVisibility = Visibility.Collapsed;
                 }
                 else //Narrator Tree, hide most things.
                 {
-                    RemoveFromNarrativeVisibility = Visibility.Visible;
-                    AddSectionVisibility = Visibility.Visible;
+                    ExplorerVisibility = Visibility.Collapsed;
+                    NarratorVisibility = Visibility.Visible;
+                    AddButtonVisibility = Visibility.Collapsed;
                     PrintNodeVisibility = Visibility.Visible;
-                    RemoveStoryElementVisibility = Visibility.Collapsed;
-                    AddFolderVisibility = Visibility.Collapsed;
-                    AddProblemVisibility = Visibility.Collapsed;
-                    AddCharacterVisibility = Visibility.Collapsed;
-                    AddSettingVisibility = Visibility.Collapsed;
-                    AddSceneVisibility = Visibility.Collapsed;
-                    ConvertToSceneVisibility = Visibility.Collapsed;
-                    ConvertToProblemVisibility = Visibility.Collapsed;
-                    RestoreStoryElementVisibility = Visibility.Collapsed;
-                    AddToNarrativeVisibility = Visibility.Collapsed;
-                    EmptyTrashVisibility = Visibility.Collapsed;
+                    TrashButtonVisibility = Visibility.Collapsed;
                 }
+                AddButtonVisibility = Visibility.Visible;
             }
         }
         catch (Exception e) //errors (is RightTappedNode null?

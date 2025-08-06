@@ -15,56 +15,56 @@
 
             <CommandBarFlyout x:Key="AddStoryElementFlyout" Placement="Right" x:Name="AddStoryElementCommandBarFlyout" >
                 <CommandBarFlyout.SecondaryCommands>
-                    <AppBarButton Icon="Add" Label="Add Elements" >
+                    <AppBarButton Icon="Add" Label="Add Elements" Visibility="{x:Bind ShellVm.AddButtonVisibility, Mode=OneWay}">
                         <AppBarButton.Flyout>
                             <MenuFlyout>
-                                <MenuFlyoutItem Icon="Folder" Text="Add Folder         Alt+F"  Command="{x:Bind ShellVm.AddFolderCommand, Mode=OneWay}" Visibility="{x:Bind ShellVm.AddFolderVisibility, Mode=TwoWay}" />
-                                <MenuFlyoutItem Icon="Folder" Text="Add Section        Alt+A"  Command="{x:Bind ShellVm.AddSectionCommand, Mode=OneWay}" Visibility="{x:Bind ShellVm.AddSectionVisibility, Mode=TwoWay}" />
-                                <MenuFlyoutItem Icon="Help"   Text="Add Problem      Alt+P"  Command="{x:Bind ShellVm.AddProblemCommand, Mode=OneWay}" Visibility="{x:Bind ShellVm.AddProblemVisibility, Mode=TwoWay}" />
-                                <MenuFlyoutItem Icon="Contact" Text="Add Character    Alt+C"  Command="{x:Bind ShellVm.AddCharacterCommand, Mode=OneWay}" Visibility="{x:Bind ShellVm.AddCharacterVisibility, Mode=TwoWay}" />
-                                <MenuFlyoutItem Icon="Globe" Text="Add Setting        Alt+L"  Command="{x:Bind ShellVm.AddSettingCommand, Mode=OneWay}" Visibility="{x:Bind ShellVm.AddSettingVisibility, Mode=TwoWay}" />
-                                <MenuFlyoutItem Icon="AllApps" Text="Add Scene          Alt+S"  Command="{x:Bind ShellVm.AddSceneCommand, Mode=OneWay}" Visibility="{x:Bind ShellVm.AddSceneVisibility, Mode=TwoWay}" />
-                                <MenuFlyoutItem Icon="TwoPage" Text="Add Notes          Alt+N"  Command="{x:Bind ShellVm.AddNotesCommand, Mode=OneWay}" Visibility="{x:Bind ShellVm.AddFolderVisibility, Mode=TwoWay}" />
-                                <MenuFlyoutItem Icon="PreviewLink" Text="Add Website      Alt+W"  Command="{x:Bind ShellVm.AddWebCommand, Mode=OneWay}" Visibility="{x:Bind ShellVm.AddFolderVisibility, Mode=TwoWay}" />
+                                <MenuFlyoutItem Icon="Folder" Text="Add Folder         Alt+F"  Command="{x:Bind ShellVm.AddFolderCommand, Mode=OneWay}" Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}" />
+                                <MenuFlyoutItem Icon="Folder" Text="Add Section        Alt+A"  Command="{x:Bind ShellVm.AddSectionCommand, Mode=OneWay}" Visibility="{x:Bind ShellVm.NarratorVisibility, Mode=TwoWay}" />
+                                <MenuFlyoutItem Icon="Help"   Text="Add Problem      Alt+P"  Command="{x:Bind ShellVm.AddProblemCommand, Mode=OneWay}" Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}" />
+                                <MenuFlyoutItem Icon="Contact" Text="Add Character    Alt+C"  Command="{x:Bind ShellVm.AddCharacterCommand, Mode=OneWay}" Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}" />
+                                <MenuFlyoutItem Icon="Globe" Text="Add Setting        Alt+L"  Command="{x:Bind ShellVm.AddSettingCommand, Mode=OneWay}" Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}" />
+                                <MenuFlyoutItem Icon="AllApps" Text="Add Scene          Alt+S"  Command="{x:Bind ShellVm.AddSceneCommand, Mode=OneWay}" Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}" />
+                                <MenuFlyoutItem Icon="TwoPage" Text="Add Notes          Alt+N"  Command="{x:Bind ShellVm.AddNotesCommand, Mode=OneWay}" Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}" />
+                                <MenuFlyoutItem Icon="PreviewLink" Text="Add Website      Alt+W"  Command="{x:Bind ShellVm.AddWebCommand, Mode=OneWay}" Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}" />
                             </MenuFlyout>
                         </AppBarButton.Flyout>
                     </AppBarButton>
                     <AppBarSeparator />
                     <AppBarButton Icon="Delete" Label="Delete element"  Command="{x:Bind ShellVm.RemoveStoryElementCommand, Mode=OneWay}" 
-                          Visibility="{x:Bind ShellVm.RemoveStoryElementVisibility, Mode=TwoWay}" >
+                          Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}" >
                         <ToolTipService.ToolTip>
                             <ToolTip Content="Move Story Element to Trashcan" />
                         </ToolTipService.ToolTip>
                     </AppBarButton>
                     <AppBarButton Icon="Refresh" Label="Restore Element" Command="{x:Bind ShellVm.RestoreStoryElementCommand, Mode=OneWay}" 
-                          Visibility="{x:Bind ShellVm.RestoreStoryElementVisibility, Mode=TwoWay}" >
+                          Visibility="{x:Bind ShellVm.TrashButtonVisibility, Mode=TwoWay}" >
                         <ToolTipService.ToolTip>
                             <ToolTip Content="Restore Story Element from Trashcan" />
                         </ToolTipService.ToolTip>
                     </AppBarButton>
                     <AppBarButton Icon="Switch" Label="Add to Narrative" Command="{x:Bind ShellVm.AddToNarrativeCommand, Mode=OneWay}" 
-                          Visibility="{x:Bind ShellVm.AddToNarrativeVisibility, Mode=TwoWay}" >
+                          Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}" >
                         <ToolTipService.ToolTip>
                             <ToolTip Content="Add Scene to Narrative" />
                         </ToolTipService.ToolTip>
                     </AppBarButton>
                     <AppBarButton Icon="Switch" Label="Remove from narrative" Command="{x:Bind ShellVm.RemoveFromNarrativeCommand, Mode=OneWay}"
-                          Visibility="{x:Bind ShellVm.RemoveFromNarrativeVisibility, Mode=TwoWay}" >
+                          Visibility="{x:Bind ShellVm.NarratorVisibility, Mode=TwoWay}" >
                         <ToolTipService.ToolTip>
                             <ToolTip Content="Remove Scene from Narrative" />
                         </ToolTipService.ToolTip>
                     </AppBarButton>
                     <AppBarButton Icon="Switch" Label="Convert to Scene" Command="{x:Bind ShellVm.ConvertToSceneCommand, Mode=OneWay}"
-                          Visibility="{x:Bind ShellVm.ConvertToSceneVisibility, Mode=TwoWay}" />
+                          Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}" />
                     <AppBarButton Icon="Switch" Label="Convert to Problem" Command="{x:Bind ShellVm.ConvertToProblemCommand, Mode=OneWay}"
-                          Visibility="{x:Bind ShellVm.ConvertToProblemVisibility, Mode=TwoWay}" />
+                          Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}" />
                     <AppBarButton Icon="Print" Label="Print node" Command="{x:Bind ShellVm.PrintNodeCommand, Mode=OneWay}"
                           Visibility="{x:Bind ShellVm.PrintNodeVisibility, Mode=TwoWay}" >
                         <ToolTipService.ToolTip>
                             <ToolTip Content="Print selected node"/>
                         </ToolTipService.ToolTip>
                     </AppBarButton>
-                    <AppBarButton Icon="Cancel" Label="Empty Trash" Visibility="{x:Bind ShellVm.EmptyTrashVisibility, Mode=TwoWay}" >
+                    <AppBarButton Icon="Cancel" Label="Empty Trash" Visibility="{x:Bind ShellVm.TrashButtonVisibility, Mode=TwoWay}" >
                         <ToolTipService.ToolTip>
                             <ToolTip Content="Empty trash"/>
                         </ToolTipService.ToolTip>
@@ -168,37 +168,37 @@
                     </AppBarButton.Icon>
                     <AppBarButton.Flyout>
                         <MenuFlyout>
-                            <MenuFlyoutItem  Visibility="{x:Bind ShellVm.AddFolderVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.AddFolderCommand, Mode=OneWay}" Icon="Folder" Text="Add folder">
+                            <MenuFlyoutItem  Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.AddFolderCommand, Mode=OneWay}" Icon="Folder" Text="Add folder">
                                 <MenuFlyoutItem.KeyboardAccelerators>
                                     <KeyboardAccelerator Key="F" Modifiers="Menu"/>
                                 </MenuFlyoutItem.KeyboardAccelerators>
                             </MenuFlyoutItem>
-                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.AddSectionVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.AddSectionCommand,Mode=OneWay}" Icon="Folder" Text="Add section">
+                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.NarratorVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.AddSectionCommand,Mode=OneWay}" Icon="Folder" Text="Add section">
                                 <MenuFlyoutItem.KeyboardAccelerators>
                                     <KeyboardAccelerator Key="A" Modifiers="Menu"/>
                                 </MenuFlyoutItem.KeyboardAccelerators>
                             </MenuFlyoutItem>
-                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.AddProblemVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.AddProblemCommand ,Mode=OneWay}" Icon="Help" Text="Add problem">
+                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.AddProblemCommand ,Mode=OneWay}" Icon="Help" Text="Add problem">
                                 <MenuFlyoutItem.KeyboardAccelerators>
                                     <KeyboardAccelerator Key="P" Modifiers="Menu"/>
                                 </MenuFlyoutItem.KeyboardAccelerators>
                             </MenuFlyoutItem>
-                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.AddCharacterVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.AddCharacterCommand,Mode=OneWay}" Icon="Contact" Text="Add character">
+                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.AddCharacterCommand,Mode=OneWay}" Icon="Contact" Text="Add character">
                                 <MenuFlyoutItem.KeyboardAccelerators>
                                     <KeyboardAccelerator Key="C" Modifiers="Menu"/>
                                 </MenuFlyoutItem.KeyboardAccelerators>
                             </MenuFlyoutItem>
-                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.AddSettingVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.AddSettingCommand,Mode=OneWay}" Icon="Globe" Text="Add setting">
+                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.AddSettingCommand,Mode=OneWay}" Icon="Globe" Text="Add setting">
                                 <MenuFlyoutItem.KeyboardAccelerators>
                                     <KeyboardAccelerator Key="L" Modifiers="Menu"/>
                                 </MenuFlyoutItem.KeyboardAccelerators>
                             </MenuFlyoutItem>
-                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.AddSceneVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.AddSceneCommand,Mode=OneWay}" Icon="AllApps" Text="Add scene">
+                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.AddSceneCommand,Mode=OneWay}" Icon="AllApps" Text="Add scene">
                                 <MenuFlyoutItem.KeyboardAccelerators>
                                     <KeyboardAccelerator Key="S" Modifiers="Menu"/>
                                 </MenuFlyoutItem.KeyboardAccelerators>
                             </MenuFlyoutItem>
-                            <MenuFlyoutItem Text="Add Web node" Visibility="{x:Bind ShellVm.AddSceneVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.AddWebCommand,Mode=OneWay}">
+                            <MenuFlyoutItem Text="Add Web node" Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.AddWebCommand,Mode=OneWay}">
                                 <MenuFlyoutItem.Icon>
                                     <SymbolIcon Symbol="PreviewLink"/>
                                 </MenuFlyoutItem.Icon>
@@ -206,7 +206,7 @@
                                     <KeyboardAccelerator Key="W" Modifiers="Menu"/>
                                 </MenuFlyoutItem.KeyboardAccelerators>
                             </MenuFlyoutItem>
-                            <MenuFlyoutItem Text="Add Notes node" Visibility="{x:Bind ShellVm.AddSceneVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.AddNotesCommand,Mode=OneWay}">
+                            <MenuFlyoutItem Text="Add Notes node" Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.AddNotesCommand,Mode=OneWay}">
                                 <MenuFlyoutItem.Icon>
                                     <SymbolIcon Symbol="TwoPage"/>
                                 </MenuFlyoutItem.Icon>
@@ -215,16 +215,16 @@
                                 </MenuFlyoutItem.KeyboardAccelerators>
                             </MenuFlyoutItem>
                             <MenuFlyoutSeparator/>
-                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.RemoveStoryElementVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.RemoveStoryElementCommand,Mode=OneWay}" Icon="Delete" Text="Delete story element">
+                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.RemoveStoryElementCommand,Mode=OneWay}" Icon="Delete" Text="Delete story element">
                                 <MenuFlyoutItem.KeyboardAccelerators>
                                     <KeyboardAccelerator Key="Delete"/>
                                 </MenuFlyoutItem.KeyboardAccelerators>
                             </MenuFlyoutItem>
-                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.RestoreStoryElementVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.RestoreStoryElementCommand,Mode=OneWay}" Icon="Refresh" Text="Restore Story element"/>
-                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.AddToNarrativeVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.AddToNarrativeCommand,Mode=OneWay}" Icon="Switch" Text="Add To Narrative"/>
-                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.RemoveFromNarrativeVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.RemoveFromNarrativeCommand,Mode=OneWay}" Icon="Switch" Text="Remove from Narrative"/>
-                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.ConvertToSceneVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.ConvertToSceneCommand,Mode=OneWay}" Icon="Switch" Text="Convert to Scene"/>
-                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.ConvertToProblemVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.ConvertToProblemCommand,Mode=OneWay}" Icon="Switch" Text="Convert to Problem"/>
+                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.TrashButtonVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.RestoreStoryElementCommand,Mode=OneWay}" Icon="Refresh" Text="Restore Story element"/>
+                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.AddToNarrativeCommand,Mode=OneWay}" Icon="Switch" Text="Add To Narrative"/>
+                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.NarratorVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.RemoveFromNarrativeCommand,Mode=OneWay}" Icon="Switch" Text="Remove from Narrative"/>
+                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.ConvertToSceneCommand,Mode=OneWay}" Icon="Switch" Text="Convert to Scene"/>
+                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.ConvertToProblemCommand,Mode=OneWay}" Icon="Switch" Text="Convert to Problem"/>
                         </MenuFlyout>
                     </AppBarButton.Flyout>
                 </AppBarButton>
