@@ -142,7 +142,7 @@
 	<PropertyGroup>
 		<WindowsSdkPackageVersion>10.0.22621.38</WindowsSdkPackageVersion>
 		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
-		<GeneratePackageOnBuild>False</GeneratePackageOnBuild>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<IncludeSymbols>True</IncludeSymbols>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 		<Title>StoryCADLib</Title>
