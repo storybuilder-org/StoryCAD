@@ -1097,7 +1097,7 @@ public class ShellViewModel : ObservableRecipient
                     _statusTimer.Start();
                     break;
                 case LogLevel.Warn:
-                    StatusColor = new SolidColorBrush(Colors.Yellow);
+                    StatusColor = new SolidColorBrush(Colors.Goldenrod);
                     _statusTimer.Interval = TimeSpan.FromSeconds(30);
                     _statusTimer.Start();
                     break;

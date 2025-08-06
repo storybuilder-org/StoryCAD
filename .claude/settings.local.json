@@ -20,7 +20,8 @@
       "Bash(\"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe\" \"StoryCADTests/bin/x64/Debug/net8.0-windows10.0.19041.0/StoryCADTests.dll\")",
       "Bash(gh issue comment:*)",
       "Bash(gh pr view:*)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(gh pr list:*)"
     ],
     "deny": []
   }
