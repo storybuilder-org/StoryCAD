@@ -1,5 +1,4 @@
 ﻿using System.Text.Json.Serialization;
-using Windows.Data.Xml.Dom;
 
 namespace StoryCAD.Models;
 
@@ -266,27 +265,6 @@ public class OverviewModel : StoryElement
         StoryProblem = Guid.Empty;
     }
 
-    public OverviewModel(IXmlNode xn, StoryModel model) : base(xn, model)
-    {
-        DateCreated = string.Empty;
-        Author = string.Empty;
-        DateModified = string.Empty;
-        StoryType = string.Empty;
-        StoryGenre = string.Empty;
-        Viewpoint = string.Empty;
-        ViewpointCharacter = Guid.Empty;
-        Voice = string.Empty;
-        LiteraryDevice = string.Empty;
-        Style = string.Empty;
-        Tense = string.Empty;
-        Style = string.Empty;
-        Tone = string.Empty;
-        StoryIdea = string.Empty;
-        Concept = string.Empty;
-        StructureNotes = string.Empty;
-        Notes = string.Empty;
-        StoryProblem = Guid.Empty;
-    }
 
 	/// <summary>
 	/// JSON Constructor.

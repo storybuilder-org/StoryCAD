@@ -1,5 +1,4 @@
 ﻿using System.Text.Json.Serialization;
-using Windows.Data.Xml.Dom;
 
 namespace StoryCAD.Models;
 
@@ -357,34 +356,6 @@ public class SceneModel : StoryElement
 	    Notes = string.Empty;
     }
 
-	public SceneModel(IXmlNode xn, StoryModel model) : base(xn, model)
-    {
-        ViewpointCharacter = Guid.Empty;
-        Date = string.Empty;
-        Time = string.Empty;
-        Setting = Guid.Empty;
-        SceneType = string.Empty;
-        CastMembers = new List<Guid>();
-        Remarks = string.Empty;
-        ScenePurpose = new List<string>();
-        ValueExchange = string.Empty;
-        Protagonist = Guid.Empty;
-        ProtagEmotion = string.Empty;
-        ProtagGoal = string.Empty;
-        Antagonist = Guid.Empty;
-        AntagEmotion = string.Empty;
-        AntagGoal = string.Empty;
-        Opposition = string.Empty;
-        Outcome = string.Empty;
-        Emotion = string.Empty;
-        Events = string.Empty;
-        Consequences = string.Empty;
-        Significance = string.Empty;
-        Realization = string.Empty;
-        NewGoal = string.Empty;
-        Review = string.Empty;
-        Notes = string.Empty;
-    }
 
 	public SceneModel()
 	{
