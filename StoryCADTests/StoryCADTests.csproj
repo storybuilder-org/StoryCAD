@@ -35,33 +35,6 @@
 		<None Update="TestInputs\Full.stbx">
 		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
-		<None Update="TestInputs\Migrations\A Doll%27s House.stbx">
-		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
-		<None Update="TestInputs\Migrations\Danger Calls.stbx">
-		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
-		<None Update="TestInputs\Migrations\Hamlet.stbx">
-		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
-		<None Update="TestInputs\Migrations\LegacyTest.stbx">
-		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
-		<None Update="TestInputs\Migrations\Rocky.stbx">
-		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
-		<None Update="TestInputs\Migrations\Snow White.stbx">
-		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
-		<None Update="TestInputs\Migrations\The Glass Menagerie.stbx">
-		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
-		<None Update="TestInputs\Migrations\The Maltese Falcon.stbx">
-		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
-		<None Update="TestInputs\Migrations\The Old Man and the Sea.stbx">
-		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
 		<None Update="TestInputs\OpenFromDesktopTest.stbx">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
