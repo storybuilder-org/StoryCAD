@@ -1,5 +1,4 @@
 ﻿using System.Text.Json.Serialization;
-using Windows.Data.Xml.Dom;
 
 namespace StoryCAD.Models;
 
@@ -23,10 +22,6 @@ public class FolderModel : StoryElement
         Notes = string.Empty;
     }
     public FolderModel(string name, StoryModel model, StoryItemType type, StoryNodeItem Node) : base(name, type, model, Node)
-    {
-        Notes = string.Empty;
-    }
-    public FolderModel(IXmlNode xn, StoryModel model) : base(xn, model)
     {
         Notes = string.Empty;
     }

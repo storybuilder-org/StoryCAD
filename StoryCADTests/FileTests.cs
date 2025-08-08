@@ -281,29 +281,6 @@ public class FileTests
 	    Assert.AreEqual("Refusal of the Call", mainProblem.StructureBeats[2].Title, "Third beat title mismatch.");
             Assert.AreEqual(Guid.Parse("4e7c0217-64e8-4c74-8438-debb584cf3b8"), mainProblem.StructureBeats[2].Guid, "Third bound Beat GUID mismatch");
     }
-	
-    [TestMethod]
-    public async Task MigrationTests()
-    {
-	    Ioc.Default.GetRequiredService<PreferenceService>().Model.ProjectDirectory = App.InputDir;
-	    Ioc.Default.GetRequiredService<PreferenceService>().Model.BackupDirectory = App.ResultsDir;
-	    foreach (var file in Directory.GetFiles(Path.Combine(App.InputDir, "Migrations")))
-	    {
-		    // Load XML
-		    StorageFile sample = await StorageFile.GetFileFromPathAsync(file);
-		    StoryModel xmlModel = await new LegacyXMLReader(Ioc.Default.GetRequiredService<LogService>()).ReadFile(sample);
-
-		    // Convert
-		    StoryIO io = new();
-		    StoryModel jsonModel = await io.MigrateModel(sample);
-
-		    // Assert they are the same
-		    Assert.AreEqual(xmlModel.StoryElements.Count(), jsonModel.StoryElements.Count(), "Story elements count mismatch.");
-		    Assert.IsTrue(xmlModel.ExplorerView.Count() == jsonModel.ExplorerView.Count(), "ExplorerView mismatch.");
-		    Assert.IsTrue(xmlModel.NarratorView.Count() == jsonModel.NarratorView.Count(), "NarratorView mismatch.");
-	    }
-	}
-
 
 	[TestMethod]
 	public async Task FileSaveTest()
@@ -463,7 +440,7 @@ public class FileTests
     public async Task CheckFileAvailability()
     {
         var _storyIO = Ioc.Default.GetRequiredService<StoryIO>();
-        string _legacyFilePath = Path.Combine(App.InputDir,"Migrations","LegacyTest.stbx");
+        string _legacyFilePath = Path.Combine(App.InputDir, "AddElement.stbx");
         bool result = await _storyIO.CheckFileAvailability(_legacyFilePath);
         Assert.IsTrue(result, $"Expected legacy file at {_legacyFilePath} to be available.");
     }

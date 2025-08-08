@@ -1,5 +1,4 @@
 ﻿using System.Text.Json.Serialization;
-using Windows.Data.Xml.Dom;
 using CommunityToolkit.Mvvm.ComponentModel;
 using StoryCAD.ViewModels.SubViewModels;
 using StoryCAD.DAL;
@@ -180,75 +179,6 @@ public class StoryElement : ObservableObject
         _name = string.Empty;
         _type = StoryItemType.Unknown;
         _node = null;
-    }
-
-    public StoryElement(IXmlNode xn, StoryModel model)
-    {
-        Guid uuid = default;
-        StoryItemType type = StoryItemType.Unknown;
-        string name = string.Empty;
-        bool _uuidFound = false;
-        bool _nameFound = false;
-        ElementType = StoryItemType.Unknown;
-        switch (xn.NodeName)
-        {
-            case "Overview":
-                type = StoryItemType.StoryOverview;
-                break;
-            case "Problem":
-                type = StoryItemType.Problem;
-                break;
-            case "Character":
-                type = StoryItemType.Character;
-                break;
-            case "Setting":
-                type = StoryItemType.Setting;
-                break;
-            case "PlotPoint":       // Legacy: PlotPoint was renamed to Scene   
-                type = StoryItemType.Scene;
-                break;
-            case "Scene":
-                type = StoryItemType.Scene;
-                break;
-            case "Separator":       // Legacy: Separator was renamed to Folder
-                type = StoryItemType.Folder;
-                break;
-            case "Folder":
-                type = StoryItemType.Folder;
-                break;
-            case "Section":
-                type = StoryItemType.Section;
-                break;
-            case "Notes":
-                type = StoryItemType.Notes;
-                break;
-            case "Web":
-                type= StoryItemType.Web;
-                break;
-            case "TrashCan":
-                type = StoryItemType.TrashCan;
-                break;
-        }
-        foreach (IXmlNode _attr in xn.Attributes)
-        {
-            switch (_attr.NodeName)
-            {
-                case "UUID":
-                    uuid = new Guid(_attr.InnerText);
-                    _uuidFound = true;
-                    break;
-                case "Name":
-                    name = _attr.InnerText;
-                    _nameFound = true;
-                    break;
-            }
-            if (_uuidFound && _nameFound)
-                break;
-        }
-        _uuid = uuid;
-        _name = name;
-        _type = type;
-        model.StoryElements.Add(this);
     }
 
     #endregion

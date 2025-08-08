@@ -1,5 +1,4 @@
-﻿using Windows.Data.Xml.Dom;
-using StoryCAD.Services;
+﻿using StoryCAD.Services;
 using System.Text.Json.Serialization;
 
 namespace StoryCAD.Models;
@@ -40,10 +39,4 @@ public class WebModel : StoryElement
 
 	public WebModel(){}
 	
-    //TODO: REMOVE WITH STORYREADER.
-    public WebModel(IXmlNode xn, StoryModel model) : base(xn, model)
-    {
-        URL = new Uri("https://google.com/");
-        Timestamp = DateTime.MaxValue;
-    }
 }
