@@ -37,7 +37,6 @@ public class LogService : ILogService
             fileTarget.CreateDirs = true;
             fileTarget.MaxArchiveFiles = 7;
             fileTarget.ArchiveEvery = FileArchivePeriod.Day;
-            fileTarget.ConcurrentWrites = true;
             fileTarget.Layout = "${longdate} | ${level} | ${message} | ${exception:format=Message,StackTrace,Data:MaxInnerExceptionLevel=15}";
             LoggingRule fileRule = new("*", NLog.LogLevel.Off, fileTarget);
             if (Ioc.Default.GetRequiredService<PreferenceService>().Model.AdvancedLogging)

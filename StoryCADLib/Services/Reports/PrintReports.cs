@@ -1,7 +1,6 @@
 ﻿using System.Text;
 ﻿using System.Drawing;
 using System.Drawing.Printing;
-using System.Text;
 using StoryCAD.Services.Outline;
 using StoryCAD.ViewModels.Tools;
 

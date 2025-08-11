@@ -707,7 +707,7 @@ namespace StoryCADTests
         /// Tests that GetAllStoryElements returns empty list for empty model
         /// </summary>
         [TestMethod]
-        public async Task GetAllStoryElements_EmptyModel_ReturnsEmptyList()
+        public void GetAllStoryElements_EmptyModel_ReturnsEmptyList()
         {
             // Arrange
             var model = new StoryModel();

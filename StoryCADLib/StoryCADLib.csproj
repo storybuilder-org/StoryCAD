@@ -11,6 +11,7 @@
 	  <Version>3.2.1.0</Version>
 	  <FileVersion>3.2.1.0</FileVersion>
 	  <AssemblyVersion>3.2.1.0</AssemblyVersion>
+	  <PackageVersion>3.2.1-preview</PackageVersion>
 	  <DisableEmbeddedXbf>false</DisableEmbeddedXbf>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
@@ -92,15 +93,11 @@
     <PRIResource Remove="Services\Preferences\**" />
     <PRIResource Remove="Services\Theming\**" />
   </ItemGroup>
-  <ItemGroup>
-    <Compile Remove="Collaborator\ViewModels\IWizardStepViewModel.cs" />
-    <Compile Remove="Collaborator\ViewModels\IWizardViewModel.cs" />
-    <Compile Remove="Controls\ProblemName.cs" />
-  </ItemGroup>
-
-	<PropertyGroup>
-		<WindowsSdkPackageVersion>10.0.22621.38</WindowsSdkPackageVersion>
-	</PropertyGroup>
+	<ItemGroup>
+		<Compile Remove="Collaborator\ViewModels\IWizardStepViewModel.cs" />
+		<Compile Remove="Collaborator\ViewModels\IWizardViewModel.cs" />
+		<Compile Remove="Controls\ProblemName.cs" />
+	</ItemGroup>
 
 	<ItemGroup>
 	  <AppxManifest Include="Package.appxmanifest">
@@ -110,20 +107,22 @@
 
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
-    <PackageReference Include="dotenv.net" Version="3.2.1" />
+    <PackageReference Include="dotenv.net" Version="4.0.0" />
     <PackageReference Include="Elmah.Io.NLog" Version="5.3.55" />
-    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.2792.45" />
-    <PackageReference Include="MySql.Data" Version="9.2.0" /> 
-    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.6.250228001" />
-	<PackageReference Include="NLog" Version="5.4.0" />
-	<PackageReference Include="NLog.Extensions.Logging" Version="5.4.0" />
-	<PackageReference Include="NRTFTree-Async" Version="1.0.0" />
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.2903.40" />
+    <PackageReference Include="MySql.Data" Version="9.4.0" /> 
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.7.250606001" />
+	<PackageReference Include="NLog" Version="6.0.3" />
+	<PackageReference Include="NLog.Extensions.Logging" Version="6.0.3" />
+	<PackageReference Include="NRTFTree-Async" Version="1.0.1" />
 	<PackageReference Include="Octokit" Version="14.0.0" />
-    <PackageReference Include="WinUIEx" Version="2.5.1" />
-    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.1742" />
-    <PackageReference Include="Microsoft.SemanticKernel" Version="1.41.0" />
-    <PackageReference Include="Microsoft.SemanticKernel.Abstractions" Version="1.41.0" />
+    <PackageReference Include="WinUIEx" Version="2.6.0" />
+    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.4654" />
+    <PackageReference Include="Microsoft.SemanticKernel" Version="1.61.0" />
+    <PackageReference Include="Microsoft.SemanticKernel.Abstractions" Version="1.61.0" />
     <PackageReference Include="Microsoft.SemanticKernel.Planners.OpenAI" Version="1.16.0-preview" />
+    <PackageReference Include="System.Collections.Immutable" Version="9.0.8" />
+    <PackageReference Include="System.Reflection.Metadata" Version="9.0.8" />
   </ItemGroup>
 
   <ItemGroup>
@@ -135,8 +134,6 @@
   </ItemGroup>
   
 	<PropertyGroup>
-		<WindowsSdkPackageVersion>10.0.22621.38</WindowsSdkPackageVersion>
-		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<IncludeSymbols>True</IncludeSymbols>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>

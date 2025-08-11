@@ -696,7 +696,7 @@ public class OutlineViewModel : ObservableRecipient
         }
     }
 
-    public async Task PrintCurrentNodeAsync()
+    public Task PrintCurrentNodeAsync()
     {
         using (var serializationLock = new SerializationLock(autoSaveService, backupService, logger))
         {
@@ -704,10 +704,11 @@ public class OutlineViewModel : ObservableRecipient
             {
                 Messenger.Send(new StatusChangedMessage(new("Right tap a node to print", LogLevel.Warn)));
                 logger.Log(LogLevel.Info, "Print node failed as no node is selected");
-                return;
+                return Task.CompletedTask;
             }
             Ioc.Default.GetRequiredService<PrintReportDialogVM>().PrintSingleNode(shellVm.RightTappedNode);
         }
+        return Task.CompletedTask;
     }
 
     public async Task KeyQuestionsTool()

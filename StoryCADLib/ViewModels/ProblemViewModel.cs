@@ -891,7 +891,7 @@ public class ProblemViewModel : ObservableRecipient, INavigable
             Ioc.Default.GetService<OutlineService>()
                 .SaveBeatsheet(FilePath.Path, StructureDescription, StructureBeats.ToList());
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             Ioc.Default.GetService<ShellViewModel>().ShowMessage(LogLevel.Error,"Failed to save Beatsheet", false);
 
@@ -907,7 +907,7 @@ public class ProblemViewModel : ObservableRecipient, INavigable
             StructureDescription = model.Description;
             StructureBeats = new ObservableCollection<StructureBeatViewModel>(model.Beats);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             Ioc.Default.GetService<ShellViewModel>().ShowMessage(LogLevel.Error, "Failed to Load Beatsheet", false);
 
