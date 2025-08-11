@@ -149,7 +149,7 @@ namespace StoryCADTests
             string nonExistentPath = Path.Combine(testOutputPath, "NonExistentFile.json");
 
             // Act & Assert
-            await Assert.ThrowsExceptionAsync<FileNotFoundException>(async () =>
+            await Assert.ThrowsExactlyAsync<FileNotFoundException>(async () =>
             {
                 await _outlineService.OpenFile(nonExistentPath);
             });
@@ -197,7 +197,7 @@ namespace StoryCADTests
             string invalidPath = string.Empty;
 
             // Act & Assert
-            await Assert.ThrowsExceptionAsync<ArgumentNullException>(async () =>
+            await Assert.ThrowsExactlyAsync<ArgumentNullException>(async () =>
             {
                 await _outlineService.WriteModel(model, invalidPath);
             });
@@ -246,25 +246,29 @@ namespace StoryCADTests
         /// Tests that SetCurrentView throws ArgumentNullException for null model
         /// </summary>
         [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void SetCurrentView_NullModel_ThrowsArgumentNullException()
         {
-            // Act
-            _outlineService.SetCurrentView(null, StoryViewType.ExplorerView);
+            // Act & Assert
+            Assert.ThrowsExactly<ArgumentNullException>(() =>
+            {
+                _outlineService.SetCurrentView(null, StoryViewType.ExplorerView);
+            });
         }
 
         /// <summary>
         /// Tests that SetCurrentView throws ArgumentException for invalid view type
         /// </summary>
         [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
         public void SetCurrentView_InvalidViewType_ThrowsArgumentException()
         {
             // Arrange
             var model = new StoryModel();
 
-            // Act
-            _outlineService.SetCurrentView(model, (StoryViewType)999);
+            // Act & Assert
+            Assert.ThrowsExactly<ArgumentException>(() =>
+            {
+                _outlineService.SetCurrentView(model, (StoryViewType)999);
+            });
         }
 
         /// <summary>
@@ -368,29 +372,33 @@ namespace StoryCADTests
         /// Tests that GetStoryElementByGuid throws exception for empty GUID
         /// </summary>
         [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
         public void GetStoryElementByGuid_EmptyGuid_ThrowsException()
         {
             // Arrange
             var model = new StoryModel();
 
-            // Act
-            _outlineService.GetStoryElementByGuid(model, Guid.Empty);
+            // Act & Assert
+            Assert.ThrowsExactly<ArgumentException>(() =>
+            {
+                _outlineService.GetStoryElementByGuid(model, Guid.Empty);
+            });
         }
 
         /// <summary>
         /// Tests that GetStoryElementByGuid throws exception for non-existent GUID
         /// </summary>
         [TestMethod]
-        [ExpectedException(typeof(InvalidOperationException))]
         public async Task GetStoryElementByGuid_NonExistentGuid_ThrowsException()
         {
             // Arrange
             var model = await _outlineService.CreateModel("Test Story", "Test Author", 0);
             var nonExistentGuid = Guid.NewGuid();
 
-            // Act
-            _outlineService.GetStoryElementByGuid(model, nonExistentGuid);
+            // Act & Assert
+            Assert.ThrowsExactly<InvalidOperationException>(() =>
+            {
+                _outlineService.GetStoryElementByGuid(model, nonExistentGuid);
+            });
         }
 
         #endregion
@@ -423,28 +431,32 @@ namespace StoryCADTests
         /// Tests that UpdateStoryElement throws exception for null model
         /// </summary>
         [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void UpdateStoryElement_NullModel_ThrowsException()
         {
             // Arrange
             var element = new CharacterModel();
 
-            // Act
-            _outlineService.UpdateStoryElement(null, element);
+            // Act & Assert
+            Assert.ThrowsExactly<ArgumentNullException>(() =>
+            {
+                _outlineService.UpdateStoryElement(null, element);
+            });
         }
 
         /// <summary>
         /// Tests that UpdateStoryElement throws exception for null element
         /// </summary>
         [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
         public async Task UpdateStoryElement_NullElement_ThrowsException()
         {
             // Arrange
             var model = await _outlineService.CreateModel("Test Story", "Test Author", 0);
 
-            // Act
-            _outlineService.UpdateStoryElement(model, null);
+            // Act & Assert
+            Assert.ThrowsExactly<ArgumentNullException>(() =>
+            {
+                _outlineService.UpdateStoryElement(model, null);
+            });
         }
 
         /// <summary>
@@ -510,11 +522,13 @@ namespace StoryCADTests
         /// Tests that GetCharacterList throws exception for null model
         /// </summary>
         [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void GetCharacterList_NullModel_ThrowsException()
         {
-            // Act
-            _outlineService.GetCharacterList(null);
+            // Act & Assert
+            Assert.ThrowsExactly<ArgumentNullException>(() =>
+            {
+                _outlineService.GetCharacterList(null);
+            });
         }
 
         /// <summary>
@@ -571,54 +585,62 @@ namespace StoryCADTests
         /// Tests that UpdateStoryElementByGuid throws exception for null model
         /// </summary>
         [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void UpdateStoryElementByGuid_NullModel_ThrowsException()
         {
-            // Act
-            _outlineService.UpdateStoryElementByGuid(null, Guid.NewGuid(), new CharacterModel());
+            // Act & Assert
+            Assert.ThrowsExactly<ArgumentNullException>(() =>
+            {
+                _outlineService.UpdateStoryElementByGuid(null, Guid.NewGuid(), new CharacterModel());
+            });
         }
 
         /// <summary>
         /// Tests that UpdateStoryElementByGuid throws exception for empty GUID
         /// </summary>
         [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
         public async Task UpdateStoryElementByGuid_EmptyGuid_ThrowsException()
         {
             // Arrange
             var model = await _outlineService.CreateModel("Test Story", "Test Author", 0);
             
-            // Act
-            _outlineService.UpdateStoryElementByGuid(model, Guid.Empty, new CharacterModel());
+            // Act & Assert
+            Assert.ThrowsExactly<ArgumentException>(() =>
+            {
+                _outlineService.UpdateStoryElementByGuid(model, Guid.Empty, new CharacterModel());
+            });
         }
 
         /// <summary>
         /// Tests that UpdateStoryElementByGuid throws exception for null element
         /// </summary>
         [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
         public async Task UpdateStoryElementByGuid_NullElement_ThrowsException()
         {
             // Arrange
             var model = await _outlineService.CreateModel("Test Story", "Test Author", 0);
             
-            // Act
-            _outlineService.UpdateStoryElementByGuid(model, Guid.NewGuid(), null);
+            // Act & Assert
+            Assert.ThrowsExactly<ArgumentNullException>(() =>
+            {
+                _outlineService.UpdateStoryElementByGuid(model, Guid.NewGuid(), null);
+            });
         }
 
         /// <summary>
         /// Tests that UpdateStoryElementByGuid throws exception for non-existent GUID
         /// </summary>
         [TestMethod]
-        [ExpectedException(typeof(InvalidOperationException))]
         public async Task UpdateStoryElementByGuid_NonExistentGuid_ThrowsException()
         {
             // Arrange
             var model = await _outlineService.CreateModel("Test Story", "Test Author", 0);
             var nonExistentGuid = Guid.NewGuid();
             
-            // Act
-            _outlineService.UpdateStoryElementByGuid(model, nonExistentGuid, new CharacterModel());
+            // Act & Assert
+            Assert.ThrowsExactly<InvalidOperationException>(() =>
+            {
+                _outlineService.UpdateStoryElementByGuid(model, nonExistentGuid, new CharacterModel());
+            });
         }
 
         #endregion
@@ -674,11 +696,13 @@ namespace StoryCADTests
         /// Tests that GetSettingsList throws exception for null model
         /// </summary>
         [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void GetSettingsList_NullModel_ThrowsException()
         {
-            // Act
-            _outlineService.GetSettingsList(null);
+            // Act & Assert
+            Assert.ThrowsExactly<ArgumentNullException>(() =>
+            {
+                _outlineService.GetSettingsList(null);
+            });
         }
 
         #endregion
@@ -724,11 +748,13 @@ namespace StoryCADTests
         /// Tests that GetAllStoryElements throws exception for null model
         /// </summary>
         [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void GetAllStoryElements_NullModel_ThrowsException()
         {
-            // Act
-            _outlineService.GetAllStoryElements(null);
+            // Act & Assert
+            Assert.ThrowsExactly<ArgumentNullException>(() =>
+            {
+                _outlineService.GetAllStoryElements(null);
+            });
         }
 
         /// <summary>

@@ -93,7 +93,7 @@ public class SemanticKernelApiTests
     public void GetAllElements_WithoutModel_ThrowsException()
     {
         // Act & Assert: Calling GetAllElements without creating a model should throw an InvalidOperationException.
-        Assert.ThrowsException<InvalidOperationException>(() => _api.GetAllElements());
+        Assert.ThrowsExactly<InvalidOperationException>(() => _api.GetAllElements());
     }
 
     [TestMethod]
@@ -120,7 +120,7 @@ public class SemanticKernelApiTests
         string randomGuid = Guid.NewGuid().ToString();
 
         // Act & Assert: DeleteStoryElement should throw NotImplementedException.
-        Assert.ThrowsException<NotImplementedException>(() => _api.DeleteStoryElement(randomGuid));
+        Assert.ThrowsExactly<NotImplementedException>(() => _api.DeleteStoryElement(randomGuid));
     }
 
     [TestMethod]
@@ -385,7 +385,7 @@ public class SemanticKernelApiTests
         Assert.IsTrue(relationshipResult, "AddRelationship should return true on success.");
 
         // Also verify that calling with Guid.Empty throws an exception.
-        Assert.ThrowsException<ArgumentNullException>(() =>
+        Assert.ThrowsExactly<ArgumentNullException>(() =>
             _api.AddRelationship(Guid.Empty, charElement2.Uuid, "Invalid"));
     }
 }
