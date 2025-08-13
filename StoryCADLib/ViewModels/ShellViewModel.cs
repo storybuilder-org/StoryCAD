@@ -541,9 +541,6 @@ public class ShellViewModel : ObservableRecipient
 
             //TODO: Logging???
             
-            var id = CurrentNode.Uuid; // get the story element;
-            OutlineService outlineService = Ioc.Default.GetRequiredService<OutlineService>();
-            CollabArgs.SelectedElement = outlineService.GetStoryElementByGuid(OutlineManager.StoryModel, id);
             CollabArgs.StoryModel = OutlineManager.StoryModel;
             Ioc.Default.GetService<CollaboratorService>()!.LoadWorkflows(CollabArgs);
             Ioc.Default.GetService<CollaboratorService>()!.CollaboratorWindow.Show();

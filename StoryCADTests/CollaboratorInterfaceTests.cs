@@ -26,7 +26,7 @@ public class CollaboratorInterfaceTests
     /// <summary>
     /// Test that CreateWindow returns a Window
     /// </summary>
-    [TestMethod] 
+    [UITestMethod] 
     public void ICollaborator_CreateWindow_ReturnsWindow()
     {
         // Arrange

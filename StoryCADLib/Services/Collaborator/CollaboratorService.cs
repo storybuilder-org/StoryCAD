@@ -43,12 +43,10 @@ public class CollaboratorService
     
     public void LoadWorkflows(CollaboratorArgs args)
     {
-        var wizard = Ioc.Default.GetService<WorkflowViewModel>();
-        wizard!.Model = args.SelectedElement;
-        
+        // Load the workflow navigation menu for user selection
         if (_collaboratorInterface != null)
         {
-            LoadWorkflowViewModel(args.SelectedElement.ElementType);
+            _collaboratorInterface.LoadWizardViewModel();
         }
         else
         {

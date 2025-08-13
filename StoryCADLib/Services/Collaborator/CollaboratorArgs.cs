@@ -6,8 +6,6 @@ using WinUIEx;
 
 public class CollaboratorArgs
 {
-    public StoryElement SelectedElement;
-
     public StoryModel StoryModel;
     
     public WorkflowViewModel WorkflowVm;
