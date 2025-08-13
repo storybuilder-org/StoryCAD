@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Text.Json.Serialization;
 using StoryCAD.Services.Outline;
+using StoryCAD.Services.Collaborator.Contracts;
 using Microsoft.SemanticKernel;
 using System.Reflection;
 
@@ -10,10 +11,19 @@ namespace StoryCAD.Services.API;
 /// <summary>
 /// 
 /// </summary>
-public class SemanticKernelApi
+public class SemanticKernelApi : IStoryCADAPI
 {
     private readonly OutlineService _outlineService = Ioc.Default.GetRequiredService<OutlineService>();
-    public StoryModel CurrentModel;
+    public StoryModel CurrentModel { get; set; }
+
+    /// <summary>
+    /// Sets the current StoryModel to work with (for Collaborator integration)
+    /// </summary>
+    /// <param name="model">The active StoryModel from ShellViewModel</param>
+    public void SetCurrentModel(StoryModel model)
+    {
+        CurrentModel = model;
+    }
 
     /// <summary>
     /// Creates a new empty story outline based on a template.
@@ -213,6 +223,19 @@ public class SemanticKernelApi
         return element.Serialize();
     }
 
+    /// <summary>
+    /// Implementation of IStoryCADAPI.GetStoryElement
+    /// </summary>
+    public StoryElement GetStoryElement(Guid guid)
+    {
+        if (CurrentModel == null)
+        {
+            return null;
+        }
+
+        return _outlineService.GetStoryElementByGuid(CurrentModel, guid);
+    }
+
     [KernelFunction, Description("""
                                  Adds a new StoryElement to the current StoryModel. 
                                  This function returns the Guid of the story element that was added. 
@@ -378,6 +401,20 @@ public class SemanticKernelApi
          or if any error occurs (such as a type conversion issue), the operation will fails.
          You should use AddCastMember and AddRelationship for updating those fields when updating those fields.
          """)]
+    /// <summary>
+    /// Implementation of IStoryCADAPI.UpdateElementProperty with compatible return type
+    /// </summary>
+    OperationResult<object> IStoryCADAPI.UpdateElementProperty(Guid elementUuid, string propertyName, object value)
+    {
+        var result = UpdateElementProperty(elementUuid, propertyName, value);
+        return new OperationResult<object>
+        {
+            IsSuccess = result.IsSuccess,
+            Payload = result.Payload,
+            ErrorMessage = result.ErrorMessage
+        };
+    }
+
     public OperationResult<StoryElement> UpdateElementProperty(Guid elementUuid, string propertyName, object value)
     {
         // Ensure we have a current StoryModel.
