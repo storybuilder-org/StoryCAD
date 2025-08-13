@@ -622,7 +622,7 @@ public class OutlineViewModel : ObservableRecipient
             foreach (StoryNodeItem node in shellVm.OutlineManager.StoryModel.CurrentView[0])
             {
                 //checks if node name contains the thing we are looking for
-                if (searchService.SearchStoryElement(node, shellVm.FilterText, StoryModel)) 
+                if (searchService.SearchString(node, shellVm.FilterText, StoryModel)) 
                 {
                     searchTotal++;
                     if (window.RequestedTheme == ElementTheme.Light)

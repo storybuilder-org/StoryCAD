@@ -327,7 +327,11 @@ public Task<StoryModel> CreateModel(string name, string author, int selectedTemp
         List<StoryElement> foundNodes = new();
         foreach (StoryElement element in model.StoryElements)
         {
-            if (Ioc.Default.GetRequiredService<DeletionService>().SearchStoryElement(element.Node, elementGuid, model))
+            // Skip checking the element against itself
+            if (element.Uuid == elementGuid)
+                continue;
+                
+            if (Ioc.Default.GetRequiredService<SearchService>().SearchUuid(element.Node, elementGuid, model))
             {
                 foundNodes.Add(element);
             }
@@ -357,8 +361,8 @@ public Task<StoryModel> CreateModel(string name, string author, int selectedTemp
 
         foreach (StoryElement element in model.StoryElements)
         {
-            Ioc.Default.GetRequiredService<DeletionService>()
-                .SearchStoryElement(element.Node, elementToRemove, model, true);
+            Ioc.Default.GetRequiredService<SearchService>()
+                .SearchUuid(element.Node, elementToRemove, model, true);
         }
         _log.Log(LogLevel.Info, "RemoveReferenceToElement completed.");
         return true;
@@ -1004,6 +1008,188 @@ public Task<StoryModel> CreateModel(string name, string author, int selectedTemp
             var elements = model.StoryElements.ToList();
             _log.Log(LogLevel.Info, $"Retrieved {elements.Count} story elements from model");
             return elements;
+        }
+    }
+
+    /// <summary>
+    /// Searches for story elements containing the specified text.
+    /// </summary>
+    /// <param name="model">The story model to search in</param>
+    /// <param name="searchText">The text to search for (case-insensitive)</param>
+    /// <returns>A list of story elements that contain the search text</returns>
+    public List<StoryElement> SearchForText(StoryModel model, string searchText)
+    {
+        if (model == null)
+            throw new ArgumentNullException(nameof(model));
+            
+        if (string.IsNullOrWhiteSpace(searchText))
+            return new List<StoryElement>();
+
+        _log.Log(LogLevel.Info, $"Searching for text: {searchText}");
+        
+        var searchService = new SearchService();
+        var results = new List<StoryElement>();
+        
+        var autoSaveService = Ioc.Default.GetRequiredService<AutoSaveService>();
+        var backupService = Ioc.Default.GetRequiredService<BackupService>();
+        
+        using (var serializationLock = new SerializationLock(autoSaveService, backupService, _log))
+        {
+            foreach (var element in model.StoryElements)
+            {
+                if (searchService.SearchString(element.Node, searchText, model))
+                {
+                    results.Add(element);
+                }
+            }
+        }
+        
+        _log.Log(LogLevel.Info, $"Found {results.Count} elements containing '{searchText}'");
+        return results;
+    }
+
+    /// <summary>
+    /// Searches for story elements that reference the specified UUID.
+    /// </summary>
+    /// <param name="model">The story model to search in</param>
+    /// <param name="targetUuid">The UUID to search for</param>
+    /// <returns>A list of story elements that reference the specified UUID</returns>
+    public List<StoryElement> SearchForUuidReferences(StoryModel model, Guid targetUuid)
+    {
+        if (model == null)
+            throw new ArgumentNullException(nameof(model));
+            
+        if (targetUuid == Guid.Empty)
+            return new List<StoryElement>();
+
+        _log.Log(LogLevel.Info, $"Searching for UUID references: {targetUuid}");
+        
+        var searchService = new SearchService();
+        var results = new List<StoryElement>();
+        
+        var autoSaveService = Ioc.Default.GetRequiredService<AutoSaveService>();
+        var backupService = Ioc.Default.GetRequiredService<BackupService>();
+        
+        using (var serializationLock = new SerializationLock(autoSaveService, backupService, _log))
+        {
+            foreach (var element in model.StoryElements)
+            {
+                if (searchService.SearchUuid(element.Node, targetUuid, model, false))
+                {
+                    results.Add(element);
+                }
+            }
+        }
+        
+        _log.Log(LogLevel.Info, $"Found {results.Count} elements referencing UUID {targetUuid}");
+        return results;
+    }
+
+    /// <summary>
+    /// Removes all references to a specified UUID from the story model.
+    /// </summary>
+    /// <param name="model">The story model to clean</param>
+    /// <param name="targetUuid">The UUID to remove references to</param>
+    /// <returns>The number of elements that had references removed</returns>
+    public int RemoveUuidReferences(StoryModel model, Guid targetUuid)
+    {
+        if (model == null)
+            throw new ArgumentNullException(nameof(model));
+            
+        if (targetUuid == Guid.Empty)
+            return 0;
+
+        _log.Log(LogLevel.Info, $"Removing references to UUID: {targetUuid}");
+        
+        var searchService = new SearchService();
+        int affectedCount = 0;
+        
+        var autoSaveService = Ioc.Default.GetRequiredService<AutoSaveService>();
+        var backupService = Ioc.Default.GetRequiredService<BackupService>();
+        
+        using (var serializationLock = new SerializationLock(autoSaveService, backupService, _log))
+        {
+            foreach (var element in model.StoryElements)
+            {
+                if (searchService.SearchUuid(element.Node, targetUuid, model, true))
+                {
+                    affectedCount++;
+                }
+            }
+            
+            if (affectedCount > 0)
+            {
+                model.Changed = true;
+            }
+        }
+        
+        _log.Log(LogLevel.Info, $"Removed references from {affectedCount} elements");
+        return affectedCount;
+    }
+
+    /// <summary>
+    /// Searches for story elements within a specific subtree.
+    /// </summary>
+    /// <param name="model">The story model to search in</param>
+    /// <param name="rootNode">The root node of the subtree to search</param>
+    /// <param name="searchText">The text to search for (case-insensitive)</param>
+    /// <returns>A list of story elements in the subtree that contain the search text</returns>
+    public List<StoryElement> SearchInSubtree(StoryModel model, StoryNodeItem rootNode, string searchText)
+    {
+        if (model == null)
+            throw new ArgumentNullException(nameof(model));
+            
+        if (rootNode == null)
+            throw new ArgumentNullException(nameof(rootNode));
+            
+        if (string.IsNullOrWhiteSpace(searchText))
+            return new List<StoryElement>();
+
+        _log.Log(LogLevel.Info, $"Searching in subtree rooted at {rootNode.Name} for text: {searchText}");
+        
+        var searchService = new SearchService();
+        var results = new List<StoryElement>();
+        
+        var autoSaveService = Ioc.Default.GetRequiredService<AutoSaveService>();
+        var backupService = Ioc.Default.GetRequiredService<BackupService>();
+        
+        using (var serializationLock = new SerializationLock(autoSaveService, backupService, _log))
+        {
+            // Search the root node
+            if (searchService.SearchString(rootNode, searchText, model))
+            {
+                if (model.StoryElements.StoryElementGuids.TryGetValue(rootNode.Uuid, out var element))
+                {
+                    results.Add(element);
+                }
+            }
+            
+            // Recursively search children
+            SearchChildrenRecursive(rootNode, searchText, model, searchService, results);
+        }
+        
+        _log.Log(LogLevel.Info, $"Found {results.Count} elements in subtree containing '{searchText}'");
+        return results;
+    }
+
+    /// <summary>
+    /// Helper method to recursively search children nodes.
+    /// </summary>
+    private void SearchChildrenRecursive(StoryNodeItem parentNode, string searchText, 
+        StoryModel model, SearchService searchService, List<StoryElement> results)
+    {
+        foreach (var childNode in parentNode.Children)
+        {
+            if (searchService.SearchString(childNode, searchText, model))
+            {
+                if (model.StoryElements.StoryElementGuids.TryGetValue(childNode.Uuid, out var element))
+                {
+                    results.Add(element);
+                }
+            }
+            
+            // Recursively search this child's children
+            SearchChildrenRecursive(childNode, searchText, model, searchService, results);
         }
     }
 }
