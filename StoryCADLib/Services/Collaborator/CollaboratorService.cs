@@ -23,6 +23,8 @@ public class CollaboratorService
     private Assembly CollabAssembly;
     public WindowEx CollaboratorWindow;  // The secondary window for Collaborator
     private ICollaborator _collaboratorInterface;  // Interface-based reference
+    private const string PluginFileName = "CollaboratorLib.dll";
+    private const string EnvPluginDirVar = "STORYCAD_PLUGIN_DIR";
 
     #region Collaborator calls
     
@@ -251,8 +253,12 @@ public class CollaboratorService
     }
     public async Task<bool> CollaboratorEnabled()
     {
-        return State.DeveloperBuild
-               && Debugger.IsAttached
+        // Allow loading if:
+        // 1. Developer build AND plugin found
+        // 2. OR if STORYCAD_PLUGIN_DIR is set (for JIT debugging without F5)
+        var hasPluginDir = !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable(EnvPluginDirVar));
+        
+        return (State.DeveloperBuild || hasPluginDir)
                && await FindDll();
     }
 
@@ -262,96 +268,139 @@ public class CollaboratorService
     /// <returns>True if CollaboratorLib.dll exists, false otherwise.</returns>
     private async Task<bool> FindDll()
     {
-	    logger.Log(LogLevel.Info, "Locating CollaboratorLib...");
+        logger.Log(LogLevel.Info, "Locating CollaboratorLib...");
 
-		// Development path - when debugging with StoryBuilderCollaborator source
-		if (Debugger.IsAttached && State.DeveloperBuild)
-		{
-			// Get the current assembly's location (StoryCAD)
-			var currentAssemblyPath = System.Reflection.Assembly.GetExecutingAssembly().Location;
-			var storyCADDir = Path.GetDirectoryName(currentAssemblyPath);
-			
-			// Navigate up to find the common parent directory containing both repos
-			// Typically: .../StoryCAD/StoryCADLib/bin/x64/Debug/net8.0-windows10.0.xxxxx/StoryCADLib.dll
-			// We need to go up 7 levels to reach the parent of StoryCAD (the repos directory)
-			var reposDir = storyCADDir;
-			for (int i = 0; i < 7; i++)
-			{
-				reposDir = Path.GetDirectoryName(reposDir);
-				if (reposDir == null) break;
-			}
-			
-			if (reposDir != null)
-			{
-				// Try multiple possible debug output paths (different .NET versions)
-				string[] relativePaths = 
-				{
-					@"StoryBuilderCollaborator\CollaboratorLib\bin\x64\Debug\net8.0-windows10.0.22621.0\CollaboratorLib.dll",
-					@"StoryBuilderCollaborator\CollaboratorLib\bin\x64\Debug\net8.0-windows10.0.19041.0\CollaboratorLib.dll",
-					@"StoryBuilderCollaborator\CollaboratorPackage\bin\x64\Debug\net8.0-windows10.0.22621\CollaboratorLib.dll"
-				};
+        // 1) DEV: explicit override — deterministic
+        if (TryResolveFromEnv(out var envPath))
+        {
+            dllPath = envPath;
+            dllExists = true;
+            logger.Log(LogLevel.Info, $"Found via ${EnvPluginDirVar}: {dllPath}");
+            return true;
+        }
 
-				foreach (var relativePath in relativePaths)
-				{
-					var devPath = Path.Combine(reposDir, relativePath);
-					if (File.Exists(devPath))
-					{
-						dllPath = devPath;
-						dllExists = true;
-						logger.Log(LogLevel.Info, $"Found CollaboratorLib at development path: {dllPath}");
-						return true;
-					}
-				}
-			}
-			logger.Log(LogLevel.Warn, "CollaboratorLib not found in development paths, falling back to package lookup");
-		}
+        // 2) DEV: sibling repo (safeguarded scan)
+        if (State.DeveloperBuild)
+        {
+            if (TryResolveFromSibling(out var devPath))
+            {
+                dllPath = devPath;
+                dllExists = true;
+                logger.Log(LogLevel.Info, $"Found dev DLL: {dllPath}");
+                return true;
+            }
+            logger.Log(LogLevel.Warn, "Dev paths not found, falling back to package lookup.");
+        }
 
-		// Production path - look for installed package (existing code)
-		//Find all installed extensions
-	    AppExtensionCatalog _catalog = AppExtensionCatalog.Open("org.storybuilder");
-	    var InstalledExtensions = await _catalog.FindAllAsync();
-	    logger.Log(LogLevel.Info, $"Found {InstalledExtensions} installed extensions");
+        // 3) PROD: MSIX AppExtension
+        var (ok, pkgPath) = await TryResolveFromExtensionAsync();
+        if (ok)
+        {
+            dllPath = pkgPath;
+            dllExists = File.Exists(dllPath);
+            logger.Log(LogLevel.Info, $"Found package DLL: {dllPath}, exists={dllExists}");
+            return dllExists;
+        }
 
-		//No point in continuing if we have no extensions.
-		if (InstalledExtensions.Count == 0)
-		{
-			return false;
-		}
+        logger.Log(LogLevel.Info, "Failed to resolve CollaboratorLib.dll");
+        dllPath = null;
+        dllExists = false;
+        return false;
+    }
 
-		//Get package information for collaborator if installed.
-		Package CollabPkg = InstalledExtensions.First(ext => 
-			ext.Package.DisplayName == "StoryCAD Collaborator").Package;
-	    if (CollabPkg != null)
-	    {
-		    logger.Log(LogLevel.Info, $"Found Collaborator Package, {CollabPkg.DisplayName}" +
-		                              $" version {CollabPkg.Id.Version.Major}" +
-		                              $".{CollabPkg.Id.Version.Minor}" +
-		                              $".{CollabPkg.Id.Version.Build} " +
-		                              $"Located at {CollabPkg.InstalledLocation}");
+    private bool TryResolveFromEnv(out string path)
+    {
+        path = null;
+        var dir = Environment.GetEnvironmentVariable(EnvPluginDirVar);
+        if (string.IsNullOrWhiteSpace(dir)) return false;
 
-		    if (await CollabPkg.VerifyContentIntegrityAsync())
-		    {
-			    // Get the path to the DLL
-			    dllPath = Path.Combine(CollabPkg.InstalledPath, "CollaboratorLib.dll");
-			    dllExists = File.Exists(dllPath); // Verify that the DLL is present
-			}
-		    else
-		    {
-				logger.Log(LogLevel.Error, "Failed to verify CollabPackage, " +
-				                           "not loading it (Not a StoryCAD issue)");
-		    }
+        var candidate = Path.Combine(dir, PluginFileName);
+        if (!File.Exists(candidate))
+        {
+            logger.Log(LogLevel.Warn, $"{EnvPluginDirVar} set but file missing: {candidate}");
+            return false;
+        }
+        var pdb = Path.ChangeExtension(candidate, ".pdb");
+        if (!File.Exists(pdb))
+            logger.Log(LogLevel.Warn, $"PDB missing next to DLL: {pdb}");
 
+        path = candidate;
+        return true;
+    }
 
-	    }
-	    else
-	    {
-		    logger.Log(LogLevel.Info, "Failed to find Collaborator Package");
-		    dllExists = false;
-	    }
+    // Looks for: <reposRoot>\StoryBuilderCollaborator\CollaboratorLib\bin\x64\Debug\<net8.0-windows*>\CollaboratorLib.dll
+    private bool TryResolveFromSibling(out string path)
+    {
+        path = null;
 
+        var exeDir = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)!;
 
-		logger.Log(LogLevel.Info, $"Collaborator.dll exists {dllExists}");
-	    return dllExists;
+        var cursor = exeDir;
+        for (int i = 0; i < 10 && cursor != null; i++)
+            cursor = Path.GetDirectoryName(cursor);
+        if (cursor == null) return false;
+
+        var baseDebug = Path.Combine(cursor,
+            "StoryBuilderCollaborator", "CollaboratorLib", "bin", "x64", "Debug");
+        if (!Directory.Exists(baseDebug)) return false;
+
+        var tfmCandidates = Directory.EnumerateDirectories(baseDebug, "net*-windows*")
+                                     .OrderByDescending(d => Directory.GetLastWriteTimeUtc(d))
+                                     .ToList();
+        foreach (var tfmDir in tfmCandidates)
+        {
+            var candidate = Path.Combine(tfmDir, PluginFileName);
+            if (File.Exists(candidate))
+            {
+                var pdb = Path.ChangeExtension(candidate, ".pdb");
+                if (!File.Exists(pdb))
+                    logger.Log(LogLevel.Warn, $"PDB missing next to DLL: {pdb}");
+
+                path = candidate;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private async Task<(bool ok, string dllPath)> TryResolveFromExtensionAsync()
+    {
+        try
+        {
+            AppExtensionCatalog catalog = AppExtensionCatalog.Open("org.storybuilder");
+            var exts = await catalog.FindAllAsync();
+
+            logger.Log(LogLevel.Info, $"Found {exts.Count} installed extensions for org.storybuilder");
+
+            var collab = exts.FirstOrDefault(e =>
+                string.Equals(e.Package.Id.Name, "StoryCADCollaborator", StringComparison.OrdinalIgnoreCase) ||
+                (e.Package.DisplayName?.Contains("StoryCAD Collaborator", StringComparison.OrdinalIgnoreCase) ?? false));
+
+            if (collab == null)
+            {
+                logger.Log(LogLevel.Info, "Collaborator extension not installed.");
+                return (false, null);
+            }
+
+            var pkg = collab.Package;
+            logger.Log(LogLevel.Info,
+                $"Found Collaborator Package: {pkg.DisplayName} {pkg.Id.Version.Major}.{pkg.Id.Version.Minor}.{pkg.Id.Version.Build}");
+
+            if (!await pkg.VerifyContentIntegrityAsync())
+            {
+                logger.Log(LogLevel.Error, "VerifyContentIntegrityAsync failed; refusing to load.");
+                return (false, null);
+            }
+
+            var installDir = pkg.InstalledLocation.Path; // StorageFolder → string
+            var dll = Path.Combine(installDir, PluginFileName);
+            return (true, dll);
+        }
+        catch (Exception ex)
+        {
+            logger.Log(LogLevel.Error, $"Extension lookup failed: {ex}");
+            return (false, null);
+        }
     }
     #endregion
 
