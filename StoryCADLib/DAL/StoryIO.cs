@@ -54,16 +54,17 @@ public class StoryIO
 			//Check if file is legacy
 			if (JSON.Split("\n")[0].Contains("<?xml version=\"1.0\" encoding=\"utf-8\"?>"))
 			{
-				_logService.Log(LogLevel.Info, "File is legacy XML format - no longer supported");
+				_logService.Log(LogLevel.Info, "File is legacy XML format");
 
                 // Show dialog informing user about legacy format
                 var result = await Ioc.Default.GetRequiredService<Windowing>().ShowContentDialog(new()
 				{
-					Title = "Legacy File Format Not Supported",
-					Content = "This outline is in the legacy format which is no longer supported.\n\n" +
-					         "To convert this file to the current format, please use the StoryCAD Legacy Conversion Tool available at:\n" +
-					         "https://github.com/StoryBuilder-org/StoryCAD-Legacy-STBX-Conversion-Tool",
-					PrimaryButtonText = "Open Conversion Tool",
+					Title = "Legacy Outline format detected!",
+					Content ="""
+                             This outline is in an older format that’s no longer supported.
+                             To update it, please use the Legacy STBX tool to update your outlines to the current format.
+                             """,
+					PrimaryButtonText = "Download Conversion Tool",
 					SecondaryButtonText = "Close"
 				}, true);
 				
@@ -72,7 +73,7 @@ public class StoryIO
 				{
                     Process.Start(new ProcessStartInfo
                     {
-						FileName = "https://github.com/StoryBuilder-org/StoryCAD-Legacy-Conversion-Tool",
+						FileName = "https://github.com/storybuilder-org/StoryCAD-Legacy-STBX-Conversion-Tool/releases/tag/1.0.0",
 						UseShellExecute = true
 					});
 				}
