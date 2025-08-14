@@ -533,11 +533,11 @@ public class ShellViewModel : ObservableRecipient
     {
         if (SerializationLock.IsLocked())
         {
-            if (CurrentNode == null)
-            {
-                Messenger.Send(new StatusChangedMessage(new("Select a node to collaborate on", LogLevel.Warn, true)));
-                return;
-            }
+            //if (CurrentNode == null)
+            //{
+            //    Messenger.Send(new StatusChangedMessage(new("Select a node to collaborate on", LogLevel.Warn, true)));
+            //    return;
+            //}
 
             //TODO: Logging???
             
