@@ -11,6 +11,15 @@ This file provides project-specific guidance for StoryCAD development. Universal
 - Straightforward debugging (`Debugger.Launch()`) over complex conditions
 - Clear, obvious code over clever solutions
 
+## Branch Management
+
+**IMPORTANT**: Always work in the correct branch for the issue:
+- Check current branch with `git status` at start of session
+- Create issue-specific branches: `issue-{number}-{description}`
+- Example: `issue-1069-test-coverage` for issue #1069
+- Never work directly in `main` or unrelated feature branches
+- If in wrong branch, stash changes and switch to correct branch
+
 ## About StoryCAD
 
 StoryCAD is a free, open-source Windows application for fiction writers that provides structured outlining tools. It's described as "CAD for fiction writers" and helps writers manage the complexity of plotted fiction through systematic story development.
