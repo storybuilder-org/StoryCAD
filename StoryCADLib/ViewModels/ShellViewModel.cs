@@ -533,17 +533,14 @@ public class ShellViewModel : ObservableRecipient
     {
         if (SerializationLock.IsLocked())
         {
-            if (CurrentNode == null)
-            {
-                Messenger.Send(new StatusChangedMessage(new("Select a node to collaborate on", LogLevel.Warn, true)));
-                return;
-            }
+            //if (CurrentNode == null)
+            //{
+            //    Messenger.Send(new StatusChangedMessage(new("Select a node to collaborate on", LogLevel.Warn, true)));
+            //    return;
+            //}
 
             //TODO: Logging???
             
-            var id = CurrentNode.Uuid; // get the story element;
-            OutlineService outlineService = Ioc.Default.GetRequiredService<OutlineService>();
-            CollabArgs.SelectedElement = outlineService.GetStoryElementByGuid(OutlineManager.StoryModel, id);
             CollabArgs.StoryModel = OutlineManager.StoryModel;
             Ioc.Default.GetService<CollaboratorService>()!.LoadWorkflows(CollabArgs);
             Ioc.Default.GetService<CollaboratorService>()!.CollaboratorWindow.Show();

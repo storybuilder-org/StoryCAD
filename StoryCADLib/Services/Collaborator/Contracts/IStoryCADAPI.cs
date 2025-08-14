@@ -1,0 +1,71 @@
+using StoryCAD.Models;
+using StoryCAD.Services.API;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Threading.Tasks;
+
+namespace StoryCAD.Services.Collaborator.Contracts;
+
+/// <summary>
+/// Interface for existing SemanticKernelAPI methods that Collaborator uses
+/// </summary>
+public interface IStoryCADAPI
+{
+    /// <summary>
+    /// The current story model being worked on
+    /// </summary>
+    StoryModel CurrentModel { get; set; }
+
+    /// <summary>
+    /// Creates a new empty outline
+    /// </summary>
+    /// <param name="name">Name of the story</param>
+    /// <param name="author">Author of the story</param>
+    /// <param name="templateIndex">Template index to use</param>
+    /// <returns>Result with list of created element GUIDs</returns>
+    Task<OperationResult<List<Guid>>> CreateEmptyOutline(string name, string author, string templateIndex);
+
+    /// <summary>
+    /// Writes the outline to a file
+    /// </summary>
+    /// <param name="filePath">Path to write the file to</param>
+    /// <returns>Result with the file path</returns>
+    Task<OperationResult<string>> WriteOutline(string filePath);
+
+    /// <summary>
+    /// Gets all story elements in the current model
+    /// </summary>
+    /// <returns>Collection of all story elements</returns>
+    ObservableCollection<StoryElement> GetAllElements();
+
+    /// <summary>
+    /// Updates a story element
+    /// </summary>
+    /// <param name="newElement">The updated element</param>
+    /// <param name="guid">The GUID of the element to update</param>
+    void UpdateStoryElement(object newElement, Guid guid);
+
+    /// <summary>
+    /// Updates multiple properties of an element
+    /// </summary>
+    /// <param name="elementGuid">The GUID of the element to update</param>
+    /// <param name="properties">Dictionary of property names and values</param>
+    void UpdateElementProperties(Guid elementGuid, Dictionary<string, object> properties);
+
+    /// <summary>
+    /// Updates a single property of an element
+    /// </summary>
+    /// <param name="elementGuid">The GUID of the element to update</param>
+    /// <param name="propertyName">Name of the property to update</param>
+    /// <param name="newValue">New value for the property</param>
+    /// <returns>Result of the operation</returns>
+    OperationResult<object> UpdateElementProperty(Guid elementGuid, string propertyName, object newValue);
+
+    /// <summary>
+    /// Gets a story element by its GUID
+    /// </summary>
+    /// <param name="guid">The GUID of the element</param>
+    /// <returns>The story element, or null if not found</returns>
+    StoryElement GetStoryElement(Guid guid);
+}

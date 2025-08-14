@@ -24,7 +24,7 @@ jobs:
     - name: Install .NET
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 8.x.x
+        dotnet-version: 9.x.x
 
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v2
@@ -191,7 +191,7 @@ jobs:
       with:
         name: repacked-nuget-package
         path: ${{ github.workspace }}\StoryCADLib\bin\Release\StoryCADLib*.nupkg
-        
+
     # ─── Tag & GitHub release ─────────────────────────────────────────────────
     - name: Configure Git
       shell: pwsh

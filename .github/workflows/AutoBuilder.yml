@@ -29,21 +29,21 @@ jobs:
     - name: Install .NET
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 8.x.x
+        dotnet-version: 9.x.x
 
     #Install MSBUILD
     - name: Setup MSBuild.exe
       uses: microsoft/setup-msbuild@v2
-    
+
     - uses: oprypin/find-latest-tag@v1.1.2
       with:
         repository: storybuilder-org/StoryCAD
         releases-only: true
       id: testtag
-      
+
     #Bump version number
     - id: increase_version
-      name: Increase Version Number 
+      name: Increase Version Number
       run: |
         $VersionRegex = "\d+\.\d+\.\d+\.\d+"
         $LastVer = "${{ steps.testtag.outputs.tag }}"
@@ -69,7 +69,7 @@ jobs:
         "new_version=$NewVersion" | Out-File -Append -FilePath $env:GITHUB_OUTPUT
         Write-Host "Last version (from tag): '$LastVer'"
         Write-Host "Calculated new version: '$NewVersion'"
-        
+
       # Decode the PFX
     - name: Decode the pfx
       run: |
@@ -78,19 +78,19 @@ jobs:
         [IO.File]::WriteAllBytes($pfxPath, $bytes)
         [IO.File]::WriteAllText("${{ github.workspace }}\StoryCAD\.env", "${{ secrets.ENV }}")
         [IO.File]::WriteAllText("${{ github.workspace }}\StoryCADTests\.env", "${{ secrets.ENV }}")
-        
+
     # Restore the application to populate the obj folder with RuntimeIdentifiers
     - name: Restore the application
       run: msbuild $env:Solution_Name /t:Restore /p:Configuration=$env:Configuration
       env:
         Configuration: ${{ matrix.configuration }}
-        
+
 
     - name: Build StoryCADLib
       run: |
         msbuild StoryCADLib\StoryCADLib.csproj /t:Build /p:Configuration=Release /p:Version=${{ steps.increase_version.outputs.new_version }} /p:NuGetVersion=${{ steps.increase_version.outputs.new_version }} /p:AssemblyVersion=${{ steps.increase_version.outputs.new_version }}
 
-        
+
     - name: Restore and Build StoryCADTests
       run: msbuild StoryCADTests\StoryCADTests.csproj /t:Build /p:Configuration=Debug /p:Platform=x64
 
@@ -98,9 +98,9 @@ jobs:
       uses: darenm/Setup-VSTest@v1.2
 
     - name: Run StoryCADTests
-      run: vstest.console.exe ${{ github.workspace }}\StoryCADTests\bin\x64\Debug\net8.0-windows10.0.19041.0\StoryCADTests.dll /Logger:Console /Platform:x64
+      run: vstest.console.exe ${{ github.workspace }}\StoryCADTests\bin\x64\Debug\net9.0-windows10.0.22621.0\StoryCADTests.dll /Logger:Console /Platform:x64
 
-        
+
     # Create the app package by building and packaging the project
     - name: Create the MSIX
       run: msbuild $env:Solution_Name /p:Configuration=$env:Configuration /p:Platform=$env:Platform /p:UapAppxPackageBuildMode=$env:Appx_Package_Build_Mode /p:AppxBundle=$env:Appx_Bundle /p:PackageCertificateKeyFile="${{ github.workspace }}\StoryCAD\GitHubActionsWorkflow.pfx" /p:AppxPackageDir="$env:Appx_Package_Dir" /p:GenerateAppxPackageOnBuild=true
@@ -110,12 +110,12 @@ jobs:
         Appx_Package_Dir: Packages\
         Configuration: ${{ matrix.configuration }}
         Platform: ${{ matrix.platform }}
-        
+
     # Remove the pfx
     - name: Remove the pfx
       run: |
         Remove-Item -path "${{ github.workspace }}\StoryCAD\GitHubActionsWorkflow.pfx"
-      
+
    #Cleans output and file names
     - name: Run MSIX Cleaner
       run: |
@@ -127,17 +127,17 @@ jobs:
         $LastVer = "${{ steps.testtag.outputs.tag }}"
         $VersionSplit = $LastVer.Split(".")
         $BUILD_BUILDNUMBER = $VersionSplit[0] + "." + $VersionSplit[1] + ".${{ github.run_number }}.65534"
-      
-        "Hello, Thank you for testing StoryCAD " + ${{ steps.increase_version.outputs.new_version }} + " Alpha 
+
+        "Hello, Thank you for testing StoryCAD " + ${{ steps.increase_version.outputs.new_version }} + " Alpha
         1) Open StoryCAD.cer, this should bring up the certificate import wizard
         2) Press install certificate, and change store location to Local Machine, then press next
         3) Change the option to Place All Certificates in the following store and click browse
         4) Select Trusted People and press OK and then press finish
-        Now you will want to open the msix folder and select the configuration you want, 
+        Now you will want to open the msix folder and select the configuration you want,
         if you don't know what configuration to pick then we recommend StoryCAD Release x64.msix.
-        
+
         Changelogs aren't available for Alpha Builds." | Out-File -FilePath "${{ github.workspace }}\StoryCAD\Packages\Install Instructions.txt"
-    
+
     - name: Repack StoryCADLib NuGet Package
       if: ${{ matrix.configuration == 'Release' && matrix.platform == 'x64' }}
       shell: pwsh
@@ -151,8 +151,8 @@ jobs:
         Expand-Archive -Path $releasePkg.FullName -DestinationPath $tempDir -Force
 
         # 3. Copy your compiled binaries
-        $binSrc = "${{ github.workspace }}\StoryCADLib\bin\x64\Release\net8.0-windows10.0.22621.0"
-        $libDir = Join-Path $tempDir "lib\net8.0-windows10.0.22621"
+        $binSrc = "${{ github.workspace }}\StoryCADLib\bin\x64\Release\net9.0-windows10.0.22621.0"
+        $libDir = Join-Path $tempDir "lib\net9.0-windows10.0.22621"
         New-Item -ItemType Directory -Force -Path $libDir | Out-Null
         Copy-Item "$binSrc\*" -Destination $libDir -Recurse -Force
 
@@ -182,7 +182,7 @@ jobs:
             $zipName = "StoryCAD_${{ github.run_number }}_${{ matrix.platform }}_${{ matrix.configuration }}.zip"
             Compress-Archive -Path "${{ github.workspace }}\StoryCAD\Packages\*" -DestinationPath $zipName -Force
       shell: pwsh
-    
+
     - name: Upload repacked NuGet Package
       if: ${{ matrix.configuration == 'Release' && matrix.platform == 'x64' }}
       uses: actions/upload-artifact@v4
@@ -190,11 +190,11 @@ jobs:
         name: repacked-nuget-package
         path: '${{ github.workspace }}\StoryCADLib\bin\Release\StoryCADLib*.nupkg'
 
-    
+
     - name: Upload MSIX package
       uses: actions/upload-artifact@v4
       with:
         name: StoryCAD_${{ github.run_number }}_${{ matrix.platform }}_${{ matrix.configuration }}
         path: StoryCAD_${{ github.run_number }}_${{ matrix.platform }}_${{ matrix.configuration }}.zip
         compression-level: 9
-        include-hidden-files: true  
+        include-hidden-files: true

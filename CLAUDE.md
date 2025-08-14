@@ -2,6 +2,15 @@
 
 This file provides project-specific guidance for StoryCAD development. Universal development standards are defined in `/dev/src/CLAUDE.md` and automatically included.
 
+## Primary Directive: Simplicity First
+
+**When solving StoryCAD problems, always choose the simplest approach:**
+- Direct method calls over reflection
+- Concrete types over abstractions (until needed)
+- Built-in .NET features over external libraries
+- Straightforward debugging (`Debugger.Launch()`) over complex conditions
+- Clear, obvious code over clever solutions
+
 ## About StoryCAD
 
 StoryCAD is a free, open-source Windows application for fiction writers that provides structured outlining tools. It's described as "CAD for fiction writers" and helps writers manage the complexity of plotted fiction through systematic story development.
