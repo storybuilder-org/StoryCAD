@@ -491,9 +491,9 @@ public class FileTests
     /// https://github.com/storybuilder-org/StoryCAD/pull/971
     /// </summary>
     [TestMethod]
+    [Ignore("Test temporarily disabled")]
     public void TestOpenWithNoRecentIndex()
     {
-        return;
         FileOpenVM fileOpenVM = Ioc.Default.GetRequiredService<FileOpenVM>();
         fileOpenVM.SelectedRecentIndex = -1;
         fileOpenVM.ConfirmClicked();

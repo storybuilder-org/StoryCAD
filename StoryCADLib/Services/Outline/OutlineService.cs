@@ -634,7 +634,7 @@ public Task<StoryModel> CreateModel(string name, string author, int selectedTemp
         }
 
         //Get desired bind
-        StoryElement? DesiredBindElement;
+        StoryElement DesiredBindElement;
         Model.StoryElements.StoryElementGuids.TryGetValue(DesiredBind, out DesiredBindElement);
         Parent.StructureBeats[Index].Guid = DesiredBind;
 

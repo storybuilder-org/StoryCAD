@@ -16,9 +16,6 @@ namespace StoryCAD.DAL;
 /// </summary>
 public class PreferencesIo
 {
-	//TODO: Remove this variable after June 2025.
-	private IList<string> _preferences;
-
 	private LogService _log = Ioc.Default.GetService<LogService>();
 	private AppState _state = Ioc.Default.GetService<AppState>();
 
