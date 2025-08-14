@@ -20,7 +20,7 @@ public class ShellTests
     /// crashes storycad.
     /// </summary>
     [TestMethod]
-    public async Task TestDeleteMove()
+    public async Task DeleteNode_ThenMoveNode_DoesNotCrash()
     {
         //Create test outline
         var outlineService = Ioc.Default.GetService<OutlineService>();

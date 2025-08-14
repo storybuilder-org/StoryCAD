@@ -148,6 +148,34 @@ When creating pull requests, include any design documentation directly in the PR
 - **Command Binding**: MVVM commands for user actions
 - **Collection Binding**: ObservableCollection for dynamic list updates
 
+## Test Naming Conventions
+
+### Test File Naming
+- **Pattern**: `[SourceFileName]Tests.cs`
+- **Example**: `SemanticKernelAPITests.cs` for source file `SemanticKernelAPI.cs`
+- **Location**: Test files in StoryCADTests project, mirroring source structure where practical
+
+### Test Method Naming
+- **Pattern**: `MethodName_Scenario_ExpectedResult`
+- **Examples**:
+  - `CreateEmptyOutline_WithInvalidTemplate_ReturnsFailure`
+  - `OpenFile_WhenFileNotFound_ThrowsException`  
+  - `SaveModel_WithValidPath_SucceedsSilently`
+  - `PropertyName_WhenSet_RaisesPropertyChanged`
+
+### Test Class Organization
+- One test class per source class
+- Group tests for a specific method together
+- Use `[TestInitialize]` for setup, `[TestCleanup]` for teardown
+- Use `[UITestMethod]` for tests requiring UI thread execution
+- Use Arrange-Act-Assert pattern within each test
+
+### Test Coverage Requirements
+- Each public method in API, OutlineService, and ShellViewModel must have tests
+- Test both success and failure paths
+- Test edge cases and boundary conditions
+- Verify thread safety with SerializationLock where applicable
+
 ## Pre-Approved Commands
 
 The following commands are pre-approved for automated execution without user confirmation prompts:
