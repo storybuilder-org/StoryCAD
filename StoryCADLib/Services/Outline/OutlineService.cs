@@ -745,7 +745,7 @@ public Task<StoryModel> CreateModel(string name, string author, int selectedTemp
             return;
         }
 
-        StoryElement BoundElement;
+        StoryElement? BoundElement;
         Model.StoryElements.StoryElementGuids.TryGetValue(Parent.StructureBeats[Index].Guid, out BoundElement);
         
         //An element is bound that doesn't exist
