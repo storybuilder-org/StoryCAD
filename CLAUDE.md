@@ -20,6 +20,15 @@ This file provides project-specific guidance for StoryCAD development. Universal
 - Never work directly in `main` or unrelated feature branches
 - If in wrong branch, stash changes and switch to correct branch
 
+**When switching to an existing branch:**
+1. Check current status: `git status`
+2. Stash any uncommitted changes if needed: `git stash`
+3. Switch to the branch: `git checkout branch-name`
+4. **SYNC THE BRANCH**: Pull latest changes
+   - If branch tracks remote: `git pull`
+   - If branch is behind main: `git pull origin main` or `git merge main`
+5. Apply stashed changes if any: `git stash pop`
+
 ## About StoryCAD
 
 StoryCAD is a free, open-source Windows application for fiction writers that provides structured outlining tools. It's described as "CAD for fiction writers" and helps writers manage the complexity of plotted fiction through systematic story development.
