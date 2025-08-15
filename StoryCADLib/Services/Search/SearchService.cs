@@ -169,6 +169,13 @@ public class SearchService
         {
             try
             {
+                // Skip the element's own UUID fields to avoid self-references
+                if (property.Name.Equals("Uuid", StringComparison.OrdinalIgnoreCase) ||
+                    property.Name.Equals("_uuid", StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
                 // Skip read-only properties when deleting
                 if (delete && !property.CanWrite) continue;
 

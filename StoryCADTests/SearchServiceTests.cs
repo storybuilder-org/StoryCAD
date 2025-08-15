@@ -260,6 +260,26 @@ namespace StoryCADTests
             Assert.IsTrue(result, "Should find antagonist UUID in protagonist's relationships");
         }
 
+        [TestMethod]
+        public void SearchUuid_IgnoresElementOwnUuid()
+        {
+            // Arrange
+            var protagonist = _testModel.StoryElements
+                .First(e => e.Name == "Hero Character");
+            var protagonistNode = protagonist.Node;
+
+            // Act - Search for the element's own UUID should return false
+            var result = _searchService.SearchUuid(protagonistNode, protagonist.Uuid, _testModel, false);
+
+            // Assert
+            Assert.IsFalse(result, "Should NOT find element's own UUID (Uuid field should be ignored)");
+            
+            // Also verify that it doesn't delete its own UUID when delete flag is true
+            var deleteResult = _searchService.SearchUuid(protagonistNode, protagonist.Uuid, _testModel, true);
+            Assert.IsFalse(deleteResult, "Should NOT find or delete element's own UUID");
+            Assert.AreNotEqual(Guid.Empty, protagonist.Uuid, "Element's own UUID should remain intact after delete attempt");
+        }
+
         #endregion
 
         #region UUID Deletion Tests
