@@ -1,4 +1,4 @@
-﻿using Windows.Data.Xml.Dom;
+﻿
 
 namespace StoryCAD.Models;
 
@@ -21,8 +21,6 @@ public class TrashCanModel : StoryElement
 
     }
     
-    //TODO: REMOVE WITH STORYREADER
-    public TrashCanModel(IXmlNode xn, StoryModel model) : base(xn, model) { }
 
     #endregion
 }

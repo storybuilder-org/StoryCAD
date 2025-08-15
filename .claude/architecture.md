@@ -108,10 +108,9 @@ In some experimental branches, the navigation tree displays root nodes separatel
 
 ### Advanced Services
 - **CollaboratorService**: AI-powered writing assistance using Semantic Kernel
-- **SearchService**: Full-text search across story content
+- **SearchService**: Unified service for both string-based content search and UUID-based reference search with optional deletion
 - **ReportService**: Generates various output formats including Scrivener integration
 - **PreferencesService**: User settings persistence and management
-- **DeletionService**: Manages element removal and reference cleanup
 
 ## File I/O Architecture
 
