@@ -34,11 +34,10 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
-                        <ComboBox IsEditable="True" Header="Locale" Grid.Column="0"  MinWidth="200"
+                        <ComboBox IsEditable="True" Header="Locale" Grid.Column="0"  MinWidth="200" Margin="0,0,20,0"
                                   ItemsSource="{x:Bind SettingVm.LocaleList}"
                                   Text="{x:Bind SettingVm.Locale, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                   PlaceholderText="{x:Bind SettingVm.Locale, Mode=TwoWay}" />
-                        <TextBlock Grid.Column="1" MinWidth="100"/>
                         <ComboBox IsEditable="True" Header="Season" Grid.Column="2" MinWidth="200"
                                         ItemsSource="{x:Bind SettingVm.SeasonList}"
                                         Text="{x:Bind SettingVm.Season, Mode=TwoWay}" 
@@ -50,9 +49,8 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
-                        <TextBox Header="Period" Grid.Column="0" MinWidth="200"
+                        <TextBox Header="Period" Grid.Column="0" MinWidth="200" Margin="0,0,20,0"
                                  Text="{x:Bind SettingVm.Period, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                        <TextBlock Grid.Column="1" MinWidth="100"/>
                         <TextBox Header="Lighting" Grid.Column="2" MinWidth="200"
                                  Text="{x:Bind SettingVm.Lighting, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     </Grid>
@@ -62,9 +60,8 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
-                        <TextBox Header="Weather" Grid.Column="0" MinWidth="200"
+                        <TextBox Header="Weather" Grid.Column="0" MinWidth="200" Margin="0,0,20,0"
                                  Text="{x:Bind SettingVm.Weather, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                        <TextBlock Grid.Column="1" Width="100"/>
                         <TextBox Header="Temperature" Grid.Column="2" MinWidth="200"
                                  Text="{x:Bind SettingVm.Temperature, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     </Grid>

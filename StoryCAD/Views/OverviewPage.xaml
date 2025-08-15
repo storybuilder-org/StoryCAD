@@ -26,9 +26,8 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
-                        <TextBox Header="Date Created" Grid.Column="0"
+                        <TextBox Header="Date Created" Grid.Column="0" Margin="0,0,100,0"
                                  Text="{x:Bind OverviewVm.DateCreated, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                        <TextBlock Grid.Column="1" MinWidth="100"/>
                         <TextBox Header="Last Changed" Grid.Column="2"
                                  Text="{x:Bind OverviewVm.DateModified, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     </Grid>
@@ -56,8 +55,7 @@
                               DisplayMemberPath="Name"
                               SelectedItem="{x:Bind OverviewVm.SelectedProblem, Mode=TwoWay}"
                               ItemsSource="{x:Bind OverviewVm.Problems, Mode=OneWay}" />
-                    <TextBlock Grid.Row="1" Text=" "/>
-                    <usercontrols:RichEditBoxExtended Header="Premise" Grid.Row="2" 
+                    <usercontrols:RichEditBoxExtended Header="Premise" Grid.Row="2" Margin="0,10,0,0"
                                     RtfText="{x:Bind OverviewVm.Premise, Mode=TwoWay}" AcceptsReturn="True"
                                     IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                     ScrollViewer.VerticalScrollBarVisibility="Visible"
@@ -80,10 +78,9 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
-                        <ComboBox Header="Type" Grid.Column="0" IsEditable="False" MinWidth="200"
+                        <ComboBox Header="Type" Grid.Column="0" IsEditable="False" MinWidth="200" Margin="0,0,20,0"
                                   ItemsSource="{x:Bind OverviewVm.StoryTypeList}"
                                   SelectedItem="{x:Bind OverviewVm.StoryType, Mode=TwoWay}" />
-                        <TextBlock Grid.Column="1" MinWidth="100"/>
                         <ComboBox Header="Genre" Grid.Column="2" IsEditable="False" MinWidth="200"
                                   ItemsSource="{x:Bind OverviewVm.GenreList}"
                                   SelectedItem="{x:Bind OverviewVm.StoryGenre, Mode=TwoWay}" />
@@ -94,10 +91,9 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
-                        <ComboBox Header="Viewpoint" Grid.Column="0" IsEditable="False" MinWidth="200" 
+                        <ComboBox Header="Viewpoint" Grid.Column="0" IsEditable="False" MinWidth="200" Margin="0,0,20,0" 
                                   ItemsSource="{x:Bind OverviewVm.ViewpointList}"
                                   SelectedItem="{x:Bind OverviewVm.Viewpoint, Mode=TwoWay}" BorderThickness="1" />
-                        <TextBlock Grid.Column="1" MinWidth="100"/>
                         <ComboBox Header="Literary Technique" IsEditable="False" Grid.Column="2" MinWidth="200" 
                                   ItemsSource="{x:Bind OverviewVm.LiteraryTechniqueList}"
                                   SelectedItem="{x:Bind OverviewVm.LiteraryTechnique, Mode=TwoWay}" />
@@ -112,10 +108,9 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
-                        <ComboBox Header="Voice" Grid.Column="0" IsEditable="False" MinWidth="200" 
+                        <ComboBox Header="Voice" Grid.Column="0" IsEditable="False" MinWidth="200" Margin="0,0,20,0" 
                                   ItemsSource="{x:Bind OverviewVm.VoiceList}"
                                   SelectedItem="{x:Bind OverviewVm.Voice, Mode=TwoWay}" />
-                        <TextBlock Grid.Column="1" MinWidth="100"/>
                         <ComboBox Header="Tense" Grid.Column="2" IsEditable="False" MinWidth="200" 
                                   ItemsSource="{x:Bind OverviewVm.TenseList}"
                                   SelectedItem="{x:Bind OverviewVm.Tense, Mode=TwoWay}" />
@@ -126,10 +121,9 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="2*"/>
                     </Grid.ColumnDefinitions>
-                        <ComboBox Header="Style" Grid.Column="0" IsEditable="False" MinWidth="200" 
+                        <ComboBox Header="Style" Grid.Column="0" IsEditable="False" MinWidth="200" Margin="0,0,20,0" 
                                   ItemsSource="{x:Bind OverviewVm.StyleList}"
                                   SelectedItem="{x:Bind OverviewVm.Style, Mode=TwoWay}" />
-                        <TextBlock Grid.Column="1" MinWidth="100"/>
                         <ComboBox Header="Tone" Grid.Column="2" IsEditable="False" MinWidth="200"  
                                   ItemsSource="{x:Bind OverviewVm.ToneList}"
                                   SelectedItem="{x:Bind OverviewVm.Tone, Mode=TwoWay}" />
