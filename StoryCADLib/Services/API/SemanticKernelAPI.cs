@@ -569,4 +569,160 @@ public class SemanticKernelApi : IStoryCADAPI
         _outlineService.AddRelationship(CurrentModel, source, recipient, desc, mirror);
         return true;
     }
+
+    /// <summary>
+    /// Searches for story elements containing the specified text.
+    /// </summary>
+    /// <param name="searchText">The text to search for (case-insensitive)</param>
+    /// <returns>A list of element GUIDs and names that contain the search text</returns>
+    [KernelFunction, Description("""
+                                 Searches for story elements containing the specified text.
+                                 The search is case-insensitive and searches through all text fields
+                                 of story elements including names, descriptions, and other properties.
+                                 Returns a list of matching elements with their GUIDs and names.
+                                 """)]
+    public OperationResult<List<Dictionary<string, object>>> SearchForText(string searchText)
+    {
+        try
+        {
+            if (CurrentModel == null)
+                return OperationResult<List<Dictionary<string, object>>>.Failure("No outline is opened");
+
+            if (string.IsNullOrWhiteSpace(searchText))
+                return OperationResult<List<Dictionary<string, object>>>.Failure("Search text cannot be empty");
+
+            var results = _outlineService.SearchForText(CurrentModel, searchText);
+            
+            var formattedResults = results.Select(element => new Dictionary<string, object>
+            {
+                { "Guid", element.Uuid },
+                { "Name", element.Name },
+                { "Type", element.ElementType.ToString() }
+            }).ToList();
+
+            return OperationResult<List<Dictionary<string, object>>>.Success(formattedResults);
+        }
+        catch (Exception ex)
+        {
+            return OperationResult<List<Dictionary<string, object>>>.Failure($"Error in SearchForText: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Searches for story elements that reference a specific UUID.
+    /// </summary>
+    /// <param name="targetUuid">The UUID to search for references to</param>
+    /// <returns>A list of elements that reference the specified UUID</returns>
+    [KernelFunction, Description("""
+                                 Searches for story elements that reference a specific UUID.
+                                 This is useful for finding all elements that link to a particular
+                                 character, setting, or other story element.
+                                 Returns a list of elements that contain references to the UUID.
+                                 """)]
+    public OperationResult<List<Dictionary<string, object>>> SearchForReferences(Guid targetUuid)
+    {
+        try
+        {
+            if (CurrentModel == null)
+                return OperationResult<List<Dictionary<string, object>>>.Failure("No outline is opened");
+
+            if (targetUuid == Guid.Empty)
+                return OperationResult<List<Dictionary<string, object>>>.Failure("Target UUID cannot be empty");
+
+            var results = _outlineService.SearchForUuidReferences(CurrentModel, targetUuid);
+            
+            var formattedResults = results.Select(element => new Dictionary<string, object>
+            {
+                { "Guid", element.Uuid },
+                { "Name", element.Name },
+                { "Type", element.ElementType.ToString() }
+            }).ToList();
+
+            return OperationResult<List<Dictionary<string, object>>>.Success(formattedResults);
+        }
+        catch (Exception ex)
+        {
+            return OperationResult<List<Dictionary<string, object>>>.Failure($"Error in SearchForReferences: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Removes all references to a specified UUID from the story model.
+    /// </summary>
+    /// <param name="targetUuid">The UUID to remove references to</param>
+    /// <returns>The number of elements that had references removed</returns>
+    [KernelFunction, Description("""
+                                 Removes all references to a specified UUID from the story model.
+                                 This is useful when deleting an element and cleaning up all references
+                                 to it from other elements. Use with caution as this modifies multiple
+                                 elements in the story model.
+                                 Returns the count of elements that were modified.
+                                 """)]
+    public OperationResult<int> RemoveReferences(Guid targetUuid)
+    {
+        try
+        {
+            if (CurrentModel == null)
+                return OperationResult<int>.Failure("No outline is opened");
+
+            if (targetUuid == Guid.Empty)
+                return OperationResult<int>.Failure("Target UUID cannot be empty");
+
+            int affectedCount = _outlineService.RemoveUuidReferences(CurrentModel, targetUuid);
+            
+            return OperationResult<int>.Success(affectedCount);
+        }
+        catch (Exception ex)
+        {
+            return OperationResult<int>.Failure($"Error in RemoveReferences: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Searches for story elements within a specific subtree.
+    /// </summary>
+    /// <param name="rootNodeGuid">The GUID of the root node to search from</param>
+    /// <param name="searchText">The text to search for (case-insensitive)</param>
+    /// <returns>A list of elements in the subtree that contain the search text</returns>
+    [KernelFunction, Description("""
+                                 Searches for story elements within a specific subtree.
+                                 This allows searching within a specific folder or section
+                                 rather than the entire story model.
+                                 Provide the GUID of the root node and the search text.
+                                 Returns matching elements within that subtree only.
+                                 """)]
+    public OperationResult<List<Dictionary<string, object>>> SearchInSubtree(Guid rootNodeGuid, string searchText)
+    {
+        try
+        {
+            if (CurrentModel == null)
+                return OperationResult<List<Dictionary<string, object>>>.Failure("No outline is opened");
+
+            if (rootNodeGuid == Guid.Empty)
+                return OperationResult<List<Dictionary<string, object>>>.Failure("Root node GUID cannot be empty");
+
+            if (string.IsNullOrWhiteSpace(searchText))
+                return OperationResult<List<Dictionary<string, object>>>.Failure("Search text cannot be empty");
+
+            // Find the root node
+            var rootElement = _outlineService.GetStoryElementByGuid(CurrentModel, rootNodeGuid);
+            if (rootElement == null)
+                return OperationResult<List<Dictionary<string, object>>>.Failure("Root node not found");
+
+            var results = _outlineService.SearchInSubtree(CurrentModel, rootElement.Node, searchText);
+            
+            var formattedResults = results.Select(element => new Dictionary<string, object>
+            {
+                { "Guid", element.Uuid },
+                { "Name", element.Name },
+                { "Type", element.ElementType.ToString() }
+            }).ToList();
+
+            return OperationResult<List<Dictionary<string, object>>>.Success(formattedResults);
+        }
+        catch (Exception ex)
+        {
+            return OperationResult<List<Dictionary<string, object>>>.Failure($"Error in SearchInSubtree: {ex.Message}");
+        }
+    }
 }
