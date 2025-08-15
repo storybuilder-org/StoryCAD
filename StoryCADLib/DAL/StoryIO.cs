@@ -55,7 +55,30 @@ public class StoryIO
 			if (JSON.Split("\n")[0].Contains("<?xml version=\"1.0\" encoding=\"utf-8\"?>"))
 			{
 				_logService.Log(LogLevel.Info, "File is legacy XML format");
-				return await MigrateModel(StoryFile);
+
+                // Show dialog informing user about legacy format
+                var result = await Ioc.Default.GetRequiredService<Windowing>().ShowContentDialog(new()
+				{
+					Title = "Legacy Outline format detected!",
+					Content ="""
+                             This outline is in an older format that’s no longer supported.
+                             To update it, please use the Legacy STBX tool to update your outlines to the current format.
+                             """,
+					PrimaryButtonText = "Download Conversion Tool",
+					SecondaryButtonText = "Close"
+				}, true);
+				
+				// Open the conversion tool repository if user clicks primary button
+				if (result == ContentDialogResult.Primary)
+				{
+                    Process.Start(new ProcessStartInfo
+                    {
+						FileName = "https://github.com/storybuilder-org/StoryCAD-Legacy-STBX-Conversion-Tool/releases/tag/1.0.0",
+						UseShellExecute = true
+					});
+				}
+				
+				return new StoryModel(); // Return empty model
 			}
 
 			_logService.Log(LogLevel.Info, $"Read file (Length: {JSON.Length})");
@@ -186,54 +209,6 @@ public class StoryIO
 		return rootCollection;
 	}
 
-	/// <summary>
-	/// Migrates a given StoryModel from XML to JSON
-	/// </summary>
-	/// <param name="file">StorageFile Object</param>
-	/// <returns>StoryModel</returns>
-	public async Task<StoryModel>  MigrateModel(StorageFile file)
-	{
-		StoryModel old = new();
-		try
-		{
-			//Check file exists first.
-            if (!await CheckFileAvailability(file.Path))
-            {
-				_logService.Log(LogLevel.Warn,"File is unavailable or doesn't exist.");
-                return new();
-            }
-
-            //Read Legacy file
-            _logService.Log(LogLevel.Info, $"Migrating Old STBX File from {file.Path}");
-			LegacyXMLReader reader = new(_logService);
-			old = await reader.ReadFile(file);
-
-			//Copy legacy file
-			_logService.Log(LogLevel.Info, "Read legacy file");
-			StorageFolder folder = await StorageFolder.GetFolderFromPathAsync(
-				Ioc.Default.GetRequiredService<PreferenceService>().Model.BackupDirectory);
-
-            _logService.Log(LogLevel.Info, $"Got folder object at path {folder.Path}");
-
-            string name = file.Name + $" as of {DateTime.Now.ToString().Replace('/', ' ')
-                .Replace(':', ' ').Replace(".stbx", "")}.old";
-            _logService.Log(LogLevel.Info, $"Got backup name as {name}");
-
-            await file.CopyAsync(folder, name);
-            _logService.Log(LogLevel.Info, $"Copied legacy file to backup folder ({folder.Path})");
-            
-			//File is now backed up, now migrate to new format
-			await WriteStory(file.Path, old);
-			_logService.Log(LogLevel.Info, "Updated legacy file to JSON File");
-			return old;
-		}
-		catch (Exception ex)
-		{
-			_logService.LogException(LogLevel.Error, ex, $"Failed to migrate file {file.Path}");
-		}
-
-		return await Task.FromResult(old);
-	}
 
 	/// <summary>
 	/// Checks if a file exists and is genuinely available.

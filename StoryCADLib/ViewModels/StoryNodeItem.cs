@@ -1,6 +1,5 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
-using Windows.Data.Xml.Dom;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
 using StoryCAD.Services;
@@ -338,85 +337,6 @@ public class StoryNodeItem : INotifyPropertyChanged
     {
     }
 
-    public StoryNodeItem(ILogService logger, StoryNodeItem parent, IXmlNode node)
-    {
-        _logger = logger;
-        
-        XmlNamedNodeMap _attrs = node.Attributes;
-        if (_attrs != null)
-        {
-            Uuid = new Guid(((string)_attrs.GetNamedItem("UUID")?.NodeValue)!);
-            string _nodeType = (string)_attrs.GetNamedItem("Type")?.NodeValue;
-            switch (_nodeType!.ToLower()) //Fixes differences in casing between versions.
-            {
-                case "storyoverview":
-                    Type = StoryItemType.StoryOverview;
-                    Symbol = Symbol.View;
-                    break;
-                case "character":
-                    Type = StoryItemType.Character;
-                    Symbol = Symbol.Contact;
-                    break;
-                case "plotpoint":   // Legacy: PlotPoint was renamed to Scene   
-                    Type = StoryItemType.Scene;
-                    Symbol = Symbol.AllApps;
-                    break;
-                case "scene":
-                    Type = StoryItemType.Scene;
-                    Symbol = Symbol.AllApps;
-                    break;
-                case "problem":
-                    Type = StoryItemType.Problem;
-                    Symbol = Symbol.Help;
-                    break;
-                case "setting":
-                    Type = StoryItemType.Setting;
-                    Symbol = Symbol.Globe;
-                    break;
-                case "separator":   // Legacy: Separator was renamed Folder
-                    Type = StoryItemType.Folder;
-                    Symbol = Symbol.Folder;
-                    break;
-                case "folder":
-                    Type = StoryItemType.Folder;
-                    Symbol = Symbol.Folder;
-                    break;
-                case "section":
-                    Type = StoryItemType.Section;
-                    Symbol = Symbol.Folder;
-                    break;
-                case "web":
-                    Type = StoryItemType.Web;
-                    Symbol = Symbol.PreviewLink;
-                    break;
-                case "trashcan":
-                    Type = StoryItemType.TrashCan;
-                    Symbol = Symbol.Delete;
-                    break;
-                case "notes":
-                    Type = StoryItemType.Notes;
-                    Symbol = Symbol.TwoPage;
-                    break;
-            }
-
-            Name = (string)_attrs.GetNamedItem("Name")?.NodeValue;
-            if ((string)_attrs.GetNamedItem("IsExpanded")?.NodeValue == "True")
-                IsExpanded = true;
-            if ((string)_attrs.GetNamedItem("IsSelected")?.NodeValue == "True")
-                IsSelected = true;
-            if ((string)_attrs.GetNamedItem("IsRoot")?.NodeValue == "True")
-                IsRoot = true;
-        }
-
-        Children = new();
-        Parent = parent;
-        Parent?.Children.Add(this);  // (if parent != null)
-    }
-
-    // Overloaded constructor without logger
-    public StoryNodeItem(StoryNodeItem parent, IXmlNode node) : this(Ioc.Default.GetRequiredService<ILogService>(), parent, node)
-    {
-    }
 
     #endregion
 

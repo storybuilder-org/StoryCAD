@@ -1,5 +1,4 @@
 ﻿using System.Text.Json.Serialization;
-using Windows.Data.Xml.Dom;
 
 namespace StoryCAD.Models;
 
@@ -615,53 +614,6 @@ public class CharacterModel : StoryElement
         BackStory = string.Empty;
     }
 
-    public CharacterModel(IXmlNode xn, StoryModel model) : base(xn, model)
-    {
-        Role = string.Empty;
-        StoryRole = string.Empty;
-        Archetype = string.Empty;
-        CharacterSketch = string.Empty;
-        Age = string.Empty;
-        Sex = string.Empty;
-        Eyes = string.Empty;
-        Hair = string.Empty;
-        Weight = string.Empty;
-        CharHeight = string.Empty;
-        Build = string.Empty;
-        Complexion = string.Empty;
-        Race = string.Empty;
-        Nationality = string.Empty;
-        Health = string.Empty;
-        PhysNotes = string.Empty;
-        Appearance = string.Empty;
-        RelationshipList = new List<RelationshipModel>();
-        Economic = string.Empty;
-        Education = string.Empty;
-        Ethnic = string.Empty;
-        Religion = string.Empty;
-        Enneagram = string.Empty;
-        Intelligence = string.Empty;
-        Values = string.Empty;
-        Abnormality = string.Empty;
-        Focus = string.Empty;
-        PsychNotes = string.Empty;
-        Adventureousness = string.Empty;
-        Aggression = string.Empty;
-        Confidence = string.Empty;
-        Conscientiousness = string.Empty;
-        Creativity = string.Empty;
-        Dominance = string.Empty;
-        Enthusiasm = string.Empty;
-        Assurance = string.Empty;
-        Sensitivity = string.Empty;
-        Shrewdness = string.Empty;
-        Sociability = string.Empty;
-        Stability = string.Empty;
-        Notes = string.Empty;
-        TraitList = new List<string>();
-        Flaw = string.Empty;
-        BackStory = string.Empty;
-    }
 
 	public CharacterModel() {}
 	#endregion
