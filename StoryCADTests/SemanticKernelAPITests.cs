@@ -113,15 +113,7 @@ public class SemanticKernelApiTests
         Assert.IsTrue(elements.Count > 0, "There should be at least one StoryElement in the collection.");
     }
 
-    [TestMethod]
-    public void DeleteStoryElement_NotImplemented_ThrowsNotImplementedException()
-    {
-        // Arrange
-        string randomGuid = Guid.NewGuid().ToString();
-
-        // Act & Assert: DeleteStoryElement should throw NotImplementedException.
-        Assert.ThrowsExactly<NotImplementedException>(() => _api.DeleteStoryElement(randomGuid));
-    }
+    // This test has been removed because DeleteStoryElement is now implemented
 
     [TestMethod]
     public async Task UpdateStoryElement_UpdatesElementNameSuccessfully()
@@ -318,8 +310,12 @@ public class SemanticKernelApiTests
         string author = "Test Author";
         var createResult = await _api.CreateEmptyOutline(outlineName, author, "0");
         Assert.IsTrue(createResult.IsSuccess, "Model creation should succeed.");
-        // Use one of the element GUIDs.
-        Guid elementGuid = createResult.Payload.First();
+        
+        // Add a deletable element (character)
+        var overviewGuid = _api.CurrentModel.ExplorerView.First().Uuid;
+        var addResult = _api.AddElement(StoryItemType.Character, overviewGuid.ToString(), "Test Character");
+        Assert.IsTrue(addResult.IsSuccess, "Adding character should succeed.");
+        Guid elementGuid = addResult.Payload;
 
         // Act
         // Assume deletion from ExplorerView.
@@ -387,5 +383,330 @@ public class SemanticKernelApiTests
         // Also verify that calling with Guid.Empty throws an exception.
         Assert.ThrowsExactly<ArgumentNullException>(() =>
             _api.AddRelationship(Guid.Empty, charElement2.Uuid, "Invalid"));
+    }
+
+    /// <summary>
+    /// Tests that SetCurrentModel correctly sets the CurrentModel property
+    /// </summary>
+    [TestMethod]
+    public async Task SetCurrentModel_WithValidModel_SetsCurrentModel()
+    {
+        // Arrange
+        var api = new SemanticKernelApi();
+        
+        // Create a test model
+        var createResult = await api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        Assert.IsTrue(createResult.IsSuccess, "Model creation should succeed");
+        
+        // Get the created model
+        var originalModel = api.CurrentModel;
+        Assert.IsNotNull(originalModel, "Model should be created");
+        
+        // Create a second model to switch to
+        var secondResult = await api.CreateEmptyOutline("Second Story", "Another Author", "1");
+        Assert.IsTrue(secondResult.IsSuccess, "Second model creation should succeed");
+        var secondModel = api.CurrentModel;
+        
+        // Act - Set back to the first model
+        api.SetCurrentModel(originalModel);
+        
+        // Assert
+        Assert.AreSame(originalModel, api.CurrentModel, "CurrentModel should be set to the original model");
+        Assert.AreNotSame(secondModel, api.CurrentModel, "CurrentModel should not be the second model");
+        var overview = api.CurrentModel.StoryElements.FirstOrDefault(e => e.ElementType == StoryItemType.StoryOverview);
+        Assert.AreEqual("Test Story", overview?.Name);
+    }
+
+    /// <summary>
+    /// Tests that SetCurrentModel handles null model gracefully
+    /// </summary>
+    [TestMethod]
+    public void SetCurrentModel_WithNullModel_SetsCurrentModelToNull()
+    {
+        // Arrange
+        var api = new SemanticKernelApi();
+        
+        // Act
+        api.SetCurrentModel(null);
+        
+        // Assert
+        Assert.IsNull(api.CurrentModel, "CurrentModel should be null");
+    }
+
+    /// <summary>
+    /// Tests that API operations work correctly after SetCurrentModel
+    /// </summary>
+    [TestMethod]
+    public async Task SetCurrentModel_AllowsOperationsOnNewModel()
+    {
+        // Arrange
+        var api = new SemanticKernelApi();
+        
+        // Create first model
+        var firstResult = await api.CreateEmptyOutline("First Story", "Author 1", "0");
+        Assert.IsTrue(firstResult.IsSuccess);
+        var firstModel = api.CurrentModel;
+        var firstOverviewGuid = firstResult.Payload.First();
+        
+        // Add an element to the first model
+        var firstElementResult = api.AddElement(StoryItemType.Character, firstOverviewGuid.ToString(), "First Character");
+        Assert.IsTrue(firstElementResult.IsSuccess);
+        
+        // Create second model
+        var secondResult = await api.CreateEmptyOutline("Second Story", "Author 2", "0");
+        Assert.IsTrue(secondResult.IsSuccess);
+        var secondModel = api.CurrentModel;
+        var secondOverviewGuid = secondResult.Payload.First();
+        
+        // Add an element to the second model
+        var secondElementResult = api.AddElement(StoryItemType.Scene, secondOverviewGuid.ToString(), "Second Scene");
+        Assert.IsTrue(secondElementResult.IsSuccess);
+        
+        // Act - Switch back to first model
+        api.SetCurrentModel(firstModel);
+        
+        // Add another element to verify we're working with the first model
+        var thirdElementResult = api.AddElement(StoryItemType.Problem, firstOverviewGuid.ToString(), "First Problem");
+        
+        // Assert
+        Assert.IsTrue(thirdElementResult.IsSuccess, "Should be able to add element after SetCurrentModel");
+        Assert.AreEqual(5, firstModel.StoryElements.Count, "First model should have 5 elements (overview, trash, narrative folder, character, problem)");
+        Assert.AreEqual(4, secondModel.StoryElements.Count, "Second model should still have 4 elements (overview, trash, narrative folder, scene)");
+        
+        // Verify the new element is in the first model
+        var problemElement = firstModel.StoryElements.StoryElementGuids[thirdElementResult.Payload];
+        Assert.IsNotNull(problemElement);
+        Assert.AreEqual("First Problem", problemElement.Name);
+        Assert.AreEqual(StoryItemType.Problem, problemElement.ElementType);
+    }
+
+    /// <summary>
+    /// Tests that DeleteStoryElement moves an element to trash
+    /// </summary>
+    [TestMethod]
+    public async Task DeleteStoryElement_WithValidElement_MovesToTrash()
+    {
+        // Arrange
+        var createResult = await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        Assert.IsTrue(createResult.IsSuccess);
+        
+        var overviewGuid = _api.CurrentModel.ExplorerView.First().Uuid;
+        var addResult = _api.AddElement(StoryItemType.Character, overviewGuid.ToString(), "Test Character");
+        Assert.IsTrue(addResult.IsSuccess);
+        var characterGuid = addResult.Payload;
+        
+        // Act
+        _api.DeleteStoryElement(characterGuid.ToString());
+        
+        // Assert
+        var trashNode = _api.CurrentModel.TrashView.First();
+        Assert.IsTrue(trashNode.Children.Any(n => n.Uuid == characterGuid), "Character should be in trash");
+        var overviewNode = _api.CurrentModel.ExplorerView.First();
+        Assert.IsFalse(overviewNode.Children.Any(n => n.Uuid == characterGuid), "Character should not be in explorer");
+    }
+
+    /// <summary>
+    /// Tests that DeleteStoryElement throws exception for invalid UUID
+    /// </summary>
+    [TestMethod]
+    public async Task DeleteStoryElement_WithInvalidUuid_ThrowsException()
+    {
+        // Arrange
+        var createResult = await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        Assert.IsTrue(createResult.IsSuccess);
+        
+        // Act & Assert
+        Assert.ThrowsExactly<ArgumentException>(() =>
+        {
+            _api.DeleteStoryElement("invalid-uuid");
+        });
+    }
+
+    /// <summary>
+    /// Tests that DeleteStoryElement throws exception when no model is loaded
+    /// </summary>
+    [TestMethod]
+    public void DeleteStoryElement_WithNoModel_ThrowsException()
+    {
+        // Arrange
+        var api = new SemanticKernelApi();
+        
+        // Act & Assert
+        Assert.ThrowsExactly<InvalidOperationException>(() =>
+        {
+            api.DeleteStoryElement(Guid.NewGuid().ToString());
+        });
+    }
+
+    /// <summary>
+    /// Tests that DeleteElement moves an element to trash using OperationResult
+    /// </summary>
+    [TestMethod]
+    public async Task DeleteElement_WithValidElement_ReturnsSuccess()
+    {
+        // Arrange
+        var createResult = await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        Assert.IsTrue(createResult.IsSuccess);
+        
+        var overviewGuid = _api.CurrentModel.ExplorerView.First().Uuid;
+        var addResult = _api.AddElement(StoryItemType.Scene, overviewGuid.ToString(), "Test Scene");
+        Assert.IsTrue(addResult.IsSuccess);
+        var sceneGuid = addResult.Payload;
+        
+        // Act
+        var deleteResult = await _api.DeleteElement(sceneGuid, StoryViewType.ExplorerView);
+        
+        // Assert
+        Assert.IsTrue(deleteResult.IsSuccess, "DeleteElement should succeed");
+        var trashNode = _api.CurrentModel.TrashView.First();
+        Assert.IsTrue(trashNode.Children.Any(n => n.Uuid == sceneGuid), "Scene should be in trash");
+    }
+
+    /// <summary>
+    /// Tests that DeleteElement returns failure when no model is loaded
+    /// </summary>
+    [TestMethod]
+    public async Task DeleteElement_WithNoModel_ReturnsFailure()
+    {
+        // Arrange
+        var api = new SemanticKernelApi();
+        
+        // Act
+        var result = await api.DeleteElement(Guid.NewGuid(), StoryViewType.ExplorerView);
+        
+        // Assert
+        Assert.IsFalse(result.IsSuccess, "DeleteElement should fail");
+        Assert.AreEqual("No outline is opened", result.ErrorMessage);
+    }
+
+    /// <summary>
+    /// Tests that RestoreFromTrash restores an element from trash
+    /// </summary>
+    [TestMethod]
+    public async Task RestoreFromTrash_WithValidElement_ReturnsSuccess()
+    {
+        // Arrange
+        var createResult = await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        Assert.IsTrue(createResult.IsSuccess);
+        
+        var overviewGuid = _api.CurrentModel.ExplorerView.First().Uuid;
+        var addResult = _api.AddElement(StoryItemType.Problem, overviewGuid.ToString(), "Test Problem");
+        Assert.IsTrue(addResult.IsSuccess);
+        var problemGuid = addResult.Payload;
+        
+        // Move to trash first
+        await _api.DeleteElement(problemGuid, StoryViewType.ExplorerView);
+        
+        // Act
+        var restoreResult = await _api.RestoreFromTrash(problemGuid);
+        
+        // Assert
+        Assert.IsTrue(restoreResult.IsSuccess, "RestoreFromTrash should succeed");
+        var overviewNode = _api.CurrentModel.ExplorerView.First();
+        Assert.IsTrue(overviewNode.Children.Any(n => n.Uuid == problemGuid), "Problem should be back in explorer");
+        var trashNode = _api.CurrentModel.TrashView.First();
+        Assert.IsFalse(trashNode.Children.Any(n => n.Uuid == problemGuid), "Problem should not be in trash");
+    }
+
+    /// <summary>
+    /// Tests that RestoreFromTrash returns failure for element not in trash
+    /// </summary>
+    [TestMethod]
+    public async Task RestoreFromTrash_WithElementNotInTrash_ReturnsFailure()
+    {
+        // Arrange
+        var createResult = await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        Assert.IsTrue(createResult.IsSuccess);
+        
+        // Act
+        var result = await _api.RestoreFromTrash(Guid.NewGuid());
+        
+        // Assert
+        Assert.IsFalse(result.IsSuccess, "RestoreFromTrash should fail");
+        Assert.AreEqual("Element not found in trash", result.ErrorMessage);
+    }
+
+    /// <summary>
+    /// Tests that RestoreFromTrash returns failure when no model is loaded
+    /// </summary>
+    [TestMethod]
+    public async Task RestoreFromTrash_WithNoModel_ReturnsFailure()
+    {
+        // Arrange
+        var api = new SemanticKernelApi();
+        
+        // Act
+        var result = await api.RestoreFromTrash(Guid.NewGuid());
+        
+        // Assert
+        Assert.IsFalse(result.IsSuccess, "RestoreFromTrash should fail");
+        Assert.AreEqual("No outline is opened", result.ErrorMessage);
+    }
+
+    /// <summary>
+    /// Tests that EmptyTrash removes all items from trash
+    /// </summary>
+    [TestMethod]
+    public async Task EmptyTrash_WithItemsInTrash_ReturnsSuccess()
+    {
+        // Arrange
+        var createResult = await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        Assert.IsTrue(createResult.IsSuccess);
+        
+        var overviewGuid = _api.CurrentModel.ExplorerView.First().Uuid;
+        var addResult1 = _api.AddElement(StoryItemType.Character, overviewGuid.ToString(), "Character 1");
+        var addResult2 = _api.AddElement(StoryItemType.Scene, overviewGuid.ToString(), "Scene 1");
+        Assert.IsTrue(addResult1.IsSuccess);
+        Assert.IsTrue(addResult2.IsSuccess);
+        
+        // Move both to trash
+        await _api.DeleteElement(addResult1.Payload, StoryViewType.ExplorerView);
+        await _api.DeleteElement(addResult2.Payload, StoryViewType.ExplorerView);
+        
+        var trashNode = _api.CurrentModel.TrashView.First();
+        Assert.AreEqual(2, trashNode.Children.Count, "Should have 2 items in trash");
+        
+        // Act
+        var emptyResult = await _api.EmptyTrash();
+        
+        // Assert
+        Assert.IsTrue(emptyResult.IsSuccess, "EmptyTrash should succeed");
+        Assert.AreEqual(0, trashNode.Children.Count, "Trash should be empty");
+    }
+
+    /// <summary>
+    /// Tests that EmptyTrash succeeds even when trash is already empty
+    /// </summary>
+    [TestMethod]
+    public async Task EmptyTrash_WithNoItemsInTrash_ReturnsSuccess()
+    {
+        // Arrange
+        var createResult = await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        Assert.IsTrue(createResult.IsSuccess);
+        
+        // Act
+        var result = await _api.EmptyTrash();
+        
+        // Assert
+        Assert.IsTrue(result.IsSuccess, "EmptyTrash should succeed even when empty");
+        var trashNode = _api.CurrentModel.TrashView.First();
+        Assert.AreEqual(0, trashNode.Children.Count, "Trash should remain empty");
+    }
+
+    /// <summary>
+    /// Tests that EmptyTrash returns failure when no model is loaded
+    /// </summary>
+    [TestMethod]
+    public async Task EmptyTrash_WithNoModel_ReturnsFailure()
+    {
+        // Arrange
+        var api = new SemanticKernelApi();
+        
+        // Act
+        var result = await api.EmptyTrash();
+        
+        // Assert
+        Assert.IsFalse(result.IsSuccess, "EmptyTrash should fail");
+        Assert.AreEqual("No outline is opened", result.ErrorMessage);
     }
 }

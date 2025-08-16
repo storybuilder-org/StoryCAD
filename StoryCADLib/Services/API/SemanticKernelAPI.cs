@@ -129,7 +129,14 @@ public class SemanticKernelApi : IStoryCADAPI
     /// <param name="uuid"></param>
     public void DeleteStoryElement(string uuid)
     {
-        throw new NotImplementedException();
+        if (CurrentModel == null)
+            throw new InvalidOperationException("No StoryModel available. Create a model first.");
+
+        if (!Guid.TryParse(uuid, out var guid))
+            throw new ArgumentException($"Invalid UUID: {uuid}");
+
+        var element = _outlineService.GetStoryElementByGuid(CurrentModel, guid);
+        _outlineService.MoveToTrash(element, CurrentModel);
     }
 
     /// <summary>
@@ -501,25 +508,22 @@ public class SemanticKernelApi : IStoryCADAPI
                                  """)]
     public Task<OperationResult<bool>> DeleteElement(Guid elementToDelete, StoryViewType Type)
     {
-        // Ensure we have a current StoryModel.
-        if (CurrentModel == null)
-            return Task.FromResult(OperationResult<bool>.Failure("No outline is opened"));
-
-        //Remove reference to element
-        StoryElement element = _outlineService.GetStoryElementByGuid(CurrentModel, elementToDelete);
-        _outlineService.RemoveReferenceToElement(elementToDelete, CurrentModel);
-
-        // Remove the element from the model.
-        if (Type == StoryViewType.ExplorerView)
+        try
         {
-            element.Node.Delete(Type);
-        }
-        else
-        {
-            element.Node.Delete(Type);
-        }
+            // Ensure we have a current StoryModel.
+            if (CurrentModel == null)
+                return Task.FromResult(OperationResult<bool>.Failure("No outline is opened"));
 
-        return Task.FromResult(OperationResult<bool>.Success(true));
+            // Get the element and move it to trash using OutlineService
+            StoryElement element = _outlineService.GetStoryElementByGuid(CurrentModel, elementToDelete);
+            _outlineService.MoveToTrash(element, CurrentModel);
+
+            return Task.FromResult(OperationResult<bool>.Success(true));
+        }
+        catch (Exception ex)
+        {
+            return Task.FromResult(OperationResult<bool>.Failure($"Error in DeleteElement: {ex.Message}"));
+        }
     }
 
     [KernelFunction, Description("""
@@ -723,6 +727,73 @@ public class SemanticKernelApi : IStoryCADAPI
         catch (Exception ex)
         {
             return OperationResult<List<Dictionary<string, object>>>.Failure($"Error in SearchInSubtree: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Restores a story element from the trash back to its original location.
+    /// </summary>
+    /// <param name="elementToRestore">The GUID of the element to restore from trash</param>
+    /// <returns>An OperationResult indicating success or failure</returns>
+    [KernelFunction, Description("""
+                                 Restores an element from the trashcan back to the explorer view.
+                                 The element must be a direct child of the trashcan (not nested).
+                                 All children of the element will be restored with it.
+                                 """)]
+    public Task<OperationResult<bool>> RestoreFromTrash(Guid elementToRestore)
+    {
+        try
+        {
+            // Ensure we have a current StoryModel.
+            if (CurrentModel == null)
+                return Task.FromResult(OperationResult<bool>.Failure("No outline is opened"));
+
+            // Get the trash node
+            var trashNode = CurrentModel.TrashView.FirstOrDefault(n => n.Type == StoryItemType.TrashCan);
+            if (trashNode == null)
+                return Task.FromResult(OperationResult<bool>.Failure("TrashCan node not found"));
+
+            // Find the node to restore
+            var nodeToRestore = trashNode.Children.FirstOrDefault(n => n.Uuid == elementToRestore);
+            if (nodeToRestore == null)
+                return Task.FromResult(OperationResult<bool>.Failure("Element not found in trash"));
+
+            // Use OutlineService to restore the element
+            _outlineService.RestoreFromTrash(nodeToRestore, CurrentModel);
+
+            return Task.FromResult(OperationResult<bool>.Success(true));
+        }
+        catch (Exception ex)
+        {
+            return Task.FromResult(OperationResult<bool>.Failure($"Error in RestoreFromTrash: {ex.Message}"));
+        }
+    }
+
+    /// <summary>
+    /// Empties the trash, permanently removing all items.
+    /// </summary>
+    /// <returns>An OperationResult indicating success or failure</returns>
+    [KernelFunction, Description("""
+                                 Empties the trashcan, permanently deleting all items within it.
+                                 This is a destructive action that cannot be undone.
+                                 All elements and their children will be permanently removed.
+                                 """)]
+    public Task<OperationResult<bool>> EmptyTrash()
+    {
+        try
+        {
+            // Ensure we have a current StoryModel.
+            if (CurrentModel == null)
+                return Task.FromResult(OperationResult<bool>.Failure("No outline is opened"));
+
+            // Use OutlineService to empty the trash
+            _outlineService.EmptyTrash(CurrentModel);
+
+            return Task.FromResult(OperationResult<bool>.Success(true));
+        }
+        catch (Exception ex)
+        {
+            return Task.FromResult(OperationResult<bool>.Failure($"Error in EmptyTrash: {ex.Message}"));
         }
     }
 }

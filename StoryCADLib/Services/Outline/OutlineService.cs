@@ -1192,4 +1192,162 @@ public Task<StoryModel> CreateModel(string name, string author, int selectedTemp
             SearchChildrenRecursive(childNode, searchText, model, searchService, results);
         }
     }
+
+    #region Trash Operations
+
+    /// <summary>
+    /// Moves a story element to the trash.
+    /// </summary>
+    /// <param name="element">The element to move to trash</param>
+    /// <param name="model">The story model</param>
+    /// <exception cref="ArgumentNullException">Thrown when element or model is null</exception>
+    /// <exception cref="InvalidOperationException">Thrown when element cannot be moved to trash</exception>
+    public void MoveToTrash(StoryElement element, StoryModel model)
+    {
+        if (element == null)
+            throw new ArgumentNullException(nameof(element));
+        
+        if (model == null)
+            throw new ArgumentNullException(nameof(model));
+        
+        // Validate element can be moved to trash
+        if (element.Node.IsRoot)
+            throw new InvalidOperationException("Cannot move root nodes to trash");
+        
+        if (element.ElementType == StoryItemType.TrashCan)
+            throw new InvalidOperationException("Cannot move TrashCan to trash");
+        
+        if (element.ElementType == StoryItemType.StoryOverview)
+            throw new InvalidOperationException("Cannot move StoryOverview to trash");
+
+        _log.Log(LogLevel.Info, $"Moving element {element.Uuid} to trash");
+
+        var autoSaveService = Ioc.Default.GetRequiredService<AutoSaveService>();
+        var backupService = Ioc.Default.GetRequiredService<BackupService>();
+        
+        using (var serializationLock = new SerializationLock(autoSaveService, backupService, _log))
+        {
+            // Remove references to this element from other elements
+            RemoveReferenceToElement(element.Uuid, model);
+            
+            // Get the trash node
+            var trashNode = model.TrashView.FirstOrDefault(n => n.Type == StoryItemType.TrashCan);
+            if (trashNode == null)
+            {
+                _log.Log(LogLevel.Error, "TrashCan node not found");
+                throw new InvalidOperationException("TrashCan node not found in model");
+            }
+            
+            // Remove from current parent
+            var parent = element.Node.Parent;
+            if (parent != null)
+            {
+                parent.Children.Remove(element.Node);
+            }
+            
+            // Add to trash
+            element.Node.Parent = trashNode;
+            trashNode.Children.Add(element.Node);
+            
+            // Mark model as changed
+            model.Changed = true;
+            
+            _log.Log(LogLevel.Info, $"Successfully moved element {element.Uuid} to trash");
+        }
+    }
+
+    /// <summary>
+    /// Restores an element from trash back to the explorer view.
+    /// </summary>
+    /// <param name="trashNode">The node in trash to restore</param>
+    /// <param name="model">The story model</param>
+    /// <exception cref="ArgumentNullException">Thrown when trashNode or model is null</exception>
+    /// <exception cref="InvalidOperationException">Thrown when node cannot be restored</exception>
+    public void RestoreFromTrash(StoryNodeItem trashNode, StoryModel model)
+    {
+        if (trashNode == null)
+            throw new ArgumentNullException(nameof(trashNode));
+        
+        if (model == null)
+            throw new ArgumentNullException(nameof(model));
+        
+        // Validate node is in trash
+        if (StoryNodeItem.RootNodeType(trashNode) != StoryItemType.TrashCan)
+            throw new InvalidOperationException("Can only restore items from trash");
+        
+        // Only allow restoring top-level items from trash
+        if (trashNode.Parent?.Type != StoryItemType.TrashCan)
+            throw new InvalidOperationException("Can only restore top-level items from trash. Restore the parent item instead.");
+
+        _log.Log(LogLevel.Info, $"Restoring element {trashNode.Uuid} from trash");
+
+        var autoSaveService = Ioc.Default.GetRequiredService<AutoSaveService>();
+        var backupService = Ioc.Default.GetRequiredService<BackupService>();
+        
+        using (var serializationLock = new SerializationLock(autoSaveService, backupService, _log))
+        {
+            // Get the overview node (root of explorer view)
+            var overviewNode = model.ExplorerView.FirstOrDefault();
+            if (overviewNode == null)
+            {
+                _log.Log(LogLevel.Error, "Explorer view root not found");
+                throw new InvalidOperationException("Explorer view root not found in model");
+            }
+            
+            // Remove from trash
+            var trashCanNode = trashNode.Parent;
+            trashCanNode.Children.Remove(trashNode);
+            
+            // Add to explorer view (at the end)
+            trashNode.Parent = overviewNode;
+            overviewNode.Children.Add(trashNode);
+            
+            // Mark model as changed
+            model.Changed = true;
+            
+            _log.Log(LogLevel.Info, $"Successfully restored element {trashNode.Uuid} from trash");
+        }
+    }
+
+    /// <summary>
+    /// Empties the trash, permanently removing all items.
+    /// </summary>
+    /// <param name="model">The story model</param>
+    /// <exception cref="ArgumentNullException">Thrown when model is null</exception>
+    /// <exception cref="InvalidOperationException">Thrown when TrashCan node is not found</exception>
+    public void EmptyTrash(StoryModel model)
+    {
+        if (model == null)
+            throw new ArgumentNullException(nameof(model));
+
+        _log.Log(LogLevel.Info, "Emptying trash");
+
+        var autoSaveService = Ioc.Default.GetRequiredService<AutoSaveService>();
+        var backupService = Ioc.Default.GetRequiredService<BackupService>();
+        
+        using (var serializationLock = new SerializationLock(autoSaveService, backupService, _log))
+        {
+            // Get the trash node
+            var trashNode = model.TrashView.FirstOrDefault(n => n.Type == StoryItemType.TrashCan);
+            if (trashNode == null)
+            {
+                _log.Log(LogLevel.Error, "TrashCan node not found");
+                throw new InvalidOperationException("TrashCan node not found");
+            }
+            
+            // Clear all children
+            int itemCount = trashNode.Children.Count;
+            trashNode.Children.Clear();
+            
+            // Mark model as changed if items were removed
+            if (itemCount > 0)
+            {
+                model.Changed = true;
+            }
+            
+            _log.Log(LogLevel.Info, $"Successfully emptied trash, removed {itemCount} items");
+        }
+    }
+
+    #endregion
 }

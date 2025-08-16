@@ -217,6 +217,8 @@ msbuild StoryCAD.sln /t:Build /p:Configuration=Release /p:Platform=x64
 "/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net8.0-windows10.0.19041.0/StoryCADTests.dll" --Tests:*.*
 "/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net8.0-windows10.0.19041.0/StoryCADTests.dll" --Tests:*,*
 "/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net8.0-windows10.0.19041.0/StoryCADTests.dll" --Tests:*,*,*,*
+"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net9.0-windows10.0.22621.0/StoryCADTests.dll"
+"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net9.0-windows10.0.22621.0/StoryCADTests.dll" --Tests:*
 
 # Standard test commands
 dotnet test StoryCADTests/StoryCADTests.csproj --configuration Debug
@@ -239,3 +241,4 @@ git commit -m "message"
 - **No Cloud Sync**: Data remains on user's device unless explicitly exported
 - **Open Source**: GNU GPL v3 license ensures transparency
 - **Optional Telemetry**: Error reporting requires user consent and API configuration
+- DO NOT test against the UI
