@@ -109,19 +109,23 @@ public class WorkflowInterfaceTests
         var testElement = new StoryElement { Uuid = testGuid, Name = "Test" };
         
         // Act & Assert - Test GetAllElements
-        var elements = api.GetAllElements();
-        Assert.IsNotNull(elements);
+        var elementsResult = api.GetAllElements();
+        Assert.IsTrue(elementsResult.IsSuccess, "GetAllElements should succeed");
+        Assert.IsNotNull(elementsResult.Payload);
         
         // Test UpdateStoryElement
-        api.UpdateStoryElement(testElement, testGuid);
+        var updateResult = api.UpdateStoryElement(testElement, testGuid);
+        Assert.IsTrue(updateResult.IsSuccess, "UpdateStoryElement should succeed");
         
         // Test GetStoryElement
-        var retrieved = api.GetStoryElement(testGuid);
-        Assert.IsNotNull(retrieved);
+        var retrieveResult = api.GetStoryElement(testGuid);
+        Assert.IsTrue(retrieveResult.IsSuccess, "GetStoryElement should succeed");
+        Assert.IsNotNull(retrieveResult.Payload, "Should return the element");
         
         // Test UpdateElementProperties
         var properties = new Dictionary<string, object> { { "Name", "Updated" } };
-        api.UpdateElementProperties(testGuid, properties);
+        var updatePropsResult = api.UpdateElementProperties(testGuid, properties);
+        Assert.IsTrue(updatePropsResult.IsSuccess, "UpdateElementProperties should succeed");
         
         // Test UpdateElementProperty
         var result = api.UpdateElementProperty(testGuid, "Name", "New Name");
@@ -181,25 +185,30 @@ public class WorkflowInterfaceTests
             };
         }
 
-        public ObservableCollection<StoryElement> GetAllElements()
+        public OperationResult<ObservableCollection<StoryElement>> GetAllElements()
         {
-            return new ObservableCollection<StoryElement>(_elements.Values);
+            return OperationResult<ObservableCollection<StoryElement>>.Success(
+                new ObservableCollection<StoryElement>(_elements.Values));
         }
 
-        public void UpdateStoryElement(object newElement, Guid guid)
+        public OperationResult<bool> UpdateStoryElement(object newElement, Guid guid)
         {
             if (newElement is StoryElement element)
             {
                 _elements[guid] = element;
+                return OperationResult<bool>.Success(true);
             }
+            return OperationResult<bool>.Failure("Invalid element type");
         }
 
-        public void UpdateElementProperties(Guid elementGuid, Dictionary<string, object> properties)
+        public OperationResult<bool> UpdateElementProperties(Guid elementGuid, Dictionary<string, object> properties)
         {
             if (_elements.TryGetValue(elementGuid, out var element))
             {
                 // Update properties
+                return OperationResult<bool>.Success(true);
             }
+            return OperationResult<bool>.Failure("Element not found");
         }
 
         public OperationResult<object> UpdateElementProperty(Guid elementGuid, string propertyName, object newValue)
@@ -211,9 +220,13 @@ public class WorkflowInterfaceTests
             };
         }
 
-        public StoryElement GetStoryElement(Guid guid)
+        public OperationResult<StoryElement> GetStoryElement(Guid guid)
         {
-            return _elements.TryGetValue(guid, out var element) ? element : null;
+            if (_elements.TryGetValue(guid, out var element))
+            {
+                return OperationResult<StoryElement>.Success(element);
+            }
+            return OperationResult<StoryElement>.Failure("Element not found");
         }
     }
 }

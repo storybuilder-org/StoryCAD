@@ -36,22 +36,24 @@ public interface IStoryCADAPI
     /// <summary>
     /// Gets all story elements in the current model
     /// </summary>
-    /// <returns>Collection of all story elements</returns>
-    ObservableCollection<StoryElement> GetAllElements();
+    /// <returns>OperationResult containing the collection of all story elements</returns>
+    OperationResult<ObservableCollection<StoryElement>> GetAllElements();
 
     /// <summary>
     /// Updates a story element
     /// </summary>
     /// <param name="newElement">The updated element</param>
     /// <param name="guid">The GUID of the element to update</param>
-    void UpdateStoryElement(object newElement, Guid guid);
+    /// <returns>Result of the update operation</returns>
+    OperationResult<bool> UpdateStoryElement(object newElement, Guid guid);
 
     /// <summary>
     /// Updates multiple properties of an element
     /// </summary>
     /// <param name="elementGuid">The GUID of the element to update</param>
     /// <param name="properties">Dictionary of property names and values</param>
-    void UpdateElementProperties(Guid elementGuid, Dictionary<string, object> properties);
+    /// <returns>Result of the update operation</returns>
+    OperationResult<bool> UpdateElementProperties(Guid elementGuid, Dictionary<string, object> properties);
 
     /// <summary>
     /// Updates a single property of an element
@@ -66,6 +68,6 @@ public interface IStoryCADAPI
     /// Gets a story element by its GUID
     /// </summary>
     /// <param name="guid">The GUID of the element</param>
-    /// <returns>The story element, or null if not found</returns>
-    StoryElement GetStoryElement(Guid guid);
+    /// <returns>OperationResult containing the story element if found, or error message if not</returns>
+    OperationResult<StoryElement> GetStoryElement(Guid guid);
 }

@@ -242,3 +242,4 @@ git commit -m "message"
 - **Open Source**: GNU GPL v3 license ensures transparency
 - **Optional Telemetry**: Error reporting requires user consent and API configuration
 - DO NOT test against the UI
+- Because the API is an external API, we don't know who is using it, or how.

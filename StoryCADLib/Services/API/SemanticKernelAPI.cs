@@ -9,7 +9,22 @@ using System.Reflection;
 namespace StoryCAD.Services.API;
 
 /// <summary>
+/// The StoryCAD API—a powerful interface that combines human and AI interactions for generating and managing comprehensive story outlines.
 /// 
+/// Two types of interaction are supported:
+/// - Human Interaction: Allows users to directly create, modify, and manage story elements through method calls.
+/// - AI-Driven Automation: Integrates with Semantic Kernel to enable AI-powered story generation and element creation.
+/// 
+/// For a complete description of the API and its capabilities, see:
+/// https://storybuilder-org.github.io/StoryCAD/docs/For%20Developers/Using_the_API.html
+/// 
+/// Usage:
+/// - State Handling: The API operates on a CurrentModel property which holds the active StoryModel instance.
+///   This model must be set before most operations can be performed, either via SetCurrentModel() or by
+///   creating a new outline with CreateEmptyOutline().
+/// - Calling Standard: All public API methods return OperationResult<T> to ensure safe external consumption.
+///   No exceptions are thrown to external callers; all errors are communicated through the OperationResult
+///   pattern with IsSuccess flags and descriptive ErrorMessage strings.
 /// </summary>
 public class SemanticKernelApi : IStoryCADAPI
 {
@@ -18,6 +33,9 @@ public class SemanticKernelApi : IStoryCADAPI
 
     /// <summary>
     /// Sets the current StoryModel to work with (for Collaborator integration)
+    /// An open outline in StoryCAD is represented by a StoryModel and ShellViewModel
+    /// contains the active StoryModel as CurrentModel, which is passed to Collaborator in CollaboratorArgs
+    /// for further operations. This method allows Collaborator to set the API's current StoryModel.
     /// </summary>
     /// <param name="model">The active StoryModel from ShellViewModel</param>
     public void SetCurrentModel(StoryModel model)
@@ -112,14 +130,21 @@ public class SemanticKernelApi : IStoryCADAPI
 
 
     [KernelFunction, Description("Returns basic information about all elements in the story model.")]
-    public ObservableCollection<StoryElement> GetAllElements()
+    public OperationResult<ObservableCollection<StoryElement>> GetAllElements()
     {
         if (CurrentModel == null)
         {
-            throw new InvalidOperationException("No StoryModel available. Create a model first.");
+            return OperationResult<ObservableCollection<StoryElement>>.Failure("No StoryModel available. Create a model first.");
         }
 
-        return CurrentModel.StoryElements;
+        try
+        {
+            return OperationResult<ObservableCollection<StoryElement>>.Success(CurrentModel.StoryElements);
+        }
+        catch (Exception ex)
+        {
+            return OperationResult<ObservableCollection<StoryElement>>.Failure($"Error retrieving elements: {ex.Message}");
+        }
     }
 
     /// <summary>
@@ -127,16 +152,32 @@ public class SemanticKernelApi : IStoryCADAPI
     /// </summary>
     /// <remarks>Element is just moved to trashcan</remarks>
     /// <param name="uuid"></param>
-    public void DeleteStoryElement(string uuid)
+    public OperationResult<bool> DeleteStoryElement(string uuid)
     {
         if (CurrentModel == null)
-            throw new InvalidOperationException("No StoryModel available. Create a model first.");
+        {
+            return OperationResult<bool>.Failure("No StoryModel available. Create a model first.");
+        }
 
         if (!Guid.TryParse(uuid, out var guid))
-            throw new ArgumentException($"Invalid UUID: {uuid}");
+        {
+            return OperationResult<bool>.Failure($"Invalid UUID: {uuid}");
+        }
 
-        var element = _outlineService.GetStoryElementByGuid(CurrentModel, guid);
-        _outlineService.MoveToTrash(element, CurrentModel);
+        try
+        {
+            var element = _outlineService.GetStoryElementByGuid(CurrentModel, guid);
+            _outlineService.MoveToTrash(element, CurrentModel);
+            return OperationResult<bool>.Success(true);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return OperationResult<bool>.Failure($"Element not found: {ex.Message}");
+        }
+        catch (Exception ex)
+        {
+            return OperationResult<bool>.Failure($"Error deleting element: {ex.Message}");
+        }
     }
 
     /// <summary>
@@ -157,33 +198,39 @@ public class SemanticKernelApi : IStoryCADAPI
         - You cannot create elements using this method.
         - You must return all fields previously given to you for that element previously
         """)]
-    public void UpdateStoryElement(object newElement, Guid guid)
+    public OperationResult<bool> UpdateStoryElement(object newElement, Guid guid)
     {
         if (CurrentModel == null)
         {
-            throw new InvalidOperationException("No StoryModel available. Create a model first.");
+            return OperationResult<bool>.Failure("No StoryModel available. Create a model first.");
         }
 
         if (guid == Guid.Empty)
         {
-            throw new ArgumentNullException("GUID is null");
+            return OperationResult<bool>.Failure("GUID cannot be empty");
         }
 
-        // Use OutlineService to get the element
         try
         {
+            // Use OutlineService to get the element
             var existingElement = _outlineService.GetStoryElementByGuid(CurrentModel, guid);
+            
+            //Deserialize and update.
+            StoryElement updated = StoryElement.Deserialize(newElement.ToString());
+            //TODO: force set uuid somehow.
+            updated.Uuid = guid;
+            _outlineService.UpdateStoryElement(CurrentModel, updated);
+            
+            return OperationResult<bool>.Success(true);
         }
         catch (InvalidOperationException)
         {
-            throw new ArgumentNullException("StoryElement does not exist");
+            return OperationResult<bool>.Failure("StoryElement does not exist");
         }
-
-        //Deserialize and update.
-        StoryElement updated = StoryElement.Deserialize(newElement.ToString());
-        //TODO: force set uuid somehow.
-        updated.Uuid = guid;
-        _outlineService.UpdateStoryElement(CurrentModel, updated);
+        catch (Exception ex)
+        {
+            return OperationResult<bool>.Failure($"Error updating element: {ex.Message}");
+        }
     }
 
     /// <summary>
@@ -205,42 +252,98 @@ public class SemanticKernelApi : IStoryCADAPI
          - All properties will be updated for the same StoryElement.
          - UpdateElementProperty edits each properties of the StoryElement.
          """)]
-    public void UpdateElementProperties(Guid elementGuid, Dictionary<string, object> properties)
+    public OperationResult<bool> UpdateElementProperties(Guid elementGuid, Dictionary<string, object> properties)
     {
-        foreach (var kvp in properties)
+        if (CurrentModel == null)
         {
-            var result = UpdateElementProperty(elementGuid, kvp.Key, kvp.Value);
+            return OperationResult<bool>.Failure("No StoryModel available. Create a model first.");
+        }
+        
+        if (elementGuid == Guid.Empty)
+        {
+            return OperationResult<bool>.Failure("GUID cannot be empty");
+        }
+        
+        if (properties == null || properties.Count == 0)
+        {
+            return OperationResult<bool>.Failure("No properties to update");
+        }
+        
+        try
+        {
+            foreach (var kvp in properties)
+            {
+                var result = UpdateElementProperty(elementGuid, kvp.Key, kvp.Value);
+                if (!result.IsSuccess)
+                {
+                    return OperationResult<bool>.Failure($"Failed to update property '{kvp.Key}': {result.ErrorMessage}");
+                }
+            }
+            return OperationResult<bool>.Success(true);
+        }
+        catch (Exception ex)
+        {
+            return OperationResult<bool>.Failure($"Error updating properties: {ex.Message}");
         }
     }
 
     [KernelFunction, Description("Returns a single element and all its fields.")]
-    public object GetElement(Guid guid)
+    public OperationResult<object> GetElement(Guid guid)
     {
         if (CurrentModel == null)
         {
-            throw new InvalidOperationException("No StoryModel available. Create a model first.");
+            return OperationResult<object>.Failure("No StoryModel available. Create a model first.");
         }
 
         if (guid == Guid.Empty)
         {
-            throw new ArgumentNullException("GUID is null");
+            return OperationResult<object>.Failure("GUID cannot be empty");
         }
 
-        var element = _outlineService.GetStoryElementByGuid(CurrentModel, guid);
-        return element.Serialize();
+        try
+        {
+            var element = _outlineService.GetStoryElementByGuid(CurrentModel, guid);
+            return OperationResult<object>.Success(element.Serialize());
+        }
+        catch (InvalidOperationException)
+        {
+            return OperationResult<object>.Failure("Element not found");
+        }
+        catch (Exception ex)
+        {
+            return OperationResult<object>.Failure($"Error retrieving element: {ex.Message}");
+        }
     }
 
     /// <summary>
-    /// Implementation of IStoryCADAPI.GetStoryElement
+    /// Implementation of IStoryCADAPI.GetStoryElement.
+    /// This is an alias for GetStoryElementByGuid.
     /// </summary>
-    public StoryElement GetStoryElement(Guid guid)
+    public OperationResult<StoryElement> GetStoryElement(Guid guid)
     {
         if (CurrentModel == null)
         {
-            return null;
+            return OperationResult<StoryElement>.Failure("No StoryModel available. Create a model first.");
         }
 
-        return _outlineService.GetStoryElementByGuid(CurrentModel, guid);
+        if (guid == Guid.Empty)
+        {
+            return OperationResult<StoryElement>.Failure("GUID cannot be empty");
+        }
+
+        try
+        {
+            var element = _outlineService.GetStoryElementByGuid(CurrentModel, guid);
+            return OperationResult<StoryElement>.Success(element);
+        }
+        catch (InvalidOperationException)
+        {
+            return OperationResult<StoryElement>.Failure("Element not found");
+        }
+        catch (Exception ex)
+        {
+            return OperationResult<StoryElement>.Failure($"Error retrieving element: {ex.Message}");
+        }
     }
 
     [KernelFunction, Description("""
@@ -558,20 +661,32 @@ public class SemanticKernelApi : IStoryCADAPI
                                  mirror is a boolean that specifies if the relationship
                                  should be created on both characters.
                                  """)]
-    public bool AddRelationship(Guid source, Guid recipient, string desc, bool mirror = false)
+    public OperationResult<bool> AddRelationship(Guid source, Guid recipient, string desc, bool mirror = false)
     {
+        if (CurrentModel == null)
+        {
+            return OperationResult<bool>.Failure("No StoryModel available. Create a model first.");
+        }
+
         if (source == Guid.Empty)
         {
-            throw new ArgumentNullException(nameof(source));
+            return OperationResult<bool>.Failure("Source GUID cannot be empty");
         }
 
         if (recipient == Guid.Empty)
         {
-            throw new ArgumentNullException(nameof(recipient));
+            return OperationResult<bool>.Failure("Recipient GUID cannot be empty");
         }
 
-        _outlineService.AddRelationship(CurrentModel, source, recipient, desc, mirror);
-        return true;
+        try
+        {
+            _outlineService.AddRelationship(CurrentModel, source, recipient, desc, mirror);
+            return OperationResult<bool>.Success(true);
+        }
+        catch (Exception ex)
+        {
+            return OperationResult<bool>.Failure($"Error adding relationship: {ex.Message}");
+        }
     }
 
     /// <summary>

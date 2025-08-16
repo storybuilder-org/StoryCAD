@@ -90,10 +90,15 @@ public class SemanticKernelApiTests
     }
 
     [TestMethod]
-    public void GetAllElements_WithoutModel_ThrowsException()
+    public void GetAllElements_WithoutModel_ReturnsFailure()
     {
-        // Act & Assert: Calling GetAllElements without creating a model should throw an InvalidOperationException.
-        Assert.ThrowsExactly<InvalidOperationException>(() => _api.GetAllElements());
+        // Act
+        var result = _api.GetAllElements();
+        
+        // Assert
+        Assert.IsFalse(result.IsSuccess, "GetAllElements should fail without a model");
+        Assert.IsNull(result.Payload, "Payload should be null");
+        Assert.AreEqual("No StoryModel available. Create a model first.", result.ErrorMessage);
     }
 
     [TestMethod]
@@ -106,11 +111,12 @@ public class SemanticKernelApiTests
         Assert.IsTrue(createResult.IsSuccess, "Model creation should succeed.");
 
         // Act
-        ObservableCollection<StoryElement> elements = _api.GetAllElements();
+        var result = _api.GetAllElements();
 
         // Assert
-        Assert.IsNotNull(elements, "The returned collection should not be null.");
-        Assert.IsTrue(elements.Count > 0, "There should be at least one StoryElement in the collection.");
+        Assert.IsTrue(result.IsSuccess, "GetAllElements should succeed");
+        Assert.IsNotNull(result.Payload, "The returned collection should not be null.");
+        Assert.IsTrue(result.Payload.Count > 0, "There should be at least one StoryElement in the collection.");
     }
 
     // This test has been removed because DeleteStoryElement is now implemented
@@ -127,7 +133,9 @@ public class SemanticKernelApiTests
         Guid elementGuid = createResult.Payload.First();
 
         // Retrieve current element JSON.
-        string elementJson = (string)_api.GetElement(elementGuid);
+        var getResult = _api.GetElement(elementGuid);
+        Assert.IsTrue(getResult.IsSuccess, "GetElement should succeed");
+        string elementJson = (string)getResult.Payload;
         // Deserialize to get element type information.
         StoryElement element = JsonSerializer.Deserialize<StoryElement>(elementJson);
         // Create updated JSON with the same GUID and type but a new Name.
@@ -139,10 +147,13 @@ public class SemanticKernelApiTests
         });
 
         // Act
-        _api.UpdateStoryElement(updatedJson, elementGuid);
+        var updateResult = _api.UpdateStoryElement(updatedJson, elementGuid);
+        Assert.IsTrue(updateResult.IsSuccess, "UpdateStoryElement should succeed");
 
         // Assert: Retrieve element again and verify its name.
-        string updatedElementJson = (string)_api.GetElement(elementGuid);
+        var getUpdatedResult = _api.GetElement(elementGuid);
+        Assert.IsTrue(getUpdatedResult.IsSuccess, "GetElement should succeed");
+        string updatedElementJson = (string)getUpdatedResult.Payload;
         StoryElement updatedElement = JsonSerializer.Deserialize<StoryElement>(updatedElementJson);
         Assert.AreEqual(updatedName, updatedElement.Name, "The element's name should have been updated.");
     }
@@ -163,10 +174,13 @@ public class SemanticKernelApiTests
         {
             { "Name", updatedName }
         };
-        _api.UpdateElementProperties(elementGuid, propertiesToUpdate);
+        var updateResult = _api.UpdateElementProperties(elementGuid, propertiesToUpdate);
+        Assert.IsTrue(updateResult.IsSuccess, "UpdateElementProperties should succeed");
 
         // Assert: Verify that the element's name is updated.
-        string updatedElementJson = (string)_api.GetElement(elementGuid);
+        var getResult = _api.GetElement(elementGuid);
+        Assert.IsTrue(getResult.IsSuccess, "GetElement should succeed");
+        string updatedElementJson = (string)getResult.Payload;
         StoryElement updatedElement = JsonSerializer.Deserialize<StoryElement>(updatedElementJson);
         Assert.AreEqual(updatedName, updatedElement.Name, "The element's name should be updated via UpdateElementProperties.");
     }
@@ -182,11 +196,13 @@ public class SemanticKernelApiTests
         Guid elementGuid = createResult.Payload.First();
 
         // Act
-        object elementObj = _api.GetElement(elementGuid);
-        string elementJson = elementObj as string;
+        var getResult = _api.GetElement(elementGuid);
 
         // Assert
-        Assert.IsNotNull(elementJson, "GetElement should return a non-null JSON string.");
+        Assert.IsTrue(getResult.IsSuccess, "GetElement should succeed");
+        Assert.IsNotNull(getResult.Payload, "GetElement should return a non-null payload");
+        string elementJson = getResult.Payload as string;
+        Assert.IsNotNull(elementJson, "GetElement should return a JSON string.");
         Assert.IsTrue(elementJson.Contains(outlineName), "The returned JSON should include the element's name.");
         Assert.IsTrue(elementJson.Contains(elementGuid.ToString()), "The returned JSON should include the element's GUID.");
     }
@@ -240,10 +256,13 @@ public class SemanticKernelApiTests
         {
             { "Name", "Renamed Section" }
         };
-        _api.UpdateElementProperties(elementGuid, propertiesToUpdate);
+        var updateResult = _api.UpdateElementProperties(elementGuid, propertiesToUpdate);
+        Assert.IsTrue(updateResult.IsSuccess, "UpdateElementProperties should succeed");
 
         // Assert: Verify that the element's name is updated.
-        string updatedElementJson = (string)_api.GetElement(elementGuid);
+        var getResult = _api.GetElement(elementGuid);
+        Assert.IsTrue(getResult.IsSuccess, "GetElement should succeed");
+        string updatedElementJson = (string)getResult.Payload;
         StoryElement updatedElement = JsonSerializer.Deserialize<StoryElement>(updatedElementJson);
         Assert.AreEqual("Renamed Section", updatedElement.Name, "The element's name should be updated via UpdateElementProperties.");
     }
@@ -374,15 +393,16 @@ public class SemanticKernelApiTests
         StoryElement charElement2 = _api.CurrentModel.StoryElements.StoryElementGuids[charResult2.Payload];
 
         // Act: Add a relationship between the two characters.
-        bool relationshipResult = _api.AddRelationship(charElement1.Uuid, 
+        var relationshipResult = _api.AddRelationship(charElement1.Uuid, 
             charElement2.Uuid, "Friendship");
 
         // Assert
-        Assert.IsTrue(relationshipResult, "AddRelationship should return true on success.");
+        Assert.IsTrue(relationshipResult.IsSuccess, "AddRelationship should succeed");
 
-        // Also verify that calling with Guid.Empty throws an exception.
-        Assert.ThrowsExactly<ArgumentNullException>(() =>
-            _api.AddRelationship(Guid.Empty, charElement2.Uuid, "Invalid"));
+        // Also verify that calling with Guid.Empty returns failure.
+        var failureResult = _api.AddRelationship(Guid.Empty, charElement2.Uuid, "Invalid");
+        Assert.IsFalse(failureResult.IsSuccess, "AddRelationship should fail with empty GUID");
+        Assert.AreEqual("Source GUID cannot be empty", failureResult.ErrorMessage);
     }
 
     /// <summary>
@@ -496,9 +516,10 @@ public class SemanticKernelApiTests
         var characterGuid = addResult.Payload;
         
         // Act
-        _api.DeleteStoryElement(characterGuid.ToString());
+        var deleteResult = _api.DeleteStoryElement(characterGuid.ToString());
         
         // Assert
+        Assert.IsTrue(deleteResult.IsSuccess, "DeleteStoryElement should succeed");
         var trashNode = _api.CurrentModel.TrashView.First();
         Assert.IsTrue(trashNode.Children.Any(n => n.Uuid == characterGuid), "Character should be in trash");
         var overviewNode = _api.CurrentModel.ExplorerView.First();
@@ -509,33 +530,35 @@ public class SemanticKernelApiTests
     /// Tests that DeleteStoryElement throws exception for invalid UUID
     /// </summary>
     [TestMethod]
-    public async Task DeleteStoryElement_WithInvalidUuid_ThrowsException()
+    public async Task DeleteStoryElement_WithInvalidUuid_ReturnsFailure()
     {
         // Arrange
         var createResult = await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
         Assert.IsTrue(createResult.IsSuccess);
         
-        // Act & Assert
-        Assert.ThrowsExactly<ArgumentException>(() =>
-        {
-            _api.DeleteStoryElement("invalid-uuid");
-        });
+        // Act
+        var result = _api.DeleteStoryElement("invalid-uuid");
+        
+        // Assert
+        Assert.IsFalse(result.IsSuccess, "DeleteStoryElement should fail with invalid UUID");
+        Assert.IsTrue(result.ErrorMessage.Contains("Invalid UUID"), "Error message should indicate invalid UUID");
     }
 
     /// <summary>
     /// Tests that DeleteStoryElement throws exception when no model is loaded
     /// </summary>
     [TestMethod]
-    public void DeleteStoryElement_WithNoModel_ThrowsException()
+    public void DeleteStoryElement_WithNoModel_ReturnsFailure()
     {
         // Arrange
         var api = new SemanticKernelApi();
         
-        // Act & Assert
-        Assert.ThrowsExactly<InvalidOperationException>(() =>
-        {
-            api.DeleteStoryElement(Guid.NewGuid().ToString());
-        });
+        // Act
+        var result = api.DeleteStoryElement(Guid.NewGuid().ToString());
+        
+        // Assert
+        Assert.IsFalse(result.IsSuccess, "DeleteStoryElement should fail with no model");
+        Assert.AreEqual("No StoryModel available. Create a model first.", result.ErrorMessage);
     }
 
     /// <summary>
@@ -709,4 +732,91 @@ public class SemanticKernelApiTests
         Assert.IsFalse(result.IsSuccess, "EmptyTrash should fail");
         Assert.AreEqual("No outline is opened", result.ErrorMessage);
     }
+
+    #region GetStoryElement Tests
+
+    /// <summary>
+    /// Tests that GetStoryElement returns success with the correct element for a valid GUID
+    /// </summary>
+    [TestMethod]
+    public async Task GetStoryElement_WithValidGuid_ReturnsSuccess()
+    {
+        // Arrange
+        var createResult = await _api.CreateEmptyOutline("Test Story", "Test Author", "1");  // Use template 1 to get a character
+        Assert.IsTrue(createResult.IsSuccess);
+        
+        // Get a character element from the model
+        var character = _api.CurrentModel.StoryElements.FirstOrDefault(e => e.ElementType == StoryItemType.Character);
+        Assert.IsNotNull(character, "Should have at least one character in the model");
+        
+        // Act
+        var result = _api.GetStoryElement(character.Uuid);
+        
+        // Assert
+        Assert.IsTrue(result.IsSuccess, "Should return success");
+        Assert.IsNotNull(result.Payload, "Should return a story element");
+        Assert.AreEqual(character.Uuid, result.Payload.Uuid, "Should return the element with matching GUID");
+        Assert.AreEqual(character.ElementType, result.Payload.ElementType, "Should return element with correct type");
+        Assert.AreEqual(character.Name, result.Payload.Name, "Should return element with correct name");
+    }
+
+    /// <summary>
+    /// Tests that GetStoryElement returns failure when no model is loaded
+    /// </summary>
+    [TestMethod]
+    public void GetStoryElement_WithNoCurrentModel_ReturnsFailure()
+    {
+        // Arrange
+        var api = new SemanticKernelApi();
+        var someGuid = Guid.NewGuid();
+        
+        // Act
+        var result = api.GetStoryElement(someGuid);
+        
+        // Assert
+        Assert.IsFalse(result.IsSuccess, "Should return failure");
+        Assert.IsNull(result.Payload, "Payload should be null");
+        Assert.AreEqual("No StoryModel available. Create a model first.", result.ErrorMessage);
+    }
+
+    /// <summary>
+    /// Tests that GetStoryElement returns failure for empty GUID
+    /// </summary>
+    [TestMethod]
+    public async Task GetStoryElement_WithEmptyGuid_ReturnsFailure()
+    {
+        // Arrange
+        var createResult = await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        Assert.IsTrue(createResult.IsSuccess);
+        
+        // Act
+        var result = _api.GetStoryElement(Guid.Empty);
+        
+        // Assert
+        Assert.IsFalse(result.IsSuccess, "Should return failure");
+        Assert.IsNull(result.Payload, "Payload should be null");
+        Assert.AreEqual("GUID cannot be empty", result.ErrorMessage);
+    }
+
+    /// <summary>
+    /// Tests that GetStoryElement returns failure for non-existent GUID
+    /// </summary>
+    [TestMethod]
+    public async Task GetStoryElement_WithNonExistentGuid_ReturnsFailure()
+    {
+        // Arrange
+        var createResult = await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        Assert.IsTrue(createResult.IsSuccess);
+        var nonExistentGuid = Guid.NewGuid();
+        
+        // Act
+        var result = _api.GetStoryElement(nonExistentGuid);
+        
+        // Assert
+        Assert.IsFalse(result.IsSuccess, "Should return failure");
+        Assert.IsNull(result.Payload, "Payload should be null");
+        Assert.AreEqual("Element not found", result.ErrorMessage);
+    }
+
+    #endregion
 }

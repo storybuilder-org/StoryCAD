@@ -25,7 +25,7 @@ public class OutlineService
     /// <param name="author">Creator of the outline</param>
     /// <param name="selectedTemplateIndex">Template index</param>
     /// <returns>A story outline variable.</returns>
-public Task<StoryModel> CreateModel(string name, string author, int selectedTemplateIndex)
+internal Task<StoryModel> CreateModel(string name, string author, int selectedTemplateIndex)
 {
     _log.Log(LogLevel.Info, $"Creating new model: {name} by {author} with index {selectedTemplateIndex}");
 
@@ -203,7 +203,7 @@ public Task<StoryModel> CreateModel(string name, string author, int selectedTemp
     /// Writes the StoryModel JSON file to disk.
     /// Returns true if write is successful or throws an exception.
     /// </summary>
-    public async Task<bool> WriteModel(StoryModel model, string file)
+    internal async Task<bool> WriteModel(StoryModel model, string file)
     {
         _log.Log(LogLevel.Info, $"Writing model to {file}");
         var wtr = Ioc.Default.GetRequiredService<StoryIO>();
@@ -218,7 +218,7 @@ public Task<StoryModel> CreateModel(string name, string author, int selectedTemp
     /// <param name="path">Path to Outline</param>
     /// <returns>StoryModel Object</returns>
     /// <exception cref="FileNotFoundException">Thrown if path doesn't exist.</exception>
-    public async Task<StoryModel> OpenFile(string path)
+    internal async Task<StoryModel> OpenFile(string path)
     {
         _log.Log(LogLevel.Info, $"Opening file {path}");
         if (!File.Exists(path))
@@ -239,7 +239,7 @@ public Task<StoryModel> CreateModel(string name, string author, int selectedTemp
     /// <param name="viewType">The desired view type (Explorer or Narrator)</param>
     /// <exception cref="ArgumentNullException">Thrown when model is null</exception>
     /// <exception cref="ArgumentException">Thrown when viewType is invalid</exception>
-    public void SetCurrentView(StoryModel model, StoryViewType viewType)
+    internal void SetCurrentView(StoryModel model, StoryViewType viewType)
     {
         if (model == null)
             throw new ArgumentNullException(nameof(model));
@@ -274,7 +274,7 @@ public Task<StoryModel> CreateModel(string name, string author, int selectedTemp
     /// <param name="typeToAdd">Type of StoryElement that should be created</param>
     /// <param name="parent">Parent of the node we are creating</param>
     /// <returns>Newly created StoryElement</returns>
-    public StoryElement AddStoryElement(StoryModel model, StoryItemType typeToAdd, StoryNodeItem parent)
+    internal StoryElement AddStoryElement(StoryModel model, StoryItemType typeToAdd, StoryNodeItem parent)
     {
         _log.Log(LogLevel.Info, "AddStoryElement called.");
         if (parent == null)
@@ -311,7 +311,7 @@ public Task<StoryModel> CreateModel(string name, string author, int selectedTemp
     /// <summary>
     /// Finds if an element can be safely deleted.
     /// </summary>
-    public List<StoryElement> FindElementReferences(StoryModel model, Guid elementGuid)
+    internal List<StoryElement> FindElementReferences(StoryModel model, Guid elementGuid)
     {
         _log.Log(LogLevel.Info, $"FindElementReferences called for element {elementGuid}.");
         StoryElement elementToDelete = StoryElement.GetByGuid(elementGuid);
@@ -346,7 +346,7 @@ public Task<StoryModel> CreateModel(string name, string author, int selectedTemp
     /// <param name="elementToRemove">Element you are removing references to</param>
     /// <param name="model">StoryModel you are updating</param>
     /// <returns>bool indicating success</returns>
-    public bool RemoveReferenceToElement(Guid elementToRemove, StoryModel model)
+    internal bool RemoveReferenceToElement(Guid elementToRemove, StoryModel model)
     {
         _log.Log(LogLevel.Info, $"RemoveReferenceToElement called for element {elementToRemove}.");
         if (elementToRemove == Guid.Empty)
@@ -376,7 +376,7 @@ public Task<StoryModel> CreateModel(string name, string author, int selectedTemp
     /// <param name="view">View you are deleting from</param>
     /// <param name="source">StoryModel you are deleting from.</param>
     /// <returns>true if successful.</returns>
-    public bool RemoveElement(StoryElement elementToRemove, StoryViewType view, StoryNodeItem source)
+    internal bool RemoveElement(StoryElement elementToRemove, StoryViewType view, StoryNodeItem source)
     {
         _log.Log(LogLevel.Info, $"RemoveElement called for element {elementToRemove.Uuid}.");
         if (elementToRemove == null)
@@ -413,7 +413,7 @@ public Task<StoryModel> CreateModel(string name, string author, int selectedTemp
     /// <param name="desc">Relationship description</param>
     /// <param name="mirror">Create same relationship on recipient</param>
     /// <returns></returns>
-    public bool AddRelationship(StoryModel Model, Guid source, Guid recipient, string desc, bool mirror = false)
+    internal bool AddRelationship(StoryModel Model, Guid source, Guid recipient, string desc, bool mirror = false)
     {
         _log.Log(LogLevel.Info, $"AddRelationship called from {source} to {recipient}.");
         if (source == Guid.Empty)
@@ -457,7 +457,7 @@ public Task<StoryModel> CreateModel(string name, string author, int selectedTemp
     /// <param name="source">Scene element you are adding the cast member to </param>
     /// <param name="castMember">Cast member you want to add.</param>
     /// <returns></returns>
-    public bool AddCastMember(StoryModel Model, StoryElement source, Guid castMember)
+    internal bool AddCastMember(StoryModel Model, StoryElement source, Guid castMember)
     {
         _log.Log(LogLevel.Info, $"AddCastMember called for cast member {castMember} on source {source.Uuid}.");
         if (source == null)
@@ -492,7 +492,7 @@ public Task<StoryModel> CreateModel(string name, string author, int selectedTemp
         return true;
     }
 
-    public SceneModel ConvertProblemToScene(StoryModel model, ProblemModel problem)
+    internal SceneModel ConvertProblemToScene(StoryModel model, ProblemModel problem)
     {
         _log.Log(LogLevel.Info, $"ConvertProblemToScene called for {problem.Uuid}.");
 
@@ -556,7 +556,7 @@ public Task<StoryModel> CreateModel(string name, string author, int selectedTemp
     /// <summary>
     /// Convert a Scene element to a Problem element.
     /// </summary>
-    public ProblemModel ConvertSceneToProblem(StoryModel model, SceneModel scene)
+    internal ProblemModel ConvertSceneToProblem(StoryModel model, SceneModel scene)
     {
         _log.Log(LogLevel.Info, $"ConvertSceneToProblem called for {scene.Uuid}.");
 
@@ -621,7 +621,7 @@ public Task<StoryModel> CreateModel(string name, string author, int selectedTemp
     /// <param name="Parent">Problem Element that contains the beatsheet you wish to bind to</param>
     /// <param name="Index">Index of beat you are binding to</param>
     /// <param name="DesiredBind">Guid of Element you want to bind to, MUST be scene or problem element</param>
-    public void AssignElementToBeat(StoryModel Model, ProblemModel Parent, int Index, Guid DesiredBind)
+    internal void AssignElementToBeat(StoryModel Model, ProblemModel Parent, int Index, Guid DesiredBind)
     {
         //Check params
         if (Model == null)
@@ -674,7 +674,7 @@ public Task<StoryModel> CreateModel(string name, string author, int selectedTemp
     /// <param name="Model">Story model</param>
     /// <param name="Parent">Problem Element with beatsheet</param>
     /// <param name="Index">Index you want to unbind from</param>
-    public void UnasignBeat(StoryModel Model, ProblemModel Parent, int Index)
+    internal void UnasignBeat(StoryModel Model, ProblemModel Parent, int Index)
     {
         //Check params
         if (Model == null)
@@ -707,7 +707,7 @@ public Task<StoryModel> CreateModel(string name, string author, int selectedTemp
     /// <param name="Title"></param>
     /// <param name="Description"></param>
     /// <exception cref="ArgumentNullException"></exception>
-    public void CreateBeat(ProblemModel Parent, string Title, string Description)
+    internal void CreateBeat(ProblemModel Parent, string Title, string Description)
     {
         if (Parent == null)
         {
@@ -728,7 +728,7 @@ public Task<StoryModel> CreateModel(string name, string author, int selectedTemp
     /// </summary>
     /// <param name="Model"></param>
     /// <param name="Index"></param>
-    public void DeleteBeat(StoryModel Model, ProblemModel Parent, int Index)
+    internal void DeleteBeat(StoryModel Model, ProblemModel Parent, int Index)
     {
         if (Model == null)  {  throw new ArgumentNullException(nameof(Model)); }
         if (Parent == null)
@@ -800,7 +800,7 @@ public Task<StoryModel> CreateModel(string name, string author, int selectedTemp
     /// <param name="Path">File path to save to</param>
     /// <param name="Description"> Beatsheet Description</param>
     /// <param name="Beats">Beats</param>
-    public void SaveBeatsheet(string Path, string Description, List<StructureBeatViewModel> Beats)
+    internal void SaveBeatsheet(string Path, string Description, List<StructureBeatViewModel> Beats)
     {
         SavedBeatsheet Model = new();
         Model.Beats = Beats = Beats
@@ -822,7 +822,7 @@ public Task<StoryModel> CreateModel(string name, string author, int selectedTemp
     /// </summary>
     /// <param name="path">File path to load</param>
     /// <returns>Model</returns>
-    public SavedBeatsheet LoadBeatsheet(string path)
+    internal SavedBeatsheet LoadBeatsheet(string path)
     {
         string data = File.ReadAllText(path);
         var model = JsonSerializer.Deserialize<SavedBeatsheet>(data);
@@ -837,7 +837,7 @@ public Task<StoryModel> CreateModel(string name, string author, int selectedTemp
     /// <param name="model">The StoryModel to update</param>
     /// <param name="changed">The desired Changed status</param>
     /// <exception cref="ArgumentNullException">Thrown when model is null</exception>
-    public void SetChanged(StoryModel model, bool changed)
+    internal void SetChanged(StoryModel model, bool changed)
     {
         if (model == null)
             throw new ArgumentNullException(nameof(model));
@@ -861,7 +861,7 @@ public Task<StoryModel> CreateModel(string name, string author, int selectedTemp
     /// <exception cref="ArgumentNullException">Thrown when model is null</exception>
     /// <exception cref="ArgumentException">Thrown when guid is empty</exception>
     /// <exception cref="InvalidOperationException">Thrown when element with guid is not found</exception>
-    public StoryElement GetStoryElementByGuid(StoryModel model, Guid guid)
+    internal StoryElement GetStoryElementByGuid(StoryModel model, Guid guid)
     {
         if (model == null)
             throw new ArgumentNullException(nameof(model));
@@ -890,7 +890,7 @@ public Task<StoryModel> CreateModel(string name, string author, int selectedTemp
     /// <param name="model">The StoryModel containing the element</param>
     /// <param name="element">The StoryElement to update</param>
     /// <exception cref="ArgumentNullException">Thrown when model or element is null</exception>
-    public void UpdateStoryElement(StoryModel model, StoryElement element)
+    internal void UpdateStoryElement(StoryModel model, StoryElement element)
     {
         if (model == null)
             throw new ArgumentNullException(nameof(model));
@@ -918,7 +918,7 @@ public Task<StoryModel> CreateModel(string name, string author, int selectedTemp
     /// </summary>
     /// <param name="model">The story model to retrieve characters from</param>
     /// <returns>A list of CharacterModel elements</returns>
-    public List<CharacterModel> GetCharacterList(StoryModel model)
+    internal List<CharacterModel> GetCharacterList(StoryModel model)
     {
         if (model == null)
             throw new ArgumentNullException(nameof(model));
@@ -944,7 +944,7 @@ public Task<StoryModel> CreateModel(string name, string author, int selectedTemp
     /// <param name="model">The story model containing the element</param>
     /// <param name="guid">The GUID of the element to update</param>
     /// <param name="updatedElement">The updated element data</param>
-    public void UpdateStoryElementByGuid(StoryModel model, Guid guid, StoryElement updatedElement)
+    internal void UpdateStoryElementByGuid(StoryModel model, Guid guid, StoryElement updatedElement)
     {
         if (model == null)
             throw new ArgumentNullException(nameof(model));
@@ -970,7 +970,7 @@ public Task<StoryModel> CreateModel(string name, string author, int selectedTemp
     /// </summary>
     /// <param name="model">The story model to retrieve settings from</param>
     /// <returns>A list of SettingModel elements</returns>
-    public List<SettingModel> GetSettingsList(StoryModel model)
+    internal List<SettingModel> GetSettingsList(StoryModel model)
     {
         if (model == null)
             throw new ArgumentNullException(nameof(model));
@@ -995,7 +995,7 @@ public Task<StoryModel> CreateModel(string name, string author, int selectedTemp
     /// </summary>
     /// <param name="model">The story model to retrieve elements from</param>
     /// <returns>A list of all story elements</returns>
-    public List<StoryElement> GetAllStoryElements(StoryModel model)
+    internal List<StoryElement> GetAllStoryElements(StoryModel model)
     {
         if (model == null)
             throw new ArgumentNullException(nameof(model));
@@ -1017,7 +1017,7 @@ public Task<StoryModel> CreateModel(string name, string author, int selectedTemp
     /// <param name="model">The story model to search in</param>
     /// <param name="searchText">The text to search for (case-insensitive)</param>
     /// <returns>A list of story elements that contain the search text</returns>
-    public List<StoryElement> SearchForText(StoryModel model, string searchText)
+    internal List<StoryElement> SearchForText(StoryModel model, string searchText)
     {
         if (model == null)
             throw new ArgumentNullException(nameof(model));
@@ -1054,7 +1054,7 @@ public Task<StoryModel> CreateModel(string name, string author, int selectedTemp
     /// <param name="model">The story model to search in</param>
     /// <param name="targetUuid">The UUID to search for</param>
     /// <returns>A list of story elements that reference the specified UUID</returns>
-    public List<StoryElement> SearchForUuidReferences(StoryModel model, Guid targetUuid)
+    internal List<StoryElement> SearchForUuidReferences(StoryModel model, Guid targetUuid)
     {
         if (model == null)
             throw new ArgumentNullException(nameof(model));
@@ -1091,7 +1091,7 @@ public Task<StoryModel> CreateModel(string name, string author, int selectedTemp
     /// <param name="model">The story model to clean</param>
     /// <param name="targetUuid">The UUID to remove references to</param>
     /// <returns>The number of elements that had references removed</returns>
-    public int RemoveUuidReferences(StoryModel model, Guid targetUuid)
+    internal int RemoveUuidReferences(StoryModel model, Guid targetUuid)
     {
         if (model == null)
             throw new ArgumentNullException(nameof(model));
@@ -1134,7 +1134,7 @@ public Task<StoryModel> CreateModel(string name, string author, int selectedTemp
     /// <param name="rootNode">The root node of the subtree to search</param>
     /// <param name="searchText">The text to search for (case-insensitive)</param>
     /// <returns>A list of story elements in the subtree that contain the search text</returns>
-    public List<StoryElement> SearchInSubtree(StoryModel model, StoryNodeItem rootNode, string searchText)
+    internal List<StoryElement> SearchInSubtree(StoryModel model, StoryNodeItem rootNode, string searchText)
     {
         if (model == null)
             throw new ArgumentNullException(nameof(model));
@@ -1202,7 +1202,7 @@ public Task<StoryModel> CreateModel(string name, string author, int selectedTemp
     /// <param name="model">The story model</param>
     /// <exception cref="ArgumentNullException">Thrown when element or model is null</exception>
     /// <exception cref="InvalidOperationException">Thrown when element cannot be moved to trash</exception>
-    public void MoveToTrash(StoryElement element, StoryModel model)
+    internal void MoveToTrash(StoryElement element, StoryModel model)
     {
         if (element == null)
             throw new ArgumentNullException(nameof(element));
@@ -1263,7 +1263,7 @@ public Task<StoryModel> CreateModel(string name, string author, int selectedTemp
     /// <param name="model">The story model</param>
     /// <exception cref="ArgumentNullException">Thrown when trashNode or model is null</exception>
     /// <exception cref="InvalidOperationException">Thrown when node cannot be restored</exception>
-    public void RestoreFromTrash(StoryNodeItem trashNode, StoryModel model)
+    internal void RestoreFromTrash(StoryNodeItem trashNode, StoryModel model)
     {
         if (trashNode == null)
             throw new ArgumentNullException(nameof(trashNode));
@@ -1315,7 +1315,7 @@ public Task<StoryModel> CreateModel(string name, string author, int selectedTemp
     /// <param name="model">The story model</param>
     /// <exception cref="ArgumentNullException">Thrown when model is null</exception>
     /// <exception cref="InvalidOperationException">Thrown when TrashCan node is not found</exception>
-    public void EmptyTrash(StoryModel model)
+    internal void EmptyTrash(StoryModel model)
     {
         if (model == null)
             throw new ArgumentNullException(nameof(model));
