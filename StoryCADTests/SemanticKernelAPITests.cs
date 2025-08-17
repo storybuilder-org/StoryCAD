@@ -819,4 +819,410 @@ public class SemanticKernelApiTests
     }
 
     #endregion
+
+    #region Search Methods Tests
+
+    [TestMethod]
+    public void SearchForText_WithNoModel_ReturnsFailure()
+    {
+        // Arrange
+        var api = new SemanticKernelApi();
+        
+        // Act
+        var result = api.SearchForText("test");
+        
+        // Assert
+        Assert.IsFalse(result.IsSuccess, "SearchForText should fail with no model");
+        Assert.IsNull(result.Payload, "Payload should be null");
+        Assert.AreEqual("No outline is opened", result.ErrorMessage);
+    }
+
+    [TestMethod]
+    public async Task SearchForText_WithEmptyText_ReturnsFailure()
+    {
+        // Arrange
+        var createResult = await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        Assert.IsTrue(createResult.IsSuccess);
+        
+        // Act
+        var result = _api.SearchForText("");
+        
+        // Assert
+        Assert.IsFalse(result.IsSuccess, "SearchForText should fail with empty text");
+        Assert.IsNull(result.Payload, "Payload should be null");
+        Assert.AreEqual("Search text cannot be empty", result.ErrorMessage);
+    }
+
+    [TestMethod]
+    public async Task SearchForText_WithNullText_ReturnsFailure()
+    {
+        // Arrange
+        var createResult = await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        Assert.IsTrue(createResult.IsSuccess);
+        
+        // Act
+        var result = _api.SearchForText(null);
+        
+        // Assert
+        Assert.IsFalse(result.IsSuccess, "SearchForText should fail with null text");
+        Assert.IsNull(result.Payload, "Payload should be null");
+        Assert.AreEqual("Search text cannot be empty", result.ErrorMessage);
+    }
+
+    [TestMethod]
+    public async Task SearchForText_WithValidText_ReturnsFormattedResults()
+    {
+        // Arrange
+        var createResult = await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        Assert.IsTrue(createResult.IsSuccess);
+        
+        var overviewGuid = _api.CurrentModel.ExplorerView.First().Uuid;
+        var addCharResult = _api.AddElement(StoryItemType.Character, overviewGuid.ToString(), "Hero Character");
+        Assert.IsTrue(addCharResult.IsSuccess);
+        
+        var addSceneResult = _api.AddElement(StoryItemType.Scene, overviewGuid.ToString(), "Hero's Journey");
+        Assert.IsTrue(addSceneResult.IsSuccess);
+        
+        // Act
+        var result = _api.SearchForText("Hero");
+        
+        // Assert
+        Assert.IsTrue(result.IsSuccess, "SearchForText should succeed");
+        Assert.IsNotNull(result.Payload, "Payload should not be null");
+        Assert.AreEqual(2, result.Payload.Count, "Should find 2 elements containing 'Hero'");
+        
+        // Verify the format of returned data
+        foreach (var item in result.Payload)
+        {
+            Assert.IsTrue(item.ContainsKey("Guid"), "Each result should have a Guid");
+            Assert.IsTrue(item.ContainsKey("Name"), "Each result should have a Name");
+            Assert.IsTrue(item.ContainsKey("Type"), "Each result should have a Type");
+            
+            var name = item["Name"].ToString();
+            Assert.IsTrue(name.Contains("Hero"), $"Name '{name}' should contain 'Hero'");
+        }
+    }
+
+    [TestMethod]
+    public async Task SearchForText_CaseInsensitive_ReturnsMatches()
+    {
+        // Arrange
+        var createResult = await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        Assert.IsTrue(createResult.IsSuccess);
+        
+        var overviewGuid = _api.CurrentModel.ExplorerView.First().Uuid;
+        var addResult = _api.AddElement(StoryItemType.Character, overviewGuid.ToString(), "HERO CHARACTER");
+        Assert.IsTrue(addResult.IsSuccess);
+        
+        // Act
+        var result = _api.SearchForText("hero");
+        
+        // Assert
+        Assert.IsTrue(result.IsSuccess, "SearchForText should succeed");
+        Assert.IsNotNull(result.Payload, "Payload should not be null");
+        Assert.AreEqual(1, result.Payload.Count, "Should find 1 element (case-insensitive)");
+        Assert.AreEqual("HERO CHARACTER", result.Payload[0]["Name"].ToString());
+    }
+
+    [TestMethod]
+    public void SearchForReferences_WithNoModel_ReturnsFailure()
+    {
+        // Arrange
+        var api = new SemanticKernelApi();
+        
+        // Act
+        var result = api.SearchForReferences(Guid.NewGuid());
+        
+        // Assert
+        Assert.IsFalse(result.IsSuccess, "SearchForReferences should fail with no model");
+        Assert.IsNull(result.Payload, "Payload should be null");
+        Assert.AreEqual("No outline is opened", result.ErrorMessage);
+    }
+
+    [TestMethod]
+    public async Task SearchForReferences_WithEmptyGuid_ReturnsFailure()
+    {
+        // Arrange
+        var createResult = await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        Assert.IsTrue(createResult.IsSuccess);
+        
+        // Act
+        var result = _api.SearchForReferences(Guid.Empty);
+        
+        // Assert
+        Assert.IsFalse(result.IsSuccess, "SearchForReferences should fail with empty GUID");
+        Assert.IsNull(result.Payload, "Payload should be null");
+        Assert.AreEqual("Target UUID cannot be empty", result.ErrorMessage);
+    }
+
+    [TestMethod]
+    public async Task SearchForReferences_WithNoReferences_ReturnsEmptyList()
+    {
+        // Arrange
+        var createResult = await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        Assert.IsTrue(createResult.IsSuccess);
+        var randomUuid = Guid.NewGuid();
+        
+        // Act
+        var result = _api.SearchForReferences(randomUuid);
+        
+        // Assert
+        Assert.IsTrue(result.IsSuccess, "SearchForReferences should succeed even with no matches");
+        Assert.IsNotNull(result.Payload, "Payload should not be null");
+        Assert.AreEqual(0, result.Payload.Count, "Should return empty list for UUID with no references");
+    }
+
+    [TestMethod]
+    public async Task SearchForReferences_WithValidReferences_ReturnsFormattedResults()
+    {
+        // Arrange
+        var createResult = await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        Assert.IsTrue(createResult.IsSuccess);
+        
+        var overviewGuid = _api.CurrentModel.ExplorerView.First().Uuid;
+        
+        // Add a character
+        var addCharResult = _api.AddElement(StoryItemType.Character, overviewGuid.ToString(), "Hero");
+        Assert.IsTrue(addCharResult.IsSuccess);
+        var characterGuid = addCharResult.Payload;
+        
+        // Add a scene that references the character
+        var addSceneResult = _api.AddElement(StoryItemType.Scene, overviewGuid.ToString(), "Battle Scene");
+        Assert.IsTrue(addSceneResult.IsSuccess);
+        var sceneGuid = addSceneResult.Payload;
+        
+        // Add the character to the scene's cast
+        var sceneElement = _api.CurrentModel.StoryElements.First(e => e.Uuid == sceneGuid);
+        ((SceneModel)sceneElement).CastMembers.Add(characterGuid);
+        
+        // Act
+        var result = _api.SearchForReferences(characterGuid);
+        
+        // Assert
+        Assert.IsTrue(result.IsSuccess, "SearchForReferences should succeed");
+        Assert.IsNotNull(result.Payload, "Payload should not be null");
+        Assert.AreEqual(1, result.Payload.Count, "Should find 1 element referencing the character");
+        
+        var reference = result.Payload[0];
+        Assert.IsTrue(reference.ContainsKey("Guid"), "Result should have a Guid");
+        Assert.IsTrue(reference.ContainsKey("Name"), "Result should have a Name");
+        Assert.IsTrue(reference.ContainsKey("Type"), "Result should have a Type");
+        Assert.AreEqual("Battle Scene", reference["Name"].ToString());
+        Assert.AreEqual("Scene", reference["Type"].ToString());
+    }
+
+    [TestMethod]
+    public void RemoveReferences_WithNoModel_ReturnsFailure()
+    {
+        // Arrange
+        var api = new SemanticKernelApi();
+        
+        // Act
+        var result = api.RemoveReferences(Guid.NewGuid());
+        
+        // Assert
+        Assert.IsFalse(result.IsSuccess, "RemoveReferences should fail with no model");
+        Assert.AreEqual(0, result.Payload, "Payload should be 0");
+        Assert.AreEqual("No outline is opened", result.ErrorMessage);
+    }
+
+    [TestMethod]
+    public async Task RemoveReferences_WithEmptyGuid_ReturnsFailure()
+    {
+        // Arrange
+        var createResult = await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        Assert.IsTrue(createResult.IsSuccess);
+        
+        // Act
+        var result = _api.RemoveReferences(Guid.Empty);
+        
+        // Assert
+        Assert.IsFalse(result.IsSuccess, "RemoveReferences should fail with empty GUID");
+        Assert.AreEqual(0, result.Payload, "Payload should be 0");
+        Assert.AreEqual("Target UUID cannot be empty", result.ErrorMessage);
+    }
+
+    [TestMethod]
+    public async Task RemoveReferences_WithNoReferences_ReturnsZero()
+    {
+        // Arrange
+        var createResult = await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        Assert.IsTrue(createResult.IsSuccess);
+        var randomUuid = Guid.NewGuid();
+        
+        // Act
+        var result = _api.RemoveReferences(randomUuid);
+        
+        // Assert
+        Assert.IsTrue(result.IsSuccess, "RemoveReferences should succeed even with no matches");
+        Assert.AreEqual(0, result.Payload, "Should return 0 for UUID with no references");
+    }
+
+    [TestMethod]
+    public async Task RemoveReferences_WithValidReferences_ReturnsAffectedCount()
+    {
+        // Arrange
+        var createResult = await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        Assert.IsTrue(createResult.IsSuccess);
+        
+        var overviewGuid = _api.CurrentModel.ExplorerView.First().Uuid;
+        
+        // Add a character
+        var addCharResult = _api.AddElement(StoryItemType.Character, overviewGuid.ToString(), "Hero");
+        Assert.IsTrue(addCharResult.IsSuccess);
+        var characterGuid = addCharResult.Payload;
+        
+        // Add two scenes that reference the character
+        var addScene1Result = _api.AddElement(StoryItemType.Scene, overviewGuid.ToString(), "Scene 1");
+        Assert.IsTrue(addScene1Result.IsSuccess);
+        var scene1Guid = addScene1Result.Payload;
+        
+        var addScene2Result = _api.AddElement(StoryItemType.Scene, overviewGuid.ToString(), "Scene 2");
+        Assert.IsTrue(addScene2Result.IsSuccess);
+        var scene2Guid = addScene2Result.Payload;
+        
+        // Add the character to both scenes' cast
+        var scene1Element = _api.CurrentModel.StoryElements.First(e => e.Uuid == scene1Guid);
+        ((SceneModel)scene1Element).CastMembers.Add(characterGuid);
+        
+        var scene2Element = _api.CurrentModel.StoryElements.First(e => e.Uuid == scene2Guid);
+        ((SceneModel)scene2Element).CastMembers.Add(characterGuid);
+        
+        // Act
+        var result = _api.RemoveReferences(characterGuid);
+        
+        // Assert
+        Assert.IsTrue(result.IsSuccess, "RemoveReferences should succeed");
+        Assert.AreEqual(2, result.Payload, "Should return 2 affected elements");
+        
+        // Verify references were actually removed
+        Assert.IsFalse(((SceneModel)scene1Element).CastMembers.Contains(characterGuid), 
+            "Character should be removed from scene 1 cast");
+        Assert.IsFalse(((SceneModel)scene2Element).CastMembers.Contains(characterGuid), 
+            "Character should be removed from scene 2 cast");
+    }
+
+    [TestMethod]
+    public void SearchInSubtree_WithNoModel_ReturnsFailure()
+    {
+        // Arrange
+        var api = new SemanticKernelApi();
+        
+        // Act
+        var result = api.SearchInSubtree(Guid.NewGuid(), "test");
+        
+        // Assert
+        Assert.IsFalse(result.IsSuccess, "SearchInSubtree should fail with no model");
+        Assert.IsNull(result.Payload, "Payload should be null");
+        Assert.AreEqual("No outline is opened", result.ErrorMessage);
+    }
+
+    [TestMethod]
+    public async Task SearchInSubtree_WithEmptyRootGuid_ReturnsFailure()
+    {
+        // Arrange
+        var createResult = await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        Assert.IsTrue(createResult.IsSuccess);
+        
+        // Act
+        var result = _api.SearchInSubtree(Guid.Empty, "test");
+        
+        // Assert
+        Assert.IsFalse(result.IsSuccess, "SearchInSubtree should fail with empty root GUID");
+        Assert.IsNull(result.Payload, "Payload should be null");
+        Assert.AreEqual("Root node GUID cannot be empty", result.ErrorMessage);
+    }
+
+    [TestMethod]
+    public async Task SearchInSubtree_WithEmptySearchText_ReturnsFailure()
+    {
+        // Arrange
+        var createResult = await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        Assert.IsTrue(createResult.IsSuccess);
+        
+        var overviewGuid = _api.CurrentModel.ExplorerView.First().Uuid;
+        
+        // Act
+        var result = _api.SearchInSubtree(overviewGuid, "");
+        
+        // Assert
+        Assert.IsFalse(result.IsSuccess, "SearchInSubtree should fail with empty search text");
+        Assert.IsNull(result.Payload, "Payload should be null");
+        Assert.AreEqual("Search text cannot be empty", result.ErrorMessage);
+    }
+
+    [TestMethod]
+    public async Task SearchInSubtree_WithNonExistentRoot_ReturnsFailure()
+    {
+        // Arrange
+        var createResult = await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        Assert.IsTrue(createResult.IsSuccess);
+        
+        var randomGuid = Guid.NewGuid();
+        
+        // Act
+        var result = _api.SearchInSubtree(randomGuid, "test");
+        
+        // Assert
+        Assert.IsFalse(result.IsSuccess, "SearchInSubtree should fail with non-existent root");
+        Assert.IsNull(result.Payload, "Payload should be null");
+        Assert.IsTrue(result.ErrorMessage.Contains("not found"), 
+            $"Error message should indicate element not found, but was: {result.ErrorMessage}");
+    }
+
+    [TestMethod]
+    public async Task SearchInSubtree_WithValidRoot_ReturnsSubtreeMatchesOnly()
+    {
+        // Arrange
+        var createResult = await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        Assert.IsTrue(createResult.IsSuccess);
+        
+        var overviewGuid = _api.CurrentModel.ExplorerView.First().Uuid;
+        
+        // Add a folder as subtree root
+        var addFolderResult = _api.AddElement(StoryItemType.Folder, overviewGuid.ToString(), "Hero Folder");
+        Assert.IsTrue(addFolderResult.IsSuccess);
+        var folderGuid = addFolderResult.Payload;
+        
+        // Add items inside the folder (should be found)
+        var addChar1Result = _api.AddElement(StoryItemType.Character, folderGuid.ToString(), "Hero Character");
+        Assert.IsTrue(addChar1Result.IsSuccess);
+        
+        var addChar2Result = _api.AddElement(StoryItemType.Character, folderGuid.ToString(), "Sidekick");
+        Assert.IsTrue(addChar2Result.IsSuccess);
+        var sidekickGuid = addChar2Result.Payload;
+        
+        // Add notes to sidekick that contain "hero"
+        var sidekickElement = _api.CurrentModel.StoryElements.First(e => e.Uuid == sidekickGuid);
+        ((CharacterModel)sidekickElement).Notes = "Helps the hero";
+        
+        // Add item outside the folder (should NOT be found)
+        var addChar3Result = _api.AddElement(StoryItemType.Character, overviewGuid.ToString(), "Another Hero");
+        Assert.IsTrue(addChar3Result.IsSuccess);
+        
+        // Act
+        var result = _api.SearchInSubtree(folderGuid, "hero");
+        
+        // Assert
+        Assert.IsTrue(result.IsSuccess, "SearchInSubtree should succeed");
+        Assert.IsNotNull(result.Payload, "Payload should not be null");
+        Assert.AreEqual(3, result.Payload.Count, "Should find 3 elements (folder itself + 2 characters inside)");
+        
+        // Verify results are formatted correctly
+        foreach (var item in result.Payload)
+        {
+            Assert.IsTrue(item.ContainsKey("Guid"), "Each result should have a Guid");
+            Assert.IsTrue(item.ContainsKey("Name"), "Each result should have a Name");
+            Assert.IsTrue(item.ContainsKey("Type"), "Each result should have a Type");
+        }
+        
+        // Verify the correct items were found
+        var names = result.Payload.Select(r => r["Name"].ToString()).ToList();
+        Assert.IsTrue(names.Contains("Hero Folder"), "Should find the folder itself");
+        Assert.IsTrue(names.Contains("Hero Character"), "Should find Hero Character inside folder");
+        Assert.IsTrue(names.Contains("Sidekick"), "Should find Sidekick (has 'hero' in notes)");
+        Assert.IsFalse(names.Contains("Another Hero"), "Should NOT find Another Hero (outside folder)");
+    }
+
+    #endregion
 }

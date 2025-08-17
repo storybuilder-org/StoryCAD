@@ -346,7 +346,7 @@ internal Task<StoryModel> CreateModel(string name, string author, int selectedTe
     /// <param name="elementToRemove">Element you are removing references to</param>
     /// <param name="model">StoryModel you are updating</param>
     /// <returns>bool indicating success</returns>
-    internal bool RemoveReferenceToElement(Guid elementToRemove, StoryModel model)
+    private bool RemoveReferenceToElement(Guid elementToRemove, StoryModel model)
     {
         _log.Log(LogLevel.Info, $"RemoveReferenceToElement called for element {elementToRemove}.");
         if (elementToRemove == Guid.Empty)
@@ -368,41 +368,6 @@ internal Task<StoryModel> CreateModel(string name, string author, int selectedTe
         return true;
     }
 
-    /// <summary>
-    /// Deletes an element.
-    /// <remarks>Element is moved to trashcan node.</remarks>
-    /// </summary>
-    /// <param name="elementToRemove">Element you want to remove</param>
-    /// <param name="view">View you are deleting from</param>
-    /// <param name="source">StoryModel you are deleting from.</param>
-    /// <returns>true if successful.</returns>
-    internal bool RemoveElement(StoryElement elementToRemove, StoryViewType view, StoryNodeItem source)
-    {
-        _log.Log(LogLevel.Info, $"RemoveElement called for element {elementToRemove.Uuid}.");
-        if (elementToRemove == null)
-        {
-            throw new ArgumentNullException(nameof(elementToRemove));
-        }
-
-        if (source == null)
-        {
-            throw new ArgumentNullException(nameof(source));
-        }
-
-        if (source.IsRoot)
-        {
-            throw new InvalidOperationException("Cannot delete a root node.");
-        }
-
-        if (source.Type is StoryItemType.StoryOverview or StoryItemType.TrashCan)
-        {
-            throw new InvalidOperationException("Cannot delete a trash or overview node.");
-        }
-
-        bool result = elementToRemove.Node.Delete(view);
-        _log.Log(LogLevel.Info, $"RemoveElement completed for element {elementToRemove.Uuid}.");
-        return result;
-    }
 
     /// <summary>
     /// Adds a relationship between two elements.
