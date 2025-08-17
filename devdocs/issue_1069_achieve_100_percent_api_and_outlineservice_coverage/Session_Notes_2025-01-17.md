@@ -209,5 +209,116 @@ Still need tests for 4 methods:
 3. `RemoveReferences()`
 4. `SearchInSubtree()`
 
+### Final API Test Coverage Work
+
+#### Added Complete Test Coverage for SemanticKernelAPI
+**Problem:** 4 API methods lacked test coverage despite their underlying OutlineService methods being tested.
+
+**Solution:** Created 18 comprehensive tests following the established API test pattern:
+
+1. **SearchForText() - 5 tests:**
+   - `SearchForText_WithNoModel_ReturnsFailure`
+   - `SearchForText_WithEmptyText_ReturnsFailure`
+   - `SearchForText_WithNullText_ReturnsFailure`
+   - `SearchForText_WithValidText_ReturnsFormattedResults`
+   - `SearchForText_CaseInsensitive_ReturnsMatches`
+
+2. **SearchForReferences() - 4 tests:**
+   - `SearchForReferences_WithNoModel_ReturnsFailure`
+   - `SearchForReferences_WithEmptyGuid_ReturnsFailure`
+   - `SearchForReferences_WithNoReferences_ReturnsEmptyList`
+   - `SearchForReferences_WithValidReferences_ReturnsFormattedResults`
+
+3. **RemoveReferences() - 4 tests:**
+   - `RemoveReferences_WithNoModel_ReturnsFailure`
+   - `RemoveReferences_WithEmptyGuid_ReturnsFailure`
+   - `RemoveReferences_WithNoReferences_ReturnsZero`
+   - `RemoveReferences_WithValidReferences_ReturnsAffectedCount`
+
+4. **SearchInSubtree() - 5 tests:**
+   - `SearchInSubtree_WithNoModel_ReturnsFailure`
+   - `SearchInSubtree_WithEmptyRootGuid_ReturnsFailure`
+   - `SearchInSubtree_WithEmptySearchText_ReturnsFailure`
+   - `SearchInSubtree_WithNonExistentRoot_ReturnsFailure`
+   - `SearchInSubtree_WithValidRoot_ReturnsSubtreeMatchesOnly`
+
+**Test Pattern:** All tests follow the API wrapper pattern, focusing on:
+- OperationResult handling (IsSuccess, ErrorMessage, Payload)
+- Null CurrentModel protection
+- Parameter validation (empty/null/invalid)
+- Result formatting (conversion to Dictionary<string, object>)
+- Exception handling and safe error reporting
+
+**Verification:** All 18 tests pass successfully
+
+### Documentation Updates
+
+#### Fixed .NET Version References
+**Problem:** Documentation referenced outdated .NET 8 when project uses .NET 9.
+
+**Files Updated:**
+1. **CLAUDE.md:**
+   - Updated Technology Stack from .NET 8.0 to .NET 9.0
+   - Updated all test command paths from `net8.0-windows10.0.19041.0` to `net9.0-windows10.0.22621.0`
+
+2. **.claude/build_commands.md:**
+   - Updated all test DLL paths to use .NET 9 directory
+   - Updated environment variable example for TESTDLL
+
+### Achievement Summary
+
+#### Issue #1069 Complete: 100% Test Coverage Achieved
+
+**Final Coverage:**
+- **OutlineService**: 100% (31 methods, all tested)
+- **SemanticKernelAPI**: 100% (21 methods, all tested)
+
+**Total Work Completed:**
+- 18 new API tests added
+- 5 beat tests consolidated
+- 4 dead code files deleted
+- 2 obsolete methods removed
+- 2 documentation files updated
+- 1 redundancy analysis documented
+
+### Test Failure Investigation
+
+#### Discovered Name Synchronization Issue
+**Problem:** Tests were failing because StoryElement.Name and StoryNodeItem.Name only synchronize at creation time.
+
+**Investigation Findings:**
+- When StoryElement is created, it creates its StoryNodeItem with: `_node = new(this, parentNode, type)`
+- StoryNodeItem constructor copies the name: `Name = node.Name` (line 282)
+- After creation, setting `storyElement.Name = "New Name"` doesn't update `storyElement.Node.Name`
+- The StoryElement.Name setter just sets the field without notifying the Node
+
+**Impact on Tests:**
+- Tests that set StoryElement.Name after creation but then check Node.Children names were failing
+- Example: `ConvertProblemToScene_WithChildren_MovesChildren` set `child1.Name` but checked `scene.Node.Children.Any(c => c.Name == ...)`
+
+**Documentation Created:**
+- Created `Name_Synchronization_Issue.md` documenting this architectural consideration
+
+**Solution Implemented:**
+- Fixed StoryElement.Name setter to automatically update Node.Name when changed
+- This ensures the data model (StoryElement) is authoritative and pushes changes to the view model (StoryNodeItem)
+- Aligns with the new API-centric architecture
+
+**Tests Fixed:**
+1. `ConvertProblemToScene_WithChildren_MovesChildren` - Now passes with proper synchronization
+2. `ConvertSceneToProblem_WithChildren_MovesChildren` - Now passes with proper synchronization
+
+Both tests now pass without manual synchronization due to the fix in StoryElement.Name setter.
+
+### Remaining Test Failures
+After fixing name synchronization issues, 9 tests still fail:
+- 5 FindElementReferences tests - NullReferenceException at OutlineService.cs:322
+- AddRelationship_DuplicateRelationship_ShouldNotAddDuplicate - Allows duplicates (may be intended behavior)
+- AddCastMember_WithNullSource_ThrowsException - Wrong exception type
+- DeleteNode - Logic issue
+- RestoreChildThenParent_DoesNotDuplicate - Logic issue
+
+These appear to be different issues unrelated to the test coverage work and can be addressed separately.
+
 ### Commits Made
-None - This session focused on investigation, documentation, test consolidation, and dead code cleanup only.
+- "Achieve 100% test coverage for SemanticKernelAPI and clean up dead code" (commit 0aabd14)

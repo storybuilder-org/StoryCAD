@@ -28,7 +28,13 @@ public class StoryElement : ObservableObject
 	public string Name
     {
         get => _name;
-        set => _name = value;
+        set
+        {
+            _name = value;
+            // Keep the node synchronized when name changes from API
+            if (_node != null)
+                _node.Name = value;
+        }
     }
 
 	[JsonIgnore]
