@@ -314,7 +314,16 @@ internal Task<StoryModel> CreateModel(string name, string author, int selectedTe
     internal List<StoryElement> FindElementReferences(StoryModel model, Guid elementGuid)
     {
         _log.Log(LogLevel.Info, $"FindElementReferences called for element {elementGuid}.");
-        StoryElement elementToDelete = StoryElement.GetByGuid(elementGuid);
+        
+        // Use GetByGuid with the model parameter for stateless operation
+        StoryElement elementToDelete = StoryElement.GetByGuid(elementGuid, model);
+        
+        if (elementToDelete == null || elementToDelete.Node == null)
+        {
+            _log.Log(LogLevel.Warn, $"Element {elementGuid} not found or has no associated Node.");
+            return new List<StoryElement>();
+        }
+        
         if (StoryNodeItem.RootNodeType(elementToDelete.Node) == StoryItemType.TrashCan)
         {
             throw new InvalidOperationException("Cannot delete a node from the Trash Can.");
@@ -404,13 +413,45 @@ internal Task<StoryModel> CreateModel(string name, string author, int selectedTe
             throw new InvalidOperationException("Recipient must be a character.");
         }
 
+        // Check for duplicate relationship before adding
+        CharacterModel sourceCharacter = (CharacterModel)sourceElement;
+        foreach (var existingRel in sourceCharacter.RelationshipList)
+        {
+            if (existingRel.PartnerUuid == recipient &&
+                existingRel.RelationType == desc &&
+                existingRel.Trait == string.Empty &&
+                existingRel.Attitude == string.Empty)
+            {
+                _log.Log(LogLevel.Info, $"Duplicate relationship from {source} to {recipient} not added.");
+                return true; // Return true but don't add duplicate
+            }
+        }
+
         RelationshipModel relationship = new(recipient, desc);
-        ((CharacterModel)sourceElement).RelationshipList.Add(relationship);
+        sourceCharacter.RelationshipList.Add(relationship);
 
         if (mirror)
         {
-            RelationshipModel mirrorRelationship = new(source, desc);
-            ((CharacterModel)recipientElement).RelationshipList.Add(mirrorRelationship);
+            // Check for duplicate in mirror relationship too
+            CharacterModel recipientCharacter = (CharacterModel)recipientElement;
+            bool mirrorExists = false;
+            foreach (var existingRel in recipientCharacter.RelationshipList)
+            {
+                if (existingRel.PartnerUuid == source &&
+                    existingRel.RelationType == desc &&
+                    existingRel.Trait == string.Empty &&
+                    existingRel.Attitude == string.Empty)
+                {
+                    mirrorExists = true;
+                    break;
+                }
+            }
+            
+            if (!mirrorExists)
+            {
+                RelationshipModel mirrorRelationship = new(source, desc);
+                recipientCharacter.RelationshipList.Add(mirrorRelationship);
+            }
         }
         _log.Log(LogLevel.Info, $"AddRelationship completed from {source} to {recipient}.");
         return true;
@@ -424,11 +465,12 @@ internal Task<StoryModel> CreateModel(string name, string author, int selectedTe
     /// <returns></returns>
     internal bool AddCastMember(StoryModel Model, StoryElement source, Guid castMember)
     {
-        _log.Log(LogLevel.Info, $"AddCastMember called for cast member {castMember} on source {source.Uuid}.");
         if (source == null)
         {
             throw new ArgumentNullException(nameof(source));
         }
+        
+        _log.Log(LogLevel.Info, $"AddCastMember called for cast member {castMember} on source {source.Uuid}.");
 
         if (castMember == Guid.Empty)
         {
