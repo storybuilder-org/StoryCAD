@@ -40,10 +40,11 @@
   git grep -n "Ioc.Default.GetService<SceneViewModel>"
   ```
   - ✓ No results outside of Views/ folder (Pages are out of scope)
-- [ ] Commit message:
+- [x] Commit message:
   ```
   DI: Replace Ioc.Default for SceneViewModel with constructor injection; keep singleton lifetimes
   ```
+  - ✓ Committed with hash: d2155e2
 
 ### Notes
 - Field naming: `_camelCase` and `readonly`.
