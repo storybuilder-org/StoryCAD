@@ -53,6 +53,11 @@ public class OutlineViewModel : ObservableRecipient
             return _shellVM;
         }
     }
+    // TODO: Circular dependency - OutlineViewModel ↔ AutoSaveService/BackupService
+    // These services depend on OutlineViewModel in their constructors,
+    // so we cannot inject them here without creating a circular dependency.
+    // The lazy-loading properties below will fail if accessed before the services are constructed.
+    // Long-term fix: Break the dependency by having services use messaging or move shared data to AppState.
     private AutoSaveService _autoSaveService;
 
     private AutoSaveService autoSaveService

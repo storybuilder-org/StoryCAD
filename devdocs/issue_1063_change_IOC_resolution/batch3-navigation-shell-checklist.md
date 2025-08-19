@@ -190,11 +190,27 @@ Remaining Ioc.Default calls are either:
 - **Resolution**: Left as-is since both are in the same batch and both have constructor injection
 - **Files affected**: Both have proper constructor injection
 
-### 3. Windowing Service Issues
+### 3. OutlineViewModel ↔ AutoSaveService/BackupService (Complex Circular Dependency)
+- **Issue**: Complex circular dependency chain:
+  - ShellViewModel requires: OutlineViewModel, AutoSaveService, BackupService
+  - AutoSaveService requires: OutlineViewModel  
+  - BackupService requires: OutlineViewModel
+  - OutlineViewModel has lazy-loaded properties for: AutoSaveService, BackupService
+- **Problem**: When OutlineViewModel methods try to access AutoSaveService/BackupService via lazy properties, if these services haven't been created yet, IoC tries to create them, which requires OutlineViewModel (already being constructed), causing circular dependency exception
+- **Current State**: 
+  - ShellViewModel's constructor ensures all services are created at startup
+  - Lazy properties in OutlineViewModel work as long as ShellViewModel is created first
+  - May fail if OutlineViewModel is accessed before ShellViewModel is created
+- **Resolution**: Added TODOs documenting the issue. Long-term fix requires breaking the dependency by:
+  - Moving StoryModel and StoryModelFile to AppState (already has TODO)
+  - Using messaging instead of direct references
+  - Or passing needed data as parameters instead of holding references
+
+### 4. Windowing Service Issues
 - **Issue**: Windowing.cs has existing documented circular dependency issues
 - **Resolution**: Already documented in code with TODOs, architectural fix needed
 
-### 4. Other Services Still Using Ioc.Default
+### 5. Other Services Still Using Ioc.Default
 Several services not in this batch still use Ioc.Default for these batch services:
 - StoryElement.cs
 - PrintReportsDialog.xaml.cs  
