@@ -24,23 +24,17 @@ public partial class Windowing : ObservableRecipient
 {
     private readonly AppState _appState;
     private readonly LogService _logService;
-    private readonly OutlineViewModel _outlineViewModel;
-    private readonly ShellViewModel _shellViewModel;
 
-    public Windowing(AppState appState, LogService logService, OutlineViewModel outlineViewModel, ShellViewModel shellViewModel)
+    public Windowing(AppState appState, LogService logService)
     {
         _appState = appState;
         _logService = logService;
-        _outlineViewModel = outlineViewModel;
-        _shellViewModel = shellViewModel;
     }
 
     // Constructor for backward compatibility - will be removed later
     public Windowing() : this(
         Ioc.Default.GetRequiredService<AppState>(),
-        Ioc.Default.GetRequiredService<LogService>(),
-        Ioc.Default.GetRequiredService<OutlineViewModel>(),
-        Ioc.Default.GetRequiredService<ShellViewModel>())
+        Ioc.Default.GetRequiredService<LogService>())
     {
     }
     private void OnPropertyChanged(object sender, PropertyChangedEventArgs e) { }
@@ -147,8 +141,11 @@ public partial class Windowing : ObservableRecipient
             BaseTitle += "(DEV BUILD) ";
         }
 
-        //Open file check
-        OutlineViewModel outlineVM = _outlineViewModel;
+        // TODO: ARCHITECTURAL ISSUE - Windowing (UI layer) should not depend on OutlineViewModel (business logic)
+        // This creates a circular dependency: OutlineViewModel -> Windowing -> OutlineViewModel
+        // Proper fix: Use events or a mediator pattern to update window title when file changes
+        // Current workaround: Use service locator to break the circular dependency
+        OutlineViewModel outlineVM = Ioc.Default.GetRequiredService<OutlineViewModel>();
         if (!string.IsNullOrEmpty(outlineVM.StoryModelFile))
         {
             BaseTitle += $"- Currently editing {Path.GetFileNameWithoutExtension(outlineVM.StoryModelFile)}";
@@ -166,12 +163,13 @@ public partial class Windowing : ObservableRecipient
     {
         (MainWindow.Content as FrameworkElement).RequestedTheme = RequestedTheme;
 
-        OutlineViewModel outlineVM = _outlineViewModel;
+        // TODO: Same architectural issue as UpdateWindowTitle - see comment there
+        OutlineViewModel outlineVM = Ioc.Default.GetRequiredService<OutlineViewModel>();
         //Save file, close current node since it won't be the right theme.
         if (!string.IsNullOrEmpty(outlineVM.StoryModelFile))
         {
-            await _outlineViewModel.SaveFile();
-            _shellViewModel.ShowHomePage();
+            await Ioc.Default.GetRequiredService<OutlineViewModel>().SaveFile();
+            Ioc.Default.GetRequiredService<ShellViewModel>().ShowHomePage();
         }
 	}
 
@@ -273,7 +271,7 @@ public partial class Windowing : ObservableRecipient
         {
             wnd.GlobalDispatcher.TryEnqueue(() =>
             {
-                _shellViewModel.ShowMessage(LogLevel.Warn, "You can only have one file open at once", false);
+                Ioc.Default.GetRequiredService<ShellViewModel>().ShowMessage(LogLevel.Warn, "You can only have one file open at once", false);
             });
         }
         finally { }
