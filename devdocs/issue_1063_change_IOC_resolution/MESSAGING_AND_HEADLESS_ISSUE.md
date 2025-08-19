@@ -31,10 +31,24 @@ Services are sending UI-related messages (StatusChangedMessage, property updates
 3. **Testing Complexity**: Services become harder to test in isolation
 4. **Hidden Dependencies**: The messaging creates implicit dependencies that aren't visible in constructors
 
+## The Opportunity
+
+Messages can be used for much more than UI updates - they're a general-purpose decoupling mechanism:
+- **Domain Events**: StoryModelChangedMessage, FilePathChangedMessage, ProjectSavedMessage
+- **State Changes**: BackupCompletedMessage, AutoSaveTriggeredMessage, ValidationFailedMessage  
+- **Cross-Cutting Concerns**: Any component can register for messages it cares about
+- **Replacement for Events**: Messages can eliminate many direct event subscriptions and their coupling
+
+This makes messages an excellent choice for solving several architectural problems:
+1. Services can broadcast domain events without knowing who consumes them
+2. ViewModels can listen for relevant business events and update UI accordingly
+3. API/headless mode can register for the same business events but handle them differently
+4. Testing becomes easier - just verify the right messages are sent
+
 ## Solutions
 
 ### Short-term (Tactical)
-Check `AppState.Headless` before sending UI messages:
+Check `AppState.Headless` before sending UI-specific messages:
 ```csharp
 if (!_appState.Headless)
 {
@@ -54,29 +68,47 @@ WeakReferenceMessenger.Default.Register<StatusChangedMessage>(this, (r, m) =>
 ```
 
 ### Long-term (Architectural Fix)
-1. **Separate Business Messages from UI Messages**
-   - Create `BusinessStatusMessage` for business logic events
-   - Create `UIStatusMessage` for UI-specific updates
-   - Services send business messages only
-   - ViewModels translate business messages to UI messages when not headless
-
-2. **Use Event Aggregator Pattern with Channels**
-   - Business channel for domain events
-   - UI channel for presentation events
-   - API/headless mode only subscribes to business channel
-
-3. **Return Results Instead of Sending Messages**
-   - Services return result objects with status
-   - Calling layer decides how to handle (UI update, log, ignore)
+1. **Embrace Messages as Domain Events**
+   - Services send domain-specific messages: `BackupCompletedMessage`, `StoryModelSavedMessage`, `FilePathChangedMessage`
+   - These are business events, not UI events
+   - ViewModels translate business messages to UI updates when appropriate
    - Example:
    ```csharp
-   public class BackupResult
+   // Service sends domain event
+   WeakReferenceMessenger.Default.Send(new BackupCompletedMessage 
+   { 
+       Success = true, 
+       FilePath = backupPath,
+       Timestamp = DateTime.Now 
+   });
+   
+   // ShellViewModel receives and updates UI
+   WeakReferenceMessenger.Default.Register<BackupCompletedMessage>(this, (r, m) =>
    {
-       public bool Success { get; set; }
-       public string Message { get; set; }
-       public LogLevel Level { get; set; }
-   }
+       if (!_appState.Headless)
+       {
+           BackupStatusColor = m.Success ? Colors.Green : Colors.Red;
+           ShowMessage(LogLevel.Info, $"Backup {(m.Success ? "completed" : "failed")}", false);
+       }
+   });
+   
+   // API controller could also listen and log
+   WeakReferenceMessenger.Default.Register<BackupCompletedMessage>(this, (r, m) =>
+   {
+       _logger.Log(m.Success ? LogLevel.Info : LogLevel.Error, 
+                   $"Backup {m.Success ? "completed" : "failed"} at {m.FilePath}");
+   });
    ```
+
+2. **Replace Direct Property Updates with Messages**
+   - Instead of: `ShellViewModel.FilePathToLaunch = path`
+   - Send: `new FilePathChangedMessage { NewPath = path }`
+   - Multiple components can react appropriately
+
+3. **Use Messages to Eliminate Circular Dependencies**
+   - Services don't need ViewModels at all
+   - ViewModels register for business events they care about
+   - Clean unidirectional flow: Services → Messages → ViewModels
 
 ## Specific Issues to Address
 
