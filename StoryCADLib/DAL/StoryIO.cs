@@ -14,8 +14,16 @@ namespace StoryCAD.DAL;
 /// </summary>
 public class StoryIO
 {
-	private LogService _logService = Ioc.Default.GetRequiredService<LogService>();
-    private OutlineViewModel OultineVM = Ioc.Default.GetRequiredService<OutlineViewModel>();
+	private readonly LogService _logService;
+	private readonly OutlineViewModel _outlineVM;
+	private readonly AppState _appState;
+
+	public StoryIO(LogService logService, OutlineViewModel outlineViewModel, AppState appState)
+	{
+		_logService = logService;
+		_outlineVM = outlineViewModel;
+		_appState = appState;
+	}
 
     /// <summary>
     /// Writes the current Story to the disk
@@ -31,7 +39,7 @@ public class StoryIO
 				$"Elements: {model.StoryElements.StoryElementGuids.Count}");
 
 		//Save version data
-		model.LastVersion = Ioc.Default.GetRequiredService<AppState>().Version;
+		model.LastVersion = _appState.Version;
 		_logService.Log(LogLevel.Info, $"Saving version as {model.LastVersion}");
 
         var json = model.Serialize();
@@ -146,7 +154,7 @@ public class StoryIO
 			_logService.Log(LogLevel.Info, $"Version last saved with {_model.LastVersion ?? "Error"}");
 
 			//Update file information
-            OultineVM.StoryModelFile = StoryFile.Path;
+            _outlineVM.StoryModelFile = StoryFile.Path;
 			return _model;
 		}
 		catch (Exception ex)

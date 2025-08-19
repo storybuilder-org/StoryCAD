@@ -227,7 +227,9 @@ internal Task<StoryModel> CreateModel(string name, string author, int selectedTe
         }
 
         var file = await StorageFile.GetFileFromPathAsync(path);
-        StoryModel model = await new StoryIO().ReadStory(file);
+        var outlineViewModel = Ioc.Default.GetRequiredService<OutlineViewModel>();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        StoryModel model = await new StoryIO(_log, outlineViewModel, appState).ReadStory(file);
         _log.Log(LogLevel.Info, $"Opened model contains {model.StoryElements.Count} elements.");
         return model;
     }

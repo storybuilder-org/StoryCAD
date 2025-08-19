@@ -244,3 +244,4 @@ git commit -m "message"
 - DO NOT test against the UI
 - Because the API is an external API, we don't know who is using it, or how.
 - use the /devdocs/issue_1069_achieve_100_percent_api_and_outlineservice_coverage for all your notes except /tmp files.
+- follow a naming standard for issue 1063 branches of issue_1063_di_batch{N}-{name} (e.g., issue_1063_di_batch2-corestate)

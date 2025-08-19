@@ -1143,23 +1143,24 @@ public class ShellViewModel : ObservableRecipient
 
     #region Constructor(s)
 
-    public ShellViewModel(SceneViewModel sceneViewModel)
+    public ShellViewModel(SceneViewModel sceneViewModel, LogService logger, SearchService search,
+        AutoSaveService autoSaveService, BackupService backupService, Windowing window,
+        AppState appState, ScrivenerIo scrivener, PreferenceService preferenceService,
+        OutlineViewModel outlineViewModel, OutlineService outlineService)
     {
         // Store injected services
         _sceneViewModel = sceneViewModel;
-        
-        // Resolve services via Ioc as needed
-        Logger = Ioc.Default.GetRequiredService<LogService>();
-        Search = Ioc.Default.GetRequiredService<SearchService>();
-        _autoSaveService = Ioc.Default.GetRequiredService<AutoSaveService>();
-        _BackupService = Ioc.Default.GetRequiredService<BackupService>();
-        Window = Ioc.Default.GetRequiredService<Windowing>();
-        State = Ioc.Default.GetRequiredService<AppState>();
-        Scrivener = Ioc.Default.GetRequiredService<ScrivenerIo>();
-        Preferences = Ioc.Default.GetRequiredService<PreferenceService>();
-        // Resolve sub ViewModels
-        OutlineManager = Ioc.Default.GetRequiredService<OutlineViewModel>();
-        outlineService = Ioc.Default.GetRequiredService<OutlineService>();
+        Logger = logger;
+        Search = search;
+        _autoSaveService = autoSaveService;
+        _BackupService = backupService;
+        Window = window;
+        State = appState;
+        Scrivener = scrivener;
+        Preferences = preferenceService;
+        // Store sub ViewModels
+        OutlineManager = outlineViewModel;
+        this.outlineService = outlineService;
 
         // Register inter-MVVM messaging
         Messenger.Register<IsChangedRequestMessage>(this, (_, m) => { m.Reply(OutlineManager.StoryModel!.Changed); });

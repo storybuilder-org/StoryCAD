@@ -13,9 +13,10 @@ public class BackupService
     private BackgroundWorker timedBackupWorker;
     private Timer backupTimer;
 
-    private readonly LogService Log = Ioc.Default.GetService<LogService>();
-    private readonly PreferenceService Prefs = Ioc.Default.GetService<PreferenceService>();
-    private readonly OutlineViewModel OutlineManager = Ioc.Default.GetService<OutlineViewModel>();
+    private readonly LogService _logService;
+    private readonly PreferenceService _preferenceService;
+    private readonly OutlineViewModel _outlineViewModel;
+    private readonly AppState _appState;
 
     // Fields to preserve remaining time when paused
     private double defaultIntervalMs;
@@ -27,8 +28,13 @@ public class BackupService
 
     #region Constructor
 
-    public BackupService()
+    public BackupService(LogService logService, PreferenceService preferenceService, OutlineViewModel outlineViewModel, AppState appState)
     {
+        _logService = logService;
+        _preferenceService = preferenceService;
+        _outlineViewModel = outlineViewModel;
+        _appState = appState;
+
         // Compute default interval once (in milliseconds)
         remainingIntervalMs = null;
         isResumed = false;
@@ -45,12 +51,12 @@ public class BackupService
     public void StartTimedBackup()
     {
         // Don't start if no project is loaded
-        if (String.IsNullOrEmpty(OutlineManager.StoryModelFile))
+        if (String.IsNullOrEmpty(_outlineViewModel.StoryModelFile))
         {
             return;
         }
 
-        defaultIntervalMs = Prefs.Model.TimedBackupInterval * 60 * 1000;
+        defaultIntervalMs = _preferenceService.Model.TimedBackupInterval * 60 * 1000;
 
         if (backupTimer == null)
         {
@@ -68,7 +74,7 @@ public class BackupService
             backupTimer.Elapsed += BackupTimer_Elapsed;
         }
 
-        if (!Prefs.Model.TimedBackup)
+        if (!_preferenceService.Model.TimedBackup)
             return;
 
         // If already running, do nothing
@@ -122,13 +128,13 @@ public class BackupService
     {
         try
         {
-            Log.Log(LogLevel.Info, "Starting timed backup task.");
+            _logService.Log(LogLevel.Info, "Starting timed backup task.");
             await BackupProject();
-            Log.Log(LogLevel.Info, "Timed backup task finished.");
+            _logService.Log(LogLevel.Info, "Timed backup task finished.");
         }
         catch (Exception ex)
         {
-            Log.LogException(LogLevel.Error, ex, "Error in auto backup task.");
+            _logService.LogException(LogLevel.Error, ex, "Error in auto backup task.");
         }
     }
 
@@ -171,7 +177,7 @@ public class BackupService
         var autoSaveService = Ioc.Default.GetRequiredService<AutoSaveService>();
 
         // Determine filenames and paths
-        var originalFileName = Path.GetFileNameWithoutExtension(OutlineManager.StoryModelFile);
+        var originalFileName = Path.GetFileNameWithoutExtension(_outlineViewModel.StoryModelFile);
 
         if (Filename is null)
         {
@@ -183,38 +189,38 @@ public class BackupService
                 Filename = Filename.Replace(bad, '_');
         }
 
-        FilePath ??= Prefs.Model.BackupDirectory;
+        FilePath ??= _preferenceService.Model.BackupDirectory;
 
 
-        Log.Log(LogLevel.Info, $"Starting Project Backup at {FilePath}");
+        _logService.Log(LogLevel.Info, $"Starting Project Backup at {FilePath}");
         try
         {
             // Create backup directory if missing
             if (!Directory.Exists(FilePath))
             {
-                Log.Log(LogLevel.Info, "Backup dir not found, making it.");
+                _logService.Log(LogLevel.Info, "Backup dir not found, making it.");
                 Directory.CreateDirectory(FilePath);
             }
 
-            Log.Log(LogLevel.Info, $"Backing up to {FilePath} as {Filename}.zip");
-            Log.Log(LogLevel.Info, "Writing file");
+            _logService.Log(LogLevel.Info, $"Backing up to {FilePath} as {Filename}.zip");
+            _logService.Log(LogLevel.Info, "Writing file");
 
             StorageFolder rootFolder = await StorageFolder.GetFolderFromPathAsync(
-                Ioc.Default.GetRequiredService<AppState>().RootDirectory);
+                _appState.RootDirectory);
 
             //Save file.
-            using (var serializationLock = new SerializationLock(autoSaveService, this, Log))
+            using (var serializationLock = new SerializationLock(autoSaveService, this, _logService))
             {
                 StorageFolder tempFolder = await rootFolder.CreateFolderAsync(
                     "Temp", CreationCollisionOption.ReplaceExisting);
 
-                StorageFile projectFile = await StorageFile.GetFileFromPathAsync(OutlineManager.StoryModelFile);
+                StorageFile projectFile = await StorageFile.GetFileFromPathAsync(_outlineViewModel.StoryModelFile);
                 await projectFile.CopyAsync(tempFolder, projectFile.Name, NameCollisionOption.ReplaceExisting);
 
                 string zipFilePath = Path.Combine(FilePath, Filename) + ".zip";
                 ZipFile.CreateFromDirectory(tempFolder.Path, zipFilePath);
 
-                Log.Log(LogLevel.Info, $"Created Zip file at {zipFilePath}");
+                _logService.Log(LogLevel.Info, $"Created Zip file at {zipFilePath}");
                 await tempFolder.DeleteAsync();
             }
             
@@ -222,11 +228,11 @@ public class BackupService
             Ioc.Default.GetRequiredService<Windowing>().GlobalDispatcher.TryEnqueue(() =>
                 Ioc.Default.GetRequiredService<ShellViewModel>().BackupStatusColor = Colors.Green
             );
-            Log.Log(LogLevel.Info, "Finished backup.");
+            _logService.Log(LogLevel.Info, "Finished backup.");
         }
         catch (Exception ex)
         {
-            if (!Ioc.Default.GetRequiredService<AppState>().Headless)
+            if (!_appState.Headless)
             {
                 Ioc.Default.GetRequiredService<Windowing>().GlobalDispatcher.TryEnqueue(() =>
                 {
@@ -237,9 +243,9 @@ public class BackupService
                 });
                 Ioc.Default.GetRequiredService<ShellViewModel>().BackupStatusColor = Colors.Red;
             }
-            Log.LogException(LogLevel.Error, ex, $"Error backing up project: {ex.Message}");
+            _logService.LogException(LogLevel.Error, ex, $"Error backing up project: {ex.Message}");
         }
 
-        Log.Log(LogLevel.Info, "BackupProject complete");
+        _logService.Log(LogLevel.Info, "BackupProject complete");
     }
 }
