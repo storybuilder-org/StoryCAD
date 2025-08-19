@@ -143,7 +143,8 @@ public partial class Windowing : ObservableRecipient
 
         // TODO: ARCHITECTURAL ISSUE - Windowing (UI layer) should not depend on OutlineViewModel (business logic)
         // This creates a circular dependency: OutlineViewModel -> Windowing -> OutlineViewModel
-        // Proper fix: Use events or a mediator pattern to update window title when file changes
+        // Proper fix (SRP): Move UpdateWindowTitle logic to OutlineViewModel (which knows about file changes)
+        // and have it set the title on Windowing. OutlineViewModel already has Windowing reference.
         // Current workaround: Use service locator to break the circular dependency
         OutlineViewModel outlineVM = Ioc.Default.GetRequiredService<OutlineViewModel>();
         if (!string.IsNullOrEmpty(outlineVM.StoryModelFile))
@@ -163,7 +164,10 @@ public partial class Windowing : ObservableRecipient
     {
         (MainWindow.Content as FrameworkElement).RequestedTheme = RequestedTheme;
 
-        // TODO: Same architectural issue as UpdateWindowTitle - see comment there
+        // TODO: ARCHITECTURAL ISSUE - Same as UpdateWindowTitle above
+        // Proper fix (SRP): Move UpdateUIToTheme logic to ShellViewModel (which manages navigation/UI state)
+        // ShellViewModel can coordinate the save and navigation when theme changes
+        // Current workaround: Use service locator to break the circular dependency
         OutlineViewModel outlineVM = Ioc.Default.GetRequiredService<OutlineViewModel>();
         //Save file, close current node since it won't be the right theme.
         if (!string.IsNullOrEmpty(outlineVM.StoryModelFile))
