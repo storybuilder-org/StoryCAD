@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel;
+using CommunityToolkit.Mvvm.Messaging;
 using StoryCAD.Services.Locking;
+using StoryCAD.Services.Messages;
 using StoryCAD.ViewModels.SubViewModels;
 
 namespace StoryCAD.Services.Backup
@@ -18,7 +20,8 @@ namespace StoryCAD.Services.Backup
         private readonly LogService _logger;
         private readonly AppState _appState;
         private readonly PreferenceService _preferenceService;
-        private OutlineViewModel _outlineVM;
+        private readonly OutlineViewModel _outlineVM;
+        // TODO: ShellViewModel removed due to circular dependency - needs architectural fix
 
         private BackgroundWorker autoSaveWorker;
         private System.Timers.Timer autoSaveTimer;
@@ -29,12 +32,24 @@ namespace StoryCAD.Services.Backup
 
         #region Constructor
 
-        public AutoSaveService(Windowing window, LogService logger, AppState appState, PreferenceService preferenceService)
+        // Constructor for backward compatibility - will be removed later
+        public AutoSaveService() : this(
+            Ioc.Default.GetRequiredService<Windowing>(),
+            Ioc.Default.GetRequiredService<LogService>(),
+            Ioc.Default.GetRequiredService<AppState>(),
+            Ioc.Default.GetRequiredService<PreferenceService>(),
+            Ioc.Default.GetRequiredService<OutlineViewModel>())
+        {
+        }
+
+        public AutoSaveService(Windowing window, LogService logger, AppState appState, PreferenceService preferenceService, OutlineViewModel outlineViewModel)
         {
             _window = window;
             _logger = logger;
             _appState = appState;
             _preferenceService = preferenceService;
+            _outlineVM = outlineViewModel;
+            // TODO: _shellViewModel assignment removed due to circular dependency
 
             autoSaveWorker = new BackgroundWorker
             {
@@ -108,7 +123,6 @@ namespace StoryCAD.Services.Backup
 
         private Task AutoSaveProject()
         {
-            _outlineVM = Ioc.Default.GetService<OutlineViewModel>();
             var backupService = Ioc.Default.GetRequiredService<BackupService>();
             var logService = _logger;
 
@@ -134,8 +148,8 @@ namespace StoryCAD.Services.Backup
                     //Show failed message.
                     _window.GlobalDispatcher.TryEnqueue(() =>
                     {
-                        Ioc.Default.GetRequiredService<ShellViewModel>().ShowMessage(LogLevel.Warn,
-                            "Making an AutoSave failed.", false);
+                        WeakReferenceMessenger.Default.Send(new StatusChangedMessage(new StatusMessage(
+                            "Making an AutoSave failed.", LogLevel.Warn, false)));
                     });
                     _logger.LogException(LogLevel.Error, _ex,
                         $"Error saving file in AutoSaveService.AutoSaveProject() {_ex.Message}");

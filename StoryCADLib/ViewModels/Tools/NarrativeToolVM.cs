@@ -22,9 +22,9 @@ namespace StoryCAD.ViewModels.Tools;
 /// </summary>
 public class NarrativeToolVM: ObservableRecipient
 {
-    private readonly ShellViewModel _shellVM = Ioc.Default.GetRequiredService<ShellViewModel>();
-    private readonly OutlineViewModel outlineVM = Ioc.Default.GetRequiredService<OutlineViewModel>();
-    private readonly LogService _logger = Ioc.Default.GetRequiredService<LogService>(); 
+    private readonly ShellViewModel _shellVM;
+    private readonly OutlineViewModel outlineVM;
+    private readonly LogService _logger; 
     public StoryNodeItem SelectedNode; //Currently selected node
     public bool IsNarratorSelected = false;
 
@@ -58,8 +58,20 @@ public class NarrativeToolVM: ObservableRecipient
         set => SetProperty(ref _message, value);
     }
 
-    public NarrativeToolVM()
+    // Constructor for XAML compatibility - will be removed later
+    public NarrativeToolVM() : this(
+        Ioc.Default.GetRequiredService<ShellViewModel>(),
+        Ioc.Default.GetRequiredService<OutlineViewModel>(),
+        Ioc.Default.GetRequiredService<LogService>())
     {
+    }
+
+    public NarrativeToolVM(ShellViewModel shellVM, OutlineViewModel outlineViewModel, LogService logger)
+    {
+        _shellVM = shellVM;
+        outlineVM = outlineViewModel;
+        _logger = logger;
+        
         CreateFlyout = new RelayCommand(MakeSection);
         CopyCommand = new RelayCommand(Copy);
         CopyAllUnusedCommand = new RelayCommand(CopyAllUnused);

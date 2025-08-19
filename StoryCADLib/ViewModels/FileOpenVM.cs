@@ -19,9 +19,11 @@ namespace StoryCAD.ViewModels;
 /// </summary>
 public class FileOpenVM : ObservableRecipient
 {
-	private readonly LogService _logger = Ioc.Default.GetRequiredService<LogService>();
-    private readonly OutlineViewModel _outlineVm = Ioc.Default.GetService<OutlineViewModel>();
-    private readonly PreferenceService _preferences = Ioc.Default.GetService<PreferenceService>();
+	private readonly LogService _logger;
+    private readonly OutlineViewModel _outlineVm;
+    private readonly PreferenceService _preferences;
+    private readonly ShellViewModel _shellViewModel;
+    private readonly Windowing _windowing;
 
     #region Properties
     public Visibility RecentsTabContentVisibility { get; set; }
@@ -227,11 +229,27 @@ public class FileOpenVM : ObservableRecipient
 
     #endregion
 
-    public FileOpenVM()
+    // Constructor for XAML compatibility - will be removed later
+    public FileOpenVM() : this(
+        Ioc.Default.GetRequiredService<LogService>(),
+        Ioc.Default.GetRequiredService<OutlineViewModel>(),
+        Ioc.Default.GetRequiredService<PreferenceService>(),
+        Ioc.Default.GetRequiredService<ShellViewModel>(),
+        Ioc.Default.GetRequiredService<Windowing>())
     {
+    }
+
+    public FileOpenVM(LogService logger, OutlineViewModel outlineVm, PreferenceService preferences, ShellViewModel shellViewModel, Windowing windowing)
+    {
+        _logger = logger;
+        _outlineVm = outlineVm;
+        _preferences = preferences;
+        _shellViewModel = shellViewModel;
+        _windowing = windowing;
+        
         SelectedRecentIndex = -1;
         OutlineName = string.Empty;
-        OutlineFolder = Ioc.Default.GetRequiredService<PreferenceService>().Model.ProjectDirectory;
+        OutlineFolder = _preferences.Model.ProjectDirectory;
 
         //Gets all samples in samples dir, paths is the manifest resource path
         _samplePaths = Assembly.GetExecutingAssembly().GetManifestResourceNames()
@@ -422,8 +440,8 @@ public class FileOpenVM : ObservableRecipient
             if (files.Length != 1)
             {
                 _logger.Log(LogLevel.Warn, $"Invalid backup {zipPath}, {files.Length} files found");
-                Ioc.Default.GetRequiredService<Windowing>().GlobalDispatcher.TryEnqueue(() =>
-                    Ioc.Default.GetRequiredService<ShellViewModel>().ShowMessage(
+                _windowing.GlobalDispatcher.TryEnqueue(() =>
+                    _shellViewModel.ShowMessage(
                         LogLevel.Warn,
                         "Backup archive is invalid or contains multiple files.",
                         false));

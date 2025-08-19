@@ -2,8 +2,10 @@
 using System.IO.Compression;
 using Windows.Storage;
 using Microsoft.UI;
+using CommunityToolkit.Mvvm.Messaging;
 using StoryCAD.ViewModels.SubViewModels;
 using StoryCAD.Services.Locking;
+using StoryCAD.Services.Messages;
 using System.Timers;
 
 namespace StoryCAD.Services.Backup;
@@ -17,6 +19,7 @@ public class BackupService
     private readonly PreferenceService _preferenceService;
     private readonly OutlineViewModel _outlineViewModel;
     private readonly AppState _appState;
+    // TODO: ShellViewModel removed due to circular dependency - needs architectural fix
 
     // Fields to preserve remaining time when paused
     private double defaultIntervalMs;
@@ -28,12 +31,22 @@ public class BackupService
 
     #region Constructor
 
+    // Constructor for backward compatibility - will be removed later
+    public BackupService() : this(
+        Ioc.Default.GetRequiredService<LogService>(),
+        Ioc.Default.GetRequiredService<PreferenceService>(),
+        Ioc.Default.GetRequiredService<OutlineViewModel>(),
+        Ioc.Default.GetRequiredService<AppState>())
+    {
+    }
+
     public BackupService(LogService logService, PreferenceService preferenceService, OutlineViewModel outlineViewModel, AppState appState)
     {
         _logService = logService;
         _preferenceService = preferenceService;
         _outlineViewModel = outlineViewModel;
         _appState = appState;
+        // TODO: _shellViewModel assignment removed due to circular dependency
 
         // Compute default interval once (in milliseconds)
         remainingIntervalMs = null;
@@ -147,6 +160,8 @@ public class BackupService
         // Update UI indicator on the UI thread
         Ioc.Default.GetRequiredService<Windowing>().GlobalDispatcher.TryEnqueue(() =>
         {
+            // TODO: Circular dependency - BackupService and ShellViewModel
+            // Temporary workaround: Use service locator until architectural fix
             Ioc.Default.GetRequiredService<ShellViewModel>().BackupStatusColor = Colors.Red;
         });
 
@@ -226,7 +241,9 @@ public class BackupService
             
             //update indicator.
             Ioc.Default.GetRequiredService<Windowing>().GlobalDispatcher.TryEnqueue(() =>
-                Ioc.Default.GetRequiredService<ShellViewModel>().BackupStatusColor = Colors.Green
+                // TODO: Circular dependency - BackupService and ShellViewModel
+            // Temporary workaround: Use service locator until architectural fix
+            Ioc.Default.GetRequiredService<ShellViewModel>().BackupStatusColor = Colors.Green
             );
             _logService.Log(LogLevel.Info, "Finished backup.");
         }
@@ -236,12 +253,14 @@ public class BackupService
             {
                 Ioc.Default.GetRequiredService<Windowing>().GlobalDispatcher.TryEnqueue(() =>
                 {
-                    Ioc.Default.GetRequiredService<ShellViewModel>().ShowMessage(
-                        LogLevel.Warn,
+                    WeakReferenceMessenger.Default.Send(new StatusChangedMessage(new StatusMessage(
                         "Making a backup failed, check your backup settings.",
-                        false);
+                        LogLevel.Warn,
+                        false)));
                 });
-                Ioc.Default.GetRequiredService<ShellViewModel>().BackupStatusColor = Colors.Red;
+                // TODO: Circular dependency - BackupService and ShellViewModel
+            // Temporary workaround: Use service locator until architectural fix
+            Ioc.Default.GetRequiredService<ShellViewModel>().BackupStatusColor = Colors.Red;
             }
             _logService.LogException(LogLevel.Error, ex, $"Error backing up project: {ex.Message}");
         }

@@ -53,6 +53,11 @@ public class OutlineViewModel : ObservableRecipient
             return _shellVM;
         }
     }
+    // TODO: Circular dependency - OutlineViewModel ↔ AutoSaveService/BackupService
+    // These services depend on OutlineViewModel in their constructors,
+    // so we cannot inject them here without creating a circular dependency.
+    // The lazy-loading properties below will fail if accessed before the services are constructed.
+    // Long-term fix: Break the dependency by having services use messaging or move shared data to AppState.
     private AutoSaveService _autoSaveService;
 
     private AutoSaveService autoSaveService
@@ -91,6 +96,8 @@ public class OutlineViewModel : ObservableRecipient
     private StoryModel _storyModel = new();
     /// <summary>
     /// Current Outline being edited
+    /// TODO: Consider moving StoryModel to AppState or similar central state service
+    /// to avoid ViewModels reaching into each other for shared state (SRP violation)
     /// </summary>
     public StoryModel StoryModel
     {
