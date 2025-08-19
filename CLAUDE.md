@@ -245,3 +245,16 @@ git commit -m "message"
 - Because the API is an external API, we don't know who is using it, or how.
 - use the /devdocs/issue_1069_achieve_100_percent_api_and_outlineservice_coverage for all your notes except /tmp files.
 - follow a naming standard for issue 1063 branches of issue_1063_di_batch{N}-{name} (e.g., issue_1063_di_batch2-corestate)
+
+## DI Conversion Lessons (from Batch 2)
+
+### Testing with DI
+- All services are registered in IoC container - get them via `Ioc.Default.GetRequiredService<T>()` in tests
+- Don't manually create services with `new` - let IoC handle dependency injection
+- Always rebuild before running tests after DI changes
+- Use `Assert.ThrowsExactly` instead of `Assert.ThrowsException` for precise API testing
+
+### Circular Dependencies
+- Watch for circular dependencies when adding constructor parameters
+- If encountered, document with TODO and leave specific Ioc.Default calls rather than forcing bad design
+- Example: Windowing ↔ OutlineViewModel (architectural issue documented in /devdocs/StoryCAD_architecture_notes.md)
