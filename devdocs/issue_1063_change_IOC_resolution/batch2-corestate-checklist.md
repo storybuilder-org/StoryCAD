@@ -20,7 +20,7 @@
 - [ ] Fix construction sites (pass dependencies or resolve via DI), build clean.
 - [x] Tests:
   - [x] Run unit tests (where present). ✅ 340 passed, 5 skipped, 0 failed
-  - [ ] Smoke test the app (launch, navigate, verify logs). **PENDING - Manual testing required**
+  - [x] Smoke test the app (launch, navigate, verify logs). ✅ PASSED
 - [ ] Grep gates (all must return **no results**):
   ```bash
   git grep -n "Ioc.Default.GetRequiredService<(AppState|PreferenceService|SerializationLock)>"
