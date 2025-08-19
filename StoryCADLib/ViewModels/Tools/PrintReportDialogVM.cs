@@ -20,9 +20,26 @@ public class PrintReportDialogVM : ObservableRecipient
     private PrintManager _printManager;
     public PrintDocument Document = new();
     public IPrintDocumentSource PrintDocSource;
-    private Windowing Window = Ioc.Default.GetRequiredService<Windowing>();
-    private OutlineViewModel OutlineVM = Ioc.Default.GetRequiredService<OutlineViewModel>();
+    private readonly Windowing Window;
+    private readonly OutlineViewModel _outlineViewModel;
+    private readonly ShellViewModel _shellViewModel;
     private List<StackPanel> _printPreviewCache; //This stores a list of pages for print preview
+
+    // Constructor for XAML compatibility - will be removed later
+    public PrintReportDialogVM() : this(
+        Ioc.Default.GetRequiredService<Windowing>(),
+        Ioc.Default.GetRequiredService<OutlineViewModel>(),
+        Ioc.Default.GetRequiredService<ShellViewModel>())
+    {
+    }
+
+    public PrintReportDialogVM(Windowing window, OutlineViewModel outlineViewModel, ShellViewModel shellViewModel)
+    {
+        Window = window;
+        _outlineViewModel = outlineViewModel;
+        _shellViewModel = shellViewModel;
+    }
+
     #region Properties
     private bool _createSummary;
     public bool CreateSummary
@@ -158,13 +175,13 @@ public class PrintReportDialogVM : ObservableRecipient
 
     public async Task OpenPrintReportDialog()
     {
-        ShellViewModel ShellVM = Ioc.Default.GetRequiredService<ShellViewModel>();
+        ShellViewModel ShellVM = _shellViewModel;
         var autoSaveService = Ioc.Default.GetRequiredService<AutoSaveService>();
         var backupService = Ioc.Default.GetRequiredService<BackupService>();
         var logService = Ioc.Default.GetRequiredService<LogService>();
         using (var serializationLock = new SerializationLock(autoSaveService, backupService, logService))
         {
-            if (Ioc.Default.GetRequiredService<ShellViewModel>().OutlineManager.StoryModel?.CurrentView == null)
+            if (_shellViewModel.OutlineManager.StoryModel?.CurrentView == null)
             {
                 ShellVM.ShowMessage(LogLevel.Warn, "You need to load a Story first!", false);
                 return;
@@ -266,7 +283,7 @@ public class PrintReportDialogVM : ObservableRecipient
     {
         SelectedNodes.Clear(); //Only print single node
 
-        PrintReports _rpt = new(this, OutlineVM.StoryModel);
+        PrintReports _rpt = new(this, _outlineViewModel.StoryModel);
 
         if (elementItem.Type == StoryItemType.StoryOverview) { CreateOverview = true; }
         else { SelectedNodes.Add(elementItem); }
@@ -290,7 +307,7 @@ public class PrintReportDialogVM : ObservableRecipient
         _printPreviewCache = new();
 
         //Treat each page break as its own page.
-        var report = await new PrintReports(this, OutlineVM.StoryModel).Generate();
+        var report = await new PrintReports(this, _outlineViewModel.StoryModel).Generate();
 
 		foreach (string pageText in report.Split(@"\PageBreak"))
         {
@@ -392,7 +409,7 @@ public class PrintReportDialogVM : ObservableRecipient
         {
             //Set print job name
             PrintJobManager = args.Request.CreatePrintTask("StoryCAD - " + 
-                Path.GetFileNameWithoutExtension(OutlineVM.StoryModelFile)
+                Path.GetFileNameWithoutExtension(_outlineViewModel.StoryModelFile)
                 ,PrintSourceRequested);
             PrintJobManager.Completed += PrintTaskCompleted; //Show message if job failed.
         }

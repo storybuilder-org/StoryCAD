@@ -12,6 +12,7 @@ public partial class WorkflowViewModel: ObservableRecipient
 {
     public LogService logger = Ioc.Default.GetService<LogService>();
     public CollaboratorService collaborator = Ioc.Default.GetService<CollaboratorService>();
+    private readonly NavigationService _navigationService;
 
     #region public properties
 
@@ -106,18 +107,24 @@ public partial class WorkflowViewModel: ObservableRecipient
     #endregion
 
     #region Constructor(s)
-    public WorkflowViewModel()
+    // Constructor for XAML compatibility - will be removed later
+    public WorkflowViewModel() : this(
+        Ioc.Default.GetRequiredService<NavigationService>())
     {
+    }
+
+    public WorkflowViewModel(NavigationService navigationService)
+    {
+        _navigationService = navigationService;
         PromptOutput = "Prompt output empty";
         Title = string.Empty;
         Description = string.Empty;
         InputText = string.Empty;
         // Configure Collaborator page navigation
-        NavigationService nav = Ioc.Default.GetService<NavigationService>();
         try
         {
-            nav!.Configure("WorkflowPage", typeof(WorkflowPage));
-            nav.Configure("WelcomePage", typeof(WelcomePage));
+            _navigationService.Configure("WorkflowPage", typeof(WorkflowPage));
+            _navigationService.Configure("WelcomePage", typeof(WelcomePage));
         }
         catch (Exception ex)
         {
@@ -153,12 +160,11 @@ public partial class WorkflowViewModel: ObservableRecipient
         LoadModel(Model, (string)item!.Tag);
         Ioc.Default.GetService<CollaboratorService>()!.ProcessWorkflow();
         //CurrentStep = step.Title;
-        NavigationService nav = Ioc.Default.GetService<NavigationService>();
         // Navigate to the appropriate WizardStep page, passing the WizardStep instance
         // as the parameter. This invokes the Page's OnNavigatedTo() method, which
         // Establishes the WizardStepViewModel as the DataContext (for binding)
         // In turn the ViewModel's Activate() method is invoked.
-        nav.NavigateTo(ContentFrame, "WorkflowPage", this);
+        _navigationService.NavigateTo(ContentFrame, "WorkflowPage", this);
     }
 
     public void SetCurrentNavigationViewItem(NavigationViewItem item)

@@ -19,6 +19,9 @@ public class ProblemViewModel : ObservableRecipient, INavigable
     #region Fields
 
     private readonly LogService _logger;
+    private readonly OutlineViewModel _outlineViewModel;
+    private readonly ShellViewModel _shellViewModel;
+    private readonly BeatSheetsViewModel _beatSheetsViewModel;
     private bool _changeable;
     private bool _changed;
 
@@ -393,7 +396,7 @@ public class ProblemViewModel : ObservableRecipient, INavigable
 
     private void LoadModel()
     {
-        StoryModel story_model = Ioc.Default.GetRequiredService<OutlineViewModel>().StoryModel;
+        StoryModel story_model = _outlineViewModel.StoryModel;
 
         _changeable = false;
         _changed = false;
@@ -590,7 +593,7 @@ public class ProblemViewModel : ObservableRecipient, INavigable
             SetProperty(ref _structureModelTitle, value);
 
             //Resolve master plot model if not empty
-            PlotPatternModel BeatSheet = Ioc.Default.GetRequiredService<BeatSheetsViewModel>().BeatSheets[value];
+            PlotPatternModel BeatSheet = _beatSheetsViewModel.BeatSheets[value];
 
             StructureDescription = BeatSheet.PlotPatternNotes;
 
@@ -627,12 +630,23 @@ public class ProblemViewModel : ObservableRecipient, INavigable
 
     #region Constructors
 
-    public ProblemViewModel()
+    // Constructor for XAML compatibility - will be removed later
+    public ProblemViewModel() : this(
+        Ioc.Default.GetRequiredService<LogService>(),
+        Ioc.Default.GetRequiredService<OutlineViewModel>(),
+        Ioc.Default.GetRequiredService<ShellViewModel>(),
+        Ioc.Default.GetRequiredService<BeatSheetsViewModel>())
     {
-        _logger = Ioc.Default.GetService<LogService>();
-        
+    }
 
-        Characters = Ioc.Default.GetRequiredService<OutlineViewModel>().StoryModel.StoryElements.Characters;
+    public ProblemViewModel(LogService logger, OutlineViewModel outlineViewModel, ShellViewModel shellViewModel, BeatSheetsViewModel beatSheetsViewModel)
+    {
+        _logger = logger;
+        _outlineViewModel = outlineViewModel;
+        _shellViewModel = shellViewModel;
+        _beatSheetsViewModel = beatSheetsViewModel;
+        
+        Characters = _outlineViewModel.StoryModel.StoryElements.Characters;
         ProblemType = string.Empty;
         ConflictType = string.Empty;
         Subject = string.Empty;
@@ -703,13 +717,13 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         try
         {
             Ioc.Default.GetService<OutlineService>().DeleteBeat(
-                Ioc.Default.GetRequiredService<OutlineViewModel>().StoryModel,
+                _outlineViewModel.StoryModel,
                 Model, SelectedBeatIndex);
         }
         catch (Exception ex)
         {
 
-            Ioc.Default.GetService<ShellViewModel>().ShowMessage(LogLevel.Warn, ex.Message, true);
+            _shellViewModel.ShowMessage(LogLevel.Warn, ex.Message, true);
         }
     }
 
@@ -720,7 +734,7 @@ public class ProblemViewModel : ObservableRecipient, INavigable
     {
         if (SelectedBeat == null)
         {
-            Ioc.Default.GetRequiredService<ShellViewModel>().ShowMessage(LogLevel.Warn, "Select a beat", false);
+            _shellViewModel.ShowMessage(LogLevel.Warn, "Select a beat", false);
             return;
         }
 
@@ -730,7 +744,7 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         }
         else
         {
-            Ioc.Default.GetRequiredService<ShellViewModel>().
+            _shellViewModel.
                 ShowMessage(LogLevel.Warn, "This is already the first beat.", true);
         }
     }
@@ -741,7 +755,7 @@ public class ProblemViewModel : ObservableRecipient, INavigable
     {
         if (SelectedBeat == null)
         {
-            Ioc.Default.GetRequiredService<ShellViewModel>().ShowMessage(LogLevel.Warn, "Select a beat", false);
+            _shellViewModel.ShowMessage(LogLevel.Warn, "Select a beat", false);
             return;
         }
 
@@ -753,7 +767,7 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         }
         else
         {
-            Ioc.Default.GetRequiredService<ShellViewModel>()
+            _shellViewModel
                 .ShowMessage(LogLevel.Warn, "This is already the last beat.", true);
         }
     }
@@ -765,7 +779,7 @@ public class ProblemViewModel : ObservableRecipient, INavigable
     {
         if (SelectedBeat == null)
         {
-            Ioc.Default.GetRequiredService<ShellViewModel>().ShowMessage(LogLevel.Warn, "Select a beat", false);
+            _shellViewModel.ShowMessage(LogLevel.Warn, "Select a beat", false);
             return;
         }
 
@@ -832,20 +846,20 @@ public class ProblemViewModel : ObservableRecipient, INavigable
     {
         if (SelectedBeat == null)
         {
-            Ioc.Default.GetRequiredService<ShellViewModel>()
+            _shellViewModel
                .ShowMessage(LogLevel.Warn, "Select a beat", false);
             return;
         }
 
         if (SelectedBeat.Guid == Guid.Empty)
         {
-            Ioc.Default.GetRequiredService<ShellViewModel>()
+            _shellViewModel
             .ShowMessage(LogLevel.Warn, "Nothing is bound to this beat", false);
             return;
         }
 
         Ioc.Default.GetRequiredService<OutlineService>().UnasignBeat(
-            Ioc.Default.GetService<OutlineViewModel>().StoryModel,
+            _outlineViewModel.StoryModel,
             Model, SelectedBeatIndex);
         SelectedBeat.Guid = Guid.Empty;
 
@@ -893,7 +907,7 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         }
         catch (Exception)
         {
-            Ioc.Default.GetService<ShellViewModel>().ShowMessage(LogLevel.Error,"Failed to save Beatsheet", false);
+            _shellViewModel.ShowMessage(LogLevel.Error,"Failed to save Beatsheet", false);
 
         }
     }
@@ -909,7 +923,7 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         }
         catch (Exception)
         {
-            Ioc.Default.GetService<ShellViewModel>().ShowMessage(LogLevel.Error, "Failed to Load Beatsheet", false);
+            _shellViewModel.ShowMessage(LogLevel.Error, "Failed to Load Beatsheet", false);
 
         }
     }

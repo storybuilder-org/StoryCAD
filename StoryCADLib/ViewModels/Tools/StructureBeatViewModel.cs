@@ -13,12 +13,25 @@ public class StructureBeatViewModel : ObservableObject
 {
 	public Windowing Windowing;
 	public ProblemViewModel ProblemViewModel;
+	private readonly OutlineViewModel _outlineViewModel;
+	private readonly OutlineService _outlineService;
 
 	#region Constructor
-	public StructureBeatViewModel()
+	// Constructor for XAML compatibility - will be removed later
+	public StructureBeatViewModel() : this(
+		Ioc.Default.GetRequiredService<Windowing>(),
+		Ioc.Default.GetRequiredService<ProblemViewModel>(),
+		Ioc.Default.GetRequiredService<OutlineViewModel>(),
+		Ioc.Default.GetRequiredService<OutlineService>())
 	{
-		Windowing = Ioc.Default.GetRequiredService<Windowing>();
-		ProblemViewModel = Ioc.Default.GetRequiredService<ProblemViewModel>();
+	}
+
+	public StructureBeatViewModel(Windowing windowing, ProblemViewModel problemViewModel, OutlineViewModel outlineViewModel, OutlineService outlineService)
+	{
+		Windowing = windowing;
+		ProblemViewModel = problemViewModel;
+		_outlineViewModel = outlineViewModel;
+		_outlineService = outlineService;
 		PropertyChanged += ProblemViewModel.OnPropertyChanged;
 	}
 	#endregion
@@ -80,11 +93,9 @@ public class StructureBeatViewModel : ObservableObject
         {
             if (guid != Guid.Empty)
             {
-                var outlineViewModel = Ioc.Default.GetRequiredService<OutlineViewModel>();
-                var outlineService = Ioc.Default.GetRequiredService<OutlineService>();
                 try
                 {
-                    return outlineService.GetStoryElementByGuid(outlineViewModel.StoryModel, guid);
+                    return _outlineService.GetStoryElementByGuid(_outlineViewModel.StoryModel, guid);
                 }
                 catch (InvalidOperationException)
                 {

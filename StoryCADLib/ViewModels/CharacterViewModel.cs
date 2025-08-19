@@ -21,7 +21,8 @@ public class CharacterViewModel : ObservableRecipient, INavigable
     private bool _changeable; // process property changes for this story element
     private bool _changed;    // this story element has changed
     readonly Windowing Windowing = Ioc.Default.GetService<Windowing>();
-    readonly OutlineViewModel OutlineVM = Ioc.Default.GetService<OutlineViewModel>();
+    private readonly OutlineViewModel _outlineViewModel;
+    private readonly ShellViewModel _shellViewModel;
     #endregion
 
     #region Properties
@@ -734,7 +735,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable
         _vm.RelationTypes.Clear();
         foreach (string _relationshipType in Ioc.Default.GetRequiredService<ControlData>().RelationTypes) { _vm.RelationTypes.Add(_relationshipType); }
         _vm.ProspectivePartners.Clear(); //Prospective partners are chars who are not in a relationship with this char
-        StoryModel _storyModel = OutlineVM.StoryModel;
+        StoryModel _storyModel = _outlineViewModel.StoryModel;
         foreach (StoryElement _character in _storyModel.StoryElements.Characters)
         {
             if (_character == _vm.Member) continue;  // Skip me
@@ -749,7 +750,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable
         if (_vm.ProspectivePartners.Count == 0)
         {
             Ioc.Default.GetRequiredService<LogService>().Log(LogLevel.Warn,"There are no prospective partners, not showing AddRelationship Dialog." );
-            Ioc.Default.GetRequiredService<ShellViewModel>().ShowMessage(LogLevel.Warn, "This character already has a relationship with everyone",false);
+            _shellViewModel.ShowMessage(LogLevel.Warn, "This character already has a relationship with everyone",false);
             return;
         }
 
@@ -916,9 +917,19 @@ public class CharacterViewModel : ObservableRecipient, INavigable
 
     #region Constructors
 
-    public CharacterViewModel()
+    // Constructor for XAML compatibility - will be removed later
+    public CharacterViewModel() : this(
+        Ioc.Default.GetRequiredService<LogService>(),
+        Ioc.Default.GetRequiredService<OutlineViewModel>(),
+        Ioc.Default.GetRequiredService<ShellViewModel>())
     {
-        _logger = Ioc.Default.GetService<LogService>();
+    }
+
+    public CharacterViewModel(LogService logger, OutlineViewModel outlineViewModel, ShellViewModel shellViewModel)
+    {
+        _logger = logger;
+        _outlineViewModel = outlineViewModel;
+        _shellViewModel = shellViewModel;
 
         try
         {

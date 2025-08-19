@@ -53,6 +53,7 @@ public class ShellViewModel : ObservableRecipient
     private readonly PreferenceService Preferences;
     private readonly OutlineService outlineService;
     private readonly SceneViewModel _sceneViewModel;
+    private readonly NavigationService _navigationService;
 
     
     // Navigation navigation landmark nodes
@@ -289,6 +290,7 @@ public class ShellViewModel : ObservableRecipient
     /// </summary>
     public static void ShowChange()
     {
+        // TODO: Static method requires service locator - consider making non-static in future refactoring
         StoryModel Model = Ioc.Default.GetRequiredService<OutlineViewModel>().StoryModel;
         if (Ioc.Default.GetRequiredService<AppState>().Headless) { return; }
         if (Model.Changed) { return; }
@@ -348,53 +350,51 @@ public class ShellViewModel : ObservableRecipient
 
         try
         {
-            NavigationService nav = Ioc.Default.GetRequiredService<NavigationService>();
             if (selectedItem is StoryNodeItem node)
             {
                 CurrentNode = node;
-                OutlineService outlineService = Ioc.Default.GetRequiredService<OutlineService>();
                 StoryElement element = outlineService.GetStoryElementByGuid(OutlineManager.StoryModel, node.Uuid);
                 switch (element.ElementType)
                 {
                     case StoryItemType.Character:
                         CurrentPageType = CharacterPage;
-                        nav.NavigateTo(SplitViewFrame, CharacterPage, element);
+                        _navigationService.NavigateTo(SplitViewFrame, CharacterPage, element);
                         break;
                     case StoryItemType.Scene:
                         CurrentPageType = ScenePage;
-                        nav.NavigateTo(SplitViewFrame, ScenePage, element);
+                        _navigationService.NavigateTo(SplitViewFrame, ScenePage, element);
                         break;
                     case StoryItemType.Problem:
                         CurrentPageType = ProblemPage;
-                        nav.NavigateTo(SplitViewFrame, ProblemPage, element);
+                        _navigationService.NavigateTo(SplitViewFrame, ProblemPage, element);
                         break;
                     case StoryItemType.Section:
                         CurrentPageType = FolderPage;
-                        nav.NavigateTo(SplitViewFrame, FolderPage, element);
+                        _navigationService.NavigateTo(SplitViewFrame, FolderPage, element);
                         break;
                     case StoryItemType.Folder:
                         CurrentPageType = FolderPage;
-                        nav.NavigateTo(SplitViewFrame, FolderPage, element);
+                        _navigationService.NavigateTo(SplitViewFrame, FolderPage, element);
                         break;
                     case StoryItemType.Setting:
                         CurrentPageType = SettingPage;
-                        nav.NavigateTo(SplitViewFrame, SettingPage, element);
+                        _navigationService.NavigateTo(SplitViewFrame, SettingPage, element);
                         break;
                     case StoryItemType.Web:
                         CurrentPageType = WebPage;
-                        nav.NavigateTo(SplitViewFrame, WebPage, element);
+                        _navigationService.NavigateTo(SplitViewFrame, WebPage, element);
                         break;
                     case StoryItemType.Notes:
                         CurrentPageType = FolderPage;
-                        nav.NavigateTo(SplitViewFrame, FolderPage, element);
+                        _navigationService.NavigateTo(SplitViewFrame, FolderPage, element);
                         break;
                     case StoryItemType.StoryOverview:
                         CurrentPageType = OverviewPage;
-                        nav.NavigateTo(SplitViewFrame, OverviewPage, element);
+                        _navigationService.NavigateTo(SplitViewFrame, OverviewPage, element);
                         break;
                     case StoryItemType.TrashCan:
                         CurrentPageType = TrashCanPage;
-                        nav.NavigateTo(SplitViewFrame, TrashCanPage, element);
+                        _navigationService.NavigateTo(SplitViewFrame, TrashCanPage, element);
                         break;
                 }
                 CurrentNode.IsExpanded = true;
@@ -441,9 +441,8 @@ public class ShellViewModel : ObservableRecipient
         {
             Logger.Log(LogLevel.Info, "ShowHomePage");
 
-            NavigationService nav = Ioc.Default.GetRequiredService<NavigationService>();
             CurrentPageType = HomePage;
-            nav.NavigateTo(SplitViewFrame, HomePage);
+            _navigationService.NavigateTo(SplitViewFrame, HomePage);
         }
     }
     private void TogglePane()
@@ -1143,21 +1142,38 @@ public class ShellViewModel : ObservableRecipient
 
     #region Constructor(s)
 
+    // Constructor for XAML compatibility - will be removed later
+    public ShellViewModel() : this(
+        Ioc.Default.GetRequiredService<SceneViewModel>(),
+        Ioc.Default.GetRequiredService<LogService>(),
+        Ioc.Default.GetRequiredService<SearchService>(),
+        Ioc.Default.GetRequiredService<Windowing>(),
+        Ioc.Default.GetRequiredService<AppState>(),
+        Ioc.Default.GetRequiredService<ScrivenerIo>(),
+        Ioc.Default.GetRequiredService<PreferenceService>(),
+        Ioc.Default.GetRequiredService<OutlineViewModel>(),
+        Ioc.Default.GetRequiredService<OutlineService>(),
+        Ioc.Default.GetRequiredService<NavigationService>())
+    {
+    }
+
     public ShellViewModel(SceneViewModel sceneViewModel, LogService logger, SearchService search,
-        AutoSaveService autoSaveService, BackupService backupService, Windowing window,
-        AppState appState, ScrivenerIo scrivener, PreferenceService preferenceService,
-        OutlineViewModel outlineViewModel, OutlineService outlineService)
+        Windowing window, AppState appState, ScrivenerIo scrivener, PreferenceService preferenceService,
+        OutlineViewModel outlineViewModel, OutlineService outlineService, NavigationService navigationService)
     {
         // Store injected services
         _sceneViewModel = sceneViewModel;
         Logger = logger;
         Search = search;
-        _autoSaveService = autoSaveService;
-        _BackupService = backupService;
+        // TODO: Circular dependency - AutoSaveService and BackupService depend on ShellViewModel
+        // Temporary workaround: Use service locator until architectural fix
+        _autoSaveService = Ioc.Default.GetRequiredService<AutoSaveService>();
+        _BackupService = Ioc.Default.GetRequiredService<BackupService>();
         Window = window;
         State = appState;
         Scrivener = scrivener;
         Preferences = preferenceService;
+        _navigationService = navigationService;
         // Store sub ViewModels
         OutlineManager = outlineViewModel;
         this.outlineService = outlineService;

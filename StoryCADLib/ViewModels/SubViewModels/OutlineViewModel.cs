@@ -91,6 +91,8 @@ public class OutlineViewModel : ObservableRecipient
     private StoryModel _storyModel = new();
     /// <summary>
     /// Current Outline being edited
+    /// TODO: Consider moving StoryModel to AppState or similar central state service
+    /// to avoid ViewModels reaching into each other for shared state (SRP violation)
     /// </summary>
     public StoryModel StoryModel
     {
