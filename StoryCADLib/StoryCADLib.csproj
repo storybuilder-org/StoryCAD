@@ -30,7 +30,6 @@
 		<Content Update="Assets\*.*" PackagePath="contentFiles\any\net8.0-windows10.0-22621\$(PackageId)\Assets\%(Filename)%(Extension)" />
 	</ItemGroup>
   <ItemGroup>
-    <Content Remove="Assets\Install\Lists.ini" />
     <Content Remove="Assets\Install\reports\Character Relationship Description.txt" />
     <Content Remove="Assets\Install\reports\Structure Beats.txt" />
     <Content Remove="Assets\Install\samples\A Doll's House.stbx" />
@@ -45,8 +44,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Remove="Assets\Install\Bibliog.txt" />
-    <None Remove="Assets\Install\Controls.ini" />
-    <None Remove="Assets\Install\Lists.ini" />
     <None Remove="Assets\Install\reports\Character Description.txt" />
     <None Remove="Assets\Install\reports\Character Relationship Description.txt" />
     <None Remove="Assets\Install\reports\Folder Description.txt" />
