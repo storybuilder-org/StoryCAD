@@ -162,7 +162,7 @@ StoryCAD/Views/ProblemPage.xaml.cs:15 (Page - SKIP)
 
 ## Test Results
 Build succeeds with only nullable reference warnings.
-Tests run but some have circular dependency issues documented below.
+All tests pass successfully (340 passed, 5 skipped).
 
 ## Grep Gate Verification
 Remaining Ioc.Default calls are either:
@@ -175,11 +175,14 @@ Remaining Ioc.Default calls are either:
 
 ### 1. ShellViewModel ↔ AutoSaveService/BackupService
 - **Issue**: ShellViewModel depends on AutoSaveService and BackupService, which both depend on ShellViewModel
-- **Resolution**: Removed AutoSaveService and BackupService from ShellViewModel constructor, using service locator temporarily (documented with TODO)
+- **Resolution**: Using messaging service to break circular dependency
+  - AutoSaveService sends StatusChangedMessage instead of calling ShellViewModel.ShowMessage
+  - BackupService sends StatusChangedMessage for error messages
+  - BackupService still uses Ioc.Default for BackupStatusColor property (needs architectural fix, documented with TODO)
 - **Files affected**: 
-  - ShellViewModel.cs (uses service locator for AutoSaveService/BackupService)
-  - AutoSaveService.cs (uses service locator for ShellViewModel.ShowMessage)
-  - BackupService.cs (uses service locator for ShellViewModel properties)
+  - ShellViewModel.cs (properly injects AutoSaveService/BackupService)
+  - AutoSaveService.cs (uses WeakReferenceMessenger.Default.Send for status messages)
+  - BackupService.cs (uses WeakReferenceMessenger.Default.Send for error messages, Ioc.Default for color updates with TODO)
 
 ### 2. ShellViewModel ↔ OutlineViewModel
 - **Issue**: Mutual dependency between ShellViewModel and OutlineViewModel

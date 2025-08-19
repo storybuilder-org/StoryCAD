@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel;
+using CommunityToolkit.Mvvm.Messaging;
 using StoryCAD.Services.Locking;
+using StoryCAD.Services.Messages;
 using StoryCAD.ViewModels.SubViewModels;
 
 namespace StoryCAD.Services.Backup
@@ -36,12 +38,11 @@ namespace StoryCAD.Services.Backup
             Ioc.Default.GetRequiredService<LogService>(),
             Ioc.Default.GetRequiredService<AppState>(),
             Ioc.Default.GetRequiredService<PreferenceService>(),
-            Ioc.Default.GetRequiredService<OutlineViewModel>(),
-            null) // TODO: Circular dependency with ShellViewModel - needs architectural fix
+            Ioc.Default.GetRequiredService<OutlineViewModel>())
         {
         }
 
-        public AutoSaveService(Windowing window, LogService logger, AppState appState, PreferenceService preferenceService, OutlineViewModel outlineViewModel, ShellViewModel shellViewModel = null)
+        public AutoSaveService(Windowing window, LogService logger, AppState appState, PreferenceService preferenceService, OutlineViewModel outlineViewModel)
         {
             _window = window;
             _logger = logger;
@@ -147,10 +148,8 @@ namespace StoryCAD.Services.Backup
                     //Show failed message.
                     _window.GlobalDispatcher.TryEnqueue(() =>
                     {
-                        // TODO: Circular dependency - ShellViewModel depends on AutoSaveService and vice versa
-                        // Temporary workaround: Use service locator until architectural fix
-                        Ioc.Default.GetRequiredService<ShellViewModel>().ShowMessage(LogLevel.Warn,
-                            "Making an AutoSave failed.", false);
+                        WeakReferenceMessenger.Default.Send(new StatusChangedMessage(new StatusMessage(
+                            "Making an AutoSave failed.", LogLevel.Warn, false)));
                     });
                     _logger.LogException(LogLevel.Error, _ex,
                         $"Error saving file in AutoSaveService.AutoSaveProject() {_ex.Message}");

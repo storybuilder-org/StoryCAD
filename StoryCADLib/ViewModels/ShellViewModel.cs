@@ -1147,6 +1147,8 @@ public class ShellViewModel : ObservableRecipient
         Ioc.Default.GetRequiredService<SceneViewModel>(),
         Ioc.Default.GetRequiredService<LogService>(),
         Ioc.Default.GetRequiredService<SearchService>(),
+        Ioc.Default.GetRequiredService<AutoSaveService>(),
+        Ioc.Default.GetRequiredService<BackupService>(),
         Ioc.Default.GetRequiredService<Windowing>(),
         Ioc.Default.GetRequiredService<AppState>(),
         Ioc.Default.GetRequiredService<ScrivenerIo>(),
@@ -1158,17 +1160,16 @@ public class ShellViewModel : ObservableRecipient
     }
 
     public ShellViewModel(SceneViewModel sceneViewModel, LogService logger, SearchService search,
-        Windowing window, AppState appState, ScrivenerIo scrivener, PreferenceService preferenceService,
+        AutoSaveService autoSaveService, BackupService backupService, Windowing window,
+        AppState appState, ScrivenerIo scrivener, PreferenceService preferenceService,
         OutlineViewModel outlineViewModel, OutlineService outlineService, NavigationService navigationService)
     {
         // Store injected services
         _sceneViewModel = sceneViewModel;
         Logger = logger;
         Search = search;
-        // TODO: Circular dependency - AutoSaveService and BackupService depend on ShellViewModel
-        // Temporary workaround: Use service locator until architectural fix
-        _autoSaveService = Ioc.Default.GetRequiredService<AutoSaveService>();
-        _BackupService = Ioc.Default.GetRequiredService<BackupService>();
+        _autoSaveService = autoSaveService;
+        _BackupService = backupService;
         Window = window;
         State = appState;
         Scrivener = scrivener;

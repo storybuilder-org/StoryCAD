@@ -2,8 +2,10 @@
 using System.IO.Compression;
 using Windows.Storage;
 using Microsoft.UI;
+using CommunityToolkit.Mvvm.Messaging;
 using StoryCAD.ViewModels.SubViewModels;
 using StoryCAD.Services.Locking;
+using StoryCAD.Services.Messages;
 using System.Timers;
 
 namespace StoryCAD.Services.Backup;
@@ -34,12 +36,11 @@ public class BackupService
         Ioc.Default.GetRequiredService<LogService>(),
         Ioc.Default.GetRequiredService<PreferenceService>(),
         Ioc.Default.GetRequiredService<OutlineViewModel>(),
-        Ioc.Default.GetRequiredService<AppState>(),
-        null) // TODO: Circular dependency with ShellViewModel - needs architectural fix
+        Ioc.Default.GetRequiredService<AppState>())
     {
     }
 
-    public BackupService(LogService logService, PreferenceService preferenceService, OutlineViewModel outlineViewModel, AppState appState, ShellViewModel shellViewModel = null)
+    public BackupService(LogService logService, PreferenceService preferenceService, OutlineViewModel outlineViewModel, AppState appState)
     {
         _logService = logService;
         _preferenceService = preferenceService;
@@ -252,12 +253,10 @@ public class BackupService
             {
                 Ioc.Default.GetRequiredService<Windowing>().GlobalDispatcher.TryEnqueue(() =>
                 {
-                    // TODO: Circular dependency - BackupService and ShellViewModel
-                // Temporary workaround: Use service locator until architectural fix
-                Ioc.Default.GetRequiredService<ShellViewModel>().ShowMessage(
-                        LogLevel.Warn,
+                    WeakReferenceMessenger.Default.Send(new StatusChangedMessage(new StatusMessage(
                         "Making a backup failed, check your backup settings.",
-                        false);
+                        LogLevel.Warn,
+                        false)));
                 });
                 // TODO: Circular dependency - BackupService and ShellViewModel
             // Temporary workaround: Use service locator until architectural fix
