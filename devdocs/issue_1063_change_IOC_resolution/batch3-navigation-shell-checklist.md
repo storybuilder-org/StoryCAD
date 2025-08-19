@@ -183,6 +183,7 @@ Remaining Ioc.Default calls are either:
   - ShellViewModel.cs (properly injects AutoSaveService/BackupService)
   - AutoSaveService.cs (uses WeakReferenceMessenger.Default.Send for status messages)
   - BackupService.cs (uses WeakReferenceMessenger.Default.Send for error messages, Ioc.Default for color updates with TODO)
+- **IMPORTANT**: See [MESSAGING_AND_HEADLESS_ISSUE.md](./MESSAGING_AND_HEADLESS_ISSUE.md) for critical architectural concerns about services sending UI messages in headless/API mode
 
 ### 2. ShellViewModel ↔ OutlineViewModel
 - **Issue**: Mutual dependency between ShellViewModel and OutlineViewModel
