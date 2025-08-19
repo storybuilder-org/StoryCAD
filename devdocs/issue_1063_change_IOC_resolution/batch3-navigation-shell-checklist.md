@@ -220,3 +220,56 @@ Several services not in this batch still use Ioc.Default for these batch service
 - CollaboratorService.cs
 
 These will need to be addressed in their respective batches.
+
+---
+
+## Outstanding Issues Requiring Future Work
+
+### 1. Critical: Messaging in Headless/API Mode
+- **Issue**: Services send UI messages via WeakReferenceMessenger that have no receivers in headless mode
+- **Affected Code**: AutoSaveService.cs:151, BackupService.cs:256
+- **Fix Required**: Add AppState.Headless checks or refactor to domain events
+- **See**: [MESSAGING_AND_HEADLESS_ISSUE.md](./MESSAGING_AND_HEADLESS_ISSUE.md)
+
+### 2. Critical: BackupStatusColor Property Updates
+- **Issue**: BackupService still uses Ioc.Default to set ShellViewModel.BackupStatusColor (3 locations)
+- **Affected Code**: BackupService.cs lines 165, 246, 263
+- **Fix Required**: Create BackupStatusChangedMessage or similar messaging approach
+
+### 3. High Priority: Move StoryModel to AppState
+- **Issue**: StoryModel and StoryModelFile are accessed through OutlineViewModel but should be in AppState
+- **Affected Services**: AutoSaveService, BackupService, many others
+- **Fix Required**: Refactor to move these to AppState, update all consumers
+
+### 4. High Priority: Break AutoSaveService/BackupService Dependency on OutlineViewModel
+- **Issue**: These services depend on OutlineViewModel for data that should come from elsewhere
+- **Current Usage**:
+  - AutoSaveService needs: StoryModel.StoryElements.Count, StoryModel.Changed, SaveFile()
+  - BackupService needs: StoryModelFile path
+- **Fix Required**: Use AppState or messaging patterns instead
+
+### 5. Medium Priority: ShellViewModel Direct Access in Services
+- **Issue**: Several services still directly access ShellViewModel properties
+- **Examples**:
+  - LogService.cs:305 - reads FilePathToLaunch
+  - CollaboratorService.cs:238 - sets CollabArgs
+  - OutlineViewModel.cs:214,219 - accesses _autoSaveService directly
+- **Fix Required**: Use messaging or proper injection
+
+### 6. Medium Priority: Lazy Loading Pattern Issues
+- **Issue**: OutlineViewModel uses lazy loading for AutoSaveService/BackupService which can fail
+- **Risk**: If OutlineViewModel is accessed before ShellViewModel creation, circular dependency exception occurs
+- **Fix Required**: Proper dependency resolution or architectural refactoring
+
+### 7. Low Priority: XAML Compatibility Constructors
+- **Issue**: Many ViewModels have parameterless constructors using Ioc.Default
+- **Affected**: ShellViewModel, OutlineViewModel, ProblemViewModel, others
+- **Fix Required**: Future XAML/binding refactoring to support DI properly
+
+### 8. Code Cleanup: Remove Commented Code
+- **Issue**: CollaboratorService.cs:460 has commented out OutlineViewModel code
+- **Fix Required**: Clean up or implement properly
+
+### 9. Architectural: SerializationLock Design
+- **Issue**: SerializationLock requires service instances just to stop them
+- **Fix Required**: Consider a more decoupled approach using events or messaging
