@@ -6,6 +6,7 @@ using StoryCAD.Services.Collaborator.Contracts;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.DependencyInjection;
 
 namespace StoryCADTests;
 
@@ -19,7 +20,7 @@ public class WorkflowFlowTests
     public void Workflow_LoadingSequence_WorksCorrectly()
     {
         // Arrange
-        var service = new CollaboratorService();
+        var service = Ioc.Default.GetRequiredService<CollaboratorService>();
         var mock = new TestWorkflowCollaborator();
         service.SetCollaborator(mock);
         
@@ -53,7 +54,7 @@ public class WorkflowFlowTests
     public async Task Workflow_ProcessingFlow_ExecutesInOrder()
     {
         // Arrange
-        var service = new CollaboratorService();
+        var service = Ioc.Default.GetRequiredService<CollaboratorService>();
         var mock = new TestWorkflowCollaborator();
         service.SetCollaborator(mock);
         
@@ -87,7 +88,7 @@ public class WorkflowFlowTests
     public void Workflow_MultipleElements_HandledCorrectly()
     {
         // Arrange
-        var service = new CollaboratorService();
+        var service = Ioc.Default.GetRequiredService<CollaboratorService>();
         var mock = new TestWorkflowCollaborator();
         service.SetCollaborator(mock);
         
@@ -118,7 +119,7 @@ public class WorkflowFlowTests
     public async Task Workflow_ErrorHandling_RecoversProperly()
     {
         // Arrange
-        var service = new CollaboratorService();
+        var service = Ioc.Default.GetRequiredService<CollaboratorService>();
         var mock = new TestWorkflowCollaborator { ShouldFailProcessWorkflow = true };
         service.SetCollaborator(mock);
         

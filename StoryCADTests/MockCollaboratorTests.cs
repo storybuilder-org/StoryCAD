@@ -2,6 +2,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using StoryCAD.Models;
 using StoryCAD.Services.Collaborator;
 using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.DependencyInjection;
 
 namespace StoryCADTests;
 
@@ -67,7 +68,7 @@ public class MockCollaboratorTests
     {
         // Arrange
         var mock = new MockCollaborator();
-        var service = new CollaboratorService();
+        var service = Ioc.Default.GetRequiredService<CollaboratorService>();
         
         // Act
         service.SetCollaborator(mock);

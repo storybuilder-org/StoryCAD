@@ -29,6 +29,7 @@ public class OutlineViewModel : ObservableRecipient
     private readonly Windowing window;
     private readonly OutlineService outlineService;
     private readonly SearchService searchService;
+    private readonly AppState appState;
     // The reference to ShellViewModel is temporary
     // until the ShellViewModel is refactored to fully
     // use OutlineViewModel for outline methods.
@@ -388,7 +389,7 @@ public class OutlineViewModel : ObservableRecipient
 
                 // Create the content dialog
                 ContentDialog saveAsDialog = null;
-                if (!Ioc.Default.GetRequiredService<AppState>().Headless)
+                if (!appState.Headless)
                 {
                     // Set default values in the view model using the current story file info
                     saveAsVm.ProjectName = Path.GetFileName(StoryModelFile);
@@ -470,7 +471,7 @@ public class OutlineViewModel : ObservableRecipient
 
         SaveAsViewModel saveAsVm = Ioc.Default.GetRequiredService<SaveAsViewModel>();
         if (File.Exists(Path.Combine(saveAsVm.ParentFolder, saveAsVm.ProjectName)) 
-            && !Ioc.Default.GetRequiredService<AppState>().Headless)
+            && !appState.Headless)
         {
             ContentDialog replaceDialog = new()
             {
@@ -490,7 +491,7 @@ public class OutlineViewModel : ObservableRecipient
         Messenger.Send(new StatusChangedMessage(new("Closing project", LogLevel.Info, true)));
         using (var serializationLock = new SerializationLock(autoSaveService, backupService, logger))
         {
-            if (StoryModel.Changed && !Ioc.Default.GetRequiredService<AppState>().Headless)
+            if (StoryModel.Changed && !appState.Headless)
             {
                 ContentDialog warning = new()
                 {
@@ -769,7 +770,7 @@ public class OutlineViewModel : ObservableRecipient
             if (VerifyToolUse(true, true))
             {
                 ContentDialog dialog = null;
-                if (!Ioc.Default.GetRequiredService<AppState>().Headless)
+                if (!appState.Headless)
                 {
                     //Creates and shows content dialog
                     dialog = new()
@@ -829,7 +830,7 @@ public class OutlineViewModel : ObservableRecipient
             if (VerifyToolUse(true, true))
             {
                 ContentDialog dialog = null;
-                if (!Ioc.Default.GetRequiredService<AppState>().Headless)
+                if (!appState.Headless)
                 {
                     //Creates and shows dialog
                     dialog = new()
@@ -899,7 +900,7 @@ public class OutlineViewModel : ObservableRecipient
                     //Creates and shows dialog
                     ContentDialog dialog = null;
 
-                    if (!Ioc.Default.GetRequiredService<AppState>().Headless)
+                    if (!appState.Headless)
                     {
                         dialog = new()
                         {
@@ -1054,7 +1055,7 @@ public class OutlineViewModel : ObservableRecipient
             Guid elementToDelete = shellVm.RightTappedNode.Uuid;
             List<StoryElement> _foundElements = outlineService.FindElementReferences(StoryModel, elementToDelete);
 
-            var state = Ioc.Default.GetRequiredService<AppState>();
+            var state = appState;
             //Only warns if it finds a node its referenced in
             if (_foundElements.Count > 0 && !state.Headless)
             {
@@ -1341,12 +1342,14 @@ public class OutlineViewModel : ObservableRecipient
 
     #region Constructor(s)
 
-    public OutlineViewModel()
+    public OutlineViewModel(LogService logService, PreferenceService preferenceService,
+        Windowing windowing, OutlineService outlineService, AppState appState)
     {
-        logger = Ioc.Default.GetRequiredService<LogService>();
-        preferences = Ioc.Default.GetRequiredService<PreferenceService>();
-        window = Ioc.Default.GetRequiredService<Windowing>();
-        outlineService = Ioc.Default.GetRequiredService<OutlineService>();
+        logger = logService;
+        preferences = preferenceService;
+        window = windowing;
+        this.outlineService = outlineService;
+        this.appState = appState;
         searchService = Ioc.Default.GetRequiredService<SearchService>();
     }
 
