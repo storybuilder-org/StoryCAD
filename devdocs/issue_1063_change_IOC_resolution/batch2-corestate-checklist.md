@@ -18,9 +18,9 @@
   - Create `private readonly` fields named with underscore camelCase (e.g., `_preferenceService`).
   - Replace **all** `Ioc.Default` calls with the injected fields.
 - [ ] Fix construction sites (pass dependencies or resolve via DI), build clean.
-- [ ] Tests:
-  - [ ] Run unit tests (where present).
-  - [ ] Smoke test the app (launch, navigate, verify logs).
+- [x] Tests:
+  - [x] Run unit tests (where present). ✅ 340 passed, 5 skipped, 0 failed
+  - [ ] Smoke test the app (launch, navigate, verify logs). **PENDING - Manual testing required**
 - [ ] Grep gates (all must return **no results**):
   ```bash
   git grep -n "Ioc.Default.GetRequiredService<(AppState|PreferenceService|SerializationLock)>"
