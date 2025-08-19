@@ -1393,7 +1393,7 @@ namespace StoryCADTests
         public void SearchForText_WithNullModel_ThrowsException()
         {
             // Act & Assert
-            Assert.ThrowsException<ArgumentNullException>(() => 
+            Assert.ThrowsExactly<ArgumentNullException>(() => 
                 _outlineService.SearchForText(null, "test"));
         }
 
@@ -1460,7 +1460,7 @@ namespace StoryCADTests
         public void SearchForUuidReferences_WithNullModel_ThrowsException()
         {
             // Act & Assert
-            Assert.ThrowsException<ArgumentNullException>(() => 
+            Assert.ThrowsExactly<ArgumentNullException>(() => 
                 _outlineService.SearchForUuidReferences(null, Guid.NewGuid()));
         }
 
@@ -1531,7 +1531,7 @@ namespace StoryCADTests
         public void RemoveUuidReferences_WithNullModel_ThrowsException()
         {
             // Act & Assert
-            Assert.ThrowsException<ArgumentNullException>(() => 
+            Assert.ThrowsExactly<ArgumentNullException>(() => 
                 _outlineService.RemoveUuidReferences(null, Guid.NewGuid()));
         }
 
@@ -1605,7 +1605,7 @@ namespace StoryCADTests
             var overview = model.StoryElements.First(e => e.ElementType == StoryItemType.StoryOverview);
             
             // Act & Assert
-            Assert.ThrowsException<ArgumentNullException>(() => 
+            Assert.ThrowsExactly<ArgumentNullException>(() => 
                 _outlineService.SearchInSubtree(null, overview.Node, "test"));
         }
 
@@ -1616,7 +1616,7 @@ namespace StoryCADTests
             var model = await _outlineService.CreateModel("Test Story", "Test Author", 0);
             
             // Act & Assert
-            Assert.ThrowsException<ArgumentNullException>(() => 
+            Assert.ThrowsExactly<ArgumentNullException>(() => 
                 _outlineService.SearchInSubtree(model, null, "test"));
         }
 
@@ -1691,7 +1691,7 @@ namespace StoryCADTests
             var character = _outlineService.AddStoryElement(model, StoryItemType.Character, overview.Node);
             
             // Act & Assert
-            Assert.ThrowsException<ArgumentNullException>(() => 
+            Assert.ThrowsExactly<ArgumentNullException>(() => 
                 _outlineService.AddRelationship(model, Guid.Empty, character.Uuid, "Friends"));
         }
 
@@ -1704,7 +1704,7 @@ namespace StoryCADTests
             var character = _outlineService.AddStoryElement(model, StoryItemType.Character, overview.Node);
             
             // Act & Assert
-            Assert.ThrowsException<ArgumentNullException>(() => 
+            Assert.ThrowsExactly<ArgumentNullException>(() => 
                 _outlineService.AddRelationship(model, character.Uuid, Guid.Empty, "Friends"));
         }
 
@@ -1719,7 +1719,7 @@ namespace StoryCADTests
             var character = _outlineService.AddStoryElement(model, StoryItemType.Character, overview.Node);
             
             // Act & Assert
-            Assert.ThrowsException<InvalidOperationException>(() => 
+            Assert.ThrowsExactly<InvalidOperationException>(() => 
                 _outlineService.AddRelationship(model, scene.Uuid, character.Uuid, "Friends"));
         }
 
@@ -1734,7 +1734,7 @@ namespace StoryCADTests
             var scene = _outlineService.AddStoryElement(model, StoryItemType.Scene, overview.Node);
             
             // Act & Assert
-            Assert.ThrowsException<InvalidOperationException>(() => 
+            Assert.ThrowsExactly<InvalidOperationException>(() => 
                 _outlineService.AddRelationship(model, character.Uuid, scene.Uuid, "Friends"));
         }
 
@@ -1816,7 +1816,7 @@ namespace StoryCADTests
             var character = _outlineService.AddStoryElement(model, StoryItemType.Character, overview.Node);
             
             // Act & Assert
-            Assert.ThrowsException<ArgumentNullException>(() => 
+            Assert.ThrowsExactly<ArgumentNullException>(() => 
                 _outlineService.AddCastMember(model, null, character.Uuid));
         }
 
@@ -1829,7 +1829,7 @@ namespace StoryCADTests
             var scene = _outlineService.AddStoryElement(model, StoryItemType.Scene, overview.Node);
             
             // Act & Assert
-            Assert.ThrowsException<ArgumentNullException>(() => 
+            Assert.ThrowsExactly<ArgumentNullException>(() => 
                 _outlineService.AddCastMember(model, scene, Guid.Empty));
         }
 
@@ -1844,7 +1844,7 @@ namespace StoryCADTests
             var character2 = _outlineService.AddStoryElement(model, StoryItemType.Character, overview.Node);
             
             // Act & Assert - Try to add cast member to a character instead of scene
-            Assert.ThrowsException<InvalidOperationException>(() => 
+            Assert.ThrowsExactly<InvalidOperationException>(() => 
                 _outlineService.AddCastMember(model, character1, character2.Uuid));
         }
 
@@ -1859,7 +1859,7 @@ namespace StoryCADTests
             var scene2 = _outlineService.AddStoryElement(model, StoryItemType.Scene, overview.Node);
             
             // Act & Assert - Try to add a scene as cast member
-            Assert.ThrowsException<InvalidOperationException>(() => 
+            Assert.ThrowsExactly<InvalidOperationException>(() => 
                 _outlineService.AddCastMember(model, scene1, scene2.Uuid));
         }
 
@@ -2187,7 +2187,7 @@ namespace StoryCADTests
             _outlineService.MoveToTrash(character, model);
             
             // Act & Assert
-            Assert.ThrowsException<InvalidOperationException>(() => 
+            Assert.ThrowsExactly<InvalidOperationException>(() => 
                 _outlineService.FindElementReferences(model, character.Uuid),
                 "Should throw for elements in trash");
         }
@@ -2200,7 +2200,7 @@ namespace StoryCADTests
             var overview = model.StoryElements.First(e => e.ElementType == StoryItemType.StoryOverview);
             
             // Act & Assert
-            Assert.ThrowsException<InvalidOperationException>(() => 
+            Assert.ThrowsExactly<InvalidOperationException>(() => 
                 _outlineService.FindElementReferences(model, overview.Uuid),
                 "Should throw for root nodes");
         }
