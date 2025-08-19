@@ -52,6 +52,7 @@ public class ShellViewModel : ObservableRecipient
     private readonly AppState State;
     private readonly PreferenceService Preferences;
     private readonly OutlineService outlineService;
+    private readonly SceneViewModel _sceneViewModel;
 
     
     // Navigation navigation landmark nodes
@@ -519,8 +520,7 @@ public class ShellViewModel : ObservableRecipient
                 cvm.SaveModel();
                 break;
             case ScenePage:
-                SceneViewModel scvm = Ioc.Default.GetRequiredService<SceneViewModel>();
-                scvm.SaveModel();
+                _sceneViewModel.SaveModel();
                 break;
             case FolderPage:
                 FolderViewModel folderVm = Ioc.Default.GetRequiredService<FolderViewModel>();
@@ -1143,8 +1143,11 @@ public class ShellViewModel : ObservableRecipient
 
     #region Constructor(s)
 
-    public ShellViewModel()
+    public ShellViewModel(SceneViewModel sceneViewModel)
     {
+        // Store injected services
+        _sceneViewModel = sceneViewModel;
+        
         // Resolve services via Ioc as needed
         Logger = Ioc.Default.GetRequiredService<LogService>();
         Search = Ioc.Default.GetRequiredService<SearchService>();
