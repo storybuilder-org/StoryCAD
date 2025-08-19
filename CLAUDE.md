@@ -11,6 +11,24 @@ This file provides project-specific guidance for StoryCAD development. Universal
 - Straightforward debugging (`Debugger.Launch()`) over complex conditions
 - Clear, obvious code over clever solutions
 
+## Branch Management
+
+**IMPORTANT**: Always work in the correct branch for the issue:
+- Check current branch with `git status` at start of session
+- Create issue-specific branches: `issue-{number}-{description}`
+- Example: `issue-1069-test-coverage` for issue #1069
+- Never work directly in `main` or unrelated feature branches
+- If in wrong branch, stash changes and switch to correct branch
+
+**When switching to an existing branch:**
+1. Check current status: `git status`
+2. Stash any uncommitted changes if needed: `git stash`
+3. Switch to the branch: `git checkout branch-name`
+4. **SYNC THE BRANCH**: Pull latest changes
+   - If branch tracks remote: `git pull`
+   - If branch is behind main: `git pull origin main` or `git merge main`
+5. Apply stashed changes if any: `git stash pop`
+
 ## About StoryCAD
 
 StoryCAD is a free, open-source Windows application for fiction writers that provides structured outlining tools. It's described as "CAD for fiction writers" and helps writers manage the complexity of plotted fiction through systematic story development.
@@ -18,7 +36,7 @@ StoryCAD is a free, open-source Windows application for fiction writers that pro
 ## Quick Reference
 
 ### Technology Stack
-- **Framework**: .NET 8.0 with WinUI 3, Windows App SDK 1.6
+- **Framework**: .NET 9.0 with WinUI 3, Windows App SDK 1.6
 - **Architecture**: MVVM with CommunityToolkit.Mvvm
 - **Testing**: MSTest with WinUI support
 - **Platform**: Windows 10/11 (minimum 10.0.19041.0)
@@ -47,7 +65,7 @@ StoryCAD is a free, open-source Windows application for fiction writers that pro
 "/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/MSBuild.exe" StoryCAD.sln -t:Build -p:Configuration=Debug -p:Platform=x64
 
 # Run all tests
-"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net8.0-windows10.0.19041.0/StoryCADTests.dll"
+"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net9.0-windows10.0.22621.0/StoryCADTests.dll"
 ```
 
 For detailed commands, see [Build & Test Commands](./.claude/build_commands.md).
@@ -148,6 +166,34 @@ When creating pull requests, include any design documentation directly in the PR
 - **Command Binding**: MVVM commands for user actions
 - **Collection Binding**: ObservableCollection for dynamic list updates
 
+## Test Naming Conventions
+
+### Test File Naming
+- **Pattern**: `[SourceFileName]Tests.cs`
+- **Example**: `SemanticKernelAPITests.cs` for source file `SemanticKernelAPI.cs`
+- **Location**: Test files in StoryCADTests project, mirroring source structure where practical
+
+### Test Method Naming
+- **Pattern**: `MethodName_Scenario_ExpectedResult`
+- **Examples**:
+  - `CreateEmptyOutline_WithInvalidTemplate_ReturnsFailure`
+  - `OpenFile_WhenFileNotFound_ThrowsException`  
+  - `SaveModel_WithValidPath_SucceedsSilently`
+  - `PropertyName_WhenSet_RaisesPropertyChanged`
+
+### Test Class Organization
+- One test class per source class
+- Group tests for a specific method together
+- Use `[TestInitialize]` for setup, `[TestCleanup]` for teardown
+- Use `[UITestMethod]` for tests requiring UI thread execution
+- Use Arrange-Act-Assert pattern within each test
+
+### Test Coverage Requirements
+- Each public method in API, OutlineService, and ShellViewModel must have tests
+- Test both success and failure paths
+- Test edge cases and boundary conditions
+- Verify thread safety with SerializationLock where applicable
+
 ## Pre-Approved Commands
 
 The following commands are pre-approved for automated execution without user confirmation prompts:
@@ -166,15 +212,17 @@ msbuild StoryCAD.sln /t:Build /p:Configuration=Release /p:Platform=x64
 ### Test Commands
 ```bash
 # Visual Studio Test Console (WSL path) - All wildcarded patterns
-"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net8.0-windows10.0.19041.0/StoryCADTests.dll"
-"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net8.0-windows10.0.19041.0/StoryCADTests.dll" --Tests:*
-"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net8.0-windows10.0.19041.0/StoryCADTests.dll" --Tests:*.*
-"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net8.0-windows10.0.19041.0/StoryCADTests.dll" --Tests:*,*
-"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net8.0-windows10.0.19041.0/StoryCADTests.dll" --Tests:*,*,*,*
+"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net9.0-windows10.0.22621.0/StoryCADTests.dll"
+"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net9.0-windows10.0.22621.0/StoryCADTests.dll" --Tests:*
+"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net9.0-windows10.0.22621.0/StoryCADTests.dll" --Tests:*.*
+"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net9.0-windows10.0.22621.0/StoryCADTests.dll" --Tests:*,*
+"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net9.0-windows10.0.22621.0/StoryCADTests.dll" --Tests:*,*,*,*
+"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net9.0-windows10.0.22621.0/StoryCADTests.dll"
+"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net9.0-windows10.0.22621.0/StoryCADTests.dll" --Tests:*
 
 # Standard test commands
 dotnet test StoryCADTests/StoryCADTests.csproj --configuration Debug
-vstest.console.exe "StoryCADTests/bin/x64/Debug/net8.0-windows10.0.19041.0/StoryCADTests.dll"
+vstest.console.exe "StoryCADTests/bin/x64/Debug/net9.0-windows10.0.22621.0/StoryCADTests.dll"
 ```
 
 ### Git Commands
@@ -193,3 +241,6 @@ git commit -m "message"
 - **No Cloud Sync**: Data remains on user's device unless explicitly exported
 - **Open Source**: GNU GPL v3 license ensures transparency
 - **Optional Telemetry**: Error reporting requires user consent and API configuration
+- DO NOT test against the UI
+- Because the API is an external API, we don't know who is using it, or how.
+- use the /devdocs/issue_1069_achieve_100_percent_api_and_outlineservice_coverage for all your notes except /tmp files.

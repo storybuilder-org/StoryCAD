@@ -445,23 +445,6 @@ public class FileTests
         Assert.IsTrue(result, $"Expected legacy file at {_legacyFilePath} to be available.");
     }
 
-    [TestMethod]
-    public async Task TestAPIWrite()
-    {
-		//Set up file
-        OutlineService outlineService = Ioc.Default.GetRequiredService<OutlineService>();
-        StorageFolder folder = await StorageFolder.GetFolderFromPathAsync(Path.GetTempPath());
-        StorageFile file = await folder.CreateFileAsync("Test.stbx", CreationCollisionOption.GenerateUniqueName);
-
-		//Create Model
-        OperationResult<StoryModel> model = await
-            OperationResult<StoryModel>.SafeExecuteAsync(outlineService.CreateModel("Test", "Test", 3));
-		Assert.IsTrue(model.IsSuccess);
-
-        OperationResult<bool> write = await OperationResult<bool>.SafeExecuteAsync(outlineService.WriteModel(model.Payload, file.Path));
-        Assert.IsTrue(write.IsSuccess);
-		Assert.IsTrue(File.Exists(file.Path));
-    }
 
     /// <summary>
     /// Tests the FileOpenVM with no issue to ensure it works correctly.

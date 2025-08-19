@@ -1092,19 +1092,38 @@ public class OutlineViewModel : ObservableRecipient
             {
                 using (var serializationLock = new SerializationLock(autoSaveService, backupService, logger))
                 {
-                    outlineService.RemoveReferenceToElement(elementToDelete, StoryModel);
-
-                    if (shellVm.CurrentView.Equals("Story Explorer View"))
+                    try
                     {
-                        shellVm.RightTappedNode.Delete(StoryViewType.ExplorerView);
+                        // Get the element to move to trash
+                        var element = outlineService.GetStoryElementByGuid(StoryModel, elementToDelete);
+                        if (element != null)
+                        {
+                            // Use the new OutlineService method to move to trash
+                            outlineService.MoveToTrash(element, StoryModel);
+                            
+                            // Clear the selected nodes to prevent issues (fix for #1056)
+                            if (shellVm.CurrentNode?.Uuid == elementToDelete)
+                            {
+                                shellVm.CurrentNode = null;
+                            }
+                            if (shellVm.RightTappedNode?.Uuid == elementToDelete)
+                            {
+                                shellVm.RightTappedNode = null;
+                            }
+                            
+                            // Mark the model as changed
+                            ShellViewModel.ShowChange();
+                            Messenger.Send(new StatusChangedMessage(new("Element moved to trash", LogLevel.Info)));
+                        }
+                        else
+                        {
+                            Messenger.Send(new StatusChangedMessage(new("Element not found", LogLevel.Error)));
+                        }
                     }
-                    else
+                    catch (Exception ex)
                     {
-                        shellVm.RightTappedNode.Delete(StoryViewType.NarratorView);
+                        Messenger.Send(new StatusChangedMessage(new($"Failed to move element to trash: {ex.Message}", LogLevel.Error)));
                     }
-                    
-                    // Mark the model as changed
-                    ShellViewModel.ShowChange();
                 }
             }
         }
@@ -1128,51 +1147,30 @@ public class OutlineViewModel : ObservableRecipient
             return;
         }
 
-        if (StoryNodeItem.RootNodeType(shellVm.RightTappedNode) != StoryItemType.TrashCan)
+        try
         {
-            Messenger.Send(new StatusChangedMessage(new("You can only restore from Deleted StoryElements", LogLevel.Warn)));
-            return;
+            using (var serializationLock = new SerializationLock(autoSaveService, backupService, logger))
+            {
+                // Use the new OutlineService method to restore from trash
+                outlineService.RestoreFromTrash(shellVm.RightTappedNode, StoryModel);
+                
+                // Mark the model as changed
+                ShellViewModel.ShowChange();
+                
+                Messenger.Send(new StatusChangedMessage(new(
+                    $"Restored node {shellVm.RightTappedNode.Name} and all its contents", LogLevel.Info, true)));
+            }
         }
-
-        if (shellVm.RightTappedNode.IsRoot)
+        catch (InvalidOperationException ex)
         {
-            Messenger.Send(new StatusChangedMessage(new("You can't restore a root node!", LogLevel.Warn)));
-            return;
+            // Handle validation errors from the service
+            Messenger.Send(new StatusChangedMessage(new(ex.Message, LogLevel.Warn)));
         }
-
-        // Rule 2: Don't allow children to be restored - only high-level nodes (direct children of TrashCan)
-        if (shellVm.RightTappedNode.Parent.Type != StoryItemType.TrashCan)
+        catch (Exception e)
         {
-            Messenger.Send(new StatusChangedMessage(new("You can only restore top-level items from trash. Restore the parent item instead.", LogLevel.Warn)));
-            return;
+            logger.LogException(LogLevel.Error, e, "Error restoring node");
+            Messenger.Send(new StatusChangedMessage(new("Error restoring element", LogLevel.Error)));
         }
-
-        // Ensure we have a valid target view
-        if (StoryModel.CurrentView == null || StoryModel.CurrentView.Count == 0)
-        {
-            logger.Log(LogLevel.Warn, "Failed to restore element - No valid target view.");
-            Messenger.Send(new StatusChangedMessage(new("Unable to restore - No valid target view", LogLevel.Warn)));
-            return;
-        }
-
-        // Rule 1: Always restore to the end of the root (first node in CurrentView)
-        StoryNodeItem targetRoot = StoryModel.CurrentView[0];
-        ObservableCollection<StoryNodeItem> targetChildren = targetRoot.Children;
-        
-        // Remove from trash
-        shellVm.RightTappedNode.Parent.Children.Remove(shellVm.RightTappedNode);
-        
-        // Update parent reference first
-        shellVm.RightTappedNode.Parent = targetRoot;
-        
-        // Rule 3: When restoring a parent, all children come with it (they're already attached)
-        targetChildren.Add(shellVm.RightTappedNode);
-        
-        // Mark the model as changed
-        ShellViewModel.ShowChange();
-        
-        Messenger.Send(new StatusChangedMessage(new(
-            $"Restored node {shellVm.RightTappedNode.Name} and all its contents", LogLevel.Info, true)));
     }
 
     /// <summary>
@@ -1207,36 +1205,56 @@ public class OutlineViewModel : ObservableRecipient
     /// </summary>
     public void EmptyTrash()
     {
-        if (shellVm.OutlineManager.StoryModel?.TrashView == null || shellVm.OutlineManager.StoryModel.TrashView.Count == 0)
+        if (shellVm.OutlineManager.StoryModel == null)
         {
             Messenger.Send(new StatusChangedMessage(new("You need to load a story first!", LogLevel.Warn)));
-            logger.Log(LogLevel.Info, "Failed to empty trash as TrashView is null or empty. (Is a story loaded?)");
+            logger.Log(LogLevel.Info, "Failed to empty trash - no story loaded.");
             return;
         }
 
-        // Get the TrashCan root node (should be the first/only item in TrashView)
-        var trashCanNode = shellVm.OutlineManager.StoryModel.TrashView.FirstOrDefault(n => n.Type == StoryItemType.TrashCan);
-        if (trashCanNode == null)
+        try
         {
-            logger.Log(LogLevel.Warn, "Failed to empty trash - TrashCan node not found in TrashView.");
-            Messenger.Send(new StatusChangedMessage(new("TrashCan structure error", LogLevel.Warn)));
-            return;
-        }
+            using (var serializationLock = new SerializationLock(autoSaveService, backupService, logger))
+            {
+                // Check if trash has items before attempting to empty
+                var trashCanNode = shellVm.OutlineManager.StoryModel.TrashView?.FirstOrDefault(n => n.Type == StoryItemType.TrashCan);
+                if (trashCanNode == null || trashCanNode.Children.Count == 0)
+                {
+                    logger.Log(LogLevel.Info, "Trash is already empty.");
+                    Messenger.Send(new StatusChangedMessage(new("No Deleted StoryElements to empty", LogLevel.Info)));
+                    
+                    // Fix error #1056 - clear selected nodes even when trash is empty
+                    shellVm.RightTappedNode = null;
+                    shellVm.CurrentNode = null;
+                    return;
+                }
 
-        if (trashCanNode.Children.Count == 0)
+                try
+                {
+                    // Use the new OutlineService method to empty trash
+                    outlineService.EmptyTrash(shellVm.OutlineManager.StoryModel);
+                    
+                    shellVm.StatusMessage = "Trash Emptied.";
+                    logger.Log(LogLevel.Info, "Emptied Trash.");
+                    
+                    // Fix error #1056 - clear selected nodes
+                    shellVm.RightTappedNode = null;
+                    shellVm.CurrentNode = null;
+                    
+                    // Mark the model as changed
+                    ShellViewModel.ShowChange();
+                }
+                catch (Exception ex)
+                {
+                    Messenger.Send(new StatusChangedMessage(new($"Failed to empty trash: {ex.Message}", LogLevel.Error)));
+                }
+            }
+        }
+        catch (Exception e)
         {
-            logger.Log(LogLevel.Warn, "Failed to empty trash - No items in trash.");
-            Messenger.Send(new StatusChangedMessage(new("No Deleted StoryElements to empty", LogLevel.Warn)));
-            return;
+            logger.LogException(LogLevel.Error, e, "Error emptying trash");
+            Messenger.Send(new StatusChangedMessage(new("Error emptying trash", LogLevel.Error)));
         }
-
-        shellVm.StatusMessage = "Trash Emptied.";
-        logger.Log(LogLevel.Info, "Emptied Trash.");
-        trashCanNode.Children.Clear();
-
-        //Fix error #1056
-        shellVm.RightTappedNode = null;
-        shellVm.CurrentNode = null;
     }
 
     /// <summary>

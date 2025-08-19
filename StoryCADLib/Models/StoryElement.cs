@@ -28,7 +28,13 @@ public class StoryElement : ObservableObject
 	public string Name
     {
         get => _name;
-        set => _name = value;
+        set
+        {
+            _name = value;
+            // Keep the node synchronized when name changes from API
+            if (_node != null)
+                _node.Name = value;
+        }
     }
 
 	[JsonIgnore]
@@ -94,16 +100,29 @@ public class StoryElement : ObservableObject
     /// </summary>
     /// <param name="guid">The Guid of the StoryElement to retrieve</param>
     /// <returns></returns>
-    public static StoryElement GetByGuid(Guid guid)
+    public static StoryElement GetByGuid(Guid guid, StoryModel model = null)
     {
         if (guid.Equals(Guid.Empty))
              return new StoryElement();
-        // Get the current StoryModel's StoryElementsCollection
-        OutlineViewModel outlineVM = Ioc.Default.GetRequiredService<OutlineViewModel>();
-        StoryElementCollection elements = outlineVM.StoryModel.StoryElements;
+        
+        // Get the StoryElementsCollection from the provided model or from OutlineViewModel
+        StoryElementCollection elements;
+        if (model != null)
+        {
+            elements = model.StoryElements;
+        }
+        else
+        {
+            // Fallback to current behavior - get from OutlineViewModel
+            // TODO: Examine this more closely. Called from OutlineViewModel.DeleteNode() and other ViewModels
+            // where OutlineViewModel context is available. Consider if this global state dependency is appropriate.
+            OutlineViewModel outlineVM = Ioc.Default.GetRequiredService<OutlineViewModel>();
+            elements = outlineVM.StoryModel.StoryElements;
+        }
+        
         // Look for the StoryElement corresponding to the passed guid
-            if (elements.StoryElementGuids.ContainsKey(guid))
-                return elements.StoryElementGuids[guid];
+        if (elements.StoryElementGuids.ContainsKey(guid))
+            return elements.StoryElementGuids[guid];
         //TODO: Log the error.
         return new StoryElement();  // Not found
     }

@@ -14,7 +14,14 @@
 	  <AssemblyVersion>3.2.1.0</AssemblyVersion>
 	  <PackageVersion>3.2.1-preview</PackageVersion>
 	  <DisableEmbeddedXbf>false</DisableEmbeddedXbf>
+	  <EnableMsixTooling>false</EnableMsixTooling>
   </PropertyGroup>
+  
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>StoryCADTests</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
     <NoWarn>1701;1702;CA1416;CS0618</NoWarn>
   </PropertyGroup>

@@ -81,6 +81,9 @@ public class ShellViewModel : ObservableRecipient
 
     // The right-hand (detail) side of ShellView
     public Frame SplitViewFrame;
+    
+    // Track the current page type for SaveModel (testable without UI)
+    public string CurrentPageType { get; set; }
 
 
     #region CommandBar Relay Commands
@@ -353,33 +356,43 @@ public class ShellViewModel : ObservableRecipient
                 switch (element.ElementType)
                 {
                     case StoryItemType.Character:
+                        CurrentPageType = CharacterPage;
                         nav.NavigateTo(SplitViewFrame, CharacterPage, element);
                         break;
                     case StoryItemType.Scene:
+                        CurrentPageType = ScenePage;
                         nav.NavigateTo(SplitViewFrame, ScenePage, element);
                         break;
                     case StoryItemType.Problem:
+                        CurrentPageType = ProblemPage;
                         nav.NavigateTo(SplitViewFrame, ProblemPage, element);
                         break;
                     case StoryItemType.Section:
+                        CurrentPageType = FolderPage;
                         nav.NavigateTo(SplitViewFrame, FolderPage, element);
                         break;
                     case StoryItemType.Folder:
+                        CurrentPageType = FolderPage;
                         nav.NavigateTo(SplitViewFrame, FolderPage, element);
                         break;
                     case StoryItemType.Setting:
+                        CurrentPageType = SettingPage;
                         nav.NavigateTo(SplitViewFrame, SettingPage, element);
                         break;
                     case StoryItemType.Web:
+                        CurrentPageType = WebPage;
                         nav.NavigateTo(SplitViewFrame, WebPage, element);
                         break;
                     case StoryItemType.Notes:
+                        CurrentPageType = FolderPage;
                         nav.NavigateTo(SplitViewFrame, FolderPage, element);
                         break;
                     case StoryItemType.StoryOverview:
+                        CurrentPageType = OverviewPage;
                         nav.NavigateTo(SplitViewFrame, OverviewPage, element);
                         break;
                     case StoryItemType.TrashCan:
+                        CurrentPageType = TrashCanPage;
                         nav.NavigateTo(SplitViewFrame, TrashCanPage, element);
                         break;
                 }
@@ -428,6 +441,7 @@ public class ShellViewModel : ObservableRecipient
             Logger.Log(LogLevel.Info, "ShowHomePage");
 
             NavigationService nav = Ioc.Default.GetRequiredService<NavigationService>();
+            CurrentPageType = HomePage;
             nav.NavigateTo(SplitViewFrame, HomePage);
         }
     }
@@ -446,39 +460,90 @@ public class ShellViewModel : ObservableRecipient
     /// </summary>
     public void SaveModel()
     {
-        if (SplitViewFrame == null || SplitViewFrame.CurrentSourcePageType is null) { return; }
-
-        Logger.Log(LogLevel.Trace, $"SaveModel Page type={SplitViewFrame.CurrentSourcePageType}");
-
-        switch (SplitViewFrame.CurrentSourcePageType.ToString())
+        // Use CurrentPageType if available, fall back to Frame for backwards compatibility
+        string pageType = CurrentPageType;
+        
+        // Validate that CurrentPageType matches Frame if both are available
+        if (!string.IsNullOrEmpty(pageType) && SplitViewFrame?.CurrentSourcePageType != null)
         {
-            case "StoryCAD.Views.OverviewPage":
+            var framePageType = SplitViewFrame.CurrentSourcePageType.ToString();
+            if (framePageType.StartsWith("StoryCAD.Views."))
+            {
+                framePageType = framePageType.Replace("StoryCAD.Views.", "");
+            }
+            
+            if (pageType != framePageType)
+            {
+                Logger.Log(LogLevel.Error, $"SaveModel: CurrentPageType '{pageType}' doesn't match Frame page type '{framePageType}'. Using Frame type.");
+                pageType = framePageType;
+            }
+        }
+        
+        if (string.IsNullOrEmpty(pageType))
+        {
+            // Fall back to Frame-based detection if CurrentPageType not set
+            if (SplitViewFrame == null) 
+            { 
+                Logger.Log(LogLevel.Warn, "SaveModel called but SplitViewFrame is null and CurrentPageType not set");
+                return; 
+            }
+
+            if (SplitViewFrame.CurrentSourcePageType is null) 
+            { 
+                Logger.Log(LogLevel.Warn, "SaveModel called but no active page type");
+                return; 
+            }
+            
+            pageType = SplitViewFrame.CurrentSourcePageType.ToString();
+            // Extract just the page name from the full type name
+            if (pageType.StartsWith("StoryCAD.Views."))
+            {
+                pageType = pageType.Replace("StoryCAD.Views.", "");
+            }
+        }
+
+        Logger.Log(LogLevel.Trace, $"SaveModel Page type={pageType}");
+
+        switch (pageType)
+        {
+            case OverviewPage:
                 OverviewViewModel ovm = Ioc.Default.GetRequiredService<OverviewViewModel>();
                 ovm.SaveModel();
                 break;
-            case "StoryCAD.Views.ProblemPage":
+            case ProblemPage:
                 ProblemViewModel pvm = Ioc.Default.GetRequiredService<ProblemViewModel>();
                 pvm.SaveModel();
                 break;
-            case "StoryCAD.Views.CharacterPage":
+            case CharacterPage:
                 CharacterViewModel cvm = Ioc.Default.GetRequiredService<CharacterViewModel>();
                 cvm.SaveModel();
                 break;
-            case "StoryCAD.Views.ScenePage":
+            case ScenePage:
                 SceneViewModel scvm = Ioc.Default.GetRequiredService<SceneViewModel>();
                 scvm.SaveModel();
                 break;
-            case "StoryCAD.Views.FolderPage":
+            case FolderPage:
                 FolderViewModel folderVm = Ioc.Default.GetRequiredService<FolderViewModel>();
                 folderVm.SaveModel();
                 break;
-            case "StoryCAD.Views.SettingPage":
+            case SettingPage:
                 SettingViewModel settingVm = Ioc.Default.GetRequiredService<SettingViewModel>();
                 settingVm.SaveModel();
                 break;
-            case "StoryCAD.Views.WebPage":
+            case WebPage:
                 WebViewModel webVm = Ioc.Default.GetRequiredService<WebViewModel>();
                 webVm.SaveModel();
+                break;
+            case HomePage:
+                // HomePage doesn't have data to save
+                Logger.Log(LogLevel.Trace, "HomePage has no data to save");
+                break;
+            case TrashCanPage:
+                // TrashCanPage doesn't have data to save
+                Logger.Log(LogLevel.Trace, "TrashCanPage has no data to save");
+                break;
+            default:
+                Logger.Log(LogLevel.Error, $"SaveModel: Unrecognized page type {pageType}");
                 break;
         }
     }
