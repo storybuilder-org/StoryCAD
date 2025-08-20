@@ -19,6 +19,7 @@ public class BackupService
     private readonly PreferenceService _preferenceService;
     private readonly OutlineViewModel _outlineViewModel;
     private readonly AppState _appState;
+    private readonly Windowing _windowing;
     // TODO: ShellViewModel removed due to circular dependency - needs architectural fix
 
     // Fields to preserve remaining time when paused
@@ -31,21 +32,13 @@ public class BackupService
 
     #region Constructor
 
-    // Constructor for backward compatibility - will be removed later
-    public BackupService() : this(
-        Ioc.Default.GetRequiredService<LogService>(),
-        Ioc.Default.GetRequiredService<PreferenceService>(),
-        Ioc.Default.GetRequiredService<OutlineViewModel>(),
-        Ioc.Default.GetRequiredService<AppState>())
-    {
-    }
-
-    public BackupService(LogService logService, PreferenceService preferenceService, OutlineViewModel outlineViewModel, AppState appState)
+    public BackupService(LogService logService, PreferenceService preferenceService, OutlineViewModel outlineViewModel, AppState appState, Windowing windowing)
     {
         _logService = logService;
         _preferenceService = preferenceService;
         _outlineViewModel = outlineViewModel;
         _appState = appState;
+        _windowing = windowing;
         // TODO: _shellViewModel assignment removed due to circular dependency
 
         // Compute default interval once (in milliseconds)
@@ -158,7 +151,7 @@ public class BackupService
     private void BackupTimer_Elapsed(object source, ElapsedEventArgs e)
     {
         // Update UI indicator on the UI thread
-        Ioc.Default.GetRequiredService<Windowing>().GlobalDispatcher.TryEnqueue(() =>
+        _windowing.GlobalDispatcher.TryEnqueue(() =>
         {
             // TODO: Circular dependency - BackupService and ShellViewModel
             // Temporary workaround: Use service locator until architectural fix
@@ -189,6 +182,8 @@ public class BackupService
     /// <param name="FilePath">If null, the user’s BackupDirectory preference is used.</param>
     public async Task BackupProject(string Filename = null, string FilePath = null)
     {
+        // TODO: Circular dependency - BackupService ↔ AutoSaveService
+        // AutoSaveService requires BackupService via SerializationLock, creating a circular dependency
         var autoSaveService = Ioc.Default.GetRequiredService<AutoSaveService>();
 
         // Determine filenames and paths
@@ -240,7 +235,7 @@ public class BackupService
             }
             
             //update indicator.
-            Ioc.Default.GetRequiredService<Windowing>().GlobalDispatcher.TryEnqueue(() =>
+            _windowing.GlobalDispatcher.TryEnqueue(() =>
                 // TODO: Circular dependency - BackupService and ShellViewModel
             // Temporary workaround: Use service locator until architectural fix
             Ioc.Default.GetRequiredService<ShellViewModel>().BackupStatusColor = Colors.Green
@@ -251,7 +246,7 @@ public class BackupService
         {
             if (!_appState.Headless)
             {
-                Ioc.Default.GetRequiredService<Windowing>().GlobalDispatcher.TryEnqueue(() =>
+                _windowing.GlobalDispatcher.TryEnqueue(() =>
                 {
                     WeakReferenceMessenger.Default.Send(new StatusChangedMessage(new StatusMessage(
                         "Making a backup failed, check your backup settings.",

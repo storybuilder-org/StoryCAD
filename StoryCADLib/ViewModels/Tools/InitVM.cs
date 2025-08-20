@@ -12,7 +12,8 @@ namespace StoryCAD.ViewModels.Tools;
 /// </summary>
 public class InitVM : ObservableRecipient
 {
-    private readonly PreferenceService preference = Ioc.Default.GetService<PreferenceService>();
+    private readonly PreferenceService preference;
+    private readonly BackendService _backendService;
 
 
     /// <summary>
@@ -23,8 +24,10 @@ public class InitVM : ObservableRecipient
     /// For example this would give the following path for me
     /// C:\Users\Jake\Documents\StoryCAD\Projects
     /// </summary>
-    public InitVM()
+    public InitVM(PreferenceService preferenceService, BackendService backendService)
     {
+        preference = preferenceService;
+        _backendService = backendService;
         ProjectDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "StoryCAD", "Projects");
         BackupDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "StoryCAD", "Backups");
 
@@ -81,7 +84,6 @@ public class InitVM : ObservableRecipient
         PreferencesIo _prfIo = new();
         await _prfIo.WritePreferences(Preferences);
         await _prfIo.ReadPreferences();
-        BackendService _backend = Ioc.Default.GetRequiredService<BackendService>();
-        if (preference.Model.RecordPreferencesStatus) { await _backend.PostPreferences(preference.Model); }
+        if (preference.Model.RecordPreferencesStatus) { await _backendService.PostPreferences(preference.Model); }
     }
 }

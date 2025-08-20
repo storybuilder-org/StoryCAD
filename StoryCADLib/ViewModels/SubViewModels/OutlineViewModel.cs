@@ -30,6 +30,7 @@ public class OutlineViewModel : ObservableRecipient
     private readonly OutlineService outlineService;
     private readonly SearchService searchService;
     private readonly AppState appState;
+    private readonly BackendService _backendService;
     // The reference to ShellViewModel is temporary
     // until the ShellViewModel is refactored to fully
     // use OutlineViewModel for outline methods.
@@ -547,8 +548,7 @@ public class OutlineViewModel : ObservableRecipient
                     await outlineService.WriteModel(StoryModel, StoryModelFile);
                 }
             }
-            BackendService backend = Ioc.Default.GetRequiredService<BackendService>();
-            await backend.DeleteWorkFile();
+            await _backendService.DeleteWorkFile();
             logger.Flush();
         }
         Application.Current.Exit();  // Win32
@@ -1350,14 +1350,16 @@ public class OutlineViewModel : ObservableRecipient
     #region Constructor(s)
 
     public OutlineViewModel(LogService logService, PreferenceService preferenceService,
-        Windowing windowing, OutlineService outlineService, AppState appState)
+        Windowing windowing, OutlineService outlineService, AppState appState,
+        SearchService searchService, BackendService backendService)
     {
         logger = logService;
         preferences = preferenceService;
         window = windowing;
         this.outlineService = outlineService;
         this.appState = appState;
-        searchService = Ioc.Default.GetRequiredService<SearchService>();
+        this.searchService = searchService;
+        _backendService = backendService;
     }
 
     #endregion
