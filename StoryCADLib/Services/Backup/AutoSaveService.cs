@@ -21,7 +21,7 @@ namespace StoryCAD.Services.Backup
         private readonly AppState _appState;
         private readonly PreferenceService _preferenceService;
         private readonly OutlineViewModel _outlineVM;
-        // TODO: ShellViewModel removed due to circular dependency - needs architectural fix
+        // TODO: ShellViewModel and BackupService removed due to circular dependency - needs architectural fix
 
         private BackgroundWorker autoSaveWorker;
         private System.Timers.Timer autoSaveTimer;
@@ -31,16 +31,6 @@ namespace StoryCAD.Services.Backup
         public bool IsRunning => autoSaveTimer.Enabled;
 
         #region Constructor
-
-        // Constructor for backward compatibility - will be removed later
-        public AutoSaveService() : this(
-            Ioc.Default.GetRequiredService<Windowing>(),
-            Ioc.Default.GetRequiredService<LogService>(),
-            Ioc.Default.GetRequiredService<AppState>(),
-            Ioc.Default.GetRequiredService<PreferenceService>(),
-            Ioc.Default.GetRequiredService<OutlineViewModel>())
-        {
-        }
 
         public AutoSaveService(Windowing window, LogService logger, AppState appState, PreferenceService preferenceService, OutlineViewModel outlineViewModel)
         {
@@ -123,6 +113,8 @@ namespace StoryCAD.Services.Backup
 
         private Task AutoSaveProject()
         {
+            // TODO: Circular dependency - AutoSaveService ↔ BackupService
+            // BackupService requires AutoSaveService in constructor, so we can't inject it here
             var backupService = Ioc.Default.GetRequiredService<BackupService>();
             var logService = _logger;
 
