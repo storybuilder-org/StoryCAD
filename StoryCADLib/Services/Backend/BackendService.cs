@@ -40,13 +40,13 @@ namespace StoryCAD.Services.Backend;
 /// </summary>
 public class BackendService
 {
-	private readonly LogService _logService;
+	private readonly ILogService _logService;
 	private readonly AppState _appState;
 	private readonly PreferenceService _preferenceService;
 	private string connection = string.Empty;
 	private string sslCA = string.Empty;
 
-	public BackendService(LogService logService, AppState appState, PreferenceService preferenceService)
+	public BackendService(ILogService logService, AppState appState, PreferenceService preferenceService)
 	{
 		_logService = logService;
 		_appState = appState;

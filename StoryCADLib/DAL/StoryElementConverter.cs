@@ -57,7 +57,7 @@ public class StoryElementConverter : JsonConverter<StoryElement>
         }
 		catch (Exception ex)
 		{
-			Ioc.Default.GetRequiredService<LogService>().LogException(LogLevel.Error,ex, "");
+			Ioc.Default.GetRequiredService<ILogService>().LogException(LogLevel.Error,ex, "");
 			throw;
 		}
 	}
@@ -101,7 +101,7 @@ public class StoryElementConverter : JsonConverter<StoryElement>
         }
 		catch (Exception ex)
 		{
-			Ioc.Default.GetRequiredService<LogService>().LogException(LogLevel.Error,ex, "Failed to write back");
+			Ioc.Default.GetRequiredService<ILogService>().LogException(LogLevel.Error,ex, "Failed to write back");
 			throw;
 		}
 

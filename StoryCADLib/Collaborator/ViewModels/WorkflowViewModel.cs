@@ -10,9 +10,16 @@ namespace StoryCAD.Collaborator.ViewModels;
 
 public partial class WorkflowViewModel: ObservableRecipient 
 {
-    public LogService logger = Ioc.Default.GetService<LogService>();
-    public CollaboratorService collaborator = Ioc.Default.GetService<CollaboratorService>();
+    private readonly ILogService _logger;
+    private readonly CollaboratorService _collaborator;
     private readonly NavigationService _navigationService;
+    
+    public WorkflowViewModel(ILogService logger, CollaboratorService collaborator, NavigationService navigationService)
+    {
+        _logger = logger;
+        _collaborator = collaborator;
+        _navigationService = navigationService;
+    }
 
     #region public properties
 
@@ -128,7 +135,7 @@ public partial class WorkflowViewModel: ObservableRecipient
         }
         catch (Exception ex)
         {
-            logger.LogException(LogLevel.Info, ex, "failed to configure workflow VM navigation");
+            _logger.LogException(LogLevel.Info, ex, "failed to configure workflow VM navigation");
         }
 
         AcceptCommand = new RelayCommand(SaveOutputs);
@@ -227,7 +234,7 @@ public partial class WorkflowViewModel: ObservableRecipient
         // Reset the current page (without navigation)
         //ContentFrame.Navigate(typeof(WelcomePage));
 
-        collaborator.CollaboratorWindow.AppWindow.Hide();
+        _collaborator.CollaboratorWindow.AppWindow.Hide();
     }
 
     public void EnableNavigation()

@@ -23,9 +23,9 @@ namespace StoryCAD.Models;
 public partial class Windowing : ObservableRecipient
 {
     private readonly AppState _appState;
-    private readonly LogService _logService;
+    private readonly ILogService _logService;
 
-    public Windowing(AppState appState, LogService logService)
+    public Windowing(AppState appState, ILogService logService)
     {
         _appState = appState;
         _logService = logService;
@@ -34,7 +34,7 @@ public partial class Windowing : ObservableRecipient
     // Constructor for backward compatibility - will be removed later
     public Windowing() : this(
         Ioc.Default.GetRequiredService<AppState>(),
-        Ioc.Default.GetRequiredService<LogService>())
+        Ioc.Default.GetRequiredService<ILogService>())
     {
     }
     private void OnPropertyChanged(object sender, PropertyChangedEventArgs e) { }
@@ -194,7 +194,7 @@ public partial class Windowing : ObservableRecipient
     /// <returns>A ContentDialogResult value</returns>
     public async Task<ContentDialogResult> ShowContentDialog(ContentDialog Dialog, bool force=false)
     {
-	    LogService logger = _logService;
+	    ILogService logger = _logService;
 
         // Don't show dialog if headless
         AppState state = _appState;
@@ -287,7 +287,7 @@ public partial class Windowing : ObservableRecipient
     /// <returns>A StorageFile object, of the file picked.</returns>
     public async Task<StorageFile> ShowFilePicker(string buttonText = "Open", string filter = "*")
     {
-	    LogService logger = _logService;
+	    ILogService logger = _logService;
 
 		try
 		{
@@ -328,7 +328,7 @@ public partial class Windowing : ObservableRecipient
     /// <returns>A StorageFile object, of the file picked.</returns>
     public async Task<StorageFile> ShowFileSavePicker(string buttonText, string extension)
     {
-	    LogService logger = _logService;
+	    ILogService logger = _logService;
 
 		try
 		{
@@ -374,7 +374,7 @@ public partial class Windowing : ObservableRecipient
 	/// <returns></returns>
     public async Task<StorageFolder> ShowFolderPicker(string buttonText = "Select folder", string filter = "*")
     {
-		LogService logger = _logService;
+		ILogService logger = _logService;
 
 		try
 	    {

@@ -10,9 +10,9 @@ public class RatingService
 	private readonly AppState _appState;
 	private readonly PreferenceService _preferenceService;
 	private readonly Windowing _windowing;
-	private readonly LogService _logService;
+	private readonly ILogService _logService;
 
-	public RatingService(AppState appState, PreferenceService preferenceService, Windowing windowing, LogService logService)
+	public RatingService(AppState appState, PreferenceService preferenceService, Windowing windowing, ILogService logService)
 	{
 		_appState = appState;
 		_preferenceService = preferenceService;

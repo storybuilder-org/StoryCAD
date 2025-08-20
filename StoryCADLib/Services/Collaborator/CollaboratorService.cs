@@ -19,7 +19,7 @@ public class CollaboratorService
     private bool dllExists;
     private string dllPath;
     private readonly AppState _appState;
-    private readonly LogService _logService;
+    private readonly ILogService _logService;
     private readonly PreferenceService _preferenceService;
     private readonly AutoSaveService _autoSaveService;
     private readonly BackupService _backupService;
@@ -29,7 +29,7 @@ public class CollaboratorService
     private const string PluginFileName = "CollaboratorLib.dll";
     private const string EnvPluginDirVar = "STORYCAD_PLUGIN_DIR";
 
-    public CollaboratorService(AppState appState, LogService logService, PreferenceService preferenceService,
+    public CollaboratorService(AppState appState, ILogService logService, PreferenceService preferenceService,
         AutoSaveService autoSaveService, BackupService backupService)
     {
         _appState = appState;

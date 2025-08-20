@@ -2,9 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using StoryCAD;
 using StoryCAD.Models;
+using StoryCAD.Services.Logging;
 using StoryCAD.Services.Outline;
 using StoryCAD.Services.Search;
 using StoryCAD.ViewModels;
@@ -25,7 +27,8 @@ namespace StoryCADTests
         [TestInitialize]
         public void Setup()
         {
-            _searchService = new SearchService();
+            var logger = Ioc.Default.GetRequiredService<ILogService>();
+            _searchService = new SearchService(logger);
             _outlineService = new OutlineService();
             _testModel = CreateTestModel().Result;
         }

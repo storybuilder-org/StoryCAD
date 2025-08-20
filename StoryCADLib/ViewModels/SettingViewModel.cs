@@ -11,7 +11,7 @@ public class SettingViewModel : ObservableRecipient, INavigable
 {
     #region Fields
 
-    private readonly LogService _logger;
+    private readonly ILogService _logger;
     private readonly ListData _listData;
     private readonly Windowing _windowing;
     private bool _changeable; // process property changes for this story element
@@ -254,13 +254,13 @@ public class SettingViewModel : ObservableRecipient, INavigable
     
     // Constructor for XAML compatibility - will be removed later
     public SettingViewModel() : this(
-        Ioc.Default.GetRequiredService<LogService>(),
+        Ioc.Default.GetRequiredService<ILogService>(),
         Ioc.Default.GetRequiredService<ListData>(),
         Ioc.Default.GetRequiredService<Windowing>())
     {
     }
     
-    public SettingViewModel(LogService logger, ListData listData, Windowing windowing)
+    public SettingViewModel(ILogService logger, ListData listData, Windowing windowing)
     {
         _logger = logger;
         _listData = listData;

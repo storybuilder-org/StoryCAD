@@ -24,7 +24,7 @@ public class LogService : ILogService
     private static AppState State;
     private static PreferenceService PreferenceService;
     public static NLog.LogLevel MinLogLevel = NLog.LogLevel.Info;
-    public bool ElmahLogging;
+    public bool ElmahLogging { get; private set; }
     static LogService()
     {
         // Initialize static fields with Ioc for now - will be removed when LogService fully converted
@@ -273,7 +273,7 @@ public class LogService : ILogService
                      App ARCH - {AppArch}
                      .NET Ver - {RuntimeInformation.OSArchitecture}
                      Startup  - {State.StartUpTimer.ElapsedMilliseconds} ms
-                     Elmah Status - {Ioc.Default.GetRequiredService<LogService>().ElmahLogging}
+                     Elmah Status - {ElmahLogging}
                      Windows {WinVer} Build - {Environment.OSVersion.Version.Build}
                      Debugger Attached - {Debugger.IsAttached}
                      Touchscreen - {PointerDevice.GetPointerDevices().Any(p => p.PointerDeviceType == PointerDeviceType.Touch)}

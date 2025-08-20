@@ -24,7 +24,7 @@ public class NarrativeToolVM: ObservableRecipient
 {
     private readonly ShellViewModel _shellVM;
     private readonly OutlineViewModel outlineVM;
-    private readonly LogService _logger; 
+    private readonly ILogService _logger; 
     public StoryNodeItem SelectedNode; //Currently selected node
     public bool IsNarratorSelected = false;
 
@@ -62,11 +62,11 @@ public class NarrativeToolVM: ObservableRecipient
     public NarrativeToolVM() : this(
         Ioc.Default.GetRequiredService<ShellViewModel>(),
         Ioc.Default.GetRequiredService<OutlineViewModel>(),
-        Ioc.Default.GetRequiredService<LogService>())
+        Ioc.Default.GetRequiredService<ILogService>())
     {
     }
 
-    public NarrativeToolVM(ShellViewModel shellVM, OutlineViewModel outlineViewModel, LogService logger)
+    public NarrativeToolVM(ShellViewModel shellVM, OutlineViewModel outlineViewModel, ILogService logger)
     {
         _shellVM = shellVM;
         outlineVM = outlineViewModel;

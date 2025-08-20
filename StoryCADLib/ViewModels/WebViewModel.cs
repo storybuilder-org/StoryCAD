@@ -14,10 +14,10 @@ public class WebViewModel : ObservableRecipient, INavigable
 {
     private readonly Windowing _window;
     private readonly AppState _appState;
-    private readonly LogService _logger;
+    private readonly ILogService _logger;
     private readonly PreferenceService _preferenceService;
 
-    public WebViewModel(Windowing window, AppState appState, LogService logger, PreferenceService preferenceService)
+    public WebViewModel(Windowing window, AppState appState, ILogService logger, PreferenceService preferenceService)
     {
         _window = window;
         _appState = appState;
@@ -330,7 +330,7 @@ public class WebViewModel : ObservableRecipient, INavigable
     public WebViewModel() : this(
         Ioc.Default.GetRequiredService<Windowing>(),
         Ioc.Default.GetRequiredService<AppState>(),
-        Ioc.Default.GetRequiredService<LogService>(),
+        Ioc.Default.GetRequiredService<ILogService>(),
         Ioc.Default.GetRequiredService<PreferenceService>())
     {
     }

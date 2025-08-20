@@ -23,21 +23,24 @@ public class PrintReportDialogVM : ObservableRecipient
     private readonly Windowing Window;
     private readonly OutlineViewModel _outlineViewModel;
     private readonly ShellViewModel _shellViewModel;
+    private readonly ILogService _logService;
     private List<StackPanel> _printPreviewCache; //This stores a list of pages for print preview
 
     // Constructor for XAML compatibility - will be removed later
     public PrintReportDialogVM() : this(
         Ioc.Default.GetRequiredService<Windowing>(),
         Ioc.Default.GetRequiredService<OutlineViewModel>(),
-        Ioc.Default.GetRequiredService<ShellViewModel>())
+        Ioc.Default.GetRequiredService<ShellViewModel>(),
+        Ioc.Default.GetRequiredService<ILogService>())
     {
     }
 
-    public PrintReportDialogVM(Windowing window, OutlineViewModel outlineViewModel, ShellViewModel shellViewModel)
+    public PrintReportDialogVM(Windowing window, OutlineViewModel outlineViewModel, ShellViewModel shellViewModel, ILogService logService)
     {
         Window = window;
         _outlineViewModel = outlineViewModel;
         _shellViewModel = shellViewModel;
+        _logService = logService;
     }
 
     #region Properties
@@ -178,7 +181,7 @@ public class PrintReportDialogVM : ObservableRecipient
         ShellViewModel ShellVM = _shellViewModel;
         var autoSaveService = Ioc.Default.GetRequiredService<AutoSaveService>();
         var backupService = Ioc.Default.GetRequiredService<BackupService>();
-        var logService = Ioc.Default.GetRequiredService<LogService>();
+        var logService = _logService;
         using (var serializationLock = new SerializationLock(autoSaveService, backupService, logService))
         {
             if (_shellViewModel.OutlineManager.StoryModel?.CurrentView == null)
@@ -415,7 +418,7 @@ public class PrintReportDialogVM : ObservableRecipient
         }
         catch (Exception e)
         {
-            Ioc.Default.GetService<LogService>().LogException(LogLevel.Error, e, "Error trying to print report");
+            _logService.LogException(LogLevel.Error, e, "Error trying to print report");
         }
     }
 

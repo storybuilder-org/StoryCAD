@@ -13,14 +13,14 @@ namespace StoryCAD.Services.Collaborator;
 /// </summary>
 public class MockCollaborator : ICollaborator
 {
-    private readonly LogService _logger;
+    private readonly ILogService _logger;
     private StoryElement _currentElement;
     private string _currentWorkflow;
     private StoryItemType _currentElementType;
 
-    public MockCollaborator()
+    public MockCollaborator(ILogService logger)
     {
-        _logger = Ioc.Default.GetService<LogService>();
+        _logger = logger;
         _logger?.Log(LogLevel.Info, "MockCollaborator initialized");
     }
 

@@ -19,7 +19,7 @@ namespace StoryCAD.ViewModels;
 /// </summary>
 public class FileOpenVM : ObservableRecipient
 {
-	private readonly LogService _logger;
+	private readonly ILogService _logger;
     private readonly OutlineViewModel _outlineVm;
     private readonly PreferenceService _preferences;
     private readonly ShellViewModel _shellViewModel;
@@ -231,7 +231,7 @@ public class FileOpenVM : ObservableRecipient
 
     // Constructor for XAML compatibility - will be removed later
     public FileOpenVM() : this(
-        Ioc.Default.GetRequiredService<LogService>(),
+        Ioc.Default.GetRequiredService<ILogService>(),
         Ioc.Default.GetRequiredService<OutlineViewModel>(),
         Ioc.Default.GetRequiredService<PreferenceService>(),
         Ioc.Default.GetRequiredService<ShellViewModel>(),
@@ -239,7 +239,7 @@ public class FileOpenVM : ObservableRecipient
     {
     }
 
-    public FileOpenVM(LogService logger, OutlineViewModel outlineVm, PreferenceService preferences, ShellViewModel shellViewModel, Windowing windowing)
+    public FileOpenVM(ILogService logger, OutlineViewModel outlineVm, PreferenceService preferences, ShellViewModel shellViewModel, Windowing windowing)
     {
         _logger = logger;
         _outlineVm = outlineVm;

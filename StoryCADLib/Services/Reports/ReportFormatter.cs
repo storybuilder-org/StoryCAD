@@ -665,7 +665,7 @@ public class ReportFormatter
         }
         catch (Exception ex)
         {
-            Ioc.Default.GetService<LogService>()!.LogException(LogLevel.Error, ex, "Error loading report templates.");
+            Ioc.Default.GetService<ILogService>()?.LogException(LogLevel.Error, ex, "Error loading report templates.");
         }
     }
 

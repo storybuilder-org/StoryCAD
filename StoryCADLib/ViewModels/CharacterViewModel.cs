@@ -16,7 +16,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable
 {
     #region Fields
     
-    private readonly LogService _logger;
+    private readonly ILogService _logger;
     public RelationshipModel CurrentRelationship;
     private bool _changeable; // process property changes for this story element
     private bool _changed;    // this story element has changed
@@ -749,7 +749,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable
 
         if (_vm.ProspectivePartners.Count == 0)
         {
-            Ioc.Default.GetRequiredService<LogService>().Log(LogLevel.Warn,"There are no prospective partners, not showing AddRelationship Dialog." );
+            _logger.Log(LogLevel.Warn,"There are no prospective partners, not showing AddRelationship Dialog." );
             _shellViewModel.ShowMessage(LogLevel.Warn, "This character already has a relationship with everyone",false);
             return;
         }
@@ -918,7 +918,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable
     #region Constructors
 
     // Constructor for XAML compatibility - will be removed later
-    public CharacterViewModel(LogService logger, OutlineViewModel outlineViewModel, ShellViewModel shellViewModel, Windowing windowing)
+    public CharacterViewModel(ILogService logger, OutlineViewModel outlineViewModel, ShellViewModel shellViewModel, Windowing windowing)
     {
         _logger = logger;
         _outlineViewModel = outlineViewModel;

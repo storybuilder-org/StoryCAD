@@ -18,14 +18,14 @@ public class SerializationLock : IDisposable
 
     private readonly AutoSaveService _autoSaveService;
     private readonly BackupService _backupService;
-    private readonly LogService _logger;
+    private readonly ILogService _logger;
     private readonly AppState _appState;
     private readonly PreferenceService _preferenceService;
     private string _caller;
     private bool _disposed;
     private static string currentHolder;
 
-    public SerializationLock(AutoSaveService autoSaveService, BackupService backupService, LogService logger,
+    public SerializationLock(AutoSaveService autoSaveService, BackupService backupService, ILogService logger,
     [CallerMemberName] string caller = null)
     {
         _autoSaveService = autoSaveService;

@@ -15,7 +15,7 @@ public class BackupService
     private BackgroundWorker timedBackupWorker;
     private Timer backupTimer;
 
-    private readonly LogService _logService;
+    private readonly ILogService _logService;
     private readonly PreferenceService _preferenceService;
     private readonly OutlineViewModel _outlineViewModel;
     private readonly AppState _appState;
@@ -32,7 +32,7 @@ public class BackupService
 
     #region Constructor
 
-    public BackupService(LogService logService, PreferenceService preferenceService, OutlineViewModel outlineViewModel, AppState appState, Windowing windowing)
+    public BackupService(ILogService logService, PreferenceService preferenceService, OutlineViewModel outlineViewModel, AppState appState, Windowing windowing)
     {
         _logService = logService;
         _preferenceService = preferenceService;
