@@ -9,8 +9,14 @@ namespace StoryCAD.Services.Dialogs
     public class Changelog
     {
         private GitHubClient _client = new(new ProductHeaderValue("STB"));
-        private LogService Logger = Ioc.Default.GetRequiredService<LogService>();
-        private AppState AppDat = Ioc.Default.GetRequiredService<AppState>();
+        private readonly ILogService _logger;
+        private readonly AppState _appDat;
+
+        public Changelog(ILogService logger, AppState appState)
+        {
+            _logger = logger;
+            _appDat = appState;
+        }
 
         /// <summary>
         /// This access the changelog for the latest version
@@ -20,13 +26,13 @@ namespace StoryCAD.Services.Dialogs
         {
             try
             {
-	            if (AppDat.Version.Contains("Built on:")) //Checks user isn't running a development version of StoryCAD
+	            if (_appDat.Version.Contains("Built on:")) //Checks user isn't running a development version of StoryCAD
                 {
                     return "Changelogs are unavailable for development versions of StoryCAD.";
                 }
 
 	            //Returns body of release
-	            var version = AppDat.Version.Replace("Version: ", "") + ".0";
+	            var version = _appDat.Version.Replace("Version: ", "") + ".0";
 
 	            return (await _client.Repository.Release.Get("StoryBuilder-org", "StoryCAD", version)).Body;
             }
@@ -34,12 +40,12 @@ namespace StoryCAD.Services.Dialogs
             {
                 if (_e.Source!.Contains("Net"))
                 {
-                    Logger.Log(LogLevel.Info, "Error with network, user probably isn't connected to wifi or is using an auto build");
+                    _logger.Log(LogLevel.Info, "Error with network, user probably isn't connected to wifi or is using an auto build");
                 }
 
                 if (_e.Source!.Contains("Octokit.NotFoundException"))
                 {
-                    Logger.Log(LogLevel.Info, "Error finding changelog for this version");
+                    _logger.Log(LogLevel.Info, "Error finding changelog for this version");
                 }
 
                 //Return error message
@@ -58,7 +64,7 @@ namespace StoryCAD.Services.Dialogs
         public async Task ShowChangeLog()
         {
             //Don't Show changelog on dev build's since its pointless.
-            if (AppDat.DeveloperBuild) { return; }
+            if (_appDat.DeveloperBuild) { return; }
 
             try
             {
@@ -74,7 +80,7 @@ namespace StoryCAD.Services.Dialogs
                             Text = (await GetChangelogText())
                         }
                     },
-                    Title = "What's new in StoryCAD " + AppDat.Version,
+                    Title = "What's new in StoryCAD " + _appDat.Version,
                     PrimaryButtonText = "Okay",
                 };
                 await Ioc.Default.GetService<Windowing>().ShowContentDialog(_changelogUI);
@@ -82,7 +88,7 @@ namespace StoryCAD.Services.Dialogs
             }
             catch (Exception _e)
             {
-                Logger.LogException(LogLevel.Error,_e, "Error in ShowChangeLog()");
+                _logger.LogException(LogLevel.Error,_e, "Error in ShowChangeLog()");
             }
         }
 

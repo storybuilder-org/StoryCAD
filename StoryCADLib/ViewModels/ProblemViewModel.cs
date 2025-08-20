@@ -18,7 +18,7 @@ public class ProblemViewModel : ObservableRecipient, INavigable
 {
     #region Fields
 
-    private readonly LogService _logger;
+    private readonly ILogService _logger;
     private readonly OutlineViewModel _outlineViewModel;
     private readonly ShellViewModel _shellViewModel;
     private readonly BeatSheetsViewModel _beatSheetsViewModel;
@@ -495,7 +495,7 @@ public class ProblemViewModel : ObservableRecipient, INavigable
 		}
 		catch (Exception ex)
         {
-            Ioc.Default.GetRequiredService<LogService>().LogException(LogLevel.Error,
+            _logger.LogException(LogLevel.Error,
                 ex, $"Failed to save problem model - {ex.Message}");
         }
     }
@@ -632,14 +632,14 @@ public class ProblemViewModel : ObservableRecipient, INavigable
 
     // Constructor for XAML compatibility - will be removed later
     public ProblemViewModel() : this(
-        Ioc.Default.GetRequiredService<LogService>(),
+        Ioc.Default.GetRequiredService<ILogService>(),
         Ioc.Default.GetRequiredService<OutlineViewModel>(),
         Ioc.Default.GetRequiredService<ShellViewModel>(),
         Ioc.Default.GetRequiredService<BeatSheetsViewModel>())
     {
     }
 
-    public ProblemViewModel(LogService logger, OutlineViewModel outlineViewModel, ShellViewModel shellViewModel, BeatSheetsViewModel beatSheetsViewModel)
+    public ProblemViewModel(ILogService logger, OutlineViewModel outlineViewModel, ShellViewModel shellViewModel, BeatSheetsViewModel beatSheetsViewModel)
     {
         _logger = logger;
         _outlineViewModel = outlineViewModel;

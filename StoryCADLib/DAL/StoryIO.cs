@@ -14,11 +14,11 @@ namespace StoryCAD.DAL;
 /// </summary>
 public class StoryIO
 {
-	private readonly LogService _logService;
+	private readonly ILogService _logService;
 	private readonly OutlineViewModel _outlineVM;
 	private readonly AppState _appState;
 
-	public StoryIO(LogService logService, OutlineViewModel outlineViewModel, AppState appState)
+	public StoryIO(ILogService logService, OutlineViewModel outlineViewModel, AppState appState)
 	{
 		_logService = logService;
 		_outlineVM = outlineViewModel;
@@ -294,7 +294,7 @@ public class StoryIO
     /// <returns>True if path is valid, false otherwise</returns>
     public static bool IsValidPath(string path)
     {
-        LogService logger = Ioc.Default.GetRequiredService<LogService>();
+        ILogService logger = Ioc.Default.GetRequiredService<ILogService>();
         //Checks file name validity
         try
         {

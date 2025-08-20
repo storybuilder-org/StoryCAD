@@ -16,14 +16,14 @@ namespace StoryCAD.DAL;
 /// </summary>
 public class PreferencesIo
 {
-	private readonly LogService _log;
+	private readonly ILogService _log;
 	private readonly AppState _appState;
 	private readonly AutoSaveService _autoSaveService;
 	private readonly BackupService _backupService;
 	private readonly PreferenceService _preferenceService;
 	private readonly Windowing _windowing;
 
-	public PreferencesIo(LogService log, AppState appState, AutoSaveService autoSaveService, 
+	public PreferencesIo(ILogService log, AppState appState, AutoSaveService autoSaveService, 
 		BackupService backupService, PreferenceService preferenceService, Windowing windowing)
 	{
 		_log = log;
@@ -36,7 +36,7 @@ public class PreferencesIo
 
 	// Constructor for backward compatibility - will be removed later
 	public PreferencesIo() : this(
-		Ioc.Default.GetService<LogService>(),
+		Ioc.Default.GetService<ILogService>(),
 		Ioc.Default.GetService<AppState>(),
 		Ioc.Default.GetRequiredService<AutoSaveService>(),
 		Ioc.Default.GetRequiredService<BackupService>(),

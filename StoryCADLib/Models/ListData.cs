@@ -10,13 +10,15 @@ namespace StoryCAD.Models
     /// </summary>
     public class ListData
     {
-        LogService _log = Ioc.Default.GetService<LogService>();
+        private readonly ILogService _log;
 
         /// The ComboBox and ListBox source bindings in viewmodels point to lists in this Dictionary. 
         /// Each list has a unique key related to the ComboBox or ListBox use.
         public Dictionary<string, ObservableCollection<string>> ListControlSource;
-        public ListData() 
+        
+        public ListData(ILogService log) 
         {
+            _log = log;
             try
             {
                 _log.Log(LogLevel.Info, "Loading Lists.ini data");

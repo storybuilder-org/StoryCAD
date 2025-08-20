@@ -33,7 +33,7 @@ public partial class App
     private const string TrashCanPage = "TrashCanPage";
     private const string WebPage = "WebPage";
 
-    private LogService _log;
+    private ILogService _log;
 
 	/// <summary>
 	/// This is the path to the STBX file that StoryCAD was launched with,
@@ -72,7 +72,7 @@ public partial class App
         // Make sure ToolsData is loaded by forcing instantiation
         Ioc.Default.GetRequiredService<ToolsData>();
 
-        _log = Ioc.Default.GetService<LogService>();
+        _log = Ioc.Default.GetService<ILogService>();
         Current.UnhandledException += OnUnhandledException;
     }
 
@@ -157,7 +157,7 @@ public partial class App
         {
             if (Preferences.Model.ErrorCollectionConsent)
             {
-                _log.ElmahLogging = _log.AddElmahTarget();
+                _log.AddElmahTarget();
                 if (_log.ElmahLogging) { _log.Log(LogLevel.Info, "elmah successfully added."); }
                 else { _log.Log(LogLevel.Info, "Couldn't add elmah."); }
             }

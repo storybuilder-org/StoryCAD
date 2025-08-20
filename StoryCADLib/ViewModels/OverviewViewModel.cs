@@ -19,7 +19,7 @@ public class OverviewViewModel : ObservableRecipient, INavigable
 {
     #region Fields
 
-    private readonly LogService _logger;
+    private readonly ILogService _logger;
     private readonly OutlineViewModel _outlineViewModel;
     private StoryModel _shellModel;
     private bool _changeable; // process property changes for this story element
@@ -369,7 +369,7 @@ public class OverviewViewModel : ObservableRecipient, INavigable
         }
         catch (Exception ex)
         {
-            Ioc.Default.GetRequiredService<LogService>().LogException(LogLevel.Error,
+            _logger.LogException(LogLevel.Error,
                 ex, $"Failed to save overview model - {ex.Message}");
         }
 
@@ -406,12 +406,12 @@ public class OverviewViewModel : ObservableRecipient, INavigable
 
     // Constructor for XAML compatibility - will be removed later
     public OverviewViewModel() : this(
-        Ioc.Default.GetRequiredService<LogService>(),
+        Ioc.Default.GetRequiredService<ILogService>(),
         Ioc.Default.GetRequiredService<OutlineViewModel>())
     {
     }
 
-    public OverviewViewModel(LogService logger, OutlineViewModel outlineViewModel)
+    public OverviewViewModel(ILogService logger, OutlineViewModel outlineViewModel)
     {
         _logger = logger;
         _outlineViewModel = outlineViewModel;

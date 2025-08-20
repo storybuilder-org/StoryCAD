@@ -402,7 +402,7 @@ public class StoryNodeItem : INotifyPropertyChanged
     {
         if (startNode == null)
         {
-            Ioc.Default.GetService<LogService>().LogException(
+            Ioc.Default.GetRequiredService<ILogService>().LogException(
                 LogLevel.Error, new ArgumentNullException(nameof(startNode)), 
                 "RootNodeType called with null startNode parameter");
             return StoryItemType.Unknown;
@@ -418,7 +418,7 @@ public class StoryNodeItem : INotifyPropertyChanged
             {
                 if (node.Parent == null)
                 {
-                    Ioc.Default.GetService<LogService>().LogException(
+                    Ioc.Default.GetRequiredService<ILogService>().LogException(
                         LogLevel.Error, new InvalidOperationException("Broken parent chain"), 
                         $"Node '{node.Name}' (Type: {node.Type}) is not root but has no parent");
                     return StoryItemType.Unknown;
@@ -426,7 +426,7 @@ public class StoryNodeItem : INotifyPropertyChanged
                 
                 if (++iterations > maxIterations)
                 {
-                    Ioc.Default.GetService<LogService>().LogException(
+                    Ioc.Default.GetRequiredService<ILogService>().LogException(
                         LogLevel.Error, new InvalidOperationException("Infinite loop detected"), 
                         $"RootNodeType exceeded maximum iterations traversing from node '{startNode.Name}'");
                     return StoryItemType.Unknown;
@@ -438,7 +438,7 @@ public class StoryNodeItem : INotifyPropertyChanged
         }
         catch (Exception ex)
         {
-            Ioc.Default.GetService<LogService>().LogException(
+            Ioc.Default.GetRequiredService<ILogService>().LogException(
                 LogLevel.Error, ex, $"Root node type exception, this shouldn't happen {ex.Message}");
             return StoryItemType.Unknown;
         }

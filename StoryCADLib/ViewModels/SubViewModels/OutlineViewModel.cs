@@ -24,7 +24,7 @@ namespace StoryCAD.ViewModels.SubViewModels;
 
 public class OutlineViewModel : ObservableRecipient
 {
-    private readonly LogService logger;
+    private readonly ILogService logger;
     private readonly PreferenceService preferences;
     private readonly Windowing window;
     private readonly OutlineService outlineService;
@@ -1349,7 +1349,7 @@ public class OutlineViewModel : ObservableRecipient
 
     #region Constructor(s)
 
-    public OutlineViewModel(LogService logService, PreferenceService preferenceService,
+    public OutlineViewModel(ILogService logService, PreferenceService preferenceService,
         Windowing windowing, OutlineService outlineService, AppState appState,
         SearchService searchService, BackendService backendService)
     {

@@ -17,7 +17,7 @@ namespace StoryCAD.Services.Backup
     public class AutoSaveService
     {
         private readonly Windowing _window;
-        private readonly LogService _logger;
+        private readonly ILogService _logger;
         private readonly AppState _appState;
         private readonly PreferenceService _preferenceService;
         private readonly OutlineViewModel _outlineVM;
@@ -32,7 +32,7 @@ namespace StoryCAD.Services.Backup
 
         #region Constructor
 
-        public AutoSaveService(Windowing window, LogService logger, AppState appState, PreferenceService preferenceService, OutlineViewModel outlineViewModel)
+        public AutoSaveService(Windowing window, ILogService logger, AppState appState, PreferenceService preferenceService, OutlineViewModel outlineViewModel)
         {
             _window = window;
             _logger = logger;

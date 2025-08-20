@@ -44,7 +44,7 @@ public class ShellViewModel : ObservableRecipient
     private const string WebPage = "WebPage";
 
     // Required services 
-    private readonly LogService Logger;
+    private readonly ILogService Logger;
     private readonly SearchService Search;
     public readonly AutoSaveService _autoSaveService;
     public readonly BackupService _BackupService;
@@ -432,7 +432,7 @@ public class ShellViewModel : ObservableRecipient
             PrimaryButtonText = "Okay"
         };
         await Window.ShowContentDialog(Dialog);
-        Ioc.Default.GetRequiredService<LogService>().Log(LogLevel.Error, "Env missing.");
+        Logger.Log(LogLevel.Error, "Env missing.");
     }
 
     public void ShowHomePage()
@@ -1145,7 +1145,7 @@ public class ShellViewModel : ObservableRecipient
     // Constructor for XAML compatibility - will be removed later
     public ShellViewModel() : this(
         Ioc.Default.GetRequiredService<SceneViewModel>(),
-        Ioc.Default.GetRequiredService<LogService>(),
+        Ioc.Default.GetRequiredService<ILogService>(),
         Ioc.Default.GetRequiredService<SearchService>(),
         Ioc.Default.GetRequiredService<AutoSaveService>(),
         Ioc.Default.GetRequiredService<BackupService>(),
@@ -1159,7 +1159,7 @@ public class ShellViewModel : ObservableRecipient
     {
     }
 
-    public ShellViewModel(SceneViewModel sceneViewModel, LogService logger, SearchService search,
+    public ShellViewModel(SceneViewModel sceneViewModel, ILogService logger, SearchService search,
         AutoSaveService autoSaveService, BackupService backupService, Windowing window,
         AppState appState, ScrivenerIo scrivener, PreferenceService preferenceService,
         OutlineViewModel outlineViewModel, OutlineService outlineService, NavigationService navigationService)
