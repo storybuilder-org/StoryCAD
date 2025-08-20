@@ -23,6 +23,11 @@ public class WebViewModel : ObservableRecipient, INavigable
         _appState = appState;
         _logger = logger;
         _preferenceService = preferenceService;
+        
+        PropertyChanged += OnPropertyChanged;
+        RefreshCommand = new RelayCommand(ExecuteRefresh, () => true);
+        GoBackCommand = new RelayCommand(ExecuteGoBack, () => true);
+        GoForwardCommand = new RelayCommand(ExecuteGoForward, () => true);
     }
 
     ///TODO: Make sure queries are async
@@ -321,12 +326,12 @@ public class WebViewModel : ObservableRecipient, INavigable
 
     private void ExecuteGoForward() { GoForward(); }
 
-    public WebViewModel()
+    // Constructor for XAML compatibility - will be removed later
+    public WebViewModel() : this(
+        Ioc.Default.GetRequiredService<Windowing>(),
+        Ioc.Default.GetRequiredService<AppState>(),
+        Ioc.Default.GetRequiredService<LogService>(),
+        Ioc.Default.GetRequiredService<PreferenceService>())
     {
-        PropertyChanged += OnPropertyChanged;
-
-        RefreshCommand = new RelayCommand(ExecuteRefresh, () => true);
-        GoBackCommand = new RelayCommand(ExecuteGoBack, () => true);
-        GoForwardCommand = new RelayCommand(ExecuteGoForward, () => true);
     }
 }

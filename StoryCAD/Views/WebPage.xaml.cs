@@ -4,19 +4,19 @@ using StoryCAD.Services.Logging;
 
 namespace StoryCAD.Views;
 
-public sealed partial class WebPage : BindablePage
-{
-    WebViewModel WebVM = Ioc.Default.GetRequiredService<WebViewModel>();
-    private LogService Logger = Ioc.Default.GetRequiredService<LogService>();
-
-    public WebPage()
+    public sealed partial class WebPage : BindablePage
     {
-        InitializeComponent();
-        DataContext = WebVM;
-        WebVM.Refresh = Refresh;
-        WebVM.GoForward = GoForward;
-        WebVM.GoBack = GoBack;
-    }
+        WebViewModel WebVM = Ioc.Default.GetRequiredService<WebViewModel>();
+        private LogService Logger = Ioc.Default.GetRequiredService<LogService>();
+
+        public WebPage()
+        {
+            InitializeComponent();
+            DataContext = WebVM;
+            WebVM.Refresh = Refresh;
+            WebVM.GoForward = GoForward;
+            WebVM.GoBack = GoBack;
+        }
 
     public void Refresh() { WebView.Reload(); }
     public void GoForward() { WebView.GoForward(); }

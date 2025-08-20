@@ -12,6 +12,8 @@ public class SettingViewModel : ObservableRecipient, INavigable
     #region Fields
 
     private readonly LogService _logger;
+    private readonly ListData _listData;
+    private readonly Windowing _windowing;
     private bool _changeable; // process property changes for this story element
     private bool _changed;    // this story element has changed
 
@@ -233,7 +235,7 @@ public class SettingViewModel : ObservableRecipient, INavigable
         }
         catch (Exception ex)
         {
-            Ioc.Default.GetRequiredService<LogService>().LogException(LogLevel.Error,
+            _logger.LogException(LogLevel.Error,
                 ex, $"Failed to save setting model - {ex.Message}");
         }
 
@@ -249,9 +251,20 @@ public class SettingViewModel : ObservableRecipient, INavigable
     #endregion
 
     #region Constructor
-    public SettingViewModel()
+    
+    // Constructor for XAML compatibility - will be removed later
+    public SettingViewModel() : this(
+        Ioc.Default.GetRequiredService<LogService>(),
+        Ioc.Default.GetRequiredService<ListData>(),
+        Ioc.Default.GetRequiredService<Windowing>())
     {
-        _logger = Ioc.Default.GetService<LogService>();
+    }
+    
+    public SettingViewModel(LogService logger, ListData listData, Windowing windowing)
+    {
+        _logger = logger;
+        _listData = listData;
+        _windowing = windowing;
 
         Locale = string.Empty;
         Season = string.Empty;
@@ -269,14 +282,14 @@ public class SettingViewModel : ObservableRecipient, INavigable
 
         try
         {
-            Dictionary<string, ObservableCollection<string>> _lists = Ioc.Default.GetService<ListData>().ListControlSource;
+            Dictionary<string, ObservableCollection<string>> _lists = _listData.ListControlSource;
             LocaleList = _lists["Locale"];
             SeasonList = _lists["Season"];
         }
         catch (Exception e)
         {
             _logger.LogException(LogLevel.Fatal, e, "Error loading lists in Problem view model");
-            Ioc.Default.GetRequiredService<Windowing>().ShowResourceErrorMessage();
+            _windowing.ShowResourceErrorMessage();
         }
 
 
