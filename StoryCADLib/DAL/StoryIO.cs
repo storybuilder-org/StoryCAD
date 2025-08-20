@@ -65,6 +65,7 @@ public class StoryIO
 				_logService.Log(LogLevel.Info, "File is legacy XML format");
 
                 // Show dialog informing user about legacy format
+                // TODO: Circular dependency - StoryIO ↔ OutlineViewModel prevents injecting Windowing
                 var result = await Ioc.Default.GetRequiredService<Windowing>().ShowContentDialog(new()
 				{
 					Title = "Legacy Outline format detected!",
@@ -257,6 +258,7 @@ public class StoryIO
             _logService.Log(LogLevel.Error, $"File {file.Path} is unavailable.");
 
             //Show warning so user knows their file isn't lost and is just on onedrive.
+            // TODO: Circular dependency - StoryIO ↔ OutlineViewModel prevents injecting Windowing
             var result = await Ioc.Default.GetRequiredService<Windowing>().ShowContentDialog(new()
             {
                 Title = "File unavailable.",
@@ -294,6 +296,7 @@ public class StoryIO
     /// <returns>True if path is valid, false otherwise</returns>
     public static bool IsValidPath(string path)
     {
+        // TODO: Static method requires Ioc.Default until refactored to instance method or removed logging
         ILogService logger = Ioc.Default.GetRequiredService<ILogService>();
         //Checks file name validity
         try

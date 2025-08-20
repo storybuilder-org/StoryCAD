@@ -28,8 +28,13 @@ namespace StoryCAD.Services.API;
 /// </summary>
 public class SemanticKernelApi : IStoryCADAPI
 {
-    private readonly OutlineService _outlineService = Ioc.Default.GetRequiredService<OutlineService>();
+    private readonly OutlineService _outlineService;
     public StoryModel CurrentModel { get; set; }
+
+    public SemanticKernelApi(OutlineService outlineService)
+    {
+        _outlineService = outlineService;
+    }
 
     /// <summary>
     /// Sets the current StoryModel to work with (for Collaborator integration)
