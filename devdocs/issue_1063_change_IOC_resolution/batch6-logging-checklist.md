@@ -11,30 +11,30 @@
   git grep -n "Ioc.Default.GetService<LogService>"
   git grep -n "LogService" | grep -v "ILogService"
   ```
-- [ ] Edit every consumer file:
+- [x] Edit every consumer file:
   - **SKIP Page classes (Views/*.xaml.cs)** - these are out of scope
   - Change all consumers to depend on `ILogService` interface (not `LogService` concrete)
   - Add constructor parameters using `ILogService`
   - Create `private readonly ILogService _logService` fields
   - Replace **all** `Ioc.Default` calls with the injected fields
-- [ ] Refactor LogService itself:
+- [x] Refactor LogService itself:
   - Add constructor to receive its dependencies (`AppState`, `PreferenceService`, etc.)
   - Create `private readonly` fields for injected dependencies
   - Remove all `Ioc.Default` calls from within LogService
   - Keep behavior identical (file logs, console in debug, elmah integration)
-- [ ] Fix construction sites (pass dependencies or resolve via DI), build clean.
-- [ ] Tests:
-  - [ ] Run unit tests (where present).
-  - [ ] Smoke test the app (launch, navigate, verify logs still work).
-  - [ ] Verify logging output still goes to expected destinations
-- [ ] Grep gates (all must return **no results**):
+- [x] Fix construction sites (pass dependencies or resolve via DI), build clean.
+- [x] Tests:
+  - [x] Run unit tests (where present).
+  - [x] Smoke test the app (launch, navigate, verify logs still work).
+  - [x] Verify logging output still goes to expected destinations
+- [x] Grep gates (all must return **no results**):
   ```bash
   git grep -n "Ioc.Default.GetRequiredService<LogService>"
   git grep -n "Ioc.Default.GetService<LogService>"
   # Verify all non-test consumers use ILogService interface:
   git grep -n ": LogService " | grep -v "ILogService" | grep -v Test | grep -v "\.cs:"
   ```
-- [ ] Commit message:
+- [x] Commit message:
   ```
   DI: Replace Ioc.Default for LogService with ILogService interface injection; refactor LogService to use constructor injection
   ```
