@@ -6,27 +6,27 @@
 **Services in this batch:** SearchService, RatingService, SemanticKernelApi, ControlLoader, ListLoader, ToolLoader, ScrivenerIo, StoryIO, MySqlIo, ControlData, ListData, ToolsData, TreeViewSelection
 
 ### Checkboxes (apply the playbook)
-- [ ] Confirm services are registered in `ServiceLocator.cs` (Singletons; no lifetime changes).
-- [ ] Search call sites for each service:
+- [x] Confirm services are registered in `ServiceLocator.cs` (Singletons; no lifetime changes).
+- [x] Search call sites for each service:
   ```bash
   git grep -n "Ioc.Default.GetRequiredService<(SearchService|RatingService|SemanticKernelApi|ControlLoader|ListLoader|ToolLoader|ScrivenerIo|StoryIO|MySqlIo|ControlData|ListData|ToolsData|TreeViewSelection)>"
   git grep -n "Ioc.Default.GetService<(SearchService|RatingService|SemanticKernelApi|ControlLoader|ListLoader|ToolLoader|ScrivenerIo|StoryIO|MySqlIo|ControlData|ListData|ToolsData|TreeViewSelection)>"
   ```
-- [ ] Edit every consumer file:
+- [x] Edit every consumer file:
   - **SKIP Page classes (Views/*.xaml.cs)** - these are out of scope
   - Add constructor parameters (prefer interfaces; logging uses `ILogService`).
   - Create `private readonly` fields named with underscore camelCase (e.g., `_searchService`).
   - Replace **all** `Ioc.Default` calls with the injected fields.
-- [ ] Fix construction sites (pass dependencies or resolve via DI), build clean.
-- [ ] Tests:
-  - [ ] Run unit tests (where present).
-  - [ ] Smoke test the app (launch, navigate, verify logs).
-- [ ] Grep gates (all must return **no results**):
+- [x] Fix construction sites (pass dependencies or resolve via DI), build clean.
+- [x] Tests:
+  - [x] Run unit tests (where present).
+  - [x] Smoke test the app (launch, navigate, verify logs).
+- [x] Grep gates (all must return **no results**):
   ```bash
   git grep -n "Ioc.Default.GetRequiredService<(SearchService|RatingService|SemanticKernelApi|ControlLoader|ListLoader|ToolLoader|ScrivenerIo|StoryIO|MySqlIo|ControlData|ListData|ToolsData|TreeViewSelection)>"
   git grep -n "Ioc.Default.GetService<(SearchService|RatingService|SemanticKernelApi|ControlLoader|ListLoader|ToolLoader|ScrivenerIo|StoryIO|MySqlIo|ControlData|ListData|ToolsData|TreeViewSelection)>"
   ```
-- [ ] Commit message:
+- [x] Commit message:
   ```
   DI: Replace Ioc.Default for SearchService, RatingService, SemanticKernelApi, ControlLoader, ListLoader, ToolLoader, ScrivenerIo, StoryIO, MySqlIo, ControlData, ListData, ToolsData, TreeViewSelection with constructor injection; keep singleton lifetimes
   ```
