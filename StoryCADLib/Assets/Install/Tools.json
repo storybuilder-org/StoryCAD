@@ -370,939 +370,344 @@
                                                   "Hero discovers opponent\u0027s motives"
                                               ]
                     },
-    "keyQuestions":  {
-                         "Story Overview":  [
-                                                {
-                                                    "key":  "Q01",
-                                                    "question":  "Does the story idea have the force it will need to lead to",
-                                                    "topic":  "Story Idea"
-                                                },
-                                                {
-                                                    "key":  "Q01",
-                                                    "question":  "character change, vivid scenes, and a satisfactory ending?",
-                                                    "topic":  "Story Idea"
-                                                },
-                                                {
-                                                    "key":  "Q02",
-                                                    "question":  "Are you the right person to tell this story?  Do you believe",
-                                                    "topic":  "Story Idea"
-                                                },
-                                                {
-                                                    "key":  "Q02",
-                                                    "question":  "in it?",
-                                                    "topic":  "Story Idea"
-                                                },
-                                                {
-                                                    "key":  "Q01",
-                                                    "question":  "Is your concept posed in the form of a story question? In",
-                                                    "topic":  "Concept"
-                                                },
-                                                {
-                                                    "key":  "Q01",
-                                                    "question":  "Larry Brooks\u0027 definition, a concept is an idea that asks",
-                                                    "topic":  "Concept"
-                                                },
-                                                {
-                                                    "key":  "Q01",
-                                                    "question":  "a question that implies conflict. An idea is just an idea;",
-                                                    "topic":  "Concept"
-                                                },
-                                                {
-                                                    "key":  "Q01",
-                                                    "question":  "a concept is the seed of a story. Spend time fleshing out",
-                                                    "topic":  "Concept"
-                                                },
-                                                {
-                                                    "key":  "Q01",
-                                                    "question":  "your concept.",
-                                                    "topic":  "Concept"
-                                                },
-                                                {
-                                                    "key":  "Q01",
-                                                    "question":  "Do you understand the story type, it\u0027s lengths, intended",
-                                                    "topic":  "Structure"
-                                                },
-                                                {
-                                                    "key":  "Q01",
-                                                    "question":  "effect, and potential markets?",
-                                                    "topic":  "Structure"
-                                                },
-                                                {
-                                                    "key":  "Q02",
-                                                    "question":  "Have you given sufficient thought to Viewpoint? Point of view",
-                                                    "topic":  "Structure"
-                                                },
-                                                {
-                                                    "key":  "Q02",
-                                                    "question":  "is the most important single structural decision of your story,",
-                                                    "topic":  "Structure"
-                                                },
-                                                {
-                                                    "key":  "Q02",
-                                                    "question":  "the voice through which you tell your tale. Not only person,",
-                                                    "topic":  "Structure"
-                                                },
-                                                {
-                                                    "key":  "Q02",
-                                                    "question":  "but tense, tone (ironic, bitter, etc), reliability, the POV",
-                                                    "topic":  "Structure"
-                                                },
-                                                {
-                                                    "key":  "Q02",
-                                                    "question":  "character\u0027s sophistication or naivity- endless variations",
-                                                    "topic":  "Structure"
-                                                },
-                                                {
-                                                    "key":  "Q02",
-                                                    "question":  "are possible. POV choice should be made early, as it can affect",
-                                                    "topic":  "Structure"
-                                                },
-                                                {
-                                                    "key":  "Q02",
-                                                    "question":  "every scene in your story.",
-                                                    "topic":  "Structure"
-                                                },
-                                                {
-                                                    "key":  "Q03",
-                                                    "question":  "Who is your audience? Who are you telling your story to?",
-                                                    "topic":  "Structure"
-                                                },
-                                                {
-                                                    "key":  "Q04",
-                                                    "question":  "Do you know, or are you prepared to learn, something about",
-                                                    "topic":  "Structure"
-                                                },
-                                                {
-                                                    "key":  "Q04",
-                                                    "question":  "the subject?",
-                                                    "topic":  "Structure"
-                                                },
-                                                {
-                                                    "key":  "Q05",
-                                                    "question":  "What is your aim? What are you trying to accomplish?",
-                                                    "topic":  "Structure"
-                                                },
-                                                {
-                                                    "key":  "Q06",
-                                                    "question":  "What form will your story take? (Play, novel, short story,",
-                                                    "topic":  "Structure"
-                                                },
-                                                {
-                                                    "key":  "Q06",
-                                                    "question":  "etc.) Are you familiar with this form?",
-                                                    "topic":  "Structure"
-                                                }
-                                            ],
-                         "Setting":  [
-                                         {
-                                             "key":  "Q01",
-                                             "question":  "Is the setting clear in terms of time and location?",
-                                             "topic":  "Setting Tab"
-                                         },
-                                         {
-                                             "key":  "Q02",
-                                             "question":  "Does the setting appeal to the senses?  Does it",
-                                             "topic":  "Sensations Tab"
-                                         },
-                                         {
-                                             "key":  "Q02",
-                                             "question":  "appeal to all of the senses, and not just sight?",
-                                             "topic":  "Sensations Tab"
-                                         },
-                                         {
-                                             "key":  "Q03",
-                                             "question":  "Does this setting create mood and atmosphere",
-                                             "topic":  "Sensations Tab"
-                                         },
-                                         {
-                                             "key":  "Q03",
-                                             "question":  "appropriate to the scenes being portrayed here?",
-                                             "topic":  "Sensations Tab"
-                                         }
-                                     ],
-                         "Problem":  [
-                                         {
-                                             "key":  "Q01",
-                                             "question":  "Is the struggle between opposing forces clearly",
-                                             "topic":  "Protagonist / Antagonist Tabs"
-                                         },
-                                         {
-                                             "key":  "Q01",
-                                             "question":  "recognizable? If the story is one of man against",
-                                             "topic":  "Protagonist / Antagonist Tabs"
-                                         },
-                                         {
-                                             "key":  "Q01",
-                                             "question":  "himself (internal conflict), your protagonist must be",
-                                             "topic":  "Protagonist / Antagonist Tabs"
-                                         },
-                                         {
-                                             "key":  "Q01",
-                                             "question":  "his own antagonist. If society or nature is the",
-                                             "topic":  "Protagonist / Antagonist Tabs"
-                                         },
-                                         {
-                                             "key":  "Q01",
-                                             "question":  "opponent, is it squarely against the protagonist\u0027s goal?",
-                                             "topic":  "Protagonist / Antagonist Tabs"
-                                         },
-                                         {
-                                             "key":  "Q02",
-                                             "question":  "What does your protagonist have at stake?  What goal",
-                                             "topic":  "Protagonist / Antagonist Tabs"
-                                         },
-                                         {
-                                             "key":  "Q02",
-                                             "question":  "or desire matters more to him than anything? What drives",
-                                             "topic":  "Protagonist / Antagonist Tabs"
-                                         },
-                                         {
-                                             "key":  "Q02",
-                                             "question":  "this person?",
-                                             "topic":  "Protagonist / Antagonist Tabs"
-                                         },
-                                         {
-                                             "key":  "Q03",
-                                             "question":  "Your audience should usually empathize with your",
-                                             "topic":  "Protagonist / Antagonist Tabs"
-                                         },
-                                         {
-                                             "key":  "Q03",
-                                             "question":  "protagonist. Which qualities will gain the empathy or",
-                                             "topic":  "Protagonist / Antagonist Tabs"
-                                         },
-                                         {
-                                             "key":  "Q03",
-                                             "question":  "sympathy of the audience?",
-                                             "topic":  "Protagonist / Antagonist Tabs"
-                                         },
-                                         {
-                                             "key":  "Q04",
-                                             "question":  "Character, as well as plot, can create conflict. Does",
-                                             "topic":  "Protagonist / Antagonist Tabs"
-                                         },
-                                         {
-                                             "key":  "Q04",
-                                             "question":  "the protagonist have traits which contrast and oppose traits",
-                                             "topic":  "Protagonist / Antagonist Tabs"
-                                         },
-                                         {
-                                             "key":  "Q04",
-                                             "question":  "of the antagonist?",
-                                             "topic":  "Protagonist / Antagonist Tabs"
-                                         },
-                                         {
-                                             "key":  "Q05",
-                                             "question":  "Your protagonist should be capable of growth and",
-                                             "topic":  "Protagonist / Antagonist Tabs"
-                                         },
-                                         {
-                                             "key":  "Q05",
-                                             "question":  "change. Which trait, belief or habit is the weakness, or",
-                                             "topic":  "Protagonist / Antagonist Tabs"
-                                         },
-                                         {
-                                             "key":  "Q05",
-                                             "question":  "contains the contradiction, that this person must change? This",
-                                             "topic":  "Protagonist / Antagonist Tabs"
-                                         },
-                                         {
-                                             "key":  "Q05",
-                                             "question":  "is his \u0027inner problem.\u0027",
-                                             "topic":  "Protagonist / Antagonist Tabs"
-                                         },
-                                         {
-                                             "key":  "Q06",
-                                             "question":  "What does your antagonist have at stake?  What goal or",
-                                             "topic":  "Protagonist / Antagonist Tabs"
-                                         },
-                                         {
-                                             "key":  "Q06",
-                                             "question":  "desire matters more to him than anything? What drives this",
-                                             "topic":  "Protagonist / Antagonist Tabs"
-                                         },
-                                         {
-                                             "key":  "Q06",
-                                             "question":  "person?",
-                                             "topic":  "Protagonist / Antagonist Tabs"
-                                         },
-                                         {
-                                             "key":  "Q07",
-                                             "question":  "Is your antagonist a worthy opponent?  Does he",
-                                             "topic":  "Protagonist / Antagonist Tabs"
-                                         },
-                                         {
-                                             "key":  "Q07",
-                                             "question":  "believe in his own goal? Is he forced to behave as he",
-                                             "topic":  "Protagonist / Antagonist Tabs"
-                                         },
-                                         {
-                                             "key":  "Q07",
-                                             "question":  "does? Does he have sufficient will and drive?  Are",
-                                             "topic":  "Protagonist / Antagonist Tabs"
-                                         },
-                                         {
-                                             "key":  "Q07",
-                                             "question":  "the protagonist and the antagonist evenly matched?",
-                                             "topic":  "Protagonist / Antagonist Tabs"
-                                         },
-                                         {
-                                             "key":  "Q08",
-                                             "question":  "How would you describe the relationship between",
-                                             "topic":  "Protagonist / Antagonist Tabs"
-                                         },
-                                         {
-                                             "key":  "Q08",
-                                             "question":  "the protagonist and the antagonist?  Will it",
-                                             "topic":  "Protagonist / Antagonist Tabs"
-                                         },
-                                         {
-                                             "key":  "Q08",
-                                             "question":  "change during the course of the story?",
-                                             "topic":  "Protagonist / Antagonist Tabs"
-                                         },
-                                         {
-                                             "key":  "Q09",
-                                             "question":  "What does the character have at stake? What is his",
-                                             "topic":  "Protagonist / Antagonist Tabs"
-                                         },
-                                         {
-                                             "key":  "Q09",
-                                             "question":  "purpose or desire?  What is he willing to do to achieve it?",
-                                             "topic":  "Protagonist / Antagonist Tabs"
-                                         },
-                                         {
-                                             "key":  "Q09",
-                                             "question":  "What motivates him?",
-                                             "topic":  "Protagonist / Antagonist Tabs"
-                                         },
-                                         {
-                                             "key":  "Q09",
-                                             "question":  "What is your problem\u0027s premise? Can you summarize the problem?",
-                                             "topic":  "Resolution Tab"
-                                         },
-                                         {
-                                             "key":  "Q10",
-                                             "question":  "What is your problem\u0027s theme? What are you setting",
-                                             "topic":  "Resolution Tab"
-                                         },
-                                         {
-                                             "key":  "Q10",
-                                             "question":  "out to prove?  What does it all mean?",
-                                             "topic":  "Resolution Tab"
-                                         },
-                                         {
-                                             "key":  "Q11",
-                                             "question":  "Do you know which is your main or story problem? When that problem",
-                                             "topic":  "Resolution Tab"
-                                         },
-                                         {
-                                             "key":  "Q11",
-                                             "question":  "is resolved, the story\u0027s over.",
-                                             "topic":  "Resolution Tab"
-                                         },
-                                         {
-                                             "key":  "Q12",
-                                             "question":  "Can you visualize your problem\u0027s resolution as a scene?  Does it match",
-                                             "topic":  "Resolution Tab"
-                                         },
-                                         {
-                                             "key":  "Q12",
-                                             "question":  "your premise?",
-                                             "topic":  "Resolution Tab"
-                                         },
-                                         {
-                                             "key":  "Q13",
-                                             "question":  "Do you protagonist and antagonist have traits and values",
-                                             "topic":  "Resolution Tab"
-                                         },
-                                         {
-                                             "key":  "Q13",
-                                             "question":  "which support your premise?",
-                                             "topic":  "Resolution Tab"
-                                         }
-                                     ],
-                         "Plot Point":  [
-                                            {
-                                                "key":  "Q09",
-                                                "question":  "Are there scene templates (MasterPlots) for scenes",
-                                                "topic":  "General (Plot Point Selection)"
-                                            },
-                                            {
-                                                "key":  "Q09",
-                                                "question":  "to use under a Problem? Have you used the MasterPlots",
-                                                "topic":  "General (Plot Point Selection)"
-                                            },
-                                            {
-                                                "key":  "Q09",
-                                                "question":  "tool?",
-                                                "topic":  "General (Plot Point Selection)"
-                                            },
-                                            {
-                                                "key":  "Q09",
-                                                "question":  "Are there Dramatic Situations which can provide a",
-                                                "topic":  "General (Plot Point Selection)"
-                                            },
-                                            {
-                                                "key":  "Q09",
-                                                "question":  "Plot Point (or Problem) relevant to the story?",
-                                                "topic":  "General (Plot Point Selection)"
-                                            },
-                                            {
-                                                "key":  "Q10",
-                                                "question":  "Are there set pieces (Stock Scenes) which the",
-                                                "topic":  "General (Plot Point Selection)"
-                                            },
-                                            {
-                                                "key":  "Q10",
-                                                "question":  "reader will expect in a story of this type? Have",
-                                                "topic":  "General (Plot Point Selection)"
-                                            },
-                                            {
-                                                "key":  "Q10",
-                                                "question":  "you considered the Stock Scenes tool?",
-                                                "topic":  "General (Plot Point Selection)"
-                                            },
-                                            {
-                                                "key":  "Q01",
-                                                "question":  "Does this scene follow causally from the preceeding",
-                                                "topic":  "Scene Tab"
-                                            },
-                                            {
-                                                "key":  "Q01",
-                                                "question":  "scene?",
-                                                "topic":  "Scene Tab"
-                                            },
-                                            {
-                                                "key":  "Q09",
-                                                "question":  "Are you plotting for dramatic tension? Are you:",
-                                                "topic":  "Scene Tab"
-                                            },
-                                            {
-                                                "key":  "Q09",
-                                                "question":  "taking your time resuming interrupted scenes? Leaving",
-                                                "topic":  "Scene Tab"
-                                            },
-                                            {
-                                                "key":  "Q09",
-                                                "question":  "uncertainty as to motives, comments, or",
-                                                "topic":  "Scene Tab"
-                                            },
-                                            {
-                                                "key":  "Q09",
-                                                "question":  "actions?  Stretching out or prolonging successful",
-                                                "topic":  "Scene Tab"
-                                            },
-                                            {
-                                                "key":  "Q09",
-                                                "question":  "outcomes? Offering poor choices and incomplete",
-                                                "topic":  "Scene Tab"
-                                            },
-                                            {
-                                                "key":  "Q09",
-                                                "question":  "resolutions in scenes? Using a deadline or \u0027ticking",
-                                                "topic":  "Scene Tab"
-                                            },
-                                            {
-                                                "key":  "Q09",
-                                                "question":  "clock\u0027? Varying scene length and/or type?",
-                                                "topic":  "Scene Tab"
-                                            },
-                                            {
-                                                "key":  "Q08",
-                                                "question":  "What future conflict or story events should you",
-                                                "topic":  "Scene Tab"
-                                            },
-                                            {
-                                                "key":  "Q08",
-                                                "question":  "foreshadow in this scene?",
-                                                "topic":  "Scene Tab"
-                                            },
-                                            {
-                                                "key":  "Q06",
-                                                "question":  "Should you plan to tell the current plot point as a",
-                                                "topic":  "Scene Tab"
-                                            },
-                                            {
-                                                "key":  "Q06",
-                                                "question":  "scene, or as foreshortened prose (narrative",
-                                                "topic":  "Scene Tab"
-                                            },
-                                            {
-                                                "key":  "Q06",
-                                                "question":  "summary)? Scenes are generally preferable; they\u0027re more visual and",
-                                                "topic":  "Scene Tab"
-                                            },
-                                            {
-                                                "key":  "Q06",
-                                                "question":  "dramatic, and follow the \u0027show, don\u0027t tell\u0027 dictim.",
-                                                "topic":  "Scene Tab"
-                                            },
-                                            {
-                                                "key":  "Q06",
-                                                "question":  "Foreshortened prose provides lots of information and",
-                                                "topic":  "Scene Tab"
-                                            },
-                                            {
-                                                "key":  "Q06",
-                                                "question":  "compresses action, time or space, but is easier for the",
-                                                "topic":  "Scene Tab"
-                                            },
-                                            {
-                                                "key":  "Q06",
-                                                "question":  "reader to ignore.",
-                                                "topic":  "Scene Tab"
-                                            },
-                                            {
-                                                "key":  "Q07",
-                                                "question":  "Is your scene securely anchored with a setting,",
-                                                "topic":  "Scene Tab"
-                                            },
-                                            {
-                                                "key":  "Q07",
-                                                "question":  "and/or with physical objects for your characters to",
-                                                "topic":  "Scene Tab"
-                                            },
-                                            {
-                                                "key":  "Q07",
-                                                "question":  "handle (props)? Do the setting, time, and props",
-                                                "topic":  "Scene Tab"
-                                            },
-                                            {
-                                                "key":  "Q07",
-                                                "question":  "contribute to the scene\u0027s mood and emotional impact?",
-                                                "topic":  "Scene Tab"
-                                            },
-                                            {
-                                                "key":  "Q01",
-                                                "question":  "What\u0027s the purpose of this scene? Does it belong in",
-                                                "topic":  "Development Tab"
-                                            },
-                                            {
-                                                "key":  "Q01",
-                                                "question":  "the story? Does it belong at this location in the story",
-                                                "topic":  "Development Tab"
-                                            },
-                                            {
-                                                "key":  "Q01",
-                                                "question":  "(referring to its Narrative View placement)?",
-                                                "topic":  "Development Tab"
-                                            },
-                                            {
-                                                "key":  "Q02",
-                                                "question":  "Every scene must \u0027move the needle.\u0027 What changes for your",
-                                                "topic":  "Development Tab"
-                                            },
-                                            {
-                                                "key":  "Q02",
-                                                "question":  "scene\u0027s protagonist? For the story\u0027s protagonist?",
-                                                "topic":  "Development Tab"
-                                            },
-                                            {
-                                                "key":  "Q01",
-                                                "question":  "What is the protagonist trying to accomplish in",
-                                                "topic":  "Conflict Tab"
-                                            },
-                                            {
-                                                "key":  "Q01",
-                                                "question":  "this scene? What\u0027s his goal? How does it relate to",
-                                                "topic":  "Conflict Tab"
-                                            },
-                                            {
-                                                "key":  "Q01",
-                                                "question":  "the story or prolem goal? What\u0027s the opposition? What\u0027s",
-                                                "topic":  "Conflict Tab"
-                                            },
-                                            {
-                                                "key":  "Q01",
-                                                "question":  "the antagonist trying to accomplish? Have you used GMC",
-                                                "topic":  "Conflict Tab"
-                                            },
-                                            {
-                                                "key":  "Q01",
-                                                "question":  "(Goal, Motivation, Conflict) to develop this scene?",
-                                                "topic":  "Conflict Tab"
-                                            },
-                                            {
-                                                "key":  "Q04",
-                                                "question":  "Does the outcome of the current scene lead to",
-                                                "topic":  "Sequel Tab"
-                                            },
-                                            {
-                                                "key":  "Q04",
-                                                "question":  "the next?  If the outcome is the protagonist\u0027s failure",
-                                                "topic":  "Sequel Tab"
-                                            },
-                                            {
-                                                "key":  "Q04",
-                                                "question":  "to obtain his goal, what will he try next? If the",
-                                                "topic":  "Sequel Tab"
-                                            },
-                                            {
-                                                "key":  "Q04",
-                                                "question":  "outcome is success, what new twist or problem will be",
-                                                "topic":  "Sequel Tab"
-                                            },
-                                            {
-                                                "key":  "Q04",
-                                                "question":  "introduced?",
-                                                "topic":  "Sequel Tab"
-                                            },
-                                            {
-                                                "key":  "Q03",
-                                                "question":  "Does the outcome of the current scene serve your",
-                                                "topic":  "Sequel Tab"
-                                            },
-                                            {
-                                                "key":  "Q03",
-                                                "question":  "objectives for this section of the story?  (For example,",
-                                                "topic":  "Sequel Tab"
-                                            },
-                                            {
-                                                "key":  "Q03",
-                                                "question":  "if in the middle story (complications), the outcome of",
-                                                "topic":  "Sequel Tab"
-                                            },
-                                            {
-                                                "key":  "Q03",
-                                                "question":  "the scene should leave the protagonist further from his",
-                                                "topic":  "Sequel Tab"
-                                            },
-                                            {
-                                                "key":  "Q03",
-                                                "question":  "story goal than he was at the start of the scene.)  Are you:",
-                                                "topic":  "Sequel Tab"
-                                            },
-                                            {
-                                                "key":  "Q03",
-                                                "question":  "Establishing the situation?  Developing conflict?  At crisis?",
-                                                "topic":  "Sequel Tab"
-                                            },
-                                            {
-                                                "key":  "Q03",
-                                                "question":  "Note: ask this of Problems (for sequences) as well as scenes?",
-                                                "topic":  "Sequel Tab"
-                                            },
-                                            {
-                                                "key":  "Q05",
-                                                "question":  "What emotions motivate the protagonist at this",
-                                                "topic":  "Sequel Tab"
-                                            },
-                                            {
-                                                "key":  "Q05",
-                                                "question":  "point?  What does he feel?",
-                                                "topic":  "Sequel Tab"
-                                            },
-                                            {
-                                                "key":  "Q11",
-                                                "question":  "What happens next?  What if...?",
-                                                "topic":  "Sequel Tab"
-                                            },
-                                            {
-                                                "key":  "Q12",
-                                                "question":  "What\u0027s at stake?  Can the stakes be increased?",
-                                                "topic":  "Sequel Tab"
-                                            },
-                                            {
-                                                "key":  "Q13",
-                                                "question":  "Where are all of your characters right now?  What",
-                                                "topic":  "Sequel Tab"
-                                            },
-                                            {
-                                                "key":  "Q13",
-                                                "question":  "are they doing? What\u0027s going on off stage?",
-                                                "topic":  "Sequel Tab"
-                                            },
-                                            {
-                                                "key":  "Q14",
-                                                "question":  "Does the story start at the right place (During",
-                                                "topic":  "Sequel Tab"
-                                            },
-                                            {
-                                                "key":  "Q14",
-                                                "question":  "the crisis?  Just before the crisis?  After the crisis?)",
-                                                "topic":  "Sequel Tab"
-                                            },
-                                            {
-                                                "key":  "Q15",
-                                                "question":  "(Beginning:) Is there a narrative hook?  Does",
-                                                "topic":  "Sequel Tab"
-                                            },
-                                            {
-                                                "key":  "Q15",
-                                                "question":  "the story grab the reader\u0027s interest from the beginning?",
-                                                "topic":  "Sequel Tab"
-                                            },
-                                            {
-                                                "key":  "Q16",
-                                                "question":  "(Beginning:) Do the opening scenes introduce the",
-                                                "topic":  "Sequel Tab"
-                                            },
-                                            {
-                                                "key":  "Q16",
-                                                "question":  "protagonist?  The antagonist?  Are all characters in",
-                                                "topic":  "Sequel Tab"
-                                            },
-                                            {
-                                                "key":  "Q16",
-                                                "question":  "the opening significant?",
-                                                "topic":  "Sequel Tab"
-                                            },
-                                            {
-                                                "key":  "Q17",
-                                                "question":  "(Beginning:) Does the beginning introduce the",
-                                                "topic":  "Sequel Tab"
-                                            },
-                                            {
-                                                "key":  "Q17",
-                                                "question":  "story problem or premise? Is there an expectation",
-                                                "topic":  "Sequel Tab"
-                                            },
-                                            {
-                                                "key":  "Q17",
-                                                "question":  "of change?",
-                                                "topic":  "Sequel Tab"
-                                            },
-                                            {
-                                                "key":  "Q18",
-                                                "question":  "(Beginning:) Does the beginning provide an",
-                                                "topic":  "Sequel Tab"
-                                            },
-                                            {
-                                                "key":  "Q18",
-                                                "question":  "initial conflict?",
-                                                "topic":  "Sequel Tab"
-                                            },
-                                            {
-                                                "key":  "Q19",
-                                                "question":  "(Ending)  Does the ending answer the story",
-                                                "topic":  "Sequel Tab"
-                                            },
-                                            {
-                                                "key":  "Q19",
-                                                "question":  "question?",
-                                                "topic":  "Sequel Tab"
-                                            },
-                                            {
-                                                "key":  "Q20",
-                                                "question":  "(Ending:) Are the important story threads",
-                                                "topic":  "Sequel Tab"
-                                            },
-                                            {
-                                                "key":  "Q20",
-                                                "question":  "wrapped up?  Is there dramatic tension which was",
-                                                "topic":  "Sequel Tab"
-                                            },
-                                            {
-                                                "key":  "Q20",
-                                                "question":  "not released?  Should it have been?",
-                                                "topic":  "Sequel Tab"
-                                            },
-                                            {
-                                                "key":  "Q21",
-                                                "question":  "(Ending:)  Is the ending emotional?  Is there",
-                                                "topic":  "Sequel Tab"
-                                            },
-                                            {
-                                                "key":  "Q21",
-                                                "question":  "catharsis?",
-                                                "topic":  "Sequel Tab"
-                                            },
-                                            {
-                                                "key":  "Q22",
-                                                "question":  "How does the scene begin?",
-                                                "topic":  "Sequel Tab"
-                                            },
-                                            {
-                                                "key":  "Q23",
-                                                "question":  "How will the scene end?",
-                                                "topic":  "Sequel Tab"
-                                            },
-                                            {
-                                                "key":  "Q24",
-                                                "question":  "What is the protagonist\u0027s attitude during the",
-                                                "topic":  "Sequel Tab"
-                                            },
-                                            {
-                                                "key":  "Q24",
-                                                "question":  "scene?  How does he feel?",
-                                                "topic":  "Sequel Tab"
-                                            },
-                                            {
-                                                "key":  "Q25",
-                                                "question":  "What is the antagonist\u0027s attitude during the",
-                                                "topic":  "Sequel Tab"
-                                            },
-                                            {
-                                                "key":  "Q25",
-                                                "question":  "scene? How does he feel?",
-                                                "topic":  "Sequel Tab"
-                                            }
-                                        ],
-                         "Character":  [
-                                           {
-                                               "key":  "Q08",
-                                               "question":  "What is the character\u0027s role in the story?  Does",
-                                               "topic":  "Role Tab"
-                                           },
-                                           {
-                                               "key":  "Q08",
-                                               "question":  "the character fit the role?  If not, which will",
-                                               "topic":  "Role Tab"
-                                           },
-                                           {
-                                               "key":  "Q08",
-                                               "question":  "you change: the story or the character?",
-                                               "topic":  "Role Tab"
-                                           },
-                                           {
-                                               "key":  "Q09",
-                                               "question":  "Is your character fleshed out? Does she have the",
-                                               "topic":  "Physical and Appearance Tabs"
-                                           },
-                                           {
-                                               "key":  "Q09",
-                                               "question":  "dimensionality of a real person, with physical,",
-                                               "topic":  "Physical and Appearance Tabs"
-                                           },
-                                           {
-                                               "key":  "Q09",
-                                               "question":  "social, and psychological qualities? Can you",
-                                               "topic":  "Physical and Appearance Tabs"
-                                           },
-                                           {
-                                               "key":  "Q09",
-                                               "question":  "visualize her?",
-                                               "topic":  "Physical and Appearance Tabs"
-                                           },
-                                           {
-                                               "key":  "Q02",
-                                               "question":  "Does your character have character traits which",
-                                               "topic":  "Psychological and Inner Traits Tabs"
-                                           },
-                                           {
-                                               "key":  "Q02",
-                                               "question":  "are central to her outlook and behavior- which",
-                                               "topic":  "Psychological and Inner Traits Tabs"
-                                           },
-                                           {
-                                               "key":  "Q02",
-                                               "question":  "define her character?",
-                                               "topic":  "Psychological and Inner Traits Tabs"
-                                           },
-                                           {
-                                               "key":  "Q03",
-                                               "question":  "What is there about this character that will",
-                                               "topic":  "Psychological and Inner Traits Tabs"
-                                           },
-                                           {
-                                               "key":  "Q03",
-                                               "question":  "make the reader or audience care about him?  What",
-                                               "topic":  "Psychological and Inner Traits Tabs"
-                                           },
-                                           {
-                                               "key":  "Q03",
-                                               "question":  "will gain the reader\u0027s sympathy or animosity?",
-                                               "topic":  "Psychological and Inner Traits Tabs"
-                                           },
-                                           {
-                                               "key":  "Q04",
-                                               "question":  "What is there about the character which will",
-                                               "topic":  "Psychological and Inner Traits Tabs"
-                                           },
-                                           {
-                                               "key":  "Q04",
-                                               "question":  "create or sustain conflict?  The character\u0027s",
-                                               "topic":  "Psychological and Inner Traits Tabs"
-                                           },
-                                           {
-                                               "key":  "Q04",
-                                               "question":  "motivation?  His purpose or desire?  A trait which needs",
-                                               "topic":  "Psychological and Inner Traits Tabs"
-                                           },
-                                           {
-                                               "key":  "Q04",
-                                               "question":  "altering?  A trait which contrasts with a trait in",
-                                               "topic":  "Psychological and Inner Traits Tabs"
-                                           },
-                                           {
-                                               "key":  "Q04",
-                                               "question":  "another character?",
-                                               "topic":  "Psychological and Inner Traits Tabs"
-                                           },
-                                           {
-                                               "key":  "Q05",
-                                               "question":  "Does your character have both good and bad",
-                                               "topic":  "Flaw Tab"
-                                           },
-                                           {
-                                               "key":  "Q05",
-                                               "question":  "qualities?  What facets of this character",
-                                               "topic":  "Flaw Tab"
-                                           },
-                                           {
-                                               "key":  "Q05",
-                                               "question":  "contradict other facets?",
-                                               "topic":  "Flaw Tab"
-                                           },
-                                           {
-                                               "key":  "Q06",
-                                               "question":  "What story situations might provoke the",
-                                               "topic":  "Flaw Tab"
-                                           },
-                                           {
-                                               "key":  "Q06",
-                                               "question":  "protagonist (or antagonist) to extreme measures",
-                                               "topic":  "Flaw Tab"
-                                           },
-                                           {
-                                               "key":  "Q06",
-                                               "question":  "or acts?  How will she react in crisis?",
-                                               "topic":  "Flaw Tab"
-                                           },
-                                           {
-                                               "key":  "Q07",
-                                               "question":  "How does your character feel about the other",
-                                               "topic":  "Relationships"
-                                           },
-                                           {
-                                               "key":  "Q07",
-                                               "question":  "characters? What is their relationship?",
-                                               "topic":  "Relationships"
-                                           },
-                                           {
-                                               "key":  "Q10",
-                                               "question":  "Are your character\u0027s traits consistent with his",
-                                               "topic":  "Backstory"
-                                           },
-                                           {
-                                               "key":  "Q10",
-                                               "question":  "background, as cause and/or effect?",
-                                               "topic":  "Backstory"
-                                           },
-                                           {
-                                               "key":  "Q11",
-                                               "question":  "Is your cast too large, or too small?  Will",
-                                               "topic":  "General Questions"
-                                           },
-                                           {
-                                               "key":  "Q11",
-                                               "question":  "introducing or eliminating characters make a more",
-                                               "topic":  "General Questions"
-                                           },
-                                           {
-                                               "key":  "Q11",
-                                               "question":  "effective story?  If you need to eliminate a role, have",
-                                               "topic":  "General Questions"
-                                           },
-                                           {
-                                               "key":  "Q11",
-                                               "question":  "you considered combining several characters into one?",
-                                               "topic":  "General Questions"
-                                           }
-                                       ]
-                     },
-    "beatSheets":  [
+    "keyQuestions": {
+      "Story Overview": [
+        {
+          "key": "Q01",
+          "topic": "Story Idea",
+          "question": "Does the story idea have the force it will need to lead to"
+        },
+        {
+          "key": "Q02",
+          "topic": "Story Idea",
+          "question": "Are you the right person to tell this story? Do you believe in it?"
+        },
+        {
+          "key": "Q01",
+          "topic": "Concept",
+          "question": "Is your concept posed in the form of a story question? In Larry Brooks' definition, a concept is an idea that asks a question that implies conflict. An idea is just an idea; a concept is the seed of a story. Spend time fleshing out your concept."
+        },
+        {
+          "key": "Q01",
+          "topic": "Structure",
+          "question": "Do you understand the story type, it's lengths, intended effect, and potential markets?"
+        },
+        {
+          "key": "Q02",
+          "topic": "Structure",
+          "question": "Have you given sufficient thought to Viewpoint? Point of view is the most important single structural decision of your story, the voice through which you tell your tale. Not only person, but tense, tone (ironic, bitter, etc), reliability, the POV character's sophistication or naivity- endless variations are possible. POV choice should be made early, as it can affect every scene in your story."
+        },
+        {
+          "key": "Q03",
+          "topic": "Structure",
+          "question": "Who is your audience? Who are you telling your story to?"
+        },
+        {
+          "key": "Q04",
+          "topic": "Structure",
+          "question": "Do you know, or are you prepared to learn, something about the subject?"
+        },
+        {
+          "key": "Q05",
+          "topic": "Structure",
+          "question": "What is your aim? What are you trying to accomplish?"
+        },
+        {
+          "key": "Q06",
+          "topic": "Structure",
+          "question": "What form will your story take? (Play, novel, short story, etc.) Are you familiar with this form?"
+        }
+      ],
+      "Setting": [
+        {
+          "key": "Q01",
+          "question": "Is the setting clear in terms of time and location?",
+          "topic": "Setting Tab"
+        },
+        {
+          "key": "Q02",
+          "question": "Does the setting appeal to the senses? Does it appeal to all of the senses, and not just sight?",
+          "topic": "Sensations Tab"
+        },
+        {
+          "key": "Q03",
+          "question": "Does this setting create mood and atmosphere appropriate to the scenes being portrayed here?",
+          "topic": "Sensations Tab"
+        }
+      ],
+      "Problem": [
+        {
+          "key": "Q01",
+          "question": "Is the struggle between opposing forces clearly recognizable? If the story is one of man against himself (internal conflict), your protagonist must be his own antagonist. If society or nature is the opponent, is it squarely against the protagonist's goal?",
+          "topic": "Protagonist / Antagonist Tabs"
+        },
+        {
+          "key": "Q02",
+          "question": "What does your protagonist have at stake? What goal or desire matters more to him than anything? What drives this person?",
+          "topic": "Protagonist / Antagonist Tabs"
+        },
+        {
+          "key": "Q03",
+          "question": "Your audience should usually empathize with your protagonist. Which qualities will gain the empathy or sympathy of the audience?",
+          "topic": "Protagonist / Antagonist Tabs"
+        },
+        {
+          "key": "Q04",
+          "question": "Character, as well as plot, can create conflict. Does the protagonist have traits which contrast and oppose traits of the antagonist?",
+          "topic": "Protagonist / Antagonist Tabs"
+        },
+        {
+          "key": "Q05",
+          "question": "Your protagonist should be capable of growth and change. Which trait, belief or habit is the weakness, or contains the contradiction, that this person must change? This is his 'inner problem.'",
+          "topic": "Protagonist / Antagonist Tabs"
+        },
+        {
+          "key": "Q06",
+          "question": "What does your antagonist have at stake? What goal or desire matters more to him than anything? What drives this person?",
+          "topic": "Protagonist / Antagonist Tabs"
+        },
+        {
+          "key": "Q07",
+          "question": "Is your antagonist a worthy opponent? Does he believe in his own goal? Is he forced to behave as he does? Does he have sufficient will and drive? Are the protagonist and the antagonist evenly matched?",
+          "topic": "Protagonist / Antagonist Tabs"
+        },
+        {
+          "key": "Q08",
+          "question": "How would you describe the relationship between the protagonist and the antagonist? Will it change during the course of the story?",
+          "topic": "Protagonist / Antagonist Tabs"
+        },
+        {
+          "key": "Q09",
+          "question": "What does the character have at stake? What is his purpose or desire? What is he willing to do to achieve it? What motivates him?",
+          "topic": "Protagonist / Antagonist Tabs"
+        },
+        {
+          "key": "Q09",
+          "question": "What is your problem's premise? Can you summarize the problem?",
+          "topic": "Resolution Tab"
+        },
+        {
+          "key": "Q10",
+          "question": "What is your problem's theme? What are you setting out to prove? What does it all mean?",
+          "topic": "Resolution Tab"
+        },
+        {
+          "key": "Q11",
+          "question": "Do you know which is your main or story problem? When that problem is resolved, the story's over.",
+          "topic": "Resolution Tab"
+        },
+        {
+          "key": "Q12",
+          "question": "Can you visualize your problem's resolution as a scene? Does it match your premise?",
+          "topic": "Resolution Tab"
+        },
+        {
+          "key": "Q13",
+          "question": "Do you protagonist and antagonist have traits and values which support your premise?",
+          "topic": "Resolution Tab"
+        }
+      ],
+      "Plot Point": [
+        {
+          "key": "Q09",
+          "question": "Are there scene templates (MasterPlots) for scenes to use under a Problem? Have you used the MasterPlots tool?",
+          "topic": "General (Plot Point Selection)"
+        },
+        {
+          "key": "Q09",
+          "question": "Are there Dramatic Situations which can provide a Plot Point (or Problem) relevant to the story?",
+          "topic": "General (Plot Point Selection)"
+        },
+        {
+          "key": "Q10",
+          "question": "Are there set pieces (Stock Scenes) which the reader will expect in a story of this type? Have you considered the Stock Scenes tool?",
+          "topic": "General (Plot Point Selection)"
+        },
+        {
+          "key": "Q01",
+          "question": "Does this scene follow causally from the preceeding scene?",
+          "topic": "Scene Tab"
+        },
+        {
+          "key": "Q09",
+          "question": "Are you plotting for dramatic tension? Are you: taking your time resuming interrupted scenes? Leaving uncertainty as to motives, comments, or actions? Stretching out or prolonging successful outcomes? Offering poor choices and incomplete resolutions in scenes? Using a deadline or 'ticking clock'? Varying scene length and/or type?",
+          "topic": "Scene Tab"
+        },
+        {
+          "key": "Q08",
+          "question": "What future conflict or story events should you foreshadow in this scene?",
+          "topic": "Scene Tab"
+        },
+        {
+          "key": "Q06",
+          "question": "Should you plan to tell the current plot point as a scene, or as foreshortened prose (narrative summary)? Scenes are generally preferable; they're more visual and dramatic, and follow the 'show, don't tell' dictim. Foreshortened prose provides lots of information and compresses action, time or space, but is easier for the reader to ignore.",
+          "topic": "Scene Tab"
+        },
+        {
+          "key": "Q07",
+          "question": "Is your scene securely anchored with a setting, and/or with physical objects for your characters to handle (props)? Do the setting, time, and props contribute to the scene's mood and emotional impact?",
+          "topic": "Scene Tab"
+        },
+        {
+          "key": "Q01",
+          "question": "What's the purpose of this scene? Does it belong in the story? Does it belong at this location in the story (referring to its Narrative View placement)?",
+          "topic": "Development Tab"
+        },
+        {
+          "key": "Q02",
+          "question": "Every scene must 'move the needle.' What changes for your scene's protagonist? For the story's protagonist?",
+          "topic": "Development Tab"
+        },
+        {
+          "key": "Q01",
+          "question": "What is the protagonist trying to accomplish in this scene? What's his goal? How does it relate to the story or prolem goal? What's the opposition? What's the antagonist trying to accomplish? Have you used GMC (Goal, Motivation, Conflict) to develop this scene?",
+          "topic": "Conflict Tab"
+        },
+        {
+          "key": "Q04",
+          "question": "Does the outcome of the current scene lead to the next? If the outcome is the protagonist's failure to obtain his goal, what will he try next? If the outcome is success, what new twist or problem will be introduced?",
+          "topic": "Sequel Tab"
+        },
+        {
+          "key": "Q03",
+          "question": "Does the outcome of the current scene serve your objectives for this section of the story? (For example, if in the middle story (complications), the outcome of the scene should leave the protagonist further from his story goal than he was at the start of the scene.) Are you: Establishing the situation? Developing conflict? At crisis? Note: ask this of Problems (for sequences) as well as scenes?",
+          "topic": "Sequel Tab"
+        },
+        {
+          "key": "Q05",
+          "question": "What emotions motivate the protagonist at this point? What does he feel?",
+          "topic": "Sequel Tab"
+        },
+        {
+          "key": "Q11",
+          "question": "What happens next? What if...?",
+          "topic": "Sequel Tab"
+        },
+        {
+          "key": "Q12",
+          "question": "What's at stake? Can the stakes be increased?",
+          "topic": "Sequel Tab"
+        },
+        {
+          "key": "Q13",
+          "question": "Where are all of your characters right now? What are they doing? What's going on off stage?",
+          "topic": "Sequel Tab"
+        },
+        {
+          "key": "Q14",
+          "question": "Does the story start at the right place (During the crisis? Just before the crisis? After the crisis?)",
+          "topic": "Sequel Tab"
+        },
+        {
+          "key": "Q15",
+          "question": "(Beginning:) Is there a narrative hook? Does the story grab the reader's interest from the beginning?",
+          "topic": "Sequel Tab"
+        },
+        {
+          "key": "Q16",
+          "question": "(Beginning:) Do the opening scenes introduce the protagonist? The antagonist? Are all characters in the opening significant?",
+          "topic": "Sequel Tab"
+        },
+        {
+          "key": "Q17",
+          "question": "(Beginning:) Does the beginning introduce the story problem or premise? Is there an expectation of change?",
+          "topic": "Sequel Tab"
+        },
+        {
+          "key": "Q18",
+          "question": "(Beginning:) Does the beginning provide an initial conflict?",
+          "topic": "Sequel Tab"
+        },
+        {
+          "key": "Q19",
+          "question": "(Ending) Does the ending answer the story question?",
+          "topic": "Sequel Tab"
+        },
+        {
+          "key": "Q20",
+          "question": "(Ending:) Are the important story threads wrapped up? Is there dramatic tension which was not released? Should it have been?",
+          "topic": "Sequel Tab"
+        },
+        {
+          "key": "Q21",
+          "question": "(Ending:) Is the ending emotional? Is there catharsis?",
+          "topic": "Sequel Tab"
+        },
+        {
+          "key": "Q22",
+          "question": "How does the scene begin?",
+          "topic": "Sequel Tab"
+        },
+        {
+          "key": "Q23",
+          "question": "How will the scene end?",
+          "topic": "Sequel Tab"
+        },
+        {
+          "key": "Q24",
+          "question": "What is the protagonist's attitude during the scene? How does he feel?",
+          "topic": "Sequel Tab"
+        },
+        {
+          "key": "Q25",
+          "question": "What is the antagonist's attitude during the scene? How does he feel?",
+          "topic": "Sequel Tab"
+        }
+      ],
+      "Character": [
+        {
+          "key": "Q08",
+          "question": "What is the character's role in the story? Does the character fit the role? If not, which will you change: the story or the character?",
+          "topic": "Role Tab"
+        },
+        {
+          "key": "Q09",
+          "question": "Is your character fleshed out? Does she have the dimensionality of a real person, with physical, social, and psychological qualities? Can you visualize her?",
+          "topic": "Physical and Appearance Tabs"
+        },
+        {
+          "key": "Q02",
+          "question": "Does your character have character traits which are central to her outlook and behavior- which define her character?",
+          "topic": "Psychological and Inner Traits Tabs"
+        },
+        {
+          "key": "Q03",
+          "question": "What is there about this character that will make the reader or audience care about him? What will gain the reader's sympathy or animosity?",
+          "topic": "Psychological and Inner Traits Tabs"
+        },
+        {
+          "key": "Q04",
+          "question": "What is there about the character which will create or sustain conflict? The character's motivation? His purpose or desire? A trait which needs altering? A trait which contrasts with a trait in another character?",
+          "topic": "Psychological and Inner Traits Tabs"
+        },
+        {
+          "key": "Q05",
+          "question": "Does your character have both good and bad qualities? What facets of this character contradict other facets?",
+          "topic": "Flaw Tab"
+        },
+        {
+          "key": "Q06",
+          "question": "What story situations might provoke the protagonist (or antagonist) to extreme measures or acts? How will she react in crisis?",
+          "topic": "Flaw Tab"
+        },
+        {
+          "key": "Q07",
+          "question": "How does your character feel about the other characters? What is their relationship?",
+          "topic": "Relationships"
+        },
+        {
+          "key": "Q10",
+          "question": "Are your character's traits consistent with his background, as cause and/or effect?",
+          "topic": "Backstory"
+        },
+        {
+          "key": "Q11",
+          "question": "Is your cast too large, or too small? Will introducing or eliminating characters make a more effective story? If you need to eliminate a role, have you considered combining several characters into one?",
+          "topic": "General Questions"
+        }
+      ]
+    },
+  "beatSheets":  [
                        {
                            "scenes":  [
                                           {
