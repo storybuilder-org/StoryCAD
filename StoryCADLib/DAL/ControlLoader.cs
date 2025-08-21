@@ -1,6 +1,7 @@
 ﻿using StoryCAD.Models.Tools;
 using System.Reflection;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace StoryCAD.DAL;
 
@@ -15,7 +16,13 @@ public class ControlLoader
             await using Stream internalResourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("StoryCAD.Assets.Install.Controls.json");
             using StreamReader reader = new(internalResourceStream);
             var json = await reader.ReadToEndAsync();
-            _controlsData = JsonSerializer.Deserialize<ControlsJsonData>(json);
+            
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            };
+            
+            _controlsData = JsonSerializer.Deserialize<ControlsJsonData>(json, options);
         }
         catch (Exception _ex) 
         {
@@ -66,7 +73,10 @@ public class ControlLoader
     // JSON data classes
     private class ControlsJsonData
     {
+        [JsonPropertyName("conflictTypes")]
         public List<ConflictTypeData> ConflictTypes { get; set; }
+        
+        [JsonPropertyName("relationTypes")]
         public List<string> RelationTypes { get; set; }
     }
     

@@ -18,6 +18,10 @@ public class ToolsData
     public List<PlotPatternModel> MasterPlotsSource;
     public List<PlotPatternModel> BeatSheetSource;
     public SortedDictionary<string, DramaticSituationModel> DramaticSituationsSource;
+    public ObservableCollection<string> MaleFirstNamesSource;
+    public ObservableCollection<string> FemaleFirstNamesSource;
+    public ObservableCollection<string> LastNamesSource;
+    public ObservableCollection<string> RelationshipsSource;
 
     public ToolsData() {
         try
@@ -33,14 +37,22 @@ public class ToolsData
                 MasterPlotsSource = (List<PlotPatternModel>)Tools[3];
                 BeatSheetSource = (List<PlotPatternModel>)Tools[4];
                 DramaticSituationsSource = (SortedDictionary<string, DramaticSituationModel>)Tools[5];
+                MaleFirstNamesSource = (ObservableCollection<string>)Tools[6];
+                FemaleFirstNamesSource = (ObservableCollection<string>)Tools[7];
+                LastNamesSource = (ObservableCollection<string>)Tools[8];
+                RelationshipsSource = (ObservableCollection<string>)Tools[9];
             }).Wait();
             _log.Log(LogLevel.Info, $"""
                                     {KeyQuestionsSource.Keys.Count} Key Questions created
                                     {StockScenesSource.Keys.Count} Stock Scenes created
                                     {TopicsSource.Count} Topics created
                                     {MasterPlotsSource.Count} Master Plots created
-                                    {BeatSheetSource.Count} Master Plots created
+                                    {BeatSheetSource.Count} Beat Sheets created
                                     {DramaticSituationsSource.Count} Dramatic Situations created
+                                    {MaleFirstNamesSource.Count} Male First Names loaded
+                                    {FemaleFirstNamesSource.Count} Female First Names loaded
+                                    {LastNamesSource.Count} Last Names loaded
+                                    {RelationshipsSource.Count} Relationships loaded
                                     """);
 
         }

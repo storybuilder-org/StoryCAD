@@ -28,7 +28,11 @@ public class ToolLoader
                 LoadTopics(),
                 LoadMasterPlots(),
                 LoadBeatsheets(),
-                LoadDramaticSituations()
+                LoadDramaticSituations(),
+                LoadMaleFirstNames(),
+                LoadFemaleFirstNames(),
+                LoadLastNames(),
+                LoadRelationships()
             };
 
             Clear();
@@ -219,6 +223,42 @@ public class ToolLoader
         return dramaticSituations;
     }
 
+    public ObservableCollection<string> LoadMaleFirstNames()
+    {
+        if (_toolsData?.MaleFirstNames != null)
+        {
+            return new ObservableCollection<string>(_toolsData.MaleFirstNames);
+        }
+        return new ObservableCollection<string>();
+    }
+
+    public ObservableCollection<string> LoadFemaleFirstNames()
+    {
+        if (_toolsData?.FemaleFirstNames != null)
+        {
+            return new ObservableCollection<string>(_toolsData.FemaleFirstNames);
+        }
+        return new ObservableCollection<string>();
+    }
+
+    public ObservableCollection<string> LoadLastNames()
+    {
+        if (_toolsData?.LastNames != null)
+        {
+            return new ObservableCollection<string>(_toolsData.LastNames);
+        }
+        return new ObservableCollection<string>();
+    }
+
+    public ObservableCollection<string> LoadRelationships()
+    {
+        if (_toolsData?.Relationships != null)
+        {
+            return new ObservableCollection<string>(_toolsData.Relationships);
+        }
+        return new ObservableCollection<string>();
+    }
+
     public void Clear() { _toolsData = null; }
 
     // JSON data classes
@@ -241,6 +281,18 @@ public class ToolLoader
         
         [JsonPropertyName("dramaticSituations")]
         public Dictionary<string, DramaticSituationData> DramaticSituations { get; set; }
+        
+        [JsonPropertyName("MaleFirstNames")]
+        public List<string> MaleFirstNames { get; set; }
+        
+        [JsonPropertyName("FemaleFirstNames")]
+        public List<string> FemaleFirstNames { get; set; }
+        
+        [JsonPropertyName("LastNames")]
+        public List<string> LastNames { get; set; }
+        
+        [JsonPropertyName("Relationships")]
+        public List<string> Relationships { get; set; }
     }
     
     private class KeyQuestionData
