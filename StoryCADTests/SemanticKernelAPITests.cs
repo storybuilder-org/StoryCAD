@@ -317,7 +317,7 @@ public class SemanticKernelApiTests
         Assert.IsTrue(writeResult.IsSuccess, "WriteOutline should succeed.");
 
         // Act: Create a new API instance and open the written file.
-        var newApi = Ioc.Default.GetRequiredService<SemanticKernelApi>();
+        var newApi = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>());
         var openResult = await newApi.OpenOutline(filePath);
 
         // Assert
