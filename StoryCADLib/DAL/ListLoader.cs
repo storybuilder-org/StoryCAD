@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.Reflection;
+using System.Text.Json;
 
 namespace StoryCAD.DAL;
 
@@ -11,33 +12,22 @@ public class ListLoader
     {
         Dictionary<string, ObservableCollection<string>> _lists = new();
 
-        await using Stream internalResourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("StoryCAD.Assets.Install.Lists.ini");
+        await using Stream internalResourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("StoryCAD.Assets.Install.Lists.json");
         using StreamReader reader = new(internalResourceStream);
 
-        // Read the Application .INI file. Each record is the format 'KeyWord=Keyvalue'.
-        // As each record is read, it's moved to the corresponding initialization
-        // structure field or loaded as an initialization value for a control
-        string _text = await reader.ReadToEndAsync();
-        StringReader _sr = new(_text);
-        // ReSharper disable once MoveVariableDeclarationInsideLoopCondition
-        string _line; //Not Inlining to keep code readability
-        while ((_line = await _sr.ReadLineAsync()) != null)
+        // Read the JSON file and deserialize it
+        string json = await reader.ReadToEndAsync();
+        var jsonLists = JsonSerializer.Deserialize<Dictionary<string, List<string>>>(json);
+        
+        // Convert to ObservableCollection format
+        if (jsonLists != null)
         {
-            _line = _line.TrimEnd();
-            if (_line.Equals(string.Empty))
-                continue;
-            if (_line.StartsWith(";")) // Comment
-                continue;
-            if (_line.Contains("="))
+            foreach (var kvp in jsonLists)
             {
-                string[] _tokens = _line.Split(new[] { '=' });
-                string _keyword = _tokens[0];
-                string _keyvalue = _tokens[1];
-                if (!_lists.ContainsKey(_keyword))
-                    _lists.Add(_keyword, new ObservableCollection<string>());
-                _lists[_keyword].Add(_keyvalue);
+                _lists[kvp.Key] = new ObservableCollection<string>(kvp.Value);
             }
         }
+        
         return _lists;
     }
     #endregion

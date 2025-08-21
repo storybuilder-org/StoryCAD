@@ -40,22 +40,38 @@ namespace StoryCAD.ViewModels
                 }).Wait();
 
                 _log.Log(LogLevel.Info, "ConflictType Counts");
-                _log.Log(LogLevel.Info,
-                    $"{ConflictTypes.Keys.Count} ConflictType keys created");
-                foreach (ConflictCategoryModel type in ConflictTypes.Values)
+                if (ConflictTypes != null)
+                {
+                    _log.Log(LogLevel.Info,
+                        $"{ConflictTypes.Keys.Count} ConflictType keys created");
+                }
+                
+                if (RelationTypes != null)
+                {
+                    _log.Log(LogLevel.Info,
+                        $"{RelationTypes.Count} RelationTypes loaded");
+                }
+                
+                if (ConflictTypes != null)
+                {
+                    foreach (ConflictCategoryModel type in ConflictTypes.Values)
                 {
                     subTypeCount += type.SubCategories.Count;
                     exampleCount += type.SubCategories.Sum(subType => type.Examples[subType].Count);
+                    }
+                    _log.Log(LogLevel.Info,
+                        $"{subTypeCount} Total ConflictSubType keys created");
+                    _log.Log(LogLevel.Info,
+                        $"{exampleCount} Total ConflictSubType keys created");
                 }
-                _log.Log(LogLevel.Info,
-                    $"{subTypeCount} Total ConflictSubType keys created");
-                _log.Log(LogLevel.Info,
-                    $"{exampleCount} Total ConflictSubType keys created");
             }
             catch (Exception ex)
             {
-                _log.LogException(LogLevel.Error, ex, "Error loading Controls.ini");
-                Application.Current.Exit();
+                _log.LogException(LogLevel.Error, ex, "Error loading controls data");
+                if (Application.Current != null)
+                {
+                    Application.Current.Exit();
+                }
             }
         }
     }

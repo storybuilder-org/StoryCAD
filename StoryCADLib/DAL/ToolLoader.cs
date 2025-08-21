@@ -1,13 +1,15 @@
 ﻿using System.Collections.ObjectModel;
 using StoryCAD.Models.Tools;
 using System.Reflection;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace StoryCAD.DAL;
 
 public class ToolLoader
 {
     private readonly ILogService _logger;
-    private IList<string> _lines;
+    private ToolsJsonData _toolsData;
 
     public ToolLoader(ILogService logger)
     {
@@ -17,9 +19,10 @@ public class ToolLoader
     {
         try
         {
-            await using Stream internalResourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("StoryCAD.Assets.Install.Tools.ini");
+            await using Stream internalResourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("StoryCAD.Assets.Install.Tools.json");
             using StreamReader reader = new(internalResourceStream);
-            _lines = (await reader.ReadToEndAsync()).Split("\n");
+            var json = await reader.ReadToEndAsync();
+            _toolsData = JsonSerializer.Deserialize<ToolsJsonData>(json);
 
             // Populate tool data source collections
             List<object> Tools = new()
@@ -29,369 +32,342 @@ public class ToolLoader
                 LoadTopics(),
                 LoadMasterPlots(),
                 LoadBeatsheets(),
-                LoadDramaticSituations()
+                LoadDramaticSituations(),
+                LoadMaleFirstNames(),
+                LoadFemaleFirstNames(),
+                LoadLastNames(),
+                LoadRelationships()
             };
 
             Clear();
             return Tools;
         }
-        catch (Exception _ex) { _logger.LogException(LogLevel.Error, _ex, "Error Initializing tool loader"); }
+        catch (Exception _ex) 
+        { 
+            _logger.LogException(LogLevel.Error, _ex, "Error Initializing tool loader"); 
+        }
         return null;
     }
 
     public Dictionary<string, List<KeyQuestionModel>> LoadKeyQuestions()
     {
-        string _previousKey = string.Empty;
-        KeyQuestionModel _current = null;
-        string _section = string.Empty;
-        string _keyword = string.Empty;
-        string _keyValue = string.Empty;
-        string _element = string.Empty;
-        string _topic = string.Empty;
-        Dictionary<string, List<KeyQuestionModel>> _questions = new();
-        foreach (string _line in _lines)
+        var questions = new Dictionary<string, List<KeyQuestionModel>>();
+        
+        if (_toolsData?.KeyQuestions != null)
         {
-            ParseLine(_line, ref _section, ref _keyword, ref _keyValue);
-            //   Process the parsed values
-            switch (_section)
+            foreach (var kvp in _toolsData.KeyQuestions)
             {
-                case "Key Questions":
-                    switch (_keyword)
+                questions[kvp.Key] = new List<KeyQuestionModel>();
+                foreach (var q in kvp.Value)
+                {
+                    questions[kvp.Key].Add(new KeyQuestionModel
                     {
-                        case "$SECTION$":
-                            break;
-                        case "Element":  // new list of questions for each StoryElement (Overview, Problem, etc.)
-                            _element = _keyValue;
-                            _questions.Add(_element, new List<KeyQuestionModel>());
-                            break;
-                        case "Topic":
-                            _topic = _keyValue;
-                            break;
-                        default:
-                            if (!_keyword.Equals(_previousKey))
-                            {
-                                _current = new KeyQuestionModel
-                                {
-                                    Key = _keyword,
-                                    Element = _element,
-                                    Topic = _topic,
-                                    Question = _keyValue
-                                };
-                                _questions[_element].Add(_current);
-                                _previousKey = _keyword;
-                            }
-                            else
-                            {
-                                _current!.Question = _current.Question + " " + _keyValue;
-                            }
-                            break;
-                    }
-                    break;
+                        Key = q.Key,
+                        Element = kvp.Key,
+                        Topic = q.Topic,
+                        Question = q.Question
+                    });
+                }
             }
         }
-        return _questions;
+        
+        return questions;
     }
 
     public SortedDictionary<string, ObservableCollection<string>> LoadStockScenes()
     {
-        string _stockSceneCategory = string.Empty;
-        string _section = string.Empty;
-        string _keyword = string.Empty;
-        string _keyvalue = string.Empty;
-        SortedDictionary<string, ObservableCollection<string>> _stockScenes = new();
-        foreach (string _line in _lines)
+        var stockScenes = new SortedDictionary<string, ObservableCollection<string>>();
+        
+        if (_toolsData?.StockScenes != null)
         {
-            ParseLine(_line, ref _section, ref _keyword, ref _keyvalue);
-            //   Process the parsed values
-            switch (_section)
+            foreach (var kvp in _toolsData.StockScenes)
             {
-                case "Stock Scenes":
-                    switch (_keyword)
-                    {
-                        case "":
-                            break;
-                        case "Title":
-                            _stockScenes.Add(_keyvalue, new ObservableCollection<string>());
-                            _stockSceneCategory = _keyvalue;
-                            break;
-                        case "Scene":
-                            _stockScenes[_stockSceneCategory].Add(_keyvalue);
-                            break;
-                    }
-                    break;
+                stockScenes[kvp.Key] = new ObservableCollection<string>(kvp.Value);
             }
         }
-        return _stockScenes;
+        
+        return stockScenes;
     }
 
     public SortedDictionary<string, TopicModel> LoadTopics()
     {
-        string _topicName = string.Empty;
-        TopicModel _currentTopic = null;
-        SubTopicModel _currentSubTopic = null;
-        SortedDictionary<string, TopicModel> _topics = new();
-        string _section = string.Empty;
-        string _keyword = string.Empty;
-        string _keyvalue = string.Empty;
-        foreach (string _line in _lines)
+        var topics = new SortedDictionary<string, TopicModel>();
+        
+        if (_toolsData?.Topics != null)
         {
-            ParseLine(_line, ref _section, ref _keyword, ref _keyvalue);
-            //   Process the parsed values
-            switch (_section)
+            foreach (var kvp in _toolsData.Topics)
             {
-                case "Topic Information":
-                    switch (_keyword)
+                var topicData = kvp.Value;
+                
+                if (topicData.Type == "notepad")
+                {
+                    string path = topicData.Filename.IndexOf('\\') >= 0 
+                        ? topicData.Filename 
+                        : Path.Combine(Path.GetTempPath(), topicData.Filename);
+                    topics[kvp.Key] = new TopicModel(kvp.Key, path);
+                }
+                else if (topicData.Type == "inline" && topicData.SubTopics != null)
+                {
+                    var topicModel = new TopicModel(kvp.Key);
+                    foreach (var subTopic in topicData.SubTopics)
                     {
-                        case "":
-                            break;
-                        case "Topic":
-                            _topicName = _keyvalue;
-                            _currentSubTopic = null;
-                            break;
-                        case "Notepad":
-                            string _path = _keyvalue.IndexOf('\\') >= 0 ? _keyvalue : Path.Combine(Path.GetTempPath(), _keyvalue);
-                            _topics.Add(_topicName, new TopicModel(_topicName, _path));
-                            break;
-                        case "Subtopic":
-                            if (_currentSubTopic == null)
-                            {
-                                _currentTopic = new TopicModel(_topicName);
-                                _topics.Add(_topicName, _currentTopic);
-                            }
-                            _currentSubTopic = new SubTopicModel(_keyvalue);
-                            _currentTopic!.SubTopics.Add(_currentSubTopic);
-                            break;
-                        case "Remarks":
-                            if (_currentSubTopic!.SubTopicNotes.Equals(string.Empty))
-                                _currentSubTopic.SubTopicNotes = _keyvalue;
-                            else
-                            {
-                                if (!_currentSubTopic.SubTopicNotes.EndsWith(" "))
-                                    _currentSubTopic.SubTopicNotes += " ";
-                                _currentSubTopic.SubTopicNotes += _keyvalue;
-                            }
-                            break;
+                        topicModel.SubTopics.Add(new SubTopicModel(subTopic.Name)
+                        {
+                            SubTopicNotes = subTopic.Notes ?? string.Empty
+                        });
                     }
-                    break;
+                    topics[kvp.Key] = topicModel;
+                }
             }
         }
-        return _topics;
+        
+        return topics;
     }
 
     public List<PlotPatternModel> LoadMasterPlots()
     {
-        PlotPatternModel _currentMasterPlot = null;
-        PlotPatternScene _currentPlotPatternScene = null;
-        List<PlotPatternModel> _masterPlots = new();
-        string _section = string.Empty;
-        string _keyword = string.Empty;
-        string _keyvalue = string.Empty;
-        foreach (string _line in _lines)
+        var masterPlots = new List<PlotPatternModel>();
+        
+        if (_toolsData?.MasterPlots != null)
         {
-            ParseLine(_line, ref _section, ref _keyword, ref _keyvalue);
-            //   Process the parsed values
-            switch (_section)
+            foreach (var plot in _toolsData.MasterPlots)
             {
-                case "MasterPlots":
-                    switch (_keyword)
+                var plotModel = new PlotPatternModel(plot.Name)
+                {
+                    PlotPatternNotes = plot.Notes ?? string.Empty
+                };
+                
+                if (plot.Scenes != null)
+                {
+                    foreach (var scene in plot.Scenes)
                     {
-                        case "":
-                            break;
-                        case "MasterPlot":
-                            _currentMasterPlot = new PlotPatternModel(_keyvalue);
-                            _masterPlots.Add(_currentMasterPlot);
-                            break;
-                        case "Remarks":
-                            // ReSharper disable PossibleNullReferenceException
-                            if (_currentMasterPlot.PlotPatternNotes.Equals(string.Empty))
-                                _currentMasterPlot.PlotPatternNotes = _keyvalue;
-                            else
-                            {
-                                _currentMasterPlot.PlotPatternNotes += Environment.NewLine;
-                                _currentMasterPlot.PlotPatternNotes += _keyvalue;
-                            }
-                            break;
-                        case "PlotPoint":
-                        case "Scene":
-                            _currentPlotPatternScene = new PlotPatternScene(_keyvalue);
-                            _currentMasterPlot.PlotPatternScenes.Add(_currentPlotPatternScene);
-                            break;
-                        case "Notes":
-                            if (_currentPlotPatternScene.Notes.Equals(string.Empty))
-                                _currentPlotPatternScene.Notes = _keyvalue;
-                            else
-                            {
-                                _currentPlotPatternScene.Notes += Environment.NewLine;
-                                _currentPlotPatternScene.Notes += _keyvalue;
-                            }
-                            // ReSharper restore PossibleNullReferenceException
-                            break;
+                        plotModel.PlotPatternScenes.Add(new PlotPatternScene(scene.Name)
+                        {
+                            Notes = scene.Notes ?? string.Empty
+                        });
                     }
-                    break;
+                }
+                
+                masterPlots.Add(plotModel);
             }
         }
-        return _masterPlots;
+        
+        return masterPlots;
     }
 
-        public List<PlotPatternModel> LoadBeatsheets()
+    public List<PlotPatternModel> LoadBeatsheets()
     {
-        PlotPatternModel _currentBeatsheet = null;
-        PlotPatternScene _currentPlotPatternScene = null;
-        List<PlotPatternModel> _beatSheets = new();
-        string _section = string.Empty;
-        string _keyword = string.Empty;
-        string _keyvalue = string.Empty;
-        foreach (string _line in _lines)
+        var beatSheets = new List<PlotPatternModel>();
+        
+        if (_toolsData?.BeatSheets != null)
         {
-            ParseLine(_line, ref _section, ref _keyword, ref _keyvalue);
-            //   Process the parsed values
-            switch (_section)
+            foreach (var beat in _toolsData.BeatSheets)
             {
-                case "BeatSheets":
-                    switch (_keyword)
+                var beatModel = new PlotPatternModel(beat.Name)
+                {
+                    PlotPatternNotes = beat.Notes ?? string.Empty
+                };
+                
+                if (beat.Scenes != null)
+                {
+                    foreach (var scene in beat.Scenes)
                     {
-                        case "":
-                            break;
-                        case "BeatSheet":
-                            _currentBeatsheet = new PlotPatternModel(_keyvalue);
-                            _beatSheets.Add(_currentBeatsheet);
-                            break;
-                        case "Remarks":
-                            // ReSharper disable PossibleNullReferenceException
-                            if (_currentBeatsheet.PlotPatternNotes.Equals(string.Empty))
-                                _currentBeatsheet.PlotPatternNotes = _keyvalue;
-                            else
-                            {
-                                _currentBeatsheet.PlotPatternNotes += Environment.NewLine;
-                                _currentBeatsheet.PlotPatternNotes += _keyvalue;
-                            }
-                            break;
-                        case "Beat":
-                            _currentPlotPatternScene = new PlotPatternScene(_keyvalue);
-                            _currentBeatsheet.PlotPatternScenes.Add(_currentPlotPatternScene);
-                            break;
-                        case "Notes":
-                            if (_currentPlotPatternScene.Notes.Equals(string.Empty))
-                                _currentPlotPatternScene.Notes = _keyvalue;
-                            else
-                            {
-                                _currentPlotPatternScene.Notes += Environment.NewLine;
-                                _currentPlotPatternScene.Notes += _keyvalue;
-                            }
-                            // ReSharper restore PossibleNullReferenceException
-                            break;
+                        beatModel.PlotPatternScenes.Add(new PlotPatternScene(scene.Name)
+                        {
+                            Notes = scene.Notes ?? string.Empty
+                        });
                     }
-                    break;
+                }
+                
+                beatSheets.Add(beatModel);
             }
         }
-        return _beatSheets;
+        
+        return beatSheets;
     }
 
     public SortedDictionary<string, DramaticSituationModel> LoadDramaticSituations()
     {
-        DramaticSituationModel _currentDramaticSituationModel = null;
-        SortedDictionary<string, DramaticSituationModel> _dramaticSituations = new();
-        string _section = string.Empty;
-        foreach (string _line in _lines)
+        var dramaticSituations = new SortedDictionary<string, DramaticSituationModel>();
+        
+        if (_toolsData?.DramaticSituations != null)
         {
-            string _keyword = string.Empty;
-            string _keyvalue = string.Empty;
-            ParseLine(_line, ref _section, ref _keyword, ref _keyvalue);
-            //   Process the parsed values
-            switch (_section)
+            foreach (var kvp in _toolsData.DramaticSituations)
             {
-                case "Dramatic Situations":
-                    switch (_keyword)
-                    {
-                        case "":
-                            break;
-                        case "Situation":
-                            _currentDramaticSituationModel = new DramaticSituationModel(_keyvalue);
-                            _dramaticSituations.Add(_keyvalue, _currentDramaticSituationModel);
-                            break;
-                        case "Role1":
-                            // ReSharper disable PossibleNullReferenceException
-                            _currentDramaticSituationModel.Role1 = _keyvalue;
-                            break;
-                        case "Role2":
-                            _currentDramaticSituationModel.Role2 = _keyvalue;
-                            break;
-                        case "Role3":
-                            _currentDramaticSituationModel.Role3 = _keyvalue;
-                            break;
-                        case "Role4":
-                            _currentDramaticSituationModel.Role4 = _keyvalue;
-                            break;
-                        case "Desc1":
-                            _currentDramaticSituationModel.Description1 = _keyvalue;
-                            break;
-                        case "Desc2":
-                            _currentDramaticSituationModel.Description2 = _keyvalue;
-                            break;
-                        case "Desc3":
-                            _currentDramaticSituationModel.Description3 = _keyvalue;
-                            break;
-                        case "Desc4":
-                            _currentDramaticSituationModel.Description4 = _keyvalue;
-                            break;
-                        case "Example":
-                            //TODO: Process Example lines
-                            break;
-                        case "Notes":
-                            _currentDramaticSituationModel.Notes += _keyvalue;
-                            // ReSharper restore PossibleNullReferenceException
-                            break;
-                    }
-                    break;
+                var situation = kvp.Value;
+                var model = new DramaticSituationModel(situation.Name)
+                {
+                    Notes = situation.Notes ?? string.Empty
+                };
+                
+                // Assign roles
+                if (situation.Roles != null && situation.Roles.Count > 0)
+                {
+                    if (situation.Roles.Count > 0) model.Role1 = situation.Roles[0];
+                    if (situation.Roles.Count > 1) model.Role2 = situation.Roles[1];
+                    if (situation.Roles.Count > 2) model.Role3 = situation.Roles[2];
+                    if (situation.Roles.Count > 3) model.Role4 = situation.Roles[3];
+                }
+                
+                // Assign descriptions
+                if (situation.Descriptions != null && situation.Descriptions.Count > 0)
+                {
+                    if (situation.Descriptions.Count > 0) model.Description1 = situation.Descriptions[0];
+                    if (situation.Descriptions.Count > 1) model.Description2 = situation.Descriptions[1];
+                    if (situation.Descriptions.Count > 2) model.Description3 = situation.Descriptions[2];
+                    if (situation.Descriptions.Count > 3) model.Description4 = situation.Descriptions[3];
+                }
+                
+                // Examples are stored in Notes for now (the model doesn't have an Examples property)
+                
+                dramaticSituations[kvp.Key] = model;
             }
         }
-        return _dramaticSituations;
+        
+        return dramaticSituations;
     }
-         
-    /// <summary>
-    /// Parse a line from the TOOLS.INI file into section, keyword, and keyvalue.
-    /// 
-    /// Parsed tokens are passed by reference and left unchanged if not found in
-    /// the parse. So for example, section is not modified if parsing a 
-    /// keyword=keyvalue line.
-    /// </summary>
-    /// <param name="line">The line to be parsed</param>
-    /// <param name="section">The [section] section name, if present</param>
-    /// <param name="keyword">The keyword=keyvalue keyword parameter, if present</param>
-    /// <param name="keyvalue">The </param>
-    private static void ParseLine(string line, ref string section, ref string keyword, ref string keyvalue)
+
+    public ObservableCollection<string> LoadMaleFirstNames()
     {
-        line = line.TrimEnd();
-        if (line.Equals(string.Empty))
+        if (_toolsData?.MaleFirstNames != null)
         {
-            keyword = string.Empty;
-            keyvalue = string.Empty;
-            return;
+            return new ObservableCollection<string>(_toolsData.MaleFirstNames);
         }
-        if (line.StartsWith(";")) // Comment
-            return;
-        if (line.StartsWith("["))
-        {
-            string[] _tokens = line.Split('[', ']');
-            section = _tokens[1];
-            keyword = "$SECTION$";
-            keyvalue = string.Empty;
-            return;
-        }
-        if (line.Contains("="))
-        {
-            string[] _tokens = line.Split(new[] { '=' });
-            keyword = _tokens[0];
-            keyvalue = _tokens[1].TrimEnd();
-            return;
-        }
-        if (line.StartsWith("="))
-        {
-            keyword = string.Empty;
-            keyvalue = line[1..].TrimEnd();
-        }
-
+        return new ObservableCollection<string>();
     }
 
-    public void Clear() { _lines = null; }
+    public ObservableCollection<string> LoadFemaleFirstNames()
+    {
+        if (_toolsData?.FemaleFirstNames != null)
+        {
+            return new ObservableCollection<string>(_toolsData.FemaleFirstNames);
+        }
+        return new ObservableCollection<string>();
+    }
+
+    public ObservableCollection<string> LoadLastNames()
+    {
+        if (_toolsData?.LastNames != null)
+        {
+            return new ObservableCollection<string>(_toolsData.LastNames);
+        }
+        return new ObservableCollection<string>();
+    }
+
+    public ObservableCollection<string> LoadRelationships()
+    {
+        if (_toolsData?.Relationships != null)
+        {
+            return new ObservableCollection<string>(_toolsData.Relationships);
+        }
+        return new ObservableCollection<string>();
+    }
+
+    public void Clear() { _toolsData = null; }
+
+    // JSON data classes
+    private class ToolsJsonData
+    {
+        [JsonPropertyName("keyQuestions")]
+        public Dictionary<string, List<KeyQuestionData>> KeyQuestions { get; set; }
+        
+        [JsonPropertyName("stockScenes")]
+        public Dictionary<string, List<string>> StockScenes { get; set; }
+        
+        [JsonPropertyName("topics")]
+        public Dictionary<string, TopicData> Topics { get; set; }
+        
+        [JsonPropertyName("masterPlots")]
+        public List<PlotPatternData> MasterPlots { get; set; }
+        
+        [JsonPropertyName("beatSheets")]
+        public List<PlotPatternData> BeatSheets { get; set; }
+        
+        [JsonPropertyName("dramaticSituations")]
+        public Dictionary<string, DramaticSituationData> DramaticSituations { get; set; }
+        
+        [JsonPropertyName("MaleFirstNames")]
+        public List<string> MaleFirstNames { get; set; }
+        
+        [JsonPropertyName("FemaleFirstNames")]
+        public List<string> FemaleFirstNames { get; set; }
+        
+        [JsonPropertyName("LastNames")]
+        public List<string> LastNames { get; set; }
+        
+        [JsonPropertyName("Relationships")]
+        public List<string> Relationships { get; set; }
+    }
+    
+    private class KeyQuestionData
+    {
+        [JsonPropertyName("key")]
+        public string Key { get; set; }
+        
+        [JsonPropertyName("topic")]
+        public string Topic { get; set; }
+        
+        [JsonPropertyName("question")]
+        public string Question { get; set; }
+    }
+    
+    private class TopicData
+    {
+        [JsonPropertyName("type")]
+        public string Type { get; set; }
+        
+        [JsonPropertyName("filename")]
+        public string Filename { get; set; }
+        
+        [JsonPropertyName("subTopics")]
+        public List<SubTopicData> SubTopics { get; set; }
+    }
+    
+    private class SubTopicData
+    {
+        [JsonPropertyName("name")]
+        public string Name { get; set; }
+        
+        [JsonPropertyName("notes")]
+        public string Notes { get; set; }
+    }
+    
+    private class PlotPatternData
+    {
+        [JsonPropertyName("name")]
+        public string Name { get; set; }
+        
+        [JsonPropertyName("notes")]
+        public string Notes { get; set; }
+        
+        [JsonPropertyName("scenes")]
+        public List<PlotPointData> Scenes { get; set; }
+    }
+    
+    private class PlotPointData
+    {
+        [JsonPropertyName("name")]
+        public string Name { get; set; }
+        
+        [JsonPropertyName("notes")]
+        public string Notes { get; set; }
+    }
+    
+    private class DramaticSituationData
+    {
+        [JsonPropertyName("name")]
+        public string Name { get; set; }
+        
+        [JsonPropertyName("roles")]
+        public List<string> Roles { get; set; }
+        
+        [JsonPropertyName("descriptions")]
+        public List<string> Descriptions { get; set; }
+        
+        [JsonPropertyName("examples")]
+        public List<string> Examples { get; set; }
+        
+        [JsonPropertyName("notes")]
+        public string Notes { get; set; }
+    }
 }
