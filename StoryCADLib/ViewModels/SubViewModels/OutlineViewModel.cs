@@ -24,11 +24,13 @@ namespace StoryCAD.ViewModels.SubViewModels;
 
 public class OutlineViewModel : ObservableRecipient
 {
-    private readonly LogService logger;
+    private readonly ILogService logger;
     private readonly PreferenceService preferences;
     private readonly Windowing window;
     private readonly OutlineService outlineService;
     private readonly SearchService searchService;
+    private readonly AppState appState;
+    private readonly BackendService _backendService;
     // The reference to ShellViewModel is temporary
     // until the ShellViewModel is refactored to fully
     // use OutlineViewModel for outline methods.
@@ -52,6 +54,11 @@ public class OutlineViewModel : ObservableRecipient
             return _shellVM;
         }
     }
+    // TODO: Circular dependency - OutlineViewModel ↔ AutoSaveService/BackupService
+    // These services depend on OutlineViewModel in their constructors,
+    // so we cannot inject them here without creating a circular dependency.
+    // The lazy-loading properties below will fail if accessed before the services are constructed.
+    // Long-term fix: Break the dependency by having services use messaging or move shared data to AppState.
     private AutoSaveService _autoSaveService;
 
     private AutoSaveService autoSaveService
@@ -90,6 +97,8 @@ public class OutlineViewModel : ObservableRecipient
     private StoryModel _storyModel = new();
     /// <summary>
     /// Current Outline being edited
+    /// TODO: Consider moving StoryModel to AppState or similar central state service
+    /// to avoid ViewModels reaching into each other for shared state (SRP violation)
     /// </summary>
     public StoryModel StoryModel
     {
@@ -388,7 +397,7 @@ public class OutlineViewModel : ObservableRecipient
 
                 // Create the content dialog
                 ContentDialog saveAsDialog = null;
-                if (!Ioc.Default.GetRequiredService<AppState>().Headless)
+                if (!appState.Headless)
                 {
                     // Set default values in the view model using the current story file info
                     saveAsVm.ProjectName = Path.GetFileName(StoryModelFile);
@@ -470,7 +479,7 @@ public class OutlineViewModel : ObservableRecipient
 
         SaveAsViewModel saveAsVm = Ioc.Default.GetRequiredService<SaveAsViewModel>();
         if (File.Exists(Path.Combine(saveAsVm.ParentFolder, saveAsVm.ProjectName)) 
-            && !Ioc.Default.GetRequiredService<AppState>().Headless)
+            && !appState.Headless)
         {
             ContentDialog replaceDialog = new()
             {
@@ -490,7 +499,7 @@ public class OutlineViewModel : ObservableRecipient
         Messenger.Send(new StatusChangedMessage(new("Closing project", LogLevel.Info, true)));
         using (var serializationLock = new SerializationLock(autoSaveService, backupService, logger))
         {
-            if (StoryModel.Changed && !Ioc.Default.GetRequiredService<AppState>().Headless)
+            if (StoryModel.Changed && !appState.Headless)
             {
                 ContentDialog warning = new()
                 {
@@ -539,8 +548,7 @@ public class OutlineViewModel : ObservableRecipient
                     await outlineService.WriteModel(StoryModel, StoryModelFile);
                 }
             }
-            BackendService backend = Ioc.Default.GetRequiredService<BackendService>();
-            await backend.DeleteWorkFile();
+            await _backendService.DeleteWorkFile();
             logger.Flush();
         }
         Application.Current.Exit();  // Win32
@@ -769,7 +777,7 @@ public class OutlineViewModel : ObservableRecipient
             if (VerifyToolUse(true, true))
             {
                 ContentDialog dialog = null;
-                if (!Ioc.Default.GetRequiredService<AppState>().Headless)
+                if (!appState.Headless)
                 {
                     //Creates and shows content dialog
                     dialog = new()
@@ -829,7 +837,7 @@ public class OutlineViewModel : ObservableRecipient
             if (VerifyToolUse(true, true))
             {
                 ContentDialog dialog = null;
-                if (!Ioc.Default.GetRequiredService<AppState>().Headless)
+                if (!appState.Headless)
                 {
                     //Creates and shows dialog
                     dialog = new()
@@ -899,7 +907,7 @@ public class OutlineViewModel : ObservableRecipient
                     //Creates and shows dialog
                     ContentDialog dialog = null;
 
-                    if (!Ioc.Default.GetRequiredService<AppState>().Headless)
+                    if (!appState.Headless)
                     {
                         dialog = new()
                         {
@@ -1054,7 +1062,7 @@ public class OutlineViewModel : ObservableRecipient
             Guid elementToDelete = shellVm.RightTappedNode.Uuid;
             List<StoryElement> _foundElements = outlineService.FindElementReferences(StoryModel, elementToDelete);
 
-            var state = Ioc.Default.GetRequiredService<AppState>();
+            var state = appState;
             //Only warns if it finds a node its referenced in
             if (_foundElements.Count > 0 && !state.Headless)
             {
@@ -1341,13 +1349,17 @@ public class OutlineViewModel : ObservableRecipient
 
     #region Constructor(s)
 
-    public OutlineViewModel()
+    public OutlineViewModel(ILogService logService, PreferenceService preferenceService,
+        Windowing windowing, OutlineService outlineService, AppState appState,
+        SearchService searchService, BackendService backendService)
     {
-        logger = Ioc.Default.GetRequiredService<LogService>();
-        preferences = Ioc.Default.GetRequiredService<PreferenceService>();
-        window = Ioc.Default.GetRequiredService<Windowing>();
-        outlineService = Ioc.Default.GetRequiredService<OutlineService>();
-        searchService = Ioc.Default.GetRequiredService<SearchService>();
+        logger = logService;
+        preferences = preferenceService;
+        window = windowing;
+        this.outlineService = outlineService;
+        this.appState = appState;
+        this.searchService = searchService;
+        _backendService = backendService;
     }
 
     #endregion

@@ -259,7 +259,7 @@ public class FileTests
 	    Assert.IsTrue(File.Exists(filePath), "Test file does not exist at the given path.");
 
 	    StorageFile file = await StorageFile.GetFileFromPathAsync(filePath);
-	    StoryIO storyIO = new StoryIO();
+	    StoryIO storyIO = Ioc.Default.GetRequiredService<StoryIO>();
 
 	    // Act: read the story and find the “Main Problem” that has the Hero’s Journey data
 	    StoryModel model = await storyIO.ReadStory(file);

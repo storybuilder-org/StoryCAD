@@ -16,19 +16,42 @@ namespace StoryCAD.DAL;
 /// </summary>
 public class PreferencesIo
 {
-	private LogService _log = Ioc.Default.GetService<LogService>();
-	private AppState _state = Ioc.Default.GetService<AppState>();
+	private readonly ILogService _log;
+	private readonly AppState _appState;
+	private readonly AutoSaveService _autoSaveService;
+	private readonly BackupService _backupService;
+	private readonly PreferenceService _preferenceService;
+	private readonly Windowing _windowing;
 
+	public PreferencesIo(ILogService log, AppState appState, AutoSaveService autoSaveService, 
+		BackupService backupService, PreferenceService preferenceService, Windowing windowing)
+	{
+		_log = log;
+		_appState = appState;
+		_autoSaveService = autoSaveService;
+		_backupService = backupService;
+		_preferenceService = preferenceService;
+		_windowing = windowing;
+	}
+
+	// Constructor for backward compatibility - will be removed later
+	public PreferencesIo() : this(
+		Ioc.Default.GetService<ILogService>(),
+		Ioc.Default.GetService<AppState>(),
+		Ioc.Default.GetRequiredService<AutoSaveService>(),
+		Ioc.Default.GetRequiredService<BackupService>(),
+		Ioc.Default.GetRequiredService<PreferenceService>(),
+		Ioc.Default.GetRequiredService<Windowing>())
+	{
+	}
 
 	public async Task<PreferencesModel> ReadPreferences()
 	{
 		try
 		{
-            var save = Ioc.Default.GetRequiredService<AutoSaveService>();
-            var back = Ioc.Default.GetRequiredService<BackupService>();
-            using (var serializationLock = new SerializationLock(save, back, _log))
+            using (var serializationLock = new SerializationLock(_autoSaveService, _backupService, _log))
             {
-                StorageFolder _preferencesFolder = await StorageFolder.GetFolderFromPathAsync(_state.RootDirectory);
+                StorageFolder _preferencesFolder = await StorageFolder.GetFolderFromPathAsync(_appState.RootDirectory);
 
                 PreferencesModel _model = new();
 
@@ -43,7 +66,7 @@ public class PreferencesIo
 
                     //Update _model, with new values.
                     _model = JsonSerializer.Deserialize<PreferencesModel>(_preferencesJson);
-                    Ioc.Default.GetRequiredService<PreferenceService>().Model = _model;
+                    _preferenceService.Model = _model;
                     _log.Log(LogLevel.Info, "Preferences deserialized.");
                 }
                 else
@@ -51,10 +74,10 @@ public class PreferencesIo
                     _log.Log(LogLevel.Info, "Preferences.json not found; default created.");
                 }
 
-                if (!Ioc.Default.GetRequiredService<AppState>().Headless)
+                if (!_appState.Headless)
                 {
                     //Handle UI Theme stuff
-                    Windowing window = Ioc.Default.GetRequiredService<Windowing>();
+                    Windowing window = _windowing;
                     if (_model.ThemePreference == ElementTheme.Default)
                     {
                         window.RequestedTheme = Application.Current.RequestedTheme == ApplicationTheme.Dark
@@ -96,13 +119,11 @@ public class PreferencesIo
     {
 		try
         {
-            var save = Ioc.Default.GetRequiredService<AutoSaveService>();
-            var back = Ioc.Default.GetRequiredService<BackupService>();
-            using (var serializationLock = new SerializationLock(save, back, _log))
+            using (var serializationLock = new SerializationLock(_autoSaveService, _backupService, _log))
             {
                 //Get/Create file.
                 _log.Log(LogLevel.Info, "Writing preferences model to disk.");
-                StorageFolder _preferencesFolder = await StorageFolder.GetFolderFromPathAsync(_state.RootDirectory);
+                StorageFolder _preferencesFolder = await StorageFolder.GetFolderFromPathAsync(_appState.RootDirectory);
                 _log.Log(LogLevel.Info, $"Saving to folder {_preferencesFolder.Path}");
 
                 StorageFile _preferencesFile =

@@ -92,7 +92,7 @@
 
 **Steps:**
 1. Make a small change  
-   **Expected:** "Changed" appears in status bar
+   **Expected:** Edit pencil icon button in status bar turns red (indicates unsaved changes)
 
 2. Click File > Exit  
    **Expected:** Save changes dialog appears

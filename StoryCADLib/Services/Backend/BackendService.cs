@@ -40,11 +40,18 @@ namespace StoryCAD.Services.Backend;
 /// </summary>
 public class BackendService
 {
-	private LogService log = Ioc.Default.GetService<LogService>();
-	private AppState State = Ioc.Default.GetService<AppState>();
-	private PreferenceService Preferences = Ioc.Default.GetService<PreferenceService>();
+	private readonly ILogService _logService;
+	private readonly AppState _appState;
+	private readonly PreferenceService _preferenceService;
 	private string connection = string.Empty;
 	private string sslCA = string.Empty;
+
+	public BackendService(ILogService logService, AppState appState, PreferenceService preferenceService)
+	{
+		_logService = logService;
+		_appState = appState;
+		_preferenceService = preferenceService;
+	}
 
 
 	/// <summary>
@@ -61,37 +68,37 @@ public class BackendService
 		{
 			// If the previous attempt to communicate to the back-end server
 			// or database failed, retry
-			if (Preferences.Model.RecordPreferencesStatus)
-				await PostPreferences(Preferences.Model);
+			if (_preferenceService.Model.RecordPreferencesStatus)
+				await PostPreferences(_preferenceService.Model);
                
 			// If the StoryCAD version has changed, post the version change
-			if (!State.Version.Equals(Preferences.Model.Version))
+			if (!_appState.Version.Equals(_preferenceService.Model.Version))
 			{
 				// Process a version change (usually a new release)
-				log.Log(LogLevel.Info, "Version mismatch: " + State.Version + " != " + Preferences.Model.Version);
-				State.LoadedWithVersionChange = true;
-				PreferencesModel preferences = Preferences.Model;
+				_logService.Log(LogLevel.Info, "Version mismatch: " + _appState.Version + " != " + _preferenceService.Model.Version);
+				_appState.LoadedWithVersionChange = true;
+				PreferencesModel preferences = _preferenceService.Model;
 
 				// Update Preferences
-				preferences.Version = State.Version;
+				preferences.Version = _appState.Version;
 				PreferencesIo prefIO = new();
 				await prefIO.WritePreferences(preferences);
 
 				// Post deployment to backend server
 				await PostVersion();
 			}
-			else if (!Preferences.Model.RecordVersionStatus)
+			else if (!_preferenceService.Model.RecordVersionStatus)
 				await PostVersion();
 		}
 		catch (Exception ex)
 		{
-			log.LogException(LogLevel.Error, ex, "Error in StartupRecording method");
+			_logService.LogException(LogLevel.Error, ex, "Error in StartupRecording method");
 		}
 	}
 
 	public async Task PostPreferences(PreferencesModel preferences)
 	{
-		log.Log(LogLevel.Info, "Post user preferences to back-end database");
+		_logService.Log(LogLevel.Info, "Post user preferences to back-end database");
 
 		MySqlIo sql = Ioc.Default.GetService<MySqlIo>();
 
@@ -106,43 +113,43 @@ public class BackendService
 			string name = preferences.FirstName + " " + preferences.LastName;
 			string email = preferences.Email;
 			int id = await sql.AddOrUpdateUser(conn, name, email);
-			log.Log(LogLevel.Info, "Name: " + name + " userId: " + id);
+			_logService.Log(LogLevel.Info, "Name: " + name + " userId: " + id);
 
 			bool elmah = preferences.ErrorCollectionConsent;
 			bool newsletter = preferences.Newsletter;
 			string version = preferences.Version;
 			// Workaround for an issue with the PreferencesModel Version property.
-			// It has a built-in title. We need to remove the title before we log.
+			// It has a built-in title. We need to remove the title before we _logService.
 			if (version.StartsWith("Version: "))
 				version = version.Substring(9);
 			// Post the preferences to the database
 			await sql.AddOrUpdatePreferences(conn, id, elmah, newsletter, version);
 			// Indicate we've stored them successfully
-			Preferences.Model.RecordPreferencesStatus = true;
+			_preferenceService.Model.RecordPreferencesStatus = true;
 			PreferencesIo loader = new();
-			await loader.WritePreferences(Preferences.Model);
-			log.Log(LogLevel.Info, "Preferences:  elmah=" + elmah + " newsletter=" + newsletter);
+			await loader.WritePreferences(_preferenceService.Model);
+			_logService.Log(LogLevel.Info, "Preferences:  elmah=" + elmah + " newsletter=" + newsletter);
 		}
         catch (TaskCanceledException ex) // Catch #986
         {
-            log.Log(LogLevel.Warn, $"MySQL handshake timed out {ex.Message}");
+            _logService.Log(LogLevel.Warn, $"MySQL handshake timed out {ex.Message}");
         }
         catch (Exception ex)
 		{
-			log.LogException(LogLevel.Error, ex, ex.Message);
+			_logService.LogException(LogLevel.Error, ex, ex.Message);
 		}
 		finally
 		{
 			await conn.CloseAsync();
-			log.Log(LogLevel.Info, "Back-end database connection ended");
+			_logService.Log(LogLevel.Info, "Back-end database connection ended");
 		}
 	}
 
 	public async Task PostVersion()
 	{
-		log.Log(LogLevel.Info, "Posting version data to parse");
+		_logService.Log(LogLevel.Info, "Posting version data to parse");
 
-		PreferencesModel preferences = Preferences.Model;
+		PreferencesModel preferences = _preferenceService.Model;
 		MySqlIo sql = Ioc.Default.GetService<MySqlIo>();
 
 		// Get a connection to the database
@@ -155,27 +162,27 @@ public class BackendService
 			string name = preferences.FirstName + " " + preferences.LastName;
 			string email = preferences.Email;
 			int id = await sql.AddOrUpdateUser(conn, name, email);
-			log.Log(LogLevel.Info, "User Name: " + name + " userId: " + id);
+			_logService.Log(LogLevel.Info, "User Name: " + name + " userId: " + id);
 
-			string current = State.Version;
+			string current = _appState.Version;
 			string previous = preferences.Version ?? "";
 			// Post the version change to the database
 			await sql.AddVersion(conn, id, current, previous);
 			// Indicate we've stored it  successfully
-			Preferences.Model.RecordVersionStatus = true;
+			_preferenceService.Model.RecordVersionStatus = true;
 			PreferencesIo loader = new();
-			await loader.WritePreferences(Preferences.Model);
-			log.Log(LogLevel.Info, "Version:  Current=" + current + " Previous=" + previous);
+			await loader.WritePreferences(_preferenceService.Model);
+			_logService.Log(LogLevel.Info, "Version:  Current=" + current + " Previous=" + previous);
 		}
 		// May want to use multiple catch clauses
 		catch (Exception ex)
 		{
-			log.LogException(LogLevel.Error, ex, ex.Message);
+			_logService.LogException(LogLevel.Error, ex, ex.Message);
 		}
 		finally
 		{
 			await conn.CloseAsync();
-			log.Log(LogLevel.Info, "Back-end database connection ended");
+			_logService.Log(LogLevel.Info, "Back-end database connection ended");
 		}
 	}
 
@@ -183,7 +190,7 @@ public class BackendService
 	{
 		try
 		{
-			log.Log(LogLevel.Info, "GetConnectionString");
+			_logService.Log(LogLevel.Info, "GetConnectionString");
 			StorageFolder tempFolder = await StorageFolder.GetFolderFromPathAsync(System.IO.Path.GetTempPath());
 			StorageFile tempFile = 
 				await tempFolder.CreateFileAsync("StoryCAD.pem", CreationCollisionOption.ReplaceExisting);
@@ -196,7 +203,7 @@ public class BackendService
 		}
 		catch (Exception ex)
 		{
-			log.LogException(LogLevel.Error, ex, ex.Message);
+			_logService.LogException(LogLevel.Error, ex, ex.Message);
 		}
 	}
 
@@ -204,7 +211,7 @@ public class BackendService
 	{
 		try
 		{
-			log.Log(LogLevel.Info, "DeleteWorkFile");
+			_logService.Log(LogLevel.Info, "DeleteWorkFile");
 			string path = sslCA.Substring(6);   // remove leading 'SslCa='  
 			path = path.Substring(0, path.Length - 1);  // remove trailing ';'
 			StorageFile file = await StorageFile.GetFileFromPathAsync(path);
@@ -212,7 +219,7 @@ public class BackendService
 		}
 		catch (Exception ex)
 		{
-			log.LogException(LogLevel.Error, ex, ex.Message);
+			_logService.LogException(LogLevel.Error, ex, ex.Message);
 		}
 	}
 }

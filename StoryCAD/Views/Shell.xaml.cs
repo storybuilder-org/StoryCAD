@@ -88,7 +88,9 @@ public sealed partial class Shell
         if (Ioc.Default.GetRequiredService<AppState>().LoadedWithVersionChange)
         {
 			Ioc.Default.GetService<PreferenceService>()!.Model.HideRatingPrompt = false;  //rating prompt re-enabled on updates.
-			await new Changelog().ShowChangeLog();
+			var logger = Ioc.Default.GetService<ILogService>();
+			var appState = Ioc.Default.GetService<AppState>();
+			await new Changelog(logger, appState).ShowChangeLog();
         }
 
         if (Preferences.ShowStartupDialog)

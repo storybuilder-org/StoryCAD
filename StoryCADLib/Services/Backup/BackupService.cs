@@ -2,8 +2,10 @@
 using System.IO.Compression;
 using Windows.Storage;
 using Microsoft.UI;
+using CommunityToolkit.Mvvm.Messaging;
 using StoryCAD.ViewModels.SubViewModels;
 using StoryCAD.Services.Locking;
+using StoryCAD.Services.Messages;
 using System.Timers;
 
 namespace StoryCAD.Services.Backup;
@@ -13,9 +15,12 @@ public class BackupService
     private BackgroundWorker timedBackupWorker;
     private Timer backupTimer;
 
-    private readonly LogService Log = Ioc.Default.GetService<LogService>();
-    private readonly PreferenceService Prefs = Ioc.Default.GetService<PreferenceService>();
-    private readonly OutlineViewModel OutlineManager = Ioc.Default.GetService<OutlineViewModel>();
+    private readonly ILogService _logService;
+    private readonly PreferenceService _preferenceService;
+    private readonly OutlineViewModel _outlineViewModel;
+    private readonly AppState _appState;
+    private readonly Windowing _windowing;
+    // TODO: ShellViewModel removed due to circular dependency - needs architectural fix
 
     // Fields to preserve remaining time when paused
     private double defaultIntervalMs;
@@ -27,8 +32,15 @@ public class BackupService
 
     #region Constructor
 
-    public BackupService()
+    public BackupService(ILogService logService, PreferenceService preferenceService, OutlineViewModel outlineViewModel, AppState appState, Windowing windowing)
     {
+        _logService = logService;
+        _preferenceService = preferenceService;
+        _outlineViewModel = outlineViewModel;
+        _appState = appState;
+        _windowing = windowing;
+        // TODO: _shellViewModel assignment removed due to circular dependency
+
         // Compute default interval once (in milliseconds)
         remainingIntervalMs = null;
         isResumed = false;
@@ -45,12 +57,12 @@ public class BackupService
     public void StartTimedBackup()
     {
         // Don't start if no project is loaded
-        if (String.IsNullOrEmpty(OutlineManager.StoryModelFile))
+        if (String.IsNullOrEmpty(_outlineViewModel.StoryModelFile))
         {
             return;
         }
 
-        defaultIntervalMs = Prefs.Model.TimedBackupInterval * 60 * 1000;
+        defaultIntervalMs = _preferenceService.Model.TimedBackupInterval * 60 * 1000;
 
         if (backupTimer == null)
         {
@@ -68,7 +80,7 @@ public class BackupService
             backupTimer.Elapsed += BackupTimer_Elapsed;
         }
 
-        if (!Prefs.Model.TimedBackup)
+        if (!_preferenceService.Model.TimedBackup)
             return;
 
         // If already running, do nothing
@@ -122,13 +134,13 @@ public class BackupService
     {
         try
         {
-            Log.Log(LogLevel.Info, "Starting timed backup task.");
+            _logService.Log(LogLevel.Info, "Starting timed backup task.");
             await BackupProject();
-            Log.Log(LogLevel.Info, "Timed backup task finished.");
+            _logService.Log(LogLevel.Info, "Timed backup task finished.");
         }
         catch (Exception ex)
         {
-            Log.LogException(LogLevel.Error, ex, "Error in auto backup task.");
+            _logService.LogException(LogLevel.Error, ex, "Error in auto backup task.");
         }
     }
 
@@ -139,8 +151,10 @@ public class BackupService
     private void BackupTimer_Elapsed(object source, ElapsedEventArgs e)
     {
         // Update UI indicator on the UI thread
-        Ioc.Default.GetRequiredService<Windowing>().GlobalDispatcher.TryEnqueue(() =>
+        _windowing.GlobalDispatcher.TryEnqueue(() =>
         {
+            // TODO: Circular dependency - BackupService and ShellViewModel
+            // Temporary workaround: Use service locator until architectural fix
             Ioc.Default.GetRequiredService<ShellViewModel>().BackupStatusColor = Colors.Red;
         });
 
@@ -168,10 +182,12 @@ public class BackupService
     /// <param name="FilePath">If null, the user’s BackupDirectory preference is used.</param>
     public async Task BackupProject(string Filename = null, string FilePath = null)
     {
+        // TODO: Circular dependency - BackupService ↔ AutoSaveService
+        // AutoSaveService requires BackupService via SerializationLock, creating a circular dependency
         var autoSaveService = Ioc.Default.GetRequiredService<AutoSaveService>();
 
         // Determine filenames and paths
-        var originalFileName = Path.GetFileNameWithoutExtension(OutlineManager.StoryModelFile);
+        var originalFileName = Path.GetFileNameWithoutExtension(_outlineViewModel.StoryModelFile);
 
         if (Filename is null)
         {
@@ -183,63 +199,67 @@ public class BackupService
                 Filename = Filename.Replace(bad, '_');
         }
 
-        FilePath ??= Prefs.Model.BackupDirectory;
+        FilePath ??= _preferenceService.Model.BackupDirectory;
 
 
-        Log.Log(LogLevel.Info, $"Starting Project Backup at {FilePath}");
+        _logService.Log(LogLevel.Info, $"Starting Project Backup at {FilePath}");
         try
         {
             // Create backup directory if missing
             if (!Directory.Exists(FilePath))
             {
-                Log.Log(LogLevel.Info, "Backup dir not found, making it.");
+                _logService.Log(LogLevel.Info, "Backup dir not found, making it.");
                 Directory.CreateDirectory(FilePath);
             }
 
-            Log.Log(LogLevel.Info, $"Backing up to {FilePath} as {Filename}.zip");
-            Log.Log(LogLevel.Info, "Writing file");
+            _logService.Log(LogLevel.Info, $"Backing up to {FilePath} as {Filename}.zip");
+            _logService.Log(LogLevel.Info, "Writing file");
 
             StorageFolder rootFolder = await StorageFolder.GetFolderFromPathAsync(
-                Ioc.Default.GetRequiredService<AppState>().RootDirectory);
+                _appState.RootDirectory);
 
             //Save file.
-            using (var serializationLock = new SerializationLock(autoSaveService, this, Log))
+            using (var serializationLock = new SerializationLock(autoSaveService, this, _logService))
             {
                 StorageFolder tempFolder = await rootFolder.CreateFolderAsync(
                     "Temp", CreationCollisionOption.ReplaceExisting);
 
-                StorageFile projectFile = await StorageFile.GetFileFromPathAsync(OutlineManager.StoryModelFile);
+                StorageFile projectFile = await StorageFile.GetFileFromPathAsync(_outlineViewModel.StoryModelFile);
                 await projectFile.CopyAsync(tempFolder, projectFile.Name, NameCollisionOption.ReplaceExisting);
 
                 string zipFilePath = Path.Combine(FilePath, Filename) + ".zip";
                 ZipFile.CreateFromDirectory(tempFolder.Path, zipFilePath);
 
-                Log.Log(LogLevel.Info, $"Created Zip file at {zipFilePath}");
+                _logService.Log(LogLevel.Info, $"Created Zip file at {zipFilePath}");
                 await tempFolder.DeleteAsync();
             }
             
             //update indicator.
-            Ioc.Default.GetRequiredService<Windowing>().GlobalDispatcher.TryEnqueue(() =>
-                Ioc.Default.GetRequiredService<ShellViewModel>().BackupStatusColor = Colors.Green
+            _windowing.GlobalDispatcher.TryEnqueue(() =>
+                // TODO: Circular dependency - BackupService and ShellViewModel
+            // Temporary workaround: Use service locator until architectural fix
+            Ioc.Default.GetRequiredService<ShellViewModel>().BackupStatusColor = Colors.Green
             );
-            Log.Log(LogLevel.Info, "Finished backup.");
+            _logService.Log(LogLevel.Info, "Finished backup.");
         }
         catch (Exception ex)
         {
-            if (!Ioc.Default.GetRequiredService<AppState>().Headless)
+            if (!_appState.Headless)
             {
-                Ioc.Default.GetRequiredService<Windowing>().GlobalDispatcher.TryEnqueue(() =>
+                _windowing.GlobalDispatcher.TryEnqueue(() =>
                 {
-                    Ioc.Default.GetRequiredService<ShellViewModel>().ShowMessage(
-                        LogLevel.Warn,
+                    WeakReferenceMessenger.Default.Send(new StatusChangedMessage(new StatusMessage(
                         "Making a backup failed, check your backup settings.",
-                        false);
+                        LogLevel.Warn,
+                        false)));
                 });
-                Ioc.Default.GetRequiredService<ShellViewModel>().BackupStatusColor = Colors.Red;
+                // TODO: Circular dependency - BackupService and ShellViewModel
+            // Temporary workaround: Use service locator until architectural fix
+            Ioc.Default.GetRequiredService<ShellViewModel>().BackupStatusColor = Colors.Red;
             }
-            Log.LogException(LogLevel.Error, ex, $"Error backing up project: {ex.Message}");
+            _logService.LogException(LogLevel.Error, ex, $"Error backing up project: {ex.Message}");
         }
 
-        Log.Log(LogLevel.Info, "BackupProject complete");
+        _logService.Log(LogLevel.Info, "BackupProject complete");
     }
 }

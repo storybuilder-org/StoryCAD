@@ -28,7 +28,9 @@ public sealed partial class PreferencesDialog
     {
         DevInfo.Text = Logger.SystemInfo();
 
-        Changelog.Text = await new Changelog().GetChangelogText();
+        var logger = Ioc.Default.GetService<ILogService>();
+        var appState = Ioc.Default.GetService<AppState>();
+        Changelog.Text = await new Changelog(logger, appState).GetChangelogText();
 
         if (PreferencesVm.WrapNodeNames == TextWrapping.WrapWholeWords) { TextWrap.IsChecked = true; }
         else { TextWrap.IsChecked = false; }

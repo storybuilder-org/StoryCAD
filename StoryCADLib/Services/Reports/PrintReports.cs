@@ -12,7 +12,12 @@ public class PrintReports
     private StoryModel _model;
     private ReportFormatter _formatter;
     private string _documentText;
-    private LogService logger = Ioc.Default.GetRequiredService<LogService>();
+    private readonly ILogService _logger;
+
+    public PrintReports(ILogService logger)
+    {
+        _logger = logger;
+    }
 
     public async Task<string> Generate()
     {
@@ -101,7 +106,7 @@ public class PrintReports
 
         if (string.IsNullOrEmpty(_documentText))
         {
-            logger.Log(LogLevel.Warn, "No nodes selected for report generation");
+            _logger.Log(LogLevel.Warn, "No nodes selected for report generation");
             return "";
         }
         return _documentText;

@@ -2,10 +2,12 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using StoryCAD.Models;
 using StoryCAD.Services.Collaborator;
 using StoryCAD.Services.Collaborator.Contracts;
+using StoryCAD.Services.Logging;
 using System;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.DependencyInjection;
 
 namespace StoryCADTests;
 
@@ -22,7 +24,7 @@ public class CollaboratorIntegrationTests
         // In a real deployment, this would be loaded from the plugin directory
         
         // Arrange
-        var service = new CollaboratorService();
+        var service = Ioc.Default.GetRequiredService<CollaboratorService>();
         var dllPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "CollaboratorLib.dll");
         
         // Act & Assert
@@ -49,7 +51,8 @@ public class CollaboratorIntegrationTests
         else
         {
             // If DLL doesn't exist, use mock
-            var mock = new MockCollaborator();
+            var logger = Ioc.Default.GetRequiredService<ILogService>();
+            var mock = new MockCollaborator(logger);
             service.SetCollaborator(mock);
             Assert.IsTrue(service.HasCollaborator);
         }
@@ -62,8 +65,9 @@ public class CollaboratorIntegrationTests
     public void CollaboratorService_UseMock_WhenDllNotAvailable()
     {
         // Arrange
-        var service = new CollaboratorService();
-        var mock = new MockCollaborator();
+        var service = Ioc.Default.GetRequiredService<CollaboratorService>();
+        var logger = Ioc.Default.GetRequiredService<ILogService>();
+        var mock = new MockCollaborator(logger);
         
         // Act
         service.SetCollaborator(mock);
@@ -79,8 +83,9 @@ public class CollaboratorIntegrationTests
     public async Task CollaboratorService_CanExecuteWorkflow_ThroughInterface()
     {
         // Arrange
-        var service = new CollaboratorService();
-        var mock = new MockCollaborator();
+        var service = Ioc.Default.GetRequiredService<CollaboratorService>();
+        var logger = Ioc.Default.GetRequiredService<ILogService>();
+        var mock = new MockCollaborator(logger);
         service.SetCollaborator(mock);
         
         var element = new StoryElement 
@@ -111,8 +116,9 @@ public class CollaboratorIntegrationTests
     public async Task CollaboratorService_SupportsBothSyncAndAsync()
     {
         // Arrange
-        var service = new CollaboratorService();
-        var mock = new MockCollaborator();
+        var service = Ioc.Default.GetRequiredService<CollaboratorService>();
+        var logger = Ioc.Default.GetRequiredService<ILogService>();
+        var mock = new MockCollaborator(logger);
         service.SetCollaborator(mock);
         
         // Act - Test sync methods

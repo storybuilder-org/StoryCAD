@@ -10,7 +10,7 @@ namespace StoryCAD.Models.Tools;
 /// </summary>
 public class ToolsData
 {
-    LogService _log = Ioc.Default.GetService<LogService>();
+    private readonly ILogService _log;
 
     public Dictionary<string, List<KeyQuestionModel>> KeyQuestionsSource;
     public SortedDictionary<string, ObservableCollection<string>> StockScenesSource;
@@ -23,11 +23,12 @@ public class ToolsData
     public ObservableCollection<string> LastNamesSource;
     public ObservableCollection<string> RelationshipsSource;
 
-    public ToolsData() {
+    public ToolsData(ILogService log) {
+        _log = log;
         try
         {
             _log.Log(LogLevel.Info, "Loading Tools.ini data");
-            ToolLoader loader = Ioc.Default.GetService<ToolLoader>();
+            ToolLoader loader = new ToolLoader(_log);
             Task.Run(async () =>
             {
                List<object> Tools = await loader.Init();

@@ -18,17 +18,21 @@ public class SerializationLock : IDisposable
 
     private readonly AutoSaveService _autoSaveService;
     private readonly BackupService _backupService;
-    private readonly LogService _logger;
+    private readonly ILogService _logger;
+    private readonly AppState _appState;
+    private readonly PreferenceService _preferenceService;
     private string _caller;
     private bool _disposed;
     private static string currentHolder;
 
-    public SerializationLock(AutoSaveService autoSaveService, BackupService backupService, LogService logger,
+    public SerializationLock(AutoSaveService autoSaveService, BackupService backupService, ILogService logger,
     [CallerMemberName] string caller = null)
     {
         _autoSaveService = autoSaveService;
         _backupService = backupService;
         _logger = logger;
+        _appState = Ioc.Default.GetRequiredService<AppState>();
+        _preferenceService = Ioc.Default.GetRequiredService<PreferenceService>();
 
         _caller = caller;
         // Acquire lock: disable commands, autosave, and backup.
@@ -46,7 +50,7 @@ public class SerializationLock : IDisposable
 
             if (currentHolder != _caller) //Some locks run twice i.e. datasource, (this shouldn't happen)
             {
-                if (Ioc.Default.GetRequiredService<AppState>().Headless)
+                if (_appState.Headless)
                 {
                     throw new InvalidOperationException($"Commands are already disabled by {currentHolder}");
                 }
@@ -85,11 +89,11 @@ public class SerializationLock : IDisposable
             EnableCommands();
 
             //Reenable backup/autosave 
-            if (Ioc.Default.GetRequiredService<PreferenceService>().Model.AutoSave)
+            if (_preferenceService.Model.AutoSave)
             {
                 _autoSaveService.StartAutoSave();
             }
-            if (Ioc.Default.GetRequiredService<PreferenceService>().Model.TimedBackup )
+            if (_preferenceService.Model.TimedBackup )
             {
                 _backupService.StartTimedBackup();
             }

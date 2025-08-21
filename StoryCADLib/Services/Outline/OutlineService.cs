@@ -16,7 +16,9 @@ namespace StoryCAD.Services.Outline;
 /// </summary>
 public class OutlineService
 {
-    private LogService _log = Ioc.Default.GetRequiredService<LogService>();
+    // TODO: Circular dependency - OutlineService ↔ AutoSaveService/BackupService ↔ OutlineViewModel ↔ OutlineService
+    // These services have a complex circular dependency that needs architectural refactoring
+    private ILogService _log = Ioc.Default.GetRequiredService<ILogService>();
 
     /// <summary>
     /// Creates a new story model
@@ -227,7 +229,9 @@ internal Task<StoryModel> CreateModel(string name, string author, int selectedTe
         }
 
         var file = await StorageFile.GetFileFromPathAsync(path);
-        StoryModel model = await new StoryIO().ReadStory(file);
+        var outlineViewModel = Ioc.Default.GetRequiredService<OutlineViewModel>();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        StoryModel model = await new StoryIO(_log, outlineViewModel, appState).ReadStory(file);
         _log.Log(LogLevel.Info, $"Opened model contains {model.StoryElements.Count} elements.");
         return model;
     }
@@ -1034,7 +1038,7 @@ internal Task<StoryModel> CreateModel(string name, string author, int selectedTe
 
         _log.Log(LogLevel.Info, $"Searching for text: {searchText}");
         
-        var searchService = new SearchService();
+        var searchService = new SearchService(_log);
         var results = new List<StoryElement>();
         
         var autoSaveService = Ioc.Default.GetRequiredService<AutoSaveService>();
@@ -1071,7 +1075,7 @@ internal Task<StoryModel> CreateModel(string name, string author, int selectedTe
 
         _log.Log(LogLevel.Info, $"Searching for UUID references: {targetUuid}");
         
-        var searchService = new SearchService();
+        var searchService = new SearchService(_log);
         var results = new List<StoryElement>();
         
         var autoSaveService = Ioc.Default.GetRequiredService<AutoSaveService>();
@@ -1108,7 +1112,7 @@ internal Task<StoryModel> CreateModel(string name, string author, int selectedTe
 
         _log.Log(LogLevel.Info, $"Removing references to UUID: {targetUuid}");
         
-        var searchService = new SearchService();
+        var searchService = new SearchService(_log);
         int affectedCount = 0;
         
         var autoSaveService = Ioc.Default.GetRequiredService<AutoSaveService>();
@@ -1154,7 +1158,7 @@ internal Task<StoryModel> CreateModel(string name, string author, int selectedTe
 
         _log.Log(LogLevel.Info, $"Searching in subtree rooted at {rootNode.Name} for text: {searchText}");
         
-        var searchService = new SearchService();
+        var searchService = new SearchService(_log);
         var results = new List<StoryElement>();
         
         var autoSaveService = Ioc.Default.GetRequiredService<AutoSaveService>();

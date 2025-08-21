@@ -12,7 +12,7 @@ namespace StoryCAD.ViewModels
     /// </summary>
     public class ControlData
     {
-        readonly LogService _log = Ioc.Default.GetService<LogService>();
+        private readonly ILogService _log;
 
         //Character conflics
         public SortedDictionary<string, ConflictCategoryModel> ConflictTypes;
@@ -22,8 +22,9 @@ namespace StoryCAD.ViewModels
         /// </summary>
         public List<string> RelationTypes;
 
-        public ControlData()
+        public ControlData(ILogService log)
         {
+            _log = log;
             int subTypeCount = 0;
             int exampleCount = 0;
             try

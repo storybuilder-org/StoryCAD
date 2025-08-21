@@ -18,7 +18,7 @@ public class FolderViewModel : ObservableRecipient, INavigable
 {
     #region Fields
 
-    private readonly LogService _logger;
+    private readonly ILogService _logger;
     private bool _changeable; // process property changes for this story element
     private bool _changed;    // this story element has changed
 
@@ -131,9 +131,15 @@ public class FolderViewModel : ObservableRecipient, INavigable
 
     #region Constructor
 
-    public FolderViewModel()
+    // Constructor for XAML compatibility - will be removed later
+    public FolderViewModel() : this(
+        Ioc.Default.GetRequiredService<ILogService>())
     {
-        _logger = Ioc.Default.GetService<LogService>();
+    }
+    
+    public FolderViewModel(ILogService logger)
+    {
+        _logger = logger;
         Notes = string.Empty;
         PropertyChanged += OnPropertyChanged;
     }

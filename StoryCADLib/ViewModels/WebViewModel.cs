@@ -12,15 +12,29 @@ namespace StoryCAD.ViewModels;
 
 public class WebViewModel : ObservableRecipient, INavigable
 {
-    private readonly Windowing Window = Ioc.Default.GetRequiredService<Windowing>();
-    private readonly AppState AppDat = Ioc.Default.GetRequiredService<AppState>();
+    private readonly Windowing _window;
+    private readonly AppState _appState;
+    private readonly ILogService _logger;
+    private readonly PreferenceService _preferenceService;
+
+    public WebViewModel(Windowing window, AppState appState, ILogService logger, PreferenceService preferenceService)
+    {
+        _window = window;
+        _appState = appState;
+        _logger = logger;
+        _preferenceService = preferenceService;
+        
+        PropertyChanged += OnPropertyChanged;
+        RefreshCommand = new RelayCommand(ExecuteRefresh, () => true);
+        GoBackCommand = new RelayCommand(ExecuteGoBack, () => true);
+        GoForwardCommand = new RelayCommand(ExecuteGoForward, () => true);
+    }
 
     ///TODO: Make sure queries are async
     #region Fields
 
     private bool _changed; // this story element has changed
     private bool _changeable;
-    private readonly LogService _logger = Ioc.Default.GetRequiredService<LogService>();
 
     #endregion
 
@@ -132,7 +146,7 @@ public class WebViewModel : ObservableRecipient, INavigable
             SecondaryButtonText = "No"
         };
 
-        ContentDialogResult _result = await Window.ShowContentDialog(_dialog);
+        ContentDialogResult _result = await _window.ShowContentDialog(_dialog);
         _logger.Log(LogLevel.Error, $"User clicked {_result}");
 
         //Ok clicked
@@ -154,13 +168,13 @@ public class WebViewModel : ObservableRecipient, INavigable
                     "https://go.microsoft.com/fwlink/p/?LinkId=2124703"); //Get HTTP response
             await using Stream _resultStream = await _httpResult.Content.ReadAsStreamAsync(); //Read stream
             await using FileStream _fileStream =
-                File.Create(Path.Combine(AppDat.RootDirectory, "evergreenbootstrapper.exe")); //Create File.
+                File.Create(Path.Combine(_appState.RootDirectory, "evergreenbootstrapper.exe")); //Create File.
             await _resultStream.CopyToAsync(_fileStream); //Write file
             await _fileStream.FlushAsync(); //Flushes steam.
             await _fileStream.DisposeAsync(); //Cleans up resources
 
             //Run installer and wait for it to finish
-            await Process.Start(Path.Combine(AppDat.RootDirectory, "evergreenbootstrapper.exe"))!
+            await Process.Start(Path.Combine(_appState.RootDirectory, "evergreenbootstrapper.exe"))!
                 .WaitForExitAsync();
 
             //Show success/fail dialog
@@ -180,7 +194,7 @@ public class WebViewModel : ObservableRecipient, INavigable
                                            $" WebView Runtime ({_ex.Message})");
             }
 
-            await Window.ShowContentDialog(_dialog);
+            await _window.ShowContentDialog(_dialog);
             _logger.Log(LogLevel.Warn, "Finished installing WebView runtime.");
         }
         catch (Exception _ex)
@@ -275,7 +289,7 @@ public class WebViewModel : ObservableRecipient, INavigable
             _logger.Log(LogLevel.Info, $"Checking if {Query} is not URI, searching it.");
             if (Query == null) { Query = string.Empty; }
             string _dataString = Uri.EscapeDataString(Query);
-            switch (Ioc.Default.GetRequiredService<PreferenceService>().Model.PreferredSearchEngine)
+            switch (_preferenceService.Model.PreferredSearchEngine)
             {
                 case BrowserType.DuckDuckGo:
                     Url = new Uri("https://duckduckgo.com/?va=j&q=" + _dataString);
@@ -312,12 +326,12 @@ public class WebViewModel : ObservableRecipient, INavigable
 
     private void ExecuteGoForward() { GoForward(); }
 
-    public WebViewModel()
+    // Constructor for XAML compatibility - will be removed later
+    public WebViewModel() : this(
+        Ioc.Default.GetRequiredService<Windowing>(),
+        Ioc.Default.GetRequiredService<AppState>(),
+        Ioc.Default.GetRequiredService<ILogService>(),
+        Ioc.Default.GetRequiredService<PreferenceService>())
     {
-        PropertyChanged += OnPropertyChanged;
-
-        RefreshCommand = new RelayCommand(ExecuteRefresh, () => true);
-        GoBackCommand = new RelayCommand(ExecuteGoBack, () => true);
-        GoForwardCommand = new RelayCommand(ExecuteGoForward, () => true);
     }
 }

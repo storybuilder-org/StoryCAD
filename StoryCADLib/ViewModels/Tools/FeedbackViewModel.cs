@@ -9,9 +9,16 @@ public class FeedbackViewModel : ObservableRecipient
 {
 	#region Variables
 	private protected GitHubClient client = new(new ProductHeaderValue("StoryCADFeedbackBot"));
+	private readonly ILogService _logService;
 
-	public FeedbackViewModel()
+	// Constructor for XAML compatibility - will be removed later
+	public FeedbackViewModel() : this(Ioc.Default.GetRequiredService<ILogService>())
 	{
+	}
+
+	public FeedbackViewModel(ILogService logService)
+	{
+		_logService = logService;
 		Task.Run(async () =>
 		{
 			Doppler doppler = new();
@@ -151,7 +158,7 @@ public class FeedbackViewModel : ObservableRecipient
 		}
 		catch (Exception e)
 		{
-			Ioc.Default.GetRequiredService<LogService>()
+			_logService
 				.LogException(LogLevel.Error, e, $"Failed to post feedback due to exception {e.Message}");
 		}
 

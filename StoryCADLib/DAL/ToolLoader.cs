@@ -8,9 +8,13 @@ namespace StoryCAD.DAL;
 
 public class ToolLoader
 {
-    public readonly LogService Logger = Ioc.Default.GetRequiredService<LogService>();
+    private readonly ILogService _logger;
     private ToolsJsonData _toolsData;
 
+    public ToolLoader(ILogService logger)
+    {
+        _logger = logger;
+    }
     public async Task<List<object>> Init()
     {
         try
@@ -40,7 +44,7 @@ public class ToolLoader
         }
         catch (Exception _ex) 
         { 
-            Logger.LogException(LogLevel.Error, _ex, "Error Initializing tool loader"); 
+            _logger.LogException(LogLevel.Error, _ex, "Error Initializing tool loader"); 
         }
         return null;
     }

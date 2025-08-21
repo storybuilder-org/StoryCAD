@@ -22,7 +22,7 @@ public class LockTest
         // Arrange: get service instances from IoC.
         var autoSaveService = Ioc.Default.GetService<AutoSaveService>();
         var backupService = Ioc.Default.GetService<BackupService>();
-        var logger = Ioc.Default.GetService<LogService>();
+        var logger = Ioc.Default.GetService<ILogService>();
         var outlineVm = Ioc.Default.GetService<OutlineViewModel>();
 
         // Ensure a known initial state.

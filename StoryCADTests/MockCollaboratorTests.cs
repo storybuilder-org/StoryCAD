@@ -1,7 +1,9 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using StoryCAD.Models;
 using StoryCAD.Services.Collaborator;
+using StoryCAD.Services.Logging;
 using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.DependencyInjection;
 
 namespace StoryCADTests;
 
@@ -15,7 +17,8 @@ public class MockCollaboratorTests
     public void MockCollaborator_CanBeCreated()
     {
         // Arrange & Act
-        var mock = new MockCollaborator();
+        var logger = Ioc.Default.GetRequiredService<ILogService>();
+        var mock = new MockCollaborator(logger);
         
         // Assert
         Assert.IsNotNull(mock);
@@ -28,7 +31,8 @@ public class MockCollaboratorTests
     public void MockCollaborator_TracksState()
     {
         // Arrange
-        var mock = new MockCollaborator();
+        var logger = Ioc.Default.GetRequiredService<ILogService>();
+        var mock = new MockCollaborator(logger);
         var element = new StoryElement { Name = "Test Character", ElementType = StoryItemType.Character };
         
         // Act
@@ -50,7 +54,8 @@ public class MockCollaboratorTests
     public async Task MockCollaborator_AsyncMethodsWork()
     {
         // Arrange
-        var mock = new MockCollaborator();
+        var logger = Ioc.Default.GetRequiredService<ILogService>();
+        var mock = new MockCollaborator(logger);
         var element = new StoryElement { Name = "Test Scene" };
         mock.LoadWorkflowModel(element, "scene-builder");
         
@@ -66,8 +71,9 @@ public class MockCollaboratorTests
     public void MockCollaborator_WorksWithService()
     {
         // Arrange
-        var mock = new MockCollaborator();
-        var service = new CollaboratorService();
+        var logger = Ioc.Default.GetRequiredService<ILogService>();
+        var mock = new MockCollaborator(logger);
+        var service = Ioc.Default.GetRequiredService<CollaboratorService>();
         
         // Act
         service.SetCollaborator(mock);

@@ -12,8 +12,8 @@ namespace StoryCAD.ViewModels;
 public class SceneViewModel : ObservableRecipient, INavigable
 {
     #region Fields
-    OutlineViewModel OutlineVM = Ioc.Default.GetRequiredService<OutlineViewModel>();
-    private readonly LogService _logger;
+    private readonly OutlineViewModel OutlineVM;
+    private readonly ILogService _logger;
     private bool _changeable; // process property changes for this story element
     private bool _changed;    // this story element has changed
 
@@ -645,7 +645,7 @@ public class SceneViewModel : ObservableRecipient, INavigable
     {
         VpCharTipIsOpen = false;
 
-        var shellModel = Ioc.Default.GetRequiredService<OutlineViewModel>().StoryModel;
+        var shellModel = OutlineVM.StoryModel;
         var node = shellModel.ExplorerView.FirstOrDefault();
         if (node == null)
         {
@@ -694,9 +694,17 @@ public class SceneViewModel : ObservableRecipient, INavigable
 
     #region Constructors
 
-    public SceneViewModel()
+    // Constructor for XAML compatibility - will be removed later
+    public SceneViewModel() : this(
+        Ioc.Default.GetRequiredService<ILogService>(),
+        Ioc.Default.GetRequiredService<OutlineViewModel>())
     {
-        _logger = Ioc.Default.GetService<LogService>();
+    }
+
+    public SceneViewModel(ILogService logger, OutlineViewModel outlineViewModel)
+    {
+        _logger = logger;
+        OutlineVM = outlineViewModel;
 
         Date = string.Empty;
         Time = string.Empty;

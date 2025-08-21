@@ -5,6 +5,10 @@ using StoryCAD.Services.Collaborator.Contracts;
 using System;
 using System.Threading.Tasks;
 using Microsoft.UI.Xaml;
+using CommunityToolkit.Mvvm.DependencyInjection;
+using StoryCAD.Services.Logging;
+using StoryCAD.Services;
+using StoryCAD.Services.Backup;
 
 namespace StoryCADTests;
 
@@ -19,7 +23,7 @@ public class CollaboratorServiceTests
     {
         // Arrange
         ICollaborator mockCollaborator = new MockCollaboratorImplementation();
-        var service = new CollaboratorService();
+        var service = Ioc.Default.GetRequiredService<CollaboratorService>();
         
         // Act
         service.SetCollaborator(mockCollaborator);
@@ -37,7 +41,7 @@ public class CollaboratorServiceTests
     {
         // Arrange
         var mockCollaborator = new MockCollaboratorImplementation();
-        var service = new CollaboratorService();
+        var service = Ioc.Default.GetRequiredService<CollaboratorService>();
         service.SetCollaborator(mockCollaborator);
         
         // Act
@@ -56,7 +60,7 @@ public class CollaboratorServiceTests
     {
         // Arrange
         var mockCollaborator = new MockCollaboratorImplementation();
-        var service = new CollaboratorService();
+        var service = Ioc.Default.GetRequiredService<CollaboratorService>();
         service.SetCollaborator(mockCollaborator);
         
         // Act
@@ -74,7 +78,7 @@ public class CollaboratorServiceTests
     {
         // Arrange
         var mockCollaborator = new MockCollaboratorImplementation();
-        var service = new CollaboratorService();
+        var service = Ioc.Default.GetRequiredService<CollaboratorService>();
         service.SetCollaborator(mockCollaborator);
         var element = new StoryElement { Name = "Test" };
         
@@ -95,7 +99,7 @@ public class CollaboratorServiceTests
     {
         // Arrange
         var mockCollaborator = new MockCollaboratorImplementation();
-        var service = new CollaboratorService();
+        var service = Ioc.Default.GetRequiredService<CollaboratorService>();
         service.SetCollaborator(mockCollaborator);
         
         // Act
@@ -115,7 +119,7 @@ public class CollaboratorServiceTests
     {
         // Arrange
         var mockCollaborator = new MockCollaboratorImplementation();
-        var service = new CollaboratorService();
+        var service = Ioc.Default.GetRequiredService<CollaboratorService>();
         service.SetCollaborator(mockCollaborator);
         
         // Act

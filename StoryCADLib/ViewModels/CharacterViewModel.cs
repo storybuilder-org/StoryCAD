@@ -16,12 +16,13 @@ public class CharacterViewModel : ObservableRecipient, INavigable
 {
     #region Fields
     
-    private readonly LogService _logger;
+    private readonly ILogService _logger;
     public RelationshipModel CurrentRelationship;
     private bool _changeable; // process property changes for this story element
     private bool _changed;    // this story element has changed
-    readonly Windowing Windowing = Ioc.Default.GetService<Windowing>();
-    readonly OutlineViewModel OutlineVM = Ioc.Default.GetService<OutlineViewModel>();
+    private readonly Windowing _windowing;
+    private readonly OutlineViewModel _outlineViewModel;
+    private readonly ShellViewModel _shellViewModel;
     #endregion
 
     #region Properties
@@ -734,7 +735,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable
         _vm.RelationTypes.Clear();
         foreach (string _relationshipType in Ioc.Default.GetRequiredService<ControlData>().RelationTypes) { _vm.RelationTypes.Add(_relationshipType); }
         _vm.ProspectivePartners.Clear(); //Prospective partners are chars who are not in a relationship with this char
-        StoryModel _storyModel = OutlineVM.StoryModel;
+        StoryModel _storyModel = _outlineViewModel.StoryModel;
         foreach (StoryElement _character in _storyModel.StoryElements.Characters)
         {
             if (_character == _vm.Member) continue;  // Skip me
@@ -748,8 +749,8 @@ public class CharacterViewModel : ObservableRecipient, INavigable
 
         if (_vm.ProspectivePartners.Count == 0)
         {
-            Ioc.Default.GetRequiredService<LogService>().Log(LogLevel.Warn,"There are no prospective partners, not showing AddRelationship Dialog." );
-            Ioc.Default.GetRequiredService<ShellViewModel>().ShowMessage(LogLevel.Warn, "This character already has a relationship with everyone",false);
+            _logger.Log(LogLevel.Warn,"There are no prospective partners, not showing AddRelationship Dialog." );
+            _shellViewModel.ShowMessage(LogLevel.Warn, "This character already has a relationship with everyone",false);
             return;
         }
 
@@ -762,7 +763,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable
             Content = new NewRelationshipPage(_vm),
             MinWidth = 200
         };
-        ContentDialogResult _result = await Windowing.ShowContentDialog(_NewRelDialog);
+        ContentDialogResult _result = await _windowing.ShowContentDialog(_NewRelDialog);
 
         if (_result == ContentDialogResult.Primary) //User clicks add relationship
         {
@@ -836,7 +837,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable
             PrimaryButtonText = "Copy flaw example",
             CloseButtonText = "Cancel"
         };
-        ContentDialogResult _result = await Windowing.ShowContentDialog(_flawDialog);
+        ContentDialogResult _result = await _windowing.ShowContentDialog(_flawDialog);
 
         if (_result == ContentDialogResult.Primary)   // Copy to Character Flaw  
         {
@@ -861,7 +862,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable
             CloseButtonText = "Cancel",
             Content = new Traits()
         };
-        ContentDialogResult _result = await Windowing.ShowContentDialog(_traitDialog);
+        ContentDialogResult _result = await _windowing.ShowContentDialog(_traitDialog);
 
         if (_result == ContentDialogResult.Primary)   // Copy to Character Trait 
         {
@@ -916,9 +917,13 @@ public class CharacterViewModel : ObservableRecipient, INavigable
 
     #region Constructors
 
-    public CharacterViewModel()
+    // Constructor for XAML compatibility - will be removed later
+    public CharacterViewModel(ILogService logger, OutlineViewModel outlineViewModel, ShellViewModel shellViewModel, Windowing windowing)
     {
-        _logger = Ioc.Default.GetService<LogService>();
+        _logger = logger;
+        _outlineViewModel = outlineViewModel;
+        _shellViewModel = shellViewModel;
+        _windowing = windowing;
 
         try
         {
@@ -957,7 +962,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable
         catch (Exception e)
         {
             _logger.LogException(LogLevel.Fatal, e, "Error loading lists in Problem view model");
-            Windowing.ShowResourceErrorMessage();
+            _windowing.ShowResourceErrorMessage();
         }
 
         CharacterTraits = new ObservableCollection<string>();

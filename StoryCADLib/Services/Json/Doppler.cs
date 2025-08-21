@@ -54,8 +54,8 @@ namespace StoryCAD.Services.Json
             }
             catch (Exception ex)
             {
-                LogService log = Ioc.Default.GetService<LogService>();
-                log.LogException(LogLevel.Warn, ex, ex.Message);
+                ILogService log = Ioc.Default.GetService<ILogService>();
+                log?.LogException(LogLevel.Warn, ex, ex.Message);
                 return this;
             }
         }

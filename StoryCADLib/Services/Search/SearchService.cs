@@ -12,7 +12,7 @@ namespace StoryCAD.Services.Search;
 /// </summary>
 public class SearchService
 {
-    private readonly LogService _logger;
+    private readonly ILogService _logger;
     
     /// <summary>
     /// Cache for reflection metadata to improve performance.
@@ -23,9 +23,9 @@ public class SearchService
     /// <summary>
     /// Initializes a new instance of the SearchService class.
     /// </summary>
-    public SearchService()
+    public SearchService(ILogService logger)
     {
-        _logger = Ioc.Default.GetService<LogService>();
+        _logger = logger;
     }
     
     /// <summary>
