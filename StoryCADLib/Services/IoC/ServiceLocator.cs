@@ -132,7 +132,6 @@ public static class BootStrapper
         Services.AddSingleton<PreferencesViewModel>();
         Services.AddSingleton<FlawViewModel>();
         Services.AddSingleton<TraitsViewModel>();
-        Services.AddSingleton<SemanticKernelApi>();
         Services.AddSingleton<OutlineService>();
     }
 }

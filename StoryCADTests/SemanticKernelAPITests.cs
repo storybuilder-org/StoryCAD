@@ -18,7 +18,7 @@ namespace StoryCADTests;
 [TestClass]
 public class SemanticKernelApiTests
 {
-    private SemanticKernelApi _api = Ioc.Default.GetRequiredService<SemanticKernelApi>();
+    private SemanticKernelApi _api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>());
 
     [TestMethod]
     public async Task CreateOutlineWithInvalidTemplate()
@@ -416,7 +416,7 @@ public class SemanticKernelApiTests
     public async Task SetCurrentModel_WithValidModel_SetsCurrentModel()
     {
         // Arrange
-        var api = Ioc.Default.GetRequiredService<SemanticKernelApi>();
+        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>());
         
         // Create a test model
         var createResult = await api.CreateEmptyOutline("Test Story", "Test Author", "0");
@@ -448,7 +448,7 @@ public class SemanticKernelApiTests
     public void SetCurrentModel_WithNullModel_SetsCurrentModelToNull()
     {
         // Arrange
-        var api = Ioc.Default.GetRequiredService<SemanticKernelApi>();
+        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>());
         
         // Act
         api.SetCurrentModel(null);
@@ -464,7 +464,7 @@ public class SemanticKernelApiTests
     public async Task SetCurrentModel_AllowsOperationsOnNewModel()
     {
         // Arrange
-        var api = Ioc.Default.GetRequiredService<SemanticKernelApi>();
+        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>());
         
         // Create first model
         var firstResult = await api.CreateEmptyOutline("First Story", "Author 1", "0");
@@ -555,7 +555,7 @@ public class SemanticKernelApiTests
     public void DeleteStoryElement_WithNoModel_ReturnsFailure()
     {
         // Arrange
-        var api = Ioc.Default.GetRequiredService<SemanticKernelApi>();
+        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>());
         
         // Act
         var result = api.DeleteStoryElement(Guid.NewGuid().ToString());
@@ -596,7 +596,7 @@ public class SemanticKernelApiTests
     public async Task DeleteElement_WithNoModel_ReturnsFailure()
     {
         // Arrange
-        var api = Ioc.Default.GetRequiredService<SemanticKernelApi>();
+        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>());
         
         // Act
         var result = await api.DeleteElement(Guid.NewGuid(), StoryViewType.ExplorerView);
@@ -660,7 +660,7 @@ public class SemanticKernelApiTests
     public async Task RestoreFromTrash_WithNoModel_ReturnsFailure()
     {
         // Arrange
-        var api = Ioc.Default.GetRequiredService<SemanticKernelApi>();
+        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>());
         
         // Act
         var result = await api.RestoreFromTrash(Guid.NewGuid());
@@ -727,7 +727,7 @@ public class SemanticKernelApiTests
     public async Task EmptyTrash_WithNoModel_ReturnsFailure()
     {
         // Arrange
-        var api = Ioc.Default.GetRequiredService<SemanticKernelApi>();
+        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>());
         
         // Act
         var result = await api.EmptyTrash();
@@ -771,7 +771,7 @@ public class SemanticKernelApiTests
     public void GetStoryElement_WithNoCurrentModel_ReturnsFailure()
     {
         // Arrange
-        var api = Ioc.Default.GetRequiredService<SemanticKernelApi>();
+        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>());
         var someGuid = Guid.NewGuid();
         
         // Act
@@ -830,7 +830,7 @@ public class SemanticKernelApiTests
     public void SearchForText_WithNoModel_ReturnsFailure()
     {
         // Arrange
-        var api = Ioc.Default.GetRequiredService<SemanticKernelApi>();
+        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>());
         
         // Act
         var result = api.SearchForText("test");
@@ -932,7 +932,7 @@ public class SemanticKernelApiTests
     public void SearchForReferences_WithNoModel_ReturnsFailure()
     {
         // Arrange
-        var api = Ioc.Default.GetRequiredService<SemanticKernelApi>();
+        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>());
         
         // Act
         var result = api.SearchForReferences(Guid.NewGuid());
@@ -1019,7 +1019,7 @@ public class SemanticKernelApiTests
     public void RemoveReferences_WithNoModel_ReturnsFailure()
     {
         // Arrange
-        var api = Ioc.Default.GetRequiredService<SemanticKernelApi>();
+        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>());
         
         // Act
         var result = api.RemoveReferences(Guid.NewGuid());
@@ -1110,7 +1110,7 @@ public class SemanticKernelApiTests
     public void SearchInSubtree_WithNoModel_ReturnsFailure()
     {
         // Arrange
-        var api = Ioc.Default.GetRequiredService<SemanticKernelApi>();
+        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>());
         
         // Act
         var result = api.SearchInSubtree(Guid.NewGuid(), "test");
