@@ -65,7 +65,7 @@ namespace StoryCAD.ViewModels
             }
             catch (Exception ex)
             {
-                _log.LogException(LogLevel.Error, ex, "Error loading Controls.ini");
+                _log.LogException(LogLevel.Error, ex, "Error loading controls data");
                 if (Application.Current != null)
                 {
                     Application.Current.Exit();
