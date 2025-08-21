@@ -13,6 +13,7 @@ namespace StoryCAD.ViewModels
     public class ControlData
     {
         private readonly ILogService _log;
+        private readonly ControlLoader _controlLoader;
 
         //Character conflics
         public SortedDictionary<string, ConflictCategoryModel> ConflictTypes;
@@ -22,18 +23,18 @@ namespace StoryCAD.ViewModels
         /// </summary>
         public List<string> RelationTypes;
 
-        public ControlData(ILogService log)
+        public ControlData(ILogService log, ControlLoader controlLoader)
         {
             _log = log;
+            _controlLoader = controlLoader;
             int subTypeCount = 0;
             int exampleCount = 0;
             try
             {
                 _log.Log(LogLevel.Info, "Loading Controls.ini data");
-                ControlLoader loader = Ioc.Default.GetService<ControlLoader>();
                 Task.Run(async () => 
                 {
-                    List<Object> Controls = await loader.Init();
+                    List<Object> Controls = await _controlLoader.Init();
                     ConflictTypes = (SortedDictionary<string, ConflictCategoryModel>)Controls[0];
                     RelationTypes = (List<string>)Controls[1];
                 }).Wait();

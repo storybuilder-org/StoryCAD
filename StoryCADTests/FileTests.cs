@@ -18,6 +18,7 @@ using StoryCAD.Services.Logging;
 using StoryCAD.Services.Outline;
 using StoryCAD.ViewModels.SubViewModels;
 using StoryCAD.Services.API;
+using StoryCAD.Services.IoC;
 
 namespace StoryCADTests;
 
@@ -468,7 +469,7 @@ public class FileTests
     public async Task DetectLegacyDualRoot_WithTrashCanAsSecondRoot_ReturnsTrue()
     {
         // Arrange
-        var api = new SemanticKernelApi();
+        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>());
         // All templates create the legacy dual-root structure automatically
         var createResult = await api.CreateEmptyOutline("Test Story", "Test Author", "0");
         Assert.IsTrue(createResult.IsSuccess);
@@ -495,7 +496,7 @@ public class FileTests
     public async Task MigrateLegacyDualRoot_MovesTrashCanChildrenToTrashView()
     {
         // Arrange
-        var api = new SemanticKernelApi();
+        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>());
         var createResult = await api.CreateEmptyOutline("Test Story", "Test Author", "0");
         Assert.IsTrue(createResult.IsSuccess);
         
@@ -552,7 +553,7 @@ public class FileTests
     public async Task MigrateLegacyDualRoot_PreservesHierarchyInTrashView()
     {
         // Arrange
-        var api = new SemanticKernelApi();
+        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>());
         var createResult = await api.CreateEmptyOutline("Test Story", "Test Author", "0");
         Assert.IsTrue(createResult.IsSuccess);
         
