@@ -161,12 +161,12 @@ public class SceneViewModel : ObservableRecipient, INavigable
         set => SetProperty(ref _characterList, value);
     }
 
-    // The Scene tab's Scene Sketch 
-    private string _remarks;
+    // Remarks now redirects to Description for backward compatibility
+    // The Scene tab's Scene Sketch
     public string Remarks
     {
-        get => _remarks;
-        set => SetProperty(ref _remarks, value);
+        get => Description;
+        set => Description = value;
     }
 
     // Scene development data (from Lisa Cron's Story Genius)
@@ -409,7 +409,7 @@ public class SceneViewModel : ObservableRecipient, INavigable
         Name = Model.Name;
         if (Name.Equals("New Scene"))
             IsTextBoxFocused = true;
-        Description = Model.Description;
+        Description = Model.SceneDescription;
         Date = Model.Date;
         Time = Model.Time;
         Setting = Model.Setting;
@@ -454,7 +454,7 @@ public class SceneViewModel : ObservableRecipient, INavigable
         Outcome = Model.Outcome;
         Emotion = Model.Emotion;
         NewGoal = Model.NewGoal;
-        Remarks = Model.Remarks;
+        Description = Model.SceneDescription;
         Events = Model.Events;
         Consequences = Model.Consequences;
         Significance = Model.Significance;
@@ -514,7 +514,7 @@ public class SceneViewModel : ObservableRecipient, INavigable
         // Story.Uuid is read-only and cannot be assigned
         Model.Name = Name;
         IsTextBoxFocused = false;
-        Model.Description = Description;
+        Model.SceneDescription = Description;
         Model.ViewpointCharacter = ViewpointCharacter;
         Model.Date = Date;
         Model.Time = Time;
@@ -540,7 +540,7 @@ public class SceneViewModel : ObservableRecipient, INavigable
         Model.NewGoal = NewGoal;
 
         // Write RTF files
-        Model.Remarks = Remarks;
+        Model.SceneDescription = Description;
         Model.Events = Events;
         Model.Consequences = Consequences;
         Model.Significance = Significance;

@@ -93,11 +93,19 @@ public class OverviewViewModel : ObservableRecipient, INavigable
     }
 
 
-    private string _storyIdea;
+    // Description property (migrated from StoryIdea)
+    private string _description;
+    public string Description
+    {
+        get => _description;
+        set => SetProperty(ref _description, value);
+    }
+
+    // StoryIdea now redirects to Description for backward compatibility
     public string StoryIdea
     {
-        get => _storyIdea;
-        set => SetProperty(ref _storyIdea, value);
+        get => Description;
+        set => Description = value;
     }
 
     // Concept data
@@ -314,7 +322,7 @@ public class OverviewViewModel : ObservableRecipient, INavigable
         StoryProblem = Model.StoryProblem;
         // Set SelectedProblem based on StoryProblem GUID
         SelectedProblem = Problems.FirstOrDefault(p => p.Uuid == StoryProblem);
-        StoryIdea = Model.StoryIdea;
+        Description = Model.Description;
         Concept = Model.Concept;
         Premise = Model.Premise;
         StructureNotes = Model.StructureNotes;
@@ -346,7 +354,7 @@ public class OverviewViewModel : ObservableRecipient, INavigable
 		        Model.Style = Style ?? "";
 		        Model.Tone = Tone ?? "";
 		        Model.StoryProblem = StoryProblem;
-		        Model.StoryIdea = StoryIdea ?? "";
+		        Model.Description = Description ?? "";
 		        Model.Concept = Concept ?? "";
 		        Model.Premise = Premise ?? "";
                 if (_syncPremise)
