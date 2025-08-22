@@ -32,7 +32,7 @@
                                  Text="{x:Bind OverviewVm.DateModified, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     </Grid>
                     <usercontrols:RichEditBoxExtended Header="Story Idea" Grid.Row="2"
-                         RtfText="{x:Bind OverviewVm.Description, Mode=TwoWay}" AcceptsReturn="True"
+                         RtfText="{x:Bind OverviewVm.StoryIdea, Mode=TwoWay}" AcceptsReturn="True"
                          IsSpellCheckEnabled="True" TextWrapping="Wrap"
                          ScrollViewer.VerticalScrollBarVisibility="Visible"
                          PlaceholderText="Record whatever idea or incident made you think 'story'." />

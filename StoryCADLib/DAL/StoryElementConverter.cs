@@ -49,57 +49,6 @@ public class StoryElementConverter : JsonConverter<StoryElement>
             if (targetType != null)
             {
                 var element = (StoryElement)jsonObject.Deserialize(targetType, options);
-                
-                // Migrate old fields to Description field if Description is empty
-                if (string.IsNullOrEmpty(element.Description))
-                {
-                    string migratedDescription = null;
-                    
-                    switch (element)
-                    {
-                        case OverviewModel overview when !string.IsNullOrEmpty(overview.StoryIdea):
-                            migratedDescription = overview.StoryIdea;
-                            overview.StoryIdea = string.Empty; // Clear old field
-                            break;
-                            
-                        case FolderModel folder when !string.IsNullOrEmpty(folder.Notes):
-                            migratedDescription = folder.Notes;
-                            folder.Notes = string.Empty; // Clear old field
-                            break;
-                            
-                        case WebModel web when web.URL != null:
-                            migratedDescription = web.URL.ToString();
-                            // Don't clear URL as it's still used for other purposes
-                            break;
-                            
-                        case ProblemModel problem when !string.IsNullOrEmpty(problem.StoryQuestion):
-                            migratedDescription = problem.StoryQuestion;
-                            problem.StoryQuestion = string.Empty; // Clear old field
-                            break;
-                            
-                        case CharacterModel character when !string.IsNullOrEmpty(character.CharacterSketch):
-                            migratedDescription = character.CharacterSketch;
-                            character.CharacterSketch = string.Empty; // Clear old field
-                            break;
-                            
-                        case SettingModel setting when !string.IsNullOrEmpty(setting.Summary):
-                            migratedDescription = setting.Summary;
-                            setting.Summary = string.Empty; // Clear old field
-                            break;
-                            
-                        case SceneModel scene when !string.IsNullOrEmpty(scene.Remarks):
-                            // Migrate SceneModel's Remarks (Scene Sketch) to Description
-                            migratedDescription = scene.Remarks;
-                            scene.Remarks = string.Empty; // Clear old field
-                            break;
-                    }
-                    
-                    if (!string.IsNullOrEmpty(migratedDescription))
-                    {
-                        element.Description = migratedDescription;
-                    }
-                }
-                
                 return element;
             }
 

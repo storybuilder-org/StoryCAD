@@ -7,14 +7,14 @@ public class SceneModel : StoryElement
 	#region Properties
 
 	[JsonIgnore]
-	private string _sceneDescription;
+	private string _description;
 
 	[JsonInclude]
 	[JsonPropertyName("Description")]
-	public string SceneDescription
+	public string Description
 	{
-		get => _sceneDescription;
-		set => _sceneDescription = value;
+		get => _description;
+		set => _description = value;
 	}
 
 	[JsonIgnore]
@@ -299,7 +299,6 @@ public class SceneModel : StoryElement
 	#region Constructors
 	public SceneModel(StoryModel model, StoryNodeItem Node) : base("New Scene", StoryItemType.Scene, model, Node)
     {
-        SceneDescription = string.Empty;
         ViewpointCharacter = Guid.Empty;
         Date = string.Empty;
         Time = string.Empty;
@@ -330,7 +329,6 @@ public class SceneModel : StoryElement
     public SceneModel(string name, StoryModel model, StoryNodeItem Node) : base(name, StoryItemType.Scene, model, Node)
 
 	{
-	    SceneDescription = string.Empty;
 	    ViewpointCharacter = Guid.Empty;
 	    Date = string.Empty;
 	    Time = string.Empty;

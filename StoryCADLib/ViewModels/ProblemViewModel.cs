@@ -104,19 +104,11 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         get => _conflictType;
         set => SetProperty(ref _conflictType, value);
     }
-    // Description property (migrated from StoryQuestion)
-    private string _description;
-    public string Description
-    {
-        get => _description;
-        set => SetProperty(ref _description, value);
-    }
-
-    // StoryQuestion now redirects to Description for backward compatibility
+    private string _storyQuestion;
     public string StoryQuestion
     {
-        get => Description;
-        set => Description = value;
+        get => _storyQuestion;
+        set => SetProperty(ref _storyQuestion, value);
     }
 
     // Problem protagonist data
@@ -418,7 +410,7 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         ConflictType = Model.ConflictType;
         ProblemCategory = Model.ProblemCategory;
         Subject = Model.Subject;
-        Description = Model.Description;
+        StoryQuestion = Model.StoryQuestion;
         ProblemSource = Model.ProblemSource;
         Protagonist = Model.Protagonist;
         SelectedProtagonist = Characters.FirstOrDefault(p => p.Uuid == Protagonist);
@@ -492,7 +484,7 @@ public class ProblemViewModel : ObservableRecipient, INavigable
             Model.Outcome = Outcome;
             Model.Method = Method;
             Model.Theme = Theme;
-            Model.Description = Description;
+            Model.StoryQuestion = StoryQuestion;
 			Model.Premise = Premise;
 			Model.StructureTitle = StructureModelTitle;
 			Model.StructureDescription = StructureDescription;

@@ -69,7 +69,7 @@
                     <TextBox Header="Props" Grid.Column="0" Grid.Row="3" Text="{x:Bind SettingVm.Props, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
                     <usercontrols:RichEditBoxExtended Header="Setting Summary" Grid.Row="5"
-                                                      RtfText="{x:Bind SettingVm.Description, Mode=TwoWay}" AcceptsReturn="True"
+                                                      RtfText="{x:Bind SettingVm.Summary, Mode=TwoWay}" AcceptsReturn="True"
                                                       IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                                       ScrollViewer.VerticalScrollBarVisibility="Visible" />
                 </Grid>

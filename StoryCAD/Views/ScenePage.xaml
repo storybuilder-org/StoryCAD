@@ -75,7 +75,7 @@
                                             PlaceholderText="{x:Bind SceneVm.SceneType, Mode=TwoWay}"/>
                     </Grid>
                     <usercontrols:RichEditBoxExtended Header="Scene Sketch" Grid.Row="3"
-                                                      RtfText="{x:Bind SceneVm.Description, Mode=TwoWay}"
+                                                      RtfText="{x:Bind SceneVm.Remarks, Mode=TwoWay}"
                                                       AcceptsReturn="True"
                                                       IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                                       ScrollViewer.VerticalScrollBarVisibility="Visible"/>
