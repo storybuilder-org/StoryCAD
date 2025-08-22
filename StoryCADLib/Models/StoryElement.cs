@@ -21,6 +21,20 @@ public class StoryElement : ObservableObject
 	}
 
 	[JsonIgnore]
+	private string _description;
+
+    /// <summary>
+    /// Common description field that is mapped to the main textbox on an element.
+    /// </summary>
+	[JsonInclude]
+	[JsonPropertyName("ElementDescription")]
+	public string Description
+	{
+		get => _description;
+		set => _description = value;
+	}
+
+	[JsonIgnore]
     private string _name;
 
     [JsonInclude]
@@ -183,6 +197,7 @@ public class StoryElement : ObservableObject
         _uuid = Guid.NewGuid();
         _name = name;
         _type = type;
+        _description = string.Empty;
         _node = new(this, parentNode, type);
 
         model.StoryElements.Add(this);
@@ -197,6 +212,7 @@ public class StoryElement : ObservableObject
         _uuid = Guid.Empty;
         _name = string.Empty;
         _type = StoryItemType.Unknown;
+        _description = string.Empty;
         _node = null;
     }
 

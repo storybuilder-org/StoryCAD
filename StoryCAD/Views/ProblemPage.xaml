@@ -48,7 +48,7 @@
                                     Text="{x:Bind ProblemVm.Subject, Mode=TwoWay}" 
                                     PlaceholderText="{x:Bind ProblemVm.Subject, Mode=TwoWay}" />
                     <usercontrols:RichEditBoxExtended Header="Story Question" Grid.Row="3"
-                                                          RtfText="{x:Bind ProblemVm.StoryQuestion, Mode=TwoWay}" AcceptsReturn="True"
+                                                          RtfText="{x:Bind ProblemVm.Description, Mode=TwoWay}" AcceptsReturn="True"
                                                           IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                                           ScrollViewer.VerticalScrollBarVisibility="Visible" />
                     <ComboBox IsEditable="True" Header="Problem Source" Grid.Row="4" MinWidth="300"
