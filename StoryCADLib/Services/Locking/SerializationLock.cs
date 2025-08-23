@@ -14,7 +14,7 @@ public class SerializationLock : IDisposable
     /// Returns if a lock is currently active.
     /// </summary>
     /// <returns>Lock status</returns>
-    public static bool IsLocked() => _canExecuteCommands;
+    public static bool IsLocked() => !_canExecuteCommands;
 
     private readonly AutoSaveService _autoSaveService;
     private readonly BackupService _backupService;
