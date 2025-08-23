@@ -107,8 +107,13 @@ public class StoryModel : ObservableObject
 	/// <summary>
 	/// Separate trash collection (named TrashView for consistency with ExplorerView/NarratorView)
 	/// </summary>
+	private ObservableCollection<StoryNodeItem> _trashView;
 	[JsonIgnore]
-	public ObservableCollection<StoryNodeItem> TrashView { get; set; }
+	public ObservableCollection<StoryNodeItem> TrashView 
+	{ 
+		get => _trashView;
+		set => SetProperty(ref _trashView, value);
+	}
 
 	/// <summary>
 	/// Current view type tracking

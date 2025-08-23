@@ -41,6 +41,7 @@ public sealed partial class Shell
             DataContext = ShellVm;
             Ioc.Default.GetRequiredService<Windowing>().GlobalDispatcher = Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread();
             Loaded += Shell_Loaded;
+            AppState.CurrentDocumentChanged += (_, __) => UpdateDocumentBindings();
         }
         catch (Exception ex)
         {
@@ -163,6 +164,16 @@ public sealed partial class Shell
         ShellVm.LastClickedTreeviewItem = item; //We can't set the background through RightTappedNode so
                                                 //we set a reference to the node itself to reset the background later
         ShellVm.ShowFlyoutButtons();
+    }
+
+    /// <summary>
+    /// Updates the bindings when the document changes.
+    /// Called when AppState.CurrentDocument is set to refresh x:Bind bindings
+    /// for the tree views (CurrentView and TrashView) in the Shell UI.
+    /// </summary>
+    public void UpdateDocumentBindings()
+    {
+        Bindings.Update();
     }
 
     /// <summary>
