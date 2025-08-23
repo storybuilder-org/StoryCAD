@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
+using StoryCAD.Services;
 using StoryCAD.Services.Messages;
 using StoryCAD.Services.Navigation;
 using StoryCAD.ViewModels.SubViewModels;
@@ -15,13 +16,13 @@ namespace StoryCAD.ViewModels;
 /// There is only one OverviewModel instance for each story. It's also the root of the Shell Page's
 /// StoryExplorer TreeView.
 /// </summary>
-public class OverviewViewModel : ObservableRecipient, INavigable
+public class OverviewViewModel : ObservableRecipient, INavigable, ISaveable
 {
     #region Fields
 
     private readonly ILogService _logger;
-    private readonly OutlineViewModel _outlineViewModel;
-    private StoryModel _shellModel;
+    private readonly AppState _appState;
+    private StoryModel _storyModel;
     private bool _changeable; // process property changes for this story element
     private bool _changed;    // this story element has changed
 
@@ -292,8 +293,9 @@ public class OverviewViewModel : ObservableRecipient, INavigable
         _changeable = false;
         _changed = false;
 
-        Problems = _shellModel.StoryElements.Problems;
-        Characters = _shellModel.StoryElements.Characters;
+        _storyModel = _appState.CurrentDocument!.Model;
+        Problems = _storyModel.StoryElements.Problems;
+        Characters = _storyModel.StoryElements.Characters;
 
         Uuid = Model.Uuid;
         Name = Model.Name;
@@ -323,7 +325,7 @@ public class OverviewViewModel : ObservableRecipient, INavigable
         _changeable = true;
     }
 
-    internal void SaveModel()
+    public void SaveModel()
     {
         try
         {
@@ -407,20 +409,20 @@ public class OverviewViewModel : ObservableRecipient, INavigable
     // Constructor for XAML compatibility - will be removed later
     public OverviewViewModel() : this(
         Ioc.Default.GetRequiredService<ILogService>(),
-        Ioc.Default.GetRequiredService<OutlineViewModel>())
+        Ioc.Default.GetRequiredService<AppState>())
     {
     }
 
-    public OverviewViewModel(ILogService logger, OutlineViewModel outlineViewModel)
+    public OverviewViewModel(ILogService logger, AppState appState)
     {
         _logger = logger;
-        _outlineViewModel = outlineViewModel;
-        _shellModel = _outlineViewModel.StoryModel;
+        _appState = appState;
+        _storyModel = _appState.CurrentDocument.Model;
         
         try
         {
-            Problems = _shellModel.StoryElements.Problems;
-            Characters = _shellModel.StoryElements.Characters;
+            Problems = _storyModel.StoryElements.Problems;
+            Characters = _storyModel.StoryElements.Characters;
             StoryProblem = Problems[0].Uuid;          // Set to "(none") (first Problem)
             ViewpointCharacter = Characters[0].Uuid;  // Set to "(none") (first Character)
 

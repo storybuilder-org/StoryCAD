@@ -79,4 +79,17 @@ public class AppState
     /// run and the server will update the version.
     /// </summary>    
     public bool LoadedWithVersionChange = false;
+
+    /// <summary>
+    /// The currently open story document, combining the model and its file path.
+    /// Null when no document is open (app startup).
+    /// </summary>
+    public StoryDocument? CurrentDocument { get; set; }
+
+    /// <summary>
+    /// The current ViewModel that can save its edits back to the model.
+    /// Set by pages in OnNavigatedTo when they have saveable content.
+    /// Null for pages without editable content (Home, Reports, etc.).
+    /// </summary>
+    public Services.ISaveable? CurrentSaveable { get; set; }
 }

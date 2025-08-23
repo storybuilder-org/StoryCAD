@@ -28,7 +28,7 @@
             <TextBlock Text="NarratorView View" Grid.Row="0" Grid.Column="2" HorizontalAlignment="Center"/>
 
             <ScrollViewer Grid.Row="1" Grid.Column="0">
-                <TreeView ItemsSource="{x:Bind OutlineVM.StoryModel.ExplorerView[0].Children, Mode=TwoWay}"
+                <TreeView ItemsSource="{x:Bind AppState.CurrentDocument.Model.ExplorerView[0].Children, Mode=TwoWay}"
                           Margin="0,5" Background="{x:Bind Background}" >
                     <TreeView.ItemTemplate>
                         <DataTemplate x:DataType="viewModels:StoryNodeItem">
@@ -41,7 +41,7 @@
             </ScrollViewer>
 
             <ScrollViewer Grid.Row="1" Grid.Column="2">
-                <TreeView ItemsSource="{x:Bind OutlineVM.StoryModel.NarratorView[0].Children, Mode=TwoWay}"
+                <TreeView ItemsSource="{x:Bind AppState.CurrentDocument.Model.NarratorView[0].Children, Mode=TwoWay}"
                           Margin="0,5">
                     <TreeView.ItemTemplate>
                         <DataTemplate x:DataType="viewModels:StoryNodeItem">

@@ -31,6 +31,7 @@ public class OutlineViewModel : ObservableRecipient
     private readonly SearchService searchService;
     private readonly AppState appState;
     private readonly BackendService _backendService;
+    private readonly EditFlushService _editFlushService;
     // The reference to ShellViewModel is temporary
     // until the ShellViewModel is refactored to fully
     // use OutlineViewModel for outline methods.
@@ -89,22 +90,8 @@ public class OutlineViewModel : ObservableRecipient
         }
     }
 
-    /// <summary>
-    /// Path to outline file.
-    /// </summary>
-    public string StoryModelFile;
-
-    private StoryModel _storyModel = new();
-    /// <summary>
-    /// Current Outline being edited
-    /// TODO: Consider moving StoryModel to AppState or similar central state service
-    /// to avoid ViewModels reaching into each other for shared state (SRP violation)
-    /// </summary>
-    public StoryModel StoryModel
-    {
-        get => _storyModel;
-        set => SetProperty(ref _storyModel, value);
-    }
+    // StoryModel and StoryModelFile moved to AppState.CurrentDocument
+    // Access via appState.CurrentDocument?.Model and appState.CurrentDocument?.FilePath
 
     /// <summary>
     /// Opens a file picker to let the user chose a .stbx file and loads said file
@@ -117,10 +104,10 @@ public class OutlineViewModel : ObservableRecipient
         {
 
             // Check if current StoryModel has been changed, if so, save and write the model.
-            if (StoryModel.Changed)
+            if (appState.CurrentDocument?.Model?.Changed ?? false)
             {
-                shellVm.SaveModel();
-                await outlineService.WriteModel(StoryModel, StoryModelFile);
+                _editFlushService.FlushCurrentEdits();
+                await outlineService.WriteModel(appState.CurrentDocument.Model, appState.CurrentDocument.FilePath);
             }
 
             logger.Log(LogLevel.Info, "Executing OpenFile command");
@@ -142,56 +129,55 @@ public class OutlineViewModel : ObservableRecipient
                     if (projectFile == null) //Picker was canceled.
                     {
                         logger.Log(LogLevel.Info, "Open file picker cancelled.");
-                        StoryModelFile = string.Empty;
                         return;
                     }
-                    StoryModelFile = projectFile.Path;
-                }
-                else
-                {
-                    StoryModelFile = fromPath;
+                    fromPath = projectFile.Path;
                 }
 
-                if (StoryModelFile == null)
+                string filePath = fromPath;
+                if (string.IsNullOrEmpty(filePath))
                 {
                     logger.Log(LogLevel.Warn, "Open File command failed: StoryModel.ProjectFile is null.");
                     Messenger.Send(new StatusChangedMessage(new("Open Story command cancelled", LogLevel.Info)));
                     return;
                 }
 
-                if (!File.Exists(StoryModelFile))
+                if (!File.Exists(filePath))
                 {
                     Messenger.Send(new StatusChangedMessage(
-                        new($"Cannot find file {StoryModelFile}", LogLevel.Warn, true)));
+                        new($"Cannot find file {filePath}", LogLevel.Warn, true)));
                     return;
                 }
 
                 //Check file is available.
                 StoryIO rdr = Ioc.Default.GetRequiredService<StoryIO>();
-                if (!await rdr.CheckFileAvailability(StoryModelFile))
+                if (!await rdr.CheckFileAvailability(filePath))
                 {
                     Messenger.Send(new StatusChangedMessage(new("File Unavailable.", LogLevel.Warn, true)));
                     return;
                 }
 
                 //Read file
-                StoryModel = await outlineService.OpenFile(StoryModelFile);
+                var loadedModel = await outlineService.OpenFile(filePath);
 
                 //Check the file we loaded actually has StoryCAD Data.
-                if (StoryModel == null)
+                if (loadedModel == null)
                 {
                     Messenger.Send(new StatusChangedMessage(
                         new("Unable to open file (No Story Elements found)", LogLevel.Warn, true)));
                     return;
                 }
 
-                if (StoryModel.StoryElements.Count == 0)
+                if (loadedModel.StoryElements.Count == 0)
                 {
                     Messenger.Send(new StatusChangedMessage(
                         new("Unable to open file (No Story Elements found)", LogLevel.Warn, true)));
                     return;
 
                 }
+                
+                // Successfully loaded - create StoryDocument
+                appState.CurrentDocument = new StoryDocument(loadedModel, filePath);
             }
 
             // Take a backup of the project if the user has the 'backup on open' preference set.
@@ -201,14 +187,14 @@ public class OutlineViewModel : ObservableRecipient
             }
 
             // Set the current view to the ExplorerView 
-            if (StoryModel.ExplorerView.Count > 0)
+            if (appState.CurrentDocument?.Model?.ExplorerView?.Count > 0)
             {
-                outlineService.SetCurrentView(StoryModel, StoryViewType.ExplorerView);
+                outlineService.SetCurrentView(appState.CurrentDocument.Model, StoryViewType.ExplorerView);
                 Messenger.Send(new StatusChangedMessage(new("Open Story completed", LogLevel.Info)));
             }
 
             window.UpdateWindowTitle();
-            await new FileOpenVM().UpdateRecents(StoryModelFile);
+            await new FileOpenVM().UpdateRecents(appState.CurrentDocument?.FilePath);
 
             if (preferences.Model.TimedBackup)
             {
@@ -220,7 +206,7 @@ public class OutlineViewModel : ObservableRecipient
                 shellVm._autoSaveService.StartAutoSave();
             }
 
-            logger.Log(LogLevel.Info, $"Opened project {StoryModelFile}");
+            logger.Log(LogLevel.Info, $"Opened project {appState.CurrentDocument?.FilePath}");
         }
         catch (Exception ex)
         {
@@ -261,9 +247,9 @@ public class OutlineViewModel : ObservableRecipient
             using (var serializationLock = new SerializationLock(autoSaveService, backupService, logger))
             {
                 // If the current project needs saved, do so
-                if (StoryModel.Changed && StoryModelFile != null)
+                if (appState.CurrentDocument?.Model?.Changed == true && appState.CurrentDocument?.FilePath != null)
                 {
-                    await outlineService.WriteModel(StoryModel, StoryModelFile);
+                    await outlineService.WriteModel(appState.CurrentDocument.Model, appState.CurrentDocument.FilePath);
                 }
             }
 
@@ -275,22 +261,23 @@ public class OutlineViewModel : ObservableRecipient
             {
                 // Create the new outline's file
                 StorageFolder folder = await StorageFolder.GetFolderFromPathAsync(dialogVm.OutlineFolder);
-                StoryModelFile =
+                string storyModelFile =
                     (await folder.CreateFileAsync(dialogVm.OutlineName, CreationCollisionOption.GenerateUniqueName))
                     .Path;
 
                 // Create the StoryModel
-                string name = Path.GetFileNameWithoutExtension(StoryModelFile);
+                string name = Path.GetFileNameWithoutExtension(storyModelFile);
                 string author = preferences.Model.FirstName + " " + preferences.Model.LastName;
 
                 // Create the new project StorageFile; throw an exception if it already exists.
-                StoryModel = await outlineService.CreateModel(name, author, dialogVm.SelectedTemplateIndex);
+                var newModel = await outlineService.CreateModel(name, author, dialogVm.SelectedTemplateIndex);
+                appState.CurrentDocument = new StoryDocument(newModel, storyModelFile);
             }
 
-            outlineService.SetCurrentView(StoryModel, StoryViewType.ExplorerView);
+            outlineService.SetCurrentView(appState.CurrentDocument.Model, StoryViewType.ExplorerView);
 
-            await Ioc.Default.GetRequiredService<FileOpenVM>().UpdateRecents(StoryModelFile);
-            outlineService.SetChanged(StoryModel, true);
+            await Ioc.Default.GetRequiredService<FileOpenVM>().UpdateRecents(appState.CurrentDocument.FilePath);
+            outlineService.SetChanged(appState.CurrentDocument.Model, true);
             await SaveFile();
 
             using (var serializationLock = new SerializationLock(autoSaveService, backupService, logger))
@@ -305,7 +292,7 @@ public class OutlineViewModel : ObservableRecipient
                     shellVm.BackupStatusColor = Colors.Green;
                 }
 
-                shellVm.TreeViewNodeClicked(StoryModel.ExplorerView[0]);
+                shellVm.TreeViewNodeClicked(appState.CurrentDocument.Model.ExplorerView[0]);
                 window.UpdateWindowTitle();
             }
 
@@ -347,13 +334,13 @@ public class OutlineViewModel : ObservableRecipient
         using (var serializationLock = new SerializationLock(autoSaveService, backupService, logger))
         {
             string msg = autoSave ? "AutoSave" : "SaveFile command";
-            if (autoSave && !StoryModel.Changed)
+            if (autoSave && !(appState.CurrentDocument?.Model?.Changed ?? false))
             {
                 logger.Log(LogLevel.Info, $"{msg} skipped, no changes");
                 return;
             }
 
-            if (StoryModel.StoryElements.Count == 0)
+            if (appState.CurrentDocument?.Model?.StoryElements.Count == 0)
             {
                 Messenger.Send(new StatusChangedMessage(new("You need to open a story first!", LogLevel.Info)));
                 logger.Log(LogLevel.Info, $"{msg} cancelled (StoryModel.ProjectFile was null)");
@@ -363,10 +350,10 @@ public class OutlineViewModel : ObservableRecipient
             try
             {
                 Messenger.Send(new StatusChangedMessage(new($"{msg} executing", LogLevel.Info)));
-                shellVm.SaveModel();
-                await outlineService.WriteModel(StoryModel, StoryModelFile);
+                _editFlushService.FlushCurrentEdits();
+                await outlineService.WriteModel(appState.CurrentDocument.Model, appState.CurrentDocument.FilePath);
                 Messenger.Send(new StatusChangedMessage(new($"{msg} completed", LogLevel.Info)));
-                outlineService.SetChanged(StoryModel, false);
+                outlineService.SetChanged(appState.CurrentDocument.Model, false);
                 shellVm.ChangeStatusColor = Colors.Green;
             }
             catch (Exception ex)
@@ -386,7 +373,7 @@ public class OutlineViewModel : ObservableRecipient
             Messenger.Send(new StatusChangedMessage(new("Save File As command executing", LogLevel.Info, true)));
             try
             {
-                if (string.IsNullOrEmpty(StoryModelFile))
+                if (string.IsNullOrEmpty(appState.CurrentDocument?.FilePath))
                 {
                     Messenger.Send(new StatusChangedMessage(new("You need to load a story first!", LogLevel.Info)));
                     logger.Log(LogLevel.Warn, "User tried to use save as without a story loaded.");
@@ -400,8 +387,8 @@ public class OutlineViewModel : ObservableRecipient
                 if (!appState.Headless)
                 {
                     // Set default values in the view model using the current story file info
-                    saveAsVm.ProjectName = Path.GetFileName(StoryModelFile);
-                    saveAsVm.ParentFolder = Path.GetDirectoryName(StoryModelFile);
+                    saveAsVm.ProjectName = Path.GetFileName(appState.CurrentDocument.FilePath);
+                    saveAsVm.ParentFolder = Path.GetDirectoryName(appState.CurrentDocument.FilePath);
 
                     saveAsDialog = new()
                     {
@@ -429,11 +416,11 @@ public class OutlineViewModel : ObservableRecipient
                         }
 
                         // Save the model to disk at the current file location
-                        shellVm.SaveModel();
-                        await outlineService.WriteModel(StoryModel, StoryModelFile);
+                        _editFlushService.FlushCurrentEdits();
+                        await outlineService.WriteModel(appState.CurrentDocument.Model, appState.CurrentDocument.FilePath);
 
                         // If the new path is the same as the current one, exit early
-                        if (newFilePath.Equals(StoryModelFile, StringComparison.OrdinalIgnoreCase))
+                        if (newFilePath.Equals(appState.CurrentDocument.FilePath, StringComparison.OrdinalIgnoreCase))
                         {
                             Messenger.Send(new StatusChangedMessage(new("Save File As command completed", LogLevel.Info)));
                             logger.Log(LogLevel.Info, "User tried to save file to same location as current file.");
@@ -442,20 +429,20 @@ public class OutlineViewModel : ObservableRecipient
 
                         logger.Log(LogLevel.Info, $"Testing filename validity for {saveAsVm.ParentFolder}\\{saveAsVm.ProjectName}");
                         // Copy the current file to the new location/name
-                        StorageFile currentFile = await StorageFile.GetFileFromPathAsync(StoryModelFile); 
+                        StorageFile currentFile = await StorageFile.GetFileFromPathAsync(appState.CurrentDocument.FilePath); 
                         StorageFolder folder = await StorageFolder.GetFolderFromPathAsync(saveAsVm.ParentFolder);
                         await currentFile.CopyAsync(folder, saveAsVm.ProjectName, NameCollisionOption.ReplaceExisting);
 
                         // Update the story file path to the new location
-                        StoryModelFile = newFilePath;
+                        appState.CurrentDocument.FilePath = newFilePath;
 
                         // Update window title and recent files
                         window.UpdateWindowTitle();
-                        await new FileOpenVM().UpdateRecents(StoryModelFile);
+                        await new FileOpenVM().UpdateRecents(appState.CurrentDocument.FilePath);
 
                         // Indicate the model is now saved and unchanged
                         Messenger.Send(new IsChangedMessage(true));
-                        outlineService.SetChanged(StoryModel, false);
+                        outlineService.SetChanged(appState.CurrentDocument.Model, false);
                         shellVm.ChangeStatusColor = Colors.Green;
                         Messenger.Send(new StatusChangedMessage(new("Save File As command completed", LogLevel.Info, true)));
                     }
@@ -499,7 +486,7 @@ public class OutlineViewModel : ObservableRecipient
         Messenger.Send(new StatusChangedMessage(new("Closing project", LogLevel.Info, true)));
         using (var serializationLock = new SerializationLock(autoSaveService, backupService, logger))
         {
-            if (StoryModel.Changed && !appState.Headless)
+            if (appState.CurrentDocument?.Model?.Changed == true && !appState.Headless)
             {
                 ContentDialog warning = new()
                 {
@@ -509,13 +496,13 @@ public class OutlineViewModel : ObservableRecipient
                 };
                 if (await window.ShowContentDialog(warning) == ContentDialogResult.Primary)
                 {
-                    shellVm.SaveModel();
-                    await outlineService.WriteModel(StoryModel, StoryModelFile);
+                    _editFlushService.FlushCurrentEdits();
+                    await outlineService.WriteModel(appState.CurrentDocument.Model, appState.CurrentDocument.FilePath);
                 }
             }
 
             shellVm.ResetModel();
-            StoryModelFile = string.Empty;
+            appState.CurrentDocument = null;
             shellVm.RightTappedNode = null; //Null right tapped node to prevent possible issues.
             window.UpdateWindowTitle();
             Ioc.Default.GetRequiredService<BackupService>().StopTimedBackup();
@@ -534,7 +521,7 @@ public class OutlineViewModel : ObservableRecipient
         {
             Messenger.Send(new StatusChangedMessage(new("Executing Exit project command", LogLevel.Info, true)));
 
-            if (StoryModel.Changed)
+            if (appState.CurrentDocument?.Model?.Changed == true)
             {
                 ContentDialog warning = new()
                 {
@@ -544,8 +531,8 @@ public class OutlineViewModel : ObservableRecipient
                 };
                 if (await window.ShowContentDialog(warning) == ContentDialogResult.Primary)
                 {
-                    shellVm.SaveModel();
-                    await outlineService.WriteModel(StoryModel, StoryModelFile);
+                    _editFlushService.FlushCurrentEdits();
+                    await outlineService.WriteModel(appState.CurrentDocument.Model, appState.CurrentDocument.FilePath);
                 }
             }
             await _backendService.DeleteWorkFile();
@@ -559,14 +546,14 @@ public class OutlineViewModel : ObservableRecipient
     /// </summary>
     public async Task WriteModel()
     {
-        logger.Log(LogLevel.Info, $"In WriteModel, path={StoryModelFile}");
+        logger.Log(LogLevel.Info, $"In WriteModel, path={appState.CurrentDocument?.FilePath}");
         try
         {
             // Updating the last modified time
             try
             {
                 OverviewModel overview =
-                    StoryModel.StoryElements.StoryElementGuids[StoryModel.ExplorerView[0].Uuid] as OverviewModel;
+                    appState.CurrentDocument.Model.StoryElements.StoryElementGuids[appState.CurrentDocument.Model.ExplorerView[0].Uuid] as OverviewModel;
                 overview!.DateModified = DateTime.Today.ToString("yyyy-MM-dd");
             }
             catch
@@ -575,7 +562,7 @@ public class OutlineViewModel : ObservableRecipient
             }
 
             // Use the file path if available, otherwise fallback to the old path
-            await outlineService.WriteModel(StoryModel, StoryModelFile);
+            await outlineService.WriteModel(appState.CurrentDocument.Model, appState.CurrentDocument.FilePath);
         }
         catch (UnauthorizedAccessException ex)
         {
@@ -596,10 +583,10 @@ public class OutlineViewModel : ObservableRecipient
             );
 
             // Reset to default location
-            StoryModelFile = Path.Combine(preferences.Model.ProjectDirectory, Path.GetFileName(StoryModelFile)!);
+            appState.CurrentDocument.FilePath = Path.Combine(preferences.Model.ProjectDirectory, Path.GetFileName(appState.CurrentDocument.FilePath)!);
 
             // Last opened file with reference to this version
-            preferences.Model.RecentFiles.Insert(0, StoryModelFile);
+            preferences.Model.RecentFiles.Insert(0, appState.CurrentDocument.FilePath);
         }
         catch (Exception ex)
         {
@@ -617,8 +604,8 @@ public class OutlineViewModel : ObservableRecipient
         using (var serializationLock = new SerializationLock(autoSaveService, backupService, logger))
         {
             logger.Log(LogLevel.Info, $"Search started, Searching for {shellVm.FilterText}");
-            shellVm.SaveModel();
-            if (shellVm.OutlineManager.StoryModel?.CurrentView == null || shellVm.OutlineManager.StoryModel.CurrentView.Count == 0)
+            _editFlushService.FlushCurrentEdits();
+            if (appState.CurrentDocument?.Model?.CurrentView == null || appState.CurrentDocument.Model.CurrentView.Count == 0)
             {
                 logger.Log(LogLevel.Info, "Data source is null or Empty.");
                 Messenger.Send(new StatusChangedMessage(new("You need to load a story first!", LogLevel.Warn)));
@@ -627,10 +614,10 @@ public class OutlineViewModel : ObservableRecipient
 
             int searchTotal = 0;
 
-            foreach (StoryNodeItem node in shellVm.OutlineManager.StoryModel.CurrentView[0])
+            foreach (StoryNodeItem node in appState.CurrentDocument.Model.CurrentView[0])
             {
                 //checks if node name contains the thing we are looking for
-                if (searchService.SearchString(node, shellVm.FilterText, StoryModel)) 
+                if (searchService.SearchString(node, shellVm.FilterText, appState.CurrentDocument.Model)) 
                 {
                     searchTotal++;
                     if (window.RequestedTheme == ElementTheme.Light)
@@ -675,7 +662,7 @@ public class OutlineViewModel : ObservableRecipient
 
     public async Task GenerateScrivenerReports()
     {
-        if (shellVm.OutlineManager.StoryModel?.CurrentView == null || shellVm.OutlineManager.StoryModel.CurrentView.Count == 0)
+        if (appState.CurrentDocument?.Model?.CurrentView == null || appState.CurrentDocument.Model.CurrentView.Count == 0)
         {
             Messenger.Send(new StatusChangedMessage(new("You need to open a story first!", LogLevel.Info)));
             logger.Log(LogLevel.Info, $"Scrivener Report cancelled (CurrentView was null or empty)");
@@ -685,7 +672,7 @@ public class OutlineViewModel : ObservableRecipient
         //TODO: revamp this to be more user-friendly.
         using (var serializationLock = new SerializationLock(autoSaveService, backupService, logger))
         {
-            shellVm.SaveModel();
+            _editFlushService.FlushCurrentEdits();
 
             // Select the Scrivener .scrivx file to add the report to
             StorageFile file = await window.ShowFilePicker("Open file", ".scrivx");
@@ -696,7 +683,7 @@ public class OutlineViewModel : ObservableRecipient
                 if (!await shellVm.Scrivener.IsScrivenerRelease3())
                     throw new ApplicationException("Project is not Scrivener Release 3");
                 // Load the Scrivener project file's model
-                ScrivenerReports rpt = new(file, StoryModel);
+                ScrivenerReports rpt = new(file, appState);
                 await rpt.GenerateReports();
             }
 
@@ -797,7 +784,7 @@ public class OutlineViewModel : ObservableRecipient
                     string masterPlotName = masterPlotsVm.PlotPatternName;
                     PlotPatternModel model = masterPlotsVm.MasterPlots[masterPlotName];
                     IList<PlotPatternScene> scenes = model.PlotPatternScenes;
-                    ProblemModel problem = new ProblemModel(masterPlotName, StoryModel, shellVm.RightTappedNode);
+                    ProblemModel problem = new ProblemModel(masterPlotName, appState.CurrentDocument.Model, shellVm.RightTappedNode);
                     // add the new ProblemModel & node to the end of the target (shellVm.RightTappedNode) children 
                     shellVm.RightTappedNode.IsExpanded = true;
                     problem.Node.IsSelected = true;
@@ -809,7 +796,7 @@ public class OutlineViewModel : ObservableRecipient
                     }
                     else foreach (PlotPatternScene scene in scenes)
                     {
-                        SceneModel child = new(StoryModel, shellVm.RightTappedNode)
+                        SceneModel child = new(appState.CurrentDocument.Model, shellVm.RightTappedNode)
                         { Name = scene.SceneTitle, Remarks = "See Notes.", Notes = scene.Notes };
 
                         child.Node.IsSelected = true;
@@ -857,7 +844,7 @@ public class OutlineViewModel : ObservableRecipient
 
                 if (result == ContentDialogResult.Primary)
                 {
-                    ProblemModel problem = new(situationModel.SituationName, StoryModel, shellVm.RightTappedNode)
+                    ProblemModel problem = new(situationModel.SituationName, appState.CurrentDocument.Model, shellVm.RightTappedNode)
                     {
                         StoryQuestion = "See Notes.",
                         Notes = situationModel.Notes
@@ -869,7 +856,7 @@ public class OutlineViewModel : ObservableRecipient
                 }
                 else if (result == ContentDialogResult.Secondary)
                 {
-                    SceneModel sceneVar = new(situationModel.SituationName, StoryModel, shellVm.RightTappedNode)
+                    SceneModel sceneVar = new(situationModel.SituationName, appState.CurrentDocument.Model, shellVm.RightTappedNode)
                     {
                         Remarks = "See Notes.",
                         Notes = situationModel.Notes,
@@ -930,7 +917,7 @@ public class OutlineViewModel : ObservableRecipient
                         }
 
                         SceneModel sceneVar = new(Ioc.Default.GetRequiredService<StockScenesViewModel>().SceneName,
-                            StoryModel, shellVm.RightTappedNode);
+                            appState.CurrentDocument.Model, shellVm.RightTappedNode);
 
                         shellVm._sourceChildren = shellVm.RightTappedNode.Children;
                         shellVm.TreeViewNodeClicked(sceneVar.Node);
@@ -972,17 +959,17 @@ public class OutlineViewModel : ObservableRecipient
 
             if (checkOutlineIsOpen)
             {
-                if (StoryModel == null)
+                if (appState.CurrentDocument?.Model == null)
                 {
                     Messenger.Send(new StatusChangedMessage(new("Open or create an outline first", LogLevel.Warn)));
                     return false;
                 }
-                if (shellVm.CurrentViewType == StoryViewType.ExplorerView && StoryModel.ExplorerView.Count == 0)
+                if (shellVm.CurrentViewType == StoryViewType.ExplorerView && appState.CurrentDocument.Model.ExplorerView.Count == 0)
                 {
                     Messenger.Send(new StatusChangedMessage(new("Open or create an outline first", LogLevel.Warn)));
                     return false;
                 }
-                if (shellVm.CurrentViewType == StoryViewType.NarratorView && StoryModel.NarratorView.Count == 0)
+                if (shellVm.CurrentViewType == StoryViewType.NarratorView && appState.CurrentDocument.Model.NarratorView.Count == 0)
                 {
                     Messenger.Send(new StatusChangedMessage(new("Open or create an outline first", LogLevel.Warn)));
                     return false;
@@ -1033,7 +1020,7 @@ public class OutlineViewModel : ObservableRecipient
             }
 
             //Create new element via outline service
-            StoryElement newNode = outlineService.AddStoryElement(StoryModel, typeToAdd, shellVm.RightTappedNode);
+            StoryElement newNode = outlineService.AddStoryElement(appState.CurrentDocument.Model, typeToAdd, shellVm.RightTappedNode);
 
             newNode.Node.Parent.IsExpanded = true;
             newNode.IsSelected = false;
@@ -1060,7 +1047,7 @@ public class OutlineViewModel : ObservableRecipient
             }
             bool _delete = true;
             Guid elementToDelete = shellVm.RightTappedNode.Uuid;
-            List<StoryElement> _foundElements = outlineService.FindElementReferences(StoryModel, elementToDelete);
+            List<StoryElement> _foundElements = outlineService.FindElementReferences(appState.CurrentDocument.Model, elementToDelete);
 
             var state = appState;
             //Only warns if it finds a node its referenced in
@@ -1103,11 +1090,11 @@ public class OutlineViewModel : ObservableRecipient
                     try
                     {
                         // Get the element to move to trash
-                        var element = outlineService.GetStoryElementByGuid(StoryModel, elementToDelete);
+                        var element = outlineService.GetStoryElementByGuid(appState.CurrentDocument.Model, elementToDelete);
                         if (element != null)
                         {
                             // Use the new OutlineService method to move to trash
-                            outlineService.MoveToTrash(element, StoryModel);
+                            outlineService.MoveToTrash(element, appState.CurrentDocument.Model);
                             
                             // Clear the selected nodes to prevent issues (fix for #1056)
                             if (shellVm.CurrentNode?.Uuid == elementToDelete)
@@ -1160,7 +1147,7 @@ public class OutlineViewModel : ObservableRecipient
             using (var serializationLock = new SerializationLock(autoSaveService, backupService, logger))
             {
                 // Use the new OutlineService method to restore from trash
-                outlineService.RestoreFromTrash(shellVm.RightTappedNode, StoryModel);
+                outlineService.RestoreFromTrash(shellVm.RightTappedNode, appState.CurrentDocument.Model);
                 
                 // Mark the model as changed
                 ShellViewModel.ShowChange();
@@ -1201,8 +1188,8 @@ public class OutlineViewModel : ObservableRecipient
             return;
         }
 
-        SceneModel _sceneVar = (SceneModel)outlineService.GetStoryElementByGuid(StoryModel, shellVm.RightTappedNode.Uuid);
-        _ = new StoryNodeItem(_sceneVar, StoryModel.NarratorView[0]);
+        SceneModel _sceneVar = (SceneModel)outlineService.GetStoryElementByGuid(appState.CurrentDocument.Model, shellVm.RightTappedNode.Uuid);
+        _ = new StoryNodeItem(_sceneVar, appState.CurrentDocument.Model.NarratorView[0]);
         ShellViewModel.ShowChange();
         Messenger.Send(new StatusChangedMessage(new(
             $"Copied node {shellVm.RightTappedNode.Name} to Narrative View", LogLevel.Info, true)));
@@ -1213,7 +1200,7 @@ public class OutlineViewModel : ObservableRecipient
     /// </summary>
     public void EmptyTrash()
     {
-        if (shellVm.OutlineManager.StoryModel == null)
+        if (appState.CurrentDocument?.Model == null)
         {
             Messenger.Send(new StatusChangedMessage(new("You need to load a story first!", LogLevel.Warn)));
             logger.Log(LogLevel.Info, "Failed to empty trash - no story loaded.");
@@ -1225,7 +1212,7 @@ public class OutlineViewModel : ObservableRecipient
             using (var serializationLock = new SerializationLock(autoSaveService, backupService, logger))
             {
                 // Check if trash has items before attempting to empty
-                var trashCanNode = shellVm.OutlineManager.StoryModel.TrashView?.FirstOrDefault(n => n.Type == StoryItemType.TrashCan);
+                var trashCanNode = appState.CurrentDocument.Model.TrashView?.FirstOrDefault(n => n.Type == StoryItemType.TrashCan);
                 if (trashCanNode == null || trashCanNode.Children.Count == 0)
                 {
                     logger.Log(LogLevel.Info, "Trash is already empty.");
@@ -1240,7 +1227,7 @@ public class OutlineViewModel : ObservableRecipient
                 try
                 {
                     // Use the new OutlineService method to empty trash
-                    outlineService.EmptyTrash(shellVm.OutlineManager.StoryModel);
+                    outlineService.EmptyTrash(appState.CurrentDocument.Model);
                     
                     shellVm.StatusMessage = "Trash Emptied.";
                     logger.Log(LogLevel.Info, "Emptied Trash.");
@@ -1284,11 +1271,11 @@ public class OutlineViewModel : ObservableRecipient
             return;
         }
 
-        foreach (StoryNodeItem _item in StoryModel.NarratorView[0].Children.ToList())
+        foreach (StoryNodeItem _item in appState.CurrentDocument.Model.NarratorView[0].Children.ToList())
         {
             if (_item.Uuid == shellVm.RightTappedNode.Uuid)
             {
-                StoryModel.NarratorView[0].Children.Remove(_item);
+                appState.CurrentDocument.Model.NarratorView[0].Children.Remove(_item);
                 ShellViewModel.ShowChange();
                 Messenger.Send(new StatusChangedMessage(new(
                     $"Removed node {shellVm.RightTappedNode.Name} from Narrative View", LogLevel.Info, true)));
@@ -1317,8 +1304,8 @@ public class OutlineViewModel : ObservableRecipient
             return;
         }
 
-        ProblemModel problem = (ProblemModel)outlineService.GetStoryElementByGuid(StoryModel, shellVm.RightTappedNode.Uuid);
-        SceneModel scene = outlineService.ConvertProblemToScene(StoryModel, problem);
+        ProblemModel problem = (ProblemModel)outlineService.GetStoryElementByGuid(appState.CurrentDocument.Model, shellVm.RightTappedNode.Uuid);
+        SceneModel scene = outlineService.ConvertProblemToScene(appState.CurrentDocument.Model, problem);
         shellVm.TreeViewNodeClicked(scene.Node, false);
         Messenger.Send(new StatusChangedMessage(new("Converted Problem to Scene", LogLevel.Info, true)));
     }
@@ -1340,8 +1327,8 @@ public class OutlineViewModel : ObservableRecipient
             return;
         }
 
-        SceneModel scene = (SceneModel)outlineService.GetStoryElementByGuid(StoryModel, shellVm.RightTappedNode.Uuid);
-        ProblemModel problem = outlineService.ConvertSceneToProblem(StoryModel, scene);
+        SceneModel scene = (SceneModel)outlineService.GetStoryElementByGuid(appState.CurrentDocument.Model, shellVm.RightTappedNode.Uuid);
+        ProblemModel problem = outlineService.ConvertSceneToProblem(appState.CurrentDocument.Model, scene);
         shellVm.TreeViewNodeClicked(problem.Node, false);
         Messenger.Send(new StatusChangedMessage(new("Converted Scene to Problem", LogLevel.Info, true)));
     }
@@ -1351,7 +1338,7 @@ public class OutlineViewModel : ObservableRecipient
 
     public OutlineViewModel(ILogService logService, PreferenceService preferenceService,
         Windowing windowing, OutlineService outlineService, AppState appState,
-        SearchService searchService, BackendService backendService)
+        SearchService searchService, BackendService backendService, EditFlushService editFlushService)
     {
         logger = logService;
         preferences = preferenceService;
@@ -1360,6 +1347,7 @@ public class OutlineViewModel : ObservableRecipient
         this.appState = appState;
         this.searchService = searchService;
         _backendService = backendService;
+        _editFlushService = editFlushService;
     }
 
     #endregion

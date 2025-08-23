@@ -3,17 +3,18 @@ using System.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.UI.Xaml;
+using StoryCAD.Services;
 using StoryCAD.Services.Messages;
 using StoryCAD.Services.Navigation;
 using StoryCAD.ViewModels.SubViewModels;
 
 namespace StoryCAD.ViewModels;
 
-public class SceneViewModel : ObservableRecipient, INavigable
+public class SceneViewModel : ObservableRecipient, INavigable, ISaveable
 {
     #region Fields
-    private readonly OutlineViewModel OutlineVM;
     private readonly ILogService _logger;
+    private readonly AppState _appState;
     private bool _changeable; // process property changes for this story element
     private bool _changed;    // this story element has changed
 
@@ -402,8 +403,10 @@ public class SceneViewModel : ObservableRecipient, INavigable
     {
         _changeable = false;
         _changed = false;
-        Characters = OutlineVM.StoryModel.StoryElements.Characters;
-        Settings = OutlineVM.StoryModel.StoryElements.Settings;
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        Characters = _appState.CurrentDocument!.Model.StoryElements.Characters;
+        Settings = _appState.CurrentDocument.Model.StoryElements.Settings;
+        CharacterList = _appState.CurrentDocument.Model.StoryElements.Characters;  // Populate CharacterList here
 
         Uuid = Model.Uuid;
         Name = Model.Name;
@@ -418,8 +421,6 @@ public class SceneViewModel : ObservableRecipient, INavigable
 
         // The list of cast members is loaded from the Model
         LoadCastList();
-        // CharacterList is the StoryModel's list of all Character StoryElements
-        CharacterList = OutlineVM.StoryModel.StoryElements.Characters;
         ViewpointCharacter = Model.ViewpointCharacter; // Add viewpoint character if missing
         SelectedViewpointCharacter = Characters.FirstOrDefault(p => p.Uuid == ViewpointCharacter);
         // Now set the correct view and initialize the cast elements    
@@ -507,7 +508,7 @@ public class SceneViewModel : ObservableRecipient, INavigable
         }
     }
     
-    internal void SaveModel()
+    public void SaveModel()
     {
         _changeable = false;
 
@@ -645,7 +646,8 @@ public class SceneViewModel : ObservableRecipient, INavigable
     {
         VpCharTipIsOpen = false;
 
-        var shellModel = OutlineVM.StoryModel;
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var shellModel = appState.CurrentDocument.Model;
         var node = shellModel.ExplorerView.FirstOrDefault();
         if (node == null)
         {
@@ -694,18 +696,10 @@ public class SceneViewModel : ObservableRecipient, INavigable
 
     #region Constructors
 
-    // Constructor for XAML compatibility - will be removed later
-    public SceneViewModel() : this(
-        Ioc.Default.GetRequiredService<ILogService>(),
-        Ioc.Default.GetRequiredService<OutlineViewModel>())
-    {
-    }
-
-    public SceneViewModel(ILogService logger, OutlineViewModel outlineViewModel)
+    public SceneViewModel(ILogService logger, AppState appState)
     {
         _logger = logger;
-        OutlineVM = outlineViewModel;
-
+        _appState = appState;
         Date = string.Empty;
         Time = string.Empty;
         Setting = Guid.Empty;
@@ -758,7 +752,7 @@ public class SceneViewModel : ObservableRecipient, INavigable
 
         // Initialize cast member lists / display
         CastList = new ObservableCollection<StoryElement>();
-        CharacterList = OutlineVM.StoryModel.StoryElements.Characters;
+        CharacterList = new ObservableCollection<StoryElement>();  // Empty list until LoadModel
         CastSource = AllCharacters ? CharacterList : CastList;
         AllCharacters = true;
 

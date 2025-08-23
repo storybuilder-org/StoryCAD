@@ -22,7 +22,8 @@ public class NodeItemTests
 		TrashCanModel Trash = new(model, null);
 		ProblemModel problem = new("Test", model, overview.Node);
 
-        OutlineVM.StoryModel = model;
+        var appState = Ioc.Default.GetRequiredService<StoryCAD.Models.AppState>();
+        appState.CurrentDocument = new StoryCAD.Models.StoryDocument(model, null);
 		problem.Node.Delete(StoryViewType.ExplorerView);
 	}
 }

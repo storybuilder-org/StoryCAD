@@ -11,6 +11,7 @@ namespace StoryCAD.Services.Reports
     public class ScrivenerReports
     {
 
+        private readonly AppState _appState;
         private StoryModel _model;
         private ScrivenerIo _scrivener;
         private ReportFormatter _formatter;
@@ -32,12 +33,13 @@ namespace StoryCAD.Services.Reports
 
         #region Constructor
 
-        public ScrivenerReports(StorageFile file, StoryModel model)
+        public ScrivenerReports(StorageFile file, AppState appState)
         {
             _scrivener = Ioc.Default.GetService<ScrivenerIo>();
-            _scrivener.ScrivenerFile = file;
-            _model = model;
-            _formatter = new ReportFormatter();
+            _scrivener!.ScrivenerFile = file;
+            _appState = appState;
+            _model = appState.CurrentDocument!.Model;
+            _formatter = new ReportFormatter(appState);
             //_root = root;
             //_misc = miscFolder;
         }

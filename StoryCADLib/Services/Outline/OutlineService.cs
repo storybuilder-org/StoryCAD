@@ -229,9 +229,8 @@ internal Task<StoryModel> CreateModel(string name, string author, int selectedTe
         }
 
         var file = await StorageFile.GetFileFromPathAsync(path);
-        var outlineViewModel = Ioc.Default.GetRequiredService<OutlineViewModel>();
-        var appState = Ioc.Default.GetRequiredService<AppState>();
-        StoryModel model = await new StoryIO(_log, outlineViewModel, appState).ReadStory(file);
+        var storyIO = Ioc.Default.GetRequiredService<StoryIO>();
+        StoryModel model = await storyIO.ReadStory(file);
         _log.Log(LogLevel.Info, $"Opened model contains {model.StoryElements.Count} elements.");
         return model;
     }
@@ -726,12 +725,7 @@ internal Task<StoryModel> CreateModel(string name, string author, int selectedTe
         }
 
         //Create and add beat.
-        StructureBeatViewModel NewBeat = new()
-        {
-            Title = Title,
-            Description = Description
-        };
-        Parent.StructureBeats.Add(NewBeat);
+        Parent.StructureBeats.Add(new(Title, Description));
     }
 
     /// <summary>
@@ -817,9 +811,7 @@ internal Task<StoryModel> CreateModel(string name, string author, int selectedTe
         Model.Beats = Beats = Beats
                 .Select(b =>
                 {
-                    var copy = new StructureBeatViewModel();
-                    copy.Title = b.Title;
-                    copy.Description = b.Description;
+                    var copy = new StructureBeatViewModel(b.Title, b.Description);
                     return copy;
                 })
                 .ToList();

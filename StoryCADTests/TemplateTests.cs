@@ -39,7 +39,7 @@ public class TemplateTests
         {
             fileVm.SelectedSampleIndex = i;
             await fileVm.OpenSample();
-            var model = Ioc.Default.GetRequiredService<OutlineViewModel>().StoryModel;
+            var model = Ioc.Default.GetRequiredService<AppState>().CurrentDocument.Model;
             Assert.IsNotNull(model);
             Assert.IsTrue(model.StoryElements.Count > 2, "Sample missing data.");
         }

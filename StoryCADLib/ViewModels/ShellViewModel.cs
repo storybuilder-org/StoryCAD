@@ -291,9 +291,10 @@ public class ShellViewModel : ObservableRecipient
     public static void ShowChange()
     {
         // TODO: Static method requires service locator - consider making non-static in future refactoring
-        StoryModel Model = Ioc.Default.GetRequiredService<OutlineViewModel>().StoryModel;
-        if (Ioc.Default.GetRequiredService<AppState>().Headless) { return; }
-        if (Model.Changed) { return; }
+        AppState appState = Ioc.Default.GetRequiredService<AppState>();
+        StoryModel Model = appState.CurrentDocument?.Model;
+        if (appState.Headless) { return; }
+        if (Model?.Changed == true) { return; }
         
         // Use OutlineService to set changed status with proper separation of concerns
         var outlineService = Ioc.Default.GetRequiredService<OutlineService>();
@@ -309,7 +310,7 @@ public class ShellViewModel : ObservableRecipient
 	/// </summary>
 	public async Task CreateBackupNow()
 	{
-        if (OutlineManager.StoryModel?.CurrentView == null || OutlineManager.StoryModel.CurrentView.Count == 0)
+        if (State.CurrentDocument?.Model?.CurrentView == null || State.CurrentDocument.Model.CurrentView.Count == 0)
         {
             Messenger.Send(new StatusChangedMessage(new("You need to load a story first!", LogLevel.Warn)));
             Logger.Log(LogLevel.Info, "Failed to open backup menu as CurrentView is null or empty. (Is a story loaded?)");
@@ -353,7 +354,7 @@ public class ShellViewModel : ObservableRecipient
             if (selectedItem is StoryNodeItem node)
             {
                 CurrentNode = node;
-                StoryElement element = outlineService.GetStoryElementByGuid(OutlineManager.StoryModel, node.Uuid);
+                StoryElement element = outlineService.GetStoryElementByGuid(State.CurrentDocument.Model, node.Uuid);
                 switch (element.ElementType)
                 {
                     case StoryItemType.Character:
@@ -548,7 +549,7 @@ public class ShellViewModel : ObservableRecipient
     }
     public void ResetModel()
     {
-        OutlineManager.StoryModel = new();
+        State.CurrentDocument = new StoryDocument(new StoryModel(), null);
         //TODO: Raise event for StoryModel change?
     }
 
@@ -605,7 +606,7 @@ public class ShellViewModel : ObservableRecipient
 
             //TODO: Logging???
             
-            CollabArgs.StoryModel = OutlineManager.StoryModel;
+            CollabArgs.StoryModel = State.CurrentDocument?.Model;
             Ioc.Default.GetService<CollaboratorService>()!.LoadWorkflows(CollabArgs);
             Ioc.Default.GetService<CollaboratorService>()!.CollaboratorWindow.Show();
             Ioc.Default.GetService<WorkflowViewModel>()!.EnableNavigation();
@@ -920,7 +921,7 @@ public class ShellViewModel : ObservableRecipient
 
     public void ViewChanged()
     {
-        if (OutlineManager.StoryModel?.CurrentView == null || OutlineManager.StoryModel.CurrentView.Count == 0)
+        if (State.CurrentDocument?.Model?.CurrentView == null || State.CurrentDocument.Model.CurrentView.Count == 0)
         {
             Messenger.Send(new StatusChangedMessage(new("You need to load a story first!", LogLevel.Warn)));
             Logger.Log(LogLevel.Info, "Failed to switch views as CurrentView is null or empty. (Is a story loaded?)");
@@ -933,14 +934,14 @@ public class ShellViewModel : ObservableRecipient
             switch (CurrentView)
             {
                 case "Story Explorer View":
-                    outlineService.SetCurrentView(OutlineManager.StoryModel, StoryViewType.ExplorerView);
+                    outlineService.SetCurrentView(State.CurrentDocument.Model, StoryViewType.ExplorerView);
                     break;
                 case "Story Narrator View":
-                    outlineService.SetCurrentView(OutlineManager.StoryModel, StoryViewType.NarratorView);
+                    outlineService.SetCurrentView(State.CurrentDocument.Model, StoryViewType.NarratorView);
                     break;
             }
-            CurrentViewType = OutlineManager.StoryModel.CurrentViewType;
-            TreeViewNodeClicked(OutlineManager.StoryModel.CurrentView[0]);
+            CurrentViewType = State.CurrentDocument.Model.CurrentViewType;
+            TreeViewNodeClicked(State.CurrentDocument.Model.CurrentView[0]);
         }
     }
 
@@ -1026,8 +1027,11 @@ public class ShellViewModel : ObservableRecipient
     #region MVVM  processing
     private void IsChangedMessageReceived(IsChangedMessage isDirty)
     {
-        OutlineManager.StoryModel.Changed = OutlineManager.StoryModel.Changed || isDirty.Value;
-        if (OutlineManager.StoryModel.Changed)
+        if (State.CurrentDocument?.Model != null)
+        {
+            State.CurrentDocument.Model.Changed = State.CurrentDocument.Model.Changed || isDirty.Value;
+        }
+        if (State.CurrentDocument?.Model?.Changed == true)
         {
             ChangeStatusColor = Colors.Red;
         }
@@ -1180,12 +1184,12 @@ public class ShellViewModel : ObservableRecipient
         this.outlineService = outlineService;
 
         // Register inter-MVVM messaging
-        Messenger.Register<IsChangedRequestMessage>(this, (_, m) => { m.Reply(OutlineManager.StoryModel!.Changed); });
+        Messenger.Register<IsChangedRequestMessage>(this, (_, m) => { m.Reply(State.CurrentDocument?.Model?.Changed ?? false); });
         Messenger.Register<ShellViewModel, IsChangedMessage>(this, static (r, m) => r.IsChangedMessageReceived(m));
         Messenger.Register<ShellViewModel, StatusChangedMessage>(this, static (r, m) => r.StatusMessageReceived(m));
         Messenger.Register<ShellViewModel, NameChangedMessage>(this, static (r, m) => r.NameMessageReceived(m));
 
-        OutlineManager.StoryModel = new StoryModel();
+        State.CurrentDocument = new StoryDocument(new StoryModel(), null);
 
         //Skip status timer initialization in Tests.
         if (!State.Headless)

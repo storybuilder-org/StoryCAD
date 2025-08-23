@@ -1,5 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml;
 using StoryCAD.Services.Outline;
 using StoryCAD.ViewModels.SubViewModels;
@@ -13,25 +14,22 @@ public class StructureBeatViewModel : ObservableObject
 {
 	public Windowing Windowing;
 	public ProblemViewModel ProblemViewModel;
-	private readonly OutlineViewModel _outlineViewModel;
-	private readonly OutlineService _outlineService;
+
+    private readonly AppState _appState;
+    private readonly OutlineService _outlineService;
 
 	#region Constructor
-	// Constructor for XAML compatibility - will be removed later
-	public StructureBeatViewModel() : this(
-		Ioc.Default.GetRequiredService<Windowing>(),
-		Ioc.Default.GetRequiredService<ProblemViewModel>(),
-		Ioc.Default.GetRequiredService<OutlineViewModel>(),
-		Ioc.Default.GetRequiredService<OutlineService>())
-	{
-	}
 
-	public StructureBeatViewModel(Windowing windowing, ProblemViewModel problemViewModel, OutlineViewModel outlineViewModel, OutlineService outlineService)
+	public StructureBeatViewModel(string title, string description)
 	{
-		Windowing = windowing;
-		ProblemViewModel = problemViewModel;
-		_outlineViewModel = outlineViewModel;
-		_outlineService = outlineService;
+		Windowing = Ioc.Default.GetRequiredService<Windowing>();
+		ProblemViewModel = Ioc.Default.GetRequiredService<ProblemViewModel>();
+		_appState = Ioc.Default.GetRequiredService<AppState>();
+		_outlineService = Ioc.Default.GetRequiredService<OutlineService>();
+
+		Title = title;
+		Description = description;
+
 		PropertyChanged += ProblemViewModel.OnPropertyChanged;
 	}
 	#endregion
@@ -95,7 +93,7 @@ public class StructureBeatViewModel : ObservableObject
             {
                 try
                 {
-                    return _outlineService.GetStoryElementByGuid(_outlineViewModel.StoryModel, guid);
+                    return _outlineService.GetStoryElementByGuid(_appState.CurrentDocument!.Model, guid);
                 }
                 catch (InvalidOperationException)
                 {

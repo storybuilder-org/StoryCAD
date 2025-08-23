@@ -10,7 +10,7 @@ using StoryCAD.Services;
 
 namespace StoryCAD.ViewModels;
 
-public class WebViewModel : ObservableRecipient, INavigable
+public class WebViewModel : ObservableRecipient, INavigable, ISaveable
 {
     private readonly Windowing _window;
     private readonly AppState _appState;

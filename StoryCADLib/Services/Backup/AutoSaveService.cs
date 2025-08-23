@@ -2,7 +2,7 @@
 using CommunityToolkit.Mvvm.Messaging;
 using StoryCAD.Services.Locking;
 using StoryCAD.Services.Messages;
-using StoryCAD.ViewModels.SubViewModels;
+using StoryCAD.Services.Outline;
 
 namespace StoryCAD.Services.Backup
 {
@@ -20,8 +20,8 @@ namespace StoryCAD.Services.Backup
         private readonly ILogService _logger;
         private readonly AppState _appState;
         private readonly PreferenceService _preferenceService;
-        private readonly OutlineViewModel _outlineVM;
-        // TODO: ShellViewModel and BackupService removed due to circular dependency - needs architectural fix
+        private readonly EditFlushService _editFlushService;
+        private readonly OutlineService _outlineService;
 
         private BackgroundWorker autoSaveWorker;
         private System.Timers.Timer autoSaveTimer;
@@ -32,14 +32,14 @@ namespace StoryCAD.Services.Backup
 
         #region Constructor
 
-        public AutoSaveService(Windowing window, ILogService logger, AppState appState, PreferenceService preferenceService, OutlineViewModel outlineViewModel)
+        public AutoSaveService(Windowing window, ILogService logger, AppState appState, PreferenceService preferenceService, EditFlushService editFlushService, OutlineService outlineService)
         {
             _window = window;
             _logger = logger;
             _appState = appState;
             _preferenceService = preferenceService;
-            _outlineVM = outlineViewModel;
-            // TODO: _shellViewModel assignment removed due to circular dependency
+            _editFlushService = editFlushService;
+            _outlineService = outlineService;
 
             autoSaveWorker = new BackgroundWorker
             {
@@ -123,16 +123,20 @@ namespace StoryCAD.Services.Backup
                 try
                 {
                     if (autoSaveWorker.CancellationPending || !_preferenceService.Model.AutoSave ||
-                        _outlineVM.StoryModel.StoryElements.Count == 0)
+                        _appState.CurrentDocument?.Model?.StoryElements?.Count == 0)
                     {
                         return Task.CompletedTask;
                     }
 
-                    if (_outlineVM.StoryModel.Changed)
+                    if (_appState.CurrentDocument?.IsDirty ?? false)
                     {
                         _logger.Log(LogLevel.Info, "Initiating AutoSave backup.");
-                        // Save and write the model on the UI thread
-                        _window.GlobalDispatcher.TryEnqueue(async () => await _outlineVM.SaveFile(true));
+                        // Flush edits and save the model on the UI thread
+                        _window.GlobalDispatcher.TryEnqueue(async () =>
+                        {
+                            _editFlushService.FlushCurrentEdits();
+                            await _outlineService.WriteModel(_appState.CurrentDocument.Model, _appState.CurrentDocument.FilePath);
+                        });
                     }
                 }
                 catch (Exception _ex)

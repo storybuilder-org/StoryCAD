@@ -282,12 +282,8 @@ public class ProblemViewModelTests
     /// </summary>
     private StructureBeatViewModel CreateTestBeat(string title, string description = "Test Description")
     {
-        // Create a mock beat that doesn't depend on IoC container
-        StructureBeatViewModel beat = new();
-
-        // Set properties directly to avoid constructor dependencies
-        beat.Title = title;
-        beat.Description = description;
+        // Create a beat with the required constructor parameters
+        StructureBeatViewModel beat = new(title, description);
 
         return beat;
     }

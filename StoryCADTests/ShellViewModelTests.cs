@@ -28,13 +28,14 @@ public class ShellTests
         var outlineService = Ioc.Default.GetService<OutlineService>();
         var outlineVM = Ioc.Default.GetService<OutlineViewModel>();
         var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
-        outlineVM.StoryModel = await outlineService.CreateModel("Test1056", "StoryBuilder", 2);
-        outlineVM.StoryModelFile = Path.Combine(App.ResultsDir, "NullDelete.stbx");
+        var appState = Ioc.Default.GetRequiredService<StoryCAD.Models.AppState>();
+        var model = await outlineService.CreateModel("Test1056", "StoryBuilder", 2);
+        appState.CurrentDocument = new StoryCAD.Models.StoryDocument(model, Path.Combine(App.ResultsDir, "NullDelete.stbx"));
         // Set up the current view (Explorer view)
-        outlineService.SetCurrentView(outlineVM.StoryModel, StoryCAD.Models.StoryViewType.ExplorerView);
+        outlineService.SetCurrentView(model, StoryCAD.Models.StoryViewType.ExplorerView);
 
         //Create node to be deleted
-        shell.CurrentNode = outlineVM.StoryModel.StoryElements
+        shell.CurrentNode = appState.CurrentDocument.Model.StoryElements
             .First(e => e.ElementType == StoryCAD.Models.StoryItemType.Folder
             && e.Name != "Narrative View").Node;
         shell.RightTappedNode = shell.CurrentNode;
@@ -112,12 +113,14 @@ public class ShellTests
         var outlineVM = Ioc.Default.GetService<OutlineViewModel>();
         
         // Create a model with overview
-        outlineVM.StoryModel = await outlineService.CreateModel("TestOverview", "StoryBuilder", 2);
-        var overviewElement = outlineVM.StoryModel.StoryElements.FirstOrDefault(e => e.ElementType == StoryCAD.Models.StoryItemType.StoryOverview);
+        var appState = Ioc.Default.GetRequiredService<StoryCAD.Models.AppState>();
+        var testModel = await outlineService.CreateModel("TestOverview", "StoryBuilder", 2);
+        appState.CurrentDocument = new StoryCAD.Models.StoryDocument(testModel, null);
+        var overviewElement = testModel.StoryElements.FirstOrDefault(e => e.ElementType == StoryCAD.Models.StoryItemType.StoryOverview);
         Assert.IsNotNull(overviewElement, "Could not find overview element in story model");
         
         // Set up the overview view model with test data
-        overviewVM.Model = new StoryCAD.Models.OverviewModel("Test", outlineVM.StoryModel, overviewElement.Node);
+        overviewVM.Model = new StoryCAD.Models.OverviewModel("Test", testModel, overviewElement.Node);
         overviewVM.StoryIdea = "Test Idea";
         
         // Set the current page type
@@ -138,14 +141,15 @@ public class ShellTests
     {
         // Arrange
         var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
-        var originalModel = shell.OutlineManager.StoryModel;
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var originalModel = appState.CurrentDocument?.Model;
         
         // Act
         shell.ResetModel();
         
         // Assert - should have a new instance
-        Assert.IsNotNull(shell.OutlineManager.StoryModel);
-        Assert.AreNotSame(originalModel, shell.OutlineManager.StoryModel);
+        Assert.IsNotNull(appState.CurrentDocument?.Model);
+        Assert.AreNotSame(originalModel, appState.CurrentDocument?.Model);
     }
 
     /// <summary>
@@ -157,8 +161,9 @@ public class ShellTests
         var outlineVM = Ioc.Default.GetService<OutlineViewModel>();
         
         // Create empty model (template 0)
+        var appState = Ioc.Default.GetRequiredService<StoryCAD.Models.AppState>();
         var model = await outlineService.CreateModel("TestStory", "TestAuthor", 0);
-        outlineVM.StoryModel = model;
+        appState.CurrentDocument = new StoryCAD.Models.StoryDocument(model, null);
         
         // Get overview node as parent
         var overview = model.ExplorerView.First();
@@ -484,8 +489,9 @@ public class ShellTests
         var outlineVM = Ioc.Default.GetService<OutlineViewModel>();
         
         // Create a test model
-        outlineVM.StoryModel = await outlineService.CreateModel("TestStory", "TestAuthor", 0);
-        shell.OutlineManager.StoryModel = outlineVM.StoryModel;
+        var appState = Ioc.Default.GetRequiredService<StoryCAD.Models.AppState>();
+        var model = await outlineService.CreateModel("TestStory", "TestAuthor", 0);
+        appState.CurrentDocument = new StoryCAD.Models.StoryDocument(model, null);
         
         // Set initial state to Explorer view
         shell.CurrentView = "Story Explorer View";
@@ -497,7 +503,7 @@ public class ShellTests
         // Assert
         Assert.AreEqual("Story Narrator View", shell.CurrentView);
         Assert.AreEqual(StoryViewType.NarratorView, shell.CurrentViewType);
-        Assert.AreEqual(StoryViewType.NarratorView, outlineVM.StoryModel.CurrentViewType);
+        Assert.AreEqual(StoryViewType.NarratorView, appState.CurrentDocument.Model.CurrentViewType);
     }
 
     /// <summary>
@@ -512,8 +518,9 @@ public class ShellTests
         var outlineVM = Ioc.Default.GetService<OutlineViewModel>();
         
         // Create a test model
-        outlineVM.StoryModel = await outlineService.CreateModel("TestStory", "TestAuthor", 0);
-        shell.OutlineManager.StoryModel = outlineVM.StoryModel;
+        var appState = Ioc.Default.GetRequiredService<StoryCAD.Models.AppState>();
+        var model = await outlineService.CreateModel("TestStory", "TestAuthor", 0);
+        appState.CurrentDocument = new StoryCAD.Models.StoryDocument(model, null);
         
         // Set initial state to Narrator view
         shell.CurrentView = "Story Narrator View";
@@ -525,7 +532,7 @@ public class ShellTests
         // Assert
         Assert.AreEqual("Story Explorer View", shell.CurrentView);
         Assert.AreEqual(StoryViewType.ExplorerView, shell.CurrentViewType);
-        Assert.AreEqual(StoryViewType.ExplorerView, outlineVM.StoryModel.CurrentViewType);
+        Assert.AreEqual(StoryViewType.ExplorerView, appState.CurrentDocument.Model.CurrentViewType);
     }
 
     /// <summary>
@@ -540,8 +547,9 @@ public class ShellTests
         var outlineVM = Ioc.Default.GetService<OutlineViewModel>();
         
         // Create a test model
-        outlineVM.StoryModel = await outlineService.CreateModel("TestStory", "TestAuthor", 0);
-        shell.OutlineManager.StoryModel = outlineVM.StoryModel;
+        var appState = Ioc.Default.GetRequiredService<StoryCAD.Models.AppState>();
+        var model = await outlineService.CreateModel("TestStory", "TestAuthor", 0);
+        appState.CurrentDocument = new StoryCAD.Models.StoryDocument(model, null);
         
         // Set both to same view
         shell.CurrentView = "Story Explorer View";
@@ -564,7 +572,8 @@ public class ShellTests
     {
         // Arrange
         var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
-        shell.OutlineManager.StoryModel = null;
+        var appState = Ioc.Default.GetRequiredService<StoryCAD.Models.AppState>();
+        appState.CurrentDocument = null;
         shell.CurrentView = "Story Explorer View";
         shell.SelectedView = "Story Narrator View";
         
@@ -587,9 +596,10 @@ public class ShellTests
         var outlineVM = Ioc.Default.GetService<OutlineViewModel>();
         
         // Create a test model but clear CurrentView
-        outlineVM.StoryModel = await outlineService.CreateModel("TestStory", "TestAuthor", 0);
-        shell.OutlineManager.StoryModel = outlineVM.StoryModel;
-        outlineVM.StoryModel.CurrentView.Clear();
+        var appState = Ioc.Default.GetRequiredService<StoryCAD.Models.AppState>();
+        var model = await outlineService.CreateModel("TestStory", "TestAuthor", 0);
+        appState.CurrentDocument = new StoryCAD.Models.StoryDocument(model, null);
+        appState.CurrentDocument.Model.CurrentView.Clear();
         
         shell.CurrentView = "Story Explorer View";
         shell.SelectedView = "Story Narrator View";

@@ -363,7 +363,7 @@
                 <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
                     <StackPanel>
                     <!-- Main Navigation Tree -->
-                    <ItemsRepeater ItemsSource="{x:Bind ShellVm.OutlineManager.StoryModel.CurrentView, Mode=TwoWay}" x:Name="NavigationTree"
+                    <ItemsRepeater ItemsSource="{x:Bind AppState.CurrentDocument.Model.CurrentView, Mode=TwoWay}" x:Name="NavigationTree"
                                ContextFlyout="{StaticResource AddStoryElementFlyout}" 
                                ContextRequested="AddButton_ContextRequested" >
                     <ItemsRepeater.ItemTemplate>
@@ -423,7 +423,7 @@
                 <Border Height="2" Background="Gray" Margin="5,10,5,2" />
                 
                 <!-- Trash Can TreeView -->
-                <muxc:TreeView ItemsSource="{x:Bind ShellVm.OutlineManager.StoryModel.TrashView, Mode=TwoWay}"
+                <muxc:TreeView ItemsSource="{x:Bind AppState.CurrentDocument.Model.TrashView, Mode=TwoWay}"
                               ContextFlyout="{StaticResource AddStoryElementFlyout}"
                               ContextRequested="AddButton_ContextRequested"
                               ItemInvoked="TreeViewItem_Invoked"

@@ -1,6 +1,10 @@
 ﻿using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Navigation;
 using Microsoft.Web.WebView2.Core;
+using StoryCAD.Models;
+using StoryCAD.Services;
 using StoryCAD.Services.Logging;
+using CommunityToolkit.Mvvm.DependencyInjection;
 
 namespace StoryCAD.Views;
 
@@ -38,4 +42,11 @@ namespace StoryCAD.Views;
     /// <param name="sender"></param>
     /// <param name="args"></param>
     private void QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args) { WebVM.SubmitQuery(); }
+    
+    protected override void OnNavigatedTo(NavigationEventArgs e)
+    {
+        base.OnNavigatedTo(e);
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        appState.CurrentSaveable = DataContext as ISaveable;
+    }
 }

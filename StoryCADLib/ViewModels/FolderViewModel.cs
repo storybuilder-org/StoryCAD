@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
+using StoryCAD.Services;
 using StoryCAD.Services.Messages;
 using StoryCAD.Services.Navigation;
 
@@ -14,7 +15,7 @@ namespace StoryCAD.ViewModels;
 /// another Section as its parent. Sections are Chapters, Acts,
 /// etc.
 /// </summary>
-public class FolderViewModel : ObservableRecipient, INavigable
+public class FolderViewModel : ObservableRecipient, INavigable, ISaveable
 {
     #region Fields
 
@@ -117,7 +118,7 @@ public class FolderViewModel : ObservableRecipient, INavigable
         _changeable = true;
     }
 
-    internal void SaveModel()
+    public void SaveModel()
     {
         // Story.Uuid is read-only; no need to save
         Model.Name = Name;

@@ -1,6 +1,9 @@
 ﻿using Windows.ApplicationModel.DataTransfer;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Navigation;
+using StoryCAD.Models;
+using StoryCAD.Services;
 using StoryCAD.Services.Logging;
 using StoryCAD.ViewModels.SubViewModels;
 using StoryCAD.ViewModels.Tools;
@@ -25,5 +28,12 @@ public sealed partial class ProblemPage : BindablePage
     {
         ProblemVm.SelectedBeat = (StructureBeatViewModel)(sender as Expander).DataContext;
         ProblemVm.SelectedBeatIndex = ProblemVm.StructureBeats.IndexOf(ProblemVm.SelectedBeat);
+    }
+    
+    protected override void OnNavigatedTo(NavigationEventArgs e)
+    {
+        base.OnNavigatedTo(e);
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        appState.CurrentSaveable = DataContext as ISaveable;
     }
 }

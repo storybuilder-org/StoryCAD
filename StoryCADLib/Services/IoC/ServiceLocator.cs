@@ -95,6 +95,7 @@ public static class BootStrapper
         Services.AddSingleton<ToolsData>();
         Services.AddSingleton<ControlData>();
         Services.AddSingleton<AppState>();
+        Services.AddSingleton<EditFlushService>();
         Services.AddSingleton<Windowing>();
         Services.AddSingleton<RatingService>();
         Services.AddSingleton<OutlineViewModel>();

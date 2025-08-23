@@ -3,7 +3,6 @@ using System.IO.Compression;
 using Windows.Storage;
 using Microsoft.UI;
 using CommunityToolkit.Mvvm.Messaging;
-using StoryCAD.ViewModels.SubViewModels;
 using StoryCAD.Services.Locking;
 using StoryCAD.Services.Messages;
 using System.Timers;
@@ -17,10 +16,8 @@ public class BackupService
 
     private readonly ILogService _logService;
     private readonly PreferenceService _preferenceService;
-    private readonly OutlineViewModel _outlineViewModel;
     private readonly AppState _appState;
     private readonly Windowing _windowing;
-    // TODO: ShellViewModel removed due to circular dependency - needs architectural fix
 
     // Fields to preserve remaining time when paused
     private double defaultIntervalMs;
@@ -32,14 +29,12 @@ public class BackupService
 
     #region Constructor
 
-    public BackupService(ILogService logService, PreferenceService preferenceService, OutlineViewModel outlineViewModel, AppState appState, Windowing windowing)
+    public BackupService(ILogService logService, PreferenceService preferenceService, AppState appState, Windowing windowing)
     {
         _logService = logService;
         _preferenceService = preferenceService;
-        _outlineViewModel = outlineViewModel;
         _appState = appState;
         _windowing = windowing;
-        // TODO: _shellViewModel assignment removed due to circular dependency
 
         // Compute default interval once (in milliseconds)
         remainingIntervalMs = null;
@@ -57,7 +52,7 @@ public class BackupService
     public void StartTimedBackup()
     {
         // Don't start if no project is loaded
-        if (String.IsNullOrEmpty(_outlineViewModel.StoryModelFile))
+        if (String.IsNullOrEmpty(_appState.CurrentDocument?.FilePath))
         {
             return;
         }
@@ -187,7 +182,7 @@ public class BackupService
         var autoSaveService = Ioc.Default.GetRequiredService<AutoSaveService>();
 
         // Determine filenames and paths
-        var originalFileName = Path.GetFileNameWithoutExtension(_outlineViewModel.StoryModelFile);
+        var originalFileName = Path.GetFileNameWithoutExtension(_appState.CurrentDocument?.FilePath ?? "Untitled");
 
         if (Filename is null)
         {
@@ -224,7 +219,7 @@ public class BackupService
                 StorageFolder tempFolder = await rootFolder.CreateFolderAsync(
                     "Temp", CreationCollisionOption.ReplaceExisting);
 
-                StorageFile projectFile = await StorageFile.GetFileFromPathAsync(_outlineViewModel.StoryModelFile);
+                StorageFile projectFile = await StorageFile.GetFileFromPathAsync(_appState.CurrentDocument.FilePath);
                 await projectFile.CopyAsync(tempFolder, projectFile.Name, NameCollisionOption.ReplaceExisting);
 
                 string zipFilePath = Path.Combine(FilePath, Filename) + ".zip";
