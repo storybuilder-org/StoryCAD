@@ -42,6 +42,7 @@ public sealed partial class Shell
             Ioc.Default.GetRequiredService<Windowing>().GlobalDispatcher = Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread();
             Loaded += Shell_Loaded;
             AppState.CurrentDocumentChanged += (_, __) => UpdateDocumentBindings();
+            SerializationLock.CanExecuteStateChanged += (_, __) => ShellVm.RefreshAllCommands();
         }
         catch (Exception ex)
         {
