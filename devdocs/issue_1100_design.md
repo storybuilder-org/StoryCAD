@@ -207,23 +207,24 @@ SemanticKernelAPI              OutlineViewModel
 ---
 *Design approved and ready for implementation in Code phase*
 
-## Code Phase - Planned Tasks (Final Simplified Version)
+## Code Phase - Completed
 
-### Implementation Order
-1. **Create ISaveable interface in StoryCADLib/Services/**
-2. **Create StoryDocument class in StoryCADLib/Models/**
-3. **Add CurrentDocument and CurrentSaveable to AppState**
-4. **Create EditFlushService in StoryCADLib/Services/**
-5. **Implement ISaveable in element ViewModels (Character, Problem, Scene, etc.)**
-6. **Update Pages to register CurrentSaveable in OnNavigatedTo**
-7. **Update AutoSaveService to use EditFlushService and OutlineService**
-8. **Update BackupService to use AppState**
-9. **Update StoryIO to use AppState instead of OutlineViewModel**
-10. **Update OutlineViewModel with proxy properties and new SaveFile**
-11. **Remove SaveModel() and CurrentPageType from ShellViewModel**
-12. **Search for remaining OutlineViewModel.StoryModel/StoryModelFile usages**
-13. **Compile and fix any build errors**
-14. **Run existing tests and fix failures**
+### Implementation Order (All Completed)
+1. ✅ **Create ISaveable interface in StoryCADLib/Services/**
+2. ✅ **Create StoryDocument class in StoryCADLib/Models/**
+3. ✅ **Add CurrentDocument and CurrentSaveable to AppState**
+4. ✅ **Create EditFlushService in StoryCADLib/Services/**
+5. ✅ **Implement ISaveable in element ViewModels (Character, Problem, Scene, etc.)**
+6. ✅ **Update Pages to register CurrentSaveable in OnNavigatedTo**
+7. ✅ **Update AutoSaveService to use EditFlushService and OutlineService**
+8. ✅ **Update BackupService to use AppState**
+9. ✅ **Update StoryIO to use AppState instead of OutlineViewModel**
+10. ✅ **Remove StoryModel and StoryModelFile from OutlineViewModel**
+11. ✅ **Remove SaveModel() and CurrentPageType from ShellViewModel**
+12. ✅ **Fix all remaining OutlineViewModel.StoryModel/StoryModelFile usages**
+13. ✅ **Compile and fix all build errors**
+14. ✅ **Run existing tests and fix failures**
+15. ✅ **Fix UI binding updates with CurrentDocumentChanged event**
 
 ### Key Implementation Notes
 - ISaveable interface eliminates all switch statements and ViewModel type dependencies
@@ -231,3 +232,10 @@ SemanticKernelAPI              OutlineViewModel
 - Pages self-register their saveable ViewModels
 - No messaging needed - direct service calls ensure proper sequencing
 - Windowing.PageKey already tracks current page (no need for CurrentPageType in AppState)
+
+### UI Binding Update Solution
+- Added `CurrentDocumentChanged` event to AppState
+- Shell subscribes to this event in constructor
+- When CurrentDocument is set, event fires and triggers `Shell.UpdateDocumentBindings()`
+- `Bindings.Update()` refreshes all x:Bind bindings including tree views
+- This ensures UI displays properly when documents are loaded or created
