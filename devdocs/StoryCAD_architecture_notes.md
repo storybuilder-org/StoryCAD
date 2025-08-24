@@ -1,6 +1,7 @@
 # StoryCAD Architecture Notes
 *Compiled from Issue #1069 Test Coverage Implementation*
-*Date: 2025-01-18*
+*Updated with Issue #1100 Architecture Refactoring*
+*Date: 2025-01-24*
 
 ## Overview
 StoryCAD is a Windows desktop application for fiction writers that provides structured outlining tools. It's described as "CAD for fiction writers" and helps writers manage the complexity of plotted fiction through systematic story development.
@@ -25,6 +26,9 @@ StoryCAD is a Windows desktop application for fiction writers that provides stru
 
 #### 1. Data Model Layer
 - **StoryModel**: In-memory representation of a story outline
+- **StoryDocument**: Wrapper class containing StoryModel and FilePath (Issue #1100)
+  - Provides atomic document operations
+  - Single source of truth for document state
 - **StoryElement**: Base class for all story components
   - Derived types: CharacterModel, SceneModel, ProblemModel, SettingModel, FolderModel, WebModel, etc.
 - **StoryNodeItem**: Tree node representation for UI display
@@ -36,9 +40,16 @@ StoryCAD is a Windows desktop application for fiction writers that provides stru
   - Handles all story operations (CRUD, tree manipulation, file I/O)
   - Thread-safe operations using SerializationLock
   
+- **EditFlushService**: Handles saving current page edits (Issue #1100)
+  - Uses ISaveable interface to flush ViewModel changes
+  - Eliminates ViewModel dependencies in services
+  - Called before any save operations
+  
 - **NavigationService**: Page navigation and view transitions
 - **AutoSaveService**: Automatic saving with configurable intervals
+  - Now uses AppState instead of OutlineViewModel (Issue #1100)
 - **BackupService**: Automated backup functionality
+  - Now uses AppState instead of OutlineViewModel (Issue #1100)
 - **CollaboratorService**: AI-powered writing assistance
 - **SearchService**: Full-text search across story content
 - **LogService**: Comprehensive logging with NLog and elmah.io integration
@@ -58,15 +69,18 @@ StoryCAD is a Windows desktop application for fiction writers that provides stru
   - Manages view state and tree operations
   - **Calls OutlineService** for business logic operations
   - Does NOT use OperationResult (internal, can handle exceptions)
+  - No longer has SaveModel() method (Issue #1100)
   
 - **OutlineViewModel**: Story outline management
   - File operations (new, open, save, close)
   - **Delegates to OutlineService** for all business logic
   - Direct exception handling (no OperationResult needed)
+  - No longer holds StoryModel/StoryModelFile (moved to AppState via StoryDocument)
 
 - Various element ViewModels (CharacterViewModel, SceneViewModel, etc.)
   - Handle element-specific UI logic
   - Data binding to element models
+  - Implement **ISaveable** interface for save operations (Issue #1100)
 
 #### 5. View Layer
 - **Shell.xaml**: Main application window with TreeView
@@ -75,16 +89,26 @@ StoryCAD is a Windows desktop application for fiction writers that provides stru
 
 ## Architectural Flow and Relationships
 
-### Call Hierarchy
+### Call Hierarchy (Post Issue #1100)
 ```
-External Tools/LLMs
-        ↓
-SemanticKernelAPI (uses OperationResult<T>)
-        ↓
-    OutlineService ← Also called by → ViewModels (ShellViewModel, OutlineViewModel)
-        ↓                                    ↑
-    StoryModel                           UI Events
+External Tools/LLMs                    UI/ViewModels
+        ↓                                   ↓
+SemanticKernelAPI                   OutlineViewModel
+        ↓                                   ↓
+        ├──> AppState.CurrentDocument <─────┤
+        ↓        (StoryDocument)            ↓
+        └────> OutlineService <──────────────┘
+                 (Stateless)
+                     ↓
+                 StoryIO
+                     ↓
+         Updates AppState.CurrentDocument.FilePath
 ```
+
+Services now interact with AppState instead of ViewModels:
+- AutoSaveService → AppState.CurrentDocument → EditFlushService → OutlineService
+- BackupService → AppState.CurrentDocument.FilePath
+- No circular dependencies between services and ViewModels
 
 ### Key Relationship: ViewModels vs API to OutlineService
 1. **ViewModels → OutlineService**:
@@ -144,7 +168,18 @@ using (var serializationLock = new SerializationLock(autoSaveService, backupServ
 - Prevents concurrent modifications to story data
 - Used throughout OutlineService and API
 
-### 4. OperationResult Pattern
+### 4. ISaveable Pattern (Issue #1100)
+```csharp
+public interface ISaveable
+{
+    void SaveModel(); // Flush ViewModel data to Model
+}
+```
+- Implemented by element ViewModels
+- Pages register saveable ViewModels in AppState.CurrentSaveable
+- EditFlushService calls SaveModel() without knowing ViewModel types
+
+### 5. OperationResult Pattern
 ```csharp
 public class OperationResult<T>
 {
@@ -181,6 +216,12 @@ public class OperationResult<T>
 
 ## State Management
 
+### Central State (AppState) - Issue #1100
+- **CurrentDocument**: StoryDocument wrapper containing StoryModel and FilePath
+- **CurrentSaveable**: Active ISaveable ViewModel for edit flushing
+- **CurrentDocumentChanged event**: Notifies UI of document changes
+- Single source of truth for document state
+
 ### Model State
 - **Changed flag**: Tracks if model has unsaved changes
 - **CurrentView**: Tracks active view (Explorer/Narrator)
@@ -197,6 +238,7 @@ public class OperationResult<T>
 - **Expansion state**: TreeView expansion persisted per node
 - **Background colors**: Dynamic styling based on selection/validation
 - **Context menus**: Element-specific commands based on node type
+- **Page registration**: Pages register ISaveable ViewModels in OnNavigatedTo
 
 ## File Management
 
@@ -270,6 +312,18 @@ public class OperationResult<T>
 - No unhandled exceptions leak to API consumers
 - Clear success/failure semantics
 
+### 6. StoryDocument Pattern (Issue #1100)
+- Encapsulates StoryModel and FilePath together
+- Atomic document operations
+- Prevents mismatched model/path states
+- Simplifies service interfaces
+
+### 7. ISaveable Interface Pattern (Issue #1100)
+- ViewModels implement ISaveable for save operations
+- Pages self-register saveable ViewModels
+- EditFlushService uses interface without ViewModel knowledge
+- Eliminates type-specific switch statements
+
 ## Relationship Management
 
 ### Character Relationships
@@ -320,10 +374,17 @@ public class OperationResult<T>
 - TreeView control handles internally
 - Future: Consider adding validation layer
 
-### 4. View Model Responsibilities
-- ShellViewModel has high responsibility (potential refactoring target)
-- Some operations could be moved to services
-- Balance between MVVM purity and practical implementation
+### 4. Circular Dependencies Resolved (Issue #1100)
+- Previous: Services depended on OutlineViewModel for document state
+- Now: Services use AppState.CurrentDocument
+- Eliminated: OutlineViewModel ↔ AutoSaveService, BackupService, StoryIO
+- Result: Clean dependency hierarchy
+
+### 5. View Model Responsibilities
+- ShellViewModel simplified (SaveModel removed)
+- OutlineViewModel no longer holds document state
+- Element ViewModels handle their own save operations via ISaveable
+- Better separation of concerns achieved
 
 ## Performance Considerations
 
@@ -345,23 +406,19 @@ public class OperationResult<T>
 ## Future Architecture Considerations
 
 ### Potential Improvements
-1. **Extract more logic from ViewModels to Services**
-   - Reduce ViewModel complexity
-   - Improve testability
-
-2. **Add validation layer for drag-and-drop**
+1. **Add validation layer for drag-and-drop**
    - Business rules for valid moves
    - Prevent invalid tree operations
 
-3. **Improve Changed flag handling**
+2. **Improve Changed flag handling**
    - Work consistently in headless mode
    - Better integration with auto-save
 
-4. **Consider command pattern for operations**
+3. **Consider command pattern for operations**
    - Enable undo/redo functionality
    - Better operation tracking
 
-5. **Add caching layer**
+4. **Add caching layer**
    - Improve performance for large stories
    - Cache frequently accessed elements
 
