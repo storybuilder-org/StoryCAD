@@ -536,7 +536,15 @@ public class OutlineViewModel : ObservableRecipient
                 }
             }
             await _backendService.DeleteWorkFile();
-            logger.Flush();
+            try
+            {
+                logger.Flush();
+            }
+            catch (Exception ex)
+            {
+                // Ignore logging exceptions during shutdown
+                // The important work (saving) is already done
+            }
         }
         Application.Current.Exit();  // Win32
     }
