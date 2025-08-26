@@ -1,109 +1,72 @@
-﻿using System.ComponentModel;
-using CommunityToolkit.Mvvm.Messaging;
+﻿using Microsoft.UI.Dispatching;
+using Microsoft.UI.Xaml;
 using StoryCAD.Services.Locking;
-using StoryCAD.Services.Messages;
 using StoryCAD.Services.Outline;
+using System;
+using System.ComponentModel;
+using System.Threading.Tasks;
+using System.Timers;  // <-- use non-UI timer
 
 namespace StoryCAD.Services.Backup
 {
-    /// <summary>
-    /// Automatically save the active project at regular intervals.
-    ///
-    /// This class uses a BackgroundWorker to run the AutoSave task.
-    /// The worker runs on a separate thread from the UI thread and
-    /// is event-driven by a timer.  The timer is set to the user's
-    /// specified PreferencesAutoSaveInterval (in seconds).
-    /// </summary>
-    public class AutoSaveService
+    public class AutoSaveService : IDisposable
     {
-        private readonly Windowing _window;
-        private readonly ILogService _logger;
         private readonly AppState _appState;
         private readonly PreferenceService _preferenceService;
         private readonly EditFlushService _editFlushService;
         private readonly OutlineService _outlineService;
+        private readonly Windowing _windowing;   // <-- Windowing (mockable), not Window
+        private readonly ILogService _logger;
 
-        private BackgroundWorker autoSaveWorker;
-        private System.Timers.Timer autoSaveTimer;
-        /// <summary>
-        /// Returns the running status of the AutoSave service.
-        /// </summary>
-        public bool IsRunning => autoSaveTimer.Enabled;
+        private readonly Timer _autoSaveTimer;              // System.Timers.Timer
+        private readonly BackgroundWorker _autoSaveWorker;
 
-        #region Constructor
-
-        public AutoSaveService(Windowing window, ILogService logger, AppState appState, PreferenceService preferenceService, EditFlushService editFlushService, OutlineService outlineService)
+        public AutoSaveService(
+            AppState appState,
+            PreferenceService preferenceService,
+            EditFlushService editFlushService,
+            OutlineService outlineService,
+            Windowing windowing,               // <-- use Windowing here
+            ILogService logger)
         {
-            _window = window;
-            _logger = logger;
             _appState = appState;
             _preferenceService = preferenceService;
             _editFlushService = editFlushService;
             _outlineService = outlineService;
+            _windowing = windowing;            // <-- store Windowing
+            _logger = logger;
 
-            autoSaveWorker = new BackgroundWorker
+            // Interval is milliseconds for System.Timers.Timer
+            _autoSaveTimer = new Timer(_preferenceService.Model.AutoSaveInterval * 1000.0)
             {
-                WorkerSupportsCancellation = true,
-                WorkerReportsProgress = false
+                AutoReset = true,
+                Enabled = false
             };
-            autoSaveWorker.DoWork += RunAutoSaveTask;
+            _autoSaveTimer.Elapsed += AutoSaveTimer_Elapsed;
 
-            //TODO: Move the following line to Preferences, add appropriate Status and logging
-            if (_preferenceService.Model.AutoSaveInterval is > 61 or < 14)
-                _preferenceService.Model.AutoSaveInterval = 30;
-            autoSaveTimer = new System.Timers.Timer();
-            autoSaveTimer.Elapsed += AutoSaveTimer_Elapsed;
-            autoSaveTimer.Interval = _preferenceService.Model.AutoSaveInterval * 1000;
+            _autoSaveWorker = new BackgroundWorker();
+            _autoSaveWorker.DoWork += RunAutoSaveTask;
         }
-        #endregion
 
-        #region Public Methods
-        /// <summary>
-        /// Starts the AutoSave Service
-        /// </summary>
-        public void StartAutoSave()
+        // original API names
+        public void StartAutoSave() => _autoSaveTimer.Start();
+        public void StopAutoSave()  => _autoSaveTimer.Stop();
+        public bool IsRunning => _autoSaveTimer.Enabled;
+        public bool IsStarted => _autoSaveTimer.Enabled;
+
+        private void AutoSaveTimer_Elapsed(object? sender, ElapsedEventArgs e)
         {
-            // If the timer is already running, stop it
-            if (autoSaveTimer.Enabled)
-                autoSaveTimer.Stop();
-
-            // Reset the timer and start it 
-            autoSaveTimer.Interval = _preferenceService.Model.AutoSaveInterval * 1000;
-            autoSaveTimer.Start();
+            if (!_autoSaveWorker.IsBusy)
+            {
+                _autoSaveWorker.RunWorkerAsync();
+            }
         }
 
-        /// <summary>
-        /// Stops AutoSave service
-        /// </summary>
-        public void StopAutoSave()
-        {
-            autoSaveTimer.Stop();
-        }
-        #endregion
-
-        #region Private Methods
-
-        /// <summary>
-        /// Launches the AutoSave task when the timer elapses
-        /// </summary>
-        private void AutoSaveTimer_Elapsed(object source, System.Timers.ElapsedEventArgs e)
-        {
-            if (!autoSaveWorker.IsBusy)
-                autoSaveWorker.RunWorkerAsync();
-        }
-
-        /// <summary>
-        /// Performs an AutoSave when triggered by AutoSaveTimer_Elapsed (the autoSaveTimer event)
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private async void RunAutoSaveTask(object sender, DoWorkEventArgs e)
+        private void RunAutoSaveTask(object? sender, DoWorkEventArgs e)
         {
             try
             {
-                _logger.Log(LogLevel.Info, "Invoking AutoSave.");
-                await AutoSaveProject();
-                //_logger.Log(LogLevel.Info, "AutoSave task finished.");
+                AutoSaveProjectAsync().GetAwaiter().GetResult();
             }
             catch (Exception ex)
             {
@@ -111,51 +74,35 @@ namespace StoryCAD.Services.Backup
             }
         }
 
-        private Task AutoSaveProject()
+        private async Task AutoSaveProjectAsync()
         {
-            // TODO: Circular dependency - AutoSaveService ↔ BackupService
-            // BackupService requires AutoSaveService in constructor, so we can't inject it here
-            var backupService = Ioc.Default.GetRequiredService<BackupService>();
-            var logService = _logger;
+            if (!_preferenceService.Model.AutoSave) return;
+            if (_appState.CurrentDocument?.Model?.StoryElements?.Count == 0) return;
+            if (!(_appState.CurrentDocument?.Model?.Changed ?? false)) return;
 
-            using (var serializationLock = new SerializationLock(this, backupService, _logger))
+            _logger.Log(LogLevel.Info, "Initiating AutoSave.");
+
+            using (new SerializationLock(this, _outlineService, _logger))
             {
-                try
+                // flush UI edits on the UI thread and await completion
+                await _windowing.GlobalDispatcher.EnqueueAsync(() =>
                 {
-                    if (autoSaveWorker.CancellationPending || !_preferenceService.Model.AutoSave ||
-                        _appState.CurrentDocument?.Model?.StoryElements?.Count == 0)
-                    {
-                        return Task.CompletedTask;
-                    }
+                    _editFlushService.FlushCurrentEdits();
+                });
 
-                    if (_appState.CurrentDocument?.IsDirty ?? false)
-                    {
-                        _logger.Log(LogLevel.Info, "Initiating AutoSave backup.");
-                        // Flush edits and save the model on the UI thread
-                        _window.GlobalDispatcher.TryEnqueue(async () =>
-                        {
-                            _editFlushService.FlushCurrentEdits();
-                            await _outlineService.WriteModel(_appState.CurrentDocument.Model, _appState.CurrentDocument.FilePath);
-                        });
-                    }
-                }
-                catch (Exception _ex)
-                {
-                    //Show failed message.
-                    _window.GlobalDispatcher.TryEnqueue(() =>
-                    {
-                        WeakReferenceMessenger.Default.Send(new StatusChangedMessage(new StatusMessage(
-                            "Making an AutoSave failed.", LogLevel.Warn, false)));
-                    });
-                    _logger.LogException(LogLevel.Error, _ex,
-                        $"Error saving file in AutoSaveService.AutoSaveProject() {_ex.Message}");
-                }
-
-                return Task.CompletedTask;
+                // perform the file write under the same lock
+                await _outlineService.WriteModel(
+                    _appState.CurrentDocument.Model,
+                    _appState.CurrentDocument.FilePath);
             }
         }
 
-        #endregion
+        public void Dispose()
+        {
+            _autoSaveTimer.Stop();
+            _autoSaveTimer.Elapsed -= AutoSaveTimer_Elapsed;
+            _autoSaveWorker.DoWork -= RunAutoSaveTask;
+            _autoSaveTimer.Dispose();
+        }
     }
 }
-

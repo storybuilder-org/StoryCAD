@@ -39,7 +39,7 @@ public class ShellTests
             .First(e => e.ElementType == StoryCAD.Models.StoryItemType.Folder
             && e.Name != "Narrative View").Node;
         shell.RightTappedNode = shell.CurrentNode;
-        outlineVM.RemoveStoryElement();
+        await outlineVM.RemoveStoryElement();
         outlineVM.EmptyTrash();
 
         //Assert we have cleared the stuff that could go wrong

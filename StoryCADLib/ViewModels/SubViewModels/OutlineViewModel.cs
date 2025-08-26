@@ -812,7 +812,7 @@ public class OutlineViewModel : ObservableRecipient
 
                     Messenger.Send(new StatusChangedMessage(new(
                         $"MasterPlot {masterPlotName} inserted", LogLevel.Info, true)));
-                    ShellViewModel.ShowChange();
+                    Messenger.Send(new IsChangedMessage(true));
                     logger.Log(LogLevel.Info, "MasterPlot complete");
                 }
             }
@@ -860,7 +860,7 @@ public class OutlineViewModel : ObservableRecipient
 
                     // Insert the new Problem as the target's child
                     msg = $"Problem {situationModel.SituationName} inserted";
-                    ShellViewModel.ShowChange();
+                    Messenger.Send(new IsChangedMessage(true));
                 }
                 else if (result == ContentDialogResult.Secondary)
                 {
@@ -872,7 +872,7 @@ public class OutlineViewModel : ObservableRecipient
                     };
                     // Insert the new Scene as the target's child
                     msg = $"Scene {situationModel.SituationName} inserted";
-                    ShellViewModel.ShowChange();
+                    Messenger.Send(new IsChangedMessage(true));
                 }
                 else
                 {
@@ -1044,7 +1044,7 @@ public class OutlineViewModel : ObservableRecipient
         }
     }
 
-    public async void RemoveStoryElement()
+    public async Task RemoveStoryElement()
     {
         try
         {
@@ -1079,7 +1079,7 @@ public class OutlineViewModel : ObservableRecipient
                 };
 
                 //Handle content dialog result
-                if (await Ioc.Default.GetRequiredService<Windowing>().ShowContentDialog(_Dialog) !=
+                if (await window.ShowContentDialog(_Dialog) !=
                     ContentDialogResult.Primary)
                 {
                     _delete = false;
@@ -1115,7 +1115,7 @@ public class OutlineViewModel : ObservableRecipient
                             }
                             
                             // Mark the model as changed
-                            ShellViewModel.ShowChange();
+                            Messenger.Send(new IsChangedMessage(true));
                             Messenger.Send(new StatusChangedMessage(new("Element moved to trash", LogLevel.Info)));
                         }
                         else
@@ -1158,7 +1158,7 @@ public class OutlineViewModel : ObservableRecipient
                 outlineService.RestoreFromTrash(shellVm.RightTappedNode, appState.CurrentDocument.Model);
                 
                 // Mark the model as changed
-                ShellViewModel.ShowChange();
+                Messenger.Send(new IsChangedMessage(true));
                 
                 Messenger.Send(new StatusChangedMessage(new(
                     $"Restored node {shellVm.RightTappedNode.Name} and all its contents", LogLevel.Info, true)));
@@ -1198,7 +1198,7 @@ public class OutlineViewModel : ObservableRecipient
 
         SceneModel _sceneVar = (SceneModel)outlineService.GetStoryElementByGuid(appState.CurrentDocument.Model, shellVm.RightTappedNode.Uuid);
         _ = new StoryNodeItem(_sceneVar, appState.CurrentDocument.Model.NarratorView[0]);
-        ShellViewModel.ShowChange();
+        Messenger.Send(new IsChangedMessage(true));
         Messenger.Send(new StatusChangedMessage(new(
             $"Copied node {shellVm.RightTappedNode.Name} to Narrative View", LogLevel.Info, true)));
     }
@@ -1245,7 +1245,7 @@ public class OutlineViewModel : ObservableRecipient
                     shellVm.CurrentNode = null;
                     
                     // Mark the model as changed
-                    ShellViewModel.ShowChange();
+                    Messenger.Send(new IsChangedMessage(true));
                 }
                 catch (Exception ex)
                 {
@@ -1284,7 +1284,7 @@ public class OutlineViewModel : ObservableRecipient
             if (_item.Uuid == shellVm.RightTappedNode.Uuid)
             {
                 appState.CurrentDocument.Model.NarratorView[0].Children.Remove(_item);
-                ShellViewModel.ShowChange();
+                Messenger.Send(new IsChangedMessage(true));
                 Messenger.Send(new StatusChangedMessage(new(
                     $"Removed node {shellVm.RightTappedNode.Name} from Narrative View", LogLevel.Info, true)));
                 return;

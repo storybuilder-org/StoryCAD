@@ -1,143 +1,63 @@
 using System;
-using System.Runtime.CompilerServices;
-using CommunityToolkit.Mvvm.DependencyInjection;
-using StoryCAD.Services.Backup;
-using StoryCAD.ViewModels.SubViewModels;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace StoryCAD.Services.Locking
 {
     /// <summary>
-    /// Disposable lock that disables UI commands, autosave, and timed backup while in scope.
-    /// Notifies listeners when CanExecute state changes so bound commands can requery.
+    /// A single shared gate used to serialize saves, backups, and manual commands.
     /// </summary>
-    public class SerializationLock : IDisposable
+    public sealed class SerializationLock : IDisposable
     {
-        /// <summary>
-        /// Flag controlling whether UI commands may execute.
-        /// </summary>
-        private static bool _canExecuteCommands = true;
+        // One shared gate for the whole process.
+        private static readonly SemaphoreSlim Gate = new(1, 1);
+        private bool _held;
 
         /// <summary>
-        /// Fired whenever <see cref="_canExecuteCommands"/> changes.
-        /// ViewModels should subscribe and call IRelayCommand.NotifyCanExecuteChanged() on the UI thread.
+        /// Raised whenever the lock state changes (acquire/release).
+        /// Used by ShellViewModel / Shell.xaml.cs to refresh CanExecute.
         /// </summary>
         public static event EventHandler? CanExecuteStateChanged;
 
-        /// <summary>
-        /// Returns true if commands may execute (i.e., no active SerializationLock).
-        /// </summary>
-        public static bool CanExecuteCommands() => _canExecuteCommands;
-
-        private readonly AutoSaveService _autoSaveService;
-        private readonly BackupService _backupService;
-        private readonly ILogService _logger;
-        private readonly AppState _appState;
-        private readonly PreferenceService _preferenceService;
-        private string? _caller;
-        private bool _disposed;
-        private static string? currentHolder;
-
-        public SerializationLock(
-            AutoSaveService autoSaveService,
-            BackupService backupService,
-            ILogService logger,
-            [CallerMemberName] string? caller = null)
+        // Keep a permissive ctor so existing "using (new SerializationLock(...))" still compiles.
+        public SerializationLock(params object[] _)
         {
-            _autoSaveService = autoSaveService;
-            _backupService = backupService;
-            _logger = logger;
-            _appState = Ioc.Default.GetRequiredService<AppState>();
-            _preferenceService = Ioc.Default.GetRequiredService<PreferenceService>();
-
-            _caller = caller;
-
-            // Acquire lock: disable commands, autosave, and backup.
-            DisableCommands();
-            _autoSaveService.StopAutoSave();
-            _backupService.StopTimedBackup();
-            _logger.Log(LogLevel.Info, $"Serialization lock acquired by {_caller}");
-        }
-
-        private void DisableCommands()
-        {
-            if (!_canExecuteCommands)
-            {
-                _logger.Log(LogLevel.Warn, $"{_caller} Tried to lock when already locked by {currentHolder}");
-
-                // Some callers legitimately nest; we guard against different owners.
-                if (currentHolder != _caller)
-                {
-                    if (_appState.Headless)
-                    {
-                        throw new InvalidOperationException($"Commands are already disabled by {currentHolder}");
-                    }
-                    else
-                    {
-                        // Ignore duplicate/competing lock request in UI mode.
-                        _logger.Log(LogLevel.Warn, $"{_caller} tried to lock when already locked by {currentHolder}");
-                        return;
-                    }
-                }
-            }
-
-            currentHolder = _caller;
-
-            // Disable commands if not already disabled.
-            if (_canExecuteCommands)
-            {
-                _canExecuteCommands = false;
-                _logger.Log(LogLevel.Info, $"{_caller} has locked commands");
-                RaiseCanExecuteStateChanged();
-            }
-        }
-
-        /// <summary>
-        /// Re-enables commands and raises notification. Public for rare manual resets.
-        /// </summary>
-        public void EnableCommands()
-        {
-            if (!_canExecuteCommands)
-            {
-                _canExecuteCommands = true;
-                _logger.Log(LogLevel.Info, $"{_caller} has unlocked commands");
-                currentHolder = null;
-                RaiseCanExecuteStateChanged();
-            }
+            Gate.Wait();      // acquire synchronously (matches "using" pattern)
+            _held = true;
+            CanExecuteStateChanged?.Invoke(null, EventArgs.Empty);
         }
 
         public void Dispose()
         {
-            if (_disposed) return;
-
-            // Re-enable background tasks and commands.
-            EnableCommands();
-
-            // Re-enable backup/autosave according to user preferences.
-            if (_preferenceService.Model.AutoSave)
+            if (_held)
             {
-                _autoSaveService.StartAutoSave();
+                _held = false;
+                Gate.Release();
+                CanExecuteStateChanged?.Invoke(null, EventArgs.Empty);
             }
-            if (_preferenceService.Model.TimedBackup)
-            {
-                _backupService.StartTimedBackup();
-            }
-
-            _logger.Log(LogLevel.Info, "Serialization lock released: commands enabled, autosave and backup restarted.");
-            _disposed = true;
-
-            // Extra visibility in logs (matches previous behavior).
-            _logger.Log(LogLevel.Warn, $"{_caller} has unlocked commands");
         }
 
-        private static void RaiseCanExecuteStateChanged()
+        /// <summary>True when nothing is currently saving/backing up.</summary>
+        public static bool IsIdle => Gate.CurrentCount == 1;
+
+        /// <summary>Preserve existing predicate name used by ShellViewModel CanExecute.</summary>
+        public static bool CanExecuteCommands() => IsIdle;
+
+        /// <summary>
+        /// Awaitable helper when you want the gate to cover async work end-to-end.
+        /// </summary>
+        public static async Task RunExclusiveAsync(Func<CancellationToken, Task> body, CancellationToken ct = default)
         {
+            await Gate.WaitAsync(ct).ConfigureAwait(false);
             try
             {
                 CanExecuteStateChanged?.Invoke(null, EventArgs.Empty);
+                await body(ct).ConfigureAwait(false);
             }
-            catch
+            finally
             {
-                // Never let event handler exceptions take down the lock path.
+                Gate.Release();
+                CanExecuteStateChanged?.Invoke(null, EventArgs.Empty);
             }
         }
     }

@@ -123,14 +123,14 @@ public class BackupService
     #region Private Methods
 
     /// <summary>
-    /// The worker method that performs the backup asynchronously.
+    /// The worker method that performs the backup. Blocks until the async backup completes to prevent overlap.
     /// </summary>
-    private async void RunBackupTask(object sender, DoWorkEventArgs e)
+    private void RunBackupTask(object sender, DoWorkEventArgs e)
     {
         try
         {
             _logService.Log(LogLevel.Info, "Starting timed backup task.");
-            await BackupProject();
+            BackupProject().GetAwaiter().GetResult();
             _logService.Log(LogLevel.Info, "Timed backup task finished.");
         }
         catch (Exception ex)
@@ -213,7 +213,7 @@ public class BackupService
             StorageFolder rootFolder = await StorageFolder.GetFolderFromPathAsync(
                 _appState.RootDirectory);
 
-            //Save file.
+            // Save file under the serialization lock (awaited work remains inside using scope)
             using (var serializationLock = new SerializationLock(autoSaveService, this, _logService))
             {
                 StorageFolder tempFolder = await rootFolder.CreateFolderAsync(
@@ -229,11 +229,11 @@ public class BackupService
                 await tempFolder.DeleteAsync();
             }
             
-            //update indicator.
+            // update indicator
             _windowing.GlobalDispatcher.TryEnqueue(() =>
                 // TODO: Circular dependency - BackupService and ShellViewModel
-            // Temporary workaround: Use service locator until architectural fix
-            Ioc.Default.GetRequiredService<ShellViewModel>().BackupStatusColor = Colors.Green
+                // Temporary workaround: Use service locator until architectural fix
+                Ioc.Default.GetRequiredService<ShellViewModel>().BackupStatusColor = Colors.Green
             );
             _logService.Log(LogLevel.Info, "Finished backup.");
         }
@@ -249,8 +249,8 @@ public class BackupService
                         false)));
                 });
                 // TODO: Circular dependency - BackupService and ShellViewModel
-            // Temporary workaround: Use service locator until architectural fix
-            Ioc.Default.GetRequiredService<ShellViewModel>().BackupStatusColor = Colors.Red;
+                // Temporary workaround: Use service locator until architectural fix
+                Ioc.Default.GetRequiredService<ShellViewModel>().BackupStatusColor = Colors.Red;
             }
             _logService.LogException(LogLevel.Error, ex, $"Error backing up project: {ex.Message}");
         }

@@ -45,7 +45,7 @@ namespace StoryCADTests
             //Assert root is there and still is
             Assert.IsTrue(appState.CurrentDocument.Model.StoryElements[0].Node.IsRoot && 
                           appState.CurrentDocument.Model.StoryElements[0].ElementType == StoryItemType.StoryOverview);
-            outlineVM.RemoveStoryElement();
+            await outlineVM.RemoveStoryElement();
             Assert.IsTrue(appState.CurrentDocument.Model.StoryElements[0].Node.IsRoot &&
                           appState.CurrentDocument.Model.StoryElements[0].ElementType == StoryItemType.StoryOverview);
         }
@@ -74,14 +74,13 @@ namespace StoryCADTests
         /// https://github.com/storybuilder-org/StoryCAD/issues/975
         /// </summary>
         [TestMethod]
-        [Ignore("Test assumptions outdated after TrashView architecture change - manually tested by user")]
         public async Task DeleteNode()
         {
             //Create outline
             var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
             var appState = Ioc.Default.GetRequiredService<AppState>();
             var model = await outlineService.CreateModel("TestNodeDelete", "StoryBuilder", 0);
-            appState.CurrentDocument = new StoryDocument(model, Path.Combine(App.ResultsDir, "TestRootDelete.stbx"));
+            appState.CurrentDocument = new StoryDocument(model, Path.Combine(App.ResultsDir, "TestNodeDelete.stbx"));
 
             //Create a character
             shell.RightTappedNode = outlineService.AddStoryElement(appState.CurrentDocument.Model, StoryItemType.Character,
@@ -93,7 +92,7 @@ namespace StoryCADTests
             // Store reference to the character before deletion
             var character = appState.CurrentDocument.Model.StoryElements.Characters[1];
             
-            outlineVM.RemoveStoryElement();
+            await outlineVM.RemoveStoryElement();
 
             //Assert Character was trashed - check if it's still in Characters collection
             Assert.IsTrue(appState.CurrentDocument.Model.StoryElements.Characters.Contains(character), "Character should still be in Characters collection");
@@ -117,7 +116,7 @@ namespace StoryCADTests
 
             shell.RightTappedNode = null;
             int before = appState.CurrentDocument.Model.StoryElements.Count;
-            outlineVM.RemoveStoryElement();
+            await outlineVM.RemoveStoryElement();
             Assert.AreEqual(before, appState.CurrentDocument.Model.StoryElements.Count);
         }
 
@@ -135,7 +134,7 @@ namespace StoryCADTests
 
             // Delete parent (child goes with it)
             shell.RightTappedNode = parent.Node;
-            outlineVM.RemoveStoryElement();
+            await outlineVM.RemoveStoryElement();
 
             // Try to restore child - should fail (not a top-level item in trash)
             shell.RightTappedNode = child.Node;
