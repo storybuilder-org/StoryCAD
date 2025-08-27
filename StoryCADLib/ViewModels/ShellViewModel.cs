@@ -1073,7 +1073,7 @@ public class ShellViewModel : ObservableRecipient
     {
         if (State.CurrentDocument?.Model != null)
         {
-            State.CurrentDocument.Model.Changed = State.CurrentDocument.Model.Changed || isDirty.Value;
+            State.CurrentDocument.Model.Changed =  isDirty.Value;
         }
         if (State.CurrentDocument?.Model?.Changed == true)
         {

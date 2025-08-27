@@ -1,6 +1,9 @@
-﻿using Microsoft.UI.Dispatching;
+﻿using CommunityToolkit.Mvvm.Messaging;
+using Microsoft.UI;
+using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using StoryCAD.Services.Locking;
+using StoryCAD.Services.Messages;
 using StoryCAD.Services.Outline;
 using System;
 using System.ComponentModel;
@@ -94,6 +97,18 @@ namespace StoryCAD.Services.Backup
                 await _outlineService.WriteModel(
                     _appState.CurrentDocument.Model,
                     _appState.CurrentDocument.FilePath);
+                if (!_appState.Headless)
+                {
+                    _windowing.GlobalDispatcher.TryEnqueue(() =>
+                    {
+                        // Indicate the model is now saved and unchanged
+                        WeakReferenceMessenger.Default.Send(new IsChangedMessage(false));
+                    });
+                }
+                else
+                {
+                    _appState.CurrentDocument.Model.Changed = false;
+                }
             }
         }
 
