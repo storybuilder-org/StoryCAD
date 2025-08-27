@@ -227,8 +227,10 @@ public class BackupService
 
             // update indicator
             _windowing.GlobalDispatcher.TryEnqueue(() => 
-                // Indicate the model is now saved and unchanged
-                WeakReferenceMessenger.Default.Send(new IsChangedMessage(false)));
+            {
+                // Indicate the model is now backed up
+                WeakReferenceMessenger.Default.Send(new IsBackupStatusMessage(true));
+            });
             _logService.Log(LogLevel.Info, "Finished backup.");
         }
         catch (Exception ex)
@@ -242,9 +244,11 @@ public class BackupService
                         LogLevel.Warn,
                         false)));
                 });
-                // TODO: Circular dependency - BackupService and ShellViewModel
-                // Temporary workaround: Use service locator until architectural fix
-                Ioc.Default.GetRequiredService<ShellViewModel>().BackupStatusColor = Colors.Red;
+                _windowing.GlobalDispatcher.TryEnqueue(() =>
+                {
+                    // Indicate the model is now saved and unchanged
+                    WeakReferenceMessenger.Default.Send(new IsBackupStatusMessage(false));
+                });
             }
             _logService.LogException(LogLevel.Error, ex, $"Error backing up project: {ex.Message}");
         }

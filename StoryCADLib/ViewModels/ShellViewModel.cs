@@ -354,7 +354,7 @@ public class ShellViewModel : ObservableRecipient
             if (selectedItem is StoryNodeItem node)
             {
                 CurrentNode = node;
-                StoryElement element = outlineService.GetStoryElementByGuid(State.CurrentDocument.Model, node.Uuid);
+                StoryElement element = outlineService.GetStoryElementByGuid(State.CurrentDocument!.Model, node.Uuid);
                 switch (element.ElementType)
                 {
                     case StoryItemType.Character:
@@ -1082,6 +1082,13 @@ public class ShellViewModel : ObservableRecipient
         else { ChangeStatusColor = Colors.Green; }
     }
 
+    private void BackupStatusMessageReceived(IsBackupStatusMessage isGood)
+    {
+        if (isGood.Value)
+        {  BackupStatusColor = Colors.Green; }
+        else { BackupStatusColor = Colors.Red; }
+    }
+
     /// <summary>
     /// Sends message
     /// </summary>
@@ -1230,6 +1237,7 @@ public class ShellViewModel : ObservableRecipient
         // Register inter-MVVM messaging
         Messenger.Register<IsChangedRequestMessage>(this, (_, m) => { m.Reply(State.CurrentDocument?.Model?.Changed ?? false); });
         Messenger.Register<ShellViewModel, IsChangedMessage>(this, static (r, m) => r.IsChangedMessageReceived(m));
+        Messenger.Register<ShellViewModel, IsBackupStatusMessage>(this, static (r, m) => r.BackupStatusMessageReceived(m));
         Messenger.Register<ShellViewModel, StatusChangedMessage>(this, static (r, m) => r.StatusMessageReceived(m));
         Messenger.Register<ShellViewModel, NameChangedMessage>(this, static (r, m) => r.NameMessageReceived(m));
 
