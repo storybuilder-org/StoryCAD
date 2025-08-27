@@ -210,12 +210,12 @@ public class BackupService
                 _appState.RootDirectory);
 
             // Save file under the serialization lock (awaited work remains inside using scope)
-            using (var serializationLock = new SerializationLock( _logService))
+            using (var serializationLock = new SerializationLock(_logService))
             {
                 StorageFolder tempFolder = await rootFolder.CreateFolderAsync(
                     "Temp", CreationCollisionOption.ReplaceExisting);
 
-                StorageFile projectFile = await StorageFile.GetFileFromPathAsync(_appState.CurrentDocument.FilePath);
+                StorageFile projectFile = await StorageFile.GetFileFromPathAsync(_appState.CurrentDocument!.FilePath);
                 await projectFile.CopyAsync(tempFolder, projectFile.Name, NameCollisionOption.ReplaceExisting);
 
                 string zipFilePath = Path.Combine(FilePath, Filename) + ".zip";
@@ -224,13 +224,11 @@ public class BackupService
                 _logService.Log(LogLevel.Info, $"Created Zip file at {zipFilePath}");
                 await tempFolder.DeleteAsync();
             }
-            
+
             // update indicator
-            _windowing.GlobalDispatcher.TryEnqueue(() =>
-                // TODO: Circular dependency - BackupService and ShellViewModel
-                // Temporary workaround: Use service locator until architectural fix
-                Ioc.Default.GetRequiredService<ShellViewModel>().BackupStatusColor = Colors.Green
-            );
+            _windowing.GlobalDispatcher.TryEnqueue(() => 
+                // Indicate the model is now saved and unchanged
+                WeakReferenceMessenger.Default.Send(new IsChangedMessage(false)));
             _logService.Log(LogLevel.Info, "Finished backup.");
         }
         catch (Exception ex)
