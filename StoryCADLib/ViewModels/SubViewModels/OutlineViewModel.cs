@@ -100,7 +100,7 @@ public class OutlineViewModel : ObservableRecipient
     /// <param name="fromPath">Path to open file from (Optional)</param>
     public async Task OpenFile(string fromPath = "")
     {
-        using (var serializationLock = new SerializationLock(autoSaveService, backupService, logger))
+        using (var serializationLock = new SerializationLock(logger))
         {
 
             // Check if current StoryModel has been changed, if so, save and write the model.
@@ -115,7 +115,7 @@ public class OutlineViewModel : ObservableRecipient
 
         try
         {
-            using (var serializationLock = new SerializationLock(autoSaveService, backupService, logger))
+            using (var serializationLock = new SerializationLock(logger))
             {
                 // Reset the model and show the home page
                 shellVm.ResetModel();
@@ -175,7 +175,7 @@ public class OutlineViewModel : ObservableRecipient
                     return;
 
                 }
-                
+
                 // Successfully loaded - create StoryDocument
                 appState.CurrentDocument = new StoryDocument(loadedModel, filePath);
             }
@@ -186,7 +186,7 @@ public class OutlineViewModel : ObservableRecipient
                 await Ioc.Default.GetRequiredService<BackupService>().BackupProject();
             }
 
-            // Set the current view to the ExplorerView 
+            // Set the current view to the ExplorerView
             if (appState.CurrentDocument?.Model?.ExplorerView?.Count > 0)
             {
                 outlineService.SetCurrentView(appState.CurrentDocument.Model, StoryViewType.ExplorerView);
@@ -244,7 +244,7 @@ public class OutlineViewModel : ObservableRecipient
                 Messenger.Send(new StatusChangedMessage(new("Invalid file path", LogLevel.Error)), true);
                 return;
             }
-            using (var serializationLock = new SerializationLock(autoSaveService, backupService, logger))
+            using (var serializationLock = new SerializationLock(logger))
             {
                 // If the current project needs saved, do so
                 if (appState.CurrentDocument?.Model?.Changed == true && appState.CurrentDocument?.FilePath != null)
@@ -257,7 +257,7 @@ public class OutlineViewModel : ObservableRecipient
             shellVm.ResetModel();
             shellVm.ShowHomePage();
 
-            using (var serializationLock = new SerializationLock(autoSaveService, backupService, logger))
+            using (var serializationLock = new SerializationLock(logger))
             {
                 // Create the new outline's file
                 StorageFolder folder = await StorageFolder.GetFolderFromPathAsync(dialogVm.OutlineFolder);
@@ -280,7 +280,7 @@ public class OutlineViewModel : ObservableRecipient
             outlineService.SetChanged(appState.CurrentDocument.Model, true);
             await SaveFile();
 
-            using (var serializationLock = new SerializationLock(autoSaveService, backupService, logger))
+            using (var serializationLock = new SerializationLock(logger))
             {
                 if (preferences.Model.BackupOnOpen)
                 {
@@ -325,13 +325,13 @@ public class OutlineViewModel : ObservableRecipient
     }
 
     /// <summary>
-    /// Save the currently active page from 
+    /// Save the currently active page from
     /// </summary>
     /// <param name="autoSave"></param>
     /// <returns></returns>
     public async Task SaveFile(bool autoSave = false)
     {
-        using (var serializationLock = new SerializationLock(autoSaveService, backupService, logger))
+        using (var serializationLock = new SerializationLock(logger))
         {
             string msg = autoSave ? "AutoSave" : "SaveFile command";
             if (autoSave && !(appState.CurrentDocument?.Model?.Changed ?? false))
@@ -368,7 +368,7 @@ public class OutlineViewModel : ObservableRecipient
 
     public async Task SaveFileAs()
     {
-        using (var serializationLock = new SerializationLock(autoSaveService, backupService, logger))
+        using (var serializationLock = new SerializationLock(logger))
         {
             Messenger.Send(new StatusChangedMessage(new("Save File As command executing", LogLevel.Info, true)));
             try
@@ -429,7 +429,7 @@ public class OutlineViewModel : ObservableRecipient
 
                         logger.Log(LogLevel.Info, $"Testing filename validity for {saveAsVm.ParentFolder}\\{saveAsVm.ProjectName}");
                         // Copy the current file to the new location/name
-                        StorageFile currentFile = await StorageFile.GetFileFromPathAsync(appState.CurrentDocument.FilePath); 
+                        StorageFile currentFile = await StorageFile.GetFileFromPathAsync(appState.CurrentDocument.FilePath);
                         StorageFolder folder = await StorageFolder.GetFolderFromPathAsync(saveAsVm.ParentFolder);
                         await currentFile.CopyAsync(folder, saveAsVm.ProjectName, NameCollisionOption.ReplaceExisting);
 
@@ -465,7 +465,7 @@ public class OutlineViewModel : ObservableRecipient
         logger.Log(LogLevel.Trace, "VerifyReplaceOrCreated");
 
         SaveAsViewModel saveAsVm = Ioc.Default.GetRequiredService<SaveAsViewModel>();
-        if (File.Exists(Path.Combine(saveAsVm.ParentFolder, saveAsVm.ProjectName)) 
+        if (File.Exists(Path.Combine(saveAsVm.ParentFolder, saveAsVm.ProjectName))
             && !appState.Headless)
         {
             ContentDialog replaceDialog = new()
@@ -484,7 +484,7 @@ public class OutlineViewModel : ObservableRecipient
     public async Task CloseFile()
     {
         Messenger.Send(new StatusChangedMessage(new("Closing project", LogLevel.Info, true)));
-        using (var serializationLock = new SerializationLock(autoSaveService, backupService, logger))
+        using (var serializationLock = new SerializationLock(logger))
         {
             if (appState.CurrentDocument?.Model?.Changed == true && !appState.Headless)
             {
@@ -507,7 +507,7 @@ public class OutlineViewModel : ObservableRecipient
             window.UpdateWindowTitle();
             Ioc.Default.GetRequiredService<BackupService>().StopTimedBackup();
         }
-        
+
         shellVm.ShowHomePage();
         Messenger.Send(new StatusChangedMessage(new("Close story command completed", LogLevel.Info, true)));
     }
@@ -517,7 +517,7 @@ public class OutlineViewModel : ObservableRecipient
     /// </summary>
     public async Task ExitApp()
     {
-        using (var serializationLock = new SerializationLock(autoSaveService, backupService, logger))
+        using (var serializationLock = new SerializationLock(logger))
         {
             Messenger.Send(new StatusChangedMessage(new("Executing Exit project command", LogLevel.Info, true)));
 
@@ -582,7 +582,7 @@ public class OutlineViewModel : ObservableRecipient
                     Title = "Access error",
                     Content = $"""
                                StoryCAD does not have permission to write to this location.
-                               You outline will now be saved at: 
+                               You outline will now be saved at:
                                {preferences.Model.ProjectDirectory}
                                """,
                     PrimaryButtonText = "Okay"
@@ -609,7 +609,7 @@ public class OutlineViewModel : ObservableRecipient
 
     public void SearchNodes()
     {
-        using (var serializationLock = new SerializationLock(autoSaveService, backupService, logger))
+        using (var serializationLock = new SerializationLock(logger))
         {
             logger.Log(LogLevel.Info, $"Search started, Searching for {shellVm.FilterText}");
             _editFlushService.FlushCurrentEdits();
@@ -625,7 +625,7 @@ public class OutlineViewModel : ObservableRecipient
             foreach (StoryNodeItem node in appState.CurrentDocument.Model.CurrentView[0])
             {
                 //checks if node name contains the thing we are looking for
-                if (searchService.SearchString(node, shellVm.FilterText, appState.CurrentDocument.Model)) 
+                if (searchService.SearchString(node, shellVm.FilterText, appState.CurrentDocument.Model))
                 {
                     searchTotal++;
                     if (window.RequestedTheme == ElementTheme.Light)
@@ -678,7 +678,7 @@ public class OutlineViewModel : ObservableRecipient
         }
 
         //TODO: revamp this to be more user-friendly.
-        using (var serializationLock = new SerializationLock(autoSaveService, backupService, logger))
+        using (var serializationLock = new SerializationLock(logger))
         {
             _editFlushService.FlushCurrentEdits();
 
@@ -701,7 +701,7 @@ public class OutlineViewModel : ObservableRecipient
 
     public Task PrintCurrentNodeAsync()
     {
-        using (var serializationLock = new SerializationLock(autoSaveService, backupService, logger))
+        using (var serializationLock = new SerializationLock(logger))
         {
             if (shellVm.RightTappedNode == null)
             {
@@ -717,7 +717,7 @@ public class OutlineViewModel : ObservableRecipient
     public async Task KeyQuestionsTool()
     {
         logger.Log(LogLevel.Info, "Displaying KeyQuestions tool dialog");
-        using (var serializationLock = new SerializationLock(autoSaveService, backupService, logger))
+        using (var serializationLock = new SerializationLock(logger))
         {
             if (shellVm.RightTappedNode == null)
             {
@@ -742,7 +742,7 @@ public class OutlineViewModel : ObservableRecipient
     public async Task TopicsTool()
     {
         logger.Log(LogLevel.Info, "Displaying Topics tool dialog");
-        using (var serializationLock = new SerializationLock(autoSaveService, backupService, logger))
+        using (var serializationLock = new SerializationLock(logger))
         {
             if (shellVm.RightTappedNode == null)
             {
@@ -766,7 +766,7 @@ public class OutlineViewModel : ObservableRecipient
     /// </summary>
     public async Task MasterPlotTool()
     {
-        using (var serializationLock = new SerializationLock(autoSaveService, backupService, logger))
+        using (var serializationLock = new SerializationLock(logger))
         {
             logger.Log(LogLevel.Info, "Displaying MasterPlot tool dialog");
             if (VerifyToolUse(true, true))
@@ -793,7 +793,7 @@ public class OutlineViewModel : ObservableRecipient
                     PlotPatternModel model = masterPlotsVm.MasterPlots[masterPlotName];
                     IList<PlotPatternScene> scenes = model.PlotPatternScenes;
                     ProblemModel problem = new ProblemModel(masterPlotName, appState.CurrentDocument.Model, shellVm.RightTappedNode);
-                    // add the new ProblemModel & node to the end of the target (shellVm.RightTappedNode) children 
+                    // add the new ProblemModel & node to the end of the target (shellVm.RightTappedNode) children
                     shellVm.RightTappedNode.IsExpanded = true;
                     problem.Node.IsSelected = true;
                     problem.Node.IsExpanded = true;
@@ -822,7 +822,7 @@ public class OutlineViewModel : ObservableRecipient
     public async Task DramaticSituationsTool()
     {
         logger.Log(LogLevel.Info, "Displaying Dramatic Situations tool dialog");
-        using (var serializationLock = new SerializationLock(autoSaveService, backupService, logger))
+        using (var serializationLock = new SerializationLock(logger))
         {
             if (shellVm.RightTappedNode == null)
             {
@@ -868,7 +868,7 @@ public class OutlineViewModel : ObservableRecipient
                     {
                         Remarks = "See Notes.",
                         Notes = situationModel.Notes,
-                        
+
                     };
                     // Insert the new Scene as the target's child
                     msg = $"Scene {situationModel.SituationName} inserted";
@@ -895,7 +895,7 @@ public class OutlineViewModel : ObservableRecipient
         logger.Log(LogLevel.Info, "Displaying Stock Scenes tool dialog");
         if (VerifyToolUse(true, true))
         {
-            using (var serializationLock = new SerializationLock(autoSaveService, backupService, logger))
+            using (var serializationLock = new SerializationLock(logger))
             {
                 try
                 {
@@ -1011,7 +1011,7 @@ public class OutlineViewModel : ObservableRecipient
     /// <param name="typeToAdd">Element type that you want to add</param>
     public void AddStoryElement(StoryItemType typeToAdd)
     {
-        using (var serializationLock = new SerializationLock(autoSaveService, backupService, logger))
+        using (var serializationLock = new SerializationLock(logger))
         {
             logger.Log(LogLevel.Info, $"Adding StoryElement {typeToAdd}");
             if (shellVm.RightTappedNode == null)
@@ -1065,7 +1065,7 @@ public class OutlineViewModel : ObservableRecipient
                 StackPanel _content = new();
                 _content.Children.Add(new TextBlock { Text = "The following nodes will be updated to remove references to this node:" });
                 _content.Children.Add(new ListView { ItemsSource = _foundElements, DisplayMemberPath = "Name",
-                    HorizontalAlignment = HorizontalAlignment.Center, 
+                    HorizontalAlignment = HorizontalAlignment.Center,
                     VerticalAlignment = VerticalAlignment.Center, Height = 300, Width = 480 });
 
                 //Creates dialog and then shows it
@@ -1089,11 +1089,11 @@ public class OutlineViewModel : ObservableRecipient
             {
                 _delete = true;
             }
-            
+
             // Go through with delete
             if (_delete)
             {
-                using (var serializationLock = new SerializationLock(autoSaveService, backupService, logger))
+                using (var serializationLock = new SerializationLock(logger))
                 {
                     try
                     {
@@ -1103,7 +1103,7 @@ public class OutlineViewModel : ObservableRecipient
                         {
                             // Use the new OutlineService method to move to trash
                             outlineService.MoveToTrash(element, appState.CurrentDocument.Model);
-                            
+
                             // Clear the selected nodes to prevent issues (fix for #1056)
                             if (shellVm.CurrentNode?.Uuid == elementToDelete)
                             {
@@ -1113,7 +1113,7 @@ public class OutlineViewModel : ObservableRecipient
                             {
                                 shellVm.RightTappedNode = null;
                             }
-                            
+
                             // Mark the model as changed
                             Messenger.Send(new IsChangedMessage(true));
                             Messenger.Send(new StatusChangedMessage(new("Element moved to trash", LogLevel.Info)));
@@ -1152,14 +1152,14 @@ public class OutlineViewModel : ObservableRecipient
 
         try
         {
-            using (var serializationLock = new SerializationLock(autoSaveService, backupService, logger))
+            using (var serializationLock = new SerializationLock(logger))
             {
                 // Use the new OutlineService method to restore from trash
                 outlineService.RestoreFromTrash(shellVm.RightTappedNode, appState.CurrentDocument.Model);
-                
+
                 // Mark the model as changed
                 Messenger.Send(new IsChangedMessage(true));
-                
+
                 Messenger.Send(new StatusChangedMessage(new(
                     $"Restored node {shellVm.RightTappedNode.Name} and all its contents", LogLevel.Info, true)));
             }
@@ -1189,7 +1189,7 @@ public class OutlineViewModel : ObservableRecipient
             Messenger.Send(new StatusChangedMessage(new("Select a node to copy", LogLevel.Info)));
             return;
         }
-        
+
         if (shellVm.RightTappedNode.Type != StoryItemType.Scene)
         {
             Messenger.Send(new StatusChangedMessage(new("You can only copy a scene", LogLevel.Warn)));
@@ -1217,7 +1217,7 @@ public class OutlineViewModel : ObservableRecipient
 
         try
         {
-            using (var serializationLock = new SerializationLock(autoSaveService, backupService, logger))
+            using (var serializationLock = new SerializationLock(logger))
             {
                 // Check if trash has items before attempting to empty
                 var trashCanNode = appState.CurrentDocument.Model.TrashView?.FirstOrDefault(n => n.Type == StoryItemType.TrashCan);
@@ -1225,7 +1225,7 @@ public class OutlineViewModel : ObservableRecipient
                 {
                     logger.Log(LogLevel.Info, "Trash is already empty.");
                     Messenger.Send(new StatusChangedMessage(new("No Deleted StoryElements to empty", LogLevel.Info)));
-                    
+
                     // Fix error #1056 - clear selected nodes even when trash is empty
                     shellVm.RightTappedNode = null;
                     shellVm.CurrentNode = null;
@@ -1236,14 +1236,14 @@ public class OutlineViewModel : ObservableRecipient
                 {
                     // Use the new OutlineService method to empty trash
                     outlineService.EmptyTrash(appState.CurrentDocument.Model);
-                    
+
                     shellVm.StatusMessage = "Trash Emptied.";
                     logger.Log(LogLevel.Info, "Emptied Trash.");
-                    
+
                     // Fix error #1056 - clear selected nodes
                     shellVm.RightTappedNode = null;
                     shellVm.CurrentNode = null;
-                    
+
                     // Mark the model as changed
                     Messenger.Send(new IsChangedMessage(true));
                 }

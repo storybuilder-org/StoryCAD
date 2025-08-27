@@ -82,7 +82,7 @@ namespace StoryCAD.Services.Backup
 
             _logger.Log(LogLevel.Info, "Initiating AutoSave.");
 
-            using (new SerializationLock(this, _outlineService, _logger))
+            using (new SerializationLock(_logger))
             {
                 // flush UI edits on the UI thread and await completion
                 await _windowing.GlobalDispatcher.EnqueueAsync(() =>

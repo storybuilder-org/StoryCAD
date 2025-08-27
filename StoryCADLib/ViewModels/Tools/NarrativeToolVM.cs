@@ -88,7 +88,7 @@ public class NarrativeToolVM: ObservableRecipient
             var autoSaveService = Ioc.Default.GetRequiredService<AutoSaveService>();
             var backupService = Ioc.Default.GetRequiredService<BackupService>();
 
-            using (var serializationLock = new SerializationLock(autoSaveService, backupService, _logger))
+            using (var serializationLock = new SerializationLock(_logger))
             {
                 try
                 {

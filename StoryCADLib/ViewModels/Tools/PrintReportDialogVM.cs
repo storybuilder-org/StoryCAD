@@ -184,7 +184,7 @@ public class PrintReportDialogVM : ObservableRecipient
         var autoSaveService = Ioc.Default.GetRequiredService<AutoSaveService>();
         var backupService = Ioc.Default.GetRequiredService<BackupService>();
         var logService = _logService;
-        using (var serializationLock = new SerializationLock(autoSaveService, backupService, logService))
+        using (var serializationLock = new SerializationLock(logService))
         {
             if (_appState.CurrentDocument.Model?.CurrentView == null)
             {

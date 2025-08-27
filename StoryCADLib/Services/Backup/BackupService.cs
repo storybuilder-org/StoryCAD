@@ -177,10 +177,6 @@ public class BackupService
     /// <param name="FilePath">If null, the user’s BackupDirectory preference is used.</param>
     public async Task BackupProject(string Filename = null, string FilePath = null)
     {
-        // TODO: Circular dependency - BackupService ↔ AutoSaveService
-        // AutoSaveService requires BackupService via SerializationLock, creating a circular dependency
-        var autoSaveService = Ioc.Default.GetRequiredService<AutoSaveService>();
-
         // Determine filenames and paths
         var originalFileName = Path.GetFileNameWithoutExtension(_appState.CurrentDocument?.FilePath ?? "Untitled");
 
@@ -214,7 +210,7 @@ public class BackupService
                 _appState.RootDirectory);
 
             // Save file under the serialization lock (awaited work remains inside using scope)
-            using (var serializationLock = new SerializationLock(autoSaveService, this, _logService))
+            using (var serializationLock = new SerializationLock( _logService))
             {
                 StorageFolder tempFolder = await rootFolder.CreateFolderAsync(
                     "Temp", CreationCollisionOption.ReplaceExisting);
