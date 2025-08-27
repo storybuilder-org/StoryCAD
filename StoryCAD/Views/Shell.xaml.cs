@@ -81,7 +81,7 @@ public sealed partial class Shell
             var autoSaveService = Ioc.Default.GetRequiredService<AutoSaveService>();
             var backupService = Ioc.Default.GetRequiredService<BackupService>();
             var logService = Ioc.Default.GetRequiredService<LogService>();
-            using (var serializationLock = new SerializationLock(autoSaveService, backupService, logService))
+            using (var serializationLock = new SerializationLock(logService))
             {
                 await Ioc.Default.GetRequiredService<WebViewModel>().ShowWebViewDialog();
             }

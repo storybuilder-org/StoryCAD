@@ -46,7 +46,7 @@ public class LockTest
         Assert.IsTrue(SerializationLock.CanExecuteCommands(), "Pre-condition: Commands should be enabled.");
 
         // Act: Create the SerializationLock (which disables commands and stops background services).
-        using (var serializationLock = new SerializationLock(_autoSaveService, _backupService, _logger))
+        using (var serializationLock = new SerializationLock(_logger))
         {
             // Within the lock, commands should be disabled and both services stopped.
             Assert.IsFalse(SerializationLock.CanExecuteCommands(), "During lock: Commands should be disabled.");
