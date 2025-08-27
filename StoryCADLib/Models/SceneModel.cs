@@ -84,17 +84,6 @@ public class SceneModel : StoryElement
 	}
 
 	[JsonIgnore]
-	private string _remarks;
-
-	[JsonInclude]
-	[JsonPropertyName("Remarks")]
-	public string Remarks
-	{
-		get => _remarks;
-		set => _remarks = value;
-	}
-
-	[JsonIgnore]
 	private Guid _protagonist;
 
 	[JsonInclude]
@@ -306,7 +295,7 @@ public class SceneModel : StoryElement
         Setting = Guid.Empty;
         SceneType = string.Empty;
         CastMembers = new List<Guid>();
-        Remarks = string.Empty;
+        Description = string.Empty;
         ScenePurpose = new List<string>();
         ValueExchange = string.Empty;
         Protagonist = Guid.Empty;
@@ -337,7 +326,7 @@ public class SceneModel : StoryElement
 	    Setting = Guid.Empty;
 	    SceneType = string.Empty;
 	    CastMembers = new List<Guid>();
-	    Remarks = string.Empty;
+	    Description = string.Empty;
 	    ScenePurpose = new List<string>();
 	    ValueExchange = string.Empty;
 	    Protagonist = Guid.Empty;

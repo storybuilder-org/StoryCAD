@@ -112,13 +112,6 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         set => SetProperty(ref _description, value);
     }
 
-    // StoryQuestion now redirects to Description for backward compatibility
-    public string StoryQuestion
-    {
-        get => Description;
-        set => Description = value;
-    }
-
     // Problem protagonist data
 
     private Guid _protagonist;  // The Guid of a Character  
@@ -659,7 +652,7 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         ConflictType = string.Empty;
         Subject = string.Empty;
         ProblemSource = string.Empty;
-        StoryQuestion = string.Empty;
+        Description = string.Empty;
         Protagonist = Guid.Empty;
         ProtGoal = string.Empty;
         ProtMotive = string.Empty;

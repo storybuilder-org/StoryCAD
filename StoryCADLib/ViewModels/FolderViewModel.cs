@@ -68,13 +68,6 @@ public class FolderViewModel : ObservableRecipient, INavigable
         set => SetProperty(ref _description, value);
     }
 
-    // Notes now redirects to Description for backward compatibility
-    public string Notes
-    {
-        get => Description;
-        set => Description = value;
-    }
-
     // The StoryModel is passed when FolderPage is navigated to
     private FolderModel _model;
     public FolderModel Model
@@ -148,7 +141,7 @@ public class FolderViewModel : ObservableRecipient, INavigable
     public FolderViewModel(ILogService logger)
     {
         _logger = logger;
-        Notes = string.Empty;
+        Description = string.Empty;
         PropertyChanged += OnPropertyChanged;
     }
 

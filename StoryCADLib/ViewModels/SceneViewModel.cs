@@ -161,14 +161,6 @@ public class SceneViewModel : ObservableRecipient, INavigable
         set => SetProperty(ref _characterList, value);
     }
 
-    // Remarks now redirects to Description for backward compatibility
-    // The Scene tab's Scene Sketch
-    public string Remarks
-    {
-        get => Description;
-        set => Description = value;
-    }
-
     // Scene development data (from Lisa Cron's Story Genius)
     private ObservableCollection<StringSelection> _scenePurposes;
     public ObservableCollection<StringSelection> ScenePurposes
@@ -693,14 +685,6 @@ public class SceneViewModel : ObservableRecipient, INavigable
     #endregion  
 
     #region Constructors
-
-    // Constructor for XAML compatibility - will be removed later
-    public SceneViewModel() : this(
-        Ioc.Default.GetRequiredService<ILogService>(),
-        Ioc.Default.GetRequiredService<OutlineViewModel>())
-    {
-    }
-
     public SceneViewModel(ILogService logger, OutlineViewModel outlineViewModel)
     {
         _logger = logger;
@@ -714,7 +698,7 @@ public class SceneViewModel : ObservableRecipient, INavigable
         ViewpointCharacter = Guid.Empty;
         ScenePurposes = new ObservableCollection<StringSelection>();
         ValueExchange = string.Empty;
-        Remarks = string.Empty;
+        Description = string.Empty;
         Protagonist = Guid.Empty;
         ProtagEmotion = string.Empty;
         ProtagGoal = string.Empty;

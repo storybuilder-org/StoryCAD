@@ -102,13 +102,6 @@ public class CharacterViewModel : ObservableRecipient, INavigable
         set => SetProperty(ref _description, value);
     }
 
-    // CharacterSketch now redirects to Description for backward compatibility
-    public string CharacterSketch
-    {
-        get => Description;
-        set => Description = value;
-    }
-
     // Character physical data
 
     private string _age;
@@ -984,7 +977,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable
         Role = string.Empty;
         StoryRole = string.Empty;
         Archetype = string.Empty;
-        CharacterSketch = string.Empty;
+        Description = string.Empty;
         Age = string.Empty;
         Sex = string.Empty;
         Eyes = string.Empty;

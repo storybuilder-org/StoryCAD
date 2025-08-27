@@ -101,13 +101,6 @@ public class OverviewViewModel : ObservableRecipient, INavigable
         set => SetProperty(ref _description, value);
     }
 
-    // StoryIdea now redirects to Description for backward compatibility
-    public string StoryIdea
-    {
-        get => Description;
-        set => Description = value;
-    }
-
     // Concept data
 
     private string _concept;
@@ -458,7 +451,7 @@ public class OverviewViewModel : ObservableRecipient, INavigable
         Viewpoint = string.Empty;
         Style = string.Empty;
         Tone = string.Empty;
-        StoryIdea = string.Empty;
+        Description = string.Empty;
         Concept = string.Empty;
         Premise = string.Empty;
         _syncPremise = false;     

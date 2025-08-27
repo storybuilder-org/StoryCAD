@@ -112,13 +112,6 @@ public class SettingViewModel : ObservableRecipient, INavigable
         set => SetProperty(ref _description, value);
     }
 
-    // Summary now redirects to Description for backward compatibility
-    public string Summary
-    {
-        get => Description;
-        set => Description = value;
-    }
-
     // Setting Sense data
 
     private string _sights;
@@ -281,7 +274,7 @@ public class SettingViewModel : ObservableRecipient, INavigable
         Weather = string.Empty;
         Temperature = string.Empty;
         Props = string.Empty;
-        Summary = string.Empty;
+        Description = string.Empty;
         Sights = string.Empty;
         Sounds = string.Empty;
         Touch = string.Empty;
