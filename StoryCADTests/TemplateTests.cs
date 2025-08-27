@@ -41,7 +41,7 @@ public class TemplateTests
             await fileVm.OpenSample();
             var model = Ioc.Default.GetRequiredService<OutlineViewModel>().StoryModel;
             Assert.IsNotNull(model);
-            Assert.IsTrue(model.StoryElements.Count > 2, "Sample missing data.");
+            Assert.IsTrue(model.StoryElements.Count > 2, $"Sample {fileVm.SampleNames[i]} missing data.");
         }
     }
 

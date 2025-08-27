@@ -72,7 +72,7 @@ namespace StoryCADTests
             // Add a setting
             var setting = _outlineService.AddStoryElement(model, StoryItemType.Setting, overview.Node);
             setting.Name = "Dark Castle";
-            ((SettingModel)setting).Summary = "A fortress of evil";
+            ((SettingModel)setting).Description = "A fortress of evil";
             
             ((SceneModel)scene).Setting = setting.Uuid;
             

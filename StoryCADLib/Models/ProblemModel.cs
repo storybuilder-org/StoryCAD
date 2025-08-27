@@ -61,18 +61,6 @@ public class ProblemModel : StoryElement
 		get => _problemSource;
 		set => _problemSource = value;
 	}
-
-	[JsonIgnore]
-	private string _storyQuestion;
-
-	[JsonInclude]
-	[JsonPropertyName("StoryQuestion")]
-	public string StoryQuestion
-	{
-		get => _storyQuestion;
-		set => _storyQuestion = value;
-	}
-
 	// Problem protagonist data
 
 	[JsonIgnore]
@@ -291,7 +279,7 @@ public class ProblemModel : StoryElement
         ProblemCategory = string.Empty;
         Subject = string.Empty;
         ProblemSource = string.Empty;
-        StoryQuestion = string.Empty;
+        Description = string.Empty;
         Protagonist = Guid.Empty;     // Protagonist Guid 
         ProtGoal = string.Empty;
         ProtMotive = string.Empty;
@@ -317,7 +305,7 @@ public class ProblemModel : StoryElement
         ProblemCategory = string.Empty;
         Subject = string.Empty;
         ProblemSource = string.Empty;
-        StoryQuestion = string.Empty;
+        Description = string.Empty;
         Protagonist = Guid.Empty;
         ProtGoal = string.Empty;
         ProtMotive = string.Empty;

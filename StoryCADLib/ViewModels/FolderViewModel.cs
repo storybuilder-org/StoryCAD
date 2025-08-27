@@ -60,11 +60,12 @@ public class FolderViewModel : ObservableRecipient, INavigable
 
     // Folder data
 
-    private string _notes;
-    public string Notes
+    // Description property (migrated from Notes)
+    private string _description;
+    public string Description
     {
-        get => _notes;
-        set => SetProperty(ref _notes, value);
+        get => _description;
+        set => SetProperty(ref _description, value);
     }
 
     // The StoryModel is passed when FolderPage is navigated to
@@ -112,7 +113,7 @@ public class FolderViewModel : ObservableRecipient, INavigable
             IsTextBoxFocused = true;
         if (Name.Equals("New Section"))
             IsTextBoxFocused = true;
-        Notes = Model.Notes;
+        Description = Model.Description;
 
         _changeable = true;
     }
@@ -124,7 +125,7 @@ public class FolderViewModel : ObservableRecipient, INavigable
         IsTextBoxFocused = false;
 
         // Write RYG file
-        Model.Notes = Notes;
+        Model.Description = Description;
     }
 
     #endregion
@@ -140,7 +141,7 @@ public class FolderViewModel : ObservableRecipient, INavigable
     public FolderViewModel(ILogService logger)
     {
         _logger = logger;
-        Notes = string.Empty;
+        Description = string.Empty;
         PropertyChanged += OnPropertyChanged;
     }
 

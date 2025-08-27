@@ -41,17 +41,6 @@ public class CharacterModel : StoryElement
 		set => _archetype = value;
 	}
 
-	[JsonIgnore]
-	private string _characterSketch;
-
-	[JsonInclude]
-	[JsonPropertyName("CharacterSketch")]
-	public string CharacterSketch
-	{
-		get => _characterSketch;
-		set => _characterSketch = value;
-	}
-
 	// Character physical data
 
 	[JsonIgnore]
@@ -522,7 +511,7 @@ public class CharacterModel : StoryElement
         Role = string.Empty;
         StoryRole = string.Empty;
         Archetype = string.Empty;
-        CharacterSketch = string.Empty;
+        Description = string.Empty;
         Age = string.Empty;
         Sex = string.Empty;
         Eyes = string.Empty;
@@ -571,7 +560,7 @@ public class CharacterModel : StoryElement
         Role = string.Empty;
         StoryRole = string.Empty;
         Archetype = string.Empty;
-        CharacterSketch = string.Empty;
+        Description = string.Empty;
         Age = string.Empty;
         Sex = string.Empty;
         Eyes = string.Empty;

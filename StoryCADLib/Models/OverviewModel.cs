@@ -56,17 +56,6 @@ public class OverviewModel : StoryElement
 	}
 
 	[JsonIgnore]
-	private string _storyIdea;
-
-	[JsonInclude]
-	[JsonPropertyName("StoryIdea")]
-	public string StoryIdea
-	{
-		get => _storyIdea;
-		set => _storyIdea = value;
-	}
-
-	[JsonIgnore]
 	private string _concept;
 
 	[JsonInclude]
@@ -258,7 +247,7 @@ public class OverviewModel : StoryElement
         Tense = string.Empty;
         Style = string.Empty;
         Tone = string.Empty;
-        StoryIdea = string.Empty;
+        Description = string.Empty;
         Concept = string.Empty;
         StructureNotes = string.Empty;
         Notes = string.Empty;
