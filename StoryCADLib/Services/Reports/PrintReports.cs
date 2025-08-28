@@ -1,14 +1,16 @@
-﻿using System.Text;
-﻿using System.Drawing;
-using System.Drawing.Printing;
+﻿using StoryCAD.Models;
 using StoryCAD.Services.Outline;
 using StoryCAD.ViewModels.Tools;
+﻿using System.Drawing;
+using System.Drawing.Printing;
+using System.Text;
 
 namespace StoryCAD.Services.Reports;
 
 public class PrintReports
 {
     private PrintReportDialogVM _vm;
+    private readonly AppState _appState;
     private StoryModel _model;
     private ReportFormatter _formatter;
     private string _documentText;
@@ -177,11 +179,12 @@ public class PrintReports
 
     #region Constructor
 
-    public PrintReports(PrintReportDialogVM vm, StoryModel model)
+    public PrintReports(PrintReportDialogVM vm, AppState appState)
     {
         _vm = vm;
-        _model = model;
-        _formatter = new ReportFormatter();
+        _appState = appState;
+        _model = appState.CurrentDocument!.Model;
+        _formatter = new ReportFormatter(appState);
     }
 
     #endregion

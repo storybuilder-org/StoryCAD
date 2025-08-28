@@ -4,7 +4,6 @@ using System.Text.Json.Serialization;
 using Windows.Storage;
 using StoryCAD.Services;
 using System.Diagnostics;
-using StoryCAD.ViewModels.SubViewModels;
 using System.Linq;
 
 namespace StoryCAD.DAL;
@@ -15,13 +14,11 @@ namespace StoryCAD.DAL;
 public class StoryIO
 {
 	private readonly ILogService _logService;
-	private readonly OutlineViewModel _outlineVM;
 	private readonly AppState _appState;
 
-	public StoryIO(ILogService logService, OutlineViewModel outlineViewModel, AppState appState)
+	public StoryIO(ILogService logService, AppState appState)
 	{
 		_logService = logService;
-		_outlineVM = outlineViewModel;
 		_appState = appState;
 	}
 
@@ -34,7 +31,7 @@ public class StoryIO
         Directory.CreateDirectory(parent);
 
         StorageFolder folder = await StorageFolder.GetFolderFromPathAsync(parent);
-        var output = await folder.CreateFileAsync(Path.GetFileName(output_path), CreationCollisionOption.OpenIfExists);
+        var output = await folder.CreateFileAsync(Path.GetFileName(output_path), CreationCollisionOption.ReplaceExisting);
 		_logService.Log(LogLevel.Info, $"Saving Model to disk as {output_path}  " + 
 				$"Elements: {model.StoryElements.StoryElementGuids.Count}");
 
@@ -155,7 +152,10 @@ public class StoryIO
 			_logService.Log(LogLevel.Info, $"Version last saved with {_model.LastVersion ?? "Error"}");
 
 			//Update file information
-            _outlineVM.StoryModelFile = StoryFile.Path;
+            if (_appState.CurrentDocument != null)
+            {
+                _appState.CurrentDocument.FilePath = StoryFile.Path;
+            }
 			return _model;
 		}
 		catch (Exception ex)
@@ -191,7 +191,7 @@ public class StoryIO
 		foreach (var n in flatNodes)
 		{
 			StoryElement element = storyElements.StoryElementGuids[n.Uuid];
-			StoryNodeItem nodeItem = new(logger, element, parent: null);
+			StoryNodeItem nodeItem = new(element, parent: null);
             element.Node = nodeItem;
 			lookup[n.Uuid] = nodeItem;
 		}

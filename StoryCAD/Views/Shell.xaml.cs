@@ -26,6 +26,7 @@ public sealed partial class Shell
     public ShellViewModel ShellVm => Ioc.Default.GetService<ShellViewModel>();
     public Windowing Windowing => Ioc.Default.GetService<Windowing>();
     public OutlineViewModel OutlineVM => Ioc.Default.GetService<OutlineViewModel>();
+    public AppState AppState => Ioc.Default.GetService<AppState>();
     public LogService Logger;
     public PreferencesModel Preferences = Ioc.Default.GetRequiredService<PreferenceService>().Model;
 
@@ -40,6 +41,8 @@ public sealed partial class Shell
             DataContext = ShellVm;
             Ioc.Default.GetRequiredService<Windowing>().GlobalDispatcher = Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread();
             Loaded += Shell_Loaded;
+            AppState.CurrentDocumentChanged += (_, __) => UpdateDocumentBindings();
+            SerializationLock.CanExecuteStateChanged += (_, __) => ShellVm.RefreshAllCommands();
         }
         catch (Exception ex)
         {
@@ -78,7 +81,7 @@ public sealed partial class Shell
             var autoSaveService = Ioc.Default.GetRequiredService<AutoSaveService>();
             var backupService = Ioc.Default.GetRequiredService<BackupService>();
             var logService = Ioc.Default.GetRequiredService<LogService>();
-            using (var serializationLock = new SerializationLock(autoSaveService, backupService, logService))
+            using (var serializationLock = new SerializationLock(logService))
             {
                 await Ioc.Default.GetRequiredService<WebViewModel>().ShowWebViewDialog();
             }
@@ -165,6 +168,16 @@ public sealed partial class Shell
     }
 
     /// <summary>
+    /// Updates the bindings when the document changes.
+    /// Called when AppState.CurrentDocument is set to refresh x:Bind bindings
+    /// for the tree views (CurrentView and TrashView) in the Shell UI.
+    /// </summary>
+    public void UpdateDocumentBindings()
+    {
+        Bindings.Update();
+    }
+
+    /// <summary>
     /// Treat a treeview item as if it were a button
     /// </summary>
     /// <param name="sender"></param>
@@ -189,8 +202,9 @@ public sealed partial class Shell
 
     private void ClearNodes(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
     {
-        if (ShellVm.OutlineManager.StoryModel?.CurrentView == null || ShellVm.OutlineManager.StoryModel.CurrentView.Count == 0) { return; }
-        foreach (StoryNodeItem node in ShellVm.OutlineManager.StoryModel.CurrentView[0]) { node.Background = null; }
+        var storyModel = Ioc.Default.GetService<AppState>()!.CurrentDocument.Model;
+        if (storyModel?.CurrentView == null || storyModel.CurrentView.Count == 0) { return; }
+        foreach (StoryNodeItem node in storyModel.CurrentView[0]) { node.Background = null; }
     }
 
     private void TreeViewItem_Tapped(object sender, TappedRoutedEventArgs e)
@@ -272,7 +286,8 @@ public sealed partial class Shell
             // If parent is null, use the CurrentView view's root node
             if (parent == null)
             {
-                if (ShellVm?.OutlineManager.StoryModel?.CurrentView?.Count > 0)
+                var storyModel = Ioc.Default.GetService<AppState>()!.CurrentDocument!.Model;
+                if (storyModel?.CurrentView?.Count > 0)
                 {
                     //This gets the parent grid containing the tree's data context
                     //this will be the correct root in the cases where there are

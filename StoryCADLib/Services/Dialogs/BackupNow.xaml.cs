@@ -8,10 +8,10 @@ public sealed partial class BackupNow : Page
 	public BackupNow()
 	{    
         
-        OutlineViewModel OutlineManager = Ioc.Default.GetService<OutlineViewModel>();
+        AppState appState = Ioc.Default.GetService<AppState>();
 
 		InitializeComponent();
-		string fileName = $"{OutlineManager.StoryModelFile} as of {DateTime.Now}".Replace('/', ' ')
+		string fileName = $"{appState.CurrentDocument?.FilePath} as of {DateTime.Now}".Replace('/', ' ')
 			.Replace(':', ' ').Replace(".stbx", "");
 
 		//Set names and paths.

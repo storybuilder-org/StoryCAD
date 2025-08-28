@@ -49,7 +49,7 @@ public class PreferencesIo
 	{
 		try
 		{
-            using (var serializationLock = new SerializationLock(_autoSaveService, _backupService, _log))
+            using (var serializationLock = new SerializationLock( _log))
             {
                 StorageFolder _preferencesFolder = await StorageFolder.GetFolderFromPathAsync(_appState.RootDirectory);
 
@@ -119,7 +119,7 @@ public class PreferencesIo
     {
 		try
         {
-            using (var serializationLock = new SerializationLock(_autoSaveService, _backupService, _log))
+            using (var serializationLock = new SerializationLock(_log))
             {
                 //Get/Create file.
                 _log.Log(LogLevel.Info, "Writing preferences model to disk.");

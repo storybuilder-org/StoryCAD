@@ -10,15 +10,19 @@ public class FeedbackViewModel : ObservableRecipient
 	#region Variables
 	private protected GitHubClient client = new(new ProductHeaderValue("StoryCADFeedbackBot"));
 	private readonly ILogService _logService;
+	private readonly PreferenceService _preferenceService;
 
 	// Constructor for XAML compatibility - will be removed later
-	public FeedbackViewModel() : this(Ioc.Default.GetRequiredService<ILogService>())
+	public FeedbackViewModel() : this(
+		Ioc.Default.GetRequiredService<ILogService>(),
+		Ioc.Default.GetRequiredService<PreferenceService>())
 	{
 	}
 
-	public FeedbackViewModel(ILogService logService)
+	public FeedbackViewModel(ILogService logService, PreferenceService preferenceService)
 	{
 		_logService = logService;
+		_preferenceService = preferenceService;
 		Task.Run(async () =>
 		{
 			Doppler doppler = new();
@@ -151,7 +155,7 @@ public class FeedbackViewModel : ObservableRecipient
 			}
 
 
-            Issue.Body += $"\nFeedback ID: {Ioc.Default.GetService<PreferenceService>()
+            Issue.Body += $"\nFeedback ID: {_preferenceService
                 .Model.Email.Substring(0,5)}";
 
 			await client.Issue.Create("storybuilder-org", "StoryCAD", Issue);

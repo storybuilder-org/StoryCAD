@@ -15,6 +15,12 @@ public class InitVM : ObservableRecipient
     private readonly PreferenceService preference;
     private readonly BackendService _backendService;
 
+    // Constructor for XAML compatibility - will be removed later
+    public InitVM() : this(
+        Ioc.Default.GetRequiredService<PreferenceService>(),
+        Ioc.Default.GetRequiredService<BackendService>())
+    {
+    }
 
     /// <summary>
     /// This is the constructor for InitVM.

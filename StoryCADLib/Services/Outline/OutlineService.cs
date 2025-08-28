@@ -229,9 +229,8 @@ internal Task<StoryModel> CreateModel(string name, string author, int selectedTe
         }
 
         var file = await StorageFile.GetFileFromPathAsync(path);
-        var outlineViewModel = Ioc.Default.GetRequiredService<OutlineViewModel>();
-        var appState = Ioc.Default.GetRequiredService<AppState>();
-        StoryModel model = await new StoryIO(_log, outlineViewModel, appState).ReadStory(file);
+        var storyIO = Ioc.Default.GetRequiredService<StoryIO>();
+        StoryModel model = await storyIO.ReadStory(file);
         _log.Log(LogLevel.Info, $"Opened model contains {model.StoryElements.Count} elements.");
         return model;
     }
@@ -248,10 +247,8 @@ internal Task<StoryModel> CreateModel(string name, string author, int selectedTe
         if (model == null)
             throw new ArgumentNullException(nameof(model));
 
-        var autoSaveService = Ioc.Default.GetRequiredService<AutoSaveService>();
-        var backupService = Ioc.Default.GetRequiredService<BackupService>();
         
-        using (var serializationLock = new SerializationLock(autoSaveService, backupService, _log))
+        using (var serializationLock = new SerializationLock(_log))
         {
             switch (viewType)
             {
@@ -726,12 +723,7 @@ internal Task<StoryModel> CreateModel(string name, string author, int selectedTe
         }
 
         //Create and add beat.
-        StructureBeatViewModel NewBeat = new()
-        {
-            Title = Title,
-            Description = Description
-        };
-        Parent.StructureBeats.Add(NewBeat);
+        Parent.StructureBeats.Add(new(Title, Description));
     }
 
     /// <summary>
@@ -817,9 +809,7 @@ internal Task<StoryModel> CreateModel(string name, string author, int selectedTe
         Model.Beats = Beats = Beats
                 .Select(b =>
                 {
-                    var copy = new StructureBeatViewModel();
-                    copy.Title = b.Title;
-                    copy.Description = b.Description;
+                    var copy = new StructureBeatViewModel(b.Title, b.Description);
                     return copy;
                 })
                 .ToList();
@@ -853,10 +843,8 @@ internal Task<StoryModel> CreateModel(string name, string author, int selectedTe
         if (model == null)
             throw new ArgumentNullException(nameof(model));
 
-        var autoSaveService = Ioc.Default.GetRequiredService<AutoSaveService>();
-        var backupService = Ioc.Default.GetRequiredService<BackupService>();
         
-        using (var serializationLock = new SerializationLock(autoSaveService, backupService, _log))
+        using (var serializationLock = new SerializationLock(_log))
         {
             model.Changed = changed;
             _log.Log(LogLevel.Info, $"Model Changed status set to {changed}");
@@ -880,10 +868,8 @@ internal Task<StoryModel> CreateModel(string name, string author, int selectedTe
         if (guid == Guid.Empty)
             throw new ArgumentException("GUID cannot be empty", nameof(guid));
 
-        var autoSaveService = Ioc.Default.GetRequiredService<AutoSaveService>();
-        var backupService = Ioc.Default.GetRequiredService<BackupService>();
         
-        using (var serializationLock = new SerializationLock(autoSaveService, backupService, _log))
+        using (var serializationLock = new SerializationLock(_log))
         {
             if (!model.StoryElements.StoryElementGuids.TryGetValue(guid, out var element))
             {
@@ -909,10 +895,8 @@ internal Task<StoryModel> CreateModel(string name, string author, int selectedTe
         if (element == null)
             throw new ArgumentNullException(nameof(element));
 
-        var autoSaveService = Ioc.Default.GetRequiredService<AutoSaveService>();
-        var backupService = Ioc.Default.GetRequiredService<BackupService>();
         
-        using (var serializationLock = new SerializationLock(autoSaveService, backupService, _log))
+        using (var serializationLock = new SerializationLock(_log))
         {
             // Update the element in the dictionary
             model.StoryElements.StoryElementGuids[element.Uuid] = element;
@@ -934,10 +918,8 @@ internal Task<StoryModel> CreateModel(string name, string author, int selectedTe
         if (model == null)
             throw new ArgumentNullException(nameof(model));
 
-        var autoSaveService = Ioc.Default.GetRequiredService<AutoSaveService>();
-        var backupService = Ioc.Default.GetRequiredService<BackupService>();
         
-        using (var serializationLock = new SerializationLock(autoSaveService, backupService, _log))
+        using (var serializationLock = new SerializationLock(_log))
         {
             var characters = model.StoryElements
                 .Where(e => e.ElementType == StoryItemType.Character)
@@ -986,10 +968,8 @@ internal Task<StoryModel> CreateModel(string name, string author, int selectedTe
         if (model == null)
             throw new ArgumentNullException(nameof(model));
 
-        var autoSaveService = Ioc.Default.GetRequiredService<AutoSaveService>();
-        var backupService = Ioc.Default.GetRequiredService<BackupService>();
         
-        using (var serializationLock = new SerializationLock(autoSaveService, backupService, _log))
+        using (var serializationLock = new SerializationLock(_log))
         {
             var settings = model.StoryElements
                 .Where(e => e.ElementType == StoryItemType.Setting)
@@ -1011,10 +991,8 @@ internal Task<StoryModel> CreateModel(string name, string author, int selectedTe
         if (model == null)
             throw new ArgumentNullException(nameof(model));
 
-        var autoSaveService = Ioc.Default.GetRequiredService<AutoSaveService>();
-        var backupService = Ioc.Default.GetRequiredService<BackupService>();
         
-        using (var serializationLock = new SerializationLock(autoSaveService, backupService, _log))
+        using (var serializationLock = new SerializationLock(_log))
         {
             var elements = model.StoryElements.ToList();
             _log.Log(LogLevel.Info, $"Retrieved {elements.Count} story elements from model");
@@ -1041,10 +1019,8 @@ internal Task<StoryModel> CreateModel(string name, string author, int selectedTe
         var searchService = new SearchService(_log);
         var results = new List<StoryElement>();
         
-        var autoSaveService = Ioc.Default.GetRequiredService<AutoSaveService>();
-        var backupService = Ioc.Default.GetRequiredService<BackupService>();
         
-        using (var serializationLock = new SerializationLock(autoSaveService, backupService, _log))
+        using (var serializationLock = new SerializationLock(_log))
         {
             foreach (var element in model.StoryElements)
             {
@@ -1078,10 +1054,8 @@ internal Task<StoryModel> CreateModel(string name, string author, int selectedTe
         var searchService = new SearchService(_log);
         var results = new List<StoryElement>();
         
-        var autoSaveService = Ioc.Default.GetRequiredService<AutoSaveService>();
-        var backupService = Ioc.Default.GetRequiredService<BackupService>();
         
-        using (var serializationLock = new SerializationLock(autoSaveService, backupService, _log))
+        using (var serializationLock = new SerializationLock(_log))
         {
             foreach (var element in model.StoryElements)
             {
@@ -1115,10 +1089,8 @@ internal Task<StoryModel> CreateModel(string name, string author, int selectedTe
         var searchService = new SearchService(_log);
         int affectedCount = 0;
         
-        var autoSaveService = Ioc.Default.GetRequiredService<AutoSaveService>();
-        var backupService = Ioc.Default.GetRequiredService<BackupService>();
         
-        using (var serializationLock = new SerializationLock(autoSaveService, backupService, _log))
+        using (var serializationLock = new SerializationLock(_log))
         {
             foreach (var element in model.StoryElements)
             {
@@ -1161,10 +1133,8 @@ internal Task<StoryModel> CreateModel(string name, string author, int selectedTe
         var searchService = new SearchService(_log);
         var results = new List<StoryElement>();
         
-        var autoSaveService = Ioc.Default.GetRequiredService<AutoSaveService>();
-        var backupService = Ioc.Default.GetRequiredService<BackupService>();
         
-        using (var serializationLock = new SerializationLock(autoSaveService, backupService, _log))
+        using (var serializationLock = new SerializationLock(_log))
         {
             // Search the root node
             if (searchService.SearchString(rootNode, searchText, model))
@@ -1233,10 +1203,8 @@ internal Task<StoryModel> CreateModel(string name, string author, int selectedTe
 
         _log.Log(LogLevel.Info, $"Moving element {element.Uuid} to trash");
 
-        var autoSaveService = Ioc.Default.GetRequiredService<AutoSaveService>();
-        var backupService = Ioc.Default.GetRequiredService<BackupService>();
         
-        using (var serializationLock = new SerializationLock(autoSaveService, backupService, _log))
+        using (var serializationLock = new SerializationLock(_log))
         {
             // Remove references to this element from other elements
             RemoveReferenceToElement(element.Uuid, model);
@@ -1292,10 +1260,8 @@ internal Task<StoryModel> CreateModel(string name, string author, int selectedTe
 
         _log.Log(LogLevel.Info, $"Restoring element {trashNode.Uuid} from trash");
 
-        var autoSaveService = Ioc.Default.GetRequiredService<AutoSaveService>();
-        var backupService = Ioc.Default.GetRequiredService<BackupService>();
         
-        using (var serializationLock = new SerializationLock(autoSaveService, backupService, _log))
+        using (var serializationLock = new SerializationLock(_log))
         {
             // Get the overview node (root of explorer view)
             var overviewNode = model.ExplorerView.FirstOrDefault();
@@ -1333,10 +1299,8 @@ internal Task<StoryModel> CreateModel(string name, string author, int selectedTe
 
         _log.Log(LogLevel.Info, "Emptying trash");
 
-        var autoSaveService = Ioc.Default.GetRequiredService<AutoSaveService>();
-        var backupService = Ioc.Default.GetRequiredService<BackupService>();
         
-        using (var serializationLock = new SerializationLock(autoSaveService, backupService, _log))
+        using (var serializationLock = new SerializationLock(_log))
         {
             // Get the trash node
             var trashNode = model.TrashView.FirstOrDefault(n => n.Type == StoryItemType.TrashCan);

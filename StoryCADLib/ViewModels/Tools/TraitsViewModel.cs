@@ -57,9 +57,17 @@ public class TraitsViewModel: ObservableRecipient
 
     #region Constructor
 
-    public TraitsViewModel()
+    private readonly ListData _listData;
+
+    // Constructor for XAML compatibility - will be removed later
+    public TraitsViewModel() : this(Ioc.Default.GetRequiredService<ListData>())
     {
-        Dictionary<string, ObservableCollection<string>> _lists = Ioc.Default.GetService<ListData>().ListControlSource;
+    }
+
+    public TraitsViewModel(ListData listData)
+    {
+        _listData = listData;
+        Dictionary<string, ObservableCollection<string>> _lists = _listData.ListControlSource;
         CategoryList = new ObservableCollection<string> { "Behaviors", "Habits", "Skills and Abilities" };
         ExampleList = new ObservableCollection<string>();
 

@@ -2,8 +2,10 @@
 using System.ComponentModel;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
+using NLog;
 using StoryCAD.Services;
 using StoryCAD.ViewModels.SubViewModels;
+using LogLevel = StoryCAD.Services.Logging.LogLevel;
 
 namespace StoryCAD.ViewModels;
 
@@ -36,7 +38,7 @@ namespace StoryCAD.ViewModels;
 public class StoryNodeItem : INotifyPropertyChanged
 {
     private readonly ILogService _logger;
-    private readonly OutlineViewModel _outlineVM = Ioc.Default.GetService<OutlineViewModel>();
+    private readonly AppState _appState;
 
     // is it INavigable?
     public event PropertyChangedEventHandler PropertyChanged;
@@ -275,9 +277,10 @@ public class StoryNodeItem : INotifyPropertyChanged
 
     #region Constructors
 
-    public StoryNodeItem(ILogService logger, StoryElement node, StoryNodeItem parent, StoryItemType type = StoryItemType.Unknown)
+    public StoryNodeItem(ILogService logger, AppState appstate, StoryElement node, StoryNodeItem parent, StoryItemType type = StoryItemType.Unknown)
     {
         _logger = logger;
+        _appState = appstate;
         Uuid = node.Uuid;
         Name = node.Name;
         if (type == StoryItemType.Unknown) { Type = node.ElementType; }
@@ -332,9 +335,63 @@ public class StoryNodeItem : INotifyPropertyChanged
     }
 
     // Overloaded constructor without logger
-    public StoryNodeItem(StoryElement node, StoryNodeItem parent,
-        StoryItemType type = StoryItemType.Unknown) : this(Ioc.Default.GetRequiredService<ILogService>(), node, parent, type)
+    //public StoryNodeItem(StoryElement node, StoryNodeItem parent,
+    //    StoryItemType type = StoryItemType.Unknown) : this(Ioc.Default.GetRequiredService<ILogService>(), node, parent, type)
+    public StoryNodeItem(StoryElement node, StoryNodeItem parent, StoryItemType type = StoryItemType.Unknown)
     {
+        _logger = Ioc.Default.GetRequiredService<ILogService>();
+        _appState = Ioc.Default.GetRequiredService<AppState>();
+        Uuid = node.Uuid;
+        Name = node.Name;
+        if (type == StoryItemType.Unknown) { Type = node.ElementType; }
+        else { Type = type; }
+        switch (_type)
+        {
+            case StoryItemType.StoryOverview:
+                Symbol = Symbol.View;
+                break;
+            case StoryItemType.Character:
+                Symbol = Symbol.Contact;
+                break;
+            case StoryItemType.Scene:
+                Symbol = Symbol.AllApps;
+                break;
+            case StoryItemType.Problem:
+                Symbol = Symbol.Help;
+                break;
+            case StoryItemType.Setting:
+                Symbol = Symbol.Globe;
+                break;
+            case StoryItemType.Folder:
+                Symbol = Symbol.Folder;
+                break;
+            case StoryItemType.Section:
+                Symbol = Symbol.Folder;
+                break;
+            case StoryItemType.Web:
+                Symbol = Symbol.PreviewLink;
+                break;
+            case StoryItemType.TrashCan:
+                Symbol = Symbol.Delete;
+                break;
+            case StoryItemType.Notes:
+                Symbol = Symbol.TwoPage;
+                break;
+        }
+
+        Parent = parent;
+        Children = new ObservableCollection<StoryNodeItem>();
+
+        IsExpanded = false;
+        IsRoot = false;
+
+        //If there's no parent this is a root node.
+        if (Parent == null)
+        {
+            IsRoot = true;
+            return;
+        }
+        Parent.Children.Add(this);
     }
 
 
@@ -368,7 +425,7 @@ public class StoryNodeItem : INotifyPropertyChanged
             // For Explorer view: actually move to trash
             Parent = null;
             
-            var trash = _outlineVM.StoryModel.StoryElements
+            var trash = _appState.CurrentDocument!.Model.StoryElements
                 .First(e => e.ElementType == StoryItemType.TrashCan)
                 .Node;
 

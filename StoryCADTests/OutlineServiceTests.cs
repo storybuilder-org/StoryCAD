@@ -2292,8 +2292,8 @@ namespace StoryCADTests
 
             var newBeats = new ObservableCollection<StructureBeatViewModel>
             {
-                new StructureBeatViewModel { Title = "B1", Description = "D1" },
-                new StructureBeatViewModel { Title = "B2", Description = "D2" }
+                new StructureBeatViewModel("B1", "D1"),
+                new StructureBeatViewModel("B2", "D2")
             };
 
             _outlineService.SetBeatSheet(model, problem, "Desc", "Title", newBeats);
@@ -2312,8 +2312,8 @@ namespace StoryCADTests
             
             var beats = new List<StructureBeatViewModel>
             {
-                new StructureBeatViewModel { Title = "Intro", Description = "D1", Guid = Guid.NewGuid() },
-                new StructureBeatViewModel { Title = "Middle", Description = "D2", Guid = Guid.NewGuid() }
+                new StructureBeatViewModel("Intro", "D1") { Guid = Guid.NewGuid() },
+                new StructureBeatViewModel("Middle", "D2") { Guid = Guid.NewGuid() }
             };
             string file = Path.Combine(_testBeatOutputPath, "beats.json");
 

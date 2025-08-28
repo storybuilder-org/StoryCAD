@@ -18,8 +18,10 @@ public class CharacterModelTests
     public void TestBlankTraits()
     {
         CharacterViewModel CharVM = Ioc.Default.GetRequiredService<CharacterViewModel>();
-        Ioc.Default.GetService<OutlineViewModel>()!.StoryModel = new();
-        var x = new CharacterModel("TestCharacter", Ioc.Default.GetService<OutlineViewModel>()!.StoryModel, null);
+        var appState = Ioc.Default.GetRequiredService<StoryCAD.Models.AppState>();
+        var model = new StoryModel();
+        appState.CurrentDocument = new StoryCAD.Models.StoryDocument(model, null);
+        var x = new CharacterModel("TestCharacter", model, null);
         CharVM.Activate(x);
         CharVM.NewTrait = String.Empty;
         CharVM.AddTraitCommand.Execute(null);

@@ -37,16 +37,17 @@ namespace StoryCADTests
         {
             //Create outline
             var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
-            outlineVM.StoryModel = await outlineService.CreateModel("TestRootDelete", "StoryBuilder", 0);
-            outlineVM.StoryModelFile = Path.Combine(App.ResultsDir, "TestRootDelete.stbx");
-            shell.RightTappedNode = outlineVM.StoryModel.StoryElements[0].Node;
+            var appState = Ioc.Default.GetRequiredService<AppState>();
+            var model = await outlineService.CreateModel("TestRootDelete", "StoryBuilder", 0);
+            appState.CurrentDocument = new StoryDocument(model, Path.Combine(App.ResultsDir, "TestRootDelete.stbx"));
+            shell.RightTappedNode = appState.CurrentDocument.Model.StoryElements[0].Node;
 
             //Assert root is there and still is
-            Assert.IsTrue(outlineVM.StoryModel.StoryElements[0].Node.IsRoot && 
-                          outlineVM.StoryModel.StoryElements[0].ElementType == StoryItemType.StoryOverview);
-            outlineVM.RemoveStoryElement();
-            Assert.IsTrue(outlineVM.StoryModel.StoryElements[0].Node.IsRoot &&
-                          outlineVM.StoryModel.StoryElements[0].ElementType == StoryItemType.StoryOverview);
+            Assert.IsTrue(appState.CurrentDocument.Model.StoryElements[0].Node.IsRoot && 
+                          appState.CurrentDocument.Model.StoryElements[0].ElementType == StoryItemType.StoryOverview);
+            await outlineVM.RemoveStoryElement();
+            Assert.IsTrue(appState.CurrentDocument.Model.StoryElements[0].Node.IsRoot &&
+                          appState.CurrentDocument.Model.StoryElements[0].ElementType == StoryItemType.StoryOverview);
         }
 
         /// <summary>
@@ -73,31 +74,31 @@ namespace StoryCADTests
         /// https://github.com/storybuilder-org/StoryCAD/issues/975
         /// </summary>
         [TestMethod]
-        [Ignore("Test assumptions outdated after TrashView architecture change - manually tested by user")]
         public async Task DeleteNode()
         {
             //Create outline
             var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
-            outlineVM.StoryModel = await outlineService.CreateModel("TestNodeDelete", "StoryBuilder", 0);
-            outlineVM.StoryModelFile = Path.Combine(App.ResultsDir, "TestRootDelete.stbx");
+            var appState = Ioc.Default.GetRequiredService<AppState>();
+            var model = await outlineService.CreateModel("TestNodeDelete", "StoryBuilder", 0);
+            appState.CurrentDocument = new StoryDocument(model, Path.Combine(App.ResultsDir, "TestNodeDelete.stbx"));
 
             //Create a character
-            shell.RightTappedNode = outlineService.AddStoryElement(outlineVM.StoryModel, StoryItemType.Character,
-                outlineVM.StoryModel.ExplorerView[0]).Node;
+            shell.RightTappedNode = outlineService.AddStoryElement(appState.CurrentDocument.Model, StoryItemType.Character,
+                appState.CurrentDocument.Model.ExplorerView[0]).Node;
 
             //Assert Character is still in explorer
-            Assert.IsTrue(outlineVM.StoryModel.StoryElements.Characters[1].Node.Parent == outlineVM.StoryModel.ExplorerView[0]);
+            Assert.IsTrue(appState.CurrentDocument.Model.StoryElements.Characters[1].Node.Parent == appState.CurrentDocument.Model.ExplorerView[0]);
             
             // Store reference to the character before deletion
-            var character = outlineVM.StoryModel.StoryElements.Characters[1];
+            var character = appState.CurrentDocument.Model.StoryElements.Characters[1];
             
-            outlineVM.RemoveStoryElement();
+            await outlineVM.RemoveStoryElement();
 
             //Assert Character was trashed - check if it's still in Characters collection
-            Assert.IsTrue(outlineVM.StoryModel.StoryElements.Characters.Contains(character), "Character should still be in Characters collection");
+            Assert.IsTrue(appState.CurrentDocument.Model.StoryElements.Characters.Contains(character), "Character should still be in Characters collection");
             
             // Find the TrashCan node in TrashView
-            var trashCanNode = outlineVM.StoryModel.TrashView.FirstOrDefault(n => n.Type == StoryItemType.TrashCan);
+            var trashCanNode = appState.CurrentDocument.Model.TrashView.FirstOrDefault(n => n.Type == StoryItemType.TrashCan);
             Assert.IsNotNull(trashCanNode, "TrashCan node should exist in TrashView");
             Assert.IsTrue(character.Node.Parent == trashCanNode, "Character's parent should be the TrashCan node");
         }
@@ -109,13 +110,14 @@ namespace StoryCADTests
         public async Task DeleteNodeWithoutSelection()
         {
             var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
-            outlineVM.StoryModel = await outlineService.CreateModel("TestNullDelete", "StoryBuilder", 0);
-            outlineVM.StoryModelFile = Path.Combine(App.ResultsDir, "NullDelete.stbx");
+            var appState = Ioc.Default.GetRequiredService<AppState>();
+            var model = await outlineService.CreateModel("TestNullDelete", "StoryBuilder", 0);
+            appState.CurrentDocument = new StoryDocument(model, Path.Combine(App.ResultsDir, "NullDelete.stbx"));
 
             shell.RightTappedNode = null;
-            int before = outlineVM.StoryModel.StoryElements.Count;
-            outlineVM.RemoveStoryElement();
-            Assert.AreEqual(before, outlineVM.StoryModel.StoryElements.Count);
+            int before = appState.CurrentDocument.Model.StoryElements.Count;
+            await outlineVM.RemoveStoryElement();
+            Assert.AreEqual(before, appState.CurrentDocument.Model.StoryElements.Count);
         }
 
         [TestMethod]
@@ -123,21 +125,23 @@ namespace StoryCADTests
         public async Task RestoreChildThenParent_DoesNotDuplicate()
         {
             var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
-            outlineVM.StoryModel = await outlineService.CreateModel("RestoreTest", "StoryBuilder", 0);
-            outlineService.SetCurrentView(outlineVM.StoryModel, StoryViewType.ExplorerView);
-            var parent = outlineService.AddStoryElement(outlineVM.StoryModel, StoryItemType.Folder, outlineVM.StoryModel.ExplorerView[0]);
-            var child = outlineService.AddStoryElement(outlineVM.StoryModel, StoryItemType.Scene, parent.Node);
+            var appState = Ioc.Default.GetRequiredService<AppState>();
+            var model = await outlineService.CreateModel("RestoreTest", "StoryBuilder", 0);
+            appState.CurrentDocument = new StoryDocument(model, null);
+            outlineService.SetCurrentView(appState.CurrentDocument.Model, StoryViewType.ExplorerView);
+            var parent = outlineService.AddStoryElement(appState.CurrentDocument.Model, StoryItemType.Folder, appState.CurrentDocument.Model.ExplorerView[0]);
+            var child = outlineService.AddStoryElement(appState.CurrentDocument.Model, StoryItemType.Scene, parent.Node);
 
             // Delete parent (child goes with it)
             shell.RightTappedNode = parent.Node;
-            outlineVM.RemoveStoryElement();
+            await outlineVM.RemoveStoryElement();
 
             // Try to restore child - should fail (not a top-level item in trash)
             shell.RightTappedNode = child.Node;
             outlineVM.RestoreStoryElement();
 
             // Verify child is still in trash under parent
-            Assert.IsTrue(outlineVM.StoryModel.TrashView[0].Children.Any(n => n.Uuid == parent.Node.Uuid),
+            Assert.IsTrue(appState.CurrentDocument.Model.TrashView[0].Children.Any(n => n.Uuid == parent.Node.Uuid),
                 "Parent should still be in trash");
             Assert.IsTrue(parent.Node.Children.Any(n => n.Uuid == child.Node.Uuid),
                 "Child should still be under parent in trash");
@@ -158,15 +162,15 @@ namespace StoryCADTests
             }
 
             // Verify parent is restored to ExplorerView
-            int parentCount = CountNodes(outlineVM.StoryModel.ExplorerView[0], parent.Node.Uuid);
+            int parentCount = CountNodes(appState.CurrentDocument.Model.ExplorerView[0], parent.Node.Uuid);
             Assert.AreEqual(1, parentCount, "Parent should be restored exactly once");
             
             // Verify child came with parent
-            int childCount = CountNodes(outlineVM.StoryModel.ExplorerView[0], child.Node.Uuid);
+            int childCount = CountNodes(appState.CurrentDocument.Model.ExplorerView[0], child.Node.Uuid);
             Assert.AreEqual(1, childCount, "Child should be restored with parent exactly once");
             
             // Verify trash is now empty (except for TrashCan root)
-            Assert.AreEqual(0, outlineVM.StoryModel.TrashView[0].Children.Count,
+            Assert.AreEqual(0, appState.CurrentDocument.Model.TrashView[0].Children.Count,
                 "Trash should be empty after restore");
         }
 
@@ -198,8 +202,9 @@ namespace StoryCADTests
 
             // Ensure the file does not exist before writing the model
             Assert.IsFalse(File.Exists(file), "File already exists.");
-            outlineVM.StoryModelFile = file;
-            outlineVM.StoryModel = await outlineService.CreateModel("Test", "StoryBuilder", 0);
+            var appState = Ioc.Default.GetRequiredService<AppState>();
+            var model = await outlineService.CreateModel("Test", "StoryBuilder", 0);
+            appState.CurrentDocument = new StoryDocument(model, file);
 
             //Write, check exists.
             await outlineVM.WriteModel();
@@ -214,35 +219,41 @@ namespace StoryCADTests
         public async Task TestSaveFileAs()
         {
             var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
-            outlineVM.StoryModel = await outlineService.CreateModel("Test", "StoryBuilder", 0);
-            outlineVM.StoryModelFile = Path.Combine(App.ResultsDir, "saveas.stbx");
+            var appState = Ioc.Default.GetRequiredService<AppState>();
+            var model = await outlineService.CreateModel("Test", "StoryBuilder", 0);
+            appState.CurrentDocument = new StoryDocument(model, null);
+            appState.CurrentDocument.FilePath = Path.Combine(App.ResultsDir, "saveas.stbx");
 
             var saveasVM = Ioc.Default.GetRequiredService<SaveAsViewModel>();
             saveasVM.ProjectName = "SaveAsTest2.stbx";
             saveasVM.ParentFolder = App.ResultsDir;
             await outlineVM.SaveFileAs();
 
-            Assert.IsTrue(outlineVM.StoryModelFile == Path.Combine(App.ResultsDir, "SaveAsTest2.stbx"));
+            Assert.IsTrue(appState.CurrentDocument.FilePath == Path.Combine(App.ResultsDir, "SaveAsTest2.stbx"));
         }
 
         [TestMethod]
         public async Task TestCloseFile()
         {
             //Check we have the file loaded
+            var appState = Ioc.Default.GetRequiredService<AppState>();
             await outlineVM.OpenFile(Path.Combine(App.InputDir, "CloseFileTest.stbx")); 
-            Assert.IsTrue(outlineVM.StoryModel.StoryElements.Count != 0, "Story not loaded.");
+            Assert.IsNotNull(appState.CurrentDocument, "Document not loaded.");
+            Assert.IsTrue(appState.CurrentDocument.Model.StoryElements.Count != 0, "Story not loaded.");
             Thread.Sleep(2500);
             await outlineVM.CloseFile();
-            Assert.IsTrue(outlineVM.StoryModel.StoryElements.Count == 0, "Story not closed.");
+            Assert.IsNull(appState.CurrentDocument, "Document should be null after close.");
         }
 
         [TestMethod]
         public async Task MoveRootCommands_DoNotThrow()
         {
             var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
-            outlineVM.StoryModel = await outlineService.CreateModel("MoveRoot", "StoryBuilder", 0);
-            outlineService.SetCurrentView(outlineVM.StoryModel, StoryViewType.ExplorerView);
-            shell.CurrentNode = outlineVM.StoryModel.StoryElements[0].Node;
+            var appState = Ioc.Default.GetRequiredService<AppState>();
+            var model = await outlineService.CreateModel("MoveRoot", "StoryBuilder", 0);
+            appState.CurrentDocument = new StoryDocument(model, null);
+            outlineService.SetCurrentView(appState.CurrentDocument.Model, StoryViewType.ExplorerView);
+            shell.CurrentNode = appState.CurrentDocument.Model.StoryElements[0].Node;
             shell.RightTappedNode = shell.CurrentNode;
 
             shell.MoveLeftCommand.Execute(null);
@@ -277,10 +288,11 @@ namespace StoryCADTests
         {
             //Create outline
             var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
-            outlineVM.StoryModel = await outlineService.CreateModel("Test-Masterplots", "StoryBuilder", 0);
-            outlineVM.StoryModelFile = Path.Combine(App.ResultsDir, "Masterplots.stbx");
-            outlineService.SetCurrentView(outlineVM.StoryModel, StoryViewType.ExplorerView);
-            shell.RightTappedNode = outlineVM.StoryModel.StoryElements[0].Node;
+            var appState = Ioc.Default.GetRequiredService<AppState>();
+            var model = await outlineService.CreateModel("Test-Masterplots", "StoryBuilder", 0);
+            appState.CurrentDocument = new StoryDocument(model, Path.Combine(App.ResultsDir, "Masterplots.stbx"));
+            outlineService.SetCurrentView(appState.CurrentDocument.Model, StoryViewType.ExplorerView);
+            shell.RightTappedNode = appState.CurrentDocument.Model.StoryElements[0].Node;
 
 
             //Setup plot vm
@@ -289,20 +301,22 @@ namespace StoryCADTests
 
             //Run and assert
             await outlineVM.MasterPlotTool();
-            Assert.IsTrue(outlineVM.StoryModel.StoryElements[3].Name  == masterPlotsVM.PlotPatternNames[4]);
+            Assert.IsTrue(appState.CurrentDocument.Model.StoryElements[3].Name  == masterPlotsVM.PlotPatternNames[4]);
         }
 
         [TestMethod]
         public async Task MasterPlotTool_AddsSingleProblem()
         {
             var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
-            outlineVM.StoryModel = await outlineService.CreateModel("MasterPlot", "StoryBuilder", 0);
-            outlineService.SetCurrentView(outlineVM.StoryModel, StoryViewType.ExplorerView);
-            shell.RightTappedNode = outlineVM.StoryModel.StoryElements[0].Node;
+            var appState = Ioc.Default.GetRequiredService<AppState>();
+            var model = await outlineService.CreateModel("MasterPlot", "StoryBuilder", 0);
+            appState.CurrentDocument = new StoryDocument(model, null);
+            outlineService.SetCurrentView(appState.CurrentDocument.Model, StoryViewType.ExplorerView);
+            shell.RightTappedNode = appState.CurrentDocument.Model.StoryElements[0].Node;
             var master = Ioc.Default.GetRequiredService<MasterPlotsViewModel>();
             master.PlotPatternName = master.PlotPatternNames[0];
             await outlineVM.MasterPlotTool();
-            int count = outlineVM.StoryModel.StoryElements.Count(e => e.Name == master.PlotPatternNames[0]);
+            int count = appState.CurrentDocument.Model.StoryElements.Count(e => e.Name == master.PlotPatternNames[0]);
             Assert.AreEqual(1, count, "MasterPlot created duplicate elements");
         }
 
@@ -311,30 +325,34 @@ namespace StoryCADTests
         {
             //Create outline
             var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
-            outlineVM.StoryModel = await outlineService.CreateModel("Test", "StoryBuilder", 0);
-            outlineVM.StoryModelFile = Path.Combine(App.ResultsDir, "Dramatic.stbx");
+            var appState = Ioc.Default.GetRequiredService<AppState>();
+            var model = await outlineService.CreateModel("Test", "StoryBuilder", 0);
+            appState.CurrentDocument = new StoryDocument(model, null);
+            appState.CurrentDocument.FilePath = Path.Combine(App.ResultsDir, "Dramatic.stbx");
 
             //Set view
-            outlineService.SetCurrentView(outlineVM.StoryModel, StoryViewType.ExplorerView);
-            shell.RightTappedNode = outlineVM.StoryModel.StoryElements[0].Node;
+            outlineService.SetCurrentView(appState.CurrentDocument.Model, StoryViewType.ExplorerView);
+            shell.RightTappedNode = appState.CurrentDocument.Model.StoryElements[0].Node;
 
             //Run scenario
             Ioc.Default.GetRequiredService<DramaticSituationsViewModel>().SituationName = "Abduction";
             await outlineVM.DramaticSituationsTool();
-            Assert.IsTrue(outlineVM.StoryModel.StoryElements.Count > 2, "Dramatic situation not added.");
+            Assert.IsTrue(appState.CurrentDocument.Model.StoryElements.Count > 2, "Dramatic situation not added.");
         }
 
         [TestMethod]
         public async Task DramaticSituationsTool_CreatesScene()
         {
             var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
-            outlineVM.StoryModel = await outlineService.CreateModel("Dramatic", "StoryBuilder", 0);
-            outlineService.SetCurrentView(outlineVM.StoryModel, StoryViewType.ExplorerView);
-            shell.RightTappedNode = outlineVM.StoryModel.StoryElements[0].Node;
+            var appState = Ioc.Default.GetRequiredService<AppState>();
+            var model = await outlineService.CreateModel("Dramatic", "StoryBuilder", 0);
+            appState.CurrentDocument = new StoryDocument(model, null);
+            outlineService.SetCurrentView(appState.CurrentDocument.Model, StoryViewType.ExplorerView);
+            shell.RightTappedNode = appState.CurrentDocument.Model.StoryElements[0].Node;
             var vm = Ioc.Default.GetRequiredService<DramaticSituationsViewModel>();
             vm.SituationName = "Abduction";
             await outlineVM.DramaticSituationsTool();
-            int count = outlineVM.StoryModel.StoryElements.Count(e => e.Name == "Abduction");
+            int count = appState.CurrentDocument.Model.StoryElements.Count(e => e.Name == "Abduction");
             Assert.AreEqual(1, count, "Dramatic situation created incorrectly");
         }
 
@@ -343,12 +361,13 @@ namespace StoryCADTests
         {
             //Create outline
             var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
-            outlineVM.StoryModel = await outlineService.CreateModel("TestStock", "StoryBuilder", 0);
-            outlineVM.StoryModelFile = Path.Combine(App.ResultsDir, "Stock.stbx");
+            var appState = Ioc.Default.GetRequiredService<AppState>();
+            var model = await outlineService.CreateModel("TestStock", "StoryBuilder", 0);
+            appState.CurrentDocument = new StoryDocument(model, Path.Combine(App.ResultsDir, "Stock.stbx"));
 
             //Set view
-            outlineService.SetCurrentView(outlineVM.StoryModel, StoryViewType.ExplorerView);
-            shell.RightTappedNode = outlineVM.StoryModel.StoryElements[0].Node;
+            outlineService.SetCurrentView(appState.CurrentDocument.Model, StoryViewType.ExplorerView);
+            shell.RightTappedNode = appState.CurrentDocument.Model.StoryElements[0].Node;
 
             //run scenario
             var stockVM = Ioc.Default.GetRequiredService<StockScenesViewModel>();
@@ -356,7 +375,7 @@ namespace StoryCADTests
             await outlineVM.StockScenesTool();
 
 
-            Assert.IsTrue(outlineVM.StoryModel.StoryElements[3].Name == "The police join the chase",
+            Assert.IsTrue(appState.CurrentDocument.Model.StoryElements[3].Name == "The police join the chase",
                 "Stock scene not added.");
         }
 
@@ -368,18 +387,19 @@ namespace StoryCADTests
         public async Task TestOverviewProblem()
         {
             var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
-            outlineVM.StoryModel = await outlineService.CreateModel("ProblemTest", "StoryBuilder", 0);
-            outlineVM.StoryModelFile = Path.Combine(App.ResultsDir, "ProblemTest.stbx");
-            shell.RightTappedNode = outlineVM.StoryModel.StoryElements[0].Node;
+            var appState = Ioc.Default.GetRequiredService<AppState>();
+            var model = await outlineService.CreateModel("ProblemTest", "StoryBuilder", 0);
+            appState.CurrentDocument = new StoryDocument(model, Path.Combine(App.ResultsDir, "ProblemTest.stbx"));
+            shell.RightTappedNode = appState.CurrentDocument.Model.StoryElements[0].Node;
 
             //Create char and try to assign as a story problem
-            outlineService.AddStoryElement(outlineVM.StoryModel, StoryItemType.Character, outlineVM.StoryModel.ExplorerView[0]);
-            Ioc.Default.GetRequiredService<OverviewViewModel>().Activate((outlineVM.StoryModel.StoryElements.First(o =>
+            outlineService.AddStoryElement(appState.CurrentDocument.Model, StoryItemType.Character, appState.CurrentDocument.Model.ExplorerView[0]);
+            Ioc.Default.GetRequiredService<OverviewViewModel>().Activate((appState.CurrentDocument.Model.StoryElements.First(o =>
                 o.ElementType == StoryItemType.StoryOverview) as OverviewModel));
             Ioc.Default.GetRequiredService<OverviewViewModel>().StoryProblem =
-                outlineVM.StoryModel.StoryElements[3].Uuid;
+                appState.CurrentDocument.Model.StoryElements[3].Uuid;
             Ioc.Default.GetRequiredService<OverviewViewModel>().Deactivate(null);
-            var ovm = (outlineVM.StoryModel.StoryElements.First(o =>
+            var ovm = (appState.CurrentDocument.Model.StoryElements.First(o =>
                 o.ElementType == StoryItemType.StoryOverview) as OverviewModel).StoryProblem;
             Assert.IsTrue(ovm == Guid.Empty);
         }
@@ -391,18 +411,19 @@ namespace StoryCADTests
         public async Task TestInverseOverviewProblem()
         {
             var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
-            outlineVM.StoryModel = await outlineService.CreateModel("ProblemTest2", "StoryBuilder", 0);
-            outlineVM.StoryModelFile = Path.Combine(App.ResultsDir, "ProblemTest2.stbx");
-            shell.RightTappedNode = outlineVM.StoryModel.StoryElements[0].Node;
+            var appState = Ioc.Default.GetRequiredService<AppState>();
+            var model = await outlineService.CreateModel("ProblemTest2", "StoryBuilder", 0);
+            appState.CurrentDocument = new StoryDocument(model, Path.Combine(App.ResultsDir, "ProblemTest2.stbx"));
+            shell.RightTappedNode = appState.CurrentDocument.Model.StoryElements[0].Node;
 
             //Create char and try to assign as a story problem
-            outlineService.AddStoryElement(outlineVM.StoryModel, StoryItemType.Problem, outlineVM.StoryModel.ExplorerView[0]);
-            Ioc.Default.GetRequiredService<OverviewViewModel>().Activate((outlineVM.StoryModel.StoryElements.First(o =>
+            outlineService.AddStoryElement(appState.CurrentDocument.Model, StoryItemType.Problem, appState.CurrentDocument.Model.ExplorerView[0]);
+            Ioc.Default.GetRequiredService<OverviewViewModel>().Activate((appState.CurrentDocument.Model.StoryElements.First(o =>
                 o.ElementType == StoryItemType.StoryOverview) as OverviewModel));
             Ioc.Default.GetRequiredService<OverviewViewModel>().StoryProblem =
-                outlineVM.StoryModel.StoryElements[3].Uuid;
+                appState.CurrentDocument.Model.StoryElements[3].Uuid;
             Ioc.Default.GetRequiredService<OverviewViewModel>().Deactivate(null);
-            var ovm = (outlineVM.StoryModel.StoryElements.First(o =>
+            var ovm = (appState.CurrentDocument.Model.StoryElements.First(o =>
                 o.ElementType == StoryItemType.StoryOverview) as OverviewModel).StoryProblem;
             Assert.IsTrue(ovm != Guid.Empty);
         }

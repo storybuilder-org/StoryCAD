@@ -114,24 +114,24 @@ public class StoryElement : ObservableObject
     /// </summary>
     /// <param name="guid">The Guid of the StoryElement to retrieve</param>
     /// <returns></returns>
-    public static StoryElement GetByGuid(Guid guid, StoryModel model = null)
+    public static StoryElement GetByGuid(Guid guid, StoryModel storyModel = null)
     {
         if (guid.Equals(Guid.Empty))
              return new StoryElement();
         
-        // Get the StoryElementsCollection from the provided model or from OutlineViewModel
+        // Get the StoryElementsCollection from the provided storyModel or from OutlineViewModel
         StoryElementCollection elements;
-        if (model != null)
+        if (storyModel != null)
         {
-            elements = model.StoryElements;
+            elements = storyModel.StoryElements;
         }
         else
         {
-            // Fallback to current behavior - get from OutlineViewModel
+            // Fallback to current behavior - get from AppState
             // TODO: Examine this more closely. Called from OutlineViewModel.DeleteNode() and other ViewModels
             // where OutlineViewModel context is available. Consider if this global state dependency is appropriate.
-            OutlineViewModel outlineVM = Ioc.Default.GetRequiredService<OutlineViewModel>();
-            elements = outlineVM.StoryModel.StoryElements;
+            var appState = Ioc.Default.GetRequiredService<AppState>();
+            elements = appState.CurrentDocument.Model.StoryElements;
         }
         
         // Look for the StoryElement corresponding to the passed guid

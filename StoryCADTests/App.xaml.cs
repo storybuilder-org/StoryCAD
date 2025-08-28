@@ -26,7 +26,7 @@ public partial class App : Application
     public App()
     {
         //Loads Singletons/VMs
-        IocLoaderTests.Initialise(null);//Runs the initialization code
+        TestSetup.Initialize(null);//Runs the initialization code
         Directory.CreateDirectory(Ioc.Default.GetRequiredService<AppState>().RootDirectory);
         InitializeComponent();
 

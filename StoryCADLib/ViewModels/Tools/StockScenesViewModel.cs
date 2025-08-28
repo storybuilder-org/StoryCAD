@@ -45,10 +45,18 @@ public class StockScenesViewModel : ObservableRecipient
 
     #region Constructor
 
-    public StockScenesViewModel()
+    private readonly ToolsData _toolsData;
+
+    // Constructor for XAML compatibility - will be removed later
+    public StockScenesViewModel() : this(Ioc.Default.GetRequiredService<ToolsData>())
     {
+    }
+
+    public StockScenesViewModel(ToolsData toolsData)
+    {
+        _toolsData = toolsData;
         StockSceneCategories = new ObservableCollection<string>();
-        _stockScenes = Ioc.Default.GetService<ToolsData>().StockScenesSource;
+        _stockScenes = _toolsData.StockScenesSource;
         foreach (string _category in _stockScenes.Keys) { StockSceneCategories.Add(_category); }
     }
 

@@ -1,7 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using StoryCAD.Services.Backup;
+using StoryCAD.Services.Dialogs;
 using StoryCAD.Services.Dialogs.Tools;
 using StoryCAD.Services.Locking;
 using StoryCAD.Services.Outline;
@@ -22,8 +22,12 @@ namespace StoryCAD.ViewModels.Tools;
 /// </summary>
 public class NarrativeToolVM: ObservableRecipient
 {
+    // TODO: ShellViewModel dependency is still required for CurrentViewType, CurrentNode, and RightTappedNode
+    // See ToolValidationService for details on future refactoring to move these to AppState
     private readonly ShellViewModel _shellVM;
-    private readonly OutlineViewModel outlineVM;
+    private readonly AppState _appState;
+    private readonly Windowing _windowing;
+    private readonly ToolValidationService _toolValidationService;
     private readonly ILogService _logger; 
     public StoryNodeItem SelectedNode; //Currently selected node
     public bool IsNarratorSelected = false;
@@ -61,15 +65,19 @@ public class NarrativeToolVM: ObservableRecipient
     // Constructor for XAML compatibility - will be removed later
     public NarrativeToolVM() : this(
         Ioc.Default.GetRequiredService<ShellViewModel>(),
-        Ioc.Default.GetRequiredService<OutlineViewModel>(),
+        Ioc.Default.GetRequiredService<AppState>(),
+        Ioc.Default.GetRequiredService<Windowing>(),
+        Ioc.Default.GetRequiredService<ToolValidationService>(),
         Ioc.Default.GetRequiredService<ILogService>())
     {
     }
 
-    public NarrativeToolVM(ShellViewModel shellVM, OutlineViewModel outlineViewModel, ILogService logger)
+    public NarrativeToolVM(ShellViewModel shellVM, AppState appState, Windowing windowing, ToolValidationService toolValidationService, ILogService logger)
     {
         _shellVM = shellVM;
-        outlineVM = outlineViewModel;
+        _appState = appState;
+        _windowing = windowing;
+        _toolValidationService = toolValidationService;
         _logger = logger;
         
         CreateFlyout = new RelayCommand(MakeSection);
@@ -83,12 +91,17 @@ public class NarrativeToolVM: ObservableRecipient
     /// </summary>
     public async Task OpenNarrativeTool()
     {
-        if (_shellVM.OutlineManager.VerifyToolUse(false, false))
+        // Use ToolValidationService instead of direct OutlineViewModel dependency
+        // Note: Still requires ShellViewModel for state, see ToolValidationService docs for future refactoring
+        if (_toolValidationService.VerifyToolUse(
+            _shellVM.CurrentViewType,
+            _shellVM.CurrentNode,
+            _shellVM.RightTappedNode,
+            _appState.CurrentDocument?.Model,
+            false, // explorerViewOnly
+            false)) // nodeRequired
         {
-            var autoSaveService = Ioc.Default.GetRequiredService<AutoSaveService>();
-            var backupService = Ioc.Default.GetRequiredService<BackupService>();
-
-            using (var serializationLock = new SerializationLock(autoSaveService, backupService, _logger))
+            using (var serializationLock = new SerializationLock(_logger))
             {
                 try
                 {
@@ -98,7 +111,7 @@ public class NarrativeToolVM: ObservableRecipient
                         PrimaryButtonText = "Done",
                         Content = new NarrativeTool()
                     };
-                    await Ioc.Default.GetService<Windowing>().ShowContentDialog(_dialog);
+                    await _windowing.ShowContentDialog(_dialog);
                 }
                 catch (Exception ex)
                 {
@@ -157,10 +170,10 @@ public class NarrativeToolVM: ObservableRecipient
             _logger.Log(LogLevel.Info, $"Node Selected is a {SelectedNode.Type}");
             if (SelectedNode.Type == StoryItemType.Scene)  //If its just a scene, add it immediately if not already in.
             {
-                if (RecursiveCheck(outlineVM.StoryModel.NarratorView[0].Children).All(storyNodeItem => storyNodeItem.Uuid != SelectedNode.Uuid)) //checks node isn't in the narrator view
+                if (RecursiveCheck(_appState.CurrentDocument.Model.NarratorView[0].Children).All(storyNodeItem => storyNodeItem.Uuid != SelectedNode.Uuid)) //checks node isn't in the narrator view
                 {
                     var outlineService = Ioc.Default.GetRequiredService<OutlineService>();
-                    _ = new StoryNodeItem((SceneModel)outlineService.GetStoryElementByGuid(outlineVM.StoryModel, SelectedNode.Uuid), outlineVM.StoryModel.NarratorView[0]);
+                    _ = new StoryNodeItem((SceneModel)outlineService.GetStoryElementByGuid(_appState.CurrentDocument.Model, SelectedNode.Uuid), _appState.CurrentDocument.Model.NarratorView[0]);
                     _logger.Log(LogLevel.Info, $"Copied SelectedNode {SelectedNode.Name} ({SelectedNode.Uuid})");
                     Message = $"Copied {SelectedNode.Name}";
                 }
@@ -175,10 +188,10 @@ public class NarrativeToolVM: ObservableRecipient
                 _logger.Log(LogLevel.Info, "Item is a folder/section, getting flattened list of all children.");
                 foreach (StoryNodeItem _item in RecursiveCheck(SelectedNode.Children))
                 {
-                    if (_item.Type == StoryItemType.Scene && RecursiveCheck(outlineVM.StoryModel.NarratorView[0].Children).All(storyNodeItem => storyNodeItem.Uuid != _item.Uuid))
+                    if (_item.Type == StoryItemType.Scene && RecursiveCheck(_appState.CurrentDocument.Model.NarratorView[0].Children).All(storyNodeItem => storyNodeItem.Uuid != _item.Uuid))
                     {
                         var outlineService = Ioc.Default.GetRequiredService<OutlineService>();
-                        _ = new StoryNodeItem((SceneModel)outlineService.GetStoryElementByGuid(outlineVM.StoryModel, _item.Uuid), outlineVM.StoryModel.NarratorView[0]);
+                        _ = new StoryNodeItem((SceneModel)outlineService.GetStoryElementByGuid(_appState.CurrentDocument.Model, _item.Uuid), _appState.CurrentDocument.Model.NarratorView[0]);
                         _logger.Log(LogLevel.Info, $"Copied item {SelectedNode.Name} ({SelectedNode.Uuid})");
                     }
                 }
@@ -219,7 +232,7 @@ public class NarrativeToolVM: ObservableRecipient
     private void CopyAllUnused()
     {
         //Recursively goes through the children of NarratorView View.
-        try { foreach (StoryNodeItem _item in outlineVM.StoryModel.ExplorerView[0].Children) { RecurseCopyUnused(_item); } }
+        try { foreach (StoryNodeItem _item in _appState.CurrentDocument.Model.ExplorerView[0].Children) { RecurseCopyUnused(_item); } }
         catch (Exception _e) { _logger.LogException(LogLevel.Error, _e, "Error in recursive check"); }
     }
 
@@ -229,7 +242,7 @@ public class NarrativeToolVM: ObservableRecipient
     /// </summary>
     private void MakeSection()
     {
-        if (_shellVM.OutlineManager.StoryModel?.CurrentView == null || _shellVM.OutlineManager.StoryModel.CurrentView.Count < 0)
+        if (_appState.CurrentDocument?.Model?.CurrentView == null || _appState.CurrentDocument.Model.CurrentView.Count < 0)
         {
             _logger.Log(LogLevel.Warn, "DataSource is empty or null, not adding section");
             return;
@@ -241,7 +254,7 @@ public class NarrativeToolVM: ObservableRecipient
             Message = "Please name your section";
             return;
         }
-        new FolderModel(NewSectionName, outlineVM.StoryModel, StoryItemType.Folder, outlineVM.StoryModel.NarratorView[0]);
+        new FolderModel(NewSectionName, _appState.CurrentDocument.Model, StoryItemType.Folder, _appState.CurrentDocument.Model.NarratorView[0]);
         NewSectionName = string.Empty;
         Message = string.Empty;
     }
@@ -258,12 +271,12 @@ public class NarrativeToolVM: ObservableRecipient
             if (item.Type == StoryItemType.Scene) //Check if scene/folder/section, if not then just continue.
             {
                 //This calls recursive check, which returns flattens the entire the tree and .Any() checks if the UUID is in anywhere in the model.
-                if (RecursiveCheck(outlineVM.StoryModel.NarratorView[0].Children).All(storyNodeItem => storyNodeItem.Uuid != item.Uuid)) 
+                if (RecursiveCheck(_appState.CurrentDocument.Model.NarratorView[0].Children).All(storyNodeItem => storyNodeItem.Uuid != item.Uuid)) 
                 {
                     //Since the node isn't in the node, then we add it here.
                     _logger.Log(LogLevel.Trace, $"{item.Name} ({item.Uuid}) not found in Narrative view, adding it to the tree");
                     var outlineService = Ioc.Default.GetRequiredService<OutlineService>();
-                    _ = new StoryNodeItem((SceneModel)outlineService.GetStoryElementByGuid(outlineVM.StoryModel, item.Uuid), outlineVM.StoryModel.NarratorView[0]);
+                    _ = new StoryNodeItem((SceneModel)outlineService.GetStoryElementByGuid(_appState.CurrentDocument.Model, item.Uuid), _appState.CurrentDocument.Model.NarratorView[0]);
                 }
             }
 

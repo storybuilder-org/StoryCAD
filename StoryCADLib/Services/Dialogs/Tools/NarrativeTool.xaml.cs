@@ -10,6 +10,7 @@ namespace StoryCAD.Services.Dialogs.Tools
         ShellViewModel ShellVM = Ioc.Default.GetService<ShellViewModel>();
         OutlineViewModel OutlineVM = Ioc.Default.GetService<OutlineViewModel>();
         NarrativeToolVM ToolVM = Ioc.Default.GetService<NarrativeToolVM>();
+        AppState AppState = Ioc.Default.GetService<AppState>();
 
         public NarrativeTool() { InitializeComponent(); }
 

@@ -146,10 +146,10 @@ public partial class Windowing : ObservableRecipient
         // Proper fix (SRP): Move UpdateWindowTitle logic to OutlineViewModel (which knows about file changes)
         // and have it set the title on Windowing. OutlineViewModel already has Windowing reference.
         // Current workaround: Use service locator to break the circular dependency
-        OutlineViewModel outlineVM = Ioc.Default.GetRequiredService<OutlineViewModel>();
-        if (!string.IsNullOrEmpty(outlineVM.StoryModelFile))
+        AppState appState = Ioc.Default.GetRequiredService<AppState>();
+        if (!string.IsNullOrEmpty(appState.CurrentDocument?.FilePath))
         {
-            BaseTitle += $"- Currently editing {Path.GetFileNameWithoutExtension(outlineVM.StoryModelFile)}";
+            BaseTitle += $"- Currently editing {Path.GetFileNameWithoutExtension(appState.CurrentDocument.FilePath)}";
         }
 
         //Set window Title.
@@ -168,9 +168,9 @@ public partial class Windowing : ObservableRecipient
         // Proper fix (SRP): Move UpdateUIToTheme logic to ShellViewModel (which manages navigation/UI state)
         // ShellViewModel can coordinate the save and navigation when theme changes
         // Current workaround: Use service locator to break the circular dependency
-        OutlineViewModel outlineVM = Ioc.Default.GetRequiredService<OutlineViewModel>();
+        AppState appState = Ioc.Default.GetRequiredService<AppState>();
         //Save file, close current node since it won't be the right theme.
-        if (!string.IsNullOrEmpty(outlineVM.StoryModelFile))
+        if (!string.IsNullOrEmpty(appState.CurrentDocument?.FilePath))
         {
             await Ioc.Default.GetRequiredService<OutlineViewModel>().SaveFile();
             Ioc.Default.GetRequiredService<ShellViewModel>().ShowHomePage();

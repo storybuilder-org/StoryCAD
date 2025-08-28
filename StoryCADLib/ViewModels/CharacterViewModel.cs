@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using StoryCAD.Controls;
+using StoryCAD.Services;
 using StoryCAD.Services.Dialogs;
 using StoryCAD.Services.Messages;
 using StoryCAD.Services.Navigation;
@@ -12,7 +13,7 @@ using StoryCAD.ViewModels.Tools;
 
 namespace StoryCAD.ViewModels;
 
-public class CharacterViewModel : ObservableRecipient, INavigable
+public class CharacterViewModel : ObservableRecipient, INavigable, ISaveable
 {
     #region Fields
     
@@ -21,8 +22,8 @@ public class CharacterViewModel : ObservableRecipient, INavigable
     private bool _changeable; // process property changes for this story element
     private bool _changed;    // this story element has changed
     private readonly Windowing _windowing;
-    private readonly OutlineViewModel _outlineViewModel;
-    private readonly ShellViewModel _shellViewModel;
+    private readonly AppState _appState;
+    private StoryModel _storyModel;
     #endregion
 
     #region Properties
@@ -536,6 +537,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable
     {
         _changeable = false;
         _changed = false;
+        _storyModel = _appState.CurrentDocument.Model;
 
         Uuid = Model.Uuid;
         Name = Model.Name;
@@ -603,7 +605,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable
         _changeable = true;
     }
 
-    internal void SaveModel()
+    public void SaveModel()
     {
         // Story.Uuid is read-only and cannot be set
         Model.Name = Name;
@@ -735,7 +737,6 @@ public class CharacterViewModel : ObservableRecipient, INavigable
         _vm.RelationTypes.Clear();
         foreach (string _relationshipType in Ioc.Default.GetRequiredService<ControlData>().RelationTypes) { _vm.RelationTypes.Add(_relationshipType); }
         _vm.ProspectivePartners.Clear(); //Prospective partners are chars who are not in a relationship with this char
-        StoryModel _storyModel = _outlineViewModel.StoryModel;
         foreach (StoryElement _character in _storyModel.StoryElements.Characters)
         {
             if (_character == _vm.Member) continue;  // Skip me
@@ -750,7 +751,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable
         if (_vm.ProspectivePartners.Count == 0)
         {
             _logger.Log(LogLevel.Warn,"There are no prospective partners, not showing AddRelationship Dialog." );
-            _shellViewModel.ShowMessage(LogLevel.Warn, "This character already has a relationship with everyone",false);
+            Messenger.Send(new StatusChangedMessage(new("This character already has a relationship with everyone", LogLevel.Warn)));
             return;
         }
 
@@ -918,11 +919,10 @@ public class CharacterViewModel : ObservableRecipient, INavigable
     #region Constructors
 
     // Constructor for XAML compatibility - will be removed later
-    public CharacterViewModel(ILogService logger, OutlineViewModel outlineViewModel, ShellViewModel shellViewModel, Windowing windowing)
+    public CharacterViewModel(ILogService logger, AppState appState, Windowing windowing)
     {
         _logger = logger;
-        _outlineViewModel = outlineViewModel;
-        _shellViewModel = shellViewModel;
+        _appState = appState;
         _windowing = windowing;
 
         try

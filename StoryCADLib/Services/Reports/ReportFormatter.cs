@@ -10,13 +10,13 @@ namespace StoryCAD.Services.Reports;
 public class ReportFormatter
 {
     private Dictionary<string, string[]> _templates = new();
-    private StoryModel _model;
+    private StoryModel _storyModel;
 
     #region Public methods
 
     public string FormatStoryOverviewReport()
     {
-        OverviewModel overview = (OverviewModel)_model.StoryElements.
+        OverviewModel overview = (OverviewModel)_storyModel.StoryElements.
             FirstOrDefault(element => element.ElementType == StoryItemType.StoryOverview);
         string[] lines = _templates["Story Overview"]; 
         RtfDocument doc = new(string.Empty);
@@ -27,7 +27,7 @@ public class ReportFormatter
         if (overview.StoryProblem != Guid.Empty)
         {
             var outlineService = Ioc.Default.GetRequiredService<OutlineService>();
-            ProblemModel problem = (ProblemModel)outlineService.GetStoryElementByGuid(_model, overview.StoryProblem);
+            ProblemModel problem = (ProblemModel)outlineService.GetStoryElementByGuid(_storyModel, overview.StoryProblem);
             problemName = problem.Name;
             premise = problem.Premise;
         }
@@ -171,14 +171,14 @@ public class ReportFormatter
 
 		// Retrieve the ShellViewModel once
 		var outlineViewModel = Ioc.Default.GetRequiredService<OutlineViewModel>();
-		if (outlineViewModel.StoryModel?.StoryElements == null)
+		if (_storyModel?.StoryElements == null)
 		{
 			// StoryElements not available
 			return string.Empty;
 		}
 
 		// Retrieve the Overview element
-		var overview = outlineViewModel.StoryModel.StoryElements
+		var overview = _storyModel.StoryElements
 			.OfType<OverviewModel>()
 			.FirstOrDefault(e => e.ElementType == StoryItemType.StoryOverview);
 
@@ -195,7 +195,7 @@ public class ReportFormatter
 			return string.Empty;
 		}
         
-        var storyProblem = (ProblemModel)outlineViewModel.StoryModel.StoryElements
+        var storyProblem = (ProblemModel)_storyModel.StoryElements
             .StoryElementGuids[overview.StoryProblem];
 
 		// Start building the tree with a separate root heading
@@ -205,7 +205,7 @@ public class ReportFormatter
 		var processedElements = new HashSet<Guid>(); // Keep track of processed elements
 		foreach (var beat in storyProblem.StructureBeats)
 		{
-			ProcessBeat(beat, output, outlineViewModel.StoryModel, 1, processedElements);
+			ProcessBeat(beat, output, _storyModel, 1, processedElements);
 		}
 
 		return output.ToString();
@@ -285,7 +285,7 @@ public class ReportFormatter
                 StringBuilder sb = new(line);
                 if (rel.Partner == null)
                 {
-                    foreach (StoryElement otherCharacter in Ioc.Default.GetRequiredService<OutlineViewModel>()!.StoryModel.StoryElements.Characters)
+                    foreach (StoryElement otherCharacter in _storyModel.StoryElements.Characters)
                     {
                         if (otherCharacter.Uuid == rel.PartnerUuid)
                         {
@@ -612,10 +612,10 @@ public class ReportFormatter
             if (line.Contains("@Synopsis"))
             {
                 // Find StoryNarrator' Scenes
-                foreach (StoryNodeItem child in _model.NarratorView[0].Children)
+                foreach (StoryNodeItem child in _storyModel.NarratorView[0].Children)
                 {
                     var outlineService = Ioc.Default.GetRequiredService<OutlineService>();
-                    StoryElement scn = outlineService.GetStoryElementByGuid(_model, child.Uuid);
+                    StoryElement scn = outlineService.GetStoryElementByGuid(_storyModel, child.Uuid);
                     if (scn.ElementType != StoryItemType.Scene)
                         continue;
                     SceneModel scene = (SceneModel)scn;
@@ -627,7 +627,7 @@ public class ReportFormatter
                     doc.AddNewLine();
                 }
 
-                if (_model.NarratorView[0].Children.Count == 0)
+                if (_storyModel.NarratorView[0].Children.Count == 0)
                 {
                     doc.AddText("You currently have no scenes within your narrative view, add some to see them here.");
                     doc.AddNewLine();
@@ -703,10 +703,9 @@ public class ReportFormatter
 
     #region Constructor
 
-    public ReportFormatter()
+    public ReportFormatter(AppState appState)
     {
-        OutlineViewModel outlineVM = Ioc.Default.GetService<OutlineViewModel>();
-        if (outlineVM != null) _model = outlineVM.StoryModel;
+        _storyModel = appState.CurrentDocument!.Model;
     }
 
     #endregion
@@ -727,7 +726,7 @@ public class ReportFormatter
         {
             if (line.Contains("@Description"))
             {
-                var elements = _model.StoryElements.Where(e => e.ElementType == elementType);
+                var elements = _storyModel.StoryElements.Where(e => e.ElementType == elementType);
                 foreach (StoryElement element in elements)
                 {
                     StringBuilder sb = new(line);

@@ -264,6 +264,14 @@ public class CollaboratorService
     }
     public async Task<bool> CollaboratorEnabled()
     {
+        // Check COLLAB_DEBUG environment variable to bypass collaborator loading
+        var collabDebug = Environment.GetEnvironmentVariable("COLLAB_DEBUG");
+        if (collabDebug == "0")
+        {
+            _logService.Log(LogLevel.Info, "Collaborator disabled by COLLAB_DEBUG=0");
+            return false;
+        }
+        
         // Allow loading if:
         // 1. Developer build AND plugin found
         // 2. OR if STORYCAD_PLUGIN_DIR is set (for JIT debugging without F5)

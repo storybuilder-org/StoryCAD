@@ -2,12 +2,13 @@
 using System.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
+using StoryCAD.Services;
 using StoryCAD.Services.Messages;
 using StoryCAD.Services.Navigation;
 
 namespace StoryCAD.ViewModels;
 
-public class SettingViewModel : ObservableRecipient, INavigable
+public class SettingViewModel : ObservableRecipient, INavigable, ISaveable
 {
     #region Fields
 
@@ -211,7 +212,7 @@ public class SettingViewModel : ObservableRecipient, INavigable
         _changeable = true;
     }
 
-    internal void SaveModel()
+    public void SaveModel()
     {
         try
         {
