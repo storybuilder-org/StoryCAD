@@ -95,12 +95,12 @@ public class CharacterViewModel : ObservableRecipient, INavigable, ISaveable
         set => SetProperty(ref _archetype, value);
     }
 
-    private string _characterSketch;
-
-    public string CharacterSketch
+    // Description property (migrated from CharacterSketch)
+    private string _description;
+    public string Description
     {
-        get => _characterSketch;
-        set => SetProperty(ref _characterSketch, value);
+        get => _description;
+        set => SetProperty(ref _description, value);
     }
 
     // Character physical data
@@ -546,7 +546,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable, ISaveable
         Role = Model.Role;
         StoryRole = Model.StoryRole;
         Archetype = Model.Archetype;
-        CharacterSketch = Model.CharacterSketch;
+        Description = Model.Description;
         Age = Model.Age;
         Sex = Model.Sex;
         Eyes = Model.Eyes;
@@ -655,7 +655,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable, ISaveable
         Model.BackStory = BackStory;
 
         // Write and clear RTF files
-        Model.CharacterSketch = CharacterSketch;
+        Model.Description = Description;
         Model.PhysNotes = PhysNotes;
         Model.Appearance = Appearance;
         Model.Economic = Economic;
@@ -977,7 +977,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable, ISaveable
         Role = string.Empty;
         StoryRole = string.Empty;
         Archetype = string.Empty;
-        CharacterSketch = string.Empty;
+        Description = string.Empty;
         Age = string.Empty;
         Sex = string.Empty;
         Eyes = string.Empty;

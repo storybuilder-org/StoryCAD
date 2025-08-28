@@ -44,7 +44,7 @@ public class ReportFormatter
             sb.Replace("@StoryType", overview.StoryType);
             sb.Replace("@Genre", overview.StoryGenre);
             sb.Replace("@Viewpoint", overview.Viewpoint);
-            sb.Replace("@StoryIdea", GetText(overview.StoryIdea));
+            sb.Replace("@StoryIdea", GetText(overview.Description));
             sb.Replace("@Concept", GetText(overview.Concept));
             sb.Replace("@StoryProblem", problemName);
             sb.Replace("@Premise", GetText(premise));
@@ -89,8 +89,8 @@ public class ReportFormatter
             if (String.IsNullOrEmpty(problem.Subject)) { sb.Replace("@Subject", ""); }
             else { sb.Replace("@Subject", problem.Subject); }
 
-            if (String.IsNullOrEmpty(problem.StoryQuestion)) { sb.Replace("@StoryQuestion", ""); } 
-            else { sb.Replace("@StoryQuestion", GetText(problem.StoryQuestion)); }
+            if (String.IsNullOrEmpty(problem.Description)) { sb.Replace("@StoryQuestion", ""); } 
+            else { sb.Replace("@StoryQuestion", GetText(problem.Description)); }
             
             if (String.IsNullOrEmpty(problem.ProblemSource)) { sb.Replace("@ProblemSource", ""); }
             else { sb.Replace("@ProblemSource", problem.ProblemSource); }
@@ -331,7 +331,7 @@ public class ReportFormatter
             sb.Replace("@Role", character.Role);
             sb.Replace("@StoryRole", character.StoryRole);
             sb.Replace("@Archetype", character.Archetype);
-            sb.Replace("@CharacterSketch", GetText(character.CharacterSketch));
+            sb.Replace("@CharacterSketch", GetText(character.Description));
             //Physical section
             sb.Replace("@Age", character.Age);
             sb.Replace("@Sex", character.Sex);
@@ -417,7 +417,7 @@ public class ReportFormatter
             sb.Replace("@Weather", setting.Weather);
             sb.Replace("@Temperature", setting.Temperature);
             sb.Replace("@Props", setting.Props);
-            sb.Replace("@Summary", GetText(setting.Summary));
+            sb.Replace("@Summary", GetText(setting.Description));
             sb.Replace("@Sights", GetText(setting.Sights));
             sb.Replace("@Sounds", GetText(setting.Sounds));
             sb.Replace("@Touch", GetText(setting.Touch));
@@ -471,7 +471,7 @@ public class ReportFormatter
                 sb.Clear();
             }
 
-            sb.Replace("@Remarks", GetText(scene.Remarks));
+            sb.Replace("@Remarks", GetText(scene.Description));
             //DEVELOPMENT SECTION
             if (line.Contains("@PurposeOfScene"))
             {
@@ -572,7 +572,7 @@ public class ReportFormatter
         {
             StringBuilder sb = new(line);
             sb.Replace("@Name", folder.Name);
-            sb.Replace("@Notes", GetText(folder.Notes));
+            sb.Replace("@Notes", GetText(folder.Description));
             doc.AddText(sb.ToString());  //,format);
             doc.AddNewLine();
         }
@@ -590,7 +590,7 @@ public class ReportFormatter
         {
             StringBuilder sb = new(line);
             sb.Replace("@Name", section.Name);
-            sb.Replace("@Notes", GetText(section.Notes));
+            sb.Replace("@Notes", GetText(section.Description));
             doc.AddText(sb.ToString()); // , format);
             doc.AddNewLine();
         }
@@ -623,7 +623,7 @@ public class ReportFormatter
                     sb.Replace("@Synopsis", $"[{scene.Name}] {scene.Description}");
                     doc.AddText(sb.ToString());
                     doc.AddNewLine();
-                    doc.AddText(scene.Remarks);
+                    doc.AddText(scene.Description);
                     doc.AddNewLine();
                 }
 

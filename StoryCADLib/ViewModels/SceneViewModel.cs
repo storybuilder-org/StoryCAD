@@ -162,14 +162,6 @@ public class SceneViewModel : ObservableRecipient, INavigable, ISaveable
         set => SetProperty(ref _characterList, value);
     }
 
-    // The Scene tab's Scene Sketch 
-    private string _remarks;
-    public string Remarks
-    {
-        get => _remarks;
-        set => SetProperty(ref _remarks, value);
-    }
-
     // Scene development data (from Lisa Cron's Story Genius)
     private ObservableCollection<StringSelection> _scenePurposes;
     public ObservableCollection<StringSelection> ScenePurposes
@@ -412,7 +404,7 @@ public class SceneViewModel : ObservableRecipient, INavigable, ISaveable
         Name = Model.Name;
         if (Name.Equals("New Scene"))
             IsTextBoxFocused = true;
-        Description = Model.Description;
+        Description = Model.SceneDescription;
         Date = Model.Date;
         Time = Model.Time;
         Setting = Model.Setting;
@@ -455,7 +447,7 @@ public class SceneViewModel : ObservableRecipient, INavigable, ISaveable
         Outcome = Model.Outcome;
         Emotion = Model.Emotion;
         NewGoal = Model.NewGoal;
-        Remarks = Model.Remarks;
+        Description = Model.SceneDescription;
         Events = Model.Events;
         Consequences = Model.Consequences;
         Significance = Model.Significance;
@@ -515,7 +507,7 @@ public class SceneViewModel : ObservableRecipient, INavigable, ISaveable
         // Story.Uuid is read-only and cannot be assigned
         Model.Name = Name;
         IsTextBoxFocused = false;
-        Model.Description = Description;
+        Model.SceneDescription = Description;
         Model.ViewpointCharacter = ViewpointCharacter;
         Model.Date = Date;
         Model.Time = Time;
@@ -541,7 +533,7 @@ public class SceneViewModel : ObservableRecipient, INavigable, ISaveable
         Model.NewGoal = NewGoal;
 
         // Write RTF files
-        Model.Remarks = Remarks;
+        Model.SceneDescription = Description;
         Model.Events = Events;
         Model.Consequences = Consequences;
         Model.Significance = Significance;
@@ -708,7 +700,7 @@ public class SceneViewModel : ObservableRecipient, INavigable, ISaveable
         ViewpointCharacter = Guid.Empty;
         ScenePurposes = new ObservableCollection<StringSelection>();
         ValueExchange = string.Empty;
-        Remarks = string.Empty;
+        Description = string.Empty;
         Protagonist = Guid.Empty;
         ProtagEmotion = string.Empty;
         ProtagGoal = string.Empty;

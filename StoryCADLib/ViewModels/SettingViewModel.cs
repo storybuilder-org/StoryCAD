@@ -105,11 +105,12 @@ public class SettingViewModel : ObservableRecipient, INavigable, ISaveable
         set => SetProperty(ref _props, value);
     }
 
-    private string _summary;
-    public string Summary
+    // Description property (migrated from Summary)
+    private string _description;
+    public string Description
     {
-        get => _summary;
-        set => SetProperty(ref _summary, value);
+        get => _description;
+        set => SetProperty(ref _description, value);
     }
 
     // Setting Sense data
@@ -201,7 +202,7 @@ public class SettingViewModel : ObservableRecipient, INavigable, ISaveable
         Weather = Model.Weather;
         Temperature = Model.Temperature;
         Props = Model.Props;
-        Summary = Model.Summary;
+        Description = Model.Description;
         Sights = Model.Sights;
         Sounds = Model.Sounds;
         Touch = Model.Touch;
@@ -227,7 +228,7 @@ public class SettingViewModel : ObservableRecipient, INavigable, ISaveable
             Model.Props = Props;
 
             //Write RTF files
-            Model.Summary = Summary;
+            Model.Description = Description;
             Model.Sights = Sights;
             Model.Sounds = Sounds;
             Model.Touch = Touch;
@@ -274,7 +275,7 @@ public class SettingViewModel : ObservableRecipient, INavigable, ISaveable
         Weather = string.Empty;
         Temperature = string.Empty;
         Props = string.Empty;
-        Summary = string.Empty;
+        Description = string.Empty;
         Sights = string.Empty;
         Sounds = string.Empty;
         Touch = string.Empty;

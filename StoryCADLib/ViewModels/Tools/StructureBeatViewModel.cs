@@ -133,11 +133,11 @@ public class StructureBeatViewModel : ObservableObject
             {
                 if (Element.ElementType == StoryItemType.Problem)
                 {
-                    return ((ProblemModel)Element).StoryQuestion;
+                    return ((ProblemModel)Element).Description;
                 }
                 else if (Element.ElementType == StoryItemType.Scene)
                 {
-                    return ((SceneModel)Element).Remarks;
+                    return ((SceneModel)Element).Description;
                 }
             }
 

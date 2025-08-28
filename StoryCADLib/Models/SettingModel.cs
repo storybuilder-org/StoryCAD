@@ -93,17 +93,6 @@ public class SettingModel : StoryElement
 	}
 
 	[JsonIgnore]
-	private string _summary;
-
-	[JsonInclude]
-	[JsonPropertyName("Summary")]
-	public string Summary
-	{
-		get => _summary;
-		set => _summary = value;
-	}
-
-	[JsonIgnore]
 	private string _sights;
 
 	[JsonInclude]
@@ -170,7 +159,7 @@ public class SettingModel : StoryElement
         Weather = string.Empty;
         Temperature = string.Empty;
         Props = string.Empty;
-        Summary = string.Empty;
+        Description = string.Empty;
         Sights = string.Empty;
         Sounds = string.Empty;
         Touch = string.Empty;
@@ -187,7 +176,7 @@ public class SettingModel : StoryElement
 	    Weather = string.Empty;
 	    Temperature = string.Empty;
 	    Props = string.Empty;
-	    Summary = string.Empty;
+	    Description = string.Empty;
 	    Sights = string.Empty;
 	    Sounds = string.Empty;
 	    Touch = string.Empty;

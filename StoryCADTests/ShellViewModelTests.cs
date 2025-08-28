@@ -121,7 +121,7 @@ public class ShellTests
         
         // Set up the overview view model with test data
         overviewVM.Model = new StoryCAD.Models.OverviewModel("Test", testModel, overviewElement.Node);
-        overviewVM.StoryIdea = "Test Idea";
+        overviewVM.Description = "Test Idea";
         
         // Set the current page type
         shell.CurrentPageType = "OverviewPage";
@@ -130,7 +130,7 @@ public class ShellTests
         shell.SaveModel();
         
         // Assert - the model should have the changes
-        Assert.AreEqual("Test Idea", overviewVM.Model.StoryIdea);
+        Assert.AreEqual("Test Idea", overviewVM.Model.Description);
     }
 
     /// <summary>

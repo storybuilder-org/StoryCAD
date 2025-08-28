@@ -124,7 +124,7 @@ public class FileTests
 		//Overview Model Test
 		Assert.IsTrue(((OverviewModel)model.StoryElements[0]).Author == "jake shaw");
 		Assert.IsTrue(((OverviewModel)model.StoryElements[0]).DateCreated == "2025-01-03");
-		Assert.IsTrue(((OverviewModel)model.StoryElements[0]).StoryIdea.Contains("Test"));
+		Assert.IsTrue(((OverviewModel)model.StoryElements[0]).Description.Contains("Test"));
 		Assert.IsTrue(((OverviewModel)model.StoryElements[0]).Concept.Contains("Test"));
 		Assert.IsTrue(((OverviewModel)model.StoryElements[0]).Premise.Contains("Test"));
 		Assert.IsTrue(((OverviewModel)model.StoryElements[0]).StoryType == "Short Story");
@@ -145,7 +145,7 @@ public class FileTests
 			(FolderModel)model.StoryElements.First(se =>
 				se.ElementType == StoryItemType.Folder && !se.Name.Contains("Narrative"));
 		Assert.IsTrue(Fold.Name == "New Folder");
-		Assert.IsTrue(Fold.Notes.Contains("Test"));
+		Assert.IsTrue(Fold.Description.Contains("Test"));
 
 		//Problem Model Test
 		ProblemModel prob = (ProblemModel)model.StoryElements.First(se => se.ElementType == StoryItemType.Problem);
@@ -153,7 +153,7 @@ public class FileTests
 		Assert.IsTrue(prob.ConflictType == "Person vs. Machine");
 		Assert.IsTrue(prob.ProblemCategory == "Complication");
 		Assert.IsTrue(prob.Subject == "Abuse");
-		Assert.IsTrue(prob.StoryQuestion.Contains("Test"));
+		Assert.IsTrue(prob.Description.Contains("Test"));
 		Assert.IsTrue(prob.ProtGoal.Contains("Relief from a false acquisition"));
 		Assert.IsTrue(prob.ProtMotive.Contains("Beating a diagnosis or condition"));
 		Assert.IsTrue(prob.ProtConflict.Contains("Test"));
@@ -172,7 +172,7 @@ public class FileTests
 		Assert.IsTrue(Char.Role == "Adman");
 		Assert.IsTrue(Char.StoryRole == "Supporting Role");
 		Assert.IsTrue(Char.Archetype == "Shapeshifter");
-		Assert.IsTrue(Char.CharacterSketch.Contains("Test"));
+		Assert.IsTrue(Char.Description.Contains("Test"));
 		Assert.IsTrue(Char.Age == "Test");
 		Assert.IsTrue(Char.Sex == "Test");
 		Assert.IsTrue(Char.CharHeight == "Test");
@@ -221,7 +221,7 @@ public class FileTests
 		Assert.IsTrue(Sett.Weather == "Test");
 		Assert.IsTrue(Sett.Temperature == "Test");
 		Assert.IsTrue(Sett.Props == "Test");
-		Assert.IsTrue(Sett.Summary.Contains("Test"));
+		Assert.IsTrue(Sett.Description.Contains("Test"));
 		Assert.IsTrue(Sett.Sights.Contains("Test"));
 		Assert.IsTrue(Sett.Sounds.Contains("Test"));
 		Assert.IsTrue(Sett.Touch.Contains("Test"));
@@ -246,7 +246,7 @@ public class FileTests
 		
 		//Note Folder
 		FolderModel Note = (FolderModel)model.StoryElements.First(se => se.ElementType == StoryItemType.Notes);
-		Assert.IsTrue(Note.Notes.Contains("Test"));
+		Assert.IsTrue(Note.Description.Contains("Test"));
 
 		//Web Folder
 		WebModel Web = (WebModel)model.StoryElements.First(se => se.ElementType == StoryItemType.Web);
@@ -296,7 +296,7 @@ public class FileTests
         {
             DateCreated = DateTime.Today.ToString("yyyy-MM-dd"),
 			Author = "Jane Doe",
-			StoryIdea = "A thrilling adventure of self-discovery.",
+			Description = "A thrilling adventure of self-discovery.",
 			Concept = "Exploring the depths of human resilience.",
 			Premise = "What defines a hero when facing insurmountable odds?",
 			StoryType = "Adventure",
@@ -319,7 +319,7 @@ public class FileTests
 			Role = "Protagonist",
 			StoryRole = "Hero",
 			Archetype = "The Explorer",
-			CharacterSketch = "Brave and curious, with a knack for solving mysteries.",
+			Description = "Brave and curious, with a knack for solving mysteries.",
 			Age = "28",
 			Sex = "Female",
 			CharHeight = "5'7\"",
@@ -364,7 +364,7 @@ public class FileTests
 			ConflictType = "Person vs. Nature",
 			ProblemCategory = "Discovery",
 			Subject = "Ancient civilizations",
-			StoryQuestion = "Can Aria find the lost artifact before it falls into the wrong hands?",
+			Description = "Can Aria find the lost artifact before it falls into the wrong hands?",
 			ProtGoal = "Recover the artifact to preserve history.",
 			ProtMotive = "Passion for archaeology and discovery.",
 			ProtConflict = "Harsh environmental conditions.",

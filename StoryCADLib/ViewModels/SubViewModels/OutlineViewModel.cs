@@ -799,13 +799,13 @@ public class OutlineViewModel : ObservableRecipient
                     problem.Node.IsExpanded = true;
                     if (scenes.Count == 1)
                     {
-                        problem.StoryQuestion = "See Notes.";
+                        problem.Description = "See Notes.";
                         problem.Notes = scenes[0].Notes;
                     }
                     else foreach (PlotPatternScene scene in scenes)
                     {
                         SceneModel child = new(appState.CurrentDocument.Model, shellVm.RightTappedNode)
-                        { Name = scene.SceneTitle, Remarks = "See Notes.", Notes = scene.Notes };
+                        { Name = scene.SceneTitle, Description = "See Notes.", Notes = scene.Notes };
 
                         child.Node.IsSelected = true;
                     }
@@ -854,7 +854,7 @@ public class OutlineViewModel : ObservableRecipient
                 {
                     ProblemModel problem = new(situationModel.SituationName, appState.CurrentDocument.Model, shellVm.RightTappedNode)
                     {
-                        StoryQuestion = "See Notes.",
+                        Description = "See Notes.",
                         Notes = situationModel.Notes
                     };
 
@@ -866,7 +866,7 @@ public class OutlineViewModel : ObservableRecipient
                 {
                     SceneModel sceneVar = new(situationModel.SituationName, appState.CurrentDocument.Model, shellVm.RightTappedNode)
                     {
-                        Remarks = "See Notes.",
+                        Description = "See Notes.",
                         Notes = situationModel.Notes,
 
                     };
