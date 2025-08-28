@@ -1,23 +1,23 @@
-﻿using System.ComponentModel;
-using System.IO.Compression;
+﻿using System.IO.Compression;
+using System.Threading;
+using System.Timers;
 using Windows.Storage;
 using Microsoft.UI;
 using CommunityToolkit.Mvvm.Messaging;
 using StoryCAD.Services.Locking;
 using StoryCAD.Services.Messages;
-using System.Timers;
 
 namespace StoryCAD.Services.Backup;
 
 public class BackupService
 {
-    private BackgroundWorker timedBackupWorker;
-    private Timer backupTimer;
+    private System.Timers.Timer backupTimer;
 
     private readonly ILogService _logService;
     private readonly PreferenceService _preferenceService;
     private readonly AppState _appState;
     private readonly Windowing _windowing;
+    private readonly SemaphoreSlim _backupGate = new(1, 1);
 
     // Fields to preserve remaining time when paused
     private double defaultIntervalMs;
@@ -61,13 +61,6 @@ public class BackupService
 
         if (backupTimer == null)
         {
-            timedBackupWorker = new BackgroundWorker
-            {
-                WorkerSupportsCancellation = true,
-                WorkerReportsProgress = false
-            };
-            timedBackupWorker.DoWork += RunBackupTask;
-
             backupTimer = new System.Timers.Timer(defaultIntervalMs)
             {
                 AutoReset = true
@@ -123,38 +116,48 @@ public class BackupService
     #region Private Methods
 
     /// <summary>
-    /// The worker method that performs the backup. Blocks until the async backup completes to prevent overlap.
+    /// Performs the backup asynchronously with proper concurrency control.
     /// </summary>
-    private void RunBackupTask(object sender, DoWorkEventArgs e)
+    private async Task RunBackupTaskAsync()
     {
+        // Skip if a backup is already running
+        if (!await _backupGate.WaitAsync(0)) return;
+        
         try
         {
             _logService.Log(LogLevel.Info, "Starting timed backup task.");
-            BackupProject().GetAwaiter().GetResult();
+            await BackupProject();
             _logService.Log(LogLevel.Info, "Timed backup task finished.");
+            
+            // Indicate successful backup
+            _windowing.GlobalDispatcher.TryEnqueue(() => 
+            {
+                WeakReferenceMessenger.Default.Send(new IsBackupStatusMessage(true));
+            });
         }
         catch (Exception ex)
         {
             _logService.LogException(LogLevel.Error, ex, "Error in auto backup task.");
+            
+            // Indicate failed backup
+            _windowing.GlobalDispatcher.TryEnqueue(() => 
+            {
+                WeakReferenceMessenger.Default.Send(new IsBackupStatusMessage(false));
+            });
+        }
+        finally
+        {
+            _backupGate.Release();
         }
     }
 
     /// <summary>
-    /// Fired when the timer elapses. Launches the background backup worker.
+    /// Fired when the timer elapses. Performs the backup asynchronously.
     /// After the first tick on a resumed interval, resets the interval to the default.
     /// </summary>
-    private void BackupTimer_Elapsed(object source, ElapsedEventArgs e)
+    private async void BackupTimer_Elapsed(object source, ElapsedEventArgs e)
     {
-        // Update UI indicator on the UI thread
-        _windowing.GlobalDispatcher.TryEnqueue(() =>
-        {
-            // TODO: Circular dependency - BackupService and ShellViewModel
-            // Temporary workaround: Use service locator until architectural fix
-            Ioc.Default.GetRequiredService<ShellViewModel>().BackupStatusColor = Colors.Red;
-        });
-
-        if (!timedBackupWorker.IsBusy)
-            timedBackupWorker.RunWorkerAsync();
+        await RunBackupTaskAsync();
 
         // If we had resumed from a smaller interval, reset to default for subsequent ticks
         if (isResumed)
