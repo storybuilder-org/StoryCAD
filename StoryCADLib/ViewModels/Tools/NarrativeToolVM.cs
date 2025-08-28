@@ -1,7 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using StoryCAD.Services.Backup;
+using StoryCAD.Services.Dialogs;
 using StoryCAD.Services.Dialogs.Tools;
 using StoryCAD.Services.Locking;
 using StoryCAD.Services.Outline;
@@ -22,8 +22,12 @@ namespace StoryCAD.ViewModels.Tools;
 /// </summary>
 public class NarrativeToolVM: ObservableRecipient
 {
+    // TODO: ShellViewModel dependency is still required for CurrentViewType, CurrentNode, and RightTappedNode
+    // See ToolValidationService for details on future refactoring to move these to AppState
     private readonly ShellViewModel _shellVM;
     private readonly AppState _appState;
+    private readonly Windowing _windowing;
+    private readonly ToolValidationService _toolValidationService;
     private readonly ILogService _logger; 
     public StoryNodeItem SelectedNode; //Currently selected node
     public bool IsNarratorSelected = false;
@@ -62,14 +66,18 @@ public class NarrativeToolVM: ObservableRecipient
     public NarrativeToolVM() : this(
         Ioc.Default.GetRequiredService<ShellViewModel>(),
         Ioc.Default.GetRequiredService<AppState>(),
+        Ioc.Default.GetRequiredService<Windowing>(),
+        Ioc.Default.GetRequiredService<ToolValidationService>(),
         Ioc.Default.GetRequiredService<ILogService>())
     {
     }
 
-    public NarrativeToolVM(ShellViewModel shellVM, AppState appState, ILogService logger)
+    public NarrativeToolVM(ShellViewModel shellVM, AppState appState, Windowing windowing, ToolValidationService toolValidationService, ILogService logger)
     {
         _shellVM = shellVM;
         _appState = appState;
+        _windowing = windowing;
+        _toolValidationService = toolValidationService;
         _logger = logger;
         
         CreateFlyout = new RelayCommand(MakeSection);
@@ -83,11 +91,16 @@ public class NarrativeToolVM: ObservableRecipient
     /// </summary>
     public async Task OpenNarrativeTool()
     {
-        if (_shellVM.OutlineManager.VerifyToolUse(false, false))
+        // Use ToolValidationService instead of direct OutlineViewModel dependency
+        // Note: Still requires ShellViewModel for state, see ToolValidationService docs for future refactoring
+        if (_toolValidationService.VerifyToolUse(
+            _shellVM.CurrentViewType,
+            _shellVM.CurrentNode,
+            _shellVM.RightTappedNode,
+            _appState.CurrentDocument?.Model,
+            false, // explorerViewOnly
+            false)) // nodeRequired
         {
-            var autoSaveService = Ioc.Default.GetRequiredService<AutoSaveService>();
-            var backupService = Ioc.Default.GetRequiredService<BackupService>();
-
             using (var serializationLock = new SerializationLock(_logger))
             {
                 try
@@ -98,7 +111,7 @@ public class NarrativeToolVM: ObservableRecipient
                         PrimaryButtonText = "Done",
                         Content = new NarrativeTool()
                     };
-                    await Ioc.Default.GetService<Windowing>().ShowContentDialog(_dialog);
+                    await _windowing.ShowContentDialog(_dialog);
                 }
                 catch (Exception ex)
                 {

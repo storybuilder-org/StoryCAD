@@ -194,7 +194,7 @@ public class OutlineViewModel : ObservableRecipient
             }
 
             window.UpdateWindowTitle();
-            await new FileOpenVM().UpdateRecents(appState.CurrentDocument?.FilePath);
+            await Ioc.Default.GetRequiredService<FileOpenService>().UpdateRecents(appState.CurrentDocument?.FilePath);
 
             if (preferences.Model.TimedBackup)
             {
@@ -276,7 +276,7 @@ public class OutlineViewModel : ObservableRecipient
 
             outlineService.SetCurrentView(appState.CurrentDocument.Model, StoryViewType.ExplorerView);
 
-            await Ioc.Default.GetRequiredService<FileOpenVM>().UpdateRecents(appState.CurrentDocument.FilePath);
+            await Ioc.Default.GetRequiredService<FileOpenService>().UpdateRecents(appState.CurrentDocument.FilePath);
             outlineService.SetChanged(appState.CurrentDocument.Model, true);
             await SaveFile();
 
@@ -438,7 +438,7 @@ public class OutlineViewModel : ObservableRecipient
 
                         // Update window title and recent files
                         window.UpdateWindowTitle();
-                        await new FileOpenVM().UpdateRecents(appState.CurrentDocument.FilePath);
+                        await Ioc.Default.GetRequiredService<FileOpenService>().UpdateRecents(appState.CurrentDocument.FilePath);
 
                         // Indicate the model is now saved and unchanged
                         Messenger.Send(new IsChangedMessage(true));

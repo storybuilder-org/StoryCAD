@@ -9,9 +9,9 @@ using Windows.Graphics.Printing;
 using CommunityToolkit.Mvvm.Messaging;
 using StoryCAD.Services.Dialogs.Tools;
 using StoryCAD.ViewModels.SubViewModels;
-using StoryCAD.Services.Backup;
 using StoryCAD.Services.Locking;
 using StoryCAD.Services.Messages;
+using StoryCAD.Services;
 
 namespace StoryCAD.ViewModels.Tools;
 
@@ -24,7 +24,7 @@ public class PrintReportDialogVM : ObservableRecipient
     public IPrintDocumentSource PrintDocSource;
     private readonly AppState _appState;
     private readonly Windowing Window;
-    private readonly ShellViewModel _shellViewModel;
+    private readonly EditFlushService _editFlushService;
     private readonly ILogService _logService;
     private List<StackPanel> _printPreviewCache; //This stores a list of pages for print preview
 
@@ -32,16 +32,16 @@ public class PrintReportDialogVM : ObservableRecipient
     public PrintReportDialogVM() : this(
         Ioc.Default.GetRequiredService<AppState>(),
         Ioc.Default.GetRequiredService<Windowing>(),
-        Ioc.Default.GetRequiredService<ShellViewModel>(),
+        Ioc.Default.GetRequiredService<EditFlushService>(),
         Ioc.Default.GetRequiredService<ILogService>())
     {
     }
 
-    public PrintReportDialogVM(AppState appState, Windowing window, ShellViewModel shellViewModel, ILogService logService)
+    public PrintReportDialogVM(AppState appState, Windowing window, EditFlushService editFlushService, ILogService logService)
     {
         _appState = appState;
         Window = window;
-        _shellViewModel = shellViewModel;
+        _editFlushService = editFlushService;
         _logService = logService;
     }
 
@@ -180,11 +180,7 @@ public class PrintReportDialogVM : ObservableRecipient
 
     public async Task OpenPrintReportDialog()
     {
-        ShellViewModel ShellVM = _shellViewModel;
-        var autoSaveService = Ioc.Default.GetRequiredService<AutoSaveService>();
-        var backupService = Ioc.Default.GetRequiredService<BackupService>();
-        var logService = _logService;
-        using (var serializationLock = new SerializationLock(logService))
+        using (var serializationLock = new SerializationLock(_logService))
         {
             if (_appState.CurrentDocument.Model?.CurrentView == null)
             {
@@ -193,10 +189,10 @@ public class PrintReportDialogVM : ObservableRecipient
             }
 
             Messenger.Send(new StatusChangedMessage(new("Generate Print Reports executing", LogLevel.Info, true)));
-            ShellVM.SaveModel();
+            _editFlushService.FlushCurrentEdits();
 
             // Run reports dialog
-            var result = await Ioc.Default.GetService<Windowing>().ShowContentDialog(new()
+            var result = await Window.ShowContentDialog(new()
             {
                 Title = "Generate Reports",
                 Content = new PrintReportsDialog(this, _appState, _logService),
@@ -243,7 +239,7 @@ public class PrintReportDialogVM : ObservableRecipient
                         PrimaryButtonText = "Ok"
                     };
 
-                    await Ioc.Default.GetService<Windowing>().ShowContentDialog(Dialog, true);
+                    await Window.ShowContentDialog(Dialog, true);
                 });
 
             }

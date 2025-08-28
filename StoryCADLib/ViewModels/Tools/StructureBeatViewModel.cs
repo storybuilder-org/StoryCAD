@@ -22,6 +22,7 @@ public class StructureBeatViewModel : ObservableObject
 
 	public StructureBeatViewModel(string title, string description)
 	{
+		// Get services internally like StoryNodeItem does
 		Windowing = Ioc.Default.GetRequiredService<Windowing>();
 		ProblemViewModel = Ioc.Default.GetRequiredService<ProblemViewModel>();
 		_appState = Ioc.Default.GetRequiredService<AppState>();

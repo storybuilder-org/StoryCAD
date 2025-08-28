@@ -1,9 +1,12 @@
 ﻿using System.IO.Compression;
 using System.Reflection;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.UI.Xaml;
 using StoryCAD.DAL;
 using StoryCAD.Services;
+using StoryCAD.Services.Messages;
+using StoryCAD.Services.Outline;
 using StoryCAD.ViewModels.SubViewModels;
 using Windows.Storage;
 
@@ -20,9 +23,9 @@ namespace StoryCAD.ViewModels;
 public class FileOpenVM : ObservableRecipient
 {
 	private readonly ILogService _logger;
-    private readonly OutlineViewModel _outlineVm;
+    private readonly FileOpenService _fileOpenService;
+    private readonly FileCreateService _fileCreateService;
     private readonly PreferenceService _preferences;
-    private readonly ShellViewModel _shellViewModel;
     private readonly Windowing _windowing;
 
     #region Properties
@@ -232,19 +235,19 @@ public class FileOpenVM : ObservableRecipient
     // Constructor for XAML compatibility - will be removed later
     public FileOpenVM() : this(
         Ioc.Default.GetRequiredService<ILogService>(),
-        Ioc.Default.GetRequiredService<OutlineViewModel>(),
+        Ioc.Default.GetRequiredService<FileOpenService>(),
+        Ioc.Default.GetRequiredService<FileCreateService>(),
         Ioc.Default.GetRequiredService<PreferenceService>(),
-        Ioc.Default.GetRequiredService<ShellViewModel>(),
         Ioc.Default.GetRequiredService<Windowing>())
     {
     }
 
-    public FileOpenVM(ILogService logger, OutlineViewModel outlineVm, PreferenceService preferences, ShellViewModel shellViewModel, Windowing windowing)
+    public FileOpenVM(ILogService logger, FileOpenService fileOpenService, FileCreateService fileCreateService, PreferenceService preferences, Windowing windowing)
     {
         _logger = logger;
-        _outlineVm = outlineVm;
+        _fileOpenService = fileOpenService;
+        _fileCreateService = fileCreateService;
         _preferences = preferences;
-        _shellViewModel = shellViewModel;
         _windowing = windowing;
         
         SelectedRecentIndex = -1;
@@ -280,7 +283,7 @@ public class FileOpenVM : ObservableRecipient
         await File.WriteAllTextAsync(filePath, content);
 
         //Open sample
-        await Ioc.Default.GetService<OutlineViewModel>()!.OpenFile(filePath);
+        await _fileOpenService.OpenFile(filePath);
         return filePath;
     }
 
@@ -291,7 +294,7 @@ public class FileOpenVM : ObservableRecipient
     public async void LoadStoryFromFile()
     {
         Close();
-        await _outlineVm.OpenFile();
+        await _fileOpenService.OpenFile();
     }
 
 
@@ -300,24 +303,7 @@ public class FileOpenVM : ObservableRecipient
     /// </summary>
     public async Task UpdateRecents(string path)
     {
-        //If file is in list, remove it
-        if (_preferences.Model.RecentFiles.Contains(path))
-        {
-            _preferences.Model.RecentFiles.Remove(path);
-        }
-
-        //Add to top of list.
-        _preferences.Model.RecentFiles.Insert(0, path);
-
-        //Cap at 25.
-        if (_preferences.Model.RecentFiles.Count > 25)
-        {
-            _preferences.Model.RecentFiles = _preferences.Model.RecentFiles.Take(25).ToList();
-        }
-
-        //Persist.
-        PreferencesIo loader = new();
-        await loader.WritePreferences(_preferences.Model);
+        await _fileOpenService.UpdateRecents(path);
     }
 
     /// <summary>
@@ -364,7 +350,7 @@ public class FileOpenVM : ObservableRecipient
                 if (SelectedRecentIndex != -1)
                 {
                     filePath = _preferences.Model.RecentFiles[SelectedRecentIndex];
-                    await _outlineVm.OpenFile(filePath);
+                    await _fileOpenService.OpenFile(filePath);
                 }
                 else{ return; }
                 break;
@@ -409,8 +395,8 @@ public class FileOpenVM : ObservableRecipient
         if (StoryIO.IsValidPath(filePath))
         {
             _preferences.Model.LastSelectedTemplate = SelectedTemplateIndex;
-            await _outlineVm.CreateFile(this);
-            return filePath;
+            string createdPath = await _fileCreateService.CreateFile(OutlineFolder, OutlineName, SelectedTemplateIndex);
+            return createdPath ?? "";
         }
 
         return "";
@@ -441,23 +427,21 @@ public class FileOpenVM : ObservableRecipient
             {
                 _logger.Log(LogLevel.Warn, $"Invalid backup {zipPath}, {files.Length} files found");
                 _windowing.GlobalDispatcher.TryEnqueue(() =>
-                    _shellViewModel.ShowMessage(
-                        LogLevel.Warn,
+                    Messenger.Send(new StatusChangedMessage(new(
                         "Backup archive is invalid or contains multiple files.",
-                        false));
+                        LogLevel.Warn))));
                 return;
             }
 
             //Open backup
-            await _outlineVm.OpenFile(files[0]);
+            await _fileOpenService.OpenFile(files[0]);
         }
         catch (Exception ex)
         {
-            Ioc.Default.GetRequiredService<Windowing>().GlobalDispatcher.TryEnqueue(() =>
-                Ioc.Default.GetRequiredService<ShellViewModel>().ShowMessage(
-                    LogLevel.Error,
+            _windowing.GlobalDispatcher.TryEnqueue(() =>
+                Messenger.Send(new StatusChangedMessage(new(
                     "Failed to open backup. The file may be corrupt.",
-                    false));
+                    LogLevel.Error))));
             _logger.LogException(LogLevel.Error, ex, $"Error opening backup {zipPath}");
         }
 

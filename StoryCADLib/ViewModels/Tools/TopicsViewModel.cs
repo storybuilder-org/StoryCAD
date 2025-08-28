@@ -8,7 +8,7 @@ namespace StoryCAD.ViewModels.Tools;
 
 public class TopicsViewModel : ObservableRecipient
 {
-    private readonly ToolsData ToolSource = Ioc.Default.GetService<ToolsData>();
+    private readonly ToolsData _toolsData;
 
     #region Fields
 
@@ -57,7 +57,7 @@ public class TopicsViewModel : ObservableRecipient
     {
         if (topicName == null || topicName.Equals(string.Empty)) { return; } //Can't load topics that are null or empty.
 
-        _topic = Ioc.Default.GetService<ToolsData>().TopicsSource[TopicName];
+        _topic = _toolsData.TopicsSource[TopicName];
         switch (_topic.TopicType)
         {
             case TopicTypeEnum.Notepad:
@@ -108,14 +108,21 @@ public class TopicsViewModel : ObservableRecipient
     #endregion
 
     #region Constructor
-    public TopicsViewModel()
+
+    // Constructor for XAML compatibility - will be removed later
+    public TopicsViewModel() : this(Ioc.Default.GetRequiredService<ToolsData>())
     {
-        TopicNames = new ObservableCollection<string>(ToolSource.TopicsSource.Keys);
+    }
+
+    public TopicsViewModel(ToolsData toolsData)
+    {
+        _toolsData = toolsData;
+        TopicNames = new ObservableCollection<string>(_toolsData.TopicsSource.Keys);
         SubTopicNames = new ObservableCollection<string>();
         SubTopicNotes = new ObservableCollection<string>();
 
         TopicName = TopicNames[0];
-        _topic = ToolSource.TopicsSource[TopicName];
+        _topic = _toolsData.TopicsSource[TopicName];
         TopicName = _topic.TopicName;
     }
     #endregion

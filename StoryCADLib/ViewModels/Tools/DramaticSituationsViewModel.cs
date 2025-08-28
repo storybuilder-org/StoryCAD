@@ -56,9 +56,17 @@ public class DramaticSituationsViewModel : ObservableRecipient
 
     #region Constructor
 
-    public DramaticSituationsViewModel()
+    private readonly ToolsData _toolsData;
+
+    // Constructor for XAML compatibility - will be removed later
+    public DramaticSituationsViewModel() : this(Ioc.Default.GetRequiredService<ToolsData>())
     {
-        _situations = Ioc.Default.GetRequiredService<ToolsData>().DramaticSituationsSource;
+    }
+
+    public DramaticSituationsViewModel(ToolsData toolsData)
+    {
+        _toolsData = toolsData;
+        _situations = _toolsData.DramaticSituationsSource;
         SituationsSource = new ObservableCollection<string>(_situations.Keys);
     }
     #endregion

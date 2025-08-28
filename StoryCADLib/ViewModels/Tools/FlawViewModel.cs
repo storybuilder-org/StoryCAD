@@ -30,9 +30,18 @@ public class FlawViewModel : ObservableRecipient
     #endregion
 
     #region Constructor
-    public FlawViewModel()
+
+    private readonly ListData _listData;
+
+    // Constructor for XAML compatibility - will be removed later
+    public FlawViewModel() : this(Ioc.Default.GetRequiredService<ListData>())
     {
-        Dictionary<string, ObservableCollection<string>> _lists = Ioc.Default.GetService<ListData>().ListControlSource;
+    }
+
+    public FlawViewModel(ListData listData)
+    {
+        _listData = listData;
+        Dictionary<string, ObservableCollection<string>> _lists = _listData.ListControlSource;
 
         WoundCategoryList = _lists["WoundCategory"];
         WoundSummaryList = _lists["Wound"];

@@ -20,10 +20,18 @@ public class NewProjectViewModel : ObservableRecipient
         set => SetProperty(ref _parentPathName, value);
     }
 
-    public NewProjectViewModel()
+    private readonly PreferenceService _preferenceService;
+
+    // Constructor for XAML compatibility - will be removed later
+    public NewProjectViewModel() : this(Ioc.Default.GetRequiredService<PreferenceService>())
     {
+    }
+
+    public NewProjectViewModel(PreferenceService preferenceService)
+    {
+        _preferenceService = preferenceService;
         ProjectName = string.Empty;
-        PreferencesModel _prefs = Ioc.Default.GetRequiredService<PreferenceService>().Model;
+        PreferencesModel _prefs = _preferenceService.Model;
         ParentPathName = _prefs.ProjectDirectory;
     }
 }
