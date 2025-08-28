@@ -16,11 +16,13 @@ public sealed partial class SaveAsDialog : Page
     {
         ProjectPathName.IsReadOnly = false;
         // may throw error if invalid folder location
-        SaveAsVm.ParentFolder = (await Ioc.Default.GetService<Windowing>().ShowFolderPicker()).Path;
-
-        if (SaveAsVm.ParentFolder != null)
+        var folderResult = await Ioc.Default.GetService<Windowing>().ShowFolderPicker();
+        
+        if (folderResult != null)
         {
-            ProjectPathName.IsReadOnly = true;
+            SaveAsVm.ParentFolder = folderResult.Path;
         }
+        // Always restore read-only state after picker closes
+        ProjectPathName.IsReadOnly = true;
     }
 }

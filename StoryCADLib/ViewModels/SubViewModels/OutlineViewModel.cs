@@ -60,20 +60,7 @@ public class OutlineViewModel : ObservableRecipient
     // so we cannot inject them here without creating a circular dependency.
     // The lazy-loading properties below will fail if accessed before the services are constructed.
     // Long-term fix: Break the dependency by having services use messaging or move shared data to AppState.
-    private AutoSaveService _autoSaveService;
-
-    private AutoSaveService autoSaveService
-    {
-        get
-        {
-            if (_autoSaveService == null)
-            {
-                _autoSaveService = Ioc.Default.GetRequiredService<AutoSaveService>();
-            }
-
-            return _autoSaveService;
-        }
-    }
+    private readonly AutoSaveService _autoSaveService;
 
     private BackupService _backupService;
 
@@ -203,7 +190,7 @@ public class OutlineViewModel : ObservableRecipient
 
             if (preferences.Model.AutoSave)
             {
-                shellVm._autoSaveService.StartAutoSave();
+                _autoSaveService.StartAutoSave();
             }
 
             logger.Log(LogLevel.Info, $"Opened project {appState.CurrentDocument?.FilePath}");
@@ -340,10 +327,10 @@ public class OutlineViewModel : ObservableRecipient
                 return;
             }
 
-            if (appState.CurrentDocument?.Model?.StoryElements.Count == 0)
+            if (appState.CurrentDocument?.Model == null || appState.CurrentDocument.Model.StoryElements.Count == 0)
             {
                 Messenger.Send(new StatusChangedMessage(new("You need to open a story first!", LogLevel.Info)));
-                logger.Log(LogLevel.Info, $"{msg} cancelled (StoryModel.ProjectFile was null)");
+                logger.Log(LogLevel.Info, $"{msg} cancelled (CurrentDocument or Model was null)");
                 return;
             }
 
@@ -362,7 +349,7 @@ public class OutlineViewModel : ObservableRecipient
                 Messenger.Send(new StatusChangedMessage(new($"{msg} failed", LogLevel.Error)));
             }
 
-            shellVm._autoSaveService.StartAutoSave();
+            _autoSaveService.StartAutoSave();
         }
     }
 
@@ -486,6 +473,9 @@ public class OutlineViewModel : ObservableRecipient
         Messenger.Send(new StatusChangedMessage(new("Closing project", LogLevel.Info, true)));
         using (var serializationLock = new SerializationLock(logger))
         {
+            // Stop auto-save and wait for any in-progress save to complete
+            await _autoSaveService.StopAutoSaveAndWaitAsync();
+            
             if (appState.CurrentDocument?.Model?.Changed == true && !appState.Headless)
             {
                 ContentDialog warning = new()
@@ -498,6 +488,10 @@ public class OutlineViewModel : ObservableRecipient
                 {
                     _editFlushService.FlushCurrentEdits();
                     await outlineService.WriteModel(appState.CurrentDocument.Model, appState.CurrentDocument.FilePath);
+                    
+                    // Mark the model as saved and update UI
+                    outlineService.SetChanged(appState.CurrentDocument.Model, false);
+                    Messenger.Send(new IsChangedMessage(false));
                 }
             }
 
@@ -1346,7 +1340,8 @@ public class OutlineViewModel : ObservableRecipient
 
     public OutlineViewModel(ILogService logService, PreferenceService preferenceService,
         Windowing windowing, OutlineService outlineService, AppState appState,
-        SearchService searchService, BackendService backendService, EditFlushService editFlushService)
+        SearchService searchService, BackendService backendService, EditFlushService editFlushService,
+        AutoSaveService autoSaveService)
     {
         logger = logService;
         preferences = preferenceService;
@@ -1356,6 +1351,7 @@ public class OutlineViewModel : ObservableRecipient
         this.searchService = searchService;
         _backendService = backendService;
         _editFlushService = editFlushService;
+        _autoSaveService = autoSaveService;
     }
 
     #endregion

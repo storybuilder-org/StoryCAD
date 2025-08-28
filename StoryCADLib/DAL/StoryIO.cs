@@ -31,7 +31,7 @@ public class StoryIO
         Directory.CreateDirectory(parent);
 
         StorageFolder folder = await StorageFolder.GetFolderFromPathAsync(parent);
-        var output = await folder.CreateFileAsync(Path.GetFileName(output_path), CreationCollisionOption.OpenIfExists);
+        var output = await folder.CreateFileAsync(Path.GetFileName(output_path), CreationCollisionOption.ReplaceExisting);
 		_logService.Log(LogLevel.Info, $"Saving Model to disk as {output_path}  " + 
 				$"Elements: {model.StoryElements.StoryElementGuids.Count}");
 

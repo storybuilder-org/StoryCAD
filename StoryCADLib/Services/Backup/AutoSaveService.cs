@@ -6,7 +6,7 @@ using StoryCAD.Services.Locking;
 using StoryCAD.Services.Messages;
 using StoryCAD.Services.Outline;
 using System;
-using System.ComponentModel;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;  // <-- use non-UI timer
 
@@ -21,8 +21,8 @@ namespace StoryCAD.Services.Backup
         private readonly Windowing _windowing;   // <-- Windowing (mockable), not Window
         private readonly ILogService _logger;
 
-        private readonly Timer _autoSaveTimer;              // System.Timers.Timer
-        private readonly BackgroundWorker _autoSaveWorker;
+        private readonly System.Timers.Timer _autoSaveTimer;              // System.Timers.Timer
+        private readonly SemaphoreSlim _autoSaveGate = new(1, 1);
 
         public AutoSaveService(
             AppState appState,
@@ -40,15 +40,12 @@ namespace StoryCAD.Services.Backup
             _logger = logger;
 
             // Interval is milliseconds for System.Timers.Timer
-            _autoSaveTimer = new Timer(_preferenceService.Model.AutoSaveInterval * 1000.0)
+            _autoSaveTimer = new System.Timers.Timer(_preferenceService.Model.AutoSaveInterval * 1000.0)
             {
                 AutoReset = true,
                 Enabled = false
             };
             _autoSaveTimer.Elapsed += AutoSaveTimer_Elapsed;
-
-            _autoSaveWorker = new BackgroundWorker();
-            _autoSaveWorker.DoWork += RunAutoSaveTask;
         }
 
         // original API names
@@ -56,24 +53,32 @@ namespace StoryCAD.Services.Backup
         public void StopAutoSave()  => _autoSaveTimer.Stop();
         public bool IsRunning => _autoSaveTimer.Enabled;
         public bool IsStarted => _autoSaveTimer.Enabled;
-
-        private void AutoSaveTimer_Elapsed(object? sender, ElapsedEventArgs e)
+        
+        /// <summary>
+        /// Stops auto-save and waits for any in-progress save to complete
+        /// </summary>
+        public async Task StopAutoSaveAndWaitAsync()
         {
-            if (!_autoSaveWorker.IsBusy)
-            {
-                _autoSaveWorker.RunWorkerAsync();
-            }
+            _autoSaveTimer.Stop();
+            // Wait for any in-progress save to complete
+            await _autoSaveGate.WaitAsync();
+            _autoSaveGate.Release();
         }
 
-        private void RunAutoSaveTask(object? sender, DoWorkEventArgs e)
+        private async void AutoSaveTimer_Elapsed(object? sender, ElapsedEventArgs e)
         {
+            if (!await _autoSaveGate.WaitAsync(0)) return; // avoid overlap
             try
             {
-                AutoSaveProjectAsync().GetAwaiter().GetResult();
+                await AutoSaveProjectAsync();               // <-- no GetAwaiter().GetResult()
             }
             catch (Exception ex)
             {
                 _logger.LogException(LogLevel.Error, ex, "Error in AutoSave task.");
+            }
+            finally
+            {
+                _autoSaveGate.Release();
             }
         }
 
@@ -116,7 +121,6 @@ namespace StoryCAD.Services.Backup
         {
             _autoSaveTimer.Stop();
             _autoSaveTimer.Elapsed -= AutoSaveTimer_Elapsed;
-            _autoSaveWorker.DoWork -= RunAutoSaveTask;
             _autoSaveTimer.Dispose();
         }
     }
