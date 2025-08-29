@@ -17,39 +17,19 @@ public sealed partial class PreferencesInitialization
     public PreferencesInitialization() { InitializeComponent(); }
 
     /// <summary>
-    /// This is called when the browse button next to Project Path
-    /// once clicked it opens a folder picker. If canceled, the folder
-    /// will be null and nothing will happen.
-    /// 
-    /// If a folder is selected it will set the VM and UI versions
-    /// of the variables to ensure they are in sync.
+    /// Called when a project path is selected from the browse control
     /// </summary>
-    private async void SetProjectPath(object sender, RoutedEventArgs e)
+    private void OnProjectPathSelected(object sender, string path)
     {
-        StorageFolder folder = await Ioc.Default.GetService<Windowing>().ShowFolderPicker();
-        if (folder != null)
-        {
-            _initVM.ProjectDir = folder.Path;
-        }
+        _initVM.ProjectDir = path;
     }
 
     /// <summary>
-    /// This is called when the browse button next to Project Path
-    /// once clicked it opens a folder picker. If canceled the folder
-    /// will be null and nothing will happen.
-    /// 
-    /// If a folder is selected it will set the VM and UI versions of
-    /// the variables to make sure they are in sync.
+    /// Called when a backup path is selected from the browse control
     /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="e"></param>
-    private async void SetBackupPath(object sender, RoutedEventArgs e)
+    private void OnBackupPathSelected(object sender, string path)
     {
-        StorageFolder folder = await Ioc.Default.GetRequiredService<Windowing>().ShowFolderPicker();
-        if (folder != null)
-        {
-            _initVM.BackupDir = folder.Path;
-        }
+        _initVM.BackupDir = path;
     }
 
     /// <summary>
