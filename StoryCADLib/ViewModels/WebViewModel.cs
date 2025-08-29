@@ -30,7 +30,6 @@ public class WebViewModel : ObservableRecipient, INavigable, ISaveable
         GoForwardCommand = new RelayCommand(ExecuteGoForward, () => true);
     }
 
-    ///TODO: Make sure queries are async
     #region Fields
 
     private bool _changed; // this story element has changed
@@ -72,7 +71,7 @@ public class WebViewModel : ObservableRecipient, INavigable, ISaveable
     }
 
     /// <summary>
-    /// This is the whats shown on the UI.
+    /// This is the what's shown on the UI.
     /// </summary>
     private string _query = "https://google.com/";
     public string Query

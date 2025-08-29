@@ -4,24 +4,25 @@ using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
+using StoryCAD.Collaborator.ViewModels;
 using StoryCAD.DAL;
+using StoryCAD.Models;
+using StoryCAD.Services;
 using StoryCAD.Services.Backup;
 using StoryCAD.Services.Collaborator;
 using StoryCAD.Services.Dialogs;
 using StoryCAD.Services.Dialogs.Tools;
 using StoryCAD.Services.Json;
+using StoryCAD.Services.Locking;
 using StoryCAD.Services.Messages;
 using StoryCAD.Services.Navigation;
+using StoryCAD.Services.Outline;
 using StoryCAD.Services.Search;
+using StoryCAD.ViewModels.SubViewModels;
 using StoryCAD.ViewModels.Tools;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using StoryCAD.Services;
 using WinUIEx;
-using StoryCAD.Collaborator.ViewModels;
-using StoryCAD.Services.Outline;
-using StoryCAD.ViewModels.SubViewModels;
-using StoryCAD.Services.Locking;
 
 namespace StoryCAD.ViewModels;
 
@@ -324,7 +325,7 @@ public class ShellViewModel : ObservableRecipient
 			PrimaryButtonText = "Create Backup",
 			SecondaryButtonText = "Cancel",
 			DefaultButton = ContentDialogButton.Primary,
-			Content = new BackupNow()
+			Content = new BackupNow(Path.GetFileNameWithoutExtension(State.CurrentDocument?.FilePath))
 		});
 
 		//Check result

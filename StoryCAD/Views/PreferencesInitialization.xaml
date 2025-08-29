@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:controls="using:StoryCAD.Controls"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
@@ -28,15 +29,22 @@
                     <TextBox PlaceholderText="What's your first name?" Margin="15" VerticalAlignment="Center" Text="{x:Bind _initVM.Preferences.FirstName, Mode=TwoWay}"/>
                     <TextBox PlaceholderText="What's your surname?" Margin="15" VerticalAlignment="Center" Text="{x:Bind _initVM.Preferences.LastName, Mode=TwoWay}"/>
                     <TextBox PlaceholderText="What's your email address?" IsSpellCheckEnabled="False"  Margin="15" VerticalAlignment="Center"  Text="{x:Bind _initVM.Preferences.Email, Mode=TwoWay}"/>
-                    <StackPanel Orientation="Horizontal">
-                        <TextBox IsReadOnly="True" PlaceholderText="Select a folder to hold your story outlines." Name="ProjPath" Margin="15" VerticalAlignment="Center" Width="435" HorizontalAlignment="Left" 
-                                 Text="{x:Bind _initVM.ProjectDir, Mode=TwoWay}"/>
-                        <Button Content="Browse" HorizontalAlignment="Center" Click="SetProjectPath"/>
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal">
-                        <TextBox IsReadOnly="true" PlaceholderText="Select a folder to hold your outline backups." Name="BackPath" Margin="15" VerticalAlignment="Center" Width="435" HorizontalAlignment="Left" Text="{x:Bind _initVM.BackupDir, Mode=TwoWay}"/>
-                        <Button Content="Browse" HorizontalAlignment="Center" Click="SetBackupPath"/>
-                    </StackPanel>
+                    <controls:BrowseTextBox
+                        PlaceholderText="Select a folder to hold your story outlines."
+                        Path="{x:Bind _initVM.ProjectDir, Mode=TwoWay}"
+                        TextBoxWidth="435"
+                        BrowseMode="Folder"
+                        ButtonVerticalAlignment="Center"
+                        ButtonMargin="0,0,0,0"
+                        PathSelected="OnProjectPathSelected"/>
+                    <controls:BrowseTextBox
+                        PlaceholderText="Select a folder to hold your outline backups."
+                        Path="{x:Bind _initVM.BackupDir, Mode=TwoWay}"
+                        TextBoxWidth="435"
+                        BrowseMode="Folder"
+                        ButtonVerticalAlignment="Center"
+                        ButtonMargin="0,0,0,0"
+                        PathSelected="OnBackupPathSelected"/>
                 </StackPanel>
 
                 <StackPanel Grid.Row="2">

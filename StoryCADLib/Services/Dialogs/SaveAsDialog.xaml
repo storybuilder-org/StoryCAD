@@ -4,14 +4,21 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:controls="using:StoryCAD.Controls"
     mc:Ignorable="d">
 
     <StackPanel Padding="14,14,14,24">
         <TextBox x:Name="ProjectName" Margin="10"  x:FieldModifier="public" Width="400"
                  HorizontalAlignment="Left" Header="New project Name" Text="{x:Bind SaveAsVm.ProjectName, Mode=TwoWay}" />
-        <StackPanel Orientation="Horizontal" Margin="14">
-            <TextBox x:Name="ProjectPathName" Header="Parent Folder Path" Width="330" Text="{x:Bind SaveAsVm.ParentFolder, Mode=TwoWay}" Margin="0,0,5,0"/>
-            <Button Content="Browse" Click="OnBrowse" VerticalAlignment="Bottom"/>
-        </StackPanel>
+        <controls:BrowseTextBox
+            x:Name="ProjectPathBrowse"
+            Margin="14"
+            Header="Parent Folder Path"
+            Path="{x:Bind SaveAsVm.ParentFolder, Mode=TwoWay}"
+            TextBoxWidth="330"
+            BrowseMode="Folder"
+            ButtonVerticalAlignment="Bottom"
+            ButtonMargin="0,0,0,0"
+            PathSelected="OnPathSelected"/>
     </StackPanel>
 </Page>

@@ -74,7 +74,6 @@ public class SceneModel : StoryElement
 
 	[JsonIgnore]
 	private List<Guid> _castMembers;
-	//TODO: Convert to GUIDs	
 	[JsonInclude]
 	[JsonPropertyName("CastMembers")]
 	public List<Guid> CastMembers
