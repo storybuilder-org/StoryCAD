@@ -142,7 +142,7 @@ jobs:
     - name: Move repacked StoryCADLib to Packages
       shell: pwsh
       run: |
-        Get-ChildItem -Path "${{ github.workspace }}\StoryCADLib\bin\Release" -Filter "StoryCADLib*.nupkg" |
+        Get-ChildItem -Path "${{ github.workspace }}\StoryCADLib\bin\x64\Release" -Filter "StoryCADLib*.nupkg" |
           Move-Item -Destination "${{ github.workspace }}\StoryCAD\Packages" -Force
 
     # ─── Help file & zipping ───────────────────────────────────────────────────
