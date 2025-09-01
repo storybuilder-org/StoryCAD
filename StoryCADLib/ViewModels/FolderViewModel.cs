@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
+using StoryCAD.Services;
 using StoryCAD.Services.Messages;
 using StoryCAD.Services.Navigation;
 
@@ -14,11 +15,11 @@ namespace StoryCAD.ViewModels;
 /// another Section as its parent. Sections are Chapters, Acts,
 /// etc.
 /// </summary>
-public class FolderViewModel : ObservableRecipient, INavigable
+public class FolderViewModel : ObservableRecipient, INavigable, ISaveable
 {
     #region Fields
 
-    private readonly LogService _logger;
+    private readonly ILogService _logger;
     private bool _changeable; // process property changes for this story element
     private bool _changed;    // this story element has changed
 
@@ -60,11 +61,12 @@ public class FolderViewModel : ObservableRecipient, INavigable
 
     // Folder data
 
-    private string _notes;
-    public string Notes
+    // Description property (migrated from Notes)
+    private string _description;
+    public string Description
     {
-        get => _notes;
-        set => SetProperty(ref _notes, value);
+        get => _description;
+        set => SetProperty(ref _description, value);
     }
 
     // The StoryModel is passed when FolderPage is navigated to
@@ -112,29 +114,35 @@ public class FolderViewModel : ObservableRecipient, INavigable
             IsTextBoxFocused = true;
         if (Name.Equals("New Section"))
             IsTextBoxFocused = true;
-        Notes = Model.Notes;
+        Description = Model.Description;
 
         _changeable = true;
     }
 
-    internal void SaveModel()
+    public void SaveModel()
     {
         // Story.Uuid is read-only; no need to save
         Model.Name = Name;
         IsTextBoxFocused = false;
 
         // Write RYG file
-        Model.Notes = Notes;
+        Model.Description = Description;
     }
 
     #endregion
 
     #region Constructor
 
-    public FolderViewModel()
+    // Constructor for XAML compatibility - will be removed later
+    public FolderViewModel() : this(
+        Ioc.Default.GetRequiredService<ILogService>())
     {
-        _logger = Ioc.Default.GetService<LogService>();
-        Notes = string.Empty;
+    }
+    
+    public FolderViewModel(ILogService logger)
+    {
+        _logger = logger;
+        Description = string.Empty;
         PropertyChanged += OnPropertyChanged;
     }
 

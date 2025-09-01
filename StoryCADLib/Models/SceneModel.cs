@@ -1,5 +1,4 @@
 ﻿using System.Text.Json.Serialization;
-using Windows.Data.Xml.Dom;
 
 namespace StoryCAD.Models;
 
@@ -8,14 +7,14 @@ public class SceneModel : StoryElement
 	#region Properties
 
 	[JsonIgnore]
-	private string _description;
+	private string _sceneDescription;
 
 	[JsonInclude]
 	[JsonPropertyName("Description")]
-	public string Description
+	public string SceneDescription
 	{
-		get => _description;
-		set => _description = value;
+		get => _sceneDescription;
+		set => _sceneDescription = value;
 	}
 
 	[JsonIgnore]
@@ -75,24 +74,12 @@ public class SceneModel : StoryElement
 
 	[JsonIgnore]
 	private List<Guid> _castMembers;
-	//TODO: Convert to GUIDs	
 	[JsonInclude]
 	[JsonPropertyName("CastMembers")]
 	public List<Guid> CastMembers
 	{
 		get => _castMembers;
 		set => _castMembers = value;
-	}
-
-	[JsonIgnore]
-	private string _remarks;
-
-	[JsonInclude]
-	[JsonPropertyName("Remarks")]
-	public string Remarks
-	{
-		get => _remarks;
-		set => _remarks = value;
 	}
 
 	[JsonIgnore]
@@ -300,13 +287,14 @@ public class SceneModel : StoryElement
 	#region Constructors
 	public SceneModel(StoryModel model, StoryNodeItem Node) : base("New Scene", StoryItemType.Scene, model, Node)
     {
+        SceneDescription = string.Empty;
         ViewpointCharacter = Guid.Empty;
         Date = string.Empty;
         Time = string.Empty;
         Setting = Guid.Empty;
         SceneType = string.Empty;
         CastMembers = new List<Guid>();
-        Remarks = string.Empty;
+        Description = string.Empty;
         ScenePurpose = new List<string>();
         ValueExchange = string.Empty;
         Protagonist = Guid.Empty;
@@ -330,13 +318,14 @@ public class SceneModel : StoryElement
     public SceneModel(string name, StoryModel model, StoryNodeItem Node) : base(name, StoryItemType.Scene, model, Node)
 
 	{
+	    SceneDescription = string.Empty;
 	    ViewpointCharacter = Guid.Empty;
 	    Date = string.Empty;
 	    Time = string.Empty;
 	    Setting = Guid.Empty;
 	    SceneType = string.Empty;
 	    CastMembers = new List<Guid>();
-	    Remarks = string.Empty;
+	    Description = string.Empty;
 	    ScenePurpose = new List<string>();
 	    ValueExchange = string.Empty;
 	    Protagonist = Guid.Empty;
@@ -357,34 +346,6 @@ public class SceneModel : StoryElement
 	    Notes = string.Empty;
     }
 
-	public SceneModel(IXmlNode xn, StoryModel model) : base(xn, model)
-    {
-        ViewpointCharacter = Guid.Empty;
-        Date = string.Empty;
-        Time = string.Empty;
-        Setting = Guid.Empty;
-        SceneType = string.Empty;
-        CastMembers = new List<Guid>();
-        Remarks = string.Empty;
-        ScenePurpose = new List<string>();
-        ValueExchange = string.Empty;
-        Protagonist = Guid.Empty;
-        ProtagEmotion = string.Empty;
-        ProtagGoal = string.Empty;
-        Antagonist = Guid.Empty;
-        AntagEmotion = string.Empty;
-        AntagGoal = string.Empty;
-        Opposition = string.Empty;
-        Outcome = string.Empty;
-        Emotion = string.Empty;
-        Events = string.Empty;
-        Consequences = string.Empty;
-        Significance = string.Empty;
-        Realization = string.Empty;
-        NewGoal = string.Empty;
-        Review = string.Empty;
-        Notes = string.Empty;
-    }
 
 	public SceneModel()
 	{

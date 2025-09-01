@@ -1,7 +1,6 @@
 ﻿using StoryCAD.ViewModels.Tools;
 using System.Collections.ObjectModel;
 using System.Text.Json.Serialization;
-using Windows.Data.Xml.Dom;
 
 namespace StoryCAD.Models;
 
@@ -62,18 +61,6 @@ public class ProblemModel : StoryElement
 		get => _problemSource;
 		set => _problemSource = value;
 	}
-
-	[JsonIgnore]
-	private string _storyQuestion;
-
-	[JsonInclude]
-	[JsonPropertyName("StoryQuestion")]
-	public string StoryQuestion
-	{
-		get => _storyQuestion;
-		set => _storyQuestion = value;
-	}
-
 	// Problem protagonist data
 
 	[JsonIgnore]
@@ -292,7 +279,7 @@ public class ProblemModel : StoryElement
         ProblemCategory = string.Empty;
         Subject = string.Empty;
         ProblemSource = string.Empty;
-        StoryQuestion = string.Empty;
+        Description = string.Empty;
         Protagonist = Guid.Empty;     // Protagonist Guid 
         ProtGoal = string.Empty;
         ProtMotive = string.Empty;
@@ -318,7 +305,7 @@ public class ProblemModel : StoryElement
         ProblemCategory = string.Empty;
         Subject = string.Empty;
         ProblemSource = string.Empty;
-        StoryQuestion = string.Empty;
+        Description = string.Empty;
         Protagonist = Guid.Empty;
         ProtGoal = string.Empty;
         ProtMotive = string.Empty;
@@ -336,31 +323,6 @@ public class ProblemModel : StoryElement
         StructureDescription = string.Empty;
 		StructureBeats = new();
 		BoundStructure = string.Empty;
-	}
-	public ProblemModel(IXmlNode xn, StoryModel model) : base(xn, model)
-    {
-        ProblemType = string.Empty;
-        ConflictType = string.Empty;
-        Subject = string.Empty;
-        ProblemSource = string.Empty;
-        StoryQuestion = string.Empty;
-        Protagonist = Guid.Empty;
-        ProtGoal = string.Empty;
-        ProtMotive = string.Empty;
-        ProtConflict = string.Empty;
-        Antagonist = Guid.Empty;
-        AntagGoal = string.Empty;
-        AntagMotive = string.Empty;
-        AntagConflict = string.Empty;
-        Outcome = string.Empty;
-        Method = string.Empty;
-        Theme = string.Empty;
-        Premise = string.Empty;
-        Notes = string.Empty;
-        StructureTitle = string.Empty;
-        StructureBeats = new();
-        StructureDescription = string.Empty;
-        BoundStructure = string.Empty;
 	}
 	public ProblemModel(){}
 

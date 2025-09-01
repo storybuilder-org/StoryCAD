@@ -23,7 +23,7 @@ public class KeyQuestionsViewModel : ObservableRecipient
         set
         {
             SetProperty(ref _storyElementName, value);
-            _questions = Ioc.Default.GetService<ToolsData>().KeyQuestionsSource[_storyElementName];
+            _questions = _toolsData.KeyQuestionsSource[_storyElementName];
             _index = _questions.Count - 1;
             NextQuestion();
         }
@@ -71,11 +71,20 @@ public class KeyQuestionsViewModel : ObservableRecipient
     #endregion
 
     #region Constructor
-    public KeyQuestionsViewModel()
+
+    private readonly ToolsData _toolsData;
+
+    // Constructor for XAML compatibility - will be removed later
+    public KeyQuestionsViewModel() : this(Ioc.Default.GetRequiredService<ToolsData>())
     {
+    }
+
+    public KeyQuestionsViewModel(ToolsData toolsData)
+    {
+        _toolsData = toolsData;
         KeyQuestionElements = new ObservableCollection<string>();
 
-        foreach (string _element in Ioc.Default.GetService<ToolsData>().KeyQuestionsSource.Keys) { KeyQuestionElements.Add(_element); }
+        foreach (string _element in _toolsData.KeyQuestionsSource.Keys) { KeyQuestionElements.Add(_element); }
         StoryElementName = KeyQuestionElements[0];
     }
     #endregion

@@ -1,10 +1,7 @@
 using System.Diagnostics;
 using Windows.Storage;
 using Microsoft.UI.Xaml;
-using StoryCAD.Services.API;
 using StoryCAD.ViewModels.Tools;
-using Octokit;
-using StoryCAD.Services.Outline;
 
 namespace StoryCAD.Services.Dialogs.Tools;
 
@@ -28,7 +25,9 @@ public sealed partial class PreferencesDialog
     {
         DevInfo.Text = Logger.SystemInfo();
 
-        Changelog.Text = await new Changelog().GetChangelogText();
+        var logger = Ioc.Default.GetService<ILogService>();
+        var appState = Ioc.Default.GetService<AppState>();
+        Changelog.Text = await new Changelog(logger, appState).GetChangelogText();
 
         if (PreferencesVm.WrapNodeNames == TextWrapping.WrapWholeWords) { TextWrap.IsChecked = true; }
         else { TextWrap.IsChecked = false; }
@@ -47,22 +46,14 @@ public sealed partial class PreferencesDialog
         Process.Start(new ProcessStartInfo { FileName = Path.Combine(Ioc.Default.GetRequiredService<AppState>().RootDirectory, "Logs"), UseShellExecute = true, Verb = "open" });
     }
 
-    private async void SetBackupPath(object sender, RoutedEventArgs e)
+    private void OnBackupPathSelected(object sender, string path)
     {
-        StorageFolder _folder = await window.ShowFolderPicker();
-        if (_folder != null)
-        {
-            PreferencesVm.BackupDirectory = _folder.Path;
-        }
+        PreferencesVm.BackupDirectory = path;
     }
-    private async void SetProjectPath(object sender, RoutedEventArgs e)
+
+    private void OnProjectPathSelected(object sender, string path)
     {
-        StorageFolder folder = await window.ShowFolderPicker();
-        if (folder != null)
-        {
-            PreferencesVm.ProjectDirectory = folder.Path;
-            ProjDirBox.Text = folder.Path; //Updates the box visually (fixes visual glitch.)
-        }
+        PreferencesVm.ProjectDirectory = path;
     }
 
     /// <summary>
@@ -84,7 +75,7 @@ public sealed partial class PreferencesDialog
     }
 
 	/// <summary>
-	/// Refreshes developer statisitics such as sys info.
+	/// Refreshes developer stats such as sys info.
 	/// </summary>
     public void RefreshDevStats(object sender, RoutedEventArgs e)
     {
@@ -143,23 +134,4 @@ public sealed partial class PreferencesDialog
         //Launch relevant app (browser/mail client)
         Process.Start(URL);
     }
-    /// <summary>
-	/// Spawns the element picker UI and shows the result
-	/// </summary>
-    private async void OpenPickerUI(object sender, RoutedEventArgs e)
-    {
-	    // Show dialog
-		//StoryElement Element = await Ioc.Default.GetRequiredService<ElementPickerVM
-			///>().ShowPicker(ShellViewModel.GetModel(),
-			//StoryItemType.Character);
-
-		//if (Element == null) return; // User cancelled (or error occurred)
-		// Show result
-	    await Ioc.Default.GetRequiredService<Windowing>().ShowContentDialog(new()
-	    {
-		    Title = "Result",
-		    //Content = "User picked item " + Element.Name,
-			PrimaryButtonText = "OK"
-		}, true);
-	}
 }

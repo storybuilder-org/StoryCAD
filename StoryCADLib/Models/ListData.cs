@@ -10,18 +10,21 @@ namespace StoryCAD.Models
     /// </summary>
     public class ListData
     {
-        LogService _log = Ioc.Default.GetService<LogService>();
+        private readonly ILogService _log;
+        private readonly ListLoader _listLoader;
 
         /// The ComboBox and ListBox source bindings in viewmodels point to lists in this Dictionary. 
         /// Each list has a unique key related to the ComboBox or ListBox use.
         public Dictionary<string, ObservableCollection<string>> ListControlSource;
-        public ListData() 
+        
+        public ListData(ILogService log, ListLoader listLoader) 
         {
+            _log = log;
+            _listLoader = listLoader;
             try
             {
                 _log.Log(LogLevel.Info, "Loading Lists.ini data");
-                ListLoader loader = Ioc.Default.GetService<ListLoader>();
-                Task.Run(async () => { ListControlSource = await loader.Init(); }).Wait();
+                Task.Run(async () => { ListControlSource = await _listLoader.Init(); }).Wait();
 
                 _log.Log(LogLevel.Info, $"{ListControlSource.Keys.Count} ListLoader.Init keys created");
             }

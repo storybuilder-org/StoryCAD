@@ -1,5 +1,4 @@
 ﻿using System.Text.Json.Serialization;
-using Windows.Data.Xml.Dom;
 
 namespace StoryCAD.Models;
 
@@ -49,37 +48,6 @@ public class RelationshipModel
         Notes = string.Empty;
     }
 
-    public RelationshipModel(IXmlNode xn)
-    {
-        Partner = null;
-        PartnerUuid = Guid.Empty;
-        RelationType = null;
-        Trait = string.Empty;
-        Attitude = string.Empty;
-        Notes = string.Empty;
-
-        foreach (IXmlNode _attr in xn.Attributes)
-        {
-            switch (_attr.NodeName)
-            {
-                case "Partner":
-                    PartnerUuid =  Guid.Parse(_attr.InnerText);
-                    break;
-                case "RelationType":
-                    RelationType = _attr.InnerText;
-                    break;
-                case "Trait":
-                    Trait = _attr.InnerText;
-                    break;
-                case "Attitude":
-                    Attitude = _attr.InnerText;
-                    break;
-                case "Notes":
-                    Notes = _attr.InnerText;
-                    break;
-            }
-        }
-    }
 
     public RelationshipModel() { }
 

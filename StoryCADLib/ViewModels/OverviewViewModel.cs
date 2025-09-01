@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
+using StoryCAD.Services;
 using StoryCAD.Services.Messages;
 using StoryCAD.Services.Navigation;
 using StoryCAD.ViewModels.SubViewModels;
@@ -15,12 +16,13 @@ namespace StoryCAD.ViewModels;
 /// There is only one OverviewModel instance for each story. It's also the root of the Shell Page's
 /// StoryExplorer TreeView.
 /// </summary>
-public class OverviewViewModel : ObservableRecipient, INavigable
+public class OverviewViewModel : ObservableRecipient, INavigable, ISaveable
 {
     #region Fields
 
-    private readonly LogService _logger;
-    private readonly StoryModel _shellModel = Ioc.Default.GetRequiredService<OutlineViewModel>().StoryModel;
+    private readonly ILogService _logger;
+    private readonly AppState _appState;
+    private StoryModel _storyModel;
     private bool _changeable; // process property changes for this story element
     private bool _changed;    // this story element has changed
 
@@ -92,11 +94,12 @@ public class OverviewViewModel : ObservableRecipient, INavigable
     }
 
 
-    private string _storyIdea;
-    public string StoryIdea
+    // Description property (migrated from StoryIdea)
+    private string _description;
+    public string Description
     {
-        get => _storyIdea;
-        set => SetProperty(ref _storyIdea, value);
+        get => _description;
+        set => SetProperty(ref _description, value);
     }
 
     // Concept data
@@ -291,8 +294,9 @@ public class OverviewViewModel : ObservableRecipient, INavigable
         _changeable = false;
         _changed = false;
 
-        Problems = _shellModel.StoryElements.Problems;
-        Characters = _shellModel.StoryElements.Characters;
+        _storyModel = _appState.CurrentDocument!.Model;
+        Problems = _storyModel.StoryElements.Problems;
+        Characters = _storyModel.StoryElements.Characters;
 
         Uuid = Model.Uuid;
         Name = Model.Name;
@@ -313,7 +317,7 @@ public class OverviewViewModel : ObservableRecipient, INavigable
         StoryProblem = Model.StoryProblem;
         // Set SelectedProblem based on StoryProblem GUID
         SelectedProblem = Problems.FirstOrDefault(p => p.Uuid == StoryProblem);
-        StoryIdea = Model.StoryIdea;
+        Description = Model.Description;
         Concept = Model.Concept;
         Premise = Model.Premise;
         StructureNotes = Model.StructureNotes;
@@ -322,7 +326,7 @@ public class OverviewViewModel : ObservableRecipient, INavigable
         _changeable = true;
     }
 
-    internal void SaveModel()
+    public void SaveModel()
     {
         try
         {
@@ -345,7 +349,7 @@ public class OverviewViewModel : ObservableRecipient, INavigable
 		        Model.Style = Style ?? "";
 		        Model.Tone = Tone ?? "";
 		        Model.StoryProblem = StoryProblem;
-		        Model.StoryIdea = StoryIdea ?? "";
+		        Model.Description = Description ?? "";
 		        Model.Concept = Concept ?? "";
 		        Model.Premise = Premise ?? "";
                 if (_syncPremise)
@@ -368,7 +372,7 @@ public class OverviewViewModel : ObservableRecipient, INavigable
         }
         catch (Exception ex)
         {
-            Ioc.Default.GetRequiredService<LogService>().LogException(LogLevel.Error,
+            _logger.LogException(LogLevel.Error,
                 ex, $"Failed to save overview model - {ex.Message}");
         }
 
@@ -403,14 +407,23 @@ public class OverviewViewModel : ObservableRecipient, INavigable
 
     #region Constructor
 
-    public OverviewViewModel()
+    // Constructor for XAML compatibility - will be removed later
+    public OverviewViewModel() : this(
+        Ioc.Default.GetRequiredService<ILogService>(),
+        Ioc.Default.GetRequiredService<AppState>())
     {
-        _logger = Ioc.Default.GetService<LogService>();
+    }
+
+    public OverviewViewModel(ILogService logger, AppState appState)
+    {
+        _logger = logger;
+        _appState = appState;
+        _storyModel = _appState.CurrentDocument.Model;
         
         try
         {
-            Problems = _shellModel.StoryElements.Problems;
-            Characters = _shellModel.StoryElements.Characters;
+            Problems = _storyModel.StoryElements.Problems;
+            Characters = _storyModel.StoryElements.Characters;
             StoryProblem = Problems[0].Uuid;          // Set to "(none") (first Problem)
             ViewpointCharacter = Characters[0].Uuid;  // Set to "(none") (first Character)
 
@@ -440,7 +453,7 @@ public class OverviewViewModel : ObservableRecipient, INavigable
         Viewpoint = string.Empty;
         Style = string.Empty;
         Tone = string.Empty;
-        StoryIdea = string.Empty;
+        Description = string.Empty;
         Concept = string.Empty;
         Premise = string.Empty;
         _syncPremise = false;     

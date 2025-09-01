@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Reflection;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using Windows.ApplicationModel;
 using Windows.Storage;
 
@@ -79,4 +80,34 @@ public class AppState
     /// run and the server will update the version.
     /// </summary>    
     public bool LoadedWithVersionChange = false;
+
+    private StoryDocument? _currentDocument;
+    
+    /// <summary>
+    /// The currently open story document, combining the model and its file path.
+    /// Null when no document is open (app startup).
+    /// When set, triggers UI binding updates through the Shell.
+    /// </summary>
+    /// <summary>
+    /// Event fired when CurrentDocument changes to notify UI to refresh bindings.
+    /// Shell subscribes to this to update x:Bind bindings when the document changes.
+    /// </summary>
+    public event EventHandler? CurrentDocumentChanged;
+
+    public StoryDocument? CurrentDocument 
+    { 
+        get => _currentDocument;
+        set
+        {
+            _currentDocument = value;
+            CurrentDocumentChanged?.Invoke(this, EventArgs.Empty);   // <- notify Shell
+        }
+    }
+
+    /// <summary>
+    /// The current ViewModel that can save its edits back to the model.
+    /// Set by pages in OnNavigatedTo when they have saveable content.
+    /// Null for pages without editable content (Home, Reports, etc.).
+    /// </summary>
+    public Services.ISaveable? CurrentSaveable { get; set; }
 }

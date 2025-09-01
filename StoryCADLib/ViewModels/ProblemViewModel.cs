@@ -3,26 +3,33 @@ using System.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using Microsoft.UI.Xaml;
 using StoryCAD.Controls;
 using StoryCAD.Models.Tools;
+using StoryCAD.Services;
 using StoryCAD.Services.Messages;
 using StoryCAD.Services.Navigation;
+using StoryCAD.Services.Outline;
 using StoryCAD.ViewModels.SubViewModels;
 using StoryCAD.ViewModels.Tools;
 
 namespace StoryCAD.ViewModels;
 
-public class ProblemViewModel : ObservableRecipient, INavigable
+public class ProblemViewModel : ObservableRecipient, INavigable, ISaveable
 {
     #region Fields
 
-    private readonly LogService _logger;
+    private readonly ILogService _logger;
+    private readonly AppState _appState;
+    private readonly BeatSheetsViewModel _beatSheetsViewModel;
+    private OverviewModel _overviewModel;
+    private StoryModel _storyModel;
     private bool _changeable;
     private bool _changed;
 
     // Premise sync fields
 
-    private OverviewModel _overviewModel;
+
 
     // True if _overviewModel.StoryProblem has been set, in which
     // case any ProblemViewModel Premise changes must also be made
@@ -99,11 +106,12 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         get => _conflictType;
         set => SetProperty(ref _conflictType, value);
     }
-    private string _storyQuestion;
-    public string StoryQuestion
+    // Description property (migrated from StoryQuestion)
+    private string _description;
+    public string Description
     {
-        get => _storyQuestion;
-        set => SetProperty(ref _storyQuestion, value);
+        get => _description;
+        set => SetProperty(ref _description, value);
     }
 
     // Problem protagonist data
@@ -280,11 +288,11 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         set => SetProperty(ref _model, value);
     }
 
-    private ObservableCollection<StructureBeatViewModel> structureBeats;
+    private ObservableCollection<StructureBeatViewModel> _structureBeats;
     public ObservableCollection<StructureBeatViewModel> StructureBeats
     {
-	    get => structureBeats;
-	    set => SetProperty(ref structureBeats, value);
+	    get => _structureBeats;
+	    set => SetProperty(ref _structureBeats, value);
     }
 
 	public RelayCommand ConflictCommand { get; }
@@ -319,11 +327,51 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         set => SetProperty(ref _characters, value);
     }
 
-	#endregion
+    private bool _isBeatSheetReadOnly;
+    /// <summary>
+    /// Controls if the beat sheet is read-only or not.
+    /// </summary>
+    public bool IsBeatSheetReadOnly
+    {
+        get => _isBeatSheetReadOnly;
+        set => SetProperty(ref _isBeatSheetReadOnly, value);
+    }
 
-	#region Methods
+    private Visibility _beatsheetEditButtonsVisibility;
 
-	public void Activate(object parameter)
+    /// <summary>
+    /// Controls if the beat sheet edit buttons are visible or not.
+    /// </summary>
+    public Visibility BeatsheetEditButtonsVisibility
+    {
+        get => _beatsheetEditButtonsVisibility;
+        set => SetProperty(ref _beatsheetEditButtonsVisibility, value);
+    }
+
+    public int _selectedBeatIndex;
+    /// <summary>
+    /// Selected Beat Index
+    /// </summary>
+    public int SelectedBeatIndex
+    {
+        get => _selectedBeatIndex;
+        set => SetProperty(ref _selectedBeatIndex, value);
+    }
+    private StructureBeatViewModel _selectedBeat;
+
+    /// <summary>
+    /// Selected Beat Item
+    /// </summary>
+    public StructureBeatViewModel SelectedBeat
+    {
+        get => _selectedBeat;
+        set => SetProperty(ref _selectedBeat, value);
+    }
+    #endregion
+
+    #region Methods
+
+    public void Activate(object parameter)
     {
         Model = (ProblemModel)parameter;
         LoadModel();
@@ -351,12 +399,9 @@ public class ProblemViewModel : ObservableRecipient, INavigable
 
     private void LoadModel()
     {
-        StoryModel story_model = Ioc.Default.GetRequiredService<OutlineViewModel>().StoryModel;
-
         _changeable = false;
         _changed = false;
-        Characters = story_model.StoryElements.Characters;
-
+        Characters = _appState.CurrentDocument!.Model.StoryElements.Characters;
         Uuid = Model.Uuid;
         Name = Model.Name;
         if (Name.Equals("New Problem"))
@@ -365,7 +410,7 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         ConflictType = Model.ConflictType;
         ProblemCategory = Model.ProblemCategory;
         Subject = Model.Subject;
-        StoryQuestion = Model.StoryQuestion;
+        Description = Model.Description;
         ProblemSource = Model.ProblemSource;
         Protagonist = Model.Protagonist;
         SelectedProtagonist = Characters.FirstOrDefault(p => p.Uuid == Protagonist);
@@ -382,8 +427,10 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         Theme = Model.Theme;
         Premise = Model.Premise;
         Notes = Model.Notes;
-        Guid root = story_model.ExplorerView[0].Uuid;
-        _overviewModel = (OverviewModel)story_model.StoryElements.StoryElementGuids[root];
+        _storyModel = _appState.CurrentDocument.Model;
+        Guid root = _storyModel.ExplorerView[0].Uuid;
+        OutlineService outlineService = Ioc.Default.GetService<OutlineService>();
+        _overviewModel = (OverviewModel)outlineService!.GetStoryElementByGuid(_storyModel, root);
         if (_overviewModel.StoryProblem != Guid.Empty)
             _syncPremise = true; 
         else
@@ -393,15 +440,30 @@ public class ProblemViewModel : ObservableRecipient, INavigable
 		StructureDescription = Model.StructureDescription;
 		StructureBeats = Model.StructureBeats;
 		BoundStructure = Model.BoundStructure;
+
+        SelectedBeat = null;
+        SelectedBeatIndex = -1;
 		
 		//Ensure correct set of Elements are loaded for Structure Lists
-		Problems = story_model.StoryElements.Problems;
-        Scenes = story_model.StoryElements.Scenes;
+		Problems = _storyModel.StoryElements.Problems;
+        Scenes = _storyModel.StoryElements.Scenes;
+
+        //Enable/disable edit buttons based on selection
+        if (StructureModelTitle == "Custom Beat Sheet")
+        {
+            BeatsheetEditButtonsVisibility = Visibility.Visible;
+            IsBeatSheetReadOnly = false;
+        }
+        else
+        {
+            BeatsheetEditButtonsVisibility = Visibility.Collapsed;
+            IsBeatSheetReadOnly = true;
+        }
 
         _changeable = true;
 	}
 
-    internal void SaveModel()
+    public void SaveModel()
     {
         try
         {
@@ -423,7 +485,7 @@ public class ProblemViewModel : ObservableRecipient, INavigable
             Model.Outcome = Outcome;
             Model.Method = Method;
             Model.Theme = Theme;
-            Model.StoryQuestion = StoryQuestion;
+            Model.Description = Description;
 			Model.Premise = Premise;
 			Model.StructureTitle = StructureModelTitle;
 			Model.StructureDescription = StructureDescription;
@@ -434,7 +496,7 @@ public class ProblemViewModel : ObservableRecipient, INavigable
 		}
 		catch (Exception ex)
         {
-            Ioc.Default.GetRequiredService<LogService>().LogException(LogLevel.Error,
+            _logger.LogException(LogLevel.Error,
                 ex, $"Failed to save problem model - {ex.Message}");
         }
     }
@@ -496,32 +558,54 @@ public class ProblemViewModel : ObservableRecipient, INavigable
 				    PrimaryButtonText = "Confirm",
 				    SecondaryButtonText = "Cancel"
 			    });
-	    }
+
+            //Delete beats (This handles binds)
+            for (int i = StructureBeats.Count - 1; i >= 0; i--)
+            {
+                SelectedBeat = StructureBeats[i];
+                SelectedBeatIndex = i;
+                DeleteBeat(null, null);
+            }
+        }
 	    else { Result = ContentDialogResult.Primary; }
 
+        if (value == "Load Custom Beat Sheet from file...")
+        {
+            value = "Custom Beat Sheet";
+            StructureModelTitle = value;
+            LoadBeatSheet();
+        }
 
-	    if (Result == ContentDialogResult.Primary && !string.IsNullOrEmpty(value))
-	    {
-		    //Update value 
-		    SetProperty(ref _structureModelTitle, value);
+        //Enable/disable edit buttons based on selection
+        if (value == "Custom Beat Sheet")
+        {
+            BeatsheetEditButtonsVisibility = Visibility.Visible;
+            IsBeatSheetReadOnly = false;
+        }
+        else
+        {
+            BeatsheetEditButtonsVisibility = Visibility.Collapsed;
+            IsBeatSheetReadOnly = true;
+        }
 
-		    //Resolve master plot model if not empty
-		    PlotPatternModel BeatSheet = Ioc.Default.GetRequiredService<BeatSheetsViewModel>().BeatSheets[value];
+        if (Result == ContentDialogResult.Primary && !string.IsNullOrEmpty(value))
+        {
+            //Update value 
+            SetProperty(ref _structureModelTitle, value);
 
-			StructureDescription = BeatSheet.PlotPatternNotes;
+            //Resolve master plot model if not empty
+            PlotPatternModel BeatSheet = _beatSheetsViewModel.BeatSheets[value];
 
-		    //Set model
-		    StructureBeats.Clear();
+            StructureDescription = BeatSheet.PlotPatternNotes;
 
-		    foreach (var item in BeatSheet.PlotPatternScenes)
-		    {
-			    StructureBeats.Add(new StructureBeatViewModel
-			    {
-				    Title = item.SceneTitle,
-				    Description = item.Notes,
-			    });
-		    }
-	    }
+            //Set model
+            StructureBeats.Clear();
+
+            foreach (var item in BeatSheet.PlotPatternScenes)
+            {
+                StructureBeats.Add(new StructureBeatViewModel(item.SceneTitle,item.Notes));
+            }
+        }
 	}
 	#endregion
 
@@ -543,17 +627,16 @@ public class ProblemViewModel : ObservableRecipient, INavigable
 
     #region Constructors
 
-    public ProblemViewModel()
+    public ProblemViewModel(ILogService logger, AppState appState,  BeatSheetsViewModel beatSheetsViewModel)
     {
-        _logger = Ioc.Default.GetService<LogService>();
-        
-
-        Characters = Ioc.Default.GetRequiredService<OutlineViewModel>().StoryModel.StoryElements.Characters;
+        _logger = logger;
+        _beatSheetsViewModel = beatSheetsViewModel;
+        _appState = appState;
         ProblemType = string.Empty;
         ConflictType = string.Empty;
         Subject = string.Empty;
         ProblemSource = string.Empty;
-        StoryQuestion = string.Empty;
+        Description = string.Empty;
         Protagonist = Guid.Empty;
         ProtGoal = string.Empty;
         ProtMotive = string.Empty;
@@ -598,4 +681,225 @@ public class ProblemViewModel : ObservableRecipient, INavigable
         PropertyChanged += OnPropertyChanged;
     }
 	#endregion
+
+    /// <summary>
+    /// Creates a new story beat.
+    /// </summary>
+    public void CreateBeat(object sender, RoutedEventArgs e)
+    {
+        StructureBeats.Add(new StructureBeatViewModel("New Beat", "Describe your beat here"));
+    }
+
+    /// <summary>
+    /// Deletes this beat
+    /// </summary>
+    public void DeleteBeat(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            Ioc.Default.GetService<OutlineService>()!.DeleteBeat(_storyModel, Model, SelectedBeatIndex);
+        }
+        catch (Exception ex)
+        {
+
+            Messenger.Send(new StatusChangedMessage(new(ex.Message, LogLevel.Warn, true)));
+        }
+    }
+
+    /// <summary>
+    /// Moves this beat up
+    /// </summary>
+    public void MoveUp(object sender, RoutedEventArgs e)
+    {
+        if (SelectedBeat == null)
+        {
+            Messenger.Send(new StatusChangedMessage(new("Select a beat", LogLevel.Warn, false)));
+            return;
+        }
+
+        if (SelectedBeatIndex > 0)
+        {
+            StructureBeats.Move(SelectedBeatIndex, SelectedBeatIndex - 1);
+        }
+        else
+        {
+            Messenger.Send(new StatusChangedMessage(new("This is already the first beat.", LogLevel.Warn, true)));
+        }
+    }
+    /// <summary>
+    /// Moves this beat up
+    /// </summary>
+    public void MoveDown(object sender, RoutedEventArgs e)
+    {
+        if (SelectedBeat == null)
+        {
+            Messenger.Send(new StatusChangedMessage(new("Select a beat", LogLevel.Warn, false)));
+            return;
+        }
+
+        var max = StructureBeats.Count;
+
+        if (SelectedBeatIndex < max-1)
+        {
+            StructureBeats.Move(SelectedBeatIndex, SelectedBeatIndex + 1);
+        }
+        else
+        {
+            Messenger.Send(new StatusChangedMessage(new("This is already the last beat.", LogLevel.Warn, true)));
+        }
+    }
+
+    /// <summary>
+    /// Assigns a new beat
+    /// </summary>
+    public async void AssignBeat(object sender, ItemClickEventArgs e)
+    {
+        if (SelectedBeat == null)
+        {
+            Messenger.Send(new StatusChangedMessage(new("Select a beat", LogLevel.Warn, false)));
+            return;
+        }
+
+        //Get the element we want to bind.
+        Guid DesiredBind = (e.ClickedItem as StoryElement).Uuid;
+
+        OutlineViewModel OutlineVM = Ioc.Default.GetService<OutlineViewModel>();
+        try 
+        {
+            //Find element being bound.
+
+            StoryElement Element = _appState.CurrentDocument!.Model.StoryElements.First(g => g.Uuid == DesiredBind);
+            int ElementIndex = _appState.CurrentDocument.Model.StoryElements.IndexOf(Element);
+            
+            //Check if problem is being dropped and enforce rule.
+            if (Element.ElementType == StoryItemType.Problem)
+            {
+                ProblemModel problem = (ProblemModel)Element;
+                //Enforce rule that problems can only be bound to one structure beat model
+                if (!string.IsNullOrEmpty(problem.BoundStructure)) //Check element is actually bound elsewhere
+                {
+                    ProblemModel ContainingStructure = (ProblemModel)_appState.CurrentDocument.Model.StoryElements
+                        .First(g => g.Uuid == Guid.Parse(problem.BoundStructure));
+                    //Show dialog asking to rebind.
+                    var res = await Ioc.Default.GetRequiredService<Windowing>().ShowContentDialog(new()
+                    {
+                        Title = "Already assigned!",
+                        Content = $"This problem is already assigned to a different structure ({ContainingStructure.Name}) " +            
+                        $"Would you like to assign it here instead?",
+                        PrimaryButtonText = "Assign here",
+                        SecondaryButtonText = "Cancel"
+                    });
+
+                    //Do nothing if user clicks don't rebind.
+                    if (res != ContentDialogResult.Primary) { return; }
+                    removeBindData(ContainingStructure, problem);
+                }
+
+                //If its a problem Bind
+                if (problem.Uuid == Uuid)
+                {
+                    BoundStructure = Uuid.ToString();
+                }
+                else
+                {
+                    problem.BoundStructure = Uuid.ToString();
+                    _appState.CurrentDocument.Model.StoryElements[ElementIndex] = problem;
+                }
+            }
+
+            SelectedBeat.Guid = DesiredBind;
+            SelectedBeat = null;
+            SelectedBeatIndex = -1;
+        }
+        catch (Exception ex)
+        {
+            _logger.Log(LogLevel.Warn, "Failed to bind valid element (Structure Tab) " + ex.Message);
+        }
+    }
+
+    /// <summary>
+    /// Unbinds an element from the selected beat.
+    /// </summary>
+    public void UnbindElement(object sender, RoutedEventArgs e)
+    {
+        if (SelectedBeat == null)
+        {
+            Messenger.Send(new StatusChangedMessage(new("Select a beat", LogLevel.Warn, false)));
+            return;
+        }
+
+        if (SelectedBeat.Guid == Guid.Empty)
+        {
+            Messenger.Send(new StatusChangedMessage(new("Nothing is bound to this beat", LogLevel.Warn, false)));
+            return;
+        }
+
+        Ioc.Default.GetRequiredService<OutlineService>().UnasignBeat(
+            _appState.CurrentDocument!.Model, Model, SelectedBeatIndex);
+        SelectedBeat.Guid = Guid.Empty;
+
+        // clear selection so you force the user to re-select next time
+        SelectedBeat = null;
+        SelectedBeatIndex = -1;
+    }
+
+   
+    /// <summary>
+    /// Helper to remove bind data 
+    /// </summary>
+    private void removeBindData(ProblemModel ContainingStructure, ProblemModel problem)
+    {
+        OutlineViewModel OutlineVM = Ioc.Default.GetService<OutlineViewModel>();
+        if (problem.BoundStructure.Equals(Uuid.ToString())) //Rebind from VM
+        {
+            StructureBeatViewModel oldStructure = ContainingStructure.StructureBeats.First(g => g.Guid == problem.Uuid);
+            int index = StructureBeats.IndexOf(oldStructure);
+            StructureBeats[index].Guid = Guid.Empty;
+        }
+        else //Remove from old structure and update story elements.
+        {
+            StructureBeatViewModel oldStructure = ContainingStructure.StructureBeats.First(g => g.Guid == problem.Uuid);
+            int index = ContainingStructure.StructureBeats.IndexOf(oldStructure);
+            ContainingStructure.StructureBeats[index].Guid = Guid.Empty;
+            int ContainingStructIndex = _appState.CurrentDocument.Model.StoryElements.IndexOf(ContainingStructure);
+            _appState.CurrentDocument.Model.StoryElements[ContainingStructIndex] = ContainingStructure;
+        }
+    }
+
+    public async void SaveBeatSheet()
+    {
+        try
+        {
+            var FilePath = await Ioc.Default.GetRequiredService<Windowing>()
+                                      .ShowFileSavePicker("Save", ".stbeat");
+
+            //Picker error/canceled.
+            if (FilePath == null) {  return; }
+
+
+            Ioc.Default.GetService<OutlineService>()
+                .SaveBeatsheet(FilePath.Path, StructureDescription, StructureBeats.ToList());
+        }
+        catch (Exception)
+        {
+            Messenger.Send(new StatusChangedMessage(new("Failed to save Beatsheet", LogLevel.Error, false)));
+
+        }
+    }
+
+    public async void LoadBeatSheet()
+    {
+        try
+        {
+            var FilePath = await Ioc.Default.GetRequiredService<Windowing>().ShowFilePicker("Load", ".stbeat");
+            var model = Ioc.Default.GetService<OutlineService>().LoadBeatsheet(FilePath.Path);
+            StructureDescription = model.Description;
+            StructureBeats = new ObservableCollection<StructureBeatViewModel>(model.Beats);
+        }
+        catch (Exception)
+        {
+            Messenger.Send(new StatusChangedMessage(new("Failed to Load Beatsheet", LogLevel.Error, false)));
+
+        }
+    }
 }

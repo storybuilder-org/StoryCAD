@@ -5,8 +5,6 @@ using StoryCAD.Collaborator.ViewModels;
 
 public class CollaboratorArgs
 {
-    public StoryElement SelectedElement;
-
     public StoryModel StoryModel;
     
     public WorkflowViewModel WorkflowVm;

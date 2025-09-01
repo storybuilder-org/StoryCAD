@@ -1,10 +1,11 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
-using Windows.Data.Xml.Dom;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
+using NLog;
 using StoryCAD.Services;
 using StoryCAD.ViewModels.SubViewModels;
+using LogLevel = StoryCAD.Services.Logging.LogLevel;
 
 namespace StoryCAD.ViewModels;
 
@@ -37,7 +38,7 @@ namespace StoryCAD.ViewModels;
 public class StoryNodeItem : INotifyPropertyChanged
 {
     private readonly ILogService _logger;
-    private readonly OutlineViewModel _outlineVM = Ioc.Default.GetService<OutlineViewModel>();
+    private readonly AppState _appState;
 
     // is it INavigable?
     public event PropertyChangedEventHandler PropertyChanged;
@@ -276,9 +277,10 @@ public class StoryNodeItem : INotifyPropertyChanged
 
     #region Constructors
 
-    public StoryNodeItem(ILogService logger, StoryElement node, StoryNodeItem parent, StoryItemType type = StoryItemType.Unknown)
+    public StoryNodeItem(ILogService logger, AppState appstate, StoryElement node, StoryNodeItem parent, StoryItemType type = StoryItemType.Unknown)
     {
         _logger = logger;
+        _appState = appstate;
         Uuid = node.Uuid;
         Name = node.Name;
         if (type == StoryItemType.Unknown) { Type = node.ElementType; }
@@ -333,90 +335,65 @@ public class StoryNodeItem : INotifyPropertyChanged
     }
 
     // Overloaded constructor without logger
-    public StoryNodeItem(StoryElement node, StoryNodeItem parent,
-        StoryItemType type = StoryItemType.Unknown) : this(Ioc.Default.GetRequiredService<ILogService>(), node, parent, type)
+    //public StoryNodeItem(StoryElement node, StoryNodeItem parent,
+    //    StoryItemType type = StoryItemType.Unknown) : this(Ioc.Default.GetRequiredService<ILogService>(), node, parent, type)
+    public StoryNodeItem(StoryElement node, StoryNodeItem parent, StoryItemType type = StoryItemType.Unknown)
     {
-    }
-
-    public StoryNodeItem(ILogService logger, StoryNodeItem parent, IXmlNode node)
-    {
-        _logger = logger;
-        
-        XmlNamedNodeMap _attrs = node.Attributes;
-        if (_attrs != null)
+        _logger = Ioc.Default.GetRequiredService<ILogService>();
+        _appState = Ioc.Default.GetRequiredService<AppState>();
+        Uuid = node.Uuid;
+        Name = node.Name;
+        if (type == StoryItemType.Unknown) { Type = node.ElementType; }
+        else { Type = type; }
+        switch (_type)
         {
-            Uuid = new Guid(((string)_attrs.GetNamedItem("UUID")?.NodeValue)!);
-            string _nodeType = (string)_attrs.GetNamedItem("Type")?.NodeValue;
-            switch (_nodeType!.ToLower()) //Fixes differences in casing between versions.
-            {
-                case "storyoverview":
-                    Type = StoryItemType.StoryOverview;
-                    Symbol = Symbol.View;
-                    break;
-                case "character":
-                    Type = StoryItemType.Character;
-                    Symbol = Symbol.Contact;
-                    break;
-                case "plotpoint":   // Legacy: PlotPoint was renamed to Scene   
-                    Type = StoryItemType.Scene;
-                    Symbol = Symbol.AllApps;
-                    break;
-                case "scene":
-                    Type = StoryItemType.Scene;
-                    Symbol = Symbol.AllApps;
-                    break;
-                case "problem":
-                    Type = StoryItemType.Problem;
-                    Symbol = Symbol.Help;
-                    break;
-                case "setting":
-                    Type = StoryItemType.Setting;
-                    Symbol = Symbol.Globe;
-                    break;
-                case "separator":   // Legacy: Separator was renamed Folder
-                    Type = StoryItemType.Folder;
-                    Symbol = Symbol.Folder;
-                    break;
-                case "folder":
-                    Type = StoryItemType.Folder;
-                    Symbol = Symbol.Folder;
-                    break;
-                case "section":
-                    Type = StoryItemType.Section;
-                    Symbol = Symbol.Folder;
-                    break;
-                case "web":
-                    Type = StoryItemType.Web;
-                    Symbol = Symbol.PreviewLink;
-                    break;
-                case "trashcan":
-                    Type = StoryItemType.TrashCan;
-                    Symbol = Symbol.Delete;
-                    break;
-                case "notes":
-                    Type = StoryItemType.Notes;
-                    Symbol = Symbol.TwoPage;
-                    break;
-            }
-
-            Name = (string)_attrs.GetNamedItem("Name")?.NodeValue;
-            if ((string)_attrs.GetNamedItem("IsExpanded")?.NodeValue == "True")
-                IsExpanded = true;
-            if ((string)_attrs.GetNamedItem("IsSelected")?.NodeValue == "True")
-                IsSelected = true;
-            if ((string)_attrs.GetNamedItem("IsRoot")?.NodeValue == "True")
-                IsRoot = true;
+            case StoryItemType.StoryOverview:
+                Symbol = Symbol.View;
+                break;
+            case StoryItemType.Character:
+                Symbol = Symbol.Contact;
+                break;
+            case StoryItemType.Scene:
+                Symbol = Symbol.AllApps;
+                break;
+            case StoryItemType.Problem:
+                Symbol = Symbol.Help;
+                break;
+            case StoryItemType.Setting:
+                Symbol = Symbol.Globe;
+                break;
+            case StoryItemType.Folder:
+                Symbol = Symbol.Folder;
+                break;
+            case StoryItemType.Section:
+                Symbol = Symbol.Folder;
+                break;
+            case StoryItemType.Web:
+                Symbol = Symbol.PreviewLink;
+                break;
+            case StoryItemType.TrashCan:
+                Symbol = Symbol.Delete;
+                break;
+            case StoryItemType.Notes:
+                Symbol = Symbol.TwoPage;
+                break;
         }
 
-        Children = new();
         Parent = parent;
-        Parent?.Children.Add(this);  // (if parent != null)
+        Children = new ObservableCollection<StoryNodeItem>();
+
+        IsExpanded = false;
+        IsRoot = false;
+
+        //If there's no parent this is a root node.
+        if (Parent == null)
+        {
+            IsRoot = true;
+            return;
+        }
+        Parent.Children.Add(this);
     }
 
-    // Overloaded constructor without logger
-    public StoryNodeItem(StoryNodeItem parent, IXmlNode node) : this(Ioc.Default.GetRequiredService<ILogService>(), parent, node)
-    {
-    }
 
     #endregion
 
@@ -442,17 +419,25 @@ public class StoryNodeItem : INotifyPropertyChanged
         if (!Parent.Children.Remove(this))
             throw new InvalidOperationException("Parent/child link out of sync.");
 
-        Parent = null;
+        // Handle different view types
+        if (view == StoryViewType.ExplorerView)
+        {
+            // For Explorer view: actually move to trash
+            Parent = null;
+            
+            var trash = _appState.CurrentDocument!.Model.StoryElements
+                .First(e => e.ElementType == StoryItemType.TrashCan)
+                .Node;
 
-        //Add to trash
-        if (view != StoryViewType.ExplorerView) return;
-
-        var trash = _outlineVM.StoryModel.StoryElements
-            .First(e => e.ElementType == StoryItemType.TrashCan)
-            .Node;
-
-        trash.Children.Add(this);
-        Parent = trash;
+            trash.Children.Add(this);
+            Parent = trash;
+        }
+        else if (view == StoryViewType.NarratorView)
+        {
+            // For Narrator view: just remove from this logical view
+            // The node remains in its original location in Explorer view
+            // No parent relationship changes needed
+        }
     }
 
 
@@ -472,17 +457,46 @@ public class StoryNodeItem : INotifyPropertyChanged
     /// <returns>The StoryItemType of the root node</returns>
     public static StoryItemType RootNodeType(StoryNodeItem startNode)
     {
+        if (startNode == null)
+        {
+            Ioc.Default.GetRequiredService<ILogService>().LogException(
+                LogLevel.Error, new ArgumentNullException(nameof(startNode)), 
+                "RootNodeType called with null startNode parameter");
+            return StoryItemType.Unknown;
+        }
+
         try
         {
             StoryNodeItem node = startNode;
+            int maxIterations = 1000; // Prevent infinite loops
+            int iterations = 0;
+            
             while (!node.IsRoot)
+            {
+                if (node.Parent == null)
+                {
+                    Ioc.Default.GetRequiredService<ILogService>().LogException(
+                        LogLevel.Error, new InvalidOperationException("Broken parent chain"), 
+                        $"Node '{node.Name}' (Type: {node.Type}) is not root but has no parent");
+                    return StoryItemType.Unknown;
+                }
+                
+                if (++iterations > maxIterations)
+                {
+                    Ioc.Default.GetRequiredService<ILogService>().LogException(
+                        LogLevel.Error, new InvalidOperationException("Infinite loop detected"), 
+                        $"RootNodeType exceeded maximum iterations traversing from node '{startNode.Name}'");
+                    return StoryItemType.Unknown;
+                }
+                
                 node = node.Parent;
+            }
             return node.Type;
         }
         catch (Exception ex)
         {
-            Ioc.Default.GetService<LogService>().LogException(
-                LogLevel.Error, ex, $"Root node type exception, this shouldn't happen {ex.Message} {ex.Message}");
+            Ioc.Default.GetRequiredService<ILogService>().LogException(
+                LogLevel.Error, ex, $"Root node type exception, this shouldn't happen {ex.Message}");
             return StoryItemType.Unknown;
         }
     }

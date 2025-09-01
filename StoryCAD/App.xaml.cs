@@ -28,7 +28,7 @@ public partial class App : Application
     private const string TrashCanPage = "TrashCanPage";
     private const string WebPage = "WebPage";
 
-    private LogService _log;
+    private ILogService _log;
 
     /// <summary>
     /// This is the path to the STBX file that StoryCAD was launched with,
@@ -64,7 +64,7 @@ public partial class App : Application
         // Make sure ToolsData is loaded by forcing instantiation
         Ioc.Default.GetRequiredService<ToolsData>();
 
-        _log = Ioc.Default.GetService<LogService>();
+        _log = Ioc.Default.GetService<ILogService>();
         Current.UnhandledException += OnUnhandledException;
     }
     private void ConfigureNavigation()
@@ -139,6 +139,22 @@ public partial class App : Application
         MainWindow.UseStudio();
 #endif
 
+        if (Debugger.IsAttached) {_log.Log(LogLevel.Info, "Bypassing elmah.io as debugger is attached.");}
+        else
+        {
+            if (Preferences.Model.ErrorCollectionConsent)
+            {
+                _log.AddElmahTarget();
+                if (_log.ElmahLogging) { _log.Log(LogLevel.Info, "elmah successfully added."); }
+                else { _log.Log(LogLevel.Info, "Couldn't add elmah."); }
+            }
+            else  // can have several reasons (no doppler, or an error adding the target){
+            {
+                _log.Log(LogLevel.Info, "elmah.io log target bypassed");
+            }
+        }
+
+        await Ioc.Default.GetService<BackendService>()!.StartupRecording();
         ConfigureNavigation();
 
         // Do not repeat app initialization when the Window already has content,

@@ -1,39 +1,44 @@
-﻿using System.ComponentModel;
-using System.IO.Compression;
+﻿using System.IO.Compression;
+using System.Threading;
+using System.Timers;
 using Windows.Storage;
-using StoryCAD.ViewModels.SubViewModels;
+using Microsoft.UI;
+using CommunityToolkit.Mvvm.Messaging;
 using StoryCAD.Services.Locking;
-
+using StoryCAD.Services.Messages;
 
 namespace StoryCAD.Services.Backup;
 
 public class BackupService
 {
-    private BackgroundWorker timedBackupWorker;
     private System.Timers.Timer backupTimer;
 
-    private LogService Log = Ioc.Default.GetService<LogService>();
-    private PreferenceService Prefs = Ioc.Default.GetService<PreferenceService>();
-    private OutlineViewModel OutlineManager = Ioc.Default.GetService<OutlineViewModel>();
-    ShellViewModel _shellVM;
+    private readonly ILogService _logService;
+    private readonly PreferenceService _preferenceService;
+    private readonly AppState _appState;
+    private readonly Windowing _windowing;
+    private readonly SemaphoreSlim _backupGate = new(1, 1);
+
+    // Fields to preserve remaining time when paused
+    private double defaultIntervalMs;
+    private double? remainingIntervalMs;
+    private DateTime lastStartTime;
+    private bool isResumed;
 
     public bool IsRunning => backupTimer.Enabled;
 
     #region Constructor
 
-    public BackupService()
+    public BackupService(ILogService logService, PreferenceService preferenceService, AppState appState, Windowing windowing)
     {
-        timedBackupWorker = new BackgroundWorker
-        {
-            WorkerSupportsCancellation = true,
-            WorkerReportsProgress = false
-        };
-        timedBackupWorker.DoWork += RunBackupTask;
+        _logService = logService;
+        _preferenceService = preferenceService;
+        _appState = appState;
+        _windowing = windowing;
 
-        backupTimer = new System.Timers.Timer
-            (Prefs.Model.TimedBackupInterval * 60 * 1000);  // interval in minutes
-        backupTimer.AutoReset = true;
-        backupTimer.Elapsed += BackupTimer_Elapsed;
+        // Compute default interval once (in milliseconds)
+        remainingIntervalMs = null;
+        isResumed = false;
     }
 
     #endregion
@@ -41,35 +46,69 @@ public class BackupService
     #region Public Methods
 
     /// <summary>
-    /// This method is used to enable the timed backup timer and start counting down. At the expiration
-    /// of the timer, BackupTask will be called to backup  the project.  The timer's AutoReset will cause 
-    /// ir to keep running timer events until it's stopped via a call to StopBackupTimer().
-    /// 
-    /// These two methods (start and stop) are called from file open, file  new, and file close to
-    /// insure that  timed backups are taken only when a project is open.
-    /// 
-    /// If the user's Preferences don't want timed backups, then the interval timer won't be started. 
+    /// Enables or resumes the timed backup timer. If there was a remaining interval from a previous stop,
+    /// it will resume with that remaining time; otherwise it starts a fresh countdown.
     /// </summary>
     public void StartTimedBackup()
     {
-        if (!Prefs.Model.TimedBackup)
+        // Don't start if no project is loaded
+        if (String.IsNullOrEmpty(_appState.CurrentDocument?.FilePath))
+        {
             return;
-            
-        // If the timer is already running, stop it
-        if (backupTimer.Enabled)
-            backupTimer.Stop();
+        }
 
-        // Reset the timer and start it 
-        backupTimer.Interval = (Prefs.Model.TimedBackupInterval * 60 * 1000); // interval in minutes
+        defaultIntervalMs = _preferenceService.Model.TimedBackupInterval * 60 * 1000;
+
+        if (backupTimer == null)
+        {
+            backupTimer = new System.Timers.Timer(defaultIntervalMs)
+            {
+                AutoReset = true
+            };
+            backupTimer.Elapsed += BackupTimer_Elapsed;
+        }
+
+        if (!_preferenceService.Model.TimedBackup)
+            return;
+
+        // If already running, do nothing
+        if (backupTimer.Enabled)
+            return;
+
+        double intervalToUse = defaultIntervalMs;
+        // If we previously stopped and have a positive remaining interval, resume from there
+        if (remainingIntervalMs.HasValue && remainingIntervalMs.Value > 0)
+        {
+            intervalToUse = remainingIntervalMs.Value;
+            isResumed = true;
+        }
+        else
+        {
+            isResumed = false;
+        }
+
+        backupTimer.Interval = intervalToUse;
+        lastStartTime = DateTime.Now;
         backupTimer.Start();
     }
 
     /// <summary>
-    /// Stops the timed backup task
+    /// Stops (pauses) the timed backup task and preserves the remaining time until the next backup.
     /// </summary>
     public void StopTimedBackup()
     {
-        backupTimer.Stop();
+        if (backupTimer != null)
+        {
+            if (!backupTimer.Enabled)
+                return;
+
+            // Calculate how much time is left in the current interval
+            double elapsedMs = (DateTime.Now - lastStartTime).TotalMilliseconds;
+            double rem = backupTimer.Interval - elapsedMs;
+            remainingIntervalMs = rem > 0 ? rem : 0;
+
+            backupTimer.Stop();
+        }
     }
 
     #endregion
@@ -77,106 +116,146 @@ public class BackupService
     #region Private Methods
 
     /// <summary>
-    /// Makes a backup every x minutes, x being the value of
-    /// TimedBackupInterval in user preferences.
+    /// Performs the backup asynchronously with proper concurrency control.
     /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="e"></param>
-    private async void RunBackupTask(object sender, DoWorkEventArgs e)
+    private async Task RunBackupTaskAsync()
     {
+        // Skip if a backup is already running
+        if (!await _backupGate.WaitAsync(0)) return;
+        
         try
         {
-            //while (!timedBackupWorker.CancellationPending)
-            //{
-                Log.Log(LogLevel.Info, "Starting timed backup task.");
-                await BackupProject();
-            //}
-            //e.Cancel = true;
-            Log.Log(LogLevel.Info, "Timed backup task finished.");
+            _logService.Log(LogLevel.Info, "Starting timed backup task.");
+            await BackupProject();
+            _logService.Log(LogLevel.Info, "Timed backup task finished.");
+            
+            // Indicate successful backup
+            _windowing.GlobalDispatcher.TryEnqueue(() => 
+            {
+                WeakReferenceMessenger.Default.Send(new IsBackupStatusMessage(true));
+            });
         }
         catch (Exception ex)
         {
-            Log.LogException(LogLevel.Error, ex,"Error in auto backup task.");
+            _logService.LogException(LogLevel.Error, ex, "Error in auto backup task.");
+            
+            // Indicate failed backup
+            _windowing.GlobalDispatcher.TryEnqueue(() => 
+            {
+                WeakReferenceMessenger.Default.Send(new IsBackupStatusMessage(false));
+            });
+        }
+        finally
+        {
+            _backupGate.Release();
         }
     }
 
     /// <summary>
-    /// Launches the timed backup task
+    /// Fired when the timer elapses. Performs the backup asynchronously.
+    /// After the first tick on a resumed interval, resets the interval to the default.
     /// </summary>
-    private void BackupTimer_Elapsed(object source, System.Timers.ElapsedEventArgs e)
+    private async void BackupTimer_Elapsed(object source, ElapsedEventArgs e)
     {
-        if (!timedBackupWorker.IsBusy)
-            timedBackupWorker.RunWorkerAsync();
+        await RunBackupTaskAsync();
+
+        // If we had resumed from a smaller interval, reset to default for subsequent ticks
+        if (isResumed)
+        {
+            backupTimer.Interval = defaultIntervalMs;
+            isResumed = false;
+        }
+
+        // Prepare for the next interval
+        lastStartTime = DateTime.Now;
+        remainingIntervalMs = null;
     }
 
     #endregion
 
     /// <summary>
-    /// Creates a backup
+    /// Creates a backup. If Filename or FilePath are null, defaults are used.
     /// </summary>
-    /// <param name="Filename">If null, will be the story model filename</param>
-    /// <param name="FilePath">If null, will be the backup directory</param>
+    /// <param name="Filename">If null, the story model filename plus timestamp is used.</param>
+    /// <param name="FilePath">If null, the user’s BackupDirectory preference is used.</param>
     public async Task BackupProject(string Filename = null, string FilePath = null)
     {
-        var autoSaveService = Ioc.Default.GetRequiredService<AutoSaveService>();
-        _shellVM = Ioc.Default.GetService<ShellViewModel>();
+        // Determine filenames and paths
+        var originalFileName = Path.GetFileNameWithoutExtension(_appState.CurrentDocument?.FilePath ?? "Untitled");
 
-        // Use OutlineManager.StoryModelFile to get file details
-        string originalFileName = Path.GetFileName(OutlineManager.StoryModelFile);
-        Filename ??= $"{originalFileName} as of {DateTime.Now}"
-                        .Replace('/', ' ')
-                        .Replace(':', ' ')
-                        .Replace(".stbx", "");
-        FilePath ??= Prefs.Model.BackupDirectory.Replace(".stbx", "");
+        if (Filename is null)
+        {
+            // safe timestamp avoids ':' and other invalid chars
+            Filename = $"{originalFileName} as of {DateTime.Now:yyyyMMdd_HHmm}";
 
-        Log.Log(LogLevel.Info, $"Starting Project Backup at {FilePath}");
+            // scrub anything Windows forbids in file names
+            foreach (var bad in Path.GetInvalidFileNameChars())
+                Filename = Filename.Replace(bad, '_');
+        }
+
+        FilePath ??= _preferenceService.Model.BackupDirectory;
+
+
+        _logService.Log(LogLevel.Info, $"Starting Project Backup at {FilePath}");
         try
         {
-            // Create backup directory if it doesn't exist
+            // Create backup directory if missing
             if (!Directory.Exists(FilePath))
             {
-                Log.Log(LogLevel.Info, "Backup dir not found, making it.");
+                _logService.Log(LogLevel.Info, "Backup dir not found, making it.");
                 Directory.CreateDirectory(FilePath);
             }
 
-            Log.Log(LogLevel.Info, $"Backing up to {FilePath} as {Filename}.zip");
+            _logService.Log(LogLevel.Info, $"Backing up to {FilePath} as {Filename}.zip");
+            _logService.Log(LogLevel.Info, "Writing file");
 
-            Log.Log(LogLevel.Info, "Writing file");
             StorageFolder rootFolder = await StorageFolder.GetFolderFromPathAsync(
-                Ioc.Default.GetRequiredService<AppState>().RootDirectory);
-            using (var serializationLock = new SerializationLock(autoSaveService, this, Log))
+                _appState.RootDirectory);
+
+            // Save file under the serialization lock (awaited work remains inside using scope)
+            using (var serializationLock = new SerializationLock(_logService))
             {
                 StorageFolder tempFolder = await rootFolder.CreateFolderAsync(
                     "Temp", CreationCollisionOption.ReplaceExisting);
 
-                // Retrieve the project file using the file path
-                StorageFile projectFile = await StorageFile.GetFileFromPathAsync(OutlineManager.StoryModelFile);
+                StorageFile projectFile = await StorageFile.GetFileFromPathAsync(_appState.CurrentDocument!.FilePath);
                 await projectFile.CopyAsync(tempFolder, projectFile.Name, NameCollisionOption.ReplaceExisting);
 
                 string zipFilePath = Path.Combine(FilePath, Filename) + ".zip";
                 ZipFile.CreateFromDirectory(tempFolder.Path, zipFilePath);
 
-                Log.Log(LogLevel.Info, $"Created Zip file at {zipFilePath}");
+                _logService.Log(LogLevel.Info, $"Created Zip file at {zipFilePath}");
                 await tempFolder.DeleteAsync();
             }
 
-            Log.Log(LogLevel.Info, "Finished backup.");
+            // update indicator
+            _windowing.GlobalDispatcher.TryEnqueue(() => 
+            {
+                // Indicate the model is now backed up
+                WeakReferenceMessenger.Default.Send(new IsBackupStatusMessage(true));
+            });
+            _logService.Log(LogLevel.Info, "Finished backup.");
         }
         catch (Exception ex)
         {
-            if (!Ioc.Default.GetRequiredService<AppState>().Headless)
+            if (!_appState.Headless)
             {
-                Ioc.Default.GetRequiredService<Windowing>().GlobalDispatcher.TryEnqueue(() =>
+                _windowing.GlobalDispatcher.TryEnqueue(() =>
                 {
-                    Ioc.Default.GetRequiredService<ShellViewModel>().ShowMessage(
-                        LogLevel.Warn,
+                    WeakReferenceMessenger.Default.Send(new StatusChangedMessage(new StatusMessage(
                         "Making a backup failed, check your backup settings.",
-                        false);
+                        LogLevel.Warn,
+                        false)));
+                });
+                _windowing.GlobalDispatcher.TryEnqueue(() =>
+                {
+                    // Indicate the model is now saved and unchanged
+                    WeakReferenceMessenger.Default.Send(new IsBackupStatusMessage(false));
                 });
             }
-            Log.LogException(LogLevel.Error, ex, $"Error backing up project {ex.Message}");
+            _logService.LogException(LogLevel.Error, ex, $"Error backing up project: {ex.Message}");
         }
-        Log.Log(LogLevel.Info, "BackupProject complete");
-    }
 
+        _logService.Log(LogLevel.Info, "BackupProject complete");
+    }
 }

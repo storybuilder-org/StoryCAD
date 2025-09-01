@@ -1,5 +1,8 @@
 ﻿using System.Text.Json.Serialization;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.DependencyInjection;
+using Microsoft.UI.Xaml;
+using StoryCAD.Services.Outline;
 using StoryCAD.ViewModels.SubViewModels;
 
 namespace StoryCAD.ViewModels.Tools;
@@ -10,13 +13,25 @@ namespace StoryCAD.ViewModels.Tools;
 public class StructureBeatViewModel : ObservableObject
 {
 	public Windowing Windowing;
+	public ProblemViewModel ProblemViewModel;
+
+    private readonly AppState _appState;
+    private readonly OutlineService _outlineService;
 
 	#region Constructor
-	public StructureBeatViewModel()
+
+	public StructureBeatViewModel(string title, string description)
 	{
+		// Get services internally like StoryNodeItem does
 		Windowing = Ioc.Default.GetRequiredService<Windowing>();
-		ProblemViewModel ProblemVM = Ioc.Default.GetRequiredService<ProblemViewModel>();
-		PropertyChanged += ProblemVM.OnPropertyChanged;
+		ProblemViewModel = Ioc.Default.GetRequiredService<ProblemViewModel>();
+		_appState = Ioc.Default.GetRequiredService<AppState>();
+		_outlineService = Ioc.Default.GetRequiredService<OutlineService>();
+
+		Title = title;
+		Description = description;
+
+		PropertyChanged += ProblemViewModel.OnPropertyChanged;
 	}
 	#endregion
 
@@ -71,14 +86,20 @@ public class StructureBeatViewModel : ObservableObject
 	/// Link to element
 	/// </summary>
 	[JsonIgnore]
-	private StoryElement Element
+	internal StoryElement Element
     {
         get
         {
             if (guid != Guid.Empty)
             {
-                return Ioc.Default.GetRequiredService<OutlineViewModel>()
-                    .StoryModel.StoryElements.StoryElementGuids[guid];
+                try
+                {
+                    return _outlineService.GetStoryElementByGuid(_appState.CurrentDocument!.Model, guid);
+                }
+                catch (InvalidOperationException)
+                {
+                    return new StoryElement();
+                }
             }
 
             return new StoryElement();
@@ -113,15 +134,15 @@ public class StructureBeatViewModel : ObservableObject
             {
                 if (Element.ElementType == StoryItemType.Problem)
                 {
-                    return ((ProblemModel)Element).StoryQuestion;
+                    return ((ProblemModel)Element).Description;
                 }
                 else if (Element.ElementType == StoryItemType.Scene)
                 {
-                    return ((SceneModel)Element).Remarks;
+                    return ((SceneModel)Element).Description;
                 }
             }
 
-            return "Select an element by clicking show Problems/Scenes and dragging it here";
+            return "Assign an element to this beat by clicking the edit button.";
         }
     }
 
@@ -146,4 +167,6 @@ public class StructureBeatViewModel : ObservableObject
         }
     }
     #endregion
+
+
 }

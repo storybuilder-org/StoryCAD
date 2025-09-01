@@ -1,7 +1,14 @@
 ﻿using StoryCAD.DAL;
 using StoryCAD.Services.Search;
+using StoryCAD.ViewModels.Tools;
+using System.Collections.ObjectModel;
+using System.Security.Cryptography;
+using System.Text.Json;
 using Windows.Storage;
-using Windows.Storage.Provider;
+using StoryCAD.Services.Backend;
+using StoryCAD.Services.Locking;
+using StoryCAD.Services.Backup;
+using StoryCAD.ViewModels.SubViewModels;
 
 namespace StoryCAD.Services.Outline;
 /// <summary>
@@ -9,7 +16,9 @@ namespace StoryCAD.Services.Outline;
 /// </summary>
 public class OutlineService
 {
-    private LogService _log = Ioc.Default.GetRequiredService<LogService>();
+    // TODO: Circular dependency - OutlineService ↔ AutoSaveService/BackupService ↔ OutlineViewModel ↔ OutlineService
+    // These services have a complex circular dependency that needs architectural refactoring
+    private ILogService _log = Ioc.Default.GetRequiredService<ILogService>();
 
     /// <summary>
     /// Creates a new story model
@@ -18,134 +27,185 @@ public class OutlineService
     /// <param name="author">Creator of the outline</param>
     /// <param name="selectedTemplateIndex">Template index</param>
     /// <returns>A story outline variable.</returns>
-    public Task<StoryModel> CreateModel(string name, string author, int selectedTemplateIndex)
-    {  
-        _log.Log(LogLevel.Info, $"Creating new model: {name} by {author} with index {selectedTemplateIndex}");
-        StoryModel model = new();
+internal Task<StoryModel> CreateModel(string name, string author, int selectedTemplateIndex)
+{
+    _log.Log(LogLevel.Info, $"Creating new model: {name} by {author} with index {selectedTemplateIndex}");
 
-        OverviewModel overview = new(name, model, null)
-        {
-            DateCreated = DateTime.Today.ToString("yyyy-MM-dd"),
-            Author = author
-        };
+    StoryModel model = new();
 
-        model.ExplorerView.Add(overview.Node);
-        TrashCanModel trash = new(model, null);
-        model.ExplorerView.Add(trash.Node); // The trashcan is the second root
-        FolderModel narrative = new("Narrative View", model, StoryItemType.Folder, null);
-        model.NarratorView.Add(narrative.Node);
+    OverviewModel overview = new(name, model, null)
+    {
+        DateCreated = DateTime.Today.ToString("yyyy-MM-dd"),
+        Author = author
+    };
+    model.ExplorerView.Add(overview.Node);
 
-        if (selectedTemplateIndex != 0)
+    TrashCanModel trash = new(model, null);
+    model.TrashView.Add(trash.Node);                             // Add to TrashView instead of ExplorerView
+
+    FolderModel narrative = new("Narrative View", model,
+                                StoryItemType.Folder, null);
+    model.NarratorView.Add(narrative.Node);
+
+    // branch on template type
+    switch (selectedTemplateIndex)
+    {
+        case 0: // Blank Outline
+            break;
+
+        case 1: // Overview and Story Problem
         {
             StoryElement storyProblem = new ProblemModel("Story Problem", model, overview.Node);
-            StoryElement storyProtag = new CharacterModel("Protagonist", model, overview.Node);
-            StoryElement storyAntag = new CharacterModel("Antagonist", model, overview.Node);
+            StoryElement storyProtag  = new CharacterModel("Protagonist",  model, storyProblem.Node);
+            StoryElement storyAntag   = new CharacterModel("Antagonist",   model, storyProblem.Node);
+
             overview.StoryProblem = storyProblem.Uuid;
             var problem = (ProblemModel)storyProblem;
             problem.Protagonist = storyProtag.Uuid;
-            problem.Antagonist = storyAntag.Uuid;
-            problem.Premise = """
-                              Your[protagonist] in a situation[genre, setting] wants something[goal], which brings him
-                              into [conflict] with a second character[antagonist]. After a series of conflicts[additional
-                              problems], the final battle[climax scene] erupts, and the[protagonist] finally resolves the 
-                              conflict[outcome].
-                              """;
-
-            switch (selectedTemplateIndex)
-            {
-                case 1:
-                    overview.Node.Children.Add(storyProblem.Node);
-                    storyProblem.Node.Children.Add(storyProtag.Node);
-                    storyProblem.Node.Children.Add(storyAntag.Node);
-                    storyProblem.Node.Parent = overview.Node;
-                    storyProtag.Node.Parent = storyProblem.Node;
-                    storyAntag.Node.Parent = storyProblem.Node;
-                    storyProblem.Node.IsExpanded = true;
-                    break;
-                case 2:
-                    StoryElement problems = new FolderModel("Problems", model, StoryItemType.Folder, overview.Node);
-                    StoryElement characters = new FolderModel("Characters", model, StoryItemType.Folder, overview.Node);
-                    StoryElement settings = new FolderModel("Settings", model, StoryItemType.Folder, overview.Node);
-                    StoryElement scenes = new FolderModel("Scenes", model, StoryItemType.Folder, overview.Node);
-                    overview.StoryProblem = storyProblem.Uuid;
-                    overview.Node.Children.Add(storyProblem.Node);
-                    overview.Node.Children.Add(storyProtag.Node);
-                    overview.Node.Children.Add(storyAntag.Node);
-                    problems.Node.IsExpanded = true;
-                    characters.Node.IsExpanded = true;
-                    break;
-                case 3:
-                    storyProblem.Node.Name = "External Problem";
-                    storyProblem.Node.IsExpanded = true;
-                    storyProblem.Node.Parent = overview.Node;
-                    overview.Node.Children.Add(storyProblem.Node);
-                    problem = (ProblemModel)storyProblem;
-                    problem.Name = "External Problem";
-                    overview.StoryProblem = problem.Uuid;
-                    problem.Protagonist = storyProtag.Uuid;
-                    problem.Antagonist = storyAntag.Uuid;
-                    storyProtag.Node.Parent = storyProblem.Node;
-                    storyAntag.Node.Parent = storyProblem.Node;
-                    StoryElement internalProblem = new ProblemModel("Internal Problem", model, overview.Node);
-                    problem = (ProblemModel)internalProblem;
-                    problem.Protagonist = storyProtag.Uuid;
-                    problem.Antagonist = storyProtag.Uuid;
-                    problem.ConflictType = "Person vs. Self";
-                    problem.Premise =
-                        """
-                        Your [protagonist] grapples with an [internal conflict] and is their own antagonist,
-                        marred by self-doubt and fears or having a [goal] that masks this conflict rather than
-                        a real need. The [climax scene] is often a moment of introspection in which he or she
-                        makes a decision or discovery that resolves the internal conflict [outcome]. Resolving
-                        this problem may enable your [protagonist] to resolve another (external) problem.
-                        """;
-                    break;
-                case 4:
-                    storyProtag.Node.IsExpanded = true;
-                    storyProblem.Node.Parent = storyProtag.Node;
-                    storyProtag.Node.Parent = overview.Node;
-                    storyAntag.Node.Parent = overview.Node;
-                    break;
-                case 5:
-                    StoryElement problemsFolder = new FolderModel("Problems", model, StoryItemType.Folder, overview.Node);
-                    StoryElement charactersFolder = new FolderModel("Characters", model, StoryItemType.Folder, overview.Node);
-                    StoryElement settingsFolder = new FolderModel("Settings", model, StoryItemType.Folder, overview.Node);
-                    StoryElement scenesFolder = new FolderModel("Scenes", model, StoryItemType.Folder, overview.Node);
-                    storyProblem.Node.Name = "External Problem";
-                    storyProblem.Node.IsExpanded = true;
-                    storyProblem.Node.Parent = problemsFolder.Node;
-                    problem = (ProblemModel)storyProblem;
-                    problem.Name = "External Problem";
-                    problem.Protagonist = storyProtag.Uuid;
-                    problem.Antagonist = storyAntag.Uuid;
-                    overview.StoryProblem = problem.Uuid;
-                    StoryElement internalProblem2 = new ProblemModel("Internal Problem", model, problemsFolder.Node);
-                    problem = (ProblemModel)internalProblem2;
-                    problem.Protagonist = storyProtag.Uuid;
-                    problem.Antagonist = storyProtag.Uuid;
-                    problem.ConflictType = "Person vs. Self";
-                    problem.Premise =
-                        """
-                        Your [protagonist] grapples with an [internal conflict] and is their own antagonist,
-                        marred by self-doubt and fears or having a [goal] that masks this conflict rather than
-                        a real need. The [climax scene] is often a moment of introspection in which he or she
-                        makes a decision or discovery that resolves the internal conflict [outcome]. Resolving
-                        this problem may enable your [protagonist] to resolve another (external) problem.
-                        """;
-                    storyProblem.Node.Parent = problemsFolder.Node;
-                    break;
-            }
+            problem.Antagonist  = storyAntag.Uuid;
+            problem.Premise =
+                """
+                Your [protagonist] in a situation [genre, setting] wants something [goal], which brings him
+                into [conflict] with a second character [antagonist]. After a series of conflicts [additional
+                problems], the final battle [climax scene] erupts, and the [protagonist] finally resolves the
+                conflict [outcome].
+                """;
+            storyProblem.Node.IsExpanded = true;
+            break;
         }
 
-        _log.Log(LogLevel.Info, $"Model created, element count {model.StoryElements.Count}");
-        return Task.FromResult(model);
+        case 2: // Folders
+        {
+            StoryElement problems   = new FolderModel("Problems",   model, StoryItemType.Folder, overview.Node);
+            StoryElement characters = new FolderModel("Characters", model, StoryItemType.Folder, overview.Node);
+            StoryElement settings   = new FolderModel("Settings",   model, StoryItemType.Folder, overview.Node);
+            StoryElement scenes     = new FolderModel("Scenes",     model, StoryItemType.Folder, overview.Node);
+
+            problems.Node.IsExpanded   = true;
+            characters.Node.IsExpanded = true;
+            settings.Node.IsExpanded = true;
+            scenes.Node.IsExpanded = true;
+            break;
+        }
+
+        case 3: // External and Internal Problems
+        {
+            StoryElement external = new ProblemModel("External Problem", model, overview.Node);
+            StoryElement protag   = new CharacterModel("Protagonist",     model, external.Node);
+            StoryElement antag    = new CharacterModel("Antagonist",      model, external.Node);
+
+            overview.StoryProblem = external.Uuid;
+            var extProb = (ProblemModel)external;
+            extProb.Name        = "External Problem";
+            extProb.Protagonist = protag.Uuid;
+            extProb.Antagonist  = antag.Uuid;
+            extProb.Premise =
+                """
+                Your [protagonist] in a situation [genre, setting] wants something [goal], which brings him
+                into [conflict] with a second character [antagonist]. After a series of conflicts [additional
+                problems], the final battle [climax scene] erupts, and the [protagonist] finally resolves the
+                conflict [outcome].
+                """;
+            external.Node.IsExpanded = true;
+
+            StoryElement internalProb = new ProblemModel("Internal Problem", model, overview.Node);
+            var intProb = (ProblemModel)internalProb;
+            intProb.Protagonist  = protag.Uuid;
+            intProb.Antagonist   = protag.Uuid;
+            intProb.ConflictType = "Person vs. Self";
+            intProb.Premise =
+                """
+                Your [protagonist] grapples with an [internal conflict] and is their own antagonist,
+                marred by self-doubt and fears or having a [goal] that masks this conflict rather than
+                a real need. The [climax scene] is often a moment of introspection in which he or she
+                makes a decision or discovery that resolves the internal conflict [outcome]. Resolving
+                this problem may enable your [protagonist] to resolve another (external) problem.
+                """;
+            break;
+        }
+
+        case 4: // Protagonist and Antagonist
+        {
+            StoryElement protag = new CharacterModel("Protagonist", model, overview.Node);
+            StoryElement antag  = new CharacterModel("Antagonist",  model, overview.Node);
+            protag.Node.IsExpanded = true;
+
+            StoryElement storyProblem = new ProblemModel("Story Problem", model, protag.Node);
+            overview.StoryProblem = storyProblem.Uuid;
+            var problem = (ProblemModel)storyProblem;
+            problem.Protagonist = protag.Uuid;
+            problem.Antagonist  = antag.Uuid;
+            problem.Premise =
+                """
+                Your [protagonist] in a situation [genre, setting] wants something [goal], which brings him
+                into [conflict] with a second character [antagonist]. After a series of conflicts [additional
+                problems], the final battle [climax scene] erupts, and the [protagonist] finally resolves the
+                conflict [outcome].
+                """;
+            break;
+        }
+
+        case 5: // Problems and Characters
+        {
+            StoryElement problemsFolder   = new FolderModel("Problems",   model, StoryItemType.Folder, overview.Node);
+            StoryElement charactersFolder = new FolderModel("Characters", model, StoryItemType.Folder, overview.Node);
+            StoryElement settingsFolder   = new FolderModel("Settings",   model, StoryItemType.Folder, overview.Node);
+            StoryElement scenesFolder     = new FolderModel("Scenes",     model, StoryItemType.Folder, overview.Node);
+
+            StoryElement external = new ProblemModel("External Problem", model, problemsFolder.Node);
+            StoryElement protag   = new CharacterModel("Protagonist",     model, charactersFolder.Node);
+            StoryElement antag    = new CharacterModel("Antagonist",      model, charactersFolder.Node);
+
+            overview.StoryProblem = external.Uuid;
+            var extProb = (ProblemModel)external;
+            extProb.Name        = "External Problem";
+            extProb.Protagonist = protag.Uuid;
+            extProb.Antagonist  = antag.Uuid;
+            extProb.Premise =
+                """
+                Your [protagonist] in a situation [genre, setting] wants something [goal], which brings him
+                into [conflict] with a second character [antagonist]. After a series of conflicts [additional
+                problems], the final battle [climax scene] erupts, and the [protagonist] finally resolves the
+                conflict [outcome].
+                """;
+            external.Node.IsExpanded = true;
+            settingsFolder.Node.IsExpanded = true;
+            scenesFolder.Node.IsExpanded = true;
+
+            StoryElement internalProb = new ProblemModel("Internal Problem", model, problemsFolder.Node);
+            var intProb = (ProblemModel)internalProb;
+            intProb.Protagonist  = protag.Uuid;
+            intProb.Antagonist   = protag.Uuid;
+            intProb.ConflictType = "Person vs. Self";
+            intProb.Premise =
+                """
+                Your [protagonist] grapples with an [internal conflict] and is their own antagonist,
+                marred by self-doubt and fears or having a [goal] that masks this conflict rather than
+                a real need. The [climax scene] is often a moment of introspection in which he or she
+                makes a decision or discovery that resolves the internal conflict [outcome]. Resolving
+                this problem may enable your [protagonist] to resolve another (external) problem.
+                """;
+            break;
+        }
+
+        default:
+            throw new ArgumentOutOfRangeException(nameof(selectedTemplateIndex));
     }
+
+    // Reset Changed flag after template creation
+    // Template creation adds nodes which trigger change events, but a newly created model shouldn't be marked as changed
+    model.Changed = false;
+    
+    _log.Log(LogLevel.Info, $"Model created, element count {model.StoryElements.Count}");
+    return Task.FromResult(model);
+}
+
 
     /// <summary>
     /// Writes the StoryModel JSON file to disk.
     /// Returns true if write is successful or throws an exception.
     /// </summary>
-    public async Task<bool> WriteModel(StoryModel model, string file)
+    internal async Task<bool> WriteModel(StoryModel model, string file)
     {
         _log.Log(LogLevel.Info, $"Writing model to {file}");
         var wtr = Ioc.Default.GetRequiredService<StoryIO>();
@@ -160,7 +220,7 @@ public class OutlineService
     /// <param name="path">Path to Outline</param>
     /// <returns>StoryModel Object</returns>
     /// <exception cref="FileNotFoundException">Thrown if path doesn't exist.</exception>
-    public async Task<StoryModel> OpenFile(string path)
+    internal async Task<StoryModel> OpenFile(string path)
     {
         _log.Log(LogLevel.Info, $"Opening file {path}");
         if (!File.Exists(path))
@@ -169,9 +229,43 @@ public class OutlineService
         }
 
         var file = await StorageFile.GetFileFromPathAsync(path);
-        StoryModel model = await new StoryIO().ReadStory(file);
+        var storyIO = Ioc.Default.GetRequiredService<StoryIO>();
+        StoryModel model = await storyIO.ReadStory(file);
         _log.Log(LogLevel.Info, $"Opened model contains {model.StoryElements.Count} elements.");
         return model;
+    }
+
+    /// <summary>
+    /// Sets the current view type for the story model and updates the CurrentView accordingly.
+    /// </summary>
+    /// <param name="model">The StoryModel to update</param>
+    /// <param name="viewType">The desired view type (Explorer or Narrator)</param>
+    /// <exception cref="ArgumentNullException">Thrown when model is null</exception>
+    /// <exception cref="ArgumentException">Thrown when viewType is invalid</exception>
+    internal void SetCurrentView(StoryModel model, StoryViewType viewType)
+    {
+        if (model == null)
+            throw new ArgumentNullException(nameof(model));
+
+        
+        using (var serializationLock = new SerializationLock(_log))
+        {
+            switch (viewType)
+            {
+                case StoryViewType.ExplorerView:
+                    model.CurrentView = model.ExplorerView;
+                    model.CurrentViewType = StoryViewType.ExplorerView;
+                    break;
+                case StoryViewType.NarratorView:
+                    model.CurrentView = model.NarratorView;
+                    model.CurrentViewType = StoryViewType.NarratorView;
+                    break;
+                default:
+                    throw new ArgumentException($"Unsupported view type: {viewType}", nameof(viewType));
+            }
+            
+            _log.Log(LogLevel.Info, $"View switched to {viewType}");
+        }
     }
 
     /// <summary>
@@ -181,7 +275,7 @@ public class OutlineService
     /// <param name="typeToAdd">Type of StoryElement that should be created</param>
     /// <param name="parent">Parent of the node we are creating</param>
     /// <returns>Newly created StoryElement</returns>
-    public StoryElement AddStoryElement(StoryModel model, StoryItemType typeToAdd, StoryNodeItem parent)
+    internal StoryElement AddStoryElement(StoryModel model, StoryItemType typeToAdd, StoryNodeItem parent)
     {
         _log.Log(LogLevel.Info, "AddStoryElement called.");
         if (parent == null)
@@ -194,7 +288,7 @@ public class OutlineService
             throw new ArgumentNullException(nameof(model));
         }
 
-        if (StoryNodeItem.RootNodeType(parent) == StoryItemType.TrashCan)
+            if (StoryNodeItem.RootNodeType(parent) == StoryItemType.TrashCan)
         {
             throw new InvalidOperationException("Cannot add a new node to the Trash Can.");
         }
@@ -218,10 +312,19 @@ public class OutlineService
     /// <summary>
     /// Finds if an element can be safely deleted.
     /// </summary>
-    public List<StoryElement> FindElementReferences(StoryModel model, Guid elementGuid)
+    internal List<StoryElement> FindElementReferences(StoryModel model, Guid elementGuid)
     {
         _log.Log(LogLevel.Info, $"FindElementReferences called for element {elementGuid}.");
-        StoryElement elementToDelete = StoryElement.GetByGuid(elementGuid);
+        
+        // Use GetByGuid with the model parameter for stateless operation
+        StoryElement elementToDelete = StoryElement.GetByGuid(elementGuid, model);
+        
+        if (elementToDelete == null || elementToDelete.Node == null)
+        {
+            _log.Log(LogLevel.Warn, $"Element {elementGuid} not found or has no associated Node.");
+            return new List<StoryElement>();
+        }
+        
         if (StoryNodeItem.RootNodeType(elementToDelete.Node) == StoryItemType.TrashCan)
         {
             throw new InvalidOperationException("Cannot delete a node from the Trash Can.");
@@ -234,7 +337,11 @@ public class OutlineService
         List<StoryElement> foundNodes = new();
         foreach (StoryElement element in model.StoryElements)
         {
-            if (Ioc.Default.GetRequiredService<DeletionService>().SearchStoryElement(element.Node, elementGuid, model))
+            // Skip checking the element against itself
+            if (element.Uuid == elementGuid)
+                continue;
+                
+            if (Ioc.Default.GetRequiredService<SearchService>().SearchUuid(element.Node, elementGuid, model))
             {
                 foundNodes.Add(element);
             }
@@ -249,7 +356,7 @@ public class OutlineService
     /// <param name="elementToRemove">Element you are removing references to</param>
     /// <param name="model">StoryModel you are updating</param>
     /// <returns>bool indicating success</returns>
-    public bool RemoveReferenceToElement(Guid elementToRemove, StoryModel model)
+    private bool RemoveReferenceToElement(Guid elementToRemove, StoryModel model)
     {
         _log.Log(LogLevel.Info, $"RemoveReferenceToElement called for element {elementToRemove}.");
         if (elementToRemove == Guid.Empty)
@@ -264,48 +371,13 @@ public class OutlineService
 
         foreach (StoryElement element in model.StoryElements)
         {
-            Ioc.Default.GetRequiredService<DeletionService>()
-                .SearchStoryElement(element.Node, elementToRemove, model, true);
+            Ioc.Default.GetRequiredService<SearchService>()
+                .SearchUuid(element.Node, elementToRemove, model, true);
         }
         _log.Log(LogLevel.Info, "RemoveReferenceToElement completed.");
         return true;
     }
 
-    /// <summary>
-    /// Deletes an element.
-    /// <remarks>Element is moved to trashcan node.</remarks>
-    /// </summary>
-    /// <param name="elementToRemove">Element you want to remove</param>
-    /// <param name="view">View you are deleting from</param>
-    /// <param name="source">StoryModel you are deleting from.</param>
-    /// <returns>true if successful.</returns>
-    public bool RemoveElement(StoryElement elementToRemove, StoryViewType view, StoryNodeItem source)
-    {
-        _log.Log(LogLevel.Info, $"RemoveElement called for element {elementToRemove.Uuid}.");
-        if (elementToRemove == null)
-        {
-            throw new ArgumentNullException(nameof(elementToRemove));
-        }
-
-        if (source == null)
-        {
-            throw new ArgumentNullException(nameof(source));
-        }
-
-        if (source.IsRoot)
-        {
-            throw new InvalidOperationException("Cannot delete a root node.");
-        }
-
-        if (source.Type is StoryItemType.StoryOverview or StoryItemType.TrashCan)
-        {
-            throw new InvalidOperationException("Cannot delete a trash or overview node.");
-        }
-
-        bool result = elementToRemove.Node.Delete(view);
-        _log.Log(LogLevel.Info, $"RemoveElement completed for element {elementToRemove.Uuid}.");
-        return result;
-    }
 
     /// <summary>
     /// Adds a relationship between two elements.
@@ -316,7 +388,7 @@ public class OutlineService
     /// <param name="desc">Relationship description</param>
     /// <param name="mirror">Create same relationship on recipient</param>
     /// <returns></returns>
-    public bool AddRelationship(StoryModel Model, Guid source, Guid recipient, string desc, bool mirror = false)
+    internal bool AddRelationship(StoryModel Model, Guid source, Guid recipient, string desc, bool mirror = false)
     {
         _log.Log(LogLevel.Info, $"AddRelationship called from {source} to {recipient}.");
         if (source == Guid.Empty)
@@ -342,13 +414,45 @@ public class OutlineService
             throw new InvalidOperationException("Recipient must be a character.");
         }
 
+        // Check for duplicate relationship before adding
+        CharacterModel sourceCharacter = (CharacterModel)sourceElement;
+        foreach (var existingRel in sourceCharacter.RelationshipList)
+        {
+            if (existingRel.PartnerUuid == recipient &&
+                existingRel.RelationType == desc &&
+                existingRel.Trait == string.Empty &&
+                existingRel.Attitude == string.Empty)
+            {
+                _log.Log(LogLevel.Info, $"Duplicate relationship from {source} to {recipient} not added.");
+                return true; // Return true but don't add duplicate
+            }
+        }
+
         RelationshipModel relationship = new(recipient, desc);
-        ((CharacterModel)sourceElement).RelationshipList.Add(relationship);
+        sourceCharacter.RelationshipList.Add(relationship);
 
         if (mirror)
         {
-            RelationshipModel mirrorRelationship = new(source, desc);
-            ((CharacterModel)recipientElement).RelationshipList.Add(mirrorRelationship);
+            // Check for duplicate in mirror relationship too
+            CharacterModel recipientCharacter = (CharacterModel)recipientElement;
+            bool mirrorExists = false;
+            foreach (var existingRel in recipientCharacter.RelationshipList)
+            {
+                if (existingRel.PartnerUuid == source &&
+                    existingRel.RelationType == desc &&
+                    existingRel.Trait == string.Empty &&
+                    existingRel.Attitude == string.Empty)
+                {
+                    mirrorExists = true;
+                    break;
+                }
+            }
+            
+            if (!mirrorExists)
+            {
+                RelationshipModel mirrorRelationship = new(source, desc);
+                recipientCharacter.RelationshipList.Add(mirrorRelationship);
+            }
         }
         _log.Log(LogLevel.Info, $"AddRelationship completed from {source} to {recipient}.");
         return true;
@@ -360,13 +464,14 @@ public class OutlineService
     /// <param name="source">Scene element you are adding the cast member to </param>
     /// <param name="castMember">Cast member you want to add.</param>
     /// <returns></returns>
-    public bool AddCastMember(StoryModel Model, StoryElement source, Guid castMember)
+    internal bool AddCastMember(StoryModel Model, StoryElement source, Guid castMember)
     {
-        _log.Log(LogLevel.Info, $"AddCastMember called for cast member {castMember} on source {source.Uuid}.");
         if (source == null)
         {
             throw new ArgumentNullException(nameof(source));
         }
+        
+        _log.Log(LogLevel.Info, $"AddCastMember called for cast member {castMember} on source {source.Uuid}.");
 
         if (castMember == Guid.Empty)
         {
@@ -395,7 +500,7 @@ public class OutlineService
         return true;
     }
 
-    public SceneModel ConvertProblemToScene(StoryModel model, ProblemModel problem)
+    internal SceneModel ConvertProblemToScene(StoryModel model, ProblemModel problem)
     {
         _log.Log(LogLevel.Info, $"ConvertProblemToScene called for {problem.Uuid}.");
 
@@ -459,7 +564,7 @@ public class OutlineService
     /// <summary>
     /// Convert a Scene element to a Problem element.
     /// </summary>
-    public ProblemModel ConvertSceneToProblem(StoryModel model, SceneModel scene)
+    internal ProblemModel ConvertSceneToProblem(StoryModel model, SceneModel scene)
     {
         _log.Log(LogLevel.Info, $"ConvertSceneToProblem called for {scene.Uuid}.");
 
@@ -517,5 +622,707 @@ public class OutlineService
         _log.Log(LogLevel.Info, $"ConvertSceneToProblem completed for {problem.Uuid}.");
         return problem;
     }
+    /// <summary>
+    /// Assigns an element to a beat in a ProblemModel.
+    /// </summary>
+    /// <param name="Model">StoryModel</param>
+    /// <param name="Parent">Problem Element that contains the beatsheet you wish to bind to</param>
+    /// <param name="Index">Index of beat you are binding to</param>
+    /// <param name="DesiredBind">Guid of Element you want to bind to, MUST be scene or problem element</param>
+    internal void AssignElementToBeat(StoryModel Model, ProblemModel Parent, int Index, Guid DesiredBind)
+    {
+        //Check params
+        if (Model == null)
+        {
+            throw new ArgumentNullException(nameof(Model));
+        }
+        if (Parent == null)
+        {
+            throw new ArgumentNullException(nameof(Parent));
+        }
+        if (DesiredBind == Guid.Empty)
+        {
+            throw new ArgumentNullException(nameof(DesiredBind));
+        }
 
+        //Get desired bind
+        StoryElement DesiredBindElement;
+        Model.StoryElements.StoryElementGuids.TryGetValue(DesiredBind, out DesiredBindElement);
+        Parent.StructureBeats[Index].Guid = DesiredBind;
+
+        //Check element really exists.
+        if (DesiredBindElement == null)
+        {
+            throw new NullReferenceException($"GUID: {DesiredBind} does not exist within StoryModel");
+        }
+
+        //Check we are binding the correct element
+        if (DesiredBindElement.ElementType != StoryItemType.Problem &&
+            DesiredBindElement.ElementType != StoryItemType.Scene)
+        {
+            throw new InvalidOperationException("You can only bind Scene or Problem Elements.");
+        }
+
+        //Check Index is valid
+        if (Index >= 0 && Parent.StructureBeats.Count-1 >= Index)
+        {
+            //Bind
+            Parent.StructureBeats[Index].Guid = DesiredBind;
+        }
+        else
+        {
+            // out of bounds
+            throw new InvalidOperationException("Index is out of bounds.");
+        }
+    }
+
+    /// <summary>
+    /// Removes bound element.
+    /// </summary>
+    /// <param name="Model">Story model</param>
+    /// <param name="Parent">Problem Element with beatsheet</param>
+    /// <param name="Index">Index you want to unbind from</param>
+    internal void UnasignBeat(StoryModel Model, ProblemModel Parent, int Index)
+    {
+        //Check params
+        if (Model == null)
+        {
+            throw new ArgumentNullException(nameof(Model));
+        }
+        if (Parent == null)
+        {
+            throw new ArgumentNullException(nameof(Parent));
+        }
+
+
+        //Check Index is valid
+        if (Index >= 0 && Parent.StructureBeats.Count - 1 >= Index)
+        {
+            //unbind
+            Parent.StructureBeats[Index].Guid = Guid.Empty;
+        }
+        else
+        {
+            // out of bounds
+            throw new InvalidOperationException("Index is out of bounds.");
+        }
+    }
+
+    /// <summary>
+    /// Add beat to a ProblemModel.
+    /// </summary>
+    /// <param name="Parent"></param>
+    /// <param name="Title"></param>
+    /// <param name="Description"></param>
+    /// <exception cref="ArgumentNullException"></exception>
+    internal void CreateBeat(ProblemModel Parent, string Title, string Description)
+    {
+        if (Parent == null)
+        {
+            throw new ArgumentNullException(nameof(Parent));
+        }
+
+        //Create and add beat.
+        Parent.StructureBeats.Add(new(Title, Description));
+    }
+
+    /// <summary>
+    /// Deletes a beat and unbinds elements if nesscessary.
+    /// </summary>
+    /// <param name="Model"></param>
+    /// <param name="Index"></param>
+    internal void DeleteBeat(StoryModel Model, ProblemModel Parent, int Index)
+    {
+        if (Model == null)  {  throw new ArgumentNullException(nameof(Model)); }
+        if (Parent == null)
+        {
+            throw new ArgumentNullException(nameof(Parent));
+        }
+
+        if (Index < 0 || Index >= Parent.StructureBeats.Count)
+        {
+            throw new ArgumentOutOfRangeException("Index is invalid");
+        }
+
+        // Index is valid, proceed with deletion
+        // No bound beat
+        if (Parent.StructureBeats[Index].Guid == Guid.Empty)
+        {
+            Parent.StructureBeats.RemoveAt(Index);
+            return;
+        }
+
+        StoryElement? BoundElement;
+        Model.StoryElements.StoryElementGuids.TryGetValue(Parent.StructureBeats[Index].Guid, out BoundElement);
+        
+        //An element is bound that doesn't exist
+        if (BoundElement == null)
+        {
+            Parent.StructureBeats.RemoveAt(Index);
+            return;
+        }
+        
+        //For Problem elements we MUST unassign first or StoryCAD will have issues
+        //when trying to assign that element to a beat in the future.
+        //Scenes are not limited and can be assigned to multiple
+        if (BoundElement.ElementType == StoryItemType.Problem)
+        {
+            UnasignBeat(Model, Parent, Index);
+        }
+        Parent.StructureBeats.RemoveAt(Index);
+    }
+
+    /// <summary>
+    /// Sets basic infomation about the beat sheet/creates a new one
+    /// If one exists, it will be overwritten and any beats in it will be unbound.
+    /// </summary>
+    /// <param name="Description">Description of you beatsheet, i.e. what is its structure?</param>
+    /// <param name="Model">Problem element you are trying to add the beatsheet to</param>
+    /// <param name="Title">This is the title of your beat sheet,
+    /// if it is not Custom Beat Sheet it will not be editable within the StoryCAD app.
+    /// </param>
+    /// <param name="Beats">Beats that this sheet will contain, can be added later</param>
+    public void SetBeatSheet(StoryModel Model, ProblemModel Parent, string Description, 
+        string Title = "Custom Beat Sheet", ObservableCollection<StructureBeatViewModel> Beats = null)
+    {
+        Parent.StructureTitle = Title;
+        Parent.StructureDescription = Description;
+
+        //Unbind/Delete Beats first.
+        for (int i = Parent.StructureBeats.Count - 1; i >= 0; i--) {
+            DeleteBeat(Model, Parent, i);
+        }
+
+        //Create/Add beats.
+        Parent.StructureBeats = Beats ?? new();
+    }
+
+    /// <summary>
+    /// Saves a beatsheet to a file
+    /// </summary>
+    /// <param name="Path">File path to save to</param>
+    /// <param name="Description"> Beatsheet Description</param>
+    /// <param name="Beats">Beats</param>
+    internal void SaveBeatsheet(string Path, string Description, List<StructureBeatViewModel> Beats)
+    {
+        SavedBeatsheet Model = new();
+        Model.Beats = Beats = Beats
+                .Select(b =>
+                {
+                    var copy = new StructureBeatViewModel(b.Title, b.Description);
+                    return copy;
+                })
+                .ToList();
+        Model.Description = Description;
+        string data = JsonSerializer.Serialize(Model);
+        File.WriteAllText(Path, data);
+    }
+
+    /// <summary>
+    /// Loads a beatsheet
+    /// </summary>
+    /// <param name="path">File path to load</param>
+    /// <returns>Model</returns>
+    internal SavedBeatsheet LoadBeatsheet(string path)
+    {
+        string data = File.ReadAllText(path);
+        var model = JsonSerializer.Deserialize<SavedBeatsheet>(data);
+        foreach (var Beat in model.Beats) { Beat.Guid = Guid.Empty; }
+
+        return model;
+    }
+
+    /// <summary>
+    /// Sets the Changed status of a StoryModel with proper SerializationLock handling
+    /// </summary>
+    /// <param name="model">The StoryModel to update</param>
+    /// <param name="changed">The desired Changed status</param>
+    /// <exception cref="ArgumentNullException">Thrown when model is null</exception>
+    internal void SetChanged(StoryModel model, bool changed)
+    {
+        if (model == null)
+            throw new ArgumentNullException(nameof(model));
+
+        
+        using (var serializationLock = new SerializationLock(_log))
+        {
+            model.Changed = changed;
+            _log.Log(LogLevel.Info, $"Model Changed status set to {changed}");
+        }
+    }
+
+    /// <summary>
+    /// Gets a StoryElement by its GUID from the StoryModel
+    /// </summary>
+    /// <param name="model">The StoryModel to search in</param>
+    /// <param name="guid">The GUID of the element to find</param>
+    /// <returns>The StoryElement with the matching GUID</returns>
+    /// <exception cref="ArgumentNullException">Thrown when model is null</exception>
+    /// <exception cref="ArgumentException">Thrown when guid is empty</exception>
+    /// <exception cref="InvalidOperationException">Thrown when element with guid is not found</exception>
+    internal StoryElement GetStoryElementByGuid(StoryModel model, Guid guid)
+    {
+        if (model == null)
+            throw new ArgumentNullException(nameof(model));
+            
+        if (guid == Guid.Empty)
+            throw new ArgumentException("GUID cannot be empty", nameof(guid));
+
+        
+        using (var serializationLock = new SerializationLock(_log))
+        {
+            if (!model.StoryElements.StoryElementGuids.TryGetValue(guid, out var element))
+            {
+                throw new InvalidOperationException($"StoryElement with GUID {guid} not found");
+            }
+            
+            _log.Log(LogLevel.Info, $"Retrieved StoryElement {element.Name} with GUID {guid}");
+            return element;
+        }
+    }
+
+    /// <summary>
+    /// Updates a StoryElement in the StoryModel with proper SerializationLock handling
+    /// </summary>
+    /// <param name="model">The StoryModel containing the element</param>
+    /// <param name="element">The StoryElement to update</param>
+    /// <exception cref="ArgumentNullException">Thrown when model or element is null</exception>
+    internal void UpdateStoryElement(StoryModel model, StoryElement element)
+    {
+        if (model == null)
+            throw new ArgumentNullException(nameof(model));
+            
+        if (element == null)
+            throw new ArgumentNullException(nameof(element));
+
+        
+        using (var serializationLock = new SerializationLock(_log))
+        {
+            // Update the element in the dictionary
+            model.StoryElements.StoryElementGuids[element.Uuid] = element;
+            
+            // Mark the model as changed directly (already within a lock)
+            model.Changed = true;
+            
+            _log.Log(LogLevel.Info, $"Updated StoryElement {element.Name} with GUID {element.Uuid}");
+        }
+    }
+
+    /// <summary>
+    /// Gets a list of all character elements from the story model.
+    /// </summary>
+    /// <param name="model">The story model to retrieve characters from</param>
+    /// <returns>A list of CharacterModel elements</returns>
+    internal List<CharacterModel> GetCharacterList(StoryModel model)
+    {
+        if (model == null)
+            throw new ArgumentNullException(nameof(model));
+
+        
+        using (var serializationLock = new SerializationLock(_log))
+        {
+            var characters = model.StoryElements
+                .Where(e => e.ElementType == StoryItemType.Character)
+                .Cast<CharacterModel>()
+                .ToList();
+                
+            _log.Log(LogLevel.Info, $"Retrieved {characters.Count} characters from model");
+            return characters;
+        }
+    }
+
+    /// <summary>
+    /// Updates a story element by its GUID.
+    /// </summary>
+    /// <param name="model">The story model containing the element</param>
+    /// <param name="guid">The GUID of the element to update</param>
+    /// <param name="updatedElement">The updated element data</param>
+    internal void UpdateStoryElementByGuid(StoryModel model, Guid guid, StoryElement updatedElement)
+    {
+        if (model == null)
+            throw new ArgumentNullException(nameof(model));
+            
+        if (guid == Guid.Empty)
+            throw new ArgumentException("GUID cannot be empty", nameof(guid));
+            
+        if (updatedElement == null)
+            throw new ArgumentNullException(nameof(updatedElement));
+
+        // First verify the element exists
+        var existingElement = GetStoryElementByGuid(model, guid);
+        
+        // Set the GUID to ensure consistency
+        updatedElement.Uuid = guid;
+        
+        // Update using the existing UpdateStoryElement method
+        UpdateStoryElement(model, updatedElement);
+    }
+
+    /// <summary>
+    /// Gets a list of all setting elements from the story model.
+    /// </summary>
+    /// <param name="model">The story model to retrieve settings from</param>
+    /// <returns>A list of SettingModel elements</returns>
+    internal List<SettingModel> GetSettingsList(StoryModel model)
+    {
+        if (model == null)
+            throw new ArgumentNullException(nameof(model));
+
+        
+        using (var serializationLock = new SerializationLock(_log))
+        {
+            var settings = model.StoryElements
+                .Where(e => e.ElementType == StoryItemType.Setting)
+                .Cast<SettingModel>()
+                .ToList();
+                
+            _log.Log(LogLevel.Info, $"Retrieved {settings.Count} settings from model");
+            return settings;
+        }
+    }
+
+    /// <summary>
+    /// Gets all story elements from the model.
+    /// </summary>
+    /// <param name="model">The story model to retrieve elements from</param>
+    /// <returns>A list of all story elements</returns>
+    internal List<StoryElement> GetAllStoryElements(StoryModel model)
+    {
+        if (model == null)
+            throw new ArgumentNullException(nameof(model));
+
+        
+        using (var serializationLock = new SerializationLock(_log))
+        {
+            var elements = model.StoryElements.ToList();
+            _log.Log(LogLevel.Info, $"Retrieved {elements.Count} story elements from model");
+            return elements;
+        }
+    }
+
+    /// <summary>
+    /// Searches for story elements containing the specified text.
+    /// </summary>
+    /// <param name="model">The story model to search in</param>
+    /// <param name="searchText">The text to search for (case-insensitive)</param>
+    /// <returns>A list of story elements that contain the search text</returns>
+    internal List<StoryElement> SearchForText(StoryModel model, string searchText)
+    {
+        if (model == null)
+            throw new ArgumentNullException(nameof(model));
+            
+        if (string.IsNullOrWhiteSpace(searchText))
+            return new List<StoryElement>();
+
+        _log.Log(LogLevel.Info, $"Searching for text: {searchText}");
+        
+        var searchService = new SearchService(_log);
+        var results = new List<StoryElement>();
+        
+        
+        using (var serializationLock = new SerializationLock(_log))
+        {
+            foreach (var element in model.StoryElements)
+            {
+                if (searchService.SearchString(element.Node, searchText, model))
+                {
+                    results.Add(element);
+                }
+            }
+        }
+        
+        _log.Log(LogLevel.Info, $"Found {results.Count} elements containing '{searchText}'");
+        return results;
+    }
+
+    /// <summary>
+    /// Searches for story elements that reference the specified UUID.
+    /// </summary>
+    /// <param name="model">The story model to search in</param>
+    /// <param name="targetUuid">The UUID to search for</param>
+    /// <returns>A list of story elements that reference the specified UUID</returns>
+    internal List<StoryElement> SearchForUuidReferences(StoryModel model, Guid targetUuid)
+    {
+        if (model == null)
+            throw new ArgumentNullException(nameof(model));
+            
+        if (targetUuid == Guid.Empty)
+            return new List<StoryElement>();
+
+        _log.Log(LogLevel.Info, $"Searching for UUID references: {targetUuid}");
+        
+        var searchService = new SearchService(_log);
+        var results = new List<StoryElement>();
+        
+        
+        using (var serializationLock = new SerializationLock(_log))
+        {
+            foreach (var element in model.StoryElements)
+            {
+                if (searchService.SearchUuid(element.Node, targetUuid, model, false))
+                {
+                    results.Add(element);
+                }
+            }
+        }
+        
+        _log.Log(LogLevel.Info, $"Found {results.Count} elements referencing UUID {targetUuid}");
+        return results;
+    }
+
+    /// <summary>
+    /// Removes all references to a specified UUID from the story model.
+    /// </summary>
+    /// <param name="model">The story model to clean</param>
+    /// <param name="targetUuid">The UUID to remove references to</param>
+    /// <returns>The number of elements that had references removed</returns>
+    internal int RemoveUuidReferences(StoryModel model, Guid targetUuid)
+    {
+        if (model == null)
+            throw new ArgumentNullException(nameof(model));
+            
+        if (targetUuid == Guid.Empty)
+            return 0;
+
+        _log.Log(LogLevel.Info, $"Removing references to UUID: {targetUuid}");
+        
+        var searchService = new SearchService(_log);
+        int affectedCount = 0;
+        
+        
+        using (var serializationLock = new SerializationLock(_log))
+        {
+            foreach (var element in model.StoryElements)
+            {
+                if (searchService.SearchUuid(element.Node, targetUuid, model, true))
+                {
+                    affectedCount++;
+                }
+            }
+            
+            if (affectedCount > 0)
+            {
+                model.Changed = true;
+            }
+        }
+        
+        _log.Log(LogLevel.Info, $"Removed references from {affectedCount} elements");
+        return affectedCount;
+    }
+
+    /// <summary>
+    /// Searches for story elements within a specific subtree.
+    /// </summary>
+    /// <param name="model">The story model to search in</param>
+    /// <param name="rootNode">The root node of the subtree to search</param>
+    /// <param name="searchText">The text to search for (case-insensitive)</param>
+    /// <returns>A list of story elements in the subtree that contain the search text</returns>
+    internal List<StoryElement> SearchInSubtree(StoryModel model, StoryNodeItem rootNode, string searchText)
+    {
+        if (model == null)
+            throw new ArgumentNullException(nameof(model));
+            
+        if (rootNode == null)
+            throw new ArgumentNullException(nameof(rootNode));
+            
+        if (string.IsNullOrWhiteSpace(searchText))
+            return new List<StoryElement>();
+
+        _log.Log(LogLevel.Info, $"Searching in subtree rooted at {rootNode.Name} for text: {searchText}");
+        
+        var searchService = new SearchService(_log);
+        var results = new List<StoryElement>();
+        
+        
+        using (var serializationLock = new SerializationLock(_log))
+        {
+            // Search the root node
+            if (searchService.SearchString(rootNode, searchText, model))
+            {
+                if (model.StoryElements.StoryElementGuids.TryGetValue(rootNode.Uuid, out var element))
+                {
+                    results.Add(element);
+                }
+            }
+            
+            // Recursively search children
+            SearchChildrenRecursive(rootNode, searchText, model, searchService, results);
+        }
+        
+        _log.Log(LogLevel.Info, $"Found {results.Count} elements in subtree containing '{searchText}'");
+        return results;
+    }
+
+    /// <summary>
+    /// Helper method to recursively search children nodes.
+    /// </summary>
+    private void SearchChildrenRecursive(StoryNodeItem parentNode, string searchText, 
+        StoryModel model, SearchService searchService, List<StoryElement> results)
+    {
+        foreach (var childNode in parentNode.Children)
+        {
+            if (searchService.SearchString(childNode, searchText, model))
+            {
+                if (model.StoryElements.StoryElementGuids.TryGetValue(childNode.Uuid, out var element))
+                {
+                    results.Add(element);
+                }
+            }
+            
+            // Recursively search this child's children
+            SearchChildrenRecursive(childNode, searchText, model, searchService, results);
+        }
+    }
+
+    #region Trash Operations
+
+    /// <summary>
+    /// Moves a story element to the trash.
+    /// </summary>
+    /// <param name="element">The element to move to trash</param>
+    /// <param name="model">The story model</param>
+    /// <exception cref="ArgumentNullException">Thrown when element or model is null</exception>
+    /// <exception cref="InvalidOperationException">Thrown when element cannot be moved to trash</exception>
+    internal void MoveToTrash(StoryElement element, StoryModel model)
+    {
+        if (element == null)
+            throw new ArgumentNullException(nameof(element));
+        
+        if (model == null)
+            throw new ArgumentNullException(nameof(model));
+        
+        // Validate element can be moved to trash
+        if (element.Node.IsRoot)
+            throw new InvalidOperationException("Cannot move root nodes to trash");
+        
+        if (element.ElementType == StoryItemType.TrashCan)
+            throw new InvalidOperationException("Cannot move TrashCan to trash");
+        
+        if (element.ElementType == StoryItemType.StoryOverview)
+            throw new InvalidOperationException("Cannot move StoryOverview to trash");
+
+        _log.Log(LogLevel.Info, $"Moving element {element.Uuid} to trash");
+
+        
+        using (var serializationLock = new SerializationLock(_log))
+        {
+            // Remove references to this element from other elements
+            RemoveReferenceToElement(element.Uuid, model);
+            
+            // Get the trash node
+            var trashNode = model.TrashView.FirstOrDefault(n => n.Type == StoryItemType.TrashCan);
+            if (trashNode == null)
+            {
+                _log.Log(LogLevel.Error, "TrashCan node not found");
+                throw new InvalidOperationException("TrashCan node not found in model");
+            }
+            
+            // Remove from current parent
+            var parent = element.Node.Parent;
+            if (parent != null)
+            {
+                parent.Children.Remove(element.Node);
+            }
+            
+            // Add to trash
+            element.Node.Parent = trashNode;
+            trashNode.Children.Add(element.Node);
+            
+            // Mark model as changed
+            model.Changed = true;
+            
+            _log.Log(LogLevel.Info, $"Successfully moved element {element.Uuid} to trash");
+        }
+    }
+
+    /// <summary>
+    /// Restores an element from trash back to the explorer view.
+    /// </summary>
+    /// <param name="trashNode">The node in trash to restore</param>
+    /// <param name="model">The story model</param>
+    /// <exception cref="ArgumentNullException">Thrown when trashNode or model is null</exception>
+    /// <exception cref="InvalidOperationException">Thrown when node cannot be restored</exception>
+    internal void RestoreFromTrash(StoryNodeItem trashNode, StoryModel model)
+    {
+        if (trashNode == null)
+            throw new ArgumentNullException(nameof(trashNode));
+        
+        if (model == null)
+            throw new ArgumentNullException(nameof(model));
+        
+        // Validate node is in trash
+        if (StoryNodeItem.RootNodeType(trashNode) != StoryItemType.TrashCan)
+            throw new InvalidOperationException("Can only restore items from trash");
+        
+        // Only allow restoring top-level items from trash
+        if (trashNode.Parent?.Type != StoryItemType.TrashCan)
+            throw new InvalidOperationException("Can only restore top-level items from trash. Restore the parent item instead.");
+
+        _log.Log(LogLevel.Info, $"Restoring element {trashNode.Uuid} from trash");
+
+        
+        using (var serializationLock = new SerializationLock(_log))
+        {
+            // Get the overview node (root of explorer view)
+            var overviewNode = model.ExplorerView.FirstOrDefault();
+            if (overviewNode == null)
+            {
+                _log.Log(LogLevel.Error, "Explorer view root not found");
+                throw new InvalidOperationException("Explorer view root not found in model");
+            }
+            
+            // Remove from trash
+            var trashCanNode = trashNode.Parent;
+            trashCanNode.Children.Remove(trashNode);
+            
+            // Add to explorer view (at the end)
+            trashNode.Parent = overviewNode;
+            overviewNode.Children.Add(trashNode);
+            
+            // Mark model as changed
+            model.Changed = true;
+            
+            _log.Log(LogLevel.Info, $"Successfully restored element {trashNode.Uuid} from trash");
+        }
+    }
+
+    /// <summary>
+    /// Empties the trash, permanently removing all items.
+    /// </summary>
+    /// <param name="model">The story model</param>
+    /// <exception cref="ArgumentNullException">Thrown when model is null</exception>
+    /// <exception cref="InvalidOperationException">Thrown when TrashCan node is not found</exception>
+    internal void EmptyTrash(StoryModel model)
+    {
+        if (model == null)
+            throw new ArgumentNullException(nameof(model));
+
+        _log.Log(LogLevel.Info, "Emptying trash");
+
+        
+        using (var serializationLock = new SerializationLock(_log))
+        {
+            // Get the trash node
+            var trashNode = model.TrashView.FirstOrDefault(n => n.Type == StoryItemType.TrashCan);
+            if (trashNode == null)
+            {
+                _log.Log(LogLevel.Error, "TrashCan node not found");
+                throw new InvalidOperationException("TrashCan node not found");
+            }
+            
+            // Clear all children
+            int itemCount = trashNode.Children.Count;
+            trashNode.Children.Clear();
+            
+            // Mark model as changed if items were removed
+            if (itemCount > 0)
+            {
+                model.Changed = true;
+            }
+            
+            _log.Log(LogLevel.Info, $"Successfully emptied trash, removed {itemCount} items");
+        }
+    }
+
+    #endregion
 }

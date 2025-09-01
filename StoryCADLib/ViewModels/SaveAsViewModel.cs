@@ -18,7 +18,7 @@ public class SaveAsViewModel : ObservableRecipient
     public string ParentFolder 
     {
         get => _parentFolder;
-        set => _parentFolder = value; 
+        set => SetProperty(ref _parentFolder, value); 
     }
 
     #endregion

@@ -6,7 +6,8 @@ namespace StoryCAD.ViewModels.Tools;
 
 public class MasterPlotsViewModel : ObservableRecipient
 {
-    private readonly ToolsData ToolSource = Ioc.Default.GetService<ToolsData>();
+    private readonly ToolsData _toolsData;
+    
     #region Properties
 
     private string _PlotPatternName;
@@ -39,11 +40,17 @@ public class MasterPlotsViewModel : ObservableRecipient
 
     #region Constructor
 
-    public MasterPlotsViewModel()
+    // Constructor for XAML compatibility - will be removed later
+    public MasterPlotsViewModel() : this(Ioc.Default.GetRequiredService<ToolsData>())
     {
+    }
+
+    public MasterPlotsViewModel(ToolsData toolsData)
+    {
+        _toolsData = toolsData;
         List<string> _masterNames = new();
         MasterPlots = new Dictionary<string, PlotPatternModel>();
-        foreach (PlotPatternModel _plot in ToolSource.MasterPlotsSource)
+        foreach (PlotPatternModel _plot in _toolsData.MasterPlotsSource)
         {
             _masterNames.Add(_plot.PlotPatternName);
             MasterPlots.Add(_plot.PlotPatternName, _plot);
@@ -52,7 +59,7 @@ public class MasterPlotsViewModel : ObservableRecipient
         _masterNames.Sort();
         PlotPatternNames = new ObservableCollection<string>();
         foreach (string _name in _masterNames) { PlotPatternNames.Add(_name); }
-        PlotPatternName = ToolSource.MasterPlotsSource[0].PlotPatternName;
+        PlotPatternName = _toolsData.MasterPlotsSource[0].PlotPatternName;
     }
 
     #endregion

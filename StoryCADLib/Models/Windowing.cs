@@ -1,13 +1,15 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.Windows.AppLifecycle;
 using StoryCAD.Exceptions;
+using StoryCAD.ViewModels.SubViewModels;
+using System.ComponentModel;
 using System.Runtime.InteropServices;
 using Windows.Storage;
 using Windows.Storage.Pickers;
-using System.ComponentModel;
 using Windows.UI;
 using Windows.UI.ViewManagement;
 using StoryCAD.ViewModels.SubViewModels;
@@ -20,6 +22,21 @@ namespace StoryCAD.Models;
 /// </summary>
 public partial class Windowing : ObservableRecipient
 {
+    private readonly AppState _appState;
+    private readonly ILogService _logService;
+
+    public Windowing(AppState appState, ILogService logService)
+    {
+        _appState = appState;
+        _logService = logService;
+    }
+
+    // Constructor for backward compatibility - will be removed later
+    public Windowing() : this(
+        Ioc.Default.GetRequiredService<AppState>(),
+        Ioc.Default.GetRequiredService<ILogService>())
+    {
+    }
     private void OnPropertyChanged(object sender, PropertyChangedEventArgs e) { }
 
     /// <summary>
@@ -114,21 +131,25 @@ public partial class Windowing : ObservableRecipient
     /// </summary>
     public void UpdateWindowTitle()
     {
-        if (Ioc.Default.GetRequiredService<AppState>().Headless) { return; }
+        if (_appState.Headless) { return; }
 
         string BaseTitle = "StoryCAD ";
 
         //Developer Build title warning
-        if (Ioc.Default.GetRequiredService<AppState>().DeveloperBuild)
+        if (_appState.DeveloperBuild)
         {
             BaseTitle += "(DEV BUILD) ";
         }
 
-        //Open file check
-        OutlineViewModel outlineVM = Ioc.Default.GetRequiredService<OutlineViewModel>();
-        if (!string.IsNullOrEmpty(outlineVM.StoryModelFile))
+        // TODO: ARCHITECTURAL ISSUE - Windowing (UI layer) should not depend on OutlineViewModel (business logic)
+        // This creates a circular dependency: OutlineViewModel -> Windowing -> OutlineViewModel
+        // Proper fix (SRP): Move UpdateWindowTitle logic to OutlineViewModel (which knows about file changes)
+        // and have it set the title on Windowing. OutlineViewModel already has Windowing reference.
+        // Current workaround: Use service locator to break the circular dependency
+        AppState appState = Ioc.Default.GetRequiredService<AppState>();
+        if (!string.IsNullOrEmpty(appState.CurrentDocument?.FilePath))
         {
-            BaseTitle += $"- Currently editing {Path.GetFileNameWithoutExtension(outlineVM.StoryModelFile)}";
+            BaseTitle += $"- Currently editing {Path.GetFileNameWithoutExtension(appState.CurrentDocument.FilePath)}";
         }
 
         //Set window Title.
@@ -143,9 +164,13 @@ public partial class Windowing : ObservableRecipient
     {
         (MainWindow.Content as FrameworkElement).RequestedTheme = RequestedTheme;
 
-        OutlineViewModel outlineVM = Ioc.Default.GetRequiredService<OutlineViewModel>();
+        // TODO: ARCHITECTURAL ISSUE - Same as UpdateWindowTitle above
+        // Proper fix (SRP): Move UpdateUIToTheme logic to ShellViewModel (which manages navigation/UI state)
+        // ShellViewModel can coordinate the save and navigation when theme changes
+        // Current workaround: Use service locator to break the circular dependency
+        AppState appState = Ioc.Default.GetRequiredService<AppState>();
         //Save file, close current node since it won't be the right theme.
-        if (!string.IsNullOrEmpty(outlineVM.StoryModelFile))
+        if (!string.IsNullOrEmpty(appState.CurrentDocument?.FilePath))
         {
             await Ioc.Default.GetRequiredService<OutlineViewModel>().SaveFile();
             Ioc.Default.GetRequiredService<ShellViewModel>().ShowHomePage();
@@ -169,10 +194,10 @@ public partial class Windowing : ObservableRecipient
     /// <returns>A ContentDialogResult value</returns>
     public async Task<ContentDialogResult> ShowContentDialog(ContentDialog Dialog, bool force=false)
     {
-	    LogService logger = Ioc.Default.GetRequiredService<LogService>();
+	    ILogService logger = _logService;
 
         // Don't show dialog if headless
-        AppState state = Ioc.Default.GetRequiredService<AppState>();
+        AppState state = _appState;
         if (state.Headless) { return ContentDialogResult.Primary; }
 
         logger.Log(LogLevel.Info, $"Requested to show dialog {Dialog.Title}");
@@ -261,7 +286,7 @@ public partial class Windowing : ObservableRecipient
     /// <returns>A StorageFile object, of the file picked.</returns>
     public async Task<StorageFile> ShowFilePicker(string buttonText = "Open", string filter = "*")
     {
-	    LogService logger = Ioc.Default.GetRequiredService<LogService>();
+	    ILogService logger = _logService;
 
 		try
 		{
@@ -300,6 +325,49 @@ public partial class Windowing : ObservableRecipient
 	    }
 
     }
+    /// <summary>
+    /// Shows a file save as picker.
+    /// </summary>
+    /// <returns>A StorageFile object, of the file picked.</returns>
+    public async Task<StorageFile> ShowFileSavePicker(string buttonText, string extension)
+    {
+	    ILogService logger = _logService;
+
+		try
+		{
+			logger.Log(LogLevel.Info, $"Trying to save a file picker with extension: {extension}");
+
+			FileSavePicker filePicker = new()
+		    {
+			    CommitButtonText = buttonText,
+			    SuggestedStartLocation = PickerLocationId.DocumentsLibrary,
+                DefaultFileExtension = extension,
+            };
+
+            filePicker.FileTypeChoices.Add("File", new List<string>() {extension });
+
+            //Init and spawn file picker
+            WinRT.Interop.InitializeWithWindow.Initialize(filePicker, MainWindow.GetWindowHandle());
+			StorageFile file = await filePicker.PickSaveFileAsync();
+
+			//Null check
+			if (file == null)
+			{
+				logger.Log(LogLevel.Warn, "File picker returned null, this is because the user probably clicked cancel.");
+				return null;
+			}
+
+			logger.Log(LogLevel.Info, $"Picked folder {file.Path} attributes:{file.Attributes}");
+			return file;
+		}
+	    catch (Exception e)
+	    {
+			//See below for possible exception cause.
+		    logger.Log(LogLevel.Error, $"File picker error!, ex:{e.Message} {e.StackTrace}");
+		    throw;
+	    }
+
+    }
 
 	/// <summary>
 	/// Spawn a folder picker for the user to select a folder.
@@ -309,7 +377,7 @@ public partial class Windowing : ObservableRecipient
 	/// <returns></returns>
     public async Task<StorageFolder> ShowFolderPicker(string buttonText = "Select folder", string filter = "*")
     {
-		LogService logger = Ioc.Default.GetRequiredService<LogService>();
+		ILogService logger = _logService;
 
 		try
 	    {
@@ -383,7 +451,7 @@ public partial class Windowing : ObservableRecipient
     {
         await new ContentDialog()
         {
-            XamlRoot = Ioc.Default.GetRequiredService<Windowing>().XamlRoot,
+            XamlRoot = this.XamlRoot,
             Title = "Error loading resources",
             Content = "An error has occurred, please reinstall or update StoryCAD to continue.",
             CloseButtonText = "Close",

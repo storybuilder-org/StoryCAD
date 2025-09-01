@@ -26,7 +26,7 @@
                     <ComboBox IsEditable="True" Header="Role" Grid.Row="0"  MinWidth="200" ItemsSource="{x:Bind CharVm.RoleList}" Text="{x:Bind CharVm.Role, Mode=TwoWay}"  PlaceholderText="{x:Bind CharVm.Role, Mode=TwoWay}" />
                     <ComboBox Header="Story Role" Grid.Row="1" IsEditable="False" MinWidth="200" ItemsSource="{x:Bind CharVm.StoryRoleList}" SelectedItem="{x:Bind CharVm.StoryRole, Mode=TwoWay}" />
                     <ComboBox Header="Archetype" Grid.Row="2" IsEditable="False" MinWidth="200" ItemsSource="{x:Bind CharVm.ArchetypeList}" SelectedItem="{x:Bind CharVm.Archetype, Mode=TwoWay}" />
-                    <usercontrols:RichEditBoxExtended Header="Character Sketch" Grid.Row="3" RtfText="{x:Bind CharVm.CharacterSketch, Mode=TwoWay}" AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap" ScrollViewer.VerticalScrollBarVisibility="Visible" />
+                    <usercontrols:RichEditBoxExtended Header="Character Sketch" Grid.Row="3" RtfText="{x:Bind CharVm.Description, Mode=TwoWay}" AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap" ScrollViewer.VerticalScrollBarVisibility="Visible" />
                 </Grid>
             </PivotItem>
             <PivotItem Header="Physical">
@@ -46,9 +46,8 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
-                        <TextBox Header="Age" Grid.Column="0" MinWidth="100"
+                        <TextBox Header="Age" Grid.Column="0" MinWidth="100" Margin="0,0,100,0"
                                  Text="{x:Bind CharVm.Age, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                        <TextBlock Grid.Column="1" MinWidth="300"/>
                         <TextBox Header="Sex" Grid.Column="2" MinWidth="100"
                                  Text="{x:Bind CharVm.Sex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     </Grid>
@@ -58,9 +57,8 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
-                        <TextBox Header="Height" Grid.Column="0" MinWidth="100"
+                        <TextBox Header="Height" Grid.Column="0" MinWidth="100" Margin="0,0,100,0"
                                  Text="{x:Bind CharVm.CharHeight, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                        <TextBlock Grid.Column="1" MinWidth="300"/>
                         <TextBox Header="Weight" Grid.Column="2" MinWidth="100"
                                  Text="{x:Bind CharVm.Weight, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     </Grid>
@@ -70,11 +68,10 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
-                        <ComboBox IsEditable="True" Header="Eye Color" Grid.Column="0" MinWidth="200"
+                        <ComboBox IsEditable="True" Header="Eye Color" Grid.Column="0" MinWidth="200" Margin="0,0,80,0"
                                   ItemsSource="{x:Bind CharVm.EyesList}"
                                   Text="{x:Bind CharVm.Eyes, Mode=TwoWay}"
                                   PlaceholderText="{x:Bind CharVm.Eyes, Mode=TwoWay}" />
-                        <TextBlock Grid.Column="1" MinWidth="100"/>
                         <ComboBox IsEditable="True" Header="Hair Color" Grid.Column="2"  MinWidth="200"
                                   ItemsSource="{x:Bind CharVm.HairList}"
                                   Text="{x:Bind CharVm.Hair, Mode=TwoWay}"
@@ -86,11 +83,10 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
-                        <ComboBox IsEditable="True" Header="Build" Grid.Column="0" MinWidth="200"
+                        <ComboBox IsEditable="True" Header="Build" Grid.Column="0" MinWidth="200" Margin="0,0,80,0"
                                   ItemsSource="{x:Bind CharVm.BuildList}"
                                   Text="{x:Bind CharVm.Build, Mode=TwoWay}"
                                   PlaceholderText="{x:Bind CharVm.Build, Mode=TwoWay}" />
-                        <TextBlock Grid.Column="1" MinWidth="100"/>
                         <ComboBox IsEditable="True" Header="Complexion" Grid.Column="2" MinWidth="200"
                                   ItemsSource="{x:Bind CharVm.SkinList}"
                                   Text="{x:Bind CharVm.Complexion, Mode=TwoWay}"
@@ -102,11 +98,10 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
-                        <ComboBox IsEditable="True" Header="Race" Grid.Column="0"  MinWidth="200"
+                        <ComboBox IsEditable="True" Header="Race" Grid.Column="0"  MinWidth="200" Margin="0,0,80,0"
                                   ItemsSource="{x:Bind CharVm.RaceList}"
                                   Text="{x:Bind CharVm.Race, Mode=TwoWay}"
                                   PlaceholderText="{x:Bind CharVm.Race, Mode=TwoWay}" />
-                        <TextBlock Grid.Column="1" MinWidth="100"/>
                         <ComboBox IsEditable="True" Header="Nationality" Grid.Column="2" MinWidth="200"
                                   ItemsSource="{x:Bind CharVm.NationalityList}"
                                   Text="{x:Bind CharVm.Nationality, Mode=TwoWay}"
@@ -140,8 +135,7 @@
                     </Grid.RowDefinitions>
                     <Button  Content="Flaw Builder" Grid.Row="0" HorizontalAlignment="Left" Margin="0,10,10,10"
                              Command="{x:Bind CharVm.FlawCommand, Mode=OneWay}" />
-                    <TextBlock Width="100"  Grid.Row="1" />
-                    <usercontrols:RichEditBoxExtended Grid.Row="2" Header="Flaw"
+                    <usercontrols:RichEditBoxExtended Grid.Row="2" Margin="0,10,0,0" Header="Flaw"
                                                       RtfText="{x:Bind CharVm.Flaw, Mode=TwoWay}" AcceptsReturn="True"
                                                       IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                                       ScrollViewer.VerticalScrollBarVisibility="Visible"
@@ -199,11 +193,10 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
-                        <ComboBox IsEditable="True" Header="Intelligence"  Grid.Column="0" Width="200"
+                        <ComboBox IsEditable="True" Header="Intelligence"  Grid.Column="0" Width="200" Margin="0,0,80,0"
                                   ItemsSource="{x:Bind CharVm.IntelligenceList}"
                                   Text="{x:Bind CharVm.Intelligence, Mode=TwoWay}"
                                   PlaceholderText="{x:Bind CharVm.Intelligence, Mode=TwoWay}"/>
-                        <TextBlock Width="100"  Grid.Column="1" />
                         <ComboBox IsEditable="True" Header="Values"  Grid.Column="2"  Width="200"
                                   ItemsSource="{x:Bind CharVm.ValuesList}"
                                   Text="{x:Bind CharVm.Values, Mode=TwoWay}"
@@ -215,11 +208,10 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
-                        <ComboBox IsEditable="True" Header="Focus"  Grid.Column="0" Width="200"
+                        <ComboBox IsEditable="True" Header="Focus"  Grid.Column="0" Width="200" Margin="0,0,80,0"
                                   ItemsSource="{x:Bind CharVm.FocusList}"
                                   Text="{x:Bind CharVm.Focus, Mode=TwoWay}"
                                   PlaceholderText="{x:Bind CharVm.Focus, Mode=TwoWay}"/>
-                        <TextBlock Width="100"  Grid.Column="1" />
                         <ComboBox IsEditable="True" Header="Abnormality"  Grid.Column="2"  Width="200"
                                   ItemsSource="{x:Bind CharVm.AbnormalityList}"
                                   Text="{x:Bind CharVm.Abnormality, Mode=TwoWay}"
@@ -266,11 +258,10 @@
                                   ItemsSource="{x:Bind CharVm.SensitivityList}"
                                   Text="{x:Bind CharVm.Sensitivity, Mode=TwoWay}"
                                   PlaceholderText="{x:Bind CharVm.Sensitivity, Mode=TwoWay}" />
-                    <ComboBox IsEditable="True" Header="Sociability" Grid.Column="0" Grid.Row="5" MinWidth="200"
+                    <ComboBox IsEditable="True" Header="Sociability" Grid.Column="0" Grid.Row="5" MinWidth="200" Margin="0,0,80,0"
                                   ItemsSource="{x:Bind CharVm.SociabilityList}"
                                   Text="{x:Bind CharVm.Sociability, Mode=TwoWay}"
                                   PlaceholderText="{x:Bind CharVm.Sociability, Mode=TwoWay}" />
-                    <TextBlock Grid.Column="1" Grid.Row="0" MinWidth="100"/>
                     <ComboBox IsEditable="True" Header="Aggression" Grid.Column="2" Grid.Row="0" MinWidth="200"
                                   ItemsSource="{x:Bind CharVm.AggressionList}"
                                   Text="{x:Bind CharVm.Aggression, Mode=TwoWay}"
@@ -318,14 +309,12 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
-                        <TextBox Header="Other Trait:" Grid.Column="0" MinWidth="300" Text="{x:Bind CharVm.NewTrait, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                        <TextBlock Grid.Column="1" Width="10" />
-                        <Button Grid.Column="2" FontFamily="{ThemeResource SymbolThemeFontFamily}" Content="&#xE710;"  Command="{x:Bind CharVm.AddTraitCommand, Mode=OneWay}" >
+                        <TextBox Header="Other Trait:" Grid.Column="0" MinWidth="300" Margin="0,0,10,0" Text="{x:Bind CharVm.NewTrait, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <Button Grid.Column="2" FontFamily="Segoe MDL2 Assets" Content="&#xE710;" Margin="0,0,10,0" Command="{x:Bind CharVm.AddTraitCommand, Mode=OneWay}" >
                             <ToolTipService.ToolTip>
                                 <ToolTip Content="Add Trait" />
                             </ToolTipService.ToolTip>
                         </Button>
-                        <TextBlock Grid.Column="3" Width="10" />
                         <Button Grid.Column="4" FontFamily="{ThemeResource SymbolThemeFontFamily}" Content="&#xE738;" Command="{x:Bind CharVm.RemoveTraitCommand, Mode=OneWay}">
                             <ToolTipService.ToolTip>
                                 <ToolTip Content="Remove Trait" />

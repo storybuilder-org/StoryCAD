@@ -24,7 +24,12 @@ namespace StoryCAD.ViewModels.Tools;
 /// </summary>
 public class PreferencesViewModel : ObservableValidator
 {
-    public PreferencesModel CurrentModel = Ioc.Default.GetRequiredService<StoryCAD.Services.PreferenceService>().Model;
+    private readonly PreferenceService _preferenceService;
+    private readonly BackendService _backendService;
+    private readonly RatingService _ratingService;
+    private readonly Windowing _windowing;
+    
+    public PreferencesModel CurrentModel;
     public string Errors => string.Join(Environment.NewLine, from ValidationResult e in GetErrors(null) select e.ErrorMessage);
 
     #region Fields
@@ -177,13 +182,21 @@ public class PreferencesViewModel : ObservableValidator
     public bool _advancedLogging;
     public bool AdvancedLogging
     {
-	    get => _advancedLogging;
-	    set => SetProperty(ref _advancedLogging, value);
+            get => _advancedLogging;
+            set => SetProperty(ref _advancedLogging, value);
     }
 
-	// Show startup page.
+    // Hide missing key file warning
+    public bool _hideKeyFileWarning;
+    public bool HideKeyFileWarning
+    {
+            get => _hideKeyFileWarning;
+            set => SetProperty(ref _hideKeyFileWarning, value);
+    }
+
+        // Show startup page.
     private bool _ShowStartupPage;
-	public bool ShowStartupPage
+        public bool ShowStartupPage
     {
 	    get => _ShowStartupPage;
 	    set => SetProperty(ref _ShowStartupPage, value);
@@ -220,6 +233,7 @@ public class PreferencesViewModel : ObservableValidator
         PreferredSearchEngine = CurrentModel.PreferredSearchEngine;
         PreferedTheme = CurrentModel.ThemePreference;
         AdvancedLogging = CurrentModel.AdvancedLogging;
+        HideKeyFileWarning = CurrentModel.HideKeyFileWarning;
         ShowStartupPage = CurrentModel.ShowStartupDialog;
     }
 
@@ -248,11 +262,12 @@ public class PreferencesViewModel : ObservableValidator
         CurrentModel.RecordVersionStatus = RecordVersionStatus;
         CurrentModel.PreferredSearchEngine = PreferredSearchEngine;
         CurrentModel.AdvancedLogging = AdvancedLogging;
+        CurrentModel.HideKeyFileWarning = HideKeyFileWarning;
 
         if (CurrentModel.ThemePreference != PreferedTheme)
         {
-            Ioc.Default.GetService<Windowing>().RequestedTheme = CurrentModel.ThemePreference;
-            Ioc.Default.GetService<Windowing>().UpdateUIToTheme();
+            _windowing.RequestedTheme = CurrentModel.ThemePreference;
+            _windowing.UpdateUIToTheme();
         }
         CurrentModel.ThemePreference = PreferedTheme;
         CurrentModel.ShowStartupDialog = ShowStartupPage;
@@ -266,13 +281,10 @@ public class PreferencesViewModel : ObservableValidator
         PreferencesIo _prfIo = new();
         await _prfIo.WritePreferences(CurrentModel);
         await _prfIo.ReadPreferences();
-        PreferenceService Prefs = Ioc.Default.GetService<PreferenceService>();
+        _preferenceService.Model = CurrentModel;
 
-		Prefs.Model = CurrentModel;
-
-        BackendService _backend = Ioc.Default.GetRequiredService<BackendService>();
-        Prefs.Model.RecordPreferencesStatus = false;  // indicate need to update
-        await _backend.PostPreferences(Prefs.Model);
+        _preferenceService.Model.RecordPreferencesStatus = false;  // indicate need to update
+        await _backendService.PostPreferences(_preferenceService.Model);
     }
 
     private void OnPropertyChanged(object sender, PropertyChangedEventArgs args)
@@ -290,15 +302,21 @@ public class PreferencesViewModel : ObservableValidator
 	/// </summary>
     public void ShowRatingPrompt(object sender, RoutedEventArgs e)
     {
-	    Ioc.Default.GetService<RatingService>().OpenRatingPrompt();
+	    _ratingService.OpenRatingPrompt();
     }
 
 	#endregion
 
 	#region Constructor
 
-	public PreferencesViewModel()
+	public PreferencesViewModel(PreferenceService preferenceService, BackendService backendService,
+        RatingService ratingService, Windowing windowing)
     {
+        _preferenceService = preferenceService;
+        _backendService = backendService;
+        _ratingService = ratingService;
+        _windowing = windowing;
+        CurrentModel = _preferenceService.Model;
         this.ErrorsChanged += Preferences_ErrorsChanged;
     }
 

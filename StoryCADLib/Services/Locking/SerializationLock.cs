@@ -1,104 +1,147 @@
-﻿using System.Runtime.CompilerServices;
-using StoryCAD.Services.Backup;
-using StoryCAD.ViewModels.SubViewModels;
+using System;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+using System.Threading;
+using System.Threading.Tasks;
+using StoryCAD.Services.Logging;
 
 namespace StoryCAD.Services.Locking;
-public class SerializationLock : IDisposable
+
+/// <summary>
+/// A single shared gate used to serialize saves, backups, and manual commands.
+/// Supports reentrant locking within the same async context.
+/// </summary>
+public sealed class SerializationLock : IDisposable
 {
-    /// <summary>
-    /// Lock that controls the UI, Autosave, Backup.
-    /// </summary>
-    private static bool _canExecuteCommands = true;
+    // One shared gate for the whole process.
+    private static readonly SemaphoreSlim Gate = new(1, 1);
+
+    // AsyncLocal persists data across await statements and thread context switches, making it suitable for tracking logical data
+    // through an asynchronous call stack. In this case it stores and propagates the current lock depth, which is incremented on
+    // each nested lock acquisition and decremented on each release. If the depth is greater than zero, it indicates that the current
+    // execution context already holds the lock, allowing reentrant acquisition without deadlock.
+    private static readonly AsyncLocal<int> Depth = new();
+
+    private bool _held;
+    private readonly bool _isNested;
+    private readonly string _caller;
+    private readonly ILogService _logger;
 
     /// <summary>
-    /// Returns if a lock is currently active.
+    /// Raised whenever the lock state changes (acquire/release).
+    /// Used by ShellViewModel / Shell.xaml.cs to refresh CanExecute.
     /// </summary>
-    /// <returns>Lock status</returns>
-    public static bool IsLocked() => _canExecuteCommands;
+    public static event EventHandler? CanExecuteStateChanged;
 
-    private readonly AutoSaveService _autoSaveService;
-    private readonly BackupService _backupService;
-    private readonly LogService _logger;
-    private string _caller;
-    private bool _disposed;
-    private static string currentHolder;
-
-    public SerializationLock(AutoSaveService autoSaveService, BackupService backupService, LogService logger,
-    [CallerMemberName] string caller = null)
+    // Constructor with optional logger
+    public SerializationLock(ILogService logger = null, [CallerMemberName] string caller = "")
     {
-        _autoSaveService = autoSaveService;
-        _backupService = backupService;
+        _caller = caller;
         _logger = logger;
 
-        _caller = caller;
-        // Acquire lock: disable commands, autosave, and backup.
-        DisableCommands();
-        _autoSaveService.StopAutoSave();
-        _backupService.StopTimedBackup();
-        _logger.Log(LogLevel.Info,$"Serialization lock acquired by {_caller}");
-    }
-
-    private void DisableCommands()
-    {
-        if (!_canExecuteCommands)
+        // Check if we already hold the lock in this async context
+        if (Depth.Value > 0)
         {
-            _logger.Log(LogLevel.Warn, $"{_caller} Tried to lock when already locked by {currentHolder}");
-
-            if (currentHolder != _caller) //Some locks run twice i.e. datasource, (this shouldn't happen)
+            // Nested acquisition - don't wait or fire events
+            if (Depth.Value < int.MaxValue - 1) // Prevent overflow
             {
-                if (Ioc.Default.GetRequiredService<AppState>().Headless)
-                {
-                    throw new InvalidOperationException($"Commands are already disabled by {currentHolder}");
-                }
-                else
-                {
-                    _logger.Log(LogLevel.Warn, $"{_caller} tried to lock when already locked by {currentHolder}");
-                    return;
-                }
+                Depth.Value++;
+                _logger?.Log(LogLevel.Warn, $"[CallerMemberName] REENTRANT: {_caller} acquired nested lock (depth: {Depth.Value})");
             }
+            _held = true;
+            _isNested = true;
+            return;
         }
 
-        currentHolder = _caller;
+        // First acquisition in this context
+        _logger?.Log(LogLevel.Info, $"[CallerMemberName] {_caller} waiting for lock...");
+        Gate.Wait();
+        Depth.Value = 1;
+        _held = true;
+        _isNested = false;
+        _logger?.Log(LogLevel.Info, $"[CallerMemberName] {_caller} acquired lock (depth: 1)");
 
-        // Set your _canExecuteCommands flag to false
-        // (Assuming you can access it via a shared service or static member)
-        _logger.Log(LogLevel.Info, $"{_caller} has locked commands");
-        _canExecuteCommands = false;
-    }
-
-    /// <summary>
-    /// Re-enables commands.
-    /// </summary>
-    public void EnableCommands()
-    {
-        _canExecuteCommands = true;
-        _logger.Log(LogLevel.Info, $"{_caller} has unlocked commands");
-        currentHolder = null;
-
+        // Only fire event for outermost lock acquisition
+        CanExecuteStateChanged?.Invoke(null, EventArgs.Empty);
     }
 
     public void Dispose()
     {
-        if (!_disposed)
+        if (!_held) return;
+
+        _held = false;
+
+        // Atomically decrement and check depth
+        int newDepth = Math.Max(0, Depth.Value - 1);
+        Depth.Value = newDepth;
+
+        // Only release gate and fire event when fully released
+        if (newDepth == 0)
         {
-            // Re-enable background tasks and commands.
-            EnableCommands();
+            _logger?.Log(LogLevel.Info, $"[CallerMemberName] {_caller} releasing lock (depth: 0)");
+            Gate.Release();
+            CanExecuteStateChanged?.Invoke(null, EventArgs.Empty);
+        }
+        else
+        {
+            // For nested releases, don't fire events since lock state hasn't changed
+            _logger?.Log(LogLevel.Warn, $"[CallerMemberName] REENTRANT: {_caller} releasing nested lock (depth: {newDepth})");
+        }
+    }
 
-            //Reenable backup/autosave 
-            if (Ioc.Default.GetRequiredService<PreferenceService>().Model.AutoSave)
-            {
-                _autoSaveService.StartAutoSave();
-            }
-            if (Ioc.Default.GetRequiredService<PreferenceService>().Model.TimedBackup )
-            {
-                _backupService.StartTimedBackup();
-            }
-            
-            _logger.Log(LogLevel.Info,"Serialization lock released: commands enabled, autosave and backup restarted.");
-            _disposed = true;
-            currentHolder = null;
-            _logger.Log(LogLevel.Warn, $"{_caller} has unlocked commands");
+    /// <summary>True when nothing is currently saving/backing up.</summary>
+    public static bool IsIdle => Gate.CurrentCount == 1 && Depth.Value == 0;
 
+    /// <summary>Preserve existing predicate name used by ShellViewModel CanExecute.</summary>
+    public static bool CanExecuteCommands() => IsIdle;
+
+    /// <summary>
+    /// Awaitable helper when you want the gate to cover async work end-to-end.
+    /// </summary>
+    public static async Task RunExclusiveAsync(
+        Func<CancellationToken, Task> body,
+        CancellationToken ct = default,
+        ILogService logger = null,
+        [CallerMemberName] string caller = "")
+    {
+        // Check if we already hold the lock
+        if (Depth.Value > 0)
+        {
+            // Already held - just increment depth and run
+            if (Depth.Value < int.MaxValue - 1)
+            {
+                Depth.Value++;
+                logger?.Log(LogLevel.Warn, $"[CallerMemberName] REENTRANT: {caller} acquired nested async lock (depth: {Depth.Value})");
+            }
+            try
+            {
+                await body(ct).ConfigureAwait(false);
+            }
+            finally
+            {
+                int newDepth = Math.Max(0, Depth.Value - 1);
+                Depth.Value = newDepth;
+                logger?.Log(LogLevel.Warn, $"[CallerMemberName] REENTRANT: {caller} releasing nested async lock (depth: {newDepth})");
+            }
+            return;
+        }
+
+        // First acquisition - wait for lock
+        logger?.Log(LogLevel.Info, $"[CallerMemberName] {caller} waiting for async lock...");
+        await Gate.WaitAsync(ct).ConfigureAwait(false);
+        try
+        {
+            Depth.Value = 1;
+            logger?.Log(LogLevel.Info, $"[CallerMemberName] {caller} acquired async lock (depth: 1)");
+            CanExecuteStateChanged?.Invoke(null, EventArgs.Empty);
+            await body(ct).ConfigureAwait(false);
+        }
+        finally
+        {
+            Depth.Value = 0;
+            logger?.Log(LogLevel.Info, $"[CallerMemberName] {caller} releasing async lock (depth: 0)");
+            Gate.Release();
+            CanExecuteStateChanged?.Invoke(null, EventArgs.Empty);
         }
     }
 }

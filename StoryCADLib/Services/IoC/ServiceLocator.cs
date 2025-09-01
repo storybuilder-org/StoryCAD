@@ -2,6 +2,7 @@
 using StoryCAD.DAL;
 using StoryCAD.Services.Backend;
 using StoryCAD.Services.Backup;
+using StoryCAD.Services.Dialogs;
 using StoryCAD.Services.Navigation;
 using StoryCAD.Services.Search;
 using StoryCAD.ViewModels.Tools;
@@ -89,14 +90,17 @@ public static class BootStrapper
         Services.AddSingleton<OutlineService>();
         Services.AddSingleton<BackupService>();
         Services.AddSingleton<AutoSaveService>();
-        Services.AddSingleton<DeletionService>();
         Services.AddSingleton<BackendService>();
         Services.AddSingleton<CollaboratorService>();
         Services.AddSingleton<ListData>();
         Services.AddSingleton<ToolsData>();
         Services.AddSingleton<ControlData>();
         Services.AddSingleton<AppState>();
+        Services.AddSingleton<EditFlushService>();
         Services.AddSingleton<Windowing>();
+        Services.AddSingleton<FileOpenService>();
+        Services.AddSingleton<FileCreateService>();
+        Services.AddSingleton<ToolValidationService>();
         Services.AddSingleton<RatingService>();
         Services.AddSingleton<OutlineViewModel>();
         Services.AddSingleton<ShellViewModel>();
@@ -133,7 +137,6 @@ public static class BootStrapper
         Services.AddSingleton<PreferencesViewModel>();
         Services.AddSingleton<FlawViewModel>();
         Services.AddSingleton<TraitsViewModel>();
-        Services.AddSingleton<SemanticKernelApi>();
         Services.AddSingleton<OutlineService>();
     }
 }

@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 using Windows.Storage;
 using StoryCAD.Services;
 using System.Diagnostics;
-using StoryCAD.ViewModels.SubViewModels;
+using System.Linq;
 
 namespace StoryCAD.DAL;
 
@@ -13,8 +13,14 @@ namespace StoryCAD.DAL;
 /// </summary>
 public class StoryIO
 {
-	private LogService _logService = Ioc.Default.GetRequiredService<LogService>();
-    private OutlineViewModel OultineVM = Ioc.Default.GetRequiredService<OutlineViewModel>();
+	private readonly ILogService _logService;
+	private readonly AppState _appState;
+
+	public StoryIO(ILogService logService, AppState appState)
+	{
+		_logService = logService;
+		_appState = appState;
+	}
 
     /// <summary>
     /// Writes the current Story to the disk
@@ -25,12 +31,12 @@ public class StoryIO
         Directory.CreateDirectory(parent);
 
         StorageFolder folder = await StorageFolder.GetFolderFromPathAsync(parent);
-        var output = await folder.CreateFileAsync(Path.GetFileName(output_path), CreationCollisionOption.OpenIfExists);
+        var output = await folder.CreateFileAsync(Path.GetFileName(output_path), CreationCollisionOption.ReplaceExisting);
 		_logService.Log(LogLevel.Info, $"Saving Model to disk as {output_path}  " + 
 				$"Elements: {model.StoryElements.StoryElementGuids.Count}");
 
 		//Save version data
-		model.LastVersion = Ioc.Default.GetRequiredService<AppState>().Version;
+		model.LastVersion = _appState.Version;
 		_logService.Log(LogLevel.Info, $"Saving version as {model.LastVersion}");
 
         var json = model.Serialize();
@@ -54,7 +60,31 @@ public class StoryIO
 			if (JSON.Split("\n")[0].Contains("<?xml version=\"1.0\" encoding=\"utf-8\"?>"))
 			{
 				_logService.Log(LogLevel.Info, "File is legacy XML format");
-				return await MigrateModel(StoryFile);
+
+                // Show dialog informing user about legacy format
+                // TODO: Circular dependency - StoryIO ↔ OutlineViewModel prevents injecting Windowing
+                var result = await Ioc.Default.GetRequiredService<Windowing>().ShowContentDialog(new()
+				{
+					Title = "Legacy Outline format detected!",
+					Content ="""
+                             This outline is in an older format that’s no longer supported.
+                             To update it, please use the Legacy STBX tool to update your outlines to the current format.
+                             """,
+					PrimaryButtonText = "Download Conversion Tool",
+					SecondaryButtonText = "Close"
+				}, true);
+				
+				// Open the conversion tool repository if user clicks primary button
+				if (result == ContentDialogResult.Primary)
+				{
+                    Process.Start(new ProcessStartInfo
+                    {
+						FileName = "https://github.com/storybuilder-org/StoryCAD-Legacy-STBX-Conversion-Tool/releases/tag/1.0.0",
+						UseShellExecute = true
+					});
+				}
+				
+				return new StoryModel(); // Return empty model
 			}
 
 			_logService.Log(LogLevel.Info, $"Read file (Length: {JSON.Length})");
@@ -74,6 +104,45 @@ public class StoryIO
 			//Rebuild tree.
 			_model.ExplorerView = RebuildTree(_model.FlattenedExplorerView, _model.StoryElements, _logService);
 			_model.NarratorView = RebuildTree(_model.FlattenedNarratorView, _model.StoryElements, _logService);
+			
+			// Rebuild TrashView if it exists
+			if (_model.FlattenedTrashView != null && _model.FlattenedTrashView.Any())
+			{
+				_model.TrashView = RebuildTree(_model.FlattenedTrashView, _model.StoryElements, _logService);
+			}
+			else
+			{
+				// Create empty TrashView with TrashCan root
+				_model.TrashView = new ObservableCollection<StoryNodeItem>();
+				var trashCan = new TrashCanModel(_model, null);
+				_model.TrashView.Add(trashCan.Node);
+			}
+			
+			// Check for legacy dual-root structure and migrate if needed
+			if (_model.ExplorerView.Count > 1 && _model.ExplorerView.Any(n => n.Type == StoryItemType.TrashCan))
+			{
+				_logService.Log(LogLevel.Info, "Detected legacy dual-root structure, migrating...");
+				
+				// Find and remove TrashCan from ExplorerView
+				var trashCanNode = _model.ExplorerView.FirstOrDefault(n => n.Type == StoryItemType.TrashCan);
+				if (trashCanNode != null)
+				{
+					_model.ExplorerView.Remove(trashCanNode);
+					
+					// Move TrashCan and its children to TrashView
+					_model.TrashView.Clear();
+					_model.TrashView.Add(trashCanNode);
+				}
+			}
+			
+			// Re-attach collection change handlers (they're not serialized)
+			_model.ReattachCollectionHandlers();
+			
+			// Set CurrentView to ExplorerView by default
+			_model.CurrentView = _model.ExplorerView;
+			_model.CurrentViewType = StoryViewType.ExplorerView;
+			
+			_logService.Log(LogLevel.Info, $"CurrentView set with {_model.CurrentView?.Count ?? 0} items");
 
 			//Log info about story
 			_logService.Log(LogLevel.Info, $"Model deserialized as {_model.ExplorerView[0].Name}");
@@ -83,7 +152,10 @@ public class StoryIO
 			_logService.Log(LogLevel.Info, $"Version last saved with {_model.LastVersion ?? "Error"}");
 
 			//Update file information
-            OultineVM.StoryModelFile = StoryFile.Path;
+            if (_appState.CurrentDocument != null)
+            {
+                _appState.CurrentDocument.FilePath = StoryFile.Path;
+            }
 			return _model;
 		}
 		catch (Exception ex)
@@ -103,11 +175,23 @@ public class StoryIO
 	{
 		var lookup = new Dictionary<Guid, StoryNodeItem>();
 
+		// Remove duplicate entries (same UUID with different parent relationships)
+		var uniqueNodes = new Dictionary<Guid, PersistableNode>();
+		foreach (var n in flatNodes)
+		{
+			// Keep the first occurrence of each UUID
+			if (!uniqueNodes.ContainsKey(n.Uuid))
+			{
+				uniqueNodes[n.Uuid] = n;
+			}
+		}
+		flatNodes = uniqueNodes.Values.ToList();
+
 		// First create all nodes (empty parent/children)
 		foreach (var n in flatNodes)
 		{
 			StoryElement element = storyElements.StoryElementGuids[n.Uuid];
-			StoryNodeItem nodeItem = new(logger, element, parent: null);
+			StoryNodeItem nodeItem = new(element, parent: null);
             element.Node = nodeItem;
 			lookup[n.Uuid] = nodeItem;
 		}
@@ -134,54 +218,6 @@ public class StoryIO
 		return rootCollection;
 	}
 
-	/// <summary>
-	/// Migrates a given StoryModel from XML to JSON
-	/// </summary>
-	/// <param name="file">StorageFile Object</param>
-	/// <returns>StoryModel</returns>
-	public async Task<StoryModel>  MigrateModel(StorageFile file)
-	{
-		StoryModel old = new();
-		try
-		{
-			//Check file exists first.
-            if (!await CheckFileAvailability(file.Path))
-            {
-				_logService.Log(LogLevel.Warn,"File is unavailable or doesn't exist.");
-                return new();
-            }
-
-            //Read Legacy file
-            _logService.Log(LogLevel.Info, $"Migrating Old STBX File from {file.Path}");
-			LegacyXMLReader reader = new(_logService);
-			old = await reader.ReadFile(file);
-
-			//Copy legacy file
-			_logService.Log(LogLevel.Info, "Read legacy file");
-			StorageFolder folder = await StorageFolder.GetFolderFromPathAsync(
-				Ioc.Default.GetRequiredService<PreferenceService>().Model.BackupDirectory);
-
-            _logService.Log(LogLevel.Info, $"Got folder object at path {folder.Path}");
-
-            string name = file.Name + $" as of {DateTime.Now.ToString().Replace('/', ' ')
-                .Replace(':', ' ').Replace(".stbx", "")}.old";
-            _logService.Log(LogLevel.Info, $"Got backup name as {name}");
-
-            await file.CopyAsync(folder, name);
-            _logService.Log(LogLevel.Info, $"Copied legacy file to backup folder ({folder.Path})");
-            
-			//File is now backed up, now migrate to new format
-			await WriteStory(file.Path, old);
-			_logService.Log(LogLevel.Info, "Updated legacy file to JSON File");
-			return old;
-		}
-		catch (Exception ex)
-		{
-			_logService.LogException(LogLevel.Error, ex, $"Failed to migrate file {file.Path}");
-		}
-
-		return await Task.FromResult(old);
-	}
 
 	/// <summary>
 	/// Checks if a file exists and is genuinely available.
@@ -228,6 +264,7 @@ public class StoryIO
             _logService.Log(LogLevel.Error, $"File {file.Path} is unavailable.");
 
             //Show warning so user knows their file isn't lost and is just on onedrive.
+            // TODO: Circular dependency - StoryIO ↔ OutlineViewModel prevents injecting Windowing
             var result = await Ioc.Default.GetRequiredService<Windowing>().ShowContentDialog(new()
             {
                 Title = "File unavailable.",
@@ -265,7 +302,8 @@ public class StoryIO
     /// <returns>True if path is valid, false otherwise</returns>
     public static bool IsValidPath(string path)
     {
-        LogService logger = Ioc.Default.GetRequiredService<LogService>();
+        // TODO: Static method requires Ioc.Default until refactored to instance method or removed logging
+        ILogService logger = Ioc.Default.GetRequiredService<ILogService>();
         //Checks file name validity
         try
         {

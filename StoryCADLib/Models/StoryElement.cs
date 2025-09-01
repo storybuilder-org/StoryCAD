@@ -1,5 +1,4 @@
 ﻿using System.Text.Json.Serialization;
-using Windows.Data.Xml.Dom;
 using CommunityToolkit.Mvvm.ComponentModel;
 using StoryCAD.ViewModels.SubViewModels;
 using StoryCAD.DAL;
@@ -22,6 +21,20 @@ public class StoryElement : ObservableObject
 	}
 
 	[JsonIgnore]
+	private string _description;
+
+    /// <summary>
+    /// Common description field that is mapped to the main textbox on an element.
+    /// </summary>
+	[JsonInclude]
+	[JsonPropertyName("ElementDescription")]
+	public string Description
+	{
+		get => _description;
+		set => _description = value;
+	}
+
+	[JsonIgnore]
     private string _name;
 
     [JsonInclude]
@@ -29,7 +42,13 @@ public class StoryElement : ObservableObject
 	public string Name
     {
         get => _name;
-        set => _name = value;
+        set
+        {
+            _name = value;
+            // Keep the node synchronized when name changes from API
+            if (_node != null)
+                _node.Name = value;
+        }
     }
 
 	[JsonIgnore]
@@ -67,6 +86,17 @@ public class StoryElement : ObservableObject
     #region Public Methods
 
     /// <summary>
+    /// Updates this elements GUID field.
+    /// (Call this immediately after creating an element)
+    /// </summary>
+    internal void UpdateGuid(StoryModel model, Guid newGuid)
+    {
+        model.StoryElements.StoryElementGuids.Remove(Uuid);
+        Uuid = newGuid;
+        model.StoryElements.StoryElementGuids.Add(newGuid, this);
+    }
+
+    /// <summary>
     /// Retrieve a StoryElement from its Guid.
     ///
     /// Guids are used as keys to StoryElements, stored in
@@ -84,18 +114,36 @@ public class StoryElement : ObservableObject
     /// </summary>
     /// <param name="guid">The Guid of the StoryElement to retrieve</param>
     /// <returns></returns>
-    public static StoryElement GetByGuid(Guid guid)
+    public static StoryElement GetByGuid(Guid guid, StoryModel storyModel = null)
     {
         if (guid.Equals(Guid.Empty))
              return new StoryElement();
-        // Get the current StoryModel's StoryElementsCollection
-        OutlineViewModel outlineVM = Ioc.Default.GetRequiredService<OutlineViewModel>();
-        StoryElementCollection elements = outlineVM.StoryModel.StoryElements;
+        
+        // Get the StoryElementsCollection from the provided storyModel or from OutlineViewModel
+        StoryElementCollection elements;
+        if (storyModel != null)
+        {
+            elements = storyModel.StoryElements;
+        }
+        else
+        {
+            // Fallback to current behavior - get from AppState
+            // TODO: Examine this more closely. Called from OutlineViewModel.DeleteNode() and other ViewModels
+            // where OutlineViewModel context is available. Consider if this global state dependency is appropriate.
+            var appState = Ioc.Default.GetRequiredService<AppState>();
+            elements = appState.CurrentDocument.Model.StoryElements;
+        }
+        
         // Look for the StoryElement corresponding to the passed guid
-            if (elements.StoryElementGuids.ContainsKey(guid))
-                return elements.StoryElementGuids[guid];
-        //TODO: Log the error.
-        return new StoryElement();  // Not found
+        if (elements.StoryElementGuids.ContainsKey(guid))
+            return elements.StoryElementGuids[guid];
+        else
+        {
+            Ioc.Default.GetRequiredService<ILogService>()
+                .Log(LogLevel.Error, $"Cannot find GUID {guid} in outline");
+            return new StoryElement();  // Not found
+
+        }
     }
 
     /// <summary>
@@ -154,6 +202,7 @@ public class StoryElement : ObservableObject
         _uuid = Guid.NewGuid();
         _name = name;
         _type = type;
+        _description = string.Empty;
         _node = new(this, parentNode, type);
 
         model.StoryElements.Add(this);
@@ -168,76 +217,8 @@ public class StoryElement : ObservableObject
         _uuid = Guid.Empty;
         _name = string.Empty;
         _type = StoryItemType.Unknown;
+        _description = string.Empty;
         _node = null;
-    }
-
-    public StoryElement(IXmlNode xn, StoryModel model)
-    {
-        Guid uuid = default;
-        StoryItemType type = StoryItemType.Unknown;
-        string name = string.Empty;
-        bool _uuidFound = false;
-        bool _nameFound = false;
-        ElementType = StoryItemType.Unknown;
-        switch (xn.NodeName)
-        {
-            case "Overview":
-                type = StoryItemType.StoryOverview;
-                break;
-            case "Problem":
-                type = StoryItemType.Problem;
-                break;
-            case "Character":
-                type = StoryItemType.Character;
-                break;
-            case "Setting":
-                type = StoryItemType.Setting;
-                break;
-            case "PlotPoint":       // Legacy: PlotPoint was renamed to Scene   
-                type = StoryItemType.Scene;
-                break;
-            case "Scene":
-                type = StoryItemType.Scene;
-                break;
-            case "Separator":       // Legacy: Separator was renamed to Folder
-                type = StoryItemType.Folder;
-                break;
-            case "Folder":
-                type = StoryItemType.Folder;
-                break;
-            case "Section":
-                type = StoryItemType.Section;
-                break;
-            case "Notes":
-                type = StoryItemType.Notes;
-                break;
-            case "Web":
-                type= StoryItemType.Web;
-                break;
-            case "TrashCan":
-                type = StoryItemType.TrashCan;
-                break;
-        }
-        foreach (IXmlNode _attr in xn.Attributes)
-        {
-            switch (_attr.NodeName)
-            {
-                case "UUID":
-                    uuid = new Guid(_attr.InnerText);
-                    _uuidFound = true;
-                    break;
-                case "Name":
-                    name = _attr.InnerText;
-                    _nameFound = true;
-                    break;
-            }
-            if (_uuidFound && _nameFound)
-                break;
-        }
-        _uuid = uuid;
-        _name = name;
-        _type = type;
-        model.StoryElements.Add(this);
     }
 
     #endregion

@@ -2,16 +2,19 @@
 using System.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
+using StoryCAD.Services;
 using StoryCAD.Services.Messages;
 using StoryCAD.Services.Navigation;
 
 namespace StoryCAD.ViewModels;
 
-public class SettingViewModel : ObservableRecipient, INavigable
+public class SettingViewModel : ObservableRecipient, INavigable, ISaveable
 {
     #region Fields
 
-    private readonly LogService _logger;
+    private readonly ILogService _logger;
+    private readonly ListData _listData;
+    private readonly Windowing _windowing;
     private bool _changeable; // process property changes for this story element
     private bool _changed;    // this story element has changed
 
@@ -102,11 +105,12 @@ public class SettingViewModel : ObservableRecipient, INavigable
         set => SetProperty(ref _props, value);
     }
 
-    private string _summary;
-    public string Summary
+    // Description property (migrated from Summary)
+    private string _description;
+    public string Description
     {
-        get => _summary;
-        set => SetProperty(ref _summary, value);
+        get => _description;
+        set => SetProperty(ref _description, value);
     }
 
     // Setting Sense data
@@ -198,7 +202,7 @@ public class SettingViewModel : ObservableRecipient, INavigable
         Weather = Model.Weather;
         Temperature = Model.Temperature;
         Props = Model.Props;
-        Summary = Model.Summary;
+        Description = Model.Description;
         Sights = Model.Sights;
         Sounds = Model.Sounds;
         Touch = Model.Touch;
@@ -208,7 +212,7 @@ public class SettingViewModel : ObservableRecipient, INavigable
         _changeable = true;
     }
 
-    internal void SaveModel()
+    public void SaveModel()
     {
         try
         {
@@ -224,7 +228,7 @@ public class SettingViewModel : ObservableRecipient, INavigable
             Model.Props = Props;
 
             //Write RTF files
-            Model.Summary = Summary;
+            Model.Description = Description;
             Model.Sights = Sights;
             Model.Sounds = Sounds;
             Model.Touch = Touch;
@@ -233,7 +237,7 @@ public class SettingViewModel : ObservableRecipient, INavigable
         }
         catch (Exception ex)
         {
-            Ioc.Default.GetRequiredService<LogService>().LogException(LogLevel.Error,
+            _logger.LogException(LogLevel.Error,
                 ex, $"Failed to save setting model - {ex.Message}");
         }
 
@@ -249,9 +253,20 @@ public class SettingViewModel : ObservableRecipient, INavigable
     #endregion
 
     #region Constructor
-    public SettingViewModel()
+    
+    // Constructor for XAML compatibility - will be removed later
+    public SettingViewModel() : this(
+        Ioc.Default.GetRequiredService<ILogService>(),
+        Ioc.Default.GetRequiredService<ListData>(),
+        Ioc.Default.GetRequiredService<Windowing>())
     {
-        _logger = Ioc.Default.GetService<LogService>();
+    }
+    
+    public SettingViewModel(ILogService logger, ListData listData, Windowing windowing)
+    {
+        _logger = logger;
+        _listData = listData;
+        _windowing = windowing;
 
         Locale = string.Empty;
         Season = string.Empty;
@@ -260,7 +275,7 @@ public class SettingViewModel : ObservableRecipient, INavigable
         Weather = string.Empty;
         Temperature = string.Empty;
         Props = string.Empty;
-        Summary = string.Empty;
+        Description = string.Empty;
         Sights = string.Empty;
         Sounds = string.Empty;
         Touch = string.Empty;
@@ -269,14 +284,14 @@ public class SettingViewModel : ObservableRecipient, INavigable
 
         try
         {
-            Dictionary<string, ObservableCollection<string>> _lists = Ioc.Default.GetService<ListData>().ListControlSource;
+            Dictionary<string, ObservableCollection<string>> _lists = _listData.ListControlSource;
             LocaleList = _lists["Locale"];
             SeasonList = _lists["Season"];
         }
         catch (Exception e)
         {
             _logger.LogException(LogLevel.Fatal, e, "Error loading lists in Problem view model");
-            Ioc.Default.GetRequiredService<Windowing>().ShowResourceErrorMessage();
+            _windowing.ShowResourceErrorMessage();
         }
 
 

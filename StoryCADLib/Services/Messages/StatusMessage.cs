@@ -18,7 +18,7 @@ public class StatusMessage
         
         if (SendToLog)
         {
-            Ioc.Default.GetService<LogService>().Log(Level,status);
+            Ioc.Default.GetService<ILogService>()?.Log(Level, status);
         }
     }
 }

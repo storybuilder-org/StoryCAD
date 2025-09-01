@@ -21,26 +21,30 @@ public class LogService : ILogService
     private static Exception exceptionHelper;
     private string apiKey = string.Empty;
     private string logID = string.Empty;
-    private static AppState State = Ioc.Default.GetRequiredService<AppState>();
+    private static AppState State;
+    private static PreferenceService PreferenceService;
     public static NLog.LogLevel MinLogLevel = NLog.LogLevel.Info;
-    public bool ElmahLogging;
+    public bool ElmahLogging { get; private set; }
     static LogService()
     {
+        // Initialize static fields with Ioc for now - will be removed when LogService fully converted
+        State = Ioc.Default.GetRequiredService<AppState>();
+        PreferenceService = Ioc.Default.GetRequiredService<PreferenceService>();
+        
         try
         {
             LoggingConfiguration config = new();
 
             // Create the file logging target
             FileTarget fileTarget = new();
-            logFilePath = Path.Combine(Ioc.Default.GetRequiredService<AppState>().RootDirectory, "logs");
+            logFilePath = Path.Combine(State.RootDirectory, "logs");
             fileTarget.FileName = Path.Combine(logFilePath, "StoryCAD.${date:format=yyyy-MM-dd}.log");
             fileTarget.CreateDirs = true;
             fileTarget.MaxArchiveFiles = 7;
             fileTarget.ArchiveEvery = FileArchivePeriod.Day;
-            fileTarget.ConcurrentWrites = true;
             fileTarget.Layout = "${longdate} | ${level} | ${message} | ${exception:format=Message,StackTrace,Data:MaxInnerExceptionLevel=15}";
             LoggingRule fileRule = new("*", NLog.LogLevel.Off, fileTarget);
-            if (Ioc.Default.GetRequiredService<PreferenceService>().Model.AdvancedLogging)
+            if (PreferenceService.Model.AdvancedLogging)
                 MinLogLevel = NLog.LogLevel.Trace;
             else
                 MinLogLevel = NLog.LogLevel.Info;
@@ -121,7 +125,7 @@ public class LogService : ILogService
                         msg.Data.Add(new(key: "Line " + 0, value: $"failed getting system info ({ex.Message})"));
                     }
 
-                    using (FileStream stream = File.Open(Path.Combine(Ioc.Default.GetRequiredService<AppState>().RootDirectory, "logs", $"StoryCAD.{DateTime.Now.ToString("yyyy-MM-dd")}.log"), FileMode.Open, FileAccess.Read,FileShare.ReadWrite))
+                    using (FileStream stream = File.Open(Path.Combine(State.RootDirectory, "logs", $"StoryCAD.{DateTime.Now.ToString("yyyy-MM-dd")}.log"), FileMode.Open, FileAccess.Read,FileShare.ReadWrite))
                     {
                         using (StreamReader reader = new(stream))
                         {
@@ -245,8 +249,8 @@ public class LogService : ILogService
 	{
 		try
 		{
-			PreferencesModel Prefs =  Ioc.Default.GetRequiredService<PreferenceService>().Model;
-			AppState State =  Ioc.Default.GetRequiredService<AppState>();
+			PreferencesModel Prefs = PreferenceService.Model;
+			AppState AppStateLocal = State;
 			string AppArch = IntPtr.Size switch
 			{
 				4 => "32 bit",
@@ -269,7 +273,7 @@ public class LogService : ILogService
                      App ARCH - {AppArch}
                      .NET Ver - {RuntimeInformation.OSArchitecture}
                      Startup  - {State.StartUpTimer.ElapsedMilliseconds} ms
-                     Elmah Status - {Ioc.Default.GetRequiredService<LogService>().ElmahLogging}
+                     Elmah Status - {ElmahLogging}
                      Windows {WinVer} Build - {Environment.OSVersion.Version.Build}
                      Debugger Attached - {Debugger.IsAttached}
                      Touchscreen - {PointerDevice.GetPointerDevices().Any(p => p.PointerDeviceType == PointerDeviceType.Touch)}

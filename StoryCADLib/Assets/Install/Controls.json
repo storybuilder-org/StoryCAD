@@ -1,0 +1,775 @@
+{
+  "conflictTypes": [
+    {
+      "category": "Relationship",
+      "subCategories": [
+        {
+          "name": "Family",
+          "examples": [
+            "Hiding a relative's wrongdoing",
+            "Lack of intimacy and understanding with spouse",
+            "Disagreement on how to care for an aging parent"
+          ]
+        },
+        {
+          "name": "Romantic",
+          "examples": [
+            "Discovering a Spouse's Secret",
+            "An Unwanted Romantic Advance",
+            "A Partner Being Unwilling to Commit",
+            "A Romantic Competitor",
+            "Seeing an Ex with Someone New",
+            "Being Turned Down by a Potential Love Interest",
+            "Anagonist is a rival for a lover",
+            "Your love interest's ex shows up",
+            "Your antagonist seeks to hurt you by taking your love interest"
+          ]
+        },
+        {
+          "name": "Professional",
+          "examples": [
+            "Your antagonist is jealous of your success",
+            "You're being challenged for a role you seek",
+            "A business rival wants the same contract or client"
+          ]
+        },
+        {
+          "name": "Group",
+          "examples": [
+            "A co-worker ignores you",
+            "A fellow cop is hiding a crime",
+            "A new 'star' co-worker is showing you up",
+            "Antagonist despises you because of your background"
+          ]
+        },
+        {
+          "name": "Friends",
+          "examples": [
+            "Your 'friend' keeps undermining you",
+            "Your friend has different values and goals",
+            "Lack of communication"
+          ]
+        },
+        {
+          "name": "Self (inner conflicts)",
+          "examples": [
+            "An old emotional wound hamstrings you",
+            "Lack of self-confidence holds you back"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Information",
+      "subCategories": [
+        {
+          "name": "Information nobody knows (mystery, problem to solve)",
+          "examples": [
+            "Antagonist seeks to solve same problem",
+            "Antagonist wants credit for your discovery",
+            "Antagonist fears your creation is dangerous",
+            "Antagonist wants to prevent you solving a crime"
+          ]
+        },
+        {
+          "name": "Data deliberately kept hidden",
+          "examples": [
+            "Your boss asks you to delete data on a failed project",
+            "Antagonist seeks to hide a damning truth",
+            "Data discovery will shame Antagonist or other"
+          ]
+        },
+        {
+          "name": "Information was wrong",
+          "examples": [
+            "Being Mistaken for Someone Else",
+            "Antagonist's ego won't let him accept truth",
+            "Antagonist defends old paradigm"
+          ]
+        },
+        {
+          "name": "Disagreement about what the data mean",
+          "examples": [
+            "Antagonist defends group's incorrect beliefs"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Interest",
+      "subCategories": [
+        {
+          "name": "Ownership of something (money, land, title, etc.)",
+          "examples": [
+            "An executive in your company trades using insider information",
+            "Your antagonist wants to prevent the discovery of a piece of land's true owner",
+            "A staff member is part owner of a business your university's doing business with",
+            "Your access to grazing rights are being reduced by someone in Washington"
+          ]
+        },
+        {
+          "name": "Procedural issues (how to proceed)",
+          "examples": [
+            "Misaligned Goals",
+            "A zoning meeting was rescheduled and you weren't informed",
+            "Bickering between two board members is interfering with a major decision",
+            "You and your spouse have different child-raising ideas",
+            "You know how, Antagonist believe you"
+          ]
+        },
+        {
+          "name": "Psychological need (fairness, respect, trust, etc.)",
+          "examples": [
+            "Nepotism at Work",
+            "Having to Work with an Enemy",
+            "A lawyer represents one client while receiving fees from opposing litigents",
+            "Antagonist wants to prevent your achievement"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Structural",
+      "subCategories": [
+        {
+          "name": "Limited resources (competition over land, food, etc.)",
+          "examples": [
+            "Bad Weather",
+            "Lacking an Important Resource",
+            "Being Unable to Save Everyone",
+            "Physical Exhaustion",
+            "A deadline is moved up",
+            "A resource-hungry factory is consuming the water",
+            "A rival tribe is hunting on your territory",
+            "Your precinct doesnt have enough officers to protect people",
+            "You inexplicably end up in a bidding war for a property"
+          ]
+        },
+        {
+          "name": "Authority",
+          "examples": [
+            "Your authority over same interest",
+            "Antagonist wants your job",
+            "Boss vs. worker",
+            "Your antagonist defends nationalist views",
+            "Police vs. civilians",
+            "Antagonist seeks to obtain or preserve power"
+          ]
+        },
+        {
+          "name": "External changes (drought, flood, need to migrate, etc.)",
+          "examples": [
+            "Facing a challenge beyond one's knowledge or skill",
+            "Being Unprepared",
+            "A new competitor arrives on the scene",
+            "A hurricane's bearing down on your town",
+            "Refugees are flooding your border",
+            "A powerful land owner blocks access to water during a drought"
+          ]
+        },
+        {
+          "name": "Organizational",
+          "examples": [
+            "The factory that's the largest employer in the area is closing",
+            "A rival seeks more power",
+            "Antagonist seeks to preserve position",
+            "Partisan conflicts over politics"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Value",
+      "subCategories": [
+        {
+          "name": "Knowledge/Learning/Curiousity",
+          "examples": [
+            "A scientist sticks by his findings even after being ostracized by his community",
+            "A member of a cult is beginning to doubt the cult leader's statements",
+            "A preacher whose wife has died must come to grips with his doubts",
+            "Disagreement over the truth of a claim",
+            "Inability to tolerate a differing opinion",
+            "Unwillingness to suspend judgement when evidence is mixed",
+            "Disagreement over a course of action"
+          ]
+        },
+        {
+          "name": "Respect for Others",
+          "examples": [
+            "A recruit can't seem to earn his drill sergeant's respect",
+            "A co-worker constantly bad-mouths the hispanics she works with",
+            "Disrespect due to ethinic background",
+            "Distrust due to religious differences",
+            "Disregard due to lack of education",
+            "Distain over economic circumstances"
+          ]
+        },
+        {
+          "name": "Courage",
+          "examples": [
+            "Unwillingness to face opposition due to self-doubt",
+            "Presenting false valour",
+            "Unable to ask for forgiveness",
+            "Unable to forgive an enemy"
+          ]
+        },
+        {
+          "name": "Family",
+          "examples": [
+            "A divorce or breakup is growing increasingly nasty",
+            "A sibling is vying for your parents' favor",
+            "Disagreement on what to do with your parents' farm estate",
+            "Your aunt insists you join her former sorority",
+            "Caring for an ill aging parent detracts from kids and spouse"
+          ]
+        },
+        {
+          "name": "Integrity/Honesty",
+          "examples": [
+            "Lack of transparency over evidence or research",
+            "Lack of trust in an individual because of past behavior",
+            "Mixed obligations (for example, to job and family)"
+          ]
+        },
+        {
+          "name": "Fairness/Justice/Openness",
+          "examples": [
+            "A whistle-blower is harrassed at Work",
+            "A supervisor plays favorites because of a long-standing relationship",
+            "An attacker isn't charge because he's a police officer",
+            "The mananger's daughter gets the job although she's not qualified"
+          ]
+        },
+        {
+          "name": "Spirituality/Faith",
+          "examples": [
+            "A terrible situation has made your faith falter",
+            "You turn to God in a crisis and there is no answer"
+          ]
+        },
+        {
+          "name": "Responsibility/Dependability",
+          "examples": [
+            "A co-worker is hiding his drinking problem",
+            "Attendance records are being falsified",
+            "Evidence is altered to improve chances of conviction",
+            "A familiy illness is affecting your ability to do your job"
+          ]
+        },
+        {
+          "name": "Loyalty/Friendship",
+          "examples": [
+            "You've discovered a friend is cheating on his wife",
+            "You've drifted away from a friend who insists on hanging on"
+          ]
+        },
+        {
+          "name": "Commitment/Dedication/Perseverance",
+          "examples": [
+            "Impatience over the lack of early success",
+            "Discourteous becauase of impatience",
+            "Avoiding starting a difficult task"
+          ]
+        },
+        {
+          "name": "Authenticity",
+          "examples": [
+            "Unwillingness to state one's true opinion",
+            "Afraid to stand up for a downtrodden individual"
+          ]
+        },
+        {
+          "name": "Creativity",
+          "examples": [
+            "Claiming credit for another's work or invention",
+            "Slighting another's creativness or contribution"
+          ]
+        },
+        {
+          "name": "Leadership/Self-assertion",
+          "examples": [
+            "A strong-willed child refuses to obey orders",
+            "Your boss is wrong but can't admit it",
+            "Someone shoehorns into a discussion",
+            "A parent insists his child's bullying is justified"
+          ]
+        },
+        {
+          "name": "Prudence/Foresight",
+          "examples": [
+            "Failure to prepare for a bad harvest",
+            "Borrowing recklessly",
+            "Routinely spending your entire paycheck and never saving",
+            "Failing to defend against a warlike tribe"
+          ]
+        },
+        {
+          "name": "Resilience",
+          "examples": [
+            "A former a victim of abuse, you're wary of a new relationship",
+            "A burned-out coach is given a gifted athlete"
+          ]
+        },
+        {
+          "name": "Patience",
+          "examples": [
+            "Rushing into new tasks without preparation or thought",
+            "A friend is upset because she's not recognized in a job she just started",
+            "Disregarding the fishing boat captain when he performs his safety drill",
+            "Starting a different task because you're bored with the current one"
+          ]
+        },
+        {
+          "name": "Forgiveness",
+          "examples": [
+            "Lack of foregiveness is tearing you up inside",
+            "The person who you forgave has commmited another major offense"
+          ]
+        },
+        {
+          "name": "Freedom/Indepence",
+          "examples": [
+            "Your father demands you skip time with friends and study",
+            "Your attempt to homestead has failed miserably"
+          ]
+        },
+        {
+          "name": "Gratitude/Appreciation",
+          "examples": [
+            "Not keeping in contact with old friends",
+            "Feeling upset because his car isn't the lastest model",
+            "Comparing yourself to a richer friend"
+          ]
+        },
+        {
+          "name": "Compassion",
+          "examples": [
+            "An Indian soldier refuses to accept a Pakistani as other than the enemy",
+            "A former wife belittles her former hustband in front of the children"
+          ]
+        },
+        {
+          "name": "Willingness to Compromise",
+          "examples": [
+            "A forced (non-collaborative) compromise leaves one or both sides unhappy",
+            "The child visitation schedule after a divorce is one-sided",
+            "After a  water rights court decision one party continues to overuse resources",
+            "One side gives in to avoid direct conflict, but still feels agrieved"
+          ]
+        },
+        {
+          "name": "Accomplishment",
+          "examples": [
+            "You've sacrificed your family to achieve job success",
+            "A goal you've worked years for is made obsolete"
+          ]
+        },
+        {
+          "name": "Wealth/Financial Security",
+          "examples": [
+            "A successful woman with several stores is always on the go and exhausted",
+            "Family members feud over the pastriarch's will",
+            "Barely making ends meet and then finding you're unemployed",
+            "Being coddled financially as a youth leaves a young man unprepared for life",
+            "Being expected to be active part in the family business",
+            "Acting as a steward is difficult; nobody trusts your intentions",
+            "Finding that you've blown through a windfall"
+          ]
+        },
+        {
+          "name": "Hardworking",
+          "examples": [
+            "A cop works second jobs to provide for his family, who he never sees",
+            "Hard work not recognized or rewarded",
+            "Working harder but not smarter",
+            "Working harder for war than for peace"
+          ]
+        },
+        {
+          "name": "Health/Fitness",
+          "examples": [
+            "A boy, shamed by his father, overeats, in a vicious cycle.",
+            "An addiction in the family",
+            "Work conditions in the mine are unsafe",
+            "A physical handicap causes job issues"
+          ]
+        },
+        {
+          "name": "Humility",
+          "examples": [
+            "Inability to delegate to subordinates",
+            "Unwillingness to acknowedge others' contributions"
+          ]
+        },
+        {
+          "name": "Humor",
+          "examples": [
+            "A coworker constantly pokes fun a workmate",
+            "Using humor to disarm conflict causes resentment",
+            "Self-effacing humor results in scorn",
+            "Your boss has absolutely no sense of humor"
+          ]
+        },
+        {
+          "name": "Intelligence",
+          "examples": [
+            "Claimed intelligence demonstrates lack of emotional intelligence",
+            "Using agressive humor to disparage someone else",
+            "Coworkers are mistreating a mentally challenged person"
+          ]
+        },
+        {
+          "name": "Occupation",
+          "examples": [
+            "Overseas military service is ruining your marriage",
+            "An employee thinks his role includes directing others"
+          ]
+        },
+        {
+          "name": "Optimism",
+          "examples": [
+            "A pollyanna drives her co-workers nuts"
+          ]
+        },
+        {
+          "name": "Calm/Poise",
+          "examples": [
+            "A student panics at the thought of every test or examination",
+            "The victim of a crime is so calm that she becomes a suspect"
+          ]
+        },
+        {
+          "name": "Security",
+          "examples": [
+            "A neighborhood's decline is making older neighbors vulnerable",
+            "You suspect a co-worker is stealing from your employer",
+            "Paranoia over school security is affecting your marriage",
+            "A neighbor is raising his kids to be bullies"
+          ]
+        },
+        {
+          "name": "Self-reliance",
+          "examples": [
+            "Refusal to ask for expert help when needed",
+            "Your aging mother insists on living alone"
+          ]
+        },
+        {
+          "name": "Serenity",
+          "examples": [
+            "Your coworker's snap decisions are dangerous",
+            "Your mother is a drama queen"
+          ]
+        },
+        {
+          "name": "Service/Duty/Devotion",
+          "examples": [
+            "A young man mocks customers after they leave the store",
+            "A young woman wants to join the military over her parents' objections",
+            "Two siblings react very differently toward caring for an aging parent"
+          ]
+        },
+        {
+          "name": "Stability",
+          "examples": [
+            "Your wife is exhibiting wild mood swings",
+            "A fragile peace between neighboring communities is crumbling",
+            "Your cousin exhibits road rage whenever he's behind the wheel"
+          ]
+        },
+        {
+          "name": "Status",
+          "examples": [
+            "Your child seems to always seek attention",
+            "A friend constantly posts how bad she feels on social media",
+            "Your husband feels the need to keep up with or exceed the neighbors"
+          ]
+        },
+        {
+          "name": "Trustworthiness",
+          "examples": [
+            "Antagonist is attacking your country",
+            "Religious conflicts"
+          ]
+        },
+        {
+          "name": "Crime or injustice",
+          "examples": [
+            "Antagonist wants to cover up relative's crime",
+            "Antagonist is a physical agressor",
+            "Antagonist is assailant",
+            "Antagonist has stolen an object",
+            "Antagonist is a traitor"
+          ]
+        },
+        {
+          "name": "Sense of what's right or wrong",
+          "examples": [
+            "Antagonist seeks to escape justice",
+            "Antagonist wants revenge"
+          ]
+        },
+        {
+          "name": "Denial or denegration of others' beliefs",
+          "examples": [
+            "Poking fun of door-to-door missionaries",
+            "Calling hispanics papists",
+            "Denying that the Holocaust happened"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Identity",
+      "subCategories": [
+        {
+          "name": "Ethnic/racial",
+          "examples": [
+            "A young African American man is torn between his love for hip-hop and his parents'' middle-class exptations.",
+            "A Native American woman tries to balance her indigenous beliefs and a Western lifestyle.",
+            "A Hispanic man living near the border is caught between his immigrant community and assimilation.",
+            "An Asian American tries to embrace feminism but is pressured to conform by traditional parents.",
+            "A mixed-race individual struggles to fully belong to one racial group."
+          ]
+        },
+        {
+          "name": "Gender identity",
+          "examples": [
+            "A transgender person navigating their transition faces workplace discrimination.",
+            "A non-binary individual challenging traditional gender norms upsets their neighbors.",
+            "A cisgender woman pushing against gender-based limitations in her career faces pushback from male colleagues.",
+            "A gender-nonconforming athlete faces pressure to conform to masculine norms."
+          ]
+        },
+        {
+          "name": "Sexual orientation",
+          "examples": [
+            "A gay man faces rejection and discrimination from his conservative religious community.",
+            "A lesbian woman caught in a traditional marriage struggles with her choices.",
+            "An asexual person faces misunderstanding from their romantic partner."
+          ]
+        },
+        {
+          "name": "Religious",
+          "examples": [
+            "A Muslim doctor in an American hospital is torn between the need to wear a hijab and workplace expectations.",
+            "A Christian musician/songwriter faces discrimination from liberal friends.",
+            "A Hindu woman must choose between family expectations and love for Muslim man.",
+            "A college student who's became an atheist faces pressure from his preacher father."
+          ]
+        },
+        {
+          "name": "Political",
+          "examples": [
+            "A progressive activist who is a single mother and faces opposition from the government, media, and even friends and family when she takes a stand against an oppressive new law.",
+            "A businessman who started and owns a successful retail chain faces criticism from employees and the press for his conservative policies.",
+            "A journalism major finds her college newpaper articles due to their content.",
+            "A libertarian member of his city council is attacked from both liberal and conservative peers due to his opposition to local taxes."
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Criminal activities",
+      "subCategories": [
+        {
+          "name": "Crimes of desperation",
+          "examples": [
+            "A woman shoplifts food to feed her hungry children.",
+            "A man breaks into a pharmacy to steal medicine for his terminally ill wife.",
+            "A homeless veteran drives off from a gas station without paying while fueling the car he lives in.",
+            "The co-owner of a small business embezzles in order to pay off a gambling debt."
+          ]
+        },
+        {
+          "name": "Crimes of passion",
+          "examples": [
+            "A wife, terrified of an abusive husband, shoots him as he sleeps.",
+            "A young woman who steals a parking space finds her car keyed.",
+            "An agressive protester gets hit with his own picket sign.",
+            "A stalker watches his ex-girlfriend while she sleeps.",
+            "A man kills his partner because he suspect's he's unfaithful.",
+            "Antagonist kills a witness to prevent them from testifying in a criminal case"
+          ]
+        },
+        {
+          "name": "Crimes of opportunity",
+          "examples": [
+            "A thief grabs a woman's purse while she's distracted by her phone",
+            "A man breaks into an unoccupied house through an unlocked window.",
+            "A tourist is pickpocketed while taking a photo at a crowded market.",
+            "A bartender lifts cash from the register after closing time."
+          ]
+        },
+        {
+          "name": "Organized crime",
+          "examples": [
+            "A group of mobsters runs a prostitution ring in a major city.",
+            "A notorious drug cartel controls the distribution of illegal substances in a particular region.",
+            "A mobster uses threats to force a court officer to switch evidence during a murder trial.",
+            "A cartel is tapping into government-controlled pipelines to steal fuel which is sold on the black market."
+          ]
+        },
+        {
+          "name": "White-collar crime",
+          "examples": [
+            "A stockbroker uses priveleged information to buy and sell stocks using his sister's account.",
+            "An art dealer pairs with a hacker to sell fake NFTs of art works.",
+            "A CEO embezzles millions from the company for personal gain.",
+            "A celebraty financial advisor defrauds her clients through a Ponzi scheme.",
+            "An accountanting firm tax records for their clients to reduce their liability."
+          ]
+        },
+        {
+          "name": "Cybercrime",
+          "examples": [
+            "A hacker gains access to a company's network and steals sensitive information.",
+            "A group of cybercriminals creates a ransomware attack to extort money from a large corporation.",
+            "A scammer impersonates a government official and convinces individuals to send money through email."
+          ]
+        },
+        {
+          "name": "Hate crime",
+          "examples": [
+            "A neo-Nazi group attacks a mosque during Friday prayers.",
+            "A group of white supremacists vandalizes a synagogue with anti-Semitic graffiti.",
+            "A man shoots and kills members of a LGBTQ+ community in a nightclub."
+          ]
+        },
+        {
+          "name": "Environmental crime",
+          "examples": [
+            "A company illegally dumps toxic waste into a river, contaminating the water supply for a nearby town.",
+            "A poacher kills an endangered species for their valuable ivory tusks.",
+            "A pyromaniac sets fire to a protected forest, destroying thousands of acres of land and wildlife."
+          ]
+        },
+        {
+          "name": "State-sponsored crime",
+          "examples": [
+            "A government forcibly removes indigenous people from their lands to make way for a mining operation.",
+            "A political party hacks into political opponents' emails to gain an advantage in an election.",
+            "A government implements a widespread surveillance program, violating the privacy rights of its citizens."
+          ]
+        },
+        {
+          "name": "Substance-related crime",
+          "examples": [
+            "A drug lord oversees the distribution of cocaine in several cities.",
+            "A group of individuals grows and sells marijuana illegally.",
+            "A chemist cooks meth in a makeshift lab, selling it to users in the area."
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Criminal psychology",
+      "subCategories": [
+        {
+          "name": "Antisocial behavior",
+          "examples": [
+            "A neighbor keeps breaking your garden ornaments because she doesn't like them.",
+            "A crowd of rowdy young men hang outside a bar drinking.",
+            "Football fans keep parking on your property during games.",
+            "An old man keeps a loud and agressive dog."
+          ]
+        },
+        {
+          "name": "Narcissism",
+          "examples": [
+            "Jack brags about how he can get away with anything he wants because of his wealth and connections.",
+            "Because of what she perceives as slow service in a checkout line, Jane flies into a rage and verbally attacks the clerk.",
+            "Megan ignores the pleas of a homeless person on the street, seeing them as beneath her and unworthy of her help.",
+            "John flatters and sucks up to his boss to get what he wants at every opportunity.",
+            "Paul impulsively keys a sport car on the street, because there are no witnesses.",
+            "A construction worker punches a stranger in a bar for accidentally spilling a drink on the girl he's with.",
+            "Margaret users her position as county commissioner to evade a speeding ticket."
+          ]
+        },
+        {
+          "name": "Sociopathy",
+          "examples": [
+            "A boss who belittles her assistant and anyone who does not come up to her \"standards\".",
+            "Man responds with more emotion to his goldfish than to his girlfriend."
+          ]
+        },
+        {
+          "name": "Psychopathy",
+          "examples": [
+            "Caught copying another student's test answers, she blatently claims the other person stole hers",
+            "Seeing a jacket she likes, she tries it own and walks out of the store withough hesitation",
+            "A youth cusses at his teacher, and seems contrite in counseling, but destroys the classroom after returning",
+            "After being fired, a disgruntaled employee burns his former employer's business down"
+          ]
+        }
+      ]
+    }
+  ],
+  "relationTypes": [
+    "Acquaintance",
+    "Aunt",
+    "Brother",
+    "Brother-in-law",
+    "Business acquaintance",
+    "Business competitor",
+    "Business friend",
+    "Childhood enemy",
+    "Childhood friend",
+    "Childhood sweetheart",
+    "Co-worker",
+    "Cousin",
+    "Daughter",
+    "Daughter-in-law",
+    "Employee",
+    "Employer",
+    "Ex-husband",
+    "Ex-wife",
+    "Father",
+    "Father-in-law",
+    "Former Wife",
+    "Former employee",
+    "Former employer",
+    "Former husband",
+    "Former lover",
+    "Former neighbor",
+    "Former student",
+    "Former teacher",
+    "Former teammate",
+    "Former wife",
+    "Foster parent",
+    "Friend",
+    "Husband",
+    "Lover",
+    "Mentee",
+    "Mentor",
+    "Military buddy",
+    "Mistress",
+    "Mother",
+    "Mother-in-law",
+    "Neighbor",
+    "Nephew",
+    "New-found friend",
+    "Niece",
+    "Old boyfriend",
+    "Old girlfriend",
+    "Partner",
+    "Rival",
+    "Roommate",
+    "School friend",
+    "Sister",
+    "Sister-in-law",
+    "Son",
+    "Son-in-law",
+    "Stepbrother",
+    "Stepdaughter",
+    "Stepfather",
+    "Stepmother",
+    "Stepsister",
+    "Stepson",
+    "Student",
+    "Teacher",
+    "Teammate",
+    "Uncle",
+    "Wife"
+  ]
+}

@@ -411,3 +411,7 @@ StoryCAD/.ENV
 /.idea/.idea.StoryCAD
 /.idea
 .idea/.idea.StoryCAD/.idea/workspace.xml
+
+
+# Claude settings
+.claude/settings.local.json

@@ -12,7 +12,8 @@ namespace StoryCAD.ViewModels
     /// </summary>
     public class ControlData
     {
-        readonly LogService _log = Ioc.Default.GetService<LogService>();
+        private readonly ILogService _log;
+        private readonly ControlLoader _controlLoader;
 
         //Character conflics
         public SortedDictionary<string, ConflictCategoryModel> ConflictTypes;
@@ -22,38 +23,55 @@ namespace StoryCAD.ViewModels
         /// </summary>
         public List<string> RelationTypes;
 
-        public ControlData()
+        public ControlData(ILogService log, ControlLoader controlLoader)
         {
+            _log = log;
+            _controlLoader = controlLoader;
             int subTypeCount = 0;
             int exampleCount = 0;
             try
             {
                 _log.Log(LogLevel.Info, "Loading Controls.ini data");
-                ControlLoader loader = Ioc.Default.GetService<ControlLoader>();
                 Task.Run(async () => 
                 {
-                    List<Object> Controls = await loader.Init();
+                    List<Object> Controls = await _controlLoader.Init();
                     ConflictTypes = (SortedDictionary<string, ConflictCategoryModel>)Controls[0];
                     RelationTypes = (List<string>)Controls[1];
                 }).Wait();
 
                 _log.Log(LogLevel.Info, "ConflictType Counts");
-                _log.Log(LogLevel.Info,
-                    $"{ConflictTypes.Keys.Count} ConflictType keys created");
-                foreach (ConflictCategoryModel type in ConflictTypes.Values)
+                if (ConflictTypes != null)
+                {
+                    _log.Log(LogLevel.Info,
+                        $"{ConflictTypes.Keys.Count} ConflictType keys created");
+                }
+                
+                if (RelationTypes != null)
+                {
+                    _log.Log(LogLevel.Info,
+                        $"{RelationTypes.Count} RelationTypes loaded");
+                }
+                
+                if (ConflictTypes != null)
+                {
+                    foreach (ConflictCategoryModel type in ConflictTypes.Values)
                 {
                     subTypeCount += type.SubCategories.Count;
                     exampleCount += type.SubCategories.Sum(subType => type.Examples[subType].Count);
+                    }
+                    _log.Log(LogLevel.Info,
+                        $"{subTypeCount} Total ConflictSubType keys created");
+                    _log.Log(LogLevel.Info,
+                        $"{exampleCount} Total ConflictSubType keys created");
                 }
-                _log.Log(LogLevel.Info,
-                    $"{subTypeCount} Total ConflictSubType keys created");
-                _log.Log(LogLevel.Info,
-                    $"{exampleCount} Total ConflictSubType keys created");
             }
             catch (Exception ex)
             {
-                _log.LogException(LogLevel.Error, ex, "Error loading Controls.ini");
-                Application.Current.Exit();
+                _log.LogException(LogLevel.Error, ex, "Error loading controls data");
+                if (Application.Current != null)
+                {
+                    Application.Current.Exit();
+                }
             }
         }
     }

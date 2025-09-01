@@ -5,10 +5,15 @@ using StoryCAD.ViewModels.SubViewModels;
 namespace StoryCAD.Services.Dialogs.Tools;
 public sealed partial class PrintReportsDialog
 {
-    public PrintReportDialogVM PrintVM = Ioc.Default.GetRequiredService<PrintReportDialogVM>();
+    public PrintReportDialogVM PrintVM;
+    private readonly AppState _appState;
+    private readonly ILogService _logService;
 
-    public PrintReportsDialog()
+    public PrintReportsDialog(PrintReportDialogVM printVM, AppState appState, ILogService logService)
     {
+        PrintVM = printVM;
+        _appState = appState;
+        _logService = logService;
         InitializeComponent();
         PrintVM.RegisterForPrint();
         PrintVM.SelectAllCharacters = false;
@@ -29,28 +34,24 @@ public sealed partial class PrintReportsDialog
         PrintVM.SceneList = false;
         PrintVM.WebList = false;
 
-        //Warn user if they are on win10 as print manager can't be used.
-        if (Environment.OSVersion.Version.Build <= 19045) { OldW10Warning.IsOpen = true; }
-
         //Gets all nodes that aren't deleted
         try
         {
-            foreach (StoryNodeItem rootChild in Ioc.Default.GetRequiredService<ShellViewModel>().DataSource[0].Children)
+            foreach (StoryNodeItem rootChild in _appState.CurrentDocument!.Model.ExplorerView[0].Children)
             {
                 PrintVM.TraverseNode(rootChild);
             }
         }
         catch (Exception ex)
         {
-            Ioc.Default.GetRequiredService<LogService>().LogException(LogLevel.Error, ex, "Error parsing nodes.");
+            _logService.LogException(LogLevel.Error, ex, "Error parsing nodes.");
         }
     }
 
     /// <summary>
-    /// You can't bind selected items so when the values change this function is ran which updates the values in the VM accordingly
+    /// You can't bind selected items so when the values change 
+    /// this function is ran which updates the values in the VM accordingly
     /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="e"></param>
     private void UpdateSelection(object sender, SelectionChangedEventArgs e)
     {
         PrintVM.SelectedNodes.Clear();
@@ -113,7 +114,7 @@ public sealed partial class PrintReportsDialog
     private void EmptySynopsisWarningCheck(object sender, RoutedEventArgs e)
     {
         //Check Narrative View is empty
-        if (Ioc.Default.GetRequiredService<OutlineViewModel>().StoryModel.NarratorView[0].Children.Count == 0)
+        if (_appState.CurrentDocument!.Model.NarratorView[0].Children.Count == 0)
         {
             //Show warning
             SynopsisWarning.IsOpen = true;

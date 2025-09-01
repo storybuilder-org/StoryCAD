@@ -30,3 +30,5 @@ Clicking on Sample Stories on the left tab displays a list of sample outlines in
 
 Only one story outline can be open at a time.  If you open a new file you'll be prompted to save the current file first if it’s been modified.
 
+If you see an error about invalid characters when creating a new outline, check that both the outline name and folder path contain only characters permitted by your operating system.
+

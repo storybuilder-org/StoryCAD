@@ -1,8 +1,12 @@
-﻿using System.Reflection;
+﻿using System.IO.Compression;
+using System.Reflection;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.UI.Xaml;
 using StoryCAD.DAL;
 using StoryCAD.Services;
+using StoryCAD.Services.Messages;
+using StoryCAD.Services.Outline;
 using StoryCAD.ViewModels.SubViewModels;
 using Windows.Storage;
 
@@ -18,14 +22,22 @@ namespace StoryCAD.ViewModels;
 /// </summary>
 public class FileOpenVM : ObservableRecipient
 {
-	private readonly LogService _logger = Ioc.Default.GetRequiredService<LogService>();
-    private readonly OutlineViewModel _outlineVm = Ioc.Default.GetService<OutlineViewModel>();
-    private readonly PreferenceService _preferences = Ioc.Default.GetService<PreferenceService>();
+	private readonly ILogService _logger;
+    private readonly FileOpenService _fileOpenService;
+    private readonly FileCreateService _fileCreateService;
+    private readonly PreferenceService _preferences;
+    private readonly Windowing _windowing;
 
     #region Properties
     public Visibility RecentsTabContentVisibility { get; set; }
     public Visibility SamplesTabContentVisibility { get; set; }
     public Visibility NewTabContentVisibility { get; set; }
+    public Visibility BackupTabContentVisibility { get; set; }
+
+    /// <summary>
+    /// Used to track which backup to open if needed.
+    /// </summary>
+    public string[] BackupPaths;
 
     /// <summary>
     /// Internal names of samples
@@ -112,6 +124,16 @@ public class FileOpenVM : ObservableRecipient
         set => SetProperty(ref _selectedTemplateIndex, value);
     }
 
+    private int _selectedBackupIndex;
+    /// <summary>
+    /// Index of currently selected template in the UI
+    /// </summary>
+    public int SelectedBackupIndex
+    {
+        get => _selectedBackupIndex;
+        set => SetProperty(ref _selectedBackupIndex, value);
+    }
+
     private string _outlineName;
     /// <summary>
     /// Project file name
@@ -139,6 +161,13 @@ public class FileOpenVM : ObservableRecipient
         set => SetProperty(ref _recentsUI, value);
     }
 
+    private List<StackPanel> _backupUI = [];
+    public List<StackPanel> BackupUI
+    {
+        get => _backupUI;
+        set => SetProperty(ref _backupUI, value);
+    }
+
     private NavigationViewItem _currentTab;
 
     /// <summary>
@@ -158,6 +187,7 @@ public class FileOpenVM : ObservableRecipient
                     SamplesTabContentVisibility = Visibility.Collapsed;
                     NewTabContentVisibility = Visibility.Collapsed;
                     ShowWarning = false;
+                    BackupTabContentVisibility = Visibility.Collapsed;
                     break;
                 case "Sample":
                     TitleText = "Sample outlines";
@@ -167,6 +197,7 @@ public class FileOpenVM : ObservableRecipient
                     RecentsTabContentVisibility = Visibility.Collapsed;
                     SamplesTabContentVisibility = Visibility.Visible;
                     NewTabContentVisibility = Visibility.Collapsed;
+                    BackupTabContentVisibility = Visibility.Collapsed;
                     break;
                 case "New":
                     TitleText = "New outline";
@@ -175,6 +206,17 @@ public class FileOpenVM : ObservableRecipient
                     RecentsTabContentVisibility = Visibility.Collapsed;
                     SamplesTabContentVisibility = Visibility.Collapsed;
                     NewTabContentVisibility = Visibility.Visible;
+                    BackupTabContentVisibility = Visibility.Collapsed;
+                    break;
+                case "Backup":
+                    TitleText = "Restore a backup";
+                    WarningText = "Sample edits will be lost unless you save them elsewhere.";
+                    ShowWarning = true;
+                    ConfirmButtonText = "Open backup";
+                    RecentsTabContentVisibility = Visibility.Collapsed;
+                    SamplesTabContentVisibility = Visibility.Collapsed;
+                    NewTabContentVisibility = Visibility.Collapsed;
+                    BackupTabContentVisibility = Visibility.Visible;
                     break;
                 default:
                     throw new NotImplementedException("Unexpected tag " + value.Tag);
@@ -183,17 +225,34 @@ public class FileOpenVM : ObservableRecipient
             OnPropertyChanged(nameof(RecentsTabContentVisibility));
             OnPropertyChanged(nameof(SamplesTabContentVisibility));
             OnPropertyChanged(nameof(NewTabContentVisibility));
+            OnPropertyChanged(nameof(BackupTabContentVisibility));
             SetProperty(ref _currentTab, value);
         }
     }
 
     #endregion
 
-    public FileOpenVM()
+    // Constructor for XAML compatibility - will be removed later
+    public FileOpenVM() : this(
+        Ioc.Default.GetRequiredService<ILogService>(),
+        Ioc.Default.GetRequiredService<FileOpenService>(),
+        Ioc.Default.GetRequiredService<FileCreateService>(),
+        Ioc.Default.GetRequiredService<PreferenceService>(),
+        Ioc.Default.GetRequiredService<Windowing>())
     {
+    }
+
+    public FileOpenVM(ILogService logger, FileOpenService fileOpenService, FileCreateService fileCreateService, PreferenceService preferences, Windowing windowing)
+    {
+        _logger = logger;
+        _fileOpenService = fileOpenService;
+        _fileCreateService = fileCreateService;
+        _preferences = preferences;
+        _windowing = windowing;
+        
         SelectedRecentIndex = -1;
         OutlineName = string.Empty;
-        OutlineFolder = Ioc.Default.GetRequiredService<PreferenceService>().Model.ProjectDirectory;
+        OutlineFolder = _preferences.Model.ProjectDirectory;
 
         //Gets all samples in samples dir, paths is the manifest resource path
         _samplePaths = Assembly.GetExecutingAssembly().GetManifestResourceNames()
@@ -224,7 +283,7 @@ public class FileOpenVM : ObservableRecipient
         await File.WriteAllTextAsync(filePath, content);
 
         //Open sample
-        await Ioc.Default.GetService<OutlineViewModel>()!.OpenFile(filePath);
+        await _fileOpenService.OpenFile(filePath);
         return filePath;
     }
 
@@ -235,7 +294,7 @@ public class FileOpenVM : ObservableRecipient
     public async void LoadStoryFromFile()
     {
         Close();
-        await _outlineVm.OpenFile();
+        await _fileOpenService.OpenFile();
     }
 
 
@@ -244,24 +303,7 @@ public class FileOpenVM : ObservableRecipient
     /// </summary>
     public async Task UpdateRecents(string path)
     {
-        //If file is in list, remove it
-        if (_preferences.Model.RecentFiles.Contains(path))
-        {
-            _preferences.Model.RecentFiles.Remove(path);
-        }
-
-        //Add to top of list.
-        _preferences.Model.RecentFiles.Insert(0, path);
-
-        //Cap at 25.
-        if (_preferences.Model.RecentFiles.Count > 25)
-        {
-            _preferences.Model.RecentFiles = _preferences.Model.RecentFiles.Take(25).ToList();
-        }
-
-        //Persist.
-        PreferencesIo loader = new();
-        await loader.WritePreferences(_preferences.Model);
+        await _fileOpenService.UpdateRecents(path);
     }
 
     /// <summary>
@@ -308,7 +350,7 @@ public class FileOpenVM : ObservableRecipient
                 if (SelectedRecentIndex != -1)
                 {
                     filePath = _preferences.Model.RecentFiles[SelectedRecentIndex];
-                    await _outlineVm.OpenFile(filePath);
+                    await _fileOpenService.OpenFile(filePath);
                 }
                 else{ return; }
                 break;
@@ -327,6 +369,14 @@ public class FileOpenVM : ObservableRecipient
             case "Sample": //Open Sample
                 filePath = await OpenSample();
                 break;
+            case "Backup":
+                if (SelectedBackupIndex != -1)
+                {
+                    filePath = BackupPaths[SelectedBackupIndex];
+                    OpenBackup(filePath);
+                }
+                else { return; }
+                    break;
             default:
                 throw new NotImplementedException("Unexpected tag " + CurrentTab.Tag);
         }
@@ -345,12 +395,55 @@ public class FileOpenVM : ObservableRecipient
         if (StoryIO.IsValidPath(filePath))
         {
             _preferences.Model.LastSelectedTemplate = SelectedTemplateIndex;
-            await _outlineVm.CreateFile(this);
-            return filePath;
+            string createdPath = await _fileCreateService.CreateFile(OutlineFolder, OutlineName, SelectedTemplateIndex);
+            return createdPath ?? "";
         }
 
         return "";
     }
 
     public void Close() => Ioc.Default.GetRequiredService<Windowing>().CloseContentDialog();
+
+    private async void OpenBackup(string zipPath)
+    {
+
+        // make a timestamped temp folder
+        string tempRoot = Path.GetTempPath();
+        string unpackDir = Path.Combine(
+            tempRoot,
+            Path.GetFileNameWithoutExtension(zipPath)
+            + "_" + DateTime.Now.ToString("yyyyMMdd_HHmmss")
+        );
+        Directory.CreateDirectory(unpackDir);
+
+        try
+        {
+            // unpack
+            ZipFile.ExtractToDirectory(zipPath, unpackDir);
+
+            // find the one file inside (recursive in case of subfolders)
+            var files = Directory.GetFiles(unpackDir, "*", SearchOption.AllDirectories);
+            if (files.Length != 1)
+            {
+                _logger.Log(LogLevel.Warn, $"Invalid backup {zipPath}, {files.Length} files found");
+                _windowing.GlobalDispatcher.TryEnqueue(() =>
+                    Messenger.Send(new StatusChangedMessage(new(
+                        "Backup archive is invalid or contains multiple files.",
+                        LogLevel.Warn))));
+                return;
+            }
+
+            //Open backup
+            await _fileOpenService.OpenFile(files[0]);
+        }
+        catch (Exception ex)
+        {
+            _windowing.GlobalDispatcher.TryEnqueue(() =>
+                Messenger.Send(new StatusChangedMessage(new(
+                    "Failed to open backup. The file may be corrupt.",
+                    LogLevel.Error))));
+            _logger.LogException(LogLevel.Error, ex, $"Error opening backup {zipPath}");
+        }
+
+    }
 }

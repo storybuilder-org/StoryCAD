@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using StoryCAD.Controls;
+using StoryCAD.Services;
 using StoryCAD.Services.Dialogs;
 using StoryCAD.Services.Messages;
 using StoryCAD.Services.Navigation;
@@ -12,16 +13,17 @@ using StoryCAD.ViewModels.Tools;
 
 namespace StoryCAD.ViewModels;
 
-public class CharacterViewModel : ObservableRecipient, INavigable
+public class CharacterViewModel : ObservableRecipient, INavigable, ISaveable
 {
     #region Fields
     
-    private readonly LogService _logger;
+    private readonly ILogService _logger;
     public RelationshipModel CurrentRelationship;
     private bool _changeable; // process property changes for this story element
     private bool _changed;    // this story element has changed
-    readonly Windowing Windowing = Ioc.Default.GetService<Windowing>();
-    readonly OutlineViewModel OutlineVM = Ioc.Default.GetService<OutlineViewModel>();
+    private readonly Windowing _windowing;
+    private readonly AppState _appState;
+    private StoryModel _storyModel;
     #endregion
 
     #region Properties
@@ -93,12 +95,12 @@ public class CharacterViewModel : ObservableRecipient, INavigable
         set => SetProperty(ref _archetype, value);
     }
 
-    private string _characterSketch;
-
-    public string CharacterSketch
+    // Description property (migrated from CharacterSketch)
+    private string _description;
+    public string Description
     {
-        get => _characterSketch;
-        set => SetProperty(ref _characterSketch, value);
+        get => _description;
+        set => SetProperty(ref _description, value);
     }
 
     // Character physical data
@@ -535,6 +537,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable
     {
         _changeable = false;
         _changed = false;
+        _storyModel = _appState.CurrentDocument.Model;
 
         Uuid = Model.Uuid;
         Name = Model.Name;
@@ -543,7 +546,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable
         Role = Model.Role;
         StoryRole = Model.StoryRole;
         Archetype = Model.Archetype;
-        CharacterSketch = Model.CharacterSketch;
+        Description = Model.Description;
         Age = Model.Age;
         Sex = Model.Sex;
         Eyes = Model.Eyes;
@@ -602,7 +605,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable
         _changeable = true;
     }
 
-    internal void SaveModel()
+    public void SaveModel()
     {
         // Story.Uuid is read-only and cannot be set
         Model.Name = Name;
@@ -652,7 +655,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable
         Model.BackStory = BackStory;
 
         // Write and clear RTF files
-        Model.CharacterSketch = CharacterSketch;
+        Model.Description = Description;
         Model.PhysNotes = PhysNotes;
         Model.Appearance = Appearance;
         Model.Economic = Economic;
@@ -734,7 +737,6 @@ public class CharacterViewModel : ObservableRecipient, INavigable
         _vm.RelationTypes.Clear();
         foreach (string _relationshipType in Ioc.Default.GetRequiredService<ControlData>().RelationTypes) { _vm.RelationTypes.Add(_relationshipType); }
         _vm.ProspectivePartners.Clear(); //Prospective partners are chars who are not in a relationship with this char
-        StoryModel _storyModel = OutlineVM.StoryModel;
         foreach (StoryElement _character in _storyModel.StoryElements.Characters)
         {
             if (_character == _vm.Member) continue;  // Skip me
@@ -748,8 +750,8 @@ public class CharacterViewModel : ObservableRecipient, INavigable
 
         if (_vm.ProspectivePartners.Count == 0)
         {
-            Ioc.Default.GetRequiredService<LogService>().Log(LogLevel.Warn,"There are no prospective partners, not showing AddRelationship Dialog." );
-            Ioc.Default.GetRequiredService<ShellViewModel>().ShowMessage(LogLevel.Warn, "This character already has a relationship with everyone",false);
+            _logger.Log(LogLevel.Warn,"There are no prospective partners, not showing AddRelationship Dialog." );
+            Messenger.Send(new StatusChangedMessage(new("This character already has a relationship with everyone", LogLevel.Warn)));
             return;
         }
 
@@ -762,7 +764,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable
             Content = new NewRelationshipPage(_vm),
             MinWidth = 200
         };
-        ContentDialogResult _result = await Windowing.ShowContentDialog(_NewRelDialog);
+        ContentDialogResult _result = await _windowing.ShowContentDialog(_NewRelDialog);
 
         if (_result == ContentDialogResult.Primary) //User clicks add relationship
         {
@@ -836,7 +838,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable
             PrimaryButtonText = "Copy flaw example",
             CloseButtonText = "Cancel"
         };
-        ContentDialogResult _result = await Windowing.ShowContentDialog(_flawDialog);
+        ContentDialogResult _result = await _windowing.ShowContentDialog(_flawDialog);
 
         if (_result == ContentDialogResult.Primary)   // Copy to Character Flaw  
         {
@@ -861,7 +863,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable
             CloseButtonText = "Cancel",
             Content = new Traits()
         };
-        ContentDialogResult _result = await Windowing.ShowContentDialog(_traitDialog);
+        ContentDialogResult _result = await _windowing.ShowContentDialog(_traitDialog);
 
         if (_result == ContentDialogResult.Primary)   // Copy to Character Trait 
         {
@@ -916,9 +918,12 @@ public class CharacterViewModel : ObservableRecipient, INavigable
 
     #region Constructors
 
-    public CharacterViewModel()
+    // Constructor for XAML compatibility - will be removed later
+    public CharacterViewModel(ILogService logger, AppState appState, Windowing windowing)
     {
-        _logger = Ioc.Default.GetService<LogService>();
+        _logger = logger;
+        _appState = appState;
+        _windowing = windowing;
 
         try
         {
@@ -957,7 +962,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable
         catch (Exception e)
         {
             _logger.LogException(LogLevel.Fatal, e, "Error loading lists in Problem view model");
-            Windowing.ShowResourceErrorMessage();
+            _windowing.ShowResourceErrorMessage();
         }
 
         CharacterTraits = new ObservableCollection<string>();
@@ -972,7 +977,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable
         Role = string.Empty;
         StoryRole = string.Empty;
         Archetype = string.Empty;
-        CharacterSketch = string.Empty;
+        Description = string.Empty;
         Age = string.Empty;
         Sex = string.Empty;
         Eyes = string.Empty;
