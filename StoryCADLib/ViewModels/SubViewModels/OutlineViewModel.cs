@@ -11,6 +11,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using StoryCAD.DAL;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
+using NLog;
 using StoryCAD.Services.Backend;
 using StoryCAD.Services.Dialogs;
 using StoryCAD.Services.Dialogs.Tools;
@@ -19,6 +20,7 @@ using StoryCAD.Models.Tools;
 using StoryCAD.Services.Reports;
 using StoryCAD.Services.Search;
 using StoryCAD.Services.Locking;
+using LogLevel = StoryCAD.Services.Logging.LogLevel;
 
 namespace StoryCAD.ViewModels.SubViewModels;
 
@@ -846,6 +848,11 @@ public class OutlineViewModel : ObservableRecipient
 
                 if (result == ContentDialogResult.Primary)
                 {
+                    if (situationModel == null)
+                    {
+                        logger.Log(LogLevel.Warn, "No Situation selected.");
+                        return;
+                    }
                     ProblemModel problem = new(situationModel.SituationName, appState.CurrentDocument.Model, shellVm.RightTappedNode)
                     {
                         Description = "See Notes.",
@@ -858,6 +865,11 @@ public class OutlineViewModel : ObservableRecipient
                 }
                 else if (result == ContentDialogResult.Secondary)
                 {
+                    if (situationModel == null)
+                    {
+                        logger.Log(LogLevel.Warn, "No Situation selected.");
+                        return;
+                    }
                     SceneModel sceneVar = new(situationModel.SituationName, appState.CurrentDocument.Model, shellVm.RightTappedNode)
                     {
                         Description = "See Notes.",
