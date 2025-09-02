@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using StoryCAD.Models.Tools;
 using System.Reflection;
 using System.Text.Json;
@@ -19,7 +19,7 @@ public class ToolLoader
     {
         try
         {
-            await using Stream internalResourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("StoryCADLib.Assets.Install.Tools.ini");
+            await using Stream internalResourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("StoryCADLib.Assets.Install.Tools.json");
             using StreamReader reader = new(internalResourceStream);
             var json = await reader.ReadToEndAsync();
             _toolsData = JsonSerializer.Deserialize<ToolsJsonData>(json);
