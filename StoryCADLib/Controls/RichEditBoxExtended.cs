@@ -1,4 +1,4 @@
-﻿using Microsoft.UI;
+using Microsoft.UI;
 using Microsoft.UI.Text;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -101,7 +101,8 @@ namespace StoryCAD.Controls
             var tb = d as RichEditBoxExtended;
             if (tb == null) return;
             
-            tb.Text =new ReportFormatter().GetText(e.NewValue.ToString()?? "");
+            tb.Text =new ReportFormatter(Ioc.Default.GetRequiredService<AppState>())
+                .GetText(e.NewValue.ToString()?? "");
         }
         public void UpdateTheme(object sender, RoutedEventArgs e)
         {

@@ -190,16 +190,11 @@
   <ItemGroup>
 	  <Content Remove="Assets\Icon.png" />
 	  <Content Remove="Assets\Install\Bibliog.txt" />
-	  <Content Remove="Assets\Install\Controls.ini" />
-	  <Content Remove="Assets\Install\Lists.ini" />
+	  <Content Remove="Assets\Install\Controls.json" />
+	  <Content Remove="Assets\Install\Lists.json" />
 	  <Content Remove="Assets\Install\reports\Character Description.txt" />
 	  <Content Remove="Assets\Install\reports\Character Relationship Description.txt" />
 	  <Content Remove="Assets\Install\reports\Folder Description.txt" />
-	  <Content Remove="Assets\Install\reports\List of Characters.txt" />
-	  <Content Remove="Assets\Install\reports\List of Problems.txt" />
-	  <Content Remove="Assets\Install\reports\List of Scenes.txt" />
-	  <Content Remove="Assets\Install\reports\List of Settings.txt" />
-	  <Content Remove="Assets\Install\reports\List of Websites.txt" />
 	  <Content Remove="Assets\Install\reports\Problem Description.txt" />
 	  <Content Remove="Assets\Install\reports\Scene Description.txt" />
 	  <Content Remove="Assets\Install\reports\Section Description.txt" />
@@ -215,20 +210,14 @@
 	  <Content Remove="Assets\Install\samples\The Glass Menagerie.stbx" />
 	  <Content Remove="Assets\Install\samples\The Maltese Falcon.stbx" />
 	  <Content Remove="Assets\Install\samples\The Old Man and the Sea.stbx" />
-	  <Content Remove="Assets\Install\Symbols.txt" />
-	  <Content Remove="Assets\Install\Tools.ini" />
+	  <Content Remove="Assets\Install\Symbols.json" />
+	  <Content Remove="Assets\Install\Tools.json" />
 	  <EmbeddedResource Include="Assets\Install\Bibliog.txt" />
-	  <EmbeddedResource Include="Assets\Install\Controls.ini" />
-	  <EmbeddedResource Include="Assets\Install\Lists.ini" />
+	  <EmbeddedResource Include="Assets\Install\Controls.json" />
+	  <EmbeddedResource Include="Assets\Install\Lists.json" />
 	  <EmbeddedResource Include="Assets\Install\reports\Character Description.txt" />
 	  <EmbeddedResource Include="Assets\Install\reports\Character Relationship Description.txt" />
 	  <EmbeddedResource Include="Assets\Install\reports\Folder Description.txt" />
-	  <EmbeddedResource Include="Assets\Install\reports\List of Characters.txt" />
-	  <EmbeddedResource Include="Assets\Install\reports\List of Problems.txt" />
-	  <EmbeddedResource Include="Assets\Install\reports\List of Scenes.txt" />
-	  <EmbeddedResource Include="Assets\Install\reports\List of Settings.txt" />
-	  <EmbeddedResource Include="Assets\Install\reports\List of Websites.txt" />
-	  <EmbeddedResource Include="Assets\Install\reports\Problem Description.txt" />
 	  <EmbeddedResource Include="Assets\Install\reports\Scene Description.txt" />
 	  <EmbeddedResource Include="Assets\Install\reports\Section Description.txt" />
 	  <EmbeddedResource Include="Assets\Install\reports\Setting Description.txt" />
@@ -244,7 +233,7 @@
 	  <EmbeddedResource Include="Assets\Install\samples\The Maltese Falcon.stbx" />
 	  <EmbeddedResource Include="Assets\Install\samples\The Old Man and the Sea.stbx" />
 	  <EmbeddedResource Include="Assets\Install\Symbols.txt" />
-	  <EmbeddedResource Include="Assets\Install\Tools.ini" />
+	  <EmbeddedResource Include="Assets\Install\Tools.json" />
 	  <Content Update="Assets\Icon.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

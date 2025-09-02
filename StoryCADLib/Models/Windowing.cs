@@ -1,18 +1,12 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.UI.Dispatching;
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.Windows.AppLifecycle;
 using StoryCAD.Exceptions;
 using StoryCAD.ViewModels.SubViewModels;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
-using Windows.Storage;
 using Windows.Storage.Pickers;
 using Windows.UI;
 using Windows.UI.ViewManagement;
-using StoryCAD.ViewModels.SubViewModels;
 using LogLevel = StoryCAD.Services.Logging.LogLevel;
 
 namespace StoryCAD.Models;
@@ -347,7 +341,7 @@ public partial class Windowing : ObservableRecipient
             filePicker.FileTypeChoices.Add("File", new List<string>() {extension });
 
             //Init and spawn file picker
-            WinRT.Interop.InitializeWithWindow.Initialize(filePicker, MainWindow.GetWindowHandle());
+            WinRT.Interop.InitializeWithWindow.Initialize(filePicker, WindowHandle);
 			StorageFile file = await filePicker.PickSaveFileAsync();
 
 			//Null check

@@ -1,15 +1,11 @@
-using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.Loader;
-using Windows.ApplicationModel;
 using Microsoft.UI.Windowing;
 using StoryCAD.Collaborator;
 using StoryCAD.Collaborator.ViewModels;
-using StoryCAD.Services.API;
 using StoryCAD.Services.Backup;
 using Windows.ApplicationModel.AppExtensions;
-using Microsoft.UI.Xaml;
-using StoryCAD.ViewModels.SubViewModels;
+using StoryCAD.Services.Collaborator.Contracts;
 
 namespace StoryCAD.Services.Collaborator;
 
@@ -211,7 +207,7 @@ public class CollaboratorService
         CollabAssembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(dllPath);
         _logService.Log(LogLevel.Info, "Loaded CollaboratorLib.dll");
         //Create a new WindowEx for collaborator to prevent access errors.
-        CollaboratorWindow = new WindowEx();
+        CollaboratorWindow = new Window();
         CollaboratorWindow.AppWindow.Closing += HideCollaborator;
         // Create a Window for StoryBuilder Collaborator
         Frame rootFrame = new();
@@ -294,7 +290,7 @@ public class CollaboratorService
 		//Find all installed extensions
 	    AppExtensionCatalog _catalog = AppExtensionCatalog.Open("org.storybuilder");
 	    var InstalledExtensions = await _catalog.FindAllAsync();
-	    logger.Log(LogLevel.Info, $"Found {InstalledExtensions} installed extensions");
+	    _logService.Log(LogLevel.Info, $"Found {InstalledExtensions} installed extensions");
         _logService.Log(LogLevel.Info, "Locating CollaboratorLib...");
 
         // 1) DEV: explicit override — deterministic
@@ -333,6 +329,10 @@ public class CollaboratorService
         dllPath = null;
         dllExists = false;
         return false;
+#else
+        _logService.Log(LogLevel.Error, "Collaborator is not supported on this platform.");
+        return false;
+#endif
     }
 
     private bool TryResolveFromEnv(out string path)
@@ -372,8 +372,8 @@ public class CollaboratorService
         if (!Directory.Exists(baseDebug)) return false;
 
         var tfmCandidates = Directory.EnumerateDirectories(baseDebug, "net*-windows*")
-                                     .OrderByDescending(d => Directory.GetLastWriteTimeUtc(d))
-                                     .ToList();
+            .OrderByDescending(d => Directory.GetLastWriteTimeUtc(d))
+            .ToList();
         foreach (var tfmDir in tfmCandidates)
         {
             var candidate = Path.Combine(tfmDir, PluginFileName);
@@ -382,17 +382,11 @@ public class CollaboratorService
                 var pdb = Path.ChangeExtension(candidate, ".pdb");
                 if (!File.Exists(pdb))
                     _logService.Log(LogLevel.Warn, $"PDB missing next to DLL: {pdb}");
-
-		logger.Log(LogLevel.Info, $"Collaborator.dll exists {dllExists}");
-	    return dllExists;
-#else
-        logger.Log(LogLevel.Error, "Collaborator is not supported on this platform.");
-        return false;
-#endif
                 path = candidate;
                 return true;
             }
         }
+
         return false;
     }
 
@@ -435,7 +429,7 @@ public class CollaboratorService
             return (false, null);
         }
     }
-#endregion
+    #endregion
 
     #region Show/Hide window
     //TODO: Use Show and hide properly
