@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using Elmah.Io.Client;
 using Elmah.Io.NLog;
 using NLog;
@@ -276,7 +276,6 @@ public class LogService : ILogService
                      Elmah Status - {ElmahLogging}
                      Windows {WinVer} Build - {Environment.OSVersion.Version.Build}
                      Debugger Attached - {Debugger.IsAttached}
-                     Touchscreen - {PointerDevice.GetPointerDevices().Any(p => p.PointerDeviceType == PointerDeviceType.Touch)}
                      ProcessID - {Environment.ProcessId}
                      Core Count - {Environment.ProcessorCount}
 

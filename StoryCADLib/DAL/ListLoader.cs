@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using System.Reflection;
 using System.Text.Json;
 
@@ -12,7 +12,7 @@ public class ListLoader
     {
         Dictionary<string, ObservableCollection<string>> _lists = new();
 
-        await using Stream internalResourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("StoryCADLib.Assets.Install.Lists.ini");
+        await using Stream internalResourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("StoryCADLib.Assets.Install.Lists.json");
         using StreamReader reader = new(internalResourceStream);
 
         // Read the JSON file and deserialize it
