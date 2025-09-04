@@ -4,7 +4,7 @@ using StoryCAD.Services;
 using StoryCAD.Models;
 using CommunityToolkit.Mvvm.DependencyInjection;
 
-namespace StoryCAD.Tests.ViewModels;
+namespace StoryCADTests.ViewModels;
 
 [TestClass]
 public class ShellViewModelAppStateTests

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Linq;
 using StoryCAD.Models;
 
-namespace StoryCAD.Tests.ViewModels;
+namespace StoryCADTests.ViewModels;
 
 [TestClass]
 public class OutlineViewModelSaveFileTests

@@ -7,7 +7,7 @@ using CommunityToolkit.Mvvm.DependencyInjection;
 using System.Threading.Tasks;
 using Windows.Storage;
 
-namespace StoryCAD.Tests.DAL;
+namespace StoryCADTests.DAL;
 
 [TestClass]
 public class StoryIOTests

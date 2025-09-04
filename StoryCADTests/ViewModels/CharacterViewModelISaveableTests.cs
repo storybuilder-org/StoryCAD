@@ -5,7 +5,7 @@ using StoryCAD.ViewModels;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using System;
 
-namespace StoryCAD.Tests.ViewModels;
+namespace StoryCADTests.ViewModels;
 
 [TestClass]
 public class CharacterViewModelISaveableTests

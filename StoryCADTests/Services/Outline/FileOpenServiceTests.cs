@@ -13,7 +13,7 @@ using StoryCAD.Services.Outline;
 using StoryCAD.ViewModels;
 using StoryCAD.Services.Logging;
 
-namespace StoryCAD.Tests.Services.Outline;
+namespace StoryCADTests.Services.Outline;
 
 [TestClass]
 public class FileOpenServiceTests

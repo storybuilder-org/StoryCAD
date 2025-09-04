@@ -1,7 +1,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using StoryCAD.Models;
 
-namespace StoryCAD.Tests.Models;
+namespace StoryCADTests.Models;
 
 [TestClass]
 public class StoryDocumentTests
