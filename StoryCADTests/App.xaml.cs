@@ -1,7 +1,6 @@
 ﻿using System;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml;
-//.AppContainer;
 using StoryCAD.Models;
 using StoryCAD.Services.Logging;
 using System.IO;
@@ -38,7 +37,7 @@ public partial class App : Application
     /// will be used such as when the application is launched to open a specific file.
     /// </summary>
     /// <param name="args">Details about the launch request and process.</param>
-    protected override async void OnLaunched(LaunchActivatedEventArgs args)
+    protected override async void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
     {
         _log.Log(LogLevel.Info, "StoryCADTests.App launched");
         AppState State = Ioc.Default.GetRequiredService<AppState>();
@@ -48,7 +47,9 @@ public partial class App : Application
         string pathMsg = string.Format("Configuration data location = " + State.RootDirectory);
         _log.Log(LogLevel.Info, pathMsg);
 
-		// Replace back with e.Arguments when https://github.com/microsoft/microsoft-ui-xaml/issues/3368 is fixed
+#if WINDOWS
+		// Only run test client on Windows
 		Microsoft.VisualStudio.TestPlatform.TestExecutor.UnitTestClient.Run(Environment.CommandLine);
+#endif
     }
 }

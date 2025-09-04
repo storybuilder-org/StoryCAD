@@ -1,24 +1,44 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Uno.Sdk">
 	<PropertyGroup>
-		<OutputType>WinExe</OutputType>
-		<TargetFramework>net9.0-windows10.0.22621.0</TargetFramework>
-		<LangVersion>latest</LangVersion> 
-		<TargetPlatformIdentifier>Windows</TargetPlatformIdentifier>
-		<TargetPlatformMinVersion>10.0.19041.0</TargetPlatformMinVersion>
-		<TargetPlatformVersion>10.0.22621.0</TargetPlatformVersion>
+		<OutputType>Exe</OutputType>
+		<UnoSingleProject>true</UnoSingleProject>
 		<RootNamespace>StoryCADTests</RootNamespace>
-		<ApplicationManifest>app.manifest</ApplicationManifest>
-		<Platforms>x86;x64;arm64</Platforms>
-		<RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
+		<ApplicationTitle>StoryCADTests</ApplicationTitle>
+		<ApplicationId>net.storybuilder.storycadtests</ApplicationId>
+		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
+		<ApplicationVersion>1</ApplicationVersion>
+		<ApplicationPublisher>StoryBuilder Foundation</ApplicationPublisher>
+		<Description>StoryCAD Tests powered by Uno Platform.</Description>
+		<IsTestProject>true</IsTestProject>
+		<TestProjectType>Unit</TestProjectType>
 		<EnableMsixTooling>false</EnableMsixTooling>
-		<UseWinUI>true</UseWinUI>
 		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
-		
 		<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+		
+		<UnoFeatures>
+			Toolkit;
+		</UnoFeatures>
 	</PropertyGroup>
+	
+	<PropertyGroup Condition="'$(TargetFramework)'=='net9.0-windows10.0.22621'">
+		<UseWinUI>true</UseWinUI>
+		<EnableMsixTooling>false</EnableMsixTooling>
+	</PropertyGroup>
+	
+	<!-- on Windows, build both desktop + WinUI -->
+	<PropertyGroup Condition="'$(OS)'=='Windows_NT'">
+		<TargetFrameworks>net9.0-desktop;net9.0-windows10.0.22621</TargetFrameworks>
+	</PropertyGroup>
+
+	<!-- on non-Windows, only build desktop -->
+	<PropertyGroup Condition="'$(OS)'!='Windows_NT'">
+		<TargetFrameworks>net9.0-desktop</TargetFrameworks>
+	</PropertyGroup>
+
 	<ItemGroup>
-	  <Compile Remove="SceneViewModelTests.cs" />
+		<Compile Remove="SceneViewModelTests.cs" />
 	</ItemGroup>
+	
 	<ItemGroup>
 		<Content Remove="Assets\OpenFromDesktopTest.stbx" />
 	</ItemGroup>
@@ -28,13 +48,13 @@
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
 		<None Update="TestInputs\AddElement.stbx">
-		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
 		<None Update="TestInputs\CloseFileTest.stbx">
-		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
 		<None Update="TestInputs\Full.stbx">
-		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
 		<None Update="TestInputs\OpenFromDesktopTest.stbx">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -43,11 +63,11 @@
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
 		<None Update="TestInputs\StructureTests.stbx">
-		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
 	</ItemGroup>
 
-	<ItemGroup>
+	<ItemGroup Condition="'$(TargetFramework)'=='net9.0-windows10.0.22621'">
 		<AppxManifest Include="Package.appxmanifest">
 			<SubType>Designer</SubType>
 		</AppxManifest>
@@ -66,28 +86,26 @@
 	<ItemGroup>
 		<ProjectCapability Include="TestContainer" />
 	</ItemGroup>
+	
 	<ItemGroup>
-		<PackageReference Include="Microsoft.WindowsAppSDK" Version="1.7.250606001" />
-		<PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.4654" />
-		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
-		<PackageReference Include="MSTest.TestAdapter">
-			<Version>3.10.1</Version>
-		</PackageReference>
-		<PackageReference Include="MSTest.TestFramework">
-			<Version>3.10.1</Version>
-		</PackageReference>
+		<PackageReference Include="CommunityToolkit.Mvvm" />
+		<PackageReference Include="MSTest.TestAdapter" />
+		<PackageReference Include="MSTest.TestFramework" />
 		<PackageReference Include="Microsoft.TestPlatform.TestHost">
-			<Version>17.14.1</Version>
 			<ExcludeAssets>build</ExcludeAssets>
 		</PackageReference>
-		<Manifest Include="$(ApplicationManifest)" />
 	</ItemGroup>
+	
 	<ItemGroup>
-	  <None Include="SceneViewModelTests.cs" />
+		<None Include="SceneViewModelTests.cs" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\StoryCADLib\StoryCADLib.csproj" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(TargetFramework)'=='net9.0-windows10.0.22621'">
+		<Manifest Include="$(ApplicationManifest)" />
 	</ItemGroup>
 
 </Project>
