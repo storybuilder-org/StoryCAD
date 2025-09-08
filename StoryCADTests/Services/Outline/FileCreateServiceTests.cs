@@ -10,6 +10,7 @@ using StoryCAD.Services.Backup;
 using StoryCAD.Services.Messages;
 using StoryCAD.Services.Outline;
 using StoryCAD.Services.Logging;
+using StoryCAD.ViewModels;
 
 namespace StoryCADTests.Services.Outline;
 

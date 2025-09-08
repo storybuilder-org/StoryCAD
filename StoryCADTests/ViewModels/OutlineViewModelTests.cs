@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.DependencyInjection;
+using StoryCAD.Services;
 using StoryCAD.Services.Outline;
 using StoryCAD.ViewModels;
 using StoryCAD.ViewModels.Tools;
@@ -180,8 +181,11 @@ namespace StoryCADTests
         {
             var filevm = Ioc.Default.GetRequiredService<FileOpenVM>();
 
+            // Use a unique name to avoid conflicts
+            string uniqueName = $"NewFileTest_{Guid.NewGuid():N}.stbx";
+            
             //Set files
-            filevm.OutlineName = "NewFileTest.stbx";
+            filevm.OutlineName = uniqueName;
             filevm.OutlineFolder = App.ResultsDir;
             filevm.SelectedTemplateIndex = 0;
 
@@ -189,8 +193,20 @@ namespace StoryCADTests
             string file = await filevm.CreateFile();
             await outlineVM.WriteModel();
             Thread.Sleep(1000);
-            Assert.IsFalse(string.IsNullOrEmpty(file));
+            Assert.IsTrue(!string.IsNullOrEmpty(file), 
+                $"CreateFile returned null/empty. OutlineName='{filevm.OutlineName}', OutlineFolder='{filevm.OutlineFolder}', SelectedTemplateIndex={filevm.SelectedTemplateIndex}");
             Assert.IsTrue(File.Exists(file));
+            
+            // Clean up the created file
+            try 
+            {
+                if (File.Exists(file))
+                    File.Delete(file);
+            }
+            catch 
+            {
+                // Ignore cleanup errors
+            }
         }
 
         // Test for WriteModel method

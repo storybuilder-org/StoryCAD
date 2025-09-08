@@ -1,5 +1,6 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using StoryCAD.ViewModels;
+using StoryCAD.Services;
 using CommunityToolkit.Mvvm.DependencyInjection;
 
 namespace StoryCADTests;
