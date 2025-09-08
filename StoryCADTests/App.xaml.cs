@@ -37,7 +37,7 @@ public partial class App : Application
     /// will be used such as when the application is launched to open a specific file.
     /// </summary>
     /// <param name="args">Details about the launch request and process.</param>
-    protected override async void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
+    protected override async void OnLaunched(LaunchActivatedEventArgs args)
     {
         _log.Log(LogLevel.Info, "StoryCADTests.App launched");
         AppState State = Ioc.Default.GetRequiredService<AppState>();
@@ -47,8 +47,8 @@ public partial class App : Application
         string pathMsg = string.Format("Configuration data location = " + State.RootDirectory);
         _log.Log(LogLevel.Info, pathMsg);
 
-#if WINDOWS
-		// Only run test client on Windows
+#if WINDOWS10_0_22621_0_OR_GREATER
+		// Replace back with e.Arguments when https://github.com/microsoft/microsoft-ui-xaml/issues/3368 is fixed
 		Microsoft.VisualStudio.TestPlatform.TestExecutor.UnitTestClient.Run(Environment.CommandLine);
 #endif
     }

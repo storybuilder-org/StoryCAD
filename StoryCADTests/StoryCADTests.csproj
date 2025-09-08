@@ -1,38 +1,45 @@
-﻿<Project Sdk="Uno.Sdk">
+<Project Sdk="Uno.Sdk">
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
 		<UnoSingleProject>true</UnoSingleProject>
+		<LangVersion>latest</LangVersion>
 		<RootNamespace>StoryCADTests</RootNamespace>
-		<ApplicationTitle>StoryCADTests</ApplicationTitle>
-		<ApplicationId>net.storybuilder.storycadtests</ApplicationId>
-		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
-		<ApplicationVersion>1</ApplicationVersion>
-		<ApplicationPublisher>StoryBuilder Foundation</ApplicationPublisher>
-		<Description>StoryCAD Tests powered by Uno Platform.</Description>
-		<IsTestProject>true</IsTestProject>
-		<TestProjectType>Unit</TestProjectType>
-		<EnableMsixTooling>false</EnableMsixTooling>
 		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
-		<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+		<IsTestProject>true</IsTestProject>
+		<TestProjectType>UnitTest</TestProjectType>
+		<EnableMSTestRunner>true</EnableMSTestRunner>
+		<GenerateLibraryLayout>true</GenerateLibraryLayout>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
 		
+		<!-- Test features -->
 		<UnoFeatures>
 			Toolkit;
 		</UnoFeatures>
 	</PropertyGroup>
-	
+
+	<!-- Target frameworks based on OS -->
+	<PropertyGroup Condition="'$(OS)'=='Windows_NT'">
+		<TargetFrameworks>net9.0-windows10.0.22621;net9.0-desktop</TargetFrameworks>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(OS)'!='Windows_NT'">
+		<TargetFrameworks>net9.0-desktop</TargetFrameworks>
+	</PropertyGroup>
+
+	<!-- Windows-specific settings -->
 	<PropertyGroup Condition="'$(TargetFramework)'=='net9.0-windows10.0.22621'">
 		<UseWinUI>true</UseWinUI>
 		<EnableMsixTooling>false</EnableMsixTooling>
-	</PropertyGroup>
-	
-	<!-- on Windows, build both desktop + WinUI -->
-	<PropertyGroup Condition="'$(OS)'=='Windows_NT'">
-		<TargetFrameworks>net9.0-desktop;net9.0-windows10.0.22621</TargetFrameworks>
+		<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+		<ApplicationManifest>app.manifest</ApplicationManifest>
+		<Platforms>x86;x64;arm64</Platforms>
+		<RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
 	</PropertyGroup>
 
-	<!-- on non-Windows, only build desktop -->
-	<PropertyGroup Condition="'$(OS)'!='Windows_NT'">
-		<TargetFrameworks>net9.0-desktop</TargetFrameworks>
+	<!-- Desktop-specific settings -->
+	<PropertyGroup Condition="'$(TargetFramework)'=='net9.0-desktop'">
+		<UseWinUI>false</UseWinUI>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -67,13 +74,11 @@
 		</None>
 	</ItemGroup>
 
+	<!-- Windows-specific content -->
 	<ItemGroup Condition="'$(TargetFramework)'=='net9.0-windows10.0.22621'">
 		<AppxManifest Include="Package.appxmanifest">
 			<SubType>Designer</SubType>
 		</AppxManifest>
-	</ItemGroup>
-
-	<ItemGroup>
 		<Content Include="Assets\LockScreenLogo.scale-200.png" />
 		<Content Include="Assets\SplashScreen.scale-200.png" />
 		<Content Include="Assets\Square150x150Logo.scale-200.png" />
@@ -81,31 +86,29 @@
 		<Content Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png" />
 		<Content Include="Assets\StoreLogo.png" />
 		<Content Include="Assets\Wide310x150Logo.scale-200.png" />
+		<Manifest Include="$(ApplicationManifest)" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<ProjectCapability Include="TestContainer" />
 	</ItemGroup>
 	
+	<!-- Test packages -->
 	<ItemGroup>
-		<PackageReference Include="CommunityToolkit.Mvvm" />
 		<PackageReference Include="MSTest.TestAdapter" />
 		<PackageReference Include="MSTest.TestFramework" />
 		<PackageReference Include="Microsoft.TestPlatform.TestHost">
 			<ExcludeAssets>build</ExcludeAssets>
 		</PackageReference>
+		<PackageReference Include="CommunityToolkit.Mvvm" />
 	</ItemGroup>
-	
+
 	<ItemGroup>
 		<None Include="SceneViewModelTests.cs" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\StoryCADLib\StoryCADLib.csproj" />
-	</ItemGroup>
-
-	<ItemGroup Condition="'$(TargetFramework)'=='net9.0-windows10.0.22621'">
-		<Manifest Include="$(ApplicationManifest)" />
 	</ItemGroup>
 
 </Project>

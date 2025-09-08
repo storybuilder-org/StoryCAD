@@ -1,9 +1,6 @@
-using System;
 using System.Diagnostics;
 using Windows.UI.ViewManagement;
 using dotenv.net;
-using Microsoft.Extensions.Logging;
-using Microsoft.UI.Xaml;
 using StoryCAD.DAL;
 using StoryCAD.Models.Tools;
 using StoryCAD.Services;
@@ -13,7 +10,6 @@ using StoryCAD.Services.Json;
 using StoryCAD.Services.Logging;
 using StoryCAD.Services.Navigation;
 using StoryCAD.Views;
-using Uno.Resizetizer;
 
 namespace StoryCAD;
 public partial class App : Application

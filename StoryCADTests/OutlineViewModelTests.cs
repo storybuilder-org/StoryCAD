@@ -357,6 +357,26 @@ namespace StoryCADTests
         }
 
         [TestMethod]
+        public async Task DramaticSituationsTool_WithNullSituation_DoesNotCreateElements()
+        {
+            var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+            var appState = Ioc.Default.GetRequiredService<AppState>();
+            var model = await outlineService.CreateModel("NullSituation", "StoryBuilder", 0);
+            appState.CurrentDocument = new StoryDocument(model, null);
+            outlineService.SetCurrentView(appState.CurrentDocument.Model, StoryViewType.ExplorerView);
+            shell.RightTappedNode = appState.CurrentDocument.Model.StoryElements[0].Node;
+            
+            var vm = Ioc.Default.GetRequiredService<DramaticSituationsViewModel>();
+            vm.Situation = null;  // Set Situation directly to null, not SituationName
+            
+            int countBefore = appState.CurrentDocument.Model.StoryElements.Count;
+            await outlineVM.DramaticSituationsTool();
+            int countAfter = appState.CurrentDocument.Model.StoryElements.Count;
+            
+            Assert.AreEqual(countBefore, countAfter, "No elements should be created when situation is null");
+        }
+
+        [TestMethod]
         public async Task TestStockScenesTool()
         {
             //Create outline

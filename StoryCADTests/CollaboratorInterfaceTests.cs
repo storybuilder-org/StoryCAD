@@ -1,4 +1,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+#if WINDOWS10_0_22621_0_OR_GREATER
+using Microsoft.VisualStudio.TestTools.UnitTesting.AppContainer;
+#endif
 using Microsoft.UI.Xaml;
 using StoryCAD.Models;
 using StoryCAD.Services.Collaborator.Contracts;
