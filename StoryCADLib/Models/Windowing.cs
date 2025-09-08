@@ -43,9 +43,8 @@ public partial class Windowing : ObservableRecipient
     /// by the navigation service page key.
     public string PageKey;
 
-    // MainWindow is the main window displayed by the app. It's an instance of
-    // WinUIEx's Window, which is an extension of Microsoft.Xaml.UI.Window 
-    // and which hosts a Frame holding 
+    // MainWindow is the main window displayed by the app. 
+    // Resize events can be tracked via ShellPage.xaml.cs ShellPage_SizeChanged
     public Window MainWindow;
 
     /// <summary>
@@ -57,7 +56,7 @@ public partial class Windowing : ObservableRecipient
     public XamlRoot XamlRoot;
 
     /// <summary>
-    /// A univerisal dispatcher to show messages/change UI from 
+    /// A universal dispatcher to show messages/change UI from 
     /// a non UI thread. Example: Showing a warning from backup.
     /// </summary>
     public DispatcherQueue GlobalDispatcher = null;
@@ -218,7 +217,9 @@ public partial class Windowing : ObservableRecipient
 			//Set XAML root and correct theme.
 			OpenDialog.XamlRoot = XamlRoot;
 			OpenDialog.RequestedTheme = RequestedTheme;
+
             OpenDialog.Resources["ContentDialogMaxWidth"] = 1080;
+            OpenDialog.Resources["ContentDialogMaxHeight"] = 1080;
 
             _IsContentDialogOpen = true;
             
