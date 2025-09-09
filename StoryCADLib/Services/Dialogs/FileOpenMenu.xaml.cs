@@ -1,4 +1,9 @@
-﻿using Microsoft.UI.Xaml;
+using System.Linq;
+using CommunityToolkit.Mvvm.DependencyInjection;
+using System;
+using System.IO;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml;
 namespace StoryCAD.Services.Dialogs;
 
 /// <summary>
@@ -27,13 +32,19 @@ public sealed partial class FileOpenMenuPage
             if (string.IsNullOrWhiteSpace(file) || !File.Exists(file)) continue;
 
             //Create
-            StackPanel item = new() { Width = 400 };
+            StackPanel item = new()
+            {
+                Orientation = Orientation.Vertical,
+                MaxWidth = Math.Max(320, (this.XamlRoot?.Size.Width ?? 1000) - 64)
+            };
             ToolTipService.SetToolTip(item, file);
-            item.Children.Add(new TextBlock { Text = Path.GetFileNameWithoutExtension(file), FontSize = 20 });
+            item.Children.Add(new TextBlock { Text = Path.GetFileNameWithoutExtension(file), FontSize = 20, TextWrapping = TextWrapping.Wrap, TextTrimming = TextTrimming.CharacterEllipsis });
             item.Children.Add(new TextBlock
             {
                 Text = "Last edited: " + File.GetLastWriteTime(file),
-                FontSize = 10,
+                FontSize = 12,
+                TextWrapping = TextWrapping.NoWrap,
+                TextTrimming = TextTrimming.CharacterEllipsis,
                 VerticalAlignment = VerticalAlignment.Center,
             });
             FileOpenVM.RecentsUI.Add(item);
@@ -61,13 +72,19 @@ public sealed partial class FileOpenMenuPage
             if (string.IsNullOrWhiteSpace(file) || !File.Exists(file)) continue;
 
             //Create
-            StackPanel item = new() { Width = 400 };
+            StackPanel item = new()
+            {
+                Orientation = Orientation.Vertical,
+                MaxWidth = Math.Max(320, (this.XamlRoot?.Size.Width ?? 1000) - 64)
+            };
             ToolTipService.SetToolTip(item, file);
             item.Children.Add(new TextBlock
-            {
-                //Shows as OutlineName At DATETIME
-                Text = Path.GetFileNameWithoutExtension(file.Split(" as of ")[0]) 
-                       + " at " + File.GetLastWriteTime(file), FontSize = 16
+            { //Shows as OutlineName At DATETIME
+                Text = Path.GetFileNameWithoutExtension(file.Split(" as of ")[0])
+                       + " at " + File.GetLastWriteTime(file),
+                FontSize = 16,
+                TextWrapping = TextWrapping.Wrap,
+                TextTrimming = TextTrimming.CharacterEllipsis
             });
 
             FileOpenVM.BackupUI.Add(item);

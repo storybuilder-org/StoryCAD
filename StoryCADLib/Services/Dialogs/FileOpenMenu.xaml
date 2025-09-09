@@ -4,9 +4,9 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d" Height="500" MinWidth="800">
+    mc:Ignorable="d"  MinWidth="360">
 
-    <NavigationView OverflowLabelMode="NoLabel" IsBackButtonVisible="Collapsed"
+    <NavigationView HorizontalContentAlignment="Stretch" OverflowLabelMode="NoLabel" IsBackButtonVisible="Collapsed"
                     SelectedItem="{x:Bind FileOpenVM.CurrentTab, Mode=TwoWay}"
                     IsSettingsVisible="False" PaneDisplayMode="Left" IsPaneToggleButtonVisible="False">
         <NavigationView.MenuItems>
@@ -67,19 +67,19 @@
                      Message="{x:Bind FileOpenVM.WarningText, Mode=TwoWay}" HorizontalAlignment="Center"/>
 
             <ScrollView Grid.Row="2" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Auto">
-                <Grid>
+                <Grid MinWidth="300" MinHeight="300">
                     <!-- Recents tab -->
                     <Grid Visibility="{x:Bind FileOpenVM.RecentsTabContentVisibility, Mode=TwoWay}" >
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="40"/>
+                            <RowDefinition Height="Auto"/>
                             <RowDefinition Height="*"/>
-                            <RowDefinition Height="50"/>
+                            <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
 
-                        <ListView Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center"
+                        <ListView Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Stretch"
                              ItemsSource="{x:Bind FileOpenVM.RecentsUI}"
                              SelectedIndex="{x:Bind FileOpenVM.SelectedRecentIndex, Mode=TwoWay}"/>
-                        <ListView Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center"
+                        <ListView Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Stretch"
                              ItemsSource="{x:Bind FileOpenVM.RecentsUI}"
                              SelectedIndex="{x:Bind FileOpenVM.SelectedRecentIndex, Mode=TwoWay}">
                             <ListView.ItemsPanel>
@@ -93,9 +93,9 @@
                     <!-- Backups tab -->
                     <Grid Visibility="{x:Bind FileOpenVM.BackupTabContentVisibility, Mode=TwoWay}" >
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="40"/>
+                            <RowDefinition Height="Auto"/>
                             <RowDefinition Height="*"/>
-                            <RowDefinition Height="50"/>
+                            <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
 
                         <ListBox Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center"
@@ -134,7 +134,7 @@
 
                     <!-- Samples tab -->
                     <Grid Visibility="{x:Bind FileOpenVM.SamplesTabContentVisibility, Mode=TwoWay}">
-                        <ListView HorizontalAlignment="Center" VerticalAlignment="Center"
+                        <ListView HorizontalAlignment="Stretch" VerticalAlignment="Center"
                                   ItemsSource="{x:Bind FileOpenVM.SampleNames}" CornerRadius="4"
                                   SelectedIndex="{x:Bind FileOpenVM.SelectedSampleIndex, Mode=TwoWay}"/>
                     </Grid>
@@ -143,12 +143,12 @@
 
 
             <!-- Footer buttons -->
-            <StackPanel Grid.Row="3" MinWidth="700" HorizontalAlignment="Stretch" Orientation="Horizontal"
+            <StackPanel Grid.Row="3" HorizontalAlignment="Stretch" Orientation="Horizontal"
                         Margin="10">
                 <!-- buttons -->
                 <Button Content="{x:Bind FileOpenVM.ConfirmButtonText, Mode=TwoWay}"
-                        Click="{x:Bind FileOpenVM.ConfirmClicked}" HorizontalAlignment="Stretch" Width="300" Margin="10,0" />
-                <Button Content="Close" HorizontalAlignment="Stretch" Width="300" Click="{x:Bind FileOpenVM.Close}"/>
+                        Click="{x:Bind FileOpenVM.ConfirmClicked}" HorizontalAlignment="Stretch" Margin="10,0" />
+                <Button Content="Close" HorizontalAlignment="Stretch" Click="{x:Bind FileOpenVM.Close}"/>
 
 
             </StackPanel>
