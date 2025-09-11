@@ -28,14 +28,12 @@ public class ShellTests
         var outlineService = Ioc.Default.GetService<OutlineService>();
         var outlineVM = Ioc.Default.GetService<OutlineViewModel>();
         var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
-        var appState = Ioc.Default.GetRequiredService<StoryCAD.Models.AppState>();
         var model = await outlineService.CreateModel("Test1056", "StoryBuilder", 2);
-        appState.CurrentDocument = new StoryCAD.Models.StoryDocument(model, Path.Combine(App.ResultsDir, "NullDelete.stbx"));
         // Set up the current view (Explorer view)
         outlineService.SetCurrentView(model, StoryCAD.Models.StoryViewType.ExplorerView);
 
         //Create node to be deleted
-        shell.CurrentNode = appState.CurrentDocument.Model.StoryElements
+        shell.CurrentNode = model.StoryElements
             .First(e => e.ElementType == StoryCAD.Models.StoryItemType.Folder
             && e.Name != "Narrative View").Node;
         shell.RightTappedNode = shell.CurrentNode;

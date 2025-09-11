@@ -26,6 +26,10 @@ namespace StoryCADTests
             // If necessary, you can initialize or mock dependencies here.
             outlineVM = Ioc.Default.GetRequiredService<OutlineViewModel>();
             outlineService = Ioc.Default.GetRequiredService<OutlineService>();
+            
+            // Reset app state to ensure clean start for each test
+            var appState = Ioc.Default.GetRequiredService<AppState>();
+            appState.CurrentDocument = null;
         }
 
         /// <summary>

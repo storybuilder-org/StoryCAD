@@ -90,7 +90,7 @@ public class FileCreateServiceTests
     }
 
     [TestMethod]
-    public async Task CreateFile_WithValidParameters_CreatesFile()
+     public async Task CreateFile_WithValidParameters_CreatesFile()
     {
         // Arrange
         string fileName = "TestStory.stbx";
