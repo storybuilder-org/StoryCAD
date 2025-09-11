@@ -1,13 +1,25 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.UI.Dispatching;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
 using StoryCAD.Exceptions;
+using StoryCAD.Services.Logging;
 using StoryCAD.ViewModels.SubViewModels;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
+using Windows.Storage;
 using Windows.Storage.Pickers;
 using Windows.UI;
 using Windows.UI.ViewManagement;
 using LogLevel = StoryCAD.Services.Logging.LogLevel;
+#if WINDOWS
+using Microsoft.UI.Windowing;
+using Windows.Graphics;
+#endif
 
 namespace StoryCAD.Models;
 
@@ -31,6 +43,7 @@ public partial class Windowing : ObservableRecipient
         Ioc.Default.GetRequiredService<ILogService>())
     {
     }
+
     private void OnPropertyChanged(object sender, PropertyChangedEventArgs e) { }
 
     /// <summary>
@@ -117,6 +130,118 @@ public partial class Windowing : ObservableRecipient
             return new SolidColorBrush(Contrast);
         }
     }
+
+#if WINDOWS
+    /// Sets the window size in DIPs, always honoring system text scale.
+    public void SetWindowSize(Window window, int widthDip, int heightDip)
+    {
+        var appWindow = GetAppWindow(window);
+        var wa = DisplayArea.GetFromWindowId(appWindow.Id, DisplayAreaFallback.Nearest).WorkArea;
+
+        double t = new UISettings().TextScaleFactor;
+        
+        // Apply text scaling to requested size
+        int w = (int)Math.Round(widthDip  * t);
+        int h = (int)Math.Round(heightDip * t);
+
+        // Calculate scaled minimum sizes (1000x700 base)
+        int minWidth = (int)Math.Round(1000 * t);
+        int minHeight = (int)Math.Round(700 * t);
+
+        // Ensure size is within bounds (minimum to work area maximum)
+        w = Math.Clamp(w, minWidth, wa.Width);
+        h = Math.Clamp(h, minHeight, wa.Height);
+        appWindow.Resize(new SizeInt32(w, h));
+    }
+
+    /// Centers and sizes the window (DIPs), honoring system text scale.
+    public void CenterOnScreen(Window window, int baseWidthDip, int baseHeightDip)
+    {
+        var appWindow = GetAppWindow(window);
+        var wa = DisplayArea.GetFromWindowId(appWindow.Id, DisplayAreaFallback.Nearest).WorkArea;
+
+        double t = new UISettings().TextScaleFactor;
+        
+        // Apply text scaling to requested size
+        int w = (int)Math.Round(baseWidthDip  * t);
+        int h = (int)Math.Round(baseHeightDip * t);
+
+        // Calculate scaled minimum sizes (1000x700 base)
+        int minWidth = (int)Math.Round(1000 * t);
+        int minHeight = (int)Math.Round(700 * t);
+
+        // Ensure size is within bounds (minimum to work area maximum)
+        w = Math.Clamp(w, minWidth, wa.Width);
+        h = Math.Clamp(h, minHeight, wa.Height);
+
+        int x = wa.X + (wa.Width  - w) / 2;
+        int y = wa.Y + (wa.Height - h) / 2;
+        appWindow.MoveAndResize(new RectInt32(x, y, w, h));
+    }
+
+    public void Maximize(Window window)
+    {
+        var appWindow = GetAppWindow(window);
+        if (appWindow.Presenter is OverlappedPresenter presenter)
+        {
+            presenter.Maximize();
+        }
+    }
+
+    public void Minimize(Window window)
+    {
+        var appWindow = GetAppWindow(window);
+        if (appWindow.Presenter is OverlappedPresenter presenter)
+        {
+            presenter.Minimize();
+        }
+    }
+
+    public void Restore(Window window)
+    {
+        var appWindow = GetAppWindow(window);
+        if (appWindow.Presenter is OverlappedPresenter presenter)
+        {
+            presenter.Restore();
+        }
+    }
+
+    /// Sets the minimum window size to prevent resizing below these dimensions
+    public void SetMinimumSize(Window window, int minWidthDip = 1000, int minHeightDip = 700)
+    {
+        var appWindow = GetAppWindow(window);
+        
+        if (appWindow.Presenter is OverlappedPresenter presenter)
+        {
+            double t = new UISettings().TextScaleFactor;
+            int minW = (int)Math.Round(minWidthDip * t);
+            int minH = (int)Math.Round(minHeightDip * t);
+            
+            presenter.IsMinimizable = true;
+            presenter.IsMaximizable = true;
+            presenter.IsResizable = true;
+            
+            // Set minimum size constraints
+            if (minW > 0) presenter.PreferredMinimumWidth = minW;
+            if (minH > 0) presenter.PreferredMinimumHeight = minH;
+        }
+    }
+
+    private AppWindow GetAppWindow(Window window)
+    {
+        var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(window);
+        var id = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(hwnd);
+        return AppWindow.GetFromWindowId(id)!;
+    }
+#else
+    // Non-Windows heads: keep signatures; no-ops.
+    public void SetWindowSize(Window window, int widthDip, int heightDip) { }
+    public void CenterOnScreen(Window window, int baseWidthDip, int baseHeightDip) { }
+    public void Maximize(Window window) { }
+    public void Minimize(Window window) { }
+    public void Restore(Window window) { }
+    public void SetMinimumSize(Window window, int minWidthDip = 1000, int minHeightDip = 700) { }
+#endif
 
     /// <summary>
     /// This will dynamically update the title based

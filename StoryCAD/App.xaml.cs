@@ -189,9 +189,10 @@ public partial class App : Application
         //Get the Window's HWND
         window.WindowHandle = WinRT.Interop.WindowNative.GetWindowHandle(window.MainWindow);
 
-        ApplicationView.GetForCurrentView().SetPreferredMinSize(new Windows.Foundation.Size(1000, 700));
-        ApplicationView.GetForCurrentView().TryResizeView(new Windows.Foundation.Size(1200, 800));
-        //_log.Log(LogLevel.Debug, $"Layout: Window size width={mainWindow.Width} height={mainWindow.Height}");
+        // Use new Windowing service to set window size and position
+        window.SetMinimumSize(MainWindow, 1000, 700);  // Prevent manual resize below minimum
+        window.CenterOnScreen(MainWindow, 1200, 800);
+        
         _log.Log(LogLevel.Info, "StoryCAD App loaded and launched");
             
 
