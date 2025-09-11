@@ -13,8 +13,10 @@
         </Grid.RowDefinitions>
         <TextBox Header="Name" Text="{x:Bind CharVm.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                  viewModels:TextBoxFocus.IsFocused="{x:Bind CharVm.IsTextBoxFocused, Mode=TwoWay}"
-                 Margin="10,10,10,0" />
-        <Pivot Grid.Row="1">
+                 Margin="10,10,10,0" HorizontalAlignment="Stretch" />
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+            <!-- Added for responsiveness: ensures content is reachable on small screens -->
+            <Pivot>
             <PivotItem Header="Role">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -23,9 +25,9 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    <ComboBox IsEditable="True" Header="Role" Grid.Row="0"  MinWidth="200" ItemsSource="{x:Bind CharVm.RoleList}" Text="{x:Bind CharVm.Role, Mode=TwoWay}"  PlaceholderText="{x:Bind CharVm.Role, Mode=TwoWay}" />
-                    <ComboBox Header="Story Role" Grid.Row="1" IsEditable="False" MinWidth="200" ItemsSource="{x:Bind CharVm.StoryRoleList}" SelectedItem="{x:Bind CharVm.StoryRole, Mode=TwoWay}" />
-                    <ComboBox Header="Archetype" Grid.Row="2" IsEditable="False" MinWidth="200" ItemsSource="{x:Bind CharVm.ArchetypeList}" SelectedItem="{x:Bind CharVm.Archetype, Mode=TwoWay}" />
+                    <ComboBox IsEditable="True" Header="Role" Grid.Row="0"  MinWidth="0" ItemsSource="{x:Bind CharVm.RoleList}" Text="{x:Bind CharVm.Role, Mode=TwoWay}"  PlaceholderText="{x:Bind CharVm.Role, Mode=TwoWay}" HorizontalAlignment="Stretch" />
+                    <ComboBox Header="Story Role" Grid.Row="1" IsEditable="False" MinWidth="0" ItemsSource="{x:Bind CharVm.StoryRoleList}" SelectedItem="{x:Bind CharVm.StoryRole, Mode=TwoWay}" HorizontalAlignment="Stretch" />
+                    <ComboBox Header="Archetype" Grid.Row="2" IsEditable="False" MinWidth="0" ItemsSource="{x:Bind CharVm.ArchetypeList}" SelectedItem="{x:Bind CharVm.Archetype, Mode=TwoWay}" HorizontalAlignment="Stretch" />
                     <usercontrols:RichEditBoxExtended Header="Character Sketch" Grid.Row="3" RtfText="{x:Bind CharVm.Description, Mode=TwoWay}" AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap" ScrollViewer.VerticalScrollBarVisibility="Visible" />
                 </Grid>
             </PivotItem>
@@ -40,75 +42,75 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    <Grid Grid.Row="0" HorizontalAlignment="Left">
+                    <Grid Grid.Row="0" HorizontalAlignment="Stretch">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="2*"/>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
-                        <TextBox Header="Age" Grid.Column="0" MinWidth="100" Margin="0,0,100,0"
-                                 Text="{x:Bind CharVm.Age, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                        <TextBox Header="Sex" Grid.Column="2" MinWidth="100"
-                                 Text="{x:Bind CharVm.Sex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBox Header="Age" Grid.Column="0" MinWidth="0" Margin="0,0,12,0"
+                                 Text="{x:Bind CharVm.Age, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch" />
+                        <TextBox Header="Sex" Grid.Column="2" MinWidth="0"
+                                 Text="{x:Bind CharVm.Sex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch" />
                     </Grid>
-                    <Grid Grid.Row="1" HorizontalAlignment="Left">
+                    <Grid Grid.Row="1" HorizontalAlignment="Stretch">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="2*"/>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
-                        <TextBox Header="Height" Grid.Column="0" MinWidth="100" Margin="0,0,100,0"
-                                 Text="{x:Bind CharVm.CharHeight, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                        <TextBox Header="Weight" Grid.Column="2" MinWidth="100"
-                                 Text="{x:Bind CharVm.Weight, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBox Header="Height" Grid.Column="0" MinWidth="0" Margin="0,0,12,0"
+                                 Text="{x:Bind CharVm.CharHeight, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch" />
+                        <TextBox Header="Weight" Grid.Column="2" MinWidth="0"
+                                 Text="{x:Bind CharVm.Weight, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch" />
                     </Grid>
-                    <Grid Grid.Row="2" HorizontalAlignment="Left">
+                    <Grid Grid.Row="2" HorizontalAlignment="Stretch">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="2*"/>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
-                        <ComboBox IsEditable="True" Header="Eye Color" Grid.Column="0" MinWidth="200" Margin="0,0,80,0"
+                        <ComboBox IsEditable="True" Header="Eye Color" Grid.Column="0" MinWidth="0" Margin="0,0,12,0"
                                   ItemsSource="{x:Bind CharVm.EyesList}"
                                   Text="{x:Bind CharVm.Eyes, Mode=TwoWay}"
-                                  PlaceholderText="{x:Bind CharVm.Eyes, Mode=TwoWay}" />
-                        <ComboBox IsEditable="True" Header="Hair Color" Grid.Column="2"  MinWidth="200"
+                                  PlaceholderText="{x:Bind CharVm.Eyes, Mode=TwoWay}" HorizontalAlignment="Stretch" />
+                        <ComboBox IsEditable="True" Header="Hair Color" Grid.Column="2"  MinWidth="0"
                                   ItemsSource="{x:Bind CharVm.HairList}"
-                                  Text="{x:Bind CharVm.Hair, Mode=TwoWay}"
-                                  PlaceholderText="{x:Bind CharVm.Hair, Mode=TwoWay}" />
+                                  Text="{x:Bind CharVm.Hair, Mode=TwoWay}" 
+                                  PlaceholderText="{x:Bind CharVm.Hair, Mode=TwoWay}" HorizontalAlignment="Stretch" />
                     </Grid>
-                    <Grid Grid.Row="3" HorizontalAlignment="Left">
+                    <Grid Grid.Row="3" HorizontalAlignment="Stretch">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="2*"/>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
-                        <ComboBox IsEditable="True" Header="Build" Grid.Column="0" MinWidth="200" Margin="0,0,80,0"
+                        <ComboBox IsEditable="True" Header="Build" Grid.Column="0" MinWidth="0" Margin="0,0,12,0"
                                   ItemsSource="{x:Bind CharVm.BuildList}"
                                   Text="{x:Bind CharVm.Build, Mode=TwoWay}"
-                                  PlaceholderText="{x:Bind CharVm.Build, Mode=TwoWay}" />
-                        <ComboBox IsEditable="True" Header="Complexion" Grid.Column="2" MinWidth="200"
+                                  PlaceholderText="{x:Bind CharVm.Build, Mode=TwoWay}" HorizontalAlignment="Stretch" />
+                        <ComboBox IsEditable="True" Header="Complexion" Grid.Column="2" MinWidth="0"
                                   ItemsSource="{x:Bind CharVm.SkinList}"
                                   Text="{x:Bind CharVm.Complexion, Mode=TwoWay}"
-                                  PlaceholderText="{x:Bind CharVm.Complexion, Mode=TwoWay}" />
+                                  PlaceholderText="{x:Bind CharVm.Complexion, Mode=TwoWay}" HorizontalAlignment="Stretch" />
                     </Grid>
-                    <Grid Grid.Row="4" HorizontalAlignment="Left">
+                    <Grid Grid.Row="4" HorizontalAlignment="Stretch">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="2*"/>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
-                        <ComboBox IsEditable="True" Header="Race" Grid.Column="0"  MinWidth="200" Margin="0,0,80,0"
+                        <ComboBox IsEditable="True" Header="Race" Grid.Column="0"  MinWidth="0" Margin="0,0,12,0"
                                   ItemsSource="{x:Bind CharVm.RaceList}"
                                   Text="{x:Bind CharVm.Race, Mode=TwoWay}"
-                                  PlaceholderText="{x:Bind CharVm.Race, Mode=TwoWay}" />
-                        <ComboBox IsEditable="True" Header="Nationality" Grid.Column="2" MinWidth="200"
+                                  PlaceholderText="{x:Bind CharVm.Race, Mode=TwoWay}" HorizontalAlignment="Stretch" />
+                        <ComboBox IsEditable="True" Header="Nationality" Grid.Column="2" MinWidth="0"
                                   ItemsSource="{x:Bind CharVm.NationalityList}"
                                   Text="{x:Bind CharVm.Nationality, Mode=TwoWay}"
                                   PlaceholderText="{x:Bind CharVm.Nationality, Mode=TwoWay}"/>
                     </Grid>
                     <TextBox Header="General Health" Grid.Row="5"
-                             Text="{x:Bind CharVm.Health, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                             Text="{x:Bind CharVm.Health, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch" />
                     <usercontrols:RichEditBoxExtended Header="Physical Notes" Grid.Row="6"
                                                       RtfText="{x:Bind CharVm.PhysNotes, Mode=TwoWay}" AcceptsReturn="True"
                                                       IsSpellCheckEnabled="True" TextWrapping="Wrap"
@@ -133,7 +135,7 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    <Button  Content="Flaw Builder" Grid.Row="0" HorizontalAlignment="Left" Margin="0,10,10,10"
+                    <Button  Content="Flaw Builder" Grid.Row="0" HorizontalAlignment="Stretch" Margin="0,10,10,10" 
                              Command="{x:Bind CharVm.FlawCommand, Mode=OneWay}" />
                     <usercontrols:RichEditBoxExtended Grid.Row="2" Margin="0,10,0,0" Header="Flaw"
                                                       RtfText="{x:Bind CharVm.Flaw, Mode=TwoWay}" AcceptsReturn="True"
@@ -144,7 +146,7 @@
             </PivotItem>
             <PivotItem Header="Backstory">
                 <!-- Character notes data -->
-                <usercontrols:RichEditBoxExtended Header="Backstory" RtfText="{x:Bind CharVm.BackStory, Mode=TwoWay}" AcceptsReturn="True"
+                <usercontrols:RichEditBoxExtended Header="Backstory" RtfText="{x:Bind CharVm.BackStory, Mode=TwoWay}" AcceptsReturn="True" 
                                                   IsSpellCheckEnabled="True" TextWrapping="Wrap" ScrollViewer.VerticalScrollBarVisibility="Visible" />
             </PivotItem>
             <PivotItem Header="Social">
@@ -183,48 +185,48 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    <Grid Grid.Row="0" HorizontalAlignment="Left">
+                    <Grid Grid.Row="0" HorizontalAlignment="Stretch">
                         <ComboBox Header="Personality Type" IsEditable="False" Width="200" ItemsSource="{x:Bind CharVm.EnneagramList}"
-                              SelectedValue="{x:Bind CharVm.Enneagram, Mode=TwoWay}" />
+                              SelectedValue="{x:Bind CharVm.Enneagram, Mode=TwoWay}" HorizontalAlignment="Stretch" />
                     </Grid>
-                    <Grid Grid.Row="1" HorizontalAlignment="Left">
+                    <Grid Grid.Row="1" HorizontalAlignment="Stretch">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="2*"/>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
-                        <ComboBox IsEditable="True" Header="Intelligence"  Grid.Column="0" Width="200" Margin="0,0,80,0"
+                        <ComboBox IsEditable="True" Header="Intelligence"  Grid.Column="0" Width="200" Margin="0,0,12,0"
                                   ItemsSource="{x:Bind CharVm.IntelligenceList}"
                                   Text="{x:Bind CharVm.Intelligence, Mode=TwoWay}"
                                   PlaceholderText="{x:Bind CharVm.Intelligence, Mode=TwoWay}"/>
                         <ComboBox IsEditable="True" Header="Values"  Grid.Column="2"  Width="200"
                                   ItemsSource="{x:Bind CharVm.ValuesList}"
-                                  Text="{x:Bind CharVm.Values, Mode=TwoWay}"
-                                  PlaceholderText="{x:Bind CharVm.Values, Mode=TwoWay}" />
+                                  Text="{x:Bind CharVm.Values, Mode=TwoWay}" 
+                                  PlaceholderText="{x:Bind CharVm.Values, Mode=TwoWay}" HorizontalAlignment="Stretch" />
                     </Grid>
-                    <Grid Grid.Row="2" HorizontalAlignment="Left">
+                    <Grid Grid.Row="2" HorizontalAlignment="Stretch">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="2*"/>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
-                        <ComboBox IsEditable="True" Header="Focus"  Grid.Column="0" Width="200" Margin="0,0,80,0"
+                        <ComboBox IsEditable="True" Header="Focus"  Grid.Column="0" Width="200" Margin="0,0,12,0"
                                   ItemsSource="{x:Bind CharVm.FocusList}"
                                   Text="{x:Bind CharVm.Focus, Mode=TwoWay}"
                                   PlaceholderText="{x:Bind CharVm.Focus, Mode=TwoWay}"/>
                         <ComboBox IsEditable="True" Header="Abnormality"  Grid.Column="2"  Width="200"
                                   ItemsSource="{x:Bind CharVm.AbnormalityList}"
                                   Text="{x:Bind CharVm.Abnormality, Mode=TwoWay}"
-                                  PlaceholderText="{x:Bind CharVm.Abnormality, Mode=TwoWay}" />
+                                  PlaceholderText="{x:Bind CharVm.Abnormality, Mode=TwoWay}" HorizontalAlignment="Stretch" />
                     </Grid>
-                    <usercontrols:RichEditBoxExtended Header="Psych Notes" Grid.Row="3"
+                    <usercontrols:RichEditBoxExtended Header="Psych Notes" Grid.Row="3" 
                                                 RtfText="{x:Bind CharVm.PsychNotes, Mode=TwoWay}" AcceptsReturn="True"
-                                                IsSpellCheckEnabled="True" TextWrapping="Wrap"
+                                                IsSpellCheckEnabled="True" TextWrapping="Wrap" 
                                                 ScrollViewer.VerticalScrollBarVisibility="Visible" />
                 </Grid>
             </PivotItem>
             <PivotItem Header="Inner Traits">
-                <Grid HorizontalAlignment="Left">
+                <Grid HorizontalAlignment="Stretch">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="2*"/>
                         <ColumnDefinition Width="*"/>
@@ -238,54 +240,54 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
-                    <ComboBox IsEditable="True" Header="Adventureousness" Grid.Column="0" Grid.Row="0"  MinWidth="200"
+                    <ComboBox IsEditable="True" Header="Adventureousness" Grid.Column="0" Grid.Row="0"  MinWidth="0"
                                   ItemsSource="{x:Bind CharVm.AdventurousnessList}"
                                   Text="{x:Bind CharVm.Adventurousness, Mode=TwoWay}"
-                                  PlaceholderText="{x:Bind CharVm.Adventurousness, Mode=TwoWay}" />
-                    <ComboBox IsEditable="True" Header="Confidence" Grid.Column="0" Grid.Row="1" MinWidth="200"
+                                  PlaceholderText="{x:Bind CharVm.Adventurousness, Mode=TwoWay}" HorizontalAlignment="Stretch" />
+                    <ComboBox IsEditable="True" Header="Confidence" Grid.Column="0" Grid.Row="1" MinWidth="0"
                                   ItemsSource="{x:Bind CharVm.ConfidenceList}"
                                   Text="{x:Bind CharVm.Confidence, Mode=TwoWay}"
-                                  PlaceholderText="{x:Bind CharVm.Confidence, Mode=TwoWay}" />
-                    <ComboBox IsEditable="True" Header="Creativity" Grid.Column="0" Grid.Row="2" MinWidth="200"
+                                  PlaceholderText="{x:Bind CharVm.Confidence, Mode=TwoWay}" HorizontalAlignment="Stretch" />
+                    <ComboBox IsEditable="True" Header="Creativity" Grid.Column="0" Grid.Row="2" MinWidth="0" 
                                   ItemsSource="{x:Bind CharVm.CreativityList}"
-                                  Text="{x:Bind CharVm.Creativity, Mode=TwoWay}"
-                                  PlaceholderText="{x:Bind CharVm.Creativity, Mode=TwoWay}" />
-                    <ComboBox IsEditable="True" Header="Enthusiasm" Grid.Column="0" Grid.Row="3"  MinWidth="200"
+                                  Text="{x:Bind CharVm.Creativity, Mode=TwoWay}" 
+                                  PlaceholderText="{x:Bind CharVm.Creativity, Mode=TwoWay}" HorizontalAlignment="Stretch" />
+                    <ComboBox IsEditable="True" Header="Enthusiasm" Grid.Column="0" Grid.Row="3"  MinWidth="0"
                                   ItemsSource="{x:Bind CharVm.EnthusiasmList}"
                                   Text="{x:Bind CharVm.Enthusiasm, Mode=TwoWay}"
-                                  PlaceholderText="{x:Bind CharVm.Enthusiasm, Mode=TwoWay}" />
-                    <ComboBox IsEditable="True" Header="Sensitivity" Grid.Column="0" Grid.Row="4" MinWidth="200"
+                                  PlaceholderText="{x:Bind CharVm.Enthusiasm, Mode=TwoWay}" HorizontalAlignment="Stretch" />
+                    <ComboBox IsEditable="True" Header="Sensitivity" Grid.Column="0" Grid.Row="4" MinWidth="0"
                                   ItemsSource="{x:Bind CharVm.SensitivityList}"
                                   Text="{x:Bind CharVm.Sensitivity, Mode=TwoWay}"
-                                  PlaceholderText="{x:Bind CharVm.Sensitivity, Mode=TwoWay}" />
-                    <ComboBox IsEditable="True" Header="Sociability" Grid.Column="0" Grid.Row="5" MinWidth="200" Margin="0,0,80,0"
+                                  PlaceholderText="{x:Bind CharVm.Sensitivity, Mode=TwoWay}" HorizontalAlignment="Stretch" />
+                    <ComboBox IsEditable="True" Header="Sociability" Grid.Column="0" Grid.Row="5" MinWidth="0" Margin="0,0,12,0"
                                   ItemsSource="{x:Bind CharVm.SociabilityList}"
-                                  Text="{x:Bind CharVm.Sociability, Mode=TwoWay}"
-                                  PlaceholderText="{x:Bind CharVm.Sociability, Mode=TwoWay}" />
-                    <ComboBox IsEditable="True" Header="Aggression" Grid.Column="2" Grid.Row="0" MinWidth="200"
+                                  Text="{x:Bind CharVm.Sociability, Mode=TwoWay}" 
+                                  PlaceholderText="{x:Bind CharVm.Sociability, Mode=TwoWay}" HorizontalAlignment="Stretch" />
+                    <ComboBox IsEditable="True" Header="Aggression" Grid.Column="2" Grid.Row="0" MinWidth="0"
                                   ItemsSource="{x:Bind CharVm.AggressionList}"
-                                  Text="{x:Bind CharVm.Aggression, Mode=TwoWay}"
-                                  PlaceholderText="{x:Bind CharVm.Aggression, Mode=TwoWay}" />
-                    <ComboBox IsEditable="True" Header="Conscientiousness" Grid.Column="2" Grid.Row="1" MinWidth="200"
+                                  Text="{x:Bind CharVm.Aggression, Mode=TwoWay}" 
+                                  PlaceholderText="{x:Bind CharVm.Aggression, Mode=TwoWay}" HorizontalAlignment="Stretch" />
+                    <ComboBox IsEditable="True" Header="Conscientiousness" Grid.Column="2" Grid.Row="1" MinWidth="0"
                                   ItemsSource="{x:Bind CharVm.ConscientiousnessList}"
-                                  Text="{x:Bind CharVm.Conscientiousness, Mode=TwoWay}"
-                                  PlaceholderText="{x:Bind CharVm.Conscientiousness, Mode=TwoWay}" />
-                    <ComboBox IsEditable="True" Header="Dominance" Grid.Column="2" Grid.Row="2" MinWidth="200"
+                                  Text="{x:Bind CharVm.Conscientiousness, Mode=TwoWay}" 
+                                  PlaceholderText="{x:Bind CharVm.Conscientiousness, Mode=TwoWay}" HorizontalAlignment="Stretch" />
+                    <ComboBox IsEditable="True" Header="Dominance" Grid.Column="2" Grid.Row="2" MinWidth="0" 
                                   ItemsSource="{x:Bind CharVm.DominanceList}"
                                   Text="{x:Bind CharVm.Dominance, Mode=TwoWay}"
                                   PlaceholderText="{x:Bind CharVm.Dominance, Mode=TwoWay}"/>
-                    <ComboBox IsEditable="True" Header="Self Assurance" Grid.Column="2" Grid.Row="3" MinWidth="200"
+                    <ComboBox IsEditable="True" Header="Self Assurance" Grid.Column="2" Grid.Row="3" MinWidth="0"
                                   ItemsSource="{x:Bind CharVm.AssuranceList}"
-                                  Text="{x:Bind CharVm.Assurance, Mode=TwoWay}"
-                                  PlaceholderText="{x:Bind CharVm.Assurance, Mode=TwoWay}" />
-                    <ComboBox IsEditable="True" Header="Shrewdness" Grid.Column="2" Grid.Row="4" MinWidth="200"
+                                  Text="{x:Bind CharVm.Assurance, Mode=TwoWay}" 
+                                  PlaceholderText="{x:Bind CharVm.Assurance, Mode=TwoWay}" HorizontalAlignment="Stretch" />
+                    <ComboBox IsEditable="True" Header="Shrewdness" Grid.Column="2" Grid.Row="4" MinWidth="0"
                                   ItemsSource="{x:Bind CharVm.ShrewdnessList}"
                                   Text="{x:Bind CharVm.Shrewdness, Mode=TwoWay}"
-                                  PlaceholderText="{x:Bind CharVm.Shrewdness, Mode=TwoWay}" />
-                    <ComboBox IsEditable="True" Header="Stability" Grid.Column="2" Grid.Row="5" MinWidth="200"
+                                  PlaceholderText="{x:Bind CharVm.Shrewdness, Mode=TwoWay}" HorizontalAlignment="Stretch" />
+                    <ComboBox IsEditable="True" Header="Stability" Grid.Column="2" Grid.Row="5" MinWidth="0"
                                   ItemsSource="{x:Bind CharVm.StabilityList}"
-                                  Text="{x:Bind CharVm.Stability, Mode=TwoWay}"
-                                  PlaceholderText="{x:Bind CharVm.Stability, Mode=TwoWay}" />
+                                  Text="{x:Bind CharVm.Stability, Mode=TwoWay}" 
+                                  PlaceholderText="{x:Bind CharVm.Stability, Mode=TwoWay}" HorizontalAlignment="Stretch" />
                 </Grid>
             </PivotItem>
             <PivotItem Header="Outer Traits">
@@ -295,13 +297,13 @@
                         <RowDefinition Height="*" />
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
-                    <Button  Content="Trait Builder" Grid.Row="0"  HorizontalAlignment="Left" Margin="0,10,10,10"
+                    <Button  Content="Trait Builder" Grid.Row="0"  HorizontalAlignment="Stretch" Margin="0,10,10,10" 
                              Command="{x:Bind CharVm.TraitCommand, Mode=OneWay}" />
                     <!-- Character traits -->
-                    <ListView Header="Traits" Grid.Row="1" MinWidth="300" MinHeight="150"
+                    <ListView Header="Traits" Grid.Row="1" MinWidth="0" MinHeight="150" 
                             ItemsSource="{x:Bind CharVm.CharacterTraits, Mode=TwoWay}"
                             SelectedIndex="{x:Bind CharVm.ExistingTraitIndex, Mode=TwoWay}" />
-                    <Grid Grid.Row="2" HorizontalAlignment="Left">
+                    <Grid Grid.Row="2" HorizontalAlignment="Stretch">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="2*"/>
                             <ColumnDefinition Width="*"/>
@@ -309,13 +311,13 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
-                        <TextBox Header="Other Trait:" Grid.Column="0" MinWidth="300" Margin="0,0,10,0" Text="{x:Bind CharVm.NewTrait, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                        <Button Grid.Column="2" FontFamily="Segoe MDL2 Assets" Content="&#xE710;" Margin="0,0,10,0" Command="{x:Bind CharVm.AddTraitCommand, Mode=OneWay}" >
+                        <TextBox Header="Other Trait:" Grid.Column="0" MinWidth="0" Margin="0,0,12,0" Text="{x:Bind CharVm.NewTrait, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch" />
+                        <Button Grid.Column="2" FontFamily="Segoe MDL2 Assets" Content="&#xE710;" Margin="0,0,12,0" Command="{x:Bind CharVm.AddTraitCommand, Mode=OneWay}" >
                             <ToolTipService.ToolTip>
                                 <ToolTip Content="Add Trait" />
                             </ToolTipService.ToolTip>
                         </Button>
-                        <Button Grid.Column="4" FontFamily="{ThemeResource SymbolThemeFontFamily}" Content="&#xE738;" Command="{x:Bind CharVm.RemoveTraitCommand, Mode=OneWay}">
+                        <Button Grid.Column="4" FontFamily="Segoe MDL2 Assets" Content="&#xE738;" Command="{x:Bind CharVm.RemoveTraitCommand, Mode=OneWay}">
                             <ToolTipService.ToolTip>
                                 <ToolTip Content="Remove Trait" />
                             </ToolTipService.ToolTip>
@@ -328,5 +330,6 @@
                 <usercontrols:RichEditBoxExtended Header="Notes" RtfText="{x:Bind CharVm.Notes, Mode=TwoWay}" AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap" ScrollViewer.VerticalScrollBarVisibility="Visible" />
             </PivotItem>
         </Pivot>
+            </ScrollViewer>
     </Grid>
 </Page>
