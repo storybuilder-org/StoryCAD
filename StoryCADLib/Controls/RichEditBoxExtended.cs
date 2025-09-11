@@ -21,7 +21,6 @@ namespace StoryCAD.Controls
             TextChanged += RichEditBoxExtended_TextChanged;
             TextAlignment = TextAlignment.Left;
             CornerRadius = new(5);
-
             PointerEntered += ((s, e) => UpdateTheme(null, null));
             Loaded += UpdateTheme;
             UpdateTheme(null, null);
@@ -47,7 +46,6 @@ namespace StoryCAD.Controls
         {
             if (_lockChangeExecution) return;
             _lockChangeExecution = true;
-
             Document.GetText(TextGetOptions.None, out var plain);
             if (string.IsNullOrWhiteSpace(plain))
                 RtfText = "";
@@ -56,7 +54,6 @@ namespace StoryCAD.Controls
                 Document.GetText(TextGetOptions.FormatRtf, out var rtf);
                 RtfText = rtf.TrimEnd('\0');
             }
-
             _lockChangeExecution = false;
         }
 
@@ -64,15 +61,12 @@ namespace StoryCAD.Controls
         {
             var rtb = d as RichEditBoxExtended;
             if (rtb == null || rtb._lockChangeExecution) return;
-
             rtb._lockChangeExecution = true;
             var wasReadOnly = rtb.IsReadOnly;
             rtb.IsReadOnly = false;
-
             rtb.Document.SetText(
                 TextSetOptions.FormatRtf | TextSetOptions.ApplyRtfDocumentDefaults,
                 rtb.RtfText ?? "");
-
             rtb.IsReadOnly = wasReadOnly;
             rtb._lockChangeExecution = false;
         }
@@ -85,27 +79,42 @@ namespace StoryCAD.Controls
                 nameof(RtfText), typeof(string), typeof(RichEditBoxExtended),
                 new PropertyMetadata(default(string), RtfTextPropertyChanged));
 
+        private bool _lockChangeExecution;
+
         public RichEditBoxExtended()
         {
             TextWrapping = TextWrapping.Wrap;
+            TextChanged += RichEditBoxExtended_TextChanged;
         }
 
         public string RtfText
         {
-            get => Text;
-            set => Text = value ?? "";
+            get => (string)GetValue(RtfTextProperty);
+            set => SetValue(RtfTextProperty, value);
+        }
+
+        private void RichEditBoxExtended_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (_lockChangeExecution) return;
+            _lockChangeExecution = true;
+            RtfText = Text;
+            _lockChangeExecution = false;
         }
 
         private static void RtfTextPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var tb = d as RichEditBoxExtended;
-            if (tb == null) return;
-            
-            tb.Text =new ReportFormatter(Ioc.Default.GetRequiredService<AppState>())
-                .GetText(e.NewValue.ToString()?? "");
+            if (tb == null || tb._lockChangeExecution) return;
+
+            tb._lockChangeExecution = true;
+            tb.Text = new ReportFormatter(Ioc.Default.GetRequiredService<AppState>())
+                .GetText(e.NewValue?.ToString() ?? "");
+            tb._lockChangeExecution = false;
         }
+
         public void UpdateTheme(object sender, RoutedEventArgs e)
         {
+            // No-op for TextBox version
         }
     }
 #endif
