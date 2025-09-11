@@ -14,6 +14,7 @@ using Windows.Storage;
 using StoryCAD.ViewModels;
 using StoryCAD.Services.Outline;
 using StoryCAD.Services.API;
+using StoryCAD.ViewModels.SubViewModels;
 using StoryCADTests;
 
 namespace StoryCAD.Tests.DAL;
