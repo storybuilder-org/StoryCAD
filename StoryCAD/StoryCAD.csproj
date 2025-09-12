@@ -1,64 +1,44 @@
 <Project Sdk="Uno.Sdk">
-  <PropertyGroup>
-      <OutputType>Exe</OutputType>
-    <UnoSingleProject>true</UnoSingleProject>
-    <!-- Display name -->
-    <ApplicationTitle>StoryCAD</ApplicationTitle>
-    <!-- App Identifier -->
-    <ApplicationId>net.storybuilder.storycad</ApplicationId>
-    <!-- Versions -->
-    <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
-    <ApplicationVersion>1</ApplicationVersion>
-    <!-- Package Publisher -->
-    <ApplicationPublisher>StoryBuilder Foundation</ApplicationPublisher>
-    <!-- Package Description -->
-    <Description>StoryCAD powered by Uno Platform.</Description>
-      <!--
-        If you encounter this error message:
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <UnoSingleProject>true</UnoSingleProject>
 
-          error NETSDK1148: A referenced assembly was compiled using a newer version of Microsoft.Windows.SDK.NET.dll.
-          Please update to a newer .NET SDK in order to reference this assembly.
+        <!-- Display name -->
+        <ApplicationTitle>StoryCAD</ApplicationTitle>
+        <!-- App Identifier -->
+        <ApplicationId>net.storybuilder.storycad</ApplicationId>
+        <!-- Versions -->
+        <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
+        <ApplicationVersion>1</ApplicationVersion>
+        <!-- Package Publisher -->
+        <ApplicationPublisher>StoryBuilder Foundation</ApplicationPublisher>
+        <!-- Package Description -->
+        <Description>StoryCAD powered by Uno Platform.</Description>
 
-        This means that the two packages below must be aligned with the "build" version number of
-        the "Microsoft.Windows.SDK.BuildTools" package above, and the "revision" version number
-        must be the highest found in https://www.nuget.org/packages/Microsoft.Windows.SDK.NET.Ref.
-      -->
-    <!-- <WindowsSdkPackageVersion>10.0.22621.28</WindowsSdkPackageVersion> -->
+        <!-- Target frameworks based on OS -->
+        <TargetFrameworks Condition="'$(OS)'=='Windows_NT'">net9.0-windows10.0.22621</TargetFrameworks>
+        <TargetFrameworks Condition="'$(OS)'!='Windows_NT'">net9.0-desktop</TargetFrameworks>
 
-    <!--
-      UnoFeatures let's you quickly add and manage implicit package references based on the features you want to use.
-      https://aka.platform.uno/singleproject-features
-    -->
-    <UnoFeatures>
-      Lottie;
-      Toolkit;
-    </UnoFeatures>
-  </PropertyGroup>
-    <PropertyGroup Condition="'$(TargetFramework)'=='net9.0-windows10.0.22621'">
-        <UseWinUI>true</UseWinUI>
-        <EnableMsixTooling>true</EnableMsixTooling>
+        <!-- MSIX Configuration for Windows -->
+        <UseWinUI Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">true</UseWinUI>
+        <EnableMsixTooling Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">true</EnableMsixTooling>
+        <WindowsPackageType Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">MSIX</WindowsPackageType>
+        <WindowsAppSDKSelfContained Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">true</WindowsAppSDKSelfContained>
+        <GenerateAppxPackageOnBuild Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">true</GenerateAppxPackageOnBuild>
+
+        <UnoFeatures>
+            SkiaRenderer;
+            Lottie;
+            Toolkit;
+        </UnoFeatures>
     </PropertyGroup>
-    <!-- on Windows, build both desktop + WinUI -->
-    <PropertyGroup Condition="'$(OS)'=='Windows_NT'">
-        <TargetFrameworks>net9.0-desktop;net9.0-windows10.0.22621</TargetFrameworks>
-    </PropertyGroup>
-
-    <!-- on non-Windows, only build desktop -->
-    <PropertyGroup Condition="'$(OS)'!='Windows_NT'">
-        <TargetFrameworks>net9.0-desktop</TargetFrameworks>
-    </PropertyGroup>
-
 
     <ItemGroup>
-    <ProjectReference Include="..\StoryCADLib\StoryCADLib.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Platforms\MacCatalyst\Entitlements.plist" />
-    <Content Include="Platforms\MacCatalyst\Info.plist" />
-    <Content Include="Platforms\MacCatalyst\Media.xcassets\LaunchImages.launchimage\Contents.json" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Platforms\MacCatalyst\Main.maccatalyst.cs" />
-  </ItemGroup>
+        <ProjectReference Include="..\StoryCADLib\StoryCADLib.csproj" />
+    </ItemGroup>
 
+    <!-- Move Package.appxmanifest to Windows platform folder -->
+    <ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">
+        <AppxManifest Include="Package.appxmanifest" />
+    </ItemGroup>
 </Project>
