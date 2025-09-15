@@ -45,11 +45,10 @@ public partial class App : Application
         //Set up IOC and the services.
         BootStrapper.Initialise(false);
 
-        string path = Path.Combine(Package.Current.InstalledLocation.Path, ".env");
-        DotEnvOptions options = new(false, new[] { path });
-
         try
         {
+            string path = Path.Combine(Package.Current.InstalledLocation.Path, ".env");
+            DotEnvOptions options = new(false, new[] { path });
             DotEnv.Load(options);
             Ioc.Default.GetRequiredService<AppState>().EnvPresent = true;
         }
@@ -194,9 +193,8 @@ public partial class App : Application
         window.CenterOnScreen(MainWindow, 1200, 800);
         
         _log.Log(LogLevel.Info, "StoryCAD App loaded and launched");
-            
 
-        MainWindow.SetWindowIcon();
+
         // Ensure the current window is active
         MainWindow.Activate();
     }

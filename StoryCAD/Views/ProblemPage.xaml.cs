@@ -21,6 +21,7 @@ public sealed partial class ProblemPage : Page
     {
         ProblemVm = Ioc.Default.GetService<ProblemViewModel>();
         InitializeComponent();
+        // Responsive XAML: layout made scrollable/stretchy; window enforces the only min-size.
         DataContext = ProblemVm;
     }
 

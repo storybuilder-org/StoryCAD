@@ -14,6 +14,7 @@ public sealed partial class OverviewPage : Page
     public OverviewPage()
     {
         InitializeComponent();
+            // Responsive XAML: Pivot wrapped in ScrollViewer; containers stretch; child mins removed.
         DataContext = OverviewVm;
     }
     

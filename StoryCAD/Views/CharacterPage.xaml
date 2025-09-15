@@ -14,9 +14,7 @@
         <TextBox Header="Name" Text="{x:Bind CharVm.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                  viewModels:TextBoxFocus.IsFocused="{x:Bind CharVm.IsTextBoxFocused, Mode=TwoWay}"
                  Margin="10,10,10,0" HorizontalAlignment="Stretch" />
-        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
-            <!-- Added for responsiveness: ensures content is reachable on small screens -->
-            <Pivot>
+        <Pivot Grid.Row="1">
             <PivotItem Header="Role">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -25,9 +23,9 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    <ComboBox IsEditable="True" Header="Role" Grid.Row="0"  MinWidth="0" ItemsSource="{x:Bind CharVm.RoleList}" Text="{x:Bind CharVm.Role, Mode=TwoWay}"  PlaceholderText="{x:Bind CharVm.Role, Mode=TwoWay}" HorizontalAlignment="Stretch" />
-                    <ComboBox Header="Story Role" Grid.Row="1" IsEditable="False" MinWidth="0" ItemsSource="{x:Bind CharVm.StoryRoleList}" SelectedItem="{x:Bind CharVm.StoryRole, Mode=TwoWay}" HorizontalAlignment="Stretch" />
-                    <ComboBox Header="Archetype" Grid.Row="2" IsEditable="False" MinWidth="0" ItemsSource="{x:Bind CharVm.ArchetypeList}" SelectedItem="{x:Bind CharVm.Archetype, Mode=TwoWay}" HorizontalAlignment="Stretch" />
+                    <ComboBox IsEditable="True" Header="Role" Grid.Row="0" MinWidth="200" ItemsSource="{x:Bind CharVm.RoleList}" Text="{x:Bind CharVm.Role, Mode=TwoWay}"  PlaceholderText="{x:Bind CharVm.Role, Mode=TwoWay}" />
+                    <ComboBox Header="Story Role" Grid.Row="1" IsEditable="False" MinWidth="200" ItemsSource="{x:Bind CharVm.StoryRoleList}" SelectedItem="{x:Bind CharVm.StoryRole, Mode=TwoWay}" />
+                    <ComboBox Header="Archetype" Grid.Row="2" IsEditable="False" MinWidth="200" ItemsSource="{x:Bind CharVm.ArchetypeList}" SelectedItem="{x:Bind CharVm.Archetype, Mode=TwoWay}" />
                     <usercontrols:RichEditBoxExtended Header="Character Sketch" Grid.Row="3" RtfText="{x:Bind CharVm.Description, Mode=TwoWay}" AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap" ScrollViewer.VerticalScrollBarVisibility="Visible" />
                 </Grid>
             </PivotItem>
@@ -330,6 +328,5 @@
                 <usercontrols:RichEditBoxExtended Header="Notes" RtfText="{x:Bind CharVm.Notes, Mode=TwoWay}" AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap" ScrollViewer.VerticalScrollBarVisibility="Visible" />
             </PivotItem>
         </Pivot>
-            </ScrollViewer>
     </Grid>
 </Page>
