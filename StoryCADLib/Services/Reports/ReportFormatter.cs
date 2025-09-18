@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using NRtfTree.Util;
 using System.Reflection;
 using StoryCAD.Services.Outline;
@@ -65,7 +65,7 @@ public class ReportFormatter
     }
 
     public string FormatProblemReport(StoryElement element)
-    {
+    { 
         ProblemModel problem = (ProblemModel)element;
         string[] lines = _templates["Problem Description"];
         RtfDocument doc = new(string.Empty);
@@ -647,8 +647,9 @@ public class ReportFormatter
         try
         {
             _templates.Clear();
+            var tex = Assembly.GetExecutingAssembly().GetManifestResourceNames();
             IEnumerable<string> Files = Assembly.GetExecutingAssembly().GetManifestResourceNames()
-                .Where(name => name.Contains("StoryCAD.Assets.Install.reports"));
+                .Where(name => name.Contains("StoryCADLib.Assets.Install.reports"));
             foreach (string FileName in Files.ToList())
             {
                 //Read from manifest stream

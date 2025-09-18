@@ -131,6 +131,7 @@ public class ShellViewModel : ObservableRecipient
     public RelayCommand DramaticSituationsCommand { get; }
     public RelayCommand StockScenesCommand { get; }
     public RelayCommand PrintReportsCommand { get; }
+    public RelayCommand ExportReportsToPdfCommand { get; }
     public RelayCommand ScrivenerReportsCommand { get; }
     public RelayCommand PreferencesCommand { get; }
 
@@ -585,6 +586,7 @@ public class ShellViewModel : ObservableRecipient
         StockScenesCommand.NotifyCanExecuteChanged();
         PreferencesCommand.NotifyCanExecuteChanged();
         PrintReportsCommand.NotifyCanExecuteChanged();
+        ExportReportsToPdfCommand.NotifyCanExecuteChanged();
         ScrivenerReportsCommand.NotifyCanExecuteChanged();
         MoveLeftCommand.NotifyCanExecuteChanged();
         MoveRightCommand.NotifyCanExecuteChanged();
@@ -672,6 +674,11 @@ public class ShellViewModel : ObservableRecipient
     {
         await Ioc.Default.GetRequiredService<PrintReportDialogVM>().OpenPrintReportDialog();
     }
+    private async void OpenExportPdfMenu() 
+    {
+        await Ioc.Default.GetRequiredService<PrintReportDialogVM>().OpenPrintReportDialog(PrintReportDialogVM.ReportOutputMode.Pdf);
+    }
+
 
     #endregion  
 
@@ -1286,6 +1293,7 @@ public class ShellViewModel : ObservableRecipient
         PreferencesCommand = new RelayCommand(OpenPreferences, SerializationLock.CanExecuteCommands);
 
         PrintReportsCommand = new RelayCommand(OpenPrintMenu, SerializationLock.CanExecuteCommands);
+        ExportReportsToPdfCommand = new RelayCommand(OpenExportPdfMenu, SerializationLock.CanExecuteCommands);
         ScrivenerReportsCommand = new RelayCommand(async () => await OutlineManager.GenerateScrivenerReports(), SerializationLock.CanExecuteCommands);
 
         HelpCommand = new RelayCommand(LaunchGitHubPages);

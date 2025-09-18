@@ -53,6 +53,7 @@
       <PackageReference Include="NLog.Extensions.Logging" />
       <PackageReference Include="NRTFTree-Async" />
       <PackageReference Include="Octokit" />
+      <PackageReference Include="SkiaSharp" />
   </ItemGroup>
 
   <ItemGroup>
@@ -217,6 +218,7 @@
 	  <EmbeddedResource Include="Assets\Install\Lists.json" />
 	  <EmbeddedResource Include="Assets\Install\reports\Character Description.txt" />
 	  <EmbeddedResource Include="Assets\Install\reports\Character Relationship Description.txt" />
+	  <EmbeddedResource Include="Assets\Install\reports\Problem Description.txt" />
 	  <EmbeddedResource Include="Assets\Install\reports\Folder Description.txt" />
 	  <EmbeddedResource Include="Assets\Install\reports\Scene Description.txt" />
 	  <EmbeddedResource Include="Assets\Install\reports\Section Description.txt" />
