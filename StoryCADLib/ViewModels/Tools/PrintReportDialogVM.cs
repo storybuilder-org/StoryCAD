@@ -51,6 +51,7 @@ public class PrintReportDialogVM : ObservableRecipient
     private const float PdfPageHeight = 792f;
     private const float PdfMarginLeft = 90f;
     private const float PdfMarginTop = 38f;
+    private const float PdfMarginBottom = 38f;
     private const float PdfFontSize = 10f;
     // Constructor for XAML compatibility
     public PrintReportDialogVM() : this(
@@ -217,15 +218,16 @@ public class PrintReportDialogVM : ObservableRecipient
 #endif
     }
 
-    private async Task<IReadOnlyList<IReadOnlyList<string>>> BuildReportPagesAsync()
+    private async Task<IReadOnlyList<IReadOnlyList<string>>> BuildReportPagesAsync(int? linesPerPageOverride = null)
     {
         var report = await new PrintReports(this, _appState).Generate();
-        return BuildReportPages(report);
+        return BuildReportPages(report, linesPerPageOverride);
     }
 
-    private static IReadOnlyList<IReadOnlyList<string>> BuildReportPages(string report)
+    private static IReadOnlyList<IReadOnlyList<string>> BuildReportPages(string report, int? linesPerPageOverride = null)
     {
         var pages = new List<IReadOnlyList<string>>();
+        var linesPerPage = Math.Max(1, linesPerPageOverride ?? LinesPerPage);
 
         if (string.IsNullOrWhiteSpace(report))
         {
@@ -238,7 +240,7 @@ public class PrintReportDialogVM : ObservableRecipient
         foreach (var rawPage in rawPages)
         {
             var lines = rawPage.Split('\n');
-            var currentPage = new List<string>(LinesPerPage);
+            var currentPage = new List<string>(linesPerPage);
 
             void FlushPage()
             {
@@ -258,7 +260,7 @@ public class PrintReportDialogVM : ObservableRecipient
             foreach (var line in lines)
             {
                 currentPage.Add(line.Replace("\r", string.Empty));
-                if (currentPage.Count >= LinesPerPage)
+                if (currentPage.Count >= linesPerPage)
                 {
                     FlushPage();
                 }
@@ -347,8 +349,6 @@ public class PrintReportDialogVM : ObservableRecipient
     {
         try
         {
-            var pages = await BuildReportPagesAsync();
-
             var exportFile = await Window.ShowFileSavePicker("Export", ".pdf");
             if (exportFile is null)
             {
@@ -380,28 +380,60 @@ public class PrintReportDialogVM : ObservableRecipient
                 };
 
                 var lineHeight = paint.FontSpacing;
+                if (lineHeight <= 0)
+                {
+                    lineHeight = PdfFontSize * 1.2f;
+                }
+
+                var printableHeight = PdfPageHeight - PdfMarginTop - PdfMarginBottom;
+                if (printableHeight <= 0)
+                {
+                    printableHeight = PdfPageHeight;
+                }
+
+                var linesPerPdfPage = Math.Max(1, (int)Math.Floor(printableHeight / lineHeight));
+                var pages = await BuildReportPagesAsync(linesPerPdfPage);
 
                 foreach (var pageLines in pages)
                 {
-                    var canvas = document.BeginPage(PdfPageWidth, PdfPageHeight);
-                    if (canvas is null)
-                    {
-                        continue;
-                    }
+                    var lineIndex = 0;
 
-                    try
+                    while (lineIndex < pageLines.Count)
                     {
-                        var y = PdfMarginTop + lineHeight;
-                        foreach (var line in pageLines)
+                        var canvas = document.BeginPage(PdfPageWidth, PdfPageHeight);
+                        if (canvas is null)
                         {
-                            canvas.DrawText(line ?? string.Empty, PdfMarginLeft, y, paint);
-                            y += lineHeight;
+                            break;
                         }
-                    }
-                    finally
-                    {
-                        document.EndPage();
-                        canvas.Dispose();
+
+                        try
+                        {
+                            var y = PdfMarginTop + lineHeight;
+
+                            while (lineIndex < pageLines.Count)
+                            {
+                                canvas.DrawText(pageLines[lineIndex] ?? string.Empty, PdfMarginLeft, y, paint);
+                                lineIndex++;
+
+                                if (lineIndex >= pageLines.Count)
+                                {
+                                    break;
+                                }
+
+                                var nextY = y + lineHeight;
+                                if (nextY > PdfPageHeight - PdfMarginBottom)
+                                {
+                                    break;
+                                }
+
+                                y = nextY;
+                            }
+                        }
+                        finally
+                        {
+                            document.EndPage();
+                            canvas.Dispose();
+                        }
                     }
                 }
 

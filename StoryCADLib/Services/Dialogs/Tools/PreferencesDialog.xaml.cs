@@ -1,6 +1,8 @@
 using System.Diagnostics;
 using Windows.Storage;
+using Windows.UI.Text.Core;
 using Microsoft.UI.Xaml;
+using Microsoft.Web.WebView2.Core;
 using StoryCAD.ViewModels.Tools;
 
 namespace StoryCAD.Services.Dialogs.Tools;
