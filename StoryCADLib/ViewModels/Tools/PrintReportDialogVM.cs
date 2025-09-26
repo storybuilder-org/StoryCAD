@@ -21,18 +21,12 @@ using SkiaSharp;
 
 namespace StoryCAD.ViewModels.Tools;
 
-public class PrintReportDialogVM : ObservableRecipient
+public partial class PrintReportDialogVM : ObservableRecipient
 {
     public ContentDialog Dialog;
     public PrintTask PrintJobManager;
 
-    private PrintManager _printManager;
-    private bool _printHandlerAttached;
     private bool _isPrinting;
-    private volatile bool _printTaskCreated;
-
-    public PrintDocument? Document;
-    public IPrintDocumentSource? PrintDocSource;
 
     private readonly AppState _appState;
     private readonly Windowing Window;
@@ -150,73 +144,13 @@ public class PrintReportDialogVM : ObservableRecipient
         }
     }
 
+#if !WINDOWS10_0_18362_0_OR_GREATER
     private async void StartPrintMenu()
     {
-        if (_isPrinting) return;
-        _isPrinting = true;
-        _printTaskCreated = false;
-
-        try
-        {
-            await GeneratePrintDocumentReportAsync().ConfigureAwait(false);
-
-#if WINDOWS10_0_18362_0_OR_GREATER
-            if (PrintManager.IsSupported())
-            {
-                try
-                {
-                    await RunOnUIAsync(async () =>
-                    {
-                        RegisterForPrint(); // must run on UI thread for this HWND
-                        await Windows.Graphics.Printing.PrintManagerInterop
-                            .ShowPrintUIForWindowAsync(Window.WindowHandle);
-                    });
-                }
-                catch (Exception ex)
-                {
-                    await Window.ShowContentDialog(new ContentDialog
-                    {
-                        Title = "Printing error",
-                        Content = "The following error occurred when trying to print:\n\n" + ex.Message,
-                        PrimaryButtonText = "Ok"
-                    }, true);
-                }
-            }
-            else
-            {
-                await Window.ShowContentDialog(new ContentDialog
-                {
-                    Title = "Printing",
-                    Content = "Your device does not appear to support printing.",
-                    PrimaryButtonText = "Ok"
-                });
-            }
-#else
-            await Window.ShowContentDialog(new ContentDialog
-            {
-                Title = "Printing",
-                Content = "Printing is only available on the Windows head.",
-                PrimaryButtonText = "Ok"
-            });
-#endif
-        }
-        finally
-        {
-            _isPrinting = false;
-        }
+        await ExportReportsToPdfAsync();
     }
-
-    public void RegisterForPrint()
-    {
-#if WINDOWS10_0_18362_0_OR_GREATER
-        _printManager ??= Windows.Graphics.Printing.PrintManagerInterop.GetForWindow(Window.WindowHandle);
-        if (!_printHandlerAttached)
-        {
-            _printManager.PrintTaskRequested += PrintTaskRequested;
-            _printHandlerAttached = true;
-        }
 #endif
-    }
+
 
     private async Task<IReadOnlyList<IReadOnlyList<string>>> BuildReportPagesAsync(int? linesPerPageOverride = null)
     {
@@ -277,73 +211,12 @@ public class PrintReportDialogVM : ObservableRecipient
         return pages;
     }
 
-    private void UnregisterForPrint()
-    {
+
 #if WINDOWS10_0_18362_0_OR_GREATER
-        if (_printManager is not null && _printHandlerAttached)
-        {
-            _printManager.PrintTaskRequested -= PrintTaskRequested;
-            _printHandlerAttached = false;
-        }
+    // GeneratePrintDocumentReportAsync is defined in PrintReportDialogVM.WinAppSDK.cs
+#else
+    public Task GeneratePrintDocumentReportAsync() => Task.CompletedTask;
 #endif
-    }
-
-    // Build the document on the UI thread to avoid COM threading errors.
-    public async Task GeneratePrintDocumentReportAsync()
-    {
-        UnhookDocumentEvents();
-
-        var pages = await BuildReportPagesAsync();
-
-        await RunOnUIAsync(() =>
-        {
-            Document = new();
-            _printPreviewCache = new();
-
-            foreach (var pageLines in pages)
-            {
-                var displayText = string.Join(Environment.NewLine, pageLines);
-                var panel = new StackPanel
-                {
-                    Children =
-                    {
-                        new TextBlock {
-                            Text = displayText,
-                            Foreground = new SolidColorBrush(Colors.Black),
-                            Margin = new Thickness(120, 50, 0, 0),
-                            HorizontalAlignment = HorizontalAlignment.Left,
-                            FontSize = 10
-                        }
-                    }
-                };
-
-                _printPreviewCache.Add(panel);
-            }
-
-            if (_printPreviewCache.Count == 0)
-            {
-                _printPreviewCache.Add(new StackPanel
-                {
-                    Children =
-                    {
-                        new TextBlock {
-                            Text = "(Empty report)",
-                            Foreground = new SolidColorBrush(Colors.Black),
-                            Margin = new Thickness(120, 50, 0, 0),
-                            HorizontalAlignment = HorizontalAlignment.Left,
-                            FontSize = 10
-                        }
-                    }
-                });
-            }
-
-            Document.AddPages += AddPages;
-            Document.GetPreviewPage += GetPreviewPage;
-            Document.Paginate += Paginate;
-
-            PrintDocSource = Document.DocumentSource;
-        });
-    }
 
     private async Task ExportReportsToPdfAsync()
     {
@@ -455,95 +328,8 @@ public class PrintReportDialogVM : ObservableRecipient
             }, true);
         }
     }
-    private void Paginate(object sender, PaginateEventArgs e)
-    {
-        if (Document is null) return;
-        var count = Math.Max(1, _printPreviewCache.Count);
-        Document.SetPreviewPageCount(count, PreviewPageCountType.Intermediate);
-    }
 
-    private void GetPreviewPage(object sender, GetPreviewPageEventArgs e)
-    {
-        if (Document is null) return;
 
-        try
-        {
-            Document.SetPreviewPage(e.PageNumber, _printPreviewCache[e.PageNumber - 1]); // 1-based
-        }
-        catch { }
-    }
-
-    private void AddPages(object sender, AddPagesEventArgs e)
-    {
-        if (Document is null) return;
-
-        foreach (StackPanel page in _printPreviewCache)
-            Document.AddPage(page);
-
-        Document.AddPagesComplete();
-
-        if (_printPreviewCache.Count > 0)
-            Document.SetPreviewPage(1, _printPreviewCache[0]);
-
-        Document.SetPreviewPageCount(_printPreviewCache.Count, PreviewPageCountType.Final);
-    }
-
-    private void PrintTaskRequested(PrintManager sender, PrintTaskRequestedEventArgs args)
-    {
-        try
-        {
-            var deferral = args.Request.GetDeferral();
-
-            PrintJobManager = args.Request.CreatePrintTask(
-                "StoryCAD - " + Path.GetFileNameWithoutExtension(_appState.CurrentDocument!.FilePath),
-                sourceArgs =>
-                {
-                    if (PrintDocSource is not null)
-                        sourceArgs.SetSource(PrintDocSource);
-                });
-
-            _printTaskCreated = true;
-            PrintJobManager.Completed += PrintTaskCompleted;
-
-            deferral.Complete();
-        }
-        catch (Exception e)
-        {
-            _logService.LogException(LogLevel.Error, e, "Error trying to print report");
-        }
-    }
-
-    private void PrintTaskCompleted(PrintTask sender, PrintTaskCompletedEventArgs args)
-    {
-        Window.GlobalDispatcher.TryEnqueue(async () =>
-        {
-            if (args.Completion == PrintTaskCompletion.Failed)
-            {
-                await Window.ShowContentDialog(new ContentDialog
-                {
-                    Title = "Printing error",
-                    Content = "An error occurred trying to print your document.",
-                    PrimaryButtonText = "OK"
-                }, true);
-            }
-
-            UnregisterForPrint();
-            UnhookDocumentEvents();
-            Document = null;
-            PrintDocSource = null;
-            _printTaskCreated = false;
-        });
-    }
-
-    private void UnhookDocumentEvents()
-    {
-        if (Document is not null)
-        {
-            Document.AddPages -= AddPages;
-            Document.GetPreviewPage -= GetPreviewPage;
-            Document.Paginate -= Paginate;
-        }
-    }
 
     /// <summary>Traverse a node and add it to the relevant list.</summary>
     public void TraverseNode(StoryNodeItem node)
@@ -577,40 +363,4 @@ public class PrintReportDialogVM : ObservableRecipient
         CreateOverview = false;
     }
 
-    // ---- UI thread helpers ----
-    private Task RunOnUIAsync(Func<Task> func)
-    {
-        var tcs = new TaskCompletionSource<bool>();
-        Window.GlobalDispatcher.TryEnqueue(async () =>
-        {
-            try
-            {
-                await func();
-                tcs.SetResult(true);
-            }
-            catch (Exception ex)
-            {
-                tcs.SetException(ex);
-            }
-        });
-        return tcs.Task;
-    }
-
-    private Task RunOnUIAsync(Action action)
-    {
-        var tcs = new TaskCompletionSource<bool>();
-        Window.GlobalDispatcher.TryEnqueue(() =>
-        {
-            try
-            {
-                action();
-                tcs.SetResult(true);
-            }
-            catch (Exception ex)
-            {
-                tcs.SetException(ex);
-            }
-        });
-        return tcs.Task;
-    }
 }
