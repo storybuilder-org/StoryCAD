@@ -16,7 +16,9 @@ This file provides project-specific guidance for StoryCAD development. Universal
 ### Working with UNO Platform
 When developing on the UNOTestBranch:
 - **Shared Code First**: Write platform-agnostic code whenever possible
-- **Platform Checks**: Use `#if HAS_UNO_WINUI` for Windows-specific code, `#if __MACOS__` for macOS
+- **Platform-Specific Code**:
+  - Use partial classes: `Windowing.WinAppSDK.cs` for Windows, `Windowing.desktop.cs` for macOS
+  - Use conditional compilation: `#if HAS_UNO_WINUI` for Windows, `#if __MACOS__` for macOS
 - **Testing**: Test on both Windows and macOS before committing
 - **File Paths**: Use platform-agnostic paths (avoid hardcoded Windows paths)
 - **Keyboard Shortcuts**: Support both Ctrl (Windows) and Cmd (macOS) patterns

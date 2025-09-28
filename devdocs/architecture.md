@@ -141,9 +141,9 @@ UNO Platform allows most code to be shared, but certain features require platfor
 
 #### Platform-Specific Code (10%)
 Platform-specific implementations are handled through:
-- **Conditional Compilation**: `#if HAS_UNO_WINUI` or `#if __MACOS__`
+- **Partial Classes**: Platform-specific files (e.g., `Windowing.WinAppSDK.cs`, `Windowing.desktop.cs`)
+- **Conditional Compilation**: `#if HAS_UNO_WINUI` or `#if __MACOS__` for inline platform code
 - **Dependency Injection**: Platform-specific service implementations
-- **Partial Classes**: Platform-specific UI code-behind
 
 ### Windows (WinAppSDK Head)
 - **File Dialogs**: Native Windows file pickers
@@ -159,37 +159,57 @@ Platform-specific implementations are handled through:
 - **Storage**: macOS application support directories
 - **Gestures**: Trackpad gesture support
 
-### Platform Service Example
+### Platform Implementation Examples
+
+#### Partial Class Pattern
 ```csharp
-// Interface in shared code
-public interface IFileDialogService
+// Windowing.cs - Shared code
+public partial class Windowing
 {
-    Task<string> OpenFileAsync(string[] extensions);
-    Task<string> SaveFileAsync(string defaultName);
+    public void Initialize()
+    {
+        // Shared initialization code
+        InitializePlatform(); // Implemented in platform-specific partial
+    }
+
+    partial void InitializePlatform(); // Platform-specific implementation
 }
 
-// Windows implementation
+// Windowing.WinAppSDK.cs - Windows-specific
+public partial class Windowing
+{
+    partial void InitializePlatform()
+    {
+        // Windows-specific window initialization
+        // Uses WinUI 3 / Windows App SDK APIs
+    }
+}
+
+// Windowing.desktop.cs - macOS-specific
+public partial class Windowing
+{
+    partial void InitializePlatform()
+    {
+        // macOS-specific window initialization
+        // Uses macOS desktop APIs
+    }
+}
+```
+
+#### Conditional Compilation Pattern
+```csharp
+public void SetKeyboardShortcut()
+{
 #if HAS_UNO_WINUI
-public class WindowsFileDialogService : IFileDialogService
-{
-    public async Task<string> OpenFileAsync(string[] extensions)
-    {
-        var picker = new FileOpenPicker();
-        // Windows-specific implementation
-    }
-}
+    // Windows: Ctrl+S
+    KeyboardAccelerator.Key = VirtualKey.S;
+    KeyboardAccelerator.Modifiers = VirtualKeyModifiers.Control;
+#elif __MACOS__
+    // macOS: Cmd+S
+    KeyboardAccelerator.Key = VirtualKey.S;
+    KeyboardAccelerator.Modifiers = VirtualKeyModifiers.Command;
 #endif
-
-// macOS implementation
-#if __MACOS__
-public class MacFileDialogService : IFileDialogService
-{
-    public async Task<string> OpenFileAsync(string[] extensions)
-    {
-        // macOS-specific implementation using NSOpenPanel
-    }
 }
-#endif
 ```
 
 ## File I/O Architecture
