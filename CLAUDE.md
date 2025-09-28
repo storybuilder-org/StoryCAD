@@ -49,13 +49,25 @@ StoryCAD is a free, open-source Windows application for fiction writers that pro
 ## Development Guides
 
 ### Core Documentation
-- [Architecture Guide](./.claude/architecture.md) - MVVM patterns, data binding, services
-- [Build & Test Commands](./.claude/build_commands.md) - WSL/Windows build instructions
-- [Testing Guide](./.claude/testing.md) - Test patterns and data creation
-- [User Manual Index](/mnt/c/temp/user_manual.md) - User documentation structure
+- [Architecture Guide](./devdocs/architecture.md) - MVVM patterns, data binding, services
+- [Build & Test Commands](./devdocs/build_commands.md) - WSL/Windows build instructions
+- [Testing Guide](./devdocs/testing.md) - Test patterns and data creation
+- [Coding Standards](./devdocs/coding.md) - Naming conventions, layout, SOLID principles
 
 ### Workflow Documentation
-- [AI Workflow](/mnt/c/temp/AI_Workflow.md) - Issue-centric development process
+- [AI Workflow](./devdocs/AI_workflow.md) - Issue-centric development process
+
+### User Manual Navigation
+- **Entry Point**: [User Manual Index](/mnt/d/dev/src/ManualTest/index.md) - Start here for overview
+- **Documentation Structure**: Organized by topic in subdirectories (Just the Docs format)
+- **Efficient Search**: Use Glob/Grep to search specific topics rather than reading all files
+- **Key Sections**:
+  - `Front Matter/` - Getting started, legal matters, help
+  - `Quick Start/` - UI, navigation, basic operations
+  - `Story Elements/` - Forms and tabs for each story element type
+  - `Tools/` - Plotting aids, conflict builder, dramatic situations
+  - `Writing with StoryCAD/` - Workflows, plotting, character development
+  - `Tutorial Creating a Story/` - Step-by-step story creation guide
 
 ## Quick Start
 
@@ -68,7 +80,7 @@ StoryCAD is a free, open-source Windows application for fiction writers that pro
 "/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net9.0-windows10.0.22621.0/StoryCADTests.dll"
 ```
 
-For detailed commands, see [Build & Test Commands](./.claude/build_commands.md).
+For detailed commands, see [Build & Test Commands](./devdocs/build_commands.md).
 
 ## Key Services
 
@@ -80,7 +92,7 @@ For detailed commands, see [Build & Test Commands](./.claude/build_commands.md).
 - **SearchService**: Full-text search across story content
 - **LogService**: Comprehensive logging with NLog and elmah.io integration
 
-For detailed architecture information, see [Architecture Guide](./.claude/architecture.md).
+For detailed architecture information, see [Architecture Guide](./devdocs/architecture.md).
 
 ## Important Notes
 
