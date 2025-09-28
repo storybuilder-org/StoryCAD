@@ -62,7 +62,10 @@ public class ShellViewModel : ObservableRecipient
     private readonly OutlineService outlineService;
     private readonly SceneViewModel _sceneViewModel;
     private readonly NavigationService _navigationService;
+    private readonly PrintReportDialogVM _printReportDialogVM;
 
+    // Public property for debugging PrintManager state
+    public PrintReportDialogVM PrintReportDialog => _printReportDialogVM;
     
     // Navigation navigation landmark nodes
     public StoryNodeItem CurrentNode { get; set; }
@@ -1212,27 +1215,28 @@ public class ShellViewModel : ObservableRecipient
 
     #region Constructor(s)
 
-    // Constructor for XAML compatibility - will be removed later
-    public ShellViewModel() : this(
-        Ioc.Default.GetRequiredService<SceneViewModel>(),
-        Ioc.Default.GetRequiredService<ILogService>(),
-        Ioc.Default.GetRequiredService<SearchService>(),
-        Ioc.Default.GetRequiredService<AutoSaveService>(),
-        Ioc.Default.GetRequiredService<BackupService>(),
-        Ioc.Default.GetRequiredService<Windowing>(),
-        Ioc.Default.GetRequiredService<AppState>(),
-        Ioc.Default.GetRequiredService<ScrivenerIo>(),
-        Ioc.Default.GetRequiredService<PreferenceService>(),
-        Ioc.Default.GetRequiredService<OutlineViewModel>(),
-        Ioc.Default.GetRequiredService<OutlineService>(),
-        Ioc.Default.GetRequiredService<NavigationService>())
-    {
-    }
+    //// Constructor for XAML compatibility - will be removed later
+    //public ShellViewModel() : this(
+    //    Ioc.Default.GetRequiredService<SceneViewModel>(),
+    //    Ioc.Default.GetRequiredService<ILogService>(),
+    //    Ioc.Default.GetRequiredService<SearchService>(),
+    //    Ioc.Default.GetRequiredService<AutoSaveService>(),
+    //    Ioc.Default.GetRequiredService<BackupService>(),
+    //    Ioc.Default.GetRequiredService<Windowing>(),
+    //    Ioc.Default.GetRequiredService<AppState>(),
+    //    Ioc.Default.GetRequiredService<ScrivenerIo>(),
+    //    Ioc.Default.GetRequiredService<PreferenceService>(),
+    //    Ioc.Default.GetRequiredService<OutlineViewModel>(),
+    //    Ioc.Default.GetRequiredService<OutlineService>(),
+    //    Ioc.Default.GetRequiredService<NavigationService>())
+    //{
+    //}
 
     public ShellViewModel(SceneViewModel sceneViewModel, ILogService logger, SearchService search,
         AutoSaveService autoSaveService, BackupService backupService, Windowing window,
         AppState appState, ScrivenerIo scrivener, PreferenceService preferenceService,
-        OutlineViewModel outlineViewModel, OutlineService outlineService, NavigationService navigationService)
+        OutlineViewModel outlineViewModel, OutlineService outlineService, NavigationService navigationService,
+        PrintReportDialogVM printReportDialogVM)
     {
         // Store injected services
         _sceneViewModel = sceneViewModel;
@@ -1245,6 +1249,7 @@ public class ShellViewModel : ObservableRecipient
         Scrivener = scrivener;
         Preferences = preferenceService;
         _navigationService = navigationService;
+        _printReportDialogVM = printReportDialogVM;
         // Store sub ViewModels
         OutlineManager = outlineViewModel;
         this.outlineService = outlineService;

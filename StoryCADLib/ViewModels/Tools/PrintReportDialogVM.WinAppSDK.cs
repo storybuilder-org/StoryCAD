@@ -65,6 +65,7 @@ public partial class PrintReportDialogVM
         finally
         {
             _isPrinting = false;
+            UnregisterForPrint();  // Always cleanup, regardless of what happened
         }
     }
 
@@ -84,6 +85,19 @@ public partial class PrintReportDialogVM
         {
             _printManager.PrintTaskRequested -= PrintTaskRequested;
             _printHandlerAttached = false;
+        }
+    }
+    
+    /// <summary>
+    /// Public method to check if PrintManager is registered and clean up if needed.
+    /// Used during window shutdown to prevent Win32 exceptions.
+    /// </summary>
+    public void EnsurePrintManagerCleanup()
+    {
+        if (_printHandlerAttached)
+        {
+            _logService.Log(LogLevel.Debug, "PrintManager cleanup required during window close");
+            UnregisterForPrint();
         }
     }
 
@@ -126,7 +140,7 @@ public partial class PrintReportDialogVM
                 }, true);
             }
 
-            UnregisterForPrint();
+            // UnregisterForPrint removed - cleanup now happens in StartPrintMenu finally block
             UnhookDocumentEvents();
             Document = null;
             PrintDocSource = null;

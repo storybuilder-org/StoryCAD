@@ -15,9 +15,7 @@ public sealed partial class PrintReportsDialog
         _appState = appState;
         _logService = logService;
         InitializeComponent();
-#if WINDOWS10_0_18362_0_OR_GREATER
-        PrintVM.RegisterForPrint();
-#endif
+        // RegisterForPrint moved to StartPrintMenu to avoid register/unregister mismatch
         PrintVM.SelectAllCharacters = false;
         PrintVM.SelectAllProblems = false;
         PrintVM.SelectAllScenes = false;
