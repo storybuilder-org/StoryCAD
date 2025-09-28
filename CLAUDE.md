@@ -11,6 +11,21 @@ This file provides project-specific guidance for StoryCAD development. Universal
 - Straightforward debugging (`Debugger.Launch()`) over complex conditions
 - Clear, obvious code over clever solutions
 
+## Platform Development (UNO)
+
+### Working with UNO Platform
+When developing on the UNOTestBranch:
+- **Shared Code First**: Write platform-agnostic code whenever possible
+- **Platform Checks**: Use `#if HAS_UNO_WINUI` for Windows-specific code, `#if __MACOS__` for macOS
+- **Testing**: Test on both Windows and macOS before committing
+- **File Paths**: Use platform-agnostic paths (avoid hardcoded Windows paths)
+- **Keyboard Shortcuts**: Support both Ctrl (Windows) and Cmd (macOS) patterns
+
+### UNO Platform Resources
+- [UNO Platform Documentation](https://platform.uno/docs/)
+- [Migration Guide](https://github.com/orgs/storybuilder-org/projects/6)
+- Testing Strategy: `/StoryCADTests/ManualTests/UNO_Platform_Testing_Strategy.md`
+
 ## Branch Management
 
 **IMPORTANT**: Always work in the correct branch for the issue:
@@ -31,15 +46,27 @@ This file provides project-specific guidance for StoryCAD development. Universal
 
 ## About StoryCAD
 
-StoryCAD is a free, open-source Windows application for fiction writers that provides structured outlining tools. It's described as "CAD for fiction writers" and helps writers manage the complexity of plotted fiction through systematic story development.
+StoryCAD is a free, open-source application for fiction writers that provides structured outlining tools. It's described as "CAD for fiction writers" and helps writers manage the complexity of plotted fiction through systematic story development.
+
+**Version 3.x** (main branch): Windows-only application using WinUI 3
+**Version 4.0** (UNOTestBranch): Cross-platform application supporting Windows and macOS via UNO Platform
 
 ## Quick Reference
 
-### Technology Stack
-- **Framework**: .NET 9.0 with WinUI 3, Windows App SDK 1.6
+### Technology Stack (UNO Platform - Branch: UNOTestBranch)
+- **Framework**: .NET 9.0 with UNO Platform 5.x
+- **UI Framework**: WinUI 3 (cross-platform via UNO)
+- **Platform Targets**:
+  - **Windows**: WinAppSDK head (Windows 10/11, minimum 10.0.19041.0)
+  - **macOS**: Desktop head (macOS 10.15+)
+  - **Future**: Linux, WebAssembly, iOS, Android
 - **Architecture**: MVVM with CommunityToolkit.Mvvm
-- **Testing**: MSTest with WinUI support
-- **Platform**: Windows 10/11 (minimum 10.0.19041.0)
+- **Testing**: MSTest with UNO Platform support
+- **Shared Code**: ~90% across all platforms
+
+### Production Stack (Main Branch - Version 3.x)
+- **Framework**: .NET 9.0 with WinUI 3, Windows App SDK 1.6
+- **Platform**: Windows 10/11 only
 
 ### Project Structure
 1. **StoryCAD** - Main WinUI 3 application (executable)

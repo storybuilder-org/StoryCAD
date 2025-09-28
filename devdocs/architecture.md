@@ -1,12 +1,28 @@
 # StoryCAD Architecture Guide
 
+## Platform Architecture (UNO Platform)
+
+### Current Branch Status
+- **Production (main)**: WinUI 3 (Windows App SDK) - Version 3.x
+- **Development (UNOTestBranch)**: UNO Platform conversion - Version 4.0
+- **Target Platforms**:
+  - Windows (WinAppSDK head)
+  - macOS (Desktop head)
+  - Future: Linux, WebAssembly, iOS, Android
+
+### UNO Platform Architecture
+StoryCAD 4.0 uses [UNO Platform](https://platform.uno/) to achieve cross-platform support while maintaining near-identical codebase with the WinUI 3 version. The architecture supports:
+- **Single Codebase**: 90% shared code across platforms
+- **Platform Heads**: Platform-specific implementations for 10% of features
+- **Native Performance**: Each platform uses native UI rendering
+
 ## Core Architecture
 
 ### MVVM Pattern
-- **Views**: Located in `/StoryCAD/Views/` - XAML UI definitions
-- **ViewModels**: Located in `/StoryCADLib/ViewModels/` - UI logic and data binding
-- **Models**: Located in `/StoryCADLib/Models/` - Data structures and business entities
-- **Services**: Located in `/StoryCADLib/Services/` - Business logic and data access
+- **Views**: Located in `/StoryCAD/Views/` - XAML UI definitions (shared across platforms)
+- **ViewModels**: Located in `/StoryCADLib/ViewModels/` - UI logic and data binding (platform-agnostic)
+- **Models**: Located in `/StoryCADLib/Models/` - Data structures and business entities (platform-agnostic)
+- **Services**: Located in `/StoryCADLib/Services/` - Business logic and data access (platform-agnostic with interfaces for platform-specific implementations)
 
 ### Dependency Injection
 - Uses CommunityToolkit.Mvvm IoC container
@@ -111,6 +127,70 @@ In some experimental branches, the navigation tree displays root nodes separatel
 - **SearchService**: Unified service for both string-based content search and UUID-based reference search with optional deletion
 - **ReportService**: Generates various output formats including Scrivener integration
 - **PreferencesService**: User settings persistence and management
+
+## Platform-Specific Implementations
+
+### Platform Abstraction Strategy
+UNO Platform allows most code to be shared, but certain features require platform-specific implementations:
+
+#### Shared Code (90%)
+- All ViewModels and business logic
+- Data models and serialization
+- Most UI (XAML) definitions
+- Service interfaces and core implementations
+
+#### Platform-Specific Code (10%)
+Platform-specific implementations are handled through:
+- **Conditional Compilation**: `#if HAS_UNO_WINUI` or `#if __MACOS__`
+- **Dependency Injection**: Platform-specific service implementations
+- **Partial Classes**: Platform-specific UI code-behind
+
+### Windows (WinAppSDK Head)
+- **File Dialogs**: Native Windows file pickers
+- **Keyboard Shortcuts**: Ctrl-based shortcuts
+- **Context Menus**: Windows-style right-click menus
+- **Window Management**: Multiple window support
+- **Storage**: Windows ApplicationData folders
+
+### macOS (Desktop Head)
+- **File Dialogs**: Native macOS file dialogs
+- **Keyboard Shortcuts**: Cmd-based shortcuts
+- **Menu Bar**: Native macOS menu bar at top of screen
+- **Storage**: macOS application support directories
+- **Gestures**: Trackpad gesture support
+
+### Platform Service Example
+```csharp
+// Interface in shared code
+public interface IFileDialogService
+{
+    Task<string> OpenFileAsync(string[] extensions);
+    Task<string> SaveFileAsync(string defaultName);
+}
+
+// Windows implementation
+#if HAS_UNO_WINUI
+public class WindowsFileDialogService : IFileDialogService
+{
+    public async Task<string> OpenFileAsync(string[] extensions)
+    {
+        var picker = new FileOpenPicker();
+        // Windows-specific implementation
+    }
+}
+#endif
+
+// macOS implementation
+#if __MACOS__
+public class MacFileDialogService : IFileDialogService
+{
+    public async Task<string> OpenFileAsync(string[] extensions)
+    {
+        // macOS-specific implementation using NSOpenPanel
+    }
+}
+#endif
+```
 
 ## File I/O Architecture
 
