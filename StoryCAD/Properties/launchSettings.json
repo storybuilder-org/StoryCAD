@@ -11,7 +11,10 @@
     // Note: In order to select this profile, you'll need to comment the `Packaged` profile below until this is fixed: https://aka.platform.uno/wasdk-maui-debug-profile-issue
     "StoryCAD (WinAppSDK Unpackaged)": {
       "commandName": "Project",
-      "compatibleTargetFramework": "windows"
+      "compatibleTargetFramework": "windows",
+      "environmentVariables": {
+        "DOTNET_MODIFIABLE_ASSEMBLIES": "debug"
+      }
     },
     "StoryCAD (WinAppSDK Packaged)": {
       "commandName": "MsixPackage",
@@ -19,7 +22,10 @@
     },
     "StoryCAD (Desktop)": {
       "commandName": "Project",
-      "compatibleTargetFramework": "desktop"
+      "compatibleTargetFramework": "desktop",
+      "environmentVariables": {
+        "DOTNET_MODIFIABLE_ASSEMBLIES": "debug"
+      }
     },
     "StoryCAD (Desktop WSL2)": {
       "commandName": "WSL2",
