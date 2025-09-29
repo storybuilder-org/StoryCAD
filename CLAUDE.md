@@ -87,6 +87,7 @@ StoryCAD is a free, open-source application for fiction writers that provides st
 - [Build & Test Commands](./devdocs/build_commands.md) - WSL/Windows build instructions
 - [Testing Guide](./devdocs/testing.md) - Test patterns and data creation
 - [Coding Standards](./devdocs/coding.md) - Naming conventions, layout, SOLID principles
+- [Debugging Configuration](./devdocs/debugging_configuration.md) - Visual Studio and IDE debugging setup
 
 ### Workflow Documentation
 - [AI Workflow](./devdocs/AI_workflow.md) - Issue-centric development process
