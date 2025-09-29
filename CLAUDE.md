@@ -24,8 +24,13 @@ When developing on the UNOTestBranch:
 - **Keyboard Shortcuts**: Support both Ctrl (Windows) and Cmd (macOS) patterns
 
 ### UNO Platform Resources
-- [UNO Platform Documentation](https://platform.uno/docs/)
-- [Migration Guide](https://github.com/orgs/storybuilder-org/projects/6)
+- [UNO Platform Documentation](https://platform.uno/docs/) - Main documentation
+- [Platform-Specific C#](https://platform.uno/docs/articles/platform-specific-csharp.html) - Partial classes and conditional compilation
+- [Getting Started with UNO](https://platform.uno/docs/articles/get-started.html) - Setup and basics
+- [WinUI to UNO Migration](https://platform.uno/docs/articles/howto-migrate-existing-code.html) - Migration guidance
+- [Supported Features](https://platform.uno/docs/articles/supported-features.html) - API compatibility matrix
+- [UNO Platform GitHub](https://github.com/unoplatform/uno) - Source code and issues
+- [Migration Guide](https://github.com/orgs/storybuilder-org/projects/6) - StoryCAD specific migration project
 - Testing Strategy: `/StoryCADTests/ManualTests/UNO_Platform_Testing_Strategy.md`
 
 ## Branch Management

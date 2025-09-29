@@ -16,6 +16,12 @@ StoryCAD 4.0 uses [UNO Platform](https://platform.uno/) to achieve cross-platfor
 - **Platform Heads**: Platform-specific implementations for 10% of features
 - **Native Performance**: Each platform uses native UI rendering
 
+#### Key UNO Platform Concepts
+- **[Platform-Specific Code](https://platform.uno/docs/articles/platform-specific-csharp.html)**: How to write platform-specific implementations
+- **[Uno.UI](https://platform.uno/docs/articles/uno-development/uno-ui-packages.html)**: Cross-platform UI layer implementing WinUI 3 APIs
+- **[Platform Heads](https://platform.uno/docs/articles/uno-app-solution-structure.html)**: Separate projects for each target platform
+- **[Feature Parity](https://platform.uno/docs/articles/supported-features.html)**: WinUI 3 API coverage per platform
+
 ## Core Architecture
 
 ### MVVM Pattern
