@@ -6,10 +6,13 @@ This document provides debugging configuration settings for StoryCAD using UNO P
 ## Visual Studio 2022 Configuration
 
 ### Prerequisites
-1. **Enable WinUI 3 Debugging Tools**
-   - Navigate to: Tools → Options → Environment → Preview Features
-   - Enable: "Enable UI Debugging Tooling for WinUI 3 Projects"
-   - This enables Live Visual Tree, Live Property Explorer, and Hot Reload
+1. **Visual Studio 2022 Configuration (17.8+)**
+   - WinUI 3 debugging tools are included by default
+   - **Hot Reload Settings**: Debug → Options → XAML Hot Reload
+     - ✅ Enable XAML Hot Reload
+     - ✅ Enable WinUI (including .NET MAUI)
+   - **Important**: Debug configuration must be named "Debug" for Hot Reload to work
+   - **For x64 WinUI 3**: Use Managed Debugger (not mixed mode) for Hot Reload support
 
 ### Target Framework Ordering
 **Critical**: The order of target frameworks in the .csproj file affects debugging functionality.
