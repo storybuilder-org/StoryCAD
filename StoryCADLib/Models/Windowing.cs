@@ -139,27 +139,42 @@ public partial class Windowing : ObservableRecipient
     {
         if (_appState.Headless) { return; }
 
-        string BaseTitle = "StoryCAD ";
-
-        //Developer Build title warning
-        if (_appState.DeveloperBuild)
+        // Check if window is still valid before attempting to set title
+        if (MainWindow == null)
         {
-            BaseTitle += "(DEV BUILD) ";
+            _logService.Log(LogLevel.Debug, "UpdateWindowTitle called but MainWindow is null");
+            return;
         }
 
-        // TODO: ARCHITECTURAL ISSUE - Windowing (UI layer) should not depend on OutlineViewModel (business logic)
-        // This creates a circular dependency: OutlineViewModel -> Windowing -> OutlineViewModel
-        // Proper fix (SRP): Move UpdateWindowTitle logic to OutlineViewModel (which knows about file changes)
-        // and have it set the title on Windowing. OutlineViewModel already has Windowing reference.
-        // Current workaround: Use service locator to break the circular dependency
-        AppState appState = Ioc.Default.GetRequiredService<AppState>();
-        if (!string.IsNullOrEmpty(appState.CurrentDocument?.FilePath))
+        try
         {
-            BaseTitle += $"- Currently editing {Path.GetFileNameWithoutExtension(appState.CurrentDocument.FilePath)}";
-        }
+            string BaseTitle = "StoryCAD ";
 
-        //Set window Title.
-        MainWindow.Title = BaseTitle;
+            //Developer Build title warning
+            if (_appState.DeveloperBuild)
+            {
+                BaseTitle += "(DEV BUILD) ";
+            }
+
+            // TODO: ARCHITECTURAL ISSUE - Windowing (UI layer) should not depend on OutlineViewModel (business logic)
+            // This creates a circular dependency: OutlineViewModel -> Windowing -> OutlineViewModel
+            // Proper fix (SRP): Move UpdateWindowTitle logic to OutlineViewModel (which knows about file changes)
+            // and have it set the title on Windowing. OutlineViewModel already has Windowing reference.
+            // Current workaround: Use service locator to break the circular dependency
+            AppState appState = Ioc.Default.GetRequiredService<AppState>();
+            if (!string.IsNullOrEmpty(appState.CurrentDocument?.FilePath))
+            {
+                BaseTitle += $"- Currently editing {Path.GetFileNameWithoutExtension(appState.CurrentDocument.FilePath)}";
+            }
+
+            //Set window Title.
+            MainWindow.Title = BaseTitle;
+        }
+        catch (Exception ex)
+        {
+            // Window may have been closed during shutdown
+            _logService.Log(LogLevel.Debug, $"Could not set window title (window may be closed): {ex.Message}");
+        }
     }
 
     /// <summary>
