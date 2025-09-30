@@ -313,7 +313,7 @@ public partial class PrintReportDialogVM : ObservableRecipient
                 document.Close();
             }
 
-            await Windows.Storage.FileIO.WriteBytesAsync(exportFile, memoryStream.ToArray());
+            await FileIO.WriteBytesAsync(exportFile, memoryStream.ToArray());
             Messenger.Send(new StatusChangedMessage(new($"Reports exported to PDF: {exportFile.Path}", LogLevel.Info)));
         }
         catch (Exception ex)
