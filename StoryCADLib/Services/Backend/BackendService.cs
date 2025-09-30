@@ -64,13 +64,17 @@ public class BackendService
 	/// </summary>
 	public async Task StartupRecording()
 	{
+		// TODO: This try/catch swallows all exceptions silently. Consider:
+		// 1. Handling specific exceptions (MySqlException, TaskCanceledException) differently
+		// 2. Providing user feedback for connection failures
+		// 3. Whether all exceptions should be silently logged or some should propagate
 		try
 		{
 			// If the previous attempt to communicate to the back-end server
 			// or database failed, retry
 			if (_preferenceService.Model.RecordPreferencesStatus)
 				await PostPreferences(_preferenceService.Model);
-               
+
 			// If the StoryCAD version has changed, post the version change
 			if (!_appState.Version.Equals(_preferenceService.Model.Version))
 			{
