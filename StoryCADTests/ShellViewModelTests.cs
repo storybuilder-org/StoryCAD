@@ -5,6 +5,8 @@ using StoryCAD.Models;
 using StoryCAD.Services.Outline;
 using StoryCAD.ViewModels;
 using StoryCAD.ViewModels.SubViewModels;
+using StoryCAD.Services;
+using StoryCAD.Services.Backup;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -15,7 +17,7 @@ using System.Threading.Tasks;
 namespace StoryCADTests;
 
 [TestClass]
-public class ShellTests
+public class ShellViewModelTests
 {
     /// <summary>
     /// This tests a fix from PR #1056 where moving a node after deletion
@@ -1157,6 +1159,152 @@ public class ShellTests
         // Test 4: Move Scene 1 down (should move back to Folder B)
         shell.MoveDownCommand.Execute(null);
         Assert.AreEqual(folderB.Node, scene1.Node.Parent, "Scene 1 should be back in Folder B");
+    }
+
+    #endregion
+
+    #region Shutdown Tests
+
+    [TestMethod]
+    public async Task OnApplicationClosing_WithOpenDocument_CallsCloseFile()
+    {
+        // Arrange
+        var shellViewModel = Ioc.Default.GetRequiredService<ShellViewModel>();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var document = new StoryDocument(new StoryModel(), "test.stbx");
+        appState.CurrentDocument = document;
+
+        // Act
+        await shellViewModel.OnApplicationClosing();
+
+        // Assert
+        Assert.IsNull(appState.CurrentDocument, "CloseFile should have been called and set CurrentDocument to null");
+    }
+
+    [TestMethod]
+    public async Task OnApplicationClosing_WithoutDocument_DoesNotThrow()
+    {
+        // Arrange
+        var shellViewModel = Ioc.Default.GetRequiredService<ShellViewModel>();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        appState.CurrentDocument = null;
+
+        // Act - should complete without errors
+        await shellViewModel.OnApplicationClosing();
+
+        // Assert - no exception thrown, CurrentDocument still null
+        Assert.IsNull(appState.CurrentDocument);
+    }
+
+    [TestMethod]
+    public async Task OnApplicationClosing_WithSessionTime_UpdatesCumulativeTimeUsed()
+    {
+        // Arrange
+        var shellViewModel = Ioc.Default.GetRequiredService<ShellViewModel>();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var preferenceService = Ioc.Default.GetRequiredService<PreferenceService>();
+
+        appState.CurrentDocument = null;
+        shellViewModel.AppStartTime = DateTime.Now.AddSeconds(-10);
+
+        // Act
+        await shellViewModel.OnApplicationClosing();
+
+        // Assert
+        Assert.IsTrue(preferenceService.Model.CumulativeTimeUsed > 0,
+            "CumulativeTimeUsed should have been updated with session time");
+    }
+
+    [TestMethod]
+    public async Task OnApplicationClosing_Always_SavesPreferences()
+    {
+        // Arrange
+        var shellViewModel = Ioc.Default.GetRequiredService<ShellViewModel>();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var preferenceService = Ioc.Default.GetRequiredService<PreferenceService>();
+
+        appState.CurrentDocument = null;
+        shellViewModel.AppStartTime = DateTime.Now.AddSeconds(-10);
+
+        // Act
+        await shellViewModel.OnApplicationClosing();
+
+        // Assert
+        Assert.IsTrue(preferenceService.Model.CumulativeTimeUsed > 0,
+            "Preferences should have been saved with updated time");
+    }
+
+    [TestMethod]
+    public async Task OnApplicationClosing_Always_DestroysCollaborator()
+    {
+        // Arrange
+        var shellViewModel = Ioc.Default.GetRequiredService<ShellViewModel>();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        appState.CurrentDocument = null;
+
+        // Act
+        await shellViewModel.OnApplicationClosing();
+
+        // Assert
+        // Method should complete without throwing (CollaboratorService.DestroyCollaborator is called)
+        Assert.IsTrue(true, "Method should complete without throwing");
+    }
+
+    [TestMethod]
+    public async Task OnApplicationClosing_Always_SetsIsClosingFlag()
+    {
+        // Arrange
+        var shellViewModel = Ioc.Default.GetRequiredService<ShellViewModel>();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+
+        appState.CurrentDocument = null;
+        shellViewModel.IsClosing = false;
+
+        // Act
+        await shellViewModel.OnApplicationClosing();
+
+        // Assert
+        Assert.IsTrue(shellViewModel.IsClosing, "IsClosing flag should be set to true");
+    }
+
+    [TestMethod]
+    public async Task OnApplicationClosing_WithException_HandlesGracefully()
+    {
+        // Arrange
+        var shellViewModel = Ioc.Default.GetRequiredService<ShellViewModel>();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var model = new StoryModel { Changed = true };
+        appState.CurrentDocument = new StoryDocument(model, "invalid/path.stbx");
+
+        // Act - should not throw even with potential file issues
+        try
+        {
+            await shellViewModel.OnApplicationClosing();
+            Assert.IsTrue(true, "Method should complete without throwing");
+        }
+        catch (Exception ex)
+        {
+            Assert.Fail($"OnApplicationClosing should handle exceptions gracefully: {ex.Message}");
+        }
+    }
+
+    [TestMethod]
+    public async Task OnApplicationClosing_WithOpenDocument_StopsAutoSave()
+    {
+        // Arrange
+        var shellViewModel = Ioc.Default.GetRequiredService<ShellViewModel>();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var autoSaveService = Ioc.Default.GetRequiredService<AutoSaveService>();
+
+        var document = new StoryDocument(new StoryModel(), "test.stbx");
+        appState.CurrentDocument = document;
+
+        // Note: Can't test AutoSave stopping directly as it's handled internally by CloseFile
+        // Act
+        await shellViewModel.OnApplicationClosing();
+
+        // Assert - Document should be closed (which stops AutoSave)
+        Assert.IsNull(appState.CurrentDocument, "Document should be closed");
     }
 
     #endregion

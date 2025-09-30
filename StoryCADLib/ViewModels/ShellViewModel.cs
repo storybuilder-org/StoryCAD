@@ -84,6 +84,7 @@ public class ShellViewModel : ObservableRecipient
 
     private readonly DispatcherTimer _statusTimer;
     public bool IsClosing;
+    public DateTime AppStartTime { get; set; } = DateTime.Now;
 
     public CollaboratorArgs CollabArgs;
    
@@ -1183,8 +1184,63 @@ public class ShellViewModel : ObservableRecipient
         StatusMessage = string.Empty;
     }
 
+    /// <summary>
+    /// Handles application shutdown cleanup. This method is called when the application
+    /// is closing to ensure all resources are properly released and state is saved.
+    /// </summary>
+    public async Task OnApplicationClosing()
+    {
+        try
+        {
+            Logger.Log(LogLevel.Info, "Application closing - starting cleanup");
 
+            // 1. Update cumulative time used and save preferences
+            var prefs = Ioc.Default.GetRequiredService<PreferenceService>();
+            var sessionTime = (DateTime.Now - AppStartTime).TotalSeconds;
+            prefs.Model.CumulativeTimeUsed += Convert.ToInt64(sessionTime);
+            Logger.Log(LogLevel.Info, $"Session time: {sessionTime} seconds, Total time: {prefs.Model.CumulativeTimeUsed} seconds");
+            PreferencesIo prfIo = new();
+            await prfIo.WritePreferences(prefs.Model);
+            Logger.Log(LogLevel.Info, "Preferences saved");
 
+            // 2. Close the current document if one is open
+            // This handles AutoSave stop, BackupService stop, and document cleanup
+            if (State.CurrentDocument != null)
+            {
+                Logger.Log(LogLevel.Info, "Closing open document");
+                await OutlineManager.CloseFile();
+            }
+
+            // 3. Stop the status timer
+            if (_statusTimer != null && _statusTimer.IsEnabled)
+            {
+                _statusTimer.Stop();
+                Logger.Log(LogLevel.Debug, "Status timer stopped");
+            }
+
+            // 4. Destroy Collaborator service
+            try
+            {
+                var collaboratorService = Ioc.Default.GetRequiredService<CollaboratorService>();
+                collaboratorService.DestroyCollaborator();
+                Logger.Log(LogLevel.Info, "Collaborator service destroyed");
+            }
+            catch (Exception ex)
+            {
+                Logger.LogException(LogLevel.Warn, ex, "Error destroying collaborator service during shutdown");
+            }
+
+            // 5. Set the closing flag
+            IsClosing = true;
+
+            Logger.Log(LogLevel.Info, "Application cleanup completed successfully");
+        }
+        catch (Exception ex)
+        {
+            // Log but don't throw - we want shutdown to complete even if cleanup fails
+            Logger.LogException(LogLevel.Error, ex, "Error during application shutdown cleanup");
+        }
+    }
 
     /// <summary>
     /// When a Story Element page's name changes the corresponding

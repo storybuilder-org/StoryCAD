@@ -125,67 +125,25 @@ public sealed partial class Shell : Page
         // Track when the application is shutting down
         
         // Hook up the Closing event for cleanup before window destruction
-        // Note: WinUI 3 uses AppWindow.Closing for cancellable close events
         if (Windowing.MainWindow.AppWindow != null)
         {
             Windowing.MainWindow.AppWindow.Closing += OnMainWindowClosing;
         }
-        
-        // Keep the Closed event for final state tracking
-        Windowing.MainWindow.Closed += OnMainWindowClosed;
     }
 
     /// <summary>
-    /// Handles the main window closing event (before close). This is where cleanup
-    /// should happen to prevent Win32 exceptions during XAML shutdown.
+    /// Handles the main window closing event. Calls ShellViewModel to perform cleanup.
     /// </summary>
-    private void OnMainWindowClosing(Microsoft.UI.Windowing.AppWindow sender, Microsoft.UI.Windowing.AppWindowClosingEventArgs args)
+    private async void OnMainWindowClosing(Microsoft.UI.Windowing.AppWindow sender, Microsoft.UI.Windowing.AppWindowClosingEventArgs args)
     {
-        // BREAKPOINT: Set breakpoint here to debug Win32 exception on exit
         try
         {
-            Logger.Log(LogLevel.Debug, $"MainWindow closing (pre-close) - Thread ID: {System.Threading.Thread.CurrentThread.ManagedThreadId}");
-            
-            // Check if PrintReportDialogVM has registered PrintManager and clean it up
-            if (ShellVm.PrintReportDialog != null)
-            {
-                Logger.Log(LogLevel.Debug, "PrintReportDialog exists - set breakpoint here to inspect private fields");
-            }
-            
-            Logger.Log(LogLevel.Debug, "Window closing cleanup completed successfully");
+            await ShellVm.OnApplicationClosing();
         }
         catch (Exception ex)
         {
-            Logger.LogException(LogLevel.Error, ex, "Exception during window closing cleanup");
-            // Don't cancel the close, but log the error
-        }
-    }
-    
-    /// <summary>
-    /// Handles the main window closed event (after close). This method replaces the lambda
-    /// to provide a breakpoint-friendly location for debugging Win32 exceptions.
-    /// </summary>
-    private void OnMainWindowClosed(object sender, WindowEventArgs args)
-    {
-        // BREAKPOINT: Set breakpoint here to debug Win32 exception on exit
-        try
-        {
-            Logger.Log(LogLevel.Debug, $"MainWindow closing - Thread ID: {System.Threading.Thread.CurrentThread.ManagedThreadId}");
-            
-            // Set the closing flag (original behavior)
-            ShellVm.IsClosing = true;
-            
-            // Log any relevant diagnostic information
-            Logger.Log(LogLevel.Debug, "Window close handler completed successfully");
-            
-            // TODO: Check if PrintManager is still registered
-            // This will be added after investigating the PrintReportDialogVM state
-        }
-        catch (Exception ex)
-        {
-            Logger.LogException(LogLevel.Error, ex, "Exception during window close");
-            // Re-throw to maintain original behavior
-            throw;
+            Logger.LogException(LogLevel.Error, ex, "Error during application closing");
+            // Don't re-throw - let the window close even if cleanup fails
         }
     }
 
