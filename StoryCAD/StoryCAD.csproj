@@ -31,6 +31,8 @@
             Lottie;
             Toolkit;
         </UnoFeatures>
+
+        <Platforms>AnyCPU;x64</Platforms>
     </PropertyGroup>
 
     <ItemGroup>
@@ -40,5 +42,10 @@
     <!-- Move Package.appxmanifest to Windows platform folder -->
     <ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">
         <AppxManifest Include="Package.appxmanifest" />
+    </ItemGroup>
+    <ItemGroup>
+      <Content Include=".env">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
     </ItemGroup>
 </Project>

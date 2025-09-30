@@ -47,7 +47,19 @@ public partial class App : Application
 
         try
         {
-            string path = Path.Combine(Package.Current.InstalledLocation.Path, ".env");
+            // Determine if running as packaged or unpackaged
+            bool isPackaged = false;
+            try
+            {
+                var package = Package.Current;
+                isPackaged = package != null;
+            }
+            catch { }
+
+            string path = isPackaged
+                ? Path.Combine(Package.Current.InstalledLocation.Path, ".env")
+                : Path.Combine(AppContext.BaseDirectory, ".env");
+
             DotEnvOptions options = new(false, new[] { path });
             DotEnv.Load(options);
             Ioc.Default.GetRequiredService<AppState>().EnvPresent = true;
