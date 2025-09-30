@@ -78,9 +78,6 @@
 
                         <ListView Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Stretch"
                              ItemsSource="{x:Bind FileOpenVM.RecentsUI}"
-                             SelectedIndex="{x:Bind FileOpenVM.SelectedRecentIndex, Mode=TwoWay}"/>
-                        <ListView Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Stretch"
-                             ItemsSource="{x:Bind FileOpenVM.RecentsUI}"
                              SelectedIndex="{x:Bind FileOpenVM.SelectedRecentIndex, Mode=TwoWay}">
                             <ListView.ItemsPanel>
                                 <ItemsPanelTemplate>
