@@ -364,8 +364,15 @@ public partial class Windowing : ObservableRecipient
 				logger.Log(LogLevel.Warn, "File picker returned null, this is because the user probably clicked cancel.");
 				return null;
 			}
-
-			logger.Log(LogLevel.Info, $"Picked folder {file.Path} attributes:{file.Attributes}");
+            
+            //Ensure that the file is created (
+            //Appears to not happen automatically on MacOS, returning an invalid file object)
+            File.Create(file.Path).Close();
+            #if HAS_UNO
+			logger.Log(LogLevel.Info, $"Picked folder {file.Path}");
+            #else
+			logger.Log(LogLevel.Info, $"Picked folder {file.Path} attributes:{file.Attributes}"); //Log 
+            #endif
 			return file;
 		}
 	    catch (Exception e)

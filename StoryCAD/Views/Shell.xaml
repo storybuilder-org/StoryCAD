@@ -323,8 +323,7 @@
                                     <KeyboardAccelerator Key="P" Modifiers="Control"/>
                                 </MenuFlyoutItem.KeyboardAccelerators>
                             </MenuFlyoutItem>
-                            <MenuFlyoutItem Text="Export Reports to PDF" Command="{x:Bind ShellVm.ExportReportsToPdfCommand, Mode=OneWay}"
-                                             win:Visibility="Visible" notwin:Visibility="Collapsed" skia:Visibility="Collapsed">
+                            <MenuFlyoutItem Text="PDF Reports" Command="{x:Bind ShellVm.ExportReportsToPdfCommand, Mode=OneWay}">
                                 <MenuFlyoutItem.KeyboardAccelerators>
                                     <KeyboardAccelerator Key="P" Modifiers="Control,Shift"/>
                                 </MenuFlyoutItem.KeyboardAccelerators>

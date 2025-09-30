@@ -675,14 +675,16 @@ public class ShellViewModel : ObservableRecipient
     /// </summary>
     private async void OpenPrintMenu() 
     {
-        await Ioc.Default.GetRequiredService<PrintReportDialogVM>().OpenPrintReportDialog();
+        await _printReportDialogVM.OpenPrintReportDialog();
     }
+    
+    /// <summary>
+    /// Opens PDF UI Flow.
+    /// </summary>
     private async void OpenExportPdfMenu() 
     {
-        await Ioc.Default.GetRequiredService<PrintReportDialogVM>().OpenPrintReportDialog(PrintReportDialogVM.ReportOutputMode.Pdf);
+        await _printReportDialogVM.OpenPrintReportDialog(PrintReportDialogVM.ReportOutputMode.Pdf);
     }
-
-
     #endregion  
 
     #region Move TreeViewItem Commands
