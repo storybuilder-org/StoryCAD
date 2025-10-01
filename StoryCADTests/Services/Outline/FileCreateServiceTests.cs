@@ -125,8 +125,9 @@ public class FileCreateServiceTests
     [TestMethod]
     public async Task CreateFile_WithInvalidPath_ReturnsNull()
     {
-        // Arrange
-        string invalidFolder = @"Z:\InvalidPath\That\Does\Not\Exist";
+        // Arrange - Use a path with invalid characters (cross-platform)
+        // On Unix, null character is invalid in paths; on Windows, <, >, :, ", |, ?, * are invalid
+        string invalidFolder = Path.Combine(Path.GetTempPath(), "Invalid\0Path");
         string fileName = "TestStory.stbx";
         int templateIndex = 0;
 
@@ -207,8 +208,20 @@ public class FileCreateServiceTests
     [TestMethod]
     public async Task CreateFile_WithInvalidCharacters_ReturnsNull()
     {
-        // Arrange
-        string invalidFileName = "Test<>Story|?.stbx";
+        // Arrange - Use an invalid filename with invalid characters
+        string invalidFileName;
+
+        if (OperatingSystem.IsWindows())
+        {
+            // Windows doesn't allow these characters in filenames
+            invalidFileName = "Test<>Story|?.stbx";
+        }
+        else
+        {
+            // Unix-like systems: Use null character which is invalid in filenames
+            invalidFileName = "Test\0Story.stbx";
+        }
+
         int templateIndex = 0;
 
         // Act

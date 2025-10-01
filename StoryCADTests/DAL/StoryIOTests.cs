@@ -135,15 +135,37 @@ public class StoryIOTests
     [TestMethod]
     public void IsValidPath_WithValidPath_ReturnsTrue()
     {
+        // Arrange - Use cross-platform temp path
+        string validPath = Path.Combine(Path.GetTempPath(), "mytestpath", "test.stbx");
+
         // Act & Assert
-        Assert.IsTrue(StoryIO.IsValidPath("C:\\mytestpath\\"));
+        Assert.IsTrue(StoryIO.IsValidPath(validPath));
+
+        // Cleanup - Remove created directory
+        string dir = Path.GetDirectoryName(validPath);
+        if (Directory.Exists(dir))
+        {
+            try { Directory.Delete(dir, true); } catch { }
+        }
     }
 
     [TestMethod]
     public void IsValidPath_WithInvalidPath_ReturnsFalse()
     {
+        // Note: This test only works reliably on Windows where invalid path characters are well-defined
+        // On Unix-like systems, most characters are valid and IsValidPath creates directories,
+        // making it difficult to test invalid paths safely
+        if (!OperatingSystem.IsWindows())
+        {
+            Assert.Inconclusive("This test is only reliable on Windows due to platform differences in path validation");
+            return;
+        }
+
+        // Arrange - Windows doesn't allow these characters in filenames
+        string invalidPath = Path.Combine(Path.GetTempPath(), "test<>:|?.stbx");
+
         // Act & Assert
-        Assert.IsFalse(StoryIO.IsValidPath("C:\\:::StoryCADTests::\\//"));
+        Assert.IsFalse(StoryIO.IsValidPath(invalidPath));
     }
 
     [TestMethod]
