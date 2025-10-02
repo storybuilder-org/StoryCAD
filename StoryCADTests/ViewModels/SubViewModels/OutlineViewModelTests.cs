@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using StoryCAD.Services.Outline;
+using StoryCAD.Services;
 using StoryCAD.ViewModels;
 using StoryCAD.ViewModels.Tools;
 using StoryCAD.Models;
