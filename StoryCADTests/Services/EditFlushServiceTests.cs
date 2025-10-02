@@ -2,7 +2,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using StoryCAD.Models;
 using StoryCAD.Services;
 
-namespace StoryCAD.Tests.Services;
+namespace StoryCADTests.Services;
 
 [TestClass]
 public class EditFlushServiceTests

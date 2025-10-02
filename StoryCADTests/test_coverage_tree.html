@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>StoryCAD Test Coverage Map</title>
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true });
+    </script>
+</head>
+<body>
+    <h1>StoryCAD Test Coverage Map</h1>
+    <div class="mermaid">
+graph TD
+    Root[StoryCADTests]
+
+    Root --> Collaborator["✅ Collaborator (5 tests)"]
+    Collaborator --> CollabVM["❌ ViewModels (no tests)"]
+    Collaborator --> CollabViews["❌ Views (no tests)"]
+
+    Root --> Controls["❌ Controls (no tests)"]
+
+    Root --> DAL["✅ DAL (6 tests)"]
+
+    Root --> Exceptions["❌ Exceptions (no tests)"]
+
+    Root --> Models["✅ Models (4 tests)"]
+    Models --> ModelsScrivener["❌ Scrivener (no tests)"]
+    Models --> ModelsTools["❌ Tools (no tests)"]
+
+    Root --> Services["✅ Services (2 tests)"]
+    Services --> API["✅ API (1 test)"]
+    Services --> Backend["✅ Backend (1 test)"]
+    Services --> Backup["❌ Backup (no tests)"]
+    Services --> SvcCollab["✅ Collaborator (1 test)"]
+    SvcCollab --> Contracts["✅ Contracts (1 test)"]
+    Services --> Dialogs["❌ Dialogs (no tests)"]
+    Dialogs --> DialogTools["❌ Tools (no tests)"]
+    Services --> IoC["✅ IoC (1 test)"]
+    Services --> Json["✅ Json (1 test)"]
+    Services --> Locking["✅ Locking (1 test)"]
+    Services --> Logging["❌ Logging (no tests)"]
+    Services --> Messages["❌ Messages (no tests)"]
+    Services --> Navigation["❌ Navigation (no tests)"]
+    Services --> Outline["✅ Outline (4 tests)"]
+    Services --> Ratings["❌ Ratings (no tests)"]
+    Services --> Reports["✅ Reports (1 test)"]
+    Services --> Search["✅ Search (1 test)"]
+
+    Root --> ViewModels["✅ ViewModels (8 tests)"]
+    ViewModels --> SubViewModels["❌ SubViewModels (no tests)"]
+    ViewModels --> VMTools["✅ Tools (2 tests)"]
+
+    style Collaborator fill:#90EE90,stroke:#2d5016,stroke-width:3px
+    style DAL fill:#90EE90,stroke:#2d5016,stroke-width:3px
+    style Models fill:#90EE90,stroke:#2d5016,stroke-width:3px
+    style Services fill:#90EE90,stroke:#2d5016,stroke-width:3px
+    style API fill:#90EE90,stroke:#2d5016,stroke-width:3px
+    style Backend fill:#90EE90,stroke:#2d5016,stroke-width:3px
+    style SvcCollab fill:#90EE90,stroke:#2d5016,stroke-width:3px
+    style Contracts fill:#90EE90,stroke:#2d5016,stroke-width:3px
+    style IoC fill:#90EE90,stroke:#2d5016,stroke-width:3px
+    style Json fill:#90EE90,stroke:#2d5016,stroke-width:3px
+    style Locking fill:#90EE90,stroke:#2d5016,stroke-width:3px
+    style Outline fill:#90EE90,stroke:#2d5016,stroke-width:3px
+    style Reports fill:#90EE90,stroke:#2d5016,stroke-width:3px
+    style Search fill:#90EE90,stroke:#2d5016,stroke-width:3px
+    style ViewModels fill:#90EE90,stroke:#2d5016,stroke-width:3px
+    style VMTools fill:#90EE90,stroke:#2d5016,stroke-width:3px
+
+    style CollabVM fill:#FFB6C6,stroke:#8b0000,stroke-width:3px
+    style CollabViews fill:#FFB6C6,stroke:#8b0000,stroke-width:3px
+    style Controls fill:#FFB6C6,stroke:#8b0000,stroke-width:3px
+    style Exceptions fill:#FFB6C6,stroke:#8b0000,stroke-width:3px
+    style ModelsScrivener fill:#FFB6C6,stroke:#8b0000,stroke-width:3px
+    style ModelsTools fill:#FFB6C6,stroke:#8b0000,stroke-width:3px
+    style Backup fill:#FFB6C6,stroke:#8b0000,stroke-width:3px
+    style Dialogs fill:#FFB6C6,stroke:#8b0000,stroke-width:3px
+    style DialogTools fill:#FFB6C6,stroke:#8b0000,stroke-width:3px
+    style Logging fill:#FFB6C6,stroke:#8b0000,stroke-width:3px
+    style Messages fill:#FFB6C6,stroke:#8b0000,stroke-width:3px
+    style Navigation fill:#FFB6C6,stroke:#8b0000,stroke-width:3px
+    style Ratings fill:#FFB6C6,stroke:#8b0000,stroke-width:3px
+    style SubViewModels fill:#FFB6C6,stroke:#8b0000,stroke-width:3px
+    </div>
+
+    <h2>Summary</h2>
+    <h3>Coverage Statistics:</h3>
+    <ul>
+        <li><strong>Total folders:</strong> 34</li>
+        <li><strong>Folders with tests:</strong> 16 (47%)</li>
+        <li><strong>Folders without tests:</strong> 18 (53%)</li>
+        <li><strong>Total test files:</strong> 42</li>
+    </ul>
+</body>
+</html>

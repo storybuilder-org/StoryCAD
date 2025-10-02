@@ -2,7 +2,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using StoryCAD.Models;
 using StoryCAD.Services;
 
-namespace StoryCAD.Tests.Models;
+namespace StoryCADTests.Models;
 
 [TestClass]
 public class AppStateTests

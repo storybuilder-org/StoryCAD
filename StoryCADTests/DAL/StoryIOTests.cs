@@ -17,7 +17,7 @@ using StoryCAD.Services.API;
 using StoryCAD.ViewModels.SubViewModels;
 using StoryCADTests;
 
-namespace StoryCAD.Tests.DAL;
+namespace StoryCADTests.DAL;
 
 [TestClass]
 public class StoryIOTests

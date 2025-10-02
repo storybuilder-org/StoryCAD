@@ -1,7 +1,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using StoryCAD.Services;
 
-namespace StoryCAD.Tests.Services;
+namespace StoryCADTests.Services;
 
 [TestClass]
 public class ISaveableTests
