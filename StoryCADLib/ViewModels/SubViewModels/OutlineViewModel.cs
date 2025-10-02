@@ -842,6 +842,14 @@ public class OutlineViewModel : ObservableRecipient
 
                 DramaticSituationModel situationModel =
                     Ioc.Default.GetRequiredService<DramaticSituationsViewModel>().Situation;
+
+                // If no situation was selected (null or user cancelled), return early
+                if (situationModel == null || result == ContentDialogResult.None)
+                {
+                    logger.Log(LogLevel.Info, "Dramatic situations tool cancelled or no situation selected");
+                    return;
+                }
+
                 string msg;
 
                 if (result == ContentDialogResult.Primary)

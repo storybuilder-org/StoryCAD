@@ -415,3 +415,4 @@ StoryCAD/.ENV
 
 # Claude settings
 .claude/settings.local.json
+.env

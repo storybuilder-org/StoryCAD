@@ -13,7 +13,7 @@ public class ControlLoader
     {
         try
         {
-            await using Stream internalResourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("StoryCADLib.Assets.Install.Controls.ini");
+            await using Stream internalResourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("StoryCADLib.Assets.Install.Controls.json");
             using StreamReader reader = new(internalResourceStream);
             var json = await reader.ReadToEndAsync();
             
