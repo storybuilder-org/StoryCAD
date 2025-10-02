@@ -14,7 +14,7 @@ namespace StoryCADTests.Services.Json;
 /// as a result will always fail.
 /// </summary>
 [TestClass]
-public class EnvTests
+public class DopplerTests
 {
     /// <summary>
     /// Attempts to load the .ENV File to check its valid.

@@ -13,7 +13,7 @@ using StoryCAD.Services;
 namespace StoryCADTests.DAL;
 
 [TestClass]
-public class PreferencesIoTests
+public class PreferencesIOTests
 {
 	/// <summary>
 	/// Tests that WritePreferences saves JSON with the expected values.

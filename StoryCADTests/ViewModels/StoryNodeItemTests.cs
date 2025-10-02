@@ -5,10 +5,10 @@ using StoryCAD.Models;
 using StoryCAD.ViewModels;
 using StoryCAD.ViewModels.SubViewModels;
 
-namespace StoryCADTests.Services.Outline;
+namespace StoryCADTests.ViewModels;
 
 [TestClass]
-public class NodeItemTests
+public class StoryNodeItemTests
 {
 	/// <summary>
 	/// Creates a new node and tries to delete it.

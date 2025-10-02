@@ -9,7 +9,7 @@ using StoryCAD.Services;
 namespace StoryCADTests.Services.Locking;
 
 [TestClass]
-public class LockTest
+public class SerializationLockTests
 {
     private AutoSaveService _autoSaveService;
     private BackupService _backupService;
