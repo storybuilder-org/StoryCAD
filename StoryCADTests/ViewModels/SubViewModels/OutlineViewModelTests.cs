@@ -126,7 +126,6 @@ namespace StoryCADTests.ViewModels.SubViewModels
         }
 
         [TestMethod]
-        [Ignore("Test assumptions outdated after TrashView architecture change - manually tested by user")]
         public async Task RestoreChildThenParent_DoesNotDuplicate()
         {
             var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
