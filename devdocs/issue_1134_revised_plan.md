@@ -99,11 +99,14 @@ cat msbuild.log | grep -E "warning CS" | grep -v "Uno0001" | sort | uniq
 # Build must succeed with 0 errors
 msbuild StoryCAD.sln /t:Build /p:Configuration=Debug /p:Platform=x64
 
-# All tests must pass
-"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net9.0-windows10.0.22621.0/StoryCADTests.dll"
+# Build test project then run all tests
+"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/MSBuild.exe" StoryCADTests/StoryCADTests.csproj -t:Build -p:Configuration=Debug -p:Platform=x64 && "/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net9.0-windows10.0.22621/StoryCADTests.dll"
 ```
 
-**Commit**: Individual commits per warning type (e.g., "fix: Remove unused fields (CS0169)")
+**Document & Commit**:
+1. **FIRST**: Update `/devdocs/issue_1134_progress_log.md` with what was done
+2. **THEN**: Commit code changes AND progress log together
+3. Individual commits per warning type (e.g., "fix: Remove unused fields (CS0169)")
 
 ---
 
