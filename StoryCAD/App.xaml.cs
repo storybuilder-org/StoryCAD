@@ -29,11 +29,7 @@ public partial class App : Application
     private const string WebPage = "WebPage";
 
     private readonly ILogService _log;
-
-    /// <summary>
-    ///     Used to track uptime of app
-    /// </summary>
-    private DateTime StartTime = DateTime.Now;
+    private string launchPath;
 
     /// <summary>
     ///     Initializes the singleton application object. This is the first line of authored code
@@ -43,6 +39,21 @@ public partial class App : Application
     {
         //Set up IOC and the services.
         BootStrapper.Initialise(false);
+
+        Debugger.Launch();
+        //Check how app was invoked and handle file activation if necessary.
+        var activationArgs = Microsoft.Windows.AppLifecycle.AppInstance.GetCurrent().GetActivatedEventArgs();
+        if (activationArgs != null && activationArgs.Kind == Microsoft.Windows.AppLifecycle.ExtendedActivationKind.File)
+        {
+            if (activationArgs.Data is Windows.ApplicationModel.Activation.IFileActivatedEventArgs fileArgs)
+            {
+                var file = fileArgs.Files.OfType<StorageFile>().FirstOrDefault();
+                if (file != null && file.Path.EndsWith(".stbx", StringComparison.OrdinalIgnoreCase))
+                {
+                    launchPath = file.Path;
+                }
+            }
+        }
 
         try
         {
@@ -212,6 +223,11 @@ public partial class App : Application
             }
             else
             {
+                //Set launch path if specified.
+                if (launchPath != string.Empty)
+                {
+                    Ioc.Default.GetRequiredService<ShellViewModel>().FilePathToLaunch = launchPath;
+                }
                 rootFrame.Navigate(typeof(Shell));
             }
         }

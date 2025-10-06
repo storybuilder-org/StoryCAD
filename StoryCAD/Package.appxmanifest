@@ -22,6 +22,17 @@
       Executable="$targetnametoken$.exe"
       EntryPoint="$targetentrypoint$">
       <uap:VisualElements />
+      <Extensions>
+        <uap:Extension Category="windows.fileTypeAssociation">
+          <uap:FileTypeAssociation Name="stbx">
+            <uap:SupportedFileTypes>
+              <uap:FileType>.stbx</uap:FileType>
+            </uap:SupportedFileTypes>
+            <uap:DisplayName>StoryCAD Story File</uap:DisplayName>
+            <uap:InfoTip>StoryCAD Story Outline File</uap:InfoTip>
+          </uap:FileTypeAssociation>
+        </uap:Extension>
+      </Extensions>
     </Application>
   </Applications>
 
