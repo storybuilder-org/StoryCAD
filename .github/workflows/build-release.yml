@@ -1,0 +1,213 @@
+name: Build & Release
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Tag / version (e.g. v4.0.0)'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  # ---------- BUILD ----------
+  build:
+    runs-on: ${{ matrix.os }}
+    env:
+      DOTNET_RESTORE_LOCKED_MODE: false
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            rid: win-x64
+            fw: net9.0-windows10.0.22621.0
+            art: win-x64
+            platform: x64
+            binary_name: StoryCAD.exe
+          - os: windows-latest
+            rid: win-arm64
+            fw: net9.0-windows10.0.22621.0
+            art: win-arm64
+            platform: ARM64
+            binary_name: StoryCAD.exe
+          - os: windows-latest
+            rid: win-x86
+            fw: net9.0-windows10.0.22621.0
+            art: win-x86
+            platform: x86
+            binary_name: StoryCAD.exe
+          - os: macos-latest
+            rid: osx-arm64
+            fw: net9.0-desktop
+            art: osx-arm64
+            platform: arm64
+            binary_name: StoryCAD.app
+    steps:
+      # 1 ─ Checkout repository
+      - name: Checkout StoryCAD
+        uses: actions/checkout@v4
+
+      # 2 ─ Install the .NET SDK
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      # 3 ─ Install required workloads for UNO
+      - name: Install .NET workloads
+        run: dotnet workload install macos
+
+      # 4 ─ Extract version from input
+      - name: Extract version number
+        id: extract_version
+        run: echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+
+      # 5 ─ Restore dependencies
+      - name: Restore dependencies
+        run: dotnet restore StoryCAD.sln
+
+      # 6 ─ Run tests (all platforms)
+      - name: Run all tests (Windows)
+        if: matrix.os == 'windows-latest'
+        run: dotnet test StoryCADTests/StoryCADTests.csproj --configuration Release --no-restore -p:Platform=${{ matrix.platform }}
+
+      - name: Run all tests (macOS)
+        if: matrix.os == 'macos-latest'
+        run: dotnet test StoryCADTests/StoryCADTests.csproj --configuration Release --no-restore
+
+      # 7 ─ Clean publish directory
+      - name: Clean publish directory (macOS/Linux)
+        if: matrix.os != 'windows-latest'
+        run: rm -rf publish
+
+      - name: Clean publish directory (Windows)
+        if: matrix.os == 'windows-latest'
+        run: Remove-Item -Path publish -Recurse -Force -ErrorAction SilentlyContinue
+
+      # 8 ─ Build and publish
+      - name: Publish (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          dotnet publish StoryCAD/StoryCAD.csproj `
+            -c Release `
+            -f ${{ matrix.fw }} `
+            -r ${{ matrix.rid }} `
+            --self-contained `
+            -o publish
+
+      - name: Publish (macOS)
+        if: matrix.os == 'macos-latest'
+        run: |
+          dotnet publish StoryCAD/StoryCAD.csproj \
+            -c Release \
+            -f ${{ matrix.fw }} \
+            -r ${{ matrix.rid }} \
+            --self-contained \
+            -o publish
+
+      # 9 ─ Apply font fix for macOS (UNO Platform)
+      - name: Apply font fix for macOS
+        if: matrix.os == 'macos-latest'
+        run: |
+          # Create the complete App bundle structure
+          mkdir -p publish/StoryCAD.app/Contents/MacOS
+          mkdir -p publish/StoryCAD.app/Contents/Resources
+
+          # Copy all application files to MacOS directory
+          cp -R publish/* publish/StoryCAD.app/Contents/MacOS/ 2>/dev/null || true
+
+          # Copy resources (fonts, etc.) into the bundle Resources directory
+          if [ -d publish/Resources ]; then
+            cp -R publish/Resources/* publish/StoryCAD.app/Contents/Resources/
+          fi
+
+          # Ensure Uno.Fonts.Fluent fonts are copied to the expected location
+          if [ -d publish/Uno.Fonts.Fluent/Fonts ]; then
+            mkdir -p publish/StoryCAD.app/Contents/MacOS/Uno.Fonts.Fluent/Fonts
+            cp publish/Uno.Fonts.Fluent/Fonts/* publish/StoryCAD.app/Contents/MacOS/Uno.Fonts.Fluent/Fonts/
+          fi
+
+          # Remove the app bundle from itself (avoid recursion)
+          rm -rf publish/StoryCAD.app/Contents/MacOS/StoryCAD.app
+
+          # Verify the font file exists where the app expects it
+          echo "Font file verification:"
+          find publish/StoryCAD.app/Contents/MacOS -name "*uno-fluentui-assets.ttf*" -ls
+
+          # Verify the structure was created
+          echo "App bundle structure:"
+          ls -la publish/StoryCAD.app/Contents/
+          echo "MacOS contents:"
+          ls -la publish/StoryCAD.app/Contents/MacOS/ | head -10
+
+      # 10 ─ Create custom PKG with font fix for macOS
+      - name: Create macOS PKG
+        if: matrix.os == 'macos-latest'
+        run: |
+          # Create package build structure
+          mkdir -p pkg-build/Applications
+          cp -R publish/StoryCAD.app pkg-build/Applications/
+
+          # Create the PKG installer
+          pkgbuild --root pkg-build \
+            --identifier org.storybuilder.storycad \
+            --version ${{ steps.extract_version.outputs.version }} \
+            --install-location / \
+            storycad-${{ matrix.art }}.pkg
+
+      # 11 ─ Package artifacts
+      - name: Package Windows artifact
+        if: matrix.os == 'windows-latest'
+        run: |
+          cd publish
+          Compress-Archive -Path * -DestinationPath ../storycad-${{ matrix.art }}.zip
+
+      # 12 ─ Upload artifacts
+      - name: Upload build artifacts (Windows)
+        if: matrix.os == 'windows-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: storycad-${{ matrix.art }}
+          path: storycad-${{ matrix.art }}.zip
+
+      - name: Upload build artifacts (macOS)
+        if: matrix.os == 'macos-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: storycad-${{ matrix.art }}
+          path: storycad-${{ matrix.art }}.pkg
+
+  # ---------- RELEASE ----------
+  release:
+    needs: build
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.inputs.version }}
+          name: Release ${{ github.event.inputs.version }}
+          files: |
+            storycad-win-x64/storycad-win-x64.zip
+            storycad-win-arm64/storycad-win-arm64.zip
+            storycad-win-x86/storycad-win-x86.zip
+            storycad-osx-arm64/storycad-osx-arm64.pkg
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
