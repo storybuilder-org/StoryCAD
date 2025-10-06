@@ -28,7 +28,9 @@ public class CollaboratorService
 #pragma warning disable CS0169 // Fields used in platform-specific code (!HAS_UNO only - see Issue #1126 for macOS support)
     private bool dllExists;     // Used in Windows-only FindDll() method
 #pragma warning restore CS0169
+#pragma warning disable CS0649 // Field will be assigned in future macOS implementation (Issue #1126)
     private string dllPath;     // Used in ConnectCollaborator() - will be needed for macOS (Issue #1126)
+#pragma warning restore CS0649
 
     public CollaboratorService(AppState appState, ILogService logService, PreferenceService preferenceService,
         AutoSaveService autoSaveService, BackupService backupService)
