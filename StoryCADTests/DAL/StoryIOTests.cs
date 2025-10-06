@@ -6,6 +6,8 @@ using StoryCAD.Services.Logging;
 using StoryCAD.Services.Outline;
 using StoryCAD.ViewModels.SubViewModels;
 
+#nullable disable
+
 namespace StoryCADTests.DAL;
 
 [TestClass]

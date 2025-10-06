@@ -3,6 +3,8 @@ using StoryCAD.Services.Collaborator.Contracts;
 #if WINDOWS10_0_22621_0_OR_GREATER
 #endif
 
+#nullable disable
+
 namespace StoryCADTests.Collaborator;
 
 [TestClass]

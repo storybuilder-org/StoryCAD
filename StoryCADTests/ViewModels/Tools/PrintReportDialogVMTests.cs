@@ -7,6 +7,8 @@ using StoryCAD.Services.Logging;
 using StoryCAD.Services.Outline;
 using StoryCAD.ViewModels.Tools;
 
+#nullable disable
+
 namespace StoryCADTests.ViewModels.Tools;
 
 [TestClass]

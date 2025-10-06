@@ -4,6 +4,8 @@ using StoryCAD.Services.Backup;
 using StoryCAD.Services.Locking;
 using StoryCAD.Services.Logging;
 
+#nullable disable
+
 namespace StoryCADTests.Services.Locking;
 
 [TestClass]

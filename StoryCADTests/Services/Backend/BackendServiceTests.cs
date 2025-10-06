@@ -3,6 +3,8 @@ using StoryCAD.Services;
 using StoryCAD.Services.Backend;
 using StoryCAD.Services.Json;
 
+#nullable disable
+
 namespace StoryCADTests.Services.Backend;
 
 [TestClass]

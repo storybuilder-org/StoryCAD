@@ -3,6 +3,8 @@ using StoryCAD.Models;
 using StoryCAD.Services.Collaborator;
 using StoryCAD.Services.Collaborator.Contracts;
 
+#nullable disable
+
 namespace StoryCADTests.Services.Collaborator;
 
 [TestClass]

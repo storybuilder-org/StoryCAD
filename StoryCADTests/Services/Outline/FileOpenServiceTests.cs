@@ -8,6 +8,8 @@ using StoryCAD.Services.Logging;
 using StoryCAD.Services.Messages;
 using StoryCAD.Services.Outline;
 
+#nullable disable
+
 namespace StoryCADTests.Services.Outline;
 
 [TestClass]

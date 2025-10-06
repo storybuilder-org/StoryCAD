@@ -1,6 +1,8 @@
 using StoryCAD.Models;
 using StoryCAD.Services;
 
+#nullable disable
+
 namespace StoryCADTests.Services;
 
 [TestClass]

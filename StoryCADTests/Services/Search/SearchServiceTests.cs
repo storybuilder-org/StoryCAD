@@ -4,6 +4,8 @@ using StoryCAD.Services.Logging;
 using StoryCAD.Services.Outline;
 using StoryCAD.Services.Search;
 
+#nullable disable
+
 namespace StoryCADTests.Services.Search;
 
 /// <summary>

@@ -2,6 +2,8 @@
 using StoryCAD.Models;
 using StoryCAD.ViewModels;
 
+#nullable disable
+
 namespace StoryCADTests.Models;
 
 [TestClass]

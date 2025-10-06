@@ -4,6 +4,8 @@ using StoryCAD.Models;
 using StoryCAD.Services.API;
 using StoryCAD.Services.Outline;
 
+#nullable disable
+
 namespace StoryCADTests.Services.API;
 
 [TestClass]

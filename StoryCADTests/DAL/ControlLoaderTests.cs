@@ -1,6 +1,8 @@
 ﻿using CommunityToolkit.Mvvm.DependencyInjection;
 using StoryCAD.ViewModels;
 
+#nullable disable
+
 namespace StoryCADTests.DAL;
 
 [TestClass]

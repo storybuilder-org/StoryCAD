@@ -3,6 +3,8 @@ using StoryCAD.Models;
 using StoryCAD.Services.Outline;
 using StoryCAD.ViewModels;
 
+#nullable disable
+
 namespace StoryCADTests.DAL;
 
 [TestClass]

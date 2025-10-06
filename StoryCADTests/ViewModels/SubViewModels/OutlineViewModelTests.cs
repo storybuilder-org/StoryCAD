@@ -7,6 +7,8 @@ using StoryCAD.ViewModels;
 using StoryCAD.ViewModels.SubViewModels;
 using StoryCAD.ViewModels.Tools;
 
+#nullable disable
+
 namespace StoryCADTests.ViewModels.SubViewModels;
 
 [TestClass]

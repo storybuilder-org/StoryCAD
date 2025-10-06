@@ -4,6 +4,8 @@ using StoryCAD.DAL;
 using StoryCAD.Models;
 using StoryCAD.Services.Logging;
 
+#nullable disable
+
 namespace StoryCADTests;
 
 /// <summary>

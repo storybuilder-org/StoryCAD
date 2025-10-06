@@ -1,6 +1,8 @@
 ﻿using System.Reflection;
 using StoryCAD.Models;
 
+#nullable disable
+
 namespace StoryCADTests;
 
 [TestClass]
