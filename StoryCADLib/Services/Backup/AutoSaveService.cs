@@ -1,4 +1,5 @@
-﻿using System.Timers;
+﻿#pragma warning disable CS8632 // Nullable annotations used without nullable context
+using System.Timers;
 using CommunityToolkit.Mvvm.Messaging;
 using StoryCAD.Services.Locking;
 using StoryCAD.Services.Messages;

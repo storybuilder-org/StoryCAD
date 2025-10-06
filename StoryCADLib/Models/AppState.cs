@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿#pragma warning disable CS8632 // Nullable annotations used without nullable context
+using System.Diagnostics;
 using System.Reflection;
 using StoryCAD.Services;
 

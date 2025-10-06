@@ -76,17 +76,21 @@ cat msbuild.log | grep -E "warning CS" | grep -v "Uno0001" | sort | uniq
 
 **Categories**:
 
-### 1.1 Dead Code Warnings
-- **CS0168**: Unused exception variables - change `catch (Exception ex)` to `catch (Exception)`
-- **CS0169**: Unused private fields - remove them
-- **CS0414**: Assigned but never used fields - investigate then remove or suppress with comment
+### 1.1 Dead Code Warnings ✅ COMPLETED
+- **CS0168**: Unused exception variables - change to proper logging
+- **CS0169**: Unused private fields - remove or suppress if platform-specific
+- **CS0414**: Assigned but never used fields - remove or suppress if platform-specific
+- **CS0162**: Unreachable code - suppress if intentional (platform-specific)
 
 ### 1.2 Code Quality Warnings
-- **CS0105**: Duplicate using directives - remove duplicates
-- **CS0618**: Obsolete API usage - migrate to replacement APIs
+- **CS0105**: Duplicate using directives - remove duplicates (ReSharper already cleaned this)
+- **CS0618**: Obsolete API usage (SkiaSharp) - research alternatives before migrating
 
-### 1.3 Nullable Warnings (Low Priority)
-- **CS8632**: Nullable annotation without #nullable context - remove annotations or enable nullable
+### 1.3 Nullable Warnings (Suppress, Don't Fix)
+- **CS8632**: Nullable annotation without #nullable context - **SUPPRESS with pragma**, don't remove `?` markers
+  - The `?` markers document that values can be null
+  - Removing them would hide important nullability information
+  - Proper fix: Add `#pragma warning disable CS8632` to affected files
 
 **Fix**: Address each warning type systematically
 

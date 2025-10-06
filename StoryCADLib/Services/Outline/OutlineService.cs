@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿#pragma warning disable CS8632 // Nullable annotations used without nullable context
+using System.Collections.ObjectModel;
 using System.Text.Json;
 using StoryCAD.DAL;
 using StoryCAD.Services.Locking;

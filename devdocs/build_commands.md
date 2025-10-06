@@ -63,9 +63,18 @@ dotnet build StoryCAD/StoryCAD.csproj --configuration Release
 
 ### From WSL/Claude Code
 
-Run all tests:
+**IMPORTANT**: Always build the test project before running tests:
 ```bash
-"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net9.0-windows10.0.22621.0/StoryCADTests.dll"
+# Step 1: Build test project (required)
+"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/MSBuild.exe" StoryCADTests/StoryCADTests.csproj -t:Build -p:Configuration=Debug -p:Platform=x64
+
+# Step 2: Run all tests
+"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net9.0-windows10.0.22621/StoryCADTests.dll"
+```
+
+Or combine into one command:
+```bash
+"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/MSBuild.exe" StoryCADTests/StoryCADTests.csproj -t:Build -p:Configuration=Debug -p:Platform=x64 && "/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net9.0-windows10.0.22621/StoryCADTests.dll"
 ```
 
 Run specific test class:

@@ -1,3 +1,4 @@
+#pragma warning disable CS8632 // Nullable annotations used without nullable context
 namespace StoryCAD.Services.Collaborator.Contracts;
 
 /// <summary>

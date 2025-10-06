@@ -1,3 +1,4 @@
+#pragma warning disable CS8632 // Nullable annotations used without nullable context
 using Windows.Graphics.Printing;
 using Microsoft.UI;
 using Microsoft.UI.Xaml.Printing;
